@@ -2,36 +2,43 @@ import React from 'react';
 
 import {
   KuiIcon,
+  KuiFlexGrid,
+  KuiFlexItem,
+  KuiText,
 } from '../../../../components';
 
 const iconTypes = [
   'apps',
-  'search',
-  'user',
-  'cross',
-  'check',
-  'lock',
-  'help',
-  'arrowUp',
   'arrowDown',
   'arrowLeft',
   'arrowRight',
-  'sortUp',
+  'arrowUp',
+  'check',
+  'cross',
+  'fullScreen',
+  'help',
+  'list',
+  'lock',
+  'search',
   'sortDown',
+  'sortUp',
+  'user',
 ];
 
 export default () => (
-  <div>
+  <KuiFlexGrid columns={4}>
     {
       iconTypes.map(iconType => (
-        <span key={iconType}>
+        <KuiFlexItem className="guideDemo__icon" key={iconType}>
           <KuiIcon
             type={iconType}
-            size="medium"
+            size="large"
           />
-          &nbsp;
-        </span>
+          <KuiText>
+            <p>{iconType}</p>
+          </KuiText>
+        </KuiFlexItem>
       ))
     }
-  </div>
+  </KuiFlexGrid>
 );

@@ -12,29 +12,28 @@ import {
   KuiCode,
 } from '../../../../components';
 
-import Link from './link';
-const linkSource = require('!!raw!./link');
-const linkHtml = renderToHtml(Link);
+import Code from './code';
+const codeSource = require('!!raw!./code');
+const codeHtml = renderToHtml(Code);
 
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
-      title="Link"
+      title="Code"
       source={[{
         type: GuideSectionTypes.JS,
-        code: linkSource,
+        code: codeSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: linkHtml,
+        code: codeHtml,
       }]}
       text={
         <p>
-          <KuiCode>KuiLink</KuiCode> will apply the correct styling onto
-          links and make sure the are accessible.
+          Description needed: how to use the <KuiCode>Code</KuiCode> component.
         </p>
       }
       demo={
-        <Link />
+        <Code />
       }
     />
   </GuidePage>

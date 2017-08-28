@@ -3,13 +3,14 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideCode,
-  GuideDemo,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
-  GuideText,
 } from '../../components';
+
+import {
+  KuiCode,
+} from '../../../../components';
 
 import Icons from './icons';
 const iconsSource = require('!!raw!./icons');
@@ -42,11 +43,31 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: iconsHtml,
       }]}
-    >
-      <GuideDemo>
+      text={
+        <div>
+          <p>
+            <KuiCode>KuiIcon</KuiCode> can build out an icon from our SVG
+            icon library. Icons can be resized and recolored (through a
+            CSS <KuiCode>Fill</KuiCode>) decleration.
+          </p>
+          <p>
+            New icons should be placed in
+            the <KuiCode>/icons/assets/</KuiCode> folder on a 16x16 empty canvas.
+            Icons should in the general set should be mono-color and the code
+            itself should not contain any fill attributes. Use the SVGO plugin
+            for Sketch when exporting to compress / clean your SVG of junk.
+          </p>
+          <p>
+            Note: <KuiCode>guideDemo__icon</KuiCode> styling is applied on the
+            below grid for documentation presentation only. Do not copy
+            this class into production.
+          </p>
+        </div>
+      }
+      demo={
         <Icons />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
       title="App icons"
@@ -57,14 +78,16 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: appsHtml,
       }]}
-    >
-      <GuideDemo>
+      text={
+        <p>App logos are exported from a 32x32 canvas and can contain multiple colors.</p>
+      }
+      demo={
         <Apps />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
-      title="Logos"
+      title="Product icons"
       source={[{
         type: GuideSectionTypes.JS,
         code: logosSource,
@@ -72,11 +95,15 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: logosHtml,
       }]}
-    >
-      <GuideDemo>
+      text={
+        <p>
+          Product logos follow similar rules as app logos.
+        </p>
+      }
+      demo={
         <Logos />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
       title="Sizes"
@@ -87,11 +114,16 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: iconSizesHtml,
       }]}
-    >
-      <GuideDemo>
+      text={
+        <p>
+          Use the <KuiCode>size</KuiCode> prop to automatically size your icons.
+          Medium is the most common, and will output a 16x16 icons.
+        </p>
+      }
+      demo={
         <IconSizes />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
       title="Accessibility"
@@ -102,15 +134,15 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: accessibilityHtml,
       }]}
-    >
-      <GuideText>
-        By default, this component will use a human-readable version of the <GuideCode>type</GuideCode>
-        to title the SVG. You can specify a <GuideCode>title</GuideCode> prop to override this.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          By default, this component will use a human-readable version of the <KuiCode>type</KuiCode>
+          to title the SVG. You can specify a <KuiCode>title</KuiCode> prop to override this.
+        </p>
+      }
+      demo={
         <Accessibility />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
   </GuidePage>
 );

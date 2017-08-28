@@ -3,11 +3,9 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideDemo,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
-  GuideText,
 } from '../../components';
 
 import LoadingKibana from './loading_kibana';
@@ -33,15 +31,15 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: loadingKibanaHtml,
       }]}
-    >
-      <GuideText>
-        Logo based load. Should only be used in very large panels, like bootup screens.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          Logo based load. Should only be used in very large panels, like bootup screens.
+        </p>
+      }
+      demo={
         <LoadingKibana />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
       title="Loading Chart"
@@ -52,18 +50,18 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: loadingChartHtml,
       }]}
-    >
-      <GuideText>
-        Loader for the loading of chart or dashboard and visualization elements.
-        The colored versions should be used sparingly, only when a single large
-        visualization is loaded. When loading smaller groups of panels, the smaller,
-        mono versions should be used.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          Loader for the loading of chart or dashboard and visualization elements.
+          The colored versions should be used sparingly, only when a single large
+          visualization is loaded. When loading smaller groups of panels, the smaller,
+          mono versions should be used.
+        </p>
+      }
+      demo={
         <LoadingChart />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
       title="Loading Spinner"
@@ -74,14 +72,14 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: loadingSpinnerHtml,
       }]}
-    >
-      <GuideText>
-        A simple spinner for most loading applications.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          A simple spinner for most loading applications.
+        </p>
+      }
+      demo={
         <LoadingSpinner />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
   </GuidePage>
 );

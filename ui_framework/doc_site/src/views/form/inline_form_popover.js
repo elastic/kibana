@@ -11,14 +11,6 @@ import {
   KuiFlexGroup,
   KuiFlexItem,
   KuiFieldNumber,
-  KuiPageBody,
-  KuiPageContent,
-  KuiPageContentBody,
-  KuiPageContentHeader,
-  KuiPageContentHeaderSection,
-  KuiTitle,
-  KuiText,
-  KuiHorizontalRule,
 
 } from '../../../../components';
 
@@ -91,36 +83,15 @@ export default class extends Component {
     );
 
     return (
-      <KuiPageBody>
-        <KuiPageContent verticalPosition="center" horizontalPosition="center" style={{ width: 600 }}>
-          <KuiPageContentHeader>
-            <KuiPageContentHeaderSection>
-              <KuiTitle>
-                <h2>These rules can be applied anywhere</h2>
-              </KuiTitle>
-            </KuiPageContentHeaderSection>
-          </KuiPageContentHeader>
-          <KuiPageContentBody>
-            <KuiText>
-              <p>
-                Because forms auto-size to their wrapping elements, it means you
-                can do fun things with them like stuff them in popovers and
-                they&rsquo;ll still work perfectly.
-              </p>
-            </KuiText>
-            <KuiHorizontalRule />
-            <KuiPopover
-              button={button}
-              isOpen={this.state.isPopoverOpen}
-              closePopover={this.closePopover.bind(this)}
-            >
-              <div style={{ width: 500, padding: 16 }}>
-                {formSample}
-              </div>
-            </KuiPopover>
-          </KuiPageContentBody>
-        </KuiPageContent>
-      </KuiPageBody>
+      <KuiPopover
+        button={button}
+        isOpen={this.state.isPopoverOpen}
+        closePopover={this.closePopover.bind(this)}
+      >
+        <div style={{ width: 500, padding: 16 }}>
+          {formSample}
+        </div>
+      </KuiPopover>
     );
   }
 }

@@ -3,9 +3,8 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideDemo,
-  GuideSandbox,
-  GuideSandboxCodeToggle,
+  GuidePage,
+  GuideSection,
   GuideSectionTypes,
 } from '../../components';
 
@@ -14,12 +13,8 @@ const kibanaSource = require('!!raw!./kibana');
 const kibanaHtml = renderToHtml(Kibana);
 
 export default props => (
-  <GuideSandbox>
-    <GuideDemo isFullScreen={true}>
-      <Kibana />
-    </GuideDemo>
-
-    <GuideSandboxCodeToggle
+  <GuidePage title={props.route.name}>
+    <GuideSection
       title={props.route.name}
       source={[{
         type: GuideSectionTypes.JS,
@@ -28,6 +23,12 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: kibanaHtml,
       }]}
+      text={
+        <p>A demo showing off a fully constructed page.</p>
+      }
+      demo={
+        <Kibana />
+      }
     />
-  </GuideSandbox>
+  </GuidePage>
 );

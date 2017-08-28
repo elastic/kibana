@@ -3,11 +3,14 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideDemo,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
 } from '../../components';
+
+import {
+  KuiCode,
+} from '../../../../components';
 
 import { StaticConfirmModal } from './static';
 const staticConfirmModalSource = require('!!raw!./static');
@@ -29,11 +32,16 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: staticConfirmModalHtml,
       }]}
-    >
-      <GuideDemo>
+      text={
+        <p>
+          <KuiCode>KuiConfirmModal</KuiCode> loaded staticly onto the page. More
+          likely you want the popup version, shown in the next example.
+        </p>
+      }
+      demo={
         <StaticConfirmModal />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
       title="Pop up Confirmation Modal with Overlay"
@@ -44,10 +52,15 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: showConfirmModalHtml,
       }]}
-    >
-      <GuideDemo>
+      text={
+        <p>
+          A fixed <KuiCode>KuiConfirmModal</KuiCode> loaded with a mask through
+          click events.
+        </p>
+      }
+      demo={
         <ConfirmModalExample />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
   </GuidePage>
 );

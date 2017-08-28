@@ -4,6 +4,7 @@ import React, {
 
 import {
   KuiPopover,
+  KuiButton,
 } from '../../../../components';
 
 export default class extends Component {
@@ -31,15 +32,15 @@ export default class extends Component {
     return (
       <KuiPopover
         button={(
-          <button onClick={this.onButtonClick.bind(this)}>
-            Custom class
-          </button>
+          <KuiButton iconType="arrowDown" iconSide="right" onClick={this.onButtonClick.bind(this)}>
+            Use bodyClassName prop to pass a custom class
+          </KuiButton>
         )}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover.bind(this)}
         bodyClassName="yourClassNameHere"
       >
-        It&rsquo;s hard to tell but there&rsquo;s a custom class on this element
+        It&rsquo;s hard to tell but there&rsquo;s a custom class on this element, but there is!
       </KuiPopover>
     );
   }

@@ -1,0 +1,10 @@
+.kuiCode {
+  @include kuiCodeFont;
+  display: inline-block;
+  white-space: pre;
+  background: $kuiColorLightestShade;
+  color: $kuiColorAccent;
+  border: $kuiBorderThin;
+  font-size: $kuiFontSizeXS;
+  padding:  0 $kuiSizeXS;
+}

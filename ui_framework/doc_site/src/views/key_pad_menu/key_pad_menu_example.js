@@ -3,13 +3,14 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideCode,
-  GuideDemo,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
-  GuideText,
 } from '../../components';
+
+import {
+  KuiCode,
+} from '../../../../components';
 
 import KeyPadMenu from './key_pad_menu';
 const keyPadMenuSource = require('!!raw!./key_pad_menu');
@@ -30,16 +31,16 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: keyPadMenuHtml,
       }]}
-    >
-      <GuideText>
-        The KeyPadMenu component presents KeyPadMenuItems in a tiled format, with a fixed width which will
-        accommodate three items and then wrap.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          The KeyPadMenu component presents KeyPadMenuItems in a tiled format, with a fixed width which will
+          accommodate three items and then wrap.
+        </p>
+      }
+      demo={
         <KeyPadMenu />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
 
     <GuideSection
       title="KeyPadMenuItemButton"
@@ -50,15 +51,15 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: keyPadMenuItemButtonHtml,
       }]}
-    >
-      <GuideText>
-        The KeyPadMenuItem component is a link by default, but you can swap it out for a
-        KeyPadMenuItemButton if you want <GuideCode>onClick</GuideCode> behavior.
-      </GuideText>
-
-      <GuideDemo>
+      text={
+        <p>
+          The KeyPadMenuItem component is a link by default, but you can swap it out for a
+          KeyPadMenuItemButton if you want <KuiCode>onClick</KuiCode> behavior.
+        </p>
+      }
+      demo={
         <KeyPadMenuItemButton />
-      </GuideDemo>
-    </GuideSection>
+      }
+    />
   </GuidePage>
 );
