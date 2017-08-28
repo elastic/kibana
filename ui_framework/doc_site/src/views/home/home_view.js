@@ -234,13 +234,13 @@ export const HomeView = () => (
 
     <KuiFlexGroup gutterSize="small" className="guideDemo__sizeGrid">
       <KuiFlexItem>
-        <h3>Element sizes / paddings / margins</h3>
+        <KuiText><h3>Element sizes / paddings / margins</h3></KuiText>
         {sizes.map((item, index) => {
           return (
             <div>
               <KuiSpacer size="m" />
               <KuiFlexGroup key={index} alignItems="center">
-                <KuiFlexItem grow={false} style={{ width: 64, textAlign: 'right' }}>
+                <KuiFlexItem grow={false} style={{ width: 40, textAlign: 'right' }}>
                   <div className="guideDemo__size" style={{ height: item.size, width: item.size }} />
                 </KuiFlexItem>
                 <KuiFlexItem>

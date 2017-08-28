@@ -15,7 +15,7 @@ function makeId() {
 const idPrefix = makeId();
 
 export default () => (
-  <KuiFlexGroup>
+  <KuiFlexGroup style={{ maxWidth: 600 }}>
     <KuiFlexItem>
       <KuiFormRow label="First name"  id={idPrefix} helpText="I am helpful help text!">
         <KuiFieldText />
