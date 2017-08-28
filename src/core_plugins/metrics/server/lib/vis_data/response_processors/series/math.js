@@ -48,8 +48,10 @@ export function mathAgg(resp, panel, series) {
               return acc;
             }, {});
             const someNull = values(params).some(v => v == null);
-            const val = someNull ? null : limitedEval(mathMetric.script, { params, all: splitData, currentTimestamp: ts, index });
-            return [ts, val];
+            if (someNull) return [ts, null];
+            const result = limitedEval(mathMetric.script, { params, all: splitData, currentTimestamp: ts, index });
+            if (typeof result === 'object') return [ts, last(result.valueOf())];
+            return [ts, result];
           });
           return {
             id: `${split.id}`,
