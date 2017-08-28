@@ -44,7 +44,7 @@ function "function"
   return {
     type: 'function',
     function: name,
-    arguments: arg_list || []
+    arguments: arg_list || {}
   }
  }
 
@@ -68,7 +68,7 @@ arg_type
 
 
 arg_list
- = first:argument* rest:(space arg:argument {return arg})* space? {
+ = space first:argument* rest:(space arg:argument {return arg})* space? {
   const orderedArgs = first.concat(rest);
   const args = {};
   orderedArgs.forEach((arg) => {
