@@ -30,6 +30,9 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
     },
     template: fieldChooserTemplate,
     link: function ($scope) {
+      $scope.selectedIndexPattern = $scope.indexPatternList.find(
+        (pattern) => pattern.id === $scope.indexPattern.id
+      );
       $scope.indexPatternList = _.sortBy($scope.indexPatternList, o => o.get('title'));
       $scope.setIndexPattern = function (pattern) {
         $scope.state.index = pattern.id;
