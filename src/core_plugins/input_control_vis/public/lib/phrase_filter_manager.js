@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { buildPhraseFilter } from 'ui/filter_manager/lib/phrase';
+import { buildPhrasesFilter } from 'ui/filter_manager/lib/phrases';
 
 const emptyValue = '';
 
@@ -10,34 +11,25 @@ export class PhraseFilterManager {
     this.queryFilter = queryFilter;
   }
 
-  createFilter(value) {
-    const phraseFilters = value.split(',').map((phrase) => {
+  /**
+   * Convert phrases into filter
+   *
+   * @param {array of strings} phrases
+   * @return {object} query filter
+   *   single phrase: match query
+   *   multiple phrases: bool query with should containing list of match_phrase queries
+   */
+  createFilter(phrases) {
+    if (phrases.length === 1) {
       return buildPhraseFilter(
         this.indexPattern.fields.byName[this.fieldName],
-        phrase,
+        phrases[0],
         this.indexPattern);
-    });
-
-    if (phraseFilters.length === 1) {
-      return phraseFilters[0];
     } else {
-      // convert phrase filters into bool query
-      const shouldFilters = phraseFilters.map((filter) => {
-        if (_.has(filter, 'query')) {
-          return filter.query;
-        }
-        delete filter.meta;
-        return filter;
-      });
-      return {
-        bool: {
-          should: shouldFilters
-        },
-        meta: {
-          alias: `${this.fieldName}: ${value}`,
-          index: this.indexPattern.id
-        }
-      };
+      return buildPhrasesFilter(
+        this.indexPattern.fields.byName[this.fieldName],
+        phrases,
+        this.indexPattern);
     }
   }
 
@@ -50,8 +42,8 @@ export class PhraseFilterManager {
 
   _findFilter(kbnFilter) {
     // bool filter - multiple phrase filters
-    if (_.has(kbnFilter, 'bool.should')) {
-      const subFilters = _.get(kbnFilter, 'bool.should')
+    if (_.has(kbnFilter, 'query.bool.should')) {
+      const subFilters = _.get(kbnFilter, 'query.bool.should')
       .map((kbnFilter) => {
         return this._findFilter(kbnFilter);
       });
@@ -73,7 +65,7 @@ export class PhraseFilterManager {
     }
 
     // single phrase filter from bool filter
-    if (_.has(kbnFilter, ['match', this.fieldName])) {
+    if (_.has(kbnFilter, ['match_phrase', this.fieldName])) {
       return true;
     }
 
@@ -95,8 +87,8 @@ export class PhraseFilterManager {
 
   _getValueFromFilter(kbnFilter) {
     // bool filter - multiple phrase filters
-    if (_.has(kbnFilter, 'bool.should')) {
-      return _.get(kbnFilter, 'bool.should')
+    if (_.has(kbnFilter, 'query.bool.should')) {
+      return _.get(kbnFilter, 'query.bool.should')
       .map((kbnFilter) => {
         return this._getValueFromFilter(kbnFilter);
       })
@@ -120,8 +112,8 @@ export class PhraseFilterManager {
     }
 
     // single phrase filter from bool filter
-    if (_.has(kbnFilter, ['match', this.fieldName])) {
-      return _.get(kbnFilter, ['match', this.fieldName, 'query'], emptyValue);
+    if (_.has(kbnFilter, ['match_phrase', this.fieldName])) {
+      return _.get(kbnFilter, ['match_phrase', this.fieldName], emptyValue);
     }
 
     return emptyValue;

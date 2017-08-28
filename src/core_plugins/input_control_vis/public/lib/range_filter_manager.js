@@ -35,6 +35,12 @@ export class RangeFilterManager {
     this.emptyValue = emptyValue;
   }
 
+  /**
+   * Convert slider value into filter
+   *
+   * @param {object} react-input-range value - POJO with `min` and `max` properties
+   * @return {object} range filter
+   */
   createFilter(value) {
     return buildRangeFilter(
       this.indexPattern.fields.byName[this.fieldName],

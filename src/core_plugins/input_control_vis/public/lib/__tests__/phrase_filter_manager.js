@@ -6,7 +6,10 @@ describe('PhraseFilterManager', function () {
   describe('createFilter', function () {
     const indexPatternId = '1';
     const fieldMock = {
-      name: 'field1'
+      name: 'field1',
+      format: {
+        convert: (val) => { return val; }
+      }
     };
     const indexPatternMock = {
       id: indexPatternId,
@@ -23,22 +26,23 @@ describe('PhraseFilterManager', function () {
     });
 
     it('should create match phrase filter from single value', function () {
-      const newFilter = filterManager.createFilter('ios');
+      const newFilter = filterManager.createFilter(['ios']);
       expect(newFilter).to.have.property('meta');
       expect(newFilter.meta.index).to.be(indexPatternId);
       expect(newFilter).to.have.property('query');
       expect(JSON.stringify(newFilter.query, null, '')).to.be('{"match":{"field1":{"query":"ios","type":"phrase"}}}');
     });
 
-    it('should create bool filter from multiple value', function () {
-      const newFilter = filterManager.createFilter('ios,win xp');
+    it('should create bool filter from multiple values', function () {
+      const newFilter = filterManager.createFilter(['ios','win xp']);
       expect(newFilter).to.have.property('meta');
       expect(newFilter.meta.index).to.be(indexPatternId);
-      expect(newFilter.meta.alias).to.be('field1: ios,win xp');
-      expect(newFilter).to.have.property('bool');
-      expect(newFilter.bool.should.length).to.be(2);
-      expect(JSON.stringify(newFilter.bool.should[0], null, '')).to.be('{"match":{"field1":{"query":"ios","type":"phrase"}}}');
-      expect(JSON.stringify(newFilter.bool.should[1], null, '')).to.be('{"match":{"field1":{"query":"win xp","type":"phrase"}}}');
+      expect(newFilter).to.have.property('query');
+      const query = newFilter.query;
+      expect(query).to.have.property('bool');
+      expect(query.bool.should.length).to.be(2);
+      expect(JSON.stringify(query.bool.should[0], null, '')).to.be('{"match_phrase":{"field1":"ios"}}');
+      expect(JSON.stringify(query.bool.should[1], null, '')).to.be('{"match_phrase":{"field1":"win xp"}}');
     });
   });
 
@@ -87,17 +91,16 @@ describe('PhraseFilterManager', function () {
 
     it('should not find bool filters for other fields', function () {
       kbnFilters.push({
-        bool: {
-          should: [
-            {
-              match: {
-                notField1: {
-                  query: 'ios',
-                  type: 'phrase'
+        query: {
+          bool: {
+            should: [
+              {
+                match_phrase: {
+                  notField1: 'ios'
                 }
               }
-            }
-          ]
+            ]
+          }
         }
       });
       const foundFilters = filterManager.findFilters();
@@ -106,17 +109,16 @@ describe('PhraseFilterManager', function () {
 
     it('should find bool filters for target field', function () {
       kbnFilters.push({
-        bool: {
-          should: [
-            {
-              match: {
-                field1: {
-                  query: 'ios',
-                  type: 'phrase'
+        query: {
+          bool: {
+            should: [
+              {
+                match_phrase: {
+                  field1: 'ios'
                 }
               }
-            }
-          ]
+            ]
+          }
         }
       });
       const foundFilters = filterManager.findFilters();
@@ -163,25 +165,21 @@ describe('PhraseFilterManager', function () {
     it('should extract value from bool filter', function () {
       filterManager.setMockFilters([
         {
-          bool: {
-            should: [
-              {
-                match: {
-                  field1: {
-                    query: 'ios',
-                    type: 'phrase'
+          query: {
+            bool: {
+              should: [
+                {
+                  match_phrase: {
+                    field1: 'ios'
+                  }
+                },
+                {
+                  match_phrase: {
+                    field1: 'win xp'
                   }
                 }
-              },
-              {
-                match: {
-                  field1: {
-                    query: 'win xp',
-                    type: 'phrase'
-                  }
-                }
-              }
-            ]
+              ]
+            }
           }
         }
       ]);

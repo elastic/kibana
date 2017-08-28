@@ -14,7 +14,7 @@ export class TermsControl extends Component {
     let newFilter = undefined;
     if (evt) {
       newValue = evt;
-      newFilter = this.props.control.filterManager.createFilter(newValue);
+      newFilter = this.props.control.filterManager.createFilter(newValue.split(','));
     }
     this.props.stageFilter(this.props.controlIndex, newValue, newFilter);
   }
