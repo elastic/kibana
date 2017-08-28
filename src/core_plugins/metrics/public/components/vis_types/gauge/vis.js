@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import tickFormatter from '../../lib/tick_formatter';
 import _ from 'lodash';
 import Gauge from 'plugins/metrics/visualizations/components/gauge';

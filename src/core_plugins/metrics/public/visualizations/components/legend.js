@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import VerticalLegend from './vertical_legend';
 import HorizontalLegend from './horizontal_legend';
 
