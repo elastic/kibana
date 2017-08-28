@@ -2,7 +2,7 @@ import _ from 'lodash';
 import getLastValue from '../../visualizations/lib/get_last_value';
 import tickFormatter from './tick_formatter';
 import moment from 'moment';
-export default (series, model) => {
+export default (series, model, dateFormat = 'lll') => {
   const variables = {};
   model.series.forEach(seriesModel => {
     series
@@ -24,7 +24,7 @@ export default (series, model) => {
           data: {
             raw: row.data,
             formatted: row.data.map(point => {
-              return [moment(point[0]).format('lll'), formatter(point[1])];
+              return [moment(point[0]).format(dateFormat), formatter(point[1])];
             })
           }
         };
