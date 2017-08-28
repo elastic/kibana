@@ -61,6 +61,7 @@ class VisEditor extends Component {
       const reversed = this.state.reversed;
       return (
         <Visualization
+          dateFormat={this.props.config.get('dateFormat')}
           reversed={reversed}
           onBrush={this.onBrush}
           fields={this.props.vis.fields}
@@ -86,12 +87,16 @@ class VisEditor extends Component {
             onBrush={this.onBrush}
             onCommit={handleCommit}
             onToggleAutoApply={handleAutoApplyToggle}
-            onChange={handleChange} />
+            onChange={handleChange}
+            dateFormat={this.props.config.get('dateFormat')}
+          />
           <PanelConfig
             fields={this.props.vis.fields}
             model={model}
             visData={this.props.visData}
-            onChange={handleChange} />
+            dateFormat={this.props.config.get('dateFormat')}
+            onChange={handleChange}
+          />
         </div>
       );
     }
@@ -110,6 +115,7 @@ VisEditor.propTypes = {
   visData: PropTypes.object,
   appState: PropTypes.object,
   renderComplete: PropTypes.func,
+  config: PropTypes.object
 };
 
 export default VisEditor;
