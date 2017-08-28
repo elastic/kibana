@@ -262,7 +262,7 @@ export default function MyNewVisType(Private) {
 [[development-visualization-request-handlers]]
 === Visualization Request Handlers
 Request handler gets called when one of the following keys on AppState change:
-`vis`, `query`, `filters` or `uiState`. This sums up to pretty much every change to visualization. On top
+`vis`, `query`, `filters` or `uiState` and when timepicker is updated. This sums up to pretty much every change to visualization. On top
 of that it will also get called on force refresh.
 
 By default visualizations will use courier request handler. They can also choose to use any of the other provided 
@@ -323,8 +323,8 @@ export default function MyNewVisType(Private) {
 [[development-visualization-response-handlers]]
 === Visualization Response Handlers
 Response handler will receive the data from request handler and an instance of Vis object. 
-Its job is to convert the data to a format visualization can use. By default 'none' request handler is used 
-which just passes the data it received back. The data object will then be passed to visualization.
+Its job is to convert the data to a format visualization can use. By default 'default' request handler is used 
+which produces a table representation of the data. The data object will then be passed to visualization.
 
 [[development-default-response-handler]]
 ==== default response handler
