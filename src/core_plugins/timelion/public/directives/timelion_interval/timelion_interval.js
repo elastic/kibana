@@ -15,6 +15,17 @@ app.directive('timelionInterval', function ($compile, $timeout) {
     template,
     link: function ($scope, $elem) {
       $scope.intervalOptions = ['auto', '1s', '1m', '1h', '1d', '1w', '1M', '1y', 'other'];
+      $scope.intervalLabels = {
+        'auto': 'auto',
+        '1s': '1 second',
+        '1m': '1 minute',
+        '1h': '1 hour',
+        '1d': '1 day',
+        '1w': '1 week',
+        '1M': '1 month',
+        '1y': '1 year',
+        'other': 'other'
+      };
 
       $scope.$watch('model', function (newVal, oldVal) {
         // Only run this on initialization

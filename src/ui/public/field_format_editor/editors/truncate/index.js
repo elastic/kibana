@@ -1,0 +1,1 @@
+export { truncateEditor } from './truncate';

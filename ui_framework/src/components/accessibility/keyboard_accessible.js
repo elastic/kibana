@@ -25,22 +25,19 @@ import {
   cloneElement,
 } from 'react';
 
-import {
-  ENTER_KEY,
-  SPACE_KEY,
-} from '../../services';
+import { keyCodes } from '../../services';
 
 export class KuiKeyboardAccessible extends Component {
   onKeyDown = e => {
     // Prevent a scroll from occurring if the user has hit space.
-    if (e.keyCode === SPACE_KEY) {
+    if (e.keyCode === keyCodes.SPACE) {
       e.preventDefault();
     }
   }
 
   onKeyUp = e => {
     // Support keyboard accessibility by emulating mouse click on ENTER or SPACE keypress.
-    if (e.keyCode === ENTER_KEY || e.keyCode === SPACE_KEY) {
+    if (e.keyCode === keyCodes.ENTER || e.keyCode === keyCodes.SPACE) {
       // Delegate to the click handler on the element.
       this.props.children.props.onClick(e);
     }

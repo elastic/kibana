@@ -1,5 +1,6 @@
 import _ from 'lodash';
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import getLastValue from '../lib/get_last_value';
 import getValueBy from '../lib/get_value_by';
 import GaugeVis from './gauge_vis';

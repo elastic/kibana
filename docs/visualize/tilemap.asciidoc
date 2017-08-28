@@ -34,7 +34,7 @@ Enter a string in the *Custom Label* field to change the display label.
 ===== Buckets
 
 Coordinate maps use the {es-ref}search-aggregations-bucket-geohashgrid-aggregation.html[_geohash_] aggregation. Select a field, typically coordinates, from the
-drop-down. 
+drop-down.
 
 - The_Change precision on map zoom_ box is checked by default. Uncheck the box to disable this behavior.
 The _Precision_ slider determines the granularity of the results displayed on the map. See the documentation
@@ -77,11 +77,7 @@ shades based on the metric aggregation's value.
 *_Heatmap_*:: A heat map applies blurring to the circle markers and applies shading based on the amount of overlap.
 Heatmaps have the following options:
 
-* *Radius*: Sets the size of the individual heatmap dots.
-* *Blur*: Sets the amount of blurring for the heatmap dots.
-* *Maximum zoom*: Tilemaps in Kibana support 18 zoom levels. This slider defines the maximum zoom level at which the
-heatmap dots appear at full intensity.
-* *Minimum opacity*: Sets the opacity cutoff for the dots.
+* *Cluster size*: Adjust the size of the heatmap clustering.
 * *Show Tooltip*: Check this box to have a tooltip with the values for a given dot when the cursor is on that dot.
 
 *Desaturate map tiles*:: Desaturate the map's color in order to make the markers stand out more clearly.

@@ -30,7 +30,7 @@ export class ControlledTable extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      rowToSelectedStateMap: new Map()
+      rowToSelectedStateMap: new Map(),
     };
 
     this.rows = [
@@ -88,9 +88,9 @@ export class ControlledTable extends React.Component {
   };
 
   renderTableRows() {
-    return this.rows.map(rowData => {
+    return this.rows.map((rowData, rowIndex) => {
       return (
-        <KuiTableRow>
+        <KuiTableRow key={rowIndex}>
           <KuiTableRowCheckBoxCell
             isChecked={this.isItemChecked(rowData)}
             onChange={() => this.toggleItem(rowData)}
@@ -99,7 +99,7 @@ export class ControlledTable extends React.Component {
             rowData.map((cellData, index) => {
               const align = index === rowData.length - 1 ? RIGHT_ALIGNMENT : LEFT_ALIGNMENT;
               return (
-                <KuiTableRowCell align={align}>
+                <KuiTableRowCell align={align} key={index}>
                   { cellData }
                 </KuiTableRowCell>
               );

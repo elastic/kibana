@@ -130,16 +130,22 @@
         <thead>
           <tr>
             <th class="kuiTableHeaderCell kuiTableHeaderCell--checkBox">
-              <input
-                type="checkbox"
-                aria-label="Select All"
-                class="kuiCheckBox"
-                ng-checked="managementObjectsController.areAllRowsChecked()"
-                ng-click="toggleAll()"
-              >
+              <div class="kuiTableHeaderCell__liner">
+                <input
+                  type="checkbox"
+                  aria-label="Select All"
+                  class="kuiCheckBox"
+                  ng-checked="managementObjectsController.areAllRowsChecked()"
+                  ng-click="toggleAll()"
+                  aria-label="{{managementObjectsController.areAllRowsChecked() ? 'Deselect all rows' : 'Select all rows'}}"
+                >
+              </div>
             </th>
+
             <th class="kuiTableHeaderCell">
-              Title
+              <div class="kuiTableHeaderCell__liner">
+                Title
+              </div>
             </th>
           </tr>
         </thead>

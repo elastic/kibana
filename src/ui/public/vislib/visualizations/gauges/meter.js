@@ -251,33 +251,33 @@ export function MeterGaugeProvider() {
             }
             return smallContainer || textTooLong ? 'none' : 'initial';
           });
-
-        gauges
-          .append('text')
-          .attr('class', 'chart-label')
-          .attr('y', -5)
-          .text(d => {
-            if (this.gaugeConfig.percentageMode) {
-              const percentage = Math.round(100 * (d.y - min) / (max - min));
-              return `${percentage}%`;
-            }
-            if (d.aggConfig) {
-              return d.aggConfig.fieldFormatter('text')(d.y);
-            }
-            return d.y;
-          })
-          .attr('style', 'dominant-baseline: central;')
-          .style('text-anchor', 'middle')
-          .style('font-size', '2em')
-          .style('display', function () {
-            const textLength = this.getBBox().width;
-            const textTooLong = textLength > maxRadius;
-            if (textTooLong) {
-              hiddenLabels = true;
-            }
-            return textTooLong ? 'none' : 'initial';
-          });
       }
+
+      gauges
+        .append('text')
+        .attr('class', 'chart-label')
+        .attr('y', -5)
+        .text(d => {
+          if (this.gaugeConfig.percentageMode) {
+            const percentage = Math.round(100 * (d.y - min) / (max - min));
+            return `${percentage}%`;
+          }
+          if (d.aggConfig) {
+            return d.aggConfig.fieldFormatter('text')(d.y);
+          }
+          return d.y;
+        })
+        .attr('style', 'dominant-baseline: central;')
+        .style('text-anchor', 'middle')
+        .style('font-size', '2em')
+        .style('display', function () {
+          const textLength = this.getBBox().width;
+          const textTooLong = textLength > maxRadius;
+          if (textTooLong) {
+            hiddenLabels = true;
+          }
+          return textTooLong ? 'none' : 'initial';
+        });
 
       if (this.gaugeConfig.scale.show) {
         this.drawScale(svg, radius(1), angle);

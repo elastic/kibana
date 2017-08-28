@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should return to index pattern creation page', function returnToPage() {
         return retry.try(function tryingForTime() {
-          return PageObjects.settings.getCreateButton();
+          return PageObjects.settings.getCreateIndexPatternGoToStep2Button();
         });
       });
 

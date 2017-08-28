@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import SeriesEditor from '../series_editor';
 import { IndexPattern } from '../index_pattern';
 import AceEditor from 'react-ace';
@@ -157,6 +158,7 @@ MarkdownPanelConfig.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   visData: PropTypes.object,
+  dateFormat: PropTypes.string
 };
 
 export default MarkdownPanelConfig;

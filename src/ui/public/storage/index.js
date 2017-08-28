@@ -1,0 +1,1 @@
+export { Storage } from './storage';
