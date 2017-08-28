@@ -5,11 +5,11 @@ export function AggResponseGetColumnsProvider(Private) {
   const AggConfig = Private(VisAggConfigProvider);
 
   return function getColumns(vis, minimal) {
-    const aggs = vis.aggs.getResponseAggs();
+    const aggs = vis.getAggConfig().getResponseAggs();
 
     if (minimal == null) minimal = !vis.isHierarchical();
 
-    if (!vis.aggs.bySchemaGroup.metrics) {
+    if (!vis.getAggConfig().bySchemaGroup.metrics) {
       aggs.push(new AggConfig(vis, {
         type: 'count',
         schema: vis.type.schemas.metrics[0].name

@@ -115,7 +115,7 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
 
           const scaleMetrics = interval.scaled && interval.scale < 1;
           if (scaleMetrics) {
-            const all = _.every(agg.vis.aggs.bySchemaGroup.metrics, function (agg) {
+            const all = _.every(agg.vis.getAggConfig().bySchemaGroup.metrics, function (agg) {
               return agg.type && agg.type.isScalable();
             });
             if (all) {
