@@ -214,7 +214,7 @@ export const HomeView = () => (
       </KuiFlexItem>
     </KuiFlexGroup>
 
-    <KuiSpacer size="xl" />
+    <KuiHorizontalRule />
 
     <KuiText>
       <h2>Spacing and sizing</h2>
@@ -228,34 +228,44 @@ export const HomeView = () => (
 
       <p>Sizing when passed as values to props should always be <KuiCode>xs / s / m / l / xl ...etc</KuiCode></p>
 
-      <h3>Element sizes / paddings / margins</h3>
     </KuiText>
 
     <KuiSpacer size="l" />
 
     <KuiFlexGroup gutterSize="small" className="guideDemo__sizeGrid">
-      {sizes.map((item, index) => {
-        return (
-          <KuiFlexItem key={index}>
-            <p className="guideDemo__sizeText">
-              {item.size}px<br/>
-              {item.name}
-            </p>
-            <div className="guideDemo__size" style={{ height: item.size, width: item.size }} />
-          </KuiFlexItem>
-        );
-      })}
+      <KuiFlexItem>
+        <h3>Element sizes / paddings / margins</h3>
+        {sizes.map((item, index) => {
+          return (
+            <div>
+              <KuiSpacer size="m" />
+              <KuiFlexGroup key={index} alignItems="center">
+                <KuiFlexItem grow={false} style={{ width: 64, textAlign: 'right' }}>
+                  <div className="guideDemo__size" style={{ height: item.size, width: item.size }} />
+                </KuiFlexItem>
+                <KuiFlexItem>
+                  <p className="guideDemo__sizeText">
+                    {item.size}px - {item.name}
+                  </p>
+                </KuiFlexItem>
+              </KuiFlexGroup>
+            </div>
+          );
+        })}
+      </KuiFlexItem>
+      <KuiFlexItem>
+        <KuiText><h3>Font sizes</h3></KuiText>
+        {fontSizes.map((item, index) => {
+          return (
+            <div style={{ fontSize: item.size, marginTop: 24 }} key={index}>
+              {item.name} is {item.size}: Something about a lazy fox?
+            </div>
+          );
+        })}
+      </KuiFlexItem>
     </KuiFlexGroup>
 
-    <KuiText><h3>Font sizes</h3></KuiText>
 
-    {fontSizes.map((item, index) => {
-      return (
-        <div style={{ fontSize: item.size, marginTop: 24 }} key={index}>
-          {item.name} is {item.size}: Something about a lazy fox?
-        </div>
-      );
-    })}
 
   </div>
 );

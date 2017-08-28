@@ -42,12 +42,12 @@
 }
 
 .guideDemo__size {
-  margin-top: $kuiSizeS;
   background: $kuiTextColor;
+  display: inline-block;
 }
 
 .guideDemo__sizeText {
-  height: 64px;
+  line-height: 1.5;
 }
 
 .guideDemo__sizeGrid {
