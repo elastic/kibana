@@ -7,8 +7,8 @@ export function createRawData(vis, resp) {
   const results = { rows: [] };
 
   // Create a reference to the buckets and metrics
-  const metrics = vis.aggs.bySchemaGroup.metrics;
-  const buckets = vis.aggs.bySchemaGroup.buckets;
+  const metrics = vis.getAggConfig().bySchemaGroup.metrics;
+  const buckets = vis.getAggConfig().bySchemaGroup.buckets;
   const aggs = [];
 
   if (buckets) {
