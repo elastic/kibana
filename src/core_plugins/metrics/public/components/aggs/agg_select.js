@@ -1,4 +1,5 @@
-import React, { PropTypes, Component } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import Select from 'react-select';
 
 const metricAggs = [
@@ -82,7 +83,7 @@ class AggSelectOption extends Component {
           onMouseEnter={this.handleMouseEnter}
           onMouseDown={this.handleMouseDown}
           onMouseMove={this.handleMouseMove}
-          ariaLabel={label}
+          aria-label={label}
         >
           <span className="Select-value-label" style={style}>
             <strong>{label}</strong>
@@ -97,7 +98,7 @@ class AggSelectOption extends Component {
         onMouseEnter={this.handleMouseEnter}
         onMouseDown={this.handleMouseDown}
         onMouseMove={this.handleMouseMove}
-        ariaLabel={label}
+        aria-label={label}
       >
         <span className="Select-value-label" style={style}>
           { this.props.children }

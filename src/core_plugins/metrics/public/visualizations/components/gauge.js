@@ -1,5 +1,6 @@
 import _ from 'lodash';
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import getLastValue from '../lib/get_last_value';
 import getValueBy from '../lib/get_value_by';
 import GaugeVis from './gauge_vis';
@@ -87,6 +88,14 @@ class Gauge extends Component {
     };
 
     let metrics;
+    let additionalLabel;
+    if (this.props.additionalLabel) {
+      additionalLabel = (
+        <div className="thorGauge_additionalLabel">
+          {this.props.additionalLabel}
+        </div>
+      );
+    }
     if (type === 'half') {
       metrics = (
         <div
@@ -105,6 +114,7 @@ class Gauge extends Component {
             ref="label"
           >{ formatter(value) }
           </div>
+          {additionalLabel}
         </div>
       );
     } else {
@@ -125,6 +135,7 @@ class Gauge extends Component {
             ref="title"
           >{ title }
           </div>
+          {additionalLabel}
         </div>
       );
     }
@@ -160,6 +171,7 @@ Gauge.propTypes = {
   reversed: PropTypes.bool,
   type: PropTypes.oneOf(['half', 'circle']),
   valueColor: PropTypes.string,
+  additionalLabel: PropTypes.string
 };
 
 export default Gauge;

@@ -1,5 +1,7 @@
 /* eslint max-len:0 */
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+
+import React, { Component } from 'react';
 import tickFormatter from './lib/tick_formatter';
 import convertSeriesToVars from './lib/convert_series_to_vars';
 import AceEditor from 'react-ace';
@@ -30,9 +32,9 @@ class MarkdownEditor extends Component {
   }
 
   render() {
-    const { model, visData } = this.props;
+    const { model, visData, dateFormat } = this.props;
     const series = _.get(visData, `${model.id}.series`, []);
-    const variables = convertSeriesToVars(series, model);
+    const variables = convertSeriesToVars(series, model, dateFormat);
     const rows = [];
     const rawFormatter = tickFormatter('0.[0000]');
 
@@ -135,7 +137,8 @@ class MarkdownEditor extends Component {
 MarkdownEditor.propTypes = {
   onChange: PropTypes.func,
   model: PropTypes.object,
-  visData: PropTypes.object
+  visData: PropTypes.object,
+  dateFormat: PropTypes.string
 };
 
 export default MarkdownEditor;

@@ -192,7 +192,7 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
             }
             break;
 
-          case comboBoxKeyCodes.ESC:
+          case comboBoxKeyCodes.ESCAPE:
             e.preventDefault();
             scope.functionSuggestions.hide();
             break;

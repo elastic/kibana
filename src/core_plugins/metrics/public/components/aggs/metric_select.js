@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import _ from 'lodash';
 import Select from 'react-select';
 import calculateSiblings from '../lib/calculate_siblings';

@@ -19,7 +19,7 @@ uiModules
       attrs.$observe('id', () => $scope.id = attrs.id);
 
       // bind our local model with the outside ngModel
-      $scope.$watch('model', ngModelCntrl.$setViewValue);
+      $scope.$watch('model', v => ngModelCntrl.$setViewValue(v));
       ngModelCntrl.$render = function () {
         $scope.model = ngModelCntrl.$viewValue;
       };
