@@ -51,11 +51,16 @@ export default props => (
             CSS <KuiCode>Fill</KuiCode>) decleration.
           </p>
           <p>
-            New icons should be placed in the
-            <KuiCode>/icons/assets/</KuiCode> folder on a 16x16 empty canvas.
+            New icons should be placed in
+            the <KuiCode>/icons/assets/</KuiCode> folder on a 16x16 empty canvas.
             Icons should in the general set should be mono-color and the code
             itself should not contain any fill attributes. Use the SVGO plugin
             for Sketch when exporting to compress / clean your SVG of junk.
+          </p>
+          <p>
+            Note: <KuiCode>guideDemo__icon</KuiCode> styling is applied on the
+            below grid for documentation presentation only. Do not copy
+            this class into production.
           </p>
         </div>
       }
