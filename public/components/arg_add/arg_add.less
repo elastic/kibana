@@ -1,12 +1,26 @@
 @import (reference) "../../style/variables";
 
 .canvas__arg--add {
-  display: inline-block;
+  background-color: @lightestGrey;
+  margin: 0px @spacingM;
+  border-bottom: @borderStyle;
+  padding: @spacingXXS @spacingS;
+  cursor: pointer;
+  color: @labelColor;
+  text-align: right;
+
+  &:hover {
+    background-color: @lightGrey;
+
+    label {
+      color: @darkestGrey;
+    }
+  }
 
   // TODO: This shouldn't be a bootstrap <Label>
-  .label {
-    background-color: transparent;
-    color: @labelColor;
+  label {
+    font-weight: bold !important;
     cursor: pointer;
+    background-color: transparent;
   }
 }

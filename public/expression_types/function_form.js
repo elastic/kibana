@@ -85,9 +85,16 @@ export class FunctionForm extends BaseForm {
       // allow a hook to override the data args
       const resolvedDataArgs = dataArgs.map(d => ({ ...d, ...this.resolveArg(d, props) }));
 
-      return resolvedDataArgs
-      .map(d => this.renderArg(props, d)) // Argument forms
-      .concat(resolvedDataArgs.map(d => this.renderAddArg(props, d))); // Buttons for adding more arguments
+      const argumentForms = resolvedDataArgs.map(d => this.renderArg(props, d));
+      const addForms = resolvedDataArgs.map(d => this.renderAddArg(props, d)); // Buttons for adding more arguments
+
+      return (
+        <div>
+          {argumentForms}
+          {addForms}
+        </div>
+      );
+
     } catch (e) {
       return (<Alert bsStyle="danger">
         <h4>Expression rendering error</h4>
