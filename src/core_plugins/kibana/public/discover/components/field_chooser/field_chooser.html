@@ -4,10 +4,9 @@
       class="index-pattern-selection"
       ng-model="selectedIndexPattern"
       on-select="setIndexPattern($item)"
-      ng-init="selectedIndexPattern = indexPattern"
     >
       <ui-select-match>
-        {{$select.selected.title}}
+        {{$select.selected.get('title')}}
       </ui-select-match>
       <ui-select-choices repeat="pattern in indexPatternList | filter:$select.search">
         <div ng-bind-html="pattern.get('title') | highlight: $select.search"></div>
