@@ -122,6 +122,7 @@ function TimeseriesVisualization(props) {
   }
 
   const params = {
+    dateFormat: props.dateFormat,
     crosshair: true,
     tickFormatter: formatter,
     legendPosition: model.legend_position || 'right',
@@ -159,7 +160,8 @@ TimeseriesVisualization.propTypes = {
   onBrush: PropTypes.func,
   onChange: PropTypes.func,
   reversed: PropTypes.bool,
-  visData: PropTypes.object
+  visData: PropTypes.object,
+  dateFormat: PropTypes.string
 };
 
 export default TimeseriesVisualization;

@@ -182,7 +182,7 @@ class TimeseriesChart extends Component {
               <div style={styles.text}>{ item.series.label }</div>
               <div style={styles.value}>{ formatter(value) }</div>
             </div>
-            <div style={styles.date}>{ moment(item.datapoint[0]).format('ll LTS') }</div>
+            <div style={styles.date}>{ moment(item.datapoint[0]).format(this.props.dateFormat) }</div>
           </div>
           <i className="fa fa-caret-right" style={styles.rightCaret} />
         </div>
@@ -227,7 +227,8 @@ class TimeseriesChart extends Component {
 }
 
 TimeseriesChart.defaultProps = {
-  showGrid: true
+  showGrid: true,
+  dateFormat: 'll LTS'
 };
 
 TimeseriesChart.propTypes = {
@@ -242,7 +243,8 @@ TimeseriesChart.propTypes = {
   tickFormatter: PropTypes.func,
   yaxes: PropTypes.array,
   showGrid: PropTypes.bool,
-  xaxisLabel: PropTypes.string
+  xaxisLabel: PropTypes.string,
+  dateFormat: PropTypes.string
 };
 
 export default TimeseriesChart;
