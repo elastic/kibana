@@ -21,7 +21,6 @@ export const ArgForm = (props) => {
     onValueRemove,
   } = props;
 
-
   const getTemplates = () => {
     const { template, simpleTemplate } = argTypeInstance.argType;
     const argumentProps = {

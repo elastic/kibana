@@ -1,16 +1,10 @@
-import React from 'react';
-import { FunctionFormList } from '../function_form_list';
-import PropTypes from 'prop-types';
+import { compose, branch, renderComponent } from 'recompose';
+import { SidebarComponent } from './sidebar_component';
+import { GlobalConfig } from './global_config';
 import './sidebar.less';
 
-export const Sidebar = ({ element }) => (
-  <div className="canvas__sidebar">
-    <div className="canvas__sidebar--args">
-      <FunctionFormList element={element}/>
-    </div>
-  </div>
-);
+const branches = [
+  branch(props => !props.element, renderComponent(GlobalConfig)),
+];
 
-Sidebar.propTypes = {
-  element: PropTypes.object,
-};
+export const Sidebar = compose(...branches)(SidebarComponent);

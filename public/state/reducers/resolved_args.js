@@ -3,6 +3,7 @@ import { get } from 'lodash';
 import { set, del } from 'object-path-immutable';
 import { prepend } from '../../lib/modify_path';
 import * as actions from '../actions/resolved_args';
+import { flushContext } from '../actions/elements';
 
 /*
   Resolved args are a way to handle async values. They track the status, value, and error
@@ -75,5 +76,9 @@ export default handleActions({
 
   [actions.inFlightComplete]: (transientState) => {
     return set(transientState, 'inFlight', false);
+  },
+
+  [flushContext]: (transientState, { payload: elementId }) => {
+    return del(transientState, getFullPath([elementId, 'expressionContext']));
   },
 }, {});

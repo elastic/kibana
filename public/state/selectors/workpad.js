@@ -82,3 +82,7 @@ export function getResolvedArgs(state, elementId, path) {
 export function getSelectedResolvedArgs(state, path) {
   return getResolvedArgs(state, getSelectedElementId(state), path);
 }
+
+export function getContextForIndex(state, index) {
+  return getSelectedResolvedArgs(state, ['expressionContext', index - 1]);
+}

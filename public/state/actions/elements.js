@@ -11,15 +11,6 @@ import { fromExpression, toExpression } from '../../../common/lib/ast';
 import { interpretAst } from '../../lib/interpreter';
 import { notify } from '../../lib/notify';
 
-function astToExpression(ast, element) {
-  try {
-    return toExpression(ast);
-  } catch (e) {
-    notify.error(e);
-    return element.expression;
-  }
-}
-
 function runInterpreter(ast, context = null, retry = false) {
   return interpretAst(ast, context)
   .then((renderable) => {
@@ -58,6 +49,8 @@ function getSiblingContext(state, elementId, checkIndex) {
 }
 
 export const setPosition = createAction('setPosition', (elementId, pageId, position) => ({ pageId, elementId, position }));
+
+export const flushContext = createAction('flushContext');
 
 export const fetchContext = createThunk('fetchContext', ({ dispatch, getState }, index, element, fullRefresh = false) => {
   const chain = get(element, ['ast', 'chain']);
@@ -122,7 +115,7 @@ export const fetchRenderableWithContext = createThunk('fetchRenderableWithContex
   });
 });
 
-export const fetchRenderable = createThunk('fetchRenderable', ({ dispatch, getState }, element) => {
+export const fetchRenderable = createThunk('fetchRenderable', ({ dispatch }, element) => {
   const ast = element.ast || fromExpression(element.expression);
   dispatch(fetchRenderableWithContext(element, ast, null));
 });
@@ -153,7 +146,8 @@ export const setFilter = createThunk('setFilter', ({ dispatch, getState }, filte
   if (doRender === true) dispatch(fetchAllRenderables());
 });
 
-export const setExpression = createThunk('setExpression', ({ dispatch, getState }, expression, elementId, pageId, doRender = true) => {
+export const setExpression = createThunk('setExpression', setExpressionFn);
+function setExpressionFn({ dispatch, getState }, expression, elementId, pageId, doRender = true) {
   // dispatch action to update the element in state
   const _setExpression = createAction('setExpression');
   dispatch(_setExpression({ expression, elementId, pageId }));
@@ -161,13 +155,19 @@ export const setExpression = createThunk('setExpression', ({ dispatch, getState 
   // read updated element from state and fetch renderable
   const updatedElement = getElementById(getState(), elementId, pageId);
   if (doRender === true) dispatch(fetchRenderable(updatedElement));
-});
+}
 
-export const setAst = createThunk('setAst', ({ dispatch }, ast, element, pageId, doRender = true) => {
-  const expression = astToExpression(ast, element);
-  dispatch(setExpression(expression, element.id, pageId, doRender));
-});
+const setAst = createThunk('setAst', ({ dispatch }, ast, element, pageId, doRender = true) => {
+  try {
+    const expression = toExpression(ast);
+    dispatch(setExpression(expression, element, pageId, doRender));
+  } catch (e) {
+    notify.error(e);
 
+    // TODO: remove this, may have been added just to cause a re-render, but why?
+    dispatch(setExpression(element.expression, element, pageId, doRender));
+  }
+});
 
 // index here is the top-level argument in the expression. for example in the expression
 // demodata().pointseries().plot(), demodata is 0, pointseries is 1, and plot is 2

@@ -1,7 +1,14 @@
 import expect from 'expect.js';
+import proxyquire from 'proxyquire';
 import actionCreator from './fixtures/action_creator';
 import * as actions from '../../actions/resolved_args';
-import reducer from '../resolved_args';
+
+const reducer = proxyquire('../resolved_args', {
+  '../actions/elements': {
+    flushContext: 'flushContext',
+    '@noCallThru': true,
+  },
+}).default;
 
 describe('resolved args reducer', () => {
   let state;

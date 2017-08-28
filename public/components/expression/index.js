@@ -2,7 +2,7 @@ import { connect } from 'react-redux';
 import { compose, withState, withHandlers, lifecycle } from 'recompose';
 import { Expression as Component } from './expression';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
-import { setExpression } from '../../state/actions/elements';
+import { setExpression, flushContext } from '../../state/actions/elements';
 
 const mapStateToProps = (state) => ({
   pageId: getSelectedPage(state),
@@ -10,7 +10,13 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  setExpression: (elementId, pageId) => (expression) => dispatch(setExpression(expression, elementId, pageId)),
+  setExpression: (elementId, pageId) => (expression) => {
+    // destroy the context cache
+    dispatch(flushContext(elementId));
+
+    // update the element's expression
+    dispatch(setExpression(expression, elementId, pageId));
+  },
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
