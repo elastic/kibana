@@ -1,7 +1,5 @@
-import React, {
-  Component,
-  PropTypes,
-} from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 
 import classNames from 'classnames';
 
@@ -23,11 +21,14 @@ export class AppView extends Component {
 
     this.state = {
       isNavOpen: false,
+      isChromeVisible: !props.isSandbox,
     };
 
     this.onClickNavItem = this.onClickNavItem.bind(this);
     this.onToggleNav = this.onToggleNav.bind(this);
     this.onCloseCodeViewer = this.onCloseCodeViewer.bind(this);
+    this.onHideChrome = this.onHideChrome.bind(this);
+    this.onShowChrome = this.onShowChrome.bind(this);
   }
 
   onClickNavItem() {
@@ -46,15 +47,44 @@ export class AppView extends Component {
     });
   }
 
+  onHideChrome() {
+    this.setState({
+      isChromeVisible: false,
+      isNavOpen: false,
+    });
+
+    this.props.closeCodeViewer();
+  }
+
+  onShowChrome() {
+    this.setState({
+      isChromeVisible: true,
+    });
+  }
+
+  componentWillReceiveProps(nextProps) {
+    // Only force the chrome to be hidden if we're navigating from a non-sandbox to a sandbox.
+    if (!this.props.isSandbox && nextProps.isSandbox) {
+      this.setState({
+        isChromeVisible: false,
+      });
+    }
+  }
+
   render() {
     const contentClasses = classNames('guideContent', {
       'is-code-viewer-open': this.props.isCodeViewerOpen,
+      'is-chrome-hidden': !this.state.isChromeVisible,
     });
 
     return (
       <div className="guide">
         <GuideNav
+          isChromeVisible={this.state.isChromeVisible}
           isNavOpen={this.state.isNavOpen}
+          isSandbox={this.props.isSandbox}
+          onHideChrome={this.onHideChrome}
+          onShowChrome={this.onShowChrome}
           onToggleNav={this.onToggleNav}
           onClickNavItem={this.onClickNavItem}
           version={pkg.version}
@@ -83,6 +113,7 @@ export class AppView extends Component {
 AppView.propTypes = {
   children: PropTypes.any,
   routes: PropTypes.array.isRequired,
+  isSandbox: PropTypes.bool,
   openCodeViewer: PropTypes.func,
   closeCodeViewer: PropTypes.func,
   isCodeViewerOpen: PropTypes.bool,

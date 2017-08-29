@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import tickFormatter from '../../lib/tick_formatter';
 import _ from 'lodash';
 import Timeseries from 'plugins/metrics/visualizations/components/timeseries';
@@ -80,8 +81,11 @@ function TimeseriesVisualization(props) {
   });
 
   const interval = series.reduce((currentInterval, item) => {
-    const seriesInterval = item.data[1][0] - item.data[0][0];
-    if (!currentInterval || seriesInterval < currentInterval) return seriesInterval;
+    if (item.data.length > 1) {
+      const seriesInterval = item.data[1][0] - item.data[0][0];
+      if (!currentInterval || seriesInterval < currentInterval) return seriesInterval;
+    }
+    return currentInterval;
   }, 0);
 
   let axisCount = 1;
@@ -118,6 +122,7 @@ function TimeseriesVisualization(props) {
   }
 
   const params = {
+    dateFormat: props.dateFormat,
     crosshair: true,
     tickFormatter: formatter,
     legendPosition: model.legend_position || 'right',
@@ -155,7 +160,8 @@ TimeseriesVisualization.propTypes = {
   onBrush: PropTypes.func,
   onChange: PropTypes.func,
   reversed: PropTypes.bool,
-  visData: PropTypes.object
+  visData: PropTypes.object,
+  dateFormat: PropTypes.string
 };
 
 export default TimeseriesVisualization;

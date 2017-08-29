@@ -63,7 +63,7 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
             position: 'nw',
             labelBoxBorderColor: 'rgb(255,255,255,0)',
             labelFormatter: function (label, series) {
-              return '<span class="ngLegendValue" ng-click="toggleSeries(' + series._id + ')">' +
+              return '<span class="ngLegendValue" kbn-accessible-click ng-click="toggleSeries(' + series._id + ')">' +
                 label +
                 '<span class="ngLegendValueNumber"></span></span>';
             }

@@ -1,8 +1,9 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import uuid from 'uuid';
 
-import SplitByTerms from './splits/terms';
-import SplitByFilter from './splits/filter';
+import { SplitByTerms } from './splits/terms';
+import { SplitByFilter } from './splits/filter';
 import SplitByFilters from './splits/filters';
 import SplitByEverything from './splits/everything';
 

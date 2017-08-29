@@ -78,7 +78,7 @@ export default function GaugeVisType(Private) {
           min: 1,
           aggFilter: [
             '!std_dev', '!geo_centroid', '!percentiles', '!percentile_ranks',
-            '!derivative', '!serial_diff', '!moving_avg', '!cumulative_sum'],
+            '!derivative', '!serial_diff', '!moving_avg', '!cumulative_sum','!geo_bounds'],
           defaults: [
             { schema: 'metric', type: 'count' }
           ]
@@ -89,7 +89,7 @@ export default function GaugeVisType(Private) {
           title: 'Split Group',
           min: 0,
           max: 1,
-          aggFilter: '!geohash_grid'
+          aggFilter: ['!geohash_grid', '!filter']
         }
       ])
     }

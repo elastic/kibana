@@ -1,29 +1,19 @@
-import React, {
-  Component,
-  PropTypes,
-} from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 
-export class GuidePageSideNav extends Component {
-
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    return (
-      <div className="guidePageSideNav">
-        <div className="guidePageSideNav__title">
-          {this.props.title}
-        </div>
-
-        <div className="guidePageSideNavMenu">
-          {this.props.children}
-        </div>
+export const GuidePageSideNav = props =>  {
+  return (
+    <div className="guidePageSideNav">
+      <div className="guidePageSideNav__title">
+        {props.title}
       </div>
-    );
-  }
 
-}
+      <div className="guidePageSideNavMenu">
+        {props.children}
+      </div>
+    </div>
+  );
+};
 
 GuidePageSideNav.propTypes = {
   title: PropTypes.string,

@@ -6,7 +6,7 @@ export class FunctionSuggestions {
   }
 
   reset() {
-    this.index = 0;
+    this.index = -1;
     this.list = [];
     this.isVisible = false;
   }
@@ -14,9 +14,13 @@ export class FunctionSuggestions {
   setList(list) {
     this.list = list;
 
-    // We may get a shorter list than the one we have now, so we need to make sure our index doesn't
-    // fall outside of the new list's range.
-    this.index = Math.max(0, Math.min(this.index, this.list.length - 1));
+    // Only try to position index inside of list range, when it was already focused
+    // beforehand (i.e. not -1)
+    if (this.index > -1) {
+      // We may get a shorter list than the one we have now, so we need to make sure our index doesn't
+      // fall outside of the new list's range.
+      this.index = Math.max(0, Math.min(this.index, this.list.length - 1));
+    }
   }
 
   getCount() {

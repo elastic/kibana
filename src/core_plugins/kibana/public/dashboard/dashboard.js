@@ -25,7 +25,7 @@ import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import { showCloneModal } from './top_nav/show_clone_modal';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import { QueryManagerProvider } from 'ui/query_manager';
-import { ESC_KEY_CODE } from 'ui_framework/services';
+import { keyCodes } from 'ui_framework/services';
 import { DashboardContainerAPI } from './dashboard_container_api';
 
 const app = uiModules.get('app/dashboard', [
@@ -328,7 +328,7 @@ app.directive('dashboardApp', function ($injector) {
       $scope.exitFullScreenMode = () => setFullScreenMode(false);
 
       document.addEventListener('keydown', (e) => {
-        if (e.keyCode === ESC_KEY_CODE) {
+        if (e.keyCode === keyCodes.ESCAPE) {
           setFullScreenMode(false);
         }
       }, false);

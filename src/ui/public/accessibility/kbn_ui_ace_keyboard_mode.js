@@ -15,13 +15,13 @@
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
 import './kbn_ui_ace_keyboard_mode.less';
-import { ESC_KEY_CODE, ENTER_KEY } from 'ui_framework/services';
+import { keyCodes } from 'ui_framework/services';
 
 let aceKeyboardModeId = 0;
 
-uiModules.get('kibana').directive('kbnUiAceKeyboardMode', () => ({
-  restrict: 'A',
-  link(scope, element) {
+uiModules.get('kibana')
+.factory('kbnUiAceKeyboardModeService', () => ({
+  initialize(scope, element) {
     const uniqueId = `uiAceKeyboardHint-${scope.$id}-${aceKeyboardModeId++}`;
 
     const hint = angular.element(
@@ -53,7 +53,7 @@ uiModules.get('kibana').directive('kbnUiAceKeyboardMode', () => ({
     }
 
     hint.keydown((ev) => {
-      if (ev.keyCode === ENTER_KEY) {
+      if (ev.keyCode === keyCodes.ENTER) {
         ev.preventDefault();
         startEditing();
       }
@@ -64,7 +64,7 @@ uiModules.get('kibana').directive('kbnUiAceKeyboardMode', () => ({
     });
 
     uiAceTextbox.keydown((ev) => {
-      if (ev.keyCode === ESC_KEY_CODE) {
+      if (ev.keyCode === keyCodes.ESCAPE) {
         ev.preventDefault();
         ev.stopPropagation();
         enableOverlay();
@@ -76,5 +76,11 @@ uiModules.get('kibana').directive('kbnUiAceKeyboardMode', () => ({
     // Prevent tabbing into the ACE textarea, we now handle all focusing for it
     uiAceTextbox.attr('tabindex', '-1');
     element.prepend(hint);
+  }
+}))
+.directive('kbnUiAceKeyboardMode', (kbnUiAceKeyboardModeService) => ({
+  restrict: 'A',
+  link(scope, element) {
+    kbnUiAceKeyboardModeService.initialize(scope, element);
   }
 }));

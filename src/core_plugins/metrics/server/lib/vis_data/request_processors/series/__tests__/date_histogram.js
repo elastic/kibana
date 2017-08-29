@@ -11,6 +11,7 @@ describe('dateHistogram(req, panel, series)', () => {
     req = {
       payload: {
         timerange: {
+          timezone: 'UTC',
           min: '2017-01-01T00:00:00Z',
           max: '2017-01-01T01:00:00Z'
         }
@@ -42,6 +43,7 @@ describe('dateHistogram(req, panel, series)', () => {
                 field: '@timestamp',
                 interval: '10s',
                 min_doc_count: 0,
+                time_zone: 'UTC',
                 extended_bounds: {
                   min: 1483228800000,
                   max: 1483232400000
@@ -67,6 +69,7 @@ describe('dateHistogram(req, panel, series)', () => {
                 field: '@timestamp',
                 interval: '10s',
                 min_doc_count: 0,
+                time_zone: 'UTC',
                 extended_bounds: {
                   min: 1483225200000,
                   max: 1483228800000
@@ -95,6 +98,7 @@ describe('dateHistogram(req, panel, series)', () => {
                 field: 'timestamp',
                 interval: '20s',
                 min_doc_count: 0,
+                time_zone: 'UTC',
                 extended_bounds: {
                   min: 1483228800000,
                   max: 1483232400000

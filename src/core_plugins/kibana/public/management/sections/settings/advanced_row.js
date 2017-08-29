@@ -1,6 +1,7 @@
 import 'ui/elastic_textarea';
 import 'ui/filters/markdown';
 import { uiModules } from 'ui/modules';
+import { keyCodes } from 'ui_framework/services';
 import advancedRowTemplate from 'plugins/kibana/management/sections/settings/advanced_row.html';
 
 uiModules.get('apps/management')
@@ -15,9 +16,6 @@ uiModules.get('apps/management')
     },
     link: function ($scope) {
       const notify = new Notifier();
-      const keyCodes = {
-        ESC: 27
-      };
 
       // To allow passing form validation state back
       $scope.forms = {};
@@ -33,7 +31,7 @@ uiModules.get('apps/management')
       };
 
       $scope.maybeCancel = function ($event, conf) {
-        if ($event.keyCode === keyCodes.ESC) {
+        if ($event.keyCode === keyCodes.ESCAPE) {
           $scope.cancelEdit(conf);
         }
       };

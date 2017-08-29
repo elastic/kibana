@@ -142,7 +142,7 @@ export class SavedObjectsClient {
     });
 
     if (response.found === false) {
-      throw Boom.notFound();
+      throw errors.decorateNotFoundError(Boom.notFound());
     }
   }
 

@@ -167,9 +167,8 @@ function discoverController(
   .highlightAll(true)
   .version(true);
 
-  if (savedSearch.id) {
-    docTitle.change(savedSearch.title);
-  }
+  const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
+  docTitle.change(`Discover${pageTitleSuffix}`);
 
   let stateMonitor;
   const $appStatus = $scope.appStatus = this.appStatus = {
@@ -346,7 +345,7 @@ function discoverController(
         // no timefield, no vis, nothing to update
         if (!$scope.opts.timefield) return;
 
-        const buckets = $scope.vis.aggs.bySchemaGroup.buckets;
+        const buckets = $scope.vis.getAggConfig().bySchemaGroup.buckets;
 
         if (buckets && buckets.length === 1) {
           $scope.bucketInterval = buckets[0].buckets.getInterval();
@@ -684,7 +683,7 @@ function discoverController(
 
     $scope.searchSource.aggs(function () {
       $scope.vis.requesting();
-      return $scope.vis.aggs.toDsl();
+      return $scope.vis.getAggConfig().toDsl();
     });
 
     // stash this promise so that other calls to setupVisualization will have to wait

@@ -29,6 +29,7 @@ A high level overview of our contributing guidelines.
     - [Running Browser Automation Tests](#running-browser-automation-tests)
       - [Browser Automation Notes](#browser-automation-notes)
   - [Building OS packages](#building-os-packages)
+  - [Writing documentation](#writing-documentation)
 - [Signing the contributor license agreement](#signing-the-contributor-license-agreement)
 - [Submitting a Pull Request](#submitting-a-pull-request)
 - [Code Reviewing](#code-reviewing)
@@ -361,6 +362,21 @@ npm run build -- --rpm
 ```
 
 Distributable packages can be found in `target/` after the build completes.
+
+### Writing documentation
+
+Kibana documentation is written in [asciidoc](http://asciidoc.org/) format in
+the `docs/` directory.
+
+To build the docs, you must clone the [elastic/docs](https://github.com/elastic/docs)
+repo as a sibling of your kibana repo. Follow the instructions in that project's
+README for getting the docs tooling set up.
+
+**To build the docs and open them in your browser:**
+
+```bash
+node scripts/docs.js --open
+```
 
 ## Signing the contributor license agreement
 

@@ -10,6 +10,8 @@
           <th
             ng-repeat="col in columns"
             ng-click="paginatedTable.sortColumn($index)"
+            kbn-accessible-click
+            tabindex="0"
             class="{{ col.class }}">
             <span ng-bind="::col.title"></span>
             <kbn-info ng-if="col.info" info="{{ col.info }}" placement="top"></kbn-info>

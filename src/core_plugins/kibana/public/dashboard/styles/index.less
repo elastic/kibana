@@ -81,6 +81,7 @@ dashboard-grid {
   display: block;
   margin: 0;
   padding: 5px;
+  z-index: @dashboardGridDepth;
 }
 
 .start-screen {
@@ -218,5 +219,13 @@ dashboard-panel {
       flex: 1 1 100%;
       height: auto;
     }
+  }
+
+  /**
+   * 1. We want the doc-table-container to scroll only when embedded in a dashboard panel
+   */
+  .doc-table-container {
+    flex: 1 1 0; /* 1 */
+    overflow: auto; /* 1 */
   }
 }

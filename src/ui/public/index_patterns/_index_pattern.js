@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { SavedObjectNotFound, DuplicateField, IndexPatternAlreadyExists, IndexPatternMissingIndices } from 'ui/errors';
+import { SavedObjectNotFound, DuplicateField, IndexPatternMissingIndices } from 'ui/errors';
 import angular from 'angular';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
@@ -26,7 +26,7 @@ export function getRoutes() {
   };
 }
 
-export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, confirmModalPromise, kbnUrl) {
+export function IndexPatternProvider(Private, config, Promise, confirmModalPromise, kbnUrl) {
   const fieldformats = Private(RegistryFieldFormatsProvider);
   const getConfig = (...args) => config.get(...args);
   const getIds = Private(IndexPatternsGetProvider)('id');
@@ -366,20 +366,19 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
           const confirmMessage =
             `An index pattern with the title '${this.title}' already exists.`;
 
-          return confirmModalPromise(confirmMessage, { confirmButtonText: 'Edit existing pattern' })
+          return confirmModalPromise(confirmMessage, { confirmButtonText: 'Go to existing pattern' })
             .then(() => {
-              kbnUrl.change('/management/kibana/indices/{{id}}', { id: duplicate.id });
+              kbnUrl.redirect('/management/kibana/indices/{{id}}', { id: duplicate.id });
               return true;
-            })
-            .catch(() => {
-              throw new IndexPatternAlreadyExists(this.title);
+            }).catch(() => {
+              return true;
             });
         });
     }
 
     create() {
-      return this.warnIfDuplicateTitle().then((duplicate) => {
-        if (duplicate) return;
+      return this.warnIfDuplicateTitle().then((isDuplicate) => {
+        if (isDuplicate) return;
 
         const body = this.prepBody();
 

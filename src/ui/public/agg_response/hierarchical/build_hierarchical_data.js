@@ -17,11 +17,11 @@ export function BuildHierarchicalDataProvider(Private, Notifier) {
 
   return function (vis, resp) {
     // Create a refrenece to the buckets
-    let buckets = vis.aggs.bySchemaGroup.buckets;
+    let buckets = vis.getAggConfig().bySchemaGroup.buckets;
 
     // Find the metric so it's easier to reference.
     // TODO: Change this to support multiple metrics.
-    const metric = vis.aggs.bySchemaGroup.metrics[0];
+    const metric = vis.getAggConfig().bySchemaGroup.metrics[0];
 
     // Link each agg to the next agg. This will be
     // to identify the next bucket aggregation

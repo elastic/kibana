@@ -1,14 +1,14 @@
-<div ng-click="sortableColumn.toggle()">
-  <div
-    class="kuiTableHeaderCell__liner"
-    ng-transclude
-  ></div>
-  <span
-    class="kuiTableSortIcon kuiIcon fa-long-arrow-up"
-    ng-show="sortableColumn.isSortedAscending()"
-  ></span>
-  <span
-    class="kuiTableSortIcon kuiIcon fa-long-arrow-down"
-    ng-show="sortableColumn.isSortedDescending()"
-  ></span>
-</div>
+<button
+  class="kuiTableHeaderCellButton"
+  ng-class="{'kuiTableHeaderCellButton-isSorted': sortableColumn.isSorted()}"
+  ng-click="sortableColumn.toggle()"
+  aria-label="{{sortableColumn.getAriaLabel()}}"
+>
+  <span class="kuiTableHeaderCell__liner">
+    <span ng-transclude></span>
+    <span
+    class="kuiTableSortIcon kuiIcon"
+    ng-class="sortableColumn.isSortedAscending() ? 'fa-long-arrow-up' : 'fa-long-arrow-down'"
+    ></span>
+  </span>
+</button>

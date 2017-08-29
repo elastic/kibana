@@ -1,10 +1,11 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import Select from 'react-select';
 import DataFormatPicker from '../../data_format_picker';
 import createSelectHandler from '../../lib/create_select_handler';
 import YesNo from '../../yes_no';
 import createTextHandler from '../../lib/create_text_handler';
-import IndexPattern from '../../index_pattern';
+import { IndexPattern } from '../../index_pattern';
 
 function TimeseriesConfig(props) {
   const handleSelectChange = createSelectHandler(props.onChange);

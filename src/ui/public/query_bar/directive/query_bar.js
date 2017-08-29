@@ -1,4 +1,5 @@
 import { uiModules } from 'ui/modules';
+import { callAfterBindingsWorkaround } from 'ui/compat';
 import template from './query_bar.html';
 import { queryLanguages } from '../lib/queryLanguages';
 import { documentationLinks } from '../../documentation_links/documentation_links.js';
@@ -14,10 +15,11 @@ module.directive('queryBar', function () {
       query: '=',
       appName: '=?',
       onSubmit: '&',
+      disableAutoFocus: '='
     },
     controllerAs: 'queryBar',
     bindToController: true,
-    controller: function ($scope, config) {
+    controller: callAfterBindingsWorkaround(function ($scope, config) {
       this.queryDocLinks = documentationLinks.query;
       this.appName = this.appName || 'global';
       this.availableQueryLanguages = queryLanguages;
@@ -36,7 +38,7 @@ module.directive('queryBar', function () {
       $scope.$watch('queryBar.query', (newQuery) => {
         this.localQuery = Object.assign({}, newQuery);
       }, true);
-    }
+    })
   };
 
 });

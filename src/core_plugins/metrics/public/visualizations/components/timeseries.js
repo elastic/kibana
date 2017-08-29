@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import _ from 'lodash';
 import getLastValue from '../lib/get_last_value';
 import TimeseriesChart from './timeseries_chart';
@@ -121,14 +122,15 @@ class Timeseries extends Component {
         <div style={styles.content} className="rhythm_chart__content">
           <div className="rhythm_chart__visualization">
             <TimeseriesChart
+              dateFormat={this.props.dateFormat}
               crosshair={this.props.crosshair}
               onBrush={this.props.onBrush}
-              plothover={ this.plothover}
+              plothover={this.plothover}
               reversed={this.props.reversed}
               series={this.props.series}
               annotations={this.props.annotations}
-              show={ this.state.show }
-              showGrid={ this.props.showGrid }
+              show={this.state.show}
+              showGrid={this.props.showGrid}
               tickFormatter={this.props.tickFormatter}
               options={this.props.options}
               xaxisLabel={this.props.xaxisLabel}
@@ -169,7 +171,8 @@ Timeseries.propTypes = {
   options: PropTypes.object,
   tickFormatter: PropTypes.func,
   showGrid: PropTypes.bool,
-  xaxisLabel: PropTypes.string
+  xaxisLabel: PropTypes.string,
+  dateFormat: PropTypes.string
 };
 
 export default Timeseries;

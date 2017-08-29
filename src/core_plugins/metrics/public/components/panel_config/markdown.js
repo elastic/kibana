@@ -1,6 +1,7 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import SeriesEditor from '../series_editor';
-import IndexPattern from '../index_pattern';
+import { IndexPattern } from '../index_pattern';
 import AceEditor from 'react-ace';
 import 'brace/mode/less';
 import Select from 'react-select';
@@ -120,7 +121,7 @@ class MarkdownPanelConfig extends Component {
               width="100%"
               name={`ace-css-${model.id}`}
               setOptions={{ fontSize: '14px' }}
-              value={ model.markdown_less}
+              value={model.markdown_less}
               onChange={this.handleCSSChange}
             />
           </div>
@@ -157,6 +158,7 @@ MarkdownPanelConfig.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   visData: PropTypes.object,
+  dateFormat: PropTypes.string
 };
 
 export default MarkdownPanelConfig;

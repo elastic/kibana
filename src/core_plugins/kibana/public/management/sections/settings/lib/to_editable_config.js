@@ -1,5 +1,6 @@
 import { getValType } from './get_val_type';
 import { getEditorType } from './get_editor_type';
+import { getAriaName } from './get_aria_name';
 
 /**
  * @param {object} advanced setting definition object
@@ -13,6 +14,7 @@ export function toEditableConfig({ def, name, value, isCustom }) {
   }
   const conf = {
     name,
+    ariaName: getAriaName(name),
     value,
     isCustom,
     readonly: !!def.readonly,
@@ -33,3 +35,4 @@ export function toEditableConfig({ def, name, value, isCustom }) {
 
   return conf;
 }
+

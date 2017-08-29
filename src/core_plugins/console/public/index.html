@@ -4,22 +4,23 @@
       <ul id="autocomplete"></ul>
       <div id="editor_actions">
         <kbn-tooltip text="click to send request">
-          <a
+          <button
+            kbn-accessible-click
             class="editor_action"
             ng-click="sendSelected()"
             data-test-subj="send-request-button">
             <i class="fa fa-play"></i>
-          </a>
+          </button>
         </kbn-tooltip>
         <span dropdown>
-          <a
+          <button
             id="consoleRequestOptions"
             class="editor_action"
             dropdown-toggle href="#"
             aria-label="Request options"
           >
             <span class="kuiIcon fa-wrench"></span>
-          </a>
+          </button>
 
           <ul
             class="dropdown-menu"
@@ -27,10 +28,10 @@
             aria-labelledby="consoleRequestOptions"
           >
             <li role="menuitem">
-              <a class="link" id="copy_as_curl">Copy as cURL</a>
+              <button class="link" id="copy_as_curl">Copy as cURL</button>
             </li>
             <li role="menuitem">
-              <a ng-click="autoIndent($event)">Auto indent</a>
+              <button ng-click="autoIndent($event)">Auto indent</button>
             </li>
           </ul>
         </span>

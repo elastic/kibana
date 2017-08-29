@@ -4,6 +4,7 @@ import moment from 'moment-timezone';
 import { DocTitleProvider } from 'ui/doc_title';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
 import { notify } from 'ui/notify';
+import { timezoneProvider } from 'ui/vis/lib/timezone';
 
 require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fixed_element');
@@ -75,7 +76,7 @@ app.controller('timelion', function (
   });
 
   const savedVisualizations = Private(SavedObjectRegistryProvider).byLoaderPropertiesName.visualizations;
-  const timezone = Private(require('plugins/timelion/services/timezone'))();
+  const timezone = Private(timezoneProvider)();
   const docTitle = Private(DocTitleProvider);
 
   const defaultExpression = '.es(*)';
@@ -214,15 +215,18 @@ app.controller('timelion', function (
     $scope.state.save();
     $scope.running = true;
 
-    $http.post('../api/timelion/run', {
+    const httpResult = $http.post('../api/timelion/run', {
       sheet: $scope.state.sheet,
       time: _.extend(timefilter.time, {
         interval: $scope.state.interval,
         timezone: timezone
       }),
     })
-    // data, status, headers, config
-    .success(function (resp) {
+    .then(resp => resp.data)
+    .catch(resp => { throw resp.data; });
+
+    httpResult
+    .then(function (resp) {
       dismissNotifications();
       $scope.stats = resp.stats;
       $scope.sheet = resp.sheet;
@@ -233,7 +237,7 @@ app.controller('timelion', function (
       });
       $scope.running = false;
     })
-    .error(function (resp) {
+    .catch(function (resp) {
       $scope.sheet = [];
       $scope.running = false;
 

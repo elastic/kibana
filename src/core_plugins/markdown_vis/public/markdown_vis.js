@@ -21,6 +21,7 @@ function MarkdownVisProvider(Private) {
   return VisFactory.createAngularVisualization({
     name: 'markdown',
     title: 'Markdown',
+    isAccessible: true,
     image,
     description: 'Create a document using markdown syntax',
     category: CATEGORY.OTHER,
@@ -32,6 +33,9 @@ function MarkdownVisProvider(Private) {
     },
     editorConfig: {
       optionsTemplate: markdownVisParamsTemplate
+    },
+    options: {
+      showTimePicker: false,
     },
     requestHandler: 'none',
     implementsRenderComplete: true,

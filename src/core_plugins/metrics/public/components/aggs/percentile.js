@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import _ from 'lodash';
 import AggSelect from './agg_select';
 import FieldSelect from './field_select';
@@ -114,7 +115,7 @@ Percentiles.propTypes = {
 };
 
 
-class PercentileAgg extends Component {
+class PercentileAgg extends Component { // eslint-disable-line react/no-multi-comp
 
   componentWillMount() {
     if (!this.props.model.percentiles) {

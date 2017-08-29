@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 
 function VisPickerItem(props) {
   const { label, icon, type } = props;
@@ -47,7 +48,7 @@ function VisPicker(props) {
       <VisPickerItem
         key={item.type}
         onClick={handleChange}
-        selected={ item.type === model.type }
+        selected={item.type === model.type}
         {...item}
       />
     );

@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import Tooltip from './tooltip';
 import Picker from './custom_color_picker';
 
@@ -82,7 +83,7 @@ class ColorPicker extends Component {
                 onClick={this.handleClose}
               />
               <Picker
-                color={ value }
+                color={value}
                 onChangeComplete={this.handleChange}
               />
             </div>

@@ -9,8 +9,6 @@ import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('kibana/index_patterns');
 
-export { IndexPatternsApiClientProvider } from './index_patterns_api_client_provider';
-
 export function IndexPatternsProvider(Notifier, Private) {
   const self = this;
 

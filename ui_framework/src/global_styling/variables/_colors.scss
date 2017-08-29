@@ -1,0 +1,49 @@
+// True colors
+
+$globalColorBlue: #0079a5;
+$globalColorTeal: #00A69B;
+$globalColorRed: #A30000;
+$globalColorLightestGray: #F5F5F5;
+$globalColorLightGray: #D9D9D9;
+$globalColorMediumGray: #999;
+$globalColorDarkGray: #666;
+$globalColorDarkestGray: #3F3F3F;
+$globalColorBlack: #000;
+$globalColorWhite: #FFF;
+
+// Normal colors
+
+$globalTextColor: #2d2d2d;
+$globalLinkColor: $globalColorBlue;
+$globalLinkColor-isHover: darken($globalLinkColor, 10%);
+$globalInputTextColor: $globalTextColor;
+$globalInputBackgroundColor: $globalColorWhite;
+$globalInputBorderColor: $globalColorLightGray;
+
+// Dark theme colors
+
+$globalTextColor--darkTheme: #cecece;
+$globalBackgroundColor--darkTheme: #777777;
+$globalLinkColor--darkTheme: #b7e2ea;
+$globalLinkColor-isHover--darkTheme: #def2f6;
+$globalInputTextColor--darkTheme: $globalTextColor--darkTheme;
+$globalInputBackgroundColor--darkTheme: #444444;
+$globalInputBorderColor--darkTheme: $globalInputBackgroundColor--darkTheme;
+
+// Colors
+
+$globalInfoColor: #3fa8c7;
+$globalInactiveColor: #c3c3c3;
+$globalSuccessColor: #417505;
+$globalWarningColor: #ec9800;
+$globalDangerColor: $globalColorRed;
+$globalFocusColor: $globalColorBlue;
+$globalFocusDangerColor: #ff523c;
+$globalFocusWarningColor: #ffa500;
+$globalFocusBackgroundColor: #ffffff;
+$globalFontColor: #191E23;
+$globalSubduedTextColor: $globalColorDarkGray;
+$globalLinkHoverColor: #006E8A;
+$globalSelectedBorderColor: $globalColorBlue;
+$globalDangerBorderColor: $globalDangerColor;
+$globalFormControlBorderColor: #DEDEDE;
