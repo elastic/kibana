@@ -67,6 +67,7 @@ export function VisHandlerProvider(Private) {
 
       this.renderArray = this.renderArray
         .concat(this.valueAxes)
+        // category axes need to render in reverse order https://github.com/elastic/kibana/issues/13551
         .concat(this.categoryAxes.slice().reverse());
 
       // memoize so that the same function is returned every time,
