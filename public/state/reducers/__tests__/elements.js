@@ -1,14 +1,7 @@
 import expect from 'expect.js';
-import proxyquire from 'proxyquire';
 import { get } from 'lodash';
 import actionCreator from './fixtures/action_creator';
-
-const reducer = proxyquire('../elements', {
-  '../actions/elements': {
-    setExpression: 'setExpression',
-    '@noCallThru': true,
-  },
-}).default;
+import reducer from '../elements';
 
 describe('elements reducer', () => {
   let state;
