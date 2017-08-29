@@ -196,7 +196,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       .then($scope.fetch);
     });
 
-    $scope.$watch('state.query', $scope.updateQuery);
+    $scope.$watch('state.query', $scope.updateQueryAndFetch);
 
     $state.replace();
 

@@ -228,7 +228,7 @@ app.directive('dashboardApp', function ($injector) {
         $scope.indexPatterns = dashboardState.getPanelIndexPatterns();
       };
 
-      $scope.$watch('model.query', $scope.updateQuery);
+      $scope.$watch('model.query', $scope.updateQueryAndFetch);
 
       $scope.$watchCollection(() => dashboardState.getAppState().$newFilters, function (filters = []) {
         // need to convert filters generated from user interaction with viz into kuery AST

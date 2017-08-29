@@ -352,7 +352,7 @@ function discoverController(
         }
       });
 
-      $scope.$watch('state.query', $scope.updateQuery);
+      $scope.$watch('state.query', $scope.updateQueryAndFetch);
 
       $scope.$watchMulti([
         'rows',
