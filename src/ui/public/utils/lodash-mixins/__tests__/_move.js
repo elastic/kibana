@@ -109,7 +109,7 @@ describe('_.move', function () {
   });
 
 
-  it('moves an object up based on a where callback', function () {
+  it('moves an object down based on a where callback', function () {
     const list = [
       { v: 1 },
       { v: 1 },
