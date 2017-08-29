@@ -27,6 +27,8 @@ export const FilterRatioAgg = props => {
 
   const model = { ...defaults, ...props.model };
 
+  const restrictMode = model.metric_agg === 'cardinality' ? 'none' : 'numeric';
+
   return (
     <AggRow
       disableDelete={props.disableDelete}
@@ -80,7 +82,7 @@ export const FilterRatioAgg = props => {
               <FieldSelect
                 fields={fields}
                 type={model.metric_agg}
-                restrict="numeric"
+                restrict={restrictMode}
                 indexPattern={indexPattern}
                 value={model.field}
                 onChange={handleSelectChange('field')}
