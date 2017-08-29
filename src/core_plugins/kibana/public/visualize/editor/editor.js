@@ -196,11 +196,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       .then($scope.fetch);
     });
 
-    $scope.$watch('state.query', (newQuery) => {
-      $state.query = migrateLegacyQuery(newQuery);
-
-      $scope.fetch();
-    });
+    $scope.$watch('state.query', $scope.updateQuery);
 
     $state.replace();
 
@@ -242,8 +238,8 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       $state.filters = [];
       $state.$newFilters = [];
     }
-
-    $state.query = query;
+    $state.query = migrateLegacyQuery(query);
+    $scope.fetch();
   };
 
   /**

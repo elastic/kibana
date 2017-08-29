@@ -189,8 +189,9 @@ app.directive('dashboardApp', function ($injector) {
           filterBar.removeAll();
           dashboardState.getAppState().$newFilters = [];
         }
-
-        $scope.model.query = query;
+        $scope.model.query = migrateLegacyQuery(query);
+        dashboardState.applyFilters($scope.model.query, filterBar.getFilters());
+        $scope.refresh();
       };
 
       // called by the saved-object-finder when a user clicks a vis
@@ -227,11 +228,7 @@ app.directive('dashboardApp', function ($injector) {
         $scope.indexPatterns = dashboardState.getPanelIndexPatterns();
       };
 
-      $scope.$watch('model.query', (newQuery) => {
-        $scope.model.query = migrateLegacyQuery(newQuery);
-        dashboardState.applyFilters($scope.model.query, filterBar.getFilters());
-        $scope.refresh();
-      });
+      $scope.$watch('model.query', $scope.updateQuery);
 
       $scope.$watchCollection(() => dashboardState.getAppState().$newFilters, function (filters = []) {
         // need to convert filters generated from user interaction with viz into kuery AST
