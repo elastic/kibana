@@ -35,7 +35,7 @@ class TableVis extends Component {
       const url = replaceVars(model.drilldown_url, {}, { key: row.key });
       rowDisplay = (<a href={url}>{rowDisplay}</a>);
     }
-    const columns = row.series.map(item => {
+    const columns = row.series.filter(item => item).map(item => {
       const column = model.series.find(c => c.id === item.id);
       if (!column) return null;
       const formatter = ticFormatter(column.formatter, column.value_template);
