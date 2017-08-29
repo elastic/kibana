@@ -1,4 +1,4 @@
-import { values, first, last } from 'lodash';
+import { flatten, values, first, last } from 'lodash';
 import getDefaultDecoration from '../../helpers/get_default_decoration';
 import getSiblingAggValue from '../../helpers/get_sibling_agg_value';
 import getSplits from '../../helpers/get_splits';
@@ -40,6 +40,13 @@ export function mathAgg(resp, panel, series) {
             }
             return acc;
           }, {});
+          const all = Object.keys(splitData).reduce((acc, key) => {
+            acc[key] = {
+              values: splitData[key].map(x => x[1]),
+              timestamps: splitData[key].map(x => x[0])
+            };
+            return acc;
+          }, {});
           const firstVar = first(mathMetric.variables);
           const timestamps = splitData[firstVar.name].map(r => first(r));
           const data = timestamps.map((ts, index) => {
@@ -49,8 +56,8 @@ export function mathAgg(resp, panel, series) {
             }, {});
             const someNull = values(params).some(v => v == null);
             if (someNull) return [ts, null];
-            const result = limitedEval(mathMetric.script, { params, all: splitData, currentTimestamp: ts, index });
-            if (typeof result === 'object') return [ts, last(result.valueOf())];
+            const result = limitedEval(mathMetric.script, { params: { ...params, _index: index, _timestamp: ts, _all: all } });
+            if (typeof result === 'object') return [ts, last(flatten(result.valueOf()))];
             return [ts, result];
           });
           return {

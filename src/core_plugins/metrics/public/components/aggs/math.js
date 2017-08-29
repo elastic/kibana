@@ -57,10 +57,11 @@ class MathAgg extends Component {
             </div>
             <div className="vis_editor__row_item">
               <div className="vis_editor__label">
-                Basic math (see <a href="http://mathjs.org/docs/expressions/syntax.html" target="_blank">MathJS</a>) - Variables are keys on the <code>params</code>
-                object, i.e. <code>params.&lt;name&gt;</code> To access all the data use <code>all.&lt;name&gt;</code>,
-                returns and array of arrays containing the integer timestamp and the value.
-                <code>currentTimestamp</code> and <code>index</code> are also available.
+                Basic math (see <a href="http://mathjs.org/docs/expressions/syntax.html" target="_blank">MathJS</a>) - Variables
+                are keys on the <code>params</code> object, i.e. <code>params.&lt;name&gt;</code> To access all the data use
+                <code>params._all.&lt;name&gt;.values</code> for an array of the values and <code>all.&lt;name&gt;.timestamps</code>
+                for an array of the timestamps.  <code>params._timestamp</code> is available for the current bucket&apos;s timestamp
+                and <code>params._index</code> is available for the current bucket&apos;s index.
               </div>
               <input
                 className="vis_editor__input-grows-100"
