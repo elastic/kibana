@@ -21,6 +21,7 @@ import { queryManagerFactory } from '../query_manager';
 import * as kueryAPI from 'ui/kuery';
 import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
 import { FetchProvider } from 'ui/courier/fetch/fetch';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
@@ -30,6 +31,7 @@ export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
   const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
   const fetch = Private(FetchProvider);
   const SearchSource = Private(SearchSourceProvider);
+  const savedObjectsClient = Private(SavedObjectsClientProvider);
 
   class Vis extends EventEmitter {
     constructor(indexPattern, visState, uiState) {
@@ -57,6 +59,7 @@ export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
 
       this.API = {
         fetch: fetch,
+        savedObjectsClient: savedObjectsClient,
         SearchSource: SearchSource,
         indexPatterns: indexPatterns,
         timeFilter: timefilter,

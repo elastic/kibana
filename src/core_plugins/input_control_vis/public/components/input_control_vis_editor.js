@@ -16,7 +16,12 @@ export class InputControlVisEditor extends Component {
     };
 
     this.getIndexPatterns = async () => {
-      return await props.scope.vis.API.indexPatterns.getIndexPatterns();
+      const resp = await props.scope.vis.API.savedObjectsClient.find({
+        type: 'index-pattern',
+        fields: ['title'],
+        perPage: 10000
+      });
+      return resp.savedObjects;
     };
     this.getIndexPattern = async (indexPatternId) => {
       return await props.scope.vis.API.indexPatterns.get(indexPatternId);
