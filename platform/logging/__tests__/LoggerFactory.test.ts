@@ -14,7 +14,7 @@ jest.mock('fs', () => ({
   createWriteStream: () => ({ write: mockStreamWrite, end: mockStreamEnd })
 }));
 
-const timestamp = new Date(2012, 1, 1);
+const timestamp = new Date(Date.UTC(2012, 1, 1));
 const mockConsoleLog = jest
   .spyOn(global.console, 'log')
   .mockImplementation(() => {});
@@ -76,15 +76,15 @@ test('`get()` returns Logger that appends records to buffer if config is not rea
   // Now all logs should added to configured appenders.
   expect(mockConsoleLog).toHaveBeenCalledTimes(1);
   expect(mockConsoleLog).toHaveBeenCalledWith(
-    '[2012-01-31T23:00:00.000Z][INFO ][some-context] You know, just for your info.'
+    '[2012-02-01T00:00:00.000Z][INFO ][some-context] You know, just for your info.'
   );
 
   expect(mockStreamWrite).toHaveBeenCalledTimes(2);
   expect(mockStreamWrite).toHaveBeenCalledWith(
-    '[2012-01-31T23:00:00.000Z][WARN ][tests] Config is not ready!\n'
+    '[2012-02-01T00:00:00.000Z][WARN ][tests] Config is not ready!\n'
   );
   expect(mockStreamWrite).toHaveBeenCalledWith(
-    '[2012-01-31T23:00:00.000Z][ERROR][tests.child] Too bad that config is not ready :/\n'
+    '[2012-02-01T00:00:00.000Z][ERROR][tests.child] Too bad that config is not ready :/\n'
   );
 });
 
@@ -107,7 +107,7 @@ test('`get()` returns `root` logger if context is not specified.', () => {
 
   expect(mockConsoleLog).toHaveBeenCalledTimes(1);
   expect(mockConsoleLog).toHaveBeenCalledWith(
-    '[2012-01-31T23:00:00.000Z][INFO ][root] This message goes to a root context.'
+    '[2012-02-01T00:00:00.000Z][INFO ][root] This message goes to a root context.'
   );
 });
 
