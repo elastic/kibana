@@ -86,6 +86,12 @@ export function getUiSettingDefaults() {
       description: 'Determines how many terms will be visualized when clicking the "visualize" ' +
       'button, in the field drop downs, in the discover sidebar.'
     },
+    'discover:sort:defaultOrder': {
+      value: 'desc',
+      options: ['desc', 'asc'],
+      type: 'select',
+      description: 'Controls the default sort direction for time based index patterns in the Discover app.',
+    },
     'doc_table:highlight': {
       value: true,
       description: 'Highlight results in Discover and Saved Searches Dashboard.' +
