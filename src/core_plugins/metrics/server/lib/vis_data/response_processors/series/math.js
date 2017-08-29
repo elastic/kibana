@@ -31,6 +31,7 @@ export function mathAgg(resp, panel, series) {
         if (mathMetric.variables.length) {
           const splitData = mathMetric.variables.reduce((acc, v) => {
             const metric = series.metrics.find(m => m.id === v.field);
+            if (!metric) return acc;
             if (/_bucket$/.test(metric.type)) {
               acc[v.name] = split.timeseries.buckets.map(bucket => {
                 return [bucket.key, getSiblingAggValue(split, metric)];
@@ -48,6 +49,15 @@ export function mathAgg(resp, panel, series) {
             return acc;
           }, {});
           const firstVar = first(mathMetric.variables);
+          if (!splitData[firstVar.name]) {
+            return {
+              id: split.id,
+              label: split.label,
+              color: split.color,
+              data: [],
+              ...decoration
+            };
+          }
           const timestamps = splitData[firstVar.name].map(r => first(r));
           const data = timestamps.map((ts, index) => {
             const params = mathMetric.variables.reduce((acc, v) => {
@@ -61,13 +71,12 @@ export function mathAgg(resp, panel, series) {
             return [ts, result];
           });
           return {
-            id: `${split.id}`,
+            id: split.id,
             label: split.label,
             color: split.color,
             data,
             ...decoration
           };
-          return results;
         }
       });
       return next(results.concat(mathSeries));
