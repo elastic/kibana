@@ -33,7 +33,7 @@ export default function calculateLabel(metric, metrics) {
     let additionalLabel = '';
     const targetMetric = metrics.find(m => startsWith(metric.field, m.id));
     const targetLabel = calculateLabel(targetMetric, metrics);
-    if (targetMetric.type === 'percentile') {
+    if (targetMetric && targetMetric.type === 'percentile') {
       const percentileValueMatch = /\[([0-9\.]+)\]$/;
       const matches = metric.field.match(percentileValueMatch);
       if (matches) {
