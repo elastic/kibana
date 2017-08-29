@@ -1,3 +1,3 @@
 /* eslint-disable */
-import IndexPattern from './index-pattern.container';
-export default IndexPattern;
+import IndexPatternRedirect from './index-pattern.redirect';
+export default IndexPatternRedirect;

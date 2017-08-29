@@ -7,3 +7,4 @@
 /src/ui/public/utils/decode_geo_hash.js
 /src/core_plugins/timelion/public/webpackShims/jquery.flot.*
 /ui_framework/doc_site/build
+/src/core_plugins/kibana/public/management/react
