@@ -258,48 +258,8 @@ npm run test:browser -- --dev # remove the --dev flag to run them once and close
 
 #### Running Browser Automation Tests
 
-The following will start Kibana, Elasticsearch and the chromedriver for you. To run the functional UI tests use the following commands
-
-```bash
-npm run test:ui
-```
-
-
-In order to start the server required for the `node scripts/functional_test_runner` tasks, use the following command. Once the server is started `node scripts/functional_test_runner` can be run multiple times without waiting for the server to start.
-
-```bash
-npm run test:ui:server
-```
-
-To execute the front-end browser tests, enter the following. This requires the server started by the `test:ui:server` task.
-
-```bash
-node scripts/functional_test_runner
-```
-
-To filter these tests, use `--grep=foo` for only running tests that match a regular expression.
-
-To run these browser tests against against some other Elasticsearch and Kibana instance you can set these environment variables and then run the test runner.
-Here's an example to run against an Elastic Cloud instance (note that you should run the same branch of tests as the version of Kibana you're testing);
-
-```bash
-export TEST_KIBANA_PROTOCOL=https
-export TEST_KIBANA_HOSTNAME=9249d04b1186b3e7bbe11ea60df4f963.us-east-1.aws.found.io
-export TEST_KIBANA_PORT=443
-export TEST_KIBANA_USER=elastic
-export TEST_KIBANA_PASS=<your password here>
-
-export TEST_ES_PROTOCOL=http
-export TEST_ES_HOSTNAME=aaa5d22032d76805fcce724ed9d9f5a2.us-east-1.aws.found.io
-export TEST_ES_PORT=9200
-export TEST_ES_USER=elastic
-export TEST_ES_PASS=<your password here>
-node scripts/functional_test_runner
-```
-
-##### Browser Automation Notes
-
 [Read about the `FunctionalTestRunner`](https://www.elastic.co/guide/en/kibana/current/development-functional-tests.html) to learn more about how you can run and develop functional tests for Kibana core and plugins.
+
 
 ### Building OS packages
 
