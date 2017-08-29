@@ -5,7 +5,7 @@ import { Plugin } from './Plugin';
 import { PluginSystem } from './PluginSystem';
 import { Logger, LoggerFactory } from '../../logging';
 import { CoreService } from '../../types';
-import { ConfigService } from '../../config';
+import { ConfigService, Env } from '../../config';
 
 const readDirAsObservable = Observable.bindNodeCallback(readdir);
 
@@ -13,7 +13,7 @@ export class PluginsService implements CoreService {
   private readonly log: Logger;
 
   constructor(
-    private readonly pluginsDir: string,
+    private readonly env: Env,
     private readonly pluginSystem: PluginSystem,
     private readonly configService: ConfigService,
     private readonly logger: LoggerFactory
@@ -54,10 +54,10 @@ export class PluginsService implements CoreService {
    * of plugins.
    */
   private readPlugins() {
-    return readDirAsObservable(this.pluginsDir)
+    return readDirAsObservable(this.env.pluginsDir)
       .mergeMap(dirs => dirs)
       .map(name => {
-        const pluginPath = `${this.pluginsDir}/${name}/target/dist/`;
+        const pluginPath = this.env.getPluginDir(name);
         const json = require(pluginPath);
 
         if (!('plugin' in json)) {

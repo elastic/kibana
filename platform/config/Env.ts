@@ -38,6 +38,10 @@ export class Env {
       : this.argv.config;
   }
 
+  getPluginDir(pluginName: string) {
+    return resolve(this.pluginsDir, pluginName, 'target', 'dist')
+  }
+
   private getDefaultConfigFile() {
     return resolve(this.configDir, 'kibana.yml');
   }
