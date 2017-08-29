@@ -54,7 +54,7 @@ uiModules
 
         $scope.fetch = _.debounce(function () {
           if (!$scope.vis.initialized) {
-            $timeout(() => {
+            $scope.timeout = $timeout(() => {
               $scope.fetch();
             }, 100);
             return;
@@ -154,6 +154,7 @@ uiModules
 
         $scope.$on('$destroy', () => {
           resizeChecker.destroy();
+          if ($scope.timeout) $timeout.cancel($scope.timeout);
         });
 
         $scope.fetch();
