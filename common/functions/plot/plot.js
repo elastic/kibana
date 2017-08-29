@@ -1,5 +1,6 @@
 import Fn from '../fn.js';
 import { groupBy, keyBy, get, set, map, sortBy } from 'lodash';
+import chroma from 'chroma-js';
 
 /*
 esdocs(size=1000).alterColumn(column=@timestamp, type=date, name=time)
@@ -137,6 +138,8 @@ export default new Fn({
       return result;
     });
 
+    const colors = args.palette.gradient ? chroma.scale(args.palette.colors).colors(data.length) : args.palette.colors;
+
     const result = {
       type: 'render',
       as: 'plot',
@@ -144,7 +147,7 @@ export default new Fn({
         data: sortBy(data, 'label'),
         options: {
           canvas: false,
-          colors: args.palette.colors,
+          colors: colors,
           legend: {
             show: true,
           },

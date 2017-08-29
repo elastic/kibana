@@ -1,5 +1,7 @@
 import Fn from '../fn.js';
 import { groupBy, map, sortBy } from 'lodash';
+import chroma from 'chroma-js';
+
 
 export default new Fn({
   name: 'pie',
@@ -30,6 +32,8 @@ export default new Fn({
       data: series.map(point => point.size || 1),
     }));
 
+    const colors = args.palette.gradient ? chroma.scale(args.palette.colors).colors(data.length) : args.palette.colors;
+
     return {
       type: 'render',
       as: 'pie',
@@ -37,7 +41,7 @@ export default new Fn({
         data: sortBy(data, 'label'),
         options: {
           canvas: false,
-          colors: args.palette.colors,
+          colors: colors,
           legend: {
             show: true,
           },
