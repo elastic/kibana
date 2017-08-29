@@ -6,29 +6,36 @@ export class FieldSelect extends Component {
   constructor(props) {
     super(props);
 
+    this.state = {
+      fields: []
+    };
     this.filterField = _.get(props, 'filterField', () => { return true; });
-    this.loadFields = this.loadFields.bind(this);
+    this.loadFields(this.props.indexPatternId);
   }
 
-  loadFields(input, callback) {
-    if (!this.props.indexPatternId || this.props.indexPatternId.length === 0) {
-      callback(null, { options: [] });
+  componentWillReceiveProps(nextProps) {
+    if (this.props.indexPatternId !== nextProps.indexPatternId) {
+      this.setState({ fields: [] });
+      this.loadFields(nextProps.indexPatternId);
+    }
+  }
+
+  async loadFields(indexPatternId) {
+    if (!indexPatternId || indexPatternId.length === 0) {
       return;
     }
-
-    this.props.getIndexPattern(this.props.indexPatternId).then(index => {
-      const fields = index.fields
+    const indexPattern = await this.props.getIndexPattern(indexPatternId);
+    const fields = indexPattern.fields
       .filter(this.filterField)
       .sort((a, b) => {
         if (a.name < b.name) return -1;
         if (a.name > b.name) return 1;
         return 0;
-      }).map(function (field) {
+      })
+      .map(function (field) {
         return { label: field.name, value: field.name };
       });
-      // Setting complete=true means loadOptions will never be called again.
-      callback(null, { options: fields, complete: true });
-    });
+    this.setState({ fields: fields });
   }
 
   render() {
@@ -42,11 +49,11 @@ export class FieldSelect extends Component {
           Field
         </label>
         <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
-          <Select.Async
+          <Select
             className="field-react-select"
-            placeholder="Select..."
+            placeholder="Select field..."
             value={this.props.value}
-            loadOptions={this.loadFields}
+            options={this.state.fields}
             onChange={this.props.onChange}
             resetValue={''}
           />
