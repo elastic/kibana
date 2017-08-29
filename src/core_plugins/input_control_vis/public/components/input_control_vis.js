@@ -49,7 +49,10 @@ export class InputControlVis extends Component {
           break;
       }
       return (
-        <div key={control.id}>
+        <div
+          key={control.id}
+          data-test-subj={'inputControl' + index}
+        >
           {controlComponent}
         </div>
       );
@@ -66,6 +69,7 @@ export class InputControlVis extends Component {
             type="button"
             onClick={this.handleSubmit}
             disabled={stagedControls.length === 0}
+            data-test-subj="inputControlSubmitBtn"
           >
             Update filters
           </KuiButton>
@@ -76,6 +80,7 @@ export class InputControlVis extends Component {
             type="button"
             onClick={this.handleReset}
             disabled={stagedControls.length === 0}
+            data-test-subj="inputControlCancelBtn"
           >
             Cancel
           </KuiButton>
@@ -85,6 +90,7 @@ export class InputControlVis extends Component {
             buttonType="basic"
             type="button"
             onClick={this.handleClearAll}
+            data-test-subj="inputControlClearBtn"
           >
             Clear
           </KuiButton>

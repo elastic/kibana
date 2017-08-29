@@ -30,6 +30,6 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./_markdown_vis'));
     loadTestFile(require.resolve('./_tsvb_chart'));
     loadTestFile(require.resolve('./_shared_item'));
-    loadTestFile(require.resolve('./_terms_control'));
+    loadTestFile(require.resolve('./_input_control_vis'));
   });
 }

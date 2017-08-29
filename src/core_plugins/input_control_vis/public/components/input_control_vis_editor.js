@@ -159,6 +159,7 @@ export class InputControlVisEditor extends Component {
             type="button"
             icon={<KuiButtonIcon type="create" />}
             onClick={this.handleAddControl}
+            data-test-subj="inputCtrlAddCtrlBtn"
           >
             Add
           </KuiButton>

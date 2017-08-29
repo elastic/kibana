@@ -82,8 +82,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByPartialLinkText('Heat Map');
     }
 
-    async clickTermsControl() {
-      await find.clickByPartialLinkText('Terms Control');
+    async clickInputControlVis() {
+      await find.clickByPartialLinkText('Dashboard Controls');
     }
 
     async getChartTypeCount() {
@@ -140,13 +140,22 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await input.clearValue();
       await input.type(value);
       await remote.pressKeys('\uE006');
+      await find.clickByCssSelector(className + ' * .Select-arrow-zone');
     }
 
-    async getReactSelectOptions() {
-      await testSubjects.click('termsControl');
+    async clearReactSelect(className) {
+      await find.clickByCssSelector(className + ' * .Select-clear-zone');
+    }
+
+    async getReactSelectOptions(containerSelector) {
+      await testSubjects.click(containerSelector);
       const menu = await retry.try(
           async () => find.byCssSelector('.Select-menu-outer'));
       return await menu.getVisibleText();
+    }
+
+    async addInputControl() {
+      await testSubjects.click('inputCtrlAddCtrlBtn');
     }
 
     async doesReactSelectHaveValue(className) {
