@@ -5,7 +5,7 @@
 
 import { VisResponseHandlersRegistryProvider } from 'ui/registry/vis_response_handlers';
 
-const noneResponseHandler = function () {
+const noneResponseHandler = function (Promise) {
   return {
     name: 'none',
     handler: function (vis, response) {
