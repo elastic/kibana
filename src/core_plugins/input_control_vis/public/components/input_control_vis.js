@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import { RangeControl } from './range_control';
 import { TermsControl } from './terms_control';
 import { KuiFieldGroup, KuiFieldGroupSection, KuiButton } from 'ui_framework/components';

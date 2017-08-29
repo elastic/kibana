@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import InputRange from 'react-input-range';
 import { FormRow } from './form_row';
 

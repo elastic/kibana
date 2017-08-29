@@ -1,5 +1,6 @@
 import _ from 'lodash';
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import { ControlEditor } from './control_editor';
 import { RangeControlEditor } from './range_control_editor';
 import { TermsControlEditor } from './terms_control_editor';

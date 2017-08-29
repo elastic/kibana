@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import { IndexPatternSelect } from './index_pattern_select';
 import { FieldSelect } from './field_select';
 
