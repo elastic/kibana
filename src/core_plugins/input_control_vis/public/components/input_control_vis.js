@@ -1,7 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { RangeControl } from './range_control';
 import { TermsControl } from './terms_control';
-import { TextControl } from './text_control';
 import { KuiFieldGroup, KuiFieldGroupSection, KuiButton } from 'ui_framework/components';
 
 export class InputControlVis extends Component {
@@ -25,83 +24,84 @@ export class InputControlVis extends Component {
     this.props.clearControls();
   }
 
-  render() {
-    const stagedControls = this.props.getStagedControls();
+  renderControls() {
+    return this.props.controls.map((control, index) => {
+      let controlComponent = null;
+      switch (control.type) {
+        case 'terms':
+          controlComponent = (
+            <TermsControl
+              control={control}
+              controlIndex={index}
+              stageFilter={this.props.stageFilter}
+            />
+          );
+          break;
+        case 'range':
+          controlComponent = (
+            <RangeControl
+              control={control}
+              controlIndex={index}
+              stageFilter={this.props.stageFilter}
+            />
+          );
+          break;
+      }
+      return (
+        <div key={control.id}>
+          {controlComponent}
+        </div>
+      );
+    });
+  }
 
+  renderStagingButtons() {
+    const stagedControls = this.props.getStagedControls();
+    return (
+      <KuiFieldGroup>
+        <KuiFieldGroupSection>
+          <KuiButton
+            buttonType="primary"
+            type="button"
+            onClick={this.handleSubmit}
+            disabled={stagedControls.length === 0}
+          >
+            Update filters
+          </KuiButton>
+        </KuiFieldGroupSection>
+        <KuiFieldGroupSection>
+          <KuiButton
+            buttonType="basic"
+            type="button"
+            onClick={this.handleReset}
+            disabled={stagedControls.length === 0}
+          >
+            Cancel
+          </KuiButton>
+        </KuiFieldGroupSection>
+        <KuiFieldGroupSection>
+          <KuiButton
+            buttonType="basic"
+            type="button"
+            onClick={this.handleClearAll}
+          >
+            Clear
+          </KuiButton>
+        </KuiFieldGroupSection>
+      </KuiFieldGroup>
+    );
+  }
+
+  render() {
     let stagingButtons;
     if (!this.props.updateFiltersOnChange) {
-      stagingButtons = (
-        <KuiFieldGroup>
-          <KuiFieldGroupSection>
-            <KuiButton
-              buttonType="primary"
-              type="button"
-              onClick={this.handleSubmit}
-              disabled={stagedControls.length === 0}
-            >
-              Update filters
-            </KuiButton>
-          </KuiFieldGroupSection>
-          <KuiFieldGroupSection>
-            <KuiButton
-              buttonType="basic"
-              type="button"
-              onClick={this.handleReset}
-              disabled={stagedControls.length === 0}
-            >
-              Cancel
-            </KuiButton>
-          </KuiFieldGroupSection>
-          <KuiFieldGroupSection>
-            <KuiButton
-              buttonType="basic"
-              type="button"
-              onClick={this.handleClearAll}
-            >
-              Clear
-            </KuiButton>
-          </KuiFieldGroupSection>
-        </KuiFieldGroup>
-      );
+      stagingButtons = this.renderStagingButtons();
     }
+
     return (
       <div className="inputControlVis">
-        {this.props.controls.map((control, index) => {
-          let controlComponent = null;
-          switch (control.type) {
-            case 'terms':
-              controlComponent = (
-                <TermsControl
-                  control={control}
-                  controlIndex={index}
-                  stageFilter={this.props.stageFilter}
-                />
-              );
-              break;
-            case 'range':
-              controlComponent = (
-                <RangeControl
-                  control={control}
-                  controlIndex={index}
-                  stageFilter={this.props.stageFilter}
-                />
-              );
-              break;
-            case 'text':
-              controlComponent = (
-                <TextControl
-                  control={control}
-                  controlIndex={index}
-                  stageFilter={this.props.stageFilter}
-                />
-              );
-          }
-          return controlComponent;
-        }
-        )}
-
+        {this.renderControls()}
         {stagingButtons}
-
       </div>
     );
   }

@@ -3,7 +3,6 @@ import React, { Component, PropTypes } from 'react';
 import { ControlEditor } from './control_editor';
 import { RangeControlEditor } from './range_control_editor';
 import { TermsControlEditor } from './terms_control_editor';
-import { TextControlEditor } from './text_control_editor';
 import { KuiFieldGroup, KuiFieldGroupSection, KuiButton, KuiButtonIcon } from 'ui_framework/components';
 import { addControl, moveControl, newControl, removeControl, setControl } from '../lib/editor_utils';
 
@@ -112,20 +111,10 @@ export class InputControlVisEditor extends Component {
             />
           );
           break;
-        case 'text':
-          controlEditor = (
-            <TextControlEditor
-              controlParams={controlParams}
-              handleIndexPatternChange={this.handleIndexPatternChange.bind(this, controlIndex)}
-              handleFieldNameChange={this.handleFieldNameChange.bind(this, controlIndex)}
-              getIndexPatterns={this.getIndexPatterns}
-              getIndexPattern={this.getIndexPattern}
-            />
-          );
       }
       return (
         <ControlEditor
-          key={controlIndex}
+          key={controlParams.id}
           controlIndex={controlIndex}
           controlParams={controlParams}
           handleLabelChange={this.handleLabelChange.bind(this, controlIndex)}
@@ -180,7 +169,6 @@ export class InputControlVisEditor extends Component {
             >
               <option value="range">Range Slider</option>
               <option value="terms">Terms Dropdown</option>
-              <option value="text">Text Input</option>
             </select>
           </div>
         </div>

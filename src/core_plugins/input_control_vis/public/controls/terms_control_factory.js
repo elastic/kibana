@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { Control } from './control';
 import { PhraseFilterManager } from '../lib/phrase_filter_manager';
 
 const termsAgg = (field, size, direction) => {
@@ -24,6 +25,14 @@ const termsAgg = (field, size, direction) => {
   };
 };
 
+class TermsControl extends Control {
+  constructor(controlParams, field, filterManager, selectOptions) {
+    super(controlParams, field, filterManager);
+
+    this.selectOptions = selectOptions;
+  }
+}
+
 export async function termsControlFactory(controlParams, kbnApi, callback) {
   const indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
   const searchSource = new kbnApi.SearchSource();
@@ -38,20 +47,14 @@ export async function termsControlFactory(controlParams, kbnApi, callback) {
     defer.reject = reject;
   });
   defer.promise.then((resp) => {
-    const terms = _.get(resp, 'aggregations.termsAgg.buckets', []).map((bucket) => {
-      return { label: bucket.key, value: bucket.key };
-    });
-    const filterManager = new PhraseFilterManager(controlParams.fieldName, indexPattern, kbnApi.queryFilter);
-    callback({
-      value: filterManager.getValueFromFilterBar(),
-      options: controlParams.options,
-      type: controlParams.type,
-      indexPattern: indexPattern,
-      field: indexPattern.fields.byName[controlParams.fieldName],
-      label: controlParams.label ? controlParams.label : controlParams.fieldName,
-      terms: terms,
-      filterManager: filterManager
-    });
+    callback(new TermsControl(
+      controlParams,
+      indexPattern.fields.byName[controlParams.fieldName],
+      new PhraseFilterManager(controlParams.fieldName, indexPattern, kbnApi.queryFilter),
+      _.get(resp, 'aggregations.termsAgg.buckets', []).map((bucket) => {
+        return { label: bucket.key, value: bucket.key };
+      })
+    ));
   });
   return searchSource._createRequest(defer);
 }

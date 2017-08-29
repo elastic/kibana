@@ -52,13 +52,12 @@ export const getDefaultOptions = (type) => {
       defaultOptions.size = 5;
       defaultOptions.order = 'desc';
       break;
-    case 'text':
-      break;
   }
   return defaultOptions;
 };
 
 export const newControl = (type) => ({
+  id: (new Date()).getTime(),
   indexPattern: '',
   fieldName: '',
   label: '',

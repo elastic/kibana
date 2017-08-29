@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { Control } from './control';
 import { RangeFilterManager } from '../lib/range_filter_manager';
 
 const minMaxAgg = (field) => {
@@ -21,6 +22,14 @@ const minMaxAgg = (field) => {
   };
 };
 
+class RangeControl extends Control {
+  constructor(controlParams, field, filterManager, min, max) {
+    super(controlParams, field, filterManager);
+    this.min = min;
+    this.max = max;
+  }
+}
+
 export async function rangeControlFactory(controlParams, kbnApi, callback) {
   const indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
   const searchSource = new kbnApi.SearchSource();
@@ -38,18 +47,13 @@ export async function rangeControlFactory(controlParams, kbnApi, callback) {
     const min = _.get(resp, 'aggregations.minAgg.value');
     const max = _.get(resp, 'aggregations.maxAgg.value');
     const emptyValue = { min: min, max: min };
-    const filterManager = new RangeFilterManager(controlParams.fieldName, indexPattern, kbnApi.queryFilter, emptyValue);
-    callback({
-      options: controlParams.options,
-      type: controlParams.type,
-      indexPattern: indexPattern,
-      field: indexPattern.fields.byName[controlParams.fieldName],
-      label: controlParams.label ? controlParams.label : controlParams.fieldName,
-      max: max,
-      min: min,
-      value: filterManager.getValueFromFilterBar(),
-      filterManager: filterManager
-    });
+    callback(new RangeControl(
+      controlParams,
+      indexPattern.fields.byName[controlParams.fieldName],
+      new RangeFilterManager(controlParams.fieldName, indexPattern, kbnApi.queryFilter, emptyValue),
+      min,
+      max
+    ));
   });
   return searchSource._createRequest(defer);
 }

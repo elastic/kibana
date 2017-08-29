@@ -30,7 +30,7 @@ export class TermsControl extends Component {
           multi={this.props.control.options.multiselect}
           simpleValue={true}
           value={this.props.control.value}
-          options={this.props.control.terms}
+          options={this.props.control.selectOptions}
           onChange={this.handleOnChange.bind(null, this.props.control)}
         />
       </FormRow>

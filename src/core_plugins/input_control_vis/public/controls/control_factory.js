@@ -1,6 +1,5 @@
 import { rangeControlFactory } from './range_control_factory';
 import { termsControlFactory } from './terms_control_factory';
-import { textControlFactory } from './text_control_factory';
 
 export function controlFactory(controlParamsArray, kbnApi, callback) {
   const createRequestPromises = controlParamsArray.filter((control) => {
@@ -15,9 +14,6 @@ export function controlFactory(controlParamsArray, kbnApi, callback) {
         break;
       case 'terms':
         factory = termsControlFactory;
-        break;
-      case 'text':
-        factory = textControlFactory;
         break;
     }
 
