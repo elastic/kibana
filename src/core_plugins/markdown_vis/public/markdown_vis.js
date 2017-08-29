@@ -34,6 +34,9 @@ function MarkdownVisProvider(Private) {
     editorConfig: {
       optionsTemplate: markdownVisParamsTemplate
     },
+    options: {
+      showTimePicker: false,
+    },
     requestHandler: 'none',
     implementsRenderComplete: true,
   });
