@@ -33,6 +33,9 @@ export default function calculateLabel(metric, metrics) {
     let additionalLabel = '';
     const targetMetric = metrics.find(m => startsWith(metric.field, m.id));
     const targetLabel = calculateLabel(targetMetric, metrics);
+    // For percentiles we need to parse the field id to extract the percentile
+    // the user configured in the percentile aggregation and specified in the
+    // submetric they selected. This applies only to pipeline aggs.
     if (targetMetric && targetMetric.type === 'percentile') {
       const percentileValueMatch = /\[([0-9\.]+)\]$/;
       const matches = metric.field.match(percentileValueMatch);

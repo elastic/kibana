@@ -18,6 +18,8 @@ function createTypeFilter(restrict, exclude) {
   };
 }
 
+
+// This filters out sibling aggs, percentiles, and special aggs (like Series Agg)
 export function filterRows(row) {
   return  !/_bucket$/.test(row.type)
     && !/^series/.test(row.type)
@@ -38,6 +40,9 @@ function MetricSelect(props) {
 
   const siblings = calculateSiblings(metrics, metric);
 
+  // Percentiles need to be handled differently because one percentile aggregation
+  // could have multiple percentiles associated with it. So the user needs a way
+  // to specify which percentile the want to use.
   const percentileOptions = siblings
     .filter(row => /^percentile/.test(row.type))
     .reduce((acc, row) => {

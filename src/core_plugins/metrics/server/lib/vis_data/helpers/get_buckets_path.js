@@ -9,6 +9,9 @@ export default (id, metrics) => {
     case 'derivative':
       bucketsPath += '[normalized_value]';
       break;
+    // For percentiles we need to breakout the percentile key that the user
+    // specified. This information is stored in the key using the following pattern
+    // {metric.id}[{percentile}]
     case 'percentile':
       if (percentileTest.test(bucketsPath)) break;
       const percent = metric.percentiles[0];
