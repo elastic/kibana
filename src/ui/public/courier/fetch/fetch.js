@@ -40,13 +40,6 @@ export function FetchProvider(Private, Promise) {
   }
 
   /**
-   * Fetch a single doc source
-   * @param {DocSource} source - The DocSource to request
-   * @async
-   */
-  this.doc = fetchASource;
-
-  /**
    * Fetch a single search source
    * @param {SearchSource} source - The SearchSource to request
    * @async
