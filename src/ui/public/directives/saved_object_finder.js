@@ -25,7 +25,12 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
        * @type {function} - an optional function. If supplied an `Add new X` button is shown
        * and this function is called when clicked.
        */
-      onAddNew: '='
+      onAddNew: '=',
+      /**
+       * @{type} boolean - set this to true, if you don't want the search box above the
+       * table to automatically gain focus once loaded
+       */
+      disableAutoFocus: '='
     },
     template: savedObjectFinderTemplate,
     controllerAs: 'finder',
