@@ -8,16 +8,59 @@ We use functional tests to make sure the Kibana UI works as expected. It replace
 
 The `FunctionalTestRunner` is very bare bones and gets most of its functionality from its config file, located at {blob}test/functional/config.js[test/functional/config.js]. If you’re writing a plugin you will have your own config file. See <<development-plugin-functional-tests>> for more info.
 
-Execute the `FunctionalTestRunner`'s script with node.js to run the tests with Kibana's default configuration:
+There are three ways to run the tests depending on your goals:
 
+1. Easiest option:
+** Description: Starts up Kibana & Elasticsearch servers, followed by running tests. This is much slower when running the tests multiple times because slow startup time for the servers. Recommended for single-runs.
+** `npm run test:ui`
+*** does everything in a single command, including running Elasticsearch and Kibana locally
+*** tears down everything after the tests run
+*** exit code reports success/failure of the tests
+
+2. Best for development:
+** Description: Two commands, run in separate terminals, separate the components that are long-running and slow from those that are ephemeral and fast. Tests can be re-run much faster, and this still runs Elasticsearch & Kibana locally.
+** `npm run test:ui:server`
+*** starts Elasticsearch and Kibana servers
+*** slow to start
+*** can be reused for multiple executions of the tests, thereby saving some time when re-running tests
+*** automatically restarts the Kibana server when relevant changes are detected
+** `node scripts/functional_test_runner`
+*** runs the tests against Kibana & Elasticsearch servers that were started `npm run test:ui:server`
+*** exit code reports success or failure of the tests
+
+3. Custom option:
+** Description: Runs tests against instances of Elasticsearch & Kibana started some other way (like Elastic Cloud, or an instance you are managing in some other way).
+** just executes the functional tests
+** url, credentials, etc. for Elasticsearch and Kibana are specified via environment variables
+** Here's an example that runs against an Elastic Cloud instance. Note that you should run the same branch of tests as the version of Kibana you're testing.
++
 ["source","shell"]
------------
-node scripts/functional_test_runner
------------
+----------
+export TEST_KIBANA_PROTOCOL=https
+export TEST_KIBANA_HOSTNAME=my-kibana-instance.internal.net
+export TEST_KIBANA_PORT=443
+export TEST_KIBANA_USER=kibana
+export TEST_KIBANA_PASS=<password>
 
-When run without any arguments the `FunctionalTestRunner` automatically loads the configuration in the standard location, but you can override that behavior with the `--config` flag. There are also command line flags for `--bail` and `--grep`, which behave just like their mocha counterparts. The logging can also be customized with `--quiet`, `--debug`, or `--verbose` flags.
+export TEST_ES_PROTOCOL=http
+export TEST_ES_HOSTNAME=my-es-cluster.internal.net
+export TEST_ES_PORT=9200
+export TEST_ES_USER=elastic
+export TEST_ES_PASS=<password>
+node scripts/functional_test_runner
+----------
+
+[float]
+===== More about `node scripts/functional_test_runner`
+
+When run without any arguments the `FunctionalTestRunner` automatically loads the configuration in the standard location, but you can override that behavior with the `--config` flag.
+
+There are also command line flags for `--bail` and `--grep`, which behave just like their mocha counterparts. For instance, use `--grep=foo` to run only tests that match a regular expression.
+
+Logging can also be customized with `--quiet`, `--debug`, or `--verbose` flags.
 
 Use the `--help` flag for more options.
+
 
 [float]
 ==== Writing functional tests
