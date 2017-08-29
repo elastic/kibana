@@ -17,12 +17,16 @@ export default function ratios(req, panel, series) {
         let denominatorPath =  `${metric.id}-denominator>_count`;
 
         if (metric.metric_agg !== 'count' && bucketTransform[metric.metric_agg]) {
-          const aggBody = {
-            metric: bucketTransform[metric.metric_agg]({
+          let metricAgg;
+          try {
+            metricAgg = bucketTransform[metric.metric_agg]({
               type: metric.metric_agg,
               field: metric.field
-            })
-          };
+            });
+          } catch (e) {
+            metricAgg = {};
+          }
+          const aggBody = { metric: metricAgg };
           _.set(doc, `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}-numerator.aggs`, aggBody);
           _.set(doc, `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}-denominator.aggs`, aggBody);
           numeratorPath = `${metric.id}-numerator>metric`;
