@@ -232,7 +232,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     });
   }
 
-  $scope.updateQuery = function (query) {
+  $scope.updateQueryAndFetch = function (query) {
     // reset state if language changes
     if ($state.query.language && $state.query.language !== query.language) {
       $state.filters = [];

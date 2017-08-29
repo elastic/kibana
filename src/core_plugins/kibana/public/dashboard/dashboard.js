@@ -183,7 +183,7 @@ app.directive('dashboardApp', function ($injector) {
         }
       };
 
-      $scope.updateQuery = function (query) {
+      $scope.updateQueryAndFetch = function (query) {
         // reset state if language changes
         if ($scope.model.query.language && $scope.model.query.language !== query.language) {
           filterBar.removeAll();
