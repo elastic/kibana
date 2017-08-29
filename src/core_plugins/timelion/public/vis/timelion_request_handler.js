@@ -20,7 +20,7 @@ const TimelionRequestHandlerProvider = function (Private, Notifier, $http, $root
         const expression = vis.params.expression;
         if (!expression) return;
 
-        $http.post('../api/timelion/run', {
+        const httpResult = $http.post('../api/timelion/run', {
           sheet: [expression],
           extended: {
             es: {
@@ -32,10 +32,14 @@ const TimelionRequestHandlerProvider = function (Private, Notifier, $http, $root
             timezone: timezone
           }),
         })
-          .success(function (resp) {
+          .then(resp => resp.data)
+          .catch(resp => { throw resp.data; });
+
+        httpResult
+          .then(function (resp) {
             resolve(resp);
           })
-          .error(function (resp) {
+          .catch(function (resp) {
             const err = new Error(resp.message);
             err.stack = resp.stack;
             notify.error(err);

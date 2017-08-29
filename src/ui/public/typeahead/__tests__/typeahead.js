@@ -112,7 +112,10 @@ describe('typeahead directive', function () {
     describe('controller scope', function () {
       it('should contain the input model', function () {
         expect($typeaheadScope.inputModel).to.be.an('object');
-        expect($typeaheadScope.inputModel).to.have.keys(['$viewValue', '$modelValue', '$setViewValue']);
+        expect($typeaheadScope.inputModel)
+          .to.have.property('$viewValue')
+          .and.have.property('$modelValue')
+          .and.have.property('$setViewValue').a('function');
       });
 
       it('should save data to the scope', function () {

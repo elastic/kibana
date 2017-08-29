@@ -152,7 +152,8 @@ timelion-interval {
   left:5px;
   line-height: 10px;
 
-  > div {
+  > .cell-action,
+  > .cell-id {
     display: inline-block;
     font-size: 10px;
     text-align: center;
@@ -169,6 +170,10 @@ timelion-interval {
 
   .cell-action {
     opacity: 0;
+
+    &:focus {
+      opacity: 1;
+    }
   }
 }
 
@@ -188,6 +193,7 @@ timelion-interval {
   overflow-x: hidden;
 }
 
+.ngLegendValue:focus,
 .ngLegendValue:hover {
   text-decoration: underline;
 }

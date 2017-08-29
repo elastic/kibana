@@ -59,7 +59,7 @@ export default function HistogramVisType(Private) {
           title: 'Split Slices',
           min: 0,
           max: Infinity,
-          aggFilter: '!geohash_grid'
+          aggFilter: ['!geohash_grid', '!filter']
         },
         {
           group: 'buckets',
@@ -69,7 +69,7 @@ export default function HistogramVisType(Private) {
           mustBeFirst: true,
           min: 0,
           max: 1,
-          aggFilter: '!geohash_grid'
+          aggFilter: ['!geohash_grid', '!filter']
         }
       ])
     },
