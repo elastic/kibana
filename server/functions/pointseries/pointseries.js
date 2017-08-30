@@ -122,16 +122,22 @@ export default new Fn({
     // Measures
     // First group up all of the distinct dimensioned bits. Each of these will be reduced to just 1 value
     // for each measure
-    const measureDimensions = groupBy(context.rows, (row) => {
+    const measureKeys = groupBy(context.rows, (row) => {
       const dimensions = dimensionNames.map(dimension => args[dimension] ? row[args[dimension]] : '_all');
       return dimensions.join('::%BURLAP%::');
     });
 
     // Then compute that 1 value for each measure
-    Object.values(measureDimensions).forEach(rows => {
+    Object.values(measureKeys).forEach(rows => {
       const subtable = { type: 'datatable', columns: context.columns, rows: rows };
       const subScope = getMathjsScope(subtable);
-      const measureValues = measureNames.map(measure => math.eval(args[measure], subScope));
+      const measureValues = measureNames.map(measure => {
+        try {
+          return math.eval(args[measure], subScope);
+        } catch (e) {
+          return null;
+        }
+      });
 
       rows.forEach(row => {
         Object.assign(results[row._rowId], zipObject(measureNames, measureValues));

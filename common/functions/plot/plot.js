@@ -93,7 +93,9 @@ export default new Fn({
 
     context.rows = sortBy(context.rows, ['x', 'y', 'color', 'size']);
 
-    if (context.columns.x.type === 'string') {
+    console.log(get(context.columns, 'x.type'));
+
+    if (get(context.columns, 'x.type') === 'string') {
       sortBy(context.rows, ['x']).forEach(row => {
         if (!ticks.x.hash[row.x]) {
           ticks.x.hash[row.x] = ticks.x.counter++;
@@ -101,7 +103,7 @@ export default new Fn({
       });
     }
 
-    if (context.columns.y.type === 'string') {
+    if (get(context.columns, 'y.type') === 'string') {
       sortBy(context.rows, ['y']).reverse().forEach(row => {
         if (!ticks.y.hash[row.y]) {
           ticks.y.hash[row.y] = ticks.y.counter++;
@@ -121,8 +123,8 @@ export default new Fn({
         label: label,
         data: series.map(point => {
           const attrs = {};
-          const x = context.columns.x.type === 'string' ? ticks.x.hash[point.x] : point.x;
-          const y = context.columns.y.type === 'string' ? ticks.y.hash[point.y] : point.y;
+          const x = get(context.columns, 'x.type') === 'string' ? ticks.x.hash[point.x] : point.x;
+          const y = get(context.columns, 'y.type') === 'string' ? ticks.y.hash[point.y] : point.y;
 
           if (point.size != null) {
             attrs.size = point.size;
@@ -164,12 +166,12 @@ export default new Fn({
             },
           },
           xaxis: {
-            ticks: context.columns.x.type === 'string' ? map(ticks.x.hash, (position, name) => [position, name]) : undefined,
-            mode: context.columns.x.type === 'date' ? 'time' : undefined,
+            ticks: get(context.columns, 'x.type') === 'string' ? map(ticks.x.hash, (position, name) => [position, name]) : undefined,
+            mode: get(context.columns, 'x.type') === 'date' ? 'time' : undefined,
           },
           yaxis: {
-            ticks: context.columns.y.type === 'string' ? map(ticks.y.hash, (position, name) => [position, name]) : undefined,
-            mode: context.columns.y.type === 'date' ? 'time' : undefined,
+            ticks: get(context.columns, 'y.type') === 'string' ? map(ticks.y.hash, (position, name) => [position, name]) : undefined,
+            mode: get(context.columns, 'y.type') === 'date' ? 'time' : undefined,
           },
           series: Object.assign({
             bubbles: {
