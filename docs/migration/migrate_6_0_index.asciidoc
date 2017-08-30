@@ -3,12 +3,12 @@
 
 [IMPORTANT]
 ==============================================
-The following will make transformations to your Kibana index. It is recommended you backup your Kibana index prior to running any of the following commands.
+The following will make transformations to your Kibana index. It is recommended you https://www.elastic.co/guide/en/elasticsearch/reference/5.6/modules-snapshots.html[backup your Kibana index] prior to running any of the following commands.
 ==============================================
 
-In order to migrate to Kibana 6, your Kibana index needs to be re-indexed. This will make transformations to the data model, removing types which are being {es-ref}/removal-of-types.html[removed in Elasticsearch].
+In order to migrate to Kibana 6, your Kibana index needs to be reindexed. This will make transformations to the data model, removing types which are being {es-ref}/removal-of-types.html[removed in Elasticsearch].
 
-A UI is available in X-Pack 5.6 to assist with the migration. The following is provided should you be required to run the migration manually. The commands assume your using the default `.kibana` index. If `kibana.index` is set to something different in your `kibana.yml` you will need to modify the commands.
+A UI is available in X-Pack 5.6 to assist with the migration. The following is provided should you be required to run the migration manually. The commands assume you're using the default `.kibana` index. If `kibana.index` is set to something different in your `kibana.yml` you will need to modify the commands.
 
 To perform this migration without downtime, you will need to be running Kibana 5.6. This is the only version which supports both of the index types.
 
@@ -299,7 +299,7 @@ PUT .kibana-6
 // CONSOLE
 --
 
-. Re-index `.kibana` into `.kibana-6`:
+. Reindex `.kibana` into `.kibana-6`:
 +
 --
 [source,js]
