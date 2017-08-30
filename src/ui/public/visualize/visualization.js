@@ -100,6 +100,12 @@ uiModules
       const Visualization = $scope.vis.type.visualization;
       const visualization = new Visualization(getVisEl()[0], $scope.vis);
 
+      if (visualization.init) {
+        visualization.init().then(() => { $scope.vis.initialized = true; });
+      } else {
+        $scope.vis.initialized = true;
+      }
+
       const renderFunction = _.debounce(() => {
         $scope.vis.size = [$el.width(), $el.height()];
         const status = getUpdateStatus($scope);
@@ -115,7 +121,7 @@ uiModules
       }, 100);
 
       $scope.$on('render', () => {
-        if (!$scope.vis || ($scope.vis.type.requiresSearch && !$scope.visData)) {
+        if (!$scope.vis || !$scope.vis.initialized || ($scope.vis.type.requiresSearch && !$scope.visData)) {
           return;
         }
         renderFunction();
