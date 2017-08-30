@@ -6,7 +6,7 @@ import { Datasource as Component } from './datasource';
 import { datasourceRegistry } from '../../expression_types';
 import { getSelectedElement, getSelectedPage } from '../../state/selectors/workpad';
 import { getFunctionDefinitions } from '../../state/selectors/app';
-import { setArgumentAtIndex, setAstAtIndex } from '../../state/actions/elements';
+import { setArgumentAtIndex, setAstAtIndex, flushContext } from '../../state/actions/elements';
 
 const mapStateToProps = (state) => ({
   element: getSelectedElement(state),
@@ -16,7 +16,10 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   dispatchArgumentAtIndex: props => arg => dispatch(setArgumentAtIndex({ ...props, arg })),
-  dispatchAstAtIndex: ({ index, element, pageId }) => ast => dispatch(setAstAtIndex(index, ast, element, pageId)),
+  dispatchAstAtIndex: ({ index, element, pageId }) => ast => {
+    dispatch(flushContext(element.id));
+    dispatch(setAstAtIndex(index, ast, element, pageId));
+  },
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
