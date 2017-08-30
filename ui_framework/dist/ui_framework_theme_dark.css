@@ -2484,6 +2484,16 @@ table {
   .kuiPaginationButton--hideOnMobile {
     display: none; } }
 
+.kuiPanel {
+  border: 1px solid #333;
+  border-radius: 4px; }
+  .kuiPanel.kuiPanel--paddingSmall {
+    padding: 8px; }
+  .kuiPanel.kuiPanel--paddingMedium {
+    padding: 16px; }
+  .kuiPanel.kuiPanel--paddingLarge {
+    padding: 24px; }
+
 .kuiPopover {
   display: inline-block;
   position: relative; }

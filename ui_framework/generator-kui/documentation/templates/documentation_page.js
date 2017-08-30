@@ -31,11 +31,8 @@ export default props => (
         <p>
           Description needed: how to use the <KuiCode><%= componentExampleName %></KuiCode> component.
         </p>
-      demo={
-        <<%= componentExampleName %> />
       }
-
-      }
+      demo={<<%= componentExampleName %> />}
     />
   </GuidePage>
 );

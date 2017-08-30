@@ -1,0 +1,16 @@
+.kuiPanel {
+  border: $kuiBorderThin;
+  border-radius: $kuiBorderRadius;
+
+  &.kuiPanel--paddingSmall {
+    padding: $kuiSizeS;
+  }
+
+  &.kuiPanel--paddingMedium {
+    padding: $kuiSize;
+  }
+
+  &.kuiPanel--paddingLarge {
+    padding: $kuiSizeL;
+  }
+}
