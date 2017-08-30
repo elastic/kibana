@@ -160,12 +160,12 @@ function setExpressionFn({ dispatch, getState }, expression, elementId, pageId, 
 const setAst = createThunk('setAst', ({ dispatch }, ast, element, pageId, doRender = true) => {
   try {
     const expression = toExpression(ast);
-    dispatch(setExpression(expression, element, pageId, doRender));
+    dispatch(setExpression(expression, element.id, pageId, doRender));
   } catch (e) {
     notify.error(e);
 
     // TODO: remove this, may have been added just to cause a re-render, but why?
-    dispatch(setExpression(element.expression, element, pageId, doRender));
+    dispatch(setExpression(element.expression, element.id, pageId, doRender));
   }
 });
 
