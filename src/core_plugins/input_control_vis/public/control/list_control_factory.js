@@ -1,8 +1,11 @@
 import _ from 'lodash';
 import { Control } from './control';
-import { PhraseFilterManager } from '../lib/phrase_filter_manager';
+import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
 
 const termsAgg = (field, size, direction) => {
+  if (size < 1) {
+    size = 1;
+  }
   const terms = {
     'size': size,
     'order': {
@@ -39,7 +42,10 @@ export async function listControlFactory(controlParams, kbnApi, callback) {
   searchSource.inherits(false); //Do not filter by time so can not inherit from rootSearchSource
   searchSource.size(0);
   searchSource.index(indexPattern);
-  searchSource.aggs(termsAgg(indexPattern.fields.byName[controlParams.fieldName], controlParams.options.size, 'desc'));
+  searchSource.aggs(termsAgg(
+    indexPattern.fields.byName[controlParams.fieldName],
+    _.get(controlParams, 'options.size', 5),
+    'desc'));
 
   const defer = {};
   defer.promise = new Promise((resolve, reject) => {

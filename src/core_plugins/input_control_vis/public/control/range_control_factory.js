@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { Control } from './control';
-import { RangeFilterManager } from '../lib/range_filter_manager';
+import { RangeFilterManager } from './filter_manager/range_filter_manager';
 
 const minMaxAgg = (field) => {
   const aggBody = {};

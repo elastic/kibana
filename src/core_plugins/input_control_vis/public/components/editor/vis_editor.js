@@ -5,7 +5,7 @@ import { ControlEditor } from './control_editor';
 import { RangeControlEditor } from './range_control_editor';
 import { ListControlEditor } from './list_control_editor';
 import { KuiFieldGroup, KuiFieldGroupSection, KuiButton, KuiButtonIcon } from 'ui_framework/components';
-import { addControl, moveControl, newControl, removeControl, setControl } from '../lib/editor_utils';
+import { addControl, moveControl, newControl, removeControl, setControl } from '../../editor_utils';
 
 export class InputControlVisEditor extends Component {
   constructor(props) {

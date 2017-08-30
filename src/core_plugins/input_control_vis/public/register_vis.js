@@ -1,10 +1,10 @@
-import './input_control_vis.less';
+import './vis.less';
 import 'react-select/dist/react-select.css';
 import { CATEGORY } from 'ui/vis/vis_category';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VisController } from './vis_controller';
-import { InputControlVisEditor } from './components/input_control_vis_editor';
+import { InputControlVisEditor } from './components/editor/vis_editor';
 
 function InputControlVisProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);

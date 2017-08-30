@@ -70,6 +70,18 @@ export default function ({ getService, getPageObjects }) {
           const hasValue = await PageObjects.visualize.doesReactSelectHaveValue('.list-control-react-select');
           expect(hasValue).to.equal(false);
         });
+
+        it('should remove filters when Clear button is clicked', async () => {
+          await PageObjects.visualize.setReactSelect('.list-control-react-select', 'ios');
+          await testSubjects.click('inputControlSubmitBtn');
+          const hasFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
+          expect(hasFilter).to.equal(true);
+
+          await testSubjects.click('inputControlClearBtn');
+          await PageObjects.common.sleep(500); // give time for filters to be removed
+          const hasFilterAfterClear = await filterBar.hasFilter(FIELD_NAME, 'ios');
+          expect(hasFilterAfterClear).to.equal(false);
+        });
       });
     });
   });

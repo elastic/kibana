@@ -52,6 +52,7 @@ export class ListControlEditor extends Component {
             <input
               className="kuiTextInput"
               type="number"
+              min="1"
               value={this.props.controlParams.options.size}
               onChange={this.props.handleSizeChange}
             />

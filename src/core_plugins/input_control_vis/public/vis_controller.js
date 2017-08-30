@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { InputControlVis } from './components/input_control_vis';
+import { InputControlVis } from './components/vis/vis';
 import { controlFactory } from './control/control_factory';
 
 class VisController {

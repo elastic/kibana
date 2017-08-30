@@ -139,8 +139,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const input = await find.byCssSelector(className + ' * input', 0);
       await input.clearValue();
       await input.type(value);
-      await remote.pressKeys('\uE006');
-      await find.clickByCssSelector(className + ' * .Select-arrow-zone');
+      await remote.pressKeys('\uE007');
+      const stillOpen = await find.existsByCssSelector('.Select-menu-outer', 0);
+      if (stillOpen) {
+        // force react-select to close by clicking arrow button
+        await find.clickByCssSelector(className + ' * .Select-arrow-zone');
+      }
     }
 
     async clearReactSelect(className) {
