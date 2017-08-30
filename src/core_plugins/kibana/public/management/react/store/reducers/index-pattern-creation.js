@@ -88,7 +88,7 @@ export default handleActions({
       results: {
         ...state.results,
         sortBy,
-        sortAsc: sortBy === state.sortBy ? !state.sortAsc: sortAsc,
+        sortAsc: sortBy === state.results.sortBy ? !state.results.sortAsc: sortAsc,
       },
     };
   },
