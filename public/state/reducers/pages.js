@@ -2,23 +2,23 @@ import { push, set } from 'object-path-immutable';
 import { findIndex } from 'lodash';
 import { getDefaultPage } from '../defaults';
 
-
+function setPageIndex(workpadState, index) {
+  if (index < 0 || !workpadState.pages[index]) return workpadState;
+  return set(workpadState, 'page', index);
+}
 export default function pagesReducer(workpadState = {}, { type, payload }) {
-  function setPageIndex(index) {
-    if (index < 0 || !workpadState.pages[index]) return workpadState;
-    return set(workpadState, 'page', index);
-  }
 
   if (type === 'addPage') {
-    return push(workpadState, 'pages', payload || getDefaultPage());
+    const withNewPage = push(workpadState, 'pages', payload || getDefaultPage());
+    return setPageIndex(withNewPage, withNewPage.pages.length - 1);
   }
 
   if (type === 'nextPage') {
-    return setPageIndex(workpadState.page + 1);
+    return setPageIndex(workpadState, workpadState.page + 1);
   }
 
   if (type === 'previousPage') {
-    return setPageIndex(workpadState.page - 1);
+    return setPageIndex(workpadState, workpadState.page - 1);
   }
 
   if (type === 'stylePage') {
