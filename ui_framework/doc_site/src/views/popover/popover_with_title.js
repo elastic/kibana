@@ -45,6 +45,7 @@ export default class extends Component {
         button={button}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover.bind(this)}
+        panelPaddingSize="none"
         withTitle
       >
         <div style={{ width: '300px' }}>
@@ -55,4 +56,3 @@ export default class extends Component {
     );
   }
 }
-

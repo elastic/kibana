@@ -27,7 +27,7 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: <%= componentExamplePrefix %>Html,
       }]}
-      type={
+      text={
         <p>
           Description needed: how to use the <KuiCode><%= componentExampleName %></KuiCode> component.
         </p>

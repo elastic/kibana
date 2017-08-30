@@ -5,9 +5,9 @@
   display: inline-block;
   position: relative;
 
-  // Open state happens on the wrapper and applies to the body.
+  // Open state happens on the wrapper and applies to the panel.
   &.kuiPopover-isOpen {
-    .kuiPopover__body {
+    .kuiPopover__panel {
       opacity: 1;
       visibility: visible;
       z-index: $kuiZContentMenu;
@@ -16,17 +16,12 @@
   }
 }
 
-  // Animation happens on the body.
-  .kuiPopover__body {
-    @include kuiBottomShadow;
-
-    background-color: $kuiColorEmptyShade;
+  // Animation happens on the panel.
+  .kuiPopover__panel {
     position: absolute;
     min-width: $kuiSize * 16; // Can expand further, but this size is good for our menus.
     top: 100%;
     left: 50%;
-    border: $kuiBorderThin;
-    border-radius: $kuiSizeXS;
     transform: translateX(-50%) translateY($kuiSizeS) translateZ(0);
     backface-visibility: hidden;
     transition:
@@ -52,7 +47,7 @@
       border-bottom: $kuiSize solid $kuiBorderColor;
     }
 
-    // This part of the arrow matches the body.
+    // This part of the arrow matches the panel.
     &:after {
       position: absolute;
       content: "";
@@ -68,13 +63,13 @@
     }
   }
 
-.kuiPopover--withTitle .kuiPopover__body:after {
+.kuiPopover--withTitle .kuiPopover__panel:after {
   border-bottom-color: $kuiColorLightestShade;
 }
 
 // Positions the menu and arrow to the left of the parent.
 .kuiPopover--anchorLeft {
-  .kuiPopover__body {
+  .kuiPopover__panel {
     left: 0;
     transform: translateX(0%) translateY($kuiSizeS) translateZ(0);
 
@@ -88,7 +83,7 @@
 
 // Positions the menu and arrow to the right of the parent.
 .kuiPopover--anchorRight {
-  .kuiPopover__body {
+  .kuiPopover__panel {
     left: 100%;
     transform: translateX(-100%) translateY($kuiSizeS) translateZ(0);
 

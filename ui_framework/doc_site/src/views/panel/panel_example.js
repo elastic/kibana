@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { Link } from 'react-router';
+
 import { renderToHtml } from '../../services';
 
 import {
@@ -27,9 +29,11 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: panelHtml,
       }]}
-      type={
+      text={
         <p>
-          Description needed: how to use the <KuiCode>Panel</KuiCode> component.
+          <KuiCode>Panel</KuiCode> is a simple wrapper component to add
+          depth to a contained layout. It it commonly used as a base for
+          other larger components like <Link to="/page">Page</Link> and <Link to="/popover">Popover</Link>.
         </p>
       }
       demo={<Panel />}

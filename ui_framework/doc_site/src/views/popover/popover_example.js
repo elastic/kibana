@@ -20,9 +20,9 @@ import PopoverAnchorPosition from './popover_anchor_position';
 const popoverAnchorPositionSource = require('!!raw!./popover_anchor_position');
 const popoverAnchorPositionHtml = renderToHtml(PopoverAnchorPosition);
 
-import PopoverBodyClassName from './popover_body_class_name';
-const popoverBodyClassNameSource = require('!!raw!./popover_body_class_name');
-const popoverBodyClassNameHtml = renderToHtml(PopoverBodyClassName);
+import PopoverPanelClassName from './popover_panel_class_name';
+const popoverPanelClassNameSource = require('!!raw!./popover_panel_class_name');
+const popoverPanelClassNameHtml = renderToHtml(PopoverPanelClassName);
 
 import PopoverWithTitle from './popover_with_title';
 const popoverWithTitleSource = require('!!raw!./popover_with_title');
@@ -92,22 +92,24 @@ export default props => (
     />
 
     <GuideSection
-      title="Body class name"
+      title="Panel class name and padding size"
       source={[{
         type: GuideSectionTypes.JS,
-        code: popoverBodyClassNameSource,
+        code: popoverPanelClassNameSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: popoverBodyClassNameHtml,
+        code: popoverPanelClassNameHtml,
       }]}
       text={
         <p>
-          Use the <KuiCode>bodyClassName</KuiCode> prop to pass a class to the body
-          inside a popover. Most commonly this is done to set the width and padding.
+          Use the <KuiCode>panelPaddingSize</KuiCode> prop to adjust the padding
+          on the panel within the panel. Use the <KuiCode>panelClassName</KuiCode>
+          prop to pass a custom class to the panel.
+          inside a popover.
         </p>
       }
       demo={
-        <PopoverBodyClassName />
+        <PopoverPanelClassName />
       }
     />
   </GuidePage>
