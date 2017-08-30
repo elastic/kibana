@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { sortBy } from 'lodash';
 import { FormControl } from 'react-bootstrap';
 import { MathExpression } from './math_expression';
 import { ArgType } from '../../arg_type';
@@ -35,7 +36,7 @@ const simpleTemplate = ({ onValueChange, columns, argValue, renderError }) => {
         onChange={updateFunctionValue(argValue.type)}
       >
         <option value="select" disabled>select column</option>
-        { columns.map(column => <option key={column.name} value={column.name}>{column.name}</option>) }
+        { sortBy(columns, 'name').map(column => <option key={column.name} value={column.name}>{column.name}</option>) }
       </FormControl>
     </div>
   );
