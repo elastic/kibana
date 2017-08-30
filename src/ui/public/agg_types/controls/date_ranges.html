@@ -2,10 +2,10 @@
     <table class="vis-editor-agg-editor-ranges form-group" ng-show="agg.params.ranges.length">
       <tr>
         <th>
-          <label>From</label>
+          <label id="visEditorDateRangeFrom{{agg.id}}">From</label>
         </th>
         <th colspan="2">
-          <label>To</label>
+          <label id="visEditorDateRangeTo{{agg.id}}">To</label>
         </th>
       </tr>
 
@@ -13,6 +13,7 @@
         ng-repeat="range in agg.params.ranges track by $index">
         <td class="kbn-timepicker">
           <input
+            aria-labelledby="visEditorDateRangeFrom{{agg.id}}"
             ng-model="range.from"
             validate-date-math
             type="text"
@@ -21,6 +22,7 @@
         </td>
         <td class="kbn-timepicker">
           <input
+            aria-labelledby="visEditorDateRangeTo{{agg.id}}"
             ng-model="range.to"
             validate-date-math
             class="form-control"
@@ -29,6 +31,7 @@
         <td>
           <button
             type="button"
+            aria-label="Remove this range"
             ng-click="agg.params.ranges.splice($index, 1)"
             class="kuiButton kuiButton--danger kuiButton--small">
             <i class="fa fa-times" ></i>
