@@ -56,19 +56,21 @@ class MathAgg extends Component {
               />
             </div>
             <div className="vis_editor__row_item">
-              <div className="vis_editor__label">
-                Basic math (see <a href="http://mathjs.org/docs/expressions/syntax.html" target="_blank">MathJS</a>) - Variables
-                are keys on the <code>params</code> object, i.e. <code>params.&lt;name&gt;</code> To access all the data use
-                <code>params._all.&lt;name&gt;.values</code> for an array of the values and <code>all.&lt;name&gt;.timestamps</code>
-                for an array of the timestamps.  <code>params._timestamp</code> is available for the current bucket&apos;s timestamp
-                and <code>params._index</code> is available for the current bucket&apos;s index.
-              </div>
+              <label className="vis_editor__label" aria-label="script">Expression</label>
               <input
+                aria-labelledby="script"
                 className="vis_editor__input-grows-100"
                 type="text"
                 onChange={handleTextChange('script')}
                 value={model.script}
               />
+              <div className="vis_editor__note">
+                This field uses basic math expresions (see <a href="http://mathjs.org/docs/expressions/syntax.html" target="_blank">MathJS</a>) - Variables
+                are keys on the <code>params</code> object, i.e. <code>params.&lt;name&gt;</code> To access all the data use
+                <code>params._all.&lt;name&gt;.values</code> for an array of the values and <code>all.&lt;name&gt;.timestamps</code>
+                for an array of the timestamps.  <code>params._timestamp</code> is available for the current bucket&apos;s timestamp
+                and <code>params._index</code> is available for the current bucket&apos;s index.
+              </div>
             </div>
           </div>
         </div>

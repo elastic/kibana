@@ -45,6 +45,7 @@ function MetricSelect(props) {
 
   return (
     <Select
+      aria-label="Select metric"
       placeholder="Select metric..."
       options={options.concat(props.additionalOptions)}
       value={value}
