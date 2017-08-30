@@ -24,7 +24,7 @@ To create an index pattern to connect to Elasticsearch:
 
 . Go to the *Settings > Indices* tab.
 . Specify an index pattern that matches the name of one or more of your Elasticsearch indices. By default, Kibana
-guesses that you're you're working with log data being fed into Elasticsearch by Logstash.
+guesses that you're working with log data being fed into Elasticsearch by Logstash.
 +
 NOTE: When you switch between top-level tabs, Kibana remembers where you were. For example, if you view a particular
 index pattern from the Settings tab, switch to the Discover tab, and then go back to the Settings tab, Kibana displays
@@ -108,7 +108,7 @@ to the prefix `logstash-`, such as `logstash-2015.01.31` and `logstash-2015-02-0
 [float]
 [[set-default-pattern]]
 == Setting the Default Index Pattern
-The default index pattern is loaded by automatically when you view the *Discover* tab. Kibana displays a star to the
+The default index pattern is loaded automatically when you view the *Discover* tab. Kibana displays a star to the
 left of the name of the default pattern in the Index Patterns list on the *Settings > Indices* tab. The first pattern
 you create is automatically designated as the default pattern.
 
