@@ -68,7 +68,7 @@ const IndexPatternCreate = ({
                       <KuiButton
                         fill
                         isDisabled={isCreating}
-                        onClick={() => createIndexPattern(pattern, timeField)}
+                        onClick={createIndexPattern}
                       >
                         Create
                       </KuiButton>

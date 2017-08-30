@@ -8,6 +8,10 @@ import {
   createIndexPattern,
 } from '../../../store/actions/index-pattern-creation';
 
+import {
+  getIndexPatternCreate,
+} from '../../../reducers';
+
 export default connect(
   state => {
     const {
@@ -16,7 +20,7 @@ export default connect(
       results: {
         hasExactMatches,
       }
-    } = state.indexPattern.indexPatternCreate;
+    } = getIndexPatternCreate(state);
 
     return { isIncludingSystemIndices, isCreating, hasExactMatches };
   },

@@ -15,6 +15,10 @@ import {
   createdIndexPattern,
 } from '../actions/index-pattern-creation';
 
+import {
+  getIndexPatternCreate,
+} from '../../reducers';
+
 const defaultState = {
   isIncludingSystemIndices: false,
   isCreating: false,
@@ -205,3 +209,6 @@ export const getFilteredAndPaginatedIndices = createSelector(
     }
   }
 );
+
+export const getPattern = state => getIndexPatternCreate(state).results.pattern;
+export const getSelectedTimeField = state => getIndexPatternCreate(state).timeFields.selectedTimeField;

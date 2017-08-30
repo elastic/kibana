@@ -12,9 +12,13 @@ import {
   getFilteredAndPaginatedIndices,
 } from '../../../../../store/reducers/index-pattern-creation';
 
+import {
+  getIndexPatternCreate,
+} from '../../../../../reducers';
+
 export default connect(
   state => {
-    const indexPatternState = state.indexPattern.indexPatternCreate;
+    const indexPatternState = getIndexPatternCreate(state);
     return {
       ...indexPatternState.results,
       ...getFilteredAndPaginatedIndices(indexPatternState),

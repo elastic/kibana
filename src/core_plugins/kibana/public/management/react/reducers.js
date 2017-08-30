@@ -14,3 +14,5 @@ export const rootReducer = combineReducers({
     // indexPatternList,
   }),
 });
+
+export const getIndexPatternCreate = state => state.indexPattern.indexPatternCreate;

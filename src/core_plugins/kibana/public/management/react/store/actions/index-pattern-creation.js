@@ -1,7 +1,12 @@
-import { indexPatterns, es } from '../../globals';
+import { indexPatterns, es, config, kbnUrl } from '../../globals';
 import { sortBy, endsWith, startsWith, uniq } from 'lodash';
 import { createAction } from 'redux-actions';
 import { createThunk } from 'redux-thunks';
+
+import {
+  getPattern,
+  getSelectedTimeField,
+} from '../reducers/index-pattern-creation';
 
 export const fetchTimeFields = createThunk('FETCH_TIME_FIELDS',
   async ({ dispatch }, pattern) => {
@@ -59,7 +64,11 @@ export const fetchIndices = createThunk('FETCH_INDICES',
 );
 
 export const createIndexPattern = createThunk('CREATE_INDEX_PATTERN',
-  async ({ dispatch }, { pattern, timeFieldName }) => {
+  async ({ dispatch, getState }) => {
+    const state = getState();
+    const pattern = getPattern(state);
+    const timeFieldName = getSelectedTimeField(state);
+
     dispatch(creatingIndexPattern);
     const indexPattern = await indexPatterns.get();
     Object.assign(indexPattern, {

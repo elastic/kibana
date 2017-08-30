@@ -7,9 +7,13 @@ import {
   fetchIndices,
 } from '../../../../../store/actions/index-pattern-creation';
 
+import {
+  getIndexPatternCreate,
+} from '../../../../../reducers';
+
 export default connect(
   state => {
-    const { hasExactMatches } = state.indexPattern.indexPatternCreate.results;
+    const { hasExactMatches } = getIndexPatternCreate(state).results;
     return { hasExactMatches };
   },
   { fetchIndices },

@@ -7,7 +7,11 @@ import {
   selectTimeField,
 } from '../../../../../store/actions/index-pattern-creation';
 
+import {
+  getIndexPatternCreate,
+} from '../../../../../reducers';
+
 export default connect(
-  state => ({ ...state.indexPattern.indexPatternCreate.timeFields }),
+  state => ({ ...getIndexPatternCreate(state).timeFields }),
   { fetchTimeFields, selectTimeField },
 )(IndexPatternTimeFields);
