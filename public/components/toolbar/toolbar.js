@@ -52,6 +52,8 @@ export const Toolbar = (props) => {
         { selectedPageNumber }
         <NavbarButton onClick={ nextPage }><i className="fa fa-chevron-right"/></NavbarButton>
 
+        <vr/>
+
         <NavbarButton onClick={() => showHideTray('workpadloader')}><i className="fa fa-file" /> Workpads</NavbarButton>
 
         <NavbarButton onClick={() => showHideTray('elements')}><i className="fa fa-plus" /> Add an element</NavbarButton>
@@ -66,6 +68,8 @@ export const Toolbar = (props) => {
         { !elementIsSelected ? null : (
           <NavbarButton onClick={() => showHideTray('expression')}><i className="fa fa-terminal" /> Code</NavbarButton>
         ) }
+
+        <vr/>
 
       </Navbar>
     </div>
