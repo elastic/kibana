@@ -30,9 +30,12 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('should display staging control buttons', async () => {
-          await testSubjects.exists('inputControlSubmitBtn');
-          await testSubjects.exists('inputControlCancelBtn');
-          await testSubjects.exists('inputControlClearBtn');
+          const submitButtonExists = await testSubjects.exists('inputControlSubmitBtn');
+          const cancelButtonExists = await testSubjects.exists('inputControlCancelBtn');
+          const clearButtonExists = await testSubjects.exists('inputControlClearBtn');
+          expect(submitButtonExists).to.equal(true);
+          expect(cancelButtonExists).to.equal(true);
+          expect(clearButtonExists).to.equal(true);
         });
 
         it('should stage filter when item selected', async () => {
@@ -81,6 +84,41 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.common.sleep(500); // give time for filters to be removed
           const hasFilterAfterClear = await filterBar.hasFilter(FIELD_NAME, 'ios');
           expect(hasFilterAfterClear).to.equal(false);
+        });
+      });
+
+      describe('updateFiltersOnChange is true', () => {
+        before(async () => {
+          await PageObjects.visualize.checkCheckbox('inputControlEditorUpdateFiltersOnChangeCheckbox');
+          await PageObjects.visualize.clickGo();
+
+          await PageObjects.header.waitUntilLoadingHasFinished();
+        });
+
+        after(async () => {
+          await PageObjects.visualize.uncheckCheckbox('inputControlEditorUpdateFiltersOnChangeCheckbox');
+          await PageObjects.visualize.clickGo();
+
+          await PageObjects.header.waitUntilLoadingHasFinished();
+        });
+
+        it('should not display staging control buttons', async () => {
+          const submitButtonExists = await testSubjects.exists('inputControlSubmitBtn');
+          const cancelButtonExists = await testSubjects.exists('inputControlCancelBtn');
+          const clearButtonExists = await testSubjects.exists('inputControlClearBtn');
+          expect(submitButtonExists).to.equal(false);
+          expect(cancelButtonExists).to.equal(false);
+          expect(clearButtonExists).to.equal(false);
+        });
+
+        it('should add filter pill when item selected', async () => {
+          await PageObjects.visualize.setReactSelect('.list-control-react-select', 'ios');
+
+          const dropdownValue = await PageObjects.visualize.getReactSelectValue('.list-control-react-select');
+          expect(dropdownValue.trim()).to.equal('ios');
+
+          const hasFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
+          expect(hasFilter).to.equal(true);
         });
       });
     });

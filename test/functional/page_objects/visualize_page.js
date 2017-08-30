@@ -139,10 +139,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const input = await find.byCssSelector(className + ' * input', 0);
       await input.clearValue();
       await input.type(value);
+      await PageObjects.common.sleep(100); //pause needed so 'return' key press registers correctly
       await remote.pressKeys('\uE007');
       const stillOpen = await find.existsByCssSelector('.Select-menu-outer', 0);
       if (stillOpen) {
-        // force react-select to close by clicking arrow button
         await find.clickByCssSelector(className + ' * .Select-arrow-zone');
       }
     }
@@ -158,10 +158,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await menu.getVisibleText();
     }
 
-    async addInputControl() {
-      await testSubjects.click('inputControlEditorAddBtn');
-    }
-
     async doesReactSelectHaveValue(className) {
       return await find.existsByCssSelector(className + ' * .Select-value-label', 0);
     }
@@ -175,6 +171,28 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const valueElement = await retry.try(
           async () => find.byCssSelector(className + ' * .Select-value-label'));
       return await valueElement.getVisibleText();
+    }
+
+    async addInputControl() {
+      await testSubjects.click('inputControlEditorAddBtn');
+    }
+
+    async checkCheckbox(selector) {
+      const element = await testSubjects.find(selector);
+      const isSelected = await element.isSelected();
+      if(!isSelected) {
+        log.debug(`checking checkbox ${selector}`);
+        await testSubjects.click(selector);
+      }
+    }
+
+    async uncheckCheckbox(selector) {
+      const element = await testSubjects.find(selector);
+      const isSelected = await element.isSelected();
+      if(isSelected) {
+        log.debug(`unchecking checkbox ${selector}`);
+        await testSubjects.click(selector);
+      }
     }
 
     async clickGoButton() {
