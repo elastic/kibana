@@ -4,7 +4,10 @@ import dateMath from '@elastic/datemath';
 export default new Fn({
   name: 'timefilter',
   aliases: [],
-  type: 'filter',
+  type: 'query',
+  context: {
+    types: ['query'],
+  },
   help: 'Create a timefilter for querying a source',
   args: {
     column: {
@@ -40,6 +43,7 @@ export default new Fn({
     };
 
     function parseAndValidate(str) {
+      if (!str) return;
       const moment = dateMath.parse(str);
       if (!moment.isValid()) throw new Error(`Invalid date/time string ${str}`);
       return moment.toISOString();
@@ -53,6 +57,8 @@ export default new Fn({
       filter.value.from = parseAndValidate(from);
     }
 
-    return filter;
+    context.and.push(filter);
+
+    return context;
   },
 });
