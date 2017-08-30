@@ -48,6 +48,11 @@ function getSiblingContext(state, elementId, checkIndex) {
   return getSiblingContext(state, elementId, prevContextIndex);
 }
 
+export const elementTop = createAction('elementTop');
+export const elementUp = createAction('elementUp');
+export const elementDown = createAction('elementDown');
+export const elementBottom = createAction('elementBottom');
+
 export const setPosition = createAction('setPosition', (elementId, pageId, position) => ({ pageId, elementId, position }));
 
 export const flushContext = createAction('flushContext');

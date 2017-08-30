@@ -1,11 +1,18 @@
 import { handleActions } from 'redux-actions';
 import { get, findIndex } from 'lodash';
-import { assign, push, del } from 'object-path-immutable';
+import { assign, push, del, set } from 'object-path-immutable';
 import * as actions from '../actions/elements';
 
+function getPageIndexById(workpadState, pageId) {
+  return findIndex(get(workpadState, 'pages'), { id: pageId });
+}
+
+function getElementIndexById(page, elementId) {
+  return page.elements.findIndex(element => element.id === elementId);
+}
 
 function assignElementProperties(workpadState, pageId, elementId, props) {
-  const pageIndex = findIndex(get(workpadState, 'pages'), { id: pageId });
+  const pageIndex = getPageIndexById(workpadState, pageId);
   const elementsPath = ['pages', pageIndex, 'elements'];
   const elementIndex = findIndex(get(workpadState, elementsPath), { id: elementId });
 
@@ -23,30 +30,33 @@ export default handleActions({
     const { filter, pageId, elementId } = payload;
     return assignElementProperties(workpadState, pageId, elementId, { filter });
   },
-  // This take elementId, not the full element, otherwise it is 80% the same as the above reducer
   [actions.setPosition]: (workpadState, { payload }) => {
     const { position, pageId, elementId } = payload;
     return assignElementProperties(workpadState, pageId, elementId, { position });
   },
   [actions.addElement]: (workpadState, { payload: { pageId, element } }) => {
-    // find the index of the given pageId
-    const pageIndex = workpadState.pages.findIndex(page => page.id === pageId);
-
-    // TODO: handle invalid page id
+    const pageIndex = getPageIndexById(workpadState, pageId);
     if (pageIndex < 0) return workpadState;
 
     return push(workpadState, ['pages', pageIndex, 'elements'], element);
   },
-  [actions.removeElement]: (workpadState, { payload: { pageId, elementId } }) => {
-    const pageIndex = workpadState.pages.findIndex(page => page.id === pageId);
+  [actions.elementUp]: (workpadState, { payload: { pageId, elementId } }) => {
+    const pageIndex = getPageIndexById(workpadState, pageId);
+    const elementIndex = getElementIndexById(workpadState.pages[pageIndex], elementId);
+    const elements = get(workpadState, ['pages', pageIndex, 'elements']);
 
-    // TODO: handle invalid page id
+    if (elementIndex + 1 > elements.length - 1) return workpadState;
+
+    const newElements = elements.slice(0);
+    newElements.splice(elementIndex + 1, 0, newElements.splice(elementIndex, 1)[0]);
+
+    return set(workpadState, ['pages', pageIndex, 'elements'], newElements);
+  },
+  [actions.removeElement]: (workpadState, { payload: { pageId, elementId } }) => {
+    const pageIndex = getPageIndexById(workpadState, pageId);
     if (pageIndex < 0) return workpadState;
 
-    const { elements } = workpadState.pages[pageIndex];
-    const elementIndex = elements.findIndex(element => element.id === elementId);
-
-    // TODO: handle invalid element id
+    const elementIndex = getElementIndexById(workpadState.pages[pageIndex], elementId);
     if (elementIndex < 0) return workpadState;
 
     return del(workpadState, ['pages', pageIndex, 'elements', elementIndex]);

@@ -16,6 +16,7 @@ export const Toolbar = (props) => {
     tray,
     setTray,
     addElement,
+    elementUp,
     addPage,
     previousPage,
     nextPage,
@@ -71,6 +72,8 @@ export const Toolbar = (props) => {
 
         <vr/>
 
+        <NavbarButton onClick={ elementUp }><i className="fa fa-arrow-up" /></NavbarButton>
+
       </Navbar>
     </div>
   );
@@ -81,6 +84,7 @@ Toolbar.propTypes = {
   tray: PropTypes.node,
   setTray: PropTypes.func.isRequired,
   addElement: PropTypes.func.isRequired,
+  elementUp: PropTypes.func,
   addPage: PropTypes.func.isRequired,
   nextPage: PropTypes.func.isRequired,
   previousPage: PropTypes.func.isRequired,

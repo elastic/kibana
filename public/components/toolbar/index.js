@@ -2,8 +2,8 @@ import { connect } from 'react-redux';
 import { compose, withState } from 'recompose';
 
 import { getEditing } from '../../state/selectors/app';
-import { getSelectedPage, getSelectedElement, getSelectedPageIndex } from '../../state/selectors/workpad';
-import { addElement } from '../../state/actions/elements';
+import { getSelectedPage, getSelectedElement, getSelectedElementId, getSelectedPageIndex } from '../../state/selectors/workpad';
+import { addElement, elementUp } from '../../state/actions/elements';
 import { addPage, nextPage, previousPage } from '../../state/actions/pages';
 
 import { Toolbar as Component } from './toolbar';
@@ -13,6 +13,7 @@ const mapStateToProps = (state) => ({
   selectedPage: getSelectedPage(state),
   selectedPageNumber: getSelectedPageIndex(state) + 1,
   elementIsSelected: getSelectedElement(state) ? true : false,
+  selectedElementId: getSelectedElementId(state),
 });
 
 const mapDispatchToProps = (dispatch) => ({
@@ -20,6 +21,7 @@ const mapDispatchToProps = (dispatch) => ({
   addPage: () => dispatch(addPage()),
   nextPage: () => dispatch(nextPage()),
   previousPage: () => dispatch(previousPage()),
+  elementUp: (pageId, elementId) => () => dispatch(elementUp({ pageId, elementId })),
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
@@ -28,6 +30,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     ...dispatchProps,
     ...ownProps,
     addElement: dispatchProps.addElement(stateProps.selectedPage),
+    elementUp: dispatchProps.elementUp(stateProps.selectedPage, stateProps.selectedElementId),
   };
 };
 
