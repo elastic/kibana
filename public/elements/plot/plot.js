@@ -15,20 +15,33 @@ export default new Element('plot', {
     if (!includes($.plot.plugins, size)) $.plot.plugins.push(size);
 
     config.options.legend.labelBoxBorderColor = 'transparent';
-    const plot = $.plot($(domNode), config.data, config.options);
 
-    function resize() {
-      plot.resize();
-      plot.setupGrid();
-      plot.draw();
+    let plot;
+    function draw() {
+      if (domNode.clientHeight < 1 || domNode.clientWidth < 1) return;
+
+      try {
+        if (!plot) {
+          plot = $.plot($(domNode), config.data, config.options);
+        } else {
+          plot.resize();
+          plot.setupGrid();
+          plot.draw();
+        }
+      } catch (e) {
+        // Nope
+      }
+
     }
 
     function destroy() {
-      plot.shutdown();
+      if (plot) plot.shutdown();
     }
 
     handlers.onDestroy(destroy);
-    handlers.onResize(debounce(resize, 40, { maxWait: 40 })); // 1000 / 40 = 25fps
+    handlers.onResize(debounce(draw, 40, { maxWait: 40 })); // 1000 / 40 = 25fps
+
+    draw();
 
     return handlers.done(plot);
   },
