@@ -10,19 +10,32 @@ export default new Element('pie', {
   expression: 'demodata | pointseries x="time" y="sum(price)" color="state" | pie | render',
   render(domNode, config, handlers) {
     config.options.legend.labelBoxBorderColor = 'transparent';
-    const plot = $.plot($(domNode), config.data, config.options);
 
-    function resize() {
-      plot.resize();
-      plot.draw();
+    let plot;
+    function draw() {
+      if (domNode.clientHeight < 1 || domNode.clientWidth < 1) return;
+
+      try {
+        if (!plot) {
+          plot = $.plot($(domNode), config.data, config.options);
+        } else {
+          plot.resize();
+          plot.draw();
+        }
+      } catch (e) {
+        // Nope
+      }
+
     }
 
     function destroy() {
-      plot.shutdown();
+      if (plot) plot.shutdown();
     }
 
     handlers.onDestroy(destroy);
-    handlers.onResize(debounce(resize, 40, { maxWait: 40 })); // 1000 / 40 = 25fps
+    handlers.onResize(debounce(draw, 40, { maxWait: 40 })); // 1000 / 40 = 25fps
+
+    draw();
 
     return handlers.done(plot);
   },
