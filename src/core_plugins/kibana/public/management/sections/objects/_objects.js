@@ -7,10 +7,25 @@ import 'ui/directives/file_upload';
 import uiRoutes from 'ui/routes';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { uiModules } from 'ui/modules';
+import { showChangeIndexModal } from './show_change_index_modal';
+import { SavedObjectNotFound } from 'ui/errors';
+
+const indexPatternsResolutions = {
+  indexPatterns: function (Private) {
+    const savedObjectsClient = Private(SavedObjectsClientProvider);
+
+    return savedObjectsClient.find({
+      type: 'index-pattern',
+      fields: ['title'],
+      perPage: 10000
+    }).then(response => response.savedObjects);
+  }
+};
 
 uiRoutes
 .when('/management/kibana/objects', {
-  template: objectIndexHTML
+  template: objectIndexHTML,
+  resolve: indexPatternsResolutions
 });
 
 uiRoutes
@@ -19,7 +34,7 @@ uiRoutes
 });
 
 uiModules.get('apps/management')
-.directive('kbnManagementObjects', function (kbnIndex, Notifier, Private, kbnUrl, Promise, confirmModal) {
+.directive('kbnManagementObjects', function ($route, kbnIndex, Notifier, Private, kbnUrl, Promise, confirmModal) {
   const savedObjectsClient = Private(SavedObjectsClientProvider);
 
   return {
@@ -211,6 +226,20 @@ uiModules.get('apps/management')
                       return obj.save({ confirmOverwrite : !overwriteAll });
                     })
                     .catch((err) => {
+                      if (err instanceof SavedObjectNotFound && err.savedObjectType === 'index-pattern') {
+                        showChangeIndexModal(
+                          (newIndexId) => {
+                            obj.hydrateIndexPattern(newIndexId).then(() => {
+                              return obj.save({ confirmOverwrite : !overwriteAll });
+                            });
+                          },
+                          obj.searchSource.getOwn('index'),
+                          `${doc._type}: ${doc._source.title}`,
+                          $route.current.locals.indexPatterns);
+
+                        return;
+                      }
+
                       // swallow errors here so that the remaining promise chain executes
                       err.message = `Importing ${obj.title} (${obj.id}) failed: ${err.message}`;
                       notify.error(err);
