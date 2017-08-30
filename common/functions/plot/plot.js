@@ -93,8 +93,6 @@ export default new Fn({
 
     context.rows = sortBy(context.rows, ['x', 'y', 'color', 'size']);
 
-    console.log(get(context.columns, 'x.type'));
-
     if (get(context.columns, 'x.type') === 'string') {
       sortBy(context.rows, ['x']).forEach(row => {
         if (!ticks.x.hash[row.x]) {
