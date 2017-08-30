@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { ControlEditor } from './control_editor';
 import { RangeControlEditor } from './range_control_editor';
-import { TermsControlEditor } from './terms_control_editor';
+import { ListControlEditor } from './list_control_editor';
 import { KuiFieldGroup, KuiFieldGroupSection, KuiButton, KuiButtonIcon } from 'ui_framework/components';
 import { addControl, moveControl, newControl, removeControl, setControl } from '../lib/editor_utils';
 
@@ -12,7 +12,7 @@ export class InputControlVisEditor extends Component {
     super(props);
 
     this.state = {
-      type: 'terms'
+      type: 'list'
     };
 
     this.getIndexPatterns = async () => {
@@ -87,9 +87,9 @@ export class InputControlVisEditor extends Component {
     return this.props.scope.vis.params.controls.map((controlParams, controlIndex) => {
       let controlEditor = null;
       switch (controlParams.type) {
-        case 'terms':
+        case 'list':
           controlEditor = (
-            <TermsControlEditor
+            <ListControlEditor
               controlParams={controlParams}
               handleIndexPatternChange={this.handleIndexPatternChange.bind(this, controlIndex)}
               handleFieldNameChange={this.handleFieldNameChange.bind(this, controlIndex)}
@@ -159,7 +159,7 @@ export class InputControlVisEditor extends Component {
             type="button"
             icon={<KuiButtonIcon type="create" />}
             onClick={this.handleAddControl}
-            data-test-subj="inputCtrlAddCtrlBtn"
+            data-test-subj="inputControlEditorAddBtn"
           >
             Add
           </KuiButton>
@@ -169,8 +169,8 @@ export class InputControlVisEditor extends Component {
               value={this.state.type}
               onChange={evt => this.setState({ type: evt.target.value })}
             >
-              <option value="range">Range Slider</option>
-              <option value="terms">Terms Dropdown</option>
+              <option value="range">Range slider</option>
+              <option value="list">Options list</option>
             </select>
           </div>
         </div>

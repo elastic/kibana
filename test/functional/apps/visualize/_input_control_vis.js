@@ -36,9 +36,9 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('should stage filter when item selected', async () => {
-          await PageObjects.visualize.setReactSelect('.terms-select', 'ios');
+          await PageObjects.visualize.setReactSelect('.list-control-react-select', 'ios');
 
-          const dropdownValue = await PageObjects.visualize.getReactSelectValue('.terms-select');
+          const dropdownValue = await PageObjects.visualize.getReactSelectValue('.list-control-react-select');
           expect(dropdownValue.trim()).to.equal('ios');
 
           const hasFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
@@ -53,8 +53,8 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('should replace existing filter pill(s) when new item is selected', async () => {
-          await PageObjects.visualize.clearReactSelect('.terms-select');
-          await PageObjects.visualize.setReactSelect('.terms-select', 'osx');
+          await PageObjects.visualize.clearReactSelect('.list-control-react-select');
+          await PageObjects.visualize.setReactSelect('.list-control-react-select', 'osx');
           await testSubjects.click('inputControlSubmitBtn');
 
           const hasOldFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }) {
           await filterBar.removeFilter(FIELD_NAME);
           await PageObjects.common.sleep(500); // give time for filter to be removed and event handlers to fire
 
-          const hasValue = await PageObjects.visualize.doesReactSelectHaveValue('.terms-select');
+          const hasValue = await PageObjects.visualize.doesReactSelectHaveValue('.list-control-react-select');
           expect(hasValue).to.equal(false);
         });
       });

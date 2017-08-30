@@ -1,5 +1,5 @@
 import { rangeControlFactory } from './range_control_factory';
-import { termsControlFactory } from './terms_control_factory';
+import { listControlFactory } from './list_control_factory';
 
 export function controlFactory(controlParamsArray, kbnApi, callback) {
   const createRequestPromises = controlParamsArray.filter((control) => {
@@ -12,8 +12,8 @@ export function controlFactory(controlParamsArray, kbnApi, callback) {
       case 'range':
         factory = rangeControlFactory;
         break;
-      case 'terms':
-        factory = termsControlFactory;
+      case 'list':
+        factory = listControlFactory;
         break;
     }
 

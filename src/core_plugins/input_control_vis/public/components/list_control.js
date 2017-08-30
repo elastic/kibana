@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import Select from 'react-select';
 import { FormRow } from './form_row';
 
-export class TermsControl extends Component {
+export class ListControl extends Component {
   constructor(props) {
     super(props);
 
@@ -26,7 +26,7 @@ export class TermsControl extends Component {
         label={this.props.control.label}
       >
         <Select
-          className="terms-select"
+          className="list-control-react-select"
           placeholder="Select..."
           multi={this.props.control.options.multiselect}
           simpleValue={true}
@@ -39,7 +39,7 @@ export class TermsControl extends Component {
   }
 }
 
-TermsControl.propTypes = {
+ListControl.propTypes = {
   control: PropTypes.object.isRequired,
   controlIndex: PropTypes.number.isRequired,
   stageFilter: PropTypes.func.isRequired

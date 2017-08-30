@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { RangeControl } from './range_control';
-import { TermsControl } from './terms_control';
+import { ListControl } from './list_control';
 import { KuiFieldGroup, KuiFieldGroupSection, KuiButton } from 'ui_framework/components';
 
 export class InputControlVis extends Component {
@@ -29,9 +29,9 @@ export class InputControlVis extends Component {
     return this.props.controls.map((control, index) => {
       let controlComponent = null;
       switch (control.type) {
-        case 'terms':
+        case 'list':
           controlComponent = (
-            <TermsControl
+            <ListControl
               control={control}
               controlIndex={index}
               stageFilter={this.props.stageFilter}

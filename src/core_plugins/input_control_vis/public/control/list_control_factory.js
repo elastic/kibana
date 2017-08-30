@@ -25,7 +25,7 @@ const termsAgg = (field, size, direction) => {
   };
 };
 
-class TermsControl extends Control {
+class ListControl extends Control {
   constructor(controlParams, field, filterManager, selectOptions) {
     super(controlParams, field, filterManager);
 
@@ -33,7 +33,7 @@ class TermsControl extends Control {
   }
 }
 
-export async function termsControlFactory(controlParams, kbnApi, callback) {
+export async function listControlFactory(controlParams, kbnApi, callback) {
   const indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
   const searchSource = new kbnApi.SearchSource();
   searchSource.inherits(false); //Do not filter by time so can not inherit from rootSearchSource
@@ -47,7 +47,7 @@ export async function termsControlFactory(controlParams, kbnApi, callback) {
     defer.reject = reject;
   });
   defer.promise.then((resp) => {
-    callback(new TermsControl(
+    callback(new ListControl(
       controlParams,
       indexPattern.fields.byName[controlParams.fieldName],
       new PhraseFilterManager(controlParams.fieldName, indexPattern, kbnApi.queryFilter),

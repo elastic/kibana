@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 import { IndexPatternSelect } from './index_pattern_select';
 import { FieldSelect } from './field_select';
 
-export class TermsControlEditor extends Component {
+export class ListControlEditor extends Component {
   constructor(props) {
     super(props);
   }
@@ -63,7 +63,7 @@ export class TermsControlEditor extends Component {
   }
 }
 
-TermsControlEditor.propTypes = {
+ListControlEditor.propTypes = {
   getIndexPatterns: PropTypes.func.isRequired,
   getIndexPattern: PropTypes.func.isRequired,
   controlParams: PropTypes.object.isRequired,

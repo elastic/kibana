@@ -155,7 +155,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async addInputControl() {
-      await testSubjects.click('inputCtrlAddCtrlBtn');
+      await testSubjects.click('inputControlEditorAddBtn');
     }
 
     async doesReactSelectHaveValue(className) {

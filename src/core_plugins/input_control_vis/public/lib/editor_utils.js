@@ -47,7 +47,8 @@ export const getDefaultOptions = (type) => {
     case 'range':
       defaultOptions.step = 1;
       break;
-    case 'terms':
+    case 'list':
+      defaultOptions.type = 'terms';
       defaultOptions.multiselect = true;
       defaultOptions.size = 5;
       defaultOptions.order = 'desc';

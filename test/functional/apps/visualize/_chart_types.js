@@ -30,6 +30,7 @@ export default function ({ getService, getPageObjects }) {
           'Region Map',
           'Timelion',
           'Visual Builder',
+          'Dashboard Controls',
           'Markdown',
           'Tag Cloud',
         ];
