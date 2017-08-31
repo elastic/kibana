@@ -3,7 +3,6 @@
 
 Also see <<breaking-changes-6.0>>.
 
-
 [float]
 [[breaking-6.0.0-beta2]]
 === Breaking changes
