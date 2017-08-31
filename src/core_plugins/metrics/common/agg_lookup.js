@@ -1,7 +1,7 @@
 import _ from 'lodash';
 const lookup = {
   'count': 'Count',
-  'calculation': 'Calculation',
+  'calculation': 'Bucket Script',
   'std_deviation': 'Std. Deviation',
   'variance': 'Variance',
   'sum_of_squares': 'Sum of Sq.',

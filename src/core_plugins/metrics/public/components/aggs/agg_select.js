@@ -20,7 +20,7 @@ const metricAggs = [
 ];
 
 const pipelineAggs = [
-  { label: 'Calculation', value: 'calculation' },
+  { label: 'Bucket Script', value: 'calculation' },
   { label: 'Cumulative Sum', value: 'cumulative_sum' },
   { label: 'Derivative', value: 'derivative' },
   { label: 'Moving Average', value: 'moving_average' },
