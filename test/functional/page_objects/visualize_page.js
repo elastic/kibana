@@ -509,8 +509,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async getDataTableData() {
-      const dataTable = await retry.try(
-        async () => testSubjects.find('paginated-table-body'));
+      await testSubjects.click('spyModeSelect');
+      await testSubjects.click('spyModeSelect-table');
+      const dataTable = await testSubjects.find('paginated-table-body');
       return await dataTable.getVisibleText();
     }
 
@@ -545,6 +546,20 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const zooms = await this.getZoomSelectors(zoomSelector);
       await Promise.all(zooms.map(async zoom => await zoom.click()));
       await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async getVisualizationRequest() {
+      log.debug('getVisualizationRequest');
+      await this.openSpyPanel();
+      await testSubjects.click('spyModeSelect');
+      await testSubjects.click('spyModeSelect-request');
+      return await testSubjects.getVisibleText('visualizationEsRequestBody');
+    }
+
+    async getMapBounds() {
+      const request = await this.getVisualizationRequest();
+      const requestObject = JSON.parse(request);
+      return requestObject.aggs.filter_agg.filter.geo_bounding_box['geo.coordinates'];
     }
 
     async clickMapZoomIn() {

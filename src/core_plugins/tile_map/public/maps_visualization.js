@@ -20,13 +20,11 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
   class MapsVisualization {
 
     constructor(element, vis) {
-
       this.vis = vis;
       this.$el = $(element);
       this._$container = this.$el;
       this._geohashLayer = null;
       this._kibanaMap = null;
-      this._kibanaMapReady = this._makeKibanaMap();
       this._baseLayerDirty = true;
       this._currentParams = null;
     }
@@ -35,6 +33,11 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
       if (this._kibanaMap) {
         this._kibanaMap.destroy();
       }
+    }
+
+    init() {
+      this._kibanaMapReady = this._makeKibanaMap();
+      return this._kibanaMapReady;
     }
 
     async render(esResponse, status) {
@@ -66,7 +69,6 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
 
     //**********************************************************************************************************
     async _makeKibanaMap() {
-
       try {
         this._tmsService = await serviceSettings.getTMSService();
         this._tmsError = null;
@@ -172,7 +174,6 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
      * called on options change (vis.params change)
      */
     async _updateParams() {
-
       const mapParams = this._getMapsParams();
       if (_.eq(this._currentParams, mapParams)) {
         return;

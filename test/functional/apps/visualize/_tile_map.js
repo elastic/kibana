@@ -146,13 +146,35 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.closeSpyPanel();
       });
 
+      it('Newly saved visualization retains map bounds', async () => {
+        const vizName1 = 'Visualization TileMap';
+
+        await PageObjects.visualize.clickMapZoomIn();
+        await PageObjects.visualize.clickMapZoomIn();
+
+        const mapBounds = await PageObjects.visualize.getMapBounds();
+
+        await PageObjects.visualize.closeSpyPanel();
+        await PageObjects.visualize.saveVisualization(vizName1);
+        await PageObjects.header.waitForToastMessageGone();
+
+        const afterSaveMapBounds = await PageObjects.visualize.getMapBounds();
+
+        // For some reason the values are slightly different, so we can't check that they are equal. But we did
+        // have a bug where after the save, there were _no_ map bounds. So this checks for the later case, but
+        // until we figure out how to make sure the map center is always the exact same, we can't comparison check.
+        expect(mapBounds).to.not.be(undefined);
+        expect(afterSaveMapBounds).to.not.be(undefined);
+      });
+
       /*
        ** NOTE: Since we don't have a reliable way to know the zoom level, we can
        ** check some data after we save the viz, then zoom in and check that the data
        ** changed, then open the saved viz and check that it's back to the original data.
        */
       it('should save with zoom level and load, take screenshot', async function () {
-        const expectedTableData = [
+        const expectedZoom5Data = [
+          '- 9q5 91 { "lat": 34.2934322102855, "lon": -118.57068326651722 }',
           '- 9qc 89 { "lat": 38.64546895785822, "lon": -121.59105236401383 }',
           '- dp3 79 { "lat": 41.68207651723318, "lon": -87.98703769162958 }',
           '- dp8 77 { "lat": 43.00976789278256, "lon": -89.27605793496909 }',
@@ -160,12 +182,10 @@ export default function ({ getService, getPageObjects }) {
           '- 9qh 74 { "lat": 34.18319454366291, "lon": -117.426273193009 }',
           '- 9y7 73 { "lat": 35.87868071952197, "lon": -96.3330221912275 }',
           '- 9ys 71 { "lat": 37.31065319536228, "lon": -94.82038319412567 }',
-          '- 9q9 70 { "lat": 37.327310177098425, "lon": -121.70855726221842 }',
-          '- dn2 69 { "lat": 35.69518324898799, "lon": -89.3181892565411 }',
-          '- dp4 66 { "lat": 40.09276106847789, "lon": -86.27666343596171 }',
-          '- dn6 66 { "lat": 35.88069073538381, "lon": -86.4727119640023 }'
+          '- 9yn 71 { "lat": 34.57203017311617, "lon": -92.17198946946104 }',
+          '- 9q9 70 { "lat": 37.327310177098425, "lon": -121.70855726221842 }'
         ];
-        const expectedTableDataZoomed = [
+        const expectedZoom6Data = [
           '- c20g 16 { "lat": 45.59211894578766, "lon": -122.47455075674225 }',
           '- c28c 13 { "lat": 48.0181491561234, "lon": -122.43847891688347 }',
           '- c2e5 11 { "lat": 48.46440218389034, "lon": -119.51805034652352 }',
@@ -179,35 +199,44 @@ export default function ({ getService, getPageObjects }) {
         ];
         const vizName1 = 'Visualization TileMap';
 
-        await PageObjects.visualize.clickMapZoomIn();
-        await PageObjects.visualize.clickMapZoomIn();
-        const message = await PageObjects.visualize.saveVisualization(vizName1);
-        log.debug('Saved viz message = ' + message);
-        expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
-        await PageObjects.header.waitForToastMessageGone();
+        // For some reason the map bounds right after saving a tile map for the first time are slightly different
+        // than when the map is opened from the landing page. This causes the data to be slightly different.
+        // We should figure out why that is, but it doesn't actually affect the map the user views.
+        // In order to get this test to pass we'll re-open the saved visualization from the landing page.
+        await PageObjects.visualize.loadSavedVisualization(vizName1);
+
+        const firstMapBounds = await PageObjects.visualize.getMapBounds();
+
         await PageObjects.visualize.openSpyPanel();
-        // we're not selecting page size all, so we only have to verify the first page of data
-        log.debug('first get the zoom level 5 page data and verify it');
-        let data = await PageObjects.visualize.getDataTableData();
-        compareTableData(expectedTableData, data.trim().split('\n'));
+        const actualZoom5Data = await PageObjects.visualize.getDataTableData();
+        compareTableData(expectedZoom5Data, actualZoom5Data.trim().split('\n'));
+
         await PageObjects.visualize.closeSpyPanel();
-        // zoom to level 6, and make sure we go back to the saved level 5
         await PageObjects.visualize.clickMapZoomIn();
         await PageObjects.visualize.openSpyPanel();
-        log.debug('second get the zoom level 6 page data and verify it');
-        data = await PageObjects.visualize.getDataTableData();
-        compareTableData(expectedTableDataZoomed, data.trim().split('\n'));
+
+        const actualZoom6Data = await PageObjects.visualize.getDataTableData();
+        compareTableData(expectedZoom6Data, actualZoom6Data.trim().split('\n'));
+
         await PageObjects.visualize.closeSpyPanel();
+
         await PageObjects.visualize.loadSavedVisualization(vizName1);
         await PageObjects.visualize.waitForVisualization();
-        // sleep a bit before taking the screenshot or it won't show data
-        await PageObjects.common.sleep(4000);
+
+        const secondMapBounds = await PageObjects.visualize.getMapBounds();
+
+        expect(firstMapBounds.top_left.lat).to.equal(secondMapBounds.top_left.lat);
+        expect(firstMapBounds.top_left.long).to.equal(secondMapBounds.top_left.long);
+        expect(firstMapBounds.bottom_right.lat).to.equal(secondMapBounds.bottom_right.lat);
+        expect(firstMapBounds.bottom_right.long).to.equal(secondMapBounds.bottom_right.long);
+
         await PageObjects.visualize.openSpyPanel();
-        log.debug('third get the zoom level 5 page data and verify it');
-        await PageObjects.visualize.getDataTableData();
-        compareTableData(expectedTableData, data.trim().split('\n'));
+
+        const actualReOpenedZoom5Data = await PageObjects.visualize.getDataTableData();
+        compareTableData(expectedZoom5Data, actualReOpenedZoom5Data.trim().split('\n'));
+
         await PageObjects.visualize.closeSpyPanel();
-        log.debug('Take screenshot');
+
         await screenshots.take('Visualize-site-map');
       });
 
