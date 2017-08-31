@@ -169,4 +169,5 @@ export {
 
 export {
   KuiText,
+  KuiTextColor,
 } from './text';

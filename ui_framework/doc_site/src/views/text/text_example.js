@@ -16,6 +16,10 @@ import Text from './text';
 const textSource = require('!!raw!./text');
 const textHtml = renderToHtml(Text);
 
+import TextColor from './text_color';
+const textColorSource = require('!!raw!./text_color');
+const textColorHtml = renderToHtml(TextColor);
+
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
@@ -38,6 +42,26 @@ export default props => (
       }
       demo={
         <Text />
+      }
+    />
+
+    <GuideSection
+      title="TextColor"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: textColorSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: textColorHtml,
+      }]}
+      text={
+        <p>
+          Any text element can be colored as needed. Wraps the element in a span
+          with the <KuiCode>!important</KuiCode> applied to the color.
+        </p>
+      }
+      demo={
+        <TextColor />
       }
     />
   </GuidePage>
