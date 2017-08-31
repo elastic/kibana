@@ -13,7 +13,11 @@ There are several reasons why we want to keep core plugins independent, e.g.:
 - It forces us to treat internal and external plugins the same. They get the
   same access to Kibana apis, they get the same build treatment, etc. That means
   we treat external plugins as a true first-class citizen.
-- Plugins definitely don't import into core Kibana.
+- Plugins can't import modules in the Kibana platform, e.g.
+  `import x from '../../platform/x'`. The only way a plugin can receive anything
+  from outside itself is by depending on it in its own `package.json` or have
+  it injected from the Kibana platform (or Kibana plugins it depends on) when
+  starting up.
 - It's easier to track which packages are used where, as every plugin has its
   own `package.json`.
 
