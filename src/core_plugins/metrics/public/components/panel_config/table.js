@@ -46,7 +46,7 @@ class TablePanelConfig extends Component {
                 </p>
               </div>
               <div className="vis_editor__vis_config-row">
-                <div className="vis_editor__label">Group By Field</div>
+                <label className="vis_editor__label">Group By Field</label>
                 <div className="vis_editor__row_item">
                   <FieldSelect
                     fields={this.props.fields}
@@ -55,15 +55,17 @@ class TablePanelConfig extends Component {
                     onChange={handleSelectChange('pivot_id')}
                   />
                 </div>
-                <div className="vis_editor__label">Column Label</div>
+                <label className="vis_editor__label" htmlFor="pivotLabelInput">Column Label</label>
                 <input
+                  id="pivotLabelInput"
                   className="vis_editor__input-grows"
                   type="text"
                   onChange={handleTextChange('pivot_label')}
                   value={model.pivot_label}
                 />
-                <div className="vis_editor__label">Rows</div>
+                <label className="vis_editor__label" htmlFor="pivotRowsInput">Rows</label>
                 <input
+                  id="pivotRowsInput"
                   className="vis_editor__input-number"
                   type="number"
                   onChange={handleTextChange('pivot_rows')}
@@ -84,10 +86,11 @@ class TablePanelConfig extends Component {
       view = (
         <div className="vis_editor__container">
           <div className="vis_editor__vis_config-row">
-            <div className="vis_editor__label">Item Url (This supports mustache templating.
+            <label className="vis_editor__label" htmlFor="drilldownInput">Item Url (This supports mustache templating.
               <code>{'{{key}}'}</code> is set to the term)
-            </div>
+            </label>
             <input
+              id="drilldownInput"
               className="vis_editor__input-grows"
               onChange={handleTextChange('drilldown_url')}
               value={model.drilldown_url}
@@ -99,15 +102,17 @@ class TablePanelConfig extends Component {
             onChange={this.props.onChange}
           />
           <div className="vis_editor__vis_config-row">
-            <div className="vis_editor__label">Panel Filter</div>
+            <label className="vis_editor__label" htmlFor="panelFilterInput">Panel Filter</label>
             <input
+              id="panelFilterInput"
               className="vis_editor__input-grows"
               type="text"
               onChange={handleTextChange('filter')}
               value={model.filter}
             />
-            <div className="vis_editor__label">Ignore Global Filter</div>
+            <label className="vis_editor__label">Ignore Global Filter</label>
             <YesNo
+              id="globalFilterOption"
               value={model.ignore_global_filter}
               name="ignore_global_filter"
               onChange={this.props.onChange}

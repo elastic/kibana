@@ -45,21 +45,23 @@ class TableSeriesConfig extends Component {
               onChange={handleSelectChange('formatter')}
               value={model.formatter}
             />
-            <div className="vis_editor__label">Template (eg.<code>{'{{value}}/s'}</code>)</div>
+            <label className="vis_editor__label" htmlFor="valueTemplateInput">Template (eg.<code>{'{{value}}/s'}</code>)</label>
             <input
+              id="valueTemplateInput"
               className="vis_editor__input-grows"
               onChange={handleTextChange('value_template')}
               value={model.value_template}
             />
           </div>
           <div className="vis_editor__series_config-row">
-            <div className="vis_editor__label">Filter</div>
+            <label className="vis_editor__label" htmlFor="filterInput">Filter</label>
             <input
+              id="filterInput"
               className="vis_editor__input-grows"
               onChange={handleTextChange('filter')}
               value={model.filter}
             />
-            <div className="vis_editor__label">Show Trend Arrows</div>
+            <label className="vis_editor__label">Show Trend Arrows</label>
             <YesNo
               value={model.trend_arrows}
               name="trend_arrows"
@@ -67,7 +69,6 @@ class TableSeriesConfig extends Component {
             />
           </div>
           <div className="vis_editor__series_config-row">
-            <div className="vis_editor__label">Aggregate Column By</div>
             <div className="vis_editor__row_item">
               <FieldSelect
                 fields={this.props.fields}
@@ -76,9 +77,10 @@ class TableSeriesConfig extends Component {
                 onChange={handleSelectChange('aggregate_by')}
               />
             </div>
-            <div className="vis_editor__label">Aggregate Function</div>
+            <label className="vis_editor__label" htmlFor="aggregateFunctionInput">Aggregate Function</label>
             <div className="vis_editor__row_item">
               <Select
+                inputProps={{ id: 'aggregateFunctionInput' }}
                 value={model.aggregate_function}
                 options={functionOptions}
                 onChange={handleSelectChange('aggregate_function')}
