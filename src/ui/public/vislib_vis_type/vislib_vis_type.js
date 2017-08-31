@@ -15,56 +15,6 @@ export function VislibVisTypeVislibVisTypeProvider(Private) {
   const pointSeries = Private(AggResponsePointSeriesProvider);
   const VislibRenderbot = Private(VislibVisTypeVislibRenderbotProvider);
 
-  // converts old config format (pre 5.2) to the new one
-  const updateParams = function (params) {
-
-    const updateIfSet = (from, to, prop, func) => {
-      if (from[prop]) {
-        to[prop] = func ? func(from[prop]) : from[prop];
-        delete from[prop];
-      }
-    };
-
-    if (params.gauge) {
-      updateIfSet(params, params.gauge.style, 'fontSize');
-    }
-
-    if (params.seriesParams) {
-      updateIfSet(params, params.seriesParams[0], 'drawLinesBetweenPoints');
-      updateIfSet(params, params.seriesParams[0], 'showCircles');
-      updateIfSet(params, params.seriesParams[0], 'radiusRatio');
-      updateIfSet(params, params.seriesParams[0], 'interpolate');
-      updateIfSet(params, params.seriesParams[0], 'type');
-
-      if (params.mode) {
-        const stacked = ['stacked', 'percentage', 'wiggle', 'silhouette'].includes(params.mode);
-        params.seriesParams[0].mode = stacked ? 'stacked' : 'normal';
-        const axisMode = ['stacked', 'overlap'].includes(params.mode) ? 'normal' : params.mode;
-        params.valueAxes[0].scale.mode = axisMode;
-        delete params.mode;
-      }
-
-      if (params.smoothLines) {
-        params.seriesParams[0].interpolate = 'cardinal';
-        delete params.smoothLines;
-      }
-    }
-
-    if (params.valueAxes) {
-      updateIfSet(params, params.valueAxes[0].scale, 'setYExtents');
-      updateIfSet(params, params.valueAxes[0].scale, 'defaultYExtents');
-
-      if (params.scale) {
-        params.valueAxes[0].scale.type = params.scale;
-        delete params.scale;
-      }
-    }
-
-    if (params.categoryAxes && params.categoryAxes.length) {
-      updateIfSet(params, params.categoryAxes[0], 'expandLastBucket');
-    }
-  };
-
   _.class(VislibVisType).inherits(VisType);
   function VislibVisType(opts = {}) {
     VislibVisType.Super.call(this, opts);
@@ -77,7 +27,6 @@ export function VislibVisTypeVislibVisTypeProvider(Private) {
   }
 
   VislibVisType.prototype.createRenderbot = function (vis, $el, uiState) {
-    if (vis.type.name !== 'pie') updateParams(vis.params);
     return new VislibRenderbot(vis, $el, uiState);
   };
 
