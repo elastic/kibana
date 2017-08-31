@@ -143,25 +143,28 @@ class TimeseriesPanelConfig extends Component {
     }
     return (
       <div>
-        <div className="kbnTabs">
-          <div
+        <div className="kbnTabs" role="tablist">
+          <button
+            role="tab"
+            aria-selected={selectedTab === 'data'}
             className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
             onClick={() => this.switchTab('data')}
-            tabIndex="0"
           >Data
-          </div>
-          <div
+          </button>
+          <button
+            role="tab"
+            aria-selected={selectedTab === 'options'}
             className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
             onClick={() => this.switchTab('options')}
-            tabIndex="0"
           >Panel Options
-          </div>
-          <div
+          </button>
+          <button
+            role="tab"
+            aria-selected={selectedTab === 'annotations'}
             className={`kbnTabs__tab${selectedTab === 'annotations' && '-active' || ''}`}
             onClick={() => this.switchTab('annotations')}
-            tabIndex="0"
           >Annotations
-          </div>
+          </button>
         </div>
         {view}
       </div>

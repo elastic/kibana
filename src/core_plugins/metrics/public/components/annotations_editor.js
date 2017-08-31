@@ -169,8 +169,14 @@ class AnnotationsEditor extends Component {
       const annotations = model.annotations.map(this.renderRow);
       content = (
         <div className="vis_editor__annotations">
-          <div className="kbnTabs sm">
-            <div className="kbnTabs__tab-active">Data Sources</div>
+          <div className="kbnTabs sm" role="tablist">
+            <button
+              role="tab"
+              aria-selected={true}
+              className="kbnTabs__tab-active"
+            >
+              Data Sources
+            </button>
           </div>
           { annotations }
         </div>

@@ -77,17 +77,21 @@ function MetricSeries(props) {
     }
     body = (
       <div className="vis_editor__series-row">
-        <div className="kbnTabs sm">
-          <div
+        <div className="kbnTabs sm" role="tablist">
+          <button
+            role="tab"
+            aria-selected={selectedTab === 'metrics'}
             className={metricsClassName}
             onClick={() => props.switchTab('metrics')}
           >Metrics
-          </div>
-          <div
+          </button>
+          <button
+            role="tab"
+            aria-selected={selectedTab === 'options'}
             className={optionsClassname}
             onClick={() => props.switchTab('options')}
           >Options
-          </div>
+          </button>
         </div>
         {seriesBody}
       </div>
