@@ -2,6 +2,7 @@
 // filesystem unless this is here.
 const mockFs: any = jest.genMockFromModule('fs');
 mockFs.readdir = (err: any, cb: any) => cb(null, ['foo', 'bar']);
+mockFs.statSync = (file: string) => ({ isDirectory: () => true });
 // Required by PluginService -> HttpService -> HttpServer -> body-parser.
 mockFs.readdirSync = () => [];
 jest.mock('fs', () => mockFs);
@@ -27,6 +28,7 @@ beforeEach(() => {
 
   mockConfigService.isEnabledAtPath = jest.fn(() => Promise.resolve(true));
 
+  env.pluginsDir = resolve(__dirname, 'examplePlugins');
   env.getPluginDir = jest.fn(name =>
     resolve(__dirname, 'examplePlugins', name)
   );
