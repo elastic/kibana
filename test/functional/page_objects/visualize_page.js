@@ -307,11 +307,20 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByCssSelector('input[name="wms.enabled"]');
     }
 
+    async ensureSavePanelOpen() {
+      log.debug('ensureSavePanelOpen');
+      let isOpen = await testSubjects.exists('saveVisualizationButton');
+      await retry.try(async () => {
+        while (!isOpen) {
+          await testSubjects.click('visualizeSaveButton');
+          isOpen = await testSubjects.exists('saveVisualizationButton');
+        }
+      });
+    }
+
     async saveVisualization(vizName) {
-      await testSubjects.click('visualizeSaveButton');
-      log.debug('saveButton button clicked');
-      const visTitle = await find.byName('visTitle');
-      await visTitle.type(vizName);
+      await this.ensureSavePanelOpen();
+      await testSubjects.setValue('visTitleInput', vizName);
       log.debug('click submit button');
       await testSubjects.click('saveVisualizationButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
