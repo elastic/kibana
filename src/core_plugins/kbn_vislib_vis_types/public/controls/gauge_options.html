@@ -78,6 +78,10 @@
   <div>
     <div class="kuiSideBarCollapsibleTitle">
       <div
+        kbn-accessible-click
+        aria-expanded="{{!!showColorRange}}"
+        aria-controls="gaugeOptionsRanges"
+        aria-label="Toggle range options"
         class="kuiSideBarCollapsibleTitle__label"
         ng-click="showColorRange = !showColorRange"
       >
@@ -92,7 +96,7 @@
       </div>
     </div>
 
-    <div ng-show="showColorRange" class="kuiSideBarCollapsibleSection">
+    <div id="gaugeOptionsRanges" ng-show="showColorRange" class="kuiSideBarCollapsibleSection">
       <div class="kuiSideBarSection">
         <table class="vis-editor-agg-editor-ranges form-group" ng-show="vis.params.gauge.colorsRange.length">
           <tr>
@@ -158,6 +162,10 @@
   <div ng-show="vis.params.gauge.colorsRange.length > 1">
     <div class="kuiSideBarCollapsibleTitle">
       <div
+        kbn-accessible-click
+        aria-expanded="{{!!showColorOptions}}"
+        aria-controls="gaugeOptionsColors"
+        aria-label="Toggle color options"
         class="kuiSideBarCollapsibleTitle__label"
         ng-click="showColorOptions = !showColorOptions"
       >
@@ -174,7 +182,7 @@
       </span>
       </div>
     </div>
-    <div ng-if="showColorOptions" class="kuiSideBarCollapsibleSection">
+    <div id="gaugeOptionsColors" ng-if="showColorOptions" class="kuiSideBarCollapsibleSection">
       <div class="kuiSideBarSection">
         <div class="kuiSideBarFormRow">
           <label class="kuiSideBarFormRow__label" for="colorSchema">
@@ -203,13 +211,13 @@
     </div>
   </div>
 
-
-
-
-
   <div>
     <div class="kuiSideBarCollapsibleTitle">
       <div
+        kbn-accessible-click
+        aria-expanded="{{!!showStyle}}"
+        aria-controls="gaugeOptionsStyle"
+        aria-label="Toggle style options"
         class="kuiSideBarCollapsibleTitle__label"
         ng-click="showStyle = !showStyle"
       >
@@ -226,7 +234,7 @@
         </span>
       </div>
     </div>
-    <div ng-if="showStyle" class="kuiSideBarCollapsibleSection">
+    <div id="gaugeOptionsStyle" ng-if="showStyle" class="kuiSideBarCollapsibleSection">
 
       <div class="kuiSideBarSection">
         <div ng-hide="vis.params.gauge.type === 'simple'">

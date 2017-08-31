@@ -15,6 +15,9 @@
         class="kuiSideBarCollapsibleTitle__label"
         ng-click="isSeriesOpen = !isSeriesOpen"
         kbn-accessible-click
+        aria-expanded="{{!!isSeriesOpen}}"
+        aria-controls="visSeriesOptions{{$index}}"
+        aria-label="Toggle {{chart.data.label}} options"
       >
         <span
           aria-hidden="true"
@@ -27,7 +30,7 @@
       </div>
     </div>
 
-    <div ng-show="isSeriesOpen" class="kuiSideBarCollapsibleSection">
+    <div id="visSeriesOptions{{$index}}" ng-show="isSeriesOpen" class="kuiSideBarCollapsibleSection">
       <!-- General -->
       <div class="kuiSideBarSection">
 

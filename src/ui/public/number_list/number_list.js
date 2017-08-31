@@ -14,9 +14,12 @@ uiModules
     require: 'ngModel',
     scope: {
       validateAscendingOrder: '=?',
+      labelledbyId: '@',
     },
     controller: function ($scope, $attrs, $parse) {
       const self = this;
+
+      self.labelledbyId = $scope.labelledbyId;
 
       // Called from the pre-link function once we have the controllers
       self.init = function (modelCntr) {
@@ -109,4 +112,3 @@ uiModules
     },
   };
 });
-

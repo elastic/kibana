@@ -1,11 +1,12 @@
 <div class="form-group">
-  <label for="sort">
+  <label>
     Sort On
   </label>
 
   <ui-select
     name="field"
     sortField
+    title="Sort on"
     class="vis-editor-field-ui-select"
     ng-show="sortFieldOptions.length"
     ng-model="agg.params.sortField"
@@ -26,11 +27,12 @@
 </div>
 
 <div class="form-group">
-  <label>
+  <label for="visEditorTopSort{{agg.id}}">
     Order
   </label>
 
   <select
+     id="visEditorTopSort{{agg.id}}"
      name="sortOrder"
      ng-model="agg.params.sortOrder"
      required

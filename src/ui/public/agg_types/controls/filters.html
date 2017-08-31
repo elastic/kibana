@@ -1,7 +1,7 @@
 <div class="form-group">
   <div ng-repeat="filter in agg.params.filters">
     <div class="vis-editor-agg-header">
-      <label>
+      <label for="visEditorFilterInput{{agg.id}}">
           Filter {{$index + 1}}
           <span ng-if="filter.label">- {{ filter.label }}</span>
       </label>
@@ -10,11 +10,15 @@
         <button
           ng-click="showConfig = !showConfig"
           type="button"
+          aria-label="Toggle filter label"
+          aria-expanded="{{!!showConfig}}"
+          aria-controls="visEditorFilterLabel{{agg.id}}"
           class="kuiButton kuiButton--basic kuiButton--small">
           <i class="fa fa-tag"></i>
         </button>
         <button
           type="button"
+          aria-label="Remove this filter"
           ng-click="agg.params.filters.splice($index, 1)"
           class="kuiButton kuiButton--danger kuiButton--small">
           <i class="fa fa-times"></i>
@@ -24,6 +28,7 @@
 
     <div class="form-group">
       <input
+        id="visEditorFilterInput{{agg.id}}"
         parse-query
         ng-model="filter.input.query"
         type="text"
@@ -31,9 +36,10 @@
         name="filter{{$index}}">
     </div>
 
-    <div class="form-group" ng-show="showConfig">
-      <label>Filter {{$index + 1}} label</label>
+    <div class="form-group" ng-show="showConfig" id="visEditorFilterLabel{{agg.id}}">
+      <label for="visEditorFilterLabelInput{{agg.id}}">Filter {{$index + 1}} label</label>
       <input
+        id="visEditorFilterLabelInput{{agg.id}}"
         ng-model="filter.label"
         placeholder="Label"
         type="text"
