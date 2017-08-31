@@ -172,7 +172,7 @@ locations for an RPM-based system:
 | data
   | The location of the data files written to disk by Kibana and its plugins
   | /var/lib/kibana
- d|
+  | path.data
 
 | optimize
   | Transpiled source code. Certain administrative actions (e.g. plugin install)
