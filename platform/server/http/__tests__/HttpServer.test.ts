@@ -40,9 +40,12 @@ test('200 OK with body', async () => {
 
   await server.start(port, '127.0.0.1');
 
-  await supertest(app).get('/foo').expect(200).then(res => {
-    expect(res.body).toEqual({ key: 'value' });
-  });
+  await supertest(app)
+    .get('/foo')
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ key: 'value' });
+    });
 });
 
 test('202 Accepted with body', async () => {
@@ -56,9 +59,12 @@ test('202 Accepted with body', async () => {
 
   await server.start(port, '127.0.0.1');
 
-  await supertest(app).get('/foo').expect(202).then(res => {
-    expect(res.body).toEqual({ location: 'somewhere' });
-  });
+  await supertest(app)
+    .get('/foo')
+    .expect(202)
+    .then(res => {
+      expect(res.body).toEqual({ location: 'somewhere' });
+    });
 });
 
 test('204 No content', async () => {
@@ -72,10 +78,13 @@ test('204 No content', async () => {
 
   await server.start(port, '127.0.0.1');
 
-  await supertest(app).get('/foo').expect(204).then(res => {
-    expect(res.body).toEqual({});
-    // TODO Is ^ wrong or just a result of supertest, I expect `null` or `undefined`
-  });
+  await supertest(app)
+    .get('/foo')
+    .expect(204)
+    .then(res => {
+      expect(res.body).toEqual({});
+      // TODO Is ^ wrong or just a result of supertest, I expect `null` or `undefined`
+    });
 });
 
 test('400 Bad request with error', async () => {
@@ -90,9 +99,12 @@ test('400 Bad request with error', async () => {
 
   await server.start(port, '127.0.0.1');
 
-  await supertest(app).get('/foo').expect(400).then(res => {
-    expect(res.body).toEqual({ error: 'some message' });
-  });
+  await supertest(app)
+    .get('/foo')
+    .expect(400)
+    .then(res => {
+      expect(res.body).toEqual({ error: 'some message' });
+    });
 });
 
 test('valid params', async () => {
@@ -116,9 +128,12 @@ test('valid params', async () => {
 
   await server.start(port, '127.0.0.1');
 
-  await supertest(app).get('/foo/some-string').expect(200).then(res => {
-    expect(res.body).toEqual({ key: 'some-string' });
-  });
+  await supertest(app)
+    .get('/foo/some-string')
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ key: 'some-string' });
+    });
 });
 
 test('invalid params', async () => {
@@ -142,11 +157,14 @@ test('invalid params', async () => {
 
   await server.start(port, '127.0.0.1');
 
-  await supertest(app).get('/foo/some-string').expect(400).then(res => {
-    expect(res.body).toEqual({
-      error: '[test]: expected value of type [number] but got [string]'
+  await supertest(app)
+    .get('/foo/some-string')
+    .expect(400)
+    .then(res => {
+      expect(res.body).toEqual({
+        error: '[test]: expected value of type [number] but got [string]'
+      });
     });
-  });
 });
 
 test('valid query', async () => {
@@ -171,9 +189,12 @@ test('valid query', async () => {
 
   await server.start(port, '127.0.0.1');
 
-  await supertest(app).get('/foo?bar=test&quux=123').expect(200).then(res => {
-    expect(res.body).toEqual({ bar: 'test', quux: 123 });
-  });
+  await supertest(app)
+    .get('/foo?bar=test&quux=123')
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ bar: 'test', quux: 123 });
+    });
 });
 
 test('invalid query', async () => {
@@ -197,11 +218,14 @@ test('invalid query', async () => {
 
   await server.start(port, '127.0.0.1');
 
-  await supertest(app).get('/foo?bar=test').expect(400).then(res => {
-    expect(res.body).toEqual({
-      error: '[bar]: expected value of type [number] but got [string]'
+  await supertest(app)
+    .get('/foo?bar=test')
+    .expect(400)
+    .then(res => {
+      expect(res.body).toEqual({
+        error: '[bar]: expected value of type [number] but got [string]'
+      });
     });
-  });
 });
 
 test('valid body', async () => {
@@ -281,9 +305,12 @@ test('returns 200 OK if returning object', async () => {
 
   await server.start(port, '127.0.0.1');
 
-  await supertest(app).get('/foo').expect(200).then(res => {
-    expect(res.body).toEqual({ key: 'value' });
-  });
+  await supertest(app)
+    .get('/foo')
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ key: 'value' });
+    });
 });
 
 test('returns result from `onRequest` handler as first param in route handler', async () => {
