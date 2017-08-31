@@ -13,7 +13,7 @@ export function TimefilterLibDiffIntervalProvider(Private, $interval, $rootScope
         const refreshValue = self.refreshInterval.value;
         const refreshPause = self.refreshInterval.pause;
 
-        if (_.isNumber(refreshValue) && !refreshPause) {
+        if (_.isNumber(refreshValue) && refreshValue > 0 && !refreshPause) {
           intervalTimeout = $interval(() => $rootScope.$broadcast('courier:searchRefresh'), refreshValue);
         } else if (intervalTimeout) {
           $interval.cancel(intervalTimeout);
