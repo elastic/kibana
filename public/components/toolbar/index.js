@@ -3,7 +3,7 @@ import { compose, withState } from 'recompose';
 
 import { getEditing } from '../../state/selectors/app';
 import { getSelectedPage, getSelectedElement, getSelectedElementId, getSelectedPageIndex } from '../../state/selectors/workpad';
-import { addElement, elementUp } from '../../state/actions/elements';
+import { addElement, elementLayer } from '../../state/actions/elements';
 import { addPage, nextPage, previousPage } from '../../state/actions/pages';
 
 import { Toolbar as Component } from './toolbar';
@@ -21,7 +21,8 @@ const mapDispatchToProps = (dispatch) => ({
   addPage: () => dispatch(addPage()),
   nextPage: () => dispatch(nextPage()),
   previousPage: () => dispatch(previousPage()),
-  elementUp: (pageId, elementId) => () => dispatch(elementUp({ pageId, elementId })),
+  elementLayer: (pageId, elementId) => (movement) => dispatch(elementLayer({ pageId, elementId, movement })),
+
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
@@ -30,7 +31,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     ...dispatchProps,
     ...ownProps,
     addElement: dispatchProps.addElement(stateProps.selectedPage),
-    elementUp: dispatchProps.elementUp(stateProps.selectedPage, stateProps.selectedElementId),
+    elementLayer: dispatchProps.elementLayer(stateProps.selectedPage, stateProps.selectedElementId),
   };
 };
 

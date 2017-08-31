@@ -20,6 +20,29 @@ function assignElementProperties(workpadState, pageId, elementId, props) {
   return assign(workpadState, elementsPath.concat(elementIndex), props);
 }
 
+function moveElementLayer(workpadState, pageId, elementId, movement) {
+  const pageIndex = getPageIndexById(workpadState, pageId);
+  const elementIndex = getElementIndexById(workpadState.pages[pageIndex], elementId);
+  const elements = get(workpadState, ['pages', pageIndex, 'elements']);
+  const from = elementIndex;
+
+
+  const to = (function () {
+    if (movement < Infinity && movement > -Infinity) return elementIndex + movement;
+    if (movement === Infinity) return elements.length - 1;
+    if (movement === -Infinity) return 0;
+    throw new Error('Invalid element layer movement');
+  }());
+
+  if (to > elements.length - 1 || to < 0) return workpadState;
+
+  // Common
+  const newElements = elements.slice(0);
+  newElements.splice(to, 0, newElements.splice(from, 1)[0]);
+
+  return set(workpadState, ['pages', pageIndex, 'elements'], newElements);
+}
+
 export default handleActions({
   // TODO: This takes the entire element, which is not neccesary, it could just take the id.
   [actions.setExpression]: (workpadState, { payload }) => {
@@ -40,17 +63,8 @@ export default handleActions({
 
     return push(workpadState, ['pages', pageIndex, 'elements'], element);
   },
-  [actions.elementUp]: (workpadState, { payload: { pageId, elementId } }) => {
-    const pageIndex = getPageIndexById(workpadState, pageId);
-    const elementIndex = getElementIndexById(workpadState.pages[pageIndex], elementId);
-    const elements = get(workpadState, ['pages', pageIndex, 'elements']);
-
-    if (elementIndex + 1 > elements.length - 1) return workpadState;
-
-    const newElements = elements.slice(0);
-    newElements.splice(elementIndex + 1, 0, newElements.splice(elementIndex, 1)[0]);
-
-    return set(workpadState, ['pages', pageIndex, 'elements'], newElements);
+  [actions.elementLayer]: (workpadState, { payload: { pageId, elementId, movement } }) => {
+    return moveElementLayer(workpadState, pageId, elementId, movement);
   },
   [actions.removeElement]: (workpadState, { payload: { pageId, elementId } }) => {
     const pageIndex = getPageIndexById(workpadState, pageId);

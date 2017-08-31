@@ -16,7 +16,7 @@ export const Toolbar = (props) => {
     tray,
     setTray,
     addElement,
-    elementUp,
+    elementLayer,
     addPage,
     previousPage,
     nextPage,
@@ -62,17 +62,15 @@ export const Toolbar = (props) => {
         <NavbarButton onClick={ addPage }><i className="fa fa-plus-square" /> Add a page</NavbarButton>
 
 
-        { !elementIsSelected ? null : (
-            <NavbarButton onClick={() => showHideTray('datasource')}><i className="fa fa-database" /> Datasource</NavbarButton>
-        ) }
-
-        { !elementIsSelected ? null : (
-          <NavbarButton onClick={() => showHideTray('expression')}><i className="fa fa-terminal" /> Code</NavbarButton>
-        ) }
-
-        <vr/>
-
-        <NavbarButton onClick={ elementUp }><i className="fa fa-arrow-up" /></NavbarButton>
+        { !elementIsSelected ? null : ([
+          <NavbarButton onClick={() => showHideTray('datasource')}><i className="fa fa-database" /> Datasource</NavbarButton>,
+          <NavbarButton onClick={() => showHideTray('expression')}><i className="fa fa-terminal" /> Code</NavbarButton>,
+          <vr/>,
+          <NavbarButton onClick={ () => elementLayer(Infinity) }><i className="fa fa-arrow-circle-up" /></NavbarButton>,
+          <NavbarButton onClick={ () => elementLayer(1) }><i className="fa fa-arrow-up" /></NavbarButton>,
+          <NavbarButton onClick={ () => elementLayer(-1) }><i className="fa fa-arrow-down" /></NavbarButton>,
+          <NavbarButton onClick={ () => elementLayer(-Infinity) }><i className="fa fa-arrow-circle-down" /></NavbarButton>,
+        ]) }
 
       </Navbar>
     </div>
@@ -84,7 +82,7 @@ Toolbar.propTypes = {
   tray: PropTypes.node,
   setTray: PropTypes.func.isRequired,
   addElement: PropTypes.func.isRequired,
-  elementUp: PropTypes.func,
+  elementLayer: PropTypes.func,
   addPage: PropTypes.func.isRequired,
   nextPage: PropTypes.func.isRequired,
   previousPage: PropTypes.func.isRequired,
