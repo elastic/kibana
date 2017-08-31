@@ -2,7 +2,6 @@ import { get } from 'lodash';
 import { getDefaultWorkpad } from './defaults';
 
 export default (path) => {
-
   const state = {
     app: {}, // Kibana stuff in here
     transient: {
@@ -16,7 +15,7 @@ export default (path) => {
       // See the resolved_args reducer for more information.
     },
     persistent: {
-      schemaVersion: 0,
+      schemaVersion: 1,
       workpad: getDefaultWorkpad(),
     },
   };

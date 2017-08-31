@@ -1,14 +1,30 @@
 import { get, find, findIndex, map } from 'lodash';
 import { fromExpression } from '../../../common/lib/ast';
+import { append } from '../../lib/modify_path';
+import { getAssets } from './assets';
+
+const workpadRoot = 'persistent.workpad';
+
+const appendAst = (element) => ({
+  ...element,
+  ast: fromExpression(element.expression),
+});
 
 // workpad getters
 export function getWorkpad(state) {
-  return get(state, 'persistent.workpad');
+  return get(state, workpadRoot);
+}
+
+export function getWorkpadPersisted(state) {
+  return {
+    ...getWorkpad(state),
+    assets: getAssets(state),
+  };
 }
 
 // page getters
 export function getSelectedPageIndex(state) {
-  return get(state, 'persistent.workpad.page');
+  return get(state, append(workpadRoot, 'page'));
 }
 
 export function getSelectedPage(state) {
@@ -18,7 +34,7 @@ export function getSelectedPage(state) {
 }
 
 export function getPages(state) {
-  return get(state, 'persistent.workpad.pages');
+  return get(state, append(workpadRoot, 'pages'));
 }
 
 export function getPageById(state, id) {
@@ -30,11 +46,11 @@ export function getPageIndexById(state, id) {
 }
 
 export function getWorkpadName(state) {
-  return get(state, 'persistent.workpad.name');
+  return get(state, append(workpadRoot, 'name'));
 }
 
 export function getWorkpadColors(state) {
-  return get(state, 'persistent.workpad.colors');
+  return get(state, append(workpadRoot, 'colors'));
 }
 
 export function getAllElements(state) {
@@ -54,22 +70,21 @@ export function getSelectedElement(state) {
   return getElementById(state, getSelectedElementId(state));
 }
 
-export function getElements(state, pageId) {
+export function getElements(state, pageId, withAst = true) {
   const id = pageId || getSelectedPage(state);
   if (!id) return [];
 
   const page = getPageById(state, id);
   const elements = get(page, 'elements');
   if (!elements) return [];
+  if (!withAst) return elements;
 
-  return elements.map(element => ({
-    ...element,
-    ast: fromExpression(element.expression),
-  }));
+  return elements.map(appendAst);
 }
 
 export function getElementById(state, id, pageId) {
-  return find(getElements(state, pageId), { id });
+  const element = find(getElements(state, pageId, false), { id });
+  if (element) return appendAst(element);
 }
 
 export function getResolvedArgs(state, elementId, path) {

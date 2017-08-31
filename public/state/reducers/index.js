@@ -8,10 +8,12 @@ import resolvedArgsReducer from './resolved_args';
 import workpadReducer from './workpad';
 import pagesReducer from './pages';
 import elementsReducer from './elements';
+import assetsReducer from './assets';
 import historyReducer from './history';
 
 export default function getRootReducer(initialState) {
   return combineReducers({
+    assets: assetsReducer,
     app: appReducer,
     transient: reduceReducers(transientReducer, resolvedArgsReducer),
     persistent: reduceReducers(historyReducer, combineReducers({

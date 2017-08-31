@@ -8,6 +8,8 @@ export const imageTypes = [
 ];
 
 export function parse(str, withData = false) {
+  if (typeof str !== 'string') return;
+
   const reg = /^data:([a-z]+\/[a-z0-9-+.]+)(;[a-z-]+=[a-z0-9-]+)?;base64,/;
   const matches = str.match(reg);
   if (!matches) return;
@@ -15,7 +17,7 @@ export function parse(str, withData = false) {
   return {
     mimetype: matches[1],
     charset: matches[2] && matches[2].split('=')[1],
-    data: withData ? null : str.split(',')[1],
+    data: !withData ? null : str.split(',')[1],
     isImage: (imageTypes.indexOf(matches[1]) >= 0),
   };
 }

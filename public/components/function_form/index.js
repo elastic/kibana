@@ -1,8 +1,15 @@
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import uuid from 'uuid/v4';
 import { FunctionForm as Component } from './function_form';
 import { findExpressionType } from '../../lib/find_expression_type';
-import { fetchContext, setArgumentAtIndex, addArgumentValueAtIndex, deleteArgumentAtIndex } from '../../state/actions/elements';
+import { createAsset } from '../../state/actions/assets';
+import {
+  fetchContext,
+  setArgumentAtIndex,
+  addArgumentValueAtIndex,
+  deleteArgumentAtIndex,
+} from '../../state/actions/elements';
 import {
   getSelectedElement,
   getSelectedPage,
@@ -39,19 +46,28 @@ const mapDispatchToProps = (dispatch, { expressionIndex }) => ({
       argIndex,
     }));
   },
+  onAssetAdd: (type, content) => {
+    // make the ID here and pass it into the action
+    const assetId = `asset-${uuid()}`;
+    dispatch(createAsset(type, content, assetId));
+
+    // then the id, so the caller knows the id that will be created
+    return assetId;
+  },
 });
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { element, pageId } = stateProps;
   const { argType, nextArgType } = ownProps;
+  const { updateContext, setArgument, addArgument, deleteArgument, ...dispatchers } = dispatchProps;
 
-  return Object.assign({}, stateProps, dispatchProps, ownProps, {
-    updateContext: dispatchProps.updateContext(element),
+  return Object.assign({}, stateProps, dispatchers, ownProps, {
+    updateContext: updateContext(element),
     expressionType: findExpressionType(argType),
     nextExpressionType: nextArgType ? findExpressionType(nextArgType) : nextArgType,
-    onValueChange: dispatchProps.setArgument(element, pageId),
-    onValueAdd: dispatchProps.addArgument(element, pageId),
-    onValueRemove: dispatchProps.deleteArgument(element, pageId),
+    onValueChange: setArgument(element, pageId),
+    onValueAdd: addArgument(element, pageId),
+    onValueRemove: deleteArgument(element, pageId),
   });
 };
 

@@ -16,7 +16,6 @@ export const fetchRawImage = (url) => {
     }
 
     return { data: res.data, type };
-
   });
 };
 

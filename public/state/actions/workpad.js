@@ -4,6 +4,7 @@ import { without, includes } from 'lodash';
 import * as workpadService from '../../lib/workpad_service';
 import { getWorkpadColors } from '../selectors/workpad';
 import { fetchAllRenderables } from './elements';
+import { setAssets, resetAssets } from './assets';
 import { getDefaultWorkpad } from '../defaults';
 
 export const sizeWorkpad = createAction('sizeWorkpad');
@@ -32,8 +33,10 @@ export const setWorkpad = createThunk('setWorkpad', ({ dispatch }, workpad) => {
 
 export const loadWorkpad = createThunk('loadWorkpad', ({ dispatch }, workpadId) => {
   // TODO: handle the failed loading state
-  workpadService.get(workpadId)
-  .then(({ workpad }) => dispatch(setWorkpad(workpad)));
+  workpadService.get(workpadId).then(({ assets, ...workpad }) => {
+    dispatch(setWorkpad(workpad));
+    dispatch(setAssets(assets));
+  });
 });
 
 export const createWorkpad = createThunk('createWorkpad', ({ dispatch }) => {
@@ -41,5 +44,8 @@ export const createWorkpad = createThunk('createWorkpad', ({ dispatch }) => {
 
   // TODO: handle the failed loading state
   workpadService.create(newWorkpad)
-  .then(() => dispatch(setWorkpad(newWorkpad)));
+  .then(() => {
+    dispatch(resetAssets());
+    dispatch(setWorkpad(newWorkpad));
+  });
 });

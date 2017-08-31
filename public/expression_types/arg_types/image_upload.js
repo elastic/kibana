@@ -5,17 +5,30 @@ import { withState } from 'recompose';
 import { ArgType } from '../arg_type';
 import { encode } from '../../../common/lib/dataurl';
 
-const template = ({ typeInstance, onValueChange, setLoading, isLoading }) => {
+const template = ({ typeInstance, onAssetAdd, onValueChange, setLoading, isLoading }) => {
   const { name } = typeInstance;
 
   function handleUpload(ev) {
     const [ upload ] = ev.target.files;
-    setLoading(true);
-    encode(upload).then((res) => {
-      setLoading(false);
+    setLoading(true); // start loading indicator
+
+    return encode(upload)
+    .then(dataurl => onAssetAdd('dataurl', dataurl))
+    .then((assetId) => {
+      setLoading(false); // stop loading indicator
+
       onValueChange({
-        type: 'string',
-        value: res,
+        type: 'expression',
+        chain: [{
+          type: 'function',
+          function: 'asset',
+          arguments: {
+            _: [{
+              type: 'string',
+              value: assetId,
+            }],
+          },
+        }],
       });
     });
   }
@@ -33,6 +46,7 @@ const template = ({ typeInstance, onValueChange, setLoading, isLoading }) => {
 };
 
 template.propTypes = {
+  onAssetAdd: PropTypes.func.isRequired,
   onValueChange: PropTypes.func.isRequired,
   typeInstance: PropTypes.object.isRequired,
   setLoading: PropTypes.func.isRequired,

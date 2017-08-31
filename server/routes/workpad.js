@@ -20,7 +20,7 @@ export function workpad(server) {
   }
 
   function createWorkpad(request, id) {
-    const now = new Date();
+    const now = (new Date()).toISOString();
     const doc = {
       refresh: 'wait_for',
       index: indexName,
@@ -53,8 +53,8 @@ export function workpad(server) {
         id: workpadId,
         body: merge(_source, {
           ...request.payload,
-          '@created': _source['@created'] || new Date(),
-          '@timestamp': new Date(),
+          '@created': _source['@created'] || (new Date()).toISOString(),
+          '@timestamp': (new Date()).toISOString(),
         }),
       };
 
@@ -82,9 +82,7 @@ export function workpad(server) {
 
       callWithRequest(request, 'get', doc)
       .then(formatResponse(reply, true))
-      .then(resp => reply({
-        workpad: resp._source,
-      }))
+      .then(resp => reply(resp._source))
       .catch(formatResponse(reply));
     },
   });

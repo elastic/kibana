@@ -6,8 +6,8 @@ function setPageIndex(workpadState, index) {
   if (index < 0 || !workpadState.pages[index]) return workpadState;
   return set(workpadState, 'page', index);
 }
-export default function pagesReducer(workpadState = {}, { type, payload }) {
 
+export default function pagesReducer(workpadState = {}, { type, payload }) {
   if (type === 'addPage') {
     const withNewPage = push(workpadState, 'pages', payload || getDefaultPage());
     return setPageIndex(withNewPage, withNewPage.pages.length - 1);
