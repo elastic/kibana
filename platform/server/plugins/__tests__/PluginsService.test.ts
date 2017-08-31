@@ -27,7 +27,9 @@ beforeEach(() => {
 
   mockConfigService.isEnabledAtPath = jest.fn(() => Promise.resolve(true));
 
-  env.getPluginDir = jest.fn(name => resolve(__dirname, 'examplePlugins', name));
+  env.getPluginDir = jest.fn(name =>
+    resolve(__dirname, 'examplePlugins', name)
+  );
 });
 
 test('starts plugins', async () => {
