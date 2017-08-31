@@ -19,7 +19,7 @@ import { RedirectWhenMissingProvider } from './_redirect_when_missing';
 
 
 uiModules.get('kibana/courier')
-.service('courier', function ($rootScope, Private, Promise, indexPatterns) {
+.service('courier', function (Private, Promise, indexPatterns) {
   function Courier() {
     const self = this;
 
@@ -42,16 +42,6 @@ uiModules.get('kibana/courier')
 
     self.DocSource = DocSource;
     self.SearchSource = SearchSource;
-
-    /**
-     * update the time between automatic search requests
-     *
-     * @chainable
-     */
-    self.fetchInterval = function (ms) {
-      searchLooper.ms(ms);
-      return this;
-    };
 
     /**
      * Start fetching search requests on an interval
@@ -126,17 +116,6 @@ uiModules.get('kibana/courier')
         throw new Error('Aborting all pending requests failed.');
       }
     };
-
-    // Listen for refreshInterval changes
-    $rootScope.$watchCollection('timefilter.refreshInterval', function () {
-      const refreshValue = _.get($rootScope, 'timefilter.refreshInterval.value');
-      const refreshPause = _.get($rootScope, 'timefilter.refreshInterval.pause');
-      if (_.isNumber(refreshValue) && !refreshPause) {
-        self.fetchInterval(refreshValue);
-      } else {
-        self.fetchInterval(0);
-      }
-    });
 
     const onFatalDefer = Promise.defer();
     onFatalDefer.promise.then(self.close);
