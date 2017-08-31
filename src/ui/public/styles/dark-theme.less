@@ -619,7 +619,6 @@
   .Select--multi .Select-value {
     color: #b7e2ea;
     border: 1px solid #b7e2ea;
-    background-color: inherit;
   }
 
   .Select--multi .Select-value-icon {
@@ -634,8 +633,8 @@
 
   .Select--multi .Select-value-icon:hover,
   .Select--multi .Select-value-icon:focus {
-    color: #def2f6;
-    background-color: inherit;
+    color: #444444;
+    background-color: #b7e2ea;
   }
 
   .has-value.Select--single > .Select-control .Select-value .Select-value-label,
@@ -653,6 +652,10 @@
 
   .Select-arrow {
     border-color: #a6a6a6 transparent transparent;
+  }
+
+  .is-open > .Select-control .Select-arrow {
+    border-color: transparent transparent black;
   }
 
   .is-open .Select-arrow,
