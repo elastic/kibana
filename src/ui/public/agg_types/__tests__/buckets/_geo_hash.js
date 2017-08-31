@@ -168,6 +168,16 @@ describe('Geohash Agg', () => {
         expect(aggMock.vis.sessionState.mapCollar).to.have.property('bottom_right');
         expect(aggMock.vis.sessionState.mapCollar).to.have.property('zoom');
       });
+
+      // there was a bug because of an "&& mapZoom" check which excluded 0 as a valid mapZoom, but it is.
+      it('should create filter, geohash_grid, and geo_centroid aggregations when zoom level 0', () => {
+        aggMock.vis.params.mapZoom = 0;
+        requestAggs = geohashAgg.getRequestAggs(aggMock);
+        expect(requestAggs.length).to.equal(3);
+        expect(requestAggs[0].type).to.equal('filter');
+        expect(requestAggs[1].type).to.equal('geohash_grid');
+        expect(requestAggs[2].type).to.equal('geo_centroid');
+      });
     });
 
     describe('aggregation options', () => {

@@ -45,6 +45,14 @@ export function AggTypesBucketsGeoHashProvider(Private, config) {
     return precision;
   }
 
+  function getMapZoom(vis) {
+    if (vis.hasUiState() && parseInt(vis.uiStateVal('mapZoom')) >= 0) {
+      return parseInt(vis.uiStateVal('mapZoom'));
+    }
+
+    return vis.params.mapZoom;
+  }
+
   function isOutsideCollar(bounds, collar) {
     return bounds && collar && !geoContains(collar, bounds);
   }
@@ -89,11 +97,8 @@ export function AggTypesBucketsGeoHashProvider(Private, config) {
         },
         write: function (aggConfig, output) {
           const vis = aggConfig.vis;
-          let currZoom;
-          if (vis.hasUiState()) {
-            currZoom = parseInt(vis.uiStateVal('mapZoom'), 10);
-          }
-          const autoPrecisionVal = zoomPrecision[currZoom >= 0 ? currZoom : parseInt(vis.params.mapZoom)];
+          const currZoom = getMapZoom(vis);
+          const autoPrecisionVal = zoomPrecision[currZoom];
           output.params.precision = aggConfig.params.autoPrecision ? autoPrecisionVal : getPrecision(aggConfig.params.precision);
         }
       }
@@ -104,11 +109,8 @@ export function AggTypesBucketsGeoHashProvider(Private, config) {
       if (agg.params.isFilteredByCollar && agg.getField()) {
         const vis = agg.vis;
         const mapBounds = vis.sessionState.mapBounds;
-        let mapZoom;
-        if (vis.hasUiState()) {
-          mapZoom = parseInt(vis.uiStateVal('mapZoom'), 10);
-        }
-        if (mapBounds && mapZoom) {
+        const mapZoom = getMapZoom(vis);
+        if (mapBounds) {
           const lastMapCollar = vis.sessionState.mapCollar;
           let mapCollar;
           if (!lastMapCollar || lastMapCollar.zoom !== mapZoom || isOutsideCollar(mapBounds, lastMapCollar)) {
