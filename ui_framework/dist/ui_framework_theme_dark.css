@@ -3143,3 +3143,21 @@ table {
       margin-bottom: 14px; }
   .kuiText > :last-child {
     margin-bottom: 0 !important; }
+
+.kuiTextColor.kuiTextColor--default {
+  color: #DDD !important; }
+
+.kuiTextColor.kuiTextColor--primary {
+  color: #4da1c0 !important; }
+
+.kuiTextColor.kuiTextColor--secondary {
+  color: #00A69B !important; }
+
+.kuiTextColor.kuiTextColor--accent {
+  color: #DD0A73 !important; }
+
+.kuiTextColor.kuiTextColor--warning {
+  color: #E5830E !important; }
+
+.kuiTextColor.kuiTextColor--danger {
+  color: #bf4d4d !important; }

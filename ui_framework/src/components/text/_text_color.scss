@@ -1,0 +1,16 @@
+
+$textColors: (
+  default: $kuiTextColor,
+  primary: $kuiColorPrimary,
+  secondary: $kuiColorSecondary,
+  accent: $kuiColorAccent,
+  warning: $kuiColorWarning,
+  danger: $kuiColorDanger,
+);
+
+// Create color modifiers based on the map
+@each $name, $color in $textColors {
+  .kuiTextColor.kuiTextColor--#{$name} {
+    color: $color !important;
+  }
+}
