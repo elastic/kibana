@@ -398,10 +398,6 @@ function discoverController(
         };
       }()));
 
-      $scope.searchSource.onError(function (err) {
-        notify.error(err);
-      }).catch(notify.fatal);
-
       function initForTime() {
         return setupVisualization().then($scope.updateTime);
       }
@@ -575,7 +571,7 @@ function discoverController(
 
       $scope.fetchStatus = null;
     });
-  }).catch(notify.fatal);
+  }).catch(notify.error);
 
   $scope.updateTime = function () {
     $scope.timeRange = {
