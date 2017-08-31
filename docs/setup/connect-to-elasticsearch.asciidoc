@@ -38,11 +38,6 @@ on the star icon above the index pattern title from *Management > Index Patterns
 All done! Kibana is now connected to your Elasticsearch data. Kibana displays a read-only list of fields
 configured for the matching index.
 
-NOTE: Kibana relies on dynamic mapping to use fields in visualizations and manage the
-`.kibana` index. If you have disabled dynamic mapping, you need to manually provide
-mappings for the fields that Kibana uses to create visualizations. For more information, see
-<<kibana-dynamic-mapping, Kibana and Elasticsearch Dynamic Mapping>>.
-
 [float]
 [[explore]]
 === Start Exploring your Data!
@@ -54,29 +49,3 @@ You're ready to dive in to your data:
 
 For a step-by-step introduction to these core Kibana concepts, see the <<getting-started,
 Getting Started>> tutorial.
-
-[float]
-[[kibana-dynamic-mapping]]
-=== Kibana and Elasticsearch Dynamic Mapping
-By default, Elasticsearch enables {ref}/dynamic-mapping.html[dynamic mapping] for fields. Kibana needs
-dynamic mapping to use fields in visualizations correctly, as well as to manage the `.kibana` index
-where saved searches, visualizations, and dashboards are stored.
-
-If your Elasticsearch use case requires you to disable dynamic mapping, you need to manually provide
-mappings for fields that Kibana uses to create visualizations. You also need to manually enable dynamic
-mapping for the `.kibana` index.
-
-The following procedure assumes that the `.kibana` index does not already exist in Elasticsearch and
-that the `index.mapper.dynamic` setting in `elasticsearch.yml` is set to `false`:
-
-. Start Elasticsearch.
-. Create the `.kibana` index with dynamic mapping enabled just for that index:
-+
-[source,shell]
-PUT .kibana
-{
-  "index.mapper.dynamic": true
-}
-+
-. Start Kibana and navigate to the web UI and verify that there are no error messages related to dynamic
-mapping.
