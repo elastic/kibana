@@ -8,12 +8,14 @@ import { IndexMappings } from './index_mappings';
  */
 const BASE_KIBANA_INDEX_MAPPINGS_DSL = {
   doc: {
-    'dynamic': 'strict',
+    dynamic: 'strict',
     properties: {
       type: {
         type: 'keyword'
       },
-
+      updated_at: {
+        type: 'date'
+      },
       config: {
         dynamic: true,
         properties: {
