@@ -12,12 +12,11 @@ import { resolve } from 'path';
 import { PluginsService } from '../PluginsService';
 import { logger } from '../../../logging/__mocks__';
 
-const examplesPluginsDir = resolve(__dirname, './examplePlugins');
-
 let mockConfigService: any = jest.genMockFromModule(
   '../../../config/ConfigService'
 );
 let mockPluginSystem: any = jest.genMockFromModule('../PluginSystem');
+let env: any = jest.genMockFromModule('../../../config/Env');
 
 beforeEach(() => {
   mockPluginSystem = {
@@ -27,11 +26,15 @@ beforeEach(() => {
   };
 
   mockConfigService.isEnabledAtPath = jest.fn(() => Promise.resolve(true));
+
+  env.getPluginDir = jest.fn(name =>
+    resolve(__dirname, 'examplePlugins', name)
+  );
 });
 
 test('starts plugins', async () => {
   const pluginsService = new PluginsService(
-    examplesPluginsDir,
+    env,
     mockPluginSystem,
     mockConfigService,
     logger
@@ -53,7 +56,7 @@ test('starts plugins', async () => {
 
 test('stops plugins', async () => {
   const pluginsService = new PluginsService(
-    examplesPluginsDir,
+    env,
     mockPluginSystem,
     mockConfigService,
     logger
@@ -74,7 +77,7 @@ test('does not start plugin if disabled', async () => {
   });
 
   const pluginsService = new PluginsService(
-    examplesPluginsDir,
+    env,
     mockPluginSystem,
     mockConfigService,
     logger

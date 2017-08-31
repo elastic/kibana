@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig",
+  "compilerOptions": {
+    "declaration": true,
+    "declarationDir": "./types",
+    "stripInternal": true,
+    "outDir": "./dist"
+  },
+  "files": [
+    "./index.ts",
+    "../../types/index.d.ts"
+  ]
+}
