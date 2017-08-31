@@ -8,7 +8,21 @@ export function AggTypesBucketsFilterProvider(Private) {
     title: 'Filter',
     params: [
       {
-        name: 'geo_bounding_box'
+        name: 'geo_bounding_box',
+        write: (agg, output) => {
+          if (agg.params.geo_bounding_box) {
+            output.params.geo_bounding_box = agg.params.geo_bounding_box;
+          }
+        }
+      },
+
+      {
+        name: 'range',
+        write: (agg, output) => {
+          if (agg.params.range) {
+            output.params.range = agg.params.range;
+          }
+        }
       }
     ]
   });

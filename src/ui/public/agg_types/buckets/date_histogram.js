@@ -7,6 +7,7 @@ import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_buck
 import { TimeBucketsProvider } from 'ui/time_buckets';
 import { AggTypesBucketsCreateFilterDateHistogramProvider } from 'ui/agg_types/buckets/create_filter/date_histogram';
 import { AggTypesBucketsIntervalOptionsProvider } from 'ui/agg_types/buckets/_interval_options';
+import { VisAggConfigProvider } from 'ui/vis/agg_config';
 import intervalTemplate from 'ui/agg_types/controls/interval.html';
 
 export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private) {
@@ -14,6 +15,7 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
   const TimeBuckets = Private(TimeBucketsProvider);
   const createFilter = Private(AggTypesBucketsCreateFilterDateHistogramProvider);
   const intervalOptions = Private(AggTypesBucketsIntervalOptionsProvider);
+  const AggConfig = Private(VisAggConfigProvider);
 
   const detectedTimezone = tzDetect.determine().name();
   const tzOffset = moment().format('Z');
@@ -26,10 +28,18 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
     return interval;
   }
 
+  function shouldSetBounds(agg) {
+    if (agg.fieldIsTimeField() || agg.params.restrictToGlobalTime) {
+      return true;
+    }
+
+    return false;
+  }
+
   function setBounds(agg, force) {
     if (agg.buckets._alreadySet && !force) return;
     agg.buckets._alreadySet = true;
-    agg.buckets.setBounds(agg.fieldIsTimeField() && timefilter.getActiveBounds());
+    agg.buckets.setBounds(shouldSetBounds(agg) && timefilter.getActiveBounds());
   }
 
 
@@ -156,7 +166,42 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
             return;
           }
         }
+      },
+
+      {
+        name: 'restrictToGlobalTime',
+        default: true,
+        write: _.noop
       }
-    ]
+    ],
+    getRequestAggs: function (agg) {
+      const aggs = [];
+
+      // Filter only needed when date field is not index pattern time field
+      if (!agg.fieldIsTimeField() && agg.params.restrictToGlobalTime && agg.getField()) {
+        const timeRange = {};
+        timeRange[agg.getField().name] = {
+          'gte': moment(agg.buckets.getBounds().min).valueOf(),
+          'lte': moment(agg.buckets.getBounds().max).valueOf(),
+          'format': 'epoch_millis'
+        };
+        aggs.push(new AggConfig(agg.vis, {
+          type: 'filter',
+          id: 'filter_agg',
+          enabled:true,
+          params: {
+            range: timeRange
+          },
+          schema: {
+            group: 'buckets',
+            name: 'filter',
+          }
+        }));
+      }
+
+      aggs.push(agg);
+
+      return aggs;
+    }
   });
 }

@@ -1,4 +1,16 @@
 <div class="form-group">
+
+  <div
+    class="vis-option-item indented"
+    ng-show="!agg.fieldIsTimeField()">
+    <label>
+      <input type="checkbox"
+             name="restrictToGlobalTime"
+             ng-model="agg.params.restrictToGlobalTime">
+      Restrict to global time range
+    </label>
+  </div>
+
   <label>
     Interval
     <kbn-info

@@ -9,7 +9,8 @@ export function PointSeriesGetAspectsProvider(Private) {
     metric: 'y',
     radius: 'z',
     width: 'width',
-    group: 'series'
+    group: 'series',
+    filter: 'filter'
   };
 
   function columnToAspect(aspects, col, i) {
