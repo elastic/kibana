@@ -2489,7 +2489,7 @@ table {
     padding: 16px; }
   .kuiPanel.kuiPanel--paddingLarge {
     padding: 24px; }
-  .kuiPanel.kuiPanel--hasShadow {
+  .kuiPanel.kuiPanel-hasShadow {
     box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1); }
 
 .kuiPopover {

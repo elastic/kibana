@@ -17,7 +17,7 @@
     padding: $kuiSizeL;
   }
 
-  &.kuiPanel--hasShadow {
+  &.kuiPanel-hasShadow {
     @include kuiBottomShadow;
   }
 }
