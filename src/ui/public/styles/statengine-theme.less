@@ -1,0 +1,61 @@
+//== StatEngine Theme
+
+// Variables =====================================================================
+
+@loadingIndcatorColor1: #00f5c9;
+@loadingIndcatorColor2: #00baed;
+
+// Global Nav =====================================================================
+.global-nav {
+  background-color: 155482;
+  background: linear-gradient(180deg, #155482, #113862);
+  &.is-global-nav-open .logo-small.kibana ,
+  &.is-global-nav-open .logo.kibana  {
+    background-image: url("~ui/images/statengine-logo.svg");
+    background-position: 22px 19px;
+    background-size: 127px 34px;
+  }
+  .logo-small.kibana,
+  .logo.kibana{
+    background-image: url("~ui/images/statengine-logo-symbol.svg");
+    background-position: -2px 14px;
+    background-size: 57px 41px;
+    background-repeat: no-repeat;
+    background-color: #022745;
+  }
+}
+.global-nav-link:hover {
+  background-color: rgba(0,0,0,0.2);
+}
+.global-nav-link.active {
+  background-color: #0091a9;
+}
+
+// Top Loading Indicator Bar =======================================================
+.loadingIndicator__bar {
+  background-color: @loadingIndcatorColor1;
+  background-image: linear-gradient(to right,
+    @loadingIndcatorColor2 0%,
+    @loadingIndcatorColor1 50%,
+    @loadingIndcatorColor2 100%,
+    );
+}
+
+// Product Panel =====================================================================
+/* Found under "Managament View" */
+.panel-product .panel-heading-kibana {
+  background-color: #089cb4;
+  background-image: url("~ui/images/statengine-logo-white.svg");
+}
+.panel-product .panel-heading-elasticsearch,
+.panel-product .panel-heading-kibana,
+.panel-product .panel-heading-beats,
+.panel-product .panel-heading-logstash {
+  background-position: 13px 4px;
+  background-repeat: no-repeat;
+  background-size: 99px 32px;
+  padding-left: 0;
+}
+.panel-product .panel-heading {
+  text-indent: -9999px; // Hides default text
+}
