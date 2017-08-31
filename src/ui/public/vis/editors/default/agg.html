@@ -8,6 +8,7 @@
     aria-expanded="{{ !!editorOpen }}"
     aria-controls="visAggEditorParams{{agg.id}}"
     type="button"
+    data-test-subj="toggleEditor"
     class="kuiButton kuiButton--primary kuiButton--small vis-editor-agg-header-toggle">
     <i aria-hidden="true" ng-class="{ 'fa-caret-down': editorOpen, 'fa-caret-right': !editorOpen }" class="fa"></i>
   </button>

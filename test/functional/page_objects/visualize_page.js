@@ -189,7 +189,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickMetricEditor() {
-      await find.clickByCssSelector('button[aria-label="Open Editor"]');
+      await find.clickByCssSelector('button[data-test-subj="toggleEditor"]');
     }
 
     async clickNewSearch() {
