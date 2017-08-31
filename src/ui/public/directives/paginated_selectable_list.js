@@ -17,7 +17,8 @@ module.directive('paginatedSelectableList', function () {
       list: '=',
       listProperty: '@',
       userMakeUrl: '=?',
-      userOnSelect: '=?'
+      userOnSelect: '=?',
+      disableAutoFocus: '='
     },
     template: paginatedSelectableListTemplate,
     controller: function ($scope) {

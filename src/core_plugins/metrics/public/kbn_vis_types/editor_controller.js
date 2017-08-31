@@ -4,7 +4,7 @@ import { FetchFieldsProvider } from '../lib/fetch_fields';
 import { extractIndexPatterns } from '../lib/extract_index_patterns';
 const AUTO_APPLY_KEY = 'metrics_autoApply';
 
-function ReactEditorControllerProvider(Private, localStorage) {
+function ReactEditorControllerProvider(Private, localStorage, config) {
   const fetchFields = Private(FetchFieldsProvider);
 
   class ReactEditorController {
@@ -15,6 +15,7 @@ function ReactEditorControllerProvider(Private, localStorage) {
 
       const autoApply = localStorage.get(AUTO_APPLY_KEY);
       vis.autoApply = autoApply != null ? autoApply : true;
+      vis.initialized = true;
     }
 
     render(visData) {
@@ -24,7 +25,7 @@ function ReactEditorControllerProvider(Private, localStorage) {
         fetchFields(indexPatterns).then(fields => {
           this.vis.fields = { ...fields, ...this.vis.fields };
           const Component = this.vis.type.editorConfig.component;
-          render(<Component vis={this.vis} visData={visData} renderComplete={resolve}/>, this.el);
+          render(<Component config={config} vis={this.vis} visData={visData} renderComplete={resolve}/>, this.el);
         });
       });
     }

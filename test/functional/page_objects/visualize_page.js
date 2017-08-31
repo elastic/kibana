@@ -54,6 +54,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByPartialLinkText('Tag Cloud');
     }
 
+    async clickVisualBuilder() {
+      await find.clickByPartialLinkText('Visual Builder');
+    }
+
     async getTextTag() {
       const elements = await find.allByCssSelector('text');
       return await Promise.all(elements.map(async element => await element.getVisibleText()));
@@ -189,7 +193,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickMetricEditor() {
-      await find.clickByCssSelector('button[aria-label="Open Editor"]');
+      await find.clickByCssSelector('button[data-test-subj="toggleEditor"]');
     }
 
     async clickNewSearch() {
@@ -307,11 +311,20 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByCssSelector('input[name="wms.enabled"]');
     }
 
+    async ensureSavePanelOpen() {
+      log.debug('ensureSavePanelOpen');
+      let isOpen = await testSubjects.exists('saveVisualizationButton');
+      await retry.try(async () => {
+        while (!isOpen) {
+          await testSubjects.click('visualizeSaveButton');
+          isOpen = await testSubjects.exists('saveVisualizationButton');
+        }
+      });
+    }
+
     async saveVisualization(vizName) {
-      await testSubjects.click('visualizeSaveButton');
-      log.debug('saveButton button clicked');
-      const visTitle = await find.byName('visTitle');
-      await visTitle.type(vizName);
+      await this.ensureSavePanelOpen();
+      await testSubjects.setValue('visTitleInput', vizName);
       log.debug('click submit button');
       await testSubjects.click('saveVisualizationButton');
       await PageObjects.header.waitUntilLoadingHasFinished();

@@ -1,7 +1,8 @@
 <div ng-controller="aggParam.controller">
   <div class="form-group">
-    <label>Order By</label>
+    <label for="visEditorOrder{{agg.id}}">Order By</label>
     <select
+      id="visEditorOrder{{agg.id}}"
       name="orderBy"
       ng-model="agg.params.orderBy"
       required

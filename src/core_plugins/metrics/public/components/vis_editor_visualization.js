@@ -62,9 +62,16 @@ class VisEditorVisualization extends Component {
     if (autoApply) applyMessage = 'The changes will be automatically applied.';
     const applyButton = (
       <div className="vis_editor__dirty_controls">
-        <div className="vis_editor__dirty_controls-toggle-label" id="tsvbAutoApply">Auto Apply</div>
+        <label
+          className="vis_editor__dirty_controls-toggle-label"
+          id="tsvbAutoApply"
+          htmlFor="tsvbAutoApplyInput"
+        >
+          Auto Apply
+        </label>
         <div className="vis_editor__dirty_controls-toggle">
           <Toggle
+            id="tsvbAutoApplyInput"
             defaultChecked={autoApply}
             icons={false}
             onChange={this.props.onToggleAutoApply}
@@ -97,6 +104,7 @@ class VisEditorVisualization extends Component {
           <Visualization
             backgroundColor={visBackgroundColor}
             className="dashboard__visualization"
+            dateFormat={this.props.dateFormat}
             model={this.props.model}
             onBrush={this.props.onBrush}
             onChange={this.handleChange}
@@ -124,7 +132,8 @@ VisEditorVisualization.propTypes = {
   onToggleAutoApply: PropTypes.func,
   visData: PropTypes.object,
   dirty: PropTypes.bool,
-  autoApply: PropTypes.bool
+  autoApply: PropTypes.bool,
+  dateFormat: PropTypes.string
 };
 
 export default VisEditorVisualization;
