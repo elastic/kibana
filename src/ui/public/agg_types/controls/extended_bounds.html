@@ -1,20 +1,34 @@
 <div ng-if="aggParam.shouldShow(agg)">
   <div>
-    <label>Extended Bounds</label>
+    <label id="extendedBoundsLabel{{agg.id}}">Extended Bounds</label>
     <kbn-info info="Min and Max do not filter the results, but rather extend the bounds of the result set."></kbn-info>
   </div>
   <div class="vis-editor-agg-form-row">
     <div class="form-group">
-      <div>Min <small>(optional)</small></div>
+      <label
+        id="extendedBoundsMinLabel{{agg.id}}"
+        for="extendedBoundsMinInput{{agg.id}}"
+      >
+        Min <small>(optional)</small>
+      </label>
       <input
+        id="extendedBoundsMinInput{{agg.id}}"
+        aria-labelledby="extendedBoundsLabel{{agg.id}} extendedBoundsMinLabel{{agg.id}}"
         ng-model="agg.params.extended_bounds.min"
         type="number"
         class="form-control"
         name="extended_bounds.min" />
     </div>
     <div class="form-group">
-      <div>Max <small>(optional)</small></div>
+      <label
+        id="extendedBoundsMaxLabel{{agg.id}}"
+        for="extendedBoundsMaxInput{{agg.id}}"
+      >
+        Max <small>(optional)</small>
+      </label>
       <input
+        id="extendedBoundsMaxInput{{agg.id}}"
+        aria-labelledby="extendedBoundsLabel{{agg.id}} extendedBoundsMaxLabel{{agg.id}}"
         ng-model="agg.params.extended_bounds.max"
         type="number"
         class="form-control"

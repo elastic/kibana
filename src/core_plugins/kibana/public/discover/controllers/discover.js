@@ -253,7 +253,7 @@ function discoverController(
   function getStateDefaults() {
     return {
       query: $scope.searchSource.get('query') || { query: '', language: config.get('search:queryLanguage') },
-      sort: getSort.array(savedSearch.sort, $scope.indexPattern),
+      sort: getSort.array(savedSearch.sort, $scope.indexPattern, config.get('discover:sort:defaultOrder')),
       columns: savedSearch.columns.length > 0 ? savedSearch.columns : config.get('defaultColumns').slice(),
       index: $scope.indexPattern.id,
       interval: 'auto',

@@ -1,7 +1,8 @@
 <div class="vis-editor-agg-form-row">
   <div ng-if="agg.type.params.byName.order" class="form-group">
-    <label>Order</label>
+    <label for="visEditorOrderByOrder{{agg.id}}">Order</label>
     <select
+      id="visEditorOrderByOrder{{agg.id}}"
       name="order"
       ng-model="agg.params.order"
       required
@@ -10,8 +11,9 @@
     </select>
   </div>
   <div class="form-group">
-    <label>Size</label>
+    <label for="visEditorOrderBySize{{agg.id}}">Size</label>
     <input
+      id="visEditorOrderBySize{{agg.id}}"
       name="size"
       ng-model="agg.params.size"
       required
