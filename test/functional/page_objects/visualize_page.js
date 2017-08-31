@@ -139,8 +139,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const input = await find.byCssSelector(className + ' * input', 0);
       await input.clearValue();
       await input.type(value);
-      await PageObjects.common.sleep(100); //pause needed so 'return' key press registers correctly
-      await remote.pressKeys('\uE007');
+      await find.clickByCssSelector('.Select-option');
       const stillOpen = await find.existsByCssSelector('.Select-menu-outer', 0);
       if (stillOpen) {
         await find.clickByCssSelector(className + ' * .Select-arrow-zone');
