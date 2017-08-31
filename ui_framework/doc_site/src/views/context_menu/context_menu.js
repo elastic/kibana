@@ -140,7 +140,7 @@ export default class extends Component {
 
   render() {
     const button = (
-      <KuiButton fill onClick={this.onButtonClick.bind(this)}>
+      <KuiButton iconType="arrowDown" iconSide="right" onClick={this.onButtonClick.bind(this)}>
         Click me to load a context menu
       </KuiButton>
     );
@@ -150,6 +150,7 @@ export default class extends Component {
         button={button}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover.bind(this)}
+        panelPaddingSize="none"
         withTitle
       >
         <KuiContextMenu

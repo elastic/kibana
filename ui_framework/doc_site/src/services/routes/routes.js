@@ -48,6 +48,9 @@ import ModalExample
 import PageExample
   from '../../views/page/page_example';
 
+import PanelExample
+  from '../../views/panel/panel_example';
+
 import PaginationExample
   from '../../views/pagination/pagination_example';
 
@@ -149,6 +152,10 @@ const components = [{
 }, {
   name: 'Pagination',
   component: PaginationExample,
+  hasReact: true,
+}, {
+  name: 'Panel',
+  component: PanelExample,
   hasReact: true,
 }, {
   name: 'Popover',

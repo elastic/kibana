@@ -122,6 +122,10 @@ export {
 } from './pagination';
 
 export {
+  KuiPanel,
+} from './panel';
+
+export {
   KuiPopover,
   KuiPopoverTitle,
 } from './popover';

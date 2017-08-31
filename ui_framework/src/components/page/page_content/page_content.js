@@ -3,6 +3,8 @@ import React, {
 } from 'react';
 import classNames from 'classnames';
 
+import { KuiPanel, SIZES } from '../../../components/panel/panel';
+
 const verticalPositionToClassNameMap = {
   center: 'kuiPageContent--verticalCenter',
 };
@@ -14,7 +16,14 @@ const horizontalPositionToClassNameMap = {
 export const VERTICAL_POSITIONS = Object.keys(verticalPositionToClassNameMap);
 export const HORIZONTAL_POSITIONS = Object.keys(horizontalPositionToClassNameMap);
 
-export const KuiPageContent = ({ verticalPosition, horizontalPosition, children, className, ...rest }) => {
+export const KuiPageContent = ({
+  verticalPosition,
+  horizontalPosition,
+  panelPaddingSize,
+  children,
+  className,
+  ...rest }) => {
+
   const classes = classNames(
     'kuiPageContent',
     className,
@@ -23,16 +32,22 @@ export const KuiPageContent = ({ verticalPosition, horizontalPosition, children,
   );
 
   return (
-    <div
+    <KuiPanel
       className={classes}
+      paddingSize={panelPaddingSize}
       {...rest}
     >
       {children}
-    </div>
+    </KuiPanel>
   );
 };
 
 KuiPageContent.propTypes = {
+  panelPaddingSize: PropTypes.oneOf(SIZES),
   verticalPosition: PropTypes.oneOf(VERTICAL_POSITIONS),
   horizontalPosition: PropTypes.oneOf(HORIZONTAL_POSITIONS),
+};
+
+KuiPageContent.defaultProps = {
+  panelPaddingSize: 'l',
 };

@@ -196,7 +196,7 @@ export default class extends Component {
         isOpen={this.state.isUserMenuOpen}
         anchorPosition="right"
         closePopover={this.closeUserMenu.bind(this)}
-        bodyClassName="kuiHeaderPopover"
+        panelClassName="kuiHeaderPopover"
       >
         <div className="kuiHeaderProfile kui--flexRow kui--flexAlignItemsCenter">
           <div className="kui--flexShrink1 kui--paddingRight">
@@ -282,7 +282,7 @@ export default class extends Component {
         isOpen={this.state.isAppMenuOpen}
         anchorPosition="right"
         closePopover={this.closeAppMenu.bind(this)}
-        bodyClassName="kuiHeaderPopover"
+        panelClassName="kuiHeaderPopover"
       >
         <KuiKeyPadMenu>
           <KuiKeyPadMenuItem
