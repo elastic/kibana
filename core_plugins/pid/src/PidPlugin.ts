@@ -10,8 +10,6 @@ export class PidPlugin implements KibanaPlugin<void> {
   constructor(kibana: KibanaPluginFeatures) {
     this.log = kibana.logger.get();
 
-    kibana.elasticsearch.service.getClusterOfType$('data');
-
     const config$ = kibana.config.createIfExists(PidConfig);
     this.pidService = new PidService(config$, kibana.logger);
   }
