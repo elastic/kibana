@@ -1,0 +1,40 @@
+# kbn-observable
+
+This package contains a minimally future-[spec-compliant][spec] observable
+implementation. This package is only intended for internal use in the Kibana
+platform.
+
+## Background
+
+While the Kibana platform relies on RxJS observables internally, exposed
+observables should be minimally future-spec compliant. As there exists no other
+library we can use in the interim while waiting for the Observable spec to reach
+stage 3, all exposed observables in the Kibana platform should rely on this
+package.
+
+There is a `rxjsToEsObservable` helper in the platform which transforms an
+RxJS observable into a `kbn-observable`.
+
+## Why a separate package?
+
+`kbn-observable` is implemented as a separate package instead of directly in the
+platform code base for a couple reasons. We wanted to copy the implementation
+from the [observable proposal][spec] directly (so it's easier to stay up-to-date
+with the future spec), and we therefore didn't want to start adding TS types
+directly to that implementation.
+
+We tried to avoid this by implementing the type declaration file separately and
+make that part of the build. However, to handle the JS file we would have to
+enable the `allowJs` TypeScript compiler option, which doesn't yet play nicely
+with the automatic building of declaration files we do in the `kbn-types`
+package.
+
+The best solution we found in the end was to extract this as a separate package
+and specify the `types` field in the `package.json`. Then everything works out
+of the box.
+
+There is no other reasons for this to be a separate package, so if we find a
+solution to the above we should consider inlining this implementation into the
+platform.
+
+[spec]: https://github.com/tc39/proposal-observable
