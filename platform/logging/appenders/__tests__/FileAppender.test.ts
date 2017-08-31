@@ -138,7 +138,9 @@ test('`dispose()` closes stream.', async () => {
   const mockStreamEndFinished = jest.fn();
   const mockStreamEnd = jest.fn(async (chunk, encoding, callback) => {
     // It's required to make sure `dispose` waits for `end` to complete.
-    await Observable.from([]).delay(100).toPromise();
+    await Observable.from([])
+      .delay(100)
+      .toPromise();
     mockStreamEndFinished();
     callback();
   });

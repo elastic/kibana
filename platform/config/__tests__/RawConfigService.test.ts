@@ -43,7 +43,10 @@ test('returns config at path as observable', async () => {
 
   configService.loadConfig();
 
-  const exampleConfig = await configService.getConfig$().first().toPromise();
+  const exampleConfig = await configService
+    .getConfig$()
+    .first()
+    .toPromise();
 
   expect(exampleConfig).toEqual({ key: 'value' });
 });
