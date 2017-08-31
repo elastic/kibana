@@ -33,14 +33,15 @@ export default class extends Component {
       <KuiPopover
         button={(
           <KuiButton iconType="arrowDown" iconSide="right" onClick={this.onButtonClick.bind(this)}>
-            Use bodyClassName prop to pass a custom class
+            Turn padding off and apply a custom class
           </KuiButton>
         )}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover.bind(this)}
-        bodyClassName="yourClassNameHere"
+        panelClassName="yourClassNameHere"
+        panelPaddingSize="none"
       >
-        It&rsquo;s hard to tell but there&rsquo;s a custom class on this element, but there is!
+        This should have no padding, and if you inspect, also a custom class.
       </KuiPopover>
     );
   }
