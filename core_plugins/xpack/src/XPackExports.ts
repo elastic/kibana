@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import { Observable } from 'kbn-types';
 
 import { XPackConfig } from './XPackConfig';
 

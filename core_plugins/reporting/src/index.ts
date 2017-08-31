@@ -1,4 +1,6 @@
+import { Observable } from 'rxjs';
 import { KibanaPluginConfig } from 'kbn-types';
+
 import { XPackPluginType } from 'kibana-plugin-xpack';
 import { ReportingConfig } from './ReportingConfig';
 
@@ -10,7 +12,9 @@ export const plugin: KibanaPluginConfig<XPackPluginType> = {
 
     const log = kibana.logger.get();
 
-    const config$ = kibana.config.createIfExists(ReportingConfig);
+    const config$ = Observable.from(
+      kibana.config.createIfExists(ReportingConfig)
+    );
 
     // just an example
     const isEnabled$ = config$.map(config => config && config.enabled);

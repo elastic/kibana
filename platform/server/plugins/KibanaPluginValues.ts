@@ -2,6 +2,7 @@ import { KibanaPluginFeatures } from './KibanaPluginFeatures';
 import { KibanaCoreModules } from './KibanaCoreModules';
 import { ConfigWithSchema } from '../../config';
 import * as schema from '../../lib/schema';
+import { rxjsToEsObservable } from '../../lib/rxjsToObservable';
 import { Router, RouterOptions } from '../http';
 
 /**
@@ -32,10 +33,10 @@ export function createKibanaValuesForPlugin(
     },
     elasticsearch: {
       service: core.elasticsearch.service,
-      config$: core.elasticsearch.config$
+      config$: rxjsToEsObservable(core.elasticsearch.config$)
     },
     kibana: {
-      config$: core.kibana.config$
+      config$: rxjsToEsObservable(core.kibana.config$)
     },
     http: {
       createAndRegisterRouter: <T>(path: string, options: RouterOptions<T>) => {
@@ -51,7 +52,9 @@ export function createKibanaValuesForPlugin(
         if (configPath === undefined) {
           throw new Error('config path not defined');
         }
-        return core.configService.atPath(configPath, ConfigClass);
+        return rxjsToEsObservable(
+          core.configService.atPath(configPath, ConfigClass)
+        );
       },
       createIfExists: <Schema extends schema.Any, Config>(
         ConfigClass: ConfigWithSchema<Schema, Config>
@@ -59,7 +62,9 @@ export function createKibanaValuesForPlugin(
         if (configPath === undefined) {
           throw new Error('config path not defined');
         }
-        return core.configService.optionalAtPath(configPath, ConfigClass);
+        return rxjsToEsObservable(
+          core.configService.optionalAtPath(configPath, ConfigClass)
+        );
       }
     }
   };
