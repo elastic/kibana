@@ -19,7 +19,7 @@ const accordianHtml = renderToHtml(Accordian);
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
-      title="Accordian"
+      title="Accordian (Unstyled)"
       source={[{
         type: GuideSectionTypes.JS,
         code: accordianSource,
