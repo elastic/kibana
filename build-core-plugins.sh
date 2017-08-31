@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+set -x
 set -e
 
 cd packages/kbn-types
@@ -14,7 +15,8 @@ plugins=( pid savedObjects xpack reporting timelion timelionPluginB timelionPlug
 for i in "${plugins[@]}"
 do
   cd $i
+  [ -d "target" ] && rm -r "target"
   npm install
   npm run build
-  cd -
+  cd ..
 done
