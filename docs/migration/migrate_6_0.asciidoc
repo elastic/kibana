@@ -4,12 +4,17 @@
 This section discusses the changes that you need to be aware of when migrating
 your application to Kibana 6.0.
 
+[float]
+=== Types removed from Kibana index
+*Details:* With the imminent {es-ref}/removal-of-types.html[removal of types in Elasticsearch], we have updated our index to not rely on types. Kibana 5.6.x can support both of these mappings to minimize downtime. A UI is provided with X-Pack to assist with the migration of the Elastic stack.
+
+*Impact:* You will need migrate your Kibana index either {kibana-ref}/migrating-6.0-index.html[manually], or through the Upgrade Assistant in X-Pack.
+
 
 [float]
 === Removed option to use unsupported scripting languages
 *Details:* Kibana 5.x allowed users to create scripted fields using any scripting language enabled in Elasticsearch.
 Kibana 6.0 will only support Painless and Lucene expression based scripts.
-
 
 *Impact:* You will need to migrate your groovy, python, javascript, etc. scripted fields to Painless or Lucene expressions.
 
@@ -72,7 +77,6 @@ This is no longer the case. Now, only commas are a valid query separator: e.g. `
 *Details:* Since 4.3, index patterns could be configured to do a pre-flight field_stats request before a search in order to determine exact indices that could contain matching documents. Elasticsearch now optimizes searches internally in a similar way and has also removed the field_stats API, so this option was removed from Kibana entirely.
 
 *Impact:* No change is required for existing Kibana index patterns. Those previously configured with this option will gracefully use the new Elasticsearch optimizations instead, as will all new index patterns.
-
 
 [float]
 === Replace markdown parser `marked` with `markdown-it`
