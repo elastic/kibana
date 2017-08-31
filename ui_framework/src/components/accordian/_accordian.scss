@@ -1,0 +1,23 @@
+.kuiAccordian__button {
+  text-align: left;
+  width: 100%;
+
+  &:focus {
+    background-color: $kuiFocusBackgroundColor;
+  }
+}
+
+.kuiAccordian__childWrapper {
+  visibility: hidden;
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all $kuiAnimSpeedNormal $kuiAnimSlightResistance;
+}
+
+.kuiAccordian.kuiAccordian-isOpen {
+  .kuiAccordian__childWrapper {
+    visibility: visible;
+    opacity: 1;
+  }
+}

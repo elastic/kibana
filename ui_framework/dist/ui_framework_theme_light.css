@@ -316,6 +316,23 @@ table {
 .kui--paddingRightLarge {
   padding-right: 24px !important; }
 
+.kuiAccordian__button {
+  text-align: left;
+  width: 100%; }
+  .kuiAccordian__button:focus {
+    background-color: #e6f2f6; }
+
+.kuiAccordian__childWrapper {
+  visibility: hidden;
+  height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: all 250ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+
+.kuiAccordian.kuiAccordian-isOpen .kuiAccordian__childWrapper {
+  visibility: visible;
+  opacity: 1; }
+
 .kuiAvatar {
   border-radius: 50%;
   width: 24px;
