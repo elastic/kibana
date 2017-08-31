@@ -13,7 +13,7 @@ export const plugin: KibanaFunctionalPlugin<{}> = function(core) {
 
 ## Development
 
-During development this package is built separatly from the Kibana platform.
+During development this package is built separately from the Kibana platform.
 
 First make sure you run `npm install`, then:
 
