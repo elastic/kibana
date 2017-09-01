@@ -18,7 +18,7 @@ module.exports = class extends Generator {
       message: `Where do you want to create this component's files?`,
       type: 'input',
       name: 'path',
-      default: 'ui_framework/src/components',
+      default: 'src/components',
       store: true,
     }, {
       message: 'Does it need its own directory?',
