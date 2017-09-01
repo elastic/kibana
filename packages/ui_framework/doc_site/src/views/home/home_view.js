@@ -28,7 +28,7 @@ export const HomeView = () => (
 
       <p className="guideText">
         You can find the source for the UI Framework
-        at the <a href="https://github.com/elastic/kibana/tree/master/ui_framework" className="guideLink">Kibana repo</a>.
+        at the <a href="https://github.com/elastic/kibana/tree/master/packages/ui_framework" className="guideLink">Kibana repo</a>.
       </p>
 
       <p className="guideText">
