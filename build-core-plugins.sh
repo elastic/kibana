@@ -7,6 +7,11 @@ cd packages/kbn-types
 npm install
 cd -
 
+cd packages/kbn-observable
+npm install
+npm run build
+cd -
+
 cd core_plugins
 
 plugins=( pid savedObjects xpack reporting timelion timelionPluginB timelionPluginA )

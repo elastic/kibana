@@ -236,8 +236,7 @@ export class Observable {
     
     // The stream subscriber must be a function
     if (typeof subscriber !== "function")
-      throw new
-    TypeError("Observable initializer must be a function");
+      throw new TypeError("Observable initializer must be a function");
     
     this._subscriber = subscriber;
   }
