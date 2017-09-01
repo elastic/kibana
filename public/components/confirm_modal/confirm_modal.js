@@ -24,6 +24,7 @@ export const ConfirmModal = (props) => {
     onCancel && onCancel(ev);
   };
 
+  // render nothing if this component isn't open
   if (!isOpen) return null;
 
   return (
@@ -31,8 +32,8 @@ export const ConfirmModal = (props) => {
       <KuiConfirmModal
         message={message}
         title={title}
-        onCancel={cancel}
         onConfirm={confirm}
+        onCancel={cancel}
         cancelButtonText={cancelButtonText || 'Cancel'}
         confirmButtonText={confirmButtonText || 'Confirm'}
         defaultFocusedButton="confirm"

@@ -3,10 +3,8 @@ import PropTypes from 'prop-types';
 
 import { Sidebar } from '../sidebar';
 import { Toolbar } from '../toolbar';
-
 import { Workpad } from '../workpad';
 import { WorkpadHeader } from '../workpad_header';
-
 
 import './app.less';
 
