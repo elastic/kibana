@@ -57,8 +57,8 @@ describe('searchDsl/getSortParams', () => {
     });
   });
 
-  describe('search field no direction', () => {
-    describe('search field is simple property', () => {
+  describe('sortField no direction', () => {
+    describe('sortField is simple property', () => {
       it('returns correct params', () => {
         expect(getSortingParams(MAPPINGS, 'saved', 'title'))
           .to.eql({
@@ -73,7 +73,7 @@ describe('searchDsl/getSortParams', () => {
           });
       });
     });
-    describe('search field is multi-field', () => {
+    describe('sortField is multi-field', () => {
       it('returns correct params', () => {
         expect(getSortingParams(MAPPINGS, 'saved', 'title.raw'))
           .to.eql({
@@ -90,8 +90,8 @@ describe('searchDsl/getSortParams', () => {
     });
   });
 
-  describe('search with direction', () => {
-    describe('search field is simple property', () => {
+  describe('sortField direction', () => {
+    describe('sortField is simple property', () => {
       it('returns correct params', () => {
         expect(getSortingParams(MAPPINGS, 'saved', 'title', 'desc'))
           .to.eql({
@@ -106,7 +106,7 @@ describe('searchDsl/getSortParams', () => {
           });
       });
     });
-    describe('search field is multi-field', () => {
+    describe('sortField is multi-field', () => {
       it('returns correct params', () => {
         expect(getSortingParams(MAPPINGS, 'saved', 'title.raw', 'asc'))
           .to.eql({
