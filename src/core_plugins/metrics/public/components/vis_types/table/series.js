@@ -100,11 +100,9 @@ function TopNSeries(props) {
     >
       <div className="vis_editor__container">
         <div className="vis_editor__series-details">
-          <div>
-            <a onClick={props.toggleVisible}>
-              <i className={caretClassName}/>
-            </a>
-          </div>
+          <button className="vis_editor__toggleButton" onClick={props.toggleVisible}>
+            <i className={caretClassName}/>
+          </button>
           <div className="vis_editor__row vis_editor__row_item">
             <input
               aria-label="Label"
