@@ -111,6 +111,7 @@ export default function ({ getService, getPageObjects }) {
 
         await PageObjects.visualize.openSpyPanel();
         await PageObjects.settings.setPageSize('All');
+        await PageObjects.visualize.selectTableInSpyPaneSelect();
         const actualTableData = await PageObjects.visualize.getDataTableData();
         compareTableData(expectedTableData, actualTableData.trim().split('\n'));
         await PageObjects.visualize.closeSpyPanel();
@@ -140,6 +141,7 @@ export default function ({ getService, getPageObjects }) {
 
         await PageObjects.visualize.clickMapFitDataBounds();
         await PageObjects.visualize.openSpyPanel();
+        await PageObjects.visualize.selectTableInSpyPaneSelect();
         const data = await PageObjects.visualize.getDataTableData();
         await compareTableData(expectedPrecision2DataTable, data.trim().split('\n'));
         screenshots.take('map-at-zoom-3');
@@ -208,6 +210,7 @@ export default function ({ getService, getPageObjects }) {
         const firstMapBounds = await PageObjects.visualize.getMapBounds();
 
         await PageObjects.visualize.openSpyPanel();
+        await PageObjects.visualize.selectTableInSpyPaneSelect();
         const actualZoom5Data = await PageObjects.visualize.getDataTableData();
         compareTableData(expectedZoom5Data, actualZoom5Data.trim().split('\n'));
 
@@ -232,6 +235,7 @@ export default function ({ getService, getPageObjects }) {
 
         await PageObjects.visualize.openSpyPanel();
 
+        await PageObjects.visualize.selectTableInSpyPaneSelect();
         const actualReOpenedZoom5Data = await PageObjects.visualize.getDataTableData();
         compareTableData(expectedZoom5Data, actualReOpenedZoom5Data.trim().split('\n'));
 

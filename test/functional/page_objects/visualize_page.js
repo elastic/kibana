@@ -492,9 +492,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await rect.getAttribute('height');
     }
 
-    async getDataTableData() {
+    async selectTableInSpyPaneSelect() {
       await testSubjects.click('spyModeSelect');
       await testSubjects.click('spyModeSelect-table');
+    }
+
+    async getDataTableData() {
       const dataTable = await testSubjects.find('paginated-table-body');
       return await dataTable.getVisibleText();
     }
