@@ -63,22 +63,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await Promise.all(elements.map(async element => await element.getVisibleText()));
     }
 
-    async getVectorMapData() {
-      const chartTypes = await find.allByCssSelector('path.leaflet-clickable');
-
-      async function getChartColors(chart) {
-        const stroke = await chart.getAttribute('fill');
-        return { color: stroke };
-      }
-
-      let colorData = await Promise.all(chartTypes.map(getChartColors));
-      colorData = colorData.filter((country) => {
-        //filter empty colors
-        return country.color !== 'rgb(200,200,200)';
-      });
-      return colorData;
-    }
-
     async getTextSizes() {
       const tags = await find.allByCssSelector('text');
       async function returnTagSize(tag) {
@@ -598,20 +582,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickMapFitDataBounds() {
       return await this.clickMapButton('a.fa-crop');
-    }
-
-    async getTileMapData() {
-      const chartTypes = await find.allByCssSelector('path.leaflet-clickable');
-      async function getChartType(chart) {
-        const color = await chart.getAttribute('stroke');
-        const d = await chart.getAttribute('d');
-        // scale the radius up (sometimes less than 1) and then round to int
-        let radius = d.replace(/.*A(\d+\.\d+),.*/,'$1') * 10;
-        radius = Math.round(radius);
-        return { color, radius };
-      }
-      const getChartTypesPromises = chartTypes.map(getChartType);
-      return await Promise.all(getChartTypesPromises);
     }
 
   }

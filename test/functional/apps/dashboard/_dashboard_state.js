@@ -1,7 +1,9 @@
 import expect from 'expect.js';
 
-export default function ({ getPageObjects }) {
+export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'visualize', 'header']);
+  const testSubjects = getService('testSubjects');
+  const remote = getService('remote');
 
   describe('dashboard state', function describeIndexTests() {
     before(async function () {
@@ -19,7 +21,13 @@ export default function ({ getPageObjects }) {
       await PageObjects.dashboard.setTimepickerInDataRange();
       await PageObjects.dashboard.addVisualizations(['Visualization TileMap']);
       await PageObjects.dashboard.saveDashboard('No local edits');
-      const tileMapData = await PageObjects.visualize.getTileMapData();
+
+      let panel = await testSubjects.find('dashboardPanel');
+      await remote.moveMouseTo(panel);
+      await PageObjects.visualize.openSpyPanel();
+      const tileMapData = await PageObjects.visualize.getDataTableData();
+      await remote.moveMouseTo(panel);
+      await PageObjects.visualize.closeSpyPanel();
 
       await PageObjects.dashboard.clickEdit();
       await PageObjects.dashboard.clickEditVisualization();
@@ -29,7 +37,12 @@ export default function ({ getPageObjects }) {
       await PageObjects.visualize.saveVisualization('Visualization TileMap');
       await PageObjects.header.clickDashboard();
 
-      const changedTileMapData = await PageObjects.visualize.getTileMapData();
+      panel = await testSubjects.find('dashboardPanel');
+      await remote.moveMouseTo(panel);
+      await PageObjects.visualize.openSpyPanel();
+      const changedTileMapData = await PageObjects.visualize.getDataTableData();
+      await remote.moveMouseTo(panel);
+      await PageObjects.visualize.closeSpyPanel();
 
       expect(changedTileMapData.length).to.not.equal(tileMapData.length);
     });
