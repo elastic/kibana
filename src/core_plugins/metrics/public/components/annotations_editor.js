@@ -8,6 +8,7 @@ import FieldSelect from './aggs/field_select';
 import uuid from 'uuid';
 import IconSelect from './icon_select';
 import YesNo from './yes_no';
+import { htmlIdGenerator } from './lib/html_id_generator';
 
 function newAnnotation() {
   return {
@@ -44,7 +45,7 @@ class AnnotationsEditor extends Component {
       const fn = collectionActions.handleChange.bind(null, this.props);
       fn(_.assign({}, model, part));
     };
-    const htmlId = (suffix) => `${model.id}_${suffix}`;
+    const htmlId = htmlIdGenerator(model.id);
     const handleAdd = collectionActions.handleAdd
       .bind(null, this.props, newAnnotation);
     const handleDelete = collectionActions.handleDelete

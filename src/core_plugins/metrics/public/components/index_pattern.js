@@ -3,8 +3,8 @@ import React from 'react';
 import FieldSelect from './aggs/field_select';
 import createSelectHandler from './lib/create_select_handler';
 import createTextHandler from './lib/create_text_handler';
-import uuid from 'uuid';
 import YesNo from './yes_no';
+import { htmlIdGenerator } from './lib/html_id_generator';
 
 export const IndexPattern = props => {
   const { fields, prefix } = props;
@@ -21,8 +21,7 @@ export const IndexPattern = props => {
     [dropBucketName]: 1
   };
 
-  const randomId = uuid.v1();
-  const htmlId = (suffix) => `${randomId}_${suffix}`;
+  const htmlId = htmlIdGenerator();
 
   const model = { ...defaults, ...props.model };
   return (
