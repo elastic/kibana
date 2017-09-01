@@ -100,8 +100,8 @@ export function SimpleGaugeProvider() {
       return this.colorFunc(labels[bucket]);
     }
 
-    wrapText(text, width) {
-      text.each(function () {
+    wrapText(texts, width) {
+      texts.each(function () {
         const text = d3.select(this);
         const words = text.text().split(/\s+/).reverse();
         const lineHeight = 1.1;
