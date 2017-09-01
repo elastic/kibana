@@ -17,6 +17,14 @@ describe('getSearchDsl', () => {
         });
       }).to.throwException(/sort without .+ type/);
     });
+    it('allows _doc sortField without type', () => {
+      expect(() => {
+        getSearchDsl({}, {
+          type: undefined,
+          sortField: '_doc'
+        });
+      }).to.not.throwException();
+    });
     it('throws when sortOrder without sortField', () => {
       expect(() => {
         getSearchDsl({}, {

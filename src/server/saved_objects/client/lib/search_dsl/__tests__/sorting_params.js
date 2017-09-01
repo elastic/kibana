@@ -58,6 +58,20 @@ describe('searchDsl/getSortParams', () => {
   });
 
   describe('sortField no direction', () => {
+    describe('sortField is _doc', () => {
+      it('returns correct params', () => {
+        expect(getSortingParams(MAPPINGS, 'saved', '_doc'))
+          .to.eql({
+            sort: [
+              {
+                '_doc': {
+                  order: undefined,
+                }
+              }
+            ]
+          });
+      });
+    });
     describe('sortField is simple property', () => {
       it('returns correct params', () => {
         expect(getSortingParams(MAPPINGS, 'saved', 'title'))
@@ -100,6 +114,20 @@ describe('searchDsl/getSortParams', () => {
   });
 
   describe('sortField direction', () => {
+    describe('sortField is _doc', () => {
+      it('returns correct params', () => {
+        expect(getSortingParams(MAPPINGS, 'saved', '_doc', 'asc'))
+          .to.eql({
+            sort: [
+              {
+                '_doc': {
+                  order: 'asc',
+                }
+              }
+            ]
+          });
+      });
+    });
     describe('sortField is simple property', () => {
       it('returns correct params', () => {
         expect(getSortingParams(MAPPINGS, 'saved', 'title', 'desc'))
