@@ -39,12 +39,14 @@ export class SavedObjectsClient {
     } = options;
 
     const method = id && !overwrite ? 'create' : 'index';
+    const time = this._getCurrentTime();
     const response = await this._withKibanaIndex(method, {
       id: this._generateEsId(type, id),
       type: this._type,
       refresh: 'wait_for',
       body: {
         type,
+        updated_at: time,
         [type]: attributes
       },
     });
@@ -52,6 +54,7 @@ export class SavedObjectsClient {
     return {
       id: trimIdPrefix(response._id, type),
       type,
+      updated_at: time,
       version: response._version,
       attributes
     };
@@ -69,7 +72,7 @@ export class SavedObjectsClient {
     const {
       overwrite = false
     } = options;
-
+    const time = this._getCurrentTime();
     const objectToBulkRequest = (object) => {
       const method = object.id && !overwrite ? 'create' : 'index';
 
@@ -82,6 +85,7 @@ export class SavedObjectsClient {
         },
         {
           type: object.type,
+          updated_at: time,
           [object.type]: object.attributes
         }
       ];
@@ -121,6 +125,7 @@ export class SavedObjectsClient {
       return {
         id,
         type,
+        updated_at: time,
         version,
         attributes
       };
@@ -202,11 +207,11 @@ export class SavedObjectsClient {
       per_page: perPage,
       total: response.hits.total,
       saved_objects: response.hits.hits.map(hit => {
-        const type = hit._source.type;
-
+        const { type, updated_at: updatedAt } = hit._source;
         return {
           id: trimIdPrefix(hit._id, type),
           type,
+          ...updatedAt && { updated_at: updatedAt },
           version: hit._version,
           attributes: hit._source[type],
         };
@@ -251,10 +256,11 @@ export class SavedObjectsClient {
             error: { statusCode: 404, message: 'Not found' }
           };
         }
-
+        const time = doc._source.updated_at;
         return {
           id,
           type,
+          ...time && { updated_at: time },
           version: doc._version,
           attributes: doc._source[type]
         };
@@ -274,10 +280,12 @@ export class SavedObjectsClient {
       id: this._generateEsId(type, id),
       type: this._type,
     });
+    const { updated_at: updatedAt } = response._source;
 
     return {
       id,
       type,
+      ...updatedAt && { updated_at: updatedAt },
       version: response._version,
       attributes: response._source[type]
     };
@@ -293,6 +301,7 @@ export class SavedObjectsClient {
    * @returns {promise}
    */
   async update(type, id, attributes, options = {}) {
+    const time = this._getCurrentTime();
     const response = await this._withKibanaIndex('update', {
       id: this._generateEsId(type, id),
       type: this._type,
@@ -300,6 +309,7 @@ export class SavedObjectsClient {
       refresh: 'wait_for',
       body: {
         doc: {
+          updated_at: time,
           [type]: attributes
         }
       },
@@ -308,6 +318,7 @@ export class SavedObjectsClient {
     return {
       id,
       type,
+      updated_at: time,
       version: response._version,
       attributes
     };
@@ -326,5 +337,9 @@ export class SavedObjectsClient {
 
   _generateEsId(type, id) {
     return `${type}:${id || uuid.v1()}`;
+  }
+
+  _getCurrentTime() {
+    return new Date().toISOString();
   }
 }

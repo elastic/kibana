@@ -1,6 +1,6 @@
 <div class="form-group regex">
     <span class="hintbox-label" ng-click="showJsonHint = !showJsonHint">
-      <label>JSON Input</label>
+      <label for="visEditorRawJson{{agg.id}}">JSON Input</label>
       <i class="fa fa-info-circle"></i>
     </span>
     <div class="hintbox" ng-show="showJsonHint">
@@ -11,6 +11,7 @@
   <p>
     <textarea
       type="text"
+      aria-labelledby="visEditorRawJson{{agg.id}}"
       class="form-control"
       ng-model="agg.params.json"
       validate-json

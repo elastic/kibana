@@ -8,7 +8,7 @@ import { getUpdateStatus } from 'ui/vis/update_status';
 
 uiModules
 .get('kibana/directive', ['ngSanitize'])
-.directive('visualizationEditor', function (Private) {
+.directive('visualizationEditor', function (Private, $timeout) {
   const editorTypes = Private(VisEditorTypesRegistryProvider);
 
   return {
@@ -43,6 +43,7 @@ uiModules
         editor.destroy();
       });
 
+      $timeout(() => { renderFunction(); });
     }
   };
 });
