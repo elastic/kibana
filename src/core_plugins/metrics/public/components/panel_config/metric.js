@@ -6,6 +6,7 @@ import createTextHandler from '../lib/create_text_handler';
 import ColorRules from '../color_rules';
 import YesNo from '../yes_no';
 import uuid from 'uuid';
+import { htmlIdGenerator } from '../lib/html_id_generator';
 
 class MetricPanelConfig extends Component {
 
@@ -31,6 +32,7 @@ class MetricPanelConfig extends Component {
     const { selectedTab } = this.state;
     const defaults = { filter: '' };
     const model = { ...defaults, ...this.props.model };
+    const htmlId = htmlIdGenerator();
     const handleTextChange = createTextHandler(this.props.onChange);
     let view;
     if (selectedTab === 'data') {
@@ -53,8 +55,11 @@ class MetricPanelConfig extends Component {
             onChange={this.props.onChange}
           />
           <div className="vis_editor__vis_config-row">
-            <div className="vis_editor__label">Panel Filter</div>
+            <label className="vis_editor__label" htmlFor={htmlId('panelFilter')}>
+              Panel Filter
+            </label>
             <input
+              id={htmlId('panelFilter')}
               className="vis_editor__input-grows"
               type="text"
               onChange={handleTextChange('filter')}
