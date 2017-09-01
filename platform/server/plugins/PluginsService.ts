@@ -8,7 +8,7 @@ import { Logger, LoggerFactory } from '../../logging';
 import { CoreService } from '../../types';
 import { ConfigService, Env } from '../../config';
 
-const readDirAsObservable = Observable.bindNodeCallback(readdir);
+const readDir$ = Observable.bindNodeCallback(readdir);
 
 export class PluginsService implements CoreService {
   private readonly log: Logger;
@@ -58,7 +58,7 @@ export class PluginsService implements CoreService {
     const { pluginsDir } = this.env;
 
     return (
-      readDirAsObservable(pluginsDir)
+      readDir$(pluginsDir)
         // flatten the dirs so the rest of the flow will see individual dirs
         // instead of an array of dirs
         .mergeMap(pluginNames => pluginNames)
