@@ -64,12 +64,12 @@ export function GaugeChartProvider(Private) {
                 });
 
               const transformX = finalWidth / 2;
-              const transformY = self.gaugeConfig.gaugeType === 'Meter' ? finalHeight / 1.5 : finalHeight / 2;
+              const transformY = finalHeight / 2;
               g.attr('transform', `translate(${transformX}, ${transformY})`);
             } else {
               svg.attr('height', height);
               const transformX = width / 2;
-              const transformY = self.gaugeConfig.gaugeType === 'Meter' ? height / 1.5 : height / 2;
+              const transformY = height / 2;
               g.attr('transform', `translate(${transformX}, ${transformY})`);
             }
 
