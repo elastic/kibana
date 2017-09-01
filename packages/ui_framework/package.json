@@ -4,7 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build": "webpack -p --config=doc_site/webpack.config.js"
+    "build": "webpack -p --config=doc_site/webpack.config.js",
+    "start": "webpack-dev-server --config=doc_site/webpack.config.js --hot --inline --content-base=doc_site/build --host=0.0.0.0 --port=8020"
   },
   "dependencies": {
     "classnames": "~2.2.5",
@@ -45,6 +46,7 @@
     "sass-loader": "~4.0.0",
     "sinon": "~3.2.1",
     "style-loader": "~0.12.3",
-    "webpack": "~1.12.15"
+    "webpack": "~1.12.15",
+    "webpack-dev-server": "~1.14.1"
   }
 }
