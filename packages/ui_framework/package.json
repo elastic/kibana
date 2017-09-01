@@ -7,7 +7,8 @@
     "build": "webpack -p --config=webpack.doc_site.js",
     "start": "webpack-dev-server --config=webpack.doc_site.js --hot --inline --content-base=doc_site/build --host=0.0.0.0 --port=8020",
     "createComponent": "yo ./generator-kui/app/component.js",
-    "documentComponent": "yo ./generator-kui/app/documentation.js"
+    "documentComponent": "yo ./generator-kui/app/documentation.js",
+    "dist": "rimraf build && webpack -p --config=webpack.build.js"
   },
   "dependencies": {
     "classnames": "~2.2.5",
@@ -34,6 +35,7 @@
     "css-loader": "~0.28.1",
     "enzyme": "~2.9.1",
     "expose-loader": "~0.7.0",
+    "extract-text-webpack-plugin": "~0.8.2",
     "file-loader": "~0.8.4",
     "highlight.js": "~9.0.0",
     "html": "~1.0.0",
@@ -45,11 +47,13 @@
     "raw-loader": "~0.5.1",
     "react-addons-test-utils": "~15.6.0",
     "react-test-renderer": "~15.6.1",
+    "rimraf": "^2.6.1",
     "sass-loader": "~4.0.0",
     "sinon": "~3.2.1",
     "style-loader": "~0.12.3",
     "webpack": "~1.12.15",
     "webpack-dev-server": "~1.14.1",
+    "webpack-merge": "^4.1.0",
     "yeoman-generator": "~1.1.1",
     "yo": "~2.0.0"
   }

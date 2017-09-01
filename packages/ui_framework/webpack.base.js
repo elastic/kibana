@@ -46,10 +46,6 @@ module.exports = {
         presets: [babelPreset],
       },
     }, {
-      test: /\.scss$/,
-      loaders: ['style', 'css', 'postcss', 'sass'],
-      exclude: /node_modules/
-    }, {
       test: /\.html$/,
       loader: 'html',
       exclude: /node_modules/
