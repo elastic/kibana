@@ -1,0 +1,114 @@
+/**
+ * 1. Setting to inline-block guarantees the same height when applied to both
+ *    button elements and anchor tags.
+ * 2. Disable for Angular.
+ * 3. Make the button just tall enough to fit inside an Option Layout.
+ */
+.kuiMenuButton {
+  display: inline-block; /* 1 */
+  appearance: none;
+  cursor: pointer;
+  padding: 2px 10px; /* 3 */
+  font-size: $menuButtonFontSize;
+  font-weight: $globalFontWeightRegular;
+  line-height: $globalLineHeight;
+  text-decoration: none;
+  border: none;
+  border-radius: $globalBorderRadius;
+
+  &:disabled {
+    cursor: default;
+    pointer-events: none; /* 2 */
+  }
+
+  &:active:enabled {
+    transform: translateY(1px);
+  }
+
+  &:focus {
+    @include focus;
+  }
+}
+
+.kuiMenuButton--iconText {
+  .kuiMenuButton__icon {
+    &:first-child {
+      margin-right: 4px;
+    }
+
+    &:last-child {
+      margin-left: 4px;
+    }
+  }
+}
+
+/**
+ * 1. Override Bootstrap.
+ * 2. Safari won't respect :enabled:hover/active on links.
+ */
+.kuiMenuButton--basic {
+  color: $menuButtonBasicTextColor;
+  background-color: $menuButtonBasicBackgroundColor;
+
+  // Goes before hover, so that hover can override it.
+  &:focus {
+    color: $menuButtonBasicTextColor !important; /* 1 */
+  }
+
+  &:hover, /* 2 */
+  &:active { /* 2 */
+    color: $menuButtonBasicTextColor !important; /* 1 */
+    background-color: $menuButtonBasicHoverBackgroundColor;
+  }
+
+  &:disabled {
+    color: $menuButtonBasicDisabledTextColor;
+  }
+}
+
+/**
+ * 1. Override Bootstrap.
+ * 2. Safari won't respect :enabled:hover/active on links.
+ */
+.kuiMenuButton--primary {
+  color: $menuButtonPrimaryTextColor;
+  background-color: $menuButtonPrimaryBackgroundColor;
+
+  // Goes before hover, so that hover can override it.
+  &:focus {
+    color: $menuButtonPrimaryTextColor !important; /* 1 */
+  }
+
+  &:hover, /* 2 */
+  &:active { /* 2 */
+    color: $menuButtonPrimaryTextColor !important; /* 1 */
+    background-color: $menuButtonPrimaryHoverBackgroundColor;
+  }
+
+  &:disabled {
+    background-color: $menuButtonPrimaryDisabledBackgroundColor;
+  }
+}
+
+/**
+ * 1. Override Bootstrap.
+ * 2. Safari won't respect :enabled:hover/active on links.
+ */
+.kuiMenuButton--danger {
+  color: $menuButtonDangerTextColor;
+  background-color: $menuButtonDangerBackgroundColor;
+
+  &:hover, /* 2 */
+  &:active { /* 2 */
+    color: $menuButtonDangerHoverTextColor !important; /* 1 */
+    background-color: $menuButtonDangerHoverBackgroundColor;
+  }
+
+  &:disabled {
+    color: $menuButtonDangerHoverDisabledTextColor;
+  }
+
+  &:focus {
+    @include focus($globalFocusDangerColor);
+  }
+}

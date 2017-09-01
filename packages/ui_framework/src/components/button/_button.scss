@@ -1,0 +1,204 @@
+/**
+ * 1. Setting to inline-block guarantees the same height when applied to both
+ *    button elements and anchor tags.
+ * 2. Links can be focused when they're "disabled" (since we're just faking this with a class), but
+ *    at least make them look like they're not focused.
+ */
+.kuiButton {
+  display: inline-block; /* 1 */
+  appearance: none;
+  cursor: pointer;
+  padding: 4px 12px 5px;
+  font-size: $globalFontSize;
+  font-weight: $buttonFontWeight;
+  line-height: $globalLineHeight;
+  height: $buttonHeight;
+  text-decoration: none;
+  border: none;
+  border-radius: $globalBorderRadius;
+
+  @include kuiButtonDisabled {
+    cursor: not-allowed;
+    opacity: .5;
+  }
+
+  @include kuiButtonActive {
+    transform: translateY(1px);
+  }
+
+}
+
+  /**
+   * 1. Solves whitespace problems introduced by inline elements.
+   */
+  .kuiButton__inner {
+    display: flex; /* 1 */
+    align-items: center; /* 1 */
+  }
+
+.kuiButton--small {
+  font-size: $buttonSmallFontSize;
+  padding: $buttonSmallPadding;
+  height: $buttonSmallHeight;
+}
+
+.kuiButton--fullWidth {
+  width: 100%;
+  text-align: center;
+}
+
+.kuiButton--iconText {
+  .kuiButton__icon {
+    &:first-child:not(:only-child) {
+      margin-right: $buttonIconSpacing;
+    }
+
+    &:last-child:not(:only-child) {
+      margin-left: $buttonIconSpacing;
+    }
+  }
+
+  &.kuiButton--small {
+    .kuiButton__icon {
+      &:first-child:not(:only-child) {
+        margin-right: $buttonIconSmallSpacing;
+      }
+
+      &:last-child:not(:only-child) {
+        margin-left: $buttonIconSmallSpacing;
+      }
+    }
+  }
+}
+
+/**
+ * 1. Override Bootstrap.
+ */
+.kuiButton--basic {
+  color: $buttonBasicTextColor;
+  background-color: $buttonBasicBackgroundColor;
+
+  @include kuiButtonFocus {
+    color: $buttonBasicTextColor;
+  }
+
+  @include kuiButtonHoverAndActive {
+    background-color: $buttonBasicHoverBackgroundColor !important; /* 1 */
+  }
+
+  @include darkTheme {
+    color: $buttonBasicTextColor--darkTheme;
+    background-color: $buttonBasicBackgroundColor--darkTheme;
+
+    @include kuiButtonFocus {
+      @include focus($globalFocusColor, $globalBackgroundColor--darkTheme);
+      color: $buttonBasicTextColor--darkTheme;
+    }
+
+    @include kuiButtonHoverAndActive {
+      background-color: $buttonBasicHoverBackgroundColor--darkTheme !important; /* 1 */
+    }
+  }
+}
+
+/**
+ * 1. Override Bootstrap.
+ */
+.kuiButton--primary {
+  color: $buttonDefaultTextColor;
+  background-color: $buttonPrimaryBackgroundColor;
+
+  @include kuiButtonFocus {
+    color: $buttonDefaultTextColor;
+  }
+
+  @include kuiButtonHoverAndActive {
+    color: $buttonDefaultTextColor !important; /* 1 */
+    background-color: $buttonPrimaryHoverBackgroundColor;
+  }
+}
+
+/**
+ * 1. Override Bootstrap.
+ */
+.kuiButton--success {
+  color: $buttonDefaultTextColor;
+  background-color: $buttonSuccessBackgroundColor;
+
+  @include kuiButtonFocus {
+    color: $buttonDefaultTextColor;
+  }
+
+  @include kuiButtonHoverAndActive {
+    color: $buttonDefaultTextColor !important; /* 1 */
+    background-color: $buttonSuccessHoverBackgroundColor;
+  }
+}
+
+/**
+ * 1. Override Bootstrap.
+ */
+.kuiButton--danger {
+  color: $globalColorRed;
+  background-color: rgba($globalColorWhite, 0.5);
+  border: solid 1px $globalColorRed;
+
+  @include kuiButtonFocus {
+    @include focus($globalFocusDangerColor);
+    color: $globalColorRed;
+  }
+
+  @include kuiButtonHoverAndActive {
+    color: darken($globalColorRed, 10%) !important;
+    background-color: rgba(lighten($globalColorRed, 50%), 0.5);
+    border: solid 1px darken($globalColorRed, 10%);
+  }
+}
+
+/**
+ * 1. Override Bootstrap.
+ */
+.kuiButton--warning {
+  color: $buttonDefaultTextColor;
+  background-color: $buttonWarningBackgroundColor;
+
+  @include kuiButtonFocus {
+    @include focus($globalFocusWarningColor);
+    color: $buttonDefaultTextColor;
+  }
+
+  @include kuiButtonHoverAndActive {
+    color: $buttonDefaultTextColor !important; /* 1 */
+    background-color: $buttonWarningHoverBackgroundColor;
+  }
+
+  @include kuiButtonDisabled {
+    background-color: $buttonWarningDisabledBackgroundColor;
+  }
+}
+
+/**
+ * 1. Override Bootstrap.
+ * 2. Override either Bootstrap or Timelion styles.
+ */
+.kuiButton--hollow {
+  color: $globalLinkColor !important; /* 2 */
+  background-color: transparent;
+
+  @include kuiButtonHoverAndActive {
+    color: $globalLinkHoverColor !important; /* 1 */
+    text-decoration: underline;
+  }
+}
+
+.kuiButton--secondary {
+  color: $globalLinkColor !important; /* 2 */
+  border: solid 1px $globalColorBlue;
+  background-color: rgba($globalColorWhite, 0.5);
+
+  @include kuiButtonHoverAndActive {
+    color: darken($globalLinkColor, 10%) !important; /* 1 */
+    border: solid 1px darken($globalColorBlue, 10%);
+    background-color: rgba(lighten($globalLinkColor, 50%), 0.5);
+  }
+}

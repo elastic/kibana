@@ -1,0 +1,82 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiPopover anchorPosition defaults to center 1`] = `
+<div
+  class="kuiPopover"
+>
+  <button />
+  <div
+    class="kuiPopover__body"
+  />
+</div>
+`;
+
+exports[`KuiPopover anchorPosition left is rendered 1`] = `
+<div
+  class="kuiPopover kuiPopover--anchorLeft"
+>
+  <button />
+  <div
+    class="kuiPopover__body"
+  />
+</div>
+`;
+
+exports[`KuiPopover anchorPosition right is rendered 1`] = `
+<div
+  class="kuiPopover kuiPopover--anchorRight"
+>
+  <button />
+  <div
+    class="kuiPopover__body"
+  />
+</div>
+`;
+
+exports[`KuiPopover children is rendered 1`] = `
+<div
+  class="kuiPopover"
+>
+  <button />
+  <div
+    class="kuiPopover__body"
+  >
+    Children
+  </div>
+</div>
+`;
+
+exports[`KuiPopover is rendered 1`] = `
+<div
+  aria-label="aria-label"
+  class="kuiPopover testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <button />
+  <div
+    class="kuiPopover__body"
+  />
+</div>
+`;
+
+exports[`KuiPopover isOpen defaults to false 1`] = `
+<div
+  class="kuiPopover"
+>
+  <button />
+  <div
+    class="kuiPopover__body"
+  />
+</div>
+`;
+
+exports[`KuiPopover isOpen renders true 1`] = `
+<div
+  class="kuiPopover kuiPopover-isOpen"
+>
+  <button />
+  <div
+    class="kuiPopover__body"
+  />
+</div>
+`;

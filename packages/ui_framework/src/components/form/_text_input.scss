@@ -1,0 +1,17 @@
+.kuiTextInput {
+  width: $globalFormFieldDefaultWidth;
+
+  @include formControl;
+
+  &.kuiTextInput-isInvalid {
+    @include formControlInvalid;
+  }
+}
+
+.kuiTextInput--small {
+  width: $globalFormFieldSmallWidth;
+}
+
+.kuiTextInput--large {
+  width: $globalFormFieldLargeWidth;
+}

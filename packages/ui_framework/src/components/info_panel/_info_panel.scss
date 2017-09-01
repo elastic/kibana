@@ -1,0 +1,66 @@
+.kuiInfoPanel {
+  padding: 14px 20px 18px;
+  line-height: $globalLineHeight;
+  border: 2px solid;
+}
+
+/**
+ * 1. TODO: Pick a hex value instead of making these colors translucent.
+ */
+.kuiInfoPanel--info {
+  border-color: rgba($globalInfoColor, 0.25); /* 1 */
+}
+
+/**
+ * 1. TODO: Pick a hex value instead of making these colors translucent.
+ */
+.kuiInfoPanel--success {
+  border-color: rgba($globalSuccessColor, 0.25); /* 1 */
+}
+
+/**
+ * 1. TODO: Pick a hex value instead of making these colors translucent.
+ */
+.kuiInfoPanel--warning {
+  border-color: rgba($globalWarningColor, 0.25); /* 1 */
+}
+
+/**
+ * 1. TODO: Pick a hex value instead of making these colors translucent.
+ */
+.kuiInfoPanel--error {
+  border-color: rgba($globalDangerColor, 0.25); /* 1 */
+}
+
+/**
+ * 1. Align with first line of title text if it wraps.
+ */
+.kuiInfoPanelHeader {
+  display: flex;
+  align-items: baseline; /* 1 */
+}
+
+  .kuiInfoPanelHeader__icon {
+    margin-right: 10px;
+    font-size: $globalFontSize;
+    line-height: $globalLineHeight;
+  }
+
+  .kuiInfoPanelHeader__title {
+    font-size: $globalFontSize;
+    line-height: $globalLineHeight;
+    font-weight: $globalFontWeightBold;
+  }
+
+.kuiInfoPanelBody {
+  margin-top: $infoPanelVerticalRhythm;
+
+  > * + * {
+    margin-top: $infoPanelVerticalRhythm;
+  }
+}
+
+.kuiInfoPanelBody__message {
+  font-size: $globalFontSize;
+  line-height: $globalLineHeight;
+}

@@ -1,0 +1,37 @@
+.kuiCard {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid $cardBorderColor;
+  border-radius: $globalBorderRadius;
+  overflow: hidden;
+  line-height: $globalLineHeight;
+}
+
+  .kuiCard__description {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 18px 0;
+    text-align: center;
+  }
+
+    .kuiCard__descriptionTitle {
+      font-size: $globalFontSize;
+      font-weight: bold;
+      margin-bottom: 10px;
+      text-align: center;
+      max-width: $cardMaxWidth;
+    }
+
+    .kuiCard__descriptionText {
+      font-size: $globalFontSize;
+      max-width: $cardMaxWidth;
+    }
+
+  .kuiCard__footer {
+    text-align: center;
+    font-size: 14px;
+    padding: 0 15px 20px;
+  }
+

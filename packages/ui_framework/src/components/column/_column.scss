@@ -1,0 +1,19 @@
+/**
+ * 1. If we use margins instead, columns get pushed to the next line.
+ */
+.kuiColumn + .kuiColumn {
+  padding-left: 10px; /* 1 */
+}
+
+/**
+ * 1. Use inline-block instead of flexbox so that content doesn't overflow.
+ * 2. Content can be aligned by offsetting from the top.
+ */
+$numColumns: 12;
+@for $i from 1 through $numColumns {
+  .kuiColumn--#{$i} {
+    display: inline-block; /* 1 */
+    vertical-align: top; /* 2 */
+    width: $i / $numColumns * 100%;
+  }
+}

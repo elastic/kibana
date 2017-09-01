@@ -1,0 +1,95 @@
+// Pop menu is an animated popover relatively positioned to a button / action.
+// By default it positions in the middle, but can be anchored left and right.
+
+.kuiPopover {
+  display: inline-block;
+  position: relative;
+
+  // Open state happens on the wrapper and applies to the body.
+  &.kuiPopover-isOpen {
+    .kuiPopover__body {
+      opacity: 1;
+      visibility: visible;
+      z-index: 1;
+      margin-top: 10px;
+      box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+  // Animation happens on the body.
+  .kuiPopover__body {
+    line-height: $globalLineHeight;
+    font-size: $globalFontSize;
+    position: absolute;
+    min-width: 256px; // Can expand further, but this size is good for our menus.
+    top: 100%;
+    left: 50%;
+    background: $popOverBackgroundColor;
+    border: 1px solid $globalBorderColor;
+    border-radius: $globalBorderRadius 0 $globalBorderRadius $globalBorderRadius;
+    padding: 16px;
+    transform: translateX(-50%) translateY(8px) translateZ(0);
+    backface-visibility: hidden;
+    transform-origin: center top;
+    opacity: 0;
+    visibility: hidden;
+    margin-top: 32px;
+
+    // This fakes a border on the arrow.
+    &:before {
+      position: absolute;
+      content: "";
+      top: -16px;
+      height: 0;
+      width: 0;
+      left: 50%;
+      margin-left: -16px;
+      border-left: 16px solid transparent;
+      border-right: 16px solid transparent;
+      border-bottom: 16px solid $globalBorderColor;
+    }
+
+    // This part of the arrow matches the body.
+    &:after {
+      position: absolute;
+      content: "";
+      top: -16px + 1;
+      right: 0;
+      height: 0;
+      left: 50%;
+      margin-left: -16px;
+      width: 0;
+      border-left: 16px solid transparent;
+      border-right: 16px solid transparent;
+      border-bottom: 16px solid $popOverBackgroundColor;
+    }
+  }
+
+
+// Positions the menu and arrow to the left of the parent.
+.kuiPopover--anchorLeft {
+  .kuiPopover__body {
+    left: 0;
+    transform: translateX(0%) translateY(8px) translateZ(0);
+
+    &:before, &:after {
+      right: auto;
+      left: 8px;
+      margin: 0;
+    }
+  }
+}
+
+// Positions the menu and arrow to the right of the parent.
+.kuiPopover--anchorRight {
+  .kuiPopover__body {
+    left: 100%;
+    transform: translateX(-100%) translateY(8px) translateZ(0);
+
+    &:before, &:after {
+      right: 8px;
+      left: auto;
+    }
+  }
+}

@@ -1,0 +1,50 @@
+.kuiGalleryButton {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: $galleryButtonSize;
+  height: $galleryButtonSize;
+  margin: 0 $galleryButtonRhythm $galleryButtonRhythm 0;
+  padding: 25px 10px 10px;
+  line-height: $globalLineHeight;
+  background-color: #F6F6F6;
+  border: 1px solid #CED5DA;
+  border-radius: $globalBorderRadius;
+  text-decoration: none;
+
+  &:hover {
+    background-color: #FFFFFF;
+    border-color: #00A6FF;
+  }
+}
+
+  .kuiGalleryButton__image {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: $galleryButtonIconSize;
+    height: $galleryButtonIconSize;
+    margin-bottom: 20px;
+  }
+
+  /**
+   * 1. Truncate overflowing text.
+   */
+  .kuiGalleryButton__label {
+    font-size: $globalFontSize;
+    color: $globalFontColor;
+    text-align: center;
+    max-width: 100%; /* 1 */
+    white-space: nowrap; /* 1 */
+    overflow: hidden; /* 1 */
+    text-overflow: ellipsis; /* 1 */
+  }
+
+  .kuiGalleryButton__icon {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    color: $globalSubduedTextColor;
+  }

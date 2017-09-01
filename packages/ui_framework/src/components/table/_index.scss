@@ -1,0 +1,8 @@
+$tableCellPadding: 7px 8px 8px;
+$tableCellFontWeight: 400;
+$tableBackgroundColor: #FFF;
+$tableHeaderTextColor: #a7a7a7;
+$tableCellExpandedBorderColor: #f0f0f0;
+
+@import "controlled_table";
+@import "table";
