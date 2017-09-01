@@ -89,6 +89,7 @@ IconValue.propTypes = {
 function IconSelect(props) {
   return (
     <Select
+      inputProps={{ id: props.id }}
       clearable={false}
       onChange={props.onChange}
       value={props.value}
@@ -121,6 +122,7 @@ IconSelect.defaultProps = {
 
 IconSelect.propTypes = {
   icons: PropTypes.array,
+  id: PropTypes.string,
   onChange: PropTypes.func,
   value: PropTypes.string.isRequired
 };
