@@ -4,8 +4,8 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build": "webpack -p --config=doc_site/webpack.config.js",
-    "start": "webpack-dev-server --config=doc_site/webpack.config.js --hot --inline --content-base=doc_site/build --host=0.0.0.0 --port=8020",
+    "build": "webpack -p --config=webpack.doc_site.js",
+    "start": "webpack-dev-server --config=webpack.doc_site.js --hot --inline --content-base=doc_site/build --host=0.0.0.0 --port=8020",
     "createComponent": "yo ./generator-kui/app/component.js",
     "documentComponent": "yo ./generator-kui/app/documentation.js"
   },
