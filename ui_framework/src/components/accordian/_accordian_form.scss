@@ -4,8 +4,11 @@
 
 .kuiAccordianForm__extraAction {
   opacity: 0;
-  visibility: hidden;
   transition: opacity $kuiAnimSpeedNormal $kuiAnimSlightResistance;
+  
+  &:focus {
+    opacity: 1;
+  }
 }
 
 .kuiAccordianForm__button {

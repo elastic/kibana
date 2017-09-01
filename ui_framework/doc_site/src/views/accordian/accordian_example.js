@@ -20,6 +20,10 @@ import AccordianForm from './accordian_form';
 const accordianFormSource = require('!!raw!./accordian_form');
 const accordianFormHtml = renderToHtml(AccordianForm);
 
+import AccordianExtra from './accordian_extra';
+const accordianExtraSource = require('!!raw!./accordian_extra');
+const accordianExtraHtml = renderToHtml(AccordianExtra);
+
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
@@ -54,6 +58,28 @@ export default props => (
       demo={<Accordian />}
     />
     <GuideSection
+      title="Accordian can have extra actions"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: accordianExtraSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: accordianExtraHtml,
+      }]}
+      text={
+        <p>
+          Use the <KuiCode>extraAction</KuiCode> prop to pass an extra action
+          displayed on the right of any accordian. Usually this is a delete or
+          button, but can be anything. Note that this action is separate from
+          the click state that expands the accordian. This is needed to make
+          it accessibile.
+        </p>
+     }
+      demo={
+        <AccordianExtra />
+     }
+    />
+    <GuideSection
       title="Accordian for forms"
       source={[{
         type: GuideSectionTypes.JS,
@@ -63,7 +89,11 @@ export default props => (
         code: accordianFormHtml,
       }]}
       text={
-        <p>Using the classNames as explained above, we can style the accordian in a way common for form use.</p>
+        <p>
+          Putting it all together. Using the <KuiCode>classNames</KuiCode>
+          and <KuiCode>extraAction</KuiCode> as explained above, we can
+          style the accordian in a way common for form use.
+        </p>
      }
       demo={
         <AccordianForm />

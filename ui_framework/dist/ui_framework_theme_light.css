@@ -340,8 +340,9 @@ table {
 
 .kuiAccordianForm__extraAction {
   opacity: 0;
-  visibility: hidden;
   transition: opacity 250ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+  .kuiAccordianForm__extraAction:focus {
+    opacity: 1; }
 
 .kuiAccordianForm__button {
   padding: 16px; }
