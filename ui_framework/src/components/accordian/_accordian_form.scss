@@ -1,0 +1,38 @@
+.kuiAccordianForm__children {
+  padding: $kuiSizeL;
+}
+
+.kuiAccordianForm__extraAction {
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity $kuiAnimSpeedNormal $kuiAnimSlightResistance;
+}
+
+.kuiAccordianForm__button {
+  padding: $kuiSize;
+
+  &:hover {
+    background-color: tintOrShade($kuiColorLightestShade, 50%, 20%);
+    text-decoration: none;
+  }
+
+  &:focus {
+    background-color: $kuiFocusBackgroundColor;
+    text-decoration: none;
+  }
+}
+.kuiAccordianForm {
+  border-top: $kuiBorderThin;
+  border-bottom: $kuiBorderThin;
+
+  & + .kuiAccordianForm {
+    border-top: none;
+  }
+
+  &:hover {
+    .kuiAccordianForm__extraAction {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+}

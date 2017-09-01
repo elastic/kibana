@@ -2,6 +2,10 @@
   text-align: left;
   width: 100%;
 
+  &:hover, &:focus {
+    text-decoration: underline;
+  }
+
   &:focus {
     background-color: $kuiFocusBackgroundColor;
   }
@@ -11,7 +15,7 @@
   visibility: hidden;
   height: 0;
   opacity: 0;
-  overflow: hidden;
+  overflow-y: hidden;
   transition: all $kuiAnimSpeedNormal $kuiAnimSlightResistance;
 }
 

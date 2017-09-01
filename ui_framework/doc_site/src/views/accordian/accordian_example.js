@@ -16,10 +16,14 @@ import Accordian from './accordian';
 const accordianSource = require('!!raw!./accordian');
 const accordianHtml = renderToHtml(Accordian);
 
+import AccordianForm from './accordian_form';
+const accordianFormSource = require('!!raw!./accordian_form');
+const accordianFormHtml = renderToHtml(AccordianForm);
+
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
-      title="Accordian (Unstyled)"
+      title="Accordian (unstyled)"
       source={[{
         type: GuideSectionTypes.JS,
         code: accordianSource,
@@ -48,6 +52,22 @@ export default props => (
         </div>
       }
       demo={<Accordian />}
+    />
+    <GuideSection
+      title="Accordian for forms"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: accordianFormSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: accordianFormHtml,
+      }]}
+      text={
+        <p>Using the classNames as explained above, we can style the accordian in a way common for form use.</p>
+     }
+      demo={
+        <AccordianForm />
+     }
     />
   </GuidePage>
 );

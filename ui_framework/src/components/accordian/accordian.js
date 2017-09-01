@@ -47,6 +47,7 @@ export class KuiAccordian extends Component {
       className,
       buttonClassName,
       buttonContentClassName,
+      extraAction,
       ...rest,
     } = this.props;
 
@@ -72,21 +73,36 @@ export class KuiAccordian extends Component {
       <KuiIcon type={this.state.isOpen ? 'arrowDown' : 'arrowRight'} size="medium" />
     );
 
+    let optionalAction = null;
+
+    if (extraAction) {
+      optionalAction = (
+        <KuiFlexItem grow={false}>
+          {extraAction}
+        </KuiFlexItem>
+      );
+    }
+
     return (
       <div
         className={classes}
         {...rest}
       >
-        <button onClick={this.onToggleOpen} className={buttonClasses}>
-          <KuiFlexGroup gutterSize="small" alignItems="center">
-            <KuiFlexItem grow={false}>
-              {icon}
-            </KuiFlexItem>
-            <KuiFlexItem className={buttonContentClasses}>
-              {buttonContent}
-            </KuiFlexItem>
-          </KuiFlexGroup>
-        </button>
+        <KuiFlexGroup gutterSize="none" alignItems="center">
+          <KuiFlexItem>
+            <button onClick={this.onToggleOpen} className={buttonClasses}>
+              <KuiFlexGroup gutterSize="small" alignItems="center">
+                <KuiFlexItem grow={false}>
+                  {icon}
+                </KuiFlexItem>
+                <KuiFlexItem className={buttonContentClasses}>
+                  {buttonContent}
+                </KuiFlexItem>
+              </KuiFlexGroup>
+            </button>
+          </KuiFlexItem>
+          {optionalAction}
+        </KuiFlexGroup>
 
         <div className="kuiAccordian__childWrapper"  ref={node => { this.childWrapper = node; }}>
           <div ref={node => { this.childContent = node; }}>
@@ -103,6 +119,7 @@ KuiAccordian.propTypes = {
   className: PropTypes.string,
   buttonContentClassName: PropTypes.string,
   buttonContent: PropTypes.node,
+  extraAction: PropTypes.node,
 };
 
 KuiAccordian.defaultProps = {
