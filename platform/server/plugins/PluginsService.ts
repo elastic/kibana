@@ -1,4 +1,5 @@
-import { readdir } from 'fs';
+import { readdir, statSync } from 'fs';
+import { resolve } from 'path';
 import { Observable } from 'rxjs';
 
 import { Plugin } from './Plugin';
@@ -7,7 +8,7 @@ import { Logger, LoggerFactory } from '../../logging';
 import { CoreService } from '../../types';
 import { ConfigService, Env } from '../../config';
 
-const readDirAsObservable = Observable.bindNodeCallback(readdir);
+const readDir$ = Observable.bindNodeCallback(readdir);
 
 export class PluginsService implements CoreService {
   private readonly log: Logger;
@@ -54,38 +55,48 @@ export class PluginsService implements CoreService {
    * of plugins.
    */
   private readPlugins() {
-    return readDirAsObservable(this.env.pluginsDir)
-      .mergeMap(dirs => dirs)
-      .map(name => {
-        const pluginPath = this.env.getPluginDir(name);
-        const json = require(pluginPath);
+    const { pluginsDir } = this.env;
 
-        if (!('plugin' in json)) {
-          throw new Error(
-            `'plugin' definition missing in plugin [${pluginPath}]`
-          );
-        }
+    return (
+      readDir$(pluginsDir)
+        // flatten the dirs so the rest of the flow will see individual dirs
+        // instead of an array of dirs
+        .mergeMap(pluginNames => pluginNames)
+        // skip all files, only keep plugin directories
+        .filter(pluginName =>
+          statSync(resolve(pluginsDir, pluginName)).isDirectory()
+        )
+        .map(pluginName => this.createPlugin(pluginName))
+    );
+  }
 
-        if (!('dependencies' in json)) {
-          throw new Error(
-            `'dependencies' missing in plugin [${pluginPath}], must be '[]' if no dependencies`
-          );
-        }
+  private createPlugin(name: string) {
+    const pluginPath = this.env.getPluginDir(name);
+    const json = require(pluginPath);
 
-        if (!('configPath' in json)) {
-          throw new Error(
-            `'configPath' missing in plugin [${pluginPath}], must be set to 'undefined' if no config`
-          );
-        }
+    if (!('plugin' in json)) {
+      throw new Error(`'plugin' definition missing in plugin [${pluginPath}]`);
+    }
 
-        // TODO validate these values
+    if (!('dependencies' in json)) {
+      throw new Error(
+        `'dependencies' missing in plugin [${pluginPath}], must be '[]' if no dependencies`
+      );
+    }
 
-        const run = json.plugin;
-        const dependencies = json.dependencies;
-        const configPath = json.configPath;
+    if (!('configPath' in json)) {
+      throw new Error(
+        `'configPath' missing in plugin [${pluginPath}], must be set to 'undefined' if no config`
+      );
+    }
 
-        return new Plugin({ name, dependencies, run, configPath }, this.logger);
-      });
+    // TODO validate these values
+
+    const run = json.plugin;
+    const dependencies = json.dependencies;
+    const configPath = json.configPath;
+
+    return new Plugin({ name, dependencies, run, configPath }, this.logger);
   }
 
   isPluginEnabled<T, U>(plugin: Plugin<T, U>) {
