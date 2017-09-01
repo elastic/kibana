@@ -465,7 +465,8 @@ function discoverController(
     $state.query = query;
   };
 
-  $scope.searchSource.onBeginSegmentedFetch(function (segmented) {
+
+  function initSegmentedFetch(segmented) {
     function flushResponseData() {
       $scope.hits = 0;
       $scope.faliures = [];
@@ -573,7 +574,18 @@ function discoverController(
 
       $scope.fetchStatus = null;
     });
-  }).catch(notify.error);
+  }
+
+
+  function beginSegmentedFetch() {
+    $scope.searchSource.onBeginSegmentedFetch(initSegmentedFetch)
+      .catch((error) => {
+        notify.error(error);
+        // Restart.
+        beginSegmentedFetch();
+      });
+  }
+  beginSegmentedFetch();
 
   $scope.updateTime = function () {
     $scope.timeRange = {
