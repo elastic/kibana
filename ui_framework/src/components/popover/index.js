@@ -1,3 +1,0 @@
-export {
-  KuiPopover,
-} from './popover';
