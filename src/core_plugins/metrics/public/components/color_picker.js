@@ -42,14 +42,16 @@ class ColorPicker extends Component {
   renderSwatch() {
     if (!this.props.value) {
       return (
-        <div
+        <button
+          aria-label="Color picker, not accessible"
           className="vis_editor__color_picker-swatch-empty"
           onClick={this.handleClick}
         />
       );
     }
     return (
-      <div
+      <button
+        aria-label={`Color picker ({this.props.value}), not accessible`}
         style={{ backgroundColor: this.props.value }}
         className="vis_editor__color_picker-swatch"
         onClick={this.handleClick}
