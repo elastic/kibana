@@ -1,8 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { compose, branch, renderComponent } from 'recompose';
-import { FormGroup, ControlLabel, FormControl, ButtonToolbar } from 'react-bootstrap';
-import { KuiButton } from '../../ui_framework';
+import { FormGroup, ControlLabel, FormControl, Button, ButtonToolbar } from 'react-bootstrap';
 import { ElementNotSelected } from './element_not_selected';
 import './expression.less';
 
@@ -27,9 +26,9 @@ const Component = ({ formState, updateValue, setExpression, done }) => {
         </ControlLabel>
       </FormGroup>
       <ButtonToolbar>
-        <KuiButton bsStyle="success" onClick={() => setExpression(input.value)}> Run</KuiButton>
+        <Button bsStyle="success" onClick={() => setExpression(input.value)}> Run</Button>
         {done ?
-          (<KuiButton onClick={done}> {formState.dirty ? 'Cancel' : 'Done'}</KuiButton>)
+          (<Button onClick={done}> {formState.dirty ? 'Cancel' : 'Done'}</Button>)
         : null}
       </ButtonToolbar>
     </div>
