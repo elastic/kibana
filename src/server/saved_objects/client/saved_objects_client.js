@@ -1,5 +1,6 @@
 import Boom from 'boom';
 import uuid from 'uuid';
+import Rx from 'rxjs/Rx';
 
 import { getRootType } from '../../mappings';
 
@@ -9,6 +10,7 @@ import {
   includedFields,
   decorateEsError,
   errors,
+  createSearchResponse$
 } from './lib';
 
 export class SavedObjectsClient {
@@ -165,58 +167,90 @@ export class SavedObjectsClient {
    * @returns {promise} - { saved_objects: [{ id, type, version, attributes }], total, per_page, page }
    */
   async find(options = {}) {
+    return await this
+      .createFindPage$({
+        ...options,
+        scroll: null
+      })
+      .first()
+      .toPromise();
+  }
+
+  /**
+   * Just like find, except it returns an observable of "find pages" which
+   * use scrolling to retrieve all saved_objects matching the query
+   *
+   * Supports the same options as `this.find()` and adds `scroll`:
+   *
+   * @param {Object} [options]
+   * @property {string} [options.scroll=1m] amount of time (in es duration format) that es should
+   *                                        keep the search context open. Use `null` to disable
+   *                                        scrolling if you only plan to take a single page, to
+   *                                        prevent an unnecessary `DELETE /_scroll` request.
+   * @returns {Rx<{page,per_page,total,saved_objects:Array<{id,type,version,attributes}>}>}
+   */
+  createFindPage$(options = {}) {
     const {
       type,
       search,
       searchFields,
-      page = 1,
+      page: initialPage = 1,
       perPage = 20,
       sortField,
       sortOrder,
       fields,
+      scroll = '1m',
     } = options;
 
-    if (searchFields && !Array.isArray(searchFields)) {
-      throw new TypeError('options.searchFields must be an array');
-    }
-
-    if (fields && !Array.isArray(fields)) {
-      throw new TypeError('options.searchFields must be an array');
-    }
-
-    const esOptions = {
-      size: perPage,
-      from: perPage * (page - 1),
-      _source: includedFields(type, fields),
-      body: {
-        version: true,
-        ...getSearchDsl(this._mappings, {
-          search,
-          searchFields,
-          type,
-          sortField,
-          sortOrder
-        })
+    // we use defer so that thrown errors are emitted on the observable
+    return Rx.Observable.defer(() => {
+      if (searchFields && !Array.isArray(searchFields)) {
+        throw new TypeError('options.searchFields must be an array');
       }
-    };
 
-    const response = await this._withKibanaIndex('search', esOptions);
+      if (fields && !Array.isArray(fields)) {
+        throw new TypeError('options.searchFields must be an array');
+      }
 
-    return {
-      page,
-      per_page: perPage,
-      total: response.hits.total,
-      saved_objects: response.hits.hits.map(hit => {
-        const { type, updated_at: updatedAt } = hit._source;
-        return {
-          id: trimIdPrefix(hit._id, type),
-          type,
-          ...updatedAt && { updated_at: updatedAt },
-          version: hit._version,
-          attributes: hit._source[type],
-        };
-      }),
-    };
+      const esOptions = {
+        index: this._kibanaIndex,
+        size: perPage,
+        from: perPage * (initialPage - 1),
+        _source: includedFields(type, fields),
+        scroll,
+        body: {
+          version: true,
+          ...getSearchDsl(this._mappings, {
+            search,
+            searchFields,
+            type,
+            sortField,
+            sortOrder
+          })
+        }
+      };
+
+      let currentPage = initialPage;
+      return createSearchResponse$(esOptions, this._callAdminCluster)
+        .map(({ hits }) => ({
+          page: currentPage++,
+          per_page: perPage,
+          total: hits.total,
+          saved_objects: hits.hits.map(hit => {
+            const { type, updated_at: updatedAt } = hit._source;
+            return {
+              id: trimIdPrefix(hit._id, type),
+              type,
+              ...updatedAt && { updated_at: updatedAt },
+              version: hit._version,
+              attributes: hit._source[type],
+            };
+          })
+        }))
+        .catch(error => {
+          throw decorateEsError(error);
+        });
+    });
   }
 
   /**
