@@ -100,7 +100,7 @@ function TopNSeries(props) {
     >
       <div className="vis_editor__container">
         <div className="vis_editor__series-details">
-          <button className="vis_editor__toggleButton" onClick={props.toggleVisible}>
+          <button className="vis_editor__series-visibility-toggle" onClick={props.toggleVisible}>
             <i className={caretClassName}/>
           </button>
           <div className="vis_editor__row vis_editor__row_item">
