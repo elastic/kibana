@@ -15,9 +15,7 @@ describe('Courier Request Queue', function () {
     docStrategy = Private(DocDataStrategyProvider);
     searchStrategy = Private(SearchStrategyProvider);
   }));
-  beforeEach(() => {
-    requestQueue.splice(0, requestQueue.length);
-  });
+  beforeEach(requestQueue.clear);
 
   class MockReq {
     constructor(strategy, startable = true) {

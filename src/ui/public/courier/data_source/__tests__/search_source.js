@@ -22,9 +22,7 @@ describe('SearchSource', function () {
     indexPattern2 = new IndexPattern('test2-*', null, []);
     expect(indexPattern).to.not.be(indexPattern2);
   }));
-  beforeEach(() => {
-    requestQueue.splice(0, requestQueue.length);
-  });
+  beforeEach(requestQueue.clear);
 
   describe('#onResults()', function () {
     it('adds a request to the requestQueue', function () {

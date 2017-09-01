@@ -14,9 +14,7 @@ describe('DocSource', function () {
   beforeEach(ngMock.inject(function (Private) {
     DocSource = Private(DocSourceProvider);
   }));
-  beforeEach(() => {
-    requestQueue.splice(0, requestQueue.length);
-  });
+  beforeEach(requestQueue.clear);
 
   describe('#onUpdate()', function () {
     it('adds a request to the requestQueue', function () {

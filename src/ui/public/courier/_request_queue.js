@@ -6,6 +6,10 @@
  */
 export const requestQueue = [];
 
+requestQueue.clear = function () {
+  requestQueue.splice(0, requestQueue.length);
+};
+
 requestQueue.getInactive = function (/* strategies */) {
   return requestQueue.get.apply(requestQueue, arguments)
     .filter(function (req) {
