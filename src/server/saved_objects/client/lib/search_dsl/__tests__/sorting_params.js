@@ -88,6 +88,15 @@ describe('searchDsl/getSortParams', () => {
           });
       });
     });
+    describe('sortField is unknown', () => {
+      it('throws 400 error', () => {
+        expect(() => getSortingParams(MAPPINGS, 'saved', 'notarealfield'))
+          .to.throwException((error) => {
+            expect(error.message).to.contain('Unknown sort field');
+            expect(error.output).to.have.property('statusCode', 400);
+          });
+      });
+    });
   });
 
   describe('sortField direction', () => {
@@ -118,6 +127,15 @@ describe('searchDsl/getSortParams', () => {
                 }
               }
             ]
+          });
+      });
+    });
+    describe('sortField is unknown', () => {
+      it('throws 400 error', () => {
+        expect(() => getSortingParams(MAPPINGS, 'saved', 'notarealfield', 'desc'))
+          .to.throwException((error) => {
+            expect(error.message).to.contain('Unknown sort field');
+            expect(error.output).to.have.property('statusCode', 400);
           });
       });
     });
