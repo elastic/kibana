@@ -1,7 +1,7 @@
-import $ from 'jquery-flot';
 import { debounce } from 'lodash';
 import header from './header.png';
 import { Element } from '../element';
+import '../../lib/flot';
 
 export default new Element('pie', {
   displayName: 'Pie chart',
