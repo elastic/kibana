@@ -32,7 +32,7 @@ module.exports = {
       'series': 'win 8'
     }]
   }, {
-    'label': 'win xp',
+    'label': 'windows xp service pack 2 version 20123452',
     'aggLabel': 'Count',
     'aggId': '1',
     'values': [{
