@@ -2,6 +2,7 @@
   "name": "kibana-plugin-xpack",
   "version": "1.0.0",
   "scripts": {
+    "prepare": "npm run build",
     "build": "npm run build:app && npm run build:types",
     "build:app": "webpack",
     "build:types": "tsc -p tsconfig-types.json",
