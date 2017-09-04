@@ -1,9 +1,5 @@
-import { KibanaFunctionalPlugin } from '../../../../../server/plugins/types';
+import { KibanaPlugin } from '../../../../../server/plugins/types';
 import { FooPluginType } from '../foo';
-
-export const configPath = 'bar';
-
-export const dependencies = ['foo'];
 
 interface BarExports {
   fromFoo: FooPluginType['foo']['value'];
@@ -14,12 +10,16 @@ export interface BarPluginType {
   bar: BarExports;
 }
 
-export const plugin: KibanaFunctionalPlugin<FooPluginType, BarExports> = (
-  kibana,
-  deps
-) => {
-  return {
-    fromFoo: deps.foo.value,
-    value: 'bar'
-  };
-};
+export const plugin: KibanaPlugin<FooPluginType, BarExports> = {
+  configPath: ['bar'],
+  dependencies: ['foo'],
+  plugin: (
+    kibana,
+    deps
+  ) => {
+    return {
+      fromFoo: deps.foo.value,
+      value: 'bar'
+    };
+  }
+}

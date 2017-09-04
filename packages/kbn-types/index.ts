@@ -1,5 +1,6 @@
 export {
   KibanaFunctionalPlugin,
+  KibanaClassPlugin,
   KibanaPlugin,
   KibanaPluginFeatures
 } from '../../platform/server/plugins/types';

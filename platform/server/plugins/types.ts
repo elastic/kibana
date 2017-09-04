@@ -77,6 +77,17 @@ export interface BasePluginsType {
   [key: string]: any;
 }
 
+export type KibanaPlugin<
+  DependenciesType extends BasePluginsType,
+  ExposableType = void
+> = {
+  configPath: Array<string> | undefined;
+  dependencies: Array<string>;
+  plugin:
+    | KibanaFunctionalPlugin<DependenciesType, ExposableType>
+    | KibanaPluginStatic<DependenciesType, ExposableType>;
+};
+
 export type KibanaFunctionalPlugin<
   DependenciesType extends BasePluginsType,
   ExposableType = void
@@ -99,12 +110,13 @@ export interface KibanaPluginStatic<
   DependenciesType extends BasePluginsType,
   ExposableType = void
 > {
-  new (kibana: KibanaPluginFeatures, plugins: DependenciesType): KibanaPlugin<
-    ExposableType
-  >;
+  new (
+    kibana: KibanaPluginFeatures,
+    plugins: DependenciesType
+  ): KibanaClassPlugin<ExposableType>;
 }
 
-export interface KibanaPlugin<ExposableType> {
+export interface KibanaClassPlugin<ExposableType> {
   start(): ExposableType;
 
   stop?(): void;

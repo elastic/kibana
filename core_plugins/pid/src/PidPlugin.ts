@@ -1,9 +1,9 @@
-import { KibanaPlugin, Logger, KibanaPluginFeatures } from 'kbn-types';
+import { KibanaClassPlugin, Logger, KibanaPluginFeatures } from 'kbn-types';
 
 import { PidConfig } from './PidConfig';
 import { PidService } from './PidService';
 
-export class PidPlugin implements KibanaPlugin<void> {
+export class PidPlugin implements KibanaClassPlugin<void> {
   log: Logger;
   pidService: PidService;
 
