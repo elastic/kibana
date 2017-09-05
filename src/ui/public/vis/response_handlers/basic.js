@@ -3,7 +3,7 @@ import { AggResponseTabifyTableProvider } from 'ui/agg_response/tabify/_table';
 
 import { VisResponseHandlersRegistryProvider } from 'ui/registry/vis_response_handlers';
 
-const BasicResponseHandlerProvider = function (Private) {
+const BasicResponseHandlerProvider = function (Private, Promise) {
   const aggResponse = Private(AggResponseIndexProvider);
   const Table = Private(AggResponseTabifyTableProvider);
 
