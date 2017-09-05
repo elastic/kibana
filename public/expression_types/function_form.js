@@ -52,7 +52,7 @@ export class FunctionForm extends BaseForm {
     const { arg, argValues, skipRender } = dataArg;
 
     // skip arguments that aren't defined in the expression type schema
-    if (arg.required || !arg || skipRender) return null;
+    if (!arg || arg.required || skipRender) return null;
 
     const newArgValue = fromExpression(arg.defaultValue) || { type: 'string', value: '' };
 
