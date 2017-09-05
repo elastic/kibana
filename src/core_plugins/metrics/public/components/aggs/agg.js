@@ -15,6 +15,8 @@ function Agg(props) {
     <div
       className={props.className}
       style={style}
+      onMouseDown={props.onMouseDown}
+      onTouchStart={props.onTouchStart}
     >
       <Component
         fields={props.fields}
@@ -39,8 +41,10 @@ Agg.propTypes = {
   onAdd: PropTypes.func,
   onChange: PropTypes.func,
   onDelete: PropTypes.func,
+  onMouseDown: PropTypes.func,
   onSortableItemMount: PropTypes.func,
   onSortableItemReadyToMove: PropTypes.func,
+  onTouchStart: PropTypes.func,
   panel: PropTypes.object,
   series: PropTypes.object,
   siblings: PropTypes.array,
