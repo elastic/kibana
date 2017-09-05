@@ -292,7 +292,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         await this.navigateTo();
         await this.clickKibanaIndices();
         await this.setIndexPatternField(indexPatternName);
-        await this.selectTimeFieldOption(timefield);
+        if (timefield) {
+          await this.selectTimeFieldOption(timefield);
+        }
         const createButton = await this.getCreateButton();
         await createButton.click();
       });
