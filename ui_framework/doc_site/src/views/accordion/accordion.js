@@ -1,7 +1,7 @@
 import React from 'react';
 
 import {
-  KuiAccordian,
+  KuiAccordion,
   KuiText,
   KuiCode,
   KuiSpacer,
@@ -10,17 +10,17 @@ import {
 
 export default () => (
   <div>
-    <KuiAccordian
+    <KuiAccordion
       buttonContent="Click me to toggle open / close"
     >
       <KuiText>
-        <p>Any content inside of <KuiCode>KuiAccordian</KuiCode> will appear here.</p>
+        <p>Any content inside of <KuiCode>KuiAccordion</KuiCode> will appear here.</p>
       </KuiText>
-    </KuiAccordian>
+    </KuiAccordion>
 
     <KuiSpacer size="l" />
 
-    <KuiAccordian
+    <KuiAccordion
       buttonContent="You can click me as well"
     >
       <KuiText>
@@ -31,6 +31,6 @@ export default () => (
         <p>The content inside can be of any height.</p>
         <p>The content inside can be of any height.</p>
       </KuiText>
-    </KuiAccordian>
+    </KuiAccordion>
   </div>
 );

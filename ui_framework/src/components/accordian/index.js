@@ -1,3 +1,0 @@
-export {
-  KuiAccordian,
-} from './accordian';

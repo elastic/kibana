@@ -1,8 +1,8 @@
-.kuiAccordianForm__children {
+.kuiAccordionForm__children {
   padding: $kuiSizeL;
 }
 
-.kuiAccordianForm__extraAction {
+.kuiAccordionForm__extraAction {
   opacity: 0;
   transition: opacity $kuiAnimSpeedNormal $kuiAnimSlightResistance;
 
@@ -11,17 +11,17 @@
   }
 }
 
-.kuiAccordianForm__title {
+.kuiAccordionForm__title {
   display: inline-block;
 }
 
-.kuiAccordianForm__button {
+.kuiAccordionForm__button {
   padding: $kuiSize;
 
   &:hover {
     text-decoration: none;
 
-    .kuiAccordianForm__title {
+    .kuiAccordionForm__title {
       text-decoration: underline;
     }
   }
@@ -30,23 +30,23 @@
     text-decoration: none;
     background-color: transparent;
 
-    .kuiAccordianForm__title {
+    .kuiAccordionForm__title {
       text-decoration: underline;
       background-color: $kuiFocusBackgroundColor;
       outline: solid $kuiSizeXS / 2 $kuiFocusBackgroundColor;
     }
   }
 }
-.kuiAccordianForm {
+.kuiAccordionForm {
   border-top: $kuiBorderThin;
   border-bottom: $kuiBorderThin;
 
-  & + .kuiAccordianForm {
+  & + .kuiAccordionForm {
     border-top: none;
   }
 
   &:hover {
-    .kuiAccordianForm__extraAction {
+    .kuiAccordionForm__extraAction {
       opacity: 1;
       visibility: visible;
     }

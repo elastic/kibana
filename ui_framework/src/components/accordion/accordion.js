@@ -11,7 +11,7 @@ import {
   KuiFlexItem,
 } from '../../components';
 
-export class KuiAccordian extends Component {
+export class KuiAccordion extends Component {
   static propTypes = {
     children: PropTypes.node,
     className: PropTypes.string,
@@ -53,20 +53,20 @@ export class KuiAccordian extends Component {
     } = this.props;
 
     const classes = classNames(
-      'kuiAccordian',
+      'kuiAccordion',
       {
-        'kuiAccordian-isOpen': this.state.isOpen,
+        'kuiAccordion-isOpen': this.state.isOpen,
       },
       className
     );
 
     const buttonClasses = classNames(
-      'kuiAccordian__button',
+      'kuiAccordion__button',
       buttonClassName,
     );
 
     const buttonContentClasses = classNames(
-      'kuiAccordian__buttonContent',
+      'kuiAccordion__buttonContent',
       buttonContentClassName,
     );
 
@@ -107,7 +107,7 @@ export class KuiAccordian extends Component {
           {optionalAction}
         </KuiFlexGroup>
 
-        <div className="kuiAccordian__childWrapper"  ref={node => { this.childWrapper = node; }}>
+        <div className="kuiAccordion__childWrapper"  ref={node => { this.childWrapper = node; }}>
           <div ref={node => { this.childContent = node; }}>
             {children}
           </div>
@@ -117,7 +117,7 @@ export class KuiAccordian extends Component {
   }
 }
 
-KuiAccordian.propTypes = {
+KuiAccordion.propTypes = {
   children: PropTypes.node,
   className: PropTypes.string,
   buttonContentClassName: PropTypes.string,
@@ -125,7 +125,7 @@ KuiAccordian.propTypes = {
   extraAction: PropTypes.node,
 };
 
-KuiAccordian.defaultProps = {
+KuiAccordion.defaultProps = {
   buttonContent: <div>Click to open. Replace me with the buttonContent prop.</div>,
   children: <div>Opened content. Replace me by adding chrildren to this component.</div>,
 };

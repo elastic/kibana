@@ -12,34 +12,34 @@ import {
   KuiCode,
 } from '../../../../components';
 
-import Accordian from './accordian';
-const accordianSource = require('!!raw!./accordian');
-const accordianHtml = renderToHtml(Accordian);
+import Accordion from './accordion';
+const accordionSource = require('!!raw!./accordion');
+const accordionHtml = renderToHtml(Accordion);
 
-import AccordianForm from './accordian_form';
-const accordianFormSource = require('!!raw!./accordian_form');
-const accordianFormHtml = renderToHtml(AccordianForm);
+import AccordionForm from './accordion_form';
+const accordionFormSource = require('!!raw!./accordion_form');
+const accordionFormHtml = renderToHtml(AccordionForm);
 
-import AccordianExtra from './accordian_extra';
-const accordianExtraSource = require('!!raw!./accordian_extra');
-const accordianExtraHtml = renderToHtml(AccordianExtra);
+import AccordionExtra from './accordion_extra';
+const accordionExtraSource = require('!!raw!./accordion_extra');
+const accordionExtraHtml = renderToHtml(AccordionExtra);
 
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
-      title="Accordian (unstyled)"
+      title="Accordion (unstyled)"
       source={[{
         type: GuideSectionTypes.JS,
-        code: accordianSource,
+        code: accordionSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: accordianHtml,
+        code: accordionHtml,
       }]}
       text={
         <div>
           <p>
-            <KuiCode>KuiAccordian</KuiCode> is purposely bare so that you can
-            put whatever styling you need on it (see the accordian form example). The only
+            <KuiCode>KuiAccordion</KuiCode> is purposely bare so that you can
+            put whatever styling you need on it (see the accordion form example). The only
             styling we force on you in the caret, which gives the user an understaning
             that the content will open up.
           </p>
@@ -50,53 +50,53 @@ export default props => (
           </p>
           <p>
             For styling needs. Classes can be individually applied with
-            <KuiCode>className</KuiCode> (for the accordian entire),
+            <KuiCode>className</KuiCode> (for the accordion entire),
             and <KuiCode>buttonClassName</KuiCode> (for the clickable area).
           </p>
         </div>
       }
-      demo={<Accordian />}
+      demo={<Accordion />}
     />
     <GuideSection
-      title="Accordian can have extra actions"
+      title="Accordion can have extra actions"
       source={[{
         type: GuideSectionTypes.JS,
-        code: accordianExtraSource,
+        code: accordionExtraSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: accordianExtraHtml,
+        code: accordionExtraHtml,
       }]}
       text={
         <p>
           Use the <KuiCode>extraAction</KuiCode> prop to pass an extra action
-          displayed on the right of any accordian. Usually this is a delete or
+          displayed on the right of any accordion. Usually this is a delete or
           button, but can be anything. Note that this action is separate from
-          the click state that expands the accordian. This is needed to make
+          the click state that expands the accordion. This is needed to make
           it accessibile.
         </p>
      }
       demo={
-        <AccordianExtra />
+        <AccordionExtra />
      }
     />
     <GuideSection
-      title="Accordian for forms"
+      title="Accordion for forms"
       source={[{
         type: GuideSectionTypes.JS,
-        code: accordianFormSource,
+        code: accordionFormSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: accordianFormHtml,
+        code: accordionFormHtml,
       }]}
       text={
         <p>
           Putting it all together. Using the <KuiCode>classNames</KuiCode>
           and <KuiCode>extraAction</KuiCode> as explained above, we can
-          style the accordian in a way common for form use.
+          style the accordion in a way common for form use.
         </p>
      }
       demo={
-        <AccordianForm />
+        <AccordionForm />
      }
     />
   </GuidePage>

@@ -1,0 +1,3 @@
+export {
+  KuiAccordion,
+} from './accordion';

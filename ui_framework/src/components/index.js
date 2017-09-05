@@ -1,6 +1,6 @@
 export {
-  KuiAccordian,
-} from './accordian';
+  KuiAccordion,
+} from './accordion';
 
 export {
   KuiKeyboardAccessible,

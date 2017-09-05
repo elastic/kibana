@@ -1,12 +1,12 @@
 import React from 'react';
 
 import {
-  KuiAccordian,
+  KuiAccordion,
   KuiButton,
 } from '../../../../components';
 
 export default () => (
-  <KuiAccordian
+  <KuiAccordion
     extraAction={<KuiButton size="small">Extra action!</KuiButton>}
   />
 );

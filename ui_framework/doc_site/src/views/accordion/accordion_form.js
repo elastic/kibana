@@ -1,7 +1,7 @@
 import React from 'react';
 
 import {
-  KuiAccordian,
+  KuiAccordion,
   KuiText,
   KuiTextColor,
   KuiForm,
@@ -49,7 +49,7 @@ const buttonContent = (
         <KuiIcon type="logoWebhook" size="medium" />
       </KuiFlexItem>
       <KuiFlexItem>
-        <KuiTitle size="small" className="kuiAccordianForm__title">
+        <KuiTitle size="small" className="kuiAccordionForm__title">
           <h6>Webhook</h6>
         </KuiTitle>
       </KuiFlexItem>
@@ -65,7 +65,7 @@ const buttonContent = (
 );
 
 const extraAction = (
-  <KuiButtonIcon iconType="cross" type="danger" className="kuiAccordianForm__extraAction" />
+  <KuiButtonIcon iconType="cross" type="danger" className="kuiAccordionForm__extraAction" />
 );
 
 export default () => (
@@ -74,25 +74,25 @@ export default () => (
       <h3>I am a complicated, highly styled, repeatable form!</h3>
     </KuiTitle>
     <KuiSpacer size="l" />
-    <KuiAccordian
-      className="kuiAccordianForm"
-      buttonClassName="kuiAccordianForm__button"
+    <KuiAccordion
+      className="kuiAccordionForm"
+      buttonClassName="kuiAccordionForm__button"
       buttonContent={buttonContent}
       extraAction={extraAction}
     >
-      <div className="kuiAccordianForm__children">
+      <div className="kuiAccordionForm__children">
         {repeatableForm}
       </div>
-    </KuiAccordian>
-    <KuiAccordian
-      className="kuiAccordianForm"
-      buttonClassName="kuiAccordianForm__button"
+    </KuiAccordion>
+    <KuiAccordion
+      className="kuiAccordionForm"
+      buttonClassName="kuiAccordionForm__button"
       buttonContent={buttonContent}
       extraAction={extraAction}
     >
-      <div className="kuiAccordianForm__children">
+      <div className="kuiAccordionForm__children">
         {repeatableForm}
       </div>
-    </KuiAccordian>
+    </KuiAccordion>
   </div>
 );

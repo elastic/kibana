@@ -316,58 +316,58 @@ table {
 .kui--paddingRightLarge {
   padding-right: 24px !important; }
 
-.kuiAccordian__button {
+.kuiAccordion__button {
   text-align: left;
   width: 100%; }
-  .kuiAccordian__button:hover, .kuiAccordian__button:focus {
+  .kuiAccordion__button:hover, .kuiAccordion__button:focus {
     text-decoration: underline;
     cursor: pointer; }
-  .kuiAccordian__button:focus {
+  .kuiAccordion__button:focus {
     background-color: #e6f2f6; }
 
-.kuiAccordian__childWrapper {
+.kuiAccordion__childWrapper {
   visibility: hidden;
   height: 0;
   opacity: 0;
   overflow-y: hidden;
   transition: height 250ms cubic-bezier(0.694, 0.0482, 0.335, 1), opacity 250ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
 
-.kuiAccordian.kuiAccordian-isOpen .kuiAccordian__childWrapper {
+.kuiAccordion.kuiAccordion-isOpen .kuiAccordion__childWrapper {
   visibility: visible;
   opacity: 1; }
 
-.kuiAccordianForm__children {
+.kuiAccordionForm__children {
   padding: 24px; }
 
-.kuiAccordianForm__extraAction {
+.kuiAccordionForm__extraAction {
   opacity: 0;
   transition: opacity 250ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
-  .kuiAccordianForm__extraAction:focus {
+  .kuiAccordionForm__extraAction:focus {
     opacity: 1; }
 
-.kuiAccordianForm__title {
+.kuiAccordionForm__title {
   display: inline-block; }
 
-.kuiAccordianForm__button {
+.kuiAccordionForm__button {
   padding: 16px; }
-  .kuiAccordianForm__button:hover {
+  .kuiAccordionForm__button:hover {
     text-decoration: none; }
-    .kuiAccordianForm__button:hover .kuiAccordianForm__title {
+    .kuiAccordionForm__button:hover .kuiAccordionForm__title {
       text-decoration: underline; }
-  .kuiAccordianForm__button:focus {
+  .kuiAccordionForm__button:focus {
     text-decoration: none;
     background-color: transparent; }
-    .kuiAccordianForm__button:focus .kuiAccordianForm__title {
+    .kuiAccordionForm__button:focus .kuiAccordionForm__title {
       text-decoration: underline;
       background-color: #e6f2f6;
       outline: solid 2px #e6f2f6; }
 
-.kuiAccordianForm {
+.kuiAccordionForm {
   border-top: 1px solid #D9D9D9;
   border-bottom: 1px solid #D9D9D9; }
-  .kuiAccordianForm + .kuiAccordianForm {
+  .kuiAccordionForm + .kuiAccordionForm {
     border-top: none; }
-  .kuiAccordianForm:hover .kuiAccordianForm__extraAction {
+  .kuiAccordionForm:hover .kuiAccordionForm__extraAction {
     opacity: 1;
     visibility: visible; }
 
