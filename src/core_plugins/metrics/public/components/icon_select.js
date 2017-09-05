@@ -29,6 +29,10 @@ class IconOption extends Component {
   render() {
     const icon = this.props.option.value;
     const label = this.props.option.label;
+    // We can ignore that the <div> does not have keyboard handlers even though
+    // it has mouse handlers, since react-select still takes care, that this works
+    // well with keyboard.
+    /* eslint-disable jsx-a11y/no-static-element-interactions */
     return (
       <div
         className={this.props.className}
@@ -48,6 +52,7 @@ class IconOption extends Component {
         </span>
       </div>
     );
+    /* eslint-enable jsx-a11y/no-static-element-interactions */
   }
 
 }

@@ -1,3 +1,6 @@
+/* eslint-disable jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
+// The color picker is not yet accessible.
+
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Tooltip from './tooltip';
