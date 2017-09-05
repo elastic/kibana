@@ -15,6 +15,7 @@ export class HttpServer {
     this.app = express();
     this.app.use([
       bodyParser.json(),
+      bodyParser.raw({ type: 'application/x-ndjson' }),
       bodyParser.urlencoded({ extended: false })
     ]);
 
