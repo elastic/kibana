@@ -1,16 +1,19 @@
 # kbn-observable
 
-This package contains a minimally future-[spec-compliant][spec] observable
-implementation. This package is only intended for internal use in the Kibana
-platform.
+This package contains a [spec-compliant][spec] observable implementation that
+does _not_ implement any additional helper methods on the observable.
 
 ## Background
 
 While the Kibana platform relies on RxJS observables internally, exposed
-observables should be minimally future-spec compliant. As there exists no other
-library we can use in the interim while waiting for the Observable spec to reach
-stage 3, all exposed observables in the Kibana platform should rely on this
-package.
+observables should _only_ implement the specific methods defined in the spec.
+The primary reason for doing this is that we don't want to couple our plugin
+api to a specific version of RxJS (or any other observable library that
+implements additional methods on top of the spec).
+
+As there exists no other library we can use in the interim while waiting for the
+Observable spec to reach stage 3, all exposed observables in the Kibana platform
+should rely on this package.
 
 There is a `rxjsToEsObservable` helper in the platform which transforms an
 RxJS observable into a `kbn-observable`.
