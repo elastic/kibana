@@ -16,6 +16,8 @@ export default new Fn({
   },
   fn: (context, args) => {
     const mathContext = context && context.type === 'datatable' ? getMathjsScope(context) : null;
-    return math.eval(args._, mathContext);
+    const result = math.eval(args._, mathContext);
+    if (typeof result !== 'number') throw new Error ('Failed to execute math expression. Check your column names');
+    return result;
   },
 });
