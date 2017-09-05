@@ -4,6 +4,7 @@ import classNames from 'classnames';
 
 const colorsToClassNameMap = {
   'default': 'kuiTextColor--default',
+  'subdued': 'kuiTextColor--subdued',
   'primary': 'kuiTextColor--primary',
   'secondary': 'kuiTextColor--secondary',
   'accent': 'kuiTextColor--accent',

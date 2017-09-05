@@ -316,6 +316,61 @@ table {
 .kui--paddingRightLarge {
   padding-right: 24px !important; }
 
+.kuiAccordion__button {
+  text-align: left;
+  width: 100%; }
+  .kuiAccordion__button:hover, .kuiAccordion__button:focus {
+    text-decoration: underline;
+    cursor: pointer; }
+  .kuiAccordion__button:focus {
+    background-color: #e6f2f6; }
+
+.kuiAccordion__childWrapper {
+  visibility: hidden;
+  height: 0;
+  opacity: 0;
+  overflow-y: hidden;
+  transition: height 250ms cubic-bezier(0.694, 0.0482, 0.335, 1), opacity 250ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+
+.kuiAccordion.kuiAccordion-isOpen .kuiAccordion__childWrapper {
+  visibility: visible;
+  opacity: 1; }
+
+.kuiAccordionForm__children {
+  padding: 24px; }
+
+.kuiAccordionForm__extraAction {
+  opacity: 0;
+  transition: opacity 250ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+  .kuiAccordionForm__extraAction:focus {
+    opacity: 1; }
+
+.kuiAccordionForm__title {
+  display: inline-block; }
+
+.kuiAccordionForm__button {
+  padding: 16px; }
+  .kuiAccordionForm__button:hover {
+    text-decoration: none; }
+    .kuiAccordionForm__button:hover .kuiAccordionForm__title {
+      text-decoration: underline; }
+  .kuiAccordionForm__button:focus {
+    text-decoration: none;
+    background-color: transparent; }
+    .kuiAccordionForm__button:focus .kuiAccordionForm__title {
+      text-decoration: underline;
+      background-color: #e6f2f6;
+      outline: solid 2px #e6f2f6; }
+
+.kuiAccordionForm {
+  border-top: 1px solid #D9D9D9;
+  border-bottom: 1px solid #D9D9D9; }
+  .kuiAccordionForm + .kuiAccordionForm {
+    border-top: none; }
+  .kuiAccordionForm:hover .kuiAccordionForm__extraAction {
+    opacity: 1;
+    visibility: visible; }
+
 .kuiAvatar {
   border-radius: 50%;
   width: 24px;
@@ -3146,6 +3201,9 @@ table {
 
 .kuiTextColor.kuiTextColor--default {
   color: #3F3F3F !important; }
+
+.kuiTextColor.kuiTextColor--subdued {
+  color: #666 !important; }
 
 .kuiTextColor.kuiTextColor--primary {
   color: #0079a5 !important; }

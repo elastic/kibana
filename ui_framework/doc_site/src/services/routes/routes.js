@@ -1,5 +1,8 @@
 import Slugify from '../string/slugify';
 
+import AccordionExample
+  from '../../views/accordion/accordion_example';
+
 import AccessibilityExample
   from '../../views/accessibility/accessibility_example';
 
@@ -86,6 +89,10 @@ import TextScalingSandbox
 
 // Component route names should match the component name exactly.
 const components = [{
+  name: 'Accordion',
+  component: AccordionExample,
+  hasReact: true,
+}, {
   name: 'Accessibility',
   component: AccessibilityExample,
   hasReact: true,

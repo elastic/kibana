@@ -1,4 +1,8 @@
 export {
+  KuiAccordion,
+} from './accordion';
+
+export {
   KuiKeyboardAccessible,
   KuiScreenReaderOnly,
 } from './accessibility';
