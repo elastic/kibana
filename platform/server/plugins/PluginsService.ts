@@ -72,13 +72,13 @@ export class PluginsService implements CoreService {
 
   private createPlugin(name: string) {
     const pluginPath = this.env.getPluginDir(name);
-    const json = require(pluginPath);
+    const pluginExports = require(pluginPath);
 
-    if (!('plugin' in json)) {
+    if (!('plugin' in pluginExports)) {
       throw new Error(`'plugin' definition missing in plugin [${pluginPath}]`);
     }
 
-    const { plugin } = json;
+    const { plugin } = pluginExports;
 
     if (!('plugin' in plugin)) {
       throw new Error(`'plugin' definition missing in plugin [${pluginPath}]`);
