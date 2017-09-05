@@ -5,7 +5,7 @@ import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
-import { htmlIdGenerator } from '../lib/html_id_generator';
+import { htmlIdGenerator } from '../../lib/html_id_generator';
 
 export const Static = props => {
   const handleChange = createChangeHandler(props.onChange, props.model);
