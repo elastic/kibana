@@ -2,7 +2,7 @@ const chalk = require('chalk');
 const Generator = require('yeoman-generator');
 const utils = require('../utils');
 
-const DOCUMENTATION_PAGE_PATH = 'ui_framework/doc_site/src/views';
+const DOCUMENTATION_PAGE_PATH = 'doc_site/src/views';
 
 module.exports = class extends Generator {
   constructor(args, options) {
@@ -21,7 +21,7 @@ module.exports = class extends Generator {
 
     if (this.fileType === 'demo') {
       prompts.push({
-        message: `What's the name of the directory this demo should go in? (Within ui_framework/doc_site/src/views). Use snake_case, please.`,
+        message: `What's the name of the directory this demo should go in? (Within doc_site/src/views). Use snake_case, please.`,
         name: 'folderName',
         type: 'input',
         store: true,

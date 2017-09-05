@@ -1,23 +1,32 @@
-const path = require('path');
-const babelPreset = require('../../src/optimize/babel/helpers').webpackPreset;
+const babelPreset = {
+  presets: [
+    [require.resolve('babel-preset-env'), {
+      targets: {
+        browsers: [
+          'last 2 versions',
+          '> 5%',
+          'Safari 7' // for PhantomJS support
+        ]
+      },
+      useBuiltIns: true,
+    }],
+    {
+      presets: [
+        require.resolve('babel-preset-react')
+      ],
+      plugins: [
+        require.resolve('babel-plugin-add-module-exports'),
+        // stage 3
+        require.resolve('babel-plugin-transform-async-generator-functions'),
+        require.resolve('babel-plugin-transform-object-rest-spread'),
+        // stage 2
+        require.resolve('babel-plugin-transform-class-properties'),
+      ],
+    },
+  ],
+};
+
 module.exports = {
-  devtool: 'source-map',
-
-  entry: {
-    guide: './ui_framework/doc_site/src/index.js'
-  },
-
-  output: {
-    path: path.resolve(__dirname, 'build'),
-    filename: 'bundle.js'
-  },
-
-  resolve: {
-    root: [
-      path.resolve(__dirname, 'src/ui_framework/doc_site')
-    ]
-  },
-
   // These are necessasry for using Enzyme with Webpack (https://github.com/airbnb/enzyme/blob/master/docs/guides/webpack.md).
   externals: {
     'react/lib/ExecutionEnvironment': true,
@@ -36,10 +45,6 @@ module.exports = {
       query: {
         presets: [babelPreset],
       },
-    }, {
-      test: /\.scss$/,
-      loaders: ['style', 'css', 'postcss', 'sass'],
-      exclude: /node_modules/
     }, {
       test: /\.html$/,
       loader: 'html',
