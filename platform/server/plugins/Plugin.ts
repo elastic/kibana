@@ -1,7 +1,7 @@
 import {
   BasePluginsType,
   KibanaFunctionalPlugin,
-  KibanaPluginStatic,
+  KibanaClassPluginStatic,
   PluginName
 } from './types';
 import { Logger, LoggerFactory } from '../../logging';
@@ -35,7 +35,7 @@ function isKibanaFunctionalPlugin<
 >(
   val:
     | KibanaFunctionalPlugin<DependenciesType, ExposableType>
-    | KibanaPluginStatic<DependenciesType, ExposableType>
+    | KibanaClassPluginStatic<DependenciesType, ExposableType>
 ): val is KibanaFunctionalPlugin<DependenciesType, ExposableType> {
   return !isClass(val);
 }
@@ -45,7 +45,7 @@ interface PluginDefinition<DependenciesType, ExposableType> {
   dependencies: string[];
   run:
     | KibanaFunctionalPlugin<DependenciesType, ExposableType>
-    | KibanaPluginStatic<DependenciesType, ExposableType>;
+    | KibanaClassPluginStatic<DependenciesType, ExposableType>;
   configPath?: string | string[];
 }
 
@@ -54,7 +54,7 @@ export class Plugin<DependenciesType extends BasePluginsType, ExposableType> {
   readonly dependencies: PluginName[];
   private readonly run:
     | KibanaFunctionalPlugin<DependenciesType, ExposableType>
-    | KibanaPluginStatic<DependenciesType, ExposableType>;
+    | KibanaClassPluginStatic<DependenciesType, ExposableType>;
   readonly configPath: string | string[] | undefined;
 
   private stopCallbacks: LifecycleCallback[] = [];

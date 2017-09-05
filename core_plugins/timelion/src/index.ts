@@ -1,13 +1,9 @@
-import { KibanaPlugin } from 'kbn-types';
+import { KibanaPluginConfig } from 'kbn-types';
 import { XPackPluginType } from 'kibana-plugin-xpack';
 
 import { TimelionExports, TimelionFunction } from './TimelionExports';
 
-export const plugin: KibanaPlugin<
-  XPackPluginType,
-  TimelionExports
-> = {
-  configPath: undefined,
+export const plugin: KibanaPluginConfig<XPackPluginType, TimelionExports> = {
   dependencies: ['xpack'],
   plugin: (kibana, dependencies) => {
     const { xpack } = dependencies;

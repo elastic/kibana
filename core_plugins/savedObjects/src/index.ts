@@ -1,10 +1,8 @@
-import { KibanaPlugin } from 'kbn-types';
+import { KibanaPluginConfig } from 'kbn-types';
 import { SavedObjectsService } from './SavedObjectsService';
 import { registerEndpoints } from './registerEndpoints';
 
-export const plugin: KibanaPlugin<{}> = {
-  configPath: undefined,
-  dependencies: [],
+export const plugin: KibanaPluginConfig<{}> = {
   plugin: kibana => {
     const { kibana: _kibana, elasticsearch, logger, util, http } = kibana;
   

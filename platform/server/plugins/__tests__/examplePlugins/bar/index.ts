@@ -1,4 +1,4 @@
-import { KibanaPlugin } from '../../../../../server/plugins/types';
+import { KibanaPluginConfig } from '../../../../../server/plugins/types';
 import { FooPluginType } from '../foo';
 
 interface BarExports {
@@ -10,16 +10,13 @@ export interface BarPluginType {
   bar: BarExports;
 }
 
-export const plugin: KibanaPlugin<FooPluginType, BarExports> = {
-  configPath: ['bar'],
+export const plugin: KibanaPluginConfig<FooPluginType, BarExports> = {
+  configPath: 'bar',
   dependencies: ['foo'],
-  plugin: (
-    kibana,
-    deps
-  ) => {
+  plugin: (kibana, deps) => {
     return {
       fromFoo: deps.foo.value,
       value: 'bar'
     };
   }
-}
+};

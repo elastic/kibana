@@ -1,8 +1,7 @@
-import { KibanaPlugin } from 'kbn-types';
+import { KibanaPluginConfig } from 'kbn-types';
 import { PidPlugin } from './PidPlugin';
 
-export const plugin: KibanaPlugin<{}> = {
+export const plugin: KibanaPluginConfig<{}> = {
   configPath: ['pid'],
-  dependencies: [],
   plugin: PidPlugin
 };

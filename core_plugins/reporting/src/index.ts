@@ -1,8 +1,8 @@
-import { KibanaPlugin } from 'kbn-types';
+import { KibanaPluginConfig } from 'kbn-types';
 import { XPackPluginType } from 'kibana-plugin-xpack';
 import { ReportingConfig } from './ReportingConfig';
 
-export const plugin: KibanaPlugin<XPackPluginType> = {
+export const plugin: KibanaPluginConfig<XPackPluginType> = {
   configPath: ['xpack', 'reporting'],
   dependencies: ['xpack'],
   plugin: (

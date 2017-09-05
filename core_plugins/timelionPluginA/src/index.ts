@@ -1,9 +1,10 @@
-import { KibanaPlugin } from 'kbn-types';
+import { KibanaPluginConfig } from 'kbn-types';
 import { TimelionPluginType } from 'kibana-plugin-timelion';
 import { TimelionPluginBType } from 'kibana-plugin-timelion-plugin-b';
 
-export const plugin: KibanaPlugin<TimelionPluginType & TimelionPluginBType> = {
-  configPath: undefined,
+export const plugin: KibanaPluginConfig<
+  TimelionPluginType & TimelionPluginBType
+> = {
   dependencies: ['timelion', 'timelionPluginB'],
   plugin: (kibana, dependencies) => {
     const { timelion, timelionPluginB } = dependencies;

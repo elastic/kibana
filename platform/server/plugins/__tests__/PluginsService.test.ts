@@ -7,7 +7,7 @@ mockFs.statSync = (file: string) => ({ isDirectory: () => true });
 mockFs.readdirSync = () => [];
 jest.mock('fs', () => mockFs);
 
-import { pick, isEqual } from 'lodash';
+import { pick } from 'lodash';
 import { resolve } from 'path';
 
 import { PluginsService } from '../PluginsService';
@@ -72,7 +72,7 @@ test('stops plugins', async () => {
 
 test('does not start plugin if disabled', async () => {
   mockConfigService.isEnabledAtPath = jest.fn(configPath => {
-    if (isEqual(configPath, ['bar'])) {
+    if (configPath === 'bar') {
       return Promise.resolve(false);
     }
     return Promise.resolve(true);

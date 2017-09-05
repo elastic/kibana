@@ -1,11 +1,10 @@
-import { KibanaPlugin } from 'kbn-types';
+import { KibanaPluginConfig } from 'kbn-types';
 
 import { XPackConfig } from './XPackConfig';
 import { XPackExports } from './XPackExports';
 
-export const plugin: KibanaPlugin<{}, XPackExports> = {
+export const plugin: KibanaPluginConfig<{}, XPackExports> = {
   configPath: ['xpack', 'xpack_main'],
-  dependencies: [],
   plugin: kibana => {
     const log = kibana.logger.get();
   
