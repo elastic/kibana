@@ -58,6 +58,7 @@ export default function GaugeVisType(Private) {
             bgColor: true,
             subText: '',
             fontSize: 60,
+            shrinkFont: false,
           }
         }
       },

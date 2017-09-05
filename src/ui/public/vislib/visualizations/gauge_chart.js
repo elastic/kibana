@@ -34,17 +34,25 @@ export function GaugeChartProvider(Private) {
           const containerMargin = 5;
           const containerWidth = $(this).width() - containerMargin;
           const containerHeight = $(this).height() - containerMargin;
-          const width = Math.floor(verticalSplit ? $(this).width() : containerWidth / data.series.length);
+          let extraMargin = 0;
+          const shrinkFont = self.handler.visConfig.get('gauge.style.shrinkFont', false);
+          if (shrinkFont && !verticalSplit) {
+            // add a little extra margin to prevent simple metrics from running up against each other
+            extraMargin = 3;
+            // prevent the last metric from disappearing during the font size calculation
+            div.style('white-space', 'nowrap');
+          }
+          const width = Math.floor(verticalSplit ? $(this).width() : (containerWidth / data.series.length) - extraMargin * 2);
           const height = Math.floor((verticalSplit ? containerHeight / data.series.length : $(this).height()) - 25);
           const transformX = width / 2;
           const transformY = self.gaugeConfig.gaugeType === 'Meter' ? height / 1.5 : height / 2;
-
-
 
           data.series.forEach(series => {
             const svg = div.append('svg')
               .attr('width', width)
               .attr('height', height)
+              .style('margin-left', `${extraMargin}px`)
+              .style('margin-right', `${extraMargin}px`)
               .style('display', 'inline-block')
               .style('overflow', 'hidden');
 

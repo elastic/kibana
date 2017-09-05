@@ -100,10 +100,11 @@ export function SimpleGaugeProvider() {
       return this.colorFunc(labels[bucket]);
     }
 
-    drawGauge(svg, data, width) {
+    drawGauge(svg, data, width, height) {
       const tooltip = this.gaugeChart.tooltip;
       const isTooltip = this.gaugeChart.handler.visConfig.get('addTooltip');
-      const fontSize = this.gaugeChart.handler.visConfig.get('gauge.style.fontSize');
+      let fontSize = this.gaugeChart.handler.visConfig.get('gauge.style.fontSize');
+      const shrinkFont = this.gaugeChart.handler.visConfig.get('gauge.style.shrinkFont', false);
 
       const labelColor = this.gaugeConfig.style.labelColor;
       const bgColor = this.gaugeConfig.style.bgColor;
@@ -149,8 +150,10 @@ export function SimpleGaugeProvider() {
       };
 
 
+      let topLabel;
+      let bottomLabel;
       if (this.gaugeConfig.labels.show) {
-        svg
+        topLabel = svg
           .append('text')
           .attr('class', 'chart-label')
           .text(data.label)
@@ -159,7 +162,7 @@ export function SimpleGaugeProvider() {
           .style('display', isTextTooLong)
           .style('fill', bgFill);
 
-        svg
+        bottomLabel = svg
           .append('text')
           .attr('class', 'chart-label')
           .text(this.gaugeConfig.style.subText)
@@ -169,7 +172,7 @@ export function SimpleGaugeProvider() {
           .style('fill', bgFill);
       }
 
-      gauges
+      const dataLabel = gauges
         .append('text')
         .attr('class', 'chart-label')
         .attr('y', -5)
@@ -189,6 +192,35 @@ export function SimpleGaugeProvider() {
         .style('fill', function () {
           return !bgColor && labelColor ? self.getColorBucket(data.values[0].y) : bgFill;
         });
+
+      if (shrinkFont) {
+        let box = svg.node().getBBox();
+
+        const updateFontSize = (fontSize) => {
+          dataLabel.style('font-size', fontSize + 'pt');
+          if (topLabel) {
+            topLabel.attr('y', Math.min(-25, -fontSize));
+            bottomLabel.attr('y', Math.max(15, fontSize));
+          }
+        };
+
+        // if all the labels can't fit in the height, then shrink the font size
+        // and move the labels down accordingly
+        while (box.height > height && fontSize > 10) {
+          fontSize -= 5;
+          updateFontSize(fontSize);
+          box = svg.node().getBBox();
+        }
+
+        // if the data label can't fit in the width, then shrink the font size
+        // but leave the other labels where they are so that it matches with
+        // other metric vis
+        while (box.width > width && fontSize > 10) {
+          fontSize -= 5;
+          dataLabel.style('font-size', fontSize + 'pt');
+          box = svg.node().getBBox();
+        }
+      }
 
       if (isTooltip) {
         series.each(function () {
