@@ -5,23 +5,36 @@
 .kuiAccordianForm__extraAction {
   opacity: 0;
   transition: opacity $kuiAnimSpeedNormal $kuiAnimSlightResistance;
-  
+
   &:focus {
     opacity: 1;
   }
+}
+
+.kuiAccordianForm__title {
+  display: inline-block;
 }
 
 .kuiAccordianForm__button {
   padding: $kuiSize;
 
   &:hover {
-    background-color: tintOrShade($kuiColorLightestShade, 50%, 20%);
     text-decoration: none;
+
+    .kuiAccordianForm__title {
+      text-decoration: underline;
+    }
   }
 
   &:focus {
-    background-color: $kuiFocusBackgroundColor;
     text-decoration: none;
+    background-color: transparent;
+
+    .kuiAccordianForm__title {
+      text-decoration: underline;
+      background-color: $kuiFocusBackgroundColor;
+      outline: solid $kuiSizeXS / 2 $kuiFocusBackgroundColor;
+    }
   }
 }
 .kuiAccordianForm {

@@ -39,7 +39,7 @@ export default props => (
         <div>
           <p>
             <KuiCode>KuiAccordian</KuiCode> is purposely bare so that you can
-            put whatever styling you need on it (see the other examples). The only
+            put whatever styling you need on it (see the accordian form example). The only
             styling we force on you in the caret, which gives the user an understaning
             that the content will open up.
           </p>

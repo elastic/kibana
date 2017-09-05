@@ -49,7 +49,7 @@ const buttonContent = (
         <KuiIcon type="logoWebhook" size="medium" />
       </KuiFlexItem>
       <KuiFlexItem>
-        <KuiTitle size="small">
+        <KuiTitle size="small" className="kuiAccordianForm__title">
           <h6>Webhook</h6>
         </KuiTitle>
       </KuiFlexItem>
@@ -71,7 +71,7 @@ const extraAction = (
 export default () => (
   <div>
     <KuiTitle size="small">
-      <h3>I am a complicated, repeatable form!</h3>
+      <h3>I am a complicated, highly styled, repeatable form!</h3>
     </KuiTitle>
     <KuiSpacer size="l" />
     <KuiAccordian
@@ -87,7 +87,8 @@ export default () => (
     <KuiAccordian
       className="kuiAccordianForm"
       buttonClassName="kuiAccordianForm__button"
-      buttonContent="You can click me as well"
+      buttonContent={buttonContent}
+      extraAction={extraAction}
     >
       <div className="kuiAccordianForm__children">
         {repeatableForm}

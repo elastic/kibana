@@ -320,7 +320,8 @@ table {
   text-align: left;
   width: 100%; }
   .kuiAccordian__button:hover, .kuiAccordian__button:focus {
-    text-decoration: underline; }
+    text-decoration: underline;
+    cursor: pointer; }
   .kuiAccordian__button:focus {
     background-color: #e6f2f6; }
 
@@ -329,7 +330,7 @@ table {
   height: 0;
   opacity: 0;
   overflow-y: hidden;
-  transition: all 250ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+  transition: height 250ms cubic-bezier(0.694, 0.0482, 0.335, 1), opacity 250ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
 
 .kuiAccordian.kuiAccordian-isOpen .kuiAccordian__childWrapper {
   visibility: visible;
@@ -344,14 +345,22 @@ table {
   .kuiAccordianForm__extraAction:focus {
     opacity: 1; }
 
+.kuiAccordianForm__title {
+  display: inline-block; }
+
 .kuiAccordianForm__button {
   padding: 16px; }
   .kuiAccordianForm__button:hover {
-    background-color: #fafafa;
     text-decoration: none; }
+    .kuiAccordianForm__button:hover .kuiAccordianForm__title {
+      text-decoration: underline; }
   .kuiAccordianForm__button:focus {
-    background-color: #e6f2f6;
-    text-decoration: none; }
+    text-decoration: none;
+    background-color: transparent; }
+    .kuiAccordianForm__button:focus .kuiAccordianForm__title {
+      text-decoration: underline;
+      background-color: #e6f2f6;
+      outline: solid 2px #e6f2f6; }
 
 .kuiAccordianForm {
   border-top: 1px solid #D9D9D9;

@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 import {
+  KuiKeyboardAccessible,
   KuiIcon,
   KuiFlexGroup,
   KuiFlexItem,
@@ -90,16 +91,18 @@ export class KuiAccordian extends Component {
       >
         <KuiFlexGroup gutterSize="none" alignItems="center">
           <KuiFlexItem>
-            <button onClick={this.onToggleOpen} className={buttonClasses}>
-              <KuiFlexGroup gutterSize="small" alignItems="center">
-                <KuiFlexItem grow={false}>
-                  {icon}
-                </KuiFlexItem>
-                <KuiFlexItem className={buttonContentClasses}>
-                  {buttonContent}
-                </KuiFlexItem>
-              </KuiFlexGroup>
-            </button>
+            <KuiKeyboardAccessible>
+              <div onClick={this.onToggleOpen} className={buttonClasses}>
+                <KuiFlexGroup gutterSize="small" alignItems="center">
+                  <KuiFlexItem grow={false}>
+                    {icon}
+                  </KuiFlexItem>
+                  <KuiFlexItem className={buttonContentClasses}>
+                    {buttonContent}
+                  </KuiFlexItem>
+                </KuiFlexGroup>
+              </div>
+            </KuiKeyboardAccessible>
           </KuiFlexItem>
           {optionalAction}
         </KuiFlexGroup>

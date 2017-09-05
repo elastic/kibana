@@ -4,6 +4,7 @@
 
   &:hover, &:focus {
     text-decoration: underline;
+    cursor: pointer;
   }
 
   &:focus {
@@ -16,7 +17,10 @@
   height: 0;
   opacity: 0;
   overflow-y: hidden;
-  transition: all $kuiAnimSpeedNormal $kuiAnimSlightResistance;
+  transition:
+    height $kuiAnimSpeedNormal $kuiAnimSlightResistance,
+    opacity $kuiAnimSpeedNormal $kuiAnimSlightResistance
+  ;
 }
 
 .kuiAccordian.kuiAccordian-isOpen {
