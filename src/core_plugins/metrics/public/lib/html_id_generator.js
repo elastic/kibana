@@ -8,5 +8,5 @@ import uuid from 'uuid';
  */
 export function htmlIdGenerator(idPrefix) {
   const prefix = idPrefix || uuid.v1();
-  return (suffix) => `${prefix}_${suffix}`;
+  return (suffix) => `${prefix}_${suffix || uuid.v1()}`;
 }

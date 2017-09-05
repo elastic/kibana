@@ -32,4 +32,9 @@ describe('htmlIdGenerator', () => {
     expect(idGenerator1('foo')).not.to.equal(idGenerator2('foo'));
   });
 
+  it('should generate different ids if no suffix is passed', () => {
+    const generator = htmlIdGenerator();
+    expect(generator()).not.to.equal(generator());
+  });
+
 });
