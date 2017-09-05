@@ -12,6 +12,9 @@ import '!!svg-sprite!./assets/app_timelion.svg';
 import '!!svg-sprite!./assets/app_visualize.svg';
 import '!!svg-sprite!./assets/apps.svg';
 import '!!svg-sprite!./assets/logo.svg';
+import '!!svg-sprite!./assets/logo_slack.svg';
+import '!!svg-sprite!./assets/logo_gmail.svg';
+import '!!svg-sprite!./assets/logo_webhook.svg';
 import '!!svg-sprite!./assets/search.svg';
 import '!!svg-sprite!./assets/user.svg';
 import '!!svg-sprite!./assets/help.svg';
@@ -42,6 +45,9 @@ const typeToIconMap = {
   visualizeApp: 'app_visualize',
   apps: 'apps',
   kibanaLogo: 'logo',
+  logoSlack: 'logo_slack',
+  logoWebhook: 'logo_webhook',
+  logoGmail: 'logo_gmail',
   search: 'search',
   user: 'user',
   help: 'help',

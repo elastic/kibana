@@ -29,6 +29,11 @@ export default () => (
         </KuiTextColor>
       </p>
       <p>
+        <KuiTextColor color="subdued">
+          Subdued text color
+        </KuiTextColor>
+      </p>
+      <p>
         <KuiTextColor color="primary">
           Primary text color
         </KuiTextColor>

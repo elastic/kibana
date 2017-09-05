@@ -2,22 +2,32 @@ import React from 'react';
 
 import {
   KuiIcon,
+  KuiFlexGrid,
+  KuiFlexItem,
+  KuiText,
 } from '../../../../components';
 
+const iconTypes = [
+  'kibanaLogo',
+  'logoSlack',
+  'logoGmail',
+  'logoWebhook',
+];
+
 export default () => (
-  <div>
-    <KuiIcon type="kibanaLogo" size="medium" />
-
-    &nbsp;
-
-    <KuiIcon type="kibanaLogo" size="large" />
-
-    &nbsp;
-
-    <KuiIcon type="kibanaLogo" size="xLarge" />
-
-    &nbsp;
-
-    <KuiIcon type="kibanaLogo" size="xxLarge" />
-  </div>
+  <KuiFlexGrid columns={4}>
+    {
+      iconTypes.map(iconType => (
+        <KuiFlexItem className="guideDemo__icon" key={iconType}>
+          <KuiIcon
+            type={iconType}
+            size="large"
+          />
+          <KuiText>
+            <p>{iconType}</p>
+          </KuiText>
+        </KuiFlexItem>
+      ))
+    }
+  </KuiFlexGrid>
 );
