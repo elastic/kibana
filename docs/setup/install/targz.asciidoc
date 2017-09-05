@@ -28,7 +28,7 @@ The Linux archive for Kibana v{version} can be downloaded and installed as follo
 wget https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86_64.tar.gz
 sha1sum kibana-{version}-linux-x86_64.tar.gz <1>
 tar -xzf kibana-{version}-linux-x86_64.tar.gz
-cd kibana/ <2>
+cd kibana-{version}-linux-x86_64/ <2>
 --------------------------------------------
 <1> Compare the SHA produced by `sha1sum` or `shasum` with the
     https://artifacts.elastic.co/downloads/kibana/kibana-{version}-linux-x86_64.tar.gz.sha1[published SHA].
@@ -55,7 +55,7 @@ The Darwin archive for Kibana v{version} can be downloaded and installed as foll
 curl -O https://artifacts.elastic.co/downloads/kibana/kibana-{version}-darwin-x86_64.tar.gz
 shasum kibana-{version}-darwin-x86_64.tar.gz <1>
 tar -xzf kibana-{version}-darwin-x86_64.tar.gz
-cd kibana/ <2>
+cd kibana-{version}-darwin-x86_64/ <2>
 --------------------------------------------
 <1> Compare the SHA produced by `sha1sum` or `shasum` with the
     https://artifacts.elastic.co/downloads/kibana/kibana-{version}-darwin-x86_64.tar.gz.sha1[published SHA].
