@@ -15,10 +15,7 @@ module.exports = {
     libraryTarget: 'commonjs2'
   },
 
-  externals: [
-    'lodash',
-    'rxjs'
-  ],
+  externals: ['lodash', 'rxjs'],
 
   devtool: 'source-map',
 

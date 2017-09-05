@@ -64,5 +64,7 @@ function latestValues<A, B, C, D>(
   d: Observable<D>
 ): Promise<[A, B, C, D]>;
 function latestValues(...values: Observable<any>[]) {
-  return Observable.combineLatest(values).first().toPromise();
+  return Observable.combineLatest(values)
+    .first()
+    .toPromise();
 }
