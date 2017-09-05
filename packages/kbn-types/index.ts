@@ -1,6 +1,7 @@
 export {
   KibanaFunctionalPlugin,
-  KibanaPlugin,
+  KibanaClassPlugin,
+  KibanaPluginConfig,
   KibanaPluginFeatures
 } from '../../platform/server/plugins/types';
 export { Logger, LoggerFactory } from '../../platform/logging';

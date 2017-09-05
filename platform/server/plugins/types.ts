@@ -77,34 +77,49 @@ export interface BasePluginsType {
   [key: string]: any;
 }
 
+export type KibanaPluginConfig<
+  DependenciesType extends BasePluginsType,
+  ExposableType = void
+> = {
+  configPath?: string | Array<string>;
+  dependencies?: Array<string>;
+  plugin:
+    | KibanaFunctionalPlugin<DependenciesType, ExposableType>
+    | KibanaClassPluginStatic<DependenciesType, ExposableType>;
+};
+
+/**
+ * 
+ */
 export type KibanaFunctionalPlugin<
   DependenciesType extends BasePluginsType,
   ExposableType = void
 > = (kibana: KibanaPluginFeatures, plugins: DependenciesType) => ExposableType;
 
-// TODO We can't type the constructor, so we have no way of typing
-// the `DependenciesType` in the same way as we do for `KibanaFunctionalPlugin`.
-// UNLESS we create a class you can `import`, of course.
-//
-// From the TypeScript core team:
-// > More formally, a class implementing an interface is a contract on what an
-// > instance of the class has. Since an instance of a class won't contain a
-// > construct signature, it cannot satisfy the interface.
-//
-// If we move these deps to `start` instead of the constructor there's another
-// relevant issue regarding contextual typing, which means that all types must
-// be explicitely listed in `start` in every plugin. See
-// https://github.com/Microsoft/TypeScript/pull/10610 for a "dead-ish" WIP.
-export interface KibanaPluginStatic<
+/**
+ * Defines the "static side" of the Kibana class plugin.
+ * 
+ * When a class implements an interface, only the instance side of the class is
+ * checked, so you can't include static methods there. Because of that we have
+ * a seprate interface for the static side, which we can use to specify that we
+ * want a _class_ (not an instance) that matches this interface.
+ * 
+ * See https://www.typescriptlang.org/docs/handbook/interfaces.html#difference-between-the-static-and-instance-sides-of-classes 
+ */
+export interface KibanaClassPluginStatic<
   DependenciesType extends BasePluginsType,
   ExposableType = void
 > {
-  new (kibana: KibanaPluginFeatures, plugins: DependenciesType): KibanaPlugin<
-    ExposableType
-  >;
+  new (
+    kibana: KibanaPluginFeatures,
+    plugins: DependenciesType
+  ): KibanaClassPlugin<ExposableType>;
 }
 
-export interface KibanaPlugin<ExposableType> {
+/**
+ * The interface for an instance of a Kibana class plugin.
+ */
+export interface KibanaClassPlugin<ExposableType> {
   start(): ExposableType;
 
   stop?(): void;
