@@ -69,6 +69,7 @@ export default new Fn({
             must: [ { match_all: {} } ],
           },
         },
+        size: 100,
       },
     }, context);
 
