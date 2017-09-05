@@ -11,7 +11,7 @@ Compile the CSS with `./node_modules/grunt/bin/grunt uiFramework:compileCss` (OS
 `.\node_modules\grunt\bin\grunt uiFramework:compileCss` (Windows).
 
 You can view interactive documentation by running `npm run uiFramework:start` and then visiting
-`http://localhost:8020/`. This will also start watching the SCSS files, and will recompile the CSS
+[http://localhost:8020/](http://localhost:8020/). This will also start watching the SCSS files, and will recompile the CSS
 automatically for you when you make changes.
 
 You can run `node scripts/jest --watch` to watch for changes and run the tests as you code.

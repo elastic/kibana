@@ -146,6 +146,7 @@ export function MeterGaugeProvider() {
     }
 
     drawGauge(svg, data, width, height) {
+      const self = this;
       const marginFactor = 0.95;
       const tooltip = this.gaugeChart.tooltip;
       const isTooltip = this.gaugeChart.handler.visConfig.get('addTooltip');
@@ -171,7 +172,7 @@ export function MeterGaugeProvider() {
       const arc = d3.svg.arc()
         .startAngle(minAngle)
         .endAngle(function (d) {
-          return Math.max(0, Math.min(maxAngle, angle(d.y)));
+          return Math.max(0, Math.min(maxAngle, angle(Math.max(min, d.y))));
         })
         .innerRadius(function (d, i, j) {
           return Math.max(0, radius(j + 1) + gaugePadding);
@@ -210,12 +211,11 @@ export function MeterGaugeProvider() {
         .attr('d', bgArc)
         .style('fill', this.gaugeConfig.style.bgFill);
 
-      const self = this;
       const series = gauges
         .append('path')
         .attr('d', arc)
         .style('fill', function (d) {
-          return self.getColorBucket(d.y);
+          return self.getColorBucket(Math.max(min, d.y));
         });
 
       const smallContainer = svg.node().getBBox().height < 70;
