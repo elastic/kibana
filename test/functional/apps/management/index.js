@@ -20,9 +20,10 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./_index_pattern_results_sort'));
     loadTestFile(require.resolve('./_index_pattern_popularity'));
     loadTestFile(require.resolve('./_kibana_settings'));
-    loadTestFile(require.resolve('./_scripted_fields'));
+    // TODO: revert after https://github.com/elastic/elasticsearch/issues/26429
+    // loadTestFile(require.resolve('./_scripted_fields'));
     loadTestFile(require.resolve('./_index_pattern_filter'));
-    loadTestFile(require.resolve('./_scripted_fields_filter'));
+    // loadTestFile(require.resolve('./_scripted_fields_filter'));
   });
 
 }
