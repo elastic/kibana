@@ -11,8 +11,8 @@ describe('KuiExpressionItemButton', () => {
   test('renders', () => {
     const component = (
       <KuiExpressionItemButton
-        description='the answer is'
-        buttonValue='42'
+        description="the answer is"
+        buttonValue="42"
         isActive={false}
         onClick={()=>{}}
         {...requiredProps}
@@ -27,8 +27,8 @@ describe('KuiExpressionItemButton', () => {
       test('true renders active', () => {
         const component = (
           <KuiExpressionItemButton
-            description='the answer is'
-            buttonValue='42'
+            description="the answer is"
+            buttonValue="42"
             isActive={true}
             onClick={()=>{}}
           />
@@ -40,8 +40,8 @@ describe('KuiExpressionItemButton', () => {
       test('false renders inactive', () => {
         const component = (
           <KuiExpressionItemButton
-            description='the answer is'
-            buttonValue='42'
+            description="the answer is"
+            buttonValue="42"
             isActive={false}
             onClick={()=>{}}
           />
@@ -57,8 +57,8 @@ describe('KuiExpressionItemButton', () => {
 
         const button = shallow(
           <KuiExpressionItemButton
-            description='the answer is'
-            buttonValue='42'
+            description="the answer is"
+            buttonValue="42"
             isActive={false}
             onClick={onClickHandler}
             {...requiredProps}

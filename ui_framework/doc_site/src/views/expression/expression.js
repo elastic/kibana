@@ -1,6 +1,4 @@
-import React from 'react';
-import _ from 'lodash';
-
+import React, { PropTypes } from 'react';
 import {
   KuiExpressionItem,
   KuiExpressionItemButton,
@@ -21,33 +19,27 @@ class KuiExpressionItemExample extends React.Component {
         value: '100',
         description: 'Is above'
       },
-      activeButton: null
+      activeButton: props.defaultActiveButton
     };
-
-    this.changeExample1 = this.changeExample1.bind(this);
-    this.changeExample2Object = this.changeExample2Object.bind(this);
-    this.changeExample2Description = this.changeExample2Description.bind(this);
-    this.changeExample2Value = this.changeExample2Value.bind(this);
-    this.onOutsideClick = this.onOutsideClick.bind(this);
   }
 
-  changeExample1(event) {
-    this.setState(_.merge(this.state,{ example1:{ value: event.target.value } }));
+  changeExample1 = (event) => {
+    this.setState({ example1: { ...this.state.example1, value: event.target.value } });
   }
 
-  changeExample2Object(event) {
-    this.setState(_.merge(this.state,{ example2:{ object: event.target.value } }));
+  changeExample2Object = (event) => {
+    this.setState({ example2: { ...this.state.example2, object: event.target.value } });
   }
 
-  changeExample2Value(event) {
-    this.setState(_.merge(this.state,{ example2:{ value: event.target.value } }));
+  changeExample2Value = (event) => {
+    this.setState({ example2: { ...this.state.example2, value: event.target.value } });
   }
 
-  changeExample2Description(event) {
-    this.setState(_.merge(this.state,{ example2:{ description: event.target.value } }));
+  changeExample2Description = (event) => {
+    this.setState({ example2: { ...this.state.example2, description: event.target.value } });
   }
 
-  onOutsideClick() {
+  onOutsideClick = () => {
     this.setState({ activeButton:null });
   }
 
@@ -60,16 +52,16 @@ class KuiExpressionItemExample extends React.Component {
 
     return (
       <div>
-        <KuiExpressionItem key='example1'>
+        <KuiExpressionItem key="example1">
           <KuiExpressionItemButton
-            description='when'
+            description="when"
             buttonValue={this.state.example1.value}
             isActive={this.state.activeButton === 'example1'}
             onClick={()=>this.setState({ activeButton:'example1' })}
           />
           {popover1}
         </KuiExpressionItem>
-        <KuiExpressionItem key='example2'>
+        <KuiExpressionItem key="example2">
           <KuiExpressionItemButton
             description={this.state.example2.description}
             buttonValue={this.state.example2.value}
@@ -85,12 +77,15 @@ class KuiExpressionItemExample extends React.Component {
   getPopover1(popoverStyle) {
     return (
       <KuiExpressionItemPopover
-        title='When'
-        isVisible={this.state.activeButton === 'example1'}
+        title="When"
         onOutsideClick={this.onOutsideClick}
         style={popoverStyle}
       >
-        <select className="kuiSelect" value={this.state.example1.value} onChange={this.changeExample1}>
+        <select
+          className="kuiSelect"
+          value={this.state.example1.value}
+          onChange={this.changeExample1}
+        >
           <option label="count()">count()</option>
           <option label="average()">average()</option>
           <option label="sum()">sum()</option>
@@ -106,13 +101,16 @@ class KuiExpressionItemExample extends React.Component {
     return (
       <KuiExpressionItemPopover
         title={this.state.example2.description}
-        isVisible={this.state.activeButton === 'example2'}
         onOutsideClick={this.onOutsideClick}
-        align='right'
+        align="right"
         style={popoverStyle}
       >
         <div>
-          <select className="kuiSelect" value={this.state.example2.object} onChange={this.changeExample2Object}>
+          <select
+            className="kuiSelect"
+            value={this.state.example2.object}
+            onChange={this.changeExample2Object}
+          >
             <option label="A">A</option>
             <option label="B">B</option>
             <option label="C">C</option>
@@ -125,7 +123,11 @@ class KuiExpressionItemExample extends React.Component {
             onChange={this.changeExample2Value}
           />
 
-          <select className="kuiSelect kuiSelect--large" value={this.state.example2.description} onChange={this.changeExample2Description}>
+          <select
+            className="kuiSelect kuiSelect--large"
+            value={this.state.example2.description}
+            onChange={this.changeExample2Description}
+          >
             <option label="Is above">Is above</option>
             <option label="Is below">Is below</option>
             <option label="Is exactly">Is exactly</option>
@@ -135,5 +137,9 @@ class KuiExpressionItemExample extends React.Component {
     );
   }
 }
+
+KuiExpressionItemExample.propTypes = {
+  defaultActiveButton: PropTypes.string.isRequired
+};
 
 export default KuiExpressionItemExample;

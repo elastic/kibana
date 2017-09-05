@@ -11,7 +11,7 @@ import {
 
 const Expression = require('./expression');
 const expressionSource = require('!!raw!./expression');
-const expressionHtml = renderToHtml(Expression);
+const expressionHtml = renderToHtml(Expression, { defaultActiveButton: 'example2' });
 
 export default props => (
   <GuidePage title={props.route.name}>
@@ -31,7 +31,7 @@ export default props => (
       </GuideText>
 
       <GuideDemo>
-        <Expression />
+        <Expression defaultActiveButton="example2"/>
       </GuideDemo>
     </GuideSection>
 

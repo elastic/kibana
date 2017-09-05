@@ -11,14 +11,12 @@ const POPOVER_ALIGN = [
 const KuiExpressionItemPopover = ({
   className,
   title,
-  isVisible,
   children,
   align,
   onOutsideClick,
   ...rest
 }) => {
   const classes = classNames('kuiExpressionItem__popover', className, {
-    'kuiExpressionItem__popover--isHidden': !isVisible,
     'kuiExpressionItem__popover--alignRight': align === 'right'
   });
   return (
@@ -45,7 +43,6 @@ KuiExpressionItemPopover.defaultProps = {
 KuiExpressionItemPopover.propTypes = {
   className: PropTypes.string,
   title: PropTypes.string.isRequired,
-  isVisible: PropTypes.bool.isRequired,
   children: PropTypes.node,
   align: PropTypes.oneOf(POPOVER_ALIGN),
   onOutsideClick: PropTypes.func.isRequired,

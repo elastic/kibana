@@ -11,9 +11,8 @@ describe('KuiExpressionItemPopover', () => {
   test('renders', () => {
     const component = (
       <KuiExpressionItemPopover
-        title={'title'}
-        isVisible={true}
-        align={'left'}
+        title="title"
+        align="left"
         onOutsideClick={()=>{}}
         {...requiredProps}
       />
@@ -27,9 +26,8 @@ describe('KuiExpressionItemPopover', () => {
       test('is rendered', () => {
         const component = render(
           <KuiExpressionItemPopover
-            title={'title'}
-            isVisible={true}
-            align={'left'}
+            title="title"
+            align="left"
             onOutsideClick={()=>{}}
           >
             popover content
@@ -40,40 +38,11 @@ describe('KuiExpressionItemPopover', () => {
       });
     });
 
-    describe('isVisible', () => {
-      test('true renders visible', () => {
-        const component = render(
-          <KuiExpressionItemPopover
-            title={'title'}
-            isVisible={true}
-            align={'left'}
-            onOutsideClick={()=>{}}
-          />
-        );
-
-        expect(component).toMatchSnapshot();
-      });
-
-      test('false renders hidden', () => {
-        const component = render(
-          <KuiExpressionItemPopover
-            title={'title'}
-            isVisible={false}
-            align={'left'}
-            onOutsideClick={()=>{}}
-          />
-        );
-
-        expect(component).toMatchSnapshot();
-      });
-    });
-
     describe('align', () => {
       test('renders default', () => {
         const component = render(
           <KuiExpressionItemPopover
-            title={'title'}
-            isVisible={true}
+            title="title"
             onOutsideClick={()=>{}}
           />
         );
@@ -85,8 +54,7 @@ describe('KuiExpressionItemPopover', () => {
         test(`renders the ${align} class`, () => {
           const component = render(
             <KuiExpressionItemPopover
-              title={'title'}
-              isVisible={false}
+              title="title"
               align={align}
               onOutsideClick={()=>{}}
             />
