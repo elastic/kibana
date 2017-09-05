@@ -8,57 +8,49 @@ export class ControlEditor extends Component {
     super(props);
 
     this.state = {
-      isEditorVisible: true
+      isEditorCollapsed: true
     };
   }
 
   handleToggleControlVisibility() {
-    this.setState({
-      isEditorVisible: !this.state.isEditorVisible
-    });
+    this.setState(prevState => (
+      {  isEditorCollapsed: !prevState.isEditorCollapsed }
+    ));
+  }
+
+  renderEditor() {
+    return (
+      <div>
+        <div className="kuiSideBarFormRow">
+          <label className="kuiSideBarFormRow__label">
+            Label
+          </label>
+          <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
+            <input
+              className="kuiTextInput"
+              type="text"
+              value={this.props.controlLabel}
+              onChange={this.props.handleLabelChange}
+            />
+          </div>
+        </div>
+
+        {this.props.children}
+      </div>
+    );
   }
 
   render() {
-    let editor;
-    if (this.state.isEditorVisible) {
-      editor = (
-        <div>
-          <div className="kuiSideBarFormRow">
-            <label className="kuiSideBarFormRow__label">
-              Label
-            </label>
-            <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
-              <input
-                className="kuiTextInput"
-                type="text"
-                value={this.props.controlParams.label}
-                onChange={this.props.handleLabelChange}
-              />
-            </div>
-          </div>
-
-          {this.props.children}
-        </div>
-      );
-    }
-
     const visibilityToggleClasses = classNames('fa', {
-      'fa-caret-right': !this.state.isEditorVisible,
-      'fa-caret-down': this.state.isEditorVisible
+      'fa-caret-right': !this.state.isEditorCollapsed,
+      'fa-caret-down': this.state.isEditorCollapsed
     });
-
-    let controlTitle = `${this.props.controlParams.type}: ${this.props.controlIndex}`;
-    if (this.props.controlParams.label) {
-      controlTitle = `${this.props.controlParams.type}: ${this.props.controlParams.label}`;
-    } else if (this.props.controlParams.fieldName) {
-      controlTitle = `${this.props.controlParams.type}: ${this.props.controlParams.fieldName}`;
-    }
 
     return (
       <div className="sidebar-item">
         <div className="vis-editor-agg-header">
           <button
-            aria-label={this.state.isEditorVisible ? 'Close Editor' : 'Open Editor'}
+            aria-label={this.state.isEditorCollapsed ? 'Close Editor' : 'Open Editor'}
             onClick={this.handleToggleControlVisibility.bind(this)}
             type="button"
             className="kuiButton kuiButton--primary kuiButton--small vis-editor-agg-header-toggle"
@@ -66,7 +58,7 @@ export class ControlEditor extends Component {
             <i aria-hidden="true" className={visibilityToggleClasses} />
           </button>
           <span className="vis-editor-agg-header-title ng-binding">
-            {controlTitle}
+            {this.props.controlTitle}
           </span>
           <div className="vis-editor-agg-header-controls kuiButtonGroup kuiButtonGroup--united">
             <button
@@ -94,7 +86,7 @@ export class ControlEditor extends Component {
           </div>
         </div>
 
-        {editor}
+        {this.state.isEditorCollapsed && this.renderEditor()}
       </div>
     );
   }
@@ -102,7 +94,8 @@ export class ControlEditor extends Component {
 
 ControlEditor.propTypes = {
   controlIndex: PropTypes.number.isRequired,
-  controlParams: PropTypes.object.isRequired,
+  controlLabel: PropTypes.string.isRequired,
+  controlTitle: PropTypes.string.isRequired,
   handleLabelChange: PropTypes.func.isRequired,
   moveUpControl: PropTypes.func.isRequired,
   moveDownControl: PropTypes.func.isRequired,

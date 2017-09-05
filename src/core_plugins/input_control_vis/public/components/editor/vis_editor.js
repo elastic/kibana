@@ -5,7 +5,7 @@ import { ControlEditor } from './control_editor';
 import { RangeControlEditor } from './range_control_editor';
 import { ListControlEditor } from './list_control_editor';
 import { KuiFieldGroup, KuiFieldGroupSection, KuiButton, KuiButtonIcon } from 'ui_framework/components';
-import { addControl, moveControl, newControl, removeControl, setControl } from '../../editor_utils';
+import { addControl, getTitle, moveControl, newControl, removeControl, setControl } from '../../editor_utils';
 
 export class InputControlVisEditor extends Component {
   constructor(props) {
@@ -117,6 +117,8 @@ export class InputControlVisEditor extends Component {
         <ControlEditor
           key={controlParams.id}
           controlIndex={controlIndex}
+          controlLabel={controlParams.label}
+          controlTitle={getTitle(controlParams, controlIndex)}
           controlParams={controlParams}
           handleLabelChange={this.handleLabelChange.bind(this, controlIndex)}
           moveUpControl={this.moveControl.bind(this, controlIndex, -1)}
@@ -155,15 +157,6 @@ export class InputControlVisEditor extends Component {
         {this.renderControls()}
 
         <div className="kuiSideBarFormRow">
-          <KuiButton
-            buttonType="primary"
-            type="button"
-            icon={<KuiButtonIcon type="create" />}
-            onClick={this.handleAddControl}
-            data-test-subj="inputControlEditorAddBtn"
-          >
-            Add
-          </KuiButton>
           <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
             <select
               className="kuiSelect"
@@ -174,6 +167,15 @@ export class InputControlVisEditor extends Component {
               <option value="list">Options list</option>
             </select>
           </div>
+          <KuiButton
+            buttonType="primary"
+            type="button"
+            icon={<KuiButtonIcon type="create" />}
+            onClick={this.handleAddControl}
+            data-test-subj="inputControlEditorAddBtn"
+          >
+            Add
+          </KuiButton>
         </div>
       </div>
     );

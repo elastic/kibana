@@ -1,67 +1,61 @@
 import PropTypes from 'prop-types';
-import React, { Component } from 'react';
+import React from 'react';
 import { IndexPatternSelect } from './index_pattern_select';
 import { FieldSelect } from './field_select';
 
-export class ListControlEditor extends Component {
-  constructor(props) {
-    super(props);
-  }
+function filterField(field) {
+  return field.aggregatable && ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type);
+}
 
-  filterField(field) {
-    return field.aggregatable && ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type);
-  }
+export function ListControlEditor(props) {
+  return (
+    <div>
 
-  render() {
-    return (
-      <div>
+      <IndexPatternSelect
+        value={props.controlParams.indexPattern}
+        onChange={props.handleIndexPatternChange}
+        getIndexPatterns={props.getIndexPatterns}
+      />
 
-        <IndexPatternSelect
-          value={this.props.controlParams.indexPattern}
-          onChange={this.props.handleIndexPatternChange}
-          getIndexPatterns={this.props.getIndexPatterns}
-        />
+      <FieldSelect
+        value={props.controlParams.fieldName}
+        indexPatternId={props.controlParams.indexPattern}
+        filterField={filterField}
+        onChange={props.handleFieldNameChange}
+        getIndexPattern={props.getIndexPattern}
+      />
 
-        <FieldSelect
-          value={this.props.controlParams.fieldName}
-          indexPatternId={this.props.controlParams.indexPattern}
-          filterField={this.filterField}
-          onChange={this.props.handleFieldNameChange}
-          getIndexPattern={this.props.getIndexPattern}
-        />
-
-        <div className="kuiSideBarFormRow">
-          <label className="kuiSideBarFormRow__label">
-            Enable Multiselect
-          </label>
-          <div className="kuiSideBarFormRow__control">
-            <input
-              className="kuiCheckBox"
-              type="checkbox"
-              checked={this.props.controlParams.options.multiselect}
-              onChange={this.props.handleMultiselectChange}
-            />
-          </div>
+      <div className="kuiSideBarFormRow">
+        <label className="kuiSideBarFormRow__label">
+          Enable Multiselect
+        </label>
+        <div className="kuiSideBarFormRow__control">
+          <input
+            className="kuiCheckBox"
+            type="checkbox"
+            checked={props.controlParams.options.multiselect}
+            onChange={props.handleMultiselectChange}
+          />
         </div>
-
-        <div className="kuiSideBarFormRow">
-          <label className="kuiSideBarFormRow__label">
-            Size
-          </label>
-          <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
-            <input
-              className="kuiTextInput"
-              type="number"
-              min="1"
-              value={this.props.controlParams.options.size}
-              onChange={this.props.handleSizeChange}
-            />
-          </div>
-        </div>
-
       </div>
-    );
-  }
+
+      <div className="kuiSideBarFormRow">
+        <label className="kuiSideBarFormRow__label">
+          Size
+        </label>
+        <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
+          <input
+            className="kuiTextInput"
+            type="number"
+            min="1"
+            value={props.controlParams.options.size}
+            onChange={props.handleSizeChange}
+          />
+        </div>
+      </div>
+
+    </div>
+  );
 }
 
 ListControlEditor.propTypes = {

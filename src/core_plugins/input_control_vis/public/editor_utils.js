@@ -65,3 +65,13 @@ export const newControl = (type) => ({
   type: type,
   options: getDefaultOptions(type),
 });
+
+export const getTitle = (controlParams, controlIndex) => {
+  let title = `${controlParams.type}: ${controlIndex}`;
+  if (controlParams.label) {
+    title = `${controlParams.type}: ${controlParams.label}`;
+  } else if (controlParams.fieldName) {
+    title = `${controlParams.type}: ${controlParams.fieldName}`;
+  }
+  return title;
+};
