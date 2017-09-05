@@ -1,4 +1,4 @@
-import { ConfigService } from '../config';
+import { ConfigService, Env } from '../config';
 import { HttpModule, HttpConfig } from './http';
 import { ElasticsearchModule, ElasticsearchConfigs } from './elasticsearch';
 import { KibanaModule, KibanaConfig } from './kibana';
@@ -15,7 +15,8 @@ export class Server {
 
   constructor(
     private readonly configService: ConfigService,
-    logger: LoggerFactory
+    logger: LoggerFactory,
+    env: Env
   ) {
     this.log = logger.get('server');
 
@@ -28,7 +29,7 @@ export class Server {
 
     this.elasticsearch = new ElasticsearchModule(elasticsearchConfigs$, logger);
     this.kibana = new KibanaModule(kibanaConfig$);
-    this.http = new HttpModule(httpConfig$, logger);
+    this.http = new HttpModule(httpConfig$, logger, env);
 
     const core = {
       elasticsearch: this.elasticsearch,

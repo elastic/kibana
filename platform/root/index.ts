@@ -22,7 +22,7 @@ export class Root {
 
   constructor(
     rawConfig$: Observable<{ [key: string]: any }>,
-    env: Env,
+    private readonly env: Env,
     private readonly onShutdown: OnShutdown
   ) {
     const loggerFactory = new MutableLoggerFactory();
@@ -49,7 +49,7 @@ export class Root {
 
     this.log.info('starting the server');
 
-    this.server = new Server(this.configService, this.logger);
+    this.server = new Server(this.configService, this.logger, this.env);
 
     try {
       await this.server.start();

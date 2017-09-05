@@ -1,6 +1,8 @@
 import * as supertest from 'supertest';
 import * as Chance from 'chance';
 
+import { Env } from '../../../config/Env';
+import { Logger } from '../../../logging/Logger';
 import { Router } from '../Router';
 import { HttpServer } from '../HttpServer';
 import * as schema from '../../../lib/schema';
@@ -12,8 +14,17 @@ let app: any;
 let port: number;
 
 beforeEach(() => {
+  const log: Logger = {
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+    trace: jest.fn(),
+    fatal: jest.fn(),
+    log: jest.fn()
+  };
   port = chance.integer({ min: 10000, max: 15000 });
-  server = new HttpServer();
+  server = new HttpServer(log, new Env('/kibana', {}));
   app = (server as any).httpServer;
 });
 

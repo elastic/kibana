@@ -3,6 +3,7 @@ import { resolve } from 'path';
 
 interface WithConfig {
   config?: string;
+  kbnServer?: any;
   [key: string]: any;
 }
 
@@ -40,6 +41,10 @@ export class Env {
 
   getPluginDir(pluginName: string) {
     return resolve(this.pluginsDir, pluginName, 'target', 'dist');
+  }
+
+  getKbnServer() {
+    return this.argv.kbnServer;
   }
 
   private getDefaultConfigFile() {

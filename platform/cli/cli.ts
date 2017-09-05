@@ -20,7 +20,7 @@ export const parseArgv = (argv: Array<string>) =>
     .epilogue(args.docs)
     .check(args.check(args.options)).argv;
 
-const run = (argv: { [key: string]: any }) => {
+export const run = (argv: { [key: string]: any }) => {
   if (argv.help) {
     return;
   }

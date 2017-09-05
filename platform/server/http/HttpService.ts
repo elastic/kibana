@@ -1,5 +1,6 @@
 import { Observable, Subscription } from 'rxjs';
 
+import { Env } from '../../config';
 import { HttpServer } from './HttpServer';
 import { HttpConfig } from './HttpConfig';
 import { Logger, LoggerFactory } from '../../logging';
@@ -14,10 +15,11 @@ export class HttpService implements CoreService {
 
   constructor(
     private readonly config$: Observable<HttpConfig>,
-    logger: LoggerFactory
+    logger: LoggerFactory,
+    env: Env
   ) {
     this.log = logger.get('http');
-    this.httpServer = new HttpServer();
+    this.httpServer = new HttpServer(logger.get('http', 'server'), env);
   }
 
   async start() {

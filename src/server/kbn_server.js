@@ -7,6 +7,7 @@ import loggingConfiguration from './logging/configuration';
 
 import configSetupMixin from './config/setup';
 import httpMixin from './http';
+import { platformMixin } from './platform';
 import loggingMixin from './logging';
 import warningsMixin from './warnings';
 import statusMixin from './status';
@@ -39,6 +40,9 @@ export default class KbnServer {
       configSetupMixin,
       // sets this.server
       httpMixin,
+
+      platformMixin,
+
       // adds methods for extending this.server
       serverExtensionsMixin,
       loggingMixin,
@@ -119,6 +123,7 @@ export default class KbnServer {
 
     await this.ready();
     await fromNode(cb => server.start(cb));
+    await server.startPlatform();
 
     if (isWorker) {
       // help parent process know when we are ready
@@ -131,6 +136,7 @@ export default class KbnServer {
 
   async close() {
     await fromNode(cb => this.server.stop(cb));
+    await this.server.stopPlatform();
   }
 
   async inject(opts) {

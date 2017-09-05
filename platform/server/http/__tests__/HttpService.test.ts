@@ -7,6 +7,7 @@ jest.mock('../HttpServer', () => ({
 import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 
+import { Env } from '../../../config/Env';
 import { HttpService } from '../HttpService';
 import { HttpConfig } from '../HttpConfig';
 import { Router } from '../Router';
@@ -22,7 +23,7 @@ test('creates an http server', () => {
 
   const config$ = new BehaviorSubject(config);
 
-  new HttpService(config$.asObservable(), logger);
+  new HttpService(config$.asObservable(), logger, new Env('/kibana', {}));
 
   expect(mockHttpServer.mock.instances.length).toBe(1);
 });
@@ -42,7 +43,7 @@ test('starts http server', () => {
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService(config$.asObservable(), logger);
+  const service = new HttpService(config$.asObservable(), logger, new Env('/kibana', {}));
 
   service.start();
 
@@ -62,7 +63,7 @@ test('logs error is already started', () => {
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService(config$.asObservable(), logger);
+  const service = new HttpService(config$.asObservable(), logger, new Env('/kibana', {}));
 
   service.start();
 
@@ -81,7 +82,7 @@ test('stops http server', () => {
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService(config$.asObservable(), logger);
+  const service = new HttpService(config$.asObservable(), logger, new Env('/kibana', {}));
 
   service.start();
 
@@ -105,7 +106,7 @@ test('register route handler', () => {
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService(config$.asObservable(), logger);
+  const service = new HttpService(config$.asObservable(), logger, new Env('/kibana', {}));
 
   const router = new Router('/foo');
   service.registerRouter(router);
@@ -128,7 +129,7 @@ test('throws if registering route handler after http server is started', () => {
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService(config$.asObservable(), logger);
+  const service = new HttpService(config$.asObservable(), logger, new Env('/kibana', {}));
 
   const router = new Router('/foo');
   service.registerRouter(router);

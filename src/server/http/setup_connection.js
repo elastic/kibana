@@ -7,11 +7,9 @@ export default function (kbnServer, server, config) {
   kbnServer = null;
 
   const host = config.get('server.host');
-  const port = config.get('server.port');
 
   const connectionOptions = {
     host,
-    port,
     state: {
       strictHeader: false
     },
@@ -25,7 +23,8 @@ export default function (kbnServer, server, config) {
           abortEarly: false
         }
       }
-    }
+    },
+    autoListen: false
   };
 
   const useSsl = config.get('server.ssl.enabled');
