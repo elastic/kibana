@@ -84,22 +84,10 @@ export class PluginsService implements CoreService {
       throw new Error(`'plugin' definition missing in plugin [${pluginPath}]`);
     }
 
-    if (!('dependencies' in plugin)) {
-      throw new Error(
-        `'dependencies' missing in plugin [${pluginPath}], must be '[]' if no dependencies`
-      );
-    }
-
-    if (!('configPath' in plugin)) {
-      throw new Error(
-        `'configPath' missing in plugin [${pluginPath}], must be set to 'undefined' if no config`
-      );
-    }
-
     // TODO validate these values
 
     const run = plugin.plugin;
-    const dependencies = plugin.dependencies;
+    const dependencies = plugin.dependencies || [];
     const configPath = plugin.configPath;
 
     return new Plugin({ name, dependencies, run, configPath }, this.logger);
