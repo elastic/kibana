@@ -24,6 +24,17 @@ export class FunctionForm extends BaseForm {
     if (!arg || skipRender) return null;
 
     // If value in expression, render the argument's template, wrapped in a remove control
+    if (!argValues && arg.required) {
+      return arg.render({
+        key: `${argType}-${expressionIndex}-${arg.name}-0`,
+        ...passedProps,
+        valueIndex: 0,
+        argValue: { type: undefined, value: '' },
+        onValueChange: onValueChange(arg.name, 0),
+        onValueRemove: onValueRemove(arg.name, 0),
+      });
+    }
+
     return argValues && argValues.map((argValue, valueIndex) =>
       arg.render({
         key: `${argType}-${expressionIndex}-${arg.name}-${valueIndex}`,
@@ -41,7 +52,7 @@ export class FunctionForm extends BaseForm {
     const { arg, argValues, skipRender } = dataArg;
 
     // skip arguments that aren't defined in the expression type schema
-    if (!arg || skipRender) return null;
+    if (arg.required || !arg || skipRender) return null;
 
     const newArgValue = fromExpression(arg.defaultValue) || { type: 'string', value: '' };
 

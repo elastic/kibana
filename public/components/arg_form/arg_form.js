@@ -13,6 +13,7 @@ export const ArgForm = (props) => {
     argTypeInstance,
     templateProps,
     error,
+    valueMissing,
     resetErrorState,
     label,
     setLabel,
@@ -59,7 +60,11 @@ export const ArgForm = (props) => {
           setExpand={setExpand}
         />
 
-        <ArgSimpleForm onRemove={onValueRemove}>
+        <ArgSimpleForm
+          required={argTypeInstance.required}
+          valueMissing={valueMissing}
+          onRemove={onValueRemove}
+        >
           { simpleForm }
         </ArgSimpleForm>
       </div>
@@ -75,6 +80,7 @@ ArgForm.propTypes = {
   argTypeInstance: PropTypes.object,
   templateProps: PropTypes.object,
   error: PropTypes.object,
+  valueMissing: PropTypes.bool,
   resetErrorState: PropTypes.func.isRequired,
   label: PropTypes.string,
   setLabel: PropTypes.func.isRequired,

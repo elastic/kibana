@@ -6,7 +6,17 @@ import { toInterfaceAst } from '../lib/map_arg_value';
 
 export class Arg {
   constructor(name, props) {
-    const propNames = ['displayName', 'description', 'multi', 'types', 'defaultValue', 'resolve', 'options'];
+    const propNames = [
+      'displayName',
+      'description',
+      'multi',
+      'required',
+      'types',
+      'defaultValue',
+      'resolve',
+      'options',
+    ];
+
     const argType = argTypeRegistry.get(props.argType);
     if (!argType) throw new Error(`Invalid arg type: ${props.argType}`);
 
@@ -15,6 +25,7 @@ export class Arg {
       displayName: name,
       description: argType.description || name,
       multi: false,
+      required: false,
       types: [],
       defaultValue: isUndefined(argType.defaultValue) ? '' : argType.defaultValue,
       options: {},
@@ -41,6 +52,7 @@ export class Arg {
     const formProps = {
       key,
       argTypeInstance: this,
+      valueMissing: (this.required && argValue.type == null),
       onValueChange,
       onValueRemove,
       templateProps,
