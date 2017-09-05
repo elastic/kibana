@@ -1,0 +1,46 @@
+import React from 'react';
+import { mount } from 'enzyme';
+import { DashboardViewMode } from '../dashboard_view_mode';
+import { DashboardPanel } from './dashboard_panel';
+
+const containerApiMock = {
+  addFilter: () => {},
+  getAppState: () => {},
+  createChildUistate: () => {},
+  registerPanelIndexPattern: () => {},
+  updatePanel: () => {}
+};
+
+const embeddableHandlerMock = {
+  getEditPath: () => {},
+  getTitleFor: ()  => {},
+  render: jest.fn()
+};
+
+function getProps(props = {}) {
+  const defaultTestProps = {
+    dashboardViewMode: DashboardViewMode.EDIT,
+    isFullScreenMode: false,
+    panel: {
+      gridData: { x: 0, y: 0, w: 6, h: 6, i: 1 },
+      panelIndex: '1',
+      type: 'visualization',
+      id: 'foo1'
+    },
+    getEmbeddableHandler: () => embeddableHandlerMock,
+    isExpanded: false,
+    getContainerApi: () => containerApiMock,
+    onToggleExpanded: () => {},
+    onDeletePanel: () => {}
+  };
+  return Object.assign(props, defaultTestProps);
+}
+
+test('DashboardPanel matches snapshot', () => {
+  const component = mount(<DashboardPanel {...getProps()} />);
+  expect(component).toMatchSnapshot();
+});
+
+test('and calls render', () => {
+  expect(embeddableHandlerMock.render.mock.calls.length).toBe(1);
+});

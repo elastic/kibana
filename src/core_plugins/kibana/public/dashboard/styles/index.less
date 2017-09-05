@@ -2,12 +2,22 @@
 @import (reference) "~ui/styles/mixins";
 @import "~ui/styles/local_search.less";
 
+@import "../../../../../../node_modules/react-grid-layout/css/styles.css";
+@import "../../../../../../node_modules/react-resizable/css/styles.css";
+
 .fullScreenModePlaceholder {
   text-align: center;
   width: 100%;
   height: 0;
   bottom: 0;
   position: absolute;
+}
+
+/**
+ * 1. If we don't give the resizable handler a larger z index value the spy toggle will take over the mouse hover.
+ */
+.react-resizable-handle {
+  z-index: 10; /* 1 */
 }
 
 .exitFullScreenMode {
@@ -52,7 +62,6 @@
  */
 
 .exitFullScreenModeText {
-  display: block;
   background: @globalColorBlue;
   color: tint(@globalColorBlue, 70%);
   line-height: 40px;
@@ -77,7 +86,7 @@
   width: 450px;
 }
 
-dashboard-grid {
+.dashboard-grid {
   display: block;
   margin: 0;
   padding: 5px;
@@ -93,24 +102,17 @@ dashboard-grid {
   border-radius: 4px;
 }
 
-.gridster {
-  list-style-type: none;
-  display: block;
+/**
+ * 1. Not entirely sure why but when the panel is within the grid, it requires height 100%. When it's an expanded
+ * panel, however, outside the grid, height: 100% will cause the panel not to expand properly.
+ * 2. We need this so the panel menu pop up shows up outside the boundaries of a panel.
+ */
+.react-grid-layout {
   background-color: @dashboard-bg;
-  margin: 0;
-  padding: 0;
 
-  .gs-resize-handle {
-    background-position: 50% 50% !important;
-    bottom: 0 !important;
-    right: 0 !important;
-    padding: 4px;
-    height: 25px;
-    width: 25px;
-  }
-
-  i.remove {
-    cursor: pointer;
+  .dashboard-panel {
+    height: 100%; /* 1. */
+    overflow: visible; /* 2. */
   }
 
   .gs-w {
@@ -127,6 +129,10 @@ dashboard-grid {
   .visualize-show-spy {
     visibility: visible;
   }
+
+  .panel-heading {
+    cursor: pointer;
+  }
 }
 
 .dashboard-container {
@@ -135,17 +141,22 @@ dashboard-grid {
   flex-direction: column;
 }
 
+dashboard-panel {
+  flex: 1;
+  display: flex;
+}
+
 /**
  * 1. Fix Firefox bug where a value of overflow: hidden will prevent scrolling in a panel where the spy panel does
  * not have enough room.
  * 2. react-select used in input control vis needs `visible` overflow to avoid clipping selection list
  */
-dashboard-panel {
+.dashboard-panel {
+  z-index: auto;
   flex: 1;
   display: flex;
   flex-direction: column;
 
-  height: 100%;
   background: @dashboard-panel-bg;
   color: @dashboard-panel-color;
   padding: 0;
@@ -165,7 +176,7 @@ dashboard-panel {
     justify-content: flex-start;
 
     .panel-heading {
-      padding: 0px 0px 0px 5px;
+      padding: 2px 10px 2px 5px;
       flex: 0 0 auto;
       white-space: nowrap;
       display: flex;
@@ -173,6 +184,40 @@ dashboard-panel {
       border-top-left-radius: 0;
       background-color: @white;
       border: none;
+
+      /**
+       * 1. The popover aligns with the right side of this icon, so we want the right edge as far so the right as
+       * possible to make the arrows line up.
+       */
+      .dashboardPanelPopOver {
+        margin-right: -10px; /* 1. */
+      }
+
+      /**
+       * 1. Required to get the pop up component arrow to line up with the menu icon.
+       */
+      .panel-dropdown {
+        padding: 0 20px; /* 1. */
+      }
+
+      .kuiPopover__body {
+        z-index: 25;
+      }
+
+      .dashboardPanelMenuItem {
+        padding: 10px;
+        color: @text-color;
+
+        p {
+          display: inline;
+          padding: 0 0 0 5px;
+        }
+
+        &:hover {
+          color: @link-hover-color;
+        }
+
+      }
 
       .panel-title {
         font-size: inherit;
@@ -234,4 +279,11 @@ dashboard-panel {
     flex: 1 1 0; /* 1 */
     overflow: auto; /* 1 */
   }
+}
+
+/**
+ * Allows popups inside each panel appear in front of other panels, if the boundaries are outside the panel itself.
+ */
+.react-grid-item:active {
+  z-index: 1; /* 1. */
 }

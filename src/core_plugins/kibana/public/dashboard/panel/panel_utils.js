@@ -8,8 +8,9 @@ export class PanelUtils {
    * @param {PanelState} panel
    */
   static initializeDefaults(panel) {
-    panel.size_x = panel.size_x || DEFAULT_PANEL_WIDTH;
-    panel.size_y = panel.size_y || DEFAULT_PANEL_HEIGHT;
+    panel.gridData = panel.gridData || {};
+    panel.gridData.w = panel.gridData.w || DEFAULT_PANEL_WIDTH;
+    panel.gridData.h = panel.gridData.h || DEFAULT_PANEL_HEIGHT;
 
     if (!panel.id) {
       // In the interest of backwards comparability
@@ -21,6 +22,21 @@ export class PanelUtils {
         throw new Error('Missing object id on panel');
       }
     }
+  }
+
+  static convertOldPanelData(panel) {
+    panel.gridData = {
+      x: panel.col - 1,
+      y: panel.row - 1,
+      w: panel.size_x || DEFAULT_PANEL_WIDTH,
+      h: panel.size_y || DEFAULT_PANEL_HEIGHT,
+      i: panel.panelIndex.toString(),
+      version: 6,
+    };
+    delete panel.size_x;
+    delete panel.size_y;
+    delete panel.row;
+    delete panel.col;
   }
 
   /**

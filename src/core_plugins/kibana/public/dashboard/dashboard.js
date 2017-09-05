@@ -4,8 +4,6 @@ import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import chrome from 'ui/chrome';
 
-import 'plugins/kibana/dashboard/grid';
-import 'plugins/kibana/dashboard/panel/panel';
 import 'ui/query_bar';
 
 import { SavedObjectNotFound } from 'ui/errors';
@@ -28,15 +26,35 @@ import { keyCodes } from 'ui_framework/services';
 import { DashboardContainerAPI } from './dashboard_container_api';
 import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
+import { EmbeddableHandlersRegistryProvider } from 'ui/embeddable/embeddable_handlers_registry';
+
+import {
+  DashboardGrid
+} from './grid/dashboard_grid';
+
+import {
+  DashboardPanel
+} from './panel';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
   'ngRoute',
+  'react',
   'kibana/courier',
   'kibana/config',
   'kibana/notify',
   'kibana/typeahead',
 ]);
+
+_.once(() => {
+  app.directive('dashboardGrid', function (reactDirective) {
+    return reactDirective(DashboardGrid);
+  });
+
+  app.directive('dashboardPanel', function (reactDirective) {
+    return reactDirective(DashboardPanel);
+  });
+})();
 
 uiRoutes
   .when(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
@@ -95,6 +113,8 @@ app.directive('dashboardApp', function ($injector) {
       const docTitle = Private(DocTitleProvider);
       const notify = new Notifier({ location: 'Dashboard' });
       $scope.queryDocLinks = documentationLinks.query;
+      const embeddableHandlers = Private(EmbeddableHandlersRegistryProvider);
+      $scope.getEmbeddableHandler = panelType => embeddableHandlers.byName[panelType];
 
       const dash = $scope.dash = $route.current.locals.dash;
       if (dash.id) {
@@ -110,6 +130,7 @@ app.directive('dashboardApp', function ($injector) {
           dashboardState.saveState();
         }
       );
+      $scope.getContainerApi = () => $scope.containerApi;
 
       // The 'previouslyStored' check is so we only update the time filter on dashboard open, not during
       // normal cross app navigation.
@@ -181,13 +202,13 @@ app.directive('dashboardApp', function ($injector) {
         !dashboardConfig.getHideWriteControls()
       );
 
-      $scope.toggleExpandPanel = (panelIndex) => {
-        if ($scope.expandedPanel && $scope.expandedPanel.panelIndex === panelIndex) {
-          $scope.expandedPanel = null;
-        } else {
-          $scope.expandedPanel =
+      $scope.minimizeExpandedPanel = () => {
+        $scope.expandedPanel = null;
+      };
+
+      $scope.expandPanel = (panelIndex) => {
+        $scope.expandedPanel =
             dashboardState.getPanels().find((panel) => panel.panelIndex === panelIndex);
-        }
       };
 
       $scope.updateQueryAndFetch = function (query) {

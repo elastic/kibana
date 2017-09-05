@@ -5,6 +5,8 @@ export const DashboardConstants = {
   CREATE_NEW_DASHBOARD_URL: '/dashboard',
 };
 
+export const DASHBOARD_GRID_COLUMN_COUNT = 12;
+
 export function createDashboardEditUrl(id) {
   return `/dashboard/${id}`;
 }

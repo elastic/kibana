@@ -76,6 +76,12 @@ export class SearchEmbeddableHandler extends EmbeddableHandler {
         const searchInstance = this.$compile(searchTemplate)(searchScope);
         const rootNode = angular.element(domNode);
         rootNode.append(searchInstance);
+
+        return () => {
+          searchInstance.remove();
+          searchScope.savedObj.destroy();
+          searchScope.$destroy();
+        };
       });
   }
 }

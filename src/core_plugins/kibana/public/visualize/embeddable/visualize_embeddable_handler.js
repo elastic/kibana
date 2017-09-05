@@ -56,10 +56,11 @@ export class VisualizeEmbeddableHandler extends EmbeddableHandler {
         const rootNode = angular.element(domNode);
         rootNode.append(visualizationInstance);
 
-        visualizationInstance.on('$destroy', function () {
+        return () => {
+          visualizationInstance.remove();
           visualizeScope.savedObj.destroy();
           visualizeScope.$destroy();
-        });
+        };
       });
   }
 }
