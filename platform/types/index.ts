@@ -58,12 +58,12 @@ export declare class As<S extends string> {
 }
 
 // TODO inline all of these
-import * as schemaLib from './lib/schema';
-import { ConfigService } from './config';
-import { HttpModule } from './server/http';
-import { KibanaModule } from './server/kibana';
-import { ElasticsearchModule } from './server/elasticsearch';
-import { LoggerFactory } from './logging';
+import * as schemaLib from '../lib/schema';
+import { ConfigService } from '../config';
+import { HttpModule } from '../server/http';
+import { KibanaModule } from '../server/kibana';
+import { ElasticsearchModule } from '../server/elasticsearch';
+import { LoggerFactory } from '../logging';
 
 export type Schema = typeof schemaLib;
 
