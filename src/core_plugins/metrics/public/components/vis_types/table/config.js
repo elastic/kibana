@@ -7,6 +7,7 @@ import FieldSelect from '../../aggs/field_select';
 import Select from 'react-select';
 import YesNo from '../../yes_no';
 import ColorRules from '../../color_rules';
+import { htmlIdGenerator } from '../../../lib/html_id_generator';
 
 class TableSeriesConfig extends Component {
 
@@ -24,6 +25,7 @@ class TableSeriesConfig extends Component {
     const model = { ...defaults, ...this.props.model };
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
+    const htmlId = htmlIdGenerator();
 
     const functionOptions = [
       { label: 'Sum', value: 'sum' },
@@ -45,18 +47,18 @@ class TableSeriesConfig extends Component {
               onChange={handleSelectChange('formatter')}
               value={model.formatter}
             />
-            <label className="vis_editor__label" htmlFor="valueTemplateInput">Template (eg.<code>{'{{value}}/s'}</code>)</label>
+            <label className="vis_editor__label" htmlFor={htmlId('valueTemplateInput')}>Template (eg.<code>{'{{value}}/s'}</code>)</label>
             <input
-              id="valueTemplateInput"
+              id={htmlId('valueTemplateInput')}
               className="vis_editor__input-grows"
               onChange={handleTextChange('value_template')}
               value={model.value_template}
             />
           </div>
           <div className="vis_editor__series_config-row">
-            <label className="vis_editor__label" htmlFor="filterInput">Filter</label>
+            <label className="vis_editor__label" htmlFor={htmlId('filterInput')}>Filter</label>
             <input
-              id="filterInput"
+              id={htmlId('filterInput')}
               className="vis_editor__input-grows"
               onChange={handleTextChange('filter')}
               value={model.filter}
@@ -77,10 +79,10 @@ class TableSeriesConfig extends Component {
                 onChange={handleSelectChange('aggregate_by')}
               />
             </div>
-            <label className="vis_editor__label" htmlFor="aggregateFunctionInput">Aggregate Function</label>
+            <label className="vis_editor__label" htmlFor={htmlId('aggregateFunctionInput')}>Aggregate Function</label>
             <div className="vis_editor__row_item">
               <Select
-                inputProps={{ id: 'aggregateFunctionInput' }}
+                inputProps={{ id: htmlId('aggregateFunctionInput') }}
                 value={model.aggregate_function}
                 options={functionOptions}
                 onChange={handleSelectChange('aggregate_function')}

@@ -6,6 +6,7 @@ import createTextHandler from '../lib/create_text_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import uuid from 'uuid';
 import YesNo from '../yes_no';
+import { htmlIdGenerator } from '../../lib/html_id_generator';
 
 class TablePanelConfig extends Component {
 
@@ -33,6 +34,7 @@ class TablePanelConfig extends Component {
     const model = { ...defaults, ...this.props.model };
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
+    const htmlId = htmlIdGenerator();
     let view;
     if (selectedTab === 'data') {
       view = (
@@ -46,26 +48,27 @@ class TablePanelConfig extends Component {
                 </p>
               </div>
               <div className="vis_editor__vis_config-row">
-                <label className="vis_editor__label">Group By Field</label>
+                <label className="vis_editor__label" htmlFor={htmlId('field')}>Group By Field</label>
                 <div className="vis_editor__row_item">
                   <FieldSelect
+                    id={htmlId('field')}
                     fields={this.props.fields}
                     value={model.pivot_id}
                     indexPattern={model.index_pattern}
                     onChange={handleSelectChange('pivot_id')}
                   />
                 </div>
-                <label className="vis_editor__label" htmlFor="pivotLabelInput">Column Label</label>
+                <label className="vis_editor__label" htmlFor={htmlId('pivotLabelInput')}>Column Label</label>
                 <input
-                  id="pivotLabelInput"
+                  id={htmlId('pivotLabelInput')}
                   className="vis_editor__input-grows"
                   type="text"
                   onChange={handleTextChange('pivot_label')}
                   value={model.pivot_label}
                 />
-                <label className="vis_editor__label" htmlFor="pivotRowsInput">Rows</label>
+                <label className="vis_editor__label" htmlFor={htmlId('pivotRowsInput')}>Rows</label>
                 <input
-                  id="pivotRowsInput"
+                  id={htmlId('pivotRowsInput')}
                   className="vis_editor__input-number"
                   type="number"
                   onChange={handleTextChange('pivot_rows')}
@@ -86,11 +89,11 @@ class TablePanelConfig extends Component {
       view = (
         <div className="vis_editor__container">
           <div className="vis_editor__vis_config-row">
-            <label className="vis_editor__label" htmlFor="drilldownInput">Item Url (This supports mustache templating.
+            <label className="vis_editor__label" htmlFor={htmlId('drilldownInput')}>Item Url (This supports mustache templating.
               <code>{'{{key}}'}</code> is set to the term)
             </label>
             <input
-              id="drilldownInput"
+              id={htmlId('drilldownInput')}
               className="vis_editor__input-grows"
               onChange={handleTextChange('drilldown_url')}
               value={model.drilldown_url}
@@ -102,17 +105,17 @@ class TablePanelConfig extends Component {
             onChange={this.props.onChange}
           />
           <div className="vis_editor__vis_config-row">
-            <label className="vis_editor__label" htmlFor="panelFilterInput">Panel Filter</label>
+            <label className="vis_editor__label" htmlFor={htmlId('panelFilterInput')}>Panel Filter</label>
             <input
-              id="panelFilterInput"
+              id={htmlId('panelFilterInput')}
               className="vis_editor__input-grows"
               type="text"
               onChange={handleTextChange('filter')}
               value={model.filter}
             />
-            <label className="vis_editor__label">Ignore Global Filter</label>
+            <label className="vis_editor__label" htmlFor={htmlId('globalFilterOption')}>Ignore Global Filter</label>
             <YesNo
-              id="globalFilterOption"
+              id={htmlId('globalFilterOption')}
               value={model.ignore_global_filter}
               name="ignore_global_filter"
               onChange={this.props.onChange}
