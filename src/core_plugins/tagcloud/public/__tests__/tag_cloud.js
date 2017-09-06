@@ -5,6 +5,7 @@ import d3 from 'd3';
 import { fromNode, delay } from 'bluebird';
 
 describe('tag cloud tests', function () {
+  require('test_utils/no_digest_promises').activateForSuite();
 
   const minValue = 1;
   const maxValue = 9;

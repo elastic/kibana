@@ -1,5 +1,7 @@
 import angular from 'angular';
 import _ from 'lodash';
+import { connectBluebirdToAngular } from 'ui/promises/connect_bluebird_to_angular';
+
 /**
  * This module is used by Kibana to create and reuse angular modules. Angular modules
  * can only be created once and need to have their dependencies at creation. This is
@@ -84,6 +86,7 @@ export function get(moduleName, requires) {
   if (module === void 0) {
     // create the module
     module = existingModules[moduleName] = angular.module(moduleName, []);
+    connectBluebirdToAngular(module);
 
     module.close = _.partial(close, moduleName);
 

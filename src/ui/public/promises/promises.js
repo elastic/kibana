@@ -1,106 +1,26 @@
-import _ from 'lodash';
 import { uiModules } from 'ui/modules';
+import { Promise } from 'bluebird';
 
 const module = uiModules.get('kibana');
 
-// Provides a tiny subset of the excelent API from
+// Provides a tiny subset of the excellent API from
 // bluebird, reimplemented using the $q service
-module.service('Promise', function ($q, $timeout) {
-  function Promise(fn) {
-    if (typeof this === 'undefined') throw new Error('Promise constructor must be called with "new"');
-
-    const defer = $q.defer();
-    try {
-      fn(defer.resolve, defer.reject);
-    } catch (e) {
-      defer.reject(e);
-    }
-    return defer.promise;
-  }
-
-  Promise.all = Promise.props = $q.all;
-  Promise.resolve = function (val) {
-    const defer = $q.defer();
-    defer.resolve(val);
-    return defer.promise;
-  };
-  Promise.reject = function (reason) {
-    const defer = $q.defer();
-    defer.reject(reason);
-    return defer.promise;
-  };
-  Promise.cast = $q.when;
-  Promise.defer = $q.defer;
-  Promise.delay = function (ms) {
-    return $timeout(_.noop, ms);
-  };
-  Promise.method = function (fn) {
-    return function () {
-      const args = Array.prototype.slice.call(arguments);
-      return Promise.try(fn, args, this);
-    };
-  };
-  Promise.nodeify = function (promise, cb) {
-    promise.then(function (val) {
-      cb(void 0, val);
-    }, cb);
-  };
+module.service('Promise', function () {
+  /**
+   * Unfortunately the old Promise.map we manually wrote for $q was not a perfect equivalent to bluebirds built in
+   * Promise.map.  Seems to be that this version is more synchronous than bluebirds, so that you don't always need
+   * await.
+   * TODO: For each situation that relies on this special version of map, convert to the original, and get tests
+   * working.
+   *
+   * @param arr
+   * @param fn
+   * @return {Promise.<*>}
+   */
   Promise.map = function (arr, fn) {
     return Promise.all(arr.map(function (i, el, list) {
       return Promise.try(fn, [i, el, list]);
     }));
-  };
-  Promise.each = function (arr, fn) {
-    const queue = arr.slice(0);
-    let i = 0;
-    return (function next() {
-      if (!queue.length) return arr;
-      return Promise.try(fn, [arr.shift(), i++]).then(next);
-    }());
-  };
-  Promise.is = function (obj) {
-    // $q doesn't create instances of any constructor, promises are just objects with a then function
-    // https://github.com/angular/angular.js/blob/58f5da86645990ef984353418cd1ed83213b111e/src/ng/q.js#L335
-    return obj && typeof obj.then === 'function';
-  };
-  Promise.halt = _.once(function () {
-    const promise = new Promise();
-    promise.then = _.constant(promise);
-    promise.catch = _.constant(promise);
-    return promise;
-  });
-  Promise.try = function (fn, args, ctx) {
-    if (typeof fn !== 'function') {
-      return Promise.reject(new TypeError('fn must be a function'));
-    }
-
-    let value;
-
-    if (_.isArray(args)) {
-      try { value = fn.apply(ctx, args); }
-      catch (e) { return Promise.reject(e); }
-    } else {
-      try { value = fn.call(ctx, args); }
-      catch (e) { return Promise.reject(e); }
-    }
-
-    return Promise.resolve(value);
-  };
-  Promise.fromNode = function (takesCbFn) {
-    return new Promise(function (resolve, reject) {
-      takesCbFn(function (err, ...results) {
-        if (err) reject(err);
-        else if (results.length > 1) resolve(results);
-        else resolve(results[0]);
-      });
-    });
-  };
-  Promise.race = function (iterable) {
-    return new Promise((resolve, reject) => {
-      for (const i of iterable) {
-        Promise.resolve(i).then(resolve, reject);
-      }
-    });
   };
 
   return Promise;

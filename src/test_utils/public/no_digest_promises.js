@@ -1,4 +1,5 @@
 import Bluebird from 'bluebird';
+//import { Promise } from 'bluebird';
 import 'ui/promises';
 import { uiModules } from 'ui/modules';
 
@@ -20,14 +21,22 @@ let active = false;
 
 uiModules
 .get('kibana')
-.config(function ($provide) {
-  $provide.decorator('Promise', function ($delegate) {
-    return active ? Bluebird : $delegate;
-  });
+.config(function () {
+  if (active) {
+    Bluebird.setScheduler(function (fn) {
+      setTimeout(fn, 0);
+    });
+    Bluebird.ignoreSetScheduler = true;
+  }
 });
 
-function activate() { active = true; }
-function deactivate() { active = false; }
+function activate() {
+  active = true;
+}
+function deactivate() {
+  active = false;
+  Bluebird.ignoreSetScheduler = false;
+}
 
 export default {
   activate: activate,
