@@ -100,6 +100,37 @@ export function SimpleGaugeProvider() {
       return this.colorFunc(labels[bucket]);
     }
 
+    wrapText(texts, width) {
+      texts.each(function () {
+        const text = d3.select(this);
+        const words = text.text().split(/\s+/).reverse();
+        const lineHeight = 1.1;
+        const y = text.attr('y');
+        const dy = parseFloat(text.attr('dy'));
+        let word;
+        let lineNumber = 0;
+        let line = [];
+        let tspan = text.text(null).append('tspan')
+          .attr('x', 0)
+          .attr('y', y)
+          .attr('dy', dy + 'em');
+        while (word = words.pop()) {
+          line.push(word);
+          tspan.text(line.join(' '));
+          if (tspan.node().getComputedTextLength() > width) {
+            line.pop();
+            tspan.text(line.join(' '));
+            line = [ word ];
+            tspan = text.append('tspan')
+              .attr('x', 0)
+              .attr('y', y)
+              .attr('dy', ++lineNumber * lineHeight + dy + 'em')
+              .text(word);
+          }
+        }
+      });
+    }
+
     drawGauge(svg, data, width) {
       const tooltip = this.gaugeChart.tooltip;
       const isTooltip = this.gaugeChart.handler.visConfig.get('addTooltip');
@@ -128,10 +159,10 @@ export function SimpleGaugeProvider() {
       const self = this;
       const series = gauges
         .append('rect')
-        .attr('x', '-50%')
-        .attr('y', '-50%')
-        .attr('width', '99%')
-        .attr('height', '99%')
+        .attr('x', '-45%')
+        .attr('y', '-45%')
+        .attr('width', '90%')
+        .attr('height', '90%')
         .style('fill', function (d) {
           return bgColor ? self.getColorBucket(d.y) : 'transparent';
         });
@@ -154,8 +185,14 @@ export function SimpleGaugeProvider() {
           .append('text')
           .attr('class', 'chart-label')
           .text(data.label)
-          .attr('y', Math.min(-25, -fontSize))
-          .attr('style', 'dominant-baseline: central; text-anchor: middle;')
+          .attr('dy', 0)
+          .attr('style', 'dominant-baseline: central; text-anchor: middle; pointer-events: none;')
+          .call(this.wrapText, width)
+          .attr('y', function () {
+            const textMargin = 10;
+            const height = this.getBBox().height;
+            return (-fontSize / 2) - height - textMargin;
+          })
           .style('display', isTextTooLong)
           .style('fill', bgFill);
 
@@ -164,7 +201,9 @@ export function SimpleGaugeProvider() {
           .attr('class', 'chart-label')
           .text(this.gaugeConfig.style.subText)
           .attr('y', Math.max(15, fontSize))
-          .attr('style', 'dominant-baseline: central; text-anchor: middle;')
+          .attr('dy', 0)
+          .attr('style', 'dominant-baseline: central; text-anchor: middle; pointer-events: none;')
+          .call(this.wrapText, width)
           .style('display', isTextTooLong)
           .style('fill', bgFill);
       }
@@ -183,7 +222,8 @@ export function SimpleGaugeProvider() {
           }
           return d.y;
         })
-        .attr('style', 'dominant-baseline: central; font-weight: bold; white-space: nowrap;text-overflow: ellipsis;overflow: hidden;')
+        .attr('style', `dominant-baseline: central; font-weight: bold; white-space: nowrap;
+          text-overflow: ellipsis;overflow: hidden; pointer-events: none;`)
         .style('text-anchor', 'middle')
         .style('font-size', fontSize + 'pt')
         .style('fill', function () {
