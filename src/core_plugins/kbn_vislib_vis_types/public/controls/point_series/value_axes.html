@@ -24,6 +24,9 @@
         class="kuiSideBarCollapsibleTitle__label"
         ng-click="isValueAxisOpen = !isValueAxisOpen"
         kbn-accessible-click
+        aria-expanded="{{!!isValueAxisOpen}}"
+        aria-controls="axisOptions{{axis.id}}"
+        aria-label="Toggle {{axis.name}} options"
       >
         <span
           aria-hidden="true"
@@ -48,7 +51,7 @@
       ></button>
     </div>
 
-    <div ng-show="isValueAxisOpen" class="kuiSideBarCollapsibleSection">
+    <div id="axisOptions{{axis.id}}" ng-show="isValueAxisOpen" class="kuiSideBarCollapsibleSection">
       <!-- General -->
       <div class="kuiSideBarSection">
         <div class="kuiSideBarFormRow">
