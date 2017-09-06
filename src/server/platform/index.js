@@ -8,9 +8,9 @@ export function platformMixin(kbnServer, server) {
   });
 
   // provide a simple way to expose static files
-  server.decorate('server', 'stopPlatform', () => {
+  server.decorate('server', 'stopPlatform', async () => {
     if (stopPlatform) {
-      stopPlatform();
+      await stopPlatform();
     }
   });
 

@@ -46,10 +46,12 @@ export const run = (argv: { [key: string]: any }) => {
   process.on('SIGINT', () => shutdown());
   process.on('SIGTERM', () => shutdown());
 
-  function shutdown() {
+  async function shutdown() {
     rawConfigService.stop();
-    root.shutdown();
+    await root.shutdown();
   }
+
+  return shutdown;
 };
 
 export default (argv: Array<string>) => run(parseArgv(argv));
