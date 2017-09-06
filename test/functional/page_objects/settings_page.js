@@ -294,7 +294,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         await PageObjects.common.sleep(2000);
         await (await this.getCreateIndexPatternGoToStep2Button()).click();
         await PageObjects.common.sleep(2000);
-        await this.selectTimeFieldOption(timefield);
+        if (timefield) {
+          await this.selectTimeFieldOption(timefield);
+        }
         await (await this.getCreateIndexPatternCreateButton()).click();
       });
       await PageObjects.header.waitUntilLoadingHasFinished();

@@ -8,6 +8,7 @@ import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import createNumberHandler from '../lib/create_number_handler';
+import { htmlIdGenerator } from '../../lib/html_id_generator';
 
 export const MovingAverageAgg = props => {
   const { siblings } = props;
@@ -33,6 +34,7 @@ export const MovingAverageAgg = props => {
     { label: 'True', value: 1 },
     { label: 'False', value: 0 }
   ];
+  const htmlId = htmlIdGenerator();
   return (
     <AggRow
       disableDelete={props.disableDelete}
@@ -64,8 +66,9 @@ export const MovingAverageAgg = props => {
         </div>
         <div className="vis_editor__agg_row-item">
           <div className="vis_editor__row_item">
-            <div className="vis_editor__label">Model</div>
+            <label className="vis_editor__label" htmlFor={htmlId('model')}>Model</label>
             <Select
+              inputProps={{ id: htmlId('model') }}
               clearable={false}
               placeholder="Select..."
               onChange={handleSelectChange('model')}
@@ -74,8 +77,11 @@ export const MovingAverageAgg = props => {
             />
           </div>
           <div className="vis_editor__row_item">
-            <div className="vis_editor__label">Window Size</div>
+            <label className="vis_editor__label" htmlFor={htmlId('windowSize')}>
+              Window Size
+            </label>
             <input
+              id={htmlId('windowSize')}
               className="vis_editor__input-grows-100"
               type="text"
               onChange={handleNumberChange('window')}
@@ -83,8 +89,9 @@ export const MovingAverageAgg = props => {
             />
           </div>
           <div className="vis_editor__row_item">
-            <div className="vis_editor__label">Minimize</div>
+            <label className="vis_editor__label" htmlFor={htmlId('minimize')}>Minimize</label>
             <Select
+              inputProps={{ id: htmlId('minimize') }}
               placeholder="Select..."
               onChange={handleSelectChange('minimize')}
               value={model.minimize}
@@ -94,8 +101,11 @@ export const MovingAverageAgg = props => {
         </div>
         <div className="vis_editor__agg_row-item">
           <div className="vis_editor__row_item">
-            <div className="vis_editor__label">Settings (<code>Key=Value</code> space-delimited)</div>
+            <label className="vis_editor__label" htmlFor={htmlId('settings')}>
+              Settings (<code>Key=Value</code> space-delimited)
+            </label>
             <input
+              id={htmlId('settings')}
               className="vis_editor__input-grows-100"
               type="text"
               onChange={handleTextChange('settings')}

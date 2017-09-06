@@ -33,6 +33,8 @@ uiModules
       const getVisContainer = jQueryGetter('.vis-container');
       const getSpyContainer = jQueryGetter('.visualize-spy-container');
 
+      $scope.addLegend = false;
+
       // Show no results message when isZeroHits is true and it requires search
       $scope.showNoResultsMessage = function () {
         const requiresSearch = _.get($scope, 'vis.type.requiresSearch');
@@ -124,7 +126,8 @@ uiModules
         if (!$scope.vis || !$scope.vis.initialized || ($scope.vis.type.requiresSearch && !$scope.visData)) {
           return;
         }
-        renderFunction();
+        $scope.addLegend = $scope.vis.params.addLegend;
+        $timeout(renderFunction);
       });
 
       $scope.$on('$destroy', () => {

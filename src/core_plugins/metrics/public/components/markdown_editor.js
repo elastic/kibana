@@ -1,4 +1,7 @@
 /* eslint max-len:0 */
+/* eslint-disable jsx-a11y/anchor-is-valid, jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
+// Markdown builder is not yet properly accessible
+
 import PropTypes from 'prop-types';
 
 import React, { Component } from 'react';
