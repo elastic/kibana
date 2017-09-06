@@ -1,7 +1,7 @@
 import { SslConfig } from './SslConfig';
 import { Env } from '../../config';
 import { ByteSizeValue } from '../../lib/ByteSizeValue';
-import { Schema, typeOfSchema } from '../../types';
+import { Schema, typeOfSchema } from '../../types/schema';
 
 const validHostnameRegex = /^(([A-Z0-9]|[A-Z0-9][A-Z0-9\-]*[A-Z0-9])\.)*([A-Z0-9]|[A-Z0-9][A-Z0-9\-]*[A-Z0-9])$/i;
 const validBasePathRegex = /(^$|^\/.*[^\/]$)/;

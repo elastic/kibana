@@ -1,5 +1,5 @@
 import { createWriteStream, WriteStream } from 'fs';
-import { Schema, typeOfSchema } from '../../../types';
+import { Schema, typeOfSchema } from '../../../types/schema';
 import { Layout, Layouts } from '../../layouts/Layouts';
 import { LogRecord } from '../../LogRecord';
 import { DisposableAppender } from '../Appenders';

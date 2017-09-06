@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 
-import { Schema } from '../../types';
+import { Schema } from '../../types/schema';
 import { As } from '../../types/as';
 import * as schemaLib from '../../lib/schema';
 import { ConfigWithSchema } from '../../config';

@@ -1,7 +1,7 @@
 import * as crypto from 'crypto';
 import { has } from 'lodash';
 
-import { Schema, typeOfSchema } from '../../types';
+import { Schema, typeOfSchema } from '../../types/schema';
 
 const createSslSchema = (schema: Schema) => {
   const { object, boolean, string, arrayOf, oneOf, literal, maybe } = schema;

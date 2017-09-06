@@ -1,4 +1,4 @@
-import { Schema, typeOfSchema } from '../../../types';
+import { Schema, typeOfSchema } from '../../../types/schema';
 import { LogRecord } from '../../LogRecord';
 import { Layout, Layouts } from '../../layouts/Layouts';
 import { DisposableAppender } from '../Appenders';
