@@ -31,6 +31,16 @@ Reporting users should upgrade to X-Pack version 5.5.2 or Reporting Plugin versi
 CVE ID: CVE-2017-8446
 
 [float]
+[[known-5.5.2]]
+=== Known issues
+.Visualization regression in Internet Explorer 11 causes fatal errors
+
+A bug was introduced in Kibana version 5.5.2, when a user is using Internet Explorer 11
+a full-page fatal error occurs when mousing over buckets in a bar or line chart. A
+workaround for this issue is to use any of the other supported browsers until a fix is
+released.
+
+[float]
 [[enhancement-5.5.2]]
 === Enhancements
 
