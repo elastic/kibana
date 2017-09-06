@@ -70,9 +70,21 @@ export function QueryManagerProvider(Private) {
       }
     }
 
+    function getQuery() {
+      return {
+        ...state.query
+      };
+    }
+
+    function updateQuery(newQuery) {
+      state.query = newQuery;
+    }
+
     return {
       add,
       addLegacyFilter,
+      getQuery,
+      updateQuery,
     };
 
   };
