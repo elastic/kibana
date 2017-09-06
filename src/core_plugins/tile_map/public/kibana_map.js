@@ -405,7 +405,7 @@ export class KibanaMap extends EventEmitter {
 
     // When map has not width or height, calculate map dimensions based on parent dimensions
     if (southEastLat === northWestLat || southEastLng === northWestLng) {
-      let parent = this._containerNode.parentElement;
+      let parent = this._containerNode.parentNode;
       while (parent && (parent.clientWidth === 0 || parent.clientHeight === 0)) {
         parent = parent.parentNode;
       }
