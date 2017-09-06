@@ -24,7 +24,7 @@ export class HttpService implements CoreService {
 
   async start() {
     this.configSubscription = this.config$
-      .filter(config => {
+      .filter(() => {
         if (this.httpServer.isListening()) {
           // If the server is already running we can't make any config changes
           // to it, so we warn and don't allow the config to pass through.
@@ -40,11 +40,11 @@ export class HttpService implements CoreService {
       .switchMap(
         config =>
           new Observable<void>(() => {
-            this.startHttpServer(config);
+            this.httpServer.start(config);
 
             return () => {
               // TODO: This is async! :/
-              this.stopHttpServer();
+              this.httpServer.stop();
             };
           })
       )
@@ -70,18 +70,5 @@ export class HttpService implements CoreService {
       this.log.info(`registering route handler for [${router.path}]`);
       this.httpServer.registerRouter(router);
     }
-  }
-
-  private async startHttpServer(config: HttpConfig) {
-    const { host, port } = config;
-
-    this.log.info(`starting http server [${host}:${port}]`);
-
-    await this.httpServer.start(port, host);
-  }
-
-  private stopHttpServer() {
-    this.log.debug('closing http server');
-    this.httpServer.stop();
   }
 }

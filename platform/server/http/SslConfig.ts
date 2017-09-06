@@ -44,11 +44,23 @@ export class SslConfig {
   static createSchema = createSslSchema;
 
   enabled: boolean;
+  key: string | undefined;
+  certificate: string | undefined;
+  certificateAuthorities: string[] | undefined;
+  keyPassphrase: string | undefined;
+  cipherSuites: string[];
+  supportedProtocols: string[] | undefined;
 
   /**
    * @internal
    */
   constructor(config: SslConfigType) {
     this.enabled = config.enabled;
+    this.key = config.key;
+    this.certificate = config.certificate;
+    this.certificateAuthorities = config.certificateAuthorities;
+    this.keyPassphrase = config.keyPassphrase;
+    this.cipherSuites = config.cipherSuites;
+    this.supportedProtocols = config.supportedProtocols;
   }
 }
