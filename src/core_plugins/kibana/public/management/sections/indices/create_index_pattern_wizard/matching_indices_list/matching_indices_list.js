@@ -20,6 +20,7 @@ module.directive('matchingIndicesList', function ($filter, pagerFactory) {
       indices: '=',
       pattern: '=',
       isLoading: '=',
+      selectPattern: '&'
     },
     link: function (scope) {
       scope.$watch('matchingIndicesList.indices', () => {
@@ -36,6 +37,10 @@ module.directive('matchingIndicesList', function ($filter, pagerFactory) {
     },
     controller: callAfterBindingsWorkaround(function () {
       this.pageOfIndices = [];
+
+      this.clickPattern = name => {
+        this.selectPattern({ name });
+      };
 
       this.calculateItemsOnPage = () => {
         const limitTo = $filter('limitTo');
