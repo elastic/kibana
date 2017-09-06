@@ -1,4 +1,4 @@
-import { KibanaPluginFeatures } from './types';
+import { KibanaPluginFeatures } from './KibanaPluginFeatures';
 import { KibanaCoreModules } from './KibanaCoreModules';
 import { ConfigWithSchema } from '../../config';
 import * as schema from '../../lib/schema';
