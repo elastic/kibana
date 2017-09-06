@@ -12,14 +12,14 @@ function VisPickerItem(props) {
     labelClassName += ' selected';
   }
   return (
-    <div className={itemClassName} onClick={() => props.onClick(type)}>
+    <button role="tab" className={itemClassName} onClick={() => props.onClick(type)}>
       <div className={iconClassName}>
         <i className={`fa ${icon}`} />
       </div>
-      <div className={labelClassName} tabIndex="0">
+      <div className={labelClassName}>
         { label }
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -55,7 +55,7 @@ function VisPicker(props) {
   });
 
   return (
-    <div className="vis_editor__vis_picker-container">
+    <div className="vis_editor__vis_picker-container" role="tablist">
       { icons }
     </div>
   );

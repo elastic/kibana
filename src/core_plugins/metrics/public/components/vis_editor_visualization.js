@@ -113,6 +113,7 @@ class VisEditorVisualization extends Component {
         </div>
         {applyButton}
         <div
+          aria-hidden="true"
           className="vis_editor__visualization-draghandle"
           onMouseDown={this.handleMouseDown}
           onMouseUp={this.handleMouseUp}
