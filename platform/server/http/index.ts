@@ -13,7 +13,11 @@ export { HttpConfig };
 export class HttpModule {
   readonly service: HttpService;
 
-  constructor(readonly config$: Observable<HttpConfig>, logger: LoggerFactory, env: Env) {
+  constructor(
+    readonly config$: Observable<HttpConfig>,
+    logger: LoggerFactory,
+    env: Env
+  ) {
     this.service = new HttpService(this.config$, logger, env);
   }
 }

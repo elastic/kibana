@@ -43,7 +43,11 @@ test('starts http server', () => {
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService(config$.asObservable(), logger, new Env('/kibana', {}));
+  const service = new HttpService(
+    config$.asObservable(),
+    logger,
+    new Env('/kibana', {})
+  );
 
   service.start();
 
@@ -63,7 +67,11 @@ test('logs error is already started', () => {
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService(config$.asObservable(), logger, new Env('/kibana', {}));
+  const service = new HttpService(
+    config$.asObservable(),
+    logger,
+    new Env('/kibana', {})
+  );
 
   service.start();
 
@@ -82,7 +90,11 @@ test('stops http server', () => {
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService(config$.asObservable(), logger, new Env('/kibana', {}));
+  const service = new HttpService(
+    config$.asObservable(),
+    logger,
+    new Env('/kibana', {})
+  );
 
   service.start();
 
@@ -106,7 +118,11 @@ test('register route handler', () => {
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService(config$.asObservable(), logger, new Env('/kibana', {}));
+  const service = new HttpService(
+    config$.asObservable(),
+    logger,
+    new Env('/kibana', {})
+  );
 
   const router = new Router('/foo');
   service.registerRouter(router);
@@ -129,7 +145,11 @@ test('throws if registering route handler after http server is started', () => {
   };
   mockHttpServer.mockImplementation(() => httpServer);
 
-  const service = new HttpService(config$.asObservable(), logger, new Env('/kibana', {}));
+  const service = new HttpService(
+    config$.asObservable(),
+    logger,
+    new Env('/kibana', {})
+  );
 
   const router = new Router('/foo');
   service.registerRouter(router);
