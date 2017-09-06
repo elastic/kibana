@@ -1,0 +1,34 @@
+[[release-notes-5.5.1]]
+== 5.5.1 Release Notes
+
+Also see <<breaking-changes-5.0>>.
+
+[float]
+[[security-5.5.1]]
+=== Security fix
+Kibana Node.js security flaw ({security-ref}[ESA-2017-14] {pull}12776[#12776])::
+The version of Node.js shipped in all versions of Kibana prior to 5.5.1
+contains a Denial of Service flaw in it's HashTable random seed. This
+flaw could allow a remote attacker to consume resources within Node.js
+preventing Kibana from servicing requests.
+
+[float]
+[[enhancement-5.5.1]]
+=== Enhancements
+Visualization::
+* Display regionmap attribution {pull}12647[#12647]
+
+[float]
+[[bug-5.5.1]]
+=== Bug fixes
+Design::
+* [Fix for #12738] [UI Framework] Update LocalNav layout to fix menu button hover state. {pull}12739[#12739]
+Platform::
+* Bump node.js to version 6.11.1 {pull}12776[#12776]
+* [Fix for #10546] Update regex used to detect  IE for long length warnings {pull}12617[#12617]
+Other::
+* [Fix for #12692] Make filter editor suggestions opt-in {pull}12710[#12710]
+* [Fix for #12627] do not allow registration of undefined indexpatterns in dashboard state {pull}12628[#12628]
+Visualization::
+* [Fix for #12645] fixing point series chart margins {pull}12663[#12663]
+* [Fix for #11954] removing old point series defaults {pull}11958[#11958]
