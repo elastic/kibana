@@ -4,7 +4,6 @@ import angular from 'angular';
 import 'ui/promises';
 
 import { requestQueue } from '../_request_queue';
-import { errorHandlersQueue } from '../_error_handlers';
 import { FetchProvider } from '../fetch';
 import { FieldWildcardProvider } from '../../field_wildcard';
 import { getHighlightRequest } from '../../../../core_plugins/kibana/common/highlight';
@@ -134,7 +133,13 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
       const defer = Promise.defer();
       defer.promise.then(resolve, reject);
 
-      self._createRequest(defer);
+      const request = self._createRequest(defer);
+
+      request.setErrorHandler((request, error) => {
+        reject(error);
+        request.abort();
+      });
+
     }, handler);
   };
 
@@ -143,26 +148,6 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
    */
   SourceAbstract.prototype.getParent = function () {
     return this._parent;
-  };
-
-  /**
-   * similar to onResults, but allows a seperate loopy code path
-   * for error handling.
-   *
-   * @return {Promise}
-   */
-  SourceAbstract.prototype.onError = function (handler) {
-    const self = this;
-
-    return new PromiseEmitter(function (resolve, reject) {
-      const defer = Promise.defer();
-      defer.promise.then(resolve, reject);
-
-      errorHandlersQueue.push({
-        source: self,
-        defer: defer
-      });
-    }, handler);
   };
 
   /**

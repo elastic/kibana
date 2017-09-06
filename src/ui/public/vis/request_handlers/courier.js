@@ -40,10 +40,6 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
             resolve(resp);
           }).catch(e => reject(e));
 
-          searchSource.onError(e => {
-            reject(e);
-          }).catch(e => reject(e));
-
           courier.fetch();
         } else {
           resolve(searchSource.rawResponse);

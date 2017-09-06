@@ -2,7 +2,6 @@ import _ from 'lodash';
 import moment from 'moment';
 
 import { requestQueue } from '../../_request_queue';
-import { requestErrorHandler } from './error_handler';
 
 export function AbstractRequestProvider(Private, Promise) {
 
@@ -11,11 +10,6 @@ export function AbstractRequestProvider(Private, Promise) {
       this.source = source;
       this.defer = defer || Promise.defer();
       this.abortedDefer = Promise.defer();
-
-      this.setErrorHandler((...args) => {
-        this.retry();
-        return requestErrorHandler(...args);
-      });
 
       requestQueue.push(this);
     }
