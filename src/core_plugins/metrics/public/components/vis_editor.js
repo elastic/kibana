@@ -114,6 +114,11 @@ class VisEditor extends Component {
 
 }
 
+VisEditor.defaultProps = {
+  model: {},
+  visData: {}
+};
+
 VisEditor.propTypes = {
   vis: PropTypes.object,
   visData: PropTypes.object,

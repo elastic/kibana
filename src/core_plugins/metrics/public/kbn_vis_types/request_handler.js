@@ -10,7 +10,6 @@ const MetricsRequestHandlerProvider = function (Private, Notifier, config, timef
     name: 'metrics',
     handler: function (vis /*, appState, uiState, queryFilter*/) {
       const timezone = Private(timezoneProvider)();
-
       return new Promise((resolve) => {
         const panel = vis.params;
         if (panel && panel.id) {
