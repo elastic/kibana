@@ -132,10 +132,10 @@ export default function (kibana) {
       hacks: ['plugins/console/hacks/register'],
       devTools: ['plugins/console/console'],
 
-      injectDefaultVars(server, options) {
-        const varsToInject = options;
-        varsToInject.elasticsearchUrl = server.config().get('elasticsearch.url');
-        return varsToInject;
+      injectDefaultVars(server) {
+        return {
+          elasticsearchUrl: server.config().get('elasticsearch.url')
+        };
       },
 
       noParse: [
