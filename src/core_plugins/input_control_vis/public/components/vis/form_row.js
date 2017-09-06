@@ -14,6 +14,6 @@ export const FormRow = (props) => (
 
 FormRow.propTypes = {
   label: PropTypes.string.isRequired,
-  id: PropTypes.string,
+  id: PropTypes.number.isRequired,
   children: PropTypes.node.isRequired
 };

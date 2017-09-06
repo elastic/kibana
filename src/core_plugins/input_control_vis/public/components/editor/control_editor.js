@@ -19,15 +19,17 @@ export class ControlEditor extends Component {
   }
 
   renderEditor() {
+    const labelId = `controlLabel${this.props.controlIndex}`;
     return (
       <div>
         <div className="kuiSideBarFormRow">
-          <label className="kuiSideBarFormRow__label">
+          <label className="kuiSideBarFormRow__label" htmlFor={labelId}>
             Label
           </label>
           <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
             <input
               className="kuiTextInput"
+              id={labelId}
               type="text"
               value={this.props.controlLabel}
               onChange={this.props.handleLabelChange}
@@ -62,24 +64,29 @@ export class ControlEditor extends Component {
           </span>
           <div className="vis-editor-agg-header-controls kuiButtonGroup kuiButtonGroup--united">
             <button
+              aria-label="Move control down"
               type="button"
               className="kuiButton kuiButton--small"
               onClick={this.props.moveDownControl}
+              data-test-subj={`inputControlEditorMoveDownControl${this.props.controlIndex}`}
             >
               <i aria-hidden="true" className="fa fa-chevron-down" />
             </button>
             <button
+              aria-label="Move control up"
               type="button"
               className="kuiButton kuiButton--small"
               onClick={this.props.moveUpControl}
+              data-test-subj={`inputControlEditorMoveUpControl${this.props.controlIndex}`}
             >
               <i aria-hidden="true" className="fa fa-chevron-up" />
             </button>
             <button
-              aria-label="Remove Control"
+              aria-label="Remove control"
               className="kuiButton kuiButton--danger kuiButton--small"
               type="button"
               onClick={this.props.handleRemoveControl}
+              data-test-subj={`inputControlEditorRemoveControl${this.props.controlIndex}`}
             >
               <i aria-hidden="true" className="fa fa-times" />
             </button>

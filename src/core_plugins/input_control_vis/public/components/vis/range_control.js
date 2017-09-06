@@ -25,6 +25,7 @@ export class RangeControl extends Component {
   render() {
     return (
       <FormRow
+        id={this.props.control.id}
         label={this.props.control.label}
       >
         <div className="inputRangeContainer">
@@ -35,6 +36,7 @@ export class RangeControl extends Component {
             value={this.state.sliderValue}
             onChange={newValue => this.setState({ sliderValue: newValue })}
             onChangeComplete={this.handleOnChange.bind(null, this.props.control)}
+            aria-labelledby={this.props.control.id}
           />
         </div>
       </FormRow>

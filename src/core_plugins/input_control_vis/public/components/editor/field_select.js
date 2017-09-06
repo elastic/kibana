@@ -46,7 +46,7 @@ export class FieldSelect extends Component {
 
     return (
       <div className="kuiSideBarFormRow">
-        <label className="kuiSideBarFormRow__label">
+        <label className="kuiSideBarFormRow__label" htmlFor="fieldSelect">
           Field
         </label>
         <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
@@ -57,6 +57,7 @@ export class FieldSelect extends Component {
             options={this.state.fields}
             onChange={this.props.onChange}
             resetValue={''}
+            inputProps={{ id: 'fieldSelect' }}
           />
         </div>
       </div>

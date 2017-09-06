@@ -23,6 +23,7 @@ export class ListControl extends Component {
   render() {
     return (
       <FormRow
+        id={this.props.control.id}
         label={this.props.control.label}
       >
         <Select
@@ -33,6 +34,7 @@ export class ListControl extends Component {
           value={this.props.control.value}
           options={this.props.control.selectOptions}
           onChange={this.handleOnChange.bind(null, this.props.control)}
+          inputProps={{ id: this.props.control.id }}
         />
       </FormRow>
     );

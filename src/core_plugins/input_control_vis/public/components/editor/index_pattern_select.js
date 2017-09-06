@@ -25,7 +25,7 @@ export class IndexPatternSelect extends Component {
   render() {
     return (
       <div className="kuiSideBarFormRow">
-        <label className="kuiSideBarFormRow__label">
+        <label className="kuiSideBarFormRow__label" htmlFor="indexPatternSelect">
           Index Pattern
         </label>
         <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
@@ -36,6 +36,7 @@ export class IndexPatternSelect extends Component {
             loadOptions={this.loadOptions}
             onChange={this.props.onChange}
             resetValue={''}
+            inputProps={{ id: 'indexPatternSelect' }}
           />
         </div>
       </div>

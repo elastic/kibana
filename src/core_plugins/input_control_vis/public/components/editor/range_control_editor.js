@@ -31,11 +31,12 @@ export class RangeControlEditor extends Component {
         />
 
         <div className="kuiSideBarFormRow">
-          <label className="kuiSideBarFormRow__label">
+          <label className="kuiSideBarFormRow__label" htmlFor="stepSize">
             Step Size
           </label>
           <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
             <input
+              id="stepSize"
               className="kuiTextInput"
               type="number"
               value={this.props.controlParams.options.step}

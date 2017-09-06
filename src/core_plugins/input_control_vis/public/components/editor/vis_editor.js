@@ -159,6 +159,7 @@ export class InputControlVisEditor extends Component {
         <div className="kuiSideBarFormRow">
           <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
             <select
+              aria-label="Select control type"
               className="kuiSelect"
               value={this.state.type}
               onChange={evt => this.setState({ type: evt.target.value })}

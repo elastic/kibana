@@ -26,11 +26,12 @@ export function ListControlEditor(props) {
       />
 
       <div className="kuiSideBarFormRow">
-        <label className="kuiSideBarFormRow__label">
+        <label className="kuiSideBarFormRow__label" htmlFor="multiselect">
           Enable Multiselect
         </label>
         <div className="kuiSideBarFormRow__control">
           <input
+            id="multiselect"
             className="kuiCheckBox"
             type="checkbox"
             checked={props.controlParams.options.multiselect}
@@ -40,11 +41,12 @@ export function ListControlEditor(props) {
       </div>
 
       <div className="kuiSideBarFormRow">
-        <label className="kuiSideBarFormRow__label">
+        <label className="kuiSideBarFormRow__label" htmlFor="size">
           Size
         </label>
         <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
           <input
+            id="size"
             className="kuiTextInput"
             type="number"
             min="1"
