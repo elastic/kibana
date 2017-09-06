@@ -66,6 +66,8 @@ class Annotation extends Component {
       <div className="annotation" style={style.container}>
         <div className="annotation__line" style={style.line} />
         <div
+          onFocus={this.handleMouseOver}
+          onBlur={this.handleMouseOut}
           onMouseOver={this.handleMouseOver}
           onMouseOut={this.handleMouseOut}
           className="annotation__icon"
