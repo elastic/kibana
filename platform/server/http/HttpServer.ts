@@ -19,11 +19,6 @@ export class HttpServer {
       bodyParser.urlencoded({ extended: false })
     ]);
 
-    const kibanaServer = this.env.getKbnServer();
-    if (kibanaServer) {
-      this.app.use(this.kibanaProxyMiddleware(kibanaServer));
-    }
-
     this.httpServer = http.createServer(this.app);
   }
 
@@ -37,6 +32,14 @@ export class HttpServer {
 
   start(port: number, host: string) {
     return new Promise((resolve, reject) => {
+      // We register Kibana proxy middleware right before we start server to allow
+      // all new platform plugins register their endpoints, so that kbnServer
+      // handles only requests that aren't handled by the new platform.
+      const kibanaServer = this.env.getKbnServer();
+      if (kibanaServer) {
+        this.app.use(this.kibanaProxyMiddleware(kibanaServer));
+      }
+
       this.httpServer.listen(port, host, (err?: Error) => {
         if (err != null) {
           reject(err);
