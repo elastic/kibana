@@ -17,6 +17,7 @@ import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 import { updateVisualizationConfig } from './vis_update';
+import { QueryManagerProvider } from 'ui/query_manager';
 
 export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
@@ -53,6 +54,7 @@ export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
         indexPatterns: indexPatterns,
         timeFilter: timefilter,
         queryFilter: queryFilter,
+        queryManager: Private(QueryManagerProvider)(getAppState()),
         events: {
           filter: (event) => {
             const appState = getAppState();
