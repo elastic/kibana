@@ -8,7 +8,7 @@ your application to Kibana 6.0.
 === Types removed from Kibana index
 *Details:* With the imminent {es-ref}/removal-of-types.html[removal of types in Elasticsearch], we have updated our index to not rely on types. Kibana 5.6.x can support both of these mappings to minimize downtime. A UI is provided with X-Pack to assist with the migration of the Elastic stack.
 
-*Impact:* You will need migrate your Kibana index either {kibana-ref}/migrating-6.0-index.html[manually], or through the Upgrade Assistant in X-Pack.
+*Impact:* You will need migrate your Kibana index either {kibana-ref}/migrating-6.0-index.html[manually], or preferably through the {xpack-ref}/xpack-upgrade-assistant.html[Upgrade Assistant] in X-Pack.
 
 
 [float]
