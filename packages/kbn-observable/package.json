@@ -6,9 +6,6 @@
   "scripts": {
     "build": "webpack"
   },
-  "peerDependencies": {
-    "symbol-observable": "1.0.4"
-  },
   "dependencies": {
     "symbol-observable": "1.0.4"
   },
