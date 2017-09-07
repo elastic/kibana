@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { AggResponseIndexProvider } from 'ui/agg_response/index';
 import { VisResponseHandlersRegistryProvider } from 'ui/registry/vis_response_handlers';
 
@@ -11,7 +12,7 @@ const TabifyResponseHandlerProvider = function (Private) {
 
         const tableGroup = aggResponse.tabify(vis, response, {
           canSplit: true,
-          asAggConfigResults: false
+          asAggConfigResults: _.get(vis, 'type.responseHandlerConfig.asAggConfigResults', false)
         });
 
         resolve(tableGroup);
