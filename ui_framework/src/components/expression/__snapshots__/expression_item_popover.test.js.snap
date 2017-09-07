@@ -1,0 +1,80 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiExpressionItemPopover Props align renders default 1`] = `
+<div
+  class="kuiExpressionItem__popover"
+>
+  <div
+    class="kuiExpressionItem__popoverTitle"
+  >
+    title
+  </div>
+  <div
+    class="kuiExpressionItem__popoverContent"
+  />
+</div>
+`;
+
+exports[`KuiExpressionItemPopover Props align renders the left class 1`] = `
+<div
+  class="kuiExpressionItem__popover"
+>
+  <div
+    class="kuiExpressionItem__popoverTitle"
+  >
+    title
+  </div>
+  <div
+    class="kuiExpressionItem__popoverContent"
+  />
+</div>
+`;
+
+exports[`KuiExpressionItemPopover Props align renders the right class 1`] = `
+<div
+  class="kuiExpressionItem__popover kuiExpressionItem__popover--alignRight"
+>
+  <div
+    class="kuiExpressionItem__popoverTitle"
+  >
+    title
+  </div>
+  <div
+    class="kuiExpressionItem__popoverContent"
+  />
+</div>
+`;
+
+exports[`KuiExpressionItemPopover Props children is rendered 1`] = `
+<div
+  class="kuiExpressionItem__popover"
+>
+  <div
+    class="kuiExpressionItem__popoverTitle"
+  >
+    title
+  </div>
+  <div
+    class="kuiExpressionItem__popoverContent"
+  >
+    popover content
+  </div>
+</div>
+`;
+
+exports[`KuiExpressionItemPopover renders 1`] = `
+<div
+  aria-label="aria-label"
+  class="kuiExpressionItem__popover testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <div
+    class="kuiExpressionItem__popoverTitle"
+  >
+    title
+  </div>
+  <div
+    class="kuiExpressionItem__popoverContent"
+  />
+</div>
+`;
