@@ -1,6 +1,7 @@
 import { View } from '../view';
 import { Arg } from '../arg';
 
+// TODO: add the url input and handling
 export const render = () => new View('render', {
   displayName: 'Render',
   description: 'Generic element properties',
@@ -15,10 +16,10 @@ export const render = () => new View('render', {
         confirm: 'Apply Stylesheet',
       },
     }),
-    // TODO: add the url input and handling
-    // new Arg('url', {
-    //   displayName: 'Image URL',
-    //   argType: 'url',
-    // }),
+    new Arg('containerStyle', {
+      displayName: 'Container Style',
+      description: 'Tweak the appearance of the element container',
+      argType: 'containerStyle',
+    }),
   ],
 });

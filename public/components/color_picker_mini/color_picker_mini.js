@@ -18,10 +18,10 @@ export const ColorPickerMini = ({ onChange, value, placement }) => {
     <div className="canvas__color-picker-mini">
 
       <OverlayTrigger
-          rootClose
-          overlay={picker}
-          placement={placement || 'bottom'}
-          trigger="click"
+        rootClose
+        overlay={picker}
+        placement={placement || 'bottom'}
+        trigger="click"
       >
         <div><ColorDot value={value}/></div>
       </OverlayTrigger>

@@ -22,7 +22,7 @@ export default new Fn({
     },
     containerStyle: {
       types: ['containerStyle', 'null'],
-      help: 'Background, border and opacity',
+      help: 'Style for the container, including background, border, and opacity',
     },
   },
   fn: (context, args) => {

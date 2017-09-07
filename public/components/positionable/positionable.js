@@ -77,7 +77,7 @@ const PositionableLifecycle = lifecycle({
 
 });
 
-const PositionableComponent = ({ position, children, interact  }) => {
+const PositionableComponent = ({ position, children, interact }) => {
   function setWrapperNode(domNode) {
     wrapperNode = domNode;
   }
@@ -98,17 +98,6 @@ const PositionableComponent = ({ position, children, interact  }) => {
 
     const stepChild = React.cloneElement(child, { size: { height, width } });
 
-    /*
-    if (!interact) {
-      return (
-        <div className="canvas--positionable"
-          ref={setWrapperNode}
-          style={newStyle}>
-          {stepChild}
-        </div>
-      );
-    } else {
-    */
     return (
       <div className="canvas--positionable canvas--interactable"
         ref={setWrapperNode}
@@ -116,7 +105,7 @@ const PositionableComponent = ({ position, children, interact  }) => {
 
         {stepChild}
 
-        {!interact ? null : (
+        {interact && (
           <div>
             <div className="canvas--interactable-actions">
               <div className="canvas--interactable-action canvas--interactable-rotate-handle">

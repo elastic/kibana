@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Form, FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
 import { get } from 'lodash';
 import { set, del } from 'object-path-immutable';
-import { LabeledSelect } from './labeled_select';
+import { LabeledSelect } from '../../../components/labeled_select';
 
 export const extendedTemplate = (props) => {
   const { typeInstance, onValueChange, labels, argValue } = props;
@@ -24,6 +24,7 @@ export const extendedTemplate = (props) => {
 
   // TODO: add fill and stack options
   // TODO: add label name auto-complete
+  const values = [[0, 'None'], 1, 2, 3, 4, 5];
 
   return (
     <Form onSubmit={() => false}>
@@ -44,9 +45,27 @@ export const extendedTemplate = (props) => {
         )}
         <FormGroup>
           <div className="canvas__argtype--seriesStyle--properties">
-            <LabeledSelect label="Line" argName="lines" value={get(chainArgs, 'lines.0.value', 0)} onChange={handleChange} />
-            <LabeledSelect label="Bar" argName="bars" value={get(chainArgs, 'bars.0.value', 0)} onChange={handleChange} />
-            <LabeledSelect label="Point" argName="points" value={get(chainArgs, 'points.0.value', 0)} onChange={handleChange} />
+            <LabeledSelect
+              className="canvas__argtype--seriesStyle--lines"
+              label="Line"
+              value={get(chainArgs, 'lines.0.value', 0)}
+              values={[ ...values ]}
+              onChange={ev => handleChange('lines', ev)}
+            />
+            <LabeledSelect
+              className="canvas__argtype--seriesStyle--bars"
+              label="Bar"
+              value={get(chainArgs, 'bars.0.value', 0)}
+              values={[ ...values ]}
+              onChange={ev => handleChange('bars', ev)}
+            />
+            <LabeledSelect
+              className="canvas__argtype--seriesStyle--points"
+              label="Point"
+              value={get(chainArgs, 'points.0.value', 0)}
+              values={[ ...values ]}
+              onChange={ev => handleChange('points', ev)}
+            />
           </div>
         </FormGroup>
       </div>

@@ -13,16 +13,20 @@ export default new Fn({
       help: 'Valid CSS border string',
     },
     borderRadius: {
-      types: ['number', 'null'],
+      types: ['string', 'null'],
       help: 'Number of pixels to use when rounding the border',
     },
     padding: {
-      types: ['number', 'null'],
+      types: ['string', 'null'],
       help: 'Content distance in pixels from border',
     },
-    background: {
+    backgroundColor: {
       types: ['string', 'null'],
-      help: 'Valid CSS background string',
+      help: 'Valid CSS background color string',
+    },
+    backgroundImage: {
+      types: ['string', 'null'],
+      help: 'Value CSS background image string',
     },
     opacity: {
       types: ['number', 'null'],
@@ -30,8 +34,6 @@ export default new Fn({
     },
   },
   fn: (context, args) => {
-    args.borderRadius = `${args.borderRadius}px`;
-    args.padding = `${args.padding}px`;
     return { type: 'containerStyle', ...args };
   },
 });
