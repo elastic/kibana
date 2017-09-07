@@ -3,13 +3,17 @@ import { map } from 'lodash';
 import secureOptions from './secure_options';
 
 export default function (kbnServer, server, config) {
+  const proxy = kbnServer && kbnServer.proxy;
+
   // this mixin is used outside of the kbn server, so it MUST work without a full kbnServer object.
   kbnServer = null;
 
   const host = config.get('server.host');
+  const port = config.get('server.port');
 
   const connectionOptions = {
     host,
+    port,
     state: {
       strictHeader: false
     },
@@ -24,7 +28,7 @@ export default function (kbnServer, server, config) {
         }
       }
     },
-    autoListen: false
+    listener: proxy
   };
 
   const useSsl = config.get('server.ssl.enabled');

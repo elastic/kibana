@@ -1,6 +1,8 @@
 import * as process from 'process';
 import { resolve } from 'path';
 
+import { Proxy } from '../server/http/Proxy/Proxy';
+
 interface WithConfig {
   config?: string;
   kbnServer?: any;
@@ -43,8 +45,8 @@ export class Env {
     return resolve(this.pluginsDir, pluginName, 'target', 'dist');
   }
 
-  getKbnServer() {
-    return this.argv.kbnServer;
+  getProxy(): Proxy | undefined {
+    return this.argv.kbnServer && this.argv.kbnServer.proxy;
   }
 
   private getDefaultConfigFile() {

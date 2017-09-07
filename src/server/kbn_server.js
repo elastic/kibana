@@ -7,7 +7,6 @@ import loggingConfiguration from './logging/configuration';
 
 import configSetupMixin from './config/setup';
 import httpMixin from './http';
-import { platformMixin } from './platform';
 import loggingMixin from './logging';
 import warningsMixin from './warnings';
 import statusMixin from './status';
@@ -24,6 +23,7 @@ import { savedObjectsMixin } from './saved_objects';
 import { statsMixin } from './stats';
 import { kibanaIndexMappingsMixin } from './mappings';
 import { serverExtensionsMixin } from './server_extensions';
+import { run as registerPlatform } from '../../target/platform/cli/cli';
 
 const rootDir = fromRoot('.');
 
@@ -35,13 +35,14 @@ export default class KbnServer {
     this.rootDir = rootDir;
     this.settings = settings || {};
 
+    registerPlatform({ kbnServer: this });
+
     this.ready = constant(this.mixin(
       // sets this.config, reads this.settings
       configSetupMixin,
+
       // sets this.server
       httpMixin,
-
-      platformMixin,
 
       // adds methods for extending this.server
       serverExtensionsMixin,
@@ -123,7 +124,6 @@ export default class KbnServer {
 
     await this.ready();
     await fromNode(cb => server.start(cb));
-    await server.startPlatform();
 
     if (isWorker) {
       // help parent process know when we are ready
@@ -136,7 +136,6 @@ export default class KbnServer {
 
   async close() {
     await fromNode(cb => this.server.stop(cb));
-    await this.server.stopPlatform();
   }
 
   async inject(opts) {

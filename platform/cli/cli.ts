@@ -7,6 +7,7 @@ import { version } from './version';
 import { Env, RawConfigService } from '../config';
 import { Root, OnShutdown } from '../root';
 import { argvToConfigOverrides } from './argvToConfig';
+import { Proxy } from '../server/http/Proxy/Proxy';
 
 export const parseArgv = (argv: Array<string>) =>
   yargs(argv)
@@ -40,7 +41,17 @@ export const run = (argv: { [key: string]: any }) => {
     .map(rawConfig => merge({}, rawConfig, configOverrides));
 
   const root = new Root(rawConfig$, env, onShutdown);
-  root.start();
+
+  if (argv.kbnServer) {
+    const proxy = (argv.kbnServer.proxy = new Proxy(
+      root.logger.get('proxy'),
+      argv.kbnServer
+    ));
+    proxy.on('platform-start', async () => await root.start());
+    proxy.on('platform-stop', async () => await shutdown());
+  } else {
+    root.start();
+  }
 
   process.on('SIGHUP', () => rawConfigService.reloadConfig());
   process.on('SIGINT', () => shutdown());
@@ -50,8 +61,6 @@ export const run = (argv: { [key: string]: any }) => {
     rawConfigService.stop();
     await root.shutdown();
   }
-
-  return shutdown;
 };
 
 export default (argv: Array<string>) => run(parseArgv(argv));
