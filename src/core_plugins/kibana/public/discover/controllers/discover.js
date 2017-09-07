@@ -353,11 +353,7 @@ function discoverController(
         }
       });
 
-      $scope.$watch('state.query', (newQuery) => {
-        $state.query = migrateLegacyQuery(newQuery);
-
-        $scope.fetch();
-      });
+      $scope.$watch('state.query', $scope.updateQueryAndFetch);
 
       $scope.$watchMulti([
         'rows',
@@ -461,13 +457,13 @@ function discoverController(
     .catch(notify.error);
   };
 
-  $scope.updateQuery = function (query) {
+  $scope.updateQueryAndFetch = function (query) {
     // reset state if language changes
     if ($state.query.language && $state.query.language !== query.language) {
       $state.filters = [];
     }
-
-    $state.query = query;
+    $state.query = migrateLegacyQuery(query);
+    $scope.fetch();
   };
 
   $scope.searchSource.onBeginSegmentedFetch(function (segmented) {
