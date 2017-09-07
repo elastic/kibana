@@ -21,7 +21,7 @@ RxJS observable into a `kbn-observable`.
 ## Why a separate package?
 
 `kbn-observable` is implemented as a separate package instead of directly in the
-platform code base for a couple reasons. We wanted to copy the implementation
+platform code base for a couple of reasons. We wanted to copy the implementation
 from the [observable proposal][spec] directly (so it's easier to stay up-to-date
 with the future spec), and we therefore didn't want to start adding TS types
 directly to that implementation.
