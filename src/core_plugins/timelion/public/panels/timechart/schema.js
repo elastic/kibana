@@ -63,9 +63,11 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
             position: 'nw',
             labelBoxBorderColor: 'rgb(255,255,255,0)',
             labelFormatter: function (label, series) {
-              return '<span class="ngLegendValue" kbn-accessible-click ng-click="toggleSeries(' + series._id + ')">' +
-                label +
-                '<span class="ngLegendValueNumber"></span></span>';
+              const element = $('<span class="ngLegendValue" kbn-accessible-click ng-click="toggleSeries(' + series._id + ')">')
+                .text(label)
+                .append('<span class="ngLegendValueNumber"></span>');
+
+              return element.html();
             }
           },
           colors: ['#01A4A4', '#C66', '#D0D102', '#616161', '#00A1CB', '#32742C', '#F18D05', '#113F8C', '#61AE24', '#D70060']
