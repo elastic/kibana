@@ -23,8 +23,8 @@ const minMaxAgg = (field) => {
 };
 
 class RangeControl extends Control {
-  constructor(controlParams, field, filterManager, min, max) {
-    super(controlParams, field, filterManager);
+  constructor(controlParams, filterManager, min, max) {
+    super(controlParams, filterManager);
     this.min = min;
     this.max = max;
   }
@@ -49,7 +49,6 @@ export async function rangeControlFactory(controlParams, kbnApi, callback) {
     const emptyValue = { min: min, max: min };
     callback(new RangeControl(
       controlParams,
-      indexPattern.fields.byName[controlParams.fieldName],
       new RangeFilterManager(controlParams.fieldName, indexPattern, kbnApi.queryFilter, emptyValue),
       min,
       max

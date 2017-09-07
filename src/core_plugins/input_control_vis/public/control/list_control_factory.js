@@ -29,8 +29,8 @@ const termsAgg = (field, size, direction) => {
 };
 
 class ListControl extends Control {
-  constructor(controlParams, field, filterManager, selectOptions) {
-    super(controlParams, field, filterManager);
+  constructor(controlParams, filterManager, selectOptions) {
+    super(controlParams, filterManager);
 
     this.selectOptions = selectOptions;
   }
@@ -55,7 +55,6 @@ export async function listControlFactory(controlParams, kbnApi, callback) {
   defer.promise.then((resp) => {
     callback(new ListControl(
       controlParams,
-      indexPattern.fields.byName[controlParams.fieldName],
       new PhraseFilterManager(controlParams.fieldName, indexPattern, kbnApi.queryFilter),
       _.get(resp, 'aggregations.termsAgg.buckets', []).map((bucket) => {
         return { label: bucket.key, value: bucket.key };
