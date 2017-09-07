@@ -163,6 +163,7 @@ const components = [{
 }, {
   name: 'Expression',
   component: ExpressionExample,
+  hasReact: true,
 }, {
   name: 'Form',
   component: FormExample,
