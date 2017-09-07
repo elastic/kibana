@@ -7,14 +7,14 @@ const mapToOptions = (val) => {
   return (<option value={tuple[0]} key={tuple[0]}>{tuple[1] || tuple[0]}</option>);
 };
 
-export const LabeledSelect =  ({ label, value, values, className, onChange }) => (
+export const LabeledSelect =  ({ label, includeEmpty, value, values, className, onChange }) => (
   <div className={className}>
     <FormControl
       componentClass="select"
       value={value}
       onChange={onChange}
     >
-      <option>--</option>
+      {includeEmpty && (<option value="">--</option>)}
       {values.map(mapToOptions)}
     </FormControl>
 
@@ -24,6 +24,7 @@ export const LabeledSelect =  ({ label, value, values, className, onChange }) =>
 
 LabeledSelect.propTypes = {
   label: PropTypes.string.isRequired,
+  includeEmpty: PropTypes.bool,
   className: PropTypes.string,
   value: PropTypes.oneOfType([
     PropTypes.string,

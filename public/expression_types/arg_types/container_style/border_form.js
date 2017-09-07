@@ -36,6 +36,7 @@ export const BorderForm = ({ className, value, radius, onChange }) => {
 
       <LabeledInput
         type="select"
+        includeEmpty
         className="border-style"
         label="Style"
         value={borderStyle}
