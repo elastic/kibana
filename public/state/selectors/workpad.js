@@ -58,7 +58,7 @@ export function getAllElements(state) {
 }
 
 export function getGlobalFilterExpression(state) {
-  return map(getAllElements(state), 'filter').filter(str => str != null && str.length).join('.');
+  return map(getAllElements(state), 'filter').filter(str => str != null && str.length).join(' | ');
 }
 
 // element getters
