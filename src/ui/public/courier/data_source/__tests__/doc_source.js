@@ -15,6 +15,7 @@ describe('DocSource', function () {
     DocSource = Private(DocSourceProvider);
   }));
   beforeEach(requestQueue.clear);
+  after(requestQueue.clear);
 
   describe('#onUpdate()', function () {
     it('adds a request to the requestQueue', function () {

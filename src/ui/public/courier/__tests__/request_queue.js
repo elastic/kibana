@@ -16,6 +16,7 @@ describe('Courier Request Queue', function () {
     searchStrategy = Private(SearchStrategyProvider);
   }));
   beforeEach(requestQueue.clear);
+  after(requestQueue.clear);
 
   class MockReq {
     constructor(strategy, startable = true) {

@@ -23,6 +23,7 @@ describe('SearchSource', function () {
     expect(indexPattern).to.not.be(indexPattern2);
   }));
   beforeEach(requestQueue.clear);
+  after(requestQueue.clear);
 
   describe('#onResults()', function () {
     it('adds a request to the requestQueue', function () {

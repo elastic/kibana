@@ -30,6 +30,7 @@ describe('Fetch service', function () {
     SearchSource = Private(SearchSourceProvider);
   }));
   beforeEach(requestQueue.clear);
+  after(requestQueue.clear);
 
   describe('#doc(docSource)', function () {
     it('fetches a single doc source', function () {
