@@ -3,11 +3,11 @@ import Fn from '../fn.js';
 export default new Fn({
   name: 'size',
   aliases: [],
-  type: 'query',
+  type: 'filter',
   help: 'Set the number of records a datasource should retrieve',
   context: {
     types: [
-      'query',
+      'filter',
     ],
   },
   args: {

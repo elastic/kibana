@@ -14,7 +14,7 @@ const client = new elasticsearch.Client({
 export default new Fn({
   name: 'esdocs',
   context: {
-    types: ['query'],
+    types: ['filter'],
   },
   args: {
     index: {
@@ -44,13 +44,9 @@ export default new Fn({
 
     context.and = context.and
       .concat([{ // q
-        type: 'filter',
-        value: {
-          type: 'luceneQueryString',
-          query: args.q,
-        },
+        type: 'luceneQueryString',
+        query: args.q,
       }]);
-
 
     function getSort() {
       if (!args.sort) return;
