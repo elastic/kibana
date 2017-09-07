@@ -16,7 +16,10 @@ export const BorderForm = ({ className, value, radius, onChange }) => {
     const val = ev.target.value;
 
     if (name === 'borderWidth') return onChange('border', `${val}px ${borderStyle} ${borderColor}`);
-    if (name === 'borderStyle') return onChange('border', `${borderWidth} ${val} ${borderColor}`);
+    if (name === 'borderStyle') {
+      if (val === '') return onChange('border', `0px`);
+      return onChange('border', `${borderWidth} ${val} ${borderColor}`);
+    }
     if (name === 'borderRadius') return onChange('borderRadius', `${val}px`);
 
     onChange(name, ev.target.value);
