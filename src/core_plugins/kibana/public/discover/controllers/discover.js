@@ -29,7 +29,6 @@ import indexTemplate from 'plugins/kibana/discover/index.html';
 import { StateProvider } from 'ui/state_management/state';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
-import { QueryManagerProvider } from 'ui/query_manager';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
@@ -179,7 +178,6 @@ function discoverController(
   };
 
   const $state = $scope.state = new AppState(getStateDefaults());
-  const queryManager = Private(QueryManagerProvider)($state);
 
   const getFieldCounts = async () => {
     // the field counts aren't set until we have the data back,
@@ -333,15 +331,6 @@ function discoverController(
 
       $scope.$watch('state.interval', function () {
         $scope.fetch();
-      });
-
-      // Necessary for handling new time filters when the date histogram is clicked
-      $scope.$watchCollection('state.$newFilters', function (filters = []) {
-        // need to convert filters generated from user interaction with viz into kuery AST
-        // These are handled by the filter bar directive when lucene is the query language
-        Promise.all(filters.map(queryManager.addLegacyFilter))
-        .then(() => $scope.state.$newFilters = [])
-        .then($scope.fetch);
       });
 
       $scope.$watch('vis.aggs', function () {

@@ -8,7 +8,7 @@ import { EmbeddableHandler } from 'ui/embeddable';
 import chrome from 'ui/chrome';
 
 export class VisualizeEmbeddableHandler extends EmbeddableHandler {
-  constructor($compile, $rootScope, visualizeLoader, timefilter, Notifier, Promise) {
+  constructor($compile, $rootScope, visualizeLoader, timefilter, Notifier, Promise, Private) {
     super();
     this.$compile = $compile;
     this.visualizeLoader = visualizeLoader;
@@ -16,7 +16,7 @@ export class VisualizeEmbeddableHandler extends EmbeddableHandler {
     this.name = 'visualization';
     this.Promise = Promise;
     this.brushEvent = utilsBrushEventProvider(timefilter);
-    this.filterBarClickHandler = filterBarClickHandlerProvider(Notifier);
+    this.filterBarClickHandler = filterBarClickHandlerProvider(Notifier, Private);
   }
 
   getEditPath(panelId) {

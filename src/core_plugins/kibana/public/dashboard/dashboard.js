@@ -24,7 +24,6 @@ import { notify } from 'ui/notify';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import { showCloneModal } from './top_nav/show_clone_modal';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
-import { QueryManagerProvider } from 'ui/query_manager';
 import { keyCodes } from 'ui_framework/services';
 import { DashboardContainerAPI } from './dashboard_container_api';
 import * as filterActions from 'ui/doc_table/actions/filter';
@@ -104,7 +103,6 @@ app.directive('dashboardApp', function ($injector) {
 
       const dashboardState = new DashboardState(dash, AppState, dashboardConfig.getHideWriteControls());
       $scope.appState = dashboardState.getAppState();
-      const queryManager = Private(QueryManagerProvider)(dashboardState.getAppState());
       $scope.containerApi = new DashboardContainerAPI(
         dashboardState,
         (field, value, operator, index) => {
@@ -238,16 +236,6 @@ app.directive('dashboardApp', function ($injector) {
       };
 
       $scope.$watch('model.query', $scope.updateQueryAndFetch);
-
-      $scope.$watchCollection(() => dashboardState.getAppState().$newFilters, function (filters = []) {
-        // need to convert filters generated from user interaction with viz into kuery AST
-        // These are handled by the filter bar directive when lucene is the query language
-        Promise.all(filters.map(queryManager.addLegacyFilter))
-          .then(() => dashboardState.getAppState().$newFilters = [])
-          .then(updateState)
-          .then(() => dashboardState.applyFilters($scope.model.query, filterBar.getFilters()))
-          .then($scope.refresh());
-      });
 
       $scope.$listen(timefilter, 'fetch', $scope.refresh);
 
