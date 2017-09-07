@@ -4,12 +4,13 @@ import { ControlLabel } from 'react-bootstrap';
 import { ColorPickerMini } from '../../../components/color_picker_mini';
 import { LabeledInput } from '../../../components/labeled_input';
 
-const widths = [['0px', 'None'], '1px', '2px', '3px', '4px', '5px', '6px', '7px', '8px', '9px', '10px'];
 const styles = ['solid', 'dotted', 'dashed', 'double', 'groove', 'ridge', 'inset', 'outset'];
 
 export const BorderForm = ({ className, value, radius, onChange }) => {
   const border = value || '';
   const [ borderWidth, borderStyle, borderColor ] = border.split(' ');
+  const borderWidthVal = (borderWidth) ? borderWidth.replace('px', '') : '';
+  const radiusVal = (radius) ? radius.replace('px', '') : '';
 
   const namedChange = name => ev => {
     const val = ev.target.value;
@@ -29,8 +30,7 @@ export const BorderForm = ({ className, value, radius, onChange }) => {
         type="number"
         className="border-width"
         label="Width"
-        value={borderWidth.replace('px', '')}
-        values={[ ...widths ]}
+        value={borderWidthVal}
         onChange={namedChange('borderWidth')}
       />
 
@@ -47,8 +47,7 @@ export const BorderForm = ({ className, value, radius, onChange }) => {
         type="number"
         className="border-radius"
         label="Radius"
-        value={radius.replace('px', '')}
-        values={[ ...widths ]}
+        value={radiusVal}
         onChange={namedChange('borderRadius')}
       />
 

@@ -2,10 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { LabeledInput } from '../../../components/labeled_input';
 
-const paddings = [['0px', 'None'], '1px', '2px', '3px', '4px', '5px', '6px', '7px', '8px', '9px', '10px'];
 const opacities = [[1, '100%'], [0.9, '90%'], [0.7, '70%'], [0.5, '50%'], [0.3, '30%'], [0.1, '10%']];
 
 export const AppearanceForm = ({ className, padding, opacity, onChange }) => {
+  const paddingVal = (padding) ? padding.replace('px', '') : '';
+
   const namedChange = name => (ev) => {
     if (name === 'padding') return onChange(name, `${ev.target.value}px`);
 
@@ -18,8 +19,7 @@ export const AppearanceForm = ({ className, padding, opacity, onChange }) => {
         type="number"
         className="padding"
         label="Padding"
-        value={padding.replace('px', '')}
-        values={paddings}
+        value={paddingVal}
         onChange={namedChange('padding')}
       />
 
