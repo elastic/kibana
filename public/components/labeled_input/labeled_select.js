@@ -7,7 +7,7 @@ const mapToOptions = (val) => {
   return (<option value={tuple[0]} key={tuple[0]}>{tuple[1] || tuple[0]}</option>);
 };
 
-export const LabeledSelect = ({ label, value, values, className, onChange }) => (
+export const LabeledSelect =  ({ label, value, values, className, onChange }) => (
   <div className={className}>
     <FormControl
       componentClass="select"

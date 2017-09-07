@@ -20,6 +20,7 @@ export const render = () => new View('render', {
       displayName: 'Container Style',
       description: 'Tweak the appearance of the element container',
       argType: 'containerStyle',
+      defaultValue: 'containerStyle',
     }),
   ],
 });

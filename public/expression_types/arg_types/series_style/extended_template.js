@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Form, FormGroup, FormControl, ControlLabel } from 'react-bootstrap';
 import { get } from 'lodash';
 import { set, del } from 'object-path-immutable';
-import { LabeledSelect } from '../../../components/labeled_select';
+import { LabeledInput } from '../../../components/labeled_input';
 
 export const extendedTemplate = (props) => {
   const { typeInstance, onValueChange, labels, argValue } = props;
@@ -45,21 +45,24 @@ export const extendedTemplate = (props) => {
         )}
         <FormGroup>
           <div className="canvas__argtype--seriesStyle--properties">
-            <LabeledSelect
+            <LabeledInput
+              type="select"
               className="canvas__argtype--seriesStyle--lines"
               label="Line"
               value={get(chainArgs, 'lines.0.value', 0)}
               values={[ ...values ]}
               onChange={ev => handleChange('lines', ev)}
             />
-            <LabeledSelect
+            <LabeledInput
+              type="select"
               className="canvas__argtype--seriesStyle--bars"
               label="Bar"
               value={get(chainArgs, 'bars.0.value', 0)}
               values={[ ...values ]}
               onChange={ev => handleChange('bars', ev)}
             />
-            <LabeledSelect
+            <LabeledInput
+              type="select"
               className="canvas__argtype--seriesStyle--points"
               label="Point"
               value={get(chainArgs, 'points.0.value', 0)}

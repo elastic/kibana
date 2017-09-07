@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { ControlLabel } from 'react-bootstrap';
 import { ColorPickerMini } from '../../../components/color_picker_mini';
-import { LabeledSelect } from '../../../components/labeled_select';
+import { LabeledInput } from '../../../components/labeled_input';
 
 const widths = [['0px', 'None'], '1px', '2px', '3px', '4px', '5px', '6px', '7px', '8px', '9px', '10px'];
 const styles = ['solid', 'dotted', 'dashed', 'double', 'groove', 'ridge', 'inset', 'outset'];
@@ -14,8 +14,9 @@ export const BorderForm = ({ className, value, radius, onChange }) => {
   const namedChange = name => ev => {
     const val = ev.target.value;
 
-    if (name === 'borderWidth') return onChange('border', `${val} ${borderStyle} ${borderColor}`);
+    if (name === 'borderWidth') return onChange('border', `${val}px ${borderStyle} ${borderColor}`);
     if (name === 'borderStyle') return onChange('border', `${borderWidth} ${val} ${borderColor}`);
+    if (name === 'borderRadius') return onChange('borderRadius', `${val}px`);
 
     onChange(name, ev.target.value);
   };
@@ -24,15 +25,17 @@ export const BorderForm = ({ className, value, radius, onChange }) => {
 
   return (
     <div className={className}>
-      <LabeledSelect
+      <LabeledInput
+        type="number"
         className="border-width"
         label="Width"
-        value={borderWidth}
+        value={borderWidth.replace('px', '')}
         values={[ ...widths ]}
         onChange={namedChange('borderWidth')}
       />
 
-      <LabeledSelect
+      <LabeledInput
+        type="select"
         className="border-style"
         label="Style"
         value={borderStyle}
@@ -40,10 +43,11 @@ export const BorderForm = ({ className, value, radius, onChange }) => {
         onChange={namedChange('borderStyle')}
       />
 
-      <LabeledSelect
+      <LabeledInput
+        type="number"
         className="border-radius"
         label="Radius"
-        value={radius}
+        value={radius.replace('px', '')}
         values={[ ...widths ]}
         onChange={namedChange('borderRadius')}
       />
