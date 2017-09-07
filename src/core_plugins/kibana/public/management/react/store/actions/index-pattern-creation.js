@@ -26,12 +26,8 @@ export const fetchTimeFields = createThunk('FETCH_TIME_FIELDS',
 export const fetchedTimeFields = createAction('FETCHED_TIME_FIELDS', timeFields => ({ timeFields }));
 export const selectTimeField = createAction('SELECT_TIME_FIELD', timeField => ({ timeField }));
 
-export const goToNextPage = createAction('GOTO_NEXT_PAGE');
-export const goToPreviousPage = createAction('GOTO_PREVIOUS_PAGE');
-export const changeSort = createAction('CHANGE_SORT', (sortBy, sortAsc = true) => ({ sortBy, sortAsc }));
-
-export const includeSystemIndices = createAction('INCLUDE_SYSTEM_INDICES');
-export const excludeSystemIndices = createAction('EXCLUDE_SYSTEM_INDICES');
+export const setTransientTableId = createAction('SET_TRANSIENT_TABLE_ID', id => ({ id }));
+export const setTransientId = createAction('SET_TRANSIENT_ID', id => ({ id }));
 
 export const creatingIndexPattern = createAction('CREATING_INDEX_PATTERN');
 export const createdIndexPattern = createAction('CREATED_INDEX_PATTERN');
@@ -68,7 +64,8 @@ export const createIndexPattern = createThunk('CREATE_INDEX_PATTERN',
     const state = getState();
     const pattern = getPattern(state);
     const timeFieldName = getSelectedTimeField(state);
-
+    console.log(pattern, timeFieldName);
+    return;
     dispatch(creatingIndexPattern);
     const indexPattern = await indexPatterns.get();
     Object.assign(indexPattern, {

@@ -16,7 +16,7 @@ const IndexPatternSearch = ({
     <KuiFormRow
       helpText="Patterns allow you to define dynamic index names using * as a wildcard"
     >
-      <KuiFlexGroup growItems={false}>
+      <KuiFlexGroup>
         <KuiFlexItem>
           <InputPatternInputField
             placeholder="Please enter..."

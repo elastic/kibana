@@ -5,11 +5,11 @@ import IndexPatternSearch from './index-pattern-search.component';
 
 import {
   fetchIndices,
-} from '../../../../../store/actions/index-pattern-creation';
+} from 'plugins/kibana/management/react/store/actions/index-pattern-creation';
 
 import {
   getIndexPatternCreate,
-} from '../../../../../reducers';
+} from 'plugins/kibana/management/react/reducers';
 
 export default connect(
   state => {

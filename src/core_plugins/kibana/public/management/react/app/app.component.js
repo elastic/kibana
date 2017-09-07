@@ -39,7 +39,7 @@ class SideBar extends Component {
       }
 
       const items = section.visibleItems.map((item, idx) => {
-        const url = item.url.substring(1);
+        const url = item.url ? item.url.substring(1) : null;
         return (
           <KuiSideNavItem key={idx}>
             <Link to={url}>

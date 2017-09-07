@@ -5,13 +5,13 @@ import IndexPatternTimeFields from './index-pattern-time-fields.component';
 import {
   fetchTimeFields,
   selectTimeField,
-} from '../../../../../store/actions/index-pattern-creation';
+} from 'plugins/kibana/management/react/store/actions/index-pattern-creation';
 
 import {
-  getIndexPatternCreate,
-} from '../../../../../reducers';
+  getTimeFields,
+} from 'plugins/kibana/management/react/store/reducers/index-pattern-creation';
 
 export default connect(
-  state => ({ ...getIndexPatternCreate(state).timeFields }),
+  state => ({ ...getTimeFields(state) }),
   { fetchTimeFields, selectTimeField },
 )(IndexPatternTimeFields);

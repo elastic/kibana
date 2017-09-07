@@ -16,7 +16,7 @@ const IndexPatternTimeFields = ({
   }
 
   return (
-    <KuiFlexGroup growItems={false}>
+    <KuiFlexGroup>
       <KuiFlexItem>
         <KuiSelect
           placeholder="Specify an optional time field"

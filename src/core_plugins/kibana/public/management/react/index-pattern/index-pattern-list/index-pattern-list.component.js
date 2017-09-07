@@ -27,28 +27,35 @@ import {
 
 
 const IndexPatternList = ({
-  indexPatterns,
+  items,
+  changeSort,
   sortBy,
+  sortAsc,
 }) => {
-  // const indexRows = indices.map((index, key) => {
-  //   return (
-  //     <KuiTableRow key={key}>
-  //       <KuiTableRowCell>
-  //         {index.name}
-  //       </KuiTableRowCell>
-  //       <KuiTableRowCell>
-  //         {index.count}
-  //       </KuiTableRowCell>
-  //     </KuiTableRow>
-  //   );
-  // });
+  console.log('IndexPatternList', items, sortBy, sortAsc);
+  if (items === undefined) {
+    return null;
+  }
+
+  const indexRows = items.map((index, key) => {
+    return (
+      <KuiTableRow key={key}>
+        <KuiTableRowCell>
+          {index.attributes.title}
+        </KuiTableRowCell>
+        <KuiTableRowCell>
+          {index.count}
+        </KuiTableRowCell>
+      </KuiTableRow>
+    );
+  });
 
   return (
     <KuiPageContent>
       <KuiPageContentHeader>
         <KuiPageContentHeaderSection>
           <KuiTitle>
-            <h2>Index Pattern</h2>
+            <h2>Index patterns</h2>
           </KuiTitle>
         </KuiPageContentHeaderSection>
         <KuiPageContentHeaderSection>
@@ -80,25 +87,17 @@ const IndexPatternList = ({
               <KuiSwitch
               />
             </KuiTableHeaderCell>
-            <KuiTableHeaderCell>
-              <KuiButtonEmpty
-                onClick={() => changeSortAction('name')}
-              >
-                Name
-                { sortBy === 'name'
-                  ?
-                    <span>
-                      &nbsp;
-                      <KuiIcon
-                        type={sortAsc ? 'arrowUp' : 'arrowDown'}
-                        size="medium"
-                      />
-                    </span>
-                  : null
-                }
-                </KuiButtonEmpty>
+            <KuiTableHeaderCell
+              onSort={() => changeSort('name')}
+              isSorted={sortBy === 'name'}
+              isSortAscending={sortAsc}
+            >
+              Name
             </KuiTableHeaderCell>
           </KuiTableHeader>
+          <KuiTableBody>
+            {indexRows}
+          </KuiTableBody>
         </KuiTable>
       </KuiPageContentBody>
     </KuiPageContent>

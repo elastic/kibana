@@ -1,18 +1,17 @@
 import { handleActions } from 'redux-actions';
 import { createSelector } from 'reselect';
-import { chunk, sortBy as sortByLodash } from 'lodash';
+import { chunk, sortBy as sortByLodash, pick } from 'lodash';
 
 import {
   selectTimeField,
   fetchedTimeFields,
-  goToNextPage,
-  goToPreviousPage,
-  changeSort,
   fetchedIndices,
   includeSystemIndices,
   excludeSystemIndices,
   creatingIndexPattern,
   createdIndexPattern,
+  setTransientTableId,
+  setTransientId,
 } from '../actions/index-pattern-creation';
 
 import {
@@ -20,6 +19,7 @@ import {
 } from '../../reducers';
 
 const defaultState = {
+  transientId: undefined,
   isIncludingSystemIndices: false,
   isCreating: false,
   timeFields: {
@@ -27,13 +27,10 @@ const defaultState = {
     selectedTimeField: undefined,
   },
   results: {
-    indices: undefined,
+    items: undefined,
     pattern: undefined,
     hasExactMatches: false,
-    perPage: 10,
-    page: 1,
-    sortBy: undefined,
-    sortAsc: true,
+    transientTableId: undefined,
   }
 }
 
@@ -78,52 +75,25 @@ export default handleActions({
       ...state,
       results: {
         ...state.results,
-        indices,
+        items: indices,
         hasExactMatches,
         pattern,
       },
     };
   },
-  [changeSort](state, { payload }) {
-    const { sortBy, sortAsc } = payload;
-
+  [setTransientTableId](state, { payload: { id: transientTableId } }) {
     return {
       ...state,
       results: {
         ...state.results,
-        sortBy,
-        sortAsc: sortBy === state.results.sortBy ? !state.results.sortAsc: sortAsc,
-      },
+        transientTableId,
+      }
     };
   },
-  [goToNextPage](state, { payload }) {
+  [setTransientId](state, { payload: { id: transientId } }) {
     return {
       ...state,
-      results: {
-        ...state.results,
-        page: getNextPage(state.results),
-      },
-    };
-  },
-  [goToPreviousPage](state, { payload }) {
-    return {
-      ...state,
-      results: {
-        ...state.results,
-        page: getPreviousPage(state.results),
-      },
-    };
-  },
-  [includeSystemIndices](state, action) {
-    return {
-      ...state,
-      isIncludingSystemIndices: true,
-    };
-  },
-  [excludeSystemIndices](state, action) {
-    return {
-      ...state,
-      isIncludingSystemIndices: false,
+      transientId,
     };
   },
   [creatingIndexPattern](state, action) {
@@ -140,75 +110,16 @@ export default handleActions({
   },
 }, defaultState);
 
-function getNextPage({ page, perPage, indices }) {
-  const pages = Math.ceil(indices.length / perPage);
-  const nextPage = page + 1;
-  return nextPage > pages
-    ? 1
-    : nextPage;
-}
-
-function getPreviousPage({ page, perPage, indices }) {
-  const pages = Math.ceil(indices.length / perPage);
-  const previousPage = page - 1;
-  return previousPage < 1
-    ? pages
-    : previousPage;
-}
-
-function getFilteredIndices(indices, isIncludingSystemIndices) {
-  if (!indices) {
-    return indices;
-  }
-
-  if (isIncludingSystemIndices) {
-    return indices;
-  }
-
-  // All system indices begin with a period.
-  return indices.filter(index => !index.name.startsWith('.'));
-}
-
-function getPaginatedIndices(indices, page, perPage) {
-  const pagesOfIndices = chunk(indices, perPage);
-  return pagesOfIndices[page - 1];
-}
-
-export const getFilteredAndPaginatedIndices = createSelector(
-  [
-    state => state.results,
-    state => state.isIncludingSystemIndices
-  ],
-  ({
-    indices: allIndices,
-    page,
-    perPage,
-    sortBy,
-    sortAsc,
-  }, isIncludingSystemIndices) => {
-    if (allIndices === undefined) {
-      return {
-        indices: undefined,
-        numOfPages: 0,
-      };
-    }
-
-    let filteredIndices = getFilteredIndices(allIndices, isIncludingSystemIndices);
-    if (!!sortBy) {
-      filteredIndices = sortByLodash(filteredIndices, sortBy);
-      if (!sortAsc) {
-        filteredIndices.reverse();
-      }
-    }
-
-    const numOfPages = Math.ceil(filteredIndices.length / perPage);
-    const indices = getPaginatedIndices(filteredIndices, page, perPage);
-    return {
-      indices,
-      numOfPages,
-    }
-  }
-);
-
 export const getPattern = state => getIndexPatternCreate(state).results.pattern;
 export const getSelectedTimeField = state => getIndexPatternCreate(state).timeFields.selectedTimeField;
+export const getTimeFields = state => getIndexPatternCreate(state).timeFields;
+export const getCreation = state => {
+  const {
+    isIncludingSystemIndices,
+    isCreating,
+    results: {
+      hasExactMatches,
+    },
+  } = getIndexPatternCreate(state);
+  return { isCreating, isIncludingSystemIndices, hasExactMatches };
+};

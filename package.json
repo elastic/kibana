@@ -183,6 +183,7 @@
     "react-test-renderer": "15.6.1",
     "react-toggle": "3.0.1",
     "reactcss": "1.0.7",
+    "recompose": "0.25.0",
     "redux": "3.0.0",
     "redux-actions": "2.2.1",
     "redux-thunk": "0.1.0",

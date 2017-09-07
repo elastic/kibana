@@ -1,33 +1,33 @@
 import { management } from 'ui/management';
 import './create_index_pattern_wizard';
 import './edit_index_pattern';
-import uiRoutes from 'ui/routes';
+// import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import indexTemplate from 'plugins/kibana/management/sections/indices/index.html';
-import { SavedObjectsClientProvider } from 'ui/saved_objects';
+// import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
-const indexPatternsResolutions = {
-  indexPatterns: function (Private) {
-    const savedObjectsClient = Private(SavedObjectsClientProvider);
+// const indexPatternsResolutions = {
+//   indexPatterns: function (Private) {
+//     const savedObjectsClient = Private(SavedObjectsClientProvider);
 
-    return savedObjectsClient.find({
-      type: 'index-pattern',
-      fields: ['title'],
-      perPage: 10000
-    }).then(response => response.savedObjects);
-  }
-};
+//     return savedObjectsClient.find({
+//       type: 'index-pattern',
+//       fields: ['title'],
+//       perPage: 10000
+//     }).then(response => response.savedObjects);
+//   }
+// };
 
 // add a dependency to all of the subsection routes
-uiRoutes
-.defaults(/management\/kibana\/indices/, {
-  resolve: indexPatternsResolutions
-});
+// uiRoutes
+// .defaults(/management\/kibana\/indices/, {
+//   resolve: indexPatternsResolutions
+// });
 
-uiRoutes
-.defaults(/management\/kibana\/index/, {
-  resolve: indexPatternsResolutions
-});
+// uiRoutes
+// .defaults(/management\/kibana\/index/, {
+//   resolve: indexPatternsResolutions
+// });
 
 // wrapper directive, which sets some global stuff up like the left nav
 uiModules.get('apps/management')
