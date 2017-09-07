@@ -17,7 +17,7 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  addElement: pageId => expression => dispatch(addElement(pageId, { expression })),
+  addElement: pageId => partialElement => dispatch(addElement(pageId, partialElement)),
   addPage: () => dispatch(addPage()),
   nextPage: () => dispatch(nextPage()),
   previousPage: () => dispatch(previousPage()),
