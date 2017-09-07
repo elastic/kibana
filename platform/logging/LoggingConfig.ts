@@ -1,4 +1,4 @@
-import { Schema, typeOfSchema } from '../types';
+import { Schema, typeOfSchema } from '../types/schema';
 import { Appenders, AppenderConfigType } from './appenders/Appenders';
 
 /**

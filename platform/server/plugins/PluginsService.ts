@@ -5,7 +5,7 @@ import { Observable } from 'rxjs';
 import { Plugin } from './Plugin';
 import { PluginSystem } from './PluginSystem';
 import { Logger, LoggerFactory } from '../../logging';
-import { CoreService } from '../../types';
+import { CoreService } from '../../types/CoreService';
 import { ConfigService, Env } from '../../config';
 
 const readDir$ = Observable.bindNodeCallback(readdir);

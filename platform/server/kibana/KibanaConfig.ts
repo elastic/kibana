@@ -1,4 +1,4 @@
-import { Schema, typeOfSchema } from '../../types';
+import { Schema, typeOfSchema } from '../../types/schema';
 
 const createKibanaSchema = (schema: Schema) =>
   schema.object({

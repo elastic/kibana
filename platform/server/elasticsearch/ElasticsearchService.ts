@@ -4,7 +4,7 @@ import { ElasticsearchClusterType } from './ElasticsearchConfig';
 import { ElasticsearchConfigs } from './ElasticsearchConfigs';
 import { Cluster } from './Cluster';
 import { LoggerFactory } from '../../logging';
-import { CoreService } from '../../types';
+import { CoreService } from '../../types/CoreService';
 
 type Clusters = { [type in ElasticsearchClusterType]: Cluster };
 

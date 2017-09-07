@@ -1,7 +1,7 @@
 // TODO inline all of these
 import * as schemaLib from '../lib/schema';
 import { Env } from './Env';
-import { Schema } from '../types';
+import { Schema } from '../types/schema';
 
 /**
  * Interface that defines the static side of a config class.

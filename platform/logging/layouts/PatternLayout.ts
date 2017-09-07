@@ -1,5 +1,5 @@
 import * as chalk from 'chalk';
-import { Schema, typeOfSchema } from '../../types';
+import { Schema, typeOfSchema } from '../../types/schema';
 import { LogLevel } from '../LogLevel';
 import { LogRecord } from '../LogRecord';
 import { Layout } from './Layouts';

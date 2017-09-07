@@ -1,5 +1,5 @@
 import { assertNever } from '../../lib/utils';
-import { Schema } from '../../types';
+import { Schema } from '../../types/schema';
 import {
   ConsoleAppender,
   ConsoleAppenderConfigType

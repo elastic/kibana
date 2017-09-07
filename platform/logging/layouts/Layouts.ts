@@ -1,5 +1,5 @@
 import { assertNever } from '../../lib/utils';
-import { Schema } from '../../types';
+import { Schema } from '../../types/schema';
 import { JsonLayout, JsonLayoutConfigType } from './JsonLayout';
 import { PatternLayout, PatternLayoutConfigType } from './PatternLayout';
 import { LogRecord } from '../LogRecord';

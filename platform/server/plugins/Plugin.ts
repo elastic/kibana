@@ -4,9 +4,9 @@ import {
   KibanaClassPluginStatic,
   PluginName
 } from './types';
+import { KibanaCoreModules } from './KibanaCoreModules';
 import { Logger, LoggerFactory } from '../../logging';
 import { createKibanaValuesForPlugin } from './KibanaPluginValues';
-import { KibanaCoreModules } from '../../types';
 
 type LifecycleCallback = () => void;
 

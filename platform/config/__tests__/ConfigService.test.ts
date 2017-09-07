@@ -3,7 +3,7 @@ import { BehaviorSubject } from 'rxjs';
 import { ConfigService } from '../ConfigService';
 import { Env } from '../Env';
 import { logger } from '../../logging/__mocks__';
-import { Schema } from '../../types';
+import { Schema } from '../../types/schema';
 import * as schemaLib from '../../lib/schema';
 
 const emptyArgv = {};

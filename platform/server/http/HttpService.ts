@@ -4,7 +4,7 @@ import { HttpServer } from './HttpServer';
 import { HttpConfig } from './HttpConfig';
 import { Logger, LoggerFactory } from '../../logging';
 import { Router } from './Router';
-import { CoreService } from '../../types';
+import { CoreService } from '../../types/CoreService';
 
 export class HttpService implements CoreService {
   private readonly httpServer: HttpServer;
