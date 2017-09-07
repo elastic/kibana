@@ -47,8 +47,7 @@
     transition: transform $globalAnimSpeedNormal $globalAnimSlightBounce, opacity $globalAnimSpeedNormal $globalAnimSlightBounce;
 
     // 1. Angulars ng-hide uses display: none. To use animations we need to use visibility instead.
-    &.ng-hide,
-    &.kuiExpressionItem__popover--isHidden {
+    &.ng-hide {
       display: block !important; // 1
       visibility: hidden;
       opacity: 0;
