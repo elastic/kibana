@@ -1,4 +1,4 @@
-import { compose, withState, lifecycle, withPropsOnChange } from 'recompose';
+import { compose, withState, lifecycle, withPropsOnChange, withProps } from 'recompose';
 import { RenderElement as Component } from './render_element';
 import PropTypes from 'prop-types';
 import { isEqual } from 'lodash';
@@ -6,14 +6,15 @@ import { ElementHandlers } from './lib/handlers';
 
 export const RenderElement = compose(
   withState('domNode', 'setDomNode'), // Still don't like this, seems to be the only way todo it.
-  withPropsOnChange(() => false, ({ handlers }) => ({
-    handlers: (function () {
-      return Object.assign(
-        new ElementHandlers(),
-        handlers,
-        { done: () => {} },
-      );
-    }()),
+  withPropsOnChange(() => false, () => ({
+    elementHandlers: new ElementHandlers(),
+  })),
+  withProps(({ handlers, elementHandlers }) => ({
+    handlers: Object.assign(
+      elementHandlers,
+      handlers,
+      { done: () => {} },
+    ),
   })),
   lifecycle({
     componentDidUpdate(prevProps) {
