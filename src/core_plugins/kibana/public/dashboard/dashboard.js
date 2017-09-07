@@ -27,6 +27,8 @@ import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import { QueryManagerProvider } from 'ui/query_manager';
 import { keyCodes } from 'ui_framework/services';
 import { DashboardContainerAPI } from './dashboard_container_api';
+import * as filterActions from 'ui/doc_table/actions/filter';
+import { FilterManagerProvider } from 'ui/filter_manager';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -89,6 +91,7 @@ app.directive('dashboardApp', function ($injector) {
     restrict: 'E',
     controllerAs: 'dashboardApp',
     controller: function ($scope, $rootScope, $route, $routeParams, $location, getAppState, $compile, dashboardConfig) {
+      const filterManager = Private(FilterManagerProvider);
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
       const notify = new Notifier({ location: 'Dashboard' });
@@ -102,7 +105,13 @@ app.directive('dashboardApp', function ($injector) {
       const dashboardState = new DashboardState(dash, AppState, dashboardConfig.getHideWriteControls());
       $scope.appState = dashboardState.getAppState();
       const queryManager = Private(QueryManagerProvider)(dashboardState.getAppState());
-      $scope.containerApi = new DashboardContainerAPI(dashboardState, queryManager);
+      $scope.containerApi = new DashboardContainerAPI(
+        dashboardState,
+        (field, value, operator, index) => {
+          filterActions.addFilter(field, value, operator, index, dashboardState.getAppState(), filterManager);
+          dashboardState.saveState();
+        }
+      );
 
       // The 'previouslyStored' check is so we only update the time filter on dashboard open, not during
       // normal cross app navigation.
