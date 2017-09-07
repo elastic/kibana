@@ -26,7 +26,10 @@ export default new Chainable('label', {
       if (config.regex) {
         eachSeries.label = eachSeries.label.replace(new RegExp(config.regex), config.label);
       } else {
-        const cleanLabel = sanitizeHtml(config.label);
+        const cleanLabel = sanitizeHtml(config.label, {
+          allowedTags: [],
+          allowedAttributes: []
+        });
         eachSeries.label = cleanLabel;
       }
 

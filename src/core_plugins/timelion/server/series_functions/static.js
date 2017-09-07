@@ -39,7 +39,10 @@ export default new Datasource ('static', {
     }
 
     const label = args.byName.label == null ? String(args.byName.value) : args.byName.label;
-    const cleanLabel = sanitizeHtml(label);
+    const cleanLabel = sanitizeHtml(label, {
+      allowedTags: [],
+      allowedAttributes: []
+    });
 
     return Promise.resolve({
       type: 'seriesList',
