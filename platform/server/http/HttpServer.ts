@@ -1,6 +1,7 @@
 import * as express from 'express';
 import * as http from 'http';
 import * as https from 'https';
+import { Server } from 'net';
 import { promisify } from 'util';
 import { readFileSync } from 'fs';
 
@@ -11,7 +12,7 @@ import { Router } from './Router';
 
 export class HttpServer {
   private readonly app: express.Application;
-  private server: http.Server | https.Server | null = null;
+  private server: Server | null = null;
 
   constructor(private readonly log: Logger, private readonly env: Env) {
     this.app = express();
@@ -25,7 +26,7 @@ export class HttpServer {
   }
 
   isListening() {
-    return this.server && this.server.listening;
+    return this.server !== null && this.server.listening;
   }
 
   registerRouter(router: Router<any>) {
