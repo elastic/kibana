@@ -48,6 +48,7 @@ module.exports = function () {
         'flatten@0.0.1': ['MIT'],
         'indexof@0.0.1': ['MIT'],
         'jsonify@0.0.0': ['Public domain'],
+        'regexp-quote@0.0.0': ['MIT'],
         'ripemd160@0.2.0': ['MIT'],
         'select@1.0.6': ['MIT'],
         'ua-parser-js@0.7.14': ['MIT'],

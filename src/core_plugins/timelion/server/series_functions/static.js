@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import Datasource from '../lib/classes/datasource';
 import Promise from 'bluebird';
+import sanitizeHtml from 'sanitize-html';
 
 
 export default new Datasource ('static', {
@@ -37,13 +38,19 @@ export default new Datasource ('static', {
       });
     }
 
+    const label = args.byName.label == null ? String(args.byName.value) : args.byName.label;
+    const cleanLabel = sanitizeHtml(label, {
+      allowedTags: [],
+      allowedAttributes: []
+    });
+
     return Promise.resolve({
       type: 'seriesList',
       list: [
         {
           data: data,
           type: 'series',
-          label: args.byName.label == null ? String(args.byName.value) : args.byName.label,
+          label: cleanLabel,
           fit: args.byName.fit || 'average'
         }
       ]

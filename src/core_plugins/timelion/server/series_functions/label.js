@@ -1,5 +1,6 @@
 import alter from '../lib/alter.js';
 import Chainable from '../lib/classes/chainable';
+import sanitizeHtml from 'sanitize-html';
 
 export default new Chainable('label', {
   args: [
@@ -25,7 +26,11 @@ export default new Chainable('label', {
       if (config.regex) {
         eachSeries.label = eachSeries.label.replace(new RegExp(config.regex), config.label);
       } else {
-        eachSeries.label = config.label;
+        const cleanLabel = sanitizeHtml(config.label, {
+          allowedTags: [],
+          allowedAttributes: []
+        });
+        eachSeries.label = cleanLabel;
       }
 
       return eachSeries;

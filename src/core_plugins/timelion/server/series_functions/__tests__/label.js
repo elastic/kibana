@@ -24,4 +24,20 @@ describe(filename, () => {
     });
   });
 
+  it('does not allow html tags', () => {
+    const label = '<b>test</b><em>test</em><a>test</a><textarea>test</textarea>';
+    const escapedLabel = 'testtesttest';
+    return invoke(fn, [seriesList, label]).then((r) => {
+      _.each(r.output.list, (series) => expect(series.label).to.equal(escapedLabel));
+    });
+  });
+
+  it('does not allow html scrpt tags', () => {
+    const label = 'test<script>console.log(\'error\')</script>';
+    const escapedLabel = 'test';
+    return invoke(fn, [seriesList, label]).then((r) => {
+      _.each(r.output.list, (series) => expect(series.label).to.equal(escapedLabel));
+    });
+  });
+
 });
