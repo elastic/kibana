@@ -252,5 +252,6 @@ export const addElement = createThunk('addElement', ({ dispatch }, pageId, eleme
   const newElement = Object.assign({}, getDefaultElement(), omit(element, 'id'));
   const _addElement = createAction('addElement');
   dispatch(_addElement({ pageId, element: newElement }));
-  dispatch(fetchRenderable(newElement));
+  if (element.filter) dispatch(fetchAllRenderables());
+  else dispatch(fetchRenderable(newElement));
 });
