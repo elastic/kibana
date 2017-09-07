@@ -103,6 +103,11 @@ export function TestSubjectsProvider({ getService }) {
       });
     }
 
+    async moveMouseTo(selector) {
+      const element = await this.find(selector);
+      await remote.moveMouseTo(element);
+    }
+
     async _mapAll(selectorAll, mapFn) {
       return await retry.try(async () => {
         const elements = await this.findAll(selectorAll);
