@@ -108,6 +108,7 @@ export class InputControlVisEditor extends Component {
               handleFieldNameChange={this.handleFieldNameChange.bind(this, controlIndex)}
               getIndexPatterns={this.getIndexPatterns}
               getIndexPattern={this.getIndexPattern}
+              handleDecimalPlacesChange={this.handleNumberOptionChange.bind(this, controlIndex, 'decimalPlaces')}
               handleStepChange={this.handleNumberOptionChange.bind(this, controlIndex, 'step')}
             />
           );

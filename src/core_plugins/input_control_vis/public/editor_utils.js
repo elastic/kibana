@@ -45,6 +45,7 @@ export const getDefaultOptions = (type) => {
   const defaultOptions = {};
   switch (type) {
     case 'range':
+      defaultOptions.decimalPlaces = 0;
       defaultOptions.step = 1;
       break;
     case 'list':
@@ -58,7 +59,7 @@ export const getDefaultOptions = (type) => {
 };
 
 export const newControl = (type) => ({
-  id: (new Date()).getTime(),
+  id: (new Date()).getTime().toString(),
   indexPattern: '',
   fieldName: '',
   label: '',

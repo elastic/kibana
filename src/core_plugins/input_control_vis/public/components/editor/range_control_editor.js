@@ -45,6 +45,22 @@ export class RangeControlEditor extends Component {
           </div>
         </div>
 
+        <div className="kuiSideBarFormRow">
+          <label className="kuiSideBarFormRow__label" htmlFor="decimalPlaces">
+            Decimal Places
+          </label>
+          <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
+            <input
+              id="decimalPlaces"
+              className="kuiTextInput"
+              type="number"
+              min="0"
+              value={this.props.controlParams.options.decimalPlaces}
+              onChange={this.props.handleDecimalPlacesChange}
+            />
+          </div>
+        </div>
+
       </div>
     );
   }
@@ -56,5 +72,6 @@ RangeControlEditor.propTypes = {
   controlParams: PropTypes.object.isRequired,
   handleFieldNameChange: PropTypes.func.isRequired,
   handleIndexPatternChange: PropTypes.func.isRequired,
+  handleDecimalPlacesChange: PropTypes.func.isRequired,
   handleStepChange: PropTypes.func.isRequired
 };

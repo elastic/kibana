@@ -524,6 +524,26 @@ exports[`renders InputControlVisEditor 1`] = `
             />
           </div>
         </div>
+        <div
+          class="kuiSideBarFormRow"
+        >
+          <label
+            class="kuiSideBarFormRow__label"
+            for="decimalPlaces"
+          >
+            Decimal Places
+          </label>
+          <div
+            class="kuiSideBarFormRow__control kuiFieldGroupSection--wide"
+          >
+            <input
+              class="kuiTextInput"
+              id="decimalPlaces"
+              min="0"
+              type="number"
+            />
+          </div>
+        </div>
       </div>
     </div>
   </div>

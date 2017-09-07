@@ -49,7 +49,7 @@ const scopeMock = {
     params: {
       'controls': [
         {
-          'id': 1,
+          'id': '1',
           'indexPattern': 'indexPattern1',
           'fieldName': 'keywordField',
           'label': 'custom label',
@@ -62,7 +62,7 @@ const scopeMock = {
           }
         },
         {
-          'id': 2,
+          'id': '2',
           'indexPattern': 'indexPattern1',
           'fieldName': 'numberField',
           'label': '',
@@ -114,7 +114,7 @@ test('remove control btn', () => {
   const expectedParams = {
     'controls': [
       {
-        'id': 2,
+        'id': '2',
         'indexPattern': 'indexPattern1',
         'fieldName': 'numberField',
         'label': '',
@@ -139,7 +139,7 @@ test('move down control btn', () => {
   const expectedParams = {
     'controls': [
       {
-        'id': 2,
+        'id': '2',
         'indexPattern': 'indexPattern1',
         'fieldName': 'numberField',
         'label': '',
@@ -149,7 +149,7 @@ test('move down control btn', () => {
         }
       },
       {
-        'id': 1,
+        'id': '1',
         'indexPattern': 'indexPattern1',
         'fieldName': 'keywordField',
         'label': 'custom label',
@@ -176,7 +176,7 @@ test('move up control btn', () => {
   const expectedParams = {
     'controls': [
       {
-        'id': 2,
+        'id': '2',
         'indexPattern': 'indexPattern1',
         'fieldName': 'numberField',
         'label': '',
@@ -186,7 +186,7 @@ test('move up control btn', () => {
         }
       },
       {
-        'id': 1,
+        'id': '1',
         'indexPattern': 'indexPattern1',
         'fieldName': 'keywordField',
         'label': 'custom label',

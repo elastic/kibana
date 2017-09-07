@@ -1,3 +1,4 @@
+import _  from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import InputRange from 'react-input-range';
@@ -11,6 +12,7 @@ export class RangeControl extends Component {
       sliderValue: this.props.control.value
     };
 
+    this.formatLabel = this.formatLabel.bind(this);
     this.handleOnChange = this.handleOnChange.bind(this);
   }
 
@@ -20,6 +22,15 @@ export class RangeControl extends Component {
 
   handleOnChange(control, value) {
     this.props.stageFilter(this.props.controlIndex, value, this.props.control.filterManager.createFilter(value));
+  }
+
+  formatLabel(value) {
+    let formatedValue = value;
+    const decimalPlaces = _.get(this.props, 'control.options.decimalPlaces');
+    if (decimalPlaces !== null && decimalPlaces >= 0) {
+      formatedValue = value.toFixed(decimalPlaces);
+    }
+    return formatedValue;
   }
 
   render() {
@@ -36,7 +47,9 @@ export class RangeControl extends Component {
             value={this.state.sliderValue}
             onChange={newValue => this.setState({ sliderValue: newValue })}
             onChangeComplete={this.handleOnChange.bind(null, this.props.control)}
-            aria-labelledby={this.props.control.id}
+            draggableTrack={true}
+            ariaLabelledby={this.props.control.id}
+            formatLabel={this.formatLabel}
           />
         </div>
       </FormRow>
