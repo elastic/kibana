@@ -10,7 +10,7 @@ export default new Element('grid', {
   displayName: 'Grid',
   description: 'A colorable, sizable, grid for displaying a point series',
   image: header,
-  expression: 'demodata | pointseries x="project" y="state" size="median(price)" | grid | render',
+  expression: 'filters | demodata | pointseries x="project" y="state" size="median(price)" | grid | render',
   render(domNode, config, handlers) {
 
     const { summary, columns, rows } = config;
