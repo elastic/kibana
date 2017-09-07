@@ -20,7 +20,8 @@ describe('dateHistogram(req, panel, series)', () => {
     panel = {
       index_pattern: '*',
       time_field: '@timestamp',
-      interval: '10s'
+      interval: '10s',
+      min_interval: '1ms'
     };
     series = { id: 'test' };
   });
@@ -73,6 +74,59 @@ describe('dateHistogram(req, panel, series)', () => {
                 extended_bounds: {
                   min: 1483225200000,
                   max: 1483228800000
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+  });
+
+  it('returns valid date histogram (minimum interval 1h)', () => {
+    panel.interval = 'auto';
+    panel.min_interval = '1h';
+    const next = doc => doc;
+    const doc = dateHistogram(req, panel, series)(next)({});
+    expect(doc).to.eql({
+      aggs: {
+        test: {
+          aggs: {
+            timeseries: {
+              date_histogram: {
+                field: '@timestamp',
+                interval: '1h',
+                min_doc_count: 0,
+                time_zone: 'UTC',
+                extended_bounds: {
+                  min: 1483228800000,
+                  max: 1483232400000
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+  });
+
+  it('returns valid date histogram (minimum interval 1h - not auto)', () => {
+    panel.min_interval = '1h';
+    const next = doc => doc;
+    const doc = dateHistogram(req, panel, series)(next)({});
+    expect(doc).to.eql({
+      aggs: {
+        test: {
+          aggs: {
+            timeseries: {
+              date_histogram: {
+                field: '@timestamp',
+                interval: '10s',
+                min_doc_count: 0,
+                time_zone: 'UTC',
+                extended_bounds: {
+                  min: 1483228800000,
+                  max: 1483232400000
                 }
               }
             }

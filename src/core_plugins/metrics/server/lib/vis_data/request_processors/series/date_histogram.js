@@ -4,8 +4,8 @@ import getIntervalAndTimefield from '../../get_interval_and_timefield';
 import { set } from 'lodash';
 export default function dateHistogram(req, panel, series) {
   return next => doc => {
-    const { timeField, interval } = getIntervalAndTimefield(panel, series);
-    const { intervalString } = getBucketSize(req, interval);
+    const { timeField, interval, minInterval } = getIntervalAndTimefield(panel, series);
+    const { intervalString } = getBucketSize(req, interval, minInterval);
     const { from, to }  = offsetTime(req, series.offset_time);
     const { timezone:time_zone } = req.payload.timerange;
 

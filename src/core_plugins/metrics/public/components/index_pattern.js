@@ -13,11 +13,13 @@ export const IndexPattern = props => {
   const timeFieldName = `${prefix}time_field`;
   const indexPatternName = `${prefix}index_pattern`;
   const intervalName = `${prefix}interval`;
+  const minIntervalName = `${prefix}min_interval`;
   const dropBucketName = `${prefix}drop_last_bucket`;
 
   const defaults = {
     [indexPatternName]: '*',
     [intervalName]: 'auto',
+    [minIntervalName]: '1ms',
     [dropBucketName]: 1
   };
 
@@ -59,6 +61,16 @@ export const IndexPattern = props => {
         disabled={props.disabled}
         onChange={handleTextChange(intervalName, 'auto')}
         value={model[intervalName]}
+      />
+      <label className="vis_editor__label" htmlFor={htmlId('minInterval')}>
+        Min Interval
+      </label>
+      <input
+        id={htmlId('minInterval')}
+        className="vis_editor__input"
+        disabled={props.disabled}
+        onChange={handleTextChange(minIntervalName, '1ms')}
+        value={model[minIntervalName]}
       />
       <div className="vis_editor__label">Drop Last Bucket</div>
       <YesNo
