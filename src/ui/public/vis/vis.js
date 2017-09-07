@@ -45,6 +45,10 @@ export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
       this.setState(this.getCurrentState(), false);
       this.setUiState(uiState);
 
+      // Session state is for storing information that is transitory, and will not be saved with the visualization.
+      // For instance, map bounds, which depends on the view port, browser window size, etc.
+      this.sessionState = {};
+
       this.API = {
         indexPatterns: indexPatterns,
         timeFilter: timefilter,
