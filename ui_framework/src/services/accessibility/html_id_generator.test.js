@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { htmlIdGenerator } from '../html_id_generator';
+import { htmlIdGenerator } from './html_id_generator';
 
 describe('htmlIdGenerator', () => {
 
