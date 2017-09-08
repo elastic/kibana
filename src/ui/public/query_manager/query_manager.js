@@ -1,21 +1,24 @@
-export function QueryManagerProvider() {
+import _ from 'lodash';
 
-  return function (state) {
+export function queryManagerFactory(state) {
 
-    function getQuery() {
-      return {
-        ...state.query
-      };
-    }
-
-    function updateQuery(newQuery) {
-      state.query = newQuery;
-    }
-
+  function getQuery() {
     return {
-      getQuery,
-      updateQuery,
+      ...state.query
     };
+  }
 
+  function updateQuery(newQuery) {
+    state.query = newQuery;
+
+    if (_.isFunction(state.save)) {
+      state.save();
+    }
+  }
+
+  return {
+    getQuery,
+    updateQuery,
   };
+
 }
