@@ -12,7 +12,7 @@ export function FilterBarLibGenerateMappingChainProvider(Promise) {
           if (result === filter) {
             return next(filter);
           }
-          return Promise.reject(result);
+          return Promise.reject({ error: result, filter: filter });
         });
       };
     };
