@@ -17,21 +17,14 @@ To configure the Elasticsearch indices you want to access with Kibana:
 +
 image:images/Start-Page.png[Kibana start page]
 +
-. Specify an index pattern that matches the name of one or more of your Elasticsearch indices. By default,
-Kibana guesses that you're working with data being fed into Elasticsearch by Logstash. If that's the case,
-you can use the default `logstash-*` as your index pattern. The asterisk (*) matches zero or more
-characters in an index's name. If your Elasticsearch indices follow some other naming convention, enter
-an appropriate pattern. The "pattern" can also simply be the name of a single index.
-. Select the index field that contains the timestamp that you want to use to perform time-based
+. Specify an index pattern that matches the name of one or more of your Elasticsearch indices. The pattern
+can include an asterisk (*) to matches zero or more characters in an index's name. When filling out your
+index pattern, any matched indices will be displayed.
+. Click *Next Step* to select the index field that contains the timestamp you want to use to perform time-based
 comparisons. Kibana reads the index mapping to list all of the fields that contain a timestamp. If your
-index doesn't have time-based data, disable the *Index contains time-based events* option.
+index doesn't have time-based data, choose *I don't want to use the Time Filter* option.
 +
-WARNING: Using event times to create index names is *deprecated* in this release of Kibana. Support for
-this functionality will be removed entirely in the next major Kibana release. Elasticsearch 2.1 includes
-sophisticated date parsing APIs that Kibana uses to determine date information, removing the need to
-specify dates in the index pattern name.
-+
-. Click *Create* to add the index pattern. This first pattern is automatically configured as the default.
+. Click *Create index pattern* to add the index pattern. This first pattern is automatically configured as the default.
 When you have more than one index pattern, you can designate which one to use as the default by clicking
 on the star icon above the index pattern title from *Management > Index Patterns*.
 
