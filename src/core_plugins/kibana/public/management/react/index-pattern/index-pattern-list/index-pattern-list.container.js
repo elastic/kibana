@@ -24,7 +24,7 @@ export default compose(
     state => ({ ...getIndexPatternList(state) }),
     { fetchIndexPatterns }
   ),
-  connectToTransientStore(setTransientTableId),
+  connectToTransientStore({ refSetter: setTransientTableId }),
   wrapWithSortProps(),
   // wrapWithPaginateProps({ perPage: 10, page: 1 }),
 )(IndexPatternList);

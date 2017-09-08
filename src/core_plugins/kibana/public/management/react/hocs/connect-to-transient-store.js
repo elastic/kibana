@@ -47,7 +47,8 @@ const TransientRedux = connect(
   { change, createItem }
 )(Transient);
 
-export const connectToTransientStore = (refSetter, transientId = uniqueId('transient_')) => {
+export const connectToTransientStore = ({ refSetter, id }) => {
+  const transientId = id || uniqueId('transient_');
   return (BaseComponent) => (props) => {
     return (
       <TransientRedux refSetter={refSetter} transientId={transientId}>

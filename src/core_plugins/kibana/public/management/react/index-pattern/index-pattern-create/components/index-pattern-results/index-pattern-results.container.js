@@ -33,7 +33,10 @@ export default compose(
       };
     },
   ),
-  connectToTransientStore(setTransientTableId),
+  connectToTransientStore({
+    refSetter: setTransientTableId,
+    id: 'creation_results'
+  }),
   wrapWithSortProps(),
   wrapWithPaginateProps({ perPage: 10, page: 1 }),
 )(IndexPatternResults);

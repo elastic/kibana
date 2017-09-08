@@ -7,6 +7,7 @@ import {
   KuiPageContentHeaderSection,
   KuiTitle,
   KuiText,
+  KuiLink,
   KuiForm,
   KuiFormRow,
   KuiFieldText,
@@ -62,7 +63,11 @@ const IndexPatternList = ({
           <KuiButton
             fill
           >
-            Create new index pattern
+            <KuiLink
+              href="#/management/kibana/index"
+            >
+              Create new index pattern
+            </KuiLink>
           </KuiButton>
         </KuiPageContentHeaderSection>
       </KuiPageContentHeader>

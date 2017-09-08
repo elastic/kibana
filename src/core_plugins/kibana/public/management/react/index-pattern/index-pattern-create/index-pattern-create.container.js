@@ -22,7 +22,7 @@ export default compose(
     state => ({ ...getCreation(state) }),
     { createIndexPattern },
   ),
-  connectToTransientStore(setTransientId),
+  connectToTransientStore({ refSetter: setTransientId }),
   wrapWithSimpleProps({
     props: {
       isIncludingSystemIndices: false,
