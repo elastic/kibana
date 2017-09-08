@@ -67,5 +67,5 @@ export const AdvancedFailure = compose(
 )(AdvancedFailureComponent);
 
 AdvancedFailure.propTypes = {
-  argValue: PropTypes.object.isRequired,
+  argValue: PropTypes.any.isRequired,
 };

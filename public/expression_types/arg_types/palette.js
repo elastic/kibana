@@ -53,7 +53,7 @@ const template = ({ onValueChange, argValue }) => {
 
 template.propTypes = {
   onValueChange: PropTypes.func.isRequired,
-  argValue: PropTypes.object.isRequired,
+  argValue: PropTypes.any.isRequired,
 };
 
 export const palette = () => new ArgType('palette', {

@@ -62,18 +62,12 @@ describe('ast fromExpression', () => {
 
       it('has index argument with string value', () => {
         expect(block.arguments).to.have.property('index');
-        expect(block.arguments.index).to.eql([{
-          type: 'string',
-          value: 'logstash-*',
-        }]);
+        expect(block.arguments.index).to.eql(['logstash-*']);
       });
 
       it('has oranges argument with string value', () => {
         expect(block.arguments).to.have.property('oranges');
-        expect(block.arguments.oranges).to.eql([{
-          type: 'string',
-          value: 'bananas',
-        }]);
+        expect(block.arguments.oranges).to.eql(['bananas']);
       });
     });
 
@@ -100,10 +94,7 @@ describe('ast fromExpression', () => {
             type: 'function',
             function: 'someFunction',
             arguments: {
-              q: [{
-                type: 'string',
-                value: 'do something',
-              }],
+              q: ['do something'],
             },
           }],
         }]);
@@ -133,10 +124,7 @@ describe('ast fromExpression', () => {
             type: 'function',
             function: 'somePartialFunction',
             arguments: {
-              q: [{
-                type: 'string',
-                value: 'do something',
-              }],
+              q: ['do something'],
             },
           }],
         }]);

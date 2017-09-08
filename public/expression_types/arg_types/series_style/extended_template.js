@@ -78,7 +78,7 @@ export const extendedTemplate = (props) => {
 
 extendedTemplate.propTypes = {
   onValueChange: PropTypes.func.isRequired,
-  argValue: PropTypes.object.isRequired,
+  argValue: PropTypes.any.isRequired,
   typeInstance: PropTypes.object,
   labels: PropTypes.array.isRequired,
   renderError: PropTypes.func,

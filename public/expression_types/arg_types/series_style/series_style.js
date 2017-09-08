@@ -22,7 +22,7 @@ const wrappedTemplate = lifecycle({
 })(extendedTemplate);
 
 wrappedTemplate.propTypes = {
-  argValue: PropTypes.object.isRequired,
+  argValue: PropTypes.any.isRequired,
   setLabel: PropTypes.func.isRequired,
   label: PropTypes.string,
 };

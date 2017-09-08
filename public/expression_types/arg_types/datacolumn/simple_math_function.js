@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormControl } from 'react-bootstrap';
 
-export const MathExpression = ({ onChange, value, inputRef }) => {
+export const SimpleMathFunction = ({ onChange, value, inputRef }) => {
   const options = [
     'median',
     'mean',
@@ -31,7 +31,7 @@ export const MathExpression = ({ onChange, value, inputRef }) => {
   );
 };
 
-MathExpression.propTypes = {
+SimpleMathFunction.propTypes = {
   onChange: PropTypes.func,
   value: PropTypes.string,
   inputRef: PropTypes.func,

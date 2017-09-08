@@ -29,7 +29,7 @@ export const extendedTemplate = ({ getArgValue, setArgValue }) => (
 
 extendedTemplate.propTypes = {
   onValueChange: PropTypes.func.isRequired,
-  argValue: PropTypes.object.isRequired,
+  argValue: PropTypes.any.isRequired,
   getArgValue: PropTypes.func.isRequired,
   setArgValue: PropTypes.func.isRequired,
 };

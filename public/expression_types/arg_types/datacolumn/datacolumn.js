@@ -2,38 +2,66 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { sortBy } from 'lodash';
 import { FormControl } from 'react-bootstrap';
-import { MathExpression } from './math_expression';
+import { SimpleMathFunction } from './simple_math_function';
 import { ArgType } from '../../arg_type';
-import { toExpressionAst } from './lib/map_arg_value';
+import { getType } from '../../../../common/types/get_type';
+import { parse } from 'mathjs';
+
 import './datacolumn.less';
 
 const simpleTemplate = ({ onValueChange, columns, argValue, renderError }) => {
+  // We can only handle strings, we'll figure out later if they're reasonable to turn into math inputs
+  if (getType(argValue) !== 'string') return renderError();
+
+  // TODO: Garbage, we could make a much nicer math form that can handle way more.
+  function getFormObject() {
+    try {
+      // check if the value is a math expression, and set its type if it is
+      const mathObj = parse(argValue);
+
+      // A symbol node is a plain string, so we guess that they're looking for a column.
+      if (mathObj.type === 'SymbolNode') {
+        return {
+          fn: '',
+          column: argValue,
+        };
+
+      // Check if its a simple function, eg a function wrapping a symbol node
+      } else if (mathObj.type === 'FunctionNode' && mathObj.args[0].type === 'SymbolNode') {
+        return {
+          fn: mathObj.name,
+          column: mathObj.args[0].name,
+        };
+
+      // Screw it, textarea for you my fancy.
+      } else {
+        renderError();
+      }
+    } catch (e) {
+      renderError();
+    }
+  }
+
   const inputRefs = {};
-
-  // use fallback when given a type we can't handle
-  if (argValue.type !== 'string' && argValue.type !== 'math') return renderError();
-
-  const updateFunctionValue = (valueType) => () => {
-    onValueChange(toExpressionAst({
-      type: valueType,
-      value: inputRefs.value.value,
-      function: inputRefs.fn.value,
-    }));
+  const updateFunctionValue = () => {
+    if (!inputRefs.fn.value || inputRefs.fn.value.length === 0) onValueChange(inputRefs.column.value);
+    else onValueChange(`${inputRefs.fn.value}(${inputRefs.column.value})`);
   };
 
+  const formValues = getFormObject();
   return (
     <div className="canvas__argtype--datacolumn">
-      <MathExpression
-        value={argValue.function}
+      <SimpleMathFunction
+        value={formValues.fn}
         inputRef={ref => inputRefs.fn = ref}
-        onChange={updateFunctionValue(argValue.type)}
+        onChange={updateFunctionValue}
       />
       <FormControl
         componentClass="select"
         placeholder="select"
-        value={argValue.value}
-        inputRef={ref => inputRefs.value = ref}
-        onChange={updateFunctionValue(argValue.type)}
+        value={formValues.column}
+        inputRef={ref => inputRefs.column = ref}
+        onChange={updateFunctionValue}
       >
         <option value="select" disabled>select column</option>
         { sortBy(columns, 'name').map(column => <option key={column.name} value={column.name}>{column.name}</option>) }
@@ -45,7 +73,7 @@ const simpleTemplate = ({ onValueChange, columns, argValue, renderError }) => {
 simpleTemplate.propTypes = {
   columns: PropTypes.array.isRequired,
   onValueChange: PropTypes.func.isRequired,
-  argValue: PropTypes.object.isRequired,
+  argValue: PropTypes.any.isRequired,
   typeInstance: PropTypes.object.isRequired,
   renderError: PropTypes.func.isRequired,
 };
