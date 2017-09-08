@@ -3,7 +3,9 @@ import { CATEGORY } from 'ui/vis/vis_category';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VisController } from './vis_controller';
-import { InputControlVisEditor } from './components/editor/vis_editor';
+import { ControlsTab } from './components/editor/controls_tab';
+import { OptionsTab } from './components/editor/options_tab';
+
 
 function InputControlVisProvider(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -24,7 +26,18 @@ function InputControlVisProvider(Private) {
     },
     editor: 'default',
     editorConfig: {
-      optionsTemplate: InputControlVisEditor
+      optionTabs: [
+        {
+          name: 'controls',
+          title: 'Controls',
+          editor: ControlsTab
+        },
+        {
+          name: 'options',
+          title: 'Options',
+          editor: OptionsTab
+        }
+      ]
     },
     requestHandler: 'none',
     responseHandler: 'none',

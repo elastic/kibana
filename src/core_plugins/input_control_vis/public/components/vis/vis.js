@@ -47,6 +47,8 @@ export class InputControlVis extends Component {
             />
           );
           break;
+        default:
+          throw new Error(`Unhandled control type ${control.type}`);
       }
       return (
         <div

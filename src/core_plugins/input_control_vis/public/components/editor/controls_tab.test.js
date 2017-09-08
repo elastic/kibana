@@ -1,10 +1,10 @@
 import React from 'react';
 import sinon from 'sinon';
-import { mount, render } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 
 import {
-  InputControlVisEditor,
-} from './vis_editor';
+  ControlsTab,
+} from './controls_tab';
 
 const savedObjectsClientMock = {
   find: () => {
@@ -71,8 +71,7 @@ const scopeMock = {
             'step': 1
           }
         }
-      ],
-      'updateFiltersOnChange': false
+      ]
     }
   }
 };
@@ -82,8 +81,8 @@ beforeEach(() => {
   stageEditorParams = sinon.spy();
 });
 
-test('renders InputControlVisEditor', () => {
-  const component = render(<InputControlVisEditor
+test('renders ControlsTab', () => {
+  const component = shallow(<ControlsTab
     scope={scopeMock}
     stageEditorParams={stageEditorParams}
   />);
@@ -91,7 +90,7 @@ test('renders InputControlVisEditor', () => {
 });
 
 test('add control btn', () => {
-  const component = mount(<InputControlVisEditor
+  const component = mount(<ControlsTab
     scope={scopeMock}
     stageEditorParams={stageEditorParams}
   />);
@@ -106,7 +105,7 @@ test('add control btn', () => {
 });
 
 test('remove control btn', () => {
-  const component = mount(<InputControlVisEditor
+  const component = mount(<ControlsTab
     scope={scopeMock}
     stageEditorParams={stageEditorParams}
   />);
@@ -123,15 +122,14 @@ test('remove control btn', () => {
           'step': 1
         }
       }
-    ],
-    'updateFiltersOnChange': false
+    ]
   };
   sinon.assert.calledWith(stageEditorParams, sinon.match(expectedParams));
 });
 
 
 test('move down control btn', () => {
-  const component = mount(<InputControlVisEditor
+  const component = mount(<ControlsTab
     scope={scopeMock}
     stageEditorParams={stageEditorParams}
   />);
@@ -161,14 +159,13 @@ test('move down control btn', () => {
           'order': 'desc'
         }
       }
-    ],
-    'updateFiltersOnChange': false
+    ]
   };
   sinon.assert.calledWith(stageEditorParams, sinon.match(expectedParams));
 });
 
 test('move up control btn', () => {
-  const component = mount(<InputControlVisEditor
+  const component = mount(<ControlsTab
     scope={scopeMock}
     stageEditorParams={stageEditorParams}
   />);
@@ -198,8 +195,7 @@ test('move up control btn', () => {
           'order': 'desc'
         }
       }
-    ],
-    'updateFiltersOnChange': false
+    ]
   };
   sinon.assert.calledWith(stageEditorParams, sinon.match(expectedParams));
 });
