@@ -17,7 +17,7 @@ import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 import { updateVisualizationConfig } from './vis_update';
-import { queryManagerFactory } from '../query_manager/query_manager';
+import { queryManagerFactory } from '../query_manager';
 import * as kueryAPI from 'ui/kuery';
 
 export function VisProvider(Private, indexPatterns, timefilter, getAppState) {

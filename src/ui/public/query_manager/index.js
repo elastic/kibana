@@ -1,1 +1,1 @@
-export { QueryManagerProvider } from './query_manager';
+export { queryManagerFactory } from './query_manager';
