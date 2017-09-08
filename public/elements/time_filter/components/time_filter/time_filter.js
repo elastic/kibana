@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import PrettyDuration from '../../../../components/pretty_duration';
 //import { fromExpression, toExpression } from '../../../../../common/lib/ast';
 //import { set } from 'lodash';
 
