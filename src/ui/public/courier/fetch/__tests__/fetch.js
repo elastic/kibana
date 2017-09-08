@@ -5,6 +5,7 @@ import sinon from 'sinon';
 import IndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import searchResp from 'fixtures/search_response';
 
+import { requestQueue } from '../../_request_queue';
 import { FetchProvider } from '../fetch';
 import { DocSourceProvider } from '../../data_source/doc_source';
 import { SearchSourceProvider } from '../../data_source/search_source';
@@ -28,6 +29,8 @@ describe('Fetch service', function () {
     DocSource = Private(DocSourceProvider);
     SearchSource = Private(SearchSourceProvider);
   }));
+  beforeEach(requestQueue.clear);
+  after(requestQueue.clear);
 
   describe('#doc(docSource)', function () {
     it('fetches a single doc source', function () {
