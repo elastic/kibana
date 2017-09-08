@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { ArgType } from '../arg_type';
 import { get } from 'lodash';
 import { PalettePicker } from '../../components/palette_picker';
+import { getType } from '../../../common/types/get_type';
 
 const template = ({ onValueChange, argValue }) => {
   // Why is this neccesary? Does the dialog really need to know what parameter it is setting?
@@ -15,11 +16,11 @@ const template = ({ onValueChange, argValue }) => {
     if (chain.length !== 1 || chain[0].function !== 'palette') throwNotParsed();
     try {
       const colors =  chain[0].arguments._.map(astObj => {
-        if (astObj.type !== 'string') throwNotParsed();
-        return astObj.value;
+        if (getType(astObj) !== 'string') throwNotParsed();
+        return astObj;
       });
 
-      const gradient = get(chain[0].arguments.gradient, '[0].value');
+      const gradient = get(chain[0].arguments.gradient, '[0]');
 
       return { colors, gradient };
     } catch (e) {
@@ -34,16 +35,8 @@ const template = ({ onValueChange, argValue }) => {
         type: 'function',
         function: 'palette',
         arguments: {
-          _: palette.colors.map(color => ({
-            type: 'string',
-            value: color,
-          })),
-          gradient: [
-            {
-              type: 'boolean',
-              value: palette.gradient,
-            },
-          ],
+          _: palette.colors,
+          gradient: [palette.gradient],
         },
       }],
     };

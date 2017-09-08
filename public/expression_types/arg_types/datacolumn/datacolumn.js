@@ -4,7 +4,7 @@ import { sortBy } from 'lodash';
 import { FormControl } from 'react-bootstrap';
 import { MathExpression } from './math_expression';
 import { ArgType } from '../../arg_type';
-import { toExpressionAst } from '../../../lib/map_arg_value';
+import { toExpressionAst } from './lib/map_arg_value';
 import './datacolumn.less';
 
 const simpleTemplate = ({ onValueChange, columns, argValue, renderError }) => {

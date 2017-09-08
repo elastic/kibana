@@ -1,9 +1,10 @@
 import { parse } from 'mathjs';
-import { toExpression, fromExpression } from '../../common/lib/ast';
-import { getStringType } from '../../common/types/get_type';
+import { toExpression, fromExpression } from '../../../../../common/lib/ast';
+import { getType } from '../../../../../common/types/get_type';
 
 function isExpressionOrPartial(arg) {
-  return arg.type === 'expression' || arg.type === 'partial';
+  const type = getType(arg);
+  return type === 'expression' || type === 'partial';
 }
 
 function mapToMathValue(mathObj, { value, function: fn }) {
@@ -47,7 +48,7 @@ function mapFromMathValue(argValue) {
 
 function mapFromFunctionValue(argValue) {
   if (!isExpressionOrPartial(argValue)) return argValue;
-  return fromExpression(argValue.value);
+  return fromExpression(argValue);
 }
 
 export function toInterfaceAst(argValue) {
@@ -100,7 +101,7 @@ export function toExpressionAst(argValue, batch = true) {
 export function toExpressionString(argValue) {
   if (!argValue) return '';
   if (isExpressionOrPartial(argValue)) return toExpression(argValue);
-  return `"${argValue.value}"`;
+  return `"${argValue}"`;
 }
 
 // the value should be quoted if it is not supposed to go through the expression parser
@@ -108,7 +109,7 @@ export function fromExpressionString(argExpression) {
   // if value is quoted, strip quotes and set type to string
   if (argExpression.match(/^\".+\"$/)) {
     const value = argExpression.substr(1, argExpression.length - 2);
-    return { type: 'string', value };
+    return value;
   }
 
   try {
@@ -116,6 +117,6 @@ export function fromExpressionString(argExpression) {
     return fromExpression(argExpression);
   } catch (e) {
     // fall back to simple type checking
-    return { type: getStringType(argExpression), value: argExpression };
+    return argExpression;
   }
 }

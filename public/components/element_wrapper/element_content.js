@@ -14,6 +14,7 @@ import { Loading } from '../loading';
 import { pure, compose, branch, renderComponent } from 'recompose';
 import { RenderElement } from '../render_element';
 import Style from 'style-it';
+import { getType } from '../../../common/types/get_type';
 
 /*
   Branches
@@ -26,14 +27,14 @@ const loadingBranch = branch(({ renderable, state }) => {
 
 const invalidRenderTypeBranch = branch(({ renderable, elementTypeDefintion }) => {
   // renderable is available, but no matching element is found
-  return (renderable && renderable.type !== 'render' && !elementTypeDefintion);
+  return (renderable && getType(renderable) !== 'render' && !elementTypeDefintion);
 }, renderComponent(InvalidElementType));
 
 const invalidExpressionBranch =  branch(({ renderable, elementTypeDefintion, state }) => {
   // Show an error if...
   return (
     state === 'error' || // The renderable has an error
-    renderable.type !== 'render' || // The renderable isn't, well, renderable
+    getType(renderable) !== 'render' || // The renderable isn't, well, renderable
     !elementTypeDefintion // We can't find an element in the registry for this
   );
 }, renderComponent(InvalidExpression));

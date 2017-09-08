@@ -2,7 +2,6 @@ import { createEagerElement } from 'recompose';
 import { pick, isUndefined } from 'lodash';
 import { ArgForm } from '../components/arg_form';
 import { argTypeRegistry } from './arg_type';
-import { toInterfaceAst } from '../lib/map_arg_value';
 
 export class Arg {
   constructor(name, props) {
@@ -45,14 +44,14 @@ export class Arg {
       ...otherProps,
       ...this.resolve(otherProps),
       onValueChange,
-      argValue: toInterfaceAst(argValue, this.multi),
+      argValue,
       typeInstance: this,
     };
 
     const formProps = {
       key,
       argTypeInstance: this,
-      valueMissing: (this.required && argValue.type == null),
+      valueMissing: (this.required && argValue == null),
       onValueChange,
       onValueRemove,
       templateProps,

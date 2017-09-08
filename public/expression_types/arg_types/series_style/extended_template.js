@@ -9,7 +9,7 @@ export const extendedTemplate = (props) => {
   const { typeInstance, onValueChange, labels, argValue } = props;
   const chain = get(argValue, 'chain.0', {});
   const chainArgs = get(chain, 'arguments', {});
-  const selectedSeries = get(chainArgs, 'label.0.value', '');
+  const selectedSeries = get(chainArgs, 'label.0', '');
   const { name } = typeInstance;
 
   const handleChange = (argName, ev) => {
@@ -49,7 +49,7 @@ export const extendedTemplate = (props) => {
               type="select"
               className="canvas__argtype--seriesStyle--lines"
               label="Line"
-              value={get(chainArgs, 'lines.0.value', 0)}
+              value={get(chainArgs, 'lines.0', 0)}
               values={[ ...values ]}
               onChange={ev => handleChange('lines', ev)}
             />
@@ -57,7 +57,7 @@ export const extendedTemplate = (props) => {
               type="select"
               className="canvas__argtype--seriesStyle--bars"
               label="Bar"
-              value={get(chainArgs, 'bars.0.value', 0)}
+              value={get(chainArgs, 'bars.0', 0)}
               values={[ ...values ]}
               onChange={ev => handleChange('bars', ev)}
             />
@@ -65,7 +65,7 @@ export const extendedTemplate = (props) => {
               type="select"
               className="canvas__argtype--seriesStyle--points"
               label="Point"
-              value={get(chainArgs, 'points.0.value', 0)}
+              value={get(chainArgs, 'points.0', 0)}
               values={[ ...values ]}
               onChange={ev => handleChange('points', ev)}
             />

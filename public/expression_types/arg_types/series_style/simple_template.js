@@ -8,15 +8,12 @@ export const simpleTemplate = (props) => {
   const { argValue, onValueChange } = props;
   const chain = get(argValue, 'chain.0', {});
   const chainArgs = get(chain, 'arguments', {});
-  const color = get(chainArgs, 'color.0.value', '');
+  const color = get(chainArgs, 'color.0', '');
 
   const handleChange = (argName, ev) => {
     const fn = ev.target.value === '' ? del : set;
 
-    const newValue = fn(argValue, ['chain', 0, 'arguments', argName], [{
-      type: 'string',
-      value: ev.target.value,
-    }]);
+    const newValue = fn(argValue, ['chain', 0, 'arguments', argName], [ev.target.value]);
     return onValueChange(newValue);
   };
 

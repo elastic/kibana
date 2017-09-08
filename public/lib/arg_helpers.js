@@ -1,4 +1,5 @@
 import { isArray, includes } from 'lodash';
+import { getType } from '../../common/types/get_type';
 
 /*
 
@@ -7,26 +8,28 @@ import { isArray, includes } from 'lodash';
 
 */
 
+// TODO: With the removal of objectified literals in the AST I don't think we need this anymore.
+
 const allowedTypes = ['string', 'number', 'boolean'];
 const badType = () => new Error(`Arg setting helpers only support ${allowedTypes.join(',')}`);
 
 const isAllowed = (type) => includes(allowedTypes, type);
 
-export function wrapSimpleArgValue(value) {
-  const type = typeof value;
+export function validateArg(value) {
+  const type = getType(value);
   if (!isAllowed(type)) throw badType();
-  return { value, type };
+  return value;
 }
 
 export function getSimpleArg(name, args) {
   if (!args[name]) return [];
   return args[name].map(astVal => {
-    if (!isAllowed(astVal.type)) throw badType();
-    return astVal.value;
+    if (!isAllowed(getType(astVal))) throw badType();
+    return astVal;
   });
 }
 
 export function setSimpleArg(name, value) {
   value = isArray(value) ? value : [value];
-  return { [name]: value.map(wrapSimpleArgValue) };
+  return { [name]: value.map(validateArg) };
 }
