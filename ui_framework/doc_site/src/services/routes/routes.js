@@ -9,6 +9,9 @@ import AccessibilityExample
 import BadgeExample
   from '../../views/badge/badge_example';
 
+import BottomBarExample
+  from '../../views/bottom_bar/bottom_bar_example';
+
 import ButtonExample
   from '../../views/button/button_example';
 
@@ -103,6 +106,10 @@ const components = [{
 }, {
   name: 'Badge',
   component: BadgeExample,
+  hasReact: true,
+}, {
+  name: 'BottomBar',
+  component: BottomBarExample,
   hasReact: true,
 }, {
   name: 'CallOut',

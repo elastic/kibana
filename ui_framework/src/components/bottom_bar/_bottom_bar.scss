@@ -1,0 +1,21 @@
+.kuiBottomBar {
+  padding: $kuiSize;
+  background: tintOrShade($kuiColorFullShade, 25%, 90%);
+  color: $kuiColorEmptyShade;
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  animation: kuiBottomBarAppear $kuiAnimSpeedSlow $kuiAnimSlightResistance;
+}
+
+@keyframes kuiBottomBarAppear {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(00%);
+    opacity: 1;
+  }
+}

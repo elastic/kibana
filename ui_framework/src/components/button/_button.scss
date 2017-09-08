@@ -71,6 +71,7 @@ $buttonTypes: (
   secondary: $kuiColorSecondary,
   warning: $kuiColorWarning,
   danger: $kuiColorDanger,
+  ghost: #FFF, // Ghost is special, and does not care about theming.
 );
 
 // Create button modifiders based upon the map.
@@ -85,14 +86,16 @@ $buttonTypes: (
 
     &.kuiButton--fill {
       background-color: $color;
+      border-color: $color;
 
-      @if (lightness($kuiTextColor) > 50) {
+      @if ($name == 'ghost') {
+        color: #000;
+      } @elseif (lightness($kuiTextColor) > 50) {
         color: $kuiTextColor;
       } @else {
         color: #FFF;
       }
 
-      border-color: $color;
 
       &:hover, &:focus {
         background-color: darken($color, 5%);
@@ -100,7 +103,9 @@ $buttonTypes: (
       }
 
       .kuiButton__icon {
-        @if (lightness($kuiTextColor) > 50) {
+        @if ($name == 'ghost') {
+          fill: #000;
+        } @elseif (lightness($kuiTextColor) > 50) {
           fill: $kuiTextColor;
         } @else {
           fill: #FFF;

@@ -14,6 +14,7 @@ const typeToClassNameMap = {
   secondary: 'kuiButton--secondary',
   warning: 'kuiButton--warning',
   danger: 'kuiButton--danger',
+  ghost: 'kuiButton--ghost',
 };
 
 export const TYPES = Object.keys(typeToClassNameMap);
