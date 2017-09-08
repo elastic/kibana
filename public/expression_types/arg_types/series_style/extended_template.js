@@ -15,10 +15,7 @@ export const extendedTemplate = (props) => {
   const handleChange = (argName, ev) => {
     const fn = ev.target.value === '' ? del : set;
 
-    const newValue = fn(argValue, ['chain', 0, 'arguments', argName], [{
-      type: 'string',
-      value: ev.target.value,
-    }]);
+    const newValue = fn(argValue, ['chain', 0, 'arguments', argName], [ev.target.value]);
     return onValueChange(newValue);
   };
 
