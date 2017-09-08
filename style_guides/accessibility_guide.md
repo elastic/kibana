@@ -50,6 +50,39 @@ You should always prefer the `<label for>` solution, since it also adds benefit
 for every user, by making the label clickable, to directly jump to the form
 element (or in case of checkboxes and radio buttons directly check them).
 
+#### How to generate ids?
+
+When labeling element (and for some other accessibility tasks) you will often need
+ids. Ids must be unique within the page (i.e. no duplicate ids in the rendered DOM
+at any time).
+
+Since we have some components, that are used multiple times on the page, you must
+make sure every instance of that component has a unique `id`. To make the generation
+of those `ids` easier, you can use the `htmlIdGenerator` service in the `ui_framework/services`.
+
+A react component could use it as follows:
+
+```jsx
+import { htmlIdGenerator } from 'ui_framework/services';
+
+render() {
+  // Create a new generator, that will create ids deterministic
+  const htmlId = htmlIdGenerator();
+  return (<div>
+    <label htmlFor={htmlId('agg')}>Aggregation</label>
+    <input id={htmlId('agg')}/>
+  </div>);
+}
+```
+
+Each instance you create with `htmlIdGenerator()` will generate unique ids,
+but each of that instances will generate the same id, if you pass the same argument
+to the function. That way you can use one generator to generate ids in different
+places that are the same (as seen above), but multiple instances of that react
+component, would get different ids.
+
+You can use this service of course also outside of react.
+
 ### Don't use the `title` attribute
 
 **TL;DR** *Don't use the `title` attribute, use tooltips, `aria-label`, etc. instead.*
