@@ -21,7 +21,7 @@ export function interpretProvider(config) {
       case 'number':
       case 'null':
       case 'boolean':
-        return Promise.resolve(node.value);
+        return Promise.resolve(node);
       default:
         throw new Error(`Unknown AST object: ${JSON.stringify(node)}`);
     }
@@ -102,16 +102,23 @@ export function interpretProvider(config) {
     .then(resolvedArgs => zipObject(argNames, resolvedArgs)) // Recombine the keys
     .then(resolvedArgs => {
       // Fill in defaults
-      const args = mapValues(omitBy(argDefs, { isAlias: true }), (argDef, name) => {
+
+      const nonAliasArgDefs = omitBy(argDefs, { isAlias: true });
+      const args = mapValues(nonAliasArgDefs, (argDef, name) => {
+
+        // Arg is defined, do nothing
         if (typeof resolvedArgs[name] !== 'undefined') return resolvedArgs[name];
 
-        // Still treating everything as multivalued here
+        // Arg is undefined, try to find a default
         if (typeof argDef.default !== 'undefined') return [argDef.default];
-        return [null];
+
+        // Eh, screw it, we'll strip out this guy out on the next line.
+        return undefined;
       });
 
       // Validate and normalize the argument values.
-      return mapValues(args, (val, name) => {
+      const definedArgs = omitBy(args, a => a == null);
+      return mapValues(definedArgs, (val, name) => {
         // TODO: Implement a system to allow for undeclared arguments
         const argDef = argDefs[name];
         if (!argDef) throw new Error(`Unknown argument to function: ${fnName}(${name})`);

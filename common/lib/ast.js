@@ -1,4 +1,5 @@
 import { parse } from './grammar';
+import { getType } from '../types/get_type';
 
 function getExpressionArgs(block) {
   const args = block.arguments;
@@ -10,20 +11,21 @@ function getExpressionArgs(block) {
     const multiArgs = args[argKey];
 
     return multiArgs.reduce((acc, arg) => {
-      if (arg.type === 'string') {
-        if (argKey === '_') return acc.concat(`"${arg.value}"`);
-        return acc.concat(`${argKey}="${arg.value}"`);
+      const type = getType(arg);
+      if (type === 'string') {
+        if (argKey === '_') return acc.concat(`"${arg}"`);
+        return acc.concat(`${argKey}="${arg}"`);
       }
 
-      if (arg.type === 'boolean' || arg.type === 'null' || arg.type === 'number') {
-        if (argKey === '_') return acc.concat(`${arg.value}`);
-        return acc.concat(`${argKey}=${arg.value}`);
+      if (type === 'boolean' || type === 'null' || type === 'number') {
+        if (argKey === '_') return acc.concat(`${arg}`);
+        return acc.concat(`${argKey}=${arg}`);
       }
 
-      if (arg.type === 'expression') return acc.concat(`${argKey}={${getExpression(arg.chain)}}`);
-      if (arg.type === 'partial') return acc.concat(`${argKey}=.{${getExpression(arg.chain)}}`);
+      if (type === 'expression') return acc.concat(`${argKey}={${getExpression(arg.chain)}}`);
+      if (type === 'partial') return acc.concat(`${argKey}=.{${getExpression(arg.chain)}}`);
 
-      throw new Error(`Invalid argument type in AST: ${arg.type}`);
+      throw new Error(`Invalid argument type in AST: ${type}`);
     }, []).join(' ');
   });
 }
@@ -41,7 +43,7 @@ function getExpression(chain) {
   if (!chain) throw new Error('expression and partial arguments must contain a chain');
 
   return chain.map(chainObj => {
-    const type = chainObj.type;
+    const type = getType(chainObj);
 
     if (type === 'function' || type === 'partial') {
       const fn = chainObj.function;
@@ -64,12 +66,12 @@ export function fromExpression(expression) {
 }
 
 export function toExpression(astObj) {
-  const validType = ['partial', 'expression', 'function'].includes(astObj.type);
+  const validType = ['partial', 'expression', 'function'].includes(getType(astObj));
   if (!validType) {
     throw new Error('Expression must be a partial, expression, or argument function');
   }
 
-  if (['partial', 'expression'].includes(astObj.type)) {
+  if (['partial', 'expression'].includes(getType(astObj))) {
     if (!Array.isArray(astObj.chain)) {
       throw new Error('Partials or expressions must contain a chain');
     }

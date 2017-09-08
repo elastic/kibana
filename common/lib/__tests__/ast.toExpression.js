@@ -140,10 +140,9 @@ describe('ast toExpression', () => {
           type: 'function',
           function: 'csv',
           arguments: {
-            input: [{
-              type: 'string',
-              value: 'stuff\nthings',
-            }],
+            input: [
+              'stuff\nthings',
+            ],
           },
         }],
       };
@@ -159,10 +158,9 @@ describe('ast toExpression', () => {
           type: 'function',
           function: 'series',
           arguments: {
-            input: [{
-              type: 'number',
-              value: 1234,
-            }],
+            input: [
+              1234,
+            ],
           },
         }],
       };
@@ -178,10 +176,9 @@ describe('ast toExpression', () => {
           type: 'function',
           function: 'series',
           arguments: {
-            input: [{
-              type: 'boolean',
-              value: true,
-            }],
+            input: [
+              true,
+            ],
           },
         }],
       };
@@ -197,10 +194,9 @@ describe('ast toExpression', () => {
           type: 'function',
           function: 'series',
           arguments: {
-            input: [{
-              type: 'null',
-              value: null,
-            }],
+            input: [
+              null,
+            ],
           },
         }],
       };
@@ -216,14 +212,12 @@ describe('ast toExpression', () => {
           type: 'function',
           function: 'csv',
           arguments: {
-            input: [{
-              type: 'string',
-              value: 'stuff\nthings',
-            }],
-            separator: [{
-              type: 'string',
-              value: '\\n',
-            }],
+            input: [
+              'stuff\nthings',
+            ],
+            separator: [
+              '\\n',
+            ],
           },
         }],
       };
@@ -239,17 +233,13 @@ describe('ast toExpression', () => {
           type: 'function',
           function: 'csv',
           arguments: {
-            input: [{
-              type: 'string',
-              value: 'stuff\nthings',
-            }, {
-              type: 'string',
-              value: 'more,things\nmore,stuff',
-            }],
-            separator: [{
-              type: 'string',
-              value: '\\n',
-            }],
+            input: [
+              'stuff\nthings',
+              'more,things\nmore,stuff',
+            ],
+            separator: [
+              '\\n',
+            ],
           },
         }],
       };
@@ -273,10 +263,9 @@ describe('ast toExpression', () => {
                 arguments: {},
               }],
             }],
-            input: [{
-              type: 'string',
-              value: 'stuff\nthings',
-            }],
+            input: [
+              'stuff\nthings',
+            ],
           },
         }],
       };
@@ -300,10 +289,9 @@ describe('ast toExpression', () => {
                 arguments: {},
               }],
             }],
-            input: [{
-              type: 'string',
-              value: 'stuff\nthings',
-            }],
+            input: [
+              'stuff\nthings',
+            ],
           },
         }],
       };
@@ -325,27 +313,24 @@ describe('ast toExpression', () => {
                 type: 'function',
                 function: 'partcalc',
                 arguments: {
-                  type: [{
-                    type: 'string',
-                    value: 'comma',
-                  }],
+                  type: [
+                    'comma',
+                  ],
                 },
               }],
             }],
-            input: [{
-              type: 'string',
-              value: 'stuff\nthings',
-            }],
+            input: [
+              'stuff\nthings',
+            ],
             break: [{
               type: 'expression',
               chain: [{
                 type: 'function',
                 function: 'setBreak',
                 arguments: {
-                  type: [{
-                    type: 'string',
-                    value: 'newline',
-                  }],
+                  type: [
+                    'newline',
+                  ],
                 },
               }],
             }],
@@ -366,10 +351,9 @@ describe('ast toExpression', () => {
           type: 'function',
           function: 'csv',
           arguments: {
-            input: [{
-              type: 'string',
-              value: 'year,make,model,price\n2016,honda,cr-v,23845\n2016,honda,fit,15890,\n2016,honda,civic,18640',
-            }],
+            input: [
+              'year,make,model,price\n2016,honda,cr-v,23845\n2016,honda,fit,15890,\n2016,honda,civic,18640',
+            ],
           },
         }, {
           type: 'function',
@@ -381,10 +365,9 @@ describe('ast toExpression', () => {
                 type: 'function',
                 function: 'distinct',
                 arguments: {
-                  f: [{
-                    type: 'string',
-                    value: 'year',
-                  }],
+                  f: [
+                    'year',
+                  ],
                 },
               }],
             }],
@@ -394,10 +377,9 @@ describe('ast toExpression', () => {
                 type: 'function',
                 function: 'sum',
                 arguments: {
-                  f: [{
-                    type: 'string',
-                    value: 'price',
-                  }],
+                  f: [
+                    'price',
+                  ],
                 },
               }],
             }],
@@ -407,10 +389,9 @@ describe('ast toExpression', () => {
                 type: 'function',
                 function: 'distinct',
                 arguments: {
-                  f: [{
-                    type: 'string',
-                    value: 'model',
-                  }],
+                  f: [
+                    'model',
+                  ],
                 },
               }],
             }],
@@ -435,10 +416,9 @@ describe('ast toExpression', () => {
           type: 'function',
           function: 'csv',
           arguments: {
-            input: [{
-              type: 'string',
-              value: 'year,make,model,price\n2016,honda,cr-v,23845\n2016,honda,fit,15890,\n2016,honda,civic,18640',
-            }],
+            input: [
+              'year,make,model,price\n2016,honda,cr-v,23845\n2016,honda,fit,15890,\n2016,honda,civic,18640',
+            ],
           },
         }, {
           type: 'function',
@@ -450,10 +430,9 @@ describe('ast toExpression', () => {
                 type: 'function',
                 function: 'distinct',
                 arguments: {
-                  f: [{
-                    type: 'string',
-                    value: 'year',
-                  }],
+                  f: [
+                    'year',
+                  ],
                 },
               }],
             }],
@@ -463,10 +442,9 @@ describe('ast toExpression', () => {
                 type: 'function',
                 function: 'sum',
                 arguments: {
-                  f: [{
-                    type: 'string',
-                    value: 'price',
-                  }],
+                  f: [
+                    'price',
+                  ],
                 },
               }],
             }],
@@ -476,10 +454,9 @@ describe('ast toExpression', () => {
                 type: 'function',
                 function: 'distinct',
                 arguments: {
-                  f: [{
-                    type: 'string',
-                    value: 'model',
-                  }],
+                  f: [
+                    'model',
+                  ],
                 },
               }],
             }],
@@ -494,10 +471,9 @@ describe('ast toExpression', () => {
                 type: 'function',
                 function: 'getColorPallette',
                 arguments: {
-                  name: [{
-                    type: 'string',
-                    value: 'elastic',
-                  }],
+                  name: [
+                    'elastic',
+                  ],
                 },
               }],
             }],
@@ -523,17 +499,16 @@ describe('ast toExpression', () => {
         type: 'function',
         function: 'pointseries',
         arguments: {
-          x: [{ type: 'string', value: 'time' }],
+          x: ['time'],
           y: [{
             type: 'partial',
             chain: [{
               type: 'partial',
               function: 'math',
               arguments: {
-                _: [{
-                  type: 'string',
-                  value: 'sum(price)',
-                }],
+                _: [
+                  'sum(price)',
+                ],
               },
             }],
           }],
@@ -551,16 +526,11 @@ describe('ast toExpression', () => {
           type: 'function',
           function: 'list',
           arguments: {
-            _: [{
-              type: 'string',
-              value: 'one',
-            }, {
-              type: 'string',
-              value: 'two',
-            }, {
-              type: 'string',
-              value: 'three',
-            }],
+            _: [
+              'one',
+              'two',
+              'three',
+            ],
           },
         }],
       };
@@ -576,24 +546,17 @@ describe('ast toExpression', () => {
           type: 'function',
           function: 'both',
           arguments: {
-            named: [{
-              type: 'string',
-              value: 'example',
-            }],
-            another: [{
-              type: 'string',
-              value: 'item',
-            }],
-            _: [{
-              type: 'string',
-              value: 'one',
-            }, {
-              type: 'string',
-              value: 'two',
-            }, {
-              type: 'string',
-              value: 'three',
-            }],
+            named: [
+              'example',
+            ],
+            another: [
+              'item',
+            ],
+            _: [
+              'one',
+              'two',
+              'three',
+            ],
           },
         }],
       };

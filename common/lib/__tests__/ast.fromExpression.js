@@ -1,5 +1,6 @@
 import expect from 'expect.js';
 import { fromExpression } from '../ast';
+import { getType } from '../../types/get_type';
 
 describe('ast fromExpression', () => {
   describe('invalid expression', () => {
@@ -32,7 +33,7 @@ describe('ast fromExpression', () => {
       });
 
       it('is a function ', () => {
-        expect(block.type).to.equal('function');
+        expect(getType(block)).to.equal('function');
       });
 
       it('is csv function', () => {
