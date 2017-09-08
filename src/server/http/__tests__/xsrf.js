@@ -9,6 +9,7 @@ const src = resolve.bind(null, __dirname, '../../../../src');
 const xsrfHeader = 'kbn-xsrf';
 const versionHeader = 'kbn-version';
 const testPath = '/xsrf/test/route';
+const whitelistedTestPath = '/xsrf/test/route/whitelisted';
 const actualVersion = require(src('../package.json')).version;
 
 describe('xsrf request filter', function () {
@@ -23,7 +24,10 @@ describe('xsrf request filter', function () {
   const makeServer = async function () {
     const kbnServer = kbnTestServer.createServer({
       server: {
-        xsrf: { disableProtection: false }
+        xsrf: {
+          disableProtection: false,
+          whitelist: [whitelistedTestPath]
+        }
       }
     });
 
@@ -39,6 +43,20 @@ describe('xsrf request filter', function () {
 
     kbnServer.server.route({
       path: testPath,
+      method: destructiveMethods,
+      config: {
+        // Disable payload parsing to make HapiJS server accept any content-type header.
+        payload: {
+          parse: false
+        }
+      },
+      handler: function (req, reply) {
+        reply(null, 'ok');
+      }
+    });
+
+    kbnServer.server.route({
+      path: whitelistedTestPath,
       method: destructiveMethods,
       config: {
         // Disable payload parsing to make HapiJS server accept any content-type header.
@@ -151,6 +169,16 @@ describe('xsrf request filter', function () {
 
         expect(resp.statusCode).to.be(400);
         expect(resp.result.message).to.be('Request must contain a kbn-xsrf header.');
+      });
+
+      it('accepts whitelisted requests without either an xsrf or version header', async function () {
+        const resp = await inject(kbnServer, {
+          url: whitelistedTestPath,
+          method: method
+        });
+
+        expect(resp.statusCode).to.be(200);
+        expect(resp.payload).to.be('ok');
       });
     });
   }
