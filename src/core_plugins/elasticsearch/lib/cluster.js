@@ -8,7 +8,9 @@ import { parseConfig } from './parse_config';
 
 export class Cluster {
   constructor(config) {
-    this._config = Object.assign({}, config);
+    this._config = {
+      ...config
+    };
     this.errors = elasticsearch.errors;
 
     this._client = this.createClient();
@@ -53,7 +55,10 @@ export class Cluster {
   }
 
   createClient = configOverrides => {
-    const config = Object.assign({}, this._getClientConfig(), configOverrides);
+    const config = {
+      ...this._getClientConfig(),
+      ...configOverrides
+    };
     return new elasticsearch.Client(parseConfig(config));
   }
 

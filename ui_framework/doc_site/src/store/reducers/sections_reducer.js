@@ -13,9 +13,10 @@ export default function sectionsReducer(state = defaultState, action) {
         name: action.name,
       });
 
-      return Object.assign({}, state, {
-        sections,
-      });
+      return {
+        ...state,
+        sections: sections,
+      };
     }
 
     case ActionTypes.UNREGISTER_SECTION: {
@@ -23,9 +24,10 @@ export default function sectionsReducer(state = defaultState, action) {
       const index = sections.findIndex(section => section.id === action.id);
       sections.splice(index, 1);
 
-      return Object.assign({}, state, {
-        sections,
-      });
+      return {
+        ...state,
+        sections: sections,
+      };
     }
 
     default:
