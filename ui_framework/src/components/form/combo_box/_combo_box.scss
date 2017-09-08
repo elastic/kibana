@@ -1,0 +1,74 @@
+.kuiComboBox {
+  @include kuiFormControlSize;
+  position: relative;
+
+  .kuiComboBox__inputWrap {
+    @include kuiFormControlStyle;
+    @include kuiFormControlWithIcon($isIconOptional: true);
+    padding: $kuiSizeXS;
+
+    &:hover {
+      cursor: text;
+    }
+  }
+
+  .kuiComboBox__input {
+    padding: 0;
+    border: none;
+    background: transparent;
+    font-size: $kuiFontSizeS;
+    font-family: $kuiFontFamily;
+    color: $kuiTextColor;
+    margin: $kuiSizeXS;
+  }
+
+  .kuiComboBox__panel {
+    position: absolute;
+    top: 100%;
+    left: -1px;
+    right: -1px;
+    border-radius: 0 0 $kuiBorderRadius $kuiBorderRadius;
+    visibility: hidden;
+    opacity: 0;
+    border-top: none;
+    transition:
+      visibility $kuiAnimSpeedNormal $kuiAnimSlightResistance,
+      opacity $kuiAnimSpeedNormal $kuiAnimSlightResistance;
+  }
+
+  .kuiComoboBox__empty {
+    @include kuiFontSizeS;
+    padding: $kuiSizeS;
+    text-align: center;
+    color: $kuiColorDarkShade;
+  }
+
+  .kuiComboBox__rowWrap {
+    @include kuiScrollBar;
+
+    padding: $kuiSizeS;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  .kuiComboBox__footer {
+    padding: $kuiSizeS;
+    border-top: $kuiBorderThin;
+    background: $kuiFormBackgroundColor;
+  }
+  &.kuiComboBox-isOpen {
+    .kuiComboBox__panel {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    .kuiComboBox__inputWrap {
+      background: $kuiColorEmptyShade;
+      box-shadow:
+        0 4px 4px -2px rgba(0, 0, 0, 0.1),
+        0 0 0 1px rgba(0,0,0,0.16),
+        inset 0 0 0 0 $kuiColorEmptyShade,
+        inset 0 -2px 0 0 $kuiColorPrimary;
+    }
+  }
+}

@@ -2,6 +2,7 @@ export {
   KuiCheckbox,
   KuiCheckboxGroup,
 } from './checkbox';
+export { KuiComboBox, KuiComboBoxPill, KuiComboBoxRow } from './combo_box';
 export { KuiFieldNumber } from './field_number';
 export { KuiFieldPassword } from './field_password';
 export { KuiFieldSearch } from './field_search';

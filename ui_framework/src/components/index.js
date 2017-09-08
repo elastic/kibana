@@ -43,6 +43,9 @@ export {
 export {
   KuiCheckbox,
   KuiCheckboxGroup,
+  KuiComboBox,
+  KuiComboBoxPill,
+  KuiComboBoxRow,
   KuiFieldNumber,
   KuiFieldPassword,
   KuiFieldSearch,

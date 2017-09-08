@@ -58,6 +58,7 @@ $kuiFormBackgroundColor: tintOrShade($kuiColorLightestShade, 60%, 25%);
 }
 
 @import 'checkbox/index';
+@import 'combo_box/index';
 @import 'field_number/index';
 @import 'field_password/index';
 @import 'field_search/index';

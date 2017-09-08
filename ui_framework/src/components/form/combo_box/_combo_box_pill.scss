@@ -1,0 +1,40 @@
+.kuiComboBoxPill {
+  font-size: $kuiSizeM;
+  line-height: $kuiSizeL;
+  display: inline-block;
+  text-decoration: none;
+  border: solid 1px transparent;
+  border-radius: $kuiSizeL;
+  padding: 0 $kuiSizeS;
+  background-color: transparent;
+  white-space: nowrap;
+  vertical-align: middle;
+  border-color: $kuiColorLightShade;
+  background-color: $kuiColorEmptyShade;
+  margin: $kuiSizeXS;
+  margin-right: 0;
+
+  .kuiComboBoxPill__close {
+    width: $kuiSizeM;
+    height: $kuiSizeM;
+    margin-left: $kuiSizeXS;
+    border: none;
+    vertical-align: middle;
+
+    &:hover {
+      .kuiComboBoxPill__closeIcon {
+        fill: $kuiColorDanger;
+      }
+    }
+
+    &:focus {
+      background: transparentize($kuiColorDanger, .9);
+    }
+
+    svg {
+      width: $kuiSizeM;
+      height: $kuiSizeM;
+      vertical-align: top !important;
+    }
+  }
+}

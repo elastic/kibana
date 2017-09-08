@@ -29,12 +29,12 @@
  */
 @mixin kuiScrollBar {
   &::-webkit-scrollbar {
-    width: 16px;
-    height: 16px;
+    width: $kuiSize;
+    height: $kuiSize;
   }
 
   &::-webkit-scrollbar-thumb {
-    background-color: rgba($kuiColorDarkShade, 0.5);
+    background-color: $kuiColorLightShade;
     border: 6px solid transparent;
     background-clip: content-box;
   }
