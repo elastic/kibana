@@ -529,9 +529,11 @@ function discoverController(
 
       if ($scope.opts.timefield) {
         $scope.searchSource.rawResponse = merged;
-        responseHandler($scope.vis, merged).then(resp => {
-          $scope.visData = resp;
-        });
+        Promise
+          .resolve(responseHandler($scope.vis, merged))
+          .then(resp => {
+            $scope.visData = resp;
+          });
       }
 
       $scope.hits = merged.hits.total;
