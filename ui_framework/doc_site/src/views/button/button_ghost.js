@@ -3,6 +3,7 @@ import React from 'react';
 import {
   KuiButton,
   KuiButtonEmpty,
+  KuiButtonIcon,
 } from '../../../../components';
 
 export default () => (
@@ -35,5 +36,14 @@ export default () => (
     >
       small
     </KuiButtonEmpty>
+
+    &nbsp;&nbsp;
+
+    <KuiButtonIcon
+      size="small"
+      type="ghost"
+      iconType="user"
+      onClick={() => window.alert('Button clicked')}
+    />
   </div>
 );

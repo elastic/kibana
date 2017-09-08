@@ -864,6 +864,15 @@ table {
     background-color: rgba(44, 44, 44, 0.1);
     cursor: not-allowed; }
 
+.kuiButtonIcon--ghost {
+  color: #FFF; }
+  .kuiButtonIcon--ghost .kuiButtonIcon__icon {
+    fill: #FFF; }
+  .kuiButtonIcon--ghost:focus {
+    background-color: rgba(255, 255, 255, 0.1); }
+  .kuiButtonIcon--ghost:hover, .kuiButtonIcon--ghost:focus {
+    background-color: rgba(255, 255, 255, 0.1); }
+
 .kuiCallOut {
   padding: 16px;
   border-left: 2px solid transparent; }
