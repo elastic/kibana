@@ -7,13 +7,6 @@
  * You shouldn't be futzing around in the grammar very often anyway.
  */
 
- /* ----- Helpers ----- */
-{
- function ltoo (literal) {
-  return {type: literal == null ? 'null' : typeof literal, value: literal}
- }
-}
-
  /* ----- Expressions ----- */
 
 start
@@ -64,7 +57,7 @@ argument
 arg_type
  = '{' space? expression:expression space? '}' { return expression; }
  / partial_expression
- / literal:literal { return ltoo(literal)}
+ / literal
 
 
 arg_list
