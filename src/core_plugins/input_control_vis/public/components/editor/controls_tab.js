@@ -15,18 +15,24 @@ export class ControlsTab extends Component {
       type: 'list'
     };
 
-    this.getIndexPatterns = async () => {
-      const resp = await props.scope.vis.API.savedObjectsClient.find({
-        type: 'index-pattern',
-        fields: ['title'],
-        perPage: 10000
-      });
-      return resp.savedObjects;
-    };
-    this.getIndexPattern = async (indexPatternId) => {
-      return await props.scope.vis.API.indexPatterns.get(indexPatternId);
-    };
+    this.getIndexPatterns = this.getIndexPatterns.bind(this);
+    this.getIndexPattern = this.getIndexPattern.bind(this);
     this.handleAddControl = this.handleAddControl.bind(this);
+  }
+
+  async getIndexPatterns(search) {
+    const resp = await this.props.scope.vis.API.savedObjectsClient.find({
+      type: 'index-pattern',
+      fields: ['title'],
+      search: `${search}*`,
+      search_fields: ['title'],
+      perPage: 100
+    });
+    return resp.savedObjects;
+  }
+
+  async getIndexPattern(indexPatternId) {
+    return await this.props.scope.vis.API.indexPatterns.get(indexPatternId);
   }
 
   setVisParam(paramName, paramValue) {

@@ -7,15 +7,21 @@ export class FieldSelect extends Component {
   constructor(props) {
     super(props);
 
+    // not storing activeIndexPatternId in react state
+    // 1) does not effect rendering
+    // 2) requires synchronous modification to avoid race condition
+    this.activeIndexPatternId = props.indexPatternId;
+
     this.state = {
       fields: []
     };
     this.filterField = _.get(props, 'filterField', () => { return true; });
-    this.loadFields(this.props.indexPatternId);
+    this.loadFields(props.indexPatternId);
   }
 
   componentWillReceiveProps(nextProps) {
     if (this.props.indexPatternId !== nextProps.indexPatternId) {
+      this.activeIndexPatternId = nextProps.indexPatternId;
       this.setState({ fields: [] });
       this.loadFields(nextProps.indexPatternId);
     }
@@ -25,7 +31,15 @@ export class FieldSelect extends Component {
     if (!indexPatternId || indexPatternId.length === 0) {
       return;
     }
+
     const indexPattern = await this.props.getIndexPattern(indexPatternId);
+
+    // props.indexPatternId may be updated before getIndexPattern returns
+    // ignore response when fetched index pattern does not match active index pattern
+    if (indexPattern.id !== this.activeIndexPatternId) {
+      return;
+    }
+
     const fields = indexPattern.fields
       .filter(this.filterField)
       .sort((a, b) => {

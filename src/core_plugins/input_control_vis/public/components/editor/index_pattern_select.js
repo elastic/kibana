@@ -10,15 +10,14 @@ export class IndexPatternSelect extends Component {
   }
 
   loadOptions(input, callback) {
-    this.props.getIndexPatterns().then((indexPatternSavedObjects) => {
+    this.props.getIndexPatterns(input).then((indexPatternSavedObjects) => {
       const options = indexPatternSavedObjects.map((indexPatternSavedObject) => {
         return {
           label: indexPatternSavedObject.attributes.title,
           value: indexPatternSavedObject.id
         };
       });
-      //Setting complete=true means loadOptions will never be called again.
-      callback(null, { options: options, complete: true });
+      callback(null, { options: options });
     });
   }
 
