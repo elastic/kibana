@@ -30,7 +30,7 @@ class RangeControl extends Control {
   }
 }
 
-export async function rangeControlFactory(controlParams, kbnApi, callback) {
+export async function rangeControlFactory(controlParams, kbnApi) {
   const indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
   const searchSource = new kbnApi.SearchSource();
   searchSource.inherits(false); //Do not filter by time so can not inherit from rootSearchSource
@@ -43,16 +43,17 @@ export async function rangeControlFactory(controlParams, kbnApi, callback) {
     defer.resolve = resolve;
     defer.reject = reject;
   });
-  defer.promise.then((resp) => {
-    const min = _.get(resp, 'aggregations.minAgg.value');
-    const max = _.get(resp, 'aggregations.maxAgg.value');
-    const emptyValue = { min: min, max: min };
-    callback(new RangeControl(
-      controlParams,
-      new RangeFilterManager(controlParams.fieldName, indexPattern, kbnApi.queryFilter, emptyValue),
-      min,
-      max
-    ));
-  });
-  return searchSource._createRequest(defer);
+  kbnApi.fetch.these([searchSource._createRequest(defer)]);
+
+  const resp = await defer.promise;
+
+  const min = _.get(resp, 'aggregations.minAgg.value');
+  const max = _.get(resp, 'aggregations.maxAgg.value');
+  const emptyValue = { min: min, max: min };
+  return new RangeControl(
+    controlParams,
+    new RangeFilterManager(controlParams.fieldName, indexPattern, kbnApi.queryFilter, emptyValue),
+    min,
+    max
+  );
 }

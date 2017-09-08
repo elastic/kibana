@@ -14,14 +14,15 @@ class VisController {
     this.vis.API.queryFilter.on('update', this.queryBarUpdateHandler);
   }
 
-  render(visData, status) {
+  async render(visData, status) {
     if (status.params) {
-      this.initControls();
+      this.controls = [];
+      this.controls = await this.initControls();
+      this.drawVis();
+      return;
     }
-    return new Promise(() => {});
+    return;
   }
-
-  resize() {}
 
   destroy() {
     this.vis.API.queryFilter.off('update', this.queryBarUpdateHandler);
@@ -42,16 +43,16 @@ class VisController {
       this.el);
   }
 
-  initControls() {
-    this.controls = [];
-
-    controlFactory(
-      this.vis.params.controls,
-      this.vis.API,
-      (index, control) => {
-        this.controls[index] = control;
-        this.drawVis();
-      }
+  async initControls() {
+    return await Promise.all(
+      this.vis.params.controls.filter((controlParams) => {
+        // ignore controls that do not have indexPattern or field
+        return controlParams.indexPattern && controlParams.fieldName;
+      })
+      .map((controlParams) => {
+        const factory = controlFactory(controlParams);
+        return factory(controlParams, this.vis.API);
+      })
     );
   }
 

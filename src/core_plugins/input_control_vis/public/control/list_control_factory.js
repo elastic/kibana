@@ -36,7 +36,7 @@ class ListControl extends Control {
   }
 }
 
-export async function listControlFactory(controlParams, kbnApi, callback) {
+export async function listControlFactory(controlParams, kbnApi) {
   const indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
   const searchSource = new kbnApi.SearchSource();
   searchSource.inherits(false); //Do not filter by time so can not inherit from rootSearchSource
@@ -52,14 +52,15 @@ export async function listControlFactory(controlParams, kbnApi, callback) {
     defer.resolve = resolve;
     defer.reject = reject;
   });
-  defer.promise.then((resp) => {
-    callback(new ListControl(
-      controlParams,
-      new PhraseFilterManager(controlParams.fieldName, indexPattern, kbnApi.queryFilter),
-      _.get(resp, 'aggregations.termsAgg.buckets', []).map((bucket) => {
-        return { label: bucket.key, value: bucket.key };
-      })
-    ));
-  });
-  return searchSource._createRequest(defer);
+  kbnApi.fetch.these([searchSource._createRequest(defer)]);
+
+  const resp = await defer.promise;
+
+  return new ListControl(
+    controlParams,
+    new PhraseFilterManager(controlParams.fieldName, indexPattern, kbnApi.queryFilter),
+    _.get(resp, 'aggregations.termsAgg.buckets', []).map((bucket) => {
+      return { label: bucket.key, value: bucket.key };
+    })
+  );
 }
