@@ -68,7 +68,9 @@ export function FilterBarClickHandlerProvider(Notifier, Private) {
           else if ($state.query.language === 'kuery') {
             addFiltersToKuery($state, filters)
             .then(() => {
-              $state.save();
+              if (_.isFunction($state.save)) {
+                $state.save();
+              }
             });
           }
         }
