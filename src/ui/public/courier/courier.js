@@ -9,7 +9,7 @@ import { Notifier } from 'ui/notify/notifier';
 import { DocSourceProvider } from './data_source/doc_source';
 import { SearchSourceProvider } from './data_source/search_source';
 import { SearchStrategyProvider } from './fetch/strategy/search';
-import { RequestQueueProvider } from './_request_queue';
+import { requestQueue } from './_request_queue';
 import { FetchProvider } from './fetch';
 import { DocDataLooperProvider } from './looper/doc_data';
 import { SearchLooperProvider } from './looper/search';
@@ -26,8 +26,6 @@ uiModules.get('kibana/courier')
     const DocSource = Private(DocSourceProvider);
     const SearchSource = Private(SearchSourceProvider);
     const searchStrategy = Private(SearchStrategyProvider);
-
-    const requestQueue = Private(RequestQueueProvider);
 
     const fetch = Private(FetchProvider);
     const docDataLooper = self.docLooper = Private(DocDataLooperProvider);
