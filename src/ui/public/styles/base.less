@@ -246,16 +246,25 @@ table {
 //== SavedObjectFinder
 saved-object-finder,
 paginated-selectable-list {
+
+  .list-sort-button {
+    .border-top-radius(0) !important;
+    border: none;
+    padding: 8px 15px;
+    font-weight: normal;
+    background-color: @kibanaGray6;
+  }
+
   ul.li-striped {
     li {
       border: none;
     }
 
-    li:nth-child(odd) {
+    li:nth-child(even) {
       background-color: @kibanaGray6;
     }
 
-    li:nth-child(even) {
+    li:nth-child(odd) {
       background-color: @white;
     }
 
