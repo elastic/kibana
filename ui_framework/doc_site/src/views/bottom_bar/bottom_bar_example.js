@@ -32,12 +32,13 @@ export default props => (
           <p>
             <KuiCode>BottomBar</KuiCode> is a simple wrapper component that does
             nothing but fix a bottom bar (usually filled with buttons) to the bottom
-            of the page.
-          </p>
-          <p>
-            Use it when you have really long pages or complicated, multi-page
+            of the page. Use it when you have really long pages or complicated, multi-page
             forms. In the case of forms, only invoke it if a form is in a savable
             state.
+          </p>
+          <p>
+            Like many of our other wrapper components, <KuiCode>BottomBar</KuiCode> accepts
+            a <KuiCode>paddingSize</KuiCode> prop, which can be set to <KuiCode>s / m / l / none</KuiCode>.
           </p>
         </div>
       }
