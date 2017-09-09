@@ -11,6 +11,7 @@ const typeToClassNameMap = {
   primary: 'kuiButtonIcon--primary',
   danger: 'kuiButtonIcon--danger',
   disabled: 'kuiButtonIcon--disabled',
+  ghost: 'kuiButtonIcon--ghost',
 };
 
 export const TYPES = Object.keys(typeToClassNameMap);
@@ -66,4 +67,3 @@ KuiButtonIcon.propTypes = {
 KuiButtonIcon.defaultProps = {
   type: 'primary',
 };
-

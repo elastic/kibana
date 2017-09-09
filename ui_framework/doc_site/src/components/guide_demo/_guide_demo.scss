@@ -54,6 +54,11 @@
   font-size: $kuiFontSizeS;
 }
 
+.guideDemo__ghostBackground {
+  background: #444;
+  padding: $kuiSizeL;
+}
+
 .guideDemo__icon {
   border: $kuiBorderThin;
   border-radius: $kuiBorderRadius;

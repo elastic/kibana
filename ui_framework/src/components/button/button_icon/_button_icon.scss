@@ -31,7 +31,8 @@
 $buttonTypes: (
   primary: $kuiColorPrimary,
   danger: $kuiColorDanger,
-  disabled: tintOrShade($kuiTextColor, 70%, 80%)
+  disabled: tintOrShade($kuiTextColor, 70%, 80%),
+  ghost: #FFF, // Ghost is special, and does not care about theming.
 );
 
 // Create button modifiders based upon the map.
