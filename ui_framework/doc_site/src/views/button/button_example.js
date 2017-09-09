@@ -32,6 +32,10 @@ import ButtonIcon from './button_icon';
 const buttonIconSource = require('!!raw!./button_icon');
 const buttonIconHtml = renderToHtml(ButtonIcon);
 
+import ButtonGhost from './button_ghost';
+const buttonGhostSource = require('!!raw!./button_ghost');
+const buttonGhostHtml = renderToHtml(ButtonGhost);
+
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
@@ -133,6 +137,29 @@ export default props => (
       }
       demo={
         <ButtonIcon />
+      }
+    />
+
+    <GuideSection
+      title="Ghost buttons for deep color backgrounds"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: buttonGhostSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: buttonGhostHtml,
+      }]}
+      text={
+        <p>
+          You can also pass <KuiCode>type=&apos;ghost&apos;</KuiCode> to any of the button
+          styles on this page. These should be used extremely rarely, and are
+          only for placing buttons on top of dark or image-based backgrounds.
+          A good example of their use is in
+          the <KuiCode>KuiBottomBar</KuiCode> component
+        </p>
+      }
+      demo={
+        <ButtonGhost />
       }
     />
   </GuidePage>

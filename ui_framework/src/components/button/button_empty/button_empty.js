@@ -11,6 +11,7 @@ const typeToClassNameMap = {
   primary: 'kuiButtonEmpty--primary',
   danger: 'kuiButtonEmpty--danger',
   disabled: 'kuiButtonEmpty--disabled',
+  ghost: 'kuiButtonEmpty--ghost',
 };
 
 export const TYPES = Object.keys(typeToClassNameMap);

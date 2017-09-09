@@ -8,6 +8,10 @@ export {
 } from './accessibility';
 
 export {
+  KuiBottomBar,
+} from './bottom_bar';
+
+export {
   KuiButton,
   KuiButtonEmpty,
   KuiButtonIcon,

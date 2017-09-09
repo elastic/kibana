@@ -1,0 +1,33 @@
+.kuiBottomBar {
+  background: tintOrShade($kuiColorFullShade, 25%, 90%);
+  color: $kuiColorEmptyShade;
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  animation: kuiBottomBarAppear $kuiAnimSpeedSlow $kuiAnimSlightResistance;
+  z-index: $kuiZNavigation;
+
+  &.kuiBottomBar--paddingSmall {
+    padding: $kuiSizeS;
+  }
+
+  &.kuiBottomBar--paddingMedium {
+    padding: $kuiSize;
+  }
+
+  &.kuiBottomBar--paddingLarge {
+    padding: $kuiSizeL;
+  }
+}
+
+@keyframes kuiBottomBarAppear {
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(00%);
+    opacity: 1;
+  }
+}

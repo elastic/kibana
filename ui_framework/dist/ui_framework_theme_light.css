@@ -452,6 +452,43 @@ table {
   border-color: #DD0A73;
   background-color: rgba(221, 10, 115, 0.1); }
 
+.kuiBottomBar {
+  background: #404040;
+  color: #FFF;
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  -webkit-animation: kuiBottomBarAppear 350ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+          animation: kuiBottomBarAppear 350ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+  z-index: 4000; }
+  .kuiBottomBar.kuiBottomBar--paddingSmall {
+    padding: 8px; }
+  .kuiBottomBar.kuiBottomBar--paddingMedium {
+    padding: 16px; }
+  .kuiBottomBar.kuiBottomBar--paddingLarge {
+    padding: 24px; }
+
+@-webkit-keyframes kuiBottomBarAppear {
+  0% {
+    -webkit-transform: translateY(100%);
+            transform: translateY(100%);
+    opacity: 0; }
+  100% {
+    -webkit-transform: translateY(0%);
+            transform: translateY(0%);
+    opacity: 1; } }
+
+@keyframes kuiBottomBarAppear {
+  0% {
+    -webkit-transform: translateY(100%);
+            transform: translateY(100%);
+    opacity: 0; }
+  100% {
+    -webkit-transform: translateY(0%);
+            transform: translateY(0%);
+    opacity: 1; } }
+
 /**
  * 1. Apply margin to all but last item in the flex.
  * 2. Margin gets flipped because of the row-reverse.
@@ -477,7 +514,10 @@ table {
   text-align: center;
   font-family: "Roboto", Helvetica, Arial, sans-serif;
   transition: all 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
-  whitespace: nowrap;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.15);
   border-radius: 4px;
   min-width: 112px; }
@@ -558,8 +598,8 @@ table {
     fill: #0079a5; }
   .kuiButton--primary.kuiButton--fill {
     background-color: #0079a5;
-    color: #FFF;
-    border-color: #0079a5; }
+    border-color: #0079a5;
+    color: #FFF; }
     .kuiButton--primary.kuiButton--fill:hover, .kuiButton--primary.kuiButton--fill:focus {
       background-color: #00668c;
       border-color: #00668c; }
@@ -575,8 +615,8 @@ table {
     fill: #00A69B; }
   .kuiButton--secondary.kuiButton--fill {
     background-color: #00A69B;
-    color: #FFF;
-    border-color: #00A69B; }
+    border-color: #00A69B;
+    color: #FFF; }
     .kuiButton--secondary.kuiButton--fill:hover, .kuiButton--secondary.kuiButton--fill:focus {
       background-color: #008d83;
       border-color: #008d83; }
@@ -592,8 +632,8 @@ table {
     fill: #E5830E; }
   .kuiButton--warning.kuiButton--fill {
     background-color: #E5830E;
-    color: #FFF;
-    border-color: #E5830E; }
+    border-color: #E5830E;
+    color: #FFF; }
     .kuiButton--warning.kuiButton--fill:hover, .kuiButton--warning.kuiButton--fill:focus {
       background-color: #cd750d;
       border-color: #cd750d; }
@@ -609,8 +649,8 @@ table {
     fill: #A30000; }
   .kuiButton--danger.kuiButton--fill {
     background-color: #A30000;
-    color: #FFF;
-    border-color: #A30000; }
+    border-color: #A30000;
+    color: #FFF; }
     .kuiButton--danger.kuiButton--fill:hover, .kuiButton--danger.kuiButton--fill:focus {
       background-color: #8a0000;
       border-color: #8a0000; }
@@ -618,6 +658,23 @@ table {
       fill: #FFF; }
   .kuiButton--danger:hover, .kuiButton--danger:focus {
     background-color: rgba(163, 0, 0, 0.1); }
+
+.kuiButton--ghost {
+  color: #FFF;
+  border-color: #FFF; }
+  .kuiButton--ghost .kuiButton__icon {
+    fill: #FFF; }
+  .kuiButton--ghost.kuiButton--fill {
+    background-color: #FFF;
+    border-color: #FFF;
+    color: #000; }
+    .kuiButton--ghost.kuiButton--fill:hover, .kuiButton--ghost.kuiButton--fill:focus {
+      background-color: #f2f2f2;
+      border-color: #f2f2f2; }
+    .kuiButton--ghost.kuiButton--fill .kuiButton__icon {
+      fill: #000; }
+  .kuiButton--ghost:hover, .kuiButton--ghost:focus {
+    background-color: rgba(255, 255, 255, 0.1); }
 
 .kuiButtonEmpty {
   display: inline-block;
@@ -631,7 +688,10 @@ table {
   text-align: center;
   font-family: "Roboto", Helvetica, Arial, sans-serif;
   transition: all 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
-  whitespace: nowrap;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   border-color: transparent;
   background-color: transparent;
   box-shadow: none; }
@@ -720,6 +780,15 @@ table {
     background-color: rgba(197, 197, 197, 0.1);
     cursor: not-allowed; }
 
+.kuiButtonEmpty--ghost {
+  color: #FFF; }
+  .kuiButtonEmpty--ghost .kuiButtonEmpty__icon {
+    fill: #FFF; }
+  .kuiButtonEmpty--ghost:focus {
+    background-color: rgba(255, 255, 255, 0.1); }
+  .kuiButtonEmpty--ghost:hover, .kuiButtonEmpty--ghost:focus {
+    background-color: rgba(255, 255, 255, 0.1); }
+
 .kuiButtonEmpty--flushLeft .kuiButtonEmpty__content {
   border-left: none;
   padding-left: 0; }
@@ -740,7 +809,10 @@ table {
   text-align: center;
   font-family: "Roboto", Helvetica, Arial, sans-serif;
   transition: all 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
-  whitespace: nowrap;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   border-color: transparent;
   background-color: transparent;
   box-shadow: none;
@@ -796,6 +868,15 @@ table {
   .kuiButtonIcon--disabled:hover, .kuiButtonIcon--disabled:focus {
     background-color: rgba(197, 197, 197, 0.1);
     cursor: not-allowed; }
+
+.kuiButtonIcon--ghost {
+  color: #FFF; }
+  .kuiButtonIcon--ghost .kuiButtonIcon__icon {
+    fill: #FFF; }
+  .kuiButtonIcon--ghost:focus {
+    background-color: rgba(255, 255, 255, 0.1); }
+  .kuiButtonIcon--ghost:hover, .kuiButtonIcon--ghost:focus {
+    background-color: rgba(255, 255, 255, 0.1); }
 
 .kuiCallOut {
   padding: 16px;
