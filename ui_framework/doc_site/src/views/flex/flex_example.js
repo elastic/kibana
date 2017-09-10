@@ -2,6 +2,8 @@ import React from 'react';
 
 import { renderToHtml } from '../../services';
 
+import { Link } from 'react-router';
+
 import {
   GuidePage,
   GuideSection,
@@ -41,6 +43,10 @@ const flexWrapHtml = renderToHtml(FlexWrap);
 import FlexNest from './flex_nest';
 const flexNestSource = require('!!raw!./flex_nest');
 const flexNestHtml = renderToHtml(FlexNest);
+
+import FlexItemPanel from './flex_item_panel';
+const flexItemPanelSource = require('!!raw!./flex_item_panel');
+const flexItemPanelHtml = renderToHtml(FlexItemPanel);
 
 export default props => (
   <GuidePage title={props.route.name}>
@@ -100,7 +106,29 @@ export default props => (
     />
 
     <GuideSection
-      title="FlexGroup can turn off stretching"
+      title="FlexItemPanel can substitute for any FlexItem"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: flexItemPanelSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: flexItemPanelHtml,
+      }]}
+      text={
+        <p>
+          <KuiCode>FlexItemPanel</KuiCode> can be used in place of or along-side <KuiCode>FlexItem</KuiCode>.
+          It acts just like a <KuiCode>FlexItem</KuiCode> but takes on the styling and props
+          of the <Link to="/panel">Panel</Link> component as well.
+          You normally would use it anytime you need your panels to grow in height.
+        </p>
+     }
+      demo={
+        <FlexItemPanel />
+     }
+    />
+
+    <GuideSection
+      title="FlexItem / FlexItemPanel can individually turn off stretching"
       source={[{
         type: GuideSectionTypes.JS,
         code: flexGrowSource,
@@ -120,7 +148,7 @@ export default props => (
     />
 
     <GuideSection
-      title="FlexGroup can be justified"
+      title="FlexGroup can justify and align"
       source={[{
         type: GuideSectionTypes.JS,
         code: flexJustifySource,
@@ -130,9 +158,12 @@ export default props => (
       }]}
       text={
         <p>
-          <KuiCode>FlexGroup</KuiCode>s can also use a <KuiCode>justifyContent</KuiCode> prop
-          that accepts normal flex-box paramenters.  Below are two common scenarios, where you need to
-          separate two items, or center align a single one.
+          <KuiCode>FlexGroup</KuiCode>s can also
+          use <KuiCode>justifyContent</KuiCode> and <KuiCode>alignItems</KuiCode>props
+          that accept normal flex-box paramenters. Below are some common scenarios,
+          where you need to separate two items, center justify a single one, or
+          center an item vertically. Note the usage
+          of <KuiCode>FlexItem</KuiCode>s with <KuiCode>grow=false</KuiCode> so that they do not stretch.
         </p>
       }
       demo={

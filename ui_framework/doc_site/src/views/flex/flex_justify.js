@@ -3,6 +3,7 @@ import React from 'react';
 import {
   KuiFlexGroup,
   KuiFlexItem,
+  KuiText,
 } from '../../../../components';
 
 export default () => (
@@ -16,6 +17,20 @@ export default () => (
 
     <KuiFlexGroup justifyContent="spaceAround">
       <KuiFlexItem grow={false}>I&rsquo;m a single centered item!</KuiFlexItem>
+    </KuiFlexGroup>
+
+    <br/><br/>
+
+    <KuiFlexGroup alignItems="center">
+      <KuiFlexItem grow={false}>
+        <KuiText>
+          <p>I</p>
+          <p>am</p>
+          <p>really</p>
+          <p>tall</p>
+        </KuiText>
+      </KuiFlexItem>
+      <KuiFlexItem>I am vertically centered!</KuiFlexItem>
     </KuiFlexGroup>
   </div>
 );
