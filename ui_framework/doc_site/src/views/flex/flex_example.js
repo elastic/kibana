@@ -158,12 +158,12 @@ export default props => (
       }]}
       text={
         <p>
-          <KuiCode>FlexGroup</KuiCode>s can also use <KuiCode>justifyContent</KuiCode> and
-          <KuiCode>alignItems</KuiCode>props that accept normal flex-box paramenters.
-            Below are some common scenarios, where you need to separate two items, center
-            justify a single one, or center an item vertically.
-            Note the usage of <KuiCode>FlexItem</KuiCode>s with <KuiCode>grow=false</KuiCode>
-            so that they do not stretch.
+          <KuiCode>FlexGroup</KuiCode>s can also
+          use <KuiCode>justifyContent</KuiCode> and <KuiCode>alignItems</KuiCode>props
+          that accept normal flex-box paramenters. Below are some common scenarios,
+          where you need to separate two items, center justify a single one, or
+          center an item vertically. Note the usage
+          of <KuiCode>FlexItem</KuiCode>s with <KuiCode>grow=false</KuiCode> so that they do not stretch.
         </p>
       }
       demo={
