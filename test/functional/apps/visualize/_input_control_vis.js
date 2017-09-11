@@ -11,8 +11,9 @@ export default function ({ getService, getPageObjects }) {
     before(async () => {
       await PageObjects.common.navigateToUrl('visualize', 'new');
       await PageObjects.visualize.clickInputControlVis();
+      await PageObjects.visualize.clickVisEditorTab('controls');
       await PageObjects.visualize.addInputControl();
-      await PageObjects.visualize.setReactSelect('.index-pattern-react-select', 'logstash-*');
+      await PageObjects.visualize.setReactSelect('.index-pattern-react-select', 'logstash');
       await PageObjects.common.sleep(1000); // give time for index-pattern to be fetched
       await PageObjects.visualize.setReactSelect('.field-react-select', FIELD_NAME);
       await PageObjects.visualize.clickGo();
@@ -89,6 +90,7 @@ export default function ({ getService, getPageObjects }) {
 
       describe('updateFiltersOnChange is true', () => {
         before(async () => {
+          await PageObjects.visualize.clickVisEditorTab('options');
           await PageObjects.visualize.checkCheckbox('inputControlEditorUpdateFiltersOnChangeCheckbox');
           await PageObjects.visualize.clickGo();
 
@@ -96,6 +98,7 @@ export default function ({ getService, getPageObjects }) {
         });
 
         after(async () => {
+          await PageObjects.visualize.clickVisEditorTab('options');
           await PageObjects.visualize.uncheckCheckbox('inputControlEditorUpdateFiltersOnChangeCheckbox');
           await PageObjects.visualize.clickGo();
 

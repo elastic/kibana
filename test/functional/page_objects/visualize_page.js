@@ -356,6 +356,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await testSubjects.click('visualizeEditDataLink');
     }
 
+    async clickVisEditorTab(tabName) {
+      await testSubjects.click('visEditorTab' + tabName);
+    }
+
     async selectWMS() {
       await find.clickByCssSelector('input[name="wms.enabled"]');
     }
