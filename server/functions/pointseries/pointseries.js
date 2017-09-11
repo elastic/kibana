@@ -77,7 +77,7 @@ export default new Fn({
     // The way the function below is written you can add as many arbitrary named args as you want.
   },
   fn: (context, args) => {
-    const mathScope = pivotObjectArray(context.rows, context.columns);
+    const mathScope = pivotObjectArray(context.rows, context.columns.map(col => col.name));
     const dimensionNames = Object.keys(pickBy(args, val => !isMeasure(mathScope, val))).filter(arg => args[arg] != null);
     const measureNames = Object.keys(pickBy(args, val => isMeasure(mathScope, val)));
     const columns = mapValues(args, arg => {
@@ -130,7 +130,7 @@ export default new Fn({
     // Then compute that 1 value for each measure
     Object.values(measureKeys).forEach(rows => {
       const subtable = { type: 'datatable', columns: context.columns, rows: rows };
-      const subScope = pivotObjectArray(subtable.rows, subtable.columns);
+      const subScope = pivotObjectArray(subtable.rows, subtable.columns.map(col => col.name));
       const measureValues = measureNames.map(measure => {
         try {
           return math.eval(args[measure], subScope);
