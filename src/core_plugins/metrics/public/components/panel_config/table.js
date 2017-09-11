@@ -6,7 +6,7 @@ import createTextHandler from '../lib/create_text_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import uuid from 'uuid';
 import YesNo from '../yes_no';
-import { htmlIdGenerator } from '../../lib/html_id_generator';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 class TablePanelConfig extends Component {
 

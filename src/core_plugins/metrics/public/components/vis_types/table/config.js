@@ -7,7 +7,7 @@ import FieldSelect from '../../aggs/field_select';
 import Select from 'react-select';
 import YesNo from '../../yes_no';
 import ColorRules from '../../color_rules';
-import { htmlIdGenerator } from '../../../lib/html_id_generator';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 class TableSeriesConfig extends Component {
 
