@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import createLegendSeries from '../lib/create_legend_series';
 import reactcss from 'reactcss';
-import { htmlIdGenerator } from '../../lib/html_id_generator';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 function VerticalLegend(props) {
   const rows = props.series.map(createLegendSeries(props));

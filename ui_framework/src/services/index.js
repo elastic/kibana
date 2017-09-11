@@ -5,6 +5,7 @@ export { keyCodes };
 export {
   accessibleClickKeys,
   comboBoxKeyCodes,
+  htmlIdGenerator
 } from './accessibility';
 
 export { SortableProperties } from './sort';
