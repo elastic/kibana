@@ -1,6 +1,7 @@
 export {
   accessibleClickKeys,
   comboBoxKeyCodes,
+  htmlIdGenerator,
   ENTER_KEY,
   SPACE_KEY,
 } from './accessibility';
