@@ -84,7 +84,7 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
       };
 
       $scope.saveEdit = (filter, newFilter, isPinned) => {
-        if (!filter.isNew) $scope.removeFilter(filter);
+        if (!filter.meta.isNew) $scope.removeFilter(filter);
         delete $scope.editingFilter;
         $scope.addFilters([newFilter], isPinned);
       };
