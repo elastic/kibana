@@ -1,5 +1,10 @@
-import { uniq, map, sortBy, mapValues } from 'lodash';
+import { uniq, map, get, groupBy, keyBy, sortBy, mapValues } from 'lodash';
 import Fn from '../fn.js';
+
+const getResultValues = (items, name, sorter) => {
+  const vals = uniq(map(items, name).filter(v => v !== undefined));
+  return sorter ? sortBy(vals, sorter) : vals.sort();
+};
 
 export default new Fn({
   name: 'grid',
@@ -21,22 +26,34 @@ export default new Fn({
         gradient: false,
       },
     },
+    seriesStyle: {
+      multi: true,
+      types: ['seriesStyle', 'null'],
+      help: 'A style of a specific series',
+    },
   },
-  fn: (context, /*args*/) => {
+  fn: (context, args) => {
     // Create a header array. We can determine the header by looking at X and Y. Its possible we won't have either
     // In which case we have a table with a single row and single column and no header right?
-    const resultColumns = uniq(map(context.rows, 'x')).sort();
+    const resultColumns = getResultValues(context.rows, 'x');
+    const seriesStyles = keyBy(args.seriesStyle || [], 'label') || {};
 
     function getConsolidateRow(rows, label) {
       const cells = resultColumns.map((column) => {
         // If there was a y value we could also filter for that. Nice.
+        const marks = (!context.columns.x) ? rows : rows.reduce((acc, row) => {
+          if (row.x === column) {
+            const seriesStyle = seriesStyles[row.color];
 
-        let marks;
-        if (context.columns.x) {
-          marks = rows.filter(row => row.x === column);
-        } else {
-          marks = rows;
-        }
+            acc.push(Object.assign({}, row, {
+              style: {
+                color: get(seriesStyle, 'color'),
+              },
+            }));
+          }
+
+          return acc;
+        }, []);
 
         return sortBy(marks, 'text');
       });
@@ -47,24 +64,21 @@ export default new Fn({
       };
     }
 
-    // If there is no "y" then there exists only one row. How do we get it?
-    let resultRows;
-    if (context.columns.y) {
-      const yValues = uniq(map(context.rows, 'y'));
-      resultRows = yValues.map(val => {
-        const filteredRows = context.rows.filter(row => row.y === val);
-        return getConsolidateRow(filteredRows, val);
-      });
-    } else {
-      resultRows = [
-        getConsolidateRow(context.rows), // We can also filter the rows by 'y' above.
-      ];
+    function getConsolidatedRows(rows) {
+      const groupedRows = groupBy(rows, 'y');
+      return Object.keys(groupedRows).map(val => getConsolidateRow(groupedRows[val], val));
     }
+
+    // If there is no "y" then there exists only one row. How do we get it?
+    // We can also filter the rows by 'y' above.
+    const resultRows = (context.columns.y)
+      ? getConsolidatedRows(context.rows)
+      : [getConsolidateRow(context.rows)];
 
     const summary = mapValues(context.columns, (val, name) => {
       if (!val) return;
       return Object.assign({}, val, {
-        values: sortBy(uniq(map(context.rows, name)), val => val),
+        values: getResultValues(context.rows, name, val => val),
       });
     });
 

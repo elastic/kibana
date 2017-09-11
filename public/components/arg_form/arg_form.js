@@ -69,7 +69,10 @@ export const ArgForm = (props) => {
         </ArgSimpleForm>
       </div>
 
-      <div className="canvas__arg--controls" style={{ display: (expand || !simpleForm) ? 'block' : 'none' }}>
+      <div
+        className="canvas__arg--controls"
+        style={{ display: (advancedForm && (expand || !simpleForm)) ? 'block' : 'none' }}
+      >
         { advancedForm }
       </div>
     </div>

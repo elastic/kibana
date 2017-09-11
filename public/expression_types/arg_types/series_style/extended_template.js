@@ -11,6 +11,8 @@ export const extendedTemplate = (props) => {
   const chainArgs = get(chain, 'arguments', {});
   const selectedSeries = get(chainArgs, 'label.0', '');
   const { name } = typeInstance;
+  const fields = get(typeInstance, 'options.include', []);
+  const hasPropFields = fields.some(field => ['lines', 'bars', 'points'].indexOf(field) !== -1);
 
   const handleChange = (argName, ev) => {
     const fn = ev.target.value === '' ? del : set;
@@ -34,40 +36,48 @@ export const extendedTemplate = (props) => {
               value={selectedSeries}
               onChange={ev => handleChange('label', ev)}
             >
-              <option value={null} disabled>Select a Series Label</option>
+              <option value={null}>Select a Series Label</option>
               { labels.sort().map(val => <option key={val} value={val}>{val}</option>) }
             </FormControl>
             <ControlLabel>Series Identifier</ControlLabel>
           </FormGroup>
         )}
-        <FormGroup>
-          <div className="canvas__argtype--seriesStyle--properties">
-            <LabeledInput
-              type="select"
-              className="canvas__argtype--seriesStyle--lines"
-              label="Line"
-              value={get(chainArgs, 'lines.0', 0)}
-              values={[ ...values ]}
-              onChange={ev => handleChange('lines', ev)}
-            />
-            <LabeledInput
-              type="select"
-              className="canvas__argtype--seriesStyle--bars"
-              label="Bar"
-              value={get(chainArgs, 'bars.0', 0)}
-              values={[ ...values ]}
-              onChange={ev => handleChange('bars', ev)}
-            />
-            <LabeledInput
-              type="select"
-              className="canvas__argtype--seriesStyle--points"
-              label="Point"
-              value={get(chainArgs, 'points.0', 0)}
-              values={[ ...values ]}
-              onChange={ev => handleChange('points', ev)}
-            />
-          </div>
-        </FormGroup>
+        {hasPropFields && (
+          <FormGroup>
+            <div className="canvas__argtype--seriesStyle--properties">
+              {fields.includes('lines') && (
+                <LabeledInput
+                  type="select"
+                  className="canvas__argtype--seriesStyle--lines"
+                  label="Line"
+                  value={get(chainArgs, 'lines.0', 0)}
+                  values={[ ...values ]}
+                  onChange={ev => handleChange('lines', ev)}
+                />
+              )}
+              {fields.includes('bars') && (
+                <LabeledInput
+                  type="select"
+                  className="canvas__argtype--seriesStyle--bars"
+                  label="Bar"
+                  value={get(chainArgs, 'bars.0', 0)}
+                  values={[ ...values ]}
+                  onChange={ev => handleChange('bars', ev)}
+                />
+              )}
+              {fields.includes('points') && (
+                <LabeledInput
+                  type="select"
+                  className="canvas__argtype--seriesStyle--points"
+                  label="Point"
+                  value={get(chainArgs, 'points.0', 0)}
+                  values={[ ...values ]}
+                  onChange={ev => handleChange('points', ev)}
+                />
+              )}
+            </div>
+          </FormGroup>
+        )}
       </div>
     </Form>
   );

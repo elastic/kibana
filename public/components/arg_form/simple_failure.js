@@ -7,7 +7,7 @@ export const SimpleFailure = () => {
   return (
     <div className="canvas__arg--error canvas__arg--error-simple">
       <Tooltip text={description} placement="left">
-        <i className="fa fa-exclamation-circle " />
+        <i className="fa fa-exclamation-circle" />
       </Tooltip>
     </div>
   );

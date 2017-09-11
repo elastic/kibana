@@ -12,9 +12,15 @@ export const pie = () => new View('pie', {
       displayName: 'Color palette',
       argType: 'palette',
     }),
+    new Arg('seriesStyle', {
+      displayName: 'Series Style',
+      argType: 'seriesStyle',
+      defaultValue: 'seriesStyle',
+      multi: true,
+    }),
   ],
   resolve({ context }) {
     if (getState(context) !== 'ready') return { labels: [] };
-    return { labels: uniq(map(getValue(context).rows, 'color')) };
+    return { labels: uniq(map(getValue(context).rows, 'color').filter(v => v !== undefined)) };
   },
 });

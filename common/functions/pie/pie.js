@@ -1,7 +1,6 @@
 import Fn from '../fn.js';
-import { groupBy, map, sortBy } from 'lodash';
+import { get, map, groupBy, sortBy, keyBy } from 'lodash';
 import chroma from 'chroma-js';
-
 
 export default new Fn({
   name: 'pie',
@@ -23,14 +22,31 @@ export default new Fn({
         gradient: false,
       },
     },
+    seriesStyle: {
+      multi: true,
+      types: ['seriesStyle', 'null'],
+      help: 'A style of a specific series',
+    },
   },
   fn: (context, args) => {
     const rows = sortBy(context.rows, ['color', 'size']);
+    const seriesStyles = keyBy(args.seriesStyle || [], 'label') || {};
 
-    const data = map(groupBy(rows, 'color'), (series, label) => ({
-      label: label,
-      data: series.map(point => point.size || 1),
-    }));
+    const data = map(groupBy(rows, 'color'), (series, label) => {
+      const item = {
+        label: label,
+        data: series.map(point => point.size || 1),
+      };
+
+      const seriesStyle = seriesStyles[label];
+
+      // append series style, if there is a match
+      if (seriesStyle) {
+        Object.assign(item, { color: get(seriesStyle, 'color') });
+      }
+
+      return item;
+    });
 
     const colors = args.palette.gradient ? chroma.scale(args.palette.colors).colors(data.length) : args.palette.colors;
 
