@@ -1,5 +1,7 @@
 import React from 'react';
 
+import { Link } from 'react-router';
+
 import { renderToHtml } from '../../services';
 
 import {
@@ -15,6 +17,10 @@ import {
 import SideNav from './side_nav';
 const sideNavSource = require('!!raw!./side_nav');
 const sideNavHtml = renderToHtml(SideNav);
+
+import SideNavAlternate from './side_nav_alternate';
+const sideNavAlternateSource = require('!!raw!./side_nav_alternate');
+const sideNavAlternateHtml = renderToHtml(SideNavAlternate);
 
 export default props => (
   <GuidePage title={props.route.name}>
@@ -36,6 +42,28 @@ export default props => (
       demo={
         <SideNav />
       }
+    />
+
+    <GuideSection
+      title="SideNav has an alternate style for within panels"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: sideNavAlternateSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: sideNavAlternateHtml,
+      }]}
+      text={
+        <p>
+          <KuiCode>SideNav</KuiCode> can pass an <KuiCode>alternateStyle</KuiCode> prop
+          that gives it more contextial styling when included within a <Link to="/page">Panel</Link>.
+          Note that in mobile mode it drops itself down to the original styling and still works
+          responsively.
+        </p>
+     }
+      demo={
+        <SideNavAlternate />
+     }
     />
   </GuidePage>
 );

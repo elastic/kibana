@@ -6,6 +6,9 @@ import {
   KuiSideNav,
   KuiSideNavItem,
   KuiSideNavTitle,
+  KuiFlexGroup,
+  KuiFlexItem,
+  KuiText,
 } from '../../../../components';
 
 export default class extends Component {
@@ -24,84 +27,77 @@ export default class extends Component {
   }
 
   render() {
-    return (
+
+    const sideNav = (
       <KuiSideNav
         mobileTitle="Navigate within $APP_NAME"
         toggleOpenOnMobile={this.toggleOpenOnMobile.bind(this)}
         isOpenOnMobile={this.state.isSideNavOpenOnMobile}
+        alternateStyle
       >
         {/* Elasticsearch section */}
 
         <KuiSideNavTitle>
-          Elasticsearch
+          My favorite comic books
         </KuiSideNavTitle>
 
         <KuiSideNavItem>
-          <button onClick={() => window.alert('Button clicked')}>
-            Data sources
+          <button>
+            Watchmen
           </button>
         </KuiSideNavItem>
 
         <KuiSideNavItem>
-          <a href="http://www.elastic.co">
-            Users
-          </a>
-        </KuiSideNavItem>
-
-        <KuiSideNavItem>
           <button>
-            Roles
+            Batman: The Dark Knight Returns
           </button>
         </KuiSideNavItem>
 
         <KuiSideNavItem isSelected>
           <button>
-            Watches
+            Elektra: Assassin
           </button>
         </KuiSideNavItem>
 
         <KuiSideNavItem>
           <button>
-            Extremely long title will become truncated when the browser is narrow enough
-          </button>
-        </KuiSideNavItem>
-
-        {/* Kibana section */}
-
-        <KuiSideNavTitle>
-          Kibana
-        </KuiSideNavTitle>
-
-        <KuiSideNavItem>
-          <button>
-            Index Patterns
+            V for Vendetta
           </button>
         </KuiSideNavItem>
 
         <KuiSideNavItem>
           <button>
-            Saved Objects
+            Superman: Red Son
           </button>
         </KuiSideNavItem>
 
         <KuiSideNavItem>
           <button>
-            Reporting
+            New Mutants
           </button>
         </KuiSideNavItem>
 
-        {/* Logstash section */}
-
-        <KuiSideNavTitle>
-          Logstash
-        </KuiSideNavTitle>
-
-        <KuiSideNavItem>
-          <button>
-            Pipeline Viewer
-          </button>
-        </KuiSideNavItem>
       </KuiSideNav>
+    );
+
+    return (
+      <KuiFlexGroup>
+        <KuiFlexItem grow={false} style={{ width: 200 }}>
+          {sideNav}
+        </KuiFlexItem>
+        <KuiFlexItem>
+          <KuiText>
+            <h2>Elektra: Assassin</h2>
+            <p>
+              Elektra: Assassin is an eight-issue limited series published by Epic Comics,
+              an imprint of Marvel Comics, between August 1986 and March 1987. Written
+              by Frank Miller and illustrated by Bill Sienkiewicz, Elektra: Assassin
+              satirizes ultra-violence, politics, comic book clichés like ninjas and
+              cyborgs, and the portrayal of women.
+            </p>
+          </KuiText>
+        </KuiFlexItem>
+      </KuiFlexGroup>
     );
   }
 }
