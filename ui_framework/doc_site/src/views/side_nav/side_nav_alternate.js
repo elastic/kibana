@@ -30,12 +30,11 @@ export default class extends Component {
 
     const sideNav = (
       <KuiSideNav
-        mobileTitle="Navigate within $APP_NAME"
+        mobileTitle="Navigate my favorite comic books"
         toggleOpenOnMobile={this.toggleOpenOnMobile.bind(this)}
         isOpenOnMobile={this.state.isSideNavOpenOnMobile}
         alternateStyle
       >
-        {/* Elasticsearch section */}
 
         <KuiSideNavTitle>
           My favorite comic books
