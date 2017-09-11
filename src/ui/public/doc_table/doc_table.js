@@ -128,7 +128,7 @@ uiModules.get('kibana')
           calculateItemsOnPage();
 
           return $scope.searchSource.onResults().then(onResults);
-        };
+        }
 
         function startSearching() {
           $scope.searchSource.onResults()
