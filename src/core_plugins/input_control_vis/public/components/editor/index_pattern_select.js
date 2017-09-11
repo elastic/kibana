@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Select from 'react-select';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 export class IndexPatternSelect extends Component {
   constructor(props) {
@@ -22,9 +23,11 @@ export class IndexPatternSelect extends Component {
   }
 
   render() {
+    const idGenerator = htmlIdGenerator();
+    const selectId = idGenerator('indexPatternSelect');
     return (
       <div className="kuiSideBarFormRow">
-        <label className="kuiSideBarFormRow__label" htmlFor="indexPatternSelect">
+        <label className="kuiSideBarFormRow__label" htmlFor={selectId}>
           Index Pattern
         </label>
         <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
@@ -35,7 +38,7 @@ export class IndexPatternSelect extends Component {
             loadOptions={this.loadOptions}
             onChange={this.props.onChange}
             resetValue={''}
-            inputProps={{ id: 'indexPatternSelect' }}
+            inputProps={{ id: selectId }}
           />
         </div>
       </div>

@@ -2,6 +2,7 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Select from 'react-select';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 export class FieldSelect extends Component {
   constructor(props) {
@@ -58,9 +59,11 @@ export class FieldSelect extends Component {
       return null;
     }
 
+    const idGenerator = htmlIdGenerator();
+    const selectId = idGenerator('indexPatternSelect');
     return (
       <div className="kuiSideBarFormRow">
-        <label className="kuiSideBarFormRow__label" htmlFor="fieldSelect">
+        <label className="kuiSideBarFormRow__label" htmlFor={selectId}>
           Field
         </label>
         <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
@@ -71,7 +74,7 @@ export class FieldSelect extends Component {
             options={this.state.fields}
             onChange={this.props.onChange}
             resetValue={''}
-            inputProps={{ id: 'fieldSelect' }}
+            inputProps={{ id: selectId }}
           />
         </div>
       </div>
