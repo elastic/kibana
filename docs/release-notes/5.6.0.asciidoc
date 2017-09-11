@@ -1,0 +1,83 @@
+[[release-notes-5.6.0]]
+== 5.6.0 Release Notes
+
+Also see <<breaking-changes-5.0>>.
+
+[float]
+[[enhancement-5.6.0]]
+=== Enhancements
+Management::
+* Uses SavedObjectsClient for UI Settings {pull}12747[#12747]
+* [Management] Provide a way to fetch index pattern titles {pull}13030[#13030]
+  - This PR adds another method to the indexPatterns service to fetch index patterns titles. Since the code was nearly identical to how index pattern ids are fetched, I decided to slightly refactor the function to accept a parameter for which property to fetch from the index pattern. I've updated all usages to the new approach.
+Operations::
+* Saved objects compatibility layer {pull}12648[#12648]
+* [Fix for #10779] Support v6 mappings for saved objects import/export {pull}12792[#12792]
+* [Fix for #11388] [5.x] Allow running Kibana against the next major version of Elasticsearch {pull}11803[#11803]
+* [elasticsearch/migrateConfig] use server.savedObjectsClientFactory() {pull}12767[#12767]
+* Adds bulk_get to SavedObjects {pull}12426[#12426]
+* Uses SavedObjects API in Courier Saved Object {pull}12407[#12407]
+* [elasticsearch] patch mappings that are missing types {pull}12783[#12783]
+Platform::
+* Use SavedObjectsClient for Courier Index Pattern {pull}12719[#12719]
+* Use node instead of webpack config for jest {pull}12974[#12974]
+* add api tag to api routes {pull}12948[#12948]
+* Move Jest config to json {pull}12402[#12402]
+* [Fix for #12669] ES Healthcheck v6 mapping compatibility {pull}12714[#12714]
+* Configurable custom response headers for server {pull}13045[#13045]
+Sharing::
+* Uses SavedObjectsClient for Short URL Lookup {pull}12787[#12787]
+* Use saved object client for saved_object_loader find function {pull}12083[#12083]
+Visualization::
+* Adding ability to configure grid for TSVB {pull}12385[#12385]
+* Adding option for controlling if last bucket is dropped for TSVB {pull}12379[#12379]
+  - This PR creates an option in "Panel Options" and the metric index pattern override to allow the user to control if the last bucket should be dropped. By default TSVB will drop the last bucket since most of the time it's incomplete. This also changes the method for dropping the last bucket to a more reliable method.
+* Fixes #12602 - Change TSVB Fields API to use fieldCaps API {pull}12611[#12611]
+
+[float]
+[[bug-5.6.0]]
+=== Bug fixes
+Dev Tools::
+* [Fix for #10677] Keep top line in view when resizing Console to avoid losing user context {pull}13695[#13695]
+Discover::
+* Fix call to suggestions API to correctly use index pattern title {pull}12917[#12917]
+* [Fix for #12745] Handle booleans in filter editor {pull}13406[#13406]
+* [Fix for #12416] Fix fixed-scroll on Discover page {pull}13516[#13516]
+* [Fix for #12955] Improves dark theme support in the filter editor {pull}13522[#13522]
+* [Fix for #13080] Fix blank index pattern selector in Discover {pull}13715[#13715]
+* [Fix for #13486] Hide errors due to unsupported _field_stats api {pull}13670[#13670]
+Management::
+* Remove translations from management section {pull}13049[#13049]
+Platform::
+* Remove Version Check for Dashboard Import API {pull}12476[#12476]
+* Toast Notification should handle connection failed {pull}12609[#12609]
+* [Fix for #12933] [chrome/nav/lastUrl] do not track redirect routes {pull}13432[#13432]
+  - When you navigate to a URL that Kibana doesn't recognize it tries to be helpful and send you to discover. At the same time it tries to remember the URL you were last using in each app and bring back where you left off when you come back. Unfortunately, these two features recently collided. If you somehow ended up at an unknown URL that looked like the URL for an app other than discover Kibana would get confused and remember the bad URL and immediately redirect you to discover. If you didn't give up right away you would probably try to go back to the app, but since it Kibana is trying to be helpful it would send you right back to the bad URL and then back to discover... Stupid right?! Well, it won't happen anymore!
+Sharing::
+* [Fix for #12600] Fix search issue on listing page + tests {pull}12618[#12618]
+* [Fix for #12627] do not allow registration of undefined indexpatterns in dashboard state {pull}12684[#12684]
+Visualization::
+* Date histogram axis label not getting updated when time interval changes {pull}12950[#12950]
+* Fixes #11721 - Fix bug with axis updating when data format is changed in TSVB {pull}12386[#12386]
+  - Axes in the Time Series Visual Builder now correctly update when changing a data formatter.
+* [Fix for #12866] Use devicePixelRatio to scale up and down canvas values in TSVB for Tooltip {pull}13565[#13565]
+* [Fix for #9530] Don't declare empty properties in Timelion's bool query {pull}9573[#9573]
+* [Fix for #11490] fix range agg label on heatmap y axis {pull}12754[#12754]
+* [Fix for #12838] fix gauge field formatters {pull}12913[#12913]
+  - metric/goal/gauge now correctly respect the fieldFormatters when multiple metrics are defined.
+* don't hide metric if show labels is false {pull}13637[#13637]
+  - goal/gauge show labels option should only hide the labels not the metric value
+* [Fix for #13546] custom value axis title should not be overiden {pull}13639[#13639]
+* [Fix for #12856, #13438] Fix/upgrade vis {pull}13659[#13659]
+  - fixes issues with upgrading visualizations to 5.4/5.5/5.6
+* [Fix for #12623, #13147, #12713] fix metric wrapping and legend {pull}13242[#13242]
+  - metric visualization should wrap multiple metrics in multiple lines when horizontal space is not available
+* ensure spy panel obscures underlying visualization {pull}12502[#12502]
+* [Fix for #13267, #13517] fix available metric aggs {pull}13518[#13518]
+* [Fix for #12693] Fixes #12693 - Fixing a spelling error in TSVB {pull}12695[#12695]
+* [Fix for #13244] [visualize spy] Pull index title instead of id {pull}13254[#13254]
+* [Fix for #13562] gauge/goal should not try to display negative values {pull}13638[#13638]
+* [Fix for #13622] fix IE11 vislib error {pull}13830[#13830]
+* use new staging server for catalogue manifest {pull}12521[#12521]
+
+

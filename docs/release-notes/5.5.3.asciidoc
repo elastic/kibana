@@ -1,0 +1,18 @@
+[[release-notes-5.5.3]]
+== 5.5.3 Release Notes
+
+Also see <<breaking-changes-5.0>>.
+
+[float]
+[[bug-5.5.3]]
+Visualization::
+* [Fix for #13622] fix IE11 vislib error {pull}13830[#13830]
+* don't hide metric if show labels is false {pull}13637[#13637]
+  - goal/gauge show labels option should only hide the labels not the metric value
+* [Fix for #12856, #13438] Fix/upgrade vis {pull}13659[#13659]
+  - fixes issues with upgrading visualizations to 5.4/5.5/5.6
+* [Fix for #12623, #13147, #12713] fix metric wrapping and legend {pull}13242[#13242]
+  - metric visualization should wrap multiple metrics in multiple lines when horizontal space is not available
+* [Fix for #13267, #13517] fix available metric aggs {pull}13518[#13518]
+
+
