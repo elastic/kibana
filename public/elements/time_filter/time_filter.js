@@ -17,10 +17,10 @@ export default new Element('time_filter', {
 
     // Check if the current column is what we expect it to be. If the user changes column this will be called again,
     // but we don't want to run setFilter() unless we have to because it will cause a data refresh
-    const column = get(ast, 'chain[0].arguments.column[0].value');
+    const column = get(ast, 'chain[0].arguments.column[0]');
     console.log('filter:', column, 'expression:', config.column);
     if (column !== config.column) {
-      set(ast, 'chain[0].arguments.column[0]', { type: 'string', value: config.column });
+      set(ast, 'chain[0].arguments.column[0]', config.column);
       handlers.setFilter(toExpression(ast));
     }
 
