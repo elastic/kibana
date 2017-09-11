@@ -38,7 +38,7 @@ const template = compose(
 )(component);
 
 template.propTypes = {
-  argValue: PropTypes.object.isRequired,
+  argValue: PropTypes.any.isRequired,
   onValueChange: PropTypes.func.isRequired,
   typeInstance: PropTypes.object.isRequired,
 };
