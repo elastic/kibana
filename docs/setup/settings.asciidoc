@@ -70,7 +70,7 @@ error messages.
 `logging.verbose`:: *Default: false* Set the value of this setting to `true` to log all events, including system usage
 information and all requests.
 
-`path.data`:: *Default: `./data`* The path where Kibana stores persistent data not saved in Elasticsearch
+`path.data`:: *Default: `data`* The path where Kibana stores persistent data not saved in Elasticsearch.
 
 `pid.file:`:: Specifies the path where Kibana creates the process ID file.
 
