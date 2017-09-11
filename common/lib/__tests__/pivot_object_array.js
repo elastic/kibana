@@ -41,4 +41,9 @@ describe('pivotObjectArray', () => {
       missing: [undefined, undefined, undefined],
     });
   });
+
+  it('throws when given an invalid column list', () => {
+    const check = () => pivotObjectArray(rows, [{ name: 'price' }, { name: 'missing' }]);
+    expect(check).to.throwException('Columns should be an array of strings');
+  });
 });
