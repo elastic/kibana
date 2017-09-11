@@ -7,7 +7,16 @@ export class RelativeDateFormat extends FieldFormat {
   }
 
   _convert(val) {
-    return moment(val).fromNow();
+    if (val === null || val === undefined) {
+      return '-';
+    }
+
+    const date = moment(val);
+    if (date.isValid()) {
+      return date.fromNow();
+    } else {
+      return val;
+    }
   }
 
   static id = 'relative_date';
