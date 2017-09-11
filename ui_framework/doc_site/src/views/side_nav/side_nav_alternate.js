@@ -94,6 +94,20 @@ export default class extends Component {
               satirizes ultra-violence, politics, comic book clichés like ninjas and
               cyborgs, and the portrayal of women.
             </p>
+            <p>
+              Elektra: Assassin is an eight-issue limited series published by Epic Comics,
+              an imprint of Marvel Comics, between August 1986 and March 1987. Written
+              by Frank Miller and illustrated by Bill Sienkiewicz, Elektra: Assassin
+              satirizes ultra-violence, politics, comic book clichés like ninjas and
+              cyborgs, and the portrayal of women.
+            </p>
+            <p>
+              Elektra: Assassin is an eight-issue limited series published by Epic Comics,
+              an imprint of Marvel Comics, between August 1986 and March 1987. Written
+              by Frank Miller and illustrated by Bill Sienkiewicz, Elektra: Assassin
+              satirizes ultra-violence, politics, comic book clichés like ninjas and
+              cyborgs, and the portrayal of women.
+            </p>
           </KuiText>
         </KuiFlexItem>
       </KuiFlexGroup>
