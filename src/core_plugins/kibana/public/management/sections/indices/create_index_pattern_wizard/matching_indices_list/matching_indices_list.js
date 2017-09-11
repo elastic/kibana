@@ -38,7 +38,8 @@ module.directive('matchingIndicesList', function ($filter, pagerFactory) {
     controller: callAfterBindingsWorkaround(function () {
       this.pageOfIndices = [];
 
-      this.clickPattern = name => {
+      this.clickPattern = (e, name) => {
+        e.preventDefault();
         this.selectPattern({ name });
       };
 
