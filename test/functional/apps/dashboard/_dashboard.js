@@ -21,6 +21,14 @@ export default function ({ getService, getPageObjects }) {
       return PageObjects.dashboard.initTests();
     });
 
+    after(async function () {
+      // avoids any 'Object with id x not found' errors when switching tests.
+      await PageObjects.header.clickVisualize();
+      await PageObjects.visualize.gotoLandingPage();
+      await PageObjects.header.clickDashboard();
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+    });
+
     it('should be able to add visualizations to dashboard', async function addVisualizations() {
       await screenshots.take('Dashboard-no-visualizations');
 
@@ -307,6 +315,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.clickVisualize();
         const currentUrl = await remote.getCurrentUrl();
         expect(currentUrl).to.contain(VisualizeConstants.EDIT_PATH);
+      });
+
+      after(async () => {
+        await PageObjects.header.clickDashboard();
       });
     });
   });
