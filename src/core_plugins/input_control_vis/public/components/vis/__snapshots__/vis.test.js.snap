@@ -2,412 +2,257 @@
 
 exports[`Renders list control 1`] = `
 <div
-  class="inputControlVis"
+  className="inputControlVis"
 >
   <div
     data-test-subj="inputControl0"
   >
-    <div
-      class="kuiVerticalRhythm"
-    >
-      <label
-        class="kuiLabel kuiVerticalRhythmSmall"
-        for="mock-list-control"
-      >
-        list control
-      </label>
-      <div
-        class="kuiVerticalRhythmSmall"
-      >
-        <div
-          class="Select list-control-react-select Select--multi is-clearable is-searchable"
-        >
-          <div
-            class="Select-control"
-          >
-            <span
-              class="Select-multi-value-wrapper"
-              id="react-select-2--value"
-            >
-              <div
-                class="Select-placeholder"
-              >
-                Select...
-              </div>
-              <div
-                class="Select-input"
-                style="display:inline-block;"
-              >
-                <input
-                  aria-activedescendant="react-select-2--value"
-                  aria-expanded="false"
-                  aria-haspopup="false"
-                  aria-owns=""
-                  id="mock-list-control"
-                  role="combobox"
-                  style="width:5px;box-sizing:content-box;"
-                  value=""
-                />
-                <div
-                  style="position:absolute;top:0;left:0;visibility:hidden;height:0;overflow:scroll;white-space:pre;"
-                />
-              </div>
-            </span>
-            <span
-              class="Select-arrow-zone"
-            >
-              <span
-                class="Select-arrow"
-              />
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
+    <ListControl
+      control={
+        Object {
+          "filterManager": Object {
+            "createFilter": [Function],
+          },
+          "id": "mock-list-control",
+          "label": "list control",
+          "options": Object {
+            "multiselect": true,
+            "type": "terms",
+          },
+          "selectOptions": Array [
+            Object {
+              "label": "choice1",
+              "value": "choice1",
+            },
+            Object {
+              "label": "choice2",
+              "value": "choice2",
+            },
+          ],
+          "type": "list",
+          "value": "",
+        }
+      }
+      controlIndex={0}
+      stageFilter={[Function]}
+    />
   </div>
-  <div
-    class="kuiFieldGroup"
+  <KuiFieldGroup
+    isAlignedTop={false}
   >
-    <div
-      class="kuiFieldGroupSection"
+    <KuiFieldGroupSection
+      isWide={false}
     >
-      <button
-        class="kuiButton kuiButton--primary"
+      <KuiButton
+        buttonType="primary"
         data-test-subj="inputControlSubmitBtn"
+        disabled={false}
+        onClick={[Function]}
         type="button"
       >
-        <span
-          class="kuiButton__inner"
-        >
-          <span>
-            Update filters
-          </span>
-        </span>
-      </button>
-    </div>
-    <div
-      class="kuiFieldGroupSection"
+        Update filters
+      </KuiButton>
+    </KuiFieldGroupSection>
+    <KuiFieldGroupSection
+      isWide={false}
     >
-      <button
-        class="kuiButton kuiButton--basic"
+      <KuiButton
+        buttonType="basic"
         data-test-subj="inputControlCancelBtn"
+        disabled={false}
+        onClick={[Function]}
         type="button"
       >
-        <span
-          class="kuiButton__inner"
-        >
-          <span>
-            Cancel
-          </span>
-        </span>
-      </button>
-    </div>
-    <div
-      class="kuiFieldGroupSection"
+        Cancel
+      </KuiButton>
+    </KuiFieldGroupSection>
+    <KuiFieldGroupSection
+      isWide={false}
     >
-      <button
-        class="kuiButton kuiButton--basic"
+      <KuiButton
+        buttonType="basic"
         data-test-subj="inputControlClearBtn"
+        onClick={[Function]}
         type="button"
       >
-        <span
-          class="kuiButton__inner"
-        >
-          <span>
-            Clear
-          </span>
-        </span>
-      </button>
-    </div>
-  </div>
+        Clear
+      </KuiButton>
+    </KuiFieldGroupSection>
+  </KuiFieldGroup>
 </div>
 `;
 
 exports[`Renders range control 1`] = `
 <div
-  class="inputControlVis"
+  className="inputControlVis"
 >
   <div
     data-test-subj="inputControl0"
   >
-    <div
-      class="kuiVerticalRhythm"
-    >
-      <label
-        class="kuiLabel kuiVerticalRhythmSmall"
-        for="mock-range-control"
-      >
-        ragne control
-      </label>
-      <div
-        class="kuiVerticalRhythmSmall"
-      >
-        <div
-          class="inputRangeContainer"
-        >
-          <div
-            aria-disabled="false"
-            class="input-range"
-          >
-            <span
-              class="input-range__label input-range__label--min"
-            >
-              <span
-                class="input-range__label-container"
-              >
-                0
-              </span>
-            </span>
-            <div
-              class="input-range__track input-range__track--background"
-            >
-              <div
-                class="input-range__track input-range__track--active"
-                style="left:0%;width:0%;"
-              />
-              <span
-                class="input-range__slider-container"
-                style="position:absolute;left:0%;"
-              >
-                <span
-                  class="input-range__label input-range__label--value"
-                >
-                  <span
-                    class="input-range__label-container"
-                  >
-                    0
-                  </span>
-                </span>
-                <div
-                  aria-labelledby="mock-range-control"
-                  aria-valuemax="0"
-                  aria-valuemin="0"
-                  aria-valuenow="0"
-                  class="input-range__slider"
-                  draggable="false"
-                  role="slider"
-                  tabindex="0"
-                />
-              </span>
-              <span
-                class="input-range__slider-container"
-                style="position:absolute;left:0%;"
-              >
-                <span
-                  class="input-range__label input-range__label--value"
-                >
-                  <span
-                    class="input-range__label-container"
-                  >
-                    0
-                  </span>
-                </span>
-                <div
-                  aria-labelledby="mock-range-control"
-                  aria-valuemax="100"
-                  aria-valuemin="0"
-                  aria-valuenow="0"
-                  class="input-range__slider"
-                  draggable="false"
-                  role="slider"
-                  tabindex="0"
-                />
-              </span>
-            </div>
-            <span
-              class="input-range__label input-range__label--max"
-            >
-              <span
-                class="input-range__label-container"
-              >
-                100
-              </span>
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
+    <RangeControl
+      control={
+        Object {
+          "filterManager": Object {
+            "createFilter": [Function],
+          },
+          "id": "mock-range-control",
+          "label": "ragne control",
+          "max": 100,
+          "min": 0,
+          "options": Object {
+            "decimalPlaces": 0,
+            "step": 1,
+          },
+          "type": "range",
+          "value": Object {
+            "max": 0,
+            "min": 0,
+          },
+        }
+      }
+      controlIndex={0}
+      stageFilter={[Function]}
+    />
   </div>
-  <div
-    class="kuiFieldGroup"
+  <KuiFieldGroup
+    isAlignedTop={false}
   >
-    <div
-      class="kuiFieldGroupSection"
+    <KuiFieldGroupSection
+      isWide={false}
     >
-      <button
-        class="kuiButton kuiButton--primary"
+      <KuiButton
+        buttonType="primary"
         data-test-subj="inputControlSubmitBtn"
+        disabled={false}
+        onClick={[Function]}
         type="button"
       >
-        <span
-          class="kuiButton__inner"
-        >
-          <span>
-            Update filters
-          </span>
-        </span>
-      </button>
-    </div>
-    <div
-      class="kuiFieldGroupSection"
+        Update filters
+      </KuiButton>
+    </KuiFieldGroupSection>
+    <KuiFieldGroupSection
+      isWide={false}
     >
-      <button
-        class="kuiButton kuiButton--basic"
+      <KuiButton
+        buttonType="basic"
         data-test-subj="inputControlCancelBtn"
+        disabled={false}
+        onClick={[Function]}
         type="button"
       >
-        <span
-          class="kuiButton__inner"
-        >
-          <span>
-            Cancel
-          </span>
-        </span>
-      </button>
-    </div>
-    <div
-      class="kuiFieldGroupSection"
+        Cancel
+      </KuiButton>
+    </KuiFieldGroupSection>
+    <KuiFieldGroupSection
+      isWide={false}
     >
-      <button
-        class="kuiButton kuiButton--basic"
+      <KuiButton
+        buttonType="basic"
         data-test-subj="inputControlClearBtn"
+        onClick={[Function]}
         type="button"
       >
-        <span
-          class="kuiButton__inner"
-        >
-          <span>
-            Clear
-          </span>
-        </span>
-      </button>
-    </div>
-  </div>
+        Clear
+      </KuiButton>
+    </KuiFieldGroupSection>
+  </KuiFieldGroup>
 </div>
 `;
 
 exports[`Submit and Reset btns disabled when nothing is staged 1`] = `
 <div
-  class="inputControlVis"
+  className="inputControlVis"
 >
-  <div
-    class="kuiFieldGroup"
+  <KuiFieldGroup
+    isAlignedTop={false}
   >
-    <div
-      class="kuiFieldGroupSection"
+    <KuiFieldGroupSection
+      isWide={false}
     >
-      <button
-        class="kuiButton kuiButton--primary"
+      <KuiButton
+        buttonType="primary"
         data-test-subj="inputControlSubmitBtn"
-        disabled=""
+        disabled={true}
+        onClick={[Function]}
         type="button"
       >
-        <span
-          class="kuiButton__inner"
-        >
-          <span>
-            Update filters
-          </span>
-        </span>
-      </button>
-    </div>
-    <div
-      class="kuiFieldGroupSection"
+        Update filters
+      </KuiButton>
+    </KuiFieldGroupSection>
+    <KuiFieldGroupSection
+      isWide={false}
     >
-      <button
-        class="kuiButton kuiButton--basic"
+      <KuiButton
+        buttonType="basic"
         data-test-subj="inputControlCancelBtn"
-        disabled=""
+        disabled={true}
+        onClick={[Function]}
         type="button"
       >
-        <span
-          class="kuiButton__inner"
-        >
-          <span>
-            Cancel
-          </span>
-        </span>
-      </button>
-    </div>
-    <div
-      class="kuiFieldGroupSection"
+        Cancel
+      </KuiButton>
+    </KuiFieldGroupSection>
+    <KuiFieldGroupSection
+      isWide={false}
     >
-      <button
-        class="kuiButton kuiButton--basic"
+      <KuiButton
+        buttonType="basic"
         data-test-subj="inputControlClearBtn"
+        onClick={[Function]}
         type="button"
       >
-        <span
-          class="kuiButton__inner"
-        >
-          <span>
-            Clear
-          </span>
-        </span>
-      </button>
-    </div>
-  </div>
+        Clear
+      </KuiButton>
+    </KuiFieldGroupSection>
+  </KuiFieldGroup>
 </div>
 `;
 
 exports[`Submit and Reset btns enabled when filter is staged 1`] = `
 <div
-  class="inputControlVis"
+  className="inputControlVis"
 >
-  <div
-    class="kuiFieldGroup"
+  <KuiFieldGroup
+    isAlignedTop={false}
   >
-    <div
-      class="kuiFieldGroupSection"
+    <KuiFieldGroupSection
+      isWide={false}
     >
-      <button
-        class="kuiButton kuiButton--primary"
+      <KuiButton
+        buttonType="primary"
         data-test-subj="inputControlSubmitBtn"
+        disabled={false}
+        onClick={[Function]}
         type="button"
       >
-        <span
-          class="kuiButton__inner"
-        >
-          <span>
-            Update filters
-          </span>
-        </span>
-      </button>
-    </div>
-    <div
-      class="kuiFieldGroupSection"
+        Update filters
+      </KuiButton>
+    </KuiFieldGroupSection>
+    <KuiFieldGroupSection
+      isWide={false}
     >
-      <button
-        class="kuiButton kuiButton--basic"
+      <KuiButton
+        buttonType="basic"
         data-test-subj="inputControlCancelBtn"
+        disabled={false}
+        onClick={[Function]}
         type="button"
       >
-        <span
-          class="kuiButton__inner"
-        >
-          <span>
-            Cancel
-          </span>
-        </span>
-      </button>
-    </div>
-    <div
-      class="kuiFieldGroupSection"
+        Cancel
+      </KuiButton>
+    </KuiFieldGroupSection>
+    <KuiFieldGroupSection
+      isWide={false}
     >
-      <button
-        class="kuiButton kuiButton--basic"
+      <KuiButton
+        buttonType="basic"
         data-test-subj="inputControlClearBtn"
+        onClick={[Function]}
         type="button"
       >
-        <span
-          class="kuiButton__inner"
-        >
-          <span>
-            Clear
-          </span>
-        </span>
-      </button>
-    </div>
-  </div>
+        Clear
+      </KuiButton>
+    </KuiFieldGroupSection>
+  </KuiFieldGroup>
 </div>
 `;

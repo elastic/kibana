@@ -1,6 +1,6 @@
 import React from 'react';
 import sinon from 'sinon';
-import { mount, render } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 
 import {
   InputControlVis,
@@ -56,7 +56,7 @@ beforeEach(() => {
 });
 
 test('Renders list control', () => {
-  const component = render(<InputControlVis
+  const component = shallow(<InputControlVis
     stageFilter={stageFilter}
     submitFilters={submitFilters}
     resetControls={resetControls}
@@ -69,7 +69,7 @@ test('Renders list control', () => {
 });
 
 test('Renders range control', () => {
-  const component = render(<InputControlVis
+  const component = shallow(<InputControlVis
     stageFilter={stageFilter}
     submitFilters={submitFilters}
     resetControls={resetControls}
@@ -82,7 +82,7 @@ test('Renders range control', () => {
 });
 
 test('Submit and Reset btns disabled when nothing is staged', () => {
-  const component = render(<InputControlVis
+  const component = shallow(<InputControlVis
     stageFilter={stageFilter}
     submitFilters={submitFilters}
     resetControls={resetControls}
@@ -95,7 +95,7 @@ test('Submit and Reset btns disabled when nothing is staged', () => {
 });
 
 test('Submit and Reset btns enabled when filter is staged', () => {
-  const component = render(<InputControlVis
+  const component = shallow(<InputControlVis
     stageFilter={stageFilter}
     submitFilters={submitFilters}
     resetControls={resetControls}
@@ -168,7 +168,7 @@ test('stageFilter list control', () => {
     updateFiltersOnChange={updateFiltersOnChange}
     getStagedControls={getStagedControlsWithStaged}
   />);
-  const reactSelectInput = component.find(`[id="${mockListControl.id}"]`);
+  const reactSelectInput = component.find(`#${mockListControl.id}`);
   reactSelectInput.simulate('change', { target: { value: 'choice1' } });
   reactSelectInput.simulate('keyDown', { keyCode: 9, key: 'Tab' });
   sinon.assert.notCalled(clearControls);

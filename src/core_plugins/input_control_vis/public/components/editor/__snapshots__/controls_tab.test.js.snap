@@ -27,6 +27,7 @@ exports[`renders ControlsTab 1`] = `
     moveUpControl={[Function]}
   >
     <ListControlEditor
+      controlIndex={0}
       controlParams={
         Object {
           "fieldName": "keywordField",
@@ -72,6 +73,7 @@ exports[`renders ControlsTab 1`] = `
     moveUpControl={[Function]}
   >
     <RangeControlEditor
+      controlIndex={1}
       controlParams={
         Object {
           "fieldName": "numberField",

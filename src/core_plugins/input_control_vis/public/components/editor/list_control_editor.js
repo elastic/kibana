@@ -8,6 +8,8 @@ function filterField(field) {
 }
 
 export function ListControlEditor(props) {
+  const multiselectId = `multiselect-${props.controlIndex}`;
+  const sizeId = `size-${props.controlIndex}`;
   return (
     <div>
 
@@ -26,12 +28,12 @@ export function ListControlEditor(props) {
       />
 
       <div className="kuiSideBarFormRow">
-        <label className="kuiSideBarFormRow__label" htmlFor="multiselect">
+        <label className="kuiSideBarFormRow__label" htmlFor={multiselectId}>
           Enable Multiselect
         </label>
         <div className="kuiSideBarFormRow__control">
           <input
-            id="multiselect"
+            id={multiselectId}
             className="kuiCheckBox"
             type="checkbox"
             checked={props.controlParams.options.multiselect}
@@ -41,12 +43,12 @@ export function ListControlEditor(props) {
       </div>
 
       <div className="kuiSideBarFormRow">
-        <label className="kuiSideBarFormRow__label" htmlFor="size">
+        <label className="kuiSideBarFormRow__label" htmlFor={sizeId}>
           Size
         </label>
         <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
           <input
-            id="size"
+            id={sizeId}
             className="kuiTextInput"
             type="number"
             min="1"
@@ -63,6 +65,7 @@ export function ListControlEditor(props) {
 ListControlEditor.propTypes = {
   getIndexPatterns: PropTypes.func.isRequired,
   getIndexPattern: PropTypes.func.isRequired,
+  controlIndex: PropTypes.number.isRequired,
   controlParams: PropTypes.object.isRequired,
   handleFieldNameChange: PropTypes.func.isRequired,
   handleIndexPatternChange: PropTypes.func.isRequired,

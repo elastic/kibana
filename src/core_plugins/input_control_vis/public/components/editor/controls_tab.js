@@ -91,6 +91,7 @@ export class ControlsTab extends Component {
         case 'list':
           controlEditor = (
             <ListControlEditor
+              controlIndex={controlIndex}
               controlParams={controlParams}
               handleIndexPatternChange={this.handleIndexPatternChange.bind(this, controlIndex)}
               handleFieldNameChange={this.handleFieldNameChange.bind(this, controlIndex)}
@@ -104,6 +105,7 @@ export class ControlsTab extends Component {
         case 'range':
           controlEditor = (
             <RangeControlEditor
+              controlIndex={controlIndex}
               controlParams={controlParams}
               handleIndexPatternChange={this.handleIndexPatternChange.bind(this, controlIndex)}
               handleFieldNameChange={this.handleFieldNameChange.bind(this, controlIndex)}
