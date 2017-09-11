@@ -36,7 +36,8 @@ export default props => (
       text={
         <p>
           <KuiCode>KuiSideNav</KuiCode> is a responsive menu system that usually sits on the left side of a page layout.
-          It will exapand to the width of its container.
+          It will exapand to the width of its container. This is the menu that is used on the left side of the
+          page you are looking at.
         </p>
       }
       demo={
@@ -56,9 +57,9 @@ export default props => (
       text={
         <p>
           <KuiCode>SideNav</KuiCode> can pass an <KuiCode>alternateStyle</KuiCode> prop
-          that gives it more contextial styling when included within a <Link to="/page">Panel</Link>.
-          Note that in mobile mode it drops itself down to the original styling and still works
-          responsively.
+          that gives it more contextial styling when included within a <Link to="/page">Panel</Link> (like
+          this documentation page). Note that in mobile mode it drops itself down to the original styling
+          and still works responsively.
         </p>
      }
       demo={
