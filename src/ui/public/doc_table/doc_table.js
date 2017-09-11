@@ -110,8 +110,7 @@ uiModules.get('kibana')
           if ($scope.searchSource) $scope.searchSource.destroy();
         });
 
-        // TODO: we need to have some way to clean up result requests
-        $scope.searchSource.onResults().then(function onResults(resp) {
+        function onResults(resp) {
           // Reset infinite scroll limit
           $scope.limit = 50;
 
@@ -129,7 +128,17 @@ uiModules.get('kibana')
           calculateItemsOnPage();
 
           return $scope.searchSource.onResults().then(onResults);
-        }).catch(notify.error);
+        };
+
+        function startSearching() {
+          $scope.searchSource.onResults()
+            .then(onResults)
+            .catch(error => {
+              notify.error(error);
+              startSearching();
+            });
+        }
+        startSearching();
       }));
 
       $scope.pageOfItems = [];
