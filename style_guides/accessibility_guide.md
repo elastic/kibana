@@ -125,7 +125,7 @@ If you need a label only for screen readers use `aria-label`.
 
 ### Use `<button>` and `<a href>`
 
-**TL;DR** *Use `<button>` and `<a>` (with `href`) instead of click listeners on other elements
+**TL;DR** *Use `<button>` or `<a>` (with `href`) instead of click listeners on other elements
 and style it whatever way you need.*
 
 If you want to make an element clickable, use a `<button>` or `<a href>` element for it.
