@@ -38,7 +38,7 @@ export const fetchedIndices = createAction('FETCHED_INDICES',
 );
 
 export const fetchIndices = createThunk('FETCH_INDICES',
-  async ({ dispatch }, pattern) => {
+  async ({ dispatch }, pattern, initialFetch = false) => {
     let partialPattern = pattern;
     if (!endsWith(partialPattern, '*')) {
       partialPattern = `${partialPattern}*`;
@@ -50,7 +50,7 @@ export const fetchIndices = createThunk('FETCH_INDICES',
     const exactIndices = await getIndices(pattern);
     const partialIndices = await getIndices(partialPattern);
     const indices = uniq(exactIndices.concat(partialIndices), item => item.name);
-    const hasExactMatches = exactIndices.length > 0;
+    const hasExactMatches = !initialFetch && exactIndices.length > 0;
     dispatch(fetchedIndices(indices, pattern, hasExactMatches));
 
     if (hasExactMatches) {
@@ -64,8 +64,7 @@ export const createIndexPattern = createThunk('CREATE_INDEX_PATTERN',
     const state = getState();
     const pattern = getPattern(state);
     const timeFieldName = getSelectedTimeField(state);
-    console.log(pattern, timeFieldName);
-    return;
+
     dispatch(creatingIndexPattern);
     const indexPattern = await indexPatterns.get();
     Object.assign(indexPattern, {
@@ -83,7 +82,7 @@ export const createIndexPattern = createThunk('CREATE_INDEX_PATTERN',
 
     indexPatterns.cache.clear(createdId);
     dispatch(createdIndexPattern);
-    kbnUrl.change(`/management/kibana/indices/${createdId}`);
+    kbnUrl.change(`/management/kibana/indices`);
   }
 );
 

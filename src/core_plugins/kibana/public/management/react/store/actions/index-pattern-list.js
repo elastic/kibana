@@ -1,7 +1,7 @@
 import { createAction } from 'redux-actions';
 import { createThunk } from 'redux-thunks';
 import { SavedObjectsClient } from 'ui/saved_objects';
-import { $http } from '../../globals';
+import { $http, config } from '../../globals';
 
 export const fetchIndexPatterns = createThunk('FETCH_INDEX_PATTERNS',
   async ({ dispatch }) => {
@@ -12,7 +12,14 @@ export const fetchIndexPatterns = createThunk('FETCH_INDEX_PATTERNS',
       perPage: 10000
     });
 
-    const patterns = indexPatterns.savedObjects;
+    const defaultIndexPattern = config.get('defaultIndex');
+    const patterns = indexPatterns.savedObjects.map(so => ({
+      ...so,
+      isDefault: defaultIndexPattern === so.id,
+      // indices: Math.round(Math.random() * 100 + 1),
+      // fields: Math.round(Math.random() * 100 + 1),
+      // creator: 'Chris Roberson',
+    }));
     dispatch(fetchedIndexPatterns(patterns));
   }
 );

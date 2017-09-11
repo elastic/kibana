@@ -5,6 +5,7 @@ import {
   KuiFlexGroup,
   KuiFlexItem,
   KuiText,
+  KuiSelect,
   KuiTable,
   KuiTableRow,
   KuiTableRowCell,
@@ -12,6 +13,8 @@ import {
   KuiTableBody,
   KuiTableHeader,
   KuiButtonEmpty,
+  KuiHorizontalRule,
+  KuiPagination,
 } from 'ui_framework/components';
 
 const IndexPatternResults = ({
@@ -22,8 +25,8 @@ const IndexPatternResults = ({
   sortBy,
   sortAsc,
   changeSort,
-  goToPreviousPage,
-  goToNextPage,
+  goToPage,
+  changePerPage,
 }) => {
   if (items === undefined) {
     return null;
@@ -99,33 +102,35 @@ const IndexPatternResults = ({
           {indexRows}
         </KuiTableBody>
       </KuiTable>
-      {numOfPages > 1
-        ?
-          <div className="kuiVerticalRhythm">
-            <KuiText>
-              <span>
-                {page}
-                &nbsp;
-                of
-                &nbsp;
-                {numOfPages}
-                &nbsp;
-                &nbsp;
-              </span>
-            </KuiText>
-            <KuiIcon
-              type="arrowLeft"
-              size="medium"
-              onClick={goToPreviousPage}
-            />
-            <KuiIcon
-              type="arrowRight"
-              size="medium"
-              onClick={goToNextPage}
-            />
-          </div>
-        : null
-      }
+      <KuiHorizontalRule />
+      <KuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <KuiFlexItem grow={false}>
+          <KuiText size="small">
+            Rows per page:
+          </KuiText>
+          <KuiSelect
+            value={perPage}
+            onChange={(e) => changePerPage(e.target.value)}
+            options={[
+              { value: 1, text: 1 },
+              { value: 10, text: 10 },
+              { value: 20, text: 20 },
+              { value: 50, text: 50 },
+            ]}
+          />
+        </KuiFlexItem>
+        {numOfPages > 1
+          ?
+            <KuiFlexItem grow={false}>
+              <KuiPagination
+                pageCount={numOfPages}
+                activePage={page}
+                onPageClick={goToPage}
+              />
+            </KuiFlexItem>
+          : null
+        }
+      </KuiFlexGroup>
     </KuiFlexItem>
   );
 };

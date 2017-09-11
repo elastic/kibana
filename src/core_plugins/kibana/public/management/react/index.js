@@ -13,12 +13,21 @@ import App from './app/index';
 import IndexPatternRedirect from './index-pattern';
 import {
   IndexPatternCreate,
-  IndexPatternList
+  IndexPatternList,
+  IndexPatternView,
  } from './index-pattern';
 
  import {
    fetchIndexPatterns,
  } from './store/actions/index-pattern-list';
+
+ import {
+   fetchIndices,
+ } from './store/actions/index-pattern-creation';
+
+ import {
+   fetchIndexPattern,
+ } from './store/actions/index-pattern-view';
 
 const initialState = {};
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
@@ -49,14 +58,22 @@ const ReactApp = {
     globals.indexPatterns = $injector.get('indexPatterns');
     globals.config = $injector.get('config');
     globals.kbnUrl = $injector.get('kbnUrl');
+    globals.$rootScope = $injector.get('$rootScope');
     globals.$http = $injector.get('$http');
   },
 
-  renderIndexPatternCreate: targetId => renderPage(<IndexPatternCreate/>, targetId),
+  renderIndexPatternCreate: targetId => {
+    store.dispatch(fetchIndices('*', true));
+    renderPage(<IndexPatternCreate/>, targetId);
+  },
   renderIndexPatternList: targetId => {
     store.dispatch(fetchIndexPatterns());
     renderPage(<IndexPatternList/>, targetId);
   },
+  renderIndexPatternView: (targetId, pattern) => {
+    store.dispatch(fetchIndexPattern(pattern));
+    renderPage(<IndexPatternView/>, targetId);
+  }
 };
 
 export default ReactApp;

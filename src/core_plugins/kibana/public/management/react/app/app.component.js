@@ -1,6 +1,4 @@
 import React, { Component } from 'react';
-/* eslint-disable */
-import { Link } from 'react-router';
 import {
   KuiPage,
   KuiPageBody,
@@ -15,6 +13,7 @@ import {
   KuiSideNav,
   KuiSideNavItem,
   KuiSideNavTitle,
+  KuiLink,
 } from 'ui_framework/components';
 
 class SideBar extends Component {
@@ -42,9 +41,9 @@ class SideBar extends Component {
         const url = item.url ? item.url.substring(1) : null;
         return (
           <KuiSideNavItem key={idx}>
-            <Link to={url}>
+            <KuiLink href={`#${url}`}>
               {item.display}
-            </Link>
+            </KuiLink>
           </KuiSideNavItem>
         );
       });

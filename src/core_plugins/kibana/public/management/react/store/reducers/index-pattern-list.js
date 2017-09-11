@@ -31,4 +31,4 @@ export default handleActions({
   }
 }, defaultState);
 
-export const getIndexPatterns = state => getIndexPatternList(state).indexPatterns;
+export const getIndexPatterns = state => getIndexPatternList(state).items;

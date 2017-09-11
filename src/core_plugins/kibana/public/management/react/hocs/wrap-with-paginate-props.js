@@ -19,26 +19,16 @@ const PaginateWrap = (props) => {
 
   const numOfPages = Math.ceil(items.length / perPage);
   const pages = chunk(items, perPage);
-  const paginatedItems = pages[page - 1];
+  const paginatedItems = pages[page] || [];
+
+  console.log('PaginateWrap more', pages, perPage, page);
 
   return cloneElement(children, {
     ...props,
     items: paginatedItems,
     numOfPages,
-    goToPreviousPage: () => {
-      let previousPage = page - 1;
-      previousPage = previousPage < 1
-        ? numOfPages
-        : previousPage;
-      change(transientId, { page: previousPage });
-    },
-    goToNextPage: () => {
-      let nextPage = page + 1;
-      nextPage = nextPage > pages
-        ? 1
-        : nextPage;
-      change(transientId, { page: nextPage });
-    }
+    goToPage: page => change(transientId, { page }),
+    changePerPage: perPage => change(transientId, { perPage, page: 0 }),
   });
 };
 

@@ -65,6 +65,17 @@ uiRoutes
   }
 });
 
+uiRoutes
+.when('/management/kibana/indices/:id', {
+  template: `<div id="${managementAppId}"></div>`,
+  controller: ($injector) => {
+    const route = $injector.get('$route');
+    const indexPatternId = route.current.params.id;
+    ReactApp.init($injector, management);
+    ReactApp.renderIndexPatternView(managementAppId, indexPatternId);
+  }
+});
+
 // require('ui/index_patterns/route_setup/load_default')({
 //   whenMissingRedirectTo: '/management/kibana/index'
 // });

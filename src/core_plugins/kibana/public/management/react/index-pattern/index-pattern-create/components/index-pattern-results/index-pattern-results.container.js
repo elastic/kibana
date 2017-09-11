@@ -38,5 +38,5 @@ export default compose(
     id: 'creation_results'
   }),
   wrapWithSortProps(),
-  wrapWithPaginateProps({ perPage: 10, page: 1 }),
+  wrapWithPaginateProps({ perPage: 10, page: 0 }),
 )(IndexPatternResults);

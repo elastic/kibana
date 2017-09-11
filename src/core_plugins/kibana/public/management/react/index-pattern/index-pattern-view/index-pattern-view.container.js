@@ -1,8 +1,7 @@
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { compose } from 'recompose';
-// import { TableHoC } from 'plugins/kibana/management/react/hocs/table';
-import IndexPatternList from './index-pattern-list.component';
+import IndexPatternView from './index-pattern-view.component';
 
 import {
   connectToTransientStore,
@@ -12,21 +11,19 @@ import {
 } from 'plugins/kibana/management/react/hocs';
 
 import {
-  fetchIndexPatterns,
   setTransientTableId,
 }  from 'plugins/kibana/management/react/store/actions/index-pattern-list';
 
 import {
-  getIndexPatternList,
+  getIndexPatternView,
 } from 'plugins/kibana/management/react/reducers';
 
 export default compose(
   connect(
-    state => ({ ...getIndexPatternList(state) }),
-    { fetchIndexPatterns }
+    state => ({ ...getIndexPatternView(state) }),
   ),
-  connectToTransientStore({ refSetter: setTransientTableId }),
-  wrapWithFilterProps({ filterKey: 'attributes.title' }),
-  wrapWithSortProps(),
-  wrapWithPaginateProps({ perPage: 1, page: 0 }),
-)(IndexPatternList);
+  // connectToTransientStore({ refSetter: setTransientTableId }),
+  // wrapWithFilterProps({ filterKey: 'attributes.title' }),
+  // wrapWithSortProps(),
+  // wrapWithPaginateProps({ perPage: 1, page: 1 }),
+)(IndexPatternView);

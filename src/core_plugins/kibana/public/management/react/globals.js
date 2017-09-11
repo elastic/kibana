@@ -5,4 +5,5 @@ export default {
   config: undefined,
   kbnUrl: undefined,
   $http: undefined,
+  $rootScope: undefined,
 };
