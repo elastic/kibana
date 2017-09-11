@@ -63,9 +63,18 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
             position: 'nw',
             labelBoxBorderColor: 'rgb(255,255,255,0)',
             labelFormatter: function (label, series) {
-              return '<span class="ngLegendValue" kbn-accessible-click ng-click="toggleSeries(' + series._id + ')">' +
-                label +
-                '<span class="ngLegendValueNumber"></span></span>';
+              const labelSpan = document.createElement('span');
+              labelSpan.setAttribute('class', 'ngLegendValue');
+              labelSpan.setAttribute('kbn-accessible-click', '');
+              labelSpan.setAttribute('ng-click', 'toggleSeries(' + series._id + ')');
+              labelSpan.appendChild(document.createTextNode(label));
+
+              const numberSpan = document.createElement('span');
+              numberSpan.setAttribute('class', 'ngLegendValueNumber');
+
+              labelSpan.appendChild(numberSpan);
+
+              return labelSpan.innerHTML;
             }
           },
           colors: ['#01A4A4', '#C66', '#D0D102', '#616161', '#00A1CB', '#32742C', '#F18D05', '#113F8C', '#61AE24', '#D70060']
