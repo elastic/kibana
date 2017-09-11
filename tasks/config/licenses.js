@@ -15,6 +15,7 @@ module.exports = function (grunt) {
         'BSD-3-Clause',
         'BSD-3-Clause AND MIT',
         'BSD-3-Clause OR MIT',
+        'BSD 3-Clause',
         'CC-BY',
         'Apache',
         'Apache*',
