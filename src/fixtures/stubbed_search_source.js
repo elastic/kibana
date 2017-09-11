@@ -35,7 +35,6 @@ export default function stubSearchSource(Private, $q, Promise) {
     getOnResultsCount: function () {
       return onResultsCount;
     },
-    onError: function () { return $q.defer().promise; },
     _flatten: function () {
       return Promise.resolve({ index: indexPattern, body: {} });
     }
