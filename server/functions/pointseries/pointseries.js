@@ -3,7 +3,7 @@ import moment from 'moment';
 import { groupBy, zipObject, uniqBy, omit, pickBy, find, uniq, map, mapValues } from 'lodash';
 import Fn from '../../../common/functions/fn.js';
 import { findInObject } from '../../../common/lib/find_in_object';
-import { getMathjsScope } from '../../../common/functions/math/get_mathjs_scope';
+import { pivotObjectArray } from '../../../common/lib/pivot_object_array.js';
 
 function isColumnReference(mathExpression) {
   const parsedMath = math.parse(mathExpression);
@@ -77,7 +77,7 @@ export default new Fn({
     // The way the function below is written you can add as many arbitrary named args as you want.
   },
   fn: (context, args) => {
-    const mathScope = getMathjsScope(context);
+    const mathScope = pivotObjectArray(context.rows, context.columns);
     const dimensionNames = Object.keys(pickBy(args, val => !isMeasure(mathScope, val))).filter(arg => args[arg] != null);
     const measureNames = Object.keys(pickBy(args, val => isMeasure(mathScope, val)));
     const columns = mapValues(args, arg => {
@@ -130,7 +130,7 @@ export default new Fn({
     // Then compute that 1 value for each measure
     Object.values(measureKeys).forEach(rows => {
       const subtable = { type: 'datatable', columns: context.columns, rows: rows };
-      const subScope = getMathjsScope(subtable);
+      const subScope = pivotObjectArray(subtable.rows, subtable.columns);
       const measureValues = measureNames.map(measure => {
         try {
           return math.eval(args[measure], subScope);

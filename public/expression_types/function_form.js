@@ -54,7 +54,8 @@ export class FunctionForm extends BaseForm {
     // skip arguments that aren't defined in the expression type schema
     if (!arg || arg.required || skipRender) return null;
 
-    const newArgValue = fromExpression(arg.defaultValue) || { type: 'string', value: '' };
+    // TODO: This won't always be a string just because it doesn't have a default
+    const newArgValue = fromExpression(arg.defaultValue) || [''];
 
     return (!argValues || arg.multi) && (
       <ArgAdd key={`${props.typeInstance.name}-${arg.name}-add`}

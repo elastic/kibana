@@ -27,7 +27,7 @@ const template = ({ typeInstance, onValueChange, argValue }) => {
 
 template.propTypes = {
   onValueChange: PropTypes.func.isRequired,
-  argValue: PropTypes.object.isRequired,
+  argValue: PropTypes.any.isRequired,
   typeInstance: PropTypes.object,
 };
 

@@ -10,11 +10,11 @@ const formatLabel = (label) => `Style: ${label}`;
 
 const wrappedTemplate = lifecycle({
   componentWillMount() {
-    const label = get(this.props.argValue, 'chain.0.arguments.label.0.value', '');
+    const label = get(this.props.argValue, 'chain.0.arguments.label.0', '');
     if (label) this.props.setLabel(formatLabel(label));
   },
   componentWillReceiveProps(newProps) {
-    const newLabel = get(newProps.argValue, 'chain.0.arguments.label.0.value', '');
+    const newLabel = get(newProps.argValue, 'chain.0.arguments.label.0', '');
     if (newLabel && this.props.label !== formatLabel(newLabel)) {
       this.props.setLabel(formatLabel(newLabel));
     }
@@ -22,7 +22,7 @@ const wrappedTemplate = lifecycle({
 })(extendedTemplate);
 
 wrappedTemplate.propTypes = {
-  argValue: PropTypes.object.isRequired,
+  argValue: PropTypes.any.isRequired,
   setLabel: PropTypes.func.isRequired,
   label: PropTypes.string,
 };

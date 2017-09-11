@@ -23,10 +23,7 @@ const template = ({ typeInstance, onAssetAdd, onValueChange, setLoading, isLoadi
           type: 'function',
           function: 'asset',
           arguments: {
-            _: [{
-              type: 'string',
-              value: assetId,
-            }],
+            _: [assetId],
           },
         }],
       });

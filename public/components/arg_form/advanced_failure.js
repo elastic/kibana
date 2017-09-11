@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { compose, withProps } from 'recompose';
 import { Button, FormGroup, FormControl } from 'react-bootstrap';
 import { statefulProp } from '../../lib/stateful_component';
-import { toExpressionAst, toExpressionString, fromExpressionString } from '../../lib/map_arg_value';
 
 export const AdvancedFailureComponent = (props) => {
   const {
@@ -18,7 +17,7 @@ export const AdvancedFailureComponent = (props) => {
     ev.preventDefault();
 
     resetErrorState(); // when setting a new value, attempt to reset the error state
-    return onValueChange(fromExpressionString(argExpression.trim()));
+    return onValueChange(argExpression.trim());
   };
 
   const confirmReset = (ev) => {
@@ -26,8 +25,7 @@ export const AdvancedFailureComponent = (props) => {
 
     resetErrorState(); // when setting a new value, attempt to reset the error state
     // TODO: fix this! Super hacky... we try the default as an expression first, and then fall back to a string
-    const newArgValue = fromExpressionString(defaultValue, 'expression');
-    onValueChange(newArgValue);
+    onValueChange(defaultValue);
   };
 
   return (
@@ -63,11 +61,11 @@ AdvancedFailureComponent.propTypes = {
 
 export const AdvancedFailure = compose(
   withProps(({ argValue }) => ({
-    argExpression: toExpressionString(toExpressionAst(argValue)),
+    argExpression: argValue,
   })),
   statefulProp('argExpression', 'updateArgExpression')
 )(AdvancedFailureComponent);
 
 AdvancedFailure.propTypes = {
-  argValue: PropTypes.object.isRequired,
+  argValue: PropTypes.any.isRequired,
 };

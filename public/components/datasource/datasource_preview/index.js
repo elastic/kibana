@@ -16,12 +16,7 @@ export const DatasourcePreview = compose(
             type: 'function',
             function: 'size',
             arguments: {
-              _: [
-                {
-                  type: 'number',
-                  value: 10,
-                },
-              ],
+              _: [10],
             },
           },
           this.props.function,

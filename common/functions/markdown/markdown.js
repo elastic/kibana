@@ -1,5 +1,5 @@
 import Markdown from 'markdown-it';
-import Handlebars from 'handlebars/dist/handlebars';
+import { Handlebars } from '../../lib/handlebars.js';
 import Fn from '../fn.js';
 
 const md = new Markdown();

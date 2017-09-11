@@ -10,10 +10,7 @@ const template = ({ args, updateArgs }) => {
   const updateBucket = ({ target }) => {
     updateArgs && updateArgs({
       ...args,
-      bucket: [{
-        type: 'string',
-        value: target.value,
-      }],
+      bucket: [target],
     });
   };
 
@@ -24,7 +21,7 @@ const template = ({ args, updateArgs }) => {
         <FormControl
           componentClass="select"
           placeholder="select"
-          value={get(args, 'bucket.0.value')}
+          value={get(args, 'bucket.0')}
           onChange={updateBucket}
         >
           <option value="second">Seconds</option>

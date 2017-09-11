@@ -32,17 +32,14 @@ component.propTypes = {
 const template = compose(
   withProps(({ onValueChange, typeInstance, argValue }) => ({
     confirm: get(typeInstance, 'options.confirm'),
-    commit: (value) => onValueChange({
-      type: 'string',
-      value,
-    }),
-    value: argValue.value,
+    commit: onValueChange,
+    value: argValue,
   })),
   statefulProp('value'),
 )(component);
 
 template.propTypes = {
-  argValue: PropTypes.object.isRequired,
+  argValue: PropTypes.any.isRequired,
   onValueChange: PropTypes.func.isRequired,
   typeInstance: PropTypes.object.isRequired,
 };

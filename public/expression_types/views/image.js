@@ -15,7 +15,7 @@ export const image = () => new View('image', {
       argType: 'imageUpload',
       resolve({ args }) {
         const wrap = (val) => ({ dataurl: val });
-        const dataurl = get(args, 'dataurl.0.value', null);
+        const dataurl = get(args, 'dataurl.0', null);
 
         if (dataurl && isValid(dataurl)) return wrap(dataurl);
         return wrap(elasticLogo);
