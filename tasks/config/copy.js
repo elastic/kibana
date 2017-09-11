@@ -20,10 +20,10 @@ module.exports = function () {
         'ui_framework/dist/**',
         'ui_framework/src/**',
         'webpackShims/**',
-        'config/kibana.yml',
+        'config/kibana.yml'
       ],
       dest: 'build/kibana',
       expand: true
-    },
+    }
   };
 };
