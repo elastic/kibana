@@ -13,7 +13,7 @@ export default new Fn({
   type: 'datatable',
   help: 'Product pricing data in a variety of intervals',
   context: {
-    types: ['query'],
+    types: ['filter'],
   },
   args: {
     bucket: {

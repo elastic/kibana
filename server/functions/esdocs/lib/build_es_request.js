@@ -13,8 +13,7 @@ export function buildESRequest(esRequest, canvasQuery) {
 
   if (canvasQuery.and) {
     canvasQuery.and.forEach(clause => {
-      if (clause.type !== 'filter') throw new Error('Only filter type clauses are supported right now');
-      addFilter(esRequest.body.query.bool.must, clause.value);
+      addFilter(esRequest.body.query.bool.must, clause);
     });
   }
 

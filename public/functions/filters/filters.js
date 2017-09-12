@@ -3,11 +3,11 @@ import { getState } from '../../state/store';
 import { getGlobalFilterExpression } from '../../state/selectors/workpad';
 import { fromExpression } from '../../../common/lib/ast';
 import { interpretAst } from '../../lib/interpreter';
-import query from '../../../common/types/query';
+import filter from '../../../common/types/filter';
 
 export default new Fn({
   name: 'filters',
-  type: 'query',
+  type: 'filter',
   help: 'Collect the workpad filters, usually to provide them to a data source',
   fn: () => {
     const filterExpression = getGlobalFilterExpression(getState());
@@ -16,7 +16,7 @@ export default new Fn({
       const filterAST = fromExpression(filterExpression);
       return interpretAst(filterAST);
     } else {
-      return query.from(null);
+      return filter.from(null);
     }
 
   },

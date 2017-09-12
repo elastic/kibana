@@ -24,14 +24,17 @@
 
 .btn-primary {
   background-color: @blue;
+  color: @trueWhite;
 }
 
 .btn-success {
   background-color: @aqua;
+  color: @trueWhite;
 }
 
 .btn-warning {
   background-color: @orange;
+  color: @trueWhite;
 }
 
 .btn-danger {
@@ -70,4 +73,12 @@
 
 .muted {
   color: @textSecondary;
+}
+
+.popover {
+  max-width: 2000px !important; // React-Bootstrap popovers are hardcoded to 276px;
+}
+
+.input-invalid {
+  border-bottom: 2px solid @red !important;
 }

@@ -10,7 +10,7 @@ export default new Fn({
   type: 'datatable',
   help: 'Project CI times with usernames and country',
   context: {
-    types: ['query'],
+    types: ['filter'],
   },
   args: {},
   fn: (context) => {

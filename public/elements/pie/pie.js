@@ -7,7 +7,7 @@ export default new Element('pie', {
   displayName: 'Pie chart',
   description: 'An customizable element for making pie charts from your data',
   image: header,
-  expression: 'demodata | pointseries x="time" y="sum(price)" color="state" | pie | render',
+  expression: 'filters | demodata | pointseries x="time" y="sum(price)" color="state" | pie | render',
   render(domNode, config, handlers) {
     config.options.legend.labelBoxBorderColor = 'transparent';
 
@@ -17,7 +17,11 @@ export default new Element('pie', {
 
       try {
         if (!plot) {
-          plot = $.plot($(domNode), config.data, config.options);
+          if (!config.data || !config.data.length) {
+            $(domNode).empty();
+          } else {
+            plot = $.plot($(domNode), config.data, config.options);
+          }
         } else {
           plot.resize();
           plot.draw();

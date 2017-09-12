@@ -1,11 +1,11 @@
 import Type from '../type';
 
 export default new Type({
-  name: 'query',
+  name: 'filter',
   from: {
     null: () => {
       return {
-        type: 'query',
+        type: 'filter',
         // Any meta data you wish to pass along.
         meta: {},
         // Row limiting
@@ -17,5 +17,11 @@ export default new Type({
       };
     },
   },
-  to: {},
+  to: {
+    render: (value) => ({
+      type: 'render',
+      as: 'debug',
+      value,
+    }),
+  },
 });

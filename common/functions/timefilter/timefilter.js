@@ -4,15 +4,16 @@ import dateMath from '@elastic/datemath';
 export default new Fn({
   name: 'timefilter',
   aliases: [],
-  type: 'query',
+  type: 'filter',
   context: {
-    types: ['query'],
+    types: ['filter'],
   },
   help: 'Create a timefilter for querying a source',
   args: {
     column: {
       type: ['string'],
       aliases: ['field', 'c'],
+      default: '@timestamp',
       help: 'The column or field to attach the filter to',
     },
     from: {
@@ -33,13 +34,10 @@ export default new Fn({
   fn: (context, args) => {
     const { from, to, column } = args;
     const filter = {
-      type: 'filter',
-      value: {
-        type: 'time',
-        from: null,
-        to: null,
-        column,
-      },
+      type: 'time',
+      from: null,
+      to: null,
+      column,
     };
 
     function parseAndValidate(str) {
@@ -50,11 +48,11 @@ export default new Fn({
     }
 
     if (to != null) {
-      filter.value.to = parseAndValidate(to);
+      filter.to = parseAndValidate(to);
     }
 
     if (from != null) {
-      filter.value.from = parseAndValidate(from);
+      filter.from = parseAndValidate(from);
     }
 
     context.and.push(filter);

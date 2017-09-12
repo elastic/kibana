@@ -8,6 +8,12 @@
 import * as filters from './filters';
 
 export function addFilter(boolArray, filter) {
+  console.log(filter);
   if (!filters[filter.type]) throw new Error (`Unknown filter type: ${filter.type}`);
-  boolArray.push(filters[filter.type](filter));
+
+  try {
+    boolArray.push(filters[filter.type](filter));
+  } catch(e) {
+    //nothing
+  }
 }

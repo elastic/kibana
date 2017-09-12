@@ -8,7 +8,8 @@ import { FormControl } from 'react-bootstrap';
 export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
   search = lowerCase(search);
   const elementList = map(elements, (val, name) => {
-    const whenClicked = () => onClick(val.expression);
+    const { expression, filter } = val;
+    const whenClicked = () => onClick({ expression, filter });
     const { description, image, displayName } = val;
     const card = (
       <MediaCard key={name} image={image} title={displayName} onClick={whenClicked}>

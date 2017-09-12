@@ -4,7 +4,7 @@ import number from './number';
 import string from './string';
 import dataurl from './dataurl';
 import image from './image';
-import query from './query';
+import filter from './filter';
 import render from './render';
 
 export const typeSpecs = [
@@ -14,6 +14,6 @@ export const typeSpecs = [
   string,
   dataurl,
   image,
-  query,
+  filter,
   render,
 ];

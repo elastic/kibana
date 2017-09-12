@@ -6,6 +6,7 @@ import { palette } from './palette';
 import { select } from './select';
 import { seriesStyle } from './series_style';
 import { textarea } from './textarea';
+import { string } from './string';
 
 export default [
   containerStyle,
@@ -14,6 +15,7 @@ export default [
   imageUpload,
   palette,
   select,
+  string,
   seriesStyle,
   textarea,
 ];
