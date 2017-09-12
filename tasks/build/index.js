@@ -9,7 +9,6 @@ module.exports = function (grunt) {
       'copy:devSource',
       'clean:devSourceForTestbed',
       'babel:build',
-      '_build:babelOptions',
       '_build:plugins',
       '_build:data',
       '_build:verifyTranslations',

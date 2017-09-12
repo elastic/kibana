@@ -1,2 +1,2 @@
-require('../src/optimize/babel/register');
+require('../src/babel-register');
 require('../test/scripts/run_mocha');

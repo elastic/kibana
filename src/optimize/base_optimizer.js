@@ -10,7 +10,6 @@ import UglifyJsPlugin from 'webpack/lib/optimize/UglifyJsPlugin';
 import { defaults, transform } from 'lodash';
 
 import { fromRoot } from '../utils';
-import babelOptions from './babel/options';
 import pkg from '../../package.json';
 import { setLoaderQueryParam, makeLoaderString } from './loaders';
 
@@ -133,7 +132,11 @@ export default class BaseOptimizer {
             test: /\.js$/,
             exclude: babelExclude.concat(this.env.noParse),
             loader: 'babel-loader',
-            query: babelOptions.webpack
+            query: {
+              presets: [
+                require.resolve('../babel-preset/webpack')
+              ]
+            }
           },
         ],
         postLoaders: this.env.postLoaders || [],

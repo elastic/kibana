@@ -1,2 +1,2 @@
-require('../optimize/babel/register');
+require('../babel-register');
 require('./cli');
