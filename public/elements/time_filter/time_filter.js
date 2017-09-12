@@ -10,7 +10,7 @@ export default new Element('time_filter', {
   displayName: 'Time Filter',
   description: 'Set a time window',
   image: header,
-  expression: 'timefilterControl column=@timestamp | render as=time_filter',
+  expression: 'timefilterControl compact=true column=@timestamp | render as=time_filter',
   filter: 'timefilter column=@timestamp from=now-6M to=now-2M',
   render(domNode, config, handlers) {
     const ast = fromExpression(handlers.getFilter());
@@ -24,7 +24,7 @@ export default new Element('time_filter', {
       handlers.setFilter(toExpression(ast));
     }
 
-    ReactDOM.render((<TimeFilter commit={handlers.setFilter} filter={toExpression(ast)}/>), domNode);
+    ReactDOM.render((<TimeFilter compact={config.compact} commit={handlers.setFilter} filter={toExpression(ast)}/>), domNode);
     handlers.done();
   },
 });
