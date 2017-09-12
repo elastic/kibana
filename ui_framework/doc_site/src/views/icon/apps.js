@@ -2,7 +2,11 @@ import React from 'react';
 
 import {
   KuiIcon,
+  KuiFlexGrid,
+  KuiFlexItemPanel,
+  KuiText,
 } from '../../../../components';
+
 const iconTypes = [
   'dashboardApp',
   'devToolsApp',
@@ -14,17 +18,19 @@ const iconTypes = [
 ];
 
 export default () => (
-  <div>
+  <KuiFlexGrid columns={4}>
     {
       iconTypes.map(iconType => (
-        <span key={iconType}>
+        <KuiFlexItemPanel className="guideDemo__icon" key={iconType}>
           <KuiIcon
             type={iconType}
-            size="xLarge"
+            size="large"
           />
-          &nbsp;
-        </span>
+          <KuiText size="small">
+            <p>{iconType}</p>
+          </KuiText>
+        </KuiFlexItemPanel>
       ))
     }
-  </div>
+  </KuiFlexGrid>
 );

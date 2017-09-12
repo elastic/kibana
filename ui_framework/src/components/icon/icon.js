@@ -11,24 +11,51 @@ import '!!svg-sprite!./assets/app_ml.svg';
 import '!!svg-sprite!./assets/app_timelion.svg';
 import '!!svg-sprite!./assets/app_visualize.svg';
 import '!!svg-sprite!./assets/apps.svg';
-import '!!svg-sprite!./assets/logo.svg';
-import '!!svg-sprite!./assets/logo_slack.svg';
-import '!!svg-sprite!./assets/logo_gmail.svg';
-import '!!svg-sprite!./assets/logo_webhook.svg';
-import '!!svg-sprite!./assets/search.svg';
-import '!!svg-sprite!./assets/user.svg';
-import '!!svg-sprite!./assets/help.svg';
-import '!!svg-sprite!./assets/cross.svg';
-import '!!svg-sprite!./assets/check.svg';
-import '!!svg-sprite!./assets/lock.svg';
-import '!!svg-sprite!./assets/arrow_up.svg';
 import '!!svg-sprite!./assets/arrow_down.svg';
 import '!!svg-sprite!./assets/arrow_left.svg';
 import '!!svg-sprite!./assets/arrow_right.svg';
-import '!!svg-sprite!./assets/sort_up.svg';
-import '!!svg-sprite!./assets/sort_down.svg';
+import '!!svg-sprite!./assets/arrow_up.svg';
+import '!!svg-sprite!./assets/bolt.svg';
+import '!!svg-sprite!./assets/boxes_horizontal.svg';
+import '!!svg-sprite!./assets/boxes_vertical.svg';
+import '!!svg-sprite!./assets/brush.svg';
+import '!!svg-sprite!./assets/bullseye.svg';
+import '!!svg-sprite!./assets/check.svg';
+import '!!svg-sprite!./assets/clock.svg';
+import '!!svg-sprite!./assets/console.svg';
+import '!!svg-sprite!./assets/controls_horizontal.svg';
+import '!!svg-sprite!./assets/controls_vertical.svg';
+import '!!svg-sprite!./assets/cross.svg';
+import '!!svg-sprite!./assets/document.svg';
+import '!!svg-sprite!./assets/dot.svg';
 import '!!svg-sprite!./assets/full_screen.svg';
+import '!!svg-sprite!./assets/gear.svg';
+import '!!svg-sprite!./assets/grid.svg';
+import '!!svg-sprite!./assets/help.svg';
+import '!!svg-sprite!./assets/link.svg';
+import '!!svg-sprite!./assets/list_add.svg';
 import '!!svg-sprite!./assets/list.svg';
+import '!!svg-sprite!./assets/lock.svg';
+import '!!svg-sprite!./assets/logo_beats.svg';
+import '!!svg-sprite!./assets/logo_cloud.svg';
+import '!!svg-sprite!./assets/logo_elastic_stack.svg';
+import '!!svg-sprite!./assets/logo_gmail.svg';
+import '!!svg-sprite!./assets/logo_logstash.svg';
+import '!!svg-sprite!./assets/logo_slack.svg';
+import '!!svg-sprite!./assets/logo_webhook.svg';
+import '!!svg-sprite!./assets/logo_xpack.svg';
+import '!!svg-sprite!./assets/logo.svg';
+import '!!svg-sprite!./assets/map_marker.svg';
+import '!!svg-sprite!./assets/pencil.svg';
+import '!!svg-sprite!./assets/plus_in_circle.svg';
+import '!!svg-sprite!./assets/search.svg';
+import '!!svg-sprite!./assets/share.svg';
+import '!!svg-sprite!./assets/sort_down.svg';
+import '!!svg-sprite!./assets/sort_up.svg';
+import '!!svg-sprite!./assets/star_empty.svg';
+import '!!svg-sprite!./assets/tear.svg';
+import '!!svg-sprite!./assets/trash.svg';
+import '!!svg-sprite!./assets/user.svg';
 
 const humanizeCamelCase = str => (
   // Put spaces between words in camel-cased strings.
@@ -36,37 +63,65 @@ const humanizeCamelCase = str => (
 );
 
 const typeToIconMap = {
-  dashboardApp: 'app_dashboard',
-  devToolsApp: 'app_devtools',
-  discoverApp: 'app_discover',
-  graphApp: 'app_graph',
-  machineLearningApp: 'app_ml',
-  timelionApp: 'app_timelion',
-  visualizeApp: 'app_visualize',
   apps: 'apps',
-  kibanaLogo: 'logo',
-  logoSlack: 'logo_slack',
-  logoWebhook: 'logo_webhook',
-  logoGmail: 'logo_gmail',
-  search: 'search',
-  user: 'user',
-  help: 'help',
-  cross: 'cross',
-  check: 'check',
-  lock: 'lock',
-  arrowUp: 'arrow_up',
   arrowDown: 'arrow_down',
   arrowLeft: 'arrow_left',
   arrowRight: 'arrow_right',
-  sortUp: 'sort_up',
-  sortDown: 'sort_down',
+  arrowUp: 'arrow_up',
+  bolt: 'bolt',
+  boxesHorizontal: 'boxes_horizontal',
+  boxesVertical: 'boxes_vertical',
+  brush: 'brush',
+  bullseye: 'bullseye',
+  check: 'check',
+  clock: 'clock',
+  console: 'console',
+  controlsHorizontal: 'controls_horizontal',
+  controlsVertical: 'controls_vertical',
+  cross: 'cross',
+  dashboardApp: 'app_dashboard',
+  devToolsApp: 'app_devtools',
+  discoverApp: 'app_discover',
+  document: 'document',
+  dot: 'dot',
   fullScreen: 'full_screen',
+  gear: 'gear',
+  graphApp: 'app_graph',
+  grid: 'grid',
+  help: 'help',
+  link: 'link',
   list: 'list',
+  listAdd: 'list_add',
+  lock: 'lock',
+  logoBeats: 'logo_beats',
+  logoCloud: 'logo_cloud',
+  logoElasticStack: 'logo_elastic_stack',
+  logoGmail: 'logo_gmail',
+  logoKibana: 'logo',
+  logoLogstash: 'logo_logstash',
+  logoSlack: 'logo_slack',
+  logoWebhook: 'logo_webhook',
+  logoXpack: 'logo_xpack',
+  machineLearningApp: 'app_ml',
+  mapMarker: 'map_marker',
+  pencil: 'pencil',
+  plusInCircle: 'plus_in_circle',
+  search: 'search',
+  share: 'share',
+  sortDown: 'sort_down',
+  sortUp: 'sort_up',
+  starEmpty: 'star_empty',
+  tear: 'tear',
+  timelionApp: 'app_timelion',
+  trash: 'trash',
+  user: 'user',
+  visualizeApp: 'app_visualize',
 };
 
 export const TYPES = Object.keys(typeToIconMap);
 
 const sizeToClassNameMap = {
+  original: '',
   medium: 'kuiIcon--medium',
   large: 'kuiIcon--large',
   xLarge: 'kuiIcon--xLarge',
@@ -109,4 +164,5 @@ KuiIcon.propTypes = {
 
 KuiIcon.defaultProps = {
   className: 'kuiIcon--basic',
+  size: 'medium',
 };

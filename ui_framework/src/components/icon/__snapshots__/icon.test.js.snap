@@ -223,7 +223,7 @@ exports[`KuiIcon renders type help 1`] = `
 </svg>
 `;
 
-exports[`KuiIcon renders type kibanaLogo 1`] = `
+exports[`KuiIcon renders type logoKibana 1`] = `
 <svg
   class="kuiIcon kuiIcon--basic"
 >

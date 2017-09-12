@@ -25,7 +25,7 @@ export const KuiLoadingKibana = ({ children, size, className, ...rest }) => {
       {...rest}
     >
       <div className="kuiLoadingKibana__icon">
-        <KuiIcon type="kibanaLogo" size={size} />
+        <KuiIcon type="logoKibana" size={size} />
       </div>
       {children}
     </div>
