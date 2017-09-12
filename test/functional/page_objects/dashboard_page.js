@@ -32,6 +32,13 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async clickEditVisualization() {
       log.debug('clickEditVisualization');
       await testSubjects.click('dashboardPanelEditLink');
+
+      await retry.try(async () => {
+        const current = await remote.getCurrentUrl();
+        if (current.indexOf('visualize') < 0) {
+          throw new Error('not on visualize page');
+        }
+      });
     }
 
     async clickFullScreenMode() {
