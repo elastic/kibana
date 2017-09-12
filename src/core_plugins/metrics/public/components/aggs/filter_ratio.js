@@ -27,6 +27,7 @@ class FilterRatioAgg extends Component {
     };
 
     const model = { ...defaults, ...this.props.model };
+    const restrictMode = model.metric_agg === 'cardinality' ? 'none' : 'numeric';
 
     return (
       <AggRow
@@ -76,7 +77,7 @@ class FilterRatioAgg extends Component {
         <FieldSelect
           fields={fields}
           type={model.metric_agg}
-          restrict="numeric"
+          restrict={restrictMode}
           indexPattern={indexPattern}
           value={model.field}
           onChange={handleSelectChange('field')}/>
