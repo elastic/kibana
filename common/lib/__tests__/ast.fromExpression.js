@@ -21,6 +21,11 @@ describe('ast fromExpression', () => {
       expect(fromExpression(expression)).to.have.property('chain');
     });
 
+    it('is a value', () => {
+      const expression = '"hello"';
+      expect(fromExpression(expression)).to.equal('hello');
+    });
+
     describe('function without arguments', () => {
       let expression;
       let astObject;

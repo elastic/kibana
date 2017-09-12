@@ -67,7 +67,7 @@ export default new Element('grid', {
   image: header,
   expression: 'filters | demodata | pointseries x="project" y="state" size="median(price)" | grid | render',
   render(domNode, config, handlers) {
-    const { summary, columns, rows } = config;
+    const { mark, summary, columns, rows } = config;
 
     const table = (
       <div style={{ height: '100%', overflow: 'auto' }} className="canvas__element--grid">
@@ -101,7 +101,7 @@ export default new Element('grid', {
                           color: getColor(summary, val),
                         }}
                       >
-                        {val.text == null ? <i className="fa fa-circle"/> : val.text} &nbsp;
+                        {val.text == null ? <i className={`fa fa-${mark}`}/> : val.text} &nbsp;
                       </span>
                     ))}
                   </td>

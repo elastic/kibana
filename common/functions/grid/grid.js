@@ -17,6 +17,11 @@ export default new Fn({
     ],
   },
   args: {
+    mark: {
+      types: ['string', 'null'],
+      help: 'The icon name to use for marks in the grid',
+      default: 'circle',
+    },
     palette: {
       types: ['palette', 'null'],
       help: 'A palette object for describing the colors to use in the grid',
@@ -86,6 +91,7 @@ export default new Fn({
       type: 'render',
       as: 'grid',
       value: {
+        mark: args.mark,
         columns: resultColumns,
         rows: sortBy(resultRows, 'label'),
         summary,

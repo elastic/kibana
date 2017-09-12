@@ -1,14 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { PaletteSwatch } from '../palette_swatch';
 import { Popover, OverlayTrigger } from 'react-bootstrap';
-import './palette_picker.less';
-import { palettes } from '../../../common/lib/palettes';
 import { map } from 'lodash';
-
+import { PaletteSwatch } from '../palette_swatch';
+import { palettes } from '../../../common/lib/palettes';
+import './palette_picker.less';
 
 export const PalettePicker = ({ onChange, value, placement }) => {
-
   const picker = (
     <Popover id="popover-trigger-click">
       <div className="canvas__palette-picker--swatches">

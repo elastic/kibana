@@ -57,7 +57,14 @@ function getExpression(chain) {
 }
 
 export function fromExpression(expression) {
-  if (typeof expression === 'string' && expression.length === 0) return;
+  if (typeof expression === 'string') {
+    if (expression.length === 0) return;
+
+    // handle string values, stripping quotes
+    const matches = expression.match(/^\"(.+)\"$/);
+    if (matches) return matches[1];
+  }
+
   try {
     return parse(expression);
   } catch (e) {

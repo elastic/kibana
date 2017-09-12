@@ -5,6 +5,7 @@ import { imageUpload } from './image_upload';
 import { palette } from './palette';
 import { select } from './select';
 import { seriesStyle } from './series_style';
+import { shape } from './shape';
 import { textarea } from './textarea';
 import { string } from './string';
 
@@ -17,5 +18,6 @@ export default [
   select,
   string,
   seriesStyle,
+  shape,
   textarea,
 ];

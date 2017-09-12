@@ -8,6 +8,11 @@ export const grid = () => new View('grid', {
   description: '',
   modelArgs: ['x', 'y', 'color', 'size', 'text'],
   args: [
+    new Arg('mark', {
+      displayName: 'Mark Shape',
+      argType: 'shape',
+      defaultValue: '"circle"',
+    }),
     new Arg('seriesStyle', {
       displayName: 'Series Style',
       argType: 'seriesStyle',
