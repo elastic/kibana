@@ -108,8 +108,6 @@ export class KibanaMap extends EventEmitter {
     this._leafletMap = L.map(containerNode, leafletOptions);
     this._leafletMap.attributionControl.setPrefix('');
     this._leafletMap.scrollWheelZoom.disable();
-    const worldBounds = L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180));
-    this._leafletMap.setMaxBounds(worldBounds);
 
     let previousZoom = this._leafletMap.getZoom();
     this._leafletMap.on('zoomend', () => {
