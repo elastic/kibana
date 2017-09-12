@@ -1,0 +1,18 @@
+@import (reference) "../../../../style/main";
+
+.canvas__datetime-range-absolute {
+  display: flex;
+
+  > * {
+    border: @borderStyle;
+    border-radius: @borderRadius;
+  }
+
+  > div:not(:last-child) {
+    margin-right: @spacingS;
+  }
+
+  .rdtPicker {
+    border: none;
+  }
+}
