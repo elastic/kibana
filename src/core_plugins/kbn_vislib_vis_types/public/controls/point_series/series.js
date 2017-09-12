@@ -15,15 +15,15 @@ module.directive('vislibSeries', function () {
           show: true,
           mode: last ? last.mode : 'normal',
           type: last ? last.type : 'line',
-          drawLinesBetweenPoints: true,
-          showCircles: true,
-          interpolate: 'linear',
-          lineWidth: 2,
+          drawLinesBetweenPoints: last ? last.drawLinesBetweenPoints : true,
+          showCircles: last ? last.showCircles : true,
+          interpolate: last ? last.interpolate : 'linear',
+          lineWidth: last ? last.lineWidth : 2,
           data: {
             id: id,
             label: label
           },
-          valueAxis: $scope.vis.params.valueAxes[0].id
+          valueAxis: last ? last.valueAxis : $scope.vis.params.valueAxes[0].id
         };
       }
 

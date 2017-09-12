@@ -105,7 +105,7 @@ git checkout name-of-your-branch
 git rebase master
 ```
 
-You want to make sure there are no merge conflicts. If there is are merge conflicts, git will pause the rebase and allow you to fix the conflicts before continuing.
+You want to make sure there are no merge conflicts. If there are merge conflicts, git will pause the rebase and allow you to fix the conflicts before continuing.
 
 You can use `git status` to see which files contain conflicts. They'll be the ones that aren't staged for commit. Open those files, and look for where git has marked the conflicts. Resolve the conflicts so that the changes you want to make to the code have been incorporated in a way that doesn't destroy work that's been done in master. Refer to master's commit history on GitHub if you need to gain a better understanding of how code is conflicting and how best to resolve it.
 
@@ -215,6 +215,7 @@ Editor     | Plugin
 -----------|-------------------------------------------------------------------------------
 Sublime    | [SublimeLinter-eslint](https://github.com/roadhump/SublimeLinter-eslint#installation)
 Atom       | [linter-eslint](https://github.com/AtomLinter/linter-eslint#installation)
+VSCode     | [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
 IntelliJ   | Settings » Languages & Frameworks » JavaScript » Code Quality Tools » ESLint
 `vi`       | [scrooloose/syntastic](https://github.com/scrooloose/syntastic)
 

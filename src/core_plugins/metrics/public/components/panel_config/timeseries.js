@@ -8,6 +8,7 @@ import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import ColorPicker from '../color_picker';
 import YesNo from '../yes_no';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 class TimeseriesPanelConfig extends Component {
 
@@ -32,6 +33,7 @@ class TimeseriesPanelConfig extends Component {
     const { selectedTab } = this.state;
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
+    const htmlId = htmlIdGenerator();
     const positionOptions = [
       { label: 'Right', value: 'right' },
       { label: 'Left', value: 'left' }
@@ -69,23 +71,26 @@ class TimeseriesPanelConfig extends Component {
             onChange={this.props.onChange}
           />
           <div className="vis_editor__vis_config-row">
-            <div className="vis_editor__label">Axis Min</div>
+            <label className="vis_editor__label" htmlFor={htmlId('axisMin')}>Axis Min</label>
             <input
+              id={htmlId('axisMin')}
               className="vis_editor__input-grows"
               type="text"
               onChange={handleTextChange('axis_min')}
               value={model.axis_min}
             />
-            <div className="vis_editor__label">Axis Max</div>
+            <label className="vis_editor__label" htmlFor={htmlId('axisMax')}>Axis Max</label>
             <input
+              id={htmlId('axisMax')}
               className="vis_editor__input-grows"
               type="text"
               onChange={handleTextChange('axis_max')}
               value={model.axis_max}
             />
-            <div className="vis_editor__label">Axis Position</div>
+            <label className="vis_editor__label" htmlFor={htmlId('axisPos')}>Axis Position</label>
             <div className="vis_editor__row_item">
               <Select
+                inputProps={{ id: htmlId('axisPos') }}
                 autosize={false}
                 clearable={false}
                 options={positionOptions}
@@ -107,9 +112,10 @@ class TimeseriesPanelConfig extends Component {
               name="show_legend"
               onChange={this.props.onChange}
             />
-            <div className="vis_editor__label">Legend Position</div>
+            <label className="vis_editor__label" htmlFor={htmlId('legendPos')}>Legend Position</label>
             <div className="vis_editor__row_item">
               <Select
+                inputProps={{ id: htmlId('legendPos') }}
                 clearable={false}
                 options={legendPositionOptions}
                 value={model.legend_position}
@@ -124,8 +130,9 @@ class TimeseriesPanelConfig extends Component {
             />
           </div>
           <div className="vis_editor__vis_config-row">
-            <div className="vis_editor__label">Panel Filter</div>
+            <label className="vis_editor__label" htmlFor={htmlId('panelFilter')}>Panel Filter</label>
             <input
+              id={htmlId('panelFilter')}
               className="vis_editor__input-grows"
               type="text"
               onChange={handleTextChange('filter')}
@@ -143,25 +150,28 @@ class TimeseriesPanelConfig extends Component {
     }
     return (
       <div>
-        <div className="kbnTabs">
-          <div
+        <div className="kbnTabs" role="tablist">
+          <button
+            role="tab"
+            aria-selected={selectedTab === 'data'}
             className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
             onClick={() => this.switchTab('data')}
-            tabIndex="0"
           >Data
-          </div>
-          <div
+          </button>
+          <button
+            role="tab"
+            aria-selected={selectedTab === 'options'}
             className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
             onClick={() => this.switchTab('options')}
-            tabIndex="0"
           >Panel Options
-          </div>
-          <div
+          </button>
+          <button
+            role="tab"
+            aria-selected={selectedTab === 'annotations'}
             className={`kbnTabs__tab${selectedTab === 'annotations' && '-active' || ''}`}
             onClick={() => this.switchTab('annotations')}
-            tabIndex="0"
           >Annotations
-          </div>
+          </button>
         </div>
         {view}
       </div>

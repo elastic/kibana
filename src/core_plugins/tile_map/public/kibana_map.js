@@ -405,7 +405,7 @@ export class KibanaMap extends EventEmitter {
 
     // When map has not width or height, calculate map dimensions based on parent dimensions
     if (southEastLat === northWestLat || southEastLng === northWestLng) {
-      let parent = this._containerNode.parentElement;
+      let parent = this._containerNode.parentNode;
       while (parent && (parent.clientWidth === 0 || parent.clientHeight === 0)) {
         parent = parent.parentNode;
       }
@@ -663,7 +663,7 @@ export class KibanaMap extends EventEmitter {
       if (!centerFromUIState || centerFromMap.lon !== centerFromUIState[1] || centerFromMap.lat !== centerFromUIState[0]) {
         visualization.uiStateVal('mapCenter', [centerFromMap.lat, centerFromMap.lon]);
       }
-      uiState.set('mapBounds', this.getUntrimmedBounds());
+      visualization.sessionState.mapBounds = this.getUntrimmedBounds();
     }
 
     this.on('dragend', persistMapStateInUiState);

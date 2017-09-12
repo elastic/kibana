@@ -1,12 +1,11 @@
 import { FetchProvider } from '../fetch';
 import { SearchStrategyProvider } from '../fetch/strategy/search';
-import { RequestQueueProvider } from '../_request_queue';
+import { requestQueue } from '../_request_queue';
 import { LooperProvider } from './_looper';
 
 export function SearchLooperProvider(Private, Promise, Notifier, $rootScope) {
   const fetch = Private(FetchProvider);
   const searchStrategy = Private(SearchStrategyProvider);
-  const requestQueue = Private(RequestQueueProvider);
 
   const Looper = Private(LooperProvider);
 

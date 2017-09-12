@@ -6,6 +6,7 @@ import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 export const PercentileRankAgg = props => {
   const { series, panel, fields } = props;
@@ -17,6 +18,7 @@ export const PercentileRankAgg = props => {
   const handleTextChange = createTextHandler(handleChange);
 
   const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
+  const htmlId = htmlIdGenerator();
 
   return (
     <AggRow
@@ -35,8 +37,9 @@ export const PercentileRankAgg = props => {
         />
       </div>
       <div className="vis_editor__row_item">
-        <div className="vis_editor__label">Field</div>
+        <label className="vis_editor__label" htmlFor={htmlId('field')}>Field</label>
         <FieldSelect
+          id={htmlId('field')}
           fields={fields}
           type={model.type}
           restrict="numeric"
@@ -46,8 +49,9 @@ export const PercentileRankAgg = props => {
         />
       </div>
       <div className="vis_editor__percentile_rank_value">
-        <div className="vis_editor__label">Value</div>
+        <label className="vis_editor__label" htmlFor={htmlId('value')}>Value</label>
         <input
+          id={htmlId('value')}
           className="vis_editor__input-grows"
           value={model.value}
           onChange={handleTextChange('value')}

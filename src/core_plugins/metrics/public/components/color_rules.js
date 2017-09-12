@@ -5,6 +5,7 @@ import AddDeleteButtons from './add_delete_buttons';
 import Select from 'react-select';
 import * as collectionActions from './lib/collection_actions';
 import ColorPicker from './color_picker';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 class ColorRules extends Component {
 
@@ -39,6 +40,7 @@ class ColorRules extends Component {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       handleChange(_.assign({}, model, part));
     };
+    const htmlId = htmlIdGenerator(model.id);
     let secondary;
     if (!this.props.hideSecondary) {
       secondary = (
@@ -61,15 +63,19 @@ class ColorRules extends Component {
           value={model[this.props.primaryVarName]}
         />
         { secondary }
-        <div className="color_rules__label">if metric is</div>
+        <label className="color_rules__label" htmlFor={htmlId('ifMetricIs')}>
+          if metric is
+        </label>
         <div className="color_rules__item">
           <Select
+            inputProps={{ id: htmlId('ifMetricIs') }}
             onChange={this.handleChange(model, 'opperator')}
             value={model.opperator}
             options={operatorOptions}
           />
         </div>
         <input
+          aria-label="Value"
           className="color_rules__input"
           type="number"
           value={model.value}

@@ -232,6 +232,20 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+    describe('filter editor', function () {
+      it('should add a phrases filter', async function () {
+        await filterBar.addFilter('extension.raw', 'is one of', 'jpg');
+        expect(await filterBar.hasFilter('extension.raw', 'jpg')).to.be(true);
+      });
+
+      it('should show the phrases if you re-open a phrases filter', async function () {
+        await filterBar.clickEditFilter('extension.raw', 'jpg');
+        const phrases = await filterBar.getFilterEditorPhrases();
+        expect(phrases.length).to.be(1);
+        expect(phrases[0]).to.be('jpg');
+      });
+    });
+
     describe('query language switching', function () {
 
       after(async function () {

@@ -9,6 +9,7 @@ import ColorRules from '../color_rules';
 import ColorPicker from '../color_picker';
 import uuid from 'uuid';
 import YesNo from 'plugins/metrics/components/yes_no';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 class GaugePanelConfig extends Component {
 
@@ -50,6 +51,7 @@ class GaugePanelConfig extends Component {
       { label: 'Circle', value: 'circle' },
       { label: 'Half Circle', value: 'half' }
     ];
+    const htmlId = htmlIdGenerator();
     let view;
     if (selectedTab === 'data') {
       view = (
@@ -71,8 +73,11 @@ class GaugePanelConfig extends Component {
             onChange={this.props.onChange}
           />
           <div className="vis_editor__vis_config-row">
-            <div className="vis_editor__label">Panel Filter</div>
+            <label className="vis_editor__label" htmlFor={htmlId('panelFilter')}>
+              Panel Filter
+            </label>
             <input
+              id={htmlId('panelFilter')}
               className="vis_editor__input-grows"
               type="text"
               onChange={handleTextChange('filter')}
@@ -92,15 +97,21 @@ class GaugePanelConfig extends Component {
               name="background_color"
               value={model.background_color}
             />
-            <div className="vis_editor__label">Gauge Max (empty for auto)</div>
+            <label className="vis_editor__label" htmlFor={htmlId('gaugeMax')}>
+              Gauge Max (empty for auto)
+            </label>
             <input
+              id={htmlId('gaugeMax')}
               className="vis_editor__input-grows"
               type="number"
               onChange={handleTextChange('gauge_max')}
               value={model.gauge_max}
             />
-            <div className="vis_editor__label">Gauge Style</div>
+            <label className="vis_editor__label" htmlFor={htmlId('gaugeStyle')}>
+              Gauge Style
+            </label>
             <Select
+              inputProps={{ id: htmlId('gaugeStyle') }}
               autosize={false}
               clearable={false}
               options={styleOptions}
@@ -116,15 +127,21 @@ class GaugePanelConfig extends Component {
               name="gauge_inner_color"
               value={model.gauge_inner_color}
             />
-            <div className="vis_editor__label">Inner Line Width</div>
+            <label className="vis_editor__label" htmlFor={htmlId('innerLine')}>
+              Inner Line Width
+            </label>
             <input
+              id={htmlId('innerLine')}
               className="vis_editor__input-grows"
               type="number"
               onChange={handleTextChange('gauge_inner_width')}
               value={model.gauge_inner_width}
             />
-            <div className="vis_editor__label">Gauge Line Width</div>
+            <label className="vis_editor__label" htmlFor={htmlId('gaugeLine')}>
+              Gauge Line Width
+            </label>
             <input
+              id={htmlId('gaugeLine')}
               className="vis_editor__input-grows"
               type="number"
               onChange={handleTextChange('gauge_width')}
@@ -150,17 +167,21 @@ class GaugePanelConfig extends Component {
     }
     return (
       <div>
-        <div className="kbnTabs">
-          <div
+        <div className="kbnTabs" role="tablist">
+          <button
+            role="tab"
+            aria-selected={selectedTab === 'data'}
             className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
             onClick={() => this.switchTab('data')}
           >Data
-          </div>
-          <div
+          </button>
+          <button
+            role="tab"
+            aria-selected={selectedTab === 'options'}
             className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
             onClick={() => this.switchTab('options')}
           >Panel Options
-          </div>
+          </button>
         </div>
         {view}
       </div>

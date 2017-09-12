@@ -8,11 +8,10 @@
 import _ from 'lodash';
 
 import { VersionConflict, RequestFailure } from 'ui/errors';
-import { RequestQueueProvider } from 'ui/courier/_request_queue';
+import { requestQueue } from 'ui/courier/_request_queue';
 import { FetchProvider } from 'ui/courier/fetch/fetch';
 
 export function DocSendToEsProvider(Promise, Private, es) {
-  const requestQueue = Private(RequestQueueProvider);
   const courierFetch = Private(FetchProvider);
 
   /**

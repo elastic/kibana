@@ -3,16 +3,14 @@ import angular from 'angular';
 
 import 'ui/promises';
 
-import { RequestQueueProvider } from '../_request_queue';
-import { ErrorHandlersProvider } from '../_error_handlers';
+import { requestQueue } from '../_request_queue';
+import { errorHandlersQueue } from '../_error_handlers';
 import { FetchProvider } from '../fetch';
 import { FieldWildcardProvider } from '../../field_wildcard';
 import { getHighlightRequest } from '../../../../core_plugins/kibana/common/highlight';
 import { BuildESQueryProvider } from './build_query';
 
 export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, config) {
-  const requestQueue = Private(RequestQueueProvider);
-  const errorHandlers = Private(ErrorHandlersProvider);
   const courierFetch = Private(FetchProvider);
   const buildESQuery = Private(BuildESQueryProvider);
   const { fieldWildcardFilter } = Private(FieldWildcardProvider);
@@ -160,7 +158,7 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
       const defer = Promise.defer();
       defer.promise.then(resolve, reject);
 
-      errorHandlers.push({
+      errorHandlersQueue.push({
         source: self,
         defer: defer
       });
