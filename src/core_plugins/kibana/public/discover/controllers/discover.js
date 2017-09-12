@@ -710,11 +710,11 @@ function discoverController(
     if (stateVal && !stateValFound) {
       const err = '"' + stateVal + '" is not a configured pattern ID. ';
       if (own) {
-        notify.warning(err + ' Using the saved index pattern: "' + own.id + '"');
+        notify.warning(`${err} Using the saved index pattern: "${own.title}" (${own.id})`);
         return own;
       }
 
-      notify.warning(err + ' Using the default index pattern: "' + loaded.id + '"');
+      notify.warning(`${err} Using the default index pattern: "${loaded.title}" (${loaded.id})`);
     }
     return loaded;
   }
