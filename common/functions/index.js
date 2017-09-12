@@ -3,7 +3,6 @@ import containerStyle from './containerStyle/containerStyle';
 import droprows from './droprows/droprows';
 import grid from './grid/grid';
 import image from './image/image';
-import kuler from './kuler/kuler';
 import mapColumn from './mapColumn/mapColumn';
 import markdown from './markdown/markdown';
 import math from './math/math';
@@ -27,7 +26,6 @@ export const commonFunctions = [
   droprows,
   grid,
   image,
-  kuler,
   mapColumn,
   markdown,
   math,

@@ -1,4 +1,4 @@
-import Fn from '../fn.js';
+import Fn from '../../../common/functions/fn.js';
 import fetch from 'axios';
 import { map } from 'lodash';
 
@@ -12,6 +12,7 @@ export default new Fn({
     _: {
       types: ['string'],
       help: 'ID of palette to fetch, or "random"',
+      default: 'random',
     },
     gradient: {
       types: ['boolean', 'null'],
