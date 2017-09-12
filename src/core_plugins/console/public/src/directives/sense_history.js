@@ -1,3 +1,5 @@
+import { keyCodes } from 'ui_framework/services';
+
 var { memoize } = require('lodash');
 let moment = require('moment');
 
@@ -13,7 +15,8 @@ require('ui/modules')
     controllerAs: 'history',
     controller: function ($scope, $element) {
       this.reqs = history.getHistory();
-      this.selectedReq = this.reqs[0];
+      this.selectedIndex = 0;
+      this.selectedReq = this.reqs[this.selectedIndex];
       this.viewingReq = this.selectedReq;
 
       // calculate the text description of a request
@@ -39,6 +42,25 @@ require('ui/modules')
       this.restore = (req = this.selectedReq) => {
         history.restoreFromHistory(req);
         $scope.kbnTopNav.close();
+      };
+
+      this.onKeyDown = (ev) => {
+        if (ev.keyCode === keyCodes.ENTER) {
+          this.restore();
+          return;
+        }
+
+        if (ev.keyCode === keyCodes.UP) {
+          ev.preventDefault();
+          this.selectedIndex--;
+        } else if (ev.keyCode === keyCodes.DOWN) {
+          ev.preventDefault();
+          this.selectedIndex++;
+        }
+
+        this.selectedIndex = Math.min(Math.max(0, this.selectedIndex), this.reqs.length - 1);
+        this.selectedReq = this.reqs[this.selectedIndex];
+        this.viewingReq = this.reqs[this.selectedIndex];
       };
     }
   };
