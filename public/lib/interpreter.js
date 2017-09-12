@@ -2,6 +2,7 @@ import { socketInterpreterProvider } from '../../common/interpreter/socket_inter
 import { socket } from '../socket';
 import { types } from '../lib/types';
 import { functions } from '../lib/functions';
+import { createHandlers } from './create_handlers';
 
 // Create the function list
 socket.emit('getFunctionList');
@@ -13,6 +14,7 @@ export function interpretAst(ast, context) {
   .then((serverFunctionList) => {
     return socketInterpreterProvider({
       types: types.toJS(),
+      handlers: createHandlers(socket),
       functions: functions.toJS(),
       referableFunctions: serverFunctionList,
       socket: socket,

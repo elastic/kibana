@@ -1,15 +1,8 @@
-import elasticsearch from 'elasticsearch';
 import Fn from '../../../common/functions/fn.js';
 import flattenHit from './lib/flatten_hit';
 import { buildESRequest } from './lib/build_es_request';
 import { keys, map } from 'lodash';
 import { getESFieldTypes } from '../../routes/es_fields/get_es_field_types';
-
-const client = new elasticsearch.Client({
-  host: 'localhost:9200',
-});
-
-
 
 export default new Fn({
   name: 'esdocs',
@@ -40,8 +33,7 @@ export default new Fn({
   },
   type: 'datatable',
   help: 'Query elasticsearch and get back raw documents.',
-  fn: (context, args) => {
-
+  fn: (context, args, handlers) => {
     context.and = context.and
       .concat([{ // q
         type: 'luceneQueryString',
@@ -69,7 +61,7 @@ export default new Fn({
       },
     }, context);
 
-    return client.search(esRequest)
+    return handlers.elasticsearchClient('search', esRequest)
     .then(resp => {
       const flatHits = map(resp.hits.hits, (hit, i) => {
         return Object.assign(flattenHit(hit), { _rowId: i });
