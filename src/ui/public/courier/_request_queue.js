@@ -1,35 +1,36 @@
-export function RequestQueueProvider() {
 
-  /**
-   * Queue of pending requests, requests are removed as
-   * they are processed by fetch.[sourceType]().
-   * @type {Array}
-   */
-  const queue = [];
+/**
+ * Queue of pending requests, requests are removed as
+ * they are processed by fetch.[sourceType]().
+ * @type {Array}
+ */
+export const requestQueue = [];
 
-  queue.getInactive = function (/* strategies */) {
-    return queue.get.apply(queue, arguments)
+requestQueue.clear = function () {
+  requestQueue.splice(0, requestQueue.length);
+};
+
+requestQueue.getInactive = function (/* strategies */) {
+  return requestQueue.get.apply(requestQueue, arguments)
     .filter(function (req) {
       return !req.started;
     });
-  };
+};
 
-  queue.getStartable = function (...strategies) {
-    return queue.get(...strategies).filter(req => req.canStart());
-  };
+requestQueue.getStartable = function (...strategies) {
+  return requestQueue.get(...strategies).filter(req => req.canStart());
+};
 
-  queue.get = function (...strategies) {
-    return queue.filter(function (req) {
-      let strategyMatch = !strategies.length;
-      if (!strategyMatch) {
-        strategyMatch = strategies.some(function (strategy) {
-          return req.strategy === strategy;
-        });
-      }
+requestQueue.get = function (...strategies) {
+  return requestQueue.filter(function (req) {
+    let strategyMatch = !strategies.length;
+    if (!strategyMatch) {
+      strategyMatch = strategies.some(function (strategy) {
+        return req.strategy === strategy;
+      });
+    }
 
-      return strategyMatch;
-    });
-  };
+    return strategyMatch;
+  });
+};
 
-  return queue;
-}

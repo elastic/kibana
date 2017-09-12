@@ -50,6 +50,59 @@ You should always prefer the `<label for>` solution, since it also adds benefit
 for every user, by making the label clickable, to directly jump to the form
 element (or in case of checkboxes and radio buttons directly check them).
 
+#### How to generate ids?
+
+When labeling elements (and for some other accessibility tasks) you will often need
+ids. Ids must be unique within the page i.e. no duplicate ids in the rendered DOM
+at any time.
+
+Since we have some components that are used multiple times on the page, you must
+make sure every instance of that component has a unique `id`. To make the generation
+of those `id`s easier, you can use the `htmlIdGenerator` service in the `ui_framework/services`.
+
+A react component could use it as follows:
+
+```jsx
+import { htmlIdGenerator } from 'ui_framework/services';
+
+render() {
+  // Create a new generator that will create ids deterministic
+  const htmlId = htmlIdGenerator();
+  return (<div>
+    <label htmlFor={htmlId('agg')}>Aggregation</label>
+    <input id={htmlId('agg')}/>
+  </div>);
+}
+```
+
+Each id generator you create by calling `htmlIdGenerator()` will generate unique but
+deterministic ids. As you can see in the above example, that single generator
+created the same id in the label's `htmlFor` as well as the input's `id`.
+
+A single generator instance will create the same id when passed the same argument
+to the function multiple times. But two different generators will produce two different
+ids for the same argument to the function, as you can see in the following example:
+
+```js
+const generatorOne = htmlIdGenerator();
+const generatorTwo = htmlIdGenerator();
+
+// Those statements are always true:
+// Same generator
+generatorOne('foo') === generatorOne('foo');
+generatorOne('foo') !== generatorOne('bar');
+
+// Different generator
+generatorOne('foo') !== generatorTwo('foo')
+```
+
+This allows multiple instances of a single react component to now have different ids.
+If you include the above react component multiple times in the same page,
+each component instance will have a unique id, because each render method will use a different
+id generator.
+
+You can use this service of course also outside of react.
+
 ### Don't use the `title` attribute
 
 **TL;DR** *Don't use the `title` attribute, use tooltips, `aria-label`, etc. instead.*
@@ -72,7 +125,7 @@ If you need a label only for screen readers use `aria-label`.
 
 ### Use `<button>` and `<a href>`
 
-**TL;DR** *Use `<button>` and `<a>` (with `href`) instead of click listeners on other elements
+**TL;DR** *Use `<button>` or `<a>` (with `href`) instead of click listeners on other elements
 and style it whatever way you need.*
 
 If you want to make an element clickable, use a `<button>` or `<a href>` element for it.
