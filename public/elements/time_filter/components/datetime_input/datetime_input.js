@@ -11,7 +11,6 @@ export const DatetimeInput = ({ strValue, setStrValue, setMoment, valid, setVali
       setMoment(parsed);
       setValid(true);
     } else {
-      console.log('Invalid input');
       setValid(false);
     }
     setStrValue(e.target.value);
