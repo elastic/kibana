@@ -2,7 +2,6 @@
 # exit if anything returns failure
 set -e
 
-BUILT_VERSION="5.3.4"
 VERSION="5.3.3"
 
 # return 1 if global command line program installed, else 0
@@ -36,7 +35,7 @@ function run {
   npm run build -- --deb
 
   aws s3 mv s3://files.prominentedge.com/kibana-${VERSION}-SNAPSHOT-amd64.deb s3://files.prominentedge.com/backups/kibana-${VERSION}-SNAPSHOT-amd64.$(date +%Y%m%d-%H%M).deb || true
-  aws s3 cp target/kibana-${BUILT_VERSION}-SNAPSHOT-amd64.deb s3://files.prominentedge.com/kibana-${VERSION}-SNAPSHOT-amd64.deb
+  aws s3 cp target/kibana-${VERSION}-SNAPSHOT-amd64.deb s3://files.prominentedge.com/kibana-${VERSION}-SNAPSHOT-amd64.deb
 }
 
 run

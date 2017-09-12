@@ -1,34 +1,55 @@
-//== StatEngine Theme
+//== NFORSTheme
 
 // Variables =====================================================================
 
-@loadingIndcatorColor1: #00f5c9;
-@loadingIndcatorColor2: #00baed;
+@loadingIndcatorColor1: #f07320;
+@loadingIndcatorColor2: #ffda00;
+
+
+// StatEngine Attribution Block =====================================================================
+.app-wrapper:after {
+  content: '';
+  position: fixed;
+  bottom: 0;
+  right: 11px;
+  padding: 3px 6px;
+  background-color: #eeeeee;
+  color: #333333;
+  background-image: url("~ui/images/powered-by-statengine.png");
+  background-size: 149px 23px;
+  height: 32px;
+  width: 165px;
+  background-repeat: no-repeat;
+  background-position: 11px 4px;
+  border-top-left-radius: 3px;
+  border-top-right-radius: 3px;
+  border: 1px solid #d2d2d2;
+  box-shadow: 0px 1px 12px rgba(0, 0, 0, 0.1);
+}
 
 // Global Nav =====================================================================
 .global-nav {
-  background-color: 155482;
-  background: linear-gradient(180deg, #155482, #113862);
+  background-color: #2a2320;
   &.is-global-nav-open .logo-small.kibana ,
   &.is-global-nav-open .logo.kibana  {
-    background-image: url("~ui/images/statengine-logo.svg");
-    background-position: 22px 19px;
-    background-size: 127px 34px;
+    background-image: url("~ui/images/nfors_logo.svg");
+    background-position: 30px 6px;
+    background-size: 106px 58px;
   }
   .logo-small.kibana,
   .logo.kibana{
-    background-image: url("~ui/images/statengine-logo-symbol.svg");
+    background-image: url("~ui/images/nfors-logo-symbol.svg");
     background-position: -2px 14px;
     background-size: 57px 41px;
     background-repeat: no-repeat;
-    background-color: #022745;
+    background-color: #ffffff;
   }
 }
 .global-nav-link:hover {
-  background-color: rgba(0,0,0,0.2);
+  background-color: rgba(92, 77, 55, 0.37);
 }
 .global-nav-link.active {
-  background-color: #0091a9;
+  background-color: #eaa72a;
 }
 
 // Top Loading Indicator Bar =======================================================
@@ -44,16 +65,16 @@
 // Product Panel =====================================================================
 /* Found under "Managament View" */
 .panel-product .panel-heading-kibana {
-  background-color: #089cb4;
-  background-image: url("~ui/images/statengine-logo-white.svg");
+  background-color: #eaa72a;
+  background-image: url("~ui/images/nfors-logo-text-white.png");
 }
 .panel-product .panel-heading-elasticsearch,
 .panel-product .panel-heading-kibana,
 .panel-product .panel-heading-beats,
 .panel-product .panel-heading-logstash {
-  background-position: 13px 4px;
+  background-position: 14px 8px;
   background-repeat: no-repeat;
-  background-size: 99px 32px;
+  background-size: 100px 24px;
   padding-left: 0;
 }
 .panel-product .panel-heading {
