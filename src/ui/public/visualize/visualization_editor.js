@@ -43,7 +43,9 @@ uiModules
         editor.destroy();
       });
 
-      $timeout(() => { renderFunction(); });
+      if (!vis.initialized) {
+        $timeout(() => { renderFunction(); });
+      }
     }
   };
 });
