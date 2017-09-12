@@ -1,29 +1,26 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import PrettyDuration from '../../../../components/pretty_duration';
-//import { fromExpression, toExpression } from '../../../../../common/lib/ast';
-//import { set } from 'lodash';
+import { get } from 'lodash';
+import { fromExpression } from '../../../../../common/lib/ast';
+import { TimePicker } from '../time_picker';
 
-/*
-function setFilterArgument(filter, argumentName, value) {
-  return toExpression(
-    set(
-      fromExpression(filter),
-      ['chain', 0, 'arguments', argumentName, 0],
-      { type: 'string', value }
-    )
-  );
-}
-*/
+export const TimeFilter = ({ filter, setFilter }) => {
+  const ast = fromExpression(filter);
 
-export const TimeFilter = ({ filter, /*onChange,*/ commit }) => (
-  <form onSubmit={e => { e.preventDefault(); commit(/*value*/); }} className="canvas__element__advanced_filter">
-    <pre>{filter}</pre>
-  </form>
-);
+  const from = get(ast, 'chain[0].arguments.from[0]');
+  const to = get(ast, 'chain[0].arguments.to[0]');
+  const column = get(ast, 'chain[0].arguments.column[0]');
+
+  function doSetFilter(from, to) {
+
+    setFilter(`timefilter from="${from}" to=${to} column=${column}`);
+  }
+
+  return (<TimePicker from={from} to={to} onSelect={doSetFilter}/>);
+};
 
 TimeFilter.propTypes = {
-  onChange: PropTypes.func,
   filter: PropTypes.string,
-  commit: PropTypes.func,
+  setFilter: PropTypes.func, // Local state
+  commit: PropTypes.func, // Canvas filter
 };

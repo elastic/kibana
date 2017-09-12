@@ -25,7 +25,6 @@ export default new Element('time_filter', {
     }
 
     ReactDOM.render((<TimeFilter commit={handlers.setFilter} filter={toExpression(ast)}/>), domNode);
-    //ReactDOM.render((<TimeFilter commit={handlers.setFilter} filter={handlers.getFilter()}/>), domNode);
     handlers.done();
   },
 });
