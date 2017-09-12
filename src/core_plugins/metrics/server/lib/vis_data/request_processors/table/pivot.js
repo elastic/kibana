@@ -13,15 +13,15 @@ export default function pivot(req, panel) {
     if (panel.pivot_id) {
       set(doc, 'aggs.pivot.terms.field', panel.pivot_id);
       set(doc, 'aggs.pivot.terms.size', panel.pivot_rows);
-      if (sort && sort.column === '_default_') {
-        set(doc, 'aggs.pivot.terms.order', { _term: sort.order });
-      } else if (sort) {
+      if (sort) {
         const series = panel.series.find(item => item.id === sort.column);
         const { timeField, interval } = getIntervalAndTimefield(panel, series);
         const { bucketSize } = getBucketSize(req, interval);
         const { to }  = getTimerange(req);
-        const metric = last(series.metrics);
-        if (metric && basicAggs.includes(metric.type)) {
+        const metric = series && last(series.metrics);
+        if (metric && metric.type === 'count') {
+          set(doc, 'aggs.pivot.terms.order', { _count: sort.order });
+        } else if (metric && basicAggs.includes(metric.type)) {
           const sortAggKey = `${metric.id}-SORT`;
           const fn = bucketTransform[metric.type];
           const bucketPath = getBucketsPath(metric.id, series.metrics)
@@ -44,6 +44,7 @@ export default function pivot(req, panel) {
         }
       }
     } else {
+      set(doc, 'aggs.pivot.terms.order', { _term: sort.order });
       set(doc, 'aggs.pivot.filter.match_all', {});
     }
     return next(doc);
