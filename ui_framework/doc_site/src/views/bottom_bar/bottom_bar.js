@@ -38,14 +38,16 @@ export default class extends Component {
       bottomBar = (
         <KuiBottomBar>
           <KuiFlexGroup justifyContent="spaceBetween">
-            <KuiFlexGroup gutterSize="small">
-              <KuiFlexItem>
-                <KuiButton type="ghost" size="small" iconType="help">Help</KuiButton>
-              </KuiFlexItem>
-              <KuiFlexItem>
-                <KuiButton type="ghost" size="small" iconType="user">Add user</KuiButton>
-              </KuiFlexItem>
-            </KuiFlexGroup>
+            <KuiFlexItem grow={false}>
+              <KuiFlexGroup gutterSize="small">
+                <KuiFlexItem>
+                  <KuiButton type="ghost" size="small" iconType="help">Help</KuiButton>
+                </KuiFlexItem>
+                <KuiFlexItem>
+                  <KuiButton type="ghost" size="small" iconType="user">Add user</KuiButton>
+                </KuiFlexItem>
+              </KuiFlexGroup>
+            </KuiFlexItem>
             <KuiFlexItem grow={false}>
               <KuiFlexGroup gutterSize="small">
                 <KuiFlexItem>

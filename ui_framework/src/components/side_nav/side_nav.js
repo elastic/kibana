@@ -6,6 +6,7 @@ import { KuiIcon } from '../../components';
 
 export const KuiSideNav = ({
   children,
+  alternateStyle,
   toggleOpenOnMobile,
   isOpenOnMobile,
   mobileTitle,
@@ -17,6 +18,7 @@ export const KuiSideNav = ({
     className,
     {
       'kuiSideNav-isOpenMobile': isOpenOnMobile,
+      'kuiSideNav--alternate': alternateStyle,
     },
   );
 
@@ -55,5 +57,6 @@ export const KuiSideNav = ({
 KuiSideNav.propTypes = {
   toggleOpenOnMobile: PropTypes.func,
   isOpenOnMobile: PropTypes.bool,
+  alternateStyle: PropTypes.bool,
   mobileTitle: PropTypes.string,
 };

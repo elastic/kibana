@@ -168,7 +168,7 @@ export const HomeView = () => (
       </ol>
     </KuiText>
 
-    <KuiHorizontalRule size="large" />
+    <KuiHorizontalRule />
 
     <KuiFlexGroup>
       <KuiFlexItem>
@@ -237,7 +237,7 @@ export const HomeView = () => (
         <KuiText><h3>Element sizes / paddings / margins</h3></KuiText>
         {sizes.map((item, index) => {
           return (
-            <div>
+            <div key={index}>
               <KuiSpacer size="m" />
               <KuiFlexGroup key={index} alignItems="center">
                 <KuiFlexItem grow={false} style={{ width: 40, textAlign: 'right' }}>
