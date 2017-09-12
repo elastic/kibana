@@ -1,0 +1,24 @@
+// Alternate sidenav lives within a Panel, and needs slightly different styling.
+@include screenSmallMediumLarge {
+  .kuiSideNav.kuiSideNav--alternate {
+    border-right: $kuiBorderThin;
+    background: linear-gradient(to left, rgba(0,0,0,.05) 0, $kuiColorEmptyShade $kuiSizeXS / 2, $kuiColorEmptyShade 100%);
+
+    .kuiSideNavItem.kuiSideNavItem-isSelected {
+      position: relative;
+      width: calc(100% + 1px); // Account for overlap of border
+      box-shadow: none;
+      border: $kuiBorderThin;
+      border-right: none;
+      border-radius: $kuiBorderRadius 0 0 $kuiBorderRadius;
+    }
+  }
+}
+
+// Panels already have padding, so we need to remove it for the alternate.
+.kuiSideNav.kuiSideNav--alternate {
+  .kuiSideNav__mobileToggle {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}

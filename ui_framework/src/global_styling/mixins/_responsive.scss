@@ -27,3 +27,9 @@ $breakpoints: ("xSmall": 575px, "small": 768px, "medium": 992px, "large": 1200px
     @content;
   }
 }
+
+@mixin screenSmallMediumLarge {
+  @media only screen and (min-width: map-get($breakpoints, "small")) {
+    @content;
+  }
+}
