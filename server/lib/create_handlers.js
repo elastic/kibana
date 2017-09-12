@@ -5,6 +5,7 @@ export const createHandlers = (socket, server) => {
 
   return {
     environment: 'server',
+    serverUri: server.info.uri,
     elasticsearchClient: partial(callWithRequest, socket.handshake),
   };
 };
