@@ -5,10 +5,10 @@ import { get } from 'lodash';
 import { PalettePicker } from '../../components/palette_picker';
 import { getType } from '../../../common/types/get_type';
 
-const template = ({ onValueChange, argValue }) => {
+const template = ({ onValueChange, argValue, renderError }) => {
   // Why is this neccesary? Does the dialog really need to know what parameter it is setting?
 
-  const throwNotParsed = () => {throw new Error('Could not parse palette function'); };
+  const throwNotParsed = () => renderError();
 
   // TODO: This is weird, its basically a reimplementation of what the interpretter would return.
   // Probably a better way todo this, and maybe a better way to handle template stype objects in general?
@@ -54,6 +54,7 @@ const template = ({ onValueChange, argValue }) => {
 template.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.any.isRequired,
+  renderError: PropTypes.func,
 };
 
 export const palette = () => new ArgType('palette', {
