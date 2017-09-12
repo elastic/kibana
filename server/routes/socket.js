@@ -3,6 +3,7 @@ import socket from 'socket.io';
 import { functions } from '../lib/functions';
 import { socketInterpreterProvider } from '../../common/interpreter/socket_interpret';
 import { types } from '../../common/lib/types';
+import { createHandlers } from '../lib/create_handlers';
 
 export function socketApi(server) {
   const io = socket(server.listener);
@@ -23,6 +24,7 @@ export function socketApi(server) {
         const interpret = socketInterpreterProvider({
           types: types.toJS(),
           functions: functions.toJS(),
+          handlers: createHandlers(socket, server),
           referableFunctions: clientFunctions,
           socket: socket,
         });

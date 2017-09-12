@@ -4,8 +4,7 @@ import { getType } from '../types/get_type';
 
 export function interpretProvider(config) {
   const cast = castProvider(config.types);
-  const functions = config.functions;
-  const onFunctionNotFound = config.onFunctionNotFound;
+  const { functions, onFunctionNotFound, handlers } = config;
 
   return interpret;
 
@@ -62,7 +61,7 @@ export function interpretProvider(config) {
     const fnDef = functions[name];
     const acceptableContext =  cast(context, fnDef.context.types);
 
-    return fnDef.fn(acceptableContext, args).then(output => {
+    return fnDef.fn(acceptableContext, args, handlers).then(output => {
       // Validate that the function returned the type it said it would.
       // This isn't really required, but it keeps function developers honest.
       const returnType = getType(output);

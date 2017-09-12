@@ -13,11 +13,11 @@ import { interpretProvider } from './interpret';
   socket: the socket to communicate over
 */
 
-export function socketInterpreterProvider({ types, functions, referableFunctions, socket }) {
+export function socketInterpreterProvider({ types, functions, handlers, referableFunctions, socket }) {
   // Return the interpet() function
   return interpretProvider({
-    types: types,
-    functions: functions,
+    types, functions, handlers,
+
     onFunctionNotFound: (chain, context) => {
       // Get the name of the function that wasn't found
       const functionName = chain.chain[0].function;
