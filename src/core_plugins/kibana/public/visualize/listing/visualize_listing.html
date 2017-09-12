@@ -14,7 +14,9 @@
   </div>
 </kbn-top-nav>
 
-<div class="kuiViewContent kuiViewContent--constrainedWidth">
+<div class="kuiViewContent kuiViewContent--constrainedWidth"
+     data-test-subj="visualizeLandingPage"
+>
   <div class="kuiViewContentItem kuiVerticalRhythm" ng-if="listingController.showLimitError">
     <div class="kuiInfoPanel kuiInfoPanel--warning">
       <div class="kuiInfoPanelBody">
@@ -32,6 +34,7 @@
         class="kuiToolBarSection"
         filter="listingController.filter"
         on-filter="listingController.onFilter"
+        data-test-subj="visualizationSearchFilter"
       ></tool-bar-search-box>
 
       <div class="kuiToolBarSection">

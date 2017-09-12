@@ -52,7 +52,7 @@ export function GaugeChartProvider(Private) {
             const gauges = self.gauge.drawGauge(g, series, width, height);
 
             if (self.gaugeConfig.type === 'simple') {
-              const bbox = svg.node().children[0].getBBox();
+              const bbox = svg.node().firstChild.getBBox();
               const finalWidth = bbox.width + containerMargin * 2;
               const finalHeight = bbox.height + containerMargin * 2;
               svg
