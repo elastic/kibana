@@ -1,25 +1,25 @@
 import _ from 'lodash';
+import { FilterManager } from './filter_manager.js';
 import { buildPhraseFilter } from 'ui/filter_manager/lib/phrase';
 import { buildPhrasesFilter } from 'ui/filter_manager/lib/phrases';
 
-const emptyValue = '';
+const EMPTY_VALUE = '';
 
-export class PhraseFilterManager {
+export class PhraseFilterManager extends FilterManager {
   constructor(fieldName, indexPattern, queryFilter) {
-    this.fieldName = fieldName;
-    this.indexPattern = indexPattern;
-    this.queryFilter = queryFilter;
+    super(fieldName, indexPattern, queryFilter, EMPTY_VALUE);
   }
 
   /**
    * Convert phrases into filter
    *
-   * @param {array of strings} phrases
+   * @param {string} react-select value (comma-separated string of values)
    * @return {object} query filter
    *   single phrase: match query
    *   multiple phrases: bool query with should containing list of match_phrase queries
    */
-  createFilter(phrases) {
+  createFilter(value) {
+    const phrases = value.split(',');
     if (phrases.length === 1) {
       return buildPhraseFilter(
         this.indexPattern.fields.byName[this.fieldName],
@@ -75,7 +75,7 @@ export class PhraseFilterManager {
   getValueFromFilterBar() {
     const kbnFilters = this.findFilters();
     if (kbnFilters.length === 0) {
-      return emptyValue;
+      return this.getUnsetValue();
     } else {
       const values = kbnFilters
         .map((kbnFilter) => {
@@ -103,19 +103,19 @@ export class PhraseFilterManager {
 
     // scripted field filter
     if (_.has(kbnFilter, 'script')) {
-      return _.get(kbnFilter, 'script.script.params.value', emptyValue);
+      return _.get(kbnFilter, 'script.script.params.value', this.getUnsetValue());
     }
 
     // single phrase filter
     if (_.has(kbnFilter, ['query', 'match', this.fieldName])) {
-      return _.get(kbnFilter, ['query', 'match', this.fieldName, 'query'], emptyValue);
+      return _.get(kbnFilter, ['query', 'match', this.fieldName, 'query'], this.getUnsetValue());
     }
 
     // single phrase filter from bool filter
     if (_.has(kbnFilter, ['match_phrase', this.fieldName])) {
-      return _.get(kbnFilter, ['match_phrase', this.fieldName], emptyValue);
+      return _.get(kbnFilter, ['match_phrase', this.fieldName], this.getUnsetValue());
     }
 
-    return emptyValue;
+    return this.getUnsetValue();
   }
 }

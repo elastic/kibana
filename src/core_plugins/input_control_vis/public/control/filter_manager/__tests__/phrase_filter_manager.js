@@ -26,7 +26,7 @@ describe('PhraseFilterManager', function () {
     });
 
     it('should create match phrase filter from single value', function () {
-      const newFilter = filterManager.createFilter(['ios']);
+      const newFilter = filterManager.createFilter('ios');
       expect(newFilter).to.have.property('meta');
       expect(newFilter.meta.index).to.be(indexPatternId);
       expect(newFilter).to.have.property('query');
@@ -34,7 +34,7 @@ describe('PhraseFilterManager', function () {
     });
 
     it('should create bool filter from multiple values', function () {
-      const newFilter = filterManager.createFilter(['ios','win xp']);
+      const newFilter = filterManager.createFilter('ios,win xp');
       expect(newFilter).to.have.property('meta');
       expect(newFilter.meta.index).to.be(indexPatternId);
       expect(newFilter).to.have.property('query');

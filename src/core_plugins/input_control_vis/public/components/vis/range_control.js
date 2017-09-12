@@ -20,8 +20,8 @@ export class RangeControl extends Component {
     this.setState({ sliderValue: nextProps.control.value });
   }
 
-  handleOnChange(control, value) {
-    this.props.stageFilter(this.props.controlIndex, value, this.props.control.filterManager.createFilter(value));
+  handleOnChange(value) {
+    this.props.stageFilter(this.props.controlIndex, value);
   }
 
   formatLabel(value) {
@@ -46,7 +46,7 @@ export class RangeControl extends Component {
             step={this.props.control.options.step}
             value={this.state.sliderValue}
             onChange={newValue => this.setState({ sliderValue: newValue })}
-            onChangeComplete={this.handleOnChange.bind(null, this.props.control)}
+            onChangeComplete={this.handleOnChange}
             draggableTrack={true}
             ariaLabelledby={this.props.control.id}
             formatLabel={this.formatLabel}

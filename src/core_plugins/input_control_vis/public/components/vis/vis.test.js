@@ -6,11 +6,6 @@ import {
   InputControlVis,
 } from './vis';
 
-const filterManagerMock = {
-  createFilter: (controlValue) => {
-    return `simulated kibana filter, input value:${controlValue}`;
-  }
-};
 const mockListControl = {
   id: 'mock-list-control',
   options: {
@@ -19,7 +14,6 @@ const mockListControl = {
   },
   type: 'list',
   label: 'list control',
-  filterManager: filterManagerMock,
   value: '',
   selectOptions: [
     { label: 'choice1', value: 'choice1' },
@@ -34,13 +28,10 @@ const mockRangeControl = {
   },
   type: 'range',
   label: 'ragne control',
-  filterManager: filterManagerMock,
   value: { min: 0, max: 0 },
   min: 0,
   max: 100
 };
-const getStagedControlsNothingStaged  = () => { return []; };
-const getStagedControlsWithStaged  = () => { return [{ }]; };
 const updateFiltersOnChange = false;
 
 let stageFilter;
@@ -63,7 +54,8 @@ test('Renders list control', () => {
     clearControls={clearControls}
     controls={[mockListControl]}
     updateFiltersOnChange={updateFiltersOnChange}
-    getStagedControls={getStagedControlsWithStaged}
+    hasChanges={() => { return false; }}
+    hasValues={() => { return false; }}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
@@ -76,33 +68,36 @@ test('Renders range control', () => {
     clearControls={clearControls}
     controls={[mockRangeControl]}
     updateFiltersOnChange={updateFiltersOnChange}
-    getStagedControls={getStagedControlsWithStaged}
+    hasChanges={() => { return false; }}
+    hasValues={() => { return false; }}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
-test('Submit and Reset btns disabled when nothing is staged', () => {
+test('Apply and Cancel change btns enabled when there are changes', () => {
   const component = shallow(<InputControlVis
     stageFilter={stageFilter}
     submitFilters={submitFilters}
     resetControls={resetControls}
     clearControls={clearControls}
-    controls={[]}
+    controls={[mockListControl]}
     updateFiltersOnChange={updateFiltersOnChange}
-    getStagedControls={getStagedControlsNothingStaged}
+    hasChanges={() => { return true; }}
+    hasValues={() => { return false; }}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
-test('Submit and Reset btns enabled when filter is staged', () => {
+test('Clear btns enabled when there are values', () => {
   const component = shallow(<InputControlVis
     stageFilter={stageFilter}
     submitFilters={submitFilters}
     resetControls={resetControls}
     clearControls={clearControls}
-    controls={[]}
+    controls={[mockListControl]}
     updateFiltersOnChange={updateFiltersOnChange}
-    getStagedControls={getStagedControlsWithStaged}
+    hasChanges={() => { return false; }}
+    hasValues={() => { return true; }}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
@@ -113,9 +108,10 @@ test('clearControls', () => {
     submitFilters={submitFilters}
     resetControls={resetControls}
     clearControls={clearControls}
-    controls={[]}
+    controls={[mockListControl]}
     updateFiltersOnChange={updateFiltersOnChange}
-    getStagedControls={getStagedControlsNothingStaged}
+    hasChanges={() => { return true; }}
+    hasValues={() => { return true; }}
   />);
   component.find('[data-test-subj="inputControlClearBtn"]').simulate('click');
   sinon.assert.calledOnce(clearControls);
@@ -130,9 +126,10 @@ test('submitFilters', () => {
     submitFilters={submitFilters}
     resetControls={resetControls}
     clearControls={clearControls}
-    controls={[]}
+    controls={[mockListControl]}
     updateFiltersOnChange={updateFiltersOnChange}
-    getStagedControls={getStagedControlsWithStaged}
+    hasChanges={() => { return true; }}
+    hasValues={() => { return true; }}
   />);
   component.find('[data-test-subj="inputControlSubmitBtn"]').simulate('click');
   sinon.assert.calledOnce(submitFilters);
@@ -147,9 +144,10 @@ test('resetControls', () => {
     submitFilters={submitFilters}
     resetControls={resetControls}
     clearControls={clearControls}
-    controls={[]}
+    controls={[mockListControl]}
     updateFiltersOnChange={updateFiltersOnChange}
-    getStagedControls={getStagedControlsWithStaged}
+    hasChanges={() => { return true; }}
+    hasValues={() => { return true; }}
   />);
   component.find('[data-test-subj="inputControlCancelBtn"]').simulate('click');
   sinon.assert.calledOnce(resetControls);
@@ -166,7 +164,8 @@ test('stageFilter list control', () => {
     clearControls={clearControls}
     controls={[mockListControl]}
     updateFiltersOnChange={updateFiltersOnChange}
-    getStagedControls={getStagedControlsWithStaged}
+    hasChanges={() => { return true; }}
+    hasValues={() => { return true; }}
   />);
   const reactSelectInput = component.find(`#${mockListControl.id}`);
   reactSelectInput.simulate('change', { target: { value: 'choice1' } });
@@ -176,10 +175,8 @@ test('stageFilter list control', () => {
   sinon.assert.notCalled(resetControls);
   const expectedControlIndex = 0;
   const expectedControlValue = 'choice1';
-  const expectedKbnFilter = 'simulated kibana filter, input value:choice1';
   sinon.assert.calledWith(stageFilter,
     expectedControlIndex,
-    expectedControlValue,
-    expectedKbnFilter
+    expectedControlValue
   );
 });

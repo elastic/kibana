@@ -4,7 +4,7 @@ import { IndexPatternSelect } from './index_pattern_select';
 import { FieldSelect } from './field_select';
 
 function filterField(field) {
-  return ['number'].includes(field.type);
+  return field.type === 'number';
 }
 
 export function RangeControlEditor(props) {

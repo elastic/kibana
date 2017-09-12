@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { FilterManager } from './filter_manager.js';
 import { buildRangeFilter } from 'ui/filter_manager/lib/range';
 
 // Convert slider value into ES range filter
@@ -27,14 +28,7 @@ function fromRange(range) {
   return sliderValue;
 }
 
-export class RangeFilterManager {
-  constructor(fieldName, indexPattern, queryFilter, emptyValue) {
-    this.fieldName = fieldName;
-    this.indexPattern = indexPattern;
-    this.queryFilter = queryFilter;
-    this.emptyValue = emptyValue;
-  }
-
+export class RangeFilterManager extends FilterManager {
   /**
    * Convert slider value into filter
    *
@@ -67,7 +61,7 @@ export class RangeFilterManager {
   getValueFromFilterBar() {
     const kbnFilters = this.findFilters();
     if (kbnFilters.length === 0) {
-      return this.emptyValue;
+      return this.getUnsetValue();
     } else {
       let range = null;
       if (_.has(kbnFilters[0], 'script')) {

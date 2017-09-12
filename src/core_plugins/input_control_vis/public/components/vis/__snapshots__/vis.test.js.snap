@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Renders list control 1`] = `
+exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
 <div
   className="inputControlVis"
 >
@@ -10,9 +10,6 @@ exports[`Renders list control 1`] = `
     <ListControl
       control={
         Object {
-          "filterManager": Object {
-            "createFilter": [Function],
-          },
           "id": "mock-list-control",
           "label": "list control",
           "options": Object {
@@ -50,7 +47,7 @@ exports[`Renders list control 1`] = `
         onClick={[Function]}
         type="button"
       >
-        Update filters
+        Apply changes
       </KuiButton>
     </KuiFieldGroupSection>
     <KuiFieldGroupSection
@@ -63,7 +60,7 @@ exports[`Renders list control 1`] = `
         onClick={[Function]}
         type="button"
       >
-        Cancel
+        Cancel changes
       </KuiButton>
     </KuiFieldGroupSection>
     <KuiFieldGroupSection
@@ -72,10 +69,171 @@ exports[`Renders list control 1`] = `
       <KuiButton
         buttonType="basic"
         data-test-subj="inputControlClearBtn"
+        disabled={true}
         onClick={[Function]}
         type="button"
       >
-        Clear
+        Clear form
+      </KuiButton>
+    </KuiFieldGroupSection>
+  </KuiFieldGroup>
+</div>
+`;
+
+exports[`Clear btns enabled when there are values 1`] = `
+<div
+  className="inputControlVis"
+>
+  <div
+    data-test-subj="inputControl0"
+  >
+    <ListControl
+      control={
+        Object {
+          "id": "mock-list-control",
+          "label": "list control",
+          "options": Object {
+            "multiselect": true,
+            "type": "terms",
+          },
+          "selectOptions": Array [
+            Object {
+              "label": "choice1",
+              "value": "choice1",
+            },
+            Object {
+              "label": "choice2",
+              "value": "choice2",
+            },
+          ],
+          "type": "list",
+          "value": "",
+        }
+      }
+      controlIndex={0}
+      stageFilter={[Function]}
+    />
+  </div>
+  <KuiFieldGroup
+    isAlignedTop={false}
+  >
+    <KuiFieldGroupSection
+      isWide={false}
+    >
+      <KuiButton
+        buttonType="primary"
+        data-test-subj="inputControlSubmitBtn"
+        disabled={true}
+        onClick={[Function]}
+        type="button"
+      >
+        Apply changes
+      </KuiButton>
+    </KuiFieldGroupSection>
+    <KuiFieldGroupSection
+      isWide={false}
+    >
+      <KuiButton
+        buttonType="basic"
+        data-test-subj="inputControlCancelBtn"
+        disabled={true}
+        onClick={[Function]}
+        type="button"
+      >
+        Cancel changes
+      </KuiButton>
+    </KuiFieldGroupSection>
+    <KuiFieldGroupSection
+      isWide={false}
+    >
+      <KuiButton
+        buttonType="basic"
+        data-test-subj="inputControlClearBtn"
+        disabled={false}
+        onClick={[Function]}
+        type="button"
+      >
+        Clear form
+      </KuiButton>
+    </KuiFieldGroupSection>
+  </KuiFieldGroup>
+</div>
+`;
+
+exports[`Renders list control 1`] = `
+<div
+  className="inputControlVis"
+>
+  <div
+    data-test-subj="inputControl0"
+  >
+    <ListControl
+      control={
+        Object {
+          "id": "mock-list-control",
+          "label": "list control",
+          "options": Object {
+            "multiselect": true,
+            "type": "terms",
+          },
+          "selectOptions": Array [
+            Object {
+              "label": "choice1",
+              "value": "choice1",
+            },
+            Object {
+              "label": "choice2",
+              "value": "choice2",
+            },
+          ],
+          "type": "list",
+          "value": "",
+        }
+      }
+      controlIndex={0}
+      stageFilter={[Function]}
+    />
+  </div>
+  <KuiFieldGroup
+    isAlignedTop={false}
+  >
+    <KuiFieldGroupSection
+      isWide={false}
+    >
+      <KuiButton
+        buttonType="primary"
+        data-test-subj="inputControlSubmitBtn"
+        disabled={true}
+        onClick={[Function]}
+        type="button"
+      >
+        Apply changes
+      </KuiButton>
+    </KuiFieldGroupSection>
+    <KuiFieldGroupSection
+      isWide={false}
+    >
+      <KuiButton
+        buttonType="basic"
+        data-test-subj="inputControlCancelBtn"
+        disabled={true}
+        onClick={[Function]}
+        type="button"
+      >
+        Cancel changes
+      </KuiButton>
+    </KuiFieldGroupSection>
+    <KuiFieldGroupSection
+      isWide={false}
+    >
+      <KuiButton
+        buttonType="basic"
+        data-test-subj="inputControlClearBtn"
+        disabled={true}
+        onClick={[Function]}
+        type="button"
+      >
+        Clear form
       </KuiButton>
     </KuiFieldGroupSection>
   </KuiFieldGroup>
@@ -92,9 +250,6 @@ exports[`Renders range control 1`] = `
     <RangeControl
       control={
         Object {
-          "filterManager": Object {
-            "createFilter": [Function],
-          },
           "id": "mock-range-control",
           "label": "ragne control",
           "max": 100,
@@ -123,60 +278,11 @@ exports[`Renders range control 1`] = `
       <KuiButton
         buttonType="primary"
         data-test-subj="inputControlSubmitBtn"
-        disabled={false}
-        onClick={[Function]}
-        type="button"
-      >
-        Update filters
-      </KuiButton>
-    </KuiFieldGroupSection>
-    <KuiFieldGroupSection
-      isWide={false}
-    >
-      <KuiButton
-        buttonType="basic"
-        data-test-subj="inputControlCancelBtn"
-        disabled={false}
-        onClick={[Function]}
-        type="button"
-      >
-        Cancel
-      </KuiButton>
-    </KuiFieldGroupSection>
-    <KuiFieldGroupSection
-      isWide={false}
-    >
-      <KuiButton
-        buttonType="basic"
-        data-test-subj="inputControlClearBtn"
-        onClick={[Function]}
-        type="button"
-      >
-        Clear
-      </KuiButton>
-    </KuiFieldGroupSection>
-  </KuiFieldGroup>
-</div>
-`;
-
-exports[`Submit and Reset btns disabled when nothing is staged 1`] = `
-<div
-  className="inputControlVis"
->
-  <KuiFieldGroup
-    isAlignedTop={false}
-  >
-    <KuiFieldGroupSection
-      isWide={false}
-    >
-      <KuiButton
-        buttonType="primary"
-        data-test-subj="inputControlSubmitBtn"
         disabled={true}
         onClick={[Function]}
         type="button"
       >
-        Update filters
+        Apply changes
       </KuiButton>
     </KuiFieldGroupSection>
     <KuiFieldGroupSection
@@ -189,7 +295,7 @@ exports[`Submit and Reset btns disabled when nothing is staged 1`] = `
         onClick={[Function]}
         type="button"
       >
-        Cancel
+        Cancel changes
       </KuiButton>
     </KuiFieldGroupSection>
     <KuiFieldGroupSection
@@ -198,59 +304,11 @@ exports[`Submit and Reset btns disabled when nothing is staged 1`] = `
       <KuiButton
         buttonType="basic"
         data-test-subj="inputControlClearBtn"
+        disabled={true}
         onClick={[Function]}
         type="button"
       >
-        Clear
-      </KuiButton>
-    </KuiFieldGroupSection>
-  </KuiFieldGroup>
-</div>
-`;
-
-exports[`Submit and Reset btns enabled when filter is staged 1`] = `
-<div
-  className="inputControlVis"
->
-  <KuiFieldGroup
-    isAlignedTop={false}
-  >
-    <KuiFieldGroupSection
-      isWide={false}
-    >
-      <KuiButton
-        buttonType="primary"
-        data-test-subj="inputControlSubmitBtn"
-        disabled={false}
-        onClick={[Function]}
-        type="button"
-      >
-        Update filters
-      </KuiButton>
-    </KuiFieldGroupSection>
-    <KuiFieldGroupSection
-      isWide={false}
-    >
-      <KuiButton
-        buttonType="basic"
-        data-test-subj="inputControlCancelBtn"
-        disabled={false}
-        onClick={[Function]}
-        type="button"
-      >
-        Cancel
-      </KuiButton>
-    </KuiFieldGroupSection>
-    <KuiFieldGroupSection
-      isWide={false}
-    >
-      <KuiButton
-        buttonType="basic"
-        data-test-subj="inputControlClearBtn"
-        onClick={[Function]}
-        type="button"
-      >
-        Clear
+        Clear form
       </KuiButton>
     </KuiFieldGroupSection>
   </KuiFieldGroup>

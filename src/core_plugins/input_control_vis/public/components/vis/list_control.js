@@ -10,14 +10,12 @@ export class ListControl extends Component {
     this.handleOnChange = this.handleOnChange.bind(this);
   }
 
-  handleOnChange(control, evt) {
+  handleOnChange(evt) {
     let newValue = '';
-    let newFilter = undefined;
     if (evt) {
       newValue = evt;
-      newFilter = this.props.control.filterManager.createFilter(newValue.split(','));
     }
-    this.props.stageFilter(this.props.controlIndex, newValue, newFilter);
+    this.props.stageFilter(this.props.controlIndex, newValue);
   }
 
   render() {
@@ -33,7 +31,7 @@ export class ListControl extends Component {
           simpleValue={true}
           value={this.props.control.value}
           options={this.props.control.selectOptions}
-          onChange={this.handleOnChange.bind(null, this.props.control)}
+          onChange={this.handleOnChange}
           inputProps={{ id: this.props.control.id }}
         />
       </FormRow>

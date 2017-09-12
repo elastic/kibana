@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }) {
           expect(clearButtonExists).to.equal(true);
         });
 
-        it('should stage filter when item selected', async () => {
+        it('should stage filter when item selected but not create filter pill', async () => {
           await PageObjects.visualize.setReactSelect('.list-control-react-select', 'ios');
 
           const dropdownValue = await PageObjects.visualize.getReactSelectValue('.list-control-react-select');
@@ -75,16 +75,24 @@ export default function ({ getService, getPageObjects }) {
           expect(hasValue).to.equal(false);
         });
 
-        it('should remove filters when Clear button is clicked', async () => {
+        it('should clear form when Clear button is clicked but not remove filter pill', async () => {
           await PageObjects.visualize.setReactSelect('.list-control-react-select', 'ios');
           await testSubjects.click('inputControlSubmitBtn');
-          const hasFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
-          expect(hasFilter).to.equal(true);
+          const hasFilterBeforeClearBtnClicked = await filterBar.hasFilter(FIELD_NAME, 'ios');
+          expect(hasFilterBeforeClearBtnClicked).to.equal(true);
 
           await testSubjects.click('inputControlClearBtn');
-          await PageObjects.common.sleep(500); // give time for filters to be removed
-          const hasFilterAfterClear = await filterBar.hasFilter(FIELD_NAME, 'ios');
-          expect(hasFilterAfterClear).to.equal(false);
+          const hasValue = await PageObjects.visualize.doesReactSelectHaveValue('.list-control-react-select');
+          expect(hasValue).to.equal(false);
+
+          const hasFilterAfterClearBtnClicked = await filterBar.hasFilter(FIELD_NAME, 'ios');
+          expect(hasFilterAfterClearBtnClicked).to.equal(true);
+        });
+
+        it('should remove filter pill when cleared form is submitted', async () => {
+          await testSubjects.click('inputControlSubmitBtn');
+          const hasFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
+          expect(hasFilter).to.equal(false);
         });
       });
 

@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { InputControlVis } from './components/vis/vis';
@@ -38,7 +37,8 @@ class VisController {
         submitFilters={this.submitFilters.bind(this)}
         resetControls={this.updateControlsFromKbn.bind(this)}
         clearControls={this.clearControls.bind(this)}
-        getStagedControls={this.getStagedControls.bind(this)}
+        hasChanges={this.hasChanges.bind(this)}
+        hasValues={this.hasValues.bind(this)}
       />,
       this.el);
   }
@@ -56,9 +56,8 @@ class VisController {
     );
   }
 
-  stageFilter(controlIndex, newValue, kbnFilter) {
-    this.controls[controlIndex].value = newValue;
-    this.controls[controlIndex].stagedFilter = kbnFilter;
+  stageFilter(controlIndex, newValue) {
+    this.controls[controlIndex].set(newValue);
     if (this.vis.params.updateFiltersOnChange) {
       // submit filters on each control change
       this.submitFilters();
@@ -68,19 +67,17 @@ class VisController {
     }
   }
 
-  getStagedControls() {
-    return this.controls.filter((control) => {
-      if (_.has(control, 'stagedFilter')) {
-        return true;
-      }
-      return false;
-    });
-  }
-
   submitFilters() {
-    const stagedControls = this.getStagedControls();
-    const newFilters = stagedControls.map((control) => {
-      return control.stagedFilter;
+    const stagedControls = this.controls.filter((control) => {
+      return control.hasChanged();
+    });
+
+    const newFilters = stagedControls
+    .filter((control) => {
+      return control.hasKbnFilter();
+    })
+    .map((control) => {
+      return control.getKbnFilter();
     });
 
     stagedControls.forEach((control) => {
@@ -88,7 +85,6 @@ class VisController {
       control.filterManager.findFilters().forEach((existingFilter) => {
         this.vis.API.queryFilter.removeFilter(existingFilter);
       });
-      delete control.stagedFilter;
     });
 
     this.vis.API.queryFilter.addFilters(newFilters);
@@ -96,18 +92,34 @@ class VisController {
 
   clearControls() {
     this.controls.forEach((control) => {
-      control.filterManager.findFilters().forEach((existingFilter) => {
-        this.vis.API.queryFilter.removeFilter(existingFilter);
-      });
+      control.clear();
     });
+    this.drawVis();
   }
 
   updateControlsFromKbn() {
     this.controls.forEach((control) => {
-      delete control.stagedFilter;
-      control.value = control.filterManager.getValueFromFilterBar();
+      control.reset();
     });
     this.drawVis();
+  }
+
+  hasChanges() {
+    return this.controls.map((control) => {
+      return control.hasChanged();
+    })
+    .reduce((a, b) => {
+      return a || b;
+    });
+  }
+
+  hasValues() {
+    return this.controls.map((control) => {
+      return control.hasValue();
+    })
+    .reduce((a, b) => {
+      return a || b;
+    });
   }
 }
 

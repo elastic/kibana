@@ -62,7 +62,6 @@ export class InputControlVis extends Component {
   }
 
   renderStagingButtons() {
-    const stagedControls = this.props.getStagedControls();
     return (
       <KuiFieldGroup>
         <KuiFieldGroupSection>
@@ -70,10 +69,10 @@ export class InputControlVis extends Component {
             buttonType="primary"
             type="button"
             onClick={this.handleSubmit}
-            disabled={stagedControls.length === 0}
+            disabled={!this.props.hasChanges()}
             data-test-subj="inputControlSubmitBtn"
           >
-            Update filters
+            Apply changes
           </KuiButton>
         </KuiFieldGroupSection>
         <KuiFieldGroupSection>
@@ -81,10 +80,10 @@ export class InputControlVis extends Component {
             buttonType="basic"
             type="button"
             onClick={this.handleReset}
-            disabled={stagedControls.length === 0}
+            disabled={!this.props.hasChanges()}
             data-test-subj="inputControlCancelBtn"
           >
-            Cancel
+            Cancel changes
           </KuiButton>
         </KuiFieldGroupSection>
         <KuiFieldGroupSection>
@@ -92,9 +91,10 @@ export class InputControlVis extends Component {
             buttonType="basic"
             type="button"
             onClick={this.handleClearAll}
+            disabled={!this.props.hasValues()}
             data-test-subj="inputControlClearBtn"
           >
-            Clear
+            Clear form
           </KuiButton>
         </KuiFieldGroupSection>
       </KuiFieldGroup>
@@ -103,7 +103,7 @@ export class InputControlVis extends Component {
 
   render() {
     let stagingButtons;
-    if (!this.props.updateFiltersOnChange) {
+    if (this.props.controls.length > 0 && !this.props.updateFiltersOnChange) {
       stagingButtons = this.renderStagingButtons();
     }
 
@@ -123,5 +123,6 @@ InputControlVis.propTypes = {
   clearControls: PropTypes.func.isRequired,
   controls: PropTypes.array.isRequired,
   updateFiltersOnChange: PropTypes.bool,
-  getStagedControls: PropTypes.func.isRequired
+  hasChanges: PropTypes.func.isRequired,
+  hasValues: PropTypes.func.isRequired
 };

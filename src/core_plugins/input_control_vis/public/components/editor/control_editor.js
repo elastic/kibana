@@ -4,12 +4,8 @@ import React, { Component } from 'react';
 
 export class ControlEditor extends Component {
 
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      isEditorCollapsed: true
-    };
+  state = {
+    isEditorCollapsed: true
   }
 
   handleToggleControlVisibility() {

@@ -13,10 +13,11 @@ function InputControlVisProvider(Private) {
   // return the visType object, which kibana will use to display and configure new Vis object of this type.
   return VisFactory.createBaseVisualization({
     name: 'input_control_vis',
-    title: 'Dashboard Controls',
+    title: 'Controls',
     icon: 'fa fa-gear',
-    description: 'Create interactive controls for easy Dashboard manipulation.',
+    description: 'Create interactive controls for easy dashboard manipulation.',
     category: CATEGORY.OTHER,
+    isExperimental: true,
     visualization: VisController,
     visConfig: {
       defaults: {

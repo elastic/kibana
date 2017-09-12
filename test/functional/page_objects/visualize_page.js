@@ -83,7 +83,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickInputControlVis() {
-      await find.clickByPartialLinkText('Dashboard Controls');
+      await find.clickByPartialLinkText('Controls');
     }
 
     async getChartTypeCount() {
