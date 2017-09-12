@@ -28,6 +28,7 @@ uiModules.get('apps/management')
   Notifier,
   Promise
 ) {
+  const MAX_SEARCH_SIZE = 40;
   const MAX_NUMBER_OF_MATCHING_INDICES = 20;
   const notify = new Notifier();
   const disabledDividerOption = {
@@ -73,7 +74,7 @@ uiModules.get('apps/management')
     });
   }
 
-  function getIndices(pattern, limit = MAX_NUMBER_OF_MATCHING_INDICES) {
+  function getIndices(pattern, limit = MAX_SEARCH_SIZE) {
     const params = {
       index: pattern,
       ignore: [404],
@@ -114,7 +115,11 @@ uiModules.get('apps/management')
     }
 
     // All system indices begin with a period.
-    return indices.filter(index => !index.name.startsWith('.'));
+    const filtered = indices.filter(index => !index.name.startsWith('.'));
+    if (filtered.length > MAX_NUMBER_OF_MATCHING_INDICES) {
+      return filtered.slice(0, MAX_NUMBER_OF_MATCHING_INDICES);
+    }
+    return filtered;
   };
 
   const updateWhiteListedIndices = () => {
@@ -165,7 +170,7 @@ uiModules.get('apps/management')
 
   this.fetchExistingIndices = () => {
     this.isFetchingExistingIndices = true;
-    const allExistingLocalAndRemoteIndicesPattern = '*,*:*';
+    const allExistingLocalAndRemoteIndicesPattern = '*';
 
     Promise.all([
       getIndices(allExistingLocalAndRemoteIndicesPattern),
@@ -178,6 +183,7 @@ uiModules.get('apps/management')
       this.isFetchingExistingIndices = false;
     }).catch(error => {
       notify.error(error);
+      this.isFetchingExistingIndices = false;
     });
   };
 
