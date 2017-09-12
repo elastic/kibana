@@ -17,7 +17,11 @@ export default new Element('pie', {
 
       try {
         if (!plot) {
-          plot = $.plot($(domNode), config.data, config.options);
+          if (!config.data || !config.data.length) {
+            $(domNode).empty();
+          } else {
+            plot = $.plot($(domNode), config.data, config.options);
+          }
         } else {
           plot.resize();
           plot.draw();
