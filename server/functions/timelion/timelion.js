@@ -40,9 +40,10 @@ export default new Fn({
       responseType: 'json',
       headers: {
         'kbn-xsrf': 'lollerpops',
+        ...handlers.httpHeaders,
       },
       data: {
-        sheet: [],
+        sheet: [args.q],
         time: {
           from: 'now-1y',
           to: 'now',
@@ -51,7 +52,8 @@ export default new Fn({
         },
       },
     }).then(resp => {
-      console.log(resp.data);
+
+      console.log(resp.data.sheet[0].list);
       return;
       return {
         type: 'datatable',
