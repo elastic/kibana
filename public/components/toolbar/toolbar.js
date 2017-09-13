@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { Navbar } from '../navbar';
 import { Tray } from './tray';
 import { NavbarButton } from '../navbar_button';
+import { NavbarDivider } from '../navbar_divider';
 import { Expression } from '../expression';
 import { Datasource } from '../datasource';
 import { ElementTypes } from './element_types';
@@ -53,7 +54,7 @@ export const Toolbar = (props) => {
         { selectedPageNumber }
         <NavbarButton onClick={ nextPage }><i className="fa fa-chevron-right"/></NavbarButton>
 
-        <vr/>
+        <NavbarDivider/>
 
         <NavbarButton onClick={() => showHideTray('workpadloader')}><i className="fa fa-file" /> Workpads</NavbarButton>
 
@@ -61,16 +62,20 @@ export const Toolbar = (props) => {
 
         <NavbarButton onClick={ addPage }><i className="fa fa-plus-square" /> Add a page</NavbarButton>
 
+        { !elementIsSelected ? null : (
+          <span>
+            <NavbarButton onClick={() => showHideTray('datasource')}><i className="fa fa-database" /> Datasource</NavbarButton>
+            <NavbarButton onClick={() => showHideTray('expression')}><i className="fa fa-terminal" /> Code</NavbarButton>
 
-        { !elementIsSelected ? null : ([
-          <NavbarButton onClick={() => showHideTray('datasource')}><i className="fa fa-database" /> Datasource</NavbarButton>,
-          <NavbarButton onClick={() => showHideTray('expression')}><i className="fa fa-terminal" /> Code</NavbarButton>,
-          <vr/>,
-          <NavbarButton onClick={ () => elementLayer(Infinity) }><i className="fa fa-arrow-circle-up" /></NavbarButton>,
-          <NavbarButton onClick={ () => elementLayer(1) }><i className="fa fa-arrow-up" /></NavbarButton>,
-          <NavbarButton onClick={ () => elementLayer(-1) }><i className="fa fa-arrow-down" /></NavbarButton>,
-          <NavbarButton onClick={ () => elementLayer(-Infinity) }><i className="fa fa-arrow-circle-down" /></NavbarButton>,
-        ]) }
+            <NavbarDivider/>
+
+            <NavbarButton onClick={ () => elementLayer(Infinity) }><i className="fa fa-arrow-circle-up" /></NavbarButton>
+            <NavbarButton onClick={ () => elementLayer(1) }><i className="fa fa-arrow-up" /></NavbarButton>
+            <NavbarButton onClick={ () => elementLayer(-1) }><i className="fa fa-arrow-down" /></NavbarButton>
+            <NavbarButton onClick={ () => elementLayer(-Infinity) }><i className="fa fa-arrow-circle-down" /></NavbarButton>
+          </span>
+
+        )}
 
       </Navbar>
     </div>
