@@ -6,20 +6,22 @@ import { buildPhrasesFilter } from 'ui/filter_manager/lib/phrases';
 const EMPTY_VALUE = '';
 
 export class PhraseFilterManager extends FilterManager {
-  constructor(fieldName, indexPattern, queryFilter) {
+  constructor(fieldName, indexPattern, queryFilter, delimiter) {
     super(fieldName, indexPattern, queryFilter, EMPTY_VALUE);
+
+    this.delimiter = delimiter;
   }
 
   /**
    * Convert phrases into filter
    *
-   * @param {string} react-select value (comma-separated string of values)
+   * @param {string} react-select value (delimiter-separated string of values)
    * @return {object} query filter
    *   single phrase: match query
    *   multiple phrases: bool query with should containing list of match_phrase queries
    */
   createFilter(value) {
-    const phrases = value.split(',');
+    const phrases = value.split(this.delimiter);
     if (phrases.length === 1) {
       return buildPhraseFilter(
         this.indexPattern.fields.byName[this.fieldName],
@@ -81,7 +83,7 @@ export class PhraseFilterManager extends FilterManager {
         .map((kbnFilter) => {
           return this._getValueFromFilter(kbnFilter);
         });
-      return values.join();
+      return values.join(this.delimiter);
     }
   }
 
@@ -98,7 +100,7 @@ export class PhraseFilterManager extends FilterManager {
         }
         return false;
       })
-      .join();
+      .join(this.delimiter);
     }
 
     // scripted field filter

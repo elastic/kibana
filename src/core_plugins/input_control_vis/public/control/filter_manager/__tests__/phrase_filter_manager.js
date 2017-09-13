@@ -22,7 +22,7 @@ describe('PhraseFilterManager', function () {
     const queryFilterMock = {};
     let filterManager;
     beforeEach(() => {
-      filterManager = new PhraseFilterManager('field1', indexPatternMock, queryFilterMock);
+      filterManager = new PhraseFilterManager('field1', indexPatternMock, queryFilterMock, '|');
     });
 
     it('should create match phrase filter from single value', function () {
@@ -34,7 +34,7 @@ describe('PhraseFilterManager', function () {
     });
 
     it('should create bool filter from multiple values', function () {
-      const newFilter = filterManager.createFilter('ios,win xp');
+      const newFilter = filterManager.createFilter('ios|win xp');
       expect(newFilter).to.have.property('meta');
       expect(newFilter.meta.index).to.be(indexPatternId);
       expect(newFilter).to.have.property('query');
@@ -56,7 +56,7 @@ describe('PhraseFilterManager', function () {
     let filterManager;
     beforeEach(() => {
       kbnFilters = [];
-      filterManager = new PhraseFilterManager('field1', indexPatternMock, queryFilterMock);
+      filterManager = new PhraseFilterManager('field1', indexPatternMock, queryFilterMock, '|');
     });
 
     it('should not find phrase filters for other fields', function () {
@@ -132,8 +132,8 @@ describe('PhraseFilterManager', function () {
     let filterManager;
     beforeEach(() => {
       class MockFindFiltersPhraseFilterManager extends PhraseFilterManager {
-        constructor(fieldName, indexPattern, queryFilter) {
-          super(fieldName, indexPattern, queryFilter);
+        constructor(fieldName, indexPattern, queryFilter, delimiter) {
+          super(fieldName, indexPattern, queryFilter, delimiter);
           this.mockFilters = [];
         }
         findFilters() {
@@ -143,7 +143,7 @@ describe('PhraseFilterManager', function () {
           this.mockFilters = mockFilters;
         }
       }
-      filterManager = new MockFindFiltersPhraseFilterManager('field1', indexPatternMock, queryFilterMock);
+      filterManager = new MockFindFiltersPhraseFilterManager('field1', indexPatternMock, queryFilterMock, '|');
     });
 
     it('should extract value from match phrase filter', function () {
@@ -183,7 +183,7 @@ describe('PhraseFilterManager', function () {
           }
         }
       ]);
-      expect(filterManager.getValueFromFilterBar()).to.be('ios,win xp');
+      expect(filterManager.getValueFromFilterBar()).to.be('ios|win xp');
     });
   });
 

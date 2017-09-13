@@ -2,12 +2,14 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Select from 'react-select';
 import { FormRow } from './form_row';
+import { listControlDelimiter } from '../../control/list_control_factory';
 
 export class ListControl extends Component {
   constructor(props) {
     super(props);
 
     this.handleOnChange = this.handleOnChange.bind(this);
+    this.truncate = this.truncate.bind(this);
   }
 
   handleOnChange(evt) {
@@ -16,6 +18,13 @@ export class ListControl extends Component {
       newValue = evt;
     }
     this.props.stageFilter(this.props.controlIndex, newValue);
+  }
+
+  truncate(selected) {
+    if (selected.label.length <= 24) {
+      return selected.label;
+    }
+    return `${selected.label.substring(0, 23)}...`;
   }
 
   render() {
@@ -29,9 +38,11 @@ export class ListControl extends Component {
           placeholder="Select..."
           multi={this.props.control.options.multiselect}
           simpleValue={true}
+          delimiter={listControlDelimiter}
           value={this.props.control.value}
           options={this.props.control.selectOptions}
           onChange={this.handleOnChange}
+          valueRenderer={this.truncate}
           inputProps={{ id: this.props.control.id }}
         />
       </FormRow>

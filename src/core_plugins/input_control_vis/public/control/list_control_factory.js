@@ -36,6 +36,8 @@ class ListControl extends Control {
   }
 }
 
+export const listControlDelimiter = '$$kbn_delimiter$$';
+
 export async function listControlFactory(controlParams, kbnApi) {
   const indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
   const searchSource = new kbnApi.SearchSource();
@@ -58,9 +60,9 @@ export async function listControlFactory(controlParams, kbnApi) {
 
   return new ListControl(
     controlParams,
-    new PhraseFilterManager(controlParams.fieldName, indexPattern, kbnApi.queryFilter),
+    new PhraseFilterManager(controlParams.fieldName, indexPattern, kbnApi.queryFilter, listControlDelimiter),
     _.get(resp, 'aggregations.termsAgg.buckets', []).map((bucket) => {
-      return { label: bucket.key, value: bucket.key };
+      return { label: bucket.key.toString(), value: bucket.key.toString() };
     })
   );
 }
