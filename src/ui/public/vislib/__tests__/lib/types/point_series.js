@@ -9,7 +9,22 @@ describe('Point Series Config Type Class Test Suite', function () {
   const histogramConfig = {
     type: 'histogram',
     addLegend: true,
-    addTooltip: true,
+    tooltip: {
+      show: true
+    },
+    categoryAxes: [
+      {
+        id: 'CategoryAxis-1',
+        type: 'category',
+        title: {}
+      }
+    ],
+    valueAxes: [{
+      id: 'ValueAxis-1',
+      type: 'value',
+      labels: {},
+      title: {}
+    }]
   };
 
   const heatmapConfig = {
@@ -25,7 +40,7 @@ describe('Point Series Config Type Class Test Suite', function () {
   };
 
   const data = {
-    get: (prop) => { return data[prop] || null; },
+    get: (prop) => { return data[prop] || data.data[prop] ||  null; },
     getLabels: () => [],
     data: {
       hits: 621,
@@ -64,7 +79,8 @@ describe('Point Series Config Type Class Test Suite', function () {
         { label: 's26', values: [{ x: 1408734060000, y: 8 }] }
       ],
       xAxisLabel: 'Date Histogram',
-      yAxisLabel: 'series'
+      yAxisLabel: 'series',
+      yAxisFormatter: () => 'test'
     }
 
   };
@@ -76,10 +92,15 @@ describe('Point Series Config Type Class Test Suite', function () {
 
   describe('histogram chart', function () {
     beforeEach(function () {
-      parsedConfig = pointSeriesConfig.heatmap(histogramConfig, data);
+      parsedConfig = pointSeriesConfig.column(histogramConfig, data);
     });
     it('should not throw an error when more than 25 series are provided', function () {
       expect(parsedConfig.error).to.be.undefined;
+    });
+
+    it('should set axis title and formatter from data', () => {
+      expect(parsedConfig.categoryAxes[0].title.text).to.equal(data.data.xAxisLabel);
+      expect(parsedConfig.valueAxes[0].labels.axisFormatter).to.not.be.undefined;
     });
   });
 
