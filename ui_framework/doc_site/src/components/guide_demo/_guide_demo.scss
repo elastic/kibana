@@ -60,12 +60,9 @@
 }
 
 .guideDemo__icon {
-  border: $kuiBorderThin;
-  border-radius: $kuiBorderRadius;
-  padding: $kuiSizeS;
   text-align: center;
 
   svg {
-    margin-bottom: $kuiSizeXS;
+    margin-bottom: $kuiSizeS;
   }
 }
