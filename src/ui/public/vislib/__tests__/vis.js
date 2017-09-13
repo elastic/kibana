@@ -64,6 +64,18 @@ dataArray.forEach(function (data, i) {
         expect($('.chart').length).to.be(numberOfCharts);
       });
 
+      it('should throw an error if no data is provided', function () {
+        expect(function () {
+          vis.render(null, persistedState);
+        }).to.throwError();
+      });
+
+    });
+
+    describe('getLegendColors method', () => {
+      it ('should return null if no colors are defined', () => {
+        expect(vis.getLegendColors()).to.equal(null);
+      });
     });
 
     describe('destroy Method', function () {
