@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import './agg_group';
 import './vis_options';
 import { uiModules } from 'ui/modules';
@@ -18,6 +19,14 @@ uiModules
       $scope.$watch('vis.type', (visType) => {
         if (visType) {
           this.showData = visType.schemas.buckets || visType.schemas.metrics;
+          if (_.has(visType, 'editorConfig.optionTabs')) {
+            const activeTabs = visType.editorConfig.optionTabs.filter((tab) => {
+              return _.get(tab, 'active', false);
+            });
+            if (activeTabs.length > 0) {
+              this.section = activeTabs[0].name;
+            }
+          }
           this.section = this.section || (this.showData ? 'data' : 'options');
         }
       });
