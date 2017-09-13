@@ -20,7 +20,7 @@ template.propTypes = {
 
 export const shape = () => new ArgType('shape', {
   displayName: 'Shape',
-  description: 'Shappe selector',
+  description: 'Shape selector',
   defaultValue: 'circle',
   simpleTemplate: template,
 });

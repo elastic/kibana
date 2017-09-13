@@ -13,9 +13,9 @@ app.directive('react', ($store) => {
     link: ($scope, $el) => {
       const Component = $scope.component;
       render(
-          <Provider store={$store}>
-            <Component/>
-          </Provider>
+        <Provider store={$store}>
+          <Component />
+        </Provider>
       , $el[0]);
       $scope.$on('$destroy', () => {
         unmountComponentAtNode($el[0]);

@@ -1,5 +1,4 @@
 import { connect } from 'react-redux';
-
 import { selectElement } from '../../state/actions/transient';
 import { getEditing, getAppReady } from '../../state/selectors/app';
 

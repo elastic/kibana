@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
 import { Sidebar } from '../sidebar';
 import { Toolbar } from '../toolbar';
 import { Workpad } from '../workpad';
@@ -23,6 +22,7 @@ export const AppComponent = ({ editing, deselectElement }) => (
         </div>
       ) : null }
     </div>
+
     { editing ? (
       <Toolbar />
     ) : null }

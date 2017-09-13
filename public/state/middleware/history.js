@@ -1,26 +1,26 @@
 import { isEqual } from 'lodash';
 import { historyProvider } from '../../lib/history_provider';
-import * as historyActions from '../actions/history';
+import { restoreHistory, undoHistory, redoHistory } from '../actions/history';
 
 export const historyMiddleware = (win) => {
   const history = historyProvider(win);
 
   return ({ dispatch, getState }) => {
     history.setOnChange((historyState) => {
-      if (historyState) return dispatch(historyActions.restoreHistory(historyState));
+      if (historyState) return dispatch(restoreHistory(historyState));
     });
 
     return next => (action) => {
       const oldState = getState();
 
       // deal with history actions
-      if (action.type === 'HISTORY_UNDO') return history.undo();
-      if (action.type === 'HISTORY_REDO') return history.redo();
-
-      for (const historyAction in historyActions) {
-        if (historyAction.toString() === action.type) {
+      switch (action.type) {
+        case undoHistory.toString():
+          return history.undo();
+        case redoHistory.toString():
+          return history.redo();
+        case restoreHistory.toString():
           return next(action);
-        }
       }
 
       // execute the action like normal

@@ -1,8 +1,8 @@
 import { connect } from 'react-redux';
 import { get } from 'lodash';
-import { Workpad as Component } from './workpad';
+import { undoHistory, redoHistory } from '../../state/actions/history.js';
 import { getElements, getPageById, getSelectedPage, getWorkpad } from '../../state/selectors/workpad';
-
+import { Workpad as Component } from './workpad';
 
 const mapStateToProps = (state) => {
   return {
@@ -12,4 +12,9 @@ const mapStateToProps = (state) => {
   };
 };
 
-export const Workpad = connect(mapStateToProps)(Component);
+const mapDispatchToProps = {
+  undoHistory,
+  redoHistory,
+};
+
+export const Workpad = connect(mapStateToProps, mapDispatchToProps)(Component);

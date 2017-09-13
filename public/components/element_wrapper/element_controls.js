@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Shortcuts } from 'react-shortcuts';
 import { ElementContent } from './element_content';
 import { pure } from 'recompose';
 
@@ -22,30 +23,36 @@ export const ElementControls = pure((props) => {
   // TODO: pass in render element dimensions
   const selectedClassName = isSelected ? 'selected' : '';
 
+  const handleShortcuts = (action) => {
+    if (action === 'DELETE' && isSelected) return remove();
+  };
+
   return (
     <div
       className={`canvas__workpad--element ${selectedClassName}`}
-      onClick={select}>
-
+      onClick={select}
+    >
       {/*
         Yeah, in theory we could put RenderElement in here, but the ElementContent component actually contains a
         bunch of logic for error handling. Its actually pretty nice to keep them seperate.
       */}
 
-      <ElementContent
-         state={state}
-         renderable={renderable}
-         elementTypeDefintion={elementTypeDefintion}
-         size={size}
-         handlers={handlers}
-       />
+      <Shortcuts name="ELEMENT" handler={handleShortcuts}>
+        <ElementContent
+           state={state}
+           renderable={renderable}
+           elementTypeDefintion={elementTypeDefintion}
+           size={size}
+           handlers={handlers}
+         />
 
-      {!isSelected ? null :
-        (<i
-          className="fa fa-times-circle canvas__workpad--element-remove"
-          style={{ cursor: 'pointer' }}
-          onClick={remove}/>)
-      }
+        {!isSelected ? null :
+          (<i
+            className="fa fa-times-circle canvas__workpad--element-remove"
+            style={{ cursor: 'pointer' }}
+            onClick={remove}/>)
+        }
+      </Shortcuts>
     </div>
   );
 });
