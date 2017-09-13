@@ -1,6 +1,8 @@
 import Fn from '../../../common/functions/fn.js';
 //import { buildESRequest } from '../esdocs/lib/build_es_request';
 import fetch from 'axios';
+import { flatten, find } from 'lodash';
+import { buildBoolArray } from '../esdocs/lib/build_bool_array';
 
 export default new Fn({
   name: 'timelion',
@@ -19,21 +21,58 @@ export default new Fn({
       help: 'Bucket interval for the time series',
       default: 'auto',
     },
-    filter: {
-      types: ['filter', 'null'],
-      help:
-        'Timelion requires at least a time filter with a beginning and end (see the timefilter function).' +
-        'Adding a timefilter element to your workpad will also work. This local filter wins if both are present.',
+    from: {
+      type: ['string'],
+      help: 'Elasticsearch date math string for the start of the time range',
+    },
+    to: {
+      type: ['string'],
+      help: 'Elasticsearch date math string for the end of the time range',
     },
   },
   type: 'datatable',
   help:
     'Use timelion to extract one or more timeseries from Elasticsearch and other backends. ' +
-    'Note that styling related settings will not be preserved',
+    'Note that styling related settings will not be preserved. Timelion requires a time range. ' +
+    'You can use a timefilter element for this, or both the from/to parameters of this function',
   fn: (context, args, handlers) => {
-    console.log(handlers.serverUri);
 
     // TODO: Find time range, or just request a giant single bucket?
+    function findTimeRangeInFilterContext() {
+      const timeFilter = find(context.and, { type: 'time' });
+      if (!timeFilter) throw new Error ('No time filter found');
+      return { from: timeFilter.from, to: timeFilter.to };
+    }
+
+    const defaultRange = { from: args.from || 'now-1y', to: args.to || 'now' };
+
+    let range;
+    try {
+      range = Object.assign({}, defaultRange, findTimeRangeInFilterContext());
+    } catch(e) {
+      range = Object.assign({}, defaultRange);
+    }
+
+    const body = {
+      extended: {
+        es: {
+          filter: {
+            bool: {
+              must: buildBoolArray(context.and),
+            },
+          },
+        },
+      },
+      sheet: [args.q],
+      time: {
+        from: range.from,
+        to: range.to,
+        interval: 'auto',
+        timezone: 'America/Phoenix',
+      },
+    };
+
+    console.log(JSON.stringify(body, null, ' '));
 
     return fetch(`${handlers.serverUri}/api/timelion/run`, {
       method: 'POST',
@@ -42,22 +81,25 @@ export default new Fn({
         'kbn-xsrf': 'lollerpops',
         ...handlers.httpHeaders,
       },
-      data: {
-        sheet: [args.q],
-        time: {
-          from: 'now-1y',
-          to: 'now',
-          interval: 'auto',
-          timezone: 'America/Phoenix',
-        },
-      },
+      data: body,
     }).then(resp => {
 
-      console.log(resp.data.sheet[0].list);
-      return;
+      const seriesList = resp.data.sheet[0].list;
+
+      const rows = flatten(seriesList.map(series =>
+        series.data.map(row => ({ '@timestamp': row[0], value: row[1], label: series.label }))
+      ))
+      .map((row, i) => ({ ...row, _rowId: i }));
+
       return {
         type: 'datatable',
-        rows: resp,
+        columns: [
+          { name: '_rowId',     type: 'number'  },
+          { name: '@timestamp', type: 'date'    },
+          { name: 'value',      type: 'number'  },
+          { name: 'label',      type: 'string'  },
+        ],
+        rows: rows,
       };
     });
   },
