@@ -11,7 +11,7 @@ const SortWrap = (props) => {
     sortAsc
   } = props;
 
-  console.log('SortWrap', props);
+  // console.log('SortWrap', props);
 
   if (items === undefined) {
     return children;
@@ -20,7 +20,7 @@ const SortWrap = (props) => {
   let sortedItems = items.slice(0);
   if (!!sortBy) {
     sortedItems = sortByLodash(sortedItems, sortBy);
-    if (!!sortAsc) {
+    if (!!!sortAsc) {
       sortedItems.reverse();
     }
   }
@@ -38,9 +38,10 @@ const SortWrap = (props) => {
   });
 };
 
-export const wrapWithSortProps = () => {
+export const wrapWithSortProps = (defaultProps) => {
+  const { sortBy, sortAsc } = defaultProps || {};
   return (BaseComponent) => (props) => (
-    <SortWrap {...props}>
+    <SortWrap sortBy={sortBy} sortAsc={sortAsc} {...props}>
       <BaseComponent/>
     </SortWrap>
   );

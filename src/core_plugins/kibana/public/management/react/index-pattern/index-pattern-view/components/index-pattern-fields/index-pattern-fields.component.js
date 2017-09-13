@@ -1,5 +1,4 @@
-/* eslint-disable */
-import React, { Component } from 'react';
+import React from 'react';
 import {
   KuiPageContent,
   KuiPageContentBody,
@@ -31,8 +30,9 @@ import {
   KuiHorizontalRule,
 } from 'ui_framework/components';
 
+import { getKbnTypeNames } from 'src/utils/kbn_field_types';
 
-const IndexPatternList = ({
+const IndexPatternFields = ({
   items,
   numOfPages,
   perPage,
@@ -44,82 +44,65 @@ const IndexPatternList = ({
   filter,
   changePerPage,
 }) => {
-  // console.log('IndexPatternList', items, perPage);
+  // console.log('IndexPatternFields', items);
   if (items === undefined) {
     return null;
   }
 
-  const indexRows = items.map((index, key) => {
+  const rows = items.map((item, key) => {
     return (
       <KuiTableRow key={key}>
-        <KuiTableHeaderCellCheckbox>
-          <KuiCheckbox/>
-        </KuiTableHeaderCellCheckbox>
         <KuiTableRowCell>
-          <KuiLink href={`#/management/kibana/indices/${index.attributes.title}`}>
-            {index.attributes.title}
-          </KuiLink>
-          &nbsp;&nbsp;
-          {index.isDefault
-            ? <KuiBadge>Default index</KuiBadge>
-            : null
-          }
-        </KuiTableRowCell>
-        {/* <KuiTableRowCell>
-          {index.indices}
+          {item.name}
         </KuiTableRowCell>
         <KuiTableRowCell>
-          {index.fields}
+          {item.type}
         </KuiTableRowCell>
         <KuiTableRowCell>
-          {index.creator}
-        </KuiTableRowCell> */}
+          {item.searchable.toString()}
+        </KuiTableRowCell>
+        <KuiTableRowCell>
+          {item.aggregatable.toString()}
+        </KuiTableRowCell>
       </KuiTableRow>
     );
   });
 
+  const fieldTypes = getKbnTypeNames().map(name => {
+    return {
+      text: name[0].toUpperCase() + name.slice(1),
+      value: name,
+    };
+  });
+
+  fieldTypes.unshift({ text: 'Filter by field types', value: false });
+
   return (
     <KuiPageContent>
       <KuiPageContentHeader>
-        <KuiPageContentHeaderSection>
-          <KuiTitle>
-            <h2>Index patterns</h2>
-          </KuiTitle>
-        </KuiPageContentHeaderSection>
-        <KuiPageContentHeaderSection>
-          <KuiButtonEmpty>
-            <KuiLink
-              href="#/management/kibana/index"
-            >
-              Create new index pattern
-            </KuiLink>
-          </KuiButtonEmpty>
-        </KuiPageContentHeaderSection>
-      </KuiPageContentHeader>
-      <KuiPageContentBody>
         <KuiForm>
           <KuiFormRow>
             <KuiFlexGroup>
               <KuiFlexItem>
                 <KuiFieldText
-                  placeholder="Search for an index pattern..."
+                  placeholder="Search..."
                   icon="search"
-                  onChange={(e) => filter({ ['attributes.title']: e.target.value })}
+                  onChange={(e) => filter({ name: e.target.value })}
                 />
               </KuiFlexItem>
-              {/* <KuiFlexItem>
-                <KuiSelect placeholder="Filter by creator">
-
-                </KuiSelect>
-              </KuiFlexItem> */}
+               <KuiFlexItem>
+                <KuiSelect
+                  onChange={(e) => filter({ type: e.target.value })}
+                  options={fieldTypes}
+                />
+              </KuiFlexItem>
             </KuiFlexGroup>
           </KuiFormRow>
         </KuiForm>
+      </KuiPageContentHeader>
+      <KuiPageContentBody>
         <KuiTable>
           <KuiTableHeader>
-            <KuiTableHeaderCell>
-              <KuiCheckbox/>
-            </KuiTableHeaderCell>
             <KuiTableHeaderCell
               onSort={() => changeSort('name')}
               isSorted={sortBy === 'name'}
@@ -127,30 +110,30 @@ const IndexPatternList = ({
             >
               Name
             </KuiTableHeaderCell>
-            {/* <KuiTableHeaderCell
-              onSort={() => changeSort('indices')}
-              isSorted={sortBy === 'indices'}
+            <KuiTableHeaderCell
+              onSort={() => changeSort('type')}
+              isSorted={sortBy === 'type'}
               isSortAscending={sortAsc}
             >
-              Matching Indices
+              Type
             </KuiTableHeaderCell>
             <KuiTableHeaderCell
-              onSort={() => changeSort('fields')}
-              isSorted={sortBy === 'fields'}
+              onSort={() => changeSort('searchable')}
+              isSorted={sortBy === 'searchable'}
               isSortAscending={sortAsc}
             >
-              Fields
+              Searchable
             </KuiTableHeaderCell>
             <KuiTableHeaderCell
-              onSort={() => changeSort('creator')}
-              isSorted={sortBy === 'creator'}
+              onSort={() => changeSort('aggregatable')}
+              isSorted={sortBy === 'aggregatable'}
               isSortAscending={sortAsc}
             >
-              Created by
-            </KuiTableHeaderCell> */}
+              Aggregatable
+            </KuiTableHeaderCell>
           </KuiTableHeader>
           <KuiTableBody>
-            {indexRows}
+            {rows}
           </KuiTableBody>
         </KuiTable>
         <KuiHorizontalRule />
@@ -187,4 +170,4 @@ const IndexPatternList = ({
   )
 };
 
-export default IndexPatternList;
+export default IndexPatternFields;

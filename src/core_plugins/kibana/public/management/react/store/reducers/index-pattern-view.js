@@ -2,14 +2,19 @@ import { handleActions } from 'redux-actions';
 
 import {
   fetchedIndexPattern,
+  setTransientId,
+  setResultsTransientId,
+  setAsDefaultIndexPattern,
 } from '../actions/index-pattern-view';
 
-// import {
-//   getIndexPatternView,
-// } from '../../reducers';
+import {
+  getIndexPatternView,
+} from '../../reducers';
 
 const defaultState = {
   indexPattern: undefined,
+  transientId: undefined,
+  resultsTransientId: undefined,
 };
 
 export default handleActions({
@@ -19,6 +24,27 @@ export default handleActions({
       indexPattern,
     };
   },
+  [setTransientId](state, { payload: { id: transientId }}) {
+    return {
+      ...state,
+      transientId,
+    };
+  },
+  [setResultsTransientId](state, { payload: { id: resultsTransientId }}) {
+    return {
+      ...state,
+      resultsTransientId,
+    };
+  },
+  [setAsDefaultIndexPattern](state) {
+    return {
+      ...state,
+      indexPattern: {
+        ...state.indexPattern,
+        isDefault: true,
+      }
+    }
+  }
 }, defaultState);
 
-// export const getView = state => getIndexPatternView(state).items;
+export const getPathToFields = () => 'indexPattern.fields';

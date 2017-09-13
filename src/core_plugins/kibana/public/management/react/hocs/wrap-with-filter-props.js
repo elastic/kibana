@@ -8,31 +8,45 @@ const FilterWrap = (props) => {
     transientId,
     children,
     filterBy,
-    filterKey,
+    filters,
   } = props;
 
-  console.log('FilterWrap', props);
+  // console.log('FilterWrap', props);
 
   if (items === undefined) {
     return children;
   }
 
-  const filteredItems = !!filterBy
-    ? items.filter(item => get(item, filterKey).includes(filterBy))
-    : items;
+  let filteredItems = items;
+  if (!!filterBy && Object.keys(filterBy).length) {
+    filteredItems = filteredItems.filter(item => {
+      return Object.keys(filters).every(filterKey => {
+        const filterFn = filters[filterKey];
+        const value = get(item, filterKey);
+        const filterValue = filterBy[filterKey];
 
-  console.log('Filterwrap', filteredItems);
+        return filterFn(value, filterValue);
+      });
+    })
+  }
+
+  // console.log('Filterwrap', filteredItems);
 
   return cloneElement(children, {
     ...props,
     items: filteredItems,
-    filter: filterBy => change(transientId, { filterBy }),
+    filter: filter => change(transientId, {
+      filterBy: {
+        ...filterBy,
+        ...filter,
+      }
+    }),
   });
 };
 
-export const wrapWithFilterProps = ({ filterKey }) => {
+export const wrapWithFilterProps = ({ filters }) => {
   return (BaseComponent) => (props) => (
-    <FilterWrap {...props} filterKey={filterKey}>
+    <FilterWrap filters={filters} {...props}>
       <BaseComponent/>
     </FilterWrap>
   );

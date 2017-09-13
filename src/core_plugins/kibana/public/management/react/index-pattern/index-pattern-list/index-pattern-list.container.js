@@ -1,7 +1,6 @@
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { compose } from 'recompose';
-// import { TableHoC } from 'plugins/kibana/management/react/hocs/table';
 import IndexPatternList from './index-pattern-list.component';
 
 import {
@@ -9,12 +8,17 @@ import {
   wrapWithSortProps,
   wrapWithPaginateProps,
   wrapWithFilterProps,
+  rename,
 } from 'plugins/kibana/management/react/hocs';
 
 import {
   fetchIndexPatterns,
   setTransientTableId,
-}  from 'plugins/kibana/management/react/store/actions/index-pattern-list';
+} from 'plugins/kibana/management/react/store/actions/index-pattern-list';
+
+import {
+  getPathToIndexPatterns,
+} from 'plugins/kibana/management/react/store/reducers/index-pattern-list';
 
 import {
   getIndexPatternList,
@@ -26,7 +30,12 @@ export default compose(
     { fetchIndexPatterns }
   ),
   connectToTransientStore({ refSetter: setTransientTableId }),
-  wrapWithFilterProps({ filterKey: 'attributes.title' }),
+  rename({ from: getPathToIndexPatterns(), to: 'items' }),
+  wrapWithFilterProps({
+   filters: {
+     ['attributes.title']: (value, filterValue) => !filterValue || value.includes(filterValue),
+   }
+  }),
   wrapWithSortProps(),
-  wrapWithPaginateProps({ perPage: 1, page: 0 }),
+  wrapWithPaginateProps({ perPage: 10, page: 0 }),
 )(IndexPatternList);

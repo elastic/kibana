@@ -11,7 +11,7 @@ const PaginateWrap = (props) => {
     page
   } = props;
 
-  console.log('PaginateWrap', props);
+  // console.log('PaginateWrap', props);
 
   if (items === undefined) {
     return children;
@@ -21,7 +21,7 @@ const PaginateWrap = (props) => {
   const pages = chunk(items, perPage);
   const paginatedItems = pages[page] || [];
 
-  console.log('PaginateWrap more', pages, perPage, page);
+  // console.log('PaginateWrap more', pages, perPage, page);
 
   return cloneElement(children, {
     ...props,

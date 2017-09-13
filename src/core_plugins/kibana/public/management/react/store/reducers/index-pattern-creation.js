@@ -27,7 +27,7 @@ const defaultState = {
     selectedTimeField: undefined,
   },
   results: {
-    items: undefined,
+    indices: undefined,
     pattern: undefined,
     hasExactMatches: false,
     transientTableId: undefined,
@@ -75,7 +75,7 @@ export default handleActions({
       ...state,
       results: {
         ...state.results,
-        items: indices,
+        indices,
         hasExactMatches,
         pattern,
       },
@@ -123,3 +123,4 @@ export const getCreation = state => {
   } = getIndexPatternCreate(state);
   return { isCreating, isIncludingSystemIndices, hasExactMatches };
 };
+export const getTransientId = state => getIndexPatternCreate(state).transientId;

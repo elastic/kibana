@@ -10,7 +10,7 @@ import {
 } from '../../reducers';
 
 const defaultState = {
-  items: undefined,
+  indexPatterns: undefined,
   transientTableId: undefined,
 };
 
@@ -20,7 +20,7 @@ export default handleActions({
 
     return {
       ...state,
-      items: indexPatterns,
+      indexPatterns,
     };
   },
   [setTransientTableId](state, { payload: { id: transientTableId } }) {
@@ -31,4 +31,5 @@ export default handleActions({
   }
 }, defaultState);
 
-export const getIndexPatterns = state => getIndexPatternList(state).items;
+export const getIndexPatterns = state => getIndexPatternList(state).indexPatterns;
+export const getPathToIndexPatterns = () => 'indexPatterns';

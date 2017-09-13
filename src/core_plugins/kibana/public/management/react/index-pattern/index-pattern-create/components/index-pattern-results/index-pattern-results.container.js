@@ -1,8 +1,14 @@
 import { compose } from 'recompose';
 import { connect } from 'react-redux';
-import { connectToTransientStore } from 'plugins/kibana/management/react/hocs/connect-to-transient-store';
-import { wrapWithSortProps } from 'plugins/kibana/management/react/hocs/wrap-with-sort-props';
-import { wrapWithPaginateProps } from 'plugins/kibana/management/react/hocs/wrap-with-paginate-props';
+
+import {
+  connectToTransientStore,
+  wrapWithSortProps,
+  wrapWithPaginateProps,
+  wrapWithFilterProps,
+  rename,
+} from 'plugins/kibana/management/react/hocs';
+
 import IndexPatternResults from './index-pattern-results.component';
 
 import {
@@ -11,25 +17,30 @@ import {
 
 import {
   getFilteredAndPaginatedIndices,
+  getPathToIndices,
+  getTransientId,
 } from 'plugins/kibana/management/react/store/reducers/index-pattern-creation';
 
 import {
   getIndexPatternCreate,
+  getTransient,
 } from 'plugins/kibana/management/react/reducers';
 
 export default compose(
   connect(
     state => {
       const indexPatternState = getIndexPatternCreate(state);
+      const transientId = getTransientId(state);
+      const transientState = getTransient(state)[transientId];
 
       // Is it weird to do this here?
-      const items = indexPatternState.results.items
-        ? indexPatternState.results.items.filter(item => item.name[0] !== '.' || indexPatternState.isIncludingSystemIndices)
+      const indices = indexPatternState.results.indices
+        ? indexPatternState.results.indices.filter(item => item.name[0] !== '.' || transientState.isIncludingSystemIndices)
         : undefined;
 
       return {
         ...indexPatternState.results,
-        items,
+        indices,
       };
     },
   ),
@@ -37,6 +48,7 @@ export default compose(
     refSetter: setTransientTableId,
     id: 'creation_results'
   }),
+  rename({ from: 'indices', to: 'items' }),
   wrapWithSortProps(),
   wrapWithPaginateProps({ perPage: 10, page: 0 }),
 )(IndexPatternResults);

@@ -30,22 +30,40 @@ import {
   KuiFlexItem,
   KuiPagination,
   KuiHorizontalRule,
+  KuiConfirmModal,
+  KuiModalOverlay,
 } from 'ui_framework/components';
+
+import IndexPatternFields from './components/index-pattern-fields';
 
 
 const IndexPatternView = ({
   indexPattern,
+  selectedTab,
+  isShowingRefreshFieldsConfirmation,
+  showRefreshFieldsConfirmation,
+  hideRefreshFieldsConfirmation,
+  refreshFields,
+  deleteIndexPattern,
+  setDefaultIndexPattern,
 }) => {
-  console.log('IndexPatternView', indexPattern);
+  // console.log('IndexPatternView', isShowingRefreshFieldsConfirmation);
   if (indexPattern === undefined) {
     return null;
   }
 
   const {
     pattern,
+    id,
     fields,
     timeFieldName,
+    isDefault,
   } = indexPattern;
+
+  let tabContent = null;
+  if (selectedTab === 'fields') {
+    tabContent = <IndexPatternFields/>
+  }
 
   return (
     <KuiPageContent>
@@ -57,20 +75,44 @@ const IndexPatternView = ({
                 <h2>{pattern}</h2>
               </KuiTitle>
             </KuiFlexItem>
-            <KuiFlexItem>
-              <KuiButtonEmpty>
-                Set as default index
-              </KuiButtonEmpty>
-            </KuiFlexItem>
+            { !isDefault
+              ?
+                <KuiFlexItem>
+                  <KuiButtonEmpty onClick={() => setDefaultIndexPattern(id)}>
+                    Set as default index
+                  </KuiButtonEmpty>
+                </KuiFlexItem>
+              : null
+            }
           </KuiFlexGroup>
+          { isShowingRefreshFieldsConfirmation
+            ?
+              <KuiModalOverlay>
+                <KuiConfirmModal
+                  onCancel={hideRefreshFieldsConfirmation}
+                  onConfirm={() => {
+                    hideRefreshFieldsConfirmation();
+                    refreshFields(id, pattern);
+                  }}
+                  confirmButtonText="Refresh Fields"
+                  cancelButtonText="Cancel"
+                  message="This will reset the field popularity counters. Are you sure you want to refresh your fields?"
+                  title="Are you sure?"
+                />
+              </KuiModalOverlay>
+            : null
+          }
+
         </KuiPageContentHeaderSection>
         <KuiPageContentHeaderSection>
           <KuiButtonIcon
             iconType="user"
+            onClick={showRefreshFieldsConfirmation}
           />
           &nbsp;
           <KuiButtonIcon
             iconType="lock"
+            onClick={() => deleteIndexPattern(id)}
           />
         </KuiPageContentHeaderSection>
       </KuiPageContentHeader>
@@ -89,21 +131,22 @@ const IndexPatternView = ({
         </KuiText>
         <KuiTabs>
           <KuiTab
-
+            isSelected={selectedTab === 'fields'}
           >
             Fields ({fields.length})
           </KuiTab>
           <KuiTab
-
+            isSelected={selectedTab === 'scripted'}
           >
             Scripted Fields (0)
           </KuiTab>
           <KuiTab
-
+            isSelected={selectedTab === 'source'}
           >
             Source Filters (0)
           </KuiTab>
         </KuiTabs>
+        {tabContent}
       </KuiPageContentBody>
     </KuiPageContent>
   )

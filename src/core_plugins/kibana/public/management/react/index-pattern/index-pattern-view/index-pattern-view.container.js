@@ -5,14 +5,16 @@ import IndexPatternView from './index-pattern-view.component';
 
 import {
   connectToTransientStore,
-  wrapWithSortProps,
-  wrapWithPaginateProps,
-  wrapWithFilterProps,
+  wrapWithTabsProps,
+  wrapWithSimpleProps,
 } from 'plugins/kibana/management/react/hocs';
 
 import {
-  setTransientTableId,
-}  from 'plugins/kibana/management/react/store/actions/index-pattern-list';
+  setTransientId,
+  refreshFields,
+  deleteIndexPattern,
+  setDefaultIndexPattern,
+}  from 'plugins/kibana/management/react/store/actions/index-pattern-view';
 
 import {
   getIndexPatternView,
@@ -21,9 +23,17 @@ import {
 export default compose(
   connect(
     state => ({ ...getIndexPatternView(state) }),
+    { refreshFields, deleteIndexPattern, setDefaultIndexPattern },
   ),
-  // connectToTransientStore({ refSetter: setTransientTableId }),
-  // wrapWithFilterProps({ filterKey: 'attributes.title' }),
-  // wrapWithSortProps(),
-  // wrapWithPaginateProps({ perPage: 1, page: 1 }),
+  connectToTransientStore({ refSetter: setTransientId }),
+  wrapWithTabsProps({ selectedTab: 'fields' }),
+  wrapWithSimpleProps({
+    props: {
+      isShowingRefreshFieldsConfirmation: false,
+    },
+    actions: {
+      showRefreshFieldsConfirmation: (props) => ({ isShowingRefreshFieldsConfirmation: true }),
+      hideRefreshFieldsConfirmation: (props) => ({ isShowingRefreshFieldsConfirmation: false }),
+    }
+  }),
 )(IndexPatternView);

@@ -1,4 +1,4 @@
-import { indexPatterns, es, config, kbnUrl } from '../../globals';
+import { indexPatterns, es, config, kbnUrl, $rootScope } from '../../globals';
 import { sortBy, endsWith, startsWith, uniq } from 'lodash';
 import { createAction } from 'redux-actions';
 import { createThunk } from 'redux-thunks';
@@ -83,6 +83,7 @@ export const createIndexPattern = createThunk('CREATE_INDEX_PATTERN',
     indexPatterns.cache.clear(createdId);
     dispatch(createdIndexPattern);
     kbnUrl.change(`/management/kibana/indices`);
+    $rootScope.$apply();
   }
 );
 
