@@ -666,6 +666,42 @@ main {
   .kuiCardGroup--united .kuiCard + .kuiCard {
     border-left: 1px solid #E0E0E0; }
 
+.kuiCodeEditorWrapper {
+  position: relative; }
+
+.kuiCodeEditorKeyboardHint {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  background: rgba(255, 255, 255, 0.7);
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  text-align: center;
+  opacity: 0; }
+  .kuiCodeEditorKeyboardHint:focus {
+    opacity: 1;
+    border: 2px solid #0079a5;
+    z-index: 1000; }
+  .kuiCodeEditorKeyboardHint.kuiCodeEditorKeyboardHint-isInactive {
+    display: none; }
+
 .kuiCollapseButton {
   -webkit-appearance: none;
      -moz-appearance: none;

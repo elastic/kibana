@@ -1,0 +1,89 @@
+import React, { Component } from 'react';
+import classNames from 'classnames';
+import AceEditor from 'react-ace';
+
+import { htmlIdGenerator, keyCodes } from '../../../services';
+
+export class KuiCodeEditor extends Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      hintInactive: false
+    };
+    this.idGenerator = htmlIdGenerator();
+  }
+
+  enableOverlay() {
+    this.setState({ hintInactive: false });
+  }
+
+  configureAce = (ace) => {
+    if (ace) {
+      this.aceEditor = ace;
+      ace.editor.textInput.getElement().tabIndex = -1;
+      ace.editor.textInput.getElement().addEventListener('keydown', (ev) => {
+        if (ev.keyCode === keyCodes.ESCAPE) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          this.enableOverlay();
+          this.refs.kuiCodeEditorHint.focus();
+        }
+      });
+    }
+  };
+
+  onBlurAce = (...args) => {
+    this.enableOverlay();
+    if (this.props.onBlur) {
+      this.props.onBlur(...args);
+    }
+  };
+
+  onHintKeyDown = (ev) => {
+    if (ev.keyCode === keyCodes.ENTER) {
+      ev.preventDefault();
+      this.startEditing();
+    }
+  };
+
+  startEditing = () => {
+    this.setState({ hintInactive: true });
+    this.aceEditor.editor.textInput.focus();
+  }
+
+  render() {
+    const { width, height } = this.props;
+    const classes = classNames('kuiCodeEditorKeyboardHint', {
+      'kuiCodeEditorKeyboardHint-isInactive': this.state.hintInactive
+    });
+    return (
+      <div
+        className="kuiCodeEditorWrapper"
+        style={{ width, height }}
+      >
+        <div
+          className={classes}
+          id={this.idGenerator('codeEditor')}
+          ref="kuiCodeEditorHint"
+          tabIndex="0"
+          role="button"
+          onClick={this.startEditing}
+          onKeyDown={this.onHintKeyDown}
+        >
+          <p className="kuiText kuiVerticalRhythmSmall">
+            Press Enter to start editing.
+          </p>
+          <p className="kuiText kuiVerticalRhythmSmall">
+            When you&rsquo;re done, press Escape to stop editing.
+          </p>
+        </div>
+        <AceEditor
+          {...this.props}
+          ref={this.configureAce}
+          onBlur={this.onBlurAce}
+        />
+      </div>
+    );
+  }
+}

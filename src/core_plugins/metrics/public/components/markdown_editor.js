@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import tickFormatter from './lib/tick_formatter';
 import convertSeriesToVars from './lib/convert_series_to_vars';
-import AceEditor from 'react-ace';
+import { KuiCodeEditor } from 'ui_framework/components';
 import _ from 'lodash';
 import 'brace/mode/markdown';
 import 'brace/theme/github';
@@ -96,7 +96,7 @@ class MarkdownEditor extends Component {
     return (
       <div className="vis_editor__markdown">
         <div className="vis_editor__markdown-editor">
-          <AceEditor
+          <KuiCodeEditor
             onLoad={this.handleOnLoad}
             mode="markdown"
             theme="github"

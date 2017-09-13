@@ -2,7 +2,6 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import SeriesEditor from '../series_editor';
 import { IndexPattern } from '../index_pattern';
-import AceEditor from 'react-ace';
 import 'brace/mode/less';
 import Select from 'react-select';
 import createSelectHandler from '../lib/create_select_handler';
@@ -11,6 +10,7 @@ import ColorPicker from '../color_picker';
 import YesNo from '../yes_no';
 import MarkdownEditor from '../markdown_editor';
 import less from 'less/lib/less-browser';
+import { KuiCodeEditor } from 'ui_framework/components';
 import { htmlIdGenerator } from 'ui_framework/services';
 const lessC = less(window, { env: 'production' });
 
@@ -124,7 +124,7 @@ class MarkdownPanelConfig extends Component {
             <div className="vis_editor__label">Custom CSS (supports Less)</div>
           </div>
           <div className="vis_editor__ace-editor">
-            <AceEditor
+            <KuiCodeEditor
               mode="less"
               theme="github"
               width="100%"
