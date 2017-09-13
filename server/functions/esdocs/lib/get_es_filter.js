@@ -7,12 +7,12 @@
 /*eslint import/namespace: ['error', { allowComputed: true }]*/
 import * as filters from './filters';
 
-export function addFilter(boolArray, filter) {
+export function getESFilter(filter) {
   if (!filters[filter.type]) throw new Error (`Unknown filter type: ${filter.type}`);
 
   try {
-    boolArray.push(filters[filter.type](filter));
+    return filters[filter.type](filter);
   } catch(e) {
-    //nothing
+    throw new Error (`Could not create elasticsearch filter from ${filter.type}`);
   }
 }

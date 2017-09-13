@@ -1,4 +1,4 @@
-import { addFilter } from './add_filter';
+import { buildBoolArray } from './build_bool_array';
 
 export function buildESRequest(esRequest, canvasQuery) {
   if (canvasQuery.size) {
@@ -6,9 +6,7 @@ export function buildESRequest(esRequest, canvasQuery) {
   }
 
   if (canvasQuery.and) {
-    canvasQuery.and.forEach(clause => {
-      addFilter(esRequest.body.query.bool.must, clause);
-    });
+    esRequest.body.query.bool.must = buildBoolArray(canvasQuery.and);
   }
 
   return esRequest;
