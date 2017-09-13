@@ -10,6 +10,13 @@ function filterField(field) {
 export function ListControlEditor(props) {
   const multiselectId = `multiselect-${props.controlIndex}`;
   const sizeId = `size-${props.controlIndex}`;
+  const handleMultiselectChange = (evt) => {
+    props.handleCheckboxOptionChange(props.controlIndex, 'multiselect', evt);
+  };
+  const handleSizeChange = (evt) => {
+    props.handleNumberOptionChange(props.controlIndex, 'size', evt);
+  };
+
   return (
     <div>
 
@@ -37,7 +44,7 @@ export function ListControlEditor(props) {
             className="kuiCheckBox"
             type="checkbox"
             checked={props.controlParams.options.multiselect}
-            onChange={props.handleMultiselectChange}
+            onChange={handleMultiselectChange}
           />
         </div>
       </div>
@@ -53,7 +60,7 @@ export function ListControlEditor(props) {
             type="number"
             min="1"
             value={props.controlParams.options.size}
-            onChange={props.handleSizeChange}
+            onChange={handleSizeChange}
           />
         </div>
       </div>
@@ -69,6 +76,6 @@ ListControlEditor.propTypes = {
   controlParams: PropTypes.object.isRequired,
   handleFieldNameChange: PropTypes.func.isRequired,
   handleIndexPatternChange: PropTypes.func.isRequired,
-  handleMultiselectChange: PropTypes.func.isRequired,
-  handleSizeChange: PropTypes.func.isRequired
+  handleCheckboxOptionChange: PropTypes.func.isRequired,
+  handleNumberOptionChange: PropTypes.func.isRequired
 };

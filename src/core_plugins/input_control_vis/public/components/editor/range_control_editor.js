@@ -10,6 +10,12 @@ function filterField(field) {
 export function RangeControlEditor(props) {
   const stepSizeId = `stepSize-${props.controlIndex}`;
   const decimalPlacesId = `decimalPlaces-${props.controlIndex}`;
+  const handleDecimalPlacesChange = (evt) => {
+    props.handleNumberOptionChange(props.controlIndex, 'decimalPlaces', evt);
+  };
+  const handleStepChange = (evt) => {
+    props.handleNumberOptionChange(props.controlIndex, 'step', evt);
+  };
   return (
     <div>
 
@@ -37,7 +43,7 @@ export function RangeControlEditor(props) {
             className="kuiTextInput"
             type="number"
             value={props.controlParams.options.step}
-            onChange={props.handleStepChange}
+            onChange={handleStepChange}
           />
         </div>
       </div>
@@ -53,7 +59,7 @@ export function RangeControlEditor(props) {
             type="number"
             min="0"
             value={props.controlParams.options.decimalPlaces}
-            onChange={props.handleDecimalPlacesChange}
+            onChange={handleDecimalPlacesChange}
           />
         </div>
       </div>
@@ -69,6 +75,5 @@ RangeControlEditor.propTypes = {
   controlParams: PropTypes.object.isRequired,
   handleFieldNameChange: PropTypes.func.isRequired,
   handleIndexPatternChange: PropTypes.func.isRequired,
-  handleDecimalPlacesChange: PropTypes.func.isRequired,
-  handleStepChange: PropTypes.func.isRequired
+  handleNumberOptionChange: PropTypes.func.isRequired
 };

@@ -1,6 +1,9 @@
 import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { RangeControlEditor } from './range_control_editor';
+import { ListControlEditor } from './list_control_editor';
+import { getTitle } from '../../editor_utils';
 
 export class ControlEditor extends Component {
 
@@ -14,7 +17,64 @@ export class ControlEditor extends Component {
     ));
   }
 
+  changeLabel = (evt) => {
+    this.props.handleLabelChange(this.props.controlIndex, evt);
+  }
+
+  removeControl = () => {
+    this.props.handleRemoveControl(this.props.controlIndex);
+  }
+
+  moveUpControl = () => {
+    this.props.moveControl(this.props.controlIndex, -1);
+  }
+
+  moveDownControl = () => {
+    this.props.moveControl(this.props.controlIndex, 1);
+  }
+
+  changeIndexPattern = (evt) => {
+    this.props.handleIndexPatternChange(this.props.controlIndex, evt);
+  }
+
+  changeFieldName = (evt) => {
+    this.props.handleFieldNameChange(this.props.controlIndex, evt);
+  }
+
   renderEditor() {
+    let controlEditor = null;
+    switch (this.props.controlParams.type) {
+      case 'list':
+        controlEditor = (
+          <ListControlEditor
+            controlIndex={this.props.controlIndex}
+            controlParams={this.props.controlParams}
+            handleIndexPatternChange={this.changeIndexPattern}
+            handleFieldNameChange={this.changeFieldName}
+            getIndexPatterns={this.props.getIndexPatterns}
+            getIndexPattern={this.props.getIndexPattern}
+            handleNumberOptionChange={this.props.handleNumberOptionChange}
+            handleCheckboxOptionChange={this.props.handleCheckboxOptionChange}
+          />
+        );
+        break;
+      case 'range':
+        controlEditor = (
+          <RangeControlEditor
+            controlIndex={this.props.controlIndex}
+            controlParams={this.props.controlParams}
+            handleIndexPatternChange={this.changeIndexPattern}
+            handleFieldNameChange={this.changeFieldName}
+            getIndexPatterns={this.props.getIndexPatterns}
+            getIndexPattern={this.props.getIndexPattern}
+            handleNumberOptionChange={this.props.handleNumberOptionChange}
+          />
+        );
+        break;
+      default:
+        throw new Error(`Unhandled control editor type ${this.props.controlParams.type}`);
+    }
+
     const labelId = `controlLabel${this.props.controlIndex}`;
     return (
       <div>
@@ -27,13 +87,13 @@ export class ControlEditor extends Component {
               className="kuiTextInput"
               id={labelId}
               type="text"
-              value={this.props.controlLabel}
-              onChange={this.props.handleLabelChange}
+              value={this.props.controlParams.label}
+              onChange={this.changeLabel}
             />
           </div>
         </div>
 
-        {this.props.children}
+        {controlEditor}
       </div>
     );
   }
@@ -56,14 +116,14 @@ export class ControlEditor extends Component {
             <i aria-hidden="true" className={visibilityToggleClasses} />
           </button>
           <span className="vis-editor-agg-header-title ng-binding">
-            {this.props.controlTitle}
+            {getTitle(this.props.controlParams, this.props.controlIndex)}
           </span>
           <div className="vis-editor-agg-header-controls kuiButtonGroup kuiButtonGroup--united">
             <button
               aria-label="Move control down"
               type="button"
               className="kuiButton kuiButton--small"
-              onClick={this.props.moveDownControl}
+              onClick={this.moveDownControl}
               data-test-subj={`inputControlEditorMoveDownControl${this.props.controlIndex}`}
             >
               <i aria-hidden="true" className="fa fa-chevron-down" />
@@ -72,7 +132,7 @@ export class ControlEditor extends Component {
               aria-label="Move control up"
               type="button"
               className="kuiButton kuiButton--small"
-              onClick={this.props.moveUpControl}
+              onClick={this.moveUpControl}
               data-test-subj={`inputControlEditorMoveUpControl${this.props.controlIndex}`}
             >
               <i aria-hidden="true" className="fa fa-chevron-up" />
@@ -81,7 +141,7 @@ export class ControlEditor extends Component {
               aria-label="Remove control"
               className="kuiButton kuiButton--danger kuiButton--small"
               type="button"
-              onClick={this.props.handleRemoveControl}
+              onClick={this.removeControl}
               data-test-subj={`inputControlEditorRemoveControl${this.props.controlIndex}`}
             >
               <i aria-hidden="true" className="fa fa-times" />
@@ -97,11 +157,14 @@ export class ControlEditor extends Component {
 
 ControlEditor.propTypes = {
   controlIndex: PropTypes.number.isRequired,
-  controlLabel: PropTypes.string.isRequired,
-  controlTitle: PropTypes.string.isRequired,
+  controlParams: PropTypes.object.isRequired,
   handleLabelChange: PropTypes.func.isRequired,
-  moveUpControl: PropTypes.func.isRequired,
-  moveDownControl: PropTypes.func.isRequired,
+  moveControl: PropTypes.func.isRequired,
   handleRemoveControl: PropTypes.func.isRequired,
-  children: PropTypes.node.isRequired
+  handleIndexPatternChange: PropTypes.func.isRequired,
+  handleFieldNameChange: PropTypes.func.isRequired,
+  getIndexPatterns: PropTypes.func.isRequired,
+  getIndexPattern: PropTypes.func.isRequired,
+  handleCheckboxOptionChange: PropTypes.func.isRequired,
+  handleNumberOptionChange: PropTypes.func.isRequired
 };

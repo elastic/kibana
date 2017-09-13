@@ -4,7 +4,6 @@ exports[`renders ControlsTab 1`] = `
 <div>
   <ControlEditor
     controlIndex={0}
-    controlLabel="custom label"
     controlParams={
       Object {
         "fieldName": "keywordField",
@@ -20,40 +19,18 @@ exports[`renders ControlsTab 1`] = `
         "type": "list",
       }
     }
-    controlTitle="list: custom label"
+    getIndexPattern={[Function]}
+    getIndexPatterns={[Function]}
+    handleCheckboxOptionChange={[Function]}
+    handleFieldNameChange={[Function]}
+    handleIndexPatternChange={[Function]}
     handleLabelChange={[Function]}
+    handleNumberOptionChange={[Function]}
     handleRemoveControl={[Function]}
-    moveDownControl={[Function]}
-    moveUpControl={[Function]}
-  >
-    <ListControlEditor
-      controlIndex={0}
-      controlParams={
-        Object {
-          "fieldName": "keywordField",
-          "id": "1",
-          "indexPattern": "indexPattern1",
-          "label": "custom label",
-          "options": Object {
-            "multiselect": true,
-            "order": "desc",
-            "size": 5,
-            "type": "terms",
-          },
-          "type": "list",
-        }
-      }
-      getIndexPattern={[Function]}
-      getIndexPatterns={[Function]}
-      handleFieldNameChange={[Function]}
-      handleIndexPatternChange={[Function]}
-      handleMultiselectChange={[Function]}
-      handleSizeChange={[Function]}
-    />
-  </ControlEditor>
+    moveControl={[Function]}
+  />
   <ControlEditor
     controlIndex={1}
-    controlLabel=""
     controlParams={
       Object {
         "fieldName": "numberField",
@@ -66,34 +43,16 @@ exports[`renders ControlsTab 1`] = `
         "type": "range",
       }
     }
-    controlTitle="range: numberField"
+    getIndexPattern={[Function]}
+    getIndexPatterns={[Function]}
+    handleCheckboxOptionChange={[Function]}
+    handleFieldNameChange={[Function]}
+    handleIndexPatternChange={[Function]}
     handleLabelChange={[Function]}
+    handleNumberOptionChange={[Function]}
     handleRemoveControl={[Function]}
-    moveDownControl={[Function]}
-    moveUpControl={[Function]}
-  >
-    <RangeControlEditor
-      controlIndex={1}
-      controlParams={
-        Object {
-          "fieldName": "numberField",
-          "id": "2",
-          "indexPattern": "indexPattern1",
-          "label": "",
-          "options": Object {
-            "step": 1,
-          },
-          "type": "range",
-        }
-      }
-      getIndexPattern={[Function]}
-      getIndexPatterns={[Function]}
-      handleDecimalPlacesChange={[Function]}
-      handleFieldNameChange={[Function]}
-      handleIndexPatternChange={[Function]}
-      handleStepChange={[Function]}
-    />
-  </ControlEditor>
+    moveControl={[Function]}
+  />
   <div
     className="kuiSideBarFormRow"
   >

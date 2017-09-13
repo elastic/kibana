@@ -57,14 +57,14 @@ const controlParams = {
 };
 let handleFieldNameChange;
 let handleIndexPatternChange;
-let handleMultiselectChange;
-let handleSizeChange;
+let handleCheckboxOptionChange;
+let handleNumberOptionChange;
 
 beforeEach(() => {
   handleFieldNameChange = sinon.spy();
   handleIndexPatternChange = sinon.spy();
-  handleMultiselectChange = sinon.spy();
-  handleSizeChange = sinon.spy();
+  handleCheckboxOptionChange = sinon.spy();
+  handleNumberOptionChange = sinon.spy();
 });
 
 test('renders ListControlEditor', () => {
@@ -75,13 +75,13 @@ test('renders ListControlEditor', () => {
     controlParams={controlParams}
     handleFieldNameChange={handleFieldNameChange}
     handleIndexPatternChange={handleIndexPatternChange}
-    handleMultiselectChange={handleMultiselectChange}
-    handleSizeChange={handleSizeChange}
+    handleCheckboxOptionChange={handleCheckboxOptionChange}
+    handleNumberOptionChange={handleNumberOptionChange}
   />);
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
-test('handleMultiselectChange', () => {
+test('handleCheckboxOptionChange - multiselect', () => {
   const component = mount(<ListControlEditor
     getIndexPatterns={getIndexPatterns}
     getIndexPattern={getIndexPattern}
@@ -89,18 +89,29 @@ test('handleMultiselectChange', () => {
     controlParams={controlParams}
     handleFieldNameChange={handleFieldNameChange}
     handleIndexPatternChange={handleIndexPatternChange}
-    handleMultiselectChange={handleMultiselectChange}
-    handleSizeChange={handleSizeChange}
+    handleCheckboxOptionChange={handleCheckboxOptionChange}
+    handleNumberOptionChange={handleNumberOptionChange}
   />);
   const checkbox = component.find('#multiselect-0');
   checkbox.simulate('change', { target: { checked: true } });
-  sinon.assert.calledOnce(handleMultiselectChange);
   sinon.assert.notCalled(handleFieldNameChange);
   sinon.assert.notCalled(handleIndexPatternChange);
-  sinon.assert.notCalled(handleSizeChange);
+  sinon.assert.notCalled(handleNumberOptionChange);
+  const expectedControlIndex = 0;
+  const expectedOptionName = 'multiselect';
+  sinon.assert.calledWith(
+    handleCheckboxOptionChange,
+    expectedControlIndex,
+    expectedOptionName,
+    sinon.match((evt) => {
+      if (evt.target.checked === true) {
+        return true;
+      }
+      return false;
+    }, 'unexpected checkbox input event'));
 });
 
-test('handleSizeChange', () => {
+test('handleNumberOptionChange - size', () => {
   const component = mount(<ListControlEditor
     getIndexPatterns={getIndexPatterns}
     getIndexPattern={getIndexPattern}
@@ -108,13 +119,24 @@ test('handleSizeChange', () => {
     controlParams={controlParams}
     handleFieldNameChange={handleFieldNameChange}
     handleIndexPatternChange={handleIndexPatternChange}
-    handleMultiselectChange={handleMultiselectChange}
-    handleSizeChange={handleSizeChange}
+    handleCheckboxOptionChange={handleCheckboxOptionChange}
+    handleNumberOptionChange={handleNumberOptionChange}
   />);
   const input = component.find('#size-0');
   input.simulate('change', { target: { value: 7 } });
-  sinon.assert.notCalled(handleMultiselectChange);
+  sinon.assert.notCalled(handleCheckboxOptionChange);
   sinon.assert.notCalled(handleFieldNameChange);
   sinon.assert.notCalled(handleIndexPatternChange);
-  sinon.assert.calledOnce(handleSizeChange);
+  const expectedControlIndex = 0;
+  const expectedOptionName = 'size';
+  sinon.assert.calledWith(
+    handleNumberOptionChange,
+    expectedControlIndex,
+    expectedOptionName,
+    sinon.match((evt) => {
+      if (evt.target.value === 7) {
+        return true;
+      }
+      return false;
+    }, 'unexpected input event'));
 });

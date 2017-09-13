@@ -2,25 +2,16 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { ControlEditor } from './control_editor';
-import { RangeControlEditor } from './range_control_editor';
-import { ListControlEditor } from './list_control_editor';
 import { KuiButton, KuiButtonIcon } from 'ui_framework/components';
-import { addControl, getTitle, moveControl, newControl, removeControl, setControl } from '../../editor_utils';
+import { addControl, moveControl, newControl, removeControl, setControl } from '../../editor_utils';
 
 export class ControlsTab extends Component {
-  constructor(props) {
-    super(props);
 
-    this.state = {
-      type: 'list'
-    };
-
-    this.getIndexPatterns = this.getIndexPatterns.bind(this);
-    this.getIndexPattern = this.getIndexPattern.bind(this);
-    this.handleAddControl = this.handleAddControl.bind(this);
+  state = {
+    type: 'list'
   }
 
-  async getIndexPatterns(search) {
+  getIndexPatterns = async (search) => {
     const resp = await this.props.scope.vis.API.savedObjectsClient.find({
       type: 'index-pattern',
       fields: ['title'],
@@ -31,7 +22,7 @@ export class ControlsTab extends Component {
     return resp.savedObjects;
   }
 
-  async getIndexPattern(indexPatternId) {
+  getIndexPattern = async (indexPatternId) => {
     return await this.props.scope.vis.API.indexPatterns.get(indexPatternId);
   }
 
@@ -41,98 +32,67 @@ export class ControlsTab extends Component {
     this.props.stageEditorParams(params);
   }
 
-  handleLabelChange(controlIndex, evt) {
+  handleLabelChange = (controlIndex, evt) => {
     const updatedControl = this.props.scope.vis.params.controls[controlIndex];
     updatedControl.label = evt.target.value;
     this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedControl));
   }
 
-  handleIndexPatternChange(controlIndex, evt) {
+  handleIndexPatternChange = (controlIndex, evt) => {
     const updatedControl = this.props.scope.vis.params.controls[controlIndex];
     updatedControl.indexPattern = evt.value;
     updatedControl.fieldName = '';
     this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedControl));
   }
 
-  handleFieldNameChange(controlIndex, evt) {
+  handleFieldNameChange = (controlIndex, evt) => {
     const updatedControl = this.props.scope.vis.params.controls[controlIndex];
     updatedControl.fieldName = evt.value;
     this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedControl));
   }
 
-  handleCheckboxOptionChange(controlIndex, optionName, evt) {
+  handleCheckboxOptionChange = (controlIndex, optionName, evt) => {
     const updatedControl = this.props.scope.vis.params.controls[controlIndex];
     updatedControl.options[optionName] = evt.target.checked;
     this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedControl));
   }
 
-  handleNumberOptionChange(controlIndex, optionName, evt) {
+  handleNumberOptionChange = (controlIndex, optionName, evt) => {
     const updatedControl = this.props.scope.vis.params.controls[controlIndex];
     updatedControl.options[optionName] = parseFloat(evt.target.value);
     this.setVisParam('controls', setControl(this.props.scope.vis.params.controls, controlIndex, updatedControl));
   }
 
-  handleRemoveControl(controlIndex) {
+  handleRemoveControl = (controlIndex) => {
     this.setVisParam('controls', removeControl(this.props.scope.vis.params.controls, controlIndex));
   }
 
-  moveControl(controlIndex, direction) {
+  moveControl = (controlIndex, direction) => {
     this.setVisParam('controls', moveControl(this.props.scope.vis.params.controls, controlIndex, direction));
   }
 
-  handleAddControl() {
+  handleAddControl = () => {
     this.setVisParam('controls', addControl(this.props.scope.vis.params.controls, newControl(this.state.type)));
   }
 
   renderControls() {
     return this.props.scope.vis.params.controls.map((controlParams, controlIndex) => {
-      let controlEditor = null;
-      switch (controlParams.type) {
-        case 'list':
-          controlEditor = (
-            <ListControlEditor
-              controlIndex={controlIndex}
-              controlParams={controlParams}
-              handleIndexPatternChange={this.handleIndexPatternChange.bind(this, controlIndex)}
-              handleFieldNameChange={this.handleFieldNameChange.bind(this, controlIndex)}
-              getIndexPatterns={this.getIndexPatterns}
-              getIndexPattern={this.getIndexPattern}
-              handleMultiselectChange={this.handleCheckboxOptionChange.bind(this, controlIndex, 'multiselect')}
-              handleSizeChange={this.handleNumberOptionChange.bind(this, controlIndex, 'size')}
-            />
-          );
-          break;
-        case 'range':
-          controlEditor = (
-            <RangeControlEditor
-              controlIndex={controlIndex}
-              controlParams={controlParams}
-              handleIndexPatternChange={this.handleIndexPatternChange.bind(this, controlIndex)}
-              handleFieldNameChange={this.handleFieldNameChange.bind(this, controlIndex)}
-              getIndexPatterns={this.getIndexPatterns}
-              getIndexPattern={this.getIndexPattern}
-              handleDecimalPlacesChange={this.handleNumberOptionChange.bind(this, controlIndex, 'decimalPlaces')}
-              handleStepChange={this.handleNumberOptionChange.bind(this, controlIndex, 'step')}
-            />
-          );
-          break;
-        default:
-          throw new Error(`Unhandled control editor type ${controlParams.type}`);
-      }
+
       return (
         <ControlEditor
           key={controlParams.id}
           controlIndex={controlIndex}
-          controlLabel={controlParams.label}
-          controlTitle={getTitle(controlParams, controlIndex)}
           controlParams={controlParams}
-          handleLabelChange={this.handleLabelChange.bind(this, controlIndex)}
-          moveUpControl={this.moveControl.bind(this, controlIndex, -1)}
-          moveDownControl={this.moveControl.bind(this, controlIndex, 1)}
-          handleRemoveControl={this.handleRemoveControl.bind(this, controlIndex)}
-        >
-          {controlEditor}
-        </ControlEditor>
+          handleLabelChange={this.handleLabelChange}
+          moveControl={this.moveControl}
+          handleRemoveControl={this.handleRemoveControl}
+          handleIndexPatternChange={this.handleIndexPatternChange}
+          handleFieldNameChange={this.handleFieldNameChange}
+          getIndexPatterns={this.getIndexPatterns}
+          getIndexPattern={this.getIndexPattern}
+          handleCheckboxOptionChange={this.handleCheckboxOptionChange}
+          handleNumberOptionChange={this.handleNumberOptionChange}
+        />
       );
     });
   }
