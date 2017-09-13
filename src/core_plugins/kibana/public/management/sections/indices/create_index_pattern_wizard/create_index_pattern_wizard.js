@@ -115,10 +115,7 @@ uiModules.get('apps/management')
     }
 
     // All system indices begin with a period.
-    const filtered = indices.filter(index => !index.name.startsWith('.'));
-    if (filtered.length > MAX_NUMBER_OF_MATCHING_INDICES) {
-      return filtered.slice(0, MAX_NUMBER_OF_MATCHING_INDICES);
-    }
+    const filtered = indices.filter(index => !index.name.startsWith('.')).slice(0, MAX_NUMBER_OF_MATCHING_INDICES);
     return filtered;
   };
 
