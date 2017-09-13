@@ -27,7 +27,7 @@ uiModules
               this.section = activeTabs[0].name;
             }
           }
-          this.section = this.section || (this.showData ? 'data' : 'options');
+          this.section = this.section || (this.showData ? 'data' : _.get(visType, 'editorConfig.optionTabs[0].name'));
         }
       });
     }
