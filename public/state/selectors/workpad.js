@@ -1,5 +1,5 @@
 import { get, find, findIndex, map } from 'lodash';
-import { fromExpression } from '../../../common/lib/ast';
+import { safeElementFromExpression } from '../../../common/lib/ast';
 import { append } from '../../lib/modify_path';
 import { getAssets } from './assets';
 
@@ -7,7 +7,7 @@ const workpadRoot = 'persistent.workpad';
 
 const appendAst = (element) => ({
   ...element,
-  ast: fromExpression(element.expression),
+  ast: safeElementFromExpression(element.expression),
 });
 
 // workpad getters

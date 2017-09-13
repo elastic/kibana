@@ -7,7 +7,7 @@ import { getPages, getElementById } from '../selectors/workpad';
 import { getValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
 import { getType } from '../../../common/types/get_type';
-import { fromExpression, toExpression } from '../../../common/lib/ast';
+import { fromExpression, toExpression, safeElementFromExpression } from '../../../common/lib/ast';
 import { interpretAst } from '../../lib/interpreter';
 import { notify } from '../../lib/notify';
 
@@ -118,7 +118,8 @@ export const fetchRenderableWithContext = createThunk('fetchRenderableWithContex
 });
 
 export const fetchRenderable = createThunk('fetchRenderable', ({ dispatch }, element) => {
-  const ast = element.ast || fromExpression(element.expression);
+  const ast = element.ast || safeElementFromExpression(element.expression);
+
   dispatch(fetchRenderableWithContext(element, ast, null));
 });
 

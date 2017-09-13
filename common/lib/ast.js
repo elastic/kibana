@@ -72,6 +72,23 @@ export function fromExpression(expression) {
   }
 }
 
+// TODO: OMG This is so bad, we need to talk about the right way to handle bad expressions since some are element based and others not
+export function safeElementFromExpression(expression) {
+  try {
+    return fromExpression(expression);
+  } catch (e) {
+    return fromExpression(
+      `markdown
+"## Crud.
+Canvas could not parse this element's expression. I am so sorry this error isn't more useful. I promise it will be soon.
+
+Thanks for understanding,
+#### Management
+"`
+    );
+  }
+}
+
 export function toExpression(astObj) {
   const validType = ['partial', 'expression', 'function'].includes(getType(astObj));
   if (!validType) {
