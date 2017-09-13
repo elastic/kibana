@@ -8,7 +8,7 @@ export class ControlEditor extends Component {
     isEditorCollapsed: true
   }
 
-  handleToggleControlVisibility() {
+  handleToggleControlVisibility = () => {
     this.setState(prevState => (
       {  isEditorCollapsed: !prevState.isEditorCollapsed }
     ));
@@ -49,7 +49,7 @@ export class ControlEditor extends Component {
         <div className="vis-editor-agg-header">
           <button
             aria-label={this.state.isEditorCollapsed ? 'Close Editor' : 'Open Editor'}
-            onClick={this.handleToggleControlVisibility.bind(this)}
+            onClick={this.handleToggleControlVisibility}
             type="button"
             className="kuiButton kuiButton--primary kuiButton--small vis-editor-agg-header-toggle"
           >

@@ -28,15 +28,19 @@ const termsAgg = (field, size, direction) => {
   };
 };
 
+const listControlDelimiter = '$$kbn_delimiter$$';
+
 class ListControl extends Control {
   constructor(controlParams, filterManager, selectOptions) {
     super(controlParams, filterManager);
 
     this.selectOptions = selectOptions;
   }
-}
 
-export const listControlDelimiter = '$$kbn_delimiter$$';
+  getMultiSelectDelimiter() {
+    return this.filterManager.delimiter;
+  }
+}
 
 export async function listControlFactory(controlParams, kbnApi) {
   const indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);

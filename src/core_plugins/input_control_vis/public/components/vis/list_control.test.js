@@ -14,6 +14,7 @@ const control = {
   },
   type: 'list',
   label: 'list control',
+  getMultiSelectDelimiter: () => { return ','; },
   value: '',
   selectOptions: [
     { label: 'choice1', value: 'choice1' },

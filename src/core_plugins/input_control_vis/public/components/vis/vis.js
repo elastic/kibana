@@ -63,7 +63,7 @@ export class InputControlVis extends Component {
 
   renderStagingButtons() {
     return (
-      <KuiFieldGroup>
+      <KuiFieldGroup className="actions">
         <KuiFieldGroupSection>
           <KuiButton
             buttonType="primary"

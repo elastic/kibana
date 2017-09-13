@@ -10,6 +10,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
     <ListControl
       control={
         Object {
+          "getMultiSelectDelimiter": [Function],
           "id": "mock-list-control",
           "label": "list control",
           "options": Object {
@@ -35,6 +36,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
     />
   </div>
   <KuiFieldGroup
+    className="actions"
     isAlignedTop={false}
   >
     <KuiFieldGroupSection
@@ -90,6 +92,7 @@ exports[`Clear btns enabled when there are values 1`] = `
     <ListControl
       control={
         Object {
+          "getMultiSelectDelimiter": [Function],
           "id": "mock-list-control",
           "label": "list control",
           "options": Object {
@@ -115,6 +118,7 @@ exports[`Clear btns enabled when there are values 1`] = `
     />
   </div>
   <KuiFieldGroup
+    className="actions"
     isAlignedTop={false}
   >
     <KuiFieldGroupSection
@@ -170,6 +174,7 @@ exports[`Renders list control 1`] = `
     <ListControl
       control={
         Object {
+          "getMultiSelectDelimiter": [Function],
           "id": "mock-list-control",
           "label": "list control",
           "options": Object {
@@ -195,6 +200,7 @@ exports[`Renders list control 1`] = `
     />
   </div>
   <KuiFieldGroup
+    className="actions"
     isAlignedTop={false}
   >
     <KuiFieldGroupSection
@@ -270,6 +276,7 @@ exports[`Renders range control 1`] = `
     />
   </div>
   <KuiFieldGroup
+    className="actions"
     isAlignedTop={false}
   >
     <KuiFieldGroupSection

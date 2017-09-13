@@ -2,7 +2,6 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Select from 'react-select';
 import { FormRow } from './form_row';
-import { listControlDelimiter } from '../../control/list_control_factory';
 
 export class ListControl extends Component {
   constructor(props) {
@@ -38,7 +37,7 @@ export class ListControl extends Component {
           placeholder="Select..."
           multi={this.props.control.options.multiselect}
           simpleValue={true}
-          delimiter={listControlDelimiter}
+          delimiter={this.props.control.getMultiSelectDelimiter()}
           value={this.props.control.value}
           options={this.props.control.selectOptions}
           onChange={this.handleOnChange}
