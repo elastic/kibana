@@ -72,8 +72,6 @@ export default new Fn({
       },
     };
 
-    console.log(JSON.stringify(body, null, ' '));
-
     return fetch(`${handlers.serverUri}/api/timelion/run`, {
       method: 'POST',
       responseType: 'json',
