@@ -15,6 +15,13 @@ const simpleTemplate = ({ onValueChange, columns, argValue, renderError }) => {
 
   // TODO: Garbage, we could make a much nicer math form that can handle way more.
   function getFormObject() {
+    if (argValue === '') {
+      return {
+        fn: '',
+        column: '',
+      };
+    }
+
     try {
       // check if the value is a math expression, and set its type if it is
       const mathObj = parse(argValue);
@@ -63,7 +70,7 @@ const simpleTemplate = ({ onValueChange, columns, argValue, renderError }) => {
         inputRef={ref => inputRefs.column = ref}
         onChange={updateFunctionValue}
       >
-        <option value="select" disabled>select column</option>
+        <option value="" disabled>select column</option>
         { sortBy(columns, 'name').map(column => <option key={column.name} value={column.name}>{column.name}</option>) }
       </FormControl>
     </div>
