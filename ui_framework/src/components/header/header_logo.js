@@ -14,7 +14,8 @@ export const KuiHeaderLogo = ({ href, className, ...rest }) => {
     <a href={href} className={classes} {...rest}>
       <KuiIcon
         className="kuiHeaderLogo__icon"
-        type="kibanaLogo"
+        type="logoKibana"
+        size="xLarge"
         title="Go to Kibana home page"
       />
     </a>

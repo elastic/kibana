@@ -3,30 +3,34 @@ import React from 'react';
 import {
   KuiIcon,
   KuiFlexGrid,
-  KuiFlexItem,
+  KuiFlexItemPanel,
   KuiText,
 } from '../../../../components';
 
 const iconTypes = [
-  'kibanaLogo',
+  'logoKibana',
   'logoSlack',
   'logoGmail',
   'logoWebhook',
+  'logoElasticStack',
+  'logoBeats',
+  'logoLogstash',
+  'logoXpack',
 ];
 
 export default () => (
   <KuiFlexGrid columns={4}>
     {
       iconTypes.map(iconType => (
-        <KuiFlexItem className="guideDemo__icon" key={iconType}>
+        <KuiFlexItemPanel className="guideDemo__icon" key={iconType}>
           <KuiIcon
             type={iconType}
             size="large"
           />
-          <KuiText>
+          <KuiText size="small">
             <p>{iconType}</p>
           </KuiText>
-        </KuiFlexItem>
+        </KuiFlexItemPanel>
       ))
     }
   </KuiFlexGrid>

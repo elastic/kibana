@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="16" height="16" viewBox="0 0 16 16">
+  <defs>
+    <path id="grid-a" d="M1,5 L1,1 L5,1 L5,5 L1,5 Z M4,4 L4,2 L2,2 L2,4 L4,4 Z M6,5 L6,1 L10,1 L10,5 L6,5 Z M9,4 L9,2 L7,2 L7,4 L9,4 Z M11,5 L11,1 L15,1 L15,5 L11,5 Z M12,4 L14,4 L14,2 L12,2 L12,4 Z M1,10 L1,6 L5,6 L5,10 L1,10 Z M4,9 L4,7 L2,7 L2,9 L4,9 Z M6,10 L6,6 L10,6 L10,10 L6,10 Z M9,9 L9,7 L7,7 L7,9 L9,9 Z M11,10 L11,6 L15,6 L15,10 L11,10 Z M14,9 L14,7 L12,7 L12,9 L14,9 Z M1,15 L1,11 L5,11 L5,15 L1,15 Z M2,14 L4,14 L4,12 L2,12 L2,14 Z M6,15 L6,11 L10,11 L10,15 L6,15 Z M7,14 L9,14 L9,12 L7,12 L7,14 Z M11,15 L11,11 L15,11 L15,15 L11,15 Z M12,14 L14,14 L14,12 L12,12 L12,14 Z"/>
+  </defs>
+  <g>
+    <use fill-rule="nonzero" xlink:href="#grid-a"/>
+  </g>
+</svg>

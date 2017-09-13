@@ -52,9 +52,10 @@ export default props => (
           </p>
           <p>
             New icons should be placed in
-            the <KuiCode>/icons/assets/</KuiCode> folder on a 16x16 empty canvas.
-            Icons should in the general set should be mono-color and the code
-            itself should not contain any fill attributes. Use the SVGO plugin
+            the <KuiCode>/icons/assets/</KuiCode> folder on
+            a <KuiCode>16x16</KuiCode> empty canvas.
+            Icons in the general set should be monochromatic and the code
+            itself <strong>should not contain any fill attributes</strong>. Use the SVGO plugin
             for Sketch when exporting to compress / clean your SVG of junk.
           </p>
           <p>
@@ -70,7 +71,7 @@ export default props => (
     />
 
     <GuideSection
-      title="App icons"
+      title="Apps"
       source={[{
         type: GuideSectionTypes.JS,
         code: appsSource,
@@ -79,7 +80,10 @@ export default props => (
         code: appsHtml,
       }]}
       text={
-        <p>App logos are exported from a 32x32 canvas and can contain multiple colors.</p>
+        <p>
+          App logos are usually displayed at <KuiCode>32x32</KuiCode> or above
+          and can contain multiple colors.
+        </p>
       }
       demo={
         <Apps />
@@ -87,7 +91,7 @@ export default props => (
     />
 
     <GuideSection
-      title="Product icons"
+      title="Logos"
       source={[{
         type: GuideSectionTypes.JS,
         code: logosSource,
@@ -117,7 +121,7 @@ export default props => (
       text={
         <p>
           Use the <KuiCode>size</KuiCode> prop to automatically size your icons.
-          Medium is the most common, and will output a 16x16 icons.
+          Medium is the default, and will output a <KuiCode>16x16</KuiCode> icons.
         </p>
       }
       demo={
