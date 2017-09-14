@@ -2730,31 +2730,45 @@ table {
 .kuiProgress {
   width: 100%;
   -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
   border: none;
   vertical-align: middle;
   position: relative;
   overflow: hidden; }
   .kuiProgress.kuiProgress--primary::-webkit-progress-value {
     background-color: #4da1c0; }
+  .kuiProgress.kuiProgress--primary::-moz-progress-bar {
+    background-color: #4da1c0; }
   .kuiProgress.kuiProgress--primary.kuiProgress--indeterminate:before {
     background-color: #4da1c0; }
   .kuiProgress.kuiProgress--secondary::-webkit-progress-value {
+    background-color: #00A69B; }
+  .kuiProgress.kuiProgress--secondary::-moz-progress-bar {
     background-color: #00A69B; }
   .kuiProgress.kuiProgress--secondary.kuiProgress--indeterminate:before {
     background-color: #00A69B; }
   .kuiProgress.kuiProgress--warning::-webkit-progress-value {
     background-color: #E5830E; }
+  .kuiProgress.kuiProgress--warning::-moz-progress-bar {
+    background-color: #E5830E; }
   .kuiProgress.kuiProgress--warning.kuiProgress--indeterminate:before {
     background-color: #E5830E; }
   .kuiProgress.kuiProgress--danger::-webkit-progress-value {
+    background-color: #bf4d4d; }
+  .kuiProgress.kuiProgress--danger::-moz-progress-bar {
     background-color: #bf4d4d; }
   .kuiProgress.kuiProgress--danger.kuiProgress--indeterminate:before {
     background-color: #bf4d4d; }
   .kuiProgress.kuiProgress--accent::-webkit-progress-value {
     background-color: #DD0A73; }
+  .kuiProgress.kuiProgress--accent::-moz-progress-bar {
+    background-color: #DD0A73; }
   .kuiProgress.kuiProgress--accent.kuiProgress--indeterminate:before {
     background-color: #DD0A73; }
   .kuiProgress.kuiProgress--subdued::-webkit-progress-value {
+    background-color: #444; }
+  .kuiProgress.kuiProgress--subdued::-moz-progress-bar {
     background-color: #444; }
   .kuiProgress.kuiProgress--subdued.kuiProgress--indeterminate:before {
     background-color: #444; }
@@ -2794,6 +2808,9 @@ table {
 
 /* Now the value part */
 .kuiProgress::-webkit-progress-value {
+  transition: all 250ms linear; }
+
+.kuiProgress::-mox-progress-bar {
   transition: all 250ms linear; }
 
 @-webkit-keyframes kuiProgress {

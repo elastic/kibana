@@ -1,6 +1,6 @@
 .kuiProgress {
 	width: 100%;
-	-webkit-appearance: none;
+	appearance: none;
 	border: none;
   vertical-align: middle;
 	position: relative;
@@ -19,7 +19,12 @@
 	@each $name, $color in $kuiProgressColors {
 
 		&.kuiProgress--#{$name} {
+
 			&::-webkit-progress-value {
+				background-color: $color;
+			}
+
+			&::-moz-progress-bar {
 				background-color: $color;
 			}
 
@@ -86,6 +91,10 @@
 
 /* Now the value part */
 .kuiProgress::-webkit-progress-value {
+  transition: all $kuiAnimSpeedNormal linear;
+}
+
+.kuiProgress::-mox-progress-bar {
   transition: all $kuiAnimSpeedNormal linear;
 }
 
