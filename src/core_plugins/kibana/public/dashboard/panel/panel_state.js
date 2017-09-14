@@ -2,6 +2,7 @@ export const DEFAULT_PANEL_WIDTH = 6;
 export const DEFAULT_PANEL_HEIGHT = 3;
 
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../dashboard_constants';
+import chrome from 'ui/chrome';
 
 /**
  * Represents a panel on a grid. Keeps track of position in the grid and what visualization it
@@ -96,6 +97,7 @@ export function createPanelState(id, type, panelIndex, currentPanels) {
       y,
       i: panelIndex.toString()
     },
+    version: chrome.getKibanaVersion(),
     panelIndex: panelIndex,
     type: type,
     id: id

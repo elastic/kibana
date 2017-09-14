@@ -1,4 +1,5 @@
 import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from 'plugins/kibana/dashboard/panel/panel_state';
+import chrome from 'ui/chrome';
 
 import _ from 'lodash';
 
@@ -31,38 +32,12 @@ export class PanelUtils {
       w: panel.size_x || DEFAULT_PANEL_WIDTH,
       h: panel.size_y || DEFAULT_PANEL_HEIGHT,
       i: panel.panelIndex.toString(),
-      version: 6,
+      version: chrome.getKibanaVersion(),
     };
     delete panel.size_x;
     delete panel.size_y;
     delete panel.row;
     delete panel.col;
-  }
-
-  /**
-   * Ensures that the panel object has the latest size/pos info.
-   * @param {PanelState} panel
-   * @param {Element} panelElement - jQuery element representing the element in the UI
-   */
-  static refreshSizeAndPosition(panel, panelElement) {
-    const data = panelElement.coords().grid;
-    panel.size_x = data.size_x;
-    panel.size_y = data.size_y;
-    panel.col = data.col;
-    panel.row = data.row;
-  }
-
-  /**
-   * Ensures that the grid element matches the latest size/pos info in the panel element.
-   * @param {PanelState} panel
-   * @param {Element} panelElement - jQuery element representing the element in the UI
-   */
-  static refreshElementSizeAndPosition(panel, panelElement) {
-    const data = panelElement.coords().grid;
-    data.size_x = panel.size_x;
-    data.size_y = panel.size_y;
-    data.col = panel.col;
-    data.row = panel.row;
   }
 
   /**

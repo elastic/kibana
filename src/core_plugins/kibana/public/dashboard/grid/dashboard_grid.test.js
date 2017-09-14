@@ -6,6 +6,8 @@ import { PanelUtils } from '../panel/panel_utils';
 import { DashboardGrid } from './dashboard_grid';
 import { DashboardPanel } from '../panel/dashboard_panel';
 
+jest.mock('ui/chrome', () => ({ getKibanaVersion: () => '6.0.0' }), { virtual: true });
+
 const getContainerApi = () => {
   return {
     addFilter: () => {},

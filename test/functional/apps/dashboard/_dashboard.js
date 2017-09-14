@@ -140,7 +140,11 @@ export default function ({ getService, getPageObjects }) {
           if (newPanelDimensions.length < 0) {
             throw new Error('No panel dimensions...');
           }
-          expect(newPanelDimensions[0].width).to.equal(currentPanelDimensions[0].width * 2);
+          // Some margin of error is allowed, I've noticed it being off by one pixel. Probably something to do with
+          // an odd width and dividing by two. Note that if we add margins, we'll have to adjust this as well.
+          const marginOfError = 5;
+          expect(newPanelDimensions[0].width).to.be.lessThan(currentPanelDimensions[0].width * 2 + marginOfError);
+          expect(newPanelDimensions[0].width).to.be.greaterThan(currentPanelDimensions[0].width * 2 - marginOfError);
         });
       });
     });
