@@ -1,7 +1,4 @@
-export const DEFAULT_PANEL_WIDTH = 6;
-export const DEFAULT_PANEL_HEIGHT = 3;
-
-import { DASHBOARD_GRID_COLUMN_COUNT } from '../dashboard_constants';
+import { DASHBOARD_GRID_COLUMN_COUNT, DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from '../dashboard_constants';
 import chrome from 'ui/chrome';
 
 /**

@@ -2,7 +2,7 @@ import expect from 'expect.js';
 
 import {
   DEFAULT_PANEL_WIDTH,
-} from '../../../../src/core_plugins/kibana/public/dashboard/panel/panel_state';
+} from '../../../../src/core_plugins/kibana/public/dashboard/dashboard_constants';
 
 import {
   VisualizeConstants

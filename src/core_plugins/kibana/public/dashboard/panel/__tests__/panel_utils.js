@@ -1,5 +1,5 @@
 import { PanelUtils } from '../panel_utils';
-import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from '../panel_state';
+import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from '../../dashboard_constants';
 
 describe('PanelUtils', function () {
   it('convertOldPanelData gives supplies width and height when missing', () => {
