@@ -55,13 +55,15 @@ export async function ensureTypesExist({ log, indexName, callCluster, types }) {
           properties: {
             [type.name]: type.mapping
           }
-        }
+        },
+        update_all_types: true
       });
     } else {
       await callCluster('indices.putMapping', {
         index: indexName,
         type: type.name,
-        body: type.mapping
+        body: type.mapping,
+        update_all_types: true
       });
     }
   }
