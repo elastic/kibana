@@ -1,0 +1,99 @@
+.kuiProgress {
+	width: 100%;
+	-webkit-appearance: none;
+	border: none;
+  vertical-align: middle;
+	position: relative;
+	overflow: hidden;
+
+	// Progress bars come in different colors.
+	$kuiProgressColors: (
+		primary: $kuiColorPrimary,
+		secondary: $kuiColorSecondary,
+		warning: $kuiColorWarning,
+		danger: $kuiColorDanger,
+		accent: $kuiColorAccent,
+		subdued: $kuiColorMediumShade,
+	);
+
+	@each $name, $color in $kuiProgressColors {
+
+		&.kuiProgress--#{$name} {
+			&::-webkit-progress-value {
+				background-color: $color;
+			}
+
+			&.kuiProgress--indeterminate {
+				&:before {
+					background-color: $color;
+				}
+			}
+		}
+	}
+
+	// Progress bars come in different sizes.
+	$kuiProgressSizes: (
+		xs: $kuiSizeXS / 2,
+		s: $kuiSizeXS,
+		m: $kuiSizeS,
+		l: $kuiSize,
+	);
+
+	@each $name, $size in $kuiProgressSizes {
+		&.kuiProgress--#{$name} {
+			height: $size;
+		}
+	}
+
+	// Progress bars can be set to fixed or absolute.
+  &.kuiProgress--fixed, &.kuiProgress--absolute {
+		top: 0;
+		left: 0;
+		right: 0;
+
+		&::-webkit-progress-bar {
+			background-color: transparent;
+		}
+	}
+
+  &.kuiProgress--fixed {
+		position: fixed;
+	}
+
+  &.kuiProgress--absolute {
+		position: absolute;
+	}
+
+	// An indeterminate bar has an unreliable end time.
+	&.kuiProgress--indeterminate {
+		&:before {
+			position: absolute;
+			content: "";
+			width: 100%;
+			top: 0;
+			bottom: 0;
+			left: 0;
+			transform: scaleX(0) translateX(0%);
+      animation: kuiProgress 1s $kuiAnimSlightResistance infinite;
+		}
+	}
+}
+
+/* All good till now. Now we'll style the background */
+.kuiProgress::-webkit-progress-bar {
+	background-color: $kuiColorLightShade;
+}
+
+/* Now the value part */
+.kuiProgress::-webkit-progress-value {
+  transition: all $kuiAnimSpeedNormal linear;
+}
+
+@keyframes kuiProgress {
+  0% {
+    transform: scaleX(1) translateX(-100%);
+  }
+  100% {
+    transform: scaleX(1) translateX(100%);
+  }
+}

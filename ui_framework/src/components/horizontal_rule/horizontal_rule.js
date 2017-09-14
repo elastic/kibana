@@ -45,7 +45,7 @@ KuiHorizontalRule.propTypes = {
   children: PropTypes.node,
   className: PropTypes.string,
   size: PropTypes.oneOf(SIZES),
-  margine: PropTypes.oneOf(MARGINS),
+  margin: PropTypes.oneOf(MARGINS),
 };
 
 KuiHorizontalRule.defaultProps = {

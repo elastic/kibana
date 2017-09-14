@@ -1,0 +1,3 @@
+export {
+  KuiProgress,
+} from './progress';

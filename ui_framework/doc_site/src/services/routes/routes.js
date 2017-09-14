@@ -66,6 +66,9 @@ import LoadingExample
 import PopoverExample
   from '../../views/popover/popover_example';
 
+import ProgressExample
+  from '../../views/progress/progress_example';
+
 import SideNavExample
   from '../../views/side_nav/side_nav_example';
 
@@ -174,6 +177,10 @@ const components = [{
 }, {
   name: 'Popover',
   component: PopoverExample,
+  hasReact: true,
+}, {
+  name: 'Progress',
+  component: ProgressExample,
   hasReact: true,
 }, {
   name: 'SideNav',
