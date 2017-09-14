@@ -7,7 +7,7 @@ describe('UrlFormat', function () {
     const url = new UrlFormat();
 
     expect(url.convert('http://elastic.co', 'html'))
-      .to.be('<span ng-non-bindable><a href="http://elastic.co" target="_blank">http://elastic.co</a></span>');
+      .to.be('<span ng-non-bindable><a href="http://elastic.co" target="_blank" rel="noopener">http://elastic.co</a></span>');
   });
 
   it('outputs an <image> if type === "img"', function () {
@@ -21,7 +21,7 @@ describe('UrlFormat', function () {
     it('accepts a template', function () {
       const url = new UrlFormat({ urlTemplate: 'url: {{ value }}' });
       expect(url.convert('url', 'html'))
-        .to.be('<span ng-non-bindable><a href="url: url" target="_blank">url: url</a></span>');
+        .to.be('<span ng-non-bindable><a href="url: url" target="_blank" rel="noopener">url: url</a></span>');
     });
 
     it('only outputs the url if the contentType === "text"', function () {
@@ -34,7 +34,7 @@ describe('UrlFormat', function () {
     it('accepts a template', function () {
       const url = new UrlFormat({ labelTemplate: 'extension: {{ value }}' });
       expect(url.convert('php', 'html'))
-        .to.be('<span ng-non-bindable><a href="php" target="_blank">extension: php</a></span>');
+        .to.be('<span ng-non-bindable><a href="php" target="_blank" rel="noopener">extension: php</a></span>');
     });
 
     it('uses the label template for text formating', function () {
