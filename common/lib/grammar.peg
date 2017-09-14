@@ -48,20 +48,20 @@ function_name
 
  /* ----- Arguments ----- */
 
-argument
- = space? name:function_name space? '=' space? value:arg_type {
+argument_assignment
+ = space? name:function_name space? '=' space? value:argument {
   return {name: name, value: value};
  }
- / value:arg_type {return {name: '_', value: value}}
+ / value:argument {return {name: '_', value: value}}
 
-arg_type
+argument
  = '{' space? expression:expression space? '}' { return expression; }
  / partial_expression
  / literal
 
 
 arg_list
- = space first:argument* rest:(space arg:argument {return arg})* space? {
+ = space first:argument_assignment* rest:(space arg:argument_assignment {return arg})* space? {
   const orderedArgs = first.concat(rest);
   const args = {};
   orderedArgs.forEach((arg) => {
@@ -85,11 +85,11 @@ phrase
 
 unquoted_string_or_number
  // Make sure we're not matching the beginning of a search
- = string:[^"'(){}<>\[\]$`|=\ \t\n\r]+ { // this also matches numbers via Number()
+ = string:unquoted+ { // this also matches numbers via Number()
    var result = string.join('');
    // Sort of hacky, but PEG doesn't have backtracking so
    // a number rule is hard to read, and performs worse
-   if (isNaN(Number(result))) return result;
+   if (isNaN(Number(result))) return result; // 5bears
    return Number(result);
   }
 
@@ -102,6 +102,10 @@ null
 
 space
  = [\ \t\r\n]+
+
+unquoted
+ = "\\" sequence:([\"'(){}<>\[\]$`|=\ \t\n\r] / "\\") { return sequence; }
+ / [^"'(){}<>\[\]$`|=\ \t\n\r]
 
 dq_char
   = "\\" sequence:('"' / "\\") { return sequence; }
