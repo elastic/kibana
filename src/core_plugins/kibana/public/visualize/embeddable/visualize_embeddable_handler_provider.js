@@ -8,8 +8,9 @@ export function visualizeEmbeddableHandlerProvider(Private) {
     savedVisualizations,
     timefilter,
     Notifier,
-    Promise) => {
-    return new VisualizeEmbeddableHandler($compile, $rootScope, savedVisualizations, timefilter, Notifier, Promise);
+    Promise,
+    Private) => {
+    return new VisualizeEmbeddableHandler($compile, $rootScope, savedVisualizations, timefilter, Notifier, Promise, Private);
   };
   return Private(VisualizeEmbeddableHandlerProvider);
 }
