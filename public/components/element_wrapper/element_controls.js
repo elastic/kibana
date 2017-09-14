@@ -20,9 +20,6 @@ export const ElementControls = pure((props) => {
     size,
   } = props;
 
-  // TODO: pass in render element dimensions
-  const selectedClassName = isSelected ? 'selected' : '';
-
   const selectHandler = (ev) => {
     ev && ev.stopPropagation();
     selectElement();
@@ -39,7 +36,7 @@ export const ElementControls = pure((props) => {
 
   return (
     <div
-      className={`canvas__workpad--element ${selectedClassName}`}
+      className={`canvas__workpad--element ${isSelected ? 'selected' : ''}`}
       onClick={selectHandler}
     >
       {/*
