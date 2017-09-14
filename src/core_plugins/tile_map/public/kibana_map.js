@@ -663,7 +663,7 @@ export class KibanaMap extends EventEmitter {
       if (!centerFromUIState || centerFromMap.lon !== centerFromUIState[1] || centerFromMap.lat !== centerFromUIState[0]) {
         visualization.uiStateVal('mapCenter', [centerFromMap.lat, centerFromMap.lon]);
       }
-      uiState.set('mapBounds', this.getUntrimmedBounds());
+      visualization.sessionState.mapBounds = this.getUntrimmedBounds();
     }
 
     this.on('dragend', persistMapStateInUiState);

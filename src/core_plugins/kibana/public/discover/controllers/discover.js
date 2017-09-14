@@ -352,11 +352,7 @@ function discoverController(
         }
       });
 
-      $scope.$watch('state.query', (newQuery) => {
-        $state.query = migrateLegacyQuery(newQuery);
-
-        $scope.fetch();
-      });
+      $scope.$watch('state.query', $scope.updateQueryAndFetch);
 
       $scope.$watchMulti([
         'rows',
@@ -460,13 +456,13 @@ function discoverController(
     .catch(notify.error);
   };
 
-  $scope.updateQuery = function (query) {
+  $scope.updateQueryAndFetch = function (query) {
     // reset state if language changes
     if ($state.query.language && $state.query.language !== query.language) {
       $state.filters = [];
     }
-
-    $state.query = query;
+    $state.query = migrateLegacyQuery(query);
+    $scope.fetch();
   };
 
   $scope.searchSource.onBeginSegmentedFetch(function (segmented) {
@@ -533,9 +529,11 @@ function discoverController(
 
       if ($scope.opts.timefield) {
         $scope.searchSource.rawResponse = merged;
-        responseHandler($scope.vis, merged).then(resp => {
-          $scope.visData = resp;
-        });
+        Promise
+          .resolve(responseHandler($scope.vis, merged))
+          .then(resp => {
+            $scope.visData = resp;
+          });
       }
 
       $scope.hits = merged.hits.total;
@@ -712,11 +710,11 @@ function discoverController(
     if (stateVal && !stateValFound) {
       const err = '"' + stateVal + '" is not a configured pattern ID. ';
       if (own) {
-        notify.warning(err + ' Using the saved index pattern: "' + own.id + '"');
+        notify.warning(`${err} Using the saved index pattern: "${own.title}" (${own.id})`);
         return own;
       }
 
-      notify.warning(err + ' Using the default index pattern: "' + loaded.id + '"');
+      notify.warning(`${err} Using the default index pattern: "${loaded.title}" (${loaded.id})`);
     }
     return loaded;
   }

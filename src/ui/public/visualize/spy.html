@@ -27,6 +27,7 @@
         <option
           ng-repeat="mode in modes.inOrder"
           value="{{mode.name}}"
+          data-test-subj="spyModeSelect-{{ mode.name }}"
         >
           {{mode.display}}
         </option>

@@ -7,6 +7,9 @@ export function statsMixin(kbnServer, server) {
    *  @name server.getKibanaStats
    *  @param {Object} options
    *  @property {Function} options.callCluster method for calling the elasticsearch cluster
+   *
+   *  NOTE: this API will be moved out to an external plugin in 6.1, and likely
+   *  have breaking changes in the format of the response data
    */
   server.decorate('server', 'getKibanaStats', async ({ callCluster }) => {
     const savedObjectsClient = server.savedObjectsClientFactory({ callCluster });
@@ -14,18 +17,5 @@ export function statsMixin(kbnServer, server) {
       server.config().get('kibana.index'),
       savedObjectsClient
     );
-  });
-
-  server.route({
-    method: 'GET',
-    path: '/api/stats',
-    handler: function (request, reply) {
-      const stats = getStats(
-        server.config().get('kibana.index'),
-        request.getSavedObjectsClient()
-      );
-
-      return reply(stats);
-    }
   });
 }

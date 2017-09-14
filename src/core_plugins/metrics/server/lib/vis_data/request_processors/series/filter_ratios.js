@@ -3,7 +3,7 @@ const filter = metric => metric.type === 'filter_ratio';
 import bucketTransform from '../../helpers/bucket_transform';
 import _ from 'lodash';
 export default function ratios(req, panel, series) {
-  return () => doc => {
+  return next => doc => {
     if (series.metrics.some(filter)) {
       series.metrics.filter(filter).forEach(metric => {
         _.set(doc, `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}-numerator.filter`, {
@@ -17,12 +17,16 @@ export default function ratios(req, panel, series) {
         let denominatorPath =  `${metric.id}-denominator>_count`;
 
         if (metric.metric_agg !== 'count' && bucketTransform[metric.metric_agg]) {
-          const aggBody = {
-            metric: bucketTransform[metric.metric_agg]({
+          let metricAgg;
+          try {
+            metricAgg = bucketTransform[metric.metric_agg]({
               type: metric.metric_agg,
               field: metric.field
-            })
-          };
+            });
+          } catch (e) {
+            metricAgg = {};
+          }
+          const aggBody = { metric: metricAgg };
           _.set(doc, `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}-numerator.aggs`, aggBody);
           _.set(doc, `aggs.${series.id}.aggs.timeseries.aggs.${metric.id}-denominator.aggs`, aggBody);
           numeratorPath = `${metric.id}-numerator>metric`;
@@ -40,6 +44,6 @@ export default function ratios(req, panel, series) {
         });
       });
     }
-    return doc;
+    return next(doc);
   };
 }

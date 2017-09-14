@@ -6,7 +6,7 @@ import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
-import { htmlIdGenerator } from '../../lib/html_id_generator';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 export const FilterRatioAgg = props => {
   const {
@@ -28,6 +28,8 @@ export const FilterRatioAgg = props => {
 
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
+
+  const restrictMode = model.metric_agg === 'cardinality' ? 'none' : 'numeric';
 
   return (
     <AggRow
@@ -91,7 +93,7 @@ export const FilterRatioAgg = props => {
                 id={htmlId('aggField')}
                 fields={fields}
                 type={model.metric_agg}
-                restrict="numeric"
+                restrict={restrictMode}
                 indexPattern={indexPattern}
                 value={model.field}
                 onChange={handleSelectChange('field')}

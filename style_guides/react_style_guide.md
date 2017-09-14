@@ -5,14 +5,14 @@ Stateless function components are more concise, and there are plans for react to
 Good:
 ```
 export function KuiButton(props) {
-  return <button className="kuiButton" { ...props } />
+  return <button className="kuiButton" {...props} />
 };
 ```
 Bad:
 ```
 export class KuiButton extends React.Component {
   render() {
-    return <button className="kuiButton" { ...this.props } />
+    return <button className="kuiButton" {...this.props} />
   }
 }
 ```
@@ -30,7 +30,7 @@ export class ClickCounter extends React.Component {
   }
 
   render() {
-    return <button className="kuiButton" onClick={ this.onClick } />
+    return <button className="kuiButton" onClick={this.onClick} />
   }
 }
 ```
@@ -48,7 +48,7 @@ Bad:
     }));
   },
   render() {
-    return <button className="kuiButton" onClick={ this.onClick } />
+    return <button className="kuiButton" onClick={this.onClick} />
   }
 });
 ```
@@ -76,7 +76,10 @@ This will be even more important when the fibers-based implementation is release
  - https://www.youtube.com/watch?v=ZCuYPiUIONs
 
 ### Prefer reactDirective over react-component
-reactDirective and react-component are two different ways of embedding react in angular. Using `react-component` means adding a bunch of components into angular, while `reactDirective` keeps them isolated, and is also a more succinct syntax.
+When using ngReact to embed your react components inside angular html, prefer
+reactDirective over react-component. You can read more about these two ngReact methods [here](https://github.com/ngReact/ngReact#features).
+Using `react-component` means adding a bunch of components into angular, while `reactDirective` keeps them isolated,
+and is also a more succinct syntax.
 
 Good:
 ```
@@ -92,14 +95,14 @@ Good:
 ```
 button.js:
 export function KuiButton(props) {
-  return <button className="kuiButton" { ...props } />
+  return <button className="kuiButton" {...props} />
 };
 ```
 Bad:
 ```
 button.js:
 export function Button(props) {
-  return <button className="kuiButton" { ...props } />
+  return <button className="kuiButton" {...props} />
 };
 ```
 The filenames leave it off because snake casing already increases file name length.
@@ -108,8 +111,8 @@ The filenames leave it off because snake casing already increases file name leng
 
 Name action functions in the form of a strong verb and passed properties in the form of on<Subject><Change>. E.g:
 ```
-<sort-button onClick={ action.sort }/>
-<pagerButton onPageNext={ action.turnToNextPage } />
+<sort-button onClick={action.sort}/>
+<pagerButton onPageNext={action.turnToNextPage} />
 ```
 
 ### Avoid creating a function and passing that as a property, in render functions.
@@ -124,7 +127,7 @@ export class ClickCounter extends React.Component {
   }
 
   render() {
-    return <button className="kuiButton" onClick={ this.onClick } />
+    return <button className="kuiButton" onClick={this.onClick} />
   }
 }
 ```
@@ -141,7 +144,7 @@ export class ClickCounter extends React.Component {
   }
 
   render() {
-    return <button className="kuiButton" onClick={ this.onClick } />
+    return <button className="kuiButton" onClick={this.onClick} />
   }
 }
 ```
@@ -156,10 +159,18 @@ export class ClickCounter extends React.Component {
   }
 
   render() {
-    return <button className="kuiButton" onClick={ () => this.onClick() } />
+    return <button className="kuiButton" onClick={() => this.onClick()} />
   }
 }
 ```
+
+Also Bad:
+```
+  render() {
+    return <button className="kuiButton" onClick={this.onClick.bind(this)} />
+  }
+```
+
 Background: https://facebook.github.io/react/docs/handling-events.html
 There is also an eslint rule we should be able to turn on for this.
 
@@ -193,13 +204,13 @@ this.setState({
 ### Favor spread operators
 ```
 render() {
-  return <button className="kuiButton" { ...this.props } />
+  return <button className="kuiButton" {...this.props} />
 }
 ```
 ```
 export function Button({ className, ...rest }) {
   const classNames = classNames('KuiButton', className);
-  return <button className={ classNames } { ...rest } />
+  return <button className={classNames} {...rest} />
 };
 ```
 
