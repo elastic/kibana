@@ -79,6 +79,14 @@
   max-width: 2000px !important; // React-Bootstrap popovers are hardcoded to 276px;
 }
 
-.input-invalid {
+.has-error .form-control, .has-error .form-control:focus {
+  border: 0;
+  box-shadow: none;
   border-bottom: 2px solid @red !important;
+}
+
+.has-warning .form-control, .has-warning .form-control:focus {
+  border: 0;
+  box-shadow: none;
+  border-bottom: 2px solid @orange !important;
 }
