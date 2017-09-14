@@ -1,6 +1,22 @@
 import { parse } from './grammar';
 import { getType } from '../types/get_type';
 
+function getArgumentString(arg, argKey) {
+  const type = getType(arg);
+  // TODO: MAJOR -- This breaks for single quoted strings that contain double quotes!
+
+  function maybeArgKey(argString) {
+    return (argKey == null || argKey === '_') ? argString : `${argKey}=${argString}`;
+  }
+
+  if (type === 'string') return maybeArgKey(`"${arg}"`);
+  if (type === 'boolean' || type === 'null' || type === 'number') return maybeArgKey(`${arg}`);
+  if (type === 'expression') return maybeArgKey(`{${getExpression(arg.chain)}}`);
+  if (type === 'partial') return maybeArgKey(`.{${getExpression(arg.chain)}}`);
+
+  throw new Error(`Invalid argument type in AST: ${type}`);
+}
+
 function getExpressionArgs(block) {
   const args = block.arguments;
 
@@ -10,23 +26,7 @@ function getExpressionArgs(block) {
   return argKeys.map((argKey) => {
     const multiArgs = args[argKey];
 
-    return multiArgs.reduce((acc, arg) => {
-      const type = getType(arg);
-      if (type === 'string') {
-        if (argKey === '_') return acc.concat(`"${arg}"`);
-        return acc.concat(`${argKey}="${arg}"`);
-      }
-
-      if (type === 'boolean' || type === 'null' || type === 'number') {
-        if (argKey === '_') return acc.concat(`${arg}`);
-        return acc.concat(`${argKey}=${arg}`);
-      }
-
-      if (type === 'expression') return acc.concat(`${argKey}={${getExpression(arg.chain)}}`);
-      if (type === 'partial') return acc.concat(`${argKey}=.{${getExpression(arg.chain)}}`);
-
-      throw new Error(`Invalid argument type in AST: ${type}`);
-    }, []).join(' ');
+    return multiArgs.reduce((acc, arg) => acc.concat(getArgumentString(arg, argKey)), []).join(' ');
   });
 }
 
@@ -56,17 +56,9 @@ function getExpression(chain) {
   }, []).join(' | ');
 }
 
-export function fromExpression(expression) {
-  if (typeof expression === 'string') {
-    if (expression.length === 0) return;
-
-    // handle string values, stripping quotes
-    const matches = expression.match(/^\"(.+)\"$/);
-    if (matches) return matches[1];
-  }
-
+export function fromExpression(expression, type = 'expression') {
   try {
-    return parse(expression);
+    return parse(expression, { startRule: type });
   } catch (e) {
     throw new Error(`Unable to parse expression: ${e.message}`);
   }
@@ -89,7 +81,9 @@ Thanks for understanding,
   }
 }
 
-export function toExpression(astObj) {
+export function toExpression(astObj, type = 'expression') {
+  if (type === 'argument') return getArgumentString(astObj);
+
   const validType = ['partial', 'expression', 'function'].includes(getType(astObj));
   if (!validType) {
     throw new Error('Expression must be a partial, expression, or argument function');
