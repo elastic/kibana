@@ -3,6 +3,8 @@ import WeirdControlFlow from './weird_control_flow';
 import { once } from 'lodash';
 import { join } from 'path';
 
+import { createBundlesRoute } from '../bundles_route';
+
 export default class LazyOptimizer extends BaseOptimizer {
   constructor(opts) {
     super(opts);
@@ -67,20 +69,22 @@ export default class LazyOptimizer extends BaseOptimizer {
     return join(this.compiler.outputPath, relativePath);
   }
 
-  bindToServer(server) {
-    server.route({
-      path: '/bundles/{asset*}',
-      method: 'GET',
-      handler: async (request, reply) => {
-        try {
-          const path = await this.getPath(request.params.asset);
-          return reply.file(path);
-        } catch (error) {
-          console.log(error.stack);
-          return reply(error);
-        }
-      }
+  bindToServer(server, basePath) {
+
+    // calling `build.get()` resolves when the build is
+    // "stable" (the compiler is not running) so this pauses
+    // all requests received while the compiler is running
+    // and lets the continue once it is done.
+    server.ext('onRequest', (request, reply) => {
+      this.build.get()
+        .then(() => reply.continue())
+        .catch(reply);
     });
+
+    server.route(createBundlesRoute({
+      bundlesPath: this.compiler.outputPath,
+      basePublicPath: basePath
+    }));
   }
 
   logRunStart() {

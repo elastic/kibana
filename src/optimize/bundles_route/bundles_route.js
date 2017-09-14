@@ -1,0 +1,62 @@
+import { isAbsolute, extname } from 'path';
+
+import LruCache from 'lru-cache';
+
+import { createDynamicAssetResponse } from './dynamic_asset_response';
+
+/**
+ *  Creates a route that serves files from `bundlesPath`. If the
+ *  file is js or css then it is searched for instances of
+ *  PUBLIC_PATH_PLACEHOLDER and replaces them with `publicPath`.
+ *  @param {Object} options
+ *  @property {string} options.bundlesPath
+ *  @property {string} options.basePublicPath
+ *  @return {undefined}
+ */
+export function createBundlesRoute({ bundlesPath, basePublicPath }) {
+  const cache = new LruCache(100);
+
+  if (typeof bundlesPath !== 'string' || !isAbsolute(bundlesPath)) {
+    throw new TypeError('bundlesPath must be an absolute path to the directory containing the bundles');
+  }
+
+  if (typeof basePublicPath !== 'string') {
+    throw new TypeError('basePublicPath must be a string');
+  }
+
+  if (!basePublicPath.match(/(^$|^\/.*[^\/]$)/)) {
+    throw new TypeError('basePublicPath must be empty OR start and not end with a /');
+  }
+
+  return {
+    method: 'GET',
+    path: `/bundles/{path*}`,
+    config: {
+      auth: false,
+      ext: {
+        onPreHandler: {
+          method(request, reply) {
+            const ext = extname(request.params.path);
+            if (ext !== '.js' && ext !== '.css') {
+              return reply.continue();
+            }
+
+            reply(createDynamicAssetResponse({
+              request,
+              bundlesPath,
+              cache,
+              publicPath: `${basePublicPath}/bundles/`
+            }));
+          }
+        }
+      },
+    },
+    handler: {
+      directory: {
+        path: bundlesPath,
+        listing: false,
+        lookupCompressed: true,
+      }
+    }
+  };
+}

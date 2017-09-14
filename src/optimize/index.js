@@ -1,4 +1,5 @@
 import FsOptimizer from './fs_optimizer';
+import { createBundlesRoute } from './bundles_route';
 
 export default async (kbnServer, server, config) => {
   if (!config.get('optimize.enabled')) return;
@@ -17,7 +18,11 @@ export default async (kbnServer, server, config) => {
   }
 
   const bundles = kbnServer.bundles;
-  server.exposeStaticDir('/bundles/{path*}', bundles.env.workingDir);
+  server.route(createBundlesRoute({
+    bundlesPath: bundles.env.workingDir,
+    basePublicPath: config.get('server.basePath')
+  }));
+
   await bundles.writeEntryFiles();
 
   // in prod, only bundle when someing is missing or invalid
@@ -37,7 +42,6 @@ export default async (kbnServer, server, config) => {
     env: bundles.env,
     bundles: bundles,
     profile: config.get('optimize.profile'),
-    urlBasePath: config.get('server.basePath'),
     sourceMaps: config.get('optimize.sourceMaps'),
     unsafeCache: config.get('optimize.unsafeCache'),
   });
