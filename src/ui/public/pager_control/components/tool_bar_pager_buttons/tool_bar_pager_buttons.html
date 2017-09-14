@@ -3,6 +3,7 @@
     class="kuiButton kuiButton--basic kuiButton--icon"
     ng-click="toolBarPagerButtons.previousPage()"
     ng-disabled="!toolBarPagerButtons.hasPreviousPage"
+    data-test-subj="btnPrevPage"
   >
     <span class="kuiButton__icon kuiIcon fa-chevron-left"></span>
   </button>
@@ -10,6 +11,7 @@
     class="kuiButton kuiButton--basic kuiButton--icon"
     ng-click="toolBarPagerButtons.nextPage()"
     ng-disabled="!toolBarPagerButtons.hasNextPage"
+    data-test-subj="btnNextPage"
   >
     <span class="kuiButton__icon kuiIcon fa-chevron-right"></span>
   </button>
