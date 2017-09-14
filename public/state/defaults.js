@@ -15,9 +15,9 @@ export const getDefaultElement = () => {
       angle: 0,
     },
     expression: `
-      demodata()
-      .pointseries(y="median(cost)", x=time, color="project")
-      .plot(defaultStyle=seriesStyle(lines=1))
+      demodata
+      | pointseries y="median(cost)" x=time color="project"
+      | plot defaultStyle={seriesStyle points=5} 
     `,
     filter: null,
   };
