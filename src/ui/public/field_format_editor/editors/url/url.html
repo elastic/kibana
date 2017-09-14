@@ -8,6 +8,20 @@
   </select>
 </div>
 
+<div ng-if="editor.formatParams.type == 'a'">
+  <label class="kuiCheckBoxLabel">
+    <input
+      class="kuiCheckBox"
+      type="checkbox"
+      ng-model="editor.formatParams.openLinkInCurrentTab"
+    ></input>
+    
+    <span class="kuiCheckBoxLabel__text">
+      Open link in current tab
+    </span>
+  </label>
+</div>
+
 <div class="form-group">
   <span class="pull-right text-info hintbox-label" ng-click="editor.showUrlTmplHelp = !editor.showUrlTmplHelp">
     <i class="fa fa-info"></i> Url Template Help
