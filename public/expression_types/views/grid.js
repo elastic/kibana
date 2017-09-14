@@ -11,12 +11,12 @@ export const grid = () => new View('grid', {
     new Arg('mark', {
       displayName: 'Mark Shape',
       argType: 'shape',
-      defaultValue: '"circle"',
+      defaultValue: 'circle',
     }),
     new Arg('seriesStyle', {
       displayName: 'Series Style',
       argType: 'seriesStyle',
-      defaultValue: 'seriesStyle',
+      defaultValue: '{seriesStyle points=5}',
       multi: true,
     }),
   ],

@@ -18,7 +18,7 @@ export const plot = () => new View('plot', {
       displayName: 'Default style',
       description: 'Set the style to be used by default by every series, unless overridden.',
       argType: 'seriesStyle',
-      defaultValue: 'seriesStyle points=5',
+      defaultValue: '{seriesStyle points=5}',
       options: {
         include: styleProps,
       },
@@ -26,7 +26,7 @@ export const plot = () => new View('plot', {
     new Arg('seriesStyle', {
       displayName: 'Series style',
       argType: 'seriesStyle',
-      defaultValue: 'seriesStyle lines=1',
+      defaultValue: '{seriesStyle points=5}',
       options: {
         include: styleProps,
       },

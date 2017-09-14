@@ -15,7 +15,7 @@ export const pie = () => new View('pie', {
     new Arg('seriesStyle', {
       displayName: 'Series Style',
       argType: 'seriesStyle',
-      defaultValue: 'seriesStyle',
+      defaultValue: '{seriesStyle points=5}',
       multi: true,
     }),
   ],
