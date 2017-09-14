@@ -4,9 +4,9 @@ import { getType } from '../../types/get_type';
 
 describe('ast fromExpression', () => {
   describe('invalid expression', () => {
-    it('returns undefined when empty', () => {
-      const expression = '';
-      expect(fromExpression(expression)).to.be(undefined);
+    it('throws when empty', () => {
+      const check = () => fromExpression('');
+      expect(check).to.throwException(/Unable to parse expression/i);
     });
 
     it('throws with invalid expression', () => {
@@ -23,7 +23,7 @@ describe('ast fromExpression', () => {
 
     it('is a value', () => {
       const expression = '"hello"';
-      expect(fromExpression(expression)).to.equal('hello');
+      expect(fromExpression(expression, 'argument')).to.equal('hello');
     });
 
     describe('function without arguments', () => {
