@@ -2,23 +2,6 @@ import Fn from '../fn.js';
 import { groupBy, keyBy, get, set, map, sortBy } from 'lodash';
 import chroma from 'chroma-js';
 
-/*
-esdocs(size=1000).alterColumn(column=@timestamp, type=date, name=time)
-.pointseries(x=time, y=.math("sum(bytes)"),  color=geo.country_code)
-.plot(
-  seriesStyle=seriesStyle(label='US', color=#333, line=0, bars=0.25, points=1),
-  defaultStyle=seriesStyle(label='US', color=#333, line=0, bars=0.25, points=1)
-)
-
-demodata()
-.pointseries(x=country, y=.math("sum(cost)"),  color=country)
-.plot(
-  seriesStyle=seriesStyle(label='CN', color=#c66, line=1, bars=1, points=0),
-  seriesStyle=seriesStyle(label='US', color=#6cc, line=1, bars=1, points=0),
-  defaultStyle=seriesStyle(label='US', color=#333, line=0, bars=0.25, points=0)
-)
-*/
-
 export default new Fn({
   name: 'plot',
   aliases: [],
