@@ -1,5 +1,5 @@
 import elasticsearch from 'elasticsearch';
-import { get } from 'lodash';
+import { get, set } from 'lodash';
 
 const {
   ConnectionFault,
@@ -55,6 +55,10 @@ export function decorateEsError(error) {
   }
 
   if (error instanceof BadRequest) {
+    if (error.message.match(/final mapping would have more than 1 type/)) {
+      set(error, 'body.error.type', 'type_missing_exception');
+    }
+
     return decorateBadRequestError(error, reason);
   }
 

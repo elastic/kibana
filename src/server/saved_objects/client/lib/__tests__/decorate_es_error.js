@@ -1,5 +1,6 @@
 import expect from 'expect.js';
 import { errors as esErrors } from 'elasticsearch';
+import { get } from 'lodash';
 
 import { decorateEsError } from '../decorate_es_error';
 import {
@@ -85,5 +86,13 @@ describe('savedObjectsClient/decorateEsError', () => {
     expect(error).to.not.have.property('isBoom');
     expect(decorateEsError(error)).to.be(error);
     expect(error).to.have.property('isBoom');
+  });
+
+
+  it('sets type_missing_exception on missing type error', () => {
+    const error = new esErrors.BadRequest();
+    error.message = 'Rejecting mapping update to [.kibana-6] as the final mapping would have more than 1 type: [visualization, doc]';
+    expect(decorateEsError(error)).to.be(error);
+    expect(get(error, 'body.error.type')).to.eql('type_missing_exception');
   });
 });
