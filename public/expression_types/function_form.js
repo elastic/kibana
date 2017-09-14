@@ -54,8 +54,10 @@ export class FunctionForm extends BaseForm {
     // skip arguments that aren't defined in the expression type schema
     if (!arg || arg.required || skipRender) return null;
 
+    if (arg.defaultValue != null && typeof arg.defaultValue !== 'string') throw new Error('defaultValue must be a string');
+
     // TODO: This won't always be a string just because it doesn't have a default
-    const newArgValue = fromExpression(arg.defaultValue) || [''];
+    const newArgValue = arg.defaultValue === '' ? '' : fromExpression(arg.defaultValue, 'argument');
 
     return (!argValues || arg.multi) && (
       <ArgAdd key={`${props.typeInstance.name}-${arg.name}-add`}
