@@ -6,8 +6,8 @@ import './element_wrapper.less';
 
 export const ElementWrapper = (props) => {
   const {
-    select,
-    remove,
+    selectElement,
+    removeElement,
     isSelected,
     elementTypeDefintion,
     renderable,
@@ -31,8 +31,8 @@ export const ElementWrapper = (props) => {
         Its crap, I agree. I'm open to better solutions.
       */}
       <ElementControls
-        select={select}
-        remove={remove}
+        selectElement={selectElement}
+        removeElement={removeElement}
         isSelected={isSelected}
         elementTypeDefintion={elementTypeDefintion}
         renderable={renderable}
@@ -44,8 +44,8 @@ export const ElementWrapper = (props) => {
 };
 
 ElementWrapper.propTypes = {
-  select: PropTypes.func,
-  remove: PropTypes.func,
+  selectElement: PropTypes.func,
+  removeElement: PropTypes.func,
   isSelected: PropTypes.bool,
   elementTypeDefintion: PropTypes.object,
   state: PropTypes.string,

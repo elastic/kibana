@@ -16,13 +16,11 @@ const mapStateToProps = (state, { element }) => ({
 });
 
 const mapDispatchToProps = (dispatch, { element }) => ({
-  select(ev) {
-    ev && ev.stopPropagation();
+  selectElement() {
     dispatch(selectElement(element.id));
   },
 
-  removeElementFromPage: (pageId) => (ev) => {
-    ev && ev.stopPropagation();
+  removeElement: (pageId) => () => {
     dispatch(removeElement(element.id, pageId));
   },
 
@@ -39,9 +37,9 @@ const mergeProps = (stateProps, dispatchProps, { element }) => {
   return {
     position: element.position,
     setPosition: dispatchProps.setPosition(stateProps.selectedPage),
-    remove: dispatchProps.removeElementFromPage(stateProps.selectedPage),
+    selectElement: dispatchProps.selectElement,
+    removeElement: dispatchProps.removeElement(stateProps.selectedPage),
     handlers: dispatchProps.handlers(stateProps.selectedPage),
-    select: dispatchProps.select,
     isSelected: stateProps.isSelected,
     elementTypeDefintion: elementsRegistry.get(get(renderable, 'as')),
     state: getState(stateProps.resolvedArg),

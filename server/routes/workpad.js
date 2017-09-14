@@ -1,6 +1,5 @@
 import boom from 'boom';
 import uuid from 'uuid/v4';
-import { merge } from 'lodash';
 import { INDEX_WORKPAD_SUFFIX, CANVAS_TYPE, API_ROUTE_WORKPAD } from '../../common/lib/constants';
 
 export function workpad(server) {
@@ -46,16 +45,19 @@ export function workpad(server) {
 
     return callWithRequest(request, 'get', findDoc)
     .then(({ _source }) => {
+      const body = {
+        ...request.payload,
+        '@created': _source['@created'] || (new Date()).toISOString(),
+        '@timestamp': (new Date()).toISOString(),
+      };
+
+      // const srcElements = get(_source, '')
       const doc = {
         refresh: 'wait_for',
         index: indexName,
         type: CANVAS_TYPE,
         id: workpadId,
-        body: merge(_source, {
-          ...request.payload,
-          '@created': _source['@created'] || (new Date()).toISOString(),
-          '@timestamp': (new Date()).toISOString(),
-        }),
+        body: body,
       };
 
       return callWithRequest(request, 'index', doc);
