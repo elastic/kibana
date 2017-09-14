@@ -57,14 +57,14 @@ class MathAgg extends Component {
             </div>
             <div className="vis_editor__row_item">
               <label className="vis_editor__label" htmlFor="mathExpressionInput">Expression</label>
-              <input
+              <textarea
                 id="mathExpressionInput"
                 aria-describedby="mathExpressionDescription"
                 className="vis_editor__input-grows-100"
-                type="text"
                 onChange={handleTextChange('script')}
-                value={model.script}
-              />
+              >
+                {model.script}
+              </textarea>
               <div className="vis_editor__note" id="mathExpressionDescription">
                 This field uses basic math expresions (see <a href="http://mathjs.org/docs/expressions/syntax.html" target="_blank">MathJS</a>) - Variables
                 are keys on the <code>params</code> object, i.e. <code>params.&lt;name&gt;</code> To access all the data use
