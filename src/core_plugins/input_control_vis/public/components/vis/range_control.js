@@ -1,36 +1,19 @@
 import _  from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import InputRange from 'react-input-range';
 import { FormRow } from './form_row';
 
 export class RangeControl extends Component {
-  constructor(props) {
-    super(props);
 
-    this.state = {
-      sliderValue: this.props.control.value
-    };
-
-    this.formatLabel = this.formatLabel.bind(this);
-    this.handleOnChange = this.handleOnChange.bind(this);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    this.setState({ sliderValue: nextProps.control.value });
-  }
-
-  handleOnChange(value) {
-    this.props.stageFilter(this.props.controlIndex, value);
-  }
-
-  formatLabel(value) {
-    let formatedValue = value;
-    const decimalPlaces = _.get(this.props, 'control.options.decimalPlaces');
-    if (decimalPlaces !== null && decimalPlaces >= 0) {
-      formatedValue = value.toFixed(decimalPlaces);
+  handleOnChange = (evt) => {
+    const newValue = _.cloneDeep(this.props.control.value);
+    newValue[evt.target.name] = parseFloat(evt.target.value);
+    if (newValue.min > newValue.max) {
+      const realMax = newValue.min;
+      newValue.min = newValue.max;
+      newValue.max = realMax;
     }
-    return formatedValue;
+    this.props.stageFilter(this.props.controlIndex, newValue);
   }
 
   render() {
@@ -40,16 +23,36 @@ export class RangeControl extends Component {
         label={this.props.control.label}
       >
         <div className="inputRangeContainer">
-          <InputRange
-            maxValue={this.props.control.max}
-            minValue={this.props.control.min}
+          <input
+            type="range"
+            name="min"
+            value={this.props.control.value.min}
+            min={this.props.control.min}
+            max={this.props.control.max}
             step={this.props.control.options.step}
-            value={this.state.sliderValue}
-            onChange={newValue => this.setState({ sliderValue: newValue })}
-            onChangeComplete={this.handleOnChange}
-            draggableTrack={true}
-            ariaLabelledby={this.props.control.id}
-            formatLabel={this.formatLabel}
+            onChange={this.handleOnChange}
+          />
+          <input
+            type="number"
+            value={this.props.control.value.min}
+            min={this.props.control.min}
+            max={this.props.control.max}
+          />
+          TO
+          <input
+            type="range"
+            name="max"
+            value={this.props.control.value.max}
+            min={this.props.control.min}
+            max={this.props.control.max}
+            step={this.props.control.options.step}
+            onChange={this.handleOnChange}
+          />
+          <input
+            type="number"
+            value={this.props.control.value.max}
+            min={this.props.control.min}
+            max={this.props.control.max}
           />
         </div>
       </FormRow>
