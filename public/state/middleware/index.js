@@ -5,6 +5,7 @@ import lzString from 'lz-string';
 import { esPersistMiddleware } from './es_persist';
 import { historyMiddleware } from './history';
 import { inFlight } from './in_flight';
+import { workpadUpdate } from './workpad_update';
 import { appReady } from './app_ready';
 
 const storageKey = 'canvas';
@@ -28,7 +29,14 @@ const serializer = (function () {
 }());
 
 const middlewares = [
-  applyMiddleware(thunkMiddleware, esPersistMiddleware, historyMiddleware(window), inFlight, appReady),
+  applyMiddleware(
+    thunkMiddleware,
+    esPersistMiddleware,
+    historyMiddleware(window),
+    inFlight,
+    appReady,
+    workpadUpdate,
+  ),
   persistState('persistent', { key: storageKey }),
   persistState('assets', {
     key: `${storageKey}-assets`,

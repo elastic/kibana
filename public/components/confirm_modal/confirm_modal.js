@@ -14,6 +14,7 @@ export const ConfirmModal = (props) => {
     onCancel,
     confirmButtonText,
     cancelButtonText,
+    className,
   } = props;
 
   const confirm = (ev) => {
@@ -28,17 +29,19 @@ export const ConfirmModal = (props) => {
   if (!isOpen) return null;
 
   return (
-    <KuiModalOverlay>
-      <KuiConfirmModal
-        message={message}
-        title={title}
-        onConfirm={confirm}
-        onCancel={cancel}
-        cancelButtonText={cancelButtonText || 'Cancel'}
-        confirmButtonText={confirmButtonText || 'Confirm'}
-        defaultFocusedButton="confirm"
-      />
-    </KuiModalOverlay>
+    <div className={`canvas__confirm_modal ${className || ''}`}>
+      <KuiModalOverlay>
+        <KuiConfirmModal
+          message={message}
+          title={title}
+          onConfirm={confirm}
+          onCancel={cancel}
+          cancelButtonText={cancelButtonText || 'Cancel'}
+          confirmButtonText={confirmButtonText || 'Confirm'}
+          defaultFocusedButton="confirm"
+        />
+      </KuiModalOverlay>
+    </div>
   );
 };
 
@@ -50,4 +53,5 @@ ConfirmModal.propTypes = {
   onCancel: PropTypes.func.isRequired,
   cancelButtonText: PropTypes.string,
   confirmButtonText: PropTypes.string,
+  className: PropTypes.string,
 };

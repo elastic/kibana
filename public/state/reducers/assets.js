@@ -1,13 +1,13 @@
 import { handleActions, combineActions } from 'redux-actions';
 import { set, assign, del } from 'object-path-immutable';
 import { get } from 'lodash';
-import uuid from 'uuid/v4';
 import { createAsset, setAssetValue, removeAsset, setAssets, resetAssets } from '../actions/assets';
+import { getId } from '../../lib/get_id.js';
 
 export default handleActions({
   [createAsset]: (assetState, { payload }) => {
     const asset = {
-      id: `asset-${uuid()}`,
+      id: getId('asset'),
       '@created': (new Date()).toISOString(),
       ...payload,
     };

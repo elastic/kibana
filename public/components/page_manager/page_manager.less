@@ -37,17 +37,21 @@
   .canvas__page-manager--page-controls {
     text-align: center;
 
-    .delete {
-      color: @blue;
+    > * {
+      padding: @spacingXS;
+    }
+
+    .delete,
+    .duplicate {
       font-size: @textMedium;
     }
 
-    .move-left {
-      padding-right: @spacingM;
+    .delete {
+      color: @red;
     }
 
-    .move-right {
-      padding-left: @spacingM;
+    .duplicate {
+      color: @blue;
     }
   }
 

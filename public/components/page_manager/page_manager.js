@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Button } from 'react-bootstrap';
+import { PageControls } from './page_controls';
+import { ConfirmModal } from '../confirm_modal';
 import './page_manager.less';
 
 export const PageManager = (props) => {
@@ -11,10 +13,22 @@ export const PageManager = (props) => {
     loadPage,
     addPage,
     movePage,
+    duplicatePage,
     removePage,
     withControls,
     showControls,
+    deleteId,
+    setDeleteId,
   } = props;
+
+  const confirmDelete = (pageId) => setDeleteId(pageId);
+  const resetDelete = () => setDeleteId(null);
+  const doDelete = () => {
+    resetDelete();
+    removePage(deleteId);
+  };
+
+  const pageName = page => page.id.split('-')[1].substring(0, 6);
 
   return (
     <div className="canvas__page-manager">
@@ -30,14 +44,15 @@ export const PageManager = (props) => {
               className={`body ${page.id === selectedPage ? 'selected' : ''}`}
               onClick={() => loadPage(page.id)}
             >
-              <div className="title">Page<br />{page.id.split('-')[1].substring(0, 6)}</div>
+              <div className="title">Page<br />{pageName(page)}</div>
             </div>
             {(withControls === page.id) && (
-              <div className="canvas__page-manager--page-controls">
-                <span className="fa fa-angle-double-left move-left" onClick={() => movePage(page.id, -1)} />
-                <span className="fa fa-trash delete" onClick={() => removePage(page.id)} />
-                <span className="fa fa-angle-double-right move-right" onClick={() => movePage(page.id, 1)} />
-              </div>
+              <PageControls
+                pageId={page.id}
+                movePage={movePage}
+                duplicatePage={duplicatePage}
+                removePage={confirmDelete}
+              />
             )}
           </div>
         ))}
@@ -46,6 +61,14 @@ export const PageManager = (props) => {
         <Button bsStyle="success" onClick={addPage}>Add Page</Button>
         <Button onClick={done}>Done</Button>
       </div>
+
+      <ConfirmModal
+        isOpen={deleteId != null}
+        message={'Are you sure you want to remove this page?'}
+        confirmButtonText="Remove"
+        onConfirm={doDelete}
+        onCancel={resetDelete}
+      />
     </div>
   );
 };
@@ -56,6 +79,7 @@ PageManager.propTypes = {
   loadPage: PropTypes.func.isRequired,
   addPage: PropTypes.func.isRequired,
   movePage: PropTypes.func.isRequired,
+  duplicatePage: PropTypes.func.isRequired,
   removePage: PropTypes.func.isRequired,
   selectedPage: PropTypes.string,
   withControls: PropTypes.oneOfType([
@@ -63,4 +87,6 @@ PageManager.propTypes = {
     PropTypes.bool,
   ]),
   showControls: PropTypes.func,
+  deleteId: PropTypes.string,
+  setDeleteId: PropTypes.func.isRequired,
 };

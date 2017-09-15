@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import uuid from 'uuid/v4';
 import { FunctionForm as Component } from './function_form';
 import { findExpressionType } from '../../lib/find_expression_type';
+import { getId } from '../../lib/get_id.js';
 import { createAsset } from '../../state/actions/assets';
 import {
   fetchContext,
@@ -48,7 +48,7 @@ const mapDispatchToProps = (dispatch, { expressionIndex }) => ({
   },
   onAssetAdd: (type, content) => {
     // make the ID here and pass it into the action
-    const assetId = `asset-${uuid()}`;
+    const assetId = getId('asset');
     dispatch(createAsset(type, content, assetId));
 
     // then the id, so the caller knows the id that will be created

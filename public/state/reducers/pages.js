@@ -1,6 +1,7 @@
 import { handleActions } from 'redux-actions';
 import { push, set, del, insert } from 'object-path-immutable';
 import { findIndex } from 'lodash';
+import { getId } from '../../lib/get_id.js';
 import { getDefaultPage } from '../defaults';
 import * as actions from '../actions/pages';
 
@@ -17,10 +18,29 @@ function addPage(workpadState, payload) {
   return push(workpadState, 'pages', payload || getDefaultPage());
 }
 
+function clonePage(page) {
+  // TODO: would be nice if we could more reliably know which parameters need to get a unique id
+  // this makes a pretty big assumption about the shape of the page object
+  return {
+    ...page,
+    id: getId('page'),
+    elements: page.elements.map(element => ({ ...element, id: getId('element') })),
+  };
+}
+
 export default handleActions({
   [actions.addPage]: (workpadState, { payload }) => {
     const withNewPage = addPage(workpadState, payload);
     return setPageIndex(withNewPage, withNewPage.pages.length - 1);
+  },
+
+  [actions.duplicatePage]: (workpadState, { payload }) => {
+    const srcPage = workpadState.pages.find(page => page.id === payload);
+
+    // if the page id is invalid, don't change the state
+    if (!srcPage) return workpadState;
+
+    return addPage(workpadState, clonePage(srcPage));
   },
 
   [actions.nextPage]: (workpadState) => {
