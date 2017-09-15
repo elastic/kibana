@@ -49,13 +49,29 @@ export const KuiProgress = ({
     className
   );
 
+  // Because of a FireFox issue with animation,
+  // indeterminate progress needs to use a div.
+  let progressType = null;
+  if (max) {
+    progressType = (
+      <progress
+        value={value}
+        max={max}
+        className={classes}
+        {...rest}
+      />
+    );
+  } else {
+    progressType = (
+      <div
+        className={classes}
+        {...rest}
+      />
+    );
+  }
+
   return (
-    <progress
-      value={value}
-      max={max}
-      className={classes}
-      {...rest}
-    />
+    <div>{progressType}</div>
   );
 };
 

@@ -1,3 +1,7 @@
+// https://css-tricks.com/html5-progress-element/
+// Good resource if you need to work in here. There's some gotchas with
+// dealing with cross-browser progress bars.
+
 .kuiProgress {
 	width: 100%;
 	appearance: none;
@@ -5,6 +9,7 @@
   vertical-align: middle;
 	position: relative;
 	overflow: hidden;
+	background-color: $kuiColorLightShade;
 
 	// Progress bars come in different colors.
 	$kuiProgressColors: (
@@ -55,6 +60,7 @@
 		top: 0;
 		left: 0;
 		right: 0;
+		background-color: transparent;
 
 		&::-webkit-progress-bar {
 			background-color: transparent;
@@ -70,6 +76,7 @@
 	}
 
 	// An indeterminate bar has an unreliable end time.
+	// Because of a Firefox animation issue, we make these divs instead of <progress>.
 	&.kuiProgress--indeterminate {
 		&:before {
 			position: absolute;
@@ -84,12 +91,10 @@
 	}
 }
 
-/* All good till now. Now we'll style the background */
 .kuiProgress::-webkit-progress-bar {
 	background-color: $kuiColorLightShade;
 }
 
-/* Now the value part */
 .kuiProgress::-webkit-progress-value {
   transition: width $kuiAnimSpeedNormal linear;
 }

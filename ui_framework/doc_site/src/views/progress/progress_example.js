@@ -43,7 +43,7 @@ export default props => (
       text={
         <p>
           The <KuiCode>Progress</KuiCode> component by default will display
-          in an indeterminate loading state until you define
+          in an indeterminate loading state (rendered as a signle div) until you define
           a <KuiCode>max</KuiCode> and <KuiCode>value</KuiCode> prop.
           The <KuiCode>size</KuiCode> prop refers to its verical height. It will
           always strech <KuiCode>100%</KuiCode> to its container.
@@ -64,7 +64,8 @@ export default props => (
       text={
         <p>
           Once the <KuiCode>max</KuiCode> and <KuiCode>value</KuiCode> props
-          are set, it will act as a determinate progress bar.
+          are set, it will act as a determinate progress bar. This is rendered
+          using an HTML5 <KuiCode>progress</KuiCode> tag.
         </p>
      }
       demo={
