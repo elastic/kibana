@@ -140,6 +140,10 @@ export {
 } from './popover';
 
 export {
+  KuiProgress,
+} from './progress';
+
+export {
   KuiSpacer,
 } from './spacer';
 

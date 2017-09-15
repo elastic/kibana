@@ -17,6 +17,7 @@
   height: 0;
   opacity: 0;
   overflow-y: hidden;
+  transform: translatez(0);
   transition:
     height $kuiAnimSpeedNormal $kuiAnimSlightResistance,
     opacity $kuiAnimSpeedNormal $kuiAnimSlightResistance

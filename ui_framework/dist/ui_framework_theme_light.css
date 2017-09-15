@@ -10,6 +10,30 @@
   100% {
     opacity: 1; } }
 
+@-webkit-keyframes kuiGrow {
+  0% {
+    opacity: 0; }
+  1% {
+    opacity: 0;
+    -webkit-transform: scale(0);
+            transform: scale(0); }
+  100% {
+    opacity: 1;
+    -webkit-transform: scale(1);
+            transform: scale(1); } }
+
+@keyframes kuiGrow {
+  0% {
+    opacity: 0; }
+  1% {
+    opacity: 0;
+    -webkit-transform: scale(0);
+            transform: scale(0); }
+  100% {
+    opacity: 1;
+    -webkit-transform: scale(1);
+            transform: scale(1); } }
+
 /**
  * Set scroll bar appearance on Chrome.
  */
@@ -330,6 +354,8 @@ table {
   height: 0;
   opacity: 0;
   overflow-y: hidden;
+  -webkit-transform: translatez(0);
+          transform: translatez(0);
   transition: height 250ms cubic-bezier(0.694, 0.0482, 0.335, 1), opacity 250ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
 
 .kuiAccordion.kuiAccordion-isOpen .kuiAccordion__childWrapper {
@@ -2700,6 +2726,108 @@ table {
   background-color: #F5F5F5;
   border-bottom: 1px solid #D9D9D9;
   padding: 12px; }
+
+.kuiProgress {
+  width: 100%;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  border: none;
+  vertical-align: middle;
+  position: relative;
+  overflow: hidden;
+  background-color: #D9D9D9; }
+  .kuiProgress.kuiProgress--primary::-webkit-progress-value {
+    background-color: #0079a5; }
+  .kuiProgress.kuiProgress--primary::-moz-progress-bar {
+    background-color: #0079a5; }
+  .kuiProgress.kuiProgress--primary.kuiProgress--indeterminate:before {
+    background-color: #0079a5; }
+  .kuiProgress.kuiProgress--secondary::-webkit-progress-value {
+    background-color: #00A69B; }
+  .kuiProgress.kuiProgress--secondary::-moz-progress-bar {
+    background-color: #00A69B; }
+  .kuiProgress.kuiProgress--secondary.kuiProgress--indeterminate:before {
+    background-color: #00A69B; }
+  .kuiProgress.kuiProgress--warning::-webkit-progress-value {
+    background-color: #E5830E; }
+  .kuiProgress.kuiProgress--warning::-moz-progress-bar {
+    background-color: #E5830E; }
+  .kuiProgress.kuiProgress--warning.kuiProgress--indeterminate:before {
+    background-color: #E5830E; }
+  .kuiProgress.kuiProgress--danger::-webkit-progress-value {
+    background-color: #A30000; }
+  .kuiProgress.kuiProgress--danger::-moz-progress-bar {
+    background-color: #A30000; }
+  .kuiProgress.kuiProgress--danger.kuiProgress--indeterminate:before {
+    background-color: #A30000; }
+  .kuiProgress.kuiProgress--accent::-webkit-progress-value {
+    background-color: #DD0A73; }
+  .kuiProgress.kuiProgress--accent::-moz-progress-bar {
+    background-color: #DD0A73; }
+  .kuiProgress.kuiProgress--accent.kuiProgress--indeterminate:before {
+    background-color: #DD0A73; }
+  .kuiProgress.kuiProgress--subdued::-webkit-progress-value {
+    background-color: #999; }
+  .kuiProgress.kuiProgress--subdued::-moz-progress-bar {
+    background-color: #999; }
+  .kuiProgress.kuiProgress--subdued.kuiProgress--indeterminate:before {
+    background-color: #999; }
+  .kuiProgress.kuiProgress--xs {
+    height: 2px; }
+  .kuiProgress.kuiProgress--s {
+    height: 4px; }
+  .kuiProgress.kuiProgress--m {
+    height: 8px; }
+  .kuiProgress.kuiProgress--l {
+    height: 16px; }
+  .kuiProgress.kuiProgress--fixed, .kuiProgress.kuiProgress--absolute {
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: transparent; }
+    .kuiProgress.kuiProgress--fixed::-webkit-progress-bar, .kuiProgress.kuiProgress--absolute::-webkit-progress-bar {
+      background-color: transparent; }
+  .kuiProgress.kuiProgress--fixed {
+    position: fixed; }
+  .kuiProgress.kuiProgress--absolute {
+    position: absolute; }
+  .kuiProgress.kuiProgress--indeterminate:before {
+    position: absolute;
+    content: "";
+    width: 100%;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    -webkit-transform: scaleX(0) translateX(0%);
+            transform: scaleX(0) translateX(0%);
+    -webkit-animation: kuiProgress 1s cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
+            animation: kuiProgress 1s cubic-bezier(0.694, 0.0482, 0.335, 1) infinite; }
+
+.kuiProgress::-webkit-progress-bar {
+  background-color: #D9D9D9; }
+
+.kuiProgress::-webkit-progress-value {
+  transition: width 250ms linear; }
+
+.kuiProgress::-moz-progress-bar {
+  transition: width 250ms linear; }
+
+@-webkit-keyframes kuiProgress {
+  0% {
+    -webkit-transform: scaleX(1) translateX(-100%);
+            transform: scaleX(1) translateX(-100%); }
+  100% {
+    -webkit-transform: scaleX(1) translateX(100%);
+            transform: scaleX(1) translateX(100%); } }
+
+@keyframes kuiProgress {
+  0% {
+    -webkit-transform: scaleX(1) translateX(-100%);
+            transform: scaleX(1) translateX(-100%); }
+  100% {
+    -webkit-transform: scaleX(1) translateX(100%);
+            transform: scaleX(1) translateX(100%); } }
 
 .kuiSideNav {
   position: relative;
