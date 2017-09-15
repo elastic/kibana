@@ -11,12 +11,16 @@ export default new Fn({
   args: {
     size: {
       types: ['string', 'null'],
-      help: 'The element type to use in rendering. You probably want a specialized function instead, such as plot or grid',
+      help: 'Font size',
     },
     family: {
       types: ['string', 'null'],
       default: `'"Open Sans", Helvetica, Arial, sans-serif'`,
-      help: 'Any block of custom CSS to be scoped to this element.',
+      help: 'An acceptable CSS web font string',
+    },
+    color: {
+      types: ['string', 'null'],
+      help: 'Text color',
     },
     weight: {
       types: ['string'],
@@ -27,6 +31,11 @@ export default new Fn({
       types: ['boolean'],
       default: false,
       help: 'Underline the text, true or false',
+    },
+    italic: {
+      types: ['boolean'],
+      default: false,
+      help: 'Italicize, true or false',
     },
     align: {
       types: ['string'],
@@ -42,8 +51,10 @@ export default new Fn({
         fontSize: args.size,
         fontFamily: args.family,
         fontWeight: args.weight,
-        textDecoration: args.underline ? 'underline' : false,
+        fontStyle: args.italic ? 'italic' : undefined,
+        textDecoration: args.underline ? 'underline' : undefined,
         textAlign: args.align,
+        color: args.color,
       },
       css: 'TODO: Convert to css string',
     };
