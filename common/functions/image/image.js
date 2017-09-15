@@ -15,7 +15,7 @@ export default new Fn({
       types: ['string', 'null'],
       help: 'Base64 encoded image',
       aliases: ['_'],
-      default: elasticLogo,
+      default: `'${elasticLogo}'`,
     },
     url: {
       types: ['string', 'null'],

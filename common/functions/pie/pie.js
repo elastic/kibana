@@ -16,11 +16,7 @@ export default new Fn({
     palette: {
       types: ['palette', 'null'],
       help: 'A palette object for describing the colors to use on this pie',
-      default: {
-        type: 'palette',
-        colors: ['#01A4A4', '#C66', '#D0D102', '#616161', '#00A1CB', '#32742C', '#F18D05', '#113F8C', '#61AE24', '#D70060'],
-        gradient: false,
-      },
+      default: '{palette}',
     },
     seriesStyle: {
       multi: true,

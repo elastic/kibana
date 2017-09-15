@@ -25,11 +25,7 @@ export default new Fn({
     palette: {
       types: ['palette', 'null'],
       help: 'A palette object for describing the colors to use in the grid',
-      default: {
-        type: 'palette',
-        colors: ['#01A4A4', '#CC6666', '#D0D102', '#616161', '#00A1CB', '#32742C', '#F18D05', '#113F8C', '#61AE24', '#D70060'],
-        gradient: false,
-      },
+      default: '{palette}',
     },
     seriesStyle: {
       multi: true,

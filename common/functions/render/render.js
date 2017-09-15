@@ -17,7 +17,7 @@ export default new Fn({
     },
     css: {
       types: ['string', 'null'],
-      default: '* > * {}',
+      default: '"* > * {}"',
       help: 'Any block of custom CSS to be scoped to this element.',
     },
     containerStyle: {
