@@ -15,5 +15,10 @@ export const markdown = () => new View('markdown', {
         confirm: 'Apply',
       },
     }),
+    new Arg('font', {
+      displayName: 'Text settings',
+      description: 'Fonts, alignment and color',
+      argType: 'font',
+    }),
   ],
 });
