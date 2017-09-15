@@ -1,0 +1,17 @@
+[[release-notes-5.6.1]]
+== 5.6.1 Release Notes
+
+Also see <<breaking-changes-5.0>>.
+
+[float]
+[[bug-5.6.1]]
+=== Bug fixes
+Important Note::
+* The 5.6.1 release of the Elastic Stack has an important fix for an issue affecting users upgrading with indexes created in Elasticsearch 2.x and earlier where Kibana becomes unavailable. We recommend that you upgrade to 5.6.1 to avoid the issue. You can read the details of the problem and about mitigation if you are already experiencing the issue in this https://discuss.elastic.co/t/upgrade-issue-with-elastic-stack-5-6-0-workaround-option-until-fix-is-available/100595[forum post]. If you are an Elastic Cloud user then Elastic Cloud support is working to mitigate this issue for you.
+
+Operations::
+* Sets update_all_types when setting mapping {pull}13991[#13991]
+Visualization::
+* Allow user to select any field for cardinality in filter ratio aggregation for TSVB {pull}13762[#13762]
+* [Fix for #13648] [5.6] ensure vector layer combo box displays options {pull}13931[#13931]
+  - The combobox for the vector layers in the Region Map Visualizations now correctly displays the available options.
