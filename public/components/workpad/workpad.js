@@ -17,9 +17,9 @@ export const Workpad = ({ elements, style, workpad, undoHistory, redoHistory }) 
     <Shortcuts name="WORKPAD" handler={keyboardHandler} targetNodeSelector="body" global>
       <div className="canvas__checkered" style={{ height, width }}>
         <div className="canvas__workpad" style={itsTheNewStyle}>
-            { elements.map(element => (
-              <ElementWrapper key={element.id} element={element} />
-            ))}
+          { elements.map(element => (
+            <ElementWrapper key={element.id} element={element} />
+          ))}
         </div>
       </div>
     </Shortcuts>

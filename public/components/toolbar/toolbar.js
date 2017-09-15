@@ -9,6 +9,7 @@ import { Expression } from '../expression';
 import { Datasource } from '../datasource';
 import { ElementTypes } from './element_types';
 import { WorkpadLoader } from '../workpad_loader';
+import { PageManager } from '../page_manager';
 
 import './toolbar.less';
 
@@ -18,7 +19,6 @@ export const Toolbar = (props) => {
     setTray,
     addElement,
     elementLayer,
-    addPage,
     previousPage,
     nextPage,
     elementIsSelected,
@@ -38,6 +38,7 @@ export const Toolbar = (props) => {
   };
 
   const trays = {
+    pageManager: (<PageManager done={done} />),
     elements: (<ElementTypes done={done} onClick={createElement} />),
     expression: !elementIsSelected ? null : (<Expression done={done} />),
     datasource: !elementIsSelected ? null : (<Datasource done={done} />),
@@ -46,9 +47,8 @@ export const Toolbar = (props) => {
 
   return !editing ? null : (
     <div className="canvas__toolbar">
-      {!trays[tray] ? null :
-        (<Tray>{ trays[tray] }</Tray>)
-      }
+      {trays[tray] && (<Tray>{ trays[tray] }</Tray>)}
+
       <Navbar>
         <NavbarButton onClick={ previousPage }><i className="fa fa-chevron-left"/></NavbarButton>
         { selectedPageNumber }
@@ -56,25 +56,42 @@ export const Toolbar = (props) => {
 
         <NavbarDivider/>
 
-        <NavbarButton onClick={() => showHideTray('workpadloader')}><i className="fa fa-file" /> Workpads</NavbarButton>
+        <NavbarButton onClick={() => showHideTray('workpadloader')}>
+          <i className="fa fa-briefcase" /> Workpads
+        </NavbarButton>
+        <NavbarButton onClick={() => showHideTray('pageManager')}>
+          <i className="fa fa-file" /> Pages
+        </NavbarButton>
+        <NavbarButton onClick={() => showHideTray('elements')}>
+          <i className="fa fa-plus" /> Add an element
+        </NavbarButton>
 
-        <NavbarButton onClick={() => showHideTray('elements')}><i className="fa fa-plus" /> Add an element</NavbarButton>
-
-        <NavbarButton onClick={ addPage }><i className="fa fa-plus-square" /> Add a page</NavbarButton>
-
-        { !elementIsSelected ? null : (
+        { elementIsSelected && (
           <span>
-            <NavbarButton onClick={() => showHideTray('datasource')}><i className="fa fa-database" /> Datasource</NavbarButton>
-            <NavbarButton onClick={() => showHideTray('expression')}><i className="fa fa-terminal" /> Code</NavbarButton>
+            <NavbarDivider/>
+
+            <NavbarButton onClick={() => showHideTray('datasource')}>
+              <i className="fa fa-database" /> Datasource
+            </NavbarButton>
+            <NavbarButton onClick={() => showHideTray('expression')}>
+              <i className="fa fa-terminal" /> Code
+            </NavbarButton>
 
             <NavbarDivider/>
 
-            <NavbarButton onClick={ () => elementLayer(Infinity) }><i className="fa fa-arrow-circle-up" /></NavbarButton>
-            <NavbarButton onClick={ () => elementLayer(1) }><i className="fa fa-arrow-up" /></NavbarButton>
-            <NavbarButton onClick={ () => elementLayer(-1) }><i className="fa fa-arrow-down" /></NavbarButton>
-            <NavbarButton onClick={ () => elementLayer(-Infinity) }><i className="fa fa-arrow-circle-down" /></NavbarButton>
+            <NavbarButton onClick={ () => elementLayer(Infinity) }>
+              <i className="fa fa-arrow-circle-up" />
+            </NavbarButton>
+            <NavbarButton onClick={ () => elementLayer(1) }>
+              <i className="fa fa-arrow-up" />
+            </NavbarButton>
+            <NavbarButton onClick={ () => elementLayer(-1) }>
+              <i className="fa fa-arrow-down" />
+            </NavbarButton>
+            <NavbarButton onClick={ () => elementLayer(-Infinity) }>
+              <i className="fa fa-arrow-circle-down" />
+            </NavbarButton>
           </span>
-
         )}
 
       </Navbar>
@@ -88,7 +105,6 @@ Toolbar.propTypes = {
   setTray: PropTypes.func.isRequired,
   addElement: PropTypes.func.isRequired,
   elementLayer: PropTypes.func,
-  addPage: PropTypes.func.isRequired,
   nextPage: PropTypes.func.isRequired,
   previousPage: PropTypes.func.isRequired,
   selectedPageNumber: PropTypes.number.isRequired,

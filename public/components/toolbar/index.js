@@ -4,7 +4,7 @@ import { compose, withState } from 'recompose';
 import { getEditing } from '../../state/selectors/app';
 import { getSelectedPage, getSelectedElement, getSelectedElementId, getSelectedPageIndex } from '../../state/selectors/workpad';
 import { addElement, elementLayer } from '../../state/actions/elements';
-import { addPage, nextPage, previousPage } from '../../state/actions/pages';
+import { nextPage, previousPage } from '../../state/actions/pages';
 
 import { Toolbar as Component } from './toolbar';
 
@@ -18,7 +18,6 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = (dispatch) => ({
   addElement: pageId => partialElement => dispatch(addElement(pageId, partialElement)),
-  addPage: () => dispatch(addPage()),
   nextPage: () => dispatch(nextPage()),
   previousPage: () => dispatch(previousPage()),
   elementLayer: (pageId, elementId) => (movement) => dispatch(elementLayer({ pageId, elementId, movement })),
