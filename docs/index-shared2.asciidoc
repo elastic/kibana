@@ -1,5 +1,4 @@
 
-include::migration.asciidoc[]
 
 include::getting-started.asciidoc[]
 

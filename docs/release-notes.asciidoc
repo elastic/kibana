@@ -9,23 +9,13 @@ This section summarizes the changes in each release.
 * <<release-notes-6.0.0-beta1>>
 * <<release-notes-6.0.0-alpha2>>
 * <<release-notes-6.0.0-alpha1>>
+ifdef::include-xpack[]
+* <<release-notes-xpackkb>>
+endif::include-xpack[]
+
 
 --
 include::release-notes/6.0.0-beta2.asciidoc[]
 include::release-notes/6.0.0-beta1.asciidoc[]
-
-ifdef::include-xpack[]
-include::{xkb-repo-dir}/release-notes/6.0.0-beta1.asciidoc[]
-endif::include-xpack[]
-
 include::release-notes/6.0.0-alpha2.asciidoc[]
-
-ifdef::include-xpack[]
-include::{xkb-repo-dir}/release-notes/6.0.0-alpha2.asciidoc[]
-endif::include-xpack[]
-
 include::release-notes/6.0.0-alpha1.asciidoc[]
-
-ifdef::include-xpack[]
-include::{xkb-repo-dir}/release-notes/6.0.0-alpha1.asciidoc[]
-endif::include-xpack[]
