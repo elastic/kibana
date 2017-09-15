@@ -5,6 +5,7 @@ import { FILTER_OPERATOR_TYPES } from './lib/filter_operators';
 import template from './filter_editor.html';
 import { documentationLinks } from '../documentation_links/documentation_links';
 import './filter_query_dsl_editor';
+import './filter_index_select';
 import './filter_field_select';
 import './filter_operator_select';
 import './params_editor/filter_params_editor';
@@ -58,6 +59,21 @@ module.directive('filterEditor', function ($timeout, indexPatterns) {
 
       this.setQueryDsl = (queryDsl) => {
         this.queryDsl = queryDsl;
+      };
+
+      this.setIndex = (indexPattern) => {
+        this.indexPattern = indexPattern;
+        this.field = null;
+        this.operator = null;
+        this.params = {};
+      };
+
+      this.onIndexSelect = (indexPatternSavedObject) => {
+        indexPatterns.get(indexPatternSavedObject.id)
+        .then((indexPattern) => {
+          this.setIndex(indexPattern);
+          this.setFocus('field');
+        });
       };
 
       this.setField = (field) => {
