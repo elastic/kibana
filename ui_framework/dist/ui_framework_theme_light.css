@@ -2808,10 +2808,10 @@ table {
 
 /* Now the value part */
 .kuiProgress::-webkit-progress-value {
-  transition: all 250ms linear; }
+  transition: width 250ms linear; }
 
-.kuiProgress::-mox-progress-bar {
-  transition: all 250ms linear; }
+.kuiProgress::-moz-progress-bar {
+  transition: width 250ms linear; }
 
 @-webkit-keyframes kuiProgress {
   0% {

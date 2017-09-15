@@ -91,11 +91,11 @@
 
 /* Now the value part */
 .kuiProgress::-webkit-progress-value {
-  transition: all $kuiAnimSpeedNormal linear;
+  transition: width $kuiAnimSpeedNormal linear;
 }
 
-.kuiProgress::-mox-progress-bar {
-  transition: all $kuiAnimSpeedNormal linear;
+.kuiProgress::-moz-progress-bar {
+  transition: width $kuiAnimSpeedNormal linear;
 }
 
 @keyframes kuiProgress {
