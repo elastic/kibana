@@ -15,6 +15,11 @@ export default new Fn({
       help: 'Markdown context',
       default: '',
     },
+    font: {
+      types: ['style'],
+      help: 'Font settings. Technically you can stick other styles in here too!',
+      default: '{font}',
+    },
   },
   fn: (context, args) => {
     const render = Handlebars.compile(args._);
@@ -27,7 +32,10 @@ export default new Fn({
     return {
       type: 'render',
       as: 'markdown',
-      value: render(ctx),
+      value: {
+        content: render(ctx),
+        font: args.font,
+      },
     };
   },
 });

@@ -24,7 +24,9 @@ You can use standard Markdown in here, but you can also access your piped-in dat
 
 #### Enjoy!"`,
   render(domNode, config, handlers) {
-    domNode.innerHTML = md.render(config);
+    domNode.innerHTML = md.render(config.content);
+    Object.assign(domNode.style, config.font.spec);
+    $('h1, h2, h3, h4, h5, h6', domNode).css(config.font.spec);
     handlers.done();
   },
 });

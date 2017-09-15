@@ -5,6 +5,7 @@ import chroma from 'chroma-js';
 import header from './header.png';
 import { Element } from '../element';
 import './grid.less';
+import $ from 'jquery';
 
 const ordinalPalette = ['#ACF0F2', '#1695A3', '#225378'];
 const nominalPalette = [
@@ -67,7 +68,7 @@ export default new Element('grid', {
   image: header,
   expression: 'filters | demodata | pointseries x="project" y="state" size="median(price)" | grid | render',
   render(domNode, config, handlers) {
-    const { mark, summary, columns, rows } = config;
+    const { mark, summary, columns, rows, font } = config;
 
     const table = (
       <div style={{ height: '100%', overflow: 'auto' }} className="canvas__element--grid">
@@ -116,7 +117,9 @@ export default new Element('grid', {
       </div>
     );
 
-    ReactDOM.render(table, domNode);
+    ReactDOM.render(table, domNode, () => {
+      $('td, th', domNode).css(font.spec);
+    });
     handlers.done();
   },
 });
