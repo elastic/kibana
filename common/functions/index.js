@@ -1,6 +1,7 @@
 import alterColumn from './alterColumn/alterColumn';
 import containerStyle from './containerStyle/containerStyle';
 import droprows from './droprows/droprows';
+import font from './font/font';
 import grid from './grid/grid';
 import image from './image/image';
 import mapColumn from './mapColumn/mapColumn';
@@ -24,6 +25,7 @@ export const commonFunctions = [
   alterColumn,
   containerStyle,
   droprows,
+  font,
   grid,
   image,
   mapColumn,
