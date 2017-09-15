@@ -1,5 +1,9 @@
 import { Element } from '../element';
 import header from './header.png';
+import Markdown from 'markdown-it';
+
+const md = new Markdown();
+
 
 export default new Element('markdown', {
   displayName: 'Markdown',
@@ -20,7 +24,7 @@ You can use standard Markdown in here, but you can also access your piped-in dat
 
 #### Enjoy!"`,
   render(domNode, config, handlers) {
-    domNode.innerHTML = config.markup;
+    domNode.innerHTML = md.render(config);
     handlers.done();
   },
 });
