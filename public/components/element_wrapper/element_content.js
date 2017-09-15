@@ -20,30 +20,30 @@ import { getType } from '../../../common/types/get_type';
   Branches
   Short circut rendering of the element if the element isn't ready or isn't valid.
 */
-const loadingBranch = branch(({ renderable, state }) => {
-  // no renderable or renderable config value
-  return !state || !renderable;
-}, renderComponent(Loading));
+const branches = [
+  // no renderable or renderable config value, render loading
+  branch(({ renderable, state }) => {
+    return !state || state !== 'ready' || !renderable;
+  }, renderComponent(Loading)),
 
-const invalidRenderTypeBranch = branch(({ renderable, elementTypeDefintion }) => {
-  // renderable is available, but no matching element is found
-  return (renderable && getType(renderable) !== 'render' && !elementTypeDefintion);
-}, renderComponent(InvalidElementType));
+  // renderable is available, but no matching element is found, render invalid
+  branch(({ renderable, elementTypeDefintion }) => {
+    return (renderable && getType(renderable) !== 'render' && !elementTypeDefintion);
+  }, renderComponent(InvalidElementType)),
 
-const invalidExpressionBranch =  branch(({ renderable, elementTypeDefintion, state }) => {
-  // Show an error if...
-  return (
-    state === 'error' || // The renderable has an error
-    getType(renderable) !== 'render' || // The renderable isn't, well, renderable
-    !elementTypeDefintion // We can't find an element in the registry for this
-  );
-}, renderComponent(InvalidExpression));
+  // error state, render invalid expression notice
+  branch(({ renderable, elementTypeDefintion, state }) => {
+    return (
+      state === 'error' || // The renderable has an error
+      getType(renderable) !== 'render' || // The renderable isn't, well, renderable
+      !elementTypeDefintion // We can't find an element in the registry for this
+    );
+  }, renderComponent(InvalidExpression)),
+];
 
 export const ElementContent = compose(
   pure,
-  loadingBranch,
-  invalidRenderTypeBranch,
-  invalidExpressionBranch
+  ...branches,
 )(({ elementTypeDefintion, renderable, size, handlers }) => {
   return Style.it(renderable.css,
     <div style={Object.assign({}, renderable.containerStyle, size)}>

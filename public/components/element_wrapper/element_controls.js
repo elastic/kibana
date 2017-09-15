@@ -6,8 +6,8 @@ import { pure } from 'recompose';
 
 export const ElementControls = pure((props) => {
   const {
-    select,
-    remove,
+    selectElement,
+    removeElement,
     isSelected,
     handlers,
 
@@ -20,17 +20,24 @@ export const ElementControls = pure((props) => {
     size,
   } = props;
 
-  // TODO: pass in render element dimensions
-  const selectedClassName = isSelected ? 'selected' : '';
+  const selectHandler = (ev) => {
+    ev && ev.stopPropagation();
+    selectElement();
+  };
+
+  const removeHandler = (ev) => {
+    ev && ev.stopPropagation();
+    removeElement();
+  };
 
   const handleShortcuts = (action) => {
-    if (action === 'DELETE' && isSelected) return remove();
+    if (action === 'DELETE' && isSelected) return removeElement();
   };
 
   return (
     <div
-      className={`canvas__workpad--element ${selectedClassName}`}
-      onClick={select}
+      className={`canvas__workpad--element ${isSelected ? 'selected' : ''}`}
+      onClick={selectHandler}
     >
       {/*
         Yeah, in theory we could put RenderElement in here, but the ElementContent component actually contains a
@@ -50,7 +57,7 @@ export const ElementControls = pure((props) => {
           (<i
             className="fa fa-times-circle canvas__workpad--element-remove"
             style={{ cursor: 'pointer' }}
-            onClick={remove}/>)
+            onClick={removeHandler}/>)
         }
       </Shortcuts>
     </div>
@@ -58,8 +65,8 @@ export const ElementControls = pure((props) => {
 });
 
 ElementControls.propTypes = {
-  select: PropTypes.func,
-  remove: PropTypes.func,
+  selectElement: PropTypes.func,
+  removeElement: PropTypes.func,
   isSelected: PropTypes.bool,
   elementTypeDefintion: PropTypes.object,
   renderable: PropTypes.object,

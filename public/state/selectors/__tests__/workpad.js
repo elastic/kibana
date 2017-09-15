@@ -7,7 +7,14 @@ describe('workpad selectors', () => {
 
   beforeEach(() => {
     asts = {
-      'element-0': undefined,
+      'element-0': {
+        type: 'expression',
+        chain: [{
+          type: 'function',
+          function: 'demoprices',
+          arguments: {},
+        }],
+      },
       'element-1': {
         type: 'expression',
         chain: [{
@@ -43,7 +50,7 @@ describe('workpad selectors', () => {
             id: 'page-1',
             elements: [{
               id: 'element-0',
-              expression: '',
+              expression: 'demoprices',
             }, {
               id: 'element-1',
               expression: 'demodata',

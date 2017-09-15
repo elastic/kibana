@@ -1,8 +1,9 @@
 import { connect } from 'react-redux';
-import { compose, withState, withHandlers, lifecycle } from 'recompose';
+import { compose, withState, withHandlers, lifecycle, withPropsOnChange } from 'recompose';
 import { Expression as Component } from './expression';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
 import { setExpression, flushContext } from '../../state/actions/elements';
+import { fromExpression } from '../../../common/lib/ast';
 
 const mapStateToProps = (state) => ({
   pageId: getSelectedPage(state),
@@ -54,4 +55,15 @@ export const Expression = compose(
     },
   }),
   expressionLifecycle,
+  withPropsOnChange(['formState'], ({ formState }) => ({
+    error: (function () {
+      try {
+        // TODO: We should merge the advanced UI input and this into a single validated expression input.
+        fromExpression(formState.expression);
+        return undefined;
+      } catch (e) {
+        return e.message;
+      }
+    }()),
+  })),
 )(Component);

@@ -16,36 +16,26 @@ const mapStateToProps = (state, { element }) => ({
 });
 
 const mapDispatchToProps = (dispatch, { element }) => ({
-  select(ev) {
-    ev && ev.stopPropagation();
-    dispatch(selectElement(element.id));
-  },
-
-  removeElementFromPage: (pageId) => (ev) => {
-    ev && ev.stopPropagation();
-    dispatch(removeElement(element.id, pageId));
-  },
-
-  setPosition: (pageId) => (position) => {
-    dispatch(setPosition(element.id, pageId, position));
-  },
-
+  selectElement: () => dispatch(selectElement(element.id)),
+  removeElement: (pageId) => () => dispatch(removeElement(element.id, pageId)),
+  setPosition: (pageId) => (position) => dispatch(setPosition(element.id, pageId, position)),
   handlers: (pageId) => createHandlers(element, pageId, dispatch),
 });
 
 const mergeProps = (stateProps, dispatchProps, { element }) => {
-  const renderable = getValue(stateProps.resolvedArg);
+  const { resolvedArg, selectedPage, isSelected } = stateProps;
+  const renderable = getValue(resolvedArg);
 
   return {
     position: element.position,
-    setPosition: dispatchProps.setPosition(stateProps.selectedPage),
-    remove: dispatchProps.removeElementFromPage(stateProps.selectedPage),
-    handlers: dispatchProps.handlers(stateProps.selectedPage),
-    select: dispatchProps.select,
-    isSelected: stateProps.isSelected,
+    setPosition: dispatchProps.setPosition(selectedPage),
+    selectElement: dispatchProps.selectElement,
+    removeElement: dispatchProps.removeElement(selectedPage),
+    handlers: dispatchProps.handlers(selectedPage),
+    isSelected: isSelected,
     elementTypeDefintion: elementsRegistry.get(get(renderable, 'as')),
-    state: getState(stateProps.resolvedArg),
-    error: getError(stateProps.resolvedArg),
+    state: getState(resolvedArg),
+    error: getError(resolvedArg),
     renderable,
   };
 };

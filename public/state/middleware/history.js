@@ -1,11 +1,13 @@
 import { isEqual } from 'lodash';
 import { historyProvider } from '../../lib/history_provider';
 import { restoreHistory, undoHistory, redoHistory } from '../actions/history';
+import { initializeWorkpad } from '../actions/workpad.js';
 
 export const historyMiddleware = (win) => {
   const history = historyProvider(win);
 
   return ({ dispatch, getState }) => {
+    // wire up history change handler (this only happens once)
     history.setOnChange((historyState) => {
       if (historyState) return dispatch(restoreHistory(historyState));
     });
@@ -20,7 +22,11 @@ export const historyMiddleware = (win) => {
         case redoHistory.toString():
           return history.redo();
         case restoreHistory.toString():
-          return next(action);
+          // skip state compare, simply execute the action
+          next(action);
+          // TODO: we shouldn't need to reset the entire workpad for undo/redo
+          dispatch(initializeWorkpad());
+          return;
       }
 
       // execute the action like normal
