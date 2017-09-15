@@ -71,6 +71,8 @@ export function AbstractRequestProvider(Private, Promise) {
       }
 
       source.history = [this];
+
+      return this.source._triggerRequestStart(this);
     }
 
     getFetchParams() {

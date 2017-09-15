@@ -48,6 +48,7 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
 
     self.history = [];
     self._fetchStrategy = strategy;
+    self._requestStartHandlers = [];
   }
 
   /*****
@@ -239,6 +240,10 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
     this.cancelQueued();
   };
 
+  SourceAbstract.prototype.onRequestStart = function (handler) {
+    this._requestStartHandlers.push(handler);
+  };
+
   /*****
    * PRIVATE API
    *****/
@@ -251,6 +256,12 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
 
   SourceAbstract.prototype._createRequest = function () {
     throw new Error('_createRequest must be implemented by subclass');
+  };
+
+  SourceAbstract.prototype._triggerRequestStart = function (request) {
+    return Promise.all(this._requestStartHandlers.map(fn => (
+      fn(this, request)
+    )));
   };
 
   /**
