@@ -58,9 +58,9 @@ function getExpression(chain) {
 
 export function fromExpression(expression, type = 'expression') {
   try {
-    return parse(expression, { startRule: type });
+    return parse(String(expression), { startRule: type });
   } catch (e) {
-    throw new Error(`Unable to parse expression: ${e.message}`);
+    throw new Error(`Unable to parse expression: ${expression}\n ${e.message}`);
   }
 }
 
