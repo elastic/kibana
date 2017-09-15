@@ -142,6 +142,7 @@ module.exports = async function (kbnServer, server, config) {
   server.exposeStaticDir('/ui/fonts/{path*}', resolve(__dirname, '../../ui/public/assets/fonts'));
   server.exposeStaticDir('/ui/favicons/{path*}', resolve(__dirname, '../../ui/public/assets/favicons'));
   server.exposeStaticDir('/app/ui/theme/{path*}', resolve(__dirname, '../../ui/theme'));
+  server.exposeStaticDir('/app/ui/themes/{path*}', resolve(__dirname, '../../ui/themes'));
 
   kbnServer.mixin(versionCheckMixin);
 
