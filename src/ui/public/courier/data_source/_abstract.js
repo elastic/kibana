@@ -259,9 +259,9 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
   };
 
   SourceAbstract.prototype._triggerRequestStart = function (request) {
-    return Promise.all(this._requestStartHandlers.map(fn => (
+    return Promise.map(this._requestStartHandlers, fn => (
       fn(this, request)
-    )));
+    ));
   };
 
   /**
