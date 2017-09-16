@@ -165,6 +165,7 @@ export default class BaseOptimizer {
     // https://github.com/airbnb/enzyme/blob/master/docs/guides/webpack.md
     if (this.env.context.env === 'development') {
       config.externals = {
+        'mocha': 'mocha',
         'react/lib/ExecutionEnvironment': true,
         'react/addons': true,
         'react/lib/ReactContext': true,
