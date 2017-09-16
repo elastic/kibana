@@ -6,15 +6,23 @@ All communication from the Kibana UI to the server needs to respect the
 based on the context:
 
 [float]
-==== `<img>` and `<a>` elements
+==== API requests and `src`, `href` attributes
 
-Write the `src` or `href` urls as you would without the base path, but then
-replace `src` or `href` with `kbn-src` or `kbn-href`.
+Use relative urls that will resolve from the root, not the current page url.
 
 ["source","shell"]
 -----------
-<img kbn-src="plugins/kibana/images/logo.png">
+// 🚫 incorrect
+$http.get('../../api/plugin/things');
+<img src="/plugins/kibana/images/logo.png">
+<a href="#/dashboard">
+
+// ✅ correct
+$http.get('api/plugin/things');
+<img src="plugins/kibana/images/logo.png">
+<a href="app/kibana#/dashboard">
 -----------
+
 
 [float]
 ==== Getting a static asset url
@@ -32,17 +40,6 @@ import logoUrl from 'plugins/facechimp/assets/banner.png';
 uiChrome.setBrand({
   logo: `url(${logoUrl}) center no-repeat`
 });
------------
-
-[float]
-==== API requests from the front-end
-
-Use `chrome.addBasePath()` to append the basePath to the front of the url.
-
-["source","shell"]
------------
-import chrome from 'ui/chrome';
-$http.get(chrome.addBasePath('/api/plugin/things'));
 -----------
 
 [float]
