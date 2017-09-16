@@ -149,6 +149,6 @@ export function VisualizeListingController($injector) {
   };
 
   this.getUrlForItem = function getUrlForItem(item) {
-    return `#/visualize/edit/${item.id}`;
+    return `app/kibana#/visualize/edit/${item.id}`;
   };
 }

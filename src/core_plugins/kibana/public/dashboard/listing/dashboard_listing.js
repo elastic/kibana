@@ -151,10 +151,10 @@ export function DashboardListingController($injector, $scope) {
   };
 
   this.getUrlForItem = function getUrlForItem(item) {
-    return `#${createDashboardEditUrl(item.id)}`;
+    return `app/kibana#${createDashboardEditUrl(item.id)}`;
   };
 
   this.getCreateDashboardHref = function getCreateDashboardHref() {
-    return `#${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`;
+    return `app/kibana#${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`;
   };
 }

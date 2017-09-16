@@ -20,7 +20,7 @@ const TimelionRequestHandlerProvider = function (Private, Notifier, $http, $root
         const expression = vis.params.expression;
         if (!expression) return;
 
-        const httpResult = $http.post('../api/timelion/run', {
+        const httpResult = $http.post('api/timelion/run', {
           sheet: [expression],
           extended: {
             es: {

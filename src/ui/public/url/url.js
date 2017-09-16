@@ -7,6 +7,12 @@ import { AppStateProvider } from 'ui/state_management/app_state';
 uiModules.get('kibana/url')
 .service('kbnUrl', function (Private) { return Private(KbnUrlProvider); });
 
+function stripAppFromUrl(url) {
+  return url.startsWith('app/kibana#')
+    ? url.slice('app/kibana#'.length)
+    : url;
+}
+
 export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private) {
   /**
    *  the `kbnUrl` service was created to smooth over some of the
@@ -36,7 +42,7 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
    * @return {undefined}
    */
   self.change = function (url, paramObj, appState) {
-    self._changeLocation('url', url, paramObj, false, appState);
+    self._changeLocation('url', stripAppFromUrl(url), paramObj, false, appState);
   };
 
   /**
@@ -59,7 +65,7 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
    * @return {undefined}
    */
   self.redirect = function (url, paramObj, appState) {
-    self._changeLocation('url', url, paramObj, true, appState);
+    self._changeLocation('url', stripAppFromUrl(url), paramObj, true, appState);
   };
 
   /**
@@ -116,7 +122,7 @@ export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private
    * @return {string} - the computed href
    */
   self.getRouteHref = function (obj, route) {
-    return '#' + self.getRouteUrl(obj, route);
+    return 'app/kibana#' + self.getRouteUrl(obj, route);
   };
 
   /**

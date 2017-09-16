@@ -5,7 +5,7 @@ import { uiModules } from 'ui/modules';
 
 const module = uiModules.get('kibana');
 
-module.directive('globalNavLink', chrome => {
+module.directive('globalNavLink', () => {
   return {
     restrict: 'E',
     replace: true,
@@ -15,21 +15,9 @@ module.directive('globalNavLink', chrome => {
       tooltipContent: '=',
       onClick: '&',
       url: '=',
-      kbnRoute: '=',
       icon: '=',
       label: '=',
     },
     template: globalNavLinkTemplate,
-    link: scope => {
-      scope.getHref = () => {
-        if (scope.url) {
-          return scope.url;
-        }
-
-        if (scope.kbnRoute) {
-          return chrome.addBasePath(scope.kbnRoute);
-        }
-      };
-    }
   };
 });

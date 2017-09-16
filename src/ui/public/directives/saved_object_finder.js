@@ -90,8 +90,6 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
         if (!$scope.userOnChoose) {
           return hit.url;
         }
-
-        return '#';
       };
 
       self.preventClick = function ($event) {
@@ -108,12 +106,10 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
         }
 
         const url = self.makeUrl(hit);
-        if (!url || url === '#' || url.charAt(0) !== '#') return;
+        if (!url || !url.startsWith('app/kibana#')) return;
 
         $event.preventDefault();
-
-        // we want the '/path', not '#/path'
-        kbnUrl.change(url.substr(1));
+        kbnUrl.change(url);
       };
 
       $scope.$watch('filter', function (newFilter) {

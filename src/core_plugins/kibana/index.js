@@ -96,7 +96,7 @@ export default function (kibana) {
           id: 'kibana:dev_tools',
           title: 'Dev Tools',
           order: 9001,
-          url: '/app/kibana#/dev_tools',
+          url: `${kbnBaseUrl}#/dev_tools`,
           description: 'development tools',
           icon: 'plugins/kibana/assets/wrench.svg'
         }, {

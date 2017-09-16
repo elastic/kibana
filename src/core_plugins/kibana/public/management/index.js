@@ -43,7 +43,7 @@ uiModules
 
       if ($scope.section) {
         $scope.section.items.forEach(item => {
-          item.active = `#${$location.path()}`.indexOf(item.url) > -1;
+          item.active = `app/kibana#${$location.path()}`.indexOf(item.url) > -1;
         });
       }
     }

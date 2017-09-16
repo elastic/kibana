@@ -162,7 +162,7 @@ app.directive('dashboardApp', function ($injector) {
       $scope.expandedPanel = null;
       $scope.dashboardViewMode = dashboardState.getViewMode();
 
-      $scope.landingPageUrl = () => `#${DashboardConstants.LANDING_PAGE_PATH}`;
+      $scope.landingPageUrl = () => `app/kibana#${DashboardConstants.LANDING_PAGE_PATH}`;
       $scope.hasExpandedPanel = () => $scope.expandedPanel !== null;
       $scope.getDashTitle = () => getDashboardTitle(
         dashboardState.getTitle(),

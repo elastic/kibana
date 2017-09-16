@@ -95,7 +95,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
       };
 
       $scope.getContextAppHref = () => {
-        const path = kbnUrl.eval('#/context/{{ indexPattern }}/{{ anchorType }}/{{ anchorId }}', {
+        const path = kbnUrl.eval('app/kibana#/context/{{ indexPattern }}/{{ anchorType }}/{{ anchorId }}', {
           anchorId: $scope.row._id,
           anchorType: $scope.row._type,
           indexPattern: $scope.indexPattern.id,

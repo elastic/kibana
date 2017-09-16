@@ -57,7 +57,7 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
       scope.functionSuggestions = new FunctionSuggestions();
 
       function init() {
-        $http.get('../api/timelion/functions').then(function (resp) {
+        $http.get('api/timelion/functions').then(function (resp) {
           Object.assign(functionReference, {
             byName: _.indexBy(resp.data, 'name'),
             list: resp.data,

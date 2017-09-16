@@ -25,7 +25,6 @@ describe('globalNavLink directive', () => {
         tooltip-content="tooltipContent"
         on-click="onClick()"
         url="href"
-        kbn-route="kbnRoute"
         icon="icon"
         label="title"
       />
@@ -103,27 +102,6 @@ describe('globalNavLink directive', () => {
         const element = create(attrs);
         const link = element.find('[data-test-subj=appLink]');
         expect(link.attr('href')).to.be(attrs.href);
-      });
-    });
-
-    describe('kbnRoute attribute', () => {
-      it(`is applied to the link when href isn't defined`, () => {
-        const attrs = {
-          kbnRoute: '#test',
-        };
-        const element = create(attrs);
-        const link = element.find('[data-test-subj=appLink]');
-        expect(link.attr('href')).to.be(attrs.kbnRoute);
-      });
-
-      it(`isn't applied to the link when href is defined`, () => {
-        const attrs = {
-          href: 'link to a website',
-          kbnRoute: '#test',
-        };
-        const element = create(attrs);
-        const link = element.find('[data-test-subj=appLink]');
-        expect(link.attr('href')).not.to.be(attrs.kbnRoute);
       });
     });
 

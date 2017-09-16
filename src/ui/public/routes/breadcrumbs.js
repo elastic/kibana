@@ -15,7 +15,7 @@ export function parsePathToBreadcrumbs(path) {
       {
         id,
         display: startCase(id),
-        href: i === 0 ? `#/${id}` : `${acc[i - 1].href}/${id}`,
+        href: i === 0 ? `app/kibana#/${id}` : `${acc[i - 1].href}/${id}`,
         current: i === (parts.length - 1)
       }
     ], []);

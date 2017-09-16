@@ -48,7 +48,7 @@
   </button>
   <ul class="li-striped list-group list-group-menu">
     <li class="list-group-item list-group-menu-item" ng-repeat="hit in page">
-      <a ng-show="userMakeUrl" kbn-href="{{ makeUrl(hit) }}">
+      <a ng-show="userMakeUrl" ng-href="{{ makeUrl(hit) }}">
         <span>{{ accessor(hit) }}</span>
       </a>
 

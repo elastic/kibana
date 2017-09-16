@@ -86,7 +86,7 @@ uiModules
         const service = services.find(service => service.type === type);
         if (!service) return;
 
-        $scope.editUrl = '#management/kibana/objects/' + service.name + '/' + panelId + '?notFound=' + error.savedObjectType;
+        $scope.editUrl = 'app/kibana#management/kibana/objects/' + service.name + '/' + panelId + '?notFound=' + error.savedObjectType;
       };
 
       const embeddableHandlers = Private(EmbeddableHandlersRegistryProvider);

@@ -14,7 +14,7 @@
           ng-repeat="item in kbnDevToolsApp.devTools"
           class="kuiLocalTab"
           ng-class="{'kuiLocalTab-isSelected': kbnDevToolsApp.currentPath === item.url}"
-          kbn-href="{{::item.url}}"
+          href="{{::item.url}}"
         >
           {{::item.display}}
         </a>

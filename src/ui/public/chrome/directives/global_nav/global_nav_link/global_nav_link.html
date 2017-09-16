@@ -8,7 +8,7 @@
 >
   <a
     class="global-nav-link__anchor"
-    href="{{ getHref() }}"
+    href="{{ url }}"
     ng-click="onClick({ $event: $event })"
     data-test-subj="appLink"
     aria-label="{{::label}}"
@@ -17,7 +17,7 @@
       <img
         ng-if="icon"
         class="global-nav-link__icon-image"
-        kbn-src="{{ '/' + icon }}"
+        ng-src="{{ icon }}"
         aria-hidden="true"
       >
 

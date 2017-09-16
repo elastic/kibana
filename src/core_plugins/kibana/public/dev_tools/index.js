@@ -7,7 +7,7 @@ uiRoutes
   resolve: {
     redirect(Private, kbnUrl) {
       const items = Private(DevToolsRegistryProvider).inOrder;
-      kbnUrl.redirect(items[0].url.substring(1));
+      kbnUrl.redirect(items[0].url);
     }
   }
 });
