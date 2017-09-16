@@ -1136,6 +1136,66 @@ table {
       -ms-flex-item-align: end;
           align-self: flex-end; }
 
+.kuiDescriptionList .kuiDescriptionList__title {
+  font-weight: 500; }
+
+.kuiDescriptionList .kuiDescriptionList__desc {
+  color: #666; }
+
+.kuiDescriptionList.kuiDescriptionList--row .kuiDescriptionList__title {
+  font-size: 16px;
+  font-size: 1rem;
+  line-height: 1.5;
+  margin-top: 16px; }
+  .kuiDescriptionList.kuiDescriptionList--row .kuiDescriptionList__title:first-of-type {
+    margin-top: 0; }
+
+.kuiDescriptionList.kuiDescriptionList--row .kuiDescriptionList__desc {
+  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 1.5; }
+
+.kuiDescriptionList.kuiDescriptionList--row.kuiDescriptionList--center {
+  text-align: center; }
+
+.kuiDescriptionList.kuiDescriptionList--row.kuiDescriptionList--right {
+  text-align: right; }
+
+.kuiDescriptionList.kuiDescriptionList--column {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch;
+  -webkit-flex-wrap: wrap;
+      -ms-flex-wrap: wrap;
+          flex-wrap: wrap; }
+  .kuiDescriptionList.kuiDescriptionList--column > * {
+    margin-top: 16px; }
+  .kuiDescriptionList.kuiDescriptionList--column > *:first-child, .kuiDescriptionList.kuiDescriptionList--column > :nth-child(2) {
+    margin-top: 0; }
+  .kuiDescriptionList.kuiDescriptionList--column .kuiDescriptionList__title {
+    font-size: 16px;
+    font-size: 1rem;
+    line-height: 1.5;
+    -webkit-flex-basis: 50%;
+        -ms-flex-preferred-size: 50%;
+            flex-basis: 50%;
+    padding-right: 8px; }
+  .kuiDescriptionList.kuiDescriptionList--column .kuiDescriptionList__desc {
+    font-size: 16px;
+    font-size: 1rem;
+    line-height: 1.5;
+    -webkit-flex-basis: 50%;
+        -ms-flex-preferred-size: 50%;
+            flex-basis: 50%;
+    padding-left: 8px; }
+  .kuiDescriptionList.kuiDescriptionList--column.kuiDescriptionList--center .kuiDescriptionList__title {
+    text-align: right; }
+
 .kuiFlexGroup {
   display: -webkit-box;
   display: -webkit-flex;

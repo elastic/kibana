@@ -34,6 +34,12 @@ export {
 } from './context_menu';
 
 export {
+  KuiDescriptionList,
+  KuiDescriptionListTitle,
+  KuiDescriptionListDescription,
+} from './description_list';
+
+export {
   KuiFlexGroup,
   KuiFlexGrid,
   KuiFlexItem,
