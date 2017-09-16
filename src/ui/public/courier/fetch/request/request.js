@@ -63,16 +63,7 @@ export function AbstractRequestProvider(Private, Promise) {
       this.started = true;
       this.moment = moment();
 
-      const source = this.source;
-      if (source.activeFetchCount) {
-        source.activeFetchCount += 1;
-      } else {
-        source.activeFetchCount = 1;
-      }
-
-      source.history = [this];
-
-      return this.source._triggerRequestStart(this);
+      return this.source.requestIsStarting(this);
     }
 
     getFetchParams() {
@@ -115,7 +106,7 @@ export function AbstractRequestProvider(Private, Promise) {
     _markStopped() {
       if (this.stopped) return;
       this.stopped = true;
-      this.source.activeFetchCount -= 1;
+      this.source.requestIsStopped(this);
       _.pull(requestQueue, this);
     }
 
