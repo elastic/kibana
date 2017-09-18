@@ -4,7 +4,7 @@ import FieldSelect from './aggs/field_select';
 import createSelectHandler from './lib/create_select_handler';
 import createTextHandler from './lib/create_text_handler';
 import YesNo from './yes_no';
-import { htmlIdGenerator } from '../lib/html_id_generator';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 export const IndexPattern = props => {
   const { fields, prefix } = props;

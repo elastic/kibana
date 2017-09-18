@@ -39,14 +39,20 @@ export function VislibGridProvider() {
 
     drawCategoryLines(svg, width, height) {
       const axis = this._handler.categoryAxes[0];
-      axis.getScale().ticks().forEach(tick => {
+      if (!axis) return;
+      const ticks = axis.getScale().ticks;
+      if (!ticks) return;
+      ticks().forEach(tick => {
         this.drawLine(svg, tick, axis, width, height);
       });
     }
 
     drawValueLines(svg, width, height) {
       const axis = this._handler.valueAxes.find(axis => axis.axisConfig.get('id') === this.get('valueAxis'));
-      axis.getScale().ticks().forEach(tick => {
+      if (!axis) return;
+      const ticks = axis.getScale().ticks;
+      if (!ticks) return;
+      ticks().forEach(tick => {
         this.drawLine(svg, tick, axis, width, height);
       });
     }

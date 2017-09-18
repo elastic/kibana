@@ -2,7 +2,7 @@ export default function ({ getService, loadTestFile }) {
   const remote = getService('remote');
 
   describe('dashboard app', function () {
-    before(() => remote.setWindowSize(1200,800));
+    before(() => remote.setWindowSize(1200, 900));
 
     loadTestFile(require.resolve('./_view_edit'));
     loadTestFile(require.resolve('./_dashboard'));

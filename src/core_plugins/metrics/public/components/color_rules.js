@@ -5,7 +5,7 @@ import AddDeleteButtons from './add_delete_buttons';
 import Select from 'react-select';
 import * as collectionActions from './lib/collection_actions';
 import ColorPicker from './color_picker';
-import { htmlIdGenerator } from '../lib/html_id_generator';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 class ColorRules extends Component {
 

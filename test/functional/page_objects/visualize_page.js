@@ -1,3 +1,5 @@
+import { VisualizeConstants } from '../../../src/core_plugins/kibana/public/visualize/visualize_constants';
+
 export function VisualizePageProvider({ getService, getPageObjects }) {
   const remote = getService('remote');
   const config = getService('config');
@@ -530,9 +532,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickMapButton(zoomSelector) {
-      const zooms = await this.getZoomSelectors(zoomSelector);
-      await Promise.all(zooms.map(async zoom => await zoom.click()));
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await retry.try(async () => {
+        const zooms = await this.getZoomSelectors(zoomSelector);
+        await Promise.all(zooms.map(async zoom => await zoom.click()));
+        await PageObjects.header.waitUntilLoadingHasFinished();
+      });
     }
 
     async getVisualizationRequest() {
@@ -587,6 +591,32 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await this.clickMapButton('a.fa-crop');
     }
 
+    async clickLandingPageBreadcrumbLink() {
+      log.debug('clickLandingPageBreadcrumbLink');
+      await find.clickByCssSelector(`a[href="#${VisualizeConstants.LANDING_PAGE_PATH}"]`);
+    }
+
+    /**
+     * Returns true if already on the landing page (that page doesn't have a link to itself).
+     * @returns {Promise<boolean>}
+     */
+    async onLandingPage() {
+      log.debug(`VisualizePage.onLandingPage`);
+      const exists = await testSubjects.exists('visualizeLandingPage');
+      return exists;
+    }
+
+    async gotoLandingPage() {
+      log.debug('VisualizePage.gotoLandingPage');
+      const onPage = await this.onLandingPage();
+      if (!onPage) {
+        await retry.try(async () => {
+          await this.clickLandingPageBreadcrumbLink();
+          const onLandingPage = await this.onLandingPage();
+          if (!onLandingPage) throw new Error('Not on the landing page.');
+        });
+      }
+    }
   }
 
   return new VisualizePage();

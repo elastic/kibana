@@ -2,6 +2,7 @@ import _ from 'lodash';
 import angular from 'angular';
 import { getSort } from 'ui/doc_table/lib/get_sort';
 import * as columnActions from 'ui/doc_table/actions/columns';
+import * as filterActions from 'ui/doc_table/actions/filter';
 import dateMath from '@elastic/datemath';
 import 'ui/doc_table';
 import 'ui/visualize';
@@ -28,7 +29,7 @@ import indexTemplate from 'plugins/kibana/discover/index.html';
 import { StateProvider } from 'ui/state_management/state';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
-import { QueryManagerProvider } from 'ui/query_manager';
+import { FilterManagerProvider } from 'ui/filter_manager';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 const app = uiModules.get('apps/discover', [
@@ -118,6 +119,7 @@ function discoverController(
   const HitSortFn = Private(PluginsKibanaDiscoverHitSortFnProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const responseHandler = Private(BasicResponseHandlerProvider).handler;
+  const filterManager = Private(FilterManagerProvider);
   const notify = new Notifier({
     location: 'Discover'
   });
@@ -176,7 +178,6 @@ function discoverController(
   };
 
   const $state = $scope.state = new AppState(getStateDefaults());
-  const queryManager = Private(QueryManagerProvider)($state);
 
   const getFieldCounts = async () => {
     // the field counts aren't set until we have the data back,
@@ -330,15 +331,6 @@ function discoverController(
 
       $scope.$watch('state.interval', function () {
         $scope.fetch();
-      });
-
-      // Necessary for handling new time filters when the date histogram is clicked
-      $scope.$watchCollection('state.$newFilters', function (filters = []) {
-        // need to convert filters generated from user interaction with viz into kuery AST
-        // These are handled by the filter bar directive when lucene is the query language
-        Promise.all(filters.map(queryManager.addLegacyFilter))
-        .then(() => $scope.state.$newFilters = [])
-        .then($scope.fetch);
       });
 
       $scope.$watch('vis.aggs', function () {
@@ -607,7 +599,7 @@ function discoverController(
   // TODO: On array fields, negating does not negate the combination, rather all terms
   $scope.filterQuery = function (field, values, operation) {
     $scope.indexPattern.popularizeField(field, 1);
-    queryManager.add(field, values, operation, $scope.indexPattern.id);
+    filterActions.addFilter(field, values, operation, $scope.indexPattern.id, $scope.state, filterManager);
   };
 
   $scope.addColumn = function addColumn(columnName) {
@@ -710,11 +702,11 @@ function discoverController(
     if (stateVal && !stateValFound) {
       const err = '"' + stateVal + '" is not a configured pattern ID. ';
       if (own) {
-        notify.warning(err + ' Using the saved index pattern: "' + own.id + '"');
+        notify.warning(`${err} Using the saved index pattern: "${own.title}" (${own.id})`);
         return own;
       }
 
-      notify.warning(err + ' Using the default index pattern: "' + loaded.id + '"');
+      notify.warning(`${err} Using the default index pattern: "${loaded.title}" (${loaded.id})`);
     }
     return loaded;
   }

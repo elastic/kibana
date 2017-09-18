@@ -11,7 +11,7 @@ import ColorPicker from '../color_picker';
 import YesNo from '../yes_no';
 import MarkdownEditor from '../markdown_editor';
 import less from 'less/lib/less-browser';
-import { htmlIdGenerator } from '../../lib/html_id_generator';
+import { htmlIdGenerator } from 'ui_framework/services';
 const lessC = less(window, { env: 'production' });
 
 class MarkdownPanelConfig extends Component {

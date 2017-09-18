@@ -8,7 +8,7 @@ import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import createNumberHandler from '../lib/create_number_handler';
-import { htmlIdGenerator } from '../../lib/html_id_generator';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 export const MovingAverageAgg = props => {
   const { siblings } = props;
