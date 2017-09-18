@@ -5,7 +5,30 @@
   margin: 0 5px;
 
   .inputRangeContainer {
-    padding: 15px 0;
+    display: inline-block;
+    width: 70%;
+  }
+
+  input.kuiTextInput {
+    width: 15%;
+  }
+
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+  }
+
+  // hide slider labels since they are displayed in inputs
+  .input-range__track {
+    .input-range__label-container {
+      display: none;
+    }
+  }
+
+  // do not center min/max labels - otherwise the overlfow slider sides
+  .input-range__label-container {
+    left: 0% !important;
   }
 
   .actions {
@@ -21,7 +44,5 @@ visualization.input_control_vis {
   }
 }
 
-.Select-menu-outer {
-  z-index: 99999 !important; // make sure menu is on top of everything else (leaflet)
-}
+
 

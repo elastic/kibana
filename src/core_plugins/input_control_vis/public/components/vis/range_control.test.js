@@ -13,10 +13,13 @@ const control = {
     step: 1
   },
   type: 'range',
-  label: 'ragne control',
+  label: 'range control',
   value: { min: 0, max: 0 },
   min: 0,
-  max: 100
+  max: 100,
+  hasValue: () => {
+    return false;
+  }
 };
 let stageFilter;
 

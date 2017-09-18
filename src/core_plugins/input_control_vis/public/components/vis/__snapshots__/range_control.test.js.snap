@@ -3,8 +3,18 @@
 exports[`renders RangeControl 1`] = `
 <Component
   id="mock-range-control"
-  label="ragne control"
+  label="range control"
 >
+  <input
+    className="kuiTextInput"
+    id="mock-range-control_min"
+    max={100}
+    min={0}
+    name="min"
+    onChange={[Function]}
+    type="number"
+    value=""
+  />
   <div
     className="inputRangeContainer"
   >
@@ -40,5 +50,15 @@ exports[`renders RangeControl 1`] = `
       }
     />
   </div>
+  <input
+    className="kuiTextInput"
+    id="mock-range-control_max"
+    max={100}
+    min={0}
+    name="max"
+    onChange={[Function]}
+    type="number"
+    value=""
+  />
 </Component>
 `;
