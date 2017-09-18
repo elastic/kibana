@@ -292,6 +292,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         await this.navigateTo();
         await this.clickKibanaIndices();
         await this.setIndexPatternField(indexPatternName);
+        await PageObjects.common.sleep(2000);
         if (timefield) {
           await this.selectTimeFieldOption(timefield);
         }
