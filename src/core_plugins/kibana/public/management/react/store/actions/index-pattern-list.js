@@ -25,4 +25,4 @@ export const fetchIndexPatterns = createThunk('FETCH_INDEX_PATTERNS',
 );
 
 export const fetchedIndexPatterns = createAction('FETCHED_INDEX_PATTERNS', indexPatterns => ({ indexPatterns }));
-export const setTransientTableId = createAction('SET_TRANSIENT_TABLE_ID', id => ({ id }));
+export const change = createAction('CHANGE', (selectorPath, data) => ({ selectorPath, data }));

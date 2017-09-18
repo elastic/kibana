@@ -33,7 +33,7 @@ import {
 
 
 const IndexPatternList = ({
-  items,
+  indexPatterns,
   numOfPages,
   perPage,
   page,
@@ -44,12 +44,12 @@ const IndexPatternList = ({
   filter,
   changePerPage,
 }) => {
-  // console.log('IndexPatternList', items, perPage);
-  if (items === undefined) {
+  console.log('IndexPatternList', indexPatterns);
+  if (indexPatterns === undefined) {
     return null;
   }
 
-  const indexRows = items.map((index, key) => {
+  const indexRows = indexPatterns.map((index, key) => {
     return (
       <KuiTableRow key={key}>
         <KuiTableHeaderCellCheckbox>

@@ -1,52 +1,70 @@
 import React, { cloneElement } from 'react';
-import { sortBy as sortByLodash, get } from 'lodash';
+import { get } from 'lodash';
+import { set } from 'object-path-immutable';
 
 const FilterWrap = (props) => {
   const {
-    items,
-    change,
-    transientId,
     children,
-    filterBy,
+    itemsPath,
+    selectorPath,
     filters,
+    action,
+    ...rest,
   } = props;
 
-  // console.log('FilterWrap', props);
+  const {
+    filterBy,
+  } = get(props, selectorPath, {});
 
-  if (items === undefined) {
-    return children;
+  // console.log('FilterWrap', props, filterBy, rest);
+
+  let items = Array.from(get(props, itemsPath, []));
+  if (items.length === 0) {
+    return cloneElement(children, rest);
   }
 
-  let filteredItems = items;
   if (!!filterBy && Object.keys(filterBy).length) {
-    filteredItems = filteredItems.filter(item => {
+    items = items.filter(item => {
       return Object.keys(filters).every(filterKey => {
         const filterFn = filters[filterKey];
         const value = get(item, filterKey);
         const filterValue = filterBy[filterKey];
 
+        // console.log(filterKey, value, filterValue);
         return filterFn(value, filterValue);
       });
     })
   }
 
-  // console.log('Filterwrap', filteredItems);
+  // console.log('FilterWrap filteredItems', items.length);
 
-  return cloneElement(children, {
-    ...props,
-    items: filteredItems,
-    filter: filter => change(transientId, {
+  const propsWithoutItems = {
+    ...rest,
+    filterBy,
+    filter: (filter, fields) => action(selectorPath, {
       filterBy: {
         ...filterBy,
         ...filter,
       }
     }),
-  });
+  };
+
+  const propsToChild = set(propsWithoutItems, itemsPath, items);
+
+  console.log('FilterWrap.propsToChild', propsToChild, rest);
+
+  return cloneElement(children, propsToChild);
 };
 
-export const wrapWithFilterProps = ({ filters }) => {
+export const wrapWithFilterProps = ({ filters, selectorPath, itemsPath, action }) => {
   return (BaseComponent) => (props) => (
-    <FilterWrap filters={filters} {...props}>
+    <FilterWrap
+      filters={filters}
+      selectorPath={selectorPath}
+      itemsPath={itemsPath}
+      action={action}
+      {...props}
+    >
       <BaseComponent/>
     </FilterWrap>
   );

@@ -1,9 +1,11 @@
 import { handleActions } from 'redux-actions';
+import { set } from 'object-path-immutable';
 
 import {
   fetchedIndexPattern,
-  setTransientId,
-  setResultsTransientId,
+  // setTransientId,
+  // setResultsTransientId,
+  change,
   setAsDefaultIndexPattern,
 } from '../actions/index-pattern-view';
 
@@ -12,9 +14,16 @@ import {
 } from '../../reducers';
 
 const defaultState = {
-  indexPattern: undefined,
-  transientId: undefined,
-  resultsTransientId: undefined,
+  indexPattern: {
+    pattern: undefined,
+    fields: undefined,
+    timeFieldName: undefined,
+    isDefault: undefined,
+    id: undefined,
+  },
+  fieldsTable: {},
+  tabs: undefined,
+  transient: undefined,
 };
 
 export default handleActions({
@@ -24,17 +33,8 @@ export default handleActions({
       indexPattern,
     };
   },
-  [setTransientId](state, { payload: { id: transientId }}) {
-    return {
-      ...state,
-      transientId,
-    };
-  },
-  [setResultsTransientId](state, { payload: { id: resultsTransientId }}) {
-    return {
-      ...state,
-      resultsTransientId,
-    };
+  [change](state, { payload: { selectorPath, data } }) {
+    return set(state, selectorPath, data);
   },
   [setAsDefaultIndexPattern](state) {
     return {
@@ -48,3 +48,6 @@ export default handleActions({
 }, defaultState);
 
 export const getPathToFields = () => 'indexPattern.fields';
+export const getPathToFieldsTable = () => 'fieldsTable';
+export const getPathToTabs = () => 'tabs';
+export const getPathToTransient = () => 'transient';

@@ -1,6 +1,7 @@
 import { handleActions } from 'redux-actions';
 import { createSelector } from 'reselect';
 import { chunk, sortBy as sortByLodash, pick } from 'lodash';
+import { set } from 'object-path-immutable';
 
 import {
   selectTimeField,
@@ -10,8 +11,7 @@ import {
   excludeSystemIndices,
   creatingIndexPattern,
   createdIndexPattern,
-  setTransientTableId,
-  setTransientId,
+  change,
 } from '../actions/index-pattern-creation';
 
 import {
@@ -19,7 +19,7 @@ import {
 } from '../../reducers';
 
 const defaultState = {
-  transientId: undefined,
+  transient: {},
   isIncludingSystemIndices: false,
   isCreating: false,
   timeFields: {
@@ -30,7 +30,7 @@ const defaultState = {
     indices: undefined,
     pattern: undefined,
     hasExactMatches: false,
-    transientTableId: undefined,
+    table: {},
   }
 }
 
@@ -81,20 +81,14 @@ export default handleActions({
       },
     };
   },
-  [setTransientTableId](state, { payload: { id: transientTableId } }) {
-    return {
-      ...state,
-      results: {
-        ...state.results,
-        transientTableId,
-      }
-    };
-  },
-  [setTransientId](state, { payload: { id: transientId } }) {
-    return {
-      ...state,
-      transientId,
-    };
+  [change](state, { payload: { selectorPath, data } }) {
+    if (!selectorPath) {
+      return {
+        ...state,
+        ...data,
+      };
+    }
+    return set(state, selectorPath, data);
   },
   [creatingIndexPattern](state, action) {
     return {
@@ -123,4 +117,7 @@ export const getCreation = state => {
   } = getIndexPatternCreate(state);
   return { isCreating, isIncludingSystemIndices, hasExactMatches };
 };
-export const getTransientId = state => getIndexPatternCreate(state).transientId;
+export const getIsIncludingSystemIndices = state => getIndexPatternCreate(state).isIncludingSystemIndices;
+export const getResults = state => getIndexPatternCreate(state).results;
+export const getPathToResultsTable = () => 'results.table';
+export const getPathToResults = () => 'results.indices';

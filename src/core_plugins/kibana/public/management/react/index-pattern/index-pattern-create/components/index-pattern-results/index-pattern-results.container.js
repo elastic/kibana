@@ -2,11 +2,9 @@ import { compose } from 'recompose';
 import { connect } from 'react-redux';
 
 import {
-  connectToTransientStore,
   wrapWithSortProps,
   wrapWithPaginateProps,
   wrapWithFilterProps,
-  rename,
 } from 'plugins/kibana/management/react/hocs';
 
 import IndexPatternResults from './index-pattern-results.component';
@@ -18,37 +16,48 @@ import {
 import {
   getFilteredAndPaginatedIndices,
   getPathToIndices,
-  getTransientId,
+  getIsIncludingSystemIndices,
+  getPathToResults,
+  getResults,
 } from 'plugins/kibana/management/react/store/reducers/index-pattern-creation';
 
 import {
   getIndexPatternCreate,
-  getTransient,
 } from 'plugins/kibana/management/react/reducers';
+
+import store from 'plugins/kibana/management/react/store';
+
+const action = (...args) => store.dispatch(change(...args));
+const commonOpts = {
+  itemsPath: getPathToResults(),
+  action,
+};
 
 export default compose(
   connect(
     state => {
-      const indexPatternState = getIndexPatternCreate(state);
-      const transientId = getTransientId(state);
-      const transientState = getTransient(state)[transientId];
+      const results = getResults(state);
+      const isIncludingSystemIndices = getIsIncludingSystemIndices(state);
 
       // Is it weird to do this here?
-      const indices = indexPatternState.results.indices
-        ? indexPatternState.results.indices.filter(item => item.name[0] !== '.' || transientState.isIncludingSystemIndices)
+      const indices = results.indices
+        ? results.indices.filter(item => item.name[0] !== '.' || isIncludingSystemIndices)
         : undefined;
 
       return {
-        ...indexPatternState.results,
+        ...results,
         indices,
       };
     },
   ),
-  connectToTransientStore({
-    refSetter: setTransientTableId,
-    id: 'creation_results'
+  wrapWithSortProps({
+    ...commonOpts,
+    sortBy: 'name',
+    sortAsc: true,
   }),
-  rename({ from: 'indices', to: 'items' }),
-  wrapWithSortProps(),
-  wrapWithPaginateProps({ perPage: 10, page: 0 }),
+  wrapWithPaginateProps({
+    ...commonOpts,
+    perPage: 10,
+    page: 0
+  }),
 )(IndexPatternResults);

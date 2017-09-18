@@ -18,7 +18,7 @@ import {
 } from 'ui_framework/components';
 
 const IndexPatternResults = ({
-  items,
+  indices,
   numOfPages,
   perPage,
   page,
@@ -28,12 +28,12 @@ const IndexPatternResults = ({
   goToPage,
   changePerPage,
 }) => {
-  if (items === undefined) {
+  if (indices === undefined) {
     return null;
   }
 
   // console.log('IndexPatternResults');
-  // console.log('items', items);
+  // console.log('indices', indices);
   // console.log('numOfPages', numOfPages);
   // console.log('perPage', perPage);
   // console.log('page', page);
@@ -41,7 +41,7 @@ const IndexPatternResults = ({
   // console.log('sortAsc', sortAsc);
   // console.log('======');
 
-  const indexRows = items.map((index, key) => {
+  const indexRows = indices.map((index, key) => {
     return (
       <KuiTableRow key={key}>
         <KuiTableRowCell>

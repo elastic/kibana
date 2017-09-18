@@ -1,13 +1,12 @@
-/* eslint-disable */
 import React, { Component } from 'react';
 import { render } from 'react-dom';
 import { connect, Provider } from 'react-redux';
-import thunk from 'redux-thunk';
 import { createStore, compose, applyMiddleware } from 'redux';
 import createHistory from 'history/lib/createHashHistory';
 import { rootReducer } from './reducers';
 import { initData } from './app/app.actions';
 import globals from './globals';
+import store from './store';
 
 import App from './app/index';
 import IndexPatternRedirect from './index-pattern';
@@ -28,10 +27,6 @@ import {
  import {
    fetchIndexPattern,
  } from './store/actions/index-pattern-view';
-
-const initialState = {};
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-const store = composeEnhancers(applyMiddleware(thunk))(createStore)(rootReducer, initialState);
 
 const renderPage = (page, targetId) => {
   render(

@@ -33,7 +33,10 @@ import {
 import { getKbnTypeNames } from 'src/utils/kbn_field_types';
 
 const IndexPatternFields = ({
-  items,
+  indexPattern: {
+    fields,
+    pattern,
+  },
   numOfPages,
   perPage,
   page,
@@ -42,14 +45,15 @@ const IndexPatternFields = ({
   sortBy,
   sortAsc,
   filter,
+  filterBy,
   changePerPage,
 }) => {
-  // console.log('IndexPatternFields', items);
-  if (items === undefined) {
+  // console.log('IndexPatternFields', fields);
+  if (fields === undefined) {
     return null;
   }
 
-  const rows = items.map((item, key) => {
+  const rows = fields.map((item, key) => {
     return (
       <KuiTableRow key={key}>
         <KuiTableRowCell>
@@ -87,12 +91,14 @@ const IndexPatternFields = ({
                 <KuiFieldText
                   placeholder="Search..."
                   icon="search"
+                  value={filterBy ? filterBy.name : null}
                   onChange={(e) => filter({ name: e.target.value })}
                 />
               </KuiFlexItem>
                <KuiFlexItem>
                 <KuiSelect
-                  onChange={(e) => filter({ type: e.target.value })}
+                  onChange={(e) => filter({ type: e.target.value }, fields)}
+                  value={filterBy ? filterBy.type : null}
                   options={fieldTypes}
                 />
               </KuiFlexItem>

@@ -1,44 +1,39 @@
-import React, { Component, cloneElement } from 'react';
-import { sortBy as sortByLodash } from 'lodash';
+import React, { PropTypes, cloneElement } from 'react';
+import { mapValues, get } from 'lodash';
 
-class SimplePropsWrap extends Component {
-  componentWillMount() {
-    const {
-      change,
-      transientId,
-      wrappedProps,
-      actions,
-    } = this.props;
+const SimplePropsWrap = ({
+  children,
+  statePath,
+  action,
+  wrappedProps,
+  actions,
+  ...rest,
+}) => {
+  const stateData = get(rest, statePath);
+  const connectedActions = mapValues(actions, _action => {
+    return (...args) => action(statePath, _action(wrappedProps, ...args));
+  });
 
-    change(transientId, wrappedProps);
-
-    this.connectedActions = Object.keys(actions).reduce((connectedActions, actionName) => {
-      connectedActions[actionName] = (...args) => change(transientId, actions[actionName](wrappedProps, ...args));
-      return connectedActions;
-    }, {});
-  }
-
-  render() {
-    const {
-      change,
-      transientId,
-      children,
-      wrappedProps,
-      ...rest,
-    } = this.props;
-
-    // console.log('SimplePropsWrap', wrappedProps, this.connectedActions);
-
-    return cloneElement(this.props.children, {
-      ...rest,
-      ...this.connectedActions,
-    });
-  }
+  return cloneElement(children, {
+    ...rest,
+    ...stateData,
+    ...connectedActions,
+  });
 }
 
-export const wrapWithSimpleProps = ({ props: wrappedProps, actions }) => {
+SimplePropsWrap.contextTypes = {
+  store: PropTypes.object,
+};
+
+export const wrapWithSimpleProps = ({ props: wrappedProps, actions, statePath, action }) => {
   return (BaseComponent) => (props) => (
-    <SimplePropsWrap wrappedProps={wrappedProps} actions={actions} {...props}>
+    <SimplePropsWrap
+      statePath={statePath}
+      action={action}
+      wrappedProps={wrappedProps}
+      actions={actions}
+      {...props}
+    >
       <BaseComponent/>
     </SimplePropsWrap>
   );

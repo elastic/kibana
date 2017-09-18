@@ -158,6 +158,7 @@
     "ngreact": "0.3.0",
     "no-ui-slider": "1.2.0",
     "node-fetch": "1.3.2",
+    "object-path-immutable": "0.5.1",
     "pegjs": "0.9.0",
     "postcss-loader": "1.3.3",
     "prop-types": "15.5.8",

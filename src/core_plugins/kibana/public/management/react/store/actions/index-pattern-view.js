@@ -74,5 +74,4 @@ export const setDefaultIndexPattern = createThunk('SET_DEFAULT_INDEX_PATTERN',
 
 export const setAsDefaultIndexPattern = createAction('SET_AS_DEFAULT_INDEX_PATTERN');
 export const fetchedIndexPattern = createAction('FETCHED_INDEX_PATTERN', indexPattern => ({ indexPattern }));
-export const setTransientId = createAction('SET_TRANSIENT_ID', id => ({ id }));
-export const setResultsTransientId = createAction('SET_RESULTS_TRANSIENT_ID', id => ({ id }));
+export const change = createAction('CHANGE', (selectorPath, data) => ({ selectorPath, data }));

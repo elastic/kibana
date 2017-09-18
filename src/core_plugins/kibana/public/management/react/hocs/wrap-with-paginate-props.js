@@ -1,40 +1,58 @@
 import React, { cloneElement } from 'react';
-import { chunk } from 'lodash';
+import { chunk, get } from 'lodash';
+import { set } from 'object-path-immutable';
 
 const PaginateWrap = (props) => {
   const {
-    items,
-    change,
-    transientId,
     children,
-    perPage,
-    page
+    itemsPath,
+    selectorPath,
+    action,
+    defaultPerPage,
+    defaultPage,
+    ...rest,
   } = props;
 
-  // console.log('PaginateWrap', props);
+  const perPage = get(props, `${selectorPath}.perPage`, defaultPerPage);
+  const page = get(props, `${selectorPath}.page`, defaultPage);
 
-  if (items === undefined) {
-    return children;
+  // console.log('PaginateWrap', props, perPage, page, get(props, selectorPath));
+
+  let items = Array.from(get(props, itemsPath, []));
+  if (items.length === 0) {
+    return cloneElement(children, rest);
   }
 
   const numOfPages = Math.ceil(items.length / perPage);
   const pages = chunk(items, perPage);
-  const paginatedItems = pages[page] || [];
+  items = pages[page] || [];
 
-  // console.log('PaginateWrap more', pages, perPage, page);
+  // console.log('PaginateWrap more', numOfPages, pages, perPage, page);
 
-  return cloneElement(children, {
-    ...props,
-    items: paginatedItems,
+  const propsWithoutItems = {
+    ...rest,
+    page,
+    perPage,
     numOfPages,
-    goToPage: page => change(transientId, { page }),
-    changePerPage: perPage => change(transientId, { perPage, page: 0 }),
-  });
+    goToPage: page => action(selectorPath, { page, perPage }),
+    changePerPage: perPage => action(selectorPath, { perPage, page: 0 }),
+  };
+
+  const propsToChild = set(propsWithoutItems, itemsPath, items);
+
+  return cloneElement(children, propsToChild);
 };
 
-export const wrapWithPaginateProps = (defaultProps = {}) => {
+export const wrapWithPaginateProps = ({ perPage, page, selectorPath, itemsPath, action}) => {
   return (BaseComponent) => (props) => (
-    <PaginateWrap {...defaultProps} {...props}>
+    <PaginateWrap
+      defaultPerPage={perPage}
+      defaultPage={page}
+      selectorPath={selectorPath}
+      itemsPath={itemsPath}
+      action={action}
+      {...props}
+    >
       <BaseComponent/>
     </PaginateWrap>
   );

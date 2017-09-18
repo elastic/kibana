@@ -4,26 +4,29 @@ import { compose } from 'recompose';
 import IndexPatternCreate from './index-pattern-create.component';
 
 import {
-  connectToTransientStore,
   wrapWithSimpleProps,
 } from 'plugins/kibana/management/react/hocs';
 
 import {
   createIndexPattern,
-  setTransientId,
+  change,
 } from 'plugins/kibana/management/react/store/actions/index-pattern-creation';
 
 import {
   getCreation,
 } from 'plugins/kibana/management/react/store/reducers/index-pattern-creation';
 
+import store from 'plugins/kibana/management/react/store';
+
+const action = (...args) => store.dispatch(change(...args));
+
 export default compose(
   connect(
     state => ({ ...getCreation(state) }),
     { createIndexPattern },
   ),
-  connectToTransientStore({ refSetter: setTransientId }),
   wrapWithSimpleProps({
+    action,
     props: {
       isIncludingSystemIndices: false,
     },

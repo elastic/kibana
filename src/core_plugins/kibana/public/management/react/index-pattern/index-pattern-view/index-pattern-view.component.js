@@ -40,6 +40,7 @@ import IndexPatternFields from './components/index-pattern-fields';
 const IndexPatternView = ({
   indexPattern,
   selectedTab,
+  changeTab,
   isShowingRefreshFieldsConfirmation,
   showRefreshFieldsConfirmation,
   hideRefreshFieldsConfirmation,
@@ -47,8 +48,8 @@ const IndexPatternView = ({
   deleteIndexPattern,
   setDefaultIndexPattern,
 }) => {
-  // console.log('IndexPatternView', isShowingRefreshFieldsConfirmation);
-  if (indexPattern === undefined) {
+  // console.log('IndexPatternView', indexPattern, selectedTab);
+  if (indexPattern === undefined || indexPattern.fields === undefined) {
     return null;
   }
 
@@ -131,16 +132,19 @@ const IndexPatternView = ({
         </KuiText>
         <KuiTabs>
           <KuiTab
+            onClick={() => changeTab('fields')}
             isSelected={selectedTab === 'fields'}
           >
             Fields ({fields.length})
           </KuiTab>
           <KuiTab
+            onClick={() => changeTab('scripted')}
             isSelected={selectedTab === 'scripted'}
           >
             Scripted Fields (0)
           </KuiTab>
           <KuiTab
+            onClick={() => changeTab('source')}
             isSelected={selectedTab === 'source'}
           >
             Source Filters (0)

@@ -14,13 +14,13 @@ export default handleActions({
       [id]: defaultData || {},
     }
   },
-  [change](state, { payload: { id, data } }) {
-    return {
-      ...state,
-      [id]: {
-        ...state[id],
-        ...data
-      },
-    };
-  },
+  // [change](state, { payload: { id, data } }) {
+  //   return {
+  //     ...state,
+  //     [id]: {
+  //       ...state[id],
+  //       ...data
+  //     },
+  //   };
+  // },
 }, defaultState);

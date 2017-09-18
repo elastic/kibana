@@ -26,8 +26,7 @@ export const fetchTimeFields = createThunk('FETCH_TIME_FIELDS',
 export const fetchedTimeFields = createAction('FETCHED_TIME_FIELDS', timeFields => ({ timeFields }));
 export const selectTimeField = createAction('SELECT_TIME_FIELD', timeField => ({ timeField }));
 
-export const setTransientTableId = createAction('SET_TRANSIENT_TABLE_ID', id => ({ id }));
-export const setTransientId = createAction('SET_TRANSIENT_ID', id => ({ id }));
+export const change = createAction('CHANGE', (selectorPath, data) => ({ selectorPath, data }));
 
 export const creatingIndexPattern = createAction('CREATING_INDEX_PATTERN');
 export const createdIndexPattern = createAction('CREATED_INDEX_PATTERN');

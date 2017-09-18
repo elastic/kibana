@@ -1,8 +1,9 @@
 import { handleActions } from 'redux-actions';
+import { set } from 'object-path-immutable';
 
 import {
   fetchedIndexPatterns,
-  setTransientTableId,
+  change,
 } from '../actions/index-pattern-list';
 
 import {
@@ -11,7 +12,7 @@ import {
 
 const defaultState = {
   indexPatterns: undefined,
-  transientTableId: undefined,
+  listTable: {},
 };
 
 export default handleActions({
@@ -23,13 +24,11 @@ export default handleActions({
       indexPatterns,
     };
   },
-  [setTransientTableId](state, { payload: { id: transientTableId } }) {
-    return {
-      ...state,
-      transientTableId,
-    };
-  }
+  [change](state, { payload: { selectorPath, data } }) {
+    return set(state, selectorPath, data);
+  },
 }, defaultState);
 
 export const getIndexPatterns = state => getIndexPatternList(state).indexPatterns;
 export const getPathToIndexPatterns = () => 'indexPatterns';
+export const getPathToListTable = () => 'listTable';
