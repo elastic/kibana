@@ -1,0 +1,137 @@
+.kuiDescriptionList {
+
+  .kuiDescriptionList__title {
+    font-weight: $kuiFontWeightMedium;
+  }
+
+  .kuiDescriptionList__desc {
+    color: $kuiColorDarkShade;
+  }
+
+  &.kuiDescriptionList--row {
+
+    .kuiDescriptionList__title {
+      @include kuiFontSizeM;
+      margin-top: $kuiSize;
+
+      // Make sure the first <dt> doesn't get a margine.
+      &:first-of-type {
+        margin-top: 0;
+      }
+    }
+
+    .kuiDescriptionList__desc {
+      @include kuiFontSizeS;
+    }
+
+    // Lists can be aligned.
+    &.kuiDescriptionList--center {
+      text-align: center;
+    }
+
+    &.kuiDescriptionList--right {
+      text-align: right;
+    }
+
+    // Compressed gets smaller fonts.
+    &.kuiDescriptionList--compressed {
+
+      .kuiDescriptionList__title {
+        @include kuiFontSizeS;
+      }
+
+      .kuiDescriptionList__desc {
+        @include kuiFontSizeS;
+      }
+    }
+  }
+
+
+  &.kuiDescriptionList--column {
+    display: flex;
+    align-items: stretch;
+    flex-wrap: wrap;
+
+    > * {
+      margin-top: $kuiSize;
+    }
+
+    // First two items don't have margin
+    > *:first-child, >:nth-child(2) {
+      margin-top: 0;
+    }
+
+    .kuiDescriptionList__title {
+      @include kuiFontSizeM;
+      flex-basis: 50%;
+      padding-right: $kuiSizeS;
+    }
+
+    .kuiDescriptionList__desc {
+      @include kuiFontSizeM;
+      flex-basis: 50%;
+      padding-left: $kuiSizeS;
+    }
+
+    // Align the title to smush against the description.
+    &.kuiDescriptionList--center {
+
+      .kuiDescriptionList__title {
+        text-align: right;
+      }
+    }
+
+    &.kuiDescriptionList--compressed {
+
+      .kuiDescriptionList__title {
+        @include kuiFontSizeS;
+      }
+
+      .kuiDescriptionList__desc {
+        @include kuiFontSizeS;
+      }
+    }
+  }
+
+  &.kuiDescriptionList--inline {
+
+    .kuiDescriptionList__title {
+      @include kuiFontSizeS;
+      display: inline;
+      border-radius: $kuiBorderRadius;
+      font-weight: $kuiFontWeightRegular;
+      background: $kuiColorLightestShade;
+      border: $kuiBorderThin;
+      padding:  0 $kuiSizeXS;
+      margin: 0 $kuiSizeXS;
+
+      // Make sure the first <dt> doesn't get a margine.
+      &:first-of-type {
+        margin-left: 0;
+      }
+    }
+
+    .kuiDescriptionList__desc {
+      @include kuiFontSizeS;
+      display: inline;
+      word-break: break-all;
+    }
+
+    // Compressed when inline is even smaller.
+    &.kuiDescriptionList--compressed {
+
+      .kuiDescriptionList__title {
+        @include kuiFontSizeXS;
+      }
+
+      .kuiDescriptionList__desc {
+        @include kuiFontSizeXS;
+      }
+    }
+
+    &.kuiDescriptionList--center {
+      text-align: center;
+    }
+  }
+
+}

@@ -24,6 +24,9 @@ import CodeExample
 import ContextMenuExample
   from '../../views/context_menu/context_menu_example';
 
+import DescriptionListExample
+  from '../../views/description_list/description_list_example';
+
 import FlexExample
   from '../../views/flex/flex_example';
 
@@ -125,6 +128,10 @@ const components = [{
 }, {
   name: 'ContextMenu',
   component: ContextMenuExample,
+  hasReact: true,
+}, {
+  name: 'DescriptionList',
+  component: DescriptionListExample,
   hasReact: true,
 }, {
   name: 'Flex',
