@@ -3,16 +3,14 @@ import _ from 'lodash';
 export function VislibTypesPointSeries() {
 
   const createSerieFromParams = (cfg, seri) => {
-    const matchingSeriParams = cfg.seriesParams ? cfg.seriesParams.find(seriConfig => {
+    const matchingSeriesParams = cfg.seriesParams ? cfg.seriesParams.find(seriConfig => {
       return seri.aggId === seriConfig.data.id;
     }) : null;
 
 
-    let interpolate = matchingSeriParams ? matchingSeriParams.interpolate : cfg.interpolate;
-    // for backward compatibility when loading URLs or configs we need to check smoothLines
-    if (cfg.smoothLines) interpolate = 'cardinal';
+    const interpolate = cfg.smoothLines ? 'cardinal' : cfg.interpolate;
 
-    if (!matchingSeriParams) {
+    if (!matchingSeriesParams) {
       const stacked = ['stacked', 'percentage', 'wiggle', 'silhouette'].includes(cfg.mode);
       return {
         show: true,
@@ -27,15 +25,7 @@ export function VislibTypesPointSeries() {
     }
 
     return {
-      show: matchingSeriParams.show,
-      type: matchingSeriParams.type,
-      mode: matchingSeriParams.mode,
-      interpolate: interpolate,
-      valueAxis: matchingSeriParams.valueAxis,
-      drawLinesBetweenPoints: matchingSeriParams.drawLinesBetweenPoints,
-      showCircles: matchingSeriParams.showCircles,
-      radiusRatio: cfg.radiusRatio,
-      lineWidth: matchingSeriParams.lineWidth,
+      ...matchingSeriesParams,
       data: seri
     };
   };

@@ -170,7 +170,9 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     async getToastMessage(findTimeout = defaultFindTimeout) {
       const toastMessage =
         await find.displayedByCssSelector('kbn-truncated.toast-message.ng-isolate-scope', findTimeout);
-      return toastMessage.getVisibleText();
+      const messageText = await toastMessage.getVisibleText();
+      log.debug(`getToastMessage: ${messageText}`);
+      return messageText;
     }
 
     async waitForToastMessageGone() {

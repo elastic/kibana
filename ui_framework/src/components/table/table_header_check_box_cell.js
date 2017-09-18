@@ -15,6 +15,7 @@ export const KuiTableHeaderCheckBoxCell = ({ onChange, isChecked, className, ...
         className="kuiCheckBox"
         onChange={onChange}
         checked={isChecked}
+        aria-label={`${isChecked ? 'Deselect' : 'Select'} all rows`}
       />
     </KuiTableHeaderCell>
   );

@@ -1,4 +1,4 @@
-import html from 'ui/partials/info.html';
+import template from 'ui/partials/info.html';
 import { uiModules } from 'ui/modules';
 
 uiModules
@@ -10,7 +10,7 @@ uiModules
         info: '@',
         placement: '@'
       },
-      template: html,
+      template,
       link: function ($scope) {
         $scope.placement = $scope.placement || 'top';
       }

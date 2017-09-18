@@ -48,6 +48,9 @@
   flex: 1 1 auto;
 }
 .vis_editor__label {
+  display: block;
+  font-size: 1em;
+  font-weight: normal;
   color: @gray;
   margin: 0 10px;
   flex-shrink: 0;
@@ -129,6 +132,12 @@
   }
 }
 
+.vis_editor__series-visibility-toggle {
+  appearance: none;
+  background: none;
+  border: none;
+}
+
 // series_config.js
 .vis_editor__series_config-subhead { .vis_editor__subhead; margin: 10px 0 5px; }
 
@@ -149,6 +158,9 @@
 }
 
 .vis_editor__vis_picker-item {
+  appearance: none;
+  background: none;
+  border: none;
   justify-content: center;
   display: flex;
   align-items: center;
@@ -470,9 +482,9 @@
   padding: 4px 10px 0;
   flex: 0 0 auto;
   color: @gray;
+  font-weight: normal;
 }
 
 .vis_editor__dirty_controls-toggle {
   flex: 0 0 auto;
 }
-

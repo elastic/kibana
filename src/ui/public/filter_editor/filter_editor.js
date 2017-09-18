@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
+import { callAfterBindingsWorkaround } from 'ui/compat';
 import { FILTER_OPERATOR_TYPES } from './lib/filter_operators';
 import template from './filter_editor.html';
 import { documentationLinks } from '../documentation_links/documentation_links';
@@ -33,7 +34,7 @@ module.directive('filterEditor', function ($timeout, indexPatterns) {
     },
     controllerAs: 'filterEditor',
     bindToController: true,
-    controller: function ($scope, $element) {
+    controller: callAfterBindingsWorkaround(function ($scope, $element) {
       this.init = () => {
         const { filter } = this;
         this.docLinks = documentationLinks;
@@ -124,6 +125,6 @@ module.directive('filterEditor', function ($timeout, indexPatterns) {
           $timeout(() => this.onCancel());
         }
       });
-    }
+    })
   };
 });

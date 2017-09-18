@@ -8,7 +8,7 @@ import { getUpdateStatus } from 'ui/vis/update_status';
 
 uiModules
 .get('kibana/directive', ['ngSanitize'])
-.directive('visualizationEditor', function (Private) {
+.directive('visualizationEditor', function (Private, $timeout) {
   const editorTypes = Private(VisEditorTypesRegistryProvider);
 
   return {
@@ -27,7 +27,7 @@ uiModules
         editorTypes.find(editor => editor.key === vis.type.editor);
       const editor = new Editor(element[0], vis);
 
-      const renderFunction = () => {
+      $scope.renderFunction = () => {
         if (!$scope.vis) return;
         editor.render($scope.visData, $scope.searchSource, getUpdateStatus($scope)).then(() => {
           $scope.$emit('renderComplete');
@@ -36,13 +36,16 @@ uiModules
 
       $scope.$on('render', (event) => {
         event.preventDefault();
-        renderFunction();
+        $scope.renderFunction();
       });
 
       $scope.$on('$destroy', () => {
         editor.destroy();
       });
 
+      if (!vis.initialized) {
+        $timeout(() => { $scope.renderFunction(); });
+      }
     }
   };
 });

@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import _ from 'lodash';
 import AggSelect from './agg_select';
 import FieldSelect from './field_select';
@@ -9,6 +10,7 @@ import Select from 'react-select';
 import uuid from 'uuid';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
+import { htmlIdGenerator } from 'ui_framework/services';
 const newPercentile = (opts) => {
   return _.assign({ id: uuid.v1(), mode: 'line', shade: 0.2 }, opts);
 };
@@ -42,10 +44,12 @@ class Percentiles extends Component {
     if (model.mode === 'line') {
       optionsStyle.display = 'none';
     }
+    const htmlId = htmlIdGenerator(model.id);
     return  (
       <div className="vis_editor__percentiles-row" key={model.id}>
         <div className="vis_editor__percentiles-content">
           <input
+            aria-label="Percentile"
             placeholder="Percentile"
             className="vis_editor__input-grows"
             type="number"
@@ -53,17 +57,21 @@ class Percentiles extends Component {
             onChange={this.handleTextChange(model, 'value')}
             value={model.value}
           />
-          <div className="vis_editor__label">Mode</div>
+          <label className="vis_editor__label" htmlFor={htmlId('mode')}>Mode</label>
           <div className="vis_editor__row_item">
             <Select
+              inputProps={{ id: htmlId('mode') }}
               clearable={false}
               onChange={this.handleTextChange(model, 'mode')}
               options={modeOptions}
               value={model.mode}
             />
           </div>
-          <div style={optionsStyle} className="vis_editor__label">Fill To</div>
+          <label style={optionsStyle} className="vis_editor__label" htmlFor={htmlId('fillTo')}>
+            Fill To
+          </label>
           <input
+            id={htmlId('fillTo')}
             style={optionsStyle}
             className="vis_editor__input-grows"
             type="number"
@@ -71,8 +79,11 @@ class Percentiles extends Component {
             onChange={this.handleTextChange(model, 'percentile')}
             value={model.percentile}
           />
-          <div style={optionsStyle} className="vis_editor__label">Shade (0 to 1)</div>
+          <label style={optionsStyle} className="vis_editor__label" htmlFor={htmlId('shade')}>
+            Shade (0 to 1)
+          </label>
           <input
+            id={htmlId('shade')}
             style={optionsStyle}
             className="vis_editor__input-grows"
             type="number"
@@ -186,4 +197,3 @@ PercentileAgg.propTypes = {
 };
 
 export default PercentileAgg;
-

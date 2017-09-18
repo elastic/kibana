@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import tickFormatter from '../../lib/tick_formatter';
 import _ from 'lodash';
 import Timeseries from 'plugins/metrics/visualizations/components/timeseries';
@@ -121,6 +122,7 @@ function TimeseriesVisualization(props) {
   }
 
   const params = {
+    dateFormat: props.dateFormat,
     crosshair: true,
     tickFormatter: formatter,
     legendPosition: model.legend_position || 'right',
@@ -158,7 +160,8 @@ TimeseriesVisualization.propTypes = {
   onBrush: PropTypes.func,
   onChange: PropTypes.func,
   reversed: PropTypes.bool,
-  visData: PropTypes.object
+  visData: PropTypes.object,
+  dateFormat: PropTypes.string
 };
 
 export default TimeseriesVisualization;

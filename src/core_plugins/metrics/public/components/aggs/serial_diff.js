@@ -1,10 +1,12 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import AggSelect from './agg_select';
 import MetricSelect from './metric_select';
 import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createNumberHandler from '../lib/create_number_handler';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 export const SerialDiffAgg = props => {
   const { siblings } = props;
@@ -14,6 +16,8 @@ export const SerialDiffAgg = props => {
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
   const handleNumberChange = createNumberHandler(handleChange);
+
+  const htmlId = htmlIdGenerator();
 
   return (
     <AggRow
@@ -41,8 +45,9 @@ export const SerialDiffAgg = props => {
         />
       </div>
       <div>
-        <div className="vis_editor__label">Lag</div>
+        <label className="vis_editor__label" htmlFor={htmlId('lag')}>Lag</label>
         <input
+          id={htmlId('lag')}
           className="vis_editor__input"
           onChange={handleNumberChange('lag')}
           value={model.lag}

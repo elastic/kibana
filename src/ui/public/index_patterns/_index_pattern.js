@@ -26,7 +26,7 @@ export function getRoutes() {
   };
 }
 
-export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, confirmModalPromise, kbnUrl) {
+export function IndexPatternProvider(Private, config, Promise, confirmModalPromise, kbnUrl) {
   const fieldformats = Private(RegistryFieldFormatsProvider);
   const getConfig = (...args) => config.get(...args);
   const getIds = Private(IndexPatternsGetProvider)('id');
@@ -366,7 +366,7 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
           const confirmMessage =
             `An index pattern with the title '${this.title}' already exists.`;
 
-          return confirmModalPromise(confirmMessage, { confirmButtonText: 'Edit existing pattern' })
+          return confirmModalPromise(confirmMessage, { confirmButtonText: 'Go to existing pattern' })
             .then(() => {
               kbnUrl.redirect('/management/kibana/indices/{{id}}', { id: duplicate.id });
               return true;

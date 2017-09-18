@@ -1,0 +1,168 @@
+<div class="kuiPanel">
+  <div class="kuiPanelHeader">
+    <div class="kuiPanelHeaderSection">
+      <h2 class="kuiPanelHeader__title">
+        Step 1 of 2: Define index pattern
+      </h2>
+    </div>
+  </div>
+
+  <div class="kuiPanelBody">
+    <div>
+      <form
+        name="stepIndexPattern.indexPatternNameForm"
+        role="form"
+        ng-submit="stepIndexPattern.goToNextStep()"
+        class="kuiVerticalRhythm"
+      >
+        <div class="createIndexPatternInputContainer kuiVerticalRhythm">
+          <!-- Index pattern input -->
+          <div>
+            <label
+              for="indexPatternNameField"
+              class="kuiLabel kuiVerticalRhythmSmall"
+            >
+              Index pattern
+            </label>
+
+            <div class="kuiVerticalRhythmSmall kuiVerticalRhythm">
+              <input
+                id="indexPatternNameField"
+                class="kuiTextInput kuiTextInput--large createIndexPatternInputField"
+                data-test-subj="createIndexPatternNameInput"
+                ng-model="stepIndexPattern.indexPatternName"
+                placeholder="index-name-*"
+                validate-index-pattern
+                validate-index-pattern-allow-wildcard
+                name="name"
+                required
+                type="text"
+                aria-describedby="indexPatternNameFieldHelp1 indexPatternNameFieldHelp2"
+              >
+            </div>
+
+            <p
+              id="indexPatternNameFieldHelp1"
+              class="kuiText kuiSubduedText kuiVerticalRhythm"
+            >
+              You can use a <strong>*</strong> as a wildcard in your index pattern.
+            </p>
+
+            <p
+              id="indexPatternNameFieldHelp2"
+              class="kuiText kuiSubduedText"
+            >
+              You can't use empty spaces or the characters <strong>\ / ? " < > , |</strong>.
+            </p>
+          </div>
+
+          <!-- Action -->
+          <button
+            data-test-subj="createIndexPatternGoToStep2Button"
+            class="kuiButton kuiButton--primary kuiButton--iconText kuiVerticalRhythmSmall"
+            ng-click="stepIndexPattern.goToNextStep()"
+            ng-disabled="!stepIndexPattern.canGoToNextStep()"
+          >
+            <span class="kuiButton__inner">
+              <span>
+                Next step
+              </span>
+              <span
+                aria-hidden="true"
+                class="kuiButton__icon kuiIcon fa-chevron-right"
+              ></span>
+            </span>
+          </button>
+        </div>
+      </form>
+
+      <!-- List of matching indices -->
+      <div
+        class="kuiVerticalRhythm"
+        ng-switch="stepIndexPattern.matchingIndicesListType"
+      >
+        <div ng-switch-when="invalidIndexPattern">
+          <matching-indices-list
+            is-loading="stepIndexPattern.isFetchingMatchingIndices"
+            indices="stepIndexPattern.allIndices"
+            pattern="stepIndexPattern.indexPatternName"
+          >
+           <span class="kuiStatusText kuiStatusText--error">
+              <span
+                aria-hidden="true"
+                class="kuiStatusText__icon kuiIcon fa-hand-stop-o"
+              ></span>
+
+              <span>
+                You've entered an invalid index pattern. Please adjust it to match any of your <strong>{{stepIndexPattern.allIndices.length}} indices</strong>, below.
+              </span>
+            </span>
+          </matching-indices-list>
+        </div><div ng-switch-when="noInput">
+          <matching-indices-list
+            is-loading="stepIndexPattern.isFetchingMatchingIndices"
+            indices="stepIndexPattern.allIndices"
+            pattern="stepIndexPattern.indexPatternName"
+          >
+            <span class="kuiStatusText kuiStatusText--info">
+              <span ng-if="!stepIndexPattern.allIndices.length">
+                You only have a single index. You can create an index pattern to match it.
+              </span>
+
+              <span ng-if="stepIndexPattern.allIndices.length">
+                Your index pattern can match any of your <strong>{{stepIndexPattern.allIndices.length}} indices</strong>, below.
+              </span>
+            </span>
+          </matching-indices-list>
+        </div>
+
+        <div ng-switch-when="noMatches">
+          <matching-indices-list
+            is-loading="stepIndexPattern.isFetchingMatchingIndices"
+            indices="stepIndexPattern.allIndices"
+            pattern="stepIndexPattern.indexPatternName"
+          >
+            <span class="kuiStatusText kuiStatusText--info">
+              <span>
+                The index pattern you've entered doesn't match any indices. You can match any of your <strong>{{stepIndexPattern.allIndices.length}} indices</strong>, below.
+              </span>
+            </span>
+          </matching-indices-list>
+        </div>
+
+        <div ng-switch-when="partialMatches">
+          <matching-indices-list
+            is-loading="stepIndexPattern.isFetchingMatchingIndices"
+            indices="stepIndexPattern.partialMatchingIndices"
+            pattern="stepIndexPattern.indexPatternName"
+          >
+            <span class="kuiStatusText kuiStatusText--info">
+              <span>
+                Your index pattern doesn't match any indices, but you have <strong>{{stepIndexPattern.partialMatchingIndices.length}} {{stepIndexPattern.partialMatchingIndices.length > 1 ? 'indices' : 'index'}}</strong> which {{stepIndexPattern.partialMatchingIndices.length > 1 ? 'look' : 'looks'}} similar.
+              </span>
+            </span>
+          </matching-indices-list>
+        </div>
+
+        <div ng-switch-when="exactMatches">
+          <matching-indices-list
+            is-loading="stepIndexPattern.isFetchingMatchingIndices"
+            indices="stepIndexPattern.matchingIndices"
+            pattern="stepIndexPattern.indexPatternName"
+          >
+            <span class="kuiStatusText kuiStatusText--success">
+              <span
+                aria-hidden="true"
+                class="kuiStatusText__icon kuiIcon fa-check"
+              ></span>
+
+              <span>
+                <strong>Success!</strong> Your index pattern matches <strong>{{stepIndexPattern.matchingIndices.length}} {{stepIndexPattern.matchingIndices.length > 1 ? 'indices' : 'index'}}</strong>.
+              </span>
+            </span>
+          </matching-indices-list>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

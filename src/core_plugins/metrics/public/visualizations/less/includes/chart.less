@@ -37,6 +37,13 @@
   padding: 6px 2px 0 0;
   color: @textColor;
   font-size: 12px;
+
+  button {
+    background: none;
+    border: none;
+    appearance: none;
+    padding: 0;
+  }
 }
 
 .rhythm_chart__legend-series {
@@ -52,6 +59,10 @@
 }
 
 .rhythm_chart__legend_item {
+  appearance: none;
+  background: none;
+  border: none;
+  text-align: left;
   cursor: pointer;
   &.disabled {
     opacity: 0.5;
@@ -62,6 +73,7 @@
     border-top: 1px solid @lineColor;
   }
   display: flex;
+  width: 100%;
   max-width: 170px;
 }
 

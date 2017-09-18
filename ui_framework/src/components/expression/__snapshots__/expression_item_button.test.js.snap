@@ -1,0 +1,57 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiExpressionItemButton Props isActive false renders inactive 1`] = `
+<button
+  class="kuiExpressionItem__button"
+>
+  <span
+    class="kuiExpressionItem__buttonDescription"
+  >
+    the answer is
+  </span>
+   
+  <span
+    class="kuiExpressionItem__buttonValue"
+  >
+    42
+  </span>
+</button>
+`;
+
+exports[`KuiExpressionItemButton Props isActive true renders active 1`] = `
+<button
+  class="kuiExpressionItem__button kuiExpressionItem__button--isActive"
+>
+  <span
+    class="kuiExpressionItem__buttonDescription"
+  >
+    the answer is
+  </span>
+   
+  <span
+    class="kuiExpressionItem__buttonValue"
+  >
+    42
+  </span>
+</button>
+`;
+
+exports[`KuiExpressionItemButton renders 1`] = `
+<button
+  aria-label="aria-label"
+  class="kuiExpressionItem__button testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <span
+    class="kuiExpressionItem__buttonDescription"
+  >
+    the answer is
+  </span>
+   
+  <span
+    class="kuiExpressionItem__buttonValue"
+  >
+    42
+  </span>
+</button>
+`;

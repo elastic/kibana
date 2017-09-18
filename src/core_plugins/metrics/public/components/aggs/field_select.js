@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import Select from 'react-select';
 import generateByTypeFilter from '../lib/generate_by_type_filter';
 
@@ -15,6 +16,7 @@ function FieldSelect(props) {
 
   return (
     <Select
+      inputProps={{ id: props.id }}
       placeholder="Select field..."
       disabled={props.disabled}
       options={options}
@@ -33,6 +35,7 @@ FieldSelect.defaultProps = {
 FieldSelect.propTypes = {
   disabled: PropTypes.bool,
   fields: PropTypes.object,
+  id: PropTypes.string,
   indexPattern: PropTypes.string,
   onChange: PropTypes.func,
   restrict: PropTypes.string,

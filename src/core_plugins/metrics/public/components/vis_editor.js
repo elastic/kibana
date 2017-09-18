@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import VisEditorVisualization from './vis_editor_visualization';
 import Visualization from './visualization';
 import VisPicker from './vis_picker';
@@ -58,9 +59,11 @@ class VisEditor extends Component {
     };
 
     if (!this.props.vis.isEditorMode()) {
+      if (!this.props.vis.params || !this.props.visData) return null;
       const reversed = this.state.reversed;
       return (
         <Visualization
+          dateFormat={this.props.config.get('dateFormat')}
           reversed={reversed}
           onBrush={this.onBrush}
           fields={this.props.vis.fields}
@@ -73,7 +76,7 @@ class VisEditor extends Component {
 
     const { model } = this.state;
 
-    if (model) {
+    if (model && this.props.visData) {
       return (
         <div className="vis_editor">
           <VisPicker
@@ -89,11 +92,13 @@ class VisEditor extends Component {
             onCommit={handleCommit}
             onToggleAutoApply={handleAutoApplyToggle}
             onChange={handleChange}
+            dateFormat={this.props.config.get('dateFormat')}
           />
           <PanelConfig
             fields={this.props.vis.fields}
             model={model}
             visData={this.props.visData}
+            dateFormat={this.props.config.get('dateFormat')}
             onChange={handleChange}
           />
         </div>
@@ -109,11 +114,16 @@ class VisEditor extends Component {
 
 }
 
+VisEditor.defaultProps = {
+  visData: {}
+};
+
 VisEditor.propTypes = {
   vis: PropTypes.object,
   visData: PropTypes.object,
   appState: PropTypes.object,
   renderComplete: PropTypes.func,
+  config: PropTypes.object
 };
 
 export default VisEditor;

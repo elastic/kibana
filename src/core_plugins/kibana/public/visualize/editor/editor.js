@@ -22,7 +22,6 @@ import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
-import { QueryManagerProvider } from 'ui/query_manager';
 
 uiRoutes
 .when(VisualizeConstants.CREATE_PATH, {
@@ -154,7 +153,6 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
     return appState;
   }());
-  const queryManager = Private(QueryManagerProvider)($state);
 
   function init() {
     // export some objects
@@ -188,19 +186,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       $appStatus.dirty = status.dirty || !savedVis.id;
     });
 
-    $scope.$watchCollection('state.$newFilters', function (filters = []) {
-      // need to convert filters generated from user interaction with viz into kuery AST
-      // These are handled by the filter bar directive when lucene is the query language
-      Promise.all(filters.map(queryManager.addLegacyFilter))
-      .then(() => $scope.state.$newFilters = [])
-      .then($scope.fetch);
-    });
-
-    $scope.$watch('state.query', (newQuery) => {
-      $state.query = migrateLegacyQuery(newQuery);
-
-      $scope.fetch();
-    });
+    $scope.$watch('state.query', $scope.updateQueryAndFetch);
 
     $state.replace();
 
@@ -209,10 +195,10 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     };
 
     $scope.$watchMulti([
-      'searchSource.get("index").timeFieldName',
+      'searchSource.get("index")',
       'vis.type.options.showTimePicker',
-    ], function ([timeField, requiresTimePicker]) {
-      timefilter.enabled = Boolean(timeField || requiresTimePicker);
+    ], function ([index, requiresTimePicker]) {
+      timefilter.enabled = Boolean((!index || index.timeFieldName) && requiresTimePicker);
     });
 
     // update the searchSource when filters update
@@ -236,14 +222,14 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     });
   }
 
-  $scope.updateQuery = function (query) {
+  $scope.updateQueryAndFetch = function (query) {
     // reset state if language changes
     if ($state.query.language && $state.query.language !== query.language) {
       $state.filters = [];
       $state.$newFilters = [];
     }
-
-    $state.query = query;
+    $state.query = migrateLegacyQuery(query);
+    $scope.fetch();
   };
 
   /**

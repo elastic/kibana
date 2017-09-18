@@ -10,6 +10,7 @@ exports[`renders KuiTableRowCheckBoxCell 1`] = `
     class="kuiTableRowCell__liner"
   >
     <input
+      aria-label="Select row"
       class="kuiCheckBox"
       type="checkbox"
     />

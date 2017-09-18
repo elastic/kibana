@@ -10,6 +10,7 @@ import {
   SettingsPageProvider,
   MonitoringPageProvider,
   PointSeriesPageProvider,
+  VisualBuilderPageProvider,
 } from './page_objects';
 
 import {
@@ -48,6 +49,7 @@ export default async function ({ readConfigFile }) {
       settings: SettingsPageProvider,
       monitoring: MonitoringPageProvider,
       pointSeries: PointSeriesPageProvider,
+      visualBuilder: VisualBuilderPageProvider,
     },
     services: {
       es: commonConfig.get('services.es'),

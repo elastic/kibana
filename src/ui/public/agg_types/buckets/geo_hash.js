@@ -45,6 +45,14 @@ export function AggTypesBucketsGeoHashProvider(Private, config) {
     return precision;
   }
 
+  function getMapZoom(vis) {
+    if (vis.hasUiState() && parseInt(vis.uiStateVal('mapZoom')) >= 0) {
+      return parseInt(vis.uiStateVal('mapZoom'));
+    }
+
+    return vis.params.mapZoom;
+  }
+
   function isOutsideCollar(bounds, collar) {
     return bounds && collar && !geoContains(collar, bounds);
   }
@@ -89,11 +97,8 @@ export function AggTypesBucketsGeoHashProvider(Private, config) {
         },
         write: function (aggConfig, output) {
           const vis = aggConfig.vis;
-          let currZoom;
-          if (vis.hasUiState()) {
-            currZoom = parseInt(vis.uiStateVal('mapZoom'), 10);
-          }
-          const autoPrecisionVal = zoomPrecision[currZoom >= 0 ? currZoom : parseInt(vis.params.mapZoom)];
+          const currZoom = getMapZoom(vis);
+          const autoPrecisionVal = zoomPrecision[currZoom];
           output.params.precision = aggConfig.params.autoPrecision ? autoPrecisionVal : getPrecision(aggConfig.params.precision);
         }
       }
@@ -103,25 +108,23 @@ export function AggTypesBucketsGeoHashProvider(Private, config) {
 
       if (agg.params.isFilteredByCollar && agg.getField()) {
         const vis = agg.vis;
-        let mapBounds;
-        let mapZoom;
-        if (vis.hasUiState()) {
-          mapBounds = vis.uiStateVal('mapBounds');
-          mapZoom = vis.uiStateVal('mapZoom');
-        }
-        if (mapBounds && mapZoom) {
-          const lastMapCollar = vis.uiStateVal('mapCollar');
+        const mapBounds = vis.sessionState.mapBounds;
+        const mapZoom = getMapZoom(vis);
+        if (mapBounds) {
+          const lastMapCollar = vis.sessionState.mapCollar;
           let mapCollar;
           if (!lastMapCollar || lastMapCollar.zoom !== mapZoom || isOutsideCollar(mapBounds, lastMapCollar)) {
             mapCollar = scaleBounds(mapBounds);
             mapCollar.zoom = mapZoom;
-            vis.getUiState().set('mapCollar', mapCollar);
+            vis.sessionState.mapCollar = mapCollar;
           } else {
             mapCollar = lastMapCollar;
           }
           const boundingBox = {};
-          delete mapCollar.zoom; // zoom is not part of bounding box filter
-          boundingBox[agg.getField().name] = mapCollar;
+          boundingBox[agg.getField().name] = {
+            top_left: mapCollar.top_left,
+            bottom_right: mapCollar.bottom_right
+          };
           aggs.push(new AggConfig(agg.vis, {
             type: 'filter',
             id: 'filter_agg',

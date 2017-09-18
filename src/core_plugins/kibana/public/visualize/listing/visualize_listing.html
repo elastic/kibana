@@ -6,13 +6,17 @@
     <div
       data-transclude-slot="topLeftCorner"
       class="kuiLocalTitle"
+      role="heading"
+      aria-level="1"
     >
       Visualize
     </div>
   </div>
 </kbn-top-nav>
 
-<div class="kuiViewContent kuiViewContent--constrainedWidth">
+<div class="kuiViewContent kuiViewContent--constrainedWidth"
+     data-test-subj="visualizeLandingPage"
+>
   <div class="kuiViewContentItem kuiVerticalRhythm" ng-if="listingController.showLimitError">
     <div class="kuiInfoPanel kuiInfoPanel--warning">
       <div class="kuiInfoPanelBody">
@@ -30,6 +34,7 @@
         class="kuiToolBarSection"
         filter="listingController.filter"
         on-filter="listingController.onFilter"
+        data-test-subj="visualizationSearchFilter"
       ></tool-bar-search-box>
 
       <div class="kuiToolBarSection">
@@ -113,36 +118,53 @@
       <thead>
         <tr>
           <th class="kuiTableHeaderCell kuiTableHeaderCell--checkBox">
-            <input
-              type="checkbox"
-              class="kuiCheckBox"
-              ng-checked="listingController.areAllItemsChecked()"
-              ng-click="listingController.toggleAll()"
+            <div class="kuiTableHeaderCell__liner">
+              <input
+                type="checkbox"
+                class="kuiCheckBox"
+                ng-checked="listingController.areAllItemsChecked()"
+                ng-click="listingController.toggleAll()"
+                aria-label="{{listingController.areAllItemsChecked() ? 'Deselect all rows' : 'Select all rows'}}"
+              >
+            </div>
+          </th>
+
+          <th
+            class="kuiTableHeaderCell"
+          >
+            <button
+              class="kuiTableHeaderCellButton"
+              ng-class="{'kuiTableHeaderCellButton-isSorted': listingController.getSortedProperty().name == 'title'}"
+              ng-click="listingController.sortOn('title')"
+              aria-label="{{listingController.isAscending('title') ? 'Sort name descending' : 'Sort name ascending'}}"
             >
+              <span class="kuiTableHeaderCell__liner">
+                Name
+                <span
+                  class="kuiTableSortIcon kuiIcon"
+                  ng-class="listingController.isAscending('title') ? 'fa-long-arrow-up' : 'fa-long-arrow-down'"
+                ></span>
+              </span>
+            </button>
           </th>
 
           <th
             class="kuiTableHeaderCell"
-            ng-click="listingController.sortOn('title')"
           >
-            Name
-            <span
-              class="kuiIcon"
-              ng-show="listingController.getSortedProperty().name === 'title'"
-              ng-class="listingController.isAscending('title') ? 'fa-caret-up' : 'fa-caret-down'"
-            ></span>
-          </th>
-
-          <th
-            class="kuiTableHeaderCell"
-            ng-click="listingController.sortOn('type')"
-          >
-            Type
-            <span
-              class="kuiIcon"
-              ng-show="listingController.getSortedProperty().name === 'type'"
-              ng-class="listingController.isAscending('type') ? 'fa-caret-up' : 'fa-caret-down'"
-            ></span>
+            <button
+              class="kuiTableHeaderCellButton"
+              ng-class="{'kuiTableHeaderCellButton-isSorted': listingController.getSortedProperty().name == 'type'}"
+              ng-click="listingController.sortOn('type')"
+              aria-label="{{listingController.isAscending('type') ? 'Sort type descending' : 'Sort type ascending'}}"
+            >
+              <span class="kuiTableHeaderCell__liner">
+                Type
+                <span
+                  class="kuiTableSortIcon kuiIcon"
+                  ng-class="listingController.isAscending('type') ? 'fa-long-arrow-up' : 'fa-long-arrow-down'"
+                ></span>
+              </span>
+            </button>
           </th>
         </tr>
       </thead>
@@ -159,6 +181,7 @@
                 class="kuiCheckBox"
                 ng-click="listingController.toggleItem(item)"
                 ng-checked="listingController.isItemChecked(item)"
+                aria-label="{{listingController.isItemChecked(item) ? 'Deselect row' : 'Select row'}}"
               >
             </div>
           </td>

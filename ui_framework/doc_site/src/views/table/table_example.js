@@ -9,8 +9,9 @@ import {
   GuideText,
 } from '../../components';
 
-const tableHtml = require('./table.html');
-const tableJs = require('raw!./table.js');
+import { Table } from './table';
+const tableSource = require('!!raw!./table');
+const tableHtml = renderToHtml(Table);
 
 import { TableWithMenuButtons } from './table_with_menu_buttons';
 const tableWithMenuButtonsSource = require('!!raw!./table_with_menu_buttons');
@@ -41,21 +42,20 @@ export default props => (
     <GuideSection
       title="Table"
       source={[{
+        type: GuideSectionTypes.JS,
+        code: tableSource,
+      }, {
         type: GuideSectionTypes.HTML,
         code: tableHtml,
-      }, {
-        type: GuideSectionTypes.JS,
-        code: tableJs,
       }]}
     >
       <GuideText>
         Here&rsquo;s the basic Table. You can expand and collapse rows.
       </GuideText>
 
-      <GuideDemo
-        html={tableHtml}
-        js={tableJs}
-      />
+      <GuideDemo>
+        <Table />
+      </GuideDemo>
     </GuideSection>
 
     <GuideSection

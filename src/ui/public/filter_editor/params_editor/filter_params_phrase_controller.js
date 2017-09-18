@@ -32,7 +32,7 @@ export function filterParamsPhraseController($http, $scope, config) {
       .catch(() => []);
   }
 
-  function getFieldQueryHash(field, query) {
+  function getFieldQueryHash(field, query = '') {
     return `${field.indexPattern.id}/${field.name}/${query}`;
   }
 }

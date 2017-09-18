@@ -2,21 +2,21 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'sinon';
 
-import { RequestQueueProvider } from '../_request_queue';
+import { requestQueue } from '../_request_queue';
 import { SearchStrategyProvider } from '../fetch/strategy/search';
 import { DocDataStrategyProvider } from '../fetch/strategy/doc_data';
 
 describe('Courier Request Queue', function () {
   let docStrategy;
-  let requestQueue;
   let searchStrategy;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     docStrategy = Private(DocDataStrategyProvider);
-    requestQueue = Private(RequestQueueProvider);
     searchStrategy = Private(SearchStrategyProvider);
   }));
+  beforeEach(requestQueue.clear);
+  after(requestQueue.clear);
 
   class MockReq {
     constructor(strategy, startable = true) {

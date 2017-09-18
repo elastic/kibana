@@ -1,13 +1,12 @@
 import _ from 'lodash';
 
-import { RequestQueueProvider } from '../_request_queue';
+import { requestQueue } from '../_request_queue';
 import { FetchTheseProvider } from './fetch_these';
 import { CallResponseHandlersProvider } from './call_response_handlers';
 import { ReqStatusProvider } from './req_status';
 
 export function FetchProvider(Private, Promise) {
 
-  const requestQueue = Private(RequestQueueProvider);
   const immediatelyFetchThese = Private(FetchTheseProvider);
   const callResponseHandlers = Private(CallResponseHandlersProvider);
   const INCOMPLETE = Private(ReqStatusProvider).INCOMPLETE;

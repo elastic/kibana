@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import moment from 'moment';
 import reactcss from 'reactcss';
 class Annotation extends Component {
@@ -65,6 +66,8 @@ class Annotation extends Component {
       <div className="annotation" style={style.container}>
         <div className="annotation__line" style={style.line} />
         <div
+          onFocus={this.handleMouseOver}
+          onBlur={this.handleMouseOut}
           onMouseOver={this.handleMouseOver}
           onMouseOut={this.handleMouseOut}
           className="annotation__icon"

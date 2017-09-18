@@ -172,7 +172,7 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
       //we need to propagate user's query so we can higlight matches
       scope.query = undefined;
 
-      //Declare the timeout promise var outside the function scope so that stacked calls can be cancelled later 
+      //Declare the timeout promise var outside the function scope so that stacked calls can be cancelled later
       var timeoutPromise;
 
       var scheduleSearchWithTimeout = function(inputValue) {
@@ -379,8 +379,8 @@ angular.module('ui.bootstrap.typeahead', ['ui.bootstrap.position', 'ui.bootstrap
       },
       link:function (scope, element, attrs) {
         var tplUrl = $parse(attrs.templateUrl)(scope.$parent) || 'template/typeahead/typeahead-match.html';
-        $http.get(tplUrl, {cache: $templateCache}).success(function(tplContent){
-           element.replaceWith($compile(tplContent.trim())(scope));
+        $http.get(tplUrl, {cache: $templateCache}).then(function(resp){
+           element.replaceWith($compile(resp.data.trim())(scope));
         });
       }
     };

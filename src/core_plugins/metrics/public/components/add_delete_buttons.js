@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import Tooltip from './tooltip';
 
 function AddDeleteButtons(props) {
@@ -8,9 +9,13 @@ function AddDeleteButtons(props) {
     }
     return (
       <Tooltip text={props.deleteTooltip}>
-        <a className="thor__button-outlined-danger sm" onClick={props.onDelete}>
+        <button
+          aria-label={props.deleteTooltip}
+          className="thor__button-outlined-danger sm"
+          onClick={props.onDelete}
+        >
           <i className="fa fa-trash-o" />
-        </a>
+        </button>
       </Tooltip>
     );
   };
@@ -20,9 +25,13 @@ function AddDeleteButtons(props) {
     }
     return (
       <Tooltip text={props.addTooltip}>
-        <a className="thor__button-outlined-default sm" onClick={props.onAdd}>
+        <button
+          aria-label={props.addTooltip}
+          className="thor__button-outlined-default sm"
+          onClick={props.onAdd}
+        >
           <i className="fa fa-plus" />
-        </a>
+        </button>
       </Tooltip>
     );
   };
@@ -32,9 +41,13 @@ function AddDeleteButtons(props) {
   if (props.onClone && !props.disableAdd) {
     clone = (
       <Tooltip text={props.cloneTooltip}>
-        <a className="thor__button-outlined-default sm" onClick={props.onClone}>
+        <button
+          aria-label={props.cloneTooltip}
+          className="thor__button-outlined-default sm"
+          onClick={props.onClone}
+        >
           <i className="fa fa-files-o" />
-        </a>
+        </button>
       </Tooltip>
     );
   }

@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 
 import { ColorWrap as colorWrap, Saturation, Hue, Alpha, Checkboard } from 'react-color/lib/components/common';
 import ChromeFields from 'react-color/lib/components/chrome/ChromeFields';

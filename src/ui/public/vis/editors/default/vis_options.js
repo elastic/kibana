@@ -12,7 +12,7 @@ import visOptionsTemplate from './vis_options.html';
 
 uiModules
 .get('app/visualize')
-.directive('visEditorVisOptions', function (Private, $timeout, $compile) {
+.directive('visEditorVisOptions', function (Private, $compile) {
   return {
     restrict: 'E',
     template: visOptionsTemplate,

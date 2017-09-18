@@ -1,11 +1,13 @@
+// Export all keyCodes under a `keyCodes` named variable
+import * as keyCodes from './key_codes';
+export { keyCodes };
+
 export {
   accessibleClickKeys,
   comboBoxKeyCodes,
-  ENTER_KEY,
-  SPACE_KEY,
+  htmlIdGenerator
 } from './accessibility';
 
 export { SortableProperties } from './sort';
-export { ESC_KEY_CODE } from './key_codes';
 
 export { LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from './alignment';

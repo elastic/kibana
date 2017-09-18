@@ -903,7 +903,7 @@ main {
   transition: opacity 250ms cubic-bezier(0.34, 1.61, 0.7, 1), -webkit-transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
   transition: transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1), opacity 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
   transition: transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1), opacity 250ms cubic-bezier(0.34, 1.61, 0.7, 1), -webkit-transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1); }
-  .kuiExpressionItem__popover.ng-hide, .kuiExpressionItem__popover.kuiExpressionItem__popover--isHidden {
+  .kuiExpressionItem__popover.ng-hide {
     display: block !important;
     visibility: hidden;
     opacity: 0;
@@ -1469,6 +1469,7 @@ main {
 
 .kuiInfoButton {
   font-size: 16px;
+  line-height: 0;
   background-color: transparent;
   color: #0079a5;
   cursor: pointer;
@@ -2623,6 +2624,33 @@ main {
   border: 1px solid #D9D9D9;
   border-radius: 4px; }
 
+.kuiPanel--prompt {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  text-align: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  min-height: 300px; }
+  .kuiPanel--prompt .kuiPanelBody {
+    padding: 30px;
+    max-width: 500px; }
+
+.kuiPanel--noBorder {
+  border: none; }
+
 .kuiPanel--withToolBar {
   border-top: none;
   border-radius: 0; }
@@ -2699,9 +2727,14 @@ main {
       outline: none;
       border-color: #0079a5; }
 
+/**
+   * 1. This way we can use h1, h2, etc.
+   */
 .kuiPanelHeader__title {
   font-size: 18px;
-  line-height: 1.5; }
+  line-height: 1.5;
+  margin: 0;
+  /* 1 */ }
 
 /**
  * 1. Undo what barSection mixin does.
@@ -2885,7 +2918,7 @@ main {
   /* 2 */ }
 
 /**
- * 1. Make seamless transition from ToolBar to Table header.
+ * 1. Make seamless transition from ToolBar to Table header and contained Menu.
  * 1. Make seamless transition from Table to ToolBarFooter header.
  */
 .kuiControlledTable .kuiTable {
@@ -2895,6 +2928,10 @@ main {
 .kuiControlledTable .kuiToolBarFooter {
   border-top: none;
   /* 2 */ }
+
+.kuiControlledTable .kuiMenu--contained {
+  border-top: none;
+  /* 1 */ }
 
 /**
  * 1. Prevent cells from expanding based on content size. This substitutes for table-layout: fixed.
@@ -2926,31 +2963,67 @@ main {
   text-align: left;
   max-width: 20px;
   /* 1 */
-  padding: 7px 8px 8px;
   line-height: 1.5;
   color: #a7a7a7; }
 
 .kuiTableHeaderCell__liner {
-  display: inline-block; }
+  display: inline-block;
+  padding: 7px 8px 8px; }
 
 /**
  * 1. Prevent rapid clicking from selecting text.
+ * 2. Remove native button element styles.
+ * 3. Make buttons look and behave like table header cells.
  */
-.kuiTableHeaderCell--sortable {
+.kuiTableHeaderCellButton {
   -webkit-user-select: none;
      -moz-user-select: none;
       -ms-user-select: none;
           user-select: none;
   /* 1 */
-  cursor: pointer; }
-  .kuiTableHeaderCell--sortable:hover:not(.kuiTableHeaderCell-isSorted) .kuiTableSortIcon {
-    opacity: 0.4; }
+  cursor: pointer;
+  width: 100%;
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  /* 2 */
+  background-color: transparent;
+  /* 2 */
+  border: 0;
+  /* 2 */
+  padding: 0;
+  /* 2 */
+  color: inherit;
+  /* 3 */
+  line-height: inherit;
+  /* 3 */
+  font-size: inherit;
+  /* 3 */
+  text-align: inherit;
+  /* 3 */ }
+  .kuiTableHeaderCellButton:hover .kuiTableSortIcon {
+    display: block;
+    opacity: 1; }
+  .kuiTableHeaderCellButton .kuiTableHeaderCell__liner {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+        -ms-flex-align: center;
+            align-items: center; }
 
 .kuiTableHeaderCell--alignRight {
   text-align: right; }
 
 .kuiTableSortIcon {
-  pointer-events: none; }
+  display: none;
+  pointer-events: none;
+  margin-left: 4px; }
+  .kuiTableHeaderCellButton-isSorted .kuiTableSortIcon {
+    display: block;
+    opacity: 0.4; }
 
 .kuiTableRow:hover .kuiTableRowHoverReveal {
   display: inline-block; }
@@ -3012,13 +3085,17 @@ main {
 .kuiTableRowCell--checkBox {
   width: 28px;
   /* 1 */
-  padding-right: 0;
   line-height: 1;
   /* 2 */ }
   .kuiTableHeaderCell--checkBox .kuiTableRowCell__liner,
   .kuiTableRowCell--checkBox .kuiTableRowCell__liner {
     overflow: visible;
     /* 3 */ }
+  .kuiTableHeaderCell--checkBox .kuiTableHeaderCell__liner,
+  .kuiTableHeaderCell--checkBox .kuiTableRowCell__liner,
+  .kuiTableRowCell--checkBox .kuiTableHeaderCell__liner,
+  .kuiTableRowCell--checkBox .kuiTableRowCell__liner {
+    padding-right: 0; }
 
 .kuiTableInfo {
   padding: 30px;

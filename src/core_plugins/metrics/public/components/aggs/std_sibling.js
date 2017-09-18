@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import AggRow from './agg_row';
 import MetricSelect from './metric_select';
 import AggSelect from './agg_select';
@@ -6,11 +7,13 @@ import Select from 'react-select';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 export const StandardSiblingAgg = props => {
   const { siblings } = props;
   const defaults = { sigma: '' };
   const model = { ...defaults, ...props.model };
+  const htmlId = htmlIdGenerator();
 
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
@@ -20,8 +23,9 @@ export const StandardSiblingAgg = props => {
   if (model.type === 'std_deviation_bucket') {
     stdDev.sigma = (
       <div className="vis_editor__std_deviation-sigma_item">
-        <div className="vis_editor__label">Sigma</div>
+        <label className="vis_editor__label" htmlFor={htmlId('sigma')}>Sigma</label>
         <input
+          id={htmlId('sigma')}
           className="vis_editor__std_deviation-sigma"
           value={model.sigma}
           onChange={handleTextChange('sigma')}
@@ -38,8 +42,9 @@ export const StandardSiblingAgg = props => {
 
     stdDev.mode = (
       <div className="vis_editor__row_item">
-        <div className="vis_editor__label">Mode</div>
+        <label className="vis_editor__label" htmlFor={htmlId('mode')}>Mode</label>
         <Select
+          inputProps={{ id: htmlId('mode') }}
           options={modeOptions}
           onChange={handleSelectChange('mode')}
           value={model.mode}

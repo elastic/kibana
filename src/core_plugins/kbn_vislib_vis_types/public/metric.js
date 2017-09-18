@@ -80,7 +80,7 @@ export default function MetricVisType(Private) {
           title: 'Split Group',
           min: 0,
           max: 1,
-          aggFilter: '!geohash_grid'
+          aggFilter: ['!geohash_grid', '!filter']
         }
       ])
     }

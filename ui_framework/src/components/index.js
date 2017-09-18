@@ -50,6 +50,12 @@ export {
 } from './event';
 
 export {
+  KuiExpressionItem,
+  KuiExpressionItemButton,
+  KuiExpressionItemPopover,
+} from './expression';
+
+export {
   KuiFieldGroup,
   KuiFieldGroupSection,
 } from './form_layout';

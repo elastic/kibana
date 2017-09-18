@@ -25,12 +25,21 @@ app.directive('sortableColumn', function () {
         }
       }
 
+      getAriaLabel() {
+        const direction = this.isSortedAscending() ? 'descending' : 'ascending';
+        return `Sort ${this.field} ${direction}`;
+      }
+
+      isSorted() {
+        return this.sortField === this.field;
+      }
+
       isSortedAscending() {
-        return (this.sortField === this.field) && (!this.sortReverse);
+        return this.isSorted() && !this.sortReverse;
       }
 
       isSortedDescending() {
-        return (this.sortField === this.field) && (this.sortReverse);
+        return this.isSorted() && this.sortReverse;
       }
     }
   };

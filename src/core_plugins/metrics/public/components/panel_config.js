@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import timeseries from './panel_config/timeseries';
 import metric from './panel_config/metric';
 import topN from './panel_config/top_n';
@@ -27,6 +28,7 @@ PanelConfig.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func,
   visData: PropTypes.object,
+  dateFormat: PropTypes.string
 };
 
 export default PanelConfig;

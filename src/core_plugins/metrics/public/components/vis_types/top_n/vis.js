@@ -6,7 +6,9 @@ import getLastValue from 'plugins/metrics/visualizations/lib/get_last_value';
 import color from 'color';
 import replaceVars from '../../lib/replace_vars';
 
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+
+import React from 'react';
 function TopNVisualization(props) {
   const { backgroundColor, model, visData } = props;
 

@@ -1,9 +1,11 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import AggSelect from './agg_select';
 import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 export const Static = props => {
   const handleChange = createChangeHandler(props.onChange, props.model);
@@ -17,6 +19,7 @@ export const Static = props => {
   };
 
   const model = { ...defaults, ...props.model };
+  const htmlId = htmlIdGenerator();
 
   return (
     <AggRow
@@ -37,12 +40,15 @@ export const Static = props => {
             />
           </div>
           <div className="vis_editor__row_item">
-            <div className="vis_editor__label">Static Value</div>
+            <label className="vis_editor__label" htmlFor={htmlId('staticValue')}>
+              Static Value
+            </label>
             <input
+              id={htmlId('staticValue')}
               className="vis_editor__input-grows-100"
               onChange={handleTextChange('value')}
               value={model.value}
-              steps="0.1"
+              step="0.1"
               type="number"
             />
           </div>

@@ -20,7 +20,8 @@ const formatIds = [
   'url',
   '_source',
   'truncate',
-  'boolean'
+  'boolean',
+  'relative_date'
 ];
 
 // eslint-disable-next-line kibana-custom/no-default-export

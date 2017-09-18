@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import _ from 'lodash';
 
 import timeseries from './vis_types/timeseries/vis';
@@ -30,6 +31,7 @@ function Visualization(props) {
   const component = types[model.type];
   if (component) {
     return React.createElement(component, {
+      dateFormat: props.dateFormat,
       reversed: props.reversed,
       backgroundColor: props.backgroundColor,
       model: props.model,
@@ -52,7 +54,8 @@ Visualization.propTypes = {
   onBrush: PropTypes.func,
   onChange: PropTypes.func,
   reversed: PropTypes.bool,
-  visData: PropTypes.object
+  visData: PropTypes.object,
+  dateFormat: PropTypes.string
 };
 
 export default Visualization;

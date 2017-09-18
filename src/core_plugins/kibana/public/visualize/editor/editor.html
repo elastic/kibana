@@ -36,7 +36,8 @@
           <query-bar
             query="state.query"
             app-name="'visualize'"
-            on-submit="updateQuery($query)"
+            on-submit="updateQueryAndFetch($query)"
+            disable-auto-focus="true"
           >
           </query-bar>
         </div>

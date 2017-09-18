@@ -1,5 +1,5 @@
 <div class="form-group">
-  <label>
+  <label for="visEditorInterval{{agg.id}}">
     Interval
     <kbn-info
       ng-show="agg.buckets.getInterval().scaled"
@@ -9,6 +9,7 @@
     </kbn-info>
   </label>
   <select
+    id="visEditorInterval{{agg.id}}"
     ng-if="aggParam.options"
     ng-model="agg.params.interval"
     ng-change="agg.write()"
@@ -19,6 +20,7 @@
     <option value="">-- select a valid interval --</option>
   </select>
   <input
+    aria-label="Custom interval"
     type="text"
     name="customInterval"
     ng-model="agg.params.customInterval"
@@ -28,6 +30,7 @@
     class="form-control"
     required />
   <input
+    id="visEditorInterval{{agg.id}}"
     ng-if="!aggParam.options"
     ng-model="agg.params.interval"
     required

@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import SeriesEditor from '../series_editor';
 import { IndexPattern } from '../index_pattern';
 import createTextHandler from '../lib/create_text_handler';
@@ -6,6 +7,7 @@ import ColorRules from '../color_rules';
 import ColorPicker from '../color_picker';
 import uuid from 'uuid';
 import YesNo from '../yes_no';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 class TopNPanelConfig extends Component {
 
@@ -31,6 +33,7 @@ class TopNPanelConfig extends Component {
     const { selectedTab } = this.state;
     const defaults = { drilldown_url: '', filter: '' };
     const model = { ...defaults, ...this.props.model };
+    const htmlId = htmlIdGenerator();
     const handleTextChange = createTextHandler(this.props.onChange);
     let view;
     if (selectedTab === 'data') {
@@ -47,10 +50,12 @@ class TopNPanelConfig extends Component {
       view = (
         <div className="vis_editor__container">
           <div className="vis_editor__vis_config-row">
-            <div className="vis_editor__label">Item Url (This supports mustache templating.
+            <label className="vis_editor__label" htmlFor={htmlId('itemUrl')}>
+              Item Url (This supports mustache templating.
               <code>{'{{key}}'}</code> is set to the term)
-            </div>
+            </label>
             <input
+              id={htmlId('itemUrl')}
               className="vis_editor__input-grows"
               onChange={handleTextChange('drilldown_url')}
               value={model.drilldown_url}
@@ -68,8 +73,11 @@ class TopNPanelConfig extends Component {
               name="background_color"
               value={model.background_color}
             />
-            <div className="vis_editor__label">Panel Filter</div>
+            <label className="vis_editor__label" htmlFor={htmlId('panelFilter')}>
+              Panel Filter
+            </label>
             <input
+              id={htmlId('panelFilter')}
               className="vis_editor__input-grows"
               type="text"
               onChange={handleTextChange('filter')}
@@ -100,17 +108,21 @@ class TopNPanelConfig extends Component {
     }
     return (
       <div>
-        <div className="kbnTabs">
-          <div
+        <div className="kbnTabs" role="tablist">
+          <button
+            role="tab"
+            aria-selected={selectedTab === 'data'}
             className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
             onClick={() => this.switchTab('data')}
           >Data
-          </div>
-          <div
+          </button>
+          <button
+            role="tab"
+            aria-selected={selectedTab === 'options'}
             className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
             onClick={() => this.switchTab('options')}
           >Panel Options
-          </div>
+          </button>
         </div>
         {view}
       </div>

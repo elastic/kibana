@@ -1,9 +1,12 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import createLegendSeries from '../lib/create_legend_series';
 import reactcss from 'reactcss';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 function HorizontalLegend(props) {
   const rows = props.series.map(createLegendSeries(props));
+  const htmlId = htmlIdGenerator();
   const styles = reactcss({
     hideLegned: {
       legend: {
@@ -18,9 +21,15 @@ function HorizontalLegend(props) {
   return (
     <div className="rhythm_chart__legend-horizontal">
       <div className="rhythm_chart__legend-control">
-        <i className={legendControlClass} onClick={props.onClick}/>
+        <button
+          className={legendControlClass}
+          onClick={props.onClick}
+          aria-label="Toggle chart legend"
+          aria-expanded={!!props.showLegend}
+          aria-controls={htmlId('legend')}
+        />
       </div>
-      <div className="rhythm_chart__legend-series" style={styles.legend}>
+      <div className="rhythm_chart__legend-series" style={styles.legend} id={htmlId('legend')}>
         { rows }
       </div>
     </div>

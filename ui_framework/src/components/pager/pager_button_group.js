@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 
 import { KuiButton, KuiButtonIcon, KuiButtonGroup } from '../button';
@@ -26,9 +27,9 @@ export function KuiPagerButtonGroup({ className, onPrevious, onNext, hasNext, ha
 }
 
 KuiPagerButtonGroup.propTypes = {
-  onPrevious: React.PropTypes.func.isRequired,
-  onNext: React.PropTypes.func.isRequired,
-  hasNext: React.PropTypes.bool.isRequired,
-  hasPrevious: React.PropTypes.bool.isRequired,
-  className: React.PropTypes.string
+  onPrevious: PropTypes.func.isRequired,
+  onNext: PropTypes.func.isRequired,
+  hasNext: PropTypes.bool.isRequired,
+  hasPrevious: PropTypes.bool.isRequired,
+  className: PropTypes.string
 };

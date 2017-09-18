@@ -1,5 +1,5 @@
 import { management } from 'ui/management';
-import './create_index_pattern';
+import './create_index_pattern_wizard';
 import './edit_index_pattern';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';

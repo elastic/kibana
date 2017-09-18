@@ -1,4 +1,5 @@
 import React from 'react';
+import { renderToHtml } from '../../services';
 
 import {
   GuideDemo,
@@ -8,19 +9,20 @@ import {
   GuideText,
 } from '../../components';
 
-const expressionHtml = require('./expression.html');
-const expressionJs = require('raw!./expression.js');
+const Expression = require('./expression');
+const expressionSource = require('!!raw!./expression');
+const expressionHtml = renderToHtml(Expression, { defaultActiveButton: 'example2' });
 
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="ExpressionItem"
       source={[{
+        type: GuideSectionTypes.JS,
+        code: expressionSource,
+      }, {
         type: GuideSectionTypes.HTML,
         code: expressionHtml,
-      }, {
-        type: GuideSectionTypes.JS,
-        code: expressionJs,
       }]}
     >
       <GuideText>
@@ -28,10 +30,9 @@ export default props => (
         Left aligned to the button by default. Can be optionally right aligned (as in the last example).
       </GuideText>
 
-      <GuideDemo
-        html={expressionHtml}
-        js={expressionJs}
-      />
+      <GuideDemo>
+        <Expression defaultActiveButton="example2"/>
+      </GuideDemo>
     </GuideSection>
 
   </GuidePage>

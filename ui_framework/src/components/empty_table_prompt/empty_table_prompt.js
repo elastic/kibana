@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import classnames from 'classnames';
 
@@ -19,7 +20,7 @@ export function KuiEmptyTablePrompt({ actions, message, className, ...rest }) {
 }
 
 KuiEmptyTablePrompt.propTypes = {
-  message: React.PropTypes.string.isRequired,
-  actions: React.PropTypes.node,
-  className: React.PropTypes.string,
+  message: PropTypes.string.isRequired,
+  actions: PropTypes.node,
+  className: PropTypes.string,
 };

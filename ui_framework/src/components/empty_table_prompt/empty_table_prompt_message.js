@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import classNames from 'classnames';
 
@@ -6,6 +7,6 @@ export const KuiEmptyTablePromptMessage = ({ children, className, ...rest }) => 
   return <div className={classes} {...rest}>{children}</div>;
 };
 KuiEmptyTablePromptMessage.propTypes = {
-  children: React.PropTypes.node,
-  className: React.PropTypes.string,
+  children: PropTypes.node,
+  className: PropTypes.string,
 };

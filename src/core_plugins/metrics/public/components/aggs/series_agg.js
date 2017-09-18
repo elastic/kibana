@@ -1,15 +1,19 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import AggSelect from './agg_select';
 import Select from 'react-select';
 import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 function SeriesAgg(props) {
   const { model } = props;
 
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
+
+  const htmlId = htmlIdGenerator();
 
   const functionOptions = [
     { label: 'Sum', value: 'sum' },
@@ -40,8 +44,9 @@ function SeriesAgg(props) {
         />
       </div>
       <div className="vis_editor__item">
-        <div className="vis_editor__label">Function</div>
+        <label className="vis_editor__label" htmlFor={htmlId('function')}>Function</label>
         <Select
+          inputProps={{ id: htmlId('function') }}
           value={model.function}
           options={functionOptions}
           onChange={handleSelectChange('function')}

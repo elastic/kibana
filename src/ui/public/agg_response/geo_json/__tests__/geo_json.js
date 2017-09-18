@@ -15,6 +15,8 @@ describe('GeoJson Agg Response Converter', function () {
   let esResponse;
   let expectedAggs;
 
+  let createVis;
+
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     const Vis = Private(VisProvider);
@@ -24,22 +26,29 @@ describe('GeoJson Agg Response Converter', function () {
     tabify = Private(AggResponseTabifyProvider);
     convert = Private(AggResponseGeoJsonProvider);
 
-    vis = new Vis(indexPattern, {
-      type: 'tile_map',
-      aggs: [
-        { schema: 'metric', type: 'avg', params: { field: 'bytes' } },
-        { schema: 'segment', type: 'geohash_grid', params: { field: 'geo.coordinates', precision: 3, useGeocentroid: false } }
-      ],
-      params: {
-        isDesaturated: true,
-        mapType: 'Scaled%20Circle%20Markers'
-      }
-    });
+    createVis = function (useGeocentroid) {
+      vis = new Vis(indexPattern, {
+        type: 'tile_map',
+        aggs: [
+          { schema: 'metric', type: 'avg', params: { field: 'bytes' } },
+          { schema: 'segment', type: 'geohash_grid', params: { field: 'geo.coordinates', precision: 3, useGeocentroid: useGeocentroid } }
+        ],
+        params: {
+          isDesaturated: true,
+          mapType: 'Scaled%20Circle%20Markers'
+        }
+      });
 
-    expectedAggs = {
-      metric: vis.aggs[0],
-      geo: vis.aggs[1]
+      expectedAggs = {
+        metric: vis.aggs[0],
+        geo: vis.aggs[1]
+      };
+      if (useGeocentroid) {
+        expectedAggs.centroid = vis.aggs[2];
+      }
     };
+
+    createVis(false);
   }));
 
   [ { asAggConfigResults: true }, { asAggConfigResults: false } ].forEach(function (tableOpts) {
@@ -171,6 +180,80 @@ describe('GeoJson Agg Response Converter', function () {
                 expect(props.value).to.be(row[metricColI]);
                 expect(props.geohash).to.be(row[geoColI]);
               }
+            });
+          });
+        });
+
+        describe('geocentroid', function () {
+          const createEsResponse = function (position = { lat: 37, lon: -122 }) {
+            esResponse = {
+              took: 1,
+              timed_out: false,
+              _shards: {
+                total: 4,
+                successful: 4,
+                failed: 0
+              },
+              hits: {
+                total: 61005,
+                max_score: 0.0,
+                hits: []
+              },
+              aggregations: {
+                2: {
+                  buckets: [{
+                    key: '9q',
+                    doc_count: 10307,
+                    1: {
+                      value: 10307
+                    },
+                    3: {
+                      location: position
+                    }
+                  }]
+                }
+              }
+            };
+          };
+
+          beforeEach(function () {
+            createEsResponse();
+            createVis(true);
+          });
+
+          it('should use geocentroid', function () {
+            const chart = makeSingleChart();
+            expect(chart.geoJson.features[0].geometry.coordinates).to.eql([ -122, 37 ]);
+          });
+
+          // 9q has latitude boundaries of 33.75 to 39.375
+          // 9q has longituted boundaries of -123.75 to -112.5
+          [
+            {
+              lat: 30,
+              lon: -122,
+              expected: [ -122, 33.75 ]
+            },
+            {
+              lat: 45,
+              lon: -122,
+              expected: [ -122, 39.375 ]
+            },
+            {
+              lat: 37,
+              lon: -130,
+              expected: [ -123.75, 37 ]
+            },
+            {
+              lat: 37,
+              lon: -110,
+              expected: [ -112.5, 37 ]
+            }
+          ].forEach(function (position) {
+            it('should clamp geocentroid ' + JSON.stringify(position), function () {
+              createEsResponse(position);
+              const chart = makeSingleChart();
+              expect(chart.geoJson.features[0].geometry.coordinates).to.eql(position.expected);
             });
           });
         });

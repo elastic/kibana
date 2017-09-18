@@ -1,0 +1,174 @@
+<form
+  name="stepTimeField.form"
+  role="form"
+  ng-submit="stepTimeField.createIndexPattern()"
+  class="kuiPanel"
+>
+  <div class="kuiPanelHeader">
+    <div class="kuiPanelHeaderSection">
+      <h2 class="kuiPanelHeader__title">
+        Step 2 of 2: Configure settings
+      </h2>
+    </div>
+  </div>
+
+  <div class="kuiPanelBody">
+    <p class="kuiText kuiSubduedText kuiVerticalRhythm">
+      You've defined <strong>{{stepTimeField.indexPatternName}}</strong> as your index pattern. Now you can specify some settings before we create it.
+    </p>
+
+    <!-- Time field select -->
+    <div class="kuiVerticalRhythm">
+      <div class="kuiVerticalRhythmSmall timeFieldNameLabel">
+        <label
+          id="timeFilterFieldSelectLabel"
+          class="kuiLabel"
+          for="timeFilterFieldSelect"
+        >
+          Time Filter field name
+        </label>
+
+        <a
+          ng-if="!stepTimeField.isFetchingTimeFieldOptions"
+          class="kuiLink kuiSubText"
+          ng-click="stepTimeField.fetchTimeFieldOptions()"
+          kbn-accessible-click
+          aria-describedby="timeFilterFieldSelectLabel"
+        >
+          Refresh
+        </a>
+
+        <p
+          ng-if="stepTimeField.isFetchingTimeFieldOptions"
+          class="kuiText kuiSubduedText"
+          aria-label="Please wait while we fetch your time field options"
+          aria-describedby="timeFilterFieldSelectLabel"
+        >
+          <span
+            aria-hidden="true"
+            class="kuiIcon fa-spinner fa-spin"
+          ></span>
+        </p>
+      </div>
+
+      <div class="kuiVerticalRhythmSmall kuiVerticalRhythm">
+        <select
+          ng-show="stepTimeField.canShowMainSelect()"
+          id="timeFilterFieldSelect"
+          aria-describedby="timeFilterFieldSelectHelpText"
+          class="kuiSelect kuiSelect--large"
+          data-test-subj="createIndexPatternTimeFieldSelect"
+          ng-disabled="stepTimeField.isTimeFieldSelectDisabled()"
+          ng-required="stepTimeField.hasTimeFieldOptions()"
+          ng-options="option as option.display disable when option.isDisabled for option in stepTimeField.timeFieldOptions"
+          ng-model="stepTimeField.selectedTimeFieldOption"
+        ></select>
+        <select
+          ng-show="stepTimeField.canShowLoadingSelect()"
+          id="timeFilterFieldSelect"
+          aria-describedby="timeFilterFieldSelectHelpText"
+          class="kuiSelect kuiSelect--large"
+          data-test-subj="createIndexPatternTimeFieldSelect"
+          disabled="disabled"
+        >
+          <option>Loading...</option>
+        </select>
+        <p
+          ng-if="stepTimeField.canShowNoTimeBasedFieldsMessage()"
+          class="kuiText kuiSubduedText"
+        >
+          The indices which match this index pattern don't contain any time fields.
+        </p>
+      </div>
+
+      <p
+        ng-if="stepTimeField.canShowHelpText()"
+        id="timeFilterFieldSelectHelpText"
+        class="kuiText kuiSubduedText kuiVerticalRhythm"
+      >
+        The Time Filter will use this field to filter your data by time.
+        You can choose not to have a time field, but you will not be able to narrow down your data by a time range.
+      </p>
+    </div>
+
+    <div class="kuiVerticalRhythm">
+      <button
+        class="kuiToggleButton"
+        data-id="toggleButton"
+        ng-click="stepTimeField.toggleAdvancedOptions()"
+      >
+        <span
+          class="kuiToggleButton__icon kuiIcon"
+          ng-class="{
+            'fa-caret-right': !stepTimeField.showAdvancedOptions,
+            'fa-caret-down': stepTimeField.showAdvancedOptions
+          }"
+          data-id="toggleButtonIcon"
+        >
+        </span>
+        <span ng-if="stepTimeField.showAdvancedOptions">Hide advanced options</span>
+        <span ng-if="!stepTimeField.showAdvancedOptions">Show advanced options</span>
+      </button>
+    </div>
+
+    <!-- Index pattern id input -->
+    <div
+      class="kuiVerticalRhythm"
+      ng-if="stepTimeField.showAdvancedOptions"
+    >
+      <label
+        class="kuiLabel kuiVerticalRhythmSmall"
+        for="indexPatternCreationId"
+      >
+        Custom index pattern ID
+      </label>
+
+      <div class="kuiVerticalRhythm kuiVerticalRhythmSmall">
+        <input
+          class="kuiTextInput kuiTextInput--large"
+          id="indexPatternCreationId"
+          data-test-subj="createIndexPatternIdInput"
+          ng-model="stepTimeField.indexPatternId"
+          ng-model-options="{ updateOn: 'default blur', debounce: {'default': 500, 'blur': 0} }"
+          validate-index-pattern
+          allow-wildcard
+          name="id"
+          type="text"
+        >
+      </div>
+
+      <p
+        class="kuiText kuiSubduedText kuiVerticalRhythm"
+      >
+        Kibana will provide a unique identifier for each index pattern.
+        If you do not want to use this unique ID, enter a custom one.
+      </p>
+    </div>
+
+    <!-- Actions -->
+    <div class="kuiBar kuiVerticalRhythm">
+      <div class="kuiBarSection">
+        <div class="kuiButtonGroup">
+          <button
+            class="kuiButton kuiButton--secondary kuiButton--iconText"
+            ng-click="stepTimeField.goToPreviousStep()"
+          >
+            <span class="kuiButton__inner">
+              <span aria-hidden="true" class="kuiButton__icon kuiIcon fa-chevron-left"></span>
+              <span>Back</span>
+            </span>
+          </button>
+
+          <button
+            data-test-subj="createIndexPatternCreateButton"
+            ng-disabled="!stepTimeField.canCreateIndexPattern()"
+            class="kuiButton kuiButton--primary"
+            type="submit"
+          >
+            Create index pattern
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>

@@ -15,9 +15,9 @@
 <div class="kuiViewContent kuiViewContent--constrainedWidth">
   <div class="wizard kuiViewContentItem">
     <div class="wizard-column wizard-column--small">
-      <h1 class="kuiTitle kuiVerticalRhythm">
+      <h2 class="kuiTitle kuiVerticalRhythm">
         From a New Search, Select Index
-      </h1>
+      </h2>
 
       <paginated-selectable-list
         per-page="20"
@@ -25,6 +25,7 @@
         list-property="attributes.title"
         user-make-url="makeUrl"
         class="wizard-row visualizeWizardPaginatedSelectableList kuiVerticalRhythm"
+        disable-auto-focus="true"
       ></paginated-selectable-list>
     </div>
 
@@ -38,6 +39,7 @@
         type="searches"
         class="wizard-row visualizeWizardSavedObjectFinder kuiVerticalRhythm"
         make-url="step2WithSearchUrl"
+        disable-auto-focus="true"
       ></saved-object-finder>
     </div>
   </div>

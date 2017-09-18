@@ -13,20 +13,6 @@ module.directive('vislibCategoryAxis', function () {
         { name: 'vertical', value: 90 },
         { name: 'angled', value: 75 },
       ];
-
-      let lastAxisTitle = '';
-      $scope.$watch(() => {
-        return $scope.vis.aggs.map(agg => {
-          return agg.params.field ? agg.makeLabel() : '';
-        }).join();
-      }, () => {
-        const agg = $scope.vis.aggs.find(agg => agg.schema.name === 'segment');
-        const label = agg ? agg.makeLabel() : '';
-        if (lastAxisTitle !== label) {
-          lastAxisTitle = label;
-          $scope.vis.params.categoryAxes[0].title.text = label;
-        }
-      });
     }
   };
 });

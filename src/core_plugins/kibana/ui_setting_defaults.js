@@ -86,6 +86,12 @@ export function getUiSettingDefaults() {
       description: 'Determines how many terms will be visualized when clicking the "visualize" ' +
       'button, in the field drop downs, in the discover sidebar.'
     },
+    'discover:sort:defaultOrder': {
+      value: 'desc',
+      options: ['desc', 'asc'],
+      type: 'select',
+      description: 'Controls the default sort direction for time based index patterns in the Discover app.',
+    },
     'doc_table:highlight': {
       value: true,
       description: 'Highlight results in Discover and Saved Searches Dashboard.' +
@@ -265,9 +271,8 @@ export function getUiSettingDefaults() {
       description: 'Whether the filters should have a global state (be pinned) by default'
     },
     'filterEditor:suggestValues': {
-      value: false,
-      description: 'Set this property to `true` to have the filter editor suggest values for fields, ' +
-        'instead of just providing a text input. This may result in heavy queries to Elasticsearch.'
+      value: true,
+      description: 'Set this property to `false` to prevent the filter editor from suggesting values for fields.'
     },
     'notifications:banner': {
       type: 'markdown',

@@ -1,10 +1,12 @@
-import React, { Component, PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React, { Component } from 'react';
 import SeriesEditor from '../series_editor';
 import { IndexPattern } from '../index_pattern';
 import createTextHandler from '../lib/create_text_handler';
 import ColorRules from '../color_rules';
 import YesNo from '../yes_no';
 import uuid from 'uuid';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 class MetricPanelConfig extends Component {
 
@@ -30,6 +32,7 @@ class MetricPanelConfig extends Component {
     const { selectedTab } = this.state;
     const defaults = { filter: '' };
     const model = { ...defaults, ...this.props.model };
+    const htmlId = htmlIdGenerator();
     const handleTextChange = createTextHandler(this.props.onChange);
     let view;
     if (selectedTab === 'data') {
@@ -52,8 +55,11 @@ class MetricPanelConfig extends Component {
             onChange={this.props.onChange}
           />
           <div className="vis_editor__vis_config-row">
-            <div className="vis_editor__label">Panel Filter</div>
+            <label className="vis_editor__label" htmlFor={htmlId('panelFilter')}>
+              Panel Filter
+            </label>
             <input
+              id={htmlId('panelFilter')}
               className="vis_editor__input-grows"
               type="text"
               onChange={handleTextChange('filter')}
@@ -81,19 +87,21 @@ class MetricPanelConfig extends Component {
     }
     return (
       <div>
-        <div className="kbnTabs">
-          <div
+        <div className="kbnTabs" role="tablist">
+          <button
+            role="tab"
+            aria-selected={selectedTab === 'data'}
             className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
             onClick={() => this.switchTab('data')}
-            tabIndex="0"
           >Data
-          </div>
-          <div
+          </button>
+          <button
+            role="tab"
+            aria-selected={selectedTab === 'options'}
             className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
             onClick={() => this.switchTab('options')}
-            tabIndex="0"
           >Panel Options
-          </div>
+          </button>
         </div>
         {view}
       </div>

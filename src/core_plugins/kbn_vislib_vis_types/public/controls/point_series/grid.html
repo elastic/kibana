@@ -4,6 +4,9 @@
       class="kuiSideBarCollapsibleTitle__label"
       ng-click="isGridOpen = !isGridOpen"
       kbn-accessible-click
+      aria-expanded="{{!!isGridOpen}}"
+      aria-controls="visGridOptions"
+      aria-label="Toggle grid options"
     >
       <span
         aria-hidden="true"
@@ -16,7 +19,7 @@
     </div>
   </div>
 
-  <div ng-show="isGridOpen" class="kuiSideBarCollapsibleSection">
+  <div id="visGridOptions" ng-show="isGridOpen" class="kuiSideBarCollapsibleSection">
     <!-- General -->
     <div class="kuiSideBarSection">
       <div class="kuiSideBarFormRow">

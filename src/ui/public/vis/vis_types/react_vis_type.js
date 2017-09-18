@@ -2,7 +2,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { VisTypeProvider } from 'ui/vis/vis_types';
 
-export function ReactVisTypeProvider(Private, getAppState) {
+export function ReactVisTypeProvider(Private, getAppState, config) {
   const VisType = Private(VisTypeProvider);
 
   class ReactVisController {
@@ -17,7 +17,7 @@ export function ReactVisTypeProvider(Private, getAppState) {
       return new Promise((resolve, reject) => {
         if (!this.visData) return reject();
         const Component = this.vis.type.visConfig.component;
-        render(<Component vis={this.vis} appState={getAppState()} visData={visData} renderComplete={resolve} />, this.el);
+        render(<Component config={config} vis={this.vis} appState={getAppState()} visData={visData} renderComplete={resolve} />, this.el);
       });
     }
 

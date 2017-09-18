@@ -16,10 +16,6 @@ export function send(method, path, data) {
   var wrappedDfd = $.Deferred();
 
   console.log("Calling " + path);
-  if (data && method == "GET") {
-    method = "POST";
-  }
-
   var options = {
     url: '../api/console/proxy?' + formatQueryString({ path, method }),
     data,

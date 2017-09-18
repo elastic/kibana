@@ -40,9 +40,9 @@ describe('$scope.$watchMulti', function () {
       expect(triggers).to.be(2);
 
       // remove watchers
-      expect($scope.$$watchers).to.not.eql([]);
+      expect($scope.$$watchers).to.not.have.length(0);
       unwatch();
-      expect($scope.$$watchers).to.eql([]);
+      expect($scope.$$watchers).to.have.length(0);
 
       // prove that it doesn't trigger anymore
       $scope.a++;

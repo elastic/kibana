@@ -286,14 +286,18 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
-    async createIndexPattern(indexPatternName = 'logstash-*', timefield = '@timestamp') {
+    async createIndexPattern(indexPatternName, timefield = '@timestamp') {
       await retry.try(async () => {
         await this.navigateTo();
         await this.clickKibanaIndices();
         await this.setIndexPatternField(indexPatternName);
-        await this.selectTimeFieldOption(timefield);
-        const createButton = await this.getCreateButton();
-        await createButton.click();
+        await PageObjects.common.sleep(2000);
+        await (await this.getCreateIndexPatternGoToStep2Button()).click();
+        await PageObjects.common.sleep(2000);
+        if (timefield) {
+          await this.selectTimeFieldOption(timefield);
+        }
+        await (await this.getCreateIndexPatternCreateButton()).click();
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
@@ -318,11 +322,20 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       return indexPatternId;
     }
 
-    async setIndexPatternField(pattern) {
-      log.debug(`setIndexPatternField(${pattern})`);
-      return await testSubjects.setValue('createIndexPatternNameInput', pattern);
+    async setIndexPatternField(indexPatternName = 'logstash-') {
+      log.debug(`setIndexPatternField(${indexPatternName})`);
+      const field = await this.getIndexPatternField();
+      await field.clearValue();
+      field.type(indexPatternName);
     }
 
+    async getCreateIndexPatternGoToStep2Button() {
+      return await testSubjects.find('createIndexPatternGoToStep2Button');
+    }
+
+    async getCreateIndexPatternCreateButton() {
+      return await testSubjects.find('createIndexPatternCreateButton');
+    }
 
     async removeIndexPattern() {
       let alertText;

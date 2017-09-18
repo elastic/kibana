@@ -10,6 +10,12 @@ function unwrap(val) {
   return getAcr(val) ? val.value : val;
 }
 
+function clampGrid(val, min, max) {
+  if (val > max) val = max;
+  else if (val < min) val = min;
+  return val;
+}
+
 export function convertRowsToFeatures(table, geoI, metricI, centroidI) {
 
   return _.transform(table.rows, function (features, row) {
@@ -28,9 +34,10 @@ export function convertRowsToFeatures(table, geoI, metricI, centroidI) {
     let point = centerLatLng;
     const centroid = unwrap(row[centroidI]);
     if (centroid) {
+      // see https://github.com/elastic/elasticsearch/issues/24694 for why clampGrid is used
       point = [
-        centroid.lat,
-        centroid.lon
+        clampGrid(centroid.lat, location.latitude[0], location.latitude[1]),
+        clampGrid(centroid.lon, location.longitude[0], location.longitude[1])
       ];
     }
 

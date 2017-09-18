@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types';
 import React from 'react';
 import classNames from 'classnames';
 
@@ -33,14 +34,14 @@ export function KuiPager({
 }
 
 KuiPager.propTypes = {
-  startNumber: React.PropTypes.number.isRequired,
-  endNumber: React.PropTypes.number.isRequired,
-  totalItems: React.PropTypes.number.isRequired,
-  hasPreviousPage: React.PropTypes.bool.isRequired,
-  hasNextPage: React.PropTypes.bool.isRequired,
-  onNextPage: React.PropTypes.func.isRequired,
-  onPreviousPage: React.PropTypes.func.isRequired,
-  className: React.PropTypes.string
+  startNumber: PropTypes.number.isRequired,
+  endNumber: PropTypes.number.isRequired,
+  totalItems: PropTypes.number.isRequired,
+  hasPreviousPage: PropTypes.bool.isRequired,
+  hasNextPage: PropTypes.bool.isRequired,
+  onNextPage: PropTypes.func.isRequired,
+  onPreviousPage: PropTypes.func.isRequired,
+  className: PropTypes.string
 };
 
 

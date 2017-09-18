@@ -1,5 +1,8 @@
-export const DOWN_KEY_CODE = 40;
-export const ENTER_KEY_CODE = 13;
-export const ESC_KEY_CODE = 27;
-export const TAB_KEY_CODE = 9;
-export const UP_KEY_CODE = 38;
+export const ENTER = 13;
+export const SPACE = 32;
+export const ESCAPE = 27;
+export const TAB = 9;
+
+// Arrow keys
+export const DOWN = 40;
+export const UP = 38;

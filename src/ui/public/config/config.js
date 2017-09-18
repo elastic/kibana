@@ -6,7 +6,7 @@ import { ConfigDelayedUpdaterProvider } from 'ui/config/_delayed_updater';
 const module = uiModules.get('kibana/config');
 
 // service for delivering config variables to everywhere else
-module.service(`config`, function (Private, $rootScope, $http, chrome, uiSettings) {
+module.service(`config`, function (Private, $rootScope, chrome, uiSettings) {
   const config = this;
   const notify = new Notifier({ location: `Config` });
   const { defaults, user: initialUserSettings } = uiSettings;

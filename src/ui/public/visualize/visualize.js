@@ -53,8 +53,8 @@ uiModules
         const responseHandler = getHandler(responseHandlers, $scope.vis.type.responseHandler);
 
         $scope.fetch = _.debounce(function () {
-
-        // searchSource is only there for courier request handler
+          if (!$scope.vis.initialized) return;
+          // searchSource is only there for courier request handler
           requestHandler($scope.vis, $scope.appState, $scope.uiState, queryFilter, $scope.savedObj.searchSource)
           .then(requestHandlerResponse => {
 
@@ -150,6 +150,8 @@ uiModules
         $scope.$on('$destroy', () => {
           resizeChecker.destroy();
         });
+
+        $scope.$watch('vis.initialized', $scope.fetch);
 
         $scope.fetch();
         $scope.$root.$broadcast('ready:vis');

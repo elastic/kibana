@@ -1,7 +1,8 @@
 <div ng-if="!aggParam.disabled(agg)">
   <div class="form-group regex">
-    <label>{{ aggParam.name | label }} Pattern</label>
+    <label for="visEditorRegexInput{{agg.id}}{{aggParam.name}}">{{ aggParam.name | label }} Pattern</label>
     <input
+      id="visEditorRegexInput{{agg.id}}{{aggParam.name}}"
       type="text"
       class="form-control"
       ng-model="agg.params[aggParam.name].pattern"

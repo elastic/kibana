@@ -1,12 +1,10 @@
 import _ from 'lodash';
 import moment from 'moment';
 
-import { RequestQueueProvider } from '../../_request_queue';
-import { ErrorHandlerRequestProvider } from './error_handler';
+import { requestQueue } from '../../_request_queue';
+import { requestErrorHandler } from './error_handler';
 
 export function AbstractRequestProvider(Private, Promise) {
-  const requestQueue = Private(RequestQueueProvider);
-  const requestErrorHandler = Private(ErrorHandlerRequestProvider);
 
   return class AbstractReq {
     constructor(source, defer) {

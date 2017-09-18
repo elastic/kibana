@@ -1,10 +1,12 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import Select from 'react-select';
 import DataFormatPicker from '../../data_format_picker';
 import createSelectHandler from '../../lib/create_select_handler';
 import YesNo from '../../yes_no';
 import createTextHandler from '../../lib/create_text_handler';
 import { IndexPattern } from '../../index_pattern';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 function TimeseriesConfig(props) {
   const handleSelectChange = createSelectHandler(props.onChange);
@@ -23,6 +25,7 @@ function TimeseriesConfig(props) {
     steps: 0
   };
   const model = { ...defaults, ...props.model };
+  const htmlId = htmlIdGenerator();
 
   const stackedOptions = [
     { label: 'None', value: 'none' },
@@ -49,41 +52,56 @@ function TimeseriesConfig(props) {
   if (model.chart_type === 'line') {
     type = (
       <div className="vis_editor__series_config-row">
-        <div className="vis_editor__label">Chart Type</div>
+        <label className="vis_editor__label" htmlFor={htmlId('chartType')}>
+          Chart Type
+        </label>
         <div className="vis_editor__item">
           <Select
+            inputProps={{ id: htmlId('chartType') }}
             clearable={false}
             options={chartTypeOptions}
             value={model.chart_type}
             onChange={handleSelectChange('chart_type')}
           />
         </div>
-        <div className="vis_editor__label">Stacked</div>
+        <label className="vis_editor__label" htmlFor={htmlId('stacked')}>
+          Stacked
+        </label>
         <div className="vis_editor__item">
           <Select
+            inputProps={{ id: htmlId('stacked') }}
             clearable={false}
             options={stackedOptions}
             value={model.stacked}
             onChange={handleSelectChange('stacked')}
           />
         </div>
-        <div className="vis_editor__label">Fill (0 to 1)</div>
+        <label className="vis_editor__label" htmlFor={htmlId('fill')}>
+          Fill (0 to 1)
+        </label>
         <input
+          id={htmlId('fill')}
           className="vis_editor__input-grows"
           type="number"
           step="0.1"
           onChange={handleTextChange('fill')}
           value={model.fill}
         />
-        <div className="vis_editor__label">Line Width</div>
+        <label className="vis_editor__label" htmlFor={htmlId('lineWidth')}>
+          Line Width
+        </label>
         <input
+          id={htmlId('lineWidth')}
           className="vis_editor__input-grows"
           type="number"
           onChange={handleTextChange('line_width')}
           value={model.line_width}
         />
-        <div className="vis_editor__label">Point Size</div>
+        <label className="vis_editor__label" htmlFor={htmlId('pointSize')}>
+          Point Size
+        </label>
         <input
+          id={htmlId('pointSize')}
           className="vis_editor__input-grows"
           type="number"
           onChange={handleTextChange('point_size')}
@@ -101,34 +119,46 @@ function TimeseriesConfig(props) {
   if (model.chart_type === 'bar') {
     type = (
       <div className="vis_editor__series_config-row">
-        <div className="vis_editor__label">Chart Type</div>
+        <label className="vis_editor__label" htmlFor={htmlId('chartType')}>
+          Chart Type
+        </label>
         <div className="vis_editor__item">
           <Select
+            inputProps={{ id: htmlId('chartType') }}
             clearable={false}
             options={chartTypeOptions}
             value={model.chart_type}
             onChange={handleSelectChange('chart_type')}
           />
         </div>
-        <div className="vis_editor__label">Stacked</div>
+        <label className="vis_editor__label" htmlFor={htmlId('stacked')}>
+          Stacked
+        </label>
         <div className="vis_editor__item">
           <Select
+            inputProps={{ id: htmlId('stacked') }}
             clearable={false}
             options={stackedOptions}
             value={model.stacked}
             onChange={handleSelectChange('stacked')}
           />
         </div>
-        <div className="vis_editor__label">Fill (0 to 1)</div>
+        <label className="vis_editor__label" htmlFor={htmlId('fill')}>
+          Fill (0 to 1)
+        </label>
         <input
+          id={htmlId('fill')}
           className="vis_editor__input-grows"
           type="number"
           step="0.5"
           onChange={handleTextChange('fill')}
           value={model.fill}
         />
-        <div className="vis_editor__label">Line Width</div>
+        <label className="vis_editor__label" htmlFor={htmlId('lineWidth')}>
+          Line Width
+        </label>
         <input
+          id={htmlId('lineWidth')}
           className="vis_editor__input-grows"
           type="number"
           onChange={handleTextChange('line_width')}
@@ -148,8 +178,11 @@ function TimeseriesConfig(props) {
             onChange={handleSelectChange('formatter')}
             value={model.formatter}
           />
-          <div className="vis_editor__label">Template (eg.<code>{'{{value}}/s'}</code>)</div>
+          <label className="vis_editor__label" htmlFor={htmlId('template')}>
+            Template (eg.<code>{'{{value}}/s'}</code>)
+          </label>
           <input
+            id={htmlId('template')}
             className="vis_editor__input-grows"
             onChange={handleTextChange('value_template')}
             value={model.value_template}
@@ -157,8 +190,11 @@ function TimeseriesConfig(props) {
         </div>
         { type }
         <div className="vis_editor__series_config-row">
-          <div className="vis_editor__label">Offset series time by (1m, 1h, 1w, 1d)</div>
+          <label className="vis_editor__label" htmlFor={htmlId('offset')}>
+            Offset series time by (1m, 1h, 1w, 1d)
+          </label>
           <input
+            id={htmlId('offset')}
             className="vis_editor__input-grows"
             type="text"
             onChange={handleTextChange('offset_time')}
@@ -170,9 +206,12 @@ function TimeseriesConfig(props) {
             name="hide_in_legend"
             onChange={props.onChange}
           />
-          <div className="vis_editor__label">Split Color Theme</div>
+          <label className="vis_editor__label" htmlFor={htmlId('splitColor')}>
+            Split Color Theme
+          </label>
           <div className="vis_editor__row_item">
             <Select
+              inputProps={{ id: htmlId('splitColor') }}
               clearable={false}
               options={splitColorOptions}
               value={model.split_color_mode}
@@ -187,25 +226,34 @@ function TimeseriesConfig(props) {
             name="seperate_axis"
             onChange={props.onChange}
           />
-          <div className="vis_editor__label">Axis Min</div>
+          <label className="vis_editor__label" htmlFor={htmlId('axisMin')}>
+            Axis Min
+          </label>
           <input
+            id={htmlId('axisMin')}
             className="vis_editor__input-grows"
             type="number"
             disabled={disableSeperateYaxis}
             onChange={handleTextChange('axis_min')}
             value={model.axis_min}
           />
-          <div className="vis_editor__label">Axis Max</div>
+          <label className="vis_editor__label" htmlFor={htmlId('axisMax')}>
+            Axis Max
+          </label>
           <input
+            id={htmlId('axisMax')}
             className="vis_editor__input-grows"
             type="number"
             disabled={disableSeperateYaxis}
             onChange={handleTextChange('axis_max')}
             value={model.axis_max}
           />
-          <div className="vis_editor__label">Axis Position</div>
+          <label className="vis_editor__label" htmlFor={htmlId('axisPos')}>
+            Axis Position
+          </label>
           <div className="vis_editor__row_item">
             <Select
+              inputProps={{ id: htmlId('axisPos') }}
               clearable={false}
               disabled={disableSeperateYaxis}
               options={positionOptions}

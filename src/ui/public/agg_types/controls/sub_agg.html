@@ -1,7 +1,8 @@
 <div ng-controller="aggParam.controller">
   <div class="form-group">
-    <label>Metric</label>
+    <label for="visEditorSubAggMetric{{agg.id}}">Metric</label>
     <select
+      id="visEditorSubAggMetric{{agg.id}}"
       name="metricAgg"
       ng-model="agg.params.metricAgg"
       agg="agg"

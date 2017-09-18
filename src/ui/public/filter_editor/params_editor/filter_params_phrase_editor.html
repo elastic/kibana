@@ -2,6 +2,8 @@
   ng-if="filterParamsPhraseEditor.shouldSuggestValues && field.aggregatable && field.type === 'string'"
   ng-model="params.phrase"
   ui-select-focus-on="focus-params"
+  spinner-enabled="true"
+  spinner-class="kuiIcon kuiIcon--basic fa-spinner fa-spin"
 >
   <ui-select-match placeholder="Values...">
     <span

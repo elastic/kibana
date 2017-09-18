@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import PropTypes from 'prop-types';
+import React from 'react';
 import ColorPicker from '../../color_picker';
 import AddDeleteButtons from '../../add_delete_buttons';
 import { SeriesConfig } from '../../series_config';
@@ -76,17 +77,21 @@ function GaugeSeries(props) {
     }
     body = (
       <div className="vis_editor__series-row">
-        <div className="kbnTabs sm">
-          <div
+        <div className="kbnTabs sm" role="tablist">
+          <button
+            role="tab"
+            aria-selected={selectedTab === 'metrics'}
             className={metricsClassName}
             onClick={() => props.switchTab('metrics')}
           >Metrics
-          </div>
-          <div
+          </button>
+          <button
+            role="tab"
+            aria-selected={selectedTab === 'options'}
             className={optionsClassname}
             onClick={() => props.switchTab('options')}
           >Options
-          </div>
+          </button>
         </div>
         {seriesBody}
       </div>
@@ -118,6 +123,7 @@ function GaugeSeries(props) {
 
   return (
     <div
+      aria-hidden="true"
       className={`${props.className} vis_editor__series`}
       style={props.style}
       onMouseDown={props.onMouseDown}
@@ -125,7 +131,14 @@ function GaugeSeries(props) {
     >
       <div className="vis_editor__container">
         <div className="vis_editor__series-details">
-          <div onClick={props.toggleVisible}><i className={caretClassName}/></div>
+          <button
+            className="vis_editor__series-visibility-toggle"
+            onClick={props.toggleVisible}
+            aria-label="Toggle series editor"
+            aria-expanded={props.visible}
+          >
+            <i className={caretClassName}/>
+          </button>
           { colorPicker }
           <div className="vis_editor__row vis_editor__row_item">
             <input

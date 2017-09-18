@@ -14,7 +14,7 @@ export default props => (row, i) => {
   if (!_.includes(props.seriesFilter, row.id)) classes.push('disabled');
   if (row.label == null || row.legend === false) return (<div key={key} style={{ display: 'none' }}/>);
   return (
-    <div
+    <button
       className={classes.join(' ')}
       onClick={event => props.onToggle(event, row.id)}
       key={key}
@@ -24,6 +24,6 @@ export default props => (row, i) => {
         <span>{ row.label }</span>
       </div>
       <div className="rhythm_chart__legend_value">{ value }</div>
-    </div>
+    </button>
   );
 };

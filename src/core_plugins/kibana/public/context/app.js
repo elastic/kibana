@@ -1,5 +1,6 @@
 import _ from 'lodash';
 
+import { callAfterBindingsWorkaround } from 'ui/compat';
 import { uiModules } from 'ui/modules';
 import contextAppTemplate from './app.html';
 import './components/loading_button';
@@ -28,7 +29,7 @@ const module = uiModules.get('apps/context', [
 module.directive('contextApp', function ContextApp() {
   return {
     bindToController: true,
-    controller: ContextAppController,
+    controller: callAfterBindingsWorkaround(ContextAppController),
     controllerAs: 'contextApp',
     restrict: 'E',
     scope: {

@@ -2,12 +2,15 @@
   ng-model="params.phrases"
   multiple
   ui-select-focus-on="focus-params"
+  spinner-enabled="true"
+  spinner-class="kuiIcon kuiIcon--basic fa-spinner fa-spin"
 >
   <ui-select-match
     placeholder="Values..."
     class="uiSelectMatch--restrictToParent"
   >
     <span
+      data-test-subj="filterEditorPhrases"
       class="uiSelectMatch--pillWithTooltip"
       tooltip="{{$item}}"
     >
