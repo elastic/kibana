@@ -1,0 +1,17 @@
+.kuiComboBoxRow {
+  font-size: $kuiFontSizeS;
+  padding: $kuiSizeXS $kuiSizeS;
+  width: 100%;
+  text-align: left;
+  border: $kuiBorderThin;
+  border-color: transparent;
+
+  &:hover {
+    text-decoration: underline;
+  }
+  &:focus {
+    cursor: pointer;
+    color: $kuiColorPrimary;
+    background-color: $kuiFocusBackgroundColor;
+  }
+}

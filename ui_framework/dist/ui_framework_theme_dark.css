@@ -1518,6 +1518,127 @@ table {
 .kuiCheckboxGroup__item + .kuiCheckboxGroup__item {
   margin-top: 8px; }
 
+.kuiComboBox {
+  max-width: 400px;
+  width: 100%;
+  position: relative; }
+  .kuiComboBox .kuiComboBox__inputWrap {
+    max-width: 400px;
+    width: 100%;
+    border: none;
+    font-size: 14px;
+    font-family: "Roboto", Helvetica, Arial, sans-serif;
+    padding: 12px;
+    color: #DDD;
+    background: #1d1d1d;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #1d1d1d;
+    transition: box-shadow 250ms ease-in, background 250ms ease-in;
+    border-radius: 0;
+    padding: 4px; }
+    .kuiComboBox .kuiComboBox__inputWrap:invalid {
+      /* 1 */
+      box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #222, inset 0 -2px 0 0 #bf4d4d; }
+    .kuiComboBox .kuiComboBox__inputWrap:focus {
+      /* 1 */
+      background: #222;
+      box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #222, inset 0 -2px 0 0 #4da1c0; }
+    .kuiComboBox .kuiComboBox__inputWrap--withIcon {
+      padding-left: 40px; }
+    .kuiComboBox .kuiComboBox__inputWrap:hover {
+      cursor: text; }
+  .kuiComboBox .kuiComboBox__input {
+    padding: 0;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    font-family: "Roboto", Helvetica, Arial, sans-serif;
+    color: #DDD;
+    margin: 4px; }
+  .kuiComboBox .kuiComboBox__panel {
+    position: absolute;
+    top: 100%;
+    left: -1px;
+    right: -1px;
+    border-radius: 0 0 4px 4px;
+    visibility: hidden;
+    opacity: 0;
+    border-top: none;
+    transition: visibility 250ms cubic-bezier(0.694, 0.0482, 0.335, 1), opacity 250ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+  .kuiComboBox .kuiComoboBox__empty {
+    font-size: 14px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    padding: 8px;
+    text-align: center;
+    color: #D9D9D9; }
+  .kuiComboBox .kuiComboBox__rowWrap {
+    padding: 8px;
+    max-height: 200px;
+    overflow-y: auto; }
+    .kuiComboBox .kuiComboBox__rowWrap::-webkit-scrollbar {
+      width: 16px;
+      height: 16px; }
+    .kuiComboBox .kuiComboBox__rowWrap::-webkit-scrollbar-thumb {
+      background-color: #333;
+      border: 6px solid transparent;
+      background-clip: content-box; }
+    .kuiComboBox .kuiComboBox__rowWrap::-webkit-scrollbar-track {
+      background-color: transparent; }
+  .kuiComboBox .kuiComboBox__footer {
+    padding: 8px;
+    border-top: 1px solid #333;
+    background: #1d1d1d; }
+  .kuiComboBox.kuiComboBox-isOpen .kuiComboBox__panel {
+    visibility: visible;
+    opacity: 1; }
+  .kuiComboBox.kuiComboBox-isOpen .kuiComboBox__inputWrap {
+    background: #222;
+    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #222, inset 0 -2px 0 0 #4da1c0; }
+
+.kuiComboBoxPill {
+  font-size: 12px;
+  line-height: 24px;
+  display: inline-block;
+  text-decoration: none;
+  border: solid 1px transparent;
+  border-radius: 24px;
+  padding: 0 8px;
+  background-color: transparent;
+  white-space: nowrap;
+  vertical-align: middle;
+  border-color: #333;
+  background-color: #222;
+  margin: 4px;
+  margin-right: 0; }
+  .kuiComboBoxPill .kuiComboBoxPill__close {
+    width: 12px;
+    height: 12px;
+    margin-left: 4px;
+    border: none;
+    vertical-align: middle; }
+    .kuiComboBoxPill .kuiComboBoxPill__close:hover .kuiComboBoxPill__closeIcon {
+      fill: #bf4d4d; }
+    .kuiComboBoxPill .kuiComboBoxPill__close:focus {
+      background: rgba(191, 77, 77, 0.1); }
+    .kuiComboBoxPill .kuiComboBoxPill__close svg {
+      width: 12px;
+      height: 12px;
+      vertical-align: top !important; }
+
+.kuiComboBoxRow {
+  font-size: 14px;
+  padding: 4px 8px;
+  width: 100%;
+  text-align: left;
+  border: 1px solid #333;
+  border-color: transparent; }
+  .kuiComboBoxRow:hover {
+    text-decoration: underline; }
+  .kuiComboBoxRow:focus {
+    cursor: pointer;
+    color: #4da1c0;
+    background-color: #275160; }
+
 .kuiFieldNumber {
   max-width: 400px;
   width: 100%;
@@ -3322,7 +3443,7 @@ table {
     width: 16px;
     height: 16px; }
   .kuiGlobalToastList::-webkit-scrollbar-thumb {
-    background-color: rgba(217, 217, 217, 0.5);
+    background-color: #333;
     border: 6px solid transparent;
     background-clip: content-box; }
   .kuiGlobalToastList::-webkit-scrollbar-track {

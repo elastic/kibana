@@ -21,6 +21,9 @@ import CallOutExample
 import CodeExample
   from '../../views/code/code_example';
 
+import ComboBoxExample
+  from '../../views/combo_box/combo_box_example';
+
 import ContextMenuExample
   from '../../views/context_menu/context_menu_example';
 
@@ -124,6 +127,10 @@ const components = [{
 }, {
   name: 'Code',
   component: CodeExample,
+  hasReact: true,
+}, {
+  name: 'ComboBox',
+  component: ComboBoxExample,
   hasReact: true,
 }, {
   name: 'ContextMenu',
