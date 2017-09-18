@@ -38,14 +38,7 @@ export async function rangeControlFactory(controlParams, kbnApi) {
   searchSource.index(indexPattern);
   searchSource.aggs(minMaxAgg(indexPattern.fields.byName[controlParams.fieldName]));
 
-  const defer = {};
-  defer.promise = new Promise((resolve, reject) => {
-    defer.resolve = resolve;
-    defer.reject = reject;
-  });
-  kbnApi.fetch.these([searchSource._createRequest(defer)]);
-
-  const resp = await defer.promise;
+  const resp = await searchSource.fetch();
 
   const min = _.get(resp, 'aggregations.minAgg.value');
   const max = _.get(resp, 'aggregations.maxAgg.value');

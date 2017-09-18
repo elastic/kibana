@@ -8,35 +8,25 @@ import {
 
 const savedObjectsClientMock = {
   find: () => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const resp = {
-          savedObjects: [
-            {
-              id: 'indexPattern1',
-              attributes: {
-                title: 'title1'
-              }
-            }
-          ]
-        };
-        resolve(resp);
-      }, 0);
+    return Promise.resolve({
+      savedObjects: [
+        {
+          id: 'indexPattern1',
+          attributes: {
+            title: 'title1'
+          }
+        }
+      ]
     });
   }
 };
 const indexPatternsMock = {
   get: () => {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        const indexPattern = {
-          fields: [
-            { name: 'keywordField', type: 'string', aggregatable: true },
-            { name: 'numberField', type: 'number', aggregatable: true }
-          ]
-        };
-        resolve(indexPattern);
-      }, 0);
+    return Promise.resolve({
+      fields: [
+        { name: 'keywordField', type: 'string', aggregatable: true },
+        { name: 'numberField', type: 'number', aggregatable: true }
+      ]
     });
   }
 };

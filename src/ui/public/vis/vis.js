@@ -20,7 +20,6 @@ import { updateVisualizationConfig } from './vis_update';
 import { queryManagerFactory } from '../query_manager';
 import * as kueryAPI from 'ui/kuery';
 import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
-import { FetchProvider } from 'ui/courier/fetch/fetch';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
@@ -29,7 +28,6 @@ export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
   const brushEvent = Private(UtilsBrushEventProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
-  const fetch = Private(FetchProvider);
   const SearchSource = Private(SearchSourceProvider);
   const savedObjectsClient = Private(SavedObjectsClientProvider);
 
@@ -58,7 +56,6 @@ export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
       this.sessionState = {};
 
       this.API = {
-        fetch: fetch,
         savedObjectsClient: savedObjectsClient,
         SearchSource: SearchSource,
         indexPatterns: indexPatterns,

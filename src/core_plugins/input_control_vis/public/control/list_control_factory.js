@@ -53,14 +53,7 @@ export async function listControlFactory(controlParams, kbnApi) {
     _.get(controlParams, 'options.size', 5),
     'desc'));
 
-  const defer = {};
-  defer.promise = new Promise((resolve, reject) => {
-    defer.resolve = resolve;
-    defer.reject = reject;
-  });
-  kbnApi.fetch.these([searchSource._createRequest(defer)]);
-
-  const resp = await defer.promise;
+  const resp = await searchSource.fetch();
 
   return new ListControl(
     controlParams,

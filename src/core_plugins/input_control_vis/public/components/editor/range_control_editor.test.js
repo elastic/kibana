@@ -7,40 +7,30 @@ import {
 } from './range_control_editor';
 
 const getIndexPatterns = () => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const resp = {
-        savedObjects: [
-          {
-            id: 'indexPattern1',
-            attributes: {
-              title: 'indexPattern1'
-            }
-          },
-          {
-            id: 'indexPattern2',
-            attributes: {
-              title: 'indexPattern2'
-            }
-          }
-        ]
-      };
-      resolve(resp);
-    }, 0);
+  return Promise.resolve({
+    savedObjects: [
+      {
+        id: 'indexPattern1',
+        attributes: {
+          title: 'indexPattern1'
+        }
+      },
+      {
+        id: 'indexPattern2',
+        attributes: {
+          title: 'indexPattern2'
+        }
+      }
+    ]
   });
 };
 const getIndexPattern = () => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const indexPattern = {
-        fields: [
-          { name: 'keywordField', type: 'string', aggregatable: true },
-          { name: 'textField', type: 'string', aggregatable: false },
-          { name: 'numberField', type: 'number', aggregatable: true }
-        ]
-      };
-      resolve(indexPattern);
-    }, 0);
+  return Promise.resolve({
+    fields: [
+      { name: 'keywordField', type: 'string', aggregatable: true },
+      { name: 'textField', type: 'string', aggregatable: false },
+      { name: 'numberField', type: 'number', aggregatable: true }
+    ]
   });
 };
 const controlParams = {
