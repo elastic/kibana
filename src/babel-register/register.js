@@ -12,9 +12,14 @@ const ignore = [
 ];
 
 if (global.__BUILT_WITH_BABEL__) {
-  // in "production" builds we define `typeof BUILT_WITH_BABEL` as `true`
-  // which indicates that all of the code in the `src` directory is already
-  // built and can be ignored by `babel-register`
+  // when building the Kibana source we replace the statement
+  // `global.__BUILT_WITH_BABEL__` with the value `true` so that
+  // when babel-register is required for the first time by users
+  // it will exclude kibana's `src` directory.
+  //
+  // We still need babel-register for plugins though, we've been
+  // building their server code at require-time since version 4.2
+  // TODO: the plugin install process could transpile plugin server code...
   ignore.push(resolve(__dirname, '../../src'));
 }
 
