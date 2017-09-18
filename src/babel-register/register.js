@@ -11,7 +11,7 @@ const ignore = [
   /[\\\/](node_modules|bower_components)[\\\/]/,
 ];
 
-if (typeof BUILT_WITH_BABEL !== 'undefined') {
+if (global.__BUILT_WITH_BABEL__) {
   // in "production" builds we define `typeof BUILT_WITH_BABEL` as `true`
   // which indicates that all of the code in the `src` directory is already
   // built and can be ignored by `babel-register`

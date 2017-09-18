@@ -24,7 +24,7 @@ module.exports = {
     [
       require.resolve('babel-plugin-transform-define'),
       {
-        'typeof BUILT_WITH_BABEL': 'true'
+        'global.__BUILT_WITH_BABEL__': 'true'
       }
     ]
   ]
