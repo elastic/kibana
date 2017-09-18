@@ -25,10 +25,10 @@ const favoriteVideoGames = [
 export default () => (
   <KuiFlexGroup>
     <KuiFlexItem>
-      <KuiDescriptionList type="column" listItems={favoriteVideoGames} />
+      <KuiDescriptionList align="center" compressed listItems={favoriteVideoGames} />
     </KuiFlexItem>
     <KuiFlexItem>
-      <KuiDescriptionList type="column">
+      <KuiDescriptionList type="column" align="center" compressed>
         <KuiDescriptionListTitle>
           Dota 2
         </KuiDescriptionListTitle>

@@ -12,6 +12,7 @@
       @include kuiFontSizeM;
       margin-top: $kuiSize;
 
+      // Make sure the first <dt> doesn't get a margine.
       &:first-of-type {
         margin-top: 0;
       }
@@ -21,12 +22,23 @@
       @include kuiFontSizeS;
     }
 
+    // Lists can be aligned.
     &.kuiDescriptionList--center {
       text-align: center;
     }
 
     &.kuiDescriptionList--right {
       text-align: right;
+    }
+
+    // Compressed gets smaller fonts.
+    &.kuiDescriptionList--compressed {
+      .kuiDescriptionList__title {
+        @include kuiFontSizeS;
+      }
+      .kuiDescriptionList__desc {
+        @include kuiFontSizeS;
+      }
     }
   }
 
@@ -57,10 +69,21 @@
       padding-left: $kuiSizeS;
     }
 
+    // Align the title to smush against the description.
     &.kuiDescriptionList--center {
       .kuiDescriptionList__title {
         text-align: right;
       }
     }
+
+    &.kuiDescriptionList--compressed {
+      .kuiDescriptionList__title {
+        @include kuiFontSizeS;
+      }
+      .kuiDescriptionList__desc {
+        @include kuiFontSizeS;
+      }
+    }
   }
+
 }

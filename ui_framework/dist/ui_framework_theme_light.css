@@ -1161,6 +1161,16 @@ table {
 .kuiDescriptionList.kuiDescriptionList--row.kuiDescriptionList--right {
   text-align: right; }
 
+.kuiDescriptionList.kuiDescriptionList--row.kuiDescriptionList--compressed .kuiDescriptionList__title {
+  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 1.5; }
+
+.kuiDescriptionList.kuiDescriptionList--row.kuiDescriptionList--compressed .kuiDescriptionList__desc {
+  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 1.5; }
+
 .kuiDescriptionList.kuiDescriptionList--column {
   display: -webkit-box;
   display: -webkit-flex;
@@ -1195,6 +1205,14 @@ table {
     padding-left: 8px; }
   .kuiDescriptionList.kuiDescriptionList--column.kuiDescriptionList--center .kuiDescriptionList__title {
     text-align: right; }
+  .kuiDescriptionList.kuiDescriptionList--column.kuiDescriptionList--compressed .kuiDescriptionList__title {
+    font-size: 14px;
+    font-size: 0.875rem;
+    line-height: 1.5; }
+  .kuiDescriptionList.kuiDescriptionList--column.kuiDescriptionList--compressed .kuiDescriptionList__desc {
+    font-size: 14px;
+    font-size: 0.875rem;
+    line-height: 1.5; }
 
 .kuiFlexGroup {
   display: -webkit-box;

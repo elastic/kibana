@@ -26,6 +26,7 @@ export const KuiDescriptionList = ({
   className,
   listItems,
   align,
+  compressed,
   type,
   ...rest,
 }) => {
@@ -33,6 +34,9 @@ export const KuiDescriptionList = ({
     'kuiDescriptionList',
     typesToClassNameMap[type],
     alignmentsToClassNameMap[align],
+    {
+      'kuiDescriptionList--compressed': compressed,
+    },
     className
   );
 
@@ -63,6 +67,7 @@ export const KuiDescriptionList = ({
 KuiDescriptionList.propTypes = {
   children: PropTypes.node,
   className: PropTypes.string,
+  compressed: PropTypes.bool,
   type: PropTypes.oneOf(TYPES),
   align: PropTypes.oneOf(ALIGNMENTS),
 };
@@ -70,4 +75,5 @@ KuiDescriptionList.propTypes = {
 KuiDescriptionList.defaultProps = {
   type: 'row',
   align: 'left',
+  compressed: false,
 };

@@ -2,11 +2,10 @@ import React from 'react';
 
 import {
   KuiDescriptionList,
-  KuiTitle,
-  KuiHorizontalRule,
-  KuiFlexItemPanel,
   KuiFlexItem,
   KuiFlexGroup,
+  KuiDescriptionListTitle,
+  KuiDescriptionListDescription,
 } from '../../../../components';
 
 const favoriteVideoGames = [
@@ -28,14 +27,21 @@ export default () => (
     <KuiFlexItem>
       <KuiDescriptionList listItems={favoriteVideoGames} />
     </KuiFlexItem>
-    <KuiFlexItemPanel style={{ width: 300 }}>
-      <KuiTitle size="small">
-        <h2>My favorite video games</h2>
-      </KuiTitle>
-
-      <KuiHorizontalRule margin="small" />
-
-      <KuiDescriptionList listItems={favoriteVideoGames} />
-    </KuiFlexItemPanel>
+    <KuiFlexItem>
+      <KuiDescriptionList>
+        <KuiDescriptionListTitle>
+          Dota 2
+        </KuiDescriptionListTitle>
+        <KuiDescriptionListDescription>
+          A videogame that I have spent way too much time on over the years.
+        </KuiDescriptionListDescription>
+        <KuiDescriptionListTitle>
+          Kings Quest VI
+        </KuiDescriptionListTitle>
+        <KuiDescriptionListDescription>
+          The game that forced me to learn DOS.
+        </KuiDescriptionListDescription>
+      </KuiDescriptionList>
+    </KuiFlexItem>
   </KuiFlexGroup>
 );

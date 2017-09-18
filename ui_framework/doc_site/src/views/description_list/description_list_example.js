@@ -20,6 +20,10 @@ import DescriptionListColumn from './description_list_column';
 const descriptionListColumnSource = require('!!raw!./description_list_column');
 const descriptionListColumnHtml = renderToHtml(DescriptionListColumn);
 
+import DescriptionListStyling from './description_list_styling';
+const descriptionListStylingSource = require('!!raw!./description_list_styling');
+const descriptionListStylingHtml = renderToHtml(DescriptionListStyling);
+
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
@@ -33,7 +37,11 @@ export default props => (
       }]}
       text={
         <p>
-          Description needed: how to use the <KuiCode>DescriptionList</KuiCode> component.
+          <KuiCode>DescriptionList</KuiCode> is a component for listing pairs of
+          information together. You can use the component on its own, passing
+          in an object for the list, or use
+          the <KuiCode>KuiDescriptionListTitle</KuiCode> and <KuiCode>KuiDescriptionListDescription</KuiCode>
+          components separately to build a list manually.
         </p>
       }
       demo={<DescriptionList />}
@@ -49,10 +57,31 @@ export default props => (
       }]}
       text={
         <p>
-          Description needed: how to use the <KuiCode>DescriptionList</KuiCode> component.
+          Using a prop <KuiCode>type</KuiCode> set to <KuiCode>column</KuiCode> description lists
+          can be presented in an inline, column format.
         </p>
       }
       demo={<DescriptionListColumn />}
+    />
+    <GuideSection
+      title="Description lists can be centered and compressed"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: descriptionListStylingSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: descriptionListStylingHtml,
+      }]}
+      text={
+        <p>
+          Using the <KuiCode>align</KuiCode> and <KuiCode>compressed</KuiCode> props you
+          can further tailor the look of a description list. This works both in row and column
+          types.
+        </p>
+     }
+      demo={
+        <DescriptionListStyling />
+     }
     />
   </GuidePage>
 );
