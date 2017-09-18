@@ -1,7 +1,6 @@
-import { Observable } from 'rxjs';
-
 import { Schema } from '../../types/schema';
 import * as schemaLib from '../../lib/schema';
+import { Observable as EsObservable } from 'kbn-observable';
 import { ConfigWithSchema } from '../../config';
 import { Router, RouterOptions } from '../http';
 import { KibanaConfig } from '../kibana';
@@ -26,10 +25,10 @@ export interface KibanaPluginFeatures {
    */
   elasticsearch: {
     service: ElasticsearchService;
-    config$: Observable<ElasticsearchConfigs>;
+    config$: EsObservable<ElasticsearchConfigs>;
   };
   kibana: {
-    config$: Observable<KibanaConfig>;
+    config$: EsObservable<KibanaConfig>;
   };
 
   /**
@@ -64,9 +63,9 @@ export interface KibanaPluginFeatures {
      */
     create: <Schema extends schemaLib.Any, Config>(
       ConfigClass: ConfigWithSchema<Schema, Config>
-    ) => Observable<Config>;
+    ) => EsObservable<Config>;
     createIfExists: <Schema extends schemaLib.Any, Config>(
       ConfigClass: ConfigWithSchema<Schema, Config>
-    ) => Observable<Config | undefined>;
+    ) => EsObservable<Config | undefined>;
   };
 }

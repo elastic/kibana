@@ -7,9 +7,6 @@
     "start": "webpack --watch"
   },
   "dependencies": {},
-  "peerDependencies": {
-    "rxjs": "5.4.2"
-  },
   "devDependencies": {
     "awesome-typescript-loader": "^3.2.2",
     "babel-core": "^6.25.0",

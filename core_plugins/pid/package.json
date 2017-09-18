@@ -9,9 +9,6 @@
   "dependencies": {
     "lodash": "^4.17.4"
   },
-  "peerDependencies": {
-    "rxjs": "5.4.2"
-  },
   "devDependencies": {
     "awesome-typescript-loader": "^3.2.2",
     "babel-core": "^6.25.0",

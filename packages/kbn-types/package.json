@@ -8,6 +8,9 @@
     "build": "tsc",
     "start": "tsc --watch"
   },
+  "dependencies": {
+    "kbn-observable": "../kbn-observable"
+  },
   "devDependencies": {
     "typescript": "2.5.1"
   }

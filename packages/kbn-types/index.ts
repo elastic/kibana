@@ -12,3 +12,4 @@ export { ElasticsearchService } from '../../platform/server/elasticsearch';
 export { KibanaConfig } from '../../platform/server/kibana';
 export { KibanaRequest, Router } from '../../platform/server/http';
 export { KibanaError } from '../../platform/lib/Errors';
+export { Observable, Subscription } from 'kbn-observable';

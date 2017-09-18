@@ -1,6 +1,6 @@
 import { Observable, Subscription } from 'rxjs';
 import { noop } from 'lodash';
-import { LoggerFactory } from 'kbn-types';
+import { LoggerFactory, Observable as EsObservable } from 'kbn-types';
 
 import { PidConfig } from './PidConfig';
 import { PidFile } from './PidFile';
@@ -10,10 +10,10 @@ export class PidService {
   private subscription?: Subscription;
 
   constructor(
-    pidConfig$: Observable<PidConfig | undefined>,
+    pidConfig$: EsObservable<PidConfig | undefined>,
     logger: LoggerFactory
   ) {
-    this.pid$ = pidConfig$
+    this.pid$ = Observable.from(pidConfig$)
       // Explanation of `switchMap`:
       // It's kinda like a normal `flatMap`, except it's producing observables
       // and you _only_ care about the latest observable it produced. It's
