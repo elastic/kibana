@@ -94,6 +94,7 @@
     "babel-jest": "21.0.0",
     "babel-loader": "6.2.10",
     "babel-plugin-add-module-exports": "0.2.1",
+    "babel-plugin-styled-components": "1.2.0",
     "babel-plugin-transform-async-generator-functions": "6.24.1",
     "babel-plugin-transform-class-properties": "6.24.1",
     "babel-plugin-transform-object-rest-spread": "6.23.0",
