@@ -39,7 +39,11 @@ dataTypesArray.forEach(function (dataType) {
       addLegend: true,
       addTooltip: true,
       mode: mode,
-      zeroFill: true
+      zeroFill: true,
+      grid: {
+        categoryLines: true,
+        valueAxis: 'ValueAxis-1'
+      }
     };
 
     beforeEach(ngMock.module('kibana'));

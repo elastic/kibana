@@ -612,7 +612,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       if (!onPage) {
         await retry.try(async () => {
           await this.clickLandingPageBreadcrumbLink();
-          await testSubjects.find('visualizationSearchFilter');
+          const onLandingPage = await this.onLandingPage();
+          if (!onLandingPage) throw new Error('Not on the landing page.');
         });
       }
     }

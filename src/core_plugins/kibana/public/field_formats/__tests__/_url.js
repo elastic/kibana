@@ -23,7 +23,7 @@ describe('Url Format', function () {
       Url = fieldFormats.getType('url');
     });
 
-    it('ouputs a simple <a> tab by default', function () {
+    it('outputs a simple <a> tab by default', function () {
       const url = new Url();
 
       const $a = unwrap($(url.convert('http://elastic.co', 'html')));
@@ -32,6 +32,14 @@ describe('Url Format', function () {
       expect($a.attr('href')).to.be('http://elastic.co');
       expect($a.attr('target')).to.be('_blank');
       expect($a.children().size()).to.be(0);
+    });
+
+    it('outputs a <a> link with target=_self if "open link in current tab" is checked', function () {
+      const url = new Url({ openLinkInCurrentTab: true });
+
+      const $a = unwrap($(url.convert('http://elastic.co', 'html')));
+      expect($a.is('a')).to.be(true);
+      expect($a.attr('target')).to.be('_self');
     });
 
     it('outputs an <image> if type === "img"', function () {
