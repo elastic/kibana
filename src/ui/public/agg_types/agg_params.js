@@ -1,21 +1,21 @@
 import 'ui/filters/label';
 import _ from 'lodash';
 import { IndexedArray } from 'ui/indexed_array';
-import { AggTypesParamTypesFieldProvider } from 'ui/agg_types/param_types/field';
-import { AggTypesParamTypesOptionedProvider } from 'ui/agg_types/param_types/optioned';
-import { AggTypesParamTypesRegexProvider } from 'ui/agg_types/param_types/regex';
-import { AggTypesParamTypesStringProvider } from 'ui/agg_types/param_types/string';
-import { AggTypesParamTypesRawJsonProvider } from 'ui/agg_types/param_types/raw_json';
-import { AggTypesParamTypesBaseProvider } from 'ui/agg_types/param_types/base';
+import { FieldParamTypeProvider } from './param_types/field';
+import { OptionedParamTypeProvider } from './param_types/optioned';
+import { RegexParamTypeProvider } from './param_types/regex';
+import { StringParamTypeProvider } from './param_types/string';
+import { JsonParamTypeProvider } from './param_types/json';
+import { BaseParamTypeProvider } from './param_types/base';
 
 export function AggTypesAggParamsProvider(Private) {
   const paramTypeMap = {
-    field: Private(AggTypesParamTypesFieldProvider),
-    optioned: Private(AggTypesParamTypesOptionedProvider),
-    regex: Private(AggTypesParamTypesRegexProvider),
-    string: Private(AggTypesParamTypesStringProvider),
-    json: Private(AggTypesParamTypesRawJsonProvider),
-    _default: Private(AggTypesParamTypesBaseProvider)
+    field: Private(FieldParamTypeProvider),
+    optioned: Private(OptionedParamTypeProvider),
+    regex: Private(RegexParamTypeProvider),
+    string: Private(StringParamTypeProvider),
+    json: Private(JsonParamTypeProvider),
+    _default: Private(BaseParamTypeProvider)
   };
 
   /**
