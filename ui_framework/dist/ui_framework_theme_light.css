@@ -1214,6 +1214,40 @@ table {
     font-size: 0.875rem;
     line-height: 1.5; }
 
+.kuiDescriptionList.kuiDescriptionList--inline .kuiDescriptionList__title {
+  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  display: inline;
+  border-radius: 4px;
+  font-weight: 400;
+  background: #F5F5F5;
+  border: 1px solid #D9D9D9;
+  padding: 0 4px;
+  margin: 0 4px; }
+  .kuiDescriptionList.kuiDescriptionList--inline .kuiDescriptionList__title:first-of-type {
+    margin-left: 0; }
+
+.kuiDescriptionList.kuiDescriptionList--inline .kuiDescriptionList__desc {
+  font-size: 14px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  display: inline;
+  word-break: break-all; }
+
+.kuiDescriptionList.kuiDescriptionList--inline.kuiDescriptionList--compressed .kuiDescriptionList__title {
+  font-size: 12px;
+  font-size: 0.75rem;
+  line-height: 1.5; }
+
+.kuiDescriptionList.kuiDescriptionList--inline.kuiDescriptionList--compressed .kuiDescriptionList__desc {
+  font-size: 12px;
+  font-size: 0.75rem;
+  line-height: 1.5; }
+
+.kuiDescriptionList.kuiDescriptionList--inline.kuiDescriptionList--center {
+  text-align: center; }
+
 .kuiFlexGroup {
   display: -webkit-box;
   display: -webkit-flex;

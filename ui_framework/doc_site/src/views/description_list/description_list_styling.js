@@ -4,6 +4,7 @@ import {
   KuiDescriptionList,
   KuiFlexItem,
   KuiFlexGroup,
+  KuiSpacer,
   KuiDescriptionListTitle,
   KuiDescriptionListDescription,
 } from '../../../../components';
@@ -23,25 +24,29 @@ const favoriteVideoGames = [
   },
 ];
 export default () => (
-  <KuiFlexGroup>
-    <KuiFlexItem>
-      <KuiDescriptionList align="center" compressed listItems={favoriteVideoGames} />
-    </KuiFlexItem>
-    <KuiFlexItem>
-      <KuiDescriptionList type="column" align="center" compressed>
-        <KuiDescriptionListTitle>
-          Dota 2
-        </KuiDescriptionListTitle>
-        <KuiDescriptionListDescription>
-          A videogame that I have spent way too much time on over the years.
-        </KuiDescriptionListDescription>
-        <KuiDescriptionListTitle>
-          Kings Quest VI
-        </KuiDescriptionListTitle>
-        <KuiDescriptionListDescription>
-          The game that forced me to learn DOS.
-        </KuiDescriptionListDescription>
-      </KuiDescriptionList>
-    </KuiFlexItem>
-  </KuiFlexGroup>
+  <div>
+    <KuiFlexGroup>
+      <KuiFlexItem>
+        <KuiDescriptionList align="center" compressed listItems={favoriteVideoGames} />
+      </KuiFlexItem>
+      <KuiFlexItem>
+        <KuiDescriptionList type="column" align="center" compressed>
+          <KuiDescriptionListTitle>
+            Dota 2
+          </KuiDescriptionListTitle>
+          <KuiDescriptionListDescription>
+            A videogame that I have spent way too much time on over the years.
+          </KuiDescriptionListDescription>
+          <KuiDescriptionListTitle>
+            Kings Quest VI
+          </KuiDescriptionListTitle>
+          <KuiDescriptionListDescription>
+            The game that forced me to learn DOS.
+          </KuiDescriptionListDescription>
+        </KuiDescriptionList>
+      </KuiFlexItem>
+    </KuiFlexGroup>
+    <KuiSpacer size="l" />
+    <KuiDescriptionList type="inline" align="center" compressed listItems={favoriteVideoGames} />
+  </div>
 );

@@ -10,6 +10,7 @@ import {
 const typesToClassNameMap = {
   row: 'kuiDescriptionList--row',
   column: 'kuiDescriptionList--column',
+  inline: 'kuiDescriptionList--inline',
 };
 
 export const TYPES = Object.keys(typesToClassNameMap);

@@ -24,6 +24,10 @@ import DescriptionListStyling from './description_list_styling';
 const descriptionListStylingSource = require('!!raw!./description_list_styling');
 const descriptionListStylingHtml = renderToHtml(DescriptionListStyling);
 
+import DescriptionListInline from './description_list_inline';
+const descriptionListInlineSource = require('!!raw!./description_list_inline');
+const descriptionListInlineHtml = renderToHtml(DescriptionListInline);
+
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
@@ -62,6 +66,22 @@ export default props => (
         </p>
       }
       demo={<DescriptionListColumn />}
+    />
+    <GuideSection
+      title="Description lists can be inline"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: descriptionListInlineSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: descriptionListInlineHtml,
+      }]}
+      text={
+        <p>Description needed: how to use the DescriptionListInline component.</p>
+     }
+      demo={
+        <DescriptionListInline />
+     }
     />
     <GuideSection
       title="Description lists can be centered and compressed"
