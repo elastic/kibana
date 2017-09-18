@@ -3,6 +3,7 @@ import { resolve } from 'path';
 import { Observable } from 'rxjs';
 
 import { Plugin } from './Plugin';
+import { PluginName } from './types';
 import { PluginSystem } from './PluginSystem';
 import { Logger, LoggerFactory } from '../../logging';
 import { CoreService } from '../../types/CoreService';
@@ -70,7 +71,7 @@ export class PluginsService implements CoreService {
     );
   }
 
-  private createPlugin(name: string) {
+  private createPlugin(name: PluginName) {
     const pluginPath = this.env.getPluginDir(name);
     const pluginExports = require(pluginPath);
 
@@ -84,13 +85,9 @@ export class PluginsService implements CoreService {
       throw new Error(`'plugin' definition missing in plugin [${pluginPath}]`);
     }
 
-    // TODO validate these values
+    // TODO validate the values in `plugin` before instantiating `Plugin`
 
-    const run = plugin.plugin;
-    const dependencies = plugin.dependencies || [];
-    const configPath = plugin.configPath;
-
-    return new Plugin({ name, dependencies, run, configPath }, this.logger);
+    return new Plugin(name, plugin, this.logger);
   }
 
   isPluginEnabled<T, U>(plugin: Plugin<T, U>) {

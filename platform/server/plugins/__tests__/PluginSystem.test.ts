@@ -22,10 +22,10 @@ test('can register value', () => {
   };
 
   const foo = new Plugin<{}, Foo['foo']>(
+    'foo',
     {
-      name: 'foo',
       dependencies: [],
-      run: config => {
+      plugin: config => {
         return {
           value: 'my-value'
         };
@@ -35,10 +35,10 @@ test('can register value', () => {
   );
 
   const bar = new Plugin<Foo, void>(
+    'bar',
     {
-      name: 'bar',
       dependencies: ['foo'],
-      run: (kibana, deps) => {
+      plugin: (kibana, deps) => {
         expect(deps.foo).toEqual({ value: 'my-value' });
       }
     },
@@ -61,10 +61,10 @@ test('can register function', () => {
   };
 
   const foo = new Plugin<{}, Foo['foo']>(
+    'foo',
     {
-      name: 'foo',
       dependencies: [],
-      run: config => ({
+      plugin: config => ({
         fn: val => `test-${val}`
       })
     },
@@ -72,10 +72,10 @@ test('can register function', () => {
   );
 
   const bar = new Plugin<Foo, void>(
+    'bar',
     {
-      name: 'bar',
       dependencies: ['foo'],
-      run: (kibana, deps) => {
+      plugin: (kibana, deps) => {
         expect(deps.foo).toBeDefined();
         expect(deps.foo.fn('some-value')).toBe('test-some-value');
       }
@@ -105,10 +105,10 @@ test('can register value with same name across plugins', () => {
   };
 
   const foo = new Plugin<{}, Foo['foo']>(
+    'foo',
     {
-      name: 'foo',
       dependencies: [],
-      run: kibana => ({
+      plugin: kibana => ({
         value: 'value-foo'
       })
     },
@@ -116,10 +116,10 @@ test('can register value with same name across plugins', () => {
   );
 
   const bar = new Plugin<{}, Bar['bar']>(
+    'bar',
     {
-      name: 'bar',
       dependencies: [],
-      run: kibana => ({
+      plugin: kibana => ({
         value: 'value-bar'
       })
     },
@@ -127,10 +127,10 @@ test('can register value with same name across plugins', () => {
   );
 
   const quux = new Plugin<Foo & Bar, void>(
+    'quux',
     {
-      name: 'quux',
       dependencies: ['foo', 'bar'],
-      run: (kibana, deps) => {
+      plugin: (kibana, deps) => {
         expect(deps.foo).toEqual({ value: 'value-foo' });
         expect(deps.bar).toEqual({ value: 'value-bar' });
       }
@@ -155,10 +155,10 @@ test('receives values from dependencies but not transitive dependencies', () => 
   };
 
   const grandchild = new Plugin<{}, Grandchild['grandchild']>(
+    'grandchild',
     {
-      name: 'grandchild',
       dependencies: [],
-      run: kibana => ({
+      plugin: kibana => ({
         value: 'grandchild'
       })
     },
@@ -172,10 +172,10 @@ test('receives values from dependencies but not transitive dependencies', () => 
   };
 
   const child = new Plugin<Grandchild, Child['child']>(
+    'child',
     {
-      name: 'child',
       dependencies: ['grandchild'],
-      run: (kibana, deps) => {
+      plugin: (kibana, deps) => {
         expect(deps.grandchild).toEqual({ value: 'grandchild' });
 
         return {
@@ -187,10 +187,10 @@ test('receives values from dependencies but not transitive dependencies', () => 
   );
 
   const parent = new Plugin<Grandchild & Child, void>(
+    'parent',
     {
-      name: 'parent',
       dependencies: ['child'],
-      run: (kibana, deps) => {
+      plugin: (kibana, deps) => {
         expect(deps.child).toEqual({ value: 'child' });
         expect(deps.grandchild).toBeUndefined();
       }
@@ -217,10 +217,10 @@ test('keeps ref on registered value', () => {
   const myRef = {};
 
   const child = new Plugin<{}, Child['child']>(
+    'child',
     {
-      name: 'child',
       dependencies: [],
-      run: kibana => ({
+      plugin: kibana => ({
         value: myRef
       })
     },
@@ -228,10 +228,10 @@ test('keeps ref on registered value', () => {
   );
 
   const parent = new Plugin<Child, void>(
+    'parent',
     {
-      name: 'parent',
       dependencies: ['child'],
-      run: (kibana, deps) => {
+      plugin: (kibana, deps) => {
         expect(deps.child.value).toBe(myRef);
       }
     },
@@ -255,10 +255,10 @@ test('can register multiple values in single plugin', () => {
   };
 
   const child = new Plugin<{}, Child['child']>(
+    'child',
     {
-      name: 'child',
       dependencies: [],
-      run: kibana => ({
+      plugin: kibana => ({
         value1: 1,
         value2: 2
       })
@@ -267,10 +267,10 @@ test('can register multiple values in single plugin', () => {
   );
 
   const parent = new Plugin<Child, void>(
+    'parent',
     {
-      name: 'parent',
       dependencies: ['child'],
-      run: (kibana, deps) => {
+      plugin: (kibana, deps) => {
         expect(deps.child).toEqual({
           value1: 1,
           value2: 2
@@ -297,10 +297,10 @@ test('plugins can be typed', () => {
   };
 
   const foo = new Plugin<{}, Foo['foo']>(
+    'foo',
     {
-      name: 'foo',
       dependencies: [],
-      run: kibana => ({
+      plugin: kibana => ({
         value1: 1,
         value2: 2
       })
@@ -316,10 +316,10 @@ test('plugins can be typed', () => {
   };
 
   const bar = new Plugin<Foo, Bar['bar']>(
+    'bar',
     {
-      name: 'bar',
       dependencies: ['foo'],
-      run: (kibana, deps) => {
+      plugin: (kibana, deps) => {
         expect(deps.foo.value1).toBe(1);
 
         return {
@@ -332,10 +332,10 @@ test('plugins can be typed', () => {
   );
 
   const quux = new Plugin<Foo & Bar, void>(
+    'quux',
     {
-      name: 'quux',
       dependencies: ['foo', 'bar'],
-      run: (kibana, deps) => {
+      plugin: (kibana, deps) => {
         expect(deps.foo.value1).toBe(1);
         expect(deps.foo.value2).toBe(2);
 
@@ -357,10 +357,10 @@ test('ensure `this` is not specified when starting a plugin', () => {
   expect.assertions(1);
 
   const foo = new Plugin<{}, void>(
+    'foo',
     {
-      name: 'foo',
       dependencies: [],
-      run: function(this: any, config) {
+      plugin: function(this: any, config) {
         expect(this).toBeNull();
       }
     },
@@ -374,10 +374,10 @@ test('ensure `this` is not specified when starting a plugin', () => {
 
 test("throws if starting a plugin that depends on a plugin that's not yet started", () => {
   const foo = new Plugin<{}, void>(
+    'foo',
     {
-      name: 'foo',
       dependencies: ['does-not-exist'],
-      run: () => {}
+      plugin: () => {}
     },
     logger
   );
@@ -393,10 +393,10 @@ test("throws if starting a plugin that depends on a plugin that's not yet starte
 
 test("throws if adding a plugin that's already added", () => {
   const foo = new Plugin<{}, void>(
+    'foo',
     {
-      name: 'foo',
       dependencies: [],
-      run: () => {}
+      plugin: () => {}
     },
     logger
   );
@@ -431,18 +431,18 @@ test('stops plugins in reverse order of started order', () => {
   }
 
   const foo = new Plugin<{}, void>(
+    'foo',
     {
-      name: 'foo',
       dependencies: [],
-      run: FooPlugin
+      plugin: FooPlugin
     },
     logger
   );
   const bar = new Plugin<{}, void>(
+    'bar',
     {
-      name: 'bar',
       dependencies: [],
-      run: BarPlugin
+      plugin: BarPlugin
     },
     logger
   );
@@ -466,19 +466,19 @@ test('can add plugins before adding its dependencies', () => {
   };
 
   const foo = new Plugin<{}, Foo['foo']>(
+    'foo',
     {
-      name: 'foo',
       dependencies: [],
-      run: kibana => 'value'
+      plugin: kibana => 'value'
     },
     logger
   );
 
   const bar = new Plugin<Foo, void>(
+    'bar',
     {
-      name: 'bar',
       dependencies: ['foo'],
-      run: (kibana, deps) => {
+      plugin: (kibana, deps) => {
         expect(deps.foo).toBe('value');
       }
     },

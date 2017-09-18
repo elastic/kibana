@@ -2,7 +2,9 @@ import {
   BasePluginsType,
   KibanaFunctionalPlugin,
   KibanaClassPluginStatic,
-  PluginName
+  KibanaPluginConfig,
+  PluginName,
+  PluginConfigPath
 } from './types';
 import { KibanaCoreModules } from './KibanaCoreModules';
 import { Logger, LoggerFactory } from '../../logging';
@@ -40,36 +42,27 @@ function isKibanaFunctionalPlugin<
   return !isClass(val);
 }
 
-interface PluginDefinition<DependenciesType, ExposableType> {
-  name: string;
-  dependencies: string[];
-  run:
-    | KibanaFunctionalPlugin<DependenciesType, ExposableType>
-    | KibanaClassPluginStatic<DependenciesType, ExposableType>;
-  configPath?: string | string[];
-}
-
 export class Plugin<DependenciesType extends BasePluginsType, ExposableType> {
   readonly name: PluginName;
   readonly dependencies: PluginName[];
   private readonly run:
     | KibanaFunctionalPlugin<DependenciesType, ExposableType>
     | KibanaClassPluginStatic<DependenciesType, ExposableType>;
-  readonly configPath: string | string[] | undefined;
-
+  readonly configPath?: PluginConfigPath;
   private stopCallbacks: LifecycleCallback[] = [];
   private exposedValues?: ExposableType;
   private log: Logger;
 
   constructor(
-    pluginDefinition: PluginDefinition<DependenciesType, ExposableType>,
+    name: PluginName,
+    plugin: KibanaPluginConfig<DependenciesType, ExposableType>,
     logger: LoggerFactory
   ) {
-    this.name = pluginDefinition.name as PluginName;
-    this.dependencies = pluginDefinition.dependencies as PluginName[];
-    this.run = pluginDefinition.run;
-    this.configPath = pluginDefinition.configPath;
-    this.log = logger.get('plugins', pluginDefinition.name);
+    this.name = name;
+    this.dependencies = plugin.dependencies || [];
+    this.run = plugin.plugin;
+    this.configPath = plugin.configPath;
+    this.log = logger.get('plugins', name);
   }
 
   getExposedValues(): ExposableType {
