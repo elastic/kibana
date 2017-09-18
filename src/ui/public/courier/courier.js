@@ -88,15 +88,6 @@ uiModules.get('kibana/courier')
       return this;
     };
 
-
-    // /**
-    //  * create a source object that is a child of this courier
-    //  *
-    //  */
-    // self.createSource = function () {
-    //   return new SearchSource();
-    // };
-
     /**
      * Abort all pending requests
      * @return {[type]} [description]
