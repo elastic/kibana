@@ -89,9 +89,9 @@ export class Plugin<DependenciesType extends BasePluginsType, ExposableType> {
     if (isKibanaFunctionalPlugin(this.run)) {
       value = this.run.call(null, kibanaValues, dependenciesValues);
     } else {
-      const r = new this.run(kibanaValues, dependenciesValues);
-      value = r.start();
-      this.onStop = () => r.stop && r.stop();
+      const pluginInstance = new this.run(kibanaValues, dependenciesValues);
+      value = pluginInstance.start();
+      this.onStop = () => pluginInstance.stop && pluginInstance.stop();
     }
 
     // TODO throw if then-able? To make sure no one async/awaits while processing the plugin?
@@ -99,8 +99,7 @@ export class Plugin<DependenciesType extends BasePluginsType, ExposableType> {
     //   throw new Error('plugin cannot return a promise')
     // }
 
-    this.exposedValues =
-      typeof value === 'undefined' ? {} as ExposableType : value;
+    this.exposedValues = value === undefined ? {} as ExposableType : value;
   }
 
   stop() {
