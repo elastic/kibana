@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import sinon from 'sinon';
-import { AggTypesParamTypesBaseProvider } from 'ui/agg_types/param_types/base';
-import { AggTypesParamTypesFieldProvider } from 'ui/agg_types/param_types/field';
-import { AggTypesParamTypesOptionedProvider } from 'ui/agg_types/param_types/optioned';
+import { BaseParamTypeProvider } from '../../param_types/base';
+import { FieldParamTypeProvider } from '../../param_types/field';
+import { OptionedParamTypeProvider } from '../../param_types/optioned';
 
 function ParamClassStub(parent, body) {
   const stub = sinon.spy(body || function () {
@@ -29,19 +29,19 @@ function ParamClassStub(parent, body) {
 // eslint-disable-next-line kibana-custom/no-default-export
 export default function stubParamClasses(Private) {
   const BaseAggParam = Private.stub(
-    AggTypesParamTypesBaseProvider,
+    BaseParamTypeProvider,
     new ParamClassStub(null, function (config) {
       _.assign(this, config);
     })
   );
 
   Private.stub(
-    AggTypesParamTypesFieldProvider,
+    FieldParamTypeProvider,
     new ParamClassStub(BaseAggParam)
   );
 
   Private.stub(
-    AggTypesParamTypesOptionedProvider,
+    OptionedParamTypeProvider,
     new ParamClassStub(BaseAggParam)
   );
 }
