@@ -18,18 +18,20 @@ export class KuiCodeEditor extends Component {
     this.setState({ hintInactive: false });
   }
 
+  onKeydownAce = (ev) => {
+    if (ev.keyCode === keyCodes.ESCAPE) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      this.enableOverlay();
+      this.refs.kuiCodeEditorHint.focus();
+    }
+  }
+
   configureAce = (ace) => {
     if (ace) {
       this.aceEditor = ace;
       ace.editor.textInput.getElement().tabIndex = -1;
-      ace.editor.textInput.getElement().addEventListener('keydown', (ev) => {
-        if (ev.keyCode === keyCodes.ESCAPE) {
-          ev.preventDefault();
-          ev.stopPropagation();
-          this.enableOverlay();
-          this.refs.kuiCodeEditorHint.focus();
-        }
-      });
+      ace.editor.textInput.getElement().addEventListener('keydown', this.onKeydownAce);
     }
   };
 

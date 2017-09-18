@@ -1,6 +1,8 @@
 import React from 'react';
+import sinon from 'sinon';
 import { mount } from 'enzyme';
 import { KuiCodeEditor } from './code_editor';
+import { keyCodes } from '../../services';
 
 describe('KuiCodeEditor', () => {
 
@@ -19,68 +21,36 @@ describe('KuiCodeEditor', () => {
       expect(element.find('.kuiCodeEditorKeyboardHint').prop('tabIndex')).toBe('0');
     });
 
-    // test('should move focus to textbox and be inactive if pressed enter on it', () => {
-    //   const textarea = element.find('textarea');
-    //   sinon.spy(textarea[0], 'focus');
-    //   const ev = angular.element.Event('keydown'); // eslint-disable-line new-cap
-    //   ev.keyCode = keyCodes.ENTER;
-    //   element.find('.uiAceKeyboardHint').trigger(ev);
-    //   expect(textarea[0].focus.called).to.be(true);
-    //   expect(element.find('.uiAceKeyboardHint').hasClass('uiAceKeyboardHint-isInactive')).to.be(true);
-    // });
-//
-//     it('should be shown again, when pressing Escape in ace editor', () => {
-//       const textarea = element.find('textarea');
-//       const hint = element.find('.uiAceKeyboardHint');
-//       sinon.spy(hint[0], 'focus');
-//       const ev = angular.element.Event('keydown'); // eslint-disable-line new-cap
-//       ev.keyCode = keyCodes.ESCAPE;
-//       textarea.trigger(ev);
-//       expect(hint[0].focus.called).to.be(true);
-//       expect(hint.hasClass('uiAceKeyboardHint-isInactive')).to.be(false);
-//     });
+    test('should vanish when hit enter on it', () => {
+      const hint = element.find('.kuiCodeEditorKeyboardHint');
+      hint.simulate('keydown', { keyCode: keyCodes.ENTER });
+      expect(hint.hasClass('kuiCodeEditorKeyboardHint-isInactive')).toBe(true);
+    });
+
+    test('should be enabled after bluring the ui ace box', () => {
+      const hint = element.find('.kuiCodeEditorKeyboardHint');
+      hint.simulate('keydown', { keyCode: keyCodes.ENTER });
+      expect(hint.hasClass('kuiCodeEditorKeyboardHint-isInactive')).toBe(true);
+      element.instance().onBlurAce();
+      expect(hint.hasClass('kuiCodeEditorKeyboardHint-isInactive')).toBe(false);
+    });
+
   });
-//
-  // describe('ui-ace textarea', () => {
-  //   test('should not be tabable anymore', () => {
-  //     console.log(element.debug());
-  //     expect(element.find('textarea').prop('tabIndex')).toBe('-1');
-  //   });
-  // });
-//
-// });
-//
-//   describe('hint element', () => {
-//     it('should be tabable', () => {
-//       expect(element.find('.uiAceKeyboardHint').attr('tabindex')).to.be('0');
-//     });
-//
-//     it('should move focus to textbox and be inactive if pressed enter on it', () => {
-//       const textarea = element.find('textarea');
-//       sinon.spy(textarea[0], 'focus');
-//       const ev = angular.element.Event('keydown'); // eslint-disable-line new-cap
-//       ev.keyCode = keyCodes.ENTER;
-//       element.find('.uiAceKeyboardHint').trigger(ev);
-//       expect(textarea[0].focus.called).to.be(true);
-//       expect(element.find('.uiAceKeyboardHint').hasClass('uiAceKeyboardHint-isInactive')).to.be(true);
-//     });
-//
-//     it('should be shown again, when pressing Escape in ace editor', () => {
-//       const textarea = element.find('textarea');
-//       const hint = element.find('.uiAceKeyboardHint');
-//       sinon.spy(hint[0], 'focus');
-//       const ev = angular.element.Event('keydown'); // eslint-disable-line new-cap
-//       ev.keyCode = keyCodes.ESCAPE;
-//       textarea.trigger(ev);
-//       expect(hint[0].focus.called).to.be(true);
-//       expect(hint.hasClass('uiAceKeyboardHint-isInactive')).to.be(false);
-//     });
-//   });
-//
-//   describe('ui-ace textarea', () => {
-//     it('should not be tabable anymore', () => {
-//       expect(element.find('textarea').attr('tabindex')).to.be('-1');
-//     });
-  // });
+
+  test('bluring the ace textbox should call a passed onBlur prop', () => {
+    const blurSpy = sinon.spy();
+    const el = mount(<KuiCodeEditor onBlur={blurSpy}/>);
+    el.instance().onBlurAce();
+    expect(blurSpy.called).toBe(true);
+  });
+
+  test('pressing escape in ace textbox will enable overlay', () => {
+    element.instance().onKeydownAce({
+      preventDefault: () => {},
+      stopPropagation: () => {},
+      keyCode: keyCodes.ESCAPE
+    });
+    expect(element.find('.kuiCodeEditorKeyboardHint').matchesElement(document.activeElement)).toBe(true);
+  });
 
 });
