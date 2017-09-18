@@ -173,18 +173,21 @@ export function SearchSourceProvider(Promise, Private, config) {
 
   SearchSource.prototype.onBeginSegmentedFetch = function (initFunction) {
     const self = this;
-    return new Promise(function addRequest(resolve, reject) {
-      const defer = Promise.defer();
-      const req = new SegmentedRequest(self, defer, initFunction);
+    return new Promise((resolve, reject) => {
+      function addRequest() {
+        const defer = Promise.defer();
+        const req = new SegmentedRequest(self, defer, initFunction);
 
-      req.setErrorHandler((request, error) => {
-        reject(error);
-        request.abort();
-      });
+        req.setErrorHandler((request, error) => {
+          reject(error);
+          request.abort();
+        });
 
-      // Return promises created by the completion handler so that
-      // errors will bubble properly
-      return req.getCompletePromise().then(() => addRequest(resolve, reject));
+        // Return promises created by the completion handler so that
+        // errors will bubble properly
+        return req.getCompletePromise().then(addRequest);
+      }
+      addRequest();
     });
   };
 
