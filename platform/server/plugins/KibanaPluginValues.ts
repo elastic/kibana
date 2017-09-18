@@ -1,8 +1,7 @@
 import { KibanaPluginFeatures } from './KibanaPluginFeatures';
 import { KibanaCoreModules } from './KibanaCoreModules';
-import { ConfigWithSchema } from '../../config';
 import * as schema from '../../lib/schema';
-import { Router, RouterOptions } from '../http';
+import { Router } from '../http';
 
 /**
  * This is the full plugin API exposed from Kibana core, everything else is
@@ -23,7 +22,7 @@ export function createKibanaValuesForPlugin(
 ): KibanaPluginFeatures {
   return {
     logger: {
-      get: (...contextParts: string[]) => {
+      get: (...contextParts) => {
         return core.logger.get('plugins', pluginName, ...contextParts);
       }
     },
@@ -38,24 +37,20 @@ export function createKibanaValuesForPlugin(
       config$: core.kibana.config$
     },
     http: {
-      createAndRegisterRouter: <T>(path: string, options: RouterOptions<T>) => {
+      createAndRegisterRouter: (path, options) => {
         const router = new Router(path, options);
         core.http.service.registerRouter(router);
         return router;
       }
     },
     config: {
-      create: <Schema extends schema.Any, Config>(
-        ConfigClass: ConfigWithSchema<Schema, Config>
-      ) => {
+      create: ConfigClass => {
         if (configPath === undefined) {
           throw new Error('config path not defined');
         }
         return core.configService.atPath(configPath, ConfigClass);
       },
-      createIfExists: <Schema extends schema.Any, Config>(
-        ConfigClass: ConfigWithSchema<Schema, Config>
-      ) => {
+      createIfExists: ConfigClass => {
         if (configPath === undefined) {
           throw new Error('config path not defined');
         }
