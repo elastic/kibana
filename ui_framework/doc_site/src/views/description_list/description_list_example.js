@@ -77,7 +77,11 @@ export default props => (
         code: descriptionListInlineHtml,
       }]}
       text={
-        <p>Description needed: how to use the DescriptionListInline component.</p>
+        <p>
+          Using a prop <KuiCode>type</KuiCode> set to <KuiCode>inline</KuiCode> description lists
+          can be presented in an inline, blob format. This is useful for JSON code blocks. Inline
+          description lists are sized smaller then normal lists due to their compact nature.
+        </p>
      }
       demo={
         <DescriptionListInline />
@@ -95,8 +99,8 @@ export default props => (
       text={
         <p>
           Using the <KuiCode>align</KuiCode> and <KuiCode>compressed</KuiCode> props you
-          can further tailor the look of a description list. This works both in row and column
-          types.
+          can further tailor the look of a description list. This works with, column
+          and inline types.
         </p>
      }
       demo={
