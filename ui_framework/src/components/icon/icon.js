@@ -3,11 +3,14 @@ import React, {
 } from 'react';
 import classNames from 'classnames';
 
+import '!!svg-sprite!./assets/app_apm.svg';
 import '!!svg-sprite!./assets/app_dashboard.svg';
 import '!!svg-sprite!./assets/app_devtools.svg';
 import '!!svg-sprite!./assets/app_discover.svg';
 import '!!svg-sprite!./assets/app_graph.svg';
+import '!!svg-sprite!./assets/app_logging.svg';
 import '!!svg-sprite!./assets/app_ml.svg';
+import '!!svg-sprite!./assets/app_monitoring.svg';
 import '!!svg-sprite!./assets/app_timelion.svg';
 import '!!svg-sprite!./assets/app_visualize.svg';
 import '!!svg-sprite!./assets/apps.svg';
@@ -63,6 +66,7 @@ const humanizeCamelCase = str => (
 );
 
 const typeToIconMap = {
+  apmApp: 'app_apm',
   apps: 'apps',
   arrowDown: 'arrow_down',
   arrowLeft: 'arrow_left',
@@ -93,6 +97,7 @@ const typeToIconMap = {
   list: 'list',
   listAdd: 'list_add',
   lock: 'lock',
+  loggingApp: 'app_logging',
   logoBeats: 'logo_beats',
   logoCloud: 'logo_cloud',
   logoElasticStack: 'logo_elastic_stack',
@@ -104,6 +109,7 @@ const typeToIconMap = {
   logoXpack: 'logo_xpack',
   machineLearningApp: 'app_ml',
   mapMarker: 'map_marker',
+  monitoringApp: 'app_monitoring',
   pencil: 'pencil',
   plusInCircle: 'plus_in_circle',
   search: 'search',

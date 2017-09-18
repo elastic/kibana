@@ -8,11 +8,14 @@ import {
 } from '../../../../components';
 
 const iconTypes = [
+  'apmApp',
   'dashboardApp',
   'devToolsApp',
   'discoverApp',
   'graphApp',
+  'loggingApp',
   'machineLearningApp',
+  'monitoringApp',
   'timelionApp',
   'visualizeApp',
 ];
