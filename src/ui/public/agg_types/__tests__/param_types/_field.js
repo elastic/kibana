@@ -2,36 +2,36 @@ import expect from 'expect.js';
 import { reject } from 'lodash';
 import ngMock from 'ng_mock';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import { AggTypesParamTypesBaseProvider } from 'ui/agg_types/param_types/base';
-import { AggTypesParamTypesFieldProvider } from 'ui/agg_types/param_types/field';
+import { BaseParamTypeProvider } from '../../param_types/base';
+import { FieldParamTypeProvider } from '../../param_types/field';
 
 describe('Field', function () {
 
-  let BaseAggParam;
-  let FieldAggParam;
+  let BaseParamType;
+  let FieldParamType;
   let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
   // fetch out deps
   beforeEach(ngMock.inject(function (Private) {
-    BaseAggParam = Private(AggTypesParamTypesBaseProvider);
-    FieldAggParam = Private(AggTypesParamTypesFieldProvider);
+    BaseParamType = Private(BaseParamTypeProvider);
+    FieldParamType = Private(FieldParamTypeProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 
   describe('constructor', function () {
-    it('it is an instance of BaseAggParam', function () {
-      const aggParam = new FieldAggParam({
+    it('it is an instance of BaseParamType', function () {
+      const aggParam = new FieldParamType({
         name: 'field'
       });
 
-      expect(aggParam).to.be.a(BaseAggParam);
+      expect(aggParam).to.be.a(BaseParamType);
     });
   });
 
   describe('getFieldOptions', function () {
     it('should return only aggregatable fields by default', function () {
-      const aggParam = new FieldAggParam({
+      const aggParam = new FieldParamType({
         name: 'field'
       });
 
@@ -45,7 +45,7 @@ describe('Field', function () {
     });
 
     it('should return all fields if onlyAggregatable is false', function () {
-      const aggParam = new FieldAggParam({
+      const aggParam = new FieldParamType({
         name: 'field'
       });
 
