@@ -23,6 +23,7 @@ export function EmbeddedTooltipFormatterProvider($rootScope, $compile, Private, 
     let $visEl;
     let requestHandler;
     let responseHandler;
+    let fetchTimestamp;
     savedVisualizations.get('c3778850-8ccb-11e7-9508-3f73ba707926').then((savedObject) => {
       popVis = savedObject;
       requestHandler = getHandler(requestHandlers, savedObject.vis.type.requestHandler);
@@ -38,8 +39,19 @@ export function EmbeddedTooltipFormatterProvider($rootScope, $compile, Private, 
     let previousResp;
 
     return function (event) {
+      const localFetchTimestamp = Date.now();
+      fetchTimestamp = localFetchTimestamp;
+
       const datum = event.datum;
 
+      const aggFilters = [];
+      let aggResult = datum.aggConfigResult
+      while(aggResult) {
+        aggFilters.push(aggResult.aggConfig.createFilter(aggResult.key));
+        aggResult = aggResult.$parent;
+      }
+
+      popVis.searchSource.set('filter', aggFilters);
       requestHandler($tooltipScope.vis, appState, $tooltipScope.uiState, queryFilter, popVis.searchSource)
       .then(requestHandlerResponse => {
         return responseHandler($tooltipScope.vis, requestHandlerResponse);
@@ -53,10 +65,14 @@ export function EmbeddedTooltipFormatterProvider($rootScope, $compile, Private, 
           height: 500
         });
         const $popup = $('#embeddedTooltip');
-        $popup.empty();
-        $popup.append($visEl);
-        $tooltipScope.visData = resp;
-        $tooltipScope.$apply();
+
+        // Only update popup if results are for calling fetch
+        if ($popup && localFetchTimestamp === fetchTimestamp) {
+          $popup.empty();
+          $popup.append($visEl);
+          $tooltipScope.visData = resp;
+          $tooltipScope.$apply();
+        }
       }, e => {
         // TODO display error message in popup text
         console.log(e);

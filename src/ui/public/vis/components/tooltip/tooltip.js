@@ -163,16 +163,20 @@ Tooltip.prototype.render = function () {
       }
 
       self.binder.fakeD3Bind(this, 'mouseenter', function () {
-        if (!self.showCondition.call(element, d, i)) {
+        /*if (!self.showCondition.call(element, d, i)) {
           return render();
-        }
+        }*/
 
         const events = self.events ? self.events.eventResponse(d, i) : d;
         return render(self.formatter(events));
       });
 
+      self.binder.fakeD3Bind(this, 'mousemove', function () {
+        self.show();
+      });
+
       self.binder.fakeD3Bind(this, 'mouseleave', function () {
-        //render();
+        self.hide();
       });
     });
   };
