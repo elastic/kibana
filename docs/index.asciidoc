@@ -2,8 +2,8 @@
 = Kibana User Guide
 
 include::index-shared1.asciidoc[]
-include::index-shared11.asciidoc[]
 include::index-shared2.asciidoc[]
 include::index-shared3.asciidoc[]
 include::index-shared4.asciidoc[]
 include::index-shared5.asciidoc[]
+include::index-shared6.asciidoc[]
