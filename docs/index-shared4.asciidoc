@@ -1,2 +1,2 @@
 
-include::management.asciidoc[]
+include::console.asciidoc[]

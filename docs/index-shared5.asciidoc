@@ -1,6 +1,2 @@
 
-include::plugins.asciidoc[]
-
-include::development.asciidoc[]
-
-include::release-notes.asciidoc[]
+include::management.asciidoc[]
