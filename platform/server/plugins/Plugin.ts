@@ -55,13 +55,13 @@ export class Plugin<DependenciesType extends BasePluginsType, ExposableType> {
 
   constructor(
     name: PluginName,
-    plugin: KibanaPluginConfig<DependenciesType, ExposableType>,
+    config: KibanaPluginConfig<DependenciesType, ExposableType>,
     logger: LoggerFactory
   ) {
     this.name = name;
-    this.dependencies = plugin.dependencies || [];
-    this.run = plugin.plugin;
-    this.configPath = plugin.configPath;
+    this.dependencies = config.dependencies || [];
+    this.run = config.plugin;
+    this.configPath = config.configPath;
     this.log = logger.get('plugins', name);
   }
 
