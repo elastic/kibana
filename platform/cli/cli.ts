@@ -7,7 +7,7 @@ import { version } from './version';
 import { Env, RawConfigService } from '../config';
 import { Root, OnShutdown } from '../root';
 import { argvToConfigOverrides } from './argvToConfig';
-import { Proxy } from '../server/http/Proxy/Proxy';
+import { ProxyToLegacyPlatform } from '../server/http/ProxyToLegacyPlatform';
 
 export const parseArgv = (argv: Array<string>) =>
   yargs(argv)
@@ -43,12 +43,12 @@ export const run = (argv: { [key: string]: any }) => {
   const root = new Root(rawConfig$, env, onShutdown);
 
   if (argv.kbnServer) {
-    const proxy = (argv.kbnServer.proxy = new Proxy(
-      root.logger.get('proxy'),
-      argv.kbnServer
-    ));
-    proxy.on('platform-start', async () => await root.start());
-    proxy.on('platform-stop', async () => await shutdown());
+    argv.kbnServer.newPlatformProxyListener = new ProxyToLegacyPlatform(
+      root.logger.get('proxy-to-legacy-platform'),
+      argv.kbnServer,
+      async () => await root.start(),
+      async () => await shutdown()
+    );
   } else {
     root.start();
   }

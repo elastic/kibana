@@ -3,7 +3,7 @@ import { map } from 'lodash';
 import secureOptions from './secure_options';
 
 export default function (kbnServer, server, config) {
-  const proxy = kbnServer && kbnServer.proxy;
+  const newPlatformProxyListener = kbnServer && kbnServer.newPlatformProxyListener;
 
   // this mixin is used outside of the kbn server, so it MUST work without a full kbnServer object.
   kbnServer = null;
@@ -28,7 +28,7 @@ export default function (kbnServer, server, config) {
         }
       }
     },
-    listener: proxy
+    listener: newPlatformProxyListener
   };
 
   const useSsl = config.get('server.ssl.enabled');

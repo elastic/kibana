@@ -41,7 +41,7 @@ export class HttpServer {
     const proxy = this.env.getProxy();
     if (proxy) {
       proxy.bind(this.server);
-      port = proxy.getPort();
+      port = proxy.getPort()!;
 
       // We register Kibana proxy middleware right before we start server to allow
       // all new platform plugins register their endpoints, so that kbnServer
