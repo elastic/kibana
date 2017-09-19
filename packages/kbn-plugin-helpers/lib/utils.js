@@ -4,7 +4,17 @@ const pluginConfig = require('./plugin_config');
 
 function babelRegister() {
   const plugin = pluginConfig();
-  require(resolve(plugin.kibanaRoot, 'src/optimize/babel/register'));
+
+  try {
+    // add support for moved babel-register source: https://github.com/elastic/kibana/pull/13973
+    require(resolve(plugin.kibanaRoot, 'src/babel-register'));
+  } catch (error) {
+    if (error.code === 'MODULE_NOT_FOUND') {
+      require(resolve(plugin.kibanaRoot, 'src/optimize/babel/register'));
+    } else {
+      throw error;
+    }
+  }
 }
 
 function resolveKibanaPath(path) {
