@@ -40,6 +40,8 @@ function isKibanaFunctionalPlugin<
   return !isClass(val);
 }
 
+const noop = () => {};
+
 export class Plugin<DependenciesType extends BasePluginsType, ExposableType> {
   readonly name: PluginName;
   readonly dependencies: PluginName[];
@@ -47,7 +49,7 @@ export class Plugin<DependenciesType extends BasePluginsType, ExposableType> {
     | KibanaFunctionalPlugin<DependenciesType, ExposableType>
     | KibanaClassPluginStatic<DependenciesType, ExposableType>;
   readonly configPath?: PluginConfigPath;
-  private onStop: () => void = () => {};
+  private onStop: () => void = noop;
   private exposedValues?: ExposableType;
   private log: Logger;
 
@@ -105,6 +107,7 @@ export class Plugin<DependenciesType extends BasePluginsType, ExposableType> {
   stop() {
     this.log.info('stopping plugin');
     this.onStop();
+    this.onStop = noop;
     this.exposedValues = undefined;
   }
 }
