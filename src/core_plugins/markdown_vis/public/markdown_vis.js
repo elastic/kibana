@@ -38,7 +38,6 @@ function MarkdownVisProvider(Private) {
       showTimePicker: false,
     },
     requestHandler: 'none',
-    responseHandler: 'none',
     implementsRenderComplete: true,
   });
 }

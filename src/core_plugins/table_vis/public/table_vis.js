@@ -78,9 +78,6 @@ function TableVisTypeProvider(Private) {
         }
       ])
     },
-    responseHandlerConfig: {
-      asAggConfigResults: true
-    },
     hierarchicalData: function (vis) {
       return Boolean(vis.params.showPartialRows || vis.params.showMeticsAtAllLevels);
     }
