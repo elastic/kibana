@@ -75,3 +75,20 @@ _Note: The version numbers below are only examples, meant to illustrate the rela
 Please check to make sure someone else hasn't already created an issue for the same topic.
 - Need help using Kibana? Ask away on our [Kibana Discuss Forum](https://discuss.elastic.co/c/kibana) and a fellow community member or
 Elastic engineer will be glad to help you out.
+
+## StatEngine/NFORS styling
+
+To switch between NFORS and StatEngine styling, we use a [symlink](https://kb.iu.edu/d/abbe) in order to create the `/src/ui/theme` folder.  This folder is where a local instance of StatEngine/NFORS will pull assets from when rendering the site.  By default, the symlink is pointed at the `statengine` theme, but it easily switched to another theme (under `/src/ui/themes/`):
+
+```bash
+cd /src/ui/
+rm theme
+ln -s themes/statengine/ theme  # Symlink to the "StatEngine" theme
+# OR
+ln -s themes/nfors/ theme  # Symlink to the "NFORS" theme
+```
+
+Adding additional themes is as simple as creating a new folder under `/src/ui/themes/`, dropping in _at least_ the following assets (using an existing theme as a template) and pointing the symlink at the new theme:
+
+- theme.css
+- text-overrides.js
