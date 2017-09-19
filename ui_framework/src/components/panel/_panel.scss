@@ -1,6 +1,6 @@
 .kuiPanel {
   @include kuiBottomShadowSmall;
-  
+
   background-color: $kuiColorEmptyShade;
   border: $kuiBorderThin;
   border-radius: $kuiBorderRadius;
@@ -17,7 +17,7 @@
     padding: $kuiSizeL;
   }
 
-  &.kuiPanel-hasShadow {
+  &.kuiPanel--shadow {
     @include kuiBottomShadow;
   }
 }

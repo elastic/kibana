@@ -23,7 +23,7 @@ export const KuiPanel = ({
     'kuiPanel',
     paddingSizeToClassNameMap[paddingSize],
     {
-      'kuiPanel-hasShadow': hasShadow,
+      'kuiPanel--shadow': hasShadow,
     },
     className
   );
