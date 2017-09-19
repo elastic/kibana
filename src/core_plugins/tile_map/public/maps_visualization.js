@@ -1,12 +1,12 @@
 import 'ui/vislib';
 import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
+import './editors/wms_options';
 import $ from 'jquery';
 import _ from 'lodash';
 import { KibanaMap } from './kibana_map';
 import { GeohashLayer } from './geohash_layer';
 import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
-// import './lib/service_settings';
 import 'ui/vis/map/service_settings';
 import './styles/_tilemap.less';
 
