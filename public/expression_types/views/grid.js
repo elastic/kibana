@@ -13,6 +13,10 @@ export const grid = () => new View('grid', {
       argType: 'shape',
       defaultValue: 'circle',
     }),
+    new Arg('palette', {
+      displayName: 'Palette',
+      argType: 'palette',
+    }),
     new Arg('seriesStyle', {
       displayName: 'Series Style',
       argType: 'seriesStyle',
