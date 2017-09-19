@@ -14,10 +14,11 @@ export default new Fn({
       types: ['string'],
       help: 'Markdown context',
       default: '',
+      multi: true,
     },
   },
   fn: (context, args) => {
-    const render = Handlebars.compile(args._);
+    const compileFunctions = args._.map(str => Handlebars.compile(String(str)));
     const ctx = Object.assign({
       columns: [],
       rows: [],
@@ -27,7 +28,7 @@ export default new Fn({
     return {
       type: 'render',
       as: 'markdown',
-      value: render(ctx),
+      value: compileFunctions.map(fn => fn(ctx)).join(''),
     };
   },
 });
