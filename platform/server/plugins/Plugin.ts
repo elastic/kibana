@@ -2,13 +2,13 @@ import {
   BasePluginsType,
   KibanaFunctionalPlugin,
   KibanaClassPluginStatic,
-  PluginName
+  KibanaPluginConfig,
+  PluginName,
+  PluginConfigPath
 } from './types';
 import { KibanaCoreModules } from './KibanaCoreModules';
 import { Logger, LoggerFactory } from '../../logging';
 import { createKibanaValuesForPlugin } from './KibanaPluginValues';
-
-type LifecycleCallback = () => void;
 
 // `isClass` is forked from https://github.com/miguelmota/is-class/blob/master/is-class.js
 // MIT licensed, copyright 2014 Miguel Mota
@@ -40,14 +40,7 @@ function isKibanaFunctionalPlugin<
   return !isClass(val);
 }
 
-interface PluginDefinition<DependenciesType, ExposableType> {
-  name: string;
-  dependencies: string[];
-  run:
-    | KibanaFunctionalPlugin<DependenciesType, ExposableType>
-    | KibanaClassPluginStatic<DependenciesType, ExposableType>;
-  configPath?: string | string[];
-}
+const noop = () => {};
 
 export class Plugin<DependenciesType extends BasePluginsType, ExposableType> {
   readonly name: PluginName;
@@ -55,21 +48,21 @@ export class Plugin<DependenciesType extends BasePluginsType, ExposableType> {
   private readonly run:
     | KibanaFunctionalPlugin<DependenciesType, ExposableType>
     | KibanaClassPluginStatic<DependenciesType, ExposableType>;
-  readonly configPath: string | string[] | undefined;
-
-  private stopCallbacks: LifecycleCallback[] = [];
+  readonly configPath?: PluginConfigPath;
+  private onStop: () => void = noop;
   private exposedValues?: ExposableType;
   private log: Logger;
 
   constructor(
-    pluginDefinition: PluginDefinition<DependenciesType, ExposableType>,
+    name: PluginName,
+    config: KibanaPluginConfig<DependenciesType, ExposableType>,
     logger: LoggerFactory
   ) {
-    this.name = pluginDefinition.name as PluginName;
-    this.dependencies = pluginDefinition.dependencies as PluginName[];
-    this.run = pluginDefinition.run;
-    this.configPath = pluginDefinition.configPath;
-    this.log = logger.get('plugins', pluginDefinition.name);
+    this.name = name;
+    this.dependencies = config.dependencies || [];
+    this.run = config.plugin;
+    this.configPath = config.configPath;
+    this.log = logger.get('plugins', name);
   }
 
   getExposedValues(): ExposableType {
@@ -98,12 +91,9 @@ export class Plugin<DependenciesType extends BasePluginsType, ExposableType> {
     if (isKibanaFunctionalPlugin(this.run)) {
       value = this.run.call(null, kibanaValues, dependenciesValues);
     } else {
-      const r = new this.run(kibanaValues, dependenciesValues);
-      value = r.start();
-
-      this.onStop(() => {
-        r.stop && r.stop();
-      });
+      const pluginInstance = new this.run(kibanaValues, dependenciesValues);
+      value = pluginInstance.start();
+      this.onStop = () => pluginInstance.stop && pluginInstance.stop();
     }
 
     // TODO throw if then-able? To make sure no one async/awaits while processing the plugin?
@@ -111,17 +101,13 @@ export class Plugin<DependenciesType extends BasePluginsType, ExposableType> {
     //   throw new Error('plugin cannot return a promise')
     // }
 
-    this.exposedValues =
-      typeof value === 'undefined' ? {} as ExposableType : value;
-  }
-
-  private onStop(cb: LifecycleCallback) {
-    this.stopCallbacks.push(cb);
+    this.exposedValues = value === undefined ? {} as ExposableType : value;
   }
 
   stop() {
     this.log.info('stopping plugin');
-    this.stopCallbacks.forEach(cb => cb());
+    this.onStop();
+    this.onStop = noop;
     this.exposedValues = undefined;
   }
 }

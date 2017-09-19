@@ -1,7 +1,7 @@
 import { KibanaPluginFeatures } from './KibanaPluginFeatures';
-import { As } from '../../types/as';
 
-export type PluginName = string & As<'PluginName'>;
+export type PluginName = string;
+export type PluginConfigPath = string | string[];
 
 export interface BasePluginsType {
   [key: string]: any;
@@ -11,8 +11,8 @@ export type KibanaPluginConfig<
   DependenciesType extends BasePluginsType,
   ExposableType = void
 > = {
-  configPath?: string | Array<string>;
-  dependencies?: Array<string>;
+  configPath?: PluginConfigPath;
+  dependencies?: PluginName[];
   plugin:
     | KibanaFunctionalPlugin<DependenciesType, ExposableType>
     | KibanaClassPluginStatic<DependenciesType, ExposableType>;
