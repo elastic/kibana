@@ -1,6 +1,8 @@
 import {uiModules} from 'ui/modules';
 import regionMapVisParamsTemplate from './region_map_vis_params.html';
 import {mapToLayerWithId} from './util';
+import '../../tile_map/public/editors/wms_options';
+import _ from 'lodash';
 
 uiModules.get('kibana/region_map')
   .directive('regionMapVisParams', function (serviceSettings, regionmapsConfig, Notifier) {
