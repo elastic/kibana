@@ -136,7 +136,8 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
       $scope.vis.API.events.filter({ point: { aggConfigResult: aggConfigResult } });
     });
     choroplethLayer.on('styleChanged', function (event) {
-      if (event.mismatches.length > 0 && config.get('visualization:regionmap:showWarnings')) {
+      const shouldShowWarning = $scope.vis.params.isDisplayWarning && config.get('visualization:regionmap:showWarnings');
+      if (event.mismatches.length > 0 && shouldShowWarning) {
         notify.warning(
           `Could not show ${event.mismatches.length} ${event.mismatches.length > 1 ? 'results' : 'result'} on the map.`
             + ` To avoid this, ensure that each term can be joined to a corresponding shape on that shape's join field.`

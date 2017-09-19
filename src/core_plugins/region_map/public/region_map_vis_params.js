@@ -43,7 +43,9 @@ uiModules.get('kibana/region_map')
 
           })
           .catch(function (error) {
-            notify.warning(error.message);
+            if ($scope.vis.params.isDisplayWarning) {
+              notify.warning(error.message);
+            }
           });
 
         function onLayerChange() {
