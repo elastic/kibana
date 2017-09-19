@@ -39,7 +39,8 @@ module.exports = function (grunt) {
     'jenkins:env',
     'rejectRejFiles',
 
-    'test:uiRelease'
+    'test:uiRelease',
+    'aws_s3:ci'
   ]);
 
 };
