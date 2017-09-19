@@ -168,7 +168,7 @@
     "babel-eslint": "4.1.8",
     "chai": "3.5.0",
     "chokidar": "1.6.0",
-    "chromedriver": "2.24.1",
+    "chromedriver": "2.32.3",
     "elasticdump": "2.1.1",
     "eslint": "1.10.3",
     "eslint-plugin-mocha": "1.1.0",
