@@ -140,7 +140,9 @@ Tooltip.prototype.render = function () {
       const element = d3.select(this);
 
       function render(html) {
-        allContents = _.filter(allContents, function (content) {
+        $tooltip.html(html);
+        self.show();
+        /*allContents = _.filter(allContents, function (content) {
           return content.id !== id;
         });
 
@@ -157,10 +159,10 @@ Tooltip.prototype.render = function () {
           self.show();
         } else {
           self.hide();
-        }
+        }*/
       }
 
-      self.binder.fakeD3Bind(this, 'mousemove', function () {
+      self.binder.fakeD3Bind(this, 'mouseenter', function () {
         if (!self.showCondition.call(element, d, i)) {
           return render();
         }
@@ -170,7 +172,7 @@ Tooltip.prototype.render = function () {
       });
 
       self.binder.fakeD3Bind(this, 'mouseleave', function () {
-        render();
+        //render();
       });
     });
   };

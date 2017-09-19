@@ -5,10 +5,12 @@ import { arrayToLinkedList } from 'ui/agg_response/hierarchical/_array_to_linked
 import AggConfigResult from 'ui/vis/agg_config_result';
 import { AggResponseHierarchicalBuildSplitProvider } from 'ui/agg_response/hierarchical/_build_split';
 import { HierarchicalTooltipFormatterProvider } from 'ui/agg_response/hierarchical/_hierarchical_tooltip_formatter';
+import { EmbeddedTooltipFormatterProvider } from 'ui/agg_response/_embedded_tooltip_formatter';
 
 export function BuildHierarchicalDataProvider(Private, Notifier) {
   const buildSplit = Private(AggResponseHierarchicalBuildSplitProvider);
   const tooltipFormatter = Private(HierarchicalTooltipFormatterProvider);
+  const embeddedTooltipFormatter = Private(EmbeddedTooltipFormatterProvider);
 
 
   const notify = new Notifier({
@@ -41,7 +43,7 @@ export function BuildHierarchicalDataProvider(Private, Notifier) {
         hits: resp.hits.total,
         raw: raw,
         names: [label],
-        tooltipFormatter: tooltipFormatter(raw.columns),
+        tooltipFormatter: embeddedTooltipFormatter(vis),
         slices: {
           children: [
             { name: label, size: value }
@@ -62,7 +64,7 @@ export function BuildHierarchicalDataProvider(Private, Notifier) {
       const split = buildSplit(firstAgg, metric, aggData);
       split.hits = resp.hits.total;
       split.raw = raw;
-      split.tooltipFormatter = tooltipFormatter(raw.columns);
+      split.tooltipFormatter = embeddedTooltipFormatter(vis);
       return split;
     }
 
@@ -76,7 +78,7 @@ export function BuildHierarchicalDataProvider(Private, Notifier) {
       const displayName = firstAgg.getFieldDisplayName();
       if (!_.isEmpty(displayName)) split.label += ': ' + displayName;
 
-      split.tooltipFormatter = tooltipFormatter(raw.columns);
+      split.tooltipFormatter = embeddedTooltipFormatter(vis);
       const aggConfigResult = new AggConfigResult(firstAgg, null, null, firstAgg.getKey(bucket));
       split.split = { aggConfig: firstAgg, aggConfigResult: aggConfigResult, key: bucket.key };
       _.each(split.slices.children, function (child) {

@@ -39,7 +39,18 @@ export default function HistogramVisType(Private) {
           text: 'bottom',
         }],
       },
-      optionsTemplate: pieTemplate,
+      optionTabs: [
+        {
+          name: 'options',
+          title: 'Options',
+          editor: pieTemplate
+        },
+        {
+          name: 'tooltip',
+          title: 'Tooltip',
+          editor: pieTemplate
+        }
+      ],
       schemas: new Schemas([
         {
           group: 'metrics',
