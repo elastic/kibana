@@ -17,12 +17,10 @@ describe('Controller', function () {
   let Vis;
   let fixtures;
   let AppState;
-  let tabify;
 
   beforeEach(ngMock.module('kibana', 'kibana/table_vis'));
   beforeEach(ngMock.inject(function ($injector) {
     Private = $injector.get('Private');
-    tabify = Private(AggResponseTabifyProvider);
     $rootScope = $injector.get('$rootScope');
     $compile = $injector.get('$compile');
     fixtures = require('fixtures/fake_hierarchical_data');
@@ -72,7 +70,7 @@ describe('Controller', function () {
 
   // put a response into the controller
   function attachEsResponseToScope(resp) {
-    $rootScope.esResponse = resp;
+    $rootScope.esResponse = resp || fixtures.oneRangeBucket;
     $rootScope.$apply();
   }
 
@@ -83,13 +81,12 @@ describe('Controller', function () {
   }
 
   it('exposes #tableGroups and #hasSomeRows when a response is attached to scope', function () {
-    const vis = new OneRangeVis();
-    initController(vis);
+    initController(new OneRangeVis());
 
     expect(!$scope.tableGroups).to.be.ok();
     expect(!$scope.hasSomeRows).to.be.ok();
 
-    attachEsResponseToScope(tabify(vis, fixtures.oneRangeBucket));
+    attachEsResponseToScope(fixtures.oneRangeBucket);
 
     expect($scope.hasSomeRows).to.be(true);
     expect($scope.tableGroups).to.have.property('tables');
@@ -99,10 +96,9 @@ describe('Controller', function () {
   });
 
   it('clears #tableGroups and #hasSomeRows when the response is removed', function () {
-    const vis = new OneRangeVis();
-    initController(vis);
+    initController(new OneRangeVis());
 
-    attachEsResponseToScope(tabify(vis, fixtures.oneRangeBucket));
+    attachEsResponseToScope(fixtures.oneRangeBucket);
     removeEsResponseFromScope();
 
     expect(!$scope.hasSomeRows).to.be.ok();
@@ -114,28 +110,26 @@ describe('Controller', function () {
       columnIndex: 1,
       direction: 'asc'
     };
-    const vis = new OneRangeVis({ sort: sortObj });
-    initController(vis);
+    initController(new OneRangeVis({ sort: sortObj }));
 
     // modify the data to not have any buckets
     const resp = _.cloneDeep(fixtures.oneRangeBucket);
     resp.aggregations.agg_2.buckets = {};
 
-    attachEsResponseToScope(tabify(vis, resp));
+    attachEsResponseToScope(resp);
 
     expect($scope.sort.columnIndex).to.equal(sortObj.columnIndex);
     expect($scope.sort.direction).to.equal(sortObj.direction);
   });
 
   it('sets #hasSomeRows properly if the table group is empty', function () {
-    const vis = new OneRangeVis();
-    initController(vis);
+    initController(new OneRangeVis());
 
     // modify the data to not have any buckets
     const resp = _.cloneDeep(fixtures.oneRangeBucket);
     resp.aggregations.agg_2.buckets = {};
 
-    attachEsResponseToScope(tabify(vis, resp));
+    attachEsResponseToScope(resp);
 
     expect($scope.hasSomeRows).to.be(false);
     expect(!$scope.tableGroups).to.be.ok();
@@ -148,10 +142,10 @@ describe('Controller', function () {
 
     const vis = new OneRangeVis({ showPartialRows: true });
     initController(vis);
-    attachEsResponseToScope(spiedTabify(vis, fixtures.oneRangeBucket));
+    attachEsResponseToScope(fixtures.oneRangeBucket);
 
     expect(spiedTabify).to.have.property('callCount', 1);
-    expect(spiedTabify.firstCall.args[0].isHierarchical()).to.equal(true);
+    expect(spiedTabify.firstCall.args[2]).to.have.property('partialRows', true);
   });
 
   it('passes partialRows:false to tabify based on the vis params', function () {
@@ -161,10 +155,10 @@ describe('Controller', function () {
 
     const vis = new OneRangeVis({ showPartialRows: false });
     initController(vis);
-    attachEsResponseToScope(spiedTabify(vis, fixtures.oneRangeBucket));
+    attachEsResponseToScope(fixtures.oneRangeBucket);
 
     expect(spiedTabify).to.have.property('callCount', 1);
-    expect(spiedTabify.firstCall.args[0].isHierarchical()).to.equal(false);
+    expect(spiedTabify.firstCall.args[2]).to.have.property('partialRows', false);
   });
 
   it('passes partialRows:true to tabify based on the vis params', function () {
