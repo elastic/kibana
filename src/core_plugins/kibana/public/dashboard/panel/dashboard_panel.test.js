@@ -1,4 +1,5 @@
 import React from 'react';
+import _ from 'lodash';
 import { mount } from 'enzyme';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { DashboardPanel } from './dashboard_panel';
@@ -33,7 +34,7 @@ function getProps(props = {}) {
     onToggleExpanded: () => {},
     onDeletePanel: () => {}
   };
-  return Object.assign(props, defaultTestProps);
+  return _.defaultsDeep(props, defaultTestProps);
 }
 
 test('DashboardPanel matches snapshot', () => {
