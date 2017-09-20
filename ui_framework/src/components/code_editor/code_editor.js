@@ -10,13 +10,13 @@ export class KuiCodeEditor extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      hintInactive: false
+      isHintActive: true
     };
     this.idGenerator = htmlIdGenerator();
   }
 
   enableOverlay() {
-    this.setState({ hintInactive: false });
+    this.setState({ isHintActive: true });
   }
 
   onKeydownAce = (ev) => {
@@ -51,14 +51,14 @@ export class KuiCodeEditor extends Component {
   };
 
   startEditing = () => {
-    this.setState({ hintInactive: true });
+    this.setState({ isHintActive: false });
     this.aceEditor.editor.textInput.focus();
   }
 
   render() {
     const { width, height } = this.props;
     const classes = classNames('kuiCodeEditorKeyboardHint', {
-      'kuiCodeEditorKeyboardHint-isInactive': this.state.hintInactive
+      'kuiCodeEditorKeyboardHint-isInactive': !this.state.isHintActive
     });
     return (
       <div
