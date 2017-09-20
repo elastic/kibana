@@ -112,6 +112,10 @@ dashboard-grid {
   i.remove {
     cursor: pointer;
   }
+
+  .gs-w {
+    z-index: auto;
+  }
 }
 
 .panel {
@@ -134,6 +138,7 @@ dashboard-grid {
 /**
  * 1. Fix Firefox bug where a value of overflow: hidden will prevent scrolling in a panel where the spy panel does
  * not have enough room.
+ * 2. react-select used in input control vis needs `visible` overflow to avoid clipping selection list
  */
 dashboard-panel {
   flex: 1;
@@ -144,7 +149,8 @@ dashboard-panel {
   background: @dashboard-panel-bg;
   color: @dashboard-panel-color;
   padding: 0;
-  overflow: auto; /* 1 */
+  overflow: visible; /* 1, 2 */
+
   position: relative;
 
   .panel {
