@@ -1,0 +1,95 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders ControlsTab 1`] = `
+<div>
+  <ControlEditor
+    controlIndex={0}
+    controlParams={
+      Object {
+        "fieldName": "keywordField",
+        "id": "1",
+        "indexPattern": "indexPattern1",
+        "label": "custom label",
+        "options": Object {
+          "multiselect": true,
+          "order": "desc",
+          "size": 5,
+          "type": "terms",
+        },
+        "type": "list",
+      }
+    }
+    getIndexPattern={[Function]}
+    getIndexPatterns={[Function]}
+    handleCheckboxOptionChange={[Function]}
+    handleFieldNameChange={[Function]}
+    handleIndexPatternChange={[Function]}
+    handleLabelChange={[Function]}
+    handleNumberOptionChange={[Function]}
+    handleRemoveControl={[Function]}
+    moveControl={[Function]}
+  />
+  <ControlEditor
+    controlIndex={1}
+    controlParams={
+      Object {
+        "fieldName": "numberField",
+        "id": "2",
+        "indexPattern": "indexPattern1",
+        "label": "",
+        "options": Object {
+          "step": 1,
+        },
+        "type": "range",
+      }
+    }
+    getIndexPattern={[Function]}
+    getIndexPatterns={[Function]}
+    handleCheckboxOptionChange={[Function]}
+    handleFieldNameChange={[Function]}
+    handleIndexPatternChange={[Function]}
+    handleLabelChange={[Function]}
+    handleNumberOptionChange={[Function]}
+    handleRemoveControl={[Function]}
+    moveControl={[Function]}
+  />
+  <div
+    className="kuiSideBarFormRow"
+  >
+    <div
+      className="kuiSideBarFormRow__control kuiFieldGroupSection--wide"
+    >
+      <select
+        aria-label="Select control type"
+        className="kuiSelect"
+        onChange={[Function]}
+        value="list"
+      >
+        <option
+          value="range"
+        >
+          Range slider
+        </option>
+        <option
+          value="list"
+        >
+          Options list
+        </option>
+      </select>
+    </div>
+    <KuiButton
+      buttonType="primary"
+      data-test-subj="inputControlEditorAddBtn"
+      icon={
+        <KuiButtonIcon
+          type="create"
+        />
+      }
+      onClick={[Function]}
+      type="button"
+    >
+      Add
+    </KuiButton>
+  </div>
+</div>
+`;

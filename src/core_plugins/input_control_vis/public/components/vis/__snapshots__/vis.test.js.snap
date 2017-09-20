@@ -1,0 +1,323 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
+<div
+  className="inputControlVis"
+>
+  <div
+    data-test-subj="inputControl0"
+  >
+    <ListControl
+      control={
+        Object {
+          "getMultiSelectDelimiter": [Function],
+          "id": "mock-list-control",
+          "label": "list control",
+          "options": Object {
+            "multiselect": true,
+            "type": "terms",
+          },
+          "selectOptions": Array [
+            Object {
+              "label": "choice1",
+              "value": "choice1",
+            },
+            Object {
+              "label": "choice2",
+              "value": "choice2",
+            },
+          ],
+          "type": "list",
+          "value": "",
+        }
+      }
+      controlIndex={0}
+      stageFilter={[Function]}
+    />
+  </div>
+  <KuiFieldGroup
+    className="actions"
+    isAlignedTop={false}
+  >
+    <KuiFieldGroupSection
+      isWide={false}
+    >
+      <KuiButton
+        buttonType="primary"
+        data-test-subj="inputControlSubmitBtn"
+        disabled={false}
+        onClick={[Function]}
+        type="button"
+      >
+        Apply changes
+      </KuiButton>
+    </KuiFieldGroupSection>
+    <KuiFieldGroupSection
+      isWide={false}
+    >
+      <KuiButton
+        buttonType="basic"
+        data-test-subj="inputControlCancelBtn"
+        disabled={false}
+        onClick={[Function]}
+        type="button"
+      >
+        Cancel changes
+      </KuiButton>
+    </KuiFieldGroupSection>
+    <KuiFieldGroupSection
+      isWide={false}
+    >
+      <KuiButton
+        buttonType="basic"
+        data-test-subj="inputControlClearBtn"
+        disabled={true}
+        onClick={[Function]}
+        type="button"
+      >
+        Clear form
+      </KuiButton>
+    </KuiFieldGroupSection>
+  </KuiFieldGroup>
+</div>
+`;
+
+exports[`Clear btns enabled when there are values 1`] = `
+<div
+  className="inputControlVis"
+>
+  <div
+    data-test-subj="inputControl0"
+  >
+    <ListControl
+      control={
+        Object {
+          "getMultiSelectDelimiter": [Function],
+          "id": "mock-list-control",
+          "label": "list control",
+          "options": Object {
+            "multiselect": true,
+            "type": "terms",
+          },
+          "selectOptions": Array [
+            Object {
+              "label": "choice1",
+              "value": "choice1",
+            },
+            Object {
+              "label": "choice2",
+              "value": "choice2",
+            },
+          ],
+          "type": "list",
+          "value": "",
+        }
+      }
+      controlIndex={0}
+      stageFilter={[Function]}
+    />
+  </div>
+  <KuiFieldGroup
+    className="actions"
+    isAlignedTop={false}
+  >
+    <KuiFieldGroupSection
+      isWide={false}
+    >
+      <KuiButton
+        buttonType="primary"
+        data-test-subj="inputControlSubmitBtn"
+        disabled={true}
+        onClick={[Function]}
+        type="button"
+      >
+        Apply changes
+      </KuiButton>
+    </KuiFieldGroupSection>
+    <KuiFieldGroupSection
+      isWide={false}
+    >
+      <KuiButton
+        buttonType="basic"
+        data-test-subj="inputControlCancelBtn"
+        disabled={true}
+        onClick={[Function]}
+        type="button"
+      >
+        Cancel changes
+      </KuiButton>
+    </KuiFieldGroupSection>
+    <KuiFieldGroupSection
+      isWide={false}
+    >
+      <KuiButton
+        buttonType="basic"
+        data-test-subj="inputControlClearBtn"
+        disabled={false}
+        onClick={[Function]}
+        type="button"
+      >
+        Clear form
+      </KuiButton>
+    </KuiFieldGroupSection>
+  </KuiFieldGroup>
+</div>
+`;
+
+exports[`Renders list control 1`] = `
+<div
+  className="inputControlVis"
+>
+  <div
+    data-test-subj="inputControl0"
+  >
+    <ListControl
+      control={
+        Object {
+          "getMultiSelectDelimiter": [Function],
+          "id": "mock-list-control",
+          "label": "list control",
+          "options": Object {
+            "multiselect": true,
+            "type": "terms",
+          },
+          "selectOptions": Array [
+            Object {
+              "label": "choice1",
+              "value": "choice1",
+            },
+            Object {
+              "label": "choice2",
+              "value": "choice2",
+            },
+          ],
+          "type": "list",
+          "value": "",
+        }
+      }
+      controlIndex={0}
+      stageFilter={[Function]}
+    />
+  </div>
+  <KuiFieldGroup
+    className="actions"
+    isAlignedTop={false}
+  >
+    <KuiFieldGroupSection
+      isWide={false}
+    >
+      <KuiButton
+        buttonType="primary"
+        data-test-subj="inputControlSubmitBtn"
+        disabled={true}
+        onClick={[Function]}
+        type="button"
+      >
+        Apply changes
+      </KuiButton>
+    </KuiFieldGroupSection>
+    <KuiFieldGroupSection
+      isWide={false}
+    >
+      <KuiButton
+        buttonType="basic"
+        data-test-subj="inputControlCancelBtn"
+        disabled={true}
+        onClick={[Function]}
+        type="button"
+      >
+        Cancel changes
+      </KuiButton>
+    </KuiFieldGroupSection>
+    <KuiFieldGroupSection
+      isWide={false}
+    >
+      <KuiButton
+        buttonType="basic"
+        data-test-subj="inputControlClearBtn"
+        disabled={true}
+        onClick={[Function]}
+        type="button"
+      >
+        Clear form
+      </KuiButton>
+    </KuiFieldGroupSection>
+  </KuiFieldGroup>
+</div>
+`;
+
+exports[`Renders range control 1`] = `
+<div
+  className="inputControlVis"
+>
+  <div
+    data-test-subj="inputControl0"
+  >
+    <RangeControl
+      control={
+        Object {
+          "id": "mock-range-control",
+          "label": "ragne control",
+          "max": 100,
+          "min": 0,
+          "options": Object {
+            "decimalPlaces": 0,
+            "step": 1,
+          },
+          "type": "range",
+          "value": Object {
+            "max": 0,
+            "min": 0,
+          },
+        }
+      }
+      controlIndex={0}
+      stageFilter={[Function]}
+    />
+  </div>
+  <KuiFieldGroup
+    className="actions"
+    isAlignedTop={false}
+  >
+    <KuiFieldGroupSection
+      isWide={false}
+    >
+      <KuiButton
+        buttonType="primary"
+        data-test-subj="inputControlSubmitBtn"
+        disabled={true}
+        onClick={[Function]}
+        type="button"
+      >
+        Apply changes
+      </KuiButton>
+    </KuiFieldGroupSection>
+    <KuiFieldGroupSection
+      isWide={false}
+    >
+      <KuiButton
+        buttonType="basic"
+        data-test-subj="inputControlCancelBtn"
+        disabled={true}
+        onClick={[Function]}
+        type="button"
+      >
+        Cancel changes
+      </KuiButton>
+    </KuiFieldGroupSection>
+    <KuiFieldGroupSection
+      isWide={false}
+    >
+      <KuiButton
+        buttonType="basic"
+        data-test-subj="inputControlClearBtn"
+        disabled={true}
+        onClick={[Function]}
+        type="button"
+      >
+        Clear form
+      </KuiButton>
+    </KuiFieldGroupSection>
+  </KuiFieldGroup>
+</div>
+`;

@@ -26,9 +26,9 @@ export function TestSubjectsProvider({ getService }) {
       });
     }
 
-    async click(selector) {
+    async click(selector, timeout = defaultFindTimeout) {
       return await retry.try(async () => {
-        const element = await this.find(selector);
+        const element = await this.find(selector, timeout);
         await remote.moveMouseTo(element);
         await element.click();
       });
