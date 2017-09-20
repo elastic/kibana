@@ -1,0 +1,32 @@
+@import (reference) "../../style/main";
+
+.canvas__asset-manager {
+
+  .canvas__asset-manager--thumb {
+    display: inline-block;
+    position: relative;
+    height: 200px;
+    width: 200px;
+    border-radius: @borderRadius;
+    border: @borderStyle;
+    margin-right: @spacingM;
+    background-color: @lightestGrey;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .canvas__asset-manager--remove {
+    position: absolute;
+    top: @spacingXS;
+    right: @spacingXS;
+    color: @colorDanger;
+    font-size: 20px;
+    cursor: pointer;
+
+    &:hover {
+      color: @colorDangerHover;
+    }
+  }
+
+}
