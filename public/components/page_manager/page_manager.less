@@ -1,0 +1,63 @@
+@import (reference) "../../style/variables";
+
+.canvas__page-manager {
+  .canvas__page-manager--pages {
+    white-space: nowrap;
+    overflow-y: hidden;
+    overflow-x: auto;
+    max-height: 148px;
+    padding: @spacingS;
+    margin-bottom: @spacingS;
+  }
+
+  .canvas__page-manager--page {
+    display: inline-block;
+    vertical-align: top;
+    width: 77px;
+    height: 100px;
+    margin: 0px @spacingS @spacingM;
+
+    .body {
+      background-color: @lightGrey;
+      color: @darkestGrey;
+      font-weight: bold;
+      font-size: @textMedium;
+      text-align: center;
+      border: 2px solid @darkGrey;
+      width: 100%;
+      height: 100%;
+    }
+
+    .body.selected {
+      background-color: @trueWhite;
+      color: @trueBlack;
+    }
+  }
+
+  .canvas__page-manager--page-controls {
+    text-align: center;
+
+    > * {
+      padding: @spacingXS;
+    }
+
+    .delete,
+    .duplicate {
+      font-size: @textMedium;
+    }
+
+    .delete {
+      color: @red;
+    }
+
+    .duplicate {
+      color: @blue;
+    }
+  }
+
+  .canvas__page-manager--controls {
+    button {
+      margin-left: @spacingS;
+    }
+  }
+}

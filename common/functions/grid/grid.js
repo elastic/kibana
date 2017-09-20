@@ -20,7 +20,6 @@ export default new Fn({
     mark: {
       types: ['string', 'null'],
       help: 'The icon name to use for marks in the grid',
-      default: 'circle',
     },
     palette: {
       types: ['palette', 'null'],
@@ -94,6 +93,7 @@ export default new Fn({
       as: 'grid',
       value: {
         mark: args.mark,
+        palette: args.palette,
         columns: resultColumns,
         rows: sortBy(resultRows, 'label'),
         summary,

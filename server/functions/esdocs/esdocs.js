@@ -24,11 +24,9 @@ export default new Fn({
       types: ['string'],
       help: 'Sort directions as "field, direction". Eg "@timestamp, desc" or "bytes, asc"',
     },
-    // TODO: This doesn't work
     fields: {
       help: 'Comma seperated list of fields. Fewer fields will perform better.',
       types: ['string'],
-      default: '',
     },
   },
   type: 'datatable',
@@ -47,10 +45,11 @@ export default new Fn({
       return [{ [sort[0]]: sort[1] }];
     }
 
+    const fields = args.fields && args.fields.split(',').map(str => str.trim());
     const esRequest = buildESRequest({
       index: args.index,
       body: {
-        _source: args.fields ? args.fields.split(',').map(str => str.trim()) : undefined,
+        _source: fields,
         sort: getSort(),
         query: {
           bool: {

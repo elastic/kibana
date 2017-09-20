@@ -1,3 +1,6 @@
+@import (reference) "../../style/variables.less";
+
+
 .canvas__element--grid {
   padding: 10px;
 
@@ -12,12 +15,23 @@
     font-weight: 100;
   }
 
+  .canvas__element--grid-block {
+    margin: @spacingXS;
+    display: inline-block;
+
+    .fa {
+      display: block;
+      font-size: 2em;
+    }
+  }
+
   th.canvas__element--grid-label {
     text-align: center;
   }
 
   td:not(.canvas__element--grid-label) {
     text-align: center;
+    vertical-align: top;
   }
 
   tr {

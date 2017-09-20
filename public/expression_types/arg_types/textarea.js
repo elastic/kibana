@@ -6,27 +6,33 @@ import { get } from 'lodash';
 import { statefulProp } from '../../lib/stateful_component';
 import { compose, withProps } from 'recompose';
 
-const component = ({ updateValue, value, confirm, commit }) => (
-  <div>
-    <FormGroup>
-      <FormControl
-        spellCheck={false}
-        componentClass="textarea"
-        style={{ height: 200 }}
-        value={value}
-        onChange={confirm ? updateValue : (ev) => commit(ev.target.value)}
-      />
-    </FormGroup>
+const component = ({ updateValue, value, confirm, commit, renderError }) => {
 
-    {confirm && (<Button bsStyle="primary" bsSize="xsmall" onClick={() => commit(value)}>{confirm}</Button>)}
-  </div>
-);
+  if (typeof value !== 'string') renderError();
+
+  return (
+    <div>
+      <FormGroup>
+        <FormControl
+          spellCheck={false}
+          componentClass="textarea"
+          style={{ height: 200 }}
+          value={value}
+          onChange={confirm ? updateValue : (ev) => commit(ev.target.value)}
+        />
+      </FormGroup>
+
+      {confirm && (<Button bsStyle="primary" bsSize="xsmall" onClick={() => commit(value)}>{confirm}</Button>)}
+    </div>
+  );
+};
 
 component.propTypes = {
   updateValue: PropTypes.func.isRequired,
   value: PropTypes.string.isRequired,
   confirm: PropTypes.string,
   commit: PropTypes.func.isRequired,
+  renderError: PropTypes.function,
 };
 
 const template = compose(

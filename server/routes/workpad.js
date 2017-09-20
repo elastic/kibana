@@ -1,6 +1,6 @@
 import boom from 'boom';
-import uuid from 'uuid/v4';
 import { INDEX_WORKPAD_SUFFIX, CANVAS_TYPE, API_ROUTE_WORKPAD } from '../../common/lib/constants';
+import { getId } from '../../public/lib/get_id.js';
 
 export function workpad(server) {
   const config = server.config();
@@ -24,7 +24,7 @@ export function workpad(server) {
       refresh: 'wait_for',
       index: indexName,
       type: CANVAS_TYPE,
-      id: id || request.payload.id || `workpad-${uuid()}`,
+      id: id || request.payload.id || getId('workpad'),
       body: {
         ...request.payload,
         '@timestamp': now,

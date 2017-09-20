@@ -1,12 +1,8 @@
-import uuid from 'uuid/v4';
-
-function getID(type) {
-  return `${type}-${uuid()}`;
-}
+import { getId } from '../lib/get_id.js';
 
 export const getDefaultElement = () => {
   return {
-    id: getID('element'),
+    id: getId('element'),
     position: {
       top: 20,
       left: 20,
@@ -17,7 +13,7 @@ export const getDefaultElement = () => {
     expression: `
       demodata
       | pointseries y="median(cost)" x=time color="project"
-      | plot defaultStyle={seriesStyle points=5} 
+      | plot defaultStyle={seriesStyle points=5}
     `,
     filter: null,
   };
@@ -25,7 +21,7 @@ export const getDefaultElement = () => {
 
 export const getDefaultPage = () => {
   return {
-    id: getID('page'),
+    id: getId('page'),
     style: {
       background: '#fff',
     },
@@ -37,7 +33,7 @@ export const getDefaultWorkpad = () => {
   const page = getDefaultPage();
   return {
     name: 'Untitled Workpad',
-    id: getID('workpad'),
+    id: getId('workpad'),
     width: 600,
     height: 720,
     page: 0,

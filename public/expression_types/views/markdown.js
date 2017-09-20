@@ -14,6 +14,7 @@ export const markdown = () => new View('markdown', {
       options: {
         confirm: 'Apply',
       },
+      multi: true,
     }),
     new Arg('font', {
       displayName: 'Text settings',
