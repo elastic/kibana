@@ -11,6 +11,7 @@ export const KuiTabs = ({
 
   return (
     <div
+      role="tablist"
       className={classes}
       {...rest}
     >
