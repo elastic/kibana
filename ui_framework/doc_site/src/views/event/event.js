@@ -11,7 +11,7 @@ import {
 export default () => (
   <KuiEvent>
     <KuiEventSymbol>
-      <span className="kuiIcon kuiIcon--error fa-warning" />
+      <span className="kuiIcon kuiIcon--error fa-warning" aria-label="Warning" role="img"/>
     </KuiEventSymbol>
 
     <KuiEventBody>
