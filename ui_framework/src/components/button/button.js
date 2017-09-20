@@ -71,8 +71,8 @@ const KuiButton = ({
   children,
   ...rest
 }) => {
-  if (!children && !rest['aria-label']) {
-    console.error('Specify aria-label on <KuiButton/> if it does not have children.');
+  if (!children && !rest['aria-label'] && !rest['aria-labelledby']) {
+    console.error('Specify aria-label or aria-labelledby on <KuiButton/> if it does not have children.');
   }
   return (
     <button
@@ -119,8 +119,8 @@ const KuiLinkButton = ({
     }
   };
 
-  if (!children && !rest['aria-label']) {
-    console.error('Specify aria-label on <KuiLinkButton/> if it does not have children.');
+  if (!children && !rest['aria-label'] && !rest['aria-labelledby']) {
+    console.error('Specify aria-label or aria-labelledby on <KuiLinkButton/> if it does not have children.');
   }
 
   const classes = classNames(getClassName({
