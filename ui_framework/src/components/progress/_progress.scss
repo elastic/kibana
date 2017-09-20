@@ -11,6 +11,18 @@
 	overflow: hidden;
 	background-color: $kuiColorLightShade;
 
+  &::-webkit-progress-bar {
+    background-color: $kuiColorLightShade;
+  }
+
+  &::-webkit-progress-value {
+    transition: width $kuiAnimSpeedNormal linear;
+  }
+
+  &::-moz-progress-bar {
+    transition: width $kuiAnimSpeedNormal linear;
+  }
+
 	// Progress bars come in different colors.
 	$kuiProgressColors: (
 		primary: $kuiColorPrimary,
@@ -22,7 +34,6 @@
 	);
 
 	@each $name, $color in $kuiProgressColors {
-
 		&.kuiProgress--#{$name} {
 
 			&::-webkit-progress-value {
@@ -75,8 +86,11 @@
 		position: absolute;
 	}
 
-	// An indeterminate bar has an unreliable end time.
-	// Because of a Firefox animation issue, we make these divs instead of <progress>.
+	/**
+   * An indeterminate bar has an unreliable end time. Because of a Firefox animation issue,
+   * we apply this style to a <div> instead of a <progress> element.
+   * See https://css-tricks.com/html5-progress-element/ for more info.
+   */
 	&.kuiProgress--indeterminate {
 		&:before {
 			position: absolute;
@@ -89,18 +103,6 @@
       animation: kuiProgress 1s $kuiAnimSlightResistance infinite;
 		}
 	}
-}
-
-.kuiProgress::-webkit-progress-bar {
-	background-color: $kuiColorLightShade;
-}
-
-.kuiProgress::-webkit-progress-value {
-  transition: width $kuiAnimSpeedNormal linear;
-}
-
-.kuiProgress::-moz-progress-bar {
-  transition: width $kuiAnimSpeedNormal linear;
 }
 
 @keyframes kuiProgress {

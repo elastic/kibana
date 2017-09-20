@@ -2939,7 +2939,18 @@ table {
   vertical-align: middle;
   position: relative;
   overflow: hidden;
-  background-color: #D9D9D9; }
+  background-color: #D9D9D9;
+  /**
+   * An indeterminate bar has an unreliable end time. Because of a Firefox animation issue,
+   * we apply this style to a <div> instead of a <progress> element.
+   * See https://css-tricks.com/html5-progress-element/ for more info.
+   */ }
+  .kuiProgress::-webkit-progress-bar {
+    background-color: #D9D9D9; }
+  .kuiProgress::-webkit-progress-value {
+    transition: width 250ms linear; }
+  .kuiProgress::-moz-progress-bar {
+    transition: width 250ms linear; }
   .kuiProgress.kuiProgress--primary::-webkit-progress-value {
     background-color: #0079a5; }
   .kuiProgress.kuiProgress--primary::-moz-progress-bar {
@@ -3006,15 +3017,6 @@ table {
             transform: scaleX(0) translateX(0%);
     -webkit-animation: kuiProgress 1s cubic-bezier(0.694, 0.0482, 0.335, 1) infinite;
             animation: kuiProgress 1s cubic-bezier(0.694, 0.0482, 0.335, 1) infinite; }
-
-.kuiProgress::-webkit-progress-bar {
-  background-color: #D9D9D9; }
-
-.kuiProgress::-webkit-progress-value {
-  transition: width 250ms linear; }
-
-.kuiProgress::-moz-progress-bar {
-  transition: width 250ms linear; }
 
 @-webkit-keyframes kuiProgress {
   0% {
