@@ -178,7 +178,6 @@
     "react-router": "2.0.0",
     "react-router-redux": "4.0.4",
     "react-select": "1.0.0-rc.5",
-
     "react-sizeme": "2.3.4",
     "react-sortable": "1.1.0",
     "react-test-renderer": "15.6.1",

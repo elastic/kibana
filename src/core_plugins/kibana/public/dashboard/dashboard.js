@@ -46,15 +46,13 @@ const app = uiModules.get('app/dashboard', [
   'kibana/typeahead',
 ]);
 
-_.once(() => {
-  app.directive('dashboardGrid', function (reactDirective) {
-    return reactDirective(DashboardGrid);
-  });
+app.directive('dashboardGrid', function (reactDirective) {
+  return reactDirective(DashboardGrid);
+});
 
-  app.directive('dashboardPanel', function (reactDirective) {
-    return reactDirective(DashboardPanel);
-  });
-})();
+app.directive('dashboardPanel', function (reactDirective) {
+  return reactDirective(DashboardPanel);
+});
 
 uiRoutes
   .when(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
