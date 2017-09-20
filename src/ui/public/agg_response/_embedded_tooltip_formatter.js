@@ -48,7 +48,9 @@ export function EmbeddedTooltipFormatterProvider($rootScope, $compile, Private, 
         const aggFilters = [];
         let aggResult = event.datum.aggConfigResult
         while(aggResult) {
-          aggFilters.push(aggResult.aggConfig.createFilter(aggResult.key));
+          if (aggResult.type === 'bucket') {
+            aggFilters.push(aggResult.aggConfig.createFilter(aggResult.key));
+          }
           aggResult = aggResult.$parent;
         }
 

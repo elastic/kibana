@@ -33,7 +33,7 @@ export function BuildHierarchicalDataProvider(Private, Notifier) {
     const raw = createRawData(vis, resp);
 
     let tooltipFormatter;
-    if (_.get(vis, 'params.tooltip.type') === 'vis' && _.get(vis, 'params.tooltip.vis') ) {
+    if (_.get(vis, 'params.tooltip.type') === 'vis' && _.has(vis, 'params.tooltip.vis') ) {
       tooltipFormatter = embeddedTooltipFormatter(vis);
     } else {
       tooltipFormatter = metricTooltipFormatter(raw.columns);
