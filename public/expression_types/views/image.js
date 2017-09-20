@@ -11,7 +11,7 @@ export const image = () => new View('image', {
   requiresContext: false,
   args: [
     new Arg('dataurl', {
-      displayName: 'Image Dataurl',
+      displayName: 'Upload Image',
       argType: 'imageUpload',
       resolve({ args }) {
         const wrap = (val) => ({ dataurl: val });
