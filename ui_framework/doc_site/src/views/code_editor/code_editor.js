@@ -10,5 +10,6 @@ export default () => (
     theme="github"
     width="100%"
     setOptions={{ fontSize: '14px' }}
+    onBlur={() => window.alert('KuiCodeEditor.onBlur() called')}
   />
 );
