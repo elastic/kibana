@@ -99,7 +99,7 @@ export default props => (
       text={
         <p>
           Using the <KuiCode>align</KuiCode> and <KuiCode>compressed</KuiCode> props you
-          can further tailor the look of a description list. This works with, column
+          can further tailor the look of a description list. This works with column
           and inline types.
         </p>
      }

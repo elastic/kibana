@@ -7,7 +7,7 @@ export const KuiDescriptionListDescription = ({
   className,
   ...rest,
 }) => {
-  const classes = classNames('kuiDescriptionList__desc', className);
+  const classes = classNames('kuiDescriptionList__description', className);
 
   return (
     <dd

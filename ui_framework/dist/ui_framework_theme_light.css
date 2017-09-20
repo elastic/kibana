@@ -1139,7 +1139,7 @@ table {
 .kuiDescriptionList .kuiDescriptionList__title {
   font-weight: 500; }
 
-.kuiDescriptionList .kuiDescriptionList__desc {
+.kuiDescriptionList .kuiDescriptionList__description {
   color: #666; }
 
 .kuiDescriptionList.kuiDescriptionList--row .kuiDescriptionList__title {
@@ -1150,7 +1150,7 @@ table {
   .kuiDescriptionList.kuiDescriptionList--row .kuiDescriptionList__title:first-of-type {
     margin-top: 0; }
 
-.kuiDescriptionList.kuiDescriptionList--row .kuiDescriptionList__desc {
+.kuiDescriptionList.kuiDescriptionList--row .kuiDescriptionList__description {
   font-size: 14px;
   font-size: 0.875rem;
   line-height: 1.5; }
@@ -1166,7 +1166,7 @@ table {
   font-size: 0.875rem;
   line-height: 1.5; }
 
-.kuiDescriptionList.kuiDescriptionList--row.kuiDescriptionList--compressed .kuiDescriptionList__desc {
+.kuiDescriptionList.kuiDescriptionList--row.kuiDescriptionList--compressed .kuiDescriptionList__description {
   font-size: 14px;
   font-size: 0.875rem;
   line-height: 1.5; }
@@ -1195,7 +1195,7 @@ table {
         -ms-flex-preferred-size: 50%;
             flex-basis: 50%;
     padding-right: 8px; }
-  .kuiDescriptionList.kuiDescriptionList--column .kuiDescriptionList__desc {
+  .kuiDescriptionList.kuiDescriptionList--column .kuiDescriptionList__description {
     font-size: 16px;
     font-size: 1rem;
     line-height: 1.5;
@@ -1209,7 +1209,7 @@ table {
     font-size: 14px;
     font-size: 0.875rem;
     line-height: 1.5; }
-  .kuiDescriptionList.kuiDescriptionList--column.kuiDescriptionList--compressed .kuiDescriptionList__desc {
+  .kuiDescriptionList.kuiDescriptionList--column.kuiDescriptionList--compressed .kuiDescriptionList__description {
     font-size: 14px;
     font-size: 0.875rem;
     line-height: 1.5; }
@@ -1228,7 +1228,7 @@ table {
   .kuiDescriptionList.kuiDescriptionList--inline .kuiDescriptionList__title:first-of-type {
     margin-left: 0; }
 
-.kuiDescriptionList.kuiDescriptionList--inline .kuiDescriptionList__desc {
+.kuiDescriptionList.kuiDescriptionList--inline .kuiDescriptionList__description {
   font-size: 14px;
   font-size: 0.875rem;
   line-height: 1.5;
@@ -1240,7 +1240,7 @@ table {
   font-size: 0.75rem;
   line-height: 1.5; }
 
-.kuiDescriptionList.kuiDescriptionList--inline.kuiDescriptionList--compressed .kuiDescriptionList__desc {
+.kuiDescriptionList.kuiDescriptionList--inline.kuiDescriptionList--compressed .kuiDescriptionList__description {
   font-size: 12px;
   font-size: 0.75rem;
   line-height: 1.5; }
