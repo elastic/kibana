@@ -1,9 +1,9 @@
 import React from 'react';
 
 import {
-  KuiFlexItemPanel,
-  KuiFlexGroup,
   KuiFlexItem,
+  KuiFlexGroup,
+  KuiPanel,
   KuiCode,
   KuiText,
 } from '../../../../components';
@@ -17,12 +17,18 @@ export default () => (
         <p>And you would want the panel on the right to expand with it.</p>
       </KuiText>
     </KuiFlexItem>
-    <KuiFlexItemPanel>
-      <KuiCode>FlexItemPanel</KuiCode>
-    </KuiFlexItemPanel>
-    <KuiFlexItemPanel paddingSize="l">
-      Another <KuiCode>FlexItemPanel</KuiCode>,
-      with <KuiCode>paddingSize=&ldquo;l&rdquo;</KuiCode>.
-    </KuiFlexItemPanel>
+
+    <KuiFlexItem>
+      <KuiPanel>
+        <KuiCode>KuiPanel</KuiCode>
+      </KuiPanel>
+    </KuiFlexItem>
+
+    <KuiFlexItem>
+      <KuiPanel grow={false}>
+        Another <KuiCode>KuiPanel</KuiCode>,
+        with <KuiCode>grow=&#123;false&#125;</KuiCode>.
+      </KuiPanel>
+    </KuiFlexItem>
   </KuiFlexGroup>
 );

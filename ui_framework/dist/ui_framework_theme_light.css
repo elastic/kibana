@@ -1437,14 +1437,36 @@ table {
         -ms-flex-preferred-size: calc(50% - 32px);
             flex-basis: calc(50% - 32px); }
 
-.kuiFlexItem.kuiFlexItem--flexGrowZero {
-  -webkit-box-flex: 0;
-  -webkit-flex-grow: 0;
-      -ms-flex-positive: 0;
-          flex-grow: 0;
-  -webkit-flex-basis: auto;
-      -ms-flex-preferred-size: auto;
-          flex-basis: auto; }
+/**
+ * 1. Allow KuiPanels to expand to fill the item.
+ */
+.kuiFlexItem {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  /* 1 */
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  /* 1 */
+  /*
+   * 1. We need the extra specificity here to override the FlexGroup > FlexItem styles.
+   * 2. FlexItem can be manually set to not grow if needed.
+   */ }
+  .kuiFlexItem.kuiFlexItem--flexGrowZero {
+    /* 1 */
+    -webkit-box-flex: 0;
+    -webkit-flex-grow: 0;
+        -ms-flex-positive: 0;
+            flex-grow: 0;
+    /* 2 */
+    -webkit-flex-basis: auto;
+        -ms-flex-preferred-size: auto;
+            flex-basis: auto;
+    /* 2 */ }
 
 @media only screen and (max-width: 768px) {
   .kuiFlexItem {
@@ -2756,7 +2778,11 @@ table {
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
   background-color: #FFF;
   border: 1px solid #D9D9D9;
-  border-radius: 4px; }
+  border-radius: 4px;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1; }
   .kuiPanel.kuiPanel--paddingSmall {
     padding: 8px; }
   .kuiPanel.kuiPanel--paddingMedium {
@@ -2765,6 +2791,11 @@ table {
     padding: 24px; }
   .kuiPanel.kuiPanel--shadow {
     box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1); }
+  .kuiPanel.kuiPanel--flexGrowZero {
+    -webkit-box-flex: 0;
+    -webkit-flex-grow: 0;
+        -ms-flex-positive: 0;
+            flex-grow: 0; }
 
 .kuiPopover {
   display: inline-block;

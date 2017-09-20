@@ -84,7 +84,6 @@ export default props => (
       }
     />
 
-
     <GuideSection
       title="FlexGroup accepts infinite items"
       source={[{
@@ -106,7 +105,7 @@ export default props => (
     />
 
     <GuideSection
-      title="FlexItemPanel can substitute for any FlexItem"
+      title="FlexPanels grow to fill FlexItems"
       source={[{
         type: GuideSectionTypes.JS,
         code: flexItemPanelSource,
@@ -116,19 +115,17 @@ export default props => (
       }]}
       text={
         <p>
-          <KuiCode>FlexItemPanel</KuiCode> can be used in place of or along-side <KuiCode>FlexItem</KuiCode>.
-          It acts just like a <KuiCode>FlexItem</KuiCode> but takes on the styling and props
-          of the <Link to="/panel">Panel</Link> component as well.
-          You normally would use it anytime you need your panels to grow in height.
+          The <Link to="/panel">Panel</Link> component will naturally grow to fill the
+          <KuiCode>FlexItem</KuiCode> which contains it.
         </p>
-     }
+      }
       demo={
         <FlexItemPanel />
-     }
+      }
     />
 
     <GuideSection
-      title="FlexItem / FlexItemPanel can individually turn off stretching"
+      title="FlexItem can individually turn off stretching"
       source={[{
         type: GuideSectionTypes.JS,
         code: flexGrowSource,
@@ -170,7 +167,6 @@ export default props => (
         <div className="guideDemo__highlightGrid"><FlexJustify /></div>
       }
     />
-
 
     <GuideSection
       title="FlexGrids are for repeatable grids"
@@ -235,6 +231,5 @@ export default props => (
         <div className="guideDemo__highlightGrid"><FlexGutter /></div>
       }
     />
-
   </GuidePage>
 );

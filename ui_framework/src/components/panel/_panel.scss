@@ -4,6 +4,7 @@
   background-color: $kuiColorEmptyShade;
   border: $kuiBorderThin;
   border-radius: $kuiBorderRadius;
+  flex-grow: 1;
 
   &.kuiPanel--paddingSmall {
     padding: $kuiSizeS;
@@ -19,5 +20,9 @@
 
   &.kuiPanel--shadow {
     @include kuiBottomShadow;
+  }
+
+  &.kuiPanel--flexGrowZero {
+    flex-grow: 0;
   }
 }

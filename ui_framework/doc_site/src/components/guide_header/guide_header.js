@@ -20,11 +20,9 @@ export class GuideHeader extends Component {
     this.state = {
       search: '',
     };
-
   }
 
   render() {
-
     return (
       <div className="guideHeader">
         <KuiFlexGroup alignItems="center" gutterSize="small">

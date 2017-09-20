@@ -1,9 +1,10 @@
 import React from 'react';
 
 import {
-  KuiIcon,
   KuiFlexGrid,
-  KuiFlexItemPanel,
+  KuiFlexItem,
+  KuiIcon,
+  KuiPanel,
   KuiText,
 } from '../../../../components';
 
@@ -19,15 +20,17 @@ export default () => (
   <KuiFlexGrid columns={4}>
     {
       iconSizes.map(iconSize => (
-        <KuiFlexItemPanel className="guideDemo__icon" key={iconSize}>
-          <KuiIcon
-            type="logoElasticStack"
-            size={iconSize}
-          />
-          <KuiText size="small">
-            <p>{iconSize}</p>
-          </KuiText>
-        </KuiFlexItemPanel>
+        <KuiFlexItem className="guideDemo__icon" key={iconSize}>
+          <KuiPanel>
+            <KuiIcon
+              type="logoElasticStack"
+              size={iconSize}
+            />
+            <KuiText size="small">
+              <p>{iconSize}</p>
+            </KuiText>
+          </KuiPanel>
+        </KuiFlexItem>
       ))
     }
   </KuiFlexGrid>
