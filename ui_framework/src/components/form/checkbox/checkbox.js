@@ -8,13 +8,13 @@ export const KuiCheckbox = ({
   checked,
   label,
   onChange,
-  alternateStyle,
+  isInList,
   ...rest,
 }) => {
   const classes = classNames(
     'kuiCheckbox',
     {
-      'kuiCheckbox--alternate': alternateStyle,
+      'kuiCheckbox--isInList': isInList,
     },
     className
   );
@@ -60,10 +60,10 @@ KuiCheckbox.propTypes = {
   checked: PropTypes.bool.isRequired,
   label: PropTypes.string,
   onChange: PropTypes.func.isRequired,
-  alternateStyle: PropTypes.bool,
+  isInList: PropTypes.bool,
 };
 
 KuiCheckbox.defaultProps = {
   checked: false,
-  alternateStyle: false,
+  isInList: false,
 };

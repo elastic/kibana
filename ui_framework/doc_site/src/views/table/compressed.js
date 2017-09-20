@@ -142,7 +142,7 @@ export class Compressed extends Component {
               id="selectAllCheckbox"
               checked={this.areAllItemsSelected()}
               onChange={this.toggleAll.bind(this)}
-              alternateStyle
+              isInList
             />
           </KuiTableHeaderCellCheckbox>
         );
@@ -174,7 +174,7 @@ export class Compressed extends Component {
                 id={`${item.id}-checkbox`}
                 checked={this.isItemSelected(item.id)}
                 onChange={this.toggleItem.bind(this, item.id)}
-                alternateStyle
+                isInList
               />
             </KuiTableRowCellCheckbox>
           );
