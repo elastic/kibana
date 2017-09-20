@@ -83,7 +83,7 @@ export class KuiCodeEditor extends Component {
         </div>
         <AceEditor
           {...this.props}
-          ref={this.configureAce}
+          ref={this.aceEditorRef}
           onBlur={this.onBlurAce}
         />
       </div>
