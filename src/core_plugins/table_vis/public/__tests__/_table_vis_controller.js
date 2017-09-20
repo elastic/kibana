@@ -166,30 +166,4 @@ describe('Controller', function () {
     expect(spiedTabify).to.have.property('callCount', 1);
     expect(spiedTabify.firstCall.args[0].isHierarchical()).to.equal(false);
   });
-
-  it('passes partialRows:true to tabify based on the vis params', function () {
-    // spy on the tabify private module
-    const spiedTabify = sinon.spy(Private(AggResponseTabifyProvider));
-    Private.stub(AggResponseTabifyProvider, spiedTabify);
-
-    const vis = new OneRangeVis({ showPartialRows: true });
-    initController(vis);
-    attachEsResponseToScope(fixtures.oneRangeBucket);
-
-    expect(spiedTabify).to.have.property('callCount', 1);
-    expect(spiedTabify.firstCall.args[2]).to.have.property('partialRows', true);
-  });
-
-  it('passes partialRows:false to tabify based on the vis params', function () {
-    // spy on the tabify private module
-    const spiedTabify = sinon.spy(Private(AggResponseTabifyProvider));
-    Private.stub(AggResponseTabifyProvider, spiedTabify);
-
-    const vis = new OneRangeVis({ showPartialRows: false });
-    initController(vis);
-    attachEsResponseToScope(fixtures.oneRangeBucket);
-
-    expect(spiedTabify).to.have.property('callCount', 1);
-    expect(spiedTabify.firstCall.args[2]).to.have.property('partialRows', false);
-  });
 });
