@@ -1,18 +1,18 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import { AggTypesAggParamsProvider } from 'ui/agg_types/agg_params';
-import { AggTypesParamTypesBaseProvider } from 'ui/agg_types/param_types/base';
-import { AggTypesParamTypesFieldProvider } from 'ui/agg_types/param_types/field';
-import { AggTypesParamTypesOptionedProvider } from 'ui/agg_types/param_types/optioned';
-import { AggTypesParamTypesRegexProvider } from 'ui/agg_types/param_types/regex';
+import { BaseParamTypeProvider } from '../param_types/base';
+import { FieldParamTypeProvider } from '../param_types/field';
+import { OptionedParamTypeProvider } from '../param_types/optioned';
+import { RegexParamTypeProvider } from '../param_types/regex';
 
 describe('AggParams class', function () {
 
   let AggParams;
-  let BaseAggParam;
-  let FieldAggParam;
-  let OptionedAggParam;
-  let RegexAggParam;
+  let BaseParamType;
+  let FieldParamType;
+  let OptionedParamType;
+  let RegexParamType;
 
   beforeEach(ngMock.module('kibana'));
   // stub out the param classes before we get the AggParams
@@ -20,10 +20,10 @@ describe('AggParams class', function () {
   // fetch out deps
   beforeEach(ngMock.inject(function (Private) {
     AggParams = Private(AggTypesAggParamsProvider);
-    BaseAggParam = Private(AggTypesParamTypesBaseProvider);
-    FieldAggParam = Private(AggTypesParamTypesFieldProvider);
-    OptionedAggParam = Private(AggTypesParamTypesOptionedProvider);
-    RegexAggParam = Private(AggTypesParamTypesRegexProvider);
+    BaseParamType = Private(BaseParamTypeProvider);
+    FieldParamType = Private(FieldParamTypeProvider);
+    OptionedParamType = Private(OptionedParamTypeProvider);
+    RegexParamType = Private(RegexParamTypeProvider);
   }));
 
   describe('constructor args', function () {
@@ -41,17 +41,17 @@ describe('AggParams class', function () {
   });
 
   describe('AggParam creation', function () {
-    it('Uses the FieldAggParam class for params with the name "field"', function () {
+    it('Uses the FieldParamType class for params with the name "field"', function () {
       const params = [
         { name: 'field' }
       ];
       const aggParams = new AggParams(params);
 
       expect(aggParams).to.have.length(params.length);
-      expect(aggParams[0]).to.be.a(FieldAggParam);
+      expect(aggParams[0]).to.be.a(FieldParamType);
     });
 
-    it('Uses the OptionedAggParam class for params of type "optioned"', function () {
+    it('Uses the OptionedParamType class for params of type "optioned"', function () {
       const params = [
         {
           name: 'interval',
@@ -61,10 +61,10 @@ describe('AggParams class', function () {
       const aggParams = new AggParams(params);
 
       expect(aggParams).to.have.length(params.length);
-      expect(aggParams[0]).to.be.a(OptionedAggParam);
+      expect(aggParams[0]).to.be.a(OptionedParamType);
     });
 
-    it('Uses the RegexAggParam class for params of type "regex"', function () {
+    it('Uses the RegexParamType class for params of type "regex"', function () {
       const params = [
         {
           name: 'exclude',
@@ -74,10 +74,10 @@ describe('AggParams class', function () {
       const aggParams = new AggParams(params);
 
       expect(aggParams).to.have.length(params.length);
-      expect(aggParams[0]).to.be.a(RegexAggParam);
+      expect(aggParams[0]).to.be.a(RegexParamType);
     });
 
-    it('Always converts the params to a BaseAggParam', function () {
+    it('Always converts the params to a BaseParamType', function () {
       const params = [
         {
           name: 'height',
@@ -94,13 +94,13 @@ describe('AggParams class', function () {
       ];
       const aggParams = new AggParams(params);
 
-      expect(BaseAggParam).to.have.property('callCount', params.length);
-      expect(FieldAggParam).to.have.property('callCount', 0);
-      expect(OptionedAggParam).to.have.property('callCount', 0);
+      expect(BaseParamType).to.have.property('callCount', params.length);
+      expect(FieldParamType).to.have.property('callCount', 0);
+      expect(OptionedParamType).to.have.property('callCount', 0);
 
       expect(aggParams).to.have.length(params.length);
       aggParams.forEach(function (aggParam) {
-        expect(aggParam).to.be.a(BaseAggParam);
+        expect(aggParam).to.be.a(BaseParamType);
       });
     });
   });

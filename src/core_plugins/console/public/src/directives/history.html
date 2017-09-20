@@ -1,15 +1,26 @@
 <div class="kuiLocalDropdownTitle">History</div>
 
 <div class="history-body">
-  <ul class="list-group history-reqs">
+  <ul
+    class="list-group history-reqs"
+    tabindex="0"
+    role="listbox"
+    aria-activedescendant="historyReq{{ history.selectedIndex }}"
+    scrollto-activedescendant
+    ng-keydown="history.onKeyDown($event)"
+    aria-label="History of sent requests"
+  >
     <li
+      role="option"
       ng-repeat="req in history.reqs"
+      id="historyReq{{$index}}"
       ng-class="{ selected: history.viewingReq === req }"
-      ng-click="history.selectedReq = req; history.viewingReq = req"
+      ng-click="history.selectedReq = req; history.viewingReq = req; history.selectedIndex = $index"
       ng-mouseenter="history.viewingReq = req"
       ng-mouseleave="history.viewingReq = history.selectedReq"
       ng-dblclick="history.restore(req)"
       aria-label="{{:: 'Request: ' + history.describeReq(req) }}"
+      aria-selected="{{ history.selectedReq === req }}"
       class="list-group-item history-req"
     >
       {{ history.describeReq(req) }}

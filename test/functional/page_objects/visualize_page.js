@@ -82,6 +82,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByPartialLinkText('Heat Map');
     }
 
+    async clickInputControlVis() {
+      await find.clickByPartialLinkText('Controls');
+    }
+
     async getChartTypeCount() {
       const tags = await find.allByCssSelector('a.wizard-vis-type.ng-scope');
       return tags.length;
@@ -129,6 +133,65 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const input = await find.byCssSelector('input[ng-model="absolute.to"]', defaultFindTimeout * 2);
       await input.clearValue();
       await input.type(timeString);
+    }
+
+    async setReactSelect(className, value) {
+      const input = await find.byCssSelector(className + ' * input', 0);
+      await input.clearValue();
+      await input.type(value);
+      await find.clickByCssSelector('.Select-option');
+      const stillOpen = await find.existsByCssSelector('.Select-menu-outer', 0);
+      if (stillOpen) {
+        await find.clickByCssSelector(className + ' * .Select-arrow-zone');
+      }
+    }
+
+    async clearReactSelect(className) {
+      await find.clickByCssSelector(className + ' * .Select-clear-zone');
+    }
+
+    async getReactSelectOptions(containerSelector) {
+      await testSubjects.click(containerSelector);
+      const menu = await retry.try(
+          async () => find.byCssSelector('.Select-menu-outer'));
+      return await menu.getVisibleText();
+    }
+
+    async doesReactSelectHaveValue(className) {
+      return await find.existsByCssSelector(className + ' * .Select-value-label', 0);
+    }
+
+    async getReactSelectValue(className) {
+      const hasValue = await this.doesReactSelectHaveValue(className);
+      if (!hasValue) {
+        return '';
+      }
+
+      const valueElement = await retry.try(
+          async () => find.byCssSelector(className + ' * .Select-value-label'));
+      return await valueElement.getVisibleText();
+    }
+
+    async addInputControl() {
+      await testSubjects.click('inputControlEditorAddBtn');
+    }
+
+    async checkCheckbox(selector) {
+      const element = await testSubjects.find(selector);
+      const isSelected = await element.isSelected();
+      if(!isSelected) {
+        log.debug(`checking checkbox ${selector}`);
+        await testSubjects.click(selector);
+      }
+    }
+
+    async uncheckCheckbox(selector) {
+      const element = await testSubjects.find(selector);
+      const isSelected = await element.isSelected();
+      if(isSelected) {
+        log.debug(`unchecking checkbox ${selector}`);
+        await testSubjects.click(selector);
+      }
     }
 
     async clickGoButton() {
@@ -291,6 +354,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickData() {
       await testSubjects.click('visualizeEditDataLink');
+    }
+
+    async clickVisEditorTab(tabName) {
+      await testSubjects.click('visEditorTab' + tabName);
     }
 
     async selectWMS() {
@@ -612,7 +679,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       if (!onPage) {
         await retry.try(async () => {
           await this.clickLandingPageBreadcrumbLink();
-          await testSubjects.find('visualizationSearchFilter');
+          const onLandingPage = await this.onLandingPage();
+          if (!onLandingPage) throw new Error('Not on the landing page.');
         });
       }
     }

@@ -1,5 +1,6 @@
 import d3 from 'd3';
 import _ from 'lodash';
+import $ from 'jquery';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import { VislibLibAxisTitleProvider } from 'ui/vislib/lib/axis/axis_title';
@@ -18,6 +19,7 @@ describe('Vislib AxisTitle Class Test Suite', function () {
   let dataObj;
   let xTitle;
   let yTitle;
+  let visConfig;
   const data = {
     hits: 621,
     ordered: {
@@ -104,7 +106,7 @@ describe('Vislib AxisTitle Class Test Suite', function () {
 
 
     dataObj = new Data(data, new PersistedState());
-    const visConfig = new VisConfig({
+    visConfig = new VisConfig({
       type: 'histogram'
     }, data, new PersistedState(), el.node());
     const xAxisConfig = new AxisConfig(visConfig, {
@@ -125,6 +127,19 @@ describe('Vislib AxisTitle Class Test Suite', function () {
 
   afterEach(function () {
     el.remove();
+  });
+
+  it('should not do anything if title.show is set to false', function () {
+    const xAxisConfig = new AxisConfig(visConfig, {
+      position: 'bottom',
+      show: false,
+      title: {
+        text: dataObj.get('xAxisLabel')
+      }
+    });
+    xTitle = new AxisTitle(xAxisConfig);
+    xTitle.render();
+    expect($(el.node()).find('.x-axis-title').find('svg').length).to.be(0);
   });
 
   describe('render Method', function () {

@@ -1,13 +1,11 @@
 import _ from 'lodash';
 import { VislibComponentsLabelsDataArrayProvider } from './data_array';
 import { VislibComponentsLabelsUniqLabelsProvider } from './uniq_labels';
-import { VislibComponentsLabelsPiePieLabelsProvider } from './pie/pie_labels';
 
 export function VislibComponentsLabelsLabelsProvider(Private) {
 
   const createArr = Private(VislibComponentsLabelsDataArrayProvider);
   const getArrOfUniqLabels = Private(VislibComponentsLabelsUniqLabelsProvider);
-  const getPieLabels = Private(VislibComponentsLabelsPiePieLabelsProvider);
 
   /*
    * Accepts a Kibana data object and returns an array of unique labels (strings).
@@ -16,9 +14,8 @@ export function VislibComponentsLabelsLabelsProvider(Private) {
    *
    * Currently, this service is only used for vertical bar charts and line charts.
    */
-  return function (obj, chartType) {
+  return function (obj) {
     if (!_.isObject(obj)) { throw new TypeError('LabelUtil expects an object'); }
-    if (chartType === 'pie') { return getPieLabels(obj); }
     return getArrOfUniqLabels(createArr(obj));
   };
 }

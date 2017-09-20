@@ -1,25 +1,25 @@
 import { SavedObjectNotFound } from 'ui/errors';
 import _ from 'lodash';
-import editorHtml from 'ui/agg_types/controls/field.html';
-import { AggTypesParamTypesBaseProvider } from 'ui/agg_types/param_types/base';
+import editorHtml from '../controls/field.html';
+import { BaseParamTypeProvider } from './base';
 import 'ui/filters/field_type';
 import { IndexedArray } from 'ui/indexed_array';
 import { Notifier } from 'ui/notify/notifier';
 
-export function AggTypesParamTypesFieldProvider(Private, $filter) {
-  const BaseAggParam = Private(AggTypesParamTypesBaseProvider);
+export function FieldParamTypeProvider(Private, $filter) {
+  const BaseParamType = Private(BaseParamTypeProvider);
   const notifier = new Notifier();
 
-  _.class(FieldAggParam).inherits(BaseAggParam);
-  function FieldAggParam(config) {
-    FieldAggParam.Super.call(this, config);
+  _.class(FieldParamType).inherits(BaseParamType);
+  function FieldParamType(config) {
+    FieldParamType.Super.call(this, config);
   }
 
-  FieldAggParam.prototype.editor = editorHtml;
-  FieldAggParam.prototype.scriptable = true;
-  FieldAggParam.prototype.filterFieldTypes = '*';
+  FieldParamType.prototype.editor = editorHtml;
+  FieldParamType.prototype.scriptable = true;
+  FieldParamType.prototype.filterFieldTypes = '*';
   // retain only the fields with the aggregatable property if the onlyAggregatable option is true
-  FieldAggParam.prototype.onlyAggregatable = true;
+  FieldParamType.prototype.onlyAggregatable = true;
 
   /**
    * Called to serialize values for saving an aggConfig object
@@ -27,14 +27,14 @@ export function AggTypesParamTypesFieldProvider(Private, $filter) {
    * @param  {field} field - the field that was selected
    * @return {string}
    */
-  FieldAggParam.prototype.serialize = function (field) {
+  FieldParamType.prototype.serialize = function (field) {
     return field.name;
   };
 
   /**
    * Get the options for this field from the indexPattern
    */
-  FieldAggParam.prototype.getFieldOptions = function (aggConfig) {
+  FieldParamType.prototype.getFieldOptions = function (aggConfig) {
     const indexPattern = aggConfig.getIndexPattern();
     let fields = indexPattern.fields.raw;
 
@@ -70,7 +70,7 @@ export function AggTypesParamTypesFieldProvider(Private, $filter) {
    * @param  {string} fieldName
    * @return {field}
    */
-  FieldAggParam.prototype.deserialize = function (fieldName, aggConfig) {
+  FieldParamType.prototype.deserialize = function (fieldName, aggConfig) {
     const field = aggConfig.getIndexPattern().fields.byName[fieldName];
 
     if (!field) {
@@ -95,7 +95,7 @@ export function AggTypesParamTypesFieldProvider(Private, $filter) {
    *                               for the agg
    * @return {undefined}
    */
-  FieldAggParam.prototype.write = function (aggConfig, output) {
+  FieldParamType.prototype.write = function (aggConfig, output) {
     const field = aggConfig.getField();
 
     if (!field) {
@@ -112,5 +112,5 @@ export function AggTypesParamTypesFieldProvider(Private, $filter) {
     }
   };
 
-  return FieldAggParam;
+  return FieldParamType;
 }

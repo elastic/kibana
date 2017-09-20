@@ -63,18 +63,22 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
             position: 'nw',
             labelBoxBorderColor: 'rgb(255,255,255,0)',
             labelFormatter: function (label, series) {
+              const wrapperSpan = document.createElement('span');
               const labelSpan = document.createElement('span');
-              labelSpan.setAttribute('class', 'ngLegendValue');
-              labelSpan.setAttribute('kbn-accessible-click', '');
-              labelSpan.setAttribute('ng-click', 'toggleSeries(' + series._id + ')');
-              labelSpan.appendChild(document.createTextNode(label));
-
               const numberSpan = document.createElement('span');
+
+              wrapperSpan.setAttribute('class', 'ngLegendValue');
+              wrapperSpan.setAttribute('kbn-accessible-click', '');
+              wrapperSpan.setAttribute('ng-click', 'toggleSeries(' + series._id + ')');
+
+              labelSpan.setAttribute('ng-non-bindable', '');
+              labelSpan.appendChild(document.createTextNode(label));
               numberSpan.setAttribute('class', 'ngLegendValueNumber');
 
-              labelSpan.appendChild(numberSpan);
+              wrapperSpan.appendChild(labelSpan);
+              wrapperSpan.appendChild(numberSpan);
 
-              return labelSpan.innerHTML;
+              return wrapperSpan.outerHTML;
             }
           },
           colors: ['#01A4A4', '#C66', '#D0D102', '#616161', '#00A1CB', '#32742C', '#F18D05', '#113F8C', '#61AE24', '#D70060']
@@ -219,6 +223,12 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
               }
             }));
             series._id = index;
+
+            if (series.color) {
+              const span = document.createElement('span');
+              span.style.color = series.color;
+              series.color = span.style.color;
+            }
 
             if (series._hide) {
               series.data = [];
