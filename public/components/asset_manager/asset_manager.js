@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import './asset_manager.less';
+import { RemoveIcon } from '../remove_icon';
 
 export const AssetManager = ({ assets, removeAsset }) => {
 
@@ -23,7 +24,7 @@ export const AssetManager = ({ assets, removeAsset }) => {
         <div key={asset.id} className="canvas__asset-manager--thumb" style={{
           backgroundImage: `url("${asset.value}")`,
         }}>
-          <i className="fa fa-times-circle canvas__asset-manager--remove" onClick={() => removeAsset(asset.id)}/>
+          <RemoveIcon style={{ position: 'absolute', top: 0, right: 0 }} onClick={() => removeAsset(asset.id)}/>
         </div>
       ))}
     </div>
