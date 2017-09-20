@@ -7,7 +7,7 @@ import { FauxSelect } from '../faux_select';
 
 const fonts = [
   { label: 'American Typewriter',  value: `'American Typewriter', 'Courier New', Courier, Monaco, mono` },
-  { label: 'Arial',                value: `'Arial Rounded MT Bold', Helvetica, Arial, sans-serif` },
+  { label: 'Arial',                value: `'Arial, sans-serif` },
   { label: 'Baskerville',          value: `Baskerville, Georgia, Garamond, 'Times New Roman', Times, serif` },
   { label: 'Book Antiqua',         value: `'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif` },
   { label: 'Brush Script',         value: `'Brush Script MT', 'Comic Sans', sans-serif` },
@@ -19,6 +19,7 @@ const fonts = [
   { label: 'Hoefler Text',         value: `'Hoefler Text', Garamond, Georgia, 'Times New Roman', Times, serif` },
   { label: 'Lucida Grande',        value: `'Lucida Grande', 'Lucida Sans Unicode', Lucida, Verdana, Helvetica, Arial, sans-serif` },
   { label: 'Myriad',               value: `Myriad, Helvetica, Arial, sans-serif` },
+  { label: 'Open Sans',            value: `'Open Sans', Helvetica, Arial, sans-serif` },
   { label: 'Optima',               value: `Optima, 'Lucida Grande', 'Lucida Sans Unicode', Verdana, Helvetica, Arial, sans-serif` },
   { label: 'Palatino',             value: `Palatino, 'Book Antiqua', Georgia, Garamond, 'Times New Roman', Times, serif` },
 ];
@@ -28,7 +29,7 @@ export const FontPicker = ({ onSelect, value, placement }) => {
   const selected = find(fonts, { value }) || { label: value, value };
 
   const picker = (
-    <Popover id="popover-trigger-click" style={{ width: 207 }}>
+    <Popover className="canvas__font-picker--popover" id="popover-trigger-click" style={{ width: 207 }}>
       <div className="canvas__font-picker">
         { fonts.map(font => ( // TODO: Make a custom select using bootstrap dropdowns. This is lame and causes inconsistent styling in popover selects
           <div
@@ -45,20 +46,18 @@ export const FontPicker = ({ onSelect, value, placement }) => {
   );
 
   return (
-    <div>
-      <OverlayTrigger
-        rootClose
-        overlay={picker}
-        placement={placement || 'bottom'}
-        trigger="click"
-      >
-        <div style={{ display: 'inline-block' }}>
-          <FauxSelect>
-            <div style={{ fontFamily: selected.value }}>{ selected.label }</div>
-          </FauxSelect>
-        </div>
-      </OverlayTrigger>
-    </div>
+    <OverlayTrigger
+      rootClose
+      overlay={picker}
+      placement={placement || 'bottom'}
+      trigger="click"
+    >
+      <div style={{ display: 'inline-block' }}>
+        <FauxSelect>
+          <div style={{ fontFamily: selected.value }}>{ selected.label }</div>
+        </FauxSelect>
+      </div>
+    </OverlayTrigger>
   );
 };
 
