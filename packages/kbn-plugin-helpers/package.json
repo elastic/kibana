@@ -1,6 +1,6 @@
 {
   "name": "@elastic/plugin-helpers",
-  "version": "7.0.1",
+  "version": "7.0.2",
   "description": "Just some helpers for kibana plugin devs.",
   "main": "lib/index.js",
   "bin": {
@@ -34,8 +34,8 @@
     "@elastic/eslint-config-kibana": "0.5.0",
     "babel-eslint": "6.1.2",
     "eslint": "3.11.1",
-    "eslint-plugin-mocha": "4.7.0",
     "eslint-plugin-babel": "4.0.0",
+    "eslint-plugin-mocha": "4.7.0",
     "eslint-plugin-react": "6.10.3",
     "jest": "^17.0.3"
   },
