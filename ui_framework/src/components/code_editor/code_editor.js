@@ -15,6 +15,14 @@ export class KuiCodeEditor extends Component {
     this.idGenerator = htmlIdGenerator();
   }
 
+  aceEditorRef = (aceEditor) => {
+    if (aceEditor) {
+      this.aceEditor = aceEditor;
+      aceEditor.editor.textInput.getElement().tabIndex = -1;
+      aceEditor.editor.textInput.getElement().addEventListener('keydown', this.onKeydownAce);
+    }
+  };
+
   stopEditing() {
     this.setState({ isHintActive: true });
   }
@@ -27,14 +35,6 @@ export class KuiCodeEditor extends Component {
       this.refs.kuiCodeEditorHint.focus();
     }
   }
-
-  configureAce = (ace) => {
-    if (ace) {
-      this.aceEditor = ace;
-      ace.editor.textInput.getElement().tabIndex = -1;
-      ace.editor.textInput.getElement().addEventListener('keydown', this.onKeydownAce);
-    }
-  };
 
   onBlurAce = (...args) => {
     this.stopEditing();
