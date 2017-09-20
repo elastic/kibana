@@ -1042,6 +1042,9 @@ table {
   visibility: hidden; }
 
 .kuiContextMenuPanelTitle {
+  background-color: #F5F5F5;
+  border-bottom: 1px solid #D9D9D9;
+  padding: 12px;
   width: 100%;
   text-align: left; }
 
