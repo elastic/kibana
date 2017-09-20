@@ -1,5 +1,4 @@
 import '../visualizations/less/main.less';
-import 'react-select/dist/react-select.css';
 import '../less/main.less';
 import image from '../images/icon-visualbuilder.svg';
 import { MetricsRequestHandlerProvider } from './request_handler';

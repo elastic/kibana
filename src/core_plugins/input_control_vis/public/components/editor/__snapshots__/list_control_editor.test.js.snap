@@ -1,0 +1,61 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders ListControlEditor 1`] = `
+<div>
+  <IndexPatternSelect
+    getIndexPatterns={[Function]}
+    onChange={[Function]}
+    value="indexPattern1"
+  />
+  <FieldSelect
+    filterField={[Function]}
+    getIndexPattern={[Function]}
+    indexPatternId="indexPattern1"
+    onChange={[Function]}
+    value="keywordField"
+  />
+  <div
+    className="kuiSideBarFormRow"
+  >
+    <label
+      className="kuiSideBarFormRow__label"
+      htmlFor="multiselect-0"
+    >
+      Enable Multiselect
+    </label>
+    <div
+      className="kuiSideBarFormRow__control"
+    >
+      <input
+        checked={true}
+        className="kuiCheckBox"
+        id="multiselect-0"
+        onChange={[Function]}
+        type="checkbox"
+      />
+    </div>
+  </div>
+  <div
+    className="kuiSideBarFormRow"
+  >
+    <label
+      className="kuiSideBarFormRow__label"
+      htmlFor="size-0"
+    >
+      Size
+    </label>
+    <div
+      className="kuiSideBarFormRow__control kuiFieldGroupSection--wide"
+    >
+      <input
+        className="kuiTextInput"
+        id="size-0"
+        min="1"
+        onChange={[Function]}
+        type="number"
+        value={10}
+      />
+    </div>
+  </div>
+</div>
+`;
