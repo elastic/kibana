@@ -54,7 +54,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       if (!onPage) {
         await retry.try(async () => {
           await this.clickDashboardBreadcrumbLink();
-          await testSubjects.find('searchFilter');
+          const onDashboardLandingPage = await this.onDashboardLandingPage();
+          if (!onDashboardLandingPage) throw new Error('Not on the landing page.');
         });
       }
     }
