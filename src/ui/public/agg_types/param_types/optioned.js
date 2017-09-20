@@ -1,14 +1,14 @@
 import _ from 'lodash';
 import { IndexedArray } from 'ui/indexed_array';
-import { AggTypesParamTypesBaseProvider } from 'ui/agg_types/param_types/base';
+import { BaseParamTypeProvider } from './base';
 
-export function AggTypesParamTypesOptionedProvider(Private) {
+export function OptionedParamTypeProvider(Private) {
 
-  const BaseAggParam = Private(AggTypesParamTypesBaseProvider);
+  const BaseParamType = Private(BaseParamTypeProvider);
 
-  _.class(OptionedAggParam).inherits(BaseAggParam);
-  function OptionedAggParam(config) {
-    OptionedAggParam.Super.call(this, config);
+  _.class(OptionedParamType).inherits(BaseParamType);
+  function OptionedParamType(config) {
+    OptionedParamType.Super.call(this, config);
 
     this.options = new IndexedArray({
       index: ['val'],
@@ -22,7 +22,7 @@ export function AggTypesParamTypesOptionedProvider(Private) {
    * @param  {object} selected - the option that was selected
    * @return {any}
    */
-  OptionedAggParam.prototype.serialize = function (selected) {
+  OptionedParamType.prototype.serialize = function (selected) {
     return selected.val;
   };
 
@@ -33,7 +33,7 @@ export function AggTypesParamTypesOptionedProvider(Private) {
    * @param  {any} val - the value that was saved
    * @return {object}
    */
-  OptionedAggParam.prototype.deserialize = function (val) {
+  OptionedParamType.prototype.deserialize = function (val) {
     return this.options.byVal[val];
   };
 
@@ -47,9 +47,9 @@ export function AggTypesParamTypesOptionedProvider(Private) {
    *                               for the agg
    * @return {undefined}
    */
-  OptionedAggParam.prototype.write = function (aggConfig, output) {
+  OptionedParamType.prototype.write = function (aggConfig, output) {
     output.params[this.name] = aggConfig.params[this.name].val;
   };
 
-  return OptionedAggParam;
+  return OptionedParamType;
 }

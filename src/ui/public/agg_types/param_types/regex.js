@@ -1,25 +1,25 @@
 import _ from 'lodash';
-import editorHtml from 'ui/agg_types/controls/regular_expression.html';
-import { AggTypesParamTypesBaseProvider } from 'ui/agg_types/param_types/base';
+import editorHtml from '../controls/regular_expression.html';
+import { BaseParamTypeProvider } from './base';
 
-export function AggTypesParamTypesRegexProvider(Private) {
+export function RegexParamTypeProvider(Private) {
 
-  const BaseAggParam = Private(AggTypesParamTypesBaseProvider);
+  const BaseParamType = Private(BaseParamTypeProvider);
 
-  _.class(RegexAggParam).inherits(BaseAggParam);
-  function RegexAggParam(config) {
+  _.class(RegexParamType).inherits(BaseParamType);
+  function RegexParamType(config) {
     _.defaults(config, { pattern: '' });
-    RegexAggParam.Super.call(this, config);
+    RegexParamType.Super.call(this, config);
   }
 
-  RegexAggParam.prototype.editor = editorHtml;
+  RegexParamType.prototype.editor = editorHtml;
 
   /**
    * Disabled state of the agg param
    *
    * @return {bool}
    */
-  RegexAggParam.prototype.disabled = function () {
+  RegexParamType.prototype.disabled = function () {
     return false;
   };
 
@@ -33,7 +33,7 @@ export function AggTypesParamTypesRegexProvider(Private) {
    *                               for the agg
    * @return {undefined}
    */
-  RegexAggParam.prototype.write = function (aggConfig, output) {
+  RegexParamType.prototype.write = function (aggConfig, output) {
     const param = aggConfig.params[this.name];
     const paramType = aggConfig.type.params.byName[this.name];
 
@@ -49,5 +49,5 @@ export function AggTypesParamTypesRegexProvider(Private) {
     output.params[this.name] = obj;
   };
 
-  return RegexAggParam;
+  return RegexParamType;
 }

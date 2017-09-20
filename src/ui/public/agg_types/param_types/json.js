@@ -1,19 +1,19 @@
 import _ from 'lodash';
-import editorHtml from 'ui/agg_types/controls/raw_json.html';
-import { AggTypesParamTypesBaseProvider } from 'ui/agg_types/param_types/base';
+import editorHtml from '../controls/raw_json.html';
+import { BaseParamTypeProvider } from './base';
 
-export function AggTypesParamTypesRawJsonProvider(Private) {
+export function JsonParamTypeProvider(Private) {
 
-  const BaseAggParam = Private(AggTypesParamTypesBaseProvider);
+  const BaseParamType = Private(BaseParamTypeProvider);
 
-  _.class(RawJSONAggParam).inherits(BaseAggParam);
-  function RawJSONAggParam(config) {
+  _.class(JsonParamType).inherits(BaseParamType);
+  function JsonParamType(config) {
     // force name override
     config = _.defaults(config, { name: 'json' });
-    RawJSONAggParam.Super.call(this, config);
+    JsonParamType.Super.call(this, config);
   }
 
-  RawJSONAggParam.prototype.editor = editorHtml;
+  JsonParamType.prototype.editor = editorHtml;
 
   /**
    * Write the aggregation parameter.
@@ -25,17 +25,17 @@ export function AggTypesParamTypesRawJsonProvider(Private) {
    *                               for the agg
    * @return {undefined}
    */
-  RawJSONAggParam.prototype.write = function (aggConfig, output) {
-    let paramJSON;
+  JsonParamType.prototype.write = function (aggConfig, output) {
+    let paramJson;
     const param = aggConfig.params[this.name];
 
     if (!param) {
       return;
     }
 
-    // handle invalid JSON input
+    // handle invalid Json input
     try {
-      paramJSON = JSON.parse(param);
+      paramJson = JSON.parse(param);
     } catch (err) {
       return;
     }
@@ -70,9 +70,9 @@ export function AggTypesParamTypesRawJsonProvider(Private) {
       return compare(srcA, srcB);
     }
 
-    output.params = filteredCombine(output.params, paramJSON);
+    output.params = filteredCombine(output.params, paramJson);
     return;
   };
 
-  return RawJSONAggParam;
+  return JsonParamType;
 }
