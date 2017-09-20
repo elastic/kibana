@@ -20,7 +20,7 @@ export class PanelHeader extends React.Component {
 
   getExpandToggle() {
     const { isExpanded } = this.props;
-    const classes = classNames('kuiIcon', null, { 'fa-expand': !isExpanded, 'fa-compress': isExpanded });
+    const classes = classNames('kuiIcon', { 'fa-expand': !isExpanded, 'fa-compress': isExpanded });
     return (
       <KuiKeyboardAccessible>
         <a
