@@ -6,9 +6,6 @@ import { KuiKeyboardAccessible } from 'ui_framework/components';
 import { PanelOptionsMenu } from './panel_options_menu';
 
 export class PanelHeader extends React.Component {
-  constructor(props) {
-    super(props);
-  }
 
   getOptionsDropDown() {
     return (

@@ -8,13 +8,9 @@ import {
 } from 'ui_framework/components';
 
 export class PanelOptionsMenu extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      showMenu: false
-    };
-  }
+  state = {
+    showMenu: false
+  };
 
   toggleMenu = () => {
     this.setState({ showMenu: !this.state.showMenu });

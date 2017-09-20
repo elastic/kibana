@@ -36,13 +36,9 @@ const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
 
 
 export class DashboardGrid extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      layout: this.buildLayoutFromPanels()
-    };
-  }
+  state = {
+    layout: this.buildLayoutFromPanels()
+  };
 
   buildLayoutFromPanels() {
     return _.map(this.props.panels, panel => {
