@@ -139,6 +139,8 @@ app.directive('dashboardApp', function ($injector) {
 
       updateState();
 
+      $scope.showFilterBar = () => filterBar.getFilters().length > 0;
+
       $scope.refresh = (...args) => {
         $rootScope.$broadcast('fetch');
         courier.fetch(...args);
