@@ -12,11 +12,12 @@ describe('KuiCodeEditor', () => {
     element = mount(<KuiCodeEditor/>);
   });
 
-  test('should have the hint element', () => {
-    expect(element.find('.kuiCodeEditorKeyboardHint').exists()).toBe(true);
-  });
-
   describe('hint element', () => {
+
+    test('should exist', () => {
+      expect(element.find('.kuiCodeEditorKeyboardHint').exists()).toBe(true);
+    });
+
     test('should be tabable', () => {
       expect(element.find('.kuiCodeEditorKeyboardHint').prop('tabIndex')).toBe('0');
     });
@@ -37,20 +38,24 @@ describe('KuiCodeEditor', () => {
 
   });
 
-  test('bluring the ace textbox should call a passed onBlur prop', () => {
-    const blurSpy = sinon.spy();
-    const el = mount(<KuiCodeEditor onBlur={blurSpy}/>);
-    el.instance().onBlurAce();
-    expect(blurSpy.called).toBe(true);
-  });
+  describe('interaction', () => {
 
-  test('pressing escape in ace textbox will enable overlay', () => {
-    element.instance().onKeydownAce({
-      preventDefault: () => {},
-      stopPropagation: () => {},
-      keyCode: keyCodes.ESCAPE
+    test('bluring the ace textbox should call a passed onBlur prop', () => {
+      const blurSpy = sinon.spy();
+      const el = mount(<KuiCodeEditor onBlur={blurSpy}/>);
+      el.instance().onBlurAce();
+      expect(blurSpy.called).toBe(true);
     });
-    expect(element.find('.kuiCodeEditorKeyboardHint').matchesElement(document.activeElement)).toBe(true);
+
+    test('pressing escape in ace textbox will enable overlay', () => {
+      element.instance().onKeydownAce({
+        preventDefault: () => {},
+        stopPropagation: () => {},
+        keyCode: keyCodes.ESCAPE
+      });
+      expect(element.find('.kuiCodeEditorKeyboardHint').matchesElement(document.activeElement)).toBe(true);
+    });
+
   });
 
 });
