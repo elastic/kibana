@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import { KuiKeyboardAccessible } from 'ui_framework/components';
 import { PanelOptionsMenu } from './panel_options_menu';
 
 export class PanelHeader extends React.Component {
@@ -21,20 +20,19 @@ export class PanelHeader extends React.Component {
   renderExpandToggle() {
     const { isExpanded } = this.props;
     const classes = classNames('kuiIcon', { 'fa-expand': !isExpanded, 'fa-compress': isExpanded });
+    const ariaLabel = isExpanded ? 'Minimize panel' : 'Maximize panel';
     return (
-      <KuiKeyboardAccessible>
-        <a
-          className="kuiMicroButton"
-          aria-label="Expand panel"
-          data-test-subj="dashboardPanelExpandIcon"
-          onClick={this.props.onToggleExpand}
-        >
-          <span
-            aria-hidden="true"
-            className={classes}
-          />
-        </a>
-      </KuiKeyboardAccessible>
+      <button
+        className="kuiMicroButton"
+        aria-label={ariaLabel}
+        data-test-subj="dashboardPanelExpandIcon"
+        onClick={this.props.onToggleExpand}
+      >
+        <span
+          aria-hidden="true"
+          className={classes}
+        />
+      </button>
     );
   }
 
