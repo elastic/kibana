@@ -48,7 +48,7 @@ const IndexPatternFields = ({
   filterBy,
   changePerPage,
 }) => {
-  // console.log('IndexPatternFields', fields);
+  // console.log('IndexPatternFields', fields.length);
   if (fields === undefined) {
     return null;
   }
