@@ -27,15 +27,13 @@ export default class extends Component {
   }
 
   render() {
-
     const sideNav = (
       <KuiSideNav
         mobileTitle="Navigate my favorite comic books"
         toggleOpenOnMobile={this.toggleOpenOnMobile.bind(this)}
         isOpenOnMobile={this.state.isSideNavOpenOnMobile}
-        alternateStyle
+        isInPanel
       >
-
         <KuiSideNavTitle>
           My favorite comic books
         </KuiSideNavTitle>
@@ -75,7 +73,6 @@ export default class extends Component {
             New Mutants
           </button>
         </KuiSideNavItem>
-
       </KuiSideNav>
     );
 

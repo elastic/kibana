@@ -2983,9 +2983,9 @@ table {
   width: 100%;
   text-align: left;
   /**
-   * 1. This toggle also works with KUI link, but we need the outline
-   *    that comes with the focus state.
-   */ }
+     * 1. This toggle also works with KUI link, but we need the outline
+     *    that comes with the focus state.
+     */ }
   .kuiSideNav__mobileToggle:focus {
     outline: none; }
 
@@ -3026,6 +3026,15 @@ table {
   right: -40px;
   top: 32px; }
 
+/**
+ * 1. Panels already have padding, so we need to remove it.
+ */
+.kuiSideNav--inPanel .kuiSideNav__mobileToggle {
+  padding-left: 0;
+  /* 1 */
+  padding-right: 0;
+  /* 1 */ }
+
 @media only screen and (max-width: 768px) {
   /**
    * 1. Animation doesn't work against height. Need max-height instead.
@@ -3045,6 +3054,24 @@ table {
     opacity: 0;
     max-height: 0;
     margin: 0 24px; } }
+
+@media only screen and (min-width: 768px) {
+  .kuiSideNav--inPanel {
+    border-right: 1px solid #D9D9D9;
+    background: linear-gradient(to left, rgba(0, 0, 0, 0.05) 0, #FFF 2px, #FFF 100%);
+    /**
+     * 1. We need the extra specificity to override the original nested selector.
+     * 2. Adjust width to take overlap of border into account.
+     */ }
+    .kuiSideNav--inPanel .kuiSideNavItem.kuiSideNavItem-isSelected {
+      /* 1 */
+      position: relative;
+      width: calc(100% + 1px);
+      /* 2 */
+      box-shadow: none;
+      border: 1px solid #D9D9D9;
+      border-right: none;
+      border-radius: 4px 0 0 4px; } }
 
 .kuiSideNavItem {
   font-size: 14px;
@@ -3087,22 +3114,6 @@ table {
   .kuiSideNavTitle:first-of-type {
     margin-top: 0;
     /* 1 */ }
-
-@media only screen and (min-width: 768px) {
-  .kuiSideNav.kuiSideNav--alternate {
-    border-right: 1px solid #D9D9D9;
-    background: linear-gradient(to left, rgba(0, 0, 0, 0.05) 0, #FFF 2px, #FFF 100%); }
-    .kuiSideNav.kuiSideNav--alternate .kuiSideNavItem.kuiSideNavItem-isSelected {
-      position: relative;
-      width: calc(100% + 1px);
-      box-shadow: none;
-      border: 1px solid #D9D9D9;
-      border-right: none;
-      border-radius: 4px 0 0 4px; } }
-
-.kuiSideNav.kuiSideNav--alternate .kuiSideNav__mobileToggle {
-  padding-left: 0;
-  padding-right: 0; }
 
 .kuiSpacer--xs {
   height: 4px; }
