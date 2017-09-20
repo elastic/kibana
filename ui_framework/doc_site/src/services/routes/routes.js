@@ -142,16 +142,16 @@ const components = [{
   component: CardExample,
   hasReact: true,
 }, {
+  name: 'CollapseButton',
+  component: CollapseButtonExample,
+  hasReact: true,
+}, {
   name: 'ColorPicker',
   component: ColorPickerExample,
   hasReact: true,
 }, {
   name: 'Column',
   component: ColumnExample,
-}, {
-  name: 'CollapseButton',
-  component: CollapseButtonExample,
-  hasReact: true,
 }, {
   name: 'EmptyTablePrompt',
   component: EmptyTablePromptExample,
