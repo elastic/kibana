@@ -7,7 +7,7 @@ import { PanelOptionsMenu } from './panel_options_menu';
 
 export class PanelHeader extends React.Component {
 
-  getOptionsDropDown() {
+  renderOptionsDropDown() {
     return (
       <PanelOptionsMenu
         onEditPanel={this.props.onEditPanel}
@@ -18,7 +18,7 @@ export class PanelHeader extends React.Component {
     );
   }
 
-  getExpandToggle() {
+  renderExpandToggle() {
     const { isExpanded } = this.props;
     const classes = classNames('kuiIcon', { 'fa-expand': !isExpanded, 'fa-compress': isExpanded });
     return (
@@ -50,7 +50,7 @@ export class PanelHeader extends React.Component {
         </span>
 
         <div className="kuiMicroButtonGroup">
-          {this.props.isViewOnlyMode ? this.getExpandToggle() : this.getOptionsDropDown()}
+          {this.props.isViewOnlyMode ? this.renderExpandToggle() : this.renderOptionsDropDown()}
         </div>
       </div>
     );

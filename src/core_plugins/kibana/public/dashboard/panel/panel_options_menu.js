@@ -17,7 +17,7 @@ export class PanelOptionsMenu extends React.Component {
   };
   closeMenu = () => this.setState({ showMenu: false });
 
-  getEditVisualizationMenuItem() {
+  renderEditVisualizationMenuItem() {
     return (
       <PanelMenuItem
         onClick={this.props.onEditPanel}
@@ -28,7 +28,7 @@ export class PanelOptionsMenu extends React.Component {
     );
   }
 
-  getDeleteMenuItem() {
+  renderDeleteMenuItem() {
     return (
       <PanelMenuItem
         onClick={this.props.onDeletePanel}
@@ -39,7 +39,7 @@ export class PanelOptionsMenu extends React.Component {
     );
   }
 
-  getToggleExpandMenuItem() {
+  renderToggleExpandMenuItem() {
     return (
       <PanelMenuItem
         onClick={this.props.onToggleExpandPanel}
@@ -69,9 +69,9 @@ export class PanelOptionsMenu extends React.Component {
         closePopover={this.closeMenu}
       >
         <KuiMenu>
-          {this.getEditVisualizationMenuItem()}
-          {this.getToggleExpandMenuItem()}
-          {this.props.isExpanded ? null : this.getDeleteMenuItem()}
+          {this.renderEditVisualizationMenuItem()}
+          {this.renderToggleExpandMenuItem()}
+          {this.props.isExpanded ? null : this.renderDeleteMenuItem()}
         </KuiMenu>
       </KuiPopover>
     );

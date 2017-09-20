@@ -69,7 +69,7 @@ export class DashboardGrid extends React.Component {
     });
   };
 
-  generateDOM() {
+  renderDOM() {
     const {
       panels,
       onPanelRemoved,
@@ -117,7 +117,7 @@ export class DashboardGrid extends React.Component {
         buildLayoutFromPanels={this.buildLayoutFromPanels()}
         onLayoutChange={this.onLayoutChange}
       >
-        {this.generateDOM()}
+        {this.renderDOM()}
       </ResponsiveSizedGrid>
     );
   }
