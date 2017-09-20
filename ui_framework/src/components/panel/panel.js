@@ -16,6 +16,7 @@ export const KuiPanel = ({
   className,
   paddingSize,
   hasShadow,
+  grow,
   ...rest,
 }) => {
 
@@ -23,7 +24,8 @@ export const KuiPanel = ({
     'kuiPanel',
     paddingSizeToClassNameMap[paddingSize],
     {
-      'kuiPanel-hasShadow': hasShadow,
+      'kuiPanel--shadow': hasShadow,
+      'kuiPanel--flexGrowZero': !grow,
     },
     className
   );
@@ -44,9 +46,11 @@ KuiPanel.propTypes = {
   className: PropTypes.string,
   hasShadow: PropTypes.bool,
   paddingSize: PropTypes.oneOf(SIZES),
+  grow: PropTypes.bool,
 };
 
 KuiPanel.defaultProps = {
   paddingSize: 'm',
   hasShadow: false,
+  grow: true,
 };

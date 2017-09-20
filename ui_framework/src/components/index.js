@@ -43,7 +43,6 @@ export {
   KuiFlexGroup,
   KuiFlexGrid,
   KuiFlexItem,
-  KuiFlexItemPanel,
 } from './flex';
 
 export {

@@ -2,10 +2,6 @@ import React from 'react';
 
 import {
   KuiDescriptionList,
-  KuiFlexItem,
-  KuiFlexGroup,
-  KuiDescriptionListTitle,
-  KuiDescriptionListDescription,
 } from '../../../../components';
 
 const favoriteVideoGames = [
@@ -23,25 +19,9 @@ const favoriteVideoGames = [
   },
 ];
 export default () => (
-  <KuiFlexGroup>
-    <KuiFlexItem>
-      <KuiDescriptionList type="inline" listItems={favoriteVideoGames} />
-    </KuiFlexItem>
-    <KuiFlexItem>
-      <KuiDescriptionList  type="inline">
-        <KuiDescriptionListTitle>
-          Dota 2
-        </KuiDescriptionListTitle>
-        <KuiDescriptionListDescription>
-          A videogame that I have spent way too much time on over the years.
-        </KuiDescriptionListDescription>
-        <KuiDescriptionListTitle>
-          Kings Quest VI
-        </KuiDescriptionListTitle>
-        <KuiDescriptionListDescription>
-          The game that forced me to learn DOS.
-        </KuiDescriptionListDescription>
-      </KuiDescriptionList>
-    </KuiFlexItem>
-  </KuiFlexGroup>
+  <KuiDescriptionList
+    type="inline"
+    listItems={favoriteVideoGames}
+    style={{ maxWidth: '400px' }}
+  />
 );

@@ -2,48 +2,59 @@
   position: relative;
   height: 100%;
 }
-// These mobile children are hidden in everything but mobile view.
-.kuiSideNav__mobileToggle {
-  display: none;
-  border-bottom: $kuiBorderThin;
-  padding: $kuiSize $kuiSizeL;
-  width: 100%;
-  text-align: left;
 
-  /**
-   * 1. This toggle also works with KUI link, but we need the outline
-   *    that comes with the focus state.
-   */
-  &:focus {
-    outline: none;
+  // These mobile children are hidden in everything but mobile view.
+  .kuiSideNav__mobileToggle {
+    display: none;
+    border-bottom: $kuiBorderThin;
+    padding: $kuiSize $kuiSizeL;
+    width: 100%;
+    text-align: left;
+
+    /**
+     * 1. This toggle also works with KUI link, but we need the outline
+     *    that comes with the focus state.
+     */
+    &:focus {
+      outline: none;
+    }
   }
-}
 
-.kuiSideNav__mobileIcon {
-  fill: $kuiColorPrimary;
-}
+  .kuiSideNav__mobileIcon {
+    fill: $kuiColorPrimary;
+  }
 
-.kuiSideNav__mobileWrap {
-  display: flex;
-}
+  .kuiSideNav__mobileWrap {
+    display: flex;
+  }
 
-.kuiSideNav__mobileTitle {
-  flex-grow: 1;
-  color: $kuiColorPrimary;
-}
+  .kuiSideNav__mobileTitle {
+    flex-grow: 1;
+    color: $kuiColorPrimary;
+  }
 
-.kuiSideNav__hideButton {
-  width: $kuiSizeL;
-  height: $kuiSizeL;
-  border-radius: $kuiBorderRadius;
-  border: $kuiBorderThin;
-  background: $kuiColorEmptyShade;
-  position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  right: -$kuiSizeXXL;
-  top: $kuiSizeXL;
+  .kuiSideNav__hideButton {
+    width: $kuiSizeL;
+    height: $kuiSizeL;
+    border-radius: $kuiBorderRadius;
+    border: $kuiBorderThin;
+    background: $kuiColorEmptyShade;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    right: -$kuiSizeXXL;
+    top: $kuiSizeXL;
+  }
+
+/**
+ * 1. Panels already have padding, so we need to remove it.
+ */
+.kuiSideNav--inPanel {
+  .kuiSideNav__mobileToggle {
+    padding-left: 0; /* 1 */
+    padding-right: 0; /* 1 */
+  }
 }
 
 @include screenXSmall {
@@ -70,5 +81,25 @@
     opacity: 0;
     max-height: 0;
     margin: 0 $kuiSizeL;
+  }
+}
+
+@include screenSmallMediumLarge {
+  .kuiSideNav--inPanel {
+    border-right: $kuiBorderThin;
+    background: linear-gradient(to left, rgba(0,0,0,.05) 0, $kuiColorEmptyShade $kuiSizeXS / 2, $kuiColorEmptyShade 100%);
+
+    /**
+     * 1. We need the extra specificity to override the original nested selector.
+     * 2. Adjust width to take overlap of border into account.
+     */
+    .kuiSideNavItem.kuiSideNavItem-isSelected { /* 1 */
+      position: relative;
+      width: calc(100% + 1px); /* 2 */
+      box-shadow: none;
+      border: $kuiBorderThin;
+      border-right: none;
+      border-radius: $kuiBorderRadius 0 0 $kuiBorderRadius;
+    }
   }
 }

@@ -9,7 +9,3 @@ export {
 export {
   KuiFlexItem,
 } from './flex_item';
-
-export {
-  KuiFlexItemPanel,
-} from './flex_item_panel';

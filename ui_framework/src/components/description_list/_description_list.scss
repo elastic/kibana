@@ -4,7 +4,7 @@
     font-weight: $kuiFontWeightMedium;
   }
 
-  .kuiDescriptionList__desc {
+  .kuiDescriptionList__description {
     color: $kuiColorDarkShade;
   }
 
@@ -20,7 +20,7 @@
       }
     }
 
-    .kuiDescriptionList__desc {
+    .kuiDescriptionList__description {
       @include kuiFontSizeS;
     }
 
@@ -40,7 +40,7 @@
         @include kuiFontSizeS;
       }
 
-      .kuiDescriptionList__desc {
+      .kuiDescriptionList__description {
         @include kuiFontSizeS;
       }
     }
@@ -67,7 +67,7 @@
       padding-right: $kuiSizeS;
     }
 
-    .kuiDescriptionList__desc {
+    .kuiDescriptionList__description {
       @include kuiFontSizeM;
       flex-basis: 50%;
       padding-left: $kuiSizeS;
@@ -87,7 +87,7 @@
         @include kuiFontSizeS;
       }
 
-      .kuiDescriptionList__desc {
+      .kuiDescriptionList__description {
         @include kuiFontSizeS;
       }
     }
@@ -111,7 +111,7 @@
       }
     }
 
-    .kuiDescriptionList__desc {
+    .kuiDescriptionList__description {
       @include kuiFontSizeS;
       display: inline;
       word-break: break-all;
@@ -124,7 +124,7 @@
         @include kuiFontSizeXS;
       }
 
-      .kuiDescriptionList__desc {
+      .kuiDescriptionList__description {
         @include kuiFontSizeXS;
       }
     }

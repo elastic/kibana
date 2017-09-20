@@ -5,7 +5,5 @@ import {
 } from '../../../../components';
 
 export default () => (
-  <div>
-    <KuiProgress size="xs" />
-  </div>
+  <KuiProgress size="xs" />
 );

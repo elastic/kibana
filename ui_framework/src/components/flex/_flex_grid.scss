@@ -1,6 +1,5 @@
 .kuiFlexGrid {
   display: flex;
-  align-items: stretch;
   flex-wrap: wrap;
   margin-bottom: 0;
 
@@ -28,15 +27,25 @@ $fractions: (
 );
 
 @each $gutterName, $gutterSize in $gutterTypes {
-  @each $fraction, $percentage in $fractions {
-    $halfGutterSize: $gutterSize * 0.5;
+  $halfGutterSize: $gutterSize * 0.5;
 
+  /**
+   * Uncouple the gutter margin from the column widths to support cases where we use a FlexGrid
+   * without columns.
+   */
+  .kuiFlexGrid--#{$gutterName} {
+    > .kuiFlexItem {
+      margin: $halfGutterSize;
+    }
+  }
+
+  @each $fraction, $percentage in $fractions {
     .kuiFlexGrid--#{$gutterName} {
       margin: -$halfGutterSize;
+      align-items: stretch;
 
       &.kuiFlexGrid--#{$fraction} {
         > .kuiFlexItem {
-          margin: $halfGutterSize;
           flex-basis: calc(#{$percentage} - #{$gutterSize});
         }
       }

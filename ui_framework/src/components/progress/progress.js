@@ -49,8 +49,8 @@ export const KuiProgress = ({
     className
   );
 
-  // Because of a FireFox issue with animation,
-  // indeterminate progress needs to use a div.
+  // Because of a FireFox issue with animation, indeterminate progress needs to use a div.
+  // See https://css-tricks.com/html5-progress-element/.
   let progressType = null;
   if (max) {
     progressType = (

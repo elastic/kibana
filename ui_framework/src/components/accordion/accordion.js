@@ -124,8 +124,3 @@ KuiAccordion.propTypes = {
   buttonContent: PropTypes.node,
   extraAction: PropTypes.node,
 };
-
-KuiAccordion.defaultProps = {
-  buttonContent: <div>Click to open. Replace me with the buttonContent prop.</div>,
-  children: <div>Opened content. Replace me by adding chrildren to this component.</div>,
-};
