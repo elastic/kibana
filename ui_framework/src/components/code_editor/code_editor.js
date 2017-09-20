@@ -15,7 +15,7 @@ export class KuiCodeEditor extends Component {
     this.idGenerator = htmlIdGenerator();
   }
 
-  enableOverlay() {
+  stopEditing() {
     this.setState({ isHintActive: true });
   }
 
@@ -23,7 +23,7 @@ export class KuiCodeEditor extends Component {
     if (ev.keyCode === keyCodes.ESCAPE) {
       ev.preventDefault();
       ev.stopPropagation();
-      this.enableOverlay();
+      this.stopEditing();
       this.refs.kuiCodeEditorHint.focus();
     }
   }
@@ -37,7 +37,7 @@ export class KuiCodeEditor extends Component {
   };
 
   onBlurAce = (...args) => {
-    this.enableOverlay();
+    this.stopEditing();
     if (this.props.onBlur) {
       this.props.onBlur(...args);
     }
