@@ -121,4 +121,3 @@ describe('defaultFocusedButton', () => {
     expect(document.activeElement).toEqual(button);
   });
 });
-

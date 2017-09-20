@@ -1,3 +1,14 @@
 .kuiLink {
-  @include link;
+  @include kuiLink;
+
+  color: $kuiLinkColor;
+
+  &:hover {
+    color: darken($kuiLinkColor, 10%);
+  }
+
+  &:focus {
+    background: $kuiFocusBackgroundColor;
+    outline: solid 3px $kuiFocusBackgroundColor;
+  }
 }

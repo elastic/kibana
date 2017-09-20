@@ -1,0 +1,21 @@
+/**
+ * 1. Coerce inline form elements to behave as block-level elements.
+ * 2. For inline forms, we need to add padding if the label doesn't exist.
+ */
+.kuiFormRow {
+  display: flex; /* 1 */
+  flex-direction: column; /* 1 */
+  max-width: $kuiFormMaxWidth;
+
+  + * {
+    margin-top: $kuiSizeL;
+  }
+
+  &.kuiFormRow--hasEmptyLabelSpace {
+    padding-top: $kuiFontSizeXS + $kuiSizeS; /* 2 */
+  }
+
+  .kuiFormRow__text + .kuiFormRow__text {
+    padding-top: 0;
+  }
+}

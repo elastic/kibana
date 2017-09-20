@@ -1,13 +1,14 @@
 .kuiModalOverlay {
   position: fixed;
-  z-index: $globalModalDepth;
+  z-index: $kuiZMask;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   display: flex;
+  background: transparentize($kuiColorEmptyShade, .1);
   align-items: center;
   justify-content: center;
   padding-bottom: 10vh;
-  background-color: $modalOverlayBackground;
+  animation: kuiAnimFadeIn $kuiAnimSpeedFast ease-in;
 }

@@ -1,6 +1,9 @@
 // Borders
 
-$globalBorderColor: $globalColorLightGray;
-$globalBorderRadius: 4px;
-$globalBorderThick: 2px solid $globalBorderColor;
-$globalBorderThin: 1px solid $globalBorderColor;
+$kuiBorderWidthThin: 1px;
+$kuiBorderWidthThick: 2px;
+
+$kuiBorderColor: $kuiColorLightShade;
+$kuiBorderRadius: 4px;
+$kuiBorderThick: $kuiBorderWidthThick solid $kuiBorderColor;
+$kuiBorderThin: $kuiBorderWidthThin solid $kuiBorderColor;

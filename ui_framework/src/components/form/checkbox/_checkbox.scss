@@ -1,0 +1,71 @@
+.kuiCheckbox {
+  position: relative;
+  height: $kuiSizeL;
+
+  /**
+   * 1. Float above the visual checkbox and match its dimension, so that when users try to click it
+   *    they actually click this input.
+   */
+  .kuiCheckbox__input {
+    position: absolute; /* 1 */
+    opacity: 0; /* 1 */
+    height: $kuiSizeL; /* 1 */
+    width: $kuiSizeL; /* 1 */
+    z-index: 1; /* 1 */
+    margin: 0; /* 1 */
+    cursor: pointer;
+
+    &:checked ~ .kuiCheckbox__square {
+      .kuiCheckbox__check {
+        background-color: $kuiTextColor;
+        mask: url('../src/components/icon/assets/check.svg') center center no-repeat;
+      }
+    }
+
+    &:focus ~ .kuiCheckbox__square,
+    &:active ~ .kuiCheckbox__square {
+      background-color: $kuiFocusBackgroundColor;
+      border-color: $kuiColorPrimary;
+    }
+  }
+
+  .kuiCheckbox__square {
+    position: absolute;
+    height: $kuiSizeL;
+    width: $kuiSizeL;
+    border-radius: $kuiBorderRadius;
+    border: $kuiBorderThin;
+    background: $kuiFormBackgroundColor;
+    z-index: 0;
+  }
+
+    .kuiCheckbox__check {
+      height: 100%;
+      width: 100%;
+    }
+
+  .kuiCheckbox__label {
+    position: absolute;
+    padding-left: $kuiSizeXL;
+    line-height: $kuiSizeL;
+    display: block;
+    font-weight: $kuiFontWeightRegular;
+    z-index: 2;
+    font-size: $kuiFontSizeS;
+    cursor: pointer;
+  }
+
+  &.kuiCheckbox--alternate .kuiCheckbox__input {
+    &:checked ~ .kuiCheckbox__square {
+      background: $kuiColorPrimary;
+      border-color: $kuiColorPrimary;
+
+      .kuiCheckbox__check {
+        background-color: $kuiColorEmptyShade;
+      }
+    }
+    &:focus:checked ~.kuiCheckbox__square {
+      background: tintOrShade($kuiColorPrimary, 20%, 20%);
+    }
+  }
+}

@@ -93,33 +93,6 @@ module.exports = class extends Generator {
       );
     };
 
-    const writeSandbox = () => {
-      const fileName = config.name;
-      const componentExampleName = utils.makeComponentName(fileName, false);
-
-      const path = DOCUMENTATION_PAGE_PATH;
-
-      const vars = config.documentationVars = {
-        componentExampleName,
-        fileName,
-      };
-
-      const sandboxPath
-        = config.documentationPageDemoPath
-        = `${path}/${config.name}/${fileName}`;
-
-      this.fs.copyTpl(
-        this.templatePath('documentation_sandbox.html'),
-        this.destinationPath(`${sandboxPath}_sandbox.html`)
-      );
-
-      this.fs.copyTpl(
-        this.templatePath('documentation_sandbox.js'),
-        this.destinationPath(`${sandboxPath}_sandbox.js`),
-        vars
-      );
-    };
-
     switch (this.fileType) {
       case 'documentation':
         writeDocumentationPage();
@@ -128,10 +101,6 @@ module.exports = class extends Generator {
 
       case 'demo':
         writeDocumentationPageDemo(config.demoName, config.folderName);
-        break;
-
-      case 'sandbox':
-        writeSandbox();
         break;
     }
   }
@@ -162,15 +131,13 @@ module.exports = class extends Generator {
         `    type: GuideSectionTypes.HTML,\n` +
         `    code: ${componentExamplePrefix}Html,\n` +
         `  }]}\n` +
-        `>\n` +
-        `  <GuideText>\n` +
-        `    Description needed: how to use the ${componentExampleName} component.\n` +
-        `  </GuideText>\n` +
-        `\n` +
-        `  <GuideDemo>\n` +
+        `  text={\n` +
+        `    <p>Description needed: how to use the ${componentExampleName} component.</p>\n` +
+        ` }\n` +
+        `  demo={\n` +
         `    <${componentExampleName} />\n` +
-        `  </GuideDemo>\n` +
-        `</GuideSection>\n`
+        ` }\n` +
+        `/>\n`
       );
     };
 
@@ -206,10 +173,6 @@ module.exports = class extends Generator {
 
       case 'demo':
         showImportDemoSnippet();
-        break;
-
-      case 'sandbox':
-        showImportRouteSnippet('Sandbox', true);
         break;
     }
     this.log('------------------------------------------------');

@@ -1,0 +1,102 @@
+// Some mixins that help us deal with browser scaling of text more consistantly.
+// Essentially, fonts across kui should scale agains the root html element, not
+// against parent inheritance.
+
+
+// Typography mixins
+
+@function convertToRem($size) {
+  @return #{$size / $kuiFontSize}rem;
+}
+
+// Spit out rem and px
+
+@mixin fontSize($size: $kuiFontSize) {
+  font-size: $size;
+  font-size: convertToRem($size);
+}
+
+// Families
+
+$kuiFontFamily: "Roboto", Helvetica, Arial, sans-serif;
+$kuiCodeFontFamily: "Roboto Mono", monospace;
+
+// Font sizes
+
+$kuiFontSize:       $kuiSize;
+
+$kuiFontSizeXS:     12px;
+$kuiFontSizeS:      14px;
+$kuiFontSizeM:      $kuiFontSize;
+$kuiFontSizeL:      24px;
+$kuiFontSizeXL:     32px;
+$kuiFontSizeXXL:    48px;
+
+// Line height
+
+$kuiLineHeight:     1.5;
+
+
+// Font weights
+
+$kuiFontWeightLight:    300;
+$kuiFontWeightRegular:  400;
+$kuiFontWeightMedium:   500;
+
+// Our base fonts
+
+@mixin kuiFont {
+  font-family: $kuiFontFamily;
+  font-weight: $kuiFontWeightRegular;
+}
+
+@mixin kuiCodeFont {
+  font-family: $kuiCodeFontFamily;
+}
+
+@mixin kuiTitle {
+  color: $kuiTitleColor;
+  font-weight: $kuiFontWeightLight;
+}
+
+@mixin kuiText {
+  color: $kuiTextColor;
+  font-weight: $kuiFontWeightRegular;
+}
+
+// Font sizing extends, using rem mixin
+
+@mixin kuiFontSize {
+  @include fontSize($kuiFontSize);
+  line-height: $kuiLineHeight;
+}
+
+@mixin kuiFontSizeXS {
+  @include fontSize($kuiFontSizeXS);
+  line-height: $kuiLineHeight;
+}
+
+@mixin kuiFontSizeS {
+  @include fontSize($kuiFontSizeS);
+  line-height: $kuiLineHeight;
+}
+
+@mixin kuiFontSizeM {
+  @include fontSize($kuiFontSizeM);
+  line-height: $kuiLineHeight;
+}
+
+@mixin kuiFontSizeL {
+  @include fontSize($kuiFontSizeL);
+  line-height: $kuiLineHeight;
+}
+
+@mixin kuiFontSizeXL {
+  @include fontSize($kuiFontSizeXL);
+  line-height: $kuiLineHeight;
+}
+
+@mixin kuiFontSizeXXL {
+  @include fontSize($kuiFontSizeXXL);
+  line-height: $kuiLineHeight;
+}

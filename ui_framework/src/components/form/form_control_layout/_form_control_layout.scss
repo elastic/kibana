@@ -1,0 +1,17 @@
+.kuiFormControlLayout {
+  @include kuiFormControlSize;
+
+  display: inline-block;
+  position: relative;
+}
+
+  .kuiFormControlLayout__icon {
+    position: absolute;
+    top: $kuiSizeM;
+    left: $kuiSizeM;
+  }
+
+  .kuiFormControlLayout__icon--right {
+    left: auto;
+    right: $kuiSizeM;
+  }

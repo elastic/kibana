@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiFieldSearch is rendered 1`] = `
+<div
+  class="kuiFormControlLayout"
+>
+  <input
+    aria-label="aria-label"
+    class="kuiFieldSearch testClass1 testClass2"
+    data-test-subj="test subject string"
+    type="search"
+  />
+  <svg
+    class="kuiIcon kuiFormControlLayout__icon kuiIcon--medium"
+  >
+    <title>
+      search icon
+    </title>
+    <use
+      href="#search"
+    />
+  </svg>
+</div>
+`;

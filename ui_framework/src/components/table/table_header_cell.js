@@ -2,8 +2,23 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
+import {
+  KuiIcon,
+} from '../../components';
+
+import {
+  LEFT_ALIGNMENT,
+  RIGHT_ALIGNMENT,
+} from '../../services';
+
+const ALIGNMENT = [
+  LEFT_ALIGNMENT,
+  RIGHT_ALIGNMENT,
+];
+
 export const KuiTableHeaderCell = ({
   children,
+  align,
   onSort,
   isSorted,
   isSortAscending,
@@ -13,16 +28,21 @@ export const KuiTableHeaderCell = ({
 }) => {
   const classes = classNames('kuiTableHeaderCell', className);
 
+  const contentClasses = classNames('kuiTableCellContent', className, {
+    'kuiTableCellContent--alignRight': align === RIGHT_ALIGNMENT,
+  });
+
   if (onSort) {
-    const sortIconClasses = classNames('kuiTableSortIcon kuiIcon', {
-      'fa-long-arrow-up': isSortAscending,
-      'fa-long-arrow-down': !isSortAscending,
-    });
+    const sortIcon = (
+      <KuiIcon
+        className="kuiTableSortIcon"
+        type={isSortAscending ? 'sortUp' : 'sortDown'}
+        size="medium"
+      />
+    );
 
-    const sortIcon = <span className={sortIconClasses} aria-hidden="true" />;
-
-    const buttonClasses = classNames('kuiTableHeaderCellButton', {
-      'kuiTableHeaderCellButton-isSorted': isSorted,
+    const buttonClasses = classNames('kuiTableHeaderButton', {
+      'kuiTableHeaderButton-isSorted': isSorted,
     });
 
     const columnTitle = ariaLabel ? ariaLabel : children;
@@ -38,7 +58,7 @@ export const KuiTableHeaderCell = ({
           onClick={onSort}
           aria-label={statefulAriaLabel}
         >
-          <span className="kuiTableHeaderCell__liner">
+          <span className={contentClasses}>
             {children}
             {sortIcon}
           </span>
@@ -53,7 +73,7 @@ export const KuiTableHeaderCell = ({
       aria-label={ariaLabel}
       {...rest}
     >
-      <div className="kuiTableHeaderCell__liner">
+      <div className={contentClasses}>
         {children}
       </div>
     </th>
@@ -63,7 +83,12 @@ export const KuiTableHeaderCell = ({
 KuiTableHeaderCell.propTypes = {
   children: PropTypes.node,
   className: PropTypes.string,
+  align: PropTypes.oneOf(ALIGNMENT),
   onSort: PropTypes.func,
   isSorted: PropTypes.bool,
   isSortAscending: PropTypes.bool,
+};
+
+KuiTableHeaderCell.defaultProps = {
+  align: LEFT_ALIGNMENT,
 };

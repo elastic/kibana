@@ -1,0 +1,35 @@
+.kuiSideNavItem {
+  @include kuiFontSizeS;
+
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: $kuiSizeXS $kuiSizeS;
+  color: $kuiColorDarkShade;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border: $kuiBorderThin;
+  border-color: transparent;
+
+  &.kuiSideNavItem-isSelected {
+    @include kuiBottomShadowSmall;
+
+    color: $kuiColorSecondary;
+    border-left: $kuiBorderThick;
+    border-left-color: $kuiColorSecondary;
+    background-color: $kuiColorEmptyShade;
+  }
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus {
+    background-color: $kuiFocusBackgroundColor;
+  }
+
+  &:focus:not(.kuiSideNavItem-isSelected) {
+    border: solid 1px darken($kuiFocusBackgroundColor, 10%);
+  }
+}

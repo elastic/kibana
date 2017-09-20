@@ -16,5 +16,18 @@ test('renders KuiTableRow', () => {
       <KuiTableRowCell>hi</KuiTableRowCell>
     </KuiTableRow>
   );
+
   expect(render(component)).toMatchSnapshot();
+});
+
+describe('isSelected', () => {
+  test('renders true when specified', () => {
+    const component = (
+      <KuiTableRow isSelected={true}>
+        <KuiTableRowCell />
+      </KuiTableRow>
+    );
+
+    expect(render(component)).toMatchSnapshot();
+  });
 });

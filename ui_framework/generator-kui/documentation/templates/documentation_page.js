@@ -3,13 +3,14 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideCode,
-  GuideDemo,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
-  GuideText,
 } from '../../components';
+
+import {
+  KuiCode,
+} from '../../../../components';
 
 import <%= componentExampleName %> from './<%= fileName %>';
 const <%= componentExamplePrefix %>Source = require('!!raw!./<%= fileName %>');
@@ -26,14 +27,12 @@ export default props => (
         type: GuideSectionTypes.HTML,
         code: <%= componentExamplePrefix %>Html,
       }]}
-    >
-      <GuideText>
-        Description needed: how to use the <GuideCode><%= componentExampleName %></GuideCode> component.
-      </GuideText>
-
-      <GuideDemo>
-        <<%= componentExampleName %> />
-      </GuideDemo>
-    </GuideSection>
+      text={
+        <p>
+          Description needed: how to use the <KuiCode><%= componentExampleName %></KuiCode> component.
+        </p>
+      }
+      demo={<<%= componentExampleName %> />}
+    />
   </GuidePage>
 );

@@ -1,0 +1,49 @@
+.kuiHeaderAlert {
+  text-align: left;
+  min-width: 300px;
+  position: relative;
+  margin: 0 (-$kuiSize);
+  padding: $kuiSize;
+  border-top: $kuiBorderThin;
+
+  &:hover {
+    .kuiHeaderAlert__dismiss {
+      opacity: 1;
+    }
+  }
+}
+
+  .kuiHeaderAlert__dismiss {
+    opacity: 0;
+    position: absolute;
+    right: $kuiSize;
+    top: $kuiSize;
+    transition: opacity $kuiAnimSpeedNormal ease-in;
+    cursor: pointer;
+  }
+
+  .kuiHeaderAlert__title {
+    font-weight: $kuiFontWeightMedium;
+    @include kuiFontSizeM;
+    padding-right: $kuiSizeL; // Accounts for the dismiss button.
+  }
+
+  .kuiHeaderAlert__text {
+    @include kuiFontSizeXS;
+    margin-bottom: $kuiSizeS;
+  }
+
+  .kuiHeaderAlert__action {
+    @include kuiFontSizeXS;
+    color: $kuiLinkColor;
+
+    &:focus {
+      outline: solid $kuiFontSizeXS / 2 $kuiFocusBackgroundColor;
+    }
+  }
+
+  .kuiHeaderAlert__date {
+    @include kuiFontSizeXS;
+    color: $kuiColorDarkShade;
+    text-align: right;
+  }

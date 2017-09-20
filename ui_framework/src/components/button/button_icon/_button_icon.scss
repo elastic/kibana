@@ -1,0 +1,59 @@
+.kuiButtonIcon {
+  @include kuiButton;
+
+  border-color: transparent;
+  background-color: transparent;
+  box-shadow: none;
+  height: $kuiSizeXL;
+  width: $kuiSizeXL;
+
+  // Account for border.
+  .kuiButtonIcon__icon {
+    transform: translateY(-2px);
+  }
+
+  &:disabled {
+    color: $kuiButtonColorDisabled;
+    pointer-events: none;
+
+    .kuiButtonIcon__icon {
+      fill: $kuiButtonColorDisabled;
+    }
+
+    &:hover, &:focus {
+      background-color: $kuiColorEmptyShade;
+      text-decoration: none;
+    }
+  }
+}
+
+// Modifier naming and colors.
+$buttonTypes: (
+  primary: $kuiColorPrimary,
+  danger: $kuiColorDanger,
+  disabled: tintOrShade($kuiTextColor, 70%, 80%),
+  ghost: #FFF, // Ghost is special, and does not care about theming.
+);
+
+// Create button modifiders based upon the map.
+@each $name, $color in $buttonTypes {
+  .kuiButtonIcon--#{$name} {
+    color: $color;
+
+    .kuiButtonIcon__icon {
+      fill: $color;
+    }
+
+    &:focus {
+      background-color: transparentize($color, .9);
+    }
+
+    &:hover, &:focus {
+      background-color: transparentize($color, .9);
+
+      @if ($name == 'disabled') {
+        cursor: not-allowed;
+      }
+    }
+  }
+}

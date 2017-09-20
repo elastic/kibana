@@ -1,0 +1,13 @@
+.kuiPageContentHeader {
+  margin-bottom: $kuiSizeL;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@include screenXSmall {
+  .kuiPageContentHeader {
+    flex-direction: column;
+  }
+}

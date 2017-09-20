@@ -1,61 +1,42 @@
 import React from 'react';
 
+import { Link } from 'react-router';
+
+import { renderToHtml } from '../../services';
+
 import {
-  GuideDemo,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
-  GuideText,
 } from '../../components';
 
-const panelHtml = require('./panel.html');
-const panelWithToolBarHtml = require('./panel_with_toolbar.html');
-const panelWithHeaderSectionsHtml = require('./panel_with_header_sections.html');
+import {
+  KuiCode,
+} from '../../../../components';
+
+import Panel from './panel';
+const panelSource = require('!!raw!./panel');
+const panelHtml = renderToHtml(Panel);
 
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="Panel"
       source={[{
+        type: GuideSectionTypes.JS,
+        code: panelSource,
+      }, {
         type: GuideSectionTypes.HTML,
         code: panelHtml,
       }]}
-    >
-      <GuideDemo
-        html={panelHtml}
-      />
-    </GuideSection>
-
-    <GuideSection
-      title="Panel with PanelHeaderSections"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: panelWithHeaderSectionsHtml,
-      }]}
-    >
-      <GuideText>
-        PanelHeaders can have sections.
-      </GuideText>
-
-      <GuideDemo
-        html={panelWithHeaderSectionsHtml}
-      />
-    </GuideSection>
-
-    <GuideSection
-      title="Panel with Toolbar"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: panelWithToolBarHtml,
-      }]}
-    >
-      <GuideText>
-        Panels can live within toolbar sections. This is normally used as replacement for an empty table.
-      </GuideText>
-
-      <GuideDemo
-        html={panelWithToolBarHtml}
-      />
-    </GuideSection>
+      text={
+        <p>
+          <KuiCode>Panel</KuiCode> is a simple wrapper component to add
+          depth to a contained layout. It it commonly used as a base for
+          other larger components like <Link to="/page">Page</Link> and <Link to="/popover">Popover</Link>.
+        </p>
+      }
+      demo={<Panel />}
+    />
   </GuidePage>
 );

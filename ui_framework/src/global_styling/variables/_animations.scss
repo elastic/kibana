@@ -1,9 +1,33 @@
 // Animations
 
-$globalAnimSlightBounce: cubic-bezier(0.34,1.61,0.7,1);
-$globalAnimSlightResistance: cubic-bezier(0.694, 0.0482, 0.335, 1);
-$globalAnimSpeedVeryFast: 90ms;
-$globalAnimSpeedFast: 150ms;
-$globalAnimSpeedNormal: 250ms;
-$globalAnimSpeedSlow: 350ms;
-$globalAnimSpeedVerySlow: 500ms;
+$kuiAnimSlightBounce: cubic-bezier(0.34,1.61,0.7,1);
+$kuiAnimSlightResistance: cubic-bezier(0.694, 0.0482, 0.335, 1);
+
+$kuiAnimSpeedExtraFast: 90ms;
+$kuiAnimSpeedFast: 150ms;
+$kuiAnimSpeedNormal: 250ms;
+$kuiAnimSpeedSlow: 350ms;
+$kuiAnimSpeedExtraSlow: 500ms;
+
+@keyframes kuiAnimFadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes kuiGrow {
+  0% {
+    opacity: 0;
+  }
+  1% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

@@ -41,6 +41,14 @@ module.exports = {
       loaders: ['style', 'css', 'postcss', 'sass'],
       exclude: /node_modules/
     }, {
+      test: /\.css$/,
+      loaders: ['style', 'css'],
+      exclude: /node_modules/
+    }, {
+      test: /\.useable\.css$/,
+      loaders: ['style/useable', 'css'],
+      exclude: /node_modules/
+    }, {
       test: /\.html$/,
       loader: 'html',
       exclude: /node_modules/

@@ -1,0 +1,92 @@
+.kuiText {
+  @include kuiText;
+  @include kuiFontSizeM;
+
+  a {
+    color: $kuiLinkColor;
+
+    &:hover {
+      color: darken($kuiLinkColor, 10%);
+      text-decoration: underline;
+    }
+  }
+
+  img {
+    display: block;
+    width: 100%;
+  }
+
+  p,
+  ul,
+  ol,
+  img {
+    margin-bottom: $kuiSizeL;
+  }
+
+  ul {
+    list-style: disc;
+    margin-left: $kuiSizeL;
+  }
+
+  ol {
+    list-style: decimal;
+    margin-left: $kuiSizeL;
+  }
+
+  * + h1,
+  * + h2,
+  * + h3,
+  * + h4,
+  * + h5,
+  * + h6 {
+    margin-top: $kuiSizeXL
+  }
+
+  h1,h2,h3,h4,h5,h6 {
+    @include kuiTitle;
+    margin-bottom: $kuiSizeS;
+  }
+
+  h1 {
+    font-size: 200%;
+  }
+
+  h2 {
+    font-size: 150%;
+    line-height: $kuiSizeXL;
+  }
+
+  h3 {
+    font-weight: $kuiFontWeightMedium;
+  }
+
+  &.kuiText--small {
+    @include kuiFontSizeS;
+
+    * + h1,
+    * + h2,
+    * + h3,
+    * + h4,
+    * + h5,
+    * + h6 {
+      margin-top: $kuiSizeL;
+    }
+
+    p,
+    ul,
+    ol,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    img {
+      margin-bottom: $kuiFontSizeS;
+    }
+  }
+
+  > :last-child {
+    margin-bottom: 0 !important;
+  }
+}

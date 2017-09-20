@@ -1,0 +1,54 @@
+.kuiAccordionForm__children {
+  padding: $kuiSizeL;
+}
+
+.kuiAccordionForm__extraAction {
+  opacity: 0;
+  transition: opacity $kuiAnimSpeedNormal $kuiAnimSlightResistance;
+
+  &:focus {
+    opacity: 1;
+  }
+}
+
+.kuiAccordionForm__title {
+  display: inline-block;
+}
+
+.kuiAccordionForm__button {
+  padding: $kuiSize;
+
+  &:hover {
+    text-decoration: none;
+
+    .kuiAccordionForm__title {
+      text-decoration: underline;
+    }
+  }
+
+  &:focus {
+    text-decoration: none;
+    background-color: transparent;
+
+    .kuiAccordionForm__title {
+      text-decoration: underline;
+      background-color: $kuiFocusBackgroundColor;
+      outline: solid $kuiSizeXS / 2 $kuiFocusBackgroundColor;
+    }
+  }
+}
+.kuiAccordionForm {
+  border-top: $kuiBorderThin;
+  border-bottom: $kuiBorderThin;
+
+  & + .kuiAccordionForm {
+    border-top: none;
+  }
+
+  &:hover {
+    .kuiAccordionForm__extraAction {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+}

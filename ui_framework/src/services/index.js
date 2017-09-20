@@ -8,6 +8,11 @@ export {
   htmlIdGenerator
 } from './accessibility';
 
-export { SortableProperties } from './sort';
+export {
+  SortableProperties,
+} from './sort';
 
-export { LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from './alignment';
+export {
+  LEFT_ALIGNMENT,
+  RIGHT_ALIGNMENT,
+} from './alignment';

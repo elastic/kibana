@@ -2,65 +2,138 @@ import React from 'react';
 
 import {
   KuiButton,
-  KuiButtonIcon,
-} from '../../../../components';
+} from '../../../../components/';
 
 export default () => (
   <div>
     <KuiButton
-      buttonType="primary"
-      icon={<KuiButtonIcon type="create" />}
+      onClick={() => window.alert('Button clicked')}
+      iconType="arrowUp"
     >
-      Create
+      Primary
     </KuiButton>
 
-    <br />
-    <br />
+    &nbsp;&nbsp;
 
     <KuiButton
-      buttonType="danger"
-      icon={<KuiButtonIcon type="delete" />}
+      fill
+      iconType="arrowDown"
+      onClick={() => window.alert('Button clicked')}
     >
-      Delete
+      Filled
     </KuiButton>
 
-    <br />
-    <br />
+    &nbsp;&nbsp;
 
     <KuiButton
-      buttonType="basic"
-      icon={<KuiButtonIcon type="previous" />}
+      iconType="arrowLeft"
+      size="small"
+      onClick={() => window.alert('Button clicked')}
     >
-      Previous
+      small
     </KuiButton>
 
-    <br />
-    <br />
+    &nbsp;&nbsp;
 
     <KuiButton
-      buttonType="basic"
-      icon={<KuiButtonIcon type="next" />}
-      iconPosition="right"
+      iconType="arrowRight"
+      size="small"
+      fill
+      onClick={() => window.alert('Button clicked')}
     >
-      Next
+      small and filled
     </KuiButton>
 
-    <br />
-    <br />
+    <br/><br/>
 
     <KuiButton
-      buttonType="basic"
-      icon={<KuiButtonIcon type="loading" />}
+      iconSide="right"
+      onClick={() => window.alert('Button clicked')}
+      iconType="arrowUp"
     >
-      Loading
+      Primary
     </KuiButton>
 
-    <br />
-    <br />
+    &nbsp;&nbsp;
 
     <KuiButton
-      buttonType="basic"
-      icon={<KuiButtonIcon className="fa-plane" />}
-    />
+      iconSide="right"
+      fill
+      iconType="arrowDown"
+      onClick={() => window.alert('Button clicked')}
+    >
+      Filled
+    </KuiButton>
+
+    &nbsp;&nbsp;
+
+    <KuiButton
+      iconSide="right"
+      iconType="arrowLeft"
+      size="small"
+      onClick={() => window.alert('Button clicked')}
+    >
+      small
+    </KuiButton>
+
+    &nbsp;&nbsp;
+
+    <KuiButton
+      iconSide="right"
+      iconType="arrowRight"
+      size="small"
+      fill
+      onClick={() => window.alert('Button clicked')}
+    >
+      small and filled
+    </KuiButton>
+
+    <br/><br/>
+
+    <KuiButton
+      iconSide="right"
+      onClick={() => window.alert('Button clicked')}
+      iconType="arrowUp"
+      isDisabled
+    >
+      Disabled
+    </KuiButton>
+
+    &nbsp;&nbsp;
+
+    <KuiButton
+      iconSide="right"
+      fill
+      iconType="arrowDown"
+      onClick={() => window.alert('Button clicked')}
+      isDisabled
+    >
+      Filled
+    </KuiButton>
+
+    &nbsp;&nbsp;
+
+    <KuiButton
+      iconSide="right"
+      iconType="arrowLeft"
+      size="small"
+      onClick={() => window.alert('Button clicked')}
+      isDisabled
+    >
+      small
+    </KuiButton>
+
+    &nbsp;&nbsp;
+
+    <KuiButton
+      iconSide="right"
+      iconType="arrowRight"
+      size="small"
+      fill
+      onClick={() => window.alert('Button clicked')}
+      isDisabled
+    >
+      small and filled
+    </KuiButton>
   </div>
 );

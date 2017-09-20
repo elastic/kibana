@@ -1,8 +1,23 @@
-$tableCellPadding: 7px 8px 8px;
-$tableCellFontWeight: 400;
-$tableBackgroundColor: #FFF;
-$tableHeaderTextColor: #a7a7a7;
-$tableCellExpandedBorderColor: #f0f0f0;
+$kuiTableCellPadding: $kuiSizeM;
+$kuiTableCellPaddingCompressed: $kuiSizeS;
 
-@import "controlled_table";
+/**
+ * 1. Prevent cells from expanding based on content size. This substitutes for table-layout: fixed.
+ */
+@mixin kuiTableCell {
+  max-width: 20px; /* 1 */
+  vertical-align: middle;
+}
+
+@mixin kuiTableCellCheckbox {
+  width: $kuiSizeL + $kuiTableCellPadding;
+  vertical-align: middle;
+
+  .kuiTableCellContent {
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+}
+
 @import "table";

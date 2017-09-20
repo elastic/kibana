@@ -1,0 +1,35 @@
+// Responsiveness
+
+$breakpoints: ("xSmall": 575px, "small": 768px, "medium": 992px, "large": 1200px) !default;
+
+
+@mixin screenXSmall {
+  @media only screen and (max-width: map-get($breakpoints, "small")) {
+     @content;
+  }
+}
+
+
+@mixin screenSmall {
+  @media only screen and (min-width: map-get($breakpoints, "small") + 1) and (max-width: map-get($breakpoints, "medium") - 1) {
+     @content;
+  }
+}
+
+@mixin screenMedium {
+  @media only screen and (min-width: map-get($breakpoints, "medium")) and (max-width: map-get($breakpoints, "large") - 1) {
+    @content;
+  }
+}
+
+@mixin screenLarge {
+  @media only screen and (min-width: map-get($breakpoints, "large")) {
+    @content;
+  }
+}
+
+@mixin screenSmallMediumLarge {
+  @media only screen and (min-width: map-get($breakpoints, "small")) {
+    @content;
+  }
+}

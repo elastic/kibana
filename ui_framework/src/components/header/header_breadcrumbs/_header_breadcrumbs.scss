@@ -1,0 +1,77 @@
+// Breadcrumb navigation included in the header.
+
+.kuiHeaderBreadcrumbs {
+  display: flex;
+}
+
+.kuiHeaderBreadcrumb {
+  display: inline-block;
+  height: $kuiHeaderChildSize;
+  line-height: $kuiHeaderChildSize;
+  padding: 0 $kuiSize;
+  position: relative;
+  color: $kuiHeaderBreadcrumbColor;
+
+  // Slanted separator. Shows on all but last item.
+  &:not(:last-child):after {
+    position: absolute;
+    top: $kuiSizeL;
+    right: -3px; // Half the transformed width.
+    content: "";
+    width: 1px;
+    height: $kuiSize;
+    transform: rotate(15deg);
+    background: $kuiColorLightShade;
+  }
+
+  &:not(.kuiHeaderBreadcrumb--collapsed) {
+    @include kuiLink;
+  }
+
+  &.kuiHeaderBreadcrumb-isActive {
+    color: $kuiColorMediumShade;
+  }
+}
+
+  .kuiHeaderBreadcrumb__text {
+    white-space: nowrap;
+    max-width: 150px;
+    display: block;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+.kuiHeaderBreadcrumb--collapsed {
+  color: $kuiColorLightShade;
+}
+
+// Laptop
+@include screenMedium {
+  .kuiHeaderBreadcrumb {
+    display: none;
+
+    // Only show last 4 breadcrumbs
+    &:nth-last-child(-n+4) {
+      display: inline-block;
+    }
+  }
+}
+
+// Tablets
+@include screenSmall {
+  .kuiHeaderBreadcrumb {
+    display: none;
+
+    // Only show last 2 breadcrumbs
+    &:nth-last-child(-n+2) {
+      display: inline-block;
+    }
+  }
+}
+
+// Mobile
+@include screenXSmall {
+  .kuiHeaderBreadcrumb {
+    display: none;
+  }
+}

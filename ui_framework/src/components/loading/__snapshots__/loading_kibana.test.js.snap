@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiLoadingKibana is rendered 1`] = `
+<div
+  aria-label="aria-label"
+  class="kuiLoadingKibana testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <div
+    class="kuiLoadingKibana__icon"
+  >
+    <svg
+      class="kuiIcon kuiIcon--basic"
+    >
+      <title>
+        kibana logo icon
+      </title>
+      <use
+        href="#logo"
+      />
+    </svg>
+  </div>
+</div>
+`;

@@ -1,0 +1,15 @@
+.kuiHeaderLogo {
+  @include kuiLink;
+
+  position: relative;
+  height: $kuiHeaderChildSize;
+  padding: $kuiSize $kuiSizeL;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+  .kuiHeaderLogo__icon {
+    height: $kuiSizeXL;
+    width: $kuiSizeL;
+    opacity: 1;
+  }

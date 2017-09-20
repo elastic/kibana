@@ -16,8 +16,8 @@ class KuiTabsExample extends React.Component {
       id: 'dextrose',
       name: 'Dextrose',
     }, {
-      id: 'helium_3',
-      name: 'Helium-3',
+      id: 'hydrogen',
+      name: 'Hydrogen',
     }, {
       id: 'monosodium_glutammate',
       name: 'Monosodium Glutamate',
@@ -32,7 +32,7 @@ class KuiTabsExample extends React.Component {
     this.setState({
       selectedTabId: id,
     });
-  };
+  }
 
   renderTabs() {
     return this.tabs.map((tab,index) => (

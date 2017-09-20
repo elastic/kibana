@@ -1,0 +1,27 @@
+.kui--textAlignRight {
+  text-align: right !important;
+}
+
+.kui--textAlignLeft {
+  text-align: left !important;
+}
+
+.kui--textAlignCenter {
+  text-align: center !important;
+}
+
+.kui--verticalAlignMiddle {
+  vertical-align: middle !important;
+}
+
+.kui--fontSizeSmall {
+  @include kuiFontSizeS;
+}
+
+.kui--codeFont {
+  @include kuiCodeFont;
+}
+
+.kui--subduedText {
+  color: $kuiColorDarkShade;
+}

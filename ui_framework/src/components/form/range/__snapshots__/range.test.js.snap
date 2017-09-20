@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiRange is rendered 1`] = `
+<input
+  aria-label="aria-label"
+  class="kuiRange testClass1 testClass2"
+  data-test-subj="test subject string"
+  max="100"
+  min="1"
+  type="range"
+/>
+`;

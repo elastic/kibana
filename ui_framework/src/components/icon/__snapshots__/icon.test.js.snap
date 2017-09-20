@@ -1,0 +1,367 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiIcon is rendered 1`] = `
+<svg
+  aria-label="aria-label"
+  class="kuiIcon testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <title>
+    search icon
+  </title>
+  <use
+    href="#search"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders size large 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--large"
+>
+  <title>
+    search icon
+  </title>
+  <use
+    href="#search"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders size medium 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    search icon
+  </title>
+  <use
+    href="#search"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders size xLarge 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--xLarge"
+>
+  <title>
+    search icon
+  </title>
+  <use
+    href="#search"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders size xxLarge 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--xxLarge"
+>
+  <title>
+    search icon
+  </title>
+  <use
+    href="#search"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type apps 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic"
+>
+  <title>
+    apps icon
+  </title>
+  <use
+    href="#apps"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type arrowDown 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic"
+>
+  <title>
+    arrow down icon
+  </title>
+  <use
+    href="#arrow_down"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type arrowLeft 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic"
+>
+  <title>
+    arrow left icon
+  </title>
+  <use
+    href="#arrow_left"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type arrowRight 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic"
+>
+  <title>
+    arrow right icon
+  </title>
+  <use
+    href="#arrow_right"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type arrowUp 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic"
+>
+  <title>
+    arrow up icon
+  </title>
+  <use
+    href="#arrow_up"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type check 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic"
+>
+  <title>
+    check icon
+  </title>
+  <use
+    href="#check"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type cross 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic"
+>
+  <title>
+    cross icon
+  </title>
+  <use
+    href="#cross"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type dashboardApp 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic"
+>
+  <title>
+    dashboard app icon
+  </title>
+  <use
+    href="#app_dashboard"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type devToolsApp 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic"
+>
+  <title>
+    dev tools app icon
+  </title>
+  <use
+    href="#app_devtools"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type discoverApp 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic"
+>
+  <title>
+    discover app icon
+  </title>
+  <use
+    href="#app_discover"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type graphApp 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic"
+>
+  <title>
+    graph app icon
+  </title>
+  <use
+    href="#app_graph"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type help 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic"
+>
+  <title>
+    help icon
+  </title>
+  <use
+    href="#help"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type logoKibana 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic"
+>
+  <title>
+    kibana logo icon
+  </title>
+  <use
+    href="#logo"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type lock 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic"
+>
+  <title>
+    lock icon
+  </title>
+  <use
+    href="#lock"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type machineLearningApp 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic"
+>
+  <title>
+    machine learning app icon
+  </title>
+  <use
+    href="#app_ml"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type search 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic"
+>
+  <title>
+    search icon
+  </title>
+  <use
+    href="#search"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type sortDown 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic"
+>
+  <title>
+    sort down icon
+  </title>
+  <use
+    href="#sort_down"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type sortUp 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic"
+>
+  <title>
+    sort up icon
+  </title>
+  <use
+    href="#sort_up"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type timelionApp 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic"
+>
+  <title>
+    timelion app icon
+  </title>
+  <use
+    href="#app_timelion"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type user 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic"
+>
+  <title>
+    user icon
+  </title>
+  <use
+    href="#user"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type visualizeApp 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic"
+>
+  <title>
+    visualize app icon
+  </title>
+  <use
+    href="#app_visualize"
+  />
+</svg>
+`;
+
+exports[`KuiIcon title defaults to a humanized version of the type 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic"
+>
+  <title>
+    dashboard app icon
+  </title>
+  <use
+    href="#app_dashboard"
+  />
+</svg>
+`;
+
+exports[`KuiIcon title is rendered 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic"
+>
+  <title>
+    a custom title
+  </title>
+  <use
+    href="#search"
+  />
+</svg>
+`;

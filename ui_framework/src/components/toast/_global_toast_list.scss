@@ -1,0 +1,67 @@
+/**
+ * 1. Allow list to expand as items are added, but cap it at the screen height.
+ * 2. Only show the scroll on hover. Generally, scrolling is bad for toasts.
+ * 3. Allow some padding if a scroll shows up.
+ */
+.kuiGlobalToastList {
+  @include kuiScrollBar;
+
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  position: fixed;
+  z-index: $kuiZToastList;
+  bottom: 0;
+  right: 0;
+  width: $kuiToastWidth + $kuiSize; /* 3 */
+  padding-right: $kuiSize;
+  max-height: 100vh; /* 1 */
+
+  &:hover {
+    overflow-y: auto; /* 2 */
+  }
+}
+
+.kuiGlobalToastListItem {
+  margin-bottom: $kuiSize;
+  margin-right: $kuiSize;
+  animation: $kuiAnimSpeedNormal kuiShowToast $kuiAnimSlightResistance;
+  opacity: 1;
+
+  /**
+   * 1. justify-content: flex-end interferes with overflowing content, so we'll use this to push
+   *    items to the bottom instead.
+   */
+  &:first-child {
+    margin-top: auto; /* 1 */
+  }
+
+  &.kuiGlobalToastListItem-isDismissed {
+    transition: opacity $kuiAnimSpeedNormal;
+    opacity: 0;
+  }
+}
+
+@keyframes kuiShowToast {
+  from {
+    transform: translateY($kuiSizeL) scale(.9);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@include screenXSmall {
+  /**
+   * 1. Mobile we make these 100%. Matching change happens on the item as well.
+   */
+  .kuiGlobalToastList {
+    left: 0;
+    padding-left: $kuiSize;
+    width: 100%; /* 1 */
+  }
+}
+

@@ -1,100 +1,82 @@
 import Slugify from '../string/slugify';
 
+import AccordionExample
+  from '../../views/accordion/accordion_example';
+
 import AccessibilityExample
   from '../../views/accessibility/accessibility_example';
-
-import ActionItemExample
-  from '../../views/action_item/action_item_example';
 
 import BadgeExample
   from '../../views/badge/badge_example';
 
-import BarExample
-  from '../../views/bar/bar_example';
+import BottomBarExample
+  from '../../views/bottom_bar/bottom_bar_example';
 
 import ButtonExample
   from '../../views/button/button_example';
 
-import CardExample
-  from '../../views/card/card_example';
+import CallOutExample
+  from '../../views/call_out/call_out_example';
 
-import CollapseButtonExample
-  from '../../views/collapse_button/collapse_button_example';
+import CodeExample
+  from '../../views/code/code_example';
 
-import ColorPickerExample
-  from '../../views/color_picker/color_picker_example';
+import ContextMenuExample
+  from '../../views/context_menu/context_menu_example';
 
-import ColumnExample
-  from '../../views/column/column_example';
+import DescriptionListExample
+  from '../../views/description_list/description_list_example';
 
-import EventExample
-  from '../../views/event/event_example';
-
-import EventsSandbox
-  from '../../views/event/events_sandbox';
-
-import ExpressionExample
-  from '../../views/expression/expression_example';
+import FlexExample
+  from '../../views/flex/flex_example';
 
 import FormExample
   from '../../views/form/form_example';
 
-import FormLayoutExample
-  from '../../views/form_layout/form_layout_example';
-
-import GalleryExample
-  from '../../views/gallery/gallery_example';
-
-import HeaderBarExample
-  from '../../views/header_bar/header_bar_example';
-
-import HeaderBarSandbox
-  from '../../views/header_bar/header_bar_sandbox';
-
 import IconExample
   from '../../views/icon/icon_example';
 
-import InfoButtonExample
-  from '../../views/info_button/info_button_example';
+import HeaderExample
+  from '../../views/header/header_example';
 
-import InfoPanelExample
-  from '../../views/info_panel/info_panel_example';
+import HorizontalRuleExample
+  from '../../views/horizontal_rule/horizontal_rule_example';
+
+import KeyPadMenuExample
+  from '../../views/key_pad_menu/key_pad_menu_example';
+
+import KibanaSandbox
+  from '../../views/kibana/kibana_sandbox';
 
 import LinkExample
   from '../../views/link/link_example';
 
-import LocalNavExample
-  from '../../views/local_nav/local_nav_example';
-
-import MenuExample
-  from '../../views/menu/menu_example';
-
-import MenuButtonExample
-  from '../../views/menu_button/menu_button_example';
-
-import MicroButtonExample
-  from '../../views/micro_button/micro_button_example';
-
 import ModalExample
   from '../../views/modal/modal_example';
 
-import NoticeSandbox
-  from '../../views/notice/notice_sandbox';
-
-import PagerExample
-  from '../../views/pager/pager_example';
+import PageExample
+  from '../../views/page/page_example';
 
 import PanelExample
   from '../../views/panel/panel_example';
 
+import PaginationExample
+  from '../../views/pagination/pagination_example';
+
+import LoadingExample
+  from '../../views/loading/loading_example';
+
 import PopoverExample
   from '../../views/popover/popover_example';
 
-import EmptyTablePromptExample
-  from '../../views/empty_table_prompt/empty_table_prompt_example';
+import ProgressExample
+  from '../../views/progress/progress_example';
 
-import StatusTextExample
-  from '../../views/status_text/status_text_example';
+import SideNavExample
+  from '../../views/side_nav/side_nav_example';
+
+import SpacerExample
+  from '../../views/spacer/spacer_example';
 
 import TableExample
   from '../../views/table/table_example';
@@ -102,128 +84,119 @@ import TableExample
 import TabsExample
   from '../../views/tabs/tabs_example';
 
-import ToggleButtonExample
-  from '../../views/toggle_button/toggle_button_example';
+import TextExample
+  from '../../views/text/text_example';
 
-import ToolBarExample
-  from '../../views/tool_bar/tool_bar_example';
+import ToastExample
+  from '../../views/toast/toast_example';
 
-import TypographyExample
-  from '../../views/typography/typography_example';
+import TitleExample
+  from '../../views/title/title_example';
 
-import VerticalRhythmExample
-  from '../../views/vertical_rhythm/vertical_rhythm_example';
-
-import ViewSandbox
-  from '../../views/view/view_sandbox';
+import TextScalingSandbox
+  from '../../views/text_scaling/text_scaling_sandbox';
 
 // Component route names should match the component name exactly.
 const components = [{
+  name: 'Accordion',
+  component: AccordionExample,
+  hasReact: true,
+}, {
   name: 'Accessibility',
   component: AccessibilityExample,
-  hasReact: true,
-}, {
-  name: 'ActionItem',
-  component: ActionItemExample,
-  hasReact: true,
-}, {
-  name: 'Badge',
-  component: BadgeExample,
-}, {
-  name: 'Bar',
-  component: BarExample,
   hasReact: true,
 }, {
   name: 'Button',
   component: ButtonExample,
   hasReact: true,
 }, {
-  name: 'Card',
-  component: CardExample,
+  name: 'Badge',
+  component: BadgeExample,
   hasReact: true,
 }, {
-  name: 'ColorPicker',
-  component: ColorPickerExample,
+  name: 'BottomBar',
+  component: BottomBarExample,
   hasReact: true,
 }, {
-  name: 'Column',
-  component: ColumnExample,
-}, {
-  name: 'CollapseButton',
-  component: CollapseButtonExample,
+  name: 'CallOut',
+  component: CallOutExample,
   hasReact: true,
 }, {
-  name: 'EmptyTablePrompt',
-  component: EmptyTablePromptExample,
+  name: 'Code',
+  component: CodeExample,
   hasReact: true,
 }, {
-  name: 'Event',
-  component: EventExample,
+  name: 'ContextMenu',
+  component: ContextMenuExample,
   hasReact: true,
 }, {
-  name: 'Expression',
-  component: ExpressionExample,
+  name: 'DescriptionList',
+  component: DescriptionListExample,
+  hasReact: true,
+}, {
+  name: 'Flex',
+  component: FlexExample,
   hasReact: true,
 }, {
   name: 'Form',
   component: FormExample,
-}, {
-  name: 'FormLayout',
-  component: FormLayoutExample,
   hasReact: true,
 }, {
-  name: 'Gallery',
-  component: GalleryExample,
+  name: 'Header',
+  component: HeaderExample,
   hasReact: true,
 }, {
-  name: 'HeaderBar',
-  component: HeaderBarExample,
+  name: 'HorizontalRule',
+  component: HorizontalRuleExample,
   hasReact: true,
 }, {
   name: 'Icon',
   component: IconExample,
-}, {
-  name: 'InfoButton',
-  component: InfoButtonExample,
   hasReact: true,
 }, {
-  name: 'InfoPanel',
-  component: InfoPanelExample,
+  name: 'KeyPadMenu',
+  component: KeyPadMenuExample,
+  hasReact: true,
 }, {
   name: 'Link',
   component: LinkExample,
-}, {
-  name: 'LocalNav',
-  component: LocalNavExample,
   hasReact: true,
 }, {
-  name: 'Menu',
-  component: MenuExample,
+  name: 'Loading',
+  component: LoadingExample,
   hasReact: true,
-}, {
-  name: 'MenuButton',
-  component: MenuButtonExample,
-}, {
-  name: 'MicroButton',
-  component: MicroButtonExample,
 }, {
   name: 'Modal',
   component: ModalExample,
   hasReact: true,
 }, {
-  name: 'Pager',
-  component: PagerExample,
+  name: 'Page',
+  component: PageExample,
+  hasReact: true,
+}, {
+  name: 'Pagination',
+  component: PaginationExample,
   hasReact: true,
 }, {
   name: 'Panel',
   component: PanelExample,
+  hasReact: true,
 }, {
   name: 'Popover',
   component: PopoverExample,
   hasReact: true,
 }, {
-  name: 'StatusText',
-  component: StatusTextExample,
+  name: 'Progress',
+  component: ProgressExample,
+  hasReact: true,
+}, {
+  name: 'SideNav',
+  component: SideNavExample,
+  hasReact: true,
+}, {
+  name: 'Spacer',
+  component: SpacerExample,
+  hasReact: true,
 }, {
   name: 'Table',
   component: TableExample,
@@ -233,32 +206,27 @@ const components = [{
   component: TabsExample,
   hasReact: true,
 }, {
-  name: 'ToggleButton',
-  component: ToggleButtonExample,
-}, {
-  name: 'ToolBar',
-  component: ToolBarExample,
+  name: 'Text',
+  component: TextExample,
   hasReact: true,
 }, {
-  name: 'Typography',
-  component: TypographyExample,
+  name: 'Toast',
+  component: ToastExample,
+  hasReact: true,
 }, {
-  name: 'VerticalRhythm',
-  component: VerticalRhythmExample,
+  name: 'Title',
+  component: TitleExample,
+  hasReact: true,
 }];
 
 const sandboxes = [{
-  name: 'Events',
-  component: EventsSandbox,
+  name: 'Kibana',
+  component: KibanaSandbox,
+  hasReact: true,
 }, {
-  name: 'HeaderBar with Table',
-  component: HeaderBarSandbox,
-}, {
-  name: 'Notice',
-  component: NoticeSandbox,
-}, {
-  name: 'View',
-  component: ViewSandbox,
+  name: 'TextScalingSandbox',
+  component: TextScalingSandbox,
+  hasReact: true,
 }];
 
 const allRoutes = components.concat(sandboxes);

@@ -1,3 +1,8 @@
-$popOverBackgroundColor: #FFF;
+@mixin kuiPopoverTitle {
+  background-color: $kuiColorLightestShade;
+  border-bottom: $kuiBorderThin;
+  padding: $kuiSizeM;
+}
 
 @import 'popover';
+@import 'popover_title';

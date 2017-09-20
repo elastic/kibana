@@ -1,157 +1,152 @@
 import React from 'react';
 
+import { renderToHtml } from '../../services';
+
 import {
-  GuideCode,
-  GuideDemo,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
-  GuideText,
 } from '../../components';
 
-const iconHtml = require('./icon.html');
-const infoHtml = require('./icon_info.html');
-const basicHtml = require('./icon_basic.html');
-const successHtml = require('./icon_success.html');
-const warningHtml = require('./icon_warning.html');
-const errorHtml = require('./icon_error.html');
-const inactiveHtml = require('./icon_inactive.html');
-const spinnerHtml = require('./icon_spinner.html');
-const spinnerJs = require('raw!./icon_spinner.js');
+import {
+  KuiCode,
+} from '../../../../components';
+
+import Icons from './icons';
+const iconsSource = require('!!raw!./icons');
+const iconsHtml = renderToHtml(Icons);
+
+import Apps from './apps';
+const appsSource = require('!!raw!./apps');
+const appsHtml = renderToHtml(Apps);
+
+import Logos from './logos';
+const logosSource = require('!!raw!./logos');
+const logosHtml = renderToHtml(Logos);
+
+import IconSizes from './icon_sizes';
+const iconSizesSource = require('!!raw!./icon_sizes');
+const iconSizesHtml = renderToHtml(IconSizes);
+
+import Accessibility from './accessibility';
+const accessibilitySource = require('!!raw!./accessibility');
+const accessibilityHtml = renderToHtml(Accessibility);
 
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
-      title="Icon"
+      title="Icons"
       source={[{
+        type: GuideSectionTypes.JS,
+        code: iconsSource,
+      }, {
         type: GuideSectionTypes.HTML,
-        code: iconHtml,
+        code: iconsHtml,
       }]}
-    >
-      <GuideText>
-        Use the <GuideCode>icon</GuideCode> class instead of the <GuideCode>fa</GuideCode> class for
-        FontAwesome icons. This will make it easier for us to migrate away from FontAwesome.
-      </GuideText>
-
-      <GuideDemo
-        html={iconHtml}
-      />
-    </GuideSection>
+      text={
+        <div>
+          <p>
+            <KuiCode>KuiIcon</KuiCode> can build out an icon from our SVG
+            icon library. Icons can be resized and recolored (through a
+            CSS <KuiCode>Fill</KuiCode>) decleration.
+          </p>
+          <p>
+            New icons should be placed in
+            the <KuiCode>/icons/assets/</KuiCode> folder on
+            a <KuiCode>16x16</KuiCode> empty canvas.
+            Icons in the general set should be monochromatic and the code
+            itself <strong>should not contain any fill attributes</strong>. Use the SVGO plugin
+            for Sketch when exporting to compress / clean your SVG of junk.
+          </p>
+          <p>
+            Note: <KuiCode>guideDemo__icon</KuiCode> styling is applied on the
+            below grid for documentation presentation only. Do not copy
+            this class into production.
+          </p>
+        </div>
+      }
+      demo={
+        <Icons />
+      }
+    />
 
     <GuideSection
-      title="Info"
+      title="Apps"
       source={[{
+        type: GuideSectionTypes.JS,
+        code: appsSource,
+      }, {
         type: GuideSectionTypes.HTML,
-        code: infoHtml,
+        code: appsHtml,
       }]}
-    >
-      <GuideText>
-        Use this Icon to denote useful information.
-      </GuideText>
-
-      <GuideDemo
-        html={infoHtml}
-      />
-    </GuideSection>
+      text={
+        <p>
+          App logos are usually displayed at <KuiCode>32x32</KuiCode> or above
+          and can contain multiple colors.
+        </p>
+      }
+      demo={
+        <Apps />
+      }
+    />
 
     <GuideSection
-      title="Basic"
+      title="Logos"
       source={[{
+        type: GuideSectionTypes.JS,
+        code: logosSource,
+      }, {
         type: GuideSectionTypes.HTML,
-        code: basicHtml,
+        code: logosHtml,
       }]}
-    >
-      <GuideText>
-        Use this Icon when you don&rsquo;t want to communicate any particular meaning with the icon&rsquo;s
-        color.
-      </GuideText>
-
-      <GuideDemo
-        html={basicHtml}
-      />
-    </GuideSection>
+      text={
+        <p>
+          Product logos follow similar rules as app logos.
+        </p>
+      }
+      demo={
+        <Logos />
+      }
+    />
 
     <GuideSection
-      title="Success"
+      title="Sizes"
       source={[{
+        type: GuideSectionTypes.JS,
+        code: iconSizesSource,
+      }, {
         type: GuideSectionTypes.HTML,
-        code: successHtml,
+        code: iconSizesHtml,
       }]}
-    >
-      <GuideText>
-        Use this Icon to denote the successful completion of an action, e.g. filling out a form
-        field correctly or a successful API request.
-      </GuideText>
-
-      <GuideDemo
-        html={successHtml}
-      />
-    </GuideSection>
+      text={
+        <p>
+          Use the <KuiCode>size</KuiCode> prop to automatically size your icons.
+          Medium is the default, and will output a <KuiCode>16x16</KuiCode> icons.
+        </p>
+      }
+      demo={
+        <IconSizes />
+      }
+    />
 
     <GuideSection
-      title="Warning"
+      title="Accessibility"
       source={[{
+        type: GuideSectionTypes.JS,
+        code: accessibilitySource,
+      }, {
         type: GuideSectionTypes.HTML,
-        code: warningHtml,
+        code: accessibilityHtml,
       }]}
-    >
-      <GuideText>
-        Use this Icon to denote an irregularity or potential problems.
-      </GuideText>
-
-      <GuideDemo
-        html={warningHtml}
-      />
-    </GuideSection>
-
-    <GuideSection
-      title="Error"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: errorHtml,
-      }]}
-    >
-      <GuideText>
-        Use this Icon to denote a failed attempt at an action, e.g. an invalid form field or an API
-        error.
-      </GuideText>
-
-      <GuideDemo
-        html={errorHtml}
-      />
-    </GuideSection>
-
-    <GuideSection
-      title="Inactive"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: inactiveHtml,
-      }]}
-    >
-      <GuideText>
-        Use this Icon to denote a disabled, inactive, off, offline, or asleep status.
-      </GuideText>
-
-      <GuideDemo
-        html={inactiveHtml}
-      />
-    </GuideSection>
-
-    <GuideSection
-      title="Spinner"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: spinnerHtml,
-      }]}
-    >
-      <GuideText>
-        You can use Icons to represent a loading and successfully-loaded state.
-      </GuideText>
-
-      <GuideDemo
-        html={spinnerHtml}
-        js={spinnerJs}
-      />
-    </GuideSection>
+      text={
+        <p>
+          By default, this component will use a human-readable version of the <KuiCode>type</KuiCode>
+          to title the SVG. You can specify a <KuiCode>title</KuiCode> prop to override this.
+        </p>
+      }
+      demo={
+        <Accessibility />
+      }
+    />
   </GuidePage>
 );

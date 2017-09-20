@@ -1,0 +1,10 @@
+@mixin kuiLink {
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &:focus {
+    text-decoration: underline;
+    background: $kuiFocusBackgroundColor;
+  }
+}

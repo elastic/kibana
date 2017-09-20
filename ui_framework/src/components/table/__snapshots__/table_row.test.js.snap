@@ -1,5 +1,23 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`isSelected renders true when specified 1`] = `
+<tr
+  class="kuiTableRow kuiTableRow-isSelected"
+>
+  <td
+    class="kuiTableRowCell"
+  >
+    <div
+      class="kuiTableCellContent"
+    >
+      <span
+        class="kuiTableCellContent__text"
+      />
+    </div>
+  </td>
+</tr>
+`;
+
 exports[`renders KuiTableRow 1`] = `
 <tr
   aria-label="aria-label"
@@ -10,9 +28,13 @@ exports[`renders KuiTableRow 1`] = `
     class="kuiTableRowCell"
   >
     <div
-      class="kuiTableRowCell__liner"
+      class="kuiTableCellContent"
     >
-      hi
+      <span
+        class="kuiTableCellContent__text"
+      >
+        hi
+      </span>
     </div>
   </td>
 </tr>

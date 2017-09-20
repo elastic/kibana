@@ -31,28 +31,14 @@ exports[`renders KuiConfirmModal 1`] = `
     class="kuiModalFooter"
   >
     <button
-      class="kuiButton kuiButton--hollow"
       data-test-subj="confirmModalCancelButton"
     >
-      <span
-        class="kuiButton__inner"
-      >
-        <span>
-          Cancel Button Text
-        </span>
-      </span>
+      Cancel Button Text
     </button>
     <button
-      class="kuiButton kuiButton--primary"
       data-test-subj="confirmModalConfirmButton"
     >
-      <span
-        class="kuiButton__inner"
-      >
-        <span>
-          Confirm Button Text
-        </span>
-      </span>
+      Confirm Button Text
     </button>
   </div>
 </div>

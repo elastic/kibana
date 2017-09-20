@@ -1,179 +1,102 @@
-import PropTypes from 'prop-types';
-import React from 'react';
+import React, {
+  PropTypes,
+} from 'react';
+
 import classNames from 'classnames';
 
-import { KuiButtonIcon } from './button_icon/button_icon';
+import {
+  ICON_TYPES,
+  KuiIcon,
+} from '../icon';
 
-const BUTTON_TYPES = [
-  'basic',
-  'hollow',
-  'danger',
-  'warning',
-  'primary',
-  'secondary',
-];
-
-const ICON_POSITIONS = [
-  'left',
-  'right',
-];
-
-const DEFAULT_ICON_POSITION = 'left';
-
-const buttonTypeToClassNameMap = {
-  basic: 'kuiButton--basic',
-  hollow: 'kuiButton--hollow',
-  danger: 'kuiButton--danger',
-  warning: 'kuiButton--warning',
+const typeToClassNameMap = {
   primary: 'kuiButton--primary',
   secondary: 'kuiButton--secondary',
+  warning: 'kuiButton--warning',
+  danger: 'kuiButton--danger',
+  ghost: 'kuiButton--ghost',
 };
 
-const getClassName = ({ className, buttonType, hasIcon = false }) =>
-  classNames('kuiButton', className, buttonTypeToClassNameMap[buttonType], {
-    'kuiButton--iconText': hasIcon,
-  });
+export const TYPES = Object.keys(typeToClassNameMap);
 
-const ContentWithIcon = ({ children, icon, iconPosition, isLoading }) => {
-  const iconOrLoading = isLoading
-    ? <KuiButtonIcon type="loading" />
-    : icon;
-
-  // We need to wrap the children so that the icon's :first-child etc. pseudo-selectors get applied
-  // correctly.
-  const wrappedChildren = children ? <span>{children}</span> : undefined;
-
-  switch(iconPosition) {
-    case 'left':
-      return (
-        <span className="kuiButton__inner">
-          {iconOrLoading}
-          {wrappedChildren}
-        </span>
-      );
-
-    case 'right':
-      return (
-        <span className="kuiButton__inner">
-          {wrappedChildren}
-          {iconOrLoading}
-        </span>
-      );
-  }
+const sizeToClassNameMap = {
+  small: 'kuiButton--small',
+  large: 'kuiButton--large',
 };
 
-const KuiButton = ({
-  isLoading,
-  iconPosition = DEFAULT_ICON_POSITION,
-  className,
-  buttonType,
-  icon,
+export const SIZES = Object.keys(sizeToClassNameMap);
+
+const iconSideToClassNameMap = {
+  left: '',
+  right: 'kuiButton--iconRight',
+};
+
+export const ICON_SIDES = Object.keys(iconSideToClassNameMap);
+
+export const KuiButton = ({
   children,
-  ...rest
+  className,
+  iconType,
+  iconSide,
+  type,
+  size,
+  fill,
+  isDisabled,
+  ...rest,
 }) => {
+
+  const classes = classNames(
+    'kuiButton',
+    typeToClassNameMap[type],
+    sizeToClassNameMap[size],
+    iconSideToClassNameMap[iconSide],
+    className,
+    {
+      'kuiButton--fill': fill,
+    },
+  );
+
+  // Add an icon to the button if one exists.
+  let buttonIcon;
+
+  if (iconType) {
+    buttonIcon = (
+      <KuiIcon
+        className="kuiButton__icon"
+        type={iconType}
+        size="medium"
+        aria-hidden="true"
+      />
+    );
+  }
+
   return (
     <button
-      className={getClassName({
-        className,
-        buttonType,
-        hasIcon: icon || isLoading,
-      })}
+      disabled={isDisabled}
+      className={classes}
       {...rest}
     >
-      <ContentWithIcon
-        icon={icon}
-        iconPosition={iconPosition}
-        isLoading={isLoading}
-      >
-        {children}
-      </ContentWithIcon>
+      <span className="kuiButton__content">
+        {buttonIcon}
+        <span>{children}</span>
+      </span>
     </button>
   );
 };
 
 KuiButton.propTypes = {
-  icon: PropTypes.node,
-  iconPosition: PropTypes.oneOf(ICON_POSITIONS),
   children: PropTypes.node,
-  isLoading: PropTypes.bool,
-  buttonType: PropTypes.oneOf(BUTTON_TYPES),
   className: PropTypes.string,
+  iconType: PropTypes.oneOf(ICON_TYPES),
+  iconSide: PropTypes.oneOf(ICON_SIDES),
+  fill: React.PropTypes.bool,
+  type: PropTypes.oneOf(TYPES),
+  size: PropTypes.oneOf(SIZES),
+  isDisabled: PropTypes.bool,
 };
 
-const KuiLinkButton = ({
-  isLoading,
-  icon,
-  iconPosition = DEFAULT_ICON_POSITION,
-  className,
-  disabled,
-  buttonType,
-  children,
-  ...rest
-}) => {
-  const onClick = e => {
-    if (disabled) {
-      e.preventDefault();
-    }
-  };
-
-  const classes = classNames(getClassName({
-    className,
-    buttonType,
-    hasIcon: icon || isLoading,
-  }), { 'kuiButton-isDisabled': disabled });
-
-  return (
-    <a
-      className={classes}
-      onClick={onClick}
-      {...rest}
-    >
-      <ContentWithIcon
-        icon={icon}
-        iconPosition={iconPosition}
-        isLoading={isLoading}
-      >
-        {children}
-      </ContentWithIcon>
-    </a>
-  );
-};
-
-KuiLinkButton.propTypes = {
-  icon: PropTypes.node,
-  iconPosition: PropTypes.oneOf(ICON_POSITIONS),
-  isLoading: PropTypes.bool,
-  buttonType: PropTypes.oneOf(BUTTON_TYPES),
-  className: PropTypes.string,
-  children: PropTypes.node,
-};
-
-const KuiSubmitButton = ({
-  className,
-  buttonType,
-  children,
-  ...rest
-}) => {
-  // NOTE: The `input` element is a void element and can't contain children.
-  return (
-    <input
-      type="submit"
-      value={children}
-      className={getClassName({ className, buttonType })}
-      {...rest}
-    />
-  );
-};
-
-KuiSubmitButton.propTypes = {
-  children: PropTypes.string,
-  buttonType: PropTypes.oneOf(BUTTON_TYPES),
-  className: PropTypes.string,
-};
-
-export {
-  BUTTON_TYPES,
-  KuiButton,
-  KuiLinkButton,
-  KuiSubmitButton,
+KuiButton.defaultProps = {
+  iconSide: 'left',
+  type: 'primary',
+  fill: false,
 };

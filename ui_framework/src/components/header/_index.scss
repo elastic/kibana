@@ -1,0 +1,16 @@
+// Themable colors
+$kuiHeaderBackgroundColor: $kuiColorEmptyShade;
+$kuiHeaderBreadcrumbColor: $kuiColorDarkestShade;
+$kuiHeaderNotificationBackgroundColor: $kuiColorAccent;
+
+// Layout vars
+$kuiHeaderChildSize: $kuiSizeXXL + $kuiSizeL;
+
+// Components
+@import 'header';
+@import 'header_alert';
+@import 'header_popover';
+@import 'header_profile';
+@import 'header_logo';
+@import 'header_breadcrumbs/index';
+@import 'header_section/index';

@@ -1,0 +1,16 @@
+.guideHeader {
+  background: #222;
+  color: #FFF !important;
+  height: $kuiSizeXXL;
+  border-bottom: $kuiBorderThin;
+  line-height: $kuiSizeXXL;
+  padding-left: $kuiSizeS;
+}
+
+.guideHeader__link {
+  color: #FFF;
+}
+
+.guideHeader__appListIcon {
+  fill: #FFF !important;
+}

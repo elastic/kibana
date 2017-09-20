@@ -1,48 +1,71 @@
-// All buttons
-$buttonHeight: 30px;
-$buttonIconSpacing: 8px;
-$buttonIconSmallSpacing: 4px;
-$buttonFontWeight: $globalFontWeightRegular;
+$kuiButtonHeightSmall: $kuiSizeXL;
+$kuiButtonColorDisabled: tintOrShade($kuiTextColor, 70%, 80%);
 
-// Size
-$buttonSmallFontSize: 12px;
-$buttonSmallPadding: 2px 8px 3px;
-$buttonSmallHeight: 22px;
+@mixin kuiButton {
 
-// Most buttons
-$buttonDefaultTextColor: #FFF;
+  display: inline-block;
+  appearance: none;
+  cursor: pointer;
+  height: $kuiSizeXXL;
+  text-decoration: none;
+  border: solid 1px transparent;
+  text-align: center;
+  font-family: $kuiFontFamily;
+  transition: all $kuiAnimSpeedNormal $kuiAnimSlightBounce;
+  white-space: nowrap;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
-// Basic
-$buttonBasicTextColor: $globalTextColor;
-$buttonBasicBackgroundColor: $globalColorLightestGray;
-$buttonBasicHoverBackgroundColor: darken($globalColorLightestGray, 10%);
-$buttonBasicDisabledTextColor: $globalTextColor;
-$buttonBasicTextColor--darkTheme: #FFF;
-$buttonBasicBackgroundColor--darkTheme: #9c9c9c;
-$buttonBasicHoverBackgroundColor--darkTheme: darken($buttonBasicBackgroundColor--darkTheme, 20%);
+  &:hover {
+    transform: translateY(-1px);
+  }
 
-// Primary
-$buttonPrimaryBackgroundColor: $globalLinkColor;
-$buttonPrimaryHoverBackgroundColor: $globalLinkColor-isHover;
-$buttonPrimaryDisabledBackgroundColor: desaturate($globalLinkColor, 70%);
+  &:hover, &:focus {
+    text-decoration: underline;
+  }
 
-// Success
-$buttonSuccessBackgroundColor: $globalColorTeal;
-$buttonSuccessHoverBackgroundColor: darken($globalColorTeal, 10%);
-$buttonSuccessDisabledBackgroundColor: desaturate($globalColorTeal, 70%);
+  &:focus {
+    animation: kuiButtonActive $kuiAnimSpeedNormal $kuiAnimSlightBounce;
+  }
 
-// Danger
-$buttonDangerBackgroundColor: $globalColorRed;
-$buttonDangerHoverBackgroundColor: darken($globalColorRed, 10%);
-$buttonDangerDisabledBackgroundColor: lighten($buttonDangerBackgroundColor, 50%);
+  &:active {
+    transform: translateY(1px);
+  }
+}
 
-// Warning
-$buttonWarningBackgroundColor: #f98100;
-$buttonWarningHoverBackgroundColor: darken($buttonWarningBackgroundColor, 10%);
-$buttonWarningDisabledBackgroundColor: lighten($buttonWarningBackgroundColor, 10%);
+/**
+ * 1. Apply margin to all but last item in the flex.
+ * 2. Margin gets flipped because of the row-reverse.
+ */
+@mixin kuiButtonContent($isReverse: false) {
+  height: 100%;
+  width: 100%;
 
-// Hollow
-$buttonHollowDiabledTextColor: #dddddd;
+  @if ($isReverse) {
+    flex-direction: row-reverse;
 
-@import "button";
-@import "button_group/button_group";
+    > * + * {
+      margin-left: 0; /* 1 */
+      margin-right: $kuiSizeS; /* 1 */
+    }
+  } @else {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    > * + * {
+      margin-left: $kuiSizeS; /* 1 */
+    }
+  }
+}
+
+@keyframes kuiButtonActive {
+  50% {
+    transform: translateY(1px);
+  }
+}
+
+@import 'button';
+@import 'button_empty/index';
+@import 'button_icon/index';

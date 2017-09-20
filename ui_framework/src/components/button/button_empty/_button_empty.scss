@@ -1,0 +1,87 @@
+.kuiButtonEmpty {
+  @include kuiButton;
+
+  border-color: transparent;
+  background-color: transparent;
+  box-shadow: none;
+
+  .kuiButtonEmpty__content {
+    @include kuiButtonContent;
+
+    padding: 0 $kuiSizeS;
+  }
+
+  &.kuiButtonEmpty--small {
+    height: $kuiButtonHeightSmall;
+  }
+
+  &.kuiButtonEmpty--iconRight {
+    .kuiButtonEmpty__content {
+      @include kuiButtonContent($isReverse: true);
+    }
+  }
+
+  &:disabled {
+    color: $kuiButtonColorDisabled;
+    pointer-events: none;
+
+    .kuiButtonEmpty__content {
+      pointer-events: auto;
+      cursor: not-allowed;
+    }
+
+    .kuiButtonEmpty__icon {
+      fill: $kuiButtonColorDisabled;
+    }
+
+    &:hover, &:focus {
+      background-color: $kuiColorEmptyShade;
+      text-decoration: none;
+    }
+  }
+}
+
+// Modifier naming and colors.
+$buttonTypes: (
+  primary: $kuiColorPrimary,
+  danger: $kuiColorDanger,
+  disabled: tintOrShade($kuiTextColor, 70%, 80%),
+  ghost: #FFF, // Ghost is special, and does not care about theming.
+);
+
+// Create button modifiders based upon the map.
+@each $name, $color in $buttonTypes {
+  .kuiButtonEmpty--#{$name} {
+    color: $color;
+
+    .kuiButtonEmpty__icon {
+      fill: $color;
+    }
+
+    &:focus {
+      background-color: transparentize($color, .9);
+    }
+
+    &:hover, &:focus {
+      background-color: transparentize($color, .9);
+
+      @if ($name == 'disabled') {
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+.kuiButtonEmpty--flushLeft {
+  .kuiButtonEmpty__content {
+    border-left: none;
+    padding-left: 0;
+  }
+}
+
+.kuiButtonEmpty--flushRight {
+  .kuiButtonEmpty__content {
+    border-right: none;
+    padding-right: 0;
+  }
+}

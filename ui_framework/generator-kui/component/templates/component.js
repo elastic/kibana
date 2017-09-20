@@ -21,7 +21,10 @@ export class <%= componentName %> extends Component {
       ...rest,
     } = this.props;
 
-    const classes = classNames('<%= cssClassName %>', className);
+    const classes = classNames(
+      '<%= cssClassName %>',
+      className
+    );
 
     return (
       <div

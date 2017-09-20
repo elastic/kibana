@@ -1,0 +1,15 @@
+// FlexItem can be manually set to not grow if needed.
+.kuiFlexItem.kuiFlexItem--flexGrowZero {
+  flex-grow: 0;
+  flex-basis: auto;
+}
+
+// On mobile we force them to stack and act the same.
+@include screenXSmall {
+  .kuiFlexItem {
+    width: 100% !important;
+    flex-basis: 100% !important;
+    margin-left: 0 !important;
+    margin-bottom: $kuiSize !important;
+  }
+}

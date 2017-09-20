@@ -1,0 +1,4 @@
+.kuiFieldText {
+  @include kuiFormControlStyle;
+  @include kuiFormControlWithIcon($isIconOptional: true);
+}

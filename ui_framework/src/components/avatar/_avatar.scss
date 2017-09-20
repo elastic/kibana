@@ -1,0 +1,17 @@
+.kuiAvatar {
+  border-radius: 50%;
+  width: $kuiSizeL;
+  height: $kuiSizeL;
+  display: inline-block;
+  @include innerBorder('dark', 50%);
+}
+
+.kuiAvatar--small {
+  width: $kuiSize;
+  height: $kuiSize;
+}
+
+.kuiAvatar--large {
+  width: $kuiSize * 4;
+  height: $kuiSize * 4;
+}

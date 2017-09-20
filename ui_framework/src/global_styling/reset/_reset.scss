@@ -1,24 +1,114 @@
-* {
+/**
+ * Adapted from Eric Meyer's reset (http://meyerweb.com/eric/tools/css/reset/, v2.0 | 20110126).
+ *
+ */
+
+*, *:before, *:after {
   box-sizing: border-box;
-
-  &:before,
-  &:after {
-    box-sizing: border-box;
-  }
-}
-
-// Removes outline, but still provides a two color box shadow that works anywhere.
-:focus {
-  @include focus;
-}
-
-body {
-  font-family: $globalFontFamily;
 }
 
 /**
- * 1. Required for IE11.
+ * 1. Inheriting the font will allow some browser defaults to take effect, e.g. Chrome applies
+ *    `font: 11px system-ui` to the button element. We can't hardcode the font-family here because
+ *    that will disrupt components which rely upon a different inherited font-family, e.g. code
+ *    blocks.
  */
-main {
-  display: block; /* 1 */
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font: inherit; /* 1 */
+  font-family: inherit; /* 1 */
+  vertical-align: baseline;
+}
+
+em {
+  font-style: italic;
+}
+
+strong {
+  font-weight: 500;
+}
+
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block;
+}
+
+html {
+  font-family: $kuiFontFamily;
+  font-weight: $kuiFontWeightRegular;
+  font-size: $kuiFontSize;
+  color: $kuiTextColor;
+  height: 100%;
+  background-color: $kuiColorLightestShade;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  line-height: 1;
+}
+
+*:focus {
+  outline: none;
+}
+
+a {
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: none;
+  }
+
+  &:focus {
+    text-decoration: none;
+    outline: none;
+  }
+}
+
+
+button {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  outline: none;
+  font-size: $kuiFontSize;
+  color: inherit;
+
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+ol, ul {
+  list-style: none;
+}
+
+blockquote, q {
+  quotes: none;
+}
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
 }

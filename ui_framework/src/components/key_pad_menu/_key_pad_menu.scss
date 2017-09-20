@@ -1,0 +1,64 @@
+/**
+ * Dial menu is a phone like dial comprised of an svg icon and a title.
+ */
+
+/**
+ * 1. Default to grid of 3
+ */
+.kuiKeyPadMenu {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: $kuiKeyPadMenuSize * 3;
+}
+
+/**
+ * 1. If this class is applied to a button, we need to override the Chrome default font.
+ */
+.kuiKeyPadMenuItem {
+  display: block;
+  padding: $kuiSize;
+  height: $kuiKeyPadMenuSize;
+  width: $kuiKeyPadMenuSize;
+  color: $kuiColorDarkShade;
+  border: $kuiBorderThin;
+  border-color: transparent;
+  border-radius: $kuiBorderRadius;
+  font-family: $kuiFontFamily; /* 1 */
+
+  &:hover, &:focus {
+    border-color: $kuiBorderColor;
+
+    .kuiKeyPadMenuItem__icon {
+      transform: translateY(0);
+    }
+  }
+
+  &:focus {
+    background: $kuiFocusBackgroundColor;
+
+    .kuiKeyPadMenuItem__label {
+      text-decoration: underline;
+    }
+  }
+}
+
+  .kuiKeyPadMenuItem__inner {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .kuiKeyPadMenuItem__icon {
+    transition: transform $kuiAnimSlightBounce $kuiAnimSpeedNormal;
+    transform: translateY($kuiSizeXS);
+    margin-bottom: $kuiSizeS;
+  }
+
+  .kuiKeyPadMenuItem__label {
+    @include kuiFontSizeS;
+    text-align: center;
+  }

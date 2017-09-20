@@ -1,0 +1,96 @@
+.kuiToast {
+  @include kuiBottomShadow;
+
+  position: relative;
+  padding: $kuiSize;
+  background-color: $kuiColorEmptyShade;
+  border: $kuiBorderThin;
+  width: 100%;
+
+  &:hover .kuiToast__closeButton,
+  &:focus .kuiToast__closeButton, {
+    opacity: 1;
+  }
+}
+
+  /**
+   * 1. Fit button to icon.
+   */
+  .kuiToast__closeButton {
+    position: absolute;
+    top: $kuiSize;
+    right: $kuiSize;
+    line-height: 0; /* 1 */
+    appearance: none;
+    opacity: 0;
+    transition: opacity $kuiAnimSpeedFast $kuiAnimSlightResistance;
+
+    svg {
+      fill: tintOrShade($kuiTitleColor, 50%, 70%);
+    }
+
+    &:hover {
+      svg {
+        fill: $kuiTitleColor;
+      }
+    }
+
+    &:focus {
+      background-color: $kuiFocusBackgroundColor;
+      opacity: 1;
+
+      svg {
+        fill: $kuiColorPrimary;
+      }
+    }
+  }
+
+// Modifier naming and colors.
+$toastTypes: (
+  info: $kuiColorPrimary,
+  success: $kuiColorSecondary,
+  warning: $kuiColorWarning,
+  danger: $kuiColorDanger,
+);
+
+// Create button modifiders based upon the map.
+@each $name, $color in $toastTypes {
+  .kuiToast--#{$name} {
+    border-top: 2px solid $color;
+  }
+}
+
+/**
+ * 1. Align icon with first line of title text if it wraps.
+ * 2. Apply margin to all but last item in the flex.
+ * 3. Account for close button.
+ */
+.kuiToastHeader {
+  @include kuiFontSizeM;
+  padding-right: $kuiSizeL; /* 3 */
+
+  display: flex;
+  align-items: baseline; /* 1 */
+
+  > * + * {
+    margin-left: $kuiSizeS; /* 2 */
+  }
+}
+
+  /**
+   * 1. Vertically center icon with first line of title.
+   */
+  .kuiToastHeader__icon {
+    flex: 0 0 auto;
+    fill: $kuiTitleColor;
+    transform: translateY(2px); /* 1 */
+  }
+
+  .kuiToastHeader__title {
+    color: $kuiTitleColor;
+    font-weight: $kuiFontWeightLight;
+  }
+
+.kuiToastHeader--withBody {
+  margin-bottom: $kuiSizeM;
+}

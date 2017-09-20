@@ -8,6 +8,7 @@ export const KuiTableBody = ({ children, className, ...rest }) => {
     </tbody>
   );
 };
+
 KuiTableBody.propTypes = {
   children: PropTypes.node,
   className: PropTypes.string,

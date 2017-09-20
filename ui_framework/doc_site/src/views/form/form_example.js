@@ -1,168 +1,189 @@
 import React from 'react';
 
+import { renderToHtml } from '../../services';
+
 import {
-  GuideCode,
-  GuideDemo,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
-  GuideText,
 } from '../../components';
 
-const textInputHtml = require('./text_input.html');
-const labelHtml = require('./label.html');
-const assistedInputHtml = require('./assisted_input.html');
-const searchInputHtml = require('./search_input.html');
-const staticInputHtml = require('./static_input.html');
-const textAreaHtml = require('./text_area.html');
-const textAreaNonResizableHtml = require('./text_area_non_resizable.html');
-const checkBoxHtml = require('./check_box.html');
-const selectHtml = require('./select.html');
+import {
+  KuiCode,
+} from '../../../../components';
+
+import FormControls from './form_controls';
+const formControlsSource = require('!!raw!./form_controls');
+const formControlsHtml = renderToHtml(FormControls);
+
+import FormRows from './form_rows';
+const formRowsSource = require('!!raw!./form_rows');
+const formRowsHtml = renderToHtml(FormRows);
+
+import Validation from './validation';
+const validationSource = require('!!raw!./validation');
+const validationHtml = renderToHtml(Validation);
+
+import FormPopover from './form_popover';
+const formPopoverSource = require('!!raw!./form_popover');
+const formPopoverHtml = renderToHtml(FormPopover);
+
+import InlineForm from './inline_form';
+const inlineFormSource = require('!!raw!./inline_form');
+const inlineFormHtml = renderToHtml(InlineForm);
+
+import InlineFormSizing from './inline_form_sizing';
+const inlineFormSizingSource = require('!!raw!./inline_form_sizing');
+const inlineFormSizingHtml = renderToHtml(InlineForm);
+
+import InlineFormPopover from './inline_form_popover';
+const inlineFormPopoverSource = require('!!raw!./inline_form_popover');
+const inlineFormPopoverHtml = renderToHtml(InlineFormPopover);
 
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
-      title="Label"
+      title="Form controls"
       source={[{
+        type: GuideSectionTypes.JS,
+        code: formControlsSource,
+      }, {
         type: GuideSectionTypes.HTML,
-        code: labelHtml,
+        code: formControlsHtml,
       }]}
-    >
-      <GuideDemo
-        html={labelHtml}
-      />
-    </GuideSection>
+      text={
+        <p>
+          These are the base inputs without their labels. If you need labels
+          then use the <KuiCode>FormRow</KuiCode> wrapper as explained
+          in the next example.
+        </p>
+      }
+      demo={
+        <FormControls />
+      }
+    />
 
     <GuideSection
-      title="TextInput"
+      title="Form rows"
       source={[{
+        type: GuideSectionTypes.JS,
+        code: formRowsSource,
+      }, {
         type: GuideSectionTypes.HTML,
-        code: textInputHtml,
+        code: formRowsHtml,
       }]}
-    >
-      <GuideDemo
-        html={textInputHtml}
-      />
-
-      <GuideDemo
-        html={textInputHtml}
-        isDarkTheme={true}
-      />
-    </GuideSection>
+      text={
+        <p>
+          Use the <KuiCode>FormRow</KuiCode> component to easily associate form components with
+          labels, help text, and error text.
+        </p>
+      }
+      demo={
+        <FormRows />
+      }
+    />
 
     <GuideSection
-      title="AssistedInput"
+      title="Form in popover"
       source={[{
+        type: GuideSectionTypes.JS,
+        code: formPopoverSource,
+      }, {
         type: GuideSectionTypes.HTML,
-        code: assistedInputHtml,
+        code: formPopoverHtml,
       }]}
-    >
-      <GuideText>
-        <strong>Note:</strong> You have to specify right-side padding using a custom class or
-        inline style to keep the input text from overlapping with the assistance content.
-        Use <GuideCode>em</GuideCode> units for this padding so that it scales appropriately if the
-        user changes their root font-size.
-      </GuideText>
-
-      <GuideDemo
-        html={assistedInputHtml}
-      />
-
-      <GuideDemo
-        html={assistedInputHtml}
-        isDarkTheme={true}
-      />
-    </GuideSection>
+      text={
+        <p>
+          Forms can be placed within <KuiCode>KuiPopover</KuiCode> and
+          should scale accordingly.
+        </p>
+      }
+      demo={
+        <FormPopover />
+      }
+    />
 
     <GuideSection
-      title="SearchInput"
+      title="Validation"
       source={[{
+        type: GuideSectionTypes.JS,
+        code: validationSource,
+      }, {
         type: GuideSectionTypes.HTML,
-        code: searchInputHtml,
+        code: validationHtml,
       }]}
-    >
-      <GuideDemo
-        html={searchInputHtml}
-      />
-
-      <GuideDemo
-        html={searchInputHtml}
-        isDarkTheme={true}
-      />
-    </GuideSection>
-
+      text={
+        <p>
+          Validation is achieved by applying <KuiCode>isInvalid</KuiCode>
+          and optionally <KuiCode>error</KuiCode> props
+          onto the <KuiCode>KuiForm</KuiCode> or <KuiCode>KuiFormRow</KuiCode>
+          components. Errors are optional and are passed as an array in case you
+          need to list many errors.
+        </p>
+      }
+      demo={
+        <Validation />
+      }
+    />
     <GuideSection
-      title="StaticInput"
+      title="Inline form"
       source={[{
+        type: GuideSectionTypes.JS,
+        code: inlineFormSource,
+      }, {
         type: GuideSectionTypes.HTML,
-        code: staticInputHtml,
+        code: inlineFormHtml,
       }]}
-    >
-      <GuideText>
-        Use StaticInput to display dynamic content in a form which the user isn&rsquo;t allowed to edit.
-      </GuideText>
-
-      <GuideDemo
-        html={staticInputHtml}
-      />
-    </GuideSection>
-
+      text={
+        <p>
+          Inline forms can be made with <KuiCode>FlexGroup</KuiCode>. Apply
+          <KuiCode>grow=false</KuiCode> on any of the items you want to collapse
+          (like this button). Note that the button FormRow component also requires
+          an additional prop because it&rsquo;s missing a label.
+        </p>
+      }
+      demo={
+        <InlineForm />
+      }
+    />
     <GuideSection
-      title="TextArea"
+      title="Apply width to FlexItem to size individual controls"
       source={[{
+        type: GuideSectionTypes.JS,
+        code: inlineFormSizingSource,
+      }, {
         type: GuideSectionTypes.HTML,
-        code: textAreaHtml,
+        code: inlineFormSizingHtml,
       }]}
-    >
-      <GuideDemo
-        html={textAreaHtml}
-      />
-
-      <GuideDemo
-        html={textAreaHtml}
-        isDarkTheme={true}
-      />
-    </GuideSection>
-
+      text={
+        <p>
+          When you need to make a field smaller, always apply the width to the
+          FlexItem, not the input. The input inside will resize as needed.
+        </p>
+      }
+      demo={
+        <InlineFormSizing />
+      }
+    />
     <GuideSection
-      title="TextArea, non-resizable"
+      title="Inline forms can live in popovers, or any container"
       source={[{
+        type: GuideSectionTypes.JS,
+        code: inlineFormPopoverSource,
+      }, {
         type: GuideSectionTypes.HTML,
-        code: textAreaNonResizableHtml,
+        code: inlineFormPopoverHtml,
       }]}
-    >
-      <GuideDemo
-        html={textAreaNonResizableHtml}
-      />
-    </GuideSection>
-
-    <GuideSection
-      title="CheckBox"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: checkBoxHtml,
-      }]}
-    >
-      <GuideDemo
-        html={checkBoxHtml}
-      />
-    </GuideSection>
-
-    <GuideSection
-      title="Select"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: selectHtml,
-      }]}
-    >
-      <GuideDemo
-        html={selectHtml}
-      />
-
-      <GuideDemo
-        html={selectHtml}
-        isDarkTheme={true}
-      />
-    </GuideSection>
+      text={
+        <p>
+          Because forms auto-size to their wrapping elements, it means you
+          can do fun things with them like stuff them in popovers and
+          they&rsquo;ll still work perfectly.
+        </p>
+      }
+      demo={
+        <InlineFormPopover />
+      }
+    />
   </GuidePage>
 );

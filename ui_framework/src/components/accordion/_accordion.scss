@@ -1,0 +1,32 @@
+.kuiAccordion__button {
+  text-align: left;
+  width: 100%;
+
+  &:hover, &:focus {
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  &:focus {
+    background-color: $kuiFocusBackgroundColor;
+  }
+}
+
+.kuiAccordion__childWrapper {
+  visibility: hidden;
+  height: 0;
+  opacity: 0;
+  overflow-y: hidden;
+  transform: translatez(0);
+  transition:
+    height $kuiAnimSpeedNormal $kuiAnimSlightResistance,
+    opacity $kuiAnimSpeedNormal $kuiAnimSlightResistance
+  ;
+}
+
+.kuiAccordion.kuiAccordion-isOpen {
+  .kuiAccordion__childWrapper {
+    visibility: visible;
+    opacity: 1;
+  }
+}

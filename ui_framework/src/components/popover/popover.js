@@ -4,6 +4,8 @@ import classNames from 'classnames';
 
 import { KuiOutsideClickDetector } from '../outside_click_detector';
 
+import { KuiPanel, SIZES } from '../../components/panel/panel';
+
 const anchorPositionToClassNameMap = {
   'center': '',
   'left': 'kuiPopover--anchorLeft',
@@ -14,12 +16,14 @@ export const ANCHOR_POSITIONS = Object.keys(anchorPositionToClassNameMap);
 
 export const KuiPopover = ({
   anchorPosition,
-  bodyClassName,
   button,
   isOpen,
+  withTitle,
   children,
   className,
   closePopover,
+  panelClassName,
+  panelPaddingSize,
   ...rest,
 }) => {
   const classes = classNames(
@@ -28,15 +32,20 @@ export const KuiPopover = ({
     className,
     {
       'kuiPopover-isOpen': isOpen,
+      'kuiPopover--withTitle': withTitle,
     },
   );
 
-  const bodyClasses = classNames('kuiPopover__body', bodyClassName);
+  const panelClasses = classNames('kuiPopover__panel', panelClassName);
 
-  const body = (
-    <div className={bodyClasses}>
+  const panel = (
+    <KuiPanel
+      className={panelClasses}
+      paddingSize={panelPaddingSize}
+      hasShadow
+    >
       { children }
-    </div>
+    </KuiPanel>
   );
 
   return (
@@ -45,8 +54,8 @@ export const KuiPopover = ({
         className={classes}
         {...rest}
       >
-        { button }
-        { body }
+        {button}
+        {panel}
       </div>
     </KuiOutsideClickDetector>
   );
@@ -54,14 +63,17 @@ export const KuiPopover = ({
 
 KuiPopover.propTypes = {
   isOpen: PropTypes.bool,
+  withTitle: PropTypes.bool,
   closePopover: PropTypes.func.isRequired,
   button: PropTypes.node.isRequired,
   children: PropTypes.node,
   anchorPosition: PropTypes.oneOf(ANCHOR_POSITIONS),
-  bodyClassName: PropTypes.string,
+  panelClassName: PropTypes.string,
+  panelPaddingSize: PropTypes.oneOf(SIZES),
 };
 
 KuiPopover.defaultProps = {
   isOpen: false,
   anchorPosition: 'center',
+  panelPaddingSize: 'm',
 };

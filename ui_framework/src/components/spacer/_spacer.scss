@@ -1,0 +1,14 @@
+$spacerSizes: (
+  xs: $kuiSizeXS,
+  s: $kuiSizeS,
+  m: $kuiSize,
+  l: $kuiSizeL,
+  xl: $kuiSizeXL,
+  xxl: $kuiSizeXXL,
+);
+
+@each $name, $size in $spacerSizes {
+  .kuiSpacer--#{$name} {
+    height: $size;
+  }
+}

@@ -1,0 +1,6 @@
+$kuiSwitchHeight: $kuiSizeL;
+$kuiSwitchWidth: ($kuiSizeL * 2) + $kuiSizeXS;
+$kuiSwitchThumbSize: $kuiSizeL;
+$kuiSwitchIconHeight: $kuiSize;
+
+@import 'switch';

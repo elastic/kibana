@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiHeaderLogo is rendered 1`] = `
+<a
+  aria-label="aria-label"
+  class="kuiHeaderLogo testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <svg
+    class="kuiIcon kuiHeaderLogo__icon"
+  >
+    <title>
+      Go to Kibana home page
+    </title>
+    <use
+      href="#logo"
+    />
+  </svg>
+</a>
+`;
+
+exports[`KuiHeaderLogo renders href 1`] = `
+<a
+  class="kuiHeaderLogo"
+  href="#"
+>
+  <svg
+    class="kuiIcon kuiHeaderLogo__icon"
+  >
+    <title>
+      Go to Kibana home page
+    </title>
+    <use
+      href="#logo"
+    />
+  </svg>
+</a>
+`;

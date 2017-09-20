@@ -1,47 +1,69 @@
-import PropTypes from 'prop-types';
 import React from 'react';
-
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-const ICON_TYPES = [
-  'create',
-  'delete',
-  'previous',
-  'next',
-  'loading',
-  'settings',
-  'menu',
-];
+import {
+  ICON_TYPES,
+  KuiIcon,
+} from '../../icon';
 
-const KuiButtonIcon = props => {
-  const typeToClassNameMap = {
-    create: 'fa-plus',
-    delete: 'fa-trash',
-    previous: 'fa-chevron-left',
-    next: 'fa-chevron-right',
-    loading: 'fa-spinner fa-spin',
-    settings: 'fa-gear',
-    menu: 'fa-bars',
-  };
+const typeToClassNameMap = {
+  primary: 'kuiButtonIcon--primary',
+  danger: 'kuiButtonIcon--danger',
+  disabled: 'kuiButtonIcon--disabled',
+  ghost: 'kuiButtonIcon--ghost',
+};
 
-  const iconClasses = classNames('kuiButton__icon kuiIcon', props.className, {
-    [typeToClassNameMap[props.type]]: props.type,
-  });
+export const TYPES = Object.keys(typeToClassNameMap);
 
-  // Purely decorative icons should be hidden from screen readers. Button icons are purely
-  // decorate since assisted users will want to click on the button itself, not the icon within.
-  // (https://www.w3.org/WAI/GL/wiki/Using_aria-hidden%3Dtrue_on_an_icon_font_that_AT_should_ignore)
+
+export const KuiButtonIcon = ({
+  className,
+  iconType,
+  type,
+  isDisabled,
+  ...rest,
+}) => {
+
+  const classes = classNames(
+    'kuiButtonIcon',
+    typeToClassNameMap[type],
+    className,
+  );
+
+  // Add an icon to the button if one exists.
+  let buttonIcon;
+
+  if (iconType) {
+    buttonIcon = (
+      <KuiIcon
+        className="kuiButtonIcon__icon"
+        type={iconType}
+        size="medium"
+        aria-hidden="true"
+      />
+    );
+  }
+
   return (
-    <span aria-hidden="true" className={iconClasses} />
+    <button
+      disabled={isDisabled}
+      className={classes}
+      {...rest}
+    >
+      {buttonIcon}
+    </button>
   );
 };
 
 KuiButtonIcon.propTypes = {
-  type: PropTypes.oneOf(ICON_TYPES),
+  children: PropTypes.node,
   className: PropTypes.string,
+  iconType: PropTypes.oneOf(ICON_TYPES),
+  type: PropTypes.oneOf(TYPES),
+  isDisabled: PropTypes.bool,
 };
 
-export {
-  ICON_TYPES,
-  KuiButtonIcon,
+KuiButtonIcon.defaultProps = {
+  type: 'primary',
 };

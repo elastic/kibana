@@ -2,64 +2,160 @@ import React, {
   Component,
 } from 'react';
 
-import classNames from 'classnames';
-
 import {
+  KuiCheckbox,
+  KuiIcon,
+  KuiLink,
   KuiTable,
   KuiTableBody,
   KuiTableHeader,
   KuiTableHeaderCell,
-  KuiTableHeaderCheckBoxCell,
+  KuiTableHeaderCellCheckbox,
   KuiTableRow,
   KuiTableRowCell,
-  KuiTableRowCheckBoxCell,
+  KuiTableRowCellCheckbox,
 } from '../../../../components';
 
 import {
+  LEFT_ALIGNMENT,
+  RIGHT_ALIGNMENT,
   SortableProperties,
 } from '../../../../services';
-
-const statusToIconClassNameMap = {
-  success: 'kuiIcon--success fa-check',
-  warning: 'kuiIcon--warning fa-bolt',
-  danger: 'kuiIcon--error fa-warning',
-};
 
 export class Table extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
+      itemIdToSelectedMap: {
+        2: true,
+      },
       sortedColumn: 'title',
-      rowToSelectedStateMap: new Map(),
     };
 
     this.items = [{
-      title: 'Alligator',
-      isLink: true,
-      status: 'success',
+      id: 0,
+      title: 'A very long line which will not wrap on narrower screens and instead will become truncated and replaced by an ellipsis',
+      type: 'user',
       dateCreated: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
-      dateModified: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 1,
     }, {
-      title: 'Boomerang',
-      isLink: false,
-      status: 'success',
-      dateCreated: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
-      dateModified: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
-      details: 'All kinds of crazy information about boomerangs could go in here.',
+      id: 1,
+      title: {
+        value: 'A very long line which will wrap on narrower screens and NOT become truncated and replaced by an ellipsis',
+        isWrapped: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 01 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 1,
     }, {
-      title: 'Celebration of some very long content that will affect cell width and should eventually become truncated',
-      isLink: true,
-      status: 'warning',
-      dateCreated: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
-      dateModified: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
+      id: 2,
+      title: {
+        value: 'Boomerang',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 28 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10,
     }, {
-      title: 'You can also specify that really long content wraps instead of becoming truncated with an ellipsis (which is the default behavior)', // eslint-disable-line max-len
-      isLink: true,
-      isWrapped: true,
-      status: 'danger',
-      dateCreated: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
-      dateModified: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
+      id: 3,
+      title: {
+        value: 'Celebration',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 16 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 100,
+    }, {
+      id: 4,
+      title: {
+        value: 'Dog',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 13 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 1000,
+    }, {
+      id: 5,
+      title: {
+        value: 'Dragon',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10000,
+    }, {
+      id: 6,
+      title: {
+        value: 'Bear',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10000,
+    }, {
+      id: 7,
+      title: {
+        value: 'Dinosaur',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10000,
+    }, {
+      id: 8,
+      title: {
+        value: 'Spider',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10000,
+    }, {
+      id: 9,
+      title: {
+        value: 'Bugbear',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10000,
+    }, {
+      id: 10,
+      title: {
+        value: 'Bear',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10000,
+    }, {
+      id: 11,
+      title: {
+        value: 'Dinosaur',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10000,
+    }, {
+      id: 12,
+      title: {
+        value: 'Spider',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10000,
+    }, {
+      id: 13,
+      title: {
+        value: 'Bugbear',
+        isLink: true,
+      },
+      type: 'user',
+      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+      magnitude: 10000,
     }];
 
     this.sortableProperties = new SortableProperties([{
@@ -67,10 +163,41 @@ export class Table extends Component {
       getValue: item => item.title.toLowerCase(),
       isAscending: true,
     }, {
-      name: 'status',
-      getValue: item => item.status.toLowerCase(),
+      name: 'dateCreated',
+      getValue: item => item.dateCreated.toLowerCase(),
+      isAscending: true,
+    }, {
+      name: 'magnitude',
+      getValue: item => item.magnitude.toLowerCase(),
       isAscending: true,
     }], this.state.sortedColumn);
+
+    this.columns = [{
+      id: 'checkbox',
+      isCheckbox: true,
+      width: '20px',
+    }, {
+      id: 'title',
+      label: 'Title',
+      alignment: LEFT_ALIGNMENT,
+      isSortable: true,
+    }, {
+      id: 'type',
+      label: 'Type',
+      alignment: LEFT_ALIGNMENT,
+      width: '60px',
+      cellProvider: cell => <KuiIcon type={cell} size="medium" />,
+    }, {
+      id: 'dateCreated',
+      label: 'Date created',
+      alignment: LEFT_ALIGNMENT,
+      isSortable: true,
+    }, {
+      id: 'magnitude',
+      label: 'Orders of magnitude',
+      alignment: RIGHT_ALIGNMENT,
+      isSortable: true,
+    }];
   }
 
   onSort = prop => {
@@ -81,115 +208,124 @@ export class Table extends Component {
     });
   }
 
-  toggleItem = item => {
-    this.setState(previousState => {
-      const rowToSelectedStateMap = new Map(previousState.rowToSelectedStateMap);
-      rowToSelectedStateMap.set(item, !rowToSelectedStateMap.get(item));
-      return { rowToSelectedStateMap };
+  toggleItem = itemId => {
+    const newItemIdToSelectedMap = Object.assign({}, this.state.itemIdToSelectedMap, {
+      [itemId]: !this.state.itemIdToSelectedMap[itemId],
     });
-  };
 
-  isItemChecked = item => {
-    return this.state.rowToSelectedStateMap.get(item);
-  };
+    this.setState({
+      itemIdToSelectedMap: newItemIdToSelectedMap,
+    });
+  }
 
-  renderStatusIcon(status) {
-    const iconClasses = classNames('kuiIcon', statusToIconClassNameMap[status]);
-    return <div className={iconClasses} />;
+  toggleAll = () => {
+    const allSelected = this.areAllItemsSelected();
+    const newItemIdToSelectedMap = {};
+    this.items.forEach(item => newItemIdToSelectedMap[item.id] = !allSelected);
+
+
+    this.setState({
+      itemIdToSelectedMap: newItemIdToSelectedMap,
+    });
+  }
+
+  isItemSelected = itemId => {
+    return this.state.itemIdToSelectedMap[itemId];
+  }
+
+  areAllItemsSelected = () => {
+    const indexOfUnselectedItem = this.items.findIndex(item => !this.isItemSelected(item.id));
+    return indexOfUnselectedItem === -1;
+  }
+
+  renderHeaderCells() {
+    return this.columns.map((column, columnIndex) => {
+      if (column.isCheckbox) {
+        return (
+          <KuiTableHeaderCellCheckbox
+            key={column.id}
+            width={column.width}
+          >
+            <KuiCheckbox
+              id="selectAllCheckbox"
+              checked={this.areAllItemsSelected()}
+              onChange={this.toggleAll.bind(this)}
+              alternateStyle
+            />
+          </KuiTableHeaderCellCheckbox>
+        );
+      }
+
+      return (
+        <KuiTableHeaderCell
+          key={column.id}
+          align={this.columns[columnIndex].alignment}
+          width={column.width}
+          onSort={column.isSortable ? this.onSort.bind(this, column.id) : undefined}
+          isSorted={this.state.sortedColumn === column.id}
+          isSortAscending={this.sortableProperties.isAscendingByName(column.id)}
+        >
+          {column.label}
+        </KuiTableHeaderCell>
+      );
+    });
   }
 
   renderRows() {
-    const rows = [];
+    return this.items.map(item => {
+      const cells = this.columns.map(column => {
+        const cell = item[column.id];
 
-    this.items.forEach(item => {
-      const classes = classNames({
-        'kuiTableRowCell--wrap': item.isWrapped,
+        let child;
+
+        if (column.isCheckbox) {
+          return (
+            <KuiTableRowCellCheckbox key={column.id}>
+              <KuiCheckbox
+                id={`${item.id}-checkbox`}
+                checked={this.isItemSelected(item.id)}
+                onChange={this.toggleItem.bind(this, item.id)}
+                alternateStyle
+              />
+            </KuiTableRowCellCheckbox>
+          );
+        } else if (column.cellProvider) {
+          child = column.cellProvider(cell);
+        } else if (cell.isLink) {
+          child = <KuiLink href="">{cell.value}</KuiLink>;
+        } else if (cell.isWrapped) {
+          child = cell.value;
+        } else {
+          child = cell;
+        }
+
+        return (
+          <KuiTableRowCell
+            key={column.id}
+            align={column.alignment}
+            wrapText={cell && cell.isWrapped}
+          >
+            {child}
+          </KuiTableRowCell>
+        );
       });
 
-      let title;
-
-      if (item.isLink) {
-        title = <a href="">{item.title}</a>;
-      } else {
-        title = item.title;
-      }
-
-      rows.push(
-        <KuiTableRow key={item.title}>
-          <KuiTableRowCheckBoxCell
-            isChecked={this.isItemChecked(item)}
-            onChange={() => this.toggleItem(item)}
-          />
-
-          <KuiTableRowCell className={classes}>
-            {title}
-          </KuiTableRowCell>
-
-          <KuiTableRowCell>
-            {this.renderStatusIcon(item.status)}
-          </KuiTableRowCell>
-
-          <KuiTableRowCell>
-            {item.dateCreated}
-          </KuiTableRowCell>
-
-          <KuiTableRowCell>
-            {item.dateModified}
-          </KuiTableRowCell>
+      return (
+        <KuiTableRow
+          key={item.id}
+          isSelected={this.isItemSelected(item.id)}
+        >
+          {cells}
         </KuiTableRow>
       );
-
-      if (item.details) {
-        rows.push(
-          <KuiTableRow key={`${item.title}Details`}>
-            <KuiTableRowCell className="kuiTableRowCell--expanded" colSpan="5">
-              <h3 className="kuiSubTitle">
-                {item.title}
-              </h3>
-              <p className="kuiText">
-                {item.details}
-              </p>
-            </KuiTableRowCell>
-          </KuiTableRow>
-        );
-      }
     });
-
-    return rows;
   }
 
   render() {
     return (
       <KuiTable>
         <KuiTableHeader>
-          <KuiTableHeaderCheckBoxCell
-            isChecked={this.isItemChecked('header')}
-            onChange={() => this.toggleItem('header')}
-          />
-
-          <KuiTableHeaderCell
-            onSort={this.onSort.bind(this, 'title')}
-            isSorted={this.state.sortedColumn === 'title'}
-            isSortAscending={this.sortableProperties.isAscendingByName('title')}
-          >
-            Title
-          </KuiTableHeaderCell>
-
-          <KuiTableHeaderCell
-            onSort={this.onSort.bind(this, 'status')}
-            isSorted={this.state.sortedColumn === 'status'}
-            isSortAscending={this.sortableProperties.isAscendingByName('status')}
-          >
-            Status
-          </KuiTableHeaderCell>
-
-          <KuiTableHeaderCell>
-            Date created
-          </KuiTableHeaderCell>
-
-          <KuiTableHeaderCell>
-            Date last modified
-          </KuiTableHeaderCell>
+          {this.renderHeaderCells()}
         </KuiTableHeader>
 
         <KuiTableBody>

@@ -1,5 +1,33 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`align defaults to left 1`] = `
+<td
+  class="kuiTableRowCell"
+>
+  <div
+    class="kuiTableCellContent"
+  >
+    <span
+      class="kuiTableCellContent__text"
+    />
+  </div>
+</td>
+`;
+
+exports[`align renders right when specified 1`] = `
+<td
+  class="kuiTableRowCell"
+>
+  <div
+    class="kuiTableCellContent kuiTableCellContent--alignRight"
+  >
+    <span
+      class="kuiTableCellContent__text"
+    />
+  </div>
+</td>
+`;
+
 exports[`renders KuiTableRowCell 1`] = `
 <td
   aria-label="aria-label"
@@ -7,7 +35,27 @@ exports[`renders KuiTableRowCell 1`] = `
   data-test-subj="test subject string"
 >
   <div
-    class="kuiTableRowCell__liner"
-  />
+    class="kuiTableCellContent testClass1 testClass2"
+  >
+    <span
+      class="kuiTableCellContent__text"
+    >
+      children
+    </span>
+  </div>
+</td>
+`;
+
+exports[`wrapText is rendered when specified 1`] = `
+<td
+  class="kuiTableRowCell"
+>
+  <div
+    class="kuiTableCellContent kuiTableCellContent--wrapText"
+  >
+    <span
+      class="kuiTableCellContent__text"
+    />
+  </div>
 </td>
 `;

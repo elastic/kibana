@@ -1,0 +1,4 @@
+.kuiFieldNumber {
+  @include kuiFormControlStyle;
+  @include kuiFormControlWithIcon($isIconOptional: true);
+}

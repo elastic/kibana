@@ -1,0 +1,115 @@
+.kuiSwitch {
+  position: relative;
+  display: inline-block;
+  height: $kuiSwitchHeight;
+
+  .kuiSwitch__label {
+    padding-left: $kuiSizeS;
+    line-height: $kuiSwitchHeight;
+    font-size: $kuiFontSizeS;
+  }
+
+  /**
+   * 1. The input is "hidden" but still focusable.
+   */
+  .kuiSwitch__input {
+    position: absolute;
+    opacity: 0; /* 1 */
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+  }
+
+  .kuiSwitch__input:focus + .kuiSwitch__body {
+    background: $kuiColorEmptyShade;
+
+    .kuiSwitch__thumb {
+      border-color: $kuiColorPrimary;
+      background-color: $kuiColorPrimary;
+    }
+  }
+
+  .kuiSwitch__body {
+    pointer-events: none;
+    width: $kuiSwitchWidth;
+    height: $kuiSwitchHeight;
+    background: $kuiFormBackgroundColor;
+    box-shadow: inset 0 0 0 1px $kuiBorderColor;
+    display: inline-block;
+    position: relative;
+    border-radius: $kuiSwitchHeight;
+    vertical-align: middle;
+  }
+
+  .kuiSwitch__thumb {
+    position: absolute;
+    width: $kuiSwitchHeight;
+    height: $kuiSwitchHeight;
+    display: inline-block;
+    background-color: $kuiColorEmptyShade;
+    left: $kuiSwitchWidth - $kuiSwitchThumbSize;
+    border-radius: 50%;
+    border: $kuiBorderThin;
+    transition: border-color $kuiAnimSpeedNormal $kuiAnimSlightBounce, background-color $kuiAnimSpeedNormal $kuiAnimSlightBounce, left $kuiAnimSpeedNormal $kuiAnimSlightBounce, transform $kuiAnimSpeedNormal $kuiAnimSlightBounce;
+  }
+
+  .kuiSwitch__track {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+    border-radius: $kuiSwitchHeight;
+  }
+
+  .kuiSwitch__icon {
+    position: absolute;
+    right: -($kuiSwitchWidth - ($kuiSwitchThumbSize / 2));
+    top: ($kuiSwitchHeight - $kuiSwitchIconHeight) / 2;
+    bottom: 0;
+    width: $kuiSwitchWidth - ($kuiSwitchThumbSize / 2) + $kuiSizeS;
+    height: $kuiSwitchIconHeight;
+    transition: left $kuiAnimSpeedNormal $kuiAnimSlightBounce, right $kuiAnimSpeedNormal $kuiAnimSlightBounce;
+    fill: $kuiTextColor;
+  }
+
+  .kuiSwitch__icon--checked {
+    right: auto;
+    left: -$kuiSizeS;
+    fill: $kuiTextColor;
+  }
+
+  /**
+   * The thumb is slightly scaled when in use.
+   */
+  &:hover {
+    .kuiSwitch__thumb {
+      transform: scale(1.05);
+    }
+  }
+
+  &:active {
+    .kuiSwitch__thumb {
+      transform: scale(.95);
+    }
+  }
+
+  /**
+   * When input is not checked, we shift around the positioning of sibling/child selectors.
+   */
+  .kuiSwitch__input:not(:checked) ~ .kuiSwitch__body {
+    .kuiSwitch__thumb {
+      left: 0;
+    }
+
+    .kuiSwitch__icon {
+      right: -$kuiSizeS;
+
+      &.kuiSwitch__icon--checked {
+        right: auto;
+        left: -($kuiSwitchWidth - ($kuiSwitchThumbSize / 2));
+      }
+    }
+  }
+}

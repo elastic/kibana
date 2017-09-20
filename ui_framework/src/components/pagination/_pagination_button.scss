@@ -1,0 +1,39 @@
+.kuiPaginationButton {
+  font-size: $kuiFontSizeS;
+  padding: 0;
+  height: $kuiSizeL;
+  min-width: $kuiSizeXL;
+  text-align: center;
+  color: $kuiTextColor;
+
+  svg {
+    fill: $kuiTextColor !important;
+  }
+  // It's too heavy to have the normal button background on hover.
+  &:not(:focus):hover {
+    background-color: transparent;
+  }
+}
+
+.kuiPaginationButton-isActive {
+  pointer-events: none;
+  background-color: $kuiColorPrimary;
+  color: $kuiColorEmptyShade;
+  border-radius: $kuiBorderRadius;
+
+  &:focus {
+    background-color: $kuiColorPrimary;
+    color: $kuiColorEmptyShade;
+  }
+}
+
+.kuiPaginationButton-isPlaceholder {
+  pointer-events: none;
+  color: $kuiColorMediumShade;
+}
+
+@include screenXSmall {
+  .kuiPaginationButton--hideOnMobile {
+    display: none;
+  }
+}

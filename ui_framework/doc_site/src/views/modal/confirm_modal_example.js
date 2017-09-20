@@ -1,12 +1,14 @@
-import React from 'react';
+import React, {
+  Component,
+} from 'react';
 
 import {
+  KuiButton,
   KuiConfirmModal,
   KuiModalOverlay,
-  KuiButton
 } from '../../../../components';
 
-export class ConfirmModalExample extends React.Component {
+export class ConfirmModalExample extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -27,8 +29,8 @@ export class ConfirmModalExample extends React.Component {
   render() {
     return (
       <div>
-        <KuiButton buttonType="primary" onClick={this.showModal}>
-          Show Modal
+        <KuiButton onClick={this.showModal}>
+          Click me to load a modal
         </KuiButton>
         {
           this.state.showConfirmModal ?

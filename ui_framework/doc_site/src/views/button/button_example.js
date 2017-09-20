@@ -3,284 +3,164 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
-  GuideDemo,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
-  GuideText,
 } from '../../components';
 
-import Basic from './button_basic';
-const basicSource = require('!!raw!./button_basic');
-const basicHtml = renderToHtml(Basic);
+import {
+  KuiCode,
+} from '../../../../components';
 
-import Hollow from './button_hollow';
-const hollowSource = require('!!raw!./button_hollow');
-const hollowHtml = renderToHtml(Hollow);
+import Button from './button';
+const buttonSource = require('!!raw!./button');
+const buttonHtml = renderToHtml(Button);
 
-import Primary from './button_primary';
-const primarySource = require('!!raw!./button_primary');
-const primaryHtml = renderToHtml(Primary);
+import ButtonWithIcon from './button_with_icon';
+const buttonWithIconSource = require('!!raw!./button_with_icon');
+const buttonWithIconHtml = renderToHtml(Button);
 
-import Secondary from './button_secondary';
-const secondarySource = require('!!raw!./button_secondary');
-const secondaryHtml = renderToHtml(Secondary);
+import ButtonOption from './button_empty';
+const buttonOptionSource = require('!!raw!./button_empty');
+const buttonOptionHtml = renderToHtml(ButtonOption);
 
-import Danger from './button_danger';
-const dangerSource = require('!!raw!./button_danger');
-const dangerHtml = renderToHtml(Danger);
+import ButtonOptionFlush from './button_empty_flush';
+const buttonOptionFlushSource = require('!!raw!./button_empty_flush');
+const buttonOptionFlushHtml = renderToHtml(ButtonOptionFlush);
 
-import Warning from './button_warning';
-const warningSource = require('!!raw!./button_danger');
-const warningHtml = renderToHtml(Warning);
+import ButtonIcon from './button_icon';
+const buttonIconSource = require('!!raw!./button_icon');
+const buttonIconHtml = renderToHtml(ButtonIcon);
 
-import Loading from './button_loading';
-const loadingSource = require('!!raw!./button_loading');
-const loadingHtml = renderToHtml(Loading, { isLoading: true });
-
-import WithIcon from './button_with_icon';
-const withIconSource = require('!!raw!./button_with_icon');
-const withIconHtml = renderToHtml(WithIcon);
-
-import ButtonGroup from './button_group';
-const buttonGroupSource = require('!!raw!./button_group');
-const buttonGroupHtml = renderToHtml(ButtonGroup);
-
-import ButtonGroupUnited from './button_group_united';
-const buttonGroupUnitedSource = require('!!raw!./button_group_united');
-const buttonGroupUnitedHtml = renderToHtml(ButtonGroupUnited);
-
-import Elements from './button_elements';
-const elementsSource = require('!!raw!./button_elements');
-const elementsHtml = renderToHtml(Elements);
-
-const sizesHtml = require('./button_sizes.html');
+import ButtonGhost from './button_ghost';
+const buttonGhostSource = require('!!raw!./button_ghost');
+const buttonGhostHtml = renderToHtml(ButtonGhost);
 
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
-      title="Basic Button"
+      title="Button"
       source={[{
         type: GuideSectionTypes.JS,
-        code: basicSource,
+        code: buttonSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: basicHtml,
+        code: buttonHtml,
       }]}
-    >
-      <GuideText>
-        Use the basic button for navigation elements or controls that are not the primary focus of the page (ex: pagination, toggles...etc).
-      </GuideText>
-
-      <GuideDemo>
-        <Basic />
-      </GuideDemo>
-
-      <GuideDemo isDarkTheme={true}>
-        <Basic />
-      </GuideDemo>
-    </GuideSection>
+      text={
+        <p>
+          Button <KuiCode>type</KuiCode> defines the color of the button.
+          <KuiCode>fill</KuiCode> can be optionally added to add more focus to an action.
+        </p>
+      }
+      demo={
+        <Button />
+      }
+    />
 
     <GuideSection
-      title="Hollow Button"
+      title="Button with Icon"
       source={[{
         type: GuideSectionTypes.JS,
-        code: hollowSource,
+        code: buttonWithIconSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: hollowHtml,
+        code: buttonWithIconHtml,
       }]}
-    >
-      <GuideText>
-        Use the hollow Button when presenting a neutral action, e.g. a &ldquo;Cancel&rdquo; button.
-      </GuideText>
-
-      <GuideDemo>
-        <Hollow />
-      </GuideDemo>
-    </GuideSection>
+      text={
+        <p>
+          The passed icon needs to come from our list of svg icons. Can be flipped {
+            // eslint-disable-next-line react/no-unescaped-entities
+          } to the other side by passing <KuiCode>iconSide="right"</KuiCode>.
+        </p>
+      }
+      demo={
+        <ButtonWithIcon />
+      }
+    />
 
     <GuideSection
-      title="Primary Button"
+      title="ButtonEmpty"
       source={[{
         type: GuideSectionTypes.JS,
-        code: primarySource,
+        code: buttonOptionSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: primaryHtml,
+        code: buttonOptionHtml,
       }]}
-    >
-      <GuideText>
-        Use the primary Button to represent the most common action. Generally, there won&rsquo;t be a
-        need to present more than one of these at a time.
-      </GuideText>
-
-      <GuideDemo>
-        <Primary />
-      </GuideDemo>
-    </GuideSection>
+      text={
+        <p>
+          <KuiCode>KuiButtonEmpty</KuiCode> is used when you want to make
+          a button look like a regular link, but still want to align it to
+          the rest of the buttons.
+        </p>
+      }
+      demo={
+        <ButtonOption />
+      }
+    />
 
     <GuideSection
-      title="Secondary Button"
+      title="Flush ButtonEmpty"
       source={[{
         type: GuideSectionTypes.JS,
-        code: secondarySource,
+        code: buttonOptionFlushSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: secondaryHtml,
+        code: buttonOptionFlushHtml,
       }]}
-    >
-      <GuideText>
-        Secondary buttons are usually used for actions (&ldquo;do this&rdquo;) that are optional actions on a page.
-      </GuideText>
-
-      <GuideDemo>
-        <Secondary />
-      </GuideDemo>
-    </GuideSection>
+      text={
+        <p>
+          When aligning <KuiCode>KuiButtonEmpty</KuiCode> components to the left or the right,
+          you should make sure they&rsquo;re flush with the edge of their container, so that they&rsquo;re
+          horizontally-aligned with the other content in the container.
+        </p>
+      }
+      demo={
+        <ButtonOptionFlush />
+      }
+    />
 
     <GuideSection
-      title="Danger Button"
+      title="Button Icon"
       source={[{
         type: GuideSectionTypes.JS,
-        code: dangerSource,
+        code: buttonIconSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: dangerHtml,
+        code: buttonIconHtml,
       }]}
-    >
-      <GuideText>
-        Danger Buttons represent irreversible, potentially regrettable actions.
-      </GuideText>
-
-      <GuideDemo>
-        <Danger />
-      </GuideDemo>
-    </GuideSection>
+      text={
+        <p>
+          Button icons are buttons that only contain an icon (no text).
+        </p>
+      }
+      demo={
+        <ButtonIcon />
+      }
+    />
 
     <GuideSection
-      title="Warning Button"
+      title="Ghost buttons for deep color backgrounds"
       source={[{
         type: GuideSectionTypes.JS,
-        code: warningSource,
+        code: buttonGhostSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: warningHtml,
+        code: buttonGhostHtml,
       }]}
-    >
-      <GuideText>
-        Warning Buttons represent potentially notable actions.
-      </GuideText>
-
-      <GuideDemo>
-        <Warning />
-      </GuideDemo>
-    </GuideSection>
-
-    <GuideSection
-      title="Loading Button"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: loadingSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: loadingHtml,
-      }]}
-    >
-      <GuideDemo>
-        <Loading />
-      </GuideDemo>
-    </GuideSection>
-
-    <GuideSection
-      title="Button with icon"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: withIconSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: withIconHtml,
-      }]}
-    >
-      <GuideText>
-        You can toss an icon into a Button, with or without text. You can also use a predefined icon
-        or specify custom icon classes.
-      </GuideText>
-
-      <GuideDemo>
-        <WithIcon />
-      </GuideDemo>
-    </GuideSection>
-
-    <GuideSection
-      title="ButtonGroup"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: buttonGroupSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: buttonGroupHtml,
-      }]}
-    >
-      <GuideDemo>
-        <ButtonGroup />
-      </GuideDemo>
-    </GuideSection>
-
-    <GuideSection
-      title="United ButtonGroup"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: buttonGroupUnitedSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: buttonGroupUnitedHtml,
-      }]}
-    >
-      <GuideText>
-        Use the united version of the ButtonGroup to emphasize the close relationship within a set
-        of Buttons, and differentiate them from Buttons outside of the set.
-      </GuideText>
-
-      <GuideText>
-        They support containing a single Button, so that Buttons can be dynamically added and
-        removed.
-      </GuideText>
-
-      <GuideDemo>
-        <ButtonGroupUnited />
-      </GuideDemo>
-    </GuideSection>
-
-    <GuideSection
-      title="Element variations"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: elementsSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: elementsHtml,
-      }]}
-    >
-      <GuideText>
-        You can create a Button using a button element, link, or input[type=&ldquo;submit&rdquo;].
-      </GuideText>
-
-      <GuideDemo>
-        <Elements />
-      </GuideDemo>
-    </GuideSection>
-
-    <GuideSection
-      title="Sizes"
-      source={[{
-        type: GuideSectionTypes.HTML,
-        code: sizesHtml,
-      }]}
-    >
-      <GuideDemo
-        html={sizesHtml}
-      />
-    </GuideSection>
+      text={
+        <p>
+          You can also pass <KuiCode>type=&apos;ghost&apos;</KuiCode> to any of the button
+          styles on this page. These should be used extremely rarely, and are
+          only for placing buttons on top of dark or image-based backgrounds.
+          A good example of their use is in
+          the <KuiCode>KuiBottomBar</KuiCode> component
+        </p>
+      }
+      demo={
+        <ButtonGhost />
+      }
+    />
   </GuidePage>
 );
