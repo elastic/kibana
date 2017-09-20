@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import AceEditor from 'react-ace';
 
@@ -89,3 +90,9 @@ export class KuiCodeEditor extends Component {
     );
   }
 }
+
+KuiCodeEditor.propTypes = {
+  height: PropTypes.string,
+  onBlur: PropTypes.func,
+  width: PropTypes.string,
+};
