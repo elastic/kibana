@@ -24,7 +24,9 @@ export default props => (
       }]}
     >
       <GuideText>
-        You can use this button to reveal and hide content.
+        You can use this button to reveal and hide content. For a complete example
+        on how to make an collapsable panel proper accessible, read
+        the <a href="#/collapsebutton">CollapseButton</a> documentation.
       </GuideText>
 
       <GuideDemo
