@@ -89,7 +89,9 @@ Tooltip.prototype.hide = function () {
   $tooltip.css({
     visibility: 'hidden',
     left: '-500px',
-    top: '-500px'
+    top: '-500px',
+    width: '',
+    height: ''
   });
 };
 
@@ -167,7 +169,11 @@ Tooltip.prototype.render = function () {
           return render();
         }*/
 
+        //console.log("element", element);
+        //console.log("d", d);
+        //console.log("i", i);
         const events = self.events ? self.events.eventResponse(d, i) : d;
+        //console.log("events", events);
         return render(self.formatter(events));
       });
 

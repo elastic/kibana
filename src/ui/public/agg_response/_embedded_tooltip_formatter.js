@@ -15,6 +15,7 @@ export function EmbeddedTooltipFormatterProvider($rootScope, $compile, Private, 
   }
 
   return function (parentVis) {
+    let tooltipMsg = 'Initializing Tooltip...';
     const $tooltipScope = $rootScope.$new();
     const requestHandlers = Private(VisRequestHandlersRegistryProvider);
     const responseHandlers = Private(VisResponseHandlersRegistryProvider);
@@ -24,7 +25,7 @@ export function EmbeddedTooltipFormatterProvider($rootScope, $compile, Private, 
     let requestHandler;
     let responseHandler;
     let fetchTimestamp;
-    savedVisualizations.get('c3778850-8ccb-11e7-9508-3f73ba707926').then((savedObject) => {
+    savedVisualizations.get(parentVis.params.tooltip.vis).then((savedObject) => {
       popVis = savedObject;
       requestHandler = getHandler(requestHandlers, savedObject.vis.type.requestHandler);
       responseHandler = getHandler(responseHandlers, savedObject.vis.type.responseHandler);
@@ -34,51 +35,56 @@ export function EmbeddedTooltipFormatterProvider($rootScope, $compile, Private, 
       $tooltipScope.vis = savedObject.vis;
       $tooltipScope.visData = null;
       $visEl = $compile(tooltipTemplate)($tooltipScope);
+    }, e => {
+      tooltipMsg = _.get(e, 'message', 'Error initializing tooltip');
     });
 
-    let previousResp;
-
     return function (event) {
-      const localFetchTimestamp = Date.now();
-      fetchTimestamp = localFetchTimestamp;
+      if (requestHandler && responseHandler) {
+        tooltipMsg = 'Loading Data...';
 
-      const datum = event.datum;
+        const localFetchTimestamp = Date.now();
+        fetchTimestamp = localFetchTimestamp;
+        const aggFilters = [];
+        let aggResult = event.datum.aggConfigResult
+        while(aggResult) {
+          aggFilters.push(aggResult.aggConfig.createFilter(aggResult.key));
+          aggResult = aggResult.$parent;
+        }
 
-      const aggFilters = [];
-      let aggResult = datum.aggConfigResult
-      while(aggResult) {
-        aggFilters.push(aggResult.aggConfig.createFilter(aggResult.key));
-        aggResult = aggResult.$parent;
+        popVis.searchSource.set('filter', aggFilters);
+        requestHandler($tooltipScope.vis, appState, $tooltipScope.uiState, queryFilter, popVis.searchSource)
+        .then(requestHandlerResponse => {
+          return responseHandler($tooltipScope.vis, requestHandlerResponse);
+        }, e => {
+          // TODO display error message in popup text
+          console.log(e);
+        })
+        .then(resp => {
+          $visEl.css({
+            width: parentVis.params.tooltip.width,
+            height: parentVis.params.tooltip.height
+          });
+          const $popup = $('.vis-tooltip');
+
+          // Only update popup if results are for calling fetch
+          if ($popup && localFetchTimestamp === fetchTimestamp) {
+            $popup.css({
+              width: parentVis.params.tooltip.width,
+              height: parentVis.params.tooltip.height
+            });
+            $popup.empty();
+            $popup.append($visEl);
+            $tooltipScope.visData = resp;
+            $tooltipScope.$apply();
+          }
+        }, e => {
+          // TODO display error message in popup text
+          console.log(e);
+        });
       }
 
-      popVis.searchSource.set('filter', aggFilters);
-      requestHandler($tooltipScope.vis, appState, $tooltipScope.uiState, queryFilter, popVis.searchSource)
-      .then(requestHandlerResponse => {
-        return responseHandler($tooltipScope.vis, requestHandlerResponse);
-      }, e => {
-        // TODO display error message in popup text
-        console.log(e);
-      })
-      .then(resp => {
-        $visEl.css({
-          width: 300,
-          height: 500
-        });
-        const $popup = $('#embeddedTooltip');
-
-        // Only update popup if results are for calling fetch
-        if ($popup && localFetchTimestamp === fetchTimestamp) {
-          $popup.empty();
-          $popup.append($visEl);
-          $tooltipScope.visData = resp;
-          $tooltipScope.$apply();
-        }
-      }, e => {
-        // TODO display error message in popup text
-        console.log(e);
-      });
-
-      return '<div id="embeddedTooltip" style="height: 300px; width: 500px;">Loading Visualization Data</div>';
+      return `<div style="height: ${parentVis.params.tooltip.height}px; width: ${parentVis.params.tooltip.width}px;">${tooltipMsg}</div>`;
     };
 
   };
