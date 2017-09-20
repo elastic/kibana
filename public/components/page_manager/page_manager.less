@@ -6,58 +6,79 @@
     overflow-y: hidden;
     overflow-x: auto;
     max-height: 148px;
-    padding: @spacingS;
+    padding-top: @spacingS;
     margin-bottom: @spacingS;
   }
 
+  .canvas__page-manager--page.active {
+    background-color: @trueWhite !important;
+    color: @textMain !important;
+  }
+
+  .canvas__page-manager--page:hover {
+    background-color: @mediumGrey;
+    color: @lightGrey;
+  }
+
   .canvas__page-manager--page {
+    background-color: @darkGrey;
+    position: relative;
+    color: @mediumGrey;
+    border: @borderStyle;
     display: inline-block;
     vertical-align: top;
+    font-weight: bold;
+    text-align: center;
     width: 77px;
     height: 100px;
-    margin: 0px @spacingS @spacingM;
+    margin: 0 @spacingM @spacingS 0;
+    cursor: pointer;
 
-    .body {
-      background-color: @lightGrey;
-      color: @darkestGrey;
-      font-weight: bold;
-      font-size: @textMedium;
-      text-align: center;
-      border: 2px solid @darkGrey;
-      width: 100%;
-      height: 100%;
+    &:hover {
+      .canvas__page-manager--page-controls {
+        bottom: 0;
+        display: block;
+        position: absolute;
+        text-align: center;
+        width: 100%;
+
+        > * {
+          padding: @spacingXS;
+        }
+
+        .delete,
+        .duplicate {
+          font-size: @textMedium;
+        }
+
+        .delete {
+          color: @red;
+        }
+
+        .duplicate {
+          color: @blue;
+        }
+      }
+
+      .canvas__page-manager--page-remove {
+        display: inline;
+      }
     }
 
-    .body.selected {
-      background-color: @trueWhite;
-      color: @trueBlack;
-    }
-  }
-
-  .canvas__page-manager--page-controls {
-    text-align: center;
-
-    > * {
-      padding: @spacingXS;
+    .canvas__page-manager--page-remove {
+      display: none;
+      position: absolute;
+      top: -8px;
+      right: -12px;
     }
 
-    .delete,
-    .duplicate {
-      font-size: @textMedium;
+    .canvas__page-manager--page-controls {
+      display: none;
     }
 
-    .delete {
-      color: @red;
-    }
-
-    .duplicate {
-      color: @blue;
-    }
-  }
-
-  .canvas__page-manager--controls {
-    button {
-      margin-left: @spacingS;
+    .canvas__page-manager--page-index {
+      line-height: 100px;
+      font-size: @textLarge;
     }
   }
 }
