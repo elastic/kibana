@@ -14,7 +14,6 @@ import { loadTestFiles } from './load_test_files';
 export async function setupMocha(lifecycle, log, config, providers) {
   // configure mocha
   const mocha = new Mocha({
-    timeout: config.get('timeouts.test'),
     ...config.get('mochaOpts'),
     reporter: await providers.loadExternalService(
       'configured mocha reporter',
