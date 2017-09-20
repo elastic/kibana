@@ -43,7 +43,7 @@ export class KuiCodeEditor extends Component {
     }
   };
 
-  onHintKeyDown = (ev) => {
+  onKeyDownHint = (ev) => {
     if (ev.keyCode === keyCodes.ENTER) {
       ev.preventDefault();
       this.startEditing();
@@ -72,7 +72,7 @@ export class KuiCodeEditor extends Component {
           tabIndex="0"
           role="button"
           onClick={this.startEditing}
-          onKeyDown={this.onHintKeyDown}
+          onKeyDown={this.onKeyDownHint}
         >
           <p className="kuiText kuiVerticalRhythmSmall">
             Press Enter to start editing.
