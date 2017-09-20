@@ -16,7 +16,9 @@ function runInterpreter(ast, context = null, retry = false) {
   .then((renderable) => {
     if (getType(renderable) === 'render') {
       return renderable;
-    } else if (!context && !retry) {
+    }
+
+    if (!retry) {
       return runInterpreter(fromExpression('render'), renderable || context, true);
     }
 
