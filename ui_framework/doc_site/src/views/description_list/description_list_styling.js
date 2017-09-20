@@ -20,13 +20,24 @@ const favoriteVideoGames = [
   },
 ];
 export default () => (
-  <div>
+  <div style={{ maxWidth: '400px' }}>
     <KuiDescriptionList
       listItems={favoriteVideoGames}
       align="center"
       compressed
     />
+
     <KuiSpacer size="l" />
+
+    <KuiDescriptionList
+      listItems={favoriteVideoGames}
+      type="column"
+      align="center"
+      compressed
+    />
+
+    <KuiSpacer size="l" />
+
     <KuiDescriptionList
       listItems={favoriteVideoGames}
       type="inline"

@@ -19,5 +19,9 @@ const favoriteVideoGames = [
   },
 ];
 export default () => (
-  <KuiDescriptionList type="column" listItems={favoriteVideoGames} />
+  <KuiDescriptionList
+    type="column"
+    listItems={favoriteVideoGames}
+    style={{ maxWidth: '400px' }}
+  />
 );
