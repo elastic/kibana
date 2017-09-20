@@ -15,7 +15,7 @@ export default () => (
     <KuiMenuItem>
       <KuiEvent>
         <KuiEventSymbol>
-          <span className="kuiIcon kuiIcon--error fa-warning" aria-label="Warning" role="img"/>
+          <span className="kuiIcon kuiIcon--error fa-warning" aria-label="Error" role="img"/>
         </KuiEventSymbol>
 
         <KuiEventBody>
@@ -33,7 +33,7 @@ export default () => (
     <KuiMenuItem>
       <KuiEvent>
         <KuiEventSymbol>
-          <span className="kuiIcon kuiIcon--error fa-warning" aria-label="Warning" role="img"/>
+          <span className="kuiIcon kuiIcon--error fa-warning" aria-label="Error" role="img"/>
         </KuiEventSymbol>
 
         <KuiEventBody>
@@ -51,7 +51,7 @@ export default () => (
     <KuiMenuItem>
       <KuiEvent>
         <KuiEventSymbol>
-          <span className="kuiIcon kuiIcon--warning fa-bolt" aria-label="Error" role="img"/>
+          <span className="kuiIcon kuiIcon--warning fa-bolt" aria-label="Warning" role="img"/>
         </KuiEventSymbol>
 
         <KuiEventBody>
