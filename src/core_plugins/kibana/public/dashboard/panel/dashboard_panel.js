@@ -14,9 +14,11 @@ export class DashboardPanel extends React.Component {
     this.embeddable = null;
     this.embeddableHandler = null;
     this.parentNode = null;
+    this._isMounted = false;
   }
 
-  async componentWillMount() {
+  async componentDidMount() {
+    this._isMounted = true;
     const { getEmbeddableHandler, panel, getContainerApi } = this.props;
 
     this.containerApi = getContainerApi();
@@ -24,12 +26,16 @@ export class DashboardPanel extends React.Component {
     const editUrl = await this.embeddableHandler.getEditPath(panel.id);
     const title = await this.embeddableHandler.getTitleFor(panel.id);
 
-    this.setState({ editUrl, title });
+    // TODO: use redux instead of the isMounted anti-pattern to handle the case when the component is unmounted
+    // before the async calls above return.
+    if (this._isMounted) {
+      this.setState({ editUrl, title });
 
-    this.destroyEmbeddable = await this.embeddableHandler.render(
-      this.panelElement,
-      panel,
-      this.containerApi);
+      this.destroyEmbeddable = await this.embeddableHandler.render(
+        this.panelElement,
+        panel,
+        this.containerApi);
+    }
   }
 
   isViewOnlyMode() {
@@ -61,7 +67,14 @@ export class DashboardPanel extends React.Component {
   };
 
   componentWillUnmount() {
-    this.destroyEmbeddable();
+    // This is required because it's possible the component becomes unmounted before embeddableHandler.render returns.
+    // This is really an anti-pattern and could be cleaned up by implementing a redux framework for dashboard state.
+    // Because implementing that may be a very large change in and of itself, it will be a second step, and we'll live
+    // with this anti-pattern for the time being.
+    this._isMounted = false;
+    if (this.destroyEmbeddable) {
+      this.destroyEmbeddable();
+    }
   }
 
   render() {
