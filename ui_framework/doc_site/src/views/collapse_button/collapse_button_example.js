@@ -63,7 +63,7 @@ export default props => (
           <dt><code>aria-label</code></dt>
           <dd>
             should contain a label like &quot;Toggle panel&quot; or preferably more specific what
-            it toggles (e.g. &quot;Toggle filter actions&quot;). You don&apos;t need to switch the label
+            it toggles (e.g. &quot;Toggle filter actions&quot;). You don&rsquo;t need to switch the label
             when the state changes, since a screen reader will use <code>aria-expanded</code> to
             read out the current state.
           </dd>

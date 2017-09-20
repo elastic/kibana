@@ -37,7 +37,7 @@ export default props => (
       </GuideText>
 
       <GuideText>
-        For the sake of simplicity we haven&apos;t labeled the element on this page
+        For the sake of simplicity we haven&rsquo;t labeled the element on this page
         correctly.
       </GuideText>
 
