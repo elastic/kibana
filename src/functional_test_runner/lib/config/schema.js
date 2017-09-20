@@ -7,7 +7,10 @@ import { ConsoleReporterProvider } from '../reporters';
 // valid pattern for ID
 // enforced camel-case identifiers for consistency
 const ID_PATTERN = /^[a-zA-Z0-9_]+$/;
-const INSPECTING = process.execArgv.includes('--inspect');
+const INSPECTING = (
+  process.execArgv.includes('--inspect') ||
+  process.execArgv.includes('--inspect-brk')
+);
 
 const urlPartsSchema = () => Joi.object().keys({
   protocol: Joi.string().valid('http', 'https').default('http'),
@@ -48,7 +51,6 @@ export const schema = Joi.object().keys({
   timeouts: Joi.object().keys({
     find: Joi.number().default(10000),
     try: Joi.number().default(40000),
-    test: Joi.number().default(INSPECTING ? Infinity : 120000),
     esRequestTimeout: Joi.number().default(30000),
     kibanaStabilize: Joi.number().default(15000),
     navigateStatusPageCheck: Joi.number().default(250),
@@ -58,7 +60,7 @@ export const schema = Joi.object().keys({
     bail: Joi.boolean().default(false),
     grep: Joi.string(),
     slow: Joi.number().default(30000),
-    timeout: Joi.number().default(60000),
+    timeout: Joi.number().default(INSPECTING ? Infinity : 120000),
     ui: Joi.string().default('bdd'),
     reporterProvider: Joi.func().default(ConsoleReporterProvider),
   }).default(),
