@@ -1,0 +1,69 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders ListControl 1`] = `
+<Component
+  id="mock-list-control"
+  label="list control"
+>
+  <Select
+    addLabelText="Add \\"{label}\\"?"
+    arrowRenderer={[Function]}
+    autosize={true}
+    backspaceRemoves={true}
+    backspaceToRemoveMessage="Press backspace to remove {label}"
+    className="list-control-react-select"
+    clearAllText="Clear all"
+    clearRenderer={[Function]}
+    clearValueText="Clear value"
+    clearable={true}
+    deleteRemoves={true}
+    delimiter=","
+    disabled={false}
+    escapeClearsValue={true}
+    filterOptions={[Function]}
+    ignoreAccents={true}
+    ignoreCase={true}
+    inputProps={
+      Object {
+        "id": "mock-list-control",
+      }
+    }
+    isLoading={false}
+    joinValues={false}
+    labelKey="label"
+    matchPos="any"
+    matchProp="any"
+    menuBuffer={0}
+    menuRenderer={[Function]}
+    multi={true}
+    noResultsText="No results found"
+    onBlurResetsInput={true}
+    onChange={[Function]}
+    onCloseResetsInput={true}
+    optionComponent={[Function]}
+    options={
+      Array [
+        Object {
+          "label": "choice1",
+          "value": "choice1",
+        },
+        Object {
+          "label": "choice2",
+          "value": "choice2",
+        },
+      ]
+    }
+    pageSize={5}
+    placeholder="Select..."
+    required={false}
+    scrollMenuIntoView={true}
+    searchable={true}
+    simpleValue={true}
+    tabSelectsValue={true}
+    value=""
+    valueComponent={[Function]}
+    valueKey="value"
+    valueRenderer={[Function]}
+  />
+</Component>
+`;
