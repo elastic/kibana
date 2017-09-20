@@ -20,10 +20,14 @@ const iconTypes = [
 ];
 
 export default () => (
-  <KuiFlexGrid columns={4}>
+  <KuiFlexGrid>
     {
       iconTypes.map(iconType => (
-        <KuiFlexItem className="guideDemo__icon" key={iconType}>
+        <KuiFlexItem
+          className="guideDemo__icon"
+          key={iconType}
+          style={{ width: '200px' }}
+        >
           <KuiPanel>
             <KuiIcon
               type={iconType}

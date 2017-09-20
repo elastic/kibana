@@ -36,9 +36,13 @@ import FlexJustify from './flex_justify';
 const flexJustifySource = require('!!raw!./flex_justify');
 const flexJustifyHtml = renderToHtml(FlexJustify);
 
-import FlexWrap from './flex_wrap';
-const flexWrapSource = require('!!raw!./flex_wrap');
-const flexWrapHtml = renderToHtml(FlexWrap);
+import FlexGrid from './flex_grid';
+const flexGridSource = require('!!raw!./flex_grid');
+const flexGridHtml = renderToHtml(FlexGrid);
+
+import FlexGridColumns from './flex_grid_columns';
+const flexGridColumnsSource = require('!!raw!./flex_grid_columns');
+const flexGridColumnsHtml = renderToHtml(FlexGridColumns);
 
 import FlexNest from './flex_nest';
 const flexNestSource = require('!!raw!./flex_nest');
@@ -172,21 +176,39 @@ export default props => (
       title="FlexGrids are for repeatable grids"
       source={[{
         type: GuideSectionTypes.JS,
-        code: flexWrapSource,
+        code: flexGridSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: flexWrapHtml,
+        code: flexGridHtml,
       }]}
       text={
         <p>
           <KuiCode>FlexGrid</KuiCode> is a more rigid component that sets multiple, wrapping
-          rows of same width items. It only accpets a <KuiCode>columns</KuiCode> and
-          <KuiCode>gutterSize</KuiCode> prop. You can have anywhere between 2-4 columns. Any
-          more would likely break on laptop screens.
+          rows of same width items.
         </p>
       }
       demo={
-        <div className="guideDemo__highlightGridWrap"><FlexWrap /></div>
+        <div className="guideDemo__highlightGridWrap"><FlexGrid /></div>
+      }
+    />
+
+    <GuideSection
+      title="FlexGrids can have set column widths"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: flexGridColumnsSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: flexGridColumnsHtml,
+      }]}
+      text={
+        <p>
+          You can set a <KuiCode>columns</KuiCode> prop to specify
+          anywhere between 2-4 columns. Any more would likely break on laptop screens.
+        </p>
+      }
+      demo={
+        <div className="guideDemo__highlightGridWrap"><FlexGridColumns /></div>
       }
     />
 

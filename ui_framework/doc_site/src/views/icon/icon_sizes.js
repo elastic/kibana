@@ -17,10 +17,14 @@ const iconSizes = [
 ];
 
 export default () => (
-  <KuiFlexGrid columns={4}>
+  <KuiFlexGrid>
     {
       iconSizes.map(iconSize => (
-        <KuiFlexItem className="guideDemo__icon" key={iconSize}>
+        <KuiFlexItem
+          className="guideDemo__icon"
+          key={iconSize}
+          style={{ width: '340px' }}
+        >
           <KuiPanel>
             <KuiIcon
               type="logoElasticStack"

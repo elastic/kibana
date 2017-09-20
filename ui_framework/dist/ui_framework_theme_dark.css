@@ -1319,10 +1319,6 @@ table {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  -webkit-box-align: stretch;
-  -webkit-align-items: stretch;
-      -ms-flex-align: stretch;
-          align-items: stretch;
   -webkit-flex-wrap: wrap;
       -ms-flex-wrap: wrap;
           flex-wrap: wrap;
@@ -1341,98 +1337,162 @@ table {
           -ms-flex-preferred-size: auto !important;
               flex-basis: auto !important; }
 
+/**
+   * Uncouple the gutter margin from the column widths to support cases where we use a FlexGrid
+   * without columns.
+   */
+.kuiFlexGrid--gutterSmall > .kuiFlexItem {
+  margin: 4px; }
+
 .kuiFlexGrid--gutterSmall {
-  margin: -4px; }
+  margin: -4px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
   .kuiFlexGrid--gutterSmall.kuiFlexGrid--fourths > .kuiFlexItem {
-    margin: 4px;
     -webkit-flex-basis: calc(25% - 8px);
         -ms-flex-preferred-size: calc(25% - 8px);
             flex-basis: calc(25% - 8px); }
 
 .kuiFlexGrid--gutterSmall {
-  margin: -4px; }
+  margin: -4px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
   .kuiFlexGrid--gutterSmall.kuiFlexGrid--thirds > .kuiFlexItem {
-    margin: 4px;
     -webkit-flex-basis: calc(33.3% - 8px);
         -ms-flex-preferred-size: calc(33.3% - 8px);
             flex-basis: calc(33.3% - 8px); }
 
 .kuiFlexGrid--gutterSmall {
-  margin: -4px; }
+  margin: -4px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
   .kuiFlexGrid--gutterSmall.kuiFlexGrid--halves > .kuiFlexItem {
-    margin: 4px;
     -webkit-flex-basis: calc(50% - 8px);
         -ms-flex-preferred-size: calc(50% - 8px);
             flex-basis: calc(50% - 8px); }
 
+/**
+   * Uncouple the gutter margin from the column widths to support cases where we use a FlexGrid
+   * without columns.
+   */
+.kuiFlexGrid--gutterMedium > .kuiFlexItem {
+  margin: 8px; }
+
 .kuiFlexGrid--gutterMedium {
-  margin: -8px; }
+  margin: -8px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
   .kuiFlexGrid--gutterMedium.kuiFlexGrid--fourths > .kuiFlexItem {
-    margin: 8px;
     -webkit-flex-basis: calc(25% - 16px);
         -ms-flex-preferred-size: calc(25% - 16px);
             flex-basis: calc(25% - 16px); }
 
 .kuiFlexGrid--gutterMedium {
-  margin: -8px; }
+  margin: -8px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
   .kuiFlexGrid--gutterMedium.kuiFlexGrid--thirds > .kuiFlexItem {
-    margin: 8px;
     -webkit-flex-basis: calc(33.3% - 16px);
         -ms-flex-preferred-size: calc(33.3% - 16px);
             flex-basis: calc(33.3% - 16px); }
 
 .kuiFlexGrid--gutterMedium {
-  margin: -8px; }
+  margin: -8px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
   .kuiFlexGrid--gutterMedium.kuiFlexGrid--halves > .kuiFlexItem {
-    margin: 8px;
     -webkit-flex-basis: calc(50% - 16px);
         -ms-flex-preferred-size: calc(50% - 16px);
             flex-basis: calc(50% - 16px); }
 
+/**
+   * Uncouple the gutter margin from the column widths to support cases where we use a FlexGrid
+   * without columns.
+   */
+.kuiFlexGrid--gutterLarge > .kuiFlexItem {
+  margin: 12px; }
+
 .kuiFlexGrid--gutterLarge {
-  margin: -12px; }
+  margin: -12px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
   .kuiFlexGrid--gutterLarge.kuiFlexGrid--fourths > .kuiFlexItem {
-    margin: 12px;
     -webkit-flex-basis: calc(25% - 24px);
         -ms-flex-preferred-size: calc(25% - 24px);
             flex-basis: calc(25% - 24px); }
 
 .kuiFlexGrid--gutterLarge {
-  margin: -12px; }
+  margin: -12px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
   .kuiFlexGrid--gutterLarge.kuiFlexGrid--thirds > .kuiFlexItem {
-    margin: 12px;
     -webkit-flex-basis: calc(33.3% - 24px);
         -ms-flex-preferred-size: calc(33.3% - 24px);
             flex-basis: calc(33.3% - 24px); }
 
 .kuiFlexGrid--gutterLarge {
-  margin: -12px; }
+  margin: -12px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
   .kuiFlexGrid--gutterLarge.kuiFlexGrid--halves > .kuiFlexItem {
-    margin: 12px;
     -webkit-flex-basis: calc(50% - 24px);
         -ms-flex-preferred-size: calc(50% - 24px);
             flex-basis: calc(50% - 24px); }
 
+/**
+   * Uncouple the gutter margin from the column widths to support cases where we use a FlexGrid
+   * without columns.
+   */
+.kuiFlexGrid--gutterXLarge > .kuiFlexItem {
+  margin: 16px; }
+
 .kuiFlexGrid--gutterXLarge {
-  margin: -16px; }
+  margin: -16px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
   .kuiFlexGrid--gutterXLarge.kuiFlexGrid--fourths > .kuiFlexItem {
-    margin: 16px;
     -webkit-flex-basis: calc(25% - 32px);
         -ms-flex-preferred-size: calc(25% - 32px);
             flex-basis: calc(25% - 32px); }
 
 .kuiFlexGrid--gutterXLarge {
-  margin: -16px; }
+  margin: -16px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
   .kuiFlexGrid--gutterXLarge.kuiFlexGrid--thirds > .kuiFlexItem {
-    margin: 16px;
     -webkit-flex-basis: calc(33.3% - 32px);
         -ms-flex-preferred-size: calc(33.3% - 32px);
             flex-basis: calc(33.3% - 32px); }
 
 .kuiFlexGrid--gutterXLarge {
-  margin: -16px; }
+  margin: -16px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
   .kuiFlexGrid--gutterXLarge.kuiFlexGrid--halves > .kuiFlexItem {
-    margin: 16px;
     -webkit-flex-basis: calc(50% - 32px);
         -ms-flex-preferred-size: calc(50% - 32px);
             flex-basis: calc(50% - 32px); }

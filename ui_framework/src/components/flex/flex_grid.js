@@ -13,6 +13,7 @@ const gutterSizeToClassNameMap = {
 export const GUTTER_SIZES = Object.keys(gutterSizeToClassNameMap);
 
 const columnsToClassNameMap = {
+  0: 'kuiFlexGrid--wrap',
   2: 'kuiFlexGrid--halves',
   3: 'kuiFlexGrid--thirds',
   4: 'kuiFlexGrid--fourths',
@@ -47,6 +48,6 @@ KuiFlexGrid.propTypes = {
 
 KuiFlexGrid.defaultProps = {
   gutterSize: 'large',
-  columns: null,
+  columns: 0,
 };
 
