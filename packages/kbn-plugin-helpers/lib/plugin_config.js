@@ -11,7 +11,7 @@ module.exports = function (root) {
   const buildSourcePatterns = [
     'package.json',
     'index.js',
-    '{lib,public,server,webpackShims}/**/*',
+    '{lib,public,server,webpackShims,translations}/**/*',
   ];
 
   // add shrinkwrap and lock files, if they exist
