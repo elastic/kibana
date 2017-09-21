@@ -99,7 +99,9 @@ export class SavedObjectLoader {
       }).then((resp) => {
         return {
           total: resp.total,
-          hits: resp.savedObjects.map((savedObject) => this.mapSavedObjectApiHits(savedObject))
+          hits: resp.savedObjects
+            .map((savedObject) => this.mapSavedObjectApiHits(savedObject))
+            .filter(savedObject => savedObject !== null)
         };
       });
   }

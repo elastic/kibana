@@ -13,11 +13,8 @@ savedObjectManagementRegistry.register({
   title: 'visualizations'
 });
 
-app.service('savedVisualizations', function (Promise, kbnIndex, SavedVis, Private, Notifier, kbnUrl, $http) {
+app.service('savedVisualizations', function (Promise, kbnIndex, SavedVis, Private, kbnUrl, $http) {
   const visTypes = Private(VisTypesRegistryProvider);
-  const notify = new Notifier({
-    location: 'Saved Visualization Service'
-  });
 
   const saveVisualizationLoader = new SavedObjectLoader(SavedVis, kbnIndex, kbnUrl, $http);
 
@@ -32,9 +29,7 @@ app.service('savedVisualizations', function (Promise, kbnIndex, SavedVis, Privat
     }
 
     if (!typeName || !visTypes.byName[typeName]) {
-      if (!typeName) notify.error('Visualization type is missing. Please add a type to this visualization.', source);
-      else notify.error('Visualization type of "' + typeName + '" is invalid. Please change to a valid type.', source);
-      return kbnUrl.redirect('/management/kibana/objects/savedVisualizations/{{id}}', { id: source.id });
+      return null;
     }
 
     source.type = visTypes.byName[typeName];
