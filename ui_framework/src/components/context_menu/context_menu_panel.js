@@ -25,34 +25,35 @@ export const KuiContextMenuPanel = ({
   transitionDirection,
   ...rest,
 }) => {
-  let arrow;
-
-  if (Boolean(onClose)) {
-    arrow = (
-      <KuiIcon
-        type="arrowLeft"
-        size="medium"
-        className="kuiContextMenu__icon"
-      />
-    );
-  }
-
   let panelTitle;
 
   if (title) {
-    panelTitle = (
-      <KuiPopoverTitle>
+    if (Boolean(onClose)) {
+      panelTitle = (
         <button
           className="kuiContextMenuPanelTitle"
           onClick={onClose}
         >
           <span className="kuiContextMenu__itemLayout">
-            {arrow}
+            <KuiIcon
+              type="arrowLeft"
+              size="medium"
+              className="kuiContextMenu__icon"
+            />
+
             {title}
           </span>
         </button>
-      </KuiPopoverTitle>
-    );
+      );
+    } else {
+      panelTitle = (
+        <KuiPopoverTitle>
+          <span className="kuiContextMenu__itemLayout">
+            {title}
+          </span>
+        </KuiPopoverTitle>
+      );
+    }
   }
 
   const hasTransition = transitionDirection && transitionType;

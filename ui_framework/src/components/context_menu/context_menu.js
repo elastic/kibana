@@ -26,7 +26,7 @@ export class KuiContextMenu extends Component {
   constructor(props) {
     super(props);
 
-    this.resetTransitionId = undefined;
+    this.resetTransitionTimeout = undefined;
 
     this.state = {
       outGoingPanelId: undefined,
@@ -36,7 +36,7 @@ export class KuiContextMenu extends Component {
   }
 
   showPanel(panelId, direction) {
-    clearTimeout(this.resetTransitionId);
+    clearTimeout(this.resetTransitionTimeout);
 
     this.setState({
       outGoingPanelId: this.state.currentPanelId,
@@ -45,7 +45,7 @@ export class KuiContextMenu extends Component {
     });
 
     // Queue the transition to reset.
-    this.resetTransitionId = setTimeout(() => {
+    this.resetTransitionTimeout = setTimeout(() => {
       this.setState({
         transitionDirection: undefined,
       });
@@ -106,7 +106,10 @@ export class KuiContextMenu extends Component {
     let onClose;
 
     if (typeof previousPanelId === 'number') {
-      onClose = this.showPanel.bind(this, previousPanelId, 'previous');
+      // As above, we need to wait for KuiOutsideClickDetector to complete its logic before
+      // re-rendering via showPanel.
+      onClose =
+        () => window.requestAnimationFrame(this.showPanel.bind(this, previousPanelId, 'previous'));
     }
 
     return (

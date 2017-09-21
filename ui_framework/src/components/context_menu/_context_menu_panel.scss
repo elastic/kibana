@@ -1,3 +1,5 @@
+@import '../popover/mixins';
+
 .kuiContextMenuPanel {
   position: absolute;
   width: 100%;
@@ -36,8 +38,14 @@
 }
 
 .kuiContextMenuPanelTitle {
+  @include kuiPopoverTitle;
+
   width: 100%;
   text-align: left;
+
+  &:hover, &:focus {
+    text-decoration: underline;
+  }
 }
 
 @keyframes kuiContextMenuPanelTxInLeft {
