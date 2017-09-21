@@ -7,13 +7,11 @@ import { htmlIdGenerator, keyCodes } from '../../../services';
 
 export class KuiCodeEditor extends Component {
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      isHintActive: true
-    };
-    this.idGenerator = htmlIdGenerator();
-  }
+  state = {
+    isHintActive: true
+  };
+
+  idGenerator = htmlIdGenerator();
 
   aceEditorRef = (aceEditor) => {
     if (aceEditor) {
