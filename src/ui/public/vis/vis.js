@@ -99,6 +99,7 @@ export function VisProvider(Notifier, Private) {
       _.cloneDeep(state.params || {}),
       _.cloneDeep(this.type.params.defaults || {})
     );
+    if (!this.params.type) this.params.type = this.type.name;
 
     updateVisualizationConfig(state.params, this.params);
 
