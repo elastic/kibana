@@ -101,17 +101,14 @@
   border-radius: 4px;
 }
 
-/**
- * 1. Not entirely sure why but when the panel is within the grid, it requires height 100%. When it's an expanded
- * panel, however, outside the grid, height: 100% will cause the panel not to expand properly.
- * 2. We need this so the panel menu pop up shows up outside the boundaries of a panel.
+/**.
+ * 1. We need this so the panel menu pop up shows up outside the boundaries of a panel.
  */
 .react-grid-layout {
   background-color: @dashboard-bg;
 
   .dashboard-panel {
-    height: 100%; /* 1. */
-    overflow: visible; /* 2. */
+    overflow: visible; /* 1. */
   }
 
   .gs-w {
@@ -140,9 +137,15 @@
   flex-direction: column;
 }
 
-dashboard-panel {
+/**
+ * Needs to correspond with the react root nested inside angular.
+ */
+dashboard-viewport {
   flex: 1;
   display: flex;
+  [data-reactroot] {
+    flex: 1;
+  }
 }
 
 /**
@@ -155,6 +158,7 @@ dashboard-panel {
   flex: 1;
   display: flex;
   flex-direction: column;
+  height: 100%;
 
   background: @dashboard-panel-bg;
   color: @dashboard-panel-color;

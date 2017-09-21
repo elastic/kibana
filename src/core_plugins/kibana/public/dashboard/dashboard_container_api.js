@@ -1,4 +1,7 @@
+import _ from 'lodash';
 import { ContainerAPI } from 'ui/embeddable';
+import { store } from '../store';
+import { updatePanel } from './dashboard_actions';
 
 export class DashboardContainerAPI extends ContainerAPI {
   constructor(dashboardState, addFilter) {
@@ -8,10 +11,7 @@ export class DashboardContainerAPI extends ContainerAPI {
   }
 
   updatePanel(panelIndex, panelAttributes) {
-    const panelToUpdate = this.dashboardState.getPanels().find((panel) => panel.panelIndex === panelIndex);
-    Object.assign(panelToUpdate, panelAttributes);
-    this.dashboardState.saveState();
-    return panelToUpdate;
+    return this.dashboardState.updatePanel(panelIndex, panelAttributes);
   }
 
   getAppState() {

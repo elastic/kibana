@@ -3,45 +3,17 @@ import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import { DashboardViewMode } from '../dashboard_view_mode';
 import { PanelHeader } from './panel_header';
 
 export class DashboardPanel extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {};
-    this.embeddable = null;
-    this.embeddableHandler = null;
     this.parentNode = null;
-    this._isMounted = false;
   }
 
   async componentDidMount() {
-    this._isMounted = true;
-    const { getEmbeddableHandler, panel, getContainerApi } = this.props;
-
-    this.containerApi = getContainerApi();
-    this.embeddableHandler = getEmbeddableHandler(panel.type);
-    const editUrl = await this.embeddableHandler.getEditPath(panel.id);
-    const title = await this.embeddableHandler.getTitleFor(panel.id);
-
-    // TODO: use redux instead of the isMounted anti-pattern to handle the case when the component is unmounted
-    // before the async calls above return. We can then get rid of the eslint disable line. Without redux, there is
-    // not a better option, since you aren't supposed to run async calls inside of componentWillMount.
-    if (this._isMounted) {
-      /* eslint-disable react/no-did-mount-set-state */
-      this.setState({ editUrl, title });
-
-      this.destroyEmbeddable = await this.embeddableHandler.render(
-        this.panelElement,
-        panel,
-        this.containerApi);
-    }
-  }
-
-  isViewOnlyMode() {
-    return this.props.dashboardViewMode === DashboardViewMode.VIEW || this.props.isFullScreenMode;
+    this.props.renderEmbeddable(this.panelElement);
   }
 
   getParentNode() {
@@ -51,11 +23,16 @@ export class DashboardPanel extends React.Component {
     return this.parentNode;
   }
 
-  toggleExpandedPanel = () => this.props.onToggleExpanded(this.props.panel.panelIndex);
-  deletePanel = () => {
-    this.props.onDeletePanel(this.props.panel.panelIndex);
+  toggleExpandedPanel = () => {
+    const { isExpanded, onMaximizePanel, onMinimizePanel } = this.props;
+    if (isExpanded) {
+      onMinimizePanel();
+    } else {
+      onMaximizePanel();
+    }
   };
-  onEditPanel = () => window.location = this.state.editUrl;
+  deletePanel = () => this.props.onDeletePanel();
+  onEditPanel = () => window.location = this.props.editUrl;
 
   /**
    * Setting the zIndex on onFocus and onBlur allows popups, like the panel menu, to appear above other panels in the
@@ -69,21 +46,13 @@ export class DashboardPanel extends React.Component {
   };
 
   componentWillUnmount() {
-    // This is required because it's possible the component becomes unmounted before embeddableHandler.render returns.
-    // This is really an anti-pattern and could be cleaned up by implementing a redux framework for dashboard state.
-    // Because implementing that may be a very large change in and of itself, it will be a second step, and we'll live
-    // with this anti-pattern for the time being.
-    this._isMounted = false;
-    if (this.destroyEmbeddable) {
-      this.destroyEmbeddable();
-    }
+    this.props.onDestroy();
   }
 
   render() {
-    const { title } = this.state;
-    const { dashboardViewMode, isFullScreenMode, isExpanded } = this.props;
+    const { viewOnlyMode, isExpanded, title } = this.props;
     const classes = classNames('panel panel-default', this.props.className, {
-      'panel--edit-mode': !this.isViewOnlyMode()
+      'panel--edit-mode': !viewOnlyMode
     });
     return (
       <div
@@ -101,7 +70,7 @@ export class DashboardPanel extends React.Component {
             onEditPanel={this.onEditPanel}
             onToggleExpand={this.toggleExpandedPanel}
             isExpanded={isExpanded}
-            isViewOnlyMode={isFullScreenMode || dashboardViewMode === DashboardViewMode.VIEW}
+            isViewOnlyMode={viewOnlyMode}
           />
           <div
             id="embeddedPanel"
@@ -115,12 +84,13 @@ export class DashboardPanel extends React.Component {
 }
 
 DashboardPanel.propTypes = {
-  dashboardViewMode: PropTypes.oneOf([DashboardViewMode.EDIT, DashboardViewMode.VIEW]).isRequired,
-  isFullScreenMode: PropTypes.bool.isRequired,
-  panel: PropTypes.object.isRequired,
-  getEmbeddableHandler: PropTypes.func.isRequired,
+  renderEmbeddable: PropTypes.func.isRequired,
   isExpanded: PropTypes.bool.isRequired,
-  getContainerApi: PropTypes.func.isRequired,
-  onToggleExpanded: PropTypes.func.isRequired,
-  onDeletePanel: PropTypes.func
+  onMaximizePanel: PropTypes.func.isRequired,
+  onMinimizePanel: PropTypes.func.isRequired,
+  onDeletePanel: PropTypes.func,
+  editUrl: PropTypes.string,
+  title: PropTypes.string,
+  viewOnlyMode: PropTypes.bool.isRequired,
+  onDestroy: PropTypes.func.isRequired
 };

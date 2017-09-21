@@ -1,8 +1,9 @@
 import _ from 'lodash';
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
-import uiRoutes from 'ui/routes';
 import chrome from 'ui/chrome';
+import { store } from '../store';
+import { updatePanels } from './dashboard_actions';
 
 import 'ui/query_bar';
 
@@ -11,13 +12,13 @@ import { getDashboardTitle, getUnsavedChangesWarningMessage } from './dashboard_
 import { DashboardViewMode } from './dashboard_view_mode';
 import { TopNavIds } from './top_nav/top_nav_ids';
 import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
-import dashboardTemplate from 'plugins/kibana/dashboard/dashboard.html';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { DocTitleProvider } from 'ui/doc_title';
 import { getTopNavConfig } from './top_nav/get_top_nav_config';
 import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 import { VisualizeConstants } from 'plugins/kibana/visualize/visualize_constants';
-import { DashboardState } from './dashboard_state';
+import { DashboardStateManager } from './dashboard_state_manager';
+import { saveDashboard } from './lib';
 import { notify } from 'ui/notify';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import { showCloneModal } from './top_nav/show_clone_modal';
@@ -28,13 +29,7 @@ import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { EmbeddableHandlersRegistryProvider } from 'ui/embeddable/embeddable_handlers_registry';
 
-import {
-  DashboardGrid
-} from './grid/dashboard_grid';
-
-import {
-  DashboardPanel
-} from './panel';
+import { DashboardViewport } from './viewport/dashboard_viewport';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -46,50 +41,9 @@ const app = uiModules.get('app/dashboard', [
   'kibana/typeahead',
 ]);
 
-app.directive('dashboardGrid', function (reactDirective) {
-  return reactDirective(DashboardGrid);
+app.directive('dashboardViewport', function (reactDirective) {
+  return reactDirective(DashboardViewport);
 });
-
-app.directive('dashboardPanel', function (reactDirective) {
-  return reactDirective(DashboardPanel);
-});
-
-uiRoutes
-  .when(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
-    template: dashboardTemplate,
-    resolve: {
-      dash: function (savedDashboards, courier) {
-        return savedDashboards.get()
-          .catch(courier.redirectWhenMissing({
-            'dashboard': DashboardConstants.LANDING_PAGE_PATH
-          }));
-      }
-    }
-  })
-  .when(createDashboardEditUrl(':id'), {
-    template: dashboardTemplate,
-    resolve: {
-      dash: function (savedDashboards, Notifier, $route, $location, courier, kbnUrl, AppState) {
-        const id = $route.current.params.id;
-        return savedDashboards.get(id)
-          .catch((error) => {
-            // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
-            // See https://github.com/elastic/kibana/issues/10951 for more context.
-            if (error instanceof SavedObjectNotFound && id === 'create') {
-              // Note "new AppState" is neccessary so the state in the url is preserved through the redirect.
-              kbnUrl.redirect(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}, new AppState());
-              notify.error(
-                'The url "dashboard/create" is deprecated and will be removed in 6.0. Please update your bookmarks.');
-            } else {
-              throw error;
-            }
-          })
-          .catch(courier.redirectWhenMissing({
-            'dashboard' : DashboardConstants.LANDING_PAGE_PATH
-          }));
-      }
-    }
-  });
 
 app.directive('dashboardApp', function ($injector) {
   const Notifier = $injector.get('Notifier');
@@ -119,13 +73,15 @@ app.directive('dashboardApp', function ($injector) {
         docTitle.change(dash.title);
       }
 
-      const dashboardState = new DashboardState(dash, AppState, dashboardConfig.getHideWriteControls());
+      const dashboardState = new DashboardStateManager(dash, AppState, dashboardConfig.getHideWriteControls());
+
+      $scope.getDashboardState = () => dashboardState;
       $scope.appState = dashboardState.getAppState();
       $scope.containerApi = new DashboardContainerAPI(
         dashboardState,
         (field, value, operator, index) => {
           filterActions.addFilter(field, value, operator, index, dashboardState.getAppState(), filterManager);
-          dashboardState.saveState();
+          dashboardState.saveAppState();
         }
       );
       $scope.getContainerApi = () => $scope.containerApi;
@@ -155,7 +111,8 @@ app.directive('dashboardApp', function ($injector) {
       this.appStatus = {
         dirty: !dash.id
       };
-      dashboardState.stateMonitor.onChange(status => {
+
+      dashboardState.registerChangeListener(status => {
         this.appStatus.dirty = status.dirty || !dash.id;
         updateState();
       });
@@ -301,19 +258,20 @@ app.directive('dashboardApp', function ($injector) {
       };
 
       $scope.save = function () {
-        return dashboardState.saveDashboard(angular.toJson, timefilter).then(function (id) {
-          $scope.kbnTopNav.close('save');
-          if (id) {
-            notify.info(`Saved Dashboard as "${dash.title}"`);
-            if (dash.id !== $routeParams.id) {
-              kbnUrl.change(createDashboardEditUrl(dash.id));
-            } else {
-              docTitle.change(dash.lastSavedTitle);
-              updateViewMode(DashboardViewMode.VIEW);
+        return Promise.resolve(saveDashboard(angular.toJson, timefilter, dashboardState))
+          .then(function (id) {
+            $scope.kbnTopNav.close('save');
+            if (id) {
+              notify.info(`Saved Dashboard as "${dash.title}"`);
+              if (dash.id !== $routeParams.id) {
+                kbnUrl.change(createDashboardEditUrl(dash.id));
+              } else {
+                docTitle.change(dash.lastSavedTitle);
+                updateViewMode(DashboardViewMode.VIEW);
+              }
             }
-          }
-          return id;
-        }).catch(notify.error);
+            return id;
+          }).catch(notify.error);
       };
 
       $scope.showFilterBar = () => filterBar.getFilters().length > 0 || !$scope.fullScreenMode;

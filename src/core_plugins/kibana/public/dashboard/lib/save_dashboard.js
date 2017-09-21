@@ -1,0 +1,27 @@
+import { DashboardViewMode } from '../dashboard_view_mode';
+import { updateSavedDashboard } from './update_saved_dashboard';
+import { getAppStateDefaults } from './get_app_state_defaults';
+
+/**
+ * Saves the dashboard.
+ * @param toJson {function} A custom toJson function. Used because the previous code used
+ * the angularized toJson version, and it was unclear whether there was a reason not to use
+ * JSON.stringify
+ * @param timefilter
+ * @returns {Promise<string>} A promise that if resolved, will contain the id of the newly saved
+ * dashboard.
+ */
+export function saveDashboard(toJson, timeFilter, dashboardStateManager) {
+  dashboardStateManager.saveState();
+
+  const savedDashboard = dashboardStateManager.savedDashboard;
+  const appState = dashboardStateManager.appState;
+
+  updateSavedDashboard(savedDashboard, appState, dashboardStateManager.uiState, timeFilter, toJson);
+
+  return savedDashboard.save()
+    .then((id) => {
+      dashboardStateManager.resetState();
+      return id;
+    });
+}
