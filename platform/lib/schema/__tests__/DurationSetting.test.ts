@@ -32,10 +32,24 @@ describe('#defaultValue', () => {
       }).validate(undefined)
     ).toMatchSnapshot();
   });
+
+  test('can be a number', () => {
+    expect(
+      duration({
+        defaultValue: 600,
+      }).validate(undefined)
+    ).toMatchSnapshot();
+  });
 });
 
-test('returns error when not string', () => {
-  expect(() => duration().validate(123)).toThrowErrorMatchingSnapshot();
+test('returns error when not string or non-safe positive integer', () => {
+  expect(() => duration().validate(-123)).toThrowErrorMatchingSnapshot();
+
+  expect(() => duration().validate(NaN)).toThrowErrorMatchingSnapshot();
+
+  expect(() => duration().validate(Infinity)).toThrowErrorMatchingSnapshot();
+
+  expect(() => duration().validate(Math.pow(2, 53))).toThrowErrorMatchingSnapshot();
 
   expect(() => duration().validate([1, 2, 3])).toThrowErrorMatchingSnapshot();
 

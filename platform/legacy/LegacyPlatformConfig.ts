@@ -33,35 +33,6 @@ const transformServer = (configValue: any) => {
   };
 };
 
-const transformElasticsearch = (configValue: any) => {
-  const clusterTimeoutNames = [
-    'shardTimeout',
-    'requestTimeout',
-    'pingTimeout',
-    'startupTimeout'
-  ];
-
-  // Fix `duration` formats.
-  clusterTimeoutNames.forEach(key => {
-    if (key in configValue) {
-      configValue[key] = `${configValue[key]}ms`;
-    }
-
-    if (key in configValue.tribe) {
-      configValue.tribe[key] = `${configValue.tribe[key]}ms`;
-    }
-  });
-
-  if (configValue.healthCheck) {
-    // TODO: Implement full `healthCheck` schema.
-    configValue.healthCheck = {
-      delay: `${configValue.healthCheck.delay}ms`
-    };
-  }
-
-  return configValue;
-};
-
 const configProxyHandler = {
   get(target: any, configKey: string): any {
     const config = target[configProperty];
@@ -85,10 +56,6 @@ const configProxyHandler = {
 
     if (configKey === 'server') {
       return transformServer(configValue);
-    }
-
-    if (configKey === 'elasticsearch') {
-      return transformElasticsearch(configValue);
     }
 
     return configValue;

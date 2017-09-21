@@ -284,11 +284,19 @@ class ByteSizeSetting extends Setting<ByteSizeValue> {
 export type DurationOptions = {
   // we need to special-case defaultValue as we want to handle string inputs too
   validate?: (value: Duration) => string | void;
-  defaultValue?: Duration | string;
+  defaultValue?: Duration | string | number;
 };
 
-function ensureDuration(value?: Duration | string) {
-  return typeof value === 'string' ? stringToDuration(value) : value;
+function ensureDuration(value?: Duration | string | number) {
+  if (typeof value === 'string') {
+    return stringToDuration(value);
+  }
+
+  if (typeof value === 'number') {
+    return numberToDuration(value);
+  }
+
+  return value;
 }
 
 const timeFormatRegex = /^(0|[1-9][0-9]*)(ms|s|m|h|d|w|M|Y)$/;
@@ -308,6 +316,17 @@ function stringToDuration(text: string) {
   return momentDuration(count, unit);
 }
 
+function numberToDuration(numberMs: number) {
+  if (!Number.isSafeInteger(numberMs) || numberMs < 0) {
+    throw new Error(
+      `Failed to parse [${numberMs}] as time value. ` +
+      `Value should be a safe positive integer number.`
+    );
+  }
+
+  return momentDuration(numberMs);
+}
+
 class DurationSetting extends Setting<Duration> {
   constructor(options: DurationOptions = {}) {
     const { defaultValue, ...rest } = options;
@@ -321,6 +340,10 @@ class DurationSetting extends Setting<Duration> {
   process(value: any, context?: string): Duration {
     if (typeof value === 'string') {
       value = stringToDuration(value);
+    }
+
+    if (typeof value === 'number') {
+      value = numberToDuration(value);
     }
 
     if (!isDuration(value)) {
