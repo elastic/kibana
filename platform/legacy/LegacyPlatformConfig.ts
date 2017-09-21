@@ -52,10 +52,6 @@ const transformElasticsearch = (configValue: any) => {
     }
   });
 
-  if (configValue.tribe) {
-    configValue.tribe.ssl = undefined;
-  }
-
   if (configValue.healthCheck) {
     // TODO: Implement full `healthCheck` schema.
     configValue.healthCheck = {
