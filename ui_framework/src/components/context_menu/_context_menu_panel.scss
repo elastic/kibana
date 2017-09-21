@@ -42,6 +42,10 @@
 
   width: 100%;
   text-align: left;
+
+  &:hover, &:focus {
+    text-decoration: underline;
+  }
 }
 
 @keyframes kuiContextMenuPanelTxInLeft {

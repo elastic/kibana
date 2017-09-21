@@ -1047,6 +1047,8 @@ table {
   padding: 12px;
   width: 100%;
   text-align: left; }
+  .kuiContextMenuPanelTitle:hover, .kuiContextMenuPanelTitle:focus {
+    text-decoration: underline; }
 
 @-webkit-keyframes kuiContextMenuPanelTxInLeft {
   0% {
