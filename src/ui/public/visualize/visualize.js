@@ -39,7 +39,7 @@ uiModules
         uiState: '=?'
       },
       template: visualizeTemplate,
-      link: function ($scope, $el) {
+      link: function ($scope, $el, Promise) {
         const resizeChecker = new ResizeChecker($el);
 
         $scope.vis = $scope.savedObj.vis;
@@ -67,7 +67,7 @@ uiModules
 
             $scope.previousVisState = $scope.vis.getState();
             $scope.previousRequestHandlerResponse = requestHandlerResponse;
-            return canSkipResponseHandler ? $scope.visData : responseHandler($scope.vis, requestHandlerResponse);
+            return canSkipResponseHandler ? $scope.visData : Promise.resolve(responseHandler($scope.vis, requestHandlerResponse));
           }, e => {
             $scope.savedObj.searchSource.cancelQueued();
             $el.trigger('renderComplete');
