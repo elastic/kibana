@@ -63,4 +63,6 @@ export const run = (argv: { [key: string]: any }) => {
   }
 };
 
+export const runWithLegacyKbnServer = (kbnServer: object) => run({ kbnServer });
+
 export default (argv: Array<string>) => run(parseArgv(argv));
