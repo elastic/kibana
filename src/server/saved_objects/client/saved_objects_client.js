@@ -144,11 +144,23 @@ export class SavedObjectsClient {
       id: this._generateEsId(type, id),
       type: this._type,
       refresh: 'wait_for',
+      ignore: [404],
     });
 
-    if (response.found === false) {
+    const deleted = response.result === 'deleted';
+    if (deleted) {
+      return {};
+    }
+
+    const docNotFound = response.result === 'not_found';
+    const indexNotFound = response.error && response.error.type === 'index_not_found_exception';
+    if (docNotFound || indexNotFound) {
       throw errors.decorateNotFoundError(Boom.notFound());
     }
+
+    throw new Error(
+      `Unexpected Elasticsearch DELETE response: ${JSON.stringify({ type, id, response, })}`
+    );
   }
 
   /**
@@ -249,13 +261,14 @@ export class SavedObjectsClient {
       saved_objects: response.docs.map((doc, i) => {
         const { id, type } = objects[i];
 
-        if (doc.found === false) {
+        if (!doc.found) {
           return {
             id,
             type,
             error: { statusCode: 404, message: 'Not found' }
           };
         }
+
         const time = doc._source.updated_at;
         return {
           id,
