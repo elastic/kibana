@@ -1,21 +1,13 @@
-import _ from 'lodash';
 import Promise from 'bluebird';
 import elasticsearch from 'elasticsearch';
-import { migrateConfig } from './migrate_config';
-import createKibanaIndex from './create_kibana_index';
 import kibanaVersion from './kibana_version';
 import { ensureEsVersion } from './ensure_es_version';
 import { ensureNotTribe } from './ensure_not_tribe';
 import { ensureAllowExplicitIndex } from './ensure_allow_explicit_index';
-import { patchKibanaIndex } from './patch_kibana_index';
 
 const NoConnections = elasticsearch.errors.NoConnections;
 import util from 'util';
 const format = util.format;
-
-const NO_INDEX = 'no_index';
-const INITIALIZING = 'initializing';
-const READY = 'ready';
 
 export default function (plugin, server) {
   const config = server.config();
@@ -33,50 +25,15 @@ export default function (plugin, server) {
     });
   }
 
-  // just figure out the current "health" of the es setup
-  function getHealth() {
+  function waitUntilReady() {
     return callAdminAsKibanaUser('cluster.health', {
       timeout: '5s', // tells es to not sit around and wait forever
       index: config.get('kibana.index'),
       ignore: [408]
     })
-    .then(function (resp) {
-      // if "timed_out" === true then elasticsearch could not
-      // find any idices matching our filter within 5 seconds
-      if (!resp || resp.timed_out) {
-        return NO_INDEX;
-      }
-
-      // If status === "red" that means that index(es) were found
-      // but the shards are not ready for queries
-      if (resp.status === 'red') {
-        return INITIALIZING;
-      }
-
-      return READY;
-    });
-  }
-
-  function waitUntilReady() {
-    return getHealth()
-    .then(function (health) {
-      if (health !== READY) {
+    .then((resp) => {
+      if (!resp || resp.timed_out || resp.status === 'red') {
         return Promise.delay(REQUEST_DELAY).then(waitUntilReady);
-      }
-    });
-  }
-
-  function waitForShards() {
-    return getHealth()
-    .then(function (health) {
-      if (health === NO_INDEX) {
-        plugin.status.yellow('No existing Kibana index found');
-        return createKibanaIndex(server);
-      }
-
-      if (health === INITIALIZING) {
-        plugin.status.red('Elasticsearch is still initializing the kibana index.');
-        return Promise.delay(REQUEST_DELAY).then(waitForShards);
       }
     });
   }
@@ -98,14 +55,7 @@ export default function (plugin, server) {
       .then(waitForEsVersion)
       .then(() => ensureNotTribe(callAdminAsKibanaUser))
       .then(() => ensureAllowExplicitIndex(callAdminAsKibanaUser, config))
-      .then(waitForShards)
-      .then(() => patchKibanaIndex({
-        callCluster: callAdminAsKibanaUser,
-        log: (...args) => server.log(...args),
-        indexName: config.get('kibana.index'),
-        kibanaIndexMappingsDsl: server.getKibanaIndexMappingsDsl()
-      }))
-      .then(_.partial(migrateConfig, server))
+      .then(() => server.runSavedObjectsHealthCheck(plugin.status))
       .then(() => {
         const tribeUrl = config.get('elasticsearch.tribe.url');
         if (tribeUrl) {
