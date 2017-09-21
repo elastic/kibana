@@ -30,7 +30,7 @@ export class KuiCodeEditor extends Component {
       ev.preventDefault();
       ev.stopPropagation();
       this.stopEditing();
-      this.refs.kuiCodeEditorHint.focus();
+      this.editorHint.focus();
     }
   }
 
@@ -66,7 +66,7 @@ export class KuiCodeEditor extends Component {
         <div
           className={classes}
           id={this.idGenerator('codeEditor')}
-          ref="kuiCodeEditorHint"
+          ref={(hint) => { this.editorHint = hint; }}
           tabIndex="0"
           role="button"
           onClick={this.startEditing}
