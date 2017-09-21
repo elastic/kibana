@@ -10,12 +10,14 @@ export const createSslSchema = (schema: Schema) =>
       schema.literal('certificate'),
       schema.literal('full')
     ]),
-    certificateAuthorities: schema.arrayOf(schema.string(), {
-      minSize: 1
-    }),
-    certificate: schema.string(),
-    key: schema.string(),
-    keyPassphrase: schema.string()
+    certificateAuthorities: schema.maybe(
+      schema.arrayOf(schema.string(), {
+        minSize: 1
+      })
+    ),
+    certificate: schema.maybe(schema.string()),
+    key: schema.maybe(schema.string()),
+    keyPassphrase: schema.maybe(schema.string())
   });
 
 const DEFAULT_REQUEST_HEADERS = ['authorization'];

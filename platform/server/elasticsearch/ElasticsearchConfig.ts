@@ -64,11 +64,14 @@ export class ElasticsearchConfig {
     }
 
     if (this.config.ssl !== undefined) {
-      const ssl: { [key: string]: any } = {
-        cert: readFileSync(this.config.ssl.certificate),
-        key: readFileSync(this.config.ssl.key),
-        passphrase: this.config.ssl.keyPassphrase
-      };
+      let ssl: { [key: string]: any } = {};
+      if (this.config.ssl.certificate && this.config.ssl.key) {
+        ssl = {
+          cert: readFileSync(this.config.ssl.certificate),
+          key: readFileSync(this.config.ssl.key),
+          passphrase: this.config.ssl.keyPassphrase
+        };
+      }
 
       const verificationMode = this.config.ssl.verificationMode;
 
@@ -89,7 +92,10 @@ export class ElasticsearchConfig {
           assertNever(verificationMode);
       }
 
-      if (this.config.ssl.certificateAuthorities.length > 0) {
+      if (
+        this.config.ssl.certificateAuthorities &&
+        this.config.ssl.certificateAuthorities.length > 0
+      ) {
         ssl.ca = this.config.ssl.certificateAuthorities.map(authority =>
           readFileSync(authority)
         );

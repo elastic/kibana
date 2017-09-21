@@ -52,9 +52,6 @@ const transformElasticsearch = (configValue: any) => {
     }
   });
 
-  // TODO: Review SSL config format and make it work.
-  configValue.ssl = undefined;
-
   if (configValue.tribe) {
     configValue.tribe.ssl = undefined;
   }
