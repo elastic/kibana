@@ -38,7 +38,7 @@ export function TooltipTab(props) {
   };
 
   const handleHeightChange = (evt) => {
-    setTooltipParam('heigth', parseFloat(evt.target.value));
+    setTooltipParam('height', parseFloat(evt.target.value));
   };
 
   const handleWidthChange = (evt) => {
