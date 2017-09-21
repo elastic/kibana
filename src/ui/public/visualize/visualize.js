@@ -17,7 +17,7 @@ import {
 
 uiModules
 .get('kibana/directive', ['ngSanitize'])
-  .directive('visualize', function (Notifier, Private, timefilter, getAppState) {
+  .directive('visualize', function (Notifier, Private, timefilter, getAppState, Promise) {
     const notify = new Notifier({ location: 'Visualize' });
     const requestHandlers = Private(VisRequestHandlersRegistryProvider);
     const responseHandlers = Private(VisResponseHandlersRegistryProvider);
@@ -39,7 +39,7 @@ uiModules
         uiState: '=?'
       },
       template: visualizeTemplate,
-      link: function ($scope, $el, Promise) {
+      link: function ($scope, $el) {
         const resizeChecker = new ResizeChecker($el);
 
         $scope.vis = $scope.savedObj.vis;
