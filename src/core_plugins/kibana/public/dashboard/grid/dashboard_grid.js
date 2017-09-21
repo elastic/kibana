@@ -41,7 +41,7 @@ export class DashboardGrid extends React.Component {
   };
 
   buildLayoutFromPanels() {
-    return _.map(this.props.panels, panel => {
+    return this.props.panels.map(panel => {
       if (panel.size_x || panel.size_y || panel.col || panel.row) {
         PanelUtils.convertOldPanelData(panel);
       }
@@ -90,7 +90,7 @@ export class DashboardGrid extends React.Component {
       }
     });
 
-    return _.map(panelsInOrder, panel => {
+    return panelsInOrder.map(panel => {
       return (
         <div key={panel.panelIndex.toString()}>
           <DashboardPanel
