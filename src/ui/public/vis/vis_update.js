@@ -22,16 +22,16 @@ const updateVisualizationConfig = (stateConfig, config) => {
   };
 
   // update series options
-  const interpolate = config.smoothLines ? 'cardinal' : config.interpolate;
-  const stacked = ['stacked', 'percentage', 'wiggle', 'silhouette'].includes(config.mode);
+  const interpolate = config.smoothLines ? 'cardinal' : config.interpolate || 'linear';
+  const stacked = ['stacked', 'percentage', 'wiggle', 'silhouette'].includes(config.mode || 'stacked');
   config.seriesParams[0] = {
     ...config.seriesParams[0],
-    type: config.type || 'line',
+    type: config.type || config.seriesParams[0].type,
     mode: stacked ? 'stacked' : 'normal',
     interpolate: interpolate,
-    drawLinesBetweenPoints: config.drawLinesBetweenPoints,
-    showCircles: config.showCircles,
-    radiusRatio: config.radiusRatio
+    drawLinesBetweenPoints: config.drawLinesBetweenPoints || config.seriesParams[0].drawLinesBetweenPoints,
+    showCircles: config.showCircles || config.seriesParams[0].showCircles,
+    radiusRatio: config.radiusRatio || config.seriesParams[0].radiusRatio
   };
 };
 
