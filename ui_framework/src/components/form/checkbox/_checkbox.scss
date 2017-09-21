@@ -55,17 +55,20 @@
     cursor: pointer;
   }
 
-  &.kuiCheckbox--alternate .kuiCheckbox__input {
-    &:checked ~ .kuiCheckbox__square {
-      background: $kuiColorPrimary;
-      border-color: $kuiColorPrimary;
+  &.kuiCheckbox--inList {
+    .kuiCheckbox__input {
+      &:checked ~ .kuiCheckbox__square {
+        background: $kuiColorPrimary;
+        border-color: $kuiColorPrimary;
 
-      .kuiCheckbox__check {
-        background-color: $kuiColorEmptyShade;
+        .kuiCheckbox__check {
+          background-color: $kuiColorEmptyShade;
+        }
       }
-    }
-    &:focus:checked ~.kuiCheckbox__square {
-      background: tintOrShade($kuiColorPrimary, 20%, 20%);
+
+      &:focus:checked ~.kuiCheckbox__square {
+        background: tintOrShade($kuiColorPrimary, 20%, 20%);
+      }
     }
   }
 }

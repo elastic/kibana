@@ -1589,12 +1589,12 @@ table {
     z-index: 2;
     font-size: 14px;
     cursor: pointer; }
-  .kuiCheckbox.kuiCheckbox--alternate .kuiCheckbox__input:checked ~ .kuiCheckbox__square {
+  .kuiCheckbox.kuiCheckbox--inList .kuiCheckbox__input:checked ~ .kuiCheckbox__square {
     background: #4da1c0;
     border-color: #4da1c0; }
-    .kuiCheckbox.kuiCheckbox--alternate .kuiCheckbox__input:checked ~ .kuiCheckbox__square .kuiCheckbox__check {
+    .kuiCheckbox.kuiCheckbox--inList .kuiCheckbox__input:checked ~ .kuiCheckbox__square .kuiCheckbox__check {
       background-color: #222; }
-  .kuiCheckbox.kuiCheckbox--alternate .kuiCheckbox__input:focus:checked ~ .kuiCheckbox__square {
+  .kuiCheckbox.kuiCheckbox--inList .kuiCheckbox__input:focus:checked ~ .kuiCheckbox__square {
     background: #3e819a; }
 
 .kuiCheckboxGroup__item + .kuiCheckboxGroup__item {

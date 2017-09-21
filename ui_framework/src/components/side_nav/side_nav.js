@@ -4,9 +4,15 @@ import React, {
 import classNames from 'classnames';
 import { KuiIcon } from '../../components';
 
+const typeToClassNameMap = {
+  inPanel: 'kuiSideNav--inPanel',
+};
+
+export const TYPES = Object.keys(typeToClassNameMap);
+
 export const KuiSideNav = ({
   children,
-  isInPanel,
+  type,
   toggleOpenOnMobile,
   isOpenOnMobile,
   mobileTitle,
@@ -16,9 +22,9 @@ export const KuiSideNav = ({
   const classes = classNames(
     'kuiSideNav',
     className,
+    typeToClassNameMap[type],
     {
       'kuiSideNav-isOpenMobile': isOpenOnMobile,
-      'kuiSideNav--inPanel': isInPanel,
     },
   );
 
@@ -57,6 +63,6 @@ export const KuiSideNav = ({
 KuiSideNav.propTypes = {
   toggleOpenOnMobile: PropTypes.func,
   isOpenOnMobile: PropTypes.bool,
-  isInPanel: PropTypes.bool,
+  type: PropTypes.oneOf(TYPES),
   mobileTitle: PropTypes.string,
 };
