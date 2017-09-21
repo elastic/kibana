@@ -37,8 +37,8 @@ export default props => (
       </GuideText>
 
       <GuideText>
-        For the sake of simplicity we haven&rsquo;t labeled the element on this page
-        correctly.
+        For the sake of simplicity we haven&rsquo;t labeled the input elements on
+        this page correctly.
       </GuideText>
 
       <GuideDemo
