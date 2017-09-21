@@ -20,7 +20,7 @@ function ResponsiveGrid({ size, isViewMode, buildLayoutFromPanels, onLayoutChang
       margin={[0, 0]}
       cols={DASHBOARD_GRID_COLUMN_COUNT}
       rowHeight={100}
-      draggableHandle=".panel-heading"
+      draggableHandle=".panel-title"
       layout={buildLayoutFromPanels}
       onLayoutChange={onLayoutChange}
       measureBeforeMount={false}
