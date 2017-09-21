@@ -7,9 +7,7 @@ const MINUTE = 60 * SECOND;
 const HOUR = 60 * MINUTE;
 
 module.exports = function (grunt) {
-  const platform = require('os').platform();
   const binScript =  `node`;
-  const buildScript =  /^win/.test(platform) ? '.\\build\\kibana\\bin\\kibana.bat' : './build/kibana/bin/kibana';
   const pkgVersion = grunt.config.get('pkg.version');
   const releaseBinScript = `./build/kibana-${pkgVersion}-linux-x86_64/bin/kibana`;
 
@@ -202,8 +200,9 @@ module.exports = function (grunt) {
         ready: /Optimization .+ complete/,
         quiet: true
       },
-      cmd: buildScript,
+      cmd: binScript,
       args: [
+        ...binArgs,
         '--env.name=production',
         '--logging.json=false',
         '--plugins.initialize=false',
