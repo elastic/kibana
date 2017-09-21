@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button } from 'react-bootstrap';
 import { PageControls } from './page_controls';
 import { ConfirmModal } from '../confirm_modal';
 import { RemoveIcon } from '../remove_icon';
@@ -9,7 +8,6 @@ import './page_manager.less';
 
 export const PageManager = (props) => {
   const {
-    done,
     pages,
     selectedPage,
     loadPage,
@@ -58,9 +56,6 @@ export const PageManager = (props) => {
           </div>
         </div>
       </div>
-      <div className="canvas__page-manager--controls">
-        <Button onClick={done}>Done</Button>
-      </div>
 
       <ConfirmModal
         isOpen={deleteId != null}
@@ -74,7 +69,6 @@ export const PageManager = (props) => {
 };
 
 PageManager.propTypes = {
-  done: PropTypes.func.isRequired,
   pages: PropTypes.array.isRequired,
   loadPage: PropTypes.func.isRequired,
   addPage: PropTypes.func.isRequired,

@@ -39,7 +39,7 @@ export const Toolbar = (props) => {
   };
 
   const trays = {
-    pageManager: (<PageManager done={done} />),
+    pageManager: (<PageManager/>),
     assetManager: (<AssetManager/>),
     elements: (<ElementTypes done={done} onClick={createElement} />),
     expression: !elementIsSelected ? null : (<Expression done={done} />),
