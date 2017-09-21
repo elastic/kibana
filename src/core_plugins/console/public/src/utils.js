@@ -40,7 +40,7 @@ utils.reformatData = function (data, indent) {
 };
 
 utils.collapseLiteralStrings = function (data) {
-  return data.replace(/"""(?:\s*\n)?((?:.|\n)*?)(?:\n\s*)?"""/g,function (match, literal) {
+  return data.replace(/"""(?:\s*\r?\n)?((?:.|\r?\n)*?)(?:\r?\n\s*)?"""/g,function (match, literal) {
       return JSON.stringify(literal);
   });
 }
