@@ -29,6 +29,11 @@ export default new Fn({
       help: 'A palette object for describing the colors to use on this plot',
       default: '{palette}',
     },
+    legend: {
+      type: ['boolean'],
+      default: true,
+      help: 'Legend visibility',
+    },
   },
   fn: (context, args) => {
     function seriesStyleToFlot(seriesStyle) {
@@ -129,7 +134,7 @@ export default new Fn({
           canvas: false,
           colors: colors,
           legend: {
-            show: true,
+            show: args.legend,
           },
           grid: {
             borderWidth: 0,
