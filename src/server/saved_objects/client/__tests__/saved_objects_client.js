@@ -291,7 +291,9 @@ describe('SavedObjectsClient', () => {
 
   describe('#delete', () => {
     it('throws notFound when ES is unable to find the document',  async () => {
-      callAdminCluster.returns(Promise.resolve({ found: false }));
+      callAdminCluster.returns(Promise.resolve({
+        result: 'not_found'
+      }));
 
       try {
         await savedObjectsClient.delete('index-pattern', 'logstash-*');
@@ -303,7 +305,9 @@ describe('SavedObjectsClient', () => {
     });
 
     it('passes the parameters to callAdminCluster', async () => {
-      callAdminCluster.returns({});
+      callAdminCluster.returns({
+        result: 'deleted'
+      });
       await savedObjectsClient.delete('index-pattern', 'logstash-*');
 
       expect(callAdminCluster.calledOnce).to.be(true);
@@ -314,7 +318,8 @@ describe('SavedObjectsClient', () => {
         type: 'doc',
         id: 'index-pattern:logstash-*',
         refresh: 'wait_for',
-        index: '.kibana-test'
+        index: '.kibana-test',
+        ignore: [404],
       });
     });
   });
