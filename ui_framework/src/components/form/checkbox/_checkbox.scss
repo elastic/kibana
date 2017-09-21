@@ -55,7 +55,7 @@
     cursor: pointer;
   }
 
-  &.kuiCheckbox--isInList {
+  &.kuiCheckbox--inList {
     .kuiCheckbox__input {
       &:checked ~ .kuiCheckbox__square {
         background: $kuiColorPrimary;

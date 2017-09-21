@@ -32,7 +32,7 @@ export default class extends Component {
         mobileTitle="Navigate my favorite comic books"
         toggleOpenOnMobile={this.toggleOpenOnMobile.bind(this)}
         isOpenOnMobile={this.state.isSideNavOpenOnMobile}
-        isInPanel
+        type="inPanel"
       >
         <KuiSideNavTitle>
           My favorite comic books

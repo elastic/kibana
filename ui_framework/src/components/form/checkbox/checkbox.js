@@ -2,20 +2,24 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
+const typeToClassNameMap = {
+  inList: 'kuiCheckbox--inList',
+};
+
+export const TYPES = Object.keys(typeToClassNameMap);
+
 export const KuiCheckbox = ({
   className,
   id,
   checked,
   label,
   onChange,
-  isInList,
+  type,
   ...rest,
 }) => {
   const classes = classNames(
     'kuiCheckbox',
-    {
-      'kuiCheckbox--isInList': isInList,
-    },
+    typeToClassNameMap[type],
     className
   );
 
@@ -60,10 +64,9 @@ KuiCheckbox.propTypes = {
   checked: PropTypes.bool.isRequired,
   label: PropTypes.string,
   onChange: PropTypes.func.isRequired,
-  isInList: PropTypes.bool,
+  type: PropTypes.oneOf(TYPES),
 };
 
 KuiCheckbox.defaultProps = {
   checked: false,
-  isInList: false,
 };

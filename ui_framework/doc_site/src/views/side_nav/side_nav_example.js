@@ -56,7 +56,7 @@ export default props => (
       }]}
       text={
         <p>
-          <KuiCode>SideNav</KuiCode> accepts an <KuiCode>isInPanel</KuiCode> prop
+          <KuiCode>SideNav</KuiCode> accepts a <KuiCode>type=&ldquo;inPanel&rdquo;</KuiCode> prop
           that gives it more contextual styling when included within a <Link to="/page">Panel</Link> (like
           this documentation page). Note that in mobile mode it drops itself down to the original styling
           and still works responsively.
