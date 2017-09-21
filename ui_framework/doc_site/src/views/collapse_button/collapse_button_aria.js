@@ -32,13 +32,13 @@ export default class extends Component {
           direction={isExpanded ? 'down' : 'up'}
           aria-label="Toggle panel"
           aria-expanded={isExpanded}
-          aria-controls={idGen('collapsable')}
+          aria-controls={idGen('collapsible')}
         />
         <div
-          id={idGen('collapsable')}
+          id={idGen('collapsible')}
           style={{ display: isExpanded ? 'block' : 'none' }}
         >
-          Here is some collapsable content.
+          Here is some collapsible content.
         </div>
       </div>
     );
