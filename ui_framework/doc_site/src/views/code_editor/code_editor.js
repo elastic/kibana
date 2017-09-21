@@ -18,7 +18,7 @@ export default class extends Component {
         value={this.state.value}
         onChange={(value) => this.setState({ value })}
         setOptions={{ fontSize: '14px' }}
-        onBlur={() => window.alert('KuiCodeEditor.onBlur() called')}
+        onBlur={() => console.log('KuiCodeEditor.onBlur() called')}
       />
     );
   }
