@@ -1,0 +1,29 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiCodeEditor is rendered 1`] = `
+<div
+  class="kuiCodeEditorWrapper"
+>
+  <div
+    class="kuiCodeEditorKeyboardHint"
+    id="42"
+    role="button"
+    tabindex="0"
+  >
+    <p
+      class="kuiText kuiVerticalRhythmSmall"
+    >
+      Press Enter to start editing.
+    </p>
+    <p
+      class="kuiText kuiVerticalRhythmSmall"
+    >
+      When you’re done, press Escape to stop editing.
+    </p>
+  </div>
+  <div
+    id="brace-editor"
+    style="width:500px;height:500px;"
+  />
+</div>
+`;

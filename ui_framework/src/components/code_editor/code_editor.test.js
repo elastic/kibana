@@ -1,8 +1,14 @@
 import React from 'react';
 import sinon from 'sinon';
-import { mount } from 'enzyme';
+import { mount, render } from 'enzyme';
 import { KuiCodeEditor } from './code_editor';
 import { keyCodes } from '../../services';
+import { requiredProps } from '../../test/required_props';
+
+// Mock the htmlIdGenerator to generate predictable ids for snapshot tests
+jest.mock('../../services/accessibility/html_id_generator', () => ({
+  htmlIdGenerator: () => { return () => 42; },
+}));
 
 describe('KuiCodeEditor', () => {
 
@@ -10,6 +16,11 @@ describe('KuiCodeEditor', () => {
 
   beforeEach(() => {
     element = mount(<KuiCodeEditor/>);
+  });
+
+  test('is rendered', () => {
+    const component = <KuiCodeEditor {...requiredProps}/>;
+    expect(render(component)).toMatchSnapshot();
   });
 
   describe('hint element', () => {
