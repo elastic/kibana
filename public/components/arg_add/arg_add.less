@@ -1,13 +1,11 @@
 @import (reference) "../../style/variables";
 
 .canvas__arg--add {
-  //background-color: @lightestGrey;
-  margin: 0px @spacingM;
-  border-bottom: @borderStyle;
-  padding: @spacingXXS @spacingS;
   cursor: pointer;
-  color: @labelColor;
-  text-align: right;
+  text-align: center;
+  font-size: @textSmall;
+  font-weight: normal;
+  padding: @spacingXS @spacingS;
 
   &:hover {
     background-color: @lightestGrey;
@@ -15,12 +13,5 @@
     label {
       color: @darkestGrey;
     }
-  }
-
-  // TODO: This shouldn't be a bootstrap <Label>
-  label {
-    font-weight: bold !important;
-    cursor: pointer;
-    background-color: transparent;
   }
 }
