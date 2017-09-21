@@ -23,7 +23,7 @@ import { savedObjectsMixin } from './saved_objects';
 import { statsMixin } from './stats';
 import { kibanaIndexMappingsMixin } from './mappings';
 import { serverExtensionsMixin } from './server_extensions';
-import { runWithLegacyKbnServer } from '../../target/platform/cli/cli';
+import { runWithLegacyKbnServer as newPlatformMixin } from '../../target/platform/cli/cli';
 
 const rootDir = fromRoot('.');
 
@@ -35,11 +35,11 @@ export default class KbnServer {
     this.rootDir = rootDir;
     this.settings = settings || {};
 
-    runWithLegacyKbnServer(this);
-
     this.ready = constant(this.mixin(
       // sets this.config, reads this.settings
       configSetupMixin,
+
+      newPlatformMixin,
 
       // sets this.server
       httpMixin,

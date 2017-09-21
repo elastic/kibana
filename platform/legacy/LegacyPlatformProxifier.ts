@@ -2,9 +2,9 @@ import { Server } from 'net';
 import { IncomingMessage, OutgoingMessage } from 'http';
 import { EventEmitter } from 'events';
 
-import { Logger } from '../../../logging';
+import { Logger } from '../logging';
 
-export class ProxyToLegacyPlatform extends EventEmitter {
+export class LegacyPlatformProxifier extends EventEmitter {
   private server: Server;
   private readonly eventHandlers: any;
   private port?: number;

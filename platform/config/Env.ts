@@ -1,7 +1,7 @@
 import * as process from 'process';
 import { resolve } from 'path';
 
-import { ProxyToLegacyPlatform } from '../server/http/ProxyToLegacyPlatform';
+import { LegacyPlatformProxifier } from '../legacy';
 
 interface WithConfig {
   config?: string;
@@ -45,7 +45,7 @@ export class Env {
     return resolve(this.pluginsDir, pluginName, 'target', 'dist');
   }
 
-  getProxy(): ProxyToLegacyPlatform | undefined {
+  getProxy(): LegacyPlatformProxifier | undefined {
     return this.argv.kbnServer && this.argv.kbnServer.newPlatformProxyListener;
   }
 

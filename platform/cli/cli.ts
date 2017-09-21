@@ -1,4 +1,6 @@
 // TODO Fix build system so we can switch these to `import`s
+import { Observable } from 'rxjs/Observable';
+
 const yargs = require('yargs');
 import { merge } from 'lodash';
 
@@ -7,7 +9,7 @@ import { version } from './version';
 import { Env, RawConfigService } from '../config';
 import { Root, OnShutdown } from '../root';
 import { argvToConfigOverrides } from './argvToConfig';
-import { ProxyToLegacyPlatform } from '../server/http/ProxyToLegacyPlatform';
+import { LegacyPlatformProxifier, getLegacyConfig$ } from '../legacy';
 
 export const parseArgv = (argv: Array<string>) =>
   yargs(argv)
@@ -27,24 +29,30 @@ export const run = (argv: { [key: string]: any }) => {
   }
 
   const env = Env.createDefault(argv);
-  const rawConfigService = new RawConfigService(env.getConfigFile());
-  const configOverrides = argvToConfigOverrides(argv);
-
-  rawConfigService.loadConfig();
 
   const onShutdown: OnShutdown = reason => {
     process.exit(reason === undefined ? 0 : 1);
   };
 
-  const rawConfig$ = rawConfigService
-    .getConfig$()
-    .map(rawConfig => merge({}, rawConfig, configOverrides));
+  let rawConfigService: RawConfigService;
+  let rawConfig$: Observable<{ [key: string]: any }>;
+  if (argv.kbnServer) {
+    rawConfig$ = getLegacyConfig$(argv.kbnServer);
+  } else {
+    rawConfigService = new RawConfigService(env.getConfigFile());
+    const configOverrides = argvToConfigOverrides(argv);
+    rawConfigService.loadConfig();
+
+    rawConfig$ = rawConfigService
+      .getConfig$()
+      .map(rawConfig => merge({}, rawConfig, configOverrides));
+  }
 
   const root = new Root(rawConfig$, env, onShutdown);
 
   if (argv.kbnServer) {
-    argv.kbnServer.newPlatformProxyListener = new ProxyToLegacyPlatform(
-      root.logger.get('proxy-to-legacy-platform'),
+    argv.kbnServer.newPlatformProxyListener = new LegacyPlatformProxifier(
+      root.logger.get('legacy-platform-proxifier'),
       argv.kbnServer,
       async () => await root.start(),
       async () => await shutdown()
@@ -53,12 +61,15 @@ export const run = (argv: { [key: string]: any }) => {
     root.start();
   }
 
-  process.on('SIGHUP', () => rawConfigService.reloadConfig());
+  process.on(
+    'SIGHUP',
+    () => rawConfigService && rawConfigService.reloadConfig()
+  );
   process.on('SIGINT', () => shutdown());
   process.on('SIGTERM', () => shutdown());
 
   async function shutdown() {
-    rawConfigService.stop();
+    rawConfigService && rawConfigService.stop();
     await root.shutdown();
   }
 };
