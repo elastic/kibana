@@ -8,6 +8,12 @@ export const render = () => new View('render', {
   modelArgs: [],
   requiresContext: false,
   args: [
+    new Arg('containerStyle', {
+      displayName: 'Container Style',
+      description: 'Tweak the appearance of the element container',
+      argType: 'containerStyle',
+      defaultValue: '{containerStyle}',
+    }),
     new Arg('css', {
       displayName: 'Custom CSS',
       description: 'CSS will be scoped to your element',
@@ -15,12 +21,6 @@ export const render = () => new View('render', {
       options: {
         confirm: 'Apply Stylesheet',
       },
-    }),
-    new Arg('containerStyle', {
-      displayName: 'Container Style',
-      description: 'Tweak the appearance of the element container',
-      argType: 'containerStyle',
-      defaultValue: '{containerStyle}',
     }),
   ],
 });
