@@ -1,0 +1,23 @@
+@import (reference) "../../style/main";
+
+.canvas__remove-icon--background, .canvas__remove-icon--foreground{
+  position: absolute;
+}
+.canvas__remove-icon--background {
+  height: 14px;
+  width: 14px;
+  background-color: @trueWhite;
+  top: 2px;
+  left: 2px;
+  border-radius: 20px;
+}
+
+.canvas__remove-icon {
+  color: @colorDanger;
+  font-size: 20px;
+  cursor: pointer;
+
+  &:hover {
+    color: @colorDangerHover;
+  }
+}

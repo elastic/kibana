@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Shortcuts } from 'react-shortcuts';
 import { ElementContent } from './element_content';
 import { pure } from 'recompose';
+import { RemoveIcon } from '../remove_icon';
 
 export const ElementControls = pure((props) => {
   const {
@@ -54,10 +55,7 @@ export const ElementControls = pure((props) => {
          />
 
         {!isSelected ? null :
-          (<i
-            className="fa fa-times-circle canvas__workpad--element-remove"
-            style={{ cursor: 'pointer' }}
-            onClick={removeHandler}/>)
+          (<RemoveIcon style={{ position: 'absolute', top: -20, right: -20 }} onClick={removeHandler}/>)
         }
       </Shortcuts>
     </div>

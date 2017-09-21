@@ -1,13 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button } from 'react-bootstrap';
 import { PageControls } from './page_controls';
 import { ConfirmModal } from '../confirm_modal';
+import { RemoveIcon } from '../remove_icon';
 import './page_manager.less';
+
 
 export const PageManager = (props) => {
   const {
-    done,
     pages,
     selectedPage,
     loadPage,
@@ -15,8 +15,6 @@ export const PageManager = (props) => {
     movePage,
     duplicatePage,
     removePage,
-    withControls,
-    showControls,
     deleteId,
     setDeleteId,
   } = props;
@@ -28,38 +26,35 @@ export const PageManager = (props) => {
     removePage(deleteId);
   };
 
-  const pageName = page => page.id.split('-')[1].substring(0, 6);
-
   return (
     <div className="canvas__page-manager">
       <div className="canvas__page-manager--pages">
-        {pages.map(page => (
+        {pages.map((page, i) => (
           <div
             key={page.id}
-            className="canvas__page-manager--page"
-            onMouseEnter={() => showControls(page.id)}
-            onMouseLeave={() => showControls(false)}
+            className={`canvas__page-manager--page ${page.id === selectedPage ? 'active' : ''}`}
+            onClick={() => loadPage(page.id)}
           >
-            <div
-              className={`body ${page.id === selectedPage ? 'selected' : ''}`}
-              onClick={() => loadPage(page.id)}
-            >
-              <div className="title">Page<br />{pageName(page)}</div>
+            <RemoveIcon
+              className="canvas__page-manager--page-remove"
+              onClick={() => confirmDelete(page.id)}/>
+            <div className="canvas__page-manager--page-index">
+              { i + 1 }
             </div>
-            {(withControls === page.id) && (
-              <PageControls
-                pageId={page.id}
-                movePage={movePage}
-                duplicatePage={duplicatePage}
-                removePage={confirmDelete}
-              />
-            )}
+            <PageControls
+              pageId={page.id}
+              movePage={movePage}
+              duplicatePage={duplicatePage}/>
           </div>
         ))}
-      </div>
-      <div className="canvas__page-manager--controls">
-        <Button bsStyle="success" onClick={addPage}>Add Page</Button>
-        <Button onClick={done}>Done</Button>
+        <div
+          className="canvas__page-manager--page"
+          onClick={addPage}
+        >
+          <div className="canvas__page-manager--page-index">
+            +
+          </div>
+        </div>
       </div>
 
       <ConfirmModal
@@ -74,7 +69,6 @@ export const PageManager = (props) => {
 };
 
 PageManager.propTypes = {
-  done: PropTypes.func.isRequired,
   pages: PropTypes.array.isRequired,
   loadPage: PropTypes.func.isRequired,
   addPage: PropTypes.func.isRequired,
@@ -82,11 +76,6 @@ PageManager.propTypes = {
   duplicatePage: PropTypes.func.isRequired,
   removePage: PropTypes.func.isRequired,
   selectedPage: PropTypes.string,
-  withControls: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.bool,
-  ]),
-  showControls: PropTypes.func,
   deleteId: PropTypes.string,
   setDeleteId: PropTypes.func.isRequired,
 };

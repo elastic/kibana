@@ -32,7 +32,7 @@ component.propTypes = {
   value: PropTypes.string.isRequired,
   confirm: PropTypes.string,
   commit: PropTypes.func.isRequired,
-  renderError: PropTypes.function,
+  renderError: PropTypes.func,
 };
 
 const template = compose(

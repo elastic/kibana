@@ -5,9 +5,7 @@ import './arg_add.less';
 export const ArgAdd = ({ onValueAdd, displayName }) => {
   return (
     <div className="canvas__arg--add" onClick={onValueAdd}>
-      <label>
-        {displayName} <i className="fa fa-plus"/>
-      </label>
+      {displayName}
     </div>
   );
 };

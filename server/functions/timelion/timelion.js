@@ -10,9 +10,9 @@ export default new Fn({
     types: ['filter'],
   },
   args: {
-    q: {
+    _: {
       types: ['string'],
-      aliases: ['query'],
+      aliases: ['query', 'q'],
       help: 'A timelion query',
       default: '.es(*)',
     },
@@ -63,7 +63,7 @@ export default new Fn({
           },
         },
       },
-      sheet: [args.q],
+      sheet: [args._],
       time: {
         from: range.from,
         to: range.to,

@@ -10,6 +10,7 @@ import { Datasource } from '../datasource';
 import { ElementTypes } from './element_types';
 import { WorkpadLoader } from '../workpad_loader';
 import { PageManager } from '../page_manager';
+import { AssetManager } from '../asset_manager';
 
 import './toolbar.less';
 
@@ -38,7 +39,8 @@ export const Toolbar = (props) => {
   };
 
   const trays = {
-    pageManager: (<PageManager done={done} />),
+    pageManager: (<PageManager/>),
+    assetManager: (<AssetManager/>),
     elements: (<ElementTypes done={done} onClick={createElement} />),
     expression: !elementIsSelected ? null : (<Expression done={done} />),
     datasource: !elementIsSelected ? null : (<Datasource done={done} />),
@@ -63,8 +65,13 @@ export const Toolbar = (props) => {
           <i className="fa fa-file" /> Pages
         </NavbarButton>
         <NavbarButton onClick={() => showHideTray('elements')}>
-          <i className="fa fa-plus" /> Add an element
+          <i className="fa fa-plus" /> Elements
         </NavbarButton>
+
+        <NavbarButton onClick={() => showHideTray('assetManager')}>
+          <i className="fa fa-image" /> Assets
+        </NavbarButton>
+
 
         { elementIsSelected && (
           <span>

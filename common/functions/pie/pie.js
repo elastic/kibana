@@ -23,6 +23,26 @@ export default new Fn({
       types: ['seriesStyle', 'null'],
       help: 'A style of a specific series',
     },
+    hole: {
+      types: ['number'],
+      default: 0,
+      help: 'Draw a hole in the pie, 0-100, as a percentage of the pie radius',
+    },
+    strokeColor: {
+      types: ['string'],
+      default: '#000000',
+      help: 'A color for the outline of the pie and it\'s slices',
+    },
+    strokeWidth: {
+      types: ['number'],
+      default: 0,
+      help: 'Weight of stroke in pixels',
+    },
+    combine: {
+      types: ['number'],
+      default: 3,
+      help: 'Combine slices that represent less than this percent, into one big "Other" slice',
+    },
   },
   fn: (context, args) => {
     const rows = sortBy(context.rows, ['color', 'size']);
@@ -55,13 +75,24 @@ export default new Fn({
           canvas: false,
           colors: colors,
           legend: {
-            show: true,
+            show: false,
           },
           grid: {
             show: false,
           },
           series: {
             pie: {
+              show: true,
+              innerRadius: args.hole / 100,
+              stroke: {
+                color: args.strokeColor,
+                width: args.strokeWidth,
+              },
+              combine: {
+                threshold: args.combine / 100,
+              },
+            },
+            label: {
               show: true,
             },
             bubbles: {

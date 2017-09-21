@@ -22,6 +22,7 @@ export default new Fn({
       multi: false,
       types: ['seriesStyle', 'null'],
       help: 'The default style to use for a series',
+      default: '{seriesStyle points=5}',
     },
     palette: {
       types: ['palette', 'null'],

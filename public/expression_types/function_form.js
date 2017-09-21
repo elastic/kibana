@@ -1,9 +1,9 @@
 import React from 'react';
 import { Alert } from 'react-bootstrap';
-import { isPlainObject, uniq, last } from 'lodash';
+import { isPlainObject, uniq, last, compact } from 'lodash';
 import { BaseForm } from './base_form';
 import { fromExpression } from '../../common/lib/ast';
-import { ArgAdd } from '../components/arg_add';
+import { ArgAddPopover } from '../components/arg_add_popover';
 
 export class FunctionForm extends BaseForm {
   constructor(name, props) {
@@ -47,24 +47,22 @@ export class FunctionForm extends BaseForm {
     );
   }
 
-  renderAddArg(props, dataArg) {
+  // TODO: What a complete disaster. This is terribly hard to read. Ask Rashid why this is so bad, it's his fault. I hate that guy.
+  // This was done at the end of a 15hr day. I'm so tired. I hate this. The Kibana dev server has a memory leak. I hate it.
+  getAddableArg(props, dataArg) {
     const { onValueAdd } = props;
     const { arg, argValues, skipRender } = dataArg;
 
     // skip arguments that aren't defined in the expression type schema
     if (!arg || arg.required || skipRender) return null;
+    if (argValues && !arg.multi) return null;
 
     if (arg.defaultValue != null && typeof arg.defaultValue !== 'string') throw new Error('defaultValue must be a string');
 
     // TODO: This won't always be a string just because it doesn't have a default
-    const newArgValue = arg.defaultValue === '' ? '' : fromExpression(arg.defaultValue, 'argument');
+    const value = arg.defaultValue === '' ? '' : fromExpression(arg.defaultValue, 'argument');
 
-    return (!argValues || arg.multi) && (
-      <ArgAdd key={`${props.typeInstance.name}-${arg.name}-add`}
-        displayName={arg.displayName}
-        onValueAdd={onValueAdd(arg.name, newArgValue)}
-      />
-    );
+    return { arg, onValueAdd: onValueAdd(arg.name, value) };
   }
 
   resolveArg() {
@@ -99,13 +97,15 @@ export class FunctionForm extends BaseForm {
       // allow a hook to override the data args
       const resolvedDataArgs = dataArgs.map(d => ({ ...d, ...this.resolveArg(d, props) }));
 
-      const argumentForms = resolvedDataArgs.map(d => this.renderArg(props, d));
-      const addForms = resolvedDataArgs.map(d => this.renderAddArg(props, d)); // Buttons for adding more arguments
+      const argumentForms = compact(resolvedDataArgs.map(d => this.renderArg(props, d)));
+      const addableArgs = compact(resolvedDataArgs.map(d => this.getAddableArg(props, d)));
 
       return (
         <div>
           {argumentForms}
-          {addForms}
+          {addableArgs.length === 0 ? null : (
+            <ArgAddPopover options={addableArgs}/>
+          )}
         </div>
       );
 
