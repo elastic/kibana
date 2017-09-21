@@ -8,10 +8,7 @@ const template = ({ typeInstance, onValueChange, argValue }) => {
   const choices = typeInstance.options.choices;
 
   function handleChange(ev) {
-    onValueChange({
-      type: 'string',
-      value: ev.target.value,
-    });
+    onValueChange(ev.target.value);
   }
 
   const options = choices.map(choice => (
