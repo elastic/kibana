@@ -22,9 +22,12 @@ function serializer() {
 }
 
 const getUpdateStatus = ($scope) => {
-  if (!$scope._oldStatus) $scope._oldStatus = [];
 
-  const hasChanged = (name, value) => {
+  if (!$scope._oldStatus) {
+    $scope._oldStatus = {};
+  }
+
+  const hasChangedUsingGenericHashComparison = (name, value) => {
     const currentValue = JSON.stringify(value, serializer());
     if (currentValue !== $scope._oldStatus[name]) {
       $scope._oldStatus[name] = currentValue;
@@ -33,15 +36,27 @@ const getUpdateStatus = ($scope) => {
     return false;
   };
 
-  const status = {
-    aggs: hasChanged('aggs', $scope.vis.aggs),
-    data: hasChanged('data', $scope.visData),
-    params: hasChanged('param', $scope.vis.params),
-    resize: hasChanged('resize', $scope.vis.size),
-    uiState: hasChanged('uiState', $scope.uiState)
-  };
+  function hasSizeChanged(currentWidth, currentHeight) {
 
-  return status;
+    if (!$scope._oldStatus.resize) {
+      $scope._oldStatus.resize = { width: currentWidth, height: currentHeight };
+      return true;
+    }
+
+    if (currentWidth !== $scope._oldStatus.resize.width || currentHeight !== $scope._oldStatus.resize.height) {
+      $scope._oldStatus.resize = { width: currentWidth, height: currentHeight };
+      return true;
+    }
+    return false;
+  }
+
+  return {
+    aggs: hasChangedUsingGenericHashComparison('aggs', $scope.vis.aggs),
+    data: hasChangedUsingGenericHashComparison('data', $scope.visData),
+    params: hasChangedUsingGenericHashComparison('param', $scope.vis.params),
+    resize: hasSizeChanged($scope.vis.size),
+    uiState: hasChangedUsingGenericHashComparison('uiState', $scope.uiState)
+  };
 };
 
 module.exports = { getUpdateStatus };
