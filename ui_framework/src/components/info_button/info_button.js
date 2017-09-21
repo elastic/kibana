@@ -6,9 +6,8 @@ import classNames from 'classnames';
 const KuiInfoButton = props => {
   const iconClasses = classNames('kuiInfoButton', props.className);
 
-  const ariaLabel = props['aria-label'] || 'Info';
   return (
-    <button className={iconClasses} aria-label={ariaLabel} {...props}>
+    <button className={iconClasses} {...props}>
       <span className="kuiIcon fa-info-circle" />
     </button>
   );
@@ -17,6 +16,10 @@ const KuiInfoButton = props => {
 KuiInfoButton.propTypes = {
   'aria-label': PropTypes.string,
   className: PropTypes.string,
+};
+
+KuiInfoButton.defaultProps = {
+  'aria-label': 'Info'
 };
 
 export {
