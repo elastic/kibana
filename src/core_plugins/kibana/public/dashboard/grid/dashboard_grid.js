@@ -36,9 +36,15 @@ const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
 
 
 export class DashboardGrid extends React.Component {
-  state = {
-    layout: this.buildLayoutFromPanels()
-  };
+  constructor(props) {
+    super(props);
+    // A mapping of panelIndexes to grid items so we can set the zIndex appropriately on the last focused
+    // item.
+    this.gridItems = {};
+    this.state = {
+      layout: this.buildLayoutFromPanels()
+    };
+  }
 
   buildLayoutFromPanels() {
     return this.props.panels.map(panel => {
@@ -50,23 +56,28 @@ export class DashboardGrid extends React.Component {
   }
 
   onLayoutChange = (layout) => {
-    const { panels, getContainerApi } = this.props;
-
-    const containerApi = getContainerApi();
-
+    const { onPanelUpdated } = this.props;
     layout.forEach(panelLayout => {
-      const panelUpdated = _.find(panels, panel => panel.panelIndex.toString() === panelLayout.i);
-      panelUpdated.gridData = {
-        x: panelLayout.x,
-        y: panelLayout.y,
-        w: panelLayout.w,
-        h: panelLayout.h,
-        i: panelLayout.i,
+      const updatedPanel = {
+        panelIndex: panelLayout.i,
+        gridData: {
+          x: panelLayout.x,
+          y: panelLayout.y,
+          w: panelLayout.w,
+          h: panelLayout.h,
+          i: panelLayout.i,
+        },
         version: panelLayout.version
       };
-      panelUpdated.gridData.version = 6.0;
-      containerApi.updatePanel(panelUpdated.panelIndex, panelUpdated);
+      onPanelUpdated(updatedPanel.panelIndex, updatedPanel);
     });
+  };
+
+  onPanelFocused = panelIndex => {
+    this.gridItems[panelIndex].style.zIndex = '1';
+  };
+  onPanelBlurred = panelIndex => {
+    this.gridItems[panelIndex].style.zIndex = 'auto';
   };
 
   renderDOM() {
@@ -92,7 +103,10 @@ export class DashboardGrid extends React.Component {
 
     return panelsInOrder.map(panel => {
       return (
-        <div key={panel.panelIndex.toString()}>
+        <div
+          key={panel.panelIndex.toString()}
+          ref={reactGridItem => { this.gridItems[panel.panelIndex] = reactGridItem; }}
+        >
           <DashboardPanel
             panel={panel}
             onDeletePanel={onPanelRemoved}
@@ -102,6 +116,8 @@ export class DashboardGrid extends React.Component {
             getEmbeddableHandler={getEmbeddableHandler}
             getContainerApi={getContainerApi}
             dashboardViewMode={dashboardViewMode}
+            onPanelFocused={this.onPanelFocused}
+            onPanelBlurred={this.onPanelBlurred}
           />
         </div>
       );
@@ -131,5 +147,6 @@ DashboardGrid.propTypes = {
   dashboardViewMode: PropTypes.oneOf([DashboardViewMode.EDIT, DashboardViewMode.VIEW]).isRequired,
   expandPanel: PropTypes.func.isRequired,
   onPanelRemoved: PropTypes.func.isRequired,
+  onPanelUpdated: PropTypes.func.isRequired,
 };
 

@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
@@ -13,7 +12,6 @@ export class DashboardPanel extends React.Component {
     this.state = {};
     this.embeddable = null;
     this.embeddableHandler = null;
-    this.parentNode = null;
     this._isMounted = false;
   }
 
@@ -44,28 +42,23 @@ export class DashboardPanel extends React.Component {
     return this.props.dashboardViewMode === DashboardViewMode.VIEW || this.props.isFullScreenMode;
   }
 
-  getParentNode() {
-    if (!this.parentNode) {
-      this.parentNode = ReactDOM.findDOMNode(this).parentNode;
-    }
-    return this.parentNode;
-  }
-
   toggleExpandedPanel = () => this.props.onToggleExpanded(this.props.panel.panelIndex);
   deletePanel = () => {
     this.props.onDeletePanel(this.props.panel.panelIndex);
   };
   onEditPanel = () => window.location = this.state.editUrl;
 
-  /**
-   * Setting the zIndex on onFocus and onBlur allows popups, like the panel menu, to appear above other panels in the
-   * grid.
-   */
   onFocus = () => {
-    this.getParentNode().style.zIndex = 1;
+    const { onPanelFocused } = this.props;
+    if (onPanelFocused) {
+      onPanelFocused(this.props.panel.panelIndex);
+    }
   };
   onBlur = () => {
-    this.getParentNode().style.zIndex = 'auto';
+    const { onPanelBlurred } = this.props;
+    if (onPanelBlurred) {
+      onPanelBlurred(this.props.panel.panelIndex);
+    }
   };
 
   componentWillUnmount() {
@@ -122,5 +115,7 @@ DashboardPanel.propTypes = {
   isExpanded: PropTypes.bool.isRequired,
   getContainerApi: PropTypes.func.isRequired,
   onToggleExpanded: PropTypes.func.isRequired,
-  onDeletePanel: PropTypes.func
+  onDeletePanel: PropTypes.func,
+  onPanelFocused: PropTypes.func,
+  onPanelBlurred: PropTypes.func,
 };
