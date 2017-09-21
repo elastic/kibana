@@ -1,5 +1,7 @@
 // Breadcrumb navigation included in the header.
 
+@import '../../link/mixins';
+
 .kuiHeaderBreadcrumbs {
   display: flex;
 }
