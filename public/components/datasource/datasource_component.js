@@ -62,9 +62,7 @@ export const DatasourceComponent = (props) => {
     <div className="canvas__datasource">
       <div>
         <h5>
-          <i className="fa fa-database"/> &nbsp;
-           Configure <i>{stateDatasource.name}</i>
-           <Button className="pull-right" bsSize="xsmall" onClick={() => setSelecting(!selecting)}>Change Datasource</Button>
+          <Button bsSize="xsmall" onClick={() => setSelecting(!selecting)}><i className="fa fa-database"/> Change Datasource</Button>
         </h5>
         <FormGroup>
           {stateDatasource.render({ args: stateArgs, updateArgs, datasourceDef })}
