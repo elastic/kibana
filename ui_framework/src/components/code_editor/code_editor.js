@@ -21,10 +21,6 @@ export class KuiCodeEditor extends Component {
     }
   };
 
-  stopEditing() {
-    this.setState({ isHintActive: true });
-  }
-
   onKeydownAce = (ev) => {
     if (ev.keyCode === keyCodes.ESCAPE) {
       ev.preventDefault();
@@ -51,6 +47,10 @@ export class KuiCodeEditor extends Component {
   startEditing = () => {
     this.setState({ isHintActive: false });
     this.aceEditor.editor.textInput.focus();
+  }
+
+  stopEditing() {
+    this.setState({ isHintActive: true });
   }
 
   render() {
