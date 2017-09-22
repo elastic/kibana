@@ -46,7 +46,7 @@ export default function ({ getService }) {
         await es.indices.delete({ index: '.kibana' })
       ));
 
-      it('should return 200 anc create invalid kibana index', async () => {
+      it('should return 200 and create invalid kibana index', async () => {
         // just in case the kibana server has recreated it
         await es.indices.delete({
           index: '.kibana',

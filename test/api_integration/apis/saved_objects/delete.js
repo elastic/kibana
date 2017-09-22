@@ -19,7 +19,7 @@ export default function ({ getService }) {
           })
       ));
 
-      it('should return 404 when deleting an unknown doc', async () => (
+      it('should return generic 404 when deleting an unknown doc', async () => (
         await supertest
           .delete(`/api/saved_objects/dashboard/not-a-real-id`)
           .expect(404)
@@ -34,7 +34,7 @@ export default function ({ getService }) {
     });
 
     describe('without kibana index', () => {
-      it('returns 404 when kibana index is missing', async () => {
+      it('returns generic 404 when kibana index is missing', async () => {
         // just in case the kibana server has recreated it
         await es.indices.delete({
           index: '.kibana',

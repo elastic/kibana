@@ -217,9 +217,9 @@ export class SavedObjectsClient {
 
     const response = await this._withKibanaIndex('search', esOptions);
 
-    // 404 might be because document is missing or index is missing,
-    // don't leak that implementation detail to the user
     if (response.status === 404) {
+      // 404 is only possible here if the index is missing, which
+      // is an implementation detail we don't want to leak
       return {
         page,
         per_page: perPage,
@@ -312,7 +312,7 @@ export class SavedObjectsClient {
     const docNotFound = response.found === false;
     const indexNotFound = response.status === 404;
     if (docNotFound || indexNotFound) {
-      // don't leak that implementation details about why there was a 404
+      // don't leak implementation details about why there was a 404
       throw errors.decorateNotFoundError(Boom.notFound());
     }
 
