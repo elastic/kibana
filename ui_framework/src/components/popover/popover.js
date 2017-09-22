@@ -3,6 +3,7 @@ import React, {
 } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import FocusTrap from 'focus-trap-react';
 
 import { cascadingMenuKeyCodes } from '../../services';
 
@@ -100,13 +101,19 @@ export class KuiPopover extends Component {
 
     if (isOpen || this.state.isClosing) {
       panel = (
-        <KuiPanel
-          className={panelClasses}
-          paddingSize={panelPaddingSize}
-          hasShadow
+        <FocusTrap
+          focusTrapOptions={{
+            clickOutsideDeactivates: true,
+          }}
         >
-          {children}
-        </KuiPanel>
+          <KuiPanel
+            className={panelClasses}
+            paddingSize={panelPaddingSize}
+            hasShadow
+          >
+            {children}
+          </KuiPanel>
+        </FocusTrap>
       );
     }
 

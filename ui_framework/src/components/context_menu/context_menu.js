@@ -3,6 +3,7 @@ import React, {
 } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import tabbable from 'tabbable';
 
 import { cascadingMenuKeyCodes } from '../../services';
 
@@ -128,9 +129,15 @@ export class KuiContextMenu extends Component {
       const focusedMenuItem = this.menuItems[this.state.focusedMenuItemIndex];
       if (focusedMenuItem) {
         focusedMenuItem.focus();
+      } else {
+        // Focus first tabbable item.
+        const tabbableItems = tabbable(this.currentPanel);
+        if (tabbableItems.length) {
+          tabbableItems[0].focus();
+        } else {
+          document.activeElement.blur();
+        }
       }
-    } else {
-      this.menu.focus();
     }
   }
 
@@ -250,7 +257,6 @@ export class KuiContextMenu extends Component {
         ref={node => { this.menu = node; }}
         className={classes}
         onKeyDown={this.onKeyDown}
-        tabIndex="0"
         {...rest}
       >
         {outGoingPanel}
