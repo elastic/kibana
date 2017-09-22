@@ -36,10 +36,12 @@ export class DashboardPanel extends React.Component {
       if (this._isMounted) { this.setState({ title }); }
     });
 
-    this.destroyEmbeddable = await this.embeddableHandler.render(
-      this.panelElement,
-      panel,
-      this.containerApi);
+    if (this._isMounted) {
+      this.destroyEmbeddable = await this.embeddableHandler.render(
+        this.panelElement,
+        panel,
+        this.containerApi);
+    }
   }
 
   isViewOnlyMode() {

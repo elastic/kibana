@@ -13,8 +13,8 @@ const containerApiMock = {
 };
 
 const embeddableHandlerMock = {
-  getEditPath: () => {},
-  getTitleFor: ()  => {},
+  getEditPath: () => Promise.resolve('editPath'),
+  getTitleFor: () => Promise.resolve('title'),
   render: jest.fn()
 };
 

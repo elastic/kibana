@@ -31,6 +31,8 @@ exports[`renders DashboardGrid 1`] = `
       isExpanded={false}
       isFullScreenMode={false}
       onDeletePanel={[Function]}
+      onPanelBlurred={[Function]}
+      onPanelFocused={[Function]}
       onToggleExpanded={[Function]}
       panel={
         Object {
@@ -56,6 +58,8 @@ exports[`renders DashboardGrid 1`] = `
       isExpanded={false}
       isFullScreenMode={false}
       onDeletePanel={[Function]}
+      onPanelBlurred={[Function]}
+      onPanelFocused={[Function]}
       onToggleExpanded={[Function]}
       panel={
         Object {
