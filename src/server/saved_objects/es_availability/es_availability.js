@@ -1,5 +1,9 @@
 import Boom from 'boom';
+import { delay } from 'bluebird';
 import { Subscription, BehaviorSubject, Subject, Observable } from 'rxjs/Rx';
+
+import { mergeMapLatest } from './lib';
+
 import { errors } from '../client';
 
 export function createEsAvailability(kbnServer) {
@@ -30,64 +34,79 @@ export function createEsAvailability(kbnServer) {
    */
   const checkReq$ = new Subject();
 
+  /**
+   *  Runs the check, which attempts to put the indexTemplate to elasticsearch
+   *  and will eventually patch the index if it already exists
+   *  @return {Promise<undefined>}
+   */
+  async function check() {
+    const esExports = server.plugins.elasticsearch;
+
+    if (!esExports) {
+      // the `kbnServer.ready()` handler will prevent check from
+      // running after we know that elasticsearch is not enabled, but
+      // it's possible it will be triggered before that happens
+      return;
+    }
+
+    const callCluster = esExports.getCluster('admin').callWithInternalUser;
+    const index = config.get('kibana.index');
+
+    // tell external parties that we don't know if es is available right now,
+    // they should wait to see what we discover
+    esIsAvailable$.next(undefined);
+
+    try {
+      // try to add the index template to elasticsearch. if it already exists
+      // then a new version will be written
+      await callCluster('indices.putTemplate', {
+        name: `kibana_index_template:${index}`,
+        body: {
+          template: index,
+          settings: {
+            number_of_shards: 1
+          },
+          mappings: savedObjectMappings.getDsl()
+        }
+      });
+
+      // TODO: we need to check for existing index and make sure it
+      // has the types it needs
+
+      // es seems to be available, let the listeners know
+      esIsAvailable$.next(true);
+    } catch (error) {
+      // we log every error
+      server.log(['error', 'savedObjects', 'putTemplate'], {
+        tmpl: 'Failed to put index template "<%= err.message %>"',
+        err: {
+          message: error.message,
+          stack: error.stack,
+        }
+      });
+
+      // and then notify listeners that es is not available
+      esIsAvailable$.next(false);
+
+      // wait for 1 second before finishing this check so that we don't pound elasticsearch too hard
+      await delay(1000);
+    }
+  }
+
   sub.add(
     checkReq$
-      // throttle check requests so that we only have one every 1 second at the most
-      .throttleTime(1000, undefined, { leading: true, trailing: true })
-      // and after that, if a check is delivered before the previous has
-      // completed exhaustMap ignores it
-      .exhaustMap(async () => {
-        const esExports = server.plugins.elasticsearch;
-        if (!esExports) {
-          esIsAvailable$.next(false);
-          return;
-        }
+      // mergeMapLatest will run check() for each request
+      // and buffer up to requests that arrives while it
+      // is processing.
+      .let(mergeMapLatest(check))
 
-        const callCluster = esExports.getCluster('admin').callWithInternalUser;
-        const index = config.get('kibana.index');
-
-        // tell external parties that we don't know if es is available right now,
-        // they should wait to see what we discover
-        esIsAvailable$.next(undefined);
-
-        try {
-          // try to add the index template to elasticsearch. if it already exists
-          // then a new version will be written
-          await callCluster('indices.putTemplate', {
-            name: `kibana_index_template:${index}`,
-            body: {
-              template: index,
-              settings: {
-                number_of_shards: 1
-              },
-              mappings: savedObjectMappings.getDsl()
-            }
-          });
-
-          // TODO: we need to check for existing index and make sure it
-          // has the types it needs
-
-          // es seems to be available, let the listeners know
-          return esIsAvailable$.next(true);
-        } catch (error) {
-          // we log every error
-          server.log(['error', 'savedObjects', 'putTemplate'], {
-            tmpl: 'Failed to put index template "<%= err.message %>"',
-            err: {
-              message: error.message,
-              stack: error.stack,
-            }
-          });
-
-          // and then notify listeners that es is not available
-          return esIsAvailable$.next(false);
-        }
-      })
+      // this should only happen if there is a syntax error,
+      // undefined methods, or something like that, but since
+      // we are not "supervised" by a request or anything we
+      // need to log and resubscribe
       .catch((error, resubscribe) => {
-        // this should only happen if there is a syntax error,
-        // undefined methods, or something like that.
         server.log(['error', 'savedObjects'], {
-          tmpl: 'Failure attempting to set index template "<%= err.message %>"',
+          tmpl: 'Error in savedObjects/esAvailability check "<%= err.message %>"',
           err: {
             message: error.message,
             stack: error.stack
@@ -103,21 +122,23 @@ export function createEsAvailability(kbnServer) {
   // when the kbnServer is ready plugins have loaded, so if
   // elasticsearch is enabled it will be available on the server now
   kbnServer.ready().then(() => {
-    checkReq$.next();
-
-    // try to get the elasticsearch plugin's status. if it's disabled then we just hang out
     const esStatus = kbnServer.status.getForPluginId('elasticsearch');
+
     if (!esStatus) {
+      esIsAvailable$.complete();
+      checkReq$.complete();
       return;
     }
 
     sub.add(
       Observable
-        // listen to es plugin's status and on each change
+        // event the state of the es plugin whenever it changes
         .fromEvent(esStatus, 'change', (prev, prevMsg, state) => state)
+        // start with the current state
+        .startWith(esStatus.switch)
         // determine if the status is green or not
         .map(state => state === 'green')
-        // when we toggle between green and not green
+        // toggle between green and not green
         .distinctUntilChanged()
         // request a check
         .subscribe(() => checkReq$.next())
@@ -133,15 +154,14 @@ export function createEsAvailability(kbnServer) {
   return new class EsAvailability {
     wrapCallClusterFunction(callCluster) {
       return async (method, params) => {
-
         // wait for the first non-undefined availablility
         const esIsAvailable = await esIsAvailable$
           .filter(available => available !== undefined)
           .take(1)
           .toPromise();
 
-        // PS, availability could still be undefined if esIsAvailable$
-        // completes before producing anything other than undefined
+        // esIsAvailable will still be undefined in some
+        // scenarios (like es is disabled) so use falsy check
         if (!esIsAvailable) {
           checkReq$.next();
           throw errors.decorateEsUnavailableError(
