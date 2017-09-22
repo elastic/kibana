@@ -32,7 +32,8 @@ export function createEsAvailability(kbnServer) {
       .exhaustMap(async () => {
         const esExports = server.plugins.elasticsearch;
         if (!esExports) {
-          return esIsUsable$.next(false);
+          esIsUsable$.next(false);
+          return;
         }
 
         const callCluster = esExports.getCluster('admin').callWithInternalUser;
@@ -83,20 +84,19 @@ export function createEsAvailability(kbnServer) {
   kbnServer.ready().then(() => {
     checkReq$.next();
 
+    // try to get the elasticsearch plugin's status. if it's disabled then we just hang out
     const esStatus = kbnServer.status.getForPluginId('elasticsearch');
     if (!esStatus) {
       return;
     }
 
-    // check every time the elasticsearch plugin changes status
+    // check every time the elasticsearch plugin goes between green and anything else
     sub.add(
       Observable
-        .fromEvent(esStatus, 'change')
-        .subscribe({
-          next() {
-            checkReq$.next();
-          }
-        })
+        .fromEvent(esStatus, 'change', (prev, prevMsg, state) => state)
+        .map(state => state === 'green')
+        .distinctUntilChanged()
+        .subscribe(() => checkReq$.next())
     );
   });
 
