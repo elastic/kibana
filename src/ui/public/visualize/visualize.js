@@ -17,7 +17,7 @@ import {
 
 uiModules
 .get('kibana/directive', ['ngSanitize'])
-  .directive('visualize', function (Notifier, Private, timefilter, getAppState) {
+  .directive('visualize', function (Notifier, Private, timefilter, getAppState, Promise) {
     const notify = new Notifier({ location: 'Visualize' });
     const requestHandlers = Private(VisRequestHandlersRegistryProvider);
     const responseHandlers = Private(VisResponseHandlersRegistryProvider);
@@ -67,7 +67,7 @@ uiModules
 
             $scope.previousVisState = $scope.vis.getState();
             $scope.previousRequestHandlerResponse = requestHandlerResponse;
-            return canSkipResponseHandler ? $scope.visData : responseHandler($scope.vis, requestHandlerResponse);
+            return canSkipResponseHandler ? $scope.visData : Promise.resolve(responseHandler($scope.vis, requestHandlerResponse));
           }, e => {
             $scope.savedObj.searchSource.cancelQueued();
             $el.trigger('renderComplete');
