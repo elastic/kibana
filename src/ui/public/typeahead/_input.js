@@ -3,7 +3,7 @@ import { uiModules } from 'ui/modules';
 const typeahead = uiModules.get('kibana/typeahead');
 
 
-typeahead.directive('kbnTypeaheadInput', function ($rootScope) {
+typeahead.directive('kbnTypeaheadInput', function () {
 
   return {
     restrict: 'A',
@@ -20,29 +20,22 @@ typeahead.directive('kbnTypeaheadInput', function ($rootScope) {
 
       // handle keypresses
       $el.on('keydown', function (ev) {
-        typeaheadCtrl.keypressHandler(ev);
-        digest();
+        $scope.$apply(() => typeaheadCtrl.keypressHandler(ev));
       });
 
       // update focus state based on the input focus state
       $el.on('focus', function () {
-        typeaheadCtrl.setFocused(true);
-        digest();
+        $scope.$apply(() => typeaheadCtrl.setFocused(true));
       });
 
       $el.on('blur', function () {
-        typeaheadCtrl.setFocused(false);
-        digest();
+        $scope.$apply(() => typeaheadCtrl.setFocused(false));
       });
 
       // unbind event listeners
       $scope.$on('$destroy', function () {
         $el.off();
       });
-
-      function digest() {
-        $rootScope.$$phase || $scope.$digest();
-      }
     }
   };
 });
