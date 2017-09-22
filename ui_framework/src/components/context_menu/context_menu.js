@@ -83,6 +83,11 @@ export class KuiContextMenu extends Component {
     }
   };
 
+  hasPreviousPanel = panelId => {
+    const previousPanelId = this.props.idToPreviousPanelIdMap[panelId];
+    return typeof previousPanelId === 'number';
+  };
+
   showPanel(panelId, direction) {
     clearTimeout(this.resetTransitionTimeout);
 
@@ -105,8 +110,8 @@ export class KuiContextMenu extends Component {
 
   showPreviousPanel = () => {
     // If there's a previous panel, then we can close the current panel to go back to it.
-    const previousPanelId = this.props.idToPreviousPanelIdMap[this.state.currentPanelId];
-    if (typeof previousPanelId === 'number') {
+    if (this.hasPreviousPanel(this.state.currentPanelId)) {
+      const previousPanelId = this.props.idToPreviousPanelIdMap[this.state.currentPanelId];
       this.showPanel(previousPanelId, 'previous');
     }
   };
@@ -127,6 +132,40 @@ export class KuiContextMenu extends Component {
     } else {
       this.menu.focus();
     }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    // If the user is opening the context menu, reset the state.
+    if (nextProps.isVisible && !this.props.isVisible) {
+      this.setState({
+        outGoingPanelId: undefined,
+        currentPanelId: nextProps.initialPanelId,
+        transitionDirection: undefined,
+        focusedMenuItemIndex: 0,
+      });
+    }
+  }
+
+  componentDidMount() {
+    this.updateHeight();
+    this.updateFocusedMenuItem();
+  }
+
+  componentDidUpdate() {
+    // Make sure we don't steal focus while the ContextMenu is closed.
+    if (!this.props.isVisible) {
+      return;
+    }
+
+    if (this.state.isTransitioning) {
+      this.updateHeight();
+    }
+
+    this.updateFocusedMenuItem();
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.resetTransitionTimeout);
   }
 
   renderPanel(panelId, transitionType) {
@@ -164,7 +203,10 @@ export class KuiContextMenu extends Component {
 
     // As above, we need to wait for KuiOutsideClickDetector to complete its logic before
     // re-rendering via showPanel.
-    const onClose = () => window.requestAnimationFrame(this.showPreviousPanel);
+    let onClose;
+    if (this.hasPreviousPanel(panelId)) {
+      onClose = () => window.requestAnimationFrame(this.showPreviousPanel);
+    }
 
     return (
       <KuiContextMenuPanel
@@ -183,40 +225,6 @@ export class KuiContextMenu extends Component {
     );
   }
 
-  componentWillReceiveProps(nextProps) {
-    // If the user is opening the context menu, reset the state.
-    if (nextProps.isVisible && !this.props.isVisible) {
-      this.setState({
-        outGoingPanelId: undefined,
-        currentPanelId: nextProps.initialPanelId,
-        transitionDirection: undefined,
-        focusedMenuItemIndex: 0,
-      });
-    }
-  }
-
-  componentDidMount() {
-    this.updateHeight();
-    this.updateFocusedMenuItem();
-  }
-
-  componentDidUpdate() {
-    // Make sure we don't steal focus while the ContextMenu is closed.
-    if (!this.props.isVisible) {
-      return;
-    }
-
-    if (this.state.isTransitioning) {
-      this.updateHeight();
-    }
-
-    this.updateFocusedMenuItem();
-  }
-
-  componentWillUnmount() {
-    clearTimeout(this.resetTransitionTimeout);
-  }
-
   render() {
     const {
       idToPanelMap, // eslint-disable-line no-unused-vars
@@ -230,6 +238,7 @@ export class KuiContextMenu extends Component {
     const currentPanel = this.renderPanel(this.state.currentPanelId, 'in');
     let outGoingPanel;
 
+    // Hide the out-going panel ASAP, so it can't take focus.
     if (this.state.isTransitioning) {
       outGoingPanel = this.renderPanel(this.state.outGoingPanelId, 'out');
     }
