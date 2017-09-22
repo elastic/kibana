@@ -37,6 +37,8 @@ export function GaugeChartProvider(Private) {
           const width = Math.floor(verticalSplit ? $(this).width() : containerWidth / data.series.length);
           const height = Math.floor((verticalSplit ? containerHeight / data.series.length : $(this).height()) - 25);
 
+          if (height < 0 || width < 0) return;
+
           div
             .style('text-align', 'center')
             .style('overflow-y', 'auto');
