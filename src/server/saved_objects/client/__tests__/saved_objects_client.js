@@ -567,6 +567,7 @@ describe('SavedObjectsClient', () => {
         body: {
           doc: { updated_at: mockTimestamp, 'index-pattern': { title: 'Testing' } }
         },
+        ignore: [404],
         refresh: 'wait_for',
         index: '.kibana-test'
       });
