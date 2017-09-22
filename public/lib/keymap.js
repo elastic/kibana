@@ -19,4 +19,8 @@ export const keymap = {
   ELEMENT: {
     DELETE: 'del',
   },
+  PRESENTATION: {
+    NEXT: ['space', 'right'],
+    PREV: 'left',
+  },
 };

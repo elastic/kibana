@@ -18,7 +18,11 @@ export default handleActions({
   },
 
   [actions.setEditing]: (transientState, { payload }) => {
-    return set(transientState, 'editing', payload);
+    return set(transientState, 'editing', Boolean(payload));
+  },
+
+  [actions.setFullscreen]: (transientState, { payload }) => {
+    return set(transientState, 'fullscreen', Boolean(payload));
   },
 
   [actions.selectElement]: (transientState, { payload }) => {
