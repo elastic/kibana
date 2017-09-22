@@ -1,7 +1,7 @@
 import Boom from 'boom';
 import uuid from 'uuid';
 
-import { getRootType } from '../../mappings';
+import { getRootType } from '../mappings';
 
 import {
   getSearchDsl,

@@ -5,7 +5,7 @@ import UiAppCollection from './ui_app_collection';
 import UiNavLinkCollection from './ui_nav_link_collection';
 
 export default class UiExports {
-  constructor({ urlBasePath, kibanaIndexMappings }) {
+  constructor({ urlBasePath, savedObjectMappings }) {
     this.navLinks = new UiNavLinkCollection(this);
     this.apps = new UiAppCollection(this);
     this.aliases = {
@@ -33,7 +33,7 @@ export default class UiExports {
     this.bundleProviders = [];
     this.defaultInjectedVars = {};
     this.injectedVarsReplacers = [];
-    this.kibanaIndexMappings = kibanaIndexMappings;
+    this.savedObjectMappings = savedObjectMappings;
   }
 
   consumePlugin(plugin) {
@@ -151,7 +151,7 @@ export default class UiExports {
 
       case 'mappings':
         return (plugin, mappings) => {
-          this.kibanaIndexMappings.addRootProperties(mappings, { plugin: plugin.id });
+          this.savedObjectMappings.addRootProperties(mappings, { plugin: plugin.id });
         };
 
       case 'replaceInjectedVars':

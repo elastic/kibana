@@ -1,4 +1,4 @@
-import { getRootProperties } from '../../../../mappings';
+import { getRootProperties } from '../../../mappings';
 
 /**
  *  Get the field params based on the types and searchFields
