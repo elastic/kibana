@@ -36,12 +36,9 @@ export class HttpServer {
   async start(config: HttpConfig) {
     this.server = this.initializeServer(config);
 
-    let port = config.port;
-
     const proxy = this.env.getProxy();
     if (proxy) {
       proxy.bind(this.server);
-      port = proxy.getPort()!;
 
       // We register Kibana proxy middleware right before we start server to allow
       // all new platform plugins register their endpoints, so that kbnServer
@@ -49,9 +46,9 @@ export class HttpServer {
       this.app.use((req, res) => proxy.proxy(req, res));
     }
 
-    this.log.info(`starting http server [${config.host}:${port}]`);
+    this.log.info(`starting http server [${config.host}:${config.port}]`);
 
-    return promisify(this.server.listen).call(this.server, port, config.host);
+    return promisify(this.server.listen).call(this.server, config.port, config.host);
   }
 
   stop() {

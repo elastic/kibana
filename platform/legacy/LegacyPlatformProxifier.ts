@@ -7,7 +7,6 @@ import { Logger } from '../logging';
 export class LegacyPlatformProxifier extends EventEmitter {
   private server: Server;
   private readonly eventHandlers: any;
-  private port?: number;
 
   constructor(
     private readonly log: Logger,
@@ -38,7 +37,6 @@ export class LegacyPlatformProxifier extends EventEmitter {
 
   async listen(port: number, host: string, callback: Function) {
     this.log.info(`"listen" has been called (${host}:${port}).`);
-    this.port = port;
 
     await this.startPlatform();
 
@@ -85,9 +83,5 @@ export class LegacyPlatformProxifier extends EventEmitter {
       `Request will be handled by proxy ${request.method}:${request.url}.`
     );
     this.emit('request', request, response);
-  }
-
-  getPort() {
-    return this.port;
   }
 }
