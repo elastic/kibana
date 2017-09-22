@@ -24,7 +24,7 @@ You can use standard Markdown in here, but you can also access your piped-in dat
 
 #### Enjoy!"`,
   render(domNode, config, handlers) {
-    domNode.innerHTML = md.render(config);
+    domNode.innerHTML = md.render(config.markup);
     handlers.done();
   },
 });

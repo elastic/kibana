@@ -28,7 +28,9 @@ export default new Fn({
     return {
       type: 'render',
       as: 'markdown',
-      value: compileFunctions.map(fn => fn(ctx)).join(''),
+      value: {
+        markup: compileFunctions.map(fn => fn(ctx)).join(''),
+      },
     };
   },
 });
