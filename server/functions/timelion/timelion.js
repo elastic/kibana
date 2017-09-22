@@ -14,7 +14,7 @@ export default new Fn({
       types: ['string'],
       aliases: ['query', 'q'],
       help: 'A timelion query',
-      default: '.es(*)',
+      default: '".es(*)"',
     },
     interval: {
       types: ['string'],
@@ -67,7 +67,7 @@ export default new Fn({
       time: {
         from: range.from,
         to: range.to,
-        interval: 'auto',
+        interval: args.interval,
         timezone: 'America/Phoenix',
       },
     };
