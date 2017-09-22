@@ -31,6 +31,14 @@ describe('#defaultValue', () => {
       }).validate(undefined)
     ).toMatchSnapshot();
   });
+
+  test('can be a number', () => {
+    expect(
+      byteSize({
+        defaultValue: 1024
+      }).validate(undefined)
+    ).toMatchSnapshot();
+  });
 });
 
 describe('#min', () => {
@@ -63,8 +71,14 @@ describe('#max', () => {
   });
 });
 
-test('returns error when not string', () => {
-  expect(() => byteSize().validate(123)).toThrowErrorMatchingSnapshot();
+test('returns error when not string or positive safe integer', () => {
+  expect(() => byteSize().validate(-123)).toThrowErrorMatchingSnapshot();
+
+  expect(() => byteSize().validate(NaN)).toThrowErrorMatchingSnapshot();
+
+  expect(() => byteSize().validate(Infinity)).toThrowErrorMatchingSnapshot();
+
+  expect(() => byteSize().validate(Math.pow(2, 53))).toThrowErrorMatchingSnapshot();
 
   expect(() => byteSize().validate([1, 2, 3])).toThrowErrorMatchingSnapshot();
 

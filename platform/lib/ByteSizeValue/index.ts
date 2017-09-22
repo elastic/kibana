@@ -13,7 +13,14 @@ function renderUnit(value: number, unit: string) {
 }
 
 export class ByteSizeValue {
-  constructor(private readonly valueInBytes: number) {}
+  constructor(private readonly valueInBytes: number) {
+    if (!Number.isSafeInteger(valueInBytes) || valueInBytes < 0) {
+      throw new Error(
+        `Value in bytes is expected to be a safe positive integer, ` +
+        `but provided [${valueInBytes}]`
+      );
+    }
+  }
 
   isGreaterThan(other: ByteSizeValue): boolean {
     return this.valueInBytes > other.valueInBytes;

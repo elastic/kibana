@@ -23,11 +23,12 @@ const transformPid = (configValue: any) => {
 };
 
 const transformServer = (configValue: any) => {
-  // TODO: New platform doesn't support too many fields right now, we should fix it.
+  // TODO: New platform uses just a subset of `server` config from the legacy platform,
+  // new values will be exposed once we need them (eg. customResponseHeaders, cors or xsrf).
   return {
     host: configValue.host,
     port: configValue.port,
-    maxPayload: `${configValue.maxPayloadBytes || 0}b`,
+    maxPayload: configValue.maxPayloadBytes,
     basePath: configValue.basePath,
     ssl: configValue.ssl
   };

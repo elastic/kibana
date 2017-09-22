@@ -220,13 +220,21 @@ class NumberSetting extends Setting<number> {
 export type ByteSizeOptions = {
   // we need to special-case defaultValue as we want to handle string inputs too
   validate?: (value: ByteSizeValue) => string | void;
-  defaultValue?: ByteSizeValue | string;
-  min?: ByteSizeValue | string;
-  max?: ByteSizeValue | string;
+  defaultValue?: ByteSizeValue | string | number;
+  min?: ByteSizeValue | string | number;
+  max?: ByteSizeValue | string | number;
 };
 
-function ensureByteSizeValue(value?: ByteSizeValue | string) {
-  return typeof value === 'string' ? ByteSizeValue.parse(value) : value;
+function ensureByteSizeValue(value?: ByteSizeValue | string | number) {
+  if (typeof value === 'string') {
+    return ByteSizeValue.parse(value);
+  }
+
+  if (typeof value === 'number') {
+    return new ByteSizeValue(value);
+  }
+
+  return value;
 }
 
 class ByteSizeSetting extends Setting<ByteSizeValue> {
@@ -248,6 +256,10 @@ class ByteSizeSetting extends Setting<ByteSizeValue> {
   process(value: any, context?: string): ByteSizeValue {
     if (typeof value === 'string') {
       value = ByteSizeValue.parse(value);
+    }
+
+    if (typeof value === 'number') {
+      value = new ByteSizeValue(value);
     }
 
     if (!(value instanceof ByteSizeValue)) {
