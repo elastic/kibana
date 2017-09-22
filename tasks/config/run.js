@@ -55,6 +55,7 @@ module.exports = function (grunt) {
         ...stdDevArgs,
         '--optimize.enabled=false',
         '--elasticsearch.url=' + esTestConfig.getUrl(),
+        '--elasticsearch.healthCheck.delay=360000',
         '--server.port=' + kibanaTestServerUrlParts.port,
         '--server.xsrf.disableProtection=true',
         ...kbnServerFlags,
