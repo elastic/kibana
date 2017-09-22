@@ -56,20 +56,19 @@ export class DashboardGrid extends React.Component {
   }
 
   onLayoutChange = (layout) => {
-    const { onPanelUpdated } = this.props;
+    const { panels, getContainerApi } = this.props;
+    const containerApi = getContainerApi();
     layout.forEach(panelLayout => {
-      const updatedPanel = {
-        panelIndex: panelLayout.i,
-        gridData: {
-          x: panelLayout.x,
-          y: panelLayout.y,
-          w: panelLayout.w,
-          h: panelLayout.h,
-          i: panelLayout.i,
-        },
+      const panelUpdated = _.find(panels, panel => panel.panelIndex.toString() === panelLayout.i);
+      panelUpdated.gridData = {
+        x: panelLayout.x,
+        y: panelLayout.y,
+        w: panelLayout.w,
+        h: panelLayout.h,
+        i: panelLayout.i,
         version: panelLayout.version
       };
-      onPanelUpdated(updatedPanel.panelIndex, updatedPanel);
+      containerApi.updatePanel(panelUpdated.panelIndex, panelUpdated);
     });
   };
 
@@ -147,6 +146,5 @@ DashboardGrid.propTypes = {
   dashboardViewMode: PropTypes.oneOf([DashboardViewMode.EDIT, DashboardViewMode.VIEW]).isRequired,
   expandPanel: PropTypes.func.isRequired,
   onPanelRemoved: PropTypes.func.isRequired,
-  onPanelUpdated: PropTypes.func.isRequired,
 };
 
