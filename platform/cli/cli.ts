@@ -63,14 +63,14 @@ export const runWithLegacyKbnServer = (kbnServer: any) => {
   kbnServer.newPlatformProxyListener = new LegacyPlatformProxifier(
     root.logger.get('legacy-platform-proxifier'),
     kbnServer,
-    async () => await root.start(),
-    async () => await root.shutdown()
+    () => root.start(),
+    () => root.shutdown()
   );
 
   // TODO: Do something to reload config.
   process.on('SIGHUP', () => {});
-  process.on('SIGINT', async () => await root.shutdown());
-  process.on('SIGTERM', async () => await root.shutdown());
+  process.on('SIGINT', () => root.shutdown());
+  process.on('SIGTERM', () => root.shutdown());
 };
 
 export default (argv: Array<string>) => run(parseArgv(argv));
