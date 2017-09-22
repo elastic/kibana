@@ -1,4 +1,5 @@
-import { isConfigVersionUpgradeable } from './is_config_version_upgradeable';
+import { getExistingConfig } from './get_existing_config';
+import { getUpgradeableConfig } from './get_upgradeable_config';
 
 export async function ensureConfigExists(options) {
   const {
@@ -8,48 +9,37 @@ export async function ensureConfigExists(options) {
     log,
   } = options;
 
-  const { saved_objects: savedConfigs } = await savedObjectsClient.find({
-    type: 'config',
-    page: 1,
-    perPage: 1000,
-    sortField: 'buildNum',
-    sortOrder: 'desc'
-  });
-
-  async function create(attributes) {
-    await savedObjectsClient.create('config', attributes, { id: version });
-  }
-
-  // only look for existing configs if kibana's version is not `@@version`
-  const existing = version === '@@version'
-    ? null
-    : savedConfigs.find(savedConfig => savedConfig.id === version);
-
-  // config already exists, our work is done
+  // first, check for an existing config
+  const existing = await getExistingConfig({ savedObjectsClient, version });
   if (existing) {
     return;
   }
 
-  // try to find a config that we can upgrade
-  const upgradeable = savedConfigs.find(savedConfig => (
-    isConfigVersionUpgradeable(savedConfig.id, version)
-  ));
+  // next, try to upgrade an older config
+  const upgradeable = await getUpgradeableConfig({ savedObjectsClient, version });
+  if (upgradeable) {
+    log(['plugin', 'elasticsearch'], {
+      tmpl: 'Upgrade config from <%= prevVersion %> to <%= newVersion %>',
+      prevVersion: upgradeable.id,
+      newVersion: version
+    });
 
-  // if there is nothing to upgrade just create a new one
-  if (!upgradeable) {
-    await create({ buildNum });
+    await savedObjectsClient.create(
+      'config',
+      {
+        ...upgradeable.attributes,
+        buildNum
+      },
+      { id: version }
+    );
+
     return;
   }
 
-  // it's upgradeing time!
-  log(['plugin', 'elasticsearch'], {
-    tmpl: 'Upgrade config from <%= prevVersion %> to <%= newVersion %>',
-    prevVersion: upgradeable.id,
-    newVersion: version
-  });
-
-  await create({
-    ...upgradeable.attributes,
-    buildNum
-  });
+  // if all else fails, create a new SavedConfig
+  await savedObjectsClient.create(
+    'config',
+    { buildNum },
+    { id: version }
+  );
 }

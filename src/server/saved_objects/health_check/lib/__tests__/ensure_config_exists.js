@@ -1,52 +1,65 @@
 import sinon from 'sinon';
 import Chance from 'chance';
 
+import * as getExistingConfigNS from '../get_existing_config';
+import * as getUpgradeableConfigNS from '../get_upgradeable_config';
 import { ensureConfigExists } from '../ensure_config_exists';
 
 const chance = new Chance();
 
 describe('savedObjects/healthCheck/ensureConfigExists', function () {
-  function setup(options = {}) {
-    const {
-      buildNum = chance.integer({ min: 1000, max: 5000 }),
-      version = '4.0.1',
-      savedConfigs = [],
-    } = options;
+  const sandbox = sinon.sandbox.create();
+  afterEach(() => sandbox.restore());
 
+  const version = '4.0.1';
+  const prevVersion = '4.0.0';
+  const buildNum = chance.integer({ min: 1000, max: 5000 });
+
+  function setup() {
+    const log = sinon.stub();
+    const getExistingConfig = sandbox.stub(getExistingConfigNS, 'getExistingConfig');
+    const getUpgradeableConfig = sandbox.stub(getUpgradeableConfigNS, 'getUpgradeableConfig');
     const savedObjectsClient = {
       create: sinon.spy(async (type, attributes, options = {}) => ({
         type,
         id: options.id,
         version: 1,
-      })),
-      find: sinon.spy(async () => ({
-        saved_objects: savedConfigs
       }))
     };
 
-    const log = sinon.stub();
-
-    function run() {
-      return ensureConfigExists({
+    async function run() {
+      const resp = await ensureConfigExists({
         savedObjectsClient,
         version,
         buildNum,
         log,
       });
+
+      if (getExistingConfig.callCount) {
+        sinon.assert.alwaysCalledWith(getExistingConfig, { savedObjectsClient, version });
+      }
+
+      if (getUpgradeableConfig.callCount) {
+        sinon.assert.alwaysCalledWith(getUpgradeableConfig, { savedObjectsClient, version });
+      }
+
+      return resp;
     }
 
     return {
       buildNum,
       log,
       run,
-      savedObjectsClient,
       version,
+      savedObjectsClient,
+      getExistingConfig,
+      getUpgradeableConfig,
     };
   }
 
   describe('nothing is found', function () {
     it('should create config with current version and buildNum', async () => {
-      const { buildNum, run, savedObjectsClient, version } = setup();
+      const { run, savedObjectsClient } = setup();
 
       await run();
 
@@ -61,68 +74,46 @@ describe('savedObjects/healthCheck/ensureConfigExists', function () {
 
   describe('current version is found', () => {
     it('should not create', async () => {
-      const { run, savedObjectsClient } = setup({
-        savedConfigs: [
-          {
-            id: '4.0.1',
-            attributes: {}
-          }
-        ]
-      });
+      const {
+        run,
+        getUpgradeableConfig,
+        getExistingConfig,
+        savedObjectsClient
+      } = setup();
+
+      getExistingConfig
+        .returns({ id: version, attributes: { buildNum } });
 
       await run();
+      sinon.assert.calledOnce(getExistingConfig);
+      sinon.assert.notCalled(getUpgradeableConfig);
       sinon.assert.notCalled(savedObjectsClient.create);
-    });
-  });
-
-  describe('nothing is upgradeable', () => {
-    it('should create new config with current version and buildNum', async () => {
-      const { buildNum, run, savedObjectsClient, version } = setup({
-        savedConfig: [
-          { id: '4.0.1-alpha3' },
-          { id: '4.0.1-beta1' },
-          { id: '4.0.0-SNAPSHOT1' },
-        ]
-      });
-
-      await run();
-
-      sinon.assert.calledOnce(savedObjectsClient.create);
-      sinon.assert.calledWithExactly(savedObjectsClient.create,
-        'config',
-        {
-          buildNum
-        },
-        {
-          id: version
-        }
-      );
     });
   });
 
   describe('something is upgradeable', () => {
     it('should merge upgraded attributes with current build number in new config', async () => {
-      const buildNum = chance.integer({ min: 1000, max: 5000 });
-      const savedBuildNum = buildNum - 100;
+      const {
+        run,
+        getUpgradeableConfig,
+        getExistingConfig,
+        savedObjectsClient
+      } = setup();
+
       const savedAttributes = {
-        buildNum: savedBuildNum,
+        buildNum: buildNum - 100,
         [chance.word()]: chance.sentence(),
         [chance.word()]: chance.sentence(),
-        [chance.word()]: chance.sentence(),
+        [chance.word()]: chance.sentence()
       };
 
-      const { run, savedObjectsClient, version } = setup({
-        buildNum,
-        savedConfigs: [
-          {
-            id: '4.0.0',
-            attributes: savedAttributes
-          }
-        ]
-      });
+      getUpgradeableConfig
+        .returns({ id: prevVersion, attributes: savedAttributes });
 
       await run();
 
+      sinon.assert.calledOnce(getExistingConfig);
+      sinon.assert.calledOnce(getUpgradeableConfig);
       sinon.assert.calledOnce(savedObjectsClient.create);
       sinon.assert.calledWithExactly(savedObjectsClient.create,
         'config',
@@ -137,13 +128,10 @@ describe('savedObjects/healthCheck/ensureConfigExists', function () {
     });
 
     it('should log a message for upgrades', async () => {
-      const { log, run } = setup({
-        buildNum: 2,
-        version: '4.0.1',
-        savedConfigs: [
-          { id: '4.0.0', attributes: { buildNum: 1 } }
-        ]
-      });
+      const { getUpgradeableConfig, log, run } = setup();
+
+      getUpgradeableConfig
+        .returns({ id: prevVersion, attributes: { buildNum: buildNum - 100 } });
 
       await run();
       sinon.assert.calledOnce(log);
@@ -151,8 +139,8 @@ describe('savedObjects/healthCheck/ensureConfigExists', function () {
         ['plugin', 'elasticsearch'],
         sinon.match({
           tmpl: sinon.match('Upgrade'),
-          prevVersion: '4.0.0',
-          newVersion: '4.0.1',
+          prevVersion,
+          newVersion: version,
         })
       );
     });
