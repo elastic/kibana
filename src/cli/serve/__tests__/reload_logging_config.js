@@ -72,7 +72,7 @@ describe(`Server logging configuration`, function () {
       }
 
       function switchToPlainTextLog() {
-        json = 3; // ignore both "reloading" messages + ui settings status message
+        json = 2; // ignore both "reloading" messages
         setLoggingJson(false);
         child.kill(`SIGHUP`); // reload logging config
       }

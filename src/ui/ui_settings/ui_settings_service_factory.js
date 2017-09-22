@@ -10,9 +10,6 @@ import { UiSettingsService } from './ui_settings_service';
  *                            param object which causes a request via some elasticsearch client
  *  @property {AsyncFunction} [options.getDefaults] async function that returns defaults/details about
  *                            the uiSettings.
- *  @property {AsyncFunction} [options.readInterceptor] async function that is called when the
- *                            UiSettingsService does a read() an has an oportunity to intercept the
- *                            request and return an alternate `_source` value to use.
  *  @return {UiSettingsService}
  */
 export function uiSettingsServiceFactory(server, options) {
@@ -20,7 +17,6 @@ export function uiSettingsServiceFactory(server, options) {
 
   const {
     savedObjectsClient,
-    readInterceptor,
     getDefaults,
   } = options;
 
@@ -28,7 +24,6 @@ export function uiSettingsServiceFactory(server, options) {
     type: 'config',
     id: config.get('pkg.version'),
     savedObjectsClient,
-    readInterceptor,
     getDefaults,
   });
 }
