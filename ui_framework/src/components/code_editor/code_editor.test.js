@@ -1,6 +1,6 @@
 import React from 'react';
 import sinon from 'sinon';
-import { mount, render } from 'enzyme';
+import { mount } from 'enzyme';
 import { KuiCodeEditor } from './code_editor';
 import { keyCodes } from '../../services';
 import { requiredProps } from '../../test/required_props';
@@ -20,7 +20,7 @@ describe('KuiCodeEditor', () => {
 
   test('is rendered', () => {
     const component = <KuiCodeEditor {...requiredProps}/>;
-    expect(render(component)).toMatchSnapshot();
+    expect(mount(component).html()).toMatchSnapshot();
   });
 
   describe('hint element', () => {
