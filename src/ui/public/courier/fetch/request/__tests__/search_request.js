@@ -1,15 +1,11 @@
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
+import expect from 'expect.js';
 
 import { SearchRequestProvider } from '../search';
-import { requestQueue } from '../../../_request_queue';
 
 describe('ui/courier/fetch search request', () => {
   beforeEach(ngMock.module('kibana'));
-
-  afterEach(() => {
-    requestQueue.clear();
-  });
 
   describe('#start()', () => {
     it('calls this.source.requestIsStarting(request)', ngMock.inject((Private) => {
