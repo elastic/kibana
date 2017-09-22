@@ -116,6 +116,19 @@ export class KuiContextMenu extends Component {
     this.menu.setAttribute('style', `height: ${height}px`);
   }
 
+  updateFocusedMenuItem() {
+    // When the transition completes focus on a menu item or just the menu itself.
+    if (!this.state.isTransitioning) {
+      this.menuItems = this.currentPanel.querySelectorAll('[data-menu-item]');
+      const focusedMenuItem = this.menuItems[this.state.focusedMenuItemIndex];
+      if (focusedMenuItem) {
+        focusedMenuItem.focus();
+      }
+    } else {
+      this.menu.focus();
+    }
+  }
+
   renderPanel(panelId, transitionType) {
     const panel = this.props.idToPanelMap[panelId];
 
@@ -184,23 +197,20 @@ export class KuiContextMenu extends Component {
 
   componentDidMount() {
     this.updateHeight();
+    this.updateFocusedMenuItem();
   }
 
   componentDidUpdate() {
+    // Make sure we don't steal focus while the ContextMenu is closed.
+    if (!this.props.isVisible) {
+      return;
+    }
+
     if (this.state.isTransitioning) {
       this.updateHeight();
     }
 
-    // When the transition completes focus on a menu item or just the menu itself.
-    if (!this.state.isTransitioning) {
-      this.menuItems = this.currentPanel.querySelectorAll('[data-menu-item]');
-      const focusedMenuItem = this.menuItems[this.state.focusedMenuItemIndex];
-      if (focusedMenuItem) {
-        focusedMenuItem.focus();
-      }
-    } else {
-      this.menu.focus();
-    }
+    this.updateFocusedMenuItem();
   }
 
   componentWillUnmount() {
