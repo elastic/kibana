@@ -28,6 +28,9 @@ export default new Fn({
       help: 'Comma seperated list of fields. Fewer fields will perform better.',
       types: ['string'],
     },
+    metaFields: {
+      help: 'Comma seperated list of meta fields, eg "_index,_type"',
+    },
   },
   type: 'datatable',
   help: 'Query elasticsearch and get back raw documents.',
@@ -63,7 +66,7 @@ export default new Fn({
     return handlers.elasticsearchClient('search', esRequest)
     .then(resp => {
       const flatHits = map(resp.hits.hits, (hit, i) => {
-        return Object.assign(flattenHit(hit), { _rowId: i });
+        return Object.assign(flattenHit(hit, args.metaFields ? args.metaFields.split(',') : []), { _rowId: i });
       });
 
       const columnNames = keys(flatHits[0]);
