@@ -3,5 +3,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./bulk_get'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
+    loadTestFile(require.resolve('./find'));
   });
 }
