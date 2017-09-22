@@ -93,7 +93,7 @@ export default new Element('grid', {
                       >
                         { (!mark && !val.text) &&  <i className={`fa fa-circle`}/>}
                         { mark && <i className={`fa fa-${mark}`}/> }
-                        { val.text && val.text }
+                        { val.text && <div className="canvas__element--grid--series-label">{val.text}</div> }
                       </div>
                     ))}
                   </td>
