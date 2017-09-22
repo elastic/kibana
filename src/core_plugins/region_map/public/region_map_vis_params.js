@@ -1,6 +1,5 @@
 import { uiModules } from 'ui/modules';
 import regionMapVisParamsTemplate from './region_map_vis_params.html';
-import _ from 'lodash';
 
 uiModules.get('kibana/region_map')
   .directive('regionMapVisParams', function (serviceSettings, Notifier) {
@@ -22,7 +21,7 @@ uiModules.get('kibana/region_map')
             const newVectorLayers = $scope.collections.vectorLayers.slice();
             for (let i = 0; i < layersFromService.length; i += 1) {
               const layerFromService = layersFromService[i];
-              const alreadyAdded = newVectorLayers.some((layer) =>_.eq(layerFromService, layer));
+              const alreadyAdded = newVectorLayers.some((layer) => layerFromService.name === layer.name);
               if (!alreadyAdded) {
                 newVectorLayers.push(layerFromService);
               }
