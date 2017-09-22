@@ -50,6 +50,7 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
 
     self.history = [];
     self._fetchStrategy = strategy;
+    self._requestStartHandlers = [];
   }
 
   /*****
@@ -239,6 +240,39 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
    */
   SourceAbstract.prototype.destroy = function () {
     this.cancelQueued();
+    this._requestStartHandlers.length = 0;
+  };
+
+  /**
+   *  Add a handler that will be notified whenever requests start
+   *  @param  {Function} handler
+   *  @return {undefined}
+   */
+  SourceAbstract.prototype.onRequestStart = function (handler) {
+    this._requestStartHandlers.push(handler);
+  };
+
+  /**
+   *  Called by requests of this search source when they are started
+   *  @param  {Courier.Request} request
+   *  @return {Promise<undefined>}
+   */
+  SourceAbstract.prototype.requestIsStarting = function (request) {
+    this.activeFetchCount = (this.activeFetchCount || 0) + 1;
+    this.history = [request];
+
+    return Promise
+      .map(this._requestStartHandlers, fn => fn(this, request))
+      .then(_.noop);
+  };
+
+  /**
+   *  Called by requests of this search source when they are done
+   *  @param  {Courier.Request} request
+   *  @return {undefined}
+   */
+  SourceAbstract.prototype.requestIsStopped = function (/* request */) {
+    this.activeFetchCount -= 1;
   };
 
   /*****
