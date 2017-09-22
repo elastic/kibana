@@ -152,6 +152,8 @@ export class SavedObjectsClient {
       return {};
     }
 
+    // 404 might be because document is missing or index is missing,
+    // don't leak that implementation detail to the user
     const docNotFound = response.result === 'not_found';
     const indexNotFound = response.error && response.error.type === 'index_not_found_exception';
     if (docNotFound || indexNotFound) {
@@ -215,6 +217,8 @@ export class SavedObjectsClient {
 
     const response = await this._withKibanaIndex('search', esOptions);
 
+    // 404 might be because document is missing or index is missing,
+    // don't leak that implementation detail to the user
     if (response.status === 404) {
       return {
         page,
@@ -302,7 +306,16 @@ export class SavedObjectsClient {
     const response = await this._withKibanaIndex('get', {
       id: this._generateEsId(type, id),
       type: this._type,
+      ignore: [404]
     });
+
+    const docNotFound = response.found === false;
+    const indexNotFound = response.status === 404;
+    if (docNotFound || indexNotFound) {
+      // don't leak that implementation details about why there was a 404
+      throw errors.decorateNotFoundError(Boom.notFound());
+    }
+
     const { updated_at: updatedAt } = response._source;
 
     return {
