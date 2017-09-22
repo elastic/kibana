@@ -66,7 +66,6 @@ export class DashboardGrid extends React.Component {
         w: panelLayout.w,
         h: panelLayout.h,
         i: panelLayout.i,
-        version: panelLayout.version
       };
       containerApi.updatePanel(panelUpdated.panelIndex, panelUpdated);
     });
