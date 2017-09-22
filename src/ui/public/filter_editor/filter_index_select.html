@@ -1,0 +1,23 @@
+<ui-select
+  ng-model="indexPatternOption"
+  ui-select-focus-on="focus-index"
+  on-select="selectIndexPattern($select.selected)"
+>
+  <ui-select-match placeholder="Index Patterns...">
+    <span
+      class="uiSelectMatch--ellipsis"
+      tooltip="{{$select.selected.title}}"
+    >
+      {{$select.selected.title}}
+    </span>
+  </ui-select-match>
+  <ui-select-choices
+    class="uiSelectChoices--autoWidth"
+    repeat="option in indexPatternOptions
+      | filter:{ title: $select.search }
+      | orderBy:'title'
+      | sortPrefixFirst:$select.search:'title'"
+  >
+    <div ng-bind-html="option.title | highlight: $select.search"></div>
+  </ui-select-choices>
+</ui-select>

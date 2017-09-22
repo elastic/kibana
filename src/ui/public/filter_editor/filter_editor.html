@@ -43,9 +43,18 @@
         class="kuiFieldGroup kuiVerticalRhythmSmall kuiFieldGroup--alignTop"
         ng-show="!filterEditor.showQueryDslEditor()"
       >
+        <div class="kuiFieldGroupSection">
+          <filter-index-select
+            index-patterns="filterEditor.indexPatterns"
+            index-pattern="filterEditor.indexPattern"
+            on-select="filterEditor.onIndexSelect(indexPattern)"
+          ></filter-index-select>
+        </div>
+
         <div class="kuiFieldGroupSection filterEditor__wideField">
           <filter-field-select
-            index-patterns="filterEditor.indexPatterns"
+            ng-if="filterEditor.indexPattern"
+            index-patterns="[filterEditor.indexPattern]"
             field="filterEditor.field"
             on-select="filterEditor.onFieldSelect(field)"
           ></filter-field-select>
