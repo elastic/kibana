@@ -62,10 +62,10 @@ export {
 
 export {
   KuiGallery,
-  KuiGalleryButton,
-  KuiGalleryButtonIcon,
-  KuiGalleryButtonImage,
-  KuiGalleryButtonLabel,
+  KuiGalleryItem,
+  KuiGalleryItemIcon,
+  KuiGalleryItemImage,
+  KuiGalleryItemLabel,
 } from './gallery';
 
 export {

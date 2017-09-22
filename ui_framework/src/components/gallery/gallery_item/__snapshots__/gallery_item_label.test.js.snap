@@ -1,12 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`renders KuiGalleryButton href 1`] = `
-<a
+exports[`renders KuiGalleryItemLabel 1`] = `
+<div
   aria-label="aria-label"
-  class="kuiGalleryButton testClass1 testClass2"
+  class="kuiGalleryItem__label testClass1 testClass2"
   data-test-subj="test subject string"
-  href="#"
 >
   children
-</a>
+</div>
 `;

@@ -1331,7 +1331,7 @@ main {
       -ms-flex-wrap: wrap;
           flex-wrap: wrap; }
 
-.kuiGalleryButton {
+.kuiGalleryItem {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1359,11 +1359,11 @@ main {
   border: 1px solid #CED5DA;
   border-radius: 4px;
   text-decoration: none; }
-  .kuiGalleryButton:hover {
+  .kuiGalleryItem:hover {
     background-color: #FFFFFF;
     border-color: #00A6FF; }
 
-.kuiGalleryButton__image {
+.kuiGalleryItem__image {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1383,7 +1383,7 @@ main {
 /**
    * 1. Truncate overflowing text.
    */
-.kuiGalleryButton__label {
+.kuiGalleryItem__label {
   font-size: 14px;
   color: #191E23;
   text-align: center;
@@ -1396,7 +1396,7 @@ main {
   text-overflow: ellipsis;
   /* 1 */ }
 
-.kuiGalleryButton__icon {
+.kuiGalleryItem__icon {
   position: absolute;
   top: 5px;
   right: 5px;

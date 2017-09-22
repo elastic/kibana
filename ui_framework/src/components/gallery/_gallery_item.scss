@@ -1,4 +1,4 @@
-.kuiGalleryButton {
+.kuiGalleryItem {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -20,7 +20,7 @@
   }
 }
 
-  .kuiGalleryButton__image {
+  .kuiGalleryItem__image {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -32,7 +32,7 @@
   /**
    * 1. Truncate overflowing text.
    */
-  .kuiGalleryButton__label {
+  .kuiGalleryItem__label {
     font-size: $globalFontSize;
     color: $globalFontColor;
     text-align: center;
@@ -42,7 +42,7 @@
     text-overflow: ellipsis; /* 1 */
   }
 
-  .kuiGalleryButton__icon {
+  .kuiGalleryItem__icon {
     position: absolute;
     top: 5px;
     right: 5px;
