@@ -55,7 +55,6 @@ export default function (plugin, server) {
       .then(waitForEsVersion)
       .then(() => ensureNotTribe(callAdminAsKibanaUser))
       .then(() => ensureAllowExplicitIndex(callAdminAsKibanaUser, config))
-      .then(() => server.runSavedObjectsHealthCheck(plugin.status))
       .then(() => {
         const tribeUrl = config.get('elasticsearch.tribe.url');
         if (tribeUrl) {

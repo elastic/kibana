@@ -75,7 +75,6 @@ describe('plugins/elasticsearch', () => {
             getCluster: sinon.stub().returns(cluster)
           }
         },
-        runSavedObjectsHealthCheck: sinon.stub().returns(Promise.resolve()),
         ext: sinon.stub()
       };
 
@@ -119,7 +118,6 @@ describe('plugins/elasticsearch', () => {
 
           sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('ping'));
           sinon.assert.calledTwice(cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any));
-          sinon.assert.calledOnce(server.runSavedObjectsHealthCheck);
           sinon.assert.notCalled(plugin.status.red);
           sinon.assert.calledOnce(plugin.status.green);
 
@@ -148,7 +146,6 @@ describe('plugins/elasticsearch', () => {
 
           sinon.assert.calledTwice(ping);
           sinon.assert.calledTwice(cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any));
-          sinon.assert.calledOnce(server.runSavedObjectsHealthCheck);
           sinon.assert.calledOnce(plugin.status.green);
           expect(plugin.status.green.args[0][0]).to.be('Kibana index ready');
         });

@@ -51,7 +51,4 @@ export function savedObjectsMixin(kbnServer, server) {
     return savedObjectsClient;
   });
 
-  server.decorate('server', 'runSavedObjectsHealthCheck', async (status) => {
-    await savedObjectsHealthCheck(kbnServer, status);
-  });
 }
