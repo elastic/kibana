@@ -1,5 +1,6 @@
 import alterColumn from './alterColumn/alterColumn';
 import containerStyle from './containerStyle/containerStyle';
+import date from './date/date';
 import droprows from './droprows/droprows';
 import font from './font/font';
 import grid from './grid/grid';
@@ -21,9 +22,11 @@ import timefilter from './timefilter/timefilter';
 import timefilterControl from './timefilterControl/timefilterControl';
 
 
+
 export const commonFunctions = [
   alterColumn,
   containerStyle,
+  date,
   droprows,
   font,
   grid,

@@ -48,5 +48,5 @@ export const ArgAddPopover = ({ options }) => {
 };
 
 ArgAddPopover.propTypes = {
-  options: PropTypes.object,
+  options: PropTypes.array.isRequired,
 };

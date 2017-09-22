@@ -2,7 +2,11 @@ import { get } from 'lodash';
 
 // page getters
 export function getEditing(state) {
-  return get(state, 'transient.editing');
+  return get(state, 'transient.editing', false);
+}
+
+export function getFullscreen(state) {
+  return get(state, 'transient.fullscreen', false);
 }
 
 export function getFunctionDefinitions(state) {

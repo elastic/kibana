@@ -6,6 +6,7 @@ export default (path) => {
     app: {}, // Kibana stuff in here
     transient: {
       editing: true,
+      fullscreen: false,
       selectedElement: null,
       resolvedArgs: {},
       // values in resolvedArgs should live under a unique index so they can be looked up.
