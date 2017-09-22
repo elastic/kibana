@@ -343,6 +343,7 @@ export class SavedObjectsClient {
       type: this._type,
       version: options.version,
       refresh: 'wait_for',
+      ignore: [404],
       body: {
         doc: {
           updated_at: time,
@@ -350,6 +351,11 @@ export class SavedObjectsClient {
         }
       },
     });
+
+    if (response.status === 404) {
+      // don't leak implementation details about why there was a 404
+      throw errors.decorateNotFoundError(Boom.notFound());
+    }
 
     return {
       id,
