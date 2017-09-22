@@ -1,4 +1,5 @@
 import { has, get } from 'lodash';
+import { SavedObjectNotFound } from '../../errors';
 
 export function FilterBarLibMapRangeProvider(Promise, courier) {
   return function (filter) {
@@ -7,13 +8,9 @@ export function FilterBarLibMapRangeProvider(Promise, courier) {
       return Promise.reject(filter);
     }
 
-    return courier
-    .indexPatterns
-    .get(filter.meta.index)
-    .then(function (indexPattern) {
+    function getParams(indexPattern) {
       const type = 'range';
       const key = isScriptedRangeFilter ? filter.meta.field : Object.keys(filter.range)[0];
-      const convert = indexPattern.fields.byName[key].format.getConverterFor('text');
       const params = isScriptedRangeFilter ? filter.script.script.params : filter.range[key];
 
       let left = has(params, 'gte') ? params.gte : params.gt;
@@ -22,9 +19,24 @@ export function FilterBarLibMapRangeProvider(Promise, courier) {
       let right = has(params, 'lte') ? params.lte : params.lt;
       if (right == null) right = Infinity;
 
-      const value = `${convert(left)} to ${convert(right)}`;
+      let value = `${left} to ${right}`;
+      if (indexPattern) {
+        const convert = indexPattern.fields.byName[key].format.getConverterFor('text');
+        value = `${convert(left)} to ${convert(right)}`;
+      }
 
       return { type, key, value, params };
+    }
+
+    return courier
+    .indexPatterns
+    .get(filter.meta.index)
+    .then(getParams)
+    .catch((error) => {
+      if (error instanceof SavedObjectNotFound) {
+        return getParams();
+      }
+      throw error;
     });
 
   };

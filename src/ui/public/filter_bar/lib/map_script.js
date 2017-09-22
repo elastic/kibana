@@ -1,23 +1,15 @@
-export function FilterBarLibMapScriptProvider(Promise, courier) {
+export function FilterBarLibMapScriptProvider(Promise) {
   return function (filter) {
     if (filter.script) {
-      return courier
-      .indexPatterns
-      .get(filter.meta.index).then(function (indexPattern) {
-        const type = 'scripted';
-        const key = filter.meta.field;
-        const field = indexPattern.fields.byName[key];
+      const type = 'scripted';
+      const key = filter.meta.field;
 
-        let value;
-        if (filter.meta.formattedValue) {
-          value = filter.meta.formattedValue;
-        } else {
-          value = filter.script.script.params.value;
-          value = field.format.convert(value);
-        }
+      let value = '';
+      if (filter.meta.formattedValue) {
+        value = filter.meta.formattedValue;
+      }
 
-        return { type, key, value };
-      });
+      return Promise.resolve({ type, key, value });
     }
     return Promise.reject(filter);
   };
