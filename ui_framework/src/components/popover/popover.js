@@ -4,6 +4,8 @@ import React, {
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
+import { cascadingMenuKeyCodes } from '../../services';
+
 import { KuiOutsideClickDetector } from '../outside_click_detector';
 
 import { KuiPanel, SIZES } from '../../components/panel/panel';
@@ -27,6 +29,12 @@ export class KuiPopover extends Component {
       isOpening: false,
     };
   }
+
+  onKeyDown = e => {
+    if (e.keyCode === cascadingMenuKeyCodes.ESCAPE) {
+      this.props.closePopover();
+    }
+  };
 
   componentWillReceiveProps(nextProps) {
     // The popover is being opened.
@@ -106,6 +114,7 @@ export class KuiPopover extends Component {
       <KuiOutsideClickDetector onOutsideClick={closePopover}>
         <div
           className={classes}
+          onKeyDown={this.onKeyDown}
           {...rest}
         >
           {button}
