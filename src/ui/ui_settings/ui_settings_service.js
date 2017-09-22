@@ -1,4 +1,5 @@
 import { defaultsDeep, noop } from 'lodash';
+import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
 
 function hydrateUserSettings(userSettings) {
   return Object.keys(userSettings)
@@ -26,6 +27,7 @@ export class UiSettingsService {
     const {
       type,
       id,
+      buildNum,
       savedObjectsClient,
       readInterceptor = noop,
       // we use a function for getDefaults() so that defaults can be different in
@@ -36,6 +38,7 @@ export class UiSettingsService {
     this._savedObjectsClient = savedObjectsClient;
     this._getDefaults = getDefaults;
     this._readInterceptor = readInterceptor;
+    this._buildNum = buildNum;
     this._type = type;
     this._id = id;
   }
@@ -92,7 +95,26 @@ export class UiSettingsService {
   }
 
   async _write(changes) {
-    await this._savedObjectsClient.update(this._type, this._id, changes);
+    try {
+      await this._savedObjectsClient.update(this._type, this._id, changes);
+    } catch (error) {
+      const { isNotFoundError } = this._savedObjectsClient.errors;
+      if (!isNotFoundError(error)) {
+        throw error;
+      }
+
+      await createOrUpgradeSavedConfig({
+        id: this._id,
+        type: this._type,
+        buildNum: this._buildNum,
+        savedObjectsClient: this._savedObjectsClient,
+        log(...args) {
+          console.log('createOrUpgradeSavedConfig()', ...args);
+        },
+      });
+
+      await this._write(changes);
+    }
   }
 
   async _read(options = {}) {
