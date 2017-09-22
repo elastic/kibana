@@ -9,6 +9,10 @@ export default class extends Component {
     value: ''
   };
 
+  onChange = (value) => {
+    this.setState({ value });
+  };
+
   render() {
     return (
       <KuiCodeEditor
@@ -16,7 +20,7 @@ export default class extends Component {
         theme="github"
         width="100%"
         value={this.state.value}
-        onChange={(value) => this.setState({ value })}
+        onChange={this.onChange}
         setOptions={{ fontSize: '14px' }}
         onBlur={() => console.log('KuiCodeEditor.onBlur() called')}
       />
