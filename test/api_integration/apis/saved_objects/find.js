@@ -83,13 +83,15 @@ export default function ({ getService }) {
     });
 
     describe('without kibana index', () => {
-      it('should return 200 with empty response', async () => {
+      before(async () => (
         // just in case the kibana server has recreated it
         await es.indices.delete({
           index: '.kibana',
           ignore: [404],
-        });
+        })
+      ));
 
+      it('should return 200 with empty response', async () => (
         await supertest
           .get('/api/saved_objects/visualization')
           .expect(200)
@@ -100,8 +102,8 @@ export default function ({ getService }) {
               total: 0,
               saved_objects: []
             });
-          });
-      });
+          })
+      ));
 
       describe('unknown type', () => {
         it('should return 200 with empty response', async () => (

@@ -41,6 +41,14 @@ export default function ({ getService }) {
     });
 
     describe('without kibana index', () => {
+      before(async () => (
+        // just in case the kibana server has recreated it
+        await es.indices.delete({
+          index: '.kibana',
+          ignore: [404],
+        })
+      ));
+
       after(async () => (
         // make sure to delete the invalid kibana index
         await es.indices.delete({ index: '.kibana' })

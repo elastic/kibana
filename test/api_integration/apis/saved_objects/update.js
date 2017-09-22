@@ -59,18 +59,15 @@ export default function ({ getService }) {
     });
 
     describe('without kibana index', () => {
-      after(async () => (
-        // make sure to delete the invalid kibana index
-        await es.indices.delete({ index: '.kibana' })
-      ));
-
-      it('should return generic 404', async () => {
+      before(async () => (
         // just in case the kibana server has recreated it
         await es.indices.delete({
           index: '.kibana',
           ignore: [404],
-        });
+        })
+      ));
 
+      it('should return generic 404', async () => (
         await supertest
           .put(`/api/saved_objects/visualization/dd7caf20-9efd-11e7-acb3-3dab96693fab`)
           .send({
@@ -85,8 +82,8 @@ export default function ({ getService }) {
               error: 'Not Found',
               message: 'Not Found'
             });
-          });
-      });
+          })
+      ));
     });
   });
 }

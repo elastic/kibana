@@ -34,13 +34,15 @@ export default function ({ getService }) {
     });
 
     describe('without kibana index', () => {
-      it('returns generic 404 when kibana index is missing', async () => {
+      before(async () => (
         // just in case the kibana server has recreated it
         await es.indices.delete({
           index: '.kibana',
           ignore: [404],
-        });
+        })
+      ));
 
+      it('returns generic 404 when kibana index is missing', async () => (
         await supertest
           .delete(`/api/saved_objects/dashboard/not-a-real-id`)
           .expect(404)
@@ -50,8 +52,8 @@ export default function ({ getService }) {
               error: 'Not Found',
               message: 'Not Found'
             });
-          });
-      });
+          })
+      ));
     });
   });
 }

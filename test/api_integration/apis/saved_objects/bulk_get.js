@@ -73,13 +73,15 @@ export default function ({ getService }) {
     });
 
     describe('without kibana index', () => {
-      it('should return 200 with individual responses', async () => {
+      before(async () => (
         // just in case the kibana server has recreated it
         await es.indices.delete({
           index: '.kibana',
           ignore: [404],
-        });
+        })
+      ));
 
+      it('should return 200 with individual responses', async () => (
         await supertest
           .post('/api/saved_objects/bulk_get')
           .send(BULK_REQUESTS)
@@ -113,8 +115,8 @@ export default function ({ getService }) {
                 }
               ]
             });
-          });
-      });
+          })
+      ));
     });
   });
 }
