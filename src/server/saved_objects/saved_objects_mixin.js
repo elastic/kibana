@@ -1,4 +1,5 @@
 import { SavedObjectsClient } from './client';
+import { savedObjectsHealthCheck } from './health_check';
 
 import {
   createBulkGetRoute,
@@ -29,7 +30,7 @@ export function savedObjectsMixin(kbnServer, server) {
   server.decorate('server', 'savedObjectsClientFactory', ({ callCluster }) => {
     return new SavedObjectsClient(
       server.config().get('kibana.index'),
-      server.getKibanaIndexMappingsDsl(),
+      kbnServer.savedObjectMappings.getDsl(),
       callCluster
     );
   });
@@ -48,5 +49,9 @@ export function savedObjectsMixin(kbnServer, server) {
 
     savedObjectsClientCache.set(request, savedObjectsClient);
     return savedObjectsClient;
+  });
+
+  server.decorate('server', 'runSavedObjectsHealthCheck', async (status) => {
+    await savedObjectsHealthCheck(kbnServer, status);
   });
 }

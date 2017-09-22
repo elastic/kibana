@@ -1,6 +1,6 @@
 import Boom from 'boom';
 
-import { getProperty } from '../../../../mappings';
+import { getProperty } from '../../../mappings';
 
 export function getSortingParams(mappings, type, sortField, sortOrder) {
   if (!sortField) {
