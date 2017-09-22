@@ -69,7 +69,7 @@ export default function ({ getService }) {
         it('should return 200 with empty response', async () => (
           await supertest
             .get('/api/saved_objects/wigwags?search_fields=a')
-            // .expect(200)
+            .expect(200)
             .then(resp => {
               expect(resp.body).to.eql({
                 page: 1,
@@ -139,7 +139,7 @@ export default function ({ getService }) {
         it('should return 200 with empty response', async () => (
           await supertest
             .get('/api/saved_objects/wigwags?search_fields=a')
-            // .expect(200)
+            .expect(200)
             .then(resp => {
               expect(resp.body).to.eql({
                 page: 1,
