@@ -4,6 +4,8 @@ import React, {
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
+import { cascadingMenuKeyCodes } from '../../services';
+
 import { KuiContextMenuPanel } from './context_menu_panel';
 import { KuiContextMenuItem } from './context_menu_item';
 
@@ -27,13 +29,57 @@ export class KuiContextMenu extends Component {
     super(props);
 
     this.resetTransitionTimeout = undefined;
+    this.menuItems = [];
 
     this.state = {
       outGoingPanelId: undefined,
       currentPanelId: props.initialPanelId,
       transitionDirection: undefined,
+      isTransitioning: false,
+      focusedMenuItemIndex: 0,
     };
   }
+
+  onKeyDown = e => {
+    switch (e.keyCode) {
+      case cascadingMenuKeyCodes.UP:
+        if (this.menuItems.length) {
+          e.preventDefault();
+          const nextFocusedMenuItemIndex = this.state.focusedMenuItemIndex - 1;
+
+          this.setState({
+            focusedMenuItemIndex: nextFocusedMenuItemIndex < 0 ? this.menuItems.length - 1 : nextFocusedMenuItemIndex,
+          });
+        }
+        break;
+
+      case cascadingMenuKeyCodes.DOWN:
+        if (this.menuItems.length) {
+          e.preventDefault();
+          const nextFocusedMenuItemIndex = this.state.focusedMenuItemIndex + 1;
+
+          this.setState({
+            focusedMenuItemIndex: nextFocusedMenuItemIndex > this.menuItems.length - 1 ? 0 : nextFocusedMenuItemIndex,
+          });
+        }
+        break;
+
+      case cascadingMenuKeyCodes.LEFT:
+        e.preventDefault();
+        this.showPreviousPanel();
+        break;
+
+      case cascadingMenuKeyCodes.RIGHT:
+        if (this.menuItems.length) {
+          e.preventDefault();
+          this.menuItems[this.state.focusedMenuItemIndex].click();
+        }
+        break;
+
+      default:
+        break;
+    }
+  };
 
   showPanel(panelId, direction) {
     clearTimeout(this.resetTransitionTimeout);
@@ -42,30 +88,27 @@ export class KuiContextMenu extends Component {
       outGoingPanelId: this.state.currentPanelId,
       currentPanelId: panelId,
       transitionDirection: direction,
+      isTransitioning: true,
     });
 
     // Queue the transition to reset.
     this.resetTransitionTimeout = setTimeout(() => {
       this.setState({
         transitionDirection: undefined,
+        isTransitioning: false,
+        focusedMenuItemIndex: 0,
       });
     }, 250);
   }
 
+  showPreviousPanel = () => {
+    const previousPanelId = this.props.idToPreviousPanelIdMap[this.state.currentPanelId];
+    this.showPanel(previousPanelId, 'previous');
+  };
+
   updateHeight() {
     const height = this.currentPanel.clientHeight;
     this.menu.setAttribute('style', `height: ${height}px`);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    // If the user is opening the context menu, reset the state.
-    if (nextProps.isVisible && !this.props.isVisible) {
-      this.setState({
-        outGoingPanelId: undefined,
-        currentPanelId: nextProps.initialPanelId,
-        transitionDirection: undefined,
-      });
-    }
   }
 
   renderPanel(panelId, transitionType) {
@@ -74,7 +117,6 @@ export class KuiContextMenu extends Component {
     if (!panel) {
       return;
     }
-
 
     const renderItems = items => items.map(item => {
       let onClick;
@@ -95,6 +137,7 @@ export class KuiContextMenu extends Component {
           icon={item.icon}
           onClick={onClick}
           hasPanel={Boolean(item.panel)}
+          data-menu-item
         >
           {item.name}
         </KuiContextMenuItem>
@@ -105,16 +148,21 @@ export class KuiContextMenu extends Component {
 
     let onClose;
 
+    // If there's a previous panel, then we can close the current panel to go back to it.
     if (typeof previousPanelId === 'number') {
       // As above, we need to wait for KuiOutsideClickDetector to complete its logic before
       // re-rendering via showPanel.
       onClose =
-        () => window.requestAnimationFrame(this.showPanel.bind(this, previousPanelId, 'previous'));
+        () => window.requestAnimationFrame(this.showPreviousPanel);
     }
 
     return (
       <KuiContextMenuPanel
-        panelRef={node => { this.currentPanel = node; }}
+        panelRef={node => {
+          if (transitionType === 'in') {
+            this.currentPanel = node;
+          }
+        }}
         title={panel.title}
         onClose={onClose}
         transitionType={transitionType}
@@ -125,12 +173,41 @@ export class KuiContextMenu extends Component {
     );
   }
 
+  componentWillReceiveProps(nextProps) {
+    // If the user is opening the context menu, reset the state.
+    if (nextProps.isVisible && !this.props.isVisible) {
+      this.setState({
+        outGoingPanelId: undefined,
+        currentPanelId: nextProps.initialPanelId,
+        transitionDirection: undefined,
+        focusedMenuItemIndex: 0,
+      });
+    }
+  }
+
   componentDidMount() {
     this.updateHeight();
   }
 
   componentDidUpdate() {
-    this.updateHeight();
+    if (this.state.isTransitioning) {
+      this.updateHeight();
+    }
+
+    // When the transition completes focus on a menu item or just the menu itself.
+    if (!this.state.isTransitioning) {
+      this.menuItems = this.currentPanel.querySelectorAll('[data-menu-item]');
+      const focusedMenuItem = this.menuItems[this.state.focusedMenuItemIndex];
+      if (focusedMenuItem) {
+        focusedMenuItem.focus();
+      }
+    } else {
+      this.menu.focus();
+    }
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this.resetTransitionTimeout);
   }
 
   render() {
@@ -144,7 +221,11 @@ export class KuiContextMenu extends Component {
     } = this.props;
 
     const currentPanel = this.renderPanel(this.state.currentPanelId, 'in');
-    const outGoingPanel = this.renderPanel(this.state.outGoingPanelId, 'out');
+    let outGoingPanel;
+
+    if (this.state.isTransitioning) {
+      outGoingPanel = this.renderPanel(this.state.outGoingPanelId, 'out');
+    }
 
     const classes = classNames('kuiContextMenu', className);
 
@@ -152,6 +233,8 @@ export class KuiContextMenu extends Component {
       <div
         ref={node => { this.menu = node; }}
         className={classes}
+        onKeyDown={this.onKeyDown}
+        tabIndex="0"
         {...rest}
       >
         {outGoingPanel}

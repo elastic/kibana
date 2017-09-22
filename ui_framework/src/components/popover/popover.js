@@ -48,11 +48,15 @@ export const KuiPopover = ({
     </KuiPanel>
   );
 
+  // Make sure that we can't tab to the content of this Popover if it isn't open.
+  const tabIndex = isOpen ? '0' : '-1';
+
   return (
     <KuiOutsideClickDetector onOutsideClick={closePopover}>
       <div
         className={classes}
         {...rest}
+        tabIndex={tabIndex}
       >
         {button}
         {panel}
