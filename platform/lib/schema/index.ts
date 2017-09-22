@@ -332,7 +332,7 @@ function numberToDuration(numberMs: number) {
   if (!Number.isSafeInteger(numberMs) || numberMs < 0) {
     throw new Error(
       `Failed to parse [${numberMs}] as time value. ` +
-      `Value should be a safe positive integer number.`
+        `Value should be a safe positive integer number.`
     );
   }
 

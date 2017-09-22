@@ -78,7 +78,9 @@ test('returns error when not string or positive safe integer', () => {
 
   expect(() => byteSize().validate(Infinity)).toThrowErrorMatchingSnapshot();
 
-  expect(() => byteSize().validate(Math.pow(2, 53))).toThrowErrorMatchingSnapshot();
+  expect(() =>
+    byteSize().validate(Math.pow(2, 53))
+  ).toThrowErrorMatchingSnapshot();
 
   expect(() => byteSize().validate([1, 2, 3])).toThrowErrorMatchingSnapshot();
 

@@ -36,7 +36,7 @@ describe('#defaultValue', () => {
   test('can be a number', () => {
     expect(
       duration({
-        defaultValue: 600,
+        defaultValue: 600
       }).validate(undefined)
     ).toMatchSnapshot();
   });
@@ -49,7 +49,9 @@ test('returns error when not string or non-safe positive integer', () => {
 
   expect(() => duration().validate(Infinity)).toThrowErrorMatchingSnapshot();
 
-  expect(() => duration().validate(Math.pow(2, 53))).toThrowErrorMatchingSnapshot();
+  expect(() =>
+    duration().validate(Math.pow(2, 53))
+  ).toThrowErrorMatchingSnapshot();
 
   expect(() => duration().validate([1, 2, 3])).toThrowErrorMatchingSnapshot();
 
