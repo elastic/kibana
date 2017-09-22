@@ -4,7 +4,6 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'header', 'discover']);
 
   describe('discover app', function describeIndexTests() {
@@ -34,7 +33,6 @@ export default function ({ getService, getPageObjects }) {
           return retry.try(function tryingForTime() {
             return PageObjects.discover.getHitCount()
             .then(function compareData(hitCount) {
-              screenshots.take('Discover-field-data');
               expect(hitCount).to.be(expectedHitCount);
             });
           });
@@ -207,7 +205,6 @@ export default function ({ getService, getPageObjects }) {
           return retry.try(function tryingForTime() {
             return PageObjects.discover.getDocTableIndex(1)
             .then(function (rowData) {
-              screenshots.take('Discover-sort-down');
               expect(rowData).to.be(ExpectedDoc);
             });
           });
@@ -222,7 +219,6 @@ export default function ({ getService, getPageObjects }) {
           return PageObjects.header.getToastMessage();
         })
         .then(function (toastMessage) {
-          screenshots.take('Discover-syntax-error-toast');
           expect(toastMessage).to.contain(expectedError);
         })
         .then(function () {
