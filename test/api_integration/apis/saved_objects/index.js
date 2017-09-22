@@ -5,5 +5,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./find'));
     loadTestFile(require.resolve('./get'));
+    loadTestFile(require.resolve('./update'));
   });
 }
