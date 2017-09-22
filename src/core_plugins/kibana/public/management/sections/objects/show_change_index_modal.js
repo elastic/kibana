@@ -2,7 +2,7 @@ import { ChangeIndexModal } from './change_index_modal';
 import React from 'react';
 import ReactDOM from 'react-dom';
 
-export function showChangeIndexModal(onChange, currentIndexID, objectTitle, indices = []) {
+export function showChangeIndexModal(onChange, conflictedObjects, indices = []) {
   const container = document.createElement('div');
   const closeModal = () => {
     document.body.removeChild(container);
@@ -19,8 +19,7 @@ export function showChangeIndexModal(onChange, currentIndexID, objectTitle, indi
     <ChangeIndexModal
       onChange={onIndexChangeConfirmed}
       onClose={closeModal}
-      currentIndexID={currentIndexID}
-      objectTitle={objectTitle}
+      conflictedObjects={conflictedObjects}
       indices={indices}
     />
   );
