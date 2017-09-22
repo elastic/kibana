@@ -45,10 +45,11 @@ export class KuiContextMenu extends Component {
       case cascadingMenuKeyCodes.UP:
         if (this.menuItems.length) {
           e.preventDefault();
-          const nextFocusedMenuItemIndex = this.state.focusedMenuItemIndex - 1;
-
-          this.setState({
-            focusedMenuItemIndex: nextFocusedMenuItemIndex < 0 ? this.menuItems.length - 1 : nextFocusedMenuItemIndex,
+          this.setState(prevState => {
+            const nextFocusedMenuItemIndex = prevState.focusedMenuItemIndex - 1;
+            return {
+              focusedMenuItemIndex: nextFocusedMenuItemIndex < 0 ? this.menuItems.length - 1 : nextFocusedMenuItemIndex,
+            };
           });
         }
         break;
@@ -56,10 +57,11 @@ export class KuiContextMenu extends Component {
       case cascadingMenuKeyCodes.DOWN:
         if (this.menuItems.length) {
           e.preventDefault();
-          const nextFocusedMenuItemIndex = this.state.focusedMenuItemIndex + 1;
-
-          this.setState({
-            focusedMenuItemIndex: nextFocusedMenuItemIndex > this.menuItems.length - 1 ? 0 : nextFocusedMenuItemIndex,
+          this.setState(prevState => {
+            const nextFocusedMenuItemIndex = prevState.focusedMenuItemIndex + 1;
+            return {
+              focusedMenuItemIndex: nextFocusedMenuItemIndex > this.menuItems.length - 1 ? 0 : nextFocusedMenuItemIndex,
+            };
           });
         }
         break;
@@ -102,8 +104,11 @@ export class KuiContextMenu extends Component {
   }
 
   showPreviousPanel = () => {
+    // If there's a previous panel, then we can close the current panel to go back to it.
     const previousPanelId = this.props.idToPreviousPanelIdMap[this.state.currentPanelId];
-    this.showPanel(previousPanelId, 'previous');
+    if (typeof previousPanelId === 'number') {
+      this.showPanel(previousPanelId, 'previous');
+    }
   };
 
   updateHeight() {
@@ -144,17 +149,9 @@ export class KuiContextMenu extends Component {
       );
     });
 
-    const previousPanelId = this.props.idToPreviousPanelIdMap[panelId];
-
-    let onClose;
-
-    // If there's a previous panel, then we can close the current panel to go back to it.
-    if (typeof previousPanelId === 'number') {
-      // As above, we need to wait for KuiOutsideClickDetector to complete its logic before
-      // re-rendering via showPanel.
-      onClose =
-        () => window.requestAnimationFrame(this.showPreviousPanel);
-    }
+    // As above, we need to wait for KuiOutsideClickDetector to complete its logic before
+    // re-rendering via showPanel.
+    const onClose = () => window.requestAnimationFrame(this.showPreviousPanel);
 
     return (
       <KuiContextMenuPanel
