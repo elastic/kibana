@@ -200,6 +200,7 @@ export class SavedObjectsClient {
       size: perPage,
       from: perPage * (page - 1),
       _source: includedFields(type, fields),
+      ignore: [404],
       body: {
         version: true,
         ...getSearchDsl(this._mappings, {
@@ -213,6 +214,15 @@ export class SavedObjectsClient {
     };
 
     const response = await this._withKibanaIndex('search', esOptions);
+
+    if (response.status === 404) {
+      return {
+        page,
+        per_page: perPage,
+        total: 0,
+        saved_objects: []
+      };
+    }
 
     return {
       page,
