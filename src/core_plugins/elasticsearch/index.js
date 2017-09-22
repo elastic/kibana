@@ -119,9 +119,14 @@ export default function (kibana) {
       createProxy(server, 'POST', '/{index}/_search');
       createProxy(server, 'POST', '/_msearch');
 
+      server.expose('waitUntilReady', () => {
+        return new Promise(resolve => {
+          this.status.once('green', resolve);
+        });
+      });
+
       // Set up the health check service and start it.
-      const { start, waitUntilReady } = healthCheck(this, server);
-      server.expose('waitUntilReady', waitUntilReady);
+      const { start } = healthCheck(this, server);
       start();
     }
   });

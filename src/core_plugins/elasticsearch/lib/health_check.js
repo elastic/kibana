@@ -25,19 +25,6 @@ export default function (plugin, server) {
     });
   }
 
-  function waitUntilReady() {
-    return callAdminAsKibanaUser('cluster.health', {
-      timeout: '5s', // tells es to not sit around and wait forever
-      index: config.get('kibana.index'),
-      ignore: [408]
-    })
-    .then((resp) => {
-      if (!resp || resp.timed_out || resp.status === 'red') {
-        return Promise.delay(REQUEST_DELAY).then(waitUntilReady);
-      }
-    });
-  }
-
   function waitForEsVersion() {
     return ensureEsVersion(server, kibanaVersion.get()).catch(err => {
       plugin.status.red(err);
@@ -100,7 +87,6 @@ export default function (plugin, server) {
   });
 
   return {
-    waitUntilReady: waitUntilReady,
     run: check,
     start: startorRestartChecking,
     stop: stopChecking,

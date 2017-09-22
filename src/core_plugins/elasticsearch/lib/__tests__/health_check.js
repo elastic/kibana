@@ -150,18 +150,5 @@ describe('plugins/elasticsearch', () => {
           expect(plugin.status.green.args[0][0]).to.be('Kibana index ready');
         });
     });
-
-    describe('#waitUntilReady', function () {
-      it('polls health until index is ready', function () {
-        const clusterHealth = cluster.callWithInternalUser.withArgs('cluster.health', sinon.match.any);
-        clusterHealth.onCall(0).returns(Promise.resolve({ timed_out: true }));
-        clusterHealth.onCall(1).returns(Promise.resolve({ status: 'red' }));
-        clusterHealth.onCall(2).returns(Promise.resolve({ status: 'green' }));
-
-        return health.waitUntilReady().then(function () {
-          sinon.assert.calledThrice(clusterHealth);
-        });
-      });
-    });
   });
 });
