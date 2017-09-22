@@ -102,6 +102,54 @@ export default function ({ getService }) {
             });
           });
       });
+
+      describe('unknown type', () => {
+        it('should return 200 with empty response', async () => (
+          await supertest
+            .get('/api/saved_objects/wigwags')
+            .expect(200)
+            .then(resp => {
+              expect(resp.body).to.eql({
+                page: 1,
+                per_page: 20,
+                total: 0,
+                saved_objects: []
+              });
+            })
+        ));
+      });
+
+      describe('page beyond total', () => {
+        it('should return 200 with empty response', async () => (
+          await supertest
+            .get('/api/saved_objects/visualization?page=100&per_page=100')
+            .expect(200)
+            .then(resp => {
+              expect(resp.body).to.eql({
+                page: 100,
+                per_page: 100,
+                total: 0,
+                saved_objects: []
+              });
+            })
+        ));
+      });
+
+      describe('unknown search field', () => {
+        it('should return 200 with empty response', async () => (
+          await supertest
+            .get('/api/saved_objects/wigwags?search_fields=a')
+            // .expect(200)
+            .then(resp => {
+              expect(resp.body).to.eql({
+                page: 1,
+                per_page: 20,
+                total: 0,
+                saved_objects: []
+              });
+            })
+        ));
+      });
     });
   });
 }
