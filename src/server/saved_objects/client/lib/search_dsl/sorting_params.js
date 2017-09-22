@@ -7,6 +7,19 @@ export function getSortingParams(mappings, type, sortField, sortOrder) {
     return {};
   }
 
+  // support sorting in "index order" for efficient scrolling
+  if (sortField === '_doc') {
+    return {
+      sort: [
+        {
+          '_doc': {
+            order: sortOrder
+          }
+        }
+      ]
+    };
+  }
+
   const field = getProperty(mappings, `${type}.${sortField}`);
   if (!field) {
     throw Boom.badRequest(`Unknown sort field ${sortField}`);

@@ -57,8 +57,22 @@ describe('searchDsl/getSortParams', () => {
     });
   });
 
-  describe('search field no direction', () => {
-    describe('search field is simple property', () => {
+  describe('sortField no direction', () => {
+    describe('sortField is _doc', () => {
+      it('returns correct params', () => {
+        expect(getSortingParams(MAPPINGS, 'saved', '_doc'))
+          .to.eql({
+            sort: [
+              {
+                '_doc': {
+                  order: undefined,
+                }
+              }
+            ]
+          });
+      });
+    });
+    describe('sortField is simple property', () => {
       it('returns correct params', () => {
         expect(getSortingParams(MAPPINGS, 'saved', 'title'))
           .to.eql({
@@ -73,7 +87,7 @@ describe('searchDsl/getSortParams', () => {
           });
       });
     });
-    describe('search field is multi-field', () => {
+    describe('sortField is multi-field', () => {
       it('returns correct params', () => {
         expect(getSortingParams(MAPPINGS, 'saved', 'title.raw'))
           .to.eql({
@@ -88,10 +102,33 @@ describe('searchDsl/getSortParams', () => {
           });
       });
     });
+    describe('sortField is unknown', () => {
+      it('throws 400 error', () => {
+        expect(() => getSortingParams(MAPPINGS, 'saved', 'notarealfield'))
+          .to.throwException((error) => {
+            expect(error.message).to.contain('Unknown sort field');
+            expect(error.output).to.have.property('statusCode', 400);
+          });
+      });
+    });
   });
 
-  describe('search with direction', () => {
-    describe('search field is simple property', () => {
+  describe('sortField direction', () => {
+    describe('sortField is _doc', () => {
+      it('returns correct params', () => {
+        expect(getSortingParams(MAPPINGS, 'saved', '_doc', 'asc'))
+          .to.eql({
+            sort: [
+              {
+                '_doc': {
+                  order: 'asc',
+                }
+              }
+            ]
+          });
+      });
+    });
+    describe('sortField is simple property', () => {
       it('returns correct params', () => {
         expect(getSortingParams(MAPPINGS, 'saved', 'title', 'desc'))
           .to.eql({
@@ -106,7 +143,7 @@ describe('searchDsl/getSortParams', () => {
           });
       });
     });
-    describe('search field is multi-field', () => {
+    describe('sortField is multi-field', () => {
       it('returns correct params', () => {
         expect(getSortingParams(MAPPINGS, 'saved', 'title.raw', 'asc'))
           .to.eql({
@@ -118,6 +155,15 @@ describe('searchDsl/getSortParams', () => {
                 }
               }
             ]
+          });
+      });
+    });
+    describe('sortField is unknown', () => {
+      it('throws 400 error', () => {
+        expect(() => getSortingParams(MAPPINGS, 'saved', 'notarealfield', 'desc'))
+          .to.throwException((error) => {
+            expect(error.message).to.contain('Unknown sort field');
+            expect(error.output).to.have.property('statusCode', 400);
           });
       });
     });

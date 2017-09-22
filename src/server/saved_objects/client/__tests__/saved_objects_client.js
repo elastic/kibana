@@ -1,8 +1,9 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
+import { errors as esErrors } from 'elasticsearch';
 import { SavedObjectsClient } from '../saved_objects_client';
 import * as getSearchDslNS from '../lib/search_dsl/search_dsl';
-import { getSearchDsl } from '../lib';
+import { getSearchDsl, errors } from '../lib';
 
 describe('SavedObjectsClient', () => {
   const sandbox = sinon.sandbox.create();
@@ -156,6 +157,25 @@ describe('SavedObjectsClient', () => {
       const args = callAdminCluster.getCall(0).args;
       expect(args[1].id).to.match(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/);
     });
+
+    it('throws decorated es errors', async () => {
+      const stub = new esErrors.Conflict();
+
+      callAdminCluster.onFirstCall()
+        .returns(Promise.reject(stub));
+
+      expect(errors.isConflictError(stub)).to.be(false);
+
+      try {
+        await savedObjectsClient.create('index-pattern', {
+          title: 'Logstash'
+        });
+        throw new Error('expected #create() to reject');
+      } catch (error) {
+        expect(error).to.be(stub);
+        expect(errors.isConflictError(error)).to.be(true);
+      }
+    });
   });
 
   describe('#bulkCreate', () => {
@@ -287,6 +307,26 @@ describe('SavedObjectsClient', () => {
         }
       ]);
     });
+
+    it('throws decorated es errors', async () => {
+      const stub = new esErrors.Conflict();
+
+      callAdminCluster.onFirstCall()
+        .returns(Promise.reject(stub));
+
+      expect(errors.isConflictError(stub)).to.be(false);
+
+      try {
+        await savedObjectsClient.bulkCreate([
+          { type: 'config', id: 'one', attributes: { title: 'Test One' } },
+          { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
+        ]);
+        throw new Error('expected #bulkCreate() to reject');
+      } catch (error) {
+        expect(error).to.be(stub);
+        expect(errors.isConflictError(error)).to.be(true);
+      }
+    });
   });
 
   describe('#delete', () => {
@@ -316,6 +356,23 @@ describe('SavedObjectsClient', () => {
         refresh: 'wait_for',
         index: '.kibana-test'
       });
+    });
+
+    it('throws decorated es errors', async () => {
+      const stub = new esErrors.Conflict();
+
+      callAdminCluster.onFirstCall()
+        .returns(Promise.reject(stub));
+
+      expect(errors.isConflictError(stub)).to.be(false);
+
+      try {
+        await savedObjectsClient.delete('index-pattern', 'logstash-*');
+        throw new Error('expected #delete() to reject');
+      } catch (error) {
+        expect(error).to.be(stub);
+        expect(errors.isConflictError(error)).to.be(true);
+      }
     });
   });
 
@@ -445,6 +502,23 @@ describe('SavedObjectsClient', () => {
       expect(args.id).to.eql('index-pattern:logstash-*');
       expect(args.type).to.eql('doc');
     });
+
+    it('throws decorated es errors', async () => {
+      const stub = new esErrors.Conflict();
+
+      callAdminCluster.onFirstCall()
+        .returns(Promise.reject(stub));
+
+      expect(errors.isConflictError(stub)).to.be(false);
+
+      try {
+        await savedObjectsClient.get('index-pattern', 'logstash-*');
+        throw new Error('expected #get() to reject');
+      } catch (error) {
+        expect(error).to.be(stub);
+        expect(errors.isConflictError(error)).to.be(true);
+      }
+    });
   });
 
   describe('#bulkGet', () => {
@@ -507,6 +581,25 @@ describe('SavedObjectsClient', () => {
         error: { statusCode: 404, message: 'Not found' }
       });
     });
+
+    it('throws decorated es errors', async () => {
+      const stub = new esErrors.Conflict();
+
+      callAdminCluster.onFirstCall()
+        .returns(Promise.reject(stub));
+
+      expect(errors.isConflictError(stub)).to.be(false);
+
+      try {
+        await savedObjectsClient.bulkGet(
+          [{ id: 'good', type: 'config' }, { id: 'bad', type: 'config' }]
+        );
+        throw new Error('expected #bulkGet() to reject');
+      } catch (error) {
+        expect(error).to.be(stub);
+        expect(errors.isConflictError(error)).to.be(true);
+      }
+    });
   });
 
   describe('#update', () => {
@@ -565,6 +658,23 @@ describe('SavedObjectsClient', () => {
         refresh: 'wait_for',
         index: '.kibana-test'
       });
+    });
+
+    it('throws decorated es errors', async () => {
+      const stub = new esErrors.Conflict();
+
+      callAdminCluster.onFirstCall()
+        .returns(Promise.reject(stub));
+
+      expect(errors.isConflictError(stub)).to.be(false);
+
+      try {
+        await savedObjectsClient.update('index-pattern', 'logstash-*', { title: 'Testing' });
+        throw new Error('expected #update() to reject');
+      } catch (error) {
+        expect(error).to.be(stub);
+        expect(errors.isConflictError(error)).to.be(true);
+      }
     });
   });
 });
