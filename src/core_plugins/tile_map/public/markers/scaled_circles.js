@@ -13,9 +13,12 @@ export class ScaledCirclesMarkers extends EventEmitter {
 
     this._valueFormatter = options.valueFormatter;
     this._tooltipFormatter = options.tooltipFormatter;
+    this._opacity = options.opacity;
 
     this._legendColors = null;
     this._legendQuantizer = null;
+
+    this._initLayerControls();
 
     this._popups = [];
 
@@ -38,6 +41,26 @@ export class ScaledCirclesMarkers extends EventEmitter {
     this._leafletLayer.addData(this._geohashGeoJson);
   }
 
+  destroy() {
+    this._opacitySlider.off();
+  }
+
+  _initLayerControls() {
+    this._opacitySlider = $('<input type="range" min="0.1" max="1" step="0.1"/>');
+    this._opacitySlider.val(this._opacity);
+    this._opacitySlider.on('mousemove', (event) => {
+      // disable map panning for range input
+      event.stopPropagation();
+    });
+    this._opacitySlider.on('change input', (event) => {
+      this._leafletLayer.setStyle({
+        opacity: event.target.value,
+        fillOpacity: event.target.value
+      });
+      this.emit('changeOpacity', event.target.value);
+    });
+  }
+
   getLeafletLayer() {
     return this._leafletLayer;
   }
@@ -51,7 +74,7 @@ export class ScaledCirclesMarkers extends EventEmitter {
     this._legendColors = makeCircleMarkerLegendColors(min, max);
     this._legendQuantizer = d3.scale.quantize().domain(quantizeDomain).range(this._legendColors);
 
-    return makeStyleFunction(min, max, this._legendColors, quantizeDomain);
+    return makeStyleFunction(min, max, this._legendColors, quantizeDomain, this._opacity);
   }
 
 
@@ -65,12 +88,13 @@ export class ScaledCirclesMarkers extends EventEmitter {
     return '';
   }
 
-
   appendLegendContents(jqueryDiv) {
 
     if (!this._legendColors || !this._legendQuantizer) {
       return;
     }
+
+    jqueryDiv.append(this._opacitySlider);
 
     const titleText = this.getLabel();
     const $title = $('<div>').addClass('tilemap-legend-title').text(titleText);
@@ -220,7 +244,7 @@ function makeColorDarker(color) {
   return d3.hcl(color).darker(amount).toString();
 }
 
-function makeStyleFunction(min, max, legendColors, quantizeDomain) {
+function makeStyleFunction(min, max, legendColors, quantizeDomain, opacity) {
   const legendQuantizer = d3.scale.quantize().domain(quantizeDomain).range(legendColors);
   return (feature) => {
     const value = _.get(feature, 'properties.value');
@@ -229,8 +253,8 @@ function makeStyleFunction(min, max, legendColors, quantizeDomain) {
       fillColor: color,
       color: makeColorDarker(color),
       weight: 1.5,
-      opacity: 1,
-      fillOpacity: 0.75
+      opacity: opacity,
+      fillOpacity: opacity
     };
   };
 }

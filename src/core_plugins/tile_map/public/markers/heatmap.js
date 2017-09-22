@@ -35,6 +35,8 @@ export class HeatmapMarkers extends EventEmitter {
     this._addTooltips();
   }
 
+  destroy() {}
+
   getBounds() {
     return this._leafletLayer.getBounds();
   }
