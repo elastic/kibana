@@ -52,9 +52,8 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
       let $toggleScope;
 
       $scope.copyToClipboard = (uriescape) => {
-        let text = window.location.origin + window.location.pathname;
-        text += '#/doc/' + $scope.indexPattern.id + '/' + $scope.row._index + '/' +
-          $scope.row._type + '/?id=' + ($scope.row._id || uriescape);
+        let text = `${window.location.origin}${window.location.pathname}`;
+        text += `#/doc/${$scope.indexPattern.id}/${$scope.row._index}/${$scope.row._type}/?id=${$scope.row._id || uriescape}`;
         copyToClipboardService.copyText(text);
       };
 
