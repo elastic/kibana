@@ -21,21 +21,25 @@ export class DashboardPanel extends React.Component {
 
     this.containerApi = getContainerApi();
     this.embeddableHandler = getEmbeddableHandler(panel.type);
-    const editUrl = await this.embeddableHandler.getEditPath(panel.id);
-    const title = await this.embeddableHandler.getTitleFor(panel.id);
 
     // TODO: use redux instead of the isMounted anti-pattern to handle the case when the component is unmounted
     // before the async calls above return. We can then get rid of the eslint disable line. Without redux, there is
     // not a better option, since you aren't supposed to run async calls inside of componentWillMount.
-    if (this._isMounted) {
-      /* eslint-disable react/no-did-mount-set-state */
-      this.setState({ editUrl, title });
 
-      this.destroyEmbeddable = await this.embeddableHandler.render(
-        this.panelElement,
-        panel,
-        this.containerApi);
-    }
+    /* eslint-disable react/no-did-mount-set-state */
+    this.embeddableHandler.getEditPath(panel.id).then(editUrl => {
+      if (this._isMounted) { this.setState({ editUrl }); }
+    });
+
+    /* eslint-disable react/no-did-mount-set-state */
+    this.embeddableHandler.getTitleFor(panel.id).then(title => {
+      if (this._isMounted) { this.setState({ title }); }
+    });
+
+    this.destroyEmbeddable = await this.embeddableHandler.render(
+      this.panelElement,
+      panel,
+      this.containerApi);
   }
 
   isViewOnlyMode() {
