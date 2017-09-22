@@ -1,5 +1,6 @@
 import { uiModules } from 'ui/modules';
 import regionMapVisParamsTemplate from './region_map_vis_params.html';
+import { mapToLayerWithId } from './util';
 
 uiModules.get('kibana/region_map')
   .directive('regionMapVisParams', function (serviceSettings, Notifier) {
@@ -14,26 +15,28 @@ uiModules.get('kibana/region_map')
 
         $scope.collections = $scope.vis.type.editorConfig.collections;
 
+        if ($scope.vis.params.selectedLayer && !$scope.vis.params.selectedLayer._id) {
+          //tracking by id wasn't ideal.
+          $scope.vis.params.selectedLayer = mapToLayerWithId('unknown', $scope.vis.params.selectedLayer);
+        }
+
         $scope.onLayerChange = onLayerChange;
         serviceSettings.getFileLayers()
           .then(function (layersFromService) {
-
-            const newVectorLayers = $scope.collections.vectorLayers.slice();
+            const newVectorLayers = $scope.collections.vectorLayers.map(mapToLayerWithId.bind(null, 'elastic_maps_service'));
             for (let i = 0; i < layersFromService.length; i += 1) {
               const layerFromService = layersFromService[i];
-              const alreadyAdded = newVectorLayers.some((layer) => layerFromService.name === layer.name);
+              const alreadyAdded = newVectorLayers.some((layer) => layerFromService._id === layer._id);
               if (!alreadyAdded) {
                 newVectorLayers.push(layerFromService);
               }
             }
 
             $scope.collections.vectorLayers = newVectorLayers;
-
             if ($scope.collections.vectorLayers[0] && !$scope.vis.params.selectedLayer) {
               $scope.vis.params.selectedLayer = $scope.collections.vectorLayers[0];
               onLayerChange();
             }
-
 
             //the dirty flag is set to true because the change in vector layers config causes an update of the scope.params
             //temp work-around. addressing this issue with the visualize refactor for 6.0
@@ -50,7 +53,9 @@ uiModules.get('kibana/region_map')
           $scope.vis.params.selectedJoinField = $scope.vis.params.selectedLayer.fields[0];
         }
 
-
+        $scope.layerId = function (layer) {
+          return (layer._selfHosted ? 'self_hosted' : 'ems') + '.' + layer.name;
+        };
       }
     };
   });
