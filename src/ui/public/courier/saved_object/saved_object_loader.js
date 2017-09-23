@@ -36,7 +36,7 @@ export class SavedObjectLoader {
   }
 
   urlFor(id) {
-    return this.kbnUrl.eval(`#/${ this.lowercaseType }/{{id}}`, { id: id });
+    return this.kbnUrl.eval(`app/kibana#/${ this.lowercaseType }/{{id}}`, { id: id });
   }
 
   delete(ids) {

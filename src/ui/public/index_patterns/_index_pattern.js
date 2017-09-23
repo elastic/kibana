@@ -79,7 +79,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       throw new SavedObjectNotFound(
         type,
         indexPattern.id,
-        kbnUrl.eval('#/management/kibana/index?id={{id}}&name=', { id: markdownSaveId })
+        kbnUrl.eval('app/kibana#/management/kibana/index?id={{id}}&name=', { id: markdownSaveId })
       );
     }
 

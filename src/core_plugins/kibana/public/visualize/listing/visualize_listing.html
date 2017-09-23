@@ -21,7 +21,7 @@
     <div class="kuiInfoPanel kuiInfoPanel--warning">
       <div class="kuiInfoPanelBody">
         <div class="kuiInfoPanelBody__message">
-          You have {{ listingController.totalItems }} visualizations, but your "listingLimit" setting prevents the table below from displaying more than {{ listingController.listingLimit }}. You can change this setting under <a kbn-href="#/management/kibana/settings" class="kuiLink">Advanced Settings</a>.
+          You have {{ listingController.totalItems }} visualizations, but your "listingLimit" setting prevents the table below from displaying more than {{ listingController.listingLimit }}. You can change this setting under <a href="app/kibana#/management/kibana/settings" class="kuiLink">Advanced Settings</a>.
         </div>
       </div>
     </div>
@@ -53,7 +53,7 @@
         <!-- Create visualization button -->
         <a
           class="kuiButton kuiButton--primary"
-          href="#/visualize/new"
+          href="app/kibana#/visualize/new"
           aria-label="Create new visualization"
           ng-if="listingController.getSelectedItemsCount() === 0"
           tooltip="Create new visualization"
@@ -102,7 +102,7 @@
         <div class="kuiEmptyTablePrompt__actions">
           <a
             class="kuiButton kuiButton--primary kuiButton--iconText"
-            href="#/visualize/new"
+            href="app/kibana#/visualize/new"
           >
             <span class="kuiButton__inner">
               <span class="kuiButton__icon kuiIcon fa-plus"></span>

@@ -90,7 +90,7 @@ uiModules.get('apps/management')
 
       // TODO: Migrate all scope methods to the controller.
       $scope.open = function (item) {
-        kbnUrl.change(item.url.substr(1));
+        kbnUrl.change(item.url);
       };
 
       // TODO: Migrate all scope methods to the controller.

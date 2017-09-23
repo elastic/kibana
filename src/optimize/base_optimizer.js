@@ -100,7 +100,6 @@ export default class BaseOptimizer {
         path: this.env.workingDir,
         filename: '[name].bundle.js',
         sourceMapFilename: '[file].map',
-        publicPath: `${this.urlBasePath || ''}/bundles/`,
         devtoolModuleFilenameTemplate: '[absolute-resource-path]'
       },
 
@@ -125,8 +124,8 @@ export default class BaseOptimizer {
           { test: /\.jade$/, loader: 'jade-loader' },
           { test: /\.json$/, loader: 'json-loader' },
           { test: /\.(html|tmpl)$/, loader: 'raw-loader' },
-          { test: /\.png$/, loader: 'url-loader' },
-          { test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/, loader: 'file-loader' },
+          { test: /\.png$/, loader: 'url-loader?name=./bundles/[hash].[ext]' },
+          { test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/, loader: 'file-loader?name=./bundles/[hash].[ext]' },
           { test: /[\/\\]src[\/\\](core_plugins|ui)[\/\\].+\.js$/, loader: loaderWithSourceMaps('rjs-repack-loader') },
           {
             test: /\.js$/,

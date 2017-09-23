@@ -25,7 +25,7 @@ describe('kbnAccessibleClick directive', () => {
     });
 
     it('when the element is a link with an href', () => {
-      const html = `<a href="#" kbn-accessible-click></a>`;
+      const html = `<a href="app/kibana#discover" kbn-accessible-click></a>`;
       expect(() => {
         $compile(html)($rootScope);
       }).to.throwError(/kbnAccessibleClick doesn't need to be used on a link if it has a href attribute./);

@@ -29,7 +29,7 @@ export function initAngularApi(chrome, internals) {
     .value('chrome', chrome)
     .value('esUrl', (function () {
       const a = document.createElement('a');
-      a.href = chrome.addBasePath('/elasticsearch');
+      a.href = 'elasticsearch';
       return a.href;
     }()))
     .config(chrome.$setupXsrfRequestInterceptor)
@@ -60,7 +60,7 @@ export function initAngularApi(chrome, internals) {
                   The URL has gotten big and may cause Kibana
                   to stop working. Please either enable the
                   <code>state:storeInSessionStorage</code>
-                  option in the <a href="#/management/kibana/settings">advanced
+                  option in the <a href="app/kibana#/management/kibana/settings">advanced
                   settings</a> or simplify the onscreen visuals.
                 </p>
               `

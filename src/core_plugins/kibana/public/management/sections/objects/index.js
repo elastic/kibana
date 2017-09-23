@@ -11,5 +11,5 @@ uiModules.get('apps/management');
 management.getSection('kibana').register('objects', {
   display: 'Saved Objects',
   order: 10,
-  url: '#/management/kibana/objects'
+  url: 'app/kibana#/management/kibana/objects'
 });

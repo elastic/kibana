@@ -143,8 +143,8 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
   $scope.getVisTypeUrl = function (visType) {
     const baseUrl =
       visType.requiresSearch && visType.options.showIndexSelection
-      ? `#${VisualizeConstants.WIZARD_STEP_2_PAGE_PATH}?`
-      : `#${VisualizeConstants.CREATE_PATH}?`;
+      ? `app/kibana#${VisualizeConstants.WIZARD_STEP_2_PAGE_PATH}?`
+      : `app/kibana#${VisualizeConstants.CREATE_PATH}?`;
 
     const params = [`type=${encodeURIComponent(visType.name)}`];
 
@@ -191,7 +191,7 @@ module.controller('VisualizeWizardStep2', function ($route, $scope, timefilter, 
   $scope.step2WithSearchUrl = function (hit) {
     if (addToDashMode) {
       return kbnUrl.eval(
-        `#${VisualizeConstants.CREATE_PATH}` +
+        `app/kibana#${VisualizeConstants.CREATE_PATH}` +
         `?type={{type}}&savedSearchId={{id}}` +
         `&${DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM}`,
         { type: type, id: hit.id }
@@ -199,7 +199,7 @@ module.controller('VisualizeWizardStep2', function ($route, $scope, timefilter, 
     }
 
     return kbnUrl.eval(
-      `#${VisualizeConstants.CREATE_PATH}?type={{type}}&savedSearchId={{id}}`,
+      `app/kibana#${VisualizeConstants.CREATE_PATH}?type={{type}}&savedSearchId={{id}}`,
       { type: type, id: hit.id }
     );
   };
@@ -215,11 +215,11 @@ module.controller('VisualizeWizardStep2', function ($route, $scope, timefilter, 
     if (!pattern) return;
 
     if (addToDashMode) {
-      return `#${VisualizeConstants.CREATE_PATH}` +
+      return `app/kibana#${VisualizeConstants.CREATE_PATH}` +
         `?${DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM}` +
         `&type=${type}&indexPattern=${pattern.id}`;
     }
 
-    return `#${VisualizeConstants.CREATE_PATH}?type=${type}&indexPattern=${pattern.id}`;
+    return `app/kibana#${VisualizeConstants.CREATE_PATH}?type=${type}&indexPattern=${pattern.id}`;
   };
 });

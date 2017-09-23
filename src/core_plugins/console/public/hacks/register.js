@@ -4,5 +4,5 @@ DevToolsRegistryProvider.register(() => ({
   order: 1,
   name: 'console',
   display: 'Console',
-  url: '#/dev_tools/console'
+  url: 'app/kibana#/dev_tools/console'
 }));

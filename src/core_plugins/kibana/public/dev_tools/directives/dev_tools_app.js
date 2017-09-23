@@ -21,7 +21,7 @@ uiModules
     controllerAs: 'kbnDevToolsApp',
     controller() {
       this.devTools = devToolsRegistry.inOrder;
-      this.currentPath = `#${$location.path()}`;
+      this.currentPath = `app/kibana#${$location.path()}`;
     }
   };
 });

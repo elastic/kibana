@@ -47,7 +47,7 @@ uiModules.get('apps/management')
           return {
             id: id,
             title: pattern.get('title'),
-            url: kbnUrl.eval('#/management/kibana/indices/{{id}}', { id: id }),
+            url: kbnUrl.eval('app/kibana#/management/kibana/indices/{{id}}', { id: id }),
             class: 'sidebar-item-title ' + ($scope.editingId === id ? 'active' : ''),
             default: $scope.defaultIndex === id
           };
@@ -62,5 +62,5 @@ uiModules.get('apps/management')
 management.getSection('kibana').register('indices', {
   display: 'Index Patterns',
   order: 0,
-  url: '#/management/kibana/indices/'
+  url: 'app/kibana#/management/kibana/indices/'
 });

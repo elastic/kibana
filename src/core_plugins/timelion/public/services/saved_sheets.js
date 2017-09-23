@@ -16,7 +16,7 @@ savedObjectManagementRegistry.register({
 module.service('savedSheets', function (Promise, SavedSheet, kbnIndex, kbnUrl, $http) {
   const savedSheetLoader = new SavedObjectLoader(SavedSheet, kbnIndex, kbnUrl, $http);
   savedSheetLoader.urlFor = function (id) {
-    return kbnUrl.eval('#/{{id}}', { id: id });
+    return kbnUrl.eval('app/kibana#/{{id}}', { id: id });
   };
 
   // Customize loader properties since adding an 's' on type doesn't work for type 'timelion-sheet'.

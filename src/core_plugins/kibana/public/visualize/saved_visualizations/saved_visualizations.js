@@ -43,7 +43,7 @@ app.service('savedVisualizations', function (Promise, kbnIndex, SavedVis, Privat
   };
 
   saveVisualizationLoader.urlFor = function (id) {
-    return kbnUrl.eval('#/visualize/edit/{{id}}', { id: id });
+    return kbnUrl.eval('app/kibana#/visualize/edit/{{id}}', { id: id });
   };
   return saveVisualizationLoader;
 });

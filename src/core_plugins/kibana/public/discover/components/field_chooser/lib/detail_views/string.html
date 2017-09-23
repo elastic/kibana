@@ -4,7 +4,6 @@
       Top 5 values in
       <span ng-if="!field.details.error">
         <a
-          href=""
           ng-show="!field.indexPattern.metaFields.includes(field.name) && !field.scripted"
           ng-click="onAddFilter('_exists_', field.name, '+')">
           {{::field.details.exists}}
