@@ -11,7 +11,7 @@ import sizeMe from 'react-sizeme';
 const config = { monitorWidth: true };
 let lastValidGridSize = 0;
 
-function ResponsiveGrid({ size, isViewMode, buildLayoutFromPanels, onLayoutChange, children }) {
+function ResponsiveGrid({ size, isViewMode, layout, onLayoutChange, children }) {
   // This is to prevent a bug where view mode changes when the panel is expanded.  View mode changes will trigger
   // the grid to re-render, but when a panel is expanded, the size will be 0. Minimizing the panel won't cause the
   // grid to re-render so it'll show a grid with a width of 0.
@@ -28,7 +28,7 @@ function ResponsiveGrid({ size, isViewMode, buildLayoutFromPanels, onLayoutChang
       cols={DASHBOARD_GRID_COLUMN_COUNT}
       rowHeight={100}
       draggableHandle={isViewMode ? '.doesnt-exist' : '.panel-title'}
-      layout={buildLayoutFromPanels}
+      layout={layout}
       onLayoutChange={onLayoutChange}
       measureBeforeMount={false}
     >
@@ -135,7 +135,7 @@ export class DashboardGrid extends React.Component {
     return (
       <ResponsiveSizedGrid
         isViewMode={isViewMode}
-        buildLayoutFromPanels={this.buildLayoutFromPanels()}
+        layout={this.buildLayoutFromPanels()}
         onLayoutChange={this.onLayoutChange}
       >
         {this.renderDOM()}
