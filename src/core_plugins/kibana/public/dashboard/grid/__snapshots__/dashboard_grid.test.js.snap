@@ -2,7 +2,8 @@
 
 exports[`renders DashboardGrid 1`] = `
 <SizeMe(ResponsiveGrid)
-  buildLayoutFromPanels={
+  isViewMode={false}
+  layout={
     Array [
       Object {
         "h": 6,
@@ -20,7 +21,6 @@ exports[`renders DashboardGrid 1`] = `
       },
     ]
   }
-  isViewMode={true}
   onLayoutChange={[Function]}
 >
   <div>
@@ -82,8 +82,8 @@ exports[`renders DashboardGrid 1`] = `
 
 exports[`renders DashboardGrid with no visualizations 1`] = `
 <SizeMe(ResponsiveGrid)
-  buildLayoutFromPanels={Array []}
-  isViewMode={true}
+  isViewMode={false}
+  layout={Array []}
   onLayoutChange={[Function]}
 />
 `;
