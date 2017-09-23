@@ -3,7 +3,9 @@ module.exports = {
     require.resolve('babel-preset-react'),
   ],
   plugins: [
+    require.resolve('babel-plugin-styled-components'),
     require.resolve('babel-plugin-add-module-exports'),
+
     // stage 3
     require.resolve('babel-plugin-transform-async-generator-functions'),
     require.resolve('babel-plugin-transform-object-rest-spread'),
