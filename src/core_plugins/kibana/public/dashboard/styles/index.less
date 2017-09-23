@@ -276,10 +276,15 @@ dashboard-panel {
       }
     }
 
+    /**
+     * 1. For tile maps, this is necessary to get the panel pop over to show up. Otherwise the tilemap ends up having
+     * a bigger z-index than the pop over.
+     */
     .panel-content {
       display: flex;
       flex: 1 1 100%;
       height: auto;
+      z-index: 1; /* 1. */
     }
   }
 
