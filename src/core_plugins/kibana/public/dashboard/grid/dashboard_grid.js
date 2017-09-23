@@ -11,16 +11,18 @@ import sizeMe from 'react-sizeme';
 const config = { monitorWidth: true };
 
 function ResponsiveGrid({ size, isViewMode, buildLayoutFromPanels, onLayoutChange, children }) {
+  // We can't take advantage of isDraggable or isResizable due to performance concerns:
+  // https://github.com/STRML/react-grid-layout/issues/240
   return (
     <ReactGridLayout
       width={size.width}
-      className="layout"
-      isDraggable={isViewMode}
-      isResizable={isViewMode}
+      className={isViewMode ? 'layout-view' : 'layout-edit'}
+      isDraggable={true}
+      isResizable={true}
       margin={[0, 0]}
       cols={DASHBOARD_GRID_COLUMN_COUNT}
       rowHeight={100}
-      draggableHandle=".panel-title"
+      draggableHandle={isViewMode ? '.doesnt-exist' : '.panel-title'}
       layout={buildLayoutFromPanels}
       onLayoutChange={onLayoutChange}
       measureBeforeMount={false}
@@ -124,7 +126,7 @@ export class DashboardGrid extends React.Component {
 
   render() {
     const { dashboardViewMode } = this.props;
-    const isViewMode = dashboardViewMode === DashboardViewMode.EDIT;
+    const isViewMode = dashboardViewMode === DashboardViewMode.VIEW;
     return (
       <ResponsiveSizedGrid
         isViewMode={isViewMode}

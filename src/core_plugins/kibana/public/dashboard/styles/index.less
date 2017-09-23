@@ -12,11 +12,23 @@
   position: absolute;
 }
 
-/**
- * 1. If we don't give the resizable handler a larger z index value the spy toggle will take over the mouse hover.
- */
-.react-resizable-handle {
-  z-index: 10; /* 1 */
+.layout-edit {
+  /**
+   * 1. If we don't give the resizable handler a larger z index value the spy toggle will take over the mouse hover.
+   */
+  .react-resizable-handle {
+    z-index: 10; /* 1 */
+  }
+}
+
+.layout-view {
+  /**
+   * 1. Due to https://github.com/STRML/react-grid-layout/issues/240 we have to manually hide the resizable
+   * element.
+   */
+  .react-resizable-handle {
+    display: none; /* 1. */
+  }
 }
 
 .exitFullScreenMode {
