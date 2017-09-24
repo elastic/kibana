@@ -17,6 +17,7 @@ export const KuiPanel = ({
   paddingSize,
   hasShadow,
   grow,
+  panelRef,
   ...rest,
 }) => {
 
@@ -32,6 +33,7 @@ export const KuiPanel = ({
 
   return (
     <div
+      ref={panelRef}
       className={classes}
       {...rest}
     >
@@ -47,6 +49,7 @@ KuiPanel.propTypes = {
   hasShadow: PropTypes.bool,
   paddingSize: PropTypes.oneOf(SIZES),
   grow: PropTypes.bool,
+  panelRef: PropTypes.func,
 };
 
 KuiPanel.defaultProps = {

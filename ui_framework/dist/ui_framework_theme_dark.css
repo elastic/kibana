@@ -2869,7 +2869,8 @@ table {
     opacity: 1;
     visibility: visible;
     z-index: 2000;
-    margin-top: 8px; }
+    margin-top: 8px;
+    pointer-events: auto; }
 
 .kuiPopover__panel {
   position: absolute;
@@ -2885,6 +2886,7 @@ table {
           transform-origin: center top;
   opacity: 0;
   visibility: hidden;
+  pointer-events: none;
   margin-top: 24px; }
   .kuiPopover__panel:before {
     position: absolute;

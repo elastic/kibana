@@ -12,6 +12,7 @@
       visibility: visible;
       z-index: $kuiZContentMenu;
       margin-top: $kuiSizeS;
+      pointer-events: auto;
     }
   }
 }
@@ -31,6 +32,7 @@
     transform-origin: center top;
     opacity: 0;
     visibility: hidden;
+    pointer-events: none;
     margin-top: $kuiSizeL;
 
     // This fakes a border on the arrow.
