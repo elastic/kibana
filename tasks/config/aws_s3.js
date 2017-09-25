@@ -2,6 +2,7 @@ export default function (grunt) {
   const { sha, version } = grunt.config.get('build');
   const versionSha = `${version}-${sha.substr(0, 7)}`;
 
+  const ciHash = versionSha.replace('-SNAPSHOT', '');
   const ciOptions = {
     bucket: 'kibana-ci-artifacts',
     region: 'us-west-2'
@@ -30,7 +31,7 @@ export default function (grunt) {
         expand: true,
         cwd: 'test/functional/screenshots',
         src: ['**'],
-        dest: `kibana/${versionSha}/screenshots/`
+        dest: `kibana/${ciHash}/screenshots/`
       }]
     },
     'ci_packages': {
@@ -39,7 +40,7 @@ export default function (grunt) {
         expand: true,
         cwd: 'target',
         src: ['**'],
-        dest: `kibana/${versionSha}/packages/`
+        dest: `kibana/${ciHash}/packages/`
       }]
     },
     'ci_docs': {
@@ -48,7 +49,7 @@ export default function (grunt) {
         expand: true,
         cwd: 'html_docs',
         src: ['**'],
-        dest: `kibana/${versionSha}/html_docs/`
+        dest: `kibana/${ciHash}/html_docs/`
       }]
     }
   };
