@@ -3,17 +3,8 @@ import { set } from 'object-path-immutable';
 
 import {
   fetchedIndexPattern,
-  // setTransientId,
-  // setResultsTransientId,
-  change,
   setAsDefaultIndexPattern,
 } from '../actions/index-pattern-view';
-
-import {
-  changeSort,
-  changeFilter,
-  changePaginate,
-} from '../actions/shared';
 
 import {
   getIndexPatternView,
@@ -28,8 +19,7 @@ const defaultState = {
     id: undefined,
   },
   fieldsTable: {},
-  tabs: undefined,
-  transient: undefined,
+  tabs: {},
 };
 
 export default handleActions({
@@ -37,38 +27,6 @@ export default handleActions({
     return {
       ...state,
       indexPattern,
-    };
-  },
-  // [change](state, { payload: { selectorPath, data } }) {
-  //   return set(state, selectorPath, data);
-  // },
-  [changeSort](state, { payload: { sortBy, sortAsc } }) {
-    return {
-      ...state,
-      fieldsTable: {
-        ...state.fieldsTable,
-        sortBy,
-        sortAsc,
-      },
-    };
-  },
-  [changeFilter](state, { payload: { filterBy } }) {
-    return {
-      ...state,
-      fieldsTable: {
-        ...state.fieldsTable,
-        filterBy,
-      },
-    };
-  },
-  [changePaginate](state, { payload: { page, perPage } }) {
-    return {
-      ...state,
-      fieldsTable: {
-        ...state.fieldsTable,
-        page,
-        perPage,
-      },
     };
   },
   [setAsDefaultIndexPattern](state) {
@@ -83,7 +41,4 @@ export default handleActions({
 }, defaultState);
 
 export const getPathToFields = () => 'indexPattern.fields';
-export const getPathToFieldsTable = () => 'fieldsTable';
-export const getFieldsTable = state => getIndexPatternView(state).fieldsTable;
-export const getPathToTabs = () => 'tabs';
-export const getPathToTransient = () => 'transient';
+export const getTabs = state => getIndexPatternView(state).tabs;

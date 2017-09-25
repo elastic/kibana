@@ -3,7 +3,6 @@ import { set } from 'object-path-immutable';
 
 import {
   fetchedIndexPatterns,
-  change,
 } from '../actions/index-pattern-list';
 
 import {
@@ -23,9 +22,6 @@ export default handleActions({
       ...state,
       indexPatterns,
     };
-  },
-  [change](state, { payload: { selectorPath, data } }) {
-    return set(state, selectorPath, data);
   },
 }, defaultState);
 

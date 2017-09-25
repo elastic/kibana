@@ -78,7 +78,7 @@ const IndexPatternCreate = ({
               }
             </KuiForm>
           </KuiFlexItem>
-          <IndexPatternResults/>
+          <IndexPatternResults isIncludingSystemIndices={isIncludingSystemIndices}/>
         </KuiFlexGroup>
       </KuiPageContentBody>
     </KuiPageContent>

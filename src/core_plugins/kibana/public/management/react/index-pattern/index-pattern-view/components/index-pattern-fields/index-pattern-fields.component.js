@@ -40,13 +40,13 @@ const IndexPatternFields = ({
   numOfPages,
   perPage,
   page,
-  goToPage,
-  changeSort,
+  setPage,
+  setSort,
   sortBy,
   sortAsc,
-  filter,
+  setFilterBy,
   filterBy,
-  changePerPage,
+  setPerPage,
 }) => {
   // console.log('IndexPatternFields', fields.length);
   if (fields === undefined) {
@@ -92,12 +92,12 @@ const IndexPatternFields = ({
                   placeholder="Search..."
                   icon="search"
                   value={filterBy ? filterBy.name : null}
-                  onChange={(e) => filter({ name: e.target.value })}
+                  onChange={(e) => setFilterBy({ name: e.target.value })}
                 />
               </KuiFlexItem>
                <KuiFlexItem>
                 <KuiSelect
-                  onChange={(e) => filter({ type: e.target.value }, fields)}
+                  onChange={(e) => setFilterBy({ type: e.target.value }, fields)}
                   value={filterBy ? filterBy.type : null}
                   options={fieldTypes}
                 />
@@ -110,28 +110,28 @@ const IndexPatternFields = ({
         <KuiTable>
           <KuiTableHeader>
             <KuiTableHeaderCell
-              onSort={() => changeSort('name')}
+              onSort={() => setSort('name')}
               isSorted={sortBy === 'name'}
               isSortAscending={sortAsc}
             >
               Name
             </KuiTableHeaderCell>
             <KuiTableHeaderCell
-              onSort={() => changeSort('type')}
+              onSort={() => setSort('type')}
               isSorted={sortBy === 'type'}
               isSortAscending={sortAsc}
             >
               Type
             </KuiTableHeaderCell>
             <KuiTableHeaderCell
-              onSort={() => changeSort('searchable')}
+              onSort={() => setSort('searchable')}
               isSorted={sortBy === 'searchable'}
               isSortAscending={sortAsc}
             >
               Searchable
             </KuiTableHeaderCell>
             <KuiTableHeaderCell
-              onSort={() => changeSort('aggregatable')}
+              onSort={() => setSort('aggregatable')}
               isSorted={sortBy === 'aggregatable'}
               isSortAscending={sortAsc}
             >
@@ -150,7 +150,7 @@ const IndexPatternFields = ({
             </KuiText>
             <KuiSelect
               value={perPage}
-              onChange={(e) => changePerPage(e.target.value)}
+              onChange={(e) => setPerPage(e.target.value)}
               options={[
                 { value: 1, text: 1 },
                 { value: 10, text: 10 },
@@ -165,7 +165,7 @@ const IndexPatternFields = ({
                 <KuiPagination
                   pageCount={numOfPages}
                   activePage={page}
-                  onPageClick={goToPage}
+                  onPageClick={setPage}
                 />
               </KuiFlexItem>
             : null

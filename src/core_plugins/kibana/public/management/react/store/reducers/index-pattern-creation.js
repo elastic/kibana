@@ -11,7 +11,6 @@ import {
   excludeSystemIndices,
   creatingIndexPattern,
   createdIndexPattern,
-  change,
 } from '../actions/index-pattern-creation';
 
 import {
@@ -19,7 +18,6 @@ import {
 } from '../../reducers';
 
 const defaultState = {
-  transient: {},
   isIncludingSystemIndices: false,
   isCreating: false,
   timeFields: {
@@ -30,7 +28,6 @@ const defaultState = {
     indices: undefined,
     pattern: undefined,
     hasExactMatches: false,
-    table: {},
   }
 }
 
@@ -81,15 +78,6 @@ export default handleActions({
       },
     };
   },
-  [change](state, { payload: { selectorPath, data } }) {
-    if (!selectorPath) {
-      return {
-        ...state,
-        ...data,
-      };
-    }
-    return set(state, selectorPath, data);
-  },
   [creatingIndexPattern](state, action) {
     return {
       ...state,
@@ -119,5 +107,3 @@ export const getCreation = state => {
 };
 export const getIsIncludingSystemIndices = state => getIndexPatternCreate(state).isIncludingSystemIndices;
 export const getResults = state => getIndexPatternCreate(state).results;
-export const getPathToResultsTable = () => 'results.table';
-export const getPathToResults = () => 'results.indices';

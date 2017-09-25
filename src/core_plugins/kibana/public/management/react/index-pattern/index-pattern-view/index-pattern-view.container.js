@@ -12,12 +12,11 @@ import {
   refreshFields,
   deleteIndexPattern,
   setDefaultIndexPattern,
-  change,
+  setSelectedTab,
 }  from 'plugins/kibana/management/react/store/actions/index-pattern-view';
 
 import {
-  getPathToTabs,
-  getPathToTransient,
+  getTabs,
 }  from 'plugins/kibana/management/react/store/reducers/index-pattern-view';
 
 import {
@@ -26,7 +25,8 @@ import {
 
 import store from 'plugins/kibana/management/react/store';
 
-const action = (...args) => store.dispatch(change(...args));
+const getState = () => getListTable(store.getState());
+const setState = (action, ...data) => store.dispatch(action(...data));
 
 export default compose(
   connect(
@@ -34,19 +34,21 @@ export default compose(
     { refreshFields, deleteIndexPattern, setDefaultIndexPattern },
   ),
   wrapWithTabsProps({
-    tabsPath: getPathToTabs(),
-    selectedTab: 'fields',
-    action,
-  }),
-  wrapWithSimpleProps({
-    statePath: getPathToTransient(),
-    action,
-    props: {
-      isShowingRefreshFieldsConfirmation: false,
+    getState: () => getTabs(store.getState()),
+    setState: setState.bind(null, setSelectedTab),
+    defaults: {
+      selectedTab: 'fields',
     },
-    actions: {
-      showRefreshFieldsConfirmation: (props) => ({ isShowingRefreshFieldsConfirmation: true }),
-      hideRefreshFieldsConfirmation: (props) => ({ isShowingRefreshFieldsConfirmation: false }),
-    }
   }),
+  // wrapWithSimpleProps({
+  //   statePath: getPathToTransient(),
+  //   action,
+  //   props: {
+  //     isShowingRefreshFieldsConfirmation: false,
+  //   },
+  //   actions: {
+  //     showRefreshFieldsConfirmation: (props) => ({ isShowingRefreshFieldsConfirmation: true }),
+  //     hideRefreshFieldsConfirmation: (props) => ({ isShowingRefreshFieldsConfirmation: false }),
+  //   }
+  // }),
 )(IndexPatternView);

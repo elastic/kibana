@@ -1,37 +1,13 @@
-import React, { cloneElement } from 'react';
-import { chunk, get } from 'lodash';
+import React from 'react';
 
-const TabsWrap = (props) => {
-  const {
-    children,
-    tabsPath,
-    action,
-    defaultSelectedTab,
-    ...rest,
-  } = props;
+export const wrapWithTabsProps = ({ defaults, getState, setState}) => {
+  return (BaseComponent) => (props) => {
+    const { selectedTab = defaults.selectedTab } = getState();
+    const tabsProps = {
+      selectedTab: selectedTab,
+      changeTab: tab => setState(tab),
+    };
 
-  const {
-    selectedTab,
-  } = get(props, tabsPath, { selectedTab: defaultSelectedTab });
-
-  console.log('TabsWrap', props, selectedTab);
-
-  return cloneElement(children, {
-    ...rest,
-    selectedTab,
-    changeTab: tab => action(tabsPath, { selectedTab: tab }),
-  });
-};
-
-export const wrapWithTabsProps = ({ tabsPath, action, selectedTab }) => {
-  return (BaseComponent) => (props) => (
-    <TabsWrap
-      tabsPath={tabsPath}
-      action={action}
-      defaultSelectedTab={selectedTab}
-      {...props}
-    >
-      <BaseComponent/>
-    </TabsWrap>
-  );
+    return <BaseComponent {...props} {...tabsProps}/>
+  }
 };

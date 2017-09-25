@@ -25,4 +25,3 @@ export const fetchIndexPatterns = createThunk('FETCH_INDEX_PATTERNS',
 );
 
 export const fetchedIndexPatterns = createAction('FETCHED_INDEX_PATTERNS', indexPatterns => ({ indexPatterns }));
-export const change = createAction('CHANGE', (selectorPath, data) => ({ selectorPath, data }));

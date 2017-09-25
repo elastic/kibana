@@ -1,15 +1,9 @@
-import { wrapWithPaginateProps } from './wrap-with-paginate-props';
-import { wrapWithSortProps } from './wrap-with-sort-props';
-import { wrapWithSimpleProps } from './wrap-with-simple-props';
-import { wrapWithFilterProps } from './wrap-with-filter-props';
+import { wrapWithProps } from './wrap-with-props';
 import { wrapWithTabsProps } from './wrap-with-tabs-props';
-import { debug } from './debug';
+import { wrapWithTableProps } from './wrap-with-table-props';
 
 export {
-  wrapWithPaginateProps,
-  wrapWithSimpleProps,
-  wrapWithSortProps,
-  wrapWithFilterProps,
+  wrapWithProps,
   wrapWithTabsProps,
-  debug,
+  wrapWithTableProps,
 };

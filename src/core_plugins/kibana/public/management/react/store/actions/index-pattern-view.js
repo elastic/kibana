@@ -74,4 +74,3 @@ export const setDefaultIndexPattern = createThunk('SET_DEFAULT_INDEX_PATTERN',
 
 export const setAsDefaultIndexPattern = createAction('SET_AS_DEFAULT_INDEX_PATTERN');
 export const fetchedIndexPattern = createAction('FETCHED_INDEX_PATTERN', indexPattern => ({ indexPattern }));
-export const change = createAction('CHANGE', (selectorPath, data) => ({ selectorPath, data }));
