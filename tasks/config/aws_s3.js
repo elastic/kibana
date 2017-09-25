@@ -24,7 +24,7 @@ export default function (grunt) {
         dest: `kibana/staging/${versionSha}/kibana/`
       }]
     },
-    'ci_packages': {
+    'ci_screenshots': {
       options: ciOptions,
       files: [{
         expand: true,
@@ -33,7 +33,7 @@ export default function (grunt) {
         dest: `kibana/${versionSha}/screenshots/`
       }]
     },
-    'ci_screenshots': {
+    'ci_packages': {
       options: ciOptions,
       files:[{
         expand: true,
