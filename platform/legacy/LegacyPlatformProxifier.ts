@@ -4,20 +4,23 @@ import { EventEmitter } from 'events';
 
 import { Logger } from '../logging';
 
+/**
+ * Represents "proxy" between legacy and current platform.
+ * @internal
+ */
 export class LegacyPlatformProxifier extends EventEmitter {
   private server: Server;
   private readonly eventHandlers: any;
 
   constructor(
     private readonly log: Logger,
-    readonly kbnServer: any,
-    private readonly startPlatform: () => Promise<any>,
-    private readonly stopPlatform: () => Promise<any>
+    private readonly startPlatform: () => Promise<void>,
+    private readonly stopPlatform: () => Promise<void>
   ) {
     super();
 
     const forwardEvent = (name: string, ...args: any[]) => {
-      this.log.info(`Event is being forwarded: ${name}`);
+      this.log.debug(`Event is being forwarded: ${name}`);
       this.emit(name, ...args);
     };
 
@@ -36,7 +39,7 @@ export class LegacyPlatformProxifier extends EventEmitter {
   }
 
   async listen(port: number, host: string, callback: Function) {
-    this.log.info(`"listen" has been called (${host}:${port}).`);
+    this.log.debug(`"listen" has been called (${host}:${port}).`);
 
     await this.startPlatform();
 
@@ -44,7 +47,7 @@ export class LegacyPlatformProxifier extends EventEmitter {
   }
 
   async close(callback: Function) {
-    this.log.info('"close" has been called.');
+    this.log.debug('"close" has been called.');
 
     await this.stopPlatform();
 
@@ -79,7 +82,7 @@ export class LegacyPlatformProxifier extends EventEmitter {
   }
 
   proxy(request: IncomingMessage, response: OutgoingMessage) {
-    this.log.info(
+    this.log.debug(
       `Request will be handled by proxy ${request.method}:${request.url}.`
     );
     this.emit('request', request, response);

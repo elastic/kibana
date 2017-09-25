@@ -45,6 +45,9 @@ export class Env {
     return resolve(this.pluginsDir, pluginName, 'target', 'dist');
   }
 
+  /**
+   * @internal
+   */
   getProxy(): LegacyPlatformProxifier | undefined {
     return this.argv.kbnServer && this.argv.kbnServer.newPlatformProxyListener;
   }

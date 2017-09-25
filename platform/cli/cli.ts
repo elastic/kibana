@@ -6,7 +6,11 @@ import { version } from './version';
 import { Env, RawConfigService } from '../config';
 import { Root, OnShutdown } from '../root';
 import { argvToConfigOverrides } from './argvToConfig';
-import { LegacyPlatformProxifier, getLegacyConfig$ } from '../legacy';
+import {
+  LegacyPlatformProxifier,
+  getLegacyConfig$,
+  LegacyKbnServer
+} from '../legacy';
 
 export const parseArgv = (argv: Array<string>) =>
   yargs(argv)
@@ -51,7 +55,7 @@ const run = (argv: { [key: string]: any }) => {
   }
 };
 
-export const runWithLegacyKbnServer = (kbnServer: any) => {
+export const runWithLegacyKbnServer = (kbnServer: LegacyKbnServer) => {
   const root = new Root(
     getLegacyConfig$(kbnServer),
     Env.createDefault({ kbnServer }),
@@ -60,7 +64,6 @@ export const runWithLegacyKbnServer = (kbnServer: any) => {
 
   kbnServer.newPlatformProxyListener = new LegacyPlatformProxifier(
     root.logger.get('legacy-platform-proxifier'),
-    kbnServer,
     () => root.start(),
     () => root.shutdown()
   );
