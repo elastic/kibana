@@ -29,7 +29,8 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
   function setBounds(agg, force) {
     if (agg.buckets._alreadySet && !force) return;
     agg.buckets._alreadySet = true;
-    agg.buckets.setBounds(agg.fieldIsTimeField() && timefilter.getActiveBounds());
+    const timeRange = timefilter.getActiveBounds() || agg.params.timeRange;
+    agg.buckets.setBounds(agg.fieldIsTimeField() && timeRange);
   }
 
 
