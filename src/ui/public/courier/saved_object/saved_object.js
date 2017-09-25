@@ -6,7 +6,7 @@
  * similar to how Backbone Models work.
  *
  * This class seems to interface with ES primarily through the es Angular
- * service and a DocSource instance.
+ * service and the saved object api.
  */
 
 import angular from 'angular';

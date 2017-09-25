@@ -11,6 +11,12 @@ export function FilterBarProvider({ getService }) {
       );
     }
 
+    async removeFilter(key) {
+      const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
+      await remote.moveMouseTo(filterElement);
+      await testSubjects.click(`filter & filter-key-${key} removeFilter-${key}`);
+    }
+
     async toggleFilterEnabled(key) {
       const filterElement = await testSubjects.find(`filter & filter-key-${key}`);
       await remote.moveMouseTo(filterElement);

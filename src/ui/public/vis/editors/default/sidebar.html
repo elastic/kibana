@@ -40,6 +40,7 @@
               ng-class="{'is-vis-editor-sub-nav-link-selected': sidebar.section == tab.name}"
               ng-click="sidebar.section=tab.name"
               kbn-accessible-click
+              data-test-subj="{{ 'visEditorTab' + tab.name }}"
             >
               {{tab.title}}
             </a>
