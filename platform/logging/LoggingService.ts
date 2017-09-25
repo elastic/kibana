@@ -1,4 +1,4 @@
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 
 import { MutableLoggerFactory } from './LoggerFactory';
 import { LoggingConfig } from './LoggingConfig';
@@ -8,7 +8,7 @@ import { LoggingConfig } from './LoggingConfig';
  * pushing updates the the logger factory.
  */
 export class LoggingService {
-  private readonly stop$ = new Subject();
+  private subscription?: Subscription;
 
   constructor(private readonly loggingFactory: MutableLoggerFactory) {}
 
@@ -18,7 +18,7 @@ export class LoggingService {
    * @param config$ Observable that tracks all updates in the logging config.
    */
   upgrade(config$: Observable<LoggingConfig>) {
-    config$.takeUntil(this.stop$).subscribe({
+    this.subscription = config$.subscribe({
       next: config => this.loggingFactory.updateConfig(config)
     });
   }
@@ -28,9 +28,9 @@ export class LoggingService {
    * and close internal logger factory.
    */
   async stop() {
-    this.stop$.next(true);
-    this.stop$.complete();
-
+    if (this.subscription !== undefined) {
+      this.subscription.unsubscribe();
+    }
     await this.loggingFactory.close();
   }
 }
