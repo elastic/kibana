@@ -1,3 +1,3 @@
-export { KuiExpressionItem } from './expressionItem';
-export { KuiExpressionItemButton } from './expressionItemButton';
-export { KuiExpressionItemPopover } from './expressionItemPopover';
+export { KuiExpressionItem } from './expression_item';
+export { KuiExpressionItemButton } from './expression_item_button';
+export { KuiExpressionItemPopover } from './expression_item_popover';
