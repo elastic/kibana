@@ -18,8 +18,10 @@ export default function (grunt) {
       }]
     },
     ci: {
-      bucket: 'kibana-ci-artifacts',
-      region: 'us-west-2',
+      options: {
+        bucket: 'kibana-ci-artifacts',
+        region: 'us-west-2'
+      },
       files: [{
         expand: true,
         cwd: 'test/functional/screenshots',
