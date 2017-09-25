@@ -1,8 +1,15 @@
 import { BehaviorSubject, Observable } from 'rxjs';
-import { isEqual, isPlainObject } from 'lodash';
+import { get, isEqual, isPlainObject, set } from 'lodash';
 import typeDetect from 'type-detect';
 
+import { ConfigPath } from './ConfigService';
 import { getConfigFromFile } from './readConfig';
+
+export interface RawConfig {
+  get(configPath: ConfigPath): any;
+  set(configPath: ConfigPath, value: any): void;
+  getFlattenedPaths(): string[];
+}
 
 // Used to indicate that no config has been received yet
 const notRead = Symbol('config not yet read');
@@ -22,7 +29,7 @@ export class RawConfigService {
     any
   > = new BehaviorSubject(notRead);
 
-  private readonly config$: Observable<{ [key: string]: any }>;
+  private readonly config$: Observable<RawConfig>;
 
   constructor(readonly configFile: string) {
     this.config$ = this.rawConfigFromFile$
@@ -32,12 +39,12 @@ export class RawConfigService {
         // If the raw config is null, e.g. if empty config file, we default to
         // an empty config
         if (rawConfig == null) {
-          return {};
+          return new ObjectToRawConfigAdapter({});
         }
 
         if (isPlainObject(rawConfig)) {
           // TODO Make config consistent, e.g. handle dots in keys
-          return rawConfig;
+          return new ObjectToRawConfigAdapter(rawConfig);
         }
 
         throw new Error(
@@ -69,5 +76,37 @@ export class RawConfigService {
 
   getConfig$() {
     return this.config$;
+  }
+}
+
+class ObjectToRawConfigAdapter implements RawConfig {
+  constructor(private readonly rawValue: { [key: string]: any }) {}
+
+  get(configPath: ConfigPath) {
+    return get(this.rawValue, configPath);
+  }
+
+  set(configPath: ConfigPath, value: any) {
+    set(this.rawValue, configPath, value);
+  }
+
+  getFlattenedPaths() {
+    return [...ObjectToRawConfigAdapter.flattenObjectKeys(this.rawValue)];
+  }
+
+  private static *flattenObjectKeys(
+    obj: { [key: string]: any },
+    accKey: string = ''
+  ): IterableIterator<string> {
+    if (typeof obj !== 'object') {
+      yield accKey;
+    } else {
+      for (const [key, value] of Object.entries(obj)) {
+        yield* ObjectToRawConfigAdapter.flattenObjectKeys(
+          value,
+          (accKey !== '' ? accKey + '.' : '') + key
+        );
+      }
+    }
   }
 }

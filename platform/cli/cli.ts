@@ -1,6 +1,5 @@
 // TODO Fix build system so we can switch these to `import`s
 const yargs = require('yargs');
-import { merge } from 'lodash';
 
 import * as args from './args';
 import { version } from './version';
@@ -28,7 +27,6 @@ const run = (argv: { [key: string]: any }) => {
 
   const env = Env.createDefault(argv);
   const rawConfigService = new RawConfigService(env.getConfigFile());
-  const configOverrides = argvToConfigOverrides(argv);
 
   rawConfigService.loadConfig();
 
@@ -38,7 +36,7 @@ const run = (argv: { [key: string]: any }) => {
 
   const rawConfig$ = rawConfigService
     .getConfig$()
-    .map(rawConfig => merge({}, rawConfig, configOverrides));
+    .map(rawConfig => argvToConfigOverrides(argv, rawConfig));
 
   const root = new Root(rawConfig$, env, onShutdown);
   root.start();

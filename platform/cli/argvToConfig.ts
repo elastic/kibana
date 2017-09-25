@@ -1,18 +1,20 @@
-import { set } from 'lodash';
+import { RawConfig } from '../config';
 
 /**
  * Extract config overrides from argv
  *
  * @param argv Argv object with key/value pairs
  */
-export function argvToConfigOverrides(argv: { [key: string]: any }) {
-  const config = {};
-
+export function argvToConfigOverrides(
+  argv: { [key: string]: any },
+  config: RawConfig
+) {
   if (argv.port != null) {
-    set(config, ['server', 'port'], argv.port);
+    config.set(['server', 'port'], argv.port);
   }
+
   if (argv.host != null) {
-    set(config, ['server', 'host'], argv.host);
+    config.set(['server', 'host'], argv.host);
   }
 
   return config;

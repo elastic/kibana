@@ -1,4 +1,4 @@
 export { ConfigService } from './ConfigService';
-export { RawConfigService } from './RawConfigService';
+export { RawConfigService, RawConfig } from './RawConfigService';
 export { Env } from './Env';
 export { ConfigWithSchema } from './ConfigWithSchema';

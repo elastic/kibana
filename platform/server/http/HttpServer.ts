@@ -48,7 +48,11 @@ export class HttpServer {
 
     this.log.info(`starting http server [${config.host}:${config.port}]`);
 
-    return promisify(this.server.listen).call(this.server, config.port, config.host);
+    return promisify(this.server.listen).call(
+      this.server,
+      config.port,
+      config.host
+    );
   }
 
   stop() {

@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 
 import { Server } from '../server';
-import { ConfigService, Env } from '../config';
+import { ConfigService, Env, RawConfig } from '../config';
 
 import { Logger } from '../logging/Logger';
 import { LoggingService } from '../logging/LoggingService';
@@ -21,7 +21,7 @@ export class Root {
   private readonly loggingService: LoggingService;
 
   constructor(
-    rawConfig$: Observable<{ [key: string]: any }>,
+    rawConfig$: Observable<RawConfig>,
     private readonly env: Env,
     private readonly onShutdown: OnShutdown
   ) {
