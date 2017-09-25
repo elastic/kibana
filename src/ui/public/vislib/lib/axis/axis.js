@@ -77,11 +77,29 @@ export function VislibLibAxisProvider(Private) {
       const position = this.axisConfig.get('position');
       const axisFormatter = this.axisConfig.get('labels.axisFormatter');
 
-      return d3.svg.axis()
+      const axis = d3.svg.axis()
       .scale(scale)
       .tickFormat(axisFormatter)
-      .ticks(this.tickScale(length))
       .orient(position);
+
+      if (!scale.ticks) {
+        // D3 ordinal scales do not support ticks
+        // Its more usable to label every nth tick instead of having an unreadable mess of overlapping labels
+        const numValues = _.get(this.axisConfig, 'values.length', 1);
+        const pixelsPerLabel = length / numValues;
+        const minLabelSize = 12;
+        if (pixelsPerLabel < minLabelSize) {
+          const nthIndex = Math.ceil(minLabelSize / pixelsPerLabel);
+          const nthValues = this.axisConfig.values.filter((value, index) => {
+            return index % nthIndex === 0;
+          });
+          axis.tickValues(nthValues);
+        }
+      } else {
+        axis.ticks(this.tickScale(length));
+      }
+
+      return axis;
     }
 
     getScale() {
