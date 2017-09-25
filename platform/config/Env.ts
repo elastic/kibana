@@ -48,7 +48,7 @@ export class Env {
   /**
    * @internal
    */
-  getProxy(): LegacyPlatformProxifier | undefined {
+  getNewPlatformProxyListener(): LegacyPlatformProxifier | undefined {
     return this.argv.kbnServer && this.argv.kbnServer.newPlatformProxyListener;
   }
 

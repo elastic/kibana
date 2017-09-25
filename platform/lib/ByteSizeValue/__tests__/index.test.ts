@@ -39,7 +39,9 @@ describe('#constructor', () => {
   test('throws if number of bytes is not safe', () => {
     expect(() => new ByteSizeValue(NaN)).toThrowErrorMatchingSnapshot();
     expect(() => new ByteSizeValue(Infinity)).toThrowErrorMatchingSnapshot();
-    expect(() => new ByteSizeValue(Math.pow(2, 53))).toThrowErrorMatchingSnapshot();
+    expect(
+      () => new ByteSizeValue(Math.pow(2, 53))
+    ).toThrowErrorMatchingSnapshot();
   });
 
   test('accepts 0', () => {

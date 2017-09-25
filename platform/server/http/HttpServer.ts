@@ -36,14 +36,14 @@ export class HttpServer {
   async start(config: HttpConfig) {
     this.server = this.initializeServer(config);
 
-    const proxy = this.env.getProxy();
-    if (proxy) {
-      proxy.bind(this.server);
+    const proxyListener = this.env.getNewPlatformProxyListener();
+    if (proxyListener) {
+      proxyListener.bind(this.server);
 
       // We register Kibana proxy middleware right before we start server to allow
       // all new platform plugins register their endpoints, so that kbnServer
       // handles only requests that aren't handled by the new platform.
-      this.app.use((req, res) => proxy.proxy(req, res));
+      this.app.use((req, res) => proxyListener.proxy(req, res));
     }
 
     this.log.info(`starting http server [${config.host}:${config.port}]`);
@@ -77,7 +77,7 @@ export class HttpServer {
         cert: readFileSync(config.ssl.certificate!),
         ca:
           config.ssl.certificateAuthorities &&
-          config.ssl.certificateAuthorities!.map(caFilePath =>
+          config.ssl.certificateAuthorities.map(caFilePath =>
             readFileSync(caFilePath)
           ),
         passphrase: config.ssl.keyPassphrase,
