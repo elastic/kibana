@@ -23,6 +23,8 @@ import {
   KuiPager,
 } from 'ui_framework/components';
 
+import { keyCodes } from 'ui_framework/services';
+
 export class ChangeIndexModal extends React.Component {
   constructor(props) {
     super(props);
@@ -58,7 +60,6 @@ export class ChangeIndexModal extends React.Component {
     event.persist();
     this.setState(state => {
       return {
-        ...state,
         objects: {
           ...state.objects,
           [id]: {
@@ -71,7 +72,7 @@ export class ChangeIndexModal extends React.Component {
   };
 
   onKeyDown = (event) => {
-    if (event.keyCode === 27) { // ESC key
+    if (event.keyCode === keyCodes.ESCAPE) {
       this.props.onClose();
     }
   };
@@ -131,7 +132,10 @@ export class ChangeIndexModal extends React.Component {
           </KuiModalHeader>
           <KuiModalBody>
             <KuiModalBodyText>
-              <p>The following saved objects use index patterns that do not exist.</p>
+              <p>
+                The following saved objects use index patterns that do not exist.
+                Please select the index patterns you&apos;d like re-associated them with.
+              </p>
             </KuiModalBodyText>
             <KuiControlledTable>
               <KuiToolBar>
@@ -161,10 +165,10 @@ export class ChangeIndexModal extends React.Component {
                     Count
                   </KuiTableHeaderCell>
                   <KuiTableHeaderCell>
-                    Sample of Affected Objects
+                    Sample of affected objects
                   </KuiTableHeaderCell>
                   <KuiTableHeaderCell width="200">
-                    New Index
+                    New index pattern
                   </KuiTableHeaderCell>
                 </KuiTableHeader>
                 <KuiTableBody>
@@ -187,7 +191,7 @@ export class ChangeIndexModal extends React.Component {
               data-test-subj="cloneConfirmButton"
               onClick={this.changeIndex}
             >
-              Confirm All Changes
+              Confirm all changes
             </KuiButton>
           </KuiModalFooter>
         </KuiModal>
