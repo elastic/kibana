@@ -19,7 +19,7 @@ export class LegacyPlatformProxifier extends EventEmitter {
   ) {
     super();
 
-    const forwardEvent = (name: string) => (name: string, ...args: any[]) => {
+    const forwardEvent = (name: string) => (...args: any[]) => {
       this.log.debug(`Event is being forwarded: ${name}`);
       this.emit(name, ...args);
     };
