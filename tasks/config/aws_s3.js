@@ -4,12 +4,14 @@ export default function (grunt) {
 
   return {
     options: {
-      bucket: 'download.elasticsearch.org',
       access: 'private',
       uploadConcurrency: 10
     },
 
     staging: {
+      options: {
+        bucket: 'download.elasticsearch.org',
+      },
       files: [{
         expand: true,
         cwd: 'target',
