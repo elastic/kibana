@@ -44,6 +44,13 @@
           on-page-previous="matchingIndicesList.onPagePrevious"
           ng-if="matchingIndicesList.hasMultiplePages()"
         ></tool-bar-pager-buttons>
+
+        <span
+          ng-if="matchingIndicesList.hasMultiplePages()"
+          className="kuiSubduedText"
+        >
+          (representative sample only)
+        </span>
       </div>
     </div>
 
