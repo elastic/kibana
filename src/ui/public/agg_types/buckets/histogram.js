@@ -7,10 +7,9 @@ import intervalTemplate from 'ui/agg_types/controls/number_interval.html';
 import minDocCountTemplate from 'ui/agg_types/controls/min_doc_count.html';
 import extendedBoundsTemplate from 'ui/agg_types/controls/extended_bounds.html';
 
-export function AggTypesBucketsHistogramProvider(Private) {
+export function AggTypesBucketsHistogramProvider(Private, config) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
   const createFilter = Private(AggTypesBucketsCreateFilterHistogramProvider);
-
 
   return new BucketAggType({
     name: 'histogram',
@@ -48,23 +47,43 @@ export function AggTypesBucketsHistogramProvider(Private) {
             })
             .fetchAsRejectablePromise()
             .then((resp) => {
-              aggConfig.params.min = _.get(resp, 'aggregations.minAgg.value');
-              aggConfig.params.max = _.get(resp, 'aggregations.maxAgg.value');
+              aggConfig.params.min = _.get(resp, 'aggregations.minAgg.value', null);
+              aggConfig.params.max = _.get(resp, 'aggregations.maxAgg.value', null);
             });
         },
         write: function (aggConfig, output) {
-          //const interval = aggConfig.buckets.getInterval();
-          output.params.interval = parseFloat(aggConfig.params.interval);
+          let interval = parseFloat(aggConfig.params.interval);
+
+          // ensure interval does not create too many buckets and crash browser
+          if (aggConfig.params.min !== null && aggConfig.params.max != null) {
+            const range = aggConfig.params.max - aggConfig.params.min;
+            const bars = range / interval;
+            if (bars > config.get('histogram:maxBars')) {
+              const minInterval = range / config.get('histogram:maxBars');
+              // Round interval by order of magnitude to provide clean intervals
+              // Always round interval up so there will always be less buckets than histogram:maxBars
+              const orderOfMaginute = Math.pow(10, Math.floor(Math.log10(minInterval)));
+              let roundInterval = orderOfMaginute;
+              while (roundInterval < minInterval) {
+                roundInterval += orderOfMaginute;
+              }
+              interval = roundInterval;
+            }
+          }
+
+          output.params.interval = interval;
         }
       },
 
       {
         name: 'max',
+        default: null,
         write: _.noop,
       },
 
       {
         name: 'min',
+        default: null,
         write: _.noop,
       },
 
