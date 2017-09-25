@@ -54,7 +54,7 @@ const buttonContent = (
         </KuiTitle>
       </KuiFlexItem>
     </KuiFlexGroup>
-    <KuiText size="small">
+    <KuiText size="s">
       <p>
         <KuiTextColor color="subdued">
           Will send a POST request to www.example.com/some/path/

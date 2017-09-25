@@ -89,7 +89,7 @@ export class GuideNav extends Component {
             </Link>
           </KuiFlexItem>
           <KuiFlexItem grow={false}>
-            <KuiText size="small">
+            <KuiText size="s">
               <button
                 to="/"
                 onClick={this.props.onToggleTheme}

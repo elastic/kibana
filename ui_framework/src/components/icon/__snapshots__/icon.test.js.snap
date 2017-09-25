@@ -3,7 +3,7 @@
 exports[`KuiIcon is rendered 1`] = `
 <svg
   aria-label="aria-label"
-  class="kuiIcon testClass1 testClass2"
+  class="kuiIcon testClass1 testClass2 kuiIcon--medium"
   data-test-subj="test subject string"
 >
   <title>
@@ -41,6 +41,19 @@ exports[`KuiIcon renders size medium 1`] = `
 </svg>
 `;
 
+exports[`KuiIcon renders size original 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic"
+>
+  <title>
+    search icon
+  </title>
+  <use
+    href="#search"
+  />
+</svg>
+`;
+
 exports[`KuiIcon renders size xLarge 1`] = `
 <svg
   class="kuiIcon kuiIcon--basic kuiIcon--xLarge"
@@ -67,9 +80,22 @@ exports[`KuiIcon renders size xxLarge 1`] = `
 </svg>
 `;
 
+exports[`KuiIcon renders type apmApp 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    apm app icon
+  </title>
+  <use
+    href="#app_apm"
+  />
+</svg>
+`;
+
 exports[`KuiIcon renders type apps 1`] = `
 <svg
-  class="kuiIcon kuiIcon--basic"
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
 >
   <title>
     apps icon
@@ -82,7 +108,7 @@ exports[`KuiIcon renders type apps 1`] = `
 
 exports[`KuiIcon renders type arrowDown 1`] = `
 <svg
-  class="kuiIcon kuiIcon--basic"
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
 >
   <title>
     arrow down icon
@@ -95,7 +121,7 @@ exports[`KuiIcon renders type arrowDown 1`] = `
 
 exports[`KuiIcon renders type arrowLeft 1`] = `
 <svg
-  class="kuiIcon kuiIcon--basic"
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
 >
   <title>
     arrow left icon
@@ -108,7 +134,7 @@ exports[`KuiIcon renders type arrowLeft 1`] = `
 
 exports[`KuiIcon renders type arrowRight 1`] = `
 <svg
-  class="kuiIcon kuiIcon--basic"
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
 >
   <title>
     arrow right icon
@@ -121,7 +147,7 @@ exports[`KuiIcon renders type arrowRight 1`] = `
 
 exports[`KuiIcon renders type arrowUp 1`] = `
 <svg
-  class="kuiIcon kuiIcon--basic"
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
 >
   <title>
     arrow up icon
@@ -132,9 +158,74 @@ exports[`KuiIcon renders type arrowUp 1`] = `
 </svg>
 `;
 
+exports[`KuiIcon renders type bolt 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    bolt icon
+  </title>
+  <use
+    href="#bolt"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type boxesHorizontal 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    boxes horizontal icon
+  </title>
+  <use
+    href="#boxes_horizontal"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type boxesVertical 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    boxes vertical icon
+  </title>
+  <use
+    href="#boxes_vertical"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type brush 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    brush icon
+  </title>
+  <use
+    href="#brush"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type bullseye 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    bullseye icon
+  </title>
+  <use
+    href="#bullseye"
+  />
+</svg>
+`;
+
 exports[`KuiIcon renders type check 1`] = `
 <svg
-  class="kuiIcon kuiIcon--basic"
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
 >
   <title>
     check icon
@@ -145,9 +236,61 @@ exports[`KuiIcon renders type check 1`] = `
 </svg>
 `;
 
+exports[`KuiIcon renders type clock 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    clock icon
+  </title>
+  <use
+    href="#clock"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type console 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    console icon
+  </title>
+  <use
+    href="#console"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type controlsHorizontal 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    controls horizontal icon
+  </title>
+  <use
+    href="#controls_horizontal"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type controlsVertical 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    controls vertical icon
+  </title>
+  <use
+    href="#controls_vertical"
+  />
+</svg>
+`;
+
 exports[`KuiIcon renders type cross 1`] = `
 <svg
-  class="kuiIcon kuiIcon--basic"
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
 >
   <title>
     cross icon
@@ -160,7 +303,7 @@ exports[`KuiIcon renders type cross 1`] = `
 
 exports[`KuiIcon renders type dashboardApp 1`] = `
 <svg
-  class="kuiIcon kuiIcon--basic"
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
 >
   <title>
     dashboard app icon
@@ -173,7 +316,7 @@ exports[`KuiIcon renders type dashboardApp 1`] = `
 
 exports[`KuiIcon renders type devToolsApp 1`] = `
 <svg
-  class="kuiIcon kuiIcon--basic"
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
 >
   <title>
     dev tools app icon
@@ -186,7 +329,7 @@ exports[`KuiIcon renders type devToolsApp 1`] = `
 
 exports[`KuiIcon renders type discoverApp 1`] = `
 <svg
-  class="kuiIcon kuiIcon--basic"
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
 >
   <title>
     discover app icon
@@ -197,9 +340,61 @@ exports[`KuiIcon renders type discoverApp 1`] = `
 </svg>
 `;
 
+exports[`KuiIcon renders type document 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    document icon
+  </title>
+  <use
+    href="#document"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type dot 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    dot icon
+  </title>
+  <use
+    href="#dot"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type fullScreen 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    full screen icon
+  </title>
+  <use
+    href="#full_screen"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type gear 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    gear icon
+  </title>
+  <use
+    href="#gear"
+  />
+</svg>
+`;
+
 exports[`KuiIcon renders type graphApp 1`] = `
 <svg
-  class="kuiIcon kuiIcon--basic"
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
 >
   <title>
     graph app icon
@@ -210,9 +405,22 @@ exports[`KuiIcon renders type graphApp 1`] = `
 </svg>
 `;
 
+exports[`KuiIcon renders type grid 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    grid icon
+  </title>
+  <use
+    href="#grid"
+  />
+</svg>
+`;
+
 exports[`KuiIcon renders type help 1`] = `
 <svg
-  class="kuiIcon kuiIcon--basic"
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
 >
   <title>
     help icon
@@ -223,22 +431,48 @@ exports[`KuiIcon renders type help 1`] = `
 </svg>
 `;
 
-exports[`KuiIcon renders type logoKibana 1`] = `
+exports[`KuiIcon renders type link 1`] = `
 <svg
-  class="kuiIcon kuiIcon--basic"
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
 >
   <title>
-    kibana logo icon
+    link icon
   </title>
   <use
-    href="#logo"
+    href="#link"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type list 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    list icon
+  </title>
+  <use
+    href="#list"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type listAdd 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    list add icon
+  </title>
+  <use
+    href="#list_add"
   />
 </svg>
 `;
 
 exports[`KuiIcon renders type lock 1`] = `
 <svg
-  class="kuiIcon kuiIcon--basic"
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
 >
   <title>
     lock icon
@@ -249,9 +483,139 @@ exports[`KuiIcon renders type lock 1`] = `
 </svg>
 `;
 
+exports[`KuiIcon renders type loggingApp 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    logging app icon
+  </title>
+  <use
+    href="#app_logging"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type logoBeats 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    logo beats icon
+  </title>
+  <use
+    href="#logo_beats"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type logoCloud 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    logo cloud icon
+  </title>
+  <use
+    href="#logo_cloud"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type logoElasticStack 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    logo elastic stack icon
+  </title>
+  <use
+    href="#logo_elastic_stack"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type logoGmail 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    logo gmail icon
+  </title>
+  <use
+    href="#logo_gmail"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type logoKibana 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    logo kibana icon
+  </title>
+  <use
+    href="#logo"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type logoLogstash 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    logo logstash icon
+  </title>
+  <use
+    href="#logo_logstash"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type logoSlack 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    logo slack icon
+  </title>
+  <use
+    href="#logo_slack"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type logoWebhook 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    logo webhook icon
+  </title>
+  <use
+    href="#logo_webhook"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type logoXpack 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    logo xpack icon
+  </title>
+  <use
+    href="#logo_xpack"
+  />
+</svg>
+`;
+
 exports[`KuiIcon renders type machineLearningApp 1`] = `
 <svg
-  class="kuiIcon kuiIcon--basic"
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
 >
   <title>
     machine learning app icon
@@ -262,9 +626,61 @@ exports[`KuiIcon renders type machineLearningApp 1`] = `
 </svg>
 `;
 
+exports[`KuiIcon renders type mapMarker 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    map marker icon
+  </title>
+  <use
+    href="#map_marker"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type monitoringApp 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    monitoring app icon
+  </title>
+  <use
+    href="#app_monitoring"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type pencil 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    pencil icon
+  </title>
+  <use
+    href="#pencil"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type plusInCircle 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    plus in circle icon
+  </title>
+  <use
+    href="#plus_in_circle"
+  />
+</svg>
+`;
+
 exports[`KuiIcon renders type search 1`] = `
 <svg
-  class="kuiIcon kuiIcon--basic"
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
 >
   <title>
     search icon
@@ -275,9 +691,22 @@ exports[`KuiIcon renders type search 1`] = `
 </svg>
 `;
 
+exports[`KuiIcon renders type share 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    share icon
+  </title>
+  <use
+    href="#share"
+  />
+</svg>
+`;
+
 exports[`KuiIcon renders type sortDown 1`] = `
 <svg
-  class="kuiIcon kuiIcon--basic"
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
 >
   <title>
     sort down icon
@@ -290,7 +719,7 @@ exports[`KuiIcon renders type sortDown 1`] = `
 
 exports[`KuiIcon renders type sortUp 1`] = `
 <svg
-  class="kuiIcon kuiIcon--basic"
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
 >
   <title>
     sort up icon
@@ -301,9 +730,35 @@ exports[`KuiIcon renders type sortUp 1`] = `
 </svg>
 `;
 
+exports[`KuiIcon renders type starEmpty 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    star empty icon
+  </title>
+  <use
+    href="#star_empty"
+  />
+</svg>
+`;
+
+exports[`KuiIcon renders type tear 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    tear icon
+  </title>
+  <use
+    href="#tear"
+  />
+</svg>
+`;
+
 exports[`KuiIcon renders type timelionApp 1`] = `
 <svg
-  class="kuiIcon kuiIcon--basic"
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
 >
   <title>
     timelion app icon
@@ -314,9 +769,22 @@ exports[`KuiIcon renders type timelionApp 1`] = `
 </svg>
 `;
 
+exports[`KuiIcon renders type trash 1`] = `
+<svg
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
+>
+  <title>
+    trash icon
+  </title>
+  <use
+    href="#trash"
+  />
+</svg>
+`;
+
 exports[`KuiIcon renders type user 1`] = `
 <svg
-  class="kuiIcon kuiIcon--basic"
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
 >
   <title>
     user icon
@@ -329,7 +797,7 @@ exports[`KuiIcon renders type user 1`] = `
 
 exports[`KuiIcon renders type visualizeApp 1`] = `
 <svg
-  class="kuiIcon kuiIcon--basic"
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
 >
   <title>
     visualize app icon
@@ -342,7 +810,7 @@ exports[`KuiIcon renders type visualizeApp 1`] = `
 
 exports[`KuiIcon title defaults to a humanized version of the type 1`] = `
 <svg
-  class="kuiIcon kuiIcon--basic"
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
 >
   <title>
     dashboard app icon
@@ -355,7 +823,7 @@ exports[`KuiIcon title defaults to a humanized version of the type 1`] = `
 
 exports[`KuiIcon title is rendered 1`] = `
 <svg
-  class="kuiIcon kuiIcon--basic"
+  class="kuiIcon kuiIcon--basic kuiIcon--medium"
 >
   <title>
     a custom title

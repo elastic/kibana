@@ -1,45 +1,63 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`renders KuiConfirmModal 1`] = `
-<div
-  aria-label="aria-label"
-  class="kuiModal testClass1 testClass2"
-  data-tests-subj="test subject string"
-  style="width:450px;"
->
+<div>
   <div
-    class="kuiModalHeader"
+    aria-label="aria-label"
+    class="kuiModal kuiModal--confirmation testClass1 testClass2"
+    data-test-subj="test subject string"
+    tabindex="0"
   >
     <div
-      class="kuiModalHeader__title"
-      data-test-subj="confirmModalTitleText"
+      class="kuiModalHeader"
     >
-      A confirmation modal
+      <div
+        class="kuiModalHeader__title"
+        data-test-subj="confirmModalTitleText"
+      >
+        A confirmation modal
+      </div>
     </div>
-  </div>
-  <div
-    class="kuiModalBody"
-  >
     <div
-      class="kuiModalBodyText"
-      data-test-subj="confirmModalBodyText"
+      class="kuiModalBody"
     >
-      This is a confirmation modal example
+      <div
+        class="kuiText"
+        data-test-subj="confirmModalBodyText"
+      >
+        <p>
+          This is a confirmation modal example
+        </p>
+      </div>
     </div>
-  </div>
-  <div
-    class="kuiModalFooter"
-  >
-    <button
-      data-test-subj="confirmModalCancelButton"
+    <div
+      class="kuiModalFooter"
     >
-      Cancel Button Text
-    </button>
-    <button
-      data-test-subj="confirmModalConfirmButton"
-    >
-      Confirm Button Text
-    </button>
+      <button
+        class="kuiButtonEmpty kuiButtonEmpty--primary kuiButtonEmpty--small"
+        data-test-subj="confirmModalCancelButton"
+      >
+        <span
+          class="kuiButtonEmpty__content"
+        >
+          <span>
+            Cancel Button Text
+          </span>
+        </span>
+      </button>
+      <button
+        class="kuiButton kuiButton--primary kuiButton--small kuiButton--fill"
+        data-test-subj="confirmModalConfirmButton"
+      >
+        <span
+          class="kuiButton__content"
+        >
+          <span>
+            Confirm Button Text
+          </span>
+        </span>
+      </button>
+    </div>
   </div>
 </div>
 `;

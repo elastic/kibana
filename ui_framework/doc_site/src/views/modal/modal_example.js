@@ -12,25 +12,49 @@ import {
   KuiCode,
 } from '../../../../components';
 
-import { ConfirmModalExample } from './confirm_modal_example';
-const showConfirmModalSource = require('!!raw!./confirm_modal_example');
-const showConfirmModalHtml = renderToHtml(ConfirmModalExample);
+import { ModalExample } from './modal';
+const modalSource = require('!!raw!./modal');
+const modalHtml = renderToHtml(ModalExample);
+
+import { ConfirmModalExample } from './confirm_modal';
+const confirmModalSource = require('!!raw!./confirm_modal');
+const confirmModalHtml = renderToHtml(ConfirmModalExample);
 
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
-      title="Pop up Confirmation Modal with Overlay"
+      title="Modal"
       source={[{
         type: GuideSectionTypes.JS,
-        code: showConfirmModalSource,
+        code: modalSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: showConfirmModalHtml,
+        code: modalHtml,
       }]}
       text={
         <p>
-          A fixed <KuiCode>KuiConfirmModal</KuiCode> loaded with a mask through
-          click events.
+          Use a <KuiCode>KuiModal</KuiCode> to temporarily escape the current UX and create a
+          another UX within it.
+        </p>
+      }
+      demo={
+        <ModalExample />
+      }
+    />
+
+    <GuideSection
+      title="Confirm Modal"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: confirmModalSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: confirmModalHtml,
+      }]}
+      text={
+        <p>
+          Use the <KuiCode>KuiConfirmModal</KuiCode> to ask the user to confirm a decision,
+          typically one which is destructive and potentially regrettable.
         </p>
       }
       demo={

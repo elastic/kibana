@@ -25,7 +25,7 @@ export default props => (
       title="Try not to stuff these in loops"
       type="warning"
     >
-      <KuiText size="small">
+      <KuiText size="s">
         <p>
           This component is handy for setting space between two different
           components, be it a block level element or two pieces of isolated text. You

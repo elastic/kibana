@@ -5,9 +5,6 @@ exports[`KuiPopover anchorPosition defaults to center 1`] = `
   class="kuiPopover"
 >
   <button />
-  <div
-    class="kuiPopover__body"
-  />
 </div>
 `;
 
@@ -16,9 +13,6 @@ exports[`KuiPopover anchorPosition left is rendered 1`] = `
   class="kuiPopover kuiPopover--anchorLeft"
 >
   <button />
-  <div
-    class="kuiPopover__body"
-  />
 </div>
 `;
 
@@ -27,9 +21,6 @@ exports[`KuiPopover anchorPosition right is rendered 1`] = `
   class="kuiPopover kuiPopover--anchorRight"
 >
   <button />
-  <div
-    class="kuiPopover__body"
-  />
 </div>
 `;
 
@@ -38,11 +29,6 @@ exports[`KuiPopover children is rendered 1`] = `
   class="kuiPopover"
 >
   <button />
-  <div
-    class="kuiPopover__body"
-  >
-    Children
-  </div>
 </div>
 `;
 
@@ -53,9 +39,6 @@ exports[`KuiPopover is rendered 1`] = `
   data-test-subj="test subject string"
 >
   <button />
-  <div
-    class="kuiPopover__body"
-  />
 </div>
 `;
 
@@ -64,19 +47,18 @@ exports[`KuiPopover isOpen defaults to false 1`] = `
   class="kuiPopover"
 >
   <button />
-  <div
-    class="kuiPopover__body"
-  />
 </div>
 `;
 
 exports[`KuiPopover isOpen renders true 1`] = `
 <div
-  class="kuiPopover kuiPopover-isOpen"
+  class="kuiPopover"
 >
   <button />
-  <div
-    class="kuiPopover__body"
-  />
+  <div>
+    <div
+      class="kuiPanel kuiPanel--paddingMedium kuiPanel--shadow kuiPopover__panel"
+    />
+  </div>
 </div>
 `;

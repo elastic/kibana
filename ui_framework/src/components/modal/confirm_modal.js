@@ -1,14 +1,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import classnames from 'classnames';
 
 import { KuiModal } from './modal';
 import { KuiModalFooter } from './modal_footer';
 import { KuiModalHeader } from './modal_header';
 import { KuiModalHeaderTitle } from './modal_header_title';
 import { KuiModalBody } from './modal_body';
-import { KuiModalBodyText } from './modal_body_text';
-import { KuiButton, KuiButtonEmpty } from '../../components/';
-import { keyCodes } from '../../services';
+import {
+  KuiButton,
+  KuiButtonEmpty,
+  KuiText,
+} from '../../components/';
 
 export const CONFIRM_BUTTON = 'confirm';
 export const CANCEL_BUTTON = 'cancel';
@@ -19,47 +22,50 @@ const CONFIRM_MODAL_BUTTONS = [
 ];
 
 export function KuiConfirmModal({
-    message,
-    title,
-    onCancel,
-    onConfirm,
-    cancelButtonText,
-    confirmButtonText,
-    className,
-    defaultFocusedButton,
-    ...rest,
-  }) {
+  children,
+  title,
+  onCancel,
+  onConfirm,
+  cancelButtonText,
+  confirmButtonText,
+  className,
+  defaultFocusedButton,
+  ...rest,
+}) {
+  const classes = classnames('kuiModal--confirmation', className);
 
-  const onKeyDown = event => {
-    // Treat the 'esc' key as a cancel indicator.
-    if (event.keyCode === keyCodes.ESCAPE) {
-      onCancel();
-    }
-  };
+  let modalTitle;
 
-  const ariaLabel = rest['aria-label'];
-  const dataTestSubj = rest['data-test-subj'];
+  if (title) {
+    modalTitle = (
+      <KuiModalHeader>
+        <KuiModalHeaderTitle data-test-subj="confirmModalTitleText">
+          {title}
+        </KuiModalHeaderTitle>
+      </KuiModalHeader>
+    );
+  }
+
+  let message;
+
+  if (typeof children === 'string') {
+    message = <p>{children}</p>;
+  } else {
+    message = children;
+  }
+
   return (
     <KuiModal
-      style={{ 'width': '450px' }}
-      data-tests-subj={dataTestSubj}
-      aria-label={ariaLabel}
-      className={className}
-      onKeyDown={onKeyDown}
+      className={classes}
+      onClose={onCancel}
+      {...rest}
     >
-      {
-        title ?
-          <KuiModalHeader>
-            <KuiModalHeaderTitle data-test-subj="confirmModalTitleText">
-              { title }
-            </KuiModalHeaderTitle>
-          </KuiModalHeader>
-          : null
-      }
+      {modalTitle}
+
       <KuiModalBody>
-        <KuiModalBodyText data-test-subj="confirmModalBodyText">
-          { message }
-        </KuiModalBodyText>
+        <KuiText data-test-subj="confirmModalBodyText">
+          {message}
+        </KuiText>
       </KuiModalBody>
 
       <KuiModalFooter>
@@ -67,11 +73,11 @@ export function KuiConfirmModal({
           autoFocus={defaultFocusedButton === CANCEL_BUTTON}
           data-test-subj="confirmModalCancelButton"
           onClick={onCancel}
-          type="danger"
           size="small"
         >
           {cancelButtonText}
         </KuiButtonEmpty>
+
         <KuiButton
           autoFocus={defaultFocusedButton === CONFIRM_BUTTON}
           data-test-subj="confirmModalConfirmButton"
@@ -87,14 +93,12 @@ export function KuiConfirmModal({
 }
 
 KuiConfirmModal.propTypes = {
-  message: PropTypes.string,
+  children: PropTypes.node,
   title: PropTypes.string,
   cancelButtonText: PropTypes.string,
   confirmButtonText: PropTypes.string,
   onCancel: PropTypes.func,
   onConfirm: PropTypes.func,
-  dataTestSubj: PropTypes.string,
-  ariaLabel: PropTypes.string,
   className: PropTypes.string,
   defaultFocusedButton: PropTypes.oneOf(CONFIRM_MODAL_BUTTONS)
 };
