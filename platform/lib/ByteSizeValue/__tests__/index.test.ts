@@ -33,23 +33,13 @@ describe('parsing units', () => {
 
 describe('#constructor', () => {
   test('throws if number of bytes is negative', () => {
-    expect(() => new ByteSizeValue(-1024)).toThrowError(
-      'Value in bytes is expected to be a safe positive integer'
-    );
+    expect(() => new ByteSizeValue(-1024)).toThrowErrorMatchingSnapshot();
   });
 
   test('throws if number of bytes is not safe', () => {
-    expect(() => new ByteSizeValue(NaN)).toThrowError(
-      'Value in bytes is expected to be a safe positive integer'
-    );
-
-    expect(() => new ByteSizeValue(Infinity)).toThrowError(
-      'Value in bytes is expected to be a safe positive integer'
-    );
-
-    expect(() => new ByteSizeValue(Math.pow(2, 53))).toThrowError(
-      'Value in bytes is expected to be a safe positive integer'
-    );
+    expect(() => new ByteSizeValue(NaN)).toThrowErrorMatchingSnapshot();
+    expect(() => new ByteSizeValue(Infinity)).toThrowErrorMatchingSnapshot();
+    expect(() => new ByteSizeValue(Math.pow(2, 53))).toThrowErrorMatchingSnapshot();
   });
 
   test('accepts 0', () => {
