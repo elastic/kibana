@@ -39,7 +39,7 @@ function handleError(indexPattern) {
     const errorCode400 = error.statusCode === 400;
     const fieldStatsError = (error.message || '').includes('_field_stats');
     if (errorCode400 && fieldStatsError) {
-      return [indexPattern];
+      return Promise.resolve([indexPattern]);
     }
     return Promise.reject(error);
   };
@@ -57,4 +57,5 @@ function calculateIndices(req, indexPattern = '*', timeField = '@timestamp', off
 
 calculateIndices.handleResponse = handleResponse;
 calculateIndices.getParams = getParams;
+calculateIndices.handleError = handleError;
 export default calculateIndices;
