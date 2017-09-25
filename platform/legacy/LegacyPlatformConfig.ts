@@ -15,6 +15,17 @@ export interface LegacyConfig {
 }
 
 /**
+ * Represents logging config supported by the legacy platform.
+ */
+interface LegacyLoggingConfig {
+  silent: boolean;
+  verbose: boolean;
+  quiet: boolean;
+  dest: string;
+  json: boolean;
+}
+
+/**
  * Represents adapter between config provided by legacy platform and `RawConfig`
  * supported by the current platform.
  */
@@ -67,9 +78,38 @@ class LegacyConfigToRawConfigAdapter implements RawConfig {
     return configPath.join('.');
   }
 
-  private static transformLogging(configValue: any) {
-    // Use default `logging` config for now.
-    return {};
+  private static transformLogging(configValue: LegacyLoggingConfig) {
+    const loggingConfig = {
+      root: { level: 'info' },
+      appenders: { default: {} }
+    };
+
+    if (configValue.silent) {
+      loggingConfig.root.level = 'off';
+    } else if (configValue.quiet) {
+      loggingConfig.root.level = 'error';
+    } else if (configValue.verbose) {
+      loggingConfig.root.level = 'all';
+    }
+
+    const layout = configValue.json
+      ? { kind: 'json' }
+      : { kind: 'pattern', highlight: true };
+
+    if (configValue.dest && configValue.dest !== 'stdout') {
+      loggingConfig.appenders.default = {
+        kind: 'file',
+        path: configValue.dest,
+        layout
+      };
+    } else {
+      loggingConfig.appenders.default = {
+        kind: 'console',
+        layout
+      };
+    }
+
+    return loggingConfig;
   }
 
   private static transformXPack(configValue: any) {
