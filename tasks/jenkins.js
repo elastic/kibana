@@ -40,7 +40,8 @@ module.exports = function (grunt) {
     'rejectRejFiles',
 
     'test:uiRelease',
-    'aws_s3:ci'
+    'aws_s3:ci_screenshots',
+    'aws_s3:ci_packages'
   ]);
 
 };
