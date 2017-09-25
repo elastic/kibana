@@ -20,16 +20,16 @@ typeahead.directive('kbnTypeaheadInput', function () {
 
       // handle keypresses
       $el.on('keydown', function (ev) {
-        $scope.$apply(() => typeaheadCtrl.keypressHandler(ev));
+        $scope.$evalAsync(() => typeaheadCtrl.keypressHandler(ev));
       });
 
       // update focus state based on the input focus state
       $el.on('focus', function () {
-        $scope.$apply(() => typeaheadCtrl.setFocused(true));
+        $scope.$evalAsync(() => typeaheadCtrl.setFocused(true));
       });
 
       $el.on('blur', function () {
-        $scope.$apply(() => typeaheadCtrl.setFocused(false));
+        $scope.$evalAsync(() => typeaheadCtrl.setFocused(false));
       });
 
       // unbind event listeners
