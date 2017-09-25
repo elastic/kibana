@@ -108,7 +108,6 @@ export {
   KuiConfirmModal,
   KuiModal,
   KuiModalBody,
-  KuiModalBodyText,
   KuiModalFooter,
   KuiModalHeader,
   KuiModalHeaderTitle,

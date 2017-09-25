@@ -46,7 +46,7 @@ export default class extends Component {
 
         <KuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <KuiFlexItem grow={false}>
-            <KuiText size="small"><p>5000 results, returned in 2.03 secs.</p></KuiText>
+            <KuiText size="s"><p>5000 results, returned in 2.03 secs.</p></KuiText>
           </KuiFlexItem>
           <KuiFlexItem grow={false}>
             <KuiPagination

@@ -1,0 +1,50 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiAccordion is rendered 1`] = `
+<div
+  aria-label="aria-label"
+  class="kuiAccordion testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <div
+    class="kuiFlexGroup kuiFlexGroup--alignItemsCenter"
+  >
+    <div
+      class="kuiFlexItem"
+    >
+      <div
+        class="kuiAccordion__button"
+        role="button"
+        tabindex="0"
+      >
+        <div
+          class="kuiFlexGroup kuiFlexGroup--gutterSmall kuiFlexGroup--alignItemsCenter"
+        >
+          <div
+            class="kuiFlexItem kuiFlexItem--flexGrowZero"
+          >
+            <svg
+              class="kuiIcon kuiIcon--basic kuiIcon--medium"
+            >
+              <title>
+                arrow right icon
+              </title>
+              <use
+                href="#arrow_right"
+              />
+            </svg>
+          </div>
+          <div
+            class="kuiFlexItem kuiAccordion__buttonContent"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+  <div
+    class="kuiAccordion__childWrapper"
+  >
+    <div />
+  </div>
+</div>
+`;

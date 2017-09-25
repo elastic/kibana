@@ -28,6 +28,7 @@ export const KuiTitle = ({ size, children, className, ...rest }) => {
 };
 
 KuiTitle.propTypes = {
+  children: PropTypes.element.isRequired,
   className: PropTypes.string,
   size: PropTypes.oneOf(TITLE_SIZES),
 };

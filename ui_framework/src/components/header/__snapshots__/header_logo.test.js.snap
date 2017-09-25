@@ -7,7 +7,7 @@ exports[`KuiHeaderLogo is rendered 1`] = `
   data-test-subj="test subject string"
 >
   <svg
-    class="kuiIcon kuiHeaderLogo__icon"
+    class="kuiIcon kuiHeaderLogo__icon kuiIcon--xLarge"
   >
     <title>
       Go to Kibana home page
@@ -25,7 +25,7 @@ exports[`KuiHeaderLogo renders href 1`] = `
   href="#"
 >
   <svg
-    class="kuiIcon kuiHeaderLogo__icon"
+    class="kuiIcon kuiHeaderLogo__icon kuiIcon--xLarge"
   >
     <title>
       Go to Kibana home page

@@ -3,7 +3,7 @@
 exports[`KuiPageContent is rendered 1`] = `
 <div
   aria-label="aria-label"
-  class="kuiPageContent testClass1 testClass2"
+  class="kuiPanel kuiPanel--paddingLarge kuiPageContent testClass1 testClass2"
   data-test-subj="test subject string"
 />
 `;

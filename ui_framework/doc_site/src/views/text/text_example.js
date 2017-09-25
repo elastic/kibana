@@ -16,6 +16,10 @@ import Text from './text';
 const textSource = require('!!raw!./text');
 const textHtml = renderToHtml(Text);
 
+import TextSmall from './text_small';
+const textSmallSource = require('!!raw!./text_small');
+const textSmallHtml = renderToHtml(Text);
+
 import TextColor from './text_color';
 const textColorSource = require('!!raw!./text_color');
 const textColorHtml = renderToHtml(TextColor);
@@ -42,6 +46,20 @@ export default props => (
       }
       demo={
         <Text />
+      }
+    />
+
+    <GuideSection
+      title="TextSmall"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: textSmallSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: textSmallHtml,
+      }]}
+      demo={
+        <TextSmall />
       }
     />
 

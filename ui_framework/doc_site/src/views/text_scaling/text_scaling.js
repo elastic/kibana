@@ -84,7 +84,7 @@ export default () => (
       <KuiPageContent className="guideDemo__textLines" style={{ padding: 32 }}>
         <KuiPageContentBody>
 
-          <KuiText size="small">
+          <KuiText size="s">
             {text}
           </KuiText>
 

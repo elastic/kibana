@@ -13,5 +13,8 @@ exports[`KuiCallOut is rendered 1`] = `
       class="kuiCallOutHeader__title"
     />
   </div>
+  <div
+    class="kuiText kuiText--small"
+  />
 </div>
 `;

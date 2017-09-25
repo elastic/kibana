@@ -62,7 +62,7 @@ export const KuiToast = ({ title, type, iconType, onClose, children, className, 
 
   if (children) {
     optionalBody = (
-      <KuiText size="small">
+      <KuiText size="s">
         {children}
       </KuiText>
     );

@@ -10,6 +10,11 @@
   animation: kuiModal $kuiAnimSpeedSlow $kuiAnimSlightBounce;
 }
 
+.kuiModal--confirmation {
+  width: 450px;
+  min-width: auto;
+}
+
 .kuiModalHeader {
   display: flex;
   justify-content: space-between;
@@ -25,9 +30,6 @@
 
 .kuiModalBody {
   padding: $kuiSizeXL 0;
-}
-
-.kuiModalBodyText {
 }
 
 .kuiModalFooter {

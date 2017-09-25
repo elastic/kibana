@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiDescriptionList is rendered 1`] = `
+<dl
+  aria-label="aria-label"
+  class="kuiDescriptionList kuiDescriptionList--row testClass1 testClass2"
+  data-test-subj="test subject string"
+/>
+`;

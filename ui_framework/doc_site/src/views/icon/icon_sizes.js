@@ -30,7 +30,7 @@ export default () => (
               type="logoElasticStack"
               size={iconSize}
             />
-            <KuiText size="small">
+            <KuiText size="s">
               <p>{iconSize}</p>
             </KuiText>
           </KuiPanel>

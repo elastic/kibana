@@ -2576,30 +2576,6 @@ table {
     -webkit-transform: rotate(359deg);
             transform: rotate(359deg); } }
 
-.kuiModalOverlay {
-  position: fixed;
-  z-index: 6000;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  background: rgba(255, 255, 255, 0.9);
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center;
-  -webkit-box-pack: center;
-  -webkit-justify-content: center;
-      -ms-flex-pack: center;
-          justify-content: center;
-  padding-bottom: 10vh;
-  -webkit-animation: kuiAnimFadeIn 150ms ease-in;
-          animation: kuiAnimFadeIn 150ms ease-in; }
-
 .kuiModal {
   box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1);
   background-color: #FFF;
@@ -2610,6 +2586,10 @@ table {
   min-width: 50%;
   -webkit-animation: kuiModal 350ms cubic-bezier(0.34, 1.61, 0.7, 1);
           animation: kuiModal 350ms cubic-bezier(0.34, 1.61, 0.7, 1); }
+
+.kuiModal--confirmation {
+  width: 450px;
+  min-width: auto; }
 
 .kuiModalHeader {
   display: -webkit-box;
@@ -2664,6 +2644,30 @@ table {
     opacity: 1;
     -webkit-transform: translateY(0);
             transform: translateY(0); } }
+
+.kuiModalOverlay {
+  position: fixed;
+  z-index: 6000;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: rgba(255, 255, 255, 0.9);
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  padding-bottom: 10vh;
+  -webkit-animation: kuiAnimFadeIn 150ms ease-in;
+          animation: kuiAnimFadeIn 150ms ease-in; }
 
 .kuiPage {
   padding: 24px; }

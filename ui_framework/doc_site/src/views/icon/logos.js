@@ -33,7 +33,7 @@ export default () => (
               type={iconType}
               size="large"
             />
-            <KuiText size="small">
+            <KuiText size="s">
               <p>{iconType}</p>
             </KuiText>
           </KuiPanel>
