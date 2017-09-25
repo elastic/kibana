@@ -34,10 +34,10 @@ export function AggResponseBucketsProvider() {
     }
   };
 
-  Buckets.prototype.reorder = function (params) {
-    if (!this.objectMode || !params.filters) return;
+  Buckets.prototype.orderBucketsAccordingToFilterParams = function (params) {
+    if (!this.objectMode || !params.filters) return [];
 
-    this._keys = params.filters.map(filter => {
+    return params.filters.map(filter => {
       return filter.input.query || '*';
     });
   };
