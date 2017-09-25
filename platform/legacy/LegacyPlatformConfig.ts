@@ -45,10 +45,6 @@ class LegacyConfigToRawConfigAdapter implements RawConfig {
     switch (configPath) {
       case 'logging':
         return LegacyConfigToRawConfigAdapter.transformLogging(configValue);
-      case 'xpack':
-        return LegacyConfigToRawConfigAdapter.transformXPack(configValue);
-      case 'pid':
-        return LegacyConfigToRawConfigAdapter.transformPid(configValue);
       case 'server':
         return LegacyConfigToRawConfigAdapter.transformServer(configValue);
       default:
@@ -110,21 +106,6 @@ class LegacyConfigToRawConfigAdapter implements RawConfig {
     }
 
     return loggingConfig;
-  }
-
-  private static transformXPack(configValue: any) {
-    // No `xpack` config support for now.
-    return { enabled: false };
-  }
-
-  private static transformPid(configValue: any) {
-    // Currently pid plugin always expects non-empty pid file path if plugin is not disabled.
-    // TODO: Should be fixed in Pid plugin.
-    if (!configValue.file) {
-      return { enabled: false };
-    }
-
-    return configValue;
   }
 
   private static transformServer(configValue: any) {
