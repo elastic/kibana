@@ -1,7 +1,9 @@
+import _ from 'lodash';
+
 import 'ui/validate_date_interval';
 import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';
 import { AggTypesBucketsCreateFilterHistogramProvider } from 'ui/agg_types/buckets/create_filter/histogram';
-import intervalTemplate from 'ui/agg_types/controls/interval.html';
+import intervalTemplate from 'ui/agg_types/controls/number_interval.html';
 import minDocCountTemplate from 'ui/agg_types/controls/min_doc_count.html';
 import extendedBoundsTemplate from 'ui/agg_types/controls/extended_bounds.html';
 
@@ -27,9 +29,43 @@ export function AggTypesBucketsHistogramProvider(Private) {
       {
         name: 'interval',
         editor: intervalTemplate,
+        onSearchRequestStart(aggConfig, searchSource) {
+          const field = aggConfig.getField();
+          const aggBody = field.scripted
+            ? { script: { inline: field.script, lang: field.lang } }
+            : { field: field.name };
+
+          return searchSource
+            .extend()
+            .size(0)
+            .aggs({
+              maxAgg: {
+                max: aggBody
+              },
+              minAgg: {
+                min: aggBody
+              }
+            })
+            .fetchAsRejectablePromise()
+            .then((resp) => {
+              aggConfig.params.min = _.get(resp, 'aggregations.minAgg.value');
+              aggConfig.params.max = _.get(resp, 'aggregations.maxAgg.value');
+            });
+        },
         write: function (aggConfig, output) {
+          //const interval = aggConfig.buckets.getInterval();
           output.params.interval = parseFloat(aggConfig.params.interval);
         }
+      },
+
+      {
+        name: 'max',
+        write: _.noop,
+      },
+
+      {
+        name: 'min',
+        write: _.noop,
       },
 
       {

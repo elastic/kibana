@@ -7,7 +7,7 @@ import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_buck
 import { TimeBucketsProvider } from 'ui/time_buckets';
 import { AggTypesBucketsCreateFilterDateHistogramProvider } from 'ui/agg_types/buckets/create_filter/date_histogram';
 import { AggTypesBucketsIntervalOptionsProvider } from 'ui/agg_types/buckets/_interval_options';
-import intervalTemplate from 'ui/agg_types/controls/interval.html';
+import intervalTemplate from 'ui/agg_types/controls/time_interval.html';
 
 export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
@@ -108,7 +108,7 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
         default: 'auto',
         options: intervalOptions,
         editor: intervalTemplate,
-        onRequest: function (agg) {
+        onSearchRequestStart: function (agg) {
           setBounds(agg, true);
         },
         write: function (agg, output) {

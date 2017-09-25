@@ -23,7 +23,7 @@ import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { FilterManagerProvider } from 'ui/filter_manager';
 
-export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
+export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
   const AggConfigs = Private(VisAggConfigsProvider);
   const brushEvent = Private(UtilsBrushEventProvider);
@@ -164,9 +164,17 @@ export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
       return clonedVis;
     }
 
-    requesting() {
-      // Invoke requesting() on each agg. Aggs is an instance of AggConfigs.
-      _.invoke(this.aggs.getRequestAggs(), 'requesting');
+    /**
+     *  Hook for pre-flight logic, see AggType#onSearchRequestStart()
+     *  @param {Courier.SearchSource} searchSource
+     *  @param {Courier.SearchRequest} searchRequest
+     *  @return {Promise<undefined>}
+     */
+    onSearchRequestStart(...args) {
+      return Promise.map(
+        this.aggs.getRequestAggs(),
+        agg => agg.onSearchRequestStart(...args)
+      );
     }
 
     isHierarchical() {

@@ -8,7 +8,7 @@
 import _ from 'lodash';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 
-export function VisAggConfigProvider(Private) {
+export function VisAggConfigProvider(Private, Promise) {
   const fieldFormats = Private(RegistryFieldFormatsProvider);
 
   function AggConfig(vis, opts) {
@@ -183,16 +183,20 @@ export function VisAggConfigProvider(Private) {
   };
 
   /**
-   * Hook into param onRequest handling, and tell the aggConfig that it
-   * is being sent to elasticsearch.
-   *
-   * @return {[type]} [description]
+   *  Hook for pre-flight logic, see AggType#onSearchRequestStart
+   *  @param {Courier.SearchSource} searchSource
+   *  @param {Courier.SearchRequest} searchRequest
+   *  @return {Promise<undefined>}
    */
-  AggConfig.prototype.requesting = function () {
-    const self = this;
-    self.type && self.type.params.forEach(function (param) {
-      if (param.onRequest) param.onRequest(self);
-    });
+  AggConfig.prototype.onSearchRequestStart = function (...args) {
+    if (!this.type) {
+      return Promise.resolve();
+    }
+
+    return Promise.map(
+      this.type.params,
+      param => param.onSearchRequestStart(this, ...args)
+    );
   };
 
   /**

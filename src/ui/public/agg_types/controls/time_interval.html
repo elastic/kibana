@@ -10,7 +10,6 @@
   </label>
   <select
     id="visEditorInterval{{agg.id}}"
-    ng-if="aggParam.options"
     ng-model="agg.params.interval"
     ng-change="agg.write()"
     required
@@ -29,15 +28,4 @@
     ng-if="agg.params.interval.val == 'custom'"
     class="form-control"
     required />
-  <input
-    id="visEditorInterval{{agg.id}}"
-    ng-if="!aggParam.options"
-    ng-model="agg.params.interval"
-    required
-    type="number"
-    class="form-control"
-    name="interval"
-    min="0"
-    input-number
-    >
 </div>
