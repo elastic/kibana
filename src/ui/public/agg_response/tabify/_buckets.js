@@ -34,12 +34,25 @@ export function AggResponseBucketsProvider() {
     }
   };
 
-  Buckets.prototype.orderBucketsAccordingToFilterParams = function (params) {
-    if (!this.objectMode || !params.filters) return [];
-
-    return params.filters.map(filter => {
-      return filter.input.query || '*';
-    });
+  Buckets.prototype.orderBucketsAccordingToParams = function (params) {
+    if (params.filters && this.objectMode) {
+      this._keys = params.filters.map(filter => {
+        return filter.label || filter.input.query || '*';
+      });
+    } else if (params.ranges && this.objectMode) {
+      this._keys = params.ranges.map(range => {
+        return _.findKey(this.buckets, el => el.from === range.from && el.to === range.to);
+      });
+    } else if (params.ranges && params.field.type !== 'date') {
+      let ranges = params.ranges;
+      if (params.ipRangeType) {
+        ranges = params.ipRangeType === 'mask' ? ranges.mask : ranges.fromTo;
+      }
+      this.buckets = ranges.map(range => {
+        if (range.mask) return this.buckets.find(el => el.key === range.mask);
+        return this.buckets.find(el => el.from === range.from && el.to === range.to);
+      });
+    }
   };
 
   return Buckets;

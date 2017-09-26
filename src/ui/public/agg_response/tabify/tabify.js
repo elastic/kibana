@@ -37,14 +37,14 @@ export function AggResponseTabifyProvider(Private, Notifier) {
       case 'buckets':
         const buckets = new Buckets(bucket[agg.id]);
         if (buckets.length) {
-          const reorderedBuckets = buckets.orderBucketsAccordingToFilterParams(agg.params);
+          buckets.orderBucketsAccordingToParams(agg.params);
           const splitting = write.canSplit && agg.schema.name === 'split';
           if (splitting) {
-            write.split(agg, reorderedBuckets, function forEachBucket(subBucket, key) {
+            write.split(agg, buckets, function forEachBucket(subBucket, key) {
               collectBucket(write, subBucket, agg.getKey(subBucket, key), aggScale);
             });
           } else {
-            reorderedBuckets.forEach(function (subBucket, key) {
+            buckets.forEach(function (subBucket, key) {
               write.cell(agg, agg.getKey(subBucket, key), function () {
                 collectBucket(write, subBucket, agg.getKey(subBucket, key), aggScale);
               });
