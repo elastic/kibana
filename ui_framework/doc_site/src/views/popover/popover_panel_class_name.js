@@ -29,19 +29,19 @@ export default class extends Component {
   }
 
   render() {
-    const button = (
-      <KuiButton buttonType="basic" onClick={this.onButtonClick.bind(this)}>
-        Show popover
-      </KuiButton>
-    );
-
     return (
       <KuiPopover
-        button={button}
+        button={(
+          <KuiButton buttonType="basic" onClick={this.onButtonClick.bind(this)}>
+            Turn padding off and apply a custom class
+          </KuiButton>
+        )}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover.bind(this)}
+        panelClassName="yourClassNameHere"
+        panelPaddingSize="none"
       >
-        <div style={{ width: '300px' }}>Popover content that&rsquo;s wider than the default width</div>
+        This should have no padding, and if you inspect, also a custom class.
       </KuiPopover>
     );
   }

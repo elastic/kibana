@@ -1,0 +1,40 @@
+/**
+ * 1. Button reset.
+ */
+.kuiContextMenuItem {
+  appearance: none; /* 1 */
+  background-color: transparent; /* 1 */
+  font-size: $kuiFontSize; /* 1 */
+  border: none; /* 1 */
+  cursor: pointer; /* 1 */
+  padding: 12px;
+  width: 100%;
+  text-align: left;
+  color: $kuiTextColor;
+
+  &:hover, &:focus {
+    .kuiContextMenuItem__text {
+      text-decoration: underline;
+    }
+  }
+
+  /**
+   * 1. Overwrite default style.
+   */
+  &:focus {
+    background-color: $kuiFocusAltBackgroundColor;
+    box-shadow: none; /* 1 */
+  }
+}
+
+  .kuiContextMenuItem__inner {
+    display: flex;
+  }
+
+  .kuiContextMenuItem__text {
+    flex-grow: 1;
+  }
+
+  .kuiContextMenuItem__arrow {
+    align-self: flex-end;
+  }

@@ -1,0 +1,22 @@
+$kuiContextMenuWidth: $kuiSize * 16;
+
+.kuiContextMenu {
+  width: $kuiContextMenuWidth;
+  position: relative;
+  overflow: hidden;
+  transition: height $kuiAnimSpeedFast $kuiAnimSlightResistance;
+  border-radius: $kuiBorderRadius;
+
+  .kuiContextMenu__content {
+    padding: $kuiSizeS;
+  }
+}
+
+  .kuiContextMenu__icon {
+    margin-right: $kuiSizeS;
+  }
+
+  .kuiContextMenu__itemLayout {
+    display: flex;
+    align-items: center;
+  }
