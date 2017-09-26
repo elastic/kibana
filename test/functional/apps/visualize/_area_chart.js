@@ -3,7 +3,6 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
-  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
 
   describe('visualize app', function describeIndexTests() {
@@ -86,7 +85,6 @@ export default function ({ getService, getPageObjects }) {
         return PageObjects.visualize.saveVisualization(vizName1)
         .then(function (message) {
           log.debug('Saved viz message = ' + message);
-          screenshots.take('Visualize-area-chart-save-toast');
           expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
         })
         .then(function testVisualizeWaitForToastMessageGone() {
@@ -135,7 +133,6 @@ export default function ({ getService, getPageObjects }) {
         .then(function (paths) {
           log.debug('expectedAreaChartData = ' + expectedAreaChartData);
           log.debug('actual chart data =     ' + paths);
-          screenshots.take('Visualize-area-chart');
           expect(paths).to.eql(expectedAreaChartData);
         });
       });

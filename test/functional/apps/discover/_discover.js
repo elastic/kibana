@@ -6,7 +6,6 @@ export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const remote = getService('remote');
   const kibanaServer = getService('kibanaServer');
-  const screenshots = getService('screenshots');
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'discover', 'header']);
@@ -52,7 +51,6 @@ export default function ({ getService, getPageObjects }) {
 
         const expectedToastMessage = `Discover: Saved Data Source "${queryName1}"`;
         expect(toastMessage).to.be(expectedToastMessage);
-        await screenshots.take('Discover-save-query-toast');
 
         await PageObjects.header.waitForToastMessageGone();
         const actualQueryNameString = await PageObjects.discover.getCurrentQueryName();
@@ -66,7 +64,6 @@ export default function ({ getService, getPageObjects }) {
         await retry.try(async function () {
           expect(await PageObjects.discover.getCurrentQueryName()).to.be(queryName1);
         });
-        await screenshots.take('Discover-load-query');
       });
 
       it('should show the correct hit count', async function () {
@@ -212,7 +209,6 @@ export default function ({ getService, getPageObjects }) {
       it('should show "no results"', async () => {
         const isVisible = await PageObjects.discover.hasNoResults();
         expect(isVisible).to.be(true);
-        await screenshots.take('Discover-no-results');
       });
 
       it('should suggest a new time range is picked', async () => {
