@@ -39,7 +39,7 @@ class IndexPattern extends Component {
             indexPattern={model[indexPatternName]}
             fields={fields}/>
         </div>
-        <div className="vis_editor__label">Interval (auto, 1m, 1d, 1w, 1y)</div>
+        <div className="vis_editor__label">Interval (auto, 1m, 1d, 1w, 1y, &gt;=1m)</div>
         <input
           className="vis_editor__input"
           disabled={this.props.disabled}
