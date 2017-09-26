@@ -2831,6 +2831,7 @@ main {
   .kuiPopover.kuiPopover-isOpen .kuiPopover__body {
     opacity: 1;
     visibility: visible;
+    display: inline-block;
     z-index: 1;
     margin-top: 10px;
     box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1); }
@@ -2853,7 +2854,7 @@ main {
   -webkit-transform-origin: center top;
           transform-origin: center top;
   opacity: 0;
-  visibility: hidden;
+  display: none;
   margin-top: 32px; }
   .kuiPopover__body:before {
     position: absolute;
