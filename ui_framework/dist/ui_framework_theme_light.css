@@ -2320,6 +2320,62 @@ table {
     background: #e6f2f6;
     outline: solid 3px #e6f2f6; }
 
+.kuiLink.kuiLink--default {
+  color: #3F3F3F; }
+  .kuiLink.kuiLink--default:hover {
+    color: #262626; }
+  .kuiLink.kuiLink--default:focus {
+    outline: solid 3px rgba(63, 63, 63, 0.1);
+    background-color: rgba(63, 63, 63, 0.1); }
+
+.kuiLink.kuiLink--subdued {
+  color: #666; }
+  .kuiLink.kuiLink--subdued:hover {
+    color: #4d4d4d; }
+  .kuiLink.kuiLink--subdued:focus {
+    outline: solid 3px rgba(102, 102, 102, 0.1);
+    background-color: rgba(102, 102, 102, 0.1); }
+
+.kuiLink.kuiLink--primary {
+  color: #0079a5; }
+  .kuiLink.kuiLink--primary:hover {
+    color: #005472; }
+  .kuiLink.kuiLink--primary:focus {
+    outline: solid 3px rgba(0, 121, 165, 0.1);
+    background-color: rgba(0, 121, 165, 0.1); }
+
+.kuiLink.kuiLink--secondary {
+  color: #00A69B; }
+  .kuiLink.kuiLink--secondary:hover {
+    color: #00736b; }
+  .kuiLink.kuiLink--secondary:focus {
+    outline: solid 3px rgba(0, 166, 155, 0.1);
+    background-color: rgba(0, 166, 155, 0.1); }
+
+.kuiLink.kuiLink--accent {
+  color: #DD0A73; }
+  .kuiLink.kuiLink--accent:hover {
+    color: #ac085a; }
+  .kuiLink.kuiLink--accent:focus {
+    outline: solid 3px rgba(221, 10, 115, 0.1);
+    background-color: rgba(221, 10, 115, 0.1); }
+
+.kuiLink.kuiLink--warning {
+  color: #E5830E; }
+  .kuiLink.kuiLink--warning:hover {
+    color: #b5680b; }
+  .kuiLink.kuiLink--warning:focus {
+    outline: solid 3px rgba(229, 131, 14, 0.1);
+    background-color: rgba(229, 131, 14, 0.1); }
+
+.kuiLink.kuiLink--danger {
+  color: #A30000; }
+  .kuiLink.kuiLink--danger:hover {
+    color: #700000; }
+  .kuiLink.kuiLink--danger:focus {
+    outline: solid 3px rgba(163, 0, 0, 0.1);
+    background-color: rgba(163, 0, 0, 0.1); }
+
 .kuiLoadingKibana {
   position: relative;
   display: inline-block; }

@@ -12,3 +12,29 @@
     outline: solid 3px $kuiFocusBackgroundColor;
   }
 }
+
+$textColors: (
+  default: $kuiTextColor,
+  subdued: $kuiColorDarkShade,
+  primary: $kuiColorPrimary,
+  secondary: $kuiColorSecondary,
+  accent: $kuiColorAccent,
+  warning: $kuiColorWarning,
+  danger: $kuiColorDanger,
+);
+
+// Create color modifiers based on the map
+@each $name, $color in $textColors {
+  .kuiLink.kuiLink--#{$name} {
+    color: $color;
+
+    &:hover {
+      color: darken($color, 10%);
+    }
+
+    &:focus {
+      outline: solid 3px transparentize($color, .9);
+      background-color: transparentize($color, .9);
+    }
+  }
+}
