@@ -10,7 +10,7 @@ node scripts/{{script name}} --help
 
 This directory is excluded from the build and tools within it should help users discover their capabilities. Each script in this directory must:
 
-- include the `../src/optimize/babel/register` module to bootstrap babel
+- require `src/babel-register` to bootstrap babel
 - call out to source code that is in the `src` directory
 - react to the `--help` flag
 - run everywhere OR check and fail fast when a required OS or toolchain is not available

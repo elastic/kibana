@@ -18,6 +18,9 @@ import ButtonExample
 import CardExample
   from '../../views/card/card_example';
 
+import CodeEditor
+  from '../../views/code_editor/code_editor_example';
+
 import CollapseButtonExample
   from '../../views/collapse_button/collapse_button_example';
 
@@ -141,6 +144,10 @@ const components = [{
   name: 'Card',
   component: CardExample,
   hasReact: true,
+}, {
+  name: 'CodeEditor',
+  component: CodeEditor,
+  hasReact: true
 }, {
   name: 'ColorPicker',
   component: ColorPickerExample,

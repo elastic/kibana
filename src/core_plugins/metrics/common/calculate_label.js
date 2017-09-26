@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { includes, startsWith } from 'lodash';
 import lookup from './agg_lookup';
 const paths = [
   'cumulative_sum',
@@ -29,10 +29,22 @@ export default function calculateLabel(metric, metrics) {
     return `${lookup[metric.type]} (${metric.value}) of ${metric.field}`;
   }
 
-  if (_.includes(paths, metric.type)) {
-    const targetMetric = _.find(metrics, { id: metric.field });
+
+  if (includes(paths, metric.type)) {
+    let additionalLabel = '';
+    const targetMetric = metrics.find(m => startsWith(metric.field, m.id));
     const targetLabel = calculateLabel(targetMetric, metrics);
-    return `${lookup[metric.type]} of ${targetLabel}`;
+    // For percentiles we need to parse the field id to extract the percentile
+    // the user configured in the percentile aggregation and specified in the
+    // submetric they selected. This applies only to pipeline aggs.
+    if (targetMetric && targetMetric.type === 'percentile') {
+      const percentileValueMatch = /\[([0-9\.]+)\]$/;
+      const matches = metric.field.match(percentileValueMatch);
+      if (matches) {
+        additionalLabel += ` (${matches[1]})`;
+      }
+    }
+    return `${lookup[metric.type]} of ${targetLabel}${additionalLabel}`;
   }
 
   return `${lookup[metric.type]} of ${metric.field}`;

@@ -1,14 +1,10 @@
 import { ContainerAPI } from 'ui/embeddable';
 
 export class DashboardContainerAPI extends ContainerAPI {
-  constructor(dashboardState, queryManager) {
+  constructor(dashboardState, addFilter) {
     super();
     this.dashboardState = dashboardState;
-    this.queryManager = queryManager;
-  }
-
-  addFilter(field, value, operator, index) {
-    this.queryManager.add(field, value, operator, index);
+    this.addFilter = addFilter;
   }
 
   updatePanel(panelIndex, panelAttributes) {

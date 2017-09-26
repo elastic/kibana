@@ -119,16 +119,18 @@ export function VislibVisualizationsAreaChartProvider(Private) {
       }
 
       // update
-      path.attr('d', function () {
-        const area = getArea()
-        .defined(function (d) {
-          return !_.isNull(d.y);
+      path
+        .attr('d', function () {
+          const area = getArea()
+          .defined(function (d) {
+            return !_.isNull(d.y);
+          })
+          .interpolate(interpolate);
+          return area(data.values.filter(function (d) {
+            return !_.isNull(d.y);
+          }));
         })
-        .interpolate(interpolate);
-        return area(data.values.filter(function (d) {
-          return !_.isNull(d.y);
-        }));
-      });
+        .style('stroke-width', '1px');
 
       return path;
     }

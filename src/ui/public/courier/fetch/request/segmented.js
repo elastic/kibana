@@ -39,33 +39,34 @@ export function SegmentedRequestProvider(es, Private, Promise, timefilter, confi
     *********/
 
     start() {
-      super.start();
+      return super.start().then(() => {
+        this._complete = [];
+        this._active = null;
+        this._segments = [];
+        this._all = [];
+        this._queue = [];
 
-      this._complete = [];
-      this._active = null;
-      this._segments = [];
-      this._all = [];
-      this._queue = [];
+        this._mergedResp = {
+          took: 0,
+          hits: {
+            hits: [],
+            total: 0,
+            max_score: 0
+          }
+        };
 
-      this._mergedResp = {
-        took: 0,
-        hits: {
-          hits: [],
-          total: 0,
-          max_score: 0
-        }
-      };
-
-      // give the request consumer a chance to receive each segment and set
-      // parameters via the handle
-      if (_.isFunction(this._initFn)) this._initFn(this._handle);
-      return this._createQueue().then((queue) => {
+        // give the request consumer a chance to receive each segment and set
+        // parameters via the handle
+        if (_.isFunction(this._initFn)) this._initFn(this._handle);
+        return this._createQueue();
+      })
+      .then((queue) => {
         if (this.stopped) return;
 
         this._all = queue.slice(0);
 
         // Send the initial fetch status
-        this._reportStatus();
+        return this._reportStatus();
       });
     }
 
