@@ -32,7 +32,8 @@ Specify the position of the subdomain the URL with the token `{s}`.
 
 [[regionmap-settings]] `regionmap`:: Specifies additional vector layers for use in <<regionmap, Region Map>> visualizations. 
 Each layer object points to an external vector file that contains a geojson FeatureCollection. 
-The file must use the WGS84 coordinate reference system and only include polygons. 
+The file must use the [WGS84 coordinate reference system](https://en.wikipedia.org/wiki/World_Geodetic_System) and only 
+include polygons. 
 If the file is hosted on a separate domain from Kibana, the server needs to be CORS-enabled so Kibana can download the file. 
 The url field also serves as a unique identifier for the file. 
 Each layer can contain multiple fields to indicate what properties from the geojson features you want to expose. 
