@@ -55,7 +55,7 @@ Tooltip.prototype.getContentContainer = function () {
     .detach().appendTo($tooltip);
     return contentContainer;
   }
-  return $container[0];
+  return $container;
 };
 
 /**
@@ -203,7 +203,3 @@ Tooltip.prototype.destroy = function () {
   this.hide();
   this.binder.destroy();
 };
-
-export function TooltipProvider() {
-  return Tooltip;
-}

@@ -1,7 +1,7 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import { TooltipProvider } from 'ui/vis/components/tooltip';
+import { Tooltip } from 'ui/vis/components/tooltip';
 import { VislibVisualizationsChartProvider } from './_chart';
 import { VislibVisualizationsTimeMarkerProvider } from './time_marker';
 import { VislibVisualizationsSeriesTypesProvider } from './point_series/series_types';
@@ -9,7 +9,6 @@ import { VislibVisualizationsSeriesTypesProvider } from './point_series/series_t
 export function VislibVisualizationsPointSeriesProvider(Private) {
 
   const Chart = Private(VislibVisualizationsChartProvider);
-  const Tooltip = Private(TooltipProvider);
   const TimeMarker = Private(VislibVisualizationsTimeMarkerProvider);
   const seriTypes = Private(VislibVisualizationsSeriesTypesProvider);
   const touchdownTmpl = _.template(require('../partials/touchdown.tmpl.html'));

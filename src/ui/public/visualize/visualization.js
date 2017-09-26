@@ -122,8 +122,6 @@ uiModules
             if (!$scope.vis.visualizeScope) {
               $el.trigger('renderComplete');
             }
-          }, e => {
-            console.log("Unable to render visualization, e:", e);
           });
         $scope.$apply();
       }, 100);

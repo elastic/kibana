@@ -91,11 +91,12 @@ export function EmbeddedTooltipFormatterProvider($rootScope, $compile, Private, 
 
       return `<div
         id="${executionId}"
+        class="tab-dashboard theme-dark"
         style="height: ${parentVis.params.tooltip.height}px; width: ${parentVis.params.tooltip.width}px;">
           ${tooltipMsg}
       </div>`;
     };
-    formatter.destroy = function() {
+    formatter.destroy = () => {
       $tooltipScope.$destroy();
       if ($visEl) {
         $visEl.remove();
