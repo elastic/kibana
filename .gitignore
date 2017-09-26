@@ -41,3 +41,4 @@ jspm_packages
 
 target
 build
+.kibana-plugin-helpers.dev.json
