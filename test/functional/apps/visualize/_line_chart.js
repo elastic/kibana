@@ -3,7 +3,6 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
-  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
   describe('visualize app', function describeIndexTests() {
@@ -63,7 +62,6 @@ export default function ({ getService, getPageObjects }) {
           return PageObjects.visualize.getLineChartData('fill="#00a69b"')
           .then(function showData(data) {
             log.debug('data=' + data);
-            screenshots.take('Visualize-line-chart');
             const tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
             for (let x = 0; x < data.length; x++) {
               log.debug('x=' + x + ' expectedChartData[x].split(\' \')[1] = ' +
@@ -93,7 +91,6 @@ export default function ({ getService, getPageObjects }) {
             return PageObjects.visualize.getLineChartData('fill="#00a69b"')
             .then(function showData(data) {
               log.debug('data=' + data);
-              screenshots.take('Visualize-line-chart');
               const tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
               for (let x = 0; x < data.length; x++) {
                 log.debug('x=' + x + ' expectedChartData[x].split(\' \')[1] = ' +
