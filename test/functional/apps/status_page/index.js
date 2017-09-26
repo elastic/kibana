@@ -2,7 +2,6 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
-  const screenshots = getService('screenshots');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common']);
 
@@ -14,7 +13,6 @@ export default function ({ getService, getPageObjects }) {
     it('should show the kibana plugin as ready', async function () {
       await retry.tryForTime(6000, async () => {
         const text = await testSubjects.getVisibleText('statusBreakdown');
-        screenshots.take('Status');
         expect(text.indexOf('plugin:kibana')).to.be.above(-1);
       });
     });
