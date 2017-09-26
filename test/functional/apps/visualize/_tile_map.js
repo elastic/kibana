@@ -3,7 +3,6 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
-  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
 
   describe('tile map visualize app', function describeIndexTests() {
@@ -121,7 +120,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.zoomAllTheWayOut();
         const enabled = await PageObjects.visualize.getMapZoomOutEnabled();
         expect(enabled).to.be(false);
-        screenshots.take('map-at-zoom-0');
       });
 
       // See https://github.com/elastic/kibana/issues/13137 if this test starts failing intermittently
@@ -144,7 +142,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.selectTableInSpyPaneSelect();
         const data = await PageObjects.visualize.getDataTableData();
         await compareTableData(expectedPrecision2DataTable, data.trim().split('\n'));
-        screenshots.take('map-at-zoom-3');
         await PageObjects.visualize.closeSpyPanel();
       });
 
@@ -242,8 +239,6 @@ export default function ({ getService, getPageObjects }) {
         compareTableData(expectedZoom5Data, actualReOpenedZoom5Data.trim().split('\n'));
 
         await PageObjects.visualize.closeSpyPanel();
-
-        await screenshots.take('Visualize-site-map');
       });
 
       it('should zoom in to level 10', function () {
