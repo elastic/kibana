@@ -193,85 +193,97 @@ uiModules.get('apps/management')
           return;
         }
 
-        const conflictedIndexPatterns = [];
+        return new Promise((resolve) => {
+          confirmModal(
+            `If any of the objects already exist, do you want to automatically overwrite them?`, {
+              confirmButtonText: `Yes, overwrite all`,
+              cancelButtonText: `No, prompt me for each one`,
+              onConfirm: () => resolve(true),
+              onCancel: () => resolve(false),
+            }
+          );
+        })
+        .then((overwriteAll) => {
+          const conflictedIndexPatterns = [];
 
-        function importDocument(doc) {
-          const { service } = find($scope.services, { type: doc._type }) || {};
+          function importDocument(doc) {
+            const { service } = find($scope.services, { type: doc._type }) || {};
 
-          if (!service) {
-            const msg = `Skipped import of "${doc._source.title}" (${doc._id})`;
-            const reason = `Invalid type: "${doc._type}"`;
+            if (!service) {
+              const msg = `Skipped import of "${doc._source.title}" (${doc._id})`;
+              const reason = `Invalid type: "${doc._type}"`;
 
-            notify.warning(`${msg}, ${reason}`, {
-              lifetime: 0,
-            });
+              notify.warning(`${msg}, ${reason}`, {
+                lifetime: 0,
+              });
 
-            return;
+              return;
+            }
+
+            return service.get()
+              .then(function (obj) {
+                obj.id = doc._id;
+                return obj.applyESResp(doc)
+                  .then(() => {
+                    return obj.save({ confirmOverwrite : !overwriteAll });
+                  })
+                  .catch((err) => {
+                    if (err instanceof SavedObjectNotFound && err.savedObjectType === 'index-pattern') {
+                      conflictedIndexPatterns.push({ obj, doc });
+                      return;
+                    }
+
+                    // swallow errors here so that the remaining promise chain executes
+                    err.message = `Importing ${obj.title} (${obj.id}) failed: ${err.message}`;
+                    notify.error(err);
+                  });
+              });
           }
 
-          return service.get()
-            .then(function (obj) {
-              obj.id = doc._id;
-              return obj.applyESResp(doc)
-                .then(() => {
-                  return obj.save({ confirmOverwrite : false });
-                })
-                .catch((err) => {
-                  if (err instanceof SavedObjectNotFound && err.savedObjectType === 'index-pattern') {
-                    conflictedIndexPatterns.push({ obj, doc });
-                    return;
-                  }
+          function groupByType(docs) {
+            const defaultDocTypes = {
+              searches: [],
+              other: [],
+            };
 
-                  // swallow errors here so that the remaining promise chain executes
-                  err.message = `Importing ${obj.title} (${obj.id}) failed: ${err.message}`;
-                  notify.error(err);
-                });
-            });
-        }
+            return docs.reduce((types, doc) => {
+              switch (doc._type) {
+                case 'search':
+                  types.searches.push(doc);
+                  break;
+                default:
+                  types.other.push(doc);
+              }
+              return types;
+            }, defaultDocTypes);
+          }
 
-        function groupByType(docs) {
-          const defaultDocTypes = {
-            searches: [],
-            other: [],
-          };
+          const docTypes = groupByType(docs);
 
-          return docs.reduce((types, doc) => {
-            switch (doc._type) {
-              case 'search':
-                types.searches.push(doc);
-                break;
-              default:
-                types.other.push(doc);
-            }
-            return types;
-          }, defaultDocTypes);
-        }
-
-        const docTypes = groupByType(docs);
-
-        return Promise.map(docTypes.searches, importDocument)
-          .then(() => Promise.map(docTypes.other, importDocument))
-          .then(() => {
-            if (conflictedIndexPatterns.length) {
-              showChangeIndexModal(
-                (objs) => {
-                  return Promise.map(
-                    conflictedIndexPatterns,
-                    ({ obj }) => {
-                      const newIndexId = objs.find(({ oldId }) => oldId === obj.searchSource.getOwn('index')).newId;
-                      return obj.hydrateIndexPattern(newIndexId)
-                        .then(() => obj.save({ confirmOverwrite : false }));
-                    }
-                  ).then(refreshData);
-                },
-                conflictedIndexPatterns,
-                $route.current.locals.indexPatterns,
-              );
-            } else {
-              return refreshData();
-            }
-          })
-          .catch(notify.error);
+          return Promise.map(docTypes.searches, importDocument)
+            .then(() => Promise.map(docTypes.other, importDocument))
+            .then(() => {
+              if (conflictedIndexPatterns.length) {
+                showChangeIndexModal(
+                  (objs) => {
+                    return Promise.map(
+                      conflictedIndexPatterns,
+                      ({ obj }) => {
+                        const newIndexId = objs.find(({ oldId }) => oldId === obj.searchSource.getOwn('index')).newId;
+                        return obj.hydrateIndexPattern(newIndexId)
+                          .then(() => obj.save({ confirmOverwrite : !overwriteAll }));
+                      }
+                    ).then(refreshData);
+                  },
+                  conflictedIndexPatterns,
+                  $route.current.locals.indexPatterns,
+                );
+              } else {
+                return refreshData();
+              }
+            })
+            .catch(notify.error);
+        });
       };
 
       // TODO: Migrate all scope methods to the controller.

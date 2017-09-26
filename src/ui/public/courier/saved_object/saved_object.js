@@ -123,7 +123,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
         return Promise.resolve(null);
       }
 
-      if (id || config.clearSavedIndexPattern) {
+      if (config.clearSavedIndexPattern) {
         this.searchSource.set('index', undefined);
         return Promise.resolve(null);
       }
