@@ -38,6 +38,11 @@ export default function (chrome, internals) {
     return internals.showAppsLink == null ? internals.nav.length > 1 : internals.showAppsLink;
   };
 
+
+  chrome.getKibanaVersion = function () {
+    return internals.version;
+  };
+
   chrome.getApp = function () {
     return clone(internals.app);
   };

@@ -1,27 +1,16 @@
 import _ from 'lodash';
-import { FilterUtils } from './filter_utils';
+import { FilterUtils } from './lib/filter_utils';
 
 import { DashboardViewMode } from './dashboard_view_mode';
 import { PanelUtils } from './panel/panel_utils';
+import { store } from '../store';
+import { updateViewMode, updatePanels, updateIsFullScreenMode } from './dashboard_actions';
+
 import moment from 'moment';
 
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
-import { createPanelState, getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
-
-function getStateDefaults(dashboard, hideWriteControls) {
-  return {
-    fullScreenMode: false,
-    title: dashboard.title,
-    description: dashboard.description,
-    timeRestore: dashboard.timeRestore,
-    panels: dashboard.panelsJSON ? JSON.parse(dashboard.panelsJSON) : [],
-    options: dashboard.optionsJSON ? JSON.parse(dashboard.optionsJSON) : {},
-    uiState: dashboard.uiStateJSON ? JSON.parse(dashboard.uiStateJSON) : {},
-    query: FilterUtils.getQueryFilterForDashboard(dashboard),
-    filters: FilterUtils.getFilterBarsForDashboard(dashboard),
-    viewMode: dashboard.id || hideWriteControls ? DashboardViewMode.VIEW : DashboardViewMode.EDIT,
-  };
-}
+import { createPanelState, getPersistedStateId } from './panel';
+import { getAppStateDefaults } from './lib/get_app_state_defaults';
 
 /**
  * Depending on how a dashboard is loaded, the filter object may contain a $$hashKey and $state that will throw
@@ -54,18 +43,42 @@ function areTimesEqual(timeA, timeB) {
   return convertTimeToString(timeA) === convertTimeToString(timeB);
 }
 
-export class DashboardState {
+/**
+ * Dashboard state manager handles connecting angular and redux state between the angular and react portions of the
+ * app. There are two "sources of truth" that need to stay in sync - AppState and the Store. They aren't complete
+ * duplicates of each other as AppState has state that the Store doesn't, and vice versa.
+ *
+ * State that is only stored in AppState:
+ *  - title
+ *  - description
+ *  - timeRestore
+ *  - query
+ *  - uiState
+ *  - filters
+ *
+ * State that is only stored in the Store:
+ *  - embeddables
+ *  - maximizedPanelId
+ *
+ * State that is shared and needs to be synced:
+ * - fullScreenMode - changes only propagate from AppState -> Store
+ * - viewMode - changes only propagate from AppState -> Store
+ * - panels - changes propagate from AppState -> Store and from Store -> AppState.
+ *
+ *
+ */
+export class DashboardStateManager {
   /**
    *
    * @param savedDashboard {SavedDashboard}
-   * @param AppState {AppState}
+   * @param AppState {AppState} The AppState class to use when instantiating a new AppState instance.
    * @param hideWriteControls {boolean} true if write controls should be hidden.
    */
   constructor(savedDashboard, AppState, hideWriteControls) {
     this.savedDashboard = savedDashboard;
     this.hideWriteControls = hideWriteControls;
 
-    this.stateDefaults = getStateDefaults(this.savedDashboard, this.hideWriteControls);
+    this.stateDefaults = getAppStateDefaults(this.savedDashboard, this.hideWriteControls);
 
     this.appState = new AppState(this.stateDefaults);
     this.uiState = this.appState.makeStateful('uiState');
@@ -74,7 +87,7 @@ export class DashboardState {
     // We can't compare the filters stored on this.appState to this.savedDashboard because in order to apply
     // the filters to the visualizations, we need to save it on the dashboard. We keep track of the original
     // filter state in order to let the user know if their filters changed and provide this specific information
-    //in the 'lose changes' warning message.
+    // in the 'lose changes' warning message.
     this.lastSavedDashboardFilters = this.getFilterState();
 
     // A mapping of panel index to the index pattern it uses.
@@ -82,6 +95,57 @@ export class DashboardState {
 
     PanelUtils.initPanelIndexes(this.getPanels());
     this.createStateMonitor();
+
+    store.dispatch(updatePanels(this.getPanels()));
+
+    this.changeListeners = [];
+
+    store.subscribe(() => this._handleStoreChanges());
+    this.stateMonitor.onChange(status => {
+      this.changeListeners.forEach(listener => listener(status));
+      this._pushAppStateChangesToStore();
+    });
+  }
+
+  /**
+   * Changes made to app state outside of direct calls to this class will need to be propagated to the store.
+   * @private
+   */
+  _pushAppStateChangesToStore() {
+    store.dispatch(updatePanels(this.getPanels()));
+    store.dispatch(updateViewMode(this.getViewMode()));
+    store.dispatch(updateIsFullScreenMode(this.getFullScreenMode()));
+  }
+
+  registerChangeListener(callback) {
+    this.changeListeners.push(callback);
+  }
+
+  _handleStoreChanges() {
+    const { dashboardState } = store.getState();
+
+    // We need to run this comparison check or we can enter an infinite loop.
+    let differencesFound = false;
+    for (let i = 0; i < this.appState.panels.length; i++) {
+      const appStatePanel = this.appState.panels[i];
+      if (!_.isEqual(appStatePanel, dashboardState.panels[appStatePanel.panelIndex])) {
+        differencesFound = true;
+        break;
+      }
+    }
+
+    if (!differencesFound) {
+      return;
+    }
+
+    // The only state that the store deals with that appState cares about is the panels array. Every other state change
+    // (that appState cares about) is initiated from appState (e.g. view mode).
+    this.appState.panels = [];
+    _.map(dashboardState.panels, panel => {
+      this.appState.panels.push(panel);
+    });
+    this.changeListeners.forEach(listener => listener(status));
+    this.saveState();
   }
 
   getFullScreenMode() {
@@ -117,7 +181,7 @@ export class DashboardState {
     // The right way to fix this might be to ensure the defaults object stored on state is a deep
     // clone, but given how much code uses the state object, I determined that to be too risky of a change for
     // now.  TODO: revisit this!
-    this.stateDefaults = getStateDefaults(this.savedDashboard, this.hideWriteControls);
+    this.stateDefaults = getAppStateDefaults(this.savedDashboard, this.hideWriteControls);
     // The original query won't be restored by the above because the query on this.savedDashboard is applied
     // in place in order for it to affect the visualizations.
     this.stateDefaults.query = this.lastSavedDashboardFilters.query;
@@ -291,6 +355,13 @@ export class DashboardState {
     return this.appState.panels;
   }
 
+  updatePanel(panelIndex, panelAttributes) {
+    const updatedPanel = this.getPanels().find((panel) => panel.panelIndex === panelIndex);
+    Object.assign(updatedPanel, panelAttributes);
+    this.saveState();
+    return updatedPanel;
+  }
+
   /**
    * Creates and initializes a basic panel, adding it to the state.
    * @param {number} id
@@ -298,7 +369,9 @@ export class DashboardState {
    */
   addNewPanel(id, type) {
     const maxPanelIndex = PanelUtils.getMaxPanelIndex(this.getPanels());
-    this.getPanels().push(createPanelState(id, type, maxPanelIndex));
+    const newPanel = createPanelState(id, type, maxPanelIndex, this.getPanels());
+    this.getPanels().push(newPanel);
+    this.saveState();
   }
 
   removePanel(panelIndex) {
@@ -443,6 +516,7 @@ export class DashboardState {
    */
   switchViewMode(newMode) {
     this.appState.viewMode = newMode;
+    store.dispatch(updateViewMode(newMode));
     this.saveState();
   }
 
