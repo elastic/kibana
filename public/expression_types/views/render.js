@@ -18,6 +18,9 @@ export const render = () => new View('render', {
       displayName: 'Custom CSS',
       description: 'CSS will be scoped to your element',
       argType: 'textarea',
+      defaultValue: `".canvas__element {
+
+}"`,
       options: {
         confirm: 'Apply Stylesheet',
       },
