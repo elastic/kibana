@@ -1,4 +1,5 @@
 import angular from 'angular';
+import 'ui/visualize';
 
 import visualizationTemplate from './visualize_template.html';
 import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
