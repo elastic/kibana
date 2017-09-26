@@ -6,6 +6,12 @@ module.exports = function (plugin, run, options) {
   const cmd = (process.platform === 'win32') ? 'bin\\kibana.bat' : 'bin/kibana';
   let args = ['--dev', '--plugin-path', plugin.root];
 
+  if (Array.isArray(plugin.includePlugins)) {
+    plugin.includePlugins.forEach((path) => {
+      args = args.concat(['--plugin-path', path]);
+    });
+  }
+
   if (options.flags) {
     args = args.concat(options.flags);
   }

@@ -24,8 +24,12 @@ module.exports = function (root) {
     }
   });
 
-  // if the kibanaRoot is set, use resolve to ensure correct resolution
-  if (config.kibanaRoot) config.kibanaRoot = resolve(root, config.kibanaRoot);
+  // use resolve to ensure correct resolution of paths
+  const { kibanaRoot, includePlugins } = config;
+  if (kibanaRoot) config.kibanaRoot = resolve(root, kibanaRoot);
+  if (includePlugins) config.includePlugins = includePlugins.map(path => resolve(root, path));
+
+  // allow env setting to override kibana root from config
   if (KIBANA_ROOT_OVERRIDE) config.kibanaRoot = KIBANA_ROOT_OVERRIDE;
 
   return config;
