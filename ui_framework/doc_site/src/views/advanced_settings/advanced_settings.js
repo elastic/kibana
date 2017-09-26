@@ -326,7 +326,7 @@ export default class extends Component {
           label="sort:options"
           helpText="Options for the Elasticsearch sort parameter"
         >
-          <KuiFieldText value="unmapped_type: boolean" />
+          <KuiFieldText onChange={this.handleFormChange.bind(this)} value="unmapped_type: boolean" />
         </KuiFormRow>
 
         <KuiFormRow
@@ -334,7 +334,7 @@ export default class extends Component {
           label="dateFormat"
           helpText="When displaying a pretty formatted date, use this format"
         >
-          <KuiFieldText value="MMMM Do YYYY, HH:mm:ss.SSS" />
+          <KuiFieldText onChange={this.handleFormChange.bind(this)} value="MMMM Do YYYY, HH:mm:ss.SSS" />
         </KuiFormRow>
 
         <KuiFormRow
@@ -342,7 +342,7 @@ export default class extends Component {
           label="dateFormat:tz"
           helpText="Which timezone should be used. 'Browser' will use the timezone detected by your browser."
         >
-          <KuiFieldText value="Browser" />
+          <KuiFieldText onChange={this.handleFormChange.bind(this)} value="Browser" />
         </KuiFormRow>
 
         <KuiFormRow
@@ -350,7 +350,7 @@ export default class extends Component {
           label="dateFormat:dow"
           helpText="What day should weeks start on?"
         >
-          <KuiFieldText value="Sunday" />
+          <KuiFieldText onChange={this.handleFormChange.bind(this)} value="Sunday" />
         </KuiFormRow>
 
         <KuiFormRow
@@ -358,7 +358,7 @@ export default class extends Component {
           label="defaultIndex (Default: null) "
           helpText="The index to access if no index is set"
         >
-          <KuiFieldText value="null" />
+          <KuiFieldText onChange={this.handleFormChange.bind(this)} value="null" />
         </KuiFormRow>
       </KuiForm>
     );
