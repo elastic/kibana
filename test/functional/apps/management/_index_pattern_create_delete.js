@@ -5,7 +5,6 @@ export default function ({ getService, getPageObjects }) {
   const remote = getService('remote');
   const log = getService('log');
   const retry = getService('retry');
-  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['settings', 'common']);
 
   describe('creating and deleting default index', function describeIndexTests() {
@@ -31,7 +30,6 @@ export default function ({ getService, getPageObjects }) {
       it('should have index pattern in page header', async function () {
         const indexPageHeading = await PageObjects.settings.getIndexPageHeading();
         const patternName = await indexPageHeading.getVisibleText();
-        screenshots.take('Settings-indices-new-index-pattern');
         expect(patternName).to.be('logstash-*');
       });
 
@@ -77,7 +75,6 @@ export default function ({ getService, getPageObjects }) {
         const expectedAlertText = 'Are you sure you want to remove this index pattern?';
         return PageObjects.settings.removeIndexPattern()
         .then(function (alertText) {
-          screenshots.take('Settings-indices-confirm-remove-index-pattern');
           expect(alertText).to.be(expectedAlertText);
         });
       });

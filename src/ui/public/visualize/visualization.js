@@ -127,6 +127,7 @@ uiModules
           return;
         }
         $scope.addLegend = $scope.vis.params.addLegend;
+        $scope.vis.refreshLegend++;
         $timeout(renderFunction);
       });
 

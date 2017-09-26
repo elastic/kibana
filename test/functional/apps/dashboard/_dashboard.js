@@ -12,7 +12,6 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
   const remote = getService('remote');
-  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize']);
 
   describe('dashboard tab', function describeIndexTests() {
@@ -29,8 +28,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should be able to add visualizations to dashboard', async function addVisualizations() {
-      await screenshots.take('Dashboard-no-visualizations');
-
       // This flip between apps fixes the url so state is preserved when switching apps in test mode.
       // Without this flip the url in test mode looks something like
       // "http://localhost:5620/app/kibana?_t=1486069030837#/dashboard?_g=...."
@@ -42,7 +39,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
 
       log.debug('done adding visualizations');
-      await screenshots.take('Dashboard-add-visualizations');
     });
 
     it('set the timepicker time to that which contains our test data', async function setTimepicker() {
@@ -59,7 +55,6 @@ export default function ({ getService, getPageObjects }) {
         log.debug('now re-load previously saved dashboard');
         return PageObjects.dashboard.loadSavedDashboard(dashboardName);
       });
-      await screenshots.take('Dashboard-load-saved');
     });
 
     it('should have all the expected visualizations', function checkVisualizations() {
@@ -71,7 +66,6 @@ export default function ({ getService, getPageObjects }) {
         });
       })
       .then(function () {
-        screenshots.take('Dashboard-has-visualizations');
       });
     });
 
