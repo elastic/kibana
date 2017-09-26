@@ -24,9 +24,7 @@ typeahead.directive('kbnTypeahead', function () {
 
       this.submit = () => {
         const item = this.items[this.selectedIndex];
-        if (item) {
-          this.onSelect({ item });
-        }
+        this.onSelect({ item });
         this.selectedIndex = null;
       };
 
@@ -51,7 +49,12 @@ typeahead.directive('kbnTypeahead', function () {
 
       this.onKeyDown = (event) => {
         // Prevent up/down from moving the cursor in the input
-        if (this.isVisible() && [UP, DOWN].includes(event.keyCode)) {
+        const isUpOrDownArrow = [UP, DOWN].includes(event.keyCode);
+
+        // Prevent enter from submitting the form if there is a selection
+        const isEnterWithSelection = event.keyCode === ENTER && this.selectedIndex !== null;
+
+        if (this.isVisible() && (isUpOrDownArrow || isEnterWithSelection)) {
           event.preventDefault();
         }
       };
@@ -61,7 +64,7 @@ typeahead.directive('kbnTypeahead', function () {
 
         this.isHidden = (keyCode === ESCAPE);
 
-        if ([TAB, ENTER].includes(keyCode)) {
+        if ([TAB, ENTER].includes(keyCode) && this.selectedIndex !== null) {
           this.submit();
         } else if (keyCode === UP) {
           this.selectPrevious();
