@@ -11,6 +11,7 @@ export default () => {
     time_field: '@timestamp',
     index_pattern: '*',
     interval: 'auto',
+    min_interval: '1ms',
     axis_position: 'left',
     axis_formatter: 'number',
     show_legend: 1
