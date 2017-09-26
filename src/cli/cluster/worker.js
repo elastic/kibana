@@ -39,10 +39,9 @@ module.exports = class Worker extends EventEmitter {
     this.clusterBinder = new BinderFor(cluster);
     this.processBinder = new BinderFor(process);
 
-    const argv = _.union(baseArgv, opts.argv || []);
     this.env = {
       kbnWorkerType: this.type,
-      kbnWorkerArgv: JSON.stringify(argv)
+      kbnWorkerArgv: JSON.stringify(baseArgv.concat(opts.argv || []))
     };
   }
 
