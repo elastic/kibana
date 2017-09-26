@@ -2307,26 +2307,12 @@ table {
   line-height: 1.5;
   text-align: center; }
 
-.kuiLink {
-  color: #4da1c0; }
-  .kuiLink:hover {
-    text-decoration: underline; }
-  .kuiLink:focus {
-    text-decoration: underline;
-    background: #275160; }
-  .kuiLink:hover {
-    color: #3985a1; }
-  .kuiLink:focus {
-    background: #275160;
-    outline: solid 3px #275160; }
+.kuiLink:hover {
+  text-decoration: underline; }
 
-.kuiLink.kuiLink--default {
-  color: #DDD; }
-  .kuiLink.kuiLink--default:hover {
-    color: #c4c4c4; }
-  .kuiLink.kuiLink--default:focus {
-    outline: solid 3px rgba(221, 221, 221, 0.1);
-    background-color: rgba(221, 221, 221, 0.1); }
+.kuiLink:focus {
+  text-decoration: underline;
+  background: #275160; }
 
 .kuiLink.kuiLink--subdued {
   color: #D9D9D9; }
