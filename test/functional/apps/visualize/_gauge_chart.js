@@ -3,7 +3,6 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
-  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
   describe('visualize app', function describeIndexTests() {
@@ -35,7 +34,6 @@ export default function ({ getService, getPageObjects }) {
         return retry.try(function tryingForTime() {
           return PageObjects.visualize.getGaugeValue()
           .then(function (metricValue) {
-            screenshots.take('Visualize-gauge-chart');
             expect(expectedCount).to.eql(metricValue[0].split('\n'));
           });
         });

@@ -76,7 +76,10 @@ This will be even more important when the fibers-based implementation is release
  - https://www.youtube.com/watch?v=ZCuYPiUIONs
 
 ### Prefer reactDirective over react-component
-reactDirective and react-component are two different ways of embedding react in angular. Using `react-component` means adding a bunch of components into angular, while `reactDirective` keeps them isolated, and is also a more succinct syntax.
+When using ngReact to embed your react components inside angular html, prefer
+reactDirective over react-component. You can read more about these two ngReact methods [here](https://github.com/ngReact/ngReact#features).
+Using `react-component` means adding a bunch of components into angular, while `reactDirective` keeps them isolated,
+and is also a more succinct syntax.
 
 Good:
 ```
@@ -160,6 +163,14 @@ export class ClickCounter extends React.Component {
   }
 }
 ```
+
+Also Bad:
+```
+  render() {
+    return <button className="kuiButton" onClick={this.onClick.bind(this)} />
+  }
+```
+
 Background: https://facebook.github.io/react/docs/handling-events.html
 There is also an eslint rule we should be able to turn on for this.
 

@@ -1,0 +1,61 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders RangeControlEditor 1`] = `
+<div>
+  <IndexPatternSelect
+    getIndexPatterns={[Function]}
+    onChange={[Function]}
+    value="indexPattern1"
+  />
+  <FieldSelect
+    filterField={[Function]}
+    getIndexPattern={[Function]}
+    indexPatternId="indexPattern1"
+    onChange={[Function]}
+    value="numberField"
+  />
+  <div
+    className="kuiSideBarFormRow"
+  >
+    <label
+      className="kuiSideBarFormRow__label"
+      htmlFor="stepSize-0"
+    >
+      Step Size
+    </label>
+    <div
+      className="kuiSideBarFormRow__control kuiFieldGroupSection--wide"
+    >
+      <input
+        className="kuiTextInput"
+        id="stepSize-0"
+        onChange={[Function]}
+        type="number"
+        value={1}
+      />
+    </div>
+  </div>
+  <div
+    className="kuiSideBarFormRow"
+  >
+    <label
+      className="kuiSideBarFormRow__label"
+      htmlFor="decimalPlaces-0"
+    >
+      Decimal Places
+    </label>
+    <div
+      className="kuiSideBarFormRow__control kuiFieldGroupSection--wide"
+    >
+      <input
+        className="kuiTextInput"
+        id="decimalPlaces-0"
+        min="0"
+        onChange={[Function]}
+        type="number"
+        value={0}
+      />
+    </div>
+  </div>
+</div>
+`;

@@ -21,12 +21,6 @@ export function VislibVisualizationsPointSeriesProvider() {
       }
     }
 
-    getStackedCount() {
-      return this.baseChart.chartConfig.series.reduce(function (sum, series) {
-        return series.mode === 'stacked' ? sum + 1 : sum;
-      }, 0);
-    }
-
     getGroupedCount() {
       const stacks = [];
       return this.baseChart.chartConfig.series.reduce((sum, series) => {
@@ -38,15 +32,6 @@ export function VislibVisualizationsPointSeriesProvider() {
         if (isStacked) stacks.push(valueAxis);
         return sum + 1;
       }, 0);
-    }
-
-    getStackedNum(data) {
-      let i = 0;
-      for (const seri of this.baseChart.chartConfig.series) {
-        if (seri.data === data) return i;
-        if (seri.mode === 'stacked') i++;
-      }
-      return 0;
     }
 
     getGroupedNum(data) {

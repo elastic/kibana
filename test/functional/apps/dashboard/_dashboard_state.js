@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.setTimepickerInDataRange();
       await PageObjects.dashboard.addVisualizations(['Visualization TileMap']);
       await PageObjects.dashboard.saveDashboard('No local edits');
+      await PageObjects.header.clickToastOK();
 
       await testSubjects.moveMouseTo('dashboardPanel');
       await PageObjects.visualize.openSpyPanel();

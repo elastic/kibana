@@ -27,7 +27,10 @@ should follow:
 |4.x >= 4.2     |5.x            |<<upgrade-standard,Standard upgrade>>
 |5.0.0 pre GA   |5.x            |<<upgrade-standard-reindex,Standard upgrade & reindex>>
 |5.x            |5.y            |<<upgrade-standard,Standard upgrade>> (where `y > x`)
-|5.x            |6.x            |<<upgrade-standard,Standard upgrade>> & <<migrating-6.0-index,Reindex transformation>>
+|5.x            |6.x            |<<upgrade-standard,Standard upgrade>>
+// & <<migrating-6.0-index,Reindex transformation>>
+|6.x            |6.y            |<<upgrade-standard,Standard upgrade>> (where `y > x`)
+|6.x            |7.x            |<<upgrade-standard,Standard upgrade>>
 |=======================================================================
 
 NOTE: Saved searches, visualizations, and dashboards created in Kibana 4.x or 5.x

@@ -26,9 +26,9 @@ export function TestSubjectsProvider({ getService }) {
       });
     }
 
-    async click(selector) {
+    async click(selector, timeout = defaultFindTimeout) {
       return await retry.try(async () => {
-        const element = await this.find(selector);
+        const element = await this.find(selector, timeout);
         await remote.moveMouseTo(element);
         await element.click();
       });
@@ -104,8 +104,13 @@ export function TestSubjectsProvider({ getService }) {
     }
 
     async moveMouseTo(selector) {
-      const element = await this.find(selector);
-      await remote.moveMouseTo(element);
+      // Wrapped in a retry because even though the find should do a stale element check of it's own, we seem to
+      // have run into a case where the element becomes stale after the find succeeds, throwing an error during the
+      // moveMouseTo function.
+      await retry.try(async () => {
+        const element = await this.find(selector);
+        await remote.moveMouseTo(element);
+      });
     }
 
     async _mapAll(selectorAll, mapFn) {

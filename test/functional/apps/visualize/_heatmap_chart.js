@@ -2,7 +2,6 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
-  const screenshots = getService('screenshots');
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
@@ -81,7 +80,6 @@ export default function ({ getService, getPageObjects }) {
           const data = await PageObjects.visualize.getHeatmapData();
           log.debug('data=' + data);
           log.debug('data.length=' + data.length);
-          screenshots.take('Visualize-heatmap-chart');
           expect(data).to.eql(expectedChartValues);
         });
       });

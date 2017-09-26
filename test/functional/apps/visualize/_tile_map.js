@@ -3,7 +3,6 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
-  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
 
   describe('tile map visualize app', function describeIndexTests() {
@@ -121,7 +120,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.zoomAllTheWayOut();
         const enabled = await PageObjects.visualize.getMapZoomOutEnabled();
         expect(enabled).to.be(false);
-        screenshots.take('map-at-zoom-0');
       });
 
       // See https://github.com/elastic/kibana/issues/13137 if this test starts failing intermittently
@@ -144,7 +142,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.selectTableInSpyPaneSelect();
         const data = await PageObjects.visualize.getDataTableData();
         await compareTableData(expectedPrecision2DataTable, data.trim().split('\n'));
-        screenshots.take('map-at-zoom-3');
         await PageObjects.visualize.closeSpyPanel();
       });
 
@@ -175,29 +172,31 @@ export default function ({ getService, getPageObjects }) {
        ** changed, then open the saved viz and check that it's back to the original data.
        */
       it('should save with zoom level and load, take screenshot', async function () {
+
         const expectedZoom5Data = [
-          '- 9q5 91 { "lat": 34.2934322102855, "lon": -118.57068326651722 }',
-          '- 9qc 89 { "lat": 38.64546895785822, "lon": -121.59105236401383 }',
-          '- dp3 79 { "lat": 41.68207651723318, "lon": -87.98703769162958 }',
-          '- dp8 77 { "lat": 43.00976789278256, "lon": -89.27605793496909 }',
-          '- dp6 74 { "lat": 41.468768046942316, "lon": -86.55083711737313 }',
-          '- 9qh 74 { "lat": 34.18319454366291, "lon": -117.426273193009 }',
-          '- 9y7 73 { "lat": 35.87868071952197, "lon": -96.3330221912275 }',
-          '- 9ys 71 { "lat": 37.31065319536228, "lon": -94.82038319412567 }',
-          '- 9yn 71 { "lat": 34.57203017311617, "lon": -92.17198946946104 }',
-          '- 9q9 70 { "lat": 37.327310177098425, "lon": -121.70855726221842 }'
+          `- 9q5 91 { "lat": 34.2934322102855, "lon": -118.57068326651722 }`,
+          `- 9qc 89 { "lat": 38.64546895785822, "lon": -121.59105236401383 }`,
+          `- 9qh 74 { "lat": 34.18319454366291, "lon": -117.426273193009 }`,
+          `- 9y7 73 { "lat": 35.87868071952197, "lon": -96.3330221912275 }`,
+          `- 9ys 71 { "lat": 37.31065319536228, "lon": -94.82038319412567 }`,
+          `- 9yn 71 { "lat": 34.57203017311617, "lon": -92.17198946946104 }`,
+          `- 9q9 70 { "lat": 37.327310177098425, "lon": -121.70855726221842 }`,
+          `- 9zv 65 { "lat": 44.39887339514322, "lon": -93.34879252386207 }`,
+          `- 9yu 65 { "lat": 38.83211174621605, "lon": -94.76601768729205 }`,
+          `- 9y6 64 { "lat": 35.743489960441366, "lon": -97.75019769280334 }`
         ];
+
         const expectedZoom6Data = [
-          '- c20g 16 { "lat": 45.59211894578766, "lon": -122.47455075674225 }',
-          '- c28c 13 { "lat": 48.0181491561234, "lon": -122.43847891688347 }',
-          '- c2e5 11 { "lat": 48.46440218389034, "lon": -119.51805034652352 }',
-          '- c262 10 { "lat": 46.56816971953958, "lon": -120.5440594162792 }',
-          '- c23n 10 { "lat": 47.51524904742837, "lon": -122.26747375912964 }',
-          '- 9rw6 10 { "lat": 42.59157135151327, "lon": -114.79671782813966 }',
-          '- c2mq 9 { "lat": 47.547698873095214, "lon": -116.18850083090365 }',
-          '- c27x 9 { "lat": 47.753206375055015, "lon": -118.7438936624676 }',
-          '- c25p 9 { "lat": 46.30563497543335, "lon": -119.30418533273041 }',
-          '- c209 9 { "lat": 45.29028058052063, "lon": -122.9347869195044 }'
+          `- c20g 16 { "lat": 45.59211894578766, "lon": -122.47455075674225 }`,
+          `- c28c 13 { "lat": 48.0181491561234, "lon": -122.43847891688347 }`,
+          `- c40b 11 { "lat": 56.34347582997923, "lon": -133.61804031343624 }`,
+          `- c2e5 11 { "lat": 48.46440218389034, "lon": -119.51805034652352 }`,
+          `- c262 10 { "lat": 46.56816971953958, "lon": -120.5440594162792 }`,
+          `- c23n 10 { "lat": 47.51524904742837, "lon": -122.26747375912964 }`,
+          `- 9rw6 10 { "lat": 42.59157135151327, "lon": -114.79671782813966 }`,
+          `- c2mq 9 { "lat": 47.547698873095214, "lon": -116.18850083090365 }`,
+          `- c27x 9 { "lat": 47.753206375055015, "lon": -118.7438936624676 }`,
+          `- c25p 9 { "lat": 46.30563497543335, "lon": -119.30418533273041 }`
         ];
         const vizName1 = 'Visualization TileMap';
 
@@ -240,8 +239,6 @@ export default function ({ getService, getPageObjects }) {
         compareTableData(expectedZoom5Data, actualReOpenedZoom5Data.trim().split('\n'));
 
         await PageObjects.visualize.closeSpyPanel();
-
-        await screenshots.take('Visualize-site-map');
       });
 
       it('should zoom in to level 10', function () {
