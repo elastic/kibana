@@ -19,14 +19,21 @@ module.directive('queryBar', function () {
     },
     controllerAs: 'queryBar',
     bindToController: true,
-    controller: callAfterBindingsWorkaround(function ($scope, config) {
+    controller: callAfterBindingsWorkaround(function ($scope, config, PersistedLog, filterFilter) {
       this.queryDocLinks = documentationLinks.query;
       this.appName = this.appName || 'global';
       this.availableQueryLanguages = queryLanguages;
       this.showLanguageSwitcher = config.get('search:queryLanguage:switcher:enable');
-      this.typeaheadKey = () => `${this.appName}-${this.query.language}`;
+
+      const persistedLog = new PersistedLog(`typeahead:${this.appName}-${this.query.language}`, {
+        maxLength: config.get('history:limit'),
+        filterDuplicates: true
+      });
 
       this.submit = () => {
+        if (this.localQuery.query) {
+          persistedLog.add(this.localQuery.query);
+        }
         this.onSubmit({ $query: this.localQuery });
       };
 
@@ -34,6 +41,15 @@ module.directive('queryBar', function () {
         this.localQuery.query = '';
         this.submit();
       };
+
+      this.onTypeaheadSelect = (item) => {
+        this.localQuery.query = item;
+        this.submit();
+      };
+
+      $scope.$watch('queryBar.localQuery.query', (query) => {
+        this.typeaheadItems = filterFilter(persistedLog.get(), query);
+      });
 
       $scope.$watch('queryBar.query', (newQuery) => {
         this.localQuery = Object.assign({}, newQuery);

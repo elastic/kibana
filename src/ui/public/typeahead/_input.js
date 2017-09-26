@@ -1,48 +1,25 @@
-import 'ui/notify/directives';
 import { uiModules } from 'ui/modules';
 const typeahead = uiModules.get('kibana/typeahead');
 
-
-typeahead.directive('kbnTypeaheadInput', function ($rootScope) {
-
+typeahead.directive('kbnTypeaheadInput', function () {
   return {
     restrict: 'A',
-    require: ['^ngModel', '^kbnTypeahead'],
-
-    link: function ($scope, $el, $attr, deps) {
-      const model = deps[0];
-      const typeaheadCtrl = deps[1];
-
-      typeaheadCtrl.setInputModel(model);
-
+    require: '^kbnTypeahead',
+    link: function ($scope, $el, $attr, typeahead) {
       // disable browser autocomplete
       $el.attr('autocomplete', 'off');
 
-      // handle keypresses
-      $el.on('keydown', function (ev) {
-        typeaheadCtrl.keypressHandler(ev);
-        digest();
+      $el.on('focus', () => {
+        $scope.$evalAsync(() => typeahead.onFocus());
       });
 
-      // update focus state based on the input focus state
-      $el.on('focus', function () {
-        typeaheadCtrl.setFocused(true);
-        digest();
+      $el.on('blur', () => {
+        $scope.$evalAsync(() => typeahead.onBlur());
       });
 
-      $el.on('blur', function () {
-        typeaheadCtrl.setFocused(false);
-        digest();
-      });
-
-      // unbind event listeners
-      $scope.$on('$destroy', function () {
+      $scope.$on('$destroy', () => {
         $el.off();
       });
-
-      function digest() {
-        $rootScope.$$phase || $scope.$digest();
-      }
     }
   };
 });

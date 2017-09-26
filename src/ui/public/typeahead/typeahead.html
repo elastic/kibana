@@ -1,0 +1,23 @@
+<div
+  class="typeahead"
+  ng-keydown="typeahead.onKeyDown($event)"
+  ng-keyup="typeahead.onKeyUp($event)"
+>
+  <ng-transclude></ng-transclude>
+  <div
+    class="typeahead-items"
+    ng-show="typeahead.isVisible()"
+    ng-mouseenter="typeahead.onMouseEnter()"
+    ng-mouseleave="typeahead.onMouseLeave()"
+  >
+    <div
+      class="typeahead-item"
+      ng-repeat="item in typeahead.items"
+      ng-class="{active: $index === typeahead.selectedIndex}"
+      ng-click="typeahead.submit()"
+      ng-mouseenter="typeahead.setSelectedIndex($index)"
+    >
+      {{item}}
+    </div>
+  </div>
+</div>
