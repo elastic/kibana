@@ -2376,6 +2376,14 @@ table {
     outline: solid 3px rgba(191, 77, 77, 0.1);
     background-color: rgba(191, 77, 77, 0.1); }
 
+.kuiLink.kuiLink--ghost {
+  color: #FFF; }
+  .kuiLink.kuiLink--ghost:hover {
+    color: #e6e6e6; }
+  .kuiLink.kuiLink--ghost:focus {
+    outline: solid 3px rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.1); }
+
 .kuiLoadingKibana {
   position: relative;
   display: inline-block; }

@@ -55,9 +55,11 @@ export default () => (
         </KuiLink>
       </li>
       <li>
-        <KuiLink color="ghost" href="#">
-          ghost
-        </KuiLink>
+        <span style={{ background: 'black' }}>
+          <KuiLink color="ghost" href="#">
+            ghost
+          </KuiLink>
+        </span>
       </li>
     </ul>
   </KuiText>
