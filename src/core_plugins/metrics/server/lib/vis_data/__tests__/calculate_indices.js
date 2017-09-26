@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { getParams, handleResponse } from '../calculate_indices';
+import { getParams, handleResponse, handleError } from '../calculate_indices';
 
 describe('calculateIndices', () => {
 
@@ -30,6 +30,22 @@ describe('calculateIndices', () => {
       });
     });
 
+  });
+
+  describe('handleError', () => {
+    it('should resolve a promise with an array with the index pattern', () => {
+      const error = new Error('_field_stats');
+      error.statusCode = 400;
+      return handleError('metricbeat-*')(error)
+        .then(resp => expect(resp).to.eql(['metricbeat-*']));
+    });
+
+    it('should reject a promise if the error is not field stats', () => {
+      const error = new Error('_');
+      error.statusCode = 404;
+      return handleError('metricbeat-*')(error)
+        .catch(err => expect(err instanceof Error).to.equal(true));
+    });
   });
 
   describe('handleResponse', () => {
