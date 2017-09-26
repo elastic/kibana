@@ -1,4 +1,5 @@
-import { flatten, values, first, last } from 'lodash';
+const percentileValueMatch = /\[([0-9\.]+)\]$/;
+import { startsWith, flatten, values, first, last } from 'lodash';
 import getDefaultDecoration from '../../helpers/get_default_decoration';
 import getSiblingAggValue from '../../helpers/get_sibling_agg_value';
 import getSplits from '../../helpers/get_splits';
@@ -30,14 +31,16 @@ export function mathAgg(resp, panel, series) {
       const mathSeries = splits.map((split) => {
         if (mathMetric.variables.length) {
           const splitData = mathMetric.variables.reduce((acc, v) => {
-            const metric = series.metrics.find(m => m.id === v.field);
+            const metric = series.metrics.find(m => startsWith(v.field, m.id));
             if (!metric) return acc;
             if (/_bucket$/.test(metric.type)) {
               acc[v.name] = split.timeseries.buckets.map(bucket => {
                 return [bucket.key, getSiblingAggValue(split, metric)];
               });
             } else {
-              acc[v.name] = split.timeseries.buckets.map(mapBucket(metric));
+              const percentileMatch = v.field.match(percentileValueMatch);
+              const m = percentileMatch ? { ...metric, percent: percentileMatch[1] } : { ...metric };
+              acc[v.name] = split.timeseries.buckets.map(mapBucket(m));
             }
             return acc;
           }, {});
