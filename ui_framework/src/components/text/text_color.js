@@ -10,6 +10,7 @@ const colorsToClassNameMap = {
   'accent': 'kuiTextColor--accent',
   'danger': 'kuiTextColor--danger',
   'warning': 'kuiTextColor--warning',
+  'ghost': 'kuiTextColor--ghost',
 };
 
 export const COLORS = Object.keys(colorsToClassNameMap);

@@ -6,6 +6,9 @@ import AccordionExample
 import AccessibilityExample
   from '../../views/accessibility/accessibility_example';
 
+import AdvancedSettingsExample
+  from '../../views/advanced_settings/advanced_settings_example';
+
 import BadgeExample
   from '../../views/badge/badge_example';
 
@@ -220,6 +223,10 @@ const components = [{
 }];
 
 const sandboxes = [{
+  name: 'AdvancedSettings',
+  component: AdvancedSettingsExample,
+  hasReact: true,
+}, {
   name: 'Kibana',
   component: KibanaSandbox,
   hasReact: true,

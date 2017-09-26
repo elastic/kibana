@@ -113,7 +113,8 @@ button {
   margin: 0;
   outline: none;
   font-size: 16px;
-  color: inherit; }
+  color: inherit;
+  font-size: inherit; }
   button:hover {
     cursor: pointer; }
 
@@ -1307,7 +1308,7 @@ table {
     -webkit-align-items: center;
         -ms-flex-align: center;
             align-items: center; }
-  .kuiFlexGroup.kuiFlexGroup--alignItemsFlexEnd {
+  .kuiFlexGroup.kuiFlexGroup--alignItemsEnd {
     -webkit-box-align: end;
     -webkit-align-items: flex-end;
         -ms-flex-align: end;
@@ -3166,10 +3167,20 @@ table {
     border-left: 2px solid #D9D9D9;
     border-left-color: #00A69B;
     background-color: #FFF; }
+  .kuiSideNavItem.kuiSideNavItem--indent {
+    margin-left: 16px;
+    font-size: 14px;
+    padding: 2px 8px;
+    border-left: 1px solid #D9D9D9;
+    border-left-color: #D9D9D9; }
+    .kuiSideNavItem.kuiSideNavItem--indent.kuiSideNavItem-isSelected {
+      border-left-color: #00A69B;
+      background-color: transparent;
+      box-shadow: none; }
   .kuiSideNavItem:hover {
     text-decoration: underline; }
   .kuiSideNavItem:focus {
-    background-color: #e6f2f6; }
+    background-color: #e6f2f6 !important; }
   .kuiSideNavItem:focus:not(.kuiSideNavItem-isSelected) {
     border: solid 1px #c1dfe9; }
 
@@ -3672,3 +3683,6 @@ table {
 
 .kuiTextColor.kuiTextColor--danger {
   color: #A30000 !important; }
+
+.kuiTextColor.kuiTextColor--ghost {
+  color: #FFF !important; }

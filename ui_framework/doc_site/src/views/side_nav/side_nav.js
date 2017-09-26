@@ -54,7 +54,7 @@ export default class extends Component {
           </button>
         </KuiSideNavItem>
 
-        <KuiSideNavItem isSelected>
+        <KuiSideNavItem>
           <button>
             Watches
           </button>
@@ -71,6 +71,30 @@ export default class extends Component {
         <KuiSideNavTitle>
           Kibana
         </KuiSideNavTitle>
+
+        <KuiSideNavItem isSelected>
+          <button>
+            Advanced settings
+          </button>
+        </KuiSideNavItem>
+
+        <KuiSideNavItem indent>
+          <button>
+            General
+          </button>
+        </KuiSideNavItem>
+
+        <KuiSideNavItem indent isSelected>
+          <button>
+            Timelion
+          </button>
+        </KuiSideNavItem>
+
+        <KuiSideNavItem indent>
+          <button>
+            Visualizations
+          </button>
+        </KuiSideNavItem>
 
         <KuiSideNavItem>
           <button>

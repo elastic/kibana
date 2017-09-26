@@ -22,7 +22,7 @@ const iconTypes = [
 ];
 
 export default () => (
-  <KuiFlexGrid columns="4">
+  <KuiFlexGrid columns={4}>
     {
       iconTypes.map(iconType => (
         <KuiFlexItem
