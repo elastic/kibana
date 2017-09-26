@@ -34,7 +34,6 @@ export function VislibVisTypeProvider(Private) {
         this.vis.vislibVis.on('click', this.vis.API.events.filter);
         this.vis.vislibVis.on('renderComplete', resolve);
         this.vis.vislibVis.render(esResponse, this.vis.getUiState());
-        this.vis.refreshLegend++;
       });
     }
 
