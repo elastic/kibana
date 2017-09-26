@@ -172,14 +172,16 @@ export function VislibVisualizationsPointSeriesProvider(Private) {
       function textFormatter() {
         return touchdownTmpl(callPlay(d3.event));
       }
-
-      /*const endzoneTT = new Tooltip('endzones', this.handler.el, textFormatter, null);
-      this.tooltips.push(endzoneTT);
-      endzoneTT.order = 0;
-      endzoneTT.showCondition = function inEndzone() {
+      function inEndzone() {
         return callPlay(d3.event).touchdown;
-      };
-      endzoneTT.render()(svg);*/
+      }
+      const endzoneTT = new Tooltip('endzones', this.handler.el, textFormatter, null, {
+        order: 0, // show endone tooltip first
+        showCondition: inEndzone,
+        updateContentOnMove: true
+      });
+      this.tooltips.push(endzoneTT);
+      endzoneTT.render()(svg);
     }
 
     calculateRadiusLimits(data) {

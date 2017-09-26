@@ -4,34 +4,59 @@ import { Binder } from 'ui/binder';
 import { positionTooltip } from './position_tooltip';
 import $ from 'jquery';
 
-let allContents = [];
-
 /**
  * Add tooltip and listeners to visualization elements
+ *
+ * All Tooltip instances populate a shared div element
+ * Each Tooltip instance with unique id manages a content container within the shared div element
  *
  * @class Tooltip
  * @constructor
  * @param el {HTMLElement} Reference to DOM element
  * @param formatter {Function} Tooltip formatter
  * @param events {Constructor} Allows tooltip to return event response data
+ * @param options {Object} Tooltip options
  */
-export function Tooltip(id, el, formatter, events) {
+export function Tooltip(id, el, formatter, events, options = {}) {
   if (!(this instanceof Tooltip)) {
-    return new Tooltip(id, el, formatter, events);
+    return new Tooltip(id, el, formatter, events, options);
   }
 
   this.id = id; // unique id for this tooltip type
   this.el = el;
-  this.order = 100; // higher ordered contents are rendered below the others
   this.formatter = formatter;
   this.events = events;
   this.containerClass = 'vis-wrapper';
   this.tooltipClass = 'vis-tooltip';
   this.tooltipSizerClass = 'vis-tooltip-sizing-clone';
-  this.showCondition = _.constant(true);
+  this.order = _.get(options, 'order', 100); // higher ordered contents are rendered below the others
+  this.showCondition = _.get(options, 'showCondition', _.constant(true));
+  this.updateContentOnMove = _.get(options, 'updateContentOnMove', false);
+  this.contentContainer = this.getContentContainer();
 
   this.binder = new Binder();
 }
+
+/**
+ * Get content container for Tooltip.
+ * Tooltips with the same id share a content container.
+ */
+Tooltip.prototype.getContentContainer = function () {
+  const $tooltip = this.$get();
+  const containerId = `vis-tooltip-container-${this.id}`;
+  const $container = $tooltip.find(`#${containerId}`);
+  if($container.length === 0) {
+    const contentContainer = $('<div>').attr('id', containerId).attr('data-order', this.order);
+    $tooltip.append(contentContainer);
+    $tooltip.children('div')
+    .sort((a, b) => {
+      return parseInt(a.getAttribute('data-order'), 10) - parseInt(b.getAttribute('data-order'), 10);
+    })
+    .detach().appendTo($tooltip);
+    return contentContainer;
+  }
+  return $container[0];
+};
 
 /**
  * Get jquery reference to the tooltip node
@@ -85,7 +110,6 @@ Tooltip.prototype.show = function () {
  */
 Tooltip.prototype.hide = function () {
   const $tooltip = this.$get();
-  allContents = [];
   $tooltip.css({
     visibility: 'hidden',
     left: '-500px',
@@ -121,10 +145,6 @@ Tooltip.prototype.render = function () {
    * @param {Object} selection D3 selection object
    */
   return function (selection) {
-    const $tooltip = self.$get();
-    const id = self.id;
-    const order = self.order;
-
     if (self.container === undefined || self.container !== d3.select(self.el).select('.' + self.containerClass)) {
       self.container = d3.select(self.el).select('.' + self.containerClass);
     }
@@ -141,47 +161,34 @@ Tooltip.prototype.render = function () {
     selection.each(function (d, i) {
       const element = d3.select(this);
 
-      function render(html) {
-        $tooltip.html(html);
-        self.show();
-        /*allContents = _.filter(allContents, function (content) {
-          return content.id !== id;
-        });
-
-        if (html) allContents.push({ id: id, html: html, order: order });
-
-        const allHtml = _(allContents)
-        .sortBy('order')
-        .pluck('html')
-        .compact()
-        .join('\n');
-
-        if (allHtml) {
-          $tooltip.html(allHtml);
-          self.show();
-        } else {
-          self.hide();
-        }*/
-      }
-
       self.binder.fakeD3Bind(this, 'mouseenter', function () {
-        /*if (!self.showCondition.call(element, d, i)) {
-          return render();
-        }*/
+        if (!self.showCondition.call(element, d, i)) {
+          self.contentContainer.empty();
+          return;
+        }
 
-        //console.log("element", element);
-        //console.log("d", d);
-        //console.log("i", i);
         const events = self.events ? self.events.eventResponse(d, i) : d;
-        //console.log("events", events);
-        return render(self.formatter(events));
+        self.contentContainer.html(self.formatter(events));
+        self.contentContainer.show();
+        self.show();
       });
 
       self.binder.fakeD3Bind(this, 'mousemove', function () {
+        if (!self.showCondition.call(element, d, i)) {
+          self.contentContainer.hide();
+          return;
+        }
+
+        if (self.updateContentOnMove) {
+          const events = self.events ? self.events.eventResponse(d, i) : d;
+          self.contentContainer.html(self.formatter(events));
+        }
+        self.contentContainer.show();
         self.show();
       });
 
       self.binder.fakeD3Bind(this, 'mouseleave', function () {
+        self.contentContainer.empty();
         self.hide();
       });
     });
@@ -189,6 +196,10 @@ Tooltip.prototype.render = function () {
 };
 
 Tooltip.prototype.destroy = function () {
+  this.contentContainer.remove();
+  if (this.formatter.destroy) {
+    this.formatter.destroy();
+  }
   this.hide();
   this.binder.destroy();
 };
