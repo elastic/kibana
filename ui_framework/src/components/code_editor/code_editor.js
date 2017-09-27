@@ -71,6 +71,7 @@ export class KuiCodeEditor extends Component {
           role="button"
           onClick={this.startEditing}
           onKeyDown={this.onKeyDownHint}
+          data-test-subj="codeEditorHint"
         >
           <p className="kuiText kuiVerticalRhythmSmall">
             Press Enter to start editing.
