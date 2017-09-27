@@ -49,7 +49,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const data = await PageObjects.visualize.getDataTableData();
-        await PageObjects.common.sleep(2000);
         const dataArray = data.replace(/,/g, '').split('\n');
         expect(dataArray.length).to.eql(20);
         const bucketStart = parseInt(dataArray[0], 10);
