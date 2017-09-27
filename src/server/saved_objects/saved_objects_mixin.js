@@ -1,4 +1,5 @@
 import { SavedObjectsClient } from './client';
+import { createEsAvailability } from './es_availability';
 
 import {
   createBulkGetRoute,
@@ -26,11 +27,13 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createGetRoute(prereqs));
   server.route(createUpdateRoute(prereqs));
 
+  const esAvailability = createEsAvailability(kbnServer);
+
   server.decorate('server', 'savedObjectsClientFactory', ({ callCluster }) => {
     return new SavedObjectsClient(
       server.config().get('kibana.index'),
-      server.getKibanaIndexMappingsDsl(),
-      callCluster
+      kbnServer.savedObjectMappings.getDsl(),
+      esAvailability.wrapCallClusterFunction(callCluster),
     );
   });
 

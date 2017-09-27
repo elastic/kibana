@@ -1,7 +1,7 @@
 import Boom from 'boom';
 import uuid from 'uuid';
 
-import { getRootType } from '../../mappings';
+import { getRootType } from '../mappings';
 
 import {
   getSearchDsl,
@@ -144,11 +144,25 @@ export class SavedObjectsClient {
       id: this._generateEsId(type, id),
       type: this._type,
       refresh: 'wait_for',
+      ignore: [404],
     });
 
-    if (response.found === false) {
+    const deleted = response.result === 'deleted';
+    if (deleted) {
+      return {};
+    }
+
+    // 404 might be because document is missing or index is missing,
+    // don't leak that implementation detail to the user
+    const docNotFound = response.result === 'not_found';
+    const indexNotFound = response.error && response.error.type === 'index_not_found_exception';
+    if (docNotFound || indexNotFound) {
       throw errors.decorateNotFoundError(Boom.notFound());
     }
+
+    throw new Error(
+      `Unexpected Elasticsearch DELETE response: ${JSON.stringify({ type, id, response, })}`
+    );
   }
 
   /**
@@ -188,6 +202,7 @@ export class SavedObjectsClient {
       size: perPage,
       from: perPage * (page - 1),
       _source: includedFields(type, fields),
+      ignore: [404],
       body: {
         version: true,
         ...getSearchDsl(this._mappings, {
@@ -201,6 +216,17 @@ export class SavedObjectsClient {
     };
 
     const response = await this._withKibanaIndex('search', esOptions);
+
+    if (response.status === 404) {
+      // 404 is only possible here if the index is missing, which
+      // is an implementation detail we don't want to leak
+      return {
+        page,
+        per_page: perPage,
+        total: 0,
+        saved_objects: []
+      };
+    }
 
     return {
       page,
@@ -249,13 +275,14 @@ export class SavedObjectsClient {
       saved_objects: response.docs.map((doc, i) => {
         const { id, type } = objects[i];
 
-        if (doc.found === false) {
+        if (!doc.found) {
           return {
             id,
             type,
             error: { statusCode: 404, message: 'Not found' }
           };
         }
+
         const time = doc._source.updated_at;
         return {
           id,
@@ -279,7 +306,16 @@ export class SavedObjectsClient {
     const response = await this._withKibanaIndex('get', {
       id: this._generateEsId(type, id),
       type: this._type,
+      ignore: [404]
     });
+
+    const docNotFound = response.found === false;
+    const indexNotFound = response.status === 404;
+    if (docNotFound || indexNotFound) {
+      // don't leak implementation details about why there was a 404
+      throw errors.decorateNotFoundError(Boom.notFound());
+    }
+
     const { updated_at: updatedAt } = response._source;
 
     return {
@@ -307,6 +343,7 @@ export class SavedObjectsClient {
       type: this._type,
       version: options.version,
       refresh: 'wait_for',
+      ignore: [404],
       body: {
         doc: {
           updated_at: time,
@@ -314,6 +351,11 @@ export class SavedObjectsClient {
         }
       },
     });
+
+    if (response.status === 404) {
+      // don't leak implementation details about why there was a 404
+      throw errors.decorateNotFoundError(Boom.notFound());
+    }
 
     return {
       id,

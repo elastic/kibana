@@ -1,4 +1,5 @@
-import { defaultsDeep, noop } from 'lodash';
+import { defaultsDeep } from 'lodash';
+import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
 
 function hydrateUserSettings(userSettings) {
   return Object.keys(userSettings)
@@ -17,17 +18,14 @@ function hydrateUserSettings(userSettings) {
  *  @property {string} options.id id of ui settings Elasticsearch doc
  *  @property {AsyncFunction} options.callCluster function that accepts a method name and
  *                            param object which causes a request via some elasticsearch client
- *  @property {AsyncFunction} [options.readInterceptor] async function that is called when the
- *                            UiSettingsService does a read() an has an oportunity to intercept the
- *                            request and return an alternate `_source` value to use.
  */
 export class UiSettingsService {
   constructor(options) {
     const {
       type,
       id,
+      buildNum,
       savedObjectsClient,
-      readInterceptor = noop,
       // we use a function for getDefaults() so that defaults can be different in
       // different scenarios, and so they can change over time
       getDefaults = () => ({}),
@@ -35,7 +33,7 @@ export class UiSettingsService {
 
     this._savedObjectsClient = savedObjectsClient;
     this._getDefaults = getDefaults;
-    this._readInterceptor = readInterceptor;
+    this._buildNum = buildNum;
     this._type = type;
     this._id = id;
   }
@@ -92,15 +90,29 @@ export class UiSettingsService {
   }
 
   async _write(changes) {
-    await this._savedObjectsClient.update(this._type, this._id, changes);
+    try {
+      await this._savedObjectsClient.update(this._type, this._id, changes);
+    } catch (error) {
+      const { isNotFoundError } = this._savedObjectsClient.errors;
+      if (!isNotFoundError(error)) {
+        throw error;
+      }
+
+      await createOrUpgradeSavedConfig({
+        id: this._id,
+        type: this._type,
+        buildNum: this._buildNum,
+        savedObjectsClient: this._savedObjectsClient,
+        log(...args) {
+          console.log('createOrUpgradeSavedConfig()', ...args);
+        },
+      });
+
+      await this._write(changes);
+    }
   }
 
   async _read(options = {}) {
-    const interceptValue = await this._readInterceptor(options);
-    if (interceptValue != null) {
-      return interceptValue;
-    }
-
     const {
       ignore401Errors = false
     } = options;

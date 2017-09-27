@@ -21,6 +21,7 @@ import {
   decorateConflictError,
   decorateEsUnavailableError,
   decorateGeneralError,
+  isEsUnavailableError,
 } from './errors';
 
 export function decorateEsError(error) {
@@ -33,7 +34,8 @@ export function decorateEsError(error) {
     error instanceof ConnectionFault ||
     error instanceof ServiceUnavailable ||
     error instanceof NoConnections ||
-    error instanceof RequestTimeout
+    error instanceof RequestTimeout ||
+    isEsUnavailableError(error)
   ) {
     return decorateEsUnavailableError(error, reason);
   }

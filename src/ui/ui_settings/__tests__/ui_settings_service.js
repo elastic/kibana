@@ -16,7 +16,6 @@ const chance = new Chance();
 
 function setup(options = {}) {
   const {
-    readInterceptor,
     getDefaults,
     defaults = {},
     esDocSource = {},
@@ -27,7 +26,6 @@ function setup(options = {}) {
     type: TYPE,
     id: ID,
     getDefaults: getDefaults || (() => defaults),
-    readInterceptor,
     savedObjectsClient,
   });
 
@@ -335,49 +333,6 @@ describe('ui settings', () => {
       const { uiSettings } = setup({ esDocSource });
       const result = await uiSettings.get('dateFormat');
       expect(result).to.equal('YYYY-MM-DD');
-    });
-  });
-
-  describe('readInterceptor() argument', () => {
-    describe('#getUserProvided()', () => {
-      it('returns a promise when interceptValue doesn\'t', () => {
-        const { uiSettings } = setup({ readInterceptor: () => ({}) });
-        expect(uiSettings.getUserProvided()).to.be.a(Promise);
-      });
-
-      it('returns intercept values', async () => {
-        const { uiSettings } = setup({
-          readInterceptor: () => ({
-            foo: 'bar'
-          })
-        });
-
-        expect(await uiSettings.getUserProvided()).to.eql({
-          foo: {
-            userValue: 'bar'
-          }
-        });
-      });
-    });
-
-    describe('#getAll()', () => {
-      it('merges intercept value with defaults', async () => {
-        const { uiSettings } = setup({
-          defaults: {
-            foo: { value: 'foo' },
-            bar: { value: 'bar' },
-          },
-
-          readInterceptor: () => ({
-            foo: 'not foo'
-          }),
-        });
-
-        expect(await uiSettings.getAll()).to.eql({
-          foo: 'not foo',
-          bar: 'bar'
-        });
-      });
     });
   });
 });
