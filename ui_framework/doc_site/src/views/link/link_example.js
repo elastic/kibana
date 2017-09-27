@@ -30,7 +30,10 @@ export default props => (
       text={
         <p>
           <KuiCode>KuiLink</KuiCode> will apply the correct styling onto
-          links and make sure the are accessible.
+          links and make sure the are accessible. Links can be passed a color.
+          Note that the <KuiCode>ghost</KuiCode> type should only be used on
+          dark backgrounds (regardless of theming). It will always create a white
+          link.
         </p>
       }
       demo={

@@ -1,14 +1,29 @@
 .kuiLink {
   @include kuiLink;
+}
 
-  color: $kuiLinkColor;
+$textColors: (
+  subdued: $kuiColorDarkShade,
+  primary: $kuiColorPrimary,
+  secondary: $kuiColorSecondary,
+  accent: $kuiColorAccent,
+  warning: $kuiColorWarning,
+  danger: $kuiColorDanger,
+  ghost: #FFF, // Ghost is special and a constant.
+);
 
-  &:hover {
-    color: darken($kuiLinkColor, 10%);
-  }
+// Create color modifiers based on the map
+@each $name, $color in $textColors {
+  .kuiLink.kuiLink--#{$name} {
+    color: $color;
 
-  &:focus {
-    background: $kuiFocusBackgroundColor;
-    outline: solid 3px $kuiFocusBackgroundColor;
+    &:hover {
+      color: darken($color, 10%);
+    }
+
+    &:focus {
+      outline: solid 3px transparentize($color, .9);
+      background-color: transparentize($color, .9);
+    }
   }
 }
