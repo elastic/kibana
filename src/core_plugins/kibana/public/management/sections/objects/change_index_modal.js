@@ -103,7 +103,7 @@ export class ChangeIndexModal extends React.Component {
               value={this.state.objects[indexPatternId].newIndexPatternId}
               onChange={this.onIndexChange.bind(this, indexPatternId)}
             >
-              <option value={indexPatternId}>-- None --</option>
+              <option value={indexPatternId}>Fix later</option>
               {this.props.indices.map((index, i) => {
                 return (
                   <option key={i} value={index.id}>
@@ -116,6 +116,28 @@ export class ChangeIndexModal extends React.Component {
         </KuiTableRow>
       );
     });
+
+    const TableComponent = () => (
+      <KuiTable className="kuiVerticalRhythm">
+        <KuiTableHeader>
+          <KuiTableHeaderCell width="300">
+            ID
+          </KuiTableHeaderCell>
+          <KuiTableHeaderCell width="50">
+            Count
+          </KuiTableHeaderCell>
+          <KuiTableHeaderCell>
+            Sample of affected objects
+          </KuiTableHeaderCell>
+          <KuiTableHeaderCell width="200">
+            New index pattern
+          </KuiTableHeaderCell>
+        </KuiTableHeader>
+        <KuiTableBody>
+          {rows}
+        </KuiTableBody>
+      </KuiTable>
+    );
 
     return (
       <KuiModalOverlay>
@@ -137,11 +159,11 @@ export class ChangeIndexModal extends React.Component {
                 Please select the index patterns you&apos;d like re-associated them with.
               </p>
             </KuiModalBodyText>
-            <KuiControlledTable>
-              <KuiToolBar>
-                <KuiToolBarSection>
-                  { totalIndexPatterns > perPage
-                    ?
+            { totalIndexPatterns > perPage
+              ?
+                <KuiControlledTable>
+                  <KuiToolBar>
+                    <KuiToolBarSection>
                       <KuiPager
                         startNumber={page + 1}
                         hasPreviousPage={page >= 1}
@@ -151,31 +173,13 @@ export class ChangeIndexModal extends React.Component {
                         onNextPage={() => this.setState({ page: page + 1 })}
                         onPreviousPage={() => this.setState({ page: page - 1 })}
                       />
-
-                    : null
-                  }
-                </KuiToolBarSection>
-              </KuiToolBar>
-              <KuiTable className="kuiVerticalRhythm">
-                <KuiTableHeader>
-                  <KuiTableHeaderCell width="300">
-                    ID
-                  </KuiTableHeaderCell>
-                  <KuiTableHeaderCell width="50">
-                    Count
-                  </KuiTableHeaderCell>
-                  <KuiTableHeaderCell>
-                    Sample of affected objects
-                  </KuiTableHeaderCell>
-                  <KuiTableHeaderCell width="200">
-                    New index pattern
-                  </KuiTableHeaderCell>
-                </KuiTableHeader>
-                <KuiTableBody>
-                  {rows}
-                </KuiTableBody>
-              </KuiTable>
-            </KuiControlledTable>
+                    </KuiToolBarSection>
+                  </KuiToolBar>
+                  <TableComponent/>
+                </KuiControlledTable>
+              :
+                <TableComponent/>
+            }
           </KuiModalBody>
 
           <KuiModalFooter>
