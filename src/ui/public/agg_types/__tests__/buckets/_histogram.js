@@ -59,11 +59,6 @@ describe('Histogram Agg', function () {
         const output = paramWriter.write({ interval: [] });
         expect(isNaN(output.params.interval)).to.be.ok();
       });
-
-      it('scales internval to ensure number of generated buckets are less than histogram:maxBars', function () {
-        const output = paramWriter.write({ interval: 100, autoBounds: { min: 0, max: 199999 } });
-        expect(output.params).to.have.property('interval', 2000);
-      });
     });
 
     describe('min_doc_count', function () {

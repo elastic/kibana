@@ -19,6 +19,13 @@ export function AggTypesBucketsHistogramProvider(Private, config) {
       return aggConfig.getFieldDisplayName();
     },
     createFilter: createFilter,
+    decorateAggConfig: function () {
+      return {
+        autoBounds: {
+          writable: true
+        }
+      };
+    },
     params: [
       {
         name: 'field',
@@ -47,7 +54,7 @@ export function AggTypesBucketsHistogramProvider(Private, config) {
             })
             .fetchAsRejectablePromise()
             .then((resp) => {
-              aggConfig.params.autoBounds = {
+              aggConfig.autoBounds = {
                 min: _.get(resp, 'aggregations.minAgg.value'),
                 max: _.get(resp, 'aggregations.maxAgg.value')
               };
@@ -57,8 +64,8 @@ export function AggTypesBucketsHistogramProvider(Private, config) {
           let interval = parseFloat(aggConfig.params.interval);
 
           // ensure interval does not create too many buckets and crash browser
-          if (aggConfig.params.autoBounds) {
-            const range = aggConfig.params.autoBounds.max - aggConfig.params.autoBounds.min;
+          if (aggConfig.autoBounds) {
+            const range = aggConfig.autoBounds.max - aggConfig.autoBounds.min;
             const bars = range / interval;
             if (bars > config.get('histogram:maxBars')) {
               const minInterval = range / config.get('histogram:maxBars');
@@ -75,11 +82,6 @@ export function AggTypesBucketsHistogramProvider(Private, config) {
 
           output.params.interval = interval;
         }
-      },
-
-      {
-        name: 'autoBounds',
-        write: _.noop,
       },
 
       {
