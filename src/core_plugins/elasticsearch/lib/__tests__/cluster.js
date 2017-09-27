@@ -34,6 +34,13 @@ describe('plugins/elasticsearch', function () {
       sinon.assert.calledOnce(cluster._noAuthClient.close);
     });
 
+    it('closes clients created with createClient', () => {
+      const client = cluster.createClient();
+      sinon.stub(client, 'close');
+      cluster.close();
+      sinon.assert.calledOnce(client.close);
+    });
+
     it('protects the config from changes', () => {
       const localRequestHeadersWhitelist = cluster.getRequestHeadersWhitelist();
       expect(localRequestHeadersWhitelist.length).to.not.equal(config.requestHeadersWhitelist);
