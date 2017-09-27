@@ -75,7 +75,13 @@ describe('SavedObjectsClient', () => {
 
   beforeEach(() => {
     callAdminCluster = sandbox.stub();
-    savedObjectsClient = new SavedObjectsClient('.kibana-test', mappings, callAdminCluster);
+
+    savedObjectsClient = new SavedObjectsClient({
+      index: '.kibana-test',
+      mappings,
+      callCluster: callAdminCluster,
+    });
+
     sandbox.stub(savedObjectsClient, '_getCurrentTime').returns(mockTimestamp);
     sandbox.stub(getSearchDslNS, 'getSearchDsl').returns({});
   });

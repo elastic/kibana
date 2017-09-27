@@ -27,11 +27,11 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createUpdateRoute(prereqs));
 
   server.decorate('server', 'savedObjectsClientFactory', ({ callCluster }) => {
-    return new SavedObjectsClient(
-      server.config().get('kibana.index'),
-      server.getKibanaIndexMappingsDsl(),
-      callCluster
-    );
+    return new SavedObjectsClient({
+      index: server.config().get('kibana.index'),
+      mappings: server.getKibanaIndexMappingsDsl(),
+      callCluster,
+    });
   });
 
   const savedObjectsClientCache = new WeakMap();
