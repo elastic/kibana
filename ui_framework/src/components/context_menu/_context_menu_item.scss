@@ -24,6 +24,14 @@
   &:focus {
     background-color: $kuiFocusAltBackgroundColor;
     box-shadow: none; /* 1 */
+
+    @include darkTheme {
+      background-color: transparent;
+    }
+  }
+
+  @include darkTheme {
+    color: #ffffff;
   }
 }
 

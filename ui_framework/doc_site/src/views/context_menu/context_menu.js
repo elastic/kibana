@@ -154,6 +154,7 @@ export default class extends Component {
         closePopover={this.closePopover.bind(this)}
         panelPaddingSize="none"
         withTitle
+        anchorPosition="left"
       >
         <KuiContextMenu
           initialPanelId={0}

@@ -899,6 +899,8 @@ main {
     pointer-events: none;
     -webkit-animation: kuiContextMenuPanelTxOutRight 250ms cubic-bezier(0.694, 0.0482, 0.335, 1);
             animation: kuiContextMenuPanelTxOutRight 250ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+  .theme-dark .kuiContextMenuPanel {
+    background-color: #777777; }
 
 .kuiContextMenuPanel--next {
   -webkit-transform: translateX(256px);
@@ -931,6 +933,10 @@ main {
   /**
    * 1. Overwrite default style.
    */ }
+  .theme-dark .kuiContextMenuPanelTitle {
+    background-color: #777777;
+    border-color: #444444;
+    color: #ffffff; }
   .kuiContextMenuPanelTitle:hover .kuiContextMenu__text, .kuiContextMenuPanelTitle:focus .kuiContextMenu__text {
     text-decoration: underline; }
   .kuiContextMenuPanelTitle:focus {
@@ -1030,6 +1036,10 @@ main {
     background-color: rgba(63, 168, 199, 0.2);
     box-shadow: none;
     /* 1 */ }
+    .theme-dark .kuiContextMenuItem:focus {
+      background-color: transparent; }
+  .theme-dark .kuiContextMenuItem {
+    color: #ffffff; }
 
 .kuiContextMenuItem__inner {
   display: -webkit-box;
@@ -3246,6 +3256,9 @@ main {
     -webkit-flex-grow: 0;
         -ms-flex-positive: 0;
             flex-grow: 0; }
+  .theme-dark .kuiPanelSimple {
+    background-color: #777777;
+    border-color: #444444; }
 
 .kuiPopover {
   display: inline-block;
@@ -3328,6 +3341,10 @@ main {
   border-bottom: 1px solid #D9D9D9;
   padding: 12px;
   font-size: 14px; }
+  .theme-dark .kuiPopoverTitle {
+    background-color: #777777;
+    border-color: #444444;
+    color: #ffffff; }
 
 .kuiEmptyTablePrompt {
   display: -webkit-box;

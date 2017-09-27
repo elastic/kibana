@@ -33,7 +33,11 @@ export default props => (
         which itself can be wrapped around any component (like a button in this example).
       </GuideText>
 
-      <GuideDemo>
+      <GuideDemo style={{ height: 280 }}>
+        <ContextMenu />
+      </GuideDemo>
+
+      <GuideDemo isDarkTheme={true} style={{ height: 280 }}>
         <ContextMenu />
       </GuideDemo>
     </GuideSection>

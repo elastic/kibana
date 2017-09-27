@@ -25,6 +25,10 @@
     pointer-events: none;
     animation: kuiContextMenuPanelTxOutRight $kuiAnimSpeedNormal $kuiAnimSlightResistance;
   }
+
+  @include darkTheme {
+    background-color: $kuiBackgroundColor--darkTheme;
+  }
 }
 
 .kuiContextMenuPanel--next {
