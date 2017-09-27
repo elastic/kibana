@@ -15,11 +15,11 @@ export function FilterBarLibMapGeoBoundingBoxProvider(Promise, courier) {
         // external factors e.g. a reindex. We only need the index in order to grab the field formatter, so we fallback
         // on displaying the raw value if the index is invalid.
         const topLeft = indexPattern
-        ? indexPattern.fields.byName[key].format.convert(params.top_left)
-        : JSON.stringify(params.top_left);
+          ? indexPattern.fields.byName[key].format.convert(params.top_left)
+          : JSON.stringify(params.top_left);
         const bottomRight = indexPattern
-         ? indexPattern.fields.byName[key].format.convert(params.bottom_right)
-         : JSON.stringify(params.bottom_right);
+          ? indexPattern.fields.byName[key].format.convert(params.bottom_right)
+          : JSON.stringify(params.bottom_right);
         const value = topLeft + ' to ' + bottomRight;
         return { type, key, value, params };
       }
