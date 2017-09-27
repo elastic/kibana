@@ -88,7 +88,7 @@ export class SavedObjectLoader {
    * @param size
    * @returns {Promise}
    */
-  find(search = '', size = 100) {
+  findAll(search = '', size = 100) {
     return this.savedObjectsClient.find(
       {
         type: this.lowercaseType,
@@ -101,8 +101,16 @@ export class SavedObjectLoader {
           total: resp.total,
           hits: resp.savedObjects
             .map((savedObject) => this.mapSavedObjectApiHits(savedObject))
-            .filter(savedObject => savedObject !== null)
         };
       });
+  }
+
+  find(search = '', size = 100) {
+    return this.findAll(search, size).then(resp => {
+      return {
+        total: resp.total,
+        hits: resp.hits.filter(savedObject => !savedObject.error)
+      };
+    });
   }
 }

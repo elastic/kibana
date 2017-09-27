@@ -29,7 +29,8 @@ app.service('savedVisualizations', function (Promise, kbnIndex, SavedVis, Privat
     }
 
     if (!typeName || !visTypes.byName[typeName]) {
-      return null;
+      source.error = 'Unknown visualization type';
+      return source;
     }
 
     source.type = visTypes.byName[typeName];
