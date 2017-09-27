@@ -1,6 +1,6 @@
 .kuiBottomBar {
-  background: tintOrShade($kuiColorFullShade, 25%, 90%);
-  color: $kuiColorEmptyShade;
+  background-color: $kuiColorEmptyShade;
+  border-top: $kuiBorderThin;
   position: fixed;
   bottom: 0;
   right: 0;
