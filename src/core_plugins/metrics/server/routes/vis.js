@@ -9,7 +9,8 @@ export default (server) => {
       getVisData(req)
         .then(reply)
         .catch(err => {
-          reply(Boom.wrap(err, 400));
+          if (err.isBoom && err.status === 401) return reply(err);
+          reply(Boom.wrap(err, 500));
         });
     }
   });
