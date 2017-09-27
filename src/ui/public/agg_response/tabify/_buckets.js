@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 export function AggResponseBucketsProvider() {
 
-  function Buckets(aggResp) {
+  function Buckets(aggResp, aggParams) {
     if (_.has(aggResp, 'buckets')) {
       this.buckets = aggResp.buckets;
     } else {
@@ -18,6 +18,8 @@ export function AggResponseBucketsProvider() {
     } else {
       this.length = this.buckets.length;
     }
+
+    if (this.length && aggParams) this._orderBucketsAccordingToParams(aggParams);
   }
 
   Buckets.prototype.forEach = function (fn) {
@@ -34,7 +36,7 @@ export function AggResponseBucketsProvider() {
     }
   };
 
-  Buckets.prototype.orderBucketsAccordingToParams = function (params) {
+  Buckets.prototype._orderBucketsAccordingToParams = function (params) {
     if (params.filters && this.objectMode) {
       this._keys = params.filters.map(filter => {
         return filter.label || filter.input.query || '*';

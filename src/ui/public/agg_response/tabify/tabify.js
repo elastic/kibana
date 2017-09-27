@@ -35,9 +35,8 @@ export function AggResponseTabifyProvider(Private, Notifier) {
 
     switch (agg.schema.group) {
       case 'buckets':
-        const buckets = new Buckets(bucket[agg.id]);
+        const buckets = new Buckets(bucket[agg.id], agg.params);
         if (buckets.length) {
-          buckets.orderBucketsAccordingToParams(agg.params);
           const splitting = write.canSplit && agg.schema.name === 'split';
           if (splitting) {
             write.split(agg, buckets, function forEachBucket(subBucket, key) {
