@@ -19,6 +19,10 @@ export function FilterBarLibMapRangeProvider(Promise, courier) {
       let right = has(params, 'lte') ? params.lte : params.lt;
       if (right == null) right = Infinity;
 
+      // Sometimes a filter will end up with an invalid index param. This could happen for a lot of reasons,
+      // for example a user might manually edit the url or the index pattern's ID might change due to
+      // external factors e.g. a reindex. We only need the index in order to grab the field formatter, so we fallback
+      // on displaying the raw value if the index is invalid.
       let value = `${left} to ${right}`;
       if (indexPattern) {
         const convert = indexPattern.fields.byName[key].format.getConverterFor('text');
