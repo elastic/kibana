@@ -197,6 +197,11 @@ export default () => Joi.object({
       }))
     }))
   }).default(),
+
+  savedObjects: Joi.object({
+    indexCheckTimeout: Joi.string().default('2.5s').regex(/^\d+(\.\d)?[sm]$/, 'number with optional decimal and either s or m suffix')
+  }),
+
   uiSettings: Joi.object({
     // this is used to prevent the uiSettings from initializing. Since they
     // require the elasticsearch plugin in order to function we need to turn

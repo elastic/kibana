@@ -26,11 +26,30 @@ export function savedObjectsMixin(kbnServer, server) {
   server.route(createGetRoute(prereqs));
   server.route(createUpdateRoute(prereqs));
 
+  async function onBeforeWrite() {
+    const adminCluster = server.plugins.elasticsearch.getCluster('admin');
+
+    try {
+      await adminCluster.callWithInternalUser('cluster.health', {
+        timeout: server.config().get('savedObjects.indexCheckTimeout'),
+        index: server.config().get('kibana.index'),
+        waitForStatus: 'yellow',
+      });
+    } catch (error) {
+      if (error && error.body && error.body.status === 'red') {
+        server.log(['debug', 'savedObjects'], `Attempted to write to the Kibana index when it didn't exist.`);
+        throw new adminCluster.errors.NotFound();
+      }
+      throw error;
+    }
+  }
+
   server.decorate('server', 'savedObjectsClientFactory', ({ callCluster }) => {
     return new SavedObjectsClient({
       index: server.config().get('kibana.index'),
       mappings: server.getKibanaIndexMappingsDsl(),
       callCluster,
+      onBeforeWrite,
     });
   });
 

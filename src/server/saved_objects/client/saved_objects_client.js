@@ -1,5 +1,6 @@
 import Boom from 'boom';
 import uuid from 'uuid';
+import { noop } from 'lodash';
 
 import { getRootType } from '../../mappings';
 
@@ -17,11 +18,13 @@ export class SavedObjectsClient {
       index,
       mappings,
       callCluster,
+      onBeforeWrite = noop,
     } = options;
 
     this._index = index;
     this._mappings = mappings;
     this._type = getRootType(this._mappings);
+    this._onBeforeWrite = onBeforeWrite;
     this._unwrappedCallCluster = callCluster;
   }
 
@@ -46,7 +49,7 @@ export class SavedObjectsClient {
 
     const method = id && !overwrite ? 'create' : 'index';
     const time = this._getCurrentTime();
-    const response = await this._callCluster(method, {
+    const response = await this._writeToCluster(method, {
       id: this._generateEsId(type, id),
       type: this._type,
       index: this._index,
@@ -98,7 +101,7 @@ export class SavedObjectsClient {
       ];
     };
 
-    const { items } = await this._callCluster('bulk', {
+    const { items } = await this._writeToCluster('bulk', {
       index: this._index,
       refresh: 'wait_for',
       body: objects.reduce((acc, object) => ([
@@ -148,7 +151,7 @@ export class SavedObjectsClient {
    * @returns {promise}
    */
   async delete(type, id) {
-    const response = await this._callCluster('delete', {
+    const response = await this._writeToCluster('delete', {
       id: this._generateEsId(type, id),
       type: this._type,
       index: this._index,
@@ -314,7 +317,7 @@ export class SavedObjectsClient {
    */
   async update(type, id, attributes, options = {}) {
     const time = this._getCurrentTime();
-    const response = await this._callCluster('update', {
+    const response = await this._writeToCluster('update', {
       id: this._generateEsId(type, id),
       type: this._type,
       index: this._index,
@@ -335,6 +338,15 @@ export class SavedObjectsClient {
       version: response._version,
       attributes
     };
+  }
+
+  async _writeToCluster(method, params) {
+    try {
+      await this._onBeforeWrite();
+      return await this._callCluster(method, params);
+    } catch (err) {
+      throw decorateEsError(err);
+    }
   }
 
   async _callCluster(method, params) {
