@@ -4,24 +4,34 @@ import _ from 'lodash';
 import ReactGridLayout from 'react-grid-layout';
 import { PanelUtils } from '../panel/panel_utils';
 import { DashboardViewMode } from '../dashboard_view_mode';
-import { DashboardPanel } from '../panel/dashboard_panel';
+import { DashboardPanelContainer } from '../panel/dashboard_panel_container';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../dashboard_constants';
 import sizeMe from 'react-sizeme';
 
 const config = { monitorWidth: true };
 let lastValidGridSize = 0;
 
-function ResponsiveGrid({ size, isViewMode, layout, onLayoutChange, children }) {
+function ResponsiveGrid({ size, isViewMode, layout, onLayoutChange, children, hidden }) {
   // This is to prevent a bug where view mode changes when the panel is expanded.  View mode changes will trigger
   // the grid to re-render, but when a panel is expanded, the size will be 0. Minimizing the panel won't cause the
   // grid to re-render so it'll show a grid with a width of 0.
   lastValidGridSize = size.width > 0 ? size.width : lastValidGridSize;
+  let classNames = '';
+
+  if (hidden) {
+    classNames = 'layout-hidden';
+  } else if (isViewMode) {
+    classNames = 'layout-view';
+  } else {
+    classNames = 'layout-edit';
+  }
+
   // We can't take advantage of isDraggable or isResizable due to performance concerns:
   // https://github.com/STRML/react-grid-layout/issues/240
   return (
     <ReactGridLayout
       width={lastValidGridSize}
-      className={isViewMode ? 'layout-view' : 'layout-edit'}
+      className={classNames}
       isDraggable={true}
       isResizable={true}
       margin={[0, 0]}
@@ -54,8 +64,8 @@ export class DashboardGrid extends React.Component {
   }
 
   buildLayoutFromPanels() {
-    return this.props.panels.map(panel => {
-      if (panel.size_x || panel.size_y || panel.col || panel.row) {
+    return _.map(this.props.panels, panel => {
+      if (!panel.version) {
         PanelUtils.convertOldPanelData(panel);
       }
       return panel.gridData;
@@ -63,18 +73,19 @@ export class DashboardGrid extends React.Component {
   }
 
   onLayoutChange = (layout) => {
-    const { panels, getContainerApi } = this.props;
-    const containerApi = getContainerApi();
+    const { onPanelUpdated } = this.props;
     layout.forEach(panelLayout => {
-      const panelUpdated = _.find(panels, panel => panel.panelIndex.toString() === panelLayout.i);
-      panelUpdated.gridData = {
-        x: panelLayout.x,
-        y: panelLayout.y,
-        w: panelLayout.w,
-        h: panelLayout.h,
-        i: panelLayout.i,
+      const updatedPanel = {
+        panelIndex: panelLayout.i,
+        gridData: {
+          x: panelLayout.x,
+          y: panelLayout.y,
+          w: panelLayout.w,
+          h: panelLayout.h,
+          i: panelLayout.i,
+        }
       };
-      containerApi.updatePanel(panelUpdated.panelIndex, panelUpdated);
+      onPanelUpdated(updatedPanel);
     });
   };
 
@@ -95,16 +106,12 @@ export class DashboardGrid extends React.Component {
   renderDOM() {
     const {
       panels,
-      onPanelRemoved,
-      expandPanel,
-      isFullScreenMode,
       getEmbeddableHandler,
       getContainerApi,
-      dashboardViewMode
     } = this.props;
 
     // Part of our unofficial API - need to render in a consistent order for plugins.
-    const panelsInOrder = panels.slice(0);
+    const panelsInOrder = Object.keys(panels).map(key => panels[key]);
     panelsInOrder.sort((panelA, panelB) => {
       if (panelA.gridData.y === panelB.gridData.y) {
         return panelA.gridData.x - panelB.gridData.x;
@@ -113,21 +120,16 @@ export class DashboardGrid extends React.Component {
       }
     });
 
-    return panelsInOrder.map(panel => {
+    return _.map(panelsInOrder, panel => {
       return (
         <div
           key={panel.panelIndex.toString()}
           ref={reactGridItem => { this.gridItems[panel.panelIndex] = reactGridItem; }}
         >
-          <DashboardPanel
-            panel={panel}
-            onDeletePanel={onPanelRemoved}
-            onToggleExpanded={expandPanel}
-            isExpanded={false}
-            isFullScreenMode={isFullScreenMode}
-            getEmbeddableHandler={getEmbeddableHandler}
+          <DashboardPanelContainer
+            panelId={panel.panelIndex}
             getContainerApi={getContainerApi}
-            dashboardViewMode={dashboardViewMode}
+            embeddableHandler={getEmbeddableHandler(panel.type)}
             onPanelFocused={this.onPanelFocused}
             onPanelBlurred={this.onPanelBlurred}
           />
@@ -144,6 +146,7 @@ export class DashboardGrid extends React.Component {
         isViewMode={isViewMode}
         layout={this.buildLayoutFromPanels()}
         onLayoutChange={this.onLayoutChange}
+        hidden={this.props.hidden}
       >
         {this.renderDOM()}
       </ResponsiveSizedGrid>
@@ -152,12 +155,10 @@ export class DashboardGrid extends React.Component {
 }
 
 DashboardGrid.propTypes = {
-  isFullScreenMode: PropTypes.bool.isRequired,
-  panels: PropTypes.array.isRequired,
+  panels: PropTypes.object.isRequired,
   getContainerApi: PropTypes.func.isRequired,
   getEmbeddableHandler: PropTypes.func.isRequired,
   dashboardViewMode: PropTypes.oneOf([DashboardViewMode.EDIT, DashboardViewMode.VIEW]).isRequired,
-  expandPanel: PropTypes.func.isRequired,
-  onPanelRemoved: PropTypes.func.isRequired,
+  onPanelUpdated: PropTypes.func.isRequired,
+  hidden: PropTypes.bool
 };
-
