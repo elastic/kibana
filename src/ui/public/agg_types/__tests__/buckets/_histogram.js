@@ -61,7 +61,7 @@ describe('Histogram Agg', function () {
       });
 
       it('scales internval to ensure number of generated buckets are less than histogram:maxBars', function () {
-        const output = paramWriter.write({ interval: 100, min: 0, max: 199999 });
+        const output = paramWriter.write({ interval: 100, autoBounds: { min: 0, max: 199999 } });
         expect(output.params).to.have.property('interval', 2000);
       });
     });
