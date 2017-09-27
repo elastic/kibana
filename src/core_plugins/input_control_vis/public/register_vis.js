@@ -18,6 +18,7 @@ function InputControlVisProvider(Private) {
     description: 'Create interactive controls for easy dashboard manipulation.',
     category: CATEGORY.OTHER,
     isExperimental: true,
+    githubUrl: 'https://github.com/elastic/kibana/issues/12345',
     visualization: VisController,
     visConfig: {
       defaults: {
