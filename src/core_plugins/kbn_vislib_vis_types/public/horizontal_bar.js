@@ -80,6 +80,11 @@ export default function PointSeriesVisType(Private) {
           showCircles: true
         }],
         addTooltip: true,
+        tooltip: {
+          type: 'metric',
+          width: 400,
+          height: 300
+        },
         addLegend: true,
         legendPosition: 'right',
         times: [],

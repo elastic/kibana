@@ -1,7 +1,6 @@
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
 import { CATEGORY } from 'ui/vis/vis_category';
-import { TooltipTab } from 'ui/vis/editors/default/tooltip_tab';
 import pointSeriesTemplate from 'plugins/kbn_vislib_vis_types/editors/point_series.html';
 import image from './images/icon-vertical.svg';
 
@@ -79,15 +78,15 @@ export default function PointSeriesVisType(Private) {
           }
         ],
         addTooltip: true,
+        tooltip: {
+          type: 'metric',
+          width: 400,
+          height: 300
+        },
         addLegend: true,
         legendPosition: 'right',
         times: [],
         addTimeMarker: false,
-        tooltip: {
-          type: 'metric',
-          width: 250,
-          height: 150
-        }
       },
     },
     editorConfig: {
@@ -124,12 +123,7 @@ export default function PointSeriesVisType(Private) {
           editor: '<div><vislib-series></vislib-series><vislib-value-axes>' +
           '</vislib-value-axes><vislib-category-axis></vislib-category-axis></div>'
         },
-        { name: 'options', title: 'Panel Settings', editor: pointSeriesTemplate },
-        {
-          name: 'tooltip',
-          title: 'Tooltip',
-          editor: TooltipTab
-        }
+        { name: 'options', title: 'Panel Settings', editor: pointSeriesTemplate }
       ],
       schemas: new Schemas([
         {

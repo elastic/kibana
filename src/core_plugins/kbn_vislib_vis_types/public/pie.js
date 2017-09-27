@@ -19,14 +19,14 @@ export default function HistogramVisType(Private) {
       defaults: {
         type: 'pie',
         addTooltip: true,
-        addLegend: true,
-        legendPosition: 'right',
-        isDonut: false,
         tooltip: {
           type: 'metric',
-          width: 250,
-          height: 150
-        }
+          width: 400,
+          height: 300
+        },
+        addLegend: true,
+        legendPosition: 'right',
+        isDonut: false
       },
     },
     editorConfig: {

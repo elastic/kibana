@@ -77,6 +77,11 @@ export default function PointSeriesVisType(Private) {
           valueAxis: 'ValueAxis-1'
         }],
         addTooltip: true,
+        tooltip: {
+          type: 'metric',
+          width: 400,
+          height: 300
+        },
         addLegend: true,
         legendPosition: 'right',
         times: [],

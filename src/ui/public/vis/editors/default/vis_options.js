@@ -39,6 +39,10 @@ uiModules
       if (reactOptionsComponent) {
         renderReactComponent();
       } else {
+        // Angular templates may include reactDirectives. Provide those directives with the ability to set params.
+        $scope.setParam = (name, value) => {
+          $scope.vis.params[name] = value;
+        };
         const $editor = $compile($scope.editor)($scope);
         $optionContainer.append($editor);
       }
