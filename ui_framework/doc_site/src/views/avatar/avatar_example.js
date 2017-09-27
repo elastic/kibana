@@ -30,8 +30,9 @@ export default props => (
       text={
         <p>
           The <KuiCode>Avatar</KuiCode> component creates a user icon. It will
-          accept <KuiCode>name</KuiCode> (requred) and <KuiCode>image</KuiCode> props
-          and will configure the display and accessibility as needed.
+          accept <KuiCode>name</KuiCode> (required) and <KuiCode>image</KuiCode> props
+          and will configure the display and accessibility as needed. The background colors
+          come from the set of colors used for visualiations.
         </p>
       }
       demo={<Avatar />}
