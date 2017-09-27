@@ -3,6 +3,10 @@ export {
 } from './accordion';
 
 export {
+  KuiAvatar,
+} from './avatar';
+
+export {
   KuiKeyboardAccessible,
   KuiScreenReaderOnly,
 } from './accessibility';

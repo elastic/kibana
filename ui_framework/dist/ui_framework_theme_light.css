@@ -399,11 +399,14 @@ table {
     visibility: visible; }
 
 .kuiAvatar {
+  position: relative;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
   display: inline-block;
-  position: relative; }
+  background-size: cover;
+  color: #FFF;
+  text-align: center;
+  font-weight: 300;
+  text-shadow: 1px 1px rgba(0, 0, 0, 0.2); }
   .kuiAvatar:after {
     position: absolute;
     top: 0;
@@ -415,13 +418,29 @@ table {
     pointer-events: none;
     border: 1px solid rgba(0, 0, 0, 0.1); }
 
-.kuiAvatar--small {
-  width: 16px;
-  height: 16px; }
+.kuiAvatar--s {
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  font-size: 12px; }
 
-.kuiAvatar--large {
+.kuiAvatar--m {
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  font-size: 16px; }
+
+.kuiAvatar--l {
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  font-size: 24px; }
+
+.kuiAvatar--xl {
   width: 64px;
-  height: 64px; }
+  height: 64px;
+  line-height: 64px;
+  font-size: 32px; }
 
 .kuiBadge {
   font-size: 12px;
