@@ -17,7 +17,7 @@ const iconSizes = [
 ];
 
 export default () => (
-  <KuiFlexGrid columns="4">
+  <KuiFlexGrid columns={4}>
     {
       iconSizes.map(iconSize => (
         <KuiFlexItem

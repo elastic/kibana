@@ -5,7 +5,7 @@ import {
 } from 'react';
 import classNames from 'classnames';
 
-export const KuiSideNavItem = ({ children, isSelected }) => {
+export const KuiSideNavItem = ({ children, indent, isSelected }) => {
   const child = Children.only(children);
 
   const classes = classNames(
@@ -13,6 +13,7 @@ export const KuiSideNavItem = ({ children, isSelected }) => {
     'kuiSideNavItem',
     {
       'kuiSideNavItem-isSelected': isSelected,
+      'kuiSideNavItem--indent': indent,
     }
   );
 
@@ -23,4 +24,5 @@ export const KuiSideNavItem = ({ children, isSelected }) => {
 
 KuiSideNavItem.propTypes = {
   isSelected: PropTypes.bool,
+  indent: PropTypes.bool,
 };

@@ -88,6 +88,7 @@ button {
   outline: none;
   font-size: $kuiFontSize;
   color: inherit;
+  font-size: inherit;
 
   &:hover {
     cursor: pointer;
