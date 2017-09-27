@@ -91,7 +91,19 @@ export default function PointSeriesVisType(Private) {
     },
     editorConfig: {
       collections: {
-        positions: ['top', 'left', 'right', 'bottom'],
+        legendPositions: [{
+          value: 'left',
+          text: 'left',
+        }, {
+          value: 'right',
+          text: 'right',
+        }, {
+          value: 'top',
+          text: 'top',
+        }, {
+          value: 'bottom',
+          text: 'bottom',
+        }],
         chartTypes: [{
           value: 'line',
           text: 'line'
