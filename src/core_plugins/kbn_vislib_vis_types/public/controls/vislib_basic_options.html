@@ -1,20 +1,21 @@
 <div>
-  <div class="vis-option-item">
-    <label for="visualizeBasicSettingsLegendPosition">
+  <div class="kuiSideBarFormRow">
+    <label class="kuiSideBarFormRow__label" for="legendPosition">
       Legend Position
     </label>
-    <select
-      id="visualizeBasicSettingsLegendPosition"
-      class="form-control"
-      ng-model="vis.params.legendPosition"
-      ng-options="position.value as position.text for position in vis.type.editorConfig.collections.legendPositions"
-    >
-    </select>
+    <div class="kuiSideBarFormRow__control">
+      <select
+        id="legendPosition"
+        class="kuiSelect kuiSideBarSelect"
+        ng-model="vis.params.legendPosition"
+        ng-options="position for position in ['top', 'left', 'right', 'bottom']"
+      ></select>
+    </div>
   </div>
-  <div class="vis-option-item">
-    <label id="visualizeBasicSettingsShowTooltip">
-      <input type="checkbox" ng-model="vis.params.addTooltip">
-      Show Tooltip
-    </label>
-  </div>
+
+  <tooltip-options
+    params="vis.params"
+    set-param="setParam"
+    saved-objects-client="vis.API.savedObjectsClient"
+  ></tooltip-options>
 </div>

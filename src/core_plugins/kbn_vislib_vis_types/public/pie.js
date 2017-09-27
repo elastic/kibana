@@ -1,7 +1,6 @@
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
 import { CATEGORY } from 'ui/vis/vis_category';
-import { TooltipTab } from 'ui/vis/editors/default/tooltip_tab';
 import pieTemplate from 'plugins/kbn_vislib_vis_types/editors/pie.html';
 import image from './images/icon-pie.svg';
 
@@ -45,18 +44,7 @@ export default function HistogramVisType(Private) {
           text: 'bottom',
         }],
       },
-      optionTabs: [
-        {
-          name: 'options',
-          title: 'Options',
-          editor: pieTemplate
-        },
-        {
-          name: 'tooltip',
-          title: 'Tooltip',
-          editor: TooltipTab
-        }
-      ],
+      optionsTemplate: pieTemplate,
       schemas: new Schemas([
         {
           group: 'metrics',

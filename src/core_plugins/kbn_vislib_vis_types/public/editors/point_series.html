@@ -7,25 +7,7 @@
       </div>
     </div>
 
-    <div class="kuiSideBarFormRow">
-      <label class="kuiSideBarFormRow__label" for="legendPosition">
-        Legend Position
-      </label>
-      <div class="kuiSideBarFormRow__control">
-        <select
-          id="legendPosition"
-          class="kuiSelect kuiSideBarSelect"
-          ng-model="vis.params.legendPosition"
-          ng-options="position for position in ['top', 'left', 'right', 'bottom']"
-        ></select>
-      </div>
-    </div>
-
-    <tooltip-options
-      params="vis.params"
-      set-param="setParam"
-      saved-objects-client="vis.API.savedObjectsClient"
-    ></tooltip-options>
+    <vislib-basic-options></vislib-basic-options>
 
     <div class="kuiSideBarFormRow" ng-show="vis.hasSchemaAgg('segment', 'date_histogram')">
       <label class="kuiSideBarFormRow__label" for="currentTimeMarker">

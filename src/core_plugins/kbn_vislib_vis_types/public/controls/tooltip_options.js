@@ -139,7 +139,7 @@ export function TooltipOptions(props) {
   let visSelect = null;
   let tooltipWidth = null;
   let tooltipHeight = null;
-  if (props.params.addTooltip) {
+  if (props.params.addTooltip && props.params.tooltip) {
     tooltipType = renderTooltipType();
     if (props.params.tooltip.type === 'vis') {
       visSelect = renderVisSelect();
