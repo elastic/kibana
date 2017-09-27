@@ -7,7 +7,7 @@ $textColors: (
   accent: $kuiColorAccent,
   warning: $kuiColorWarning,
   danger: $kuiColorDanger,
-  ghost: #FFF, // Ghost is a special case.
+  ghost: $kuiColorGhost,
 );
 
 // Create color modifiers based on the map
