@@ -1,6 +1,7 @@
 import './typeahead.less';
+import './typeahead_input';
+import './typeahead_item';
 import template from './typeahead.html';
-import './_input';
 import { comboBoxKeyCodes } from 'ui_framework/services';
 import { uiModules } from 'ui/modules';
 
@@ -14,6 +15,7 @@ typeahead.directive('kbnTypeahead', function () {
     restrict: 'E',
     scope: {
       items: '=',
+      itemTemplate: '=',
       onSelect: '&'
     },
     bindToController: true,

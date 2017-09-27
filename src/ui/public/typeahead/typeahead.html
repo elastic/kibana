@@ -17,7 +17,11 @@
       ng-click="typeahead.submit()"
       ng-mouseenter="typeahead.setSelectedIndex($index)"
     >
-      {{item}}
+      <kbn-typeahead-item
+        item="item"
+        template="typeahead.itemTemplate"
+      >
+      </kbn-typeahead-item>
     </div>
   </div>
 </div>
