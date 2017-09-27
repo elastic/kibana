@@ -24,7 +24,7 @@ export default () => (
         >
           button
         </KuiLink>
-      )} with an onClick event.
+      )} with an onClick handler.
 
     </p>
     <p>Links can be colored as well.</p>
