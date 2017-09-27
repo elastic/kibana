@@ -7,6 +7,7 @@ import chrome from 'ui/chrome';
  *
  * @typedef {Object} PanelState
  * @property {number} id - Id of the visualization contained in the panel.
+ * @property {string} version - Version of Kibana this panel was created in.
  * @property {string} type - Type of the visualization in the panel.
  * @property {number} panelIndex - Unique id to represent this panel in the grid. Note that this is
  * NOT the index in the panels array. While it may initially represent that, it is not
