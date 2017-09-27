@@ -1,4 +1,3 @@
-import { bindKey } from 'lodash';
 import { clientLogger } from './client_logger';
 
 export function createDataCluster(server) {
@@ -18,10 +17,8 @@ export function createDataCluster(server) {
     return config.get('elasticsearch');
   }
 
-  const dataCluster = server.plugins.elasticsearch.createCluster(
+  server.plugins.elasticsearch.createCluster(
     'data',
     Object.assign({ log: DataClientLogging }, getConfig())
   );
-
-  server.on('close', bindKey(dataCluster, 'close'));
 }
