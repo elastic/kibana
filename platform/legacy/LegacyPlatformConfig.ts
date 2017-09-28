@@ -1,8 +1,5 @@
-import { Observable } from 'rxjs/Observable';
-
 import { RawConfig } from '../config/RawConfigService';
 import { ConfigPath } from '../config/ConfigService';
-import { LegacyKbnServer } from './LegacyKbnServer';
 
 /**
  * Represents legacy Kibana config class.
@@ -29,7 +26,7 @@ interface LegacyLoggingConfig {
  * Represents adapter between config provided by legacy platform and `RawConfig`
  * supported by the current platform.
  */
-class LegacyConfigToRawConfigAdapter implements RawConfig {
+export class LegacyConfigToRawConfigAdapter implements RawConfig {
   constructor(private readonly legacyConfig: LegacyConfig) {}
 
   get(configPath: ConfigPath) {
@@ -120,12 +117,3 @@ class LegacyConfigToRawConfigAdapter implements RawConfig {
     };
   }
 }
-
-/**
- * @internal
- */
-export const getLegacyConfig$ = (kbnServer: LegacyKbnServer) => {
-  return Observable.from([
-    new LegacyConfigToRawConfigAdapter(kbnServer.config)
-  ]) as Observable<RawConfig>;
-};
