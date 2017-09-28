@@ -2,7 +2,7 @@ import React from 'react';
 import { render, mount } from 'enzyme';
 import {
   requiredProps,
-  snapshotComponent,
+  takeMountedSnapshot,
 } from '../../test';
 
 import { KuiContextMenu } from './context_menu';
@@ -89,13 +89,13 @@ describe('KuiContextMenu', () => {
           />
         );
 
-        expect(snapshotComponent(component))
+        expect(takeMountedSnapshot(component))
           .toMatchSnapshot();
 
         // Navigate to a different panel.
         component.find('[data-test-subj="contextMenuPanelTitleButton"]').simulate('click');
 
-        expect(snapshotComponent(component))
+        expect(takeMountedSnapshot(component))
           .toMatchSnapshot();
       });
     });
@@ -118,7 +118,7 @@ describe('KuiContextMenu', () => {
         component.setProps({ isVisible: false });
         component.setProps({ isVisible: true });
 
-        expect(snapshotComponent(component))
+        expect(takeMountedSnapshot(component))
           .toMatchSnapshot();
       });
     });
