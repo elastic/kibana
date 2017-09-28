@@ -62,9 +62,6 @@ export function EmbeddedTooltipFormatterProvider($rootScope, $compile, Private, 
         requestHandler($tooltipScope.vis, appState, $tooltipScope.uiState, queryFilter, searchSource)
         .then(requestHandlerResponse => {
           return responseHandler($tooltipScope.vis, requestHandlerResponse);
-        }, e => {
-          // TODO display error message in popup text
-          console.log(e);
         })
         .then(resp => {
           const $popup = $(`#${executionId}`);
@@ -83,9 +80,6 @@ export function EmbeddedTooltipFormatterProvider($rootScope, $compile, Private, 
             $tooltipScope.visData = resp;
             $tooltipScope.$apply();
           }
-        }, e => {
-          // TODO display error message in popup text
-          console.log(e);
         });
       }
 

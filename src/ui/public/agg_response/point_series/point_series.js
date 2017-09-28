@@ -21,7 +21,7 @@ export function AggResponsePointSeriesProvider(Private) {
     const chart = {};
     const aspects = chart.aspects = getAspects(vis, table);
 
-    if (_.get(vis, 'params.tooltip.type') === 'vis' && _.has(vis, 'params.tooltip.vis') ) {
+    if (_.get(vis, 'params.tooltip.type') === 'vis' && _.has(vis, 'params.tooltip.vis')) {
       chart.tooltipFormatter = embeddedTooltipFormatter(vis);
     } else {
       chart.tooltipFormatter = metricTooltipFormatter;

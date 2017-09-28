@@ -18,10 +18,6 @@ export function CallResponseHandlersProvider(Private, Promise) {
       let resp = responses[i];
 
       if (!resp) {
-        console.log("requests", requests);
-        console.log("responses", responses);
-        console.log("bad request", req);
-        notify.warning("No response for request");
         return;
       }
       if (resp.timed_out) {
