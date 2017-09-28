@@ -6,6 +6,8 @@ import { PageControls } from '../paginate_controls';
 import './datatable.less';
 
 const getIcon = (type) => {
+  if (type === null) return;
+
   switch (type) {
     case 'string':
       return (<strong>a</strong>);
@@ -18,6 +20,10 @@ const getIcon = (type) => {
   }
 };
 
+const getColumnName = col => (typeof col === 'string') ? col : col.name;
+
+const getColumnType = col => col.type || null;
+
 export const Datatable = ({ datatable, perPage, setPerPage }) => (
   <Paginate rows={datatable.rows} perPage={perPage || 10}>
     {({ rows, nextPage, prevPage, setPage, prevPageEnabled, nextPageEnabled, pageNumber, totalPages }) => (
@@ -26,15 +32,17 @@ export const Datatable = ({ datatable, perPage, setPerPage }) => (
           <thead>
             <tr>
               {datatable.columns.map(col => (
-                <th key={`header-${col.name}`}>{col.name} <small className="muted">{getIcon(col.type)}</small></th>
+                <th key={`header-${getColumnName(col)}`}>
+                  {getColumnName(col)} <small className="muted">{getIcon(getColumnType(col))}</small>
+                </th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {rows.map(row => (
-              <tr key={`row-${row._rowId}`}>
+            {rows.map((row, i) => (
+              <tr key={`row-${row._rowId || i}`}>
                 {datatable.columns.map(col => (
-                  <td key={`row-${row._rowId}-${col.name}`}>{row[col.name]}</td>
+                  <td key={`row-${row._rowId || i}-${getColumnName(col)}`}>{row[getColumnName(col)]}</td>
                 ))}
               </tr>
             ))}
