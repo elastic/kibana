@@ -1,7 +1,9 @@
 import { Element } from '../element';
 import header from './header.png';
 import Markdown from 'markdown-it';
-import { omit } from 'lodash';
+import ReactDOM from 'react-dom';
+import React from 'react';
+import './markdown.less';
 
 const md = new Markdown();
 
@@ -25,9 +27,13 @@ You can use standard Markdown in here, but you can also access your piped-in dat
 
 #### Enjoy!"`,
   render(domNode, config, handlers) {
-    domNode.innerHTML = md.render(config.content);
-    Object.assign(domNode.style, config.font.spec);
-    $('h1, h2, h3, h4, h5, h6', domNode).css(omit(config.font.spec, 'fontSize'));
+    const html = { __html: md.render(config.content) };
+    ReactDOM.render((
+      <div
+        className="canvas__element__markdown"
+        style={config.font.spec}
+        dangerouslySetInnerHTML={html}/>
+    ), domNode);
     handlers.done();
   },
 });
