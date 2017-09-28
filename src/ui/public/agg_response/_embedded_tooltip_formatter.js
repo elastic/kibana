@@ -16,26 +16,42 @@ export function EmbeddedTooltipFormatterProvider($rootScope, $compile, Private, 
 
   return function (parentVis) {
     let tooltipMsg = 'Initializing Tooltip...';
-    const $tooltipScope = $rootScope.$new();
+    let $tooltipScope;
+    let $visEl;
+    let initEmbedded;
+    const destroyEmbedded = () => {
+      if ($tooltipScope) {
+        $tooltipScope.$destroy();
+      }
+      if ($visEl) {
+        $visEl.remove();
+      }
+    };
     const requestHandlers = Private(VisRequestHandlersRegistryProvider);
     const responseHandlers = Private(VisResponseHandlersRegistryProvider);
     const appState = getAppState();
+    let vis;
     let searchSource;
-    let $visEl;
     let requestHandler;
     let responseHandler;
+    let uiState;
     let fetchTimestamp;
     savedVisualizations.get(parentVis.params.tooltip.vis).then((savedObject) => {
+      vis = savedObject.vis;
+      vis.params.addTooltip = false; // disable tooltips for embedded visualization
       searchSource = savedObject.searchSource;
       requestHandler = getHandler(requestHandlers, savedObject.vis.type.requestHandler);
       responseHandler = getHandler(responseHandlers, savedObject.vis.type.responseHandler);
-      const uiState = savedObject.uiStateJSON ? JSON.parse(savedObject.uiStateJSON) : {};
+      uiState = savedObject.uiStateJSON ? JSON.parse(savedObject.uiStateJSON) : {};
       const parentUiState = getAppState().makeStateful('uiState');
-      $tooltipScope.uiState = parentUiState.createChild(UI_STATE_ID, uiState, true);
-      savedObject.vis.params.addTooltip = false; // disable tooltips for embedded visualization
-      $tooltipScope.vis = savedObject.vis;
-      $tooltipScope.visData = null;
-      $visEl = $compile(tooltipTemplate)($tooltipScope);
+      initEmbedded = () => {
+        destroyEmbedded();
+        $tooltipScope = $rootScope.$new();
+        $tooltipScope.uiState = parentUiState.createChild(UI_STATE_ID, uiState, true);
+        $tooltipScope.vis = savedObject.vis;
+        $tooltipScope.visData = null;
+        $visEl = $compile(tooltipTemplate)($tooltipScope);
+      };
     }, e => {
       tooltipMsg = _.get(e, 'message', 'Error initializing tooltip');
     });
@@ -77,14 +93,15 @@ export function EmbeddedTooltipFormatterProvider($rootScope, $compile, Private, 
         }
 
         searchSource.set('filter', aggFilters);
-        requestHandler($tooltipScope.vis, appState, $tooltipScope.uiState, queryFilter, searchSource)
+        requestHandler(vis, appState, uiState, queryFilter, searchSource)
         .then(requestHandlerResponse => {
-          return responseHandler($tooltipScope.vis, requestHandlerResponse);
+          return responseHandler(vis, requestHandlerResponse);
         })
         .then(resp => {
           const $popup = $(`#${executionId}`);
           // Only update popup contents if results are for calling fetch
           if (localFetchTimestamp === fetchTimestamp && $popup && $popup.length > 0) {
+            initEmbedded();
             $visEl.css({
               width: getWidth(),
               height: getHeight()
@@ -101,18 +118,11 @@ export function EmbeddedTooltipFormatterProvider($rootScope, $compile, Private, 
         });
       }
 
-      return `<div
-        id="${executionId}"
-        class="tab-dashboard theme-dark"
-        style="height: ${getHeight()}px; width: ${getWidth()}px;">
-          ${tooltipMsg}
-      </div>`;
+      return `<div id="${executionId}" class="tab-dashboard theme-dark"
+        style="height: ${getHeight()}px; width: ${getWidth()}px;">${tooltipMsg}></div>`;
     };
-    formatter.destroy = () => {
-      $tooltipScope.$destroy();
-      if ($visEl) {
-        $visEl.remove();
-      }
+    formatter.cleanUp = () => {
+      destroyEmbedded();
     };
     return formatter;
 

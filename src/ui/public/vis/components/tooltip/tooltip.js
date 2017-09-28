@@ -213,6 +213,9 @@ Tooltip.prototype.render = function () {
         }
         self.contentContainer.empty();
         self.hide();
+        if (_.has(self, 'formatter.cleanUp')) {
+          self.formatter.cleanUp();
+        }
       });
     });
   };
@@ -220,9 +223,6 @@ Tooltip.prototype.render = function () {
 
 Tooltip.prototype.destroy = function () {
   this.contentContainer.remove();
-  if (_.has(this, 'formatter.destroy')) {
-    this.formatter.destroy();
-  }
   this.hide();
   this.binder.destroy();
 };
