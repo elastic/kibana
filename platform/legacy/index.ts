@@ -24,11 +24,7 @@ export const injectIntoKbnServer = (kbnServer: LegacyKbnServer) => {
     legacyConfig => new LegacyConfigToRawConfigAdapter(legacyConfig)
   );
 
-  const root = new Root(config$, Env.createDefault({ kbnServer }), () => {});
-
   kbnServer.newPlatformProxyListener = new LegacyPlatformProxifier(
-    root.logger.get('legacy-platform-proxifier'),
-    () => root.start(),
-    () => root.shutdown()
+    new Root(config$, Env.createDefault({ kbnServer }), () => {})
   );
 };
