@@ -4,6 +4,10 @@ import { mount } from 'enzyme';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { DashboardPanel } from './dashboard_panel';
 
+import {
+  snapshotComponent,
+} from 'ui_framework/src/test';
+
 const containerApiMock = {
   addFilter: () => {},
   getAppState: () => {},
@@ -39,7 +43,7 @@ function getProps(props = {}) {
 
 test('DashboardPanel matches snapshot', () => {
   const component = mount(<DashboardPanel {...getProps()} />);
-  expect(component).toMatchSnapshot();
+  expect(snapshotComponent(component)).toMatchSnapshot();
 });
 
 test('and calls render', () => {
