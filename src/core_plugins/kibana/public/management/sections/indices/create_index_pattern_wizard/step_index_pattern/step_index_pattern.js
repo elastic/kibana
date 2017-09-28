@@ -56,7 +56,7 @@ module.directive('stepIndexPattern', function () {
         scope.stepIndexPattern.updateList();
       });
     },
-    controller: function () {
+    controller: function ($timeout) {
       this.matchingIndicesListType = 'noMatches';
       this.documentationLinks = documentationLinks;
 
@@ -65,6 +65,13 @@ module.directive('stepIndexPattern', function () {
         && !this.indexPatternNameForm.$invalid
         && this.hasExactMatches()
       );
+
+      this.selectPattern = (name) => {
+        this.indexPatternName = name;
+        $timeout(() => {
+          this.goToNextStep();
+        });
+      };
 
       const hasInvalidIndexPattern = () => (
         this.indexPatternNameForm

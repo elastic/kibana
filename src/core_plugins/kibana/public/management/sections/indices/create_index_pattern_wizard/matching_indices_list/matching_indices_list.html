@@ -53,8 +53,8 @@
         class="kuiMenuItem"
         ng-repeat="index in matchingIndicesList.pageOfIndices"
       >
-        <p class="kuiText" ng-bind-html="index.name | highlight:matchingIndicesList.formattedPattern">
-        </p>
+        <a class="kuiLink" href="#/management/kibana/index" ng-click="matchingIndicesList.clickPattern($event, index.name)" ng-bind-html="index.name | highlight:matchingIndicesList.formattedPattern">
+        </a>
       </li>
     </ul>
   </div>

@@ -86,6 +86,7 @@
             is-loading="stepIndexPattern.isFetchingMatchingIndices"
             indices="stepIndexPattern.allIndices"
             pattern="stepIndexPattern.indexPatternName"
+            select-pattern="stepIndexPattern.selectPattern(name)"
           >
            <span class="kuiStatusText kuiStatusText--error">
               <span
@@ -103,6 +104,7 @@
             is-loading="stepIndexPattern.isFetchingMatchingIndices"
             indices="stepIndexPattern.allIndices"
             pattern="stepIndexPattern.indexPatternName"
+            select-pattern="stepIndexPattern.selectPattern(name)"
           >
             <span class="kuiStatusText kuiStatusText--info">
               <span ng-if="!stepIndexPattern.allIndices.length">
@@ -135,6 +137,7 @@
             is-loading="stepIndexPattern.isFetchingMatchingIndices"
             indices="stepIndexPattern.partialMatchingIndices"
             pattern="stepIndexPattern.indexPatternName"
+            select-pattern="stepIndexPattern.selectPattern(name)"
           >
             <span class="kuiStatusText kuiStatusText--info">
               <span>
@@ -149,6 +152,7 @@
             is-loading="stepIndexPattern.isFetchingMatchingIndices"
             indices="stepIndexPattern.matchingIndices"
             pattern="stepIndexPattern.indexPatternName"
+            select-pattern="stepIndexPattern.selectPattern(name)"
           >
             <span class="kuiStatusText kuiStatusText--success">
               <span
