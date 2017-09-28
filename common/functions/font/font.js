@@ -10,7 +10,7 @@ export default new Fn({
   },
   args: {
     size: {
-      types: ['string', 'null'],
+      types: ['number', 'null'],
       help: 'Font size',
     },
     family: {
@@ -48,11 +48,11 @@ export default new Fn({
       type: 'style',
       spec: {
         ...context.spec,
-        fontSize: args.size,
+        fontSize: `${args.size}px`,
         fontFamily: args.family,
         fontWeight: args.weight,
-        fontStyle: args.italic ? 'italic' : undefined,
-        textDecoration: args.underline ? 'underline' : undefined,
+        fontStyle: args.italic ? 'italic' : 'normal',
+        textDecoration: args.underline ? 'underline' : 'none',
         textAlign: args.align,
         color: args.color,
       },
