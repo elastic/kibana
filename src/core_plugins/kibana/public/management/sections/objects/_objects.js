@@ -269,7 +269,12 @@ uiModules.get('apps/management')
                     return Promise.map(
                       conflictedIndexPatterns,
                       ({ obj }) => {
-                        const newIndexId = objs.find(({ oldId }) => oldId === obj.searchSource.getOwn('index')).newId;
+                        const oldIndexId = obj.searchSource.getOwn('index');
+                        const newIndexId = objs.find(({ oldId }) => oldId === oldIndexId).newId;
+                        if (newIndexId === oldIndexId) {
+                          // Skip
+                          return;
+                        }
                         return obj.hydrateIndexPattern(newIndexId)
                           .then(() => obj.save({ confirmOverwrite : !overwriteAll }));
                       }

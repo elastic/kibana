@@ -103,7 +103,7 @@ export class ChangeIndexModal extends React.Component {
               value={this.state.objects[indexPatternId].newIndexPatternId}
               onChange={this.onIndexChange.bind(this, indexPatternId)}
             >
-              <option value={indexPatternId}>Fix later</option>
+              <option value={indexPatternId}>Skip import</option>
               {this.props.indices.map((index, i) => {
                 return (
                   <option key={i} value={index.id}>
