@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { groupBy, mapValues, take } from 'lodash';
+import { groupBy, mapValues, take, get } from 'lodash';
 
 import {
   KuiModal,
@@ -35,7 +35,7 @@ export class ChangeIndexModal extends React.Component {
       perPage: 10,
       objects: mapValues(byId, (list, indexPatternId) => {
         return {
-          newIndexPatternId: props.indices[0].id,
+          newIndexPatternId: get(props, 'indices[0].id'),
           list: list.map(({ doc }) => {
             return {
               id: indexPatternId,
