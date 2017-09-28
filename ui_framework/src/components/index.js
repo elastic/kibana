@@ -28,6 +28,10 @@ export {
 } from './card';
 
 export {
+  KuiCodeEditor
+} from './code_editor';
+
+export {
   KuiColorPicker,
 } from './color_picker';
 

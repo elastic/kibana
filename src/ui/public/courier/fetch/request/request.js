@@ -2,7 +2,6 @@ import _ from 'lodash';
 import moment from 'moment';
 
 import { requestQueue } from '../../_request_queue';
-import { requestErrorHandler } from './error_handler';
 
 export function AbstractRequestProvider(Private, Promise) {
 
@@ -11,11 +10,6 @@ export function AbstractRequestProvider(Private, Promise) {
       this.source = source;
       this.defer = defer || Promise.defer();
       this.abortedDefer = Promise.defer();
-
-      this.setErrorHandler((...args) => {
-        this.retry();
-        return requestErrorHandler(...args);
-      });
 
       requestQueue.push(this);
     }
@@ -63,14 +57,7 @@ export function AbstractRequestProvider(Private, Promise) {
       this.started = true;
       this.moment = moment();
 
-      const source = this.source;
-      if (source.activeFetchCount) {
-        source.activeFetchCount += 1;
-      } else {
-        source.activeFetchCount = 1;
-      }
-
-      source.history = [this];
+      return this.source.requestIsStarting(this);
     }
 
     getFetchParams() {
@@ -113,7 +100,7 @@ export function AbstractRequestProvider(Private, Promise) {
     _markStopped() {
       if (this.stopped) return;
       this.stopped = true;
-      this.source.activeFetchCount -= 1;
+      this.source.requestIsStopped(this);
       _.pull(requestQueue, this);
     }
 

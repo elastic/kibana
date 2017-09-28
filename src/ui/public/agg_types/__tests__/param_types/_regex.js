@@ -1,34 +1,34 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import { AggTypesParamTypesBaseProvider } from 'ui/agg_types/param_types/base';
-import { AggTypesParamTypesRegexProvider } from 'ui/agg_types/param_types/regex';
+import { BaseParamTypeProvider } from '../../param_types/base';
+import { RegexParamTypeProvider } from '../../param_types/regex';
 import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 describe('Regex', function () {
 
-  let BaseAggParam;
-  let RegexAggParam;
+  let BaseParamType;
+  let RegexParamType;
   let Vis;
   let indexPattern;
 
   beforeEach(ngMock.module('kibana'));
   // fetch out deps
   beforeEach(ngMock.inject(function (Private) {
-    BaseAggParam = Private(AggTypesParamTypesBaseProvider);
-    RegexAggParam = Private(AggTypesParamTypesRegexProvider);
+    BaseParamType = Private(BaseParamTypeProvider);
+    RegexParamType = Private(RegexParamTypeProvider);
     Vis = Private(VisProvider);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
   }));
 
   describe('constructor', function () {
-    it('should be an instance of BaseAggParam', function () {
-      const aggParam = new RegexAggParam({
+    it('should be an instance of BaseParamType', function () {
+      const aggParam = new RegexParamType({
         name: 'some_param',
         type: 'regex'
       });
 
-      expect(aggParam).to.be.a(BaseAggParam);
+      expect(aggParam).to.be.a(BaseParamType);
       expect(aggParam).to.have.property('write');
     });
   });
@@ -48,7 +48,7 @@ describe('Regex', function () {
       });
       aggConfig = vis.aggs[0];
 
-      aggParam = new RegexAggParam({
+      aggParam = new RegexParamType({
         name: paramName,
         type: 'regex'
       });

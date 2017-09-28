@@ -9,6 +9,6 @@ module.exports = function (grunt) {
     ['sysv', 'lsb-3.1']
   ]
   .map(function ([ name, version ]) {
-    return { name, version, outputDir: resolve(rootDir, `build/services/${name}`) };
+    return { name, version, outputDir: resolve(rootDir, `tasks/build/services/${name}`) };
   });
 };

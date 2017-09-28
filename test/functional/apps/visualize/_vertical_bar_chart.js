@@ -3,7 +3,6 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
-  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
   describe('visualize app', function describeIndexTests() {
@@ -83,7 +82,6 @@ export default function ({ getService, getPageObjects }) {
           const data = await PageObjects.visualize.getBarChartData();
           log.debug('data=' + data);
           log.debug('data.length=' + data.length);
-          screenshots.take('Visualize-vertical-bar-chart');
           expect(data).to.eql(expectedChartValues);
         });
       });
