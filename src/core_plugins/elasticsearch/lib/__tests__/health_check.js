@@ -213,12 +213,13 @@ describe('plugins/elasticsearch', () => {
         clusterHealth.onCall(1).returns(Promise.resolve({ status: 'red' }));
         clusterHealth.onCall(2).returns(Promise.resolve({ status: 'green' }));
 
-        plugin.status.once = function (event, handler) {
+        plugin.status.once = sinon.spy(function (event, handler) {
           expect(event).to.be('green');
           setImmediate(handler);
-        };
+        });
 
         return health.waitUntilReady().then(function () {
+          sinon.assert.calledOnce(plugin.status.once);
           sinon.assert.calledThrice(clusterHealth);
         });
       });
