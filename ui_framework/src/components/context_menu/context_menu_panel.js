@@ -33,6 +33,7 @@ export const KuiContextMenuPanel = ({
         <button
           className="kuiContextMenuPanelTitle"
           onClick={onClose}
+          data-test-subj="contextMenuPanelTitleButton"
         >
           <span className="kuiContextMenu__itemLayout">
             <span className="kuiContextMenu__icon kuiIcon fa-angle-left" />

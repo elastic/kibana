@@ -12,7 +12,6 @@ import { KuiContextMenuItem } from './context_menu_item';
 
 export class KuiContextMenu extends Component {
   static propTypes = {
-    children: PropTypes.node,
     className: PropTypes.string,
     initialPanelId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     isVisible: PropTypes.bool.isRequired,
@@ -31,6 +30,10 @@ export class KuiContextMenu extends Component {
 
     this.resetTransitionTimeout = undefined;
     this.menuItems = [];
+    // We have to store explicit references to each click handler because we want to call it directly
+    // when the user hits the right arrow key, instead of calling `click()` on the element.
+    // If we call `click()` on the element, the tests fail.
+    this.menuItemClickHandlers = [];
 
     this.state = {
       outGoingPanelId: undefined,
@@ -75,7 +78,7 @@ export class KuiContextMenu extends Component {
       case cascadingMenuKeyCodes.RIGHT:
         if (this.menuItems.length) {
           e.preventDefault();
-          this.menuItems[this.state.focusedMenuItemIndex].click();
+          this.menuItemClickHandlers[this.state.focusedMenuItemIndex]();
         }
         break;
 
@@ -182,28 +185,38 @@ export class KuiContextMenu extends Component {
       return;
     }
 
-    const renderItems = items => items.map(item => {
-      let onClick;
+    this.menuItemClickHandlers = [];
 
-      if (item.onClick) {
-        onClick = item.onClick;
-      } else if (item.panel) {
+    const renderItems = items => items.map(item => {
+      const {
+        panel,
+        name,
+        icon,
+        ...rest,
+      } = item;
+
+      let { onClick } = item;
+
+      if (!onClick && panel) {
         onClick = () => {
           // This component is commonly wrapped in a KuiOutsideClickDetector, which means we'll
           // need to wait for that logic to complete before re-rendering the DOM via showPanel.
-          window.requestAnimationFrame(this.showPanel.bind(this, item.panel.id, 'next'));
+          window.requestAnimationFrame(this.showPanel.bind(this, panel.id, 'next'));
         };
       }
 
+      this.menuItemClickHandlers.push(onClick);
+
       return (
         <KuiContextMenuItem
-          key={item.name}
-          icon={item.icon}
+          key={name}
+          icon={icon}
           onClick={onClick}
-          hasPanel={Boolean(item.panel)}
+          hasPanel={Boolean(panel)}
           data-menu-item
+          {...rest}
         >
-          {item.name}
+          {name}
         </KuiContextMenuItem>
       );
     });
