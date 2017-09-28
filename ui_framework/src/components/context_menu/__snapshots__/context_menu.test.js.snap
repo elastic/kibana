@@ -13,7 +13,7 @@ exports[`KuiContextMenu props idToPanelMap and initialPanelId renders the refere
   class="kuiContextMenu"
 >
   <div
-    class="kuiContextMenuPanel"
+    class="kuiContextMenuPanel kuiContextMenu__panel"
   >
     <div
       class="kuiPopoverTitle"
@@ -37,7 +37,7 @@ exports[`KuiContextMenu props idToPreviousPanelIdMap allows you to click the tit
   style="height: 0px"
 >
   <div
-    class="kuiContextMenuPanel"
+    class="kuiContextMenuPanel kuiContextMenu__panel"
   >
     <button
       class="kuiContextMenuPanelTitle"
@@ -69,7 +69,7 @@ exports[`KuiContextMenu props idToPreviousPanelIdMap allows you to click the tit
   style="height: 0px"
 >
   <div
-    class="kuiContextMenuPanel kuiContextMenuPanel-txOutRight"
+    class="kuiContextMenuPanel kuiContextMenu__panel kuiContextMenuPanel-txOutRight"
   >
     <button
       class="kuiContextMenuPanelTitle"
@@ -93,7 +93,7 @@ exports[`KuiContextMenu props idToPreviousPanelIdMap allows you to click the tit
     </div>
   </div>
   <div
-    class="kuiContextMenuPanel kuiContextMenuPanel-txInRight"
+    class="kuiContextMenuPanel kuiContextMenu__panel kuiContextMenuPanel-txInRight"
   >
     <button
       class="kuiContextMenuPanelTitle"
@@ -114,8 +114,6 @@ exports[`KuiContextMenu props idToPreviousPanelIdMap allows you to click the tit
     </button>
     <button
       class="kuiContextMenuItem"
-      data-menu-item="true"
-      data-test-subj="itemA"
     >
       <span
         class="kuiContextMenu__itemLayout"
@@ -132,8 +130,6 @@ exports[`KuiContextMenu props idToPreviousPanelIdMap allows you to click the tit
     </button>
     <button
       class="kuiContextMenuItem"
-      data-menu-item="true"
-      data-test-subj="itemB"
     >
       <span
         class="kuiContextMenu__itemLayout"
@@ -150,8 +146,6 @@ exports[`KuiContextMenu props idToPreviousPanelIdMap allows you to click the tit
     </button>
     <button
       class="kuiContextMenuItem"
-      data-menu-item="true"
-      data-test-subj="itemC"
     >
       <span
         class="kuiContextMenu__itemLayout"
@@ -176,7 +170,7 @@ exports[`KuiContextMenu props isVisible causes the first panel to be shown when 
   style="height: 0px"
 >
   <div
-    class="kuiContextMenuPanel"
+    class="kuiContextMenuPanel kuiContextMenu__panel"
   >
     <button
       class="kuiContextMenuPanelTitle"

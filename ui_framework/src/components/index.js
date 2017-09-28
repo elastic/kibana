@@ -41,6 +41,8 @@ export {
 
 export {
   KuiContextMenu,
+  KuiContextMenuPanel,
+  KuiContextMenuItem,
 } from './context_menu';
 
 export {

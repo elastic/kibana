@@ -12,6 +12,10 @@ $kuiContextMenuWidth: $kuiSize * 16;
   }
 }
 
+  .kuiContextMenu__panel {
+    position: absolute;
+  }
+
   .kuiContextMenu__icon {
     margin-right: $kuiSizeS;
   }

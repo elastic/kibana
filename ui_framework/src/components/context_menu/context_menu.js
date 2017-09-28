@@ -3,9 +3,6 @@ import React, {
 } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
-import tabbable from 'tabbable';
-
-import { cascadingMenuKeyCodes } from '../../services';
 
 import { KuiContextMenuPanel } from './context_menu_panel';
 import { KuiContextMenuItem } from './context_menu_item';
@@ -34,62 +31,19 @@ export class KuiContextMenu extends Component {
     // when the user hits the right arrow key, instead of calling `click()` on the element.
     // If we call `click()` on the element, the tests fail.
     this.menuItemClickHandlers = [];
+    this.itemIndexToPanelIdMap = {};
 
     this.state = {
       outGoingPanelId: undefined,
       currentPanelId: props.initialPanelId,
       transitionDirection: undefined,
       isTransitioning: false,
-      focusedMenuItemIndex: 0,
     };
   }
 
-  onKeyDown = e => {
-    switch (e.keyCode) {
-      case cascadingMenuKeyCodes.UP:
-        if (this.menuItems.length) {
-          e.preventDefault();
-          this.setState(prevState => {
-            const nextFocusedMenuItemIndex = prevState.focusedMenuItemIndex - 1;
-            return {
-              focusedMenuItemIndex: nextFocusedMenuItemIndex < 0 ? this.menuItems.length - 1 : nextFocusedMenuItemIndex,
-            };
-          });
-        }
-        break;
-
-      case cascadingMenuKeyCodes.DOWN:
-        if (this.menuItems.length) {
-          e.preventDefault();
-          this.setState(prevState => {
-            const nextFocusedMenuItemIndex = prevState.focusedMenuItemIndex + 1;
-            return {
-              focusedMenuItemIndex: nextFocusedMenuItemIndex > this.menuItems.length - 1 ? 0 : nextFocusedMenuItemIndex,
-            };
-          });
-        }
-        break;
-
-      case cascadingMenuKeyCodes.LEFT:
-        e.preventDefault();
-        this.showPreviousPanel();
-        break;
-
-      case cascadingMenuKeyCodes.RIGHT:
-        if (this.menuItems.length) {
-          e.preventDefault();
-          this.menuItemClickHandlers[this.state.focusedMenuItemIndex]();
-        }
-        break;
-
-      default:
-        break;
-    }
-  };
-
   hasPreviousPanel = panelId => {
     const previousPanelId = this.props.idToPreviousPanelIdMap[panelId];
-    return typeof previousPanelId === 'number';
+    return typeof previousPanelId !== 'undefined';
   };
 
   showPanel(panelId, direction) {
@@ -107,10 +61,16 @@ export class KuiContextMenu extends Component {
       this.setState({
         transitionDirection: undefined,
         isTransitioning: false,
-        focusedMenuItemIndex: 0,
       });
     }, 250);
   }
+
+  showNextPanel = itemIndex => {
+    const nextPanelId = this.itemIndexToPanelIdMap[itemIndex];
+    if (nextPanelId) {
+      this.showPanel(nextPanelId, 'next');
+    }
+  };
 
   showPreviousPanel = () => {
     // If there's a previous panel, then we can close the current panel to go back to it.
@@ -125,25 +85,6 @@ export class KuiContextMenu extends Component {
     this.menu.setAttribute('style', `height: ${height}px`);
   }
 
-  updateFocusedMenuItem() {
-    // When the transition completes focus on a menu item or just the menu itself.
-    if (!this.state.isTransitioning) {
-      this.menuItems = this.currentPanel.querySelectorAll('[data-menu-item]');
-      const focusedMenuItem = this.menuItems[this.state.focusedMenuItemIndex];
-      if (focusedMenuItem) {
-        focusedMenuItem.focus();
-      } else {
-        // Focus first tabbable item.
-        const tabbableItems = tabbable(this.currentPanel);
-        if (tabbableItems.length) {
-          tabbableItems[0].focus();
-        } else {
-          document.activeElement.blur();
-        }
-      }
-    }
-  }
-
   componentWillReceiveProps(nextProps) {
     // If the user is opening the context menu, reset the state.
     if (nextProps.isVisible && !this.props.isVisible) {
@@ -151,14 +92,12 @@ export class KuiContextMenu extends Component {
         outGoingPanelId: undefined,
         currentPanelId: nextProps.initialPanelId,
         transitionDirection: undefined,
-        focusedMenuItemIndex: 0,
       });
     }
   }
 
   componentDidMount() {
     this.updateHeight();
-    this.updateFocusedMenuItem();
   }
 
   componentDidUpdate() {
@@ -170,12 +109,44 @@ export class KuiContextMenu extends Component {
     if (this.state.isTransitioning) {
       this.updateHeight();
     }
-
-    this.updateFocusedMenuItem();
   }
 
   componentWillUnmount() {
     clearTimeout(this.resetTransitionTimeout);
+  }
+
+  renderItems(items = []) {
+    return items.map((item, index) => {
+      const {
+        panel,
+        name,
+        icon,
+        onClick,
+        ...rest,
+      } = item;
+
+      const onClickHandler = panel
+        ? () => {
+          // This component is commonly wrapped in a KuiOutsideClickDetector, which means we'll
+          // need to wait for that logic to complete before re-rendering the DOM via showPanel.
+          window.requestAnimationFrame(() => {
+            if (onClick) onClick();
+            this.showNextPanel(index);
+          });
+        } : onClick;
+
+      return (
+        <KuiContextMenuItem
+          key={name}
+          icon={icon}
+          onClick={onClickHandler}
+          hasPanel={Boolean(panel)}
+          {...rest}
+        >
+          {name}
+        </KuiContextMenuItem>
+      );
+    });
   }
 
   renderPanel(panelId, transitionType) {
@@ -185,41 +156,17 @@ export class KuiContextMenu extends Component {
       return;
     }
 
-    this.menuItemClickHandlers = [];
+    if (transitionType === 'in') {
+      this.itemIndexToPanelIdMap = {};
 
-    const renderItems = items => items.map(item => {
-      const {
-        panel,
-        name,
-        icon,
-        ...rest,
-      } = item;
-
-      let { onClick } = item;
-
-      if (!onClick && panel) {
-        onClick = () => {
-          // This component is commonly wrapped in a KuiOutsideClickDetector, which means we'll
-          // need to wait for that logic to complete before re-rendering the DOM via showPanel.
-          window.requestAnimationFrame(this.showPanel.bind(this, panel.id, 'next'));
-        };
+      if (panel.items) {
+        panel.items.forEach((item, index) => {
+          if (item.panel) {
+            this.itemIndexToPanelIdMap[index] = item.panel.id;
+          }
+        });
       }
-
-      this.menuItemClickHandlers.push(onClick);
-
-      return (
-        <KuiContextMenuItem
-          key={name}
-          icon={icon}
-          onClick={onClick}
-          hasPanel={Boolean(panel)}
-          data-menu-item
-          {...rest}
-        >
-          {name}
-        </KuiContextMenuItem>
-      );
-    });
+    }
 
     // As above, we need to wait for KuiOutsideClickDetector to complete its logic before
     // re-rendering via showPanel.
@@ -230,6 +177,7 @@ export class KuiContextMenu extends Component {
 
     return (
       <KuiContextMenuPanel
+        className="kuiContextMenu__panel"
         panelRef={node => {
           if (transitionType === 'in') {
             this.currentPanel = node;
@@ -239,8 +187,13 @@ export class KuiContextMenu extends Component {
         onClose={onClose}
         transitionType={transitionType}
         transitionDirection={this.state.transitionDirection}
+        isTransitioning={this.state.isTransitioning}
+        isActive={transitionType === 'in'}
+        items={this.renderItems(panel.items)}
+        showNextPanel={this.showNextPanel}
+        showPreviousPanel={this.showPreviousPanel}
       >
-        {panel.content || renderItems(panel.items)}
+        {panel.content}
       </KuiContextMenuPanel>
     );
   }
@@ -269,7 +222,6 @@ export class KuiContextMenu extends Component {
       <div
         ref={node => { this.menu = node; }}
         className={classes}
-        onKeyDown={this.onKeyDown}
         {...rest}
       >
         {outGoingPanel}

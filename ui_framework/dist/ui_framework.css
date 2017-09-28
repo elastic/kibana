@@ -865,6 +865,9 @@ main {
   .kuiContextMenu .kuiContextMenu__content {
     padding: 8px; }
 
+.kuiContextMenu__panel {
+  position: absolute; }
+
 .kuiContextMenu__icon {
   margin-right: 8px; }
 
@@ -879,7 +882,6 @@ main {
           align-items: center; }
 
 .kuiContextMenuPanel {
-  position: absolute;
   width: 100%;
   visibility: visible;
   background-color: #ffffff; }
@@ -1009,6 +1011,7 @@ main {
 
 /**
  * 1. Button reset.
+ * 2. Ensure buttons stack.
  */
 .kuiContextMenuItem {
   -webkit-appearance: none;
@@ -1023,6 +1026,8 @@ main {
   /* 1 */
   cursor: pointer;
   /* 1 */
+  display: block;
+  /* 2 */
   padding: 12px;
   width: 100%;
   text-align: left;

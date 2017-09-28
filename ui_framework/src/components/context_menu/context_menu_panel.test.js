@@ -3,7 +3,15 @@ import { render, shallow, mount } from 'enzyme';
 import sinon from 'sinon';
 import { requiredProps } from '../../test/required_props';
 
-import { KuiContextMenuPanel } from './context_menu_panel';
+import {
+  KuiContextMenuPanel,
+} from './context_menu_panel';
+
+import {
+  KuiContextMenuItem,
+} from './context_menu_item';
+
+import { keyCodes } from '../../services';
 
 describe('KuiContextMenuPanel', () => {
   test('is rendered', () => {
@@ -125,6 +133,96 @@ describe('KuiContextMenuPanel', () => {
             });
           });
         });
+      });
+    });
+  });
+
+  describe('behavior', () => {
+    describe('focus', () => {
+      it('is set on the first focusable element by default, if there are no items', () => {
+        const component = mount(
+          <KuiContextMenuPanel>
+            <button data-test-subj="button" />
+          </KuiContextMenuPanel>
+        );
+
+        expect(
+          component.find('[data-test-subj="button"]').matchesElement(document.activeElement)
+        ).toBe(true);
+      });
+    });
+
+    describe('keyboard navigation of items', () => {
+      let component;
+      let showNextPanelHandler;
+      let showPreviousPanelHandler;
+
+      const items = [(
+        <KuiContextMenuItem
+          key="A"
+          data-test-subj="itemA"
+        >
+          Option A
+        </KuiContextMenuItem>
+      ), (
+        <KuiContextMenuItem
+          key="B"
+          data-test-subj="itemB"
+        >
+          Option B
+        </KuiContextMenuItem>
+      ), (
+        <KuiContextMenuItem
+          key="C"
+          data-test-subj="itemC"
+        >
+          Option C
+        </KuiContextMenuItem>
+      )];
+
+      beforeEach(() => {
+        showNextPanelHandler = sinon.stub();
+        showPreviousPanelHandler = sinon.stub();
+
+        component = mount(
+          <KuiContextMenuPanel
+            items={items}
+            showNextPanel={showNextPanelHandler}
+            showPreviousPanel={showPreviousPanelHandler}
+          />
+        );
+      });
+
+      it('focuses the first menu item by default, if there are items', () => {
+        expect(
+          component.find('[data-test-subj="itemA"]').matchesElement(document.activeElement)
+        ).toBe(true);
+      });
+
+      it('down arrow key focuses the next menu item', () => {
+        component.simulate('keydown', { keyCode: keyCodes.DOWN });
+
+        expect(
+          component.find('[data-test-subj="itemB"]').matchesElement(document.activeElement)
+        ).toBe(true);
+      });
+
+      it('up arrow key focuses the previous menu item', () => {
+        component.simulate('keydown', { keyCode: keyCodes.UP });
+
+        expect(
+          component.find('[data-test-subj="itemC"]').matchesElement(document.activeElement)
+        ).toBe(true);
+      });
+
+      it('right arrow key shows next panel', () => {
+        component.simulate('keydown', { keyCode: keyCodes.RIGHT });
+        sinon.assert.calledWith(showNextPanelHandler, 0);
+      });
+
+      it('left arrow key shows previous panel', () => {
+        component.simulate('keydown', { keyCode: keyCodes.LEFT });
+        sinon.assert.calledOnce(showPreviousPanelHandler);
       });
     });
   });

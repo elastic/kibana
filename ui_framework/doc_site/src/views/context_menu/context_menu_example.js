@@ -15,6 +15,10 @@ import ContextMenu from './context_menu';
 const contextMenuSource = require('!!raw!./context_menu');
 const contextMenuHtml = renderToHtml(ContextMenu);
 
+import SinglePanel from './single_panel';
+const singlePanelSource = require('!!raw!./single_panel');
+const singlePanelHtml = renderToHtml(SinglePanel);
+
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
@@ -39,6 +43,26 @@ export default props => (
 
       <GuideDemo isDarkTheme={true} style={{ height: 280 }}>
         <ContextMenu />
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="Single panel"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: singlePanelSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: singlePanelHtml,
+      }]}
+    >
+      <GuideText>
+        You can put a single panel inside of the menu using the
+        <GuideCode>KuiContextMenuPanel</GuideCode> component directly.
+      </GuideText>
+
+      <GuideDemo style={{ height: 280 }}>
+        <SinglePanel />
       </GuideDemo>
     </GuideSection>
   </GuidePage>

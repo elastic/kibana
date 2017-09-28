@@ -13,6 +13,7 @@ import {
   ESCAPE,
   LEFT,
   RIGHT,
+  TAB,
   UP,
 } from '../key_codes';
 
@@ -21,5 +22,6 @@ export const cascadingMenuKeyCodes = {
   ESCAPE,
   LEFT,
   RIGHT,
+  TAB,
   UP,
 };
