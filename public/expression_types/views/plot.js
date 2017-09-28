@@ -14,6 +14,11 @@ export const plot = () => new View('plot', {
       displayName: 'Color palette',
       argType: 'palette',
     }),
+    new Arg('font', {
+      displayName: 'Text settings',
+      description: 'Fonts, alignment and color',
+      argType: 'font',
+    }),
     new Arg('defaultStyle', {
       displayName: 'Default style',
       description: 'Set the style to be used by default by every series, unless overridden.',

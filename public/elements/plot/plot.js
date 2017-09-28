@@ -14,8 +14,6 @@ export default new Element('plot', {
     // TODO: OH NOES
     if (!includes($.plot.plugins, size)) $.plot.plugins.push(size);
 
-    config.options.legend.labelBoxBorderColor = 'transparent';
-
     let plot;
     function draw() {
       if (domNode.clientHeight < 1 || domNode.clientWidth < 1) return;
@@ -23,10 +21,12 @@ export default new Element('plot', {
       try {
         if (!plot) {
           plot = $.plot($(domNode), config.data, config.options);
+          $('.legendLabel, .flot-tick-label').css(config.font.spec);
         } else {
           plot.resize();
           plot.setupGrid();
           plot.draw();
+          $('.legendLabel, .flot-tick-label').css(config.font.spec);
         }
       } catch (e) {
         // Nope
@@ -43,7 +43,6 @@ export default new Element('plot', {
 
     draw();
 
-    $('.legend, .flot-tick-label').css(config.font.spec);
 
     return handlers.done(plot);
   },
