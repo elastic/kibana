@@ -24,7 +24,8 @@ export class DashboardPanel extends React.Component {
     this.embeddableHandler = getEmbeddableHandler(panel.type);
 
     if (!this.embeddableHandler) {
-      this.setState({ error: `Invalid panel type ${panel.type}`});
+      /* eslint-disable react/no-did-mount-set-state */
+      this.setState({ error: `Invalid panel type ${panel.type}` });
     }
 
     // TODO: use redux instead of the isMounted anti-pattern to handle the case when the component is unmounted
@@ -49,7 +50,7 @@ export class DashboardPanel extends React.Component {
         .then(destroyEmbeddable => this.destroyEmbeddable = destroyEmbeddable)
         .catch(error => {
           const message = error.message || JSON.stringify(error);
-          this.setState({ error: message })
+          this.setState({ error: message });
         });
     }
   }
@@ -89,11 +90,13 @@ export class DashboardPanel extends React.Component {
   }
 
   renderEmbeddedContent() {
-    return <div
-      id="embeddedPanel"
-      className="panel-content"
-      ref={panelElement => this.panelElement = panelElement}
-    />;
+    return (
+      <div
+        id="embeddedPanel"
+        className="panel-content"
+        ref={panelElement => this.panelElement = panelElement}
+      />
+    );
   }
 
   renderEmbeddedError() {

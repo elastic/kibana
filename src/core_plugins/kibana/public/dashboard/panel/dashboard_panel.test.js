@@ -54,11 +54,11 @@ test('renders an error message when an error is thrown', () => {
         getEditPath: () => Promise.resolve('editPath'),
         getTitleFor: () => Promise.resolve('title'),
         render: () => Promise.reject(new Error({ message: 'simulated error' }))
-      }
+      };
     }
   });
   const component = mount(<DashboardPanel {...props} />);
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     return process.nextTick(() => {
       const panelElements = component.find(PanelError);
       expect(panelElements.length).toBe(1);

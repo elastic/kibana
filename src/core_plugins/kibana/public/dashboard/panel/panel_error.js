@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 export function PanelError({ error }) {
   return (
     <div className="load-error">
-      <span aria-hidden="true" className="kuiIcon fa-exclamation-triangle"></span>
+      <span aria-hidden="true" className="kuiIcon fa-exclamation-triangle"/>
       <span>{error}</span>
     </div>
   );
@@ -12,8 +12,8 @@ export function PanelError({ error }) {
 
 PanelError.PropTypes = {
   error: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.node
-    ]),
+    PropTypes.string,
+    PropTypes.node
+  ]),
 };
 
