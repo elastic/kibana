@@ -494,10 +494,7 @@ export default class extends Component {
             <KuiPageContentHeader>
               <KuiPageContentHeaderSection>
                 <KuiTitle>
-                  <span>
-                    <KuiLink href="">Advanced settings</KuiLink>
-                    <span>: General</span>
-                  </span>
+                  <h2>Advanced settings &raquo; General</h2>
                 </KuiTitle>
               </KuiPageContentHeaderSection>
             </KuiPageContentHeader>

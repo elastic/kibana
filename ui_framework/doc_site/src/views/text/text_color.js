@@ -58,6 +58,13 @@ export default () => (
           Danger text color
         </KuiTextColor>
       </p>
+      <p>
+        <span style={{ background: '#222' }}>
+          <KuiTextColor color="ghost">
+            Ghost text color is always white regardless of theme.
+          </KuiTextColor>
+        </span>
+      </p>
     </KuiText>
   </div>
 );
