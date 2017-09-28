@@ -33,7 +33,7 @@ function confirmConflictResolved() {
   return {
     type: 'confirm',
     name: 'isConflictResolved',
-    message: 'Merge conflict resolved'
+    message: 'Have you solved the merge conflict?'
   };
 }
 
