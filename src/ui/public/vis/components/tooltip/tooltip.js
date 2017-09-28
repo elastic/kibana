@@ -33,6 +33,7 @@ export function Tooltip(id, el, formatter, events, options = {}) {
   this.showCondition = _.get(options, 'showCondition', _.constant(true));
   this.updateContentOnMove = _.get(options, 'updateContentOnMove', false);
   this.contentContainer = this.getContentContainer();
+  this.enterCount = 0;
 
   this.binder = new Binder();
 }
@@ -139,6 +140,42 @@ Tooltip.prototype.$getChart = function () {
 Tooltip.prototype.render = function () {
   const self = this;
 
+  const mouseEnter = _.debounce(function (d3Event, d, i) {
+    if (self.enterCount === 0) {
+      return;
+    }
+    const currentD3Event = d3.event;
+    d3.event = d3Event;
+    if (!self.showCondition(d, i)) {
+      self.contentContainer.empty();
+    } else {
+      const events = self.events ? self.events.eventResponse(d, i) : d;
+      self.contentContainer.html(self.formatter(events));
+      self.contentContainer.show();
+      self.show();
+    }
+    d3.event = currentD3Event;
+  }, 100);
+
+  const mouseMove = _.debounce(function (d3Event, d, i) {
+    if (self.enterCount === 0) {
+      return;
+    }
+    const currentD3Event = d3.event;
+    d3.event = d3Event;
+    if (!self.showCondition(d, i)) {
+      self.contentContainer.hide();
+    } else {
+      if (self.updateContentOnMove) {
+        const events = self.events ? self.events.eventResponse(d, i) : d;
+        self.contentContainer.html(self.formatter(events));
+      }
+      self.contentContainer.show();
+      self.show();
+    }
+    d3.event = currentD3Event;
+  }, 100);
+
   /**
    * Calculates values for the tooltip placement
    *
@@ -159,35 +196,21 @@ Tooltip.prototype.render = function () {
     }
 
     selection.each(function (d, i) {
-      const element = d3.select(this);
-
       self.binder.fakeD3Bind(this, 'mouseenter', function () {
-        if (!self.showCondition.call(element, d, i)) {
-          self.contentContainer.empty();
-          return;
-        }
-
-        const events = self.events ? self.events.eventResponse(d, i) : d;
-        self.contentContainer.html(self.formatter(events));
-        self.contentContainer.show();
-        self.show();
+        const d3Event = d3.event; //preserve latest d3.event for when event handler is executed
+        self.enterCount++;
+        mouseEnter(d3Event, d, i);
       });
 
       self.binder.fakeD3Bind(this, 'mousemove', function () {
-        if (!self.showCondition.call(element, d, i)) {
-          self.contentContainer.hide();
-          return;
-        }
-
-        if (self.updateContentOnMove) {
-          const events = self.events ? self.events.eventResponse(d, i) : d;
-          self.contentContainer.html(self.formatter(events));
-        }
-        self.contentContainer.show();
-        self.show();
+        const d3Event = d3.event; //preserve latest d3.event for when event handler is executed
+        mouseMove(d3Event, d, i);
       });
 
       self.binder.fakeD3Bind(this, 'mouseleave', function () {
+        if (self.enterCount > 0) {
+          self.enterCount--;
+        }
         self.contentContainer.empty();
         self.hide();
       });
