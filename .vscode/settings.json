@@ -1,0 +1,6 @@
+{
+  "editor.formatOnSave": true,
+  "files.exclude": {
+    "repos": true
+  }
+}

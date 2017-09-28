@@ -1,0 +1,20 @@
+{
+  "parser": "babel-eslint",
+  "env": {
+    "node": true
+  },
+  "rules": {
+    "prettier/prettier": [
+      "error",
+      {
+        "singleQuote": true,
+        "semi": true
+      }
+    ],
+    "no-console": 0,
+    "import/no-commonjs": 0,
+    "arrow-body-style": 0
+  },
+  "plugins": ["prettier"],
+  "extends": ["eslint:recommended", "prettier"]
+}
