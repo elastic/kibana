@@ -1,5 +1,5 @@
 const axios = require('axios');
-const { accessToken } = require('../config.json');
+const { accessToken } = require('./configs');
 
 function getCommits(repoName, author) {
   return axios(

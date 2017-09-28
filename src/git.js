@@ -1,8 +1,10 @@
 const promisify = require('es6-promisify');
+const fs = require('fs');
 const Git = require('nodegit');
 const process = require('child_process');
 const exec = promisify(process.exec);
-const { githubUsername } = require('../config.json');
+const stat = promisify(fs.stat);
+const { username, getRepoPath } = require('./configs');
 
 const authCallbacks = {
   certificateCheck: () => 1,
@@ -10,15 +12,43 @@ const authCallbacks = {
 };
 
 function openRepo(repoName) {
-  return Git.Repository.open(`./repos/${repoName}`);
+  return Git.Repository.open(getRepoPath(repoName));
+}
+
+function folderExists(path) {
+  return stat(path)
+    .then(stats => stats.isDirectory())
+    .catch(e => {
+      if (e.code === 'ENOENT') {
+        return false;
+      }
+
+      throw e;
+    });
+}
+
+function maybeSetupRepo(repoName) {
+  return folderExists(getRepoPath(repoName)).then(exists => {
+    if (!exists) {
+      return cloneRepo(repoName).then(repo => addUserRemote(repo, repoName));
+    }
+  });
+}
+
+function getRemoteUrl(owner, repoName) {
+  return `git@github.com:${owner}/${repoName}`;
 }
 
 function cloneRepo(repoName) {
-  return Git.Clone(`git@github.com:elastic/${repoName}`, repoName, {
+  return Git.Clone(getRemoteUrl('elastic', repoName), getRepoPath(repoName), {
     fetchOpts: {
       callbacks: authCallbacks
     }
   });
+}
+
+function addUserRemote(repo, repoName) {
+  return Git.Remote.create(repo, username, getRemoteUrl(username, repoName));
 }
 
 function resetHard(repo) {
@@ -26,7 +56,7 @@ function resetHard(repo) {
 }
 
 function cherrypick(repoName, sha) {
-  return exec(`git cherry-pick ${sha}`, { cwd: `./repos/${repoName}` });
+  return exec(`git cherry-pick ${sha}`, { cwd: getRepoPath(repoName) });
 }
 
 function createAndCheckoutBranch(repo, baseBranch, featureBranch) {
@@ -38,7 +68,7 @@ function createAndCheckoutBranch(repo, baseBranch, featureBranch) {
 }
 
 function push(repo, backportBranchName) {
-  return Git.Remote.lookup(repo, githubUsername).then(function(remote) {
+  return Git.Remote.lookup(repo, username).then(function(remote) {
     return remote.push(
       [`refs/heads/${backportBranchName}:refs/heads/${backportBranchName}`],
       {
@@ -71,6 +101,8 @@ function getCommit(repo, sha) {
 }
 
 module.exports = {
+  addUserRemote,
+  maybeSetupRepo,
   resetHard,
   checkoutAndPull,
   cherrypick,
