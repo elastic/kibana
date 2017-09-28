@@ -1,8 +1,6 @@
 const promisify = require('es6-promisify');
 const fs = require('fs');
 const Git = require('nodegit');
-const process = require('child_process');
-const exec = promisify(process.exec);
 const stat = promisify(fs.stat);
 const { username, getRepoPath } = require('./configs');
 
@@ -55,8 +53,32 @@ function resetHard(repo) {
   return repo.getHeadCommit().then(head => Git.Reset.reset(repo, head, 3));
 }
 
-function cherrypick(repoName, sha) {
-  return exec(`git cherry-pick ${sha}`, { cwd: getRepoPath(repoName) });
+function cherrypick(repo, sha) {
+  return Git.Commit.lookup(repo, sha).then(cherrypickCommit => {
+    return Git.Cherrypick
+      .cherrypick(repo, cherrypickCommit, {})
+      .then(() => repo.index())
+      .then(index => {
+        if (index.hasConflicts() > 0) {
+          throw new Error('CHERRYPICK_CONFLICT');
+        }
+        repo.stateCleanup();
+        return index.writeTree();
+      })
+      .then(oid => {
+        return repo.getHeadCommit().then(parent => {
+          return repo.createCommit(
+            'HEAD',
+            cherrypickCommit.author(),
+            cherrypickCommit.committer(),
+            cherrypickCommit.message(),
+            oid,
+            [parent]
+          );
+        });
+      })
+      .then(() => repo.stateCleanup());
+  });
 }
 
 function createAndCheckoutBranch(repo, baseBranch, featureBranch) {

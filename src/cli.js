@@ -5,6 +5,7 @@ const ora = require('ora');
 const { withSpinner } = require('./utils');
 const { getCommits, createPullRequest } = require('./github');
 const {
+  getRepoPath,
   ensureConfigAndFoldersExists,
   username,
   validateConfig,
@@ -73,16 +74,16 @@ ensureConfigAndFoldersExists()
         console.log(`Backporting #${pullRequest} to ${version}`);
 
         return withSpinner(
-          'Cloning repository (may take a few minutes)',
-          maybeSetupRepo(repoName)
+          maybeSetupRepo(repoName),
+          'Cloning repository (may take a few minutes)'
         )
           .then(() => openRepo(repoName))
           .then(repo => {
             return resetHard(repo)
               .then(() =>
                 withSpinner(
-                  'Pull latest changes',
-                  checkoutAndPull(repo, 'master')
+                  checkoutAndPull(repo, 'master'),
+                  'Pull latest changes'
                 )
               )
               .then(() => {
@@ -94,10 +95,17 @@ ensureConfigAndFoldersExists()
               })
               .then(() => {
                 return withSpinner(
+                  cherrypick(repo, sha),
                   'Cherry-pick commit',
-                  cherrypick(repoName, sha)
+                  `Cherry-pick commit failed. Please resolve conflicts in: ${getRepoPath(
+                    repoName
+                  )}`
                 )
                   .catch(e => {
+                    if (e.message !== 'CHERRYPICK_CONFLICT') {
+                      throw e;
+                    }
+
                     return inquirer
                       .prompt([
                         {
@@ -117,21 +125,21 @@ ensureConfigAndFoldersExists()
                   })
                   .then(() =>
                     withSpinner(
-                      'Pushing branch',
-                      push(repo, backportBranchName)
+                      push(repo, backportBranchName),
+                      'Pushing branch'
                     )
                   )
                   .then(() => getCommit(repo, sha))
                   .then(commit => {
                     return withSpinner(
-                      'Creating pull request',
                       createPullRequest(repoName, {
                         title: `Backport: ${commit.message()}`,
                         body: `Backports #${pullRequest} to ${version}`,
                         head: `sqren:${backportBranchName}`,
                         base: `${version}`,
                         labels: [':apm', 'backport']
-                      })
+                      }),
+                      'Creating pull request'
                     );
                   })
                   .then(res => {
