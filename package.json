@@ -1,6 +1,6 @@
 {
   "name": "backport",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "bin": {
     "backport": "./src/cli.js"
   },
