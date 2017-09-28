@@ -8,6 +8,9 @@ const $throw = Rx.Observable.throw;
 
 /**
  *  Get the hash of a file via a file descriptor
+ *  @param  {LruCache} cache
+ *  @param  {string} path
+ *  @param  {Fs.Stat} stat
  *  @param  {Fs.FileDescriptor} fd
  *  @return {Promise<string>}
  */
