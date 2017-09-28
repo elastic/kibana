@@ -6,9 +6,11 @@ import dataurl from './dataurl';
 import image from './image';
 import filter from './filter';
 import render from './render';
+import style from './style';
 
 export const typeSpecs = [
   datatable,
+  style,
   pointseries,
   number,
   string,

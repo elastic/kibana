@@ -1,0 +1,19 @@
+@import (reference) "../../style/main";
+
+.canvas__text-style-picker--top {
+  display: flex;
+
+  .canvas__font-picker--preview {
+    flex-grow: 1;
+    margin-left: @spacingS;
+    width: 100%;
+
+    .canvas__faux-select {
+      width: 100%;
+    }
+  }
+}
+
+.canvas__text-style-picker--bottom > * {
+  margin-right: @spacingS;
+}

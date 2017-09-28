@@ -8,11 +8,13 @@ import { seriesStyle } from './series_style';
 import { shape } from './shape';
 import { textarea } from './textarea';
 import { string } from './string';
+import { font } from './font';
 
 export default [
   containerStyle,
   datacolumn,
   expression,
+  font,
   imageUpload,
   palette,
   select,

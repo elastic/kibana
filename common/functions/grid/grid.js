@@ -31,8 +31,14 @@ export default new Fn({
       types: ['seriesStyle', 'null'],
       help: 'A style of a specific series',
     },
+    font: {
+      types: ['style'],
+      default: '{font}',
+      help: 'Font style',
+    },
   },
   fn: (context, args) => {
+    const { font } = args;
     // Create a header array. We can determine the header by looking at X and Y. Its possible we won't have either
     // In which case we have a table with a single row and single column and no header right?
     const resultColumns = getResultValues(context.rows, 'x');
@@ -91,6 +97,7 @@ export default new Fn({
         columns: resultColumns,
         rows: sortBy(resultRows, 'label'),
         summary,
+        font,
       },
     };
   },

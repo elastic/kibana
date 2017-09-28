@@ -43,6 +43,8 @@ export default new Element('plot', {
 
     draw();
 
+    $('.legend, .flot-tick-label').css(config.font.spec);
+
     return handlers.done(plot);
   },
 });

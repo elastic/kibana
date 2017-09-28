@@ -5,6 +5,7 @@ import chroma from 'chroma-js';
 import header from './header.png';
 import { Element } from '../element';
 import './grid.less';
+import $ from 'jquery';
 
 // TODO: This should be between 0.5 and 1.5, or something, currently between 0 and 1, 0 is bad.
 // This should always return a number between 0 and 1, whether for dimensions or metrics
@@ -35,7 +36,7 @@ export default new Element('grid', {
   image: header,
   expression: 'filters | demodata | pointseries x="project" y="state" size="median(price)" | grid | render',
   render(domNode, config, handlers) {
-    const { mark, summary, columns, rows, palette } = config;
+    const { mark, summary, columns, rows, palette, font } = config;
 
     // This should always return a number between 0 and 1, whether for dimensions or metrics
     function getColor(summary, val) {
@@ -56,7 +57,6 @@ export default new Element('grid', {
 
       return null;
     }
-
 
     const table = (
       <div style={{ height: '100%', overflow: 'auto' }} className="canvas__element--grid">
@@ -93,7 +93,7 @@ export default new Element('grid', {
                       >
                         { (!mark && !val.text) &&  <i className={`fa fa-circle`}/>}
                         { mark && <i className={`fa fa-${mark}`}/> }
-                        { val.text && val.text }
+                        { val.text && <div className="canvas__element--grid--series-label">{val.text}</div> }
                       </div>
                     ))}
                   </td>
@@ -108,7 +108,9 @@ export default new Element('grid', {
       </div>
     );
 
-    ReactDOM.render(table, domNode);
+    ReactDOM.render(table, domNode, () => {
+      $('td, th', domNode).css(font.spec);
+    });
     handlers.done();
   },
 });

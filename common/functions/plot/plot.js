@@ -29,10 +29,15 @@ export default new Fn({
       help: 'A palette object for describing the colors to use on this plot',
       default: '{palette}',
     },
+    font: {
+      types: ['style'],
+      help: 'Legend and tick mark fonts',
+      default: '{font}',
+    },
     legend: {
-      type: ['boolean'],
-      default: true,
-      help: 'Legend visibility',
+      types: ['string', 'boolean'],
+      help: 'Legend position, nw, sw, ne, se or false',
+      default: 'nw',
     },
   },
   fn: (context, args) => {
@@ -129,12 +134,14 @@ export default new Fn({
       type: 'render',
       as: 'plot',
       value: {
+        font: args.font,
         data: sortBy(data, 'label'),
         options: {
           canvas: false,
           colors: colors,
           legend: {
-            show: args.legend,
+            show: !!args.legend,
+            position: args.legend ? args.legend : undefined,
           },
           grid: {
             borderWidth: 0,

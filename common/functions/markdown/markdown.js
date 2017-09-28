@@ -16,6 +16,11 @@ export default new Fn({
       default: '',
       multi: true,
     },
+    font: {
+      types: ['style'],
+      help: 'Font settings. Technically you can stick other styles in here too!',
+      default: '{font}',
+    },
   },
   fn: (context, args) => {
     const compileFunctions = args._.map(str => Handlebars.compile(String(str)));
@@ -29,7 +34,8 @@ export default new Fn({
       type: 'render',
       as: 'markdown',
       value: {
-        markup: compileFunctions.map(fn => fn(ctx)).join(''),
+        content: compileFunctions.map(fn => fn(ctx)).join(''),
+        font: args.font,
       },
     };
   },
