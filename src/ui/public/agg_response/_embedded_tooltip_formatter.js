@@ -119,7 +119,7 @@ export function EmbeddedTooltipFormatterProvider($rootScope, $compile, Private, 
       }
 
       return `<div id="${executionId}" class="tab-dashboard theme-dark"
-        style="height: ${getHeight()}px; width: ${getWidth()}px;">${tooltipMsg}></div>`;
+        style="height: ${getHeight()}px; width: ${getWidth()}px;">${tooltipMsg}</div>`;
     };
     formatter.cleanUp = () => {
       destroyEmbedded();

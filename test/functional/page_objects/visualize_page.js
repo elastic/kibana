@@ -198,6 +198,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       }
     }
 
+    async setTooltipType(type) {
+      await testSubjects.click('tooltipTypeSelect');
+      await testSubjects.click(type);
+    }
+
     async clickGoButton() {
       await testSubjects.click('timepickerGoButton');
     }

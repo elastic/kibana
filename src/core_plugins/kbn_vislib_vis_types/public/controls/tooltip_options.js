@@ -95,9 +95,10 @@ export function TooltipOptions(props) {
             className="kuiSelect"
             value={props.params.tooltip.type}
             onChange={handleTypeChange}
+            data-test-subj="tooltipTypeSelect"
           >
             <option value="metric">Metric</option>
-            <option value="vis">Visualization</option>
+            <option value="vis" data-test-subj="visTooltipOption">Visualization</option>
           </select>
         </div>
       </div>
