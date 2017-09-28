@@ -142,6 +142,8 @@ export default new Fn({
           legend: {
             show: !!args.legend,
             position: args.legend ? args.legend : undefined,
+            backgroundOpacity: 0,
+            labelBoxBorderColor: 'transparent',
           },
           grid: {
             borderWidth: 0,
