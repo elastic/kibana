@@ -3,25 +3,58 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import Select from 'react-select';
 
+const visTypeExcludeList = [
+  'input_control_vis',
+  'tagcloud',
+  'tile_map',
+  'timelion',
+  'region_map',
+  'metrics' // TSVB
+];
+
 export function TooltipOptions(props) {
 
-  const findVisualizations = (input, callback) => {
-    props.savedObjectsClient.find({
+  const findVisualizations = async (input) => {
+    const findOptions = {
       type: ['visualization'],
-      fields: ['title'],
+      fields: ['title', 'visState'],
       search: `${input}*`,
       search_fields: ['title^3', 'description'],
+      page: 1,
       perPage: 100
-    })
-    .then((resp) => {
-      const options = resp.savedObjects.map((savedObject) => {
+    };
+
+    let options = [];
+    let fetchNextPage = false;
+
+    do {
+      const resp = await props.savedObjectsClient.find(findOptions);
+      const optionsFromPage = resp.savedObjects
+      .filter((savedObject) => {
+        const visType = JSON.parse(savedObject.attributes.visState).type;
+        if (visTypeExcludeList.includes(visType)) {
+          return false;
+        }
+        return true;
+      })
+      .map((savedObject) => {
         return {
           label: savedObject.attributes.title,
           value: savedObject.id
         };
       });
-      callback(null, { options: options });
-    });
+      options = options.concat(optionsFromPage);
+
+      fetchNextPage = false;
+      if (resp.savedObjects.length === findOptions.perPage && options.length < findOptions.perPage / 5) {
+        // More than 4/5ths of returned visualizations got filtered out!
+        // Fetch next page to provide a fuller list
+        fetchNextPage = true;
+        findOptions.page += 1;
+      }
+    } while (fetchNextPage && findOptions.page <= 10);
+
+    return { options: options };
   };
 
   const setTooltipParam = (paramName, paramValue) => {
