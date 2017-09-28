@@ -1,0 +1,3 @@
+export {
+  KuiAvatar,
+} from './avatar';

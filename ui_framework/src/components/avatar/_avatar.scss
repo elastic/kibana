@@ -1,17 +1,39 @@
 .kuiAvatar {
+  @include innerBorder('dark', 50%);
+
   border-radius: 50%;
+  display: inline-block;
+  background-size: cover;
+  color: $kuiColorGhost;
+  text-align: center;
+  text-shadow: 1px 1px rgba(0,0,0,.2);
+  vertical-align: middle;
+}
+
+.kuiAvatar--s {
   width: $kuiSizeL;
   height: $kuiSizeL;
-  display: inline-block;
-  @include innerBorder('dark', 50%);
+  line-height: $kuiSizeL;
+  font-size: $kuiSizeM;
 }
 
-.kuiAvatar--small {
-  width: $kuiSize;
-  height: $kuiSize;
+.kuiAvatar--m {
+  width: $kuiSizeXL;
+  height: $kuiSizeXL;
+  line-height: $kuiSizeXL;
+  font-size: $kuiSize;
 }
 
-.kuiAvatar--large {
+.kuiAvatar--l {
+  width: $kuiSizeXXL;
+  height: $kuiSizeXXL;
+  line-height: $kuiSizeXXL;
+  font-size: $kuiSizeL;
+}
+
+.kuiAvatar--xl {
   width: $kuiSize * 4;
   height: $kuiSize * 4;
+  line-height: $kuiSize * 4;
+  font-size: $kuiSizeXL;
 }

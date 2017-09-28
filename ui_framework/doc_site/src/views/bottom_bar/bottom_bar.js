@@ -51,10 +51,10 @@ export default class extends Component {
             <KuiFlexItem grow={false}>
               <KuiFlexGroup gutterSize="small">
                 <KuiFlexItem>
-                  <KuiButtonEmpty type="ghost" size="small" iconType="check">Save</KuiButtonEmpty>
+                  <KuiButtonEmpty type="ghost" size="small" iconType="cross">Discard</KuiButtonEmpty>
                 </KuiFlexItem>
                 <KuiFlexItem>
-                  <KuiButtonEmpty type="ghost" size="small" iconType="cross">Discard</KuiButtonEmpty>
+                  <KuiButton type="primary" fill size="small" iconType="check">Save</KuiButton>
                 </KuiFlexItem>
               </KuiFlexGroup>
             </KuiFlexItem>
