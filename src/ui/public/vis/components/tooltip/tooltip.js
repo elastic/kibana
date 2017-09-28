@@ -197,7 +197,7 @@ Tooltip.prototype.render = function () {
 
 Tooltip.prototype.destroy = function () {
   this.contentContainer.remove();
-  if (this.formatter.destroy) {
+  if (_.has(this, 'formatter.destroy')) {
     this.formatter.destroy();
   }
   this.hide();
