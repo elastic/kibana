@@ -8,7 +8,24 @@ import { getFileHash } from './file_hash';
 import { replacePlaceholder } from '../public_path_placeholder';
 
 /**
- *  Create a Hapi response for the requested path
+ *  Create a Hapi response for the requested path. This is designed
+ *  to replicate a subset of the features provided by Hapi's Inert
+ *  plugin including:
+ *   - ensure path is not traversing out of the bundle directory
+ *   - manage use file descriptors for file access to efficiently
+ *     interact with the file multiple times in each request
+ *   - generate and cache etag for the file
+ *   - write correct headers to response for client-side caching
+ *     and invalidation
+ *   - stream file to response
+ *
+ *  It differs from Inert in some important ways:
+ *   - the PUBLIC_PATH_PLACEHOLDER is replaced with the correct
+ *     public path as the response is streamed
+ *   - cached hash/etag is based on the file on disk, but modified
+ *     by the public path so that individual public paths have
+ *     different etags, but can share a cache
+ *
  *  @param {Object} options
  *  @property {Hapi.Request} options.request
  *  @property {string} options.bundlesPath
