@@ -28,6 +28,16 @@ export default new Fn({
       default: 0,
       help: 'Draw a hole in the pie, 0-100, as a percentage of the pie radius',
     },
+    labels: {
+      types: ['boolean'],
+      default: true,
+      help: 'Show pie labels',
+    },
+    labelRadius: {
+      types: ['number'],
+      default: 100,
+      help: 'Percentage of area of container to use as radius for the label circle',
+    },
     strokeColor: {
       types: ['string'],
       default: '#000000',
@@ -42,6 +52,11 @@ export default new Fn({
       types: ['number'],
       default: 3,
       help: 'Combine slices that represent less than this percent, into one big "Other" slice',
+    },
+    font: {
+      types: ['style'],
+      help: 'Label font',
+      default: '{font}',
     },
   },
   fn: (context, args) => {
@@ -70,6 +85,7 @@ export default new Fn({
       type: 'render',
       as: 'pie',
       value: {
+        font: args.font,
         data: sortBy(data, 'label'),
         options: {
           canvas: false,
@@ -91,9 +107,10 @@ export default new Fn({
               combine: {
                 threshold: args.combine / 100,
               },
-            },
-            label: {
-              show: true,
+              label: {
+                show: args.labels,
+                radius: args.labelRadius / 100,
+              },
             },
             bubbles: {
               show: false,
