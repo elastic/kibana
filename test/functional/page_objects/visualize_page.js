@@ -364,10 +364,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await testSubjects.click('visEditorTab' + tabName);
     }
 
-    async selectWMS() {
-      await find.clickByCssSelector('input[name="wms.enabled"]');
-    }
-
     async ensureSavePanelOpen() {
       log.debug('ensureSavePanelOpen');
       let isOpen = await testSubjects.exists('saveVisualizationButton');

@@ -279,7 +279,7 @@ export default function ({ getService, getPageObjects }) {
       it('wms switch should change allow to zoom in further', async function () {
         await PageObjects.visualize.openSpyPanel();
         await PageObjects.visualize.clickOptions();
-        await PageObjects.visualize.selectWMS();
+        await PageObjects.visualize.checkCheckbox('wmsEnabledCheckbox');
         await PageObjects.visualize.clickGo();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.common.sleep(2000);
