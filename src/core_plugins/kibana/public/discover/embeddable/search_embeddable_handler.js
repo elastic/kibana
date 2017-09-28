@@ -1,5 +1,7 @@
 import searchTemplate from './search_template.html';
 import angular from 'angular';
+import 'ui/doc_table';
+
 import * as columnActions from 'ui/doc_table/actions/columns';
 import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
 import { EmbeddableHandler } from 'ui/embeddable';
@@ -76,6 +78,12 @@ export class SearchEmbeddableHandler extends EmbeddableHandler {
         const searchInstance = this.$compile(searchTemplate)(searchScope);
         const rootNode = angular.element(domNode);
         rootNode.append(searchInstance);
+
+        return () => {
+          searchInstance.remove();
+          searchScope.savedObj.destroy();
+          searchScope.$destroy();
+        };
       });
   }
 }
