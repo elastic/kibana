@@ -1,15 +1,18 @@
-import { argvToConfigOverrides } from '../../cli/argvToConfig';
+import { ObjectToRawConfigAdapter } from '..';
+import { overrideConfigWithArgv } from '../../cli/overrideConfigWithArgv';
 
 test('port', () => {
   const argv = {
     port: 123
   };
 
-  expect(argvToConfigOverrides(argv)).toEqual({
-    server: {
-      port: 123
-    }
+  const config = new ObjectToRawConfigAdapter({
+    server: { port: 456 }
   });
+
+  overrideConfigWithArgv(config, argv);
+
+  expect(config.get('server.port')).toEqual(123);
 });
 
 test('host', () => {
@@ -17,11 +20,13 @@ test('host', () => {
     host: 'example.org'
   };
 
-  expect(argvToConfigOverrides(argv)).toEqual({
-    server: {
-      host: 'example.org'
-    }
+  const config = new ObjectToRawConfigAdapter({
+    server: { host: 'org.example' }
   });
+
+  overrideConfigWithArgv(config, argv);
+
+  expect(config.get('server.host')).toEqual('example.org');
 });
 
 test('ignores unknown', () => {
@@ -29,5 +34,10 @@ test('ignores unknown', () => {
     unknown: 'some value'
   };
 
-  expect(argvToConfigOverrides(argv)).toEqual({});
+  const config = new ObjectToRawConfigAdapter({});
+  jest.spyOn(config, 'set');
+
+  overrideConfigWithArgv(config, argv);
+
+  expect(config.set).not.toHaveBeenCalled();
 });

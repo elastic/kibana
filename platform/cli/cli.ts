@@ -5,7 +5,7 @@ import * as args from './args';
 import { version } from './version';
 import { Env, RawConfigService } from '../config';
 import { Root, OnShutdown } from '../root';
-import { argvToConfigOverrides } from './argvToConfig';
+import { overrideConfigWithArgv } from './overrideConfigWithArgv';
 
 export const parseArgv = (argv: Array<string>) =>
   yargs(argv)
@@ -35,7 +35,7 @@ const run = (argv: { [key: string]: any }) => {
 
   const rawConfig$ = rawConfigService
     .getConfig$()
-    .map(rawConfig => argvToConfigOverrides(argv, rawConfig));
+    .map(rawConfig => overrideConfigWithArgv(rawConfig, argv));
 
   const root = new Root(rawConfig$, env, onShutdown);
   root.start();
