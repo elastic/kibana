@@ -11,7 +11,7 @@ import { createDynamicAssetResponse } from './dynamic_asset_response';
  *  @param {Object} options
  *  @property {string} options.bundlesPath
  *  @property {string} options.basePublicPath
- *  @return {undefined}
+ *  @return {Hapi.RouteConfig}
  */
 export function createBundlesRoute({ bundlesPath, basePublicPath }) {
   const cache = new LruCache(100);
