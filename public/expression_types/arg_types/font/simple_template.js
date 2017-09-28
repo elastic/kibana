@@ -1,11 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
-import { set, del } from 'object-path-immutable';
-import { ColorPickerMini } from '../../../components/color_picker_mini';
-import { Tooltip } from '../../../components/tooltip';
+//import { get } from 'lodash';
 
-export const simpleTemplate = (props) => {
+export const simpleTemplate = (/*props*/) => {
   // const { argValue, onValueChange, labels } = props;
 
   return (
