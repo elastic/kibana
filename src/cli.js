@@ -2,8 +2,10 @@
 
 const inquirer = require('inquirer');
 const ora = require('ora');
+const prompts = require('./prompts');
 const { withSpinner } = require('./utils');
 const { getCommits, createPullRequest } = require('./github');
+const constants = require('./constants');
 const {
   getRepoPath,
   ensureConfigAndFoldersExists,
@@ -26,14 +28,7 @@ const {
 ensureConfigAndFoldersExists()
   .then(validateConfig)
   .then(() => {
-    return inquirer.prompt([
-      {
-        type: 'input',
-        name: 'repoName',
-        message: 'Repository',
-        default: 'x-pack-kibana'
-      }
-    ]);
+    return inquirer.prompt([prompts.inputRepositoryName()]);
   })
   .then(({ repoName }) => {
     const spinner = ora('Loading commits...').start();
@@ -48,22 +43,8 @@ ensureConfigAndFoldersExists()
       .then(commits => {
         spinner.stop();
         return inquirer.prompt([
-          {
-            type: 'list',
-            name: 'commit',
-            message: 'Which pull request do you want to backport?',
-            choices: commits.map(commits => ({
-              name: commits.message,
-              value: commits,
-              short: commits.message
-            }))
-          },
-          {
-            type: 'list',
-            name: 'version',
-            message: 'Which version do you want to backport to?',
-            choices: ['6.x', '6.0', '5.6', '5.5', '5.4']
-          }
+          prompts.listCommits(commits),
+          prompts.listVersions()
         ]);
       })
       .then(function({ commit, version }) {
@@ -102,20 +83,14 @@ ensureConfigAndFoldersExists()
                   )}`
                 )
                   .catch(e => {
-                    if (e.message !== 'CHERRYPICK_CONFLICT') {
+                    if (e.message !== constants.CHERRYPICK_CONFLICT) {
                       throw e;
                     }
 
                     return inquirer
-                      .prompt([
-                        {
-                          type: 'confirm',
-                          name: 'mergeResult',
-                          message: 'Merge conflict resolved'
-                        }
-                      ])
-                      .then(({ mergeResult }) => {
-                        if (!mergeResult) {
+                      .prompt([prompts.confirmConflictResolved()])
+                      .then(({ isConflictResolved }) => {
+                        if (!isConflictResolved) {
                           console.error(e);
                           throw new Error(
                             'Merge errors were not manually fixed'
@@ -150,7 +125,7 @@ ensureConfigAndFoldersExists()
       });
   })
   .catch(e => {
-    if (e.message === 'INVALID_CONFIG') {
+    if (e.message === constants.INVALID_CONFIG) {
       console.log(
         `Welcome to the Backport CLI tool! Update this config to proceed: ${CONFIG_FILE_PATH}`
       );

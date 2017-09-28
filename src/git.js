@@ -3,6 +3,7 @@ const fs = require('fs');
 const Git = require('nodegit');
 const stat = promisify(fs.stat);
 const { username, getRepoPath } = require('./configs');
+const constants = require('./constants');
 
 const authCallbacks = {
   certificateCheck: () => 1,
@@ -60,9 +61,9 @@ function cherrypick(repo, sha) {
       .then(() => repo.index())
       .then(index => {
         if (index.hasConflicts() > 0) {
-          throw new Error('CHERRYPICK_CONFLICT');
+          throw new Error(constants.CHERRYPICK_CONFLICT);
         }
-        repo.stateCleanup();
+        // repo.stateCleanup();
         return index.writeTree();
       })
       .then(oid => {

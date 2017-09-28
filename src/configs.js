@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const homedir = require('os').homedir();
 const stripJsonComments = require('strip-json-comments');
+const constants = require('./constants');
 
 const mkdirp = promisify(require('mkdirp'));
 const writeFile = promisify(fs.writeFile);
@@ -34,7 +35,7 @@ function getConfigTemplate() {
 
 function validateConfig() {
   if (!username || !accessToken) {
-    throw new Error('INVALID_CONFIG');
+    throw new Error(constants.INVALID_CONFIG);
   }
 }
 
