@@ -13,6 +13,11 @@ export const grid = () => new View('grid', {
       argType: 'shape',
       defaultValue: 'circle',
     }),
+    new Arg('font', {
+      displayName: 'Text settings',
+      description: 'Fonts, alignment and color',
+      argType: 'font',
+    }),
     new Arg('palette', {
       displayName: 'Palette',
       argType: 'palette',
