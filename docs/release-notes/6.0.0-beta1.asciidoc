@@ -1,0 +1,244 @@
+[[release-notes-6.0.0-beta1]]
+== 6.0.0-beta1 Release Notes
+
+Also see <<breaking-changes-6.0>>.
+
+
+[float]
+[[breaking-6.0.0-beta1]]
+=== Breaking changes
+Management::
+* [indexPatterns] remove support for time patterns {pull}12158[#12158]
+  - - Removes ability to create index patterns based on time patterns/intervals  - Adds a warning that informs users when they are using an index pattern that is now unsupported (disabled by default until #10442 is done, #12322)  - Does not address editing/remapping index patterns, see last task in #12242
+Operations::
+* Updates to status API, re-align status page {pull}10180[#10180]
+* [Fix for #10181] Revert same port http -> https redirect {pull}10930[#10930]
+  - Kibana 5.x redirected requests from http to https on the same port if TLS was configured. Starting in Kibana 6.0.0 Kibana no longer redirects basic http traffic to https.
+Platform::
+* [Fix for #12012] Fail to start if settings include unknown keys {pull}12554[#12554]
+  - When a config file includes invalid keys or values, Kibana usually logs a message describing the issue and fails to start. There has been an exception to this rule since 4.2 that allowed top-level keys to be unknown/misspelled and only caused a warning to be logged. That exception has been removed and now any unknown or misspelled config key passed to Kibana (via the config file or command line flags) will prevent it from starting.
+* Remove the es_admin proxy {pull}13000[#13000]
+* Restrict ES data proxy to msearch and search {pull}13020[#13020]
+Visualization::
+* [Fix for #10907] allows more flexible timelion queries {pull}10961[#10961]
+
+
+[float]
+[[feature-6.0.0-beta1]]
+=== New features
+Discover::
+* Implement new Kibana query language {pull}12624[#12624]
+  - This PR adds a new experimental query language to Kibana. The new language is turned off by default but can be enabled in the Management > Advanced Settings via the search:queryLanguage:switcher:enable option. Changing this setting to true will add a language selector to the query bar that allows users to choose the new language for their query. Details of the new query language can be found in the issue description (#12282).
+Sharing::
+* Full screen mode implementation for dashboard {pull}12265[#12265]
+  - You can now enter full screen mode when viewing a dashboard. This hides the Chrome and the top nav bar.  If you have any filters applied, you'll see the filter bar, otherwise that will be hidden as well.  To exit full screen mode, hover over and click the Kibana button on the lower left side of the page, or simple press the ESC key.
+Visualization::
+* Visualize Refactor {pull}11786[#11786]
+  - When creating new visualizations, developers are no longer restricted to using just Angular as a rendering technology. The changes now also enables developers to create custom editors that do not conform to the current sidebar-layout. Commonly used functionality - such as access to the query bar or timefilter - is now also exposed on the visualization object. This avoids the need to import individual modules from inside Kibana. These changes are a first step in a longer term effort to provide a robust long-lived programming interface for building visualizations in Kibana.
+
+
+[float]
+[[enhancement-6.0.0-beta1]]
+=== Enhancements
+Design::
+* We'd like to extend a special thanks to Arpad Popradi for his contributions to the UI Framework.
+* [UI Framework] Reactify menu {pull}12135[#12135]
+* Adding for and id attributes to labels and form elements {pull}12215[#12215]
+* [UI Framework] Reactify kuiEvent and related CSS components (#12226) {pull}12228[#12228]
+* [UI Framework] Reactify actionItem {pull}12142[#12142]
+* [UI Framework] Reactify kuiCollapseButton {pull}12225[#12225]
+* [UI Framework] Reactify kuiFieldGroup and related CSS components {pull}12260[#12260]
+* [UI Framework] Update LocalNav examples to use tabIndex instead of tabindex, to eliminate React console warnings. {pull}12284[#12284]
+* [UI Framework] Reactify kuiCard and related CSS components {pull}12197[#12197]
+* [UI Framework] Reactify kuiBar {pull}12167[#12167]
+* [UI Framework] Reactify kuiGallery and related CSS components {pull}12277[#12277]
+* [UI Framework] Fix examples of Table component with ToolBar. {pull}12326[#12326]
+* [UI Framework] Improve Warning Button contrast {pull}12327[#12327]
+* [UI Framework] Reactify kuiHeaderBar and related CSS components {pull}12280[#12280]
+* [UI Framework] Define consistent default, small, and wide sizing for form fields, and support them within ExpressionItems. {pull}12190[#12190]
+* [UI Framework] Order UI Framework React component exports to be alphabetical {pull}12526[#12526]
+* [UI Framework] Reactify kuiTabs and related CSS components {pull}12302[#12302]
+* Replace brand-danger color with new global red color. {pull}12654[#12654]
+* Make ui-select appearance match other inputs. {pull}12652[#12652]
+* [UI Framework] remove check for ng-untouched class from formControlInvalid mixin {pull}12153[#12153]
+* [UI Framework] reactify prompt for items {pull}12151[#12151]
+* [UI Framework] Allow custom placeholder for Tool Bar Search Box {pull}12959[#12959]
+* Palette swap for accessibility / kibana 6 {pull}12085[#12085]
+  - We re-skinned a decent portion of Kibana to be mostly AA accessibility compatible in regards to coloring of major navigation elements.
+* [Design] Use alpha logo, retain branding in fullscreen mode {pull}12735[#12735]
+* [Fix for #12622] [Design] Update favicons {pull}12774[#12774]
+Dev Tools::
+* Respects ES customHeaders config for Console {pull}13033[#13033]
+Discover::
+* Accessible sort buttons {pull}12217[#12217]
+* [Accessibility] Avoid empty th in doc-table header row {pull}12364[#12364]
+  - The discover document table header cells provide appropriate hints to screen-readers.
+* [Accessibility] Add button to skip past the discover doc table {pull}12539[#12539]
+  - The new "Skip to bottom"-button in Discover is invisible unless focused. When activated it displays all remaining rows that were already loaded and focuses an anchor located below the table.
+* Timepicker on the right {pull}11980[#11980]
+Management::
+* Uses SavedObjectsClient for UI Settings {pull}12747[#12747]
+* [Management] Provide a way to fetch indices and template index patterns {pull}12200[#12200]
+* [Management] More universal solution for fetching indices and aliases {pull}12405[#12405]
+* [Management] Provide a way to fetch index pattern titles {pull}13030[#13030]
+  - This PR adds another method to the indexPatterns service to fetch index patterns titles. Since the code was nearly identical to how index pattern ids are fetched, I decided to slightly refactor the function to accept a parameter for which property to fetch from the index pattern. I've updated all usages to the new approach.
+* Add breadcrumb-page-title to management-app {pull}12765[#12765]
+  - The bread-crumbs component allows for the consumer to pass in a page-title value which is appended as the final breadcrumb in the chain. This PR adds a scope argument to the management-app to take advantage of it.
+Operations::
+* Update mappings for kibana index {pull}9280[#9280]
+* Saved objects compatibility layer {pull}12648[#12648]
+* Support v6 mappings for saved objects import/export {pull}12792[#12792]
+* Use single ES document type {pull}12794[#12794]
+  - Starting in Elasticsearch 6.0, you are no longer able to create new indices with multiple index types. To accomplish the same effect as index types, a new type field was added to identify the document and the value mapped under the index to allow for strict mapping.
+* Add eslint import resolution {pull}12025[#12025]
+* [eslint] Ignore ui_framework/doc_site/build {pull}12400[#12400]
+* [logging] Downgrade hapi connection errors when connecting with the w… {pull}11209[#11209]
+* [git] ignore extra files in the root config/ directory {pull}9296[#9296]
+* upgrade makelogs {pull}9295[#9295]
+* [Fix for #9436] [optimizer] remove support for .jsx extension {pull}12712[#12712]
+* [elasticsearch/migrateConfig] use server.savedObjectsClientFactory() {pull}12767[#12767]
+* [status] 15m load average should use the 3rd index {pull}11202[#11202]
+* Sets ES mapping to single_type=false {pull}11451[#11451]
+* Adds bulk_get to SavedObjects {pull}12426[#12426]
+* Uses SavedObjects API in Courier Saved Object {pull}12407[#12407]
+Platform::
+* Use SavedObjectsClient for Courier Index Pattern {pull}12719[#12719]
+* Document merge conflict resolution process in CONTRIBUTING.md. {pull}12212[#12212]
+* Update files_to_commit to find renamed files. {pull}12423[#12423]
+* Remove client-side management of Kibana index mappings {pull}12820[#12820]
+* Uses uuid for auto-generated ids and prepends type (#12834) {pull}12877[#12877]
+* Use node instead of webpack config for jest {pull}12974[#12974]
+* add api tag to api routes {pull}12948[#12948]
+* Move Jest config to json {pull}12402[#12402]
+* [uiSettings] support defining settings with uiExports {pull}12250[#12250]
+  - - define a uiExports.uiSettingDefaults key your plugin definition to add uiSettingDefaults - uiSettingDefaults must be unique. If a key is already defined elsewhere then the server will not start. - defined settings will display in the advanced settings editor, along with the intended default value and description - the REST API is identical to before - the browser API is identical to before - defaults for timelion have been extracted to the timelion plugin definition and the existing defaults are defined in the kibana plugin definition
+* Refactor commaList filter logic into common util {pull}12553[#12553]
+* [kbnServer/extensions] formalize request factories with helper {pull}12697[#12697]
+* Allow plugins to turn off the “link to last URL” navigation helper {pull}13044[#13044]
+Sharing::
+* Uses SavedObjectsClient for Short URL Lookup {pull}12787[#12787]
+* Stats API {pull}11992[#11992]
+  - We introduced a new api endpoint at api/stats which displays counts of saved objects in your kibana index: {"dashboard":{"total":1},"visualization":{"total":3},"search":{"total":1},"index_pattern":{"total":1},"index":".kibana"}
+* Add new react color picker to ui framework with tests {pull}12245[#12245]
+* Add label and clear link to color picker {pull}12422[#12422]
+* Expose the variables for dynamically building doc links {pull}12513[#12513]
+* Reactify stateless table components {pull}12349[#12349]
+Other::
+* ES Healthcheck v6 mapping compatibility {pull}12714[#12714]
+* Remove field_stats pre-flight option for index patterns {pull}12814[#12814]
+* Configurable custom response headers for server {pull}13045[#13045]
+Visualization::
+* Fix ui-select error border color and placeholder font color. {pull}12411[#12411]
+* Fix appearance of error indicator in Visualize sidebar.  {pull}12410[#12410]
+* Adding ability to configure grid for TSVB {pull}12385[#12385]
+* Adding option for controlling if last bucket is dropped for TSVB {pull}12379[#12379]
+  - This PR creates an option in "Panel Options" and the metric index pattern override to allow the user to control if the last bucket should be dropped. By default TSVB will drop the last bucket since most of the time it's incomplete. This also changes the method for dropping the last bucket to a more reliable method.
+* Fixes #12602 - Change TSVB Fields API to use fieldCaps API {pull}12611[#12611]
+* [Fix for #11193] hide current time marker when the timespan doesn't include the current time {pull}12266[#12266]
+  - Only display current time marker on  a visualization when the x-axis extent includes the current time.
+* [Fix for #7040] Add github-markdown.css to markdown visualization {pull}12377[#12377]
+* Filter geohash_grid aggregation to map view box with collar {pull}12806[#12806]
+* add font size control to markdown visualization {pull}12860[#12860]
+* [vis/resizeChecker] swap out implemenation with ResizeObserver polyfill {pull}9439[#9439]
+* Add imports for SavedObjectRegistryProvider.register, fixing Timelion {pull}12844[#12844]
+* [Fix for #7572] add polygon drawing tool {pull}11578[#11578]
+  - On a coordinate map, users can now make a selection on the map by drawing a freehand polygon. Just like the earlier boundary selection, this adds a boundary filter to the filter bar.
+* Visualize refactor (bis) {pull}12715[#12715]
+
+
+[float]
+[[bug-6.0.0-beta1]]
+=== Bug fixes
+Design::
+* [UI Framework] Fix disappearing borders for LocalNav search select. {pull}12803[#12803]
+* [Accessibilty] Make kbn_accessible_click part of autoload/all  {pull}13299[#13299]
+Discover::
+* Fix call to suggestions API to correctly use index pattern title {pull}12917[#12917]
+* Remove simple_query_string hack now that multi_match supports * properly {pull}13285[#13285]
+* Add documentation link to query bar when Kuery is selected {pull}13300[#13300]
+Management::
+* [Fix for #12728] Ensure conflicted fields can be searchable and/or aggregatable {pull}13070[#13070]
+* [Fix for #13186] [Management] Update saved objects client usage to `attributes` instead of `_source` {pull}13223[#13223]
+* [Fix for #12249] Fixes issue #12249 {pull}12254[#12254]
+* Refine getIndices() to return an empty array if there are no matching indices. {pull}12659[#12659]
+* Remove translations from management section {pull}13049[#13049]
+* [Fix for #9352] Change mapping of index-pattern fields to text {pull}9353[#9353]
+Operations::
+* Remove `@elastic` folder from `packages/` {pull}13089[#13089]
+* Fix jsonify license check (#12615) {pull}12619[#12619]
+* Use es6 exports, replace module.exports {pull}12084[#12084]
+* [es archiver] fix error causes when requesting multiple index feature… {pull}12473[#12473]
+* Bump makelogs to 4.0.2 {pull}13007[#13007]
+Platform::
+* Update HTML style guide with rule for camel casing attribute values. {pull}11653[#11653]
+* Add title and tooltip accessibility information to HTML style guide. {pull}11655[#11655]
+* [Fix for #12580] Update HTML style guide with rule about putting nested elements on multiple lines. {pull}12812[#12812]
+* Remove Version Check for Dashboard Import API {pull}12476[#12476]
+* Toast Notification should handle connection failed {pull}12609[#12609]
+* [Fix for #12047] [uiSettings] make service request based {pull}12243[#12243]
+  - - removes server.uiSettings() (throws error with instructions)  - Adds request.getUiSettingsService() which returns a unique instance of UiSettingsService per request  - Methods on UiSettingsService no longer require a request object  - Adds server.uiSettingsServiceFactory(options) which can be used to create an instance of UiSettingsService with a custom callCluster() function
+* [Fix for #12436] Fix stats permissions and use underscore instead of dash {pull}12478[#12478]
+* [server/indexPatterns] expose indexPatternService getter/factory {pull}13012[#13012]
+Sharing::
+* Restoring the dashboard-grid padding to appease Gridster {pull}12613[#12613]
+* [Fix for #11857] Accessibility: Sharing UI - associate labels with controls {pull}12143[#12143]
+* [Fix for #12600] Fix search issue on listing page + tests {pull}12618[#12618]
+* [Fix for #11860] Make add edit buttons accessible {pull}12320[#12320]
+* Need to trigger renderComplete when there are no results {pull}12380[#12380]
+* [Fix for #12987] Children of buttons won't capture hover events in firefox {pull}13015[#13015]
+Other::
+* Fixes #12757 - Fixing field fetching for index patterns for TSVB {pull}12771[#12771]
+* Limit scripted fields to painless and expression langs {pull}9172[#9172]
+* update logstash data and mappings for single type {pull}13001[#13001]
+* [Fix for #13032] TEST - Fix flaky map functional test {pull}13039[#13039]
+Visualization::
+* Fixes #11721 - Fix bug with axis updating when data format is changed in TSVB {pull}12386[#12386]
+  - Axes in the Time Series Visual Builder now correctly update when changing a data formatter.
+* Fixes #12763 - Add show_grid to the default vis structure for TSVB {pull}12769[#12769]
+* Fixes #12777 - Add onBrush to Visualization component for TSVB {pull}12778[#12778]
+* [Fix for #12802, #12762] Fix TSVB Visualizations to honor darkTheme {pull}12804[#12804]
+* [Fix for #8076] Scaled date format for date histogram aggregation {pull}12384[#12384]
+  - Format date_histogram aggregation bucket labels with format specified in Advanced Setting's "dateFormat:scaled"
+* [Fix for #3230] Make vertical bar chart gutter widths consistent {pull}12264[#12264]
+  - Histogram intervals are not always equal widths (monthly time intervals). Keeping gutter widths consistent and reducing the bar width provides a more visually appealing bar chart.
+* [Fix for #3173] Date histogram brush - add range filter when field is not index pattern time field. {pull}12286[#12286]
+* Remove event listener for resizeChecker when directive is destroyed {pull}12734[#12734]
+* Date histogram axis label not getting updated when time interval changes {pull}12815[#12815]
+* [Fix for #9530] Don't declare empty properties in Timelion's bool query {pull}9573[#9573]
+* [Fix for #12782] visualize should send ready:vis event when done {pull}12796[#12796]
+* [Fix for #11490] fix range agg label on heatmap y axis {pull}12754[#12754]
+* [Fix for #12811] reload visualization on auto refresh trigger {pull}12823[#12823]
+* [Fix for #12882] changing query should update url state {pull}12912[#12912]
+* vis with saved search should not show query and filter panels {pull}12911[#12911]
+* [Fix for #12925] analyze wildcard should not be part of default query {pull}12938[#12938]
+* [Fix for #12838] fix gauge field formatters {pull}12913[#12913]
+  - metric/goal/gauge now correctly respect the fieldFormatters when multiple metrics are defined.
+* [Fix for #12940] query queue should be cleared on failure {pull}12942[#12942]
+* Handle date histogram scaling for table vis and avg_buckets metric {pull}11929[#11929]
+* [Fix for #12724] by default metric should not define color {pull}12993[#12993]
+* [Fix for #11414] remove default WMS settings {pull}11573[#11573]
+* ensure spy panel obscures underlying visualization {pull}12502[#12502]
+* [Fix for #12497] allows to order percentiles freely {pull}12498[#12498]
+* [Fix for #12732] Should only run visualization on Discover page when the indexpattern is time based {pull}12741[#12741]
+* reload on global fetch event and emit vis:ready {pull}12805[#12805]
+* Use the customMetric's formatter for pipeline aggregations {pull}11933[#11933]
+* [Fix for #12919] Fix excessive redraw {pull}12931[#12931]
+* [Fix for #12220] Should only fit on shapes that are part of the result {pull}12881[#12881]
+* [Fix for #12172] Save layer setting in the region map UI {pull}12956[#12956]
+* [Fix for #12189] Region map should respect saved center and zoom {pull}12883[#12883]
+* [Fix for #13181, elastic/beats#4777] Add Checks to Dashboard Context {pull}13182[#13182]
+* [Fix for #13244] [visualize spy] Pull index title instead of id {pull}13254[#13254]
+* [Fix for #11586] Use ui-select for agg selector {pull}13292[#13292]
+* [Fix for #13227] Send map filters through $newFilters so they get picked up by both kuery and lucene {pull}13251[#13251]
+* [Fix for #12827] removes :filters from label {pull}12962[#12962]
+* [Fix for #12983] resize was not detected correctly {pull}13239[#13239]
+* [Fix for #13011] Should respect pinned filters {pull}13019[#13019]
+* [Fix for #13255] Ensure we are working with data-series to avoid tooltip errors {pull}13266[#13266]
+* [Fix for #12724] by default metric should not define color {pull}12993[#12993]
+* [Fix for #12391] in percentage mode tooltip should also show percentages {pull}13217[#13217]
+  - Tooltips now correctly display the percentage-value in area charts where the Y-Axis is formatted in percentage mode.
+* [Fix for #12963] Exclude stacktrace from error response of Timelion backend {pull}12973[#12973]
+  - the Timelion backend no longer includes the stacktrace as part of the server response. This stacktrace is now logged to the server console.
+* Visualization accessibility issues {pull}13226[#13226]
+
+

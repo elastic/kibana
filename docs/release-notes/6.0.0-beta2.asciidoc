@@ -1,0 +1,99 @@
+[[release-notes-6.0.0-beta2]]
+== 6.0.0-beta2 Release Notes
+
+Also see <<breaking-changes-6.0>>.
+
+[float]
+[[breaking-6.0.0-beta2]]
+=== Breaking changes
+Discover::
+* [Fix for #13096] Remove highlight query {pull}13231[#13231]
+Visualization::
+* [Fix for #13425] Replace "marked" with "markdown-it" {pull}13623[#13623]
+
+
+[float]
+[[enhancement-6.0.0-beta2]]
+=== Enhancements
+Discover::
+* [Fix for #12343] Remove custom keyboard navigation in datepicker {pull}13644[#13644]
+Management::
+* [Management] Provide a way to fetch index pattern titles {pull}13030[#13030]
+  - This PR adds another method to the indexPatterns service to fetch index patterns titles. Since the code was nearly identical to how index pattern ids are fetched, I decided to slightly refactor the function to accept a parameter for which property to fetch from the index pattern. I've updated all usages to the new approach.
+* [Fix for #11526, #8225] Move build info from management section to status page {pull}13341[#13341]
+Platform::
+* [server/indexPatterns] expose indexPatternService getter/factory {pull}13012[#13012]
+Visualization::
+* Upgrade kibana to leaflet 1.x {pull}12367[#12367]
+* Duration Formatting for TSVB {pull}13337[#13337]
+
+
+[float]
+[[bug-6.0.0-beta2]]
+=== Bug fixes
+Design::
+* Make breadcrumb a heading for screen readers, fix #12885 {pull}13734[#13734]
+* [Accessibilty] Make kbn_accessible_click part of autoload/all  {pull}13299[#13299]
+Discover::
+* [Fix for #12745] Handle booleans in filter editor {pull}13406[#13406]
+* [Fix for #12692] Re-enable filter editor suggestions {pull}13376[#13376]
+* Remove simple_query_string hack now that multi_match supports * properly {pull}13285[#13285]
+* Add documentation link to query bar when Kuery is selected {pull}13300[#13300]
+* [Fix for #12639] Make filter pills keyboard accessible {pull}13331[#13331]
+* [Fix for #12640] Make 'all filters' actions keyboard accessible {pull}13391[#13391]
+* [Fix for #12416] Fix fixed-scroll on Discover page {pull}13516[#13516]
+* [Fix for #12955] Improves dark theme support in the filter editor {pull}13522[#13522]
+* [Fix for #11830] Disable creation of "exists" filters for scripted fields {pull}13538[#13538]
+* [Fix for #13080] Fix blank index pattern selector in Discover {pull}13715[#13715]
+* Fix relative z-index of spy panel and filter editor {pull}13717[#13717]
+Management::
+* [Fix for #12861, #12862, #12863, #12865, #12868, #12870, #11526] [Management] Improve accessibility within management {pull}13364[#13364]
+* [Fix for #12864] [Management] Accessibility - continued {pull}13576[#13576]
+* [Fix for #13542] [Management] Fix breaking scope changes in the field format editor samples {pull}13549[#13549]
+* [Fix for #12872] Adds getAriaName function and applies it to advanced settings {pull}13448[#13448]
+* [Fix for #13072] Prevents default index pattern name when ID is provided {pull}13353[#13353]
+* [Fix for #13654] Changes verbage for opening an existing pattern {pull}13697[#13697]
+Operations::
+* Remove `@elastic` folder from `packages/` {pull}13089[#13089]
+Dev Tools::
+* [Fix for #10504] [console] Replace text/plain fallback with application/json {pull}12294[#12294]
+* [Fix for #10677] Keep top line in view when resizing Console to avoid losing user context {pull}13695[#13695]
+Sharing::
+* remove inline awaits {pull}13043[#13043]
+* Stabilize and bring back flaky tests {pull}13034[#13034]
+* [Fix for #12484, #12485, #12483] Fix accessibility issues with saved object finder {pull}13152[#13152]
+* [Fix for #12987] Children of buttons won't capture hover events in firefox {pull}13015[#13015]
+Platform::
+* [Fix for #12933] [chrome/nav/lastUrl] do not track redirect routes {pull}13432[#13432]
+  - When you navigate to a URL that Kibana doesn't recognize it tries to be helpful and send you to discover. At the same time it tries to remember the URL you were last using in each app and bring back where you left off when you come back. Unfortunately, these two features recently collided. If you somehow ended up at an unknown URL that looked like the URL for an app other than discover Kibana would get confused and remember the bad URL and immediately redirect you to discover. If you didn't give up right away you would probably try to go back to the app, but since it Kibana is trying to be helpful it would send you right back to the bad URL and then back to discover... Stupid right?! Well, it won't happen anymore!
+Visualization::
+* Fixes #12685 - Improve error handling for TSVB {pull}12688[#12688]
+* [Fix for #13246] Fixes #13246 - Add checks for empty annotations {pull}13422[#13422]
+* [Fix for #12866] Use devicePixelRatio to scale up and down canvas values in TSVB for Tooltip {pull}13565[#13565]
+* [Fix for #13010] Fixes #13010 - Add dateFormat config to TSVB Visualizations {pull}13626[#13626]
+* [Fix for #13625] Map filter not set appropriately when spy panel is open {pull}13678[#13678]
+* don't hide metric if show labels is false {pull}13637[#13637]
+  - goal/gauge show labels option should only hide the labels not the metric value
+* [Fix for #13156] fixing disabling aggregations {pull}13686[#13686]
+  - Disabled aggregations are no longer removed on applying visualization configuration.
+* [Fix for #13546] custom value axis title should not be overiden {pull}13639[#13639]
+* Visualization accessibility issues {pull}13226[#13226]
+* [Fix for #12896, #12897, #12898, #12899] Visualize Accessibility Issues {pull}13428[#13428]
+* [Fix for #13267, #13517] fix available metric aggs {pull}13518[#13518]
+* [Fix for #12491, #12904, #12887] Improve accessibility of visualizations {pull}13507[#13507]
+* [Fix for #11856, #12888, #12900] Improve accessibility of visualization view {pull}13726[#13726]
+* Fix a bug with the interval label for TSVB {pull}13440[#13440]
+* [Fix for #12113] Fixes #12113 - Add timezone to date histogram aggregations for TSVB {pull}13378[#13378]
+* [Fix for #13471] Closes #13471 - Change split behavior of gauges and metrics vis {pull}13583[#13583]
+* [Fix for #13244] [visualize spy] Pull index title instead of id {pull}13254[#13254]
+* [Fix for #11586] Use ui-select for agg selector {pull}13292[#13292]
+* [Fix for #13227] Send map filters through $newFilters so they get picked up by both kuery and lucene {pull}13251[#13251]
+* [Fix for #12227] Fix discover sidebar Visualize button for geo_point fields {pull}13539[#13539]
+* [Fix for #12827] removes :filters from label {pull}12962[#12962]
+* [Fix for #12983] resize was not detected correctly {pull}13239[#13239]
+* Clamp the centroid to stay within the box boundaries {pull}13581[#13581]
+* [Fix for #13551] fix heatmap sizing on dashboard {pull}13636[#13636]
+* ensure editor mode propagates correctly {pull}13355[#13355]
+* [Fix for #13517] remove geo_bounds agg from visualizations {pull}13536[#13536]
+* [Fix for #13424] Exclude filter agg from visualizations {pull}13680[#13680]
+* [Fix for #13572] Show a warning for non accessible charts for screen readers {pull}13573[#13573]
