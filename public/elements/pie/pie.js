@@ -21,16 +21,19 @@ export default new Element('pie', {
             $(domNode).empty();
           } else {
             plot = $.plot($(domNode), config.data, config.options);
+            $('.pieLabel > div', domNode).css(config.font.spec);
           }
         } else {
           plot.resize();
           plot.draw();
+          $('.pieLabel > div', domNode).css(config.font.spec);
         }
       } catch (e) {
         // Nope
       }
 
     }
+
 
     function destroy() {
       if (plot) plot.shutdown();

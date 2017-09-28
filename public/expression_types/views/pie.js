@@ -8,6 +8,11 @@ export const pie = () => new View('pie', {
   description: 'Show your data, as a pie chart',
   modelArgs: ['color', 'size'],
   args: [
+    new Arg('font', {
+      displayName: 'Text settings',
+      description: 'Fonts, alignment and color',
+      argType: 'font',
+    }),
     new Arg('palette', {
       displayName: 'Color palette',
       argType: 'palette',
