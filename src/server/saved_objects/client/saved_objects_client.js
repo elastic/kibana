@@ -1,6 +1,5 @@
 import Boom from 'boom';
 import uuid from 'uuid';
-import { noop } from 'lodash';
 
 import { getRootType } from '../../mappings';
 
@@ -18,7 +17,7 @@ export class SavedObjectsClient {
       index,
       mappings,
       callCluster,
-      onBeforeWrite = noop,
+      onBeforeWrite = () => {},
     } = options;
 
     this._index = index;
