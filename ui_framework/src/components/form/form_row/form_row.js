@@ -116,7 +116,7 @@ KuiFormRow.propTypes = {
   id: PropTypes.string,
   isInvalid: PropTypes.bool,
   error: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
-  helpText: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
+  helpText: PropTypes.node,
   hasEmptyLabelSpace: PropTypes.bool,
 };
 
