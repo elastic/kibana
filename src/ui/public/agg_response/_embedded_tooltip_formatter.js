@@ -40,6 +40,24 @@ export function EmbeddedTooltipFormatterProvider($rootScope, $compile, Private, 
       tooltipMsg = _.get(e, 'message', 'Error initializing tooltip');
     });
 
+    // Do not let dimensions exceed 40% of window dimensions
+    function getWidth() {
+      let width = parentVis.params.tooltip.width;
+      const max = Math.floor(window.innerWidth * 0.4);
+      if (width > max) {
+        width = max;
+      }
+      return width;
+    }
+    function getHeight() {
+      let height = parentVis.params.tooltip.height;
+      const max = Math.floor(window.innerHeight * 0.4);
+      if (height > max) {
+        height = max;
+      }
+      return height;
+    }
+
     const formatter = function (event) {
       const executionId = `embedded-${Date.now()}`;
 
@@ -68,12 +86,12 @@ export function EmbeddedTooltipFormatterProvider($rootScope, $compile, Private, 
           // Only update popup contents if results are for calling fetch
           if (localFetchTimestamp === fetchTimestamp && $popup && $popup.length > 0) {
             $visEl.css({
-              width: parentVis.params.tooltip.width,
-              height: parentVis.params.tooltip.height
+              width: getWidth(),
+              height: getHeight()
             });
             $popup.css({
-              width: parentVis.params.tooltip.width,
-              height: parentVis.params.tooltip.height
+              width: getWidth(),
+              height: getHeight()
             });
             $popup.empty();
             $popup.append($visEl);
@@ -86,7 +104,7 @@ export function EmbeddedTooltipFormatterProvider($rootScope, $compile, Private, 
       return `<div
         id="${executionId}"
         class="tab-dashboard theme-dark"
-        style="height: ${parentVis.params.tooltip.height}px; width: ${parentVis.params.tooltip.width}px;">
+        style="height: ${getHeight()}px; width: ${getWidth()}px;">
           ${tooltipMsg}
       </div>`;
     };
