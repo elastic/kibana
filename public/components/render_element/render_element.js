@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import './render_element.less';
 
 export const RenderElement = ({ domNode, setDomNode }) => {
   const linkRef = (refNode) => {
