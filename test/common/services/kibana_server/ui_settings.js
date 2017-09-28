@@ -5,11 +5,19 @@ export class KibanaServerUiSettings {
   constructor(log, es, kibanaIndex, kibanaVersion) {
     this._log = log;
     this._kibanaVersion = kibanaVersion;
-    this._savedObjectsClient = new SavedObjectsClient(
-      kibanaIndex.getName(),
-      kibanaIndex.getMappingsDsl(),
-      createCallCluster(es)
-    );
+
+    this._savedObjectsClient = new SavedObjectsClient({
+      index: kibanaIndex.getName(),
+      mappings: kibanaIndex.getMappingsDsl(),
+      callCluster: createCallCluster(es),
+      async onBeforeWrite() {
+        await es.cluster.health({
+          timeout: '5s',
+          index: kibanaIndex.getName(),
+          waitForStatus: 'yellow',
+        });
+      }
+    });
   }
 
   async _id() {

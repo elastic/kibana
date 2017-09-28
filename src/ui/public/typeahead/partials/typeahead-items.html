@@ -3,8 +3,7 @@
   ng-mouseenter="typeahead.setMouseover(true);"
   ng-mouseleave="typeahead.setMouseover(false);"
   class="typeahead-items"
-  >
-
+>
   <div
     ng-repeat="item in typeahead.getItems()"
     ng-class="{active: item === typeahead.active}"
