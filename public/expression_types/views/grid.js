@@ -26,6 +26,9 @@ export const grid = () => new View('grid', {
   ],
   resolve: ({ context }) => {
     if (getState(context) !== 'ready') return { labels: [] };
-    return { labels: uniq(map(getValue(context).rows, 'color').filter(v => v !== undefined)) };
+
+    return {
+      labels: uniq(map(getValue(context).rows, 'color').filter(v => v !== undefined)),
+    };
   },
 });

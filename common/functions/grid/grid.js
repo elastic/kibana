@@ -44,6 +44,9 @@ export default new Fn({
     const resultColumns = getResultValues(context.rows, 'x');
     const seriesStyles = keyBy(args.seriesStyle || [], 'label') || {};
 
+    // If there are no columns, add an "all" column
+    if (resultColumns.length === 0) resultColumns.push('');
+
     function getConsolidateRow(rows, label) {
       const cells = resultColumns.map((column) => {
         // If there was a y value we could also filter for that. Nice.

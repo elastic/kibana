@@ -1,7 +1,7 @@
 import { compose, withState, lifecycle, withPropsOnChange, withProps } from 'recompose';
 import { RenderElement as Component } from './render_element';
 import PropTypes from 'prop-types';
-import { isEqual } from 'lodash';
+import { isEqual, cloneDeep } from 'lodash';
 import { ElementHandlers } from './lib/handlers';
 
 export const RenderElement = compose(
@@ -22,8 +22,8 @@ export const RenderElement = compose(
 
       // Config changes
       if (this.shouldFullRerender(prevProps)) {
-        this.props.handlers.destroy();
-        return renderFn(domNode, config, handlers);
+        handlers.destroy();
+        return renderFn(domNode, cloneDeep(config), handlers);
       }
 
       // Size changes
@@ -31,7 +31,7 @@ export const RenderElement = compose(
     },
 
     shouldComponentUpdate(prevProps) {
-      return this.shouldFullRerender(prevProps) || !isEqual(this.props.size, prevProps.size);
+      return !isEqual(this.props.size, prevProps.size) || this.shouldFullRerender(prevProps);
     },
 
     componentWillUnmount() {

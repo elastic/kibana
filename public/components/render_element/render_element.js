@@ -10,7 +10,11 @@ export const RenderElement = ({ domNode, setDomNode }) => {
   };
 
   return (
-    <div className="canvas__workpad--element_render canvas__element" style={{ height: '100%', width: '100%' }} ref={linkRef} />
+    <div
+      className="canvas__workpad--element_render canvas__element"
+      style={{ height: '100%', width: '100%' }}
+      ref={linkRef}
+    />
   );
 };
 
