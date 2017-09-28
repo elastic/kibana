@@ -24,10 +24,7 @@ module.exports = function (grunt) {
       '_build:versionedLinks',
       '_build:osShellScripts',
       grunt.option('skip-archives') ? [] : ['_build:archives'],
-      grunt.option('skip-os-packages') ? [] : [
-        '_build:pleaseRun',
-        '_build:osPackages',
-      ],
+      grunt.option('skip-os-packages') ? [] : ['_build:osPackages'],
       '_build:shasums'
     ]));
   });
