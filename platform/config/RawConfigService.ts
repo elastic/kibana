@@ -79,7 +79,11 @@ export class RawConfigService {
   }
 }
 
-class ObjectToRawConfigAdapter implements RawConfig {
+/**
+ * Allows plain javascript object to behave like `RawConfig` instance.
+ * @internal
+ */
+export class ObjectToRawConfigAdapter implements RawConfig {
   constructor(private readonly rawValue: { [key: string]: any }) {}
 
   get(configPath: ConfigPath) {
