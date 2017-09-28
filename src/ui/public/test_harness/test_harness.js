@@ -11,7 +11,11 @@ import { setupTestSharding } from './test_sharding';
 
 const { query } = parseUrl(window.location.href, true);
 if (query && query.mocha) {
-  window.mocha.setup(JSON.parse(query.mocha));
+  try {
+    window.mocha.setup(JSON.parse(query.mocha));
+  } catch (error) {
+    throw new Error(`'?mocha=${query.mocha}' query string param provided but it could not be parsed as json`);
+  }
 }
 
 setupTestSharding();
