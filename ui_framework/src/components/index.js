@@ -72,6 +72,7 @@ export {
 
 export {
   KuiHeader,
+  KuiHeaderAlert,
   KuiHeaderBreadcrumb,
   KuiHeaderBreadcrumbCollapsed,
   KuiHeaderBreadcrumbs,
