@@ -199,8 +199,8 @@ export default () => Joi.object({
   }).default(),
 
   savedObjects: Joi.object({
-    indexCheckTimeout: Joi.string().default('2.5s').regex(/^\d+(\.\d)?[sm]$/, 'number with optional decimal and either s or m suffix')
-  }),
+    indexCheckTimeout: Joi.string().default('5s').regex(/^\d+(\.\d)?[sm]$/, 'number with either s (seconds) or m (minutes) suffix')
+  }).default(),
 
   uiSettings: Joi.object({
     // this is used to prevent the uiSettings from initializing. Since they

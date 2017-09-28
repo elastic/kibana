@@ -63,6 +63,10 @@ export default function (plugin, server) {
       if (health !== READY) {
         return Promise.delay(REQUEST_DELAY).then(waitUntilReady);
       }
+
+      return new Promise((resolve) => {
+        plugin.status.once('green', resolve);
+      });
     });
   }
 

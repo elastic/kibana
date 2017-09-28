@@ -4,18 +4,18 @@ import {
   getServices,
   chance,
   assertGeneric404Response,
+  waitUntilNextHealthCheck,
 } from './lib';
 
 export function indexMissingSuite() {
-  beforeEach(async function () {
-    const { kbnServer } = getServices();
-    await kbnServer.server.plugins.elasticsearch.waitUntilReady();
-  });
+  beforeEach(waitUntilNextHealthCheck);
 
   async function setup() {
     const { callCluster, kbnServer } = getServices();
     const indexName = kbnServer.config.get('kibana.index');
 
+    // delete the kibana index and run the test, we have about 2 seconds
+    // before the healthCheck runs again, that SHOULD be enough time
     await callCluster('indices.delete', {
       index: indexName,
     });

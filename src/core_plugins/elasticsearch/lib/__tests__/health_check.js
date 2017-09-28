@@ -42,7 +42,7 @@ describe('plugins/elasticsearch', () => {
         status: {
           red: sinon.stub(),
           green: sinon.stub(),
-          yellow: sinon.stub()
+          yellow: sinon.stub(),
         }
       };
 
@@ -207,11 +207,16 @@ describe('plugins/elasticsearch', () => {
     });
 
     describe('#waitUntilReady', function () {
-      it('polls health until index is ready', function () {
+      it('polls health until index is ready, then waits for green status', function () {
         const clusterHealth = cluster.callWithInternalUser.withArgs('cluster.health', sinon.match.any);
         clusterHealth.onCall(0).returns(Promise.resolve({ timed_out: true }));
         clusterHealth.onCall(1).returns(Promise.resolve({ status: 'red' }));
         clusterHealth.onCall(2).returns(Promise.resolve({ status: 'green' }));
+
+        plugin.status.once = function (event, handler) {
+          expect(event).to.be('green');
+          setImmediate(handler);
+        };
 
         return health.waitUntilReady().then(function () {
           sinon.assert.calledThrice(clusterHealth);
