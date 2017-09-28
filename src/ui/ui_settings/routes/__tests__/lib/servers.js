@@ -15,7 +15,7 @@ export async function startServers() {
     // speed up the index check timeout so that the healthCheck doesn't
     // have time to recreate the index before we get a response
     savedObjects: {
-      indexCheckTimeout: '1s'
+      indexCheckTimeout: 1000
     }
   });
   await kbnServer.ready();

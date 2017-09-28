@@ -199,7 +199,7 @@ export default () => Joi.object({
   }).default(),
 
   savedObjects: Joi.object({
-    indexCheckTimeout: Joi.string().default('5s').regex(/^\d+(\.\d)?[sm]$/, 'number with either s (seconds) or m (minutes) suffix')
+    indexCheckTimeout: Joi.number().default(5000)
   }).default(),
 
   uiSettings: Joi.object({

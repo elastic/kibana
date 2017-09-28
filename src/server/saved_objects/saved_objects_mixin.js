@@ -31,7 +31,7 @@ export function savedObjectsMixin(kbnServer, server) {
 
     try {
       await adminCluster.callWithInternalUser('cluster.health', {
-        timeout: server.config().get('savedObjects.indexCheckTimeout'),
+        timeout: `${server.config().get('savedObjects.indexCheckTimeout')}ms`,
         index: server.config().get('kibana.index'),
         waitForStatus: 'yellow',
       });
