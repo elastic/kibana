@@ -28,10 +28,12 @@ You can use standard Markdown in here, but you can also access your piped-in dat
 #### Enjoy!"`,
   render(domNode, config, handlers) {
     const html = { __html: md.render(config.content) };
+    const fontStyle = config.font ? config.font.spec : {};
+
     ReactDOM.render((
       <div
         className="canvas__element__markdown"
-        style={config.font.spec}
+        style={fontStyle}
         dangerouslySetInnerHTML={html}/>
     ), domNode);
     handlers.done();

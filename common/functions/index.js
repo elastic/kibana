@@ -21,8 +21,6 @@ import sleep from './sleep/sleep';
 import timefilter from './timefilter/timefilter';
 import timefilterControl from './timefilterControl/timefilterControl';
 
-
-
 export const commonFunctions = [
   alterColumn,
   containerStyle,
