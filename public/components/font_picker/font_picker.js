@@ -52,7 +52,7 @@ export const FontPicker = ({ onSelect, value, placement }) => {
       placement={placement || 'bottom'}
       trigger="click"
     >
-      <div style={{ display: 'inline-block' }}>
+      <div style={{ display: 'inline-block' }} className="canvas__font-picker--preview">
         <FauxSelect>
           <div style={{ fontFamily: selected.value }}>{ selected.label }</div>
         </FauxSelect>
