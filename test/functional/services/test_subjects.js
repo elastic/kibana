@@ -49,6 +49,12 @@ export function TestSubjectsProvider({ getService }) {
       return await filterAsync(all, el => el.isDisplayed());
     }
 
+    async getPropertyAll(selector, property) {
+      return await this._mapAll(selector, async (element) => {
+        return await element.getProperty(property);
+      });
+    }
+
     async getProperty(selector, property) {
       return await retry.try(async () => {
         const element = await this.find(selector);
