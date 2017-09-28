@@ -1,14 +1,14 @@
-
 import React, {
   Component,
 } from 'react';
 
 import {
   KuiBottomBar,
+  KuiButton,
   KuiFlexGroup,
   KuiFlexItem,
-  KuiButton,
-  KuiButtonEmpty,
+  KuiProgress,
+  KuiText,
 } from '../../../../components';
 
 export default class extends Component {
@@ -37,24 +37,45 @@ export default class extends Component {
     if (this.state.showBar) {
       bottomBar = (
         <KuiBottomBar>
-          <KuiFlexGroup justifyContent="spaceBetween">
+          <KuiProgress size="xs" color="accent" position="absolute"/>
+          <KuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <KuiFlexItem grow={false}>
-              <KuiFlexGroup gutterSize="small">
-                <KuiFlexItem>
-                  <KuiButton type="ghost" size="small" iconType="help">Help</KuiButton>
-                </KuiFlexItem>
-                <KuiFlexItem>
-                  <KuiButton type="ghost" size="small" iconType="user">Add user</KuiButton>
-                </KuiFlexItem>
-              </KuiFlexGroup>
+              <KuiText>
+                <p>Saving...</p>
+              </KuiText>
             </KuiFlexItem>
+
             <KuiFlexItem grow={false}>
               <KuiFlexGroup gutterSize="small">
                 <KuiFlexItem>
-                  <KuiButtonEmpty type="ghost" size="small" iconType="check">Save</KuiButtonEmpty>
+                  <KuiButton
+                    type="danger"
+                    size="small"
+                    iconType="trash"
+                  >
+                    Delete
+                  </KuiButton>
                 </KuiFlexItem>
+
                 <KuiFlexItem>
-                  <KuiButtonEmpty type="ghost" size="small" iconType="cross">Discard</KuiButtonEmpty>
+                  <KuiButton
+                    type="primary"
+                    size="small"
+                    iconType="cross"
+                  >
+                    Cancel
+                  </KuiButton>
+                </KuiFlexItem>
+
+                <KuiFlexItem>
+                  <KuiButton
+                    type="primary"
+                    fill
+                    size="small"
+                    iconType="check"
+                  >
+                    Save
+                  </KuiButton>
                 </KuiFlexItem>
               </KuiFlexGroup>
             </KuiFlexItem>

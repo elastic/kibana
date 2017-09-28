@@ -480,8 +480,8 @@ table {
   background-color: rgba(221, 10, 115, 0.1); }
 
 .kuiBottomBar {
-  background: #404040;
-  color: #FFF;
+  background-color: #FFF;
+  border-top: 1px solid #D9D9D9;
   position: fixed;
   bottom: 0;
   right: 0;
