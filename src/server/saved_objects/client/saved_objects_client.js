@@ -12,11 +12,17 @@ import {
 } from './lib';
 
 export class SavedObjectsClient {
-  constructor(kibanaIndex, mappings, callAdminCluster) {
-    this._kibanaIndex = kibanaIndex;
+  constructor(options) {
+    const {
+      index,
+      mappings,
+      callCluster,
+    } = options;
+
+    this._index = index;
     this._mappings = mappings;
     this._type = getRootType(this._mappings);
-    this._callAdminCluster = callAdminCluster;
+    this._unwrappedCallCluster = callCluster;
   }
 
   static errors = errors
@@ -40,9 +46,10 @@ export class SavedObjectsClient {
 
     const method = id && !overwrite ? 'create' : 'index';
     const time = this._getCurrentTime();
-    const response = await this._withKibanaIndex(method, {
+    const response = await this._callCluster(method, {
       id: this._generateEsId(type, id),
       type: this._type,
+      index: this._index,
       refresh: 'wait_for',
       body: {
         type,
@@ -91,7 +98,8 @@ export class SavedObjectsClient {
       ];
     };
 
-    const { items } = await this._withKibanaIndex('bulk', {
+    const { items } = await this._callCluster('bulk', {
+      index: this._index,
       refresh: 'wait_for',
       body: objects.reduce((acc, object) => ([
         ...acc,
@@ -140,9 +148,10 @@ export class SavedObjectsClient {
    * @returns {promise}
    */
   async delete(type, id) {
-    const response = await this._withKibanaIndex('delete', {
+    const response = await this._callCluster('delete', {
       id: this._generateEsId(type, id),
       type: this._type,
+      index: this._index,
       refresh: 'wait_for',
       ignore: [404],
     });
@@ -199,6 +208,7 @@ export class SavedObjectsClient {
     }
 
     const esOptions = {
+      index: this._index,
       size: perPage,
       from: perPage * (page - 1),
       _source: includedFields(type, fields),
@@ -215,7 +225,7 @@ export class SavedObjectsClient {
       }
     };
 
-    const response = await this._withKibanaIndex('search', esOptions);
+    const response = await this._callCluster('search', esOptions);
 
     if (response.status === 404) {
       // 404 is only possible here if the index is missing, which
@@ -262,7 +272,8 @@ export class SavedObjectsClient {
       return { saved_objects: [] };
     }
 
-    const response = await this._withKibanaIndex('mget', {
+    const response = await this._callCluster('mget', {
+      index: this._index,
       body: {
         docs: objects.map(object => ({
           _id: this._generateEsId(object.type, object.id),
@@ -303,9 +314,10 @@ export class SavedObjectsClient {
    * @returns {promise} - { id, type, version, attributes }
    */
   async get(type, id) {
-    const response = await this._withKibanaIndex('get', {
+    const response = await this._callCluster('get', {
       id: this._generateEsId(type, id),
       type: this._type,
+      index: this._index,
       ignore: [404]
     });
 
@@ -338,9 +350,10 @@ export class SavedObjectsClient {
    */
   async update(type, id, attributes, options = {}) {
     const time = this._getCurrentTime();
-    const response = await this._withKibanaIndex('update', {
+    const response = await this._callCluster('update', {
       id: this._generateEsId(type, id),
       type: this._type,
+      index: this._index,
       version: options.version,
       refresh: 'wait_for',
       ignore: [404],
@@ -366,12 +379,9 @@ export class SavedObjectsClient {
     };
   }
 
-  async _withKibanaIndex(method, params) {
+  async _callCluster(method, params) {
     try {
-      return await this._callAdminCluster(method, {
-        ...params,
-        index: this._kibanaIndex,
-      });
+      return await this._unwrappedCallCluster(method, params);
     } catch (err) {
       throw decorateEsError(err);
     }
