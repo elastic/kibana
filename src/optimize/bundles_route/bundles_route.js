@@ -14,7 +14,11 @@ import { createDynamicAssetResponse } from './dynamic_asset_response';
  *  @return {Hapi.RouteConfig}
  */
 export function createBundlesRoute({ bundlesPath, basePublicPath }) {
-  const cache = new LruCache(100);
+
+  // rather than calculate the fileHash on every request, we
+  // provide a cache object to `createDynamicAssetResponse()` that
+  // will store the 100 most recently used hashes.
+  const fileHashCache = new LruCache(100);
 
   if (typeof bundlesPath !== 'string' || !isAbsolute(bundlesPath)) {
     throw new TypeError('bundlesPath must be an absolute path to the directory containing the bundles');
@@ -44,7 +48,7 @@ export function createBundlesRoute({ bundlesPath, basePublicPath }) {
             reply(createDynamicAssetResponse({
               request,
               bundlesPath,
-              cache,
+              fileHashCache,
               publicPath: `${basePublicPath}/bundles/`
             }));
           }

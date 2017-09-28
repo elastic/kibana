@@ -13,14 +13,14 @@ import { replacePlaceholder } from '../public_path_placeholder';
  *  @property {Hapi.Request} options.request
  *  @property {string} options.bundlesPath
  *  @property {string} options.publicPath
- *  @property {MapLike} [options.cache]
+ *  @property {LruCache} options.fileHashCache
  */
 export async function createDynamicAssetResponse(options) {
   const {
     request,
     bundlesPath,
     publicPath,
-    cache,
+    fileHashCache,
   } = options;
 
   let fd;
@@ -38,7 +38,7 @@ export async function createDynamicAssetResponse(options) {
     fd = await fcb(cb => open(path, 'r', cb));
 
     const stat = await fcb(cb => fstat(fd, cb));
-    const hash = await getFileHash(cache, path, stat, fd);
+    const hash = await getFileHash(fileHashCache, path, stat, fd);
 
     const read = createReadStream(null, {
       fd,
