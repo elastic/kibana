@@ -8,7 +8,7 @@ const styleProps = ['lines', 'bars', 'points', 'fill', 'stack'];
 export const plot = () => new View('plot', {
   displayName: 'Plot Chart',
   description: 'Show your data, as plots',
-  modelArgs: ['x', 'y', 'color', 'size'],
+  modelArgs: ['x', 'y', 'color', 'size', 'text'],
   args: [
     new Arg('palette', {
       displayName: 'Color palette',
