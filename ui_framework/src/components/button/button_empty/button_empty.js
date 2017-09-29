@@ -11,6 +11,7 @@ const typeToClassNameMap = {
   primary: 'kuiButtonEmpty--primary',
   danger: 'kuiButtonEmpty--danger',
   disabled: 'kuiButtonEmpty--disabled',
+  text: 'kuiButtonEmpty--text',
   ghost: 'kuiButtonEmpty--ghost',
 };
 

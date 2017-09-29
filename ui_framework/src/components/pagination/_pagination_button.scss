@@ -4,15 +4,6 @@
   height: $kuiSizeL;
   min-width: $kuiSizeXL;
   text-align: center;
-  color: $kuiTextColor;
-
-  svg {
-    fill: $kuiTextColor !important;
-  }
-  // It's too heavy to have the normal button background on hover.
-  &:not(:focus):hover {
-    background-color: transparent;
-  }
 }
 
 .kuiPaginationButton-isActive {

@@ -24,6 +24,7 @@ export const KuiPaginationButton = ({
     <KuiButtonEmpty
       className={classes}
       size="small"
+      type="text"
       {...rest}
     >
       {children}

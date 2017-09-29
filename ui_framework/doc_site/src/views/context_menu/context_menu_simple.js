@@ -6,10 +6,6 @@ import {
   KuiButtonEmpty,
   KuiContextMenu,
   KuiPopover,
-  KuiPagination,
-  KuiFlexGroup,
-  KuiFlexItem,
-  KuiHorizontalRule,
 } from '../../../../components';
 
 function convertPanelTreeToMap(panel, map = {}) {
@@ -48,7 +44,6 @@ export default class extends Component {
 
     this.state = {
       isPopoverOpen: false,
-      activePage: 0,
     };
 
     const panelTree = {
@@ -72,7 +67,6 @@ export default class extends Component {
       }],
     };
 
-    this.PAGE_COUNT = 10;
     this.idToPanelMap = convertPanelTreeToMap(panelTree);
     this.idToPreviousPanelIdMap = extractPreviousIds(this.idToPanelMap);
   }
@@ -89,12 +83,6 @@ export default class extends Component {
     });
   }
 
-  goToPage = pageNumber => {
-    this.setState({
-      activePage: pageNumber,
-    });
-  }
-
   render() {
     const button = (
       <KuiButtonEmpty size="small" type="text" iconType="arrowDown" iconSide="right" onClick={this.onButtonClick.bind(this)}>
@@ -103,47 +91,20 @@ export default class extends Component {
     );
 
     return (
-      <div>
-        <KuiHorizontalRule />
-
-        <KuiFlexGroup justifyContent="spaceAround">
-          <KuiFlexItem grow={false}>
-            <KuiPagination
-              pageCount={this.PAGE_COUNT}
-              activePage={this.state.activePage}
-              onPageClick={this.goToPage}
-            />
-          </KuiFlexItem>
-        </KuiFlexGroup>
-
-        <KuiHorizontalRule />
-
-        <KuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <KuiFlexItem grow={false}>
-            <KuiPopover
-              button={button}
-              isOpen={this.state.isPopoverOpen}
-              closePopover={this.closePopover.bind(this)}
-              panelPaddingSize="none"
-              withTitle
-            >
-              <KuiContextMenu
-                initialPanelId={0}
-                isVisible={this.state.isPopoverOpen}
-                idToPanelMap={this.idToPanelMap}
-                idToPreviousPanelIdMap={this.idToPreviousPanelIdMap}
-              />
-            </KuiPopover>
-          </KuiFlexItem>
-          <KuiFlexItem grow={false}>
-            <KuiPagination
-              pageCount={this.PAGE_COUNT}
-              activePage={this.state.activePage}
-              onPageClick={this.goToPage}
-            />
-          </KuiFlexItem>
-        </KuiFlexGroup>
-      </div>
+      <KuiPopover
+        button={button}
+        isOpen={this.state.isPopoverOpen}
+        closePopover={this.closePopover.bind(this)}
+        panelPaddingSize="none"
+        withTitle
+      >
+        <KuiContextMenu
+          initialPanelId={0}
+          isVisible={this.state.isPopoverOpen}
+          idToPanelMap={this.idToPanelMap}
+          idToPreviousPanelIdMap={this.idToPreviousPanelIdMap}
+        />
+      </KuiPopover>
     );
   }
 }
