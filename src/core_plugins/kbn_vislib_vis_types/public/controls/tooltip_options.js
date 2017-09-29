@@ -3,15 +3,6 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import Select from 'react-select';
 
-const visTypeExcludeList = [
-  'input_control_vis',
-  'tagcloud',
-  'tile_map',
-  'timelion',
-  'region_map',
-  'metrics' // TSVB
-];
-
 export function TooltipOptions(props) {
 
   const findVisualizations = async (input) => {
@@ -23,7 +14,6 @@ export function TooltipOptions(props) {
       page: 1,
       perPage: 100
     };
-
     let options = [];
     let fetchNextPage = false;
 
@@ -31,11 +21,12 @@ export function TooltipOptions(props) {
       const resp = await props.savedObjectsClient.find(findOptions);
       const optionsFromPage = resp.savedObjects
       .filter((savedObject) => {
-        const visType = JSON.parse(savedObject.attributes.visState).type;
-        if (visTypeExcludeList.includes(visType)) {
-          return false;
+        const typeName = JSON.parse(savedObject.attributes.visState).type;
+        const visType = props.visTypes.byName[typeName];
+        if (visType && visType.isEmbeddableInTooltip) {
+          return true;
         }
-        return true;
+        return false;
       })
       .map((savedObject) => {
         return {
@@ -217,5 +208,6 @@ export function TooltipOptions(props) {
 TooltipOptions.propTypes = {
   params: PropTypes.object.isRequired,
   savedObjectsClient: PropTypes.object.isRequired,
-  setParam: PropTypes.func.isRequired
+  setParam: PropTypes.func.isRequired,
+  visTypes: PropTypes.object.isRequired
 };

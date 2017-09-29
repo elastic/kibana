@@ -23,6 +23,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
     image,
     description: 'Plot latitude and longitude coordinates on a map',
     category: CATEGORY.MAP,
+    isEmbeddableInTooltip: false,
     visConfig: {
       canDesaturate: true,
       defaults: {

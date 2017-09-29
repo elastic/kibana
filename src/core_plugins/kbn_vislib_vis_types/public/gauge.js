@@ -13,9 +13,10 @@ export default function GaugeVisType(Private) {
     name: 'gauge',
     title: 'Gauge',
     image,
-    description: `Gauges indicate the status of a metric. Use it to show how a metric's value relates 
+    description: `Gauges indicate the status of a metric. Use it to show how a metric's value relates
       to reference threshold values.`,
     category: CATEGORY.DATA,
+    isEmbeddableInTooltip: true,
     visConfig: {
       defaults: {
         type:'gauge',

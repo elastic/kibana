@@ -15,6 +15,7 @@ export default function HeatmapVisType(Private) {
     image,
     description: 'Shade cells within a matrix',
     category: CATEGORY.BASIC,
+    isEmbeddableInTooltip: true,
     visConfig: {
       defaults: {
         type: 'heatmap',

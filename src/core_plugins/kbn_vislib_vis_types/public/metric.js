@@ -15,6 +15,7 @@ export default function MetricVisType(Private) {
     image,
     description: 'Display a calculation as a single number',
     category: CATEGORY.DATA,
+    isEmbeddableInTooltip: true,
     visConfig: {
       defaults: {
         addTooltip: true,

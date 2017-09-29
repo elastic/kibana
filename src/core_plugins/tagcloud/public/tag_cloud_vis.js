@@ -18,6 +18,7 @@ VisTypesRegistryProvider.register(function TagCloudProvider(Private) {
     image,
     description: 'A group of words, sized according to their importance',
     category: CATEGORY.OTHER,
+    isEmbeddableInTooltip: false,
     visConfig: {
       defaults: {
         scale: 'linear',

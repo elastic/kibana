@@ -14,6 +14,7 @@ export default function PointSeriesVisType(Private) {
     image,
     description: 'Assign a continuous variable to each axis',
     category: CATEGORY.BASIC,
+    isEmbeddableInTooltip: true,
     visConfig: {
       defaults: {
         type: 'histogram',

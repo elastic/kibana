@@ -14,6 +14,7 @@ export default function PointSeriesVisType(Private) {
     image,
     description: 'Emphasize trends',
     category: CATEGORY.BASIC,
+    isEmbeddableInTooltip: true,
     visConfig: {
       defaults: {
         type: 'line',

@@ -25,6 +25,7 @@ function MarkdownVisProvider(Private) {
     image,
     description: 'Create a document using markdown syntax',
     category: CATEGORY.OTHER,
+    isEmbeddableInTooltip: true,
     visConfig: {
       template: markdownVisTemplate,
       defaults: {

@@ -15,6 +15,7 @@ export default function GoalVisType(Private) {
     image,
     description: 'A goal chart indicates how close you are to your final goal.',
     category: CATEGORY.DATA,
+    isEmbeddableInTooltip: true,
     visConfig: {
       defaults: {
         addTooltip: true,

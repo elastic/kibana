@@ -17,6 +17,7 @@ function InputControlVisProvider(Private) {
     icon: 'fa fa-gear',
     description: 'Create interactive controls for easy dashboard manipulation.',
     category: CATEGORY.OTHER,
+    isEmbeddableInTooltip: false,
     isExperimental: true,
     visualization: VisController,
     visConfig: {

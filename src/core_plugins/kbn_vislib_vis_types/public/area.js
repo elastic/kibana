@@ -14,6 +14,7 @@ export default function PointSeriesVisType(Private) {
     image,
     description: 'Emphasize the quantity beneath a line chart',
     category: CATEGORY.BASIC,
+    isEmbeddableInTooltip: true,
     visConfig: {
       defaults: {
         type: 'area',

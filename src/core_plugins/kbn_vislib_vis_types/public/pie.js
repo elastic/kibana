@@ -14,6 +14,7 @@ export default function HistogramVisType(Private) {
     image,
     description: 'Compare parts of a whole',
     category: CATEGORY.BASIC,
+    isEmbeddableInTooltip: true,
     visConfig: {
       defaults: {
         type: 'pie',
