@@ -122,6 +122,7 @@ export function EmbeddedTooltipFormatterProvider($rootScope, $compile, Private, 
         style="height: ${getHeight()}px; width: ${getWidth()}px;">${tooltipMsg}</div>`;
     };
     formatter.cleanUp = () => {
+      fetchTimestamp = 'expired';
       destroyEmbedded();
     };
     return formatter;
