@@ -11,9 +11,7 @@ export const createSslSchema = (schema: Schema) =>
       schema.literal('full')
     ]),
     certificateAuthorities: schema.maybe(
-      schema.arrayOf(schema.string(), {
-        minSize: 1
-      })
+      schema.arrayOf(schema.string(), { minSize: 1 })
     ),
     certificate: schema.maybe(schema.string()),
     key: schema.maybe(schema.string()),

@@ -63,46 +63,44 @@ export class ElasticsearchConfig {
       config.host.auth = `${this.config.username}:${this.config.password}`;
     }
 
-    if (this.config.ssl !== undefined) {
-      let ssl: { [key: string]: any } = {};
-      if (this.config.ssl.certificate && this.config.ssl.key) {
-        ssl = {
-          cert: readFileSync(this.config.ssl.certificate),
-          key: readFileSync(this.config.ssl.key),
-          passphrase: this.config.ssl.keyPassphrase
-        };
-      }
-
-      const verificationMode = this.config.ssl.verificationMode;
-
-      switch (verificationMode) {
-        case 'none':
-          ssl.rejectUnauthorized = false;
-          break;
-        case 'certificate':
-          ssl.rejectUnauthorized = true;
-
-          // by default NodeJS checks the server identify
-          ssl.checkServerIdentity = noop;
-          break;
-        case 'full':
-          ssl.rejectUnauthorized = true;
-          break;
-        default:
-          assertNever(verificationMode);
-      }
-
-      if (
-        this.config.ssl.certificateAuthorities &&
-        this.config.ssl.certificateAuthorities.length > 0
-      ) {
-        ssl.ca = this.config.ssl.certificateAuthorities.map(authority =>
-          readFileSync(authority)
-        );
-      }
-
-      config.ssl = ssl;
+    if (this.config.ssl === undefined) {
+      return config;
     }
+
+    let ssl: { [key: string]: any } = {};
+    if (this.config.ssl.certificate && this.config.ssl.key) {
+      ssl = {
+        cert: readFileSync(this.config.ssl.certificate),
+        key: readFileSync(this.config.ssl.key),
+        passphrase: this.config.ssl.keyPassphrase
+      };
+    }
+
+    const verificationMode = this.config.ssl.verificationMode;
+
+    switch (verificationMode) {
+      case 'none':
+        ssl.rejectUnauthorized = false;
+        break;
+      case 'certificate':
+        ssl.rejectUnauthorized = true;
+
+        // by default NodeJS checks the server identify
+        ssl.checkServerIdentity = noop;
+        break;
+      case 'full':
+        ssl.rejectUnauthorized = true;
+        break;
+      default:
+        assertNever(verificationMode);
+    }
+
+    const ca = this.config.ssl.certificateAuthorities;
+    if (ca && ca.length > 0) {
+      ssl.ca = ca.map(authority => readFileSync(authority));
+    }
+
+    config.ssl = ssl;
 
     return config;
   }

@@ -52,7 +52,6 @@ test('starts http server', () => {
   service.start();
 
   expect(httpServer.start).toHaveBeenCalledTimes(1);
-  expect(logger._collect()).toMatchSnapshot();
 });
 
 test('logs error is already started', () => {

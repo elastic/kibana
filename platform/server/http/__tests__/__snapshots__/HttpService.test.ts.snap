@@ -26,19 +26,6 @@ Object {
 }
 `;
 
-exports[`starts http server 1`] = `
-Object {
-  "debug": Array [],
-  "error": Array [],
-  "info": Array [
-    Array [
-      "starting http server [example.org:1234]",
-    ],
-  ],
-  "warn": Array [],
-}
-`;
-
 exports[`throws if registering route handler after http server is started 1`] = `
 Object {
   "debug": Array [],
