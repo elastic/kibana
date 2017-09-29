@@ -27,6 +27,7 @@ const iconTypes = [
   'cross',
   'document',
   'dot',
+  'empty',
   'fullScreen',
   'gear',
   'grid',

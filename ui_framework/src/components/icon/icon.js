@@ -88,6 +88,7 @@ const typeToIconMap = {
   discoverApp: 'app_discover',
   document: 'document',
   dot: 'dot',
+  empty: 'empty',
   fullScreen: 'full_screen',
   gear: 'gear',
   graphApp: 'app_graph',
