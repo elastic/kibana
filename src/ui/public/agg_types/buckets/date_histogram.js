@@ -108,7 +108,7 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
         default: 'auto',
         options: intervalOptions,
         editor: intervalTemplate,
-        onSearchRequestStart: function (agg) {
+        modifyAggConfigOnSearchRequestStart: function (agg) {
           setBounds(agg, true);
         },
         write: function (agg, output) {

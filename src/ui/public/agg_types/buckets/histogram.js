@@ -20,9 +20,18 @@ export function AggTypesBucketsHistogramProvider(Private, config) {
     },
     createFilter: createFilter,
     decorateAggConfig: function () {
+      let autoBounds;
+
       return {
-        autoBounds: {
-          writable: true
+        setAutoBounds: {
+          value(newValue) {
+            autoBounds = newValue;
+          }
+        },
+        getAutoBounds: {
+          value() {
+            return autoBounds;
+          }
         }
       };
     },
@@ -35,7 +44,7 @@ export function AggTypesBucketsHistogramProvider(Private, config) {
       {
         name: 'interval',
         editor: intervalTemplate,
-        onSearchRequestStart(aggConfig, searchSource) {
+        modifyAggConfigOnSearchRequestStart(aggConfig, searchSource) {
           const field = aggConfig.getField();
           const aggBody = field.scripted
             ? { script: { inline: field.script, lang: field.lang } }
@@ -54,18 +63,21 @@ export function AggTypesBucketsHistogramProvider(Private, config) {
             })
             .fetchAsRejectablePromise()
             .then((resp) => {
-              aggConfig.autoBounds = {
+              aggConfig.setAutoBounds({
                 min: _.get(resp, 'aggregations.minAgg.value'),
                 max: _.get(resp, 'aggregations.maxAgg.value')
-              };
+              });
             });
         },
         write: function (aggConfig, output) {
           let interval = parseFloat(aggConfig.params.interval);
+          if (interval <= 0) {
+            interval = 1;
+          }
 
           // ensure interval does not create too many buckets and crash browser
-          if (aggConfig.autoBounds) {
-            const range = aggConfig.autoBounds.max - aggConfig.autoBounds.min;
+          if (aggConfig.getAutoBounds()) {
+            const range = aggConfig.getAutoBounds().max - aggConfig.getAutoBounds().min;
             const bars = range / interval;
             if (bars > config.get('histogram:maxBars')) {
               const minInterval = range / config.get('histogram:maxBars');

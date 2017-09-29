@@ -188,14 +188,14 @@ export function VisAggConfigProvider(Private, Promise) {
    *  @param {Courier.SearchRequest} searchRequest
    *  @return {Promise<undefined>}
    */
-  AggConfig.prototype.onSearchRequestStart = function (...args) {
+  AggConfig.prototype.onSearchRequestStart = function (searchSource, searchRequest) {
     if (!this.type) {
       return Promise.resolve();
     }
 
     return Promise.map(
       this.type.params,
-      param => param.onSearchRequestStart(this, ...args)
+      param => param.modifyAggConfigOnSearchRequestStart(this, searchSource, searchRequest)
     );
   };
 

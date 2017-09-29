@@ -170,10 +170,10 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
      *  @param {Courier.SearchRequest} searchRequest
      *  @return {Promise<undefined>}
      */
-    onSearchRequestStart(...args) {
+    onSearchRequestStart(searchSource, searchRequest) {
       return Promise.map(
         this.aggs.getRequestAggs(),
-        agg => agg.onSearchRequestStart(...args)
+        agg => agg.onSearchRequestStart(searchSource, searchRequest)
       );
     }
 
