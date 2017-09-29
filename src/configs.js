@@ -57,10 +57,9 @@ function getRepoPath(repoName) {
 
 module.exports = {
   getRepoPath,
-  accessToken,
   ensureConfigAndFoldersExists,
   CONFIG_FILE_PATH,
   REPOSITORIES_DIR_PATH,
-  username,
+  getConfig,
   validateConfig
 };

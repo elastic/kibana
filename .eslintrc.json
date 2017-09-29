@@ -1,7 +1,8 @@
 {
   "parser": "babel-eslint",
   "env": {
-    "node": true
+    "node": true,
+    "jest": true
   },
   "rules": {
     "prettier/prettier": [

@@ -2,13 +2,18 @@ const promisify = require('es6-promisify');
 const fs = require('fs');
 const Git = require('nodegit');
 const stat = promisify(fs.stat);
-const { username, getRepoPath } = require('./configs');
+const { getConfig, getRepoPath } = require('./configs');
 const constants = require('./constants');
+const { username } = getConfig();
 
-const authCallbacks = {
-  certificateCheck: () => 1,
-  credentials: (url, username) => Git.Cred.sshKeyFromAgent(username)
-};
+function withAuthentication() {
+  return {
+    callbacks: {
+      certificateCheck: () => 1,
+      credentials: (url, username) => Git.Cred.sshKeyFromAgent(username)
+    }
+  };
+}
 
 function openRepo(repoName) {
   return Git.Repository.open(getRepoPath(repoName));
@@ -29,7 +34,9 @@ function folderExists(path) {
 function maybeSetupRepo(repoName) {
   return folderExists(getRepoPath(repoName)).then(exists => {
     if (!exists) {
-      return cloneRepo(repoName).then(repo => addUserRemote(repo, repoName));
+      return cloneRepo(repoName).then(repo =>
+        addPersonalRemote(repo, repoName)
+      );
     }
   });
 }
@@ -40,13 +47,11 @@ function getRemoteUrl(owner, repoName) {
 
 function cloneRepo(repoName) {
   return Git.Clone(getRemoteUrl('elastic', repoName), getRepoPath(repoName), {
-    fetchOpts: {
-      callbacks: authCallbacks
-    }
+    fetchOpts: withAuthentication()
   });
 }
 
-function addUserRemote(repo, repoName) {
+function addPersonalRemote(repo, repoName) {
   return Git.Remote.create(repo, username, getRemoteUrl(username, repoName));
 }
 
@@ -90,22 +95,18 @@ function createAndCheckoutBranch(repo, baseBranch, featureBranch) {
     .then(() => repo.checkoutBranch(featureBranch));
 }
 
-function push(repo, backportBranchName) {
-  return Git.Remote.lookup(repo, username).then(function(remote) {
+function push(repo, branchName) {
+  return Git.Remote.lookup(repo, username).then(remote => {
     return remote.push(
-      [`refs/heads/${backportBranchName}:refs/heads/${backportBranchName}`],
-      {
-        callbacks: authCallbacks
-      }
+      [`refs/heads/${branchName}:refs/heads/${branchName}`],
+      withAuthentication()
     );
   });
 }
 
 function pull(repo, branchName) {
   return repo
-    .fetchAll({
-      callbacks: authCallbacks
-    })
+    .fetchAll(withAuthentication())
     .then(() => repo.mergeBranches(branchName, `origin/${branchName}`));
 }
 
@@ -124,16 +125,16 @@ function getCommit(repo, sha) {
 }
 
 module.exports = {
-  addUserRemote,
-  maybeSetupRepo,
-  resetHard,
+  addPersonalRemote,
   checkoutAndPull,
   cherrypick,
   cloneRepo,
   createAndCheckoutBranch,
   deleteBranch,
   getCommit,
+  maybeSetupRepo,
   openRepo,
   pull,
-  push
+  push,
+  resetHard
 };

@@ -7,39 +7,68 @@ const { withSpinner } = require('./utils');
 const { getCommits, createPullRequest } = require('./github');
 const constants = require('./constants');
 const {
-  getRepoPath,
+  CONFIG_FILE_PATH,
   ensureConfigAndFoldersExists,
-  username,
-  validateConfig,
-  CONFIG_FILE_PATH
+  getRepoPath,
+  getConfig,
+  validateConfig
 } = require('./configs');
 
+const { username } = getConfig();
 const {
-  resetHard,
-  openRepo,
-  createAndCheckoutBranch,
-  cherrypick,
-  push,
   checkoutAndPull,
+  cherrypick,
+  createAndCheckoutBranch,
   getCommit,
-  maybeSetupRepo
+  maybeSetupRepo,
+  openRepo,
+  push,
+  resetHard
 } = require('./git');
+
+function cherrypickAndPrompt(repo, repoName, sha) {
+  return withSpinner(
+    cherrypick(repo, sha),
+    'Cherry-pick commit',
+    `Cherry-pick commit failed. Please resolve conflicts in: ${getRepoPath(
+      repoName
+    )}`
+  ).catch(e => {
+    if (e.message !== constants.CHERRYPICK_CONFLICT) {
+      throw e;
+    }
+
+    return inquirer
+      .prompt([prompts.confirmConflictResolved()])
+      .then(({ isConflictResolved }) => {
+        if (!isConflictResolved) {
+          console.error(e);
+          throw new Error('Merge errors were not manually fixed');
+        }
+      });
+  });
+}
+
+function getBackportBranchName(version, pullRequest) {
+  return `backport/${version}/${pullRequest}`;
+}
+
+function getPullRequestPayload(commitMessage, version, pullRequest) {
+  const backportBranchName = getBackportBranchName(version, pullRequest);
+  return {
+    title: `Backport: ${commitMessage}`,
+    body: `Backports #${pullRequest} to ${version}`,
+    head: `${username}:${backportBranchName}`,
+    base: `${version}`
+  };
+}
 
 ensureConfigAndFoldersExists()
   .then(validateConfig)
-  .then(() => {
-    return inquirer.prompt([prompts.inputRepositoryName()]);
-  })
+  .then(() => inquirer.prompt([prompts.inputRepositoryName()]))
   .then(({ repoName }) => {
     const spinner = ora('Loading commits...').start();
     return getCommits(repoName, username)
-      .then(res =>
-        res.data.map(commit => ({
-          message: commit.commit.message,
-          sha: commit.sha,
-          date: commit.commit.author.date
-        }))
-      )
       .then(commits => {
         spinner.stop();
         return inquirer.prompt([
@@ -47,82 +76,49 @@ ensureConfigAndFoldersExists()
           prompts.listVersions()
         ]);
       })
-      .then(function({ commit, version }) {
-        const { sha, message } = commit;
-        const [, pullRequest] = message.match(/\(#(\d+)\)$/) || {};
-        const backportBranchName = `backport/${version}/${pullRequest}`;
+      .then(({ commit, version }) => ({
+        repoName,
+        sha: commit.sha,
+        pullRequest: commit.pullRequest,
+        version
+      }));
+  })
+  .then(({ repoName, sha, pullRequest, version }) => {
+    console.log(`Backporting #${pullRequest} to ${version}`);
 
-        console.log(`Backporting #${pullRequest} to ${version}`);
+    return withSpinner(
+      maybeSetupRepo(repoName),
+      'Cloning repository (may take a few minutes)'
+    )
+      .then(() => openRepo(repoName))
+      .then(repo => ({
+        repoName,
+        sha,
+        pullRequest,
+        version,
+        repo
+      }));
+  })
+  .then(({ repoName, sha, pullRequest, version, repo }) => {
+    const backportBranchName = getBackportBranchName(version, pullRequest);
 
-        return withSpinner(
-          maybeSetupRepo(repoName),
-          'Cloning repository (may take a few minutes)'
-        )
-          .then(() => openRepo(repoName))
-          .then(repo => {
-            return resetHard(repo)
-              .then(() =>
-                withSpinner(
-                  checkoutAndPull(repo, 'master'),
-                  'Pull latest changes'
-                )
-              )
-              .then(() => {
-                return createAndCheckoutBranch(
-                  repo,
-                  version,
-                  backportBranchName
-                );
-              })
-              .then(() => {
-                return withSpinner(
-                  cherrypick(repo, sha),
-                  'Cherry-pick commit',
-                  `Cherry-pick commit failed. Please resolve conflicts in: ${getRepoPath(
-                    repoName
-                  )}`
-                )
-                  .catch(e => {
-                    if (e.message !== constants.CHERRYPICK_CONFLICT) {
-                      throw e;
-                    }
-
-                    return inquirer
-                      .prompt([prompts.confirmConflictResolved()])
-                      .then(({ isConflictResolved }) => {
-                        if (!isConflictResolved) {
-                          console.error(e);
-                          throw new Error(
-                            'Merge errors were not manually fixed'
-                          );
-                        }
-                      });
-                  })
-                  .then(() =>
-                    withSpinner(
-                      push(repo, backportBranchName),
-                      'Pushing branch'
-                    )
-                  )
-                  .then(() => getCommit(repo, sha))
-                  .then(commit => {
-                    return withSpinner(
-                      createPullRequest(repoName, {
-                        title: `Backport: ${commit.message()}`,
-                        body: `Backports #${pullRequest} to ${version}`,
-                        head: `sqren:${backportBranchName}`,
-                        base: `${version}`,
-                        labels: [':apm', 'backport']
-                      }),
-                      'Creating pull request'
-                    );
-                  })
-                  .then(res => {
-                    console.log(`View pull request: ${res.data.html_url}`);
-                  });
-              });
-          });
-      });
+    return resetHard(repo)
+      .then(() =>
+        withSpinner(checkoutAndPull(repo, 'master'), 'Pull latest changes')
+      )
+      .then(() => createAndCheckoutBranch(repo, version, backportBranchName))
+      .then(() => cherrypickAndPrompt(repo, repoName, sha))
+      .then(() => withSpinner(push(repo, backportBranchName), 'Pushing branch'))
+      .then(() => getCommit(repo, sha))
+      .then(commit =>
+        withSpinner(
+          createPullRequest(
+            repoName,
+            getPullRequestPayload(commit.message(), version, pullRequest)
+          ),
+          'Creating pull request'
+        ).then(res => console.log(`View pull request: ${res.data.html_url}`))
+      );
   })
   .catch(e => {
     if (e.message === constants.INVALID_CONFIG) {

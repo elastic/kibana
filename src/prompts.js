@@ -38,8 +38,8 @@ function confirmConflictResolved() {
 }
 
 module.exports = {
+  confirmConflictResolved,
   inputRepositoryName,
   listCommits,
-  listVersions,
-  confirmConflictResolved
+  listVersions
 };

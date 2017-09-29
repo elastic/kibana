@@ -5,6 +5,9 @@
     "backport": "./src/cli.js"
   },
   "license": "MIT",
+  "scripts": {
+    "test": "jest"
+  },
   "dependencies": {
     "axios": "^0.16.2",
     "babel-eslint": "^8.0.1",
@@ -20,6 +23,7 @@
     "eslint-config-prettier": "^2.4.0",
     "eslint-plugin-import": "^2.7.0",
     "eslint-plugin-prettier": "^2.2.0",
+    "jest": "^21.2.1",
     "prettier": "^1.7.2"
   }
 }

@@ -1,9 +1,26 @@
 const axios = require('axios');
-const { accessToken } = require('./configs');
+const { getConfig } = require('./configs');
+const { accessToken } = getConfig();
+
+function getPullRequest(commitMessage) {
+  const matches = commitMessage.match(/\(#(\d+)\)$/) || [];
+  return matches[1];
+}
 
 function getCommits(repoName, author) {
   return axios(
     `https://api.github.com/repos/elastic/${repoName}/commits?author=${author}&per_page=5&access_token=${accessToken}`
+  ).then(res =>
+    res.data.map(commit => {
+      const message = commit.commit.message;
+      const pullRequest = getPullRequest(message);
+      return {
+        message,
+        sha: commit.sha,
+        date: commit.commit.author.date,
+        pullRequest
+      };
+    })
   );
 }
 
@@ -21,7 +38,7 @@ function createPullRequest(repoName, payload) {
 }
 
 module.exports = {
+  createPullRequest,
   getCommits,
-  getPullRequestSha,
-  createPullRequest
+  getPullRequestSha
 };
