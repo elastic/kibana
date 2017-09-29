@@ -46,8 +46,8 @@ export function isForbiddenError(error) {
 
 // 404 - Not Found
 const CODE_NOT_FOUND = 'SavedObjectsClient/notFound';
-export function decorateNotFoundError(error, reason) {
-  return decorate(error, CODE_NOT_FOUND, 404, reason);
+export function createGenericNotFoundError() {
+  return decorate(Boom.notFound(), CODE_NOT_FOUND, 404);
 }
 export function isNotFoundError(error) {
   return error && error[code] === CODE_NOT_FOUND;
