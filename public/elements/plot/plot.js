@@ -1,6 +1,8 @@
 import { debounce, includes } from 'lodash';
 import { Element } from '../element';
 import { size } from './plugins/size';
+import { text } from './plugins/text';
+
 import header from './header.png';
 import '../../lib/flot';
 import './plot.less';
@@ -13,6 +15,8 @@ export default new Element('plot', {
   render(domNode, config, handlers) {
     // TODO: OH NOES
     if (!includes($.plot.plugins, size)) $.plot.plugins.push(size);
+    if (!includes($.plot.plugins, text)) $.plot.plugins.push(text);
+
 
     let plot;
     function draw() {
@@ -21,12 +25,12 @@ export default new Element('plot', {
       try {
         if (!plot) {
           plot = $.plot($(domNode), config.data, config.options);
-          $('.legendLabel, .flot-tick-label').css(config.font.spec);
+          $('.legendLabel, .flot-tick-label, .valueLabel').css(config.font.spec);
         } else {
           plot.resize();
           plot.setupGrid();
           plot.draw();
-          $('.legendLabel, .flot-tick-label').css(config.font.spec);
+          $('.legendLabel, .flot-tick-label, .valueLabel').css(config.font.spec);
         }
       } catch (e) {
         // Nope

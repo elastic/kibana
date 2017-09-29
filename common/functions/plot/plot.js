@@ -45,6 +45,9 @@ export default new Fn({
       if (!seriesStyle) return {};
       return {
         stack: get(seriesStyle, 'stack'),
+        numbers: {
+          show: true,
+        },
         lines: {
           show: get(seriesStyle, 'lines') > 0,
           lineWidth: get(seriesStyle, 'lines'),
@@ -81,7 +84,7 @@ export default new Fn({
       },
     };
 
-    context.rows = sortBy(context.rows, ['x', 'y', 'color', 'size']);
+    context.rows = sortBy(context.rows, ['x', 'y', 'color', 'size', 'text']);
 
     if (get(context.columns, 'x.type') === 'string') {
       sortBy(context.rows, ['x']).forEach(row => {
@@ -120,6 +123,8 @@ export default new Fn({
             attrs.size = seriesStyle.points;
             set(result, 'bubbles.size.min', seriesStyle.points);
           }
+
+          if (point.text != null) attrs.text = point.text;
 
           return [x, y, attrs];
         }),
