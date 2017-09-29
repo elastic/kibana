@@ -16,7 +16,8 @@ export function BaseParamTypeProvider() {
    *  @param {Courier.SearchRequest} searchRequest
    *  @returns {Promise<undefined>|undefined}
    */
-  BaseParamType.prototype.modifyAggConfigOnSearchRequestStart = function () {
+  // eslint-disable-next-line no-unused-vars
+  BaseParamType.prototype.modifyAggConfigOnSearchRequestStart = function (aggconfig, searchSource, searchRequest) {
   };
 
   return BaseParamType;
