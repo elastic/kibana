@@ -14,7 +14,7 @@ const sizeToClassNameMap = {
 export const SIZES = Object.keys(sizeToClassNameMap);
 
 export const KuiAvatar = ({
-  image,
+  imageUrl,
   name,
   className,
   size,
@@ -26,16 +26,8 @@ export const KuiAvatar = ({
     className
   );
 
-  let optionalBackgroundImage;
-
-  if (image) {
-    optionalBackgroundImage = 'url(' + image + ')';
-  } else {
-    optionalBackgroundImage = 'none';
-  }
-
   let optionalInitial;
-  if (name && !image) {
+  if (name && !imageUrl) {
     optionalInitial = (
       <span aria-hidden="true">{name.substring(0,1)}</span>
     );
@@ -44,7 +36,7 @@ export const KuiAvatar = ({
   const assignedColor = VISUALIZATION_COLORS[Math.floor(name.length % VISUALIZATION_COLORS.length)];
 
   const avatarStyle = {
-    backgroundImage: optionalBackgroundImage,
+    backgroundImage: imageUrl ? 'url(' + imageUrl + ')' : 'none',
     backgroundColor: assignedColor,
   };
 
@@ -63,6 +55,7 @@ export const KuiAvatar = ({
 KuiAvatar.propTypes = {
   children: PropTypes.node,
   className: PropTypes.string,
+  imageUrl: PropTypes.string,
   name: PropTypes.string.isRequired,
 };
 

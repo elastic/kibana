@@ -14,9 +14,9 @@ export default () => (
 
     <KuiHorizontalRule margin="large" />
 
-    <KuiAvatar size="s" name="Cat" image="http://lorempixel.com/64/64/cats/" />
-    <KuiAvatar size="m" name="Cat" image="http://lorempixel.com/64/64/cats/" />
-    <KuiAvatar size="l"  name="Cat" image="http://lorempixel.com/64/64/cats/" />
-    <KuiAvatar size="xl" name="Cat" image="http://lorempixel.com/64/64/cats/" />
+    <KuiAvatar size="s" name="Cat" imageUrl="http://lorempixel.com/64/64/cats/" />
+    <KuiAvatar size="m" name="Cat" imageUrl="http://lorempixel.com/64/64/cats/" />
+    <KuiAvatar size="l"  name="Cat" imageUrl="http://lorempixel.com/64/64/cats/" />
+    <KuiAvatar size="xl" name="Cat" imageUrl="http://lorempixel.com/64/64/cats/" />
   </div>
 );

@@ -1807,6 +1807,37 @@ table {
   min-width: 16px;
   vertical-align: middle; }
 
+/**
+ * 1. Override KeyPadMenu.
+ * 2. Override popover default.
+ */
+.kuiHeaderPopover {
+  top: calc(100% - 8px) !important;
+  /* 1 */
+  border-radius: 4px 0 4px 4px !important;
+  /* 2 */ }
+
+.kuiHeaderProfile {
+  text-align: left;
+  padding-bottom: 16px; }
+
+.kuiHeaderLogo {
+  position: relative;
+  height: 64px;
+  padding: 16px 24px;
+  display: inline-block;
+  vertical-align: middle; }
+  .kuiHeaderLogo:hover {
+    text-decoration: underline; }
+  .kuiHeaderLogo:focus {
+    text-decoration: underline;
+    background: #275160; }
+
+.kuiHeaderLogo__icon {
+  height: 32px;
+  width: 24px;
+  opacity: 1; }
+
 .kuiHeaderAlert {
   text-align: left;
   min-width: 300px;
@@ -1849,37 +1880,6 @@ table {
     font-size: 0.75rem;
     line-height: 1.5;
     color: #D9D9D9; }
-
-/**
- * 1. Override KeyPadMenu.
- * 2. Override popover default.
- */
-.kuiHeaderPopover {
-  top: calc(100% - 16px) !important;
-  /* 1 */
-  border-radius: 4px 0 4px 4px !important;
-  /* 2 */ }
-
-.kuiHeaderProfile {
-  text-align: left;
-  padding-bottom: 16px; }
-
-.kuiHeaderLogo {
-  position: relative;
-  height: 64px;
-  padding: 16px 24px;
-  display: inline-block;
-  vertical-align: middle; }
-  .kuiHeaderLogo:hover {
-    text-decoration: underline; }
-  .kuiHeaderLogo:focus {
-    text-decoration: underline;
-    background: #275160; }
-
-.kuiHeaderLogo__icon {
-  height: 32px;
-  width: 24px;
-  opacity: 1; }
 
 .kuiHeaderBreadcrumbs {
   display: -webkit-box;
