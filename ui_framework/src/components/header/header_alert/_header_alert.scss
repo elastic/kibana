@@ -6,13 +6,6 @@
   padding: $kuiSize;
   border-top: $kuiBorderThin;
 
-  &:hover {
-    .kuiHeaderAlert__dismiss {
-      opacity: 1;
-    }
-  }
-}
-
   .kuiHeaderAlert__dismiss {
     opacity: 0;
     position: absolute;
@@ -20,6 +13,13 @@
     top: $kuiSize;
     transition: opacity $kuiAnimSpeedNormal ease-in;
     cursor: pointer;
+    height: auto;
+    width: auto;
+  }
+
+  &:hover .kuiHeaderAlert__dismiss,
+  .kuiHeaderAlert__dismiss:focus {
+    opacity: 1;
   }
 
   .kuiHeaderAlert__title {
@@ -45,5 +45,5 @@
   .kuiHeaderAlert__date {
     @include kuiFontSizeXS;
     color: $kuiColorDarkShade;
-    text-align: right;
   }
+}

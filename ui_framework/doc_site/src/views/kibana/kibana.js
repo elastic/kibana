@@ -4,6 +4,7 @@ import React, {
 } from 'react';
 
 import {
+  KuiAvatar,
   KuiButton,
   KuiFlexGroup,
   KuiFlexItem,
@@ -36,6 +37,9 @@ import {
   KuiSideNavTitle,
   KuiToast,
   KuiTitle,
+  KuiText,
+  KuiSpacer,
+  KuiHeaderAlert,
 } from '../../../../components';
 
 import {
@@ -198,73 +202,46 @@ export default class extends Component {
         closePopover={this.closeUserMenu.bind(this)}
         panelClassName="kuiHeaderPopover"
       >
-        <div className="kuiHeaderProfile kui--flexRow kui--flexAlignItemsCenter">
-          <div className="kui--flexShrink1 kui--paddingRight">
-            <div
-              className="kuiAvatar kuiAvatar--large"
-              style={{ background: `url('http://lorempixel.com/64/64/cats/')` }}
-            />
-          </div>
-          <div className="kui--flexGrow1">
-            <p className="kui--marginBottom">John Username</p>
-            <div className="kui--flexRow">
-              <div className="kui--flexGrow1">
-                <a href="" className="kuiLink">Edit profile</a>
-              </div>
-              <div className="kui--flexGrow1 kui--textAlignRight">
-                <a href="" className="kuiLink">Log out</a>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="kuiHeaderAlert">
-          <svg tabIndex="0" className="kuiIcon kuiIcon--medium kuiHeaderAlert__dismiss">
-            <use href="#cross" />
-          </svg>
-          <p className="kuiHeaderAlert__title">Here&rsquo;s a notification title</p>
-          <p className="kuiHeaderAlert__text">I am the hat judge. Show me a hat and I will tell you if it&rsquo;s a good hat or bad hat.</p>
-          <div className="kui--flexRow">
-            <div className="kui--flexGrow1">
-              <a href="" className="kuiHeaderAlert__action kuiLink">Download your thing here</a>
-            </div>
-            <div className="kui--flexGrow1 kuiHeaderAlert__date">
-              Nov. 14, 02:14PM.
-            </div>
-          </div>
-        </div>
-        <div className="kuiHeaderAlert">
-          <svg tabIndex="0" className="kuiIcon kuiIcon--medium kuiHeaderAlert__dismiss">
-            <use href="#cross" />
-          </svg>
-          <p className="kuiHeaderAlert__title">Here&rsquo;s a really long notification title with nonsense beneath it.</p>
-          <p className="kuiHeaderAlert__text">Walk the cow through a warm room, and then bring it to my plate.</p>
-          <div className="kui--flexRow">
-            <div className="kui--flexGrow1">
-              <a href="" className="kuiHeaderAlert__action kuiLink">Download your thing here</a>
-            </div>
-            <div className="kui--flexGrow1 kuiHeaderAlert__date">
-              Nov. 14, 02:14PM.
-            </div>
-          </div>
-        </div>
-        <div className="kuiHeaderAlert">
-          <svg tabIndex="0" className="kuiIcon kuiIcon--medium kuiHeaderAlert__dismiss">
-            <use href="#cross" />
-          </svg>
-          <p className="kuiHeaderAlert__title">Here&rsquo;s a notification title</p>
-          <p className="kuiHeaderAlert__text">
-            Only usable on grilled cheese sandwiches.
-            That is the only application of Kraft Singles as far as I&rsquo;m concerned.
-          </p>
-          <div className="kui--flexRow">
-            <div className="kui--flexGrow1">
-              <a href="" className="kuiHeaderAlert__action kuiLink">Download your thing here</a>
-            </div>
-            <div className="kui--flexGrow1 kuiHeaderAlert__date">
-              Nov. 14, 02:14PM.
-            </div>
-          </div>
-        </div>
+        <KuiFlexGroup gutterSize="medium" className="kuiHeaderProfile kui--flexRow kui--flexAlignItemsCenter">
+          <KuiFlexItem grow={false}>
+            <KuiAvatar name="John Username" size="xl" />
+          </KuiFlexItem>
+          <KuiFlexItem>
+            <KuiText>
+              <p>John Username</p>
+            </KuiText>
+            <KuiSpacer size="m" />
+            <KuiFlexGroup>
+              <KuiFlexItem>
+                <KuiFlexGroup justifyContent="spaceBetween">
+                  <KuiFlexItem grow={false}>
+                    <KuiLink href="">Edit profile</KuiLink>
+                  </KuiFlexItem>
+                  <KuiFlexItem grow={false}>
+                    <KuiLink href="">Log out</KuiLink>
+                  </KuiFlexItem>
+                </KuiFlexGroup>
+              </KuiFlexItem>
+            </KuiFlexGroup>
+          </KuiFlexItem>
+        </KuiFlexGroup>
+        <KuiHeaderAlert
+          title="Here&rsquo;s a notification title"
+          text="I am the hat judge. Show me a hat and I will tell you if it&rsquo;s a good hat or bad hat."
+          date="Nov. 14, 02:14PM."
+        />
+        <KuiHeaderAlert
+          title="Here&rsquo;s a notification title that is extremely long and will wrap"
+          text="I am the hat judge. Show me a hat and I will tell you if it&rsquo;s a good hat or bad hat."
+          action={<KuiLink href="#">Download your thing here</KuiLink>}
+          date="Nov. 14, 02:14PM."
+        />
+        <KuiHeaderAlert
+          title="Here&rsquo;s a notification title"
+          text="I am the hat judge. Show me a hat and I will tell you if it&rsquo;s a good hat or bad hat."
+          action={<KuiLink href="#">Download your thing here</KuiLink>}
+          date="Nov. 14, 02:14PM."
+        />
       </KuiPopover>
     );
   }

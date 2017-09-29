@@ -71,7 +71,7 @@ $buttonTypes: (
   secondary: $kuiColorSecondary,
   warning: $kuiColorWarning,
   danger: $kuiColorDanger,
-  ghost: #FFF, // Ghost is special, and does not care about theming.
+  ghost: $kuiColorGhost, // Ghost is special, and does not care about theming.
 );
 
 // Create button modifiders based upon the map.

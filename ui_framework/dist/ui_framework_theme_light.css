@@ -133,214 +133,6 @@ table {
   border-collapse: collapse;
   border-spacing: 0; }
 
-.kui--flex {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex; }
-
-.kui--flexRow {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-orient: horizontal;
-  -webkit-box-direction: normal;
-  -webkit-flex-direction: row;
-      -ms-flex-direction: row;
-          flex-direction: row; }
-
-.kui--flexWrap {
-  -webkit-flex-wrap: wrap;
-      -ms-flex-wrap: wrap;
-          flex-wrap: wrap; }
-
-.kui--flexGrow1 {
-  -webkit-box-flex: 1;
-  -webkit-flex-grow: 1;
-      -ms-flex-positive: 1;
-          flex-grow: 1; }
-
-.kui--flexShrink1 {
-  -webkit-flex-shrink: 1;
-      -ms-flex-negative: 1;
-          flex-shrink: 1; }
-
-.kui--flexBasisOneThird {
-  -webkit-flex-basis: 33.33%;
-      -ms-flex-preferred-size: 33.33%;
-          flex-basis: 33.33%; }
-
-.kui--flexAlignItemsCenter {
-  -webkit-box-align: center;
-  -webkit-align-items: center;
-      -ms-flex-align: center;
-          align-items: center; }
-
-.kui--textAlignRight {
-  text-align: right !important; }
-
-.kui--textAlignLeft {
-  text-align: left !important; }
-
-.kui--textAlignCenter {
-  text-align: center !important; }
-
-.kui--verticalAlignMiddle {
-  vertical-align: middle !important; }
-
-.kui--fontSizeSmall {
-  font-size: 14px;
-  font-size: 0.875rem;
-  line-height: 1.5; }
-
-.kui--codeFont {
-  font-family: "Roboto Mono", monospace; }
-
-.kui--subduedText {
-  color: #666; }
-
-.kui--bottomShadow {
-  box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1); }
-
-.kui--margin {
-  margin: 16px !important; }
-
-.kui--marginLarge {
-  margin: 24px !important; }
-
-.kui--marginSmall {
-  margin: 8px !important; }
-
-.kui--padding {
-  padding: 16px !important; }
-
-.kui--paddingLarge {
-  padding: 24px !important; }
-
-.kui--paddingSmall {
-  padding: 8px !important; }
-
-.kui--marginTopBottom {
-  margin-top: 16px !important;
-  margin-bottom: 16px !important; }
-
-.kui--marginTopBottomSmall {
-  margin-top: 8px !important;
-  margin-bottom: 8px !important; }
-
-.kui--marginTopBottomLarge {
-  margin-top: 24px !important;
-  margin-bottom: 24px !important; }
-
-.kui--marginTop {
-  margin-top: 16px !important; }
-
-.kui--marginBottom {
-  margin-bottom: 16px !important; }
-
-.kui--marginTopSmall {
-  margin-top: 8px !important; }
-
-.kui--marginBottomSmall {
-  margin-bottom: 8px !important; }
-
-.kui--marginTopLarge {
-  margin-top: 24px !important; }
-
-.kui--marginBottomLarge {
-  margin-bottom: 24px !important; }
-
-.kui--marginLeftRight {
-  margin-left: 16px !important;
-  margin-right: 16px !important; }
-
-.kui--marginLeftRightSmall {
-  margin-left: 8px !important;
-  margin-right: 8px !important; }
-
-.kui--marginLeftRightLarge {
-  margin-left: 24px !important;
-  margin-right: 24px !important; }
-
-.kui--marginLeft {
-  margin-left: 16px !important; }
-
-.kui--marginRight {
-  margin-right: 16px !important; }
-
-.kui--marginLeftSmall {
-  margin-left: 8px !important; }
-
-.kui--marginRightSmall {
-  margin-right: 8px !important; }
-
-.kui--marginLeftLarge {
-  margin-left: 24px !important; }
-
-.kui--marginRightLarge {
-  margin-right: 24px !important; }
-
-.kui--paddingTopBottom {
-  padding-top: 16px !important;
-  padding-bottom: 16px !important; }
-
-.kui--paddingTopBottomSmall {
-  padding-top: 8px !important;
-  padding-bottom: 8px !important; }
-
-.kui--paddingTopBottomLarge {
-  padding-top: 24px !important;
-  padding-bottom: 24px !important; }
-
-.kui--paddingTop {
-  padding-top: 16px !important; }
-
-.kui--paddingBottom {
-  padding-bottom: 16px !important; }
-
-.kui--paddingTopSmall {
-  padding-top: 8px !important; }
-
-.kui--paddingBottomSmall {
-  padding-bottom: 8px !important; }
-
-.kui--paddingTopLarge {
-  padding-top: 24px !important; }
-
-.kui--paddingBottomLarge {
-  padding-bottom: 24px !important; }
-
-.kui--paddingLeftRight {
-  padding-left: 16px !important;
-  padding-right: 16px !important; }
-
-.kui--paddingLeftRightSmall {
-  padding-left: 8px !important;
-  padding-right: 8px !important; }
-
-.kui--paddingLeftRightLarge {
-  padding-left: 24px !important;
-  padding-right: 24px !important; }
-
-.kui--paddingLeft {
-  padding-left: 16px !important; }
-
-.kui--paddingRight {
-  padding-right: 16px !important; }
-
-.kui--paddingLeftSmall {
-  padding-left: 8px !important; }
-
-.kui--paddingRightSmall {
-  padding-right: 8px !important; }
-
-.kui--paddingLeftLarge {
-  padding-left: 24px !important; }
-
-.kui--paddingRightLarge {
-  padding-right: 24px !important; }
-
 .kuiAccordion__button {
   text-align: left;
   width: 100%; }
@@ -399,11 +191,14 @@ table {
     visibility: visible; }
 
 .kuiAvatar {
+  position: relative;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
   display: inline-block;
-  position: relative; }
+  background-size: cover;
+  color: #FFF;
+  text-align: center;
+  text-shadow: 1px 1px rgba(0, 0, 0, 0.2);
+  vertical-align: middle; }
   .kuiAvatar:after {
     position: absolute;
     top: 0;
@@ -415,13 +210,29 @@ table {
     pointer-events: none;
     border: 1px solid rgba(0, 0, 0, 0.1); }
 
-.kuiAvatar--small {
-  width: 16px;
-  height: 16px; }
+.kuiAvatar--s {
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  font-size: 12px; }
 
-.kuiAvatar--large {
+.kuiAvatar--m {
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
+  font-size: 16px; }
+
+.kuiAvatar--l {
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  font-size: 24px; }
+
+.kuiAvatar--xl {
   width: 64px;
-  height: 64px; }
+  height: 64px;
+  line-height: 64px;
+  font-size: 32px; }
 
 .kuiBadge {
   font-size: 12px;
@@ -1996,58 +1807,12 @@ table {
   min-width: 16px;
   vertical-align: middle; }
 
-.kuiHeaderAlert {
-  text-align: left;
-  min-width: 300px;
-  position: relative;
-  margin: 0 -16px;
-  padding: 16px;
-  border-top: 1px solid #D9D9D9; }
-  .kuiHeaderAlert:hover .kuiHeaderAlert__dismiss {
-    opacity: 1; }
-
-.kuiHeaderAlert__dismiss {
-  opacity: 0;
-  position: absolute;
-  right: 16px;
-  top: 16px;
-  transition: opacity 250ms ease-in;
-  cursor: pointer; }
-
-.kuiHeaderAlert__title {
-  font-weight: 500;
-  font-size: 16px;
-  font-size: 1rem;
-  line-height: 1.5;
-  padding-right: 24px; }
-
-.kuiHeaderAlert__text {
-  font-size: 12px;
-  font-size: 0.75rem;
-  line-height: 1.5;
-  margin-bottom: 8px; }
-
-.kuiHeaderAlert__action {
-  font-size: 12px;
-  font-size: 0.75rem;
-  line-height: 1.5;
-  color: #0079a5; }
-  .kuiHeaderAlert__action:focus {
-    outline: solid 6px #e6f2f6; }
-
-.kuiHeaderAlert__date {
-  font-size: 12px;
-  font-size: 0.75rem;
-  line-height: 1.5;
-  color: #666;
-  text-align: right; }
-
 /**
  * 1. Override KeyPadMenu.
  * 2. Override popover default.
  */
 .kuiHeaderPopover {
-  top: calc(100% - 16px) !important;
+  top: calc(100% - 8px) !important;
   /* 1 */
   border-radius: 4px 0 4px 4px !important;
   /* 2 */ }
@@ -2072,6 +1837,49 @@ table {
   height: 32px;
   width: 24px;
   opacity: 1; }
+
+.kuiHeaderAlert {
+  text-align: left;
+  min-width: 300px;
+  position: relative;
+  margin: 0 -16px;
+  padding: 16px;
+  border-top: 1px solid #D9D9D9; }
+  .kuiHeaderAlert .kuiHeaderAlert__dismiss {
+    opacity: 0;
+    position: absolute;
+    right: 16px;
+    top: 16px;
+    transition: opacity 250ms ease-in;
+    cursor: pointer;
+    height: auto;
+    width: auto; }
+  .kuiHeaderAlert:hover .kuiHeaderAlert__dismiss,
+  .kuiHeaderAlert .kuiHeaderAlert__dismiss:focus {
+    opacity: 1; }
+  .kuiHeaderAlert .kuiHeaderAlert__title {
+    font-weight: 500;
+    font-size: 16px;
+    font-size: 1rem;
+    line-height: 1.5;
+    padding-right: 24px; }
+  .kuiHeaderAlert .kuiHeaderAlert__text {
+    font-size: 12px;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    margin-bottom: 8px; }
+  .kuiHeaderAlert .kuiHeaderAlert__action {
+    font-size: 12px;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: #0079a5; }
+    .kuiHeaderAlert .kuiHeaderAlert__action:focus {
+      outline: solid 6px #e6f2f6; }
+  .kuiHeaderAlert .kuiHeaderAlert__date {
+    font-size: 12px;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: #666; }
 
 .kuiHeaderBreadcrumbs {
   display: -webkit-box;

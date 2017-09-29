@@ -3,6 +3,10 @@ export {
 } from './header';
 
 export {
+  KuiHeaderAlert,
+} from './header_alert';
+
+export {
   KuiHeaderBreadcrumb,
   KuiHeaderBreadcrumbs,
   KuiHeaderBreadcrumbCollapsed,

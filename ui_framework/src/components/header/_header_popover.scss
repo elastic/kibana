@@ -3,6 +3,6 @@
  * 2. Override popover default.
  */
 .kuiHeaderPopover {
-  top: calc(100% - #{$kuiSize}) !important; /* 1 */
+  top: calc(100% - #{$kuiSizeS}) !important; /* 1 */
   border-radius: $kuiBorderRadius 0 $kuiBorderRadius $kuiBorderRadius !important; /* 2 */
 }
