@@ -10,11 +10,11 @@
   cursor: pointer;
   padding: 2px 10px; /* 3 */
   font-size: $menuButtonFontSize;
-  font-weight: $globalFontWeightRegular;
-  line-height: $globalLineHeight;
+  font-weight: $kuiFontWeightRegular;
+  line-height: $kuiLineHeight;
   text-decoration: none;
   border: none;
-  border-radius: $globalBorderRadius;
+  border-radius: $kuiBorderRadius;
 
   &:disabled {
     cursor: default;
@@ -109,6 +109,6 @@
   }
 
   &:focus {
-    @include focus($globalFocusDangerColor);
+    @include focus($kuiFocusDangerColor);
   }
 }
