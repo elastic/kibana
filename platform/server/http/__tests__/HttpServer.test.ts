@@ -5,13 +5,13 @@ import { Env } from '../../../config/Env';
 import { Logger } from '../../../logging/Logger';
 import { Router } from '../Router';
 import { HttpServer } from '../HttpServer';
+import { HttpConfig } from '../HttpConfig';
 import * as schema from '../../../lib/schema';
 
 const chance = new Chance();
 
 let server: HttpServer;
-let app: any;
-let port: number;
+let config: HttpConfig;
 
 beforeEach(() => {
   const log: Logger = {
@@ -23,9 +23,14 @@ beforeEach(() => {
     fatal: jest.fn(),
     log: jest.fn()
   };
-  port = chance.integer({ min: 10000, max: 15000 });
+
+  config = {
+    port: chance.integer({ min: 10000, max: 15000 }),
+    host: '127.0.0.1',
+    ssl: {}
+  } as HttpConfig;
+
   server = new HttpServer(log, new Env('/kibana', {}));
-  app = (server as any).httpServer;
 });
 
 afterEach(() => {
@@ -35,7 +40,7 @@ afterEach(() => {
 test('listening after started', async () => {
   expect(server.isListening()).toBe(false);
 
-  await server.start(port, '127.0.0.1');
+  await server.start(config);
 
   expect(server.isListening()).toBe(true);
 });
@@ -49,9 +54,9 @@ test('200 OK with body', async () => {
 
   server.registerRouter(router);
 
-  await server.start(port, '127.0.0.1');
+  await server.start(config);
 
-  await supertest(app)
+  await supertest((server as any).server)
     .get('/foo')
     .expect(200)
     .then(res => {
@@ -68,9 +73,9 @@ test('202 Accepted with body', async () => {
 
   server.registerRouter(router);
 
-  await server.start(port, '127.0.0.1');
+  await server.start(config);
 
-  await supertest(app)
+  await supertest((server as any).server)
     .get('/foo')
     .expect(202)
     .then(res => {
@@ -87,9 +92,9 @@ test('204 No content', async () => {
 
   server.registerRouter(router);
 
-  await server.start(port, '127.0.0.1');
+  await server.start(config);
 
-  await supertest(app)
+  await supertest((server as any).server)
     .get('/foo')
     .expect(204)
     .then(res => {
@@ -108,9 +113,9 @@ test('400 Bad request with error', async () => {
 
   server.registerRouter(router);
 
-  await server.start(port, '127.0.0.1');
+  await server.start(config);
 
-  await supertest(app)
+  await supertest((server as any).server)
     .get('/foo')
     .expect(400)
     .then(res => {
@@ -137,9 +142,9 @@ test('valid params', async () => {
 
   server.registerRouter(router);
 
-  await server.start(port, '127.0.0.1');
+  await server.start(config);
 
-  await supertest(app)
+  await supertest((server as any).server)
     .get('/foo/some-string')
     .expect(200)
     .then(res => {
@@ -166,9 +171,9 @@ test('invalid params', async () => {
 
   server.registerRouter(router);
 
-  await server.start(port, '127.0.0.1');
+  await server.start(config);
 
-  await supertest(app)
+  await supertest((server as any).server)
     .get('/foo/some-string')
     .expect(400)
     .then(res => {
@@ -198,9 +203,9 @@ test('valid query', async () => {
 
   server.registerRouter(router);
 
-  await server.start(port, '127.0.0.1');
+  await server.start(config);
 
-  await supertest(app)
+  await supertest((server as any).server)
     .get('/foo?bar=test&quux=123')
     .expect(200)
     .then(res => {
@@ -227,9 +232,9 @@ test('invalid query', async () => {
 
   server.registerRouter(router);
 
-  await server.start(port, '127.0.0.1');
+  await server.start(config);
 
-  await supertest(app)
+  await supertest((server as any).server)
     .get('/foo?bar=test')
     .expect(400)
     .then(res => {
@@ -259,9 +264,9 @@ test('valid body', async () => {
 
   server.registerRouter(router);
 
-  await server.start(port, '127.0.0.1');
+  await server.start(config);
 
-  await supertest(app)
+  await supertest((server as any).server)
     .post('/foo')
     .send({
       bar: 'test',
@@ -292,9 +297,9 @@ test('invalid body', async () => {
 
   server.registerRouter(router);
 
-  await server.start(port, '127.0.0.1');
+  await server.start(config);
 
-  await supertest(app)
+  await supertest((server as any).server)
     .post('/foo')
     .send({ bar: 'test' })
     .expect(400)
@@ -314,9 +319,9 @@ test('returns 200 OK if returning object', async () => {
 
   server.registerRouter(router);
 
-  await server.start(port, '127.0.0.1');
+  await server.start(config);
 
-  await supertest(app)
+  await supertest((server as any).server)
     .get('/foo')
     .expect(200)
     .then(res => {
@@ -344,9 +349,9 @@ test('returns result from `onRequest` handler as first param in route handler', 
 
   server.registerRouter(router);
 
-  await server.start(port, '127.0.0.1');
+  await server.start(config);
 
-  await supertest(app).get('/foo?bar=quux');
+  await supertest((server as any).server).get('/foo?bar=quux');
 
   expect(receivedValue).toEqual({
     q: {
@@ -370,15 +375,15 @@ test('filtered headers', async () => {
 
   server.registerRouter(router);
 
-  await server.start(port, '127.0.0.1');
+  await server.start(config);
 
-  await supertest(app)
+  await supertest((server as any).server)
     .get('/foo?bar=quux')
     .set('x-kibana-foo', 'bar')
     .set('x-kibana-bar', 'quux');
 
   expect(filteredHeaders).toEqual({
     'x-kibana-foo': 'bar',
-    host: `127.0.0.1:${port}`
+    host: `127.0.0.1:${config.port}`
   });
 });

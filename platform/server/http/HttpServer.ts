@@ -16,13 +16,6 @@ export class HttpServer {
 
   constructor(private readonly log: Logger, private readonly env: Env) {
     this.app = express();
-
-    // We will register body parser only for routes defined in the new platform.
-    /*this.app.use([
-      bodyParser.json(),
-      bodyParser.raw({ type: 'application/x-ndjson' }),
-      bodyParser.urlencoded({ extended: false })
-    ]);*/
   }
 
   isListening() {
@@ -71,6 +64,7 @@ export class HttpServer {
       return http.createServer(this.app);
     }
 
+    // TODO: add support for `secureOptions`.
     return https.createServer(
       {
         key: readFileSync(config.ssl.key!),
