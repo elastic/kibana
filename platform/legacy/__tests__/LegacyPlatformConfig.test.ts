@@ -22,7 +22,7 @@ describe('Retrieving values', () => {
   });
 
   test('correctly handles paths that do not need to be transformed.', () => {
-    legacyConfigMock.__rawData = new Map([
+    legacyConfigMock.__rawData = new Map<string, any>([
       ['one', 'value-one'],
       ['one.sub', 'value-one-sub'],
       ['container', { value: 'some' }]
