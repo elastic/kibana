@@ -596,7 +596,7 @@ table {
     fill: #0079a5; }
   .kuiButtonEmpty--primary:focus {
     background-color: rgba(0, 121, 165, 0.1); }
-  .kuiButtonEmpty--primary:hover, .kuiButtonEmpty--primary:focus {
+  .kuiButtonEmpty--primary:hover {
     background-color: rgba(0, 121, 165, 0.1); }
 
 .kuiButtonEmpty--danger {
@@ -605,7 +605,7 @@ table {
     fill: #A30000; }
   .kuiButtonEmpty--danger:focus {
     background-color: rgba(163, 0, 0, 0.1); }
-  .kuiButtonEmpty--danger:hover, .kuiButtonEmpty--danger:focus {
+  .kuiButtonEmpty--danger:hover {
     background-color: rgba(163, 0, 0, 0.1); }
 
 .kuiButtonEmpty--disabled {
@@ -614,7 +614,7 @@ table {
     fill: #c5c5c5; }
   .kuiButtonEmpty--disabled:focus {
     background-color: rgba(197, 197, 197, 0.1); }
-  .kuiButtonEmpty--disabled:hover, .kuiButtonEmpty--disabled:focus {
+  .kuiButtonEmpty--disabled:hover {
     background-color: rgba(197, 197, 197, 0.1);
     cursor: not-allowed; }
 
@@ -624,8 +624,17 @@ table {
     fill: #FFF; }
   .kuiButtonEmpty--ghost:focus {
     background-color: rgba(255, 255, 255, 0.1); }
-  .kuiButtonEmpty--ghost:hover, .kuiButtonEmpty--ghost:focus {
+  .kuiButtonEmpty--ghost:hover {
     background-color: rgba(255, 255, 255, 0.1); }
+
+.kuiButtonEmpty--text {
+  color: #3F3F3F; }
+  .kuiButtonEmpty--text .kuiButtonEmpty__icon {
+    fill: #3F3F3F; }
+  .kuiButtonEmpty--text:focus {
+    background-color: rgba(0, 121, 165, 0.1); }
+  .kuiButtonEmpty--text:hover {
+    background-color: transparent; }
 
 .kuiButtonEmpty--flushLeft .kuiButtonEmpty__content {
   border-left: none;
@@ -2678,12 +2687,7 @@ table {
   padding: 0;
   height: 24px;
   min-width: 32px;
-  text-align: center;
-  color: #3F3F3F; }
-  .kuiPaginationButton svg {
-    fill: #3F3F3F !important; }
-  .kuiPaginationButton:not(:focus):hover {
-    background-color: transparent; }
+  text-align: center; }
 
 .kuiPaginationButton-isActive {
   pointer-events: none;

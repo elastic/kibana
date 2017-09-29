@@ -47,6 +47,7 @@ $buttonTypes: (
   danger: $kuiColorDanger,
   disabled: tintOrShade($kuiTextColor, 70%, 80%),
   ghost: $kuiColorGhost,
+  text: $kuiTextColor,
 );
 
 // Create button modifiders based upon the map.
@@ -59,11 +60,19 @@ $buttonTypes: (
     }
 
     &:focus {
-      background-color: transparentize($color, .9);
+      @if ($name == 'text') {
+        background-color: transparentize($kuiColorPrimary, .9);
+      } @else {
+        background-color: transparentize($color, .9);
+      }
     }
 
-    &:hover, &:focus {
-      background-color: transparentize($color, .9);
+    &:hover {
+      @if ($name == 'text') {
+        background-color: transparent;
+      } @else {
+        background-color: transparentize($color, .9);
+      }
 
       @if ($name == 'disabled') {
         cursor: not-allowed;

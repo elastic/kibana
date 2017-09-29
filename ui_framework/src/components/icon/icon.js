@@ -31,6 +31,9 @@ import '!!svg-sprite!./assets/controls_vertical.svg';
 import '!!svg-sprite!./assets/cross.svg';
 import '!!svg-sprite!./assets/document.svg';
 import '!!svg-sprite!./assets/dot.svg';
+import '!!svg-sprite!./assets/empty.svg';
+import '!!svg-sprite!./assets/face_happy.svg';
+import '!!svg-sprite!./assets/face_sad.svg';
 import '!!svg-sprite!./assets/full_screen.svg';
 import '!!svg-sprite!./assets/gear.svg';
 import '!!svg-sprite!./assets/grid.svg';
@@ -49,9 +52,11 @@ import '!!svg-sprite!./assets/logo_webhook.svg';
 import '!!svg-sprite!./assets/logo_xpack.svg';
 import '!!svg-sprite!./assets/logo.svg';
 import '!!svg-sprite!./assets/map_marker.svg';
+import '!!svg-sprite!./assets/node.svg';
 import '!!svg-sprite!./assets/pencil.svg';
 import '!!svg-sprite!./assets/plus_in_circle.svg';
 import '!!svg-sprite!./assets/search.svg';
+import '!!svg-sprite!./assets/shard.svg';
 import '!!svg-sprite!./assets/share.svg';
 import '!!svg-sprite!./assets/sort_down.svg';
 import '!!svg-sprite!./assets/sort_up.svg';
@@ -88,6 +93,9 @@ const typeToIconMap = {
   discoverApp: 'app_discover',
   document: 'document',
   dot: 'dot',
+  empty: 'empty',
+  faceHappy: 'face_happy',
+  faceSad: 'face_sad',
   fullScreen: 'full_screen',
   gear: 'gear',
   graphApp: 'app_graph',
@@ -110,9 +118,11 @@ const typeToIconMap = {
   machineLearningApp: 'app_ml',
   mapMarker: 'map_marker',
   monitoringApp: 'app_monitoring',
+  node: 'node',
   pencil: 'pencil',
   plusInCircle: 'plus_in_circle',
   search: 'search',
+  shard: 'shard',
   share: 'share',
   sortDown: 'sort_down',
   sortUp: 'sort_up',

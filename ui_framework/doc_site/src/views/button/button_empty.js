@@ -127,6 +127,69 @@ export default () => (
     <br/><br/>
 
     <KuiButtonEmpty
+      type="text"
+      onClick={() => window.alert('Button clicked')}
+    >
+      Text
+    </KuiButtonEmpty>
+
+    &nbsp;&nbsp;
+
+    <KuiButtonEmpty
+      type="text"
+      size="small"
+      onClick={() => window.alert('Button clicked')}
+    >
+      small
+    </KuiButtonEmpty>
+
+    <br/><br/>
+
+    <KuiButtonEmpty
+      type="text"
+      onClick={() => window.alert('Button clicked')}
+      iconType="arrowDown"
+    >
+      Text
+    </KuiButtonEmpty>
+
+    &nbsp;&nbsp;
+
+    <KuiButtonEmpty
+      type="text"
+      size="small"
+      onClick={() => window.alert('Button clicked')}
+      iconType="arrowDown"
+    >
+      small
+    </KuiButtonEmpty>
+
+    &nbsp;&nbsp;
+
+    <KuiButtonEmpty
+      type="text"
+      onClick={() => window.alert('Button clicked')}
+      iconType="arrowDown"
+      iconSide="right"
+    >
+      Text
+    </KuiButtonEmpty>
+
+    &nbsp;&nbsp;
+
+    <KuiButtonEmpty
+      type="text"
+      size="small"
+      onClick={() => window.alert('Button clicked')}
+      iconType="arrowDown"
+      iconSide="right"
+    >
+      small
+    </KuiButtonEmpty>
+
+    <br/><br/>
+
+    <KuiButtonEmpty
       type="danger"
       onClick={() => window.alert('Button clicked')}
       isDisabled
