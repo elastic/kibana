@@ -6,9 +6,9 @@
 }
 
   .kuiEmptyTablePrompt__message {
-    font-size: $globalTitleFontSize;
-    color: $globalSubduedTextColor;
-    line-height: $globalLineHeight;
+    font-size: $kuiTitleFontSize;
+    color: $kuiSubduedTextColor;
+    line-height: $kuiLineHeight;
   }
 
   .kuiEmptyTablePrompt__actions {

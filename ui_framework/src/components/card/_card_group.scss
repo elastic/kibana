@@ -28,7 +28,7 @@
 .kuiCardGroup--united {
   flex-wrap: nowrap; /* 1 */
   border: 1px solid $cardBorderColor;
-  border-radius: $globalBorderRadius;
+  border-radius: $kuiBorderRadius;
   overflow: hidden;
   margin: 0; /* 2 */
 

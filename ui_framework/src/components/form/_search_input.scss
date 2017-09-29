@@ -1,11 +1,11 @@
 $searchInputTextColor: #ACACAC;
 
 .kuiSearchInput {
-  width: $globalFormFieldDefaultWidth;
+  width: $kuiFormFieldDefaultWidth;
   display: inline-block;
   position: relative;
-  font-size: $globalFontSize;
-  line-height: $globalLineHeight;
+  font-size: $kuiFontSize;
+  line-height: $kuiLineHeight;
 
   &.kuiSearchInput-isInvalid {
     .kuiSearchInput__input {
@@ -33,9 +33,9 @@ $searchInputTextColor: #ACACAC;
   }
 
 .kuiSearchInput--small {
-  width: $globalFormFieldSmallWidth;
+  width: $kuiFormFieldSmallWidth;
 }
 
 .kuiSearchInput--large {
-  width: $globalFormFieldLargeWidth;
+  width: $kuiFormFieldLargeWidth;
 }
