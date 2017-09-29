@@ -1,11 +1,22 @@
 import _ from 'lodash';
+import classNames from 'classnames';
 import PropTypes from 'prop-types';
-import React from 'react';
+import React, { Component } from 'react';
 import Select from 'react-select';
 
-export function TooltipOptions(props) {
+export class TooltipOptions extends Component {
 
-  const findVisualizations = async (input) => {
+  state = {
+    isCollapsed: true
+  }
+
+  handleToggleCollapse = () => {
+    this.setState(prevState => (
+      {  isCollapsed: !prevState.isCollapsed }
+    ));
+  }
+
+  findVisualizations = async (input) => {
     const findOptions = {
       type: ['visualization'],
       fields: ['title', 'visState'],
@@ -18,11 +29,11 @@ export function TooltipOptions(props) {
     let fetchNextPage = false;
 
     do {
-      const resp = await props.savedObjectsClient.find(findOptions);
+      const resp = await this.props.savedObjectsClient.find(findOptions);
       const optionsFromPage = resp.savedObjects
       .filter((savedObject) => {
         const typeName = JSON.parse(savedObject.attributes.visState).type;
-        const visType = props.visTypes.byName[typeName];
+        const visType = this.props.visTypes.byName[typeName];
         if (visType && visType.isEmbeddableInTooltip) {
           return true;
         }
@@ -46,35 +57,35 @@ export function TooltipOptions(props) {
     } while (fetchNextPage && findOptions.page <= 10);
 
     return { options: options };
-  };
+  }
 
-  const setTooltipParam = (paramName, paramValue) => {
-    const tooltip = _.cloneDeep(props.params.tooltip);
+  setTooltipParam = (paramName, paramValue) => {
+    const tooltip = _.cloneDeep(this.props.params.tooltip);
     tooltip[paramName] = paramValue;
-    props.setParam('tooltip', tooltip);
-  };
+    this.props.setParam('tooltip', tooltip);
+  }
 
-  const handleShowTooltipChange = (evt) => {
-    props.setParam('addTooltip', evt.target.checked);
-  };
+  handleShowTooltipChange = (evt) => {
+    this.props.setParam('addTooltip', evt.target.checked);
+  }
 
-  const handleTypeChange = (evt) => {
-    setTooltipParam('type', evt.target.value);
-  };
+  handleTypeChange = (evt) => {
+    this.setTooltipParam('type', evt.target.value);
+  }
 
-  const handleVisChange = (evt) => {
-    setTooltipParam('vis', evt.value);
-  };
+  handleVisChange = (evt) => {
+    this.setTooltipParam('vis', evt.value);
+  }
 
-  const handleHeightChange = (evt) => {
-    setTooltipParam('height', parseFloat(evt.target.value));
-  };
+  handleHeightChange = (evt) => {
+    this.setTooltipParam('height', parseFloat(evt.target.value));
+  }
 
-  const handleWidthChange = (evt) => {
-    setTooltipParam('width', parseFloat(evt.target.value));
-  };
+  handleWidthChange = (evt) => {
+    this.setTooltipParam('width', parseFloat(evt.target.value));
+  }
 
-  const renderTooltipType = () => {
+  renderTooltipType = () => {
     return (
       <div className="kuiSideBarFormRow">
         <label className="kuiSideBarFormRow__label" htmlFor="tooltipType">
@@ -84,8 +95,8 @@ export function TooltipOptions(props) {
           <select
             id="tooltipType"
             className="kuiSelect"
-            value={props.params.tooltip.type}
-            onChange={handleTypeChange}
+            value={this.props.params.tooltip.type}
+            onChange={this.handleTypeChange}
             data-test-subj="tooltipTypeSelect"
           >
             <option value="metric">Metric</option>
@@ -94,9 +105,9 @@ export function TooltipOptions(props) {
         </div>
       </div>
     );
-  };
+  }
 
-  const renderTooltipHeight = () => {
+  renderTooltipHeight = () => {
     return (
       <div className="kuiSideBarFormRow">
         <label className="kuiSideBarFormRow__label" htmlFor="tooltipHeight">
@@ -109,15 +120,15 @@ export function TooltipOptions(props) {
             type="number"
             min="100"
             max={window.innerHeight}
-            value={props.params.tooltip.height}
-            onChange={handleHeightChange}
+            value={this.props.params.tooltip.height}
+            onChange={this.handleHeightChange}
           />
         </div>
       </div>
     );
-  };
+  }
 
-  const renderTooltipWidth = () => {
+  renderTooltipWidth = () => {
     return (
       <div className="kuiSideBarFormRow">
         <label className="kuiSideBarFormRow__label" htmlFor="tooltipWidth">
@@ -130,15 +141,15 @@ export function TooltipOptions(props) {
             type="number"
             min="100"
             max={window.innerWidth}
-            value={props.params.tooltip.width}
-            onChange={handleWidthChange}
+            value={this.props.params.tooltip.width}
+            onChange={this.handleWidthChange}
           />
         </div>
       </div>
     );
-  };
+  }
 
-  const renderVisSelect = () => {
+  renderVisSelect = () => {
     const visSelectId = 'tooltipVisualization';
     return (
       <div className="kuiSideBarFormRow">
@@ -149,35 +160,19 @@ export function TooltipOptions(props) {
           <Select.Async
             className="vis-react-select"
             placeholder="Select..."
-            value={props.params.tooltip.vis}
-            loadOptions={findVisualizations}
-            onChange={handleVisChange}
+            value={this.props.params.tooltip.vis}
+            loadOptions={this.findVisualizations}
+            onChange={this.handleVisChange}
             resetValue={''}
             inputProps={{ id: visSelectId }}
           />
         </div>
       </div>
     );
-  };
-
-  let tooltipType = null;
-  let visSelect = null;
-  let tooltipWidth = null;
-  let tooltipHeight = null;
-  if (props.params.addTooltip && props.params.tooltip) {
-    tooltipType = renderTooltipType();
-    if (props.params.tooltip.type === 'vis') {
-      visSelect = renderVisSelect();
-    }
-    if (props.params.tooltip.type !== 'metric') {
-      tooltipWidth = renderTooltipWidth();
-      tooltipHeight = renderTooltipHeight();
-    }
   }
 
-  return (
-    <div>
-
+  renderShowtooltip = () => {
+    return (
       <div className="kuiSideBarFormRow">
         <label className="kuiSideBarFormRow__label" htmlFor="showTooltip">
           Show Tooltip
@@ -187,22 +182,78 @@ export function TooltipOptions(props) {
             className="kuiCheckBox"
             id="showTooltip"
             type="checkbox"
-            checked={props.params.addTooltip}
-            onChange={handleShowTooltipChange}
+            checked={this.props.params.addTooltip}
+            onChange={this.handleShowTooltipChange}
           />
         </div>
       </div>
+    );
+  }
 
-      {tooltipType}
+  render() {
+    const collapseToggleClasses = classNames('kuiIcon', 'kuiSideBarCollapsibleTitle__caret', {
+      'fa-caret-right': this.state.isCollapsed,
+      'fa-caret-down': !this.state.isCollapsed
+    });
 
-      {visSelect}
+    let showTooltip = null;
+    let tooltipType = null;
+    let visSelect = null;
+    let tooltipWidth = null;
+    let tooltipHeight = null;
+    if (!this.state.isCollapsed) {
+      showTooltip = this.renderShowtooltip();
+      if (this.props.params.addTooltip && this.props.params.tooltip) {
+        tooltipType = this.renderTooltipType();
+        if (this.props.params.tooltip.type === 'vis') {
+          visSelect = this.renderVisSelect();
+        }
+        if (this.props.params.tooltip.type !== 'metric') {
+          tooltipWidth = this.renderTooltipWidth();
+          tooltipHeight = this.renderTooltipHeight();
+        }
+      }
+    }
 
-      {tooltipWidth}
+    return (
+      <div>
 
-      {tooltipHeight}
+        <div className="kuiSideBarCollapsibleTitle">
+          <div
+            className="kuiSideBarCollapsibleTitle__label"
+            aria-expanded={!this.isCollapsed}
+            aria-controls="tooltipSettings"
+            aria-label="Toggle tooltip settings visibility"
+            onClick={this.handleToggleCollapse}
+          >
+            <span
+              aria-hidden="true"
+              className={collapseToggleClasses}
+            />
+            <span className="kuiSideBarCollapsibleTitle__text">
+              Tooltip Settings
+            </span>
+          </div>
+        </div>
 
-    </div>
-  );
+        <div id="tooltipSettings" className="kuiSideBarCollapsibleSection">
+          <div className="kuiSideBarSection">
+
+            {showTooltip}
+
+            {tooltipType}
+
+            {visSelect}
+
+            {tooltipWidth}
+
+            {tooltipHeight}
+
+          </div>
+        </div>
+      </div>
+    );
+  }
 }
 
 TooltipOptions.propTypes = {
