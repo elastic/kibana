@@ -37,7 +37,7 @@ export default function ({ getService }) {
           });
       });
 
-      describe('unkown id', () => {
+      describe('unknown id', () => {
         it('should return a generic 404', async () => {
           await supertest
             .put(`/api/saved_objects/visualization/not an id`)
