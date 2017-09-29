@@ -8,3 +8,8 @@ export { KuiTableRowCheckBoxCell } from './table_row_check_box_cell';
 export { KuiTableHeaderCheckBoxCell } from './table_header_check_box_cell';
 export { KuiTableBody } from './table_body';
 export { KuiTableHeader } from './table_header';
+export {
+  KuiListingTable,
+  KuiListingTableCreateButton,
+  KuiListingTableDeleteButton
+} from './listing_table';

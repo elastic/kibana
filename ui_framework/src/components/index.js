@@ -135,6 +135,9 @@ export {
   KuiTableHeaderCheckBoxCell,
   KuiTableHeader,
   KuiTableBody,
+  KuiListingTable,
+  KuiListingTableCreateButton,
+  KuiListingTableDeleteButton
 } from './table';
 
 export {
