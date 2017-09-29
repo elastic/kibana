@@ -10,8 +10,8 @@
   min-height: 69px; /* 1 */
   color: $localNavTextColor;
   background-color: $localNavBackgroundColor;
-  line-height: $globalLineHeight;
-  border-bottom: solid 1px $globalColorLightGray;
+  line-height: $kuiLineHeight;
+  border-bottom: solid 1px $kuiColorLightGray;
 
   @include darkTheme {
     color: $localNavTextColor--darkTheme;
