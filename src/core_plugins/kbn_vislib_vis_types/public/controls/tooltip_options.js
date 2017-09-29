@@ -32,6 +32,9 @@ export class TooltipOptions extends Component {
       const resp = await this.props.savedObjectsClient.find(findOptions);
       const optionsFromPage = resp.savedObjects
       .filter((savedObject) => {
+        if (this.props.isSameSavedObject(savedObject.id)) {
+          return false;
+        }
         const typeName = JSON.parse(savedObject.attributes.visState).type;
         const visType = this.props.visTypes.byName[typeName];
         if (visType && visType.isEmbeddableInTooltip) {
@@ -257,6 +260,7 @@ export class TooltipOptions extends Component {
 }
 
 TooltipOptions.propTypes = {
+  isSameSavedObject: PropTypes.func.isRequired,
   params: PropTypes.object.isRequired,
   savedObjectsClient: PropTypes.object.isRequired,
   setParam: PropTypes.func.isRequired,

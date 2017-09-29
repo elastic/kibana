@@ -125,6 +125,7 @@ uiModules
       self.searchSource.get('index'),
       self.visState
     );
+    self.vis._id = self.id;
 
     return self.vis;
   };
