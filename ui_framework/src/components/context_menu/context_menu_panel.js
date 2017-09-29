@@ -34,6 +34,7 @@ export class KuiContextMenuPanel extends Component {
     items: PropTypes.array,
     showNextPanel: PropTypes.func,
     showPreviousPanel: PropTypes.func,
+    focusItemIndex: PropTypes.number,
   }
 
   static defaultProps = {
@@ -119,14 +120,20 @@ export class KuiContextMenuPanel extends Component {
 
     // If we're active, but nothing is focused then we should focus the first item.
     if (!this.isMenuItemFocused()) {
+      if (this.props.focusItemIndex !== undefined) {
+        this.menuItems[this.props.focusItemIndex].focus();
+        return;
+      }
+
       if (this.menuItems.length !== 0) {
         this.menuItems[0].focus();
-      } else {
-        // Focus first tabbable item.
-        const tabbableItems = tabbable(this.panel);
-        if (tabbableItems.length) {
-          tabbableItems[0].focus();
-        }
+        return;
+      }
+
+      // Focus first tabbable item.
+      const tabbableItems = tabbable(this.panel);
+      if (tabbableItems.length) {
+        tabbableItems[0].focus();
       }
       return;
     }
@@ -193,9 +200,10 @@ export class KuiContextMenuPanel extends Component {
       panelRef,
       transitionType,
       transitionDirection,
-      isTransitioning, // eslint-disable-line no-unused-vars
+      isTransitioning,
       isActive, // eslint-disable-line no-unused-vars
       items,
+      focusItemIndex, // eslint-disable-line no-unused-vars
       showNextPanel, // eslint-disable-line no-unused-vars
       showPreviousPanel, // eslint-disable-line no-unused-vars
       ...rest,
@@ -230,9 +238,10 @@ export class KuiContextMenuPanel extends Component {
       }
     }
 
-    const hasTransition = transitionDirection && transitionType;
     const classes = classNames('kuiContextMenuPanel', className, (
-      hasTransition ? transitionDirectionAndTypeToClassNameMap[transitionDirection][transitionType] : ''
+      isTransitioning && transitionDirectionAndTypeToClassNameMap[transitionDirection]
+      ? transitionDirectionAndTypeToClassNameMap[transitionDirection][transitionType]
+      : ''
     ));
 
     const content = items.length

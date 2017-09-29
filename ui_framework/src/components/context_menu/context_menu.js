@@ -26,18 +26,15 @@ export class KuiContextMenu extends Component {
     super(props);
 
     this.resetTransitionTimeout = undefined;
-    this.menuItems = [];
-    // We have to store explicit references to each click handler because we want to call it directly
-    // when the user hits the right arrow key, instead of calling `click()` on the element.
-    // If we call `click()` on the element, the tests fail.
-    this.menuItemClickHandlers = [];
     this.itemIndexToPanelIdMap = {};
+    this.panelIdToItemIndexMap = {};
 
     this.state = {
       outGoingPanelId: undefined,
       currentPanelId: props.initialPanelId,
       transitionDirection: undefined,
       isTransitioning: false,
+      focusItemIndex: undefined,
     };
   }
 
@@ -59,7 +56,6 @@ export class KuiContextMenu extends Component {
     // Queue the transition to reset.
     this.resetTransitionTimeout = setTimeout(() => {
       this.setState({
-        transitionDirection: undefined,
         isTransitioning: false,
       });
     }, 250);
@@ -76,6 +72,19 @@ export class KuiContextMenu extends Component {
     // If there's a previous panel, then we can close the current panel to go back to it.
     if (this.hasPreviousPanel(this.state.currentPanelId)) {
       const previousPanelId = this.props.idToPreviousPanelIdMap[this.state.currentPanelId];
+
+      // Set focus on the item which shows the panel we're leaving.
+      const previousPanel = this.props.idToPanelMap[previousPanelId];
+      const focusItemIndex = previousPanel.items.findIndex(
+        item => item.panel && item.panel.id === this.state.currentPanelId
+      );
+
+      if (focusItemIndex !== -1) {
+        this.setState({
+          focusItemIndex,
+        });
+      }
+
       this.showPanel(previousPanelId, 'previous');
     }
   };
@@ -92,6 +101,7 @@ export class KuiContextMenu extends Component {
         outGoingPanelId: undefined,
         currentPanelId: nextProps.initialPanelId,
         transitionDirection: undefined,
+        focusItemIndex: undefined,
       });
     }
   }
@@ -190,6 +200,12 @@ export class KuiContextMenu extends Component {
         isTransitioning={this.state.isTransitioning}
         isActive={transitionType === 'in'}
         items={this.renderItems(panel.items)}
+        focusItemIndex={
+          // Set focus on the item which shows the panel we're leaving.
+          transitionType === 'in' && this.state.transitionDirection === 'previous'
+          ? this.state.focusItemIndex
+          : undefined
+        }
         showNextPanel={this.showNextPanel}
         showPreviousPanel={this.showPreviousPanel}
       >
@@ -211,7 +227,7 @@ export class KuiContextMenu extends Component {
     const currentPanel = this.renderPanel(this.state.currentPanelId, 'in');
     let outGoingPanel;
 
-    // Hide the out-going panel ASAP, so it can't take focus.
+    // Hide the out-going panel as soon as it's done transitioning, so it can't take focus.
     if (this.state.isTransitioning) {
       outGoingPanel = this.renderPanel(this.state.outGoingPanelId, 'out');
     }

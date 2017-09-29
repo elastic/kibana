@@ -52,24 +52,24 @@ exports[`KuiContextMenuPanel props title is rendered 1`] = `
 
 exports[`KuiContextMenuPanel props transitionDirection next with transitionType in is rendered 1`] = `
 <div
-  class="kuiContextMenuPanel kuiContextMenuPanel-txInLeft"
+  class="kuiContextMenuPanel"
 />
 `;
 
 exports[`KuiContextMenuPanel props transitionDirection next with transitionType out is rendered 1`] = `
 <div
-  class="kuiContextMenuPanel kuiContextMenuPanel-txOutLeft"
+  class="kuiContextMenuPanel"
 />
 `;
 
 exports[`KuiContextMenuPanel props transitionDirection previous with transitionType in is rendered 1`] = `
 <div
-  class="kuiContextMenuPanel kuiContextMenuPanel-txInRight"
+  class="kuiContextMenuPanel"
 />
 `;
 
 exports[`KuiContextMenuPanel props transitionDirection previous with transitionType out is rendered 1`] = `
 <div
-  class="kuiContextMenuPanel kuiContextMenuPanel-txOutRight"
+  class="kuiContextMenuPanel"
 />
 `;

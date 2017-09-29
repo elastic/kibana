@@ -13,6 +13,29 @@ import {
 
 import { keyCodes } from '../../services';
 
+const items = [(
+  <KuiContextMenuItem
+    key="A"
+    data-test-subj="itemA"
+  >
+    Option A
+  </KuiContextMenuItem>
+), (
+  <KuiContextMenuItem
+    key="B"
+    data-test-subj="itemB"
+  >
+    Option B
+  </KuiContextMenuItem>
+), (
+  <KuiContextMenuItem
+    key="C"
+    data-test-subj="itemC"
+  >
+    Option C
+  </KuiContextMenuItem>
+)];
+
 describe('KuiContextMenuPanel', () => {
   test('is rendered', () => {
     const component = render(
@@ -135,6 +158,21 @@ describe('KuiContextMenuPanel', () => {
         });
       });
     });
+
+    describe('focusItemIndex', () => {
+      it('sets focus on the item occupying that index', () => {
+        const component = mount(
+          <KuiContextMenuPanel
+            items={items}
+            focusItemIndex={1}
+          />
+        );
+
+        expect(
+          component.find('[data-test-subj="itemB"]').matchesElement(document.activeElement)
+        ).toBe(true);
+      });
+    });
   });
 
   describe('behavior', () => {
@@ -156,29 +194,6 @@ describe('KuiContextMenuPanel', () => {
       let component;
       let showNextPanelHandler;
       let showPreviousPanelHandler;
-
-      const items = [(
-        <KuiContextMenuItem
-          key="A"
-          data-test-subj="itemA"
-        >
-          Option A
-        </KuiContextMenuItem>
-      ), (
-        <KuiContextMenuItem
-          key="B"
-          data-test-subj="itemB"
-        >
-          Option B
-        </KuiContextMenuItem>
-      ), (
-        <KuiContextMenuItem
-          key="C"
-          data-test-subj="itemC"
-        >
-          Option C
-        </KuiContextMenuItem>
-      )];
 
       beforeEach(() => {
         showNextPanelHandler = sinon.stub();
