@@ -307,12 +307,11 @@ npm run test:browser -- --dev # remove the --dev flag to run them once and close
 
 ### Building OS packages
 
-Packages are built using fpm, pleaserun, dpkg, and rpm.  fpm and pleaserun can be installed using gem.  Package building has only been tested on Linux and is not supported on any other platform.
+Packages are built using fpm, dpkg, and rpm.  Package building has only been tested on Linux and is not supported on any other platform.
 
 ```bash
 apt-get install ruby-dev rpm
 gem install fpm -v 1.5.0
-gem install pleaserun -v 0.0.24
 npm run build -- --skip-archives
 ```
 
