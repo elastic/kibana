@@ -19,6 +19,7 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
     const aggs = $scope.vis.getAggConfig().getResponseAggs();
     const aggConfigResult = new AggConfigResult(aggs[0], false, event, event);
     clickHandler({ point: { aggConfigResult: aggConfigResult } });
+    $scope.$apply();
   });
 
   tagCloud.on('renderComplete', () => {
@@ -66,7 +67,8 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
 
     const tags = buckets.map((bucket) => {
       return {
-        text: bucketsAgg.fieldFormatter()(bucket.key),
+        displayText: bucketsAgg.fieldFormatter()(bucket.key),
+        text: bucket.key,
         value: getValue(metricsAgg, bucket)
       };
     });
