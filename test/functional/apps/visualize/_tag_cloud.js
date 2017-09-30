@@ -5,7 +5,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
 
-  describe('visualize app', function describeIndexTests() {
+  describe('visualize app', function () {
     const fromTime = '2015-09-19 06:31:44.000';
     const toTime = '2015-09-23 18:31:44.000';
 
@@ -50,13 +50,13 @@ export default function ({ getService, getPageObjects }) {
     });
 
 
-    describe('tile cloud chart', function indexPatternCreation() {
+    describe('tag cloud chart', function () {
       const vizName1 = 'Visualization tagCloud';
 
       it('should show correct tag cloud data', async function () {
         const data = await PageObjects.visualize.getTextTag();
         log.debug(data);
-        expect(data).to.eql([ '32212254720', '21474836480','20401094656','19327352832','18253611008' ]);
+        expect(data).to.eql([ '32,212,254,720', '21,474,836,480', '20,401,094,656', '19,327,352,832', '18,253,611,008' ]);
       });
 
 
@@ -110,7 +110,41 @@ export default function ({ getService, getPageObjects }) {
             expect(data.trim().split('\n')).to.eql(expectedTableData);
           });
       });
+
+      describe('formatted field', function () {
+        before(async function () {
+          await PageObjects.settings.navigateTo();
+          await PageObjects.settings.clickKibanaIndices();
+          await PageObjects.settings.filterField('machine.ram');
+          await PageObjects.settings.openControlsByName('machine.ram');
+          await PageObjects.settings.setFieldFormat('Bytes');
+          await PageObjects.settings.controlChangeSave();
+          await PageObjects.common.navigateToUrl('visualize', 'new');
+          await PageObjects.visualize.loadSavedVisualization(vizName1);
+          await PageObjects.header.waitUntilLoadingHasFinished();
+          await PageObjects.header.setAbsoluteRange(fromTime, toTime);
+          await PageObjects.visualize.waitForVisualization();
+        });
+
+        after(async function () {
+          await PageObjects.settings.navigateTo();
+          await PageObjects.settings.clickKibanaIndices();
+          await PageObjects.settings.filterField('machine.ram');
+          await PageObjects.settings.openControlsByName('machine.ram');
+          await PageObjects.settings.setFieldFormat('- default - ');
+          await PageObjects.settings.controlChangeSave();
+        });
+
+        it('should format tags with field formatter', async function () {
+          const data = await PageObjects.visualize.getTextTag();
+          log.debug(data);
+          expect(data).to.eql([ '30GB', '20GB', '19GB', '18GB', '17GB' ]);
+        });
+
+      });
     });
+
+
 
   });
 }

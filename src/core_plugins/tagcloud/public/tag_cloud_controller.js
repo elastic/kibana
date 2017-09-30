@@ -47,14 +47,15 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
     $scope.renderComplete();
   });
 
-  $scope.$watch('esResponse', async function (response) {
+  $scope.$watch('esResponse', function (response) {
 
     if (!response) {
       tagCloud.setData([]);
       return;
     }
 
-    const tagsAggId = _.first(_.pluck($scope.vis.getAggConfig().bySchemaName.segment, 'id'));
+    const bucketsAgg = _.first($scope.vis.getAggConfig().bySchemaName.segment);
+    const tagsAggId = _.get(bucketsAgg, 'id');
     if (!tagsAggId || !response.aggregations) {
       tagCloud.setData([]);
       return;
@@ -65,7 +66,7 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
 
     const tags = buckets.map((bucket) => {
       return {
-        text: bucket.key,
+        text: bucketsAgg.fieldFormatter()(bucket.key),
         value: getValue(metricsAgg, bucket)
       };
     });
