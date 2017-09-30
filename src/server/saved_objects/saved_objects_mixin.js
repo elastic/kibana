@@ -36,11 +36,24 @@ export function savedObjectsMixin(kbnServer, server) {
         waitForStatus: 'yellow',
       });
     } catch (error) {
-      if (error && error.body && error.body.status === 'red') {
+      // This check is designed to emulate our planned index template move until
+      // we get there, and once we do the plan is to just post the index template
+      // and attempt the request.
+      //
+      // Because of this we only throw NotFound() when the status is red AND
+      // there are no shards. All other red statuses indicate real problems that
+      // will be described in better detail when the write fails.
+      if (
+        error &&
+        error.body &&
+        error.body.status === 'red' &&
+        !error.body.unassigned_shards &&
+        !error.body.initializing_shards &&
+        !error.body.delayed_unassigned_shards
+      ) {
         server.log(['debug', 'savedObjects'], `Attempted to write to the Kibana index when it didn't exist.`);
         throw new adminCluster.errors.NotFound();
       }
-      throw error;
     }
   }
 
