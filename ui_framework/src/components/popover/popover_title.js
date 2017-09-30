@@ -3,13 +3,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 export const KuiPopoverTitle = ({ children, className, ...rest }) => {
-
-  const classes = classNames(
-    {
-      'kuiPopoverTitle': children,
-    },
-    className,
-  );
+  const classes = classNames('kuiPopoverTitle', className);
 
   return (
     <div
