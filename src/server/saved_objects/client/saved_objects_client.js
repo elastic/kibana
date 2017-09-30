@@ -17,11 +17,13 @@ export class SavedObjectsClient {
       index,
       mappings,
       callCluster,
+      onBeforeWrite = () => {},
     } = options;
 
     this._index = index;
     this._mappings = mappings;
     this._type = getRootType(this._mappings);
+    this._onBeforeWrite = onBeforeWrite;
     this._unwrappedCallCluster = callCluster;
   }
 
@@ -46,25 +48,38 @@ export class SavedObjectsClient {
 
     const method = id && !overwrite ? 'create' : 'index';
     const time = this._getCurrentTime();
-    const response = await this._callCluster(method, {
-      id: this._generateEsId(type, id),
-      type: this._type,
-      index: this._index,
-      refresh: 'wait_for',
-      body: {
+
+    try {
+      const response = await this._writeToCluster(method, {
+        id: this._generateEsId(type, id),
+        type: this._type,
+        index: this._index,
+        refresh: 'wait_for',
+        body: {
+          type,
+          updated_at: time,
+          [type]: attributes
+        },
+      });
+
+      return {
+        id: trimIdPrefix(response._id, type),
         type,
         updated_at: time,
-        [type]: attributes
-      },
-    });
+        version: response._version,
+        attributes
+      };
+    } catch (error) {
+      // if we get a 404 because the index is missing we should respond
+      // with a 503 instead, 404 on saved object create doesn't really
+      // make sense when we are trying not to leak the implementation
+      // details of the SavedObjects index
+      if (errors.isNotFoundError(error)) {
+        throw errors.decorateEsUnavailableError(Boom.serverUnavailable());
+      }
 
-    return {
-      id: trimIdPrefix(response._id, type),
-      type,
-      updated_at: time,
-      version: response._version,
-      attributes
-    };
+      throw error;
+    }
   }
 
   /**
@@ -98,7 +113,7 @@ export class SavedObjectsClient {
       ];
     };
 
-    const { items } = await this._callCluster('bulk', {
+    const { items } = await this._writeToCluster('bulk', {
       index: this._index,
       refresh: 'wait_for',
       body: objects.reduce((acc, object) => ([
@@ -148,7 +163,7 @@ export class SavedObjectsClient {
    * @returns {promise}
    */
   async delete(type, id) {
-    const response = await this._callCluster('delete', {
+    const response = await this._writeToCluster('delete', {
       id: this._generateEsId(type, id),
       type: this._type,
       index: this._index,
@@ -314,7 +329,7 @@ export class SavedObjectsClient {
    */
   async update(type, id, attributes, options = {}) {
     const time = this._getCurrentTime();
-    const response = await this._callCluster('update', {
+    const response = await this._writeToCluster('update', {
       id: this._generateEsId(type, id),
       type: this._type,
       index: this._index,
@@ -335,6 +350,15 @@ export class SavedObjectsClient {
       version: response._version,
       attributes
     };
+  }
+
+  async _writeToCluster(method, params) {
+    try {
+      await this._onBeforeWrite();
+      return await this._callCluster(method, params);
+    } catch (err) {
+      throw decorateEsError(err);
+    }
   }
 
   async _callCluster(method, params) {
