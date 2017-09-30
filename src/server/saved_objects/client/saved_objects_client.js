@@ -48,25 +48,38 @@ export class SavedObjectsClient {
 
     const method = id && !overwrite ? 'create' : 'index';
     const time = this._getCurrentTime();
-    const response = await this._writeToCluster(method, {
-      id: this._generateEsId(type, id),
-      type: this._type,
-      index: this._index,
-      refresh: 'wait_for',
-      body: {
+
+    try {
+      const response = await this._writeToCluster(method, {
+        id: this._generateEsId(type, id),
+        type: this._type,
+        index: this._index,
+        refresh: 'wait_for',
+        body: {
+          type,
+          updated_at: time,
+          [type]: attributes
+        },
+      });
+
+      return {
+        id: trimIdPrefix(response._id, type),
         type,
         updated_at: time,
-        [type]: attributes
-      },
-    });
+        version: response._version,
+        attributes
+      };
+    } catch (error) {
+      // if we get a 404 because the index is missing we should respond
+      // with a 503 instead, 404 on saved object create doesn't really
+      // make sense when we are trying not to leak the implementation
+      // details of the SavedObjects index
+      if (errors.isNotFoundError(error)) {
+        throw errors.decorateEsUnavailableError(Boom.serverUnavailable());
+      }
 
-    return {
-      id: trimIdPrefix(response._id, type),
-      type,
-      updated_at: time,
-      version: response._version,
-      attributes
-    };
+      throw error;
+    }
   }
 
   /**
