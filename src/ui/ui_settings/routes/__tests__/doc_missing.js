@@ -3,10 +3,13 @@ import expect from 'expect.js';
 import {
   getServices,
   chance,
-  assertDocMissingResponse
+  assertDocMissingResponse,
+  waitUntilNextHealthCheck,
 } from './lib';
 
 export function docMissingSuite() {
+  beforeEach(waitUntilNextHealthCheck);
+
   async function setup() {
     const { kbnServer, savedObjectsClient } = getServices();
 
