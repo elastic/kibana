@@ -1,14 +1,28 @@
 {
-    // Use IntelliSense to learn about possible Node.js debug attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
-    "version": "0.2.0",
-    "configurations": [
-      {
-        "type": "node",
-        "request": "launch",
-        "name": "Launch Program",
-        "program": "${file}"
-      }
-    ]
-  }
+  // Use IntelliSense to learn about possible Node.js debug attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Program",
+      "program": "${file}"
+    },
+    {
+      "name": "Jest",
+      "type": "node",
+      "request": "launch",
+      "args": ["--runInBand"],
+      "port": 9229,
+      "address": "localhost",
+      "stopOnEntry": false,
+      "runtimeExecutable": null,
+      "sourceMaps": true,
+      "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
+      "runtimeArgs": ["--inspect-brk"],
+      "cwd": "${workspaceRoot}"
+    }
+  ]
+}

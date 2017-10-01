@@ -1,21 +1,18 @@
 const promisify = require('es6-promisify');
 const path = require('path');
 const fs = require('fs');
-const homedir = require('os').homedir();
 const stripJsonComments = require('strip-json-comments');
 const constants = require('./constants');
+const env = require('./env');
 
 const mkdirp = promisify(require('mkdirp'));
 const writeFile = promisify(fs.writeFile);
 const readFile = promisify(fs.readFile);
 
-const BACKPORT_DIR_PATH = path.join(homedir, '.backport');
-const REPOSITORIES_DIR_PATH = path.join(BACKPORT_DIR_PATH, 'repositories');
-const CONFIG_FILE_PATH = path.join(BACKPORT_DIR_PATH, 'config.json');
-
-const { username, accessToken } = getConfig();
-
 function ensureConfigAndFoldersExists() {
+  const REPOSITORIES_DIR_PATH = env.getRepositoriesDirPath();
+  const CONFIG_FILE_PATH = env.getConfigFilePath();
+
   return mkdirp(REPOSITORIES_DIR_PATH)
     .then(getConfigTemplate)
     .then(configTemplate => {
@@ -33,7 +30,7 @@ function getConfigTemplate() {
   return readFile(path.join(__dirname, 'configTemplate.json'), 'utf8');
 }
 
-function validateConfig() {
+function validateConfig({ username, accessToken }) {
   if (!username || !accessToken) {
     throw new Error(constants.INVALID_CONFIG);
   }
@@ -41,6 +38,7 @@ function validateConfig() {
 
 function getConfig() {
   try {
+    const CONFIG_FILE_PATH = env.getConfigFilePath();
     const res = fs.readFileSync(CONFIG_FILE_PATH, 'utf8');
     return JSON.parse(stripJsonComments(res));
   } catch (e) {
@@ -51,15 +49,8 @@ function getConfig() {
   }
 }
 
-function getRepoPath(repoName) {
-  return path.join(REPOSITORIES_DIR_PATH, repoName);
-}
-
 module.exports = {
-  getRepoPath,
   ensureConfigAndFoldersExists,
-  CONFIG_FILE_PATH,
-  REPOSITORIES_DIR_PATH,
   getConfig,
   validateConfig
 };

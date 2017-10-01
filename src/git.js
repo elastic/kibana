@@ -2,9 +2,8 @@ const promisify = require('es6-promisify');
 const fs = require('fs');
 const Git = require('nodegit');
 const stat = promisify(fs.stat);
-const { getConfig, getRepoPath } = require('./configs');
+const { getRepoPath } = require('./env');
 const constants = require('./constants');
-const { username } = getConfig();
 
 function withAuthentication() {
   return {
@@ -31,11 +30,12 @@ function folderExists(path) {
     });
 }
 
-function maybeSetupRepo(repoName) {
+// Clone repo and add remotes if it does not exist
+function maybeSetupRepo(repoName, username) {
   return folderExists(getRepoPath(repoName)).then(exists => {
     if (!exists) {
       return cloneRepo(repoName).then(repo =>
-        addPersonalRemote(repo, repoName)
+        addRemote(repo, repoName, username)
       );
     }
   });
@@ -51,12 +51,15 @@ function cloneRepo(repoName) {
   });
 }
 
-function addPersonalRemote(repo, repoName) {
+function addRemote(repo, repoName, username) {
   return Git.Remote.create(repo, username, getRemoteUrl(username, repoName));
 }
 
 function resetHard(repo) {
-  return repo.getHeadCommit().then(head => Git.Reset.reset(repo, head, 3));
+  const RESET_HARD = 3;
+  return repo
+    .getHeadCommit()
+    .then(head => Git.Reset.reset(repo, head, RESET_HARD));
 }
 
 function cherrypick(repo, sha) {
@@ -68,7 +71,6 @@ function cherrypick(repo, sha) {
         if (index.hasConflicts() > 0) {
           throw new Error(constants.CHERRYPICK_CONFLICT);
         }
-        // repo.stateCleanup();
         return index.writeTree();
       })
       .then(oid => {
@@ -95,7 +97,7 @@ function createAndCheckoutBranch(repo, baseBranch, featureBranch) {
     .then(() => repo.checkoutBranch(featureBranch));
 }
 
-function push(repo, branchName) {
+function push(repo, branchName, username) {
   return Git.Remote.lookup(repo, username).then(remote => {
     return remote.push(
       [`refs/heads/${branchName}:refs/heads/${branchName}`],
@@ -114,23 +116,15 @@ function checkoutAndPull(repo, branchName) {
   return repo.checkoutBranch(branchName).then(() => pull(repo, branchName));
 }
 
-function deleteBranch(repo, branchName) {
-  return repo.getBranch(branchName).then(reference => {
-    return Git.Branch.delete(reference);
-  });
-}
-
 function getCommit(repo, sha) {
   return repo.getCommit(sha);
 }
 
 module.exports = {
-  addPersonalRemote,
   checkoutAndPull,
   cherrypick,
   cloneRepo,
   createAndCheckoutBranch,
-  deleteBranch,
   getCommit,
   maybeSetupRepo,
   openRepo,
