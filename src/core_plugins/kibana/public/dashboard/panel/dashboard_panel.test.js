@@ -5,7 +5,7 @@ import { DashboardViewMode } from '../dashboard_view_mode';
 import { DashboardPanel } from './dashboard_panel';
 
 import {
-  snapshotComponent,
+  takeMountedSnapshot,
 } from 'ui_framework/src/test';
 
 const containerApiMock = {
@@ -43,7 +43,7 @@ function getProps(props = {}) {
 
 test('DashboardPanel matches snapshot', () => {
   const component = mount(<DashboardPanel {...getProps()} />);
-  expect(snapshotComponent(component)).toMatchSnapshot();
+  expect(takeMountedSnapshot(component)).toMatchSnapshot();
 });
 
 test('and calls render', () => {

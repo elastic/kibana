@@ -5,7 +5,7 @@ import { KuiCodeEditor } from './code_editor';
 import { keyCodes } from '../../services';
 import {
   requiredProps,
-  snapshotComponent,
+  takeMountedSnapshot,
 } from '../../test';
 
 // Mock the htmlIdGenerator to generate predictable ids for snapshot tests
@@ -22,7 +22,7 @@ describe('KuiCodeEditor', () => {
 
   test('is rendered', () => {
     const component = mount(<KuiCodeEditor {...requiredProps}/>);
-    expect(snapshotComponent(component)).toMatchSnapshot();
+    expect(takeMountedSnapshot(component)).toMatchSnapshot();
   });
 
   describe('hint element', () => {
