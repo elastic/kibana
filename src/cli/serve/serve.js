@@ -174,7 +174,7 @@ export default function (program) {
 
     process.on('SIGHUP', function reloadConfig() {
       const settings = transformDeprecations(getCurrentSettings());
-      const config = Config.withDefaultSchema(settings);
+      const config = new Config(kbnServer.config.getSchema(), settings);
 
       kbnServer.server.log(['info', 'config'], 'Reloading logging configuration due to SIGHUP.');
       kbnServer.applyLoggingConfiguration(config);

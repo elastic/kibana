@@ -144,7 +144,7 @@ export class Router<V> {
   >(route: Route<P, Q, B>, handler: RequestHandler<V, P, Q, B>) {
     this.router.post(
       route.path,
-      Router.getBodyParsers(),
+      ...Router.getBodyParsers(),
       async (req, res) => await this.handle(route, req, res, handler)
     );
   }
