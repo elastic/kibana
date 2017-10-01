@@ -290,7 +290,7 @@
     "nock": "8.0.0",
     "node-sass": "3.8.0",
     "pixelmatch": "4.0.2",
-    "prettier": "1.6.1",
+    "prettier": "1.7.3",
     "proxyquire": "1.7.10",
     "sass-loader": "4.0.0",
     "simple-git": "1.37.0",
