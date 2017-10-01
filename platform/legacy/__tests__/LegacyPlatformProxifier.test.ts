@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import { IncomingMessage, OutgoingMessage } from 'http';
+import { IncomingMessage, ServerResponse } from 'http';
 
 const mockConfigService = jest.fn(() => ({
   atPath: jest.fn()
@@ -194,7 +194,7 @@ test('correctly proxies request and response objects.', () => {
   proxifier.addListener('request', onRequest);
 
   const request = {} as IncomingMessage;
-  const response = {} as OutgoingMessage;
+  const response = {} as ServerResponse;
   proxifier.proxy(request, response);
 
   expect(onRequest).toHaveBeenCalledTimes(1);

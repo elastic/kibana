@@ -1,5 +1,5 @@
 import { Server } from 'net';
-import { IncomingMessage, OutgoingMessage } from 'http';
+import { IncomingMessage, ServerResponse } from 'http';
 import { EventEmitter } from 'events';
 
 import { Root } from '../root';
@@ -106,7 +106,7 @@ export class LegacyPlatformProxifier extends EventEmitter {
    * @param request Native Node request object instance.
    * @param response Native Node response object instance.
    */
-  proxy(request: IncomingMessage, response: OutgoingMessage) {
+  proxy(request: IncomingMessage, response: ServerResponse) {
     this.log.debug(
       `Request will be handled by proxy ${request.method}:${request.url}.`
     );

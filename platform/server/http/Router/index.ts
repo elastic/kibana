@@ -166,7 +166,7 @@ export class Router<V> {
   }
 
   /**
-   * Returns supported list of body parsers.
+   * Returns list of supported body parsers.
    */
   private static getBodyParsers() {
     return [
