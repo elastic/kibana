@@ -2,18 +2,18 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-export const KuiGalleryButton = ({ children, className, ...rest }) => {
-  const classes = classNames('kuiGalleryButton', className);
+export const KuiGalleryItemLabel = ({ children, className, ...rest }) => {
+  const classes = classNames('kuiGalleryItem__label', className);
   return (
-    <a
+    <div
       className={classes}
       {...rest}
     >
       {children}
-    </a>
+    </div>
   );
 };
-KuiGalleryButton.propTypes = {
+KuiGalleryItemLabel.propTypes = {
   children: PropTypes.node,
   className: PropTypes.string,
 };

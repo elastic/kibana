@@ -5,5 +5,6 @@ exports[`KuiTabs renders 1`] = `
   aria-label="aria-label"
   class="kuiTabs testClass1 testClass2"
   data-test-subj="test subject string"
+  role="tablist"
 />
 `;

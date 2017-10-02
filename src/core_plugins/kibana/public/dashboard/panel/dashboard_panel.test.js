@@ -3,6 +3,11 @@ import _ from 'lodash';
 import { mount } from 'enzyme';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { DashboardPanel } from './dashboard_panel';
+import { PanelError } from '../panel/panel_error';
+
+import {
+  takeMountedSnapshot,
+} from 'ui_framework/src/test';
 
 const containerApiMock = {
   addFilter: () => {},
@@ -15,7 +20,7 @@ const containerApiMock = {
 const embeddableHandlerMock = {
   getEditPath: () => Promise.resolve('editPath'),
   getTitleFor: () => Promise.resolve('title'),
-  render: jest.fn()
+  render: jest.fn(() => Promise.resolve(() => {}))
 };
 
 function getProps(props = {}) {
@@ -39,9 +44,30 @@ function getProps(props = {}) {
 
 test('DashboardPanel matches snapshot', () => {
   const component = mount(<DashboardPanel {...getProps()} />);
-  expect(component).toMatchSnapshot();
+  expect(takeMountedSnapshot(component)).toMatchSnapshot();
 });
 
 test('and calls render', () => {
   expect(embeddableHandlerMock.render.mock.calls.length).toBe(1);
 });
+
+test('renders an error message when an error is thrown', () => {
+  const props = getProps({
+    getEmbeddableHandler: () => {
+      return {
+        getEditPath: () => Promise.resolve('editPath'),
+        getTitleFor: () => Promise.resolve('title'),
+        render: () => Promise.reject(new Error({ message: 'simulated error' }))
+      };
+    }
+  });
+  const component = mount(<DashboardPanel {...props} />);
+  return new Promise(resolve => {
+    return process.nextTick(() => {
+      const panelElements = component.find(PanelError);
+      expect(panelElements.length).toBe(1);
+      resolve();
+    });
+  });
+});
+

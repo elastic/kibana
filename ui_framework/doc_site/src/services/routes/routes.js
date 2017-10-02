@@ -147,7 +147,11 @@ const components = [{
 }, {
   name: 'CodeEditor',
   component: CodeEditor,
-  hasReact: true
+  hasReact: true,
+}, {
+  name: 'CollapseButton',
+  component: CollapseButtonExample,
+  hasReact: true,
 }, {
   name: 'ColorPicker',
   component: ColorPickerExample,
@@ -155,10 +159,6 @@ const components = [{
 }, {
   name: 'Column',
   component: ColumnExample,
-}, {
-  name: 'CollapseButton',
-  component: CollapseButtonExample,
-  hasReact: true,
 }, {
   name: 'EmptyTablePrompt',
   component: EmptyTablePromptExample,

@@ -1,4 +1,4 @@
-.kuiGalleryButton {
+.kuiGalleryItem {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -8,10 +8,10 @@
   height: $galleryButtonSize;
   margin: 0 $galleryButtonRhythm $galleryButtonRhythm 0;
   padding: 25px 10px 10px;
-  line-height: $globalLineHeight;
+  line-height: $kuiLineHeight;
   background-color: #F6F6F6;
   border: 1px solid #CED5DA;
-  border-radius: $globalBorderRadius;
+  border-radius: $kuiBorderRadius;
   text-decoration: none;
 
   &:hover {
@@ -20,7 +20,7 @@
   }
 }
 
-  .kuiGalleryButton__image {
+  .kuiGalleryItem__image {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -32,9 +32,9 @@
   /**
    * 1. Truncate overflowing text.
    */
-  .kuiGalleryButton__label {
-    font-size: $globalFontSize;
-    color: $globalFontColor;
+  .kuiGalleryItem__label {
+    font-size: $kuiFontSize;
+    color: $kuiFontColor;
     text-align: center;
     max-width: 100%; /* 1 */
     white-space: nowrap; /* 1 */
@@ -42,9 +42,9 @@
     text-overflow: ellipsis; /* 1 */
   }
 
-  .kuiGalleryButton__icon {
+  .kuiGalleryItem__icon {
     position: absolute;
     top: 5px;
     right: 5px;
-    color: $globalSubduedTextColor;
+    color: $kuiSubduedTextColor;
   }

@@ -43,14 +43,14 @@
       <!-- Gallery of buttons for each vis type -->
       <div class="kuiGallery kuiVerticalRhythm">
         <a
-          class="kuiGalleryButton"
+          class="kuiGalleryItem"
           ng-repeat="type in category.list"
           ng-href="{{ getVisTypeUrl(type) }}"
           tooltip="{{ getVisTypeTooltip(type) }}"
           tooltip-placement="{{ getVisTypeTooltipPosition($parent.$index) }}"
           aria-describedby="visDescription_{{ ::getVisTypeId(type) }}"
         >
-          <div class="kuiGalleryButton__image">
+          <div class="kuiGalleryItem__image">
             <img
               ng-if="type.image"
               aria-hidden="true"
@@ -67,14 +67,14 @@
           </div>
 
           <div
-            class="kuiGalleryButton__label"
+            class="kuiGalleryItem__label"
             data-test-subj="visualizeWizardChartTypeTitle"
           >
             {{ type.title }}
           </div>
 
           <div
-            class="kuiGalleryButton__icon kuiIcon fa-flask"
+            class="kuiGalleryItem__icon kuiIcon fa-flask"
             ng-if="type.isExperimental"
           ></div>
 

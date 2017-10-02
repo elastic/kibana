@@ -1,10 +1,10 @@
 .kuiModal {
-  line-height: $globalLineHeight;
+  line-height: $kuiLineHeight;
   background-color: $modalBackgroundColor;
   border: 1px solid $modalBorderColor;
-  border-radius: $globalBorderRadius;
-  box-shadow: $globalBoxShadow;
-  z-index: $globalModalDepth + 1;
+  border-radius: $kuiBorderRadius;
+  box-shadow: $kuiBoxShadow;
+  z-index: $kuiModalDepth + 1;
 
   @include darkTheme {
     background-color: $modalBackgroundColor--darkTheme;
@@ -18,7 +18,7 @@
   align-items: center;
   padding: $modalPadding;
   padding-left: $modalPadding * 2;
-  border-bottom: $globalBorderThin;
+  border-bottom: $kuiBorderThin;
 
   @include darkTheme {
     border-bottom-color: $modalBorderColor--darkTheme;
@@ -26,16 +26,16 @@
 }
 
   .kuiModalHeader__title {
-    font-size: $globalTitleFontSize;
+    font-size: $kuiTitleFontSize;
 
     @include darkTheme {
-      color: $globalTextColor--darkTheme;
+      color: $kuiTextColor--darkTheme;
     }
   }
 
 .kuiModalHeaderCloseButton {
   @include microButton;
-  font-size: $globalTitleFontSize;
+  font-size: $kuiTitleFontSize;
 }
 
 .kuiModalBody {
@@ -46,7 +46,7 @@
   font-size: 14px;
 
   @include darkTheme {
-    color: $globalTextColor--darkTheme;
+    color: $kuiTextColor--darkTheme;
   }
 }
 
