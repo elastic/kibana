@@ -227,6 +227,7 @@ export class TooltipOptions extends Component {
             aria-expanded={!this.isCollapsed}
             aria-controls="tooltipSettings"
             aria-label="Toggle tooltip settings visibility"
+            data-test-subj="tooltipSettingsVisibilityToogle"
             onClick={this.handleToggleCollapse}
           >
             <span

@@ -93,6 +93,7 @@ export default function ({ getService, getPageObjects }) {
     describe('embedded vis tooltip', async () => {
       before(async function () {
         await PageObjects.visualize.clickVisEditorTab('options');
+        await PageObjects.visualize.openTooltipSettings();
         await PageObjects.visualize.setTooltipType('visTooltipOption');
         await PageObjects.visualize.setReactSelect('.vis-react-select', embeddedVisName);
         await PageObjects.visualize.clickGo();
