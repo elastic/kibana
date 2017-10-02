@@ -4,6 +4,8 @@ import fieldControlsHtml from '../field_controls.html';
 import { dateScripts } from './date_scripts';
 import { uiModules } from 'ui/modules';
 import template from './scripted_fields_table.html';
+import { getSupportedScriptingLanguages } from 'ui/scripting_languages';
+import { documentationLinks } from 'ui/documentation_links/documentation_links';
 
 uiModules.get('apps/management')
 .directive('scriptedFieldsTable', function (kbnUrl, Notifier, $filter, confirmModal) {
@@ -21,6 +23,7 @@ uiModules.get('apps/management')
       const fieldCreatorPath = '/management/kibana/indices/{{ indexPattern }}/scriptedField';
       const fieldEditorPath = fieldCreatorPath + '/{{ fieldName }}';
 
+      $scope.docLinks = documentationLinks.scriptedFields;
       $scope.perPage = 25;
       $scope.columns = [
         { title: 'name' },
@@ -109,6 +112,12 @@ uiModules.get('apps/management')
           onConfirm: () => { $scope.indexPattern.removeScriptedField(field.name); }
         };
         confirmModal(`Are you sure want to delete ${field.name}? This action is irreversible!`, confirmModalOptions);
+      };
+
+      $scope.getDeprecatedLanguagesInUse = function () {
+        const fields = $scope.indexPattern.getScriptedFields();
+        const langsInUse = _.uniq(_.map(fields, 'lang'));
+        return _.difference(langsInUse, getSupportedScriptingLanguages());
       };
     }
   };
