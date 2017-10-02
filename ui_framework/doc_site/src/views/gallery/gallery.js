@@ -2,10 +2,10 @@ import React from 'react';
 
 import {
   KuiGallery,
-  KuiGalleryButton,
-  KuiGalleryButtonIcon,
-  KuiGalleryButtonImage,
-  KuiGalleryButtonLabel
+  KuiGalleryItem,
+  KuiGalleryItemIcon,
+  KuiGalleryItemImage,
+  KuiGalleryItemLabel
 } from '../../../../components';
 
 export default () => {
@@ -25,47 +25,47 @@ export default () => {
         </h2>
 
         <KuiGallery className="kuiVerticalRhythmSmall">
-          <KuiGalleryButton href="#">
-            <KuiGalleryButtonImage style={imageStyle}/>
+          <KuiGalleryItem href="#">
+            <KuiGalleryItemImage style={imageStyle}/>
 
-            <KuiGalleryButtonLabel>
+            <KuiGalleryItemLabel>
               Item A
-            </KuiGalleryButtonLabel>
+            </KuiGalleryItemLabel>
 
-            <KuiGalleryButtonIcon className="fa-flask"/>
-          </KuiGalleryButton>
+            <KuiGalleryItemIcon className="fa-flask"/>
+          </KuiGalleryItem>
 
-          <KuiGalleryButton href="#">
-            <KuiGalleryButtonImage style={imageStyle}/>
+          <KuiGalleryItem href="#">
+            <KuiGalleryItemImage style={imageStyle}/>
 
-            <KuiGalleryButtonLabel>
+            <KuiGalleryItemLabel>
               Item B
-            </KuiGalleryButtonLabel>
-          </KuiGalleryButton>
+            </KuiGalleryItemLabel>
+          </KuiGalleryItem>
 
-          <KuiGalleryButton>
-            <KuiGalleryButtonImage style={imageStyle}/>
+          <KuiGalleryItem>
+            <KuiGalleryItemImage style={imageStyle}/>
 
-            <KuiGalleryButtonLabel>
+            <KuiGalleryItemLabel>
               Item C
-            </KuiGalleryButtonLabel>
-          </KuiGalleryButton>
+            </KuiGalleryItemLabel>
+          </KuiGalleryItem>
 
-          <KuiGalleryButton>
-            <KuiGalleryButtonImage style={imageStyle}/>
+          <KuiGalleryItem>
+            <KuiGalleryItemImage style={imageStyle}/>
 
-            <KuiGalleryButtonLabel>
+            <KuiGalleryItemLabel>
               Item D
-            </KuiGalleryButtonLabel>
-          </KuiGalleryButton>
+            </KuiGalleryItemLabel>
+          </KuiGalleryItem>
 
-          <KuiGalleryButton>
-            <KuiGalleryButtonImage style={imageStyle}/>
+          <KuiGalleryItem>
+            <KuiGalleryItemImage style={imageStyle}/>
 
-            <KuiGalleryButtonLabel>
+            <KuiGalleryItemLabel>
               Item E
-            </KuiGalleryButtonLabel>
-          </KuiGalleryButton>
+            </KuiGalleryItemLabel>
+          </KuiGalleryItem>
         </KuiGallery>
       </div>
 
@@ -75,21 +75,21 @@ export default () => {
         </div>
 
         <KuiGallery className="kuiVerticalRhythmSmall">
-          <KuiGalleryButton href="#">
-            <KuiGalleryButtonImage style={imageStyle}/>
+          <KuiGalleryItem href="#">
+            <KuiGalleryItemImage style={imageStyle}/>
 
-            <KuiGalleryButtonLabel>
+            <KuiGalleryItemLabel>
               Item F
-            </KuiGalleryButtonLabel>
-          </KuiGalleryButton>
+            </KuiGalleryItemLabel>
+          </KuiGalleryItem>
 
-          <KuiGalleryButton href="#">
-            <KuiGalleryButtonImage style={imageStyle}/>
+          <KuiGalleryItem href="#">
+            <KuiGalleryItemImage style={imageStyle}/>
 
-            <KuiGalleryButtonLabel>
+            <KuiGalleryItemLabel>
               Item G with a long label with ellipsis
-            </KuiGalleryButtonLabel>
-          </KuiGalleryButton>
+            </KuiGalleryItemLabel>
+          </KuiGalleryItem>
         </KuiGallery>
       </div>
     </div>
