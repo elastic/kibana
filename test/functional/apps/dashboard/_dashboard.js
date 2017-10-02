@@ -2,8 +2,7 @@ import expect from 'expect.js';
 
 import {
   DEFAULT_PANEL_WIDTH,
-  DEFAULT_PANEL_HEIGHT,
-} from '../../../../src/core_plugins/kibana/public/dashboard/panel/panel_state';
+} from '../../../../src/core_plugins/kibana/public/dashboard/dashboard_constants';
 
 import {
   VisualizeConstants
@@ -13,7 +12,6 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
   const remote = getService('remote');
-  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize']);
 
   describe('dashboard tab', function describeIndexTests() {
@@ -30,8 +28,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should be able to add visualizations to dashboard', async function addVisualizations() {
-      await screenshots.take('Dashboard-no-visualizations');
-
       // This flip between apps fixes the url so state is preserved when switching apps in test mode.
       // Without this flip the url in test mode looks something like
       // "http://localhost:5620/app/kibana?_t=1486069030837#/dashboard?_g=...."
@@ -43,7 +39,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
 
       log.debug('done adding visualizations');
-      await screenshots.take('Dashboard-add-visualizations');
     });
 
     it('set the timepicker time to that which contains our test data', async function setTimepicker() {
@@ -60,7 +55,6 @@ export default function ({ getService, getPageObjects }) {
         log.debug('now re-load previously saved dashboard');
         return PageObjects.dashboard.loadSavedDashboard(dashboardName);
       });
-      await screenshots.take('Dashboard-load-saved');
     });
 
     it('should have all the expected visualizations', function checkVisualizations() {
@@ -72,30 +66,6 @@ export default function ({ getService, getPageObjects }) {
         });
       })
       .then(function () {
-        screenshots.take('Dashboard-has-visualizations');
-      });
-    });
-
-    it('should have all the expected initial sizes', function checkVisualizationSizes() {
-      const width = DEFAULT_PANEL_WIDTH;
-      const height = DEFAULT_PANEL_HEIGHT;
-      const titles = PageObjects.dashboard.getTestVisualizationNames();
-      const visObjects = [
-        { dataCol: '1', dataRow: '1', dataSizeX: width, dataSizeY: height, title: titles[0] },
-        { dataCol: width + 1, dataRow: '1', dataSizeX: width, dataSizeY: height, title: titles[1] },
-        { dataCol: '1', dataRow: height + 1, dataSizeX: width, dataSizeY: height, title: titles[2] },
-        { dataCol: width + 1, dataRow: height + 1, dataSizeX: width, dataSizeY: height, title: titles[3] },
-        { dataCol: '1', dataRow: (height * 2) + 1, dataSizeX: width, dataSizeY: height, title: titles[4] },
-        { dataCol: width + 1, dataRow: (height * 2) + 1, dataSizeX: width, dataSizeY: height, title: titles[5] },
-        { dataCol: '1', dataRow: (height * 3) + 1, dataSizeX: width, dataSizeY: height, title: titles[6] }
-      ];
-      return retry.tryForTime(10000, function () {
-        return PageObjects.dashboard.getPanelSizeData()
-          .then(function (panelTitles) {
-            log.info('visualization titles = ' + panelTitles);
-            screenshots.take('Dashboard-visualization-sizes');
-            expect(panelTitles).to.eql(visObjects);
-          });
       });
     });
 
@@ -156,10 +126,20 @@ export default function ({ getService, getPageObjects }) {
 
       it('for panel size parameters', async function () {
         const currentUrl = await remote.getCurrentUrl();
-        const newUrl = currentUrl.replace(`size_x:${DEFAULT_PANEL_WIDTH}`, `size_x:${DEFAULT_PANEL_WIDTH * 2}`);
+        const currentPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
+        const newUrl = currentUrl.replace(`w:${DEFAULT_PANEL_WIDTH}`, `w:${DEFAULT_PANEL_WIDTH * 2}`);
         await remote.get(newUrl.toString(), false);
-        const allPanelInfo = await PageObjects.dashboard.getPanelSizeData();
-        expect(allPanelInfo[0].dataSizeX).to.equal(`${DEFAULT_PANEL_WIDTH * 2}`);
+        await retry.try(async () => {
+          const newPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
+          if (newPanelDimensions.length < 0) {
+            throw new Error('No panel dimensions...');
+          }
+          // Some margin of error is allowed, I've noticed it being off by one pixel. Probably something to do with
+          // an odd width and dividing by two. Note that if we add margins, we'll have to adjust this as well.
+          const marginOfError = 5;
+          expect(newPanelDimensions[0].width).to.be.lessThan(currentPanelDimensions[0].width * 2 + marginOfError);
+          expect(newPanelDimensions[0].width).to.be.greaterThan(currentPanelDimensions[0].width * 2 - marginOfError);
+        });
       });
     });
 
@@ -303,11 +283,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.clickToastOK();
 
         const visualizations = PageObjects.dashboard.getTestVisualizations();
-        return retry.tryForTime(10000, async function () {
-          const panelTitles = await PageObjects.dashboard.getPanelSizeData();
-          log.info('visualization titles = ' + panelTitles.map(item => item.title));
-          screenshots.take('Dashboard-visualization-sizes');
-          expect(panelTitles.length).to.eql(visualizations.length + 1);
+        return retry.try(async () => {
+          const panelCount = await PageObjects.dashboard.getPanelCount();
+          expect(panelCount).to.eql(visualizations.length + 1);
         });
       });
 

@@ -11,7 +11,7 @@
    */
   .kuiAssistedInput__assistance {
     position: absolute;
-    right: $globalFormControlHorizontalPadding;
+    right: $kuiFormControlHorizontalPadding;
     top: 50%; /* 1 */
     transform: translateY(-50%); /* 1 */
   }

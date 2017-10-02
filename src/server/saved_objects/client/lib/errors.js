@@ -3,6 +3,10 @@ import Boom from 'boom';
 const code = Symbol('SavedObjectsClientErrorCode');
 
 function decorate(error, errorCode, statusCode, message) {
+  if (isSavedObjectsClientError(error)) {
+    return error;
+  }
+
   const boom = Boom.boomify(error, {
     statusCode,
     message,
@@ -12,6 +16,10 @@ function decorate(error, errorCode, statusCode, message) {
   boom[code] = errorCode;
 
   return boom;
+}
+
+export function isSavedObjectsClientError(error) {
+  return error && !!error[code];
 }
 
 // 400 - badRequest

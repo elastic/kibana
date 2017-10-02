@@ -79,13 +79,14 @@
 
   <dashboard-grid
     ng-show="!hasExpandedPanel()"
-    on-panel-removed="onPanelRemoved"
-    dashboard-view-mode="dashboardViewMode"
     panels="panels"
-    save-state="saveState"
-    toggle-expand="toggleExpandPanel"
+    is-full-screen-mode="!chrome.getVisible()"
+    dashboard-view-mode="dashboardViewMode"
+    get-embeddable-handler="getEmbeddableHandler"
+    get-container-api="getContainerApi"
+    expand-panel="expandPanel"
     data-shared-items-count="{{panels.length}}"
-    container-api="containerApi"
+    on-panel-removed="onPanelRemoved"
   ></dashboard-grid>
 
   <dashboard-panel
@@ -94,8 +95,8 @@
     is-full-screen-mode="!chrome.getVisible()"
     is-expanded="true"
     dashboard-view-mode="dashboardViewMode"
-    container-api="containerApi"
-    toggle-expand="toggleExpandPanel(expandedPanel.panelIndex)"
+    get-embeddable-handler="getEmbeddableHandler"
+    get-container-api="getContainerApi"
+    on-toggle-expanded="minimizeExpandedPanel"
   ></dashboard-panel>
-
 </dashboard-app>

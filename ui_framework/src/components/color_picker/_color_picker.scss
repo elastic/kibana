@@ -10,7 +10,7 @@
   .kuiColorPicker__swatch {
     width: $colorPickerSize;
     height: $colorPickerSize;
-    border-radius: $globalBorderRadius;
+    border-radius: $kuiBorderRadius;
     box-shadow: inset 0 0 0 1px rgba(#000, 0.2);
     display: inline-block;
   }
@@ -29,8 +29,8 @@
   }
 
   .kuiColorPicker__label {
-    font-size: $globalFontSize;
-    line-height: $globalLineHeight;
+    font-size: $kuiFontSize;
+    line-height: $kuiLineHeight;
     margin-left: 10px;
     display: inline-block;
     vertical-align: middle;
