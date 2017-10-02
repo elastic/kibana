@@ -127,11 +127,9 @@ describe('SavedObjectsClient', () => {
         title: 'Logstash'
       });
 
-      expect(callAdminCluster.calledOnce).to.be(true);
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWith(callAdminCluster, 'index');
       sinon.assert.calledOnce(onBeforeWrite);
-
-      const args = callAdminCluster.getCall(0).args;
-      expect(args[0]).to.be('index');
     });
 
     it('should use create action if ID defined and overwrite=false', async () => {
@@ -141,11 +139,9 @@ describe('SavedObjectsClient', () => {
         id: 'logstash-*',
       });
 
-      expect(callAdminCluster.calledOnce).to.be(true);
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWith(callAdminCluster, 'create');
       sinon.assert.calledOnce(onBeforeWrite);
-
-      const args = callAdminCluster.getCall(0).args;
-      expect(args[0]).to.be('create');
     });
 
     it('allows for id to be provided', async () => {
@@ -153,11 +149,12 @@ describe('SavedObjectsClient', () => {
         title: 'Logstash'
       }, { id: 'logstash-*' });
 
-      expect(callAdminCluster.calledOnce).to.be(true);
-      sinon.assert.calledOnce(onBeforeWrite);
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
+        id: 'index-pattern:logstash-*'
+      }));
 
-      const args = callAdminCluster.getCall(0).args;
-      expect(args[1].id).to.be('index-pattern:logstash-*');
+      sinon.assert.calledOnce(onBeforeWrite);
     });
 
     it('self-generates an ID', async () => {
@@ -165,11 +162,12 @@ describe('SavedObjectsClient', () => {
         title: 'Logstash'
       });
 
-      expect(callAdminCluster.calledOnce).to.be(true);
-      sinon.assert.calledOnce(onBeforeWrite);
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
+        id: sinon.match(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/)
+      }));
 
-      const args = callAdminCluster.getCall(0).args;
-      expect(args[1].id).to.match(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/);
+      sinon.assert.calledOnce(onBeforeWrite);
     });
   });
 
@@ -182,18 +180,17 @@ describe('SavedObjectsClient', () => {
         { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
       ]);
 
-      expect(callAdminCluster.calledOnce).to.be(true);
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, 'bulk', sinon.match({
+        body: [
+          { create: { _type: 'doc', _id: 'config:one' } },
+          { type: 'config', ...mockTimestampFields, config: { title: 'Test One' } },
+          { create: { _type: 'doc', _id: 'index-pattern:two' } },
+          { type: 'index-pattern', ...mockTimestampFields, 'index-pattern': { title: 'Test Two' } }
+        ]
+      }));
+
       sinon.assert.calledOnce(onBeforeWrite);
-
-      const args = callAdminCluster.getCall(0).args;
-
-      expect(args[0]).to.be('bulk');
-      expect(args[1].body).to.eql([
-        { create: { _type: 'doc', _id: 'config:one' } },
-        { type: 'config', ...mockTimestampFields, config: { title: 'Test One' } },
-        { create: { _type: 'doc', _id: 'index-pattern:two' } },
-        { type: 'index-pattern', ...mockTimestampFields, 'index-pattern': { title: 'Test Two' } }
-      ]);
     });
 
     it('should overwrite objects if overwrite is truthy', async () => {
@@ -201,7 +198,6 @@ describe('SavedObjectsClient', () => {
 
       await savedObjectsClient.bulkCreate([{ type: 'foo', id: 'bar', attributes: {} }], { overwrite: false });
       sinon.assert.calledOnce(callAdminCluster);
-      sinon.assert.calledOnce(onBeforeWrite);
       sinon.assert.calledWithExactly(callAdminCluster, 'bulk', sinon.match({
         body: [
           // uses create because overwriting is not allowed
@@ -210,12 +206,13 @@ describe('SavedObjectsClient', () => {
         ]
       }));
 
+      sinon.assert.calledOnce(onBeforeWrite);
+
       callAdminCluster.reset();
       onBeforeWrite.reset();
 
       await savedObjectsClient.bulkCreate([{ type: 'foo', id: 'bar', attributes: {} }], { overwrite: true });
       sinon.assert.calledOnce(callAdminCluster);
-      sinon.assert.calledOnce(onBeforeWrite);
       sinon.assert.calledWithExactly(callAdminCluster, 'bulk', sinon.match({
         body: [
           // uses index because overwriting is allowed
@@ -224,7 +221,7 @@ describe('SavedObjectsClient', () => {
         ]
       }));
 
-
+      sinon.assert.calledOnce(onBeforeWrite);
     });
 
     it('returns document errors', async () => {
@@ -330,18 +327,16 @@ describe('SavedObjectsClient', () => {
       });
       await savedObjectsClient.delete('index-pattern', 'logstash-*');
 
-      expect(callAdminCluster.calledOnce).to.be(true);
-      sinon.assert.calledOnce(onBeforeWrite);
-
-      const [method, args] = callAdminCluster.getCall(0).args;
-      expect(method).to.be('delete');
-      expect(args).to.eql({
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, 'delete', {
         type: 'doc',
         id: 'index-pattern:logstash-*',
         refresh: 'wait_for',
         index: '.kibana-test',
         ignore: [404],
       });
+
+      sinon.assert.calledOnce(onBeforeWrite);
     });
   });
 
@@ -421,24 +416,26 @@ describe('SavedObjectsClient', () => {
     it('accepts per_page/page', async () => {
       await savedObjectsClient.find({ perPage: 10, page: 6 });
 
-      expect(callAdminCluster.calledOnce).to.be(true);
-      sinon.assert.notCalled(onBeforeWrite);
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
+        size: 10,
+        from: 50
+      }));
 
-      const options = callAdminCluster.getCall(0).args[1];
-      expect(options.size).to.be(10);
-      expect(options.from).to.be(50);
+      sinon.assert.notCalled(onBeforeWrite);
     });
 
     it('can filter by fields', async () => {
       await savedObjectsClient.find({ fields: ['title'] });
 
-      expect(callAdminCluster.calledOnce).to.be(true);
-      sinon.assert.notCalled(onBeforeWrite);
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
+        _source: [
+          '*.title', 'type', 'title'
+        ]
+      }));
 
-      const options = callAdminCluster.getCall(0).args[1];
-      expect(options._source).to.eql([
-        '*.title', 'type', 'title'
-      ]);
+      sinon.assert.notCalled(onBeforeWrite);
     });
   });
 
@@ -476,9 +473,11 @@ describe('SavedObjectsClient', () => {
       await savedObjectsClient.get('index-pattern', 'logstash-*');
 
       sinon.assert.notCalled(onBeforeWrite);
-      const [, args] = callAdminCluster.getCall(0).args;
-      expect(args.id).to.eql('index-pattern:logstash-*');
-      expect(args.type).to.eql('doc');
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
+        id: 'index-pattern:logstash-*',
+        type: 'doc'
+      }));
     });
   });
 
@@ -491,14 +490,17 @@ describe('SavedObjectsClient', () => {
         { id: 'two', type: 'index-pattern' }
       ]);
 
-      expect(callAdminCluster.calledOnce).to.be(true);
-      sinon.assert.notCalled(onBeforeWrite);
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
+        body: {
+          docs: [
+            { _type: 'doc', _id: 'config:one' },
+            { _type: 'doc', _id: 'index-pattern:two' }
+          ]
+        }
+      }));
 
-      const options = callAdminCluster.getCall(0).args[1];
-      expect(options.body.docs).to.eql([
-        { _type: 'doc', _id: 'config:one' },
-        { _type: 'doc', _id: 'index-pattern:two' }
-      ]);
+      sinon.assert.notCalled(onBeforeWrite);
     });
 
     it('returns early for empty objects argument', async () => {
@@ -507,7 +509,7 @@ describe('SavedObjectsClient', () => {
       const response = await savedObjectsClient.bulkGet([]);
 
       expect(response.saved_objects).to.have.length(0);
-      expect(callAdminCluster.notCalled).to.be(true);
+      sinon.assert.notCalled(callAdminCluster);
       sinon.assert.notCalled(onBeforeWrite);
     });
 
@@ -583,20 +585,17 @@ describe('SavedObjectsClient', () => {
         { version: newVersion - 1 }
       );
 
-      const esParams = callAdminCluster.getCall(0).args[1];
-      expect(esParams.version).to.be(newVersion - 1);
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
+        version: newVersion - 1
+      }));
     });
 
     it('passes the parameters to callAdminCluster', async () => {
       await savedObjectsClient.update('index-pattern', 'logstash-*', { title: 'Testing' });
 
-      expect(callAdminCluster.calledOnce).to.be(true);
-      sinon.assert.calledOnce(onBeforeWrite);
-
-      const args = callAdminCluster.getCall(0).args;
-
-      expect(args[0]).to.be('update');
-      expect(args[1]).to.eql({
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, 'update', {
         type: 'doc',
         id: 'index-pattern:logstash-*',
         version: undefined,
@@ -607,6 +606,8 @@ describe('SavedObjectsClient', () => {
         refresh: 'wait_for',
         index: '.kibana-test'
       });
+
+      sinon.assert.calledOnce(onBeforeWrite);
     });
   });
 
