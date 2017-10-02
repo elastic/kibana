@@ -4,7 +4,7 @@
     <div class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm">
       <div class="kuiInfoPanelHeader">
         <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--warning fa-bolt"></span>
-        <span class="kuiInfoPanelHeader__title">
+        <span class="kuiInfoPanelHeader__title" id="kbnManagementAdvancedWarning">
           Caution: You can break stuff here
         </span>
       </div>
@@ -34,6 +34,7 @@
           ng-model="advancedFilter"
           type="text"
           placeholder="Filter..."
+          aria-describedby="kbnManagementAdvancedWarning"
         >
       </div>
     </form>
