@@ -5,6 +5,10 @@ import { DashboardViewMode } from '../dashboard_view_mode';
 import { DashboardPanel } from './dashboard_panel';
 import { PanelError } from '../panel/panel_error';
 
+import {
+  takeMountedSnapshot,
+} from 'ui_framework/src/test';
+
 const containerApiMock = {
   addFilter: () => {},
   getAppState: () => {},
@@ -40,7 +44,7 @@ function getProps(props = {}) {
 
 test('DashboardPanel matches snapshot', () => {
   const component = mount(<DashboardPanel {...getProps()} />);
-  expect(component).toMatchSnapshot();
+  expect(takeMountedSnapshot(component)).toMatchSnapshot();
 });
 
 test('and calls render', () => {
