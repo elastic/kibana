@@ -28,13 +28,15 @@ source code and the existing visualizations provided with it.
 
 To create a new visualization you need to create new visualization type using the VisualizationFactory. 
 The factory can create `Base`, `Angular`, `React` and `Vislib` visualization.
+You should also register the visualization with `VisTypesRegistryProvider`.
 
 ["source","html"]
 -----------
 import { CATEGORY } from 'ui/vis/vis_category';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
-export default function MyNewVisType(Private) {
+const MyNewVisType = (Private) => {
   const VisFactory = Private(VisFactoryProvider);
 
   return  VisFactory.createBaseVisualization({
@@ -46,6 +48,8 @@ export default function MyNewVisType(Private) {
     ...
   });
 }
+
+VisTypesRegistryProvider.register(MyNewVisType);
 -----------
 
 The list of common parameters:
@@ -83,6 +87,11 @@ or data change and destroy function which will be called to cleanup.
 The render function receives the data object and status object which tells what actually changed.
 Render function needs to return a promise, which should be resolved once the visualization is done rendering.
 
+Status object has the following properties: `vis`, `aggs`, `resize`, `data`. Each of them is set to true if the matching
+object changed since last call to the render function or set to false otherwise. You can use it to make your 
+visualization rendering more efficient.
+
+
 image::images/visualize-flow.png[Main Flow]
 
 - Your visualizations constructor will get called with `vis` object and element to which it should render.
@@ -101,6 +110,7 @@ It should return a promise and resolve once its done rendering.
 ["source","js"]
 -----------
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
+import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
 class MyVisualization {
    constructor(vis, el) {
@@ -117,7 +127,7 @@ class MyVisualization {
    }
 }
 
-export default function MyNewVisType(Private) {
+const MyNewVisType = (Private) => {
   const VisFactory = Private(VisFactoryProvider);
 
   return VisFactory.createBaseVisualization({
@@ -128,6 +138,8 @@ export default function MyNewVisType(Private) {
     visualization: MyVisualization
   });
 }
+
+VisTypesRegistryProvider.register(MyNewVisType);
 -----------
 
 [[development-angular-visualization-type]]
@@ -140,7 +152,7 @@ its done rendering.
 
 ["source","js"]
 -----------
-export default function MyNewVisType(Private) {
+const MyNewVisType = (Private) => {
   const VisFactory = Private(VisFactoryProvider);
   
   return VisFactory.createAngularVisualization({
@@ -167,7 +179,7 @@ done rendering.
 -----------
 import { ReactComponent } from './my_react_component';
 
-export default function MyNewVisType(Private) {
+const MyNewVisType = (Private) => {
   const VisFactory = Private(VisFactoryProvider);
   
   return VisFactory.createReactVisualization({
@@ -245,7 +257,7 @@ class MyEditorController {
    }
 }
 
-export default function MyNewVisType(Private) {
+const MyNewVisType = (Private) => {
   const VisFactory = Private(VisFactoryProvider);
 
   return VisFactory.createAngularVisualization({
@@ -257,6 +269,8 @@ export default function MyNewVisType(Private) {
     editorConfig: { my: 'custom config' }
   });
 }
+
+VisTypesRegistryProvider.register(MyNewVisType);
 -----------
 
 [[development-visualization-request-handlers]]
@@ -307,7 +321,7 @@ const myRequestHandler = (vis, appState, uiState, searchSource) => {
   });
 };
 
-export default function MyNewVisType(Private) {
+const MyNewVisType = (Private) => {
   const VisFactory = Private(VisFactoryProvider);
 
   return VisFactory.createAngularVisualization({
@@ -318,6 +332,8 @@ export default function MyNewVisType(Private) {
     requestHandler: myRequestHandler
   });
 }
+
+VisTypesRegistryProvider.register(MyNewVisType);
 -----------
 
 [[development-visualization-response-handlers]]
@@ -351,7 +367,7 @@ const myResponseHandler = (vis, response) => {
    return response;
 };
 
-export default function MyNewVisType(Private) {
+const MyNewVisType(Private) => {
   const VisFactory = Private(VisFactoryProvider);
 
   return VisFactory.createAngularVisualization({
@@ -362,6 +378,8 @@ export default function MyNewVisType(Private) {
     responseHandler: myResponseHandler
   });
 }
+
+VisTypesRegistryProvider.register(MyNewVisType);
 -----------
 
 [[development-vis-object]]
