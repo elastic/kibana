@@ -44,7 +44,7 @@ export default function ({ getService }) {
 
       it('returns generic 404 when kibana index is missing', async () => (
         await supertest
-          .delete(`/api/saved_objects/dashboard/not-a-real-id`)
+          .delete(`/api/saved_objects/dashboard/be3733a0-9efe-11e7-acb3-3dab96693fab`)
           .expect(404)
           .then(resp => {
             expect(resp.body).to.eql({
