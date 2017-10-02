@@ -61,7 +61,7 @@ export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
         indexPatterns: indexPatterns,
         timeFilter: timefilter,
         queryFilter: queryFilter,
-        queryManager: queryManagerFactory(getAppState()),
+        queryManager: queryManagerFactory(getAppState),
         kuery: kueryAPI,
         events: {
           filter: (event) => {
