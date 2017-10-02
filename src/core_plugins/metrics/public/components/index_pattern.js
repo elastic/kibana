@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import FieldSelect from './aggs/field_select';
-import createSelectHandler from './lib/create_select_handler';
-import createTextHandler from './lib/create_text_handler';
+import createSelectHandler from '../lib/component_utils/create_select_handler';
+import createTextHandler from '../lib/component_utils/create_text_handler';
 import YesNo from './yes_no';
 import { htmlIdGenerator } from 'ui_framework/services';
 
@@ -61,11 +61,7 @@ export const IndexPattern = props => {
         value={model[intervalName]}
       />
       <div className="vis_editor__label">Drop Last Bucket</div>
-      <YesNo
-        value={model[dropBucketName]}
-        name={dropBucketName}
-        onChange={props.onChange}
-      />
+      <YesNo value={model[dropBucketName]} name={dropBucketName} onChange={props.onChange} />
     </div>
   );
 };

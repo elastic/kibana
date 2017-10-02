@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import StdAgg from './std_agg';
-import aggToComponent from '../lib/agg_to_component';
+import aggToComponent from '../../lib/component_utils/agg_to_component';
 import { sortable } from 'react-anything-sortable';
 
 function Agg(props) {
@@ -12,13 +12,7 @@ function Agg(props) {
   }
   const style = Object.assign({ cursor: 'default' }, props.style);
   return (
-    <div
-      aria-hidden="true"
-      className={props.className}
-      style={style}
-      onMouseDown={props.onMouseDown}
-      onTouchStart={props.onTouchStart}
-    >
+    <div aria-hidden="true" className={props.className} style={style} onMouseDown={props.onMouseDown} onTouchStart={props.onTouchStart}>
       <Component
         fields={props.fields}
         disableDelete={props.disableDelete}
@@ -32,7 +26,6 @@ function Agg(props) {
       />
     </div>
   );
-
 }
 
 Agg.propTypes = {
@@ -49,7 +42,7 @@ Agg.propTypes = {
   panel: PropTypes.object,
   series: PropTypes.object,
   siblings: PropTypes.array,
-  sortData: PropTypes.string,
+  sortData: PropTypes.string
 };
 
 export default sortable(Agg);

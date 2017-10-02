@@ -1,17 +1,12 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import reIdSeries from './lib/re_id_series';
+import reIdSeries from '../lib/component_utils/re_id_series';
 import Series from './series';
-import {
-  handleAdd,
-  handleDelete,
-  handleChange
-} from './lib/collection_actions';
-import newSeriesFn from './lib/new_series_fn';
+import { handleAdd, handleDelete, handleChange } from '../lib/component_utils/collection_actions';
+import newSeriesFn from '../lib/component_utils/new_series_fn';
 import Sortable from 'react-anything-sortable';
 
 class SeriesEditor extends Component {
-
   constructor(props) {
     super(props);
     this.renderRow = this.renderRow.bind(this);
@@ -45,27 +40,19 @@ class SeriesEditor extends Component {
 
   render() {
     const { limit, model, name } = this.props;
-    const series = model[name]
-      .filter((val, index) => index < (limit || Infinity))
-      .map(this.renderRow);
-    const handleSort = (data) => {
+    const series = model[name].filter((val, index) => index < (limit || Infinity)).map(this.renderRow);
+    const handleSort = data => {
       const series = data.map(id => model[name].find(s => s.id === id));
       this.props.onChange({ series });
     };
     return (
       <div className="vis_editor__series_editor-container">
-        <Sortable
-          dynamic={true}
-          direction="vertical"
-          onSort={handleSort}
-          sortHandle="vis_editor__sort"
-        >
-          { series }
+        <Sortable dynamic={true} direction="vertical" onSort={handleSort} sortHandle="vis_editor__sort">
+          {series}
         </Sortable>
       </div>
     );
   }
-
 }
 SeriesEditor.defaultProps = {
   name: 'series',

@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
-import * as collectionActions from './lib/collection_actions';
+import * as collectionActions from '../lib/component_utils/collection_actions';
 import AddDeleteButtons from './add_delete_buttons';
 import ColorPicker from './color_picker';
 import FieldSelect from './aggs/field_select';
@@ -23,14 +23,13 @@ function newAnnotation() {
 }
 
 class AnnotationsEditor extends Component {
-
   constructor(props) {
     super(props);
     this.renderRow = this.renderRow.bind(this);
   }
 
   handleChange(item, name) {
-    return (e) => {
+    return e => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       const part = {};
       part[name] = _.get(e, 'value', _.get(e, 'target.value'));
@@ -41,24 +40,17 @@ class AnnotationsEditor extends Component {
   renderRow(row) {
     const defaults = { fields: '', template: '', index_pattern: '*', query_string: '' };
     const model = { ...defaults, ...row };
-    const handleChange = (part) => {
+    const handleChange = part => {
       const fn = collectionActions.handleChange.bind(null, this.props);
       fn(_.assign({}, model, part));
     };
     const htmlId = htmlIdGenerator(model.id);
-    const handleAdd = collectionActions.handleAdd
-      .bind(null, this.props, newAnnotation);
-    const handleDelete = collectionActions.handleDelete
-      .bind(null, this.props, model);
+    const handleAdd = collectionActions.handleAdd.bind(null, this.props, newAnnotation);
+    const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
     return (
       <div className="vis_editor__annotations-row" key={model.id}>
         <div className="vis_editor__annotations-color">
-          <ColorPicker
-            disableTrash={true}
-            onChange={handleChange}
-            name="color"
-            value={model.color}
-          />
+          <ColorPicker disableTrash={true} onChange={handleChange} name="color" value={model.color} />
         </div>
         <div className="vis_editor__annotations-content">
           <div className="vis_editor__row">
@@ -103,32 +95,20 @@ class AnnotationsEditor extends Component {
             </div>
             <fieldset className="vis_editor__row-item-small">
               <legend className="vis_editor__label">Ignore Global Filters</legend>
-              <YesNo
-                value={model.ignore_global_filters}
-                name="ignore_global_filters"
-                onChange={handleChange}
-              />
-
+              <YesNo value={model.ignore_global_filters} name="ignore_global_filters" onChange={handleChange} />
             </fieldset>
             <fieldset className="vis_editor__row-item-small">
               <legend className="vis_editor__label">Ignore Panel Filters</legend>
-              <YesNo
-                value={model.ignore_panel_filters}
-                name="ignore_panel_filters"
-                onChange={handleChange}
-              />
-
+              <YesNo value={model.ignore_panel_filters} name="ignore_panel_filters" onChange={handleChange} />
             </fieldset>
           </div>
           <div className="vis_editor__row">
             <div className="vis_editor__row-item">
-              <label className="vis_editor__label" htmlFor={htmlId('icon')}>Icon (required)</label>
+              <label className="vis_editor__label" htmlFor={htmlId('icon')}>
+                Icon (required)
+              </label>
               <div className="vis_editor__item">
-                <IconSelect
-                  id={htmlId('icon')}
-                  value={model.icon}
-                  onChange={this.handleChange(model, 'icon')}
-                />
+                <IconSelect id={htmlId('icon')} value={model.icon} onChange={this.handleChange(model, 'icon')} />
               </div>
             </div>
             <div className="vis_editor__row-item">
@@ -158,10 +138,7 @@ class AnnotationsEditor extends Component {
           </div>
         </div>
         <div className="vis_editor__annotations-controls">
-          <AddDeleteButtons
-            onAdd={handleAdd}
-            onDelete={handleDelete}
-          />
+          <AddDeleteButtons onAdd={handleAdd} onDelete={handleDelete} />
         </div>
       </div>
     );
@@ -171,15 +148,12 @@ class AnnotationsEditor extends Component {
     const { model } = this.props;
     let content;
     if (!model.annotations || !model.annotations.length) {
-      const handleAdd = collectionActions.handleAdd
-        .bind(null, this.props, newAnnotation);
+      const handleAdd = collectionActions.handleAdd.bind(null, this.props, newAnnotation);
       content = (
         <div className="vis_editor__annotations-missing">
           <p>Click the button below to create an annotation data source.</p>
-          <button
-            className="thor__button-outlined-default large"
-            onClick={handleAdd}
-          >Add Data Source
+          <button className="thor__button-outlined-default large" onClick={handleAdd}>
+            Add Data Source
           </button>
         </div>
       );
@@ -188,25 +162,16 @@ class AnnotationsEditor extends Component {
       content = (
         <div className="vis_editor__annotations">
           <div className="kbnTabs sm" role="tablist">
-            <button
-              role="tab"
-              aria-selected={true}
-              className="kbnTabs__tab-active"
-            >
+            <button role="tab" aria-selected={true} className="kbnTabs__tab-active">
               Data Sources
             </button>
           </div>
-          { annotations }
+          {annotations}
         </div>
       );
     }
-    return(
-      <div className="vis_editor__container">
-        { content }
-      </div>
-    );
+    return <div className="vis_editor__container">{content}</div>;
   }
-
 }
 
 AnnotationsEditor.defaultProps = {

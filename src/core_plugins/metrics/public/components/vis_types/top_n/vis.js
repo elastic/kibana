@@ -1,10 +1,10 @@
-import tickFormatter from '../../lib/tick_formatter';
+import tickFormatter from '../../../lib/component_utils/tick_formatter';
 import _ from 'lodash';
 import TopN from 'plugins/metrics/components/top_n';
 import getLastValue from 'plugins/metrics/lib/get_last_value';
 
 import color from 'color';
-import replaceVars from '../../lib/replace_vars';
+import replaceVars from '../../../lib/component_utils/replace_vars';
 
 import PropTypes from 'prop-types';
 

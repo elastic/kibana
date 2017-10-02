@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import DataFormatPicker from './data_format_picker';
-import createSelectHandler from './lib/create_select_handler';
-import createTextHandler from './lib/create_text_handler';
+import createSelectHandler from '../lib/component_utils/create_select_handler';
+import createTextHandler from '../lib/component_utils/create_text_handler';
 import YesNo from './yes_no';
 import { IndexPattern } from './index_pattern';
 import { htmlIdGenerator } from 'ui_framework/services';
@@ -18,10 +18,7 @@ export const SeriesConfig = props => {
     <div>
       <div className="vis_editor__series_config-container">
         <div className="vis_editor__series_config-row">
-          <DataFormatPicker
-            onChange={handleSelectChange('formatter')}
-            value={model.formatter}
-          />
+          <DataFormatPicker onChange={handleSelectChange('formatter')} value={model.formatter} />
           <label className="vis_editor__label" htmlFor={htmlId('template')}>
             Template (eg.<code>{'{{value}}/s'}</code>)
           </label>
@@ -44,11 +41,7 @@ export const SeriesConfig = props => {
         </div>
         <div className="vis_editor__series_config-row">
           <div className="vis_editor__label">Override Index Pattern</div>
-          <YesNo
-            value={model.override_index_pattern}
-            name="override_index_pattern"
-            onChange={props.onChange}
-          />
+          <YesNo value={model.override_index_pattern} name="override_index_pattern" onChange={props.onChange} />
           <IndexPattern
             onChange={props.onChange}
             model={props.model}

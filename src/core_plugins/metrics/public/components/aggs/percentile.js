@@ -4,26 +4,25 @@ import _ from 'lodash';
 import AggSelect from './agg_select';
 import FieldSelect from './field_select';
 import AggRow from './agg_row';
-import * as collectionActions from '../lib/collection_actions';
+import * as collectionActions from '../../lib/component_utils/collection_actions';
 import AddDeleteButtons from '../add_delete_buttons';
 import Select from 'react-select';
 import uuid from 'uuid';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
+import createChangeHandler from '../../lib/component_utils/create_change_handler';
+import createSelectHandler from '../../lib/component_utils/create_select_handler';
 import { htmlIdGenerator } from 'ui_framework/services';
-const newPercentile = (opts) => {
+const newPercentile = opts => {
   return _.assign({ id: uuid.v1(), mode: 'line', shade: 0.2 }, opts);
 };
 
 class Percentiles extends Component {
-
   constructor(props) {
     super(props);
     this.renderRow = this.renderRow.bind(this);
   }
 
   handleTextChange(item, name) {
-    return (e) => {
+    return e => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       const part = {};
       part[name] = _.get(e, 'value', _.get(e, 'target.value'));
@@ -36,16 +35,13 @@ class Percentiles extends Component {
     const model = { ...defaults, ...row };
     const handleAdd = collectionActions.handleAdd.bind(null, this.props, newPercentile);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, model);
-    const modeOptions = [
-      { label: 'Line', value: 'line' },
-      { label: 'Band', value: 'band' }
-    ];
+    const modeOptions = [{ label: 'Line', value: 'line' }, { label: 'Band', value: 'band' }];
     const optionsStyle = {};
     if (model.mode === 'line') {
       optionsStyle.display = 'none';
     }
     const htmlId = htmlIdGenerator(model.id);
-    return  (
+    return (
       <div className="vis_editor__percentiles-row" key={model.id}>
         <div className="vis_editor__percentiles-content">
           <input
@@ -57,7 +53,9 @@ class Percentiles extends Component {
             onChange={this.handleTextChange(model, 'value')}
             value={model.value}
           />
-          <label className="vis_editor__label" htmlFor={htmlId('mode')}>Mode</label>
+          <label className="vis_editor__label" htmlFor={htmlId('mode')}>
+            Mode
+          </label>
           <div className="vis_editor__row_item">
             <Select
               inputProps={{ id: htmlId('mode') }}
@@ -92,25 +90,17 @@ class Percentiles extends Component {
             value={model.shade}
           />
         </div>
-        <AddDeleteButtons
-          onAdd={handleAdd}
-          onDelete={handleDelete}
-          disableDelete={items.length < 2}
-        />
+        <AddDeleteButtons onAdd={handleAdd} onDelete={handleDelete} disableDelete={items.length < 2} />
       </div>
     );
   }
 
   render() {
     const { model, name } = this.props;
-    if (!model[name]) return (<div/>);
+    if (!model[name]) return <div />;
 
     const rows = model[name].map(this.renderRow);
-    return (
-      <div className="vis_editor__percentiles">
-        { rows }
-      </div>
-    );
+    return <div className="vis_editor__percentiles">{rows}</div>;
   }
 }
 
@@ -124,14 +114,16 @@ Percentiles.propTypes = {
   onChange: PropTypes.func
 };
 
-
+// prettier-ignore
 class PercentileAgg extends Component { // eslint-disable-line react/no-multi-comp
 
   componentWillMount() {
     if (!this.props.model.percentiles) {
-      this.props.onChange(_.assign({}, this.props.model, {
-        percentiles: [newPercentile({ value: 50 })]
-      }));
+      this.props.onChange(
+        _.assign({}, this.props.model, {
+          percentiles: [newPercentile({ value: 50 })]
+        })
+      );
     }
   }
 
@@ -140,7 +132,7 @@ class PercentileAgg extends Component { // eslint-disable-line react/no-multi-co
 
     const handleChange = createChangeHandler(this.props.onChange, model);
     const handleSelectChange = createSelectHandler(handleChange);
-    const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
+    const indexPattern = (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
 
     return (
       <AggRow
@@ -154,11 +146,7 @@ class PercentileAgg extends Component { // eslint-disable-line react/no-multi-co
           <div className="vis_editor__agg_row-item">
             <div className="vis_editor__row_item">
               <div className="vis_editor__label">Aggregation</div>
-              <AggSelect
-                siblings={this.props.siblings}
-                value={model.type}
-                onChange={handleSelectChange('type')}
-              />
+              <AggSelect siblings={this.props.siblings} value={model.type} onChange={handleSelectChange('type')} />
             </div>
             <div className="vis_editor__row_item">
               <div className="vis_editor__label">Field</div>
@@ -172,16 +160,11 @@ class PercentileAgg extends Component { // eslint-disable-line react/no-multi-co
               />
             </div>
           </div>
-          <Percentiles
-            onChange={handleChange}
-            name="percentiles"
-            model={model}
-          />
+          <Percentiles onChange={handleChange} name="percentiles" model={model} />
         </div>
       </AggRow>
     );
   }
-
 }
 
 PercentileAgg.propTypes = {
@@ -193,7 +176,7 @@ PercentileAgg.propTypes = {
   onDelete: PropTypes.func,
   panel: PropTypes.object,
   series: PropTypes.object,
-  siblings: PropTypes.array,
+  siblings: PropTypes.array
 };
 
 export default PercentileAgg;

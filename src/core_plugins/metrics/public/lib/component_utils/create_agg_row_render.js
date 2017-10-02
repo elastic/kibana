@@ -2,7 +2,7 @@ import React from 'react';
 import seriesChangeHandler from './series_change_handler';
 import newMetricAggFn from './new_metric_agg_fn';
 import { handleAdd, handleDelete } from './collection_actions';
-import Agg from '../aggs/agg';
+import Agg from '../../components/aggs/agg';
 
 export default function createAggRowRender(props) {
   return (row, index, items) => {

@@ -1,11 +1,11 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import tickFormatter from '../../lib/tick_formatter';
+import tickFormatter from '../../../lib/component_utils/tick_formatter';
 import _ from 'lodash';
 import Timeseries from 'plugins/metrics/components/timeseries';
 import color from 'color';
-import replaceVars from '../../lib/replace_vars';
-import { getAxisLabelString } from '../../lib/get_axis_label_string';
+import replaceVars from '../../../lib/component_utils/replace_vars';
+import { getAxisLabelString } from '../../../lib/component_utils/get_axis_label_string';
 
 function hasSeperateAxis(row) {
   return row.seperate_axis;

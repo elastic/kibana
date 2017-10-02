@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
-import tickFormatter from '../../lib/tick_formatter';
+import tickFormatter from '../../../lib/component_utils/tick_formatter';
 import _ from 'lodash';
 import Metric from 'plugins/metrics/components/metric';
 import getLastValue from 'plugins/metrics/lib/get_last_value';

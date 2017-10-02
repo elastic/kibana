@@ -3,22 +3,18 @@ import React from 'react';
 import AggSelect from './agg_select';
 import FieldSelect from './field_select';
 import AggRow from './agg_row';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
-import createTextHandler from '../lib/create_text_handler';
+import createChangeHandler from '../../lib/component_utils/create_change_handler';
+import createSelectHandler from '../../lib/component_utils/create_select_handler';
+import createTextHandler from '../../lib/component_utils/create_text_handler';
 import { htmlIdGenerator } from 'ui_framework/services';
 
 export const FilterRatioAgg = props => {
-  const {
-    series,
-    fields,
-    panel
-  } = props;
+  const { series, fields, panel } = props;
 
   const handleChange = createChangeHandler(props.onChange, props.model);
   const handleSelectChange = createSelectHandler(handleChange);
   const handleTextChange = createTextHandler(handleChange);
-  const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
+  const indexPattern = (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
 
   const defaults = {
     numerator: '*',
@@ -32,22 +28,12 @@ export const FilterRatioAgg = props => {
   const restrictMode = model.metric_agg === 'cardinality' ? 'none' : 'numeric';
 
   return (
-    <AggRow
-      disableDelete={props.disableDelete}
-      model={props.model}
-      onAdd={props.onAdd}
-      onDelete={props.onDelete}
-      siblings={props.siblings}
-    >
+    <AggRow disableDelete={props.disableDelete} model={props.model} onAdd={props.onAdd} onDelete={props.onDelete} siblings={props.siblings}>
       <div style={{ flex: '1 0 auto' }}>
         <div style={{ flex: '1 0 auto', display: 'flex' }}>
           <div className="vis_editor__row_item">
             <div className="vis_editor__label">Aggregation</div>
-            <AggSelect
-              siblings={props.siblings}
-              value={model.type}
-              onChange={handleSelectChange('type')}
-            />
+            <AggSelect siblings={props.siblings} value={model.type} onChange={handleSelectChange('type')} />
           </div>
           <div className="vis_editor__row_item">
             <label className="vis_editor__label" htmlFor={htmlId('numerator')}>
@@ -77,14 +63,9 @@ export const FilterRatioAgg = props => {
         <div style={{ flex: '1 0 auto', display: 'flex', marginTop: '10px' }}>
           <div className="vis_editor__row_item">
             <div className="vis_editor__label">Metric Aggregation</div>
-            <AggSelect
-              siblings={props.siblings}
-              panelType="metrics"
-              value={model.metric_agg}
-              onChange={handleSelectChange('metric_agg')}
-            />
+            <AggSelect siblings={props.siblings} panelType="metrics" value={model.metric_agg} onChange={handleSelectChange('metric_agg')} />
           </div>
-          { model.metric_agg !== 'count' ? (
+          {model.metric_agg !== 'count' ? (
             <div className="vis_editor__row_item">
               <label className="vis_editor__label" htmlFor={htmlId('aggField')}>
                 Field
@@ -98,7 +79,8 @@ export const FilterRatioAgg = props => {
                 value={model.field}
                 onChange={handleSelectChange('field')}
               />
-            </div>) : null }
+            </div>
+          ) : null}
         </div>
       </div>
     </AggRow>
@@ -114,5 +96,5 @@ FilterRatioAgg.propTypes = {
   onDelete: PropTypes.func,
   panel: PropTypes.object,
   series: PropTypes.object,
-  siblings: PropTypes.array,
+  siblings: PropTypes.array
 };

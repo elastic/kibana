@@ -33,7 +33,7 @@ function AggRow(props) {
           <i className={iconClassName} />
         </div>
         {props.children}
-        { dragHandle }
+        {dragHandle}
         <AddDeleteButtons
           addTooltip="Add Metric"
           deleteTooltip="Delete Metric"
@@ -51,7 +51,7 @@ AggRow.propTypes = {
   model: PropTypes.object,
   onAdd: PropTypes.func,
   onDelete: PropTypes.func,
-  siblings: PropTypes.array,
+  siblings: PropTypes.array
 };
 
 export default AggRow;

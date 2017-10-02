@@ -2,14 +2,13 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import SeriesEditor from '../series_editor';
 import { IndexPattern } from '../index_pattern';
-import createTextHandler from '../lib/create_text_handler';
+import createTextHandler from '../../lib/component_utils/create_text_handler';
 import ColorRules from '../color_rules';
 import YesNo from '../yes_no';
 import uuid from 'uuid';
 import { htmlIdGenerator } from 'ui_framework/services';
 
 class MetricPanelConfig extends Component {
-
   constructor(props) {
     super(props);
     this.state = { selectedTab: 'data' };
@@ -49,11 +48,7 @@ class MetricPanelConfig extends Component {
     } else {
       view = (
         <div className="vis_editor__container">
-          <IndexPattern
-            fields={this.props.fields}
-            model={this.props.model}
-            onChange={this.props.onChange}
-          />
+          <IndexPattern fields={this.props.fields} model={this.props.model} onChange={this.props.onChange} />
           <div className="vis_editor__vis_config-row">
             <label className="vis_editor__label" htmlFor={htmlId('panelFilter')}>
               Panel Filter
@@ -66,21 +61,13 @@ class MetricPanelConfig extends Component {
               value={model.filter}
             />
             <div className="vis_editor__label">Ignore Global Filter</div>
-            <YesNo
-              value={model.ignore_global_filter}
-              name="ignore_global_filter"
-              onChange={this.props.onChange}
-            />
+            <YesNo value={model.ignore_global_filter} name="ignore_global_filter" onChange={this.props.onChange} />
           </div>
           <div>
             <div className="vis_editor__label">Color Rules</div>
           </div>
           <div className="vis_editor__vis_config-row">
-            <ColorRules
-              model={model}
-              onChange={this.props.onChange}
-              name="background_color_rules"
-            />
+            <ColorRules model={model} onChange={this.props.onChange} name="background_color_rules" />
           </div>
         </div>
       );
@@ -91,30 +78,31 @@ class MetricPanelConfig extends Component {
           <button
             role="tab"
             aria-selected={selectedTab === 'data'}
-            className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
+            className={`kbnTabs__tab${(selectedTab === 'data' && '-active') || ''}`}
             onClick={() => this.switchTab('data')}
-          >Data
+          >
+            Data
           </button>
           <button
             role="tab"
             aria-selected={selectedTab === 'options'}
-            className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
+            className={`kbnTabs__tab${(selectedTab === 'options' && '-active') || ''}`}
             onClick={() => this.switchTab('options')}
-          >Panel Options
+          >
+            Panel Options
           </button>
         </div>
         {view}
       </div>
     );
   }
-
 }
 
 MetricPanelConfig.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  visData: PropTypes.object,
+  visData: PropTypes.object
 };
 
 export default MetricPanelConfig;
