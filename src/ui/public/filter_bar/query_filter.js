@@ -46,7 +46,6 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
    * @returns {Promise} filter map promise
    */
   queryFilter.addFilters = function (filters, global) {
-
     if (global === undefined) {
       const configDefault = config.get('filters:pinnedByDefault');
 

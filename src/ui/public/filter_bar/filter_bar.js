@@ -11,10 +11,10 @@ import { FilterBarLibFilterOutTimeBasedFilterProvider } from 'ui/filter_bar/lib/
 import { FilterBarLibChangeTimeFilterProvider } from 'ui/filter_bar/lib/change_time_filter';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { compareFilters } from './lib/compare_filters';
+import { mergeFilters, isMultiSelectEnabled } from 'ui/filter_bar/lib/multi_filter';
 import { uiModules } from 'ui/modules';
 
 export { disableFilter, enableFilter, toggleFilterDisabled } from './lib/disable_filter';
-
 
 const module = uiModules.get('kibana');
 
@@ -49,13 +49,14 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
       });
 
       $scope.state = getAppState();
+      $scope.newFilters = [];
 
       $scope.showAddFilterButton = () => {
         return _.compact($scope.indexPatterns).length > 0;
       };
 
       $scope.applyFilters = function (filters) {
-        addAndInvertFilters(filterAppliedAndUnwrap(filters));
+        addAndInvertFilters(mergeFilters(filterAppliedAndUnwrap(filters)));
         $scope.newFilters = [];
 
         // change time filter
@@ -105,12 +106,13 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
       });
 
       $scope.$watch('state.$newFilters', function (filters) {
-        if (!filters) return;
+        if (!filters || filters.length === 0) return;
 
-        // If filters is not undefined and the length is greater than
-        // one we need to set the newFilters attribute and allow the
-        // users to decide what they want to apply.
-        if (filters.length > 1) {
+        // Allow the users to decide what filters to apply when
+        // - more than one new filter getting added
+        // - new filters exist that have not been applied
+        // - multiselect is enabled
+        if (filters.length > 1 || $scope.newFilters.length > 0 || isMultiSelectEnabled()) {
           return mapFlattenAndWrapFilters(filters)
           .then(function (results) {
             extractTimeFilter(results).then(function (filter) {
@@ -120,7 +122,7 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
           })
           .then(filterOutTimeBasedFilter)
           .then(function (results) {
-            $scope.newFilters = results;
+            $scope.newFilters = $scope.newFilters.concat(results);
           });
         }
 
