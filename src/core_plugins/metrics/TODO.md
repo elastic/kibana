@@ -1,3 +1,0 @@
-- [] rename to tsvb
-- [] merge the visualizations into the rest of the code
-- [] create test branch with react ui refactor
