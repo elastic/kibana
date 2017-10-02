@@ -1,4 +1,3 @@
-import '../visualizations/less/main.less';
 import '../less/main.less';
 import image from '../images/icon-visualbuilder.svg';
 import { MetricsRequestHandlerProvider } from './request_handler';
@@ -35,7 +34,8 @@ export default function MetricsVisProvider(Private) {
               {
                 id: '61ca57f2-469d-11e7-af02-69e470af7417',
                 type: 'count'
-              }],
+              }
+            ],
             seperate_axis: 0,
             axis_position: 'right',
             formatter: 'number',
@@ -44,13 +44,14 @@ export default function MetricsVisProvider(Private) {
             point_size: 1,
             fill: 0.5,
             stacked: 'none'
-          }],
+          }
+        ],
         time_field: '@timestamp',
         index_pattern: '*',
         interval: 'auto',
         axis_position: 'left',
         axis_formatter: 'number',
-        show_legend:1,
+        show_legend: 1,
         show_grid: 1
       },
       component: require('../components/vis_editor')

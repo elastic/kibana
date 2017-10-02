@@ -3,8 +3,8 @@ import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
 import tickFormatter from '../../lib/tick_formatter';
 import _ from 'lodash';
-import Metric from 'plugins/metrics/visualizations/components/metric';
-import getLastValue from 'plugins/metrics/visualizations/lib/get_last_value';
+import Metric from 'plugins/metrics/components/metric';
+import getLastValue from 'plugins/metrics/lib/get_last_value';
 import color from 'color';
 
 function getColors(props) {
@@ -13,9 +13,9 @@ function getColors(props) {
   let color;
   let background;
   if (model.background_color_rules) {
-    model.background_color_rules.forEach((rule) => {
+    model.background_color_rules.forEach(rule => {
       if (rule.opperator && rule.value != null) {
-        const value = series[0] && getLastValue(series[0].data) || 0;
+        const value = (series[0] && getLastValue(series[0].data)) || 0;
         if (_[rule.opperator](value, rule.value)) {
           background = rule.background_color;
           color = rule.color;
@@ -57,10 +57,9 @@ function MetricVisualization(props) {
   const style = { backgroundColor: panelBackgroundColor };
   return (
     <div className="dashboard__visualization" style={style}>
-      <Metric {...params}/>
+      <Metric {...params} />
     </div>
   );
-
 }
 
 MetricVisualization.propTypes = {
