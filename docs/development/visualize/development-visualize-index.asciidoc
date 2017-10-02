@@ -1,0 +1,14 @@
+[[development-visualize-index]]
+== Developing Visualizations
+
+Easiest way to add new visualizations to kibana or to show existing kibana visualizations in your plugin is using 
+Visualize Plugin. This part of documentation is split into two parts. First part will tell you all you need to know to
+use existing kibana visualization in your plugin and second step will focus on creating your own custom visualization.
+
+* <<development-using-visualizations>>
+* <<development-create-visualization>>
+
+
+include::development-using-visualizations.asciidoc[]
+
+include::development-create-visualization.asciidoc[]
