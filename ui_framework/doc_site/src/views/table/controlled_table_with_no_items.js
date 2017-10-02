@@ -43,11 +43,13 @@ export class ControlledTableWithNoItems extends React.Component {
 
             <KuiButton
               buttonType="basic"
+              aria-label="Settings"
               icon={<KuiButtonIcon type="settings" />}
             />
 
             <KuiButton
               buttonType="basic"
+              aria-label="Menu"
               icon={<KuiButtonIcon type="menu" />}
             />
           </KuiToolBarSection>
