@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Select from 'react-select';
+import { KuiKeyboardAccessible } from 'ui_framework/components';
 
 export class TooltipOptions extends Component {
 
@@ -221,24 +222,28 @@ export class TooltipOptions extends Component {
     return (
       <div>
 
-        <div className="kuiSideBarCollapsibleTitle">
+        <KuiKeyboardAccessible>
           <div
-            className="kuiSideBarCollapsibleTitle__label"
-            aria-expanded={!this.isCollapsed}
-            aria-controls="tooltipSettings"
-            aria-label="Toggle tooltip settings visibility"
-            data-test-subj="tooltipSettingsVisibilityToogle"
+            className="kuiSideBarCollapsibleTitle"
             onClick={this.handleToggleCollapse}
           >
-            <span
-              aria-hidden="true"
-              className={collapseToggleClasses}
-            />
-            <span className="kuiSideBarCollapsibleTitle__text">
-              Tooltip Settings
-            </span>
+            <div
+              className="kuiSideBarCollapsibleTitle__label"
+              aria-expanded={!this.isCollapsed}
+              aria-controls="tooltipSettings"
+              aria-label="Toggle tooltip settings visibility"
+              data-test-subj="tooltipSettingsVisibilityToogle"
+            >
+              <span
+                aria-hidden="true"
+                className={collapseToggleClasses}
+              />
+              <span className="kuiSideBarCollapsibleTitle__text">
+                Tooltip Settings
+              </span>
+            </div>
           </div>
-        </div>
+        </KuiKeyboardAccessible>
 
         <div id="tooltipSettings" className="kuiSideBarCollapsibleSection">
           <div className="kuiSideBarSection">
