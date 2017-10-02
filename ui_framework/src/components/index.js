@@ -28,6 +28,10 @@ export {
 } from './card';
 
 export {
+  KuiCodeEditor
+} from './code_editor';
+
+export {
   KuiColorPicker,
 } from './color_picker';
 
@@ -62,10 +66,10 @@ export {
 
 export {
   KuiGallery,
-  KuiGalleryButton,
-  KuiGalleryButtonIcon,
-  KuiGalleryButtonImage,
-  KuiGalleryButtonLabel,
+  KuiGalleryItem,
+  KuiGalleryItemIcon,
+  KuiGalleryItemImage,
+  KuiGalleryItemLabel,
 } from './gallery';
 
 export {

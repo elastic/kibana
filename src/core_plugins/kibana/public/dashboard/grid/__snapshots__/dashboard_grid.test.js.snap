@@ -1,0 +1,89 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders DashboardGrid 1`] = `
+<SizeMe(ResponsiveGrid)
+  isViewMode={false}
+  layout={
+    Array [
+      Object {
+        "h": 6,
+        "i": 1,
+        "w": 6,
+        "x": 0,
+        "y": 0,
+      },
+      Object {
+        "h": 6,
+        "i": 2,
+        "w": 6,
+        "x": 6,
+        "y": 6,
+      },
+    ]
+  }
+  onLayoutChange={[Function]}
+>
+  <div>
+    <DashboardPanel
+      dashboardViewMode="edit"
+      getContainerApi={[Function]}
+      getEmbeddableHandler={[Function]}
+      isExpanded={false}
+      isFullScreenMode={false}
+      onDeletePanel={[Function]}
+      onPanelBlurred={[Function]}
+      onPanelFocused={[Function]}
+      onToggleExpanded={[Function]}
+      panel={
+        Object {
+          "gridData": Object {
+            "h": 6,
+            "i": 1,
+            "w": 6,
+            "x": 0,
+            "y": 0,
+          },
+          "id": "123",
+          "panelIndex": "1",
+          "type": "visualization",
+        }
+      }
+    />
+  </div>
+  <div>
+    <DashboardPanel
+      dashboardViewMode="edit"
+      getContainerApi={[Function]}
+      getEmbeddableHandler={[Function]}
+      isExpanded={false}
+      isFullScreenMode={false}
+      onDeletePanel={[Function]}
+      onPanelBlurred={[Function]}
+      onPanelFocused={[Function]}
+      onToggleExpanded={[Function]}
+      panel={
+        Object {
+          "gridData": Object {
+            "h": 6,
+            "i": 2,
+            "w": 6,
+            "x": 6,
+            "y": 6,
+          },
+          "id": "456",
+          "panelIndex": "2",
+          "type": "visualization",
+        }
+      }
+    />
+  </div>
+</SizeMe(ResponsiveGrid)>
+`;
+
+exports[`renders DashboardGrid with no visualizations 1`] = `
+<SizeMe(ResponsiveGrid)
+  isViewMode={false}
+  layout={Array []}
+  onLayoutChange={[Function]}
+/>
+`;

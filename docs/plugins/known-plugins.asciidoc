@@ -30,6 +30,7 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 * https://github.com/mstoyano/kbn_c3js_vis[C3JS Visualizations] (mstoyano)
 * https://github.com/elo7/cohort[Cohort analysis] (elo7)
 * https://github.com/DeanF/health_metric_vis[Colored Metric Visualization] (deanf)
+* https://github.com/JuanCarniglia/dendrogram_vis[Dendrogram] (JuanCarniglia)
 * https://github.com/dlumbrer/kbn_dotplot[Dotplot] (dlumbrer)
 * https://github.com/nreese/enhanced_tilemap[Enhanced Tilemap] (nreese)
 * https://github.com/ommsolutions/kibana_ext_metrics_vis[Extended Metric] (ommsolutions)
@@ -43,7 +44,7 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 * https://github.com/prelert/kibana-swimlane-vis[Swimlanes] (prelert)
 * https://github.com/sbeyn/kibana-plugin-traffic-sg[Traffic] (sbeyn)
 * https://github.com/PhaedrusTheGreek/transform_vis[Transform Visualization] (PhaedrusTheGreek)
-* https://github.com/nyurik/kibana-vega-vis[Vega-based visualization with map support] (nyurik)
+* https://github.com/nyurik/kibana-vega-vis[Vega-based visualizations] (nyurik) - Support for user-defined graphs, external data sources, maps, images, and user-defined interactivity.
 
 [float]
 === Other

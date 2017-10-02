@@ -1,1 +1,1 @@
-require('../src/optimize/babel/register');
+require('../src/babel-register');

@@ -5,7 +5,6 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'discover', 'header']);
 
   describe('shared links', function describeIndexTests() {
@@ -61,7 +60,6 @@ export default function ({ getService, getPageObjects }) {
         const expectedCaption = 'Share saved';
         return PageObjects.discover.clickShare()
         .then(function () {
-          screenshots.take('Discover-share-link');
           return PageObjects.discover.getShareCaption();
         })
         .then(function (actualCaption) {
@@ -91,7 +89,6 @@ export default function ({ getService, getPageObjects }) {
           return PageObjects.header.getToastMessage();
         })
         .then(function (toastMessage) {
-          screenshots.take('Discover-copy-to-clipboard-toast');
           expect(toastMessage).to.match(expectedToastMessage);
         })
         .then(function () {
@@ -105,7 +102,6 @@ export default function ({ getService, getPageObjects }) {
         return PageObjects.discover.clickShortenUrl()
         .then(function () {
           return retry.try(function tryingForTime() {
-            screenshots.take('Discover-shorten-url-button');
             return PageObjects.discover.getSharedUrl()
             .then(function (actualUrl) {
               expect(actualUrl).to.match(re);
