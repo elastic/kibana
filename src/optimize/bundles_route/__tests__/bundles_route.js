@@ -93,6 +93,18 @@ describe('optimizer/bundle route', () => {
           basePublicPath: 'a/'
         });
       }).to.throwError(/start and not end with a \//);
+      expect(() => {
+        createBundlesRoute({
+          bundlesPath: '/bundles',
+          basePublicPath: '/a'
+        });
+      }).to.not.throwError();
+      expect(() => {
+        createBundlesRoute({
+          bundlesPath: '/bundles',
+          basePublicPath: ''
+        });
+      }).to.not.throwError();
     });
   });
 
