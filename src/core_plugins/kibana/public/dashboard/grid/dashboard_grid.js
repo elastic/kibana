@@ -127,7 +127,7 @@ export class DashboardGrid extends React.Component {
           ref={reactGridItem => { this.gridItems[panel.panelIndex] = reactGridItem; }}
         >
           <DashboardPanelContainer
-            panelId={panel.panelIndex}
+            panelId={`${panel.panelIndex}`}
             getContainerApi={getContainerApi}
             embeddableHandler={getEmbeddableHandler(panel.type)}
             onPanelFocused={this.onPanelFocused}

@@ -1,17 +1,18 @@
 import { connect } from 'react-redux';
-import { renderEmbeddable, maximizePanel, minimizePanel, deletePanel } from '../dashboard_actions';
+import { renderEmbeddable, maximizePanel, minimizePanel, deletePanel } from '../actions';
 import { DashboardPanel } from './dashboard_panel';
 import { DashboardViewMode } from '../dashboard_view_mode';
 
 const mapStateToProps = ({ dashboardState }, { onPanelBlurred, onPanelFocused, panelId }) => {
-  const embeddable = dashboardState.embeddables[panelId];
+  const { isFullScreenMode, viewMode, maximizedPanelId } = dashboardState.view;
+  const embeddable = dashboardState.panels[panelId].embeddable;
   const title = embeddable ? embeddable.title : '';
   const editUrl = embeddable ? embeddable.editUrl : '';
   return {
-    viewOnlyMode: dashboardState.isFullScreenMode || dashboardState.viewMode === DashboardViewMode.VIEW,
+    viewOnlyMode: isFullScreenMode || viewMode === DashboardViewMode.VIEW,
     title,
     editUrl,
-    isExpanded: dashboardState.maximizedPanelId === panelId,
+    isExpanded: maximizedPanelId === panelId,
     panelId,
     onPanelBlurred,
     onPanelFocused,

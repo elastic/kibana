@@ -1,12 +1,13 @@
-import { createStore, applyMiddleware } from 'redux';
+import { createStore, applyMiddleware, compose } from 'redux';
+import thunk from 'redux-thunk';
+
 import { reducers } from './reducers';
-import thunkMiddleware from 'redux-thunk';
-import { getInitialState } from './dashboard/dashboard_store';
+
+const enhancers = [ applyMiddleware(thunk) ];
+window.__REDUX_DEVTOOLS_EXTENSION__ && enhancers.push(window.__REDUX_DEVTOOLS_EXTENSION__());
 
 export const store = createStore(
   reducers,
-  {
-    dashboardState: getInitialState()
-  },
-  applyMiddleware(thunkMiddleware)
+  {},
+  compose(...enhancers)
 );

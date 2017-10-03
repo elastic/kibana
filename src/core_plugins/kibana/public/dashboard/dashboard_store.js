@@ -18,7 +18,6 @@ import { DashboardViewMode } from './dashboard_view_mode';
 export function getInitialState() {
   return {
     panels: {}, // Mapping of panel ids to panel state
-    embeddables: {}, // Panel id to embeddable object
     isFullScreenMode: false,
     viewMode: DashboardViewMode.VIEW,
     maximizedPanelId: undefined

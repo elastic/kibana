@@ -7,7 +7,8 @@ export function DashboardViewport({
   getContainerApi,
   maximizedPanelId,
   maximizedPanelEmbeddableHandler,
-  getEmbeddableHandler
+  getEmbeddableHandler,
+  panelCount,
 }) {
   function renderMaximizedPanel() {
     return (
@@ -22,7 +23,9 @@ export function DashboardViewport({
   // We always render the grid because we don't want to reload all the visualizations, which is a time consuming
   // operation, every time a panel is expanded or minimized.
   return (
-    <div>
+    <div
+      data-shared-items-count={panelCount}
+    >
       <DashboardGridContainer
         hidden={maximizedPanelId !== undefined}
         getEmbeddableHandler={getEmbeddableHandler}
@@ -37,5 +40,6 @@ DashboardViewport.propTypes = {
   getContainerApi: PropTypes.func,
   getEmbeddableHandler: PropTypes.func,
   maximizedPanelId: PropTypes.string,
-  maximizedPanelEmbeddableHandler: PropTypes.object
+  maximizedPanelEmbeddableHandler: PropTypes.object,
+  panelCount: PropTypes.number,
 };

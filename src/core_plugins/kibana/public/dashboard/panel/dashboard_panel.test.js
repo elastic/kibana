@@ -1,6 +1,6 @@
 import React from 'react';
 import _ from 'lodash';
-import { mount, shallow } from 'enzyme';
+import { mount } from 'enzyme';
 import { DashboardPanel } from './dashboard_panel';
 import { PanelError } from '../panel/panel_error';
 

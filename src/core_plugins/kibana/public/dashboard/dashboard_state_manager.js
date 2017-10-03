@@ -5,7 +5,7 @@ import { DashboardViewMode } from './dashboard_view_mode';
 import { FilterUtils } from './lib/filter_utils';
 import { PanelUtils } from './panel/panel_utils';
 import { store } from '../store';
-import { updateViewMode, updatePanels, updateIsFullScreenMode } from './dashboard_actions';
+import { updateViewMode, updatePanels, updateIsFullScreenMode } from './actions';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { createPanelState, getPersistedStateId } from './panel';
 import { getAppStateDefaults } from './lib';
@@ -84,7 +84,9 @@ export class DashboardStateManager {
     let differencesFound = false;
     for (let i = 0; i < this.appState.panels.length; i++) {
       const appStatePanel = this.appState.panels[i];
-      if (!_.isEqual(appStatePanel, dashboardState.panels[appStatePanel.panelIndex])) {
+      const appStatePanelJSON = JSON.stringify(appStatePanel);
+      const storePanelJSON = JSON.stringify(dashboardState.panels[appStatePanel.panelIndex]);
+      if (appStatePanelJSON !== storePanelJSON) {
         differencesFound = true;
         break;
       }
@@ -109,7 +111,7 @@ export class DashboardStateManager {
       store.dispatch(updateViewMode(this.getViewMode()));
     }
 
-    if (dashboardState.isFullScreenMode !== this.getFullScreenMode()) {
+    if (dashboardState.view.isFullScreenMode !== this.getFullScreenMode()) {
       store.dispatch(updateIsFullScreenMode(this.getFullScreenMode()));
     }
   }

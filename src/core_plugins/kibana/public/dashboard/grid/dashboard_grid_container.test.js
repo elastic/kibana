@@ -7,7 +7,7 @@ import { getContainerApiMock } from '../__tests__/get_container_api_mock';
 import { getEmbeddableHandlerMock } from '../__tests__/get_embeddable_handlers_mock';
 import { store } from '../../store';
 import { DashboardGridContainer } from './dashboard_grid_container';
-import { updatePanels } from '../dashboard_actions';
+import { updatePanels } from '../actions';
 
 jest.mock('ui/chrome', () => ({ getKibanaVersion: () => '6.0.0' }), { virtual: true });
 
