@@ -3,6 +3,7 @@ import location from './location/location';
 import navigator from './navigator/navigator';
 import filters from './filters/filters';
 import asset from './asset/asset';
+import to from './to/to';
 
 export const clientFunctions = [
   clientdata,
@@ -10,4 +11,5 @@ export const clientFunctions = [
   navigator,
   filters,
   asset,
+  to,
 ];

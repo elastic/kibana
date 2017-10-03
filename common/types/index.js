@@ -7,6 +7,7 @@ import image from './image';
 import filter from './filter';
 import render from './render';
 import style from './style';
+import location from './location';
 
 export const typeSpecs = [
   datatable,
@@ -18,4 +19,5 @@ export const typeSpecs = [
   image,
   filter,
   render,
+  location,
 ];

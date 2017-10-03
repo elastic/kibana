@@ -4,6 +4,8 @@ import demoprices from './demoprices/demoprices';
 import pointseries from './pointseries/pointseries';
 import kuler from './kuler/kuler';
 import timelion from './timelion/timelion';
+import to from './to/to';
+
 
 export const serverFunctions = [
   esdocs,
@@ -12,4 +14,5 @@ export const serverFunctions = [
   pointseries,
   kuler,
   timelion,
+  to,
 ];
