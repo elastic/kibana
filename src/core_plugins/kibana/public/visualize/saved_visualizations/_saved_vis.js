@@ -111,10 +111,6 @@ uiModules
   SavedVis.prototype._createVis = function () {
     const self = this;
 
-    if (self.stateJSON) {
-      self.visState = Vis.convertOldState(self.typeName, JSON.parse(self.stateJSON));
-    }
-
     // visState doesn't yet exist when importing a visualization, so we can't
     // assume that exists at this point. If it does exist, then we're not
     // importing a visualization, so we want to sync the title.

@@ -131,7 +131,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     linked: !!savedVis.savedSearchId,
     query: searchSource.getOwn('query') || { query: '', language: config.get('search:queryLanguage') },
     filters: searchSource.getOwn('filter') || [],
-    vis: savedVisState
+    visState: savedVisState
   };
 
   // Instance of app_state.js.
@@ -142,6 +142,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     // The savedVis is pulled from elasticsearch, but the appState is pulled from the url, with the
     // defaults applied. If the url was from a previous session which included modifications to the
     // appState then they won't be equal.
+    // console.log('comp', appState.vis, savedVisState);
     if (!angular.equals(appState.visState, savedVisState)) {
       Promise.try(function () {
         vis.setState(appState.visState);
@@ -237,8 +238,8 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
    */
   $scope.doSave = function () {
     // vis.title was not bound and it's needed to reflect title into visState
-    $appState.vis.title = savedVis.title;
-    $appState.vis.type = savedVis.type || $appState.vis.type;
+    $appState.visState.title = savedVis.title;
+    $appState.visState.type = savedVis.type || $appState.visState.type;
     savedVis.visState = $appState.visState;
     savedVis.uiStateJSON = angular.toJson($scope.uiState.getChanges());
 
