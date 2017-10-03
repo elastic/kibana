@@ -203,8 +203,12 @@ export default props => (
       }]}
     >
       <GuideText>
-        You can toss an icon into a Button, with or without text. You can also use a predefined icon
-        or specify custom icon classes.
+        <p>
+          You can toss an icon into a Button, with or without text. You can also use a predefined icon
+          or specify custom icon classes. If you have a button without textual content, make sure you set
+          the <code>aria-label</code> attribute with a textual representation for screen readers (see
+          last example below).
+        </p>
       </GuideText>
 
       <GuideDemo>

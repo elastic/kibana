@@ -1,12 +1,18 @@
 <div>
   <div class="kuiTogglePanelHeader">
-    <button class="kuiToggleButton" data-id="togglePanelButton">
+    <button
+      class="kuiToggleButton"
+      data-id="togglePanelButton"
+      aria-controls="togglePanelContent"
+      aria-expanded="false"
+    >
       <span class="kuiToggleButton__icon kuiIcon fa-caret-right" data-id="togglePanelButtonIcon"></span>
       Expand and collapse this content
     </button>
   </div>
 
   <div
+    id="togglePanelContent"
     class="kuiTogglePanelContent"
     data-id="togglePanelContent"
   >

@@ -4,6 +4,25 @@ import classNames from 'classnames';
 
 import { KuiButtonIcon } from './button_icon/button_icon';
 
+const accessibleIconButton = (props, propName, componentName) => {
+  if (props.children) {
+    return;
+  }
+
+  if (props['aria-label']) {
+    return;
+  }
+
+  if (props['aria-labelledby']) {
+    return;
+  }
+
+  throw new Error(
+    `${componentName} requires aria-label or aria-labelledby to be specified if it does not have children. ` +
+    `This is because we're assuming you're creating an icon-only button, which is screen-reader-inaccessible.`
+  );
+};
+
 const BUTTON_TYPES = [
   'basic',
   'hollow',
@@ -98,6 +117,7 @@ KuiButton.propTypes = {
   isLoading: PropTypes.bool,
   buttonType: PropTypes.oneOf(BUTTON_TYPES),
   className: PropTypes.string,
+  'aria-label': accessibleIconButton,
 };
 
 const KuiLinkButton = ({
@@ -146,6 +166,7 @@ KuiLinkButton.propTypes = {
   buttonType: PropTypes.oneOf(BUTTON_TYPES),
   className: PropTypes.string,
   children: PropTypes.node,
+  'aria-label': accessibleIconButton,
 };
 
 const KuiSubmitButton = ({
