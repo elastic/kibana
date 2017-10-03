@@ -20,9 +20,7 @@ export default function HistogramVisType(Private) {
         type: 'pie',
         addTooltip: true,
         tooltip: {
-          type: 'metric',
-          width: 400,
-          height: 300
+          type: 'metric'
         },
         addLegend: true,
         legendPosition: 'right',

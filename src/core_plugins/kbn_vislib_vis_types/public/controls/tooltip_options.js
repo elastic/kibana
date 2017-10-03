@@ -111,48 +111,6 @@ export class TooltipOptions extends Component {
     );
   }
 
-  renderTooltipHeight = () => {
-    return (
-      <div className="kuiSideBarFormRow">
-        <label className="kuiSideBarFormRow__label" htmlFor="tooltipHeight">
-          Height
-        </label>
-        <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
-          <input
-            id="tooltipHeight"
-            className="kuiTextInput"
-            type="number"
-            min="100"
-            max={window.innerHeight}
-            value={this.props.params.tooltip.height}
-            onChange={this.handleHeightChange}
-          />
-        </div>
-      </div>
-    );
-  }
-
-  renderTooltipWidth = () => {
-    return (
-      <div className="kuiSideBarFormRow">
-        <label className="kuiSideBarFormRow__label" htmlFor="tooltipWidth">
-          Width
-        </label>
-        <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
-          <input
-            id="tooltipWidth"
-            className="kuiTextInput"
-            type="number"
-            min="100"
-            max={window.innerWidth}
-            value={this.props.params.tooltip.width}
-            onChange={this.handleWidthChange}
-          />
-        </div>
-      </div>
-    );
-  }
-
   renderVisSelect = () => {
     const visSelectId = 'tooltipVisualization';
     return (
@@ -203,18 +161,12 @@ export class TooltipOptions extends Component {
     let showTooltip = null;
     let tooltipType = null;
     let visSelect = null;
-    let tooltipWidth = null;
-    let tooltipHeight = null;
     if (!this.state.isCollapsed) {
       showTooltip = this.renderShowtooltip();
       if (this.props.params.addTooltip && this.props.params.tooltip) {
         tooltipType = this.renderTooltipType();
         if (this.props.params.tooltip.type === 'vis') {
           visSelect = this.renderVisSelect();
-        }
-        if (this.props.params.tooltip.type !== 'metric') {
-          tooltipWidth = this.renderTooltipWidth();
-          tooltipHeight = this.renderTooltipHeight();
         }
       }
     }
@@ -253,10 +205,6 @@ export class TooltipOptions extends Component {
             {tooltipType}
 
             {visSelect}
-
-            {tooltipWidth}
-
-            {tooltipHeight}
 
           </div>
         </div>

@@ -21,9 +21,7 @@ export default function HeatmapVisType(Private) {
         type: 'heatmap',
         addTooltip: true,
         tooltip: {
-          type: 'metric',
-          width: 400,
-          height: 300
+          type: 'metric'
         },
         addLegend: true,
         enableHover: false,

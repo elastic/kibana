@@ -58,20 +58,10 @@ export function EmbeddedTooltipFormatterProvider($rootScope, $compile, Private, 
 
     // Do not let dimensions exceed 40% of window dimensions
     function getWidth() {
-      let width = parentVis.params.tooltip.width;
-      const max = Math.floor(window.innerWidth * 0.4);
-      if (width > max) {
-        width = max;
-      }
-      return width;
+      return window.innerWidth * 0.4;
     }
     function getHeight() {
-      let height = parentVis.params.tooltip.height;
-      const max = Math.floor(window.innerHeight * 0.4);
-      if (height > max) {
-        height = max;
-      }
-      return height;
+      return window.innerHeight * 0.4;
     }
 
     const formatter = function (event) {

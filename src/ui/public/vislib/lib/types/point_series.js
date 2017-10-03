@@ -69,9 +69,7 @@ export function VislibTypesPointSeries() {
 
       if (!config.tooltip) {
         config.tooltip = {
-          type: 'metric',
-          height: 150,
-          width: 250
+          type: 'metric'
         };
       }
       config.tooltip.show = cfg.addTooltip;
