@@ -185,14 +185,14 @@ export class ChangeIndexModal extends React.Component {
           <KuiModalFooter>
             <KuiButton
               buttonType="hollow"
-              data-test-subj="cloneCancelButton"
+              data-test-subj="changeIndexCancelButton"
               onClick={this.props.onClose}
             >
               Cancel
             </KuiButton>
             <KuiButton
               buttonType="primary"
-              data-test-subj="cloneConfirmButton"
+              data-test-subj="changeIndexConfirmButton"
               onClick={this.changeIndex}
             >
               Confirm all changes
