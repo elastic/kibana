@@ -67,6 +67,11 @@ uiModules
           });
         }
 
+        // spy panel is supported only with courier request handler
+        if (!$scope.vis.type.requestHandler !== 'courier') $scope.showSpyPanel = false;
+
+        if (!$scope.appState) $scope.appState = getAppState();
+
         const requestHandler = getHandler(requestHandlers, $scope.vis.type.requestHandler);
         const responseHandler = getHandler(responseHandlers, $scope.vis.type.responseHandler);
 
