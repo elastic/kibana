@@ -1,14 +1,17 @@
-[[development-using-visualizations]]
-=== Using Visualizations
+[[development-embedding-visualizations]]
+=== Embedding Visualizations
 
-There are two ways to insert visualization in your page. Using `<visualize>` directive or using `<visualization>` directive.
-The following assumes you are using AngularJS in your plugin.
+There are two different angular directives you can use to insert a visualization in your page. 
+To display an already saved visualization, use the `<visualize>` directive. 
+To reuse an existing Visualization implementation for a more custom purpose, use the `<visualization>` directive instead.
 
 ==== `<visualize>` directive
-`<visualize>` directive takes care of loading data, parsing data, 
-rendering the editor (if in edit mode) and rendering the visualization. Its the easiest way to add visualization to your
-page under the assumption that the visualization you are trying to display is saved in kibana. If that is not the case
-take a look at using <visualization> directive. 
+The `<visualize>` directive takes care of loading data, parsing data, rendering the editor 
+(if the Visualization is in edit mode) and rendering the visualization. 
+The directive takes a savedVis object for its configuration. 
+It is the easiest way to add visualization to your page under the assumption that 
+the visualization you are trying to display is saved in kibana. 
+If that is not the case, take a look at using `<visualization>` directive.
 
 The simplest way is to just pass `saved-id` to `<visualize>`:
 
@@ -35,14 +38,14 @@ which is explained later in this documentation.
 - `filters` which is an instance of searchSource filter object and
 - `query` which is an instance of searchSource query object
 
-if not provided <visualize> will still work, just without monitoring the AppState.
+If `appState` is not provided, `<visualize>` will not monitor the `AppState`.
 
 `uiState` should be an instance of `PersistedState`. if not provided visualize will generate one, 
-but you will have no access to it. Its used to store viewer specific information (like is legend toggled or not)
+but you will have no access to it. It is used to store viewer specific information like whether the legend is toggled on or off.
 
 `editor-mode` defines if <visualize> should render in editor or in view mode.
 
-*code example: showing saved visualization, without linking to querybar or filterbar*
+*code example: Showing a saved visualization, without linking to querybar or filterbar.*
 ["source","html"]
 -----------
 <div ng-controller="KbnTestController" class="test_vis">
@@ -64,20 +67,20 @@ When <visualize> is ready it will emit `ready:vis` event on the root scope.
 When <visualize> is done rendering it will emit `renderComplete` event on the element.
 
 ==== `<visualization>` directive
-`<visualization>` directive takes visualization config and data and renders the appropriate visualization.
+The `<visualization>` directive takes a visualization configuration and data.
 
 `<visualization vis='vis' vis-data='visData' ui-state='uiState' ></visualization>` where
 
 `vis` is an instance of `Vis` object. The constructor takes 3 parameters:
 
-- indexPattern (string): the indexPattern you want to pass to the visualization
-- visConfig (object): the configuration object
-- uiState (object): uiState object you want to pass to Vis. If not provided Vis will create its own.
+- `indexPattern` <string>: the indexPattern you want to pass to the visualization
+- `visConfig` <object>: the configuration object
+- `uiState` <object>: uiState object you want to pass to Vis. If not provided Vis will create its own.
 
 `visData` is the data object. Each visualization defines a `responseHandler`, which defines the format of this object.
 
-`uiState` is an instance of PersistedState. Visualization uses it to keep track of its current state. If not provided 
-<visualization> will create its own (but you won't be able to check its values)
+`uiState` is an instance of PersistedState. Visualizations use it to keep track of their current state. If not provided 
+`<visualization>` will create its own (but you won't be able to check its values)
 
 *code example: create single metric visualization*
 ["source","html"]
