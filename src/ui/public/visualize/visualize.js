@@ -90,7 +90,7 @@ uiModules
 
         $scope.vis.on('update', () => {
           if ($scope.editorMode) {
-            $scope.appState.vis = $scope.vis.getState();
+            $scope.appState.visState = $scope.vis.getState();
             $scope.appState.save();
           } else {
             $scope.fetch();
@@ -113,7 +113,7 @@ uiModules
           const stateMonitor = stateMonitorFactory.create($scope.appState);
           stateMonitor.onChange((status, type, keys) => {
             if (keys[0] === 'vis') {
-              if ($scope.appState.vis) $scope.vis.setState($scope.appState.vis);
+              if ($scope.appState.visState) $scope.vis.setState($scope.appState.visState);
               $scope.fetch();
             }
             if ($scope.vis.type.requiresSearch && ['query', 'filters'].includes(keys[0])) {

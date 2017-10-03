@@ -142,9 +142,9 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     // The savedVis is pulled from elasticsearch, but the appState is pulled from the url, with the
     // defaults applied. If the url was from a previous session which included modifications to the
     // appState then they won't be equal.
-    if (!angular.equals(appState.vis, savedVisState)) {
+    if (!angular.equals(appState.visState, savedVisState)) {
       Promise.try(function () {
-        vis.setState(appState.vis);
+        vis.setState(appState.visState);
       })
       .catch(courier.redirectWhenMissing({
         'index-pattern-field': '/visualize'
