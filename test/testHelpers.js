@@ -4,18 +4,18 @@ const exec = promisify(process.exec);
 const path = require('path');
 const env = require('../src/env');
 
-function resetHard(branchName) {
+function resetHard(branchName, owner, repoName) {
   return exec(
     `git checkout ${branchName} && git reset --hard origin/${branchName}`,
     {
-      cwd: env.getRepoPath('test-repo')
+      cwd: env.getRepoPath(owner, repoName)
     }
   );
 }
 
-function deleteFeatureBranch() {
+function deleteFeatureBranch(owner, repoName) {
   return exec(`git branch -D my-feature-branch`, {
-    cwd: env.getRepoPath('test-repo')
+    cwd: env.getRepoPath(owner, repoName)
   }).catch(e => {
     if (!e.message.includes("branch 'my-feature-branch' not found")) {
       throw e;
@@ -23,13 +23,15 @@ function deleteFeatureBranch() {
   });
 }
 
-function resetAllBranches() {
-  return resetHard('master')
-    .then(() => resetHard('6.x'))
+function resetAllBranches(owner, repoName) {
+  return resetHard('master', owner, repoName)
+    .then(() => resetHard('6.x', owner, repoName))
     .then(() => {
-      return exec(`git checkout master`, { cwd: env.getRepoPath('test-repo') });
+      return exec(`git checkout master`, {
+        cwd: env.getRepoPath(owner, repoName)
+      });
     })
-    .then(deleteFeatureBranch);
+    .then(() => deleteFeatureBranch(owner, repoName));
 }
 
 function mockBackportDirPath() {

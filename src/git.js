@@ -14,8 +14,8 @@ function withAuthentication() {
   };
 }
 
-function openRepo(repoName) {
-  return Git.Repository.open(getRepoPath(repoName));
+function openRepo(owner, repoName) {
+  return Git.Repository.open(getRepoPath(owner, repoName));
 }
 
 function folderExists(path) {
@@ -31,11 +31,11 @@ function folderExists(path) {
 }
 
 // Clone repo and add remotes if it does not exist
-function maybeSetupRepo(repoName, username) {
-  return folderExists(getRepoPath(repoName)).then(exists => {
+function maybeSetupRepo(owner, repoName, username) {
+  return folderExists(getRepoPath(owner, repoName)).then(exists => {
     if (!exists) {
-      return cloneRepo(repoName).then(repo =>
-        addRemote(repo, repoName, username)
+      return cloneRepo(owner, repoName).then(repo =>
+        addRemote(repo, username, repoName)
       );
     }
   });
@@ -45,13 +45,17 @@ function getRemoteUrl(owner, repoName) {
   return `git@github.com:${owner}/${repoName}`;
 }
 
-function cloneRepo(repoName) {
-  return Git.Clone(getRemoteUrl('elastic', repoName), getRepoPath(repoName), {
-    fetchOpts: withAuthentication()
-  });
+function cloneRepo(owner, repoName) {
+  return Git.Clone(
+    getRemoteUrl(owner, repoName),
+    getRepoPath(owner, repoName),
+    {
+      fetchOpts: withAuthentication()
+    }
+  );
 }
 
-function addRemote(repo, repoName, username) {
+function addRemote(repo, username, repoName) {
   return Git.Remote.create(repo, username, getRemoteUrl(username, repoName));
 }
 
@@ -121,6 +125,7 @@ function getCommit(repo, sha) {
 }
 
 module.exports = {
+  addRemote,
   checkoutAndPull,
   cherrypick,
   cloneRepo,

@@ -2,6 +2,6 @@
 
 const { init } = require('../src/cli');
 const { getConfig } = require('./configs');
-const { username, accessToken } = getConfig();
+const config = getConfig();
 
-init({ username, accessToken });
+init(config);

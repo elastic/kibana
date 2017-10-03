@@ -11,9 +11,9 @@ env.getRepositoriesDirPath = () =>
 env.getConfigFilePath = () =>
   path.join(env.getBackportDirPath(), 'config.json');
 
-env.getRepoPath = repoName => {
+env.getRepoPath = (owner, repoName) => {
   const REPOSITORIES_DIR_PATH = env.getRepositoriesDirPath();
-  return path.join(REPOSITORIES_DIR_PATH, repoName);
+  return path.join(REPOSITORIES_DIR_PATH, owner, repoName);
 };
 
 module.exports = env;

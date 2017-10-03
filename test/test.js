@@ -10,21 +10,28 @@ const github = require('../src/github');
 const git = require('../src/git');
 const commitsMock = require('./mocks/commits.json');
 
+const owner = 'elastic';
+const repoName = 'backport-cli-test';
+const fullRepoName = `elastic/${repoName}`;
+
 beforeEach(() => {
   mockBackportDirPath();
-  return resetAllBranches();
+  return resetAllBranches(owner, repoName);
 });
 
-afterAll(resetAllBranches);
+afterAll(() => resetAllBranches(owner, repoName));
 
 describe('cli', () => {
   beforeEach(() => {
     this.promptSpy = jest
       .spyOn(inquirer, 'prompt')
-      .mockReturnValueOnce(Promise.resolve({ repoName: 'test-repo' }))
+      .mockReturnValueOnce(Promise.resolve({ fullRepoName: fullRepoName }))
       .mockReturnValueOnce(
         Promise.resolve({
-          commit: { sha: 'mySha', pullRequest: 'myPullRequest' },
+          commit: {
+            sha: 'mySha',
+            reference: { value: 'myPullRequest', type: 'pullRequest' }
+          },
           version: 'myVersion'
         })
       );
@@ -109,7 +116,13 @@ describe('cli', () => {
 
     return init({
       username: 'sqren',
-      accessToken: 'myAccessToken'
+      accessToken: 'myAccessToken',
+      repositories: [
+        {
+          name: fullRepoName,
+          versions: ['6.x', '6.0', '5.6', '5.5', '5.4']
+        }
+      ]
     });
   });
 
@@ -120,16 +133,17 @@ describe('cli', () => {
   });
 
   test('checkoutBranch', () => {
-    expect(this.repoMock.checkoutBranch).toHaveBeenCalledWith(
-      'backport/myVersion/myPullRequest'
-    );
-    expect(this.repoMock.checkoutBranch).toHaveBeenCalledWith('master');
+    expect(this.repoMock.checkoutBranch.mock.calls).toEqual([
+      ['master'],
+      ['backport/myVersion/pr-myPullRequest']
+    ]);
     expect(this.repoMock.checkoutBranch).toHaveBeenCalledTimes(2);
   });
 
   test('createBranch', () => {
+    expect(this.repoMock.createCommit).toHaveBeenCalledTimes(1);
     expect(this.repoMock.createBranch).toHaveBeenCalledWith(
-      'backport/myVersion/myPullRequest',
+      'backport/myVersion/pr-myPullRequest',
       'myBranchHeadCommit',
       true
     );
@@ -187,7 +201,7 @@ describe('cli', () => {
 describe('git', () => {
   test('openRepo: Can open and get the first commit', () => {
     return git
-      .openRepo('test-repo')
+      .openRepo(owner, repoName)
       .then(repo => repo.getHeadCommit())
       .then(commit => {
         expect(commit.sha()).toBe('57da351791ac51e7342bb265fd8324867893e8ce');
@@ -195,7 +209,7 @@ describe('git', () => {
   });
 
   test('cherrypick: can cherrypick a commit', () => {
-    return git.openRepo('test-repo').then(repo =>
+    return git.openRepo(owner, repoName).then(repo =>
       repo
         .checkoutBranch('6.x')
         .then(() =>
@@ -224,7 +238,7 @@ describe('git', () => {
   });
 
   test('createAndCheckoutBranch: can create feature branch based on version branch', () => {
-    return git.openRepo('test-repo').then(repo =>
+    return git.openRepo(owner, repoName).then(repo =>
       git
         .createAndCheckoutBranch(repo, '6.x', 'my-feature-branch')
         .then(() => repo.getCurrentBranch())

@@ -30,8 +30,8 @@ function getConfigTemplate() {
   return readFile(path.join(__dirname, 'configTemplate.json'), 'utf8');
 }
 
-function validateConfig({ username, accessToken }) {
-  if (!username || !accessToken) {
+function validateConfig({ username, accessToken, repositories }) {
+  if (!username || !accessToken || !repositories || repositories.length === 0) {
     throw new Error(constants.INVALID_CONFIG);
   }
 }

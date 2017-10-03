@@ -1,9 +1,9 @@
-function inputRepositoryName() {
+function listFullRepositoryName(repoNames) {
   return {
-    type: 'input',
-    name: 'repoName',
-    message: 'Repository',
-    default: 'x-pack-kibana'
+    type: 'list',
+    name: 'fullRepoName',
+    message: 'Select repository',
+    choices: repoNames
   };
 }
 
@@ -11,7 +11,7 @@ function listCommits(commits) {
   return {
     type: 'list',
     name: 'commit',
-    message: 'Which pull request do you want to backport?',
+    message: 'Select a commit to backport',
     choices: commits.map(commit => ({
       name: commit.message,
       value: commit,
@@ -20,12 +20,12 @@ function listCommits(commits) {
   };
 }
 
-function listVersions() {
+function listVersions(versions) {
   return {
     type: 'list',
     name: 'version',
-    message: 'Which version do you want to backport to?',
-    choices: ['6.x', '6.0', '5.6', '5.5', '5.4']
+    message: 'Select version you want to backport to',
+    choices: versions
   };
 }
 
@@ -39,7 +39,7 @@ function confirmConflictResolved() {
 
 module.exports = {
   confirmConflictResolved,
-  inputRepositoryName,
   listCommits,
+  listFullRepositoryName,
   listVersions
 };
