@@ -12,7 +12,9 @@ export default new Type({
       return {
         type: 'render',
         as: 'markdown',
-        value: input,
+        value: {
+          content: input,
+        },
       };
     },
   },
