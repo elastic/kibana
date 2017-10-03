@@ -10,14 +10,14 @@ export function assertGeneric404Response({ result }) {
   assertSinonMatch(result, {
     statusCode: 404,
     error: 'Not Found',
-    message: sinon.match.same('Not Found')
+    message: 'Not Found'
   });
 }
 
-export function assertDocMissingResponse({ result }) {
+export function assertServiceUnavailableResponse({ result }) {
   assertSinonMatch(result, {
-    statusCode: 404,
-    error: 'Not Found',
-    message: 'Not Found'
+    statusCode: 503,
+    error: 'Service Unavailable',
+    message: 'Service Unavailable'
   });
 }

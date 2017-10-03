@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('default request response should contain .kibana' , function () {
-      const expectedResponseContains = '"_index": ".kibana",';
+      const expectedResponseContains = '"timed_out": false,';
 
       return PageObjects.console.clickPlay()
       .then(function () {
