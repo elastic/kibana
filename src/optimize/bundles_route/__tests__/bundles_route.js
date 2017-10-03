@@ -18,12 +18,6 @@ function replaceAll(source, replace, replaceWith) {
   return source.split(replace).join(replaceWith);
 }
 
-function assertBufferMatch(a, b) {
-  if (a.length !== b.length || a.indexOf(b) !== 0) {
-    throw new Error('Expected buffers to match');
-  }
-}
-
 describe('optimizer/bundle route', () => {
   const sandbox = sinon.sandbox.create();
 
@@ -112,7 +106,7 @@ describe('optimizer/bundle route', () => {
       expect(response.statusCode).to.be(200);
       const image = readFileSync(resolve(outputFixture, 'image.png'));
       expect(response.headers).to.have.property('content-length', image.length);
-      assertBufferMatch(image, response.rawPayload);
+      expect(image).to.eql(response.rawPayload);
     });
   });
 
@@ -125,10 +119,8 @@ describe('optimizer/bundle route', () => {
 
       expect(response.statusCode).to.be(200);
       expect(response.headers).to.not.have.property('content-length');
-      assertBufferMatch(
-        readFileSync(resolve(outputFixture, 'no_placeholder.js')),
-        response.rawPayload
-      );
+      expect(readFileSync(resolve(outputFixture, 'no_placeholder.js')))
+        .to.eql(response.rawPayload);
     });
   });
 
@@ -162,10 +154,8 @@ describe('optimizer/bundle route', () => {
 
       expect(response.statusCode).to.be(200);
       expect(response.headers).to.not.have.property('content-length');
-      assertBufferMatch(
-        readFileSync(resolve(outputFixture, 'no_placeholder.css')),
-        response.rawPayload
-      );
+      expect(readFileSync(resolve(outputFixture, 'no_placeholder.css')))
+        .to.eql(response.rawPayload);
     });
   });
 
@@ -282,7 +272,7 @@ describe('optimizer/bundle route', () => {
       expect(resp1.statusCode).to.be(200);
       expect(resp2.statusCode).to.be(200);
 
-      assertBufferMatch(resp1.rawPayload, resp2.rawPayload);
+      expect(resp1.rawPayload).to.eql(resp2.rawPayload);
 
       expect(resp1.headers.etag).to.be.a('string');
       expect(resp2.headers.etag).to.be.a('string');
