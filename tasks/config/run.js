@@ -1,6 +1,10 @@
 import { esTestConfig } from '../../src/test_utils/es';
 import { kibanaTestServerUrlParts } from '../../test/kibana_test_server_url_parts';
 
+const SECOND = 1000;
+const MINUTE = 60 * SECOND;
+const HOUR = 60 * MINUTE;
+
 module.exports = function (grunt) {
   const platform = require('os').platform();
   const binScript =  /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana';
@@ -55,6 +59,7 @@ module.exports = function (grunt) {
         ...stdDevArgs,
         '--optimize.enabled=false',
         '--elasticsearch.url=' + esTestConfig.getUrl(),
+        '--elasticsearch.healthCheck.delay=' + HOUR,
         '--server.port=' + kibanaTestServerUrlParts.port,
         '--server.xsrf.disableProtection=true',
         ...kbnServerFlags,
