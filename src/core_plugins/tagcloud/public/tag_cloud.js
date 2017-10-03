@@ -200,7 +200,8 @@ class TagCloud extends EventEmitter {
       enteringTags.style('fill', getFill);
       enteringTags.attr('text-anchor', () => 'middle');
       enteringTags.attr('transform', affineTransform);
-      enteringTags.text(getText);
+      enteringTags.attr('data-test-subj', getDisplayText);
+      enteringTags.text(getDisplayText);
 
       const self = this;
       enteringTags.on({
@@ -358,12 +359,20 @@ function seed() {
 }
 
 function toWordTag(word) {
-  return { value: word.value, text: word.text };
+  return {
+    displayText: word.displayText ? word.displayText : word.text,
+    text: word.text,
+    value: word.value
+  };
 }
 
 
 function getText(word) {
   return word.text;
+}
+
+function getDisplayText(word) {
+  return word.displayText;
 }
 
 function positionWord(xTranslate, yTranslate, word) {
