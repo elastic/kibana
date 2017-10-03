@@ -47,6 +47,10 @@ export function convertEsError(indices, error) {
     return createNoMatchingIndicesError(indices);
   }
 
+  if (error.isBoom) {
+    return error;
+  }
+
   const statusCode = error.statusCode;
   const message = error.body ? error.body.error : undefined;
   return Boom.wrap(error, statusCode, message);
