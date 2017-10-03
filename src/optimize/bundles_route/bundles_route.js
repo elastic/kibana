@@ -34,7 +34,7 @@ export function createBundlesRoute({ bundlesPath, basePublicPath }) {
 
   return {
     method: 'GET',
-    path: `/bundles/{path*}`,
+    path: '/bundles/{path*}',
     config: {
       auth: false,
       ext: {
