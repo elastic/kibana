@@ -5,6 +5,7 @@ export default async (kbnServer, kibanaHapiServer, config) => {
   const server = new LazyServer(
     config.get('optimize.lazyHost'),
     config.get('optimize.lazyPort'),
+    config.get('server.basePath'),
     new LazyOptimizer({
       log: (tags, data) => kibanaHapiServer.log(tags, data),
       env: kbnServer.bundles.env,
@@ -12,7 +13,6 @@ export default async (kbnServer, kibanaHapiServer, config) => {
       profile: config.get('optimize.profile'),
       sourceMaps: config.get('optimize.sourceMaps'),
       prebuild: config.get('optimize.lazyPrebuild'),
-      urlBasePath: config.get('server.basePath'),
       unsafeCache: config.get('optimize.unsafeCache'),
     })
   );
