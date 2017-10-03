@@ -23,9 +23,9 @@ export function createReplaceStream(toReplace, replacement) {
           buffer = buffer.slice(index + toReplace.length);
         }
 
-        if (buffer.length > replacement.length) {
-          this.push(buffer.slice(0, buffer.length - replacement.length));
-          buffer = buffer.slice(-replacement.length);
+        if (buffer.length > toReplace.length) {
+          this.push(buffer.slice(0, buffer.length - toReplace.length));
+          buffer = buffer.slice(-toReplace.length);
         }
 
         done();
