@@ -118,6 +118,7 @@ describe('optimizer/bundle route', () => {
       expect(response.statusCode).to.be(200);
       const image = readFileSync(resolve(outputFixture, 'image.png'));
       expect(response.headers).to.have.property('content-length', image.length);
+      expect(response.headers).to.have.property('content-type', 'image/png');
       expect(image).to.eql(response.rawPayload);
     });
   });
@@ -131,6 +132,7 @@ describe('optimizer/bundle route', () => {
 
       expect(response.statusCode).to.be(200);
       expect(response.headers).to.not.have.property('content-length');
+      expect(response.headers).to.have.property('content-type', 'application/javascript; charset=utf-8');
       expect(readFileSync(resolve(outputFixture, 'no_placeholder.js')))
         .to.eql(response.rawPayload);
     });
@@ -148,6 +150,7 @@ describe('optimizer/bundle route', () => {
       expect(response.statusCode).to.be(200);
       const source = readFileSync(resolve(outputFixture, 'with_placeholder.js'), 'utf8');
       expect(response.headers).to.not.have.property('content-length');
+      expect(response.headers).to.have.property('content-type', 'application/javascript; charset=utf-8');
       expect(response.result.indexOf(source)).to.be(-1);
       expect(response.result).to.be(replaceAll(
         source,
@@ -166,6 +169,7 @@ describe('optimizer/bundle route', () => {
 
       expect(response.statusCode).to.be(200);
       expect(response.headers).to.not.have.property('content-length');
+      expect(response.headers).to.have.property('content-type', 'text/css; charset=utf-8');
       expect(readFileSync(resolve(outputFixture, 'no_placeholder.css')))
         .to.eql(response.rawPayload);
     });
@@ -183,6 +187,7 @@ describe('optimizer/bundle route', () => {
       expect(response.statusCode).to.be(200);
       const source = readFileSync(resolve(outputFixture, 'with_placeholder.css'), 'utf8');
       expect(response.headers).to.not.have.property('content-length');
+      expect(response.headers).to.have.property('content-type', 'text/css; charset=utf-8');
       expect(response.result.indexOf(source)).to.be(-1);
       expect(response.result).to.be(replaceAll(
         source,
