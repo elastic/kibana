@@ -252,6 +252,12 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    async filterField(name) {
+      const input = await testSubjects.find('indexPatternFieldFilter');
+      await input.clearValue();
+      await input.type(name);
+    }
+
     async openControlsByName(name) {
       await remote.setFindTimeout(defaultFindTimeout)
       .findByCssSelector('[data-test-subj="indexPatternFieldEditButton"][href$="/' + name + '"]')
@@ -381,7 +387,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       if (language) await this.setScriptedFieldLanguage(language);
       if (type) await this.setScriptedFieldType(type);
       if (format) {
-        await this.setScriptedFieldFormat(format.format);
+        await this.setFieldFormat(format.format);
         // null means leave - default - which has no other settings
         // Url adds Type, Url Template, and Label Template
         // Date adds moment.js format pattern (Default: "MMMM Do YYYY, HH:mm:ss.SSS")
@@ -436,7 +442,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       .click();
     }
 
-    async setScriptedFieldFormat(format) {
+    async setFieldFormat(format) {
       log.debug('set scripted field format = ' + format);
       await remote.setFindTimeout(defaultFindTimeout)
       .findByCssSelector('select[data-test-subj="editorSelectedFormatId"] > option[label="' + format + '"]')
