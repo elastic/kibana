@@ -93,7 +93,7 @@ function callAPI(client, endpoint, clientParams = {}, options = {}) {
       return Promise.reject(err);
     }
 
-    const boomError = Boom.wrap(err, err.statusCode);
+    const boomError = Boom.boomify(err, { statusCode: err.statusCode });
     const wwwAuthHeader = get(err, 'body.error.header[WWW-Authenticate]');
     boomError.output.headers['WWW-Authenticate'] = wwwAuthHeader || 'Basic realm="Authorization Required"';
 
