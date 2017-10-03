@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import getLastValue from '../../lib/get_last_value';
+import getLastValue from '../get_last_value';
 import tickFormatter from './tick_formatter';
 import moment from 'moment';
 export default (series, model, dateFormat = 'lll') => {
