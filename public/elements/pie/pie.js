@@ -29,6 +29,7 @@ export default new Element('pie', {
           $('.pieLabel > div', domNode).css(config.font.spec);
         }
       } catch (e) {
+        console.log(e);
         // Nope
       }
 
