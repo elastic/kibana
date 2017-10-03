@@ -135,7 +135,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   };
 
   // Instance of app_state.js.
-  const $state = (function initState() {
+  const $appState = (function initState() {
     // This is used to sync visualization state with the url when `appState.save()` is called.
     const appState = new AppState(stateDefaults);
 
@@ -159,12 +159,12 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     $scope.savedVis = savedVis;
     $scope.indexPattern = vis.indexPattern;
     $scope.searchSource = searchSource;
-    $scope.state = $state;
+    $scope.state = $appState;
     $scope.queryDocLinks = documentationLinks.query;
     $scope.dateDocLinks = documentationLinks.date;
 
     // Create a PersistedState instance.
-    $scope.uiState = $state.makeStateful('uiState');
+    $scope.uiState = $appState.makeStateful('uiState');
     $scope.appStatus = $appStatus;
 
     const addToDashMode = $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
@@ -181,14 +181,14 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     $scope.timefilter = timefilter;
     $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter', 'isAddToDashMode');
 
-    stateMonitor = stateMonitorFactory.create($state, stateDefaults);
+    stateMonitor = stateMonitorFactory.create($appState, stateDefaults);
     stateMonitor.ignoreProps([ 'vis.listeners' ]).onChange((status) => {
       $appStatus.dirty = status.dirty || !savedVis.id;
     });
 
     $scope.$watch('state.query', $scope.updateQueryAndFetch);
 
-    $state.replace();
+    $appState.replace();
 
     $scope.getVisualizationTitle = function getVisualizationTitle() {
       return savedVis.lastSavedTitle || `${savedVis.title} (unsaved)`;
@@ -203,12 +203,12 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
     // update the searchSource when filters update
     $scope.$listen(queryFilter, 'update', function () {
-      $state.save();
+      $appState.save();
     });
 
     // update the searchSource when query updates
     $scope.fetch = function () {
-      $state.save();
+      $appState.save();
       $scope.vis.forceReload();
     };
 
@@ -224,11 +224,11 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
   $scope.updateQueryAndFetch = function (query) {
     // reset state if language changes
-    if ($state.query.language && $state.query.language !== query.language) {
-      $state.filters = [];
-      $state.$newFilters = [];
+    if ($appState.query.language && $appState.query.language !== query.language) {
+      $appState.filters = [];
+      $appState.$newFilters = [];
     }
-    $state.query = migrateLegacyQuery(query);
+    $appState.query = migrateLegacyQuery(query);
     $scope.fetch();
   };
 
@@ -237,14 +237,14 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
    */
   $scope.doSave = function () {
     // vis.title was not bound and it's needed to reflect title into visState
-    $state.vis.title = savedVis.title;
-    $state.vis.type = savedVis.type || $state.vis.type;
-    savedVis.visState = $state.vis;
+    $appState.vis.title = savedVis.title;
+    $appState.vis.type = savedVis.type || $appState.vis.type;
+    savedVis.visState = $appState.visState;
     savedVis.uiStateJSON = angular.toJson($scope.uiState.getChanges());
 
     savedVis.save()
     .then(function (id) {
-      stateMonitor.setInitialState($state.toJSON());
+      stateMonitor.setInitialState($appState.toJSON());
       $scope.kbnTopNav.close('save');
 
       if (id) {
@@ -276,11 +276,11 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   };
 
   $scope.unlink = function () {
-    if (!$state.linked) return;
+    if (!$appState.linked) return;
 
     notify.info(`Unlinked Visualization "${savedVis.title}" from Saved Search "${savedVis.savedSearch.title}"`);
 
-    $state.linked = false;
+    $appState.linked = false;
     const parent = searchSource.getParent(true);
     const parentsParent = parent.getParent(true);
 
@@ -295,8 +295,8 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     })
     .commit();
 
-    $state.query = searchSource.get('query');
-    $state.filters = searchSource.get('filter');
+    $appState.query = searchSource.get('query');
+    $appState.filters = searchSource.get('filter');
     searchSource.inherits(parentsParent);
   };
 
