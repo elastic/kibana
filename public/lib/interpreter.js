@@ -1,7 +1,7 @@
 import { socketInterpreterProvider } from '../../common/interpreter/socket_interpret';
 import { socket } from '../socket';
-import { types } from '../lib/types';
-import { functions } from '../lib/functions';
+import { types } from './types';
+import { functions } from './functions';
 import { createHandlers } from './create_handlers';
 
 // Create the function list
