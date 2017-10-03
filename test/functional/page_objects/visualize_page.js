@@ -60,6 +60,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByPartialLinkText('Visual Builder');
     }
 
+    async selectTagCloudTag(tagDisplayText) {
+      await testSubjects.click(tagDisplayText);
+    }
+
     async getTextTag() {
       const elements = await find.allByCssSelector('text');
       return await Promise.all(elements.map(async element => await element.getVisibleText()));
