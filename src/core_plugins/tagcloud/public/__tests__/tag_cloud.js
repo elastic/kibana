@@ -11,9 +11,9 @@ describe('tag cloud tests', function () {
   const midValue = (minValue + maxValue) / 2;
   const baseTest = {
     data: [
-      { text: 'foo', value: minValue },
-      { text: 'bar', value: midValue },
-      { text: 'foobar', value: maxValue },
+      { rawText: 'foo', displayText: 'foo', value: minValue },
+      { rawText: 'bar', displayText: 'bar', value: midValue },
+      { rawText: 'foobar', displayText: 'foobar', value: maxValue },
     ],
     options: {
       orientation: 'single',

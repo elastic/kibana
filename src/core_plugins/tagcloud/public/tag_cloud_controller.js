@@ -15,6 +15,7 @@ module.controller('KbnTagCloudController', function ($scope, $element) {
     if (!bucketAgg) return;
     const aggConfigResult = new AggConfigResult(bucketAgg, false, event, event);
     $scope.vis.API.events.filter({ point: { aggConfigResult: aggConfigResult } });
+    $scope.$apply();
   });
 
   tagCloud.on('renderComplete', () => {
@@ -57,7 +58,7 @@ module.controller('KbnTagCloudController', function ($scope, $element) {
       const [tag, count] = row;
       return {
         displayText: bucketAgg ? bucketAgg.fieldFormatter()(tag) : tag,
-        text: tag,
+        rawText: tag,
         value: count
       };
     });
