@@ -45,9 +45,11 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.common.clickCancelOnModal();
       await PageObjects.dashboard.confirmClone();
 
-      // Should see the same confirmation if the title is the same.
-      const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
-      expect(isConfirmOpen).to.equal(true);
+      await retry.try(async () => {
+        // Should see the same confirmation if the title is the same.
+        const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
+        expect(isConfirmOpen).to.equal(true);
+      });
     });
 
     it('and doesn\'t save', async() => {
