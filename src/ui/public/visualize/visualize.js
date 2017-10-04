@@ -68,7 +68,10 @@ uiModules
         }
 
         // spy panel is supported only with courier request handler
-        if (!$scope.vis.type.requestHandler !== 'courier') $scope.showSpyPanel = false;
+        $scope.shouldShowSpyPanel = () => {
+          if ($scope.vis.type.requestHandler !== 'courier') return false;
+          return $scope.vis.type.requiresSearch && $scope.showSpyPanel;
+        };
 
         if (!$scope.appState) $scope.appState = getAppState();
 
