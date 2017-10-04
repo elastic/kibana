@@ -11,6 +11,7 @@ export function VisualizeLoaderProvider($compile, $rootScope, savedVisualization
       const visEl = $('<visualize saved-obj="savedObj" time-range="timeRange"></visualize>');
       const visHtml = $compile(visEl)(scope);
       $(el).html(visHtml);
+      return visEl[0];
     });
   };
 }
