@@ -135,7 +135,7 @@ module.exports = function (grunt) {
         '--no-base-path',
         '--optimize.lazyPort=5611',
         '--optimize.lazyPrebuild=true',
-        '--optimize.bundleDir=' + resolve('../../optimize/testUiServer'),
+        '--optimize.bundleDir=' + resolve(__dirname, '../../optimize/testUiServer'),
         ...kbnServerFlags,
       ]
     },
@@ -172,7 +172,7 @@ module.exports = function (grunt) {
         '--server.port=5610',
         '--optimize.lazyPort=5611',
         '--optimize.lazyPrebuild=true',
-        '--optimize.bundleDir=' + resolve('../../optimize/testdev'),
+        '--optimize.bundleDir=' + resolve(__dirname, '../../optimize/testdev'),
         ...kbnServerFlags,
       ]
     },
