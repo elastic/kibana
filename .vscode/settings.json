@@ -1,6 +1,7 @@
 {
   "editor.formatOnSave": true,
   "files.exclude": {
-    "yarn.lock": true
+    "yarn.lock": true,
+    "coverage": true
   }
 }

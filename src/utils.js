@@ -1,4 +1,7 @@
 const ora = require('ora');
+const promisify = require('es6-promisify');
+const process = require('child_process');
+const processExec = promisify(process.exec);
 
 function withSpinner(promise, text, errorText) {
   const spinner = ora(text).start();
@@ -16,4 +19,8 @@ function withSpinner(promise, text, errorText) {
     });
 }
 
-module.exports = { withSpinner };
+function exec(...args) {
+  return processExec(...args);
+}
+
+module.exports = { withSpinner, exec };

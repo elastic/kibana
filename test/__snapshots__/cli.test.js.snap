@@ -1,0 +1,427 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`cli prompt calls should match snapshot 1`] = `
+Array [
+  Array [
+    Array [
+      Object {
+        "choices": Array [
+          "elastic/backport-cli-test",
+        ],
+        "message": "Select repository",
+        "name": "fullRepoName",
+        "type": "list",
+      },
+    ],
+  ],
+  Array [
+    Array [
+      Object {
+        "choices": Array [
+          Object {
+            "name": "Update readme: Make ui-framework url a link",
+            "short": "Update readme: Make ui-framework url a link",
+            "value": Object {
+              "date": "2017-09-05T08:48:42Z",
+              "message": "Update readme: Make ui-framework url a link",
+              "reference": Object {
+                "type": "commit",
+                "value": "7939a98",
+              },
+              "sha": "7939a98aadb94ead30b54bea7974cd02dc816b02",
+            },
+          },
+          Object {
+            "name": "Update react 15.6.1 (#13672)",
+            "short": "Update react 15.6.1 (#13672)",
+            "value": Object {
+              "date": "2017-08-28T08:27:51Z",
+              "message": "Update react 15.6.1 (#13672)",
+              "reference": Object {
+                "type": "pullRequest",
+                "value": "13672",
+              },
+              "sha": "52552a93efa5b4038ea57d9cb3d158ba6a1ff71d",
+            },
+          },
+          Object {
+            "name": "Mock out static files when running in Jest (#13315)",
+            "short": "Mock out static files when running in Jest (#13315)",
+            "value": Object {
+              "date": "2017-08-07T15:35:59Z",
+              "message": "Mock out static files when running in Jest (#13315)",
+              "reference": Object {
+                "type": "pullRequest",
+                "value": "13315",
+              },
+              "sha": "8cfbb82cfb50aa962410a9682d96335a252d751a",
+            },
+          },
+        ],
+        "message": "Select a commit to backport",
+        "name": "commit",
+        "type": "list",
+      },
+      Object {
+        "choices": Array [
+          "6.x",
+          "6.0",
+          "5.6",
+          "5.5",
+          "5.4",
+        ],
+        "message": "Select version you want to backport to",
+        "name": "version",
+        "type": "list",
+      },
+    ],
+  ],
+  Array [
+    Array [
+      Object {
+        "choices": Array [
+          "elastic/backport-cli-test",
+        ],
+        "message": "Select repository",
+        "name": "fullRepoName",
+        "type": "list",
+      },
+    ],
+  ],
+  Array [
+    Array [
+      Object {
+        "choices": Array [
+          Object {
+            "name": "Update readme: Make ui-framework url a link",
+            "short": "Update readme: Make ui-framework url a link",
+            "value": Object {
+              "date": "2017-09-05T08:48:42Z",
+              "message": "Update readme: Make ui-framework url a link",
+              "reference": Object {
+                "type": "commit",
+                "value": "7939a98",
+              },
+              "sha": "7939a98aadb94ead30b54bea7974cd02dc816b02",
+            },
+          },
+          Object {
+            "name": "Update react 15.6.1 (#13672)",
+            "short": "Update react 15.6.1 (#13672)",
+            "value": Object {
+              "date": "2017-08-28T08:27:51Z",
+              "message": "Update react 15.6.1 (#13672)",
+              "reference": Object {
+                "type": "pullRequest",
+                "value": "13672",
+              },
+              "sha": "52552a93efa5b4038ea57d9cb3d158ba6a1ff71d",
+            },
+          },
+          Object {
+            "name": "Mock out static files when running in Jest (#13315)",
+            "short": "Mock out static files when running in Jest (#13315)",
+            "value": Object {
+              "date": "2017-08-07T15:35:59Z",
+              "message": "Mock out static files when running in Jest (#13315)",
+              "reference": Object {
+                "type": "pullRequest",
+                "value": "13315",
+              },
+              "sha": "8cfbb82cfb50aa962410a9682d96335a252d751a",
+            },
+          },
+        ],
+        "message": "Select a commit to backport",
+        "name": "commit",
+        "type": "list",
+      },
+      Object {
+        "choices": Array [
+          "6.x",
+          "6.0",
+          "5.6",
+          "5.5",
+          "5.4",
+        ],
+        "message": "Select version you want to backport to",
+        "name": "version",
+        "type": "list",
+      },
+    ],
+  ],
+  Array [
+    Array [
+      Object {
+        "choices": Array [
+          "elastic/backport-cli-test",
+        ],
+        "message": "Select repository",
+        "name": "fullRepoName",
+        "type": "list",
+      },
+    ],
+  ],
+  Array [
+    Array [
+      Object {
+        "choices": Array [
+          Object {
+            "name": "Update readme: Make ui-framework url a link",
+            "short": "Update readme: Make ui-framework url a link",
+            "value": Object {
+              "date": "2017-09-05T08:48:42Z",
+              "message": "Update readme: Make ui-framework url a link",
+              "reference": Object {
+                "type": "commit",
+                "value": "7939a98",
+              },
+              "sha": "7939a98aadb94ead30b54bea7974cd02dc816b02",
+            },
+          },
+          Object {
+            "name": "Update react 15.6.1 (#13672)",
+            "short": "Update react 15.6.1 (#13672)",
+            "value": Object {
+              "date": "2017-08-28T08:27:51Z",
+              "message": "Update react 15.6.1 (#13672)",
+              "reference": Object {
+                "type": "pullRequest",
+                "value": "13672",
+              },
+              "sha": "52552a93efa5b4038ea57d9cb3d158ba6a1ff71d",
+            },
+          },
+          Object {
+            "name": "Mock out static files when running in Jest (#13315)",
+            "short": "Mock out static files when running in Jest (#13315)",
+            "value": Object {
+              "date": "2017-08-07T15:35:59Z",
+              "message": "Mock out static files when running in Jest (#13315)",
+              "reference": Object {
+                "type": "pullRequest",
+                "value": "13315",
+              },
+              "sha": "8cfbb82cfb50aa962410a9682d96335a252d751a",
+            },
+          },
+        ],
+        "message": "Select a commit to backport",
+        "name": "commit",
+        "type": "list",
+      },
+      Object {
+        "choices": Array [
+          "6.x",
+          "6.0",
+          "5.6",
+          "5.5",
+          "5.4",
+        ],
+        "message": "Select version you want to backport to",
+        "name": "version",
+        "type": "list",
+      },
+    ],
+  ],
+  Array [
+    Array [
+      Object {
+        "choices": Array [
+          "elastic/backport-cli-test",
+        ],
+        "message": "Select repository",
+        "name": "fullRepoName",
+        "type": "list",
+      },
+    ],
+  ],
+  Array [
+    Array [
+      Object {
+        "choices": Array [
+          Object {
+            "name": "Update readme: Make ui-framework url a link",
+            "short": "Update readme: Make ui-framework url a link",
+            "value": Object {
+              "date": "2017-09-05T08:48:42Z",
+              "message": "Update readme: Make ui-framework url a link",
+              "reference": Object {
+                "type": "commit",
+                "value": "7939a98",
+              },
+              "sha": "7939a98aadb94ead30b54bea7974cd02dc816b02",
+            },
+          },
+          Object {
+            "name": "Update react 15.6.1 (#13672)",
+            "short": "Update react 15.6.1 (#13672)",
+            "value": Object {
+              "date": "2017-08-28T08:27:51Z",
+              "message": "Update react 15.6.1 (#13672)",
+              "reference": Object {
+                "type": "pullRequest",
+                "value": "13672",
+              },
+              "sha": "52552a93efa5b4038ea57d9cb3d158ba6a1ff71d",
+            },
+          },
+          Object {
+            "name": "Mock out static files when running in Jest (#13315)",
+            "short": "Mock out static files when running in Jest (#13315)",
+            "value": Object {
+              "date": "2017-08-07T15:35:59Z",
+              "message": "Mock out static files when running in Jest (#13315)",
+              "reference": Object {
+                "type": "pullRequest",
+                "value": "13315",
+              },
+              "sha": "8cfbb82cfb50aa962410a9682d96335a252d751a",
+            },
+          },
+        ],
+        "message": "Select a commit to backport",
+        "name": "commit",
+        "type": "list",
+      },
+      Object {
+        "choices": Array [
+          "6.x",
+          "6.0",
+          "5.6",
+          "5.5",
+          "5.4",
+        ],
+        "message": "Select version you want to backport to",
+        "name": "version",
+        "type": "list",
+      },
+    ],
+  ],
+]
+`;
+
+exports[`cli utils,  1`] = `
+Array [
+  Array [
+    "git reset --hard && git checkout master && git pull origin master",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git cherry-pick mySha",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git push sqren backport/myVersion/pr-myPullRequest --force",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git reset --hard && git checkout master && git pull origin master",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git cherry-pick mySha",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git push sqren backport/myVersion/pr-myPullRequest --force",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git reset --hard && git checkout master && git pull origin master",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git cherry-pick mySha",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git push sqren backport/myVersion/pr-myPullRequest --force",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git reset --hard && git checkout master && git pull origin master",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git cherry-pick mySha",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git push sqren backport/myVersion/pr-myPullRequest --force",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git reset --hard && git checkout master && git pull origin master",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git cherry-pick mySha",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git push sqren backport/myVersion/pr-myPullRequest --force",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+]
+`;

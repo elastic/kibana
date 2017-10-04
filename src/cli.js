@@ -8,26 +8,27 @@ const { getConfigFilePath, getRepoPath } = require('./env');
 const { ensureConfigAndFoldersExists, validateConfig } = require('./configs');
 
 const {
-  checkoutAndPull,
+  resetAndPullMaster,
   cherrypick,
   createAndCheckoutBranch,
-  getCommit,
   maybeSetupRepo,
-  openRepo,
-  push,
-  resetHard
+  push
 } = require('./git');
 
-function cherrypickAndPrompt(repo, owner, repoName, sha) {
+function isCherrypickConflict(e) {
+  return e.cmd.includes('git cherry-pick');
+}
+
+function cherrypickAndPrompt(owner, repoName, sha) {
   return withSpinner(
-    cherrypick(repo, sha),
+    cherrypick(owner, repoName, sha),
     'Cherry-pick commit',
     `Cherry-pick commit failed. Please resolve conflicts in: ${getRepoPath(
       owner,
       repoName
     )}`
   ).catch(e => {
-    if (e.message !== constants.CHERRYPICK_CONFLICT) {
+    if (!isCherrypickConflict(e)) {
       throw e;
     }
 
@@ -35,8 +36,9 @@ function cherrypickAndPrompt(repo, owner, repoName, sha) {
       .prompt([prompts.confirmConflictResolved()])
       .then(({ isConflictResolved }) => {
         if (!isConflictResolved) {
-          console.error(e);
-          throw new Error('Merge errors were not manually fixed');
+          const error = new Error(constants.CHERRYPICK_CONFLICT_NOT_HANDLED);
+          error.details = e.message;
+          throw error;
         }
       });
   });
@@ -101,70 +103,82 @@ function init(config) {
         .then(({ commit, version }) => ({
           owner,
           repoName,
-          sha: commit.sha,
-          reference: commit.reference,
+          commit,
           version
         }));
     })
-    .then(({ owner, repoName, sha, reference, version }) => {
-      console.log(`Backporting ${getReferenceValue(reference)} to ${version}`);
+    .then(({ owner, repoName, commit, version }) => {
+      console.log(
+        `Backporting ${getReferenceValue(commit.reference)} to ${version}`
+      );
 
       return withSpinner(
         maybeSetupRepo(owner, repoName, username),
         'Cloning repository (may take a few minutes)'
-      )
-        .then(() => openRepo(owner, repoName))
-        .then(repo => ({
-          owner,
-          repoName,
-          sha,
-          reference,
-          version,
-          repo
-        }));
+      ).then(() => ({
+        owner,
+        repoName,
+        commit,
+        version
+      }));
     })
-    .then(({ owner, repoName, sha, reference, version, repo }) => {
-      const backportBranchName = getBackportBranchName(version, reference);
+    .then(({ owner, repoName, commit, version }) => {
+      const backportBranchName = getBackportBranchName(
+        version,
+        commit.reference
+      );
 
-      return resetHard(repo)
+      return withSpinner(
+        resetAndPullMaster(owner, repoName),
+        'Pull latest changes'
+      )
         .then(() =>
-          withSpinner(checkoutAndPull(repo, 'master'), 'Pull latest changes')
+          createAndCheckoutBranch(owner, repoName, version, backportBranchName)
         )
-        .then(() => createAndCheckoutBranch(repo, version, backportBranchName))
-        .then(() => cherrypickAndPrompt(repo, owner, repoName, sha))
+        .then(() => cherrypickAndPrompt(owner, repoName, commit.sha))
         .then(() =>
           withSpinner(
-            push(repo, backportBranchName, username),
+            push(owner, repoName, username, backportBranchName),
             'Pushing branch'
           )
         )
-        .then(() => getCommit(repo, sha))
-        .then(commit =>
+        .then(() =>
           withSpinner(
             github.createPullRequest(
               owner,
               repoName,
               getPullRequestPayload(
-                commit.message(),
+                commit.message,
                 version,
-                reference,
+                commit.reference,
                 username
               )
             ),
             'Creating pull request'
-          ).then(res => console.log(`View pull request: ${res.data.html_url}`))
+          )
         );
     })
     .catch(e => {
-      if (e.message === constants.INVALID_CONFIG) {
-        console.log(
-          `Welcome to the Backport CLI tool! Update this config to proceed: ${getConfigFilePath()}`
-        );
-        return;
-      }
+      switch (e.message) {
+        case constants.INVALID_CONFIG:
+          console.log(
+            `Welcome to the Backport CLI tool! Update this config to proceed: ${getConfigFilePath()}`
+          );
+          break;
 
-      console.error(e);
-    });
+        case constants.GITHUB_ERROR:
+          console.error(JSON.stringify(e.details, null, 4));
+          break;
+
+        case constants.CHERRYPICK_CONFLICT_NOT_HANDLED:
+          console.error('Merge conflict was not resolved', e.details);
+          break;
+
+        default:
+          console.error(e);
+      }
+    })
+    .then(res => console.log(`View pull request: ${res.data.html_url}`));
 }
 
 module.exports = {
