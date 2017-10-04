@@ -1,5 +1,5 @@
 import semver from 'semver';
-const rcVersionRegex = /(\d+\.\d+\.\d+)\-rc(\d+)/i;
+const rcVersionRegex = /^(\d+\.\d+\.\d+)\-rc(\d+)$/i;
 
 function extractRcNumber(version) {
   const match = version.match(rcVersionRegex);
