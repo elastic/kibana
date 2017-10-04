@@ -298,7 +298,7 @@ test('returns 200 OK if returning object', async () => {
   const router = new Router('/foo');
 
   router.get({ path: '/' }, async (val, req, res) => {
-    return { key: 'value' };
+    return res.ok({ key: 'value' });
   });
 
   server.registerRouter(router);

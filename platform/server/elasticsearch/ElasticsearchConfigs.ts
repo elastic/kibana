@@ -14,24 +14,38 @@ export class ElasticsearchConfigs {
    */
   static createSchema = createElasticsearchSchema;
 
-  private readonly configs: {
-    [type in ElasticsearchClusterType]: ElasticsearchConfig
-  };
+  private readonly typedConfigs: Map<
+    ElasticsearchClusterType,
+    ElasticsearchConfig
+  > = new Map();
 
   /**
    * @internal
    */
-  constructor(config: ElasticsearchConfigsSchema, env: Env) {
-    this.configs = {
-      data:
-        config.tribe !== undefined
-          ? new ElasticsearchConfig('data', config.tribe)
-          : new ElasticsearchConfig('data', config),
-      admin: new ElasticsearchConfig('admin', config)
-    };
+  constructor(private readonly config: ElasticsearchConfigsSchema, env: Env) {}
+
+  /**
+   * Provides Elasticsearch config required for specific cluster type.
+   * @param type Type of the cluster to return config for.
+   */
+  forType(type: ElasticsearchClusterType) {
+    if (!this.typedConfigs.has(type)) {
+      this.typedConfigs.set(
+        type,
+        new ElasticsearchConfig(type, this.getClusterConfig(type))
+      );
+    }
+
+    return this.typedConfigs.get(type)!;
   }
 
-  forType(type: ElasticsearchClusterType) {
-    return this.configs[type];
+  /**
+   * Returns cluster config based on its type.
+   * @param clusterType Type of the cluster config is requested for.
+   */
+  private getClusterConfig(clusterType: string) {
+    return this.config.tribe !== undefined && clusterType === 'data'
+      ? this.config.tribe
+      : this.config;
   }
 }
