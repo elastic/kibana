@@ -229,7 +229,7 @@ module.exports = function MapsRenderbotFactory(Private, $injector, serviceSettin
         }
       };
     }
-    
+
     _doRenderCompleteWhenBaseLayerIsLoaded(resolve, endTime) {
       if (this._paramsDirty || this._dataDirty || this._baseLayerDirty) {
         if (Date.now() <= endTime) {
