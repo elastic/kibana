@@ -6,10 +6,12 @@ import { luceneStringToDsl } from '../../../../ui/public/courier/data_source/bui
 
 export function dashboardContextProvider(Private, getAppState) {
   return () => {
+    const appState = getAppState();
     const queryFilter = Private(FilterBarQueryFilterProvider);
     const bool = { must: [], must_not: [] };
+    if (!appState) return { bool: bool };
     const filterBarFilters = queryFilter.getFilters();
-    const queryBarQuery = getAppState().query;
+    const queryBarQuery = appState.query;
 
     if (queryBarQuery.language === 'lucene') {
       // Add the query bar filter, its handled differently.

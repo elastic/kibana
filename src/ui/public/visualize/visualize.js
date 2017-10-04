@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import dateMath from '@elastic/datemath';
 import { uiModules } from 'ui/modules';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import visualizeTemplate from 'ui/visualize/visualize.html';
@@ -53,18 +54,23 @@ uiModules
         $scope.vis.visualizeScope = true;
 
         if ($scope.timeRange) {
+          $scope.vis.params.timeRange = {
+            min: dateMath.parse($scope.timeRange.min),
+            max: dateMath.parse($scope.timeRange.max)
+          };
+
           $scope.vis.aggs.forEach(agg => {
             if (agg.type.name !== 'date_histogram') return;
-            agg.setTimeRange({
-              min: new Date($scope.timeRange.min),
-              max: new Date($scope.timeRange.max)
-            });
+            agg.setTimeRange($scope.vis.params.timeRange);
           });
 
           const searchSource = $scope.savedObj.searchSource;
-          const filter = timefilter.get(searchSource.index(), $scope.timeRange);
-          searchSource.get('filter').push(filter);
-          searchSource.skipTimeRangeFilter = true;
+          const filter = timefilter.get(searchSource.index(), $scope.vis.params.timeRange);
+          const searchSourceFilters = searchSource.get('filter');
+          if (searchSourceFilters instanceof Array) {
+            searchSourceFilters.push(filter);
+            searchSource.skipTimeRangeFilter = true;
+          }
         }
 
         $scope.editorMode = $scope.editorMode || false;

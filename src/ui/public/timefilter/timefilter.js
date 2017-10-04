@@ -91,8 +91,8 @@ uiModules
       const bounds = this.getBounds();
       filter = { range : {} };
       filter.range[timefield.name] = {
-        gte: range ? dateMath.parse(range.min).valueOf() : bounds.min.valueOf(),
-        lte: range ? dateMath.parse(range.max).valueOf() : bounds.max.valueOf(),
+        gte: range ? range.min.valueOf() : bounds.min.valueOf(),
+        lte: range ? range.max.valueOf() : bounds.max.valueOf(),
         format: 'epoch_millis'
       };
     }
