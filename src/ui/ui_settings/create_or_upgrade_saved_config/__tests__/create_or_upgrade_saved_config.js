@@ -33,9 +33,8 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
         log,
       });
 
-      if (getUpgradeableConfig.callCount) {
-        sinon.assert.alwaysCalledWith(getUpgradeableConfig, { savedObjectsClient, version });
-      }
+      sinon.assert.calledOnce(getUpgradeableConfig);
+      sinon.assert.alwaysCalledWith(getUpgradeableConfig, { savedObjectsClient, version });
 
       return resp;
     }
