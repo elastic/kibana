@@ -6,9 +6,8 @@ export default function replaceVars(str, args = {}, vars = {}) {
 
     const string = template(_.assign({}, vars, { args }));
 
-    return string + 'foo';
+    return string;
   } catch (e) {
-    console.log(e.toString());
     // Unknown variable
     if (e.message.indexOf('not defined in') !== -1) {
       const badVar = e.message.split(/"/)[1];
