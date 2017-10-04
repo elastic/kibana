@@ -89,6 +89,12 @@ export function IndexPatternProvider(Private, $http, config, kbnIndex, Promise, 
     // give index pattern all of the values in _source
     _.assign(indexPattern, response._source);
 
+    // older kibana indices reference the index pattern by _id and may not have the pattern
+    // saved in title
+    // if the title doesn't exist, it's an old format and we can use the id instead
+    if (!indexPattern.title) {
+      indexPattern.title = indexPattern.id;
+    }
     return indexFields(indexPattern);
   }
 

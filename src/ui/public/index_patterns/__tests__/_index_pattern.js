@@ -103,9 +103,18 @@ describe('index pattern', function () {
         expect(indexPattern).to.have.property('toString');
         expect(indexPattern).to.have.property('toJSON');
         expect(indexPattern).to.have.property('save');
+        expect(indexPattern).to.have.property('title');
+        expect(indexPattern).to.have.property('id');
 
         // properties
         expect(indexPattern).to.have.property('fields');
+      });
+    });
+
+    it('should have a title when there is no saved title', function () {
+      const id = 'foo';
+      return create(id, {}).then(function (indexPattern) {
+        expect(indexPattern.title).to.be(id);
       });
     });
   });
