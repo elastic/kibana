@@ -32,3 +32,19 @@ export function toElasticsearchQuery(node, indexPattern) {
     },
   };
 }
+
+export function getSuggestions(node, cursorPosition) {
+  const childAtCursor = ast.getChildAtCursor(node, cursorPosition) || {};
+  const { location, value = '' } = childAtCursor;
+
+  const start = location ? location.min : cursorPosition;
+  const end = location ? location.max : cursorPosition;
+
+  const types = (node.arguments.length === 0 || node.arguments[0] === childAtCursor) ? ['field'] : [];
+  const params = {
+    query: value,
+    types: ['geo_point']
+  };
+
+  return { start, end, types, params };
+}

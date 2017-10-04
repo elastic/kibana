@@ -5,6 +5,7 @@
 >
   <kbn-typeahead
     items="queryBar.typeaheadItems"
+    item-template="queryBar.typeaheadItemTemplate"
     on-select="queryBar.onTypeaheadSelect(item)"
   >
     <div
@@ -52,6 +53,9 @@
       >
         <input
           ng-model="queryBar.localQuery.query"
+          ng-trim="false"
+          ng-keyup="queryBar.updateCursorPosition($event)"
+          ng-click="queryBar.updateCursorPosition($event)"
           input-focus
           disable-input-focus="queryBar.disableAutoFocus"
           kbn-typeahead-input

@@ -76,3 +76,32 @@ function extractArguments(args) {
     return acc;
   }, {});
 }
+
+export function getSuggestions(node, cursorPosition) {
+  const childAtCursor = ast.getChildAtCursor(node, cursorPosition) || {};
+  const { location, value = '' } = childAtCursor;
+  const start = location ? location.min : cursorPosition;
+  const end = location ? location.max : cursorPosition;
+
+  const [ fieldNameArg, ...args ] = node.arguments;
+  const namedArgs = Object.keys(extractArguments(args));
+  const remainingArgs = _.difference(['gt', 'gte', 'lt', 'lte'], namedArgs);
+
+  let types;
+  let params;
+  if (node.arguments.length === 0 || fieldNameArg === childAtCursor) {
+    types = ['field'];
+    params = {
+      query: value,
+      types: ['number', 'date', 'ip']
+    };
+  } else {
+    types = ['argument'];
+    params = {
+      query: value,
+      argNames: remainingArgs
+    };
+  }
+
+  return { start, end, types, params };
+}

@@ -39,3 +39,31 @@ export function toElasticsearchQuery(node, indexPattern) {
   };
 }
 
+export function getSuggestions(node, cursorPosition) {
+  const childAtCursor = ast.getChildAtCursor(node, cursorPosition) || {};
+  const { location, value = '' } = childAtCursor;
+  const start = location ? location.min : cursorPosition;
+  const end = location ? location.max : cursorPosition;
+
+  const [ fieldNameArg, ...args ] = node.arguments;
+  const namedArgs = _.compact(args.map(arg => arg.name));
+  const remainingArgs = _.difference(['topLeft', 'bottomRight'], namedArgs);
+
+  let types;
+  let params;
+  if (node.arguments.length === 0 || fieldNameArg === childAtCursor) {
+    types = ['field'];
+    params = {
+      query: value,
+      types: ['geo_point']
+    };
+  } else {
+    types = ['argument'];
+    params = {
+      query: value,
+      argNames: remainingArgs
+    };
+  }
+
+  return { start, end, types, params };
+}

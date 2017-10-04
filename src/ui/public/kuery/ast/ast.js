@@ -30,3 +30,15 @@ export function toElasticsearchQuery(node, indexPattern) {
 
   return nodeTypes[node.type].toElasticsearchQuery(node, indexPattern);
 }
+
+export function getSuggestions(node, cursorPosition) {
+  return nodeTypes[node.type].getSuggestions(node, cursorPosition);
+}
+
+export function getChildAtCursor(node, cursorPosition) {
+  return (node.arguments || []).find(child => (
+    child && child.location
+    && child.location.min <= cursorPosition
+    && child.location.max >= cursorPosition
+  ));
+}

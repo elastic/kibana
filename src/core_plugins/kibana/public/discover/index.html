@@ -18,6 +18,7 @@
       <!-- Search. -->
       <div data-transclude-slot="bottomRow" class="fullWidth">
         <query-bar
+          index-pattern="indexPattern"
           query="state.query"
           app-name="'discover'"
           on-submit="updateQueryAndFetch($query)"
