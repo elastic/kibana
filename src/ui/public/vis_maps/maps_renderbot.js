@@ -229,13 +229,45 @@ module.exports = function MapsRenderbotFactory(Private, $injector, serviceSettin
         }
       };
     }
+    
+    _doRenderCompleteWhenBaseLayerIsLoaded(resolve, endTime) {
+      if (this._paramsDirty || this._dataDirty || this._baseLayerDirty) {
+        if (Date.now() <= endTime) {
+          setTimeout(() => {
+            this._doRenderCompleteWhenBaseLayerIsLoaded(resolve, endTime);
+          }, 10);
+        } else {
+          //wait time exceeded. If the baselayer cannot load, we will still fire a render-complete.
+          //This is because slow or unstable network connections cause tiles to get dropped.
+          //It is unfortunate that tiles get dropped, but we should not drop the render-complete because of it.
+          resolve();
+        }
+      } else {
+        resolve();
+      }
+    }
+
 
     _doRenderComplete() {
-      if (this._paramsDirty || this._dataDirty || this._baseLayerDirty) {
-        return;
-      }
-      this.$el.trigger('renderComplete');
+      const msAllowedForBaseLayerToLoad = 10000;
+      const resolve = () => {
+        this.$el.trigger('renderComplete');
+      };
+      this._doRenderCompleteWhenBaseLayerIsLoaded(resolve, Date.now() + msAllowedForBaseLayerToLoad);
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   }
 
