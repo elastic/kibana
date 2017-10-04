@@ -4,7 +4,7 @@ import fieldControlsHtml from '../field_controls.html';
 import { dateScripts } from './date_scripts';
 import { uiModules } from 'ui/modules';
 import template from './scripted_fields_table.html';
-import { getSupportedScriptingLanguages } from 'ui/scripting_languages';
+import { getSupportedScriptingLanguages, getDeprecatedScriptingLanguages } from 'ui/scripting_languages';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
 
 uiModules.get('apps/management')
@@ -114,10 +114,17 @@ uiModules.get('apps/management')
         confirmModal(`Are you sure want to delete ${field.name}? This action is irreversible!`, confirmModalOptions);
       };
 
-      $scope.getDeprecatedLanguagesInUse = function () {
+      function getLanguagesInUse() {
         const fields = $scope.indexPattern.getScriptedFields();
-        const langsInUse = _.uniq(_.map(fields, 'lang'));
-        return _.difference(langsInUse, getSupportedScriptingLanguages());
+        return _.uniq(_.map(fields, 'lang'));
+      }
+
+      $scope.getDeprecatedLanguagesInUse = function () {
+        return _.intersection(getLanguagesInUse(), getDeprecatedScriptingLanguages());
+      };
+
+      $scope.getUnsupportedLanguagesInUse = function () {
+        return _.difference(getLanguagesInUse(), _.union(getSupportedScriptingLanguages(), getDeprecatedScriptingLanguages()));
       };
     }
   };

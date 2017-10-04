@@ -28,6 +28,26 @@
   </div>
 </div>
 
+<div class="kuiInfoPanel kuiInfoPanel--error kuiVerticalRhythm" ng-if="getUnsupportedLanguagesInUse().length !== 0">
+  <div class="kuiInfoPanelHeader">
+    <span
+      class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--error fa-warning"
+      aria-label="Error"
+      role="img"
+    ></span>
+    <span class="kuiInfoPanelHeader__title">
+      Unsupported Languages
+    </span>
+  </div>
+
+  <div class="kuiInfoPanelBody">
+    <div class="kuiInfoPanelBody__message">
+      We've detected that the following unsupported languages are in use: {{ getUnsupportedLanguagesInUse().join(', ') }}.
+      All scripted fields must be converted to <a class="kuiLink" ng-href="{{docLinks.painless}}">Painless</a>.
+    </div>
+  </div>
+</div>
+
 <a
   data-test-subj="addScriptedFieldLink"
   ng-href="{{ kbnUrl.getRouteHref(indexPattern, 'addField') }}"
