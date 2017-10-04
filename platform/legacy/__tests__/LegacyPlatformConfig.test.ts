@@ -17,8 +17,6 @@ describe('Retrieving values', () => {
     expect(() =>
       configAdapter.get(['one.three'])
     ).toThrowErrorMatchingSnapshot();
-    expect(configAdapter.get('pid.enabled')).toEqual(false);
-    expect(configAdapter.get(['pid', 'enabled'])).toEqual(false);
   });
 
   test('correctly handles paths that do not need to be transformed.', () => {

@@ -32,11 +32,6 @@ export class LegacyConfigToRawConfigAdapter implements RawConfig {
   get(configPath: ConfigPath) {
     configPath = LegacyConfigToRawConfigAdapter.flattenConfigPath(configPath);
 
-    // Explicitly disable plugins until they are supported by the legacy config.
-    if (!this.legacyConfig.has(configPath) && configPath.endsWith('.enabled')) {
-      return false;
-    }
-
     const configValue = this.legacyConfig.get(configPath);
 
     switch (configPath) {
