@@ -28,7 +28,7 @@
 
   <div ng-if="editor.field.scripted" class="form-group">
     <label for="scriptedFieldLang">Language</label>
-    <div class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm" ng-if="editor.field.lang && !editor.isSupportedLang(editor.field.lang)">
+    <div class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm" ng-if="editor.field.lang && editor.isDeprecatedLang(editor.field.lang)">
       <div class="kuiInfoPanelHeader">
         <span
           class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--warning fa-bolt"

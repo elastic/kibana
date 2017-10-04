@@ -107,8 +107,8 @@ uiModules
         );
       };
 
-      self.isSupportedLang = function (lang) {
-        return _.contains(getSupportedScriptingLanguages(), lang);
+      self.isDeprecatedLang = function (lang) {
+        return _.contains(getDeprecatedScriptingLanguages(), lang);
       };
 
       $scope.$watch('editor.selectedFormatId', function (cur, prev) {

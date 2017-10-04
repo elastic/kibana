@@ -8,7 +8,7 @@ export function getSupportedScriptingLanguages() {
 }
 
 export function getDeprecatedScriptingLanguages() {
-  return ['expression'];
+  return [];
 }
 
 export function GetEnabledScriptingLanguagesProvider($http) {
