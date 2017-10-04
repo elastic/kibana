@@ -97,31 +97,5 @@ describe('editor', function () {
     });
   });
 
-  describe('interval "auto" and indexPattern timeField', function () {
-    let params;
-
-    beforeEach(function () {
-      params = render({ field: indexPattern.timeFieldName, interval: 'auto' });
-    });
-
-    it('clears the interval when the field is changed', function () {
-      expect(params.interval.modelValue().val).to.be('auto');
-      expect(params.field.modelValue().name).to.be(indexPattern.timeFieldName);
-
-      const field = _.find(indexPattern.fields, function (f) {
-        return f.type === 'date' && f.name !== indexPattern.timeFieldName;
-      });
-
-      params.field.$input()
-      .find('option')
-      .filter(function () {
-        return $(this).text().trim() === field.name;
-      })
-      .prop('selected', true);
-      params.field.$input().change();
-
-      expect(params.interval.modelValue()).to.be(undefined);
-    });
-  });
 
 });
