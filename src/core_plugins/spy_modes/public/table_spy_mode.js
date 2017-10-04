@@ -1,4 +1,4 @@
-import 'ui/agg_table';
+// import 'ui/agg_table';
 import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
 import tableSpyModeTemplate from 'plugins/spy_modes/table_spy_mode.html';
 import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
