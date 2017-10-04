@@ -10,7 +10,9 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
 
       if (queryFilter && vis.editorMode) {
         searchSource.set('filter', queryFilter.getFilters());
-        searchSource.set('query', appState.query);
+        if (!appState.linked) {
+          searchSource.set('query', appState.query);
+        }
       }
 
       const shouldQuery = () => {

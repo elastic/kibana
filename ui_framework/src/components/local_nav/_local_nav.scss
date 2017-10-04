@@ -43,6 +43,7 @@
  *    of this container using padding.
  */
 .kuiLocalNavRow--secondary {
-  padding: 0 $localNavSideSpacing 10px; /* 1 */
+  height: 40px; /* 1 */
+  padding: 0 $localNavSideSpacing 0; /* 1 */
   align-items: flex-start; /* 1 */
 }

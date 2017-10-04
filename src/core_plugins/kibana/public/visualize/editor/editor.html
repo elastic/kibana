@@ -18,6 +18,7 @@
         ng-show="chrome.getVisible()"
         class="fullWidth"
       >
+        <!-- Block searching if the Visualization is linked to a Saved Search. -->
         <div ng-if="vis.type.requiresSearch && state.linked">
           Linked to Saved Search &ldquo;{{ savedVis.savedSearch.title }}&rdquo;
           &nbsp;
@@ -30,7 +31,8 @@
           </a>
         </div>
 
-        <div ng-if="vis.type.requiresSearch && vis.type.options.showQueryBar" class="fullWidth">
+        <!-- Allow searching if there is no linked Saved Search. -->
+        <div ng-if="vis.type.requiresSearch && !state.linked && vis.type.options.showQueryBar" class="fullWidth">
           <query-bar
             query="state.query"
             app-name="'visualize'"
@@ -45,7 +47,7 @@
 
   <!-- Filters. -->
   <filter-bar
-    ng-if="vis.type.options.showFilterBar && state.query.language === 'lucene'"
+    ng-if="vis.type.options.showFilterBar && state.query.language === 'lucene' && !state.linked"
     state="state"
     index-patterns="[indexPattern]"
   ></filter-bar>

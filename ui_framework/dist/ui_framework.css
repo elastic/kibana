@@ -2135,7 +2135,9 @@ main {
  *    of this container using padding.
  */
 .kuiLocalNavRow--secondary {
-  padding: 0 10px 10px;
+  height: 40px;
+  /* 1 */
+  padding: 0 10px 0;
   /* 1 */
   -webkit-box-align: start;
   -webkit-align-items: flex-start;

@@ -287,9 +287,9 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     delete savedVis.savedSearchId;
     parent.set('filter', _.union(searchSource.getOwn('filter'), parent.getOwn('filter')));
 
-    // copy over all state except "aggs", "query" and "filter"
+    // copy over all state except "aggs" and filter, which is already copied
     _(parent.toJSON())
-    .omit(['aggs', 'filter', 'query'])
+    .omit('aggs')
     .forOwn(function (val, key) {
       searchSource.set(key, val);
     })
@@ -298,8 +298,6 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     $state.query = searchSource.get('query');
     $state.filters = searchSource.get('filter');
     searchSource.inherits(parentsParent);
-
-    $scope.fetch();
   };
 
   init();
