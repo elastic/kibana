@@ -1,11 +1,12 @@
 import _ from 'lodash';
 
+import { ErrorAllowExplicitIndexProvider } from 'ui/error_allow_explicit_index';
 import { IsRequestProvider } from './is_request';
 import { MergeDuplicatesRequestProvider } from './merge_duplicate_requests';
 import { ReqStatusProvider } from './req_status';
 
 export function CallClientProvider(Private, Promise, es) {
-
+  const errorAllowExplicitIndex = Private(ErrorAllowExplicitIndexProvider);
   const isRequest = Private(IsRequestProvider);
   const mergeDuplicateRequests = Private(MergeDuplicatesRequestProvider);
 
@@ -121,9 +122,13 @@ export function CallClientProvider(Private, Promise, es) {
       return strategy.getResponses(clientResp);
     })
     .then(respond)
-    .catch(function (err) {
-      if (err === ABORTED) respond();
-      else defer.reject(err);
+    .catch(function (error) {
+      if (errorAllowExplicitIndex.test(error)) {
+        return errorAllowExplicitIndex.takeover();
+      }
+
+      if (error === ABORTED) respond();
+      else defer.reject(error);
     });
 
     // return our promise, but catch any errors we create and
