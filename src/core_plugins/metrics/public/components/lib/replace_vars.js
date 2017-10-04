@@ -8,8 +8,11 @@ export default function replaceVars(str, args = {}, vars = {}) {
 
     return string;
   } catch (e) {
+    console.log(e);
     // Unknown variable
-    if (e.message.indexOf('not defined in') !== -1) {
+    if (e.toString().indexOf('Parse error') !== -1) {
+      return str;
+    } else if (e.message.indexOf('not defined in') !== -1) {
       const badVar = e.message.split(/"/)[1];
       e.error = {
         caused_by: {
