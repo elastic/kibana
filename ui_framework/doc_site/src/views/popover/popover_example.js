@@ -11,15 +11,15 @@ import {
 } from '../../components';
 
 import Popover from './popover';
-const popoverSource = require('!!raw!./popover');
+const popoverSource = require('!!raw-loader!./popover');
 const popoverHtml = renderToHtml(Popover);
 
 import PopoverAnchorPosition from './popover_anchor_position';
-const popoverAnchorPositionSource = require('!!raw!./popover_anchor_position');
+const popoverAnchorPositionSource = require('!!raw-loader!./popover_anchor_position');
 const popoverAnchorPositionHtml = renderToHtml(PopoverAnchorPosition);
 
 import PopoverBodyClassName from './popover_body_class_name';
-const popoverBodyClassNameSource = require('!!raw!./popover_body_class_name');
+const popoverBodyClassNameSource = require('!!raw-loader!./popover_body_class_name');
 const popoverBodyClassNameHtml = renderToHtml(PopoverBodyClassName);
 
 export default props => (

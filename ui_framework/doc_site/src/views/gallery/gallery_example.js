@@ -10,7 +10,7 @@ import {
 } from '../../components';
 
 import Gallery from './gallery';
-const gallerySource = require('!!raw!./gallery');
+const gallerySource = require('!!raw-loader!./gallery');
 const galleryHtml = renderToHtml(Gallery);
 
 export default props => (

@@ -10,7 +10,7 @@ import {
 } from '../../components';
 
 const Expression = require('./expression');
-const expressionSource = require('!!raw!./expression');
+const expressionSource = require('!!raw-loader!./expression');
 const expressionHtml = renderToHtml(Expression, { defaultActiveButton: 'example2' });
 
 export default props => (

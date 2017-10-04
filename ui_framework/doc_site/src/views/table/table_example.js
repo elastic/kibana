@@ -10,31 +10,31 @@ import {
 } from '../../components';
 
 import { Table } from './table';
-const tableSource = require('!!raw!./table');
+const tableSource = require('!!raw-loader!./table');
 const tableHtml = renderToHtml(Table);
 
 import { TableWithMenuButtons } from './table_with_menu_buttons';
-const tableWithMenuButtonsSource = require('!!raw!./table_with_menu_buttons');
+const tableWithMenuButtonsSource = require('!!raw-loader!./table_with_menu_buttons');
 const tableWithMenuButtonsHtml = renderToHtml(TableWithMenuButtons);
 
 import { FluidTable } from './fluid_table';
-const fluidTableSource = require('!!raw!./fluid_table');
+const fluidTableSource = require('!!raw-loader!./fluid_table');
 const fluidTableHtml = renderToHtml(FluidTable);
 
 import { ControlledTable } from './controlled_table';
-const controlledTableSource = require('!!raw!./controlled_table');
+const controlledTableSource = require('!!raw-loader!./controlled_table');
 const controlledTableHtml = renderToHtml(ControlledTable);
 
 import { ControlledTableWithEmptyPrompt } from './controlled_table_with_empty_prompt';
-const controlledTableWithEmptyPromptSource = require('!!raw!./controlled_table_with_empty_prompt');
+const controlledTableWithEmptyPromptSource = require('!!raw-loader!./controlled_table_with_empty_prompt');
 const controlledTableWithEmptyPromptHtml = renderToHtml(ControlledTableWithEmptyPrompt);
 
 import { ControlledTableWithNoItems } from './controlled_table_with_no_items';
-const controlledTableWithNoItemsSource = require('!!raw!./controlled_table_with_no_items');
+const controlledTableWithNoItemsSource = require('!!raw-loader!./controlled_table_with_no_items');
 const controlledTableWithNoItemsHtml = renderToHtml(ControlledTableWithNoItems);
 
 import { ControlledTableLoadingItems } from './controlled_table_loading_items';
-const controlledTableLoadingItemsSource = require('!!raw!./controlled_table_loading_items');
+const controlledTableLoadingItemsSource = require('!!raw-loader!./controlled_table_loading_items');
 const controlledTableLoadingItemsHtml = renderToHtml(ControlledTableLoadingItems);
 
 export default props => (

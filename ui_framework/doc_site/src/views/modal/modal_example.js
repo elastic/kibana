@@ -10,11 +10,11 @@ import {
 } from '../../components';
 
 import { StaticConfirmModal } from './static';
-const staticConfirmModalSource = require('!!raw!./static');
+const staticConfirmModalSource = require('!!raw-loader!./static');
 const staticConfirmModalHtml = renderToHtml(StaticConfirmModal);
 
 import { ConfirmModalExample } from './confirm_modal_example';
-const showConfirmModalSource = require('!!raw!./confirm_modal_example');
+const showConfirmModalSource = require('!!raw-loader!./confirm_modal_example');
 const showConfirmModalHtml = renderToHtml(ConfirmModalExample);
 
 export default props => (
