@@ -35,10 +35,6 @@ uiModules
 
       $scope.addLegend = false;
 
-      $scope.shouldShowSpyPanel = () => {
-        return $scope.vis.type.requiresSearch && $scope.showSpyPanel;
-      };
-
       // Show no results message when isZeroHits is true and it requires search
       $scope.showNoResultsMessage = function () {
         const requiresSearch = _.get($scope, 'vis.type.requiresSearch');
