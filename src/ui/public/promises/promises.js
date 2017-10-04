@@ -64,7 +64,7 @@ module.service('Promise', function ($q, $timeout) {
     return obj && typeof obj.then === 'function';
   };
   Promise.halt = _.once(function () {
-    const promise = new Promise();
+    const promise = new Promise(() => {});
     promise.then = _.constant(promise);
     promise.catch = _.constant(promise);
     return promise;
