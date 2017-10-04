@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 
-const TEST_INDEX_PATTERN = 'f1e4c910-a2e6-11e7-bb30-233be9be6a15';
+const TEST_INDEX_PATTERN = 'logstash-*';
 const TEST_ANCHOR_TYPE = 'doc';
 const TEST_ANCHOR_ID = 'AU_x3_BrGFA8no6QjjaI';
 const TEST_ANCHOR_FILTER_FIELD = 'geo.src';
