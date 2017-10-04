@@ -2,9 +2,30 @@ import _ from 'lodash';
 import handlebars from 'handlebars/dist/handlebars';
 export default function replaceVars(str, args = {}, vars = {}) {
   try {
-    const template = handlebars.compile(str);
-    return template(_.assign({}, vars, { args }));
+    const template = handlebars.compile(str, { strict: true });
+
+    const string = template(_.assign({}, vars, { args }));
+
+    return string + 'foo';
   } catch (e) {
-    return str;
+    console.log(e.toString());
+    // Unknown variable
+    if (e.message.indexOf('not defined in') !== -1) {
+      const badVar = e.message.split(/"/)[1];
+      e.error = {
+        caused_by: {
+          reason: `The variable "${badVar}" that you used is not avaliable in this data metric`,
+          title: 'Error processing your markdown'
+        }
+      };
+    } else {
+      e.error = {
+        caused_by: {
+          reason: 'Please verify you are only using markdown, known variables, and built-in Handlebars expressions',
+          title: 'Error processing your markdown'
+        }
+      };
+    }
+    return e;
   }
 }
