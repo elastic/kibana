@@ -88,7 +88,7 @@ class MarkdownEditor extends Component {
     }
 
     walk(variables);
-    console.log('rows.length', rows.length);
+
     return (
       <div className="vis_editor__markdown">
         <div className="vis_editor__markdown-editor">
