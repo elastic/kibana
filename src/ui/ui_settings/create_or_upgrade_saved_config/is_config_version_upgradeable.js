@@ -31,9 +31,5 @@ export function isConfigVersionUpgradeable(savedVersion, kibanaVersion) {
   const savedIsLessThanKibana = semver.lt(savedReleaseVersion, kibanaReleaseVersion);
   const savedIsSameAsKibana = semver.eq(savedReleaseVersion, kibanaReleaseVersion);
   const savedRcIsLessThanKibana = savedRcNumber < kibanaRcNumber;
-  if (savedIsLessThanKibana || (savedIsSameAsKibana && savedRcIsLessThanKibana)) {
-    return true;
-  }
-
-  return false;
+  return savedIsLessThanKibana || (savedIsSameAsKibana && savedRcIsLessThanKibana);
 }
