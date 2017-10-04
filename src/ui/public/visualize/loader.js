@@ -1,19 +1,34 @@
 import $ from 'jquery';
 
 export function VisualizeLoaderProvider($compile, $rootScope, savedVisualizations) {
-  return (el, savedVisualizationId, timeRange, appState, uiState) => {
-    savedVisualizations.get(savedVisualizationId).then(savedObj => {
-      const scope = $rootScope.$new();
-      scope.savedObj = savedObj;
-      scope.appState = appState;
-      scope.uiState = uiState;
-      scope.timeRange = timeRange;
+  const renderVis = (el, savedObj, params) => {
+    const scope = $rootScope.$new();
+    scope.savedObj = savedObj;
+    scope.appState = params.appState;
+    scope.uiState = params.uiState;
+    scope.timeRange = params.timeRange;
+    scope.showSpyPanel = params.showSpyPanel;
+    scope.editorMode = params.editorMode;
 
-      $(el).html('');
-      const visEl = $('<visualize saved-obj="savedObj" app-state="appState" ui-state="uiState" time-range="timeRange"></visualize>');
-      const visHtml = $compile(visEl)(scope);
-      $(el).html(visHtml);
-      return visEl[0];
-    });
+    $(el).html('');
+    const visEl = $('<visualize saved-obj="savedObj" app-state="appState" ui-state="uiState" ' +
+      'time-range="timeRange" editor-mode="editorMode" show-spy-panel="showSpyPanel"></visualize>');
+    const visHtml = $compile(visEl)(scope);
+    $(el).html(visHtml);
+    return visEl[0];
+  };
+
+  return {
+    fromId: (el, savedVisualizationId, params) => {
+      return new Promise((resolve) => {
+        savedVisualizations.get(savedVisualizationId).then(savedObj => {
+          const element = renderVis(el, savedObj, params);
+          resolve(element);
+        });
+      });
+    },
+    fromSavedObject: (el, savedObj, params) => {
+      return renderVis(el, savedObj, params);
+    }
   };
 }
