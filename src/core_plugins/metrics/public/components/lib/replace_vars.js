@@ -17,7 +17,7 @@ export default function replaceVars(str, args = {}, vars = {}) {
       const badVar = e.message.split(/"/)[1];
       e.error = {
         caused_by: {
-          reason: `The variable "${badVar}" that you used is not avaliable in this data metric`,
+          reason: `{{${badVar}}} is an unknown variable`,
           title: 'Error processing your markdown'
         }
       };
