@@ -11,23 +11,23 @@ export async function createOrUpgradeSavedConfig(options) {
   } = options;
 
   // try to find an older config we can upgrade
-  const upgradeable = await getUpgradeableConfig({
+  const upgradeableConfig = await getUpgradeableConfig({
     savedObjectsClient,
     version
   });
 
-  if (upgradeable) {
+  if (upgradeableConfig) {
     log(['plugin', 'elasticsearch'], {
       tmpl: 'Upgrade config from <%= prevVersion %> to <%= newVersion %>',
-      prevVersion: upgradeable.id,
+      prevVersion: upgradeableConfig.id,
       newVersion: version
     });
   }
 
-  // default to the attributes of the upgradeable config if available
+  // default to the attributes of the upgradeableConfig if available
   const attributes = defaults(
     { buildNum },
-    upgradeable ? upgradeable.attributes : {}
+    upgradeableConfig ? upgradeableConfig.attributes : {}
   );
 
   // create the new SavedConfig
