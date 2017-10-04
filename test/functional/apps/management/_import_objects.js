@@ -5,18 +5,18 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
+  const PageObjects = getPageObjects(['common', 'settings']);
 
   describe('import objects', function describeIndexTests() {
     before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
-      await esArchiver.load('visualize');
+      await esArchiver.load('management');
     });
 
     after(async function () {
-      await esArchiver.unload('visualize');
+      await esArchiver.unload('management');
     });
 
     it('should import saved objects normally', async function () {
