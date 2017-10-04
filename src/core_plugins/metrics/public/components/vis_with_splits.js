@@ -1,12 +1,12 @@
 import React from 'react';
-import { getDisplayName } from './lib/get_display_name';
+import { getDisplayName } from '../lib/component_utils/get_display_name';
 import { last, findIndex, first } from 'lodash';
-import calculateLabel  from '../../common/calculate_label';
+import calculateLabel from '../../common/calculate_label';
 export function visWithSplits(WrappedComponent) {
   function SplitVisComponent(props) {
     const { model, visData } = props;
     if (visData[model.id].series.every(s => s.id.split(':').length === 1)) {
-      return (<WrappedComponent {...props} />);
+      return <WrappedComponent {...props} />;
     }
 
     const splitsVisData = visData[model.id].series.reduce((acc, series) => {
@@ -25,19 +25,20 @@ export function visWithSplits(WrappedComponent) {
       return acc;
     }, {});
 
-    const nonSplitSeries = first(visData[model.id].series.filter((series) => {
-      const seriesModel = model.series.find(s => s.id === series.id);
-      if (!seriesModel) return false;
-      return ['everything', 'filter'].includes(seriesModel.split_mode);
-    }));
+    const nonSplitSeries = first(
+      visData[model.id].series.filter(series => {
+        const seriesModel = model.series.find(s => s.id === series.id);
+        if (!seriesModel) return false;
+        return ['everything', 'filter'].includes(seriesModel.split_mode);
+      })
+    );
 
     const indexOfNonSplit = nonSplitSeries ? findIndex(model.series, s => s.id === nonSplitSeries.id) : null;
-
 
     const rows = Object.keys(splitsVisData).map(key => {
       const splitData = splitsVisData[key];
       const { series, label } = splitData;
-      const newSeries = (indexOfNonSplit != null && indexOfNonSplit > 0) ?  [...series, nonSplitSeries] : [nonSplitSeries, ...series];
+      const newSeries = indexOfNonSplit != null && indexOfNonSplit > 0 ? [...series, nonSplitSeries] : [nonSplitSeries, ...series];
       const newVisData = {
         [model.id]: {
           id: model.id,
@@ -59,9 +60,7 @@ export function visWithSplits(WrappedComponent) {
       );
     });
 
-    return (
-      <div className="splitVis">{rows}</div>
-    );
+    return <div className="splitVis">{rows}</div>;
   }
   SplitVisComponent.displayName = `SplitVisComponent(${getDisplayName(WrappedComponent)})`;
   return SplitVisComponent;

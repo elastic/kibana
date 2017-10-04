@@ -5,20 +5,21 @@ import uuid from 'uuid';
 import AggRow from './agg_row';
 import AggSelect from './agg_select';
 
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
-import createTextHandler from '../lib/create_text_handler';
+import createChangeHandler from '../../lib/component_utils/create_change_handler';
+import createSelectHandler from '../../lib/component_utils/create_select_handler';
+import createTextHandler from '../../lib/component_utils/create_text_handler';
 import Vars from './vars';
 
 import { htmlIdGenerator } from 'ui_framework/services';
 
 class CalculationAgg extends Component {
-
   componentWillMount() {
     if (!this.props.model.variables) {
-      this.props.onChange(_.assign({}, this.props.model, {
-        variables: [{ id: uuid.v1() }]
-      }));
+      this.props.onChange(
+        _.assign({}, this.props.model, {
+          variables: [{ id: uuid.v1() }]
+        })
+      );
     }
   }
 
@@ -45,19 +46,10 @@ class CalculationAgg extends Component {
         <div className="vis_editor__row_item">
           <div>
             <div className="vis_editor__label">Aggregation</div>
-            <AggSelect
-              siblings={this.props.siblings}
-              value={model.type}
-              onChange={handleSelectChange('type')}
-            />
+            <AggSelect siblings={this.props.siblings} value={model.type} onChange={handleSelectChange('type')} />
             <div className="vis_editor__variables">
               <div className="vis_editor__label">Variables</div>
-              <Vars
-                metrics={siblings}
-                onChange={handleChange}
-                name="variables"
-                model={model}
-              />
+              <Vars metrics={siblings} onChange={handleChange} name="variables" model={model} />
             </div>
             <div className="vis_editor__row_item">
               <label className="vis_editor__label" htmlFor={htmlId('painless')}>
@@ -77,7 +69,6 @@ class CalculationAgg extends Component {
       </AggRow>
     );
   }
-
 }
 
 CalculationAgg.propTypes = {
@@ -89,7 +80,7 @@ CalculationAgg.propTypes = {
   onDelete: PropTypes.func,
   panel: PropTypes.object,
   series: PropTypes.object,
-  siblings: PropTypes.array,
+  siblings: PropTypes.array
 };
 
 export default CalculationAgg;

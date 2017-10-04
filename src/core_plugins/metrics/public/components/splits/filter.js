@@ -1,5 +1,5 @@
-import createTextHandler from '../lib/create_text_handler';
-import createSelectHandler from '../lib/create_select_handler';
+import createTextHandler from '../../lib/component_utils/create_text_handler';
+import createSelectHandler from '../../lib/component_utils/create_select_handler';
 import GroupBySelect from './group_by_select';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -14,17 +14,10 @@ export const SplitByFilter = props => {
     <div className="vis_editor__split-container">
       <div className="vis_editor__label">Group By</div>
       <div className="vis_editor__split-selects">
-        <GroupBySelect
-          value={model.split_mode}
-          onChange={handleSelectChange('split_mode')}
-        />
+        <GroupBySelect value={model.split_mode} onChange={handleSelectChange('split_mode')} />
       </div>
       <div className="vis_editor__label">Query String</div>
-      <input
-        className="vis_editor__split-filter"
-        value={model.filter}
-        onChange={handleTextChange('filter')}
-      />
+      <input className="vis_editor__split-filter" value={model.filter} onChange={handleTextChange('filter')} />
     </div>
   );
 };

@@ -4,10 +4,10 @@ import AggRow from './agg_row';
 import AggSelect from './agg_select';
 import MetricSelect from './metric_select';
 import Select from 'react-select';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
-import createTextHandler from '../lib/create_text_handler';
-import createNumberHandler from '../lib/create_number_handler';
+import createChangeHandler from '../../lib/component_utils/create_change_handler';
+import createSelectHandler from '../../lib/component_utils/create_select_handler';
+import createTextHandler from '../../lib/component_utils/create_text_handler';
+import createNumberHandler from '../../lib/component_utils/create_number_handler';
 import { htmlIdGenerator } from 'ui_framework/services';
 
 export const MovingAverageAgg = props => {
@@ -30,42 +30,26 @@ export const MovingAverageAgg = props => {
     { label: 'Holt-Linear', value: 'holt' },
     { label: 'Holt-Winters', value: 'holt_winters' }
   ];
-  const minimizeOptions = [
-    { label: 'True', value: 1 },
-    { label: 'False', value: 0 }
-  ];
+  const minimizeOptions = [{ label: 'True', value: 1 }, { label: 'False', value: 0 }];
   const htmlId = htmlIdGenerator();
   return (
-    <AggRow
-      disableDelete={props.disableDelete}
-      model={props.model}
-      onAdd={props.onAdd}
-      onDelete={props.onDelete}
-      siblings={props.siblings}
-    >
+    <AggRow disableDelete={props.disableDelete} model={props.model} onAdd={props.onAdd} onDelete={props.onDelete} siblings={props.siblings}>
       <div className="vis_editor__row_item">
         <div className="vis_editor__agg_row-item">
           <div className="vis_editor__row_item">
             <div className="vis_editor__label">Aggregation</div>
-            <AggSelect
-              siblings={props.siblings}
-              value={model.type}
-              onChange={handleSelectChange('type')}
-            />
+            <AggSelect siblings={props.siblings} value={model.type} onChange={handleSelectChange('type')} />
           </div>
           <div className="vis_editor__row_item">
             <div className="vis_editor__label">Metric</div>
-            <MetricSelect
-              onChange={handleSelectChange('field')}
-              metrics={siblings}
-              metric={model}
-              value={model.field}
-            />
+            <MetricSelect onChange={handleSelectChange('field')} metrics={siblings} metric={model} value={model.field} />
           </div>
         </div>
         <div className="vis_editor__agg_row-item">
           <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('model')}>Model</label>
+            <label className="vis_editor__label" htmlFor={htmlId('model')}>
+              Model
+            </label>
             <Select
               inputProps={{ id: htmlId('model') }}
               clearable={false}
@@ -88,7 +72,9 @@ export const MovingAverageAgg = props => {
             />
           </div>
           <div className="vis_editor__row_item">
-            <label className="vis_editor__label" htmlFor={htmlId('minimize')}>Minimize</label>
+            <label className="vis_editor__label" htmlFor={htmlId('minimize')}>
+              Minimize
+            </label>
             <Select
               inputProps={{ id: htmlId('minimize') }}
               placeholder="Select..."
@@ -126,5 +112,5 @@ MovingAverageAgg.propTypes = {
   onDelete: PropTypes.func,
   panel: PropTypes.object,
   series: PropTypes.object,
-  siblings: PropTypes.array,
+  siblings: PropTypes.array
 };

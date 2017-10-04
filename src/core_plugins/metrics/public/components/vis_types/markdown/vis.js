@@ -3,14 +3,14 @@ import React from 'react';
 import _ from 'lodash';
 import color from 'color';
 import Markdown from 'react-markdown';
-import replaceVars from '../../lib/replace_vars';
-import convertSeriesToVars from '../../lib/convert_series_to_vars';
+import replaceVars from '../../../lib/component_utils/replace_vars';
+import convertSeriesToVars from '../../../lib/component_utils/convert_series_to_vars';
 
 function MarkdownVisualization(props) {
   const { backgroundColor, model, visData, dateFormat } = props;
   const series = _.get(visData, `${model.id}.series`, []);
   const variables = convertSeriesToVars(series, model, dateFormat);
-  const style = { };
+  const style = {};
   let reversed = props.reversed;
   const panelBackgroundColor = model.background_color || backgroundColor;
   if (panelBackgroundColor) {
@@ -19,22 +19,24 @@ function MarkdownVisualization(props) {
   }
   let markdown;
   if (model.markdown) {
-    const markdownSource = replaceVars(model.markdown, {}, {
-      _all: variables,
-      ...variables
-    });
+    const markdownSource = replaceVars(
+      model.markdown,
+      {},
+      {
+        _all: variables,
+        ...variables
+      }
+    );
     let className = 'thorMarkdown';
     let contentClassName = `thorMarkdown__content ${model.markdown_vertical_align}`;
     if (model.markdown_scrollbars) contentClassName += ' scrolling';
     if (reversed) className += ' reversed';
     markdown = (
       <div className={className}>
-        <style type="text/css">
-          {model.markdown_css}
-        </style>
+        <style type="text/css">{model.markdown_css}</style>
         <div className={contentClassName}>
           <div id={`markdown-${model.id}`}>
-            <Markdown escapeHtml={true} source={markdownSource}/>
+            <Markdown escapeHtml={true} source={markdownSource} />
           </div>
         </div>
       </div>

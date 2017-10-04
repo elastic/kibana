@@ -3,8 +3,8 @@ import React from 'react';
 import AggSelect from './agg_select';
 import FieldSelect from './field_select';
 import AggRow from './agg_row';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
+import createChangeHandler from '../../lib/component_utils/create_change_handler';
+import createSelectHandler from '../../lib/component_utils/create_select_handler';
 import { htmlIdGenerator } from 'ui_framework/services';
 
 function StandardAgg(props) {
@@ -17,45 +17,33 @@ function StandardAgg(props) {
     restrict = 'string';
   }
 
-  const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
+  const indexPattern = (series.override_index_pattern && series.series_index_pattern) || panel.index_pattern;
   const htmlId = htmlIdGenerator();
 
   return (
-    <AggRow
-      disableDelete={props.disableDelete}
-      model={props.model}
-      onAdd={props.onAdd}
-      onDelete={props.onDelete}
-      siblings={props.siblings}
-    >
+    <AggRow disableDelete={props.disableDelete} model={props.model} onAdd={props.onAdd} onDelete={props.onDelete} siblings={props.siblings}>
       <div className="vis_editor__item">
         <div className="vis_editor__label">Aggregation</div>
-        <AggSelect
-          siblings={props.siblings}
-          value={model.type}
-          onChange={handleSelectChange('type')}
-        />
+        <AggSelect siblings={props.siblings} value={model.type} onChange={handleSelectChange('type')} />
       </div>
-      {
-        model.type !== 'count'
-        ? (
-          <div className="vis_editor__item">
-            <label className="vis_editor__label" htmlFor={htmlId('field')}>Field</label>
-            <FieldSelect
-              id={htmlId('field')}
-              fields={fields}
-              type={model.type}
-              restrict={restrict}
-              indexPattern={indexPattern}
-              value={model.field}
-              onChange={handleSelectChange('field')}
-            />
-          </div>
-        ) : null
-      }
+      {model.type !== 'count' ? (
+        <div className="vis_editor__item">
+          <label className="vis_editor__label" htmlFor={htmlId('field')}>
+            Field
+          </label>
+          <FieldSelect
+            id={htmlId('field')}
+            fields={fields}
+            type={model.type}
+            restrict={restrict}
+            indexPattern={indexPattern}
+            value={model.field}
+            onChange={handleSelectChange('field')}
+          />
+        </div>
+      ) : null}
     </AggRow>
   );
-
 }
 
 StandardAgg.propTypes = {
@@ -67,7 +55,7 @@ StandardAgg.propTypes = {
   onDelete: PropTypes.func,
   panel: PropTypes.object,
   series: PropTypes.object,
-  siblings: PropTypes.array,
+  siblings: PropTypes.array
 };
 
 export default StandardAgg;

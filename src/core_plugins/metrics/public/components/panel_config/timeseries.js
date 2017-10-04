@@ -4,14 +4,13 @@ import SeriesEditor from '../series_editor';
 import AnnotationsEditor from '../annotations_editor';
 import { IndexPattern } from '../index_pattern';
 import Select from 'react-select';
-import createSelectHandler from '../lib/create_select_handler';
-import createTextHandler from '../lib/create_text_handler';
+import createSelectHandler from '../../lib/component_utils/create_select_handler';
+import createTextHandler from '../../lib/component_utils/create_text_handler';
 import ColorPicker from '../color_picker';
 import YesNo from '../yes_no';
 import { htmlIdGenerator } from 'ui_framework/services';
 
 class TimeseriesPanelConfig extends Component {
-
   constructor(props) {
     super(props);
     this.state = { selectedTab: 'data' };
@@ -34,10 +33,7 @@ class TimeseriesPanelConfig extends Component {
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
     const htmlId = htmlIdGenerator();
-    const positionOptions = [
-      { label: 'Right', value: 'right' },
-      { label: 'Left', value: 'left' }
-    ];
+    const positionOptions = [{ label: 'Right', value: 'right' }, { label: 'Left', value: 'left' }];
     const legendPositionOptions = [
       { label: 'Right', value: 'right' },
       { label: 'Left', value: 'left' },
@@ -45,33 +41,17 @@ class TimeseriesPanelConfig extends Component {
     ];
     let view;
     if (selectedTab === 'data') {
-      view = (
-        <SeriesEditor
-          fields={this.props.fields}
-          model={this.props.model}
-          name={this.props.name}
-          onChange={this.props.onChange}
-        />
-      );
+      view = <SeriesEditor fields={this.props.fields} model={this.props.model} name={this.props.name} onChange={this.props.onChange} />;
     } else if (selectedTab === 'annotations') {
-      view = (
-        <AnnotationsEditor
-          fields={this.props.fields}
-          model={this.props.model}
-          name="annotations"
-          onChange={this.props.onChange}
-        />
-      );
+      view = <AnnotationsEditor fields={this.props.fields} model={this.props.model} name="annotations" onChange={this.props.onChange} />;
     } else {
       view = (
         <div className="vis_editor__container">
-          <IndexPattern
-            fields={this.props.fields}
-            model={this.props.model}
-            onChange={this.props.onChange}
-          />
+          <IndexPattern fields={this.props.fields} model={this.props.model} onChange={this.props.onChange} />
           <div className="vis_editor__vis_config-row">
-            <label className="vis_editor__label" htmlFor={htmlId('axisMin')}>Axis Min</label>
+            <label className="vis_editor__label" htmlFor={htmlId('axisMin')}>
+              Axis Min
+            </label>
             <input
               id={htmlId('axisMin')}
               className="vis_editor__input-grows"
@@ -79,7 +59,9 @@ class TimeseriesPanelConfig extends Component {
               onChange={handleTextChange('axis_min')}
               value={model.axis_min}
             />
-            <label className="vis_editor__label" htmlFor={htmlId('axisMax')}>Axis Max</label>
+            <label className="vis_editor__label" htmlFor={htmlId('axisMax')}>
+              Axis Max
+            </label>
             <input
               id={htmlId('axisMax')}
               className="vis_editor__input-grows"
@@ -87,7 +69,9 @@ class TimeseriesPanelConfig extends Component {
               onChange={handleTextChange('axis_max')}
               value={model.axis_max}
             />
-            <label className="vis_editor__label" htmlFor={htmlId('axisPos')}>Axis Position</label>
+            <label className="vis_editor__label" htmlFor={htmlId('axisPos')}>
+              Axis Position
+            </label>
             <div className="vis_editor__row_item">
               <Select
                 inputProps={{ id: htmlId('axisPos') }}
@@ -101,18 +85,12 @@ class TimeseriesPanelConfig extends Component {
           </div>
           <div className="vis_editor__vis_config-row">
             <div className="vis_editor__label">Background Color</div>
-            <ColorPicker
-              onChange={this.props.onChange}
-              name="background_color"
-              value={model.background_color}
-            />
+            <ColorPicker onChange={this.props.onChange} name="background_color" value={model.background_color} />
             <div className="vis_editor__label">Show Legend</div>
-            <YesNo
-              value={model.show_legend}
-              name="show_legend"
-              onChange={this.props.onChange}
-            />
-            <label className="vis_editor__label" htmlFor={htmlId('legendPos')}>Legend Position</label>
+            <YesNo value={model.show_legend} name="show_legend" onChange={this.props.onChange} />
+            <label className="vis_editor__label" htmlFor={htmlId('legendPos')}>
+              Legend Position
+            </label>
             <div className="vis_editor__row_item">
               <Select
                 inputProps={{ id: htmlId('legendPos') }}
@@ -123,14 +101,12 @@ class TimeseriesPanelConfig extends Component {
               />
             </div>
             <div className="vis_editor__label">Display Grid</div>
-            <YesNo
-              value={model.show_grid}
-              name="show_grid"
-              onChange={this.props.onChange}
-            />
+            <YesNo value={model.show_grid} name="show_grid" onChange={this.props.onChange} />
           </div>
           <div className="vis_editor__vis_config-row">
-            <label className="vis_editor__label" htmlFor={htmlId('panelFilter')}>Panel Filter</label>
+            <label className="vis_editor__label" htmlFor={htmlId('panelFilter')}>
+              Panel Filter
+            </label>
             <input
               id={htmlId('panelFilter')}
               className="vis_editor__input-grows"
@@ -139,11 +115,7 @@ class TimeseriesPanelConfig extends Component {
               value={model.filter}
             />
             <div className="vis_editor__label">Ignore Global Filter</div>
-            <YesNo
-              value={model.ignore_global_filter}
-              name="ignore_global_filter"
-              onChange={this.props.onChange}
-            />
+            <YesNo value={model.ignore_global_filter} name="ignore_global_filter" onChange={this.props.onChange} />
           </div>
         </div>
       );
@@ -154,38 +126,39 @@ class TimeseriesPanelConfig extends Component {
           <button
             role="tab"
             aria-selected={selectedTab === 'data'}
-            className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
+            className={`kbnTabs__tab${(selectedTab === 'data' && '-active') || ''}`}
             onClick={() => this.switchTab('data')}
-          >Data
+          >
+            Data
           </button>
           <button
             role="tab"
             aria-selected={selectedTab === 'options'}
-            className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
+            className={`kbnTabs__tab${(selectedTab === 'options' && '-active') || ''}`}
             onClick={() => this.switchTab('options')}
-          >Panel Options
+          >
+            Panel Options
           </button>
           <button
             role="tab"
             aria-selected={selectedTab === 'annotations'}
-            className={`kbnTabs__tab${selectedTab === 'annotations' && '-active' || ''}`}
+            className={`kbnTabs__tab${(selectedTab === 'annotations' && '-active') || ''}`}
             onClick={() => this.switchTab('annotations')}
-          >Annotations
+          >
+            Annotations
           </button>
         </div>
         {view}
       </div>
     );
   }
-
-
 }
 
 TimeseriesPanelConfig.propTypes = {
   fields: PropTypes.object,
   model: PropTypes.object,
   onChange: PropTypes.func,
-  visData: PropTypes.object,
+  visData: PropTypes.object
 };
 
 export default TimeseriesPanelConfig;

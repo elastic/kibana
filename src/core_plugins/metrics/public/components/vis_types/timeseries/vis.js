@@ -1,11 +1,11 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import tickFormatter from '../../lib/tick_formatter';
+import tickFormatter from '../../../lib/component_utils/tick_formatter';
 import _ from 'lodash';
-import Timeseries from 'plugins/metrics/visualizations/components/timeseries';
+import Timeseries from 'plugins/metrics/components/timeseries';
 import color from 'color';
-import replaceVars from '../../lib/replace_vars';
-import { getAxisLabelString } from '../../lib/get_axis_label_string';
+import replaceVars from '../../../lib/component_utils/replace_vars';
+import { getAxisLabelString } from '../../../lib/component_utils/get_axis_label_string';
 
 function hasSeperateAxis(row) {
   return row.seperate_axis;
@@ -17,16 +17,18 @@ function TimeseriesVisualization(props) {
   let annotations;
   if (model.annotations && _.isArray(model.annotations)) {
     annotations = model.annotations.map(annotation => {
-      const data = _.get(visData, `${model.id}.annotations.${annotation.id}`, [])
-        .map(item => [item.key, item.docs]);
+      const data = _.get(visData, `${model.id}.annotations.${annotation.id}`, []).map(item => [item.key, item.docs]);
       return {
         id: annotation.id,
         color: annotation.color,
         icon: annotation.icon,
         series: data.map(s => {
-          return [s[0], s[1].map(doc => {
-            return replaceVars(annotation.template, null, doc);
-          })];
+          return [
+            s[0],
+            s[1].map(doc => {
+              return replaceVars(annotation.template, null, doc);
+            })
+          ];
         })
       };
     });
@@ -42,22 +44,16 @@ function TimeseriesVisualization(props) {
     axisFormatterTemplate: _.get(firstSeries, 'value_template')
   };
 
-
   if (model.axis_min) mainAxis.min = model.axis_min;
   if (model.axis_max) mainAxis.max = model.axis_max;
 
   const yaxes = [mainAxis];
 
-
   seriesModel.forEach(s => {
-    series
-      .filter(r => _.startsWith(r.id, s.id))
-      .forEach(r => r.tickFormatter = tickFormatter(s.formatter, s.value_template));
+    series.filter(r => _.startsWith(r.id, s.id)).forEach(r => (r.tickFormatter = tickFormatter(s.formatter, s.value_template)));
 
     if (s.hide_in_legend) {
-      series
-        .filter(r => _.startsWith(r.id, s.id))
-        .forEach(r => delete r.label);
+      series.filter(r => _.startsWith(r.id, s.id)).forEach(r => delete r.label);
     }
     if (s.stacked === 'percent') {
       s.seperate_axis = true;
@@ -73,7 +69,7 @@ function TimeseriesVisualization(props) {
             return item.data[index][1] + acc;
           }, 0);
           seriesData.forEach(item => {
-            item.data[index][1] = rowSum && item.data[index][1] / rowSum || 0;
+            item.data[index][1] = (rowSum && item.data[index][1] / rowSum) || 0;
           });
         });
       }
@@ -90,7 +86,7 @@ function TimeseriesVisualization(props) {
 
   let axisCount = 1;
   if (seriesModel.some(hasSeperateAxis)) {
-    seriesModel.forEach((row) => {
+    seriesModel.forEach(row => {
       if (row.seperate_axis) {
         axisCount++;
 
@@ -104,19 +100,15 @@ function TimeseriesVisualization(props) {
           axisFormatterTemplate: row.value_template
         };
 
-
-
         if (row.axis_min != null) yaxis.min = row.axis_min;
         if (row.axis_max != null) yaxis.max = row.axis_max;
 
         yaxes.push(yaxis);
 
         // Assign axis and formatter to each series
-        series
-          .filter(r => _.startsWith(r.id, row.id))
-          .forEach(r => {
-            r.yaxis = axisCount;
-          });
+        series.filter(r => _.startsWith(r.id, row.id)).forEach(r => {
+          r.yaxis = axisCount;
+        });
       }
     });
   }
@@ -132,14 +124,14 @@ function TimeseriesVisualization(props) {
     reversed: props.reversed,
     showGrid: Boolean(model.show_grid),
     legend: Boolean(model.show_legend),
-    onBrush: (ranges) => {
+    onBrush: ranges => {
       if (props.onBrush) props.onBrush(ranges);
     }
   };
   if (interval) {
     params.xaxisLabel = getAxisLabelString(interval);
   }
-  const style = { };
+  const style = {};
   const panelBackgroundColor = model.background_color || backgroundColor;
   if (panelBackgroundColor) {
     style.backgroundColor = panelBackgroundColor;
@@ -147,10 +139,9 @@ function TimeseriesVisualization(props) {
   }
   return (
     <div className="dashboard__visualization" style={style}>
-      <Timeseries {...params}/>
+      <Timeseries {...params} />
     </div>
   );
-
 }
 
 TimeseriesVisualization.propTypes = {

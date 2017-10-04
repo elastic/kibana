@@ -3,8 +3,8 @@ import React from 'react';
 import AggSelect from './agg_select';
 import MetricSelect from './metric_select';
 import AggRow from './agg_row';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
+import createChangeHandler from '../../lib/component_utils/create_change_handler';
+import createSelectHandler from '../../lib/component_utils/create_select_handler';
 
 export const PositiveOnlyAgg = props => {
   const { siblings } = props;
@@ -16,29 +16,14 @@ export const PositiveOnlyAgg = props => {
   const handleSelectChange = createSelectHandler(handleChange);
 
   return (
-    <AggRow
-      disableDelete={props.disableDelete}
-      model={props.model}
-      onAdd={props.onAdd}
-      onDelete={props.onDelete}
-      siblings={props.siblings}
-    >
+    <AggRow disableDelete={props.disableDelete} model={props.model} onAdd={props.onAdd} onDelete={props.onDelete} siblings={props.siblings}>
       <div className="vis_editor__row_item">
         <div className="vis_editor__label">Aggregation</div>
-        <AggSelect
-          siblings={props.siblings}
-          value={model.type}
-          onChange={handleSelectChange('type')}
-        />
+        <AggSelect siblings={props.siblings} value={model.type} onChange={handleSelectChange('type')} />
       </div>
       <div className="vis_editor__row_item">
         <div className="vis_editor__label">Metric</div>
-        <MetricSelect
-          onChange={handleSelectChange('field')}
-          metrics={siblings}
-          metric={model}
-          value={model.field}
-        />
+        <MetricSelect onChange={handleSelectChange('field')} metrics={siblings} metric={model} value={model.field} />
       </div>
     </AggRow>
   );
@@ -53,5 +38,5 @@ PositiveOnlyAgg.propTypes = {
   onDelete: PropTypes.func,
   panel: PropTypes.object,
   series: PropTypes.object,
-  siblings: PropTypes.array,
+  siblings: PropTypes.array
 };

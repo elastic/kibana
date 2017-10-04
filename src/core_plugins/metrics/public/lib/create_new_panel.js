@@ -1,4 +1,4 @@
-import newSeriesFn from '../components/lib/new_series_fn';
+import newSeriesFn from './component_utils/new_series_fn';
 import uuid from 'uuid';
 export default () => {
   const id = uuid.v1();

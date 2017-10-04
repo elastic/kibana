@@ -2,9 +2,9 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import Select from 'react-select';
 import DataFormatPicker from '../../data_format_picker';
-import createSelectHandler from '../../lib/create_select_handler';
+import createSelectHandler from '../../../lib/component_utils/create_select_handler';
 import YesNo from '../../yes_no';
-import createTextHandler from '../../lib/create_text_handler';
+import createTextHandler from '../../../lib/component_utils/create_text_handler';
 import { IndexPattern } from '../../index_pattern';
 import { htmlIdGenerator } from 'ui_framework/services';
 
@@ -27,26 +27,13 @@ function TimeseriesConfig(props) {
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
 
-  const stackedOptions = [
-    { label: 'None', value: 'none' },
-    { label: 'Stacked', value: 'stacked' },
-    { label: 'Percent', value: 'percent' }
-  ];
+  const stackedOptions = [{ label: 'None', value: 'none' }, { label: 'Stacked', value: 'stacked' }, { label: 'Percent', value: 'percent' }];
 
-  const positionOptions = [
-    { label: 'Right', value: 'right' },
-    { label: 'Left', value: 'left' }
-  ];
+  const positionOptions = [{ label: 'Right', value: 'right' }, { label: 'Left', value: 'left' }];
 
-  const chartTypeOptions = [
-    { label: 'Bar', value: 'bar' },
-    { label: 'Line', value: 'line' }
-  ];
+  const chartTypeOptions = [{ label: 'Bar', value: 'bar' }, { label: 'Line', value: 'line' }];
 
-  const splitColorOptions = [
-    { label: 'Gradient', value: 'gradient' },
-    { label: 'Rainbow', value: 'rainbow' }
-  ];
+  const splitColorOptions = [{ label: 'Gradient', value: 'gradient' }, { label: 'Rainbow', value: 'rainbow' }];
 
   let type;
   if (model.chart_type === 'line') {
@@ -108,11 +95,7 @@ function TimeseriesConfig(props) {
           value={model.point_size}
         />
         <div className="vis_editor__label">Steps</div>
-        <YesNo
-          value={model.steps}
-          name="steps"
-          onChange={props.onChange}
-        />
+        <YesNo value={model.steps} name="steps" onChange={props.onChange} />
       </div>
     );
   }
@@ -174,10 +157,7 @@ function TimeseriesConfig(props) {
     <div>
       <div className="vis_editor__series_config-container">
         <div className="vis_editor__series_config-row">
-          <DataFormatPicker
-            onChange={handleSelectChange('formatter')}
-            value={model.formatter}
-          />
+          <DataFormatPicker onChange={handleSelectChange('formatter')} value={model.formatter} />
           <label className="vis_editor__label" htmlFor={htmlId('template')}>
             Template (eg.<code>{'{{value}}/s'}</code>)
           </label>
@@ -188,7 +168,7 @@ function TimeseriesConfig(props) {
             value={model.value_template}
           />
         </div>
-        { type }
+        {type}
         <div className="vis_editor__series_config-row">
           <label className="vis_editor__label" htmlFor={htmlId('offset')}>
             Offset series time by (1m, 1h, 1w, 1d)
@@ -201,11 +181,7 @@ function TimeseriesConfig(props) {
             value={model.offset_time}
           />
           <div className="vis_editor__label">Hide in Legend</div>
-          <YesNo
-            value={model.hide_in_legend}
-            name="hide_in_legend"
-            onChange={props.onChange}
-          />
+          <YesNo value={model.hide_in_legend} name="hide_in_legend" onChange={props.onChange} />
           <label className="vis_editor__label" htmlFor={htmlId('splitColor')}>
             Split Color Theme
           </label>
@@ -221,11 +197,7 @@ function TimeseriesConfig(props) {
         </div>
         <div className="vis_editor__series_config-row">
           <div className="vis_editor__label">Separate Axis</div>
-          <YesNo
-            value={model.seperate_axis}
-            name="seperate_axis"
-            onChange={props.onChange}
-          />
+          <YesNo value={model.seperate_axis} name="seperate_axis" onChange={props.onChange} />
           <label className="vis_editor__label" htmlFor={htmlId('axisMin')}>
             Axis Min
           </label>
@@ -264,11 +236,7 @@ function TimeseriesConfig(props) {
         </div>
         <div className="vis_editor__series_config-row">
           <div className="vis_editor__label">Override Index Pattern</div>
-          <YesNo
-            value={model.override_index_pattern}
-            name="override_index_pattern"
-            onChange={props.onChange}
-          />
+          <YesNo value={model.override_index_pattern} name="override_index_pattern" onChange={props.onChange} />
           <IndexPattern
             {...props}
             prefix="series_"
@@ -280,7 +248,6 @@ function TimeseriesConfig(props) {
       </div>
     </div>
   );
-
 }
 
 TimeseriesConfig.propTypes = {

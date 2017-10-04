@@ -2,18 +2,17 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
 import AddDeleteButtons from '../add_delete_buttons';
-import * as collectionActions from '../lib/collection_actions';
+import * as collectionActions from '../../lib/component_utils/collection_actions';
 import MetricSelect from './metric_select';
 
 class CalculationVars extends Component {
-
   constructor(props) {
     super(props);
     this.renderRow = this.renderRow.bind(this);
   }
 
   handleChange(item, name) {
-    return (e) => {
+    return e => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       const part = {};
       part[name] = _.get(e, 'value', _.get(e, 'target.value'));
@@ -24,7 +23,7 @@ class CalculationVars extends Component {
   renderRow(row, i, items) {
     const handleAdd = collectionActions.handleAdd.bind(null, this.props);
     const handleDelete = collectionActions.handleDelete.bind(null, this.props, row);
-    return  (
+    return (
       <div className="vis_editor__calc_vars-row" key={row.id}>
         <div className="vis_editor__calc_vars-name">
           <input
@@ -46,11 +45,7 @@ class CalculationVars extends Component {
           />
         </div>
         <div className="vis_editor__calc_vars-control">
-          <AddDeleteButtons
-            onAdd={handleAdd}
-            onDelete={handleDelete}
-            disableDelete={items.length < 2}
-          />
+          <AddDeleteButtons onAdd={handleAdd} onDelete={handleDelete} disableDelete={items.length < 2} />
         </div>
       </div>
     );
@@ -58,15 +53,10 @@ class CalculationVars extends Component {
 
   render() {
     const { model, name } = this.props;
-    if (!model[name]) return (<div/>);
+    if (!model[name]) return <div />;
     const rows = model[name].map(this.renderRow);
-    return (
-      <div className="vis_editor__calc_vars">
-        { rows }
-      </div>
-    );
+    return <div className="vis_editor__calc_vars">{rows}</div>;
   }
-
 }
 
 CalculationVars.defaultProps = {

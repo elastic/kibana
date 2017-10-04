@@ -1,4 +1,4 @@
-import createSelectHandler from '../lib/create_select_handler';
+import createSelectHandler from '../../lib/component_utils/create_select_handler';
 import GroupBySelect from './group_by_select';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -10,14 +10,10 @@ function SplitByEverything(props) {
     <div className="vis_editor__split-container">
       <div className="vis_editor__label">Group By</div>
       <div className="vis_editor__split-selects">
-        <GroupBySelect
-          value={model.split_mode}
-          onChange={handleSelectChange('split_mode')}
-        />
+        <GroupBySelect value={model.split_mode} onChange={handleSelectChange('split_mode')} />
       </div>
     </div>
   );
-
 }
 
 SplitByEverything.propTypes = {
@@ -26,4 +22,3 @@ SplitByEverything.propTypes = {
 };
 
 export default SplitByEverything;
-

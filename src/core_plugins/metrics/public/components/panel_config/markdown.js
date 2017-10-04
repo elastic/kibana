@@ -4,8 +4,8 @@ import SeriesEditor from '../series_editor';
 import { IndexPattern } from '../index_pattern';
 import 'brace/mode/less';
 import Select from 'react-select';
-import createSelectHandler from '../lib/create_select_handler';
-import createTextHandler from '../lib/create_text_handler';
+import createSelectHandler from '../../lib/component_utils/create_select_handler';
+import createTextHandler from '../../lib/component_utils/create_text_handler';
 import ColorPicker from '../color_picker';
 import YesNo from '../yes_no';
 import MarkdownEditor from '../markdown_editor';
@@ -15,7 +15,6 @@ import { htmlIdGenerator } from 'ui_framework/services';
 const lessC = less(window, { env: 'production' });
 
 class MarkdownPanelConfig extends Component {
-
   constructor(props) {
     super(props);
     this.state = { selectedTab: 'markdown' };
@@ -49,14 +48,10 @@ class MarkdownPanelConfig extends Component {
 
     const htmlId = htmlIdGenerator();
 
-    const alignOptions = [
-      { label: 'Top', value: 'top' },
-      { label: 'Middle', value: 'middle' },
-      { label: 'Bottom', value: 'bottom' }
-    ];
+    const alignOptions = [{ label: 'Top', value: 'top' }, { label: 'Middle', value: 'middle' }, { label: 'Bottom', value: 'bottom' }];
     let view;
     if (selectedTab === 'markdown') {
-      view = (<MarkdownEditor {...this.props}/>);
+      view = <MarkdownEditor {...this.props} />;
     } else if (selectedTab === 'data') {
       view = (
         <SeriesEditor
@@ -70,18 +65,10 @@ class MarkdownPanelConfig extends Component {
     } else {
       view = (
         <div className="vis_editor__container">
-          <IndexPattern
-            fields={this.props.fields}
-            model={this.props.model}
-            onChange={this.props.onChange}
-          />
+          <IndexPattern fields={this.props.fields} model={this.props.model} onChange={this.props.onChange} />
           <div className="vis_editor__vis_config-row">
             <div className="vis_editor__label">Background Color</div>
-            <ColorPicker
-              onChange={this.props.onChange}
-              name="background_color"
-              value={model.background_color}
-            />
+            <ColorPicker onChange={this.props.onChange} name="background_color" value={model.background_color} />
             <label className="vis_editor__label" htmlFor={htmlId('panelFilter')}>
               Panel Filter
             </label>
@@ -93,19 +80,11 @@ class MarkdownPanelConfig extends Component {
               value={model.filter}
             />
             <div className="vis_editor__label">Ignore Global Filter</div>
-            <YesNo
-              value={model.ignore_global_filter}
-              name="ignore_global_filter"
-              onChange={this.props.onChange}
-            />
+            <YesNo value={model.ignore_global_filter} name="ignore_global_filter" onChange={this.props.onChange} />
           </div>
           <div className="vis_editor__vis_config-row">
             <div className="vis_editor__label">Show Scrollbars</div>
-            <YesNo
-              value={model.markdown_scrollbars}
-              name="markdown_scrollbars"
-              onChange={this.props.onChange}
-            />
+            <YesNo value={model.markdown_scrollbars} name="markdown_scrollbars" onChange={this.props.onChange} />
             <label className="vis_editor__label" htmlFor={htmlId('valign')}>
               Vertical Alignment
             </label>
@@ -143,23 +122,26 @@ class MarkdownPanelConfig extends Component {
           <button
             role="tab"
             aria-selected={selectedTab === 'markdown'}
-            className={`kbnTabs__tab${selectedTab === 'markdown' && '-active' || ''}`}
+            className={`kbnTabs__tab${(selectedTab === 'markdown' && '-active') || ''}`}
             onClick={() => this.switchTab('markdown')}
-          >Markdown
+          >
+            Markdown
           </button>
           <button
             role="tab"
             aria-selected={selectedTab === 'data'}
-            className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
+            className={`kbnTabs__tab${(selectedTab === 'data' && '-active') || ''}`}
             onClick={() => this.switchTab('data')}
-          >Data
+          >
+            Data
           </button>
           <button
             role="tab"
             aria-selected={selectedTab === 'options'}
-            className={`kbnTabs__tab${selectedTab === 'options' && '-active' || ''}`}
+            className={`kbnTabs__tab${(selectedTab === 'options' && '-active') || ''}`}
             onClick={() => this.switchTab('options')}
-          >Panel Options
+          >
+            Panel Options
           </button>
         </div>
         {view}

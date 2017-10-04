@@ -2,11 +2,10 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
 import Select from 'react-select';
-import { durationOutputOptions, durationInputOptions } from './lib/durations';
+import { durationOutputOptions, durationInputOptions } from '../lib/component_utils/durations';
 const durationFormatTest = /[pnumshdwMY]+,[pnumshdwMY]+/;
 
 class DataFormatPicker extends Component {
-
   constructor(props) {
     super(props);
     this.handleChange = this.handleChange.bind(this);
@@ -25,7 +24,7 @@ class DataFormatPicker extends Component {
   }
 
   handleCustomChange() {
-    this.props.onChange({ value: this.custom && this.custom.value || '' });
+    this.props.onChange({ value: (this.custom && this.custom.value) || '' });
   }
 
   handleChange(value) {
@@ -42,18 +41,21 @@ class DataFormatPicker extends Component {
   }
 
   handleDurationChange(name) {
-    return (value) => {
+    return value => {
       if (name === 'decimals') {
         value = this.decimals;
       }
-      this.setState({
-        [name]: value.value
-      }, () => {
-        const { from, to, decimals } = this.state;
-        this.props.onChange({
-          value: `${from},${to},${decimals}`
-        });
-      });
+      this.setState(
+        {
+          [name]: value.value
+        },
+        () => {
+          const { from, to, decimals } = this.state;
+          this.props.onChange({
+            value: `${from},${to},${decimals}`
+          });
+        }
+      );
     };
   }
 
@@ -79,40 +81,23 @@ class DataFormatPicker extends Component {
       const [from, to, decimals] = value.split(',');
       return (
         <div className="vis_editor__data_format_picker-container">
-          <div className="vis_editor__label">
-            {this.props.label}
-          </div>
+          <div className="vis_editor__label">{this.props.label}</div>
           <div className="vis_editor__item">
-            <Select
-              clearable={false}
-              value={defaultValue}
-              options={options}
-              onChange={this.handleChange}
-            />
+            <Select clearable={false} value={defaultValue} options={options} onChange={this.handleChange} />
           </div>
           <div className="vis_editor__label">From</div>
           <div className="vis_editor__item">
-            <Select
-              clearable={false}
-              value={from}
-              options={durationInputOptions}
-              onChange={this.handleDurationChange('from')}
-            />
+            <Select clearable={false} value={from} options={durationInputOptions} onChange={this.handleDurationChange('from')} />
           </div>
           <div className="vis_editor__label">To</div>
           <div className="vis_editor__item">
-            <Select
-              clearable={false}
-              value={to}
-              options={durationOutputOptions}
-              onChange={this.handleDurationChange('to')}
-            />
+            <Select clearable={false} value={to} options={durationOutputOptions} onChange={this.handleDurationChange('to')} />
           </div>
           <div className="vis_editor__label">Decimal Places</div>
           <input
             className="vis_editor__input"
             defaultValue={decimals}
-            ref={(el) => this.decimals = el}
+            ref={el => (this.decimals = el)}
             onChange={this.handleDurationChange('decimals')}
             type="text"
           />
@@ -123,12 +108,15 @@ class DataFormatPicker extends Component {
       custom = (
         <div className="vis_editor__data_format_picker-custom_row">
           <div className="vis_editor__label">
-            Format String (See <a href="http://numeraljs.com/" target="_BLANK">Numeral.js</a>)
+            Format String (See{' '}
+            <a href="http://numeraljs.com/" target="_BLANK">
+              Numeral.js
+            </a>)
           </div>
           <input
             className="vis_editor__input"
             defaultValue={value}
-            ref={(el) => this.custom = el}
+            ref={el => (this.custom = el)}
             onChange={this.handleCustomChange}
             type="text"
           />
@@ -137,22 +125,14 @@ class DataFormatPicker extends Component {
     }
     return (
       <div className="vis_editor__data_format_picker-container">
-        <div className="vis_editor__label">
-          {this.props.label}
-        </div>
+        <div className="vis_editor__label">{this.props.label}</div>
         <div className="vis_editor__item">
-          <Select
-            clearable={false}
-            value={defaultValue}
-            options={options}
-            onChange={this.handleChange}
-          />
+          <Select clearable={false} value={defaultValue} options={options} onChange={this.handleChange} />
         </div>
         {custom}
       </div>
     );
   }
-
 }
 
 DataFormatPicker.defaultProps = {

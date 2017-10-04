@@ -3,19 +3,18 @@ import React, { Component } from 'react';
 import _ from 'lodash';
 import AddDeleteButtons from './add_delete_buttons';
 import Select from 'react-select';
-import * as collectionActions from './lib/collection_actions';
+import * as collectionActions from '../lib/component_utils/collection_actions';
 import ColorPicker from './color_picker';
 import { htmlIdGenerator } from 'ui_framework/services';
 
 class ColorRules extends Component {
-
   constructor(props) {
     super(props);
     this.renderRow = this.renderRow.bind(this);
   }
 
   handleChange(item, name, cast = String) {
-    return (e) => {
+    return e => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       const part = {};
       part[name] = cast(_.get(e, 'value', _.get(e, 'target.value')));
@@ -34,9 +33,9 @@ class ColorRules extends Component {
       { label: '> greater than', value: 'gt' },
       { label: '>= greater than or equal', value: 'gte' },
       { label: '< less than', value: 'lt' },
-      { label: '<= less than or equal', value: 'lte' },
+      { label: '<= less than or equal', value: 'lte' }
     ];
-    const handleColorChange = (part) => {
+    const handleColorChange = part => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       handleChange(_.assign({}, model, part));
     };
@@ -46,23 +45,15 @@ class ColorRules extends Component {
       secondary = (
         <div className="color_rules__secondary">
           <div className="color_rules__label">and {this.props.secondaryName} to</div>
-          <ColorPicker
-            onChange={handleColorChange}
-            name={this.props.secondaryVarName}
-            value={model[this.props.secondaryVarName]}
-          />
+          <ColorPicker onChange={handleColorChange} name={this.props.secondaryVarName} value={model[this.props.secondaryVarName]} />
         </div>
       );
     }
     return (
       <div key={model.id} className="color_rules__rule">
         <div className="color_rules__label">Set {this.props.primaryName} to</div>
-        <ColorPicker
-          onChange={handleColorChange}
-          name={this.props.primaryVarName}
-          value={model[this.props.primaryVarName]}
-        />
-        { secondary }
+        <ColorPicker onChange={handleColorChange} name={this.props.primaryVarName} value={model[this.props.primaryVarName]} />
+        {secondary}
         <label className="color_rules__label" htmlFor={htmlId('ifMetricIs')}>
           if metric is
         </label>
@@ -82,11 +73,7 @@ class ColorRules extends Component {
           onChange={this.handleChange(model, 'value', Number)}
         />
         <div className="color_rules__control">
-          <AddDeleteButtons
-            onAdd={handleAdd}
-            onDelete={handleDelete}
-            disableDelete={items.length < 2}
-          />
+          <AddDeleteButtons onAdd={handleAdd} onDelete={handleDelete} disableDelete={items.length < 2} />
         </div>
       </div>
     );
@@ -94,15 +81,10 @@ class ColorRules extends Component {
 
   render() {
     const { model, name } = this.props;
-    if (!model[name]) return (<div/>);
+    if (!model[name]) return <div />;
     const rows = model[name].map(this.renderRow);
-    return (
-      <div className="color_rules">
-        { rows }
-      </div>
-    );
+    return <div className="color_rules">{rows}</div>;
   }
-
 }
 
 ColorRules.defaultProps = {

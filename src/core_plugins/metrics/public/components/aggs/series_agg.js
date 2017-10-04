@@ -3,8 +3,8 @@ import React from 'react';
 import AggSelect from './agg_select';
 import Select from 'react-select';
 import AggRow from './agg_row';
-import createChangeHandler from '../lib/create_change_handler';
-import createSelectHandler from '../lib/create_select_handler';
+import createChangeHandler from '../../lib/component_utils/create_change_handler';
+import createSelectHandler from '../../lib/component_utils/create_select_handler';
 import { htmlIdGenerator } from 'ui_framework/services';
 
 function SeriesAgg(props) {
@@ -24,27 +24,19 @@ function SeriesAgg(props) {
     { label: 'Overall Max', value: 'overall_max' },
     { label: 'Overall Min', value: 'overall_min' },
     { label: 'Overall Avg', value: 'overall_avg' },
-    { label: 'Cumlative Sum', value: 'cumlative_sum' },
+    { label: 'Cumlative Sum', value: 'cumlative_sum' }
   ];
 
   return (
-    <AggRow
-      disableDelete={props.disableDelete}
-      model={props.model}
-      onAdd={props.onAdd}
-      onDelete={props.onDelete}
-      siblings={props.siblings}
-    >
+    <AggRow disableDelete={props.disableDelete} model={props.model} onAdd={props.onAdd} onDelete={props.onDelete} siblings={props.siblings}>
       <div className="vis_editor__item">
         <div className="vis_editor__label">Aggregation</div>
-        <AggSelect
-          siblings={props.siblings}
-          value={model.type}
-          onChange={handleSelectChange('type')}
-        />
+        <AggSelect siblings={props.siblings} value={model.type} onChange={handleSelectChange('type')} />
       </div>
       <div className="vis_editor__item">
-        <label className="vis_editor__label" htmlFor={htmlId('function')}>Function</label>
+        <label className="vis_editor__label" htmlFor={htmlId('function')}>
+          Function
+        </label>
         <Select
           inputProps={{ id: htmlId('function') }}
           value={model.function}
@@ -54,7 +46,6 @@ function SeriesAgg(props) {
       </div>
     </AggRow>
   );
-
 }
 
 SeriesAgg.propTypes = {
@@ -66,7 +57,7 @@ SeriesAgg.propTypes = {
   onDelete: PropTypes.func,
   panel: PropTypes.object,
   series: PropTypes.object,
-  siblings: PropTypes.array,
+  siblings: PropTypes.array
 };
 
 export default SeriesAgg;

@@ -4,21 +4,11 @@ import AddDeleteButtons from '../../add_delete_buttons';
 import { SeriesConfig } from '../../series_config';
 import Sortable from 'react-anything-sortable';
 import Split from '../../split';
-import createAggRowRender from '../../lib/create_agg_row_render';
-import createTextHandler from '../../lib/create_text_handler';
+import createAggRowRender from '../../../lib/component_utils/create_agg_row_render';
+import createTextHandler from '../../../lib/component_utils/create_text_handler';
 
 function MarkdownSeries(props) {
-  const {
-    panel,
-    fields,
-    onAdd,
-    onChange,
-    onDelete,
-    disableDelete,
-    disableAdd,
-    selectedTab,
-    visible
-  } = props;
+  const { panel, fields, onAdd, onChange, onDelete, disableDelete, disableAdd, selectedTab, visible } = props;
 
   const defaults = { label: '', var_name: '' };
   const model = { ...defaults, ...props.model };
@@ -37,41 +27,24 @@ function MarkdownSeries(props) {
     if (selectedTab === 'options') optionsClassname += '-active';
     let seriesBody;
     if (selectedTab === 'metrics') {
-      const handleSort = (data) => {
+      const handleSort = data => {
         const metrics = data.map(id => model.metrics.find(m => m.id === id));
         props.onChange({ metrics });
       };
       seriesBody = (
         <div>
-          <Sortable
-            style={{ cursor: 'default' }}
-            dynamic={true}
-            direction="vertical"
-            onSort={handleSort}
-            sortHandle="vis_editor__agg_sort"
-          >
-            { aggs }
+          <Sortable style={{ cursor: 'default' }} dynamic={true} direction="vertical" onSort={handleSort} sortHandle="vis_editor__agg_sort">
+            {aggs}
           </Sortable>
           <div className="vis_editor__series_row">
             <div className="vis_editor__series_row-item">
-              <Split
-                onChange={props.onChange}
-                fields={fields}
-                panel={panel}
-                model={model}
-              />
+              <Split onChange={props.onChange} fields={fields} panel={panel} model={model} />
             </div>
           </div>
         </div>
       );
     } else {
-      seriesBody = (
-        <SeriesConfig
-          fields={props.fields}
-          model={props.model}
-          onChange={props.onChange}
-        />
-      );
+      seriesBody = <SeriesConfig fields={props.fields} model={props.model} onChange={props.onChange} />;
     }
     body = (
       <div className="vis_editor__series-row">
@@ -81,14 +54,16 @@ function MarkdownSeries(props) {
             aria-selected={selectedTab === 'metrics'}
             className={metricsClassName}
             onClick={() => props.switchTab('metrics')}
-          >Metrics
+          >
+            Metrics
           </button>
           <button
             role="tab"
             aria-selected={selectedTab === 'metrics'}
             className={optionsClassname}
             onClick={() => props.switchTab('options')}
-          >Options
+          >
+            Options
           </button>
         </div>
         {seriesBody}
@@ -112,7 +87,7 @@ function MarkdownSeries(props) {
             aria-label="Toggle series editor"
             aria-expanded={props.visible}
           >
-            <i className={caretClassName}/>
+            <i className={caretClassName} />
           </button>
           <div className="vis_editor__row vis_editor__row_item">
             <input
@@ -140,10 +115,9 @@ function MarkdownSeries(props) {
           />
         </div>
       </div>
-      { body }
+      {body}
     </div>
   );
-
 }
 
 MarkdownSeries.propTypes = {

@@ -1,10 +1,10 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
-import tickFormatter from '../../lib/tick_formatter';
+import tickFormatter from '../../../lib/component_utils/tick_formatter';
 import _ from 'lodash';
-import Gauge from 'plugins/metrics/visualizations/components/gauge';
-import getLastValue from 'plugins/metrics/visualizations/lib/get_last_value';
+import Gauge from 'plugins/metrics/components/gauge';
+import getLastValue from 'plugins/metrics/lib/get_last_value';
 import color from 'color';
 
 function getColors(props) {
@@ -13,9 +13,9 @@ function getColors(props) {
   let text;
   let gauge;
   if (model.gauge_color_rules) {
-    model.gauge_color_rules.forEach((rule) => {
+    model.gauge_color_rules.forEach(rule => {
       if (rule.opperator && rule.value != null) {
-        const value = series[0] && getLastValue(series[0].data) || 0;
+        const value = (series[0] && getLastValue(series[0].data)) || 0;
         if (_[rule.opperator](value, rule.value)) {
           gauge = rule.gauge;
           text = rule.text;
