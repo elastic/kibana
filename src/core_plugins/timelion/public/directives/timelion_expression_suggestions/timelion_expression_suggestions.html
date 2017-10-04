@@ -17,6 +17,7 @@
     ng-click="onClickSuggestion({ suggestionIndex: $index })"
     aria-label="{{suggestion.name}}"
     aria-describedby="timelionSuggestionDescription{{$index}}"
+    data-test-subj="timelionSuggestionListItem"
   >
     <h4>
       <strong>.{{suggestion.name}}()</strong>
