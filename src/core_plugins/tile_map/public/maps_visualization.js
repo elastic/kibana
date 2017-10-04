@@ -255,26 +255,14 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
       };
     }
 
-    _doRenderCompleteWhenBaseLayerIsLoaded(resolve, endTime) {
-      if (this._baseLayerDirty) {
-        if (Date.now() <= endTime) {
-          setTimeout(() => {
-            this._doRenderCompleteWhenBaseLayerIsLoaded(resolve, endTime);
-          }, 10);
-        } else {
-          //wait time exceeded. If the baselayer cannot load, we will still fire a render-complete.
-          //This is because slow or unstable network connections cause tiles to get dropped.
-          //It is unfortunate that tiles get dropped, but we should not drop the render-complete because of it.
-          resolve();
-        }
+    _doRenderComplete(resolve) {
+      if (this._baseLayerDirty) {//as long as the baselayer is dirty, we cannot fire the render complete event
+        setTimeout(() => {
+          this._doRenderComplete(resolve);
+        }, 10);
       } else {
         resolve();
       }
-    }
-
-    _doRenderComplete(resolve) {
-      const msAllowedForBaseLayerToLoad = 10000;
-      this._doRenderCompleteWhenBaseLayerIsLoaded(resolve, Date.now() + msAllowedForBaseLayerToLoad);
     }
 
     addSpatialFilter(agg, filterName, filterData) {
