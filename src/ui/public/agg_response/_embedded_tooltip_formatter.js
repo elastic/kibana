@@ -3,11 +3,11 @@ import $ from 'jquery';
 import { VisRequestHandlersRegistryProvider } from 'ui/registry/vis_request_handlers';
 import { VisResponseHandlersRegistryProvider } from 'ui/registry/vis_response_handlers';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { PersistedState } from 'ui/persisted_state';
 
 export function EmbeddedTooltipFormatterProvider($rootScope, $compile, Private, getAppState, savedVisualizations) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const tooltipTemplate = require('ui/agg_response/_embedded_tooltip.html');
-  const UI_STATE_ID = 'popupVis';
 
   function getHandler(from, name) {
     if (typeof name === 'function') return name;
@@ -18,6 +18,7 @@ export function EmbeddedTooltipFormatterProvider($rootScope, $compile, Private, 
     let tooltipMsg = 'Initializing Tooltip...';
     let $tooltipScope;
     let $visEl;
+    let setTimeRange;
     let initEmbedded;
     const destroyEmbedded = () => {
       if ($tooltipScope) {
@@ -42,12 +43,20 @@ export function EmbeddedTooltipFormatterProvider($rootScope, $compile, Private, 
       searchSource = savedObject.searchSource;
       requestHandler = getHandler(requestHandlers, savedObject.vis.type.requestHandler);
       responseHandler = getHandler(responseHandlers, savedObject.vis.type.responseHandler);
-      uiState = savedObject.uiStateJSON ? JSON.parse(savedObject.uiStateJSON) : {};
-      const parentUiState = getAppState().makeStateful('uiState');
+      uiState = new PersistedState(savedObject.uiStateJSON ? JSON.parse(savedObject.uiStateJSON) : {});
+      setTimeRange = (timeRange) => {
+        savedObject.vis.aggs.forEach(agg => {
+          if (agg.type.name !== 'date_histogram') return;
+          agg.params.timeRange = {
+            min: new Date(timeRange.min),
+            max: new Date(timeRange.max)
+          };
+        });
+      };
       initEmbedded = () => {
         destroyEmbedded();
         $tooltipScope = $rootScope.$new();
-        $tooltipScope.uiState = parentUiState.createChild(UI_STATE_ID, uiState, true);
+        $tooltipScope.uiState = uiState;
         $tooltipScope.vis = savedObject.vis;
         $tooltipScope.visData = null;
         $visEl = $compile(tooltipTemplate)($tooltipScope);
@@ -56,7 +65,6 @@ export function EmbeddedTooltipFormatterProvider($rootScope, $compile, Private, 
       tooltipMsg = _.get(e, 'message', 'Error initializing tooltip');
     });
 
-    // Do not let dimensions exceed 40% of window dimensions
     function getWidth() {
       return window.innerWidth * 0.4;
     }
@@ -77,7 +85,14 @@ export function EmbeddedTooltipFormatterProvider($rootScope, $compile, Private, 
         let aggResult = event.datum.aggConfigResult;
         while(aggResult) {
           if (aggResult.type === 'bucket') {
-            aggFilters.push(aggResult.aggConfig.createFilter(aggResult.key));
+            const filter = aggResult.aggConfig.createFilter(aggResult.key);
+            aggFilters.push(filter);
+            if (aggResult.aggConfig.getField().type === 'date') {
+              setTimeRange({
+                min: filter.range[aggResult.aggConfig.getField().name].gte,
+                max: filter.range[aggResult.aggConfig.getField().name].lt
+              });
+            }
           }
           aggResult = aggResult.$parent;
         }
