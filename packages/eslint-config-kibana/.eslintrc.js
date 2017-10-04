@@ -10,7 +10,6 @@ module.exports = {
 
   env: {
     es6: true,
-    amd: true,
     node: true,
     mocha: true,
     browser: true,
