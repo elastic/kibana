@@ -77,7 +77,7 @@ uiModules
     $rootScope.$apply();
   };
 
-  Timefilter.prototype.get = function (indexPattern) {
+  Timefilter.prototype.get = function (indexPattern, range) {
 
     if (!indexPattern) {
       //in CI, we sometimes seem to fail here.
@@ -91,8 +91,8 @@ uiModules
       const bounds = this.getBounds();
       filter = { range : {} };
       filter.range[timefield.name] = {
-        gte: bounds.min.valueOf(),
-        lte: bounds.max.valueOf(),
+        gte: range ? dateMath.parse(range.min).valueOf() : bounds.min.valueOf(),
+        lte: range ? dateMath.parse(range.max).valueOf() : bounds.max.valueOf(),
         format: 'epoch_millis'
       };
     }

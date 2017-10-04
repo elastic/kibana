@@ -18,7 +18,7 @@ import {
 
 uiModules
 .get('kibana/directive', ['ngSanitize'])
-  .directive('visualize', function (Notifier, Private, timefilter, getAppState, Promise, savedVisualizations) {
+  .directive('visualize', function (Notifier, Private, timefilter, getAppState, Promise) {
     const notify = new Notifier({ location: 'Visualize' });
     const requestHandlers = Private(VisRequestHandlersRegistryProvider);
     const responseHandlers = Private(VisResponseHandlersRegistryProvider);
@@ -36,7 +36,7 @@ uiModules
         showSpyPanel: '=?',
         editorMode: '=?',
         savedObj: '=?',
-        appState: '=',
+        appState: '=?',
         uiState: '=?',
         savedId: '=?',
         timeRange: '=?'
@@ -45,16 +45,11 @@ uiModules
       link: async function ($scope, $el) {
         const resizeChecker = new ResizeChecker($el);
 
-        if (!$scope.savedObj) {
-          if (!$scope.savedId) throw(`saved object was not provided to <visualize> directive`);
-          $scope.savedObj = await savedVisualizations.get($scope.savedId);
-        }
+        if (!$scope.savedObj) throw(`saved object was not provided to <visualize> directive`);
         if (!$scope.appState) $scope.appState = getAppState();
         if (!$scope.uiState) $scope.uiState = new PersistedState({});
 
         $scope.vis = $scope.savedObj.vis;
-        $scope.editorMode = $scope.editorMode || false;
-        $scope.vis.editorMode = $scope.editorMode;
         $scope.vis.visualizeScope = true;
 
         if ($scope.timeRange) {
@@ -65,15 +60,21 @@ uiModules
               max: new Date($scope.timeRange.max)
             });
           });
+
+          const searchSource = $scope.savedObj.searchSource;
+          const filter = timefilter.get(searchSource.index(), $scope.timeRange);
+          searchSource.get('filter').push(filter);
+          searchSource.skipTimeRangeFilter = true;
         }
+
+        $scope.editorMode = $scope.editorMode || false;
+        $scope.vis.editorMode = $scope.editorMode;
 
         // spy panel is supported only with courier request handler
         $scope.shouldShowSpyPanel = () => {
           if ($scope.vis.type.requestHandler !== 'courier') return false;
           return $scope.vis.type.requiresSearch && $scope.showSpyPanel;
         };
-
-        if (!$scope.appState) $scope.appState = getAppState();
 
         const requestHandler = getHandler(requestHandlers, $scope.vis.type.requestHandler);
         const responseHandler = getHandler(responseHandlers, $scope.vis.type.responseHandler);
