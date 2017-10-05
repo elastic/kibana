@@ -83,11 +83,12 @@ export class ListingTable extends React.Component {
     );
   }
 
-  renderToolbarActions() {
+  renderToolBarActions() {
     return [
       <KuiButton
         buttonType="primary"
         aria-label="Add"
+      >
       >
         Add
       </KuiButton>,
@@ -132,7 +133,7 @@ export class ListingTable extends React.Component {
     return (
       <KuiListingTable
         pager={this.renderPager()}
-        toolbarActions={this.renderToolbarActions()}
+        toolBarActions={this.renderToolBarActions()}
         selectedRowIds={this.state.selectedRowIds}
         rows={this.rows}
         columns={this.renderColumns()}

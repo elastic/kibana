@@ -207,7 +207,7 @@ export class VisualizeListingTable extends React.Component {
     window.location = '#/visualize/new';
   }
 
-  renderToolbarActions() {
+  renderToolBarActions() {
     return this.state.selectedRowIds.length > 0 ?
       <KuiListingTableDeleteButton onDelete={this.onDelete} aria-label="Delete selected visualizations"/> :
       <KuiListingTableCreateButton onCreate={this.onCreate} aria-label="Create new visualization"/>;
@@ -233,7 +233,7 @@ export class VisualizeListingTable extends React.Component {
         {this.state.showDeleteModal && this.renderConfirmDeleteModal()}
         <KuiListingTable
           pager={this.renderPager()}
-          toolbarActions={this.renderToolbarActions()}
+          toolBarActions={this.renderToolBarActions()}
           selectedRowIds={this.state.selectedRowIds}
           rows={this.createRows()}
           columns={this.renderColumns()}

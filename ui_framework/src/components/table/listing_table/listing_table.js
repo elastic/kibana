@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { KuiListingTableToolbar } from './listing_table_toolbar';
-import { KuiListingTableToolbarFooter } from './listing_table_toolbar_footer';
+import { KuiListingTableToolBar } from './listing_table_tool_bar';
+import { KuiListingTableToolBarFooter } from './listing_table_tool_bar_footer';
 import { KuiListingTableRow } from './listing_table_row';
 
 import {
@@ -19,7 +19,7 @@ export function KuiListingTable({
   rows,
   columns,
   pager,
-  toolbarActions,
+  toolBarActions,
   onFilter,
   onItemSelectionChanged,
   selectedRowIds,
@@ -115,8 +115,8 @@ export function KuiListingTable({
 
   return (
     <KuiControlledTable>
-      <KuiListingTableToolbar
-        actionComponent={toolbarActions}
+      <KuiListingTableToolBar
+        actionComponent={toolBarActions}
         pagerComponent={pager}
         onFilter={onFilter}
         filter={filter}
@@ -124,7 +124,7 @@ export function KuiListingTable({
 
       {renderContents()}
 
-      <KuiListingTableToolbarFooter
+      <KuiListingTableToolBarFooter
         itemsSelectedCount={selectedRowIds.length}
         pagerComponent={pager}
       />
@@ -143,7 +143,7 @@ KuiListingTable.PropTypes = {
   selectedRowIds: PropTypes.array,
   noItemsPrompt: PropTypes.node,
   onFilter: PropTypes.func,
-  toolbarActions: PropTypes.node,
+  toolBarActions: PropTypes.node,
   filter: PropTypes.string,
   loading: PropTypes.bool,
 };

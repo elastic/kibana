@@ -43,7 +43,7 @@ export class ListingTableLoadingItems extends React.Component {
     );
   }
 
-  renderToolbarActions() {
+  renderToolBarActions() {
     return [
       <KuiButton
         buttonType="primary"
@@ -68,7 +68,7 @@ export class ListingTableLoadingItems extends React.Component {
     return (
       <KuiListingTable
         pager={this.renderPager()}
-        toolbarActions={this.renderToolbarActions()}
+        toolBarActions={this.renderToolBarActions()}
         selectedRowIds={[]}
         rows={[]}
         columns={renderColumns()}

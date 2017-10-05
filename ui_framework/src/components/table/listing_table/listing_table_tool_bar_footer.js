@@ -7,7 +7,7 @@ import {
   KuiToolBarFooterSection,
 } from '../../';
 
-export function KuiListingTableToolbarFooter({ pagerComponent, itemsSelectedCount }) {
+export function KuiListingTableToolBarFooter({ pagerComponent, itemsSelectedCount }) {
   return (
     <KuiToolBarFooter>
       <KuiToolBarFooterSection>
@@ -23,7 +23,7 @@ export function KuiListingTableToolbarFooter({ pagerComponent, itemsSelectedCoun
   );
 }
 
-KuiListingTableToolbarFooter.PropTypes = {
+KuiListingTableToolBarFooter.PropTypes = {
   pagerComponent: PropTypes.node,
   itemsSelectedCount: PropTypes.number,
 };

@@ -21,7 +21,7 @@ function renderEmptyTablePrompt() {
   );
 }
 
-function renderToolbarActions() {
+function renderToolBarActions() {
   return [
     <KuiButton
       buttonType="primary"
@@ -82,7 +82,7 @@ export function ListingTableWithEmptyPrompt() {
   return (
     <KuiListingTable
       pager={renderPager()}
-      toolbarActions={renderToolbarActions()}
+      toolBarActions={renderToolBarActions()}
       selectedRowIds={[]}
       rows={[]}
       columns={renderColumns()}
