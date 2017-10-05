@@ -1,7 +1,5 @@
-import _ from 'lodash';
 import Promise from 'bluebird';
 import elasticsearch from 'elasticsearch';
-import { migrateConfig } from './migrate_config';
 import createKibanaIndex from './create_kibana_index';
 import kibanaVersion from './kibana_version';
 import { ensureEsVersion } from './ensure_es_version';
@@ -107,7 +105,6 @@ export default function (plugin, server) {
         indexName: config.get('kibana.index'),
         kibanaIndexMappingsDsl: server.getKibanaIndexMappingsDsl()
       }))
-      .then(_.partial(migrateConfig, server))
       .then(() => {
         const tribeUrl = config.get('elasticsearch.tribe.url');
         if (tribeUrl) {

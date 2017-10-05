@@ -202,14 +202,6 @@ export default () => Joi.object({
     indexCheckTimeout: Joi.number().default(5000)
   }).default(),
 
-  uiSettings: Joi.object({
-    // this is used to prevent the uiSettings from initializing. Since they
-    // require the elasticsearch plugin in order to function we need to turn
-    // them off when we turn off the elasticsearch plugin (like we do in the
-    // optimizer half of the dev server)
-    enabled: Joi.boolean().default(true)
-  }).default(),
-
   i18n: Joi.object({
     defaultLocale: Joi.string().default('en'),
   }).default(),

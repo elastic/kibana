@@ -1,8 +1,6 @@
 import sinon from 'sinon';
 import expect from 'expect.js';
-import Chance from 'chance';
 
-import ServerStatus from '../../../server/status/server_status';
 import Config from '../../../server/config/config';
 
 /* eslint-disable import/no-duplicates */
@@ -13,8 +11,6 @@ import { getUiSettingsServiceForRequest } from '../ui_settings_service_for_reque
 /* eslint-enable import/no-duplicates */
 
 import { uiSettingsMixin } from '../ui_settings_mixin';
-
-const chance = new Chance();
 
 describe('uiSettingsMixin()', () => {
   const sandbox = sinon.sandbox.create();
@@ -58,7 +54,6 @@ describe('uiSettingsMixin()', () => {
       server,
       config,
       uiExports: { addConsumer: sinon.stub() },
-      status: new ServerStatus(server),
       ready: sinon.stub().returns(readyPromise),
     };
 
@@ -69,59 +64,10 @@ describe('uiSettingsMixin()', () => {
       server,
       decorations,
       readyPromise,
-      status: kbnServer.status.get('ui settings'),
     };
   }
 
   afterEach(() => sandbox.restore());
-
-  describe('status', () => {
-    it('creates a "ui settings" status', () => {
-      const { status } = setup();
-      expect(status).to.have.property('state', 'uninitialized');
-    });
-
-    describe('disabled', () => {
-      it('disables if uiSettings.enabled config is false', () => {
-        const { status } = setup({ enabled: false });
-        expect(status).to.have.property('state', 'disabled');
-      });
-
-      it('does not register a handler for kbnServer.ready()', () => {
-        const { readyPromise } = setup({ enabled: false });
-        sinon.assert.notCalled(readyPromise.then);
-      });
-    });
-
-    describe('enabled', () => {
-      it('registers a handler for kbnServer.ready()', () => {
-        const { readyPromise } = setup();
-        sinon.assert.calledOnce(readyPromise.then);
-      });
-
-      it('mirrors the elasticsearch plugin status once kibanaServer.ready() resolves', () => {
-        const { kbnServer, readyPromise, status } = setup();
-        const esStatus = kbnServer.status.createForPlugin({
-          id: 'elasticsearch',
-          version: 'kibana',
-        });
-
-        esStatus.green();
-        expect(status).to.have.property('state', 'uninitialized');
-        const readyPromiseHandler = readyPromise.then.firstCall.args[0];
-        readyPromiseHandler();
-        expect(status).to.have.property('state', 'green');
-
-
-        const states = chance.shuffle(['red', 'green', 'yellow']);
-        states.forEach((state) => {
-          esStatus[state]();
-          expect(esStatus).to.have.property('state', state);
-          expect(status).to.have.property('state', state);
-        });
-      });
-    });
-  });
 
   describe('server.uiSettingsServiceFactory()', () => {
     it('decorates server with "uiSettingsServiceFactory"', () => {
@@ -171,32 +117,6 @@ describe('uiSettingsMixin()', () => {
       const request = {};
       decorations.request.getUiSettingsService.call(request);
       sinon.assert.calledWith(getUiSettingsServiceForRequest, server, request);
-    });
-
-    it('defines read interceptor that intercepts when status is not green', () => {
-      const { status, decorations } = setup();
-      expect(decorations.request).to.have.property('getUiSettingsService').a('function');
-
-      sandbox.stub(getUiSettingsServiceForRequestNS, 'getUiSettingsServiceForRequest');
-      decorations.request.getUiSettingsService();
-
-      const options = getUiSettingsServiceForRequest.firstCall.args[2];
-      expect(options).to.have.property('readInterceptor');
-
-      const { readInterceptor } = options;
-      expect(readInterceptor).to.be.a('function');
-
-      status.green();
-      expect(readInterceptor()).to.be(undefined);
-
-      status.yellow();
-      expect(readInterceptor()).to.eql({});
-
-      status.red();
-      expect(readInterceptor()).to.eql({});
-
-      status.green();
-      expect(readInterceptor()).to.eql(undefined);
     });
   });
 

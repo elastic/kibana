@@ -3,7 +3,7 @@ import expect from 'expect.js';
 import {
   getServices,
   chance,
-  assertGeneric404Response,
+  assertServiceUnavailableResponse,
   waitUntilNextHealthCheck,
 } from './lib';
 
@@ -58,10 +58,10 @@ export function indexMissingSuite() {
   });
 
   describe('set route', () => {
-    it('returns a generic 404 and does not create the kibana index', async () => {
+    it('returns a 503 and does not create the kibana index', async () => {
       const { kbnServer, assertNoKibanaIndex } = await setup();
 
-      assertGeneric404Response(await kbnServer.inject({
+      assertServiceUnavailableResponse(await kbnServer.inject({
         method: 'POST',
         url: '/api/kibana/settings/defaultIndex',
         payload: {
@@ -74,10 +74,10 @@ export function indexMissingSuite() {
   });
 
   describe('setMany route', () => {
-    it('returns a generic 404 and does not create the kibana index', async () => {
+    it('returns a 503 and does not create the kibana index', async () => {
       const { kbnServer, assertNoKibanaIndex } = await setup();
 
-      assertGeneric404Response(await kbnServer.inject({
+      assertServiceUnavailableResponse(await kbnServer.inject({
         method: 'POST',
         url: '/api/kibana/settings',
         payload: {
@@ -92,10 +92,10 @@ export function indexMissingSuite() {
   });
 
   describe('delete route', () => {
-    it('returns a generic 404 and does not create the kibana index', async () => {
+    it('returns a 503 and does not create the kibana index', async () => {
       const { kbnServer, assertNoKibanaIndex } = await setup();
 
-      assertGeneric404Response(await kbnServer.inject({
+      assertServiceUnavailableResponse(await kbnServer.inject({
         method: 'DELETE',
         url: '/api/kibana/settings/defaultIndex'
       }));
