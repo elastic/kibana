@@ -1,7 +1,6 @@
 import elasticsearch from 'elasticsearch';
 import { get, set, isEmpty, cloneDeep, pick } from 'lodash';
 import toPath from 'lodash/internal/toPath';
-import Boom from 'boom';
 
 import filterHeaders from './filter_headers';
 import { parseConfig } from './parse_config';
@@ -20,17 +19,17 @@ export class Cluster {
     return this;
   }
 
-  callWithRequest = (req = {}, endpoint, clientParams = {}, options = {}) => {
+  callWithRequest = (req = {}, endpoint, clientParams = {}) => {
     if (req.headers) {
       const filteredHeaders = filterHeaders(req.headers, this.getRequestHeadersWhitelist());
       set(clientParams, 'headers', filteredHeaders);
     }
 
-    return callAPI(this._noAuthClient, endpoint, clientParams, options);
+    return callAPI(this._noAuthClient, endpoint, clientParams);
   }
 
-  callWithInternalUser = (endpoint, clientParams = {}, options = {}) => {
-    return callAPI(this._client, endpoint, clientParams, options);
+  callWithInternalUser = (endpoint, clientParams = {}) => {
+    return callAPI(this._client, endpoint, clientParams);
   }
 
   getRequestHeadersWhitelist = () => getClonedProperty(this._config, 'requestHeadersWhitelist');
@@ -81,8 +80,7 @@ export class Cluster {
   }
 }
 
-function callAPI(client, endpoint, clientParams = {}, options = {}) {
-  const wrap401Errors = options.wrap401Errors !== false;
+function callAPI(client, endpoint, clientParams = {}) {
   const clientPath = toPath(endpoint);
   const api = get(client, clientPath);
 
@@ -95,17 +93,7 @@ function callAPI(client, endpoint, clientParams = {}, options = {}) {
     throw new Error(`called with an invalid endpoint: ${endpoint}`);
   }
 
-  return api.call(apiContext, clientParams).catch((err) => {
-    if (!wrap401Errors || err.statusCode !== 401) {
-      return Promise.reject(err);
-    }
-
-    const boomError = Boom.boomify(err, { statusCode: err.statusCode });
-    const wwwAuthHeader = get(err, 'body.error.header[WWW-Authenticate]');
-    boomError.output.headers['WWW-Authenticate'] = wwwAuthHeader || 'Basic realm="Authorization Required"';
-
-    throw boomError;
-  });
+  return api.call(apiContext, clientParams);
 }
 
 function getClonedProperties(config, paths) {
