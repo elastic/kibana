@@ -6,6 +6,7 @@ import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 export const FilterRatioAgg = props => {
   const {
@@ -26,6 +27,9 @@ export const FilterRatioAgg = props => {
   };
 
   const model = { ...defaults, ...props.model };
+  const htmlId = htmlIdGenerator();
+
+  const restrictMode = model.metric_agg === 'cardinality' ? 'none' : 'numeric';
 
   return (
     <AggRow
@@ -46,8 +50,11 @@ export const FilterRatioAgg = props => {
             />
           </div>
           <div className="vis_editor__row_item">
-            <div className="vis_editor__label">Numerator</div>
+            <label className="vis_editor__label" htmlFor={htmlId('numerator')}>
+              Numerator
+            </label>
             <input
+              id={htmlId('numerator')}
               className="vis_editor__input-grows-100"
               onChange={handleTextChange('numerator')}
               value={model.numerator}
@@ -55,8 +62,11 @@ export const FilterRatioAgg = props => {
             />
           </div>
           <div className="vis_editor__row_item">
-            <div className="vis_editor__label">Denominator</div>
+            <label className="vis_editor__label" htmlFor={htmlId('denominator')}>
+              Denominator
+            </label>
             <input
+              id={htmlId('denominator')}
               className="vis_editor__input-grows-100"
               onChange={handleTextChange('denominator')}
               value={model.denominator}
@@ -76,11 +86,14 @@ export const FilterRatioAgg = props => {
           </div>
           { model.metric_agg !== 'count' ? (
             <div className="vis_editor__row_item">
-              <div className="vis_editor__label">Field</div>
+              <label className="vis_editor__label" htmlFor={htmlId('aggField')}>
+                Field
+              </label>
               <FieldSelect
+                id={htmlId('aggField')}
                 fields={fields}
                 type={model.metric_agg}
-                restrict="numeric"
+                restrict={restrictMode}
                 indexPattern={indexPattern}
                 value={model.field}
                 onChange={handleSelectChange('field')}

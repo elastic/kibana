@@ -59,8 +59,11 @@ export function VislibLibDispatchProvider(Private, config) {
       if (isSeries) {
         let percentageMode = false;
         //only series charts work in percentage mode.
-        if (handler.charts && handler.charts[0] && handler.charts[0].getSeries && d3.event.target.parentElement.__data__) {
-          const aggId = d3.event.target.parentElement.__data__.aggId;
+        const isSeriesChart = handler.charts && handler.charts[0] && handler.charts[0].getSeries;
+        const parentNode = d3.event.target.parentNode;
+        const parentData = parentNode ? parentNode.__data__ : null;
+        if (isSeriesChart && parentData) {
+          const aggId = parentData.aggId;
           const seriesFromAggId = handler.charts[0].getSeries(aggId);
           if (seriesFromAggId && seriesFromAggId.getValueAxis) {
             percentageMode = seriesFromAggId.getValueAxis().axisConfig.isPercentage();

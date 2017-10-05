@@ -3,16 +3,13 @@ import angular from 'angular';
 
 import 'ui/promises';
 
-import { RequestQueueProvider } from '../_request_queue';
-import { ErrorHandlersProvider } from '../_error_handlers';
+import { requestQueue } from '../_request_queue';
 import { FetchProvider } from '../fetch';
 import { FieldWildcardProvider } from '../../field_wildcard';
 import { getHighlightRequest } from '../../../../core_plugins/kibana/common/highlight';
 import { BuildESQueryProvider } from './build_query';
 
 export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, config) {
-  const requestQueue = Private(RequestQueueProvider);
-  const errorHandlers = Private(ErrorHandlersProvider);
   const courierFetch = Private(FetchProvider);
   const buildESQuery = Private(BuildESQueryProvider);
   const { fieldWildcardFilter } = Private(FieldWildcardProvider);
@@ -50,6 +47,7 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
 
     self.history = [];
     self._fetchStrategy = strategy;
+    self._requestStartHandlers = [];
   }
 
   /*****
@@ -136,7 +134,13 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
       const defer = Promise.defer();
       defer.promise.then(resolve, reject);
 
-      self._createRequest(defer);
+      const request = self._createRequest(defer);
+
+      request.setErrorHandler((request, error) => {
+        reject(error);
+        request.abort();
+      });
+
     }, handler);
   };
 
@@ -145,26 +149,6 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
    */
   SourceAbstract.prototype.getParent = function () {
     return this._parent;
-  };
-
-  /**
-   * similar to onResults, but allows a seperate loopy code path
-   * for error handling.
-   *
-   * @return {Promise}
-   */
-  SourceAbstract.prototype.onError = function (handler) {
-    const self = this;
-
-    return new PromiseEmitter(function (resolve, reject) {
-      const defer = Promise.defer();
-      defer.promise.then(resolve, reject);
-
-      errorHandlers.push({
-        source: self,
-        defer: defer
-      });
-    }, handler);
   };
 
   /**
@@ -239,6 +223,39 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
    */
   SourceAbstract.prototype.destroy = function () {
     this.cancelQueued();
+    this._requestStartHandlers.length = 0;
+  };
+
+  /**
+   *  Add a handler that will be notified whenever requests start
+   *  @param  {Function} handler
+   *  @return {undefined}
+   */
+  SourceAbstract.prototype.onRequestStart = function (handler) {
+    this._requestStartHandlers.push(handler);
+  };
+
+  /**
+   *  Called by requests of this search source when they are started
+   *  @param  {Courier.Request} request
+   *  @return {Promise<undefined>}
+   */
+  SourceAbstract.prototype.requestIsStarting = function (request) {
+    this.activeFetchCount = (this.activeFetchCount || 0) + 1;
+    this.history = [request];
+
+    return Promise
+      .map(this._requestStartHandlers, fn => fn(this, request))
+      .then(_.noop);
+  };
+
+  /**
+   *  Called by requests of this search source when they are done
+   *  @param  {Courier.Request} request
+   *  @return {undefined}
+   */
+  SourceAbstract.prototype.requestIsStopped = function (/* request */) {
+    this.activeFetchCount -= 1;
   };
 
   /*****

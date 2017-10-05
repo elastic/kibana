@@ -28,6 +28,7 @@ class CalculationVars extends Component {
       <div className="vis_editor__calc_vars-row" key={row.id}>
         <div className="vis_editor__calc_vars-name">
           <input
+            aria-label="Variable name"
             placeholder="Variable Name"
             className="vis_editor__input-grows-100"
             type="text"

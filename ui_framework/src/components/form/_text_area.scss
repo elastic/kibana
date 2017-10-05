@@ -1,5 +1,5 @@
 .kuiTextArea {
-  width: $globalFormFieldDefaultWidth;
+  width: $kuiFormFieldDefaultWidth;
 
   @include formControl;
 
@@ -18,9 +18,9 @@
 }
 
 .kuiTextArea--small {
-  width: $globalFormFieldSmallWidth;
+  width: $kuiFormFieldSmallWidth;
 }
 
 .kuiTextArea--large {
-  width: $globalFormFieldLargeWidth;
+  width: $kuiFormFieldLargeWidth;
 }

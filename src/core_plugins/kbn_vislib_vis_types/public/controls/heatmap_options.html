@@ -84,6 +84,9 @@
         class="kuiSideBarCollapsibleTitle__label"
         ng-click="toggleColorRangeSection()"
         kbn-accessible-click
+        aria-expanded="{{!!showColorRange}}"
+        aria-controls="heatmapOptionsRanges"
+        aria-label="Toggle custom ranges options"
       >
         <span
           aria-hidden="true"
@@ -104,7 +107,12 @@
       >
     </div>
 
-    <div ng-if="vis.params.setColorRange" ng-show="showColorRange" class="kuiSideBarCollapsibleSection">
+    <div
+      id="heatmapOptionsRanges"
+      ng-if="vis.params.setColorRange"
+      ng-show="showColorRange"
+      class="kuiSideBarCollapsibleSection"
+    >
       <div class="kuiSideBarSection">
         <table class="vis-editor-agg-editor-ranges form-group" ng-show="vis.params.colorsRange.length">
           <tr>
@@ -172,6 +180,8 @@
         class="kuiSideBarCollapsibleTitle__label"
         ng-click="toggleLabelSection()"
         kbn-accessible-click
+        aria-expanded="{{!!showLabels}}"
+        aria-controls="heatmapOptionsLabels"
       >
         <span
           aria-hidden="true"
@@ -192,7 +202,12 @@
         class="kuiSideBarSectionTitle__action"
       >
     </div>
-    <div ng-if="vis.params.valueAxes[0].labels.show" ng-show="showLabels" class="kuiSideBarCollapsibleSection">
+    <div
+      id="heatmapOptionsLabels"
+      ng-if="vis.params.valueAxes[0].labels.show"
+      ng-show="showLabels"
+      class="kuiSideBarCollapsibleSection"
+    >
       <div class="kuiSideBarSection">
         <div class="kuiSideBarFormRow">
           <label class="kuiSideBarFormRow__label" for="rotateLabels">

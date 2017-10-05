@@ -138,7 +138,7 @@ module.directive('vislibValueAxes', function () {
           if (matchingSeries.length === 1) {
             label = matchingSeries[0].makeLabel();
           }
-          if (lastAxisTitles[axis.id] !== label) {
+          if (lastAxisTitles[axis.id] !== label && label !== '') {
             lastAxisTitles[axis.id] = label;
             axis.title.text = label;
           }
@@ -147,11 +147,7 @@ module.directive('vislibValueAxes', function () {
 
       $scope.$watch(() => {
         return $scope.vis.getAggConfig().map(agg => {
-          try {
-            return agg.makeLabel();
-          } catch (e) {
-            return '';
-          }
+          return agg.makeLabel();
         }).join();
       }, () => {
         $scope.updateAxisTitle();

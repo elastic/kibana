@@ -18,6 +18,14 @@ function createTypeFilter(restrict, exclude) {
   };
 }
 
+
+// This filters out sibling aggs, percentiles, and special aggs (like Series Agg)
+export function filterRows(row) {
+  return  !/_bucket$/.test(row.type)
+    && !/^series/.test(row.type)
+    && !/^percentile/.test(row.type);
+}
+
 function MetricSelect(props) {
   const {
     restrict,
@@ -30,8 +38,27 @@ function MetricSelect(props) {
   const metrics = props.metrics
     .filter(createTypeFilter(restrict, exclude));
 
-  const options = calculateSiblings(metrics, metric)
-    .filter(row => !/_bucket$/.test(row.type) && !/^series/.test(row.type))
+  const siblings = calculateSiblings(metrics, metric);
+
+  // Percentiles need to be handled differently because one percentile aggregation
+  // could have multiple percentiles associated with it. So the user needs a way
+  // to specify which percentile the want to use.
+  const percentileOptions = siblings
+    .filter(row => /^percentile/.test(row.type))
+    .reduce((acc, row) => {
+      const label = calculateLabel(row, metrics);
+      row.percentiles.forEach(p => {
+        if (p.value) {
+          const value = /\./.test(p.value) ? p.value : `${p.value}.0`;
+          acc.push({ value: `${row.id}[${value}]`, label: `${label} (${value})` });
+        }
+      });
+      return acc;
+    }, []);
+
+
+  const options = siblings
+    .filter(filterRows)
     .map(row => {
       const label = calculateLabel(row, metrics);
       return { value: row.id, label };
@@ -39,8 +66,9 @@ function MetricSelect(props) {
 
   return (
     <Select
+      aria-label="Select metric"
       placeholder="Select metric..."
-      options={options.concat(props.additionalOptions)}
+      options={[ ...options, ...props.additionalOptions, ...percentileOptions]}
       value={value}
       onChange={onChange}
     />

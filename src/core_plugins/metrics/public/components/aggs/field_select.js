@@ -16,6 +16,7 @@ function FieldSelect(props) {
 
   return (
     <Select
+      inputProps={{ id: props.id }}
       placeholder="Select field..."
       disabled={props.disabled}
       options={options}
@@ -34,6 +35,7 @@ FieldSelect.defaultProps = {
 FieldSelect.propTypes = {
   disabled: PropTypes.bool,
   fields: PropTypes.object,
+  id: PropTypes.string,
   indexPattern: PropTypes.string,
   onChange: PropTypes.func,
   restrict: PropTypes.string,

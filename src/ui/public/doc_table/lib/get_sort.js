@@ -6,7 +6,7 @@ import _ from 'lodash';
  * @param {object} indexPattern used for determining default sort
  * @returns {object} a sort object suitable for returning to elasticsearch
  */
-export function getSort(sort, indexPattern) {
+export function getSort(sort, indexPattern, defaultSortOrder = 'desc') {
   const sortObj = {};
   let field;
   let direction;
@@ -21,7 +21,7 @@ export function getSort(sort, indexPattern) {
     direction = sort[1];
   } else if (indexPattern.timeFieldName && isSortable(indexPattern.timeFieldName)) {
     field = indexPattern.timeFieldName;
-    direction = 'desc';
+    direction = defaultSortOrder;
   }
 
   if (field) {
@@ -35,7 +35,7 @@ export function getSort(sort, indexPattern) {
   return sortObj;
 }
 
-getSort.array = function (sort, indexPattern) {
-  return _(getSort(sort, indexPattern)).pairs().pop();
+getSort.array = function (sort, indexPattern, defaultSortOrder) {
+  return _(getSort(sort, indexPattern, defaultSortOrder)).pairs().pop();
 };
 

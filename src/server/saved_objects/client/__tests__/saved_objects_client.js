@@ -1,14 +1,19 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
+import { delay } from 'bluebird';
 import { SavedObjectsClient } from '../saved_objects_client';
 import * as getSearchDslNS from '../lib/search_dsl/search_dsl';
 import { getSearchDsl } from '../lib';
+import elasticsearch from 'elasticsearch';
 
 describe('SavedObjectsClient', () => {
   const sandbox = sinon.sandbox.create();
 
   let callAdminCluster;
+  let onBeforeWrite;
   let savedObjectsClient;
+  const mockTimestamp = '2017-08-14T15:49:14.886Z';
+  const mockTimestampFields = { updated_at: mockTimestamp };
   const searchResults = {
     hits: {
       total: 3,
@@ -19,6 +24,7 @@ describe('SavedObjectsClient', () => {
         _score: 1,
         _source: {
           type: 'index-pattern',
+          ...mockTimestampFields,
           'index-pattern': {
             title: 'logstash-*',
             timeFieldName: '@timestamp',
@@ -32,6 +38,7 @@ describe('SavedObjectsClient', () => {
         _score: 1,
         _source: {
           type: 'config',
+          ...mockTimestampFields,
           config: {
             buildNum: 8467,
             defaultIndex: 'logstash-*'
@@ -44,6 +51,7 @@ describe('SavedObjectsClient', () => {
         _score: 1,
         _source: {
           type: 'index-pattern',
+          ...mockTimestampFields,
           'index-pattern': {
             title: 'stocks-*',
             timeFieldName: '@timestamp',
@@ -70,7 +78,16 @@ describe('SavedObjectsClient', () => {
 
   beforeEach(() => {
     callAdminCluster = sandbox.stub();
-    savedObjectsClient = new SavedObjectsClient('.kibana-test', mappings, callAdminCluster);
+    onBeforeWrite = sandbox.stub();
+
+    savedObjectsClient = new SavedObjectsClient({
+      index: '.kibana-test',
+      mappings,
+      callCluster: callAdminCluster,
+      onBeforeWrite
+    });
+
+    sandbox.stub(savedObjectsClient, '_getCurrentTime').returns(mockTimestamp);
     sandbox.stub(getSearchDslNS, 'getSearchDsl').returns({});
   });
 
@@ -96,6 +113,7 @@ describe('SavedObjectsClient', () => {
       expect(response).to.eql({
         type: 'index-pattern',
         id: 'logstash-*',
+        ...mockTimestampFields,
         version: 2,
         attributes: {
           title: 'Logstash',
@@ -109,10 +127,9 @@ describe('SavedObjectsClient', () => {
         title: 'Logstash'
       });
 
-      expect(callAdminCluster.calledOnce).to.be(true);
-
-      const args = callAdminCluster.getCall(0).args;
-      expect(args[0]).to.be('index');
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWith(callAdminCluster, 'index');
+      sinon.assert.calledOnce(onBeforeWrite);
     });
 
     it('should use create action if ID defined and overwrite=false', async () => {
@@ -122,10 +139,9 @@ describe('SavedObjectsClient', () => {
         id: 'logstash-*',
       });
 
-      expect(callAdminCluster.calledOnce).to.be(true);
-
-      const args = callAdminCluster.getCall(0).args;
-      expect(args[0]).to.be('create');
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWith(callAdminCluster, 'create');
+      sinon.assert.calledOnce(onBeforeWrite);
     });
 
     it('allows for id to be provided', async () => {
@@ -133,10 +149,12 @@ describe('SavedObjectsClient', () => {
         title: 'Logstash'
       }, { id: 'logstash-*' });
 
-      expect(callAdminCluster.calledOnce).to.be(true);
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
+        id: 'index-pattern:logstash-*'
+      }));
 
-      const args = callAdminCluster.getCall(0).args;
-      expect(args[1].id).to.be('index-pattern:logstash-*');
+      sinon.assert.calledOnce(onBeforeWrite);
     });
 
     it('self-generates an ID', async () => {
@@ -144,10 +162,12 @@ describe('SavedObjectsClient', () => {
         title: 'Logstash'
       });
 
-      expect(callAdminCluster.calledOnce).to.be(true);
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
+        id: sinon.match(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/)
+      }));
 
-      const args = callAdminCluster.getCall(0).args;
-      expect(args[1].id).to.match(/index-pattern:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/);
+      sinon.assert.calledOnce(onBeforeWrite);
     });
   });
 
@@ -160,17 +180,17 @@ describe('SavedObjectsClient', () => {
         { type: 'index-pattern', id: 'two', attributes: { title: 'Test Two' } }
       ]);
 
-      expect(callAdminCluster.calledOnce).to.be(true);
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, 'bulk', sinon.match({
+        body: [
+          { create: { _type: 'doc', _id: 'config:one' } },
+          { type: 'config', ...mockTimestampFields, config: { title: 'Test One' } },
+          { create: { _type: 'doc', _id: 'index-pattern:two' } },
+          { type: 'index-pattern', ...mockTimestampFields, 'index-pattern': { title: 'Test Two' } }
+        ]
+      }));
 
-      const args = callAdminCluster.getCall(0).args;
-
-      expect(args[0]).to.be('bulk');
-      expect(args[1].body).to.eql([
-        { create: { _type: 'doc', _id: 'config:one' } },
-        { type: 'config', config: { title: 'Test One' } },
-        { create: { _type: 'doc', _id: 'index-pattern:two' } },
-        { type: 'index-pattern', 'index-pattern': { title: 'Test Two' } }
-      ]);
+      sinon.assert.calledOnce(onBeforeWrite);
     });
 
     it('should overwrite objects if overwrite is truthy', async () => {
@@ -182,11 +202,14 @@ describe('SavedObjectsClient', () => {
         body: [
           // uses create because overwriting is not allowed
           { create: { _type: 'doc', _id: 'foo:bar' } },
-          { type: 'foo', 'foo': {} },
+          { type: 'foo', ...mockTimestampFields, 'foo': {} },
         ]
       }));
 
+      sinon.assert.calledOnce(onBeforeWrite);
+
       callAdminCluster.reset();
+      onBeforeWrite.reset();
 
       await savedObjectsClient.bulkCreate([{ type: 'foo', id: 'bar', attributes: {} }], { overwrite: true });
       sinon.assert.calledOnce(callAdminCluster);
@@ -194,11 +217,11 @@ describe('SavedObjectsClient', () => {
         body: [
           // uses index because overwriting is allowed
           { index: { _type: 'doc', _id: 'foo:bar' } },
-          { type: 'foo', 'foo': {} },
+          { type: 'foo', ...mockTimestampFields, 'foo': {} },
         ]
       }));
 
-
+      sinon.assert.calledOnce(onBeforeWrite);
     });
 
     it('returns document errors', async () => {
@@ -235,6 +258,7 @@ describe('SavedObjectsClient', () => {
           id: 'two',
           type: 'index-pattern',
           version: 2,
+          ...mockTimestampFields,
           attributes: { title: 'Test Two' },
         }
       ]);
@@ -268,11 +292,13 @@ describe('SavedObjectsClient', () => {
           id: 'one',
           type: 'config',
           version: 2,
+          ...mockTimestampFields,
           attributes: { title: 'Test One' },
         }, {
           id: 'two',
           type: 'index-pattern',
           version: 2,
+          ...mockTimestampFields,
           attributes: { title: 'Test Two' },
         }
       ]);
@@ -281,10 +307,13 @@ describe('SavedObjectsClient', () => {
 
   describe('#delete', () => {
     it('throws notFound when ES is unable to find the document',  async () => {
-      callAdminCluster.returns(Promise.resolve({ found: false }));
+      callAdminCluster.returns(Promise.resolve({
+        result: 'not_found'
+      }));
 
       try {
         await savedObjectsClient.delete('index-pattern', 'logstash-*');
+        sinon.assert.calledOnce(onBeforeWrite);
         expect().fail('should throw error');
       } catch(e) {
         expect(e.output.statusCode).to.eql(404);
@@ -293,19 +322,21 @@ describe('SavedObjectsClient', () => {
     });
 
     it('passes the parameters to callAdminCluster', async () => {
-      callAdminCluster.returns({});
+      callAdminCluster.returns({
+        result: 'deleted'
+      });
       await savedObjectsClient.delete('index-pattern', 'logstash-*');
 
-      expect(callAdminCluster.calledOnce).to.be(true);
-
-      const [method, args] = callAdminCluster.getCall(0).args;
-      expect(method).to.be('delete');
-      expect(args).to.eql({
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, 'delete', {
         type: 'doc',
         id: 'index-pattern:logstash-*',
         refresh: 'wait_for',
-        index: '.kibana-test'
+        index: '.kibana-test',
+        ignore: [404],
       });
+
+      sinon.assert.calledOnce(onBeforeWrite);
     });
   });
 
@@ -319,6 +350,8 @@ describe('SavedObjectsClient', () => {
         await savedObjectsClient.find({ searchFields: 'string' });
         throw new Error('expected find() to reject');
       } catch (error) {
+        sinon.assert.notCalled(callAdminCluster);
+        sinon.assert.notCalled(onBeforeWrite);
         expect(error).to.have.property('message').contain('must be an array');
       }
     });
@@ -328,6 +361,8 @@ describe('SavedObjectsClient', () => {
         await savedObjectsClient.find({ fields: 'string' });
         throw new Error('expected find() to reject');
       } catch (error) {
+        sinon.assert.notCalled(callAdminCluster);
+        sinon.assert.notCalled(onBeforeWrite);
         expect(error).to.have.property('message').contain('must be an array');
       }
     });
@@ -350,6 +385,7 @@ describe('SavedObjectsClient', () => {
       getSearchDsl.returns({ query: 1, aggregations: 2 });
       await savedObjectsClient.find();
       sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.notCalled(onBeforeWrite);
       sinon.assert.calledWithExactly(callAdminCluster, 'search', sinon.match({
         body: sinon.match({
           query: 1,
@@ -370,6 +406,7 @@ describe('SavedObjectsClient', () => {
         expect(response.saved_objects[i]).to.eql({
           id: doc._id.replace(/(index-pattern|config)\:/, ''),
           type: doc._source.type,
+          ...mockTimestampFields,
           version: doc._version,
           attributes: doc._source[doc._source.type]
         });
@@ -379,22 +416,26 @@ describe('SavedObjectsClient', () => {
     it('accepts per_page/page', async () => {
       await savedObjectsClient.find({ perPage: 10, page: 6 });
 
-      expect(callAdminCluster.calledOnce).to.be(true);
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
+        size: 10,
+        from: 50
+      }));
 
-      const options = callAdminCluster.getCall(0).args[1];
-      expect(options.size).to.be(10);
-      expect(options.from).to.be(50);
+      sinon.assert.notCalled(onBeforeWrite);
     });
 
     it('can filter by fields', async () => {
       await savedObjectsClient.find({ fields: ['title'] });
 
-      expect(callAdminCluster.calledOnce).to.be(true);
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
+        _source: [
+          '*.title', 'type', 'title'
+        ]
+      }));
 
-      const options = callAdminCluster.getCall(0).args[1];
-      expect(options._source).to.eql([
-        '*.title', 'type', 'title'
-      ]);
+      sinon.assert.notCalled(onBeforeWrite);
     });
   });
 
@@ -406,6 +447,7 @@ describe('SavedObjectsClient', () => {
         _version: 2,
         _source: {
           type: 'index-pattern',
+          ...mockTimestampFields,
           'index-pattern': {
             title: 'Testing'
           }
@@ -415,9 +457,11 @@ describe('SavedObjectsClient', () => {
 
     it('formats Elasticsearch response', async () => {
       const response = await savedObjectsClient.get('index-pattern', 'logstash-*');
+      sinon.assert.notCalled(onBeforeWrite);
       expect(response).to.eql({
         id: 'logstash-*',
         type: 'index-pattern',
+        updated_at: mockTimestamp,
         version: 2,
         attributes: {
           title: 'Testing'
@@ -428,9 +472,12 @@ describe('SavedObjectsClient', () => {
     it('prepends type to the id', async () => {
       await savedObjectsClient.get('index-pattern', 'logstash-*');
 
-      const [, args] = callAdminCluster.getCall(0).args;
-      expect(args.id).to.eql('index-pattern:logstash-*');
-      expect(args.type).to.eql('doc');
+      sinon.assert.notCalled(onBeforeWrite);
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
+        id: 'index-pattern:logstash-*',
+        type: 'doc'
+      }));
     });
   });
 
@@ -443,13 +490,17 @@ describe('SavedObjectsClient', () => {
         { id: 'two', type: 'index-pattern' }
       ]);
 
-      expect(callAdminCluster.calledOnce).to.be(true);
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
+        body: {
+          docs: [
+            { _type: 'doc', _id: 'config:one' },
+            { _type: 'doc', _id: 'index-pattern:two' }
+          ]
+        }
+      }));
 
-      const options = callAdminCluster.getCall(0).args[1];
-      expect(options.body.docs).to.eql([
-        { _type: 'doc', _id: 'config:one' },
-        { _type: 'doc', _id: 'index-pattern:two' }
-      ]);
+      sinon.assert.notCalled(onBeforeWrite);
     });
 
     it('returns early for empty objects argument', async () => {
@@ -458,7 +509,8 @@ describe('SavedObjectsClient', () => {
       const response = await savedObjectsClient.bulkGet([]);
 
       expect(response.saved_objects).to.have.length(0);
-      expect(callAdminCluster.notCalled).to.be(true);
+      sinon.assert.notCalled(callAdminCluster);
+      sinon.assert.notCalled(onBeforeWrite);
     });
 
     it('reports error on missed objects', async () => {
@@ -468,7 +520,7 @@ describe('SavedObjectsClient', () => {
           _id: 'config:good',
           found: true,
           _version: 2,
-          _source: { config: { title: 'Test' } }
+          _source: { ...mockTimestampFields, config: { title: 'Test' } }
         }, {
           _type: 'doc',
           _id: 'config:bad',
@@ -480,10 +532,14 @@ describe('SavedObjectsClient', () => {
         [{ id: 'good', type: 'config' }, { id: 'bad', type: 'config' }]
       );
 
+      sinon.assert.notCalled(onBeforeWrite);
+      sinon.assert.calledOnce(callAdminCluster);
+
       expect(savedObjects).to.have.length(2);
       expect(savedObjects[0]).to.eql({
         id: 'good',
         type: 'config',
+        ...mockTimestampFields,
         version: 2,
         attributes: { title: 'Test' }
       });
@@ -515,6 +571,7 @@ describe('SavedObjectsClient', () => {
       expect(response).to.eql({
         id,
         type,
+        ...mockTimestampFields,
         version: newVersion,
         attributes
       });
@@ -528,26 +585,59 @@ describe('SavedObjectsClient', () => {
         { version: newVersion - 1 }
       );
 
-      const esParams = callAdminCluster.getCall(0).args[1];
-      expect(esParams.version).to.be(newVersion - 1);
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, sinon.match.string, sinon.match({
+        version: newVersion - 1
+      }));
     });
 
     it('passes the parameters to callAdminCluster', async () => {
       await savedObjectsClient.update('index-pattern', 'logstash-*', { title: 'Testing' });
 
-      expect(callAdminCluster.calledOnce).to.be(true);
-
-      const args = callAdminCluster.getCall(0).args;
-
-      expect(args[0]).to.be('update');
-      expect(args[1]).to.eql({
+      sinon.assert.calledOnce(callAdminCluster);
+      sinon.assert.calledWithExactly(callAdminCluster, 'update', {
         type: 'doc',
         id: 'index-pattern:logstash-*',
         version: undefined,
-        body: { doc: { 'index-pattern': { title: 'Testing' } } },
+        body: {
+          doc: { updated_at: mockTimestamp, 'index-pattern': { title: 'Testing' } }
+        },
+        ignore: [404],
         refresh: 'wait_for',
         index: '.kibana-test'
       });
+
+      sinon.assert.calledOnce(onBeforeWrite);
+    });
+  });
+
+  describe('onBeforeWrite', () => {
+    it('blocks calls to callCluster of requests', async () => {
+      onBeforeWrite.returns(delay(500));
+      callAdminCluster.returns({ result: 'deleted', found: true });
+
+      const deletePromise = savedObjectsClient.delete('type', 'id');
+      await delay(100);
+      sinon.assert.calledOnce(onBeforeWrite);
+      sinon.assert.notCalled(callAdminCluster);
+      await deletePromise;
+      sinon.assert.calledOnce(onBeforeWrite);
+      sinon.assert.calledOnce(callAdminCluster);
+    });
+
+    it('can throw es errors and have them decorated as SavedObjectsClient errors', async () => {
+      const es401 = new elasticsearch.errors[401];
+      expect(SavedObjectsClient.errors.isNotAuthorizedError(es401)).to.be(false);
+      onBeforeWrite.throws(es401);
+
+      try {
+        await savedObjectsClient.delete('type', 'id');
+        throw new Error('expected savedObjectsClient.delete() to reject');
+      } catch (error) {
+        sinon.assert.calledOnce(onBeforeWrite);
+        expect(error).to.be(es401);
+        expect(SavedObjectsClient.errors.isNotAuthorizedError(error)).to.be(true);
+      }
     });
   });
 });

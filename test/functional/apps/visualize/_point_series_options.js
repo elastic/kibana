@@ -3,7 +3,6 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
-  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'pointSeries']);
   const pointSeriesVis = PageObjects.pointSeries;
 
@@ -97,7 +96,6 @@ export default function ({ getService, getPageObjects }) {
           const data = await PageObjects.visualize.getLineChartData('fill="#00a69b"');
           log.debug('count data=' + data);
           log.debug('data.length=' + data.length);
-          screenshots.take('Visualize-secondary-value-axis');
           expect(data).to.eql(expectedChartValues[0]);
 
           const avgMemoryData = await PageObjects.visualize.getLineChartData('fill="#57c17b"', 'ValueAxis-2');

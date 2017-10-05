@@ -28,6 +28,10 @@ export {
 } from './card';
 
 export {
+  KuiCodeEditor
+} from './code_editor';
+
+export {
   KuiColorPicker,
 } from './color_picker';
 
@@ -50,16 +54,22 @@ export {
 } from './event';
 
 export {
+  KuiExpressionItem,
+  KuiExpressionItemButton,
+  KuiExpressionItemPopover,
+} from './expression';
+
+export {
   KuiFieldGroup,
   KuiFieldGroupSection,
 } from './form_layout';
 
 export {
   KuiGallery,
-  KuiGalleryButton,
-  KuiGalleryButtonIcon,
-  KuiGalleryButtonImage,
-  KuiGalleryButtonLabel,
+  KuiGalleryItem,
+  KuiGalleryItemIcon,
+  KuiGalleryItemImage,
+  KuiGalleryItemLabel,
 } from './gallery';
 
 export {

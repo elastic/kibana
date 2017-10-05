@@ -11,6 +11,7 @@
         <input
           parse-query
           input-focus
+          disable-input-focus="queryBar.disableAutoFocus"
           kbn-typeahead-input
           ng-model="queryBar.localQuery.query"
           placeholder="Search... (e.g. status:200 AND extension:PHP)"
@@ -40,6 +41,7 @@
         <input
           ng-model="queryBar.localQuery.query"
           input-focus
+          disable-input-focus="queryBar.disableAutoFocus"
           kbn-typeahead-input
           placeholder="Search... (e.g. status:200 AND extension:PHP)"
           aria-label="Search input"

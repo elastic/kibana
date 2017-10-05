@@ -27,6 +27,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await this.clickLinkText('Advanced Settings');
     }
 
+    async clickKibanaSavedObjects() {
+      await this.clickLinkText('Saved Objects');
+    }
+
     async clickKibanaIndices() {
       log.debug('clickKibanaIndices link');
       await this.clickLinkText('Index Patterns');
@@ -252,6 +256,12 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    async filterField(name) {
+      const input = await testSubjects.find('indexPatternFieldFilter');
+      await input.clearValue();
+      await input.type(name);
+    }
+
     async openControlsByName(name) {
       await remote.setFindTimeout(defaultFindTimeout)
       .findByCssSelector('[data-test-subj="indexPatternFieldEditButton"][href$="/' + name + '"]')
@@ -294,7 +304,9 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
         await PageObjects.common.sleep(2000);
         await (await this.getCreateIndexPatternGoToStep2Button()).click();
         await PageObjects.common.sleep(2000);
-        await this.selectTimeFieldOption(timefield);
+        if (timefield) {
+          await this.selectTimeFieldOption(timefield);
+        }
         await (await this.getCreateIndexPatternCreateButton()).click();
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -379,7 +391,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       if (language) await this.setScriptedFieldLanguage(language);
       if (type) await this.setScriptedFieldType(type);
       if (format) {
-        await this.setScriptedFieldFormat(format.format);
+        await this.setFieldFormat(format.format);
         // null means leave - default - which has no other settings
         // Url adds Type, Url Template, and Label Template
         // Date adds moment.js format pattern (Default: "MMMM Do YYYY, HH:mm:ss.SSS")
@@ -434,7 +446,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       .click();
     }
 
-    async setScriptedFieldFormat(format) {
+    async setFieldFormat(format) {
       log.debug('set scripted field format = ' + format);
       await remote.setFindTimeout(defaultFindTimeout)
       .findByCssSelector('select[data-test-subj="editorSelectedFormatId"] > option[label="' + format + '"]')
@@ -484,6 +496,29 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async setScriptedFieldScript(script) {
       log.debug('set scripted field script = ' + script);
       await testSubjects.setValue('editorFieldScript', script);
+    }
+
+    async importFile(path) {
+      log.debug(`importFile(${path})`);
+      await remote.findById('testfile').type(path);
+    }
+
+    async setImportIndexFieldOption(child) {
+      await remote.setFindTimeout(defaultFindTimeout)
+      .findByCssSelector(`select[data-test-subj="managementChangeIndexSelection"] > option:nth-child(${child})`)
+      .click();
+    }
+
+    async clickChangeIndexConfirmButton() {
+      await (await testSubjects.find('changeIndexConfirmButton')).click();
+    }
+
+    async clickVisualizationsTab() {
+      await (await testSubjects.find('objectsTab-visualizations')).click();
+    }
+
+    async getVisualizationRows() {
+      return await testSubjects.findAll(`objectsTableRow`);
     }
   }
 

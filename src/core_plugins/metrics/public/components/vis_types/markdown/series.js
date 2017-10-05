@@ -75,17 +75,21 @@ function MarkdownSeries(props) {
     }
     body = (
       <div className="vis_editor__series-row">
-        <div className="kbnTabs sm">
-          <div
+        <div className="kbnTabs sm" role="tablist">
+          <button
+            role="tab"
+            aria-selected={selectedTab === 'metrics'}
             className={metricsClassName}
             onClick={() => props.switchTab('metrics')}
           >Metrics
-          </div>
-          <div
+          </button>
+          <button
+            role="tab"
+            aria-selected={selectedTab === 'metrics'}
             className={optionsClassname}
             onClick={() => props.switchTab('options')}
           >Options
-          </div>
+          </button>
         </div>
         {seriesBody}
       </div>
@@ -94,6 +98,7 @@ function MarkdownSeries(props) {
 
   return (
     <div
+      aria-hidden="true"
       className={`${props.className} vis_editor__series`}
       style={props.style}
       onMouseDown={props.onMouseDown}
@@ -101,7 +106,14 @@ function MarkdownSeries(props) {
     >
       <div className="vis_editor__container">
         <div className="vis_editor__series-details">
-          <div onClick={props.toggleVisible}><i className={caretClassName}/></div>
+          <button
+            className="vis_editor__series-visibility-toggle"
+            onClick={props.toggleVisible}
+            aria-label="Toggle series editor"
+            aria-expanded={props.visible}
+          >
+            <i className={caretClassName}/>
+          </button>
           <div className="vis_editor__row vis_editor__row_item">
             <input
               className="vis_editor__input-grows vis_editor__row_item"

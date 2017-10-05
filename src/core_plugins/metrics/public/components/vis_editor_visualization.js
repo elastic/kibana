@@ -62,9 +62,16 @@ class VisEditorVisualization extends Component {
     if (autoApply) applyMessage = 'The changes will be automatically applied.';
     const applyButton = (
       <div className="vis_editor__dirty_controls">
-        <div className="vis_editor__dirty_controls-toggle-label" id="tsvbAutoApply">Auto Apply</div>
+        <label
+          className="vis_editor__dirty_controls-toggle-label"
+          id="tsvbAutoApply"
+          htmlFor="tsvbAutoApplyInput"
+        >
+          Auto Apply
+        </label>
         <div className="vis_editor__dirty_controls-toggle">
           <Toggle
+            id="tsvbAutoApplyInput"
             defaultChecked={autoApply}
             icons={false}
             onChange={this.props.onToggleAutoApply}
@@ -106,6 +113,7 @@ class VisEditorVisualization extends Component {
         </div>
         {applyButton}
         <div
+          aria-hidden="true"
           className="vis_editor__visualization-draghandle"
           onMouseDown={this.handleMouseDown}
           onMouseUp={this.handleMouseUp}

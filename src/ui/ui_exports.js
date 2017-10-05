@@ -16,7 +16,8 @@ export default class UiExports {
       ],
       visResponseHandlers: [
         'ui/vis/response_handlers/basic',
-        'ui/vis/response_handlers/none'
+        'ui/vis/response_handlers/none',
+        'ui/vis/response_handlers/tabify'
       ],
       visEditorTypes: [
         'ui/vis/editors/default/default',

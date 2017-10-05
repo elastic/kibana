@@ -2,9 +2,11 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import createLegendSeries from '../lib/create_legend_series';
 import reactcss from 'reactcss';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 function VerticalLegend(props) {
   const rows = props.series.map(createLegendSeries(props));
+  const htmlId = htmlIdGenerator();
   const hideLegend = !props.showLegend;
   const leftLegend = props.legendPosition === 'left';
 
@@ -29,9 +31,15 @@ function VerticalLegend(props) {
   return (
     <div className="rhythm_chart__legend" style={styles.legend}>
       <div className="rhythm_chart__legend-control" style={styles.control}>
-        <i className={legendControlClass} onClick={props.onClick}/>
+        <button
+          className={legendControlClass}
+          onClick={props.onClick}
+          aria-label="Toggle chart legend"
+          aria-expanded={!!props.showLegend}
+          aria-controls={htmlId('legend')}
+        />
       </div>
-      <div className="rhythm_chart__legend-series" style={styles.series}>
+      <div className="rhythm_chart__legend-series" style={styles.series} id={htmlId('legend')}>
         { rows }
       </div>
     </div>

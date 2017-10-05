@@ -14,7 +14,12 @@ const KuiInfoButton = props => {
 };
 
 KuiInfoButton.propTypes = {
+  'aria-label': PropTypes.string,
   className: PropTypes.string,
+};
+
+KuiInfoButton.defaultProps = {
+  'aria-label': 'Info'
 };
 
 export {

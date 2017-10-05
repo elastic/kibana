@@ -14,7 +14,7 @@
   <label>
     Elasticsearch request body &nbsp;
   </label>
-  <pre>{{req.fetchParams.body | json}}</pre>
+  <pre data-test-subj="visualizationEsRequestBody">{{req.fetchParams.body | json}}</pre>
 </div>
 
 <div ng-if="spy.mode.name === 'response'">

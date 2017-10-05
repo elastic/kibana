@@ -1,34 +1,27 @@
-import { createCallCluster } from '../../../../src/test_utils/es';
-import { SavedObjectsClient } from '../../../../src/server/saved_objects';
+import Wreck from 'wreck';
+import { get } from 'lodash';
+
+const MINUTE = 60 * 1000;
+const HOUR = 60 * MINUTE;
 
 export class KibanaServerUiSettings {
-  constructor(log, es, kibanaIndex, kibanaVersion) {
+  constructor(url, log, es, kibanaIndex, kibanaVersion) {
     this._log = log;
     this._kibanaVersion = kibanaVersion;
-    this._savedObjectsClient = new SavedObjectsClient(
-      kibanaIndex.getName(),
-      kibanaIndex.getMappingsDsl(),
-      createCallCluster(es)
-    );
-  }
-
-  async _id() {
-    return await this._kibanaVersion.get();
-  }
-
-  async existInEs() {
-    return !!(await this._read());
+    this._wreck = Wreck.defaults({
+      headers: { 'kbn-xsrf': 'ftr/services/uiSettings' },
+      baseUrl: url,
+      json: true,
+      redirects: 3,
+    });
   }
 
   /*
   ** Gets defaultIndex from the config doc.
   */
   async getDefaultIndex() {
-    const doc = await this._read();
-    if (!doc) {
-      throw new TypeError('Failed to fetch kibana config doc');
-    }
-    const defaultIndex = doc.attributes.defaultIndex;
+    const { payload } = await this._wreck.get('/api/kibana/settings');
+    const defaultIndex = get(payload, 'settings.defaultIndex.userValue');
     this._log.verbose('uiSettings.defaultIndex: %j', defaultIndex);
     return defaultIndex;
   }
@@ -43,18 +36,26 @@ export class KibanaServerUiSettings {
    */
   async disableToastAutohide() {
     await this.update({
-      'notifications:lifetime:banner': 360000,
-      'notifications:lifetime:error': 360000,
-      'notifications:lifetime:warning': 360000,
-      'notifications:lifetime:info': 360000,
+      'notifications:lifetime:banner': HOUR,
+      'notifications:lifetime:error': HOUR,
+      'notifications:lifetime:warning': HOUR,
+      'notifications:lifetime:info': HOUR,
     });
   }
 
   async replace(doc) {
+    const { payload } = await this._wreck.get('/api/kibana/settings');
+
+    for (const key of Object.keys(payload.settings)) {
+      await this._wreck.delete(`/api/kibana/settings/${key}`);
+    }
+
     this._log.debug('replacing kibana config doc: %j', doc);
-    await this._savedObjectsClient.create('config', doc, {
-      id: await this._id(),
-      overwrite: true,
+
+    await this._wreck.post('/api/kibana/settings', {
+      payload: {
+        changes: doc
+      }
     });
   }
 
@@ -64,17 +65,10 @@ export class KibanaServerUiSettings {
   */
   async update(updates) {
     this._log.debug('applying update to kibana config: %j', updates);
-    await this._savedObjectsClient.update('config', await this._id(), updates);
-  }
-
-  async _read() {
-    try {
-      const doc = await this._savedObjectsClient.get('config', await this._id());
-      this._log.verbose('Fetched kibana config doc', doc);
-      return doc;
-    } catch (err) {
-      this._log.debug('Failed to fetch kibana config doc', err.message);
-      return;
-    }
+    await this._wreck.post('/api/kibana/settings', {
+      payload: {
+        changes: updates
+      }
+    });
   }
 }

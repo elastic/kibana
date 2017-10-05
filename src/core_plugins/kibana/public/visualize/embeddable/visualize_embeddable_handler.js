@@ -1,4 +1,5 @@
 import angular from 'angular';
+import 'ui/visualize';
 
 import visualizationTemplate from './visualize_template.html';
 import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
@@ -8,7 +9,7 @@ import { EmbeddableHandler } from 'ui/embeddable';
 import chrome from 'ui/chrome';
 
 export class VisualizeEmbeddableHandler extends EmbeddableHandler {
-  constructor($compile, $rootScope, visualizeLoader, timefilter, Notifier, Promise) {
+  constructor($compile, $rootScope, visualizeLoader, timefilter, Notifier, Promise, Private) {
     super();
     this.$compile = $compile;
     this.visualizeLoader = visualizeLoader;
@@ -16,7 +17,7 @@ export class VisualizeEmbeddableHandler extends EmbeddableHandler {
     this.name = 'visualization';
     this.Promise = Promise;
     this.brushEvent = utilsBrushEventProvider(timefilter);
-    this.filterBarClickHandler = filterBarClickHandlerProvider(Notifier);
+    this.filterBarClickHandler = filterBarClickHandlerProvider(Notifier, Private);
   }
 
   getEditPath(panelId) {
@@ -56,10 +57,11 @@ export class VisualizeEmbeddableHandler extends EmbeddableHandler {
         const rootNode = angular.element(domNode);
         rootNode.append(visualizationInstance);
 
-        visualizationInstance.on('$destroy', function () {
+        return () => {
+          visualizationInstance.remove();
           visualizeScope.savedObj.destroy();
           visualizeScope.$destroy();
-        });
+        };
       });
   }
 }

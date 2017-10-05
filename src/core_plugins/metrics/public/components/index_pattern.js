@@ -4,6 +4,7 @@ import FieldSelect from './aggs/field_select';
 import createSelectHandler from './lib/create_select_handler';
 import createTextHandler from './lib/create_text_handler';
 import YesNo from './yes_no';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 export const IndexPattern = props => {
   const { fields, prefix } = props;
@@ -20,19 +21,27 @@ export const IndexPattern = props => {
     [dropBucketName]: 1
   };
 
+  const htmlId = htmlIdGenerator();
+
   const model = { ...defaults, ...props.model };
   return (
     <div className={props.className}>
-      <div className="vis_editor__label">Index Pattern</div>
+      <label className="vis_editor__label" htmlFor={htmlId('indexPattern')}>
+        Index Pattern
+      </label>
       <input
+        id={htmlId('indexPattern')}
         className="vis_editor__input"
         disabled={props.disabled}
         onChange={handleTextChange(indexPatternName, '*')}
         value={model[indexPatternName]}
       />
-      <div className="vis_editor__label">Time Field</div>
+      <label className="vis_editor__label" htmlFor={htmlId('timeField')}>
+        Time Field
+      </label>
       <div className="vis_editor__index_pattern-fields">
         <FieldSelect
+          id={htmlId('timeField')}
           restrict="date"
           value={model[timeFieldName]}
           disabled={props.disabled}
@@ -41,8 +50,11 @@ export const IndexPattern = props => {
           fields={fields}
         />
       </div>
-      <div className="vis_editor__label">Interval (auto, 1m, 1d, 1w, 1y)</div>
+      <label className="vis_editor__label" htmlFor={htmlId('interval')}>
+        Interval (auto, 1m, 1d, 1w, 1y, &gt;=1m)
+      </label>
       <input
+        id={htmlId('interval')}
         className="vis_editor__input"
         disabled={props.disabled}
         onChange={handleTextChange(intervalName, 'auto')}

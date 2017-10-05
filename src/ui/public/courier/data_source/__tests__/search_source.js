@@ -2,21 +2,19 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'sinon';
 
-import { RequestQueueProvider } from '../../_request_queue';
+import { requestQueue } from '../../_request_queue';
 import { SearchSourceProvider } from '../search_source';
 import StubIndexPatternProv from 'test_utils/stub_index_pattern';
 
 describe('SearchSource', function () {
   require('test_utils/no_digest_promises').activateForSuite();
 
-  let requestQueue;
   let SearchSource;
   let indexPattern;
   let indexPattern2;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    requestQueue = Private(RequestQueueProvider);
     SearchSource = Private(SearchSourceProvider);
 
     const IndexPattern = Private(StubIndexPatternProv);
@@ -24,6 +22,8 @@ describe('SearchSource', function () {
     indexPattern2 = new IndexPattern('test2-*', null, []);
     expect(indexPattern).to.not.be(indexPattern2);
   }));
+  beforeEach(requestQueue.clear);
+  after(requestQueue.clear);
 
   describe('#onResults()', function () {
     it('adds a request to the requestQueue', function () {

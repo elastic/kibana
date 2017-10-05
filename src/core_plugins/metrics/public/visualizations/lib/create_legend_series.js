@@ -15,15 +15,19 @@ export default props => (row, i) => {
   if (row.label == null || row.legend === false) return (<div key={key} style={{ display: 'none' }}/>);
   return (
     <div
-      className={classes.join(' ')}
-      onClick={event => props.onToggle(event, row.id)}
       key={key}
+      className={classes.join(' ')}
     >
-      <div className="rhythm_chart__legend_label">
-        <i className="fa fa-circle" style={{ color: row.color }} />
-        <span>{ row.label }</span>
-      </div>
-      <div className="rhythm_chart__legend_value">{ value }</div>
+      <button
+        onClick={event => props.onToggle(event, row.id)}
+        className="rhythm_chart__legend_button"
+      >
+        <div className="rhythm_chart__legend_label">
+          <i className="fa fa-circle" style={{ color: row.color }} />
+          <span>{ row.label }</span>
+        </div>
+        <div className="rhythm_chart__legend_value">{ value }</div>
+      </button>
     </div>
   );
 };

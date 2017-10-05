@@ -16,6 +16,11 @@ import { PersistedState } from 'ui/persisted_state';
 import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
+import { updateVisualizationConfig } from './vis_update';
+import { queryManagerFactory } from '../query_manager';
+import * as kueryAPI from 'ui/kuery';
+import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
@@ -23,6 +28,8 @@ export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
   const brushEvent = Private(UtilsBrushEventProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
+  const SearchSource = Private(SearchSourceProvider);
+  const savedObjectsClient = Private(SavedObjectsClientProvider);
 
   class Vis extends EventEmitter {
     constructor(indexPattern, visState, uiState) {
@@ -44,10 +51,18 @@ export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
       this.setState(this.getCurrentState(), false);
       this.setUiState(uiState);
 
+      // Session state is for storing information that is transitory, and will not be saved with the visualization.
+      // For instance, map bounds, which depends on the view port, browser window size, etc.
+      this.sessionState = {};
+
       this.API = {
+        savedObjectsClient: savedObjectsClient,
+        SearchSource: SearchSource,
         indexPatterns: indexPatterns,
         timeFilter: timefilter,
         queryFilter: queryFilter,
+        queryManager: queryManagerFactory(getAppState),
+        kuery: kueryAPI,
         events: {
           filter: (event) => {
             const appState = getAppState();
@@ -80,6 +95,8 @@ export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
         _.cloneDeep(state.params || {}),
         _.cloneDeep(this.type.visConfig.defaults || {})
       );
+
+      updateVisualizationConfig(state.params, this.params);
 
       this.aggs = new AggConfigs(this, state.aggs);
     }

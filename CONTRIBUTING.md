@@ -105,7 +105,7 @@ git checkout name-of-your-branch
 git rebase master
 ```
 
-You want to make sure there are no merge conflicts. If there is are merge conflicts, git will pause the rebase and allow you to fix the conflicts before continuing.
+You want to make sure there are no merge conflicts. If there are merge conflicts, git will pause the rebase and allow you to fix the conflicts before continuing.
 
 You can use `git status` to see which files contain conflicts. They'll be the ones that aren't staged for commit. Open those files, and look for where git has marked the conflicts. Resolve the conflicts so that the changes you want to make to the code have been incorporated in a way that doesn't destroy work that's been done in master. Refer to master's commit history on GitHub if you need to gain a better understanding of how code is conflicting and how best to resolve it.
 
@@ -215,6 +215,7 @@ Editor     | Plugin
 -----------|-------------------------------------------------------------------------------
 Sublime    | [SublimeLinter-eslint](https://github.com/roadhump/SublimeLinter-eslint#installation)
 Atom       | [linter-eslint](https://github.com/AtomLinter/linter-eslint#installation)
+VSCode     | [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
 IntelliJ   | Settings » Languages & Frameworks » JavaScript » Code Quality Tools » ESLint
 `vi`       | [scrooloose/syntastic](https://github.com/scrooloose/syntastic)
 
@@ -301,57 +302,16 @@ npm run test:browser -- --dev # remove the --dev flag to run them once and close
 
 #### Running Browser Automation Tests
 
-The following will start Kibana, Elasticsearch and the chromedriver for you. To run the functional UI tests use the following commands
-
-```bash
-npm run test:ui
-```
-
-
-In order to start the server required for the `node scripts/functional_test_runner` tasks, use the following command. Once the server is started `node scripts/functional_test_runner` can be run multiple times without waiting for the server to start.
-
-```bash
-npm run test:ui:server
-```
-
-To execute the front-end browser tests, enter the following. This requires the server started by the `test:ui:server` task.
-
-```bash
-node scripts/functional_test_runner
-```
-
-To filter these tests, use `--grep=foo` for only running tests that match a regular expression.
-
-To run these browser tests against against some other Elasticsearch and Kibana instance you can set these environment variables and then run the test runner.
-Here's an example to run against an Elastic Cloud instance (note that you should run the same branch of tests as the version of Kibana you're testing);
-
-```bash
-export TEST_KIBANA_PROTOCOL=https
-export TEST_KIBANA_HOSTNAME=9249d04b1186b3e7bbe11ea60df4f963.us-east-1.aws.found.io
-export TEST_KIBANA_PORT=443
-export TEST_KIBANA_USER=elastic
-export TEST_KIBANA_PASS=<your password here>
-
-export TEST_ES_PROTOCOL=http
-export TEST_ES_HOSTNAME=aaa5d22032d76805fcce724ed9d9f5a2.us-east-1.aws.found.io
-export TEST_ES_PORT=9200
-export TEST_ES_USER=elastic
-export TEST_ES_PASS=<your password here>
-node scripts/functional_test_runner
-```
-
-##### Browser Automation Notes
-
 [Read about the `FunctionalTestRunner`](https://www.elastic.co/guide/en/kibana/current/development-functional-tests.html) to learn more about how you can run and develop functional tests for Kibana core and plugins.
+
 
 ### Building OS packages
 
-Packages are built using fpm, pleaserun, dpkg, and rpm.  fpm and pleaserun can be installed using gem.  Package building has only been tested on Linux and is not supported on any other platform.
+Packages are built using fpm, dpkg, and rpm.  Package building has only been tested on Linux and is not supported on any other platform.
 
 ```bash
 apt-get install ruby-dev rpm
 gem install fpm -v 1.5.0
-gem install pleaserun -v 0.0.24
 npm run build -- --skip-archives
 ```
 

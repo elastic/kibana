@@ -5,6 +5,7 @@ import FieldSelect from './field_select';
 import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 function StandardAgg(props) {
   const { model, panel, series, fields } = props;
@@ -17,6 +18,7 @@ function StandardAgg(props) {
   }
 
   const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
+  const htmlId = htmlIdGenerator();
 
   return (
     <AggRow
@@ -38,8 +40,9 @@ function StandardAgg(props) {
         model.type !== 'count'
         ? (
           <div className="vis_editor__item">
-            <div className="vis_editor__label">Field</div>
+            <label className="vis_editor__label" htmlFor={htmlId('field')}>Field</label>
             <FieldSelect
+              id={htmlId('field')}
               fields={fields}
               type={model.type}
               restrict={restrict}

@@ -4,8 +4,6 @@ import { uiModules } from 'ui/modules';
 import uiRoutes from 'ui/routes';
 import chrome from 'ui/chrome';
 
-import 'plugins/kibana/dashboard/grid';
-import 'plugins/kibana/dashboard/panel/panel';
 import 'ui/query_bar';
 
 import { SavedObjectNotFound } from 'ui/errors';
@@ -24,18 +22,37 @@ import { notify } from 'ui/notify';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import { showCloneModal } from './top_nav/show_clone_modal';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
-import { QueryManagerProvider } from 'ui/query_manager';
 import { keyCodes } from 'ui_framework/services';
 import { DashboardContainerAPI } from './dashboard_container_api';
+import * as filterActions from 'ui/doc_table/actions/filter';
+import { FilterManagerProvider } from 'ui/filter_manager';
+import { EmbeddableHandlersRegistryProvider } from 'ui/embeddable/embeddable_handlers_registry';
+
+import {
+  DashboardGrid
+} from './grid/dashboard_grid';
+
+import {
+  DashboardPanel
+} from './panel';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
   'ngRoute',
+  'react',
   'kibana/courier',
   'kibana/config',
   'kibana/notify',
   'kibana/typeahead',
 ]);
+
+app.directive('dashboardGrid', function (reactDirective) {
+  return reactDirective(DashboardGrid);
+});
+
+app.directive('dashboardPanel', function (reactDirective) {
+  return reactDirective(DashboardPanel);
+});
 
 uiRoutes
   .when(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
@@ -89,10 +106,13 @@ app.directive('dashboardApp', function ($injector) {
     restrict: 'E',
     controllerAs: 'dashboardApp',
     controller: function ($scope, $rootScope, $route, $routeParams, $location, getAppState, $compile, dashboardConfig) {
+      const filterManager = Private(FilterManagerProvider);
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
       const notify = new Notifier({ location: 'Dashboard' });
       $scope.queryDocLinks = documentationLinks.query;
+      const embeddableHandlers = Private(EmbeddableHandlersRegistryProvider);
+      $scope.getEmbeddableHandler = panelType => embeddableHandlers.byName[panelType];
 
       const dash = $scope.dash = $route.current.locals.dash;
       if (dash.id) {
@@ -101,8 +121,14 @@ app.directive('dashboardApp', function ($injector) {
 
       const dashboardState = new DashboardState(dash, AppState, dashboardConfig.getHideWriteControls());
       $scope.appState = dashboardState.getAppState();
-      const queryManager = Private(QueryManagerProvider)(dashboardState.getAppState());
-      $scope.containerApi = new DashboardContainerAPI(dashboardState, queryManager);
+      $scope.containerApi = new DashboardContainerAPI(
+        dashboardState,
+        (field, value, operator, index) => {
+          filterActions.addFilter(field, value, operator, index, dashboardState.getAppState(), filterManager);
+          dashboardState.saveState();
+        }
+      );
+      $scope.getContainerApi = () => $scope.containerApi;
 
       // The 'previouslyStored' check is so we only update the time filter on dashboard open, not during
       // normal cross app navigation.
@@ -174,23 +200,24 @@ app.directive('dashboardApp', function ($injector) {
         !dashboardConfig.getHideWriteControls()
       );
 
-      $scope.toggleExpandPanel = (panelIndex) => {
-        if ($scope.expandedPanel && $scope.expandedPanel.panelIndex === panelIndex) {
-          $scope.expandedPanel = null;
-        } else {
-          $scope.expandedPanel =
-            dashboardState.getPanels().find((panel) => panel.panelIndex === panelIndex);
-        }
+      $scope.minimizeExpandedPanel = () => {
+        $scope.expandedPanel = null;
       };
 
-      $scope.updateQuery = function (query) {
+      $scope.expandPanel = (panelIndex) => {
+        $scope.expandedPanel =
+            dashboardState.getPanels().find((panel) => panel.panelIndex === panelIndex);
+      };
+
+      $scope.updateQueryAndFetch = function (query) {
         // reset state if language changes
         if ($scope.model.query.language && $scope.model.query.language !== query.language) {
           filterBar.removeAll();
           dashboardState.getAppState().$newFilters = [];
         }
-
-        $scope.model.query = query;
+        $scope.model.query = migrateLegacyQuery(query);
+        dashboardState.applyFilters($scope.model.query, filterBar.getFilters());
+        $scope.refresh();
       };
 
       // called by the saved-object-finder when a user clicks a vis
@@ -227,21 +254,7 @@ app.directive('dashboardApp', function ($injector) {
         $scope.indexPatterns = dashboardState.getPanelIndexPatterns();
       };
 
-      $scope.$watch('model.query', (newQuery) => {
-        $scope.model.query = migrateLegacyQuery(newQuery);
-        dashboardState.applyFilters($scope.model.query, filterBar.getFilters());
-        $scope.refresh();
-      });
-
-      $scope.$watchCollection(() => dashboardState.getAppState().$newFilters, function (filters = []) {
-        // need to convert filters generated from user interaction with viz into kuery AST
-        // These are handled by the filter bar directive when lucene is the query language
-        Promise.all(filters.map(queryManager.addLegacyFilter))
-          .then(() => dashboardState.getAppState().$newFilters = [])
-          .then(updateState)
-          .then(() => dashboardState.applyFilters($scope.model.query, filterBar.getFilters()))
-          .then($scope.refresh());
-      });
+      $scope.$watch('model.query', $scope.updateQueryAndFetch);
 
       $scope.$listen(timefilter, 'fetch', $scope.refresh);
 

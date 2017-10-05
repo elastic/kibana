@@ -29,6 +29,19 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return logstash;
     }
 
+    async clickEditVisualization() {
+      log.debug('clickEditVisualization');
+      await testSubjects.click('dashboardPanelToggleMenuIcon');
+      await testSubjects.click('dashboardPanelEditLink');
+
+      await retry.try(async () => {
+        const current = await remote.getCurrentUrl();
+        if (current.indexOf('visualize') < 0) {
+          throw new Error('not on visualize page');
+        }
+      });
+    }
+
     async clickFullScreenMode() {
       log.debug(`clickFullScreenMode`);
       await testSubjects.click('dashboardFullScreenMode');
@@ -365,20 +378,25 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return await testSubjects.findAll('dashboardPanel');
     }
 
-    async getPanelSizeData() {
-      const titleObjects = await find.allByCssSelector('li.gs-w'); // These are gridster-defined elements and classes
-      async function getTitles(chart) {
-        const dataCol = await chart.getAttribute('data-col');
-        const dataRow = await chart.getAttribute('data-row');
-        const dataSizeX = await chart.getAttribute('data-sizex');
-        const dataSizeY = await chart.getAttribute('data-sizey');
-        const childElement = await testSubjects.findDescendant('dashboardPanelTitle', chart);
-        const title = await childElement.getVisibleText();
-        return { dataCol, dataRow, dataSizeX, dataSizeY, title };
+
+    async getPanelDimensions() {
+      const panels = await find.allByCssSelector('.react-grid-item'); // These are gridster-defined elements and classes
+      async function getPanelDimensions(panel) {
+        const size = await panel.getSize();
+        return {
+          width: size.width,
+          height: size.height
+        };
       }
 
-      const getTitlePromises = _.map(titleObjects, getTitles);
-      return await Promise.all(getTitlePromises);
+      const getDimensionsPromises = _.map(panels, getPanelDimensions);
+      return await Promise.all(getDimensionsPromises);
+    }
+
+    async getPanelCount() {
+      log.debug('getPanelCount');
+      const panels = await find.allByCssSelector('.react-grid-item');
+      return panels.length;
     }
 
     getTestVisualizations() {
@@ -453,13 +471,9 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       log.debug('toggleExpandPanel');
       const expandShown = await testSubjects.exists('dashboardPanelExpandIcon');
       if (!expandShown) {
-        const panelElements = await find.allByCssSelector('span.panel-title');
-        log.debug('click title');
-        await retry.try(() => panelElements[0].click()); // Click to simulate hover.
+        await testSubjects.click('dashboardPanelToggleMenuIcon');
       }
-      const expandButton = await testSubjects.find('dashboardPanelExpandIcon');
-      log.debug('click expand icon');
-      await retry.try(() => expandButton.click());
+      await testSubjects.click('dashboardPanelExpandIcon');
     }
 
     async getSharedItemsCount() {

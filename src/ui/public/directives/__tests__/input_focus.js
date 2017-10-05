@@ -35,10 +35,12 @@ describe('Input focus directive', function () {
     $rootScope.$digest();
     $timeout.flush();
     selectedEl = document.activeElement;
-    selectedText = selectedEl.value.slice(
-      selectedEl.selectionStart,
-      selectedEl.selectionEnd
-    );
+    if (selectedEl.value) {
+      selectedText = selectedEl.value.slice(
+        selectedEl.selectionStart,
+        selectedEl.selectionEnd
+      );
+    }
   }
 
 
@@ -53,5 +55,15 @@ describe('Input focus directive', function () {
     expect(selectedEl).to.equal(element[0]);
     expect(selectedText.length).to.equal(inputValue.length);
     expect(selectedText).to.equal(inputValue);
+  });
+
+  it('should not focus the input if disable-input-focus is set to true on the same element', function () {
+    renderEl('<input type="text" ng-model="value" input-focus disable-input-focus="true">');
+    expect(selectedEl).not.to.be(element[0]);
+  });
+
+  it('should still focus the input if disable-input-focus is falsy', function () {
+    renderEl('<input type="text" ng-model="value" input-focus disable-input-focus="false">');
+    expect(selectedEl).to.be(element[0]);
   });
 });

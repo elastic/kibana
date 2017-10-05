@@ -6,11 +6,10 @@ export function assertSinonMatch(value, match) {
   sinon.assert.calledWithExactly(stub, match);
 }
 
-export function assertDocMissingResponse({ result }) {
+export function assertServiceUnavailableResponse({ result }) {
   assertSinonMatch(result, {
-    statusCode: 404,
-    error: 'Not Found',
-    message: sinon.match('document_missing_exception')
-      .and(sinon.match('document missing'))
+    statusCode: 503,
+    error: 'Service Unavailable',
+    message: 'Service Unavailable'
   });
 }

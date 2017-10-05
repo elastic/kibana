@@ -1,4 +1,3 @@
-import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
 import { uiModules } from 'ui/modules';
 import { assign } from 'lodash';
 
@@ -8,9 +7,7 @@ const module = uiModules.get('kibana/table_vis', ['kibana']);
 
 // add a controller to tha module, which will transform the esResponse into a
 // tabular format that we can pass to the table directive
-module.controller('KbnTableVisController', function ($scope, $element, Private) {
-  const tabifyAggResponse = Private(AggResponseTabifyProvider);
-
+module.controller('KbnTableVisController', function ($scope) {
   const uiStateSort = ($scope.uiState) ? $scope.uiState.get('vis.params.sort') : {};
   assign($scope.vis.params.sort, uiStateSort);
 
@@ -24,20 +21,13 @@ module.controller('KbnTableVisController', function ($scope, $element, Private) 
    * - the underlying data changes (esResponse)
    * - one of the view options changes (vis.params)
    */
-  $scope.$watchMulti(['esResponse', 'vis.params'], function ([resp]) {
+  $scope.$watch('esResponse', function (resp) {
 
     let tableGroups = $scope.tableGroups = null;
     let hasSomeRows = $scope.hasSomeRows = null;
 
     if (resp) {
-      const vis = $scope.vis;
-      const params = vis.params;
-
-      tableGroups = tabifyAggResponse(vis, resp, {
-        partialRows: params.showPartialRows,
-        minimalColumns: vis.isHierarchical() && !params.showMeticsAtAllLevels,
-        asAggConfigResults: true
-      });
+      tableGroups = resp;
 
       hasSomeRows = tableGroups.tables.some(function haveRows(table) {
         if (table.tables) return table.tables.some(haveRows);

@@ -33,6 +33,8 @@ uiModules
       const getVisContainer = jQueryGetter('.vis-container');
       const getSpyContainer = jQueryGetter('.visualize-spy-container');
 
+      $scope.addLegend = false;
+
       // Show no results message when isZeroHits is true and it requires search
       $scope.showNoResultsMessage = function () {
         const requiresSearch = _.get($scope, 'vis.type.requiresSearch');
@@ -100,8 +102,18 @@ uiModules
       const Visualization = $scope.vis.type.visualization;
       const visualization = new Visualization(getVisEl()[0], $scope.vis);
 
+      if (visualization.init) {
+        visualization.init().then(() => {
+          $scope.vis.initialized = true;
+          $scope.$emit('render');
+        });
+      } else {
+        $scope.vis.initialized = true;
+      }
+
       const renderFunction = _.debounce(() => {
-        $scope.vis.size = [$el.width(), $el.height()];
+        const container = getVisContainer();
+        $scope.vis.size = [container.width(), container.height()];
         const status = getUpdateStatus($scope);
         visualization.render($scope.visData, status)
           .then(() => {
@@ -115,10 +127,12 @@ uiModules
       }, 100);
 
       $scope.$on('render', () => {
-        if (!$scope.vis || ($scope.vis.type.requiresSearch && !$scope.visData)) {
+        if (!$scope.vis || !$scope.vis.initialized || ($scope.vis.type.requiresSearch && !$scope.visData)) {
           return;
         }
-        renderFunction();
+        $scope.addLegend = $scope.vis.params.addLegend;
+        $scope.vis.refreshLegend++;
+        $timeout(renderFunction);
       });
 
       $scope.$on('$destroy', () => {
