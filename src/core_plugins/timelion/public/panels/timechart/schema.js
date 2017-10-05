@@ -37,9 +37,11 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
 
         const defaultOptions = {
           xaxis: {
+            show: true,
+            position: 'bottom',
             mode: 'time',
-            tickLength: 5,
-            timezone: 'browser',
+            tickLength: 0,
+            timezone: 'browser'
           },
           selection: {
             mode: 'x',
