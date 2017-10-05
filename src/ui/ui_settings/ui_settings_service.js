@@ -76,7 +76,7 @@ export class UiSettingsService {
   }
 
   async setMany(changes) {
-    await this._write(changes);
+    await this._write({ changes });
   }
 
   async set(key, value) {
@@ -95,12 +95,12 @@ export class UiSettingsService {
     await this.setMany(changes);
   }
 
-  async _write(changes) {
+  async _write({ changes, autoCreateOrUpgradeIfMissing = true }) {
     try {
       await this._savedObjectsClient.update(this._type, this._id, changes);
     } catch (error) {
       const { isNotFoundError } = this._savedObjectsClient.errors;
-      if (!isNotFoundError(error)) {
+      if (!isNotFoundError(error) || !autoCreateOrUpgradeIfMissing) {
         throw error;
       }
 
@@ -111,7 +111,10 @@ export class UiSettingsService {
         log: this._log,
       });
 
-      await this._write(changes);
+      await this._write({
+        changes,
+        autoCreateOrUpgradeIfMissing: false
+      });
     }
   }
 
