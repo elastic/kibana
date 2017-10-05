@@ -40,7 +40,7 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
             show: true,
             position: 'bottom',
             mode: 'time',
-            tickLength: 0,
+            tickLength: null,
             timezone: 'browser',
             font: {
               size: 14,
@@ -49,6 +49,7 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
             }
           },
           yaxes: [{
+            tickLength: null,
             font: {
               size: 14,
               family: '"Open Sans", Helvetica, Arial, sans-serif',
@@ -56,6 +57,7 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
             }
           },
           {
+            tickLength: null,
             font: {
               size: 14,
               family: '"Open Sans", Helvetica, Arial, sans-serif',
