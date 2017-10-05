@@ -6,14 +6,6 @@ export function assertSinonMatch(value, match) {
   sinon.assert.calledWithExactly(stub, match);
 }
 
-export function assertGeneric404Response({ result }) {
-  assertSinonMatch(result, {
-    statusCode: 404,
-    error: 'Not Found',
-    message: 'Not Found'
-  });
-}
-
 export function assertServiceUnavailableResponse({ result }) {
   assertSinonMatch(result, {
     statusCode: 503,

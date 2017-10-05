@@ -11,6 +11,5 @@ export {
 
 export {
   assertSinonMatch,
-  assertGeneric404Response,
   assertServiceUnavailableResponse,
 } from './assert';
