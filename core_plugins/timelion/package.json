@@ -7,19 +7,9 @@
     "start": "tsc --watch"
   },
   "types": "./target/types/index.d.ts",
-  "dependencies": {},
-  "peerDependencies": {
-    "rxjs": "5.4.3"
-  },
   "devDependencies": {
-    "awesome-typescript-loader": "^3.2.2",
-    "babel-core": "^6.25.0",
-    "babel-loader": "^7.1.1",
-    "babel-polyfill": "^6.23.0",
-    "babel-preset-es2015": "^6.24.1",
     "kbn-types": "file:../../packages/kbn-types",
     "kibana-plugin-xpack": "file:../xpack",
-    "typescript": "2.5.1",
-    "rxjs": "5.4.3"
+    "typescript": "^2.5.3"
   }
 }
