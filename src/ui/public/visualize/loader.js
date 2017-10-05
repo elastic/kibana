@@ -19,7 +19,7 @@ export function VisualizeLoaderProvider($compile, $rootScope, savedVisualization
   };
 
   return {
-    fromId: (el, savedVisualizationId, params) => {
+    embedVisualizationWithId: (el, savedVisualizationId, params) => {
       return new Promise((resolve) => {
         savedVisualizations.get(savedVisualizationId).then(savedObj => {
           const element = renderVis(el, savedObj, params);
@@ -27,7 +27,7 @@ export function VisualizeLoaderProvider($compile, $rootScope, savedVisualization
         });
       });
     },
-    fromSavedObject: (el, savedObj, params) => {
+    embedVisualizationWithSavedObject: (el, savedObj, params) => {
       return renderVis(el, savedObj, params);
     }
   };
