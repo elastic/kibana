@@ -83,8 +83,8 @@ export function KuiListingTable({
   return (
     <KuiControlledTable>
       <KuiListingTableToolBar
-        actionComponent={toolBarActions}
-        pagerComponent={pager}
+        actions={toolBarActions}
+        pager={pager}
         onFilter={onFilter}
         filter={filter}
       />
@@ -93,7 +93,7 @@ export function KuiListingTable({
 
       <KuiListingTableToolBarFooter
         itemsSelectedCount={selectedRowIds.length}
-        pagerComponent={pager}
+        pager={pager}
       />
     </KuiControlledTable>
   );
