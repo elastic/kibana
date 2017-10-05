@@ -14,6 +14,8 @@ import {
   KuiListingTableDeleteButton,
   KuiListingTableCreateButton,
   KuiListingTable,
+  KuiListingTableNoMatchesPrompt,
+  KuiListingTableLoadingPrompt
 } from 'ui_framework/components';
 
 export class VisualizeListingTable extends React.Component {
@@ -227,6 +229,18 @@ export class VisualizeListingTable extends React.Component {
     );
   }
 
+  renderPrompt() {
+    if (this.state.isFetchingItems) {
+      return <KuiListingTableLoadingPrompt />;
+    } else if (this.state.filter && this.items.length === 0) {
+      return <KuiListingTableNoMatchesPrompt />;
+    } else if (this.items.length === 0) {
+      return <NoVisualizationsPrompt />;
+    } else {
+      return null;
+    }
+  }
+
   render() {
     return (
       <div>
@@ -239,7 +253,7 @@ export class VisualizeListingTable extends React.Component {
           columns={this.renderColumns()}
           onFilter={this.fetchItems}
           filter={this.state.filter}
-          noItemsPrompt={<NoVisualizationsPrompt />}
+          prompt={this.renderPrompt()}
           onItemSelectionChanged={this.onItemSelectionChanged}
         />
       </div>

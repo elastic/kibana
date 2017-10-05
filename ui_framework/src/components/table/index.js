@@ -11,5 +11,7 @@ export { KuiTableHeader } from './table_header';
 export {
   KuiListingTable,
   KuiListingTableCreateButton,
-  KuiListingTableDeleteButton
+  KuiListingTableDeleteButton,
+  KuiListingTableLoadingPrompt,
+  KuiListingTableNoMatchesPrompt,
 } from './listing_table';

@@ -8,20 +8,10 @@ import {
   KuiEmptyTablePromptPanel,
   KuiListingTable,
   KuiTableHeaderCell,
+  KuiListingTableNoMatchesPrompt,
 } from '../../../../components';
 
-function renderEmptyTablePrompt() {
-  return (
-    <KuiEmptyTablePromptPanel>
-      <KuiEmptyTablePrompt
-        actions={<KuiButton buttonType="primary">Add Items</KuiButton>}
-        message="Uh oh you have no items!"
-      />
-    </KuiEmptyTablePromptPanel>
-  );
-}
-
-function renderToolbarActions() {
+function renderToolBarActions() {
   return [
     <KuiButton
       buttonType="primary"
@@ -82,14 +72,11 @@ export function ListingTableWithNoItems() {
   return (
     <KuiListingTable
       pager={renderPager()}
-      toolbarActions={renderToolbarActions()}
-      selectedRowIds={[]}
-      rows={[]}
+      toolBarActions={renderToolBarActions()}
       columns={renderColumns()}
       onFilter={() => {}}
       filter="hello"
-      loading={false}
-      noItemsPrompt={renderEmptyTablePrompt()}
+      prompt={<KuiListingTableNoMatchesPrompt />}
       onItemSelectionChanged={() => {}}
     />
   );

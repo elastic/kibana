@@ -83,13 +83,10 @@ export function ListingTableWithEmptyPrompt() {
     <KuiListingTable
       pager={renderPager()}
       toolBarActions={renderToolBarActions()}
-      selectedRowIds={[]}
-      rows={[]}
       columns={renderColumns()}
       onFilter={() => {}}
       filter=""
-      loading={false}
-      noItemsPrompt={renderEmptyTablePrompt()}
+      prompt={renderEmptyTablePrompt()}
       onItemSelectionChanged={() => {}}
     />
   );

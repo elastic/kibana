@@ -24,8 +24,7 @@ export function KuiListingTable({
   onItemSelectionChanged,
   selectedRowIds,
   filter,
-  loading,
-  noItemsPrompt,
+  prompt,
 }) {
 
   function areAllRowsChecked() {
@@ -83,36 +82,6 @@ export function KuiListingTable({
     );
   }
 
-  function renderLoadingPanel() {
-    return (
-      <KuiEmptyTablePromptPanel>
-        <KuiTableInfo>
-          Loading...
-        </KuiTableInfo>
-      </KuiEmptyTablePromptPanel>
-    );
-  }
-
-  function renderNoItemsMatchedSearch() {
-    return (
-      <KuiEmptyTablePromptPanel>
-        <KuiTableInfo>
-          No items matched your search.
-        </KuiTableInfo>
-      </KuiEmptyTablePromptPanel>
-    );
-  }
-
-  function renderContents() {
-    if (loading) {
-      return renderLoadingPanel();
-    } else if (rows.length === 0) {
-      return filter ? renderNoItemsMatchedSearch() : noItemsPrompt;
-    } else {
-      return renderInnerTable();
-    }
-  }
-
   return (
     <KuiControlledTable>
       <KuiListingTableToolBar
@@ -122,7 +91,7 @@ export function KuiListingTable({
         filter={filter}
       />
 
-      {renderContents()}
+      {prompt ? prompt : renderInnerTable()}
 
       <KuiListingTableToolBarFooter
         itemsSelectedCount={selectedRowIds.length}
@@ -141,10 +110,13 @@ KuiListingTable.PropTypes = {
   pager: PropTypes.node,
   onItemSelectionChanged: PropTypes.func.isRequired,
   selectedRowIds: PropTypes.array,
-  noItemsPrompt: PropTypes.node,
+  prompt: PropTypes.node, // If given, will be shown instead of a table with rows.
   onFilter: PropTypes.func,
   toolBarActions: PropTypes.node,
   filter: PropTypes.string,
-  loading: PropTypes.bool,
 };
 
+KuiListingTable.defaultProps = {
+  rows: [],
+  selectedRowIds: [],
+};

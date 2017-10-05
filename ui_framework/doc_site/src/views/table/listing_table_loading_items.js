@@ -6,6 +6,7 @@ import {
   KuiPager,
   KuiListingTable,
   KuiTableHeaderCell,
+  KuiListingTableLoadingPrompt,
 } from '../../../../components';
 
 function renderColumns() {
@@ -28,55 +29,51 @@ function renderColumns() {
   ];
 }
 
-export class ListingTableLoadingItems extends React.Component {
-  renderPager() {
-    return (
-      <KuiPager
-        startNumber={1}
-        hasNextPage={true}
-        hasPreviousPage={false}
-        endNumber={10}
-        totalItems={100}
-        onNextPage={() => {}}
-        onPreviousPage={() => {}}
-      />
-    );
-  }
+function renderPager() {
+  return (
+    <KuiPager
+      startNumber={1}
+      hasNextPage={true}
+      hasPreviousPage={false}
+      endNumber={10}
+      totalItems={100}
+      onNextPage={() => {}}
+      onPreviousPage={() => {}}
+    />
+  );
+}
 
-  renderToolBarActions() {
-    return [
-      <KuiButton
-        buttonType="primary"
-        aria-label="Add"
-      >
-        Add
-      </KuiButton>,
-      <KuiButton
-        aria-label="Settings"
-        buttonType="basic"
-        icon={<KuiButtonIcon type="settings" />}
-      />,
-      <KuiButton
-        aria-label="Menu"
-        buttonType="basic"
-        icon={<KuiButtonIcon type="menu" />}
-      />
-    ];
-  }
+function renderToolBarActions() {
+  return [
+    <KuiButton
+      buttonType="primary"
+      aria-label="Add"
+    >
+      Add
+    </KuiButton>,
+    <KuiButton
+      aria-label="Settings"
+      buttonType="basic"
+      icon={<KuiButtonIcon type="settings" />}
+    />,
+    <KuiButton
+      aria-label="Menu"
+      buttonType="basic"
+      icon={<KuiButtonIcon type="menu" />}
+    />
+  ];
+}
 
-  render() {
-    return (
-      <KuiListingTable
-        pager={this.renderPager()}
-        toolBarActions={this.renderToolBarActions()}
-        selectedRowIds={[]}
-        rows={[]}
-        columns={renderColumns()}
-        onFilter={() => {}}
-        filter=""
-        loading={true}
-        onItemSelectionChanged={() => {}}
-      />
-    );
-  }
+export function ListingTableLoadingItems() {
+  return (
+    <KuiListingTable
+      pager={renderPager()}
+      toolBarActions={renderToolBarActions()}
+      columns={renderColumns()}
+      onFilter={() => {}}
+      filter=""
+      prompt={<KuiListingTableLoadingPrompt />}
+      onItemSelectionChanged={() => {}}
+    />
+  );
 }

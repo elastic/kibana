@@ -137,7 +137,9 @@ export {
   KuiTableBody,
   KuiListingTable,
   KuiListingTableCreateButton,
-  KuiListingTableDeleteButton
+  KuiListingTableDeleteButton,
+  KuiListingTableNoMatchesPrompt,
+  KuiListingTableLoadingPrompt
 } from './table';
 
 export {
