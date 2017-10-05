@@ -4,8 +4,6 @@ import {
   KuiButton,
   KuiButtonIcon,
   KuiPager,
-  KuiEmptyTablePrompt,
-  KuiEmptyTablePromptPanel,
   KuiListingTable,
   KuiTableHeaderCell,
   KuiListingTableNoMatchesPrompt,
