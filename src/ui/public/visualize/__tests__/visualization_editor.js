@@ -5,6 +5,7 @@ import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import FixturesStubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
 import MockState from 'fixtures/mock_state';
+import { AggResponseIndexProvider } from 'ui/agg_response';
 
 describe('visualization_editor directive', function () {
   let $rootScope;
@@ -18,6 +19,7 @@ describe('visualization_editor directive', function () {
   let appState;
   let $timeout;
   let vis;
+  let aggResponse;
 
   beforeEach(ngMock.module('kibana', 'kibana/table_vis'));
   beforeEach(ngMock.inject(function (Private, $injector) {
@@ -30,6 +32,7 @@ describe('visualization_editor directive', function () {
     appState.toJSON = () => { return {}; };
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
     searchSource = Private(FixturesStubbedSearchSourceProvider);
+    aggResponse = Private(AggResponseIndexProvider);
 
     const requiresSearch = false;
     vis = new CreateVis(null, requiresSearch);
@@ -43,7 +46,7 @@ describe('visualization_editor directive', function () {
     vis.aggs.forEach(function (agg, i) { agg.id = 'agg_' + (i + 1); });
 
     $rootScope.vis = vis;
-    $rootScope.visData = esResponse;
+    $rootScope.visData = aggResponse.tabify(vis, esResponse);
     $rootScope.uiState = require('fixtures/mock_ui_state');
     $rootScope.searchSource = searchSource;
     $el = $('<visualization-editor vis="vis" vis-data="visData" ui-state="uiState" search-source="searchSource">');

@@ -147,11 +147,7 @@ module.directive('vislibValueAxes', function () {
 
       $scope.$watch(() => {
         return $scope.vis.getAggConfig().map(agg => {
-          try {
-            return agg.makeLabel();
-          } catch (e) {
-            return '';
-          }
+          return agg.makeLabel();
         }).join();
       }, () => {
         $scope.updateAxisTitle();

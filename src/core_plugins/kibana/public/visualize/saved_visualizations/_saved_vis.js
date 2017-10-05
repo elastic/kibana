@@ -72,8 +72,11 @@ uiModules
       return self.vis ? self._updateVis() : self._createVis();
     })
     .then(function () {
+      self.searchSource.onRequestStart(() => {
+        return self.vis.requesting();
+      });
+
       self.searchSource.aggs(function () {
-        self.vis.requesting();
         return self.vis.aggs.toDsl();
       });
 

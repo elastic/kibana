@@ -1,4 +1,5 @@
 import angular from 'angular';
+import 'ui/visualize';
 
 import visualizationTemplate from './visualize_template.html';
 import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
@@ -56,10 +57,11 @@ export class VisualizeEmbeddableHandler extends EmbeddableHandler {
         const rootNode = angular.element(domNode);
         rootNode.append(visualizationInstance);
 
-        visualizationInstance.on('$destroy', function () {
+        return () => {
+          visualizationInstance.remove();
           visualizeScope.savedObj.destroy();
           visualizeScope.$destroy();
-        });
+        };
       });
   }
 }

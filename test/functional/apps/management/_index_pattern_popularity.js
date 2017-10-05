@@ -3,7 +3,6 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
-  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['settings', 'common']);
 
   describe('index result popularity', function describeIndexTests() {
@@ -52,7 +51,6 @@ export default function ({ getService, getPageObjects }) {
         const popularity = await PageObjects.settings.getPopularity();
         log.debug('popularity = ' + popularity);
         expect(popularity).to.be('1');
-        screenshots.take('Settings-indices-result-popularity-updated');
       });
 
       it('should be reset on cancel', async function () {
@@ -74,7 +72,6 @@ export default function ({ getService, getPageObjects }) {
         const popularity = await PageObjects.settings.getPopularity();
         log.debug('popularity = ' + popularity);
         expect(popularity).to.be('1');
-        screenshots.take('Settings-indices-result-popularity-saved');
       });
     }); // end 'change popularity'
   }); // end index result popularity

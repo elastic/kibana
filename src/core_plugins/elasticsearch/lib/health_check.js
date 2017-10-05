@@ -6,7 +6,6 @@ import createKibanaIndex from './create_kibana_index';
 import kibanaVersion from './kibana_version';
 import { ensureEsVersion } from './ensure_es_version';
 import { ensureNotTribe } from './ensure_not_tribe';
-import { ensureAllowExplicitIndex } from './ensure_allow_explicit_index';
 import { patchKibanaIndex } from './patch_kibana_index';
 
 const NoConnections = elasticsearch.errors.NoConnections;
@@ -63,6 +62,10 @@ export default function (plugin, server) {
       if (health !== READY) {
         return Promise.delay(REQUEST_DELAY).then(waitUntilReady);
       }
+
+      return new Promise((resolve) => {
+        plugin.status.once('green', resolve);
+      });
     });
   }
 
@@ -97,7 +100,6 @@ export default function (plugin, server) {
       waitForPong(callAdminAsKibanaUser, config.get('elasticsearch.url'))
       .then(waitForEsVersion)
       .then(() => ensureNotTribe(callAdminAsKibanaUser))
-      .then(() => ensureAllowExplicitIndex(callAdminAsKibanaUser, config))
       .then(waitForShards)
       .then(() => patchKibanaIndex({
         callCluster: callAdminAsKibanaUser,

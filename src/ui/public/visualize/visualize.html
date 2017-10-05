@@ -6,14 +6,15 @@
   ui-state="uiState"
   class="vis-editor-content"
   search-source="savedObj.searchSource"
-  show-spy-panel="showSpyPanel"
+  show-spy-panel="shouldShowSpyPanel()"
 />
 <visualization
   ng-if="editorMode==false"
+  class={{vis.type.name}}
   vis="vis"
   vis-data="visData"
   ui-state="uiState"
   search-source="savedObj.searchSource"
-  show-spy-panel="showSpyPanel"
+  show-spy-panel="shouldShowSpyPanel()"
 />
 

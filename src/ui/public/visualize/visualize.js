@@ -9,6 +9,7 @@ import 'angular-sanitize';
 import './visualization';
 import './visualization_editor';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { PersistedState } from 'ui/persisted_state';
 
 
 import {
@@ -17,7 +18,7 @@ import {
 
 uiModules
 .get('kibana/directive', ['ngSanitize'])
-  .directive('visualize', function (Notifier, Private, timefilter, getAppState) {
+  .directive('visualize', function (Notifier, Private, timefilter, getAppState, Promise, savedVisualizations) {
     const notify = new Notifier({ location: 'Visualize' });
     const requestHandlers = Private(VisRequestHandlersRegistryProvider);
     const responseHandlers = Private(VisResponseHandlersRegistryProvider);
@@ -34,18 +35,43 @@ uiModules
       scope : {
         showSpyPanel: '=?',
         editorMode: '=?',
-        savedObj: '=',
+        savedObj: '=?',
         appState: '=',
-        uiState: '=?'
+        uiState: '=?',
+        savedId: '=?',
+        timeRange: '=?'
       },
       template: visualizeTemplate,
-      link: function ($scope, $el) {
+      link: async function ($scope, $el) {
         const resizeChecker = new ResizeChecker($el);
+
+        if (!$scope.savedObj) {
+          if (!$scope.savedId) throw(`saved object was not provided to <visualize> directive`);
+          $scope.savedObj = await savedVisualizations.get($scope.savedId);
+        }
+        if (!$scope.appState) $scope.appState = getAppState();
+        if (!$scope.uiState) $scope.uiState = new PersistedState({});
 
         $scope.vis = $scope.savedObj.vis;
         $scope.editorMode = $scope.editorMode || false;
         $scope.vis.editorMode = $scope.editorMode;
         $scope.vis.visualizeScope = true;
+
+        if ($scope.timeRange) {
+          $scope.vis.aggs.forEach(agg => {
+            if (agg.type.name !== 'date_histogram') return;
+            agg.params.timeRange = {
+              min: new Date($scope.timeRange.min),
+              max: new Date($scope.timeRange.max)
+            };
+          });
+        }
+
+        // spy panel is supported only with courier request handler
+        $scope.shouldShowSpyPanel = () => {
+          if ($scope.vis.type.requestHandler !== 'courier') return false;
+          return $scope.vis.type.requiresSearch && $scope.showSpyPanel;
+        };
 
         if (!$scope.appState) $scope.appState = getAppState();
 
@@ -53,7 +79,7 @@ uiModules
         const responseHandler = getHandler(responseHandlers, $scope.vis.type.responseHandler);
 
         $scope.fetch = _.debounce(function () {
-          if (!$scope.vis.initialized) return;
+          if (!$scope.vis.initialized || !$scope.savedObj) return;
           // searchSource is only there for courier request handler
           requestHandler($scope.vis, $scope.appState, $scope.uiState, queryFilter, $scope.savedObj.searchSource)
           .then(requestHandlerResponse => {
@@ -67,7 +93,7 @@ uiModules
 
             $scope.previousVisState = $scope.vis.getState();
             $scope.previousRequestHandlerResponse = requestHandlerResponse;
-            return canSkipResponseHandler ? $scope.visData : responseHandler($scope.vis, requestHandlerResponse);
+            return canSkipResponseHandler ? $scope.visData : Promise.resolve(responseHandler($scope.vis, requestHandlerResponse));
           }, e => {
             $scope.savedObj.searchSource.cancelQueued();
             $el.trigger('renderComplete');

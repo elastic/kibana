@@ -390,10 +390,6 @@ function discoverController(
         };
       }()));
 
-      $scope.searchSource.onError(function (err) {
-        notify.error(err);
-      }).catch(notify.fatal);
-
       function initForTime() {
         return setupVisualization().then($scope.updateTime);
       }
@@ -457,7 +453,8 @@ function discoverController(
     $scope.fetch();
   };
 
-  $scope.searchSource.onBeginSegmentedFetch(function (segmented) {
+
+  function initSegmentedFetch(segmented) {
     function flushResponseData() {
       $scope.hits = 0;
       $scope.faliures = [];
@@ -567,7 +564,18 @@ function discoverController(
 
       $scope.fetchStatus = null;
     });
-  }).catch(notify.fatal);
+  }
+
+
+  function beginSegmentedFetch() {
+    $scope.searchSource.onBeginSegmentedFetch(initSegmentedFetch)
+      .catch((error) => {
+        notify.error(error);
+        // Restart.
+        beginSegmentedFetch();
+      });
+  }
+  beginSegmentedFetch();
 
   $scope.updateTime = function () {
     $scope.timeRange = {
@@ -671,8 +679,11 @@ function discoverController(
       aggs: visStateAggs
     });
 
+    $scope.searchSource.onRequestStart(() => {
+      return $scope.vis.requesting();
+    });
+
     $scope.searchSource.aggs(function () {
-      $scope.vis.requesting();
       return $scope.vis.getAggConfig().toDsl();
     });
 

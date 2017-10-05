@@ -19,6 +19,8 @@ import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_ha
 import { updateVisualizationConfig } from './vis_update';
 import { queryManagerFactory } from '../query_manager';
 import * as kueryAPI from 'ui/kuery';
+import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
@@ -26,6 +28,8 @@ export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
   const brushEvent = Private(UtilsBrushEventProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
+  const SearchSource = Private(SearchSourceProvider);
+  const savedObjectsClient = Private(SavedObjectsClientProvider);
 
   class Vis extends EventEmitter {
     constructor(indexPattern, visState, uiState) {
@@ -52,10 +56,12 @@ export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
       this.sessionState = {};
 
       this.API = {
+        savedObjectsClient: savedObjectsClient,
+        SearchSource: SearchSource,
         indexPatterns: indexPatterns,
         timeFilter: timefilter,
         queryFilter: queryFilter,
-        queryManager: queryManagerFactory(getAppState()),
+        queryManager: queryManagerFactory(getAppState),
         kuery: kueryAPI,
         events: {
           filter: (event) => {

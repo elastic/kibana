@@ -666,6 +666,42 @@ main {
   .kuiCardGroup--united .kuiCard + .kuiCard {
     border-left: 1px solid #E0E0E0; }
 
+.kuiCodeEditorWrapper {
+  position: relative; }
+
+.kuiCodeEditorKeyboardHint {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  background: rgba(255, 255, 255, 0.7);
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+  -webkit-flex-direction: column;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center;
+  text-align: center;
+  opacity: 0; }
+  .kuiCodeEditorKeyboardHint:focus {
+    opacity: 1;
+    border: 2px solid #0079a5;
+    z-index: 1000; }
+  .kuiCodeEditorKeyboardHint.kuiCodeEditorKeyboardHint-isInactive {
+    display: none; }
+
 .kuiCollapseButton {
   -webkit-appearance: none;
      -moz-appearance: none;
@@ -1331,7 +1367,7 @@ main {
       -ms-flex-wrap: wrap;
           flex-wrap: wrap; }
 
-.kuiGalleryButton {
+.kuiGalleryItem {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1359,11 +1395,11 @@ main {
   border: 1px solid #CED5DA;
   border-radius: 4px;
   text-decoration: none; }
-  .kuiGalleryButton:hover {
+  .kuiGalleryItem:hover {
     background-color: #FFFFFF;
     border-color: #00A6FF; }
 
-.kuiGalleryButton__image {
+.kuiGalleryItem__image {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
@@ -1383,7 +1419,7 @@ main {
 /**
    * 1. Truncate overflowing text.
    */
-.kuiGalleryButton__label {
+.kuiGalleryItem__label {
   font-size: 14px;
   color: #191E23;
   text-align: center;
@@ -1396,7 +1432,7 @@ main {
   text-overflow: ellipsis;
   /* 1 */ }
 
-.kuiGalleryButton__icon {
+.kuiGalleryItem__icon {
   position: absolute;
   top: 5px;
   right: 5px;
@@ -2099,9 +2135,7 @@ main {
  *    of this container using padding.
  */
 .kuiLocalNavRow--secondary {
-  height: 40px;
-  /* 1 */
-  padding: 0 10px 0;
+  padding: 0 10px 10px;
   /* 1 */
   -webkit-box-align: start;
   -webkit-align-items: flex-start;
@@ -2795,6 +2829,7 @@ main {
   .kuiPopover.kuiPopover-isOpen .kuiPopover__body {
     opacity: 1;
     visibility: visible;
+    display: inline-block;
     z-index: 1;
     margin-top: 10px;
     box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1); }
@@ -2817,7 +2852,7 @@ main {
   -webkit-transform-origin: center top;
           transform-origin: center top;
   opacity: 0;
-  visibility: hidden;
+  display: none;
   margin-top: 32px; }
   .kuiPopover__body:before {
     position: absolute;

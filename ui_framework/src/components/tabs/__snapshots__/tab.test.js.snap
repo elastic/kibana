@@ -3,8 +3,10 @@
 exports[`KuiTab renders 1`] = `
 <button
   aria-label="aria-label"
+  aria-selected="false"
   class="kuiTab testClass1 testClass2"
   data-test-subj="test subject string"
+  role="tab"
 >
   children
 </button>
@@ -13,8 +15,10 @@ exports[`KuiTab renders 1`] = `
 exports[`KuiTab renders isSelected 1`] = `
 <button
   aria-label="aria-label"
+  aria-selected="true"
   class="kuiTab testClass1 testClass2 kuiTab-isSelected"
   data-test-subj="test subject string"
+  role="tab"
 >
   children
 </button>

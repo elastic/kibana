@@ -1,5 +1,10 @@
 import { esTestConfig } from '../../src/test_utils/es';
 import { kibanaTestServerUrlParts } from '../../test/kibana_test_server_url_parts';
+import { resolve } from 'path';
+
+const SECOND = 1000;
+const MINUTE = 60 * SECOND;
+const HOUR = 60 * MINUTE;
 
 module.exports = function (grunt) {
   const platform = require('os').platform();
@@ -55,6 +60,7 @@ module.exports = function (grunt) {
         ...stdDevArgs,
         '--optimize.enabled=false',
         '--elasticsearch.url=' + esTestConfig.getUrl(),
+        '--elasticsearch.healthCheck.delay=' + HOUR,
         '--server.port=' + kibanaTestServerUrlParts.port,
         '--server.xsrf.disableProtection=true',
         ...kbnServerFlags,
@@ -129,7 +135,7 @@ module.exports = function (grunt) {
         '--no-base-path',
         '--optimize.lazyPort=5611',
         '--optimize.lazyPrebuild=true',
-        '--optimize.bundleDir=optimize/testUiServer',
+        '--optimize.bundleDir=' + resolve(__dirname, '../../optimize/testUiServer'),
         ...kbnServerFlags,
       ]
     },
@@ -166,7 +172,7 @@ module.exports = function (grunt) {
         '--server.port=5610',
         '--optimize.lazyPort=5611',
         '--optimize.lazyPrebuild=true',
-        '--optimize.bundleDir=optimize/testdev',
+        '--optimize.bundleDir=' + resolve(__dirname, '../../optimize/testdev'),
         ...kbnServerFlags,
       ]
     },

@@ -1,0 +1,91 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DashboardPanel matches snapshot 1`] = `
+<div
+  class="dashboard-panel"
+>
+  <div
+    class="panel panel-default panel--edit-mode"
+    data-test-subj="dashboardPanel"
+  >
+    <div
+      class="panel-heading"
+    >
+      <span
+        aria-label="Dashboard panel: undefined"
+        class="panel-title"
+        data-test-subj="dashboardPanelTitle"
+      />
+      <div
+        class="kuiMicroButtonGroup"
+      >
+        <div
+          class="kuiPopover kuiPopover--anchorRight dashboardPanelPopOver"
+        >
+          <span
+            aria-label="Click for more panel options"
+            class="kuiButton__icon kuiIcon panel-dropdown fa fa-caret-down"
+            data-test-subj="dashboardPanelToggleMenuIcon"
+            role="button"
+            tabindex="0"
+          />
+          <div
+            class="kuiPopover__body"
+          >
+            <ul
+              class="kuiMenu"
+            >
+              <li
+                class="kuiMenuItem dashboardPanelMenuItem"
+                data-test-subj="dashboardPanelEditLink"
+              >
+                <span
+                  aria-hidden="true"
+                  class="kuiButton__icon kuiIcon fa-edit"
+                />
+                <p
+                  class="kuiText"
+                >
+                  Edit Visualization
+                </p>
+              </li>
+              <li
+                class="kuiMenuItem dashboardPanelMenuItem"
+                data-test-subj="dashboardPanelExpandIcon"
+              >
+                <span
+                  aria-hidden="true"
+                  class="kuiButton__icon kuiIcon fa-expand"
+                />
+                <p
+                  class="kuiText"
+                >
+                  Full screen
+                </p>
+              </li>
+              <li
+                class="kuiMenuItem dashboardPanelMenuItem"
+                data-test-subj="dashboardPanelRemoveIcon"
+              >
+                <span
+                  aria-hidden="true"
+                  class="kuiButton__icon kuiIcon fa-trash"
+                />
+                <p
+                  class="kuiText"
+                >
+                  Delete from dashboard
+                </p>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
+      class="panel-content"
+      id="embeddedPanel"
+    />
+  </div>
+</div>
+`;

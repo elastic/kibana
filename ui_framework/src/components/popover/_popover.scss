@@ -10,6 +10,7 @@
     .kuiPopover__body {
       opacity: 1;
       visibility: visible;
+      display: inline-block;
       z-index: 1;
       margin-top: 10px;
       box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1);
@@ -19,21 +20,21 @@
 
   // Animation happens on the body.
   .kuiPopover__body {
-    line-height: $globalLineHeight;
-    font-size: $globalFontSize;
+    line-height: $kuiLineHeight;
+    font-size: $kuiFontSize;
     position: absolute;
     min-width: 256px; // Can expand further, but this size is good for our menus.
     top: 100%;
     left: 50%;
     background: $popOverBackgroundColor;
-    border: 1px solid $globalBorderColor;
-    border-radius: $globalBorderRadius 0 $globalBorderRadius $globalBorderRadius;
+    border: 1px solid $kuiBorderColor;
+    border-radius: $kuiBorderRadius 0 $kuiBorderRadius $kuiBorderRadius;
     padding: 16px;
     transform: translateX(-50%) translateY(8px) translateZ(0);
     backface-visibility: hidden;
     transform-origin: center top;
     opacity: 0;
-    visibility: hidden;
+    display: none;
     margin-top: 32px;
 
     // This fakes a border on the arrow.
@@ -47,7 +48,7 @@
       margin-left: -16px;
       border-left: 16px solid transparent;
       border-right: 16px solid transparent;
-      border-bottom: 16px solid $globalBorderColor;
+      border-bottom: 16px solid $kuiBorderColor;
     }
 
     // This part of the arrow matches the body.

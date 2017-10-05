@@ -1,5 +1,5 @@
 .kuiTextInput {
-  width: $globalFormFieldDefaultWidth;
+  width: $kuiFormFieldDefaultWidth;
 
   @include formControl;
 
@@ -9,9 +9,9 @@
 }
 
 .kuiTextInput--small {
-  width: $globalFormFieldSmallWidth;
+  width: $kuiFormFieldSmallWidth;
 }
 
 .kuiTextInput--large {
-  width: $globalFormFieldLargeWidth;
+  width: $kuiFormFieldLargeWidth;
 }
