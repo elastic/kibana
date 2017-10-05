@@ -1,3 +1,7 @@
+/*
+ * Please note: Much of this code is taken from the MIT licensed react-resize-detector module written by @maslianok
+ */
+
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 
