@@ -128,38 +128,30 @@ export class VisualizeListingTable extends React.Component {
 
   renderHeader() {
     return [
-      <KuiTableHeaderCell
-        key="title"
-        onSort={this.sortByTitle}
-        isSorted={this.state.sortedColumn === 'title'}
-        isSortAscending={this.sortableProperties.isAscendingByName('title')}
-      >
-        Title
-      </KuiTableHeaderCell>,
-      <KuiTableHeaderCell
-        key="type"
-        onSort={this.sortByType}
-        isSorted={this.state.sortedColumn === 'type'}
-        isSortAscending={this.sortableProperties.isAscendingByName('type')}
-      >
-        Type
-      </KuiTableHeaderCell>
+      {
+        content: 'Title',
+        onSort: this.sortByTitle,
+        isSorted: this.state.sortedColumn === 'title',
+        isSortAscending: this.sortableProperties.isAscendingByName('title'),
+      },
+      {
+        content: 'Type',
+        onSort: this.sortByType,
+        isSorted: this.state.sortedColumn === 'type',
+        isSortAscending: this.sortableProperties.isAscendingByName('type'),
+      },
     ];
   }
 
   renderRowCells(item) {
     return [
-      <KuiTableRowCell key="title">
-        <a className="kuiLink" href={this.getUrlForItem(item)}>
-          {item.title}
-        </a>
-      </KuiTableRowCell>,
-      <KuiTableRowCell key="type">
-        <span className="kuiStatusText">
-          {this.renderItemTypeIcon(item)}
-          {item.type.title}
-        </span>
-      </KuiTableRowCell>
+      <a className="kuiLink" href={this.getUrlForItem(item)}>
+        {item.title}
+      </a>,
+      <span className="kuiStatusText">
+        {this.renderItemTypeIcon(item)}
+        {item.type.title}
+      </span>
     ];
   }
 

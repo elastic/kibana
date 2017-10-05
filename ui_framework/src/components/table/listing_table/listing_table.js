@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import _ from 'lodash';
+
 import { KuiListingTableToolBar } from './listing_table_tool_bar';
 import { KuiListingTableToolBarFooter } from './listing_table_tool_bar_footer';
 import { KuiListingTableRow } from './listing_table_row';
@@ -11,11 +13,17 @@ import {
   KuiTableBody,
   KuiTableHeader,
   KuiTable,
+  KuiTableHeaderCell,
 } from '../../index';
+
+import {
+  LEFT_ALIGNMENT,
+  RIGHT_ALIGNMENT,
+} from '../../../services';
 
 export function KuiListingTable({
   rows,
-  columns,
+  header,
   pager,
   toolBarActions,
   onFilter,
@@ -54,10 +62,28 @@ export function KuiListingTable({
       return (
         <KuiListingTableRow
           key={rowIndex}
-          isChecked={selectedRowIds.indexOf(row.id) >= 0}
+          isSelected={selectedRowIds.indexOf(row.id) >= 0}
           onSelectionChanged={toggleRow}
           row={row}
         />
+      );
+    });
+  }
+
+  function renderHeader() {
+    return header.map((cell, index) => {
+      let { content, ...props } = cell;
+      if (React.isValidElement(cell) || !_.isObject(cell)) {
+        props = [];
+        content = cell;
+      }
+      return (
+        <KuiTableHeaderCell
+          key={index}
+          {...props}
+        >
+          {content}
+        </KuiTableHeaderCell>
       );
     });
   }
@@ -70,7 +96,7 @@ export function KuiListingTable({
             isChecked={areAllRowsChecked()}
             onChange={toggleAll}
           />
-          {columns}
+          {renderHeader()}
         </KuiTableHeader>
 
         <KuiTableBody>
@@ -100,10 +126,29 @@ export function KuiListingTable({
 }
 
 KuiListingTable.PropTypes = {
-  header: PropTypes.arrayOf(PropTypes.node),
+  header: PropTypes.arrayOf(
+    PropTypes.oneOf([
+      PropTypes.node,
+      PropTypes.shape({
+        content: PropTypes.node,
+        align: PropTypes.oneOf([LEFT_ALIGNMENT, RIGHT_ALIGNMENT]),
+        onSort: PropTypes.func,
+        isSortAscending: PropTypes.bool,
+        isSorted: PropTypes.bool,
+      }),
+    ]
+  )),
   rows: PropTypes.arrayOf(PropTypes.shape({
     id: PropTypes.string,
-    cells: PropTypes.arrayOf(PropTypes.node),
+    cells: PropTypes.arrayOf(
+      PropTypes.oneOf([
+        PropTypes.node,
+        PropTypes.shape({
+          content: PropTypes.node,
+          align: PropTypes.oneOf([LEFT_ALIGNMENT, RIGHT_ALIGNMENT]),
+        }),
+      ],
+    )),
   })),
   pager: PropTypes.node,
   onItemSelectionChanged: PropTypes.func.isRequired,

@@ -55,21 +55,13 @@ function renderPager() {
 
 function renderHeader() {
   return [
-    <KuiTableHeaderCell key="title">
-      Title
-    </KuiTableHeaderCell>,
-    <KuiTableHeaderCell key="status">
-      Status
-    </KuiTableHeaderCell>,
-    <KuiTableHeaderCell key="created">
-      Date created
-    </KuiTableHeaderCell>,
-    <KuiTableHeaderCell
-      key="order"
-      align={RIGHT_ALIGNMENT}
-    >
-      Orders of magnitude
-    </KuiTableHeaderCell>
+    'Title',
+    'Status',
+    'Date created',
+    {
+      content: 'Orders of magnitude',
+      align: RIGHT_ALIGNMENT
+    }
   ];
 }
 

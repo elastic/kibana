@@ -5,27 +5,22 @@ import {
   KuiButtonIcon,
   KuiPager,
   KuiListingTable,
-  KuiTableHeaderCell,
   KuiListingTableLoadingPrompt,
 } from '../../../../components';
 
+import {
+  RIGHT_ALIGNMENT
+} from '../../../../services';
+
 function renderHeader() {
   return [
-    <KuiTableHeaderCell key="title">
-      Title
-    </KuiTableHeaderCell>,
-    <KuiTableHeaderCell key="status">
-      Status
-    </KuiTableHeaderCell>,
-    <KuiTableHeaderCell key="created">
-      Date created
-    </KuiTableHeaderCell>,
-    <KuiTableHeaderCell
-      key="order"
-      className="kuiTableHeaderCell--alignRight"
-    >
-      Orders of magnitude
-    </KuiTableHeaderCell>
+    'Title',
+    'Status',
+    'Date created',
+    {
+      content: 'Orders of magnitude',
+      align: RIGHT_ALIGNMENT
+    }
   ];
 }
 
