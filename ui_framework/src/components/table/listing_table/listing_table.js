@@ -55,7 +55,7 @@ export function KuiListingTable({
         <KuiListingTableRow
           key={rowIndex}
           isChecked={selectedRowIds.indexOf(row.id) >= 0}
-          onCheckChanged={toggleRow}
+          onSelectionChanged={toggleRow}
           row={row}
         />
       );

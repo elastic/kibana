@@ -7,8 +7,8 @@ import {
 } from '../';
 
 export class KuiListingTableRow extends React.PureComponent {
-  onCheckChanged = () => {
-    this.props.onCheckChanged(this.props.row.id);
+  onSelectionChanged = () => {
+    this.props.onSelectionChanged(this.props.row.id);
   };
 
   render() {
@@ -17,7 +17,7 @@ export class KuiListingTableRow extends React.PureComponent {
       <KuiTableRow>
         <KuiTableRowCheckBoxCell
           isChecked={isChecked}
-          onChange={this.onCheckChanged}
+          onChange={this.onSelectionChanged}
         />
         {row.cells}
       </KuiTableRow>
@@ -30,6 +30,6 @@ KuiListingTableRow.PropTypes = {
     id: PropTypes.string,
     cells: PropTypes.arrayOf(PropTypes.node),
   }).isRequired,
-  onCheckChanged: PropTypes.func.isRequired,
+  onSelectionChanged: PropTypes.func.isRequired,
   isChecked: PropTypes.bool,
 };
