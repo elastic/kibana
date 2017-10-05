@@ -20,8 +20,8 @@ export class UiSettingsService {
    *  @property {string} options.id id of SavedConfig object
    *  @property {number} options.buildNum
    *  @property {SavedObjectsClient} options.savedObjectsClient
-   *  @property {Function} [options.getDefaults ]
-   *  @property {Function} [options.log ]
+   *  @property {Function} [options.getDefaults]
+   *  @property {Function} [options.log]
    */
   constructor(options) {
     const {
