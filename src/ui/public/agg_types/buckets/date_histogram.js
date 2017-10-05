@@ -29,7 +29,7 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
   function setBounds(agg, force) {
     if (agg.buckets._alreadySet && !force) return;
     agg.buckets._alreadySet = true;
-    const timeRange = agg.params.timeRange || timefilter.getActiveBounds();
+    const timeRange = agg.getTimeRange() || timefilter.getActiveBounds();
     agg.buckets.setBounds(agg.fieldIsTimeField() && timeRange);
   }
 
@@ -48,6 +48,7 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
     createFilter: createFilter,
     decorateAggConfig: function () {
       let buckets;
+      let timeRange;
       return {
         buckets: {
           configurable: true,
@@ -59,6 +60,17 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
             setBounds(this);
 
             return buckets;
+          }
+        },
+        setTimeRange: {
+          value(newValue) {
+            timeRange = newValue;
+            setBounds(this, true);
+          }
+        },
+        getTimeRange: {
+          value() {
+            return timeRange;
           }
         }
       };
