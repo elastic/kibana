@@ -1,8 +1,11 @@
 import { KibanaPluginConfig } from 'kbn-types';
 
 import { XPackConfig } from './XPackConfig';
-import { XPackExports } from './XPackExports';
+import { XPackExports, XPackPluginType } from './XPackExports';
 
+export { XPackConfig, XPackPluginType };
+
+/** @internal */
 export const plugin: KibanaPluginConfig<{}, XPackExports> = {
   configPath: ['xpack', 'xpack_main'],
   plugin: kibana => {

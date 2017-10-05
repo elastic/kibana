@@ -3,12 +3,10 @@
   "version": "1.0.0",
   "scripts": {
     "prepare": "npm run build",
-    "build": "npm run build:app && npm run build:types",
-    "build:app": "tsc -p tsconfig.json",
-    "build:types": "tsc -p tsconfig-types.json",
+    "build": "tsc",
     "start": "tsc --watch"
   },
-  "types": "./target/types/types.d.ts",
+  "types": "./target/types/index.d.ts",
   "dependencies": {},
   "peerDependencies": {
     "rxjs": "5.4.2"

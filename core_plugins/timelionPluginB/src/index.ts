@@ -1,8 +1,11 @@
 import { KibanaPluginConfig } from 'kbn-types';
 import { TimelionPluginType } from 'kibana-plugin-timelion';
 
-import { TimelionPluginBExports } from './exports';
+import { TimelionPluginBExports, TimelionPluginBType } from './exports';
 
+export { TimelionPluginBType };
+
+/** @internal */
 export const plugin: KibanaPluginConfig<
   TimelionPluginType,
   TimelionPluginBExports
