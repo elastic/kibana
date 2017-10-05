@@ -11,6 +11,7 @@
       <div class="kuiBarSection">
         <button
           class="kuiButton kuiButton--basic kuiButton--iconText"
+          data-test-subj="exportAllObjects"
           ng-click="exportAll()"
         >
           <span class="kuiButton__inner">
@@ -49,6 +50,7 @@
           ng-class="{ 'kuiTab-isSelected': state.tab === service.title }"
           ng-repeat="service in services"
           ng-click="changeTab(service)"
+          data-test-subj="objectsTab-{{ service.title }}"
         >
           {{ service.title }}
           <small aria-label="{{:: service.data.length + ' of ' + service.total + ' ' + service.title }}">
@@ -123,7 +125,7 @@
       </div>
 
       <!-- Table -->
-      <table class="kuiTable" ng-if="service.data.length">
+      <table class="kuiTable" ng-if="service.data.length" data-test-subj="objectsTable-{{service.title}}">
         <thead>
           <tr>
             <th class="kuiTableHeaderCell kuiTableHeaderCell--checkBox">
@@ -144,6 +146,7 @@
           <tr
             ng-repeat="item in service.data | orderBy:'title'"
             class="kuiTableRow"
+            data-test-subj="objectsTableRow"
           >
             <td class="kuiTableRowCell kuiTableRowCell--checkBox">
               <div class="kuiTableRowCell__liner">
