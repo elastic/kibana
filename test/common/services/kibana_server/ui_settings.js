@@ -1,6 +1,9 @@
 import Wreck from 'wreck';
 import { get } from 'lodash';
 
+const MINUTE = 60 * 1000;
+const HOUR = 60 * MINUTE;
+
 export class KibanaServerUiSettings {
   constructor(url, log, es, kibanaIndex, kibanaVersion) {
     this._log = log;
@@ -33,10 +36,10 @@ export class KibanaServerUiSettings {
    */
   async disableToastAutohide() {
     await this.update({
-      'notifications:lifetime:banner': 360000,
-      'notifications:lifetime:error': 360000,
-      'notifications:lifetime:warning': 360000,
-      'notifications:lifetime:info': 360000,
+      'notifications:lifetime:banner': HOUR,
+      'notifications:lifetime:error': HOUR,
+      'notifications:lifetime:warning': HOUR,
+      'notifications:lifetime:info': HOUR,
     });
   }
 
