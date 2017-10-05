@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should import saved objects normally', async function () {
+      await esArchiver.load('management');
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects.json'));
@@ -33,9 +34,11 @@ export default function ({ getService, getPageObjects }) {
         return rows.length;
       });
       expect(rowCount).to.be(2);
+      await esArchiver.unload('management');
     });
 
     it('should import conflicts using a confirm modal', async function () {
+      await esArchiver.load('management');
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects-conflicts.json'));
@@ -51,9 +54,11 @@ export default function ({ getService, getPageObjects }) {
         return rows.length;
       });
       expect(rowCount).to.be(2);
+      await esArchiver.unload('management');
     });
 
     it('should allow for overrides', async function () {
+      await esArchiver.load('management');
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects.json'));
@@ -69,9 +74,11 @@ export default function ({ getService, getPageObjects }) {
         return rows.length;
       });
       expect(rowCount).to.be(2);
+      await esArchiver.unload('management');
     });
 
     it('should allow for cancelling overrides', async function () {
+      await esArchiver.load('management');
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaSavedObjects();
       await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects.json'));
@@ -88,6 +95,7 @@ export default function ({ getService, getPageObjects }) {
         return rows.length;
       });
       expect(rowCount).to.be(2);
+      await esArchiver.unload('management');
     });
   });
 }
