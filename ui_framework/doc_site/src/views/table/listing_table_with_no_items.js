@@ -5,7 +5,6 @@ import {
   KuiButtonIcon,
   KuiPager,
   KuiListingTable,
-  KuiTableHeaderCell,
   KuiListingTableNoMatchesPrompt,
 } from '../../../../components';
 

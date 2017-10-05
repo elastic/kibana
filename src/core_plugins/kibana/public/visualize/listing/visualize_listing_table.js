@@ -7,8 +7,6 @@ import { NoVisualizationsPrompt } from './no_visualizations_prompt';
 
 import {
   KuiPager,
-  KuiTableHeaderCell,
-  KuiTableRowCell,
   KuiModalOverlay,
   KuiConfirmModal,
   KuiListingTableDeleteButton,
