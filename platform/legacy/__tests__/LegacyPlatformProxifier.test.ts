@@ -1,34 +1,6 @@
 import { EventEmitter } from 'events';
 import { IncomingMessage, ServerResponse } from 'http';
 
-const mockConfigService = jest.fn(() => ({
-  atPath: jest.fn()
-}));
-jest.mock('../../config/ConfigService', () => ({
-  ConfigService: mockConfigService
-}));
-
-const mockServer = jest.fn(() => ({
-  start: jest.fn(),
-  stop: jest.fn()
-}));
-jest.mock('../../server', () => ({ Server: mockServer }));
-
-const mockLoggingService = jest.fn(() => ({
-  upgrade: jest.fn(),
-  stop: jest.fn()
-}));
-jest.mock('../../logging/LoggingService', () => ({
-  LoggingService: mockLoggingService
-}));
-
-const mockMutableLoggerFactory = jest.fn(() => ({
-  get: jest.fn(() => ({ info: jest.fn(), debug: jest.fn() }))
-}));
-jest.mock('../../logging/LoggerFactory', () => ({
-  MutableLoggerFactory: mockMutableLoggerFactory
-}));
-
 class mockNetServer extends EventEmitter {
   address() {
     return { port: 1234, family: 'test-family', address: 'test-address' };
@@ -42,23 +14,24 @@ jest.mock('net', () => ({
   Server: jest.fn(() => new mockNetServer())
 }));
 
-import { BehaviorSubject } from 'rxjs';
-import { Root } from '../../root';
-import { Env, ObjectToRawConfigAdapter } from '../../config';
 import { LegacyPlatformProxifier } from '..';
 import { Server } from 'net';
 
-let root: Root;
+let root: any;
 let proxifier: LegacyPlatformProxifier;
 beforeEach(() => {
-  const env = new Env('.', {});
-  const config$ = new BehaviorSubject(new ObjectToRawConfigAdapter({}));
+  root = {
+    start: jest.fn(),
+    shutdown: jest.fn(),
+    logger: {
+      get: jest.fn(() => ({
+        info: jest.fn(),
+        debug: jest.fn()
+      }))
+    }
+  } as any;
 
-  root = new Root(config$, env, () => {});
   proxifier = new LegacyPlatformProxifier(root);
-
-  jest.spyOn(root, 'start');
-  jest.spyOn(root, 'shutdown');
 });
 
 test('correctly binds to the server.', () => {

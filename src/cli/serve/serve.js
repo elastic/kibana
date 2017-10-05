@@ -181,8 +181,8 @@ export default function (program) {
       kbnServer.server.log(['info', 'config'], 'Reloaded logging configuration due to SIGHUP.');
 
       // If new platform config subscription is active, let's notify it with the updated config.
-      if (kbnServer.newPlatformConfig) {
-        kbnServer.newPlatformConfig.next(config);
+      if (kbnServer.updateNewPlatformConfig) {
+        kbnServer.updateNewPlatformConfig(config);
       }
     });
 

@@ -12,14 +12,14 @@ import { Router } from './Router';
 
 export class HttpServer {
   private readonly app: express.Application;
-  private server: Server | null = null;
+  private server?: Server;
 
   constructor(private readonly log: Logger, private readonly env: Env) {
     this.app = express();
   }
 
   isListening() {
-    return this.server !== null && this.server.listening;
+    return this.server !== undefined && this.server.listening;
   }
 
   registerRouter(router: Router<any>) {
@@ -30,7 +30,7 @@ export class HttpServer {
     this.server = this.initializeServer(config);
 
     const proxyListener = this.env.getNewPlatformProxyListener();
-    if (proxyListener) {
+    if (proxyListener !== undefined) {
       proxyListener.bind(this.server);
 
       // We register Kibana proxy middleware right before we start server to allow
@@ -51,12 +51,12 @@ export class HttpServer {
   stop() {
     this.log.info('stopping http server');
 
-    if (!this.server) {
+    if (this.server === undefined) {
       return;
     }
 
     this.server.close();
-    this.server = null;
+    this.server = undefined;
   }
 
   private initializeServer(config: HttpConfig) {

@@ -12,7 +12,7 @@ jest.mock('path', () => ({
 
 import { Env } from '../Env';
 
-test('correctly creates default environment with empty argv.', () => {
+test('correctly creates default environment with empty options.', () => {
   const defaultEnv = Env.createDefault({});
 
   expect(defaultEnv.homeDir).toEqual('/test/cwd');
@@ -29,7 +29,7 @@ test('correctly creates default environment with empty argv.', () => {
   expect(defaultEnv.getNewPlatformProxyListener()).toBeUndefined();
 });
 
-test('correctly creates default environment with argv overrides.', () => {
+test('correctly creates default environment with options overrides.', () => {
   const proxyListenerMock = {};
   const defaultEnv = Env.createDefault({
     config: '/some/other/path/some-kibana.yml',

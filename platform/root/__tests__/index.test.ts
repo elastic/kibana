@@ -39,8 +39,6 @@ jest.mock('../../logging/LoggerFactory', () => ({
   MutableLoggerFactory: mockMutableLoggerFactory
 }));
 
-import { noop } from 'lodash';
-
 import { Root } from '../';
 import { Env } from '../../config/Env';
 
@@ -55,7 +53,7 @@ afterEach(() => {
 });
 
 test('starts services on "start"', async () => {
-  const root = new Root(config$, env, noop);
+  const root = new Root(config$, env);
 
   expect(loggingService.upgrade).toHaveBeenCalledTimes(0);
   expect(server.start).toHaveBeenCalledTimes(0);
@@ -68,7 +66,7 @@ test('starts services on "start"', async () => {
 });
 
 test('stops services on "shutdown"', async () => {
-  const root = new Root(config$, env, noop);
+  const root = new Root(config$, env);
 
   await root.start();
 
@@ -102,7 +100,7 @@ describe('when configuring logger fails', () => {
   const logged = jest.spyOn(console, 'error');
 
   beforeEach(() => {
-    logged.mockImplementation(noop);
+    logged.mockImplementation(() => {});
   });
 
   afterEach(() => {

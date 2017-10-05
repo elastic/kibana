@@ -1,4 +1,3 @@
-import { BehaviorSubject } from 'rxjs';
 import { LegacyConfig } from './LegacyPlatformConfig';
 import { LegacyPlatformProxifier } from './LegacyPlatformProxifier';
 
@@ -16,8 +15,7 @@ export interface LegacyKbnServer {
   newPlatformProxyListener: LegacyPlatformProxifier;
 
   /**
-   * Custom subscription that is used by the legacy platform to propagate
-   * config updates to the new platform.
+   * Propagates legacy config updates to the new platform.
    */
-  newPlatformConfig: BehaviorSubject<LegacyConfig>;
+  updateNewPlatformConfig: (legacyConfig: LegacyConfig) => void;
 }
