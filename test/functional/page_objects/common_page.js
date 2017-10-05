@@ -232,10 +232,14 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       await remote.pressKeys('\uE007');
     }
 
-    async clickCancelOnModal() {
+    // pass in true if your test will show multiple modals
+    // in succession
+    async clickCancelOnModal(overlayWillStay = false) {
       log.debug('Clicking modal cancel');
       await testSubjects.click('confirmModalCancelButton');
-      await this.ensureModalOverlayHidden();
+      if (!overlayWillStay) {
+        await this.ensureModalOverlayHidden();
+      }
     }
 
     async isConfirmModalOpen() {
