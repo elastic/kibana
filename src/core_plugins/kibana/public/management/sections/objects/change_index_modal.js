@@ -11,16 +11,6 @@ import {
   KuiModalFooter,
   KuiButton,
   KuiModalOverlay,
-  KuiTable,
-  KuiTableBody,
-  KuiTableHeader,
-  KuiTableHeaderCell,
-  KuiTableRow,
-  KuiTableRowCell,
-  KuiControlledTable,
-  KuiToolBar,
-  KuiToolBarSection,
-  KuiPager,
 } from 'ui_framework/components';
 
 import { ESC_KEY_CODE } from 'ui_framework/services';
@@ -86,57 +76,65 @@ export class ChangeIndexModal extends React.Component {
       const sample = take(objects, 5).map((obj, key) => <span key={key}>{obj.name}<br/></span>);
 
       return (
-        <KuiTableRow key={key}>
-          <KuiTableRowCell>
-            {indexPatternId}
-          </KuiTableRowCell>
-          <KuiTableRowCell>
-            {objects.length}
-          </KuiTableRowCell>
-          <KuiTableRowCell>
-            {sample}
-          </KuiTableRowCell>
-          <KuiTableRowCell>
-            <select
-              className="kuiSelect kuiSelect--medium"
-              data-test-subj="managementChangeIndexSelection"
-              value={this.state.objects[indexPatternId].newIndexPatternId}
-              onChange={this.onIndexChange.bind(this, indexPatternId)}
-            >
-              <option value={indexPatternId}>Skip import</option>
-              {this.props.indices.map((index, i) => {
-                return (
-                  <option key={i} value={index.id}>
-                    {index.get('title')}
-                  </option>
-                );
-              })}
-            </select>
-          </KuiTableRowCell>
-        </KuiTableRow>
+        <tr className="kuiTableRow" key={key}>
+          <td className="kuiTableRowCell">
+            <div className="kuiTableRowCell__liner">
+              {indexPatternId}
+            </div>
+          </td>
+          <td className="kuiTableRowCell">
+            <div className="kuiTableRowCell__liner">
+              {objects.length}
+            </div>
+          </td>
+          <td className="kuiTableRowCell">
+            <div className="kuiTableRowCell__liner">
+              {sample}
+            </div>
+          </td>
+          <td className="kuiTableRowCell">
+            <div className="kuiTableRowCell__liner">
+              <select
+                className="kuiSelect kuiSelect--medium"
+                data-test-subj="managementChangeIndexSelection"
+                value={this.state.objects[indexPatternId].newIndexPatternId}
+                onChange={this.onIndexChange.bind(this, indexPatternId)}
+              >
+                <option value={indexPatternId}>Skip import</option>
+                {this.props.indices.map((index, i) => {
+                  return (
+                    <option key={i} value={index.id}>
+                      {index.get('title')}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
+          </td>
+        </tr>
       );
     });
 
     const TableComponent = () => (
-      <KuiTable className="kuiVerticalRhythm">
-        <KuiTableHeader>
-          <KuiTableHeaderCell width="300">
+      <table className="kuiTable kuiVerticalRhythm">
+        <thead>
+          <th className="kuiTableHeaderCell" width="300">
             ID
-          </KuiTableHeaderCell>
-          <KuiTableHeaderCell width="50">
+          </th>
+          <th className="kuiTableHeaderCell" width="50">
             Count
-          </KuiTableHeaderCell>
-          <KuiTableHeaderCell>
+          </th>
+          <th className="kuiTableHeaderCell">
             Sample of affected objects
-          </KuiTableHeaderCell>
-          <KuiTableHeaderCell width="200">
+          </th>
+          <th className="kuiTableHeaderCell" width="200">
             New index pattern
-          </KuiTableHeaderCell>
-        </KuiTableHeader>
-        <KuiTableBody>
+          </th>
+        </thead>
+        <tbody>
           {rows}
-        </KuiTableBody>
-      </KuiTable>
+        </tbody>
+      </table>
     );
 
     return (
@@ -161,22 +159,31 @@ export class ChangeIndexModal extends React.Component {
             </KuiModalBodyText>
             { totalIndexPatterns > perPage
               ?
-                <KuiControlledTable>
-                  <KuiToolBar>
-                    <KuiToolBarSection>
-                      <KuiPager
-                        startNumber={page + 1}
-                        hasPreviousPage={page >= 1}
-                        hasNextPage={page < totalIndexPatterns}
-                        endNumber={Math.min(totalIndexPatterns, page + perPage)}
-                        totalItems={totalIndexPatterns}
-                        onNextPage={() => this.setState({ page: page + 1 })}
-                        onPreviousPage={() => this.setState({ page: page - 1 })}
-                      />
-                    </KuiToolBarSection>
-                  </KuiToolBar>
+                <div className="kuiControlledTable">
+                  <div className="kuiToolBar">
+                    <div className="kuiToolBarSection">
+                      <div className="kuiToolBarText">
+                        {page + 1} &ndash; {Math.min(totalIndexPatterns, page + perPage)} of {totalIndexPatterns}
+                      </div>
+
+                      <div className="kuiButtonGroup kuiButtonGroup--united">
+                        <button
+                          className="kuiButton kuiButton--basic kuiButton--icon"
+                          onClick={() => this.setState({ page: page + 1 })}
+                        >
+                          <span className="kuiButton__icon kuiIcon fa-chevron-left"></span>
+                        </button>
+                        <button
+                          className="kuiButton kuiButton--basic kuiButton--icon"
+                          onClick={() => this.setState({ page: page - 1 })}
+                        >
+                          <span className="kuiButton__icon kuiIcon fa-chevron-right"></span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                   <TableComponent/>
-                </KuiControlledTable>
+                </div>
               :
                 <TableComponent/>
             }
