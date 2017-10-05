@@ -11,8 +11,6 @@ import {
   KuiTableBody,
   KuiTableHeader,
   KuiTable,
-  KuiEmptyTablePromptPanel,
-  KuiTableInfo,
 } from '../../index';
 
 export function KuiListingTable({

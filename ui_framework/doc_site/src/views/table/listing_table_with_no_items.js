@@ -11,6 +11,10 @@ import {
   KuiListingTableNoMatchesPrompt,
 } from '../../../../components';
 
+import {
+  RIGHT_ALIGNMENT
+} from '../../../../services';
+
 function renderToolBarActions() {
   return [
     <KuiButton
@@ -64,7 +68,7 @@ function renderColumns() {
     </KuiTableHeaderCell>,
     <KuiTableHeaderCell
       key="order"
-      className="kuiTableHeaderCell--alignRight"
+      align={RIGHT_ALIGNMENT}
     >
       Orders of magnitude
     </KuiTableHeaderCell>
