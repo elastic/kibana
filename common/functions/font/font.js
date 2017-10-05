@@ -1,3 +1,4 @@
+import inlineStyle from 'inline-style';
 import Fn from '../fn.js';
 
 export default new Fn({
@@ -44,19 +45,21 @@ export default new Fn({
     },
   },
   fn: (context, args) => {
+    const spec = {
+      ...context.spec,
+      fontSize: `${args.size}px`,
+      fontFamily: args.family,
+      fontWeight: args.weight,
+      fontStyle: args.italic ? 'italic' : 'normal',
+      textDecoration: args.underline ? 'underline' : 'none',
+      textAlign: args.align,
+      color: args.color,
+    };
+
     return {
       type: 'style',
-      spec: {
-        ...context.spec,
-        fontSize: `${args.size}px`,
-        fontFamily: args.family,
-        fontWeight: args.weight,
-        fontStyle: args.italic ? 'italic' : 'normal',
-        textDecoration: args.underline ? 'underline' : 'none',
-        textAlign: args.align,
-        color: args.color,
-      },
-      css: 'TODO: Convert to css string',
+      spec,
+      css: inlineStyle(spec),
     };
   },
 });
