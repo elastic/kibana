@@ -1,5 +1,6 @@
 import { Observable } from 'rxjs';
 
+import { Env } from '../../config';
 import { HttpService } from './HttpService';
 import { HttpConfig } from './HttpConfig';
 import { LoggerFactory } from '../../logging';
@@ -12,7 +13,11 @@ export { HttpConfig };
 export class HttpModule {
   readonly service: HttpService;
 
-  constructor(readonly config$: Observable<HttpConfig>, logger: LoggerFactory) {
-    this.service = new HttpService(this.config$, logger);
+  constructor(
+    readonly config$: Observable<HttpConfig>,
+    logger: LoggerFactory,
+    env: Env
+  ) {
+    this.service = new HttpService(this.config$, logger, env);
   }
 }

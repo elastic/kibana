@@ -10,7 +10,7 @@ type Clusters = { [type in ElasticsearchClusterType]: Cluster };
 
 export class ElasticsearchService implements CoreService {
   private clusters$: Observable<Clusters>;
-  private subscription: Subscription;
+  private subscription?: Subscription;
 
   constructor(
     config$: Observable<ElasticsearchConfigs>,
@@ -60,7 +60,9 @@ export class ElasticsearchService implements CoreService {
   }
 
   async stop() {
-    this.subscription.unsubscribe();
+    if (this.subscription !== undefined) {
+      this.subscription.unsubscribe();
+    }
   }
 
   getClusterOfType$(type: ElasticsearchClusterType) {

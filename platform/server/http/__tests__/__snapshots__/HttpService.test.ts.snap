@@ -8,7 +8,10 @@ Object {
       "Received new HTTP config after server was started. Config will **not** be applied.",
     ],
   ],
+  "fatal": Array [],
   "info": Array [],
+  "log": Array [],
+  "trace": Array [],
   "warn": Array [],
 }
 `;
@@ -17,24 +20,14 @@ exports[`register route handler 1`] = `
 Object {
   "debug": Array [],
   "error": Array [],
+  "fatal": Array [],
   "info": Array [
     Array [
       "registering route handler for [/foo]",
     ],
   ],
-  "warn": Array [],
-}
-`;
-
-exports[`starts http server 1`] = `
-Object {
-  "debug": Array [],
-  "error": Array [],
-  "info": Array [
-    Array [
-      "starting http server [example.org:1234]",
-    ],
-  ],
+  "log": Array [],
+  "trace": Array [],
   "warn": Array [],
 }
 `;
@@ -47,7 +40,10 @@ Object {
       "Received new router [/foo] after server was started. Router will **not** be applied.",
     ],
   ],
+  "fatal": Array [],
   "info": Array [],
+  "log": Array [],
+  "trace": Array [],
   "warn": Array [],
 }
 `;

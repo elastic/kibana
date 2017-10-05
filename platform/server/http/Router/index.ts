@@ -1,4 +1,5 @@
 import * as express from 'express';
+import * as bodyParser from 'body-parser';
 
 import { Headers, filterHeaders } from './headers';
 import { ObjectSetting, Props, Any, TypeOf } from '../../../lib/schema';
@@ -143,6 +144,7 @@ export class Router<V> {
   >(route: Route<P, Q, B>, handler: RequestHandler<V, P, Q, B>) {
     this.router.post(
       route.path,
+      ...Router.getBodyParsers(),
       async (req, res) => await this.handle(route, req, res, handler)
     );
   }
@@ -161,6 +163,17 @@ export class Router<V> {
     B extends ObjectSetting<any>
   >(route: Route<P, Q, B>, handler: RequestHandler<V, P, Q, B>) {
     // TODO
+  }
+
+  /**
+   * Returns list of supported body parsers.
+   */
+  private static getBodyParsers() {
+    return [
+      bodyParser.json(),
+      bodyParser.raw({ type: 'application/x-ndjson' }),
+      bodyParser.urlencoded({ extended: false })
+    ];
   }
 
   private async handle<

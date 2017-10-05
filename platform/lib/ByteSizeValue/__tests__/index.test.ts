@@ -31,6 +31,30 @@ describe('parsing units', () => {
   });
 });
 
+describe('#constructor', () => {
+  test('throws if number of bytes is negative', () => {
+    expect(() => new ByteSizeValue(-1024)).toThrowErrorMatchingSnapshot();
+  });
+
+  test('throws if number of bytes is not safe', () => {
+    expect(() => new ByteSizeValue(NaN)).toThrowErrorMatchingSnapshot();
+    expect(() => new ByteSizeValue(Infinity)).toThrowErrorMatchingSnapshot();
+    expect(
+      () => new ByteSizeValue(Math.pow(2, 53))
+    ).toThrowErrorMatchingSnapshot();
+  });
+
+  test('accepts 0', () => {
+    const value = new ByteSizeValue(0);
+    expect(value.getValueInBytes()).toBe(0);
+  });
+
+  test('accepts safe positive integer', () => {
+    const value = new ByteSizeValue(1024);
+    expect(value.getValueInBytes()).toBe(1024);
+  });
+});
+
 describe('#isGreaterThan', () => {
   test('handles true', () => {
     const a = ByteSizeValue.parse('2kb');

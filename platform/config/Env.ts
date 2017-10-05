@@ -1,8 +1,11 @@
 import * as process from 'process';
 import { resolve } from 'path';
 
-interface WithConfig {
+import { LegacyPlatformProxifier } from '../legacy';
+
+interface EnvOptions {
   config?: string;
+  kbnServer?: any;
   [key: string]: any;
 }
 
@@ -16,14 +19,14 @@ export class Env {
   /**
    * @internal
    */
-  static createDefault(argv: WithConfig): Env {
-    return new Env(process.cwd(), argv);
+  static createDefault(options: EnvOptions): Env {
+    return new Env(process.cwd(), options);
   }
 
   /**
    * @internal
    */
-  constructor(readonly homeDir: string, private readonly argv: WithConfig) {
+  constructor(readonly homeDir: string, private readonly options: EnvOptions) {
     this.configDir = resolve(this.homeDir, 'config');
     this.pluginsDir = resolve(this.homeDir, 'core_plugins');
     this.binDir = resolve(this.homeDir, 'bin');
@@ -33,13 +36,22 @@ export class Env {
 
   getConfigFile() {
     const defaultConfigFile = this.getDefaultConfigFile();
-    return this.argv.config === undefined
+    return this.options.config === undefined
       ? defaultConfigFile
-      : this.argv.config;
+      : this.options.config;
   }
 
   getPluginDir(pluginName: string) {
     return resolve(this.pluginsDir, pluginName, 'target', 'dist');
+  }
+
+  /**
+   * @internal
+   */
+  getNewPlatformProxyListener(): LegacyPlatformProxifier | undefined {
+    if (this.options.kbnServer !== undefined) {
+      return this.options.kbnServer.newPlatformProxyListener;
+    }
   }
 
   private getDefaultConfigFile() {

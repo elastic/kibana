@@ -1,8 +1,34 @@
 import { BehaviorSubject, Observable } from 'rxjs';
-import { isEqual, isPlainObject } from 'lodash';
+import { get, isEqual, isPlainObject, set } from 'lodash';
 import typeDetect from 'type-detect';
 
+import { ConfigPath } from './ConfigService';
 import { getConfigFromFile } from './readConfig';
+
+/**
+ * Represents raw config store.
+ */
+export interface RawConfig {
+  /**
+   * Returns config value located at the specified path.
+   * @param configPath Path to locate value at.
+   * @returns Config value.
+   */
+  get(configPath: ConfigPath): any;
+
+  /**
+   * Sets config value at the specified path.
+   * @param configPath Path to set value for.
+   * @param value Value to set for the specified path.
+   */
+  set(configPath: ConfigPath, value: any): void;
+
+  /**
+   * Returns full flattened list of the config paths that config contains.
+   * @returns List of the string config paths.
+   */
+  getFlattenedPaths(): string[];
+}
 
 // Used to indicate that no config has been received yet
 const notRead = Symbol('config not yet read');
@@ -22,7 +48,7 @@ export class RawConfigService {
     any
   > = new BehaviorSubject(notRead);
 
-  private readonly config$: Observable<{ [key: string]: any }>;
+  private readonly config$: Observable<RawConfig>;
 
   constructor(readonly configFile: string) {
     this.config$ = this.rawConfigFromFile$
@@ -32,12 +58,12 @@ export class RawConfigService {
         // If the raw config is null, e.g. if empty config file, we default to
         // an empty config
         if (rawConfig == null) {
-          return {};
+          return new ObjectToRawConfigAdapter({});
         }
 
         if (isPlainObject(rawConfig)) {
           // TODO Make config consistent, e.g. handle dots in keys
-          return rawConfig;
+          return new ObjectToRawConfigAdapter(rawConfig);
         }
 
         throw new Error(
@@ -69,5 +95,41 @@ export class RawConfigService {
 
   getConfig$() {
     return this.config$;
+  }
+}
+
+/**
+ * Allows plain javascript object to behave like `RawConfig` instance.
+ * @internal
+ */
+export class ObjectToRawConfigAdapter implements RawConfig {
+  constructor(private readonly rawValue: { [key: string]: any }) {}
+
+  get(configPath: ConfigPath) {
+    return get(this.rawValue, configPath);
+  }
+
+  set(configPath: ConfigPath, value: any) {
+    set(this.rawValue, configPath, value);
+  }
+
+  getFlattenedPaths() {
+    return [...ObjectToRawConfigAdapter.flattenObjectKeys(this.rawValue)];
+  }
+
+  private static *flattenObjectKeys(
+    obj: { [key: string]: any },
+    accKey: string = ''
+  ): IterableIterator<string> {
+    if (typeof obj !== 'object') {
+      yield accKey;
+    } else {
+      for (const [key, value] of Object.entries(obj)) {
+        yield* ObjectToRawConfigAdapter.flattenObjectKeys(
+          value,
+          (accKey !== '' ? accKey + '.' : '') + key
+        );
+      }
+    }
   }
 }

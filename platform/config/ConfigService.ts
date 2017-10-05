@@ -1,10 +1,11 @@
 import { Observable } from 'rxjs';
-import { get, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 
 import { Env } from './Env';
 import { Logger, LoggerFactory } from '../logging';
 import * as schema from '../lib/schema';
 import { ConfigWithSchema } from './ConfigWithSchema';
+import { RawConfig } from './RawConfigService';
 
 export type ConfigPath = string | string[];
 
@@ -18,7 +19,7 @@ export class ConfigService {
   private readonly handledPaths: ConfigPath[] = [];
 
   constructor(
-    private readonly config$: Observable<{ [key: string]: any }>,
+    private readonly config$: Observable<RawConfig>,
     readonly env: Env,
     logger: LoggerFactory
   ) {
@@ -75,7 +76,7 @@ export class ConfigService {
     const enabledPath = createPluginEnabledPath(path);
 
     const isEnabled = await this.config$
-      .map(config => get(config, enabledPath))
+      .map(config => config.get(enabledPath))
       .first()
       .toPromise();
 
@@ -111,7 +112,7 @@ export class ConfigService {
     this.markAsHandled(path);
 
     return this.config$
-      .map(config => get(config, path))
+      .map(config => config.get(path))
       .distinctUntilChanged((prev, next) => isEqual(prev, next));
   }
 
@@ -121,10 +122,11 @@ export class ConfigService {
 
   async getUnusedPaths(): Promise<string[]> {
     const config = await this.config$.first().toPromise();
-    const flatConfigPaths = [...flattenObject(config)].map(obj => obj.key);
     const handledPaths = this.handledPaths.map(pathToString);
 
-    return flatConfigPaths.filter(path => !isPathHandled(path, handledPaths));
+    return config
+      .getFlattenedPaths()
+      .filter(path => !isPathHandled(path, handledPaths));
   }
 }
 
@@ -144,16 +146,3 @@ const pathToString = (path: ConfigPath) =>
  */
 const isPathHandled = (path: string, handledPaths: string[]) =>
   handledPaths.some(handledPath => path.startsWith(handledPath));
-
-function* flattenObject(
-  obj: { [key: string]: any },
-  accKey: string = ''
-): IterableIterator<{ key: string; value: any }> {
-  if (typeof obj !== 'object') {
-    yield { key: accKey, value: obj };
-  } else {
-    for (const key in obj) {
-      yield* flattenObject(obj[key], (accKey !== '' ? accKey + '.' : '') + key);
-    }
-  }
-}

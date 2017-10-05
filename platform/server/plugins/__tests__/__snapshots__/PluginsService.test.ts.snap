@@ -4,7 +4,10 @@ exports[`does not start plugin if disabled 1`] = `
 Object {
   "debug": Array [],
   "error": Array [],
+  "fatal": Array [],
   "info": Array [],
+  "log": Array [],
+  "trace": Array [],
   "warn": Array [
     Array [
       "Plugin [bar] is disabled and will not be started",
