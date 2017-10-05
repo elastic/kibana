@@ -11,7 +11,7 @@ function listCommits(commits) {
   return {
     type: 'list',
     name: 'commit',
-    message: 'Select a commit to backport',
+    message: 'Select commit to backport',
     choices: commits.map(commit => ({
       name: commit.message,
       value: commit,
@@ -24,7 +24,7 @@ function listVersions(versions) {
   return {
     type: 'list',
     name: 'version',
-    message: 'Select version you want to backport to',
+    message: 'Select version to backport to',
     choices: versions
   };
 }

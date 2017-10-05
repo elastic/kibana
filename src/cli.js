@@ -69,7 +69,7 @@ function getReferenceValue(reference) {
 
 function getCurrentRepoName(fullRepoNames, cwd) {
   const currentDir = path.basename(cwd);
-  return fullRepoNames.find(name => name.includes(`/${currentDir}`));
+  return fullRepoNames.find(name => name.endsWith(`/${currentDir}`));
 }
 
 function getPullRequestPayload(commitMessage, version, reference, username) {
@@ -84,6 +84,34 @@ function getPullRequestPayload(commitMessage, version, reference, username) {
   };
 }
 
+function backportVersion(owner, repoName, commit, version, username) {
+  const backportBranchName = getBackportBranchName(version, commit.reference);
+
+  return withSpinner(resetAndPullMaster(owner, repoName), 'Pull latest changes')
+    .then(() =>
+      createAndCheckoutBranch(owner, repoName, version, backportBranchName)
+    )
+    .then(() => cherrypickAndPrompt(owner, repoName, commit.sha))
+    .then(() =>
+      withSpinner(
+        push(owner, repoName, username, backportBranchName),
+        'Pushing branch'
+      )
+    )
+    .then(() => {
+      const payload = getPullRequestPayload(
+        commit.message,
+        version,
+        commit.reference,
+        username
+      );
+      return withSpinner(
+        github.createPullRequest(owner, repoName, payload),
+        'Creating pull request'
+      );
+    });
+}
+
 function init(config, options) {
   const { username, accessToken, repositories } = config;
   return ensureConfigAndFoldersExists()
@@ -93,6 +121,7 @@ function init(config, options) {
       const fullRepoNames = getFullRepoNames(repositories);
       const currentRepoName = getCurrentRepoName(fullRepoNames, options.cwd);
       if (currentRepoName) {
+        console.log(`Repository: ${currentRepoName}`);
         return currentRepoName;
       }
 
@@ -128,48 +157,7 @@ function init(config, options) {
       return withSpinner(
         maybeSetupRepo(owner, repoName, username),
         'Cloning repository (may take a few minutes)'
-      ).then(() => ({
-        owner,
-        repoName,
-        commit,
-        version
-      }));
-    })
-    .then(({ owner, repoName, commit, version }) => {
-      const backportBranchName = getBackportBranchName(
-        version,
-        commit.reference
-      );
-
-      return withSpinner(
-        resetAndPullMaster(owner, repoName),
-        'Pull latest changes'
-      )
-        .then(() =>
-          createAndCheckoutBranch(owner, repoName, version, backportBranchName)
-        )
-        .then(() => cherrypickAndPrompt(owner, repoName, commit.sha))
-        .then(() =>
-          withSpinner(
-            push(owner, repoName, username, backportBranchName),
-            'Pushing branch'
-          )
-        )
-        .then(() =>
-          withSpinner(
-            github.createPullRequest(
-              owner,
-              repoName,
-              getPullRequestPayload(
-                commit.message,
-                version,
-                commit.reference,
-                username
-              )
-            ),
-            'Creating pull request'
-          )
-        );
+      ).then(() => backportVersion(owner, repoName, commit, version, username));
     })
     .then(res => console.log(`View pull request: ${res.data.html_url}`))
     .catch(e => {
