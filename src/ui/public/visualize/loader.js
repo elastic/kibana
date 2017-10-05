@@ -10,12 +10,14 @@ export function VisualizeLoaderProvider($compile, $rootScope, savedVisualization
     scope.showSpyPanel = params.showSpyPanel;
     scope.editorMode = params.editorMode;
 
-    $(el).html('');
+    const container = el instanceof $ ? el : $(el);
+
+    container.html('');
     const visEl = $('<visualize saved-obj="savedObj" app-state="appState" ui-state="uiState" ' +
       'time-range="timeRange" editor-mode="editorMode" show-spy-panel="showSpyPanel"></visualize>');
     const visHtml = $compile(visEl)(scope);
-    $(el).html(visHtml);
-    return visEl[0];
+    container.html(visHtml);
+    return visEl;
   };
 
   return {
