@@ -60,10 +60,10 @@ uiModules
         if ($scope.timeRange) {
           $scope.vis.aggs.forEach(agg => {
             if (agg.type.name !== 'date_histogram') return;
-            agg.params.timeRange = {
+            agg.setTimeRange({
               min: new Date($scope.timeRange.min),
               max: new Date($scope.timeRange.max)
-            };
+            });
           });
         }
 
