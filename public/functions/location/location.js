@@ -1,4 +1,5 @@
 import Fn from '../../../common/functions/fn.js';
+import { noop } from 'lodash';
 
 export default new Fn({
   name: 'location',
@@ -16,7 +17,9 @@ export default new Fn({
           }
         );
       }
-      return navigator.geolocation.getCurrentPosition(createLocation);
+      return navigator.geolocation.getCurrentPosition(createLocation, noop, {
+        maximumAge: 5000,
+      });
     });
   },
 });
