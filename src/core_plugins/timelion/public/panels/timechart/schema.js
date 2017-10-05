@@ -48,6 +48,21 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
               color: '#848e96'
             }
           },
+          yaxes: [{
+            font: {
+              size: 14,
+              family: '"Open Sans", Helvetica, Arial, sans-serif',
+              color: '#848e96'
+            }
+          },
+          {
+            font: {
+              size: 14,
+              family: '"Open Sans", Helvetica, Arial, sans-serif',
+              color: '#848e96'
+            }
+          }
+          ],
           selection: {
             mode: 'x',
             color: '#ccc'
@@ -267,9 +282,6 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
               }
             });
           }
-
-          console.log('series', _.compact(series));
-          console.log('options', _.compact(options));
 
           $scope.plot = $.plot(canvasElem, _.compact(series), options);
 

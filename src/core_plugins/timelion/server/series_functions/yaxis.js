@@ -68,7 +68,7 @@ export default new Chainable('yaxis', {
       myAxis.position = position || (yaxis % 2 ? 'left' : 'right');
       myAxis.min = min;
       myAxis.max = max;
-      myAxis.axisLabelFontSizePixels = 11;
+      myAxis.axisLabelFontSizePixels = 14;
       myAxis.axisLabel = label;
       myAxis.axisLabelColour = color;
       myAxis.axisLabelUseCanvas = true;
