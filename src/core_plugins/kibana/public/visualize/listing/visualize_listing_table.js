@@ -232,13 +232,17 @@ export class VisualizeListingTable extends React.Component {
   renderPrompt() {
     if (this.state.isFetchingItems) {
       return <KuiListingTableLoadingPrompt />;
-    } else if (this.state.filter && this.items.length === 0) {
-      return <KuiListingTableNoMatchesPrompt />;
-    } else if (this.items.length === 0) {
-      return <NoVisualizationsPrompt />;
-    } else {
-      return null;
     }
+
+    if (this.items.length === 0) {
+      if (this.state.filter) {
+        return <KuiListingTableNoMatchesPrompt />;
+      }
+
+      return <NoVisualizationsPrompt />;
+    }
+
+    return null;
   }
 
   render() {
