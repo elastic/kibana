@@ -41,7 +41,12 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
             position: 'bottom',
             mode: 'time',
             tickLength: 0,
-            timezone: 'browser'
+            timezone: 'browser',
+            font: {
+              size: 14,
+              family: '"Open Sans", Helvetica, Arial, sans-serif',
+              color: '#848e96'
+            }
           },
           selection: {
             mode: 'x',
@@ -221,7 +226,7 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
             series = _.cloneDeep(_.defaults(series, {
               shadowSize: 0,
               lines: {
-                lineWidth: 3
+                lineWidth: 2
               }
             }));
             series._id = index;
@@ -262,6 +267,9 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
               }
             });
           }
+
+          console.log('series', _.compact(series));
+          console.log('options', _.compact(options));
 
           $scope.plot = $.plot(canvasElem, _.compact(series), options);
 
