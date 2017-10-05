@@ -5,7 +5,7 @@ import { DashboardViewMode } from './dashboard_view_mode';
 import { FilterUtils } from './lib/filter_utils';
 import { PanelUtils } from './panel/panel_utils';
 import { store } from '../store';
-import { updateViewMode, updatePanels, updateIsFullScreenMode } from './actions';
+import { updateViewMode, updatePanels, updateIsFullScreenMode, minimizePanel } from './actions';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { createPanelState, getPersistedStateId } from './panel';
 import { getAppStateDefaults } from './lib';
@@ -63,6 +63,8 @@ export class DashboardStateManager {
     PanelUtils.initPanelIndexes(this.getPanels());
     this.createStateMonitor();
 
+    // Always start out with all panels minimized when a dashboard is first loaded.
+    store.dispatch(minimizePanel());
     store.dispatch(updatePanels(this.getPanels()));
 
     this.changeListeners = [];
