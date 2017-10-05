@@ -43,8 +43,8 @@ export default new Fn({
   fn: (context, args) => {
     function seriesStyleToFlot(seriesStyle) {
       if (!seriesStyle) return {};
-      return {
-        stack: get(seriesStyle, 'stack'),
+
+      const flotStyle = {
         numbers: {
           show: true,
         },
@@ -62,13 +62,18 @@ export default new Fn({
           align: 'center',
         },
         // This is here intentionally even though it is the default.
-        // We use the `size` plugins for this and if the user says they want points we just set the size to be static.
+        // We use the `size` plugins for this and if the user says they want points
+        // we just set the size to be static.
         points: { show: false },
         bubbles: {
           fill: get(seriesStyle, 'fill'),
         },
-        color: get(seriesStyle, 'color'),
       };
+
+      if (get(seriesStyle, 'stack')) flotStyle.stack = get(seriesStyle, 'stack');
+      if (get(seriesStyle, 'color')) flotStyle.color = get(seriesStyle, 'color');
+
+      return flotStyle;
     }
 
     const seriesStyles = keyBy(args.seriesStyle || [], 'label') || {};
@@ -181,6 +186,10 @@ export default new Fn({
       },
     };
 
-    return result;
+    // fix the issue of plot sometimes re-rendering with an empty chart
+    // TODO: holy hell, why does this work?! the working theory is that some values become undefined
+    // and serializing the result here causes them to be dropped off, and this makes flot react differently.
+    // It's also possible that something else ends up mutating this object, but that seems less likely.
+    return JSON.parse(JSON.stringify(result));
   },
 });

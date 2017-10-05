@@ -47,14 +47,14 @@ export default new Fn({
   fn: (context, args) => {
     const spec = {
       ...context.spec,
-      fontSize: `${args.size}px`,
       fontFamily: args.family,
       fontWeight: args.weight,
       fontStyle: args.italic ? 'italic' : 'normal',
       textDecoration: args.underline ? 'underline' : 'none',
       textAlign: args.align,
-      color: args.color,
     };
+    if (args.color) spec.color = args.color;
+    if (args.size) spec.fontSize = `${args.size}px`;
 
     return {
       type: 'style',

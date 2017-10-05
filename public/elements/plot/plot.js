@@ -17,7 +17,6 @@ export default new Element('plot', {
     if (!includes($.plot.plugins, size)) $.plot.plugins.push(size);
     if (!includes($.plot.plugins, text)) $.plot.plugins.push(text);
 
-
     let plot;
     function draw() {
       if (domNode.clientHeight < 1 || domNode.clientWidth < 1) return;
@@ -46,7 +45,6 @@ export default new Element('plot', {
     handlers.onResize(debounce(draw, 40, { maxWait: 40 })); // 1000 / 40 = 25fps
 
     draw();
-
 
     return handlers.done(plot);
   },
