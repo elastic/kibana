@@ -10,7 +10,7 @@
   "dependencies": {},
   "peerDependencies": {
     "moment": "2.13.0",
-    "rxjs": "5.4.2"
+    "rxjs": "5.4.3"
   },
   "devDependencies": {
     "awesome-typescript-loader": "^3.2.2",
@@ -21,6 +21,6 @@
     "kbn-types": "file:../../packages/kbn-types",
     "moment": "2.13.0",
     "typescript": "2.5.1",
-    "rxjs": "5.4.2"
+    "rxjs": "5.4.3"
   }
 }
