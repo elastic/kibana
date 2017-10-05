@@ -5,6 +5,7 @@ import color from 'color';
 import Markdown from 'react-markdown';
 import replaceVars from '../../../lib/component_utils/replace_vars';
 import convertSeriesToVars from '../../../lib/component_utils/convert_series_to_vars';
+import ErrorComponent from '../../error';
 
 function MarkdownVisualization(props) {
   const { backgroundColor, model, visData, dateFormat } = props;
@@ -31,13 +32,13 @@ function MarkdownVisualization(props) {
     let contentClassName = `thorMarkdown__content ${model.markdown_vertical_align}`;
     if (model.markdown_scrollbars) contentClassName += ' scrolling';
     if (reversed) className += ' reversed';
+    const markdownError = markdownSource instanceof Error ? markdownSource : null;
     markdown = (
       <div className={className}>
+        {markdownError && <ErrorComponent error={markdownError} />}
         <style type="text/css">{model.markdown_css}</style>
         <div className={contentClassName}>
-          <div id={`markdown-${model.id}`}>
-            <Markdown escapeHtml={true} source={markdownSource} />
-          </div>
+          <div id={`markdown-${model.id}`}>{!markdownError && <Markdown escapeHtml={true} source={markdownSource} />}</div>
         </div>
       </div>
     );

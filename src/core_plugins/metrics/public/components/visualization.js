@@ -8,6 +8,7 @@ import topN from './vis_types/top_n/vis';
 import gauge from './vis_types/gauge/vis';
 import markdown from './vis_types/markdown/vis';
 import Error from './error';
+import NoData from './no_data';
 
 const types = {
   timeseries,
@@ -24,10 +25,19 @@ function Visualization(props) {
   if (error) {
     return (
       <div className={props.className}>
-        <Error error={error}/>
+        <Error error={error} />
       </div>
     );
   }
+  const noData = _.get(visData, `${model.id}.series`).length === 0;
+  if (noData) {
+    return (
+      <div className={props.className}>
+        <NoData />
+      </div>
+    );
+  }
+
   const component = types[model.type];
   if (component) {
     return React.createElement(component, {
@@ -40,7 +50,7 @@ function Visualization(props) {
       visData: props.visData
     });
   }
-  return (<div className={props.className} />);
+  return <div className={props.className} />;
 }
 
 Visualization.defaultProps = {

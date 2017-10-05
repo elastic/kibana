@@ -121,6 +121,10 @@ class MarkdownEditor extends Component {
             </thead>
             <tbody>{rows}</tbody>
           </table>
+          {rows.length === 0 && (
+            <div className="vis_editor__no-markdown-variables">No variables avaliable for the selected data metrics.</div>
+          )}
+
           <div className="vis_editor__markdown-code-desc">
             There is also a special variable named <code>_all</code> which you can use to access the entire tree. This is useful for
             creating lists with data from a group by...

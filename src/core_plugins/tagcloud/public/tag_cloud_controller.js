@@ -19,6 +19,7 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
     const aggs = $scope.vis.getAggConfig().getResponseAggs();
     const aggConfigResult = new AggConfigResult(aggs[0], false, event, event);
     clickHandler({ point: { aggConfigResult: aggConfigResult } });
+    $scope.$apply();
   });
 
   tagCloud.on('renderComplete', () => {
@@ -47,14 +48,15 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
     $scope.renderComplete();
   });
 
-  $scope.$watch('esResponse', async function (response) {
+  $scope.$watch('esResponse', function (response) {
 
     if (!response) {
       tagCloud.setData([]);
       return;
     }
 
-    const tagsAggId = _.first(_.pluck($scope.vis.getAggConfig().bySchemaName.segment, 'id'));
+    const bucketsAgg = _.first($scope.vis.getAggConfig().bySchemaName.segment);
+    const tagsAggId = _.get(bucketsAgg, 'id');
     if (!tagsAggId || !response.aggregations) {
       tagCloud.setData([]);
       return;
@@ -65,6 +67,7 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
 
     const tags = buckets.map((bucket) => {
       return {
+        displayText: bucketsAgg.fieldFormatter()(bucket.key),
         text: bucket.key,
         value: getValue(metricsAgg, bucket)
       };
