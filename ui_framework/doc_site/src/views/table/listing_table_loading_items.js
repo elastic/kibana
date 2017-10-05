@@ -46,17 +46,20 @@ function renderPager() {
 function renderToolBarActions() {
   return [
     <KuiButton
+      key="add"
       buttonType="primary"
       aria-label="Add"
     >
       Add
     </KuiButton>,
     <KuiButton
+      key="settings"
       aria-label="Settings"
       buttonType="basic"
       icon={<KuiButtonIcon type="settings" />}
     />,
     <KuiButton
+      key="menu"
       aria-label="Menu"
       buttonType="basic"
       icon={<KuiButtonIcon type="menu" />}
