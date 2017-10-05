@@ -211,7 +211,7 @@
   },
   "devDependencies": {
     "@elastic/eslint-config-kibana": "0.11.0",
-    "@elastic/eslint-import-resolver-kibana": "0.8.1",
+    "@elastic/eslint-import-resolver-kibana": "github:spalger/eslint-import-resolver-kibana#upgrade/webpack-3",
     "@elastic/eslint-plugin-kibana-custom": "1.0.3",
     "angular-mocks": "1.4.7",
     "babel-eslint": "7.2.3",
