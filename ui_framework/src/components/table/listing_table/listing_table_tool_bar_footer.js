@@ -12,7 +12,8 @@ export function KuiListingTableToolBarFooter({ pager, itemsSelectedCount }) {
     <KuiToolBarFooter>
       <KuiToolBarFooterSection>
         <KuiToolBarText>
-          {itemsSelectedCount > 0 && `${itemsSelectedCount} items selected`}
+          {itemsSelectedCount === 1 && '1 item selected'}
+          {itemsSelectedCount > 1 && `${itemsSelectedCount} items selected`}
         </KuiToolBarText>
       </KuiToolBarFooterSection>
 
