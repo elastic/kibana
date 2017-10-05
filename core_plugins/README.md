@@ -21,6 +21,10 @@ There are several reasons why we want to keep core plugins independent, e.g.:
 - It's easier to track which packages are used where, as every plugin has its
   own `package.json`.
 
+## How does TypeScript work for plugins?
+
+TODO: Explain `@internal`
+
 ## How do I create a new core plugin?
 
 TODO

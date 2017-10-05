@@ -42,7 +42,7 @@ export class Env {
   }
 
   getPluginDir(pluginName: string) {
-    return resolve(this.pluginsDir, pluginName, 'target', 'dist');
+    return resolve(this.pluginsDir, pluginName, 'target', 'tsc');
   }
 
   /**

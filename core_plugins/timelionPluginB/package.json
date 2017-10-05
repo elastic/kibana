@@ -1,0 +1,15 @@
+{
+  "name": "kibana-plugin-timelion-plugin-b",
+  "version": "1.0.0",
+  "scripts": {
+    "prepare": "npm run build",
+    "build": "tsc",
+    "start": "tsc --watch"
+  },
+  "types": "./target/types/index.d.ts",
+  "devDependencies": {
+    "kbn-types": "file:../../packages/kbn-types",
+    "kibana-plugin-timelion": "file:../timelion",
+    "typescript": "^2.5.3"
+  }
+}
