@@ -1,6 +1,6 @@
 {
   "name": "backport",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "bin": {
     "backport": "./src/index.js"
   },
