@@ -23,7 +23,7 @@ import {
   KuiPager,
 } from 'ui_framework/components';
 
-import { keyCodes } from 'ui_framework/services';
+import { ESC_KEY_CODE } from 'ui_framework/services';
 
 export class ChangeIndexModal extends React.Component {
   constructor(props) {
@@ -72,7 +72,7 @@ export class ChangeIndexModal extends React.Component {
   };
 
   onKeyDown = (event) => {
-    if (event.keyCode === keyCodes.ESCAPE) {
+    if (event.keyCode === ESC_KEY_CODE) {
       this.props.onClose();
     }
   };
