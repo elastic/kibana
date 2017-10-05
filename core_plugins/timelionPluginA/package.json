@@ -1,0 +1,26 @@
+{
+  "name": "kibana-plugin-timelion-plugin-a",
+  "version": "1.0.0",
+  "scripts": {
+    "prepare": "npm run build",
+    "build": "webpack",
+    "start": "webpack --watch"
+  },
+  "dependencies": {},
+  "peerDependencies": {
+    "rxjs": "5.4.2"
+  },
+  "devDependencies": {
+    "awesome-typescript-loader": "^3.2.2",
+    "babel-core": "^6.25.0",
+    "babel-loader": "^7.1.1",
+    "babel-polyfill": "^6.23.0",
+    "babel-preset-es2015": "^6.24.1",
+    "kbn-types": "file:../../packages/kbn-types",
+    "kibana-plugin-timelion": "file:../timelion",
+    "kibana-plugin-timelion-plugin-b": "file:../timelionPluginB",
+    "typescript": "2.5.1",
+    "rxjs": "5.4.2",
+    "webpack": "^3.4.1"
+  }
+}
