@@ -1,5 +1,5 @@
 # backport
-A simle CLI tool for backporting commits
+A simple CLI tool for backporting commits
 
 ![Demonstration gif](https://i.makeagif.com/media/10-05-2017/kEJLqe.gif)
 
