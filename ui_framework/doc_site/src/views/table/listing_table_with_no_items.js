@@ -53,7 +53,7 @@ function renderPager() {
   );
 }
 
-function renderColumns() {
+function renderHeader() {
   return [
     <KuiTableHeaderCell key="title">
       Title
@@ -78,7 +78,7 @@ export function ListingTableWithNoItems() {
     <KuiListingTable
       pager={renderPager()}
       toolBarActions={renderToolBarActions()}
-      columns={renderColumns()}
+      header={renderHeader()}
       onFilter={() => {}}
       filter="hello"
       prompt={<KuiListingTableNoMatchesPrompt />}

@@ -100,7 +100,7 @@ export function KuiListingTable({
 }
 
 KuiListingTable.PropTypes = {
-  columns: PropTypes.arrayOf(PropTypes.node),
+  header: PropTypes.arrayOf(PropTypes.node),
   rows: PropTypes.arrayOf(PropTypes.shape({
     id: PropTypes.string,
     cells: PropTypes.arrayOf(PropTypes.node),

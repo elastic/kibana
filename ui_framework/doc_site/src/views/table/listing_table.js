@@ -107,7 +107,7 @@ export class ListingTable extends React.Component {
     ];
   }
 
-  renderColumns() {
+  renderHeader() {
     return [
       <KuiTableHeaderCell key="title">
         Title
@@ -138,7 +138,7 @@ export class ListingTable extends React.Component {
         toolBarActions={this.renderToolBarActions()}
         selectedRowIds={this.state.selectedRowIds}
         rows={this.rows}
-        columns={this.renderColumns()}
+        header={this.renderHeader()}
         onFilter={() => {}}
         filter=""
         onItemSelectionChanged={this.onItemSelectionChanged}

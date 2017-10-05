@@ -126,7 +126,7 @@ export class VisualizeListingTable extends React.Component {
   sortByTitle = () => this.sortOn('title');
   sortByType = () => this.sortOn('type');
 
-  renderColumns() {
+  renderHeader() {
     return [
       <KuiTableHeaderCell
         key="title"
@@ -254,7 +254,7 @@ export class VisualizeListingTable extends React.Component {
           toolBarActions={this.renderToolBarActions()}
           selectedRowIds={this.state.selectedRowIds}
           rows={this.createRows()}
-          columns={this.renderColumns()}
+          header={this.renderHeader()}
           onFilter={this.fetchItems}
           filter={this.state.filter}
           prompt={this.renderPrompt()}

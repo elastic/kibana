@@ -61,7 +61,7 @@ function renderPager() {
   );
 }
 
-function renderColumns() {
+function renderHeader() {
   return [
     <KuiTableHeaderCell key="title">
       Title
@@ -86,7 +86,7 @@ export function ListingTableWithEmptyPrompt() {
     <KuiListingTable
       pager={renderPager()}
       toolBarActions={renderToolBarActions()}
-      columns={renderColumns()}
+      header={renderHeader()}
       onFilter={() => {}}
       filter=""
       prompt={renderEmptyTablePrompt()}
