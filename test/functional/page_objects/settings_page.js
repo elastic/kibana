@@ -27,6 +27,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await this.clickLinkText('Advanced Settings');
     }
 
+    async clickKibanaSavedObjects() {
+      await this.clickLinkText('Saved Objects');
+    }
+
     async clickKibanaIndices() {
       log.debug('clickKibanaIndices link');
       await this.clickLinkText('Index Patterns');
@@ -483,6 +487,29 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     async setScriptedFieldScript(script) {
       log.debug('set scripted field script = ' + script);
       await testSubjects.setValue('editorFieldScript', script);
+    }
+
+    async importFile(path) {
+      log.debug(`importFile(${path})`);
+      await remote.findById('testfile').type(path);
+    }
+
+    async setImportIndexFieldOption(child) {
+      await remote.setFindTimeout(defaultFindTimeout)
+      .findByCssSelector(`select[data-test-subj="managementChangeIndexSelection"] > option:nth-child(${child})`)
+      .click();
+    }
+
+    async clickChangeIndexConfirmButton() {
+      await (await testSubjects.find('changeIndexConfirmButton')).click();
+    }
+
+    async clickVisualizationsTab() {
+      await (await testSubjects.find('objectsTab-visualizations')).click();
+    }
+
+    async getVisualizationRows() {
+      return await testSubjects.findAll(`objectsTableRow`);
     }
   }
 
