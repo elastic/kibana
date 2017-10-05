@@ -1,5 +1,8 @@
 {
   "extends": "../../tsconfig",
+  "compilerOptions": {
+    "outDir": "target/tsc"
+  },
   "exclude": [
     "node_modules"
   ]

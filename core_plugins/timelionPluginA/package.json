@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "prepare": "npm run build",
-    "build": "webpack",
-    "start": "webpack --watch"
+    "build": "tsc",
+    "start": "tsc --watch"
   },
   "dependencies": {},
   "peerDependencies": {
@@ -20,7 +20,6 @@
     "kibana-plugin-timelion": "file:../timelion",
     "kibana-plugin-timelion-plugin-b": "file:../timelionPluginB",
     "typescript": "2.5.1",
-    "rxjs": "5.4.2",
-    "webpack": "^3.4.1"
+    "rxjs": "5.4.2"
   }
 }

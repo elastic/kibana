@@ -4,9 +4,9 @@
   "scripts": {
     "prepare": "npm run build",
     "build": "npm run build:app && npm run build:types",
-    "build:app": "webpack",
+    "build:app": "tsc",
     "build:types": "tsc -p tsconfig-types.json",
-    "start": "webpack --watch"
+    "start": "tsc --watch"
   },
   "types": "./target/types/types.d.ts",
   "dependencies": {},
@@ -23,7 +23,6 @@
     "kbn-types": "file:../../packages/kbn-types",
     "moment": "2.13.0",
     "typescript": "2.5.1",
-    "rxjs": "5.4.2",
-    "webpack": "^3.4.1"
+    "rxjs": "5.4.2"
   }
 }
