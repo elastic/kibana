@@ -14,9 +14,9 @@ import {
   RIGHT_ALIGNMENT
 } from '../../../../services';
 
-function wrapInRowCell(cell, key, alignment) {
+function wrapInRowCell(cell, key, alignment = LEFT_ALIGNMENT) {
   return (
-    <KuiTableRowCell align={alignment ? alignment : LEFT_ALIGNMENT} key={key}>
+    <KuiTableRowCell align={alignment} key={key}>
       {cell}
     </KuiTableRowCell>
   );
@@ -88,7 +88,6 @@ export class ListingTable extends React.Component {
       <KuiButton
         buttonType="primary"
         aria-label="Add"
-      >
       >
         Add
       </KuiButton>,
