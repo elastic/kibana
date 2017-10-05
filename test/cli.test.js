@@ -56,16 +56,19 @@ describe('cli', () => {
     jest.spyOn(github, 'getCommits');
     jest.spyOn(github, 'createPullRequest');
 
-    return init({
-      username: 'sqren',
-      accessToken: 'myAccessToken',
-      repositories: [
-        {
-          name: fullRepoName,
-          versions: ['6.x', '6.0', '5.6', '5.5', '5.4']
-        }
-      ]
-    });
+    return init(
+      {
+        username: 'sqren',
+        accessToken: 'myAccessToken',
+        repositories: [
+          {
+            name: fullRepoName,
+            versions: ['6.x', '6.0', '5.6', '5.5', '5.4']
+          }
+        ]
+      },
+      { cwd: '/my/path' }
+    );
   });
 
   test('prompt should display list of repository names', () => {
@@ -104,7 +107,7 @@ describe('cli', () => {
     expect(inquirer.prompt.mock.calls).toMatchSnapshot();
   });
 
-  test('utils, ', () => {
+  test('exec should be called with correct args', () => {
     expect(utils.exec.mock.calls).toMatchSnapshot();
   });
 });

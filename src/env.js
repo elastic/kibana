@@ -11,6 +11,11 @@ env.getRepositoriesDirPath = () =>
 env.getConfigFilePath = () =>
   path.join(env.getBackportDirPath(), 'config.json');
 
+env.getRepoOwnerDirPath = owner => {
+  const REPOSITORIES_DIR_PATH = env.getRepositoriesDirPath();
+  return path.join(REPOSITORIES_DIR_PATH, owner);
+};
+
 env.getRepoPath = (owner, repoName) => {
   const REPOSITORIES_DIR_PATH = env.getRepositoriesDirPath();
   return path.join(REPOSITORIES_DIR_PATH, owner, repoName);

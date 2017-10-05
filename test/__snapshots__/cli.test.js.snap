@@ -1,5 +1,190 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`cli exec should be called with correct args 1`] = `
+Array [
+  Array [
+    "git clone git@github.com:elastic/backport-cli-test",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic",
+    },
+  ],
+  Array [
+    "git remote add sqren git@github.com:sqren/backport-cli-test",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git reset --hard && git checkout master && git pull origin master",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git cherry-pick mySha",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git push sqren backport/myVersion/pr-myPullRequest --force",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git clone git@github.com:elastic/backport-cli-test",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic",
+    },
+  ],
+  Array [
+    "git remote add sqren git@github.com:sqren/backport-cli-test",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git reset --hard && git checkout master && git pull origin master",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git cherry-pick mySha",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git push sqren backport/myVersion/pr-myPullRequest --force",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git clone git@github.com:elastic/backport-cli-test",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic",
+    },
+  ],
+  Array [
+    "git remote add sqren git@github.com:sqren/backport-cli-test",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git reset --hard && git checkout master && git pull origin master",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git cherry-pick mySha",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git push sqren backport/myVersion/pr-myPullRequest --force",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git clone git@github.com:elastic/backport-cli-test",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic",
+    },
+  ],
+  Array [
+    "git remote add sqren git@github.com:sqren/backport-cli-test",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git reset --hard && git checkout master && git pull origin master",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git cherry-pick mySha",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git push sqren backport/myVersion/pr-myPullRequest --force",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git clone git@github.com:elastic/backport-cli-test",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic",
+    },
+  ],
+  Array [
+    "git remote add sqren git@github.com:sqren/backport-cli-test",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git reset --hard && git checkout master && git pull origin master",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git cherry-pick mySha",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+  Array [
+    "git push sqren backport/myVersion/pr-myPullRequest --force",
+    Object {
+      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+    },
+  ],
+]
+`;
+
 exports[`cli prompt calls should match snapshot 1`] = `
 Array [
   Array [
@@ -297,131 +482,6 @@ Array [
         "type": "list",
       },
     ],
-  ],
-]
-`;
-
-exports[`cli utils,  1`] = `
-Array [
-  Array [
-    "git reset --hard && git checkout master && git pull origin master",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git cherry-pick mySha",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git push sqren backport/myVersion/pr-myPullRequest --force",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git reset --hard && git checkout master && git pull origin master",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git cherry-pick mySha",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git push sqren backport/myVersion/pr-myPullRequest --force",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git reset --hard && git checkout master && git pull origin master",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git cherry-pick mySha",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git push sqren backport/myVersion/pr-myPullRequest --force",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git reset --hard && git checkout master && git pull origin master",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git cherry-pick mySha",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git push sqren backport/myVersion/pr-myPullRequest --force",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git reset --hard && git checkout master && git pull origin master",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git cherry-pick mySha",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git push sqren backport/myVersion/pr-myPullRequest --force",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
   ],
 ]
 `;

@@ -1,11 +1,11 @@
 const promisify = require('es6-promisify');
 const path = require('path');
 const fs = require('fs');
+const mkdirp = promisify(require('mkdirp'));
 const stripJsonComments = require('strip-json-comments');
 const constants = require('./constants');
 const env = require('./env');
 
-const mkdirp = promisify(require('mkdirp'));
 const writeFile = promisify(fs.writeFile);
 const readFile = promisify(fs.readFile);
 

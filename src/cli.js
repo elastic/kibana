@@ -1,5 +1,6 @@
 const inquirer = require('inquirer');
 const ora = require('ora');
+const path = require('path');
 const prompts = require('./prompts');
 const { withSpinner } = require('./utils');
 const github = require('./github');
@@ -14,6 +15,11 @@ const {
   maybeSetupRepo,
   push
 } = require('./git');
+
+const getFullRepoNames = repositories => repositories.map(repo => repo.name);
+const getVersions = (repositories, fullRepoName) => {
+  return repositories.find(repo => repo.name === fullRepoName).versions;
+};
 
 function isCherrypickConflict(e) {
   return e.cmd.includes('git cherry-pick');
@@ -61,6 +67,11 @@ function getReferenceValue(reference) {
     : `commit ${reference.value}`;
 }
 
+function getCurrentRepoName(fullRepoNames, cwd) {
+  const currentDir = path.basename(cwd);
+  return fullRepoNames.find(name => name.includes(`/${currentDir}`));
+}
+
 function getPullRequestPayload(commitMessage, version, reference, username) {
   const backportBranchName = getBackportBranchName(version, reference);
   const refValue = getReferenceValue(reference);
@@ -73,21 +84,23 @@ function getPullRequestPayload(commitMessage, version, reference, username) {
   };
 }
 
-const getFullRepoNames = repositories => repositories.map(repo => repo.name);
-const getVersions = (repositories, fullRepoName) => {
-  return repositories.find(repo => repo.name === fullRepoName).versions;
-};
-
-function init(config) {
+function init(config, options) {
   const { username, accessToken, repositories } = config;
   return ensureConfigAndFoldersExists()
     .then(() => validateConfig(config))
     .then(() => github.setAccessToken(accessToken))
     .then(() => {
       const fullRepoNames = getFullRepoNames(repositories);
-      return inquirer.prompt([prompts.listFullRepositoryName(fullRepoNames)]);
+      const currentRepoName = getCurrentRepoName(fullRepoNames, options.cwd);
+      if (currentRepoName) {
+        return currentRepoName;
+      }
+
+      return inquirer
+        .prompt([prompts.listFullRepositoryName(fullRepoNames)])
+        .then(({ fullRepoName }) => fullRepoName);
     })
-    .then(({ fullRepoName }) => {
+    .then(fullRepoName => {
       const [owner, repoName] = fullRepoName.split('/');
       const spinner = ora('Loading commits...').start();
       return github
@@ -158,6 +171,7 @@ function init(config) {
           )
         );
     })
+    .then(res => console.log(`View pull request: ${res.data.html_url}`))
     .catch(e => {
       switch (e.message) {
         case constants.INVALID_CONFIG:
@@ -177,8 +191,7 @@ function init(config) {
         default:
           console.error(e);
       }
-    })
-    .then(res => console.log(`View pull request: ${res.data.html_url}`));
+    });
 }
 
 module.exports = {

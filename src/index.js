@@ -4,4 +4,6 @@ const { init } = require('../src/cli');
 const { getConfig } = require('./configs');
 const config = getConfig();
 
-init(config);
+init(config, {
+  cwd: process.cwd()
+});

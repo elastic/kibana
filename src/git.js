@@ -1,4 +1,5 @@
 const promisify = require('es6-promisify');
+const mkdirp = promisify(require('mkdirp'));
 const fs = require('fs');
 const stat = promisify(fs.stat);
 const { getRepoPath } = require('./env');
@@ -21,9 +22,11 @@ function folderExists(path) {
 function maybeSetupRepo(owner, repoName, username) {
   return folderExists(getRepoPath(owner, repoName)).then(exists => {
     if (!exists) {
-      return cloneRepo(owner, repoName).then(() =>
-        addRemote(owner, repoName, username)
-      );
+      return mkdirp(env.getRepoOwnerDirPath(owner)).then(() => {
+        return cloneRepo(owner, repoName).then(() =>
+          addRemote(owner, repoName, username)
+        );
+      });
     }
   });
 }
@@ -34,7 +37,7 @@ function getRemoteUrl(owner, repoName) {
 
 function cloneRepo(owner, repoName) {
   return utils.exec(`git clone ${getRemoteUrl(owner, repoName)}`, {
-    cwd: env.getRepositoriesDirPath()
+    cwd: env.getRepoOwnerDirPath(owner)
   });
 }
 
