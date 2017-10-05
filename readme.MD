@@ -16,7 +16,7 @@ npm install -g backport
 
 ### Configuration
 The first time you run `backport` a skeleton configuration file will be created in `/<homedir>/.backport/config.json`.
-You need to update the config file with your Github username and a Github Access Token (can be create [here](https://github.com/settings/tokens/new)) to use it.
+You need to update the config file with your Github username and a Github Access Token (can be create [here](https://github.com/settings/tokens/new)).
 
 <details>
 <summary>View config sample</summary>
