@@ -7,18 +7,43 @@ import classNames from 'classnames';
 import { KuiContextMenuPanel } from './context_menu_panel';
 import { KuiContextMenuItem } from './context_menu_item';
 
+function mapIdsToPanels(panels) {
+  const map = {};
+
+  panels.forEach(panel => {
+    map[panel.id] = panel;
+  });
+
+  return map;
+}
+
+function extractPreviousIds(panels) {
+  const idToPreviousPanelIdMap = {};
+
+  panels.forEach(panel => {
+    if (Array.isArray(panel.items)) {
+      panel.items.forEach(item => {
+        const isCloseable = item.panel !== undefined;
+        if (isCloseable) {
+          idToPreviousPanelIdMap[item.panel] = panel.id;
+        }
+      });
+    }
+  });
+
+  return idToPreviousPanelIdMap;
+}
+
 export class KuiContextMenu extends Component {
   static propTypes = {
     className: PropTypes.string,
+    panels: PropTypes.array,
     initialPanelId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     isVisible: PropTypes.bool.isRequired,
-    idToPanelMap: PropTypes.object,
-    idToPreviousPanelIdMap: PropTypes.object,
   }
 
   static defaultProps = {
-    idToPanelMap: {},
-    idToPreviousPanelIdMap: {},
+    panels: [],
     isVisible: true,
   }
 
@@ -35,11 +60,13 @@ export class KuiContextMenu extends Component {
       transitionDirection: undefined,
       isTransitioning: false,
       focusItemIndex: undefined,
+      idToPanelMap: {},
+      idToPreviousPanelIdMap: {},
     };
   }
 
   hasPreviousPanel = panelId => {
-    const previousPanelId = this.props.idToPreviousPanelIdMap[panelId];
+    const previousPanelId = this.state.idToPreviousPanelIdMap[panelId];
     return typeof previousPanelId !== 'undefined';
   };
 
@@ -71,12 +98,12 @@ export class KuiContextMenu extends Component {
   showPreviousPanel = () => {
     // If there's a previous panel, then we can close the current panel to go back to it.
     if (this.hasPreviousPanel(this.state.currentPanelId)) {
-      const previousPanelId = this.props.idToPreviousPanelIdMap[this.state.currentPanelId];
+      const previousPanelId = this.state.idToPreviousPanelIdMap[this.state.currentPanelId];
 
       // Set focus on the item which shows the panel we're leaving.
-      const previousPanel = this.props.idToPanelMap[previousPanelId];
+      const previousPanel = this.state.idToPanelMap[previousPanelId];
       const focusItemIndex = previousPanel.items.findIndex(
-        item => item.panel && item.panel.id === this.state.currentPanelId
+        item => item.panel === this.state.currentPanelId
       );
 
       if (focusItemIndex !== -1) {
@@ -94,6 +121,20 @@ export class KuiContextMenu extends Component {
     this.menu.setAttribute('style', `height: ${height}px`);
   }
 
+  updatePanelMaps(panels) {
+    const idToPanelMap = mapIdsToPanels(panels);
+    const idToPreviousPanelIdMap = extractPreviousIds(panels);
+
+    this.setState({
+      idToPanelMap,
+      idToPreviousPanelIdMap,
+    });
+  }
+
+  componentWillMount() {
+    this.updatePanelMaps(this.props.panels);
+  }
+
   componentWillReceiveProps(nextProps) {
     // If the user is opening the context menu, reset the state.
     if (nextProps.isVisible && !this.props.isVisible) {
@@ -103,6 +144,10 @@ export class KuiContextMenu extends Component {
         transitionDirection: undefined,
         focusItemIndex: undefined,
       });
+    }
+
+    if (nextProps.panels !== this.props.panels) {
+      this.updatePanelMaps(nextProps.panels);
     }
   }
 
@@ -160,7 +205,7 @@ export class KuiContextMenu extends Component {
   }
 
   renderPanel(panelId, transitionType) {
-    const panel = this.props.idToPanelMap[panelId];
+    const panel = this.state.idToPanelMap[panelId];
 
     if (!panel) {
       return;
@@ -172,7 +217,7 @@ export class KuiContextMenu extends Component {
       if (panel.items) {
         panel.items.forEach((item, index) => {
           if (item.panel) {
-            this.itemIndexToPanelIdMap[index] = item.panel.id;
+            this.itemIndexToPanelIdMap[index] = item.panel;
           }
         });
       }
@@ -216,8 +261,7 @@ export class KuiContextMenu extends Component {
 
   render() {
     const {
-      idToPanelMap, // eslint-disable-line no-unused-vars
-      idToPreviousPanelIdMap, // eslint-disable-line no-unused-vars
+      panels, // eslint-disable-line no-unused-vars
       className,
       initialPanelId, // eslint-disable-line no-unused-vars
       isVisible, // eslint-disable-line no-unused-vars

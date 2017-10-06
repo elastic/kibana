@@ -10,34 +10,19 @@ import {
   KuiPopover,
 } from '../../../../components';
 
-function convertPanelTreeToMap(panel, map = {}) {
-  if (panel) {
-    map[panel.id] = panel;
+function flattenPanelTree(tree, array = []) {
+  array.push(tree);
 
-    if (panel.items) {
-      panel.items.forEach(item => convertPanelTreeToMap(item.panel, map));
-    }
+  if (tree.items) {
+    tree.items.forEach(item => {
+      if (item.panel) {
+        flattenPanelTree(item.panel, array);
+        item.panel = item.panel.id;
+      }
+    });
   }
 
-  return map;
-}
-
-function extractPreviousIds(panels) {
-  const idToPreviousPanelIdMap = {};
-
-  Object.keys(panels).forEach(panelId => {
-    const panel = panels[panelId];
-    if (Array.isArray(panel.items)) {
-      panel.items.forEach(item => {
-        const isCloseable = Boolean(item.panel);
-        if (isCloseable) {
-          idToPreviousPanelIdMap[item.panel.id] = panel.id;
-        }
-      });
-    }
-  });
-
-  return idToPreviousPanelIdMap;
+  return array;
 }
 
 export default class extends Component {
@@ -124,8 +109,7 @@ export default class extends Component {
       }],
     };
 
-    this.idToPanelMap = convertPanelTreeToMap(panelTree);
-    this.idToPreviousPanelIdMap = extractPreviousIds(this.idToPanelMap);
+    this.panels = flattenPanelTree(panelTree);
   }
 
   onButtonClick() {
@@ -159,8 +143,7 @@ export default class extends Component {
         <KuiContextMenu
           initialPanelId={0}
           isVisible={this.state.isPopoverOpen}
-          idToPanelMap={this.idToPanelMap}
-          idToPreviousPanelIdMap={this.idToPreviousPanelIdMap}
+          panels={this.panels}
         />
       </KuiPopover>
     );
