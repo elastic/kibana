@@ -27,7 +27,7 @@ You can use standard Markdown in here, but you can also access your piped-in dat
 
 #### Enjoy!"`,
   render(domNode, config, handlers) {
-    const html = { __html: md.render(config.content) };
+    const html = { __html: md.render(String(config.content)) };
     const fontStyle = config.font ? config.font.spec : {};
 
     ReactDOM.render((
