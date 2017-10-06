@@ -1,24 +1,20 @@
-import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import TagCloud from 'plugins/tagcloud/tag_cloud';
 import AggConfigResult from 'ui/vis/agg_config_result';
-import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 
 const module = uiModules.get('kibana/tagcloud', ['kibana']);
-module.controller('KbnTagCloudController', function ($scope, $element, Private, getAppState) {
+module.controller('KbnTagCloudController', function ($scope, $element) {
 
   const containerNode = $element[0];
-  const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
   const maxTagCount = 200;
   let truncated = false;
+  let bucketAgg;
 
   const tagCloud = new TagCloud(containerNode);
   tagCloud.on('select', (event) => {
-    const appState = getAppState();
-    const clickHandler = filterBarClickHandler(appState);
-    const aggs = $scope.vis.getAggConfig().getResponseAggs();
-    const aggConfigResult = new AggConfigResult(aggs[0], false, event, event);
-    clickHandler({ point: { aggConfigResult: aggConfigResult } });
+    if (!bucketAgg) return;
+    const aggConfigResult = new AggConfigResult(bucketAgg, false, event, event);
+    $scope.vis.API.events.filter({ point: { aggConfigResult: aggConfigResult } });
     $scope.$apply();
   });
 
@@ -48,28 +44,22 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
     $scope.renderComplete();
   });
 
-  $scope.$watch('esResponse', function (response) {
+  $scope.$watch('esResponse', async function (response) {
 
-    if (!response) {
+    if (!response || !response.tables.length) {
       tagCloud.setData([]);
       return;
     }
 
-    const bucketsAgg = _.first($scope.vis.getAggConfig().bySchemaName.segment);
-    const tagsAggId = _.get(bucketsAgg, 'id');
-    if (!tagsAggId || !response.aggregations) {
-      tagCloud.setData([]);
-      return;
-    }
+    const data = response.tables[0];
+    bucketAgg = data.columns[0].aggConfig;
 
-    const metricsAgg = _.first($scope.vis.getAggConfig().bySchemaName.metric);
-    const buckets = response.aggregations[tagsAggId].buckets;
-
-    const tags = buckets.map((bucket) => {
+    const tags = data.rows.map(row => {
+      const [tag, count] = row;
       return {
-        displayText: bucketsAgg.fieldFormatter()(bucket.key),
-        text: bucket.key,
-        value: getValue(metricsAgg, bucket)
+        displayText: bucketAgg ? bucketAgg.fieldFormatter()(tag) : tag,
+        rawText: tag,
+        value: count
       };
     });
 
@@ -90,18 +80,5 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
   $scope.$watch('resize', () => {
     tagCloud.resize();
   });
-
-  function getValue(metricsAgg, bucket) {
-    let size = metricsAgg.getValue(bucket);
-    if (typeof size !== 'number' || isNaN(size)) {
-      try {
-        size = bucket[1].values[0].value;//lift out first value (e.g. median aggregations return as array)
-      } catch (e) {
-        size = 1;//punt
-      }
-    }
-    return size;
-  }
-
 
 });
