@@ -12,7 +12,25 @@ export default new Type({
       return {
         type: 'render',
         as: 'markdown',
-        value: String(input),
+        value: {
+          content: String(input),
+        },
+      };
+    },
+    datatable: (value) => {
+      return {
+        type: 'datatable',
+        columns: [
+          {
+            name: '_rowId',
+            type: 'number',
+          },
+          {
+            name: 'value',
+            type: 'number',
+          },
+        ],
+        rows: [{ _rowId: 0, value }],
       };
     },
   },
