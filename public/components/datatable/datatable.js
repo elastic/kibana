@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Form, ControlLabel, FormControl } from 'react-bootstrap';
+import { Table } from 'react-bootstrap';
 import PropTypes from 'prop-types';
 import { Paginate } from '../paginate';
 import { PageControls } from '../paginate_controls';
@@ -24,7 +24,7 @@ const getColumnName = col => (typeof col === 'string') ? col : col.name;
 
 const getColumnType = col => col.type || null;
 
-export const Datatable = ({ datatable, perPage, setPerPage }) => (
+export const Datatable = ({ datatable, perPage, paginate }) => (
   <Paginate rows={datatable.rows} perPage={perPage || 10}>
     {({ rows, nextPage, prevPage, setPage, prevPageEnabled, nextPageEnabled, pageNumber, totalPages }) => (
       <div className="canvas__element--datatable" style={{ height: '100%', overflow: 'auto' }}>
@@ -49,25 +49,19 @@ export const Datatable = ({ datatable, perPage, setPerPage }) => (
           </tbody>
         </Table>
 
-        <PageControls
-          prevPage={prevPage}
-          prevPageEnabled={prevPageEnabled}
-          setPage={setPage}
-          pageNumber={pageNumber}
-          totalPages={totalPages}
-          nextPage={nextPage}
-          nextPageEnabled={nextPageEnabled}
-        />
+        {paginate && (
+          <PageControls
+            prevPage={prevPage}
+            prevPageEnabled={prevPageEnabled}
+            setPage={setPage}
+            pageNumber={pageNumber}
+            totalPages={totalPages}
+            nextPage={nextPage}
+            nextPageEnabled={nextPageEnabled}
+          />
+        )}
 
-        <Form inline className="controls--perpage">
-          <ControlLabel>Per Page</ControlLabel>
-          <FormControl componentClass="select" onChange={(ev) => setPerPage(ev.target.value)}>
-            <option value="10">10</option>
-            <option value="25">25</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
-          </FormControl>
-        </Form>
+
       </div>
     )}
   </Paginate>
@@ -75,9 +69,6 @@ export const Datatable = ({ datatable, perPage, setPerPage }) => (
 
 Datatable.propTypes = {
   datatable: PropTypes.object.isRequired,
-  setPerPage: PropTypes.func.isRequired,
-  perPage: PropTypes.oneOfType([
-    PropTypes.number,
-    PropTypes.string,
-  ]),
+  perPage: PropTypes.number,
+  paginate: PropTypes.bool,
 };

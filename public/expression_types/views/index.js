@@ -4,6 +4,7 @@ import { markdown } from './markdown';
 import { plot } from './plot';
 import { pie } from './pie';
 import { render } from './render';
+import { table } from './table';
 import { timefilterControl } from './timefilterControl';
 
 
@@ -14,5 +15,6 @@ export default [
   plot,
   pie,
   render,
+  table,
   timefilterControl,
 ];
