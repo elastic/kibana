@@ -86,9 +86,7 @@ export class DashboardStateManager {
     let differencesFound = false;
     for (let i = 0; i < this.appState.panels.length; i++) {
       const appStatePanel = this.appState.panels[i];
-      const appStatePanelJSON = JSON.stringify(appStatePanel);
-      const storePanelJSON = JSON.stringify(dashboardState.panels[appStatePanel.panelIndex]);
-      if (appStatePanelJSON !== storePanelJSON) {
+      if (!_.isEqual(appStatePanel, dashboardState.panels[appStatePanel.panelIndex])) {
         differencesFound = true;
         break;
       }
