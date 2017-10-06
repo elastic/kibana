@@ -118,16 +118,16 @@ export class ChangeIndexModal extends React.Component {
     const TableComponent = () => (
       <table className="kuiTable kuiVerticalRhythm">
         <thead>
-          <th className="kuiTableHeaderCell" width="300">
+          <th className="kuiTableHeaderCell" style={{ maxWidth: '300px', width: '300px' }}>
             ID
           </th>
-          <th className="kuiTableHeaderCell" width="50">
+          <th className="kuiTableHeaderCell" style={{ maxWidth: '50px', width: '50px' }}>
             Count
           </th>
           <th className="kuiTableHeaderCell">
             Sample of affected objects
           </th>
-          <th className="kuiTableHeaderCell" width="200">
+          <th className="kuiTableHeaderCell" style={{ maxWidth: '200px', width: '200px' }}>
             New index pattern
           </th>
         </thead>
