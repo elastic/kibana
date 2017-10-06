@@ -2,6 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 import ReactGridLayout from 'react-grid-layout';
+import classNames from 'classnames';
+
 import { PanelUtils } from '../panel/panel_utils';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { DashboardPanelContainer } from '../panel/dashboard_panel_container';
@@ -16,22 +18,18 @@ function ResponsiveGrid({ size, isViewMode, layout, onLayoutChange, children, hi
   // the grid to re-render, but when a panel is expanded, the size will be 0. Minimizing the panel won't cause the
   // grid to re-render so it'll show a grid with a width of 0.
   lastValidGridSize = size.width > 0 ? size.width : lastValidGridSize;
-  let classNames = '';
-
-  if (hidden) {
-    classNames = 'layout-hidden';
-  } else if (isViewMode) {
-    classNames = 'layout-view';
-  } else {
-    classNames = 'layout-edit';
-  }
+  const classes = classNames({
+    'layout-hidden': hidden,
+    'layout-view': !hidden && isViewMode,
+    'layout-edit': !hidden && !isViewMode,
+  });
 
   // We can't take advantage of isDraggable or isResizable due to performance concerns:
   // https://github.com/STRML/react-grid-layout/issues/240
   return (
     <ReactGridLayout
       width={lastValidGridSize}
-      className={classNames}
+      className={classes}
       isDraggable={true}
       isResizable={true}
       margin={[0, 0]}
