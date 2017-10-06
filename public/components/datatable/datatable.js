@@ -27,27 +27,29 @@ const getColumnType = col => col.type || null;
 export const Datatable = ({ datatable, perPage, paginate }) => (
   <Paginate rows={datatable.rows} perPage={perPage || 10}>
     {({ rows, nextPage, prevPage, setPage, prevPageEnabled, nextPageEnabled, pageNumber, totalPages }) => (
-      <div className="canvas__element--datatable" style={{ height: '100%', overflow: 'auto' }}>
-        <Table condensed>
-          <thead>
-            <tr>
-              {datatable.columns.map(col => (
-                <th key={`header-${getColumnName(col)}`}>
-                  {getColumnName(col)} <small className="muted">{getIcon(getColumnType(col))}</small>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row, i) => (
-              <tr key={`row-${row._rowId || i}`}>
+      <div className="canvas__datatable">
+        <div style={{ flexGrow: 1 }}>
+          <Table condensed>
+            <thead>
+              <tr>
                 {datatable.columns.map(col => (
-                  <td key={`row-${row._rowId || i}-${getColumnName(col)}`}>{row[getColumnName(col)]}</td>
+                  <th key={`header-${getColumnName(col)}`}>
+                    {getColumnName(col)} <small className="muted">{getIcon(getColumnType(col))}</small>
+                  </th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </Table>
+            </thead>
+            <tbody>
+              {rows.map((row, i) => (
+                <tr key={`row-${row._rowId || i}`}>
+                  {datatable.columns.map(col => (
+                    <td key={`row-${row._rowId || i}-${getColumnName(col)}`}>{row[getColumnName(col)]}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
 
         {paginate && (
           <PageControls

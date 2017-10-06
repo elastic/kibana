@@ -12,7 +12,10 @@ export default new Element('table', {
   render(domNode, config, handlers) {
     const { datatable, paginate, perPage, font } = config;
     ReactDOM.render((
-      <div style={font.spec}>
+      <div style={{
+        ...font.spec,
+        height: '100%',
+      }}>
         <Datatable
           datatable={datatable}
           perPage={perPage}
