@@ -1,6 +1,6 @@
 import React from 'react';
 import sinon from 'sinon';
-import { render } from 'enzyme';
+import { render, shallow } from 'enzyme';
 import { requiredProps } from '../../../test/required_props';
 
 import {
@@ -20,6 +20,19 @@ test('renders KuiGalleryItem with onClick', () => {
 test('renders KuiGalleryItem without href and onClick', () => {
   const component = <KuiGalleryItem {...requiredProps}>children</KuiGalleryItem>;
   expect(render(component)).toMatchSnapshot();
+});
+
+test('onClick on KuiGalleryItem is not triggered without click', () => {
+  const onClickSpy = sinon.spy();
+  render(<KuiGalleryItem onClick={onClickSpy} {...requiredProps}>children</KuiGalleryItem>);
+  sinon.assert.notCalled(onClickSpy);
+});
+
+test('onClick on KuiGalleryItem is triggered when clicked', () => {
+  const onClickSpy = sinon.spy();
+  const element = shallow(<KuiGalleryItem onClick={onClickSpy} {...requiredProps}>children</KuiGalleryItem>);
+  element.simulate('click');
+  sinon.assert.calledOnce(onClickSpy);
 });
 
 test('KuiGalleryItem will throw when specified href and onClick', () => {
