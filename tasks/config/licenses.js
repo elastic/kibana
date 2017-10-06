@@ -46,6 +46,7 @@ module.exports = function () {
         'css-stringify@1.0.5': ['MIT'],
         'css@1.0.8': ['MIT'],
         'delegate@3.0.1': ['MIT'],
+        'elasticsearch-browser@13.0.1': ['Apache-2.0'],
         'flatten@0.0.1': ['MIT'],
         'indexof@0.0.1': ['MIT'],
         'jsonify@0.0.0': ['Public domain'],

@@ -263,7 +263,7 @@
     "karma-safari-launcher": "1.0.0",
     "keymirror": "0.1.1",
     "leadfoot": "1.7.1",
-    "license-checker": "5.1.2",
+    "license-checker": "14.0.0",
     "load-grunt-config": "0.19.2",
     "makelogs": "4.0.2",
     "marked-text-renderer": "0.1.0",
