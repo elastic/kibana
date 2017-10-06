@@ -1,12 +1,13 @@
-/* eslint-disable */
 import { connect } from 'react-redux';
-import App from './app.component';
+import { App as AppComponent } from './app.component';
 
-export default connect(
+const App = connect(
   state => {
     return {
       version: state.app.version,
       sections: state.app.config.items,
-    }
+    };
   }
-)(App);
+)(AppComponent);
+
+export { App };

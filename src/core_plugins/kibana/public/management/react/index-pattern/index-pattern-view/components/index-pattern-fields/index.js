@@ -1,2 +1,2 @@
-import IndexPatternFields from './index-pattern-fields.container';
-export default IndexPatternFields;
+import { IndexPatternFields } from './index-pattern-fields.container';
+export { IndexPatternFields };

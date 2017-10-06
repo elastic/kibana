@@ -8,6 +8,7 @@ import {
 
 const IndexPatternTimeFields = ({
   timeFields,
+  pattern,
   selectTimeField,
   fetchTimeFields,
 }) => {
@@ -32,6 +33,6 @@ const IndexPatternTimeFields = ({
       </KuiFlexItem>
     </KuiFlexGroup>
   );
-}
+};
 
-export default IndexPatternTimeFields;
+export { IndexPatternTimeFields };

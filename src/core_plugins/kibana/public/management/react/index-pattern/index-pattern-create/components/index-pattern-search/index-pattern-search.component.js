@@ -33,6 +33,6 @@ const IndexPatternSearch = ({
       </KuiFlexGroup>
     </KuiFormRow>
   );
-}
+};
 
-export default IndexPatternSearch;
+export { IndexPatternSearch };

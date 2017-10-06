@@ -1,5 +1,4 @@
-/* eslint-disable */
-export default {
+const globals = {
   es: undefined,
   indexPatterns: undefined,
   config: undefined,
@@ -7,3 +6,5 @@ export default {
   $http: undefined,
   $rootScope: undefined,
 };
+
+export { globals };

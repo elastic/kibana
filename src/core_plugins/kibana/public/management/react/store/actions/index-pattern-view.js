@@ -1,12 +1,11 @@
 import { createAction } from 'redux-actions';
 import { createThunk } from 'redux-thunks';
-import { IndexPatternsApiClientProvider } from 'ui/index_patterns';
-import { $http, config, es, indexPatterns, kbnUrl, $rootScope } from '../../globals';
+import { globals } from '../../globals';
 
+export const fetchedIndexPattern = createAction('FETCHED_INDEX_PATTERN', indexPattern => ({ indexPattern }));
 export const fetchIndexPattern = createThunk('FETCH_INDEX_PATTERN',
   async ({ dispatch }, pattern) => {
-    const client = new IndexPatternsApiClientProvider($http);
-    const rawIndexPattern = await es.search({
+    const rawIndexPattern = await globals.es.search({
       index: '.kibana',
       body: {
         query: {
@@ -36,7 +35,7 @@ export const fetchIndexPattern = createThunk('FETCH_INDEX_PATTERN',
     const details = source['index-pattern'];
     const timeFieldName = details.timeFieldName;
     const fields = details.fields ? JSON.parse(details.fields) : [];
-    const isDefault = id === config.get('defaultIndex');
+    const isDefault = id === globals.config.get('defaultIndex');
     const indexPattern = {
       pattern,
       fields,
@@ -50,27 +49,25 @@ export const fetchIndexPattern = createThunk('FETCH_INDEX_PATTERN',
 
 export const deleteIndexPattern = createThunk('DELETE_INDEX_PATTERN',
   async ({ dispatch }, id) => {
-    const indexPattern = await indexPatterns.get(id);
+    const indexPattern = await globals.indexPatterns.get(id);
     await indexPattern.destroy();
-    kbnUrl.change('/management/kibana/indices');
-    $rootScope.$apply();
+    globals.kbnUrl.change('/management/kibana/indices');
+    globals.$rootScope.$apply();
   }
 );
 
 export const refreshFields = createThunk('REFRESH_FIELDS',
   async ({ dispatch }, id, pattern) => {
-    const indexPattern = await indexPatterns.get(id);
+    const indexPattern = await globals.indexPatterns.get(id);
     await indexPattern.refreshFields();
-    dispatch(fetchIndexPattern(pattern))
-  }
-);
-
-export const setDefaultIndexPattern = createThunk('SET_DEFAULT_INDEX_PATTERN',
-  async ({ dispatch }, id) => {
-    config.set('defaultIndex', id);
-    dispatch(setAsDefaultIndexPattern());
+    dispatch(fetchIndexPattern(pattern));
   }
 );
 
 export const setAsDefaultIndexPattern = createAction('SET_AS_DEFAULT_INDEX_PATTERN');
-export const fetchedIndexPattern = createAction('FETCHED_INDEX_PATTERN', indexPattern => ({ indexPattern }));
+export const setDefaultIndexPattern = createThunk('SET_DEFAULT_INDEX_PATTERN',
+  async ({ dispatch }, id) => {
+    globals.config.set('defaultIndex', id);
+    dispatch(setAsDefaultIndexPattern());
+  }
+);

@@ -1,6 +1,5 @@
-/* eslint-disable */
 import { connect } from 'react-redux';
-import IndexPatternTimeFields from './index-pattern-time-fields.component';
+import { IndexPatternTimeFields as IndexPatternTimeFieldsComponent } from './index-pattern-time-fields.component';
 
 import {
   fetchTimeFields,
@@ -9,9 +8,17 @@ import {
 
 import {
   getTimeFields,
+  getPattern,
 } from 'plugins/kibana/management/react/store/reducers/index-pattern-creation';
 
-export default connect(
-  state => ({ ...getTimeFields(state) }),
+const IndexPatternTimeFields = connect(
+  state => {
+    return {
+      ...getTimeFields(state),
+      pattern: getPattern(state),
+    };
+  },
   { fetchTimeFields, selectTimeField },
-)(IndexPatternTimeFields);
+)(IndexPatternTimeFieldsComponent);
+
+export { IndexPatternTimeFields };

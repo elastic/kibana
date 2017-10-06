@@ -2,29 +2,43 @@ import React, { Component } from 'react';
 import { get, sortBy as sortByLodash, chunk } from 'lodash';
 import { set } from 'object-path-immutable';
 
-export const wrapWithTableProps = ({ page, perPage, filterBy = {}, filters, sortBy, sortAsc, itemsKey = 'items' }) => {
+export const wrapWithTableProps = ({
+  page,
+  perPage,
+  perPageIncrements = [5, 10, 20, 50],
+  filterBy = {},
+  filters,
+  sortBy,
+  sortAsc,
+  itemsKey = 'items'
+}) => {
   return BaseComponent => class extends Component {
     constructor(props) {
       super(props);
       this.state = {
         page,
         perPage,
+        perPageToggleOpened: false,
         filterBy,
         sortBy,
         sortAsc,
       };
     }
 
-    setPage = (page) => {
-      this.setState({ page });
-    }
-
-    setPerPage = (perPage) => {
-      this.setState({ perPage });
-    }
-
+    setPage = (page) => this.setState({ page })
+    setPerPage = (perPage) => this.setState({ perPage })
+    openPerPageToggle = () => this.setState({ perPageToggleOpened: true })
+    closePerPageToggle = () => this.setState({ perPageToggleOpened: false })
     setFilterBy = (filterBy) => {
-      this.setState({ filterBy });
+      this.setState(state => {
+        return {
+          ...state,
+          filterBy: {
+            ...state.filterBy,
+            ...filterBy,
+          }
+        };
+      });
     }
 
     setSort = (sortBy) => {
@@ -70,6 +84,8 @@ export const wrapWithTableProps = ({ page, perPage, filterBy = {}, filters, sort
       const tableProps = {
         page: this.state.page,
         perPage: this.state.perPage,
+        perPageIncrements,
+        perPageToggleOpened: this.state.perPageToggleOpened,
         sortBy: this.state.sortBy,
         sortAsc: this.state.sortAsc,
         numOfPages,
@@ -77,11 +93,13 @@ export const wrapWithTableProps = ({ page, perPage, filterBy = {}, filters, sort
         setPerPage: this.setPerPage,
         setFilterBy: this.setFilterBy,
         setSort: this.setSort,
+        openPerPageToggle: this.openPerPageToggle,
+        closePerPageToggle: this.closePerPageToggle,
       };
 
       const tablePropsWithItems = set(tableProps, itemsKey, items);
 
-      return <BaseComponent {...this.props} {...tablePropsWithItems} />
+      return <BaseComponent {...this.props} {...tablePropsWithItems} />;
     }
-  }
+  };
 };

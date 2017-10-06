@@ -1,10 +1,6 @@
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
 import { compose } from 'recompose';
-import IndexPatternFields from './index-pattern-fields.component';
-
-import { get, sortBy as sortByLodash, chunk } from 'lodash';
-import React from 'react';
+import { IndexPatternFields as IndexPatternFieldsComponent } from './index-pattern-fields.component';
 
 import {
   wrapWithTableProps,
@@ -18,7 +14,7 @@ import {
   getIndexPatternView,
 } from 'plugins/kibana/management/react/reducers';
 
-export default compose(
+const IndexPatternFields = compose(
   connect(
     state => ({ ...getIndexPatternView(state) }),
   ),
@@ -33,4 +29,6 @@ export default compose(
     },
     itemsKey: getPathToFields(),
   })
-)(IndexPatternFields);
+)(IndexPatternFieldsComponent);
+
+export { IndexPatternFields };

@@ -1,4 +1,3 @@
-/* eslint-disable */
 import React, { Component } from 'react';
 import {
   KuiFieldText,
@@ -35,14 +34,14 @@ class InputPatternInputField extends Component {
   }
 
   render() {
-    const { children, value, onChange, ...rest } = this.props;
+    const { children, ...rest } = this.props;
 
     return (
       <KuiFieldText
+        {...rest}
         value={this.state.value}
         inputRef={(input) => { this.input = input; }}
         onChange={this.onChange}
-        {...rest}
       >
         {children}
       </KuiFieldText>

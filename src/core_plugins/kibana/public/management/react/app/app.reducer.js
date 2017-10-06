@@ -3,7 +3,7 @@ import {
   INIT_DATA
 } from './app.actions';
 
-export default function app(state = {}, action) {
+export function app(state = {}, action) {
   switch (action.type) {
     case INIT_DATA:
       return Object.assign({}, state, {

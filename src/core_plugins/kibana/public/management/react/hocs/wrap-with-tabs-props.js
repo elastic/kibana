@@ -1,13 +1,21 @@
-import React from 'react';
+import React, { Component } from 'react';
 
-export const wrapWithTabsProps = ({ defaults, getState, setState}) => {
-  return (BaseComponent) => (props) => {
-    const { selectedTab = defaults.selectedTab } = getState();
-    const tabsProps = {
-      selectedTab: selectedTab,
-      changeTab: tab => setState(tab),
-    };
+export const wrapWithTabsProps = ({ defaults }) => {
+  return (BaseComponent) => class extends Component {
+    constructor(props) {
+      super(props);
 
-    return <BaseComponent {...props} {...tabsProps}/>
-  }
+      this.state = {
+        selectedTab: defaults.selectedTab,
+      };
+    }
+
+    changeTab = tab => this.setState({ selectedTab: tab })
+
+    render() {
+      const { selectedTab } = this.state;
+
+      return <BaseComponent {...this.props} selectedTab={selectedTab} changeTab={this.changeTab}/>;
+    }
+  };
 };

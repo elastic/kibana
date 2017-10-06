@@ -1,5 +1,4 @@
 import { handleActions } from 'redux-actions';
-import { set } from 'object-path-immutable';
 
 import {
   fetchedIndexPatterns,
@@ -14,7 +13,7 @@ const defaultState = {
   listTable: {},
 };
 
-export default handleActions({
+export const indexPatternList = handleActions({
   [fetchedIndexPatterns](state, { payload }) {
     const { indexPatterns } = payload;
 

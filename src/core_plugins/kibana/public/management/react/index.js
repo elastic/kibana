@@ -1,32 +1,28 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { render } from 'react-dom';
-import { connect, Provider } from 'react-redux';
-import { createStore, compose, applyMiddleware } from 'redux';
-import createHistory from 'history/lib/createHashHistory';
-import { rootReducer } from './reducers';
+import { Provider } from 'react-redux';
 import { initData } from './app/app.actions';
-import globals from './globals';
-import store from './store';
+import { globals } from './globals';
+import { store } from './store';
 
-import App from './app/index';
-import IndexPatternRedirect from './index-pattern';
+import { App } from './app/index';
 import {
   IndexPatternCreate,
   IndexPatternList,
   IndexPatternView,
- } from './index-pattern';
+} from './index-pattern';
 
- import {
-   fetchIndexPatterns,
- } from './store/actions/index-pattern-list';
+import {
+  fetchIndexPatterns,
+} from './store/actions/index-pattern-list';
 
- import {
-   fetchIndices,
- } from './store/actions/index-pattern-creation';
+import {
+  fetchIndices,
+} from './store/actions/index-pattern-creation';
 
- import {
-   fetchIndexPattern,
- } from './store/actions/index-pattern-view';
+import {
+  fetchIndexPattern,
+} from './store/actions/index-pattern-view';
 
 const renderPage = (page, targetId) => {
   render(
@@ -71,4 +67,4 @@ const ReactApp = {
   }
 };
 
-export default ReactApp;
+export { ReactApp };

@@ -1,3 +1,2 @@
-/* eslint-disable */
-import App from './app.container';
-export default App;
+import { App } from './app.container';
+export { App };

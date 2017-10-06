@@ -6,36 +6,17 @@ import {
   KuiPageContentHeaderSection,
   KuiTitle,
   KuiText,
-  KuiLink,
-  KuiBadge,
-  KuiForm,
-  KuiFormRow,
-  KuiFieldText,
-  KuiSwitch,
-  KuiCheckbox,
-  KuiSelect,
   KuiButtonIcon,
   KuiTabs,
   KuiTab,
-  KuiTable,
-  KuiTableRow,
-  KuiTableRowCell,
-  KuiTableHeaderCell,
-  KuiTableHeaderCellCheckbox,
-  KuiTableBody,
-  KuiTableHeader,
-  KuiButton,
   KuiButtonEmpty,
   KuiFlexGroup,
   KuiFlexItem,
-  KuiPagination,
-  KuiHorizontalRule,
   KuiConfirmModal,
   KuiModalOverlay,
 } from 'ui_framework/components';
 
-import IndexPatternFields from './components/index-pattern-fields';
-
+import { IndexPatternFields } from './components/index-pattern-fields';
 
 const IndexPatternView = ({
   indexPattern,
@@ -48,7 +29,6 @@ const IndexPatternView = ({
   deleteIndexPattern,
   setDefaultIndexPattern,
 }) => {
-  // console.log('IndexPatternView', indexPattern, selectedTab);
   if (indexPattern === undefined || indexPattern.fields === undefined) {
     return null;
   }
@@ -63,7 +43,7 @@ const IndexPatternView = ({
 
   let tabContent = null;
   if (selectedTab === 'fields') {
-    tabContent = <IndexPatternFields/>
+    tabContent = <IndexPatternFields/>;
   }
 
   return (
@@ -125,9 +105,9 @@ const IndexPatternView = ({
         </KuiText>
         <KuiText style={{ maxWidth: '75%' }}>
           <p>
-            This page lists every field in the <strong>{pattern}</strong> index and the field's associated
+            This page lists every field in the <strong>{pattern}</strong> index and the field&apos;s associated
             core type as recorded by Elasticsearch. While this list allows you to view the core type of each
-            field, changing field types must be done using Elasticsearch's Mapping API.
+            field, changing field types must be done using Elasticsearch&apos;s Mapping API.
           </p>
         </KuiText>
         <KuiTabs>
@@ -153,7 +133,7 @@ const IndexPatternView = ({
         {tabContent}
       </KuiPageContentBody>
     </KuiPageContent>
-  )
+  );
 };
 
-export default IndexPatternView;
+export { IndexPatternView };

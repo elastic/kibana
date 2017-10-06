@@ -2,10 +2,6 @@ import React, { Component } from 'react';
 import {
   KuiPage,
   KuiPageBody,
-  KuiPageContent,
-  KuiPageContentBody,
-  KuiPageContentHeader,
-  KuiPageContentHeaderSection,
   KuiPageHeader,
   KuiPageHeaderSection,
   KuiPageSideBar,
@@ -71,7 +67,7 @@ class SideBar extends Component {
   }
 }
 
-const App = ({ version, sections, children }) => {
+const App = ({ /*version,*/ sections, children }) => {
   return (
     <KuiPage>
       <KuiPageHeader>
@@ -91,7 +87,7 @@ const App = ({ version, sections, children }) => {
         {children}
       </KuiPageBody>
     </KuiPage>
-  )
+  );
 };
 
-export default App;
+export { App };

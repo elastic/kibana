@@ -1,3 +1,2 @@
-/* eslint-disable */
-import IndexPatternResults from './index-pattern-results.container';
-export default IndexPatternResults;
+import { IndexPatternResults } from './index-pattern-results.container';
+export { IndexPatternResults };

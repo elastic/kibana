@@ -1,4 +1,4 @@
-import { indexPatterns, es, config, kbnUrl, $rootScope } from '../../globals';
+import { globals } from '../../globals';
 import { sortBy, endsWith, startsWith, uniq } from 'lodash';
 import { createAction } from 'redux-actions';
 import { createThunk } from 'redux-thunks';
@@ -8,9 +8,10 @@ import {
   getSelectedTimeField,
 } from '../reducers/index-pattern-creation';
 
+export const fetchedTimeFields = createAction('FETCHED_TIME_FIELDS', timeFields => ({ timeFields }));
 export const fetchTimeFields = createThunk('FETCH_TIME_FIELDS',
   async ({ dispatch }, pattern) => {
-    const fields = await indexPatterns.fieldsFetcher.fetchForWildcard(pattern);
+    const fields = await globals.indexPatterns.fieldsFetcher.fetchForWildcard(pattern);
     const dateFields = fields.filter(field => field.type === 'date');
     const timeFields = [
       { value: '', text: 'None' },
@@ -23,7 +24,6 @@ export const fetchTimeFields = createThunk('FETCH_TIME_FIELDS',
   }
 );
 
-export const fetchedTimeFields = createAction('FETCHED_TIME_FIELDS', timeFields => ({ timeFields }));
 export const selectTimeField = createAction('SELECT_TIME_FIELD', timeField => ({ timeField }));
 
 export const creatingIndexPattern = createAction('CREATING_INDEX_PATTERN');
@@ -62,7 +62,7 @@ export const createIndexPattern = createThunk('CREATE_INDEX_PATTERN',
     const timeFieldName = getSelectedTimeField(state);
 
     dispatch(creatingIndexPattern);
-    const indexPattern = await indexPatterns.get();
+    const indexPattern = await globals.indexPatterns.get();
     Object.assign(indexPattern, {
       title: pattern,
       timeFieldName,
@@ -70,16 +70,14 @@ export const createIndexPattern = createThunk('CREATE_INDEX_PATTERN',
 
     const createdId = await indexPattern.create();
 
-    console.log('createIndexPattern()', createdId);
-
-    if (!config.get('defaultIndex')) {
-      config.set('defaultIndex', createdId);
+    if (!globals.config.get('defaultIndex')) {
+      globals.config.set('defaultIndex', createdId);
     }
 
-    indexPatterns.cache.clear(createdId);
+    globals.indexPatterns.cache.clear(createdId);
     dispatch(createdIndexPattern);
-    kbnUrl.change(`/management/kibana/indices`);
-    $rootScope.$apply();
+    globals.kbnUrl.change(`/management/kibana/indices`);
+    globals.$rootScope.$apply();
   }
 );
 
@@ -103,7 +101,7 @@ async function getIndices(pattern, limit = MAX_NUMBER_OF_MATCHING_INDICES) {
     }
   };
 
-  const response = await es.search(params);
+  const response = await globals.es.search(params);
   if (!response || response.error || !response.aggregations) {
     return [];
   }

@@ -1,4 +1,3 @@
-/* eslint-disable */
 import React from 'react';
 import {
   KuiPageContent,
@@ -15,9 +14,9 @@ import {
   KuiFlexItem,
 } from 'ui_framework/components';
 
-import IndexPatternSearch from './components/index-pattern-search';
-import IndexPatternTimeFields from './components/index-pattern-time-fields';
-import IndexPatternResults from './components/index-pattern-results';
+import { IndexPatternSearch } from './components/index-pattern-search';
+import { IndexPatternTimeFields } from './components/index-pattern-time-fields';
+import { IndexPatternResults } from './components/index-pattern-results';
 
 const IndexPatternCreate = ({
   hasExactMatches,
@@ -82,7 +81,7 @@ const IndexPatternCreate = ({
         </KuiFlexGroup>
       </KuiPageContentBody>
     </KuiPageContent>
-  )
+  );
 };
 
-export default IndexPatternCreate;
+export { IndexPatternCreate };

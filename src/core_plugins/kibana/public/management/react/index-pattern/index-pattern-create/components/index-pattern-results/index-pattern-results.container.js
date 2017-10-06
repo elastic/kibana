@@ -5,18 +5,13 @@ import {
   wrapWithTableProps,
 } from 'plugins/kibana/management/react/hocs';
 
-import IndexPatternResults from './index-pattern-results.component';
+import { IndexPatternResults as IndexPatternResultsComponent } from './index-pattern-results.component';
 
 import {
-  getIsIncludingSystemIndices,
   getResults,
 } from 'plugins/kibana/management/react/store/reducers/index-pattern-creation';
 
-import {
-  getIndexPatternCreate,
-} from 'plugins/kibana/management/react/reducers';
-
-export default compose(
+const IndexPatternResults = compose(
   connect(
     (state, ownProps) => {
       const results = getResults(state);
@@ -39,4 +34,6 @@ export default compose(
     sortAsc: true,
     itemsKey: 'indices',
   })
-)(IndexPatternResults);
+)(IndexPatternResultsComponent);
+
+export { IndexPatternResults };

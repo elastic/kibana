@@ -187,4 +187,4 @@ const IndexPatternList = ({
   )
 };
 
-export default IndexPatternList;
+export { IndexPatternList };

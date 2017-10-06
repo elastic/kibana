@@ -1,20 +1,20 @@
-/* eslint-disable */
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
-import IndexPatternSearch from './index-pattern-search.component';
+import { IndexPatternSearch as IndexPatternSearchComponent } from './index-pattern-search.component';
 
 import {
   fetchIndices,
 } from 'plugins/kibana/management/react/store/actions/index-pattern-creation';
 
 import {
-  getIndexPatternCreate,
-} from 'plugins/kibana/management/react/reducers';
+  getResults,
+} from 'plugins/kibana/management/react/store/reducers/index-pattern-creation';
 
-export default connect(
+const IndexPatternSearch = connect(
   state => {
-    const { hasExactMatches } = getIndexPatternCreate(state).results;
+    const { hasExactMatches } = getResults(state);
     return { hasExactMatches };
   },
   { fetchIndices },
-)(IndexPatternSearch);
+)(IndexPatternSearchComponent);
+
+export { IndexPatternSearch };

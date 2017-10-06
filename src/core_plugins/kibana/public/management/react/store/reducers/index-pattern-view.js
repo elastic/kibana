@@ -1,5 +1,4 @@
 import { handleActions } from 'redux-actions';
-import { set } from 'object-path-immutable';
 
 import {
   fetchedIndexPattern,
@@ -22,7 +21,7 @@ const defaultState = {
   tabs: {},
 };
 
-export default handleActions({
+export const indexPatternView = handleActions({
   [fetchedIndexPattern](state, { payload: { indexPattern } }) {
     return {
       ...state,
@@ -36,7 +35,7 @@ export default handleActions({
         ...state.indexPattern,
         isDefault: true,
       }
-    }
+    };
   }
 }, defaultState);
 

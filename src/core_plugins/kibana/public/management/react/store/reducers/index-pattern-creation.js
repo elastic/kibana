@@ -1,20 +1,15 @@
 import { handleActions } from 'redux-actions';
-import { createSelector } from 'reselect';
-import { chunk, sortBy as sortByLodash, pick } from 'lodash';
-import { set } from 'object-path-immutable';
 
 import {
   selectTimeField,
   fetchedTimeFields,
   fetchedIndices,
-  includeSystemIndices,
-  excludeSystemIndices,
   creatingIndexPattern,
   createdIndexPattern,
 } from '../actions/index-pattern-creation';
 
 import {
-  getIndexPatternCreate,
+  getIndexPatternCreation,
 } from '../../reducers';
 
 const defaultState = {
@@ -29,9 +24,9 @@ const defaultState = {
     pattern: undefined,
     hasExactMatches: false,
   }
-}
+};
 
-export default handleActions({
+export const indexPatternCreation = handleActions({
   [selectTimeField](state, { payload }) {
     const { timeFields } = payload;
 
@@ -78,13 +73,13 @@ export default handleActions({
       },
     };
   },
-  [creatingIndexPattern](state, action) {
+  [creatingIndexPattern](state) {
     return {
       ...state,
       isCreating: true,
     };
   },
-  [createdIndexPattern](state, action) {
+  [createdIndexPattern](state) {
     return {
       ...state,
       isCreating: false,
@@ -92,9 +87,9 @@ export default handleActions({
   },
 }, defaultState);
 
-export const getPattern = state => getIndexPatternCreate(state).results.pattern;
-export const getSelectedTimeField = state => getIndexPatternCreate(state).timeFields.selectedTimeField;
-export const getTimeFields = state => getIndexPatternCreate(state).timeFields;
+export const getPattern = state => getIndexPatternCreation(state).results.pattern;
+export const getSelectedTimeField = state => getIndexPatternCreation(state).timeFields.selectedTimeField;
+export const getTimeFields = state => getIndexPatternCreation(state).timeFields;
 export const getCreation = state => {
   const {
     isIncludingSystemIndices,
@@ -102,8 +97,8 @@ export const getCreation = state => {
     results: {
       hasExactMatches,
     },
-  } = getIndexPatternCreate(state);
+  } = getIndexPatternCreation(state);
   return { isCreating, isIncludingSystemIndices, hasExactMatches };
 };
-export const getIsIncludingSystemIndices = state => getIndexPatternCreate(state).isIncludingSystemIndices;
-export const getResults = state => getIndexPatternCreate(state).results;
+export const getIsIncludingSystemIndices = state => getIndexPatternCreation(state).isIncludingSystemIndices;
+export const getResults = state => getIndexPatternCreation(state).results;

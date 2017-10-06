@@ -10,7 +10,7 @@ import uiRoutes from 'ui/routes';
 import { management } from 'ui/management';
 import 'ui/kbn_top_nav';
 
-import ReactApp from './react';
+import { ReactApp } from './react';
 import {
   fetchIndexPatterns,
 } from './react/store/actions/index-pattern-list';

@@ -1,7 +1,6 @@
 import { connect } from 'react-redux';
-import { omit } from 'lodash';
 import { compose } from 'recompose';
-import IndexPatternCreate from './index-pattern-create.component';
+import { IndexPatternCreate as IndexPatternCreateComponent } from './index-pattern-create.component';
 
 import {
   wrapWithProps,
@@ -15,7 +14,7 @@ import {
   getCreation,
 } from 'plugins/kibana/management/react/store/reducers/index-pattern-creation';
 
-export default compose(
+const IndexPatternCreate = compose(
   connect(
     state => ({ ...getCreation(state) }),
     { createIndexPattern },
@@ -29,4 +28,6 @@ export default compose(
       excludeSystemIndices: () => ({ isIncludingSystemIndices: false }),
     }
   }),
-)(IndexPatternCreate);
+)(IndexPatternCreateComponent);
+
+export { IndexPatternCreate };

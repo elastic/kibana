@@ -1,7 +1,6 @@
 import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
 import { compose } from 'recompose';
-import IndexPatternList from './index-pattern-list.component';
+import { IndexPatternList as IndexPatternListComponent } from './index-pattern-list.component';
 
 import {
   wrapWithTableProps,
@@ -12,15 +11,10 @@ import {
 } from 'plugins/kibana/management/react/store/actions/index-pattern-list';
 
 import {
-  getPathToIndexPatterns,
-  getPathToListTable,
-} from 'plugins/kibana/management/react/store/reducers/index-pattern-list';
-
-import {
   getIndexPatternList,
 } from 'plugins/kibana/management/react/reducers';
 
-export default compose(
+const IndexPatternList = compose(
   connect(
     state => ({ ...getIndexPatternList(state) }),
     { fetchIndexPatterns }
@@ -34,4 +28,6 @@ export default compose(
     perPage: 10,
     page: 0,
   })
-)(IndexPatternList);
+)(IndexPatternListComponent);
+
+export { IndexPatternList };

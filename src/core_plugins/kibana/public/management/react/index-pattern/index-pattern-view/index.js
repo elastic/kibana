@@ -1,2 +1,2 @@
-import IndexPatternView from './index-pattern-view.container';
-export default IndexPatternView;
+import { IndexPatternView } from './index-pattern-view.container';
+export { IndexPatternView };

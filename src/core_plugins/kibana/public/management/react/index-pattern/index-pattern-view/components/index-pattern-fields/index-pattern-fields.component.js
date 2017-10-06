@@ -3,27 +3,17 @@ import {
   KuiPageContent,
   KuiPageContentBody,
   KuiPageContentHeader,
-  KuiPageContentHeaderSection,
-  KuiTitle,
   KuiText,
-  KuiLink,
-  KuiBadge,
   KuiForm,
   KuiFormRow,
   KuiFieldText,
-  KuiSwitch,
-  KuiCheckbox,
   KuiSelect,
-  KuiIcon,
   KuiTable,
   KuiTableRow,
   KuiTableRowCell,
   KuiTableHeaderCell,
-  KuiTableHeaderCellCheckbox,
   KuiTableBody,
   KuiTableHeader,
-  KuiButton,
-  KuiButtonEmpty,
   KuiFlexGroup,
   KuiFlexItem,
   KuiPagination,
@@ -35,7 +25,6 @@ import { getKbnTypeNames } from 'src/utils/kbn_field_types';
 const IndexPatternFields = ({
   indexPattern: {
     fields,
-    pattern,
   },
   numOfPages,
   perPage,
@@ -95,7 +84,7 @@ const IndexPatternFields = ({
                   onChange={(e) => setFilterBy({ name: e.target.value })}
                 />
               </KuiFlexItem>
-               <KuiFlexItem>
+              <KuiFlexItem>
                 <KuiSelect
                   onChange={(e) => setFilterBy({ type: e.target.value }, fields)}
                   value={filterBy ? filterBy.type : null}
@@ -173,7 +162,7 @@ const IndexPatternFields = ({
         </KuiFlexGroup>
       </KuiPageContentBody>
     </KuiPageContent>
-  )
+  );
 };
 
-export default IndexPatternFields;
+export { IndexPatternFields };

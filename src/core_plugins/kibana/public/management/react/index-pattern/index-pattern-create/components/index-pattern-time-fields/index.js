@@ -1,3 +1,2 @@
-/* eslint-disable */
-import IndexPatternTimeFields from './index-pattern-time-fields.container';
-export default IndexPatternTimeFields;
+import { IndexPatternTimeFields } from './index-pattern-time-fields.container';
+export { IndexPatternTimeFields };

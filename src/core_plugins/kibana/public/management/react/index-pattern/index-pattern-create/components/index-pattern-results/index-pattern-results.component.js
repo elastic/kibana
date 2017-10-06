@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   KuiTitle,
-  KuiIcon,
   KuiFlexGroup,
   KuiFlexItem,
   KuiText,
@@ -12,7 +11,6 @@ import {
   KuiTableHeaderCell,
   KuiTableBody,
   KuiTableHeader,
-  KuiButtonEmpty,
   KuiHorizontalRule,
   KuiPagination,
 } from 'ui_framework/components';
@@ -52,41 +50,19 @@ const IndexPatternResults = ({
       </KuiTitle>
       <KuiTable className="kuiVerticalRhythm">
         <KuiTableHeader>
-          <KuiTableHeaderCell>
-            <KuiButtonEmpty
-              onClick={() => setSort('name')}
-            >
-              Name
-              { sortBy === 'name'
-                ?
-                  <span>
-                    &nbsp;
-                    <KuiIcon
-                      type={sortAsc ? 'arrowUp' : 'arrowDown'}
-                      size="medium"
-                    />
-                  </span>
-                : null
-              }
-            </KuiButtonEmpty>
+          <KuiTableHeaderCell
+            onSort={() => setSort('name')}
+            isSorted={sortBy === 'name'}
+            isSortAscending={sortAsc}
+          >
+            Name
           </KuiTableHeaderCell>
-          <KuiTableHeaderCell>
-            <KuiButtonEmpty
-              onClick={() => setSort('count')}
-            >
-              Doc Count
-              { sortBy === 'count'
-                ?
-                  <span>
-                    &nbsp;
-                    <KuiIcon
-                      type={sortAsc ? 'arrowUp' : 'arrowDown'}
-                      size="medium"
-                    />
-                  </span>
-                : null
-              }
-            </KuiButtonEmpty>
+          <KuiTableHeaderCell
+            onSort={() => setSort('count')}
+            isSorted={sortBy === 'count'}
+            isSortAscending={sortAsc}
+          >
+            Doc Count
           </KuiTableHeaderCell>
         </KuiTableHeader>
         <KuiTableBody>
@@ -126,4 +102,4 @@ const IndexPatternResults = ({
   );
 };
 
-export default IndexPatternResults;
+export { IndexPatternResults };
