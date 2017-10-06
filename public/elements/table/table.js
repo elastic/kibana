@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import { Datatable } from '../../components/datatable';
 import header from './header.png';
+import { get } from 'lodash';
 
 export default new Element('table', {
   displayName: 'Data Table',
@@ -13,7 +14,7 @@ export default new Element('table', {
     const { datatable, paginate, perPage, font } = config;
     ReactDOM.render((
       <div style={{
-        ...font.spec,
+        ...get(font, 'spec'),
         height: '100%',
       }}>
         <Datatable
