@@ -31,20 +31,19 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
     }
   });
 
-  $scope.$watch('esResponse', async function (response) {
+  $scope.$watch('esResponse', async function (tableGroup) {
+
     kibanaMapReady.then(() => {
-      const metricsAgg = _.first($scope.vis.getAggConfig().bySchemaName.metric);
-      const termAggId = _.first(_.pluck($scope.vis.getAggConfig().bySchemaName.segment, 'id'));
 
       let results;
-      if (!response || !response.aggregations) {
+      if (!tableGroup || !tableGroup.tables || !tableGroup.tables.length) {
         results = [];
       } else {
-        const buckets = response.aggregations[termAggId].buckets;
+        const buckets = tableGroup.tables[0].rows;
         results = buckets.map((bucket) => {
           return {
-            term: bucket.key,
-            value: metricsAgg.getValue(bucket)
+            term: bucket[0],
+            value: bucket[1]
           };
         });
       }
@@ -58,6 +57,8 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
       }
 
       updateChoroplethLayer($scope.vis.params.selectedLayer.url, $scope.vis.params.selectedLayer.attribution);
+
+      const metricsAgg = _.first($scope.vis.getAggConfig().bySchemaName.metric);
       choroplethLayer.setMetrics(results, metricsAgg);
       setTooltipFormatter();
 
