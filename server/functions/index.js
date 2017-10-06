@@ -1,3 +1,4 @@
+import escount from './escount/escount';
 import esdocs from './esdocs/esdocs';
 import demodata from './demodata/demodata';
 import demoprices from './demoprices/demoprices';
@@ -9,6 +10,7 @@ import to from './to/to';
 
 export const serverFunctions = [
   esdocs,
+  escount,
   demodata,
   demoprices,
   pointseries,

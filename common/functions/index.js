@@ -5,6 +5,7 @@ import droprows from './droprows/droprows';
 import font from './font/font';
 import grid from './grid/grid';
 import image from './image/image';
+import jsonquery from './jsonquery/jsonquery';
 import mapColumn from './mapColumn/mapColumn';
 import markdown from './markdown/markdown';
 import math from './math/math';
@@ -30,6 +31,7 @@ export const commonFunctions = [
   font,
   grid,
   image,
+  jsonquery,
   mapColumn,
   markdown,
   math,
