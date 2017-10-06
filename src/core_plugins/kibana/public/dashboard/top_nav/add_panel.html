@@ -2,7 +2,9 @@
   ng-switch="mode"
   ng-init="mode = 'visualization'"
 >
-  <div class="kuiLocalDropdownTitle">Add Panels</div>
+  <h2 class="kuiLocalDropdownTitle">
+    Add Panels
+  </h2>
 
   <div class="kuiTabs">
     <button
@@ -13,6 +15,7 @@
     >
       Visualization
     </button>
+
     <button
       ng-class="{ 'kuiTab-isSelected': mode == 'search' }"
       class="kuiTab"
