@@ -38,10 +38,7 @@ describe('Retrieving values', () => {
     expect(configAdapter.get('logging')).toEqual({
       root: { level: 'off' },
       appenders: {
-        default: {
-          kind: 'console',
-          layout: { kind: 'legacy-pattern' }
-        }
+        default: { kind: 'legacy-appender' }
       }
     });
   });
@@ -54,11 +51,7 @@ describe('Retrieving values', () => {
     expect(configAdapter.get('logging')).toEqual({
       root: { level: 'all' },
       appenders: {
-        default: {
-          kind: 'file',
-          path: '/some/path.log',
-          layout: { kind: 'legacy-json' }
-        }
+        default: { kind: 'legacy-appender' }
       }
     });
   });

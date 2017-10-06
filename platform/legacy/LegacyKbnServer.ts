@@ -7,6 +7,7 @@ import { LegacyPlatformProxifier } from './LegacyPlatformProxifier';
  */
 export interface LegacyKbnServer {
   readonly config: LegacyConfig;
+  readonly server: { log: (...args: any[]) => void };
 
   /**
    * Custom HTTP Listener provided by the new platform and that will be used

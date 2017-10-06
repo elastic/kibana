@@ -11,6 +11,7 @@ jest.mock('../../layouts/Layouts', () => ({
 
 import { ConsoleAppender } from '../console/ConsoleAppender';
 import { FileAppender } from '../file/FileAppender';
+import { LegacyAppender } from '../../../legacy/logging/appenders/LegacyAppender';
 import { Appenders } from '../Appenders';
 
 beforeEach(() => {
@@ -60,24 +61,46 @@ test('`createConfigSchema()` creates correct schema.', () => {
 test('`create()` creates correct appender.', () => {
   mockCreateLayout.mockReturnValue({ format: () => '' });
 
-  const consoleAppender = Appenders.create({
-    kind: 'console',
-    layout: {
-      kind: 'pattern',
-      pattern: '',
-      highlight: true
-    }
-  });
+  const consoleAppender = Appenders.create(
+    {
+      kind: 'console',
+      layout: {
+        kind: 'pattern',
+        pattern: '',
+        highlight: true
+      }
+    },
+    {} as any
+  );
   expect(consoleAppender).toBeInstanceOf(ConsoleAppender);
 
-  const fileAppender = Appenders.create({
-    kind: 'file',
-    path: 'path',
-    layout: {
-      kind: 'pattern',
-      pattern: '',
-      highlight: true
-    }
-  });
+  const fileAppender = Appenders.create(
+    {
+      kind: 'file',
+      path: 'path',
+      layout: {
+        kind: 'pattern',
+        pattern: '',
+        highlight: true
+      }
+    },
+    {} as any
+  );
   expect(fileAppender).toBeInstanceOf(FileAppender);
+});
+
+test('`create()` fails to create legacy appender if kbnServer is not provided.', () => {
+  expect(() => {
+    Appenders.create({ kind: 'legacy-appender' }, {
+      getLegacyKbnServer() {}
+    } as any);
+  }).toThrowErrorMatchingSnapshot();
+});
+
+test('`create()` creates legacy appender if kbnServer is provided.', () => {
+  const legacyAppender = Appenders.create({ kind: 'legacy-appender' }, {
+    getLegacyKbnServer: () => ({})
+  } as any);
+
+  expect(legacyAppender).toBeInstanceOf(LegacyAppender);
 });

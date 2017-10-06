@@ -1,3 +1,4 @@
+import { Env } from '../config/Env';
 import { LoggingConfig, LoggerConfigType } from './LoggingConfig';
 import { LogLevel } from './LogLevel';
 import { Logger, BaseLogger, LoggerAdapter } from './Logger';
@@ -23,6 +24,8 @@ export class MutableLoggerFactory implements LoggerFactory {
   private readonly appenders: Map<string, DisposableAppender> = new Map();
   private readonly bufferAppender = new BufferAppender();
   private readonly loggers: Map<string, LoggerAdapter> = new Map();
+
+  constructor(private readonly env: Env) {}
 
   get(...contextParts: string[]): Logger {
     const context = LoggingConfig.getLoggerContext(contextParts);
@@ -53,7 +56,10 @@ export class MutableLoggerFactory implements LoggerFactory {
 
     this.appenders.clear();
     for (const [appenderKey, appenderConfig] of config.appenders.entries()) {
-      this.appenders.set(appenderKey, Appenders.create(appenderConfig));
+      this.appenders.set(
+        appenderKey,
+        Appenders.create(appenderConfig, this.env)
+      );
     }
 
     for (const [loggerKey, loggerAdapter] of this.loggers.entries()) {

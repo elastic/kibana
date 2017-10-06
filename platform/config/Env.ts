@@ -1,7 +1,7 @@
 import * as process from 'process';
 import { resolve } from 'path';
 
-import { LegacyPlatformProxifier } from '../legacy';
+import { LegacyKbnServer } from '../legacy';
 
 interface EnvOptions {
   config?: string;
@@ -48,10 +48,8 @@ export class Env {
   /**
    * @internal
    */
-  getNewPlatformProxyListener(): LegacyPlatformProxifier | undefined {
-    if (this.options.kbnServer !== undefined) {
-      return this.options.kbnServer.newPlatformProxyListener;
-    }
+  getLegacyKbnServer(): LegacyKbnServer | undefined {
+    return this.options.kbnServer;
   }
 
   private getDefaultConfigFile() {

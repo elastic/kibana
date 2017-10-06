@@ -32,7 +32,7 @@ beforeEach(() => {
 });
 
 test('`get()` returns Logger that appends records to buffer if config is not ready.', () => {
-  const factory = new MutableLoggerFactory();
+  const factory = new MutableLoggerFactory({} as any);
   const loggerWithoutConfig = factory.get('some-context');
   const testsLogger = factory.get('tests');
   const testsChildLogger = factory.get('tests', 'child');
@@ -92,7 +92,7 @@ test('`get()` returns Logger that appends records to buffer if config is not rea
 
 test('`get()` returns `root` logger if context is not specified.', () => {
   const loggingConfigSchema = LoggingConfig.createSchema(mockSchema);
-  const factory = new MutableLoggerFactory();
+  const factory = new MutableLoggerFactory({} as any);
   const config = loggingConfigSchema.validate({
     appenders: {
       default: {
@@ -114,7 +114,7 @@ test('`get()` returns `root` logger if context is not specified.', () => {
 });
 
 test('`close()` disposes all resources used by appenders.', async () => {
-  const factory = new MutableLoggerFactory();
+  const factory = new MutableLoggerFactory({} as any);
 
   const loggingConfigSchema = LoggingConfig.createSchema(mockSchema);
   const config = new LoggingConfig(

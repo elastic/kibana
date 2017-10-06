@@ -26,14 +26,14 @@ test('correctly creates default environment with empty options.', () => {
   expect(defaultEnv.getPluginDir('some-plugin')).toEqual(
     '/test/cwd/core_plugins/some-plugin/target/dist'
   );
-  expect(defaultEnv.getNewPlatformProxyListener()).toBeUndefined();
+  expect(defaultEnv.getLegacyKbnServer()).toBeUndefined();
 });
 
 test('correctly creates default environment with options overrides.', () => {
-  const proxyListenerMock = {};
+  const kbnServerMock = {};
   const defaultEnv = Env.createDefault({
     config: '/some/other/path/some-kibana.yml',
-    kbnServer: { newPlatformProxyListener: proxyListenerMock }
+    kbnServer: kbnServerMock
   });
 
   expect(defaultEnv.homeDir).toEqual('/test/cwd');
@@ -49,7 +49,7 @@ test('correctly creates default environment with options overrides.', () => {
   expect(defaultEnv.getPluginDir('some-plugin')).toEqual(
     '/test/cwd/core_plugins/some-plugin/target/dist'
   );
-  expect(defaultEnv.getNewPlatformProxyListener()).toBe(proxyListenerMock);
+  expect(defaultEnv.getLegacyKbnServer()).toBe(kbnServerMock);
 });
 
 test('correctly creates environment with constructor.', () => {
@@ -70,5 +70,5 @@ test('correctly creates environment with constructor.', () => {
   expect(defaultEnv.getPluginDir('some-plugin')).toEqual(
     '/some/home/dir/core_plugins/some-plugin/target/dist'
   );
-  expect(defaultEnv.getNewPlatformProxyListener()).toBeUndefined();
+  expect(defaultEnv.getLegacyKbnServer()).toBeUndefined();
 });

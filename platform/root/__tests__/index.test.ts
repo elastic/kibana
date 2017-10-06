@@ -41,9 +41,10 @@ jest.mock('../../logging/LoggerFactory', () => ({
 
 import { Root } from '../';
 import { Env } from '../../config/Env';
+import { RawConfig } from '../../config/RawConfigService';
 
 const env = new Env('.', {});
-const config$ = new BehaviorSubject({});
+const config$ = new BehaviorSubject({} as RawConfig);
 
 let mockProcessExit = jest
   .spyOn(global.process, 'exit')

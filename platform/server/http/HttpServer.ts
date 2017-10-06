@@ -29,14 +29,16 @@ export class HttpServer {
   async start(config: HttpConfig) {
     this.server = this.initializeServer(config);
 
-    const proxyListener = this.env.getNewPlatformProxyListener();
-    if (proxyListener !== undefined) {
-      proxyListener.bind(this.server);
+    const legacyKbnServer = this.env.getLegacyKbnServer();
+    if (legacyKbnServer !== undefined) {
+      legacyKbnServer.newPlatformProxyListener.bind(this.server);
 
       // We register Kibana proxy middleware right before we start server to allow
       // all new platform plugins register their endpoints, so that kbnServer
       // handles only requests that aren't handled by the new platform.
-      this.app.use((req, res) => proxyListener.proxy(req, res));
+      this.app.use((req, res) =>
+        legacyKbnServer.newPlatformProxyListener.proxy(req, res)
+      );
     }
 
     this.log.info(`starting http server [${config.host}:${config.port}]`);

@@ -69,7 +69,7 @@ export class LegacyConfigToRawConfigAdapter implements RawConfig {
   private static transformLogging(configValue: LegacyLoggingConfig) {
     const loggingConfig = {
       root: { level: 'info' },
-      appenders: { default: {} }
+      appenders: { default: { kind: 'legacy-appender' } }
     };
 
     if (configValue.silent) {
@@ -78,23 +78,6 @@ export class LegacyConfigToRawConfigAdapter implements RawConfig {
       loggingConfig.root.level = 'error';
     } else if (configValue.verbose) {
       loggingConfig.root.level = 'all';
-    }
-
-    const layout = configValue.json
-      ? { kind: 'legacy-json' }
-      : { kind: 'legacy-pattern' };
-
-    if (configValue.dest && configValue.dest !== 'stdout') {
-      loggingConfig.appenders.default = {
-        kind: 'file',
-        path: configValue.dest,
-        layout
-      };
-    } else {
-      loggingConfig.appenders.default = {
-        kind: 'console',
-        layout
-      };
     }
 
     return loggingConfig;

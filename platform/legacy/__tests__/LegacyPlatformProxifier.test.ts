@@ -6,7 +6,7 @@ class mockNetServer extends EventEmitter {
     return { port: 1234, family: 'test-family', address: 'test-address' };
   }
 
-  getConnections(callback: (error: Error, count: number) => void) {
+  getConnections(callback: (error: Error | undefined, count: number) => void) {
     callback(undefined, 100500);
   }
 }
@@ -57,7 +57,7 @@ test('correctly binds to the server and redirects its events.', () => {
       const listener = jest.fn();
       proxifier.addListener(eventName, listener);
 
-      return [eventName, listener];
+      return [eventName, listener] as [string, () => void];
     })
   );
 
@@ -86,7 +86,7 @@ test('correctly unbinds from the previous server.', () => {
       const listener = jest.fn();
       proxifier.addListener(eventName, listener);
 
-      return [eventName, listener];
+      return [eventName, listener] as [string, () => void];
     })
   );
 
