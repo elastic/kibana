@@ -4,6 +4,7 @@ import 'plugins/kibana/management/sections/objects/_objects';
 import 'ace';
 import 'ui/directives/confirm_click';
 import { uiModules } from 'ui/modules';
+import { KbnDirectoryRegistryProvider, DirectoryCategory } from 'ui/registry/kbn_directory';
 
 // add the module deps to this module
 uiModules.get('apps/management');
@@ -12,4 +13,14 @@ management.getSection('kibana').register('objects', {
   display: 'Saved Objects',
   order: 10,
   url: '#/management/kibana/objects'
+});
+
+KbnDirectoryRegistryProvider.register(() => {
+  return {
+    id: 'saved_objects',
+    title: 'Saved objects',
+    description: 'Import / export your kibana objects for later reuse.',
+    showOnHomePage: true,
+    category: DirectoryCategory.ADMIN
+  };
 });

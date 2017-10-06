@@ -8,23 +8,35 @@ import {
   Route
 } from 'react-router-dom';
 
-export function HomeApp({ basePath }) {
+export function HomeApp({ basePath, directories, directoryCategories }) {
   return (
     <Router>
       <Switch>
         <Route
-          path='/home/directory'
-          component={() => <Directory></Directory>}
-        />
+          path="/home/directory"
+        >
+          <Directory
+            basePath={basePath}
+            directories={directories}
+            directoryCategories={directoryCategories}
+          />
+        </Route>
         <Route
-          path='/'
-          component={() => <Home></Home>}
-        />
+          path="/"
+        >
+          <Home
+            basePath={basePath}
+            directories={directories}
+            directoryCategories={directoryCategories}
+          />
+        </Route>
       </Switch>
     </Router>
   )
-}
+};
 
 HomeApp.propTypes = {
-  basePath: PropTypes.string.isRequired
+  basePath: PropTypes.string.isRequired,
+  directories: PropTypes.object.isRequired,
+  directoryCategories: PropTypes.object.isRequired
 };

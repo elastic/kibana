@@ -46,3 +46,13 @@ export default function TimelionVisProvider(Private) {
     }
   });
 }
+
+KbnDirectoryRegistryProvider.register(() => {
+  return {
+    id: 'timelion',
+    title: 'Timelion',
+    description: 'Build powerful time based visualizations thru expressions.',
+    showOnHomePage: true,
+    category: DirectoryCategory.DATA
+  };
+});

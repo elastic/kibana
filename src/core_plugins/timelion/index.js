@@ -1,4 +1,3 @@
-
 export default function (kibana) {
   let mainFile = 'plugins/timelion/app';
 
@@ -29,7 +28,8 @@ export default function (kibana) {
           };
         },
         uses: [
-          'savedObjectTypes',
+          'kbnDirectory',
+          'savedObjectTypes'
         ]
       },
       hacks: [

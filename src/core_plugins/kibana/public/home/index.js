@@ -1,6 +1,7 @@
 import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import template from './home_ng_wrapper.html';
+import { KbnDirectoryRegistryProvider, DirectoryCategory } from 'ui/registry/kbn_directory';
 import { uiModules } from 'ui/modules';
 import {
   HomeApp
@@ -14,8 +15,10 @@ app.directive('homeApp', function (reactDirective) {
 function getRoute() {
   return {
     template,
-    controller($scope) {
+    controller($scope, Private) {
       $scope.basePath = chrome.getBasePath();
+      $scope.directories = Private(KbnDirectoryRegistryProvider);
+      $scope.directoryCategories = DirectoryCategory;
     }
   };
 }
@@ -24,3 +27,13 @@ function getRoute() {
 // redirect us to the default page by encountering a url it isn't marked as being able to handle.
 routes.when('/home', getRoute());
 routes.when('/home/directory', getRoute());
+
+KbnDirectoryRegistryProvider.register(() => {
+  return {
+    id: 'data_source',
+    title: 'Data Sources',
+    description: 'Start ingesting data with a data source.',
+    showOnHomePage: false,
+    category: DirectoryCategory.ADMIN
+  };
+});
