@@ -8,8 +8,12 @@ export {
 export {
   updatePanel,
   updatePanels,
+  deletePanel,
+} from './panels';
+
+export {
   renderEmbeddable,
   embeddableRenderFinished,
   embeddableRenderError,
-  deletePanel,
-} from './panels';
+  destroyEmbeddable,
+} from './embeddables';

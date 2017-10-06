@@ -5,40 +5,24 @@ import {
   deletePanel,
   updatePanel,
   updatePanels,
-  embeddableRenderFinished,
-  embeddableRenderError
 } from '../actions';
 
+import { panel, getPanelType as getPanelTypeFromPanel } from './panel';
+
 export const panels = handleActions({
+  [updatePanels]: (state, { payload }) => _.cloneDeep(payload),
+
   [deletePanel]: (state, { payload }) => {
     const stateCopy = { ...state };
     delete stateCopy[payload];
     return stateCopy;
   },
 
-  [updatePanel]: (state, { payload }) => ({
+  [updatePanel]: (state, action) => ({
     ...state,
-    [payload.panelIndex]: _.defaultsDeep(payload, state[payload.panelIndex])
+    [action.payload.panelIndex]: panel(state[action.payload.panelIndex], action.payload),
   }),
-
-  [updatePanels]: (state, { payload }) => ({
-    ..._.cloneDeep(payload)
-  }),
-
-  [embeddableRenderFinished]: (state, { payload }) => ({
-    ...state,
-    [payload.panelId]: {
-      ...state[payload.panelId],
-      renderError: null,
-      embeddable: payload.embeddable,
-    }
-  }),
-
-  [embeddableRenderError]: (state, { payload: { panelId, error } }) => ({
-    ...state,
-    [panelId]: {
-      ...state[panelId],
-      renderError: error
-    }
-  })
 }, {});
+
+export const getPanel = (state, panelId) => state[panelId];
+export const getPanelType = (state, panelId) => getPanelTypeFromPanel(getPanel(state, panelId));
