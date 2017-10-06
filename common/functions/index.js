@@ -18,6 +18,7 @@ import seriesStyle from './seriesStyle/seriesStyle';
 import size from './size/size';
 import sort from './sort/sort';
 import sleep from './sleep/sleep';
+import table from './table/table';
 import timefilter from './timefilter/timefilter';
 import timefilterControl from './timefilterControl/timefilterControl';
 
@@ -42,6 +43,7 @@ export const commonFunctions = [
   size,
   sort,
   sleep,
+  table,
   timefilter,
   timefilterControl,
 ];

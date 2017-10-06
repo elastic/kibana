@@ -8,9 +8,18 @@ export default new Element('table', {
   displayName: 'Data Table',
   description: 'A scrollable grid for displaying data in a tabluar format',
   image: header,
-  expression: 'filters | demodata | render',
+  expression: 'filters | demodata | table | render',
   render(domNode, config, handlers) {
-    ReactDOM.render((<Datatable datatable={config}/>), domNode);
+    const { datatable, paginate, perPage, font } = config;
+    ReactDOM.render((
+      <div style={font.spec}>
+        <Datatable
+          datatable={datatable}
+          perPage={perPage}
+          paginate={paginate}
+        />
+      </div>
+    ), domNode);
     handlers.done();
   },
 });

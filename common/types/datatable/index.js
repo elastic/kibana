@@ -24,7 +24,12 @@ export default new Type({
       return {
         type: 'render',
         as: 'table',
-        value: datatable,
+        value: {
+          datatable,
+          font: undefined,
+          paginate: true,
+          perPage: 10,
+        },
       };
     },
   },
