@@ -5,6 +5,7 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import indexTemplate from 'plugins/kibana/management/sections/indices/index.html';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
+import { KbnDirectoryRegistryProvider, DirectoryCategory } from 'ui/registry/kbn_directory';
 
 const indexPatternsResolutions = {
   indexPatterns: function (Private) {
@@ -63,4 +64,14 @@ management.getSection('kibana').register('indices', {
   display: 'Index Patterns',
   order: 0,
   url: '#/management/kibana/indices/'
+});
+
+KbnDirectoryRegistryProvider.register(() => {
+  return {
+    id: 'index_patterns',
+    title: 'Index Patterns',
+    description: 'Make your ES data usable from within kibana.',
+    showOnHomePage: true,
+    category: DirectoryCategory.ADMIN
+  };
 });

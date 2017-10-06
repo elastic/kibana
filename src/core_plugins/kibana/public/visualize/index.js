@@ -13,6 +13,7 @@ import uiRoutes from 'ui/routes';
 import visualizeListingTemplate from './listing/visualize_listing.html';
 import { VisualizeListingController } from './listing/visualize_listing';
 import { VisualizeConstants } from './visualize_constants';
+import { KbnDirectoryRegistryProvider, DirectoryCategory } from 'ui/registry/kbn_directory';
 
 uiRoutes
 .defaults(/visualize/, {
@@ -24,3 +25,12 @@ uiRoutes
   controllerAs: 'listingController',
 });
 
+KbnDirectoryRegistryProvider.register(() => {
+  return {
+    id: 'visualize',
+    title: 'Visualize',
+    description: 'Build a variety of graphs for your data.',
+    showOnHomePage: true,
+    category: DirectoryCategory.DATA
+  };
+});

@@ -11,6 +11,8 @@ import dashboardListingTemplate from './listing/dashboard_listing.html';
 import { DashboardListingController } from './listing/dashboard_listing';
 import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 import { SavedObjectNotFound } from 'ui/errors';
+import { DashboardConstants } from './dashboard_constants';
+import { KbnDirectoryRegistryProvider, DirectoryCategory } from 'ui/registry/kbn_directory';
 
 uiRoutes
   .defaults(/dashboard/, {
@@ -56,3 +58,13 @@ uiRoutes
       }
     }
   });
+
+KbnDirectoryRegistryProvider.register(() => {
+  return {
+    id: 'dashboard',
+    title: 'Dashboards',
+    description: 'Create visual landing pages made up of content from other apps',
+    showOnHomePage: true,
+    category: DirectoryCategory.DATA
+  };
+});

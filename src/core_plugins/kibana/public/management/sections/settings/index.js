@@ -5,6 +5,7 @@ import { management } from 'ui/management';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import indexTemplate from 'plugins/kibana/management/sections/settings/index.html';
+import { KbnDirectoryRegistryProvider, DirectoryCategory } from 'ui/registry/kbn_directory';
 
 uiRoutes
 .when('/management/kibana/settings', {
@@ -43,4 +44,14 @@ management.getSection('kibana').register('settings', {
   display: 'Advanced Settings',
   order: 20,
   url: '#/management/kibana/settings'
+});
+
+KbnDirectoryRegistryProvider.register(() => {
+  return {
+    id: 'advanced_settings',
+    title: 'Advanced settings',
+    description: 'Use to customize your kibana instance.',
+    showOnHomePage: false,
+    category: DirectoryCategory.ADMIN
+  };
 });

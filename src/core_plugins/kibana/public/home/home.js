@@ -4,12 +4,41 @@ import {
   KuiButton
 } from 'ui_framework/components';
 
-export function Home() {
+export function Home({ basePath, directories, directoryCategories }) {
+
+  const renderDirectories = (category) => {
+    return directories.inTitleOrder
+    .filter((directory) => {
+      return directory.category === category;
+    })
+    .map((directory) => {
+      return (
+        <div key={directory.id}>
+          {directory.title}
+          {directory.description}
+        </div>
+      );
+    });
+  };
+
   return (
     <div>
-      <h1>
+      <h2>
         Add data to Kibana
-      </h1>
+      </h2>
+      <div>
+        <h3>
+          Visualize and explore data
+        </h3>
+        { renderDirectories(directoryCategories.DATA) }
+      </div>
+
+      <div>
+        <h3>
+          Manage and administrate the Elastic stack
+        </h3>
+        { renderDirectories(directoryCategories.ADMIN) }
+      </div>
       <p>
         Didn't find what you were looking for?
         <KuiButton buttonType="secondary">
@@ -19,3 +48,9 @@ export function Home() {
     </div>
   );
 }
+
+Home.propTypes = {
+  basePath: PropTypes.string.isRequired,
+  directories: PropTypes.object.isRequired,
+  directoryCategories: PropTypes.object.isRequired
+};

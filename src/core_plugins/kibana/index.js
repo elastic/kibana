@@ -47,6 +47,7 @@ export default function (kibana) {
         description: 'the kibana you know and love',
         main: 'plugins/kibana/kibana',
         uses: [
+          'kbnDirectory',
           'visTypes',
           'visResponseHandlers',
           'visRequestHandlers',

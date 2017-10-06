@@ -6,3 +6,14 @@ import 'plugins/kibana/discover/components/field_chooser/field_chooser';
 import 'plugins/kibana/discover/controllers/discover';
 import 'plugins/kibana/discover/styles/main.less';
 import 'ui/doc_table/components/table_row';
+import { KbnDirectoryRegistryProvider, DirectoryCategory } from 'ui/registry/kbn_directory';
+
+KbnDirectoryRegistryProvider.register(() => {
+  return {
+    id: 'discover',
+    title: 'Discover',
+    description: 'Search and explore your data.',
+    showOnHomePage: true,
+    category: DirectoryCategory.DATA
+  };
+});
