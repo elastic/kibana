@@ -40,7 +40,7 @@ describe('Retrieving values', () => {
       appenders: {
         default: {
           kind: 'console',
-          layout: { kind: 'pattern', highlight: true }
+          layout: { kind: 'legacy-pattern' }
         }
       }
     });
@@ -57,7 +57,7 @@ describe('Retrieving values', () => {
         default: {
           kind: 'file',
           path: '/some/path.log',
-          layout: { kind: 'json' }
+          layout: { kind: 'legacy-json' }
         }
       }
     });

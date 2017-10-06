@@ -81,8 +81,8 @@ export class LegacyConfigToRawConfigAdapter implements RawConfig {
     }
 
     const layout = configValue.json
-      ? { kind: 'json' }
-      : { kind: 'pattern', highlight: true };
+      ? { kind: 'legacy-json' }
+      : { kind: 'legacy-pattern' };
 
     if (configValue.dest && configValue.dest !== 'stdout') {
       loggingConfig.appenders.default = {

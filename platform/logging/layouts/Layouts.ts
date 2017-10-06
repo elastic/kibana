@@ -2,9 +2,21 @@ import { assertNever } from '../../lib/utils';
 import { Schema } from '../../types/schema';
 import { JsonLayout, JsonLayoutConfigType } from './JsonLayout';
 import { PatternLayout, PatternLayoutConfigType } from './PatternLayout';
+import {
+  LegacyPatternLayout,
+  LegacyPatternLayoutConfigType
+} from '../../legacy/logging/layouts/LegacyPatternLayout';
+import {
+  LegacyJsonLayout,
+  LegacyJsonLayoutConfigType
+} from '../../legacy/logging/layouts/LegacyJsonLayout';
 import { LogRecord } from '../LogRecord';
 
-type LayoutConfigType = PatternLayoutConfigType | JsonLayoutConfigType;
+type LayoutConfigType =
+  | PatternLayoutConfigType
+  | JsonLayoutConfigType
+  | LegacyPatternLayoutConfigType
+  | LegacyJsonLayoutConfigType;
 
 /**
  * Entity that can format `LogRecord` instance into a string.
@@ -21,7 +33,9 @@ export class Layouts {
 
     return oneOf([
       JsonLayout.createConfigSchema(schema),
-      PatternLayout.createConfigSchema(schema)
+      PatternLayout.createConfigSchema(schema),
+      LegacyPatternLayout.createConfigSchema(schema),
+      LegacyJsonLayout.createConfigSchema(schema)
     ]);
   }
 
@@ -36,6 +50,10 @@ export class Layouts {
         return new JsonLayout();
       case 'pattern':
         return new PatternLayout(config.pattern, config.highlight);
+      case 'legacy-pattern':
+        return new LegacyPatternLayout();
+      case 'legacy-json':
+        return new LegacyJsonLayout();
       default:
         return assertNever(config);
     }
