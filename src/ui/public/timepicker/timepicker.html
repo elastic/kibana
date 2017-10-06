@@ -1,15 +1,21 @@
 <div class="kbn-timepicker">
 
   <div class="tab-content kbn-timepicker-content">
-
     <!-- Filters -->
     <div ng-show="activeTab === 'filter'" role="tabpanel" class="tab-pane active">
-      <div class="kuiLocalDropdownTitle kbn-timepicker-title">
-        <div class="kbn-timepicker-title__section">
+      <div class="kbn-timepicker-title kuiVerticalRhythmSmall">
+        <h2 class="kuiLocalDropdownTitle kbn-timepicker-title__text">
           Time Range
-        </div>
-        <ul class="nav nav-pills kbn-timepicker-modes kbn-timepicker-title__section">
-          <li ng-class="{active: mode === 'quick' }">
+        </h2>
+
+        <ul
+          role="tablist"
+          class="nav nav-pills kbn-timepicker-modes kbn-timepicker-title__section"
+        >
+          <li
+            role="tab"
+            ng-class="{active: mode === 'quick' }"
+          >
             <a
               class="kbn-timerpicker-nav-button"
               ng-click="setMode('quick')"
@@ -18,7 +24,11 @@
               quick
             </a>
           </li>
-          <li ng-class="{active: mode === 'relative' }">
+
+          <li
+            role="tab"
+            ng-class="{active: mode === 'relative' }"
+          >
             <a
               class="kbn-timerpicker-nav-button"
               ng-click="setMode('relative')"
@@ -27,7 +37,11 @@
               relative
             </a>
           </li>
-          <li ng-class="{active: mode === 'absolute' }">
+
+          <li
+            role="tab"
+            ng-class="{active: mode === 'absolute' }"
+          >
             <a
               class="kbn-timerpicker-nav-button"
               ng-click="setMode('absolute')"
@@ -38,7 +52,12 @@
           </li>
         </ul>
       </div>
-      <div ng-switch on="mode">
+
+      <div
+        class="kuiVerticalRhythmSmall"
+        ng-switch
+        on="mode"
+      >
         <kbn-timepicker-quick-panel
           ng-switch-when="quick"
           set-quick="setQuick(from, to)"
@@ -69,7 +88,10 @@
 
     <!-- Refresh Intervals -->
     <div ng-show="activeTab === 'interval'" role="tabpanel" class="tab-pane active">
-      <div class="kuiLocalDropdownTitle">Refresh Interval</div>
+      <h2 class="kuiLocalDropdownTitle">
+        Refresh Interval
+      </h2>
+
       <div ng-repeat="list in refreshLists" class="kbn-refresh-section">
         <ul class="list-unstyled">
           <li ng-repeat="inter in list">
