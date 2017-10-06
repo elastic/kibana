@@ -4,9 +4,8 @@ import SeriesEditor from '../series_editor';
 import { IndexPattern } from '../index_pattern';
 import createTextHandler from '../../lib/component_utils/create_text_handler';
 import ColorRules from '../color_rules';
-import ColorPicker from '../color_picker';
 import uuid from 'uuid';
-import YesNo from '../yes_no';
+import { ColorPicker, YesNo } from '../core';
 import { htmlIdGenerator } from 'ui_framework/services';
 
 class TopNPanelConfig extends Component {

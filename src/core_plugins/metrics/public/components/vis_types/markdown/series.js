@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import AddDeleteButtons from '../../add_delete_buttons';
+import { AddDeleteButtons } from '../../core';
 import { SeriesConfig } from '../../series_config';
 import Sortable from 'react-anything-sortable';
 import Split from '../../split';

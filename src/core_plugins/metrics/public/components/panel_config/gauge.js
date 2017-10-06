@@ -6,9 +6,8 @@ import Select from 'react-select';
 import createSelectHandler from '../../lib/component_utils/create_select_handler';
 import createTextHandler from '../../lib/component_utils/create_text_handler';
 import ColorRules from '../color_rules';
-import ColorPicker from '../color_picker';
+import { ColorPicker, YesNo } from '../core';
 import uuid from 'uuid';
-import YesNo from 'plugins/metrics/components/yes_no';
 import { htmlIdGenerator } from 'ui_framework/services';
 
 class GaugePanelConfig extends Component {

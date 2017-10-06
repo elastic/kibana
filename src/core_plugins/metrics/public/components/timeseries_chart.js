@@ -2,8 +2,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import moment from 'moment';
 import reactcss from 'reactcss';
-import FlotChart from './flot_chart';
-import Annotation from './annotation';
+import { AreaChart, Annotation } from './core';
 
 export function scaleUp(value) {
   return window.devicePixelRatio * value;
@@ -14,13 +13,12 @@ export function scaleDown(value) {
 }
 
 class TimeseriesChart extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
       annotations: [],
       showTooltip: false,
-      mouseHoverTimer: false,
+      mouseHoverTimer: false
     };
     this.handleMouseLeave = this.handleMouseLeave.bind(this);
     this.handleMouseOver = this.handleMouseOver.bind(this);
@@ -47,21 +45,22 @@ class TimeseriesChart extends Component {
   handleDraw(plot) {
     if (!plot || !this.props.annotations) return;
     const annotations = this.props.annotations.reduce((acc, anno) => {
-      return acc.concat(anno.series.map(series => {
-        return {
-          series,
-          plot,
-          key: `${anno.id}-${series[0]}`,
-          icon: anno.icon,
-          color: anno.color
-        };
-      }));
+      return acc.concat(
+        anno.series.map(series => {
+          return {
+            series,
+            plot,
+            key: `${anno.id}-${series[0]}`,
+            icon: anno.icon,
+            color: anno.color
+          };
+        })
+      );
     }, []);
     this.setState({ annotations });
   }
 
   handleMouseOver(e, pos, item, plot) {
-
     if (typeof this.state.mouseHoverTimer === 'number') {
       window.clearTimeout(this.state.mouseHoverTimer);
     }
@@ -69,7 +68,7 @@ class TimeseriesChart extends Component {
     if (item) {
       const plotOffset = plot.getPlotOffset();
       const point = plot.pointOffset({ x: item.datapoint[0], y: item.datapoint[1] });
-      const [left, right ] = this.calculateLeftRight(item, plot);
+      const [left, right] = this.calculateLeftRight(item, plot);
       const top = point.top;
       this.setState({
         showTooltip: true,
@@ -106,70 +105,73 @@ class TimeseriesChart extends Component {
     const { series } = this.props;
     let tooltip;
 
-    const styles = reactcss({
-      showTooltip: {
-        tooltipContainer: {
-          pointerEvents: 'none',
-          position: 'absolute',
-          top: top - 28,
-          left,
-          right,
-          zIndex: 100,
-          display: 'flex',
-          alignItems: 'center',
-          padding: '0 5px'
+    const styles = reactcss(
+      {
+        showTooltip: {
+          tooltipContainer: {
+            pointerEvents: 'none',
+            position: 'absolute',
+            top: top - 28,
+            left,
+            right,
+            zIndex: 100,
+            display: 'flex',
+            alignItems: 'center',
+            padding: '0 5px'
+          },
+          tooltip: {
+            backgroundColor: this.props.reversed ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
+            color: this.props.reversed ? 'black' : 'white',
+            fontSize: '12px',
+            padding: '4px 8px',
+            borderRadius: '4px'
+          },
+          rightCaret: {
+            display: right ? 'block' : 'none',
+            color: this.props.reversed ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'
+          },
+          leftCaret: {
+            display: left ? 'block' : 'none',
+            color: this.props.reversed ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)'
+          },
+          date: {
+            color: this.props.reversed ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.7)',
+            fontSize: '12px',
+            lineHeight: '12px'
+          },
+          items: {
+            display: 'flex',
+            alignItems: 'center'
+          },
+          text: {
+            whiteSpace: 'nowrap',
+            fontSize: '12px',
+            lineHeight: '12px',
+            marginRight: 5
+          },
+          icon: {
+            marginRight: 5
+          },
+          value: {
+            fontSize: '12px',
+            flexShrink: 0,
+            lineHeight: '12px',
+            marginLeft: 5
+          }
         },
-        tooltip: {
-          backgroundColor: this.props.reversed ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
-          color: this.props.reversed ? 'black' : 'white',
-          fontSize: '12px',
-          padding: '4px 8px',
-          borderRadius: '4px'
-        },
-        rightCaret: {
-          display: right ? 'block' : 'none',
-          color: this.props.reversed ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
-        },
-        leftCaret: {
-          display: left ? 'block' : 'none',
-          color: this.props.reversed ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)',
-        },
-        date: {
-          color: this.props.reversed ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.7)',
-          fontSize: '12px',
-          lineHeight: '12px'
-        },
-        items: {
-          display: 'flex',
-          alignItems: 'center'
-        },
-        text: {
-          whiteSpace: 'nowrap',
-          fontSize: '12px',
-          lineHeight: '12px',
-          marginRight: 5
-        },
-        icon: {
-          marginRight: 5
-        },
-        value: {
-          fontSize: '12px',
-          flexShrink: 0,
-          lineHeight: '12px',
-          marginLeft: 5
+        hideTooltip: {
+          tooltipContainer: { display: 'none' }
         }
       },
-      hideTooltip: {
-        tooltipContainer: { display: 'none' },
+      {
+        showTooltip: this.state.showTooltip,
+        hideTooltip: !this.state.showTooltip
       }
-    }, {
-      showTooltip: this.state.showTooltip,
-      hideTooltip: !this.state.showTooltip,
-    });
+    );
 
     if (item) {
       const metric = series.find(r => r.id === item.series.id);
-      const formatter = metric && metric.tickFormatter || this.props.tickFormatter || ((v) => v);
+      const formatter = (metric && metric.tickFormatter) || this.props.tickFormatter || (v => v);
       const value = item.datapoint[2] ? item.datapoint[1] - item.datapoint[2] : item.datapoint[1];
       tooltip = (
         <div style={styles.tooltipContainer}>
@@ -179,10 +181,10 @@ class TimeseriesChart extends Component {
               <div style={styles.icon}>
                 <i className="fa fa-circle" style={{ color: item.series.color }} />
               </div>
-              <div style={styles.text}>{ item.series.label }</div>
-              <div style={styles.value}>{ formatter(value) }</div>
+              <div style={styles.text}>{item.series.label}</div>
+              <div style={styles.value}>{formatter(value)}</div>
             </div>
-            <div style={styles.date}>{ moment(item.datapoint[0]).format(this.props.dateFormat) }</div>
+            <div style={styles.date}>{moment(item.datapoint[0]).format(this.props.dateFormat)}</div>
           </div>
           <i className="fa fa-caret-right" style={styles.rightCaret} />
         </div>
@@ -214,16 +216,14 @@ class TimeseriesChart extends Component {
     }
 
     return (
-      <div ref={(el) => this.container = el} className="rhythm_chart__timeseries-container">
-        { tooltip }
-        { annotations }
-        <FlotChart {...params}/>
+      <div ref={el => (this.container = el)} className="rhythm_chart__timeseries-container">
+        {tooltip}
+        {annotations}
+        <AreaChart {...params} />
         <div className={axisLabelClass}>{this.props.xaxisLabel}</div>
       </div>
     );
   }
-
-
 }
 
 TimeseriesChart.defaultProps = {

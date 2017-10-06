@@ -5,8 +5,8 @@
 import PropTypes from 'prop-types';
 
 import React, { Component } from 'react';
-import tickFormatter from '../lib/component_utils/tick_formatter';
-import convertSeriesToVars from '../lib/component_utils/convert_series_to_vars';
+import tickFormatter from '../../lib/component_utils/tick_formatter';
+import convertSeriesToVars from '../../lib/component_utils/convert_series_to_vars';
 import { KuiCodeEditor } from 'ui_framework/components';
 import _ from 'lodash';
 import 'brace/mode/markdown';

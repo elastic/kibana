@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import _ from 'lodash';
-import Select from 'react-select';
+import { Select } from '../core';
 import calculateSiblings from '../../lib/component_utils/calculate_siblings';
 import calculateLabel from '../../../common/calculate_label';
 import basicAggs from '../../../common/basic_aggs';

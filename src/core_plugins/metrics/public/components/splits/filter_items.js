@@ -2,8 +2,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
 import * as collectionActions from '../../lib/component_utils/collection_actions';
-import AddDeleteButtons from '../add_delete_buttons';
-import ColorPicker from '../color_picker';
+import { ColorPicker, AddDeleteButtons } from '../core';
 import uuid from 'uuid';
 class FilterItems extends Component {
   constructor(props) {

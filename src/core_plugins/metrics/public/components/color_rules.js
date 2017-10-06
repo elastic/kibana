@@ -1,10 +1,8 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
-import AddDeleteButtons from './add_delete_buttons';
-import Select from 'react-select';
+import { Select, ColorPicker, AddDeleteButtons } from './core';
 import * as collectionActions from '../lib/component_utils/collection_actions';
-import ColorPicker from './color_picker';
 import { htmlIdGenerator } from 'ui_framework/services';
 
 class ColorRules extends Component {

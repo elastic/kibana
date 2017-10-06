@@ -7,8 +7,7 @@ import metric from './vis_types/metric/vis';
 import topN from './vis_types/top_n/vis';
 import gauge from './vis_types/gauge/vis';
 import markdown from './vis_types/markdown/vis';
-import Error from './error';
-import NoData from './no_data';
+import { NoDataView, ErrorView } from './core';
 
 const types = {
   timeseries,
@@ -25,7 +24,7 @@ function Visualization(props) {
   if (error) {
     return (
       <div className={props.className}>
-        <Error error={error} />
+        <ErrorView error={error} />
       </div>
     );
   }
@@ -33,7 +32,7 @@ function Visualization(props) {
   if (noData) {
     return (
       <div className={props.className}>
-        <NoData />
+        <NoDataView />
       </div>
     );
   }

@@ -1,10 +1,8 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import ColorPicker from '../../color_picker';
-import AddDeleteButtons from '../../add_delete_buttons';
+import { ColorPicker, AddDeleteButtons, Tooltip } from '../../core';
 import SeriesConfig from './config';
 import Sortable from 'react-anything-sortable';
-import Tooltip from '../../tooltip';
 import Split from '../../split';
 import createAggRowRender from '../../../lib/component_utils/create_agg_row_render';
 import createTextHandler from '../../../lib/component_utils/create_text_handler';

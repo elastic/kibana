@@ -2,12 +2,10 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
 import * as collectionActions from '../lib/component_utils/collection_actions';
-import AddDeleteButtons from './add_delete_buttons';
-import ColorPicker from './color_picker';
 import FieldSelect from './aggs/field_select';
 import uuid from 'uuid';
 import IconSelect from './icon_select';
-import YesNo from './yes_no';
+import { YesNo, ColorPicker, AddDeleteButtons } from './core';
 import { htmlIdGenerator } from 'ui_framework/services';
 
 function newAnnotation() {

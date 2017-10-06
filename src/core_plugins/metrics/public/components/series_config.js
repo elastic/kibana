@@ -1,9 +1,8 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import DataFormatPicker from './data_format_picker';
 import createSelectHandler from '../lib/component_utils/create_select_handler';
 import createTextHandler from '../lib/component_utils/create_text_handler';
-import YesNo from './yes_no';
+import { YesNo, DataFormatPicker } from './core';
 import { IndexPattern } from './index_pattern';
 import { htmlIdGenerator } from 'ui_framework/services';
 

@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import Select from 'react-select';
+import { Select } from '../core';
 
 const metricAggs = [
   { label: 'Average', value: 'avg' },
@@ -40,7 +40,6 @@ const siblingAggs = [
 ];
 
 class AggSelectOption extends Component {
-
   constructor(props) {
     super(props);
     this.handleMouseMove = this.handleMouseMove.bind(this);
@@ -75,7 +74,7 @@ class AggSelectOption extends Component {
     if (heading) {
       let note;
       if (pipeline) {
-        note = (<span className="vis_editor__agg_select-note">(requires child aggregation)</span>);
+        note = <span className="vis_editor__agg_select-note">(requires child aggregation)</span>;
       }
       return (
         <div
@@ -101,13 +100,12 @@ class AggSelectOption extends Component {
         aria-label={label}
       >
         <span className="Select-value-label" style={style}>
-          { this.props.children }
+          {this.props.children}
         </span>
       </div>
     );
     /* eslint-enable jsx-a11y/no-static-element-interactions */
   }
-
 }
 
 AggSelectOption.props = {
@@ -118,7 +116,7 @@ AggSelectOption.props = {
   isSelected: PropTypes.bool,
   onFocus: PropTypes.func,
   onSelect: PropTypes.func,
-  option: PropTypes.object.isRequired,
+  option: PropTypes.object.isRequired
 };
 
 function AggSelect(props) {
@@ -141,7 +139,7 @@ function AggSelect(props) {
     ];
   }
 
-  const handleChange = (value) => {
+  const handleChange = value => {
     if (value.disabled) return;
     if (value.value) props.onChange(value);
   };

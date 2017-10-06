@@ -1,8 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import _ from 'lodash';
-import AddDeleteButtons from '../add_delete_buttons';
-import Tooltip from '../tooltip';
+import { AddDeleteButtons, Tooltip } from '../core';
 
 function AggRow(props) {
   let iconClassName = 'fa fa-eye-slash';

@@ -3,11 +3,9 @@ import React, { Component } from 'react';
 import SeriesEditor from '../series_editor';
 import AnnotationsEditor from '../annotations_editor';
 import { IndexPattern } from '../index_pattern';
-import Select from 'react-select';
 import createSelectHandler from '../../lib/component_utils/create_select_handler';
 import createTextHandler from '../../lib/component_utils/create_text_handler';
-import ColorPicker from '../color_picker';
-import YesNo from '../yes_no';
+import { ColorPicker, YesNo, Select } from '../core';
 import { htmlIdGenerator } from 'ui_framework/services';
 
 class TimeseriesPanelConfig extends Component {

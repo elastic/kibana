@@ -1,4 +1,4 @@
-import '../less/main.less';
+import '../styles/main.less';
 import image from '../images/icon-visualbuilder.svg';
 import { MetricsRequestHandlerProvider } from './request_handler';
 import { ReactEditorControllerProvider } from './editor_controller';
@@ -54,11 +54,11 @@ export default function MetricsVisProvider(Private) {
         show_legend: 1,
         show_grid: 1
       },
-      component: require('../components/vis_editor')
+      component: require('../containers/root')
     },
     editor: ReactEditorController,
     editorConfig: {
-      component: require('../components/vis_editor')
+      component: require('../containers/root')
     },
     options: {
       showQueryBar: false,

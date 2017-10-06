@@ -3,14 +3,10 @@ import React, { Component } from 'react';
 import SeriesEditor from '../series_editor';
 import { IndexPattern } from '../index_pattern';
 import 'brace/mode/less';
-import Select from 'react-select';
+import { ColorPicker, YesNo, Select, MarkdownEditor, KuiCodeEditor } from '../core';
 import createSelectHandler from '../../lib/component_utils/create_select_handler';
 import createTextHandler from '../../lib/component_utils/create_text_handler';
-import ColorPicker from '../color_picker';
-import YesNo from '../yes_no';
-import MarkdownEditor from '../markdown_editor';
 import less from 'less/lib/less-browser';
-import { KuiCodeEditor } from 'ui_framework/components';
 import { htmlIdGenerator } from 'ui_framework/services';
 const lessC = less(window, { env: 'production' });
 

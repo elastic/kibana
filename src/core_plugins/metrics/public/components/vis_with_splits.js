@@ -2,6 +2,7 @@ import React from 'react';
 import { getDisplayName } from '../lib/component_utils/get_display_name';
 import { last, findIndex, first } from 'lodash';
 import calculateLabel from '../../common/calculate_label';
+
 export function visWithSplits(WrappedComponent) {
   function SplitVisComponent(props) {
     const { model, visData } = props;

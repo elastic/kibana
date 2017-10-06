@@ -3,7 +3,7 @@ import React from 'react';
 import AggRow from './agg_row';
 import AggSelect from './agg_select';
 import MetricSelect from './metric_select';
-import Select from 'react-select';
+import { Select } from '../core';
 import createChangeHandler from '../../lib/component_utils/create_change_handler';
 import createSelectHandler from '../../lib/component_utils/create_select_handler';
 import createTextHandler from '../../lib/component_utils/create_text_handler';

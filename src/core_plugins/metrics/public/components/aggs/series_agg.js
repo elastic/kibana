@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import AggSelect from './agg_select';
-import Select from 'react-select';
+import { Select } from '../core';
 import AggRow from './agg_row';
 import createChangeHandler from '../../lib/component_utils/create_change_handler';
 import createSelectHandler from '../../lib/component_utils/create_select_handler';

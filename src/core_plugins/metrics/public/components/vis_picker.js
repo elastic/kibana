@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import { KuiLocalNav, KuiLocalNavRow, KuiLocalTab, KuiLocalTabs } from 'ui_framework/components';
+import { KuiLocalNav, KuiLocalNavRow, KuiLocalTab, KuiLocalTabs } from './core';
 
 const nav = [
   { type: 'timeseries', label: 'Time Series' },

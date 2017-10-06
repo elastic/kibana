@@ -1,14 +1,13 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import VisEditorVisualization from './vis_editor_visualization';
-import Visualization from './visualization';
-import VisPicker from './vis_picker';
-import PanelConfig from './panel_config';
+import VisEditorVisualization from '../components/vis_editor_visualization';
+import Visualization from '../components/visualization';
+import VisPicker from '../components/vis_picker';
+import PanelConfig from '../components/panel_config';
 import brushHandler from '../lib/create_brush_handler';
 import { get } from 'lodash';
 
 class VisEditor extends Component {
-
   constructor(props) {
     super(props);
     const { appState } = props;
@@ -37,19 +36,19 @@ class VisEditor extends Component {
     }
   }
 
+  handleChange = part => {
+    const nextModel = { ...this.state.model, ...part };
+
+    this.props.vis.params = nextModel;
+    if (this.state.autoApply) {
+      this.props.vis.updateState();
+    }
+
+    this.setState({ model: nextModel, dirty: !this.state.autoApply });
+  };
+
   render() {
-    const handleChange = (part) => {
-      const nextModel = { ...this.state.model, ...part };
-
-      this.props.vis.params = nextModel;
-      if (this.state.autoApply) {
-        this.props.vis.updateState();
-      }
-
-      this.setState({ model: nextModel, dirty: !this.state.autoApply });
-    };
-
-    const handleAutoApplyToggle = (part) => {
+    const handleAutoApplyToggle = part => {
       this.setState({ autoApply: part.target.checked });
     };
 
@@ -73,16 +72,12 @@ class VisEditor extends Component {
       );
     }
 
-
     const { model } = this.state;
 
     if (model && this.props.visData) {
       return (
         <div className="vis_editor">
-          <VisPicker
-            model={model}
-            onChange={handleChange}
-          />
+          <VisPicker model={model} onChange={this.handleChange} />
           <VisEditorVisualization
             dirty={this.state.dirty}
             autoApply={this.state.autoApply}
@@ -91,7 +86,7 @@ class VisEditor extends Component {
             onBrush={this.onBrush}
             onCommit={handleCommit}
             onToggleAutoApply={handleAutoApplyToggle}
-            onChange={handleChange}
+            onChange={this.handleChange}
             dateFormat={this.props.config.get('dateFormat')}
           />
           <PanelConfig
@@ -99,7 +94,7 @@ class VisEditor extends Component {
             model={model}
             visData={this.props.visData}
             dateFormat={this.props.config.get('dateFormat')}
-            onChange={handleChange}
+            onChange={this.handleChange}
           />
         </div>
       );
@@ -111,7 +106,6 @@ class VisEditor extends Component {
   componentDidMount() {
     this.props.renderComplete();
   }
-
 }
 
 VisEditor.defaultProps = {

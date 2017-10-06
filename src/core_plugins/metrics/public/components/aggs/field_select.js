@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import Select from 'react-select';
+import { Select } from '../core';
 import generateByTypeFilter from '../../lib/component_utils/generate_by_type_filter';
 
 function FieldSelect(props) {
