@@ -1059,6 +1059,11 @@ main {
   .kuiCheckBox:disabled {
     opacity: 0.3;
     cursor: not-allowed; }
+  .theme-dark .kuiCheckBox {
+    background-color: #444444;
+    border-color: #444444; }
+    .theme-dark .kuiCheckBox:checked {
+      background-color: #0079a5; }
 
 .kuiCheckBoxLabel {
   display: -webkit-box;
