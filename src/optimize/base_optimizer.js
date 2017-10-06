@@ -222,7 +222,7 @@ export default class BaseOptimizer {
       },
 
       resolveLoader: {
-        alias: Object.keys(pkg.dependencies).reduce((acc, key) => {
+        alias: Object.keys(pkg.dependencies || {}).reduce((acc, key) => {
           if (!key.endsWith('-loader')) {
             return acc;
           }
