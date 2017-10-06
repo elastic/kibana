@@ -10,17 +10,33 @@
 
   <div class="list-group-item" ng-show="section == 'sheet'">
     <form role="form" class="container-fluid" ng-submit="opts.saveSheet()">
-      <div class="form-group">
-        <label for="savedSheet" class="control-label">Save sheet as</label>
-        <input id="savedSheet" ng-model="opts.savedSheet.title" input-focus="select" class="form-control" placeholder="Name this sheet...">
-      </div>
+      <label
+        for="savedSheet"
+        class="kuiLabel kuiVerticalRhythmSmall"
+      >
+        Save sheet as
+      </label>
 
-      <saved-object-save-as-check-box saved-object="opts.savedSheet"></saved-object-save-as-check-box>
-      <div class="form-group">
-        <button ng-disabled="!opts.savedSheet.title" type="submit" class="kuiButton kuiButton--primary">
-          Save
-        </button>
-      </div>
+      <input
+        id="savedSheet"
+        ng-model="opts.savedSheet.title"
+        input-focus="select"
+        class="form-control kuiVerticalRhythmSmall"
+        placeholder="Name this sheet..."
+      >
+
+      <saved-object-save-as-check-box
+        class="kuiVerticalRhythmSmall"
+        saved-object="opts.savedSheet"
+      ></saved-object-save-as-check-box>
+
+      <button
+        ng-disabled="!opts.savedSheet.title"
+        type="submit"
+        class="kuiButton kuiButton--primary kuiVerticalRhythmSmall"
+      >
+        Save
+      </button>
     </form>
   </div>
 

@@ -3,15 +3,19 @@
     Options
   </h2>
 
-  <div class="input-group">
-    <label>
+  <div class="kuiLocalDropdownSection">
+    <label class="kuiCheckBoxLabel">
       <input
+        class="kuiCheckBox"
         type="checkbox"
         ng-model="model.darkTheme"
         ng-checked="model.darkTheme"
         data-test-subj="dashboardDarkThemeCheckbox"
       >
-      Use dark theme
+
+      <span class="kuiCheckBoxLabel__text">
+        Use dark theme
+      </span>
     </label>
   </div>
 </form>
