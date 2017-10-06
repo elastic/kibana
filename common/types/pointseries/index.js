@@ -17,7 +17,9 @@ export default new Type({
       return {
         type: 'render',
         as: 'table',
-        value: datatable.from(pointseries),
+        value: {
+          datatable: datatable.from(pointseries),
+        },
       };
     },
   },
