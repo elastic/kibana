@@ -1943,9 +1943,14 @@ main {
           justify-content: space-between;
   margin-bottom: 6px; }
 
+/**
+   * 1. Override inherited styles.
+   */
 .kuiLocalDropdownHeader__label {
   font-size: 14px;
   font-weight: 700;
+  margin-bottom: 0;
+  /* 1 */
   color: #2d2d2d; }
   .theme-dark .kuiLocalDropdownHeader__label {
     color: #cecece; }
