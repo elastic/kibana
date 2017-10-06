@@ -16,9 +16,11 @@ export function callLicenseChecker(options = {}) {
       production: !dev,
       json: true,
       customFormat: {
-        realPath: true
+        realPath: true,
+        licenseText: false,
+        licenseFile: false
       }
-    }, (licenseInfo, err) => {
+    }, (err, licenseInfo) => {
       if (err) reject(err);
       else resolve(licenseInfo);
     });
