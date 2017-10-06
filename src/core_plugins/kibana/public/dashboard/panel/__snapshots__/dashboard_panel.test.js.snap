@@ -23,7 +23,7 @@ exports[`DashboardPanel matches snapshot 1`] = `
           class="kuiPopover kuiPopover--anchorRight dashboardPanelPopOver"
         >
           <span
-            aria-label="Click for more panel options"
+            aria-label="Panel options"
             class="kuiButton__icon kuiIcon panel-dropdown fa fa-caret-down"
             data-test-subj="dashboardPanelToggleMenuIcon"
             role="button"
