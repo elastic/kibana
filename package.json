@@ -122,7 +122,6 @@
     "expose-loader": "0.7.0",
     "extract-text-webpack-plugin": "0.8.2",
     "file-loader": "0.8.4",
-    "flot-charts": "0.8.3",
     "font-awesome": "4.4.0",
     "glob": "5.0.13",
     "glob-all": "3.0.1",
