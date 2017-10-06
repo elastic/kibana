@@ -22,24 +22,7 @@ const managementAppId = 'managementRoot';
 
 uiRoutes
 .when('/management', {
-  template: '',
-  controller: ($scope, $injector) => {
-    ReactApp.setGlobals($injector);
-    // const config = $injector.get('config');
-    const kbnUrl = $injector.get('kbnUrl');
-
-    const { getState, dispatch } = ReactApp.getStore();
-    fetchIndexPatterns()(dispatch, getState)
-    .then(() => {
-      const indexPatterns = getIndexPatterns(getState());
-      if (indexPatterns.length > 0) {
-        kbnUrl.change(`/management/kibana/indices`);
-      } else {
-        kbnUrl.change(`/management/kibana/index`);
-      }
-      $scope.$apply();
-    });
-  }
+  redirectTo: '/management/kibana/indices'
 });
 
 uiRoutes
@@ -59,9 +42,22 @@ uiRoutes
 uiRoutes
 .when('/management/kibana/indices', {
   template: `<div id="${managementAppId}"></div>`,
-  controller: ($injector) => {
-    ReactApp.init($injector, management);
-    ReactApp.renderIndexPatternList(managementAppId);
+  controller: ($injector, $scope) => {
+    ReactApp.setGlobals($injector);
+    const kbnUrl = $injector.get('kbnUrl');
+
+    const { getState, dispatch } = ReactApp.getStore();
+    fetchIndexPatterns()(dispatch, getState)
+    .then(() => {
+      const indexPatterns = getIndexPatterns(getState());
+      if (indexPatterns.length > 0) {
+        ReactApp.init($injector, management);
+        ReactApp.renderIndexPatternList(managementAppId);
+      } else {
+        kbnUrl.change(`/management/kibana/index`);
+        $scope.$apply();
+      }
+    });
   }
 });
 
