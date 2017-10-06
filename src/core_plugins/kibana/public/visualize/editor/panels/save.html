@@ -13,12 +13,15 @@
     required
   >
 
-  <saved-object-save-as-check-box saved-object="opts.savedVis"></saved-object-save-as-check-box>
+  <saved-object-save-as-check-box
+    class="kuiVerticalRhythmSmall"
+    saved-object="opts.savedVis"
+  ></saved-object-save-as-check-box>
 
   <button
     data-test-subj="saveVisualizationButton"
     type="submit"
-    class="kuiButton kuiButton--primary"
+    class="kuiButton kuiButton--primary kuiVerticalRhythmSmall"
   >
     {{ opts.isAddToDashMode() ? 'Save and Add to Dashboard' : 'Save'}}
   </button>
