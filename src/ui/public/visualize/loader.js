@@ -21,7 +21,7 @@ export function VisualizeLoaderProvider($compile, $rootScope, savedVisualization
   };
 
   return {
-    embedVisualizationWithId: (el, savedVisualizationId, params) => {
+    embedVisualizationWithId: async (el, savedVisualizationId, params) => {
       return new Promise((resolve) => {
         savedVisualizations.get(savedVisualizationId).then(savedObj => {
           const element = renderVis(el, savedObj, params);
