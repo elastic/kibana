@@ -1,4 +1,5 @@
 import React from 'react';
+import { renderToHtml } from '../../services';
 
 import {
   GuideCode,
@@ -18,6 +19,31 @@ const textAreaHtml = require('./text_area.html');
 const textAreaNonResizableHtml = require('./text_area_non_resizable.html');
 const checkBoxHtml = require('./check_box.html');
 const selectHtml = require('./select.html');
+
+const Label = require('./label');
+const labelSource2 = require('!!raw!./label');
+const labelHtml2 = renderToHtml(Label);
+
+const TextInput = require('./text_input');
+const textInputSource2 = require('!!raw!./text_input');
+const textInputHtml2 = renderToHtml(TextInput,{ id:'1' });
+
+const TextArea = require('./text_area');
+const textAreaSource2 = require('!!raw!./text_area');
+const textAreaHtml2 = renderToHtml(TextArea,{ id:'1' });
+
+const TextAreaNonResizable = require('./text_area_non_resizable');
+const textAreaNonResizableSource2 = require('!!raw!./text_area_non_resizable');
+const textAreaNonResizableHtml2 = renderToHtml(TextAreaNonResizable);
+
+const Select = require('./select');
+const selectSource2 = require('!!raw!./select');
+const selectHtml2 = renderToHtml(Select,{ id:'1' });
+
+const CheckBox = require('./check_box');
+const checkBoxSource2 = require('!!raw!./check_box');
+const checkBoxHtml2 = renderToHtml(CheckBox);
+
 
 export default props => (
   <GuidePage title={props.route.name}>
@@ -44,6 +70,36 @@ export default props => (
       <GuideDemo
         html={labelHtml}
       />
+
+    </GuideSection>
+
+    <GuideSection
+      title="Label React Component"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: labelSource2,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: labelHtml2,
+      }]}
+    >
+
+      <GuideText>
+        Never forget to label every input element. You can either
+        use a <code>label</code> element with a <code>for</code> attribute
+        referencing the <code>id</code> of the input field, wrap the <code>input</code> field
+        within the <code>label</code> element or use <code>aria-label</code> or <code>aria-labelledby</code>.
+      </GuideText>
+
+      <GuideText>
+        For the sake of simplicity we haven&rsquo;t labeled the input elements on
+        this page correctly.
+      </GuideText>
+
+      <GuideDemo>
+        <Label/>
+      </GuideDemo>
+
     </GuideSection>
 
     <GuideSection
@@ -61,6 +117,25 @@ export default props => (
         html={textInputHtml}
         isDarkTheme
       />
+    </GuideSection>
+
+    <GuideSection
+      title="TextInput React Component"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: textInputSource2,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: textInputHtml2,
+      }]}
+    >
+      <GuideDemo>
+        <TextInput id="1"/>
+      </GuideDemo>
+
+      <GuideDemo isDarkTheme={true}>
+        <TextInput id="2"/>
+      </GuideDemo>
     </GuideSection>
 
     <GuideSection
@@ -150,6 +225,40 @@ export default props => (
     </GuideSection>
 
     <GuideSection
+      title="TextArea React Component"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: textAreaSource2,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: textAreaHtml2,
+      }]}
+    >
+      <GuideDemo>
+        <TextArea id="1"/>
+      </GuideDemo>
+
+      <GuideDemo isDarkTheme={true}>
+        <TextArea id="2"/>
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="TextArea, non-resizable React Component"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: textAreaNonResizableSource2,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: textAreaNonResizableHtml2,
+      }]}
+    >
+      <GuideDemo>
+        <TextAreaNonResizable/>
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
       title="CheckBox"
       source={[{
         type: GuideSectionTypes.HTML,
@@ -167,6 +276,25 @@ export default props => (
     </GuideSection>
 
     <GuideSection
+      title="CheckBox React Component"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: checkBoxSource2,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: checkBoxHtml2,
+      }]}
+    >
+      <GuideDemo>
+        <CheckBox/>
+      </GuideDemo>
+
+      <GuideDemo isDarkTheme={true}>
+        <CheckBox/>
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
       title="Select"
       source={[{
         type: GuideSectionTypes.HTML,
@@ -181,6 +309,25 @@ export default props => (
         html={selectHtml}
         isDarkTheme
       />
+    </GuideSection>
+
+    <GuideSection
+      title="Select React Component"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: selectSource2,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: selectHtml2,
+      }]}
+    >
+      <GuideDemo>
+        <Select id="1"/>
+      </GuideDemo>
+
+      <GuideDemo isDarkTheme={true}>
+        <Select id="2"/>
+      </GuideDemo>
     </GuideSection>
   </GuidePage>
 );

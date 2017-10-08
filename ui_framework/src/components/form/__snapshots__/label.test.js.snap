@@ -1,0 +1,34 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiLabel Props htmlFor 1`] = `
+<div>
+  <input
+    id="input1"
+    type="text"
+  />
+  <label
+    class="kuiLabel"
+    for="input1"
+  >
+    other label
+  </label>
+</div>
+`;
+
+exports[`KuiLabel Props text 1`] = `
+<label
+  class="kuiLabel"
+>
+  other label
+</label>
+`;
+
+exports[`KuiLabel renders 1`] = `
+<label
+  aria-label="aria-label"
+  class="kuiLabel testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  label
+</label>
+`;
