@@ -20,6 +20,14 @@ const TimelionRequestHandlerProvider = function (Private, Notifier, $http, $root
         const expression = vis.params.expression;
         if (!expression) return;
 
+        let timeFilter = timefilter.time;
+        if (vis.params.timeRange) {
+          timeFilter = {
+            mode: 'absolute',
+            from: vis.params.timeRange.min.toJSON(),
+            to: vis.params.timeRange.max.toJSON()
+          };
+        }
         const httpResult = $http.post('../api/timelion/run', {
           sheet: [expression],
           extended: {
@@ -27,7 +35,7 @@ const TimelionRequestHandlerProvider = function (Private, Notifier, $http, $root
               filter: dashboardContext()
             }
           },
-          time: _.extend(timefilter.time, {
+          time: _.extend(timeFilter, {
             interval: vis.params.interval,
             timezone: timezone
           }),
