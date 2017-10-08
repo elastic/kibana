@@ -154,7 +154,7 @@ export function SearchSourceProvider(Promise, Private, config) {
     const self = this;
     if (self._parent === false) return;
     if (self._parent) return self._parent;
-    return onlyHardLinked ? undefined : Private(RootSearchSourceProvider).get();
+    return onlyHardLinked || this.skipTimeRangeFilter ? undefined : Private(RootSearchSourceProvider).get();
   };
 
   /**
