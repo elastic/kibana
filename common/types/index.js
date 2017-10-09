@@ -8,6 +8,7 @@ import filter from './filter';
 import render from './render';
 import style from './style';
 import location from './location';
+import boolean from './boolean';
 
 export const typeSpecs = [
   datatable,
@@ -20,4 +21,5 @@ export const typeSpecs = [
   filter,
   render,
   location,
+  boolean,
 ];
