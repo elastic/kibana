@@ -10,7 +10,6 @@ export default new Fn({
       ],
       default: 0,
       'aliases': [],
-      'multi': false, // TODO: No reason you couldn't.
       help: 'The number of milliseconds to wait',
     },
   },
