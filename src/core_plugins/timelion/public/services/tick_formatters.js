@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 function baseTickFormatter(value, axis) {
   const factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1;
   const formatted = '' + Math.round(value * factor) / factor;
@@ -57,8 +59,16 @@ export default function tickFormatters() {
     'currency': function (val, axis) {
       return val.toLocaleString('en', { style: 'currency', currency: axis.options.units.prefix || 'USD' });
     },
-    'percent': function (val) {
-      return val * 100 + '%';
+    'percent': function (val, axis) {
+      let precision = _.get(axis, 'tickDecimals', 0) - _.get(axis, 'options.units.tickDecimalsShift', 0);
+      // toFixed only accepts values between 0 and 20
+      if (precision < 0) {
+        precision = 0;
+      } else if (precision > 20) {
+        precision = 20;
+      }
+
+      return (val * 100).toFixed(precision) + '%';
     },
     'custom': function (val, axis) {
       const formattedVal = baseTickFormatter(val, axis);
