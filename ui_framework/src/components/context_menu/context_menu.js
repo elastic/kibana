@@ -55,6 +55,7 @@ export class KuiContextMenu extends Component {
     this.panelIdToItemIndexMap = {};
 
     this.state = {
+      height: undefined,
       outGoingPanelId: undefined,
       currentPanelId: props.initialPanelId,
       transitionDirection: undefined,
@@ -116,9 +117,10 @@ export class KuiContextMenu extends Component {
     }
   };
 
-  updateHeight() {
-    const height = this.currentPanel.clientHeight;
-    this.menu.setAttribute('style', `height: ${height}px`);
+  onCurrentPanelHeightChange = height => {
+    this.setState({
+      height,
+    });
   }
 
   updatePanelMaps(panels) {
@@ -151,18 +153,10 @@ export class KuiContextMenu extends Component {
     }
   }
 
-  componentDidMount() {
-    this.updateHeight();
-  }
-
   componentDidUpdate() {
     // Make sure we don't steal focus while the ContextMenu is closed.
     if (!this.props.isVisible) {
       return;
-    }
-
-    if (this.state.isTransitioning) {
-      this.updateHeight();
     }
   }
 
@@ -211,6 +205,7 @@ export class KuiContextMenu extends Component {
       return;
     }
 
+    // TODO: Build this data structure once, e.g. constructor + willReceiveProps.
     if (transitionType === 'in') {
       this.itemIndexToPanelIdMap = {};
 
@@ -232,12 +227,9 @@ export class KuiContextMenu extends Component {
 
     return (
       <KuiContextMenuPanel
+        key={panelId}
         className="kuiContextMenu__panel"
-        panelRef={node => {
-          if (transitionType === 'in') {
-            this.currentPanel = node;
-          }
-        }}
+        onHeightChange={(transitionType === 'in') ? this.onCurrentPanelHeightChange : undefined}
         title={panel.title}
         onClose={onClose}
         transitionType={transitionType}
@@ -282,6 +274,7 @@ export class KuiContextMenu extends Component {
       <div
         ref={node => { this.menu = node; }}
         className={classes}
+        style={{ height: this.state.height }}
         {...rest}
       >
         {outGoingPanel}

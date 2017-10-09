@@ -26,7 +26,7 @@ export class KuiContextMenuPanel extends Component {
     className: PropTypes.string,
     title: PropTypes.string,
     onClose: PropTypes.func,
-    panelRef: PropTypes.func,
+    onHeightChange: PropTypes.func,
     transitionType: PropTypes.oneOf(['in', 'out']),
     transitionDirection: PropTypes.oneOf(['next', 'previous']),
     isTransitioning: PropTypes.bool,
@@ -191,13 +191,23 @@ export class KuiContextMenuPanel extends Component {
     }
   };
 
+  panelRef = node => {
+    if (node) {
+      this.panel = node;
+
+      if (this.props.onHeightChange) {
+        this.props.onHeightChange(node.clientHeight);
+      }
+    }
+  }
+
   render() {
     const {
       children,
       className,
       onClose,
       title,
-      panelRef,
+      onHeightChange, // eslint-disable-line no-unused-vars
       transitionType,
       transitionDirection,
       isTransitioning,
@@ -252,10 +262,7 @@ export class KuiContextMenuPanel extends Component {
 
     return (
       <div
-        ref={node => {
-          this.panel = node;
-          if (panelRef) panelRef(node);
-        }}
+        ref={this.panelRef}
         className={classes}
         onKeyDown={this.onKeyDown}
         {...rest}

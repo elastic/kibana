@@ -947,16 +947,16 @@ main {
 
 @-webkit-keyframes kuiContextMenuPanelTxInLeft {
   0% {
-    -webkit-transform: translateX(256px);
-            transform: translateX(256px); }
+    -webkit-transform: translateX(100%);
+            transform: translateX(100%); }
   100% {
     -webkit-transform: translateX(0);
             transform: translateX(0); } }
 
 @keyframes kuiContextMenuPanelTxInLeft {
   0% {
-    -webkit-transform: translateX(256px);
-            transform: translateX(256px); }
+    -webkit-transform: translateX(100%);
+            transform: translateX(100%); }
   100% {
     -webkit-transform: translateX(0);
             transform: translateX(0); } }
@@ -966,29 +966,29 @@ main {
     -webkit-transform: translateX(0);
             transform: translateX(0); }
   100% {
-    -webkit-transform: translateX(-256px);
-            transform: translateX(-256px); } }
+    -webkit-transform: translateX(-100%);
+            transform: translateX(-100%); } }
 
 @keyframes kuiContextMenuPanelTxOutLeft {
   0% {
     -webkit-transform: translateX(0);
             transform: translateX(0); }
   100% {
-    -webkit-transform: translateX(-256px);
-            transform: translateX(-256px); } }
+    -webkit-transform: translateX(-100%);
+            transform: translateX(-100%); } }
 
 @-webkit-keyframes kuiContextMenuPanelTxInRight {
   0% {
-    -webkit-transform: translateX(-256px);
-            transform: translateX(-256px); }
+    -webkit-transform: translateX(-100%);
+            transform: translateX(-100%); }
   100% {
     -webkit-transform: translateX(0);
             transform: translateX(0); } }
 
 @keyframes kuiContextMenuPanelTxInRight {
   0% {
-    -webkit-transform: translateX(-256px);
-            transform: translateX(-256px); }
+    -webkit-transform: translateX(-100%);
+            transform: translateX(-100%); }
   100% {
     -webkit-transform: translateX(0);
             transform: translateX(0); } }
@@ -998,16 +998,16 @@ main {
     -webkit-transform: translateX(0);
             transform: translateX(0); }
   100% {
-    -webkit-transform: translateX(256px);
-            transform: translateX(256px); } }
+    -webkit-transform: translateX(100%);
+            transform: translateX(100%); } }
 
 @keyframes kuiContextMenuPanelTxOutRight {
   0% {
     -webkit-transform: translateX(0);
             transform: translateX(0); }
   100% {
-    -webkit-transform: translateX(256px);
-            transform: translateX(256px); } }
+    -webkit-transform: translateX(100%);
+            transform: translateX(100%); } }
 
 /**
  * 1. Button reset.
