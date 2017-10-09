@@ -4,6 +4,8 @@ import date from './date/date';
 import droprows from './droprows/droprows';
 import font from './font/font';
 import grid from './grid/grid';
+import ifFn from './if/if';
+import compare from './compare/compare';
 import image from './image/image';
 import jsonquery from './jsonquery/jsonquery';
 import mapColumn from './mapColumn/mapColumn';
@@ -26,10 +28,12 @@ import timefilterControl from './timefilterControl/timefilterControl';
 export const commonFunctions = [
   alterColumn,
   containerStyle,
+  compare,
   date,
   droprows,
   font,
   grid,
+  ifFn,
   image,
   jsonquery,
   mapColumn,
