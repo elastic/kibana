@@ -2,13 +2,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-const SELECT_SIZE = [
+export const SELECT_SIZE = [
   'small',
   'medium',
   'large',
 ];
 
-const KuiSelect = ({
+export const KuiSelect = ({
   className,
   onChange,
   value,
@@ -18,11 +18,11 @@ const KuiSelect = ({
   children,
   ...rest
 }) => {
-  const classes = classNames('kuiSelect', className,
-    { 'kuiSelect-isInvalid': isInvalid },
-    { 'kuiSelect--small': size === 'small' },
-    { 'kuiSelect--large': size === 'large' },
-  );
+  const classes = classNames('kuiSelect', className, {
+    'kuiSelect-isInvalid': isInvalid,
+    'kuiSelect--small': size === 'small',
+    'kuiSelect--large': size === 'large'
+  });
 
   return (
     <select
@@ -52,9 +52,4 @@ KuiSelect.propTypes = {
   isDisabled: PropTypes.bool,
   size: PropTypes.oneOf(SELECT_SIZE),
   children: PropTypes.node
-};
-
-export {
-  SELECT_SIZE,
-  KuiSelect
 };

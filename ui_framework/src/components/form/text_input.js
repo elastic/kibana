@@ -2,13 +2,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-const TEXTINPUT_SIZE = [
+export const TEXTINPUT_SIZE = [
   'small',
   'medium',
   'large',
 ];
 
-const KuiTextInput = ({
+export const KuiTextInput = ({
   className,
   onChange,
   placeholder,
@@ -57,9 +57,4 @@ KuiTextInput.propTypes = {
   isInvalid: PropTypes.bool,
   isDisabled: PropTypes.bool,
   size: PropTypes.oneOf(TEXTINPUT_SIZE)
-};
-
-export {
-  TEXTINPUT_SIZE,
-  KuiTextInput
 };

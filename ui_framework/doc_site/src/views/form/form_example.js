@@ -30,7 +30,7 @@ const textInputHtml2 = renderToHtml(TextInput,{ id:'1' });
 
 const TextArea = require('./text_area');
 const textAreaSource2 = require('!!raw!./text_area');
-const textAreaHtml2 = renderToHtml(TextArea,{ id:'1' });
+const textAreaHtml2 = renderToHtml(TextArea);
 
 const TextAreaNonResizable = require('./text_area_non_resizable');
 const textAreaNonResizableSource2 = require('!!raw!./text_area_non_resizable');
@@ -38,7 +38,7 @@ const textAreaNonResizableHtml2 = renderToHtml(TextAreaNonResizable);
 
 const Select = require('./select');
 const selectSource2 = require('!!raw!./select');
-const selectHtml2 = renderToHtml(Select,{ id:'1' });
+const selectHtml2 = renderToHtml(Select);
 
 const CheckBox = require('./check_box');
 const checkBoxSource2 = require('!!raw!./check_box');
@@ -130,11 +130,11 @@ export default props => (
       }]}
     >
       <GuideDemo>
-        <TextInput id="1"/>
+        <TextInput/>
       </GuideDemo>
 
       <GuideDemo isDarkTheme={true}>
-        <TextInput id="2"/>
+        <TextInput/>
       </GuideDemo>
     </GuideSection>
 
@@ -235,11 +235,11 @@ export default props => (
       }]}
     >
       <GuideDemo>
-        <TextArea id="1"/>
+        <TextArea/>
       </GuideDemo>
 
       <GuideDemo isDarkTheme={true}>
-        <TextArea id="2"/>
+        <TextArea/>
       </GuideDemo>
     </GuideSection>
 
@@ -322,11 +322,11 @@ export default props => (
       }]}
     >
       <GuideDemo>
-        <Select id="1"/>
+        <Select/>
       </GuideDemo>
 
       <GuideDemo isDarkTheme={true}>
-        <Select id="2"/>
+        <Select/>
       </GuideDemo>
     </GuideSection>
   </GuidePage>

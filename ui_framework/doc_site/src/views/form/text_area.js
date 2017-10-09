@@ -1,35 +1,24 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import {
   KuiTextArea,
 } from '../../../../components';
 
 
 class KuiTextAreaExample extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      value1:'',
-      value2:'Entered text',
-      value3:'',
-      value4:'Disabled',
-      value5:'',
-      value6:'',
-    };
-  }
+  state = {
+    value1:'',
+    value2:'Entered text',
+    value3:'',
+    value4:'Disabled',
+    value5:'',
+    value6:'',
+  };
 
   handleChange = (event, key) => {
     this.setState({ [key]:event.target.value });
   }
 
   render() {
-    const id = this.props.id;
-    const labelStyle = {
-      marginLeft: '8px',
-      fontWeight: 'normal'
-    };
-
     return (
       <div>
         <KuiTextArea
@@ -72,9 +61,5 @@ class KuiTextAreaExample extends React.Component {
     );
   }
 }
-
-KuiTextAreaExample.propTypes = {
-  id: PropTypes.string.isRequired
-};
 
 export default KuiTextAreaExample;

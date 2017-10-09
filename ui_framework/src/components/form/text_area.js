@@ -2,13 +2,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-const TEXTAREA_SIZE = [
+export const TEXTAREA_SIZE = [
   'small',
   'medium',
   'large',
 ];
 
-const KuiTextArea = ({
+export const KuiTextArea = ({
   className,
   onChange,
   placeholder,
@@ -56,9 +56,4 @@ KuiTextArea.propTypes = {
   isNonResizable: PropTypes.bool,
   isDisabled: PropTypes.bool,
   size: PropTypes.oneOf(TEXTAREA_SIZE)
-};
-
-export {
-  TEXTAREA_SIZE,
-  KuiTextArea
 };

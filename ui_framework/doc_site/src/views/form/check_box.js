@@ -1,5 +1,4 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import {
   KuiCheckBox,
   KuiCheckBoxLabel
@@ -7,16 +6,12 @@ import {
 
 
 class KuiCheckBoxExample extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      value1:false,
-      value2:true,
-      value3:true,
-      value4:false,
-    };
-  }
+  state = {
+    value1:false,
+    value2:true,
+    value3:true,
+    value4:false,
+  };
 
   handleChange = (event, key) => {
     this.setState({ [key]:event.target.checked });

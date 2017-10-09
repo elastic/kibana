@@ -1,34 +1,23 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import {
   KuiSelect,
 } from '../../../../components';
 
 
 class KuiSelectExample extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      value1:'',
-      value2:'',
-      value3:'',
-      value4:'',
-      value5:'',
-    };
-  }
+  state = {
+    value1:'',
+    value2:'',
+    value3:'',
+    value4:'',
+    value5:'',
+  };
 
   handleChange = (event, key) => {
     this.setState({ [key]:event.target.value });
   }
 
   render() {
-    const id = this.props.id;
-    const labelStyle = {
-      marginLeft: '8px',
-      fontWeight: 'normal'
-    };
-
     return (
       <div>
         <KuiSelect
@@ -75,9 +64,5 @@ class KuiSelectExample extends React.Component {
     );
   }
 }
-
-KuiSelectExample.propTypes = {
-  id: PropTypes.string.isRequired
-};
 
 export default KuiSelectExample;

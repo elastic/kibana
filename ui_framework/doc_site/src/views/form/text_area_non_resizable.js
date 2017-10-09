@@ -5,13 +5,9 @@ import {
 
 
 class KuiTextAreaNonResizableExample extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      value1:'Non-resizable',
-    };
-  }
+  state = {
+    value1:'Non-resizable',
+  };
 
   handleChange = (event, key) => {
     this.setState({ [key]:event.target.value });

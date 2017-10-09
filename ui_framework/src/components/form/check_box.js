@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-const KuiCheckBox = ({
+export const KuiCheckBox = ({
   className,
   isChecked,
   isDisabled,
@@ -33,8 +33,4 @@ KuiCheckBox.propTypes = {
   isChecked: PropTypes.bool,
   isDisabled: PropTypes.bool,
   onChange: PropTypes.func.isRequired,
-};
-
-export {
-  KuiCheckBox
 };
