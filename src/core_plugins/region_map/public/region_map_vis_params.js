@@ -15,10 +15,6 @@ uiModules.get('kibana/region_map')
 
         $scope.collections = $scope.vis.type.editorConfig.collections;
 
-        if ($scope.vis.params.selectedLayer && !$scope.vis.params.selectedLayer.layerId) {
-          $scope.vis.params.selectedLayer = mapToLayerWithId('unknown', $scope.vis.params.selectedLayer);
-        }
-
         $scope.onLayerChange = onLayerChange;
         serviceSettings.getFileLayers()
           .then(function (layersFromService) {
