@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Synopsis } from './synopsis';
 import {
   KuiTabs,
   KuiTab
@@ -59,27 +60,29 @@ export class Directory extends React.Component {
     })
     .map((directory) => {
       return (
-        <div key={directory.id}>
-          <a href={this.props.addBasePath(directory.path)}>
-            {directory.title}
-          </a>
-          {directory.description}
-        </div>
+        <Synopsis
+          key={directory.id}
+          description={directory.description}
+          title={directory.title}
+          url={this.props.addBasePath(directory.path)}
+        />
       );
     });
   };
 
   render() {
     return (
-      <div>
-        <a className="kuiLink" href="#/home">Home</a> / Directory
-        <h2 className="kuiTitle">
-          Directory
-        </h2>
-        <KuiTabs>
-          {this.renderTabs()}
-        </KuiTabs>
-        { this.renderDirectories() }
+      <div className="kuiView">
+        <div className="kuiViewContent kuiViewContent--constrainedWidth">
+          <a className="kuiLink" href="#/home">Home</a> / Directory
+          <h2 className="kuiTitle">
+            Directory
+          </h2>
+          <KuiTabs>
+            {this.renderTabs()}
+          </KuiTabs>
+          { this.renderDirectories() }
+        </div>
       </div>
     );
   }
