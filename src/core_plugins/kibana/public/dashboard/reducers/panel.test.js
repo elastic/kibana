@@ -1,0 +1,28 @@
+import { store } from '../../store';
+import { updatePanel, updatePanels } from '../actions';
+import { getPanel } from '../reducers';
+import { getDashboardState } from '../../reducers';
+
+describe('panel reducers', () => {
+  test('UpdatePanel updates a panel', () => {
+    store.dispatch(updatePanels([{ panelIndex: '1', gridData: {} }]));
+
+    store.dispatch(updatePanel({
+      panelIndex: '1',
+      gridData: {
+        x: 1,
+        y: 5,
+        w: 10,
+        h: 1,
+        id: '1'
+      }
+    }));
+
+    const panel = getPanel(getDashboardState(store.getState()), '1');
+    expect(panel.gridData.x).toBe(1);
+    expect(panel.gridData.y).toBe(5);
+    expect(panel.gridData.w).toBe(10);
+    expect(panel.gridData.h).toBe(1);
+    expect(panel.gridData.id).toBe('1');
+  });
+});
