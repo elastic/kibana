@@ -16,7 +16,7 @@ function getRoute() {
   return {
     template,
     controller($scope, Private) {
-      $scope.basePath = chrome.getBasePath();
+      $scope.addBasePath = chrome.addBasePath;
       $scope.directories = Private(KbnDirectoryRegistryProvider);
       $scope.directoryCategories = DirectoryCategory;
     }
@@ -27,12 +27,14 @@ function getRoute() {
 // redirect us to the default page by encountering a url it isn't marked as being able to handle.
 routes.when('/home', getRoute());
 routes.when('/home/directory', getRoute());
+routes.when('/home/directory/data_sources', getRoute());
 
 KbnDirectoryRegistryProvider.register(() => {
   return {
     id: 'data_source',
     title: 'Data Sources',
     description: 'Start ingesting data with a data source.',
+    path: '/app/kibana#/home/directory/data_sources',
     showOnHomePage: false,
     category: DirectoryCategory.ADMIN
   };

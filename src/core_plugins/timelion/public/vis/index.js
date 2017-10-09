@@ -52,6 +52,7 @@ KbnDirectoryRegistryProvider.register(() => {
     id: 'timelion',
     title: 'Timelion',
     description: 'Build powerful time based visualizations thru expressions.',
+    path: '/app/timelion',
     showOnHomePage: true,
     category: DirectoryCategory.DATA
   };

@@ -13,6 +13,7 @@ KbnDirectoryRegistryProvider.register(() => {
     id: 'discover',
     title: 'Discover',
     description: 'Search and explore your data.',
+    path: '/app/kibana#/discover',
     showOnHomePage: true,
     category: DirectoryCategory.DATA
   };
