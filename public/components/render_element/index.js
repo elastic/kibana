@@ -23,7 +23,16 @@ export const RenderElement = compose(
       // Config changes
       if (this.shouldFullRerender(prevProps)) {
         handlers.destroy();
-        return renderFn(domNode, cloneDeep(config), handlers);
+
+        // This should be the only place you call renderFn
+        // TODO: We should wait until handlers.done() is called before replacing the element content?
+        while(domNode.firstChild)
+        {
+          domNode.removeChild(domNode.firstChild);
+        }
+        const newNode = this.createNode();
+        domNode.appendChild(newNode);
+        renderFn(newNode, cloneDeep(config), handlers);
       }
 
       // Size changes
@@ -36,6 +45,13 @@ export const RenderElement = compose(
 
     componentWillUnmount() {
       this.props.handlers.destroy();
+    },
+
+    createNode() {
+      const div = document.createElement('div');
+      div.style.width = '100%';
+      div.style.height = '100%';
+      return div;
     },
 
     shouldFullRerender(prevProps) {
