@@ -3,6 +3,10 @@ import Boom from 'boom';
 const code = Symbol('SavedObjectsClientErrorCode');
 
 function decorate(error, errorCode, statusCode, message) {
+  if (isSavedObjectsClientError(error)) {
+    return error;
+  }
+
   const boom = Boom.boomify(error, {
     statusCode,
     message,
@@ -12,6 +16,10 @@ function decorate(error, errorCode, statusCode, message) {
   boom[code] = errorCode;
 
   return boom;
+}
+
+export function isSavedObjectsClientError(error) {
+  return error && !!error[code];
 }
 
 // 400 - badRequest
@@ -46,8 +54,8 @@ export function isForbiddenError(error) {
 
 // 404 - Not Found
 const CODE_NOT_FOUND = 'SavedObjectsClient/notFound';
-export function decorateNotFoundError(error, reason) {
-  return decorate(error, CODE_NOT_FOUND, 404, reason);
+export function createGenericNotFoundError() {
+  return decorate(Boom.notFound(), CODE_NOT_FOUND, 404);
 }
 export function isNotFoundError(error) {
   return error && error[code] === CODE_NOT_FOUND;

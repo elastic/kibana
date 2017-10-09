@@ -6,8 +6,9 @@ export const savedObjectsClientErrors = SavedObjectsClient.errors;
 
 export function createObjectsClientStub(type, id, esDocSource = {}) {
   const savedObjectsClient = {
-    update: sinon.stub().returns(Promise.resolve()),
+    update: sinon.stub(),
     get: sinon.stub().returns({ attributes: esDocSource }),
+    create: sinon.stub(),
     errors: savedObjectsClientErrors
   };
 

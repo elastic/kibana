@@ -17,6 +17,7 @@ const deprecations = [
   //server
   rename('server.ssl.cert', 'server.ssl.certificate'),
   unused('server.xsrf.token'),
+  unused('uiSettings.enabled'),
   serverSslEnabled,
 ];
 

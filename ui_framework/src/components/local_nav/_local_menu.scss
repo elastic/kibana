@@ -8,7 +8,7 @@
   align-items: center;
   height: 100%;
   padding: 0 $localNavSideSpacing;
-  font-size: $globalFontSize;
+  font-size: $kuiFontSize;
   background-color: $localNavButtonBackgroundColor;
   color: $localNavButtonTextColor;
   border: 0;
@@ -23,13 +23,13 @@
 
   &.kuiLocalMenuItem-isSelected {
     background-color: $localNavButtonBackgroundColor-isSelected;
-    border-color: $globalColorLightGray;
+    border-color: $kuiColorLightGray;
     height: calc(100% + 1px); // Cheat the border when opened
     z-index: 2;
-    color: $globalColorBlue;
+    color: $kuiColorBlue;
 
     &:hover, &:focus {
-      color: $globalColorBlue;
+      color: $kuiColorBlue;
     }
   }
 

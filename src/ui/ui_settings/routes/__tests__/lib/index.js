@@ -1,7 +1,8 @@
 export {
   startServers,
   getServices,
-  stopServers
+  stopServers,
+  waitUntilNextHealthCheck,
 } from './servers';
 
 export {
@@ -10,5 +11,5 @@ export {
 
 export {
   assertSinonMatch,
-  assertDocMissingResponse
+  assertServiceUnavailableResponse,
 } from './assert';
