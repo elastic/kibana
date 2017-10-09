@@ -15,18 +15,19 @@ uiModules.get('kibana/region_map')
 
         $scope.collections = $scope.vis.type.editorConfig.collections;
 
-        if ($scope.vis.params.selectedLayer && !$scope.vis.params.selectedLayer._id) {
-          //tracking by id wasn't ideal.
+        if ($scope.vis.params.selectedLayer && !$scope.vis.params.selectedLayer.layerId) {
           $scope.vis.params.selectedLayer = mapToLayerWithId('unknown', $scope.vis.params.selectedLayer);
         }
 
         $scope.onLayerChange = onLayerChange;
         serviceSettings.getFileLayers()
           .then(function (layersFromService) {
-            const newVectorLayers = $scope.collections.vectorLayers.map(mapToLayerWithId.bind(null, 'elastic_maps_service'));
+
+            layersFromService = layersFromService.map(mapToLayerWithId.bind(null, 'elastic_maps_service'));
+            const newVectorLayers = $scope.collections.vectorLayers.slice();
             for (let i = 0; i < layersFromService.length; i += 1) {
               const layerFromService = layersFromService[i];
-              const alreadyAdded = newVectorLayers.some((layer) => layerFromService._id === layer._id);
+              const alreadyAdded = newVectorLayers.some((layer) => layerFromService.layerId === layer.layerId);
               if (!alreadyAdded) {
                 newVectorLayers.push(layerFromService);
               }

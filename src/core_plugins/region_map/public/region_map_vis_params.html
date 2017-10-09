@@ -15,7 +15,7 @@
           id="regionMap"
           class="kuiSelect kuiSideBarSelect"
           ng-model="vis.params.selectedLayer"
-          ng-options="layer.name for layer in collections.vectorLayers track by layer._id"
+          ng-options="layer.name for layer in collections.vectorLayers track by layer.layerId"
           ng-change="onLayerChange()"
         ></select>
       </div>
