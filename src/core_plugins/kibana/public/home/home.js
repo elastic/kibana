@@ -131,7 +131,7 @@ export function Home({ addBasePath, directories, directoryCategories }) {
   };
 
   return (
-    <div className="kuiView">
+    <div className="kuiView home">
       <div className="kuiViewContent kuiViewContent--constrainedWidth">
         <div className="kuiViewContentItem kuiVerticalRhythm">
           <KuiBar className="kuiVerticalRhythmSmall">
