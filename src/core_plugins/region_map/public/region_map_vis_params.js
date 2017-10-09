@@ -50,9 +50,6 @@ uiModules.get('kibana/region_map')
           $scope.vis.params.selectedJoinField = $scope.vis.params.selectedLayer.fields[0];
         }
 
-        $scope.layerId = function (layer) {
-          return (layer._selfHosted ? 'self_hosted' : 'ems') + '.' + layer.name;
-        };
       }
     };
   });
