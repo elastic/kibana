@@ -93,15 +93,15 @@ describe('KuiContextMenuPanel', () => {
       });
     });
 
-    describe('panelRef', () => {
-      it('is provided a node', () => {
-        const panelRef = sinon.stub();
+    describe('onHeightChange', () => {
+      it('is called with a height value', () => {
+        const onHeightChange = sinon.stub();
 
         mount(
-          <KuiContextMenuPanel panelRef={panelRef} />
+          <KuiContextMenuPanel onHeightChange={onHeightChange} />
         );
 
-        sinon.assert.calledWith(panelRef, sinon.match.object);
+        sinon.assert.calledWith(onHeightChange, 0);
       });
     });
 

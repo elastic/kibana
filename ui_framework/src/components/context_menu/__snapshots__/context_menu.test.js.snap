@@ -15,15 +15,23 @@ exports[`KuiContextMenu props idToPanelMap and initialPanelId renders the refere
   <div
     class="kuiContextMenuPanel kuiContextMenu__panel"
   >
-    <div
-      class="kuiPopoverTitle"
+    <button
+      class="kuiContextMenuPanelTitle"
+      data-test-subj="contextMenuPanelTitleButton"
     >
       <span
         class="kuiContextMenu__itemLayout"
       >
-        2
+        <span
+          class="kuiContextMenu__icon kuiIcon fa-angle-left"
+        />
+        <span
+          class="kuiContextMenu__text"
+        >
+          2
+        </span>
       </span>
-    </div>
+    </button>
     <div>
       2
     </div>
@@ -34,7 +42,7 @@ exports[`KuiContextMenu props idToPanelMap and initialPanelId renders the refere
 exports[`KuiContextMenu props idToPreviousPanelIdMap allows you to click the title button to go back to the previous panel 1`] = `
 <div
   class="kuiContextMenu"
-  style="height: 0px"
+  style="height: 0px;"
 >
   <div
     class="kuiContextMenuPanel kuiContextMenu__panel"
@@ -66,7 +74,7 @@ exports[`KuiContextMenu props idToPreviousPanelIdMap allows you to click the tit
 exports[`KuiContextMenu props idToPreviousPanelIdMap allows you to click the title button to go back to the previous panel 2`] = `
 <div
   class="kuiContextMenu"
-  style="height: 0px"
+  style="height: 0px;"
 >
   <div
     class="kuiContextMenuPanel kuiContextMenu__panel kuiContextMenuPanel-txOutRight"
@@ -167,7 +175,7 @@ exports[`KuiContextMenu props idToPreviousPanelIdMap allows you to click the tit
 exports[`KuiContextMenu props isVisible causes the first panel to be shown when it becomes true 1`] = `
 <div
   class="kuiContextMenu"
-  style="height: 0px"
+  style="height: 0px;"
 >
   <div
     class="kuiContextMenuPanel kuiContextMenu__panel"

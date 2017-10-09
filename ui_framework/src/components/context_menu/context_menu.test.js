@@ -18,13 +18,13 @@ const panel1 = {
   title: '1',
   items: [{
     name: '2a',
-    panel: panel2,
+    panel: 2,
   }, {
     name: '2b',
-    panel: panel2,
+    panel: 2,
   }, {
     name: '2c',
-    panel: panel2,
+    panel: 2,
   }],
 };
 
@@ -33,20 +33,15 @@ const panel0 = {
   title: '0',
   items: [{
     name: '1',
-    panel: panel1,
+    panel: 1,
   }],
 };
 
-const idToPanelMap = {
-  0: panel0,
-  1: panel1,
-  2: panel2,
-};
-
-const idToPreviousPanelIdMap = {
-  1: 0,
-  2: 1,
-};
+const panels = [
+  panel0,
+  panel1,
+  panel2,
+];
 
 describe('KuiContextMenu', () => {
   test('is rendered', () => {
@@ -63,7 +58,7 @@ describe('KuiContextMenu', () => {
       it('renders the referenced panel', () => {
         const component = render(
           <KuiContextMenu
-            idToPanelMap={idToPanelMap}
+            panels={panels}
             initialPanelId={2}
             isVisible
           />
@@ -78,8 +73,7 @@ describe('KuiContextMenu', () => {
       it('allows you to click the title button to go back to the previous panel', () => {
         const component = mount(
           <KuiContextMenu
-            idToPanelMap={idToPanelMap}
-            idToPreviousPanelIdMap={idToPreviousPanelIdMap}
+            panels={panels}
             initialPanelId={2}
             isVisible
           />
@@ -100,8 +94,7 @@ describe('KuiContextMenu', () => {
       it('causes the first panel to be shown when it becomes true', () => {
         const component = mount(
           <KuiContextMenu
-            idToPanelMap={idToPanelMap}
-            idToPreviousPanelIdMap={idToPreviousPanelIdMap}
+            panels={panels}
             initialPanelId={2}
             isVisible
           />
