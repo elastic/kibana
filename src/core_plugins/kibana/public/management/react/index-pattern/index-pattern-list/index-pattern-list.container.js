@@ -1,3 +1,4 @@
+import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { compose } from 'recompose';
 import { IndexPatternList as IndexPatternListComponent } from './index-pattern-list.component';
@@ -28,6 +29,13 @@ const IndexPatternList = compose(
     perPage: 10,
     page: 0,
   })
-)(IndexPatternListComponent);
+)(class extends Component {
+  componentWillMount() {
+    this.props.fetchIndexPatterns();
+  }
+  render() {
+    return <IndexPatternListComponent {...this.props}/>;
+  }
+});
 
 export { IndexPatternList };

@@ -1,3 +1,4 @@
+import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { compose } from 'recompose';
 import { IndexPatternView as IndexPatternViewComponent } from './index-pattern-view.component';
@@ -11,6 +12,7 @@ import {
   refreshFields,
   deleteIndexPattern,
   setDefaultIndexPattern,
+  fetchIndexPattern,
 } from 'plugins/kibana/management/react/store/actions/index-pattern-view';
 
 import {
@@ -20,7 +22,7 @@ import {
 const IndexPatternView = compose(
   connect(
     state => ({ ...getIndexPatternView(state) }),
-    { refreshFields, deleteIndexPattern, setDefaultIndexPattern },
+    { refreshFields, deleteIndexPattern, setDefaultIndexPattern, fetchIndexPattern },
   ),
   wrapWithTabsProps({
     defaults: {
@@ -36,6 +38,13 @@ const IndexPatternView = compose(
       hideRefreshFieldsConfirmation: () => ({ isShowingRefreshFieldsConfirmation: false }),
     }
   }),
-)(IndexPatternViewComponent);
+)(class extends Component {
+  componentWillMount() {
+    this.props.fetchIndexPattern(this.props.pattern);
+  }
+  render() {
+    return <IndexPatternViewComponent {...this.props}/>;
+  }
+});
 
 export { IndexPatternView };

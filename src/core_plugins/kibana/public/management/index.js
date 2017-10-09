@@ -11,12 +11,6 @@ import { management } from 'ui/management';
 import 'ui/kbn_top_nav';
 
 import { ReactApp } from './react';
-import {
-  fetchIndexPatterns,
-} from './react/store/actions/index-pattern-list';
-import {
-  getIndexPatterns,
-} from './react/store/reducers/index-pattern-list';
 
 const managementAppId = 'managementRoot';
 
@@ -46,18 +40,16 @@ uiRoutes
     ReactApp.setGlobals($injector);
     const kbnUrl = $injector.get('kbnUrl');
 
-    const { getState, dispatch } = ReactApp.getStore();
-    fetchIndexPatterns()(dispatch, getState)
-    .then(() => {
-      const indexPatterns = getIndexPatterns(getState());
-      if (indexPatterns.length > 0) {
-        ReactApp.init($injector, management);
-        ReactApp.renderIndexPatternList(managementAppId);
-      } else {
-        kbnUrl.change(`/management/kibana/index`);
-        $scope.$apply();
-      }
-    });
+    ReactApp.hasAnyIndexPatterns()
+      .then(hasAny => {
+        if (hasAny) {
+          ReactApp.init($injector, management);
+          ReactApp.renderIndexPatternList(managementAppId);
+        } else {
+          kbnUrl.change(`/management/kibana/index`);
+          $scope.$apply();
+        }
+      });
   }
 });
 

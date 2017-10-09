@@ -14,15 +14,11 @@ import {
 
 import {
   fetchIndexPatterns,
-} from './store/actions/index-pattern-list';
+} from 'plugins/kibana/management/react/store/actions/index-pattern-list';
 
 import {
-  fetchIndices,
-} from './store/actions/index-pattern-creation';
-
-import {
-  fetchIndexPattern,
-} from './store/actions/index-pattern-view';
+  getIndexPatterns,
+} from 'plugins/kibana/management/react/store/reducers/index-pattern-list';
 
 const renderPage = (page, targetId) => {
   render(
@@ -42,8 +38,6 @@ const ReactApp = {
     store.dispatch(initData(kbnVersion, managementConfig));
   },
 
-  getStore: () => store,
-
   setGlobals: $injector => {
     globals.es = $injector.get('es');
     globals.indexPatterns = $injector.get('indexPatterns');
@@ -53,17 +47,21 @@ const ReactApp = {
     globals.$http = $injector.get('$http');
   },
 
+  hasAnyIndexPatterns: async () => {
+    const { getState, dispatch } = store;
+    await fetchIndexPatterns()(dispatch, getState);
+    const indexPatterns = getIndexPatterns(getState());
+    return indexPatterns.length > 0;
+  },
+
   renderIndexPatternCreate: targetId => {
-    store.dispatch(fetchIndices('*', true));
     renderPage(<IndexPatternCreate/>, targetId);
   },
   renderIndexPatternList: targetId => {
-    store.dispatch(fetchIndexPatterns());
     renderPage(<IndexPatternList/>, targetId);
   },
   renderIndexPatternView: (targetId, pattern) => {
-    store.dispatch(fetchIndexPattern(pattern));
-    renderPage(<IndexPatternView/>, targetId);
+    renderPage(<IndexPatternView pattern={pattern}/>, targetId);
   }
 };
 

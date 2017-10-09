@@ -1,3 +1,4 @@
+import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { compose } from 'recompose';
 import { IndexPatternCreate as IndexPatternCreateComponent } from './index-pattern-create.component';
@@ -8,6 +9,7 @@ import {
 
 import {
   createIndexPattern,
+  fetchIndices,
 } from 'plugins/kibana/management/react/store/actions/index-pattern-creation';
 
 import {
@@ -17,7 +19,7 @@ import {
 const IndexPatternCreate = compose(
   connect(
     state => ({ ...getCreation(state) }),
-    { createIndexPattern },
+    { createIndexPattern, fetchIndices },
   ),
   wrapWithProps({
     props: {
@@ -28,6 +30,13 @@ const IndexPatternCreate = compose(
       excludeSystemIndices: () => ({ isIncludingSystemIndices: false }),
     }
   }),
-)(IndexPatternCreateComponent);
+)(class extends Component {
+  componentWillMount() {
+    this.props.fetchIndices('*', true);
+  }
+  render() {
+    return <IndexPatternCreateComponent {...this.props}/>;
+  }
+});
 
 export { IndexPatternCreate };
