@@ -28,7 +28,7 @@ export class LegacyAppender implements DisposableAppender {
    * @param record `LogRecord` instance to forward to.
    */
   append(record: LogRecord) {
-    this.kbnServer.server.log(
+    this.kbnServer.log(
       [record.level.id.toLowerCase(), ...record.context.split('.')],
       record.error || record.message,
       record.timestamp

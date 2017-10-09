@@ -1,6 +1,7 @@
 import * as mockSchema from '../../../../lib/schema';
 import { LogLevel } from '../../../../logging/LogLevel';
 import { LogRecord } from '../../../../logging/LogRecord';
+import { LegacyKbnServer } from '../../../LegacyKbnServer';
 import { LegacyAppender } from '../LegacyAppender';
 
 test('`createConfigSchema()` creates correct schema.', () => {
@@ -69,14 +70,14 @@ test('`append()` correctly pushes records to legacy platform.', () => {
     }
   ];
 
-  const legacyLogStub = jest.fn();
-  const appender = new LegacyAppender(
-    { server: { log: legacyLogStub } } as any
-  );
+  const rawKbnServerMock = {
+    server: { log: jest.fn() }
+  };
+  const appender = new LegacyAppender(new LegacyKbnServer(rawKbnServerMock));
 
   for (const record of records) {
     appender.append(record);
   }
 
-  expect(legacyLogStub.mock.calls).toMatchSnapshot();
+  expect(rawKbnServerMock.server.log.mock.calls).toMatchSnapshot();
 });
