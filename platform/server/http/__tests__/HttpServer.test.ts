@@ -412,7 +412,7 @@ describe('when run within legacy platform', () => {
     );
   });
 
-  it('binds proxy listener to server.', async () => {
+  test('binds proxy listener to server.', async () => {
     expect(newPlatformProxyListenerMock.bind).not.toHaveBeenCalled();
 
     await server.start(config);
@@ -426,7 +426,7 @@ describe('when run within legacy platform', () => {
     );
   });
 
-  it('forwards request to legacy platform if new one can not handle it', async () => {
+  test('forwards request to legacy platform if new one can not handle it', async () => {
     await server.start(config);
 
     await supertest((server as any).server)
@@ -442,7 +442,7 @@ describe('when run within legacy platform', () => {
       });
   });
 
-  it('do not forward request to legacy platform if new one can handle it', async () => {
+  test('do not forward request to legacy platform if new one can handle it', async () => {
     await server.start(config);
 
     await supertest((server as any).server)

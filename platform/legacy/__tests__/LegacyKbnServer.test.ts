@@ -1,6 +1,6 @@
 import { LegacyKbnServer } from '..';
 
-it('correctly returns `newPlatformProxyListener`.', () => {
+test('correctly returns `newPlatformProxyListener`.', () => {
   const rawKbnServer = {
     newPlatform: {
       proxyListener: {}
@@ -13,7 +13,7 @@ it('correctly returns `newPlatformProxyListener`.', () => {
   );
 });
 
-it('correctly forwards log record.', () => {
+test('correctly forwards log record.', () => {
   const rawKbnServer = {
     server: { log: jest.fn() }
   };
