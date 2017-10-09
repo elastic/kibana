@@ -12,3 +12,17 @@
   background-color: #272727;
   padding: 10px;
 }
+
+.guideDemo__highlightGrid {
+  .kuiFlexItem {
+    background: transparentize(#0096CC, .9);
+    padding: 16px;
+  }
+}
+
+.guideDemo__highlightGridWrap {
+  .kuiFlexItem div {
+    background: transparentize(#0096CC, .9);
+    padding: 16px;
+  }
+}
