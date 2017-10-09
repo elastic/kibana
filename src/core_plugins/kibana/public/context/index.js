@@ -9,7 +9,7 @@ import contextAppRouteTemplate from './index.html';
 
 
 uiRoutes
-.when('/context/:indexPatternId/:type/:id', {
+.when('/context/:indexPatternId/:type/:id*', {
   controller: ContextAppRouteController,
   controllerAs: 'contextAppRoute',
   resolve: {
