@@ -36,16 +36,11 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
     kibanaMapReady.then(() => {
 
       let results;
-      if (!tableGroup || !tableGroup.tables || !tableGroup.tables.length) {
+      if (!tableGroup || !tableGroup.tables || !tableGroup.tables.length || tableGroup.tables[0].columns.length !== 2) {
         results = [];
       } else {
         const buckets = tableGroup.tables[0].rows;
-        results = buckets.map((bucket) => {
-          return {
-            term: bucket[0],
-            value: bucket[1]
-          };
-        });
+        results = buckets.map(([term, value]) => { return { term: term, value: value }; });
       }
 
       if (!$scope.vis.params.selectedJoinField && $scope.vis.params.selectedLayer) {
