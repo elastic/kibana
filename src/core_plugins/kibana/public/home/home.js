@@ -4,17 +4,19 @@ import {
   KuiButton
 } from 'ui_framework/components';
 
-export function Home({ basePath, directories, directoryCategories }) {
+export function Home({ addBasePath, directories, directoryCategories }) {
 
   const renderDirectories = (category) => {
     return directories.inTitleOrder
     .filter((directory) => {
-      return directory.category === category;
+      return directory.showOnHomePage && directory.category === category;
     })
     .map((directory) => {
       return (
         <div key={directory.id}>
-          {directory.title}
+          <a href={addBasePath(directory.path)}>
+            {directory.title}
+          </a>
           {directory.description}
         </div>
       );
@@ -40,7 +42,7 @@ export function Home({ basePath, directories, directoryCategories }) {
         { renderDirectories(directoryCategories.ADMIN) }
       </div>
       <p>
-        Didn't find what you were looking for?
+        Didn&apos;t find what you were looking for?
         <KuiButton buttonType="secondary">
           <a href="#/home/directory">View directory</a>
         </KuiButton>
@@ -50,7 +52,7 @@ export function Home({ basePath, directories, directoryCategories }) {
 }
 
 Home.propTypes = {
-  basePath: PropTypes.string.isRequired,
+  addBasePath: PropTypes.func.isRequired,
   directories: PropTypes.object.isRequired,
   directoryCategories: PropTypes.object.isRequired
 };

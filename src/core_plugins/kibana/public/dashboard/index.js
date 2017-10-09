@@ -64,6 +64,7 @@ KbnDirectoryRegistryProvider.register(() => {
     id: 'dashboard',
     title: 'Dashboards',
     description: 'Create visual landing pages made up of content from other apps',
+    path: '/app/kibana#/dashboard',
     showOnHomePage: true,
     category: DirectoryCategory.DATA
   };

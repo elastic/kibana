@@ -1,13 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export function Directory({ basePath, directories }) {
+export function Directory({ addBasePath, directories }) {
 
   const renderDirectories = () => {
     return directories.inTitleOrder.map((directory) => {
       return (
         <div key={directory.id}>
-          {directory.title}
+          <a href={addBasePath(directory.path)}>
+            {directory.title}
+          </a>
           {directory.description}
         </div>
       );
@@ -26,6 +28,6 @@ export function Directory({ basePath, directories }) {
 }
 
 Directory.propTypes = {
-  basePath: PropTypes.string.isRequired,
+  addBasePath: PropTypes.func.isRequired,
   directories: PropTypes.object.isRequired
 };
