@@ -21,17 +21,24 @@ import {
 /**
  * @internal
  */
-export const injectIntoKbnServer = (kbnServer: LegacyKbnServer) => {
-  const legacyConfig$ = new BehaviorSubject(kbnServer.config);
+export const injectIntoKbnServer = (rawKbnServer: any) => {
+  const legacyConfig$ = new BehaviorSubject(rawKbnServer.config);
   const config$ = legacyConfig$.map(
     legacyConfig => new LegacyConfigToRawConfigAdapter(legacyConfig)
   );
 
-  kbnServer.updateNewPlatformConfig = (legacyConfig: LegacyConfig) => {
-    legacyConfig$.next(legacyConfig);
-  };
+  rawKbnServer.newPlatform = {
+    // Custom HTTP Listener that will be used within legacy platform by HapiJS server.
+    proxyListener: new LegacyPlatformProxifier(
+      new Root(
+        config$,
+        Env.createDefault({ kbnServer: new LegacyKbnServer(rawKbnServer) })
+      )
+    ),
 
-  kbnServer.newPlatformProxyListener = new LegacyPlatformProxifier(
-    new Root(config$, Env.createDefault({ kbnServer }))
-  );
+    // Propagates legacy config updates to the new platform.
+    updateConfig(legacyConfig: LegacyConfig) {
+      legacyConfig$.next(legacyConfig);
+    }
+  };
 };

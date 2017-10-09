@@ -1,21 +1,25 @@
-import { LegacyConfig } from './LegacyPlatformConfig';
-import { LegacyPlatformProxifier } from './LegacyPlatformProxifier';
-
 /**
- * Represents legacy kbnServer instance, provided by the legacy platform.
+ * Represents a wrapper around legacy `kbnServer` instance that exposes only
+ * a subset of `kbnServer` APIs used by the new platform.
  * @internal
  */
-export interface LegacyKbnServer {
-  readonly config: LegacyConfig;
+export class LegacyKbnServer {
+  constructor(private readonly rawKbnServer: any) {}
 
   /**
-   * Custom HTTP Listener provided by the new platform and that will be used
-   * within legacy platform by HapiJS server.
+   * Custom HTTP Listener used by HapiJS server in the legacy platform.
    */
-  newPlatformProxyListener: LegacyPlatformProxifier;
+  get newPlatformProxyListener() {
+    return this.rawKbnServer.newPlatform.proxyListener;
+  }
 
   /**
-   * Propagates legacy config updates to the new platform.
+   * Forwards log request to the legacy platform.
+   * @param tags A string or array of strings used to briefly identify the event.
+   * @param [data] Optional string or object to log with the event.
+   * @param [timestamp] Timestamp value associated with the log record.
    */
-  updateNewPlatformConfig: (legacyConfig: LegacyConfig) => void;
+  log(tags: string | string[], data?: string | Error, timestamp?: Date) {
+    this.rawKbnServer.server.log(tags, data, timestamp);
+  }
 }

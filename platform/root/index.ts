@@ -25,7 +25,7 @@ export class Root {
     private readonly env: Env,
     private readonly onShutdown: OnShutdown = () => {}
   ) {
-    const loggerFactory = new MutableLoggerFactory();
+    const loggerFactory = new MutableLoggerFactory(env);
     this.loggingService = new LoggingService(loggerFactory);
     this.logger = loggerFactory;
 
