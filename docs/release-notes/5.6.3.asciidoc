@@ -1,0 +1,30 @@
+[[release-notes-5.6.3]]
+== 5.6.3 Release Notes
+
+Also see <<breaking-changes-5.0>>.
+
+
+[float]
+[[enhancement-5.6.3]]
+=== Enhancements
+Management::
+* [Management] Allows for imports to select existing index {pull}14137[#14137]
+Platform::
+* [index patterns] Don't attempt to wrap Boom errors {pull}14253[#14253]
+* [cli/dev] rely on commander for deduping argv {pull}14181[#14181]
+Visualization::
+* [TSVB] Remove field_stats calls from 5.6 for TSVB {pull}14152[#14152]
+
+[float]
+[[bug-5.6.3]]
+=== Bug Fixes
+Management::
+* [Fixes #14350] [Management] [5.6] Fix FF quirk with max width in the import saved object modal {pull}14362[#14362]
+* [Fixes #14267] [index patterns] Fallback to id if title does not exist {pull}14302[#14302]
+Sharing::
+* [Fixes #13455] Avoid a wrapped retry and use exists instead of find, which will take up all the time allotted for the retry if it fails once {pull}13467[#13467]
+Visualization::
+* Fixes #14171 - Handle boom errors properly for vis data requests {pull}14174[#14174]
+* [Fixes #13765] limit wait time for baselayer {pull}14047[#14047]
+
+
