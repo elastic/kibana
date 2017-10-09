@@ -20,7 +20,7 @@ export const panels = handleActions({
 
   [updatePanel]: (state, action) => ({
     ...state,
-    [action.payload.panelIndex]: panel(state[action.payload.panelIndex], action.payload),
+    [action.payload.panelIndex]: panel(state[action.payload.panelIndex], action),
   }),
 }, {});
 

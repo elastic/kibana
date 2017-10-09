@@ -8,3 +8,5 @@ import { dashboardState } from './dashboard/reducers';
 export const reducers = combineReducers({
   dashboardState
 });
+
+export const getDashboardState = state => state.dashboardState;

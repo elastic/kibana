@@ -22,11 +22,11 @@ export const embeddables = handleActions({
 
   [combineActions(embeddableRenderFinished, embeddableRenderError)]: (state, action) => ({
     ...state,
-    [action.payload.panelIndex]: embeddable(state[action.payload.panelIndex], action.payload),
+    [action.payload.panelId]: embeddable(state[action.payload.panelId], action),
   }),
 }, {});
 
 export const getEmbeddable = (state, panelId) => state[panelId];
-export const getEmbeddableTitle = (state, panelId) => getTitle(getEmbeddable(panelId));
-export const getEmbeddableEditUrl = (state, panelId) => getEditUrl(getEmbeddable(panelId));
-export const getEmbeddableError = (state, panelId) => getError(getEmbeddable(panelId));
+export const getEmbeddableTitle = (state, panelId) => getTitle(getEmbeddable(state, panelId));
+export const getEmbeddableEditUrl = (state, panelId) => getEditUrl(getEmbeddable(state, panelId));
+export const getEmbeddableError = (state, panelId) => getError(getEmbeddable(state, panelId));
