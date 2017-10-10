@@ -10,7 +10,10 @@ function Agg(props) {
   if (!Component) {
     Component = StdAgg;
   }
-  const style = Object.assign({ cursor: 'default' }, props.style);
+  const style = {
+    cursor: 'default',
+    ...props.style
+  };
   return (
     <div
       aria-hidden="true"
