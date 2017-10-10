@@ -62,9 +62,8 @@ export class Directory extends React.Component {
     })
     .map((directory) => {
       return (
-        <KuiFlexItem>
+        <KuiFlexItem key={directory.id}>
           <Synopsis
-            key={directory.id}
             description={directory.description}
             title={directory.title}
             url={this.props.addBasePath(directory.path)}
