@@ -66,8 +66,6 @@
     "uiFramework:build": "grunt uiFramework:build",
     "uiFramework:createComponent": "yo ./ui_framework/generator-kui/app/component.js",
     "uiFramework:documentComponent": "yo ./ui_framework/generator-kui/app/documentation.js",
-    "ts:build": "tsc -p platform",
-    "ts:start": "tsc -p platform --watch",
     "prettier": "prettier --single-quote --write 'platform/**/*.ts' 'packages/**/*.ts' 'core_plugins/**/*.[jt]s'"
   },
   "repository": {
@@ -146,6 +144,7 @@
     "json-loader": "0.5.3",
     "json-stringify-safe": "5.0.1",
     "jstimezonedetect": "1.0.5",
+    "kbn-platform": "file:packages/kbn-platform",
     "leaflet": "1.0.3",
     "leaflet-draw": "0.4.10",
     "leaflet-responsive-popup": "0.2.0",

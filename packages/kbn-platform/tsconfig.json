@@ -1,11 +1,14 @@
 {
   "compilerOptions": {
-    "outDir": "../target/platform"
+    "declaration": true,
+    "declarationDir": "./target/tsc-types",
+    "stripInternal": true,
+    "outDir": "./target/tsc"
   },
-  "extends": "../tsconfig",
+  "extends": "../../tsconfig",
   "include": [
-    "**/*.ts",
-    "../types/index.d.ts"
+    "src/**/*.ts",
+    "../../types/index.d.ts"
   ],
   "exclude": [
     "**/__tests__/*"

@@ -4,6 +4,6 @@
     "target": "es6"
   },
   "include": [
-    "../../platform/**/*"
+    "../../packages/kbn-platform/**/*"
   ]
 }

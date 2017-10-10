@@ -1,2 +1,3 @@
 packages/kbn-types/types/
+packages/**/target
 core_plugins/**/target

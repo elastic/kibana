@@ -1,7 +1,6 @@
 /**
  * Represents a wrapper around legacy `kbnServer` instance that exposes only
  * a subset of `kbnServer` APIs used by the new platform.
- * @internal
  */
 export class LegacyKbnServer {
   constructor(private readonly rawKbnServer: any) {}

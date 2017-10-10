@@ -1,0 +1,15 @@
+{
+  "name": "kbn-platform",
+  "version": "1.0.0",
+  "private": true,
+  "types": "./target/tsc-types/index.d.ts",
+  "main": "./target/tsc/index.js",
+  "scripts": {
+    "prepare": "npm run build",
+    "build": "tsc",
+    "start": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^2.5.3"
+  }
+}

@@ -17,7 +17,6 @@ const ServerEventsToForward = [
 
 /**
  * Represents "proxy" between legacy and current platform.
- * @internal
  */
 export class LegacyPlatformProxifier extends EventEmitter {
   private readonly eventHandlers: Map<string, (...args: any[]) => void>;

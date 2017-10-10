@@ -9,6 +9,7 @@
     "start": "tsc --watch"
   },
   "devDependencies": {
+    "kbn-platform": "file:../kbn-platform",
     "typescript": "2.5.1"
   }
 }

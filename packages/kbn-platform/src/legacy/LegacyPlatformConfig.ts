@@ -3,7 +3,6 @@ import { ConfigPath } from '../config/ConfigService';
 
 /**
  * Represents legacy Kibana config class.
- * @internal
  */
 export interface LegacyConfig {
   get: (configPath: string) => any;
