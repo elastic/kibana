@@ -39,6 +39,9 @@ import EventsSandbox
 import ExpressionExample
   from '../../views/expression/expression_example';
 
+import FlexExample
+  from '../../views/flex/flex_example';
+
 import FormExample
   from '../../views/form/form_example';
 
@@ -171,6 +174,9 @@ const components = [{
   name: 'Expression',
   component: ExpressionExample,
   hasReact: true,
+}, {
+  name: 'Flex',
+  component: FlexExample,
 }, {
   name: 'Form',
   component: FormExample,
