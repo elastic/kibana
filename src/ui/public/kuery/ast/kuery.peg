@@ -47,7 +47,7 @@ start
     return query;
   }
   / whitespace:[\ \t\r\n]* {
-    return addMeta(nodeTypes.function.buildNode('is', '*', '*'), text(), location());
+    return addMeta(nodeTypes.function.buildNode('and', [], 'implicit'), text(), location());
   }
 
 OrQuery
