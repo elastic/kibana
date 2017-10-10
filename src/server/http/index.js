@@ -7,7 +7,7 @@ import getDefaultRoute from './get_default_route';
 import versionCheckMixin from './version_check';
 import { handleShortUrlError } from './short_url_error';
 import { shortUrlAssertValid } from './short_url_assert_valid';
-import shortUrlLookupProvider from './short_url_lookup';
+import ShortUrlLookup from './short_url_lookup';
 import setupConnectionMixin from './setup_connection';
 import setupRedirectMixin from './setup_redirect_server';
 import registerHapiPluginsMixin from './register_hapi_plugins';
@@ -16,7 +16,6 @@ import xsrfMixin from './xsrf';
 export default async function (kbnServer, server, config) {
   server = kbnServer.server = new Hapi.Server();
 
-  const shortUrlLookup = shortUrlLookupProvider(server);
   await kbnServer.mixin(setupConnectionMixin);
   await kbnServer.mixin(setupRedirectMixin);
   await kbnServer.mixin(registerHapiPluginsMixin);
@@ -127,8 +126,10 @@ export default async function (kbnServer, server, config) {
     method: 'GET',
     path: '/goto/{urlId}',
     handler: async function (request, reply) {
+      const shortUrlLookup = new ShortUrlLookup(server.log, request.getSavedObjectsClient());
+
       try {
-        const url = await shortUrlLookup.getUrl(request.params.urlId, request);
+        const url = await shortUrlLookup.getUrl(request.params.urlId);
         shortUrlAssertValid(url);
 
         const uiSettings = request.getUiSettingsService();
@@ -152,9 +153,11 @@ export default async function (kbnServer, server, config) {
     method: 'POST',
     path: '/shorten',
     handler: async function (request, reply) {
+      const shortUrlLookup = new ShortUrlLookup(server.log, request.getSavedObjectsClient());
+
       try {
         shortUrlAssertValid(request.payload.url);
-        const urlId = await shortUrlLookup.generateUrlId(request.payload.url, request);
+        const urlId = await shortUrlLookup.generateUrlId(request.payload.url);
         reply(urlId);
       } catch (err) {
         reply(handleShortUrlError(err));
