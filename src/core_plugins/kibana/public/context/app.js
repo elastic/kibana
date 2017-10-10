@@ -59,11 +59,10 @@ function ContextAppController($scope, config, Private, timefilter) {
     this.discoverUrl,
   );
 
-  this.actions = _.mapValues(Object.assign(
-    {},
-    queryParameterActions,
-    queryActions,
-  ), (action) => (...args) => action(this.state)(...args));
+  this.actions = _.mapValues({
+    ...queryParameterActions,
+    ...queryActions,
+  }, (action) => (...args) => action(this.state)(...args));
 
   this.constants = {
     FAILURE_REASONS,

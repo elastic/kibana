@@ -5,12 +5,13 @@ export function buildQueryFromKuery(indexPattern, queries) {
   const queryASTs = _.map(queries, query => fromKueryExpression(query.query));
   const compoundQueryAST = nodeTypes.function.buildNode('and', queryASTs);
   const kueryQuery = toElasticsearchQuery(compoundQueryAST, indexPattern);
-  return Object.assign({
+  return {
     must: [],
     filter: [],
     should: [],
     must_not: [],
-  }, kueryQuery.bool);
+    ...kueryQuery.bool
+  };
 }
 
 

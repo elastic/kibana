@@ -10,7 +10,10 @@ export function fromKueryExpression(expression, parseOptions = {}) {
     throw new Error('expression must be a string, got undefined instead');
   }
 
-  parseOptions = Object.assign({}, parseOptions, { helpers: { nodeTypes } });
+  parseOptions = {
+    ...parseOptions,
+    helpers: { nodeTypes }
+  };
 
   return kueryParser.parse(expression, parseOptions);
 }

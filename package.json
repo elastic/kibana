@@ -210,7 +210,7 @@
     "yauzl": "2.7.0"
   },
   "devDependencies": {
-    "@elastic/eslint-config-kibana": "0.11.0",
+    "@elastic/eslint-config-kibana": "0.12.0",
     "@elastic/eslint-import-resolver-kibana": "github:spalger/eslint-import-resolver-kibana#upgrade/webpack-3",
     "@elastic/eslint-plugin-kibana-custom": "1.0.3",
     "angular-mocks": "1.4.7",
@@ -229,6 +229,7 @@
     "eslint-plugin-import": "2.3.0",
     "eslint-plugin-jest": "21.0.0",
     "eslint-plugin-mocha": "4.9.0",
+    "eslint-plugin-prefer-object-spread": "1.2.1",
     "eslint-plugin-react": "7.1.0",
     "event-stream": "3.3.2",
     "expect.js": "0.3.1",
