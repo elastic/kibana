@@ -68,6 +68,10 @@ export class KuiContextMenu extends Component {
   constructor(props) {
     super(props);
 
+    this.idToPanelMap = {};
+    this.idToPreviousPanelIdMap = {};
+    this.idAndItemIndexToPanelIdMap = {};
+
     this.state = {
       height: undefined,
       outgoingPanelId: undefined,
@@ -75,14 +79,11 @@ export class KuiContextMenu extends Component {
       transitionDirection: undefined,
       isOutgoingPanelVisible: false,
       focusedItemIndex: undefined,
-      idToPanelMap: {},
-      idToPreviousPanelIdMap: {},
-      idAndItemIndexToPanelIdMap: {},
     };
   }
 
   hasPreviousPanel = panelId => {
-    const previousPanelId = this.state.idToPreviousPanelIdMap[panelId];
+    const previousPanelId = this.idToPreviousPanelIdMap[panelId];
     return typeof previousPanelId !== 'undefined';
   };
 
@@ -96,7 +97,7 @@ export class KuiContextMenu extends Component {
   }
 
   showNextPanel = itemIndex => {
-    const nextPanelId = this.state.idAndItemIndexToPanelIdMap[this.state.incomingPanelId][itemIndex];
+    const nextPanelId = this.idAndItemIndexToPanelIdMap[this.state.incomingPanelId][itemIndex];
     if (nextPanelId) {
       this.showPanel(nextPanelId, 'next');
     }
@@ -105,10 +106,10 @@ export class KuiContextMenu extends Component {
   showPreviousPanel = () => {
     // If there's a previous panel, then we can close the current panel to go back to it.
     if (this.hasPreviousPanel(this.state.incomingPanelId)) {
-      const previousPanelId = this.state.idToPreviousPanelIdMap[this.state.incomingPanelId];
+      const previousPanelId = this.idToPreviousPanelIdMap[this.state.incomingPanelId];
 
       // Set focus on the item which shows the panel we're leaving.
-      const previousPanel = this.state.idToPanelMap[previousPanelId];
+      const previousPanel = this.idToPanelMap[previousPanelId];
       const focusedItemIndex = previousPanel.items.findIndex(
         item => item.panel === this.state.incomingPanelId
       );
@@ -136,15 +137,9 @@ export class KuiContextMenu extends Component {
   }
 
   updatePanelMaps(panels) {
-    const idToPanelMap = mapIdsToPanels(panels);
-    const idToPreviousPanelIdMap = mapIdsToPreviousPanels(panels);
-    const idAndItemIndexToPanelIdMap = mapPanelItemsToPanels(panels);
-
-    this.setState({
-      idToPanelMap,
-      idToPreviousPanelIdMap,
-      idAndItemIndexToPanelIdMap,
-    });
+    this.idToPanelMap = mapIdsToPanels(panels);
+    this.idToPreviousPanelIdMap = mapIdsToPreviousPanels(panels);
+    this.idAndItemIndexToPanelIdMap = mapPanelItemsToPanels(panels);
   }
 
   componentWillMount() {
@@ -202,7 +197,7 @@ export class KuiContextMenu extends Component {
   }
 
   renderPanel(panelId, transitionType) {
-    const panel = this.state.idToPanelMap[panelId];
+    const panel = this.idToPanelMap[panelId];
 
     if (!panel) {
       return;
