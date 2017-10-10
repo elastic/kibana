@@ -92,7 +92,12 @@ describe('plugins/elasticsearch', function () {
 
       it('passes only whitelisted headers', () => {
         const headers = { authorization: 'Basic TEST' };
-        const request = { headers: Object.assign({}, headers, { foo: 'Foo' }) };
+        const request = {
+          headers: {
+            ...headers,
+            foo: 'Foo'
+          }
+        };
 
         cluster.callWithRequest(request, 'nodes.info');
 
