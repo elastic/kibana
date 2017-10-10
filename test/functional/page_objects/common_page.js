@@ -29,10 +29,11 @@ export function CommonPageProvider({ getService, getPageObjects }) {
      * @param {string} subUrl The route after the hash (#)
      */
     navigateToUrl(appName, subUrl) {
-      const appConfig = Object.assign({}, config.get(['apps', appName]), {
+      const appConfig = {
+        ...config.get(['apps', appName]),
         // Overwrite the default hash with the URL we really want.
         hash: `${appName}/${subUrl}`,
-      });
+      };
 
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
       return remote.get(appUrl);
