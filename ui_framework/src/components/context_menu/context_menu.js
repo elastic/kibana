@@ -50,17 +50,16 @@ export class KuiContextMenu extends Component {
   constructor(props) {
     super(props);
 
-    this.resetTransitionTimeout = undefined;
     this.itemIndexToPanelIdMap = {};
     this.panelIdToItemIndexMap = {};
 
     this.state = {
       height: undefined,
-      outGoingPanelId: undefined,
-      currentPanelId: props.initialPanelId,
+      outgoingPanelId: undefined,
+      incomingPanelId: props.initialPanelId,
       transitionDirection: undefined,
-      isTransitioning: false,
-      focusItemIndex: undefined,
+      isOutgoingPanelVisible: false,
+      focusedItemIndex: undefined,
       idToPanelMap: {},
       idToPreviousPanelIdMap: {},
     };
@@ -72,21 +71,12 @@ export class KuiContextMenu extends Component {
   };
 
   showPanel(panelId, direction) {
-    clearTimeout(this.resetTransitionTimeout);
-
     this.setState({
-      outGoingPanelId: this.state.currentPanelId,
-      currentPanelId: panelId,
+      outgoingPanelId: this.state.incomingPanelId,
+      incomingPanelId: panelId,
       transitionDirection: direction,
-      isTransitioning: true,
+      isOutgoingPanelVisible: true,
     });
-
-    // Queue the transition to reset.
-    this.resetTransitionTimeout = setTimeout(() => {
-      this.setState({
-        isTransitioning: false,
-      });
-    }, 250);
   }
 
   showNextPanel = itemIndex => {
@@ -98,18 +88,18 @@ export class KuiContextMenu extends Component {
 
   showPreviousPanel = () => {
     // If there's a previous panel, then we can close the current panel to go back to it.
-    if (this.hasPreviousPanel(this.state.currentPanelId)) {
-      const previousPanelId = this.state.idToPreviousPanelIdMap[this.state.currentPanelId];
+    if (this.hasPreviousPanel(this.state.incomingPanelId)) {
+      const previousPanelId = this.state.idToPreviousPanelIdMap[this.state.incomingPanelId];
 
       // Set focus on the item which shows the panel we're leaving.
       const previousPanel = this.state.idToPanelMap[previousPanelId];
-      const focusItemIndex = previousPanel.items.findIndex(
-        item => item.panel === this.state.currentPanelId
+      const focusedItemIndex = previousPanel.items.findIndex(
+        item => item.panel === this.state.incomingPanelId
       );
 
-      if (focusItemIndex !== -1) {
+      if (focusedItemIndex !== -1) {
         this.setState({
-          focusItemIndex,
+          focusedItemIndex,
         });
       }
 
@@ -117,9 +107,15 @@ export class KuiContextMenu extends Component {
     }
   };
 
-  onCurrentPanelHeightChange = height => {
+  onIncomingPanelHeightChange = height => {
     this.setState({
       height,
+    });
+  }
+
+  onOutGoingPanelTransitionComplete = () => {
+    this.setState({
+      isOutgoingPanelVisible: false,
     });
   }
 
@@ -141,27 +137,16 @@ export class KuiContextMenu extends Component {
     // If the user is opening the context menu, reset the state.
     if (nextProps.isVisible && !this.props.isVisible) {
       this.setState({
-        outGoingPanelId: undefined,
-        currentPanelId: nextProps.initialPanelId,
+        outgoingPanelId: undefined,
+        incomingPanelId: nextProps.initialPanelId,
         transitionDirection: undefined,
-        focusItemIndex: undefined,
+        focusedItemIndex: undefined,
       });
     }
 
     if (nextProps.panels !== this.props.panels) {
       this.updatePanelMaps(nextProps.panels);
     }
-  }
-
-  componentDidUpdate() {
-    // Make sure we don't steal focus while the ContextMenu is closed.
-    if (!this.props.isVisible) {
-      return;
-    }
-  }
-
-  componentWillUnmount() {
-    clearTimeout(this.resetTransitionTimeout);
   }
 
   renderItems(items = []) {
@@ -229,18 +214,18 @@ export class KuiContextMenu extends Component {
       <KuiContextMenuPanel
         key={panelId}
         className="kuiContextMenu__panel"
-        onHeightChange={(transitionType === 'in') ? this.onCurrentPanelHeightChange : undefined}
+        onHeightChange={(transitionType === 'in') ? this.onIncomingPanelHeightChange : undefined}
+        onTransitionComplete={(transitionType === 'out') ? this.onOutGoingPanelTransitionComplete : undefined}
         title={panel.title}
         onClose={onClose}
         transitionType={transitionType}
         transitionDirection={this.state.transitionDirection}
-        isTransitioning={this.state.isTransitioning}
-        isActive={transitionType === 'in'}
+        hasFocus={transitionType === 'in'}
         items={this.renderItems(panel.items)}
-        focusItemIndex={
+        focusedItemIndex={
           // Set focus on the item which shows the panel we're leaving.
           transitionType === 'in' && this.state.transitionDirection === 'previous'
-          ? this.state.focusItemIndex
+          ? this.state.focusedItemIndex
           : undefined
         }
         showNextPanel={this.showNextPanel}
@@ -260,12 +245,11 @@ export class KuiContextMenu extends Component {
       ...rest,
     } = this.props;
 
-    const currentPanel = this.renderPanel(this.state.currentPanelId, 'in');
-    let outGoingPanel;
+    const incomingPanel = this.renderPanel(this.state.incomingPanelId, 'in');
+    let outgoingPanel;
 
-    // Hide the out-going panel as soon as it's done transitioning, so it can't take focus.
-    if (this.state.isTransitioning) {
-      outGoingPanel = this.renderPanel(this.state.outGoingPanelId, 'out');
+    if (this.state.isOutgoingPanelVisible) {
+      outgoingPanel = this.renderPanel(this.state.outgoingPanelId, 'out');
     }
 
     const classes = classNames('kuiContextMenu', className);
@@ -277,8 +261,8 @@ export class KuiContextMenu extends Component {
         style={{ height: this.state.height }}
         {...rest}
       >
-        {outGoingPanel}
-        {currentPanel}
+        {outgoingPanel}
+        {incomingPanel}
       </div>
     );
   }

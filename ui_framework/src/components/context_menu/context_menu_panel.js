@@ -29,16 +29,16 @@ export class KuiContextMenuPanel extends Component {
     onHeightChange: PropTypes.func,
     transitionType: PropTypes.oneOf(['in', 'out']),
     transitionDirection: PropTypes.oneOf(['next', 'previous']),
-    isTransitioning: PropTypes.bool,
-    isActive: PropTypes.bool,
+    onTransitionComplete: PropTypes.func,
+    hasFocus: PropTypes.bool,
     items: PropTypes.array,
     showNextPanel: PropTypes.func,
     showPreviousPanel: PropTypes.func,
-    focusItemIndex: PropTypes.number,
+    focusedItemIndex: PropTypes.number,
   }
 
   static defaultProps = {
-    isActive: true,
+    hasFocus: true,
     items: [],
   }
 
@@ -50,6 +50,7 @@ export class KuiContextMenuPanel extends Component {
 
   state = {
     pressedArrowDirection: undefined,
+    isTransitioning: true,
   }
 
   onKeyDown = e => {
@@ -105,7 +106,7 @@ export class KuiContextMenuPanel extends Component {
 
   updateFocusedMenuItem() {
     // If this panel isn't active, don't focus any items.
-    if (!this.props.isActive) {
+    if (!this.props.hasFocus) {
       if (this.isMenuItemFocused()) {
         document.activeElement.blur();
       }
@@ -114,14 +115,14 @@ export class KuiContextMenuPanel extends Component {
 
     // Setting focus while transitioning causes the animation to glitch, so we have to wait
     // until it's finished before we focus anything.
-    if (this.props.isTransitioning) {
+    if (this.state.isTransitioning) {
       return;
     }
 
     // If we're active, but nothing is focused then we should focus the first item.
     if (!this.isMenuItemFocused()) {
-      if (this.props.focusItemIndex !== undefined) {
-        this.menuItems[this.props.focusItemIndex].focus();
+      if (this.props.focusedItemIndex !== undefined) {
+        this.menuItems[this.props.focusedItemIndex].focus();
         return;
       }
 
@@ -167,10 +168,26 @@ export class KuiContextMenuPanel extends Component {
     }
   }
 
+  onTransitionComplete = () => {
+    this.setState({
+      isTransitioning: false,
+    });
+
+    if (this.props.onTransitionComplete) {
+      this.props.onTransitionComplete();
+    }
+  }
+
   componentWillReceiveProps(nextProps) {
     // Clear refs to menuItems if we're getting new ones.
-    if (this.props.items !== nextProps.items) {
+    if (nextProps.items !== this.props.items) {
       this.menuItems = [];
+    }
+
+    if (nextProps.transitionType !== this.props.transitionType) {
+      this.setState({
+        isTransitioning: true,
+      });
     }
   }
 
@@ -180,6 +197,10 @@ export class KuiContextMenuPanel extends Component {
 
   componentDidUpdate() {
     this.updateFocusedMenuItem();
+  }
+
+  componentWillUnmount() {
+    this.panel.removeEventListener('animationend', this.onTransitionComplete);
   }
 
   menuItemRef = (index, node) => {
@@ -194,6 +215,7 @@ export class KuiContextMenuPanel extends Component {
   panelRef = node => {
     if (node) {
       this.panel = node;
+      this.panel.addEventListener('animationend', this.onTransitionComplete);
 
       if (this.props.onHeightChange) {
         this.props.onHeightChange(node.clientHeight);
@@ -210,10 +232,10 @@ export class KuiContextMenuPanel extends Component {
       onHeightChange, // eslint-disable-line no-unused-vars
       transitionType,
       transitionDirection,
-      isTransitioning,
-      isActive, // eslint-disable-line no-unused-vars
+      onTransitionComplete, // eslint-disable-line no-unused-vars
+      hasFocus, // eslint-disable-line no-unused-vars
       items,
-      focusItemIndex, // eslint-disable-line no-unused-vars
+      focusedItemIndex, // eslint-disable-line no-unused-vars
       showNextPanel, // eslint-disable-line no-unused-vars
       showPreviousPanel, // eslint-disable-line no-unused-vars
       ...rest,
@@ -249,7 +271,7 @@ export class KuiContextMenuPanel extends Component {
     }
 
     const classes = classNames('kuiContextMenuPanel', className, (
-      isTransitioning && transitionDirectionAndTypeToClassNameMap[transitionDirection]
+      this.state.isTransitioning && transitionDirectionAndTypeToClassNameMap[transitionDirection]
       ? transitionDirectionAndTypeToClassNameMap[transitionDirection][transitionType]
       : ''
     ));
