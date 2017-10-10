@@ -187,6 +187,14 @@ Start the development server.
 
 > On Windows, you'll need you use Git Bash, Cygwin, or a similar shell that exposes the `sh` command.  And to successfully build you'll need Cygwin optional packages zip, tar, and shasum.
 
+
+Your server starts and is completly started when the following lines appears - it can take time, be patient
+  ```log
+  optmzr    log   [10:04:17.202] [info][optimize] Lazy optimization success in 346.83 seconds
+  optmzr    log   [10:09:41.637] [info][optimize] Lazy optimization started
+  optmzr    log   [10:10:09.761] [info][optimize] Lazy optimization success in 28.17 seconds
+  ```
+   
 Now you can point your web browser to https://localhost:5601 and start using Kibana! When running `npm start`, Kibana will also log that it is listening on port 5603 due to the base path proxy, but you should still access Kibana on port 5601.
 
 #### Customizing `config/kibana.dev.yml`
