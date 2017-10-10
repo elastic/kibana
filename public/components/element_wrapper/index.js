@@ -4,7 +4,8 @@ import { get } from 'lodash';
 import { ElementWrapper as Component } from './element_wrapper';
 import { removeElement, setPosition } from '../../state/actions/elements';
 import { selectElement } from '../../state/actions/transient';
-import { getFullscreen } from '../../state/selectors/app';
+import { getFullscreen, getEditing } from '../../state/selectors/app';
+
 import {
   getSelectedElementId,
   getResolvedArgs,
@@ -16,26 +17,27 @@ import { createHandlers } from './lib/handlers';
 
 const mapStateToProps = (state, { element }) => ({
   isFullscreen: getFullscreen(state),
+  isEditing: getEditing(state),
   resolvedArg: getResolvedArgs(state, element.id, 'expressionRenderable'),
   isSelected: element.id === getSelectedElementId(state),
   selectedPage: getSelectedPage(state),
 });
 
 const mapDispatchToProps = (dispatch, { element }) => ({
-  selectElement: isFullscreen => () => !isFullscreen && dispatch(selectElement(element.id)),
+  selectElement: isInteractable => () => isInteractable && dispatch(selectElement(element.id)),
   removeElement: (pageId) => () => dispatch(removeElement(element.id, pageId)),
   setPosition: (pageId) => (position) => dispatch(setPosition(element.id, pageId, position)),
   handlers: (pageId) => createHandlers(element, pageId, dispatch),
 });
 
 const mergeProps = (stateProps, dispatchProps, { element }) => {
-  const { resolvedArg, selectedPage, isSelected, isFullscreen } = stateProps;
+  const { resolvedArg, selectedPage, isSelected, isFullscreen, isEditing } = stateProps;
   const renderable = getValue(resolvedArg);
 
   return {
     position: element.position,
     setPosition: dispatchProps.setPosition(selectedPage),
-    selectElement: dispatchProps.selectElement(isFullscreen),
+    selectElement: dispatchProps.selectElement(!isFullscreen && isEditing),
     removeElement: dispatchProps.removeElement(selectedPage),
     handlers: dispatchProps.handlers(selectedPage),
     isSelected: isSelected,
