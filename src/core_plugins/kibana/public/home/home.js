@@ -29,9 +29,8 @@ export function Home({ addBasePath, directories, directoryCategories }) {
     })
     .map((directory) => {
       return (
-        <KuiFlexItem>
+        <KuiFlexItem key={directory.id}>
           <Synopsis
-            key={directory.id}
             description={directory.description}
             title={directory.title}
             url={addBasePath(directory.path)}
