@@ -12,7 +12,10 @@ export function createAdminCluster(server) {
 
   const adminCluster = server.plugins.elasticsearch.createCluster(
     'admin',
-    Object.assign({ log: AdminClientLogging }, config.get('elasticsearch'))
+    {
+      log: AdminClientLogging,
+      ...config.get('elasticsearch')
+    }
   );
 
   server.on('close', bindKey(adminCluster, 'close'));

@@ -60,6 +60,12 @@ export {
 } from './expression';
 
 export {
+  KuiFlexGroup,
+  KuiFlexGrid,
+  KuiFlexItem,
+} from './flex';
+
+export {
   KuiFieldGroup,
   KuiFieldGroupSection,
 } from './form_layout';

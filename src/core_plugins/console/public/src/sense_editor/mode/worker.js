@@ -1,4 +1,5 @@
 /* eslint import/no-unresolved: 0 */
+/* global define */
 (function (window) {
   "use strict";
 
