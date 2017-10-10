@@ -19,11 +19,11 @@ export const KuiTextInput = ({
   size,
   ...rest
 }) => {
-  const classes = classNames('kuiTextInput', className,
-    { 'kuiTextInput-isInvalid': isInvalid },
-    { 'kuiTextInput--small': size === 'small' },
-    { 'kuiTextInput--large': size === 'large' },
-  );
+  const classes = classNames('kuiTextInput', className, {
+    'kuiTextInput-isInvalid': isInvalid,
+    'kuiTextInput--small': size === 'small',
+    'kuiTextInput--large': size === 'large',
+  });
 
   return (
     <input

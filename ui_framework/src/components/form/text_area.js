@@ -19,12 +19,12 @@ export const KuiTextArea = ({
   size,
   ...rest
 }) => {
-  const classes = classNames('kuiTextArea', className,
-    { 'kuiTextArea-isInvalid': isInvalid },
-    { 'kuiTextArea--nonResizable': isNonResizable },
-    { 'kuiTextArea--small': size === 'small' },
-    { 'kuiTextArea--large': size === 'large' },
-  );
+  const classes = classNames('kuiTextArea', className, {
+    'kuiTextArea-isInvalid': isInvalid,
+    'kuiTextArea--nonResizable': isNonResizable,
+    'kuiTextArea--small': size === 'small',
+    'kuiTextArea--large': size === 'large'
+  });
 
   return (
     <textarea
