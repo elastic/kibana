@@ -164,10 +164,6 @@ export default class BaseOptimizer {
             loader: 'jade-loader'
           },
           {
-            test: /\.json$/,
-            loader: 'json-loader'
-          },
-          {
             test: /\.(html|tmpl)$/,
             loader: 'raw-loader'
           },
