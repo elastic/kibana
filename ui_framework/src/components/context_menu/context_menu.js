@@ -17,7 +17,7 @@ function mapIdsToPanels(panels) {
   return map;
 }
 
-function extractPreviousIds(panels) {
+function mapIdsToPreviousPanels(panels) {
   const idToPreviousPanelIdMap = {};
 
   panels.forEach(panel => {
@@ -32,6 +32,24 @@ function extractPreviousIds(panels) {
   });
 
   return idToPreviousPanelIdMap;
+}
+
+function mapPanelItemsToPanels(panels) {
+  const idAndItemIndexToPanelIdMap = {};
+
+  panels.forEach(panel => {
+    idAndItemIndexToPanelIdMap[panel.id] = {};
+
+    if (panel.items) {
+      panel.items.forEach((item, index) => {
+        if (item.panel) {
+          idAndItemIndexToPanelIdMap[panel.id][index] = item.panel;
+        }
+      });
+    }
+  });
+
+  return idAndItemIndexToPanelIdMap;
 }
 
 export class KuiContextMenu extends Component {
@@ -50,9 +68,6 @@ export class KuiContextMenu extends Component {
   constructor(props) {
     super(props);
 
-    this.itemIndexToPanelIdMap = {};
-    this.panelIdToItemIndexMap = {};
-
     this.state = {
       height: undefined,
       outgoingPanelId: undefined,
@@ -62,6 +77,7 @@ export class KuiContextMenu extends Component {
       focusedItemIndex: undefined,
       idToPanelMap: {},
       idToPreviousPanelIdMap: {},
+      idAndItemIndexToPanelIdMap: {},
     };
   }
 
@@ -80,7 +96,7 @@ export class KuiContextMenu extends Component {
   }
 
   showNextPanel = itemIndex => {
-    const nextPanelId = this.itemIndexToPanelIdMap[itemIndex];
+    const nextPanelId = this.state.idAndItemIndexToPanelIdMap[this.state.incomingPanelId][itemIndex];
     if (nextPanelId) {
       this.showPanel(nextPanelId, 'next');
     }
@@ -121,11 +137,13 @@ export class KuiContextMenu extends Component {
 
   updatePanelMaps(panels) {
     const idToPanelMap = mapIdsToPanels(panels);
-    const idToPreviousPanelIdMap = extractPreviousIds(panels);
+    const idToPreviousPanelIdMap = mapIdsToPreviousPanels(panels);
+    const idAndItemIndexToPanelIdMap = mapPanelItemsToPanels(panels);
 
     this.setState({
       idToPanelMap,
       idToPreviousPanelIdMap,
+      idAndItemIndexToPanelIdMap,
     });
   }
 
@@ -188,19 +206,6 @@ export class KuiContextMenu extends Component {
 
     if (!panel) {
       return;
-    }
-
-    // TODO: Build this data structure once, e.g. constructor + willReceiveProps.
-    if (transitionType === 'in') {
-      this.itemIndexToPanelIdMap = {};
-
-      if (panel.items) {
-        panel.items.forEach((item, index) => {
-          if (item.panel) {
-            this.itemIndexToPanelIdMap[index] = item.panel;
-          }
-        });
-      }
     }
 
     // As above, we need to wait for KuiOutsideClickDetector to complete its logic before
