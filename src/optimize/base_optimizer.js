@@ -72,18 +72,7 @@ export default class BaseOptimizer {
   }
 
   getConfig() {
-    const devtool = this.sourceMaps;
-    const unsafeCache = this.unsafeCache;
-    const contextDir = fromRoot('.');
-    const entry = this.bundles.toWebpackEntries();
-    const profile = this.profile || false;
-    const outputDir = this.env.workingDir;
-    const noParse = this.env.noParse;
-    const postLoaders = this.env.postLoaders;
-    const alias = this.env.aliases;
-    const bundleHash = this.bundles.hashBundleEntries();
-    const lessCacheDir = resolve(outputDir, '../.cache', bundleHash, 'less');
-    const babelCacheDir = resolve(outputDir, '../.cache', bundleHash, 'babel');
+    const cacheDirectory = resolve(this.env.workingDir, '../.cache', this.bundles.hashBundleEntries());
 
     function getStyleLoaders(preProcessors = [], postProcessors = []) {
       return ExtractTextPlugin.extract({
@@ -113,14 +102,14 @@ export default class BaseOptimizer {
 
     const commonConfig = {
       node: { fs: 'empty' },
-      context: contextDir,
-      entry,
+      context: fromRoot('.'),
+      entry: this.bundles.toWebpackEntries(),
 
-      devtool,
-      profile,
+      devtool: this.sourceMaps,
+      profile: this.profile || false,
 
       output: {
-        path: outputDir,
+        path: this.env.workingDir,
         filename: '[name].bundle.js',
         sourceMapFilename: '[file].map',
         publicPath: PUBLIC_PATH_PLACEHOLDER,
@@ -149,7 +138,7 @@ export default class BaseOptimizer {
               [{
                 loader: 'cache-loader',
                 options: {
-                  cacheDirectory: lessCacheDir,
+                  cacheDirectory: resolve(cacheDirectory, 'less'),
                 }
               }]
             ),
@@ -177,12 +166,12 @@ export default class BaseOptimizer {
           },
           {
             test: /\.js$/,
-            exclude: BABEL_EXCLUDE_RE.concat(noParse),
+            exclude: BABEL_EXCLUDE_RE.concat(this.env.noParse),
             use: [
               {
                 loader: 'cache-loader',
                 options: {
-                  cacheDirectory: babelCacheDir,
+                  cacheDirectory: resolve(cacheDirectory, 'babel'),
                 }
               },
               {
@@ -196,12 +185,12 @@ export default class BaseOptimizer {
               },
             ],
           },
-          ...postLoaders.map(loader => ({
+          ...this.env.postLoaders.map(loader => ({
             enforce: 'post',
             ...loader
           })),
         ],
-        noParse,
+        noParse: this.env.noParse,
       },
 
       resolve: {
@@ -210,11 +199,11 @@ export default class BaseOptimizer {
         modules: [
           'webpackShims',
           'node_modules',
-          resolve(contextDir, 'webpackShims'),
-          resolve(contextDir, 'node_modules'),
+          fromRoot('webpackShims'),
+          fromRoot('node_modules'),
         ],
-        alias,
-        unsafeCache,
+        alias: this.env.aliases,
+        unsafeCache: this.unsafeCache,
       },
 
       resolveLoader: {
