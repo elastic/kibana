@@ -16,26 +16,29 @@ export default function codeViewerReducer(state = defaultState, action) {
 
       if (state.code === source) {
         // If we are opening the existing code, then close the viewer.
-        return Object.assign({}, state, {
+        return {
+          ...state,
           isOpen: false,
           source: undefined,
           title: undefined,
-        });
+        };
       }
 
-      return Object.assign({}, state, {
+      return {
+        ...state,
         isOpen: true,
         source,
         title,
-      });
+      };
     }
 
     case LOCATION_CHANGE: // Close Code Viewer when we navigate somewhere.
     case ActionTypes.CLOSE_CODE_VIEWER: {
-      return Object.assign({}, state, {
+      return {
+        ...state,
         isOpen: false,
         source: undefined,
-      });
+      };
     }
 
     default:
