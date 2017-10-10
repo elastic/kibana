@@ -1,19 +1,9 @@
+@import (reference) "~ui/styles/variables.less";
+
 .home {
-  background-color: #F5F5F5;
-  height: 100vh;
+  background-color: @globalColorLightestGray;
+  min-height: 100vh;
 }
-
-.homeDirectoryPreview {
-  display: flex;
-}
-
-  .homeDirectoryPreview__panel {
-    flex: 1 1 0;
-
-    & + & {
-      margin-left: 30px;
-    }
-  }
 
 .kuiCardGroup .kuiCard {
   flex: 1 1 0 !important;

@@ -3,7 +3,9 @@ import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
 import {
   KuiTabs,
-  KuiTab
+  KuiTab,
+  KuiFlexItem,
+  KuiFlexGrid,
 } from 'ui_framework/components';
 
 const allCategories = 'all';
@@ -60,12 +62,14 @@ export class Directory extends React.Component {
     })
     .map((directory) => {
       return (
-        <Synopsis
-          key={directory.id}
-          description={directory.description}
-          title={directory.title}
-          url={this.props.addBasePath(directory.path)}
-        />
+        <KuiFlexItem>
+          <Synopsis
+            key={directory.id}
+            description={directory.description}
+            title={directory.title}
+            url={this.props.addBasePath(directory.path)}
+          />
+        </KuiFlexItem>
       );
     });
   };
@@ -81,7 +85,9 @@ export class Directory extends React.Component {
           <KuiTabs>
             {this.renderTabs()}
           </KuiTabs>
-          { this.renderDirectories() }
+          <KuiFlexGrid columns={4}>
+            { this.renderDirectories() }
+          </KuiFlexGrid>
         </div>
       </div>
     );

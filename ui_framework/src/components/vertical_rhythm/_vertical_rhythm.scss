@@ -9,3 +9,15 @@
     margin-top: $verticalRhythmSmallSpacing;
   }
 }
+
+.kuiVerticalRhythmLarge {
+  & + & {
+    margin-top: $verticalRhythmLargeSpacing;
+  }
+}
+
+.kuiVerticalRhythmXLarge {
+  & + & {
+    margin-top: $verticalRhythmXLargeSpacing;
+  }
+}
