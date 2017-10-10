@@ -23,7 +23,7 @@ const Input = ({ name, value, inputRef, label, type = 'text', placeholder, defau
         style={{ width: '100%' }}
         id={htmlId(name)}
         className={`vis_editor__input`}
-        value={String(value || defaultValue)}
+        value={value || defaultValue || null}
         placeholder={placeholder}
         onChange={handleChange(name)}
         ref={inputRef}

@@ -37,7 +37,6 @@ class VisEditor extends Component {
   }
 
   handleChange = part => {
-    console.log(part);
     const nextModel = { ...this.state.model, ...part };
 
     this.props.vis.params = nextModel;

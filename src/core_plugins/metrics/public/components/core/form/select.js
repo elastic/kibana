@@ -20,12 +20,13 @@ const Input = ({ name, value, inputRef, label, placeholder, onChange = () => {},
   const handleChange = createSelectHandler(onChange);
 
   return (
-    <div>
+    <div className="vis_editor__item">
       <label className="vis_editor__label" htmlFor={htmlId(name)}>
         {label}
       </label>
-      <div className="vis_editor__item">
+      <div>
         <Select
+          style={{ width: '100%' }}
           ref={inputRef}
           placeholder={placeholder}
           inputProps={{ id: htmlId(name) }}
@@ -33,7 +34,7 @@ const Input = ({ name, value, inputRef, label, placeholder, onChange = () => {},
           disabled={disabled}
           options={options}
           value={String(value)}
-          onChange={handleChange('split_color_mode')}
+          onChange={handleChange(name)}
         />
       </div>
     </div>

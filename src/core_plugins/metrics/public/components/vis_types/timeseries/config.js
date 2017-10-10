@@ -64,10 +64,10 @@ function TimeseriesConfig(props) {
             value={model.stacked}
           />
           <Form.Stepper label="Fill Opacity" onChange={onChange} name="fill" step="0.1" max={1} min={0} value={model.fill} />
-          <Form.Stepper label="Line Width" onChange={onChange} name="lineWidth" max={50} min={0} value={model.lineWidth} />
+          <Form.Stepper label="Line Width" onChange={onChange} name="line_width" max={50} min={0} value={model.line_width} />
           {model.chart_type === 'line' && (
             <div>
-              <Form.Stepper label="Point Size" onChange={onChange} name="pointSize" max={100} min={0} value={model.pointSize} />
+              <Form.Stepper label="Point Size" onChange={onChange} name="point_size" max={100} min={0} value={model.point_size} />
               <Form.YesNo label="Steps" onChange={onChange} name="steps" max={100} min={0} value={model.steps} />
             </div>
           )}

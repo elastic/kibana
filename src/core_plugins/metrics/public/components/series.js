@@ -18,7 +18,6 @@ const lookup = {
 };
 
 class Series extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -75,11 +74,10 @@ class Series extends Component {
         toggleVisible: this.toggleVisible,
         visible: this.state.visible
       };
-      return (<Component {...params}/>);
+      return <Component {...params} />;
     }
-    return (<div>Missing Series component for panel type: {panel.type}</div>);
+    return <div>Missing Series component for panel type: {panel.type}</div>;
   }
-
 }
 
 Series.defaultProps = {
@@ -103,7 +101,7 @@ Series.propTypes = {
   onTouchStart: PropTypes.func,
   model: PropTypes.object,
   panel: PropTypes.object,
-  sortData: PropTypes.string,
+  sortData: PropTypes.string
 };
 
 export default sortable(Series);
