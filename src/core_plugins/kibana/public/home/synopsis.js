@@ -1,19 +1,26 @@
 import './synopsis.less';
 import React from 'react';
 import PropTypes from 'prop-types';
+import {
+  KuiFlexGroup,
+  KuiFlexItem
+} from 'ui_framework/components';
 
 export function Synopsis({ description, title, url }) {
   return (
-    <div>
-      <h4 className="kuiTextTitle kuiVerticalRhythmSmall">
-        <a href={url} className="kuiLink">
-          {title}
-        </a>
-      </h4>
-      <p className="kuiText kuiSubduedText kuiVerticalRhythmSmall">
-        {description}
-      </p>
-    </div>
+    <KuiFlexGroup>
+      <KuiFlexItem grow={false}>Icon</KuiFlexItem>
+      <KuiFlexItem>
+        <h4 className="kuiTextTitle">
+          <a href={url} className="kuiLink">
+            {title}
+          </a>
+        </h4>
+        <p className="kuiText kuiSubduedText">
+          {description}
+        </p>
+      </KuiFlexItem>
+    </KuiFlexGroup>
   );
 }
 
