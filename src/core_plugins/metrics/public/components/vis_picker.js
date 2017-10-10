@@ -15,7 +15,7 @@ const VisPicker = ({ onChange, model }) => (
     <KuiLocalNavRow isSecondary>
       <KuiLocalTabs>
         {nav.map(({ label, type }) => (
-          <KuiLocalTab onClick={() => onChange({ type })} isSelected={type === model.type}>
+          <KuiLocalTab key={type} onClick={() => onChange({ type })} isSelected={type === model.type}>
             {label}
           </KuiLocalTab>
         ))}

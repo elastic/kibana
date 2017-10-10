@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
-import Select from 'react-select';
-import { durationOutputOptions, durationInputOptions } from '../../lib/component_utils/durations';
+import { Form } from './core';
+import { durationOutputOptions, durationInputOptions } from '../lib/component_utils/durations';
 const durationFormatTest = /[pnumshdwMY]+,[pnumshdwMY]+/;
 
 class DataFormatPicker extends Component {
@@ -76,60 +76,48 @@ class DataFormatPicker extends Component {
       { label: 'Custom', value: 'custom' }
     ];
 
-    let custom;
     if (defaultValue === 'duration') {
       const [from, to, decimals] = value.split(',');
       return (
         <div className="vis_editor__data_format_picker-container">
-          <div className="vis_editor__label">{this.props.label}</div>
-          <div className="vis_editor__item">
-            <Select clearable={false} value={defaultValue} options={options} onChange={this.handleChange} />
-          </div>
-          <div className="vis_editor__label">From</div>
-          <div className="vis_editor__item">
-            <Select clearable={false} value={from} options={durationInputOptions} onChange={this.handleDurationChange('from')} />
-          </div>
-          <div className="vis_editor__label">To</div>
-          <div className="vis_editor__item">
-            <Select clearable={false} value={to} options={durationOutputOptions} onChange={this.handleDurationChange('to')} />
-          </div>
-          <div className="vis_editor__label">Decimal Places</div>
-          <input
-            className="vis_editor__input"
-            defaultValue={decimals}
-            ref={el => (this.decimals = el)}
+          <Form.Select label={this.props.label} clearable={false} value={defaultValue} options={options} onChange={this.handleChange} />
+          <Form.Select
+            label="From"
+            clearable={false}
+            value={from}
+            options={durationInputOptions}
+            onChange={this.handleDurationChange('from')}
+          />
+          <Form.Select label="To" clearable={false} value={to} options={durationOutputOptions} onChange={this.handleDurationChange('to')} />
+          <Form.Stepper
+            label="Decimal Places"
+            inputRef={el => (this.decimals = el)}
+            value={decimals}
+            options={durationInputOptions}
+            min={0}
+            max={20}
             onChange={this.handleDurationChange('decimals')}
-            type="text"
           />
         </div>
       );
     }
-    if (defaultValue === 'custom') {
-      custom = (
-        <div className="vis_editor__data_format_picker-custom_row">
-          <div className="vis_editor__label">
-            Format String (See{' '}
-            <a href="http://numeraljs.com/" target="_BLANK">
-              Numeral.js
-            </a>)
-          </div>
-          <input
-            className="vis_editor__input"
-            defaultValue={value}
-            ref={el => (this.custom = el)}
-            onChange={this.handleCustomChange}
-            type="text"
-          />
-        </div>
-      );
-    }
+
     return (
       <div className="vis_editor__data_format_picker-container">
-        <div className="vis_editor__label">{this.props.label}</div>
-        <div className="vis_editor__item">
-          <Select clearable={false} value={defaultValue} options={options} onChange={this.handleChange} />
-        </div>
-        {custom}
+        <Form.Select label={this.props.label} clearable={false} value={defaultValue} options={options} onChange={this.handleChange} />
+
+        {defaultValue === 'custom' && (
+          <div className="vis_editor__data_format_picker-custom_row">
+            <Form.Text
+              label="Numeral.js Format String"
+              onChange={this.handleCustomChange}
+              name="custom_format"
+              defaultValue={value}
+              assistText="API docs"
+              assistLink="http://numeraljs.com/"
+            />
+          </div>
+        )}
       </div>
     );
   }
