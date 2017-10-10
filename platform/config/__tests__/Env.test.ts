@@ -17,7 +17,7 @@ test('correctly creates default environment with empty options.', () => {
 
   expect(defaultEnv.homeDir).toEqual('/test/cwd');
   expect(defaultEnv.configDir).toEqual('/test/cwd/config');
-  expect(defaultEnv.pluginsDir).toEqual('/test/cwd/core_plugins');
+  expect(defaultEnv.corePluginsDir).toEqual('/test/cwd/core_plugins');
   expect(defaultEnv.binDir).toEqual('/test/cwd/bin');
   expect(defaultEnv.logDir).toEqual('/test/cwd/log');
   expect(defaultEnv.staticFilesDir).toEqual('/test/cwd/ui');
@@ -38,7 +38,7 @@ test('correctly creates default environment with options overrides.', () => {
 
   expect(defaultEnv.homeDir).toEqual('/test/cwd');
   expect(defaultEnv.configDir).toEqual('/test/cwd/config');
-  expect(defaultEnv.pluginsDir).toEqual('/test/cwd/core_plugins');
+  expect(defaultEnv.corePluginsDir).toEqual('/test/cwd/core_plugins');
   expect(defaultEnv.binDir).toEqual('/test/cwd/bin');
   expect(defaultEnv.logDir).toEqual('/test/cwd/log');
   expect(defaultEnv.staticFilesDir).toEqual('/test/cwd/ui');
@@ -59,7 +59,7 @@ test('correctly creates environment with constructor.', () => {
 
   expect(defaultEnv.homeDir).toEqual('/some/home/dir');
   expect(defaultEnv.configDir).toEqual('/some/home/dir/config');
-  expect(defaultEnv.pluginsDir).toEqual('/some/home/dir/core_plugins');
+  expect(defaultEnv.corePluginsDir).toEqual('/some/home/dir/core_plugins');
   expect(defaultEnv.binDir).toEqual('/some/home/dir/bin');
   expect(defaultEnv.logDir).toEqual('/some/home/dir/log');
   expect(defaultEnv.staticFilesDir).toEqual('/some/home/dir/ui');

@@ -11,7 +11,7 @@ interface EnvOptions {
 
 export class Env {
   readonly configDir: string;
-  readonly pluginsDir: string;
+  readonly corePluginsDir: string;
   readonly binDir: string;
   readonly logDir: string;
   readonly staticFilesDir: string;
@@ -28,7 +28,7 @@ export class Env {
    */
   constructor(readonly homeDir: string, private readonly options: EnvOptions) {
     this.configDir = resolve(this.homeDir, 'config');
-    this.pluginsDir = resolve(this.homeDir, 'core_plugins');
+    this.corePluginsDir = resolve(this.homeDir, 'core_plugins');
     this.binDir = resolve(this.homeDir, 'bin');
     this.logDir = resolve(this.homeDir, 'log');
     this.staticFilesDir = resolve(this.homeDir, 'ui');
@@ -42,7 +42,7 @@ export class Env {
   }
 
   getPluginDir(pluginName: string) {
-    return resolve(this.pluginsDir, pluginName, 'target', 'dist');
+    return resolve(this.corePluginsDir, pluginName, 'target', 'dist');
   }
 
   /**

@@ -56,16 +56,16 @@ export class PluginsService implements CoreService {
    * of plugins.
    */
   private readPlugins() {
-    const { pluginsDir } = this.env;
+    const { corePluginsDir } = this.env;
 
     return (
-      readDir$(pluginsDir)
+      readDir$(corePluginsDir)
         // flatten the dirs so the rest of the flow will see individual dirs
         // instead of an array of dirs
         .mergeMap(pluginNames => pluginNames)
         // skip all files, only keep plugin directories
         .filter(pluginName =>
-          statSync(resolve(pluginsDir, pluginName)).isDirectory()
+          statSync(resolve(corePluginsDir, pluginName)).isDirectory()
         )
         .map(pluginName => this.createPlugin(pluginName))
     );
