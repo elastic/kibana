@@ -3,6 +3,7 @@ import { compose, withState } from 'recompose';
 
 import { getEditing } from '../../state/selectors/app';
 import { getSelectedPage, getSelectedElement, getSelectedElementId, getSelectedPageIndex } from '../../state/selectors/workpad';
+import { getAssets } from '../../state/selectors/assets';
 import { addElement, elementLayer } from '../../state/actions/elements';
 import { nextPage, previousPage } from '../../state/actions/pages';
 
@@ -14,6 +15,7 @@ const mapStateToProps = (state) => ({
   selectedPageNumber: getSelectedPageIndex(state) + 1,
   elementIsSelected: getSelectedElement(state) ? true : false,
   selectedElementId: getSelectedElementId(state),
+  hasAssets: Object.keys(getAssets(state)).length ? true : false,
 });
 
 const mapDispatchToProps = (dispatch) => ({

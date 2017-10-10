@@ -16,6 +16,7 @@ import './toolbar.less';
 
 export const Toolbar = (props) => {
   const { editing,
+    hasAssets,
     tray,
     setTray,
     addElement,
@@ -68,10 +69,11 @@ export const Toolbar = (props) => {
           <i className="fa fa-plus" /> Elements
         </NavbarButton>
 
-        <NavbarButton onClick={() => showHideTray('assetManager')}>
-          <i className="fa fa-image" /> Assets
-        </NavbarButton>
-
+        { hasAssets &&
+          <NavbarButton onClick={() => showHideTray('assetManager')}>
+            <i className="fa fa-image" /> Assets
+          </NavbarButton>
+        }
 
         { elementIsSelected && (
           <span>
@@ -108,6 +110,7 @@ export const Toolbar = (props) => {
 
 Toolbar.propTypes = {
   editing: PropTypes.bool,
+  hasAssets: PropTypes.bool,
   tray: PropTypes.node,
   setTray: PropTypes.func.isRequired,
   addElement: PropTypes.func.isRequired,
