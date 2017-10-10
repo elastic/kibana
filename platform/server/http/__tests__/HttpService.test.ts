@@ -28,7 +28,7 @@ test('creates an http server', () => {
   expect(mockHttpServer.mock.instances.length).toBe(1);
 });
 
-test('starts http server', () => {
+test('starts http server', async () => {
   const config = {
     port: 1234,
     host: 'example.org'
@@ -49,12 +49,12 @@ test('starts http server', () => {
     new Env('/kibana', {})
   );
 
-  service.start();
+  await service.start();
 
   expect(httpServer.start).toHaveBeenCalledTimes(1);
 });
 
-test('logs error is already started', () => {
+test('logs error is already started', async () => {
   const config = {} as HttpConfig;
 
   const config$ = new BehaviorSubject(config);
@@ -72,12 +72,12 @@ test('logs error is already started', () => {
     new Env('/kibana', {})
   );
 
-  service.start();
+  await service.start();
 
   expect(logger._collect()).toMatchSnapshot();
 });
 
-test('stops http server', () => {
+test('stops http server', async () => {
   const config = {} as HttpConfig;
 
   const config$ = new BehaviorSubject(config);
@@ -95,11 +95,11 @@ test('stops http server', () => {
     new Env('/kibana', {})
   );
 
-  service.start();
+  await service.start();
 
   expect(httpServer.stop).toHaveBeenCalledTimes(0);
 
-  service.stop();
+  await service.stop();
 
   expect(httpServer.stop).toHaveBeenCalledTimes(1);
 });

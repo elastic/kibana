@@ -43,21 +43,22 @@ export class HttpServer {
 
     this.log.info(`starting http server [${config.host}:${config.port}]`);
 
-    return promisify(this.server.listen).call(
+    await promisify(this.server.listen).call(
       this.server,
       config.port,
       config.host
     );
   }
 
-  stop() {
+  async stop() {
     this.log.info('stopping http server');
 
     if (this.server === undefined) {
       return;
     }
 
-    this.server.close();
+    await promisify(this.server.close).call(this.server);
+
     this.server = undefined;
   }
 
