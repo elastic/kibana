@@ -2,16 +2,22 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Toggle } from '../toggle';
 import { FullscreenControl } from '../fullscreen_control';
-
+import { Shortcuts } from 'react-shortcuts';
 import './workpad_header.less';
+
 const btnClass = 'canvas__workpad_header--button';
 
 export const WorkpadHeader = ({ workpadName, editing, inFlight, toggleEditing }) => {
+  const keyHandler = (action) => {
+    if (action === 'EDITING') toggleEditing();
+  };
+
   return (
     <div className="canvas__workpad_header">
       <h2>
         { workpadName }
-        <span className={`canvas__workpad_header--editToggle ${btnClass}`}>
+        <span className={`canvas__workpad_header--editToggle ${btnClass} ${inFlight && 'canvas__in_flight'}`}>
+          <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global/>
           <Toggle value={editing} onChange={toggleEditing} />
         </span>
         <FullscreenControl>
@@ -21,11 +27,6 @@ export const WorkpadHeader = ({ workpadName, editing, inFlight, toggleEditing })
             </span>
           )}
         </FullscreenControl>
-        { inFlight && (
-          <span className={btnClass}>
-            <i className="fa fa-spinner fa-pulse" />
-          </span>
-        ) }
       </h2>
     </div>
   );

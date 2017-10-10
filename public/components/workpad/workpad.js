@@ -6,24 +6,24 @@ import { Fullscreen } from '../fullscreen';
 import './workpad.less';
 
 export const Workpad = (props) => {
-  const { elements, style, workpad, undoHistory, redoHistory, nextPage, previousPage } = props;
+  const { elements, style, workpad, fetchAllRenderables, undoHistory, redoHistory, nextPage, previousPage, isFullscreen } = props;
   const { height, width } = workpad;
   const itsTheNewStyle = Object.assign({}, style, { height, width });
 
-  const workpadHandler = (action) => {
+  const keyHandler = (action) => {
+    if (action === 'REFRESH') return fetchAllRenderables();
     if (action === 'UNDO') return undoHistory();
     if (action === 'REDO') return redoHistory();
-  };
-
-  const presentationHandler = isFullscreen => (action) => {
-    if (!isFullscreen) return;
-    if (action === 'PREV') return nextPage();
-    if (action === 'NEXT') return previousPage();
+    if (action === 'PREV') return previousPage();
+    if (action === 'NEXT') return nextPage();
   };
 
   return (
-    <Shortcuts name="WORKPAD" handler={workpadHandler} targetNodeSelector="body" global>
       <div className="canvas__checkered" style={{ height, width }}>
+        {!isFullscreen &&
+          <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global/>
+        }
+
         <Fullscreen>
           {({ isFullscreen, windowSize }) => {
             const scale = Math.min(windowSize.height / height, windowSize.width / width);
@@ -34,34 +34,37 @@ export const Workpad = (props) => {
             };
 
             return (
-              <Shortcuts
-                name="PRESENTATION"
-                handler={presentationHandler(isFullscreen)}
-                targetNodeSelector="body"
-              >
                 <div
                   className={`canvas__workpad ${isFullscreen ? 'fullscreen' : ''}`}
                   style={{ ...itsTheNewStyle, ...fsStyle }}
                 >
+                  { isFullscreen &&
+                    <Shortcuts
+                      name="PRESENTATION"
+                      handler={keyHandler}
+                      targetNodeSelector="body"
+                    />
+                  }
+
                   { elements.map(element => (
                     <ElementWrapper key={element.id} element={element} />
                   ))}
                 </div>
-              </Shortcuts>
             );
           }}
         </Fullscreen>
       </div>
-    </Shortcuts>
   );
 };
 
 Workpad.propTypes = {
   elements: PropTypes.array.isRequired,
+  isFullscreen: PropTypes.bool.isRequired,
   workpad: PropTypes.object.isRequired,
   undoHistory: PropTypes.func.isRequired,
   redoHistory: PropTypes.func.isRequired,
   nextPage: PropTypes.func.isRequired,
   previousPage: PropTypes.func.isRequired,
+  fetchAllRenderables: PropTypes.func.isRequired,
   style: PropTypes.object,
 };

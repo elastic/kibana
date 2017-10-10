@@ -1,20 +1,12 @@
-const undoCombo = 'ctrl+z';
-const redoCombo = 'ctrl+shift+y';
-
 export const keymap = {
-  WORKPAD: {
-    UNDO: {
-      osx: 'meta+z',
-      windows: undoCombo,
-      linux: undoCombo,
-      other: undoCombo,
-    },
-    REDO: {
-      osx: 'meta+shift+z',
-      windows: redoCombo,
-      linux: redoCombo,
-      other: redoCombo,
-    },
+  EDITOR: {
+    UNDO: 'ctrl+z',
+    REDO: 'ctrl+shift+y',
+    NEXT: 'alt+right',
+    PREV: 'alt+left',
+    FULLSCREEN: ['alt+p', 'alt+f'],
+    EDITING: ['alt+e'],
+    REFRESH: 'alt+r',
   },
   ELEMENT: {
     DELETE: 'del',
@@ -22,5 +14,6 @@ export const keymap = {
   PRESENTATION: {
     NEXT: ['space', 'right'],
     PREV: 'left',
+    REFRESH: 'alt+r',
   },
 };
