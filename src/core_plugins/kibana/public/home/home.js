@@ -68,7 +68,7 @@ export function Home({ addBasePath, directories, directoryCategories }) {
             <KuiCardFooter>
               <KuiLinkButton
                 buttonType="secondary"
-                href={addBasePath('/app/kibana#/home/directory/data_sources')}
+                href={addBasePath('/app/kibana#/home/integrations')}
               >
                 Learn more
               </KuiLinkButton>
@@ -94,7 +94,7 @@ export function Home({ addBasePath, directories, directoryCategories }) {
             <KuiCardFooter>
               <KuiLinkButton
                 buttonType="secondary"
-                href={addBasePath('/app/kibana#/home/directory/data_sources')}
+                href={addBasePath('/app/kibana#/home/integrations')}
               >
                 Select data source
               </KuiLinkButton>
@@ -120,7 +120,7 @@ export function Home({ addBasePath, directories, directoryCategories }) {
             <KuiCardFooter>
               <KuiLinkButton
                 buttonType="secondary"
-                href={addBasePath('/app/kibana#/home/directory/data_sources')}
+                href={addBasePath('/app/kibana#/home/integrations')}
               >
                 Select data source
               </KuiLinkButton>
@@ -146,7 +146,7 @@ export function Home({ addBasePath, directories, directoryCategories }) {
             <KuiCardFooter>
               <KuiLinkButton
                 buttonType="secondary"
-                href={addBasePath('/app/kibana#/home/directory/data_sources')}
+                href={addBasePath('/app/kibana#/home/integrations')}
               >
                 Select data source
               </KuiLinkButton>
@@ -164,7 +164,7 @@ export function Home({ addBasePath, directories, directoryCategories }) {
           <KuiBar className="kuiVerticalRhythmSmall">
             <KuiBarSection>
               <div className="kuiTitle">
-                Add data to Kibana
+                Integrations
               </div>
             </KuiBarSection>
 
@@ -194,28 +194,6 @@ export function Home({ addBasePath, directories, directoryCategories }) {
         </div>
 
         <div className="kuiViewContentItem kuiVerticalRhythmXLarge">
-          <KuiBar className="kuiVerticalRhythmSmall">
-            <KuiBarSection>
-              <div className="kuiTitle">
-                Feature directory
-              </div>
-            </KuiBarSection>
-
-            <KuiBarSection>
-              <KuiFieldGroup>
-                <KuiFieldGroupSection>
-                  <KuiButton buttonType="secondary">
-                    <a href="#/home/directory">View full feature directory</a>
-                  </KuiButton>
-                </KuiFieldGroupSection>
-              </KuiFieldGroup>
-            </KuiBarSection>
-          </KuiBar>
-
-          <p className="kuiText kuiSubduedText kuiVerticalRhythm kuiVerticalRhythmSmall">
-            Use Kibana to visualize data and adminster your Elastic stack.
-          </p>
-
           <KuiFlexGroup className="kuiVerticalRhythm">
             <KuiFlexItem className="kuiPanel">
               <div className="kuiPanelBody">
@@ -238,8 +216,23 @@ export function Home({ addBasePath, directories, directoryCategories }) {
               </div>
             </KuiFlexItem>
           </KuiFlexGroup>
+        </div>
+
+        <div className="kuiViewContentItem kuiVerticalRhythmXLarge center">
+
+          <h4 className="kuiSubduedText kuiVerticalRhythmSmall">
+            {`Didn't find what you were looking for?`}
+          </h4>
+
+          <KuiButton
+            className="kuiVerticalRhythmSmall"
+            buttonType="secondary"
+          >
+            <a href="#/home/directory">View full directory of Kibana features</a>
+          </KuiButton>
 
         </div>
+
       </div>
     </div>
   );

@@ -80,7 +80,7 @@ export class Directory extends React.Component {
         <div className="kuiViewContent kuiViewContent--constrainedWidth">
           <a className="kuiLink" href="#/home">Home</a> / Directory
           <h2 className="kuiTitle">
-            Directory
+            Feature Directory
           </h2>
           <KuiTabs>
             {this.renderTabs()}
