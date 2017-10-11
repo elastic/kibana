@@ -142,7 +142,6 @@ export default class extends Component {
       >
         <KuiContextMenu
           initialPanelId={0}
-          isVisible={this.state.isPopoverOpen}
           panels={this.panels}
         />
       </KuiPopover>

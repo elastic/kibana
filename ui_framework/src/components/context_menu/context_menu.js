@@ -57,12 +57,10 @@ export class KuiContextMenu extends Component {
     className: PropTypes.string,
     panels: PropTypes.array,
     initialPanelId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    isVisible: PropTypes.bool.isRequired,
   }
 
   static defaultProps = {
     panels: [],
-    isVisible: true,
   }
 
   constructor(props) {
@@ -154,16 +152,6 @@ export class KuiContextMenu extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    // If the user is opening the context menu, reset the state.
-    if (nextProps.isVisible && !this.props.isVisible) {
-      this.setState({
-        outgoingPanelId: undefined,
-        incomingPanelId: nextProps.initialPanelId,
-        transitionDirection: undefined,
-        focusedItemIndex: undefined,
-      });
-    }
-
     if (nextProps.panels !== this.props.panels) {
       this.updatePanelMaps(nextProps.panels);
     }
@@ -244,7 +232,6 @@ export class KuiContextMenu extends Component {
       panels, // eslint-disable-line no-unused-vars
       className,
       initialPanelId, // eslint-disable-line no-unused-vars
-      isVisible, // eslint-disable-line no-unused-vars
       ...rest,
     } = this.props;
 
