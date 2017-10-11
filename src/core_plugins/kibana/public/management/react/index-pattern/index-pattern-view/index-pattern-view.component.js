@@ -83,12 +83,12 @@ const IndexPatternView = ({
         </KuiPageContentHeaderSection>
         <KuiPageContentHeaderSection>
           <KuiButtonIcon
-            iconType="user"
+            iconType="faceHappy"
             onClick={showRefreshFieldsConfirmation}
           />
           &nbsp;
           <KuiButtonIcon
-            iconType="lock"
+            iconType="trash"
             onClick={() => deleteIndexPattern(id)}
           />
         </KuiPageContentHeaderSection>

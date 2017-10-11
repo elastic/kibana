@@ -17,6 +17,3 @@ export const timeField = handleActions({
     };
   }
 }, defaultState);
-
-
-export const getTimeField = state => state.selected;

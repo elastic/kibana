@@ -47,6 +47,6 @@ export const getSearchIndicesFiltered = (state, isIncludingSystemIndices) => {
 export const getSearchPattern = state => getIndices(state).pattern;
 export const getSearchHasExactMatches = state => getIndices(state).hasExactMatches;
 
-export const getTimeField = state => state.timeField;
+export const getTimeField = state => state.timeField.selected;
 export const getTimeFields = state => state.timeFields;
 
