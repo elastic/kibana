@@ -60,7 +60,7 @@ const Cell = ({ children, align, size }) => {
   return <div className={`tsvb-grid-cell ${sizeCSS} ${alignCSS}`}>{children}</div>;
 };
 
-Grid.propTypes = {
+Cell.propTypes = {
   align: PropTypes.string,
   size: PropTypes.string
 };

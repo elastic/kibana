@@ -23,7 +23,7 @@ const Row = ({ children, align }) => {
   return <div className={`tsvb-grid ${alignCSS}`}>{children}</div>;
 };
 
-Grid.propTypes = {
+Row.propTypes = {
   align: PropTypes.string
 };
 export default Row;

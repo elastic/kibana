@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 
-const Grid = ({ children, align, gutter = true, isContainer = false, full = false, ...rest }) => {
+const Grid = ({ children, align, gutter = true, isContainer = false, ...rest }) => {
   let alignCSS = 'tsvb-grid';
   switch (align) {
     case 'top':
