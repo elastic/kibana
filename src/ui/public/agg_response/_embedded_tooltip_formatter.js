@@ -47,10 +47,10 @@ export function EmbeddedTooltipFormatterProvider($rootScope, $compile, Private, 
       setTimeRange = (timeRange) => {
         savedObject.vis.aggs.forEach(agg => {
           if (agg.type.name !== 'date_histogram') return;
-          agg.params.timeRange = {
+          agg.setTimeRange({
             min: new Date(timeRange.min),
             max: new Date(timeRange.max)
-          };
+          });
         });
       };
       initEmbedded = () => {

@@ -7,7 +7,8 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
 
   describe('tooltip', function describeIndexTests() {
-    const embeddedVisName = 'embedded data table';
+    const embeddedDataTableVisName = 'embedded data table';
+    const embeddedDateHistogramVisName = 'embedded date histogram';
     before(async function () {
 
       //Create saved visualization for embedded tooltip
@@ -25,7 +26,24 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickGo();
       await PageObjects.header.waitUntilLoadingHasFinished();
       log.debug('saving vis for embedding tests');
-      await PageObjects.visualize.saveVisualization(embeddedVisName);
+      await PageObjects.visualize.saveVisualization(embeddedDataTableVisName);
+
+      //Create saved visualization for embedded tooltip - with date histogram agg
+      log.debug('navigateToApp visualize');
+      await PageObjects.common.navigateToUrl('visualize', 'new');
+      log.debug('clickVerticalBarChart');
+      await PageObjects.visualize.clickVerticalBarChart();
+      await PageObjects.visualize.clickNewSearch();
+      log.debug('Bucket = X-Axis');
+      await PageObjects.visualize.clickBucket('X-Axis');
+      log.debug('Aggregation = Date Histogram');
+      await PageObjects.visualize.selectAggregation('Date Histogram');
+      log.debug('Field = @timestamp');
+      await PageObjects.visualize.selectField('@timestamp');
+      await PageObjects.visualize.clickGo();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      log.debug('saving vis for embedding tests');
+      await PageObjects.visualize.saveVisualization(embeddedDateHistogramVisName);
 
       const fromTime = '2015-09-20 00:30:00.000';
       const toTime = '2015-09-22 21:30:00.000';
@@ -95,7 +113,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickVisEditorTab('options');
         await PageObjects.visualize.openTooltipSettings();
         await PageObjects.visualize.setTooltipType('visTooltipOption');
-        await PageObjects.visualize.setReactSelect('.vis-react-select', embeddedVisName);
+        await PageObjects.visualize.setReactSelect('.vis-react-select', embeddedDataTableVisName);
         await PageObjects.visualize.clickGo();
         await PageObjects.header.waitUntilLoadingHasFinished();
       });
@@ -140,6 +158,27 @@ export default function ({ getService, getPageObjects }) {
           '15'
         ];
         expect(tooltipContent.split('\n').slice(0, 11)).to.eql(expected);
+      });
+    });
+
+    describe('embedded vis tooltip - time axis', async () => {
+      before(async function () {
+        await PageObjects.visualize.clickVisEditorTab('options');
+        await PageObjects.visualize.openTooltipSettings();
+        await PageObjects.visualize.setTooltipType('visTooltipOption');
+        await PageObjects.visualize.setReactSelect('.vis-react-select', embeddedDateHistogramVisName);
+        await PageObjects.visualize.clickGo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+      });
+
+      it('should display embedded tooltip with time range of moused over bar', async () => {
+        const bars = await find.allByCssSelector('rect[data-label="Count"]');
+        await remote.moveMouseTo(bars[5]);
+        await PageObjects.common.sleep(250); // give time for tooltip to open - its on debounce
+        const tooltipTimeAxis = await find.byCssSelector('div[class="vis-tooltip"] .x.axis');
+        const tooltipTimeAxisContent = await tooltipTimeAxis.getVisibleText();
+        const expected = [ '05:15', '05:30', '05:45' ];
+        expect(tooltipTimeAxisContent.split('\n')).to.eql(expected);
       });
     });
   });
