@@ -351,7 +351,7 @@ export class Table extends Component {
             <KuiFieldSearch fullWidth placeholder="Search..." />
           </KuiFlexItem>
           <KuiFlexItem grow={false}>
-            <KuiButton type="primary">Filter</KuiButton>
+            <KuiButton type="primary">Add new thing</KuiButton>
           </KuiFlexItem>
         </KuiFlexGroup>
 
