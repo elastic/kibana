@@ -29,56 +29,6 @@ exports[`DashboardPanel matches snapshot 1`] = `
             role="button"
             tabindex="0"
           />
-          <div
-            class="kuiPopover__body"
-          >
-            <ul
-              class="kuiMenu"
-            >
-              <li
-                class="kuiMenuItem dashboardPanelMenuItem"
-                data-test-subj="dashboardPanelEditLink"
-              >
-                <span
-                  aria-hidden="true"
-                  class="kuiButton__icon kuiIcon fa-edit"
-                />
-                <p
-                  class="kuiText"
-                >
-                  Edit Visualization
-                </p>
-              </li>
-              <li
-                class="kuiMenuItem dashboardPanelMenuItem"
-                data-test-subj="dashboardPanelExpandIcon"
-              >
-                <span
-                  aria-hidden="true"
-                  class="kuiButton__icon kuiIcon fa-expand"
-                />
-                <p
-                  class="kuiText"
-                >
-                  Full screen
-                </p>
-              </li>
-              <li
-                class="kuiMenuItem dashboardPanelMenuItem"
-                data-test-subj="dashboardPanelRemoveIcon"
-              >
-                <span
-                  aria-hidden="true"
-                  class="kuiButton__icon kuiIcon fa-trash"
-                />
-                <p
-                  class="kuiText"
-                >
-                  Delete from dashboard
-                </p>
-              </li>
-            </ul>
-          </div>
         </div>
       </div>
     </div>

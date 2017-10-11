@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-export const KuiExpressionItemButton = ({
+export const KuiExpressionButton = ({
   className,
   description,
   buttonValue,
@@ -10,8 +10,8 @@ export const KuiExpressionItemButton = ({
   onClick,
   ...rest
 }) => {
-  const classes = classNames('kuiExpressionItem__button', className, {
-    'kuiExpressionItem__button--isActive': isActive
+  const classes = classNames('kuiExpressionButton', className, {
+    'kuiExpressionButton-isActive': isActive
   });
 
   return (
@@ -20,16 +20,20 @@ export const KuiExpressionItemButton = ({
       onClick={onClick}
       {...rest}
     >
-      <span className="kuiExpressionItem__buttonDescription">{description}</span>{' '}
-      <span className="kuiExpressionItem__buttonValue">{buttonValue}</span>
+      <span className="kuiExpressionButton__description">{description}</span>{' '}
+      <span className="kuiExpressionButton__value">{buttonValue}</span>
     </button>
   );
 };
 
-KuiExpressionItemButton.propTypes = {
+KuiExpressionButton.propTypes = {
   className: PropTypes.string,
   description: PropTypes.string.isRequired,
   buttonValue: PropTypes.string.isRequired,
   isActive: PropTypes.bool.isRequired,
   onClick: PropTypes.func.isRequired,
+};
+
+KuiExpressionButton.defaultProps = {
+  isActive: false,
 };
