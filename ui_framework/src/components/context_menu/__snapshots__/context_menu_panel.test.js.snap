@@ -5,14 +5,18 @@ exports[`KuiContextMenuPanel is rendered 1`] = `
   aria-label="aria-label"
   class="kuiContextMenuPanel testClass1 testClass2"
   data-test-subj="test subject string"
+  tabindex="0"
 >
-  Hello
+  <div>
+    Hello
+  </div>
 </div>
 `;
 
 exports[`KuiContextMenuPanel props onClose renders a button as a title 1`] = `
 <div
   class="kuiContextMenuPanel"
+  tabindex="0"
 >
   <button
     class="kuiContextMenuPanelTitle"
@@ -31,12 +35,14 @@ exports[`KuiContextMenuPanel props onClose renders a button as a title 1`] = `
       </span>
     </span>
   </button>
+  <div />
 </div>
 `;
 
 exports[`KuiContextMenuPanel props title is rendered 1`] = `
 <div
   class="kuiContextMenuPanel"
+  tabindex="0"
 >
   <div
     class="kuiPopoverTitle"
@@ -47,29 +53,42 @@ exports[`KuiContextMenuPanel props title is rendered 1`] = `
       Title
     </span>
   </div>
+  <div />
 </div>
 `;
 
 exports[`KuiContextMenuPanel props transitionDirection next with transitionType in is rendered 1`] = `
 <div
   class="kuiContextMenuPanel kuiContextMenuPanel-txInLeft"
-/>
+  tabindex="0"
+>
+  <div />
+</div>
 `;
 
 exports[`KuiContextMenuPanel props transitionDirection next with transitionType out is rendered 1`] = `
 <div
   class="kuiContextMenuPanel kuiContextMenuPanel-txOutLeft"
-/>
+  tabindex="0"
+>
+  <div />
+</div>
 `;
 
 exports[`KuiContextMenuPanel props transitionDirection previous with transitionType in is rendered 1`] = `
 <div
   class="kuiContextMenuPanel kuiContextMenuPanel-txInRight"
-/>
+  tabindex="0"
+>
+  <div />
+</div>
 `;
 
 exports[`KuiContextMenuPanel props transitionDirection previous with transitionType out is rendered 1`] = `
 <div
   class="kuiContextMenuPanel kuiContextMenuPanel-txOutRight"
-/>
+  tabindex="0"
+>
+  <div />
+</div>
 `;

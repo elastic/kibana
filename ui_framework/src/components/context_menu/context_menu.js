@@ -79,6 +79,7 @@ export class KuiContextMenu extends Component {
       transitionDirection: undefined,
       isOutgoingPanelVisible: false,
       focusedItemIndex: undefined,
+      isUsingKeyboardToNavigate: false,
     };
   }
 
@@ -128,13 +129,19 @@ export class KuiContextMenu extends Component {
     this.setState({
       height,
     });
-  }
+  };
 
   onOutGoingPanelTransitionComplete = () => {
     this.setState({
       isOutgoingPanelVisible: false,
     });
-  }
+  };
+
+  onUseKeyboardToNavigate = () => {
+    this.setState({
+      isUsingKeyboardToNavigate: true,
+    });
+  };
 
   updatePanelMaps(panels) {
     this.idToPanelMap = mapIdsToPanels(panels);
@@ -222,12 +229,8 @@ export class KuiContextMenu extends Component {
         transitionDirection={this.state.isOutgoingPanelVisible ? this.state.transitionDirection : undefined}
         hasFocus={transitionType === 'in'}
         items={this.renderItems(panel.items)}
-        initialFocusedItemIndex={
-          // Set focus on the item which shows the panel we're leaving.
-          transitionType === 'in' && this.state.transitionDirection === 'previous'
-          ? this.state.focusedItemIndex
-          : undefined
-        }
+        initialFocusedItemIndex={this.state.isUsingKeyboardToNavigate ? this.state.focusedItemIndex : undefined}
+        onUseKeyboardToNavigate={this.onUseKeyboardToNavigate}
         showNextPanel={this.showNextPanel}
         showPreviousPanel={this.showPreviousPanel}
       >

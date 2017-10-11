@@ -54,7 +54,7 @@ describe('KuiContextMenu', () => {
   });
 
   describe('props', () => {
-    describe('idToPanelMap and initialPanelId', () => {
+    describe('panels and initialPanelId', () => {
       it('renders the referenced panel', () => {
         const component = render(
           <KuiContextMenu
@@ -67,9 +67,7 @@ describe('KuiContextMenu', () => {
         expect(component)
           .toMatchSnapshot();
       });
-    });
 
-    describe('idToPreviousPanelIdMap', () => {
       it('allows you to click the title button to go back to the previous panel', () => {
         const component = mount(
           <KuiContextMenu

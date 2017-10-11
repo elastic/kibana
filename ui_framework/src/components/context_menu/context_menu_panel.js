@@ -30,6 +30,7 @@ export class KuiContextMenuPanel extends Component {
     transitionType: PropTypes.oneOf(['in', 'out']),
     transitionDirection: PropTypes.oneOf(['next', 'previous']),
     onTransitionComplete: PropTypes.func,
+    onUseKeyboardToNavigate: PropTypes.func,
     hasFocus: PropTypes.bool,
     items: PropTypes.array,
     showNextPanel: PropTypes.func,
@@ -48,17 +49,25 @@ export class KuiContextMenuPanel extends Component {
     this.menuItems = [];
     this.state = {
       isTransitioning: Boolean(props.transitionType),
-      focusedItemIndex: props.initialFocusedItemIndex || 0,
+      focusedItemIndex: props.initialFocusedItemIndex,
     };
   }
 
   incrementFocusedItemIndex = amount => {
-    let nextFocusedItemIndex = this.state.focusedItemIndex + amount;
+    let nextFocusedItemIndex;
 
-    if (nextFocusedItemIndex < 0) {
-      nextFocusedItemIndex = this.menuItems.length - 1;
-    } else if (nextFocusedItemIndex === this.menuItems.length) {
-      nextFocusedItemIndex = 0;
+    if (this.state.focusedItemIndex === undefined) {
+      // If this is the beginning of the user's keyboard navigation of the menu, then we'll focus
+      // either the first or last item.
+      nextFocusedItemIndex = amount < 0 ? this.menuItems.length - 1 : 0;
+    } else {
+      nextFocusedItemIndex = this.state.focusedItemIndex + amount;
+
+      if (nextFocusedItemIndex < 0) {
+        nextFocusedItemIndex = this.menuItems.length - 1;
+      } else if (nextFocusedItemIndex === this.menuItems.length) {
+        nextFocusedItemIndex = 0;
+      }
     }
 
     this.setState({
@@ -75,6 +84,10 @@ export class KuiContextMenuPanel extends Component {
       if (e.keyCode === cascadingMenuKeyCodes.LEFT) {
         if (this.props.showPreviousPanel) {
           this.props.showPreviousPanel();
+
+          if (this.props.onUseKeyboardToNavigate) {
+            this.props.onUseKeyboardToNavigate();
+          }
         }
       }
     }
@@ -89,16 +102,29 @@ export class KuiContextMenuPanel extends Component {
         case cascadingMenuKeyCodes.UP:
           e.preventDefault();
           this.incrementFocusedItemIndex(-1);
+
+          if (this.props.onUseKeyboardToNavigate) {
+            this.props.onUseKeyboardToNavigate();
+          }
           break;
 
         case cascadingMenuKeyCodes.DOWN:
           e.preventDefault();
           this.incrementFocusedItemIndex(1);
+
+          if (this.props.onUseKeyboardToNavigate) {
+            this.props.onUseKeyboardToNavigate();
+          }
           break;
 
         case cascadingMenuKeyCodes.RIGHT:
           if (this.props.showNextPanel) {
+            e.preventDefault();
             this.props.showNextPanel(this.state.focusedItemIndex);
+
+            if (this.props.onUseKeyboardToNavigate) {
+              this.props.onUseKeyboardToNavigate();
+            }
           }
           break;
 
@@ -214,6 +240,7 @@ export class KuiContextMenuPanel extends Component {
       transitionType,
       transitionDirection,
       onTransitionComplete, // eslint-disable-line no-unused-vars
+      onUseKeyboardToNavigate, // eslint-disable-line no-unused-vars
       hasFocus, // eslint-disable-line no-unused-vars
       items,
       initialFocusedItemIndex, // eslint-disable-line no-unused-vars
