@@ -11,7 +11,7 @@ describe('KuiButton', () => {
   describe('Baseline', () => {
     test('is rendered', () => {
       const $button = render(
-        <KuiButton />
+        <KuiButton aria-label="aria label" />
       );
 
       expect($button)
@@ -39,7 +39,12 @@ describe('KuiButton', () => {
       BUTTON_TYPES.forEach(buttonType => {
         describe(buttonType, () => {
           test(`renders the ${buttonType} class`, () => {
-            const $button = render(<KuiButton buttonType={buttonType} />);
+            const $button = render(
+              <KuiButton
+                buttonType={buttonType}
+                aria-label="aria label"
+              />
+            );
             expect($button).toMatchSnapshot();
           });
         });
@@ -60,7 +65,10 @@ describe('KuiButton', () => {
 
       test('is rendered without children', () => {
         const $button = render(
-          <KuiButton icon="Icon" />
+          <KuiButton
+            icon="Icon"
+            aria-label="aria label"
+          />
         );
 
         expect($button)
@@ -102,7 +110,10 @@ describe('KuiButton', () => {
         const onClickHandler = sinon.stub();
 
         shallow(
-          <KuiButton onClick={onClickHandler} />
+          <KuiButton
+            onClick={onClickHandler}
+            aria-label="aria label"
+          />
         );
 
         sinon.assert.notCalled(onClickHandler);
@@ -112,7 +123,10 @@ describe('KuiButton', () => {
         const onClickHandler = sinon.stub();
 
         const $button = shallow(
-          <KuiButton onClick={onClickHandler} />
+          <KuiButton
+            onClick={onClickHandler}
+            aria-label="aria label"
+          />
         );
 
         $button.simulate('click');
@@ -124,7 +138,10 @@ describe('KuiButton', () => {
     describe('isLoading', () => {
       test('renders a spinner', () => {
         const $button = render(
-          <KuiButton isLoading />
+          <KuiButton
+            isLoading
+            aria-label="aria label"
+          />
         );
 
         expect($button)
@@ -133,7 +150,11 @@ describe('KuiButton', () => {
 
       test(`doesn't render the icon prop`, () => {
         const $button = render(
-          <KuiButton isLoading icon="Icon" />
+          <KuiButton
+            isLoading
+            icon="Icon"
+            aria-label="aria label"
+          />
         );
 
         expect($button)

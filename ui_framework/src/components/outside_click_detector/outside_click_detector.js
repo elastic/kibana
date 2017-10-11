@@ -36,11 +36,12 @@ export class KuiOutsideClickDetector extends Component {
   }
 
   render() {
-    const props = Object.assign({}, this.props.children.props, {
+    const props = {
+      ...this.props.children.props,
       ref: node => {
         this.wrapperRef = node;
       },
-    });
+    };
 
     const child = Children.only(this.props.children);
     return cloneElement(child, props);

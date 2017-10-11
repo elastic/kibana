@@ -73,7 +73,6 @@ function MarkdownSeries(props) {
 
   return (
     <div
-      aria-hidden="true"
       className={`${props.className} vis_editor__series`}
       style={props.style}
       onMouseDown={props.onMouseDown}

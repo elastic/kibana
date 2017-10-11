@@ -9,7 +9,6 @@ import healthCheck from '../health_check';
 import kibanaVersion from '../kibana_version';
 import { esTestConfig } from '../../../../test_utils/es';
 import * as patchKibanaIndexNS from '../patch_kibana_index';
-import * as migrateConfigNS from '../migrate_config';
 
 const esPort = esTestConfig.getPort();
 const esUrl = esTestConfig.getUrl();
@@ -34,7 +33,6 @@ describe('plugins/elasticsearch', () => {
       // Stub the Kibana version instead of drawing from package.json.
       sandbox.stub(kibanaVersion, 'get').returns(COMPATIBLE_VERSION_NUMBER);
       sandbox.stub(patchKibanaIndexNS, 'patchKibanaIndex');
-      sandbox.stub(migrateConfigNS, 'migrateConfig');
 
       // setup the plugin stub
       plugin = {

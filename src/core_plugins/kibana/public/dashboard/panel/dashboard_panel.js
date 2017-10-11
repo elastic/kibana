@@ -60,9 +60,11 @@ export class DashboardPanel extends React.Component {
   }
 
   toggleExpandedPanel = () => this.props.onToggleExpanded(this.props.panel.panelIndex);
+
   deletePanel = () => {
     this.props.onDeletePanel(this.props.panel.panelIndex);
   };
+
   onEditPanel = () => window.location = this.state.editUrl;
 
   onFocus = () => {
@@ -71,6 +73,7 @@ export class DashboardPanel extends React.Component {
       onPanelFocused(this.props.panel.panelIndex);
     }
   };
+
   onBlur = () => {
     const { onPanelBlurred } = this.props;
     if (onPanelBlurred) {

@@ -31,22 +31,16 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
     }
   });
 
-  $scope.$watch('esResponse', async function (response) {
+  $scope.$watch('esResponse', async function (tableGroup) {
+
     kibanaMapReady.then(() => {
-      const metricsAgg = _.first($scope.vis.getAggConfig().bySchemaName.metric);
-      const termAggId = _.first(_.pluck($scope.vis.getAggConfig().bySchemaName.segment, 'id'));
 
       let results;
-      if (!response || !response.aggregations) {
+      if (!tableGroup || !tableGroup.tables || !tableGroup.tables.length || tableGroup.tables[0].columns.length !== 2) {
         results = [];
       } else {
-        const buckets = response.aggregations[termAggId].buckets;
-        results = buckets.map((bucket) => {
-          return {
-            term: bucket.key,
-            value: metricsAgg.getValue(bucket)
-          };
-        });
+        const buckets = tableGroup.tables[0].rows;
+        results = buckets.map(([term, value]) => { return { term: term, value: value }; });
       }
 
       if (!$scope.vis.params.selectedJoinField && $scope.vis.params.selectedLayer) {
@@ -58,6 +52,8 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
       }
 
       updateChoroplethLayer($scope.vis.params.selectedLayer.url, $scope.vis.params.selectedLayer.attribution);
+
+      const metricsAgg = _.first($scope.vis.getAggConfig().bySchemaName.metric);
       choroplethLayer.setMetrics(results, metricsAgg);
       setTooltipFormatter();
 
