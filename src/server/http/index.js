@@ -129,9 +129,9 @@ export default async function (kbnServer, server, config) {
     path: '/goto/{urlId}',
     handler: async function (request, reply) {
       try {
-        const savedObjectsService = new SavedObjectsService(request);
+        const savedObjectsService = new SavedObjectsService(server, request);
 
-        const uiSettingsService = new UiSettingsService(request);
+        const uiSettingsService = new UiSettingsService(server, request);
 
         const shortUrlLookup = new ShortUrlLookup(server.log, savedObjectsService);
 
