@@ -166,7 +166,7 @@
     "querystring-browser": "1.0.4",
     "raw-loader": "0.5.1",
     "react": "15.6.1",
-    "react-ace": "3.7.0",
+    "react-ace": "5.2.2",
     "react-addons-test-utils": "15.6.0",
     "react-anything-sortable": "1.6.1",
     "react-color": "2.11.7",
