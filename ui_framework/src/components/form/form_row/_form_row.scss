@@ -11,6 +11,10 @@
     margin-top: $kuiSizeL;
   }
 
+  &.kuiFormRow--fullWidth {
+    max-width: 100%;
+  }
+
   &.kuiFormRow--hasEmptyLabelSpace {
     padding-top: $kuiFontSizeXS + $kuiSizeS; /* 2 */
   }

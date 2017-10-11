@@ -11,7 +11,16 @@ const iconSideToClassNameMap = {
 
 export const ICON_SIDES = Object.keys(iconSideToClassNameMap);
 
-export const KuiFormControlLayout = ({ children, icon, iconSide }) => {
+export const KuiFormControlLayout = ({ children, icon, fullWidth, iconSide, className }) => {
+
+  const classes = classNames(
+    'kuiFormControlLayout',
+    {
+      'kuiFormControlLayout--fullWidth': fullWidth,
+    },
+    className
+  );
+
   if (icon) {
     const iconClasses = classNames('kuiFormControlLayout__icon', iconSideToClassNameMap[iconSide]);
 
@@ -24,7 +33,7 @@ export const KuiFormControlLayout = ({ children, icon, iconSide }) => {
     );
 
     return (
-      <div className="kuiFormControlLayout">
+      <div className={classes}>
         {children}
         {optionalIcon}
       </div>

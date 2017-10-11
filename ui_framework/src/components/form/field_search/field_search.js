@@ -18,13 +18,21 @@ export const KuiFieldSearch = ({
   placeholder,
   value,
   isInvalid,
+  fullWidth,
   ...rest,
 }) => {
-  const classes = classNames('kuiFieldSearch', className);
+  const classes = classNames(
+    'kuiFieldSearch',
+    {
+      'kuiFieldSearch--fullWidth': fullWidth,
+    },
+    className
+  );
 
   return (
     <KuiFormControlLayout
       icon="search"
+      fullWidth={fullWidth}
     >
       <KuiValidatableControl isInvalid={isInvalid}>
         <input
@@ -47,8 +55,10 @@ KuiFieldSearch.propTypes = {
   placeholder: PropTypes.string,
   value: PropTypes.string,
   isInvalid: PropTypes.bool,
+  fullWidth: PropTypes.bool,
 };
 
 KuiFieldSearch.defaultProps = {
   value: undefined,
+  fullWidth: false,
 };

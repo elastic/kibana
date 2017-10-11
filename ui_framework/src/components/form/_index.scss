@@ -39,6 +39,10 @@ $kuiFormBackgroundColor: tintOrShade($kuiColorLightestShade, 60%, 25%);
   transition: box-shadow $kuiAnimSpeedNormal ease-in, background $kuiAnimSpeedNormal ease-in;
   border-radius: 0;
 
+  &--fullWidth {
+    max-width: 100%;
+  }
+
   &:invalid { /* 1 */
     box-shadow:
       0 $kuiSizeXS $kuiSizeXS (-$kuiSizeXS / 2) rgba(0, 0, 0, 0.1),

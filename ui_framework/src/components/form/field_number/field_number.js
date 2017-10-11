@@ -21,15 +21,18 @@ export const KuiFieldNumber = ({
   max,
   value,
   isInvalid,
+  fullWidth,
   ...rest,
 }) => {
   const classes = classNames('kuiFieldNumber', className, {
     'kuiFieldNumber--withIcon': icon,
+    'kuiFieldNumber--fullWidth': fullWidth,
   });
 
   return (
     <KuiFormControlLayout
       icon={icon}
+      fullWidth={fullWidth}
     >
       <KuiValidatableControl isInvalid={isInvalid}>
         <input
@@ -57,9 +60,10 @@ KuiFieldNumber.propTypes = {
   value: PropTypes.number,
   icon: PropTypes.string,
   isInvalid: PropTypes.bool,
+  fullWidth: PropTypes.bool,
 };
 
 KuiFieldNumber.defaultProps = {
   value: undefined,
+  fullWidth: false,
 };
-

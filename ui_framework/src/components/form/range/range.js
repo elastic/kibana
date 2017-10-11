@@ -3,8 +3,14 @@ import React, {
 } from 'react';
 import classNames from 'classnames';
 
-export const KuiRange = ({ className, id, name, min, max, value, ...rest }) => {
-  const classes = classNames('kuiRange', className);
+export const KuiRange = ({ className, id, name, min, max, fullWidth, value, ...rest }) => {
+  const classes = classNames(
+    'kuiRange',
+    {
+      'kuiRange--fullWidth': fullWidth,
+    },
+    className
+  );
 
   return (
     <input
@@ -26,9 +32,11 @@ KuiRange.propTypes = {
   min: PropTypes.number.isRequired,
   max: PropTypes.number.isRequired,
   value: PropTypes.string,
+  fullWidth: PropTypes.bool,
 };
 
 KuiRange.defaultProps = {
   min: 1,
   max: 100,
+  fullWidth: false,
 };

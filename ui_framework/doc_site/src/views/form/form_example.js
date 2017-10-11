@@ -40,6 +40,10 @@ import InlineFormPopover from './inline_form_popover';
 const inlineFormPopoverSource = require('!!raw!./inline_form_popover');
 const inlineFormPopoverHtml = renderToHtml(InlineFormPopover);
 
+import FullWidthForm from './form_full_width';
+const fullWidthFormSource = require('!!raw!./form_full_width');
+const fullWidthFormHtml = renderToHtml(FullWidthForm);
+
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
@@ -125,6 +129,29 @@ export default props => (
         <Validation />
       }
     />
+
+    <GuideSection
+      title="Full-width form elements and rows"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: fullWidthFormSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: fullWidthFormHtml,
+      }]}
+      text={
+        <p>
+          Form elements will automatically flex to a max-width of <KuiCode>400px</KuiCode>.
+          You can optionally pass the <KuiCode>fullWidth</KuiCode> prop to both individual field
+          and row components to expand to their container. This should be done rarely and usually
+          you will only need it for isolated controls like search bars and sliders.
+        </p>
+      }
+      demo={
+        <FullWidthForm />
+      }
+    />
+
     <GuideSection
       title="Inline form"
       source={[{
