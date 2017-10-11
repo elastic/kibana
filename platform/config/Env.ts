@@ -41,10 +41,6 @@ export class Env {
       : this.options.config;
   }
 
-  getPluginDir(pluginName: string) {
-    return resolve(this.corePluginsDir, pluginName, 'target', 'dist');
-  }
-
   /**
    * @internal
    */

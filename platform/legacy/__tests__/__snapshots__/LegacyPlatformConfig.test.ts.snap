@@ -1,13 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Retrieving values correctly handles paths that do not exist in legacy config. 1`] = `"Unknown schema key: one"`;
+exports[`#get correctly handles paths that do not exist in legacy config. 1`] = `"Unknown schema key: one"`;
 
-exports[`Retrieving values correctly handles paths that do not exist in legacy config. 2`] = `"Unknown schema key: one.two"`;
+exports[`#get correctly handles paths that do not exist in legacy config. 2`] = `"Unknown schema key: one.two"`;
 
-exports[`Retrieving values correctly handles paths that do not exist in legacy config. 3`] = `"Unknown schema key: one.three"`;
+exports[`#get correctly handles paths that do not exist in legacy config. 3`] = `"Unknown schema key: one.three"`;
 
-exports[`Setting values tries to set values for paths that do not exist in legacy config. 1`] = `"Unknown schema key: unknown"`;
+exports[`#set tries to set values for paths that do not exist in legacy config. 1`] = `"Unknown schema key: unknown"`;
 
-exports[`Setting values tries to set values for paths that do not exist in legacy config. 2`] = `"Unknown schema key: unknown.sub1"`;
+exports[`#set tries to set values for paths that do not exist in legacy config. 2`] = `"Unknown schema key: unknown.sub1"`;
 
-exports[`Setting values tries to set values for paths that do not exist in legacy config. 3`] = `"Unknown schema key: unknown.sub2"`;
+exports[`#set tries to set values for paths that do not exist in legacy config. 3`] = `"Unknown schema key: unknown.sub2"`;

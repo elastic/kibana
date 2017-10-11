@@ -1,21 +1,24 @@
-import { readdir, statSync } from 'fs';
+import { readdir, stat } from 'fs';
 import { resolve } from 'path';
 import { Observable } from 'rxjs';
+import { promisify } from 'util';
 
 import { Plugin } from './Plugin';
 import { PluginName } from './types';
 import { PluginSystem } from './PluginSystem';
+import { PluginsConfig } from './PluginsConfig';
 import { Logger, LoggerFactory } from '../../logging';
 import { CoreService } from '../../types/CoreService';
-import { ConfigService, Env } from '../../config';
+import { ConfigService } from '../../config';
 
-const readDir$ = Observable.bindNodeCallback(readdir);
+const fsReadDirAsync = promisify(readdir);
+const fsStatAsync = promisify(stat);
 
 export class PluginsService implements CoreService {
   private readonly log: Logger;
 
   constructor(
-    private readonly env: Env,
+    private readonly pluginsConfig$: Observable<PluginsConfig>,
     private readonly pluginSystem: PluginSystem,
     private readonly configService: ConfigService,
     private readonly logger: LoggerFactory
@@ -24,19 +27,20 @@ export class PluginsService implements CoreService {
   }
 
   async start() {
-    await this.readPlugins()
+    await this.getAllPlugins()
       .mergeMap(
         plugin => this.isPluginEnabled(plugin),
         (plugin, isEnabled) => ({ plugin, isEnabled })
       )
-      .filter(plugin => {
-        if (plugin.isEnabled) {
+      .filter(obj => {
+        if (obj.isEnabled) {
           return true;
         }
 
         this.log.warn(
-          `Plugin [${plugin.plugin.name}] is disabled and will not be started`
+          `Plugin [${obj.plugin.name}] is disabled and will not be started`
         );
+
         return false;
       })
       .do(plugin => {
@@ -51,29 +55,30 @@ export class PluginsService implements CoreService {
     this.pluginSystem.stopPlugins();
   }
 
-  /**
-   * Read all plugin configs from disk and returns a topologically sorted list
-   * of plugins.
-   */
-  private readPlugins() {
-    const { corePluginsDir } = this.env;
-
-    return (
-      readDir$(corePluginsDir)
-        // flatten the dirs so the rest of the flow will see individual dirs
-        // instead of an array of dirs
-        .mergeMap(pluginNames => pluginNames)
-        // skip all files, only keep plugin directories
-        .filter(pluginName =>
-          statSync(resolve(corePluginsDir, pluginName)).isDirectory()
-        )
-        .map(pluginName => this.createPlugin(pluginName))
-    );
+  private getAllPlugins() {
+    return this.pluginsConfig$
+      .first()
+      .mergeMap(config => config.scanDirs)
+      .mergeMap(
+        dir => fsReadDirAsync(dir),
+        (dir, pluginNames) =>
+          pluginNames.map(pluginName => ({
+            name: pluginName,
+            path: resolve(dir, pluginName)
+          }))
+      )
+      .mergeMap(plugins => plugins)
+      .mergeMap(
+        plugin => fsStatAsync(plugin.path),
+        (plugin, stat) => ({ ...plugin, isDir: stat.isDirectory() })
+      )
+      .filter(plugin => plugin.isDir)
+      .map(plugin => this.createPlugin(plugin.name, plugin.path));
   }
 
-  private createPlugin(name: PluginName) {
-    const pluginPath = this.env.getPluginDir(name);
-    const pluginExports = require(pluginPath);
+  private createPlugin(name: PluginName, pluginPath: string) {
+    const pathToRequire = resolve(pluginPath, 'target', 'server');
+    const pluginExports = require(pathToRequire);
 
     if (!('plugin' in pluginExports)) {
       throw new Error(`'plugin' definition missing in plugin [${pluginPath}]`);

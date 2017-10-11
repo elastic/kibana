@@ -29,8 +29,28 @@ interface LegacyLoggingConfig {
 export class LegacyConfigToRawConfigAdapter implements RawConfig {
   constructor(private readonly legacyConfig: LegacyConfig) {}
 
+  has(configPath: ConfigPath) {
+    return this.legacyConfig.has(
+      LegacyConfigToRawConfigAdapter.flattenConfigPath(configPath)
+    );
+  }
+
   get(configPath: ConfigPath) {
     configPath = LegacyConfigToRawConfigAdapter.flattenConfigPath(configPath);
+
+    if (
+      configPath.startsWith('__newPlatform') &&
+      !this.legacyConfig.has(configPath)
+    ) {
+      // Whenever we handle a config for the new platform and it isn't defined
+      // in the current platform, we want the new platform to handle the missing
+      // config value, e.g. by applying defaults.
+      //
+      // NB! Note that you might need to update the Kibana schema if the `has`
+      // check is failing for something that is present in the config, as the
+      // `has` check depends on the schema itself in the current platform.
+      return undefined;
+    }
 
     const configValue = this.legacyConfig.get(configPath);
 

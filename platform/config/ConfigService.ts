@@ -75,10 +75,13 @@ export class ConfigService {
   async isEnabledAtPath(path: ConfigPath) {
     const enabledPath = createPluginEnabledPath(path);
 
-    const isEnabled = await this.config$
-      .map(config => config.get(enabledPath))
-      .first()
-      .toPromise();
+    const config = await this.config$.first().toPromise();
+
+    if (!config.has(enabledPath)) {
+      return true;
+    }
+
+    const isEnabled = config.get(enabledPath);
 
     if (isEnabled === false) {
       // If the plugin is _not_ enabled, we mark the entire plugin path as

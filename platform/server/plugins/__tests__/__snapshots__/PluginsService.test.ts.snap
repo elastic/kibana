@@ -18,16 +18,18 @@ Object {
 
 exports[`starts plugins 1`] = `
 Object {
-  "dependencies": Array [],
-  "name": "foo",
+  "configPath": "bar",
+  "dependencies": Array [
+    "foo",
+  ],
+  "name": "bar",
 }
 `;
 
 exports[`starts plugins 2`] = `
 Object {
-  "dependencies": Array [
-    "foo",
-  ],
-  "name": "bar",
+  "configPath": "foo",
+  "dependencies": Array [],
+  "name": "foo",
 }
 `;

@@ -1,6 +1,6 @@
 import { BehaviorSubject } from 'rxjs';
 
-import { ConfigService, ObjectToRawConfigAdapter } from '..';
+import { ConfigService, ObjectToRawConfigAdapter, RawConfig } from '..';
 import { Env } from '../Env';
 import { logger } from '../../logging/__mocks__';
 import { Schema } from '../../types/schema';
@@ -220,6 +220,21 @@ test('handles disabled path and marks config as used', async () => {
 
   const isEnabled = await configService.isEnabledAtPath('pid');
   expect(isEnabled).toBe(false);
+
+  const unusedPaths = await configService.getUnusedPaths();
+  expect(unusedPaths).toEqual([]);
+});
+
+test('treats config as enabled if config path is not present in config', async () => {
+  const initialConfig = {};
+
+  const config$ = new BehaviorSubject(
+    new ObjectToRawConfigAdapter(initialConfig)
+  );
+  const configService = new ConfigService(config$, defaultEnv, logger);
+
+  const isEnabled = await configService.isEnabledAtPath('pid');
+  expect(isEnabled).toBe(true);
 
   const unusedPaths = await configService.getUnusedPaths();
   expect(unusedPaths).toEqual([]);

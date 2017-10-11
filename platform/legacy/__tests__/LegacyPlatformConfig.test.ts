@@ -8,7 +8,7 @@ beforeEach(() => {
   configAdapter = new LegacyConfigToRawConfigAdapter(legacyConfigMock);
 });
 
-describe('Retrieving values', () => {
+describe('#get', () => {
   test('correctly handles paths that do not exist in legacy config.', () => {
     expect(() => configAdapter.get('one')).toThrowErrorMatchingSnapshot();
     expect(() =>
@@ -17,6 +17,18 @@ describe('Retrieving values', () => {
     expect(() =>
       configAdapter.get(['one.three'])
     ).toThrowErrorMatchingSnapshot();
+  });
+
+  test('returns undefined for new platform config values, even if they do not exist', () => {
+    expect(configAdapter.get(['__newPlatform', 'plugins'])).toBe(undefined);
+  });
+
+  test('returns new platform config values if they exist', () => {
+    legacyConfigMock.__rawData = new Map<string, any>([
+      ['__newPlatform.plugins', ['foo']]
+    ]);
+
+    expect(configAdapter.get(['__newPlatform', 'plugins'])).toEqual(['foo']);
   });
 
   test('correctly handles paths that do not need to be transformed.', () => {
@@ -57,7 +69,7 @@ describe('Retrieving values', () => {
   });
 });
 
-describe('Setting values', () => {
+describe('#set', () => {
   test('tries to set values for paths that do not exist in legacy config.', () => {
     expect(() =>
       configAdapter.set('unknown', 'value')
@@ -86,6 +98,26 @@ describe('Setting values', () => {
     expect(legacyConfigMock.__rawData.get('known')).toEqual('value');
     expect(legacyConfigMock.__rawData.get('known.sub1')).toEqual('sub-value-1');
     expect(legacyConfigMock.__rawData.get('known.sub2')).toEqual('sub-value-2');
+  });
+});
+
+describe('#has', () => {
+  test('returns false if config is not set', () => {
+    expect(configAdapter.has('unknown')).toBe(false);
+    expect(configAdapter.has(['unknown', 'sub1'])).toBe(false);
+    expect(configAdapter.has('unknown.sub2')).toBe(false);
+  });
+
+  test('returns true if config is set.', () => {
+    legacyConfigMock.__rawData = new Map([
+      ['known', 'foo'],
+      ['known.sub1', 'bar'],
+      ['known.sub2', 'baz']
+    ]);
+
+    expect(configAdapter.has('known')).toBe(true);
+    expect(configAdapter.has(['known', 'sub1'])).toBe(true);
+    expect(configAdapter.has('known.sub2')).toBe(true);
   });
 });
 

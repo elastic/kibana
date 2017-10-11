@@ -3,6 +3,7 @@ import { HttpModule, HttpConfig } from './http';
 import { ElasticsearchModule, ElasticsearchConfigs } from './elasticsearch';
 import { KibanaModule, KibanaConfig } from './kibana';
 import { Logger, LoggerFactory } from '../logging';
+import { PluginsConfig } from './plugins/PluginsConfig';
 import { PluginsService } from './plugins/PluginsService';
 import { PluginSystem } from './plugins/PluginSystem';
 
@@ -26,6 +27,10 @@ export class Server {
       'elasticsearch',
       ElasticsearchConfigs
     );
+    const pluginsConfig$ = configService.atPath(
+      ['__newPlatform', 'plugins'],
+      PluginsConfig
+    );
 
     this.elasticsearch = new ElasticsearchModule(elasticsearchConfigs$, logger);
     this.kibana = new KibanaModule(kibanaConfig$);
@@ -40,7 +45,7 @@ export class Server {
     };
 
     this.plugins = new PluginsService(
-      configService.env,
+      pluginsConfig$,
       new PluginSystem(core, logger),
       configService,
       logger

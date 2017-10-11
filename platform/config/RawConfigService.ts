@@ -1,5 +1,5 @@
 import { BehaviorSubject, Observable } from 'rxjs';
-import { get, isEqual, isPlainObject, set } from 'lodash';
+import { get, has, isEqual, isPlainObject, set } from 'lodash';
 import typeDetect from 'type-detect';
 
 import { ConfigPath } from './ConfigService';
@@ -9,6 +9,13 @@ import { getConfigFromFile } from './readConfig';
  * Represents raw config store.
  */
 export interface RawConfig {
+  /**
+   * Returns whether or not there is a config value located at the specified path.
+   * @param configPath Path to locate value at.
+   * @returns Whether or not a value exists at the path.
+   */
+  has(configPath: ConfigPath): boolean;
+
   /**
    * Returns config value located at the specified path.
    * @param configPath Path to locate value at.
@@ -104,6 +111,10 @@ export class RawConfigService {
  */
 export class ObjectToRawConfigAdapter implements RawConfig {
   constructor(private readonly rawValue: { [key: string]: any }) {}
+
+  has(configPath: ConfigPath) {
+    return has(this.rawValue, configPath);
+  }
 
   get(configPath: ConfigPath) {
     return get(this.rawValue, configPath);

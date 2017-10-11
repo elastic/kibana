@@ -214,4 +214,12 @@ export default () => Joi.object({
     defaultLocale: Joi.string().default('en'),
   }).default(),
 
+  // These are settings that are specifically handled by the config system in
+  // the new platform, and that the current platform doesn't need to handle
+  // at all. (However, we have to specify a part of the schema. Otherwise we
+  // wouldn't be able to do `has` checks, which depends on the schema itself.)
+  __newPlatform: Joi.object({
+    plugins: Joi.any()
+  }).default(),
+
 }).default();

@@ -53,3 +53,15 @@ $ cat ~/.vscode/settings.json
   "typescript.referencesCodeLens.enabled": true
 }
 ```
+
+## Starting plugins in the new platform
+
+Plugins in `../core_plugins` will be started automatically. In addition, dirs to
+scan for plugins can be specified in the Kibana config by setting the
+`__newPlatform.plugins.scanDirs` value, e.g.
+
+```yaml
+__newPlatform:
+  plugins:
+    scanDirs: ['./example_plugins']
+```

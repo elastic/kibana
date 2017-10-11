@@ -23,9 +23,6 @@ test('correctly creates default environment with empty options.', () => {
   expect(defaultEnv.staticFilesDir).toEqual('/test/cwd/ui');
 
   expect(defaultEnv.getConfigFile()).toEqual('/test/cwd/config/kibana.yml');
-  expect(defaultEnv.getPluginDir('some-plugin')).toEqual(
-    '/test/cwd/core_plugins/some-plugin/target/dist'
-  );
   expect(defaultEnv.getLegacyKbnServer()).toBeUndefined();
 });
 
@@ -46,9 +43,6 @@ test('correctly creates default environment with options overrides.', () => {
   expect(defaultEnv.getConfigFile()).toEqual(
     '/some/other/path/some-kibana.yml'
   );
-  expect(defaultEnv.getPluginDir('some-plugin')).toEqual(
-    '/test/cwd/core_plugins/some-plugin/target/dist'
-  );
   expect(defaultEnv.getLegacyKbnServer()).toBe(kbnServerMock);
 });
 
@@ -66,9 +60,6 @@ test('correctly creates environment with constructor.', () => {
 
   expect(defaultEnv.getConfigFile()).toEqual(
     '/some/other/path/some-kibana.yml'
-  );
-  expect(defaultEnv.getPluginDir('some-plugin')).toEqual(
-    '/some/home/dir/core_plugins/some-plugin/target/dist'
   );
   expect(defaultEnv.getLegacyKbnServer()).toBeUndefined();
 });

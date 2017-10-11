@@ -1,5 +1,12 @@
 # The Kibana Plugin System
 
+## Directory structure
+
+The Kibana plugin system expects built JavaScript for the server to be in
+`./target/server` within the plugin folder. If you're writing a pure JavaScript
+plugin that does not require a build step, the JavaScript must still be in that
+folder.
+
 ## How plugins are defined
 
 ## Function or class

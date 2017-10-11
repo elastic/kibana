@@ -1,16 +1,9 @@
-// TODO For some weird reason the tests fail to read correctly from the
-// filesystem unless this is here.
-const mockFs: any = jest.genMockFromModule('fs');
-mockFs.readdir = (err: any, cb: any) => cb(null, ['foo', 'bar']);
-mockFs.statSync = (file: string) => ({ isDirectory: () => true });
-// Required by PluginService -> HttpService -> HttpServer -> body-parser.
-mockFs.readdirSync = () => [];
-jest.mock('fs', () => mockFs);
-
 import { pick } from 'lodash';
 import { resolve } from 'path';
+import { BehaviorSubject } from 'rxjs';
 
 import { PluginsService } from '../PluginsService';
+import { PluginsConfig } from '../PluginsConfig';
 import { logger } from '../../../logging/__mocks__';
 
 let mockConfigService: any = jest.genMockFromModule(
@@ -26,17 +19,18 @@ beforeEach(() => {
     stopPlugins: jest.fn()
   };
 
-  mockConfigService.isEnabledAtPath = jest.fn(() => Promise.resolve(true));
+  env.corePluginsDir = resolve(__dirname, 'examplePlugins');
 
-  env.pluginsDir = resolve(__dirname, 'examplePlugins');
-  env.getPluginDir = jest.fn(name =>
-    resolve(__dirname, 'examplePlugins', name)
-  );
+  mockConfigService.isEnabledAtPath = jest.fn(() => Promise.resolve(true));
+  mockConfigService.env = env;
 });
 
 test('starts plugins', async () => {
+  const pluginsConfig = new PluginsConfig({ scanDirs: [] }, env);
+  const pluginsConfig$ = new BehaviorSubject(pluginsConfig);
+
   const pluginsService = new PluginsService(
-    env,
+    pluginsConfig$,
     mockPluginSystem,
     mockConfigService,
     logger
@@ -49,16 +43,19 @@ test('starts plugins', async () => {
 
   const pluginsAdded = mockPluginSystem.addPlugin.mock.calls;
 
-  const foo = pick(pluginsAdded[0][0], ['name', 'dependencies']);
-  expect(foo).toMatchSnapshot();
-
-  const bar = pick(pluginsAdded[1][0], ['name', 'dependencies']);
+  const bar = pick(pluginsAdded[0][0], ['name', 'dependencies', 'configPath']);
   expect(bar).toMatchSnapshot();
+
+  const foo = pick(pluginsAdded[1][0], ['name', 'dependencies', 'configPath']);
+  expect(foo).toMatchSnapshot();
 });
 
 test('stops plugins', async () => {
+  const pluginsConfig = new PluginsConfig({ scanDirs: [] }, env);
+  const pluginsConfig$ = new BehaviorSubject(pluginsConfig);
+
   const pluginsService = new PluginsService(
-    env,
+    pluginsConfig$,
     mockPluginSystem,
     mockConfigService,
     logger
@@ -78,8 +75,11 @@ test('does not start plugin if disabled', async () => {
     return Promise.resolve(true);
   });
 
+  const pluginsConfig = new PluginsConfig({ scanDirs: [] }, env);
+  const pluginsConfig$ = new BehaviorSubject(pluginsConfig);
+
   const pluginsService = new PluginsService(
-    env,
+    pluginsConfig$,
     mockPluginSystem,
     mockConfigService,
     logger
