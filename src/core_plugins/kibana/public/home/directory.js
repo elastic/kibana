@@ -65,6 +65,7 @@ export class Directory extends React.Component {
         <KuiFlexItem key={directory.id}>
           <Synopsis
             description={directory.description}
+            iconUrl={this.props.addBasePath(directory.icon)}
             title={directory.title}
             url={this.props.addBasePath(directory.path)}
           />

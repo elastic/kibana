@@ -30,6 +30,7 @@ KbnDirectoryRegistryProvider.register(() => {
     id: 'visualize',
     title: 'Visualize',
     description: 'Build a variety of graphs for your data.',
+    icon: '/plugins/kibana/assets/app_visualize.svg',
     path: '/app/kibana#/visualize',
     showOnHomePage: true,
     category: DirectoryCategory.DATA
