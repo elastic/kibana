@@ -98,6 +98,12 @@ export class KuiContextMenu extends Component {
   showNextPanel = itemIndex => {
     const nextPanelId = this.idAndItemIndexToPanelIdMap[this.state.incomingPanelId][itemIndex];
     if (nextPanelId) {
+      if (this.state.isUsingKeyboardToNavigate) {
+        this.setState({
+          focusedItemIndex: 0,
+        });
+      }
+
       this.showPanel(nextPanelId, 'next');
     }
   };
