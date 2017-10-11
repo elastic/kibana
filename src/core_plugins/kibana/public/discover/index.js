@@ -13,6 +13,7 @@ KbnDirectoryRegistryProvider.register(() => {
     id: 'discover',
     title: 'Discover',
     description: 'Search and explore your data.',
+    icon: '/plugins/kibana/assets/app_discover.svg',
     path: '/app/kibana#/discover',
     showOnHomePage: true,
     category: DirectoryCategory.DATA

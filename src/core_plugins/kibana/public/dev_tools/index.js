@@ -18,6 +18,7 @@ KbnDirectoryRegistryProvider.register(() => {
     id: 'console',
     title: 'Console',
     description: 'Manipulate your ES data directly with console.',
+    icon: '/plugins/kibana/assets/app_devtools.svg',
     path: '/app/kibana#/dev_tools/console',
     showOnHomePage: true,
     category: DirectoryCategory.ADMIN

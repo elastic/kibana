@@ -51,6 +51,7 @@ KbnDirectoryRegistryProvider.register(() => {
     id: 'advanced_settings',
     title: 'Advanced settings',
     description: 'Use to customize your kibana instance.',
+    icon: '/plugins/kibana/assets/app_dashboard.svg',
     path: '/app/kibana#/management/kibana/settings',
     showOnHomePage: false,
     category: DirectoryCategory.ADMIN

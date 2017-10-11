@@ -20,6 +20,7 @@ KbnDirectoryRegistryProvider.register(() => {
     id: 'saved_objects',
     title: 'Saved objects',
     description: 'Import / export your kibana objects for later reuse.',
+    icon: '/plugins/kibana/assets/app_dashboard.svg',
     path: '/app/kibana#/management/kibana/objects',
     showOnHomePage: true,
     category: DirectoryCategory.ADMIN

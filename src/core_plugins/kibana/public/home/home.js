@@ -32,6 +32,7 @@ export function Home({ addBasePath, directories, directoryCategories }) {
         <KuiFlexItem key={directory.id}>
           <Synopsis
             description={directory.description}
+            iconUrl={addBasePath(directory.icon)}
             title={directory.title}
             url={addBasePath(directory.path)}
           />
@@ -51,7 +52,12 @@ export function Home({ addBasePath, directories, directoryCategories }) {
           <KuiCard style={cardStyle}>
             <KuiCardDescription>
               <KuiCardDescriptionTitle>
-                APM
+                <img
+                  src={addBasePath('/plugins/kibana/assets/app_apm.svg')}
+                />
+                <p>
+                  APM
+                </p>
               </KuiCardDescriptionTitle>
 
               <KuiCardDescriptionText>
@@ -72,11 +78,16 @@ export function Home({ addBasePath, directories, directoryCategories }) {
           <KuiCard style={cardStyle}>
             <KuiCardDescription>
               <KuiCardDescriptionTitle>
-                Logging
+                <img
+                  src={addBasePath('/plugins/kibana/assets/app_logging.svg')}
+                />
+                <p>
+                  Logging
+                </p>
               </KuiCardDescriptionTitle>
 
               <KuiCardDescriptionText>
-                Injest data from popular logging platforms and get immediate dashboards.
+                Ingest data from popular logging platforms and get immediate dashboards.
               </KuiCardDescriptionText>
             </KuiCardDescription>
 
@@ -93,7 +104,12 @@ export function Home({ addBasePath, directories, directoryCategories }) {
           <KuiCard style={cardStyle}>
             <KuiCardDescription>
               <KuiCardDescriptionTitle>
-                Metrics
+                <img
+                  src={addBasePath('/plugins/kibana/assets/app_monitoring.svg')}
+                />
+                <p>
+                  Metrics
+                </p>
               </KuiCardDescriptionTitle>
 
               <KuiCardDescriptionText>
@@ -114,7 +130,12 @@ export function Home({ addBasePath, directories, directoryCategories }) {
           <KuiCard style={cardStyle}>
             <KuiCardDescription>
               <KuiCardDescriptionTitle>
-                Security analytics
+                <img
+                  src={addBasePath('/plugins/kibana/assets/app_security.svg')}
+                />
+                <p>
+                  Security analytics
+                </p>
               </KuiCardDescriptionTitle>
 
               <KuiCardDescriptionText>
