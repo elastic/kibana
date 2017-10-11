@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 
 import {
   KuiButton,
@@ -11,7 +11,7 @@ import {
   RIGHT_ALIGNMENT
 } from '../../../../services';
 
-export class ListingTable extends React.Component {
+export class ListingTable extends Component {
   constructor(props) {
     super(props);
     this.state = {

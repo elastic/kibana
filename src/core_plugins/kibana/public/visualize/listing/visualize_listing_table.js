@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import { SortableProperties } from 'ui_framework/services';
@@ -16,7 +16,7 @@ import {
   KuiListingTableLoadingPrompt
 } from 'ui_framework/components';
 
-export class VisualizeListingTable extends React.Component {
+export class VisualizeListingTable extends Component {
 
   constructor(props) {
     super(props);
