@@ -33,12 +33,12 @@ export function KuiListingTable({
   prompt,
 }) {
 
-  function areAllRowsChecked() {
+  function areAllRowsSelected() {
     return rows.length === selectedRowIds.length;
   }
 
   function toggleAll() {
-    if (areAllRowsChecked()) {
+    if (areAllRowsSelected()) {
       onItemSelectionChanged([]);
     } else {
       onItemSelectionChanged(rows.map(row => row.id));
@@ -93,7 +93,7 @@ export function KuiListingTable({
       <KuiTable>
         <KuiTableHeader>
           <KuiTableHeaderCheckBoxCell
-            isChecked={areAllRowsChecked()}
+            isChecked={areAllRowsSelected()}
             onChange={toggleAll}
           />
           {renderHeader()}
