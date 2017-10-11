@@ -54,23 +54,39 @@ export class LegacyPlatformProxifier extends EventEmitter {
   /**
    * Neither new nor legacy platform should use this method directly.
    */
-  async listen(port: number, host: string, callback?: () => void) {
+  async listen(port: number, host: string, callback?: (error?: Error) => void) {
     this.log.debug(`"listen" has been called (${host}:${port}).`);
 
-    await this.root.start();
+    let error: Error | undefined;
+    try {
+      await this.root.start();
+    } catch (err) {
+      error = err;
+      this.emit('error', err);
+    }
 
-    callback && callback();
+    if (callback !== undefined) {
+      callback(error);
+    }
   }
 
   /**
    * Neither new nor legacy platform should use this method directly.
    */
-  async close(callback?: () => void) {
+  async close(callback?: (error?: Error) => void) {
     this.log.debug('"close" has been called.');
 
-    await this.root.shutdown();
+    let error: Error | undefined;
+    try {
+      await this.root.shutdown();
+    } catch (err) {
+      error = err;
+      this.emit('error', err);
+    }
 
-    callback && callback();
+    if (callback !== undefined) {
+      callback(error);
+    }
   }
 
   /**

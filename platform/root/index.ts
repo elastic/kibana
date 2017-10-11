@@ -44,7 +44,9 @@ export class Root {
       // This specifically console.logs because we were not able to configure
       // the logger.
       console.error('Configuring logger failed:', e.message);
-      return this.shutdown(e);
+
+      await this.shutdown(e);
+      throw e;
     }
 
     this.log.info('starting the server');
@@ -55,7 +57,9 @@ export class Root {
       await this.server.start();
     } catch (e) {
       this.log.error(e);
-      return this.shutdown(e);
+
+      await this.shutdown(e);
+      throw e;
     }
   }
 

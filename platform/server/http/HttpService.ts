@@ -23,38 +23,30 @@ export class HttpService implements CoreService {
   }
 
   async start() {
-    this.configSubscription = this.config$
-      .filter(() => {
-        if (this.httpServer.isListening()) {
-          // If the server is already running we can't make any config changes
-          // to it, so we warn and don't allow the config to pass through.
-          this.log.error(
-            'Received new HTTP config after server was started. ' +
-              'Config will **not** be applied.'
-          );
-          return false;
-        }
+    this.configSubscription = this.config$.subscribe(() => {
+      if (this.httpServer.isListening()) {
+        // If the server is already running we can't make any config changes
+        // to it, so we warn and don't allow the config to pass through.
+        this.log.warn(
+          'Received new HTTP config after server was started. ' +
+            'Config will **not** be applied.'
+        );
+      }
+    });
 
-        return true;
-      })
-      .switchMap(
-        config =>
-          new Observable<void>(() => {
-            this.httpServer.start(config);
-
-            return () => {
-              // TODO: This is async! :/
-              this.httpServer.stop();
-            };
-          })
-      )
-      .subscribe();
+    const config = await this.config$.first().toPromise();
+    await this.httpServer.start(config);
   }
 
   async stop() {
-    if (this.configSubscription !== undefined) {
-      this.configSubscription.unsubscribe();
+    if (this.configSubscription === undefined) {
+      return;
     }
+
+    this.configSubscription.unsubscribe();
+    this.configSubscription = undefined;
+
+    await this.httpServer.stop();
   }
 
   registerRouter(router: Router<any>): void {

@@ -120,7 +120,7 @@ describe('when configuring logger fails', () => {
 
     mockServer.mockClear();
 
-    await root.start();
+    await expect(root.start()).rejects.toMatchSnapshot();
 
     expect(mockServer).not.toHaveBeenCalled();
 

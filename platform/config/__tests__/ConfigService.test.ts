@@ -1,6 +1,6 @@
 import { BehaviorSubject } from 'rxjs';
 
-import { ConfigService, ObjectToRawConfigAdapter, RawConfig } from '..';
+import { ConfigService, ObjectToRawConfigAdapter } from '..';
 import { Env } from '../Env';
 import { logger } from '../../logging/__mocks__';
 import { Schema } from '../../types/schema';
