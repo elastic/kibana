@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
-import { Form } from './core';
+import { Form, Layout } from './core';
 import { durationOutputOptions, durationInputOptions } from '../lib/component_utils/durations';
 const durationFormatTest = /[pnumshdwMY]+,[pnumshdwMY]+/;
 
@@ -79,7 +79,7 @@ class DataFormatPicker extends Component {
     if (defaultValue === 'duration') {
       const [from, to, decimals] = value.split(',');
       return (
-        <div className="vis_editor__data_format_picker-container">
+        <Layout.Grid>
           <Form.Select label={this.props.label} clearable={false} value={defaultValue} options={options} onChange={this.handleChange} />
           <Form.Select
             label="From"
@@ -98,27 +98,25 @@ class DataFormatPicker extends Component {
             max={20}
             onChange={this.handleDurationChange('decimals')}
           />
-        </div>
+        </Layout.Grid>
       );
     }
 
     return (
-      <div className="vis_editor__data_format_picker-container">
+      <Layout.Grid>
         <Form.Select label={this.props.label} clearable={false} value={defaultValue} options={options} onChange={this.handleChange} />
 
         {defaultValue === 'custom' && (
-          <div className="vis_editor__data_format_picker-custom_row">
-            <Form.Text
-              label="Numeral.js Format String"
-              onChange={this.handleCustomChange}
-              name="custom_format"
-              defaultValue={value}
-              assistText="API docs"
-              assistLink="http://numeraljs.com/"
-            />
-          </div>
+          <Form.Text
+            label="Numeral.js Format String"
+            onChange={this.handleCustomChange}
+            name="custom"
+            defaultValue={value}
+            assistText="API docs"
+            assistLink="http://numeraljs.com/"
+          />
         )}
-      </div>
+      </Layout.Grid>
     );
   }
 }

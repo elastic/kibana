@@ -15,7 +15,7 @@ const YesNo = ({ name, value, label, onChange, size = 'fit' }) => {
   return (
     <Layout.Cell size={size} align="center">
       {label && (
-        <div className="vis_editor__label" style={{ marginBottom: 7 }}>
+        <div className="vis_editor__label" style={{ marginBottom: 8 }}>
           {label}
         </div>
       )}

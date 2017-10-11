@@ -3,7 +3,7 @@ import React from 'react';
 import FieldSelect from './aggs/field_select';
 import createSelectHandler from '../lib/component_utils/create_select_handler';
 import createTextHandler from '../lib/component_utils/create_text_handler';
-import { YesNo } from './core';
+import { YesNo, Form, Layout } from './core';
 import { htmlIdGenerator } from 'ui_framework/services';
 
 export const IndexPattern = props => {
@@ -25,44 +25,44 @@ export const IndexPattern = props => {
 
   const model = { ...defaults, ...props.model };
   return (
-    <div className={props.className}>
-      <label className="vis_editor__label" htmlFor={htmlId('indexPattern')}>
-        Index Pattern
-      </label>
-      <input
-        id={htmlId('indexPattern')}
-        className="vis_editor__input"
-        disabled={props.disabled}
-        onChange={handleTextChange(indexPatternName, '*')}
-        value={model[indexPatternName]}
-      />
-      <label className="vis_editor__label" htmlFor={htmlId('timeField')}>
-        Time Field
-      </label>
-      <div className="vis_editor__index_pattern-fields">
-        <FieldSelect
-          id={htmlId('timeField')}
-          restrict="date"
-          value={model[timeFieldName]}
-          disabled={props.disabled}
-          onChange={handleSelectChange(timeFieldName)}
-          indexPattern={model[indexPatternName]}
-          fields={fields}
+    <Layout.Cell>
+      <Layout.Grid className={props.className}>
+        <Form.Text
+          label="Index Pattern"
+          onChange={props.onChange}
+          defaultValue="*"
+          name="indexPatternName"
+          value={model.indexPatternName}
         />
-      </div>
-      <label className="vis_editor__label" htmlFor={htmlId('interval')}>
-        Interval (auto, 1m, 1d, 1y, &gt;=1m)
-      </label>
-      <input
-        id={htmlId('interval')}
-        className="vis_editor__input"
-        disabled={props.disabled}
-        onChange={handleTextChange(intervalName, 'auto')}
-        value={model[intervalName]}
-      />
-      <div className="vis_editor__label">Drop Last Bucket</div>
-      <YesNo value={model[dropBucketName]} name={dropBucketName} onChange={props.onChange} />
-    </div>
+
+        <label className="vis_editor__label" htmlFor={htmlId('timeField')}>
+          Time Field
+        </label>
+        <div className="vis_editor__index_pattern-fields">
+          <FieldSelect
+            id={htmlId('timeField')}
+            restrict="date"
+            value={model[timeFieldName]}
+            disabled={props.disabled}
+            onChange={handleSelectChange(timeFieldName)}
+            indexPattern={model[indexPatternName]}
+            fields={fields}
+          />
+        </div>
+        <label className="vis_editor__label" htmlFor={htmlId('interval')}>
+          Interval (auto, 1m, 1d, 1y, &gt;=1m)
+        </label>
+        <input
+          id={htmlId('interval')}
+          className="vis_editor__input"
+          disabled={props.disabled}
+          onChange={handleTextChange(intervalName, 'auto')}
+          value={model[intervalName]}
+        />
+        <div className="vis_editor__label">Drop Last Bucket</div>
+        <YesNo value={model[dropBucketName]} name={dropBucketName} onChange={props.onChange} />
+      </Layout.Grid>
+    </Layout.Cell>
   );
 };
 
