@@ -8,6 +8,10 @@ import {
   GuideText,
 } from '../../components';
 
+import {
+  Link,
+} from 'react-router';
+
 const toggleButtonHtml = require('./toggle_button.html');
 const toggleButtonJs = require('raw!./toggle_button.js');
 const toggleButtonDisabledHtml = require('./toggle_button_disabled.html');
@@ -24,7 +28,9 @@ export default props => (
       }]}
     >
       <GuideText>
-        You can use this button to reveal and hide content.
+        You can use this button to reveal and hide content. For a complete example
+        on how to make an collapsable panel proper accessible, read
+        the <Link to="collapsebutton" className="guideLink">CollapseButton</Link> documentation.
       </GuideText>
 
       <GuideDemo
