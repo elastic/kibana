@@ -2,12 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-export const KuiExpressionItem = ({
-  children,
-  className,
-  ...rest
-}) => {
-  const classes = classNames('kuiExpressionItem', className);
+export const KuiPopoverTitle = ({ children, className, ...rest }) => {
+  const classes = classNames('kuiPopoverTitle', className);
 
   return (
     <div
@@ -19,7 +15,7 @@ export const KuiExpressionItem = ({
   );
 };
 
-KuiExpressionItem.propTypes = {
+KuiPopoverTitle.propTypes = {
   children: PropTypes.node,
-  className: PropTypes.string
+  className: PropTypes.string,
 };
