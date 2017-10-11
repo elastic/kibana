@@ -1,4 +1,4 @@
-import { Observable, Subscription, BehaviorSubject } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 
 import { Env } from '../../config';
 import { HttpServer } from './HttpServer';
@@ -34,7 +34,8 @@ export class HttpService implements CoreService {
       }
     });
 
-    await this.httpServer.start(await this.config$.first().toPromise());
+    const config = await this.config$.first().toPromise();
+    await this.httpServer.start(config);
   }
 
   async stop() {
