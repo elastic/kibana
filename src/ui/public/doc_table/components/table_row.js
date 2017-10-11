@@ -26,7 +26,7 @@ const MIN_LINE_LENGTH = 20;
  * <tr ng-repeat="row in rows" kbn-table-row="row"></tr>
  * ```
  */
-module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl) {
+module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl, copyToClipboardService) {
   const cellTemplate = _.template(noWhiteSpace(require('ui/doc_table/components/table_row/cell.html')));
   const truncateByHeightTemplate = _.template(noWhiteSpace(require('ui/partials/truncate_by_height.html')));
 
@@ -50,6 +50,12 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
 
       // when we compile the toggle button in the summary, we use this $scope
       let $toggleScope;
+
+      $scope.copyToClipboard = (uriescape) => {
+        let text = `${window.location.origin}${window.location.pathname}`;
+        text += `#/doc/${$scope.indexPattern.id}/${$scope.row._index}/${$scope.row._type}/?id=${$scope.row._id || uriescape}`;
+        copyToClipboardService.copyText(text);
+      };
 
       // toggle display of the rows details, a full list of the fields from each row
       $scope.toggleRow = function () {

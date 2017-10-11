@@ -15,6 +15,13 @@
     >
       View single document
     </a>
+    <button 
+      class="kuiButton kuiButton--small kuiButton--secondary"
+      data-test-subj="docTableRowAction"
+      ng-click="copyToClipboard(uriescape)"
+    >
+    Copy Link
+    </button>
   </div>
   <doc-viewer
     columns="columns"
