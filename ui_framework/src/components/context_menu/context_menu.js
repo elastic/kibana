@@ -218,8 +218,8 @@ export class KuiContextMenu extends Component {
         onTransitionComplete={(transitionType === 'out') ? this.onOutGoingPanelTransitionComplete : undefined}
         title={panel.title}
         onClose={onClose}
-        transitionType={transitionType}
-        transitionDirection={this.state.transitionDirection}
+        transitionType={this.state.isOutgoingPanelVisible ? transitionType : undefined}
+        transitionDirection={this.state.isOutgoingPanelVisible ? this.state.transitionDirection : undefined}
         hasFocus={transitionType === 'in'}
         items={this.renderItems(panel.items)}
         focusedItemIndex={

@@ -46,11 +46,10 @@ export class KuiContextMenuPanel extends Component {
     super(props);
 
     this.menuItems = [];
-  }
-
-  state = {
-    pressedArrowDirection: undefined,
-    isTransitioning: true,
+    this.state = {
+      pressedArrowDirection: undefined,
+      isTransitioning: Boolean(props.transitionType),
+    };
   }
 
   onKeyDown = e => {
@@ -184,7 +183,7 @@ export class KuiContextMenuPanel extends Component {
       this.menuItems = [];
     }
 
-    if (nextProps.transitionType !== this.props.transitionType) {
+    if (nextProps.transitionType) {
       this.setState({
         isTransitioning: true,
       });
@@ -273,7 +272,7 @@ export class KuiContextMenuPanel extends Component {
     const classes = classNames('kuiContextMenuPanel', className, (
       this.state.isTransitioning && transitionDirectionAndTypeToClassNameMap[transitionDirection]
       ? transitionDirectionAndTypeToClassNameMap[transitionDirection][transitionType]
-      : ''
+      : undefined
     ));
 
     const content = items.length

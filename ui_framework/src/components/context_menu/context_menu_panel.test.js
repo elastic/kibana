@@ -159,12 +159,12 @@ describe('KuiContextMenuPanel', () => {
       });
     });
 
-    describe('focusItemIndex', () => {
+    describe('focusedItemIndex', () => {
       it('sets focus on the item occupying that index', () => {
         const component = mount(
           <KuiContextMenuPanel
             items={items}
-            focusItemIndex={1}
+            focusedItemIndex={1}
           />
         );
 
