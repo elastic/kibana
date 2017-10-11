@@ -7,13 +7,22 @@ import {
   KuiToolBarFooterSection,
 } from '../../';
 
+
+
 export function KuiListingTableToolBarFooter({ pager, itemsSelectedCount }) {
+  const renderText = () => {
+    if (itemsSelectedCount === 1) {
+      return '1 item selected';
+    }
+
+    return `${itemsSelectedCount} items selected`;
+  };
+
   return (
     <KuiToolBarFooter>
       <KuiToolBarFooterSection>
         <KuiToolBarText>
-          {itemsSelectedCount === 1 && '1 item selected'}
-          {itemsSelectedCount > 1 && `${itemsSelectedCount} items selected`}
+          {renderText()}
         </KuiToolBarText>
       </KuiToolBarFooterSection>
 
