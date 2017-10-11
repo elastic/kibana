@@ -18,7 +18,9 @@ export class DashboardPanel extends React.Component {
       onMaximizePanel();
     }
   };
+
   deletePanel = () => this.props.onDeletePanel();
+
   onEditPanel = () => window.location = this.props.editUrl;
 
   onFocus = () => {
@@ -27,6 +29,7 @@ export class DashboardPanel extends React.Component {
       onPanelFocused(panelId);
     }
   };
+
   onBlur = () => {
     const { onPanelBlurred, panelId } = this.props;
     if (onPanelBlurred) {

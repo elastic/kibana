@@ -54,10 +54,17 @@ export class KuiCodeEditor extends Component {
   }
 
   render() {
-    const { width, height } = this.props;
+    const {
+      width,
+      height,
+      onBlur, // eslint-disable-line no-unused-vars
+      ...rest,
+    } = this.props;
+
     const classes = classNames('kuiCodeEditorKeyboardHint', {
       'kuiCodeEditorKeyboardHint-isInactive': !this.state.isHintActive
     });
+
     return (
       <div
         className="kuiCodeEditorWrapper"
@@ -76,14 +83,18 @@ export class KuiCodeEditor extends Component {
           <p className="kuiText kuiVerticalRhythmSmall">
             Press Enter to start editing.
           </p>
+
           <p className="kuiText kuiVerticalRhythmSmall">
             When you&rsquo;re done, press Escape to stop editing.
           </p>
         </div>
+
         <AceEditor
-          {...this.props}
           ref={this.aceEditorRef}
+          width={width}
+          height={height}
           onBlur={this.onBlurAce}
+          {...rest}
         />
       </div>
     );
@@ -91,7 +102,7 @@ export class KuiCodeEditor extends Component {
 }
 
 KuiCodeEditor.propTypes = {
+  width: PropTypes.string,
   height: PropTypes.string,
   onBlur: PropTypes.func,
-  width: PropTypes.string,
 };

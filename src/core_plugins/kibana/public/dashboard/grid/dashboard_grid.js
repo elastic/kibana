@@ -88,10 +88,17 @@ export class DashboardGrid extends React.Component {
   };
 
   onPanelFocused = panelIndex => {
-    this.gridItems[panelIndex].style.zIndex = '1';
+    const gridItem = this.gridItems[panelIndex];
+    if (gridItem) {
+      gridItem.style.zIndex = '1';
+    }
   };
+
   onPanelBlurred = panelIndex => {
-    this.gridItems[panelIndex].style.zIndex = 'auto';
+    const gridItem = this.gridItems[panelIndex];
+    if (gridItem) {
+      gridItem.style.zIndex = 'auto';
+    }
   };
 
   renderDOM() {

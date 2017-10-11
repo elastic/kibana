@@ -62,7 +62,7 @@ export default class extends Component {
         <KuiPopover
           button={(
             <KuiButton buttonType="basic" onClick={this.onButtonClick2.bind(this)}>
-              Popover anchored to the right.
+              Popover anchored to the left.
             </KuiButton>
           )}
           isOpen={this.state.isPopoverOpen2}

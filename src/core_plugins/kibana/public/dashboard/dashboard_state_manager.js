@@ -172,7 +172,7 @@ export class DashboardStateManager {
     // in place in order for it to affect the visualizations.
     this.stateDefaults.query = this.lastSavedDashboardFilters.query;
     // Need to make a copy to ensure they are not overwritten.
-    this.stateDefaults.filters = Object.assign(new Array(), this.getLastSavedFilterBars());
+    this.stateDefaults.filters = [...this.getLastSavedFilterBars()];
 
     this.isDirty = false;
     this.appState.setDefaults(this.stateDefaults);

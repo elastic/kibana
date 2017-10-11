@@ -29,6 +29,7 @@ export default class UiBundlerEnv {
     // webpack aliases, like require paths, mapping a prefix to a directory
     this.aliases = {
       ui: fromRoot('src/ui/public'),
+      packages: fromRoot('packages'),
       test_harness: fromRoot('src/test_harness/public'),
       querystring: 'querystring-browser',
       moment$: fromRoot('webpackShims/moment'),
