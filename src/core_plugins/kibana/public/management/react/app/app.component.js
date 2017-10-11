@@ -67,7 +67,7 @@ class SideBar extends Component {
   }
 }
 
-const App = ({ /*version,*/ sections, children }) => {
+const App = ({ sections, children }) => {
   return (
     <KuiPage>
       <KuiPageHeader>

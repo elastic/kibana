@@ -16,7 +16,6 @@ export class TableProps extends Component {
     this.state = {
       page,
       perPage,
-      perPageToggleOpened: false,
       filterBy,
       sortBy,
       sortAsc,
@@ -25,8 +24,6 @@ export class TableProps extends Component {
 
   setPage = (page) => this.setState({ page })
   setPerPage = (perPage) => this.setState({ perPage })
-  openPerPageToggle = () => this.setState({ perPageToggleOpened: true })
-  closePerPageToggle = () => this.setState({ perPageToggleOpened: false })
   setFilterBy = (filterBy) => {
     this.setState(state => {
       return {
@@ -74,13 +71,11 @@ export class TableProps extends Component {
 
   render() {
     const { items, numOfPages } = this.getItems();
-    const { page, perPage, perPageToggleOpened, sortBy, sortAsc, filterBy } = this.state;
+    const { page, perPage, sortBy, sortAsc, filterBy } = this.state;
 
     const tableProps = {
       page,
       perPage,
-      // perPageIncrements,
-      perPageToggleOpened,
       sortBy,
       sortAsc,
       numOfPages,
@@ -90,8 +85,6 @@ export class TableProps extends Component {
       setPerPage: this.setPerPage,
       setFilterBy: this.setFilterBy,
       setSortBy: this.setSortBy,
-      openPerPageToggle: this.openPerPageToggle,
-      closePerPageToggle: this.closePerPageToggle,
     };
 
     return this.props.render(tableProps);
