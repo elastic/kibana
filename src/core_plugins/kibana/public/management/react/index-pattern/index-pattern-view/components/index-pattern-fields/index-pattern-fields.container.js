@@ -1,34 +1,28 @@
-import { connect } from 'react-redux';
-import { compose } from 'recompose';
+import React from 'react';
 import { IndexPatternFields as IndexPatternFieldsComponent } from './index-pattern-fields.component';
 
 import {
-  wrapWithTableProps,
-} from 'plugins/kibana/management/react/hocs';
+  TableProps,
+} from 'plugins/kibana/management/react/lib/table_props';
 
-import {
-  getPathToFields,
-}  from 'plugins/kibana/management/react/store/reducers/index-pattern-view';
+const filter = (item, filterBy) => {
+  const { name, type } = filterBy;
 
-import {
-  getIndexPatternView,
-} from 'plugins/kibana/management/react/reducers';
+  const nameFilters = !name || item.name.includes(name);
+  const typeFilters = !type || item.type === type;
 
-const IndexPatternFields = compose(
-  connect(
-    state => ({ ...getIndexPatternView(state) }),
-  ),
-  wrapWithTableProps({
-    perPage: 10,
-    page: 0,
-    sortBy: 'name',
-    sortAsc: true,
-    filters: {
-      name: (value, filterValue) => !filterValue || value.includes(filterValue),
-      type: (value, filterValue) => !filterValue || filterValue === 'false' || value === filterValue,
-    },
-    itemsKey: getPathToFields(),
-  })
-)(IndexPatternFieldsComponent);
+  return nameFilters && typeFilters;
+};
+
+const IndexPatternFields = (props) => (
+  <TableProps
+    sortBy="name"
+    items={props.fields}
+    filters={[filter]}
+    render={({ items, ...tableProps }) => (
+      <IndexPatternFieldsComponent fields={items} {...tableProps}/>
+    )}
+  />
+);
 
 export { IndexPatternFields };

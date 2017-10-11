@@ -1,39 +1,29 @@
-import { compose } from 'recompose';
+import React from 'react';
 import { connect } from 'react-redux';
 
 import {
-  wrapWithTableProps,
-} from 'plugins/kibana/management/react/hocs';
+  TableProps,
+} from 'plugins/kibana/management/react/lib/table_props';
 
 import { IndexPatternResults as IndexPatternResultsComponent } from './index-pattern-results.component';
 
 import {
-  getResults,
-} from 'plugins/kibana/management/react/store/reducers/index-pattern-creation';
+  getSearchIndicesFiltered,
+} from 'plugins/kibana/management/react/store/reducers';
 
-const IndexPatternResults = compose(
-  connect(
-    (state, ownProps) => {
-      const results = getResults(state);
-      const { isIncludingSystemIndices } = ownProps;
+const filter = (item, filterBy) => !filterBy['attributes.title'] || item.attributes.title.includes(filterBy['attributes.title']);
 
-      const indices = results.indices
-        ? results.indices.filter(item => item.name[0] !== '.' || isIncludingSystemIndices)
-        : undefined;
-
-      return {
-        ...results,
-        indices,
-      };
-    },
-  ),
-  wrapWithTableProps({
-    perPage: 10,
-    page: 0,
-    sortBy: 'name',
-    sortAsc: true,
-    itemsKey: 'indices',
-  })
-)(IndexPatternResultsComponent);
+const IndexPatternResults = connect(
+  (state, ownProps) => ({ indices: getSearchIndicesFiltered(state, ownProps.isIncludingSystemIndices) }),
+)((props) => (
+  <TableProps
+    sortBy="attributes.title"
+    items={props.indices}
+    filters={[filter]}
+    render={({ items, ...tableProps }) => (
+      <IndexPatternResultsComponent indices={items} {...tableProps}/>
+    )}
+  />
+));
 
 export { IndexPatternResults };

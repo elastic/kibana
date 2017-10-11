@@ -1,8 +1,9 @@
+import { globals } from '../../globals';
 import { createAction } from 'redux-actions';
 import { createThunk } from 'redux-thunks';
-import { globals } from '../../globals';
 
-export const fetchedIndexPattern = createAction('FETCHED_INDEX_PATTERN', indexPattern => ({ indexPattern }));
+export const fetchedIndexPattern = createAction('FETCHED_INDEX_PATTERN',
+  (pattern, fields, timeFieldName, isDefault, id) => ({ pattern, fields, timeFieldName, isDefault, id }));
 export const fetchIndexPattern = createThunk('FETCH_INDEX_PATTERN',
   async ({ dispatch }, pattern) => {
     const rawIndexPattern = await globals.es.search({
@@ -36,14 +37,7 @@ export const fetchIndexPattern = createThunk('FETCH_INDEX_PATTERN',
     const timeFieldName = details.timeFieldName;
     const fields = details.fields ? JSON.parse(details.fields) : [];
     const isDefault = id === globals.config.get('defaultIndex');
-    const indexPattern = {
-      pattern,
-      fields,
-      timeFieldName,
-      isDefault,
-      id,
-    };
-    dispatch(fetchedIndexPattern(indexPattern));
+    dispatch(fetchedIndexPattern(pattern, fields, timeFieldName, isDefault, id));
   }
 );
 
@@ -56,18 +50,18 @@ export const deleteIndexPattern = createThunk('DELETE_INDEX_PATTERN',
   }
 );
 
-export const refreshFields = createThunk('REFRESH_FIELDS',
-  async ({ dispatch }, id, pattern) => {
-    const indexPattern = await globals.indexPatterns.get(id);
-    await indexPattern.refreshFields();
-    dispatch(fetchIndexPattern(pattern));
-  }
-);
-
 export const setAsDefaultIndexPattern = createAction('SET_AS_DEFAULT_INDEX_PATTERN');
 export const setDefaultIndexPattern = createThunk('SET_DEFAULT_INDEX_PATTERN',
   async ({ dispatch }, id) => {
     globals.config.set('defaultIndex', id);
     dispatch(setAsDefaultIndexPattern());
+  }
+);
+
+export const refreshFields = createThunk('REFRESH_FIELDS',
+  async ({ dispatch }, id, pattern) => {
+    const indexPattern = await globals.indexPatterns.get(id);
+    await indexPattern.refreshFields();
+    dispatch(fetchIndexPattern(pattern));
   }
 );

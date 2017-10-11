@@ -1,5 +1,4 @@
-/* eslint-disable */
-import React, { Component } from 'react';
+import React from 'react';
 import {
   KuiPageContent,
   KuiPageContentBody,
@@ -12,10 +11,8 @@ import {
   KuiForm,
   KuiFormRow,
   KuiFieldText,
-  KuiSwitch,
   KuiCheckbox,
   KuiSelect,
-  KuiIcon,
   KuiTable,
   KuiTableRow,
   KuiTableRowCell,
@@ -23,7 +20,6 @@ import {
   KuiTableHeaderCellCheckbox,
   KuiTableBody,
   KuiTableHeader,
-  KuiButton,
   KuiButtonEmpty,
   KuiFlexGroup,
   KuiFlexItem,
@@ -37,14 +33,14 @@ const IndexPatternList = ({
   numOfPages,
   perPage,
   page,
-  goToPage,
-  changeSort,
+  setPage,
+  setSortBy,
   sortBy,
   sortAsc,
-  filter,
-  changePerPage,
+  setFilterBy,
+  filterBy,
+  setPerPage,
 }) => {
-  console.log('IndexPatternList', indexPatterns);
   if (indexPatterns === undefined) {
     return null;
   }
@@ -104,7 +100,8 @@ const IndexPatternList = ({
                 <KuiFieldText
                   placeholder="Search for an index pattern..."
                   icon="search"
-                  onChange={(e) => filter({ ['attributes.title']: e.target.value })}
+                  value={filterBy['attributes.title']}
+                  onChange={(e) => setFilterBy({ ['attributes.title']: e.target.value })}
                 />
               </KuiFlexItem>
               {/* <KuiFlexItem>
@@ -121,28 +118,28 @@ const IndexPatternList = ({
               <KuiCheckbox/>
             </KuiTableHeaderCell>
             <KuiTableHeaderCell
-              onSort={() => changeSort('name')}
+              onSort={() => setSortBy('name')}
               isSorted={sortBy === 'name'}
               isSortAscending={sortAsc}
             >
               Name
             </KuiTableHeaderCell>
             {/* <KuiTableHeaderCell
-              onSort={() => changeSort('indices')}
+              onSort={() => setSortBy('indices')}
               isSorted={sortBy === 'indices'}
               isSortAscending={sortAsc}
             >
               Matching Indices
             </KuiTableHeaderCell>
             <KuiTableHeaderCell
-              onSort={() => changeSort('fields')}
+              onSort={() => setSortBy('fields')}
               isSorted={sortBy === 'fields'}
               isSortAscending={sortAsc}
             >
               Fields
             </KuiTableHeaderCell>
             <KuiTableHeaderCell
-              onSort={() => changeSort('creator')}
+              onSort={() => setSortBy('creator')}
               isSorted={sortBy === 'creator'}
               isSortAscending={sortAsc}
             >
@@ -161,7 +158,7 @@ const IndexPatternList = ({
             </KuiText>
             <KuiSelect
               value={perPage}
-              onChange={(e) => changePerPage(e.target.value)}
+              onChange={(e) => setPerPage(e.target.value)}
               options={[
                 { value: 1, text: 1 },
                 { value: 10, text: 10 },
@@ -176,7 +173,7 @@ const IndexPatternList = ({
                 <KuiPagination
                   pageCount={numOfPages}
                   activePage={page}
-                  onPageClick={goToPage}
+                  onPageClick={setPage}
                 />
               </KuiFlexItem>
             : null
@@ -184,7 +181,7 @@ const IndexPatternList = ({
         </KuiFlexGroup>
       </KuiPageContentBody>
     </KuiPageContent>
-  )
+  );
 };
 
 export { IndexPatternList };

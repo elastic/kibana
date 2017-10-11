@@ -4,20 +4,18 @@ import { IndexPatternTimeFields as IndexPatternTimeFieldsComponent } from './ind
 import {
   fetchTimeFields,
   selectTimeField,
-} from 'plugins/kibana/management/react/store/actions/index-pattern-creation';
+} from 'plugins/kibana/management/react/store/actions';
 
 import {
   getTimeFields,
-  getPattern,
-} from 'plugins/kibana/management/react/store/reducers/index-pattern-creation';
+  getSearchPattern,
+} from 'plugins/kibana/management/react/store/reducers';
 
 const IndexPatternTimeFields = connect(
-  state => {
-    return {
-      ...getTimeFields(state),
-      pattern: getPattern(state),
-    };
-  },
+  state => ({
+    timeFields: getTimeFields(state),
+    pattern: getSearchPattern(state),
+  }),
   { fetchTimeFields, selectTimeField },
 )(IndexPatternTimeFieldsComponent);
 

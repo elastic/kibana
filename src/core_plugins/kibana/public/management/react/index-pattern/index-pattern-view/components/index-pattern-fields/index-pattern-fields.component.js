@@ -23,21 +23,18 @@ import {
 import { getKbnTypeNames } from 'src/utils/kbn_field_types';
 
 const IndexPatternFields = ({
-  indexPattern: {
-    fields,
-  },
+  fields,
   numOfPages,
   perPage,
   page,
   setPage,
-  setSort,
+  setSortBy,
   sortBy,
   sortAsc,
   setFilterBy,
   filterBy,
   setPerPage,
 }) => {
-  // console.log('IndexPatternFields', fields.length);
   if (fields === undefined) {
     return null;
   }
@@ -68,7 +65,7 @@ const IndexPatternFields = ({
     };
   });
 
-  fieldTypes.unshift({ text: 'Filter by field types', value: false });
+  fieldTypes.unshift({ text: 'Filter by field types', value: '' });
 
   return (
     <KuiPageContent>
@@ -99,28 +96,28 @@ const IndexPatternFields = ({
         <KuiTable>
           <KuiTableHeader>
             <KuiTableHeaderCell
-              onSort={() => setSort('name')}
+              onSort={() => setSortBy('name')}
               isSorted={sortBy === 'name'}
               isSortAscending={sortAsc}
             >
               Name
             </KuiTableHeaderCell>
             <KuiTableHeaderCell
-              onSort={() => setSort('type')}
+              onSort={() => setSortBy('type')}
               isSorted={sortBy === 'type'}
               isSortAscending={sortAsc}
             >
               Type
             </KuiTableHeaderCell>
             <KuiTableHeaderCell
-              onSort={() => setSort('searchable')}
+              onSort={() => setSortBy('searchable')}
               isSorted={sortBy === 'searchable'}
               isSortAscending={sortAsc}
             >
               Searchable
             </KuiTableHeaderCell>
             <KuiTableHeaderCell
-              onSort={() => setSort('aggregatable')}
+              onSort={() => setSortBy('aggregatable')}
               isSorted={sortBy === 'aggregatable'}
               isSortAscending={sortAsc}
             >

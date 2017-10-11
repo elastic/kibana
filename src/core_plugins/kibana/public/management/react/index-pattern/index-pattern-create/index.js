@@ -1,2 +1,1 @@
-import { IndexPatternCreate } from './index-pattern-create.container';
-export { IndexPatternCreate };
+export { IndexPatternCreate } from './index-pattern-create.container';

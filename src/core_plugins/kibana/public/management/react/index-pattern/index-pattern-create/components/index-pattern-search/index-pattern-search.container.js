@@ -3,17 +3,14 @@ import { IndexPatternSearch as IndexPatternSearchComponent } from './index-patte
 
 import {
   fetchIndices,
-} from 'plugins/kibana/management/react/store/actions/index-pattern-creation';
+} from 'plugins/kibana/management/react/store/actions/indices';
 
 import {
-  getResults,
-} from 'plugins/kibana/management/react/store/reducers/index-pattern-creation';
+  getSearchHasExactMatches,
+} from 'plugins/kibana/management/react/store/reducers';
 
 const IndexPatternSearch = connect(
-  state => {
-    const { hasExactMatches } = getResults(state);
-    return { hasExactMatches };
-  },
+  state => ({ hasExactMatches: getSearchHasExactMatches(state) }),
   { fetchIndices },
 )(IndexPatternSearchComponent);
 

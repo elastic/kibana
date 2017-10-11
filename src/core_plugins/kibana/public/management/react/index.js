@@ -1,7 +1,6 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
-import { initData } from './app/app.actions';
 import { globals } from './globals';
 import { store } from './store';
 
@@ -14,11 +13,12 @@ import {
 
 import {
   fetchIndexPatterns,
-} from 'plugins/kibana/management/react/store/actions/index-pattern-list';
+  initData,
+} from 'plugins/kibana/management/react/store/actions';
 
 import {
   getIndexPatterns,
-} from 'plugins/kibana/management/react/store/reducers/index-pattern-list';
+} from 'plugins/kibana/management/react/store/reducers';
 
 const renderPage = (page, targetId) => {
   render(

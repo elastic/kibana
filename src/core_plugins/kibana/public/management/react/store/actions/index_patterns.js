@@ -1,7 +1,7 @@
+import { globals } from '../../globals';
 import { createAction } from 'redux-actions';
 import { createThunk } from 'redux-thunks';
 import { SavedObjectsClient } from 'ui/saved_objects';
-import { globals } from '../../globals';
 
 export const fetchedIndexPatterns = createAction('FETCHED_INDEX_PATTERNS', indexPatterns => ({ indexPatterns }));
 export const fetchIndexPatterns = createThunk('FETCH_INDEX_PATTERNS',

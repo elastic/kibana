@@ -1,40 +1,40 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { compose } from 'recompose';
 import { IndexPatternList as IndexPatternListComponent } from './index-pattern-list.component';
 
 import {
-  wrapWithTableProps,
-} from 'plugins/kibana/management/react/hocs';
+  TableProps,
+} from 'plugins/kibana/management/react/lib/table_props';
 
 import {
   fetchIndexPatterns,
-} from 'plugins/kibana/management/react/store/actions/index-pattern-list';
+} from 'plugins/kibana/management/react/store/actions';
 
 import {
-  getIndexPatternList,
-} from 'plugins/kibana/management/react/reducers';
+  getIndexPatterns,
+} from 'plugins/kibana/management/react/store/reducers';
 
-const IndexPatternList = compose(
-  connect(
-    state => ({ ...getIndexPatternList(state) }),
-    { fetchIndexPatterns }
-  ),
-  wrapWithTableProps({
-    filters: {
-      ['attributes.title']: (value, filterValue) => !filterValue || value.includes(filterValue),
-    },
-    sortBy: 'attributes.title',
-    sortAsc: true,
-    perPage: 10,
-    page: 0,
-  })
+const filter = (item, filterBy) => !filterBy['attributes.title'] || item.attributes.title.includes(filterBy['attributes.title']);
+
+const IndexPatternList = connect(
+  state => ({ indexPatterns: getIndexPatterns(state) }),
+  { fetchIndexPatterns },
 )(class extends Component {
   componentWillMount() {
     this.props.fetchIndexPatterns();
   }
   render() {
-    return <IndexPatternListComponent {...this.props}/>;
+    const { indexPatterns } = this.props;
+    return (
+      <TableProps
+        sortBy="attributes.title"
+        items={indexPatterns}
+        filters={[filter]}
+        render={({ items, ...tableProps }) => (
+          <IndexPatternListComponent indexPatterns={items} {...tableProps}/>
+        )}
+      />
+    );
   }
 });
 

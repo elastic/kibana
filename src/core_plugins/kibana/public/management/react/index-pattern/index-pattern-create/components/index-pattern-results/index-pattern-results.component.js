@@ -22,7 +22,7 @@ const IndexPatternResults = ({
   page,
   sortBy,
   sortAsc,
-  setSort,
+  setSortBy,
   setPage,
   setPerPage,
 }) => {
@@ -51,14 +51,14 @@ const IndexPatternResults = ({
       <KuiTable className="kuiVerticalRhythm">
         <KuiTableHeader>
           <KuiTableHeaderCell
-            onSort={() => setSort('name')}
+            onSort={() => setSortBy('name')}
             isSorted={sortBy === 'name'}
             isSortAscending={sortAsc}
           >
             Name
           </KuiTableHeaderCell>
           <KuiTableHeaderCell
-            onSort={() => setSort('count')}
+            onSort={() => setSortBy('count')}
             isSorted={sortBy === 'count'}
             isSortAscending={sortAsc}
           >

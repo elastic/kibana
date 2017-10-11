@@ -19,7 +19,11 @@ import {
 import { IndexPatternFields } from './components/index-pattern-fields';
 
 const IndexPatternView = ({
-  indexPattern,
+  pattern,
+  id,
+  fields,
+  timeFieldName,
+  isDefault,
   selectedTab,
   changeTab,
   isShowingRefreshFieldsConfirmation,
@@ -29,21 +33,13 @@ const IndexPatternView = ({
   deleteIndexPattern,
   setDefaultIndexPattern,
 }) => {
-  if (indexPattern === undefined || indexPattern.fields === undefined) {
+  if (pattern === undefined || fields === undefined) {
     return null;
   }
 
-  const {
-    pattern,
-    id,
-    fields,
-    timeFieldName,
-    isDefault,
-  } = indexPattern;
-
   let tabContent = null;
   if (selectedTab === 'fields') {
-    tabContent = <IndexPatternFields/>;
+    tabContent = <IndexPatternFields fields={fields}/>;
   }
 
   return (
