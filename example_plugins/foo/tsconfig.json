@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig",
+  "compilerOptions": {
+    "outDir": "target/server"
+  },
+  "files": [
+    "src/index.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

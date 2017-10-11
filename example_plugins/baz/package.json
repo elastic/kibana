@@ -1,0 +1,13 @@
+{
+  "name": "example-plugin-baz",
+  "version": "1.0.0",
+  "scripts": {
+    "prepare": "npm run build",
+    "build": "tsc",
+    "start": "tsc --watch"
+  },
+  "devDependencies": {
+    "kbn-types": "file:../../packages/kbn-types",
+    "typescript": "^2.5.3"
+  }
+}

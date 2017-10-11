@@ -1,0 +1,14 @@
+{
+  "name": "example-plugin-bar",
+  "version": "1.0.0",
+  "scripts": {
+    "prepare": "npm run build",
+    "build": "tsc",
+    "start": "tsc --watch"
+  },
+  "types": "./target/tsc-types/index.d.ts",
+  "devDependencies": {
+    "kbn-types": "file:../../packages/kbn-types",
+    "typescript": "^2.5.3"
+  }
+}
