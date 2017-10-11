@@ -40,6 +40,12 @@ export {
 } from './collapse_button';
 
 export {
+  KuiContextMenu,
+  KuiContextMenuPanel,
+  KuiContextMenuItem,
+} from './context_menu';
+
+export {
   KuiEmptyTablePrompt,
   KuiEmptyTablePromptMessage,
   KuiEmptyTablePromptPanel,
@@ -54,9 +60,8 @@ export {
 } from './event';
 
 export {
-  KuiExpressionItem,
-  KuiExpressionItemButton,
-  KuiExpressionItemPopover,
+  KuiExpression,
+  KuiExpressionButton,
 } from './expression';
 
 export {
@@ -122,7 +127,12 @@ export {
 } from './pager';
 
 export {
+  KuiPanelSimple,
+} from './panel_simple';
+
+export {
   KuiPopover,
+  KuiPopoverTitle,
 } from './popover';
 
 export {

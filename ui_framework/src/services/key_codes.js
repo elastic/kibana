@@ -6,3 +6,5 @@ export const TAB = 9;
 // Arrow keys
 export const DOWN = 40;
 export const UP = 38;
+export const LEFT = 37;
+export const RIGHT = 39;

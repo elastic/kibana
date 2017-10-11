@@ -4,13 +4,13 @@ import { requiredProps } from '../../test/required_props';
 import sinon from 'sinon';
 
 import {
-  KuiExpressionItemButton,
-} from './expression_item_button';
+  KuiExpressionButton,
+} from './expression_button';
 
-describe('KuiExpressionItemButton', () => {
+describe('KuiExpressionButton', () => {
   test('renders', () => {
     const component = (
-      <KuiExpressionItemButton
+      <KuiExpressionButton
         description="the answer is"
         buttonValue="42"
         isActive={false}
@@ -26,7 +26,7 @@ describe('KuiExpressionItemButton', () => {
     describe('isActive', () => {
       test('true renders active', () => {
         const component = (
-          <KuiExpressionItemButton
+          <KuiExpressionButton
             description="the answer is"
             buttonValue="42"
             isActive={true}
@@ -39,7 +39,7 @@ describe('KuiExpressionItemButton', () => {
 
       test('false renders inactive', () => {
         const component = (
-          <KuiExpressionItemButton
+          <KuiExpressionButton
             description="the answer is"
             buttonValue="42"
             isActive={false}
@@ -56,7 +56,7 @@ describe('KuiExpressionItemButton', () => {
         const onClickHandler = sinon.spy();
 
         const button = shallow(
-          <KuiExpressionItemButton
+          <KuiExpressionButton
             description="the answer is"
             buttonValue="42"
             isActive={false}
