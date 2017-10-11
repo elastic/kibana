@@ -8,49 +8,43 @@
           Time Range
         </h2>
 
-        <ul
+        <div
           role="tablist"
-          class="nav nav-pills kbn-timepicker-modes kbn-timepicker-title__section"
+          class="kbn-timepicker-modes kbn-timepicker-title__section"
         >
-          <li
+          <a
             role="tab"
+            class="kbn-timerpicker-nav-button"
             ng-class="{active: mode === 'quick' }"
+            ng-click="setMode('quick')"
+            aria-selected="{{mode === 'quick'}}"
+            kbn-accessible-click
           >
-            <a
-              class="kbn-timerpicker-nav-button"
-              ng-click="setMode('quick')"
-              kbn-accessible-click
-            >
-              quick
-            </a>
-          </li>
+            Quick
+          </a>
 
-          <li
+          <a
             role="tab"
+            class="kbn-timerpicker-nav-button"
             ng-class="{active: mode === 'relative' }"
+            ng-click="setMode('relative')"
+            aria-selected="{{mode === 'relative'}}"
+            kbn-accessible-click
           >
-            <a
-              class="kbn-timerpicker-nav-button"
-              ng-click="setMode('relative')"
-              kbn-accessible-click
-            >
-              relative
-            </a>
-          </li>
+            Relative
+          </a>
 
-          <li
+          <a
             role="tab"
+            class="kbn-timerpicker-nav-button"
             ng-class="{active: mode === 'absolute' }"
+            ng-click="setMode('absolute')"
+            aria-selected="{{mode === 'absolute'}}"
+            kbn-accessible-click
           >
-            <a
-              class="kbn-timerpicker-nav-button"
-              ng-click="setMode('absolute')"
-              kbn-accessible-click
-            >
-              absolute
-            </a>
-          </li>
-        </ul>
+            Absolute
+          </a>
+        </div>
       </div>
 
       <div
