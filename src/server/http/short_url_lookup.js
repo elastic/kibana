@@ -1,15 +1,16 @@
 import crypto from 'crypto';
 import { get } from 'lodash';
+import { shortUrlAssertValid } from './short_url_assert_valid';
 
 export class ShortUrlLookup {
-  constructor(log, savedObjectsClient) {
+  constructor(log, savedObjectsService) {
     this.log = log;
-    this.savedObjectsClient = savedObjectsClient;
+    this.savedObjectsService = savedObjectsService;
   }
 
-  async function updateMetadata(doc) {
+  async updateMetadata(doc) {
     try {
-      await this.savedObjectsClient.update('url', doc.id, {
+      await this.savedObjectsService.update('url', doc.id, {
         accessDate: new Date(),
         accessCount: get(doc, 'attributes.accessCount', 0) + 1
       });
@@ -20,11 +21,13 @@ export class ShortUrlLookup {
   }
 
   async generateUrlId(url) {
+    shortUrlAssertValid(url);
+
     const id = crypto.createHash('md5').update(url).digest('hex');
-    const { isConflictError } = savedObjectsClient.errors;
+    const { isConflictError } = savedObjectsService.errors;
 
     try {
-      const doc = await savedObjectsClient.create('url', {
+      const doc = await savedObjectsService.create('url', {
         url,
         accessCount: 0,
         createDate: new Date(),
@@ -41,9 +44,11 @@ export class ShortUrlLookup {
     }
   }
 
-  async function getUrl(id) {
-    const doc = await this.savedObjectsClient.get('url', id);
+  async getUrl(id) {
+    const doc = await this.savedObjectsService.get('url', id);
     updateMetadata(doc);
+
+    shortUrlAssertValid(doc.attributes.url);
 
     return doc.attributes.url;
   }

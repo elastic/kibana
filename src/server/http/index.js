@@ -6,12 +6,14 @@ import Hapi from 'hapi';
 import getDefaultRoute from './get_default_route';
 import versionCheckMixin from './version_check';
 import { handleShortUrlError } from './short_url_error';
-import { shortUrlAssertValid } from './short_url_assert_valid';
 import ShortUrlLookup from './short_url_lookup';
 import setupConnectionMixin from './setup_connection';
 import setupRedirectMixin from './setup_redirect_server';
 import registerHapiPluginsMixin from './register_hapi_plugins';
 import xsrfMixin from './xsrf';
+
+import { SavedObjectsService } from '../saved_objects_service';
+import { UiSettingsService } from '../ui_settings_service';
 
 export default async function (kbnServer, server, config) {
   server = kbnServer.server = new Hapi.Server();
@@ -126,14 +128,16 @@ export default async function (kbnServer, server, config) {
     method: 'GET',
     path: '/goto/{urlId}',
     handler: async function (request, reply) {
-      const shortUrlLookup = new ShortUrlLookup(server.log, request.getSavedObjectsClient());
-
       try {
-        const url = await shortUrlLookup.getUrl(request.params.urlId);
-        shortUrlAssertValid(url);
+        const savedObjectsService = new SavedObjectsService(request);
 
-        const uiSettings = request.getUiSettingsService();
-        const stateStoreInSessionStorage = await uiSettings.get('state:storeInSessionStorage');
+        const uiSettingsService = new UiSettingsService(request);
+
+        const shortUrlLookup = new ShortUrlLookup(server.log, savedObjectsService);
+
+        const url = await shortUrlLookup.getUrl(request.params.urlId);
+
+        const stateStoreInSessionStorage = await uiSettingsService.get('state:storeInSessionStorage');
         if (!stateStoreInSessionStorage) {
           reply().redirect(config.get('server.basePath') + url);
           return;
@@ -153,10 +157,11 @@ export default async function (kbnServer, server, config) {
     method: 'POST',
     path: '/shorten',
     handler: async function (request, reply) {
-      const shortUrlLookup = new ShortUrlLookup(server.log, request.getSavedObjectsClient());
-
       try {
-        shortUrlAssertValid(request.payload.url);
+        const savedObjectsService = new SavedObjectsService(request);
+
+        const shortUrlLookup = new ShortUrlLookup(server.log, savedObjectsService);
+
         const urlId = await shortUrlLookup.generateUrlId(request.payload.url);
         reply(urlId);
       } catch (err) {
