@@ -33,13 +33,16 @@ function MetricVisProvider(Private) {
         addLegend: false,
         type: 'metric',
         metric: {
-          percentageMode: true,
+          percentageMode: false,
           useRanges: false,
           colorSchema: 'Green to Red',
           metricColorMode: 'None',
           colorsRange: [
             { from: 0, to: 10000 }
           ],
+          labels: {
+            show: true
+          },
           invertColors: false,
           style: {
             bgFill: '#000',

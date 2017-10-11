@@ -4,6 +4,6 @@
            ng-bind-html="metric.value"
            ng-style="{'font-size': vis.params.metric.style.fontSize+'pt', 'color': metric.color}"
       ></div>
-      <div>{{metric.label}}</div>
+      <div ng-if="vis.params.metric.labels.show">{{metric.label}}</div>
   </div>
 </div>

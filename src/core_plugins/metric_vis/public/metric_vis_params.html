@@ -9,6 +9,15 @@
     </div>
   </div>
 
+  <div class="kuiSideBarFormRow">
+    <label class="kuiSideBarFormRow__label" for="showLabels">
+      Show Labels
+    </label>
+    <div class="kuiSideBarFormRow__control">
+      <input class="kuiCheckBox" id="showLabels" type="checkbox" ng-model="vis.params.metric.labels.show">
+    </div>
+  </div>
+
   <div>
     <div class="kuiSideBarCollapsibleTitle">
       <div
@@ -89,7 +98,6 @@
           class="kuiButton kuiButton--primary kuiButton--fullWidth">
           Add Range
         </div>
-        <div class="text text-center text-info">Note: colors can be changed in the legend</div>
       </div>
     </div>
   </div>
