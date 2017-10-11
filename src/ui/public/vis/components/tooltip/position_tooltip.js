@@ -103,6 +103,13 @@ function mergeOverflows(dest, src) {
       dest.west = src.west;
     }
   }
+  if (dest.north && dest.south && dest.north > 0 && dest.south > 0 && (src.north < 0 || src.south < 0)) {
+    if (src.north < src.south) {
+      dest.north = src.north;
+    } else {
+      dest.south = src.south;
+    }
+  }
 }
 
 function pickPlacement(prop, pos, overflow, prev, pref, fallback, placement) {
