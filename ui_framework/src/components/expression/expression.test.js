@@ -3,13 +3,13 @@ import { render } from 'enzyme';
 import { requiredProps } from '../../test/required_props';
 
 import {
-  KuiExpressionItem,
-} from './expression_item';
+  KuiExpression,
+} from './expression';
 
-describe('KuiExpressionItem', () => {
+describe('KuiExpression', () => {
   test('renders', () => {
     const component = (
-      <KuiExpressionItem {...requiredProps} />
+      <KuiExpression {...requiredProps} />
     );
 
     expect(render(component)).toMatchSnapshot();
@@ -19,9 +19,9 @@ describe('KuiExpressionItem', () => {
     describe('children', () => {
       test('is rendered', () => {
         const component = render(
-          <KuiExpressionItem>
+          <KuiExpression>
             some expression
-          </KuiExpressionItem>
+          </KuiExpression>
         );
 
         expect(component)
