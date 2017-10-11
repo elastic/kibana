@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "declarationDir": "./target/tsc-types",
+    "stripInternal": true,
+    "outDir": "./target/tsc"
+  },
+  "extends": "../../tsconfig",
+  "include": [
+    "src/**/*.ts",
+    "../../types/index.d.ts"
+  ],
+  "exclude": [
+    "**/__tests__/*"
+  ]
+}

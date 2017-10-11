@@ -3,11 +3,10 @@
   "roots": [
     "<rootDir>/src/core_plugins",
     "<rootDir>/ui_framework/",
-    "<rootDir>/platform/"
+    "<rootDir>/packages/kbn-platform/src/"
   ],
   "collectCoverageFrom": [
-    "platform/**/*.ts",
-    "!platform/plugins/**/*.ts",
+    "packages/kbn-platform/src/**/*.ts",
     "ui_framework/src/components/**/*.js",
     "!ui_framework/src/components/index.js",
     "!ui_framework/src/components/**/*/index.js",

@@ -22,7 +22,7 @@ import { savedObjectsMixin } from './saved_objects';
 import { statsMixin } from './stats';
 import { kibanaIndexMappingsMixin } from './mappings';
 import { serverExtensionsMixin } from './server_extensions';
-import { injectIntoKbnServer as newPlatformMixin } from '../../target/platform/legacy';
+import { injectIntoKbnServer as newPlatformMixin } from 'kbn-platform';
 
 const rootDir = fromRoot('.');
 
