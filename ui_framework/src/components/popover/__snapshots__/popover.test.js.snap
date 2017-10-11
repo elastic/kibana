@@ -72,6 +72,7 @@ exports[`KuiPopover props panelClassName is rendered 1`] = `
   <div>
     <div
       class="kuiPanelSimple kuiPanelSimple--paddingMedium kuiPanelSimple--shadow kuiPopover__panel test"
+      tabindex="0"
     />
   </div>
 </div>
@@ -85,6 +86,7 @@ exports[`KuiPopover props panelPaddingSize is rendered 1`] = `
   <div>
     <div
       class="kuiPanelSimple kuiPanelSimple--paddingSmall kuiPanelSimple--shadow kuiPopover__panel"
+      tabindex="0"
     />
   </div>
 </div>
