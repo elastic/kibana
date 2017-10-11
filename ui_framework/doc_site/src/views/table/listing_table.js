@@ -68,6 +68,16 @@ export class ListingTable extends Component {
         ]
       }
     ];
+
+    this.header = [
+      'Title',
+      'Status',
+      'Date created',
+      {
+        content: 'Orders of magnitude',
+        align: RIGHT_ALIGNMENT
+      }
+    ];
   }
 
   renderPager() {
@@ -108,18 +118,6 @@ export class ListingTable extends Component {
     ];
   }
 
-  renderHeader() {
-    return [
-      'Title',
-      'Status',
-      'Date created',
-      {
-        content: 'Orders of magnitude',
-        align: RIGHT_ALIGNMENT
-      }
-    ];
-  }
-
   onItemSelectionChanged = (selectedRowIds) => {
     this.setState({ selectedRowIds });
   };
@@ -131,7 +129,7 @@ export class ListingTable extends Component {
         toolBarActions={this.renderToolBarActions()}
         selectedRowIds={this.state.selectedRowIds}
         rows={this.rows}
-        header={this.renderHeader()}
+        header={this.header}
         onFilter={() => {}}
         filter=""
         onItemSelectionChanged={this.onItemSelectionChanged}
