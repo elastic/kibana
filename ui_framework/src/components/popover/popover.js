@@ -104,13 +104,14 @@ export class KuiPopover extends Component {
         <FocusTrap
           focusTrapOptions={{
             clickOutsideDeactivates: true,
-            fallbackFocus: () => this.panel,
+            initialFocus: () => this.panel,
           }}
         >
           <KuiPanelSimple
             panelRef={node => { this.panel = node; }}
             className={panelClasses}
             paddingSize={panelPaddingSize}
+            tabIndex="0"
             hasShadow
           >
             {children}
