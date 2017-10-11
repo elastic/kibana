@@ -11,7 +11,13 @@ import Select from 'react-select';
 import Toggle from 'react-toggle';
 import Form from './form/index';
 
+import Grid from './layout/grid';
+import Cell from './layout/cell';
+import Row from './layout/row';
+
 export * from 'ui_framework/components';
+
+const Layout = { Grid, Cell, Row };
 
 export {
   Select,
@@ -25,5 +31,6 @@ export {
   ErrorView,
   NoDataView,
   AreaChart,
-  Form
+  Form,
+  Layout
 };

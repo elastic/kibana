@@ -1,5 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
+import { Layout } from '../index';
+
 import { htmlIdGenerator } from 'ui_framework/services';
 import _ from 'lodash';
 
@@ -9,12 +11,12 @@ const createTextHandler = handleChange => (name, defaultValue) => e => {
   return handleChange({ [name]: value });
 };
 
-const Input = ({ name, value, inputRef, label, type = 'text', placeholder, defaultValue, onChange = () => {}, disabled = false }) => {
+const Input = ({ name, value, inputRef, label, type = 'text', placeholder, defaultValue, onChange = () => {}, disabled = false, size }) => {
   const htmlId = htmlIdGenerator();
   const handleChange = createTextHandler(onChange);
 
   return (
-    <div className="vis_editor__inpit-container-grows">
+    <Layout.Cell size={size}>
       <label className="vis_editor__label" htmlFor={htmlId(name)}>
         {label}
       </label>
@@ -29,7 +31,7 @@ const Input = ({ name, value, inputRef, label, type = 'text', placeholder, defau
         ref={inputRef}
         disabled={disabled}
       />
-    </div>
+    </Layout.Cell>
   );
 };
 

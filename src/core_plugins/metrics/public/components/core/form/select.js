@@ -1,6 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import Select from 'react-select';
+import { Layout } from '../index';
 
 import { htmlIdGenerator } from 'ui_framework/services';
 import _ from 'lodash';
@@ -15,12 +16,23 @@ const createSelectHandler = handleChange => {
   };
 };
 
-const Input = ({ name, value, inputRef, label, placeholder, onChange = () => {}, disabled = false, options = [] }) => {
+const Input = ({
+  name,
+  value,
+  inputRef,
+  label,
+  placeholder,
+  onChange = () => {},
+  disabled = false,
+  options = [],
+  clearable = false,
+  size
+}) => {
   const htmlId = htmlIdGenerator();
   const handleChange = createSelectHandler(onChange);
 
   return (
-    <div className="vis_editor__item">
+    <Layout.Cell size={size}>
       <label className="vis_editor__label" htmlFor={htmlId(name)}>
         {label}
       </label>
@@ -30,14 +42,14 @@ const Input = ({ name, value, inputRef, label, placeholder, onChange = () => {},
           ref={inputRef}
           placeholder={placeholder}
           inputProps={{ id: htmlId(name) }}
-          clearable={false}
+          clearable={clearable}
           disabled={disabled}
           options={options}
           value={String(value)}
           onChange={handleChange(name)}
         />
       </div>
-    </div>
+    </Layout.Cell>
   );
 };
 
@@ -47,7 +59,6 @@ Input.propTypes = {
   label: PropTypes.string,
   placeholder: PropTypes.string,
   options: PropTypes.array,
-  inputRef: PropTypes.func,
   disabled: PropTypes.bool,
   inputRef: PropTypes.func,
   onChange: PropTypes.func

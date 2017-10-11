@@ -1,8 +1,9 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import _ from 'lodash';
+import { Layout } from '../index';
 
-const YesNo = ({ name, value, label, onChange }) => {
+const YesNo = ({ name, value, label, onChange, size = 'fit' }) => {
   const handleChange = value => {
     return () => {
       const parts = { [name]: value };
@@ -12,8 +13,12 @@ const YesNo = ({ name, value, label, onChange }) => {
 
   const inputName = name + _.uniqueId();
   return (
-    <div>
-      {label && <div className="vis_editor__label">{label}</div>}
+    <Layout.Cell size={size} align="center">
+      {label && (
+        <div className="vis_editor__label" style={{ marginBottom: 7 }}>
+          {label}
+        </div>
+      )}
 
       <div className="thor__yes_no">
         <label>
@@ -25,7 +30,7 @@ const YesNo = ({ name, value, label, onChange }) => {
           No
         </label>
       </div>
-    </div>
+    </Layout.Cell>
   );
 };
 
