@@ -27,7 +27,7 @@ function getRoute() {
 // redirect us to the default page by encountering a url it isn't marked as being able to handle.
 routes.when('/home', getRoute());
 routes.when('/home/directory', getRoute());
-routes.when('/home/directory/data_sources', getRoute());
+routes.when('/home/integrations', getRoute());
 
 KbnDirectoryRegistryProvider.register(() => {
   return {

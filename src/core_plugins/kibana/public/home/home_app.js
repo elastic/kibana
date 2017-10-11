@@ -14,7 +14,7 @@ export function HomeApp({ addBasePath, directories, directoryCategories }) {
     <Router>
       <Switch>
         <Route
-          path="/home/directory/data_sources"
+          path="/home/integrations"
         >
           <DataSources
             addBasePath={addBasePath}
