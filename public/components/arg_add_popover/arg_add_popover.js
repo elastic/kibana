@@ -3,47 +3,38 @@ import { PropTypes } from 'prop-types';
 import { Popover, OverlayTrigger } from 'react-bootstrap';
 import './arg_add_popover.less';
 import { ArgAdd } from '../arg_add';
-import { Tooltip } from '../tooltip';
+import { get } from 'lodash';
 
 export const ArgAddPopover = ({ options }) => {
+  let close;
+  const linkRef = (refNode) => {
+    // TODO: handleHide is a private method, there must be a supported way to do this, I just don't know
+    // what it is.
+    close = get(refNode, 'handleHide');
+  };
+
   const picker = (
     <Popover className="canvas__add-arg-popover" id="arg-add-popover">
       {options.map(opt => (
         <ArgAdd key={`${opt.arg.name}-add`}
           displayName={opt.arg.displayName}
-          onValueAdd={opt.onValueAdd}
+          description={opt.arg.description}
+          onValueAdd={() => { opt.onValueAdd(...arguments); close();}}
         />
       ))}
     </Popover>
   );
 
-
-  if (options.length === 1) {
-    return (
-      <div className="canvas__add-arg-container">
-        <Tooltip text={`Add ${options[0].arg.displayName}`} placement="bottom">
-          <div className="canvas__add-arg-button" onClick={options[0].onValueAdd}>
-            <i className="fa fa-plus"/>
-          </div>
-        </Tooltip>
-      </div>
-    );
-  }
-
   return (
-    <div className="canvas__add-arg-container">
       <OverlayTrigger
         rootClose
         overlay={picker}
         placement="bottom"
         trigger="click"
+        ref={linkRef}
       >
-        <div className="canvas__add-arg-button">
-          <i className="fa fa-plus"/>
-        </div>
+        <i className="fa fa-plus-circle canvas__add-arg-button"/>
       </OverlayTrigger>
-
-    </div>
   );
 };
 

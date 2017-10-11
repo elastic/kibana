@@ -4,7 +4,7 @@ import { getState, getValue } from '../../lib/resolved_arg';
 import { map, uniq } from 'lodash';
 
 export const grid = () => new View('grid', {
-  displayName: 'Number or Text Grid',
+  displayName: 'Chart Style',
   description: '',
   modelArgs: ['x', 'y', 'color', 'size', 'text'],
   args: [

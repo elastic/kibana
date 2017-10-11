@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
 import './function_form.less';
 
 // compose the above branch components, to short-circuit rending this ArgType component

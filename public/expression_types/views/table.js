@@ -2,7 +2,7 @@ import { View } from '../view';
 import { Arg } from '../arg';
 
 export const table = () => new View('table', {
-  displayName: 'Table',
+  displayName: 'Table Style',
   description: 'Set styling for a Table element',
   modelArgs: [],
   args: [

@@ -4,8 +4,7 @@ import { getState, getValue } from '../../lib/resolved_arg';
 import { map, uniq } from 'lodash';
 
 export const pie = () => new View('pie', {
-  displayName: 'Pie Chart',
-  description: 'Show your data, as a pie chart',
+  displayName: 'Chart Style',
   modelArgs: ['color', 'size'],
   args: [
     new Arg('font', {

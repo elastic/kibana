@@ -6,8 +6,7 @@ import { map, uniq } from 'lodash';
 const styleProps = ['lines', 'bars', 'points', 'fill', 'stack'];
 
 export const plot = () => new View('plot', {
-  displayName: 'Plot Chart',
-  description: 'Show your data, as plots',
+  displayName: 'Chart Style',
   modelArgs: ['x', 'y', 'color', 'size', 'text'],
   args: [
     new Arg('palette', {

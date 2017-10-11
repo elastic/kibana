@@ -3,8 +3,8 @@ import { Arg } from '../arg';
 
 // TODO: add the url input and handling
 export const render = () => new View('render', {
-  displayName: 'Render',
-  description: 'Generic element properties',
+  displayName: 'Element Style',
+  description: 'Setting for the container around your element',
   modelArgs: [],
   requiresContext: false,
   args: [
@@ -16,7 +16,7 @@ export const render = () => new View('render', {
     }),
     new Arg('css', {
       displayName: 'Custom CSS',
-      description: 'CSS will be scoped to your element',
+      description: 'A CSS stylesheet scoped to your element',
       argType: 'textarea',
       defaultValue: `".canvas__element {
 

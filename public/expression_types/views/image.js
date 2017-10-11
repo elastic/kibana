@@ -6,7 +6,6 @@ import { isValid } from '../../../common/lib/dataurl';
 
 export const image = () => new View('image', {
   displayName: 'Image',
-  description: 'Display an image',
   modelArgs: [],
   requiresContext: false,
   args: [

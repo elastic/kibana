@@ -4,7 +4,7 @@ import { Arg } from '../arg';
 import { getState, getValue } from '../../lib/resolved_arg';
 
 export const sort = () => new Transform('sort', {
-  displayName: 'Sort Transform',
+  displayName: 'Datatable Sorting',
   args: [
     new Arg('_', {
       displayName: 'Sort Field',

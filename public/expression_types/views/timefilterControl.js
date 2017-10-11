@@ -2,8 +2,7 @@ import { View } from '../view';
 import { Arg } from '../arg';
 
 export const timefilterControl = () => new View('timefilterControl', {
-  displayName: 'Time filter',
-  description: 'Configure the timefilter element',
+  displayName: 'Time Filter',
   modelArgs: [],
   args: [
     new Arg('column', {

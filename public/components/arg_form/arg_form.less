@@ -1,8 +1,10 @@
 @import (reference) "../../style/variables";
 
 .canvas__arg {
-  border-bottom: @borderStyle;
-  margin: 0 @spacingM;
+
+  &:not(:last-child) {
+    border-bottom: @borderStyle;
+  }
 
   .form-control {
     font-size: @textXSmall;
@@ -20,7 +22,6 @@
     .canvas__arg--label {
       margin: @spacingM @spacingS;
       flex-shrink: 0;
-      font-weight: bold;
 
       i {
         width: @spacingM;
@@ -58,7 +59,7 @@
   }
 
   .canvas__arg--controls {
-    padding: 0 @spacingS @spacingM @spacingS;
+    padding: 0 @spacingS @spacingS @spacingS;
 
     .canvas__arg--controls--submit {
       text-align: right;

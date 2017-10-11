@@ -4,6 +4,9 @@ import { isPlainObject, uniq, last, compact } from 'lodash';
 import { BaseForm } from './base_form';
 import { fromExpression } from '../../common/lib/ast';
 import { ArgAddPopover } from '../components/arg_add_popover';
+import { SidebarSection } from '../components/sidebar/sidebar_section';
+import { SidebarSectionTitle } from '../components/sidebar/sidebar_section_title';
+
 
 export class FunctionForm extends BaseForm {
   constructor(name, props) {
@@ -71,7 +74,7 @@ export class FunctionForm extends BaseForm {
   }
 
   render(data = {}) {
-    const { args } = data;
+    const { args, argTypeDef } = data;
 
     if (!isPlainObject(args)) {
       throw new Error(`Form "${this.name}" expects "args" object`);
@@ -101,12 +104,15 @@ export class FunctionForm extends BaseForm {
       const addableArgs = compact(resolvedDataArgs.map(d => this.getAddableArg(props, d)));
 
       return (
-        <div>
+        <SidebarSection>
+          <SidebarSectionTitle title={argTypeDef.displayName} tip={argTypeDef.description}>
+            {addableArgs.length === 0 ? null : (
+              <ArgAddPopover options={addableArgs}/>
+            )}
+          </SidebarSectionTitle>
           {argumentForms}
-          {addableArgs.length === 0 ? null : (
-            <ArgAddPopover options={addableArgs}/>
-          )}
-        </div>
+
+        </SidebarSection>
       );
 
     } catch (e) {

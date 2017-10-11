@@ -9,15 +9,12 @@ export const WorkpadConfig = ({ size, name, setSize, setName }) => {
 
   return (
     <div className="canvas__workpad_config">
-      <h4>
-        Workpad
-      </h4>
       <FormGroup>
-        <ControlLabel>Name</ControlLabel>
         <FormControl
           type="text"
           value={name}
           onChange={e => setName(e.target.value)}
+          placeholder="Workpad Name"
         />
       </FormGroup>
       <div className="canvas__workpad-config--size">

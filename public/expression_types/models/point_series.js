@@ -4,7 +4,7 @@ import { Arg } from '../arg';
 import { getState, getValue } from '../../lib/resolved_arg';
 
 export const pointseries = () => new Model('pointseries', {
-  displayName: 'Pointseries Model',
+  displayName: 'Dimensions & Measures',
   args: [
     new Arg('x', {
       displayName: 'X-axis',

@@ -2,10 +2,12 @@
 
 .canvas__arg--add {
   cursor: pointer;
-  text-align: center;
-  font-size: @textSmall;
-  font-weight: normal;
-  padding: @spacingXS @spacingS;
+  padding: @spacingXS;
+  padding-left: @spacingS;
+
+  &:not(:last-child) {
+    border-bottom: @borderStyle;
+  }
 
   &:hover {
     background-color: @lightestGrey;
