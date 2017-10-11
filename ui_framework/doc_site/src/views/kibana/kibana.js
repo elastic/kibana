@@ -198,7 +198,7 @@ export default class extends Component {
       <KuiPopover
         button={button}
         isOpen={this.state.isUserMenuOpen}
-        anchorPosition="right"
+        anchorPosition="downRight"
         closePopover={this.closeUserMenu.bind(this)}
         panelClassName="kuiHeaderPopover"
       >
@@ -257,7 +257,7 @@ export default class extends Component {
       <KuiPopover
         button={button}
         isOpen={this.state.isAppMenuOpen}
-        anchorPosition="right"
+        anchorPosition="downRight"
         closePopover={this.closeAppMenu.bind(this)}
         panelClassName="kuiHeaderPopover"
       >

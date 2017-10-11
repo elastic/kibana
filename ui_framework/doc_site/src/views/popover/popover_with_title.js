@@ -6,6 +6,9 @@ import {
   KuiPopover,
   KuiPopoverTitle,
   KuiButton,
+  KuiFlexGroup,
+  KuiFlexItem,
+  KuiText
 } from '../../../../components';
 
 export default class extends Component {
@@ -17,42 +20,115 @@ export default class extends Component {
     };
   }
 
-  onButtonClick() {
+  onButtonClick1() {
     this.setState({
-      isPopoverOpen: !this.state.isPopoverOpen,
+      isPopoverOpen1: !this.state.isPopoverOpen1,
     });
   }
 
-  closePopover() {
+  closePopover1() {
     this.setState({
-      isPopoverOpen: false,
+      isPopoverOpen1: false,
+    });
+  }
+
+  onButtonClick2() {
+    this.setState({
+      isPopoverOpen2: !this.state.isPopoverOpen2,
+    });
+  }
+
+  closePopover2() {
+    this.setState({
+      isPopoverOpen2: false,
+    });
+  }
+
+  onButtonClick3() {
+    this.setState({
+      isPopoverOpen3: !this.state.isPopoverOpen3,
+    });
+  }
+
+  closePopover3() {
+    this.setState({
+      isPopoverOpen3: false,
     });
   }
 
   render() {
-    const button = (
-      <KuiButton
-        iconType="arrowDown"
-        iconSide="right"
-        onClick={this.onButtonClick.bind(this)}
-      >
-        Show popover with Title
-      </KuiButton>
-    );
-
     return (
-      <KuiPopover
-        button={button}
-        isOpen={this.state.isPopoverOpen}
-        closePopover={this.closePopover.bind(this)}
-        panelPaddingSize="none"
-        withTitle
-      >
-        <div style={{ width: '300px' }}>
-          <KuiPopoverTitle>Hello, I&rsquo;m a popover title</KuiPopoverTitle>
-          <p style={{ padding: 20 }}>Popover content that&rsquo;s wider than the default width</p>
-        </div>
-      </KuiPopover>
+      <KuiFlexGroup>
+        <KuiFlexItem grow={false}>
+          <KuiPopover
+            button={(
+              <KuiButton iconType="arrowDown" iconSide="right" onClick={this.onButtonClick1.bind(this)}>
+                downCenter with title
+              </KuiButton>
+            )}
+            isOpen={this.state.isPopoverOpen1}
+            closePopover={this.closePopover1.bind(this)}
+            anchorPosition="downCenter"
+            withTitle
+            panelPaddingSize="none"
+          >
+            <KuiPopoverTitle>Hello, I&rsquo;m a popover title</KuiPopoverTitle>
+            <div style={{ width: '300px', padding: 16 }}>
+              <KuiText>
+                <p>
+                  Popover content
+                </p>
+              </KuiText>
+            </div>
+          </KuiPopover>
+        </KuiFlexItem>
+        <KuiFlexItem grow={false}>
+          <KuiPopover
+            button={(
+              <KuiButton iconType="arrowDown" iconSide="right" onClick={this.onButtonClick2.bind(this)}>
+                upCenter with title
+              </KuiButton>
+            )}
+            isOpen={this.state.isPopoverOpen2}
+            closePopover={this.closePopover2.bind(this)}
+            anchorPosition="upCenter"
+            withTitle
+            panelPaddingSize="none"
+          >
+            <KuiPopoverTitle>Hello, I&rsquo;m a popover title</KuiPopoverTitle>
+            <div style={{ width: '300px', padding: 16 }}>
+              <KuiText>
+                <p>
+                  Popover content
+                </p>
+              </KuiText>
+            </div>
+          </KuiPopover>
+        </KuiFlexItem>
+        <KuiFlexItem grow={false}>
+          <KuiPopover
+            button={(
+              <KuiButton iconType="arrowDown" iconSide="right" onClick={this.onButtonClick3.bind(this)}>
+                rightUp with title
+              </KuiButton>
+            )}
+            isOpen={this.state.isPopoverOpen3}
+            closePopover={this.closePopover3.bind(this)}
+            anchorPosition="rightUp"
+            withTitle
+            panelPaddingSize="none"
+          >
+            <KuiPopoverTitle>Hello, I&rsquo;m a popover title</KuiPopoverTitle>
+            <div style={{ width: '300px', padding: 16 }}>
+              <KuiText>
+                <p>
+                  Popover content
+                </p>
+              </KuiText>
+            </div>
+          </KuiPopover>
+        </KuiFlexItem>
+      </KuiFlexGroup>
     );
   }
 }
