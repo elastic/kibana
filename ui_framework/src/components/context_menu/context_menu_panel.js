@@ -95,8 +95,11 @@ export class KuiContextMenuPanel extends Component {
     if (this.props.items.length) {
       switch (e.keyCode) {
         case cascadingMenuKeyCodes.TAB:
-          // Normal tabbing doesn't work within panels with items.
-          e.preventDefault();
+          // We need to sync up with the user if s/he is tabbing through the items.
+          const focusedItemIndex = this.menuItems.indexOf(document.activeElement);
+          this.setState({
+            focusedItemIndex: focusedItemIndex !== -1 ? focusedItemIndex : undefined,
+          });
           break;
 
         case cascadingMenuKeyCodes.UP:
