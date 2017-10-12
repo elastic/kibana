@@ -1,29 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`KuiPopover anchorPosition defaults to center 1`] = `
-<div
-  class="kuiPopover"
->
-  <button />
-</div>
-`;
-
-exports[`KuiPopover anchorPosition left is rendered 1`] = `
-<div
-  class="kuiPopover kuiPopover--anchorLeft"
->
-  <button />
-</div>
-`;
-
-exports[`KuiPopover anchorPosition right is rendered 1`] = `
-<div
-  class="kuiPopover kuiPopover--anchorRight"
->
-  <button />
-</div>
-`;
-
 exports[`KuiPopover children is rendered 1`] = `
 <div
   class="kuiPopover"
@@ -42,7 +18,7 @@ exports[`KuiPopover is rendered 1`] = `
 </div>
 `;
 
-exports[`KuiPopover isOpen defaults to false 1`] = `
+exports[`KuiPopover props anchorPosition defaults to center 1`] = `
 <div
   class="kuiPopover"
 >
@@ -50,7 +26,31 @@ exports[`KuiPopover isOpen defaults to false 1`] = `
 </div>
 `;
 
-exports[`KuiPopover isOpen renders true 1`] = `
+exports[`KuiPopover props anchorPosition left is rendered 1`] = `
+<div
+  class="kuiPopover kuiPopover--anchorLeft"
+>
+  <button />
+</div>
+`;
+
+exports[`KuiPopover props anchorPosition right is rendered 1`] = `
+<div
+  class="kuiPopover kuiPopover--anchorRight"
+>
+  <button />
+</div>
+`;
+
+exports[`KuiPopover props isOpen defaults to false 1`] = `
+<div
+  class="kuiPopover"
+>
+  <button />
+</div>
+`;
+
+exports[`KuiPopover props isOpen renders true 1`] = `
 <div
   class="kuiPopover"
 >
@@ -60,5 +60,39 @@ exports[`KuiPopover isOpen renders true 1`] = `
       class="kuiPanelSimple kuiPanelSimple--paddingMedium kuiPanelSimple--shadow kuiPopover__panel"
     />
   </div>
+</div>
+`;
+
+exports[`KuiPopover props panelClassName is rendered 1`] = `
+<div
+  class="kuiPopover"
+>
+  <button />
+  <div>
+    <div
+      class="kuiPanelSimple kuiPanelSimple--paddingMedium kuiPanelSimple--shadow kuiPopover__panel test"
+    />
+  </div>
+</div>
+`;
+
+exports[`KuiPopover props panelPaddingSize is rendered 1`] = `
+<div
+  class="kuiPopover"
+>
+  <button />
+  <div>
+    <div
+      class="kuiPanelSimple kuiPanelSimple--paddingSmall kuiPanelSimple--shadow kuiPopover__panel"
+    />
+  </div>
+</div>
+`;
+
+exports[`KuiPopover props withTitle is rendered 1`] = `
+<div
+  class="kuiPopover kuiPopover--withTitle"
+>
+  <button />
 </div>
 `;
