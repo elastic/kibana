@@ -34,7 +34,7 @@ export function KuiListingTable({
 }) {
 
   function areAllRowsSelected() {
-    return rows.length === selectedRowIds.length;
+    return rows.length > 0 && rows.length === selectedRowIds.length;
   }
 
   function toggleAll() {
