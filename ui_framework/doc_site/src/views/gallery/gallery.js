@@ -43,7 +43,7 @@ export default () => {
             </KuiGalleryItemLabel>
           </KuiGalleryItem>
 
-          <KuiGalleryItem>
+          <KuiGalleryItem onClick={() => window.alert('Clicked an item')}>
             <KuiGalleryItemImage style={imageStyle}/>
 
             <KuiGalleryItemLabel>

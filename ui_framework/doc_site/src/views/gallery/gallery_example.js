@@ -2,6 +2,7 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
+  GuideCode,
   GuideDemo,
   GuidePage,
   GuideSection,
@@ -27,7 +28,15 @@ export default props => (
     >
       <GuideText>
         Use GalleryItem to show a gallery item.
-        It&rsquo;s an anchor and accepts all anchor properties.
+        If you specify an <GuideCode>href</GuideCode> property the item will render
+        as an HTML <GuideCode>a</GuideCode> element. If not, it will be rendered
+        as a <GuideCode>button</GuideCode> and you can attach an
+        <GuideCode>onClick</GuideCode> listener to it.
+      </GuideText>
+
+      <GuideText>
+        <strong>Note:</strong> You are not allowed to specify the <GuideCode>href</GuideCode> property
+        and the <GuideCode>onClick</GuideCode> property at the same time.
       </GuideText>
 
       <GuideDemo>
