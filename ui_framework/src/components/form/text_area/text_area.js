@@ -15,9 +15,16 @@ export const KuiTextArea = ({
   placeholder,
   className,
   isInvalid,
+  fullWidth,
   ...rest,
 }) => {
-  const classes = classNames('kuiTextArea', className);
+  const classes = classNames(
+    'kuiTextArea',
+    {
+      'kuiTextArea--fullWidth': fullWidth,
+    },
+    className
+  );
 
   return (
     <KuiValidatableControl isInvalid={isInvalid}>
@@ -41,9 +48,10 @@ KuiTextArea.propTypes = {
   placeholder: PropTypes.string,
   rows: PropTypes.number,
   isInvalid: PropTypes.bool,
+  fullWidth: PropTypes.bool,
 };
 
 KuiTextArea.defaultProps = {
   rows: 6,
+  fullWidth: false,
 };
-

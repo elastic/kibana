@@ -20,15 +20,18 @@ export const KuiFieldText = ({
   icon,
   isInvalid,
   inputRef,
+  fullWidth,
   ...rest,
 }) => {
   const classes = classNames('kuiFieldText', className, {
     'kuiFieldText--withIcon': icon,
+    'kuiFieldText--fullWidth': fullWidth,
   });
 
   return (
     <KuiFormControlLayout
       icon={icon}
+      fullWidth={fullWidth}
     >
       <KuiValidatableControl
         isInvalid={isInvalid}
@@ -56,8 +59,10 @@ KuiFieldText.propTypes = {
   icon: PropTypes.string,
   isInvalid: PropTypes.bool,
   inputRef: PropTypes.func,
+  fullWidth: PropTypes.bool,
 };
 
 KuiFieldText.defaultProps = {
   value: undefined,
+  fullWidth: false,
 };

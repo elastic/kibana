@@ -9,9 +9,14 @@
 // to be more easily maintained / themeable going forward.
 
 .kuiRange {
+  @include kuiFormControlSize;
+  
   appearance: none;
   margin: $kuiRangeThumbHeight / 2 0;
-  width: $kuiRangeTrackWidth;
+
+  &.kuiRange--fullWidth {
+    max-width: 100%;
+  }
 
   &:focus {
 

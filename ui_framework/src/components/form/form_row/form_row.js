@@ -42,6 +42,7 @@ export class KuiFormRow extends Component {
       label,
       id,
       hasEmptyLabelSpace,
+      fullWidth,
       className,
       ...rest,
     } = this.props;
@@ -50,6 +51,7 @@ export class KuiFormRow extends Component {
       'kuiFormRow',
       {
         'kuiFormRow--hasEmptyLabelSpace': hasEmptyLabelSpace,
+        'kuiFormRow--fullWidth': fullWidth,
       },
       className
     );
@@ -118,8 +120,10 @@ KuiFormRow.propTypes = {
   error: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
   helpText: PropTypes.node,
   hasEmptyLabelSpace: PropTypes.bool,
+  fullWidth: PropTypes.bool,
 };
 
 KuiFormRow.defaultProps = {
   hasEmptyLabelSpace: false,
+  fullWidth: false,
 };

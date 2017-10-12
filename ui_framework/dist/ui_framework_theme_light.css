@@ -1438,6 +1438,8 @@ table {
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #fbfbfb;
   transition: box-shadow 250ms ease-in, background 250ms ease-in;
   border-radius: 0; }
+  .kuiFieldNumber--fullWidth {
+    max-width: 100%; }
   .kuiFieldNumber:invalid {
     /* 1 */
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000; }
@@ -1461,6 +1463,8 @@ table {
   transition: box-shadow 250ms ease-in, background 250ms ease-in;
   border-radius: 0;
   padding-left: 40px; }
+  .kuiFieldPassword--fullWidth {
+    max-width: 100%; }
   .kuiFieldPassword:invalid {
     /* 1 */
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000; }
@@ -1482,6 +1486,8 @@ table {
   transition: box-shadow 250ms ease-in, background 250ms ease-in;
   border-radius: 0;
   padding-left: 40px; }
+  .kuiFieldSearch--fullWidth {
+    max-width: 100%; }
   .kuiFieldSearch:invalid {
     /* 1 */
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000; }
@@ -1502,6 +1508,8 @@ table {
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #fbfbfb;
   transition: box-shadow 250ms ease-in, background 250ms ease-in;
   border-radius: 0; }
+  .kuiFieldText--fullWidth {
+    max-width: 100%; }
   .kuiFieldText:invalid {
     /* 1 */
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000; }
@@ -1527,15 +1535,16 @@ table {
   width: 100%;
   display: inline-block;
   position: relative; }
-
-.kuiFormControlLayout__icon {
-  position: absolute;
-  top: 12px;
-  left: 12px; }
-
-.kuiFormControlLayout__icon--right {
-  left: auto;
-  right: 12px; }
+  .kuiFormControlLayout.kuiFormControlLayout--fullWidth {
+    width: 100%;
+    max-width: 100%; }
+  .kuiFormControlLayout .kuiFormControlLayout__icon {
+    position: absolute;
+    top: 12px;
+    left: 12px; }
+  .kuiFormControlLayout .kuiFormControlLayout__icon--right {
+    left: auto;
+    right: 12px; }
 
 .kuiFormErrorText {
   font-size: 12px;
@@ -1582,6 +1591,8 @@ table {
   max-width: 400px; }
   .kuiFormRow + * {
     margin-top: 24px; }
+  .kuiFormRow.kuiFormRow--fullWidth {
+    max-width: 100%; }
   .kuiFormRow.kuiFormRow--hasEmptyLabelSpace {
     padding-top: 20px;
     /* 2 */ }
@@ -1589,11 +1600,14 @@ table {
     padding-top: 0; }
 
 .kuiRange {
+  max-width: 400px;
+  width: 100%;
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none;
-  margin: 8px 0;
-  width: 100%; }
+  margin: 8px 0; }
+  .kuiRange.kuiRange--fullWidth {
+    max-width: 100%; }
   .kuiRange:focus::-webkit-slider-thumb {
     border: 2px solid #0079a5; }
   .kuiRange:focus::-moz-range-thumb {
@@ -1680,6 +1694,8 @@ table {
   -webkit-appearance: none;
      -moz-appearance: none;
           appearance: none; }
+  .kuiSelect--fullWidth {
+    max-width: 100%; }
   .kuiSelect:invalid {
     /* 1 */
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000; }
@@ -1787,7 +1803,10 @@ table {
   background: #fbfbfb;
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.08), inset -400px 0 0 0 #fbfbfb;
   transition: box-shadow 250ms ease-in, background 250ms ease-in;
-  border-radius: 0; }
+  border-radius: 0;
+  line-height: 1.5; }
+  .kuiTextArea--fullWidth {
+    max-width: 100%; }
   .kuiTextArea:invalid {
     /* 1 */
     box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.16), inset 0 0 0 0 #FFF, inset 0 -2px 0 0 #A30000; }

@@ -5,7 +5,12 @@ import React, {
 import {
   KuiCheckbox,
   KuiIcon,
+  KuiButton,
   KuiLink,
+  KuiFlexGroup,
+  KuiFlexItem,
+  KuiFieldSearch,
+  KuiSpacer,
   KuiTable,
   KuiTableBody,
   KuiTableHeader,
@@ -238,6 +243,12 @@ export class Table extends Component {
     return indexOfUnselectedItem === -1;
   }
 
+  areAnyRowsSelected = () => {
+    return Object.keys(this.state.itemIdToSelectedMap).findIndex(id => {
+      return this.state.itemIdToSelectedMap[id];
+    }) !== -1;
+  }
+
   renderHeaderCells() {
     return this.columns.map((column, columnIndex) => {
       if (column.isCheckbox) {
@@ -322,16 +333,40 @@ export class Table extends Component {
   }
 
   render() {
-    return (
-      <KuiTable>
-        <KuiTableHeader>
-          {this.renderHeaderCells()}
-        </KuiTableHeader>
+    let optionalActionButtons;
 
-        <KuiTableBody>
-          {this.renderRows()}
-        </KuiTableBody>
-      </KuiTable>
+    if (this.areAnyRowsSelected() > 0) {
+      optionalActionButtons = (
+        <KuiFlexItem grow={false}>
+          <KuiButton type="danger">Delete selected</KuiButton>
+        </KuiFlexItem>
+      );
+    }
+
+    return (
+      <div>
+        <KuiFlexGroup gutterSize="medium">
+          {optionalActionButtons}
+          <KuiFlexItem>
+            <KuiFieldSearch fullWidth placeholder="Search..." />
+          </KuiFlexItem>
+          <KuiFlexItem grow={false}>
+            <KuiButton type="primary">Add new thing</KuiButton>
+          </KuiFlexItem>
+        </KuiFlexGroup>
+
+        <KuiSpacer size="m" />
+
+        <KuiTable>
+          <KuiTableHeader>
+            {this.renderHeaderCells()}
+          </KuiTableHeader>
+
+          <KuiTableBody>
+            {this.renderRows()}
+          </KuiTableBody>
+        </KuiTable>
+      </div>
     );
   }
 }

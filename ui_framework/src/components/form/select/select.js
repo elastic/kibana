@@ -17,14 +17,22 @@ export const KuiSelect = ({
   id,
   name,
   isInvalid,
+  fullWidth,
   ...rest,
 }) => {
-  const classes = classNames('kuiSelect', className);
+  const classes = classNames(
+    'kuiSelect',
+    {
+      'kuiSelect--fullWidth': fullWidth,
+    },
+    className
+  );
 
   return (
     <KuiFormControlLayout
       icon="arrowDown"
       iconSide="right"
+      fullWidth={fullWidth}
     >
       <KuiValidatableControl isInvalid={isInvalid}>
         <select
@@ -47,8 +55,10 @@ KuiSelect.propTypes = {
   id: PropTypes.string,
   options: PropTypes.arrayOf(React.PropTypes.object).isRequired,
   isInvalid: PropTypes.bool,
+  fullWidth: PropTypes.bool,
 };
 
 KuiSelect.defaultProps = {
   options: [],
+  fullWidth: false,
 };

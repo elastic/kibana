@@ -3,7 +3,11 @@
 
   display: inline-block;
   position: relative;
-}
+
+  &.kuiFormControlLayout--fullWidth {
+    width: 100%;
+    max-width: 100%;
+  }
 
   .kuiFormControlLayout__icon {
     position: absolute;
@@ -15,3 +19,4 @@
     left: auto;
     right: $kuiSizeM;
   }
+}

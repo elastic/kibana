@@ -18,13 +18,21 @@ export const KuiFieldPassword = ({
   placeholder,
   value,
   isInvalid,
+  fullWidth,
   ...rest,
 }) => {
-  const classes = classNames('kuiFieldPassword', className);
+  const classes = classNames(
+    'kuiFieldPassword',
+    {
+      'kuiFieldPassword--fullWidth': fullWidth,
+    },
+    className
+  );
 
   return (
     <KuiFormControlLayout
       icon="lock"
+      fullWidth={fullWidth}
     >
       <KuiValidatableControl isInvalid={isInvalid}>
         <input
@@ -47,8 +55,10 @@ KuiFieldPassword.propTypes = {
   placeholder: PropTypes.string,
   value: PropTypes.string,
   isInvalid: PropTypes.bool,
+  fullWidth: PropTypes.bool,
 };
 
 KuiFieldPassword.defaultProps = {
   value: undefined,
+  fullWidth: false,
 };

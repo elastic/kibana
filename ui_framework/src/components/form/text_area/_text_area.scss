@@ -1,3 +1,4 @@
 .kuiTextArea {
   @include kuiFormControlStyle;
+  line-height: $kuiLineHeight;
 }
