@@ -1,6 +1,7 @@
 import $ from 'jquery';
+import uiRoutes from 'ui/routes';
 
-export function VisualizeLoaderProvider($compile, $rootScope, savedVisualizations) {
+const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
   const renderVis = (el, savedObj, params) => {
     const scope = $rootScope.$new();
     scope.savedObj = savedObj;
@@ -45,4 +46,28 @@ export function VisualizeLoaderProvider($compile, $rootScope, savedVisualization
       return renderVis(el, savedObj, params);
     }
   };
+};
+
+
+let visualizeLoader = null;
+let pendingPromise = null;
+let pendingResolve = null;
+uiRoutes.addSetupWork(function (Private) {
+  visualizeLoader = Private(VisualizeLoaderProvider);
+  if (pendingResolve) {
+    pendingResolve(visualizeLoader);
+  }
+});
+
+async function getVisualizeLoader() {
+  if (!pendingResolve) {
+    pendingPromise = new Promise((resolve)=> {
+      pendingResolve = resolve;
+      if (visualizeLoader) resolve(visualizeLoader);
+    });
+  }
+  return pendingPromise;
 }
+
+
+export { getVisualizeLoader, VisualizeLoaderProvider };
