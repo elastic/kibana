@@ -13,6 +13,7 @@
           class="kbn-timepicker-modes kbn-timepicker-title__section"
         >
           <a
+            id="timepickerQuick"
             role="tab"
             class="kbn-timerpicker-nav-button"
             ng-class="{active: mode === 'quick' }"
@@ -24,6 +25,7 @@
           </a>
 
           <a
+            id="timepickerRelative"
             role="tab"
             class="kbn-timerpicker-nav-button"
             ng-class="{active: mode === 'relative' }"
@@ -35,6 +37,7 @@
           </a>
 
           <a
+            id="timepickerAbsolute"
             role="tab"
             class="kbn-timerpicker-nav-button"
             ng-class="{active: mode === 'absolute' }"
@@ -55,6 +58,8 @@
         <kbn-timepicker-quick-panel
           ng-switch-when="quick"
           set-quick="setQuick(from, to)"
+          role="tabpanel"
+          aria-labelledby="timepickerQuick"
         ></kbn-timepicker-quick-panel>
 
         <kbn-timepicker-relative-panel
@@ -66,6 +71,8 @@
           relative-options="relativeOptions"
           set-relative-to-now="setRelativeToNow(key)"
           units="units"
+          role="tabpanel"
+          aria-labelledby="timepickerRelative"
         ></kbn-timepicker-relative-panel>
 
         <kbn-timepicker-absolute-panel
@@ -76,6 +83,8 @@
           pick-from-date="pickFromDate"
           pick-to-date="pickToDate"
           set-to-now="setToNow(key)"
+          role="tabpanel"
+          aria-labelledby="timepickerAbsolute"
         ></kbn-timepicker-absolute-panel>
       </div>
     </div>
