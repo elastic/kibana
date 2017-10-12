@@ -75,7 +75,10 @@ export class ListingTable extends Component {
       'Date created',
       {
         content: 'Orders of magnitude',
-        align: RIGHT_ALIGNMENT
+        onSort: () => {},
+        isSorted: true,
+        isSortAscending: true,
+        align: RIGHT_ALIGNMENT,
       }
     ];
   }
