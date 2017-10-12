@@ -2253,6 +2253,9 @@ main {
           align-items: flex-end;
   height: 100%; }
 
+/**
+   * 1. Override inherited typographic styles.
+   */
 .kuiLocalTab {
   padding: 5px 0 6px 0;
   font-size: 18px;
@@ -2260,6 +2263,10 @@ main {
   border-bottom: 2px solid transparent;
   text-decoration: none;
   cursor: pointer;
+  margin-top: 0 !important;
+  /* 1 */
+  margin-bottom: 0 !important;
+  /* 1 */
   /**
      * 1. We may want to show a tooltip to explain why the tab is disabled, so we will just show
      *    a regular cursor instead of setting pointer-events: none.
