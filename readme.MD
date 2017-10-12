@@ -1,4 +1,8 @@
 # backport
+A simple CLI tool for backporting commits
+
+![Demonstration gif](https://i.makeagif.com/media/10-05-2017/kEJLqe.gif)
+
 
 ### Install
 ```
@@ -11,10 +15,11 @@ npm install -g backport
 ```
 
 ### Configuration
-You must add your username and create a new [Github access token](https://github.com/settings/tokens/new) in `/<homedir>/.backport/config.json`
+The first time you run `backport` a skeleton configuration file will be created in `/<homedir>/.backport/config.json`.
+You need to update the config file with your Github username and a Github Access Token (can be created [here](https://github.com/settings/tokens/new)).
 
 <details>
-<summary>Config sample</summary>
+<summary>View config sample</summary>
 
 ```js
 {
