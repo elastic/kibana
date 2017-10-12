@@ -25,7 +25,7 @@ export const fetchIndices = createThunk('FETCH_INDICES',
     dispatch(fetchedIndices(indices, pattern, hasExactMatches));
 
     if (hasExactMatches) {
-      fetchTimeFields(pattern)(dispatch);
+      dispatch(fetchTimeFields(pattern));
     }
   }
 );
