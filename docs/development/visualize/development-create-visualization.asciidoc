@@ -22,6 +22,7 @@ source code and the existing visualizations provided with it.
 * <<development-custom-response-handler>>
 - <<development-vis-object>>
 * <<development-vis-timefilter>>
+- <<development-aggconfig>>
 
 [[development-visualization-factory]]
 === Visualization Factory
@@ -30,7 +31,7 @@ Use the `VisualizationFactory` to create a new visualization.
 The creation-methods create a new visualization tied to the underlying rendering technology.
 You should also register the visualization with `VisTypesRegistryProvider`.
 
-["source","html"]
+["source","js"]
 -----------
 import { CATEGORY } from 'ui/vis/vis_category';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
@@ -335,7 +336,36 @@ This response matches the visData property of the <visualization> directive.
 
 [[development-default-response-handler]]
 ==== default response handler
-Default response handler will convert pure elasticsearch response to tabular format.
+Default response handler will convert pure elasticsearch response to tabular format. Its the recommended response
+handler to use. The response object will contain a table property, which is an array of all the tables produced (if 
+you use the split chart for example). Each of the table objects has two properties:
+
+- columns, array of column objects, where each column object has a title property and an aggConfig property
+- rows, array of rows, where each row is an array of non formatted cell values
+
+Here is an example of a response with 1 table, 3 columns and 2 rows:
+
+["source","js"]
+-----------
+{
+  tables: [{
+    columns: [{
+      title: 'column1',
+      aggConfig: ...
+    },{
+      title: 'column2',
+      aggConfig: ...
+    },{
+      title: 'column3',
+      aggConfig: ...
+    }],
+    rows: [
+      [ '404', 1262, 12.5 ]
+      [ '200', 343546, 60.1 ]
+    ]
+  }];
+}
+-----------
 
 [[development-none-response-handler]]
 ==== none response handler
@@ -387,6 +417,10 @@ The `vis` object holds the visualization state and is the window into kibana:
 - *vis.uiStateVal(name, val)*: updates a property in UI state
 - *vis.isEditorMode()*: returns true if in editor mode
 - *vis.API.timeFilter*: allows you to access time picker
+- *vis.API.queryFilter*: allows you to query filter
+- *vis.API.queryManager*: allows you to query manager
+- *vis.API.filterManager*: allows you to filter manager
+- *vis.API.kuery*: allows you to access to kuery language API
 - *vis.API.events.click*: default click handler
 - *vis.API.events.brush*: default brush handler
 
@@ -404,6 +438,7 @@ You can access filter bar and time picker through the objects defined on `vis.AP
 ==== timeFilter
 
 Update the timefilter time values and call update() method on it to update time picker
+
 ["source","js"]
 -----------
    timefilter.time.from = moment(ranges.xaxis.from);
@@ -411,3 +446,22 @@ Update the timefilter time values and call update() method on it to update time 
    timefilter.time.mode = 'absolute';
    timefilter.update();
 -----------
+
+
+[[development-aggconfig]]
+=== AggConfig object
+ 
+Few times we mentioned the AggConfig object and you will probably have to handle with it in every visualization you 
+will create. Here we provide short description of some of the methods on it, however the best reference would be 
+to actually check the code and other visualizations.
+ 
+  
+- *fieldFormatter(<type>)* : returns a function which will format your value according to field formatters defined on
+the field. The type can be either 'text' or 'html'.
+- *makeLabel()* : gets the label for the aggregation
+- *isFilterable()* : return true if aggregation is filterable (you can then call createFilter)
+- *createFilter(bucketKey)* : creates a filter for specific bucket key
+- *getValue(bucket)* : gets value for a specific bucket
+- *getField()* : gets the field used for this aggregation
+- *getFieldDisplayName()* : gets field display name
+- *getAggParams()* : gets the arguments to the aggregation
