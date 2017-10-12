@@ -14,7 +14,7 @@ export class FilterUtils {
    * (e.g. goes in the query input bar), false otherwise (e.g. is in the filter bar).
    */
   static isQueryFilter(filter) {
-    return filter.query && filter.query.query_string && !filter.meta;
+    return filter.query && !filter.meta;
   }
 
   /**

@@ -23,7 +23,7 @@ export function importApi(server) {
     handler: (req, reply) => {
       return importDashboards(req)
         .then((resp) => reply(resp))
-        .catch(err => reply(Boom.wrap(err, 400)));
+        .catch(err => reply(Boom.boomify(err, { statusCode: 400 })));
     }
   });
 }

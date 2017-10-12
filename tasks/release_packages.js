@@ -37,10 +37,11 @@ export default (grunt) => {
       rpm.filePath,
       '-r', 'external-1'
     ], {
-      env: Object.assign({}, {
+      env: {
         'AWS_ACCESS_KEY': rpm.awsKey,
-        'AWS_SECRET_KEY': rpm.awsSecret
-      }, process.env)
+        'AWS_SECRET_KEY': rpm.awsSecret,
+        ...process.env
+      }
     });
   }
 
