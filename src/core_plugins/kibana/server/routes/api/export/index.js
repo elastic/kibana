@@ -1,4 +1,5 @@
 import { exportDashboards } from '../../../lib/export/export_dashboards';
+import { SavedObjectsService } from '../../../../../../../platform/saved_objects';
 import Boom from 'boom';
 import Joi from 'joi';
 import moment from 'moment';
@@ -19,7 +20,9 @@ export function exportApi(server) {
     method: ['GET'],
     handler: (req, reply) => {
       const currentDate = moment.utc();
-      return exportDashboards(req)
+      const savedObjectsService = new SavedObjectsService(server, req);
+
+      return exportDashboards(req.query.dashboard, server.config(), savedObjectsService)
         .then(resp => {
           const json = JSON.stringify(resp, null, '  ');
           const filename = `kibana-dashboards.${currentDate.format('YYYY-MM-DD-HH-mm-ss')}.json`;
