@@ -4,6 +4,7 @@ module.exports = function () {
       licenses: [
         '(BSD-2-Clause OR MIT OR Apache-2.0)',
         '(BSD-2-Clause OR MIT)',
+        '(GPL-2.0 OR MIT)',
         '(MIT AND CC-BY-3.0)',
         '(MIT OR Apache-2.0)',
         'AFLv2.1',
