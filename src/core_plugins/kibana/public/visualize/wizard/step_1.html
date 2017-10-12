@@ -15,9 +15,19 @@
 <div class="kuiViewContent kuiViewContent--constrainedWidth">
   <div class="kuiViewContentItem">
     <!-- Header -->
-    <h1 class="kuiTitle kuiVerticalRhythm kuiVerticalRhythm--medium">
-      Select visualization type
-    </h1>
+    <div class="visualizeViewContentHeader">
+      <h1 class="kuiTitle kuiVerticalRhythm kuiVerticalRhythm--medium">
+        Select visualization type
+      </h1>
+
+      <div class="visualizeLabVisualizations" ng-if="labModeEnabled">
+        <a ng-click="toggleLabView()" ng-hide="isLabMode">
+          <div class="kuiIcon fa-flask ng-scope"></div>
+          Lab Section
+        </a>
+        <a ng-click="toggleLabView()" ng-show="isLabMode">Back to all visualizations</a>
+      </div>
+    </div>
 
     <!-- Search -->
     <div class="kuiSearchInput kuiVerticalRhythm kuiVerticalRhythm--medium fullWidth" role="search">
@@ -28,6 +38,23 @@
         placeholder="Search visualization types..."
         ng-model="searchTerm"
       >
+    </div>
+
+    <div class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm" ng-if="isLabMode">
+      <div class="kuiInfoPanelHeader">
+        <span class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--warning fa-bolt"></span>
+        <span class="kuiInfoPanelHeader__title">
+          Caution: experimental visualizations ahead!
+        </span>
+      </div>
+
+      <div class="kuiInfoPanelBody">
+        <div class="kuiInfoPanelBody__message">
+          All visualizations in this section are experimental. This means we might remove them or change them significantly
+          in the next releases. Please do not use them in production environments. But DO try them out and let us know
+          your opinion.
+        </div>
+      </div>
     </div>
 
     <div

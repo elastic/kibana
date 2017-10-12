@@ -302,5 +302,9 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     $scope.fetch();
   };
 
+  $scope.getGithubUrl = () => {
+    return vis.type.githubUrl || 'https://github.com/elastic/kibana/issues';
+  };
+
   init();
 }

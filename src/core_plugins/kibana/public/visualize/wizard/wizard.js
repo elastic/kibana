@@ -31,7 +31,7 @@ routes.when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
   controller: 'VisualizeWizardStep1',
 });
 
-module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, timefilter, Private) {
+module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, timefilter, Private, config) {
   timefilter.enabled = false;
 
   const visTypeCategoryToHumanReadableMap = {
@@ -47,6 +47,13 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
   kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
 
   const visTypes = Private(VisTypesRegistryProvider);
+  $scope.labModeEnabled = config.get('visualize:labMode');
+  $scope.isLabMode = $route.current.params.lab;
+  $scope.toggleLabView = () => {
+    $route.current.params.lab = !$route.current.params.lab;
+    $route.updateParams($route.current.params);
+    $route.reload();
+  };
 
   const categoryToVisTypesMap = {};
 
@@ -54,6 +61,8 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
     const categoryName = visType.category;
 
     if (categoryName === CATEGORY.HIDDEN) return;
+    if ($scope.isLabMode && !visType.isExperimental) return;
+    if (!$scope.isLabMode && visType.isExperimental) return;
 
     // Create category object if it doesn't exist yet.
     if (!categoryToVisTypesMap[categoryName]) {
