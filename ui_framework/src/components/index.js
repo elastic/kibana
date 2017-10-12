@@ -151,6 +151,11 @@ export {
   KuiTableHeaderCheckBoxCell,
   KuiTableHeader,
   KuiTableBody,
+  KuiListingTable,
+  KuiListingTableCreateButton,
+  KuiListingTableDeleteButton,
+  KuiListingTableNoMatchesPrompt,
+  KuiListingTableLoadingPrompt
 } from './table';
 
 export {
