@@ -55,7 +55,7 @@ app.directive('dashboardApp', function ($injector) {
   return {
     restrict: 'E',
     controllerAs: 'dashboardApp',
-    controller: function ($scope, $rootScope, $route, $routeParams, $location, getAppState, $compile, dashboardConfig) {
+    controller: function ($scope, $rootScope, $route, $routeParams, $location, getAppState, $compile, dashboardConfig, $element) {
       const filterManager = Private(FilterManagerProvider);
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
@@ -400,6 +400,11 @@ app.directive('dashboardApp', function ($injector) {
       };
 
       $scope.$emit('application.load');
+
+      this.getSharingPreserveLayoutDimensions = () => ({
+        height: $element.height(),
+        width: $element.width(),
+      });
     }
   };
 });
