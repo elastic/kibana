@@ -63,7 +63,7 @@ describe('KuiPopover', () => {
         <KuiPopover
           button={<button />}
           closePopover={() => {}}
-          anchorPosition="right"
+          anchorPosition="downRight"
         />
       );
 

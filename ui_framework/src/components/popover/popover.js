@@ -12,9 +12,18 @@ import { KuiOutsideClickDetector } from '../outside_click_detector';
 import { KuiPanel, SIZES } from '../../components/panel/panel';
 
 const anchorPositionToClassNameMap = {
-  'center': '',
-  'left': 'kuiPopover--anchorLeft',
-  'right': 'kuiPopover--anchorRight',
+  'upCenter': 'kuiPopover--anchorUpCenter',
+  'upLeft': 'kuiPopover--anchorUpLeft',
+  'upRight': 'kuiPopover--anchorUpRight',
+  'downCenter': 'kuiPopover--anchorDownCenter',
+  'downLeft': 'kuiPopover--anchorDownLeft',
+  'downRight': 'kuiPopover--anchorDownRight',
+  'leftCenter': 'kuiPopover--anchorLeftCenter',
+  'leftUp': 'kuiPopover--anchorLeftUp',
+  'leftDown': 'kuiPopover--anchorLeftDown',
+  'rightCenter': 'kuiPopover--anchorRightCenter',
+  'rightUp': 'kuiPopover--anchorRightUp',
+  'rightDown': 'kuiPopover--anchorRightDown',
 };
 
 export const ANCHOR_POSITIONS = Object.keys(anchorPositionToClassNameMap);
@@ -147,6 +156,6 @@ KuiPopover.propTypes = {
 
 KuiPopover.defaultProps = {
   isOpen: false,
-  anchorPosition: 'center',
+  anchorPosition: 'downCenter',
   panelPaddingSize: 'm',
 };

@@ -50,28 +50,6 @@ export default props => (
     />
 
     <GuideSection
-      title="Popover with title"
-      source={[{
-        type: GuideSectionTypes.JS,
-        code: popoverWithTitleSource,
-      }, {
-        type: GuideSectionTypes.HTML,
-        code: popoverWithTitleHtml,
-      }]}
-      text={
-        <p>
-          Popovers often have need for titling. This can be applied through
-          a prop or used separately as its own component
-          <KuiCode>KuiPopoverTitle</KuiCode> nested somwhere in the child
-          prop.
-        </p>
-      }
-      demo={
-        <PopoverWithTitle />
-      }
-    />
-
-    <GuideSection
       title="Anchor position"
       source={[{
         type: GuideSectionTypes.JS,
@@ -81,13 +59,58 @@ export default props => (
         code: popoverAnchorPositionHtml,
       }]}
       text={
-        <p>
-          The alignment and arrow on your popover can be set with
-          the <KuiCode>anchorPostion</KuiCode> prop.
-        </p>
+        <div>
+          <p>
+            The alignment and arrow on your popover can be set with
+            the <KuiCode>anchorPostion</KuiCode> prop. These positions will not
+            update based upon screen real estate and will stick to the positions
+            you declare. Because of this,
+            <strong>be careful when using left or right positioning</strong>.
+          </p>
+          <p><strong>Some tips:</strong></p>
+          <ul>
+            <li>
+              The first word in the <KuiCode>anchorPosition</KuiCode> denotes
+              where the popover will appear relative to the button.
+            </li>
+            <li>
+              The second word in the <KuiCode>anchorPosition</KuiCode> denotes
+              where the gravity / pin position will appear relative to the popover.
+            </li>
+          </ul>
+        </div>
       }
       demo={
         <PopoverAnchorPosition />
+      }
+    />
+
+    <GuideSection
+      title="Popover with title"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: popoverWithTitleSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: popoverWithTitleHtml,
+      }]}
+      text={
+        <div>
+          <p>
+            Popovers often have need for titling. This can be applied through
+            a prop or used separately as its own component
+            <KuiCode>KuiPopoverTitle</KuiCode> nested somwhere in the child
+            prop.
+          </p>
+          <p>
+            Note that when using popover titles, you will need to
+            set <KuiCode>panelPaddingSize=&quot;none&quot;</KuiCode> and apply
+            some sort of padding around your content block itself.
+          </p>
+        </div>
+      }
+      demo={
+        <PopoverWithTitle />
       }
     />
 
@@ -103,9 +126,8 @@ export default props => (
       text={
         <p>
           Use the <KuiCode>panelPaddingSize</KuiCode> prop to adjust the padding
-          on the panel within the panel. Use the <KuiCode>panelClassName</KuiCode>
-          prop to pass a custom class to the panel.
-          inside a popover.
+          on the panel within the panel. Use the <KuiCode>panelClassName</KuiCode> prop
+          to pass a custom class to the panel. inside a popover.
         </p>
       }
       demo={
