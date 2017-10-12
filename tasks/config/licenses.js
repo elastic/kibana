@@ -52,7 +52,6 @@ module.exports = function () {
         'jsonify@0.0.0': ['Public domain'],
         'ripemd160@0.2.0': ['MIT'],
         'select@1.0.6': ['MIT'],
-        'ua-parser-js@0.7.14': ['MIT'],
         'uglify-js@2.2.5': ['BSD'],
       }
     }
