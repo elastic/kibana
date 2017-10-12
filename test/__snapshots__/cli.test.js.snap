@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`cli exec should be called with correct args 1`] = `
+exports[`select commit that originated from pull request exec should be called with correct args 1`] = `
 Array [
   Array [
     "git clone git@github.com:elastic/backport-cli-test",
@@ -185,7 +185,7 @@ Array [
 ]
 `;
 
-exports[`cli prompt calls should match snapshot 1`] = `
+exports[`select commit that originated from pull request prompt calls should match snapshot 1`] = `
 Array [
   Array [
     Array [
@@ -209,10 +209,6 @@ Array [
             "value": Object {
               "date": "2017-09-05T08:48:42Z",
               "message": "Update readme: Make ui-framework url a link",
-              "reference": Object {
-                "type": "commit",
-                "value": "7939a98",
-              },
               "sha": "7939a98aadb94ead30b54bea7974cd02dc816b02",
             },
           },
@@ -222,10 +218,6 @@ Array [
             "value": Object {
               "date": "2017-08-28T08:27:51Z",
               "message": "Update react 15.6.1 (#13672)",
-              "reference": Object {
-                "type": "pullRequest",
-                "value": "13672",
-              },
               "sha": "52552a93efa5b4038ea57d9cb3d158ba6a1ff71d",
             },
           },
@@ -235,10 +227,6 @@ Array [
             "value": Object {
               "date": "2017-08-07T15:35:59Z",
               "message": "Mock out static files when running in Jest (#13315)",
-              "reference": Object {
-                "type": "pullRequest",
-                "value": "13315",
-              },
               "sha": "8cfbb82cfb50aa962410a9682d96335a252d751a",
             },
           },
@@ -283,10 +271,6 @@ Array [
             "value": Object {
               "date": "2017-09-05T08:48:42Z",
               "message": "Update readme: Make ui-framework url a link",
-              "reference": Object {
-                "type": "commit",
-                "value": "7939a98",
-              },
               "sha": "7939a98aadb94ead30b54bea7974cd02dc816b02",
             },
           },
@@ -296,10 +280,6 @@ Array [
             "value": Object {
               "date": "2017-08-28T08:27:51Z",
               "message": "Update react 15.6.1 (#13672)",
-              "reference": Object {
-                "type": "pullRequest",
-                "value": "13672",
-              },
               "sha": "52552a93efa5b4038ea57d9cb3d158ba6a1ff71d",
             },
           },
@@ -309,10 +289,6 @@ Array [
             "value": Object {
               "date": "2017-08-07T15:35:59Z",
               "message": "Mock out static files when running in Jest (#13315)",
-              "reference": Object {
-                "type": "pullRequest",
-                "value": "13315",
-              },
               "sha": "8cfbb82cfb50aa962410a9682d96335a252d751a",
             },
           },
@@ -357,10 +333,6 @@ Array [
             "value": Object {
               "date": "2017-09-05T08:48:42Z",
               "message": "Update readme: Make ui-framework url a link",
-              "reference": Object {
-                "type": "commit",
-                "value": "7939a98",
-              },
               "sha": "7939a98aadb94ead30b54bea7974cd02dc816b02",
             },
           },
@@ -370,10 +342,6 @@ Array [
             "value": Object {
               "date": "2017-08-28T08:27:51Z",
               "message": "Update react 15.6.1 (#13672)",
-              "reference": Object {
-                "type": "pullRequest",
-                "value": "13672",
-              },
               "sha": "52552a93efa5b4038ea57d9cb3d158ba6a1ff71d",
             },
           },
@@ -383,10 +351,6 @@ Array [
             "value": Object {
               "date": "2017-08-07T15:35:59Z",
               "message": "Mock out static files when running in Jest (#13315)",
-              "reference": Object {
-                "type": "pullRequest",
-                "value": "13315",
-              },
               "sha": "8cfbb82cfb50aa962410a9682d96335a252d751a",
             },
           },
@@ -431,10 +395,6 @@ Array [
             "value": Object {
               "date": "2017-09-05T08:48:42Z",
               "message": "Update readme: Make ui-framework url a link",
-              "reference": Object {
-                "type": "commit",
-                "value": "7939a98",
-              },
               "sha": "7939a98aadb94ead30b54bea7974cd02dc816b02",
             },
           },
@@ -444,10 +404,6 @@ Array [
             "value": Object {
               "date": "2017-08-28T08:27:51Z",
               "message": "Update react 15.6.1 (#13672)",
-              "reference": Object {
-                "type": "pullRequest",
-                "value": "13672",
-              },
               "sha": "52552a93efa5b4038ea57d9cb3d158ba6a1ff71d",
             },
           },
@@ -457,10 +413,6 @@ Array [
             "value": Object {
               "date": "2017-08-07T15:35:59Z",
               "message": "Mock out static files when running in Jest (#13315)",
-              "reference": Object {
-                "type": "pullRequest",
-                "value": "13315",
-              },
               "sha": "8cfbb82cfb50aa962410a9682d96335a252d751a",
             },
           },

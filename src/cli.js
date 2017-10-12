@@ -25,6 +25,18 @@ function isCherrypickConflict(e) {
   return e.cmd.includes('git cherry-pick');
 }
 
+function getReference(owner, repoName, commitSha) {
+  return github
+    .getPullRequestByCommit(owner, repoName, commitSha)
+    .then(pullRequest => {
+      if (pullRequest) {
+        return { type: 'pullRequest', value: pullRequest };
+      }
+
+      return { type: 'commit', value: commitSha.slice(0, 7) };
+    });
+}
+
 function cherrypickAndPrompt(owner, repoName, sha) {
   return withSpinner(
     cherrypick(owner, repoName, sha),
@@ -84,8 +96,15 @@ function getPullRequestPayload(commitMessage, version, reference, username) {
   };
 }
 
-function backportVersion(owner, repoName, commit, version, username) {
-  const backportBranchName = getBackportBranchName(version, commit.reference);
+function doBackportVersion(
+  owner,
+  repoName,
+  commit,
+  reference,
+  version,
+  username
+) {
+  const backportBranchName = getBackportBranchName(version, reference);
 
   return withSpinner(resetAndPullMaster(owner, repoName), 'Pull latest changes')
     .then(() =>
@@ -102,7 +121,7 @@ function backportVersion(owner, repoName, commit, version, username) {
       const payload = getPullRequestPayload(
         commit.message,
         version,
-        commit.reference,
+        reference,
         username
       );
       return withSpinner(
@@ -150,14 +169,25 @@ function init(config, options) {
         }));
     })
     .then(({ owner, repoName, commit, version }) => {
-      console.log(
-        `Backporting ${getReferenceValue(commit.reference)} to ${version}`
-      );
+      return getReference(owner, repoName, commit.sha).then(reference => {
+        console.log(
+          `Backporting ${getReferenceValue(reference)} to ${version}`
+        );
 
-      return withSpinner(
-        maybeSetupRepo(owner, repoName, username),
-        'Cloning repository (may take a few minutes)'
-      ).then(() => backportVersion(owner, repoName, commit, version, username));
+        return withSpinner(
+          maybeSetupRepo(owner, repoName, username),
+          'Cloning repository (may take a few minutes)'
+        ).then(() =>
+          doBackportVersion(
+            owner,
+            repoName,
+            commit,
+            reference,
+            version,
+            username
+          )
+        );
+      });
     })
     .then(res => console.log(`View pull request: ${res.data.html_url}`))
     .catch(e => {

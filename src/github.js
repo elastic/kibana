@@ -2,13 +2,14 @@ const axios = require('axios');
 const constants = require('./constants');
 let accessToken;
 
-function getReference(commitMessage, commitSha) {
-  const [, pullRequest] = commitMessage.match(/\(#(\d+)\)$/) || [];
-  if (pullRequest) {
-    return { type: 'pullRequest', value: pullRequest };
+function throwGithubError(e) {
+  if (e.response && e.response.data) {
+    const error = new Error(constants.GITHUB_ERROR);
+    error.details = e.response.data;
+    throw error;
   }
 
-  return { type: 'commit', value: commitSha.slice(0, 7) };
+  throw e;
 }
 
 function getCommitMessage(message) {
@@ -19,23 +20,17 @@ function getCommits(owner, repoName, author) {
   return axios(
     `https://api.github.com/repos/${owner}/${repoName}/commits?author=${author}&per_page=5&access_token=${accessToken}`
   )
+    .catch(throwGithubError)
     .then(res =>
       res.data.map(commit => {
         const message = getCommitMessage(commit.commit.message);
-        const reference = getReference(message, commit.sha);
         return {
           message,
           sha: commit.sha,
-          date: commit.commit.author.date,
-          reference
+          date: commit.commit.author.date
         };
       })
-    )
-    .catch(e => {
-      const error = new Error(constants.GITHUB_ERROR);
-      error.details = e.response.data;
-      throw error;
-    });
+    );
 }
 
 function createPullRequest(owner, repoName, payload) {
@@ -44,11 +39,15 @@ function createPullRequest(owner, repoName, payload) {
       `https://api.github.com/repos/${owner}/${repoName}/pulls?access_token=${accessToken}`,
       payload
     )
-    .catch(e => {
-      const error = new Error(constants.GITHUB_ERROR);
-      error.details = e.response.data;
-      throw error;
-    });
+    .catch(throwGithubError);
+}
+
+function getPullRequestByCommit(owner, repoName, commitSha) {
+  return axios(
+    `https://api.github.com/search/issues?q=repo:${owner}/${repoName}+${commitSha}&access_token=${accessToken}`
+  )
+    .catch(throwGithubError)
+    .then(res => res.data.items[0] && res.data.items[0].number);
 }
 
 function setAccessToken(_accessToken) {
@@ -58,5 +57,6 @@ function setAccessToken(_accessToken) {
 module.exports = {
   setAccessToken,
   createPullRequest,
-  getCommits
+  getCommits,
+  getPullRequestByCommit
 };

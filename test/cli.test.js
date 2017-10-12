@@ -13,7 +13,7 @@ const host = 'http://localhost';
 axios.defaults.host = host;
 axios.defaults.adapter = httpAdapter;
 
-describe('cli', () => {
+describe('select commit that originated from pull request', () => {
   const owner = 'elastic';
   const repoName = 'backport-cli-test';
   const fullRepoName = `${owner}/${repoName}`;
@@ -29,8 +29,7 @@ describe('cli', () => {
         Promise.resolve({
           commit: {
             message: 'myCommitMessage',
-            sha: 'mySha',
-            reference: { value: 'myPullRequest', type: 'pullRequest' }
+            sha: 'mySha'
           },
           version: 'myVersion'
         })
@@ -42,12 +41,21 @@ describe('cli', () => {
       .reply(200, commitsMock);
 
     nock('https://api.github.com')
-      .post(`/repos/${owner}/${repoName}/pulls`, {
-        title: '[Backport] myCommitMessage',
-        body: 'Backports pull request #myPullRequest to myVersion',
-        head: 'sqren:backport/myVersion/pr-myPullRequest',
-        base: 'myVersion'
+      .get(`/search/issues`)
+      .query({
+        q: 'repo:elastic/backport-cli-test mySha',
+        access_token: 'myAccessToken'
       })
+      .reply(200, {
+        items: [
+          {
+            number: 'myPullRequest'
+          }
+        ]
+      });
+
+    nock('https://api.github.com')
+      .post(`/repos/${owner}/${repoName}/pulls`)
       .query({ access_token: 'myAccessToken' })
       .reply(200, {
         html_url: 'myHtmlUrl'
@@ -109,5 +117,81 @@ describe('cli', () => {
 
   test('exec should be called with correct args', () => {
     expect(utils.exec.mock.calls).toMatchSnapshot();
+  });
+});
+
+describe('select commit that originated from commit', () => {
+  const owner = 'elastic';
+  const repoName = 'backport-cli-test';
+  const fullRepoName = `${owner}/${repoName}`;
+
+  beforeEach(() => {
+    mockBackportDirPath();
+    jest.spyOn(utils, 'exec').mockReturnValue(Promise.resolve());
+
+    jest
+      .spyOn(inquirer, 'prompt')
+      .mockReturnValueOnce(Promise.resolve({ fullRepoName }))
+      .mockReturnValueOnce(
+        Promise.resolve({
+          commit: {
+            message: 'myCommitMessage',
+            sha: 'mySha'
+          },
+          version: 'myVersion'
+        })
+      );
+
+    nock('https://api.github.com')
+      .get(`/repos/${owner}/${repoName}/commits`)
+      .query({ author: 'sqren', per_page: '5', access_token: 'myAccessToken' })
+      .reply(200, commitsMock);
+
+    nock('https://api.github.com')
+      .get(`/search/issues`)
+      .query({
+        q: 'repo:elastic/backport-cli-test mySha',
+        access_token: 'myAccessToken'
+      })
+      .reply(200, {
+        items: []
+      });
+
+    nock('https://api.github.com')
+      .post(`/repos/${owner}/${repoName}/pulls`)
+      .query({ access_token: 'myAccessToken' })
+      .reply(200, {
+        html_url: 'myHtmlUrl'
+      });
+
+    jest.spyOn(github, 'getCommits');
+    jest.spyOn(github, 'createPullRequest');
+
+    return init(
+      {
+        username: 'sqren',
+        accessToken: 'myAccessToken',
+        repositories: [
+          {
+            name: fullRepoName,
+            versions: ['6.x', '6.0', '5.6', '5.5', '5.4']
+          }
+        ]
+      },
+      { cwd: '/my/path' }
+    );
+  });
+
+  test('createPullRequest should be called with correct args', () => {
+    expect(github.createPullRequest).toHaveBeenCalledWith(
+      'elastic',
+      'backport-cli-test',
+      {
+        base: 'myVersion',
+        body: 'Backports commit mySha to myVersion',
+        head: 'sqren:backport/myVersion/commit-mySha',
+        title: '[Backport] myCommitMessage'
+      }
+    );
   });
 });
