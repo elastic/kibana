@@ -1,6 +1,7 @@
 import chrome from 'ui/chrome';
 import { API_ROUTE_WORKPAD } from '../../common/lib/constants';
 import { fetch } from '../../common/lib/fetch';
+import { get as _get } from 'lodash';
 
 const basePath = chrome.getBasePath();
 const apiPath = `${basePath}${API_ROUTE_WORKPAD}`;
@@ -22,5 +23,5 @@ export function remove(id) {
 }
 
 export function find(searchTerm) {
-  return fetch.get(`${apiPath}/find?name=${searchTerm}`).then(resp => resp.data);
+  return fetch.get(`${apiPath}/find?name=${_get(searchTerm, 'length') ? searchTerm : '*'}`).then(resp => resp.data);
 }

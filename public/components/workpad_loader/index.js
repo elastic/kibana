@@ -21,9 +21,7 @@ export const WorkpadLoader = compose(
   withState('searchText', 'setSearchText', ''),
   withState('workpads', 'setWorkpads', null),
   withHandlers({
-    findWorkpads: ({ setWorkpads, searchText }) => () => {
-      setWorkpads(null);
-      // TODO: handle errors
+    findWorkpads: ({ setWorkpads }) => (searchText) => {
       return findWorkpads(searchText).then(setWorkpads);
     },
     removeWorkpad: ({ setWorkpads, workpadId, workpads, loadWorkpad }) => (id) => {

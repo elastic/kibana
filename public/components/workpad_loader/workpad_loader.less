@@ -1,43 +1,31 @@
-@import "../../style/variables.less";
+@import (reference) "../../style/main";
 
 .canvas__workpad_loader {
-  .canvas__workpad_loader--search {
-    background-color: @lightestGrey;
-    color: @trueBlack;
-    padding: @spacingM;
-    height: 360px;
-    overflow: auto;
+  height: 400px;
 
-    .canvas__workpad_loader--controls {
-      display: inline-block;
+  .canvas__workpad_loader--created, .canvas__workpad_loader--updated {
+    white-space: nowrap;
+  }
+
+  .canvas__workpad_loader--delete:hover {
+    color: @colorDanger;
+  }
+
+  .canvas__workpad_loader--workpad {
+    cursor: pointer;
+
+    &:hover {
+      background-color: @darkGrey;
     }
+  }
 
-    .form-inline {
-      display: inline-block;
-      margin: 0 @spacingM;
-    }
+  .canvas__workpad_loader--controls {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: @spacingM;
+  }
 
-    .form-group {
-      display: inline-block;
-
-      label, input, button {
-        margin-right: @spacingM;
-      }
-
-      input {
-        color: @darkGrey;
-        min-width: 200px;
-      }
-    }
-
-    .workpad {
-      td {
-        color: @darkestGrey;
-      }
-
-      td.name {
-        cursor: pointer;
-      }
-    }
+  .canvas__workpad_loader--new {
+    margin-right: @spacingS;
   }
 }

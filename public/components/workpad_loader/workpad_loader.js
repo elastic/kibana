@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Form, FormGroup, ControlLabel, FormControl, Button, Table } from 'react-bootstrap';
+import { Form, FormControl, Button, Table } from 'react-bootstrap';
 import moment from 'moment';
 import { ConfirmModal } from '../confirm_modal';
 import './workpad_loader.less';
@@ -24,11 +24,6 @@ export const WorkpadLoader = (props) => {
 
   const isLoading = !Boolean(workpads);
   const isDeleteOpen = Boolean(deleteWorkpad.id && deleteWorkpad.name);
-
-  const search = (ev) => {
-    ev.preventDefault();
-    findWorkpads();
-  };
 
   const load = (id) => {
     if (id !== workpadId) {
@@ -59,65 +54,65 @@ export const WorkpadLoader = (props) => {
     closeRemoveConfirm();
   };
 
+  const search = (str) => {
+    setSearchText(str);
+    findWorkpads(str);
+  };
+
   return (
     <div className="canvas__workpad_loader">
 
-      <div className="canvas__workpad_loader--search">
+      <Form className="canvas__workpad_loader--controls">
+        <Button
+          bsSize="xsmall"
+          bsStyle="primary"
+          onClick={create}
+          disabled={createPending}
+          className="canvas__workpad_loader--new"
+        >
+          {createPending && <i className="fa fa-spinner fa-pulse" />}
+          {!createPending && <i className="fa fa-plus" />}
+          &nbsp;New Workpad
+        </Button>
+        <FormControl
+          type="text"
+          placeholder="Find Workpads"
+          value={searchText}
+          onChange={ev => search(ev.target.value)}
+        />
+      </Form>
 
-        <Form inline onSubmit={search}>
-          <FormGroup controlId="workpadSearchInline">
-            <ControlLabel>Search</ControlLabel>
-            <FormControl
-              type="text"
-              placeholder="Workpad Name"
-              value={searchText}
-              onChange={ev => setSearchText(ev.target.value)}
-            />
-          </FormGroup>
-            <Button bsSize="small" type="submit" disabled={isLoading}>
-              {isLoading && <i className="fa fa-spinner fa-pulse" />}
-              {!isLoading && <i className="fa fa-search" />}
-              &nbsp;Find
-            </Button>
-        </Form>
-
-        <div className="canvas__workpad_loader--controls">
-          <Button bsSize="small" onClick={create} disabled={createPending}>
-            {createPending && <i className="fa fa-spinner fa-pulse" />}
-            {!createPending && <i className="fa fa-plus" />}
-            &nbsp;New Workpad
-          </Button>
-        </div>
-
-        <Table striped condensed>
-          <thead>
+      <Table condensed className="canvas__workpad_loader--workpads">
+        <thead>
+          <tr>
+            <th>Workpad name</th>
+            <th>Updated</th>
+            <th>Created</th>
+            <th>&nbsp;</th>
+          </tr>
+        </thead>
+        <tbody>
+          {!isLoading && workpads.length === 0 && (
             <tr>
-              <th>Workpad name</th>
-              <th>Updated</th>
-              <th>Created</th>
-              <th>&nbsp;</th>
+              <td colSpan="3">No matching workpads found</td>
             </tr>
-          </thead>
-          <tbody>
-            {!isLoading && workpads.length === 0 && (
-              <tr>
-                <td colSpan="3">No matching workpads found</td>
-              </tr>
-            )}
-            {!isLoading && workpads.workpads.map(wp => (
-              <tr
-                key={wp.id}
-                className={wp.id === workpadId ? 'workpad active' : 'workpad'}
-              >
-                <td className="name" onClick={() => load(wp.id)}>{wp.name}</td>
-                <td>{formatDate(wp['@timestamp'])}</td>
-                <td>{formatDate(wp['@created'])}</td>
-                <td><span onClick={() => removeConfirm(wp)} className="fa fa-trash" /></td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      </div>
+          )}
+          {!isLoading && workpads.workpads.map(wp => (
+            <tr
+              key={wp.id}
+              className="canvas__workpad_loader--workpad"
+              onClick={() => load(wp.id)}
+            >
+              <td width="97%" className="canvas__workpad_loader--name">{wp.name}</td>
+              <td width="1%" className="canvas__workpad_loader--created">{formatDate(wp['@created'])}</td>
+              <td width="1%" className="canvas__workpad_loader--updated">{formatDate(wp['@timestamp'])}</td>
+              <td width="1%" className="canvas__workpad_loader--delete">
+                <span onClick={() => removeConfirm(wp)} className="fa fa-trash" />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
 
       <ConfirmModal
         isOpen={isDeleteOpen}
