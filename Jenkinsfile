@@ -1,6 +1,6 @@
 #!/usr/bin/groovy
 
-node('amazon') {
+node {
   def root = pwd()
 
   stage('Setup') {
