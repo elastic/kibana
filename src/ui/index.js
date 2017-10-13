@@ -66,7 +66,7 @@ export default async (kbnServer, server, config) => {
           await reply.renderStatusPage();
         }
       } catch (err) {
-        reply(Boom.wrap(err));
+        reply(Boom.boomify(err));
       }
     }
   });
