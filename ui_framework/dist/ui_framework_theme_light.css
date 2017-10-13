@@ -3121,35 +3121,35 @@ table {
   .kuiProgress::-moz-progress-bar {
     transition: width 250ms linear; }
   .kuiProgress.kuiProgress--primary::-webkit-progress-value {
-    background-color: #0079a5; }
+    background-color: rgba(0, 121, 165, 0.6); }
   .kuiProgress.kuiProgress--primary::-moz-progress-bar {
-    background-color: #0079a5; }
+    background-color: rgba(0, 121, 165, 0.6); }
   .kuiProgress.kuiProgress--primary.kuiProgress--indeterminate:before {
-    background-color: #0079a5; }
+    background-color: rgba(0, 121, 165, 0.6); }
   .kuiProgress.kuiProgress--secondary::-webkit-progress-value {
-    background-color: #00A69B; }
+    background-color: rgba(0, 166, 155, 0.75); }
   .kuiProgress.kuiProgress--secondary::-moz-progress-bar {
-    background-color: #00A69B; }
+    background-color: rgba(0, 166, 155, 0.75); }
   .kuiProgress.kuiProgress--secondary.kuiProgress--indeterminate:before {
-    background-color: #00A69B; }
+    background-color: rgba(0, 166, 155, 0.75); }
   .kuiProgress.kuiProgress--warning::-webkit-progress-value {
-    background-color: #E5830E; }
+    background-color: rgba(229, 131, 14, 0.75); }
   .kuiProgress.kuiProgress--warning::-moz-progress-bar {
-    background-color: #E5830E; }
+    background-color: rgba(229, 131, 14, 0.75); }
   .kuiProgress.kuiProgress--warning.kuiProgress--indeterminate:before {
-    background-color: #E5830E; }
+    background-color: rgba(229, 131, 14, 0.75); }
   .kuiProgress.kuiProgress--danger::-webkit-progress-value {
-    background-color: #A30000; }
+    background-color: #d60000; }
   .kuiProgress.kuiProgress--danger::-moz-progress-bar {
-    background-color: #A30000; }
+    background-color: #d60000; }
   .kuiProgress.kuiProgress--danger.kuiProgress--indeterminate:before {
-    background-color: #A30000; }
+    background-color: #d60000; }
   .kuiProgress.kuiProgress--accent::-webkit-progress-value {
-    background-color: #DD0A73; }
+    background-color: rgba(221, 10, 115, 0.5); }
   .kuiProgress.kuiProgress--accent::-moz-progress-bar {
-    background-color: #DD0A73; }
+    background-color: rgba(221, 10, 115, 0.5); }
   .kuiProgress.kuiProgress--accent.kuiProgress--indeterminate:before {
-    background-color: #DD0A73; }
+    background-color: rgba(221, 10, 115, 0.5); }
   .kuiProgress.kuiProgress--subdued::-webkit-progress-value {
     background-color: #999; }
   .kuiProgress.kuiProgress--subdued::-moz-progress-bar {
@@ -3520,7 +3520,7 @@ table {
     text-decoration: underline; }
   .kuiTab.kuiTab-isSelected {
     cursor: default;
-    color: #00A69B; }
+    color: #0079a5; }
     .kuiTab.kuiTab-isSelected:after {
       position: absolute;
       bottom: -1px;
@@ -3528,7 +3528,7 @@ table {
       content: ' ';
       width: 100%;
       height: 2px;
-      background-color: #00A69B;
+      background-color: #0079a5;
       -webkit-animation: kuiTab 150ms cubic-bezier(0.694, 0.0482, 0.335, 1);
               animation: kuiTab 150ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
 

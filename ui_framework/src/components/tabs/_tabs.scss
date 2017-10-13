@@ -25,7 +25,7 @@
 
   &.kuiTab-isSelected {
     cursor: default;
-    color: $kuiColorSecondary;
+    color: $kuiColorPrimary;
 
     &:after {
       position: absolute;
@@ -34,7 +34,7 @@
       content: ' ';
       width: 100%;
       height: $kuiBorderWidthThick;
-      background-color: $kuiColorSecondary;
+      background-color: $kuiColorPrimary;
       animation: kuiTab $kuiAnimSpeedFast $kuiAnimSlightResistance;
     }
   }
