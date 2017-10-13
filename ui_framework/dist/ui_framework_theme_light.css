@@ -1591,8 +1591,9 @@ table {
 
 .kuiFormErrorText {
   font-size: 12px;
-  padding: 8px 0;
-  color: #A30000; }
+  padding: 8px;
+  color: #A30000;
+  background-color: #f6e6e6; }
 
 .kuiFormHelpText {
   font-size: 12px;
@@ -1639,7 +1640,9 @@ table {
   .kuiFormRow.kuiFormRow--hasEmptyLabelSpace {
     padding-top: 20px;
     /* 2 */ }
-  .kuiFormRow .kuiFormRow__text + .kuiFormRow__text {
+  .kuiFormRow .kuiFormErrorText + .kuiFormErrorText {
+    padding-top: 0; }
+  .kuiFormRow .kuiFormHelpText + .kuiFormHelpText {
     padding-top: 0; }
 
 .kuiRange {
