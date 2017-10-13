@@ -66,6 +66,8 @@ export class DashboardStateManager {
     // Always start out with all panels minimized when a dashboard is first loaded.
     store.dispatch(minimizePanel());
     store.dispatch(updatePanels(this.getPanels()));
+    store.dispatch(updateViewMode(this.getViewMode()));
+    store.dispatch(updateIsFullScreenMode(this.getFullScreenMode()));
 
     this.changeListeners = [];
 

@@ -57,6 +57,25 @@ export default function ({ getService, getPageObjects }) {
         expect(removeExists).to.equal(true);
       });
 
+      // Based off an actual bug encountered in a PR where a hard refresh in edit mode did not show the edit mode
+      // controls.
+      it ('are shown in edit mode after a hard refresh', async () => {
+        const currentUrl = await remote.getCurrentUrl();
+        // the second parameter of true will include the timestamp in the url and trigger a hard refresh.
+        await remote.get(currentUrl.toString(), true);
+
+        await PageObjects.dashboard.showPanelEditControlsDropdownMenu();
+        const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
+        const removeExists = await testSubjects.exists('dashboardPanelRemoveIcon');
+
+        expect(editLinkExists).to.equal(true);
+        expect(removeExists).to.equal(true);
+
+        // Get rid of the timestamp in the url.
+        await remote.get(currentUrl.toString(), false);
+      });
+
+
       describe('on an expanded panel', function () {
         it('are hidden in view mode', async function () {
           await PageObjects.dashboard.saveDashboard(dashboardName);
