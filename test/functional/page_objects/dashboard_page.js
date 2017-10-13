@@ -1,6 +1,8 @@
 import _ from 'lodash';
 import { DashboardConstants } from '../../../src/core_plugins/kibana/public/dashboard/dashboard_constants';
 
+export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
+
 export function DashboardPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const find = getService('find');
@@ -236,6 +238,24 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await this.clickEdit();
     }
 
+    async filterSearchNames(name) {
+      await testSubjects.setValue('savedObjectFinderSearchInput', name);
+    }
+
+    async clickSavedSearchTab() {
+      await testSubjects.click('addSavedSearchTab');
+    }
+
+    async addSavedSearch(searchName) {
+      await this.clickAddVisualization();
+      await this.clickSavedSearchTab();
+      await this.filterSearchNames(searchName);
+
+      await find.clickByPartialLinkText(searchName);
+      await PageObjects.header.clickToastOK();
+      await this.clickAddVisualization();
+    }
+
     async addVisualization(vizName) {
       await this.clickAddVisualization();
       log.debug('filter visualization (' + vizName + ')');
@@ -401,7 +421,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     getTestVisualizations() {
       return [
-        { name: 'Visualization PieChart', description: 'PieChart' },
+        { name: PIE_CHART_VIS_NAME, description: 'PieChart' },
         { name: 'Visualization☺ VerticalBarChart', description: 'VerticalBarChart' },
         { name: 'Visualization漢字 AreaChart', description: 'AreaChart' },
         { name: 'Visualization☺漢字 DataTable', description: 'DataTable' },
@@ -413,6 +433,22 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     getTestVisualizationNames() {
       return this.getTestVisualizations().map(visualization => visualization.name);
+    }
+
+    async showPanelEditControlsDropdownMenu() {
+      const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
+      if (editLinkExists) return;
+      await testSubjects.click('dashboardPanelToggleMenuIcon');
+    }
+
+    async clickDashboardPanelEditLink() {
+      await this.showPanelEditControlsDropdownMenu();
+      await testSubjects.click('dashboardPanelEditLink');
+    }
+
+    async clickDashboardPanelRemoveIcon() {
+      await this.showPanelEditControlsDropdownMenu();
+      await testSubjects.click('dashboardPanelRemoveIcon');
     }
 
     async addVisualizations(visualizations) {
