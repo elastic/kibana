@@ -21,7 +21,7 @@ Array [
     },
   ],
   Array [
-    "git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
+    "git fetch origin myVersion && git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
     Object {
       "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
     },
@@ -57,7 +57,7 @@ Array [
     },
   ],
   Array [
-    "git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
+    "git fetch origin myVersion && git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
     Object {
       "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
     },
@@ -93,7 +93,7 @@ Array [
     },
   ],
   Array [
-    "git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
+    "git fetch origin myVersion && git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
     Object {
       "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
     },
@@ -129,7 +129,7 @@ Array [
     },
   ],
   Array [
-    "git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
+    "git fetch origin myVersion && git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
     Object {
       "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
     },
@@ -165,7 +165,7 @@ Array [
     },
   ],
   Array [
-    "git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
+    "git fetch origin myVersion && git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
     Object {
       "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
     },

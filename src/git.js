@@ -58,7 +58,7 @@ function cherrypick(owner, repoName, sha) {
 
 function createAndCheckoutBranch(owner, repoName, baseBranch, featureBranch) {
   return utils.exec(
-    `git branch ${featureBranch} origin/${baseBranch} --force && git checkout ${featureBranch} `,
+    `git fetch origin ${baseBranch} && git branch ${featureBranch} origin/${baseBranch} --force && git checkout ${featureBranch} `,
     {
       cwd: getRepoPath(owner, repoName)
     }
