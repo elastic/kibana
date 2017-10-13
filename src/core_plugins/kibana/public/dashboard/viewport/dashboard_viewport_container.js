@@ -1,21 +1,13 @@
 import { connect } from 'react-redux';
 import { DashboardViewport } from './dashboard_viewport';
-import { getMaximizedPanelId, getPanelType, getPanels } from '../reducers';
+import { getMaximizedPanelId, getPanels } from '../reducers';
 
-const mapStateToProps = ({ dashboardState }, { getEmbeddableHandler }) => {
+const mapStateToProps = ({ dashboardState }) => {
   const maximizedPanelId = getMaximizedPanelId(dashboardState);
-  if (maximizedPanelId !== undefined) {
-    const panelType = getPanelType(dashboardState, maximizedPanelId);
-    const maximizedPanelEmbeddableHandler = getEmbeddableHandler(panelType);
-    return {
-      maximizedPanelId: maximizedPanelId,
-      maximizedPanelEmbeddableHandler
-    };
-  } else {
-    return {
-      panelCount: Object.keys(getPanels(dashboardState)).length
-    };
-  }
+  return {
+    maximizedPanelId,
+    panelCount: Object.keys(getPanels(dashboardState)).length,
+  };
 };
 
 export const DashboardViewportContainer = connect(
