@@ -8,41 +8,6 @@ exports[`KuiContextMenu is rendered 1`] = `
 />
 `;
 
-exports[`KuiContextMenu props isVisible causes the first panel to be shown when it becomes true 1`] = `
-<div
-  class="kuiContextMenu"
-  style="height: 0px;"
->
-  <div
-    class="kuiContextMenuPanel kuiContextMenu__panel"
-    tabindex="0"
-  >
-    <button
-      class="kuiContextMenuPanelTitle"
-      data-test-subj="contextMenuPanelTitleButton"
-    >
-      <span
-        class="kuiContextMenu__itemLayout"
-      >
-        <span
-          class="kuiContextMenu__icon kuiIcon fa-angle-left"
-        />
-        <span
-          class="kuiContextMenu__text"
-        >
-          2
-        </span>
-      </span>
-    </button>
-    <div>
-      <div>
-        2
-      </div>
-    </div>
-  </div>
-</div>
-`;
-
 exports[`KuiContextMenu props panels and initialPanelId allows you to click the title button to go back to the previous panel 1`] = `
 <div
   class="kuiContextMenu"

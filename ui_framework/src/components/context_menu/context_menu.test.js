@@ -60,7 +60,6 @@ describe('KuiContextMenu', () => {
           <KuiContextMenu
             panels={panels}
             initialPanelId={2}
-            isVisible
           />
         );
 
@@ -73,7 +72,6 @@ describe('KuiContextMenu', () => {
           <KuiContextMenu
             panels={panels}
             initialPanelId={2}
-            isVisible
           />
         );
 
@@ -82,28 +80,6 @@ describe('KuiContextMenu', () => {
 
         // Navigate to a different panel.
         component.find('[data-test-subj="contextMenuPanelTitleButton"]').simulate('click');
-
-        expect(takeMountedSnapshot(component))
-          .toMatchSnapshot();
-      });
-    });
-
-    describe('isVisible', () => {
-      it('causes the first panel to be shown when it becomes true', () => {
-        const component = mount(
-          <KuiContextMenu
-            panels={panels}
-            initialPanelId={2}
-            isVisible
-          />
-        );
-
-        // Navigate to a different panel.
-        component.find('[data-test-subj="contextMenuPanelTitleButton"]').simulate('click');
-
-        // Hide and then show the menu to reset the panel to the initial one.
-        component.setProps({ isVisible: false });
-        component.setProps({ isVisible: true });
 
         expect(takeMountedSnapshot(component))
           .toMatchSnapshot();
