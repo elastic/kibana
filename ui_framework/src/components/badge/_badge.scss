@@ -5,7 +5,7 @@
   text-decoration: none;
   border: solid 1px transparent;
   border-radius: $kuiSizeL;
-  padding: 0 $kuiSizeS;
+  padding: 0 $kuiSizeM;
   background-color: transparent;
   white-space: nowrap;
   vertical-align: middle;
@@ -32,17 +32,43 @@
 
 // Modifier naming and colors.
 $badgeTypes: (
-  default: $kuiColorLightShade,
-  primary: $kuiColorPrimary,
-  secondary: $kuiColorSecondary,
-  warning: $kuiColorWarning,
-  danger: $kuiColorDanger,
-  accent: $kuiColorAccent
+  default: (
+    textColor: darken($kuiColorLightShade, 60%),
+    backgroundColor: transparentize($kuiColorLightShade, 0.6)
+  ),
+  primary: (
+    textColor: darken($kuiColorPrimary, 10%),
+    backgroundColor: transparentize($kuiColorPrimary, 0.9)
+  ),
+  secondary: (
+    textColor: darken($kuiColorSecondary, 10%),
+    backgroundColor: transparentize($kuiColorSecondary, 0.9)
+  ),
+  warning: (
+    textColor: darken($kuiColorWarning, 20%),
+    backgroundColor: transparentize($kuiColorWarning, 0.85)
+  ),
+  danger: (
+    textColor: $kuiColorDanger,
+    backgroundColor: transparentize($kuiColorDanger, 0.9)
+  ),
+  accent: (
+    textColor: darken($kuiColorAccent, 5%),
+    backgroundColor: transparentize($kuiColorAccent, 0.9)
+  ),
 );
 
 @each $name, $color in $badgeTypes {
+  $textColor: map-get($color, textColor);
+  $backgroundColor: map-get($color, backgroundColor);
+
   .kuiBadge--#{$name} {
-    border-color: $color;
-    background-color: transparentize($color, .9);
+    color: $textColor;
+    background-color: $backgroundColor;
+    border-color: transparentize($textColor, 0.8);
+
+    svg {
+      fill: $textColor;
+    }
   }
 }

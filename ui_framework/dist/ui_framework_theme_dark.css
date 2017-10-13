@@ -241,7 +241,7 @@ table {
   text-decoration: none;
   border: solid 1px transparent;
   border-radius: 24px;
-  padding: 0 8px;
+  padding: 0 12px;
   background-color: transparent;
   white-space: nowrap;
   vertical-align: middle; }
@@ -267,28 +267,46 @@ table {
       margin-right: 0; }
 
 .kuiBadge--default {
-  border-color: #333;
-  background-color: rgba(51, 51, 51, 0.1); }
+  color: black;
+  background-color: rgba(51, 51, 51, 0.4);
+  border-color: rgba(0, 0, 0, 0.2); }
+  .kuiBadge--default svg {
+    fill: black; }
 
 .kuiBadge--primary {
-  border-color: #4da1c0;
-  background-color: rgba(77, 161, 192, 0.1); }
+  color: #3985a1;
+  background-color: rgba(77, 161, 192, 0.1);
+  border-color: rgba(57, 133, 161, 0.2); }
+  .kuiBadge--primary svg {
+    fill: #3985a1; }
 
 .kuiBadge--secondary {
-  border-color: #00A69B;
-  background-color: rgba(0, 166, 155, 0.1); }
+  color: #00736b;
+  background-color: rgba(0, 166, 155, 0.1);
+  border-color: rgba(0, 115, 107, 0.2); }
+  .kuiBadge--secondary svg {
+    fill: #00736b; }
 
 .kuiBadge--warning {
-  border-color: #E5830E;
-  background-color: rgba(229, 131, 14, 0.1); }
+  color: #854c08;
+  background-color: rgba(229, 131, 14, 0.15);
+  border-color: rgba(133, 76, 8, 0.2); }
+  .kuiBadge--warning svg {
+    fill: #854c08; }
 
 .kuiBadge--danger {
-  border-color: #bf4d4d;
-  background-color: rgba(191, 77, 77, 0.1); }
+  color: #bf4d4d;
+  background-color: rgba(191, 77, 77, 0.1);
+  border-color: rgba(191, 77, 77, 0.2); }
+  .kuiBadge--danger svg {
+    fill: #bf4d4d; }
 
 .kuiBadge--accent {
-  border-color: #DD0A73;
-  background-color: rgba(221, 10, 115, 0.1); }
+  color: #c50966;
+  background-color: rgba(221, 10, 115, 0.1);
+  border-color: rgba(197, 9, 102, 0.2); }
+  .kuiBadge--accent svg {
+    fill: #c50966; }
 
 .kuiBottomBar {
   background: #1a1a1a;
