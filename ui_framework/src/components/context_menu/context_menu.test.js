@@ -70,7 +70,7 @@ describe('KuiContextMenu', () => {
     });
 
     describe('idToPreviousPanelIdMap', () => {
-      it('allows you to click the title button to go back to the previous panel', () => {
+      it('allows you to click the title button to go back to the previous panel', done => {
         const component = mount(
           <KuiContextMenu
             panels={panels}
@@ -85,8 +85,11 @@ describe('KuiContextMenu', () => {
         // Navigate to a different panel.
         component.find('[data-test-subj="contextMenuPanelTitleButton"]').simulate('click');
 
-        expect(takeMountedSnapshot(component))
-          .toMatchSnapshot();
+        setTimeout(() => {
+          expect(takeMountedSnapshot(component))
+            .toMatchSnapshot();
+          done();
+        });
       });
     });
 
