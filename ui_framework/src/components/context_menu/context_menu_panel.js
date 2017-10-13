@@ -97,8 +97,12 @@ export class KuiContextMenuPanel extends Component {
         case cascadingMenuKeyCodes.TAB:
           // We need to sync up with the user if s/he is tabbing through the items.
           const focusedItemIndex = this.menuItems.indexOf(document.activeElement);
+
           this.setState({
-            focusedItemIndex: focusedItemIndex !== -1 ? focusedItemIndex : undefined,
+            focusedItemIndex:
+              (focusedItemIndex >= 0 && focusedItemIndex < this.menuItems.length)
+              ? focusedItemIndex
+              : undefined,
           });
           break;
 
@@ -165,6 +169,11 @@ export class KuiContextMenuPanel extends Component {
     // If an item is focused, focus it.
     if (this.state.focusedItemIndex !== undefined) {
       this.menuItems[this.state.focusedItemIndex].focus();
+      return;
+    }
+
+    // If we've already focused on something inside the panel, everything's fine.
+    if (this.panel.contains(document.activeElement)) {
       return;
     }
 
