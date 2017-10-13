@@ -23,7 +23,9 @@ exports[`renders DashboardGrid 1`] = `
   }
   onLayoutChange={[Function]}
 >
-  <div>
+  <div
+    className=""
+  >
     <Connect(DashboardPanel)
       embeddableHandler={
         Object {
@@ -38,7 +40,9 @@ exports[`renders DashboardGrid 1`] = `
       panelId="1"
     />
   </div>
-  <div>
+  <div
+    className=""
+  >
     <Connect(DashboardPanel)
       embeddableHandler={
         Object {

@@ -32,11 +32,11 @@
 }
 
 /**
- * 1. For expanded panel mode, we want to hide the grid, but keep it rendered so it doesn't cause all visualizations
- * to re-render once the panel is minimized, which is a time consuming operation.
+ * 1. Need to override the react grid layout height when a single panel is expanded. Important is required because
+ * otherwise the heigh is set inline.
  */
-.layout-hidden {
-  display: none; /* 1. */
+.layout-maximized-panel {
+  height: 100% !important; /* 1. */
 }
 
 .exitFullScreenMode {
@@ -50,7 +50,6 @@
   background: none;
   z-index: 5;
 }
-
 
 .exitFullScreenMode:hover,
 .exitFullScreenMode:focus {
@@ -140,6 +139,19 @@
   border: 2px dashed transparent;
 }
 
+/**
+ * 1. For expanded panel mode, we want to hide the grid, but keep it rendered so it doesn't cause all visualizations
+ * to re-render once the panel is minimized, which is a time consuming operation.
+ */
+.panel--hidden-mode {
+  display: none; /* 1. */
+}
+
+.panel--expanded-mode {
+  height: 100%;
+  width: 100%;
+}
+
 .panel--edit-mode {
   border-color: @kibanaGray4;
   .visualize-show-spy {
@@ -166,6 +178,22 @@ dashboard-viewport-provider {
   [data-reactroot] {
     flex: 1;
   }
+}
+
+/**
+ * When a single panel is expanded, all the other panels are hidden in the grid.
+ */
+.grid-item--hidden {
+  display: none;
+}
+
+/**
+ * We need to mark this as important because react grid layout sets the width and height of the panels inline.
+ */
+.grid-item--expanded {
+  height: 100% !important; /* 1. */
+  width: 100% !important; /* 1. */
+  transform: none !important; /* 1. */
 }
 
 /**

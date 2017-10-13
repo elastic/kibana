@@ -13,15 +13,15 @@ import sizeMe from 'react-sizeme';
 const config = { monitorWidth: true };
 let lastValidGridSize = 0;
 
-function ResponsiveGrid({ size, isViewMode, layout, onLayoutChange, children, hidden }) {
+function ResponsiveGrid({ size, isViewMode, layout, onLayoutChange, children, maximizedPanelId }) {
   // This is to prevent a bug where view mode changes when the panel is expanded.  View mode changes will trigger
   // the grid to re-render, but when a panel is expanded, the size will be 0. Minimizing the panel won't cause the
   // grid to re-render so it'll show a grid with a width of 0.
   lastValidGridSize = size.width > 0 ? size.width : lastValidGridSize;
   const classes = classNames({
-    'layout-hidden': hidden,
-    'layout-view': !hidden && isViewMode,
-    'layout-edit': !hidden && !isViewMode,
+    'layout-view': isViewMode,
+    'layout-edit': !isViewMode,
+    'layout-maximized-panel': maximizedPanelId !== undefined,
   });
 
   // We can't take advantage of isDraggable or isResizable due to performance concerns:
@@ -106,6 +106,7 @@ export class DashboardGrid extends React.Component {
       panels,
       getEmbeddableHandler,
       getContainerApi,
+      maximizedPanelId
     } = this.props;
 
     // Part of our unofficial API - need to render in a consistent order for plugins.
@@ -119,8 +120,15 @@ export class DashboardGrid extends React.Component {
     });
 
     return _.map(panelsInOrder, panel => {
+      const expandPanel = maximizedPanelId !== undefined && maximizedPanelId === panel.panelIndex;
+      const hidePanel = maximizedPanelId !== undefined && maximizedPanelId !== panel.panelIndex;
+      const classes = classNames({
+        'grid-item--expanded': expandPanel,
+        'grid-item--hidden': hidePanel,
+      });
       return (
         <div
+          className={classes}
           key={panel.panelIndex.toString()}
           ref={reactGridItem => { this.gridItems[panel.panelIndex] = reactGridItem; }}
         >
@@ -137,14 +145,14 @@ export class DashboardGrid extends React.Component {
   }
 
   render() {
-    const { dashboardViewMode } = this.props;
+    const { dashboardViewMode, maximizedPanelId } = this.props;
     const isViewMode = dashboardViewMode === DashboardViewMode.VIEW;
     return (
       <ResponsiveSizedGrid
         isViewMode={isViewMode}
         layout={this.buildLayoutFromPanels()}
         onLayoutChange={this.onLayoutChange}
-        hidden={this.props.hidden}
+        maximizedPanelId={maximizedPanelId}
       >
         {this.renderDOM()}
       </ResponsiveSizedGrid>
@@ -158,5 +166,5 @@ DashboardGrid.propTypes = {
   getEmbeddableHandler: PropTypes.func.isRequired,
   dashboardViewMode: PropTypes.oneOf([DashboardViewMode.EDIT, DashboardViewMode.VIEW]).isRequired,
   onPanelUpdated: PropTypes.func.isRequired,
-  hidden: PropTypes.bool
+  maximizedPanelId: PropTypes.string,
 };
