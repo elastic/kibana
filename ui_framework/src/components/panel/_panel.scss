@@ -2,7 +2,7 @@
   @include kuiBottomShadowSmall;
 
   background-color: $kuiColorEmptyShade;
-  border: $kuiBorderThin;
+  border: $kuiBorderThinner;
   border-radius: $kuiBorderRadius;
   flex-grow: 1;
 
@@ -19,7 +19,7 @@
   }
 
   &.kuiPanel--shadow {
-    @include kuiBottomShadow;
+    box-shadow: $kuiShadowMedium, $kuiBottomShadow;
   }
 
   &.kuiPanel--flexGrowZero {

@@ -2464,10 +2464,10 @@ table {
             transform: rotate(359deg); } }
 
 .kuiModal {
-  box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1);
   background-color: #FFF;
   border: 1px solid #D9D9D9;
   border-radius: 4px;
+  box-shadow: 0 1px 8px -1px rgba(0, 0, 0, 0.15), 0 16px 16px -8px rgba(0, 0, 0, 0.1);
   z-index: 8000;
   padding: 32px;
   min-width: 50%;
@@ -2728,7 +2728,7 @@ table {
 .kuiPanel {
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
   background-color: #FFF;
-  border: 1px solid #D9D9D9;
+  border: 1px solid #E4E4E4;
   border-radius: 4px;
   -webkit-box-flex: 1;
   -webkit-flex-grow: 1;
@@ -2741,7 +2741,7 @@ table {
   .kuiPanel.kuiPanel--paddingLarge {
     padding: 24px; }
   .kuiPanel.kuiPanel--shadow {
-    box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1); }
+    box-shadow: 0 1px 8px -1px rgba(0, 0, 0, 0.15), 0 16px 16px -8px rgba(0, 0, 0, 0.1); }
   .kuiPanel.kuiPanel--flexGrowZero {
     -webkit-box-flex: 0;
     -webkit-flex-grow: 0;
@@ -3662,7 +3662,7 @@ table {
     /* 1 */ } }
 
 .kuiToast {
-  box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 8px -1px rgba(0, 0, 0, 0.15), 0 16px 16px -8px rgba(0, 0, 0, 0.1);
   position: relative;
   padding: 16px;
   background-color: #FFF;

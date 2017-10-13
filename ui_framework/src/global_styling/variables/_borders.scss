@@ -4,6 +4,8 @@ $kuiBorderWidthThin: 1px;
 $kuiBorderWidthThick: 2px;
 
 $kuiBorderColor: $kuiColorLightShade;
+$kuiBorderColorLight: $kuiColorLightestShade;
 $kuiBorderRadius: 4px;
 $kuiBorderThick: $kuiBorderWidthThick solid $kuiBorderColor;
 $kuiBorderThin: $kuiBorderWidthThin solid $kuiBorderColor;
+$kuiBorderThinner: $kuiBorderWidthThin solid $kuiColorLighterShade;

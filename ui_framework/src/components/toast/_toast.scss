@@ -1,6 +1,5 @@
 .kuiToast {
-  @include kuiBottomShadow;
-
+  box-shadow: $kuiShadowMedium, $kuiBottomShadow;
   position: relative;
   padding: $kuiSize;
   background-color: $kuiColorEmptyShade;
