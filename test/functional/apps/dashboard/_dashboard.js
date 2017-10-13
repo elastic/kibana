@@ -17,6 +17,13 @@ export default function ({ getService, getPageObjects }) {
   describe('dashboard tab', function describeIndexTests() {
     before(async function () {
       return PageObjects.dashboard.initTests();
+
+      // This flip between apps fixes the url so state is preserved when switching apps in test mode.
+      // Without this flip the url in test mode looks something like
+      // "http://localhost:5620/app/kibana?_t=1486069030837#/dashboard?_g=...."
+      // after the initial flip, the url will look like this: "http://localhost:5620/app/kibana#/dashboard?_g=...."
+      await PageObjects.header.clickVisualize();
+      await PageObjects.header.clickDashboard();
     });
 
     after(async function () {
@@ -27,18 +34,26 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
-    it('should be able to add visualizations to dashboard', async function addVisualizations() {
-      // This flip between apps fixes the url so state is preserved when switching apps in test mode.
-      // Without this flip the url in test mode looks something like
-      // "http://localhost:5620/app/kibana?_t=1486069030837#/dashboard?_g=...."
-      // after the initial flip, the url will look like this: "http://localhost:5620/app/kibana#/dashboard?_g=...."
-      await PageObjects.header.clickVisualize();
-      await PageObjects.header.clickDashboard();
-
+    // Note, this may change, see https://github.com/elastic/kibana/issues/13676 - uncertain which the right UX
+    // is here.
+    it('should not show the add a filter button on a new dashboard with no visualizations', async function () {
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
+      const exists = await PageObjects.dashboard.addFilterExists();
+      expect(exists).to.be(false);
+    });
 
-      log.debug('done adding visualizations');
+    it('should show the add a filter button on a new dashboard with one visualization', async function () {
+      await PageObjects.dashboard.addVisualization(PageObjects.dashboard.getTestVisualizationNames()[0]);
+      const exists = await PageObjects.dashboard.addFilterExists();
+      expect(exists).to.be(true);
+    });
+
+    it('should be able to add visualizations to dashboard', async function addVisualizations() {
+      const visualizationNames = PageObjects.dashboard.getTestVisualizationNames();
+      await PageObjects.dashboard.addVisualizations(visualizationNames.splice(1));
+
+      const panelCount = await PageObjects.dashboard.getPanelCount();
+      expect(panelCount).to.be(visualizationNames.length);
     });
 
     it('set the timepicker time to that which contains our test data', async function setTimepicker() {
@@ -57,16 +72,9 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('should have all the expected visualizations', function checkVisualizations() {
-      return retry.tryForTime(10000, function () {
-        return PageObjects.dashboard.getPanelTitles()
-        .then(function (panelTitles) {
-          log.info('visualization titles = ' + panelTitles);
-          expect(panelTitles).to.eql(PageObjects.dashboard.getTestVisualizationNames());
-        });
-      })
-      .then(function () {
-      });
+    it('panel titles should match visualizations', async function checkVisualizations() {
+      const panelTitles = await PageObjects.dashboard.getPanelTitles();
+      expect(panelTitles).to.eql(PageObjects.dashboard.getTestVisualizationNames());
     });
 
     describe('filters', async function () {
