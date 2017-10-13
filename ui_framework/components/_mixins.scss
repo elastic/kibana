@@ -48,6 +48,10 @@
   &:hover {
     opacity: 1;
   }
+
+  @include darkTheme {
+    color: $globalTextColor--darkTheme !important; /* 1 */
+  }
 }
 
 /**
