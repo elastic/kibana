@@ -28,7 +28,7 @@ export class SearchEmbeddableHandler extends EmbeddableHandler {
   render(domNode, panel, container) {
     const searchScope = this.$rootScope.$new();
     searchScope.editPath = this.getEditPath(panel.id);
-    this.searchLoader.get(panel.id)
+    return this.searchLoader.get(panel.id)
       .then(savedObject => {
         searchScope.savedObj = savedObject;
         searchScope.panel = panel;
