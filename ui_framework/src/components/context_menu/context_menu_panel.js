@@ -212,10 +212,6 @@ export class KuiContextMenuPanel extends Component {
     this.updateFocus();
   }
 
-  componentWillUnmount() {
-    this.panel.removeEventListener('animationend', this.onTransitionComplete);
-  }
-
   menuItemRef = (index, node) => {
     // There's a weird bug where if you navigate to a panel without items, then this callback
     // is still invoked, so we have to do a truthiness check.
@@ -229,8 +225,6 @@ export class KuiContextMenuPanel extends Component {
     this.panel = node;
 
     if (this.panel) {
-      this.panel.addEventListener('animationend', this.onTransitionComplete);
-
       if (this.props.onHeightChange) {
         this.props.onHeightChange(this.panel.clientHeight);
       }
@@ -307,6 +301,7 @@ export class KuiContextMenuPanel extends Component {
         className={classes}
         onKeyDown={this.onKeyDown}
         tabIndex="0"
+        onAnimationEnd={this.onTransitionComplete}
         {...rest}
       >
         {panelTitle}
