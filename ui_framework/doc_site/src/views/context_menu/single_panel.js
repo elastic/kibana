@@ -18,21 +18,21 @@ export default class extends Component {
     };
   }
 
-  onButtonClick() {
+  onButtonClick = () => {
     this.setState({
       isPopoverOpen: !this.state.isPopoverOpen,
     });
-  }
+  };
 
-  closePopover() {
+  closePopover = () => {
     this.setState({
       isPopoverOpen: false,
     });
-  }
+  };
 
   render() {
     const button = (
-      <KuiButton buttonType="basic" onClick={this.onButtonClick.bind(this)}>
+      <KuiButton buttonType="basic" onClick={this.onButtonClick}>
         Click me to load a context menu
       </KuiButton>
     );
@@ -41,7 +41,7 @@ export default class extends Component {
       <KuiContextMenuItem
         key="A"
         icon={<span className="kuiIcon fa-user" />}
-        onClick={() => { window.alert('A'); }}
+        onClick={() => { this.closePopover(); window.alert('A'); }}
       >
         Option A
       </KuiContextMenuItem>
@@ -49,7 +49,7 @@ export default class extends Component {
       <KuiContextMenuItem
         key="B"
         icon={<span className="kuiIcon fa-user" />}
-        onClick={() => { window.alert('B'); }}
+        onClick={() => { this.closePopover(); window.alert('B'); }}
       >
         Option B
       </KuiContextMenuItem>
@@ -57,7 +57,7 @@ export default class extends Component {
       <KuiContextMenuItem
         key="C"
         icon={<span className="kuiIcon fa-user" />}
-        onClick={() => { window.alert('C'); }}
+        onClick={() => { this.closePopover(); window.alert('C'); }}
       >
         Option C
       </KuiContextMenuItem>
@@ -67,7 +67,7 @@ export default class extends Component {
       <KuiPopover
         button={button}
         isOpen={this.state.isPopoverOpen}
-        closePopover={this.closePopover.bind(this)}
+        closePopover={this.closePopover}
         panelPaddingSize="none"
         withTitle
         anchorPosition="left"
