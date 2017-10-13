@@ -31,6 +31,7 @@ export function FindProvider({ getService }) {
         return await retry.try(async () => {
           const element = await getElementFunction(remoteWithTimeout);
           // Calling any method forces a staleness check
+          log.debug(`Checking if element is stale...`);
           element.isEnabled();
           return element;
         });
@@ -97,6 +98,7 @@ export function FindProvider({ getService }) {
     async byPartialLinkText(partialLinkText, timeout = defaultFindTimeout) {
       log.debug(`find.byPartialLinkText(${partialLinkText})`);
       return await this._ensureElementWithTimeout(timeout, async remote => {
+        log.debug(`Finding byPartialLinkText(${partialLinkText})`);
         return await remote.findByPartialLinkText(partialLinkText);
       });
     }
