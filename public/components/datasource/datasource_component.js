@@ -61,9 +61,6 @@ export const DatasourceComponent = (props) => {
   return (
     <div className="canvas__datasource">
       <div>
-        <h5>
-          <Button bsSize="xsmall" onClick={() => setSelecting(!selecting)}><i className="fa fa-database"/> Change Datasource</Button>
-        </h5>
         <FormGroup>
           {stateDatasource.render({ args: stateArgs, updateArgs, datasourceDef })}
         </FormGroup>
@@ -72,6 +69,9 @@ export const DatasourceComponent = (props) => {
         <Button bsStyle="success" onClick={save}> Apply</Button>
         <Button bsStyle="primary" onClick={() => setPreviewing(true)}> Preview</Button>
         <Button onClick={close}> Cancel</Button>
+        <Button onClick={() => setSelecting(!selecting)}>
+          <i className="fa fa-database"/> Change Datasource
+        </Button>
       </ButtonToolbar>
     </div>
   );
