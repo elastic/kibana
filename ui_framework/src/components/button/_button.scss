@@ -67,39 +67,78 @@
 
 // Modifier naming and colors.
 $buttonTypes: (
-  primary: $kuiColorPrimary,
-  secondary: $kuiColorSecondary,
-  warning: $kuiColorWarning,
-  danger: $kuiColorDanger,
-  ghost: $kuiColorGhost, // Ghost is special, and does not care about theming.
+  primary: (
+    dark: $kuiColorPrimary,
+    light: lighten($kuiColorPrimary, 10%)
+  ),
+  secondary: (
+    dark: darken($kuiColorSecondary, 5%),
+    light: lighten($kuiColorSecondary, 5%)
+  ),
+  warning: (
+    dark: darken($kuiColorWarning, 7%),
+    light: lighten($kuiColorWarning, 7%)
+  ),
+  danger: (
+    dark: $kuiColorDanger,
+    light: lighten($kuiColorDanger, 7%)
+  ),
+  ghost: (
+    dark: $kuiColorGhost, // Ghost is special, and does not care about theming.
+    light: $kuiColorGhost,
+  )
 );
 
 // Create button modifiders based upon the map.
 @each $name, $color in $buttonTypes {
+  $colorDark: map-get($color, dark);
+  $colorLight: map-get($color, light);
+
   .kuiButton--#{$name} {
-    color: $color;
-    border-color: $color;
+    color: $colorDark;
+    border-color: transparentize($colorDark, 0.7);
+
+    &:hover, &:focus {
+      background-color: transparentize($colorDark, 0.9);
+      border-color: transparentize($colorDark, 0.5);
+
+      @if ($name == 'disabled') {
+        cursor: not-allowed;
+      }
+    }
 
     .kuiButton__icon {
-      fill: $color;
+      fill: $colorDark;
     }
 
     &.kuiButton--fill {
-      background-color: $color;
-      border-color: $color;
-
       @if ($name == 'ghost') {
         color: #000;
-      } @elseif (lightness($kuiTextColor) > 50) {
-        color: $kuiTextColor;
+        background-color: $colorDark;
+        border-color: $colorDark;
       } @else {
-        color: #FFF;
+        @if (lightness($kuiTextColor) > 50) {
+          color: $kuiTextColor;
+        } @else {
+          color: #FFF;
+        }
+
+        box-shadow: $kuiSmallShadow;
+        background: linear-gradient(0deg, $colorDark, $colorLight);
+        border-color: $colorDark;
+
+        &:hover {
+          box-shadow: $kuiSmallShadowHover;
+        }
+
+        &:active {
+          box-shadow: $kuiSmallShadowActive;
+        }
       }
 
-
       &:hover, &:focus {
-        background-color: darken($color, 5%);
-        border-color: darken($color, 5%);
+        background-color: darken($colorDark, 5%);
+        border-color: darken($colorDark, 5%);
       }
 
       .kuiButton__icon {
@@ -110,14 +149,6 @@ $buttonTypes: (
         } @else {
           fill: #FFF;
         }
-      }
-    }
-
-    &:hover, &:focus {
-      background-color: transparentize($color, .9);
-
-      @if ($name == 'disabled') {
-        cursor: not-allowed;
       }
     }
   }

@@ -405,9 +405,9 @@ table {
       margin-right: 8px;
       /* 1 */ }
   .kuiButton:hover {
-    box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.1); }
+    box-shadow: 0 4px 2px -1px rgba(0, 0, 0, 0.1); }
   .kuiButton:active {
-    box-shadow: 0 1px 1px 0px rgba(0, 0, 0, 0.2); }
+    box-shadow: 0 1px 2px -1px rgba(0, 0, 0, 0.15); }
   .kuiButton:hover, .kuiButton:focus {
     background-color: rgba(77, 161, 192, 0.1); }
   .kuiButton:disabled {
@@ -431,88 +431,113 @@ table {
 
 .kuiButton--primary {
   color: #4da1c0;
-  border-color: #4da1c0; }
+  border-color: rgba(77, 161, 192, 0.3); }
+  .kuiButton--primary:hover, .kuiButton--primary:focus {
+    background-color: rgba(77, 161, 192, 0.1);
+    border-color: rgba(77, 161, 192, 0.5); }
   .kuiButton--primary .kuiButton__icon {
     fill: #4da1c0; }
   .kuiButton--primary.kuiButton--fill {
-    background-color: #4da1c0;
-    border-color: #4da1c0;
-    color: #DDD; }
+    color: #DDD;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(0deg, #4da1c0, #73b5cd);
+    border-color: #4da1c0; }
+    .kuiButton--primary.kuiButton--fill:hover {
+      box-shadow: 0 4px 2px -1px rgba(0, 0, 0, 0.15); }
+    .kuiButton--primary.kuiButton--fill:active {
+      box-shadow: 0 1px 2px -1px rgba(0, 0, 0, 0.3); }
     .kuiButton--primary.kuiButton--fill:hover, .kuiButton--primary.kuiButton--fill:focus {
       background-color: #4095b4;
       border-color: #4095b4; }
     .kuiButton--primary.kuiButton--fill .kuiButton__icon {
       fill: #DDD; }
-  .kuiButton--primary:hover, .kuiButton--primary:focus {
-    background-color: rgba(77, 161, 192, 0.1); }
 
 .kuiButton--secondary {
-  color: #00A69B;
-  border-color: #00A69B; }
+  color: #008d83;
+  border-color: rgba(0, 141, 131, 0.3); }
+  .kuiButton--secondary:hover, .kuiButton--secondary:focus {
+    background-color: rgba(0, 141, 131, 0.1);
+    border-color: rgba(0, 141, 131, 0.5); }
   .kuiButton--secondary .kuiButton__icon {
-    fill: #00A69B; }
+    fill: #008d83; }
   .kuiButton--secondary.kuiButton--fill {
-    background-color: #00A69B;
-    border-color: #00A69B;
-    color: #DDD; }
+    color: #DDD;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(0deg, #008d83, #00c0b3);
+    border-color: #008d83; }
+    .kuiButton--secondary.kuiButton--fill:hover {
+      box-shadow: 0 4px 2px -1px rgba(0, 0, 0, 0.15); }
+    .kuiButton--secondary.kuiButton--fill:active {
+      box-shadow: 0 1px 2px -1px rgba(0, 0, 0, 0.3); }
     .kuiButton--secondary.kuiButton--fill:hover, .kuiButton--secondary.kuiButton--fill:focus {
-      background-color: #008d83;
-      border-color: #008d83; }
+      background-color: #00736b;
+      border-color: #00736b; }
     .kuiButton--secondary.kuiButton--fill .kuiButton__icon {
       fill: #DDD; }
-  .kuiButton--secondary:hover, .kuiButton--secondary:focus {
-    background-color: rgba(0, 166, 155, 0.1); }
 
 .kuiButton--warning {
-  color: #E5830E;
-  border-color: #E5830E; }
+  color: #c3700c;
+  border-color: rgba(195, 112, 12, 0.3); }
+  .kuiButton--warning:hover, .kuiButton--warning:focus {
+    background-color: rgba(195, 112, 12, 0.1);
+    border-color: rgba(195, 112, 12, 0.5); }
   .kuiButton--warning .kuiButton__icon {
-    fill: #E5830E; }
+    fill: #c3700c; }
   .kuiButton--warning.kuiButton--fill {
-    background-color: #E5830E;
-    border-color: #E5830E;
-    color: #DDD; }
+    color: #DDD;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(0deg, #c3700c, #f29425);
+    border-color: #c3700c; }
+    .kuiButton--warning.kuiButton--fill:hover {
+      box-shadow: 0 4px 2px -1px rgba(0, 0, 0, 0.15); }
+    .kuiButton--warning.kuiButton--fill:active {
+      box-shadow: 0 1px 2px -1px rgba(0, 0, 0, 0.3); }
     .kuiButton--warning.kuiButton--fill:hover, .kuiButton--warning.kuiButton--fill:focus {
-      background-color: #cd750d;
-      border-color: #cd750d; }
+      background-color: #ab620a;
+      border-color: #ab620a; }
     .kuiButton--warning.kuiButton--fill .kuiButton__icon {
       fill: #DDD; }
-  .kuiButton--warning:hover, .kuiButton--warning:focus {
-    background-color: rgba(229, 131, 14, 0.1); }
 
 .kuiButton--danger {
   color: #bf4d4d;
-  border-color: #bf4d4d; }
+  border-color: rgba(191, 77, 77, 0.3); }
+  .kuiButton--danger:hover, .kuiButton--danger:focus {
+    background-color: rgba(191, 77, 77, 0.1);
+    border-color: rgba(191, 77, 77, 0.5); }
   .kuiButton--danger .kuiButton__icon {
     fill: #bf4d4d; }
   .kuiButton--danger.kuiButton--fill {
-    background-color: #bf4d4d;
-    border-color: #bf4d4d;
-    color: #DDD; }
+    color: #DDD;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(0deg, #bf4d4d, #c86767);
+    border-color: #bf4d4d; }
+    .kuiButton--danger.kuiButton--fill:hover {
+      box-shadow: 0 4px 2px -1px rgba(0, 0, 0, 0.15); }
+    .kuiButton--danger.kuiButton--fill:active {
+      box-shadow: 0 1px 2px -1px rgba(0, 0, 0, 0.3); }
     .kuiButton--danger.kuiButton--fill:hover, .kuiButton--danger.kuiButton--fill:focus {
       background-color: #b24040;
       border-color: #b24040; }
     .kuiButton--danger.kuiButton--fill .kuiButton__icon {
       fill: #DDD; }
-  .kuiButton--danger:hover, .kuiButton--danger:focus {
-    background-color: rgba(191, 77, 77, 0.1); }
 
 .kuiButton--ghost {
   color: #FFF;
-  border-color: #FFF; }
+  border-color: rgba(255, 255, 255, 0.3); }
+  .kuiButton--ghost:hover, .kuiButton--ghost:focus {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.5); }
   .kuiButton--ghost .kuiButton__icon {
     fill: #FFF; }
   .kuiButton--ghost.kuiButton--fill {
+    color: #000;
     background-color: #FFF;
-    border-color: #FFF;
-    color: #000; }
+    border-color: #FFF; }
     .kuiButton--ghost.kuiButton--fill:hover, .kuiButton--ghost.kuiButton--fill:focus {
       background-color: #f2f2f2;
       border-color: #f2f2f2; }
     .kuiButton--ghost.kuiButton--fill .kuiButton__icon {
       fill: #000; }
-  .kuiButton--ghost:hover, .kuiButton--ghost:focus {
-    background-color: rgba(255, 255, 255, 0.1); }
 
 .kuiButtonEmpty {
   display: inline-block;
