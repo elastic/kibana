@@ -25,11 +25,11 @@
 
 	// Progress bars come in different colors.
 	$kuiProgressColors: (
-		primary: $kuiColorPrimary,
-		secondary: $kuiColorSecondary,
-		warning: $kuiColorWarning,
-		danger: $kuiColorDanger,
-		accent: $kuiColorAccent,
+		primary: transparentize($kuiColorPrimary, 0.4),
+		secondary: transparentize($kuiColorSecondary, 0.25),
+		warning: transparentize($kuiColorWarning, 0.25),
+		danger: lighten($kuiColorDanger, 10%),
+		accent: transparentize($kuiColorAccent, 0.5),
 		subdued: $kuiColorMediumShade,
 	);
 
