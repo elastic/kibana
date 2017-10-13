@@ -2047,7 +2047,7 @@ table {
     position: absolute;
     content: "";
     width: 1px;
-    top: 16px;
+    top: 0;
     bottom: 0;
     background: #D9D9D9;
     left: 0; }
