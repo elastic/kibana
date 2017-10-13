@@ -1,5 +1,6 @@
 // TODO Fix build system so we can switch these to `import`s
 const yargs = require('yargs');
+import { k$, map } from 'kbn-observable';
 
 import * as args from './args';
 import { version } from './version';
@@ -33,9 +34,9 @@ const run = (argv: { [key: string]: any }) => {
     process.exit(reason === undefined ? 0 : 1);
   };
 
-  const rawConfig$ = rawConfigService
-    .getConfig$()
-    .map(rawConfig => overrideConfigWithArgv(rawConfig, argv));
+  const rawConfig$ = k$(rawConfigService.getConfig$())(
+    map(rawConfig => overrideConfigWithArgv(rawConfig, argv))
+  );
 
   const root = new Root(rawConfig$, env, onShutdown);
   root.start();

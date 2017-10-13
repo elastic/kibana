@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import { Observable } from 'kbn-observable';
 
 import { ElasticsearchService } from './ElasticsearchService';
 import { ElasticsearchRequestHelpers } from './ElasticsearchFacade';
@@ -7,6 +7,8 @@ import { Router } from '../http';
 import { ElasticsearchConfigs } from './ElasticsearchConfigs';
 import { LoggerFactory } from '../../logging';
 
+export { ElasticsearchClusterType } from './ElasticsearchConfig';
+export { Cluster } from './Cluster';
 export {
   ElasticsearchService,
   ElasticsearchRequestHelpers,

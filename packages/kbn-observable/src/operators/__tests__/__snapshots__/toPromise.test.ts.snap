@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`rejects if error received 1`] = `
+Array [
+  Array [
+    [Error: fail],
+  ],
+]
+`;

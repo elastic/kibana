@@ -1,14 +1,13 @@
-import { Observable } from 'rxjs';
 import * as mockSchema from '../../lib/schema';
 import { LoggingConfig } from '../LoggingConfig';
+
+const tickMs = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const mockStreamWrite = jest.fn();
 const mockStreamEndFinished = jest.fn();
 const mockStreamEnd = jest.fn(async (chunk, encoding, callback) => {
   // It's required to make sure `dispose` waits for `end` to complete.
-  await Observable.from([])
-    .delay(100)
-    .toPromise();
+  await tickMs(100);
   mockStreamEndFinished();
   callback();
 });

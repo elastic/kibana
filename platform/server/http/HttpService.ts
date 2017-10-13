@@ -1,4 +1,4 @@
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, k$, first, toPromise } from 'kbn-observable';
 
 import { Env } from '../../config';
 import { HttpServer } from './HttpServer';
@@ -34,7 +34,7 @@ export class HttpService implements CoreService {
       }
     });
 
-    const config = await this.config$.first().toPromise();
+    const config = await k$(this.config$)(first(), toPromise());
     await this.httpServer.start(config);
   }
 

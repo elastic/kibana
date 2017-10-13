@@ -1,4 +1,3 @@
-import { Observable } from 'rxjs';
 import * as mockSchema from '../../../lib/schema';
 
 const mockCreateLayoutConfigSchema = jest.fn();
@@ -12,6 +11,8 @@ jest.mock('fs', () => ({ createWriteStream: mockCreateWriteStream }));
 import { LogLevel } from '../../LogLevel';
 import { LogRecord } from '../../LogRecord';
 import { FileAppender } from '../file/FileAppender';
+
+const tickMs = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 beforeEach(() => {
   mockCreateLayoutConfigSchema.mockReset();
@@ -138,9 +139,7 @@ test('`dispose()` closes stream.', async () => {
   const mockStreamEndFinished = jest.fn();
   const mockStreamEnd = jest.fn(async (chunk, encoding, callback) => {
     // It's required to make sure `dispose` waits for `end` to complete.
-    await Observable.from([])
-      .delay(100)
-      .toPromise();
+    await tickMs(100);
     mockStreamEndFinished();
     callback();
   });

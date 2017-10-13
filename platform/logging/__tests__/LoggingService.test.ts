@@ -1,4 +1,4 @@
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'kbn-observable';
 import { MutableLoggerFactory } from '../LoggerFactory';
 import { LoggingConfig } from '../LoggingConfig';
 import { LoggingService } from '../LoggingService';
@@ -39,7 +39,7 @@ test('`upgrade()` updates logging factory config.', () => {
   const config = createConfig();
   const config$ = new BehaviorSubject<LoggingConfig>(config);
 
-  service.upgrade(config$);
+  service.upgrade(config$.asObservable());
 
   expect(updateConfigMock).toHaveBeenCalledTimes(1);
   expect(getLastMockCallArgs(updateConfigMock)[0]).toBe(config);
@@ -53,7 +53,7 @@ test('`upgrade()` updates logging factory config.', () => {
 test('`stop()` closes logger factory and stops config updates.', async () => {
   const config$ = new BehaviorSubject<LoggingConfig>(createConfig());
 
-  service.upgrade(config$);
+  service.upgrade(config$.asObservable());
   updateConfigMock.mockReset();
 
   await service.stop();

@@ -6,6 +6,7 @@ import { noop } from 'lodash';
 import { ClusterSchema } from './schema';
 import { pick, assertNever } from '../../lib/utils';
 
+// TODO This can't be specified like this
 export type ElasticsearchClusterType = 'data' | 'admin';
 
 export class ElasticsearchConfig {

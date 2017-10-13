@@ -1,4 +1,4 @@
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, k$, first, toPromise } from 'kbn-observable';
 
 import { ConfigService, ObjectToRawConfigAdapter } from '..';
 import { Env } from '../Env';
@@ -16,7 +16,7 @@ test('returns config at path as observable', async () => {
   const configService = new ConfigService(config$, defaultEnv, logger);
 
   const configs = configService.atPath('key', ExampleClassWithStringSchema);
-  const exampleConfig = await configs.first().toPromise();
+  const exampleConfig = await k$(configs)(first(), toPromise());
 
   expect(exampleConfig.value).toBe('foo');
 });
@@ -32,7 +32,7 @@ test('throws if config at path does not match schema', async () => {
   const configs = configService.atPath('key', ExampleClassWithStringSchema);
 
   try {
-    await configs.first().toPromise();
+    await k$(configs)(first(), toPromise());
   } catch (e) {
     expect(e.message).toMatchSnapshot();
   }
@@ -48,7 +48,7 @@ test("returns undefined if fetching optional config at a path that doesn't exist
     'unique-name',
     ExampleClassWithStringSchema
   );
-  const exampleConfig = await configs.first().toPromise();
+  const exampleConfig = await k$(configs)(first(), toPromise());
 
   expect(exampleConfig).toBeUndefined();
 });
@@ -63,7 +63,7 @@ test('returns observable config at optional path if it exists', async () => {
     'value',
     ExampleClassWithStringSchema
   );
-  const exampleConfig: any = await configs.first().toPromise();
+  const exampleConfig: any = await k$(configs)(first(), toPromise());
 
   expect(exampleConfig).toBeDefined();
   expect(exampleConfig.value).toBe('bar');
@@ -118,7 +118,7 @@ test("throws error if config class does not implement 'createSchema'", async () 
   const configs = configService.atPath('key', ExampleClass as any);
 
   try {
-    await configs.first().toPromise();
+    await k$(configs)(first(), toPromise());
   } catch (e) {
     expect(e).toMatchSnapshot();
   }

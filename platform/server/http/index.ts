@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import { Observable } from 'kbn-observable';
 
 import { Env } from '../../config';
 import { HttpService } from './HttpService';

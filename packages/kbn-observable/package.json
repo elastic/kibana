@@ -1,0 +1,16 @@
+{
+  "name": "kbn-observable",
+  "version": "0.0.1",
+  "main": "target/tsc/index.js",
+  "types": "./target/tsc-types/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "kbn-internal-native-observable": "file:../kbn-internal-native-observable",
+    "rxjs": "5.4.3"
+  },
+  "devDependencies": {
+    "typescript": "^2.5.3"
+  }
+}
