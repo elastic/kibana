@@ -6,37 +6,37 @@ import './scripted_field_editor';
 import './source_filters_table';
 import { KbnUrlProvider } from 'ui/url';
 import { IndicesEditSectionsProvider } from './edit_sections';
-import uiRoutes from 'ui/routes';
+// import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
-import template from './edit_index_pattern.html';
+// import template from './edit_index_pattern.html';
 
-uiRoutes
-.when('/management/kibana/indices/:indexPatternId', {
-  template,
-  resolve: {
-    indexPattern: function ($route, courier) {
-      return courier.indexPatterns
-        .get($route.current.params.indexPatternId)
-        .catch(courier.redirectWhenMissing('/management/kibana/index'));
-    }
-  }
-});
+// uiRoutes
+// .when('/management/kibana/indices/:indexPatternId', {
+//   template,
+//   resolve: {
+//     indexPattern: function ($route, courier) {
+//       return courier.indexPatterns
+//         .get($route.current.params.indexPatternId)
+//         .catch(courier.redirectWhenMissing('/management/kibana/index'));
+//     }
+//   }
+// });
 
-uiRoutes
-.when('/management/kibana/indices', {
-  resolve: {
-    redirect: function ($location, config) {
-      const defaultIndex = config.get('defaultIndex');
-      let path = '/management/kibana/index';
+// uiRoutes
+// .when('/management/kibana/indices', {
+//   resolve: {
+//     redirect: function ($location, config) {
+//       const defaultIndex = config.get('defaultIndex');
+//       let path = '/management/kibana/index';
 
-      if (defaultIndex) {
-        path = `/management/kibana/indices/${defaultIndex}`;
-      }
+//       if (defaultIndex) {
+//         path = `/management/kibana/indices/${defaultIndex}`;
+//       }
 
-      $location.path(path).replace();
-    }
-  }
-});
+//       $location.path(path).replace();
+//     }
+//   }
+// });
 
 uiModules.get('apps/management')
 .controller('managementIndicesEdit', function (
