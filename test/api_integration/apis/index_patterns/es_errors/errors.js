@@ -111,7 +111,7 @@ export default function ({ getService }) {
       it('handles errors that are already Boom errors', () => {
         const error = new Error();
         error.statusCode = 401;
-        const boomError = Boom.wrap(error, error.statusCode);
+        const boomError = Boom.boomify(error, { statusCode: error.statusCode });
 
         const converted = convertEsError(indices, boomError);
 
