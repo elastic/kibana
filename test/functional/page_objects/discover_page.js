@@ -45,6 +45,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       });
     }
 
+    async getColumnHeaders() {
+      const headerElements = await testSubjects.findAll('docTableHeaderField');
+      return await Promise.all(headerElements.map(el => el.getVisibleText()));
+    }
+
     async loadSavedSearch(searchName) {
       await this.clickLoadSavedSearchButton();
       const searchLink = await find.byPartialLinkText(searchName);

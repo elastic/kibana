@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects(['dashboard', 'visualize', 'header']);
+  const PageObjects = getPageObjects(['dashboard', 'visualize', 'header', 'discover']);
   const testSubjects = getService('testSubjects');
 
   describe('dashboard state', function describeIndexTests() {
@@ -43,6 +43,27 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.closeSpyPanel();
 
       expect(changedTileMapData.length).to.not.equal(tileMapData.length);
+    });
+
+    it('Saved search with no changes will update when the saved object changes', async () => {
+      await PageObjects.header.clickDiscover();
+      await PageObjects.discover.clickFieldListItemAdd('bytes');
+      await PageObjects.discover.saveSearch('my search');
+      await PageObjects.header.clickDashboard();
+      await PageObjects.dashboard.addSavedSearch('my search');
+      await PageObjects.dashboard.saveDashboard('No local edits');
+      await PageObjects.header.clickToastOK();
+
+      await PageObjects.header.clickDiscover();
+      await PageObjects.discover.clickFieldListItemAdd('clientip');
+      await PageObjects.discover.saveSearch('my search');
+
+      await PageObjects.header.clickDashboard();
+
+      const headers = await PageObjects.discover.getColumnHeaders();
+      expect(headers.length).to.be(3);
+      expect(headers[1]).to.be('bytes');
+      expect(headers[2]).to.be('clientip');
     });
 
   });
