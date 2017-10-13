@@ -226,20 +226,19 @@ export class KuiContextMenuPanel extends Component {
   };
 
   panelRef = node => {
-    if (node) {
-      this.panel = node;
+    this.panel = node;
+
+    if (this.panel) {
       this.panel.addEventListener('animationend', this.onTransitionComplete);
 
       if (this.props.onHeightChange) {
-        this.props.onHeightChange(node.clientHeight);
+        this.props.onHeightChange(this.panel.clientHeight);
       }
     }
   };
 
   contentRef = node => {
-    if (node) {
-      this.content = node;
-    }
+    this.content = node;
   };
 
   render() {
