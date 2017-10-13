@@ -32,9 +32,7 @@ export default new Fn({
   },
   type: 'datatable',
   help:
-    'Use timelion to extract one or more timeseries from Elasticsearch and other backends. ' +
-    'Note that styling related settings will not be preserved. Timelion requires a time range. ' +
-    'You can use a timefilter element for this, or both the from/to parameters of this function',
+    'Use timelion to extract one or more timeseries from many sources.',
   fn: (context, args, handlers) => {
 
     // TODO: Find time range, or just request a giant single bucket?
