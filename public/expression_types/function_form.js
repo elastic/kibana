@@ -60,10 +60,7 @@ export class FunctionForm extends BaseForm {
     if (!arg || arg.required || skipRender) return null;
     if (argValues && !arg.multi) return null;
 
-    if (arg.defaultValue != null && typeof arg.defaultValue !== 'string') throw new Error('defaultValue must be a string');
-
-    // TODO: This won't always be a string just because it doesn't have a default
-    const value = arg.defaultValue === '' ? '' : fromExpression(arg.defaultValue, 'argument');
+    const value = arg.defaultValue == null ? null : fromExpression(arg.defaultValue, 'argument');
 
     return { arg, onValueAdd: onValueAdd(arg.name, value) };
   }
