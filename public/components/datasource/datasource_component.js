@@ -69,7 +69,7 @@ export const DatasourceComponent = (props) => {
         <Button bsStyle="success" onClick={save}> Apply</Button>
         <Button bsStyle="primary" onClick={() => setPreviewing(true)}> Preview</Button>
         <Button onClick={close}> Cancel</Button>
-        <Button onClick={() => setSelecting(!selecting)}>
+        <Button onClick={() => setSelecting(!selecting)} bsStyle="link">
           <i className="fa fa-database"/> Change Datasource
         </Button>
       </ButtonToolbar>

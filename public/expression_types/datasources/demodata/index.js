@@ -11,7 +11,7 @@ export const demodata = () => new Datasource('demodata', {
       <p>
         This data source is connected to every Canvas element by default. Its purpose is to give you lightweight data to
         use in getting to know an element. The demo data set contains 4 strings, 3 numbers and a date. Feel free to
-        experiment and, when you're ready, click the <i>Change Datasource</i> link above to connect to your own data.
+        experiment and, when you're ready, click the <i>Change Datasource</i> link below to connect to your own data.
       </p>
     </div>
   ); },
