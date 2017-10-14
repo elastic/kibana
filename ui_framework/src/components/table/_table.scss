@@ -117,4 +117,9 @@
 
 .kuiTableCellContent--wrapText {
   white-space: normal;
+  overflow: visible;
+
+  .kuiTableCellContent__text {
+    overflow: visible;
+  }
 }

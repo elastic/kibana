@@ -3549,7 +3549,10 @@ table {
           justify-content: flex-end; }
 
 .kuiTableCellContent--wrapText {
-  white-space: normal; }
+  white-space: normal;
+  overflow: visible; }
+  .kuiTableCellContent--wrapText .kuiTableCellContent__text {
+    overflow: visible; }
 
 .kuiTabs {
   display: -webkit-box;

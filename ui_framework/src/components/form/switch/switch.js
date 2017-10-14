@@ -16,6 +16,19 @@ export const KuiSwitch = ({
 }) => {
   const classes = classNames('kuiSwitch', className);
 
+  let labelElement;
+
+  if (label) {
+    labelElement = (
+      <label
+        className="kuiSwitch__label"
+        htmlFor={id}
+      >
+        {label}
+      </label>
+    );
+  }
+
   return (
     <div className={classes} {...rest}>
       <input
@@ -44,12 +57,7 @@ export const KuiSwitch = ({
         </span>
       </span>
 
-      <label
-        className="kuiSwitch__label"
-        htmlFor={id}
-      >
-        {label}
-      </label>
+      {labelElement}
     </div>
   );
 };

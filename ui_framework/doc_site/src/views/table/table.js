@@ -11,6 +11,7 @@ import {
   KuiFlexItem,
   KuiFieldSearch,
   KuiSpacer,
+  KuiSwitch,
   KuiTable,
   KuiTableBody,
   KuiTableHeader,
@@ -36,132 +37,187 @@ export class Table extends Component {
         2: true,
       },
       sortedColumn: 'title',
+      items: [{
+        id: 0,
+        title: 'A very long line which will not wrap on narrower screens and instead will become truncated and replaced by an ellipsis',
+        type: 'user',
+        dateCreated: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
+        isActive: {
+          value: true,
+          isWrapped: true,
+        },
+        magnitude: 1,
+      }, {
+        id: 1,
+        title: {
+          value: 'A very long line which will wrap on narrower screens and NOT become truncated and replaced by an ellipsis',
+          isWrapped: true,
+        },
+        type: 'user',
+        dateCreated: 'Tue Dec 01 2016 12:56:15 GMT-0800 (PST)',
+        isActive: {
+          value: true,
+          isWrapped: true,
+        },
+        magnitude: 1,
+      }, {
+        id: 2,
+        title: {
+          value: 'Boomerang',
+          isLink: true,
+        },
+        type: 'user',
+        dateCreated: 'Tue Dec 28 2016 12:56:15 GMT-0800 (PST)',
+        isActive: {
+          value: false,
+          isWrapped: true,
+        },
+        magnitude: 10,
+      }, {
+        id: 3,
+        title: {
+          value: 'Celebration',
+          isLink: true,
+        },
+        type: 'user',
+        dateCreated: 'Tue Dec 16 2016 12:56:15 GMT-0800 (PST)',
+        isActive: {
+          value: false,
+          isWrapped: true,
+        },
+        magnitude: 100,
+      }, {
+        id: 4,
+        title: {
+          value: 'Dog',
+          isLink: true,
+        },
+        type: 'user',
+        dateCreated: 'Tue Dec 13 2016 12:56:15 GMT-0800 (PST)',
+        isActive: {
+          value: false,
+          isWrapped: true,
+        },
+        magnitude: 1000,
+      }, {
+        id: 5,
+        title: {
+          value: 'Dragon',
+          isLink: true,
+        },
+        type: 'user',
+        dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+        isActive: {
+          value: true,
+          isWrapped: true,
+        },
+        magnitude: 10000,
+      }, {
+        id: 6,
+        title: {
+          value: 'Bear',
+          isLink: true,
+        },
+        type: 'user',
+        dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+        isActive: {
+          value: false,
+          isWrapped: true,
+        },
+        magnitude: 10000,
+      }, {
+        id: 7,
+        title: {
+          value: 'Dinosaur',
+          isLink: true,
+        },
+        type: 'user',
+        dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+        isActive: {
+          value: false,
+          isWrapped: true,
+        },
+        magnitude: 10000,
+      }, {
+        id: 8,
+        title: {
+          value: 'Spider',
+          isLink: true,
+        },
+        type: 'user',
+        dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+        isActive: {
+          value: true,
+          isWrapped: true,
+        },
+        magnitude: 10000,
+      }, {
+        id: 9,
+        title: {
+          value: 'Bugbear',
+          isLink: true,
+        },
+        type: 'user',
+        dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+        isActive: {
+          value: true,
+          isWrapped: true,
+        },
+        magnitude: 10000,
+      }, {
+        id: 10,
+        title: {
+          value: 'Bear',
+          isLink: true,
+        },
+        type: 'user',
+        dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+        isActive: {
+          value: true,
+          isWrapped: true,
+        },
+        magnitude: 10000,
+      }, {
+        id: 11,
+        title: {
+          value: 'Dinosaur',
+          isLink: true,
+        },
+        type: 'user',
+        dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+        isActive: {
+          value: false,
+          isWrapped: true,
+        },
+        magnitude: 10000,
+      }, {
+        id: 12,
+        title: {
+          value: 'Spider',
+          isLink: true,
+        },
+        type: 'user',
+        dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+        isActive: {
+          value: false,
+          isWrapped: true,
+        },
+        magnitude: 10000,
+      }, {
+        id: 13,
+        title: {
+          value: 'Bugbear',
+          isLink: true,
+        },
+        type: 'user',
+        dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
+        isActive: {
+          value: false,
+          isWrapped: true,
+        },
+        magnitude: 10000,
+      }],
     };
-
-    this.items = [{
-      id: 0,
-      title: 'A very long line which will not wrap on narrower screens and instead will become truncated and replaced by an ellipsis',
-      type: 'user',
-      dateCreated: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
-      magnitude: 1,
-    }, {
-      id: 1,
-      title: {
-        value: 'A very long line which will wrap on narrower screens and NOT become truncated and replaced by an ellipsis',
-        isWrapped: true,
-      },
-      type: 'user',
-      dateCreated: 'Tue Dec 01 2016 12:56:15 GMT-0800 (PST)',
-      magnitude: 1,
-    }, {
-      id: 2,
-      title: {
-        value: 'Boomerang',
-        isLink: true,
-      },
-      type: 'user',
-      dateCreated: 'Tue Dec 28 2016 12:56:15 GMT-0800 (PST)',
-      magnitude: 10,
-    }, {
-      id: 3,
-      title: {
-        value: 'Celebration',
-        isLink: true,
-      },
-      type: 'user',
-      dateCreated: 'Tue Dec 16 2016 12:56:15 GMT-0800 (PST)',
-      magnitude: 100,
-    }, {
-      id: 4,
-      title: {
-        value: 'Dog',
-        isLink: true,
-      },
-      type: 'user',
-      dateCreated: 'Tue Dec 13 2016 12:56:15 GMT-0800 (PST)',
-      magnitude: 1000,
-    }, {
-      id: 5,
-      title: {
-        value: 'Dragon',
-        isLink: true,
-      },
-      type: 'user',
-      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
-      magnitude: 10000,
-    }, {
-      id: 6,
-      title: {
-        value: 'Bear',
-        isLink: true,
-      },
-      type: 'user',
-      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
-      magnitude: 10000,
-    }, {
-      id: 7,
-      title: {
-        value: 'Dinosaur',
-        isLink: true,
-      },
-      type: 'user',
-      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
-      magnitude: 10000,
-    }, {
-      id: 8,
-      title: {
-        value: 'Spider',
-        isLink: true,
-      },
-      type: 'user',
-      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
-      magnitude: 10000,
-    }, {
-      id: 9,
-      title: {
-        value: 'Bugbear',
-        isLink: true,
-      },
-      type: 'user',
-      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
-      magnitude: 10000,
-    }, {
-      id: 10,
-      title: {
-        value: 'Bear',
-        isLink: true,
-      },
-      type: 'user',
-      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
-      magnitude: 10000,
-    }, {
-      id: 11,
-      title: {
-        value: 'Dinosaur',
-        isLink: true,
-      },
-      type: 'user',
-      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
-      magnitude: 10000,
-    }, {
-      id: 12,
-      title: {
-        value: 'Spider',
-        isLink: true,
-      },
-      type: 'user',
-      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
-      magnitude: 10000,
-    }, {
-      id: 13,
-      title: {
-        value: 'Bugbear',
-        isLink: true,
-      },
-      type: 'user',
-      dateCreated: 'Tue Dec 11 2016 12:56:15 GMT-0800 (PST)',
-      magnitude: 10000,
-    }];
 
     this.sortableProperties = new SortableProperties([{
       name: 'title',
@@ -198,10 +254,18 @@ export class Table extends Component {
       alignment: LEFT_ALIGNMENT,
       isSortable: true,
     }, {
+      id: 'on',
+      label: 'Active',
+      alignment: LEFT_ALIGNMENT,
+      isSortable: true,
+      isSwitch: true,
+      width: '100px',
+    }, {
       id: 'magnitude',
       label: 'Orders of magnitude',
       alignment: RIGHT_ALIGNMENT,
       isSortable: true,
+      width: '200px',
     }];
   }
 
@@ -211,43 +275,54 @@ export class Table extends Component {
     this.setState({
       sortedColumn: prop,
     });
-  }
+  };
+
+  onSwitchChange = itemId => {
+    const items = this.state.items.slice(0);
+    const item = items.find(item => item.id === itemId);
+    item.isActive.value = !item.isActive.value;
+
+    this.setState({
+      items,
+    });
+  };
 
   toggleItem = itemId => {
-    const newItemIdToSelectedMap = Object.assign({}, this.state.itemIdToSelectedMap, {
+    const newItemIdToSelectedMap = {
+      ...this.state.itemIdToSelectedMap,
       [itemId]: !this.state.itemIdToSelectedMap[itemId],
-    });
+    };
 
     this.setState({
       itemIdToSelectedMap: newItemIdToSelectedMap,
     });
-  }
+  };
 
   toggleAll = () => {
     const allSelected = this.areAllItemsSelected();
     const newItemIdToSelectedMap = {};
-    this.items.forEach(item => newItemIdToSelectedMap[item.id] = !allSelected);
+    this.state.items.forEach(item => newItemIdToSelectedMap[item.id] = !allSelected);
 
 
     this.setState({
       itemIdToSelectedMap: newItemIdToSelectedMap,
     });
-  }
+  };
 
   isItemSelected = itemId => {
     return this.state.itemIdToSelectedMap[itemId];
-  }
+  };
 
   areAllItemsSelected = () => {
-    const indexOfUnselectedItem = this.items.findIndex(item => !this.isItemSelected(item.id));
+    const indexOfUnselectedItem = this.state.items.findIndex(item => !this.isItemSelected(item.id));
     return indexOfUnselectedItem === -1;
-  }
+  };
 
   areAnyRowsSelected = () => {
     return Object.keys(this.state.itemIdToSelectedMap).findIndex(id => {
       return this.state.itemIdToSelectedMap[id];
     }) !== -1;
-  }
+  };
 
   renderHeaderCells() {
     return this.columns.map((column, columnIndex) => {
@@ -283,7 +358,7 @@ export class Table extends Component {
   }
 
   renderRows() {
-    return this.items.map(item => {
+    return this.state.items.map(item => {
       const cells = this.columns.map(column => {
         const cell = item[column.id];
 
@@ -300,7 +375,39 @@ export class Table extends Component {
               />
             </KuiTableRowCellCheckbox>
           );
-        } else if (column.cellProvider) {
+        }
+
+        if (column.isSwitch) {
+          return (
+            <KuiTableRowCell
+              key={column.id}
+              align={column.alignment}
+              wrapText={item.isActive.isWrapped}
+            >
+              <KuiSwitch
+                id={`${item.id}-switch`}
+                checked={item.isActive.value}
+                onChange={this.onSwitchChange.bind(this, item.id)}
+              />
+            </KuiTableRowCell>
+          );
+
+          return (
+            <KuiTableHeaderCellCheckbox
+              key={column.id}
+              width={column.width}
+            >
+              <KuiCheckbox
+                id="selectAllCheckbox"
+                checked={this.areAllItemsSelected()}
+                onChange={this.toggleAll.bind(this)}
+                type="inList"
+              />
+            </KuiTableHeaderCellCheckbox>
+          );
+        }
+
+        if (column.cellProvider) {
           child = column.cellProvider(cell);
         } else if (cell.isLink) {
           child = <KuiLink href="">{cell.value}</KuiLink>;
