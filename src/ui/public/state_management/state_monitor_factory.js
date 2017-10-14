@@ -37,11 +37,9 @@ function stateMonitor(state, customInitialState) {
 
   function dispatchChange(type = null, keys = []) {
     const status = getStatus();
-    if (changeHandlers) {
-      changeHandlers.forEach(changeHandler => {
-        changeHandler(status, type, keys);
-      });
-    }
+    changeHandlers.forEach(changeHandler => {
+      changeHandler(status, type, keys);
+    });
   }
 
   function dispatchFetch(keys) {
