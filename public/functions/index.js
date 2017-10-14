@@ -4,6 +4,7 @@ import navigator from './navigator/navigator';
 import filters from './filters/filters';
 import asset from './asset/asset';
 import to from './to/to';
+import urlparam from './urlparam/urlparam';
 
 export const clientFunctions = [
   clientdata,
@@ -12,4 +13,5 @@ export const clientFunctions = [
   filters,
   asset,
   to,
+  urlparam,
 ];
