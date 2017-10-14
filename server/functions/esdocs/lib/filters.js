@@ -18,3 +18,13 @@ export function luceneQueryString(filter) {
     },
   };
 }
+
+export function exactly(filter) {
+  return {
+    term: {
+      [filter.column]: {
+        value: filter.value,
+      },
+    },
+  };
+}

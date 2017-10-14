@@ -2,6 +2,7 @@ import alterColumn from './alterColumn/alterColumn';
 import containerStyle from './containerStyle/containerStyle';
 import date from './date/date';
 import droprows from './droprows/droprows';
+import exactly from './exactly/exactly';
 import font from './font/font';
 import grid from './grid/grid';
 import ifFn from './if/if';
@@ -31,6 +32,7 @@ export const commonFunctions = [
   compare,
   date,
   droprows,
+  exactly,
   font,
   grid,
   ifFn,
