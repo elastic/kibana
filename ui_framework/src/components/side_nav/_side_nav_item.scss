@@ -4,21 +4,16 @@
   display: block;
   width: 100%;
   text-align: left;
-  padding: $kuiSizeXS $kuiSizeS;
+  padding: $kuiSizeXXS $kuiSizeS;
   color: $kuiColorDarkShade;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  border: $kuiBorderThin;
-  border-color: transparent;
+  border-left: $kuiBorderThick;
 
   &.kuiSideNavItem-isSelected {
-    @include kuiBottomShadowSmall;
-
-    color: $kuiColorSecondary;
-    border-left: $kuiBorderThick;
-    border-left-color: $kuiColorSecondary;
-    background-color: $kuiColorEmptyShade;
+    color: $kuiTextColor;
+    border-left-color: $kuiColorPrimary;
   }
 
   // We allow one level of nesting.

@@ -18,6 +18,14 @@
     padding: $kuiSizeL;
   }
 
+  &.kuiPanel--paddingXLarge {
+    padding: $kuiSizeXL;
+  }
+
+  &.kuiPanel--paddingXXLarge {
+    padding: $kuiSizeXXL;
+  }
+
   &.kuiPanel--shadow {
     box-shadow: $kuiShadowMedium, $kuiBottomShadow;
   }

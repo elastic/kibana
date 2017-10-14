@@ -2796,6 +2796,10 @@ table {
     padding: 16px; }
   .kuiPanel.kuiPanel--paddingLarge {
     padding: 24px; }
+  .kuiPanel.kuiPanel--paddingXLarge {
+    padding: 32px; }
+  .kuiPanel.kuiPanel--paddingXXLarge {
+    padding: 40px; }
   .kuiPanel.kuiPanel--shadow {
     box-shadow: 0 1px 8px -1px rgba(0, 0, 0, 0.15), 0 16px 16px -8px rgba(0, 0, 0, 0.1); }
   .kuiPanel.kuiPanel--flexGrowZero {
@@ -3263,6 +3267,9 @@ table {
   position: relative;
   height: 100%; }
 
+.kuiSideNav__content {
+  padding: 12px; }
+
 .kuiSideNav__mobileToggle {
   display: none;
   border-bottom: 1px solid #D9D9D9;
@@ -3367,19 +3374,15 @@ table {
   display: block;
   width: 100%;
   text-align: left;
-  padding: 4px 8px;
+  padding: 2px 8px;
   color: #666;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  border: 1px solid #D9D9D9;
-  border-color: transparent; }
+  border-left: 2px solid #D9D9D9; }
   .kuiSideNavItem.kuiSideNavItem-isSelected {
-    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
-    color: #00A69B;
-    border-left: 2px solid #D9D9D9;
-    border-left-color: #00A69B;
-    background-color: #FFF; }
+    color: #3F3F3F;
+    border-left-color: #0079a5; }
   .kuiSideNavItem.kuiSideNavItem--indent {
     margin-left: 16px;
     font-size: 14px;
@@ -3402,7 +3405,7 @@ table {
   font-size: 1rem;
   line-height: 1.5;
   font-weight: 500;
-  margin-bottom: 8px;
+  margin-bottom: 2px;
   margin-top: 16px;
   /**
    * 1. Only want the first title to have margin. Since buttons exist in nav
@@ -3620,17 +3623,20 @@ table {
   font-weight: 300;
   font-size: 24px;
   font-size: 1.5rem;
-  line-height: 1.5; }
+  line-height: 1.5;
+  font-weight: 400; }
 
 .kuiTitle--small {
   font-size: 16px;
   font-size: 1rem;
-  line-height: 1.5; }
+  line-height: 1.5;
+  font-weight: 400; }
 
 .kuiTitle--large {
   font-size: 32px;
   font-size: 2rem;
-  line-height: 1.5; }
+  line-height: 1.5;
+  font-weight: 400; }
 
 /**
  * 1. Allow list to expand as items are added, but cap it at the screen height.
@@ -3806,7 +3812,7 @@ table {
 
 .kuiToastHeader__title {
   color: #000;
-  font-weight: 300; }
+  font-weight: 400; }
 
 .kuiToastHeader--withBody {
   margin-bottom: 12px; }

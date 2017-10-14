@@ -28,8 +28,6 @@ import {
   KuiPageContentBody,
   KuiPageContentHeader,
   KuiPageContentHeaderSection,
-  KuiPageHeader,
-  KuiPageHeaderSection,
   KuiPageSideBar,
   KuiPopover,
   KuiSideNav,
@@ -430,16 +428,9 @@ export default class extends Component {
   renderPage() {
     return (
       <KuiPage>
-        <KuiPageHeader>
-          <KuiPageHeaderSection>
-            <KuiTitle size="large">
-              <h1>Management</h1>
-            </KuiTitle>
-          </KuiPageHeaderSection>
-        </KuiPageHeader>
         <KuiPageBody>
           {this.renderSideNav()}
-          <KuiPageContent>
+          <KuiPageContent panelPaddingSize="xxl">
             <KuiPageContentHeader>
               <KuiPageContentHeaderSection>
                 <KuiTitle>
@@ -469,7 +460,7 @@ export default class extends Component {
               </KuiPageContentHeaderSection>
             </KuiPageContentHeader>
             <KuiPageContentBody>
-              <Table />
+              <Table compressed />
             </KuiPageContentBody>
           </KuiPageContent>
         </KuiPageBody>

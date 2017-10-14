@@ -464,7 +464,7 @@ export class Table extends Component {
 
         <KuiSpacer size="m" />
 
-        <KuiTable>
+        <KuiTable compressed={this.props.compressed}>
           <KuiTableHeader>
             {this.renderHeaderCells()}
           </KuiTableHeader>
