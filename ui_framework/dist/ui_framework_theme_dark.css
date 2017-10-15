@@ -3455,18 +3455,17 @@ table {
 .kuiTable--compressed .kuiTableCellContent {
   padding: 8px; }
 
-.kuiTable--compressed .kuiTableHeaderButton:focus {
-  outline: solid 8px #275160; }
-
 .kuiTableHeaderCell {
   max-width: 20px;
   /* 1 */
   vertical-align: middle;
+  background-color: #272727;
   color: #FFF; }
 
 .kuiTableHeaderCellCheckbox {
   width: 36px;
-  vertical-align: middle; }
+  vertical-align: middle;
+  background-color: #272727; }
   .kuiTableHeaderCellCheckbox .kuiTableCellContent {
     padding-right: 0;
     padding-top: 0;
@@ -3487,7 +3486,7 @@ table {
       display: block;
       fill: #4da1c0; }
   .kuiTableHeaderButton:focus {
-    background: #275160; }
+    box-shadow: inset 0 -2px 0 0 #4da1c0; }
 
 .kuiTableSortIcon {
   margin-left: 4px;

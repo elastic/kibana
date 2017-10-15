@@ -15,20 +15,19 @@
   .kuiTableCellContent {
     padding: $kuiTableCellPaddingCompressed;
   }
-
-  .kuiTableHeaderButton:focus {
-    outline: solid $kuiTableCellPaddingCompressed $kuiFocusBackgroundColor;
-  }
 }
 
 .kuiTableHeaderCell {
   @include kuiTableCell;
 
+  background-color: $kuiColorLightestShade;
   color: $kuiTitleColor;
 }
 
 .kuiTableHeaderCellCheckbox {
   @include kuiTableCellCheckbox;
+
+  background-color: $kuiColorLightestShade;
 }
 
 .kuiTableHeaderButton {
@@ -50,7 +49,7 @@
   }
 
   &:focus {
-    background: $kuiFocusBackgroundColor;
+    box-shadow: inset 0 -2px 0 0 $kuiColorPrimary;
   }
 }
 
