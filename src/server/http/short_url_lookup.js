@@ -8,7 +8,7 @@ export class ShortUrlLookup {
     this.savedObjectsService = savedObjectsService;
   }
 
-  async updateMetadata(doc) {
+  private async updateMetadata(doc) {
     try {
       await this.savedObjectsService.update('url', doc.id, {
         accessDate: new Date(),

@@ -12,11 +12,15 @@ import setupRedirectMixin from './setup_redirect_server';
 import registerHapiPluginsMixin from './register_hapi_plugins';
 import xsrfMixin from './xsrf';
 
-import { SavedObjectsService } from '../saved_objects_service';
-import { UiSettingsService } from '../ui_settings_service';
-
-export default async function (kbnServer, server, config) {
+export default async function (kbnServer, server, config, deps) {
   server = kbnServer.server = new Hapi.Server();
+
+  const {
+    SavedObjectsService,
+    UiSettingsService,
+    elasticsearch,
+    //IndexPatternsService,
+  } = deps;
 
   await kbnServer.mixin(setupConnectionMixin);
   await kbnServer.mixin(setupRedirectMixin);
@@ -129,9 +133,9 @@ export default async function (kbnServer, server, config) {
     path: '/goto/{urlId}',
     handler: async function (request, reply) {
       try {
-        const savedObjectsService = new SavedObjectsService(server, request);
+        const savedObjectsService = new SavedObjectsService(request, elasticsearch);
 
-        const uiSettingsService = new UiSettingsService(server, request);
+        const uiSettingsService = new UiSettingsService(server, request, savedObjectsService);
 
         const shortUrlLookup = new ShortUrlLookup(server.log, savedObjectsService);
 

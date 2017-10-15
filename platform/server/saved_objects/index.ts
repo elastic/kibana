@@ -1,7 +1,7 @@
 export class SavedObjectsService {
   private readonly esClient;
 
-  constructor(server, request) {
+  constructor(request, elasticsearch) {
     // pass in the cluster and the request headers
     // feels lighter than passing in request
     //
@@ -11,9 +11,9 @@ export class SavedObjectsService {
     // createClient would do getCluster + callWithRequest bound to a cluster
     //
     // we could even have the constructor take only:
-    // - server
+    // - elasticsearch
     // - request headers
-    this.esClient = server.plugins.elasticsearch.createClient('admin', request.headers);
+    this.esClient = elasticsearch.createClient('admin', request.headers);
     this.errors = {};
   }
 

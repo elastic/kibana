@@ -3,7 +3,7 @@ import Boom from 'boom';
 import Joi from 'joi';
 import { importDashboards } from '../../../lib/import/import_dashboards';
 
-export function importApi(server) {
+export function importApi(server, elasticsearch) {
   server.route({
     path: '/api/kibana/dashboards/import',
     method: ['POST'],
@@ -22,7 +22,7 @@ export function importApi(server) {
     },
 
     handler: (req, reply) => {
-      const savedObjectsService = new SavedObjectsService(server, req);
+      const savedObjectsService = new SavedObjectsService(req, elasticsearch);
 
       return importDashboards(req.query, payload, savedObjectsService)
         .then((resp) => reply(resp))

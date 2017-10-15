@@ -6,8 +6,9 @@ export class UiSettingsService {
   private readonly _type;
   private readonly _id;
 
-  constructor(server, request, options) {
-    this.savedObjectsService = new SavedObjectsService(server, request);
+  constructor(server, request, savedObjectsService, options) {
+    const savedObjectsClient = savedObjectsService.createClient('admin', request.headers);
+
     this._type = options.type;
     this._id = options.id;
   }
