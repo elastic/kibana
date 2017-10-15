@@ -6,9 +6,13 @@ import React, {
 import {
   KuiAvatar,
   KuiButton,
+  KuiCallOut,
   KuiFlexGroup,
   KuiFlexItem,
+  KuiGlobalToastList,
+  KuiGlobalToastListItem,
   KuiHeader,
+  KuiHeaderAlert,
   KuiHeaderBreadcrumb,
   KuiHeaderBreadcrumbCollapsed,
   KuiHeaderBreadcrumbs,
@@ -16,8 +20,6 @@ import {
   KuiHeaderSection,
   KuiHeaderSectionItem,
   KuiHeaderSectionItemButton,
-  KuiGlobalToastList,
-  KuiGlobalToastListItem,
   KuiIcon,
   KuiKeyPadMenu,
   KuiKeyPadMenuItem,
@@ -33,11 +35,10 @@ import {
   KuiSideNav,
   KuiSideNavItem,
   KuiSideNavTitle,
-  KuiToast,
-  KuiTitle,
-  KuiText,
   KuiSpacer,
-  KuiHeaderAlert,
+  KuiText,
+  KuiTitle,
+  KuiToast,
 } from '../../../../components';
 
 import {
@@ -459,7 +460,20 @@ export default class extends Component {
                 </KuiFlexGroup>
               </KuiPageContentHeaderSection>
             </KuiPageContentHeader>
+
             <KuiPageContentBody>
+              <KuiCallOut
+                title="Watch saved"
+                type="success"
+                iconType="user"
+              >
+                <p>
+                  Your <KuiLink href="#">new watch</KuiLink> has been saved.
+                </p>
+              </KuiCallOut>
+
+              <KuiSpacer size="m" />
+
               <Table compressed />
             </KuiPageContentBody>
           </KuiPageContent>

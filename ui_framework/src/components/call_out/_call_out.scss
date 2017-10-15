@@ -1,6 +1,6 @@
 .kuiCallOut {
   padding: $kuiSize;
-  border-left: $kuiSizeXS / 2 solid transparent;
+  border: 1px solid transparent;
 }
 
 // Modifier naming and colors.
@@ -14,7 +14,7 @@ $callOutTypes: (
 // Create button modifiders based upon the map.
 @each $name, $color in $callOutTypes {
   .kuiCallOut--#{$name} {
-    border-color: $color;
+    border-color: transparentize($color, 0.8);
     background-color: tintOrShade($color, 90%, 70%);
 
     $textColor: shadeOrTint($color, 30%, 70%);

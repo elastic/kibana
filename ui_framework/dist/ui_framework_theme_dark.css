@@ -770,10 +770,10 @@ table {
 
 .kuiCallOut {
   padding: 16px;
-  border-left: 2px solid transparent; }
+  border: 1px solid transparent; }
 
 .kuiCallOut--info {
-  border-color: #4da1c0;
+  border-color: rgba(77, 161, 192, 0.2);
   background-color: #17303a; }
   .kuiCallOut--info .kuiCallOutHeader__icon {
     fill: #cae3ec; }
@@ -781,7 +781,7 @@ table {
     color: #cae3ec; }
 
 .kuiCallOut--success {
-  border-color: #00A69B;
+  border-color: rgba(0, 166, 155, 0.2);
   background-color: #00322f; }
   .kuiCallOut--success .kuiCallOutHeader__icon {
     fill: #b3e4e1; }
@@ -789,7 +789,7 @@ table {
     color: #b3e4e1; }
 
 .kuiCallOut--warning {
-  border-color: #E5830E;
+  border-color: rgba(229, 131, 14, 0.2);
   background-color: #452704; }
   .kuiCallOut--warning .kuiCallOutHeader__icon {
     fill: #f7dab7; }
@@ -797,7 +797,7 @@ table {
     color: #f7dab7; }
 
 .kuiCallOut--danger {
-  border-color: #bf4d4d;
+  border-color: rgba(191, 77, 77, 0.2);
   background-color: #391717; }
   .kuiCallOut--danger .kuiCallOutHeader__icon {
     fill: #eccaca; }
