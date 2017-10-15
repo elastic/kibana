@@ -1,7 +1,7 @@
 import { store } from '../../store';
 import { updatePanel, updatePanels } from '../actions';
 import { getPanel } from '../reducers';
-import { getDashboardState } from '../../reducers';
+import { getDashboard } from '../../reducers';
 
 describe('panel reducers', () => {
   test('UpdatePanel updates a panel', () => {
@@ -18,7 +18,7 @@ describe('panel reducers', () => {
       }
     }));
 
-    const panel = getPanel(getDashboardState(store.getState()), '1');
+    const panel = getPanel(getDashboard(store.getState()), '1');
     expect(panel.gridData.x).toBe(1);
     expect(panel.gridData.y).toBe(5);
     expect(panel.gridData.w).toBe(10);

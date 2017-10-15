@@ -3,9 +3,9 @@ import { DashboardGrid } from './dashboard_grid';
 import { updatePanel } from '../actions';
 import { getPanels, getViewMode } from '../reducers';
 
-const mapStateToProps = ({ dashboardState }) => ({
-  panels: getPanels(dashboardState),
-  dashboardViewMode: getViewMode(dashboardState),
+const mapStateToProps = ({ dashboard }) => ({
+  panels: getPanels(dashboard),
+  dashboardViewMode: getViewMode(dashboard),
 });
 
 const mapDispatchToProps = (dispatch) => ({

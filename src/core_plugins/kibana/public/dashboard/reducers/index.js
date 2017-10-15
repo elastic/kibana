@@ -20,7 +20,7 @@ import {
   getMaximizedPanelId as getMaximizedPanelIdFromView
 } from './view';
 
-export const dashboardState = combineReducers({
+export const dashboard = combineReducers({
   view,
   panels,
   embeddables,

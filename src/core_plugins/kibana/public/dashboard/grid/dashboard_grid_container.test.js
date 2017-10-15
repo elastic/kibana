@@ -48,7 +48,7 @@ test('loads old panel data in the right order', () => {
 
   mount(<Provider store={store}><DashboardGridContainer {...getProps()} /></Provider>);
 
-  const panels = store.getState().dashboardState.panels;
+  const panels = store.getState().dashboard.panels;
   expect(Object.keys(panels).length).toBe(16);
 
   const foo8Panel = _.find(panels, panel => panel.id === 'foo8');

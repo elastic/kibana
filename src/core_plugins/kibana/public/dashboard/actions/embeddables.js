@@ -24,8 +24,8 @@ export const embeddableRenderError =
  */
 export function renderEmbeddable(embeddableHandler, panelElement, panelId, containerApi) {
   return (dispatch, getState) => {
-    const { dashboardState } = getState();
-    const panelState = dashboardState.panels[panelId];
+    const { dashboard } = getState();
+    const panelState = dashboard.panels[panelId];
 
     if (!embeddableHandler) {
       dispatch(embeddableRenderError(panelId, new Error(`Invalid embeddable type "${panelState.type}"`)));

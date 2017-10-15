@@ -21,15 +21,15 @@ import {
   getEmbeddableError,
 } from '../reducers';
 
-const mapStateToProps = ({ dashboardState }, { panelId }) => {
-  const embeddable = getEmbeddable(dashboardState, panelId);
+const mapStateToProps = ({ dashboard }, { panelId }) => {
+  const embeddable = getEmbeddable(dashboard, panelId);
   return {
-    title: embeddable ? getEmbeddableTitle(dashboardState, panelId) : '',
-    editUrl: embeddable ? getEmbeddableEditUrl(dashboardState, panelId) : '',
-    error: embeddable ? getEmbeddableError(dashboardState, panelId) : '',
+    title: embeddable ? getEmbeddableTitle(dashboard, panelId) : '',
+    editUrl: embeddable ? getEmbeddableEditUrl(dashboard, panelId) : '',
+    error: embeddable ? getEmbeddableError(dashboard, panelId) : '',
 
-    viewOnlyMode: getFullScreenMode(dashboardState) || getViewMode(dashboardState) === DashboardViewMode.VIEW,
-    isExpanded: getMaximizedPanelId(dashboardState) === panelId,
+    viewOnlyMode: getFullScreenMode(dashboard) || getViewMode(dashboard) === DashboardViewMode.VIEW,
+    isExpanded: getMaximizedPanelId(dashboard) === panelId,
   };
 };
 
