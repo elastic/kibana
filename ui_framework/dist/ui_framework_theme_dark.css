@@ -1437,7 +1437,8 @@ table {
     .kuiCheckbox .kuiCheckbox__input:focus ~ .kuiCheckbox__square,
     .kuiCheckbox .kuiCheckbox__input:active ~ .kuiCheckbox__square {
       background-color: #222;
-      border: 2px solid #4da1c0; }
+      border: 2px solid #4da1c0 !important;
+      box-shadow: 0 4px 2px -1px rgba(0, 0, 0, 0.15); }
     .kuiCheckbox .kuiCheckbox__input:checked:focus ~ .kuiCheckbox__square .kuiCheckbox__check,
     .kuiCheckbox .kuiCheckbox__input:checked:active ~ .kuiCheckbox__square .kuiCheckbox__check {
       background-color: #4da1c0; }
@@ -1462,10 +1463,10 @@ table {
     font-size: 14px;
     cursor: pointer; }
   .kuiCheckbox.kuiCheckbox--inList .kuiCheckbox__input:checked ~ .kuiCheckbox__square {
-    background: #4da1c0;
+    background: #222;
     border-color: #4da1c0; }
     .kuiCheckbox.kuiCheckbox--inList .kuiCheckbox__input:checked ~ .kuiCheckbox__square .kuiCheckbox__check {
-      background-color: #222; }
+      background-color: #4da1c0; }
 
 .kuiCheckboxGroup__item + .kuiCheckboxGroup__item {
   margin-top: 8px; }
@@ -3465,11 +3466,17 @@ table {
 .kuiTableHeaderCellCheckbox {
   width: 36px;
   vertical-align: middle;
-  background-color: #272727; }
+  background-color: #272727;
+  /**
+   * 1. Allow checkbox box-shadow to be visible.
+   */ }
   .kuiTableHeaderCellCheckbox .kuiTableCellContent {
     padding-right: 0;
     padding-top: 0;
     padding-bottom: 0; }
+  .kuiTableHeaderCellCheckbox .kuiTableCellContent {
+    overflow: visible;
+    /* 1 */ }
 
 .kuiTableHeaderButton {
   font-size: 14px;
@@ -3529,7 +3536,10 @@ table {
 .kuiTableRowCellCheckbox {
   width: 36px;
   vertical-align: middle;
-  border-top: 1px solid #E4E4E4; }
+  border-top: 1px solid #E4E4E4;
+  /**
+   * 1. Allow checkbox box-shadow to be visible.
+   */ }
   .kuiTableRowCellCheckbox .kuiTableCellContent {
     padding-right: 0;
     padding-top: 0;
@@ -3538,6 +3548,9 @@ table {
     border-left: 1px solid #E4E4E4; }
   .kuiTableRowCellCheckbox:last-child {
     border-right: 1px solid #E4E4E4; }
+  .kuiTableRowCellCheckbox .kuiTableCellContent {
+    overflow: visible;
+    /* 1 */ }
 
 /**
  * 1. Vertically align all children.

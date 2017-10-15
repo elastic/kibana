@@ -28,6 +28,13 @@
   @include kuiTableCellCheckbox;
 
   background-color: $kuiColorLightestShade;
+
+  /**
+   * 1. Allow checkbox box-shadow to be visible.
+   */
+  .kuiTableCellContent {
+    overflow: visible; /* 1 */
+  }
 }
 
 .kuiTableHeaderButton {
@@ -124,6 +131,13 @@
 
   &:last-child {
     border-right: $kuiTableBorder;
+  }
+
+  /**
+   * 1. Allow checkbox box-shadow to be visible.
+   */
+  .kuiTableCellContent {
+    overflow: visible; /* 1 */
   }
 }
 

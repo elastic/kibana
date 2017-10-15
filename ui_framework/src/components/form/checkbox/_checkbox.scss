@@ -25,7 +25,8 @@
     &:focus ~ .kuiCheckbox__square,
     &:active ~ .kuiCheckbox__square {
       background-color: $kuiColorEmptyShade;
-      border: 2px solid $kuiColorPrimary;
+      border: 2px solid $kuiColorPrimary !important;
+      box-shadow: $kuiSmallShadowHover;
     }
 
     &:checked:focus ~ .kuiCheckbox__square,
@@ -65,11 +66,11 @@
   &.kuiCheckbox--inList {
     .kuiCheckbox__input {
       &:checked ~ .kuiCheckbox__square {
-        background: $kuiColorPrimary;
+        background: $kuiColorEmptyShade;
         border-color: $kuiColorPrimary;
 
         .kuiCheckbox__check {
-          background-color: $kuiColorEmptyShade;
+          background-color: $kuiColorPrimary;
         }
       }
     }
