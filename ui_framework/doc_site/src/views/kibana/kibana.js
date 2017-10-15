@@ -14,7 +14,6 @@ import {
   KuiHeader,
   KuiHeaderAlert,
   KuiHeaderBreadcrumb,
-  KuiHeaderBreadcrumbCollapsed,
   KuiHeaderBreadcrumbs,
   KuiHeaderLogo,
   KuiHeaderSection,
@@ -160,18 +159,8 @@ export default class extends Component {
           Management
         </KuiHeaderBreadcrumb>
 
-        <KuiHeaderBreadcrumb href="#">
-          Truncation test is here
-        </KuiHeaderBreadcrumb>
-
-        <KuiHeaderBreadcrumbCollapsed />
-
-        <KuiHeaderBreadcrumb href="#">
-          Users
-        </KuiHeaderBreadcrumb>
-
         <KuiHeaderBreadcrumb href="#" isActive>
-          Create
+          Watches
         </KuiHeaderBreadcrumb>
       </KuiHeaderBreadcrumbs>
     );

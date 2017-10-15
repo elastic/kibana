@@ -1977,7 +1977,9 @@ table {
   line-height: 64px;
   padding: 0 16px;
   position: relative;
-  color: #F5F5F5; }
+  color: #4da1c0; }
+  .kuiHeaderBreadcrumb:hover {
+    color: #3985a1; }
   .kuiHeaderBreadcrumb:not(:last-child):after {
     position: absolute;
     top: 24px;
@@ -1988,13 +1990,14 @@ table {
     -webkit-transform: rotate(15deg);
             transform: rotate(15deg);
     background: #333; }
-  .kuiHeaderBreadcrumb:not(.kuiHeaderBreadcrumb--collapsed):hover {
+  .kuiHeaderBreadcrumb:not(.kuiHeaderBreadcrumb--collapsed):not(.kuiHeaderBreadcrumb-isActive):hover {
     text-decoration: underline; }
-  .kuiHeaderBreadcrumb:not(.kuiHeaderBreadcrumb--collapsed):focus {
+  .kuiHeaderBreadcrumb:not(.kuiHeaderBreadcrumb--collapsed):not(.kuiHeaderBreadcrumb-isActive):focus {
     text-decoration: underline;
     background: #275160; }
   .kuiHeaderBreadcrumb.kuiHeaderBreadcrumb-isActive {
-    color: #444; }
+    color: #F5F5F5;
+    font-weight: 500; }
 
 .kuiHeaderBreadcrumb__text {
   white-space: nowrap;

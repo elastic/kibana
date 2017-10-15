@@ -12,7 +12,11 @@
   line-height: $kuiHeaderChildSize;
   padding: 0 $kuiSize;
   position: relative;
-  color: $kuiHeaderBreadcrumbColor;
+  color: $kuiColorPrimary;
+
+  &:hover {
+    color: darken($kuiColorPrimary, 10%);
+  }
 
   // Slanted separator. Shows on all but last item.
   &:not(:last-child):after {
@@ -26,12 +30,13 @@
     background: $kuiColorLightShade;
   }
 
-  &:not(.kuiHeaderBreadcrumb--collapsed) {
+  &:not(.kuiHeaderBreadcrumb--collapsed):not(.kuiHeaderBreadcrumb-isActive) {
     @include kuiLink;
   }
 
   &.kuiHeaderBreadcrumb-isActive {
-    color: $kuiColorMediumShade;
+    color: $kuiHeaderBreadcrumbColor;
+    font-weight: $kuiFontWeightMedium;
   }
 }
 
