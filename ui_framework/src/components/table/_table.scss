@@ -6,7 +6,7 @@
   @include kuiFontSizeS;
 
   width: 100%;
-  border: none;
+  border: $kuiTableBorder;
   border-collapse: collapse;
   background-color: $kuiColorEmptyShade;
 }
@@ -25,10 +25,6 @@
   @include kuiTableCell;
 
   color: $kuiTitleColor;
-
-  .kuiTableHeaderButton {
-    text-align: left;
-  }
 }
 
 .kuiTableHeaderCellCheckbox {
@@ -38,7 +34,9 @@
 .kuiTableHeaderButton {
   @include kuiFontSizeS;
 
+  text-align: left;
   color: inherit;
+  font-weight: inherit;
   width: 100%;
 
   &:hover, &:focus {
@@ -67,12 +65,37 @@
 
 .kuiTableRow {
   transition: background-color $kuiAnimSpeedFast $kuiAnimSlightResistance;
-  &:hover {
+
+  &:hover:not(.kuiTableRow-isSelected) {
     background-color: tintOrShade($kuiColorLightestShade, 50%, 20%);
+
+    .kuiTableRowCell,
+    .kuiTableRowCellCheckbox {
+      border-color: $kuiColorLightShade;
+    }
+
+    & + .kuiTableRow .kuiTableRowCell,
+    & + .kuiTableRow .kuiTableRowCellCheckbox {
+      border-color: $kuiColorLightShade;
+    }
   }
 
   &.kuiTableRow-isSelected {
-    background-color: transparentize($kuiColorPrimary, .95);
+    background-color: transparentize($kuiColorPrimary, 0.95);
+
+    &:hover {
+      background-color: transparentize($kuiColorPrimary, 0.9);
+
+      .kuiTableRowCell,
+      .kuiTableRowCellCheckbox {
+        border-color: transparentize($kuiColorPrimary, 0.7);
+      }
+
+      & + .kuiTableRow .kuiTableRowCell,
+      & + .kuiTableRow .kuiTableRowCellCheckbox {
+        border-top-color: transparentize($kuiColorPrimary, 0.7);
+      }
+    }
   }
 }
 
@@ -80,15 +103,29 @@
   @include kuiTableCell;
 
   color: $kuiTextColor;
-  border-top: $kuiBorderThin;
-  border-bottom: $kuiBorderThin;
+  border-top: $kuiTableBorder;
+
+  &:first-child {
+    border-left: $kuiTableBorder;
+  }
+
+  &:last-child {
+    border-right: $kuiTableBorder;
+  }
 }
 
 .kuiTableRowCellCheckbox {
   @include kuiTableCellCheckbox;
 
-  border-top: $kuiBorderThin;
-  border-bottom: $kuiBorderThin;
+  border-top: $kuiTableBorder;
+
+  &:first-child {
+    border-left: $kuiTableBorder;
+  }
+
+  &:last-child {
+    border-right: $kuiTableBorder;
+  }
 }
 
 /**

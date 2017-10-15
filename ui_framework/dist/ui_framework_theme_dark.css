@@ -3445,7 +3445,7 @@ table {
   font-size: 0.875rem;
   line-height: 1.5;
   width: 100%;
-  border: none;
+  border: 1px solid #E4E4E4;
   border-collapse: collapse;
   background-color: #222; }
 
@@ -3460,8 +3460,6 @@ table {
   /* 1 */
   vertical-align: middle;
   color: #FFF; }
-  .kuiTableHeaderCell .kuiTableHeaderButton {
-    text-align: left; }
 
 .kuiTableHeaderCellCheckbox {
   width: 36px;
@@ -3475,7 +3473,9 @@ table {
   font-size: 14px;
   font-size: 0.875rem;
   line-height: 1.5;
+  text-align: left;
   color: inherit;
+  font-weight: inherit;
   width: 100%; }
   .kuiTableHeaderButton:hover, .kuiTableHeaderButton:focus {
     text-decoration: underline;
@@ -3494,28 +3494,48 @@ table {
 
 .kuiTableRow {
   transition: background-color 150ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
-  .kuiTableRow:hover {
+  .kuiTableRow:hover:not(.kuiTableRow-isSelected) {
     background-color: #1f1f1f; }
+    .kuiTableRow:hover:not(.kuiTableRow-isSelected) .kuiTableRowCell,
+    .kuiTableRow:hover:not(.kuiTableRow-isSelected) .kuiTableRowCellCheckbox {
+      border-color: #333; }
+    .kuiTableRow:hover:not(.kuiTableRow-isSelected) + .kuiTableRow .kuiTableRowCell,
+    .kuiTableRow:hover:not(.kuiTableRow-isSelected) + .kuiTableRow .kuiTableRowCellCheckbox {
+      border-color: #333; }
   .kuiTableRow.kuiTableRow-isSelected {
     background-color: rgba(77, 161, 192, 0.05); }
+    .kuiTableRow.kuiTableRow-isSelected:hover {
+      background-color: rgba(77, 161, 192, 0.1); }
+      .kuiTableRow.kuiTableRow-isSelected:hover .kuiTableRowCell,
+      .kuiTableRow.kuiTableRow-isSelected:hover .kuiTableRowCellCheckbox {
+        border-color: rgba(77, 161, 192, 0.3); }
+      .kuiTableRow.kuiTableRow-isSelected:hover + .kuiTableRow .kuiTableRowCell,
+      .kuiTableRow.kuiTableRow-isSelected:hover + .kuiTableRow .kuiTableRowCellCheckbox {
+        border-top-color: rgba(77, 161, 192, 0.3); }
 
 .kuiTableRowCell {
   max-width: 20px;
   /* 1 */
   vertical-align: middle;
   color: #DDD;
-  border-top: 1px solid #333;
-  border-bottom: 1px solid #333; }
+  border-top: 1px solid #E4E4E4; }
+  .kuiTableRowCell:first-child {
+    border-left: 1px solid #E4E4E4; }
+  .kuiTableRowCell:last-child {
+    border-right: 1px solid #E4E4E4; }
 
 .kuiTableRowCellCheckbox {
   width: 36px;
   vertical-align: middle;
-  border-top: 1px solid #333;
-  border-bottom: 1px solid #333; }
+  border-top: 1px solid #E4E4E4; }
   .kuiTableRowCellCheckbox .kuiTableCellContent {
     padding-right: 0;
     padding-top: 0;
     padding-bottom: 0; }
+  .kuiTableRowCellCheckbox:first-child {
+    border-left: 1px solid #E4E4E4; }
+  .kuiTableRowCellCheckbox:last-child {
+    border-right: 1px solid #E4E4E4; }
 
 /**
  * 1. Vertically align all children.

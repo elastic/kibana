@@ -1,5 +1,6 @@
 $kuiTableCellPadding: $kuiSizeM;
 $kuiTableCellPaddingCompressed: $kuiSizeS;
+$kuiTableBorder: 1px solid $kuiColorLighterShade;
 
 /**
  * 1. Prevent cells from expanding based on content size. This substitutes for table-layout: fixed.
