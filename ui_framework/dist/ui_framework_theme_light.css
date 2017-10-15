@@ -2787,7 +2787,7 @@ table {
 .kuiPanel {
   box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
   background-color: #FFF;
-  border: 1px solid #E4E4E4;
+  border: 1px solid #D9D9D9;
   border-radius: 4px;
   -webkit-box-flex: 1;
   -webkit-flex-grow: 1;
