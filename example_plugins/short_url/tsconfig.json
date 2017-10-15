@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig",
+  "compilerOptions": {
+    "outDir": "target/server"
+  },
+  "exclude": [
+    "node_modules"
+  ]
+}
+
