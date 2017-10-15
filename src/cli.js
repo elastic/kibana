@@ -23,11 +23,11 @@ function init(config, options) {
       repoName = _repoName;
     })
     .then(() => getCommit(owner, repoName, config.username))
-    .then(_commit => (commit = _commit))
+    .then(c => (commit = c))
     .then(() => getVersion(owner, repoName, config.repositories))
-    .then(_version => (version = _version))
+    .then(v => (version = v))
     .then(() => getReference(owner, repoName, commit.sha))
-    .then(_reference => (reference = _reference))
+    .then(ref => (reference = ref))
     .then(() => {
       console.log(`Backporting ${getReferenceValue(reference)} to ${version}`);
     })

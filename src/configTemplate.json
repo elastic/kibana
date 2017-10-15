@@ -1,6 +1,6 @@
 {
   // Github personal access token. Must be created here: https://github.com/settings/tokens/new
-  // Must have "Full control of private repositories"
+  // Must have "Repo: Full control of private repositories"
   "accessToken": "",
 
   // Github username, eg. kimchy

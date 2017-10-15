@@ -32,7 +32,17 @@ function getConfigTemplate() {
 
 function validateConfig({ username, accessToken, repositories }) {
   if (!username || !accessToken || !repositories || repositories.length === 0) {
-    throw new Error(constants.INVALID_CONFIG);
+    const e = new Error(constants.INVALID_CONFIG);
+    if (!username && !accessToken) {
+      e.details = 'username_and_access_token';
+    } else if (!username) {
+      e.details = 'username';
+    } else if (!accessToken) {
+      e.details = 'access_token';
+    } else if (!repositories || repositories.length === 0) {
+      e.details = 'repositories';
+    }
+    throw e;
   }
 }
 

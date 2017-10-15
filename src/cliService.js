@@ -117,9 +117,37 @@ service.getVersion = (owner, repoName, repositories) => {
 service.handleErrors = e => {
   switch (e.message) {
     case constants.INVALID_CONFIG:
-      console.log(
-        `Welcome to the Backport CLI tool! Update this config to proceed: ${getConfigFilePath()}`
-      );
+      switch (e.details) {
+        case 'username_and_access_token':
+          console.log(
+            `Welcome to the Backport tool. Please add your Github username, and a Github access token to the config: ${getConfigFilePath()}`
+          );
+          break;
+
+        case 'username':
+          console.log(
+            `Please add your username to the config: ${getConfigFilePath()}`
+          );
+          break;
+
+        case 'access_token':
+          console.log(
+            `Please add a Github access token to the config: ${getConfigFilePath()}`
+          );
+          break;
+
+        case 'repositories':
+          console.log(
+            `You must add at least 1 repository: ${getConfigFilePath()}`
+          );
+          break;
+
+        default:
+          console.log(
+            `There seems to be an issue with your config file. Please fix it: ${getConfigFilePath()}`
+          );
+      }
+
       break;
 
     case constants.GITHUB_ERROR:
