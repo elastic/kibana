@@ -14,6 +14,19 @@ export const KuiHeaderBreadcrumb = ({
     'kuiHeaderBreadcrumb-isActive': isActive,
   });
 
+  if (isActive) {
+    return (
+      <div
+        className={classes}
+        {...rest}
+      >
+        <div className="kuiHeaderBreadcrumb__text">
+          {children}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <a
       href={href}
