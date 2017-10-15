@@ -17,6 +17,9 @@ import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 import { updateVisualizationConfig } from './vis_update';
+import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
+import { FilterManagerProvider } from 'ui/filter_manager';
 
 export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
@@ -24,6 +27,9 @@ export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
   const brushEvent = Private(UtilsBrushEventProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
+  const SearchSource = Private(SearchSourceProvider);
+  const savedObjectsClient = Private(SavedObjectsClientProvider);
+  const filterManager = Private(FilterManagerProvider);
 
   class Vis extends EventEmitter {
     constructor(indexPattern, visState, uiState) {
@@ -50,8 +56,11 @@ export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
       this.sessionState = {};
 
       this.API = {
+        savedObjectsClient: savedObjectsClient,
+        SearchSource: SearchSource,
         indexPatterns: indexPatterns,
         timeFilter: timefilter,
+        filterManager: filterManager,
         queryFilter: queryFilter,
         events: {
           filter: (event) => {
