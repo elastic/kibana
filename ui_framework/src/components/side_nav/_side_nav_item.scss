@@ -38,10 +38,8 @@
 
   // Focus state background regardless of index/selected state.
   &:focus {
-    background-color: $kuiFocusBackgroundColor !important;
-  }
-
-  &:focus:not(.kuiSideNavItem-isSelected) {
-    border: solid 1px darken($kuiFocusBackgroundColor, 10%);
+    color: $kuiTextColor;
+    background-color: $kuiColorLighterShade !important;
+    text-decoration: underline;
   }
 }

@@ -3399,9 +3399,9 @@ table {
   .kuiSideNavItem:hover {
     text-decoration: underline; }
   .kuiSideNavItem:focus {
-    background-color: #275160 !important; }
-  .kuiSideNavItem:focus:not(.kuiSideNavItem-isSelected) {
-    border: solid 1px #18323c; }
+    color: #DDD;
+    background-color: #E4E4E4 !important;
+    text-decoration: underline; }
 
 .kuiSideNavTitle {
   font-size: 16px;
