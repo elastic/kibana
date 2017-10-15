@@ -107,7 +107,7 @@ export default class extends Component {
         </KuiHeaderBreadcrumb>
 
         <KuiHeaderBreadcrumb href="#" isActive>
-          Advanced settings
+          Kibana Advanced settings &raquo; General
         </KuiHeaderBreadcrumb>
       </KuiHeaderBreadcrumbs>
     );
@@ -388,7 +388,7 @@ export default class extends Component {
             Kibana
           </KuiSideNavTitle>
 
-          <KuiSideNavItem isSelected>
+          <KuiSideNavItem>
             <button>
               Advanced settings
             </button>

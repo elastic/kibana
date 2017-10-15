@@ -160,7 +160,7 @@ export default class extends Component {
         </KuiHeaderBreadcrumb>
 
         <KuiHeaderBreadcrumb href="#" isActive>
-          Watches
+          Elasticsearch Watches
         </KuiHeaderBreadcrumb>
       </KuiHeaderBreadcrumbs>
     );

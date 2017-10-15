@@ -19,17 +19,6 @@
   // We allow one level of nesting.
   &.kuiSideNavItem--indent {
     margin-left: $kuiSize;
-    font-size: $kuiFontSizeS;
-    padding: $kuiSizeXS / 2 $kuiSizeS;
-    border-left: $kuiBorderThin;
-    border-left-color: $kuiBorderColor;
-
-    // When indented and selected, make it not so heavy.
-    &.kuiSideNavItem-isSelected {
-      border-left-color: $kuiColorSecondary;
-      background-color: transparent;
-      box-shadow: none;
-    }
   }
 
   &:hover {

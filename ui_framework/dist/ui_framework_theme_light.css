@@ -1991,6 +1991,10 @@ table {
     -webkit-transform: rotate(15deg);
             transform: rotate(15deg);
     background: #D9D9D9; }
+  .kuiHeaderBreadcrumb:not(:last-child) .kuiHeaderBreadcrumb__text {
+    max-width: 150px;
+    text-overflow: ellipsis;
+    overflow: hidden; }
   .kuiHeaderBreadcrumb:not(.kuiHeaderBreadcrumb--collapsed):not(.kuiHeaderBreadcrumb-isActive):hover {
     text-decoration: underline; }
   .kuiHeaderBreadcrumb:not(.kuiHeaderBreadcrumb--collapsed):not(.kuiHeaderBreadcrumb-isActive):focus {
@@ -2002,10 +2006,7 @@ table {
 
 .kuiHeaderBreadcrumb__text {
   white-space: nowrap;
-  max-width: 150px;
-  display: block;
-  text-overflow: ellipsis;
-  overflow: hidden; }
+  display: block; }
 
 .kuiHeaderBreadcrumb--collapsed {
   color: #D9D9D9; }
@@ -3388,15 +3389,7 @@ table {
     color: #3F3F3F;
     border-left-color: #0079a5; }
   .kuiSideNavItem.kuiSideNavItem--indent {
-    margin-left: 16px;
-    font-size: 14px;
-    padding: 2px 8px;
-    border-left: 1px solid #D9D9D9;
-    border-left-color: #D9D9D9; }
-    .kuiSideNavItem.kuiSideNavItem--indent.kuiSideNavItem-isSelected {
-      border-left-color: #00A69B;
-      background-color: transparent;
-      box-shadow: none; }
+    margin-left: 16px; }
   .kuiSideNavItem:hover {
     text-decoration: underline; }
   .kuiSideNavItem:focus {
