@@ -83,12 +83,12 @@ export class DashboardStateManager {
   }
 
   _areStoreAndAppStatePanelsEqual() {
-    const { dashboardState } = store.getState();
+    const { dashboard } = store.getState();
     // We need to run this comparison check or we can enter an infinite loop.
     let differencesFound = false;
     for (let i = 0; i < this.appState.panels.length; i++) {
       const appStatePanel = this.appState.panels[i];
-      if (!_.isEqual(appStatePanel, dashboardState.panels[appStatePanel.panelIndex])) {
+      if (!_.isEqual(appStatePanel, dashboard.panels[appStatePanel.panelIndex])) {
         differencesFound = true;
         break;
       }
@@ -108,12 +108,12 @@ export class DashboardStateManager {
       store.dispatch(updatePanels(this.getPanels()));
     }
 
-    const { dashboardState } = store.getState();
-    if (dashboardState.viewMode !== this.getViewMode()) {
+    const { dashboard } = store.getState();
+    if (dashboard.viewMode !== this.getViewMode()) {
       store.dispatch(updateViewMode(this.getViewMode()));
     }
 
-    if (dashboardState.view.isFullScreenMode !== this.getFullScreenMode()) {
+    if (dashboard.view.isFullScreenMode !== this.getFullScreenMode()) {
       store.dispatch(updateIsFullScreenMode(this.getFullScreenMode()));
     }
   }
@@ -123,11 +123,11 @@ export class DashboardStateManager {
       return;
     }
 
-    const { dashboardState } = store.getState();
+    const { dashboard } = store.getState();
     // The only state that the store deals with that appState cares about is the panels array. Every other state change
     // (that appState cares about) is initiated from appState (e.g. view mode).
     this.appState.panels = [];
-    _.map(dashboardState.panels, panel => {
+    _.map(dashboard.panels, panel => {
       this.appState.panels.push(panel);
     });
     this.changeListeners.forEach(function (listener) {
