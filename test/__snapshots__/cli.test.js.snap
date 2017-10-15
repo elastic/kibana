@@ -235,6 +235,10 @@ Array [
         "name": "commit",
         "type": "list",
       },
+    ],
+  ],
+  Array [
+    Array [
       Object {
         "choices": Array [
           "6.x",
@@ -297,6 +301,10 @@ Array [
         "name": "commit",
         "type": "list",
       },
+    ],
+  ],
+  Array [
+    Array [
       Object {
         "choices": Array [
           "6.x",
@@ -359,6 +367,10 @@ Array [
         "name": "commit",
         "type": "list",
       },
+    ],
+  ],
+  Array [
+    Array [
       Object {
         "choices": Array [
           "6.x",
@@ -421,6 +433,10 @@ Array [
         "name": "commit",
         "type": "list",
       },
+    ],
+  ],
+  Array [
+    Array [
       Object {
         "choices": Array [
           "6.x",

@@ -30,7 +30,11 @@ describe('select commit that originated from pull request', () => {
           commit: {
             message: 'myCommitMessage',
             sha: 'mySha'
-          },
+          }
+        })
+      )
+      .mockReturnValueOnce(
+        Promise.resolve({
           version: 'myVersion'
         })
       );
@@ -79,7 +83,7 @@ describe('select commit that originated from pull request', () => {
     );
   });
 
-  test('prompt should display list of repository names', () => {
+  it('prompt should display list of repository names', () => {
     expect(inquirer.prompt).toHaveBeenCalledWith([
       {
         choices: ['elastic/backport-cli-test'],
@@ -90,7 +94,7 @@ describe('select commit that originated from pull request', () => {
     ]);
   });
 
-  test('getCommit should be called with correct args', () => {
+  it('getCommit should be called with correct args', () => {
     expect(github.getCommits).toHaveBeenCalledWith(
       'elastic',
       'backport-cli-test',
@@ -98,7 +102,7 @@ describe('select commit that originated from pull request', () => {
     );
   });
 
-  test('createPullRequest should be called with correct args', () => {
+  it('createPullRequest should be called with correct args', () => {
     expect(github.createPullRequest).toHaveBeenCalledWith(
       'elastic',
       'backport-cli-test',
@@ -111,11 +115,11 @@ describe('select commit that originated from pull request', () => {
     );
   });
 
-  test('prompt calls should match snapshot', () => {
+  it('prompt calls should match snapshot', () => {
     expect(inquirer.prompt.mock.calls).toMatchSnapshot();
   });
 
-  test('exec should be called with correct args', () => {
+  it('exec should be called with correct args', () => {
     expect(utils.exec.mock.calls).toMatchSnapshot();
   });
 });
@@ -137,7 +141,11 @@ describe('select commit that originated from commit', () => {
           commit: {
             message: 'myCommitMessage',
             sha: 'mySha'
-          },
+          }
+        })
+      )
+      .mockReturnValueOnce(
+        Promise.resolve({
           version: 'myVersion'
         })
       );
@@ -182,7 +190,7 @@ describe('select commit that originated from commit', () => {
     );
   });
 
-  test('createPullRequest should be called with correct args', () => {
+  it('createPullRequest should be called with correct args', () => {
     expect(github.createPullRequest).toHaveBeenCalledWith(
       'elastic',
       'backport-cli-test',

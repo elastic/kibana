@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const { init } = require('../src/cli');
+const { init } = require('./cli');
 const { getConfig } = require('./configs');
 const config = getConfig();
 

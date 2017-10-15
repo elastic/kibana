@@ -2,8 +2,7 @@ const promisify = require('es6-promisify');
 const mkdirp = promisify(require('mkdirp'));
 const fs = require('fs');
 const stat = promisify(fs.stat);
-const { getRepoPath } = require('./env');
-const env = require('../src/env');
+const env = require('./env');
 const utils = require('./utils');
 
 function folderExists(path) {
@@ -18,16 +17,16 @@ function folderExists(path) {
     });
 }
 
-// Clone repo and add remotes if it does not exist
-function maybeSetupRepo(owner, repoName, username) {
-  return folderExists(getRepoPath(owner, repoName)).then(exists => {
-    if (!exists) {
-      return mkdirp(env.getRepoOwnerDirPath(owner)).then(() => {
-        return cloneRepo(owner, repoName).then(() =>
-          addRemote(owner, repoName, username)
-        );
-      });
-    }
+function repoExists(owner, repoName) {
+  return folderExists(env.getRepoPath(owner, repoName));
+}
+
+// Clone repo and add remotes
+function setupRepo(owner, repoName, username) {
+  return mkdirp(env.getRepoOwnerDirPath(owner)).then(() => {
+    return cloneRepo(owner, repoName).then(() =>
+      addRemote(owner, repoName, username)
+    );
   });
 }
 
@@ -52,7 +51,7 @@ function addRemote(owner, repoName, username) {
 
 function cherrypick(owner, repoName, sha) {
   return utils.exec(`git cherry-pick ${sha}`, {
-    cwd: getRepoPath(owner, repoName)
+    cwd: env.getRepoPath(owner, repoName)
   });
 }
 
@@ -60,7 +59,7 @@ function createAndCheckoutBranch(owner, repoName, baseBranch, featureBranch) {
   return utils.exec(
     `git fetch origin ${baseBranch} && git branch ${featureBranch} origin/${baseBranch} --force && git checkout ${featureBranch} `,
     {
-      cwd: getRepoPath(owner, repoName)
+      cwd: env.getRepoPath(owner, repoName)
     }
   );
 }
@@ -90,6 +89,7 @@ module.exports = {
   cloneRepo,
   createAndCheckoutBranch,
   getCommit,
-  maybeSetupRepo,
+  repoExists,
+  setupRepo,
   push
 };
