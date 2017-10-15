@@ -391,20 +391,6 @@ export class Table extends Component {
               />
             </KuiTableRowCell>
           );
-
-          return (
-            <KuiTableHeaderCellCheckbox
-              key={column.id}
-              width={column.width}
-            >
-              <KuiCheckbox
-                id="selectAllCheckbox"
-                checked={this.areAllItemsSelected()}
-                onChange={this.toggleAll.bind(this)}
-                type="inList"
-              />
-            </KuiTableHeaderCellCheckbox>
-          );
         }
 
         if (column.cellProvider) {
