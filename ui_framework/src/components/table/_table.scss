@@ -6,7 +6,7 @@
   @include kuiFontSizeS;
 
   width: 100%;
-  border: none;
+  border: $kuiTableBorder;
   border-collapse: collapse;
   background-color: $kuiColorEmptyShade;
 }
@@ -15,30 +15,34 @@
   .kuiTableCellContent {
     padding: $kuiTableCellPaddingCompressed;
   }
-
-  .kuiTableHeaderButton:focus {
-    outline: solid $kuiTableCellPaddingCompressed $kuiFocusBackgroundColor;
-  }
 }
 
 .kuiTableHeaderCell {
   @include kuiTableCell;
 
+  background-color: $kuiColorLightestShade;
   color: $kuiTitleColor;
-
-  .kuiTableHeaderButton {
-    text-align: left;
-  }
 }
 
 .kuiTableHeaderCellCheckbox {
   @include kuiTableCellCheckbox;
+
+  background-color: $kuiColorLightestShade;
+
+  /**
+   * 1. Allow checkbox box-shadow to be visible.
+   */
+  .kuiTableCellContent {
+    overflow: visible; /* 1 */
+  }
 }
 
 .kuiTableHeaderButton {
   @include kuiFontSizeS;
 
+  text-align: left;
   color: inherit;
+  font-weight: inherit;
   width: 100%;
 
   &:hover, &:focus {
@@ -52,7 +56,7 @@
   }
 
   &:focus {
-    background: $kuiFocusBackgroundColor;
+    box-shadow: inset 0 -2px 0 0 $kuiColorPrimary;
   }
 }
 
@@ -67,12 +71,37 @@
 
 .kuiTableRow {
   transition: background-color $kuiAnimSpeedFast $kuiAnimSlightResistance;
-  &:hover {
+
+  &:hover:not(.kuiTableRow-isSelected) {
     background-color: tintOrShade($kuiColorLightestShade, 50%, 20%);
+
+    .kuiTableRowCell,
+    .kuiTableRowCellCheckbox {
+      border-color: $kuiColorLightShade;
+    }
+
+    & + .kuiTableRow .kuiTableRowCell,
+    & + .kuiTableRow .kuiTableRowCellCheckbox {
+      border-color: $kuiColorLightShade;
+    }
   }
 
   &.kuiTableRow-isSelected {
-    background-color: transparentize($kuiColorPrimary, .95);
+    background-color: transparentize($kuiColorPrimary, 0.95);
+
+    &:hover {
+      background-color: transparentize($kuiColorPrimary, 0.9);
+
+      .kuiTableRowCell,
+      .kuiTableRowCellCheckbox {
+        border-color: transparentize($kuiColorPrimary, 0.7);
+      }
+
+      & + .kuiTableRow .kuiTableRowCell,
+      & + .kuiTableRow .kuiTableRowCellCheckbox {
+        border-top-color: transparentize($kuiColorPrimary, 0.7);
+      }
+    }
   }
 }
 
@@ -80,15 +109,36 @@
   @include kuiTableCell;
 
   color: $kuiTextColor;
-  border-top: $kuiBorderThin;
-  border-bottom: $kuiBorderThin;
+  border-top: $kuiTableBorder;
+
+  &:first-child {
+    border-left: $kuiTableBorder;
+  }
+
+  &:last-child {
+    border-right: $kuiTableBorder;
+  }
 }
 
 .kuiTableRowCellCheckbox {
   @include kuiTableCellCheckbox;
 
-  border-top: $kuiBorderThin;
-  border-bottom: $kuiBorderThin;
+  border-top: $kuiTableBorder;
+
+  &:first-child {
+    border-left: $kuiTableBorder;
+  }
+
+  &:last-child {
+    border-right: $kuiTableBorder;
+  }
+
+  /**
+   * 1. Allow checkbox box-shadow to be visible.
+   */
+  .kuiTableCellContent {
+    overflow: visible; /* 1 */
+  }
 }
 
 /**
@@ -117,4 +167,9 @@
 
 .kuiTableCellContent--wrapText {
   white-space: normal;
+  overflow: visible;
+
+  .kuiTableCellContent__text {
+    overflow: visible;
+  }
 }

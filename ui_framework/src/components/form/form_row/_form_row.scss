@@ -19,7 +19,11 @@
     padding-top: $kuiFontSizeXS + $kuiSizeS; /* 2 */
   }
 
-  .kuiFormRow__text + .kuiFormRow__text {
+  .kuiFormErrorText + .kuiFormErrorText {
+    padding-top: 0;
+  }
+
+  .kuiFormHelpText + .kuiFormHelpText {
     padding-top: 0;
   }
 }

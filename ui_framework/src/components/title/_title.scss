@@ -1,12 +1,15 @@
 .kuiTitle {
   @include kuiTitle;
   @include kuiFontSizeL;
+  font-weight: $kuiFontWeightRegular;
 }
 
 .kuiTitle--small {
   @include kuiFontSizeM;
+  font-weight: $kuiFontWeightRegular;
 }
 
 .kuiTitle--large {
   @include kuiFontSizeXL;
+  font-weight: $kuiFontWeightRegular;
 }

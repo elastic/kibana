@@ -1,9 +1,8 @@
 .kuiModal {
-  @include kuiBottomShadow;
-
   background-color: $kuiColorEmptyShade;
   border: $kuiBorderThin;
   border-radius: $kuiBorderRadius;
+  box-shadow: $kuiShadowMedium, $kuiBottomShadow;
   z-index: $kuiZModal;
   padding: $kuiSizeXL;
   min-width: 50%;

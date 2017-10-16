@@ -1,26 +1,41 @@
+$kuiBottomShadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1);
+$kuiBottomShadowSmall: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+$kuiBottomShadowMedium: 0 4px 4px -2px rgba(0, 0, 0, 0.2);
+
+$kuiSlightShadow: 0 2px 2px -1px rgba(0, 0, 0, 0.15);
+$kuiSlightShadowHover: 0 4px 2px -1px rgba(0, 0, 0, 0.1);
+$kuiSlightShadowActive: 0 1px 2px -1px rgba(0, 0, 0, 0.15);
+
+$kuiSmallShadow: 0 2px 2px -1px rgba(0, 0, 0, 0.3);
+$kuiSmallShadowHover: 0 4px 2px -1px rgba(0, 0, 0, 0.15);
+$kuiSmallShadowActive: 0 1px 2px -1px rgba(0, 0, 0, 0.3);
+
+$kuiShadowMedium: 0 1px 8px -1px rgba(0, 0, 0, 0.15);
+
 @mixin kuiBottomShadow {
-  box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1);
+  box-shadow: $kuiBottomShadow;
 }
 
 @mixin kuiBottomShadowSmall {
-  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+  box-shadow: $kuiBottomShadowSmall;
 }
 
 @mixin kuiBottomShadowMedium {
-  box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.2);
+  box-shadow: $kuiBottomShadowMedium;
 }
 
 @mixin kuiSlightShadow {
-  box-shadow:
-    0 2px 2px -1px rgba(0, 0, 0, 0.15),
+  box-shadow: $kuiSlightShadow;
 }
 
 @mixin kuiSlightShadowHover {
-  box-shadow:
-    0 4px 4px -2px rgba(0, 0, 0, 0.1),
+  box-shadow: $kuiSlightShadowHover;
 }
 
 @mixin kuiSlightShadowActive {
-  box-shadow:
-    0 1px 1px 0px rgba(0, 0, 0, 0.2),
+  box-shadow: $kuiSlightShadowActive;
+}
+
+@mixin kuiShadowMedium {
+  box-shadow: $kuiShadowMedium;
 }

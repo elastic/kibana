@@ -1,6 +1,5 @@
 .kuiToast {
-  @include kuiBottomShadow;
-
+  box-shadow: $kuiShadowMedium, $kuiBottomShadow;
   position: relative;
   padding: $kuiSize;
   background-color: $kuiColorEmptyShade;
@@ -88,7 +87,7 @@ $toastTypes: (
 
   .kuiToastHeader__title {
     color: $kuiTitleColor;
-    font-weight: $kuiFontWeightLight;
+    font-weight: $kuiFontWeightRegular;
   }
 
 .kuiToastHeader--withBody {

@@ -12,35 +12,45 @@
   line-height: $kuiHeaderChildSize;
   padding: 0 $kuiSize;
   position: relative;
-  color: $kuiHeaderBreadcrumbColor;
+  color: $kuiColorPrimary;
 
-  // Slanted separator. Shows on all but last item.
-  &:not(:last-child):after {
-    position: absolute;
-    top: $kuiSizeL;
-    right: -3px; // Half the transformed width.
-    content: "";
-    width: 1px;
-    height: $kuiSize;
-    transform: rotate(15deg);
-    background: $kuiColorLightShade;
+  &:hover {
+    color: darken($kuiColorPrimary, 10%);
   }
 
-  &:not(.kuiHeaderBreadcrumb--collapsed) {
+  // Slanted separator. Shows on all but last item.
+  &:not(:last-child) {
+    &:after {
+      position: absolute;
+      top: $kuiSizeL;
+      right: -3px; // Half the transformed width.
+      content: "";
+      width: 1px;
+      height: $kuiSize;
+      transform: rotate(15deg);
+      background: $kuiColorLightShade;
+    }
+
+    .kuiHeaderBreadcrumb__text {
+      max-width: 150px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+    }
+  }
+
+  &:not(.kuiHeaderBreadcrumb--collapsed):not(.kuiHeaderBreadcrumb-isActive) {
     @include kuiLink;
   }
 
   &.kuiHeaderBreadcrumb-isActive {
-    color: $kuiColorMediumShade;
+    color: $kuiHeaderBreadcrumbColor;
+    font-weight: $kuiFontWeightMedium;
   }
 }
 
   .kuiHeaderBreadcrumb__text {
     white-space: nowrap;
-    max-width: 150px;
     display: block;
-    text-overflow: ellipsis;
-    overflow: hidden;
   }
 
 .kuiHeaderBreadcrumb--collapsed {

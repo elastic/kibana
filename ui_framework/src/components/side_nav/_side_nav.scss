@@ -3,6 +3,10 @@
   height: 100%;
 }
 
+  .kuiSideNav__content {
+    padding: $kuiSizeM;
+  }
+
   // These mobile children are hidden in everything but mobile view.
   .kuiSideNav__mobileToggle {
     display: none;

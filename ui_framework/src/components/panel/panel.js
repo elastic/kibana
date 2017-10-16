@@ -7,6 +7,8 @@ const paddingSizeToClassNameMap = {
   's': 'kuiPanel--paddingSmall',
   'm': 'kuiPanel--paddingMedium',
   'l': 'kuiPanel--paddingLarge',
+  'xl': 'kuiPanel--paddingXLarge',
+  'xxl': 'kuiPanel--paddingXXLarge',
 };
 
 export const SIZES = Object.keys(paddingSizeToClassNameMap);

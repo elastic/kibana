@@ -4,49 +4,27 @@
   display: block;
   width: 100%;
   text-align: left;
-  padding: $kuiSizeXS $kuiSizeS;
+  padding: $kuiSizeXXS 0;
   color: $kuiColorDarkShade;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  border: $kuiBorderThin;
-  border-color: transparent;
 
   &.kuiSideNavItem-isSelected {
-    @include kuiBottomShadowSmall;
-
-    color: $kuiColorSecondary;
-    border-left: $kuiBorderThick;
-    border-left-color: $kuiColorSecondary;
-    background-color: $kuiColorEmptyShade;
+    color: $kuiTextColor;
+    font-weight: $kuiFontWeightMedium;
+    cursor: default;
   }
 
   // We allow one level of nesting.
   &.kuiSideNavItem--indent {
-    margin-left: $kuiSize;
-    font-size: $kuiFontSizeS;
-    padding: $kuiSizeXS / 2 $kuiSizeS;
-    border-left: $kuiBorderThin;
-    border-left-color: $kuiBorderColor;
+    padding-left: $kuiSizeS;
+  }
 
-    // When indented and selected, make it not so heavy.
-    &.kuiSideNavItem-isSelected {
-      border-left-color: $kuiColorSecondary;
-      background-color: transparent;
-      box-shadow: none;
+  &:hover, &:focus {
+    &:not(.kuiSideNavItem-isSelected) {
+      color: $kuiTextColor;
+      text-decoration: underline;
     }
-  }
-
-  &:hover {
-    text-decoration: underline;
-  }
-
-  // Focus state background regardless of index/selected state.
-  &:focus {
-    background-color: $kuiFocusBackgroundColor !important;
-  }
-
-  &:focus:not(.kuiSideNavItem-isSelected) {
-    border: solid 1px darken($kuiFocusBackgroundColor, 10%);
   }
 }

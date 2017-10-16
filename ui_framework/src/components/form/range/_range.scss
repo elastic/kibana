@@ -10,7 +10,7 @@
 
 .kuiRange {
   @include kuiFormControlSize;
-  
+
   appearance: none;
   margin: $kuiRangeThumbHeight / 2 0;
 
@@ -18,23 +18,24 @@
     max-width: 100%;
   }
 
+  /**
+   * 1. We can't group these selectors or else the styles won't be applied.
+   */
   &:focus {
-
-    &::-webkit-slider-thumb {
+    &::-webkit-slider-thumb { /* 1 */
       border: $kuiRangeBorderWidth solid $kuiColorPrimary;
+      box-shadow: $kuiSmallShadowHover;
     }
 
-    &::-moz-range-thumb {
+    &::-moz-range-thumb { /* 1 */
       border: $kuiRangeBorderWidth solid $kuiColorPrimary;
+      box-shadow: $kuiSmallShadowHover;
     }
 
-    &::-ms-thumb {
+    &::-ms-thumb { /* 1 */
       border: $kuiRangeBorderWidth solid $kuiColorPrimary;
+      box-shadow: $kuiSmallShadowHover;
     }
-    &::-webkit-slider-runnable-track {
-      background-color: $kuiColorPrimary;
-    }
-
   }
 
   &::-webkit-slider-runnable-track {

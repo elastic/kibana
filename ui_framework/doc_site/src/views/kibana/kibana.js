@@ -6,18 +6,19 @@ import React, {
 import {
   KuiAvatar,
   KuiButton,
+  KuiCallOut,
   KuiFlexGroup,
   KuiFlexItem,
+  KuiGlobalToastList,
+  KuiGlobalToastListItem,
   KuiHeader,
+  KuiHeaderAlert,
   KuiHeaderBreadcrumb,
-  KuiHeaderBreadcrumbCollapsed,
   KuiHeaderBreadcrumbs,
   KuiHeaderLogo,
   KuiHeaderSection,
   KuiHeaderSectionItem,
   KuiHeaderSectionItemButton,
-  KuiGlobalToastList,
-  KuiGlobalToastListItem,
   KuiIcon,
   KuiKeyPadMenu,
   KuiKeyPadMenuItem,
@@ -28,18 +29,15 @@ import {
   KuiPageContentBody,
   KuiPageContentHeader,
   KuiPageContentHeaderSection,
-  KuiPageHeader,
-  KuiPageHeaderSection,
   KuiPageSideBar,
   KuiPopover,
   KuiSideNav,
   KuiSideNavItem,
   KuiSideNavTitle,
-  KuiToast,
-  KuiTitle,
-  KuiText,
   KuiSpacer,
-  KuiHeaderAlert,
+  KuiText,
+  KuiTitle,
+  KuiToast,
 } from '../../../../components';
 
 import {
@@ -161,18 +159,8 @@ export default class extends Component {
           Management
         </KuiHeaderBreadcrumb>
 
-        <KuiHeaderBreadcrumb href="#">
-          Truncation test is here
-        </KuiHeaderBreadcrumb>
-
-        <KuiHeaderBreadcrumbCollapsed />
-
-        <KuiHeaderBreadcrumb href="#">
-          Users
-        </KuiHeaderBreadcrumb>
-
         <KuiHeaderBreadcrumb href="#" isActive>
-          Create
+          Elasticsearch Watches
         </KuiHeaderBreadcrumb>
       </KuiHeaderBreadcrumbs>
     );
@@ -430,16 +418,9 @@ export default class extends Component {
   renderPage() {
     return (
       <KuiPage>
-        <KuiPageHeader>
-          <KuiPageHeaderSection>
-            <KuiTitle size="large">
-              <h1>Management</h1>
-            </KuiTitle>
-          </KuiPageHeaderSection>
-        </KuiPageHeader>
         <KuiPageBody>
           {this.renderSideNav()}
-          <KuiPageContent>
+          <KuiPageContent panelPaddingSize="xxl">
             <KuiPageContentHeader>
               <KuiPageContentHeaderSection>
                 <KuiTitle>
@@ -468,8 +449,21 @@ export default class extends Component {
                 </KuiFlexGroup>
               </KuiPageContentHeaderSection>
             </KuiPageContentHeader>
+
             <KuiPageContentBody>
-              <Table />
+              <KuiCallOut
+                title="Watch saved"
+                type="success"
+                iconType="user"
+              >
+                <p>
+                  Your <KuiLink href="#">new watch</KuiLink> has been saved.
+                </p>
+              </KuiCallOut>
+
+              <KuiSpacer size="m" />
+
+              <Table compressed />
             </KuiPageContentBody>
           </KuiPageContent>
         </KuiPageBody>
