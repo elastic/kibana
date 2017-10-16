@@ -4,31 +4,27 @@
   display: block;
   width: 100%;
   text-align: left;
-  padding: $kuiSizeXXS $kuiSizeS;
+  padding: $kuiSizeXXS 0;
   color: $kuiColorDarkShade;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  border-left: $kuiBorderThick;
 
   &.kuiSideNavItem-isSelected {
     color: $kuiTextColor;
-    border-left-color: $kuiColorPrimary;
+    font-weight: $kuiFontWeightMedium;
+    cursor: default;
   }
 
   // We allow one level of nesting.
   &.kuiSideNavItem--indent {
-    margin-left: $kuiSize;
+    padding-left: $kuiSizeS;
   }
 
-  &:hover {
-    text-decoration: underline;
-  }
-
-  // Focus state background regardless of index/selected state.
-  &:focus {
-    color: $kuiTextColor;
-    background-color: $kuiColorLighterShade !important;
-    text-decoration: underline;
+  &:hover, &:focus {
+    &:not(.kuiSideNavItem-isSelected) {
+      color: $kuiTextColor;
+      text-decoration: underline;
+    }
   }
 }

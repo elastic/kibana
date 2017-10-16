@@ -3379,22 +3379,19 @@ table {
   display: block;
   width: 100%;
   text-align: left;
-  padding: 2px 8px;
+  padding: 2px 0;
   color: #D9D9D9;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
-  border-left: 2px solid #333; }
+  text-overflow: ellipsis; }
   .kuiSideNavItem.kuiSideNavItem-isSelected {
     color: #DDD;
-    border-left-color: #4da1c0; }
+    font-weight: 500;
+    cursor: default; }
   .kuiSideNavItem.kuiSideNavItem--indent {
-    margin-left: 16px; }
-  .kuiSideNavItem:hover {
-    text-decoration: underline; }
-  .kuiSideNavItem:focus {
+    padding-left: 8px; }
+  .kuiSideNavItem:hover:not(.kuiSideNavItem-isSelected), .kuiSideNavItem:focus:not(.kuiSideNavItem-isSelected) {
     color: #DDD;
-    background-color: #E4E4E4 !important;
     text-decoration: underline; }
 
 .kuiSideNavTitle {
