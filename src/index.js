@@ -21,6 +21,7 @@ const args = yargs
     description: 'Show configuration file',
     type: 'boolean'
   })
+  .alias('v', 'version')
   .version()
   .help().argv;
 
