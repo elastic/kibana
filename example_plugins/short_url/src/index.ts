@@ -13,7 +13,15 @@ export const plugin: KibanaPluginConfig<{}> = {
     // which seem like they're needed in a lot of
     // places in kibana, so make them part of core
     // here we pull them out of kibana
-    const { kibana: _kibana, elasticsearch, logger, util, http, UiSettingsService, SavedObjectsService } = kibana;
+    const {
+      kibana: _kibana,
+      elasticsearch,
+      logger,
+      util,
+      http,
+      UiSettingsService,
+      SavedObjectsService,
+    } = kibana;
 
     // here we pull indexPatterns out of dependencies
     const { indexPatterns } = dependencies;
