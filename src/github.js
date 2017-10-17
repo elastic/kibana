@@ -1,4 +1,5 @@
 const axios = require('axios');
+const querystring = require('querystring');
 const constants = require('./constants');
 let accessToken;
 
@@ -17,8 +18,20 @@ function getCommitMessage(message) {
 }
 
 function getCommits(owner, repoName, author) {
+  const urlArgs = {
+    per_page: 20,
+    access_token: accessToken
+  };
+
+  if (author) {
+    urlArgs.author = author;
+    urlArgs.per_page = 5;
+  }
+
   return axios(
-    `https://api.github.com/repos/${owner}/${repoName}/commits?author=${author}&per_page=5&access_token=${accessToken}`
+    `https://api.github.com/repos/${owner}/${repoName}/commits?${querystring.stringify(
+      urlArgs
+    )}`
   )
     .catch(throwGithubError)
     .then(res =>

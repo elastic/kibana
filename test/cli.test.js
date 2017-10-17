@@ -79,19 +79,8 @@ describe('select commit that originated from pull request', () => {
           }
         ]
       },
-      { cwd: '/my/path' }
+      { cwd: '/my/path', own: true, multiple: false }
     );
-  });
-
-  it('prompt should display list of repository names', () => {
-    expect(inquirer.prompt).toHaveBeenCalledWith([
-      {
-        choices: ['elastic/backport-cli-test'],
-        message: 'Select repository',
-        name: 'fullRepoName',
-        type: 'list'
-      }
-    ]);
   });
 
   it('getCommit should be called with correct args', () => {
@@ -186,7 +175,7 @@ describe('select commit that originated from commit', () => {
           }
         ]
       },
-      { cwd: '/my/path' }
+      { cwd: '/my/path', own: true, multiple: false }
     );
   });
 

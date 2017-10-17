@@ -1,4 +1,3 @@
-const inquirer = require('inquirer');
 const ora = require('ora');
 const path = require('path');
 const prompts = require('./prompts');
@@ -16,7 +15,36 @@ const {
   setupRepo
 } = require('./git');
 
+function sequentially(items, handler) {
+  return items.reduce(
+    (p, item) => p.then(() => handler(item)),
+    Promise.resolve()
+  );
+}
+
 const service = {};
+service.doBackportVersions = ({
+  owner,
+  repoName,
+  commit,
+  reference,
+  versions,
+  username
+}) => {
+  return sequentially(versions, version => {
+    return service
+      .doBackportVersion({
+        owner,
+        repoName,
+        commit,
+        reference,
+        version,
+        username
+      })
+      .catch(e => console.error('Could not backport', version, e));
+  });
+};
+
 service.doBackportVersion = ({
   owner,
   repoName,
@@ -26,6 +54,10 @@ service.doBackportVersion = ({
   username
 }) => {
   const backportBranchName = getBackportBranchName(version, reference);
+
+  console.log(
+    `Backporting ${service.getReferenceValue(reference)} to ${version}`
+  );
 
   return withSpinner(
     resetAndPullMaster(owner, repoName).then(() =>
@@ -51,7 +83,8 @@ service.doBackportVersion = ({
         github.createPullRequest(owner, repoName, payload),
         'Creating pull request'
       );
-    });
+    })
+    .then(res => console.log(`View pull request: ${res.data.html_url}\n`));
 };
 
 service.getReference = (owner, repoName, commitSha) => {
@@ -66,7 +99,7 @@ service.getReference = (owner, repoName, commitSha) => {
     });
 };
 
-service.getRepoInfo = (repositories, cwd) => {
+service.promptRepoInfo = (repositories, cwd) => {
   return Promise.resolve()
     .then(() => {
       const fullRepoNames = repositories.map(repo => repo.name);
@@ -75,8 +108,8 @@ service.getRepoInfo = (repositories, cwd) => {
         console.log(`Repository: ${currentFullRepoName}`);
         return currentFullRepoName;
       }
-      return inquirer
-        .prompt([prompts.listFullRepositoryName(fullRepoNames)])
+      return prompts
+        .listFullRepoName(fullRepoNames)
         .then(({ fullRepoName }) => fullRepoName);
     })
     .then(fullRepoName => {
@@ -96,22 +129,33 @@ service.maybeSetupRepo = (owner, repoName, username) => {
   });
 };
 
-service.getCommit = (owner, repoName, username) => {
+service.promptCommit = (owner, repoName, username) => {
   const spinner = ora('Loading commits...').start();
   return github
     .getCommits(owner, repoName, username)
+    .catch(e => {
+      spinner.fail();
+      throw e;
+    })
     .then(commits => {
       spinner.stop();
-      return inquirer.prompt([prompts.listCommits(commits)]);
+      return prompts.listCommits(commits);
     })
     .then(({ commit }) => commit);
 };
 
-service.getVersion = (owner, repoName, repositories) => {
+service.promptVersions = (
+  owner,
+  repoName,
+  repositories,
+  multipleChoice = false
+) => {
   const versions = getVersions(owner, repoName, repositories);
-  return inquirer
-    .prompt([prompts.listVersions(versions)])
-    .then(({ version }) => version);
+  if (multipleChoice) {
+    return prompts.checkboxVersions(versions).then(({ versions }) => versions);
+  }
+
+  return prompts.listVersions(versions).then(({ version }) => [version]);
 };
 
 service.handleErrors = e => {
@@ -191,15 +235,13 @@ function cherrypickAndPrompt(owner, repoName, sha) {
       throw e;
     }
 
-    return inquirer
-      .prompt([prompts.confirmConflictResolved()])
-      .then(({ isConflictResolved }) => {
-        if (!isConflictResolved) {
-          const error = new Error(constants.CHERRYPICK_CONFLICT_NOT_HANDLED);
-          error.details = e.message;
-          throw error;
-        }
-      });
+    return prompts.confirmConflictResolved().then(({ isConflictResolved }) => {
+      if (!isConflictResolved) {
+        const error = new Error(constants.CHERRYPICK_CONFLICT_NOT_HANDLED);
+        error.details = e.message;
+        throw error;
+      }
+    });
   });
 }
 
