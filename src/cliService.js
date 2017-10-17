@@ -41,7 +41,7 @@ service.doBackportVersions = ({
         version,
         username
       })
-      .catch(e => console.error('Could not backport', version, e));
+      .catch(service.handleErrors);
   });
 };
 

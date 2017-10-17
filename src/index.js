@@ -29,7 +29,4 @@ if (args.config) {
   return;
 }
 
-init(config, {
-  ...args,
-  cwd: process.cwd()
-});
+init(config, Object.assign(args, { cwd: process.cwd() }));
