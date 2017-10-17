@@ -16,7 +16,6 @@ function Agg(props) {
   };
   return (
     <div
-      aria-hidden="true"
       className={props.className}
       style={style}
       onMouseDown={props.onMouseDown}

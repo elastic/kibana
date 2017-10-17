@@ -31,6 +31,7 @@ export default class UiBundlerEnv {
     this.aliases = {
       ui: fromRoot('src/ui/public'),
       ui_framework: fromRoot('ui_framework'),
+      packages: fromRoot('packages'),
       test_harness: fromRoot('src/test_harness/public'),
       querystring: 'querystring-browser',
       moment$: fromRoot('webpackShims/moment'),
