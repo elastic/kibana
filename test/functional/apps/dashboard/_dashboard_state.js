@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }) {
     after(async function () {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
-    
+
     describe('Directly modifying url updates dashboard state', () => {
       it('for query parameter', async function () {
         await PageObjects.dashboard.gotoDashboardLandingPage();
