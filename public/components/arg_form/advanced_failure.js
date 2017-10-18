@@ -30,8 +30,7 @@ export const AdvancedFailureComponent = (props) => {
     ev.preventDefault();
 
     resetErrorState(); // when setting a new value, attempt to reset the error state
-    // TODO: fix this! Super hacky... we try the default as an expression first, and then fall back to a string
-    onValueChange(defaultValue);
+    onValueChange(fromExpression(defaultValue, 'argument'));
   };
 
   return (
