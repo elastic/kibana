@@ -26,7 +26,7 @@ export class Arg {
       multi: false,
       required: false,
       types: [],
-      defaultValue: isUndefined(argType.defaultValue) ? '' : argType.defaultValue,
+      defaultValue: isUndefined(argType.defaultValue) ? null : argType.defaultValue,
       options: {},
       resolve: () => ({}),
     };
