@@ -8,6 +8,10 @@
   "scripts": {
     "test": "jest"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sqren/backport-cli.git"
+  },
   "dependencies": {
     "axios": "^0.16.2",
     "es6-promisify": "^5.0.0",
