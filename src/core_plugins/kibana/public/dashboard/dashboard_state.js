@@ -6,7 +6,7 @@ import { PanelUtils } from './panel/panel_utils';
 import moment from 'moment';
 
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
-import { createPanelState, getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
+import { createPanelState, getPersistedStateId } from './panel';
 
 function getStateDefaults(dashboard, hideWriteControls) {
   return {
@@ -122,7 +122,7 @@ export class DashboardState {
     // in place in order for it to affect the visualizations.
     this.stateDefaults.query = this.lastSavedDashboardFilters.query;
     // Need to make a copy to ensure they are not overwritten.
-    this.stateDefaults.filters = Object.assign(new Array(), this.getLastSavedFilterBars());
+    this.stateDefaults.filters = [...this.getLastSavedFilterBars()];
 
     this.isDirty = false;
     this.appState.setDefaults(this.stateDefaults);
@@ -298,7 +298,7 @@ export class DashboardState {
    */
   addNewPanel(id, type) {
     const maxPanelIndex = PanelUtils.getMaxPanelIndex(this.getPanels());
-    this.getPanels().push(createPanelState(id, type, maxPanelIndex));
+    this.getPanels().push(createPanelState(id, type, maxPanelIndex, this.getPanels()));
   }
 
   removePanel(panelIndex) {

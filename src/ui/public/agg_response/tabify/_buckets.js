@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 export function AggResponseBucketsProvider() {
 
-  function Buckets(aggResp) {
+  function Buckets(aggResp, aggParams) {
     if (_.has(aggResp, 'buckets')) {
       this.buckets = aggResp.buckets;
     } else {
@@ -18,6 +18,8 @@ export function AggResponseBucketsProvider() {
     } else {
       this.length = this.buckets.length;
     }
+
+    if (this.length && aggParams) this._orderBucketsAccordingToParams(aggParams);
   }
 
   Buckets.prototype.forEach = function (fn) {
@@ -30,6 +32,27 @@ export function AggResponseBucketsProvider() {
     } else {
       buckets.forEach(function (bucket) {
         fn(bucket, bucket.key);
+      });
+    }
+  };
+
+  Buckets.prototype._orderBucketsAccordingToParams = function (params) {
+    if (params.filters && this.objectMode) {
+      this._keys = params.filters.map(filter => {
+        return filter.label || filter.input.query || '*';
+      });
+    } else if (params.ranges && this.objectMode) {
+      this._keys = params.ranges.map(range => {
+        return _.findKey(this.buckets, el => el.from === range.from && el.to === range.to);
+      });
+    } else if (params.ranges && params.field.type !== 'date') {
+      let ranges = params.ranges;
+      if (params.ipRangeType) {
+        ranges = params.ipRangeType === 'mask' ? ranges.mask : ranges.fromTo;
+      }
+      this.buckets = ranges.map(range => {
+        if (range.mask) return this.buckets.find(el => el.key === range.mask);
+        return this.buckets.find(el => el.from === range.from && el.to === range.to);
       });
     }
   };

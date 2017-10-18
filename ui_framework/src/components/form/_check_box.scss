@@ -1,7 +1,7 @@
 $checkboxBackgroundColor: #FFF;
 $checkboxBorderColor: #BEBEBE;
 $checkboxIconColor: #FFF;
-$checkboxCheckedBackgroundColor: $globalColorBlue;
+$checkboxCheckedBackgroundColor: $kuiColorBlue;
 $checkboxDisabledOpacity: 0.3;
 
 
@@ -15,15 +15,15 @@ $checkboxDisabledOpacity: 0.3;
   -webkit-appearance: none; /* 1 */
   background-color: $checkboxBackgroundColor;
   border: 1px solid $checkboxBorderColor;
-  border-radius: $globalBorderRadius;
+  border-radius: $kuiBorderRadius;
   width: 16px;
   height: 16px;
-  line-height: $globalLineHeight !important; /* 2 */
+  line-height: $kuiLineHeight !important; /* 2 */
   margin: 0 !important; /* 2 */
-  font: $globalFontFamily !important; /* 2 */
-  font-family: $globalFontFamily !important; /* 2 */
+  font: $kuiFontFamily !important; /* 2 */
+  font-family: $kuiFontFamily !important; /* 2 */
   font-size: 10px !important; /* 2 */
-  transition: background-color $globalInputTransitionTiming;
+  transition: background-color $kuiInputTransitionTiming;
 
   &:before {
     position: relative;
@@ -33,7 +33,7 @@ $checkboxDisabledOpacity: 0.3;
     font-size: 1em;
     opacity: 0;
     color: $checkboxIconColor;
-    transition: opacity $globalInputTransitionTiming;
+    transition: opacity $kuiInputTransitionTiming;
   }
 
   &:checked {
@@ -58,10 +58,10 @@ $checkboxDisabledOpacity: 0.3;
   display: flex;
   align-items: center;
   font-weight: normal !important;
-  line-height: $globalLineHeight;
+  line-height: $kuiLineHeight;
 }
 
   .kuiCheckBoxLabel__text {
-    font-size: $globalFontSize;
+    font-size: $kuiFontSize;
     margin-left: 8px;
   }

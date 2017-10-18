@@ -2,7 +2,7 @@
  * 1. Prevent cells from expanding based on content size. This substitutes for table-layout: fixed.
  */
 @mixin tableCell {
-  font-size: $globalFontSize;
+  font-size: $kuiFontSize;
   font-weight: $tableCellFontWeight;
   text-align: left;
   max-width: 20px; /* 1 */
@@ -14,7 +14,7 @@
  */
 .kuiTable {
   width: 100%;
-  border: $globalBorderThin;
+  border: $kuiBorderThin;
   border-collapse: collapse;
   background-color: $tableBackgroundColor;
 }
@@ -33,7 +33,7 @@
 
 .kuiTableHeaderCell {
   @include tableCell;
-  line-height: $globalLineHeight;
+  line-height: $kuiLineHeight;
   color: $tableHeaderTextColor;
 }
 
@@ -102,8 +102,8 @@
 
 .kuiTableRowCell {
   @include tableCell;
-  color: $globalFontColor;
-  border-top: $globalBorderThin;
+  color: $kuiFontColor;
+  border-top: $kuiBorderThin;
 }
 
 .kuiTableRowCell--wrap {
@@ -130,7 +130,7 @@
     overflow: hidden; /* 2 */
     text-overflow: ellipsis; /* 2 */
     padding: $tableCellPadding; /* 2 */
-    line-height: $globalLineHeight; /* 1 */
+    line-height: $kuiLineHeight; /* 1 */
 
     & > * {
       vertical-align: middle; /* 1 */

@@ -10,7 +10,7 @@ describe('KuiLinkButton', () => {
   describe('Baseline', () => {
     test('is rendered', () => {
       const $button = render(
-        <KuiLinkButton />
+        <KuiLinkButton aria-label="aria label" />
       );
 
       expect($button)
@@ -40,7 +40,12 @@ describe('KuiLinkButton', () => {
       BUTTON_TYPES.forEach(buttonType => {
         describe(buttonType, () => {
           test(`renders the ${buttonType} class`, () => {
-            const $button = render(<KuiLinkButton buttonType={buttonType} />);
+            const $button = render(
+              <KuiLinkButton
+                buttonType={buttonType}
+                aria-label="aria label"
+              />
+            );
             expect($button).toMatchSnapshot();
           });
         });
@@ -61,7 +66,10 @@ describe('KuiLinkButton', () => {
 
       test('is rendered without children', () => {
         const $button = render(
-          <KuiLinkButton icon="Icon" />
+          <KuiLinkButton
+            icon="Icon"
+            aria-label="aria label"
+          />
         );
 
         expect($button)
@@ -101,7 +109,10 @@ describe('KuiLinkButton', () => {
     describe('isLoading', () => {
       test('renders a spinner', () => {
         const $button = render(
-          <KuiLinkButton isLoading />
+          <KuiLinkButton
+            isLoading
+            aria-label="aria label"
+          />
         );
 
         expect($button)
@@ -110,7 +121,11 @@ describe('KuiLinkButton', () => {
 
       test(`doesn't render the icon prop`, () => {
         const $button = render(
-          <KuiLinkButton isLoading icon="Icon" />
+          <KuiLinkButton
+            isLoading
+            icon="Icon"
+            aria-label="aria label"
+          />
         );
 
         expect($button)

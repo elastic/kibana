@@ -60,6 +60,7 @@ export default () => (
 
     <KuiButton
       buttonType="basic"
+      aria-label="Book flight"
       icon={<KuiButtonIcon className="fa-plane" />}
     />
   </div>

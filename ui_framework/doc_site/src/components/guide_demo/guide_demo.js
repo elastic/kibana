@@ -34,15 +34,30 @@ export class GuideDemo extends Component {
   }
 
   render() {
-    const classes = classNames('guideDemo', {
-      'guideDemo--fullScreen': this.props.isFullScreen,
-      'guideDemo--darkTheme': this.props.isDarkTheme,
-      'theme-dark': this.props.isDarkTheme,
+    const {
+      isFullScreen,
+      isDarkTheme,
+      children,
+      className,
+      js, // eslint-disable-line no-unused-vars
+      html, // eslint-disable-line no-unused-vars
+      css, // eslint-disable-line no-unused-vars
+      ...rest,
+    } = this.props;
+
+    const classes = classNames('guideDemo', className, {
+      'guideDemo--fullScreen': isFullScreen,
+      'guideDemo--darkTheme': isDarkTheme,
+      'theme-dark': isDarkTheme,
     });
 
     return (
-      <div className={classes} ref={c => (this.content = c)}>
-        {this.props.children}
+      <div
+        className={classes}
+        ref={c => (this.content = c)}
+        {...rest}
+      >
+        {children}
       </div>
     );
   }

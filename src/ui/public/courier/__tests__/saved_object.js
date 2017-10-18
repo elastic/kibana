@@ -26,14 +26,13 @@ describe('Saved Object', function () {
    * @returns {{attributes: {}, type: string, id: *, _version: integer}}
    */
   function getMockedDocResponse(indexPatternId, additionalOptions = {}) {
-    return Object.assign(
-      {
-        type: 'dashboard',
-        id: indexPatternId,
-        _version: 2,
-        attributes: {}
-      },
-      additionalOptions);
+    return {
+      type: 'dashboard',
+      id: indexPatternId,
+      _version: 2,
+      attributes: {},
+      ...additionalOptions
+    };
   }
 
   /**
@@ -481,10 +480,11 @@ describe('Saved Object', function () {
     describe('defaults', function () {
 
       function getTestDefaultConfig(extraOptions) {
-        return Object.assign({
+        return {
           defaults: { testDefault: 'hi' },
-          type: 'dashboard'
-        }, extraOptions);
+          type: 'dashboard',
+          ...extraOptions
+        };
       }
 
       function expectDefaultApplied(config) {
