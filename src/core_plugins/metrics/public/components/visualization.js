@@ -31,7 +31,9 @@ function Visualization(props) {
       </div>
     );
   }
-  const noData = _.get(visData, `${model.id}.series`).length === 0;
+
+  const path = visData.type === 'table' ? 'series' : `${model.id}.series`;
+  const noData = _.get(visData, path, []).length === 0;
   if (noData) {
     return (
       <div className={props.className}>
