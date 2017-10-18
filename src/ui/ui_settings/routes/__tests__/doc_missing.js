@@ -1,28 +1,32 @@
 import expect from 'expect.js';
+import sinon from 'sinon';
 
 import {
   getServices,
   chance,
-  assertDocMissingResponse
+  assertSinonMatch,
+  waitUntilNextHealthCheck,
 } from './lib';
 
 export function docMissingSuite() {
-  async function setup() {
-    const { kbnServer, savedObjectsClient } = getServices();
+  // health check doesn't create config doc so we
+  // only have to wait once
+  before(waitUntilNextHealthCheck);
 
-    // delete all config docs
-    const { saved_objects: objs } = await savedObjectsClient.find({ type: 'config' });
-
-    for (const obj of objs) {
-      await savedObjectsClient.delete(obj.type, obj.id);
-    }
-
-    return { kbnServer };
-  }
+  // ensure the kibana index has no documents
+  beforeEach(async () => {
+    const { kbnServer, callCluster } = getServices();
+    await callCluster('deleteByQuery', {
+      index: kbnServer.config.get('kibana.index'),
+      body: {
+        query: { match_all: {} }
+      }
+    });
+  });
 
   describe('get route', () => {
-    it('returns a 200 with empty values', async () => {
-      const { kbnServer } = await setup();
+    it('creates doc, returns a 200 with no settings', async () => {
+      const { kbnServer } = getServices();
 
       const { statusCode, result } = await kbnServer.inject({
         method: 'GET',
@@ -30,48 +34,81 @@ export function docMissingSuite() {
       });
 
       expect(statusCode).to.be(200);
-      expect(result).to.eql({ settings: {} });
+      assertSinonMatch(result, {
+        settings: {}
+      });
     });
   });
 
   describe('set route', () => {
-    it('returns a 404', async () => {
-      const { kbnServer } = await setup();
+    it('creates doc, returns a 200 with value set', async () => {
+      const { kbnServer } = getServices();
 
-      assertDocMissingResponse(await kbnServer.inject({
+      const defaultIndex = chance.word();
+      const { statusCode, result } = await kbnServer.inject({
         method: 'POST',
         url: '/api/kibana/settings/defaultIndex',
-        payload: {
-          value: chance.word()
+        payload: { value: defaultIndex }
+      });
+
+      expect(statusCode).to.be(200);
+      assertSinonMatch(result, {
+        settings: {
+          buildNum: {
+            userValue: sinon.match.number
+          },
+          defaultIndex: {
+            userValue: defaultIndex
+          }
         }
-      }));
+      });
     });
   });
 
   describe('setMany route', () => {
-    it('returns a 404', async () => {
-      const { kbnServer } = await setup();
+    it('creates doc, returns 200 with updated values', async () => {
+      const { kbnServer } = getServices();
 
-      assertDocMissingResponse(await kbnServer.inject({
+      const defaultIndex = chance.word();
+      const { statusCode, result } = await kbnServer.inject({
         method: 'POST',
         url: '/api/kibana/settings',
         payload: {
-          changes: {
-            defaultIndex: chance.word()
+          changes: { defaultIndex }
+        }
+      });
+
+      expect(statusCode).to.be(200);
+      assertSinonMatch(result, {
+        settings: {
+          buildNum: {
+            userValue: sinon.match.number
+          },
+          defaultIndex: {
+            userValue: defaultIndex
           }
         }
-      }));
+      });
     });
   });
 
   describe('delete route', () => {
-    it('returns a 404', async () => {
-      const { kbnServer } = await setup();
+    it('creates doc, returns a 200 with just buildNum', async () => {
+      const { kbnServer } = getServices();
 
-      assertDocMissingResponse(await kbnServer.inject({
+      const { statusCode, result } = await kbnServer.inject({
         method: 'DELETE',
         url: '/api/kibana/settings/defaultIndex'
-      }));
+      });
+
+      expect(statusCode).to.be(200);
+      assertSinonMatch(result, {
+        settings: {
+          buildNum: {
+            userValue: sinon.match.number
+          }
+        }
+      });
     });
   });
 }

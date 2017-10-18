@@ -9,7 +9,7 @@ const KuiButtonGroup = props => {
   });
 
   return (
-    <div className={classes}>
+    <div className={classes} role="group">
       {props.children}
     </div>
   );

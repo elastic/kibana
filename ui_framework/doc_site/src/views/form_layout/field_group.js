@@ -82,18 +82,21 @@ export default () => (
           <KuiButton
             buttonType="basic"
             className="kuiButton--small"
+            aria-label="Increase"
             icon={<KuiButtonIcon className="fa-plus" />}
           />
 
           <KuiButton
             buttonType="basic"
             className="kuiButton--small"
+            aria-label="Decrease"
             icon={<KuiButtonIcon className="fa-minus" />}
           />
 
           <KuiButton
             buttonType="danger"
             className="kuiButton--small"
+            aria-label="Remove"
             icon={<KuiButtonIcon className="fa-trash" />}
           />
         </KuiButtonGroup>

@@ -50,40 +50,4 @@ describe('routes', () => {
       });
     });
   });
-
-  describe('url shortener', () => {
-    const shortenOptions = {
-      method: 'POST',
-      url: '/shorten',
-      payload: {
-        url: '/app/kibana#/visualize/create'
-      }
-    };
-
-    it('generates shortened urls', (done) => {
-      kbnTestServer.makeRequest(kbnServer, shortenOptions, (res) => {
-        expect(typeof res.payload).to.be('string');
-        expect(res.payload.length > 0).to.be(true);
-        done();
-      });
-    });
-
-    it('redirects shortened urls', (done) => {
-      kbnTestServer.makeRequest(kbnServer, shortenOptions, (res) => {
-        expect(res).to.have.property('statusCode', 200);
-
-        const gotoOptions = {
-          method: 'GET',
-          url: '/goto/' + res.payload
-        };
-        kbnTestServer.makeRequest(kbnServer, gotoOptions, (res) => {
-          expect(res.statusCode).to.be(302);
-          expect(res.headers.location).to.be(shortenOptions.payload.url);
-          done();
-        });
-      });
-    });
-
-  });
-
 });

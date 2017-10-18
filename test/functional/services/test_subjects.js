@@ -49,10 +49,29 @@ export function TestSubjectsProvider({ getService }) {
       return await filterAsync(all, el => el.isDisplayed());
     }
 
+    async getPropertyAll(selector, property) {
+      return await this._mapAll(selector, async (element) => {
+        return await element.getProperty(property);
+      });
+    }
+
     async getProperty(selector, property) {
       return await retry.try(async () => {
         const element = await this.find(selector);
         return await element.getProperty(property);
+      });
+    }
+
+    async getAttributeAll(selector, attribute) {
+      return await this._mapAll(selector, async (element) => {
+        return await element.getAttribute(attribute);
+      });
+    }
+
+    async getAttribute(selector, attribute) {
+      return await retry.try(async () => {
+        const element = await this.find(selector);
+        return await element.getAttribute(attribute);
       });
     }
 

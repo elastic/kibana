@@ -4,6 +4,9 @@ export const DashboardConstants = {
   LANDING_PAGE_PATH: '/dashboards',
   CREATE_NEW_DASHBOARD_URL: '/dashboard',
 };
+export const DEFAULT_PANEL_WIDTH = 6;
+export const DEFAULT_PANEL_HEIGHT = 3;
+export const DASHBOARD_GRID_COLUMN_COUNT = 12;
 
 export function createDashboardEditUrl(id) {
   return `/dashboard/${id}`;

@@ -85,7 +85,7 @@ export function KuiConfirmModal({
 }
 
 KuiConfirmModal.propTypes = {
-  message: PropTypes.string,
+  message: PropTypes.node,
   title: PropTypes.string,
   cancelButtonText: PropTypes.string,
   confirmButtonText: PropTypes.string,
