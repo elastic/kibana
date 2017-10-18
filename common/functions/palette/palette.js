@@ -1,4 +1,5 @@
 import Fn from '../fn.js';
+import { palettes } from '../../lib/palettes';
 
 export default new Fn({
   name: 'palette',
@@ -21,7 +22,7 @@ export default new Fn({
   fn: (context, args) => {
     return {
       type: 'palette',
-      colors: args._ || ['#01A4A4', '#CC6666', '#D0D102', '#616161', '#00A1CB', '#32742C', '#F18D05', '#113F8C', '#61AE24', '#D70060'],
+      colors: args._ || palettes.paul_tor_14.colors,
       gradient: args.gradient,
     };
   },
