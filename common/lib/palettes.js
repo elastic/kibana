@@ -47,7 +47,7 @@ export const palettes = {
     colors: ['#833ab4', '#fd1d1d', '#fcb045'],
     gradient: true,
   },
-  paul_14: {
+  paul_tor_14: {
     colors: ['#882E72', '#B178A6', '#D6C1DE', '#1965B0', '#5289C7', '#7BAFDE', '#4EB265', '#90C987', '#CAE0AB', '#F7EE55',
       '#F6C141', '#F1932D', '#E8601C', '#DC050C'],
     gradient: false,
