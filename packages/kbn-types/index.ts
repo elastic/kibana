@@ -3,9 +3,7 @@ export {
   KibanaClassPlugin,
   KibanaPluginConfig
 } from '../../platform/server/plugins/types';
-export {
-  KibanaPluginFeatures
-} from '../../platform/server/plugins/KibanaPluginFeatures';
+export { KibanaPluginApi } from '../../platform/server/plugins/KibanaPluginApi';
 export { Logger, LoggerFactory } from '../../platform/logging';
 export { Schema, typeOfSchema } from '../../platform/types/schema';
 export { ElasticsearchService } from '../../platform/server/elasticsearch';

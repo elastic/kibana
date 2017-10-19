@@ -1,4 +1,4 @@
-import { KibanaPluginFeatures } from './KibanaPluginFeatures';
+import { KibanaPluginApi } from './KibanaPluginApi';
 import { KibanaCoreModules } from './KibanaCoreModules';
 import * as schema from '../../lib/schema';
 import { Router } from '../http';
@@ -19,7 +19,7 @@ export function createKibanaValuesForPlugin(
   pluginName: string,
   configPath: undefined | string | string[],
   core: KibanaCoreModules
-): KibanaPluginFeatures {
+): KibanaPluginApi {
   return {
     logger: {
       get(...contextParts) {
