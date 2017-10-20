@@ -71,7 +71,7 @@ export class DashboardStateManager {
 
     this.changeListeners = [];
 
-    store.subscribe(() => this._handleStoreChanges());
+    this.unsubscribe = store.subscribe(() => this._handleStoreChanges());
     this.stateMonitor.onChange(status => {
       this.changeListeners.forEach(listener => listener(status));
       this._pushAppStateChangesToStore();
@@ -482,5 +482,6 @@ export class DashboardStateManager {
       this.stateMonitor.destroy();
     }
     this.savedDashboard.destroy();
+    this.unsubscribe();
   }
 }
