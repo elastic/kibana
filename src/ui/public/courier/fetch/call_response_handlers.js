@@ -13,7 +13,7 @@ export function CallResponseHandlersProvider(Private, Promise) {
         return ABORTED;
       }
 
-      let resp = responses[i];
+      const resp = responses[i];
 
       if (resp.timed_out) {
         courierNotifier.warning(new SearchTimeout());
@@ -40,14 +40,7 @@ export function CallResponseHandlersProvider(Private, Promise) {
         }
       }
 
-      return Promise.try(function () {
-        return req.transformResponse(resp);
-      })
-      .then(function () {
-        resp = arguments[0];
-        return req.handleResponse(resp);
-      })
-      .then(progress);
+      return Promise.try(() => req.handleResponse(resp)).then(progress);
     });
   }
 

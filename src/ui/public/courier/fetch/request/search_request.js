@@ -64,10 +64,6 @@ export function SearchRequestProvider(Promise) {
       return this.source._flatten();
     }
 
-    transformResponse(resp) {
-      return resp;
-    }
-
     filterError() {
       return false;
     }
