@@ -1,12 +1,10 @@
-import { CourierNotifierProvider } from './notifier';
+import { courierNotifier } from './notifier';
 import { CallClientProvider } from './call_client';
 import { CallResponseHandlersProvider } from './call_response_handlers';
 import { ContinueIncompleteProvider } from './continue_incomplete';
 import { ReqStatusProvider } from './req_status';
 
 export function FetchTheseProvider(Private, Promise) {
-  const notify = Private(CourierNotifierProvider);
-
   // core tasks
   const callClient = Private(CallClientProvider);
   const callResponseHandlers = Private(CallResponseHandlersProvider);
@@ -21,7 +19,7 @@ export function FetchTheseProvider(Private, Promise) {
       if (!req.started) return req;
       return req.retry();
     }))
-    .catch(notify.fatal);
+    .catch(courierNotifier.fatal);
   }
 
   function fetchSearchResults(requests) {
