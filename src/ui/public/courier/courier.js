@@ -16,7 +16,7 @@ import { RedirectWhenMissingProvider } from './_redirect_when_missing';
 
 
 uiModules.get('kibana/courier')
-.service('courier', function ($rootScope, Private, Promise, indexPatterns) {
+.service('courier', function ($rootScope, Private, indexPatterns) {
   function Courier() {
     const self = this;
     const SearchSource = Private(SearchSourceProvider);
@@ -110,9 +110,7 @@ uiModules.get('kibana/courier')
       }
     });
 
-    const onFatalDefer = Promise.defer();
-    onFatalDefer.promise.then(self.close);
-    Notifier.fatalCallbacks.push(onFatalDefer.resolve);
+    Notifier.fatalCallbacks.push(() => self.close());
   }
 
   return new Courier();
