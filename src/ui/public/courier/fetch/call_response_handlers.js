@@ -1,11 +1,11 @@
 import { RequestFailure, SearchTimeout, ShardFailure } from 'ui/errors';
 
-import { ReqStatusProvider } from './req_status';
+import { RequestStatus } from './req_status';
 import { courierNotifier } from './notifier';
 
 export function CallResponseHandlersProvider(Private, Promise) {
-  const ABORTED = Private(ReqStatusProvider).ABORTED;
-  const INCOMPLETE = Private(ReqStatusProvider).INCOMPLETE;
+  const ABORTED = RequestStatus.ABORTED;
+  const INCOMPLETE = RequestStatus.INCOMPLETE;
 
   function callResponseHandlers(requests, responses) {
     return Promise.map(requests, function (req, i) {

@@ -3,7 +3,7 @@ import _ from 'lodash';
 import { ErrorAllowExplicitIndexProvider } from 'ui/error_allow_explicit_index';
 import { IsRequestProvider } from './is_request';
 import { MergeDuplicatesRequestProvider } from './merge_duplicate_requests';
-import { ReqStatusProvider } from './req_status';
+import { RequestStatus } from './req_status';
 import { RequestFetchParamsToBodyProvider } from './request/request_fetch_params_to_body_provider';
 
 export function CallClientProvider(Private, Promise, es) {
@@ -12,8 +12,8 @@ export function CallClientProvider(Private, Promise, es) {
   const mergeDuplicateRequests = Private(MergeDuplicatesRequestProvider);
   const requestFetchParamsToBody = Private(RequestFetchParamsToBodyProvider);
 
-  const ABORTED = Private(ReqStatusProvider).ABORTED;
-  const DUPLICATE = Private(ReqStatusProvider).DUPLICATE;
+  const ABORTED = RequestStatus.ABORTED;
+  const DUPLICATE = RequestStatus.DUPLICATE;
 
   function callClient(requests) {
     // merging docs can change status to DUPLICATE, capture new statuses
