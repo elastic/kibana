@@ -1,14 +1,23 @@
 import _ from 'lodash';
 import { requestQueue } from '../_request_queue';
-import { FetchTheseProvider } from './fetch_these';
+import { FetchNowProvider } from './fetch_now';
 
-export function FetchProvider(Private, Promise) {
+/**
+ * This is usually the right fetch provider to use, rather than FetchNowProvider, as this class introduces
+ * a slight delay in the request process to allow multiple requests to queue up (e.g. when a dashboard
+ * is loading).
+ *
+ * @param Private
+ * @param Promise
+ * @constructor
+ */
+export function FetchSoonProvider(Private, Promise) {
 
-  const immediatelyFetchThese = Private(FetchTheseProvider);
+  const fetchNow = Private(FetchNowProvider);
 
   const debouncedFetchThese = _.debounce(() => {
     const requests = requestQueue.filter(req => req.isFetchRequestedAndPending());
-    immediatelyFetchThese(requests);
+    fetchNow(requests);
   }, {
     wait: 10,
     maxWait: 50
@@ -16,7 +25,7 @@ export function FetchProvider(Private, Promise) {
 
   /**
    * Fetch a list of requests
-   * @param {array} reqs - the requests to fetch
+   * @param {array} requests - the requests to fetch
    * @async
    */
   this.these = (requests) => {

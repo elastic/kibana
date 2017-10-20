@@ -4,7 +4,18 @@ import { CallResponseHandlersProvider } from './call_response_handlers';
 import { ContinueIncompleteProvider } from './continue_incomplete';
 import { RequestStatus } from './req_status';
 
-export function FetchTheseProvider(Private, Promise) {
+/**
+ * Fetch now provider should be used if you want the results searched and returned immediately.
+ * This can be slightly inefficient if a large number of requests are queued up, we can batch these
+ * by using fetchSoon. This introduces a slight delay which allows other requests to queue up before
+ * sending out requests in a batch.
+ *
+ * @param Private
+ * @param Promise
+ * @return {fetchNow}
+ * @constructor
+ */
+export function FetchNowProvider(Private, Promise) {
   // core tasks
   const callClient = Private(CallClientProvider);
   const callResponseHandlers = Private(CallResponseHandlersProvider);
@@ -14,7 +25,7 @@ export function FetchTheseProvider(Private, Promise) {
   const DUPLICATE = RequestStatus.DUPLICATE;
   const INCOMPLETE = RequestStatus.INCOMPLETE;
 
-  function fetchThese(requests) {
+  function fetchNow(requests) {
     return fetchSearchResults(requests.map(function (req) {
       if (!req.started) return req;
       return req.retry();
@@ -71,5 +82,5 @@ export function FetchTheseProvider(Private, Promise) {
     });
   }
 
-  return fetchThese;
+  return fetchNow;
 }
