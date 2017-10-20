@@ -1,13 +1,11 @@
 import { RequestFailure, SearchTimeout, ShardFailure } from 'ui/errors';
 
-import { ReqStatusProvider } from './req_status';
-import { CourierNotifierProvider } from './notifier';
+import { RequestStatus } from './req_status';
+import { courierNotifier } from './notifier';
 
 export function CallResponseHandlersProvider(Private, Promise) {
-  const ABORTED = Private(ReqStatusProvider).ABORTED;
-  const INCOMPLETE = Private(ReqStatusProvider).INCOMPLETE;
-  const notify = Private(CourierNotifierProvider);
-
+  const ABORTED = RequestStatus.ABORTED;
+  const INCOMPLETE = RequestStatus.INCOMPLETE;
 
   function callResponseHandlers(requests, responses) {
     return Promise.map(requests, function (req, i) {
@@ -18,11 +16,11 @@ export function CallResponseHandlersProvider(Private, Promise) {
       let resp = responses[i];
 
       if (resp.timed_out) {
-        notify.warning(new SearchTimeout());
+        courierNotifier.warning(new SearchTimeout());
       }
 
       if (resp._shards && resp._shards.failed) {
-        notify.warning(new ShardFailure(resp));
+        courierNotifier.warning(new ShardFailure(resp));
       }
 
       function progress() {
