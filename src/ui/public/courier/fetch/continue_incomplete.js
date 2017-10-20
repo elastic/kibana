@@ -3,7 +3,7 @@ import { ReqStatusProvider } from './req_status';
 export function ContinueIncompleteProvider(Private) {
   const INCOMPLETE = Private(ReqStatusProvider).INCOMPLETE;
 
-  function continueIncompleteRequests(strategy, requests, responses, fetchWithStrategy) {
+  function continueIncompleteRequests(requests, responses, fetchSearchResults) {
     const incomplete = [];
 
     responses.forEach(function (resp, i) {
@@ -14,7 +14,7 @@ export function ContinueIncompleteProvider(Private) {
 
     if (!incomplete.length) return responses;
 
-    return fetchWithStrategy(strategy, incomplete)
+    return fetchSearchResults(incomplete)
     .then(function (completedResponses) {
       return responses.map(function (prevResponse) {
         if (prevResponse !== INCOMPLETE) return prevResponse;

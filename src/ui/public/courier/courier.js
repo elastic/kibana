@@ -7,7 +7,6 @@ import { uiModules } from 'ui/modules';
 import { Notifier } from 'ui/notify/notifier';
 
 import { SearchSourceProvider } from './data_source/search_source';
-import { SearchStrategyProvider } from './fetch/strategy/search';
 import { requestQueue } from './_request_queue';
 import { FetchProvider } from './fetch';
 import { SearchLooperProvider } from './looper/search';
@@ -21,8 +20,6 @@ uiModules.get('kibana/courier')
   function Courier() {
     const self = this;
     const SearchSource = Private(SearchSourceProvider);
-    const searchStrategy = Private(SearchStrategyProvider);
-
     const fetch = Private(FetchProvider);
     const searchLooper = self.searchLooper = Private(SearchLooperProvider);
 
@@ -60,7 +57,7 @@ uiModules.get('kibana/courier')
      * individual errors are routed to their respective requests.
      */
     self.fetch = function () {
-      fetch.fetchQueued(searchStrategy).then(function () {
+      fetch.fetchQueued().then(function () {
         searchLooper.restart();
       });
     };

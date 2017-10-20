@@ -1,5 +1,4 @@
 import { CourierNotifierProvider } from './notifier';
-import { ForEachStrategyProvider } from './for_each_strategy';
 import { CallClientProvider } from './call_client';
 import { CallResponseHandlersProvider } from './call_response_handlers';
 import { ContinueIncompleteProvider } from './continue_incomplete';
@@ -7,7 +6,6 @@ import { ReqStatusProvider } from './req_status';
 
 export function FetchTheseProvider(Private, Promise) {
   const notify = Private(CourierNotifierProvider);
-  const forEachStrategy = Private(ForEachStrategyProvider);
 
   // core tasks
   const callClient = Private(CallClientProvider);
@@ -19,16 +17,14 @@ export function FetchTheseProvider(Private, Promise) {
   const INCOMPLETE = Private(ReqStatusProvider).INCOMPLETE;
 
   function fetchThese(requests) {
-    return forEachStrategy(requests, function (strategy, reqsForStrategy) {
-      return fetchWithStrategy(strategy, reqsForStrategy.map(function (req) {
-        if (!req.started) return req;
-        return req.retry();
-      }));
-    })
+    return fetchSearchResults(requests.map(function (req) {
+      if (!req.started) return req;
+      return req.retry();
+    }))
     .catch(notify.fatal);
   }
 
-  function fetchWithStrategy(strategy, requests) {
+  function fetchSearchResults(requests) {
     function replaceAbortedRequests() {
       requests = requests.map(r => r.aborted ? ABORTED : r);
     }
@@ -37,7 +33,7 @@ export function FetchTheseProvider(Private, Promise) {
     return startRequests(requests)
     .then(function () {
       replaceAbortedRequests();
-      return callClient(strategy, requests);
+      return callClient(requests);
     })
     .then(function (responses) {
       replaceAbortedRequests();
@@ -45,7 +41,7 @@ export function FetchTheseProvider(Private, Promise) {
     })
     .then(function (responses) {
       replaceAbortedRequests();
-      return continueIncomplete(strategy, requests, responses, fetchWithStrategy);
+      return continueIncomplete(requests, responses, fetchSearchResults);
     })
     .then(function (responses) {
       replaceAbortedRequests();
