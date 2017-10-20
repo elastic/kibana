@@ -7,7 +7,7 @@ import { PanelError } from './panel_error';
 
 export class DashboardPanel extends React.Component {
   async componentDidMount() {
-    this.props.renderEmbeddable(this.panelElement);
+    this.props.renderEmbeddable(this.panelElement, this.props.panel);
   }
 
   toggleExpandedPanel = () => {
@@ -22,16 +22,16 @@ export class DashboardPanel extends React.Component {
   onEditPanel = () => window.location = this.props.editUrl;
 
   onFocus = () => {
-    const { onPanelFocused, panelId } = this.props;
+    const { onPanelFocused, panel } = this.props;
     if (onPanelFocused) {
-      onPanelFocused(panelId);
+      onPanelFocused(panel.panelIndex);
     }
   };
 
   onBlur = () => {
-    const { onPanelBlurred, panelId } = this.props;
+    const { onPanelBlurred, panel } = this.props;
     if (onPanelBlurred) {
-      onPanelBlurred(panelId);
+      onPanelBlurred(panel.panelIndex);
     }
   };
 
@@ -102,7 +102,9 @@ export class DashboardPanel extends React.Component {
 }
 
 DashboardPanel.propTypes = {
-  panelId: PropTypes.string.isRequired,
+  panel: PropTypes.shape({
+    panelIndex: PropTypes.string,
+  }),
   renderEmbeddable: PropTypes.func.isRequired,
   isExpanded: PropTypes.bool.isRequired,
   onMaximizePanel: PropTypes.func.isRequired,
