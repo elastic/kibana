@@ -1,9 +1,9 @@
 import { IsRequestProvider } from './is_request';
-import { ReqStatusProvider } from './req_status';
+import { RequestStatus } from './req_status';
 
 export function MergeDuplicatesRequestProvider(Private) {
   const isRequest = Private(IsRequestProvider);
-  const DUPLICATE = Private(ReqStatusProvider).DUPLICATE;
+  const DUPLICATE = RequestStatus.DUPLICATE;
 
   function mergeDuplicateRequests(requests) {
     // dedupe requests

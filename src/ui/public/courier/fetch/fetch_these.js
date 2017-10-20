@@ -2,7 +2,7 @@ import { courierNotifier } from './notifier';
 import { CallClientProvider } from './call_client';
 import { CallResponseHandlersProvider } from './call_response_handlers';
 import { ContinueIncompleteProvider } from './continue_incomplete';
-import { ReqStatusProvider } from './req_status';
+import { RequestStatus } from './req_status';
 
 export function FetchTheseProvider(Private, Promise) {
   // core tasks
@@ -10,9 +10,9 @@ export function FetchTheseProvider(Private, Promise) {
   const callResponseHandlers = Private(CallResponseHandlersProvider);
   const continueIncomplete = Private(ContinueIncompleteProvider);
 
-  const ABORTED = Private(ReqStatusProvider).ABORTED;
-  const DUPLICATE = Private(ReqStatusProvider).DUPLICATE;
-  const INCOMPLETE = Private(ReqStatusProvider).INCOMPLETE;
+  const ABORTED = RequestStatus.ABORTED;
+  const DUPLICATE = RequestStatus.DUPLICATE;
+  const INCOMPLETE = RequestStatus.INCOMPLETE;
 
   function fetchThese(requests) {
     return fetchSearchResults(requests.map(function (req) {

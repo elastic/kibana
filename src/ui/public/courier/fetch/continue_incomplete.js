@@ -1,7 +1,7 @@
-import { ReqStatusProvider } from './req_status';
+import { RequestStatus } from './req_status';
 
-export function ContinueIncompleteProvider(Private) {
-  const INCOMPLETE = Private(ReqStatusProvider).INCOMPLETE;
+export function ContinueIncompleteProvider() {
+  const INCOMPLETE = RequestStatus.INCOMPLETE;
 
   function continueIncompleteRequests(requests, responses, fetchSearchResults) {
     const incomplete = [];
