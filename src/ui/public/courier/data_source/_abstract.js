@@ -4,13 +4,13 @@ import angular from 'angular';
 import 'ui/promises';
 
 import { requestQueue } from '../_request_queue';
-import { FetchProvider } from '../fetch';
+import { FetchSoonProvider } from '../fetch';
 import { FieldWildcardProvider } from '../../field_wildcard';
 import { getHighlightRequest } from '../../../../core_plugins/kibana/common/highlight';
 import { BuildESQueryProvider } from './build_query';
 
 export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, config) {
-  const courierFetch = Private(FetchProvider);
+  const fetchSoon = Private(FetchSoonProvider);
   const buildESQuery = Private(BuildESQueryProvider);
   const { fieldWildcardFilter } = Private(FieldWildcardProvider);
   const getConfig = (...args) => config.get(...args);
@@ -167,7 +167,7 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
       req = self._createRequest();
     }
 
-    courierFetch.these([req]);
+    fetchSoon.these([req]);
 
     return req.getCompletePromise();
   };
@@ -192,7 +192,7 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
       request.abort();
     });
 
-    courierFetch.these([req]);
+    fetchSoon.these([req]);
 
     return req.getCompletePromise();
   };
@@ -202,7 +202,7 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
    * @async
    */
   SourceAbstract.prototype.fetchQueued = function () {
-    return courierFetch.these(this._myStartableQueued());
+    return fetchSoon.these(this._myStartableQueued());
   };
 
   /**
