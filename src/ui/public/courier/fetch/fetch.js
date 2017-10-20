@@ -12,7 +12,7 @@ export function FetchProvider(Private, Promise) {
   const INCOMPLETE = Private(ReqStatusProvider).INCOMPLETE;
 
   const debouncedFetchThese = _.debounce(() => {
-    const requests = requestQueue.get().filter(req => req.isFetchRequestedAndPending());
+    const requests = requestQueue.filter(req => req.isFetchRequestedAndPending());
     immediatelyFetchThese(requests);
   }, {
     wait: 10,
@@ -25,8 +25,8 @@ export function FetchProvider(Private, Promise) {
     return Promise.all(requests.map(req => req.getCompletePromise()));
   };
 
-  this.fetchQueued = (strategy) => {
-    return fetchTheseSoon(requestQueue.getStartable(strategy));
+  this.fetchQueued = () => {
+    return fetchTheseSoon(requestQueue.getStartable());
   };
 
   function fetchASource(source) {

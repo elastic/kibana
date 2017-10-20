@@ -3,14 +3,14 @@ import moment from 'moment';
 
 import { requestQueue } from '../../_request_queue';
 
-export function AbstractRequestProvider(Private, Promise) {
+export function SearchRequestProvider(Promise) {
 
-  return class AbstractReq {
+  return class SearchRequest {
     constructor(source, defer) {
       this.source = source;
       this.defer = defer || Promise.defer();
       this.abortedDefer = Promise.defer();
-
+      this.type = 'search';
       requestQueue.push(this);
     }
 

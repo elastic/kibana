@@ -15,7 +15,7 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
   const { fieldWildcardFilter } = Private(FieldWildcardProvider);
   const getConfig = (...args) => config.get(...args);
 
-  function SourceAbstract(initialState, strategy) {
+  function SourceAbstract(initialState) {
     const self = this;
     self._instanceid = _.uniqueId('data_source');
 
@@ -46,7 +46,6 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
     });
 
     self.history = [];
-    self._fetchStrategy = strategy;
     self._requestStartHandlers = [];
   }
 
@@ -212,9 +211,8 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
    */
   SourceAbstract.prototype.cancelQueued = function () {
     requestQueue
-    .get(this._fetchStrategy)
-    .filter(req => req.source === this)
-    .forEach(req => req.abort());
+      .filter(req => req.source === this)
+      .forEach(req => req.abort());
   };
 
   /**
@@ -264,7 +262,7 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
 
   SourceAbstract.prototype._myStartableQueued = function () {
     return requestQueue
-    .getStartable(this._fetchStrategy)
+    .getStartable()
     .filter(req => req.source === this);
   };
 
