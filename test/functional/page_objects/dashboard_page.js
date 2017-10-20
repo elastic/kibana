@@ -222,6 +222,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       const visFilter = await find.byCssSelector('input[placeholder="Visualizations Filter..."]');
       await visFilter.click();
       await remote.pressKeys(vizName);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickVizNameLink(vizName) {
@@ -240,6 +241,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async filterSearchNames(name) {
       await testSubjects.setValue('savedObjectFinderSearchInput', name);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickSavedSearchTab() {
