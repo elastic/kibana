@@ -1,4 +1,5 @@
 import { createAction } from 'redux-actions';
+import { getPanel } from '../reducers';
 
 export const destroyEmbeddable =
   createAction('DESTROY_EMBEDDABLE', (panelId, embeddableHandler) => {
@@ -25,7 +26,7 @@ export const embeddableRenderError =
 export function renderEmbeddable(embeddableHandler, panelElement, panelId, containerApi) {
   return (dispatch, getState) => {
     const { dashboard } = getState();
-    const panelState = dashboard.panels[panelId];
+    const panelState = getPanel(dashboard, panelId);
 
     if (!embeddableHandler) {
       dispatch(embeddableRenderError(panelId, new Error(`Invalid embeddable type "${panelState.type}"`)));
