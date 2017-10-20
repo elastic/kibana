@@ -346,8 +346,11 @@ export class DashboardStateManager {
   }
 
   updatePanel(panelIndex, panelAttributes) {
-    const updatedPanel = this.getPanels().find((panel) => panel.panelIndex === panelIndex);
-    Object.assign(updatedPanel, panelAttributes);
+    const originalPanel = this.getPanels().find((panel) => panel.panelIndex === panelIndex);
+    const updatedPanel = {
+      ...originalPanel,
+      ...panelAttributes,
+    };
     this.saveState();
     return updatedPanel;
   }
