@@ -1,5 +1,3 @@
-import _ from 'lodash';
-
 export function VislibComponentsZeroInjectionZeroFilledArrayProvider() {
   /*
    * Accepts an array of x axis values (strings or numbers).
@@ -7,7 +5,7 @@ export function VislibComponentsZeroInjectionZeroFilledArrayProvider() {
   */
 
   return function (arr, label) {
-    if (!_.isArray(arr)) {
+    if (!Array.isArray(arr)) {
       throw new Error('ZeroFilledArrayUtilService expects an array of strings or numbers');
     }
 
