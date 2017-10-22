@@ -39,7 +39,7 @@ export default class UiExports {
   consumePlugin(plugin) {
     plugin.apps = new UiAppCollection(this);
 
-    const types = _.keys(plugin.uiExportsSpecs);
+    const types = Object.keys(plugin.uiExportsSpecs);
     if (!types) return false;
 
     const unkown = _.reject(types, this.exportConsumer, this);
@@ -163,7 +163,7 @@ export default class UiExports {
 
   find(patterns) {
     const aliases = this.aliases;
-    const names = _.keys(aliases);
+    const names = Object.keys(aliases);
     const matcher = _.partialRight(minimatch.filter, { matchBase: true });
 
     return _.chain(patterns)

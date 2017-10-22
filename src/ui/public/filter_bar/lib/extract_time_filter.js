@@ -9,7 +9,7 @@ export function FilterBarLibExtractTimeFilterProvider(courier, Promise) {
 
     return courier.indexPatterns.get(id).then(function (indexPattern) {
       const filter = _.find(filters, function (obj) {
-        const key = _.keys(obj.range)[0];
+        const key = Object.keys(obj.range)[0];
         return key === indexPattern.timeFieldName;
       });
       if (filter && filter.range) {

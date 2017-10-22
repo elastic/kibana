@@ -18,8 +18,8 @@ export function applyDiff(target, source) {
     };
   };
 
-  const targetKeys = _.keys(target).filter(filterPrivateAndMethods(target));
-  const sourceKeys = _.keys(source).filter(filterPrivateAndMethods(source));
+  const targetKeys = Object.keys(target).filter(filterPrivateAndMethods(target));
+  const sourceKeys = Object.keys(source).filter(filterPrivateAndMethods(source));
 
   // Find the keys to be removed
   diff.removed = _.difference(targetKeys, sourceKeys);

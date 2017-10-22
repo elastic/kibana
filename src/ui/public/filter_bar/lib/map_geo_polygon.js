@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { SavedObjectNotFound } from '../../errors';
 
 export function FilterBarLibMapGeoPolygonProvider(Promise, courier) {
@@ -6,7 +5,7 @@ export function FilterBarLibMapGeoPolygonProvider(Promise, courier) {
     if (filter.geo_polygon) {
       function getParams(indexPattern) {
         const type = 'geo_polygon';
-        const key = _.keys(filter.geo_polygon)
+        const key = Object.keys(filter.geo_polygon)
         .filter(key => key !== 'ignore_unmapped')[0];
         const params = filter.geo_polygon[key];
 

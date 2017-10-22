@@ -13,7 +13,7 @@ export function AggResponseBucketsProvider() {
 
     this.objectMode = _.isPlainObject(this.buckets);
     if (this.objectMode) {
-      this._keys = _.keys(this.buckets);
+      this._keys = Object.keys(this.buckets);
       this.length = this._keys.length;
     } else {
       this.length = this.buckets.length;

@@ -152,7 +152,7 @@ export default function chainRunner(tlConfig) {
         queryCache[functionDef.cacheKey(query)] = resolvedDatasource.value();
       });
 
-      stats.cacheCount = _.keys(queryCache).length;
+      stats.cacheCount = Object.keys(queryCache).length;
       return sheet;
     });
   }

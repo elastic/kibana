@@ -189,7 +189,7 @@ function loadMappings(mappings) {
   $.each(mappings, function (index, index_mapping) {
     var normalized_index_mappings = {};
     // 1.0.0 mapping format has changed, extract underlying mapping
-    if (index_mapping.mappings && _.keys(index_mapping).length === 1) {
+    if (index_mapping.mappings && Object.keys(index_mapping).length === 1) {
       index_mapping = index_mapping.mappings;
     }
     $.each(index_mapping, function (type_name, type_mapping) {

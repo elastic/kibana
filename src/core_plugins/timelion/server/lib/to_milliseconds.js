@@ -21,7 +21,7 @@ const vals = _.transform([
   });
 }, {});
 // match any key from the vals object prececed by an optional number
-const parseRE = new RegExp('^(\\d+(?:\\.\\d*)?)?\\s*(' + _.keys(vals).join('|') + ')$');
+const parseRE = new RegExp('^(\\d+(?:\\.\\d*)?)?\\s*(' + Object.keys(vals).join('|') + ')$');
 
 export default function (expr) {
   const match = expr.match(parseRE);

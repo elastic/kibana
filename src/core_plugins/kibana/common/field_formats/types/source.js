@@ -37,7 +37,7 @@ SourceFormat.prototype._convert = {
     const sourcePairs = [];
 
     const isShortDots = this.getConfig('shortDots:enable');
-    _.keys(formatted).forEach((key) => {
+    Object.keys(formatted).forEach((key) => {
       const pairs = highlights[key] ? highlightPairs : sourcePairs;
       const field = isShortDots ? shortenDottedString(key) : key;
       const val = formatted[key];

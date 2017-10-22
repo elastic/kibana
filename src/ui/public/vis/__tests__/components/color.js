@@ -164,7 +164,7 @@ describe('Vislib Color Module Test Suite', function () {
       const arr = ['foo', 'bar', 'baz', 'qux'];
       mappedColors.mapKeys(arr);
 
-      const expectedSize = _(arr).difference(_.keys(newConfig)).size();
+      const expectedSize = _(arr).difference(Object.keys(newConfig)).size();
       expect(_(mappedColors.mapping).values().uniq().size()).to.be(expectedSize);
       expect(mappedColors.get(arr[0])).to.not.be(seedColors[0]);
     }));
@@ -178,7 +178,7 @@ describe('Vislib Color Module Test Suite', function () {
       const arr = ['foo', 'bar', 'baz', 'qux'];
       mappedColors.mapKeys(arr);
 
-      const expectedSize = _(arr).difference(_.keys(newConfig)).size();
+      const expectedSize = _(arr).difference(Object.keys(newConfig)).size();
       expect(_(mappedColors.mapping).values().uniq().size()).to.be(expectedSize);
       expect(mappedColors.get(arr[0])).to.not.be(seedColors[0]);
       expect(mappedColors.get('bar')).to.be(seedColors[0]);
@@ -187,31 +187,31 @@ describe('Vislib Color Module Test Suite', function () {
     it('should have a flush method that moves the current map to the old map', function () {
       const arr = [1, 2, 3, 4, 5];
       mappedColors.mapKeys(arr);
-      expect(_.keys(mappedColors.mapping).length).to.be(5);
-      expect(_.keys(mappedColors.oldMap).length).to.be(0);
+      expect(Object.keys(mappedColors.mapping).length).to.be(5);
+      expect(Object.keys(mappedColors.oldMap).length).to.be(0);
 
       mappedColors.flush();
 
-      expect(_.keys(mappedColors.oldMap).length).to.be(5);
-      expect(_.keys(mappedColors.mapping).length).to.be(0);
+      expect(Object.keys(mappedColors.oldMap).length).to.be(5);
+      expect(Object.keys(mappedColors.mapping).length).to.be(0);
 
       mappedColors.flush();
 
-      expect(_.keys(mappedColors.oldMap).length).to.be(0);
-      expect(_.keys(mappedColors.mapping).length).to.be(0);
+      expect(Object.keys(mappedColors.oldMap).length).to.be(0);
+      expect(Object.keys(mappedColors.mapping).length).to.be(0);
     });
 
     it('should use colors in the oldMap if they are available', function () {
       const arr = [1, 2, 3, 4, 5];
       mappedColors.mapKeys(arr);
-      expect(_.keys(mappedColors.mapping).length).to.be(5);
-      expect(_.keys(mappedColors.oldMap).length).to.be(0);
+      expect(Object.keys(mappedColors.mapping).length).to.be(5);
+      expect(Object.keys(mappedColors.oldMap).length).to.be(0);
 
       mappedColors.flush();
 
       mappedColors.mapKeys([3, 4, 5]);
-      expect(_.keys(mappedColors.oldMap).length).to.be(5);
-      expect(_.keys(mappedColors.mapping).length).to.be(3);
+      expect(Object.keys(mappedColors.oldMap).length).to.be(5);
+      expect(Object.keys(mappedColors.mapping).length).to.be(3);
 
       expect(mappedColors.mapping[1]).to.be(undefined);
       expect(mappedColors.mapping[2]).to.be(undefined);
@@ -226,13 +226,13 @@ describe('Vislib Color Module Test Suite', function () {
       mappedColors.flush();
       mappedColors.mapKeys(arr);
 
-      expect(_.keys(mappedColors.mapping).length).to.be(5);
-      expect(_.keys(mappedColors.oldMap).length).to.be(5);
+      expect(Object.keys(mappedColors.mapping).length).to.be(5);
+      expect(Object.keys(mappedColors.oldMap).length).to.be(5);
 
       mappedColors.purge();
 
-      expect(_.keys(mappedColors.mapping).length).to.be(0);
-      expect(_.keys(mappedColors.oldMap).length).to.be(0);
+      expect(Object.keys(mappedColors.mapping).length).to.be(0);
+      expect(Object.keys(mappedColors.oldMap).length).to.be(0);
 
     });
   });

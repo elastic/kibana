@@ -62,7 +62,7 @@ export function link(module) {
   links.push(module);
 
   // merge in the existing modules
-  module.requires = _.union(module.requires, _.keys(existingModules));
+  module.requires = _.union(module.requires, Object.keys(existingModules));
 }
 
 /**

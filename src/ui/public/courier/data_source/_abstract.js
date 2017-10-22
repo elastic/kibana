@@ -342,7 +342,7 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
           flatState.body.script_fields = _.pick(flatState.body.script_fields, fields);
 
           // request the remaining fields from both stored_fields and _source
-          const remainingFields = _.difference(fields, _.keys(flatState.body.script_fields));
+          const remainingFields = _.difference(fields, Object.keys(flatState.body.script_fields));
           flatState.body.stored_fields = remainingFields;
           _.set(flatState.body, '_source.includes', remainingFields);
         }

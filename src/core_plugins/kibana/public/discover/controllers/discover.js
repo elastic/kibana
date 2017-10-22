@@ -205,7 +205,7 @@ function discoverController(
       const fieldCounts = await getFieldCounts();
       return {
         searchFields: null,
-        selectFields: _.keys(fieldCounts).sort()
+        selectFields: Object.keys(fieldCounts).sort()
       };
     }
 
@@ -546,7 +546,7 @@ function discoverController(
           // "top 500" may change with each response, so don't mark this as counted
           if (!sortFn) hit.$$_counted = true;
 
-          const fields = _.keys(indexPattern.flattenHit(hit));
+          const fields = Object.keys(indexPattern.flattenHit(hit));
           let n = fields.length;
           let field;
           while (field = fields[--n]) {

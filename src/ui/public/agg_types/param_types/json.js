@@ -44,7 +44,7 @@ export function JsonParamTypeProvider(Private) {
       function mergeObjs(a, b) {
         return _(a)
         .keys()
-        .union(_.keys(b))
+        .union(Object.keys(b))
         .transform(function (dest, key) {
           const val = compare(a[key], b[key]);
           if (val !== undefined) dest[key] = val;

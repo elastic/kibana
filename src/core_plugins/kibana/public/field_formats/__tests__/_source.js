@@ -38,7 +38,7 @@ describe('_source formatting', function () {
       expect($nonBindable.is('span[ng-non-bindable]')).to.be.ok();
       const $dl = $nonBindable.children();
       expect($dl.is('dl')).to.be.ok();
-      expect($dl.find('dt')).to.have.length(_.keys(indexPattern.flattenHit(hit)).length);
+      expect($dl.find('dt')).to.have.length(Object.keys(indexPattern.flattenHit(hit)).length);
     });
   });
 });

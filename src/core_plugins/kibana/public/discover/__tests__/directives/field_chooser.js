@@ -78,7 +78,7 @@ describe('discover field chooser directives', function () {
     ];
 
     const fieldCounts = _.transform(hits, function (counts, hit) {
-      _.keys(indexPattern.flattenHit(hit)).forEach(function (key) {
+      Object.keys(indexPattern.flattenHit(hit)).forEach(function (key) {
         counts[key] = (counts[key] || 0) + 1;
       });
     }, {});

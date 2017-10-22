@@ -27,7 +27,7 @@ export default class Datasource extends TimelionFunction {
     config.args.push({
       name: 'fit',
       types: ['string', 'null'],
-      help: 'Algorithm to use for fitting series to the target time span and interval. Available: ' + _.keys(fitFunctions).join(', ')
+      help: 'Algorithm to use for fitting series to the target time span and interval. Available: ' + Object.keys(fitFunctions).join(', ')
     });
 
     // Wrap the original function so we can modify inputs/outputs with offset & fit

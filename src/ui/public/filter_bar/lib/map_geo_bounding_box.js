@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { SavedObjectNotFound } from '../../errors';
 
 export function FilterBarLibMapGeoBoundingBoxProvider(Promise, courier) {
@@ -6,7 +5,7 @@ export function FilterBarLibMapGeoBoundingBoxProvider(Promise, courier) {
     if (filter.geo_bounding_box) {
       function getParams(indexPattern) {
         const type = 'geo_bounding_box';
-        const key = _.keys(filter.geo_bounding_box)
+        const key = Object.keys(filter.geo_bounding_box)
           .filter(key => key !== 'ignore_unmapped')[0];
         const params = filter.geo_bounding_box[key];
 

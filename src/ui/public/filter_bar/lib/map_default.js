@@ -6,7 +6,7 @@ export function FilterBarLibMapDefaultProvider(Promise) {
   const metaProperty = /(^\$|meta)/;
 
   return function (filter) {
-    const key = _.find(_.keys(filter), function (key) {
+    const key = _.find(Object.keys(filter), function (key) {
       return !key.match(metaProperty);
     });
 
