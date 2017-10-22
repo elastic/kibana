@@ -18,16 +18,16 @@ export function mergeMap<T, I, R>(
 /**
  * Projects each source value to an Observable which is merged in the output
  * Observable.
- * 
+ *
  * Example:
- * 
+ *
  * ```js
  * const source = Observable.from([1, 2, 3]);
  * const observable = k$(source)(
  *   mergeMap(x => Observable.of('a', x + 1))
  * );
  * ```
- * 
+ *
  * Results in the following items emitted:
  * - a
  * - 2
@@ -35,7 +35,7 @@ export function mergeMap<T, I, R>(
  * - 3
  * - a
  * - 4
- * 
+ *
  * As you can see it merges the returned observable and emits every value from
  * that observable. You can think of it as being the same as `flatMap` on an
  * array, just that you return an Observable instead of an array.
@@ -43,7 +43,7 @@ export function mergeMap<T, I, R>(
  * You can also specify a `resultSelector` that will receive both the value
  * emitted from the `source` observable and the value returned from the provided
  * `project` function, e.g.
- * 
+ *
  * ```js
  * mergeMap(
  *  pluginName => readPluginConfig$(pluginName),
@@ -52,11 +52,11 @@ export function mergeMap<T, I, R>(
  *  }
  * )
  * ```
- * 
+ *
  * In the `resultSelector` you receive both `pluginName`, which was the value
  * emitted by the source observable, and `pluginConfig`, which was the value
  * emitted by `readPluginConfig$`.
- * 
+ *
  * More "formally" described: Returns an Observable that emits items based on
  * applying a function that you supply (the `resultSelector`) to each item
  * emitted by the source Observable, where that function returns an Observable,
@@ -68,7 +68,7 @@ export function mergeMap<T, I, R>(
  * @param resultSelector A function to produce the value on the output
  * Observable based on the values and the indices of the source (outer) emission
  * and the inner Observable emission. The arguments passed to this function are:
- * 
+ *
  * - `outerValue`: the value that came from the source
  * - `innerValue`: the value that came from the projected Observable
  * - `outerIndex`: the "index" of the value that came from the source

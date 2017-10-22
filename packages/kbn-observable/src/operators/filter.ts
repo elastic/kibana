@@ -4,7 +4,7 @@ import { MonoTypeOperatorFunction } from '../interfaces';
 /**
  * Filter items emitted by the source Observable by only emitting those that
  * satisfy a specified predicate.
- * 
+ *
  * @param predicate A function that evaluates each value emitted by the source
  * Observable. If it returns `true`, the value is emitted, if `false` the value
  * is not passed to the output Observable. The `index` parameter is the number

@@ -14,7 +14,7 @@ import { rxjsToEsObservable } from '../lib';
  * observer subscribes it will immediately receive the latest value from the
  * source, similarly to how a BehaviorSubject immediately sends the current
  * value on subscribe.
- * 
+ *
  * When all subscribers unsubscribe, the shared subscription on the source
  * observable will be unsubscribed. Later on if there is a new subscription, a
  * new subscription will be made on the source observable. The subscription flow

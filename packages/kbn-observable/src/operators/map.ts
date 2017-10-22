@@ -4,7 +4,7 @@ import { OperatorFunction } from '../interfaces';
 /**
  * Modifies each value from the source by passing it to `fn(item, i)` and
  * emitting the return value of that function instead.
- * 
+ *
  * @param fn The function to apply to each `value` emitted by the source
  * Observable. The `index` parameter is the number `i` for the i-th emission
  * that has happened since the subscription, starting from the number `0`.

@@ -4,17 +4,17 @@ import { OperatorFunction } from '../interfaces';
 /**
  * Projects each source value to an Observable which is merged in the output
  * Observable, emitting values only from the most recently projected Observable.
- * 
+ *
  * To understand how `switchMap` works, take a look at:
  * https://medium.com/@w.dave.w/becoming-more-reactive-with-rxjs-flatmap-and-switchmap-ccd3fb7b67fa
- * 
+ *
  * It's kinda like a normal `flatMap`, except it's producing observables and you
  * _only_ care about the latest observable it produced. One use-case for
  * `switchMap` is if need to control what happens both when you create and when
  * you're done with an observable, like in the example below where we want to
  * write the pid file when we receive a pid config, and delete it when we
  * receive new config values (or when we stop the pid service).
- * 
+ *
  * ```js
  * switchMap(config => {
  *   return new Observable(() => {
@@ -30,11 +30,11 @@ import { OperatorFunction } from '../interfaces';
  *   });
  * });
  * ```
- * 
+ *
  * Another example could be emitting a value X seconds after receiving it from
  * the source observable, but cancelling if another value is received before the
  * timeout, e.g.
- * 
+ *
  * ```js
  * switchMap(value => {
  *   return new Observable(observer => {

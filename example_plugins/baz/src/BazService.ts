@@ -1,6 +1,17 @@
-import { k$, Observable, $combineLatest, map, first, toPromise } from '@elastic/kbn-observable';
+import {
+  k$,
+  Observable,
+  $combineLatest,
+  map,
+  first,
+  toPromise
+} from '@elastic/kbn-observable';
 
-import { ElasticsearchService, KibanaConfig, KibanaRequest } from '@elastic/kbn-types';
+import {
+  ElasticsearchService,
+  KibanaConfig,
+  KibanaRequest
+} from '@elastic/kbn-types';
 
 export class BazService {
   constructor(
@@ -64,7 +75,5 @@ function latestValues<A, B, C, D>(
   d: Observable<D>
 ): Promise<[A, B, C, D]>;
 function latestValues(...values: Observable<any>[]) {
-  return k$($combineLatest(values))(
-    first(),
-    toPromise());
+  return k$($combineLatest(values))(first(), toPromise());
 }

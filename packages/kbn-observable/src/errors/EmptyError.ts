@@ -3,7 +3,9 @@ export class EmptyError extends Error {
 
   constructor(producer: string) {
     super(
-      `EmptyError: ${producer} requires source stream to emit at least one value.`
+      `EmptyError: ${
+        producer
+      } requires source stream to emit at least one value.`
     );
 
     // We're forching this to `any` as `captureStackTrace` is not a standard
