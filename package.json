@@ -68,7 +68,7 @@
     "uiFramework:documentComponent": "yo ./ui_framework/generator-kui/app/documentation.js",
     "ts:build": "tsc -p platform",
     "ts:start": "tsc -p platform --watch",
-    "prettier": "prettier --single-quote --write 'platform/**/*.ts' 'packages/**/*.ts' 'core_plugins/**/*.[jt]s'"
+    "prettier": "prettier --single-quote --write '**/*.ts'"
   },
   "repository": {
     "type": "git",
