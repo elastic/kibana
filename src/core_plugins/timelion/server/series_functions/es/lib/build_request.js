@@ -45,7 +45,7 @@ export default function buildRequest(config, tlConfig) {
     }
   });
 
-  _.assign(aggCursor, createDateAgg(config, tlConfig));
+  Object.assign(aggCursor, createDateAgg(config, tlConfig));
 
 
   return {

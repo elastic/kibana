@@ -23,7 +23,7 @@ function Api(name) {
     }
 
     var copiedDescription = {};
-    _.extend(copiedDescription, description || {});
+    Object.assign(copiedDescription, description || {});
     _.defaults(copiedDescription, {
       id: endpoint,
       patterns: [endpoint],

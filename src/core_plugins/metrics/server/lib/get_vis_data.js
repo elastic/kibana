@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import getPanelData from './vis_data/get_panel_data';
 
 function getVisData(req) {
@@ -6,7 +5,7 @@ function getVisData(req) {
   return Promise.all(promises)
     .then(res => {
       return res.reduce((acc, data) => {
-        return _.assign(acc, data);
+        return Object.assign(acc, data);
       }, {});
     });
 }

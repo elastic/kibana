@@ -91,7 +91,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
     });
 
     // give index pattern all of the values in _source
-    _.assign(indexPattern, response._source);
+    Object.assign(indexPattern, response._source);
 
     if (!indexPattern.title) {
       indexPattern.title = indexPattern.id;

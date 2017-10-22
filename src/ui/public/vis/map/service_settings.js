@@ -13,7 +13,10 @@ uiModules.get('kibana')
 
 
     const attributionFromConfig = $sanitize(markdownIt.render(tilemapsConfig.deprecated.config.options.attribution || ''));
-    const tmsOptionsFromConfig = _.assign({}, tilemapsConfig.deprecated.config.options, { attribution: attributionFromConfig });
+    const tmsOptionsFromConfig = {
+      ...tilemapsConfig.deprecated.config.options,
+      attribution: attributionFromConfig
+    };
 
     const extendUrl = (url, props) => (
       modifyUrl(url, parsed => _.merge(parsed, props))
@@ -164,7 +167,10 @@ uiModules.get('kibana')
           if (additionalQueryParams.hasOwnProperty(key)) {
             if (additionalQueryParams[key] !== this._queryParams[key]) {
               //changes detected.
-              this._queryParams = _.assign({}, this._queryParams, additionalQueryParams);
+              this._queryParams = {
+                ...this._queryParams,
+                ...additionalQueryParams
+              };
               this._invalidateSettings();
               break;
             }

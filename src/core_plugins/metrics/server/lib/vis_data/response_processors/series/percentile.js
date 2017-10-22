@@ -1,8 +1,8 @@
-import _ from 'lodash';
 import getAggValue from '../../helpers/get_agg_value';
 import getDefaultDecoration from '../../helpers/get_default_decoration';
 import getSplits from '../../helpers/get_splits';
 import getLastMetric from '../../helpers/get_last_metric';
+
 export default function percentile(resp, panel, series) {
   return next => results => {
     const metric = getLastMetric(series);
@@ -12,12 +12,18 @@ export default function percentile(resp, panel, series) {
       metric.percentiles.forEach(percentile => {
         const label = (split.label) + ` (${percentile.value})`;
         const data = split.timeseries.buckets.map(bucket => {
-          const m = _.assign({}, metric, { percent: percentile.value });
+          const m = {
+            ...metric,
+            percent: percentile.value
+          };
           return [bucket.key, getAggValue(bucket, m)];
         });
         if (percentile.mode === 'band') {
           const fillData = split.timeseries.buckets.map(bucket => {
-            const m = _.assign({}, metric, { percent: percentile.percentile });
+            const m = {
+              ...metric,
+              percent: percentile.percentile
+            };
             return [bucket.key, getAggValue(bucket, m)];
           });
           results.push({

@@ -45,7 +45,7 @@ uiModules.get('apps/management')
         _.find($scope.editSections, { index: 'indexedFields' }).count = fields.length; // Update the tab count
 
         $scope.rows = fields.map(function (field) {
-          const childScope = _.assign($scope.$new(), { field: field });
+          const childScope = Object.assign($scope.$new(), { field: field });
           rowScopes.push(childScope);
 
           const excluded = fieldWildcardMatch(field.name);

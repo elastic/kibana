@@ -22,7 +22,7 @@ let indexPatternList;
 const init = function ($elem, props) {
   ngMock.inject(function ($rootScope, $compile, $timeout) {
     $parentScope = $rootScope;
-    _.assign($parentScope, props);
+    Object.assign($parentScope, props);
     $compile($elem)($parentScope);
 
     // Required for test to run solo. Sigh

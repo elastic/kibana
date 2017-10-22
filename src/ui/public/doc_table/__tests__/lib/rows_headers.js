@@ -34,7 +34,7 @@ describe('Doc Table', function () {
   // Sets up the directive, take an element, and a list of properties to attach to the parent scope.
   const init = function ($elem, props) {
     ngMock.inject(function ($compile) {
-      _.assign($parentScope, props);
+      Object.assign($parentScope, props);
       $compile($elem)($parentScope);
       $elem.scope().$digest();
       $scope = $elem.isolateScope();

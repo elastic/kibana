@@ -21,7 +21,10 @@ class ColorRules extends Component {
       part[name] = cast(_.get(e, 'value', _.get(e, 'target.value')));
       if (part[name] === 'undefined') part[name] = undefined;
       if (part[name] === NaN) part[name] = undefined;
-      handleChange(_.assign({}, item, part));
+      handleChange({
+        ...item,
+        ...part
+      });
     };
   }
 
@@ -38,7 +41,10 @@ class ColorRules extends Component {
     ];
     const handleColorChange = (part) => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
-      handleChange(_.assign({}, model, part));
+      handleChange({
+        ...model,
+        ...part
+      });
     };
     const htmlId = htmlIdGenerator(model.id);
     let secondary;

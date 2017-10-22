@@ -12,7 +12,12 @@ import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import { htmlIdGenerator } from 'ui_framework/services';
 const newPercentile = (opts) => {
-  return _.assign({ id: uuid.v1(), mode: 'line', shade: 0.2 }, opts);
+  return {
+    id: uuid.v1(),
+    mode: 'line',
+    shade: 0.2,
+    ...opts
+  };
 };
 
 class Percentiles extends Component {
@@ -27,7 +32,10 @@ class Percentiles extends Component {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       const part = {};
       part[name] = _.get(e, 'value', _.get(e, 'target.value'));
-      handleChange(_.assign({}, item, part));
+      handleChange({
+        ...item,
+        ...part
+      });
     };
   }
 
@@ -129,9 +137,10 @@ class PercentileAgg extends Component { // eslint-disable-line react/no-multi-co
 
   componentWillMount() {
     if (!this.props.model.percentiles) {
-      this.props.onChange(_.assign({}, this.props.model, {
+      this.props.onChange({
+        ...this.props.model,
         percentiles: [newPercentile({ value: 50 })]
-      }));
+      });
     }
   }
 

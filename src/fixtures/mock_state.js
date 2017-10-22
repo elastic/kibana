@@ -6,7 +6,7 @@ function MockState(defaults) {
   this.off = _.noop;
   this.save = sinon.stub();
   this.replace = sinon.stub();
-  _.assign(this, defaults);
+  Object.assign(this, defaults);
 }
 
 export default MockState;

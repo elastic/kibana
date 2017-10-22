@@ -1,5 +1,3 @@
-import _ from 'lodash';
-
 export function AggTypesMetricsGetResponseAggConfigClassProvider() {
 
   /**
@@ -43,7 +41,7 @@ export function AggTypesMetricsGetResponseAggConfigClassProvider() {
       constructor: ResponseAggConfig
     });
 
-    _.assign(ResponseAggConfig.prototype, props);
+    Object.assign(ResponseAggConfig.prototype, props);
 
     return ResponseAggConfig;
   }

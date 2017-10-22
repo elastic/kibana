@@ -12,7 +12,10 @@ export function handleChange(props, doc) {
     return row;
   });
   if (_.isFunction(props.onChange)) {
-    props.onChange(_.assign({}, model, part));
+    props.onChange({
+      ...model,
+      ...part
+    });
   }
 }
 
@@ -22,7 +25,10 @@ export function handleDelete(props, doc) {
   const part = {};
   part[name] = collection.filter(row => row.id !== doc.id);
   if (_.isFunction(props.onChange)) {
-    props.onChange(_.assign({}, model, part));
+    props.onChange({
+      ...model,
+      ...part
+    });
   }
 }
 
@@ -33,7 +39,10 @@ export function handleAdd(props, fn = newFn) {
   const part = {};
   part[name] = collection.concat([fn()]);
   if (_.isFunction(props.onChange)) {
-    props.onChange(_.assign({}, model, part));
+    props.onChange({
+      ...model,
+      ...part
+    });
   }
 }
 

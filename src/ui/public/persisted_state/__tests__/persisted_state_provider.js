@@ -355,7 +355,7 @@ describe('Persisted State Provider', function () {
       const persistedState = new PersistedState(persistedStateValue);
 
       const obj = persistedState.get();
-      _.assign(obj, insertedObj);
+      Object.assign(obj, insertedObj);
 
       expect(obj).to.have.property('farewell');
       expect(persistedState.get()).to.not.have.property('farewell');
@@ -383,7 +383,10 @@ describe('Persisted State Provider', function () {
 
         expect(childState.toJSON()).to.eql({ pants: false });
         // verify JSON output of the parent state
-        const parentCompare = _.assign({ awesome: { pants: false } }, persistedStateValue);
+        const parentCompare = {
+          awesome: { pants: false },
+          ...persistedStateValue
+        };
         expect(persistedState.toJSON()).to.eql(parentCompare);
       });
 
@@ -394,7 +397,10 @@ describe('Persisted State Provider', function () {
         const data = childState.toString();
         expect(JSON.parse(data)).to.eql({ pants: false });
         // verify JSON output of the parent state
-        const parentCompare = _.assign({ awesome: { pants: false } }, persistedStateValue);
+        const parentCompare = {
+          awesome: { pants: false },
+          ...persistedStateValue
+        };
         expect(JSON.parse(persistedState.toString())).to.eql(parentCompare);
       });
     });

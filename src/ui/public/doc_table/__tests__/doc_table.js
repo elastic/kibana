@@ -1,6 +1,5 @@
 import angular from 'angular';
 import expect from 'expect.js';
-import _ from 'lodash';
 import ngMock from 'ng_mock';
 import 'ui/private';
 import 'ui/doc_table';
@@ -24,7 +23,7 @@ const init = function ($elem, props) {
   ngMock.inject(function ($rootScope, $compile, _$timeout_) {
     $timeout = _$timeout_;
     $parentScope = $rootScope;
-    _.assign($parentScope, props);
+    Object.assign($parentScope, props);
 
     $compile($elem)($parentScope);
 

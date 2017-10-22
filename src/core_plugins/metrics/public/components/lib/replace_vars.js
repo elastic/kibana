@@ -1,10 +1,13 @@
-import _ from 'lodash';
 import handlebars from 'handlebars/dist/handlebars';
+
 export default function replaceVars(str, args = {}, vars = {}) {
   try {
     const template = handlebars.compile(str, { strict: true });
 
-    const string = template(_.assign({}, vars, { args }));
+    const string = template({
+      ...vars,
+      args
+    });
 
     return string;
   } catch (e) {

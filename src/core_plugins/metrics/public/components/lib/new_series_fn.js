@@ -1,8 +1,8 @@
 import uuid from 'uuid';
-import _ from 'lodash';
 import newMetricAggFn from './new_metric_agg_fn';
+
 export default (obj = {}) => {
-  return _.assign({
+  return {
     id: uuid.v1(),
     color: '#68BC00',
     split_mode: 'everything',
@@ -14,6 +14,7 @@ export default (obj = {}) => {
     line_width: 1,
     point_size: 1,
     fill: 0.5,
-    stacked: 'none'
-  }, obj);
+    stacked: 'none',
+    ...obj
+  };
 };

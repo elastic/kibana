@@ -41,7 +41,7 @@ export class Numeral extends FieldFormat {
     }
 
     if (opts.prototype) {
-      _.assign(Class.prototype, opts.prototype);
+      Object.assign(Class.prototype, opts.prototype);
     }
 
     return Class;

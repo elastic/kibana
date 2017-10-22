@@ -67,7 +67,7 @@ export function uiRegistry(spec) {
     let modules = new IndexedArray(iaOpts);
 
     // mixin other props
-    _.assign(modules, props);
+    Object.assign(modules, props);
 
     // construct
     if (constructor) {

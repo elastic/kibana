@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import processFunctionDefinition from './server/lib/process_function_definition';
 
 export default function (server) {
@@ -10,7 +9,7 @@ export default function (server) {
   const functions = require('./server/lib/load_functions')('series_functions');
 
   function addFunction(func) {
-    _.assign(functions, processFunctionDefinition(func));
+    Object.assign(functions, processFunctionDefinition(func));
   }
 
   function getFunction(name) {

@@ -171,7 +171,7 @@ class FlotChart extends Component {
       _.set(opts, 'selection', { mode: 'x', color: textColor });
     }
     _.set(opts, 'series.bars.barWidth', calculateBarWidth(props.series));
-    return _.assign(opts, props.options);
+    return Object.assign(opts, props.options);
   }
 
   handleResize(width, height) {

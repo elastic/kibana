@@ -371,15 +371,16 @@ Notifier.prototype.error = function (err, opts, cb) {
     opts = {};
   }
 
-  const config = _.assign({
+  const config = {
     type: 'danger',
     content: formatMsg(err, this.from),
     icon: 'warning',
     title: 'Error',
     lifetime: Notifier.config.errorLifetime,
     actions: ['report', 'accept'],
-    stack: formatStack(err)
-  }, _.pick(opts, overrideableOptions));
+    stack: formatStack(err),
+    ..._.pick(opts, overrideableOptions)
+  };
   return add(config, cb);
 };
 
@@ -394,14 +395,15 @@ Notifier.prototype.warning = function (msg, opts, cb) {
     opts = {};
   }
 
-  const config = _.assign({
+  const config = {
     type: 'warning',
     content: formatMsg(msg, this.from),
     icon: 'warning',
     title: 'Warning',
     lifetime: Notifier.config.warningLifetime,
-    actions: ['accept']
-  }, _.pick(opts, overrideableOptions));
+    actions: ['accept'],
+    ..._.pick(opts, overrideableOptions)
+  };
   return add(config, cb);
 };
 
@@ -416,14 +418,15 @@ Notifier.prototype.info = function (msg, opts, cb) {
     opts = {};
   }
 
-  const config = _.assign({
+  const config = {
     type: 'info',
     content: formatMsg(msg, this.from),
     icon: 'info-circle',
     title: 'Debug',
     lifetime: Notifier.config.infoLifetime,
-    actions: ['accept']
-  }, _.pick(opts, overrideableOptions));
+    actions: ['accept'],
+    ..._.pick(opts, overrideableOptions)
+  };
   return add(config, cb);
 };
 
@@ -472,11 +475,12 @@ function getDecoratedCustomConfig(config) {
     }
   };
 
-  const customConfig = _.assign({
+  const customConfig = {
     type: 'info',
     title: 'Notification',
-    lifetime: getLifetime(config.type)
-  }, config);
+    lifetime: getLifetime(config.type),
+    ...config
+  };
 
   const hasActions = _.get(customConfig, 'actions.length');
   if (hasActions) {

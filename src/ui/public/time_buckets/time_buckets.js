@@ -226,7 +226,7 @@ export function TimeBucketsProvider(Private, timefilter, config) {
       if (+scaled === +interval) return interval;
 
       decorateInterval(interval);
-      return _.assign(scaled, {
+      return Object.assign(scaled, {
         preScaled: interval,
         scale: interval / scaled,
         scaled: true

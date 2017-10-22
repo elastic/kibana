@@ -8,7 +8,7 @@ export function FilterBarPushFilterProvider() {
       // differently because of how the point is rewritten between the two. So
       // we need to check if the point.orig is set, if not use try the point.aggConfigResult
       const pendingFilter = { meta: { negate: negate, index: index } };
-      _.extend(pendingFilter, filter);
+      Object.assign(pendingFilter, filter);
       $state.$newFilters = [pendingFilter];
     };
   };

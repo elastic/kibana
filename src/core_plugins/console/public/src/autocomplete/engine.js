@@ -229,7 +229,7 @@ function passThroughContext(context, extensionList) {
   var result = new PTC();
   if (extensionList) {
     extensionList.unshift(result);
-    _.assign.apply(_, extensionList);
+    Object.assign.apply(_, extensionList);
     extensionList.shift();
   }
   return result;
@@ -347,7 +347,7 @@ export function populateContext(tokenPath, context, editor, includeAutoComplete,
     console.log("resolved ", tokenPath, 'to', wsToUse, 'options were', walkStates);
 
     _.each(wsToUse.contextExtensionList, function (extension) {
-      _.assign(context, extension);
+      Object.assign(context, extension);
     });
   }
 }

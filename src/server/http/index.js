@@ -1,6 +1,5 @@
 import { format } from 'url';
 import { resolve } from 'path';
-import _ from 'lodash';
 import Boom from 'boom';
 import Hapi from 'hapi';
 import getDefaultRoute from './get_default_route';
@@ -54,7 +53,10 @@ export default async function (kbnServer, server, config) {
     this.views({
       path: path,
       isCached: config.get('optimize.viewCaching'),
-      engines: _.assign({ jade: require('jade') }, engines || {})
+      engines: {
+        jade: require('jade'),
+        ...(engines || {})
+      }
     });
   });
 

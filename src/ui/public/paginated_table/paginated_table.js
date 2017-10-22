@@ -50,7 +50,7 @@ uiModules
         self.sort.columnIndex = colIndex;
         self.sort.direction = sortDirection;
         if ($scope.sort) {
-          _.assign($scope.sort, self.sort);
+          Object.assign($scope.sort, self.sort);
         }
       };
 

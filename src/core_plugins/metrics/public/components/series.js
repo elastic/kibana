@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import _ from 'lodash';
 
 import timeseries from './vis_types/timeseries/series';
 import metric from './vis_types/metric/series';
@@ -37,7 +36,10 @@ class Series extends Component {
   handleChange(part) {
     if (this.props.onChange) {
       const { model } = this.props;
-      const doc = _.assign({}, model, part);
+      const doc = {
+        ...model,
+        ...part
+      };
       this.props.onChange(doc);
     }
   }

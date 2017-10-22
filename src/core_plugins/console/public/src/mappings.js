@@ -278,7 +278,7 @@ function autocomplete_retriever() {
   }, 60000);
 }
 
-export default _.assign(mappingObj, {
+export default Object.assign(mappingObj, {
   getFields: getFields,
   getIndices: getIndices,
   getTypes: getTypes,

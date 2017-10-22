@@ -1,7 +1,7 @@
-import _ from 'lodash';
 import getSplits from '../../helpers/get_splits';
 import getLastMetric from '../../helpers/get_last_metric';
 import getSiblingAggValue from '../../helpers/get_sibling_agg_value';
+
 export default function stdDeviationSibling(resp, panel, series) {
   return next => results => {
     const metric = getLastMetric(series);
@@ -10,7 +10,10 @@ export default function stdDeviationSibling(resp, panel, series) {
 
         const mapBucketByMode = (mode) => {
           return bucket => {
-            return [bucket.key, getSiblingAggValue(split, _.assign({}, metric, { mode }))];
+            return [bucket.key, getSiblingAggValue(split, {
+              ...metric,
+              mode
+            })];
           };
         };
 

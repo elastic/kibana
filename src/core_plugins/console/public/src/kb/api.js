@@ -36,7 +36,7 @@ function Api(urlParametrizedComponentFactories, bodyParametrizedComponentFactori
   cls.addEndpointDescription = function (endpoint, description) {
 
     var copiedDescription = {};
-    _.extend(copiedDescription, description || {});
+    Object.assign(copiedDescription, description || {});
     _.defaults(copiedDescription, {
       id: endpoint,
       patterns: [endpoint],

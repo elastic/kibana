@@ -21,7 +21,10 @@ import url from 'url';
 */
 
 export default function getUrl(config, app) {
-  return url.format(_.assign({}, config, app));
+  return url.format({
+    ...config,
+    ...app
+  });
 }
 
 getUrl.noAuth = function getUrlNoAuth(config, app) {
