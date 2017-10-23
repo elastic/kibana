@@ -20,7 +20,7 @@ const wrap = (Component) => withHandlers({
 export const containerStyle = () => ({
   name: 'containerStyle',
   displayName: 'Image Upload',
-  description: 'Select or upload an image',
+  help: 'Select or upload an image',
   template: wrap(extendedTemplate),
   simpleTemplate: wrap(simpleTemplate),
 });

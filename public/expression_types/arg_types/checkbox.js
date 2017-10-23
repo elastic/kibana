@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ArgType } from '../arg_type';
 
 const template = ({ onValueChange, argValue }) => {
 
@@ -26,8 +25,9 @@ template.propTypes = {
   argValue: PropTypes.any.isRequired,
 };
 
-export const checkbox = () => new ArgType('checkbox', {
+export const checkbox = () => ({
+  name: 'checkbox',
   displayName: 'Checkbox',
-  description: 'A true/false checkbox toggle',
+  help: 'A true/false checkbox toggle',
   simpleTemplate: template,
 });

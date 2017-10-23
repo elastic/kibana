@@ -1,8 +1,6 @@
-import Fn from '../../../common/functions/fn.js';
 import { parse } from 'url';
 
-
-export default new Fn({
+export default {
   name: 'urlparam',
   aliases: [],
   type: 'string',
@@ -29,4 +27,4 @@ export default new Fn({
     const query = parse(location.href, true).query;
     return query[args._] || args.default;
   },
-});
+};

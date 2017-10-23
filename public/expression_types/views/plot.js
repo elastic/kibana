@@ -14,20 +14,20 @@ export const plot = () => ({
   }, {
     name: 'legend',
     displayName: 'Legend Visibility',
-    description: 'Enable or disable the legend',
+    help: 'Enable or disable the legend',
     argType: 'checkbox',
-    defaultValue: 'true',
+    default: 'true',
   }, {
     name: 'font',
     displayName: 'Text settings',
-    description: 'Fonts, alignment and color',
+    help: 'Fonts, alignment and color',
     argType: 'font',
   }, {
     name: 'defaultStyle',
     displayName: 'Default style',
-    description: 'Set the style to be used by default by every series, unless overridden.',
+    help: 'Set the style to be used by default by every series, unless overridden.',
     argType: 'seriesStyle',
-    defaultValue: '{seriesStyle points=5}',
+    default: '{seriesStyle points=5}',
     options: {
       include: styleProps,
     },
@@ -35,7 +35,7 @@ export const plot = () => ({
     name: 'seriesStyle',
     displayName: 'Series style',
     argType: 'seriesStyle',
-    defaultValue: '{seriesStyle points=5}',
+    default: '{seriesStyle points=5}',
     options: {
       include: styleProps,
     },

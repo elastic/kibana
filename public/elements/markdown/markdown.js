@@ -9,7 +9,7 @@ const md = new Markdown();
 export default {
   name: 'markdown',
   displayName: 'Markdown',
-  description: 'Markup from Markdown',
+  help: 'Markup from Markdown',
   image: header,
   expression: `filters | demodata | markdown "### Welcome to the Markdown Element.
 

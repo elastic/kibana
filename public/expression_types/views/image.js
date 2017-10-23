@@ -21,7 +21,7 @@ export const image = () => ({
   }, {
     name: 'mode',
     displayName: 'Fill mode',
-    description: 'Note: Stretched fill may not work with vector images',
+    help: 'Note: Stretched fill may not work with vector images',
     argType: 'select',
     resolve() {
       return 'contain';

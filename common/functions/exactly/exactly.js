@@ -1,6 +1,4 @@
-import Fn from '../fn.js';
-
-export default new Fn({
+export default {
   name: 'exactly',
   aliases: [],
   type: 'filter',
@@ -33,4 +31,4 @@ export default new Fn({
 
     return context;
   },
-});
+};

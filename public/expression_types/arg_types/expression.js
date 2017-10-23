@@ -14,7 +14,7 @@ const template = (props = {}) => {
 export const expression = () => ({
   name: 'expression',
   displayName: 'Expression',
-  description: 'Manually enter a custom expression',
+  help: 'Manually enter a custom expression',
   args: [],
   template,
 });

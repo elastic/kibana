@@ -52,6 +52,6 @@ template.propTypes = {
 export const textarea = () => ({
   name: 'textarea',
   displayName: 'textarea',
-  description: 'Input long strings',
+  help: 'Input long strings',
   template: template,
 });

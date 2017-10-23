@@ -8,7 +8,7 @@ import { get, set } from 'lodash';
 export default {
   name: 'time_filter',
   displayName: 'Time Filter',
-  description: 'Set a time window',
+  help: 'Set a time window',
   image: header,
   expression: 'timefilterControl compact=true column=@timestamp | render as=time_filter',
   filter: 'timefilter column=@timestamp from=now-6M to=now-2M',

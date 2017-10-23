@@ -6,9 +6,9 @@ export class View extends FunctionForm {
   constructor(props) {
     super(props);
 
-    const propNames = ['description', 'modelArgs', 'requiresContext'];
+    const propNames = ['help', 'modelArgs', 'requiresContext'];
     const defaultProps = {
-      description: `Element: ${props.name}`,
+      help: `Element: ${props.name}`,
       requiresContext: true,
     };
 

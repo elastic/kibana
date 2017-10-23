@@ -20,7 +20,7 @@ template.propTypes = {
 export const shape = () => ({
   name: 'shape',
   displayName: 'Shape',
-  description: 'Shape selector',
-  defaultValue: 'circle',
+  help: 'Shape selector',
+  default: 'circle',
   simpleTemplate: template,
 });

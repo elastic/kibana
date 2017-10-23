@@ -59,7 +59,7 @@ export class FunctionForm extends BaseForm {
     if (!arg || arg.required || skipRender) return null;
     if (argValues && !arg.multi) return null;
 
-    const value = arg.defaultValue == null ? null : fromExpression(arg.defaultValue, 'argument');
+    const value = arg.default == null ? null : fromExpression(arg.default, 'argument');
 
     return { arg, onValueAdd: onValueAdd(arg.name, value) };
   }
@@ -101,7 +101,7 @@ export class FunctionForm extends BaseForm {
 
       return (
         <SidebarSection>
-          <SidebarSectionTitle title={argTypeDef.displayName} tip={argTypeDef.description}>
+          <SidebarSectionTitle title={argTypeDef.displayName} tip={argTypeDef.help}>
             {addableArgs.length === 0 ? null : (
               <ArgAddPopover options={addableArgs}/>
             )}

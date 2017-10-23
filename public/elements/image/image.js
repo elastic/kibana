@@ -5,7 +5,7 @@ import header from './header.png';
 export default {
   name: 'image',
   displayName: 'Image',
-  description: 'A static image.',
+  help: 'A static image.',
   image: header,
   expression: 'image mode="contain" | render',
   render(domNode, config, handlers) {

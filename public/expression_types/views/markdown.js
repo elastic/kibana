@@ -1,13 +1,13 @@
 export const markdown = () => ({
   name: 'markdown',
   displayName: 'Markdown',
-  description: 'Generate markup using markdown',
+  help: 'Generate markup using markdown',
   modelArgs: [],
   requiresContext: false,
   args: [{
     name: '_',
     displayName: 'Markdown content',
-    description: 'Markdown formatted text',
+    help: 'Markdown formatted text',
     argType: 'textarea',
     options: {
       confirm: 'Apply',
@@ -16,7 +16,7 @@ export const markdown = () => ({
   }, {
     name: 'font',
     displayName: 'Text settings',
-    description: 'Fonts, alignment and color',
+    help: 'Fonts, alignment and color',
     argType: 'font',
   }],
 });

@@ -45,6 +45,6 @@ template.propTypes = {
 export const string = () => ({
   name: 'string',
   displayName: 'string',
-  description: 'Input short strings',
+  help: 'Input short strings',
   simpleTemplate: template,
 });

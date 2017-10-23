@@ -5,7 +5,7 @@ import '../../lib/flot';
 export default {
   name: 'pie',
   displayName: 'Pie chart',
-  description: 'An customizable element for making pie charts from your data',
+  help: 'An customizable element for making pie charts from your data',
   image: header,
   expression: 'filters | demodata | pointseries color="state" size="max(price)" | pie | render',
   render(domNode, config, handlers) {

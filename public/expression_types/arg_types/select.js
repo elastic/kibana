@@ -30,6 +30,6 @@ template.propTypes = {
 export const select = () => ({
   name: 'select',
   displayName: 'Select',
-  description: 'Select from multiple options in a drop down',
+  help: 'Select from multiple options in a drop down',
   simpleTemplate: template,
 });

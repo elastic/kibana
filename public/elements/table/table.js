@@ -7,7 +7,7 @@ import { get } from 'lodash';
 export default {
   name: 'table',
   displayName: 'Data Table',
-  description: 'A scrollable grid for displaying data in a tabluar format',
+  help: 'A scrollable grid for displaying data in a tabluar format',
   image: header,
   expression: 'filters | demodata | table | render',
   render(domNode, config, handlers) {

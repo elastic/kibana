@@ -87,7 +87,7 @@ simpleTemplate.propTypes = {
 export const datacolumn = () => ({
   name: 'datacolumn',
   displayName: 'Column',
-  description: 'Select the data column',
-  defaultValue: '""',
+  help: 'Select the data column',
+  default: '""',
   simpleTemplate,
 });

@@ -8,7 +8,7 @@ export const pie = () => ({
   args: [{
     name: 'font',
     displayName: 'Text settings',
-    description: 'Fonts, alignment and color',
+    help: 'Fonts, alignment and color',
     argType: 'font',
   }, {
     name: 'palette',
@@ -18,7 +18,7 @@ export const pie = () => ({
     name: 'seriesStyle',
     displayName: 'Series Style',
     argType: 'seriesStyle',
-    defaultValue: '{seriesStyle points=5}',
+    default: '{seriesStyle points=5}',
     multi: true,
   }],
   resolve({ context }) {

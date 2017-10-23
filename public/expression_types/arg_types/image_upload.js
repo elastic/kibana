@@ -52,6 +52,6 @@ template.propTypes = {
 export const imageUpload = () => ({
   name: 'imageUpload',
   displayName: 'Image Upload',
-  description: 'Select or upload an image',
+  help: 'Select or upload an image',
   template: withState('isLoading', 'setLoading', false)(template),
 });

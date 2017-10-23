@@ -4,17 +4,17 @@ import { map, uniq } from 'lodash';
 export const grid = () => ({
   name: 'grid',
   displayName: 'Chart Style',
-  description: '',
+  help: '',
   modelArgs: ['x', 'y', 'color', 'size', 'text'],
   args: [{
     name: 'mark',
     displayName: 'Mark Shape',
     argType: 'shape',
-    defaultValue: 'circle',
+    default: 'circle',
   }, {
     name: 'font',
     displayName: 'Text settings',
-    description: 'Fonts, alignment and color',
+    help: 'Fonts, alignment and color',
     argType: 'font',
   }, {
     name: 'palette',
@@ -24,7 +24,7 @@ export const grid = () => ({
     name: 'seriesStyle',
     displayName: 'Series Style',
     argType: 'seriesStyle',
-    defaultValue: '{seriesStyle points=5}',
+    default: '{seriesStyle points=5}',
     multi: true,
   }],
   resolve: ({ context }) => {

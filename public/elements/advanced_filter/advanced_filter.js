@@ -6,7 +6,7 @@ import { AdvancedFilter } from './components/advanced_filter';
 export default {
   name: 'advanced_filter',
   displayName: 'Advanced Filter',
-  description: 'An input box for typing a Canvas filter expression',
+  help: 'An input box for typing a Canvas filter expression',
   image: header,
   expression: 'render as=advanced_filter',
   render(domNode, config, handlers) {

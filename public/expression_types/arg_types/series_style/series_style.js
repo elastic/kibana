@@ -32,7 +32,7 @@ wrappedTemplate.propTypes = {
 export const seriesStyle = () => ({
   name: 'seriesStyle',
   displayName: 'Series Style',
-  description: 'Set the style for a selected named series',
+  help: 'Set the style for a selected named series',
   template: wrappedTemplate,
   simpleTemplate,
 });

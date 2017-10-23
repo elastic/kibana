@@ -8,11 +8,11 @@ export class Arg {
     const propNames = [
       'name',
       'displayName',
-      'description',
+      'help',
       'multi',
       'required',
       'types',
-      'defaultValue',
+      'default',
       'resolve',
       'options',
     ];
@@ -24,11 +24,11 @@ export class Arg {
     // properties that can be passed in
     const defaultProps = {
       displayName: props.name,
-      description: argType.description || props.name,
+      help: argType.help || `Argument: ${props.name}`,
       multi: false,
       required: false,
       types: [],
-      defaultValue: isUndefined(argType.defaultValue) ? null : argType.defaultValue,
+      default: isUndefined(argType.default) ? null : argType.default,
       options: {},
       resolve: () => ({}),
     };

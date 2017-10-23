@@ -26,7 +26,7 @@ export const ArgForm = (props) => {
     const { template, simpleTemplate } = argTypeInstance.argType;
     const argumentProps = {
       ...templateProps,
-      defaultValue: argTypeInstance.defaultValue,
+      defaultValue: argTypeInstance.default,
       renderError: (msg) => { throw new RenderError(msg || 'Render failed'); },
       setLabel,
       resetErrorState,
@@ -54,7 +54,7 @@ export const ArgForm = (props) => {
       <div className="canvas__arg--header">
         <ArgLabel
           label={label}
-          description={argTypeInstance.description}
+          help={argTypeInstance.help}
           expandable={expandableLabel || error}
           expanded={expand}
           setExpand={setExpand}

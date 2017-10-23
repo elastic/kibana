@@ -7,20 +7,19 @@ import { FormControl } from 'react-bootstrap';
 
 export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
   search = lowerCase(search);
-  const elementList = map(elements, (val, name) => {
-    const { expression, filter } = val;
+  const elementList = map(elements, (element, name) => {
+    const { help, image, displayName, expression, filter } = element;
     const whenClicked = () => onClick({ expression, filter });
-    const { description, image, displayName } = val;
     const card = (
       <MediaCard key={name} image={image} title={displayName} onClick={whenClicked}>
-        {description}
+        {help}
       </MediaCard>
     );
 
     if (!search) return card;
     if (includes(lowerCase(name), search)) return card;
     if (includes(lowerCase(displayName), search)) return card;
-    if (includes(lowerCase(description), search)) return card;
+    if (includes(lowerCase(help), search)) return card;
     return null;
   });
 

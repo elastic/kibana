@@ -4,6 +4,6 @@ export class BaseForm {
 
     this.name = props.name;
     this.displayName = props.displayName || this.name;
-    this.description = props.description || '';
+    this.help = props.help || '';
   }
 }

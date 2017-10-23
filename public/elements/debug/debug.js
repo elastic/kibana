@@ -5,7 +5,7 @@ import header from './header.png';
 export default {
   name: 'debug',
   displayName: 'Debug',
-  description: 'Just dumps the configuration of the element',
+  help: 'Just dumps the configuration of the element',
   image: header,
   expression: 'demodata | render as=debug',
   render(domNode, config, handlers) {

@@ -9,7 +9,7 @@ export function Element(config) {
   this.image = config.image;
 
   // A sentence or few about what this element does
-  this.description = config.description;
+  this.help = config.help;
 
   if (!config.expression) throw new Error('Element types must have a default expression');
   this.expression = config.expression;

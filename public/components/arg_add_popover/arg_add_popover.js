@@ -18,7 +18,7 @@ export const ArgAddPopover = ({ options }) => {
       {options.map(opt => (
         <ArgAdd key={`${opt.arg.name}-add`}
           displayName={opt.arg.displayName}
-          description={opt.arg.description}
+          help={opt.arg.help}
           onValueAdd={() => { opt.onValueAdd(...arguments); close();}}
         />
       ))}

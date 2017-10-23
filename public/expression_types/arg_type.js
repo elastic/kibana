@@ -7,7 +7,7 @@ export class ArgType extends BaseForm {
 
     this.simpleTemplate = props.simpleTemplate;
     this.template = props.template;
-    this.defaultValue = props.defaultValue;
+    this.default = props.default;
   }
 }
 
