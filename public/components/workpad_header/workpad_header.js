@@ -7,7 +7,7 @@ import './workpad_header.less';
 
 const btnClass = 'canvas__workpad_header--button';
 
-export const WorkpadHeader = ({ workpadName, editing, inFlight, toggleEditing }) => {
+export const WorkpadHeader = ({ workpadName, editing, inFlight, toggleEditing, doRefresh }) => {
   const keyHandler = (action) => {
     if (action === 'EDITING') toggleEditing();
   };
@@ -16,10 +16,10 @@ export const WorkpadHeader = ({ workpadName, editing, inFlight, toggleEditing })
     <div className="canvas__workpad_header">
       <h2>
         { workpadName }
-        <span className={`canvas__workpad_header--editToggle ${btnClass} ${inFlight && 'canvas__in_flight'}`}>
-          <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global/>
-          <Toggle value={editing} onChange={toggleEditing} />
+        <span className={`canvas__workpad_header--editToggle ${btnClass}`}>
+          <i className={`fa fa-refresh ${inFlight && 'canvas__in_flight'}`} onClick={doRefresh}/>
         </span>
+
         <FullscreenControl>
           {({ onFullscreen }) => (
             <span className={`canvas__workpad_header--fullscreenControl ${btnClass}`}>
@@ -27,6 +27,11 @@ export const WorkpadHeader = ({ workpadName, editing, inFlight, toggleEditing })
             </span>
           )}
         </FullscreenControl>
+
+        <span className={`canvas__workpad_header--editToggle ${btnClass}`}>
+          <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global/>
+          <Toggle value={editing} onChange={toggleEditing} />
+        </span>
       </h2>
     </div>
   );
@@ -37,4 +42,5 @@ WorkpadHeader.propTypes = {
   editing: PropTypes.bool,
   inFlight: PropTypes.bool,
   toggleEditing: PropTypes.func,
+  doRefresh: PropTypes.func,
 };
