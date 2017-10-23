@@ -12,7 +12,15 @@
     overflow-x: hidden;
     text-overflow: ellipsis; // TODO: This will truncate long words, needs a tooltip or something
     white-space: nowrap;
-    padding: 0 @spacingS @spacingS @spacingS;
+
+    .canvas__pill-select--option {
+      font-size: @textXSmall;
+      padding: @spacingXS @spacingS;
+
+      &:hover {
+        background-color: @lightGrey;
+      }
+    }
   }
 
   .canvas__pill-select--search {

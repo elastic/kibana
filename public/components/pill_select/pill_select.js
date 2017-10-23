@@ -12,6 +12,7 @@ export const PillSelect = ({ values, options, onChange, setTarget, setPopover, s
 
   function close() {
     setPopover(false);
+    setSearch('');
   }
 
   function addPill(val) {
@@ -31,7 +32,9 @@ export const PillSelect = ({ values, options, onChange, setTarget, setPopover, s
       </div>
       <div className="canvas__pill-select--options">
         {difference(options, values).filter(val => val.indexOf(search) > -1).map(opt => (
-          <div key={opt}><a className="clickable" onClick={() => addPill(opt)}>{opt}</a></div>
+          <div className="canvas__pill-select--option clickable" key={opt} onClick={() => addPill(opt)}>
+            {opt}
+          </div>
         ))}
       </div>
     </Popover>
