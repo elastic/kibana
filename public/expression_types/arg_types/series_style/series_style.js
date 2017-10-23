@@ -6,17 +6,20 @@ import { simpleTemplate } from './simple_template';
 import { extendedTemplate } from './extended_template';
 import './series_style.less';
 
-const formatLabel = (label) => `Style: ${label}`;
 
 const wrappedTemplate = lifecycle({
+  formatLabel(label) {
+    if (typeof label !== 'string') this.props.renderError();
+    return `Style: ${label}`;
+  },
   componentWillMount() {
     const label = get(this.props.argValue, 'chain.0.arguments.label.0', '');
-    if (label) this.props.setLabel(formatLabel(label));
+    if (label) this.props.setLabel(this.formatLabel(label));
   },
   componentWillReceiveProps(newProps) {
     const newLabel = get(newProps.argValue, 'chain.0.arguments.label.0', '');
-    if (newLabel && this.props.label !== formatLabel(newLabel)) {
-      this.props.setLabel(formatLabel(newLabel));
+    if (newLabel && this.props.label !== this.formatLabel(newLabel)) {
+      this.props.setLabel(this.formatLabel(newLabel));
     }
   },
 })(extendedTemplate);
