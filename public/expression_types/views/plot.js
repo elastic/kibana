@@ -13,6 +13,12 @@ export const plot = () => new View('plot', {
       displayName: 'Color palette',
       argType: 'palette',
     }),
+    new Arg('legend', {
+      displayName: 'Legend Visibility',
+      description: 'Enable or disable the legend',
+      argType: 'checkbox',
+      defaultValue: 'true',
+    }),
     new Arg('font', {
       displayName: 'Text settings',
       description: 'Fonts, alignment and color',
