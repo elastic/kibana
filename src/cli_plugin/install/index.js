@@ -1,6 +1,7 @@
-import { fromRoot, pkg } from '../../utils';
+import { fromRoot } from '../../utils';
 import install from './install';
 import Logger from '../lib/logger';
+import { pkg } from '../../utils';
 import { getConfig } from '../../server/path';
 import { parse, parseMilliseconds } from './settings';
 import logWarnings from '../lib/log_warnings';
