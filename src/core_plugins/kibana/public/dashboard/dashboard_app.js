@@ -1,24 +1,21 @@
 import _ from 'lodash';
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
-import uiRoutes from 'ui/routes';
 import chrome from 'ui/chrome';
 
 import 'ui/query_bar';
 
-import { SavedObjectNotFound } from 'ui/errors';
 import { getDashboardTitle, getUnsavedChangesWarningMessage } from './dashboard_strings';
 import { DashboardViewMode } from './dashboard_view_mode';
 import { TopNavIds } from './top_nav/top_nav_ids';
 import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
-import dashboardTemplate from 'plugins/kibana/dashboard/dashboard.html';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { DocTitleProvider } from 'ui/doc_title';
 import { getTopNavConfig } from './top_nav/get_top_nav_config';
 import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 import { VisualizeConstants } from 'plugins/kibana/visualize/visualize_constants';
-import { DashboardState } from './dashboard_state';
-import { notify } from 'ui/notify';
+import { DashboardStateManager } from './dashboard_state_manager';
+import { saveDashboard } from './lib';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import { showCloneModal } from './top_nav/show_clone_modal';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
@@ -28,13 +25,7 @@ import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { EmbeddableHandlersRegistryProvider } from 'ui/embeddable/embeddable_handlers_registry';
 
-import {
-  DashboardGrid
-} from './grid/dashboard_grid';
-
-import {
-  DashboardPanel
-} from './panel';
+import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
 
 const app = uiModules.get('app/dashboard', [
   'elasticsearch',
@@ -46,50 +37,9 @@ const app = uiModules.get('app/dashboard', [
   'kibana/typeahead',
 ]);
 
-app.directive('dashboardGrid', function (reactDirective) {
-  return reactDirective(DashboardGrid);
+app.directive('dashboardViewportProvider', function (reactDirective) {
+  return reactDirective(DashboardViewportProvider);
 });
-
-app.directive('dashboardPanel', function (reactDirective) {
-  return reactDirective(DashboardPanel);
-});
-
-uiRoutes
-  .when(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
-    template: dashboardTemplate,
-    resolve: {
-      dash: function (savedDashboards, courier) {
-        return savedDashboards.get()
-          .catch(courier.redirectWhenMissing({
-            'dashboard': DashboardConstants.LANDING_PAGE_PATH
-          }));
-      }
-    }
-  })
-  .when(createDashboardEditUrl(':id'), {
-    template: dashboardTemplate,
-    resolve: {
-      dash: function (savedDashboards, Notifier, $route, $location, courier, kbnUrl, AppState) {
-        const id = $route.current.params.id;
-        return savedDashboards.get(id)
-          .catch((error) => {
-            // Preserve BWC of v5.3.0 links for new, unsaved dashboards.
-            // See https://github.com/elastic/kibana/issues/10951 for more context.
-            if (error instanceof SavedObjectNotFound && id === 'create') {
-              // Note "new AppState" is neccessary so the state in the url is preserved through the redirect.
-              kbnUrl.redirect(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}, new AppState());
-              notify.error(
-                'The url "dashboard/create" is deprecated and will be removed in 6.0. Please update your bookmarks.');
-            } else {
-              throw error;
-            }
-          })
-          .catch(courier.redirectWhenMissing({
-            'dashboard' : DashboardConstants.LANDING_PAGE_PATH
-          }));
-      }
-    }
-  });
 
 app.directive('dashboardApp', function ($injector) {
   const Notifier = $injector.get('Notifier');
@@ -119,52 +69,55 @@ app.directive('dashboardApp', function ($injector) {
         docTitle.change(dash.title);
       }
 
-      const dashboardState = new DashboardState(dash, AppState, dashboardConfig.getHideWriteControls());
-      $scope.appState = dashboardState.getAppState();
+      const dashboardStateManager = new DashboardStateManager(dash, AppState, dashboardConfig.getHideWriteControls());
+
+      $scope.getDashboardState = () => dashboardStateManager;
+      $scope.appState = dashboardStateManager.getAppState();
       $scope.containerApi = new DashboardContainerAPI(
-        dashboardState,
+        dashboardStateManager,
         (field, value, operator, index) => {
-          filterActions.addFilter(field, value, operator, index, dashboardState.getAppState(), filterManager);
-          dashboardState.saveState();
+          filterActions.addFilter(field, value, operator, index, dashboardStateManager.getAppState(), filterManager);
+          dashboardStateManager.saveState();
         }
       );
       $scope.getContainerApi = () => $scope.containerApi;
 
       // The 'previouslyStored' check is so we only update the time filter on dashboard open, not during
       // normal cross app navigation.
-      if (dashboardState.getIsTimeSavedWithDashboard() && !getAppState.previouslyStored()) {
-        dashboardState.syncTimefilterWithDashboard(timefilter, quickRanges);
+      if (dashboardStateManager.getIsTimeSavedWithDashboard() && !getAppState.previouslyStored()) {
+        dashboardStateManager.syncTimefilterWithDashboard(timefilter, quickRanges);
       }
 
       const updateState = () => {
         // Following the "best practice" of always have a '.' in your ng-models –
         // https://github.com/angular/angular.js/wiki/Understanding-Scopes
         $scope.model = {
-          query: dashboardState.getQuery(),
-          darkTheme: dashboardState.getDarkTheme(),
-          timeRestore: dashboardState.getTimeRestore(),
-          title: dashboardState.getTitle(),
-          description: dashboardState.getDescription(),
+          query: dashboardStateManager.getQuery(),
+          darkTheme: dashboardStateManager.getDarkTheme(),
+          timeRestore: dashboardStateManager.getTimeRestore(),
+          title: dashboardStateManager.getTitle(),
+          description: dashboardStateManager.getDescription(),
         };
-        $scope.panels = dashboardState.getPanels();
-        $scope.fullScreenMode = dashboardState.getFullScreenMode();
-        $scope.indexPatterns = dashboardState.getPanelIndexPatterns();
+        $scope.panels = dashboardStateManager.getPanels();
+        $scope.fullScreenMode = dashboardStateManager.getFullScreenMode();
+        $scope.indexPatterns = dashboardStateManager.getPanelIndexPatterns();
       };
 
       // Part of the exposed plugin API - do not remove without careful consideration.
       this.appStatus = {
         dirty: !dash.id
       };
-      dashboardState.stateMonitor.onChange(status => {
+
+      dashboardStateManager.registerChangeListener(status => {
         this.appStatus.dirty = status.dirty || !dash.id;
         updateState();
       });
 
-      dashboardState.applyFilters(
-        dashboardState.getQuery() || { query: '', language: config.get('search:queryLanguage') },
+      dashboardStateManager.applyFilters(
+        dashboardStateManager.getQuery() || { query: '', language: config.get('search:queryLanguage') },
         filterBar.getFilters()
       );
-      let pendingVisCount = _.size(dashboardState.getPanels());
+      let pendingVisCount = _.size(dashboardStateManager.getPanels());
 
       timefilter.enabled = true;
       dash.searchSource.highlightAll(true);
@@ -179,24 +132,24 @@ app.directive('dashboardApp', function ($injector) {
       };
       $scope.timefilter = timefilter;
       $scope.expandedPanel = null;
-      $scope.dashboardViewMode = dashboardState.getViewMode();
+      $scope.dashboardViewMode = dashboardStateManager.getViewMode();
 
       $scope.landingPageUrl = () => `#${DashboardConstants.LANDING_PAGE_PATH}`;
       $scope.hasExpandedPanel = () => $scope.expandedPanel !== null;
       $scope.getDashTitle = () => getDashboardTitle(
-        dashboardState.getTitle(),
-        dashboardState.getViewMode(),
-        dashboardState.getIsDirty(timefilter));
+        dashboardStateManager.getTitle(),
+        dashboardStateManager.getViewMode(),
+        dashboardStateManager.getIsDirty(timefilter));
       $scope.newDashboard = () => { kbnUrl.change(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {}); };
-      $scope.saveState = () => dashboardState.saveState();
+      $scope.saveState = () => dashboardStateManager.saveState();
       $scope.getShouldShowEditHelp = () => (
-        !dashboardState.getPanels().length &&
-        dashboardState.getIsEditMode() &&
+        !dashboardStateManager.getPanels().length &&
+        dashboardStateManager.getIsEditMode() &&
         !dashboardConfig.getHideWriteControls()
       );
       $scope.getShouldShowViewHelp = () => (
-        !dashboardState.getPanels().length &&
-        dashboardState.getIsViewMode() &&
+        !dashboardStateManager.getPanels().length &&
+        dashboardStateManager.getIsViewMode() &&
         !dashboardConfig.getHideWriteControls()
       );
 
@@ -206,24 +159,24 @@ app.directive('dashboardApp', function ($injector) {
 
       $scope.expandPanel = (panelIndex) => {
         $scope.expandedPanel =
-            dashboardState.getPanels().find((panel) => panel.panelIndex === panelIndex);
+            dashboardStateManager.getPanels().find((panel) => panel.panelIndex === panelIndex);
       };
 
       $scope.updateQueryAndFetch = function (query) {
         // reset state if language changes
         if ($scope.model.query.language && $scope.model.query.language !== query.language) {
           filterBar.removeAll();
-          dashboardState.getAppState().$newFilters = [];
+          dashboardStateManager.getAppState().$newFilters = [];
         }
         $scope.model.query = migrateLegacyQuery(query);
-        dashboardState.applyFilters($scope.model.query, filterBar.getFilters());
+        dashboardStateManager.applyFilters($scope.model.query, filterBar.getFilters());
         $scope.refresh();
       };
 
       // called by the saved-object-finder when a user clicks a vis
       $scope.addVis = function (hit, showToast = true) {
         pendingVisCount++;
-        dashboardState.addNewPanel(hit.id, 'visualization');
+        dashboardStateManager.addNewPanel(hit.id, 'visualization');
         if (showToast) {
           notify.info(`Visualization successfully added to your dashboard`);
         }
@@ -231,27 +184,27 @@ app.directive('dashboardApp', function ($injector) {
 
       $scope.addSearch = function (hit) {
         pendingVisCount++;
-        dashboardState.addNewPanel(hit.id, 'search');
+        dashboardStateManager.addNewPanel(hit.id, 'search');
         notify.info(`Search successfully added to your dashboard`);
       };
 
       $scope.$watch('model.darkTheme', () => {
-        dashboardState.setDarkTheme($scope.model.darkTheme);
+        dashboardStateManager.setDarkTheme($scope.model.darkTheme);
         updateTheme();
       });
-      $scope.$watch('model.description', () => dashboardState.setDescription($scope.model.description));
-      $scope.$watch('model.title', () => dashboardState.setTitle($scope.model.title));
-      $scope.$watch('model.timeRestore', () => dashboardState.setTimeRestore($scope.model.timeRestore));
+      $scope.$watch('model.description', () => dashboardStateManager.setDescription($scope.model.description));
+      $scope.$watch('model.title', () => dashboardStateManager.setTitle($scope.model.title));
+      $scope.$watch('model.timeRestore', () => dashboardStateManager.setTimeRestore($scope.model.timeRestore));
       $scope.indexPatterns = [];
 
       $scope.registerPanelIndexPattern = (panelIndex, pattern) => {
-        dashboardState.registerPanelIndexPatternMap(panelIndex, pattern);
-        $scope.indexPatterns = dashboardState.getPanelIndexPatterns();
+        dashboardStateManager.registerPanelIndexPatternMap(panelIndex, pattern);
+        $scope.indexPatterns = dashboardStateManager.getPanelIndexPatterns();
       };
 
       $scope.onPanelRemoved = (panelIndex) => {
-        dashboardState.removePanel(panelIndex);
-        $scope.indexPatterns = dashboardState.getPanelIndexPatterns();
+        dashboardStateManager.removePanel(panelIndex);
+        $scope.indexPatterns = dashboardStateManager.getPanelIndexPatterns();
       };
 
       $scope.$watch('model.query', $scope.updateQueryAndFetch);
@@ -260,14 +213,14 @@ app.directive('dashboardApp', function ($injector) {
 
       function updateViewMode(newMode) {
         $scope.topNavMenu = getTopNavConfig(newMode, navActions, dashboardConfig.getHideWriteControls()); // eslint-disable-line no-use-before-define
-        dashboardState.switchViewMode(newMode);
+        dashboardStateManager.switchViewMode(newMode);
         $scope.dashboardViewMode = newMode;
       }
 
       const onChangeViewMode = (newMode) => {
-        const isPageRefresh = newMode === dashboardState.getViewMode();
+        const isPageRefresh = newMode === dashboardStateManager.getViewMode();
         const isLeavingEditMode = !isPageRefresh && newMode === DashboardViewMode.VIEW;
-        const willLoseChanges = isLeavingEditMode && dashboardState.getIsDirty(timefilter);
+        const willLoseChanges = isLeavingEditMode && dashboardStateManager.getIsDirty(timefilter);
 
         if (!willLoseChanges) {
           updateViewMode(newMode);
@@ -275,7 +228,7 @@ app.directive('dashboardApp', function ($injector) {
         }
 
         function revertChangesAndExitEditMode() {
-          dashboardState.resetState();
+          dashboardStateManager.resetState();
           kbnUrl.change(dash.id ? createDashboardEditUrl(dash.id) : DashboardConstants.CREATE_NEW_DASHBOARD_URL);
           // This is only necessary for new dashboards, which will default to Edit mode.
           updateViewMode(DashboardViewMode.VIEW);
@@ -283,13 +236,13 @@ app.directive('dashboardApp', function ($injector) {
           // We need to do a hard reset of the timepicker. appState will not reload like
           // it does on 'open' because it's been saved to the url and the getAppState.previouslyStored() check on
           // reload will cause it not to sync.
-          if (dashboardState.getIsTimeSavedWithDashboard()) {
-            dashboardState.syncTimefilterWithDashboard(timefilter, quickRanges);
+          if (dashboardStateManager.getIsTimeSavedWithDashboard()) {
+            dashboardStateManager.syncTimefilterWithDashboard(timefilter, quickRanges);
           }
         }
 
         confirmModal(
-          getUnsavedChangesWarningMessage(dashboardState.getChangedFilterTypes(timefilter)),
+          getUnsavedChangesWarningMessage(dashboardStateManager.getChangedFilterTypes(timefilter)),
           {
             onConfirm: revertChangesAndExitEditMode,
             onCancel: _.noop,
@@ -301,26 +254,27 @@ app.directive('dashboardApp', function ($injector) {
       };
 
       $scope.save = function () {
-        return dashboardState.saveDashboard(angular.toJson, timefilter).then(function (id) {
-          $scope.kbnTopNav.close('save');
-          if (id) {
-            notify.info(`Saved Dashboard as "${dash.title}"`);
-            if (dash.id !== $routeParams.id) {
-              kbnUrl.change(createDashboardEditUrl(dash.id));
-            } else {
-              docTitle.change(dash.lastSavedTitle);
-              updateViewMode(DashboardViewMode.VIEW);
+        return saveDashboard(angular.toJson, timefilter, dashboardStateManager)
+          .then(function (id) {
+            $scope.kbnTopNav.close('save');
+            if (id) {
+              notify.info(`Saved Dashboard as "${dash.title}"`);
+              if (dash.id !== $routeParams.id) {
+                kbnUrl.change(createDashboardEditUrl(dash.id));
+              } else {
+                docTitle.change(dash.lastSavedTitle);
+                updateViewMode(DashboardViewMode.VIEW);
+              }
             }
-          }
-          return id;
-        }).catch(notify.error);
+            return id;
+          }).catch(notify.error);
       };
 
       $scope.showFilterBar = () => filterBar.getFilters().length > 0 || !$scope.fullScreenMode;
       let onRouteChange;
       const setFullScreenMode = (fullScreenMode) => {
         $scope.fullScreenMode = fullScreenMode;
-        dashboardState.setFullScreenMode(fullScreenMode);
+        dashboardStateManager.setFullScreenMode(fullScreenMode);
         chrome.setVisible(!fullScreenMode);
         $scope.$broadcast('reLayout');
 
@@ -336,7 +290,7 @@ app.directive('dashboardApp', function ($injector) {
         }
       };
 
-      $scope.$watch('fullScreenMode', () => setFullScreenMode(dashboardState.getFullScreenMode()));
+      $scope.$watch('fullScreenMode', () => setFullScreenMode(dashboardStateManager.getFullScreenMode()));
 
       $scope.exitFullScreenMode = () => setFullScreenMode(false);
 
@@ -365,15 +319,15 @@ app.directive('dashboardApp', function ($injector) {
       navActions[TopNavIds.CLONE] = () => {
         const currentTitle = $scope.model.title;
         const onClone = (newTitle) => {
-          dashboardState.savedDashboard.copyOnSave = true;
-          dashboardState.setTitle(newTitle);
+          dashboardStateManager.savedDashboard.copyOnSave = true;
+          dashboardStateManager.setTitle(newTitle);
           return $scope.save().then(id => {
             // If the save wasn't successful, put the original title back.
             if (!id) {
               $scope.model.title = currentTitle;
               // There is a watch on $scope.model.title that *should* call this automatically but
               // angular is failing to trigger it, so do so manually here.
-              dashboardState.setTitle(currentTitle);
+              dashboardStateManager.setTitle(currentTitle);
             }
             return id;
           });
@@ -381,25 +335,25 @@ app.directive('dashboardApp', function ($injector) {
 
         showCloneModal(onClone, currentTitle, $rootScope, $compile);
       };
-      updateViewMode(dashboardState.getViewMode());
+      updateViewMode(dashboardStateManager.getViewMode());
 
       // update root source when filters update
       $scope.$listen(filterBar, 'update', function () {
-        dashboardState.applyFilters($scope.model.query, filterBar.getFilters());
+        dashboardStateManager.applyFilters($scope.model.query, filterBar.getFilters());
       });
 
       // update data when filters fire fetch event
       $scope.$listen(filterBar, 'fetch', $scope.refresh);
 
       $scope.$on('$destroy', () => {
-        dashboardState.destroy();
+        dashboardStateManager.destroy();
 
         // Remove dark theme to keep it from affecting the appearance of other apps.
         setLightTheme();
       });
 
       function updateTheme() {
-        dashboardState.getDarkTheme() ? setDarkTheme() : setLightTheme();
+        dashboardStateManager.getDarkTheme() ? setDarkTheme() : setLightTheme();
       }
 
       function setDarkTheme() {
@@ -415,7 +369,7 @@ app.directive('dashboardApp', function ($injector) {
       $scope.$on('ready:vis', function () {
         if (pendingVisCount > 0) pendingVisCount--;
         if (pendingVisCount === 0) {
-          dashboardState.saveState();
+          dashboardStateManager.saveState();
           $scope.refresh();
         }
       });

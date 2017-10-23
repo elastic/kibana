@@ -1,7 +1,7 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
-import { DashboardState } from '../dashboard_state';
+import { DashboardStateManager } from '../dashboard_state_manager';
 
 describe('DashboardState', function () {
   let AppState;
@@ -14,7 +14,7 @@ describe('DashboardState', function () {
   const mockIndexPattern = { id: 'index1' };
 
   function initDashboardState() {
-    dashboardState = new DashboardState(savedDashboard, AppState, dashboardConfig);
+    dashboardState = new DashboardStateManager(savedDashboard, AppState, dashboardConfig);
   }
 
   beforeEach(ngMock.module('kibana'));
@@ -82,20 +82,20 @@ describe('DashboardState', function () {
 
   describe('panelIndexPatternMapping', function () {
     it('registers index pattern', function () {
-      const state = new DashboardState(savedDashboard, AppState, dashboardConfig);
+      const state = new DashboardStateManager(savedDashboard, AppState, dashboardConfig);
       state.registerPanelIndexPatternMap('panel1', mockIndexPattern);
       expect(state.getPanelIndexPatterns().length).to.equal(1);
     });
 
     it('registers unique index patterns', function () {
-      const state = new DashboardState(savedDashboard, AppState, dashboardConfig);
+      const state = new DashboardStateManager(savedDashboard, AppState, dashboardConfig);
       state.registerPanelIndexPatternMap('panel1', mockIndexPattern);
       state.registerPanelIndexPatternMap('panel2', mockIndexPattern);
       expect(state.getPanelIndexPatterns().length).to.equal(1);
     });
 
     it('does not register undefined index pattern for panels with no index pattern', function () {
-      const state = new DashboardState(savedDashboard, AppState, dashboardConfig);
+      const state = new DashboardStateManager(savedDashboard, AppState, dashboardConfig);
       state.registerPanelIndexPatternMap('markdownPanel1', undefined);
       expect(state.getPanelIndexPatterns().length).to.equal(0);
     });

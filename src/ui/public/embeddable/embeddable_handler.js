@@ -3,21 +3,8 @@
  * container that supports EmbeddableHandlers.
  */
 export class EmbeddableHandler {
-  /**
-   * @param {string} panelId - the id of the panel to grab the title for.
-   * @return {Promise.<string>} a promise that resolves with the path that dictates where the user will be navigated to
-   * when they click the edit icon.
-   */
-  getEditPath(/* panelId */) {
-    throw new Error('Must implement getEditPath.');
-  }
-
-  /**
-   * @param {string} panelId - the id of the panel to grab the title for.
-   * @return {Promise.<string>} - Promise that resolves with the title to display for the particular panel.
-   */
-  getTitleFor(/* panelId */) {
-    throw new Error('Must implement getTitleFor.');
+  constructor() {
+    this.destroyEmbeddableMap = {};
   }
 
   /**
@@ -26,10 +13,22 @@ export class EmbeddableHandler {
    * store per panel information.
    * @property {ContainerApi} containerApi - an id to specify the object that this panel contains.
    * @param {Promise.<void>} A promise that resolves when the object is finished rendering.
-   * @return {Promise.<function>} A promise that resolves to a function that should be used to destroy the
+   * @return {Promise.<Embeddable>} A promise that resolves to a function that should be used to destroy the
    * rendered embeddable.
    */
   render(/* domNode, panel, container */) {
     throw new Error('Must implement render.');
+  }
+
+  addDestroyEmeddable(panelIndex, destroyEmbeddable) {
+    this.destroyEmbeddableMap[panelIndex] = destroyEmbeddable;
+  }
+
+  destroy(panelIndex) {
+    // Possible there is no destroy function mapped, for instance if there was an error thrown during render.
+    if (this.destroyEmbeddableMap[panelIndex]) {
+      this.destroyEmbeddableMap[panelIndex]();
+      delete this.destroyEmbeddableMap[panelIndex];
+    }
   }
 }
