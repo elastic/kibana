@@ -37,6 +37,7 @@ export default class extends Component {
 
     return (
       <KuiPopover
+        isFocusable
         button={button}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover.bind(this)}

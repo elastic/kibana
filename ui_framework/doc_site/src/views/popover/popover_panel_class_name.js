@@ -31,6 +31,7 @@ export default class extends Component {
   render() {
     return (
       <KuiPopover
+        isFocusable
         button={(
           <KuiButton buttonType="basic" onClick={this.onButtonClick.bind(this)}>
             Turn padding off and apply a custom class
