@@ -126,10 +126,11 @@ class Resize extends Component {
   render() {
     const { state } = this;
 
-    const expandStyle = Object.assign({}, expandChildStyle, {
+    const expandStyle = {
+      ...expandChildStyle,
       width: state.expandChildWidth,
       height: state.expandChildHeight
-    });
+    };
 
     return (
       <div
