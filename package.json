@@ -20,7 +20,7 @@
     "nock": "^9.0.22",
     "ora": "^1.3.0",
     "strip-json-comments": "^2.0.1",
-    "yargs": "^9.0.1"
+    "yargs": "^10.0.3"
   },
   "devDependencies": {
     "babel-eslint": "^8.0.1",
