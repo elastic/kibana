@@ -17,7 +17,7 @@ export default () => {
       <KuiHeaderBarSection>
         <span className="kuiText">
           <span className="kuiStatusText kuiStatusText--error">
-            <span className="kuiStatusText__icon kuiIcon fa-warning" />
+            <span className="kuiStatusText__icon kuiIcon fa-warning" aria-label="Warning" role="img"/>
             Red health
           </span>
         </span>

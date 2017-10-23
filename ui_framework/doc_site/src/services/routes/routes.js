@@ -30,6 +30,9 @@ import ColorPickerExample
 import ColumnExample
   from '../../views/column/column_example';
 
+import ContextMenuExample
+  from '../../views/context_menu/context_menu_example';
+
 import EventExample
   from '../../views/event/event_example';
 
@@ -38,6 +41,9 @@ import EventsSandbox
 
 import ExpressionExample
   from '../../views/expression/expression_example';
+
+import FlexExample
+  from '../../views/flex/flex_example';
 
 import FormExample
   from '../../views/form/form_example';
@@ -89,6 +95,9 @@ import PagerExample
 
 import PanelExample
   from '../../views/panel/panel_example';
+
+import PanelSimpleExample
+  from '../../views/panel_simple/panel_simple_example';
 
 import PopoverExample
   from '../../views/popover/popover_example';
@@ -147,7 +156,11 @@ const components = [{
 }, {
   name: 'CodeEditor',
   component: CodeEditor,
-  hasReact: true
+  hasReact: true,
+}, {
+  name: 'CollapseButton',
+  component: CollapseButtonExample,
+  hasReact: true,
 }, {
   name: 'ColorPicker',
   component: ColorPickerExample,
@@ -158,6 +171,10 @@ const components = [{
 }, {
   name: 'CollapseButton',
   component: CollapseButtonExample,
+  hasReact: true,
+}, {
+  name: 'ContextMenu',
+  component: ContextMenuExample,
   hasReact: true,
 }, {
   name: 'EmptyTablePrompt',
@@ -171,6 +188,9 @@ const components = [{
   name: 'Expression',
   component: ExpressionExample,
   hasReact: true,
+}, {
+  name: 'Flex',
+  component: FlexExample,
 }, {
   name: 'Form',
   component: FormExample,
@@ -224,6 +244,10 @@ const components = [{
 }, {
   name: 'Panel',
   component: PanelExample,
+}, {
+  name: 'PanelSimple',
+  component: PanelSimpleExample,
+  hasReact: true,
 }, {
   name: 'Popover',
   component: PopoverExample,

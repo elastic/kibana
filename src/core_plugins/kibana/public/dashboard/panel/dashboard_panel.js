@@ -4,6 +4,7 @@ import classNames from 'classnames';
 
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { PanelHeader } from './panel_header';
+import { PanelError } from './panel_error';
 
 export class DashboardPanel extends React.Component {
 
@@ -15,12 +16,17 @@ export class DashboardPanel extends React.Component {
     this._isMounted = false;
   }
 
-  async componentDidMount() {
+  componentDidMount() {
     this._isMounted = true;
     const { getEmbeddableHandler, panel, getContainerApi } = this.props;
 
     this.containerApi = getContainerApi();
     this.embeddableHandler = getEmbeddableHandler(panel.type);
+
+    if (!this.embeddableHandler) {
+      /* eslint-disable react/no-did-mount-set-state */
+      this.setState({ error: `Invalid panel type ${panel.type}` });
+    }
 
     // TODO: use redux instead of the isMounted anti-pattern to handle the case when the component is unmounted
     // before the async calls above return. We can then get rid of the eslint disable line. Without redux, there is
@@ -37,10 +43,15 @@ export class DashboardPanel extends React.Component {
     });
 
     if (this._isMounted) {
-      this.destroyEmbeddable = await this.embeddableHandler.render(
-        this.panelElement,
-        panel,
-        this.containerApi);
+      this.embeddableHandler.render(
+          this.panelElement,
+          panel,
+          this.containerApi)
+        .then(destroyEmbeddable => this.destroyEmbeddable = destroyEmbeddable)
+        .catch(error => {
+          const message = error.message || JSON.stringify(error);
+          this.setState({ error: message });
+        });
     }
   }
 
@@ -49,9 +60,11 @@ export class DashboardPanel extends React.Component {
   }
 
   toggleExpandedPanel = () => this.props.onToggleExpanded(this.props.panel.panelIndex);
+
   deletePanel = () => {
     this.props.onDeletePanel(this.props.panel.panelIndex);
   };
+
   onEditPanel = () => window.location = this.state.editUrl;
 
   onFocus = () => {
@@ -60,6 +73,7 @@ export class DashboardPanel extends React.Component {
       onPanelFocused(this.props.panel.panelIndex);
     }
   };
+
   onBlur = () => {
     const { onPanelBlurred } = this.props;
     if (onPanelBlurred) {
@@ -76,6 +90,20 @@ export class DashboardPanel extends React.Component {
     if (this.destroyEmbeddable) {
       this.destroyEmbeddable();
     }
+  }
+
+  renderEmbeddedContent() {
+    return (
+      <div
+        id="embeddedPanel"
+        className="panel-content"
+        ref={panelElement => this.panelElement = panelElement}
+      />
+    );
+  }
+
+  renderEmbeddedError() {
+    return <PanelError error={this.state.error} />;
   }
 
   render() {
@@ -102,11 +130,9 @@ export class DashboardPanel extends React.Component {
             isExpanded={isExpanded}
             isViewOnlyMode={isFullScreenMode || dashboardViewMode === DashboardViewMode.VIEW}
           />
-          <div
-            id="embeddedPanel"
-            className="panel-content"
-            ref={panelElement => this.panelElement = panelElement}
-          />
+
+          {this.state.error ? this.renderEmbeddedError() : this.renderEmbeddedContent()}
+
         </div>
       </div>
     );

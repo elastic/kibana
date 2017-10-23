@@ -6,11 +6,11 @@ module.exports = {
     'babel',
     'react',
     'import',
+    'prefer-object-spread',
   ],
 
   env: {
     es6: true,
-    amd: true,
     node: true,
     mocha: true,
     browser: true,
@@ -132,5 +132,7 @@ module.exports = {
     'import/no-named-as-default': 'error',
     'import/no-named-as-default-member': 'error',
     'import/no-duplicates': 'error',
+
+    'prefer-object-spread/prefer-object-spread': 'error',
   }
 }

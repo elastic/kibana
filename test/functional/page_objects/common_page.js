@@ -29,10 +29,11 @@ export function CommonPageProvider({ getService, getPageObjects }) {
      * @param {string} subUrl The route after the hash (#)
      */
     navigateToUrl(appName, subUrl) {
-      const appConfig = Object.assign({}, config.get(['apps', appName]), {
+      const appConfig = {
+        ...config.get(['apps', appName]),
         // Overwrite the default hash with the URL we really want.
         hash: `${appName}/${subUrl}`,
-      });
+      };
 
       const appUrl = getUrl.noAuth(config.get('servers.kibana'), appConfig);
       return remote.get(appUrl);
@@ -230,10 +231,14 @@ export function CommonPageProvider({ getService, getPageObjects }) {
       await remote.pressKeys('\uE007');
     }
 
-    async clickCancelOnModal() {
+    // pass in true if your test will show multiple modals
+    // in succession
+    async clickCancelOnModal(overlayWillStay = false) {
       log.debug('Clicking modal cancel');
       await testSubjects.click('confirmModalCancelButton');
-      await this.ensureModalOverlayHidden();
+      if (!overlayWillStay) {
+        await this.ensureModalOverlayHidden();
+      }
     }
 
     async isConfirmModalOpen() {

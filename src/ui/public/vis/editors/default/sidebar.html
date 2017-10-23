@@ -21,8 +21,13 @@
       <div class="container-fluid">
 
         <!-- tabs -->
-        <ul class="nav navbar-nav">
-          <li ng-class="{active: sidebar.section == 'data'}" ng-show="sidebar.showData">
+        <ul class="nav navbar-nav" role="tablist">
+          <li
+            role="tab"
+            aria-selected="{{sidebar.section === 'data'}}"
+            ng-class="{active: sidebar.section == 'data'}"
+            ng-show="sidebar.showData"
+          >
             <a
               class="vis-editor-subnav-link"
               ng-class="{'is-vis-editor-sub-nav-link-selected': sidebar.section == 'data'}"
@@ -34,7 +39,12 @@
             </a>
           </li>
 
-          <li ng-repeat="tab in vis.type.editorConfig.optionTabs" ng-class="{active: sidebar.section == tab.name}">
+          <li
+            role="tab"
+            aria-selected="{{sidebar.section === tab.name}}"
+            ng-repeat="tab in vis.type.editorConfig.optionTabs"
+            ng-class="{active: sidebar.section == tab.name}"
+          >
             <a
               class="vis-editor-subnav-link"
               ng-class="{'is-vis-editor-sub-nav-link-selected': sidebar.section == tab.name}"
