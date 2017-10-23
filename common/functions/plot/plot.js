@@ -140,6 +140,12 @@ export default new Fn({
 
     const colors = args.palette.gradient ? chroma.scale(args.palette.colors).colors(data.length) : args.palette.colors;
 
+    function getLegendPosition() {
+      if (args.legend === true) return 'nw';
+      if (args.legend === false) return false;
+      return args.legend;
+    }
+
     const result = {
       type: 'render',
       as: 'plot',
@@ -151,7 +157,7 @@ export default new Fn({
           colors: colors,
           legend: {
             show: !!args.legend,
-            position: args.legend ? args.legend : undefined,
+            position: getLegendPosition(),
             backgroundOpacity: 0,
             labelBoxBorderColor: 'transparent',
           },
