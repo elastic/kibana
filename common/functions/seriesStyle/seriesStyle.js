@@ -34,7 +34,7 @@ export default {
       default: 5,
     },
     fill: {
-      types: ['boolean', 'null'],
+      types: ['number', 'boolean', 'null'],
       displayName: 'Fill points',
       help: 'Should we fill points?',
       default: false,
