@@ -3,6 +3,8 @@ import { RangeFilterManager } from '../range_filter_manager';
 
 describe('RangeFilterManager', function () {
 
+  const controlId = 'control1';
+
   describe('createFilter', function () {
     const indexPatternId = '1';
     const fieldMock = {
@@ -19,7 +21,7 @@ describe('RangeFilterManager', function () {
     const queryFilterMock = {};
     let filterManager;
     beforeEach(() => {
-      filterManager = new RangeFilterManager('field1', indexPatternMock, queryFilterMock);
+      filterManager = new RangeFilterManager(controlId, 'field1', indexPatternMock, queryFilterMock);
     });
 
     it('should create range filter from slider value', function () {
@@ -31,54 +33,14 @@ describe('RangeFilterManager', function () {
     });
   });
 
-  describe('findFilters', function () {
-    const indexPatternMock = {};
-    let kbnFilters;
-    const queryFilterMock = {
-      getAppFilters: () => { return kbnFilters; },
-      getGlobalFilters: () => { return []; }
-    };
-    let filterManager;
-    beforeEach(() => {
-      kbnFilters = [];
-      filterManager = new RangeFilterManager('field1', indexPatternMock, queryFilterMock);
-    });
-
-    it('should not find range filters for other fields', function () {
-      kbnFilters.push({
-        range: {
-          notField1: {
-            gte: 1,
-            lt: 3
-          }
-        }
-      });
-      const foundFilters = filterManager.findFilters();
-      expect(foundFilters.length).to.be(0);
-    });
-
-    it('should find range filters for target fields', function () {
-      kbnFilters.push({
-        range: {
-          field1: {
-            gte: 1,
-            lt: 3
-          }
-        }
-      });
-      const foundFilters = filterManager.findFilters();
-      expect(foundFilters.length).to.be(1);
-    });
-  });
-
   describe('getValueFromFilterBar', function () {
     const indexPatternMock = {};
     const queryFilterMock = {};
     let filterManager;
     beforeEach(() => {
       class MockFindFiltersRangeFilterManager extends RangeFilterManager {
-        constructor(fieldName, indexPattern, queryFilter) {
-          super(fieldName, indexPattern, queryFilter);
+        constructor(controlId, fieldName, indexPattern, queryFilter) {
+          super(controlId, fieldName, indexPattern, queryFilter);
           this.mockFilters = [];
         }
         findFilters() {
@@ -88,7 +50,7 @@ describe('RangeFilterManager', function () {
           this.mockFilters = mockFilters;
         }
       }
-      filterManager = new MockFindFiltersRangeFilterManager('field1', indexPatternMock, queryFilterMock);
+      filterManager = new MockFindFiltersRangeFilterManager(controlId, 'field1', indexPatternMock, queryFilterMock);
     });
 
     it('should extract value from range filter', function () {
