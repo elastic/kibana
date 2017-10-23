@@ -1,7 +1,6 @@
-import { fromRoot } from '../../utils';
+import { fromRoot, pkg } from '../../utils';
 import install from './install';
 import Logger from '../lib/logger';
-import { pkg } from '../../utils';
 import { getConfig } from '../../server/path';
 import { parse, parseMilliseconds } from './settings';
 import logWarnings from '../lib/log_warnings';
@@ -40,6 +39,11 @@ export default function pluginInstall(program) {
     '-d, --plugin-dir <path>',
     'path to the directory where plugins are stored',
     fromRoot('plugins')
+  )
+  .option(
+    '--skip-optimize',
+    'avoid the mandatory optimization after each plugin installation. \n' +
+    'Require a manual "kibana-plugin optimize" command to update bundle and reload the available plugins list'
   )
   .description('install a plugin',
 `Common examples:
