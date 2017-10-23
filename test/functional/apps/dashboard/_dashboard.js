@@ -1,10 +1,6 @@
 import expect from 'expect.js';
 
 import {
-  DEFAULT_PANEL_WIDTH,
-} from '../../../../src/core_plugins/kibana/public/dashboard/dashboard_constants';
-
-import {
   VisualizeConstants
 } from '../../../../src/core_plugins/kibana/public/visualize/visualize_constants';
 
@@ -107,38 +103,6 @@ export default function ({ getService, getPageObjects }) {
         .then(function (data) {
           expect(data.map(item => item.title)).to.eql(visualizations.map(v => v.name));
           expect(data.map(item => item.description)).to.eql(visualizations.map(v => v.description));
-        });
-      });
-    });
-
-    describe('Directly modifying url updates dashboard state', () => {
-      it('for query parameter', async function () {
-        const currentQuery = await PageObjects.dashboard.getQuery();
-        expect(currentQuery).to.equal('');
-        const currentUrl = await remote.getCurrentUrl();
-        const newUrl = currentUrl.replace('query:%27%27', 'query:%27hi%27');
-        // Don't add the timestamp to the url or it will cause a hard refresh and we want to test a
-        // soft refresh.
-        await remote.get(newUrl.toString(), false);
-        const newQuery = await PageObjects.dashboard.getQuery();
-        expect(newQuery).to.equal('hi');
-      });
-
-      it('for panel size parameters', async function () {
-        const currentUrl = await remote.getCurrentUrl();
-        const currentPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
-        const newUrl = currentUrl.replace(`w:${DEFAULT_PANEL_WIDTH}`, `w:${DEFAULT_PANEL_WIDTH * 2}`);
-        await remote.get(newUrl.toString(), false);
-        await retry.try(async () => {
-          const newPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
-          if (newPanelDimensions.length < 0) {
-            throw new Error('No panel dimensions...');
-          }
-          // Some margin of error is allowed, I've noticed it being off by one pixel. Probably something to do with
-          // an odd width and dividing by two. Note that if we add margins, we'll have to adjust this as well.
-          const marginOfError = 5;
-          expect(newPanelDimensions[0].width).to.be.lessThan(currentPanelDimensions[0].width * 2 + marginOfError);
-          expect(newPanelDimensions[0].width).to.be.greaterThan(currentPanelDimensions[0].width * 2 - marginOfError);
         });
       });
     });
