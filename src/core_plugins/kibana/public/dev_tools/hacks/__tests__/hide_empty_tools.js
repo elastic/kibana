@@ -21,7 +21,7 @@ describe('hide dev tools', function () {
 
   beforeEach(function () {
     navlinks = {};
-    sinon.stub(chrome, 'getNavLinkById',function () {
+    sinon.stub(chrome, 'getNavLinkById', function () {
       return navlinks;
     });
   });

@@ -5,7 +5,7 @@ export default function ({ getService, getPageObjects, loadTestFile }) {
 
   describe('context app', function () {
     before(async function () {
-      await remote.setWindowSize(1200,800);
+      await remote.setWindowSize(1200, 800);
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('visualize');
       await PageObjects.common.navigateToApp('discover');

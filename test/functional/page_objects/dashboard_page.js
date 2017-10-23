@@ -349,7 +349,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         await searchFilter.clearValue();
         await searchFilter.click();
         // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
-        await searchFilter.type(dashName.replace('-',' '));
+        await searchFilter.type(dashName.replace('-', ' '));
       });
 
       await PageObjects.header.waitUntilLoadingHasFinished();

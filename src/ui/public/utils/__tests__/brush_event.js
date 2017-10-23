@@ -169,7 +169,7 @@ describe('brushEvent', function () {
 
       it('by creating a new filter', function () {
         const event = _.cloneDeep(numberEvent);
-        event.range = [1,2,3,4];
+        event.range = [1, 2, 3, 4];
         brushEvent(event);
         expect($state)
           .to.have.property('$newFilters');
@@ -186,7 +186,7 @@ describe('brushEvent', function () {
 
       it('by updating the existing range filter', function () {
         const event = _.cloneDeep(numberEvent);
-        event.range = [3,7];
+        event.range = [3, 7];
         $state.filters.push({
           meta: {
             key: 'numberField'
@@ -206,7 +206,7 @@ describe('brushEvent', function () {
 
       it('by updating the existing scripted filter', function () {
         const event = _.cloneDeep(numberEvent);
-        event.range = [3,7];
+        event.range = [3, 7];
         $state.filters.push({
           meta: {
             key: 'numberField'
