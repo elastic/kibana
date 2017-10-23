@@ -113,9 +113,9 @@ export default class extends Component {
   }
 
   onButtonClick = () => {
-    this.setState({
-      isPopoverOpen: !this.state.isPopoverOpen,
-    });
+    this.setState(prevState => ({
+      isPopoverOpen: !prevState.isPopoverOpen,
+    }));
   };
 
   closePopover = () => {

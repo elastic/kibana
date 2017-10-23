@@ -159,9 +159,11 @@ export class KuiContextMenuPanel extends Component {
     // If there aren't any items then this is probably a form or something.
     // So let's focus the first tabbable item and expedite input from the user.
     if (!this.menuItems.length) {
-      const tabbableItems = tabbable(this.content);
-      if (tabbableItems.length) {
-        tabbableItems[0].focus();
+      if (this.content) {
+        const tabbableItems = tabbable(this.content);
+        if (tabbableItems.length) {
+          tabbableItems[0].focus();
+        }
       }
       return;
     }

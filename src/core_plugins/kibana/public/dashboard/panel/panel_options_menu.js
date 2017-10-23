@@ -25,7 +25,10 @@ export class PanelOptionsMenu extends React.Component {
 
   onDeletePanel = () => {
     this.closePopover();
-    this.props.onDeletePanel();
+
+    if (this.props.onDeletePanel) {
+      this.props.onDeletePanel();
+    }
   };
 
   onToggleExpandPanel = () => {
