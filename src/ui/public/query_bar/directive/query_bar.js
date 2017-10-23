@@ -26,14 +26,13 @@ module.directive('queryBar', function () {
     },
     controllerAs: 'queryBar',
     bindToController: true,
-    controller: callAfterBindingsWorkaround(function ($scope, $element, $http, config, PersistedLog, filterFilter) {
+    controller: callAfterBindingsWorkaround(function ($scope, $element, $http, $timeout, config, PersistedLog, filterFilter) {
       this.typeaheadItemTemplate = typeaheadItemTemplate;
       this.queryDocLinks = documentationLinks.query;
       this.appName = this.appName || 'global';
       this.availableQueryLanguages = queryLanguages;
       this.showLanguageSwitcher = config.get('search:queryLanguage:switcher:enable');
       this.typeaheadItems = [];
-      this.cursorPosition = 0;
 
       const persistedLog = new PersistedLog(`typeahead:${this.appName}-${this.query.language}`, {
         maxLength: config.get('history:limit'),
@@ -54,26 +53,27 @@ module.directive('queryBar', function () {
 
       this.onTypeaheadSelect = (item) => {
         const { start, end, type, value } = item;
-        const { localQuery: { query }, inputEl } = this;
+        const { localQuery: { query } } = this;
+        const inputEl = $element.find('input')[0];
         if (type === 'function') {
           this.localQuery.query = inputEl.value = query.substring(0, start) + value + '()' + query.substring(end);
-          this.cursorPosition = start + value.length + 1;
+          inputEl.setSelectionRange(start + value.length + 1, start + value.length + 1);
         } else if (type === 'field' || type === 'value') {
           this.localQuery.query = inputEl.value = query.substring(0, start) + '"' + value + '"' + query.substring(end);
-          this.cursorPosition = start + value.length + 2;
+          inputEl.setSelectionRange(start + value.length + 2, start + value.length + 2);
         } else if (type === 'argument') {
           this.localQuery.query = inputEl.value = query.substring(0, start) + value + '=' + query.substring(end);
-          this.cursorPosition = start + value.length + 1;
+          inputEl.setSelectionRange(start + value.length + 1, start + value.length + 1);
         }
-        inputEl.setSelectionRange(this.cursorPosition, this.cursorPosition);
         this.updateSuggestions();
       };
 
       this.updateSuggestions = async () => {
         try {
-          const { cursorPosition, indexPattern, localQuery: { query } } = this;
+          const { indexPattern, localQuery: { query } } = this;
+          const inputEl = $element.find('input')[0];
           const node = fromKueryExpression(query);
-          const suggestions = getSuggestions(node, cursorPosition);
+          const suggestions = getSuggestions(node, inputEl.selectionEnd);
           const { start, end, types, params } = suggestions;
           this.typeaheadItems = await types.reduce(async (items, type) => {
             items = await items;
@@ -103,18 +103,11 @@ module.directive('queryBar', function () {
         $scope.$digest();
       };
 
-      this.updateCursorPosition = (event) => {
-        const { currentTarget } = event;
-        const { selectionEnd } = currentTarget;
-        this.inputEl = currentTarget;
-        this.cursorPosition = selectionEnd;
-      };
-
       $scope.$watch('queryBar.query', (newQuery) => {
         this.localQuery = { ...newQuery };
       }, true);
 
-      $scope.$watchGroup(['queryBar.localQuery.query', 'queryBar.cursorPosition'], this.updateSuggestions);
+      $scope.$watch('queryBar.localQuery.query', this.updateSuggestions);
 
       function getFunctionNameSuggestions(functions, query) {
         const functionNames = Object.keys(functions);

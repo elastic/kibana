@@ -54,8 +54,8 @@
         <input
           ng-model="queryBar.localQuery.query"
           ng-trim="false"
-          ng-keyup="queryBar.updateCursorPosition($event)"
-          ng-click="queryBar.updateCursorPosition($event)"
+          ng-keyup="queryBar.updateSuggestions()"
+          ng-click="queryBar.updateSuggestions()"
           input-focus
           disable-input-focus="queryBar.disableAutoFocus"
           kbn-typeahead-input
