@@ -16,7 +16,7 @@ uiModules
   return {
     restrict: 'E',
     require: '?renderCounter',
-    scope : {
+    scope: {
       showSpyPanel: '=?',
       vis: '=',
       visData: '=',

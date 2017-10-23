@@ -16,7 +16,7 @@ import invoke from './helpers/invoke_series_fn.js';
 function stubResponse(response) {
   return {
     server: {
-      plugins:{
+      plugins: {
         elasticsearch: {
           getCluster: sinon.stub().withArgs('data').returns({
             callWithRequest: function () {
@@ -153,7 +153,7 @@ describe(filename, () => {
             from: 1,
             to: 5,
           },
-          request: { payload: { extended: { es: { filter:{
+          request: { payload: { extended: { es: { filter: {
             bool: {
               must: [
                 { query: { query_string: { query: 'foo' } } }
@@ -229,7 +229,7 @@ describe(filename, () => {
         ];
 
         expect(fn(buckets)).to.eql({
-          count:[[1000,3],[2000,14],[3000,15]]
+          count: [[1000,3],[2000,14],[3000,15]]
         });
       });
 
@@ -241,7 +241,7 @@ describe(filename, () => {
         ];
 
         expect(fn(buckets)).to.eql({
-          count:[[1000,3],[2000,14],[3000,15]],
+          count: [[1000,3],[2000,14],[3000,15]],
           max: [[1000,92],[2000,65],[3000,35]]
         });
       });

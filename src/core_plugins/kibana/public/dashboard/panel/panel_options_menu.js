@@ -102,7 +102,7 @@ export class PanelOptionsMenu extends React.Component {
 
 PanelOptionsMenu.propTypes = {
   onEditPanel: PropTypes.func.isRequired,
-  onToggleExpandPanel:  PropTypes.func.isRequired,
+  onToggleExpandPanel: PropTypes.func.isRequired,
   isExpanded: PropTypes.bool.isRequired,
   onDeletePanel: PropTypes.func, // Not available when the panel is expanded.
 };

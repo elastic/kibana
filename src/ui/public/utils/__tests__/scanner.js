@@ -32,7 +32,7 @@ describe('Scanner', function () {
     let search;
     let scroll;
     let scanner;
-    const mockSearch = { '_scroll_id':'abc','took':1,'timed_out':false,'_shards':{ 'total':1,'successful':1,'failed':0 },'hits':{ 'total':2,'max_score':0.0,'hits':[] } }; // eslint-disable-line max-len
+    const mockSearch = { '_scroll_id': 'abc','took': 1,'timed_out': false,'_shards': { 'total': 1,'successful': 1,'failed': 0 },'hits': { 'total': 2,'max_score': 0.0,'hits': [] } }; // eslint-disable-line max-len
     const hits = [{
       _id: 'one',
       _type: 'config',
@@ -42,7 +42,7 @@ describe('Scanner', function () {
       _type: 'config',
       _source: { title: 'Second title' }
     }];
-    const mockScroll = { 'took':1,'timed_out':false,'_shards':{ 'total':1,'successful':1,'failed':0 },'hits':{ 'total':2,'max_score':0.0,'hits':hits } }; // eslint-disable-line max-len
+    const mockScroll = { 'took': 1,'timed_out': false,'_shards': { 'total': 1,'successful': 1,'failed': 0 },'hits': { 'total': 2,'max_score': 0.0,'hits': hits } }; // eslint-disable-line max-len
 
     beforeEach(function () {
       scanner = new Scanner(http, {
@@ -103,7 +103,7 @@ describe('Scanner', function () {
     });
 
     it('should scroll across multiple pages', function () {
-      const oneResult = { 'took':1,'timed_out':false,'_shards':{ 'total':1,'successful':1,'failed':0 },'hits':{ 'total':2,'max_score':0.0,'hits':['one'] } }; // eslint-disable-line max-len
+      const oneResult = { 'took': 1,'timed_out': false,'_shards': { 'total': 1,'successful': 1,'failed': 0 },'hits': { 'total': 2,'max_score': 0.0,'hits': ['one'] } }; // eslint-disable-line max-len
       scroll = sinon.stub().returns(Promise.resolve({ data: oneResult }));
       return scanner.scanAndMap(null, { pageSize: 1 })
       .then(function (response) {

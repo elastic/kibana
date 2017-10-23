@@ -34,7 +34,7 @@ module.exports = {
     eqeqeq: [ 'error', 'allow-null' ],
     'guard-for-in': 'error',
     indent: [ 'error', 2, { SwitchCase: 1 } ],
-    'key-spacing': [ 'off', { align: 'value' } ],
+    'key-spacing': ['error', { beforeColon: false, afterColon: true }],
     'max-len': [ 'error', 140, 2, { ignoreComments: true, ignoreUrls: true } ],
     'new-cap': [ 'error', { capIsNewExceptions: [ 'Private' ] } ],
     'no-bitwise': 'off',

@@ -18,7 +18,7 @@ describe('collection actions', () => {
     handleChange.call(null, props, { id: 1, title: 'bar' });
     expect(fn.calledOnce).to.equal(true);
     expect(fn.firstCall.args[0]).to.eql({
-      test: [{ id:1, title: 'bar' }]
+      test: [{ id: 1, title: 'bar' }]
     });
   });
 
@@ -34,7 +34,7 @@ describe('collection actions', () => {
     expect(fn.calledOnce).to.equal(true);
     expect(newItemFn.calledOnce).to.equal(true);
     expect(fn.firstCall.args[0]).to.eql({
-      test: [{ id:1, title: 'foo' }, { id: 2, title: 'example' }]
+      test: [{ id: 1, title: 'foo' }, { id: 2, title: 'example' }]
     });
   });
 

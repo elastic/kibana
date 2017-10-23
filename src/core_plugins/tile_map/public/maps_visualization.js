@@ -330,7 +330,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
         searchSource.aggs(function () {
           const geoBoundsAgg = new AggConfig(agg.vis, {
             type: 'geo_bounds',
-            enabled:true,
+            enabled: true,
             params: {
               field: agg.getField()
             },

@@ -27,7 +27,7 @@ describe('brushEvent', function () {
     let brushEvent;
 
     const baseState = {
-      filters:[],
+      filters: [],
     };
 
     const baseEvent = {

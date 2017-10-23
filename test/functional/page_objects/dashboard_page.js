@@ -20,8 +20,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async initTests() {
       const logstash = esArchiver.loadIfNeeded('logstash_functional');
       await kibanaServer.uiSettings.replace({
-        'dateFormat:tz':'UTC',
-        'defaultIndex':'logstash-*'
+        'dateFormat:tz': 'UTC',
+        'defaultIndex': 'logstash-*'
       });
 
       log.debug('load kibana index with visualizations');

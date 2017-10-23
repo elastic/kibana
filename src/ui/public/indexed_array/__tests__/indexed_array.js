@@ -6,7 +6,7 @@ import { IndexedArray } from 'ui/indexed_array';
 // this is generally a data-structure that IndexedArray is good for managing
 const users = [
   { name: 'John', id: 69, username: 'beast', group: 'admins' },
-  { name: 'Anon', id:  0, username: 'shhhh', group: 'secret' },
+  { name: 'Anon', id: 0, username: 'shhhh', group: 'secret' },
   { name: 'Fern', id: 42, username: 'kitty', group: 'editor' },
   { name: 'Mary', id: 55, username: 'sheep', group: 'editor' }
 ];
