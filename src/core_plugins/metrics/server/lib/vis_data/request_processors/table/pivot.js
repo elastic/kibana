@@ -41,10 +41,11 @@ export default function pivot(req, panel) {
               aggs: { SORT: fn(metric) }
             }
           });
+        } else {
+          set(doc, 'aggs.pivot.terms.order', { _term: get(sort, 'order', 'asc') });
         }
       }
     } else {
-      set(doc, 'aggs.pivot.terms.order', { _term: get(sort, 'order', 'asc') });
       set(doc, 'aggs.pivot.filter.match_all', {});
     }
     return next(doc);
