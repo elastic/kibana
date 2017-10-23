@@ -1,4 +1,7 @@
 # backport
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/sqren/backport-cli.svg)](https://greenkeeper.io/)
+
 A simple CLI tool for backporting commits
 
 ![Demonstration gif](https://i.makeagif.com/media/10-05-2017/kEJLqe.gif)

@@ -13,7 +13,7 @@
     "url": "git+https://github.com/sqren/backport-cli.git"
   },
   "dependencies": {
-    "axios": "^0.16.2",
+    "axios": "^0.17.0",
     "es6-promisify": "^5.0.0",
     "inquirer": "^3.3.0",
     "mkdirp": "^0.5.1",
