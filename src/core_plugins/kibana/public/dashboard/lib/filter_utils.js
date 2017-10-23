@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import moment from 'moment';
 
 /**
  * @typedef {Object} QueryFilter
@@ -50,5 +51,36 @@ export class FilterUtils {
    */
   static getFilterBarsForDashboard(dashboard) {
     return _.reject(this.getDashboardFilters(dashboard), this.isQueryFilter);
+  }
+
+  /**
+   * Converts the time to a string, if it isn't already.
+   * @param time {string|Moment}
+   * @returns {string}
+   */
+  static convertTimeToString(time) {
+    return typeof time === 'string' ? time : moment(time).toString();
+  }
+
+  /**
+   * Compares the two times, making sure they are in both compared in string format. Absolute times
+   * are sometimes stored as moment objects, but converted to strings when reloaded. Relative times are
+   * strings that are not convertible to moment objects.
+   * @param timeA {string|Moment}
+   * @param timeB {string|Moment}
+   * @returns {boolean}
+   */
+  static areTimesEqual(timeA, timeB) {
+    return this.convertTimeToString(timeA) === this.convertTimeToString(timeB);
+  }
+
+  /**
+   * Depending on how a dashboard is loaded, the filter object may contain a $$hashKey and $state that will throw
+   * off a filter comparison. This removes those variables.
+   * @param filters {Array.<Object>}
+   * @returns {Array.<Object>}
+   */
+  static cleanFiltersForComparison(filters) {
+    return _.map(filters, (filter) => _.omit(filter, ['$$hashKey', '$state']));
   }
 }
