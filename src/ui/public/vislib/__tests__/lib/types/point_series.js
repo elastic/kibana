@@ -104,7 +104,6 @@ describe('Point Series Config Type Class Test Suite', function () {
     });
   });
 
-
   describe('heatmap chart', function () {
     beforeEach(function () {
       const stackedData = {
@@ -131,5 +130,86 @@ describe('Point Series Config Type Class Test Suite', function () {
     it('should add second category axis', function () {
       expect(parsedConfig.categoryAxes.length).to.equal(2);
     });
+  });
+
+  describe('point series chart configuration', function () {
+    const originalConfig = {
+      categoryAxes: [
+        {
+          id: 'CategoryAxis-1',
+          type: 'category',
+          position: 'left',
+          show: true,
+          style: {
+          },
+          scale: {
+            type: 'linear'
+          },
+          labels: {
+            show: true,
+            rotate: 0,
+            filter: false,
+            truncate: 200
+          },
+          title: {}
+        }
+      ],
+      valueAxes: [
+        {
+          id: 'ValueAxis-1',
+          name: 'LeftAxis-1',
+          type: 'value',
+          position: 'bottom',
+          show: true,
+          style: {
+          },
+          scale: {
+            type: 'linear',
+            mode: 'normal'
+          },
+          labels: {
+            show: true,
+            rotate: 75,
+            filter: true,
+            truncate: 100
+          },
+          title: {
+            text: 'Count'
+          }
+        }
+      ]
+    };
+    let configManagementFunc;
+    beforeEach(() => {
+      configManagementFunc = pointSeriesConfig.line;
+    });
+
+    describe('update chart configuration', function () {
+
+      const dataMock = {
+        get: (prop) => {
+          const internalData = {
+            xAxisLabel: '@timestamp per second',
+            yAxisLabel: 'Count per second'
+          };
+          return internalData[prop] || null;
+        },
+        data: {}
+      };
+
+      let updatedConfig;
+      beforeEach(() => {
+        updatedConfig = configManagementFunc(originalConfig, dataMock);
+      });
+
+      it('should update category axis title', function () {
+        expect(updatedConfig.categoryAxes[0].title.text).to.equal('@timestamp per second');
+      });
+
+      it('should update value axis title', function () {
+        expect(updatedConfig.valueAxes[0].title.text).to.equal('Count per second');
+      });
+    });
+
   });
 });

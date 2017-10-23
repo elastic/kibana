@@ -43,7 +43,12 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
     makeLabel: function (agg) {
       const output = this.params.write(agg);
       const field = agg.getFieldDisplayName();
-      return field + ' per ' + (output.metricScaleText || output.bucketInterval.description);
+      if (output.metricScaledInterval) {
+        // When metric values are scaled, only display time interval on metric axis
+        return field;
+      } else {
+        return field + ' per ' + output.bucketInterval.description;
+      }
     },
     createFilter: createFilter,
     decorateAggConfig: function () {
@@ -132,8 +137,7 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
               return agg.type && agg.type.isScalable();
             });
             if (all) {
-              output.metricScale = interval.scale;
-              output.metricScaleText = interval.preScaled.description;
+              output.metricScaledInterval = interval;
             }
           }
         }

@@ -101,6 +101,9 @@ export function VislibTypesPointSeries() {
           if (axis.labels) {
             axis.labels.axisFormatter = data.data.yAxisFormatter || data.get('yAxisFormatter');
           }
+          if (axis.title) {
+            axis.title.text = data.get('yAxisLabel');
+          }
         });
       }
 
