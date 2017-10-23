@@ -1,4 +1,4 @@
-import { set, last } from 'lodash';
+import { get, set, last } from 'lodash';
 
 import basicAggs from '../../../../../common/basic_aggs';
 import getBucketSize from '../../helpers/get_bucket_size';
@@ -44,7 +44,7 @@ export default function pivot(req, panel) {
         }
       }
     } else {
-      set(doc, 'aggs.pivot.terms.order', { _term: sort.order });
+      set(doc, 'aggs.pivot.terms.order', { _term: get(sort, 'order', 'asc') });
       set(doc, 'aggs.pivot.filter.match_all', {});
     }
     return next(doc);
