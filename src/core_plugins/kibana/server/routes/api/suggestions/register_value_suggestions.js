@@ -6,9 +6,9 @@ export function registerValueSuggestions(server) {
     method: ['POST'],
     handler: async function (req, reply) {
       const { index } = req.params;
-      const { field, query } = req.payload;
+      const { field, query, size } = req.payload;
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-      const body = getBody({ field, query });
+      const body = getBody({ field, query, size });
       try {
         const response = await callWithRequest(req, 'search', { index, body });
         const suggestions = response.aggregations.suggestions.buckets.map(bucket => bucket.key);
@@ -20,7 +20,7 @@ export function registerValueSuggestions(server) {
   });
 }
 
-function getBody({ field, query }) {
+function getBody({ field, query, size = 10 }) {
   // Helps ensure that the regex is not evaluated eagerly against the terms dictionary
   const executionHint = 'map';
 
@@ -42,6 +42,7 @@ function getBody({ field, query }) {
           field,
           include: `${getEscapedQuery(query)}.*`,
           execution_hint: executionHint,
+          size: size,
           shard_size: shardSize
         }
       }

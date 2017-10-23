@@ -1,14 +1,18 @@
 import _ from 'lodash';
-import chrome from 'ui/chrome';
+import { getTerms } from 'ui/terms/terms';
 
-const baseUrl = chrome.addBasePath('/api/kibana/suggestions/values');
-
-export function filterParamsPhraseController($http, $scope, config) {
+export function filterParamsPhraseController($scope, config) {
   const shouldSuggestValues = this.shouldSuggestValues = config.get('filterEditor:suggestValues');
 
   this.compactUnion = _.flow(_.union, _.compact);
 
-  this.getValueSuggestions = _.memoize(getValueSuggestions, getFieldQueryHash);
+  this.getValueSuggestions = (field, query) => {
+    if (!shouldSuggestValues) {
+      return Promise.resolve([]);
+    }
+
+    return getTerms(field, query);
+  };
 
   this.refreshValueSuggestions = (query) => {
     return this.getValueSuggestions($scope.field, query)
@@ -16,23 +20,4 @@ export function filterParamsPhraseController($http, $scope, config) {
   };
 
   this.refreshValueSuggestions();
-
-  function getValueSuggestions(field, query) {
-    if (!shouldSuggestValues || !_.get(field, 'aggregatable') || field.type !== 'string') {
-      return Promise.resolve([]);
-    }
-
-    const params = {
-      query,
-      field: field.name
-    };
-
-    return $http.post(`${baseUrl}/${field.indexPattern.title}`, params)
-      .then(response => response.data)
-      .catch(() => []);
-  }
-
-  function getFieldQueryHash(field, query = '') {
-    return `${field.indexPattern.id}/${field.name}/${query}`;
-  }
 }
