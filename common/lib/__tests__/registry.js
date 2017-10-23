@@ -91,6 +91,35 @@ describe('Registry', () => {
     });
   });
 
+  describe('wrapped registry', () => {
+    let idx = 0;
+    const elements = [{
+      name: '__test1',
+      prop1: 'some value',
+    }, {
+      name: '__test2',
+      prop2: 'some other value',
+      type: 'unused',
+    }];
+
+    class CustomRegistry extends Registry {
+      wrapper(obj) {
+        // append custom prop to shallow cloned object, with index as a value
+        return Object.assign({}, obj, { __CUSTOM_PROP__: idx += 1 });
+      }
+    }
+
+    const registry = new CustomRegistry();
+    registry.register(elements[0]);
+    registry.register(elements[1]);
+
+    it('contains wrapped elements', () => {
+      // test for the custom prop on the returned elements
+      expect(registry.get(elements[0].name)).to.have.property('__CUSTOM_PROP__', 1);
+      expect(registry.get(elements[1].name)).to.have.property('__CUSTOM_PROP__', 2);
+    });
+  });
+
   describe('shallow clone full prototype', () => {
     const name = 'test_thing';
     let registry;

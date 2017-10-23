@@ -1,7 +1,6 @@
-import Fn from '../fn.js';
 import _ from 'lodash';
 
-export default new Fn({
+export default {
   name: 'sort',
   aliases: [],
   type: 'datatable',
@@ -25,4 +24,4 @@ export default new Fn({
     _.assign(context, {
       rows: _.sortBy(context.rows, args._),
     }),
-});
+};

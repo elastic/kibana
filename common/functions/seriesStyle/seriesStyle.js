@@ -1,8 +1,7 @@
-import FnTypedObject from '../fn_typed_object.js';
+const name = 'seriesStyle';
 
-// seriesConfig(series=_all, label="free beer", width=1, color=blue)
-export default new FnTypedObject({
-  name: 'seriesStyle',
+export default {
+  name,
   help: 'Creates an object used for describing the properties of a series on a chart.' +
   ' You would usually use this inside of a charting function',
   args: {
@@ -46,4 +45,5 @@ export default new FnTypedObject({
       help: 'Should we stack the series? This is the stack "id". Series with the same stack id will be stacked together',
     },
   },
-});
+  fn: (context, args) => ({ type: name, ...args }),
+};

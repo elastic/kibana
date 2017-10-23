@@ -1,7 +1,6 @@
 import _ from 'lodash';
-import Fn from '../fn.js';
 
-export default new Fn({
+export default {
   name: 'alterColumn',
   type: 'datatable',
   help: 'Converts between core types, eg string, number, null, boolean, date',
@@ -52,4 +51,4 @@ export default new Fn({
 
     return context;
   },
-});
+};

@@ -1,8 +1,7 @@
-import Fn from '../../../common/functions/fn.js';
 import fetch from 'axios';
 
 // TODO: We should implement our own Elastic GeoIP service instead of using freegeoip.net
-export default new Fn({
+export default {
   name: 'geoip',
   aliases: [],
   type: 'location',
@@ -32,4 +31,4 @@ export default new Fn({
       };
     });
   },
-});
+};

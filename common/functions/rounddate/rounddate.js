@@ -1,7 +1,6 @@
-import Fn from '../fn.js';
 import moment from 'moment';
 
-export default new Fn({
+export default {
   name: 'rounddate',
   type: 'string',
   help: 'Round dates using a moment formatting string',
@@ -17,4 +16,4 @@ export default new Fn({
   fn: (context, args) => {
     return moment(moment(context).format(args._), args._).format();
   },
-});
+};

@@ -1,10 +1,9 @@
 import _ from 'lodash';
 import moment from 'moment';
 import rows from './mock.json';
-import Fn from '../../../common/functions/fn.js';
 import { queryDatatable } from '../../../common/lib/datatable/query';
 
-export default new Fn({
+export default {
   name: 'demodata',
   aliases: [],
   type: 'datatable',
@@ -33,4 +32,4 @@ export default new Fn({
       })),
     }, context);
   },
-});
+};

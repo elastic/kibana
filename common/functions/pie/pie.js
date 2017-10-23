@@ -1,8 +1,7 @@
-import Fn from '../fn.js';
 import { get, map, groupBy, sortBy, keyBy } from 'lodash';
 import chroma from 'chroma-js';
 
-export default new Fn({
+export default {
   name: 'pie',
   aliases: [],
   type: 'render',
@@ -121,4 +120,4 @@ export default new Fn({
       },
     };
   },
-});
+};

@@ -1,10 +1,9 @@
-import Fn from '../../../common/functions/fn.js';
 import flattenHit from './lib/flatten_hit';
 import { buildESRequest } from './lib/build_es_request';
 import { keys, map } from 'lodash';
 import { getESFieldTypes } from '../../routes/es_fields/get_es_field_types';
 
-export default new Fn({
+export default {
   name: 'esdocs',
   context: {
     types: ['filter'],
@@ -93,4 +92,4 @@ export default new Fn({
 
     });
   },
-});
+};

@@ -4,8 +4,9 @@ import { ArgForm } from '../components/arg_form';
 import { argTypeRegistry } from './arg_type';
 
 export class Arg {
-  constructor(name, props) {
+  constructor(props) {
     const propNames = [
+      'name',
       'displayName',
       'description',
       'multi',
@@ -18,11 +19,12 @@ export class Arg {
 
     const argType = argTypeRegistry.get(props.argType);
     if (!argType) throw new Error(`Invalid arg type: ${props.argType}`);
+    if (!props.name) throw new Error('Args must have a name property');
 
     // properties that can be passed in
     const defaultProps = {
-      displayName: name,
-      description: argType.description || name,
+      displayName: props.name,
+      description: argType.description || props.name,
       multi: false,
       required: false,
       types: [],
@@ -32,7 +34,6 @@ export class Arg {
     };
 
     Object.assign(this, defaultProps, pick(props, propNames), {
-      name,
       argType,
     });
   }

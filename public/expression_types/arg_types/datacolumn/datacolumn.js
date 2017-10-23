@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { sortBy } from 'lodash';
 import { FormControl } from 'react-bootstrap';
 import { SimpleMathFunction } from './simple_math_function';
-import { ArgType } from '../../arg_type';
 import { getType } from '../../../../common/types/get_type';
 import { parse } from 'mathjs';
 
@@ -85,7 +84,8 @@ simpleTemplate.propTypes = {
   renderError: PropTypes.func.isRequired,
 };
 
-export const datacolumn = () => new ArgType('datacolumn', {
+export const datacolumn = () => ({
+  name: 'datacolumn',
   displayName: 'Column',
   description: 'Select the data column',
   defaultValue: '""',

@@ -1,8 +1,8 @@
 import { map } from 'lodash';
 import socket from 'socket.io';
-import { functions } from '../lib/functions';
+import { functionsRegistry } from '../../common/lib/functions';
 import { socketInterpreterProvider } from '../../common/interpreter/socket_interpret';
-import { types } from '../../common/lib/types';
+import { typesRegistry } from '../../common/lib/types';
 import { createHandlers } from '../lib/create_handlers';
 
 export function socketApi(server) {
@@ -16,14 +16,14 @@ export function socketApi(server) {
     const getClientFunctions = new Promise((resolve) => socket.once('functionList', resolve));
 
     socket.on('getFunctionList', () => {
-      socket.emit('functionList', map(functions.toJS(), 'name'));
+      socket.emit('functionList', map(functionsRegistry.toJS(), 'name'));
     });
 
     const handler = (msg) => {
       getClientFunctions.then((clientFunctions) => {
         const interpret = socketInterpreterProvider({
-          types: types.toJS(),
-          functions: functions.toJS(),
+          types: typesRegistry.toJS(),
+          functions: functionsRegistry.toJS(),
           handlers: createHandlers(socket, server),
           referableFunctions: clientFunctions,
           socket: socket,
@@ -51,7 +51,5 @@ export function socketApi(server) {
       console.log('User disconnected, removing handlers.');
       socket.removeListener('run', handler);
     });
-
-
   });
 }

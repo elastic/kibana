@@ -1,6 +1,6 @@
-import { functions as functionsRegistry } from './functions';
-import { clientFunctions } from '../functions';
+import { functionsRegistry } from '../../common/lib/functions';
 import { commonFunctions } from '../../common/functions';
+import { clientFunctions } from '../functions';
 
 function addFunction(fnDef) {
   functionsRegistry.register(fnDef);

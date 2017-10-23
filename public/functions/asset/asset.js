@@ -1,8 +1,7 @@
-import Fn from '../../../common/functions/fn.js';
 import { getState } from '../../state/store';
 import { getAssetById } from '../../state/selectors/assets';
 
-export default new Fn({
+export default {
   name: 'asset',
   aliases: [],
   help: 'Use Canvas asset objects to provide argument values',
@@ -18,4 +17,4 @@ export default new Fn({
     const assetId = args._;
     return getAssetById(getState(), assetId);
   },
-});
+};

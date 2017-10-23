@@ -1,6 +1,4 @@
-import Type from '../type';
-
-export default new Type({
+export default {
   name: 'filter',
   from: {
     null: () => {
@@ -24,4 +22,4 @@ export default new Type({
       value,
     }),
   },
-});
+};

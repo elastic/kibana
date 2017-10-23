@@ -1,7 +1,6 @@
-import Type from '../type';
 import datatable from '../datatable';
 
-export default new Type({
+export default {
   name: 'pointseries',
   from: {
     null: () => {
@@ -23,4 +22,4 @@ export default new Type({
       };
     },
   },
-});
+};

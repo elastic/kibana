@@ -1,9 +1,9 @@
 import { debounce } from 'lodash';
 import header from './header.png';
-import { Element } from '../element';
 import '../../lib/flot';
 
-export default new Element('pie', {
+export default {
+  name: 'pie',
   displayName: 'Pie chart',
   description: 'An customizable element for making pie charts from your data',
   image: header,
@@ -47,4 +47,4 @@ export default new Element('pie', {
 
     return handlers.done(plot);
   },
-});
+};

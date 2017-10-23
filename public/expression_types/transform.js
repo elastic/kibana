@@ -3,8 +3,8 @@ import { Registry } from '../../common/lib/registry';
 import { FunctionForm } from './function_form';
 
 export class Transform extends FunctionForm {
-  constructor(name, props) {
-    super(name, props);
+  constructor(props) {
+    super(props);
 
     const propNames = ['requiresContext'];
     const defaultProps = {
@@ -15,4 +15,10 @@ export class Transform extends FunctionForm {
   }
 }
 
-export const transformRegistry = new Registry();
+class TransformRegistry extends Registry {
+  wrapper(obj) {
+    return new Transform(obj);
+  }
+}
+
+export const transformRegistry = new TransformRegistry();

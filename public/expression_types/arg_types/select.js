@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormControl } from 'react-bootstrap';
-import { ArgType } from '../arg_type';
 
 const template = ({ typeInstance, onValueChange, argValue }) => {
   // Why is this neccesary? Does the dialog really need to know what parameter it is setting?
@@ -28,7 +27,8 @@ template.propTypes = {
   typeInstance: PropTypes.object,
 };
 
-export const select = () => new ArgType('select', {
+export const select = () => ({
+  name: 'select',
   displayName: 'Select',
   description: 'Select from multiple options in a drop down',
   simpleTemplate: template,

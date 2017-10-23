@@ -1,5 +1,4 @@
 import { debounce, includes } from 'lodash';
-import { Element } from '../element';
 import { size } from './plugins/size';
 import { text } from './plugins/text';
 
@@ -7,7 +6,8 @@ import header from './header.png';
 import '../../lib/flot';
 import './plot.less';
 
-export default new Element('plot', {
+export default {
+  name: 'plot',
   displayName: 'Coordinate plot',
   description: 'An customizable XY plot for making line, bar or dot charts from your data',
   image: header,
@@ -48,4 +48,4 @@ export default new Element('plot', {
 
     return handlers.done(plot);
   },
-});
+};

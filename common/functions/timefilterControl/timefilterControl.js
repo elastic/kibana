@@ -1,6 +1,4 @@
-import Fn from '../fn.js';
-
-export default new Fn({
+export default {
   name: 'timefilterControl',
   aliases: [],
   type: 'render',
@@ -24,4 +22,4 @@ export default new Fn({
       value: args,
     };
   },
-});
+};

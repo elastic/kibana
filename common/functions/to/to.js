@@ -3,11 +3,10 @@
   it needs access to types and the registry of types is, obviously, different between the environments
 */
 
-import Fn from '../fn';
 import { castProvider } from '../../interpreter/cast';
 
 export function toProvider(types) {
-  return new Fn({
+  return {
     name: 'to',
     aliases: [],
     help: 'Explicitly cast from one type to another.',
@@ -24,5 +23,5 @@ export function toProvider(types) {
       if (!args._) throw new Error ('Must specify a casting type');
       return castProvider(types.toJS())(context, args._);
     },
-  });
+  };
 }

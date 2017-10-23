@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Form, FormGroup, FormControl, Button } from 'react-bootstrap';
-import { ArgType } from '../arg_type';
 import { get } from 'lodash';
 import { statefulProp } from '../../lib/stateful_component';
 import { compose, withProps } from 'recompose';
@@ -43,7 +42,8 @@ template.propTypes = {
   typeInstance: PropTypes.object.isRequired,
 };
 
-export const string = () => new ArgType('string', {
+export const string = () => ({
+  name: 'string',
   displayName: 'string',
   description: 'Input short strings',
   simpleTemplate: template,

@@ -1,12 +1,12 @@
 import { routes } from './server/routes';
-import { functions } from './server/lib/functions';
+import { functionsRegistry } from './common/lib/functions';
 import { serverFunctions } from './server/functions';
 import { createIndices } from './server/lib/create_indices';
 
 import { commonFunctions } from './common/functions';
 import { typeSpecs } from './common/types';
 
-import { types } from './common/lib/types';
+import { typesRegistry } from './common/lib/types';
 
 export default function (server, /*options*/) {
   server.plugins.canvas = {
@@ -17,17 +17,18 @@ export default function (server, /*options*/) {
     */
 
     addFunction(fnDef) {
-      functions.register(fnDef);
+      functionsRegistry.register(fnDef);
     },
 
     addType(typeDef) {
-      types.register(typeDef);
+      typesRegistry.register(typeDef);
     },
   };
 
   // create the canvas indicies
   createIndices(server);
 
+  // register all of the functions and types using the plugin's methods
   const { addFunction, addType } = server.plugins.canvas;
   serverFunctions.forEach(addFunction);
   commonFunctions.forEach(addFunction);

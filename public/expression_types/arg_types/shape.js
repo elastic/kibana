@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ArgType } from '../arg_type';
 import { ShapePicker } from '../../components/shape_picker/shape_picker.js';
 
 const template = ({ argValue, onValueChange }) => {
@@ -18,7 +17,8 @@ template.propTypes = {
   onValueChange: PropTypes.func,
 };
 
-export const shape = () => new ArgType('shape', {
+export const shape = () => ({
+  name: 'shape',
   displayName: 'Shape',
   description: 'Shape selector',
   defaultValue: 'circle',

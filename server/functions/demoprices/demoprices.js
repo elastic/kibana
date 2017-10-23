@@ -1,13 +1,12 @@
 import moment from 'moment';
 import rows from './mock.json';
-import Fn from '../../../common/functions/fn.js';
 import { queryDatatable } from '../../../common/lib/datatable/query';
 
 function mapRecord(row, i, adjustedTime) {
   return Object.assign({}, row, { _rowId: i, time: adjustedTime || row.time });
 }
 
-export default new Fn({
+export default {
   name: 'demoprices',
   aliases: [],
   type: 'datatable',
@@ -76,4 +75,4 @@ export default new Fn({
     }, context);
 
   },
-});
+};

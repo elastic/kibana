@@ -1,7 +1,6 @@
-import Fn from '../../../common/functions/fn.js';
 import { buildESRequest } from '../esdocs/lib/build_es_request';
 
-export default new Fn({
+export default {
   name: 'escount',
   context: {
     types: ['filter'],
@@ -45,4 +44,4 @@ export default new Fn({
         return resp.hits.total;
       });
   },
-});
+};

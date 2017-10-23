@@ -1,9 +1,9 @@
-import { Element } from '../element';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import header from './header.png';
 
-export default new Element('image', {
+export default {
+  name: 'image',
   displayName: 'Image',
   description: 'A static image.',
   image: header,
@@ -18,4 +18,4 @@ export default new Element('image', {
     }} />, domNode);
     handlers.done();
   },
-});
+};

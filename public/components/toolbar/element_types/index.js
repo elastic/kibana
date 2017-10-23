@@ -1,10 +1,10 @@
 import { pure, compose, withProps, withState } from 'recompose';
-import { elements } from '../../../lib/elements';
+import { elementsRegistry } from '../../../lib/elements';
 
 import { ElementTypes as Component } from './element_types';
 
 const elementTypesState = withState('search', 'setSearch');
-const elementTypeProps = withProps(() => ({ elements: elements.toJS() }));
+const elementTypeProps = withProps(() => ({ elements: elementsRegistry.toJS() }));
 
 export const ElementTypes = compose(
   pure,

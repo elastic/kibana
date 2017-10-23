@@ -1,14 +1,13 @@
-import { Element } from '../element';
-import header from './header.png';
-import Markdown from 'markdown-it';
-import ReactDOM from 'react-dom';
 import React from 'react';
+import ReactDOM from 'react-dom';
+import Markdown from 'markdown-it';
+import header from './header.png';
 import './markdown.less';
 
 const md = new Markdown();
 
-
-export default new Element('markdown', {
+export default {
+  name: 'markdown',
   displayName: 'Markdown',
   description: 'Markup from Markdown',
   image: header,
@@ -38,4 +37,4 @@ You can use standard Markdown in here, but you can also access your piped-in dat
     ), domNode);
     handlers.done();
   },
-});
+};

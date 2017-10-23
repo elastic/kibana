@@ -1,7 +1,6 @@
-import Type from '../type';
 import { parse } from '../../lib/dataurl';
 
-export default new Type({
+export default {
   name: 'dataurl',
   from: {
     null: () => '',
@@ -21,4 +20,4 @@ export default new Type({
       return dataurl.value;
     },
   },
-});
+};

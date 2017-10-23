@@ -1,6 +1,4 @@
-import Fn from '../fn.js';
-
-export default new Fn({
+export default {
   name: 'compare',
   help: 'Compare the input to something else to determine true or false. Usually used in combination with {if}',
   aliases: ['condition'],
@@ -39,4 +37,4 @@ export default new Fn({
         return a >= b;
     }
   },
-});
+};

@@ -1,9 +1,8 @@
 import { includes } from 'lodash';
-import Fn from '../fn.js';
 import elasticLogo from './elastic_logo';
 import { fetchImage } from '../../lib/fetch_image';
 
-export default new Fn({
+export default {
   name: 'image',
   aliases: [],
   type: 'image',
@@ -46,4 +45,4 @@ export default new Fn({
 
     return wrapImage(args.dataurl);
   },
-});
+};

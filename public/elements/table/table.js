@@ -1,11 +1,11 @@
-import { Element } from '../element';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import { Datatable } from '../../components/datatable';
 import header from './header.png';
 import { get } from 'lodash';
 
-export default new Element('table', {
+export default {
+  name: 'table',
   displayName: 'Data Table',
   description: 'A scrollable grid for displaying data in a tabluar format',
   image: header,
@@ -26,4 +26,4 @@ export default new Element('table', {
     ), domNode);
     handlers.done();
   },
-});
+};

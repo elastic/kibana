@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { ControlLabel, FormControl } from 'react-bootstrap';
 import { getSimpleArg, setSimpleArg } from '../../../lib/arg_helpers';
-import { Datasource } from '../../datasource';
 import header from './header.png';
 import { TooltipIcon } from '../../../components/tooltip_icon';
 import './timelion.less';
@@ -80,7 +79,8 @@ template.propTypes = {
   updateArgs: PropTypes.func,
 };
 
-export const timelion = () => new Datasource('timelion', {
+export const timelion = () => ({
+  name: 'timelion',
   displayName: 'Timelion',
   image: header,
   template,

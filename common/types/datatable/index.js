@@ -1,7 +1,6 @@
 import { map } from 'lodash';
-import Type from '../type';
 
-export default new Type({
+export default {
   name: 'datatable',
   from: {
     null: () => {
@@ -33,4 +32,4 @@ export default new Type({
       };
     },
   },
-});
+};

@@ -1,10 +1,9 @@
-import Fn from '../../../common/functions/fn.js';
 //import { buildESRequest } from '../esdocs/lib/build_es_request';
 import fetch from 'axios';
 import { flatten, find } from 'lodash';
 import { buildBoolArray } from '../esdocs/lib/build_bool_array';
 
-export default new Fn({
+export default {
   name: 'timelion',
   context: {
     types: ['filter'],
@@ -99,4 +98,4 @@ export default new Fn({
       };
     });
   },
-});
+};

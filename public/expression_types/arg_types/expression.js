@@ -1,5 +1,4 @@
 import React from 'react';
-import { ArgType } from '../arg_type';
 
 const template = (props = {}) => {
   return (
@@ -12,7 +11,8 @@ const template = (props = {}) => {
   );
 };
 
-export const expression = () => new ArgType('expression', {
+export const expression = () => ({
+  name: 'expression',
   displayName: 'Expression',
   description: 'Manually enter a custom expression',
   args: [],

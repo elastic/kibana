@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormGroup, ControlLabel } from 'react-bootstrap';
 import { withState } from 'recompose';
-import { ArgType } from '../arg_type';
 import { encode } from '../../../common/lib/dataurl';
 
 const template = ({ typeInstance, onAssetAdd, onValueChange, setLoading, isLoading }) => {
@@ -50,7 +49,8 @@ template.propTypes = {
   isLoading: PropTypes.bool,
 };
 
-export const imageUpload = () => new ArgType('imageUpload', {
+export const imageUpload = () => ({
+  name: 'imageUpload',
   displayName: 'Image Upload',
   description: 'Select or upload an image',
   template: withState('isLoading', 'setLoading', false)(template),

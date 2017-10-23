@@ -1,6 +1,4 @@
-import Fn from '../fn.js';
-
-export default new Fn({
+export default {
   name: 'if',
   help: 'Perform conditional logic',
   args: {
@@ -30,4 +28,4 @@ then the input context to the function will be returned`,
     if (typeof args.else !== 'undefined') return args.else;
     return context;
   },
-});
+};

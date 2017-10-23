@@ -1,7 +1,6 @@
-import Fn from '../fn.js';
 import dateMath from '@elastic/datemath';
 
-export default new Fn({
+export default {
   name: 'timefilter',
   aliases: [],
   type: 'filter',
@@ -59,4 +58,4 @@ export default new Fn({
 
     return context;
   },
-});
+};

@@ -1,12 +1,11 @@
 import { uniq, map, get, groupBy, keyBy, sortBy, mapValues } from 'lodash';
-import Fn from '../fn.js';
 
 const getResultValues = (items, name, sorter) => {
   const vals = uniq(map(items, name).filter(v => v !== undefined));
   return sorter ? sortBy(vals, sorter) : vals.sort();
 };
 
-export default new Fn({
+export default {
   name: 'grid',
   aliases: [],
   type: 'render',
@@ -104,4 +103,4 @@ export default new Fn({
       },
     };
   },
-});
+};

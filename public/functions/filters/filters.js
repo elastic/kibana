@@ -1,11 +1,10 @@
-import Fn from '../../../common/functions/fn.js';
+import { fromExpression } from '../../../common/lib/ast';
+import { typesRegistry } from '../../../common/lib/types';
 import { getState } from '../../state/store';
 import { getGlobalFilterExpression } from '../../state/selectors/workpad';
-import { fromExpression } from '../../../common/lib/ast';
 import { interpretAst } from '../../lib/interpreter';
-import filter from '../../../common/types/filter';
 
-export default new Fn({
+export default {
   name: 'filters',
   type: 'filter',
   help: 'Collect the workpad filters, usually to provide them to a data source',
@@ -16,8 +15,8 @@ export default new Fn({
       const filterAST = fromExpression(filterExpression);
       return interpretAst(filterAST);
     } else {
-      return filter.from(null);
+      const filterType = typesRegistry.get('filter');
+      return filterType.from(null);
     }
-
   },
-});
+};

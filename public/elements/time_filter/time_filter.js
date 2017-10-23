@@ -1,4 +1,3 @@
-import { Element } from '../element';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import header from './header.png';
@@ -6,7 +5,8 @@ import { TimeFilter } from './components/time_filter';
 import { fromExpression, toExpression } from '../../../common/lib/ast';
 import { get, set } from 'lodash';
 
-export default new Element('time_filter', {
+export default {
+  name: 'time_filter',
   displayName: 'Time Filter',
   description: 'Set a time window',
   image: header,
@@ -26,4 +26,4 @@ export default new Element('time_filter', {
     ReactDOM.render((<TimeFilter compact={config.compact} commit={handlers.setFilter} filter={toExpression(ast)}/>), domNode);
     handlers.done();
   },
-});
+};

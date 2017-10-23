@@ -1,8 +1,7 @@
 import _ from 'lodash';
-import Fn from '../../../common/functions/fn.js';
 import cheap from './cheap.json';
 
-export default new Fn({
+export default {
   name: 'clientdata',
   aliases: [],
   type: 'datatable',
@@ -24,4 +23,4 @@ export default new Fn({
       rows: _.cloneDeep(cheap),
     };
   },
-});
+};

@@ -1,7 +1,6 @@
-import Fn from '../../../common/functions/fn.js';
 import { noop } from 'lodash';
 
-export default new Fn({
+export default {
   name: 'location',
   type: 'location',
   help: 'Get the users location',
@@ -22,4 +21,4 @@ export default new Fn({
       });
     });
   },
-});
+};

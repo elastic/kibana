@@ -1,3 +1,10 @@
 import { Registry } from '../../common/lib/registry';
+import { Element } from '../elements/element';
 
-export const elements = new Registry();
+class ElementsRegistry extends Registry {
+  wrapper(obj) {
+    return new Element(obj);
+  }
+}
+
+export const elementsRegistry = new ElementsRegistry();

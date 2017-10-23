@@ -1,9 +1,9 @@
-import { Element } from '../element';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import header from './header.png';
 
-export default new Element('debug', {
+export default {
+  name: 'debug',
   displayName: 'Debug',
   description: 'Just dumps the configuration of the element',
   image: header,
@@ -15,4 +15,4 @@ export default new Element('debug', {
       </div>, domNode);
     handlers.done();
   },
-});
+};

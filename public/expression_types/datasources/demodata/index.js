@@ -1,8 +1,8 @@
 import React from 'react';
-import { Datasource } from '../../datasource';
 import header from './header.png';
 
-export const demodata = () => new Datasource('demodata', {
+export const demodata = () => ({
+  name: 'demodata',
   displayName: 'Demo Data',
   image: header,
   template() { return (

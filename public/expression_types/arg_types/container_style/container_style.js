@@ -1,7 +1,6 @@
 import { withHandlers } from 'recompose';
 import { get } from 'lodash';
 import { set } from 'object-path-immutable';
-import { ArgType } from '../../arg_type';
 import { simpleTemplate } from './simple_template';
 import { extendedTemplate } from './extended_template';
 
@@ -18,7 +17,8 @@ const wrap = (Component) => withHandlers({
   },
 })(Component);
 
-export const containerStyle = () => new ArgType('containerStyle', {
+export const containerStyle = () => ({
+  name: 'containerStyle',
   displayName: 'Image Upload',
   description: 'Select or upload an image',
   template: wrap(extendedTemplate),

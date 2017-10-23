@@ -3,11 +3,12 @@ import { Registry } from '../../common/lib/registry';
 import { FunctionForm } from './function_form';
 
 export class View extends FunctionForm {
-  constructor(name, props) {
-    super(name, props);
+  constructor(props) {
+    super(props);
+
     const propNames = ['description', 'modelArgs', 'requiresContext'];
     const defaultProps = {
-      description: `Element: ${name}`,
+      description: `Element: ${props.name}`,
       requiresContext: true,
     };
 
@@ -19,4 +20,10 @@ export class View extends FunctionForm {
   }
 }
 
-export const viewRegistry = new Registry();
+class ViewRegistry extends Registry {
+  wrapper(obj) {
+    return new View(obj);
+  }
+}
+
+export const viewRegistry = new ViewRegistry();

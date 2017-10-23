@@ -1,6 +1,4 @@
-import Fn from '../../../common/functions/fn.js';
-
-export default new Fn({
+export default {
   name: 'navigator',
   aliases: [],
   type: 'string',
@@ -19,4 +17,4 @@ export default new Fn({
   fn: (context, args) => {
     return navigator[args._];
   },
-});
+};

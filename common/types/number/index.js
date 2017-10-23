@@ -1,6 +1,4 @@
-import Type from '../type';
-
-export default new Type({
+export default {
   name: 'number',
   from: {
     null: () => 0,
@@ -34,4 +32,4 @@ export default new Type({
       };
     },
   },
-});
+};

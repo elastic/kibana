@@ -1,9 +1,8 @@
-import Fn from '../fn.js';
+import { map } from 'lodash';
 import { math } from '../../lib/math.js';
 import { pivotObjectArray } from '../../lib/pivot_object_array.js';
-import { map } from 'lodash';
 
-export default new Fn({
+export default {
   name: 'math',
   type: 'number',
   help: 'Interpret a mathJS expression, with a datatable as context, or not',
@@ -22,4 +21,4 @@ export default new Fn({
     if (typeof result !== 'number') throw new Error ('Failed to execute math expression. Check your column names');
     return result;
   },
-});
+};

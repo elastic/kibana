@@ -1,6 +1,4 @@
-import Type from '../type';
-
-export default new Type({
+export default {
   name: 'boolean',
   from: {
     null: () => 0,
@@ -11,4 +9,4 @@ export default new Type({
     string: (n) => String(n),
     number: (n) => Number(n),
   },
-});
+};

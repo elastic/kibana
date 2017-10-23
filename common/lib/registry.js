@@ -1,32 +1,42 @@
 import { clone } from 'lodash';
 
-export function Registry(prop = 'name') {
-  let _indexed = new Object();
+export class Registry {
+  constructor(prop = 'name') {
+    this._prop = prop;
+    this._indexed = new Object();
+  }
 
-  this.register = (obj) => {
-    if (typeof obj !== 'object' || !obj[prop]) {
-      throw new Error(`Register requires an object with a ${prop} property`);
+  wrapper(obj) {
+    return obj;
+  }
+
+  register(obj) {
+    if (typeof obj !== 'object' || !obj[this._prop]) {
+      throw new Error(`Register requires an object with a ${this._prop} property`);
     }
+    this._indexed[obj[this._prop]] = this.wrapper(obj);
+  }
 
-    _indexed[obj[prop]] = obj;
-  };
-
-  this.toJS = () => {
-    return Object.keys(_indexed).reduce((acc, key) => {
+  toJS() {
+    return Object.keys(this._indexed).reduce((acc, key) => {
       acc[key] = this.get(key);
       return acc;
     }, {});
-  };
+  }
 
-  this.toArray = () => Object.keys(_indexed).map((key) => this.get(key));
+  toArray() {
+    return Object.keys(this._indexed).map((key) => this.get(key));
+  }
 
-  this.get = (name) => {
-    return _indexed[name] ? clone(_indexed[name]) : null;
-  };
+  get(name) {
+    return this._indexed[name] ? clone(this._indexed[name]) : null;
+  }
 
-  this.getProp = () => prop;
+  getProp() {
+    return this._prop;
+  }
 
-  this.reset = () => {
-    _indexed = new Object();
-  };
+  reset() {
+    this._indexed = new Object();
+  }
 }

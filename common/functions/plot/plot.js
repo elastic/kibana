@@ -1,8 +1,7 @@
-import Fn from '../fn.js';
 import { groupBy, keyBy, get, set, map, sortBy } from 'lodash';
 import chroma from 'chroma-js';
 
-export default new Fn({
+export default {
   name: 'plot',
   aliases: [],
   type: 'render',
@@ -198,4 +197,4 @@ export default new Fn({
     // It's also possible that something else ends up mutating this object, but that seems less likely.
     return JSON.parse(JSON.stringify(result));
   },
-});
+};

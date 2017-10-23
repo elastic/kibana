@@ -1,7 +1,4 @@
-import Fn from '../fn.js';
-
-// seriesConfig(series=_all, label="free beer", width=1, color=blue)
-export default new Fn({
+export default {
   name: 'containerStyle',
   aliases: [],
   type: 'containerStyle',
@@ -36,4 +33,4 @@ export default new Fn({
   fn: (context, args) => {
     return { type: 'containerStyle', ...args };
   },
-});
+};

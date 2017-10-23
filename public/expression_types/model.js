@@ -12,8 +12,8 @@ function getModelArgs(expressionType) {
 }
 
 export class Model extends FunctionForm {
-  constructor(name, props) {
-    super(name, props);
+  constructor(props) {
+    super(props);
 
     const propNames = ['requiresContext'];
     const defaultProps = {
@@ -45,4 +45,10 @@ export class Model extends FunctionForm {
   }
 }
 
-export const modelRegistry = new Registry();
+class ModelRegistry extends Registry {
+  wrapper(obj) {
+    return new Model(obj);
+  }
+}
+
+export const modelRegistry = new ModelRegistry();

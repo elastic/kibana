@@ -1,9 +1,7 @@
-import Type from '../type';
-
-export default new Type({
+export default {
   name: 'location',
   from: {},
   to: {
     'string': (value) => `${value.latitude},${value.longitude}`,
   },
-});
+};

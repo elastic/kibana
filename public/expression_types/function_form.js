@@ -2,19 +2,18 @@ import React from 'react';
 import { Alert } from 'react-bootstrap';
 import { isPlainObject, uniq, last, compact } from 'lodash';
 import { BaseForm } from './base_form';
+import { Arg } from './arg';
 import { fromExpression } from '../../common/lib/ast';
 import { ArgAddPopover } from '../components/arg_add_popover';
 import { SidebarSection } from '../components/sidebar/sidebar_section';
 import { SidebarSectionTitle } from '../components/sidebar/sidebar_section_title';
 
-
 export class FunctionForm extends BaseForm {
-  constructor(name, props) {
-    super(name, {
-      ...props,
-    });
+  constructor(props) {
+    super({ ...props });
 
-    this.args = props.args || [];
+    // auto-wrap arg values to create arg instances
+    this.args = props.args.map(argSpec => new Arg(argSpec)) || [];
     this.resolve = props.resolve || (() => ({}));
   }
 

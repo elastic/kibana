@@ -1,7 +1,6 @@
 import inlineStyle from 'inline-style';
-import Fn from '../fn.js';
 
-export default new Fn({
+export default {
   name: 'font',
   aliases: [],
   type: 'style',
@@ -62,4 +61,4 @@ export default new Fn({
       css: inlineStyle(spec),
     };
   },
-});
+};

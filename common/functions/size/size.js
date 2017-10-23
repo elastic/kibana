@@ -1,6 +1,4 @@
-import Fn from '../fn.js';
-
-export default new Fn({
+export default {
   name: 'size',
   aliases: [],
   type: 'filter',
@@ -17,4 +15,4 @@ export default new Fn({
     },
   },
   fn: (context, args) => Object.assign({}, context, { size: args._ }),
-});
+};

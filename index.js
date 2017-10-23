@@ -1,5 +1,5 @@
 import init from './init';
-import { functions as serverFunctionsRegistry } from './server/lib/functions';
+import { functionsRegistry } from './common/lib/functions';
 
 export default function (kibana) {
   return new kibana.Plugin({
@@ -19,7 +19,7 @@ export default function (kibana) {
             kbnIndex: config.get('kibana.index'),
             esShardTimeout: config.get('elasticsearch.shardTimeout'),
             esApiVersion: config.get('elasticsearch.apiVersion'),
-            serverFunctions: serverFunctionsRegistry.toArray(),
+            serverFunctions: functionsRegistry.toArray(),
             basePath,
           };
         },

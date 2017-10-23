@@ -1,8 +1,7 @@
-import Fn from '../../../common/functions/fn.js';
 import fetch from 'axios';
 import { map } from 'lodash';
 
-export default new Fn({
+export default {
   name: 'kuler',
   aliases: [],
   type: 'palette',
@@ -47,4 +46,4 @@ export default new Fn({
       };
     });
   },
-});
+};

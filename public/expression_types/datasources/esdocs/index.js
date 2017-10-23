@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { ControlLabel, FormControl } from 'react-bootstrap';
 import { getSimpleArg, setSimpleArg } from '../../../lib/arg_helpers';
-import { Datasource } from '../../datasource';
 import header from './header.png';
 import { ESFieldsSelect } from '../../../components/es_fields_select';
 import { ESFieldSelect } from '../../../components/es_field_select';
@@ -123,7 +122,8 @@ template.propTypes = {
   updateArgs: PropTypes.func,
 };
 
-export const esdocs = () => new Datasource('esdocs', {
+export const esdocs = () => ({
+  name: 'esdocs',
   displayName: 'Elasticsearch Raw Documents',
   image: header,
   template,

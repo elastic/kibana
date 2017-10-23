@@ -1,7 +1,6 @@
-import Fn from '../fn.js';
 import moment from 'moment';
 
-export default new Fn({
+export default {
   name: 'date',
   type: 'string',
   help: 'Returns the time, as a string, in the current execution environment',
@@ -16,4 +15,4 @@ export default new Fn({
   fn: (context, args) => {
     return moment().format(args._);
   },
-});
+};

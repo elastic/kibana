@@ -1,3 +1,2 @@
-import { Registry } from '../../common/lib/registry';
-
-export const functions = new Registry();
+// export the common registry here, so it's available in plugin public code
+export { functionsRegistry } from '../../common/lib/functions';

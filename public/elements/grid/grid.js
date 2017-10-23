@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom';
 import { min, max, get } from 'lodash';
 import chroma from 'chroma-js';
 import header from './header.png';
-import { Element } from '../element';
 import './grid.less';
 import $ from 'jquery';
 
@@ -48,7 +47,8 @@ function getColor(palette, summary, val) {
   return null;
 }
 
-export default new Element('grid', {
+export default {
+  name: 'grid',
   displayName: 'Grid',
   description: 'A colorable, sizable, grid for displaying a point series',
   image: header,
@@ -111,4 +111,4 @@ export default new Element('grid', {
     });
     handlers.done();
   },
-});
+};

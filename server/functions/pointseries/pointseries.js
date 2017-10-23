@@ -1,7 +1,6 @@
 import { math } from '../../../common/lib/math.js';
 import moment from 'moment';
 import { groupBy, zipObject, uniqBy, omit, pickBy, find, uniq, map, mapValues } from 'lodash';
-import Fn from '../../../common/functions/fn.js';
 import { findInObject } from '../../../common/lib/find_in_object';
 import { pivotObjectArray } from '../../../common/lib/pivot_object_array.js';
 
@@ -44,7 +43,7 @@ function getType(columns, mathExpression) {
   return (symbolTypes.length === 1) ? symbolTypes[0] : 'string';
 }
 
-export default new Fn({
+export default {
   name: 'pointseries',
   type: 'pointseries',
   help: 'Turn a datatable into a point series model. Dimensions are combined to create unique keys. Measures are then ' +
@@ -153,4 +152,4 @@ export default new Fn({
       rows: rows,
     };
   },
-});
+};

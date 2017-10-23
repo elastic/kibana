@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormGroup, FormControl, Button } from 'react-bootstrap';
-import { ArgType } from '../arg_type';
 import { get } from 'lodash';
 import { statefulProp } from '../../lib/stateful_component';
 import { compose, withProps } from 'recompose';
@@ -50,7 +49,8 @@ template.propTypes = {
   typeInstance: PropTypes.object.isRequired,
 };
 
-export const textarea = () => new ArgType('textarea', {
+export const textarea = () => ({
+  name: 'textarea',
   displayName: 'textarea',
   description: 'Input long strings',
   template: template,

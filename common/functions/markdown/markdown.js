@@ -1,7 +1,6 @@
 import { Handlebars } from '../../lib/handlebars.js';
-import Fn from '../fn.js';
 
-export default new Fn({
+export default {
   name: 'markdown',
   aliases: [],
   type: 'render',
@@ -39,4 +38,4 @@ export default new Fn({
       },
     };
   },
-});
+};

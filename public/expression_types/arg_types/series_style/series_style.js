@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types';
 import { lifecycle } from 'recompose';
 import { get } from 'lodash';
-import { ArgType } from '../../arg_type';
 import { simpleTemplate } from './simple_template';
 import { extendedTemplate } from './extended_template';
 import './series_style.less';
@@ -30,7 +29,8 @@ wrappedTemplate.propTypes = {
   label: PropTypes.string,
 };
 
-export const seriesStyle = () => new ArgType('seriesStyle', {
+export const seriesStyle = () => ({
+  name: 'seriesStyle',
   displayName: 'Series Style',
   description: 'Set the style for a selected named series',
   template: wrappedTemplate,

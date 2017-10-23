@@ -1,4 +1,4 @@
 import { toProvider } from '../../../common/functions/to/to';
-import { types } from '../../../common/lib/types';
+import { typesRegistry } from '../../../common/lib/types';
 
-export default toProvider(types);
+export default toProvider(typesRegistry);

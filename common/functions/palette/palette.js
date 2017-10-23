@@ -1,7 +1,5 @@
-import Fn from '../fn.js';
 import { palettes } from '../../lib/palettes';
-
-export default new Fn({
+export default {
   name: 'palette',
   aliases: [],
   type: 'palette',
@@ -26,4 +24,4 @@ export default new Fn({
       gradient: args.gradient,
     };
   },
-});
+};

@@ -9,8 +9,8 @@ const defaultTemplate = () => (
 );
 
 export class Datasource extends BaseForm {
-  constructor(name, props) {
-    super(name, props);
+  constructor(props) {
+    super(props);
 
     this.template = props.template || defaultTemplate;
     this.image = props.image;
@@ -21,4 +21,10 @@ export class Datasource extends BaseForm {
   }
 }
 
-export const datasourceRegistry = new Registry();
+class DatasourceRegistry extends Registry {
+  wrapper(obj) {
+    return new Datasource(obj);
+  }
+}
+
+export const datasourceRegistry = new DatasourceRegistry();
