@@ -31,6 +31,11 @@ export default new Fn({
     metaFields: {
       help: 'Comma seperated list of meta fields, eg "_index,_type"',
     },
+    count: {
+      types: ['number'],
+      default: 100,
+      help: 'The number of docs to pull back. Smaller numbers perform better',
+    },
   },
   type: 'datatable',
   help: 'Query elasticsearch and get back raw documents.',
@@ -59,12 +64,15 @@ export default new Fn({
             must: [ { match_all: {} } ],
           },
         },
-        size: 100,
+        size: args.count,
       },
     }, context);
 
     return handlers.elasticsearchClient('search', esRequest)
     .then(resp => {
+
+      // TODO: This doesn't work for complex fields such as geo objects. This is really important to fix.
+      // we need to pull the field caps for the index first, then use that knowledge to flatten the documents
       const flatHits = map(resp.hits.hits, (hit, i) => {
         return Object.assign(flattenHit(hit, args.metaFields ? args.metaFields.split(',') : []), { _rowId: i });
       });
@@ -75,8 +83,10 @@ export default new Fn({
       .then(typedFields => {
         return {
           type: 'datatable',
-          columns: map(typedFields, (type, name) => ({ name, type })),
-          rows: flatHits,
+          columns: [
+            { name: '_rowId', type: 'number' },
+          ].concat(map(typedFields, (type, name) => ({ name, type }))),
+          rows: flatHits.map((row, i) => Object.assign(row, { _rowId: i })),
         };
       });
 
