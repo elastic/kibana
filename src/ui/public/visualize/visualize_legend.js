@@ -3,6 +3,7 @@ import html from 'ui/visualize/visualize_legend.html';
 import { VislibLibDataProvider } from 'ui/vislib/lib/data';
 import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 import { uiModules } from 'ui/modules';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 
 uiModules.get('kibana')
@@ -16,6 +17,7 @@ uiModules.get('kibana')
     link: function ($scope) {
       const $state = getAppState();
       const clickHandler = filterBarClickHandler($state);
+      $scope.legendId = htmlIdGenerator()('legend');
       $scope.open = $scope.uiState.get('vis.legendOpen', true);
 
       $scope.$watch('visData', function (data) {

@@ -3,10 +3,13 @@
     type="button"
     ng-click="toggleLegend()"
     class="kuiCollapseButton legend-collapse-button"
+    aria-label="Toggle legend"
+    aria-expanded="{{!!open}}"
+    aria-controls="{{::legendId}}"
   >
     <span class="kuiIcon {{getToggleLegendClasses()}}"></span>
   </button>
-  <ul class="legend-ul" ng-show="open">
+  <ul class="legend-ul" ng-show="open" id="{{::legendId}}">
 
     <li
       ng-repeat="legendData in labels track by legendData.label"
