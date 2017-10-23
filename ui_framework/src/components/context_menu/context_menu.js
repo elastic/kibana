@@ -142,9 +142,11 @@ export class KuiContextMenu extends Component {
   };
 
   onUseKeyboardToNavigate = () => {
-    this.setState({
-      isUsingKeyboardToNavigate: true,
-    });
+    if (!this.state.isUsingKeyboardToNavigate) {
+      this.setState({
+        isUsingKeyboardToNavigate: true,
+      });
+    }
   };
 
   updatePanelMaps(panels) {
