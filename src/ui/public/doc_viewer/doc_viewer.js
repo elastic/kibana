@@ -21,8 +21,8 @@ uiModules.get('kibana')
     template: function ($el) {
       const $viewer = $('<div class="doc-viewer">');
       $el.append($viewer);
-      const $tabs = $('<ul class="nav nav-tabs">');
-      const $content = $('<div class="doc-viewer-content">');
+      const $tabs = $('<ul class="nav nav-tabs" role="tablist">');
+      const $content = $('<div class="doc-viewer-content" role="tabpanel">');
       $viewer.append($tabs);
       $viewer.append($content);
       docViews.inOrder.forEach(view => {
@@ -30,6 +30,8 @@ uiModules.get('kibana')
           `<li
             ng-show="docViews['${view.name}'].shouldShow(hit)"
             ng-class="{active: mode == '${view.name}'}"
+            role="tab"
+            aria-selected="{{mode === '${view.name}'}}"
           >
             <a
               ng-click="mode='${view.name}'"

@@ -5,7 +5,6 @@ exports[`renders DashboardCloneModal 1`] = `
   class="kuiModalOverlay"
 >
   <div
-    aria-label="Clone a dashboard"
     class="kuiModal dashboardCloneModal"
     data-tests-subj="dashboardCloneModal"
   >

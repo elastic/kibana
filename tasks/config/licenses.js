@@ -4,6 +4,7 @@ module.exports = function () {
       licenses: [
         '(BSD-2-Clause OR MIT OR Apache-2.0)',
         '(BSD-2-Clause OR MIT)',
+        '(GPL-2.0 OR MIT)',
         '(MIT AND CC-BY-3.0)',
         '(MIT OR Apache-2.0)',
         'AFLv2.1',
@@ -51,7 +52,6 @@ module.exports = function () {
         'jsonify@0.0.0': ['Public domain'],
         'ripemd160@0.2.0': ['MIT'],
         'select@1.0.6': ['MIT'],
-        'ua-parser-js@0.7.14': ['MIT'],
         'uglify-js@2.2.5': ['BSD'],
       }
     }
