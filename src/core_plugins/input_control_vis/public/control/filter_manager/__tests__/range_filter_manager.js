@@ -28,6 +28,7 @@ describe('RangeFilterManager', function () {
       const newFilter = filterManager.createFilter({ min: 1, max: 3 });
       expect(newFilter).to.have.property('meta');
       expect(newFilter.meta.index).to.be(indexPatternId);
+      expect(newFilter.meta.controlledBy).to.be(controlId);
       expect(newFilter).to.have.property('range');
       expect(JSON.stringify(newFilter.range, null, '')).to.be('{"field1":{"gte":1,"lt":3}}');
     });

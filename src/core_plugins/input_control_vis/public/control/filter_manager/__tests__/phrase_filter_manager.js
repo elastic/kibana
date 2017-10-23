@@ -31,6 +31,7 @@ describe('PhraseFilterManager', function () {
       const newFilter = filterManager.createFilter('ios');
       expect(newFilter).to.have.property('meta');
       expect(newFilter.meta.index).to.be(indexPatternId);
+      expect(newFilter.meta.controlledBy).to.be(controlId);
       expect(newFilter).to.have.property('query');
       expect(JSON.stringify(newFilter.query, null, '')).to.be('{"match":{"field1":{"query":"ios","type":"phrase"}}}');
     });
@@ -39,6 +40,7 @@ describe('PhraseFilterManager', function () {
       const newFilter = filterManager.createFilter('ios|win xp');
       expect(newFilter).to.have.property('meta');
       expect(newFilter.meta.index).to.be(indexPatternId);
+      expect(newFilter.meta.controlledBy).to.be(controlId);
       expect(newFilter).to.have.property('query');
       const query = newFilter.query;
       expect(query).to.have.property('bool');
