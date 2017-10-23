@@ -42,6 +42,29 @@ describe('splitByTerms(req, panel, series)', () => {
         test: {
           terms: {
             field: 'host',
+            order: {
+              _count: 'desc'
+            },
+            size: 10
+          }
+        }
+      }
+    });
+  });
+
+  it('returns a valid terms agg sort by terms', () => {
+    const next = doc => doc;
+    series.terms_order_by = '_term';
+    series.terms_direction = 'asc';
+    const doc = splitByTerms(req, panel, series)(next)({});
+    expect(doc).to.eql({
+      aggs: {
+        test: {
+          terms: {
+            field: 'host',
+            order: {
+              _term: 'asc'
+            },
             size: 10
           }
         }
