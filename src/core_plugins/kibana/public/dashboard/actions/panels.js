@@ -1,8 +1,8 @@
 import { createAction } from 'redux-actions';
 
-export const deletePanel = createAction('DELETE_PANEL', panelId => panelId);
+export const deletePanel = createAction('DELETE_PANEL');
 
-export const updatePanel = createAction('UPDATE_PANEL', panel => panel);
+export const updatePanel = createAction('UPDATE_PANEL');
 
 /**
  * @param panels {Array<PanelState>}
