@@ -60,6 +60,6 @@ template.propTypes = {
 export const palette = () => new ArgType('palette', {
   displayName: 'Palette',
   description: 'Color palette selector',
-  defaultValue: '{palette #01A4A4 #CC6666 #D0D102 #616161 #00A1CB #32742C #F18D05 #113F8C #61AE24 #D70060}',
+  defaultValue: '{palette #882E72 #B178A6 #D6C1DE #1965B0 #5289C7 #7BAFDE #4EB265 #90C987 #CAE0AB #F7EE55 #F6C141 #F1932D #E8601C #DC050C}',
   simpleTemplate: template,
 });
