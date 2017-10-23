@@ -35,7 +35,7 @@ function resetAllBranches(owner, repoName) {
 }
 
 function mockBackportDirPath() {
-  env.getBackportDirPath = jest.fn(() => path.join(__dirname, '.backport'));
+  env.getBackportDirPath = jest.fn(() => path.join('homefolder', '.backport'));
 }
 
 function getFiles(commit) {

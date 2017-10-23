@@ -5,9 +5,7 @@ const mkdirp = promisify(require('mkdirp'));
 const stripJsonComments = require('strip-json-comments');
 const constants = require('./constants');
 const env = require('./env');
-
-const writeFile = promisify(fs.writeFile);
-const readFile = promisify(fs.readFile);
+const utils = require('./utils');
 
 function ensureConfigAndFoldersExists() {
   const REPOSITORIES_DIR_PATH = env.getRepositoriesDirPath();
@@ -16,18 +14,21 @@ function ensureConfigAndFoldersExists() {
   return mkdirp(REPOSITORIES_DIR_PATH)
     .then(getConfigTemplate)
     .then(configTemplate => {
-      return writeFile(CONFIG_FILE_PATH, configTemplate, {
-        flag: 'wx'
-      }).catch(e => {
-        if (e.code !== 'EEXIST') {
-          throw e;
-        }
-      });
+      return utils
+        .writeFile(CONFIG_FILE_PATH, configTemplate, {
+          flag: 'wx' // create and write file. Error if it already exists
+        })
+        .catch(e => {
+          const FILE_ALREADY_EXISTS = 'EEXIST';
+          if (e.code !== FILE_ALREADY_EXISTS) {
+            throw e;
+          }
+        });
     });
 }
 
 function getConfigTemplate() {
-  return readFile(path.join(__dirname, 'configTemplate.json'), 'utf8');
+  return utils.readFile(path.join(__dirname, 'configTemplate.json'), 'utf8');
 }
 
 function validateConfig({ username, accessToken, repositories }) {

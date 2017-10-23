@@ -5,145 +5,37 @@ Array [
   Array [
     "git clone git@github.com:elastic/backport-cli-test",
     Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic",
+      "cwd": "homefolder/.backport/repositories/elastic",
     },
   ],
   Array [
     "git remote add sqren git@github.com:sqren/backport-cli-test",
     Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+      "cwd": "homefolder/.backport/repositories/elastic/backport-cli-test",
     },
   ],
   Array [
     "git reset --hard && git checkout master && git pull origin master",
     Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+      "cwd": "homefolder/.backport/repositories/elastic/backport-cli-test",
     },
   ],
   Array [
     "git fetch origin myVersion && git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
     Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+      "cwd": "homefolder/.backport/repositories/elastic/backport-cli-test",
     },
   ],
   Array [
     "git cherry-pick mySha",
     Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+      "cwd": "homefolder/.backport/repositories/elastic/backport-cli-test",
     },
   ],
   Array [
     "git push sqren backport/myVersion/pr-myPullRequest --force",
     Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git clone git@github.com:elastic/backport-cli-test",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic",
-    },
-  ],
-  Array [
-    "git remote add sqren git@github.com:sqren/backport-cli-test",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git reset --hard && git checkout master && git pull origin master",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git fetch origin myVersion && git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git cherry-pick mySha",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git push sqren backport/myVersion/pr-myPullRequest --force",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git clone git@github.com:elastic/backport-cli-test",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic",
-    },
-  ],
-  Array [
-    "git remote add sqren git@github.com:sqren/backport-cli-test",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git reset --hard && git checkout master && git pull origin master",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git fetch origin myVersion && git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git cherry-pick mySha",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git push sqren backport/myVersion/pr-myPullRequest --force",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git clone git@github.com:elastic/backport-cli-test",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic",
-    },
-  ],
-  Array [
-    "git remote add sqren git@github.com:sqren/backport-cli-test",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git reset --hard && git checkout master && git pull origin master",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git fetch origin myVersion && git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git cherry-pick mySha",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
-    },
-  ],
-  Array [
-    "git push sqren backport/myVersion/pr-myPullRequest --force",
-    Object {
-      "cwd": "/srv/backport-cli/test/.backport/repositories/elastic/backport-cli-test",
+      "cwd": "homefolder/.backport/repositories/elastic/backport-cli-test",
     },
   ],
 ]
@@ -218,139 +110,37 @@ Array [
       },
     ],
   ],
+]
+`;
+
+exports[`select commit that originated from pull request writeFile should be called with correct args 1`] = `
+Array [
   Array [
-    Array [
-      Object {
-        "choices": Array [
-          "elastic/backport-cli-test",
-        ],
-        "message": "Select repository",
-        "name": "fullRepoName",
-        "type": "list",
-      },
-    ],
-  ],
-  Array [
-    Array [
-      Object {
-        "choices": Array [
-          Object {
-            "name": "Update readme: Make ui-framework url a link",
-            "short": "Update readme: Make ui-framework url a link",
-            "value": Object {
-              "date": "2017-09-05T08:48:42Z",
-              "message": "Update readme: Make ui-framework url a link",
-              "sha": "7939a98aadb94ead30b54bea7974cd02dc816b02",
-            },
-          },
-          Object {
-            "name": "Update react 15.6.1 (#13672)",
-            "short": "Update react 15.6.1 (#13672)",
-            "value": Object {
-              "date": "2017-08-28T08:27:51Z",
-              "message": "Update react 15.6.1 (#13672)",
-              "sha": "52552a93efa5b4038ea57d9cb3d158ba6a1ff71d",
-            },
-          },
-          Object {
-            "name": "Mock out static files when running in Jest (#13315)",
-            "short": "Mock out static files when running in Jest (#13315)",
-            "value": Object {
-              "date": "2017-08-07T15:35:59Z",
-              "message": "Mock out static files when running in Jest (#13315)",
-              "sha": "8cfbb82cfb50aa962410a9682d96335a252d751a",
-            },
-          },
-        ],
-        "message": "Select commit to backport",
-        "name": "commit",
-        "pageSize": 3,
-        "type": "list",
-      },
-    ],
-  ],
-  Array [
-    Array [
-      Object {
-        "choices": Array [
-          "6.x",
-          "6.0",
-          "5.6",
-          "5.5",
-          "5.4",
-        ],
-        "message": "Select version to backport to",
-        "name": "version",
-        "type": "list",
-      },
-    ],
-  ],
-  Array [
-    Array [
-      Object {
-        "choices": Array [
-          "elastic/backport-cli-test",
-        ],
-        "message": "Select repository",
-        "name": "fullRepoName",
-        "type": "list",
-      },
-    ],
-  ],
-  Array [
-    Array [
-      Object {
-        "choices": Array [
-          Object {
-            "name": "Update readme: Make ui-framework url a link",
-            "short": "Update readme: Make ui-framework url a link",
-            "value": Object {
-              "date": "2017-09-05T08:48:42Z",
-              "message": "Update readme: Make ui-framework url a link",
-              "sha": "7939a98aadb94ead30b54bea7974cd02dc816b02",
-            },
-          },
-          Object {
-            "name": "Update react 15.6.1 (#13672)",
-            "short": "Update react 15.6.1 (#13672)",
-            "value": Object {
-              "date": "2017-08-28T08:27:51Z",
-              "message": "Update react 15.6.1 (#13672)",
-              "sha": "52552a93efa5b4038ea57d9cb3d158ba6a1ff71d",
-            },
-          },
-          Object {
-            "name": "Mock out static files when running in Jest (#13315)",
-            "short": "Mock out static files when running in Jest (#13315)",
-            "value": Object {
-              "date": "2017-08-07T15:35:59Z",
-              "message": "Mock out static files when running in Jest (#13315)",
-              "sha": "8cfbb82cfb50aa962410a9682d96335a252d751a",
-            },
-          },
-        ],
-        "message": "Select commit to backport",
-        "name": "commit",
-        "pageSize": 3,
-        "type": "list",
-      },
-    ],
-  ],
-  Array [
-    Array [
-      Object {
-        "choices": Array [
-          "6.x",
-          "6.0",
-          "5.6",
-          "5.5",
-          "5.4",
-        ],
-        "message": "Select version to backport to",
-        "name": "version",
-        "type": "list",
-      },
-    ],
+    "homefolder/.backport/config.json",
+    "{
+  // Github personal access token. Must be created here: https://github.com/settings/tokens/new
+  // Must have \\"Repo: Full control of private repositories\\"
+  \\"accessToken\\": \\"\\",
+
+  // Github username, eg. kimchy
+  \\"username\\": \\"\\",
+
+  // Repositories and the versions that will be available in backport cli
+  \\"repositories\\": [
+    {
+      \\"name\\": \\"elastic/x-pack-kibana\\",
+      \\"versions\\": [\\"6.x\\", \\"6.0\\", \\"5.6\\", \\"5.5\\", \\"5.4\\"]
+    },
+    {
+      \\"name\\": \\"elastic/kibana\\",
+      \\"versions\\": [\\"6.x\\", \\"6.0\\", \\"5.6\\", \\"5.5\\", \\"5.4\\"]
+    }
+  ]
+}
+",
+    Object {
+      "flag": "wx",
+    },
   ],
 ]
 `;
