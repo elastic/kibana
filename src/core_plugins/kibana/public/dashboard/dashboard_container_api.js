@@ -8,10 +8,7 @@ export class DashboardContainerAPI extends ContainerAPI {
   }
 
   updatePanel(panelIndex, panelAttributes) {
-    const panelToUpdate = this.dashboardState.getPanels().find((panel) => panel.panelIndex === panelIndex);
-    Object.assign(panelToUpdate, panelAttributes);
-    this.dashboardState.saveState();
-    return panelToUpdate;
+    return this.dashboardState.updatePanel(panelIndex, panelAttributes);
   }
 
   getAppState() {

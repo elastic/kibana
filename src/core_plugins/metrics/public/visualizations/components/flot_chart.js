@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import { findDOMNode } from 'react-dom';
 import _ from 'lodash';
 import $ from '../lib/flot';
 import eventBus from '../lib/events';
@@ -8,6 +9,7 @@ import calculateBarWidth from '../lib/calculate_bar_width';
 import colors from '../lib/colors';
 
 class FlotChart extends Component {
+
   constructor(props) {
     super(props);
     this.handleResize = this.handleResize.bind(this);
@@ -26,13 +28,11 @@ class FlotChart extends Component {
       // We need to rerender if the axis change
       const valuesChanged = props.yaxes.some((axis, i) => {
         if (this.props.yaxes[i]) {
-          return (
-            axis.position !== this.props.yaxes[i].position ||
-            axis.max !== this.props.yaxes[i].max ||
-            axis.min !== this.props.yaxes[i].min ||
-            axis.axisFormatter !== this.props.yaxes[i].axisFormatter ||
-            axis.axisFormatterTemplate !== this.props.yaxes[i].axisFormatterTemplate
-          );
+          return axis.position !== this.props.yaxes[i].position ||
+          axis.max !== this.props.yaxes[i].max ||
+          axis.min !== this.props.yaxes[i].min ||
+          axis.axisFormatter !== this.props.yaxes[i].axisFormatter ||
+          axis.axisFormatterTemplate !== this.props.yaxes[i].axisFormatterTemplate;
         }
       });
       if (props.yaxes.length !== this.props.yaxes.length || valuesChanged) {
@@ -62,7 +62,7 @@ class FlotChart extends Component {
 
   filterByShow(show) {
     if (show) {
-      return metric => {
+      return (metric) => {
         return show.some(id => _.startsWith(id, metric.id));
       };
     }
@@ -95,7 +95,7 @@ class FlotChart extends Component {
   calculateData(data, show) {
     return _(data)
       .filter(this.filterByShow(show))
-      .map(set => {
+      .map((set) => {
         if (_.isPlainObject(set)) {
           return set;
         }
@@ -103,9 +103,7 @@ class FlotChart extends Component {
           color: '#990000',
           data: set
         };
-      })
-      .reverse()
-      .value();
+      }).reverse().value();
   }
 
   handleDraw(plot) {
@@ -155,7 +153,7 @@ class FlotChart extends Component {
         borderWidth,
         borderColor: lineColor,
         hoverable: true,
-        mouseActiveRadius: 200
+        mouseActiveRadius: 200,
       }
     };
 
@@ -174,17 +172,15 @@ class FlotChart extends Component {
     return _.assign(opts, props.options);
   }
 
-  handleResize(width, height) {
-    this.size = { width, height };
-    console.log(this.size);
+  handleResize() {
+    const resize = findDOMNode(this.resize);
     if (!this.rendered) {
       this.renderChart();
       return;
     }
 
-    if (this.size.height > 0 && this.size.width > 0) {
+    if (resize && resize.clientHeight > 0 && resize.clientHeight > 0) {
       if (!this.plot) return;
-      console.log('here');
       this.plot.resize();
       this.plot.setupGrid();
       this.plot.draw();
@@ -193,23 +189,18 @@ class FlotChart extends Component {
   }
 
   renderChart() {
-    console.log('here 2');
+    const resize = findDOMNode(this.resize);
 
-    if (this.size.height > 0 && this.size.width > 0) {
-      console.log('here 2.3');
-
+    if (resize.clientWidth > 0 && resize.clientHeight > 0) {
       this.rendered = true;
       const { series } = this.props;
       const data = this.calculateData(series, this.props.show);
-      console.log('here 2.3.3.2');
 
       this.plot = $.plot(this.target, data, this.getOptions(this.props));
-      console.log('here 2.3.3');
-
       this.handleDraw(this.plot);
-      console.log('here 3');
 
       _.defer(() => this.handleResize());
+
 
       this.handleMouseOver = (...args) => {
         if (this.props.onMouseOver) this.props.onMouseOver(...args, this.plot);
@@ -223,6 +214,8 @@ class FlotChart extends Component {
       $(this.target).on('mouseleave', this.handleMouseLeave);
 
       if (this.props.crosshair) {
+
+
         this.handleThorPlotover = (e, pos, item, originalPlot) => {
           if (this.plot !== originalPlot) {
             this.plot.setCrosshair({ x: _.get(pos, 'x') });
@@ -232,7 +225,7 @@ class FlotChart extends Component {
 
         this.handlePlotover = (e, pos, item) => eventBus.trigger('thorPlotover', [pos, item, this.plot]);
         this.handlePlotleave = () => eventBus.trigger('thorPlotleave');
-        this.handleThorPlotleave = e => {
+        this.handleThorPlotleave = (e) =>  {
           this.plot.clearCrosshair();
           if (this.props.plothover) this.props.plothover(e);
         };
@@ -263,14 +256,20 @@ class FlotChart extends Component {
   }
 
   render() {
-    console.log('render');
     return (
-      <div className="rhythm_chart__timeseries-container">
-        <div ref={el => (this.target = el)} className="rhythm_chart__timeseries-container" />
-        <Resize onResize={this.handleResize} />
-      </div>
+      <Resize
+        onResize={this.handleResize}
+        ref={(el) => this.resize = el}
+        className="rhythm_chart__timeseries-container"
+      >
+        <div
+          ref={(el) => this.target = el}
+          className="rhythm_chart__timeseries-container"
+        />
+      </Resize>
     );
   }
+
 }
 
 FlotChart.defaultProps = {
@@ -290,7 +289,7 @@ FlotChart.propTypes = {
   show: PropTypes.array,
   tickFormatter: PropTypes.func,
   showGrid: PropTypes.bool,
-  yaxes: PropTypes.array
+  yaxes: PropTypes.array,
 };
 
 export default FlotChart;

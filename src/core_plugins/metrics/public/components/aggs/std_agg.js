@@ -14,7 +14,7 @@ function StandardAgg(props) {
   const handleSelectChange = createSelectHandler(handleChange);
   let restrict = 'numeric';
   if (model.type === 'cardinality') {
-    restrict = 'none';
+    restrict = 'string';
   }
 
   const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
