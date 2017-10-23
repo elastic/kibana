@@ -14,6 +14,7 @@ const template = ({ onValueChange, argValue }) => {
     <input
       type="checkbox"
       className="form-control"
+      style={{ width: '20px', float: 'right' }}
       checked={Boolean(argValue)}
       onChange={handleChange}
     />
