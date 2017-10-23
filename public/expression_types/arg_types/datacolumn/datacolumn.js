@@ -88,5 +88,6 @@ simpleTemplate.propTypes = {
 export const datacolumn = () => new ArgType('datacolumn', {
   displayName: 'Column',
   description: 'Select the data column',
+  defaultValue: '""',
   simpleTemplate,
 });
