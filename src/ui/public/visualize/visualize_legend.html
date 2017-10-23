@@ -21,6 +21,10 @@
 
       <div class="legend-value-container">
         <div
+          kbn-accessible-click
+          data-label="{{legendData.label}}"
+          ng-focus="highlight($event)"
+          ng-blur="unhighlight($event)"
           ng-click="showDetails = !showDetails"
           ng-class="showDetails ? 'legend-value-full' : 'legend-value-truncate'"
           class="legend-value-title"
