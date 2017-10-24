@@ -271,6 +271,20 @@ describe('bucketTransform', () => {
       });
     });
 
+    it('returns moving_average agg with predict', () => {
+      const metric = { id: '2', type: 'moving_average', field: '1', predict: 10 };
+      const metrics = [{ id: '1', type: 'avg', field: 'cpu.pct' }, metric];
+      const fn = bucketTransform.moving_average;
+      expect(fn(metric, metrics, '10s')).is.eql({
+        moving_avg: {
+          buckets_path: '1',
+          model: 'simple',
+          gap_policy: 'skip',
+          predict: 10
+        }
+      });
+    });
+
     it('returns moving_average agg with options', () => {
       const metric = {
         id: '2',
