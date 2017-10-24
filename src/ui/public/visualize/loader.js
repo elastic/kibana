@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import uiRoutes from 'ui/routes';
+import 'ui/visualize';
 
 const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
   const renderVis = (el, savedObj, params) => {
@@ -44,7 +45,14 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
     },
     embedVisualizationWithSavedObject: (el, savedObj, params) => {
       return renderVis(el, savedObj, params);
-    }
+    },
+    getVisualizationList: () => {
+      return new Promise(resolve => {
+        savedVisualizations.find().then(result => {
+          resolve(result.hits);
+        });
+      });
+    },
   };
 };
 
@@ -54,6 +62,7 @@ let pendingPromise = null;
 let pendingResolve = null;
 uiRoutes.addSetupWork(function (Private) {
   visualizeLoader = Private(VisualizeLoaderProvider);
+
   if (pendingResolve) {
     pendingResolve(visualizeLoader);
   }
