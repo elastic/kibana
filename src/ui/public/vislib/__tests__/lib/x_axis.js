@@ -173,7 +173,7 @@ describe('Vislib xAxis Class Test Suite', function () {
     });
 
     it('should return an array of values', function () {
-      expect(_.isArray(ordinalDomain.domain())).to.be(true);
+      expect(Array.isArray(ordinalDomain.domain())).to.be(true);
     });
   });
 

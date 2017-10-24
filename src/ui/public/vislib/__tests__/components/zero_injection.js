@@ -285,7 +285,7 @@ describe('Vislib Zero Injection Module Test Suite', function () {
     });
 
     it('should return an array', function () {
-      expect(_.isArray(results)).to.be(true);
+      expect(Array.isArray(results)).to.be(true);
     });
 
     it('should return an array of values ordered by their index by default', function () {
@@ -383,7 +383,7 @@ describe('Vislib Zero Injection Module Test Suite', function () {
     });
 
     it('should return an array', function () {
-      expect(_.isArray(results)).to.be(true);
+      expect(Array.isArray(results)).to.be(true);
     });
 
     it('should return an array of objects', function () {
@@ -438,7 +438,7 @@ describe('Vislib Zero Injection Module Test Suite', function () {
     });
 
     it('should return an array', function () {
-      expect(_.isArray(results1)).to.be(true);
+      expect(Array.isArray(results1)).to.be(true);
     });
 
     it('should return an array of objects', function () {
@@ -523,7 +523,7 @@ describe('Vislib Zero Injection Module Test Suite', function () {
     });
 
     it('should return an array', function () {
-      expect(_.isArray(results)).to.be(true);
+      expect(Array.isArray(results)).to.be(true);
     });
 
     it('should return an array of objects', function () {
@@ -552,7 +552,7 @@ describe('Vislib Zero Injection Module Test Suite', function () {
 
     it('should return an array of objects', function () {
       results.forEach(function (row) {
-        expect(_.isArray(row.values)).to.be(true);
+        expect(Array.isArray(row.values)).to.be(true);
       });
     });
 

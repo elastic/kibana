@@ -179,7 +179,7 @@ export function AggTypesMetricsTopHitProvider(Private) {
         values = values[0];
       }
 
-      if (_.isArray(values)) {
+      if (Array.isArray(values)) {
         if (!_.compact(values).length) {
           return null;
         }
