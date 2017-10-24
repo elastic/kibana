@@ -55,7 +55,7 @@ export function createRawData(vis, resp) {
    */
   function walkBuckets(agg, data, record) {
     if (!data) return;
-    if (!_.isArray(record)) {
+    if (!Array.isArray(record)) {
       record = [];
     }
 
