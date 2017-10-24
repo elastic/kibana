@@ -1,0 +1,14 @@
+{
+  "name": "port_dashboards",
+  "version": "1.0.0",
+  "scripts": {
+    "prepare": "npm run build",
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "@elastic/kbn-types": "file:../../packages/kbn-types",
+    "example-plugin-bar": "file:../bar",
+    "typescript": "2.6.1"
+  }
+}
+

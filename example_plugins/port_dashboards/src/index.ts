@@ -1,4 +1,4 @@
-import { KibanaPluginConfig } from 'kbn-types';
+import { KibanaPluginConfig } from '@elastic/kbn-types';
 import { PortDashboardsService } from './PortDashboardsService';
 import { registerEndpoints } from './registerEndpoints';
 

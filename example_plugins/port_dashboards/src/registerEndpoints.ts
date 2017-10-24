@@ -20,16 +20,19 @@ export function registerEndpoints(
     {
       path: '/api/kibana/dashboards/export',
       validate: {
+        headers: object({}),
         query: object({
           dashboard: [string()] or string(),
         }),
       },
     },
     async (request, response) {
+      const { dashboard } = request.query;
+      const { headers } = request;
       const currentDate = moment.utc();
-      const savedObjectsService = new SavedObjectsService(req, elasticsearch);
+      const savedObjectsService = new SavedObjectsService(headers, elasticsearch);
 
-      return exportDashboards(req.query.dashboard, config(), savedObjectsService)
+      return exportDashboards(dashboard, config(), savedObjectsService)
         .then(resp => {
           const json = JSON.stringify(resp, null, '  ');
           const filename = `kibana-dashboards.${currentDate.format('YYYY-MM-DD-HH-mm-ss')}.json`;
@@ -46,6 +49,7 @@ export function registerEndpoints(
     {
       path: '/api/kibana/dashboards/import',
       validate: {
+        headers: object({}),
         payload: object({
           objects: [object()],
           version: string(),
@@ -57,10 +61,12 @@ export function registerEndpoints(
       },
     },
     async (request, response) {
-      const savedObjectsService = new SavedObjectsService(req, elasticsearch);
+      const { query, payload } = request;
+      const { headers } = request;
+      const savedObjectsService = new SavedObjectsService(headers, elasticsearch);
 
-      return importDashboards(req.query, payload, savedObjectsService)
-        .then((resp) => reply(resp))
+      return importDashboards(query, payload, savedObjectsService)
+        .then(resp => reply(resp))
         .catch(err => reply(Boom.boomify(err, { statusCode: 400 })));
     }
   );

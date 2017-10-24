@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { flatten } from 'lodash';
 //TODO: pull this in
 import { collectDashboards } from './collect_dashboards';
 
@@ -9,7 +9,7 @@ export class PortDashboardsService {
 
   async importDashboards(query, payload) {
     const overwrite = 'force' in query && query.force !== false;
-    const exclude = _.flatten([query.exclude]);
+    const exclude = flatten([query.exclude]);
 
     const docs = payload.objects
       .filter(item => !exclude.includes(item.type));

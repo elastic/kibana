@@ -5,7 +5,7 @@ import { shortUrlAssertValid } from './short_url_assert_valid';
 import {
   SavedObjectsService,
   Logger,
-} from 'kbn-types';
+} from '@elastic/kbn-types';
 
 export class ShortUrlService {
   constructor(
