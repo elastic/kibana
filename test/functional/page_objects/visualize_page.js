@@ -344,7 +344,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async setNumericInterval(newValue) {
       const input = await find.byCssSelector('input[name="interval"]');
-      await input.type(newValue);
+      await input.clearValue();
+      await input.type(newValue + '');
     }
 
     async clickGo() {
