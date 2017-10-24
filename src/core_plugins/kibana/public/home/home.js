@@ -68,7 +68,7 @@ export function Home({ addBasePath, directories, directoryCategories }) {
             <KuiCardFooter>
               <KuiLinkButton
                 buttonType="secondary"
-                href={addBasePath('/app/kibana#/home/integrations')}
+                href={addBasePath('/app/kibana#/home/tutorial_directory')}
               >
                 Learn more
               </KuiLinkButton>
@@ -94,7 +94,7 @@ export function Home({ addBasePath, directories, directoryCategories }) {
             <KuiCardFooter>
               <KuiLinkButton
                 buttonType="secondary"
-                href={addBasePath('/app/kibana#/home/integrations')}
+                href={addBasePath('/app/kibana#/home/tutorial_directory')}
               >
                 Select data source
               </KuiLinkButton>
@@ -120,7 +120,7 @@ export function Home({ addBasePath, directories, directoryCategories }) {
             <KuiCardFooter>
               <KuiLinkButton
                 buttonType="secondary"
-                href={addBasePath('/app/kibana#/home/integrations')}
+                href={addBasePath('/app/kibana#/home/tutorial_directory')}
               >
                 Select data source
               </KuiLinkButton>
@@ -146,7 +146,7 @@ export function Home({ addBasePath, directories, directoryCategories }) {
             <KuiCardFooter>
               <KuiLinkButton
                 buttonType="secondary"
-                href={addBasePath('/app/kibana#/home/integrations')}
+                href={addBasePath('/app/kibana#/home/tutorial_directory')}
               >
                 Select data source
               </KuiLinkButton>
@@ -228,7 +228,7 @@ export function Home({ addBasePath, directories, directoryCategories }) {
             className="kuiVerticalRhythmSmall"
             buttonType="secondary"
           >
-            <a href="#/home/directory">View full directory of Kibana features</a>
+            <a href="#/home/feature_directory">View full directory of Kibana features</a>
           </KuiButton>
 
         </div>
