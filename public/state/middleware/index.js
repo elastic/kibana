@@ -28,11 +28,16 @@ const serializer = (function () {
   };
 }());
 
+// Because this will sometimes get loaded in node. Eg, docs generation.
+const getWindow = () => {
+  return typeof (window) === 'undefined' ? {} : window;
+};
+
 const middlewares = [
   applyMiddleware(
     thunkMiddleware,
     esPersistMiddleware,
-    historyMiddleware(window),
+    historyMiddleware(getWindow()),
     inFlight,
     appReady,
     workpadUpdate,
@@ -45,6 +50,6 @@ const middlewares = [
   }),
 ];
 
-if (window.__REDUX_DEVTOOLS_EXTENSION__) middlewares.push(window.__REDUX_DEVTOOLS_EXTENSION__());
+if (getWindow().__REDUX_DEVTOOLS_EXTENSION__) middlewares.push(getWindow().__REDUX_DEVTOOLS_EXTENSION__());
 
 export default compose(...middlewares);
