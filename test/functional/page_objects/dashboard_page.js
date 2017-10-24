@@ -241,10 +241,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async filterSearchNames(name) {
       await testSubjects.setValue('savedObjectFinderSearchInput', name);
-<<<<<<< HEAD
-=======
       await PageObjects.header.waitUntilLoadingHasFinished();
->>>>>>> 88f3af406dcf95828b0297372f17d417d0d2915b
     }
 
     async clickSavedSearchTab() {
