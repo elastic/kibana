@@ -15,7 +15,7 @@ function TimeseriesVisualization(props) {
   const { backgroundColor, model, visData } = props;
   const series = _.get(visData, `${model.id}.series`, []);
   let annotations;
-  if (model.annotations && _.isArray(model.annotations)) {
+  if (model.annotations && Array.isArray(model.annotations)) {
     annotations = model.annotations.map(annotation => {
       const data = _.get(visData, `${model.id}.annotations.${annotation.id}`, [])
         .map(item => [item.key, item.docs]);
