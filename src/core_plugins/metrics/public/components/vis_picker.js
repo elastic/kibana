@@ -42,7 +42,8 @@ function VisPicker(props) {
     { type: 'metric', icon: 'fa-superscript', label: 'Metric' },
     { type: 'top_n', icon: 'fa-bar-chart fa-rotate-90', label: 'Top N' },
     { type: 'gauge', icon: 'fa-circle-o-notch', label: 'Gauge' },
-    { type: 'markdown', icon: 'fa-paragraph', label: 'Markdown' }
+    { type: 'markdown', icon: 'fa-paragraph', label: 'Markdown' },
+    { type: 'table', icon: 'fa-paragraph', label: 'Table' }
   ].map(item => {
     return (
       <VisPickerItem

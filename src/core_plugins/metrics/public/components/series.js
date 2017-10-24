@@ -5,12 +5,14 @@ import _ from 'lodash';
 import timeseries from './vis_types/timeseries/series';
 import metric from './vis_types/metric/series';
 import topN from './vis_types/top_n/series';
+import table from './vis_types/table/series';
 import gauge from './vis_types/gauge/series';
 import markdown from './vis_types/markdown/series';
 import { sortable } from 'react-anything-sortable';
 
 const lookup = {
   top_n: topN,
+  table,
   metric,
   timeseries,
   gauge,
@@ -53,7 +55,6 @@ class Series extends Component {
     if (Component) {
       const params = {
         className: this.props.className,
-        colorPicker: this.props.colorPicker,
         disableAdd: this.props.disableAdd,
         disableDelete: this.props.disableDelete,
         fields: this.props.fields,
@@ -88,7 +89,6 @@ Series.defaultProps = {
 
 Series.propTypes = {
   className: PropTypes.string,
-  colorPicker: PropTypes.bool,
   disableAdd: PropTypes.bool,
   disableDelete: PropTypes.bool,
   fields: PropTypes.object,

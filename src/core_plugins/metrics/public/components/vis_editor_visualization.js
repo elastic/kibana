@@ -108,6 +108,8 @@ class VisEditorVisualization extends Component {
             model={this.props.model}
             onBrush={this.props.onBrush}
             onChange={this.handleChange}
+            onUiState={this.props.onUiState}
+            uiState={this.props.uiState}
             visData={this.props.visData}
           />
         </div>
@@ -130,6 +132,8 @@ VisEditorVisualization.propTypes = {
   onBrush: PropTypes.func,
   onChange: PropTypes.func,
   onCommit: PropTypes.func,
+  onUiState: PropTypes.func,
+  uiState: PropTypes.object,
   onToggleAutoApply: PropTypes.func,
   visData: PropTypes.object,
   dirty: PropTypes.bool,
