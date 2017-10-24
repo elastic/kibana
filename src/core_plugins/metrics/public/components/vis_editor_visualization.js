@@ -6,7 +6,6 @@ import Toggle from 'react-toggle';
 import 'react-toggle/style.css';
 
 class VisEditorVisualization extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -27,7 +26,7 @@ class VisEditorVisualization extends Component {
   }
 
   componentWillMount() {
-    this.handleMouseMove = (event) => {
+    this.handleMouseMove = event => {
       if (this.state.dragging) {
         const height = this.state.height + event.movementY;
         if (height > 250) {
@@ -62,45 +61,25 @@ class VisEditorVisualization extends Component {
     if (autoApply) applyMessage = 'The changes will be automatically applied.';
     const applyButton = (
       <div className="vis_editor__dirty_controls">
-        <label
-          className="vis_editor__dirty_controls-toggle-label"
-          id="tsvbAutoApply"
-          htmlFor="tsvbAutoApplyInput"
-        >
+        <label className="vis_editor__dirty_controls-toggle-label" id="tsvbAutoApply" htmlFor="tsvbAutoApplyInput">
           Auto Apply
         </label>
         <div className="vis_editor__dirty_controls-toggle">
-          <Toggle
-            id="tsvbAutoApplyInput"
-            defaultChecked={autoApply}
-            icons={false}
-            onChange={this.props.onToggleAutoApply}
-          />
+          <Toggle id="tsvbAutoApplyInput" defaultChecked={autoApply} icons={false} onChange={this.props.onToggleAutoApply} />
         </div>
         <div className="vis_editor__dirty_controls-button">
-          <button
-            disabled={!dirty}
-            onClick={this.props.onCommit}
-            className={`${applyButtonClassName} md`}
-          >
+          <button disabled={!dirty} onClick={this.props.onCommit} className={`${applyButtonClassName} md`}>
             <i className="fa fa-play" /> Apply Changes
           </button>
         </div>
-        <div className={`vis_editor__dirty_controls-message${dirty ? '-dirty' : ''}`}>
-          {applyMessage}
-        </div>
+        <div className={`vis_editor__dirty_controls-message${dirty ? '-dirty' : ''}`}>{applyMessage}</div>
       </div>
     );
 
     const visBackgroundColor = '#FFF';
     return (
       <div>
-        <div
-          style={style}
-          data-shared-item={true}
-          ref={(el) => this.visDiv = el}
-          className="vis_editor__visualization"
-        >
+        <div style={style} ref={el => (this.visDiv = el)} className="vis_editor__visualization">
           <Visualization
             backgroundColor={visBackgroundColor}
             className="dashboard__visualization"
@@ -111,14 +90,16 @@ class VisEditorVisualization extends Component {
             visData={this.props.visData}
           />
         </div>
-        {applyButton}
-        <div
-          aria-hidden="true"
-          className="vis_editor__visualization-draghandle"
-          onMouseDown={this.handleMouseDown}
-          onMouseUp={this.handleMouseUp}
-        >
-          <i className="fa fa-ellipsis-h" />
+        <div className="vis-editor-hide-for-reporting">
+          {applyButton}
+          <div
+            aria-hidden="true"
+            className="vis_editor__visualization-draghandle"
+            onMouseDown={this.handleMouseDown}
+            onMouseUp={this.handleMouseUp}
+          >
+            <i className="fa fa-ellipsis-h" />
+          </div>
         </div>
       </div>
     );

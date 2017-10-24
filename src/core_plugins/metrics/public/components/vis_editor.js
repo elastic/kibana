@@ -8,7 +8,6 @@ import brushHandler from '../lib/create_brush_handler';
 import { get } from 'lodash';
 
 class VisEditor extends Component {
-
   constructor(props) {
     super(props);
     const { appState } = props;
@@ -38,7 +37,7 @@ class VisEditor extends Component {
   }
 
   render() {
-    const handleChange = (part) => {
+    const handleChange = part => {
       const nextModel = { ...this.state.model, ...part };
 
       this.props.vis.params = nextModel;
@@ -49,7 +48,7 @@ class VisEditor extends Component {
       this.setState({ model: nextModel, dirty: !this.state.autoApply });
     };
 
-    const handleAutoApplyToggle = (part) => {
+    const handleAutoApplyToggle = part => {
       this.setState({ autoApply: part.target.checked });
     };
 
@@ -73,16 +72,14 @@ class VisEditor extends Component {
       );
     }
 
-
     const { model } = this.state;
 
     if (model && this.props.visData) {
       return (
         <div className="vis_editor">
-          <VisPicker
-            model={model}
-            onChange={handleChange}
-          />
+          <div className="vis-editor-hide-for-reporting">
+            <VisPicker model={model} onChange={handleChange} />
+          </div>
           <VisEditorVisualization
             dirty={this.state.dirty}
             autoApply={this.state.autoApply}
@@ -94,13 +91,15 @@ class VisEditor extends Component {
             onChange={handleChange}
             dateFormat={this.props.config.get('dateFormat')}
           />
-          <PanelConfig
-            fields={this.props.vis.fields}
-            model={model}
-            visData={this.props.visData}
-            dateFormat={this.props.config.get('dateFormat')}
-            onChange={handleChange}
-          />
+          <div className="vis-editor-hide-for-reporting">
+            <PanelConfig
+              fields={this.props.vis.fields}
+              model={model}
+              visData={this.props.visData}
+              dateFormat={this.props.config.get('dateFormat')}
+              onChange={handleChange}
+            />
+          </div>
         </div>
       );
     }
@@ -111,7 +110,6 @@ class VisEditor extends Component {
   componentDidMount() {
     this.props.renderComplete();
   }
-
 }
 
 VisEditor.defaultProps = {
