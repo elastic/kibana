@@ -76,7 +76,7 @@ module.service('Promise', function ($q, $timeout) {
 
     let value;
 
-    if (_.isArray(args)) {
+    if (Array.isArray(args)) {
       try { value = fn.apply(ctx, args); }
       catch (e) { return Promise.reject(e); }
     } else {

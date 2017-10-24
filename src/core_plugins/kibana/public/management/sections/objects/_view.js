@@ -38,7 +38,7 @@ uiModules.get('apps/management')
        * @returns {array}
        */
       const createField = function (memo, val, key, collection, parents) {
-        if (_.isArray(parents)) {
+        if (Array.isArray(parents)) {
           parents.push(key);
         } else {
           parents = [key];
@@ -55,7 +55,7 @@ uiModules.get('apps/management')
           }
         } else if (_.isNumeric(field.value)) {
           field.type = 'number';
-        } else if (_.isArray(field.value)) {
+        } else if (Array.isArray(field.value)) {
           field.type = 'array';
           field.value = angular.toJson(field.value, true);
         } else if (_.isBoolean(field.value)) {
