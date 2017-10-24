@@ -286,7 +286,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       return this
         .toDetailedIndexList(start, stop, sortDirection)
         .then(detailedIndices => {
-          if (!_.isArray(detailedIndices)) {
+          if (!Array.isArray(detailedIndices)) {
             return detailedIndices.index;
           }
           return _.pluck(detailedIndices, 'index');

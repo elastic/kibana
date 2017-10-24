@@ -80,7 +80,7 @@ class MarkdownEditor extends Component {
 
     function walk(obj, path = []) {
       for (const name in obj) {
-        if (_.isArray(obj[name])) {
+        if (Array.isArray(obj[name])) {
           createArrayRow(path.concat(name).join('.'));
         } else if (_.isObject(obj[name])) {
           walk(obj[name], path.concat(name));

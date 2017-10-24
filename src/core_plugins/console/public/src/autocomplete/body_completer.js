@@ -20,7 +20,7 @@ function getTemplate(description) {
     // assume an object for now.
     return {};
   }
-  else if (_.isArray(description)) {
+  else if (Array.isArray(description)) {
     if (description.length == 1) {
       if (_.isObject(description[0])) {
         // shortcut to save typing
@@ -57,7 +57,7 @@ function getOptions(description) {
  * @param compilingContext
  */
 function compileDescription(description, compilingContext) {
-  if (_.isArray(description)) {
+  if (Array.isArray(description)) {
     return [compileList(description, compilingContext)];
   }
   else if (_.isObject(description)) {
