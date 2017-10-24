@@ -61,33 +61,31 @@ class VisEditorVisualization extends Component {
     if (autoApply) applyMessage = 'The changes will be automatically applied.';
     const applyButton = (
       <div className="vis_editor__dirty_controls">
-        <label 
-            className="vis_editor__dirty_controls-toggle-label"		
-            id="tsvbAutoApply"		
-            htmlFor="tsvbAutoApplyInput"		
+        <label
+          className="vis_editor__dirty_controls-toggle-label"
+          id="tsvbAutoApply"
+          htmlFor="tsvbAutoApplyInput"
         >
           Auto Apply
         </label>
         <div className="vis_editor__dirty_controls-toggle">
-          <Toggle 
-            id="tsvbAutoApplyInput" 
-            defaultChecked={autoApply} 
-            icons={false} 
-            onChange={this.props.onToggleAutoApply} 
+          <Toggle
+            id="tsvbAutoApplyInput"
+            defaultChecked={autoApply}
+            icons={false}
+            onChange={this.props.onToggleAutoApply}
           />
         </div>
         <div className="vis_editor__dirty_controls-button">
-          <button 
-            disabled={!dirty} 
-            onClick={this.props.onCommit} 
+          <button
+            disabled={!dirty}
+            onClick={this.props.onCommit}
             className={`${applyButtonClassName} md`}
           >
             <i className="fa fa-play" /> Apply Changes
           </button>
         </div>
-        <div 
-          className={`vis_editor__dirty_controls-message${dirty ? '-dirty' : ''}`}
-        >
+        <div className={`vis_editor__dirty_controls-message${dirty ? '-dirty' : ''}`}>
           {applyMessage}
         </div>
       </div>
@@ -96,9 +94,9 @@ class VisEditorVisualization extends Component {
     const visBackgroundColor = '#FFF';
     return (
       <div>
-        <div 
-          style={style} 
-          ref={el => (this.visDiv = el)} 
+        <div
+          style={style}
+          ref={(el) => this.visDiv = el}
           className="vis_editor__visualization"
         >
           <Visualization
