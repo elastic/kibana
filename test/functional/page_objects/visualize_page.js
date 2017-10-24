@@ -198,6 +198,18 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       }
     }
 
+    async openTooltipSettings() {
+      const open = await testSubjects.exists('tooltipTypeSelect');
+      if (!open) {
+        await testSubjects.click('tooltipSettingsVisibilityToogle');
+      }
+    }
+
+    async setTooltipType(type) {
+      await testSubjects.click('tooltipTypeSelect');
+      await testSubjects.click(type);
+    }
+
     async clickGoButton() {
       await testSubjects.click('timepickerGoButton');
     }
@@ -362,10 +374,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickVisEditorTab(tabName) {
       await testSubjects.click('visEditorTab' + tabName);
-    }
-
-    async selectWMS() {
-      await find.clickByCssSelector('input[name="wms.enabled"]');
     }
 
     async ensureSavePanelOpen() {

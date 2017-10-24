@@ -20,6 +20,7 @@ export default function MetricsVisProvider(Private) {
     title: 'Visual Builder',
     description: 'Build time-series using a visual pipeline interface',
     category: CATEGORY.TIME,
+    isEmbeddableInTooltip: false,
     image,
     isExperimental: true,
     visConfig: {

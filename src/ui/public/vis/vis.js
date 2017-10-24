@@ -66,6 +66,7 @@ export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
         queryFilter: queryFilter,
         queryManager: queryManagerFactory(getAppState),
         kuery: kueryAPI,
+        visTypes: visTypes,
         events: {
           filter: (event) => {
             const appState = getAppState();
@@ -211,6 +212,13 @@ export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
         return this.__uiState.set(key, val);
       }
       return val;
+    }
+
+    isSameSavedObject = (savedObjectId) => {
+      if (this._id && this._id === savedObjectId) {
+        return true;
+      }
+      return false;
     }
   }
 

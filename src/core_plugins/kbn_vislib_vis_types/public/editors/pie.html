@@ -1,8 +1,20 @@
 <!-- vis type specific options -->
 <div class="kuiSideBarSection">
-  <label>
-    <input type="checkbox" value="{{isDonut}}" ng-model="vis.params.isDonut" name="isDonut" ng-checked="vis.params.isDonut">
-   Donut
-  </label>
+  <div class="kuiSideBarFormRow">
+    <label class="kuiSideBarFormRow__label">
+      Donut
+    </label>
+    <div class="kuiSideBarFormRow__control">
+      <input
+        class="kuiCheckBox"
+        type="checkbox"
+        value="{{isDonut}}"
+        ng-model="vis.params.isDonut"
+        name="isDonut"
+        ng-checked="vis.params.isDonut"
+      />
+    </div>
+  </div>
+
   <vislib-basic-options></vislib-basic-options>
 </div>

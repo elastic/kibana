@@ -5,10 +5,12 @@ import { arrayToLinkedList } from 'ui/agg_response/hierarchical/_array_to_linked
 import AggConfigResult from 'ui/vis/agg_config_result';
 import { AggResponseHierarchicalBuildSplitProvider } from 'ui/agg_response/hierarchical/_build_split';
 import { HierarchicalTooltipFormatterProvider } from 'ui/agg_response/hierarchical/_hierarchical_tooltip_formatter';
+import { EmbeddedTooltipFormatterProvider } from 'ui/agg_response/_embedded_tooltip_formatter';
 
 export function BuildHierarchicalDataProvider(Private, Notifier) {
   const buildSplit = Private(AggResponseHierarchicalBuildSplitProvider);
-  const tooltipFormatter = Private(HierarchicalTooltipFormatterProvider);
+  const metricTooltipFormatter = Private(HierarchicalTooltipFormatterProvider);
+  const embeddedTooltipFormatter = Private(EmbeddedTooltipFormatterProvider);
 
 
   const notify = new Notifier({
@@ -30,6 +32,13 @@ export function BuildHierarchicalDataProvider(Private, Notifier) {
     // Create the raw data to be used in the spy panel
     const raw = createRawData(vis, resp);
 
+    let tooltipFormatter;
+    if (_.get(vis, 'params.tooltip.type') === 'vis' && _.has(vis, 'params.tooltip.vis')) {
+      tooltipFormatter = embeddedTooltipFormatter(vis);
+    } else {
+      tooltipFormatter = metricTooltipFormatter(raw.columns);
+    }
+
     // If buckets is falsy then we should just return the aggs
     if (!buckets) {
       const label = 'Count';
@@ -41,7 +50,7 @@ export function BuildHierarchicalDataProvider(Private, Notifier) {
         hits: resp.hits.total,
         raw: raw,
         names: [label],
-        tooltipFormatter: tooltipFormatter(raw.columns),
+        tooltipFormatter: tooltipFormatter,
         slices: {
           children: [
             { name: label, size: value }
@@ -62,7 +71,7 @@ export function BuildHierarchicalDataProvider(Private, Notifier) {
       const split = buildSplit(firstAgg, metric, aggData);
       split.hits = resp.hits.total;
       split.raw = raw;
-      split.tooltipFormatter = tooltipFormatter(raw.columns);
+      split.tooltipFormatter = tooltipFormatter;
       return split;
     }
 
@@ -76,7 +85,7 @@ export function BuildHierarchicalDataProvider(Private, Notifier) {
       const displayName = firstAgg.getFieldDisplayName();
       if (!_.isEmpty(displayName)) split.label += ': ' + displayName;
 
-      split.tooltipFormatter = tooltipFormatter(raw.columns);
+      split.tooltipFormatter = tooltipFormatter;
       const aggConfigResult = new AggConfigResult(firstAgg, null, null, firstAgg.getKey(bucket));
       split.split = { aggConfig: firstAgg, aggConfigResult: aggConfigResult, key: bucket.key };
       _.each(split.slices.children, function (child) {

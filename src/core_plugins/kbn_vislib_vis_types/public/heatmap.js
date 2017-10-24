@@ -15,10 +15,14 @@ export default function HeatmapVisType(Private) {
     image,
     description: 'Shade cells within a matrix',
     category: CATEGORY.BASIC,
+    isEmbeddableInTooltip: true,
     visConfig: {
       defaults: {
         type: 'heatmap',
         addTooltip: true,
+        tooltip: {
+          type: 'metric'
+        },
         addLegend: true,
         enableHover: false,
         legendPosition: 'right',

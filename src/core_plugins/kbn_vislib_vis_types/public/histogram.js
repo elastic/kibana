@@ -14,6 +14,7 @@ export default function PointSeriesVisType(Private) {
     image,
     description: 'Assign a continuous variable to each axis',
     category: CATEGORY.BASIC,
+    isEmbeddableInTooltip: true,
     visConfig: {
       defaults: {
         type: 'histogram',
@@ -78,6 +79,9 @@ export default function PointSeriesVisType(Private) {
           }
         ],
         addTooltip: true,
+        tooltip: {
+          type: 'metric'
+        },
         addLegend: true,
         legendPosition: 'right',
         times: [],
@@ -86,7 +90,19 @@ export default function PointSeriesVisType(Private) {
     },
     editorConfig: {
       collections: {
-        positions: ['top', 'left', 'right', 'bottom'],
+        legendPositions: [{
+          value: 'left',
+          text: 'left',
+        }, {
+          value: 'right',
+          text: 'right',
+        }, {
+          value: 'top',
+          text: 'top',
+        }, {
+          value: 'bottom',
+          text: 'bottom',
+        }],
         chartTypes: [{
           value: 'line',
           text: 'line'
@@ -118,7 +134,7 @@ export default function PointSeriesVisType(Private) {
           editor: '<div><vislib-series></vislib-series><vislib-value-axes>' +
           '</vislib-value-axes><vislib-category-axis></vislib-category-axis></div>'
         },
-        { name: 'options', title: 'Panel Settings', editor: pointSeriesTemplate },
+        { name: 'options', title: 'Panel Settings', editor: pointSeriesTemplate }
       ],
       schemas: new Schemas([
         {

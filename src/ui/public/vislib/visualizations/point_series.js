@@ -1,7 +1,7 @@
 import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
-import { TooltipProvider } from 'ui/vis/components/tooltip';
+import { Tooltip } from 'ui/vis/components/tooltip';
 import { VislibVisualizationsChartProvider } from './_chart';
 import { VislibVisualizationsTimeMarkerProvider } from './time_marker';
 import { VislibVisualizationsSeriesTypesProvider } from './point_series/series_types';
@@ -9,7 +9,6 @@ import { VislibVisualizationsSeriesTypesProvider } from './point_series/series_t
 export function VislibVisualizationsPointSeriesProvider(Private) {
 
   const Chart = Private(VislibVisualizationsChartProvider);
-  const Tooltip = Private(TooltipProvider);
   const TimeMarker = Private(VislibVisualizationsTimeMarkerProvider);
   const seriTypes = Private(VislibVisualizationsSeriesTypesProvider);
   const touchdownTmpl = _.template(require('../partials/touchdown.tmpl.html'));
@@ -172,13 +171,15 @@ export function VislibVisualizationsPointSeriesProvider(Private) {
       function textFormatter() {
         return touchdownTmpl(callPlay(d3.event));
       }
-
-      const endzoneTT = new Tooltip('endzones', this.handler.el, textFormatter, null);
-      this.tooltips.push(endzoneTT);
-      endzoneTT.order = 0;
-      endzoneTT.showCondition = function inEndzone() {
+      function inEndzone() {
         return callPlay(d3.event).touchdown;
-      };
+      }
+      const endzoneTT = new Tooltip('endzones', this.handler.el, textFormatter, null, {
+        order: 0, // show endone tooltip first
+        showCondition: inEndzone,
+        updateContentOnMove: true
+      });
+      this.tooltips.push(endzoneTT);
       endzoneTT.render()(svg);
     }
 

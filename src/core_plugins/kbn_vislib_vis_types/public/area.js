@@ -14,6 +14,7 @@ export default function PointSeriesVisType(Private) {
     image,
     description: 'Emphasize the quantity beneath a line chart',
     category: CATEGORY.BASIC,
+    isEmbeddableInTooltip: true,
     visConfig: {
       defaults: {
         type: 'area',
@@ -77,6 +78,9 @@ export default function PointSeriesVisType(Private) {
           valueAxis: 'ValueAxis-1'
         }],
         addTooltip: true,
+        tooltip: {
+          type: 'metric'
+        },
         addLegend: true,
         legendPosition: 'right',
         times: [],
@@ -85,7 +89,19 @@ export default function PointSeriesVisType(Private) {
     },
     editorConfig: {
       collections: {
-        positions: ['top', 'left', 'right', 'bottom'],
+        legendPositions: [{
+          value: 'left',
+          text: 'left',
+        }, {
+          value: 'right',
+          text: 'right',
+        }, {
+          value: 'top',
+          text: 'top',
+        }, {
+          value: 'bottom',
+          text: 'bottom',
+        }],
         chartTypes: [{
           value: 'line',
           text: 'line'

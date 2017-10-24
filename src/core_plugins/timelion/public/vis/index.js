@@ -29,6 +29,7 @@ export default function TimelionVisProvider(Private) {
     image,
     description: 'Build time-series using functional expressions',
     category: CATEGORY.TIME,
+    isEmbeddableInTooltip: false,
     visConfig: {
       defaults: {
         expression: '.es(*)',

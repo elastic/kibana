@@ -14,13 +14,17 @@ export default function HistogramVisType(Private) {
     image,
     description: 'Compare parts of a whole',
     category: CATEGORY.BASIC,
+    isEmbeddableInTooltip: true,
     visConfig: {
       defaults: {
         type: 'pie',
         addTooltip: true,
+        tooltip: {
+          type: 'metric'
+        },
         addLegend: true,
         legendPosition: 'right',
-        isDonut: true
+        isDonut: false
       },
     },
     editorConfig: {

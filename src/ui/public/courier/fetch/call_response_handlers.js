@@ -17,6 +17,9 @@ export function CallResponseHandlersProvider(Private, Promise) {
 
       let resp = responses[i];
 
+      if (!resp) {
+        return;
+      }
       if (resp.timed_out) {
         notify.warning(new SearchTimeout());
       }

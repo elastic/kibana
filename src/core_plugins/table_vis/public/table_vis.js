@@ -37,6 +37,7 @@ function TableVisTypeProvider(Private) {
     image,
     description: 'Display values in a table',
     category: CATEGORY.DATA,
+    isEmbeddableInTooltip: true,
     visConfig: {
       defaults: {
         perPage: 10,
