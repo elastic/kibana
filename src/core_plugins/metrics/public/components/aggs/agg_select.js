@@ -121,6 +121,13 @@ AggSelectOption.props = {
   option: PropTypes.object.isRequired,
 };
 
+function filterByPanelType(panelType) {
+  return agg => {
+    if (panelType === 'table') return agg.value !== 'series_agg';
+    return true;
+  };
+}
+
 function AggSelect(props) {
   const { siblings, panelType } = props;
 
@@ -135,7 +142,7 @@ function AggSelect(props) {
       { label: 'Metric Aggregations', value: null, heading: true, disabled: true },
       ...metricAggs,
       { label: 'Parent Pipeline Aggregations', value: null, pipeline: true, heading: true, disabled: true },
-      ...pipelineAggs.map(agg => ({ ...agg, disabled: !enablePipelines })),
+      ...pipelineAggs.filter(filterByPanelType(panelType)).map(agg => ({ ...agg, disabled: !enablePipelines })),
       { label: 'Sibling Pipeline Aggregations', value: null, pipeline: true, heading: true, disabled: true },
       ...siblingAggs.map(agg => ({ ...agg, disabled: !enablePipelines }))
     ];

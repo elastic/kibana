@@ -34,6 +34,7 @@ export const Static = props => {
           <div className="vis_editor__row_item">
             <div className="vis_editor__label">Aggregation</div>
             <AggSelect
+              panelType={props.panel.type}
               siblings={props.siblings}
               value={model.type}
               onChange={handleSelectChange('type')}
