@@ -10,7 +10,7 @@ import {
 
 const allCategories = 'all';
 
-export class Directory extends React.Component {
+export class FeatureDirectory extends React.Component {
 
   constructor(props) {
     super(props);
@@ -94,8 +94,7 @@ export class Directory extends React.Component {
   }
 }
 
-Directory.propTypes = {
+FeatureDirectory.propTypes = {
   addBasePath: PropTypes.func.isRequired,
-  directories: PropTypes.object.isRequired,
-  directoryCategories: PropTypes.object.isRequired
+  directories: PropTypes.object.isRequired
 };

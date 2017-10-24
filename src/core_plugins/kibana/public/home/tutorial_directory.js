@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Synopsis } from './synopsis';
 import {
   KuiTabs,
   KuiTab,
@@ -7,7 +8,7 @@ import {
   KuiFlexGrid,
 } from 'ui_framework/components';
 
-export class DataSources extends React.Component {
+export class TutorialDirectory extends React.Component {
 
   constructor(props) {
     super(props);
@@ -49,6 +50,21 @@ export class DataSources extends React.Component {
     ));
   }
 
+  renderTutorials = () => {
+    return this.props.tutorials.inNameOrder
+    .map((tutorial) => {
+      return (
+        <KuiFlexItem key={tutorial.name}>
+          <Synopsis
+            description={tutorial.shortDescription}
+            title={tutorial.name}
+            url={this.props.addBasePath(`#/home/tutorial/${tutorial.name}`)}
+          />
+        </KuiFlexItem>
+      );
+    });
+  };
+
   render() {
     return (
       <div className="kuiView">
@@ -60,12 +76,26 @@ export class DataSources extends React.Component {
           <KuiTabs>
             {this.renderTabs()}
           </KuiTabs>
+          <KuiFlexGrid columns={4}>
+
+            <KuiFlexItem>
+              <Synopsis
+                description="Is your data already in Elastic Search? Set up an Index Pattern to quickly query it."
+                title="Set up an Index Pattern"
+                url={this.props.addBasePath('/app/kibana#/management/kibana/index')}
+              />
+            </KuiFlexItem>
+
+            { this.renderTutorials() }
+
+          </KuiFlexGrid>
         </div>
       </div>
     );
   }
 }
 
-DataSources.propTypes = {
-  addBasePath: PropTypes.func.isRequired
+TutorialDirectory.propTypes = {
+  addBasePath: PropTypes.func.isRequired,
+  tutorials: PropTypes.object.isRequired
 };
