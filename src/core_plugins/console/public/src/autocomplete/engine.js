@@ -228,9 +228,7 @@ function passThroughContext(context, extensionList) {
   PTC.prototype = context;
   var result = new PTC();
   if (extensionList) {
-    extensionList.unshift(result);
-    Object.assign.apply(_, extensionList);
-    extensionList.shift();
+    Object.assign(result, ...extensionList);
   }
   return result;
 }
