@@ -52,6 +52,15 @@ $checkboxDisabledOpacity: 0.3;
     opacity: $checkboxDisabledOpacity;
     cursor: not-allowed;
   }
+
+  @include darkTheme {
+    background-color: $globalInputBackgroundColor--darkTheme;
+    border-color: $globalInputBorderColor--darkTheme;
+
+    &:checked {
+      background-color: $checkboxCheckedBackgroundColor;
+    }
+  }
 }
 
 .kuiCheckBoxLabel {
