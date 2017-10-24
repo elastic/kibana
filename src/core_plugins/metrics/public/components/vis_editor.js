@@ -37,7 +37,7 @@ class VisEditor extends Component {
   }
 
   render() {
-    const handleChange = part => {
+    const handleChange = (part) => {
       const nextModel = { ...this.state.model, ...part };
 
       this.props.vis.params = nextModel;
@@ -48,7 +48,7 @@ class VisEditor extends Component {
       this.setState({ model: nextModel, dirty: !this.state.autoApply });
     };
 
-    const handleAutoApplyToggle = part => {
+    const handleAutoApplyToggle = (part) => {
       this.setState({ autoApply: part.target.checked });
     };
 
