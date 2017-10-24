@@ -1,7 +1,7 @@
 import _ from 'lodash';
 const lookup = {
   'count': 'Count',
-  'calculation': 'Calculation',
+  'calculation': 'Bucket Script',
   'std_deviation': 'Std. Deviation',
   'variance': 'Variance',
   'sum_of_squares': 'Sum of Sq.',
@@ -24,6 +24,7 @@ const lookup = {
   'sum_of_squares_bucket': 'Overall Sum of Sq.',
   'std_deviation_bucket': 'Overall Std. Deviation',
   'series_agg': 'Series Agg',
+  'math': 'Math',
   'serial_diff': 'Serial Difference',
   'filter_ratio': 'Filter Ratio',
   'positive_only': 'Positive Only',
@@ -43,6 +44,7 @@ const pipeline = [
   'sum_of_squares_bucket',
   'std_deviation_bucket',
   'series_agg',
+  'math',
   'serial_diff',
   'positive_only'
 ];
