@@ -216,6 +216,7 @@
     "@elastic/eslint-plugin-kibana-custom": "1.0.3",
     "angular-mocks": "1.4.7",
     "babel-eslint": "7.2.3",
+    "backport": "0.2.3",
     "chai": "3.5.0",
     "chalk": "2.0.1",
     "chance": "1.0.6",
