@@ -165,6 +165,12 @@ uiModules
           $scope.$on('$destroy', () => {
             stateMonitor.destroy();
           });
+        } else {
+          const handleUiStateChange = () => { $scope.$broadcast('render'); };
+          $scope.uiState.on('change', handleUiStateChange);
+          $scope.$on('destroy', () => {
+            $scope.uiState.off('change', handleUiStateChange);
+          });
         }
 
         let resizeInit = false;
