@@ -15,6 +15,11 @@ class VisEditor extends Component {
     const reversed = get(appState, 'options.darkTheme', false);
     this.state = { model: props.vis.params, dirty: false, autoApply: true, reversed };
     this.onBrush = brushHandler(props.vis.API.timeFilter);
+    this.handleUiState = this.handleUiState.bind(this, props.vis);
+  }
+
+  handleUiState(vis, ...args) {
+    vis.uiStateVal(...args);
     this.handleAppStateChange = this.handleAppStateChange.bind(this);
   }
 
@@ -66,6 +71,8 @@ class VisEditor extends Component {
           dateFormat={this.props.config.get('dateFormat')}
           reversed={reversed}
           onBrush={this.onBrush}
+          onUiState={this.handleUiState}
+          uiState={this.props.vis.getUiState()}
           fields={this.props.vis.fields}
           model={this.props.vis.params}
           visData={this.props.visData}
@@ -88,6 +95,8 @@ class VisEditor extends Component {
             autoApply={this.state.autoApply}
             model={model}
             visData={this.props.visData}
+            onUiState={this.handleUiState}
+            uiState={this.props.vis.getUiState()}
             onBrush={this.onBrush}
             onCommit={handleCommit}
             onToggleAutoApply={handleAutoApplyToggle}
