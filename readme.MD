@@ -1,6 +1,8 @@
 # backport
 
+[![Build Status](https://travis-ci.org/sqren/backport-cli.svg?branch=master)](https://travis-ci.org/sqren/backport-cli)
 [![Greenkeeper badge](https://badges.greenkeeper.io/sqren/backport-cli.svg)](https://greenkeeper.io/)
+[![Maintainability](https://api.codeclimate.com/v1/badges/725c103c79c5ba2ec6a5/maintainability)](https://codeclimate.com/github/sqren/backport-cli/maintainability)
 
 A simple CLI tool for backporting commits
 
