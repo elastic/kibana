@@ -59,7 +59,7 @@ SharedComponent.prototype = _.create(
 /** A component that suggests one of the give options, but accepts anything */
 function ListComponent(name, list, parent, multi_valued, allow_non_valid_values) {
   SharedComponent.call(this, name, parent);
-  this.listGenerator = _.isArray(list) ? function () {
+  this.listGenerator = Array.isArray(list) ? function () {
     return list
   } : list;
   this.multi_valued = _.isUndefined(multi_valued) ? true : multi_valued;
@@ -120,7 +120,7 @@ ListComponent.prototype = _.create(SharedComponent.prototype, { "constructor": L
   };
 
   cls.match = function (token, context, editor) {
-    if (!_.isArray(token)) {
+    if (!Array.isArray(token)) {
       token = [token]
     }
     if (!this.allow_non_valid_values && !this.validateTokens(token, context, editor)) {
@@ -168,7 +168,7 @@ export { SharedComponent, ListComponent, SimpleParamComponent, ConstantComponent
   };
 
   cls.addOption = function (options) {
-    if (!_.isArray(options)) {
+    if (!Array.isArray(options)) {
       options = [options];
     }
 
@@ -261,7 +261,7 @@ function walkTokenPath(tokenPath, walkingStates, context, editor) {
       if (result && !_.isEmpty(result)) {
         tracer("matched [" + token + "] with:", result);
         var next, extensionList;
-        if (result.next && !_.isArray(result.next)) {
+        if (result.next && !Array.isArray(result.next)) {
           next = [result.next];
         }
         else {

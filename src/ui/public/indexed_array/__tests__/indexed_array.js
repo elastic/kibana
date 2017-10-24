@@ -32,12 +32,12 @@ describe('IndexedArray', function () {
     });
 
     it('fails basic lodash check', function () {
-      expect(_.isArray(reg)).to.be(false);
+      expect(Array.isArray(reg)).to.be(false);
     });
 
     it('clones to an object', function () {
       expect(_.isPlainObject(_.clone(reg))).to.be(true);
-      expect(_.isArray(_.clone(reg))).to.be(false);
+      expect(Array.isArray(_.clone(reg))).to.be(false);
     });
   });
 

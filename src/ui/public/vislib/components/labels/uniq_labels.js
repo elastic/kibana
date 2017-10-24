@@ -7,7 +7,7 @@ export function VislibComponentsLabelsUniqLabelsProvider() {
    * Returns a unique list of formatted labels (strings).
    */
   return function (arr) {
-    if (!_.isArray(arr)) {
+    if (!Array.isArray(arr)) {
       throw new TypeError('UniqLabelUtil expects an array of objects');
     }
 

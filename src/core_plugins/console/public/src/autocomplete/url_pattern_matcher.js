@@ -64,7 +64,7 @@ export function UrlPatternMatcher(parametrizedComponentFactories) {
 
         if ((c = endpointComponents[part])) {
           // endpoint specific. Support list
-          if (_.isArray(c)) {
+          if (Array.isArray(c)) {
             c = new engine.ListComponent(part, c, active_component);
           }
           else if (_.isObject(c) && c.type === "list") {
