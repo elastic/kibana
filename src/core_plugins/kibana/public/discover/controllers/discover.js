@@ -478,7 +478,7 @@ function discoverController(
      * @type {String}
      */
     const sortBy = (function () {
-      if (!_.isArray(sort)) return 'implicit';
+      if (!Array.isArray(sort)) return 'implicit';
       else if (sort[0] === '_score') return 'implicit';
       else if (sort[0] === timeField) return 'time';
       else return 'non-time';

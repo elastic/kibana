@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { Scanner } from 'ui/utils/scanner';
 import { StringUtils } from 'ui/utils/string_utils';
 import { SavedObjectsClient } from 'ui/saved_objects';
@@ -40,7 +39,7 @@ export class SavedObjectLoader {
   }
 
   delete(ids) {
-    ids = !_.isArray(ids) ? [ids] : ids;
+    ids = !Array.isArray(ids) ? [ids] : ids;
 
     const deletions = ids.map(id => {
       const savedObject = new this.Class(id);

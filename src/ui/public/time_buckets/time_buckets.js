@@ -49,7 +49,7 @@ export function TimeBucketsProvider(Private, timefilter, config) {
       // accept the response from timefilter.getActiveBounds()
       bounds = [input.min, input.max];
     } else {
-      bounds = _.isArray(input) ? input : [];
+      bounds = Array.isArray(input) ? input : [];
     }
 
     const moments = _(bounds)

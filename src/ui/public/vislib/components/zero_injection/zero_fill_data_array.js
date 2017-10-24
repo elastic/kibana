@@ -9,7 +9,7 @@ export function VislibComponentsZeroInjectionZeroFillDataArrayProvider() {
    */
 
   return function (arr1, arr2) {
-    if (!_.isArray(arr1) || !_.isArray(arr2)) {
+    if (!Array.isArray(arr1) || !Array.isArray(arr2)) {
       throw new TypeError('ZeroFillDataArrayUtilService expects 2 arrays');
     }
 
