@@ -151,9 +151,14 @@ export default function ({ getService, getPageObjects }) {
         // Panels are all minimized on a fresh open of a dashboard, so we need to re-expand in order to then minimize.
         await PageObjects.dashboard.toggleExpandPanel();
         await PageObjects.dashboard.toggleExpandPanel();
-        const panels = await PageObjects.dashboard.getDashboardPanels();
-        const visualizations = PageObjects.dashboard.getTestVisualizations();
-        expect(panels.length).to.eql(visualizations.length);
+
+        // Add a retry to fix https://github.com/elastic/kibana/issues/14574.  Perhaps the recent changes to this
+        // being a CSS update is causing the UI to change slower than grabbing the panels?
+        retry.try(async () => {
+          const panels = await PageObjects.dashboard.getDashboardPanels();
+          const visualizations = PageObjects.dashboard.getTestVisualizations();
+          expect(panels.length).to.eql(visualizations.length);
+        });
       });
     });
 
