@@ -24,11 +24,13 @@ export function AggTypesBucketsHistogramProvider(Private, config) {
 
       return {
         setAutoBounds: {
+          configurable: true,
           value(newValue) {
             autoBounds = newValue;
           }
         },
         getAutoBounds: {
+          configurable: true,
           value() {
             return autoBounds;
           }
