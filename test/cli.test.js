@@ -35,7 +35,7 @@ function setup() {
     )
     .mockReturnValueOnce(
       Promise.resolve({
-        version: 'myVersion'
+        version: '6.2'
       })
     );
 
@@ -96,10 +96,10 @@ describe('select commit that originated from pull request', () => {
       'elastic',
       'backport-cli-test',
       {
-        base: 'myVersion',
-        body: 'Backports pull request #myPullRequest to myVersion',
-        head: 'sqren:backport/myVersion/pr-myPullRequest',
-        title: '[Backport] myCommitMessage'
+        base: '6.2',
+        body: 'Backports pull request #myPullRequest to 6.2',
+        head: 'sqren:backport/6.2/pr-myPullRequest',
+        title: '[6.2] myCommitMessage'
       }
     );
   });

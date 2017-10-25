@@ -266,7 +266,7 @@ function getPullRequestPayload(commitMessage, version, reference, username) {
   const refValue = service.getReferenceValue(reference);
 
   return {
-    title: `[Backport] ${commitMessage}`,
+    title: `[${version}] ${commitMessage}`,
     body: `Backports ${refValue} to ${version}`,
     head: `${username}:${backportBranchName}`,
     base: `${version}`

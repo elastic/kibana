@@ -21,7 +21,7 @@ Array [
     },
   ],
   Array [
-    "git fetch origin myVersion && git branch backport/myVersion/pr-myPullRequest origin/myVersion --force && git checkout backport/myVersion/pr-myPullRequest ",
+    "git fetch origin 6.2 && git branch backport/6.2/pr-myPullRequest origin/6.2 --force && git checkout backport/6.2/pr-myPullRequest ",
     Object {
       "cwd": "homefolder/.backport/repositories/elastic/backport-cli-test",
     },
@@ -33,7 +33,7 @@ Array [
     },
   ],
   Array [
-    "git push sqren backport/myVersion/pr-myPullRequest --force",
+    "git push sqren backport/6.2/pr-myPullRequest --force",
     Object {
       "cwd": "homefolder/.backport/repositories/elastic/backport-cli-test",
     },
