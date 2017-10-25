@@ -1,5 +1,5 @@
 // All types must be universal and be castable on the client or on the server
-import _ from 'lodash';
+import { intersection, keys, constant } from 'lodash';
 import { getType } from './get_type';
 
 // TODO: Currently all casting functions must be syncronous.
@@ -11,12 +11,15 @@ export function Type(config) {
   // Optional
   this.help = config.help || ''; // A short help text
 
+  // Optional type validation, useful for checking function output
+  this.validate = config.validate || constant(true);
+
   const fns = {
     from: config.from || {},
     to: config.to || {},
   };
 
-  const castableTypeNames = (types, toOrFrom) => _.intersection(types, _.keys(fns[toOrFrom]));
+  const castableTypeNames = (types, toOrFrom) => intersection(types, keys(fns[toOrFrom]));
 
   this.castsTo = (types) => castableTypeNames(types, 'to').length > 0;
   this.castsFrom = (types) => castableTypeNames(types, 'from').length > 0;

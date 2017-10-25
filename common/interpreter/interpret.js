@@ -2,6 +2,7 @@ import { clone, each, keys, last, map, mapValues, values, zipObject, omitBy } fr
 import { castProvider } from './cast';
 import { getType } from '../types/get_type';
 import { fromExpression } from '../lib/ast';
+import { typesRegistry } from '../lib/types';
 
 export function interpretProvider(config) {
   const cast = castProvider(config.types);
@@ -62,13 +63,23 @@ export function interpretProvider(config) {
     const fnDef = functions[name];
     const acceptableContext =  cast(context, fnDef.context.types);
 
-    return fnDef.fn(acceptableContext, args, handlers).then(output => {
+    return fnDef.fn(acceptableContext, args, handlers).then((output) => {
       // Validate that the function returned the type it said it would.
       // This isn't really required, but it keeps function developers honest.
       const returnType = getType(output);
       const expectedType = fnDef.type;
       if (expectedType && returnType !== expectedType) {
-        throw new Error(`Function ${name} should return '${expectedType}', actually returned '${returnType}'`);
+        throw new Error(`Function '${name}' should return '${expectedType}', actually returned '${returnType}'`);
+      }
+
+      // Validate the function output against the type definition's validate function
+      const type = typesRegistry.get(fnDef.type);
+      if (type && type.validate) {
+        try {
+          type.validate(output);
+        } catch (e) {
+          throw new Error(`Output of '${name}' is not a valid type '${fnDef.type}': ${e}`);
+        }
       }
 
       return output;
