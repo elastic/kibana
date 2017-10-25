@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export default {
+export const alterColumn = {
   name: 'alterColumn',
   type: 'datatable',
   help: 'Converts between core types, eg string, number, null, boolean, date',

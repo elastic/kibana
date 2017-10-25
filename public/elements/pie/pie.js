@@ -2,7 +2,7 @@ import { debounce } from 'lodash';
 import header from './header.png';
 import '../../lib/flot';
 
-export default {
+export const pie = {
   name: 'pie',
   displayName: 'Pie chart',
   help: 'An customizable element for making pie charts from your data',

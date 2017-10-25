@@ -1,5 +1,5 @@
 import { get } from 'lodash';
-import elasticLogo from '../../../common/functions/image/elastic_logo.js';
+import { elasticLogo } from '../../../common/functions/image/elastic_logo.js';
 import { isValid } from '../../../common/lib/dataurl';
 
 export const image = () => ({

@@ -1,6 +1,6 @@
 import { createStore } from 'redux';
-import middleware from './middleware';
-import getRootReducer from './reducers';
+import { middleware } from './middleware';
+import { getRootReducer } from './reducers';
 
 let store;
 

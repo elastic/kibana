@@ -1,4 +1,4 @@
 import { toProvider } from '../../../common/functions/to/to';
 import { typesRegistry } from '../../../common/lib/types';
 
-export default toProvider(typesRegistry);
+export const toFn = toProvider(typesRegistry);

@@ -52,4 +52,4 @@ const middlewares = [
 
 if (getWindow().__REDUX_DEVTOOLS_EXTENSION__) middlewares.push(getWindow().__REDUX_DEVTOOLS_EXTENSION__());
 
-export default compose(...middlewares);
+export const middleware = compose(...middlewares);

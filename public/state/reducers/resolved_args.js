@@ -50,7 +50,7 @@ function getFullPath(path) {
   return prepend(path, 'resolvedArgs');
 }
 
-export default handleActions({
+export const resolvedArgsReducer = handleActions({
   [actions.setLoading]: (transientState, { payload }) => {
     const { path, loading = true } = payload;
     const fullPath = getFullPath(path);

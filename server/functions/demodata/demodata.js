@@ -3,7 +3,7 @@ import moment from 'moment';
 import rows from './mock.json';
 import { queryDatatable } from '../../../common/lib/datatable/query';
 
-export default {
+export const demodata = {
   name: 'demodata',
   aliases: [],
   type: 'datatable',

@@ -1,4 +1,4 @@
-export default {
+export const image = {
   name: 'image',
   to: {
     render: (input) => {

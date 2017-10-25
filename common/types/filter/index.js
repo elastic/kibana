@@ -1,4 +1,4 @@
-export default {
+export const filter = {
   name: 'filter',
   from: {
     null: () => {

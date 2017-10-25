@@ -1,6 +1,6 @@
 import { includes } from 'lodash';
 
-export default function Arg(config) {
+export function Arg(config) {
   this.name = config.name;
   this.types = config.types || [];
   this.default = config.default;

@@ -1,7 +1,7 @@
 import { getState } from '../../state/store';
 import { getAssetById } from '../../state/selectors/assets';
 
-export default {
+export const asset = {
   name: 'asset',
   aliases: [],
   help: 'Use Canvas asset objects to provide argument values',

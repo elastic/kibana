@@ -6,7 +6,7 @@ import './markdown.less';
 
 const md = new Markdown();
 
-export default {
+export const markdown = {
   name: 'markdown',
   displayName: 'Markdown',
   help: 'Markup from Markdown',

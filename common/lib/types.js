@@ -1,5 +1,5 @@
 import { Registry } from '../../common/lib/registry';
-import Type from '../../common/types/type';
+import { Type } from '../../common/types/type';
 
 class TypesRegistry extends Registry {
   wrapper(obj) {

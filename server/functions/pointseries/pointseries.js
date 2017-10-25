@@ -43,7 +43,7 @@ function getType(columns, mathExpression) {
   return (symbolTypes.length === 1) ? symbolTypes[0] : 'string';
 }
 
-export default {
+export const pointseries = {
   name: 'pointseries',
   type: 'pointseries',
   help: 'Turn a datatable into a point series model. Dimensions are combined to create unique keys. Measures are then ' +

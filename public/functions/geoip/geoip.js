@@ -1,7 +1,7 @@
 import fetch from 'axios';
 
 // TODO: We should implement our own Elastic GeoIP service instead of using freegeoip.net
-export default {
+export const geoip = {
   name: 'geoip',
   aliases: [],
   type: 'location',

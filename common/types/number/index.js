@@ -1,4 +1,4 @@
-export default {
+export const number = {
   name: 'number',
   from: {
     null: () => 0,

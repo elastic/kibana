@@ -3,7 +3,7 @@ import fetch from 'axios';
 import { flatten, find } from 'lodash';
 import { buildBoolArray } from '../esdocs/lib/build_bool_array';
 
-export default {
+export const timelion = {
   name: 'timelion',
   context: {
     types: ['filter'],

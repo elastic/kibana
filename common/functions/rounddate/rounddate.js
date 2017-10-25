@@ -1,6 +1,6 @@
 import moment from 'moment';
 
-export default {
+export const rounddate = {
   name: 'rounddate',
   type: 'string',
   help: 'Round dates using a moment formatting string',

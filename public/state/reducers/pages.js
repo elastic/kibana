@@ -28,7 +28,7 @@ function clonePage(page) {
   };
 }
 
-export default handleActions({
+export const pagesReducer = handleActions({
   [actions.addPage]: (workpadState, { payload }) => {
     const withNewPage = addPage(workpadState, payload);
     return setPageIndex(withNewPage, withNewPage.pages.length - 1);

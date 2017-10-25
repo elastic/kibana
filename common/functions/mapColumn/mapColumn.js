@@ -1,4 +1,4 @@
-export default {
+export const mapColumn = {
   name: 'mapColumn',
   aliases: ['mc'], // midnight commander. So many times I've launched midnight commander instead of moving a file.
   type: 'datatable',

@@ -1,4 +1,4 @@
-export default {
+export const sleep = {
   name: 'sleep',
   help: 'Introduces a delay to expressions. This should not be used in production. If you need this, you did something wrong',
   args: {

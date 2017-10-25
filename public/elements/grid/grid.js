@@ -47,7 +47,7 @@ function getColor(palette, summary, val) {
   return null;
 }
 
-export default {
+export const grid = {
   name: 'grid',
   displayName: 'Grid',
   help: 'A colorable, sizable, grid for displaying a point series',

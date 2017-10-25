@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import { getDefaultWorkpad } from './defaults';
 
-export default (path) => {
+export const getInitialState = (path) => {
   const state = {
     app: {}, // Kibana stuff in here
     transient: {

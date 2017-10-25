@@ -1,7 +1,7 @@
 import { get, map, groupBy, sortBy, keyBy } from 'lodash';
 import chroma from 'chroma-js';
 
-export default {
+export const pie = {
   name: 'pie',
   aliases: [],
   type: 'render',

@@ -1,4 +1,4 @@
-export default {
+export const render = {
   name: 'render',
   from: {
     null: () => ({

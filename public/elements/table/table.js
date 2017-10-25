@@ -4,7 +4,7 @@ import { Datatable } from '../../components/datatable';
 import header from './header.png';
 import { get } from 'lodash';
 
-export default {
+export const table = {
   name: 'table',
   displayName: 'Data Table',
   help: 'A scrollable grid for displaying data in a tabluar format',

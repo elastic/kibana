@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import cheap from './cheap.json';
 
-export default {
+export const clientdata = {
   name: 'clientdata',
   aliases: [],
   type: 'datatable',

@@ -1,5 +1,5 @@
 import { palettes } from '../../lib/palettes';
-export default {
+export const palette = {
   name: 'palette',
   aliases: [],
   type: 'palette',

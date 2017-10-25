@@ -1,4 +1,4 @@
-export default {
+export const replace = {
   name: 'replace',
   type: 'string',
   help: 'Use a regular expression to replace parts of a string',

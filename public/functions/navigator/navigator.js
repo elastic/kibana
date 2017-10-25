@@ -1,4 +1,4 @@
-export default {
+export const navigator = {
   name: 'navigator',
   aliases: [],
   type: 'string',

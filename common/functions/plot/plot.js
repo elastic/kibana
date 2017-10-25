@@ -1,7 +1,7 @@
 import { groupBy, keyBy, get, set, map, sortBy } from 'lodash';
 import chroma from 'chroma-js';
 
-export default {
+export const plot = {
   name: 'plot',
   aliases: [],
   type: 'render',

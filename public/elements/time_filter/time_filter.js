@@ -5,7 +5,7 @@ import { TimeFilter } from './components/time_filter';
 import { fromExpression, toExpression } from '../../../common/lib/ast';
 import { get, set } from 'lodash';
 
-export default {
+export const timeFilter = {
   name: 'time_filter',
   displayName: 'Time Filter',
   help: 'Set a time window',

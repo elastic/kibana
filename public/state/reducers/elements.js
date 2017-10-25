@@ -43,7 +43,7 @@ function moveElementLayer(workpadState, pageId, elementId, movement) {
   return set(workpadState, ['pages', pageIndex, 'elements'], newElements);
 }
 
-export default handleActions({
+export const elementsReducer = handleActions({
   // TODO: This takes the entire element, which is not neccesary, it could just take the id.
   [actions.setExpression]: (workpadState, { payload }) => {
     const { expression, pageId, elementId } = payload;

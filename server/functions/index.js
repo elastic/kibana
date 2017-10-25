@@ -1,11 +1,11 @@
-import demodata from './demodata/demodata';
-import demoprices from './demoprices/demoprices';
-import escount from './escount/escount';
-import esdocs from './esdocs/esdocs';
-import kuler from './kuler/kuler';
-import pointseries from './pointseries/pointseries';
-import timelion from './timelion/timelion';
-import to from './to/to';
+import { demodata } from './demodata/demodata';
+import { demoprices } from './demoprices/demoprices';
+import { escount } from './escount/escount';
+import { esdocs } from './esdocs/esdocs';
+import { kuler } from './kuler/kuler';
+import { pointseries } from './pointseries/pointseries';
+import { timelion } from './timelion/timelion';
+import { toFn } from './to/to';
 
 export const serverFunctions = [
   esdocs,
@@ -15,5 +15,5 @@ export const serverFunctions = [
   pointseries,
   kuler,
   timelion,
-  to,
+  toFn,
 ];

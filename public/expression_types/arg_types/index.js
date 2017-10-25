@@ -11,7 +11,7 @@ import { textarea } from './textarea';
 import { string } from './string';
 import { font } from './font';
 
-export default [
+export const argTypeSpecs = [
   containerStyle,
   checkbox,
   datacolumn,

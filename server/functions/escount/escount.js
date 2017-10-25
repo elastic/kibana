@@ -1,6 +1,6 @@
 import { buildESRequest } from '../esdocs/lib/build_es_request';
 
-export default {
+export const escount = {
   name: 'escount',
   context: {
     types: ['filter'],

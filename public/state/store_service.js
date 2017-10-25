@@ -3,7 +3,7 @@ import { historyProvider } from '../lib/history_provider';
 import { onStart } from './on_start';
 import { uniqBy } from 'lodash';
 import { functionsRegistry } from '../../common/lib/functions';
-import getInitialState from './initial_state';
+import { getInitialState } from './initial_state';
 import { setStore } from './store';
 
 const app = uiModules.get('apps/canvas');

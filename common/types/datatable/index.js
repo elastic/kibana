@@ -1,6 +1,6 @@
 import { map } from 'lodash';
 
-export default {
+export const datatable = {
   name: 'datatable',
   from: {
     null: () => {

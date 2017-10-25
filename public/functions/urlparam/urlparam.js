@@ -1,6 +1,6 @@
 import { parse } from 'url';
 
-export default {
+export const urlparam = {
   name: 'urlparam',
   aliases: [],
   type: 'string',

@@ -1,6 +1,6 @@
 import inlineStyle from 'inline-style';
 
-export default {
+export const font = {
   name: 'font',
   aliases: [],
   type: 'style',

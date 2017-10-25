@@ -5,7 +5,7 @@ const getResultValues = (items, name, sorter) => {
   return sorter ? sortBy(vals, sorter) : vals.sort();
 };
 
-export default {
+export const grid = {
   name: 'grid',
   aliases: [],
   type: 'render',

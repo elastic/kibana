@@ -2,7 +2,7 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import header from './header.png';
 
-export default {
+export const image = {
   name: 'image',
   displayName: 'Image',
   help: 'A static image.',

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export default {
+export const sort = {
   name: 'sort',
   aliases: [],
   type: 'datatable',

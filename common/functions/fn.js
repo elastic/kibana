@@ -1,7 +1,7 @@
 import { each, includes } from 'lodash';
-import Arg from './arg';
+import { Arg } from './arg';
 
-export default function Fn(config) {
+export function Fn(config) {
   // Required
   this.name = config.name; // Name of function
 

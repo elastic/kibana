@@ -1,6 +1,6 @@
 import { parse } from '../../lib/dataurl';
 
-export default {
+export const dataurl = {
   name: 'dataurl',
   from: {
     null: () => '',

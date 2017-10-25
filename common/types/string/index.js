@@ -1,4 +1,4 @@
-export default {
+export const string = {
   name: 'string',
   from: {
     null: () => '',

@@ -6,7 +6,7 @@ import header from './header.png';
 import '../../lib/flot';
 import './plot.less';
 
-export default {
+export const plot = {
   name: 'plot',
   displayName: 'Coordinate plot',
   help: 'An customizable XY plot for making line, bar or dot charts from your data',

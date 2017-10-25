@@ -4,7 +4,7 @@ import { restoreHistory } from '../actions/history';
 import * as actions from '../actions/transient';
 import { removeElement } from '../actions/elements';
 
-export default handleActions({
+export const transientReducer = handleActions({
   // clear all the resolved args when restoring the history
   // TODO: we shouldn't need to reset the resolved args for history
   [restoreHistory]: (transientState) => set(transientState, 'resolvedArgs', {}),

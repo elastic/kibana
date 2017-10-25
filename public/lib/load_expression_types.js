@@ -1,8 +1,8 @@
-import expressionArgTypes from '../expression_types/arg_types';
-import expressionDatasources from '../expression_types/datasources';
-import expressionTransforms from '../expression_types/transforms';
-import expressionModels from '../expression_types/models';
-import expressionViews from '../expression_types/views';
+import { argTypeSpecs } from '../expression_types/arg_types';
+import { datasourceSpecs } from '../expression_types/datasources';
+import { modelSpecs } from '../expression_types/models';
+import { transformSpecs } from '../expression_types/transforms';
+import { viewSpecs } from '../expression_types/views';
 import {
   argTypeRegistry,
   datasourceRegistry,
@@ -35,8 +35,8 @@ function addExpressionType(typeName, expObj) {
 }
 
 // register default args, arg types, and expression types
-expressionArgTypes.forEach(expFn => addArgType(expFn()));
-expressionDatasources.forEach(expFn => addExpressionType('datasource', expFn()));
-expressionTransforms.forEach(expFn => addExpressionType('transform', expFn()));
-expressionModels.forEach(expFn => addExpressionType('model', expFn()));
-expressionViews.forEach(expFn => addExpressionType('view', expFn()));
+argTypeSpecs.forEach(expFn => addArgType(expFn()));
+datasourceSpecs.forEach(expFn => addExpressionType('datasource', expFn()));
+modelSpecs.forEach(expFn => addExpressionType('model', expFn()));
+transformSpecs.forEach(expFn => addExpressionType('transform', expFn()));
+viewSpecs.forEach(expFn => addExpressionType('view', expFn()));

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export default function flattenHit(hit, metaFields) {
+export function flattenHit(hit, metaFields) {
   const flat = {};
 
   metaFields = metaFields || ['_type', '_index'];

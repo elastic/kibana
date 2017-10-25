@@ -1,6 +1,6 @@
 import moment from 'moment';
 
-export default {
+export const date = {
   name: 'date',
   type: 'string',
   help: 'Returns the time, as a string, in the current execution environment',

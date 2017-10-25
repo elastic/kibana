@@ -1,5 +1,5 @@
 import { sort } from './sort';
 
-export default [
+export const transformSpecs = [
   sort,
 ];

@@ -1,4 +1,4 @@
-export default {
+export const containerStyle = {
   name: 'containerStyle',
   aliases: [],
   type: 'containerStyle',

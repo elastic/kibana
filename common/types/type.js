@@ -4,7 +4,7 @@ import { getType } from './get_type';
 
 // TODO: Currently all casting functions must be syncronous.
 
-export default function Type(config) {
+export function Type(config) {
   // Required
   this.name = config.name;
 

@@ -3,7 +3,7 @@ import { demoprices } from './demoprices';
 import { esdocs } from './esdocs';
 import { timelion } from './timelion';
 
-export default [
+export const datasourceSpecs = [
   demodata,
   demoprices,
   esdocs,

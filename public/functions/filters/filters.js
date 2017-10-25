@@ -4,7 +4,7 @@ import { getState } from '../../state/store';
 import { getGlobalFilterExpression } from '../../state/selectors/workpad';
 import { interpretAst } from '../../lib/interpreter';
 
-export default {
+export const filters = {
   name: 'filters',
   type: 'filter',
   help: 'Collect the workpad filters, usually to provide them to a data source',

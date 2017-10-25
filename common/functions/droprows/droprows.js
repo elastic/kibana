@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export default {
+export const droprows = {
   name: 'droprows',
   aliases: [],
   type: 'datatable',

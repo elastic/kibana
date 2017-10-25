@@ -1,9 +1,9 @@
-import flattenHit from './lib/flatten_hit';
+import { flattenHit } from './lib/flatten_hit';
 import { buildESRequest } from './lib/build_es_request';
 import { keys, map } from 'lodash';
 import { getESFieldTypes } from '../../routes/es_fields/get_es_field_types';
 
-export default {
+export const esdocs = {
   name: 'esdocs',
   context: {
     types: ['filter'],

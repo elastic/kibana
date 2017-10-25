@@ -3,7 +3,7 @@ import React from 'react';
 import header from './header.png';
 import { AdvancedFilter } from './components/advanced_filter';
 
-export default {
+export const advancedFilter = {
   name: 'advanced_filter',
   displayName: 'Advanced Filter',
   help: 'An input box for typing a Canvas filter expression',

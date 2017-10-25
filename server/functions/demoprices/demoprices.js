@@ -6,7 +6,7 @@ function mapRecord(row, i, adjustedTime) {
   return Object.assign({}, row, { _rowId: i, time: adjustedTime || row.time });
 }
 
-export default {
+export const demoprices = {
   name: 'demoprices',
   aliases: [],
   type: 'datatable',

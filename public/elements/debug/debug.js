@@ -2,7 +2,7 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import header from './header.png';
 
-export default {
+export const debug = {
   name: 'debug',
   displayName: 'Debug',
   help: 'Just dumps the configuration of the element',

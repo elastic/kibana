@@ -1,6 +1,6 @@
 import { noop } from 'lodash';
 
-export default {
+export const location = {
   name: 'location',
   type: 'location',
   help: 'Get the users location',

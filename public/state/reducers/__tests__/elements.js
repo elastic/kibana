@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import { get } from 'lodash';
-import actionCreator from './fixtures/action_creator';
-import reducer from '../elements';
+import { actionCreator } from './fixtures/action_creator';
+import { elementsReducer } from '../elements';
 
 describe('elements reducer', () => {
   let state;
@@ -34,7 +34,7 @@ describe('elements reducer', () => {
       pageId: 'page-1',
     });
 
-    const newState = reducer(state, action);
+    const newState = elementsReducer(state, action);
     const newElement = get(newState, ['pages', 0, 'elements', 1]);
 
     expect(newElement).to.eql(expected);

@@ -4,7 +4,7 @@ import { get } from 'lodash';
 import { createAsset, setAssetValue, removeAsset, setAssets, resetAssets } from '../actions/assets';
 import { getId } from '../../lib/get_id.js';
 
-export default handleActions({
+export const assetsReducer = handleActions({
   [createAsset]: (assetState, { payload }) => {
     const asset = {
       id: getId('asset'),

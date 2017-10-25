@@ -1,7 +1,7 @@
 import fetch from 'axios';
 import { map } from 'lodash';
 
-export default {
+export const kuler = {
   name: 'kuler',
   aliases: [],
   type: 'palette',

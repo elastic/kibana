@@ -1,7 +1,7 @@
 import expect from 'expect.js';
-import actionCreator from './fixtures/action_creator';
+import { actionCreator } from './fixtures/action_creator';
 import * as actions from '../../actions/resolved_args';
-import reducer from '../resolved_args';
+import { resolvedArgsReducer } from '../resolved_args';
 
 describe('resolved args reducer', () => {
   let state;
@@ -30,7 +30,7 @@ describe('resolved args reducer', () => {
         path: 'element-1.0',
       });
 
-      const newState = reducer(state, action);
+      const newState = resolvedArgsReducer(state, action);
       expect(newState.resolvedArgs['element-1']).to.eql([{
         state: 'pending',
         value: null,
@@ -43,7 +43,7 @@ describe('resolved args reducer', () => {
         path: ['element-1', 0],
       });
 
-      const newState = reducer(state, action);
+      const newState = resolvedArgsReducer(state, action);
       expect(newState.resolvedArgs['element-1']).to.eql([{
         state: 'pending',
         value: null,
@@ -60,7 +60,7 @@ describe('resolved args reducer', () => {
         value,
       });
 
-      const newState = reducer(state, action);
+      const newState = resolvedArgsReducer(state, action);
       expect(newState.resolvedArgs['element-1']).to.eql([{
         state: 'ready',
         value,
@@ -75,7 +75,7 @@ describe('resolved args reducer', () => {
         value: err,
       });
 
-      const newState = reducer(state, action);
+      const newState = resolvedArgsReducer(state, action);
       expect(newState.resolvedArgs['element-1']).to.eql([{
         state: 'error',
         value: null,
@@ -90,7 +90,7 @@ describe('resolved args reducer', () => {
         value: err,
       });
 
-      const newState = reducer(state, action);
+      const newState = resolvedArgsReducer(state, action);
       expect(newState.resolvedArgs['element-0'][0]).to.eql({
         state: 'error',
         value: 'testing',
@@ -105,7 +105,7 @@ describe('resolved args reducer', () => {
         path: 'element-0.1',
       });
 
-      const newState = reducer(state, action);
+      const newState = resolvedArgsReducer(state, action);
       expect(newState.resolvedArgs['element-0']).to.have.length(1);
       expect(newState.resolvedArgs['element-0']).to.eql([{
         state: 'ready',
@@ -119,7 +119,7 @@ describe('resolved args reducer', () => {
         path: 'element-0',
       });
 
-      const newState = reducer(state, action);
+      const newState = resolvedArgsReducer(state, action);
       expect(newState.resolvedArgs['element-0']).to.be(undefined);
     });
   });

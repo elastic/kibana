@@ -1,6 +1,6 @@
-import datatable from '../datatable';
+import { datatable } from '../datatable';
 
-export default {
+export const pointseries = {
   name: 'pointseries',
   from: {
     null: () => {

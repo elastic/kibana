@@ -1,14 +1,14 @@
-import datatable from './datatable';
-import pointseries from './pointseries';
-import number from './number';
-import string from './string';
-import dataurl from './dataurl';
-import image from './image';
-import filter from './filter';
-import render from './render';
-import style from './style';
-import location from './location';
-import boolean from './boolean';
+import { boolean } from './boolean';
+import { datatable } from './datatable';
+import { dataurl } from './dataurl';
+import { filter } from './filter';
+import { image } from './image';
+import { location } from './location';
+import { number } from './number';
+import { pointseries } from './pointseries';
+import { render } from './render';
+import { string } from './string';
+import { style } from './style';
 
 export const typeSpecs = [
   datatable,

@@ -1,5 +1,5 @@
 import { pointseries } from './point_series';
 
-export default [
+export const modelSpecs = [
   pointseries,
 ];

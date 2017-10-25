@@ -1,8 +1,8 @@
 import { includes } from 'lodash';
-import elasticLogo from './elastic_logo';
+import { elasticLogo } from './elastic_logo';
 import { fetchImage } from '../../lib/fetch_image';
 
-export default {
+export const image = {
   name: 'image',
   aliases: [],
   type: 'image',

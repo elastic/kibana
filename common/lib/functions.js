@@ -1,5 +1,5 @@
 import { Registry } from '../../common/lib/registry';
-import Fn from '../functions/fn';
+import { Fn } from '../functions/fn';
 
 class FunctionsRegistry extends Registry {
   wrapper(obj) {

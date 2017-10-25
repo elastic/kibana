@@ -1,7 +1,7 @@
 import { handleActions } from 'redux-actions';
 import { setWorkpad, sizeWorkpad, setColors, setName } from '../actions/workpad';
 
-export default handleActions({
+export const workpadReducer = handleActions({
   [setWorkpad]: (workpadState, { payload }) => {
     return payload;
   },

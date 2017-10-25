@@ -1,4 +1,4 @@
-export default {
+export const timefilterControl = {
   name: 'timefilterControl',
   aliases: [],
   type: 'render',

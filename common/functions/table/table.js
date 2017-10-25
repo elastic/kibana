@@ -1,4 +1,4 @@
-export default {
+export const table = {
   name: 'table',
   aliases: [],
   type: 'render',
