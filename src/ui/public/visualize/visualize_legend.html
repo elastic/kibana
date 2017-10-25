@@ -69,7 +69,7 @@
               aria-label="{{choice}}"
               aria-describedby="{{legendId}}ColorPickerDesc"
               aria-selected="{{choice === getColor(legendData.label)}}"
-              ng-click="setColor(legendData.label, choice, $event)"
+              ng-click="setColor(legendData.label, choice)"
               ng-class="choice == getColor(legendData.label) ? 'fa-circle-o' : 'fa-circle'"
               ng-style="{color: choice}" class="fa dot"
             >

@@ -50,16 +50,13 @@ uiModules.get('kibana')
         handler.unHighlight.call(el, handler.el);
       };
 
-      $scope.setColor = function (label, color, event) {
+      $scope.setColor = function (label, color) {
         const colors = $scope.uiState.get('vis.colors') || {};
         if (colors[label] === color) delete colors[label];
         else colors[label] = color;
         $scope.uiState.setSilent('vis.colors', null);
         $scope.uiState.set('vis.colors', colors);
         $scope.uiState.emit('colorChanged');
-        if (event) {
-          event.currentTarget.blur();
-        }
         refresh();
       };
 
