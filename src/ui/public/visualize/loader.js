@@ -47,11 +47,7 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
       return renderVis(el, savedObj, params);
     },
     getVisualizationList: () => {
-      return new Promise(resolve => {
-        savedVisualizations.find().then(result => {
-          resolve(result.hits);
-        });
-      });
+      return savedVisualizations.find().then(result => result.hits);
     },
   };
 };
