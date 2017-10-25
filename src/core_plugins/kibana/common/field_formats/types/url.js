@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { getHighlightHtml } from '../../highlight/highlight_html';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
+const whitelistUrlSchemes = ['http://', 'https://'];
 
 export function createUrlFormat(FieldFormat) {
   class UrlFormat extends FieldFormat {
@@ -78,6 +79,7 @@ export function createUrlFormat(FieldFormat) {
     ];
   }
 
+<<<<<<< HEAD
   UrlFormat.prototype._convert = {
     text: function (value) {
       return this._formatLabel(value);
@@ -105,6 +107,40 @@ export function createUrlFormat(FieldFormat) {
           } else {
             linkLabel = label;
           }
+=======
+UrlFormat.prototype._convert = {
+  text: function (value) {
+    return this._formatLabel(value);
+  },
+
+  html: function (rawValue, field, hit) {
+    const url = _.escape(this._formatUrl(rawValue));
+    const label = _.escape(this._formatLabel(rawValue, url));
+
+    switch (this.param('type')) {
+      case 'img':
+        // If the URL hasn't been formatted to become a meaningful label then the best we can do
+        // is tell screen readers where the image comes from.
+        const imageLabel =
+          label === url
+            ? `A dynamically-specified image located at ${url}`
+            : label;
+
+        return `<img src="${url}" alt="${imageLabel}">`;
+      default:
+        const inWhitelist = !!whitelistUrlSchemes.find(scheme => url.indexOf(scheme) === 0);
+        if (!inWhitelist) {
+          return url;
+        }
+
+        let linkLabel;
+
+        if (hit && hit.highlight && hit.highlight[field.name]) {
+          linkLabel = getHighlightHtml(label, hit.highlight[field.name]);
+        } else {
+          linkLabel = label;
+        }
+>>>>>>> Add url whitelist
 
           const linkTarget = this.param('openLinkInCurrentTab') ? '_self' : '_blank';
 
