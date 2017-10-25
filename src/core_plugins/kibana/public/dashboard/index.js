@@ -51,7 +51,7 @@ uiRoutes
             }
           })
           .catch(courier.redirectWhenMissing({
-            'dashboard' : DashboardConstants.LANDING_PAGE_PATH
+            'dashboard': DashboardConstants.LANDING_PAGE_PATH
           }));
       }
     }

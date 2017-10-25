@@ -10,7 +10,7 @@ describe(filename, function () {
 
   describe('carry', function () {
     it('should maintain the previous value until it changes', function () {
-      const seriesList = getSeriesList('',[
+      const seriesList = getSeriesList('', [
         [moment.utc('1980-01-01T00:00:00.000Z'), 5],
         [moment.utc('1981-01-01T00:00:00.000Z'), null],
         [moment.utc('1982-01-01T00:00:00.000Z'), 3.4],
@@ -27,7 +27,7 @@ describe(filename, function () {
 
   describe('nearest', function () {
     it('should use the closest temporal value to fill the null', function () {
-      const seriesList = getSeriesList('',[
+      const seriesList = getSeriesList('', [
         [moment.utc('1980-01-01T00:00:00.000Z'), 5],
         [moment.utc('1981-01-01T00:00:00.000Z'), null],
         [moment.utc('1981-05-01T00:00:00.000Z'), 3.4],
@@ -46,7 +46,7 @@ describe(filename, function () {
 
   describe('average', function () {
     it('should produce a smooth, straight line between points', function () {
-      const seriesList = getSeriesList('',[
+      const seriesList = getSeriesList('', [
         [moment.utc('1980-01-01T00:00:00.000Z'), 10],
         [moment.utc('1981-07-01T00:00:00.000Z'), null],
         [moment.utc('1982-01-01T00:00:00.000Z'), null],

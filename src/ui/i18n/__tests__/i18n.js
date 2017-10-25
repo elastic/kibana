@@ -27,7 +27,7 @@ describe('ui/i18n module', function () {
 
     describe('getTranslations', function () {
 
-      it('should return the translations for en locale as registered' , function () {
+      it('should return the translations for en locale as registered', function () {
         const languageTag = ['en'];
         const expectedTranslationJson = {
           'test_plugin_1-NO_SSL': 'Dont run the dev server using HTTPS',
@@ -38,7 +38,7 @@ describe('ui/i18n module', function () {
         return checkTranslations(expectedTranslationJson, languageTag, i18nObj);
       });
 
-      it('should return the translations for de locale as registered' , function () {
+      it('should return the translations for de locale as registered', function () {
         const languageTag = ['de'];
         const expectedTranslationJson = {
           'test_plugin_1-NO_SSL': 'Dont run the DE dev server using HTTPS',
@@ -47,7 +47,7 @@ describe('ui/i18n module', function () {
         return checkTranslations(expectedTranslationJson, languageTag, i18nObj);
       });
 
-      it('should pick the highest priority language for which translations exist' , function () {
+      it('should pick the highest priority language for which translations exist', function () {
         const languageTags = ['es-ES', 'de', 'en'];
         const expectedTranslations = {
           'test_plugin_1-NO_SSL': 'Dont run the DE dev server using HTTPS',
@@ -56,16 +56,16 @@ describe('ui/i18n module', function () {
         return checkTranslations(expectedTranslations, languageTags, i18nObj);
       });
 
-      it('should return translations for highest priority locale where best case match is chosen from registered locales' , function () {
+      it('should return translations for highest priority locale where best case match is chosen from registered locales', function () {
         const languageTags = ['es', 'de'];
         const expectedTranslations = {
           'test_plugin_1-NO_SSL': 'Dont run the es-ES dev server using HTTPS! I am regsitered afterwards!'
         };
-        i18nObj.registerTranslations(join(FIXTURES, 'translations', 'test_plugin_1','es-ES.json'));
+        i18nObj.registerTranslations(join(FIXTURES, 'translations', 'test_plugin_1', 'es-ES.json'));
         return checkTranslations(expectedTranslations, languageTags, i18nObj);
       });
 
-      it('should return an empty object for locales with no translations' , function () {
+      it('should return an empty object for locales with no translations', function () {
         const languageTags = ['ja-JA', 'fr'];
         return checkTranslations({}, languageTags, i18nObj);
       });
@@ -74,7 +74,7 @@ describe('ui/i18n module', function () {
 
     describe('getTranslationsForDefaultLocale', function () {
 
-      it('should return translations for default locale which is set to the en locale' , function () {
+      it('should return translations for default locale which is set to the en locale', function () {
         const i18nObj1 = new I18n('en');
         const expectedTranslations = {
           'test_plugin_1-NO_SSL': 'Dont run the dev server using HTTPS',
@@ -82,17 +82,17 @@ describe('ui/i18n module', function () {
           'test_plugin_1-NO_RUN_SERVER': 'Dont run the dev server',
           'test_plugin_1-HOME': 'Run along home now!'
         };
-        i18nObj1.registerTranslations(join(FIXTURES, 'translations', 'test_plugin_1','en.json'));
+        i18nObj1.registerTranslations(join(FIXTURES, 'translations', 'test_plugin_1', 'en.json'));
         return checkTranslationsForDefaultLocale(expectedTranslations, i18nObj1);
       });
 
-      it('should return translations for default locale which is set to the de locale' , function () {
+      it('should return translations for default locale which is set to the de locale', function () {
         const i18nObj1 = new I18n('de');
         const expectedTranslations = {
           'test_plugin_1-NO_SSL': 'Dont run the DE dev server using HTTPS',
           'test_plugin_1-DEV': 'Run the DE server with development mode defaults',
         };
-        i18nObj1.registerTranslations(join(FIXTURES, 'translations', 'test_plugin_1','de.json'));
+        i18nObj1.registerTranslations(join(FIXTURES, 'translations', 'test_plugin_1', 'de.json'));
         return checkTranslationsForDefaultLocale(expectedTranslations, i18nObj1);
       });
 
@@ -100,7 +100,7 @@ describe('ui/i18n module', function () {
 
     describe('getAllTranslations', function () {
 
-      it('should return all translations' , function () {
+      it('should return all translations', function () {
         const expectedTranslations = {
           de: {
             'test_plugin_1-NO_SSL': 'Dont run the DE dev server using HTTPS',
@@ -142,7 +142,7 @@ describe('ui/i18n module', function () {
 
     describe('getTranslations', function () {
 
-      it('should return the translations for en locale as registered' , function () {
+      it('should return the translations for en locale as registered', function () {
         const languageTag = ['en'];
         const expectedTranslationJson = {
           'test_plugin_1-NO_SSL': 'Dont run the dev server using HTTPS',
@@ -157,7 +157,7 @@ describe('ui/i18n module', function () {
         return checkTranslations(expectedTranslationJson, languageTag, i18nObj);
       });
 
-      it('should return the translations for de locale as registered' , function () {
+      it('should return the translations for de locale as registered', function () {
         const languageTag = ['de'];
         const expectedTranslationJson = {
           'test_plugin_1-NO_SSL': 'Dont run the DE dev server using HTTPS',
@@ -166,7 +166,7 @@ describe('ui/i18n module', function () {
         return checkTranslations(expectedTranslationJson, languageTag, i18nObj);
       });
 
-      it('should return the most recently registered translation for a key that has multiple translations' , function () {
+      it('should return the most recently registered translation for a key that has multiple translations', function () {
         i18nObj.registerTranslations(join(FIXTURES, 'translations', 'test_plugin_2', 'de.json'));
         const languageTag = ['de'];
         const expectedTranslationJson = {

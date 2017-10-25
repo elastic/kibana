@@ -23,7 +23,7 @@ describe(filename, () => {
     const expected = ['#000000', '#111111', '#222222', '#333333'];
     const fourLongList = {
       type: 'seriesList',
-      list: seriesList.list.slice(0,4)
+      list: seriesList.list.slice(0, 4)
     };
     return invoke(fn, [fourLongList, '#000:#333']).then((r) => {
       const colors = _.map(r.output.list, 'color');

@@ -225,7 +225,7 @@ uiModules.get('apps/management')
                 obj.id = doc._id;
                 return obj.applyESResp(doc)
                   .then(() => {
-                    return obj.save({ confirmOverwrite : !overwriteAll });
+                    return obj.save({ confirmOverwrite: !overwriteAll });
                   })
                   .catch((err) => {
                     if (err instanceof SavedObjectNotFound && err.savedObjectType === 'index-pattern') {
@@ -276,7 +276,7 @@ uiModules.get('apps/management')
                           return;
                         }
                         return obj.hydrateIndexPattern(newIndexId)
-                          .then(() => obj.save({ confirmOverwrite : !overwriteAll }));
+                          .then(() => obj.save({ confirmOverwrite: !overwriteAll }));
                       }
                     ).then(refreshData);
                   },
