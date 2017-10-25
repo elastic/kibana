@@ -14,8 +14,8 @@ export const ifFn = {
       help: 'The return value if true',
     },
     else: {
-      help: `The return value if false. If else is not specified, and the condition is false,
-then the input context to the function will be returned`,
+      help: 'The return value if false. If else is not specified, and the condition is false' +
+            'then the input context to the function will be returned',
     },
     // TODO: When we add "action" functions, this could be used a perform an action without
     passthru: {
