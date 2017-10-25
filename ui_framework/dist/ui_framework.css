@@ -884,7 +884,13 @@ main {
 .kuiContextMenuPanel {
   width: 100%;
   visibility: visible;
-  background-color: #ffffff; }
+  background-color: #ffffff;
+  /**
+   * 1. Override global focus style.
+   */ }
+  .kuiContextMenuPanel:focus {
+    box-shadow: none;
+    /* 1 */ }
   .kuiContextMenuPanel.kuiContextMenuPanel-txInLeft {
     pointer-events: none;
     -webkit-animation: kuiContextMenuPanelTxInLeft 250ms cubic-bezier(0.694, 0.0482, 0.335, 1);

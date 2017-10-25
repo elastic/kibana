@@ -71,11 +71,18 @@ export class KuiPopover extends Component {
     clearTimeout(this.closingTransitionTimeout);
   }
 
+  panelRef = node => {
+    if (this.props.isFocusable) {
+      this.panel = node;
+    }
+  };
+
   render() {
     const {
       anchorPosition,
       button,
       isOpen,
+      isFocusable,
       withTitle,
       children,
       className,
@@ -100,17 +107,26 @@ export class KuiPopover extends Component {
     let panel;
 
     if (isOpen || this.state.isClosing) {
+      let tabIndex;
+      let initialFocus;
+
+      if (isFocusable) {
+        tabIndex = '0';
+        initialFocus = () => this.panel;
+      }
+
       panel = (
         <FocusTrap
           focusTrapOptions={{
             clickOutsideDeactivates: true,
-            fallbackFocus: () => this.panel,
+            initialFocus,
           }}
         >
           <KuiPanelSimple
-            panelRef={node => { this.panel = node; }}
+            panelRef={this.panelRef}
             className={panelClasses}
             paddingSize={panelPaddingSize}
+            tabIndex={tabIndex}
             hasShadow
           >
             {children}
@@ -136,6 +152,7 @@ export class KuiPopover extends Component {
 
 KuiPopover.propTypes = {
   isOpen: PropTypes.bool,
+  isFocusable: PropTypes.bool,
   withTitle: PropTypes.bool,
   closePopover: PropTypes.func.isRequired,
   button: PropTypes.node.isRequired,
@@ -147,6 +164,7 @@ KuiPopover.propTypes = {
 
 KuiPopover.defaultProps = {
   isOpen: false,
+  isFocusable: false,
   anchorPosition: 'center',
   panelPaddingSize: 'm',
 };
