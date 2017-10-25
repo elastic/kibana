@@ -458,24 +458,39 @@ main {
   color: #0079a5 !important;
   /* 2 */
   background-color: transparent; }
+  .theme-dark .kuiButton--hollow {
+    color: #b7e2ea !important;
+    /* 2 */ }
   .kuiButton--hollow:enabled:hover {
     color: #006E8A !important;
     /* 1 */
     text-decoration: underline; }
+    .theme-dark .kuiButton--hollow:enabled:hover {
+      color: #def2f6 !important;
+      /* 2 */ }
   a.kuiButton--hollow:not(.kuiButton-isDisabled):hover {
     /* 1 */
     color: #006E8A !important;
     /* 1 */
     text-decoration: underline; }
+    .theme-dark a.kuiButton--hollow:not(.kuiButton-isDisabled):hover {
+      color: #def2f6 !important;
+      /* 2 */ }
   .kuiButton--hollow:enabled:active {
     color: #006E8A !important;
     /* 1 */
     text-decoration: underline; }
+    .theme-dark .kuiButton--hollow:enabled:active {
+      color: #def2f6 !important;
+      /* 2 */ }
   a.kuiButton--hollow:not(.kuiButton-isDisabled):active {
     /* 1 */
     color: #006E8A !important;
     /* 1 */
     text-decoration: underline; }
+    .theme-dark a.kuiButton--hollow:not(.kuiButton-isDisabled):active {
+      color: #def2f6 !important;
+      /* 2 */ }
 
 .kuiButton--secondary {
   color: #0079a5 !important;
