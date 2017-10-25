@@ -5,15 +5,16 @@ const { init } = require('./cli');
 const { getConfig } = require('./configs');
 const config = getConfig();
 
+const isBool = value => typeof value === 'boolean';
 const args = yargs
   .usage('$0 [args]')
   .option('multiple', {
-    default: false,
+    default: isBool(config.multiple) ? config.multiple : true,
     description: 'Backport to multiple versions',
     type: 'boolean'
   })
   .option('own', {
-    default: true,
+    default: isBool(config.own) ? config.own : true,
     description: 'Only show own commits',
     type: 'boolean'
   })
@@ -30,4 +31,6 @@ if (args.config) {
   return;
 }
 
-init(config, Object.assign(args, { cwd: process.cwd() }));
+const options = Object.assign({}, args, { cwd: process.cwd() });
+
+init(config, options);
