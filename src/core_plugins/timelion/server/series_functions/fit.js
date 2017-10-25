@@ -20,12 +20,7 @@ export default new Chainable('fit', {
   fn: function absFn(args) {
     return alter(args, function (eachSeries, mode) {
 
-      const noNulls = eachSeries.data.filter((item) => {
-        if (item[1] === 0 || item[1]) {
-          return true;
-        }
-        return false;
-      });
+      const noNulls = eachSeries.data.filter((item) => (item[1] === 0 || item[1]));
 
       if (noNulls.length === 0) {
         return eachSeries;
