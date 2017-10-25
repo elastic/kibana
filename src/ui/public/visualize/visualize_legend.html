@@ -19,7 +19,7 @@
       class="legend-value color"
     >
 
-      <div class="legend-value-container">
+      <div class="legend-value-container" ng-keydown="onLegendEntryKeydown($event, this)">
         <div
           kbn-accessible-click
           data-label="{{legendData.label}}"

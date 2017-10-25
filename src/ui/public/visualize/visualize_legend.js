@@ -3,7 +3,7 @@ import html from 'ui/visualize/visualize_legend.html';
 import { VislibLibDataProvider } from 'ui/vislib/lib/data';
 import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 import { uiModules } from 'ui/modules';
-import { htmlIdGenerator } from 'ui_framework/services';
+import { htmlIdGenerator, keyCodes } from 'ui_framework/services';
 
 
 uiModules.get('kibana')
@@ -91,6 +91,18 @@ uiModules.get('kibana')
       $scope.canFilter = function (legendData) {
         const filters = clickHandler({ point: legendData }, true) || [];
         return filters.length;
+      };
+
+      /**
+       * Keydown listener for a legend entry.
+       * This will close the details panel of this legend entry when pressing Escape.
+       */
+      $scope.onLegendEntryKeydown = function (event, scope) {
+        if (event.keyCode === keyCodes.ESCAPE) {
+          event.preventDefault();
+          event.stopPropagation();
+          scope.showDetails = false;
+        }
       };
 
       $scope.colors = [
