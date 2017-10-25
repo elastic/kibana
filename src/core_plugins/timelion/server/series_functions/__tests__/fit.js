@@ -8,6 +8,21 @@ import _ from 'lodash';
 
 describe(filename, function () {
 
+  it('should not filter out values that are zero', function () {
+    const seriesList = getSeriesList('',[
+      [moment.utc('1980-01-01T00:00:00.000Z'), 0],
+      [moment.utc('1981-01-01T00:00:00.000Z'), null],
+      [moment.utc('1982-01-01T00:00:00.000Z'), 0],
+      [moment.utc('1983-01-01T00:00:00.000Z'), 0],
+    ]);
+
+    return invoke(fn, [seriesList, 'carry']).then(function (r) {
+      expect(r.input[0].list[0].data[1][1]).to.equal(null);
+      expect(_.map(r.output.list[0].data, 1)).to.eql([0, 0, 0, 0]);
+      expect(r.output.list[0].data[1][0]).to.not.equal(r.output.list[0].data[0][0]);
+    });
+  });
+
   describe('carry', function () {
     it('should maintain the previous value until it changes', function () {
       const seriesList = getSeriesList('', [
