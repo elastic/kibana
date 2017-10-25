@@ -25,7 +25,7 @@ module.exports = {
   rules: {
     'block-scoped-var': 'error',
     camelcase: [ 'error', { properties: 'never' } ],
-    'comma-dangle': 'off',
+    'comma-dangle': [ 'error', 'always-multiline' ],
     'comma-style': [ 'error', 'last' ],
     'consistent-return': 'off',
     curly: [ 'error', 'multi-line' ],
