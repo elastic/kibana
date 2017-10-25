@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Home } from './home';
 import { FeatureDirectory } from './feature_directory';
 import { TutorialDirectory } from './tutorial_directory';
+import { Tutorial } from './tutorial';
 import {
   HashRouter as Router,
   Switch,
@@ -11,10 +12,21 @@ import {
 
 export function HomeApp({ addBasePath, directories, directoryCategories, tutorials }) {
   const renderTutorial = (props) => {
+    const tutorial = tutorials.byId[props.match.params.id];
+    if (!tutorial) {
+      return (
+        <div className="kuiView">
+          <div className="kuiViewContent kuiViewContent--constrainedWidth">
+            Unable to locate tutorial with id: {props.match.params.id}
+          </div>
+        </div>
+      );
+    }
+
     return (
-      <div>
-        {tutorials.byName[props.match.params.tutorial_name].longDescription}
-      </div>
+      <Tutorial
+        tutorial={tutorial}
+      />
     );
   };
 
@@ -22,7 +34,7 @@ export function HomeApp({ addBasePath, directories, directoryCategories, tutoria
     <Router>
       <Switch>
         <Route
-          path="/home/tutorial/:tutorial_name"
+          path="/home/tutorial/:id"
           render={renderTutorial}
         />
         <Route

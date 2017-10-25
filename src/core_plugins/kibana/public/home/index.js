@@ -7,7 +7,7 @@ import { TutorialsRegistryProvider } from 'ui/registry/tutorials';
 import { uiModules } from 'ui/modules';
 import {
   HomeApp
-} from './home_app';
+} from './components/home_app';
 
 const app = uiModules.get('apps/home', []);
 app.directive('homeApp', function (reactDirective) {
@@ -31,7 +31,7 @@ function getRoute() {
 routes.when('/home', getRoute());
 routes.when('/home/feature_directory', getRoute());
 routes.when('/home/tutorial_directory', getRoute());
-routes.when('/home/tutorial/:tutorial_name', getRoute());
+routes.when('/home/tutorial/:id', getRoute());
 
 KbnDirectoryRegistryProvider.register(() => {
   return {

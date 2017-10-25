@@ -9,6 +9,6 @@ import { uiRegistry } from 'ui/registry/_registry';
  */
 export const TutorialsRegistryProvider = uiRegistry({
   name: 'tutorials',
-  index: ['name'],
+  index: ['id'],
   order: ['name']
 });

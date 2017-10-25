@@ -58,7 +58,7 @@ export class TutorialDirectory extends React.Component {
           <Synopsis
             description={tutorial.shortDescription}
             title={tutorial.name}
-            url={this.props.addBasePath(`#/home/tutorial/${tutorial.name}`)}
+            url={this.props.addBasePath(`#/home/tutorial/${tutorial.id}`)}
           />
         </KuiFlexItem>
       );
