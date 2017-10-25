@@ -104,6 +104,7 @@ export default function ({ getService, getPageObjects }) {
 
       describe('visualization object edit menu', () => {
         it('opens a visualization when edit link is clicked', async () => {
+          await testSubjects.click('dashboardPanelToggleMenuIcon');
           await PageObjects.dashboard.clickDashboardPanelEditLink();
           await PageObjects.header.waitUntilLoadingHasFinished();
           const currentUrl = await remote.getCurrentUrl();

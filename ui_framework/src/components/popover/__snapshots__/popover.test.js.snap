@@ -42,6 +42,33 @@ exports[`KuiPopover props anchorPosition right is rendered 1`] = `
 </div>
 `;
 
+exports[`KuiPopover props isFocusable defaults to false 1`] = `
+<div
+  class="kuiPopover"
+>
+  <button />
+  <div>
+    <div
+      class="kuiPanelSimple kuiPanelSimple--paddingMedium kuiPanelSimple--shadow kuiPopover__panel"
+    />
+  </div>
+</div>
+`;
+
+exports[`KuiPopover props isFocusable renders true 1`] = `
+<div
+  class="kuiPopover"
+>
+  <button />
+  <div>
+    <div
+      class="kuiPanelSimple kuiPanelSimple--paddingMedium kuiPanelSimple--shadow kuiPopover__panel"
+      tabindex="0"
+    />
+  </div>
+</div>
+`;
+
 exports[`KuiPopover props isOpen defaults to false 1`] = `
 <div
   class="kuiPopover"

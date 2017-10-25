@@ -5,6 +5,13 @@
   visibility: visible;
   background-color: #ffffff;
 
+  /**
+   * 1. Override global focus style.
+   */
+  &:focus {
+    box-shadow: none; /* 1 */
+  }
+
   &.kuiContextMenuPanel-txInLeft {
     pointer-events: none;
     animation: kuiContextMenuPanelTxInLeft $kuiAnimSpeedNormal $kuiAnimSlightResistance;
