@@ -108,7 +108,7 @@ export function VislibAxisLabelsProvider() {
 
           if ((startPos + halfSize) < myPos && maxSize > (myPos + halfSize)) {
             startPos = myPos + halfSize;
-            return this.innerHTML;
+            return this.innerHTML || (new XMLSerializer()).serializeToString(this.firstChild);
           } else {
             d3.select(this.parentNode).remove();
           }
