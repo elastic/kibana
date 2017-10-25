@@ -14,7 +14,7 @@ uiModules
   return {
     restrict: 'E',
     require: '?renderCounter',
-    scope : {
+    scope: {
       vis: '=',
       visData: '=',
       uiState: '=?',

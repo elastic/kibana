@@ -24,7 +24,7 @@ function sortSeries(visData, model) {
     });
     const direction = item.terms_direction || 'desc';
     if (item.terms_order_by === '_term') return acc.concat(itemSeries);
-    return acc.concat(sortByDirection(itemSeries, direction , s => getLastValue(s.data)));
+    return acc.concat(sortByDirection(itemSeries, direction, s => getLastValue(s.data)));
   }, []);
 }
 

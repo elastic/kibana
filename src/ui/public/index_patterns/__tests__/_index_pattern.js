@@ -457,7 +457,7 @@ describe('index pattern', function () {
       expect(notif).to.have.property('type', 'warning');
       expect(notif.content).to.match(MARKDOWN_LINK_RE);
 
-      const [,text,url] = notif.content.match(MARKDOWN_LINK_RE);
+      const [, text, url] = notif.content.match(MARKDOWN_LINK_RE);
       expect(text).to.contain(indexPattern.title);
       expect(url).to.contain(indexPattern.id);
       expect(url).to.contain('management/kibana/indices');

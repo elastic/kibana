@@ -7,7 +7,7 @@ export default function dateHistogram(req, panel, series) {
     const { timeField, interval } = getIntervalAndTimefield(panel, series);
     const { intervalString } = getBucketSize(req, interval);
     const { from, to }  = offsetTime(req, series.offset_time);
-    const { timezone:time_zone } = req.payload.timerange;
+    const { timezone: time_zone } = req.payload.timerange;
 
     set(doc, `aggs.${series.id}.aggs.timeseries.date_histogram`, {
       field: timeField,

@@ -42,7 +42,7 @@ describe('Boolean Format', function () {
       expected: 'true'
     },
     {
-      input: ' True  ',//should handle trailing and mixed case
+      input: ' True  ', //should handle trailing and mixed case
       expected: 'true'
     }
   ].forEach((test)=> {
