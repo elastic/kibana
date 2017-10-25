@@ -18,12 +18,30 @@ export class PanelOptionsMenu extends React.Component {
 
   closePopover = () => this.setState({ isPopoverOpen: false });
 
+  onEditPanel = () => {
+    this.closePopover();
+    this.props.onEditPanel();
+  };
+
+  onDeletePanel = () => {
+    this.closePopover();
+
+    if (this.props.onDeletePanel) {
+      this.props.onDeletePanel();
+    }
+  };
+
+  onToggleExpandPanel = () => {
+    this.closePopover();
+    this.props.onToggleExpandPanel();
+  };
+
   renderItems() {
     const items = [(
       <KuiContextMenuItem
         key="0"
         data-test-subj="dashboardPanelEditLink"
-        onClick={this.props.onEditPanel}
+        onClick={this.onEditPanel}
         icon={(
           <span
             aria-hidden="true"
@@ -37,7 +55,7 @@ export class PanelOptionsMenu extends React.Component {
       <KuiContextMenuItem
         key="1"
         data-test-subj="dashboardPanelExpandIcon"
-        onClick={this.props.onToggleExpandPanel}
+        onClick={this.onToggleExpandPanel}
         icon={(
           <span
             aria-hidden="true"
@@ -54,7 +72,7 @@ export class PanelOptionsMenu extends React.Component {
         <KuiContextMenuItem
           key="2"
           data-test-subj="dashboardPanelRemoveIcon"
-          onClick={this.props.onDeletePanel}
+          onClick={this.onDeletePanel}
           icon={(
             <span
               aria-hidden="true"
