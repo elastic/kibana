@@ -128,7 +128,7 @@ UrlFormat.prototype._convert = {
 
         return `<img src="${url}" alt="${imageLabel}">`;
       default:
-        const inWhitelist = !!whitelistUrlSchemes.find(scheme => url.indexOf(scheme) === 0);
+        const inWhitelist = whitelistUrlSchemes.some(scheme => url.indexOf(scheme) === 0);
         if (!inWhitelist) {
           return url;
         }
