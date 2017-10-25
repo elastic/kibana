@@ -132,14 +132,14 @@ describe('timepicker directive', function () {
     });
 
     it('should highlight the right mode', function () {
-      expect($elem.find('.kbn-timepicker-modes .active').text().trim()).to.be('quick');
+      expect($elem.find('.kbn-timepicker-modes .active').text().trim()).to.be('Quick');
 
       // Each of the 3 modes
       const modes = ['absolute', 'relative', 'quick'];
       _.each(modes, function (mode) {
         $scope.setMode(mode);
         $scope.$digest();
-        expect($elem.find('.kbn-timepicker-modes .active').text().trim()).to.be(mode);
+        expect($elem.find('.kbn-timepicker-modes .active').text().trim().toLowerCase()).to.be(mode);
       });
     });
   });
