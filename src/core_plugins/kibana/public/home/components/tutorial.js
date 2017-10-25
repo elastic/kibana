@@ -45,9 +45,15 @@ export class Tutorial extends React.Component {
     return (
       <div className="kuiView">
         <div className="kuiViewContent kuiViewContent--constrainedWidth">
+
           <h2 className="kuiTitle">
             {this.props.tutorial.name}
           </h2>
+
+          <p className="kuiText kuiSubduedText kuiVerticalRhythm kuiVerticalRhythmSmall">
+            {this.props.tutorial.longDescription}
+          </p>
+
           <KuiTabs>
             {this.renderTabs()}
           </KuiTabs>
