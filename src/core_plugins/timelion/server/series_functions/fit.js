@@ -27,6 +27,10 @@ export default new Chainable('fit', {
         return false;
       });
 
+      if (noNulls.length === 0) {
+        return eachSeries;
+      }
+
       eachSeries.data = fitFunctions[mode](noNulls, eachSeries.data);
       return eachSeries;
     });

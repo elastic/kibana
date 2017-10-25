@@ -23,6 +23,19 @@ describe(filename, function () {
     });
   });
 
+  it('should return original series when all values are null', function () {
+    const seriesList = getSeriesList('',[
+      [moment.utc('1980-01-01T00:00:00.000Z'), null],
+      [moment.utc('1981-01-01T00:00:00.000Z'), null],
+      [moment.utc('1982-01-01T00:00:00.000Z'), null],
+      [moment.utc('1983-01-01T00:00:00.000Z'), null],
+    ]);
+
+    return invoke(fn, [seriesList, 'carry']).then(function (r) {
+      expect(_.map(r.output.list[0].data, 1)).to.eql([null, null, null, null]);
+    });
+  });
+
   describe('carry', function () {
     it('should maintain the previous value until it changes', function () {
       const seriesList = getSeriesList('', [
