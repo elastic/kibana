@@ -5,7 +5,7 @@ export default function buildRequest(config, tlConfig) {
 
   const bool = { must: [] };
 
-  const timeFilter = { range:{} };
+  const timeFilter = { range: {} };
   timeFilter.range[config.timefield] = { gte: tlConfig.time.from, lte: tlConfig.time.to, format: 'epoch_millis' };
   bool.must.push(timeFilter);
 
@@ -19,7 +19,7 @@ export default function buildRequest(config, tlConfig) {
       meta: { type: 'split' },
       filters: {
         filters: _.chain(config.q).map(function (q) {
-          return [q, { query_string:{ query: q } }];
+          return [q, { query_string: { query: q } }];
         }).zipObject().value(),
       },
       aggs: {}

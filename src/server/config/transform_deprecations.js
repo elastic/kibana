@@ -1,4 +1,4 @@
-import _ , { partial } from 'lodash';
+import _, { partial } from 'lodash';
 import { createTransform, Deprecations } from '../../deprecation';
 
 const { rename, unused } = Deprecations;

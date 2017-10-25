@@ -103,7 +103,7 @@ describe('plugins/elasticsearch', () => {
 
       // call the server extension
       const reply = sinon.stub();
-      const [,handler] = server.ext.firstCall.args;
+      const [, handler] = server.ext.firstCall.args;
       handler({}, reply);
 
       // ensure that the handler called reply and unregistered the time
