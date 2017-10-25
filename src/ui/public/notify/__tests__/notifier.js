@@ -14,7 +14,7 @@ describe('Notifier', function () {
   const customText = 'fooMarkup';
   const customParams = {
     title: 'fooTitle',
-    actions:[{
+    actions: [{
       text: 'Cancel',
       callback: sinon.spy()
     }, {
@@ -449,7 +449,7 @@ describe('Directive Notification', function () {
   };
   const customParams = {
     title: 'fooTitle',
-    actions:[{
+    actions: [{
       text: 'Cancel',
       callback: sinon.spy()
     }, {

@@ -4,7 +4,7 @@ export default (row, metric) => {
   // Extended Stats
   if (_.includes(extendStatsTypes, metric.type)) {
     const isStdDeviation = /^std_deviation/.test(metric.type);
-    const modeIsBounds = ~['upper','lower'].indexOf(metric.mode);
+    const modeIsBounds = ~['upper', 'lower'].indexOf(metric.mode);
     if (isStdDeviation && modeIsBounds) {
       return _.get(row, `${metric.id}.std_deviation_bounds.${metric.mode}`);
     }
