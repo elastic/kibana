@@ -35,7 +35,6 @@ uiModules.get('kibana/table_vis')
          * set the uislider value to the new value.
          */
         $scope.$watch('vis.params.minFontSize', (val) => {
-          console.log('set value');
           slider.noUiSlider.set([val, null]);
         });
         $scope.$watch('vis.params.maxFontSize', (val) => {
