@@ -20,16 +20,16 @@ const CONFIRM_MODAL_BUTTONS = [
 ];
 
 export function KuiConfirmModal({
-    children,
-    title,
-    onCancel,
-    onConfirm,
-    cancelButtonText,
-    confirmButtonText,
-    className,
-    defaultFocusedButton,
-    ...rest,
-  }) {
+  children,
+  title,
+  onCancel,
+  onConfirm,
+  cancelButtonText,
+  confirmButtonText,
+  className,
+  defaultFocusedButton,
+  ...rest,
+}) {
   const classes = classnames('kuiModal--confirmation', className);
 
   let modalTitle;
@@ -94,7 +94,7 @@ KuiConfirmModal.propTypes = {
   title: PropTypes.string,
   cancelButtonText: PropTypes.string,
   confirmButtonText: PropTypes.string,
-  onCancel: PropTypes.func,
+  onCancel: PropTypes.func.isRequired,
   onConfirm: PropTypes.func,
   className: PropTypes.string,
   defaultFocusedButton: PropTypes.oneOf(CONFIRM_MODAL_BUTTONS)

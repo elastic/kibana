@@ -145,6 +145,7 @@ export class ChangeIndexModal extends React.Component {
           aria-label="Index does not exist"
           className="managementChangeIndexModal"
           onKeyDown={this.onKeyDown}
+          onClose={this.props.onClose}
         >
           <KuiModalHeader>
             <KuiModalHeaderTitle>
