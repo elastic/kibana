@@ -81,7 +81,7 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
               return wrapperSpan.outerHTML;
             }
           },
-          colors: ['#01A4A4', '#C66', '#D0D102', '#616161', '#00A1CB', '#32742C', '#F18D05', '#113F8C', '#61AE24', '#D70060']
+          colors: ['#00B3A4','#3185FC','#DB1374','#490092','#FEB6DB','#F98510','#E6C220','#BFA180','#920000','#461A0A']
         };
 
 
