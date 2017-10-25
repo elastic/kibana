@@ -12,6 +12,14 @@ export function VislibAxisLabelsProvider() {
       selection.call(this.draw());
     }
 
+    // IE11 does not support innerHTML on svg elements, this is a workaround
+    _xmlSerialize(svgNode) {
+      if (!this._xmlSerializerInstance) {
+        this._xmlSerializerInstance = new XMLSerializer();
+      }
+      return this._xmlSerializerInstance.serializeToString(svgNode);
+    }
+
     rotateAxisLabels() {
       const config = this.axisConfig;
       return function (selection) {
@@ -108,7 +116,7 @@ export function VislibAxisLabelsProvider() {
 
           if ((startPos + halfSize) < myPos && maxSize > (myPos + halfSize)) {
             startPos = myPos + halfSize;
-            return this.innerHTML || (new XMLSerializer()).serializeToString(this.firstChild);
+            return this.innerHTML || self._xmlSerialize(this.firstChild);
           } else {
             d3.select(this.parentNode).remove();
           }
