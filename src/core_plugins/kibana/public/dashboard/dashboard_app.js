@@ -108,6 +108,10 @@ app.directive('dashboardApp', function ($injector) {
         dirty: !dash.id
       };
 
+      this.getSharingTitle = () => {
+        return dash.title;
+      };
+
       dashboardStateManager.registerChangeListener(status => {
         this.appStatus.dirty = status.dirty || !dash.id;
         updateState();
