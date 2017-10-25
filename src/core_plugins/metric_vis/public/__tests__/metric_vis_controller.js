@@ -9,9 +9,29 @@ describe('metric vis', function () {
     return value.toFixed(3);
   };
 
+  const aggConfig = {
+    fieldFormatter: () => {
+      return formatter;
+    },
+    schema: {}
+  };
+
   beforeEach(ngMock.module('kibana/metric_vis'));
   beforeEach(ngMock.inject(function ($rootScope, $controller) {
     $scope = $rootScope.$new();
+    $scope.vis = {
+      params: {
+        metric: {
+          colorsRange: [
+            { from: 0, to: 1000 }
+          ],
+          style: {
+
+          }
+        }
+      }
+    };
+
     const $element = $('<div>');
     $controller('KbnMetricVisController', { $scope, $element });
     $scope.$digest();
@@ -20,8 +40,8 @@ describe('metric vis', function () {
   it('should set the metric label and value', function () {
     $scope.processTableGroups({
       tables: [{
-        columns: [{ title: 'Count' }],
-        rows: [[ { toString: () => formatter(4301021) } ]]
+        columns: [{ title: 'Count', aggConfig: { ...aggConfig, makeLabel: () => 'Count' } }],
+        rows: [[ 4301021 ]]
       }]
     });
 
@@ -34,10 +54,10 @@ describe('metric vis', function () {
     $scope.processTableGroups({
       tables: [{
         columns: [
-          { title: '1st percentile of bytes' },
-          { title: '99th percentile of bytes' }
+          { aggConfig: { ...aggConfig, makeLabel: () => '1st percentile of bytes' } },
+          { aggConfig: { ...aggConfig, makeLabel: () => '99th percentile of bytes' } }
         ],
-        rows: [[ { toString: () => formatter(182) }, { toString: () => formatter(445842.4634666484) } ]]
+        rows: [[ 182, 445842.4634666484 ]]
       }]
     });
 

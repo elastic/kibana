@@ -8,6 +8,7 @@ import MetricVisProvider from '../metric_vis';
 
 describe('metric_vis', () => {
   let setup = null;
+  let vis;
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject((Private, $rootScope) => {
@@ -21,15 +22,16 @@ describe('metric_vis', () => {
         labelTemplate: 'ip[{{value}}]'
       });
 
-      const vis = new Vis(indexPattern, {
+      vis = new Vis(indexPattern, {
         type: 'metric',
         aggs: [{ id: '1', type: 'top_hits', schema: 'metric', params: { field: 'ip' } }],
       });
 
       const $el = $('<div>');
-      const renderbot = metricVisType.createRenderbot(vis, $el);
+      const Controller = metricVisType.visualization;
+      const controller = new Controller($el, vis);
       const render = (esResponse) => {
-        renderbot.render(esResponse);
+        controller.render(esResponse);
         $rootScope.$digest();
       };
 
@@ -42,12 +44,10 @@ describe('metric_vis', () => {
 
     const ip = '235.195.237.208';
     render({
-      hits: { total: 0, hits: [] },
-      aggregations: {
-        '1': {
-          hits: { total: 1, hits: [{ _source: { ip } }] }
-        }
-      }
+      tables: [{
+        columns: [{ title: 'ip', aggConfig: vis.aggs[0] }],
+        rows: [[ ip ]]
+      }]
     });
 
     const $link = $el

@@ -73,7 +73,7 @@ module.controller('KbnMetricVisController', function ($scope, $element) {
       table.columns.forEach(function (column, i) {
         const aggConfig = column.aggConfig;
 
-        if (aggConfig.schema.group === 'buckets') {
+        if (aggConfig && aggConfig.schema.group === 'buckets') {
           bucketAgg = aggConfig;
           return;
         }
