@@ -4,7 +4,7 @@ import _ from 'lodash';
 import $ from 'jquery';
 import moment from 'moment-timezone';
 import observeResize from 'plugins/timelion/lib/observe_resize';
-import { calculateInterval } from '../../../common/lib';
+import { calculateInterval, DEFAULT_TIME_FORMAT } from '../../../common/lib';
 
 const SET_LEGEND_NUMBERS_DELAY = 50;
 
@@ -29,6 +29,7 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
         $scope.search = $scope.search || _.noop;
 
         let legendValueNumbers;
+        let legendTable;
         const debouncedSetLegendNumbers = _.debounce(setLegendNumbers, SET_LEGEND_NUMBERS_DELAY, {
           maxWait: SET_LEGEND_NUMBERS_DELAY,
           leading: true,
@@ -141,6 +142,11 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
           let i;
           let j;
           const dataset = plot.getData();
+          if (_.get(dataset, '[0]._global.legend.showTime', true)) {
+            legendTable.find('caption').remove();
+            const formattedTime = moment(pos.x).format(_.get(dataset, '[0]._global.legend.timeFormat', DEFAULT_TIME_FORMAT));
+            legendTable.append(`<caption>${formattedTime}</caption>`);
+          }
           for (i = 0; i < dataset.length; ++i) {
 
             const series = dataset[i];
@@ -173,6 +179,7 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
         }
 
         function clearLegendNumbers() {
+          legendTable.find('caption').remove();
           _.each(legendValueNumbers, function (num) {
             $(num).empty();
           });
@@ -274,6 +281,8 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
           _.each(canvasElem.find('.ngLegendValue'), function (elem) {
             $compile(elem)(legendScope);
           });
+
+          legendTable = canvasElem.find('div.legend table');
         }
         $scope.$watch('chart', drawPlot);
       }
