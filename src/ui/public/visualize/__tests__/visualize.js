@@ -44,7 +44,7 @@ describe('visualize directive', function () {
     $rootScope.esResponse = esResponse;
     $rootScope.uiState = require('fixtures/mock_ui_state');
     $rootScope.appState = appState;
-    $rootScope.appState.vis = vis.getState();
+    $rootScope.appState.visState = vis.getState();
     $rootScope.searchSource = searchSource;
     $rootScope.savedObject = {
       vis: vis,
@@ -98,9 +98,9 @@ describe('visualize directive', function () {
 
   it('updates the appState in editor mode on update event', () => {
     $scope.editorMode = true;
-    $scope.appState.vis = {};
+    $scope.appState.visState = {};
     $scope.vis.emit('update');
-    expect($scope.appState.vis).to.not.equal({});
+    expect($scope.appState.visState).to.not.equal({});
   });
 
   it('sets force flag on force event', () => {
