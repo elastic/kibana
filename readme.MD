@@ -35,6 +35,12 @@ You need to update the config file with your Github username and a Github Access
   // Github username, eg. kimchy
   "username": "",
 
+  // Only allow picking own commits to backport
+  "own": true,
+
+  // Allow picking multiple versions to backporting to
+  "multiple": true,
+
   // Repositories and the versions that will be available in backport cli
   "repositories": [
     {
