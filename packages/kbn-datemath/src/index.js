@@ -7,11 +7,16 @@ const unitsAsc = _.sortBy(units, function (unit) {
 });
 const unitsDesc = unitsAsc.reverse();
 
-/* This is a simplified version of elasticsearch's date parser */
-function parse(text, roundUp) {
+/*
+ * This is a simplified version of elasticsearch's date parser.
+ * If you pass in a momentjs instance as the third parameter the calculation
+ * will be done using this (and its locale settings) instead of the one bundled
+ * with this library.
+ */
+function parse(text, roundUp, momentInstance = moment) {
   if (!text) return undefined;
-  if (moment.isMoment(text)) return text;
-  if (_.isDate(text)) return moment(text);
+  if (momentInstance.isMoment(text)) return text;
+  if (_.isDate(text)) return momentInstance(text);
 
   let time;
   let mathString = '';
@@ -19,7 +24,7 @@ function parse(text, roundUp) {
   let parseString;
 
   if (text.substring(0, 3) === 'now') {
-    time = moment();
+    time = momentInstance();
     mathString = text.substring('now'.length);
   } else {
     index = text.indexOf('||');
@@ -31,7 +36,7 @@ function parse(text, roundUp) {
       mathString = text.substring(index + 2);
     }
     // We're going to just require ISO8601 timestamps, k?
-    time = moment(parseString);
+    time = momentInstance(parseString);
   }
 
   if (!mathString.length) {

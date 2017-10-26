@@ -4,6 +4,20 @@ import moment from 'moment';
 import sinon from 'sinon';
 import expect from 'expect.js';
 
+/**
+ * Require a new instance of the moment library, bypassing the require cache.
+ * This is needed, since we are trying to test whether or not this library works
+ * when passing in a different configured moment instance. If we would change
+ * the locales on the imported moment, it would automatically apply
+ * to the source code, even without passing it in to the method, since they share
+ * the same global state. This method avoids this, by loading a separate instance
+ * of moment, by deleting the require cache and require the library again.
+ */
+function momentClone() {
+  delete require.cache[require.resolve('moment')];
+  return require('moment');
+}
+
 describe('dateMath', function () {
   // Test each of these intervals when testing relative time
   const spans = ['s', 'm', 'h', 'd', 'w', 'M', 'y', 'ms'];
@@ -182,6 +196,33 @@ describe('dateMath', function () {
     it('should subtract 555ms, rounded to the nearest second', function () {
       const val = dateMath.parse('now-555ms/s').format(format);
       expect(val).to.eql(now.subtract(555, 'ms').startOf('s').format(format));
+    });
+
+    it('should round weeks to Sunday by default', function () {
+      const val = dateMath.parse('now-1w/w');
+      expect(val.isoWeekday()).to.eql(7);
+    });
+
+    it('should round weeks based on the passed moment locale start of week setting', function () {
+      const m = momentClone();
+      // Define a locale, that has Tuesday as beginning of the week
+      m.defineLocale('x-test', {
+        week: { dow: 2 }
+      });
+      const val = dateMath.parse('now-1w/w', false, m);
+      expect(val.isoWeekday()).to.eql(2);
+    });
+
+    it('should round up weeks based on the passed moment locale start of week setting', function () {
+      const m = momentClone();
+      // Define a locale, that has Tuesday as beginning of the week
+      m.defineLocale('x-test', {
+        week: { dow: 3 }
+      });
+      const val = dateMath.parse('now-1w/w', true, m);
+      // The end of the range (rounding up) should be the last day of the week (so one day before)
+      // our start of the week, that's why 2 - 1
+      expect(val.isoWeekday()).to.eql(3 - 1);
     });
   });
 });
