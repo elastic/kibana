@@ -185,9 +185,17 @@
   color: $kuiLinkColor !important; /* 2 */
   background-color: transparent;
 
+  @include darkTheme {
+    color: $kuiLinkColor--darkTheme !important; /* 2 */
+  }
+
   @include kuiButtonHoverAndActive {
     color: $kuiLinkHoverColor !important; /* 1 */
     text-decoration: underline;
+
+    @include darkTheme {
+      color: $kuiLinkColor-isHover--darkTheme !important; /* 2 */
+    }
   }
 }
 
