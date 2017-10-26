@@ -4,10 +4,11 @@ import { getAssetById } from '../../state/selectors/assets';
 export const asset = {
   name: 'asset',
   aliases: [],
-  help: 'Use Canvas workpad asset objects to provide argument values',
+  help: 'Use Canvas workpad asset objects to provide argument values. Usually images.',
   args: {
     _: {
       types: ['string'],
+      help: 'The ID of the asset value to return',
       multi: false,
     },
   },
