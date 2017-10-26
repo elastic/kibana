@@ -5,7 +5,7 @@ export const plot = {
   name: 'plot',
   aliases: [],
   type: 'render',
-  help: 'Produces a plot chart',
+  help: 'Configure a plot element',
   context: {
     types: [
       'pointseries',

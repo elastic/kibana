@@ -2,7 +2,7 @@ export const render = {
   name: 'render',
   aliases: [],
   type: 'render',
-  help: 'Render an object with its default renderer, if one exists',
+  help: 'Render an input as a specific element and set element level options such as styling',
   context: {
     types: [
       'render',

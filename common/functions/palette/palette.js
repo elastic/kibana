@@ -4,7 +4,9 @@ export const palette = {
   aliases: [],
   type: 'palette',
   help: 'Create a color palette',
-  context: {},
+  context: {
+    types: ['null'],
+  },
   args: {
     _: {
       multi: true,

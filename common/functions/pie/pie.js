@@ -5,7 +5,7 @@ export const pie = {
   name: 'pie',
   aliases: [],
   type: 'render',
-  help: 'Produces a pie chart',
+  help: 'Configure a pie chart element',
   context: {
     types: [
       'pointseries',
