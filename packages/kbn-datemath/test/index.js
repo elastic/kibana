@@ -221,7 +221,7 @@ describe('dateMath', function () {
       });
       const val = dateMath.parse('now-1w/w', true, m);
       // The end of the range (rounding up) should be the last day of the week (so one day before)
-      // our start of the week, that's why 2 - 1
+      // our start of the week, that's why 3 - 1
       expect(val.isoWeekday()).to.eql(3 - 1);
     });
   });
