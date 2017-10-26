@@ -11,6 +11,7 @@ export function DashboardViewport({
   return (
     <div
       data-shared-items-count={panelCount}
+      data-shared-items-container
     >
       <DashboardGridContainer
         getEmbeddableHandler={getEmbeddableHandler}
