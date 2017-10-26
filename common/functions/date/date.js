@@ -10,7 +10,7 @@ export const date = {
       types: ['string'],
       default: '"YYYY-MM-DDTHH:mm:ssZ"',
       'aliases': ['format'],
-      help: 'The momentJS format for the output',
+      help: 'The momentJS format for the output (See https://momentjs.com/docs/#/displaying/)',
     },
   },
   fn: (context, args) => {
