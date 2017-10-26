@@ -2,35 +2,39 @@ export const mapColumn = {
   name: 'mapColumn',
   aliases: ['mc'], // midnight commander. So many times I've launched midnight commander instead of moving a file.
   type: 'datatable',
-  help: 'Replace value in column with output of a function',
+  help: 'Replace value in column with output of an expression that will receive the current value of the column',
   context: {
     types: ['datatable'],
   },
   args: {
-    column: {
+    _: {
       types: ['string'],
-      aliases: ['_'],
+      aliases: ['column'],
+      help: 'The column containing values to pass into the expression',
     },
-    function: {
+    expression: {
       types: ['function'],
-      aliases: ['fn'],
+      aliases: ['exp', 'fn'],
+      help: 'A canvas expression to pass each value in the column to',
     },
-    dest: {
+    destination: {
+      aliases: ['dest', 'd'],
       types: ['string', 'null'],
+      help: 'Instead of overwriting the column value, put the new value in this column. Use alterColumn if you need to change the type',
     },
   },
   fn: (context, args) => {
-    if (args.dest) {
-      context.columns.push({ name: args.dest, type: 'string' });
-      context.columns[args.dest] = { type: 'string' };
+    if (args.destination) {
+      context.columns.push({ name: args.destination, type: 'string' });
+      context.columns[args.destination] = { type: 'string' };
     } else {
-      args.dest = args.column;
+      args.destination = args._;
     }
 
     const rowPromises = context.rows.map(row => {
-      return args.function(row[args.column])
+      return args.expression(row[args._])
         .then(val => {
-          return Object.assign({}, row, { [args.dest]: val });
+          return Object.assign({}, row, { [args.destination]: val });
         });
     });
 
