@@ -123,6 +123,10 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     return savedVis.title;
   };
 
+  this.getSharingType = () => {
+    return 'visualization';
+  };
+
   if (savedVis.id) {
     docTitle.change(savedVis.title);
   }
