@@ -2,6 +2,8 @@ import { buildESRequest } from '../esdocs/lib/build_es_request';
 
 export const escount = {
   name: 'escount',
+  type: 'number',
+  help: 'Query elasticsearch for a count of the number of hits matching a query',
   context: {
     types: ['filter'],
   },
@@ -17,8 +19,6 @@ export const escount = {
       default: '"-_index:.kibana"',
     },
   },
-  type: 'number',
-  help: 'Query elasticsearch and get back raw documents.',
   fn: (context, args, handlers) => {
     context.and = context.and
       .concat([{ // q
