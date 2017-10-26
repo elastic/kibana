@@ -172,7 +172,7 @@
     "react-anything-sortable": "1.6.1",
     "react-color": "2.11.7",
     "react-dom": "15.6.1",
-    "react-grid-layout": "0.14.7",
+    "react-grid-layout": "0.16.0",
     "react-input-autosize": "1.1.0",
     "react-input-range": "1.2.1",
     "react-markdown": "2.4.2",
