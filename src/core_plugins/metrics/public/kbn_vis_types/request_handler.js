@@ -8,7 +8,7 @@ const MetricsRequestHandlerProvider = function (Private, Notifier, config, timef
 
   return {
     name: 'metrics',
-    handler: function (vis , appState, uiState) {
+    handler: function (vis, appState, uiState) {
       const timezone = Private(timezoneProvider)();
       return new Promise((resolve) => {
         const panel = vis.params;
