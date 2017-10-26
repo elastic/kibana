@@ -1,12 +1,10 @@
 import { routes } from './server/routes';
-import { functionsRegistry } from './common/lib/functions';
+import { functionsRegistry } from './common/lib/functions_registry';
+import { typesRegistry } from './common/lib/types_registry';
 import { serverFunctions } from './server/functions';
 import { createIndices } from './server/lib/create_indices';
-
 import { commonFunctions } from './common/functions';
 import { typeSpecs } from './common/types';
-
-import { typesRegistry } from './common/lib/types';
 
 export default function (server, /*options*/) {
   server.plugins.canvas = {

@@ -1,5 +1,5 @@
 import { pure, compose, withProps, withState } from 'recompose';
-import { elementsRegistry } from '../../../lib/elements';
+import { elementsRegistry } from '../../../lib/elements_registry';
 
 import { ElementTypes as Component } from './element_types';
 

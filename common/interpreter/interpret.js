@@ -1,8 +1,8 @@
 import { clone, each, keys, last, map, mapValues, values, zipObject, omitBy } from 'lodash';
 import { castProvider } from './cast';
-import { getType } from '../types/get_type';
+import { getType } from '../lib/get_type';
 import { fromExpression } from '../lib/ast';
-import { typesRegistry } from '../lib/types';
+import { typesRegistry } from '../lib/types_registry';
 
 export function interpretProvider(config) {
   const cast = castProvider(config.types);

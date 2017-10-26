@@ -1,0 +1,1 @@
+export { table } from './table';

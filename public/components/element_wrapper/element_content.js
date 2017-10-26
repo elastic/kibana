@@ -14,7 +14,7 @@ import { Loading } from '../loading';
 import { pure, compose, branch, renderComponent } from 'recompose';
 import { RenderElement } from '../render_element';
 import Style from 'style-it';
-import { getType } from '../../../common/types/get_type';
+import { getType } from '../../../common/lib/get_type';
 
 /*
   Branches

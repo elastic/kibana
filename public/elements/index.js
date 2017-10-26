@@ -1,12 +1,12 @@
-import { advancedFilter } from './advanced_filter/advanced_filter';
-import { debug } from './debug/debug';
-import { grid } from './grid/grid';
-import { image } from './image/image';
-import { markdown } from './markdown/markdown';
-import { pie } from './pie/pie';
-import { plot } from './plot/plot';
-import { table } from './table/table';
-import { timeFilter } from './time_filter/time_filter';
+import { advancedFilter } from './advanced_filter';
+import { debug } from './debug';
+import { grid } from './grid';
+import { image } from './image';
+import { markdown } from './markdown';
+import { pie } from './pie';
+import { plot } from './plot';
+import { table } from './table';
+import { timeFilter } from './time_filter';
 
 export const elementSpecs = [
   advancedFilter,

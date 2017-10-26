@@ -1,5 +1,5 @@
 import init from './init';
-import { functionsRegistry } from './common/lib/functions';
+import { functionsRegistry } from './common/lib/functions_registry';
 
 export default function (kibana) {
   return new kibana.Plugin({

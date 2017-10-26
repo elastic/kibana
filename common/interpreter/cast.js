@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { getType } from '../types/get_type';
+import { getType } from '../lib/get_type';
 
 export function castProvider(types) {
   return function cast(node, toTypeNames) {

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { sortBy } from 'lodash';
 import { FormControl } from 'react-bootstrap';
 import { SimpleMathFunction } from './simple_math_function';
-import { getType } from '../../../../common/types/get_type';
+import { getType } from '../../../../common/lib/get_type';
 import { parse } from 'mathjs';
 
 import './datacolumn.less';

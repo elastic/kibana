@@ -1,9 +1,9 @@
 import { map } from 'lodash';
 import socket from 'socket.io';
-import { functionsRegistry } from '../../common/lib/functions';
-import { socketInterpreterProvider } from '../../common/interpreter/socket_interpret';
-import { typesRegistry } from '../../common/lib/types';
 import { createHandlers } from '../lib/create_handlers';
+import { socketInterpreterProvider } from '../../common/interpreter/socket_interpret';
+import { functionsRegistry } from '../../common/lib/functions_registry';
+import { typesRegistry } from '../../common/lib/types_registry';
 
 export function socketApi(server) {
   const io = socket(server.listener);

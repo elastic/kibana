@@ -1,10 +1,10 @@
-import { demodata } from './demodata/demodata';
-import { demoprices } from './demoprices/demoprices';
-import { escount } from './escount/escount';
-import { esdocs } from './esdocs/esdocs';
-import { pointseries } from './pointseries/pointseries';
-import { timelion } from './timelion/timelion';
-import { toFn } from './to/to';
+import { demodata } from './demodata';
+import { demoprices } from './demoprices';
+import { escount } from './escount';
+import { esdocs } from './esdocs';
+import { pointseries } from './pointseries';
+import { timelion } from './timelion';
+import { toFn } from './to';
 
 export const serverFunctions = [
   esdocs,

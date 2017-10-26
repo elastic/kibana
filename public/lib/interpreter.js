@@ -1,8 +1,8 @@
 import { socketInterpreterProvider } from '../../common/interpreter/socket_interpret';
-import { typesRegistry } from '../../common/lib/types';
 import { socket } from '../socket';
-import { functionsRegistry } from './functions';
 import { createHandlers } from './create_handlers';
+import { typesRegistry } from '../../common/lib/types_registry';
+import { functionsRegistry } from './functions_registry';
 
 // Create the function list
 socket.emit('getFunctionList');

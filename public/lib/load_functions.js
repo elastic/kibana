@@ -1,4 +1,4 @@
-import { functionsRegistry } from '../../common/lib/functions';
+import { functionsRegistry } from '../../common/lib/functions_registry';
 import { commonFunctions } from '../../common/functions';
 import { clientFunctions } from '../functions';
 

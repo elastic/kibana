@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import { fromExpression } from '../ast';
-import { getType } from '../../types/get_type';
+import { getType } from '../../lib/get_type';
 
 describe('ast fromExpression', () => {
   describe('invalid expression', () => {

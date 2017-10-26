@@ -6,7 +6,7 @@ import * as args from './resolved_args';
 import { getPages, getElementById } from '../selectors/workpad';
 import { getValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
-import { getType } from '../../../common/types/get_type';
+import { getType } from '../../../common/lib/get_type';
 import { fromExpression, toExpression, safeElementFromExpression } from '../../../common/lib/ast';
 import { interpretAst } from '../../lib/interpreter';
 import { notify } from '../../lib/notify';

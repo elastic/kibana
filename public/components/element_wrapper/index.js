@@ -12,7 +12,7 @@ import {
   getSelectedPage,
 } from '../../state/selectors/workpad';
 import { getState, getValue, getError } from '../../lib/resolved_arg';
-import { elementsRegistry } from '../../lib/elements';
+import { elementsRegistry } from '../../lib/elements_registry';
 import { createHandlers } from './lib/handlers';
 
 const mapStateToProps = (state, { element }) => ({

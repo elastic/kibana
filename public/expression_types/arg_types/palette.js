@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { PalettePicker } from '../../components/palette_picker';
-import { getType } from '../../../common/types/get_type';
+import { getType } from '../../../common/lib/get_type';
 
 const template = ({ onValueChange, argValue, renderError }) => {
   // Why is this neccesary? Does the dialog really need to know what parameter it is setting?

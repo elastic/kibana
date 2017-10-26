@@ -1,5 +1,5 @@
 import { isArray, includes } from 'lodash';
-import { getType } from '../../common/types/get_type';
+import { getType } from '../../common/lib/get_type';
 
 /*
 

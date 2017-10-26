@@ -1,10 +1,10 @@
-import { uiModules } from 'ui/modules';
-import { historyProvider } from '../lib/history_provider';
-import { onStart } from './on_start';
 import { uniqBy } from 'lodash';
-import { functionsRegistry } from '../../common/lib/functions';
+import { uiModules } from 'ui/modules';
+import { onStart } from './on_start';
 import { getInitialState } from './initial_state';
 import { setStore } from './store';
+import { historyProvider } from '../lib/history_provider';
+import { functionsRegistry } from '../../common/lib/functions_registry';
 
 const app = uiModules.get('apps/canvas');
 
