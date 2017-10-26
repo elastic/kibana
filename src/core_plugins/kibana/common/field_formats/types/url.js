@@ -3,6 +3,7 @@ import { FieldFormat } from '../../../../../ui/field_formats/field_format';
 import { getHighlightHtml } from '../../highlight/highlight_html';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
+const whitelistUrlSchemes = ['http://', 'https://'];
 
 export class UrlFormat extends FieldFormat {
   constructor(params) {
@@ -98,6 +99,11 @@ UrlFormat.prototype._convert = {
 
         return `<img src="${url}" alt="${imageLabel}">`;
       default:
+        const inWhitelist = whitelistUrlSchemes.some(scheme => url.indexOf(scheme) === 0);
+        if (!inWhitelist) {
+          return url;
+        }
+
         let linkLabel;
 
         if (hit && hit.highlight && hit.highlight[field.name]) {
