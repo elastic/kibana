@@ -5,7 +5,8 @@ import { pivotObjectArray } from '../../lib/pivot_object_array.js';
 export const math = {
   name: 'math',
   type: 'number',
-  help: 'Interpret a mathJS expression, with a datatable as context, or not',
+  help: 'Interpret a mathJS expression, with a number or datatable as context. Datatable columns are available by their column name. ' +
+  'If you pass in a number it is available as "value" (without the quotes)',
   context: {
     types: ['number', 'datatable'],
   },
