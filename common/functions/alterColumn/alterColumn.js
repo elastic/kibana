@@ -3,19 +3,24 @@ import _ from 'lodash';
 export const alterColumn = {
   name: 'alterColumn',
   type: 'datatable',
-  help: 'Converts between core types, eg string, number, null, boolean, date',
+  help: 'Converts between core types, eg string, number, null, boolean, date and rename columns',
   context: {
     types: ['datatable'],
   },
   args: {
     column: {
       types: ['string'],
+      help: 'The name of the column to alter',
     },
     type: {
       types: ['string'],
+      help: 'The type to convert the column to. Leave blank to not change type.',
+      default: null,
     },
     name: {
       types: ['string'],
+      help: 'The resultant column name. Leave blank to not rename.',
+      default: null,
     },
   },
   fn: (context, args) => {
