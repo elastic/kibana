@@ -98,7 +98,7 @@ uiModules.get('kibana')
        * This will close the details panel of this legend entry when pressing Escape.
        */
       $scope.onLegendEntryKeydown = function (event, scope) {
-        if (event.keyCode === keyCodes.ESCAPE) {
+        if (event.keyCode === keyCodes.ESCAPE && scope.showDetails) {
           event.preventDefault();
           event.stopPropagation();
           scope.showDetails = false;
