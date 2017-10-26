@@ -1,6 +1,9 @@
 export const containerStyle = {
   name: 'containerStyle',
   aliases: [],
+  context: {
+    types: ['null'],
+  },
   type: 'containerStyle',
   help: 'Creates an object used for describing the properties of a series on a chart.' +
   ' You would usually use this inside of a charting function',
