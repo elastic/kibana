@@ -1,3 +1,5 @@
+// TODO: pointseries performs poorly, that's why we run it on the server.
+
 import { math } from '../../../common/lib/math.js';
 import moment from 'moment';
 import { groupBy, zipObject, uniqBy, omit, pickBy, find, uniq, map, mapValues } from 'lodash';
@@ -46,8 +48,9 @@ function getType(columns, mathExpression) {
 export const pointseries = {
   name: 'pointseries',
   type: 'pointseries',
-  help: 'Turn a datatable into a point series model. Dimensions are combined to create unique keys. Measures are then ' +
-  'deduplicated by those keys.',
+  help: 'Turn a datatable into a point series model. Currently we differentiate measure from dimensions by looking for a MathJS function.' +
+  'If you are using MathJS, we treat that argument as a measure, otherwise it is a dimension. Dimensions are combined to create unique ' +
+  'keys. Measures are then deduplicated by those keys using the specified MathJS function',
   context: {
     types: ['datatable'],
   },
