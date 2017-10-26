@@ -25,6 +25,7 @@ export {
   createReduceStream,
   createSplitStream,
   createMapStream,
+  createReplaceStream,
 } from './streams';
 
 export {

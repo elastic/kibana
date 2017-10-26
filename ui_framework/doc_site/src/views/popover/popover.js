@@ -31,12 +31,13 @@ export default class extends Component {
   render() {
     const button = (
       <KuiButton buttonType="basic" onClick={this.onButtonClick.bind(this)}>
-        Click me
+        Show popover
       </KuiButton>
     );
 
     return (
       <KuiPopover
+        isFocusable
         button={button}
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover.bind(this)}

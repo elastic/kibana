@@ -9,7 +9,7 @@ export class KuiOutsideClickDetector extends Component {
   static propTypes = {
     children: PropTypes.node.isRequired,
     onOutsideClick: PropTypes.func.isRequired,
-  }
+  };
 
   onClickOutside = event => {
     if (!this.wrapperRef) {
@@ -25,22 +25,23 @@ export class KuiOutsideClickDetector extends Component {
     }
 
     this.props.onOutsideClick();
-  }
+  };
 
   componentDidMount() {
-    document.addEventListener('click', this.onClickOutside);
+    document.addEventListener('mousedown', this.onClickOutside);
   }
 
   componentWillUnmount() {
-    document.removeEventListener('click', this.onClickOutside);
+    document.removeEventListener('mousedown', this.onClickOutside);
   }
 
   render() {
-    const props = Object.assign({}, this.props.children.props, {
+    const props = {
+      ...this.props.children.props,
       ref: node => {
         this.wrapperRef = node;
       },
-    });
+    };
 
     const child = Children.only(this.props.children);
     return cloneElement(child, props);

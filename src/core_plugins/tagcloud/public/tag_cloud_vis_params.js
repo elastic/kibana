@@ -24,11 +24,21 @@ uiModules.get('kibana/table_vis')
         });
         slider.noUiSlider.on('change', function () {
           const fontSize = slider.noUiSlider.get();
-          $scope.vis.params.minFontSize = parseInt(fontSize[0], 10);
-          $scope.vis.params.maxFontSize = parseInt(fontSize[1], 10);
-          $scope.vis.updateState();
-          $scope.$apply();
+          $scope.$apply(() => {
+            $scope.vis.params.minFontSize = parseInt(fontSize[0], 10);
+            $scope.vis.params.maxFontSize = parseInt(fontSize[1], 10);
+          });
+        });
 
+        /**
+         * Whenever the params change (e.g. by hitting reset in the editor)
+         * set the uislider value to the new value.
+         */
+        $scope.$watch('vis.params.minFontSize', (val) => {
+          slider.noUiSlider.set([val, null]);
+        });
+        $scope.$watch('vis.params.maxFontSize', (val) => {
+          slider.noUiSlider.set([null, val]);
         });
       }
     };

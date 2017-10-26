@@ -1,23 +1,15 @@
 import _ from 'lodash';
 import moment from 'moment';
 
-import { RequestQueueProvider } from '../../_request_queue';
-import { ErrorHandlerRequestProvider } from './error_handler';
+import { requestQueue } from '../../_request_queue';
 
 export function AbstractRequestProvider(Private, Promise) {
-  const requestQueue = Private(RequestQueueProvider);
-  const requestErrorHandler = Private(ErrorHandlerRequestProvider);
 
   return class AbstractReq {
     constructor(source, defer) {
       this.source = source;
       this.defer = defer || Promise.defer();
       this.abortedDefer = Promise.defer();
-
-      this.setErrorHandler((...args) => {
-        this.retry();
-        return requestErrorHandler(...args);
-      });
 
       requestQueue.push(this);
     }
@@ -65,14 +57,7 @@ export function AbstractRequestProvider(Private, Promise) {
       this.started = true;
       this.moment = moment();
 
-      const source = this.source;
-      if (source.activeFetchCount) {
-        source.activeFetchCount += 1;
-      } else {
-        source.activeFetchCount = 1;
-      }
-
-      source.history = [this];
+      return this.source.requestIsStarting(this);
     }
 
     getFetchParams() {
@@ -115,7 +100,7 @@ export function AbstractRequestProvider(Private, Promise) {
     _markStopped() {
       if (this.stopped) return;
       this.stopped = true;
-      this.source.activeFetchCount -= 1;
+      this.source.requestIsStopped(this);
       _.pull(requestQueue, this);
     }
 

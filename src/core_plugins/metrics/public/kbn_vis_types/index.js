@@ -1,5 +1,4 @@
 import '../visualizations/less/main.less';
-import 'react-select/dist/react-select.css';
 import '../less/main.less';
 import image from '../images/icon-visualbuilder.svg';
 import { MetricsRequestHandlerProvider } from './request_handler';
@@ -51,7 +50,7 @@ export default function MetricsVisProvider(Private) {
         interval: 'auto',
         axis_position: 'left',
         axis_formatter: 'number',
-        show_legend:1,
+        show_legend: 1,
         show_grid: 1
       },
       component: require('../components/vis_editor')

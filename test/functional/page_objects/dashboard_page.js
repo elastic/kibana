@@ -1,6 +1,8 @@
 import _ from 'lodash';
 import { DashboardConstants } from '../../../src/core_plugins/kibana/public/dashboard/dashboard_constants';
 
+export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
+
 export function DashboardPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const find = getService('find');
@@ -18,8 +20,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async initTests() {
       const logstash = esArchiver.loadIfNeeded('logstash_functional');
       await kibanaServer.uiSettings.replace({
-        'dateFormat:tz':'UTC',
-        'defaultIndex':'logstash-*'
+        'dateFormat:tz': 'UTC',
+        'defaultIndex': 'logstash-*'
       });
 
       log.debug('load kibana index with visualizations');
@@ -27,6 +29,19 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
       await PageObjects.common.navigateToApp('dashboard');
       return logstash;
+    }
+
+    async clickEditVisualization() {
+      log.debug('clickEditVisualization');
+      await testSubjects.click('dashboardPanelToggleMenuIcon');
+      await testSubjects.click('dashboardPanelEditLink');
+
+      await retry.try(async () => {
+        const current = await remote.getCurrentUrl();
+        if (current.indexOf('visualize') < 0) {
+          throw new Error('not on visualize page');
+        }
+      });
     }
 
     async clickFullScreenMode() {
@@ -207,6 +222,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       const visFilter = await find.byCssSelector('input[placeholder="Visualizations Filter..."]');
       await visFilter.click();
       await remote.pressKeys(vizName);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickVizNameLink(vizName) {
@@ -221,6 +237,25 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async gotoDashboardEditMode(dashboardName) {
       await this.loadSavedDashboard(dashboardName);
       await this.clickEdit();
+    }
+
+    async filterSearchNames(name) {
+      await testSubjects.setValue('savedObjectFinderSearchInput', name);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async clickSavedSearchTab() {
+      await testSubjects.click('addSavedSearchTab');
+    }
+
+    async addSavedSearch(searchName) {
+      await this.clickAddVisualization();
+      await this.clickSavedSearchTab();
+      await this.filterSearchNames(searchName);
+
+      await find.clickByPartialLinkText(searchName);
+      await PageObjects.header.clickToastOK();
+      await this.clickAddVisualization();
     }
 
     async addVisualization(vizName) {
@@ -314,7 +349,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         await searchFilter.clearValue();
         await searchFilter.click();
         // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
-        await searchFilter.type(dashName.replace('-',' '));
+        await searchFilter.type(dashName.replace('-', ' '));
       });
 
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -365,25 +400,30 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return await testSubjects.findAll('dashboardPanel');
     }
 
-    async getPanelSizeData() {
-      const titleObjects = await find.allByCssSelector('li.gs-w'); // These are gridster-defined elements and classes
-      async function getTitles(chart) {
-        const dataCol = await chart.getAttribute('data-col');
-        const dataRow = await chart.getAttribute('data-row');
-        const dataSizeX = await chart.getAttribute('data-sizex');
-        const dataSizeY = await chart.getAttribute('data-sizey');
-        const childElement = await testSubjects.findDescendant('dashboardPanelTitle', chart);
-        const title = await childElement.getVisibleText();
-        return { dataCol, dataRow, dataSizeX, dataSizeY, title };
+
+    async getPanelDimensions() {
+      const panels = await find.allByCssSelector('.react-grid-item'); // These are gridster-defined elements and classes
+      async function getPanelDimensions(panel) {
+        const size = await panel.getSize();
+        return {
+          width: size.width,
+          height: size.height
+        };
       }
 
-      const getTitlePromises = _.map(titleObjects, getTitles);
-      return await Promise.all(getTitlePromises);
+      const getDimensionsPromises = _.map(panels, getPanelDimensions);
+      return await Promise.all(getDimensionsPromises);
+    }
+
+    async getPanelCount() {
+      log.debug('getPanelCount');
+      const panels = await find.allByCssSelector('.react-grid-item');
+      return panels.length;
     }
 
     getTestVisualizations() {
       return [
-        { name: 'Visualization PieChart', description: 'PieChart' },
+        { name: PIE_CHART_VIS_NAME, description: 'PieChart' },
         { name: 'Visualization☺ VerticalBarChart', description: 'VerticalBarChart' },
         { name: 'Visualization漢字 AreaChart', description: 'AreaChart' },
         { name: 'Visualization☺漢字 DataTable', description: 'DataTable' },
@@ -395,6 +435,22 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     getTestVisualizationNames() {
       return this.getTestVisualizations().map(visualization => visualization.name);
+    }
+
+    async showPanelEditControlsDropdownMenu() {
+      const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
+      if (editLinkExists) return;
+      await testSubjects.click('dashboardPanelToggleMenuIcon');
+    }
+
+    async clickDashboardPanelEditLink() {
+      await this.showPanelEditControlsDropdownMenu();
+      await testSubjects.click('dashboardPanelEditLink');
+    }
+
+    async clickDashboardPanelRemoveIcon() {
+      await this.showPanelEditControlsDropdownMenu();
+      await testSubjects.click('dashboardPanelRemoveIcon');
     }
 
     async addVisualizations(visualizations) {
@@ -453,13 +509,9 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       log.debug('toggleExpandPanel');
       const expandShown = await testSubjects.exists('dashboardPanelExpandIcon');
       if (!expandShown) {
-        const panelElements = await find.allByCssSelector('span.panel-title');
-        log.debug('click title');
-        await retry.try(() => panelElements[0].click()); // Click to simulate hover.
+        await testSubjects.click('dashboardPanelToggleMenuIcon');
       }
-      const expandButton = await testSubjects.find('dashboardPanelExpandIcon');
-      log.debug('click expand icon');
-      await retry.try(() => expandButton.click());
+      await testSubjects.click('dashboardPanelExpandIcon');
     }
 
     async getSharedItemsCount() {

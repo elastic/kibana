@@ -6,6 +6,7 @@ import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 export const DerivativeAgg = props => {
   const { siblings } = props;
@@ -16,6 +17,8 @@ export const DerivativeAgg = props => {
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
   const handleTextChange = createTextHandler(handleChange);
+
+  const htmlId = htmlIdGenerator();
 
   return (
     <AggRow
@@ -28,6 +31,7 @@ export const DerivativeAgg = props => {
       <div className="vis_editor__row_item">
         <div className="vis_editor__label">Aggregation</div>
         <AggSelect
+          panelType={props.panel.type}
           siblings={props.siblings}
           value={model.type}
           onChange={handleSelectChange('type')}
@@ -43,8 +47,11 @@ export const DerivativeAgg = props => {
         />
       </div>
       <div>
-        <div className="vis_editor__label">Units (1s, 1m, etc)</div>
+        <label className="vis_editor__label" htmlFor={htmlId('units')}>
+          Units (1s, 1m, etc)
+        </label>
         <input
+          id={htmlId('units')}
           className="vis_editor__input"
           onChange={handleTextChange('unit')}
           value={model.unit}

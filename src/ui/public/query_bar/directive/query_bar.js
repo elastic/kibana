@@ -36,7 +36,9 @@ module.directive('queryBar', function () {
       };
 
       $scope.$watch('queryBar.query', (newQuery) => {
-        this.localQuery = Object.assign({}, newQuery);
+        this.localQuery = {
+          ...newQuery
+        };
       }, true);
     })
   };

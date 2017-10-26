@@ -77,7 +77,9 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
           aggFilter: ['terms']
         }
       ])
-    }
+    },
+    responseHandler: 'tabify'
+
   });
 });
 

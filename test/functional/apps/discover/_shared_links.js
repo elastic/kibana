@@ -5,7 +5,6 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'discover', 'header']);
 
   describe('shared links', function describeIndexTests() {
@@ -21,7 +20,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('baseUrl = ' + baseUrl);
       // browsers don't show the ':port' if it's 80 or 443 so we have to
       // remove that part so we can get a match in the tests.
-      baseUrl = baseUrl.replace(':80','').replace(':443','');
+      baseUrl = baseUrl.replace(':80', '').replace(':443', '');
       log.debug('New baseUrl = ' + baseUrl);
 
       const fromTime = '2015-09-19 06:31:44.000';
@@ -61,7 +60,6 @@ export default function ({ getService, getPageObjects }) {
         const expectedCaption = 'Share saved';
         return PageObjects.discover.clickShare()
         .then(function () {
-          screenshots.take('Discover-share-link');
           return PageObjects.discover.getShareCaption();
         })
         .then(function (actualCaption) {
@@ -80,8 +78,8 @@ export default function ({ getService, getPageObjects }) {
         return PageObjects.discover.getSharedUrl()
         .then(function (actualUrl) {
           // strip the timestamp out of each URL
-          expect(actualUrl.replace(/_t=\d{13}/,'_t=TIMESTAMP'))
-            .to.be(expectedUrl.replace(/_t=\d{13}/,'_t=TIMESTAMP'));
+          expect(actualUrl.replace(/_t=\d{13}/, '_t=TIMESTAMP'))
+            .to.be(expectedUrl.replace(/_t=\d{13}/, '_t=TIMESTAMP'));
         });
       });
 
@@ -91,7 +89,6 @@ export default function ({ getService, getPageObjects }) {
           return PageObjects.header.getToastMessage();
         })
         .then(function (toastMessage) {
-          screenshots.take('Discover-copy-to-clipboard-toast');
           expect(toastMessage).to.match(expectedToastMessage);
         })
         .then(function () {
@@ -105,7 +102,6 @@ export default function ({ getService, getPageObjects }) {
         return PageObjects.discover.clickShortenUrl()
         .then(function () {
           return retry.try(function tryingForTime() {
-            screenshots.take('Discover-shorten-url-button');
             return PageObjects.discover.getSharedUrl()
             .then(function (actualUrl) {
               expect(actualUrl).to.match(re);

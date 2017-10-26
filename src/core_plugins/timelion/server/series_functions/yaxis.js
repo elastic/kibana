@@ -2,13 +2,13 @@ import _ from 'lodash';
 import alter from '../lib/alter.js';
 import Chainable from '../lib/classes/chainable';
 const tickFormatters = {
-  'bits':'bits',
-  'bits/s':'bits/s',
-  'bytes':'bytes',
-  'bytes/s':'bytes/s',
-  'currency':'currency(:ISO 4217 currency code)',
-  'percent':'percent',
-  'custom':'custom(:prefix:suffix)'
+  'bits': 'bits',
+  'bits/s': 'bits/s',
+  'bytes': 'bytes',
+  'bytes/s': 'bytes/s',
+  'currency': 'currency(:ISO 4217 currency code)',
+  'percent': 'percent',
+  'custom': 'custom(:prefix:suffix)'
 };
 
 export default new Chainable('yaxis', {
@@ -52,10 +52,15 @@ export default new Chainable('yaxis', {
       types: ['string', 'null'],
       help: 'The function to use for formatting y-axis labels. One of: ' + _.values(tickFormatters).join(', ')
     },
+    {
+      name: 'tickDecimals',
+      types: ['number', 'null'],
+      help: 'tick decimal precision'
+    },
   ],
   help: 'Configures a variety of y-axis options, the most important likely being the ability to add an Nth (eg 2nd) y-axis',
   fn: function yaxisFn(args) {
-    return alter(args, function (eachSeries, yaxis, min, max, position, label, color, units) {
+    return alter(args, function (eachSeries, yaxis, min, max, position, label, color, units, tickDecimals) {
       yaxis = yaxis || 1;
 
       eachSeries.yaxis = yaxis;
@@ -73,12 +78,17 @@ export default new Chainable('yaxis', {
       myAxis.axisLabelColour = color;
       myAxis.axisLabelUseCanvas = true;
 
+      if (tickDecimals) {
+        myAxis.tickDecimals = tickDecimals < 0 ? 0 : tickDecimals;
+      }
+
       if (units) {
         const unitTokens = units.split(':');
-        if (!tickFormatters[unitTokens[0]]) {
+        const unitType = unitTokens[0];
+        if (!tickFormatters[unitType]) {
           throw new Error (`${units} is not a supported unit type.`);
         }
-        if (unitTokens[0] === 'currency') {
+        if (unitType === 'currency') {
           const threeLetterCode = /^[A-Za-z]{3}$/;
           const currency = unitTokens[1];
           if (currency && !threeLetterCode.test(currency)) {
@@ -87,10 +97,21 @@ export default new Chainable('yaxis', {
         }
 
         myAxis.units = {
-          type: unitTokens[0],
+          type: unitType,
           prefix: unitTokens[1] || '',
           suffix: unitTokens[2] || ''
         };
+
+        if (unitType === 'percent') {
+          // jquery.flot uses axis.tickDecimals to generate tick values
+          // need 2 extra decimal places to perserve percision when percent shifts value to left
+          myAxis.units.tickDecimalsShift = 2;
+          if (tickDecimals) {
+            myAxis.tickDecimals += myAxis.units.tickDecimalsShift;
+          } else {
+            myAxis.tickDecimals = myAxis.units.tickDecimalsShift;
+          }
+        }
       }
 
       return eachSeries;

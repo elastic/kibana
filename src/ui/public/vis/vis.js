@@ -16,13 +16,22 @@ import { PersistedState } from 'ui/persisted_state';
 import { UtilsBrushEventProvider } from 'ui/utils/brush_event';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
+import { updateVisualizationConfig } from './vis_update';
+import { queryManagerFactory } from '../query_manager';
+import * as kueryAPI from 'ui/kuery';
+import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
+import { FilterManagerProvider } from 'ui/filter_manager';
 
-export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
+export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppState) {
   const visTypes = Private(VisTypesRegistryProvider);
   const AggConfigs = Private(VisAggConfigsProvider);
   const brushEvent = Private(UtilsBrushEventProvider);
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const filterBarClickHandler = Private(FilterBarClickHandlerProvider);
+  const SearchSource = Private(SearchSourceProvider);
+  const savedObjectsClient = Private(SavedObjectsClientProvider);
+  const filterManager = Private(FilterManagerProvider);
 
   class Vis extends EventEmitter {
     constructor(indexPattern, visState, uiState) {
@@ -44,10 +53,19 @@ export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
       this.setState(this.getCurrentState(), false);
       this.setUiState(uiState);
 
+      // Session state is for storing information that is transitory, and will not be saved with the visualization.
+      // For instance, map bounds, which depends on the view port, browser window size, etc.
+      this.sessionState = {};
+
       this.API = {
+        savedObjectsClient: savedObjectsClient,
+        SearchSource: SearchSource,
         indexPatterns: indexPatterns,
         timeFilter: timefilter,
+        filterManager: filterManager,
         queryFilter: queryFilter,
+        queryManager: queryManagerFactory(getAppState),
+        kuery: kueryAPI,
         events: {
           filter: (event) => {
             const appState = getAppState();
@@ -80,6 +98,8 @@ export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
         _.cloneDeep(state.params || {}),
         _.cloneDeep(this.type.visConfig.defaults || {})
       );
+
+      updateVisualizationConfig(state.params, this.params);
 
       this.aggs = new AggConfigs(this, state.aggs);
     }
@@ -144,9 +164,17 @@ export function VisProvider(Private, indexPatterns, timefilter, getAppState) {
       return clonedVis;
     }
 
-    requesting() {
-      // Invoke requesting() on each agg. Aggs is an instance of AggConfigs.
-      _.invoke(this.aggs.getRequestAggs(), 'requesting');
+    /**
+     *  Hook for pre-flight logic, see AggType#onSearchRequestStart()
+     *  @param {Courier.SearchSource} searchSource
+     *  @param {Courier.SearchRequest} searchRequest
+     *  @return {Promise<undefined>}
+     */
+    onSearchRequestStart(searchSource, searchRequest) {
+      return Promise.map(
+        this.aggs.getRequestAggs(),
+        agg => agg.onSearchRequestStart(searchSource, searchRequest)
+      );
     }
 
     isHierarchical() {

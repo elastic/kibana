@@ -6,7 +6,6 @@ import Toggle from 'react-toggle';
 import 'react-toggle/style.css';
 
 class VisEditorVisualization extends Component {
-
   constructor(props) {
     super(props);
     this.state = {
@@ -97,7 +96,6 @@ class VisEditorVisualization extends Component {
       <div>
         <div
           style={style}
-          data-shared-item={true}
           ref={(el) => this.visDiv = el}
           className="vis_editor__visualization"
         >
@@ -108,16 +106,21 @@ class VisEditorVisualization extends Component {
             model={this.props.model}
             onBrush={this.props.onBrush}
             onChange={this.handleChange}
+            onUiState={this.props.onUiState}
+            uiState={this.props.uiState}
             visData={this.props.visData}
           />
         </div>
-        {applyButton}
-        <div
-          className="vis_editor__visualization-draghandle"
-          onMouseDown={this.handleMouseDown}
-          onMouseUp={this.handleMouseUp}
-        >
-          <i className="fa fa-ellipsis-h" />
+        <div className="vis-editor-hide-for-reporting">
+          {applyButton}
+          <div
+            aria-hidden="true"
+            className="vis_editor__visualization-draghandle"
+            onMouseDown={this.handleMouseDown}
+            onMouseUp={this.handleMouseUp}
+          >
+            <i className="fa fa-ellipsis-h" />
+          </div>
         </div>
       </div>
     );
@@ -129,6 +132,8 @@ VisEditorVisualization.propTypes = {
   onBrush: PropTypes.func,
   onChange: PropTypes.func,
   onCommit: PropTypes.func,
+  onUiState: PropTypes.func,
+  uiState: PropTypes.object,
   onToggleAutoApply: PropTypes.func,
   visData: PropTypes.object,
   dirty: PropTypes.bool,

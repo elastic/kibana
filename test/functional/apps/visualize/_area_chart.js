@@ -3,7 +3,6 @@ import expect from 'expect.js';
 export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
-  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
 
   describe('visualize app', function describeIndexTests() {
@@ -86,7 +85,6 @@ export default function ({ getService, getPageObjects }) {
         return PageObjects.visualize.saveVisualization(vizName1)
         .then(function (message) {
           log.debug('Saved viz message = ' + message);
-          screenshots.take('Visualize-area-chart-save-toast');
           expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
         })
         .then(function testVisualizeWaitForToastMessageGone() {
@@ -110,7 +108,7 @@ export default function ({ getService, getPageObjects }) {
         const xAxisLabels = [ '2015-09-20 00:00', '2015-09-21 00:00',
           '2015-09-22 00:00', '2015-09-23 00:00'
         ];
-        const yAxisLabels = ['0','200','400','600','800','1,000','1,200','1,400','1,600'];
+        const yAxisLabels = ['0', '200', '400', '600', '800', '1,000', '1,200', '1,400', '1,600'];
         const expectedAreaChartData = [37, 202, 740, 1437, 1371, 751, 188, 31, 42, 202,
           683, 1361, 1415, 707, 177, 27, 32, 175, 707, 1408, 1355, 726, 201, 29
         ];
@@ -135,7 +133,6 @@ export default function ({ getService, getPageObjects }) {
         .then(function (paths) {
           log.debug('expectedAreaChartData = ' + expectedAreaChartData);
           log.debug('actual chart data =     ' + paths);
-          screenshots.take('Visualize-area-chart');
           expect(paths).to.eql(expectedAreaChartData);
         });
       });

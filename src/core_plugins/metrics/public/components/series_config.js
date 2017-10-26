@@ -5,12 +5,14 @@ import createSelectHandler from './lib/create_select_handler';
 import createTextHandler from './lib/create_text_handler';
 import YesNo from './yes_no';
 import { IndexPattern } from './index_pattern';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 export const SeriesConfig = props => {
   const defaults = { offset_time: '', value_template: '' };
   const model = { ...defaults, ...props.model };
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
+  const htmlId = htmlIdGenerator();
 
   return (
     <div>
@@ -20,14 +22,22 @@ export const SeriesConfig = props => {
             onChange={handleSelectChange('formatter')}
             value={model.formatter}
           />
-          <div className="vis_editor__label">Template (eg.<code>{'{{value}}/s'}</code>)</div>
+          <label className="vis_editor__label" htmlFor={htmlId('template')}>
+            Template (eg.<code>{'{{value}}/s'}</code>)
+          </label>
           <input
+            style={{ width: 100 }}
+            id={htmlId('template')}
             className="vis_editor__input-grows"
             onChange={handleTextChange('value_template')}
             value={model.value_template}
           />
-          <div className="vis_editor__label">Offset series time by (1m, 1h, 1w, 1d)</div>
+          <label className="vis_editor__label" htmlFor={htmlId('offsetSeries')}>
+            Offset series time by (1m, 1h, 1w, 1d)
+          </label>
           <input
+            style={{ width: 100 }}
+            id={htmlId('offsetSeries')}
             className="vis_editor__input-grows"
             type="text"
             onChange={handleTextChange('offset_time')}
@@ -60,4 +70,3 @@ SeriesConfig.propTypes = {
   model: PropTypes.object,
   onChange: PropTypes.func
 };
-

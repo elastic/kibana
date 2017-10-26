@@ -8,7 +8,7 @@ uiModules
 .get('kibana')
 .filter('matchAny', function () {
   return function (items, rules) {
-    if (!_.isArray(rules)) {
+    if (!Array.isArray(rules)) {
       rules = [rules];
     }
 

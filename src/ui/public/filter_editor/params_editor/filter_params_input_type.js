@@ -2,6 +2,7 @@ import { uiModules } from 'ui/modules';
 import template from './filter_params_input_type.html';
 import '../../directives/validate_date_math';
 import '../../directives/validate_ip';
+import '../../directives/string_to_number';
 
 const module = uiModules.get('kibana');
 module.directive('filterParamsInputType', function () {

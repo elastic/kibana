@@ -15,7 +15,7 @@ describe('calculateLabel(metric, metrics)', () => {
   });
 
   it('returns "Calcuation" for a bucket script metric', () => {
-    expect(calculateLabel({ type: 'calculation' })).to.equal('Calculation');
+    expect(calculateLabel({ type: 'calculation' })).to.equal('Bucket Script');
   });
 
   it('returns formated label for series_agg', () => {
@@ -36,6 +36,16 @@ describe('calculateLabel(metric, metrics)', () => {
     ];
     const label = calculateLabel(metric, metrics);
     expect(label).to.equal('Derivative of Max of network.out.bytes');
+  });
+
+  it('returns formated label for derivative of percentile', () => {
+    const metric = { id: 2, type: 'derivative', field: '1[50.0]' };
+    const metrics = [
+      { id: 1, type: 'percentile', field: 'network.out.bytes' },
+      metric
+    ];
+    const label = calculateLabel(metric, metrics);
+    expect(label).to.equal('Derivative of Percentile of network.out.bytes (50.0)');
   });
 
   it('returns formated label for pipeline aggs (deep)', () => {

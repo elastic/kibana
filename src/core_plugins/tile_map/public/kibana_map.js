@@ -108,8 +108,6 @@ export class KibanaMap extends EventEmitter {
     this._leafletMap = L.map(containerNode, leafletOptions);
     this._leafletMap.attributionControl.setPrefix('');
     this._leafletMap.scrollWheelZoom.disable();
-    const worldBounds = L.latLngBounds(L.latLng(-90, -180), L.latLng(90, 180));
-    this._leafletMap.setMaxBounds(worldBounds);
 
     let previousZoom = this._leafletMap.getZoom();
     this._leafletMap.on('zoomend', () => {
@@ -405,7 +403,7 @@ export class KibanaMap extends EventEmitter {
 
     // When map has not width or height, calculate map dimensions based on parent dimensions
     if (southEastLat === northWestLat || southEastLng === northWestLng) {
-      let parent = this._containerNode.parentElement;
+      let parent = this._containerNode.parentNode;
       while (parent && (parent.clientWidth === 0 || parent.clientHeight === 0)) {
         parent = parent.parentNode;
       }
@@ -663,7 +661,7 @@ export class KibanaMap extends EventEmitter {
       if (!centerFromUIState || centerFromMap.lon !== centerFromUIState[1] || centerFromMap.lat !== centerFromUIState[0]) {
         visualization.uiStateVal('mapCenter', [centerFromMap.lat, centerFromMap.lon]);
       }
-      uiState.set('mapBounds', this.getUntrimmedBounds());
+      visualization.sessionState.mapBounds = this.getUntrimmedBounds();
     }
 
     this.on('dragend', persistMapStateInUiState);

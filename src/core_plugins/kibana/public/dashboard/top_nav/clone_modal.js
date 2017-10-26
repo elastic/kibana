@@ -40,7 +40,6 @@ export class DashboardCloneModal extends React.Component {
       <KuiModalOverlay>
         <KuiModal
           data-tests-subj="dashboardCloneModal"
-          aria-label="Clone a dashboard"
           className="dashboardCloneModal"
           onKeyDown={this.onKeyDown}
         >

@@ -47,72 +47,6 @@ export default function ({ getService, getPageObjects }) {
       expect(inViewMode).to.equal(true);
     });
 
-    describe('panel edit controls', function () {
-      it('are hidden in view mode', async function () {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
-        await PageObjects.dashboard.clickDashboardByLinkText(dashboardName);
-
-        const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
-        const moveExists = await testSubjects.exists('dashboardPanelMoveIcon');
-        const removeExists = await testSubjects.exists('dashboardPanelRemoveIcon');
-
-        expect(editLinkExists).to.equal(false);
-        expect(moveExists).to.equal(false);
-        expect(removeExists).to.equal(false);
-      });
-
-      it('are shown in edit mode', async function () {
-        await PageObjects.dashboard.clickEdit();
-
-        const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
-        const moveExists = await testSubjects.exists('dashboardPanelMoveIcon');
-        const removeExists = await testSubjects.exists('dashboardPanelRemoveIcon');
-
-        expect(editLinkExists).to.equal(true);
-        expect(moveExists).to.equal(true);
-        expect(removeExists).to.equal(true);
-      });
-
-      describe('on an expanded panel', function () {
-        it('are hidden in view mode', async function () {
-          await PageObjects.dashboard.saveDashboard(dashboardName);
-          await PageObjects.header.clickToastOK();
-          await PageObjects.dashboard.toggleExpandPanel();
-
-          const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
-          const moveExists = await testSubjects.exists('dashboardPanelMoveIcon');
-          const removeExists = await testSubjects.exists('dashboardPanelRemoveIcon');
-
-          expect(editLinkExists).to.equal(false);
-          expect(moveExists).to.equal(false);
-          expect(removeExists).to.equal(false);
-        });
-
-        it('in edit mode hides move and remove icons ', async function () {
-          await PageObjects.dashboard.clickEdit();
-
-          const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
-          const moveExists = await testSubjects.exists('dashboardPanelMoveIcon');
-          const removeExists = await testSubjects.exists('dashboardPanelRemoveIcon');
-
-          expect(editLinkExists).to.equal(true);
-          expect(moveExists).to.equal(false);
-          expect(removeExists).to.equal(false);
-
-          await PageObjects.dashboard.toggleExpandPanel();
-        });
-      });
-    });
-
-    // Panel expand should also be shown in view mode, but only on mouse hover.
-    describe('panel expand control', function () {
-      it('shown in edit mode', async function () {
-        await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-        const expandExists = await testSubjects.exists('dashboardPanelExpandIcon');
-        expect(expandExists).to.equal(true);
-      });
-    });
-
     describe('save', function () {
       it('auto exits out of edit mode', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
@@ -212,8 +146,8 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.common.clickConfirmOnModal();
 
           const visualizations = PageObjects.dashboard.getTestVisualizations();
-          const panelTitles = await PageObjects.dashboard.getPanelSizeData();
-          expect(panelTitles.length).to.eql(visualizations.length);
+          const panelCount = await PageObjects.dashboard.getPanelCount();
+          expect(panelCount).to.eql(visualizations.length);
         });
 
         it('when an existing vis is added', async function () {
@@ -224,8 +158,8 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.common.clickConfirmOnModal();
 
           const visualizations = PageObjects.dashboard.getTestVisualizations();
-          const panelTitles = await PageObjects.dashboard.getPanelSizeData();
-          expect(panelTitles.length).to.eql(visualizations.length);
+          const panelCount = await PageObjects.dashboard.getPanelCount();
+          expect(panelCount).to.eql(visualizations.length);
         });
       });
 

@@ -9,7 +9,6 @@ import healthCheck from '../health_check';
 import kibanaVersion from '../kibana_version';
 import { esTestConfig } from '../../../../test_utils/es';
 import * as patchKibanaIndexNS from '../patch_kibana_index';
-import * as migrateConfigNS from '../migrate_config';
 
 const esPort = esTestConfig.getPort();
 const esUrl = esTestConfig.getUrl();
@@ -34,7 +33,6 @@ describe('plugins/elasticsearch', () => {
       // Stub the Kibana version instead of drawing from package.json.
       sandbox.stub(kibanaVersion, 'get').returns(COMPATIBLE_VERSION_NUMBER);
       sandbox.stub(patchKibanaIndexNS, 'patchKibanaIndex');
-      sandbox.stub(migrateConfigNS, 'migrateConfig');
 
       // setup the plugin stub
       plugin = {
@@ -42,7 +40,7 @@ describe('plugins/elasticsearch', () => {
         status: {
           red: sinon.stub(),
           green: sinon.stub(),
-          yellow: sinon.stub()
+          yellow: sinon.stub(),
         }
       };
 
@@ -105,7 +103,7 @@ describe('plugins/elasticsearch', () => {
 
       // call the server extension
       const reply = sinon.stub();
-      const [,handler] = server.ext.firstCall.args;
+      const [, handler] = server.ext.firstCall.args;
       handler({}, reply);
 
       // ensure that the handler called reply and unregistered the time
@@ -207,13 +205,19 @@ describe('plugins/elasticsearch', () => {
     });
 
     describe('#waitUntilReady', function () {
-      it('polls health until index is ready', function () {
+      it('polls health until index is ready, then waits for green status', function () {
         const clusterHealth = cluster.callWithInternalUser.withArgs('cluster.health', sinon.match.any);
         clusterHealth.onCall(0).returns(Promise.resolve({ timed_out: true }));
         clusterHealth.onCall(1).returns(Promise.resolve({ status: 'red' }));
         clusterHealth.onCall(2).returns(Promise.resolve({ status: 'green' }));
 
+        plugin.status.once = sinon.spy(function (event, handler) {
+          expect(event).to.be('green');
+          setImmediate(handler);
+        });
+
         return health.waitUntilReady().then(function () {
+          sinon.assert.calledOnce(plugin.status.once);
           sinon.assert.calledThrice(clusterHealth);
         });
       });

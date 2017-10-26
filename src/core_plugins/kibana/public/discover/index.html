@@ -8,7 +8,14 @@
         <h1 tabindex="0" id="kui_local_breadcrumb" class="kuiLocalBreadcrumb">
           <span ng-show="opts.savedSearch.id" class="kuiLocalBreadcrumb__emphasis">
             <span data-test-subj="discoverCurrentQuery" ng-bind="opts.savedSearch.lastSavedTitle"></span>
-            <i id="reload_saved_search" tabindex="0" aria-label="Reload Saved Search" tooltip="Reload Saved Search" ng-click="resetQuery();" class="fa fa-undo small"></i>&nbsp;
+            <span
+              id="reload_saved_search"
+              aria-label="Reload Saved Search"
+              tooltip="Reload Saved Search"
+              ng-click="resetQuery()"
+              kbn-accessible-click
+              class="kuiIcon fa-undo small"
+            ></span>&nbsp;
           </span>
           <span data-test-subj="discoverQueryHits" class="kuiLocalBreadcrumb__emphasis">{{(hits || 0) | number:0}}</span>
           <ng-pluralize count="hits" when="{'1':'hit', 'other':'hits'}"></ng-pluralize>
@@ -20,7 +27,7 @@
         <query-bar
           query="state.query"
           app-name="'discover'"
-          on-submit="updateQuery($query)"
+          on-submit="updateQueryAndFetch($query)"
         >
         </query-bar>
       </div>

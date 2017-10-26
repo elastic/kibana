@@ -6,12 +6,10 @@ import 'ui/index_patterns';
 import { uiModules } from 'ui/modules';
 import { Notifier } from 'ui/notify/notifier';
 
-import { DocSourceProvider } from './data_source/doc_source';
 import { SearchSourceProvider } from './data_source/search_source';
 import { SearchStrategyProvider } from './fetch/strategy/search';
-import { RequestQueueProvider } from './_request_queue';
+import { requestQueue } from './_request_queue';
 import { FetchProvider } from './fetch';
-import { DocDataLooperProvider } from './looper/doc_data';
 import { SearchLooperProvider } from './looper/search';
 import { RootSearchSourceProvider } from './data_source/_root_search_source';
 import { SavedObjectProvider } from './saved_object';
@@ -22,15 +20,10 @@ uiModules.get('kibana/courier')
 .service('courier', function ($rootScope, Private, Promise, indexPatterns) {
   function Courier() {
     const self = this;
-
-    const DocSource = Private(DocSourceProvider);
     const SearchSource = Private(SearchSourceProvider);
     const searchStrategy = Private(SearchStrategyProvider);
 
-    const requestQueue = Private(RequestQueueProvider);
-
     const fetch = Private(FetchProvider);
-    const docDataLooper = self.docLooper = Private(DocDataLooperProvider);
     const searchLooper = self.searchLooper = Private(SearchLooperProvider);
 
     // expose some internal modules
@@ -40,7 +33,6 @@ uiModules.get('kibana/courier')
     self.indexPatterns = indexPatterns;
     self.redirectWhenMissing = Private(RedirectWhenMissingProvider);
 
-    self.DocSource = DocSource;
     self.SearchSource = SearchSource;
 
     /**
@@ -59,7 +51,6 @@ uiModules.get('kibana/courier')
      */
     self.start = function () {
       searchLooper.start();
-      docDataLooper.start();
       return this;
     };
 
@@ -97,28 +88,12 @@ uiModules.get('kibana/courier')
       return this;
     };
 
-
-    /**
-     * create a source object that is a child of this courier
-     *
-     * @param {string} type - the type of Source to create
-     */
-    self.createSource = function (type) {
-      switch (type) {
-        case 'doc':
-          return new DocSource();
-        case 'search':
-          return new SearchSource();
-      }
-    };
-
     /**
      * Abort all pending requests
      * @return {[type]} [description]
      */
     self.close = function () {
       searchLooper.stop();
-      docDataLooper.stop();
 
       _.invoke(requestQueue, 'abort');
 

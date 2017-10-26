@@ -26,9 +26,9 @@ export function TestSubjectsProvider({ getService }) {
       });
     }
 
-    async click(selector) {
+    async click(selector, timeout = defaultFindTimeout) {
       return await retry.try(async () => {
-        const element = await this.find(selector);
+        const element = await this.find(selector, timeout);
         await remote.moveMouseTo(element);
         await element.click();
       });
@@ -49,10 +49,29 @@ export function TestSubjectsProvider({ getService }) {
       return await filterAsync(all, el => el.isDisplayed());
     }
 
+    async getPropertyAll(selector, property) {
+      return await this._mapAll(selector, async (element) => {
+        return await element.getProperty(property);
+      });
+    }
+
     async getProperty(selector, property) {
       return await retry.try(async () => {
         const element = await this.find(selector);
         return await element.getProperty(property);
+      });
+    }
+
+    async getAttributeAll(selector, attribute) {
+      return await this._mapAll(selector, async (element) => {
+        return await element.getAttribute(attribute);
+      });
+    }
+
+    async getAttribute(selector, attribute) {
+      return await retry.try(async () => {
+        const element = await this.find(selector);
+        return await element.getAttribute(attribute);
       });
     }
 
@@ -100,6 +119,16 @@ export function TestSubjectsProvider({ getService }) {
     async getVisibleTextAll(selectorAll) {
       return await this._mapAll(selectorAll, async (element) => {
         return await element.getVisibleText();
+      });
+    }
+
+    async moveMouseTo(selector) {
+      // Wrapped in a retry because even though the find should do a stale element check of it's own, we seem to
+      // have run into a case where the element becomes stale after the find succeeds, throwing an error during the
+      // moveMouseTo function.
+      await retry.try(async () => {
+        const element = await this.find(selector);
+        await remote.moveMouseTo(element);
       });
     }
 

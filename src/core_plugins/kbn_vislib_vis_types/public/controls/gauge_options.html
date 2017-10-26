@@ -1,4 +1,4 @@
-<div>
+<div class="kuiSideBarSection">
   <div class="kuiSideBarFormRow">
     <label class="kuiSideBarFormRow__label" for="gaugeType">
       Gauge Type
@@ -22,7 +22,7 @@
     </div>
   </div>
 
-  <div class="kuiSideBarFormRow">
+  <div class="kuiSideBarFormRow" ng-hide="vis.params.gauge.type === 'simple'">
     <label class="kuiSideBarFormRow__label" for="verticalSplit">
       Vertical Split &nbsp;
       <kbn-info
@@ -32,6 +32,15 @@
     </label>
     <div class="kuiSideBarFormRow__control">
       <input class="kuiCheckBox" id="verticalSplit" type="checkbox" ng-model="vis.params.gauge.verticalSplit">
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow">
+    <label class="kuiSideBarFormRow__label" for="addLegend">
+      Show Legend
+    </label>
+    <div class="kuiSideBarFormRow__control">
+      <input class="kuiCheckBox" id="addLegend" type="checkbox" ng-model="vis.params.addLegend">
     </div>
   </div>
 

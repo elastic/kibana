@@ -7,8 +7,8 @@ export function FilterManagerProvider(Private) {
   const queryFilter = Private(FilterBarQueryFilterProvider);
   const filterManager = {};
 
-  filterManager.add = function (field, values, operation, index) {
-    values = _.isArray(values) ? values : [values];
+  filterManager.generate = (field, values, operation, index) => {
+    values = Array.isArray(values) ? values : [values];
     const fieldName = _.isObject(field) ? field.name : field;
     const filters = _.flatten([queryFilter.getAppFilters()]);
     const newFilters = [];
@@ -68,6 +68,11 @@ export function FilterManagerProvider(Private) {
       newFilters.push(filter);
     });
 
+    return newFilters;
+  };
+
+  filterManager.add = function (field, values, operation, index) {
+    const newFilters = this.generate(field, values, operation, index);
     return queryFilter.addFilters(newFilters);
   };
 

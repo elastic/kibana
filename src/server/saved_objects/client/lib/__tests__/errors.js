@@ -8,7 +8,7 @@ import {
   isNotAuthorizedError,
   decorateForbiddenError,
   isForbiddenError,
-  decorateNotFoundError,
+  createGenericNotFoundError,
   isNotFoundError,
   decorateConflictError,
   isConflictError,
@@ -145,42 +145,26 @@ describe('savedObjectsClient/errorTypes', () => {
     });
   });
   describe('NotFound error', () => {
-    describe('decorateNotFoundError', () => {
-      it('returns original object', () => {
-        const error = new Error();
-        expect(decorateNotFoundError(error)).to.be(error);
-      });
-
-      it('makes the error identifiable as a NotFound error', () => {
-        const error = new Error();
-        expect(isNotFoundError(error)).to.be(false);
-        decorateNotFoundError(error);
+    describe('createGenericNotFoundError', () => {
+      it('makes an error identifiable as a NotFound error', () => {
+        const error = createGenericNotFoundError();
         expect(isNotFoundError(error)).to.be(true);
       });
 
-      it('adds boom properties', () => {
-        const error = decorateNotFoundError(new Error());
+      it('is a boom error, has boom properties', () => {
+        const error = createGenericNotFoundError();
+        expect(error).to.have.property('isBoom', true);
         expect(error.output).to.be.an('object');
         expect(error.output.statusCode).to.be(404);
       });
 
-      it('preserves boom properties of input', () => {
-        const error = Boom.forbidden();
-        decorateNotFoundError(error);
-        expect(error.output.statusCode).to.be(403);
-      });
-
       describe('error.output', () => {
-        it('defaults to message of erorr', () => {
-          const error = decorateNotFoundError(new Error('foobar'));
-          expect(error.output.payload).to.have.property('message', 'foobar');
-        });
-        it('prefixes message with passed reason', () => {
-          const error = decorateNotFoundError(new Error('foobar'), 'biz');
-          expect(error.output.payload).to.have.property('message', 'biz: foobar');
+        it('Uses "Not Found" message', () => {
+          const error = createGenericNotFoundError();
+          expect(error.output.payload).to.have.property('message', 'Not Found');
         });
         it('sets statusCode to 404', () => {
-          const error = decorateNotFoundError(new Error('foo'));
+          const error = createGenericNotFoundError();
           expect(error.output).to.have.property('statusCode', 404);
         });
       });

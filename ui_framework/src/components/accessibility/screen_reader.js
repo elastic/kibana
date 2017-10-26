@@ -6,9 +6,10 @@ import classNames from 'classnames';
 export const KuiScreenReaderOnly = ({ children }) => {
   const classes = classNames('kuiScreenReaderOnly', children.props.className);
 
-  const props = Object.assign({}, children.props, {
-    className: classes
-  });
+  const props = {
+    ...children.props,
+    className: classes,
+  };
 
   return cloneElement(children, props);
 };

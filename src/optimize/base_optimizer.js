@@ -10,8 +10,9 @@ import UglifyJsPlugin from 'webpack/lib/optimize/UglifyJsPlugin';
 import { defaults, transform } from 'lodash';
 
 import { fromRoot } from '../utils';
-import babelOptions from './babel/options';
 import pkg from '../../package.json';
+
+import { PUBLIC_PATH_PLACEHOLDER } from './public_path_placeholder';
 import { setLoaderQueryParam, makeLoaderString } from './loaders';
 
 const babelExclude = [/[\/\\](webpackShims|node_modules|bower_components)[\/\\]/];
@@ -19,7 +20,6 @@ const babelExclude = [/[\/\\](webpackShims|node_modules|bower_components)[\/\\]/
 export default class BaseOptimizer {
   constructor(opts) {
     this.env = opts.env;
-    this.urlBasePath = opts.urlBasePath;
     this.bundles = opts.bundles;
     this.profile = opts.profile || false;
 
@@ -101,7 +101,7 @@ export default class BaseOptimizer {
         path: this.env.workingDir,
         filename: '[name].bundle.js',
         sourceMapFilename: '[file].map',
-        publicPath: `${this.urlBasePath || ''}/bundles/`,
+        publicPath: PUBLIC_PATH_PLACEHOLDER,
         devtoolModuleFilenameTemplate: '[absolute-resource-path]'
       },
 
@@ -133,7 +133,11 @@ export default class BaseOptimizer {
             test: /\.js$/,
             exclude: babelExclude.concat(this.env.noParse),
             loader: 'babel-loader',
-            query: babelOptions.webpack
+            query: {
+              presets: [
+                require.resolve('../babel-preset/webpack')
+              ]
+            }
           },
         ],
         postLoaders: this.env.postLoaders || [],

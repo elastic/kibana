@@ -5,6 +5,7 @@ import FieldSelect from './field_select';
 import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 function StandardAgg(props) {
   const { model, panel, series, fields } = props;
@@ -13,10 +14,11 @@ function StandardAgg(props) {
   const handleSelectChange = createSelectHandler(handleChange);
   let restrict = 'numeric';
   if (model.type === 'cardinality') {
-    restrict = 'string';
+    restrict = 'none';
   }
 
   const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
+  const htmlId = htmlIdGenerator();
 
   return (
     <AggRow
@@ -29,6 +31,7 @@ function StandardAgg(props) {
       <div className="vis_editor__item">
         <div className="vis_editor__label">Aggregation</div>
         <AggSelect
+          panelType={props.panel.type}
           siblings={props.siblings}
           value={model.type}
           onChange={handleSelectChange('type')}
@@ -38,8 +41,9 @@ function StandardAgg(props) {
         model.type !== 'count'
         ? (
           <div className="vis_editor__item">
-            <div className="vis_editor__label">Field</div>
+            <label className="vis_editor__label" htmlFor={htmlId('field')}>Field</label>
             <FieldSelect
+              id={htmlId('field')}
               fields={fields}
               type={model.type}
               restrict={restrict}

@@ -17,7 +17,7 @@ import {
   decorateBadRequestError,
   decorateNotAuthorizedError,
   decorateForbiddenError,
-  decorateNotFoundError,
+  createGenericNotFoundError,
   decorateConflictError,
   decorateEsUnavailableError,
   decorateGeneralError,
@@ -51,7 +51,7 @@ export function decorateEsError(error) {
   }
 
   if (error instanceof NotFound) {
-    return decorateNotFoundError(error, reason);
+    return createGenericNotFoundError();
   }
 
   if (error instanceof BadRequest) {

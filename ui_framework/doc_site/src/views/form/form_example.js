@@ -28,6 +28,19 @@ export default props => (
         code: labelHtml,
       }]}
     >
+
+      <GuideText>
+        Never forget to label every input element. You can either
+        use a <code>label</code> element with a <code>for</code> attribute
+        referencing the <code>id</code> of the input field, wrap the <code>input</code> field
+        within the <code>label</code> element or use <code>aria-label</code> or <code>aria-labelledby</code>.
+      </GuideText>
+
+      <GuideText>
+        For the sake of simplicity we haven&rsquo;t labeled the input elements on
+        this page correctly.
+      </GuideText>
+
       <GuideDemo
         html={labelHtml}
       />
@@ -46,7 +59,7 @@ export default props => (
 
       <GuideDemo
         html={textInputHtml}
-        isDarkTheme={true}
+        isDarkTheme
       />
     </GuideSection>
 
@@ -70,7 +83,7 @@ export default props => (
 
       <GuideDemo
         html={assistedInputHtml}
-        isDarkTheme={true}
+        isDarkTheme
       />
     </GuideSection>
 
@@ -87,7 +100,7 @@ export default props => (
 
       <GuideDemo
         html={searchInputHtml}
-        isDarkTheme={true}
+        isDarkTheme
       />
     </GuideSection>
 
@@ -120,7 +133,7 @@ export default props => (
 
       <GuideDemo
         html={textAreaHtml}
-        isDarkTheme={true}
+        isDarkTheme
       />
     </GuideSection>
 
@@ -146,6 +159,11 @@ export default props => (
       <GuideDemo
         html={checkBoxHtml}
       />
+
+      <GuideDemo
+        html={checkBoxHtml}
+        isDarkTheme
+      />
     </GuideSection>
 
     <GuideSection
@@ -161,7 +179,7 @@ export default props => (
 
       <GuideDemo
         html={selectHtml}
-        isDarkTheme={true}
+        isDarkTheme
       />
     </GuideSection>
   </GuidePage>

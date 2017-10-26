@@ -1,9 +1,10 @@
 import searchTemplate from './search_template.html';
 import angular from 'angular';
+import 'ui/doc_table';
+
 import * as columnActions from 'ui/doc_table/actions/columns';
 import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
-import { EmbeddableHandler } from 'ui/embeddable';
-
+import { EmbeddableHandler, Embeddable } from 'ui/embeddable';
 
 export class SearchEmbeddableHandler extends EmbeddableHandler {
 
@@ -17,7 +18,7 @@ export class SearchEmbeddableHandler extends EmbeddableHandler {
   }
 
   getEditPath(panelId) {
-    return this.Promise.resolve(this.searchLoader.urlFor(panelId));
+    return this.searchLoader.urlFor(panelId);
   }
 
   getTitleFor(panelId) {
@@ -26,11 +27,8 @@ export class SearchEmbeddableHandler extends EmbeddableHandler {
 
   render(domNode, panel, container) {
     const searchScope = this.$rootScope.$new();
-    return this.getEditPath(panel.id)
-      .then(editPath => {
-        searchScope.editPath = editPath;
-        return this.searchLoader.get(panel.id);
-      })
+    searchScope.editPath = this.getEditPath(panel.id);
+    return this.searchLoader.get(panel.id)
       .then(savedObject => {
         searchScope.savedObj = savedObject;
         searchScope.panel = panel;
@@ -76,6 +74,17 @@ export class SearchEmbeddableHandler extends EmbeddableHandler {
         const searchInstance = this.$compile(searchTemplate)(searchScope);
         const rootNode = angular.element(domNode);
         rootNode.append(searchInstance);
+
+        this.addDestroyEmeddable(panel.panelIndex, () => {
+          searchInstance.remove();
+          searchScope.savedObj.destroy();
+          searchScope.$destroy();
+        });
+
+        return new Embeddable({
+          title: savedObject.title,
+          editUrl: searchScope.editPath
+        });
       });
   }
 }

@@ -10,9 +10,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
 
       if (queryFilter && vis.editorMode) {
         searchSource.set('filter', queryFilter.getFilters());
-        if (!appState.linked) {
-          searchSource.set('query', appState.query);
-        }
+        searchSource.set('query', appState.query);
       }
 
       const shouldQuery = () => {
@@ -38,10 +36,6 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
 
             searchSource.rawResponse = resp;
             resolve(resp);
-          }).catch(e => reject(e));
-
-          searchSource.onError(e => {
-            reject(e);
           }).catch(e => reject(e));
 
           courier.fetch();

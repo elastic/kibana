@@ -30,6 +30,8 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 * https://github.com/mstoyano/kbn_c3js_vis[C3JS Visualizations] (mstoyano)
 * https://github.com/elo7/cohort[Cohort analysis] (elo7)
 * https://github.com/DeanF/health_metric_vis[Colored Metric Visualization] (deanf)
+* https://github.com/JuanCarniglia/dendrogram_vis[Dendrogram] (JuanCarniglia)
+* https://github.com/dlumbrer/kbn_dotplot[Dotplot] (dlumbrer)
 * https://github.com/nreese/enhanced_tilemap[Enhanced Tilemap] (nreese)
 * https://github.com/ommsolutions/kibana_ext_metrics_vis[Extended Metric] (ommsolutions)
 * https://github.com/outbrain/ob-kb-funnel[Funnel Visualization] (roybass)
@@ -42,11 +44,12 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 * https://github.com/prelert/kibana-swimlane-vis[Swimlanes] (prelert)
 * https://github.com/sbeyn/kibana-plugin-traffic-sg[Traffic] (sbeyn)
 * https://github.com/PhaedrusTheGreek/transform_vis[Transform Visualization] (PhaedrusTheGreek)
-* https://github.com/nyurik/kibana-vega-vis[Vega-based visualization with map support] (nyurik)
+* https://github.com/nyurik/kibana-vega-vis[Vega-based visualizations] (nyurik) - Support for user-defined graphs, external data sources, maps, images, and user-defined interactivity.
 
 [float]
 === Other
 * https://github.com/nreese/kibana-time-plugin[Time picker as a dashboard panel] Widget to view and edit the time range from within dashboards.
+* https://github.com/sw-jung/kibana_notification_center[Notification Center] - for better experience of notifier toasts.
 
 * https://github.com/Webiks/kibana-API.git[Kibana-API] (webiks) Exposes an API with Kibana functionality.
 Use it to create, edit and embed visualizations, and also to search inside an embedded dashboard.

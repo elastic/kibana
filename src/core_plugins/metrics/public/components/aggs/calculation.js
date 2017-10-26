@@ -10,6 +10,8 @@ import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import Vars from './vars';
 
+import { htmlIdGenerator } from 'ui_framework/services';
+
 class CalculationAgg extends Component {
 
   componentWillMount() {
@@ -30,6 +32,8 @@ class CalculationAgg extends Component {
     const handleSelectChange = createSelectHandler(handleChange);
     const handleTextChange = createTextHandler(handleChange);
 
+    const htmlId = htmlIdGenerator();
+
     return (
       <AggRow
         disableDelete={this.props.disableDelete}
@@ -42,6 +46,7 @@ class CalculationAgg extends Component {
           <div>
             <div className="vis_editor__label">Aggregation</div>
             <AggSelect
+              panelType={this.props.panel.type}
               siblings={this.props.siblings}
               value={model.type}
               onChange={handleSelectChange('type')}
@@ -56,11 +61,12 @@ class CalculationAgg extends Component {
               />
             </div>
             <div className="vis_editor__row_item">
-              <div className="vis_editor__label">
+              <label className="vis_editor__label" htmlFor={htmlId('painless')}>
                 Painless Script - Variables are keys on the <code>params</code>
                 object, i.e. <code>params.&lt;name&gt;</code>
-              </div>
+              </label>
               <input
+                id={htmlId('painless')}
                 className="vis_editor__input-grows-100"
                 type="text"
                 onChange={handleTextChange('script')}

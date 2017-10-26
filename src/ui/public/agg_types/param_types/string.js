@@ -1,17 +1,17 @@
 import _ from 'lodash';
-import editorHtml from 'ui/agg_types/controls/string.html';
-import { AggTypesParamTypesBaseProvider } from 'ui/agg_types/param_types/base';
+import editorHtml from '../controls/string.html';
+import { BaseParamTypeProvider } from './base';
 
-export function AggTypesParamTypesStringProvider(Private) {
+export function StringParamTypeProvider(Private) {
 
-  const BaseAggParam = Private(AggTypesParamTypesBaseProvider);
+  const BaseParamType = Private(BaseParamTypeProvider);
 
-  _.class(ScriptAggParam).inherits(BaseAggParam);
-  function ScriptAggParam(config) {
-    ScriptAggParam.Super.call(this, config);
+  _.class(StringParamType).inherits(BaseParamType);
+  function StringParamType(config) {
+    StringParamType.Super.call(this, config);
   }
 
-  ScriptAggParam.prototype.editor = editorHtml;
+  StringParamType.prototype.editor = editorHtml;
 
   /**
    * Write the aggregation parameter.
@@ -23,11 +23,11 @@ export function AggTypesParamTypesStringProvider(Private) {
    *                               for the agg
    * @return {undefined}
    */
-  ScriptAggParam.prototype.write = function (aggConfig, output) {
+  StringParamType.prototype.write = function (aggConfig, output) {
     if (aggConfig.params[this.name] && aggConfig.params[this.name].length) {
       output.params[this.name] = aggConfig.params[this.name];
     }
   };
 
-  return ScriptAggParam;
+  return StringParamType;
 }

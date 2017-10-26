@@ -7,6 +7,7 @@ import Select from 'react-select';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
+import { htmlIdGenerator } from 'ui_framework/services';
 
 export const StandardDeviationAgg = props => {
   const { series, panel, fields } = props;
@@ -17,14 +18,18 @@ export const StandardDeviationAgg = props => {
     { label: 'Raw', value: 'raw' },
     { label: 'Upper Bound', value: 'upper' },
     { label: 'Lower Bound', value: 'lower' },
-    { label: 'Bounds Band', value: 'band' }
   ];
+
+  if (panel.type !== 'table') {
+    modeOptions.push({ label: 'Bounds Band', value: 'band' });
+  }
 
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
   const handleTextChange = createTextHandler(handleChange);
 
   const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
+  const htmlId = htmlIdGenerator();
 
   return (
     <AggRow
@@ -37,14 +42,16 @@ export const StandardDeviationAgg = props => {
       <div className="vis_editor__row_item">
         <div className="vis_editor__label">Aggregation</div>
         <AggSelect
+          panelType={props.panel.type}
           siblings={props.siblings}
           value={model.type}
           onChange={handleSelectChange('type')}
         />
       </div>
       <div className="vis_editor__std_deviation-field">
-        <div className="vis_editor__label">Field</div>
+        <label className="vis_editor__label" htmlFor={htmlId('field')}>Field</label>
         <FieldSelect
+          id={htmlId('field')}
           fields={fields}
           type={model.type}
           restrict="numeric"
@@ -54,16 +61,18 @@ export const StandardDeviationAgg = props => {
         />
       </div>
       <div className="vis_editor__std_deviation-sigma_item">
-        <div className="vis_editor__label">Sigma</div>
+        <label className="vis_editor__label" htmlFor={htmlId('sigma')}>Sigma</label>
         <input
+          id={htmlId('sigma')}
           className="vis_editor__std_deviation-sigma"
           value={model.sigma}
           onChange={handleTextChange('sigma')}
         />
       </div>
       <div className="vis_editor__row_item">
-        <div className="vis_editor__label">Mode</div>
+        <label className="vis_editor__label" htmlFor={htmlId('mode')}>Mode</label>
         <Select
+          inputProps={{ id: htmlId('mode') }}
           options={modeOptions}
           onChange={handleSelectChange('mode')}
           value={model.mode}

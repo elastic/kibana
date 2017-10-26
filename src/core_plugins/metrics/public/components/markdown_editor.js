@@ -1,16 +1,18 @@
 /* eslint max-len:0 */
+/* eslint-disable jsx-a11y/anchor-is-valid, jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */
+// Markdown builder is not yet properly accessible
+
 import PropTypes from 'prop-types';
 
 import React, { Component } from 'react';
 import tickFormatter from './lib/tick_formatter';
 import convertSeriesToVars from './lib/convert_series_to_vars';
-import AceEditor from 'react-ace';
+import { KuiCodeEditor } from 'ui_framework/components';
 import _ from 'lodash';
 import 'brace/mode/markdown';
 import 'brace/theme/github';
 
 class MarkdownEditor extends Component {
-
   constructor(props) {
     super(props);
     this.handleChange = this.handleChange.bind(this);
@@ -45,12 +47,10 @@ class MarkdownEditor extends Component {
       rows.push(
         <tr key={key}>
           <td>
-            <a onClick={this.handleVarClick(snippet)}>
-              { snippet }
-            </a>
+            <a onClick={this.handleVarClick(snippet)}>{snippet}</a>
           </td>
           <td>
-            <code>&ldquo;{ value }&rdquo;</code>
+            <code>&ldquo;{value}&rdquo;</code>
           </td>
         </tr>
       );
@@ -64,12 +64,12 @@ class MarkdownEditor extends Component {
       rows.push(
         <tr key={key}>
           <td>
-            <a onClick={this.handleVarClick(snippet)}>
-              { `{{ ${key} }}` }
-            </a>
+            <a onClick={this.handleVarClick(snippet)}>{`{{ ${key} }}`}</a>
           </td>
           <td>
-            <code>[ [ &ldquo;{date}&rdquo;, &ldquo;{value}&rdquo; ], ... ]</code>
+            <code>
+              [ [ &ldquo;{date}&rdquo;, &ldquo;{value}&rdquo; ], ... ]
+            </code>
           </td>
         </tr>
       );
@@ -77,7 +77,7 @@ class MarkdownEditor extends Component {
 
     function walk(obj, path = []) {
       for (const name in obj) {
-        if (_.isArray(obj[name])) {
+        if (Array.isArray(obj[name])) {
           createArrayRow(path.concat(name).join('.'));
         } else if (_.isObject(obj[name])) {
           walk(obj[name], path.concat(name));
@@ -89,11 +89,10 @@ class MarkdownEditor extends Component {
 
     walk(variables);
 
-
     return (
       <div className="vis_editor__markdown">
         <div className="vis_editor__markdown-editor">
-          <AceEditor
+          <KuiCodeEditor
             onLoad={this.handleOnLoad}
             mode="markdown"
             theme="github"
@@ -106,7 +105,13 @@ class MarkdownEditor extends Component {
           />
         </div>
         <div className="vis_editor__markdown-variables">
-          <div>The following variables can be used in the Markdown by using the Handlebar (mustache) syntax. <a href="http://handlebarsjs.com/expressions.html" target="_BLANK">Click here for documentation</a> on the available expressions.</div>
+          <div>
+            The following variables can be used in the Markdown by using the Handlebar (mustache) syntax.{' '}
+            <a href="http://handlebarsjs.com/expressions.html" target="_BLANK">
+              Click here for documentation
+            </a>{' '}
+            on the available expressions.
+          </div>
           <table className="table">
             <thead>
               <tr>
@@ -114,13 +119,19 @@ class MarkdownEditor extends Component {
                 <th>Value</th>
               </tr>
             </thead>
-            <tbody>
-              {rows}
-            </tbody>
+            <tbody>{rows}</tbody>
           </table>
-          <div className="vis_editor__markdown-code-desc">There is also a special variable named <code>_all</code> which you can use to access the entire tree. This is useful for creating lists with data from a group by...</div>
+          {rows.length === 0 && (
+            <div className="vis_editor__no-markdown-variables">No variables avaliable for the selected data metrics.</div>
+          )}
+
+          <div className="vis_editor__markdown-code-desc">
+            There is also a special variable named <code>_all</code> which you can use to access the entire tree. This is useful for
+            creating lists with data from a group by...
+          </div>
           <pre>
-            <code>{`# All servers:
+            <code>
+              {`# All servers:
 
 {{#each _all}}
 - {{ label }} {{ last.formatted }}
@@ -131,7 +142,6 @@ class MarkdownEditor extends Component {
       </div>
     );
   }
-
 }
 
 MarkdownEditor.propTypes = {

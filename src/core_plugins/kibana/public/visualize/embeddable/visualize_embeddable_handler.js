@@ -1,14 +1,16 @@
 import angular from 'angular';
+import 'ui/visualize';
 
 import visualizationTemplate from './visualize_template.html';
 import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
 import { UtilsBrushEventProvider as utilsBrushEventProvider } from 'ui/utils/brush_event';
 import { FilterBarClickHandlerProvider as filterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
-import { EmbeddableHandler } from 'ui/embeddable';
+import { EmbeddableHandler, Embeddable } from 'ui/embeddable';
+
 import chrome from 'ui/chrome';
 
 export class VisualizeEmbeddableHandler extends EmbeddableHandler {
-  constructor($compile, $rootScope, visualizeLoader, timefilter, Notifier, Promise) {
+  constructor($compile, $rootScope, visualizeLoader, timefilter, Notifier, Promise, Private) {
     super();
     this.$compile = $compile;
     this.visualizeLoader = visualizeLoader;
@@ -16,24 +18,17 @@ export class VisualizeEmbeddableHandler extends EmbeddableHandler {
     this.name = 'visualization';
     this.Promise = Promise;
     this.brushEvent = utilsBrushEventProvider(timefilter);
-    this.filterBarClickHandler = filterBarClickHandlerProvider(Notifier);
+    this.filterBarClickHandler = filterBarClickHandlerProvider(Notifier, Private);
   }
 
   getEditPath(panelId) {
-    return this.Promise.resolve(this.visualizeLoader.urlFor(panelId));
-  }
-
-  getTitleFor(panelId) {
-    return this.visualizeLoader.get(panelId).then(savedObject => savedObject.title);
+    return this.visualizeLoader.urlFor(panelId);
   }
 
   render(domNode, panel, container) {
     const visualizeScope = this.$rootScope.$new();
-    return this.getEditPath(panel.id)
-      .then(editPath => {
-        visualizeScope.editUrl = editPath;
-        return this.visualizeLoader.get(panel.id);
-      })
+    visualizeScope.editUrl = this.getEditPath(panel.id);
+    return this.visualizeLoader.get(panel.id)
       .then(savedObject => {
         visualizeScope.savedObj = savedObject;
         visualizeScope.panel = panel;
@@ -56,9 +51,15 @@ export class VisualizeEmbeddableHandler extends EmbeddableHandler {
         const rootNode = angular.element(domNode);
         rootNode.append(visualizationInstance);
 
-        visualizationInstance.on('$destroy', function () {
+        this.addDestroyEmeddable(panel.panelIndex, () => {
+          visualizationInstance.remove();
           visualizeScope.savedObj.destroy();
           visualizeScope.$destroy();
+        });
+
+        return new Embeddable({
+          title: savedObject.title,
+          editUrl: visualizeScope.editUrl
         });
       });
   }

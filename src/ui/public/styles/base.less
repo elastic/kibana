@@ -2,6 +2,8 @@
 @import (reference) "./mixins";
 @import (reference) "./variables";
 @import (reference) "~ui/styles/bootstrap/bootstrap";
+@import "./react-input-range";
+@import "./react-select";
 
 html,
 body {
@@ -246,16 +248,25 @@ table {
 //== SavedObjectFinder
 saved-object-finder,
 paginated-selectable-list {
+
+  .list-sort-button {
+    .border-top-radius(0) !important;
+    border: none;
+    padding: 8px 15px;
+    font-weight: normal;
+    background-color: @kibanaGray6;
+  }
+
   ul.li-striped {
     li {
       border: none;
     }
 
-    li:nth-child(odd) {
+    li:nth-child(even) {
       background-color: @kibanaGray6;
     }
 
-    li:nth-child(even) {
+    li:nth-child(odd) {
       background-color: @white;
     }
 
@@ -725,6 +736,11 @@ fieldset {
 
 .kuiSideBarOptionsLink__text {
   margin-left: 2px;
+}
+
+.kuiGalleryItem__image img {
+  width: 64px;
+  height: 64px;
 }
 
 @import "~dragula/dist/dragula.css";

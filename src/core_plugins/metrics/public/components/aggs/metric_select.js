@@ -18,20 +18,52 @@ function createTypeFilter(restrict, exclude) {
   };
 }
 
+
+// This filters out sibling aggs, percentiles, and special aggs (like Series Agg)
+export function filterRows(includeSiblings) {
+  return row => {
+    if (includeSiblings) return !/^series/.test(row.type) && !/^percentile/.test(row.type) && row.type !== 'math';
+    return  !/_bucket$/.test(row.type)
+      && !/^series/.test(row.type)
+      && !/^percentile/.test(row.type)
+      && row.type !== 'math';
+  };
+}
+
 function MetricSelect(props) {
   const {
     restrict,
     metric,
     onChange,
     value,
-    exclude
+    exclude,
+    includeSiblings
   } = props;
 
   const metrics = props.metrics
     .filter(createTypeFilter(restrict, exclude));
 
-  const options = calculateSiblings(metrics, metric)
-    .filter(row => !/_bucket$/.test(row.type) && !/^series/.test(row.type))
+  const siblings = calculateSiblings(metrics, metric);
+
+  // Percentiles need to be handled differently because one percentile aggregation
+  // could have multiple percentiles associated with it. So the user needs a way
+  // to specify which percentile the want to use.
+  const percentileOptions = siblings
+    .filter(row => /^percentile/.test(row.type))
+    .reduce((acc, row) => {
+      const label = calculateLabel(row, metrics);
+      row.percentiles.forEach(p => {
+        if (p.value) {
+          const value = /\./.test(p.value) ? p.value : `${p.value}.0`;
+          acc.push({ value: `${row.id}[${value}]`, label: `${label} (${value})` });
+        }
+      });
+      return acc;
+    }, []);
+
+
+  const options = siblings
+    .filter(filterRows(includeSiblings))
     .map(row => {
       const label = calculateLabel(row, metrics);
       return { value: row.id, label };
@@ -39,8 +71,9 @@ function MetricSelect(props) {
 
   return (
     <Select
+      aria-label="Select metric"
       placeholder="Select metric..."
-      options={options.concat(props.additionalOptions)}
+      options={[ ...options, ...props.additionalOptions, ...percentileOptions]}
       value={value}
       onChange={onChange}
     />
@@ -52,6 +85,7 @@ MetricSelect.defaultProps = {
   exclude: [],
   metric: {},
   restrict: 'none',
+  includeSiblings: false
 };
 
 MetricSelect.propTypes = {
@@ -60,7 +94,8 @@ MetricSelect.propTypes = {
   metric: PropTypes.object,
   onChange: PropTypes.func,
   restrict: PropTypes.string,
-  value: PropTypes.string
+  value: PropTypes.string,
+  includeSiblings: PropTypes.bool
 };
 
 export default MetricSelect;

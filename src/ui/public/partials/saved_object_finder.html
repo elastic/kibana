@@ -16,6 +16,7 @@
           name="filter"
           type="text"
           autocomplete="off"
+          data-test-subj="savedObjectFinderSearchInput"
         >
       </div>
     </div>
@@ -52,23 +53,20 @@
   per-page="20"
   class="kuiVerticalRhythm"
 >
+  <button
+    class="paginate-heading list-group-item list-sort-button"
+    ng-click="finder.sortHits(finder.hits)"
+    aria-live="assertive"
+  >
+    <span class="kuiScreenReaderOnly">Sort by</span>
+    Name
+    <span
+      class="fa"
+      ng-class="finder.isAscending ? 'fa-caret-up' : 'fa-caret-down'">
+      <span class="kuiScreenReaderOnly">({{finder.isAscending ? 'ascending' : 'descending'}})</span>
+    </span>
+  </button>
   <ul class="li-striped list-group list-group-menu" ng-class="{'select-mode': finder.selector.enabled}">
-    <li
-      class="list-group-item"
-      ng-click="finder.sortHits(finder.hits)"
-      kbn-accessible-click
-      aria-live="assertive"
-      >
-      <span class="paginate-heading">
-        <span class="kuiScreenReaderOnly">Sort by</span>
-        Name
-        <span
-          class="fa"
-          ng-class="finder.isAscending ? 'fa-caret-up' : 'fa-caret-down'">
-          <span class="kuiScreenReaderOnly">({{finder.isAscending ? 'ascending' : 'descending'}})</span>
-        </span>
-      </span>
-    </li>
     <li
       class="list-group-item list-group-menu-item"
       ng-class="{'active': finder.selector.index === $index && finder.selector.enabled}"

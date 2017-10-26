@@ -21,10 +21,10 @@ describe('formatESMsg', function () {
   it('should return the root_cause if passed an extended elasticsearch', function () {
     const err = new Error('This is an elasticsearch error');
     err.resp = {
-      error : {
-        root_cause : [
+      error: {
+        root_cause: [
           {
-            reason : 'I am the detailed message'
+            reason: 'I am the detailed message'
           }
         ]
       }
@@ -38,13 +38,13 @@ describe('formatESMsg', function () {
   it('should combine the reason messages if more than one is returned.', function () {
     const err = new Error('This is an elasticsearch error');
     err.resp = {
-      error : {
-        root_cause : [
+      error: {
+        root_cause: [
           {
-            reason : 'I am the detailed message 1'
+            reason: 'I am the detailed message 1'
           },
           {
-            reason : 'I am the detailed message 2'
+            reason: 'I am the detailed message 2'
           }
         ]
       }

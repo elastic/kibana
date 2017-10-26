@@ -1,11 +1,6 @@
 import expect from 'expect.js';
 
 import {
-  DEFAULT_PANEL_WIDTH,
-  DEFAULT_PANEL_HEIGHT,
-} from '../../../../src/core_plugins/kibana/public/dashboard/panel/panel_state';
-
-import {
   VisualizeConstants
 } from '../../../../src/core_plugins/kibana/public/visualize/visualize_constants';
 
@@ -13,7 +8,6 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
   const remote = getService('remote');
-  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize']);
 
   describe('dashboard tab', function describeIndexTests() {
@@ -21,9 +15,15 @@ export default function ({ getService, getPageObjects }) {
       return PageObjects.dashboard.initTests();
     });
 
-    it('should be able to add visualizations to dashboard', async function addVisualizations() {
-      await screenshots.take('Dashboard-no-visualizations');
+    after(async function () {
+      // avoids any 'Object with id x not found' errors when switching tests.
+      await PageObjects.header.clickVisualize();
+      await PageObjects.visualize.gotoLandingPage();
+      await PageObjects.header.clickDashboard();
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+    });
 
+    it('should be able to add visualizations to dashboard', async function addVisualizations() {
       // This flip between apps fixes the url so state is preserved when switching apps in test mode.
       // Without this flip the url in test mode looks something like
       // "http://localhost:5620/app/kibana?_t=1486069030837#/dashboard?_g=...."
@@ -35,7 +35,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
 
       log.debug('done adding visualizations');
-      await screenshots.take('Dashboard-add-visualizations');
     });
 
     it('set the timepicker time to that which contains our test data', async function setTimepicker() {
@@ -52,7 +51,6 @@ export default function ({ getService, getPageObjects }) {
         log.debug('now re-load previously saved dashboard');
         return PageObjects.dashboard.loadSavedDashboard(dashboardName);
       });
-      await screenshots.take('Dashboard-load-saved');
     });
 
     it('should have all the expected visualizations', function checkVisualizations() {
@@ -64,30 +62,6 @@ export default function ({ getService, getPageObjects }) {
         });
       })
       .then(function () {
-        screenshots.take('Dashboard-has-visualizations');
-      });
-    });
-
-    it('should have all the expected initial sizes', function checkVisualizationSizes() {
-      const width = DEFAULT_PANEL_WIDTH;
-      const height = DEFAULT_PANEL_HEIGHT;
-      const titles = PageObjects.dashboard.getTestVisualizationNames();
-      const visObjects = [
-        { dataCol: '1', dataRow: '1', dataSizeX: width, dataSizeY: height, title: titles[0] },
-        { dataCol: width + 1, dataRow: '1', dataSizeX: width, dataSizeY: height, title: titles[1] },
-        { dataCol: '1', dataRow: height + 1, dataSizeX: width, dataSizeY: height, title: titles[2] },
-        { dataCol: width + 1, dataRow: height + 1, dataSizeX: width, dataSizeY: height, title: titles[3] },
-        { dataCol: '1', dataRow: (height * 2) + 1, dataSizeX: width, dataSizeY: height, title: titles[4] },
-        { dataCol: width + 1, dataRow: (height * 2) + 1, dataSizeX: width, dataSizeY: height, title: titles[5] },
-        { dataCol: '1', dataRow: (height * 3) + 1, dataSizeX: width, dataSizeY: height, title: titles[6] }
-      ];
-      return retry.tryForTime(10000, function () {
-        return PageObjects.dashboard.getPanelSizeData()
-          .then(function (panelTitles) {
-            log.info('visualization titles = ' + panelTitles);
-            screenshots.take('Dashboard-visualization-sizes');
-            expect(panelTitles).to.eql(visObjects);
-          });
       });
     });
 
@@ -130,28 +104,6 @@ export default function ({ getService, getPageObjects }) {
           expect(data.map(item => item.title)).to.eql(visualizations.map(v => v.name));
           expect(data.map(item => item.description)).to.eql(visualizations.map(v => v.description));
         });
-      });
-    });
-
-    describe('Directly modifying url updates dashboard state', () => {
-      it('for query parameter', async function () {
-        const currentQuery = await PageObjects.dashboard.getQuery();
-        expect(currentQuery).to.equal('');
-        const currentUrl = await remote.getCurrentUrl();
-        const newUrl = currentUrl.replace('query:%27%27', 'query:%27hi%27');
-        // Don't add the timestamp to the url or it will cause a hard refresh and we want to test a
-        // soft refresh.
-        await remote.get(newUrl.toString(), false);
-        const newQuery = await PageObjects.dashboard.getQuery();
-        expect(newQuery).to.equal('hi');
-      });
-
-      it('for panel size parameters', async function () {
-        const currentUrl = await remote.getCurrentUrl();
-        const newUrl = currentUrl.replace(`size_x:${DEFAULT_PANEL_WIDTH}`, `size_x:${DEFAULT_PANEL_WIDTH * 2}`);
-        await remote.get(newUrl.toString(), false);
-        const allPanelInfo = await PageObjects.dashboard.getPanelSizeData();
-        expect(allPanelInfo[0].dataSizeX).to.equal(`${DEFAULT_PANEL_WIDTH * 2}`);
       });
     });
 
@@ -199,9 +151,14 @@ export default function ({ getService, getPageObjects }) {
         // Panels are all minimized on a fresh open of a dashboard, so we need to re-expand in order to then minimize.
         await PageObjects.dashboard.toggleExpandPanel();
         await PageObjects.dashboard.toggleExpandPanel();
-        const panels = await PageObjects.dashboard.getDashboardPanels();
-        const visualizations = PageObjects.dashboard.getTestVisualizations();
-        expect(panels.length).to.eql(visualizations.length);
+
+        // Add a retry to fix https://github.com/elastic/kibana/issues/14574.  Perhaps the recent changes to this
+        // being a CSS update is causing the UI to change slower than grabbing the panels?
+        retry.try(async () => {
+          const panels = await PageObjects.dashboard.getDashboardPanels();
+          const visualizations = PageObjects.dashboard.getTestVisualizations();
+          expect(panels.length).to.eql(visualizations.length);
+        });
       });
     });
 
@@ -295,11 +252,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.clickToastOK();
 
         const visualizations = PageObjects.dashboard.getTestVisualizations();
-        return retry.tryForTime(10000, async function () {
-          const panelTitles = await PageObjects.dashboard.getPanelSizeData();
-          log.info('visualization titles = ' + panelTitles.map(item => item.title));
-          screenshots.take('Dashboard-visualization-sizes');
-          expect(panelTitles.length).to.eql(visualizations.length + 1);
+        return retry.try(async () => {
+          const panelCount = await PageObjects.dashboard.getPanelCount();
+          expect(panelCount).to.eql(visualizations.length + 1);
         });
       });
 
@@ -307,6 +262,10 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.header.clickVisualize();
         const currentUrl = await remote.getCurrentUrl();
         expect(currentUrl).to.contain(VisualizeConstants.EDIT_PATH);
+      });
+
+      after(async () => {
+        await PageObjects.header.clickDashboard();
       });
     });
   });

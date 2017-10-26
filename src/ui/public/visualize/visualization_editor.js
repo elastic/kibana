@@ -14,7 +14,7 @@ uiModules
   return {
     restrict: 'E',
     require: '?renderCounter',
-    scope : {
+    scope: {
       vis: '=',
       visData: '=',
       uiState: '=?',
@@ -27,7 +27,7 @@ uiModules
         editorTypes.find(editor => editor.key === vis.type.editor);
       const editor = new Editor(element[0], vis);
 
-      const renderFunction = () => {
+      $scope.renderFunction = () => {
         if (!$scope.vis) return;
         editor.render($scope.visData, $scope.searchSource, getUpdateStatus($scope)).then(() => {
           $scope.$emit('renderComplete');
@@ -36,14 +36,16 @@ uiModules
 
       $scope.$on('render', (event) => {
         event.preventDefault();
-        renderFunction();
+        $scope.renderFunction();
       });
 
       $scope.$on('$destroy', () => {
         editor.destroy();
       });
 
-      $timeout(() => { renderFunction(); });
+      if (!vis.initialized) {
+        $timeout(() => { $scope.renderFunction(); });
+      }
     }
   };
 });

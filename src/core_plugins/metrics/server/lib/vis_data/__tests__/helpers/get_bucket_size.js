@@ -35,4 +35,16 @@ describe('getBucketSize', () => {
     expect(result).to.have.property('intervalString', '1d');
   });
 
+  it('returns overriden buckets (>=2d)', () => {
+    const result = getBucketSize(req, '>=2d');
+    expect(result).to.have.property('bucketSize', 86400 * 2);
+    expect(result).to.have.property('intervalString', '2d');
+  });
+
+  it('returns overriden buckets (>=10s)', () => {
+    const result = getBucketSize(req, '>=10s');
+    expect(result).to.have.property('bucketSize', 30);
+    expect(result).to.have.property('intervalString', '30s');
+  });
+
 });

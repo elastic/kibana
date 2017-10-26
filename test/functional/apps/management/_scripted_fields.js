@@ -18,19 +18,18 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const remote = getService('remote');
   const retry = getService('retry');
-  const screenshots = getService('screenshots');
   const PageObjects = getPageObjects(['common', 'header', 'settings', 'visualize', 'discover']);
 
   describe('scripted fields', () => {
 
     before(async function () {
-      await remote.setWindowSize(1200,800);
+      await remote.setWindowSize(1200, 800);
       // delete .kibana index and then wait for Kibana to re-create it
-      await kibanaServer.uiSettings.replace({ 'dateFormat:tz':'UTC' });
+      await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC' });
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndices();
       await PageObjects.settings.createIndexPattern();
-      await kibanaServer.uiSettings.update({ 'dateFormat:tz':'UTC' });
+      await kibanaServer.uiSettings.update({ 'dateFormat:tz': 'UTC' });
     });
 
     after(async function afterAll() {
@@ -103,7 +102,6 @@ export default function ({ getService, getPageObjects }) {
         await log.debug('getDataTableData = ' + data.split('\n'));
         await log.debug('data=' + data);
         await log.debug('data.length=' + data.length);
-        await screenshots.take('Visualize-vertical-bar-chart');
         expect(data.trim().split('\n')).to.eql(expectedChartValues);
       });
     });
@@ -170,7 +168,6 @@ export default function ({ getService, getPageObjects }) {
         await log.debug('getDataTableData = ' + data.split('\n'));
         await log.debug('data=' + data);
         await log.debug('data.length=' + data.length);
-        await screenshots.take('Visualize-vertical-bar-chart');
         expect(data.trim().split('\n')).to.eql(expectedChartValues);
       });
     });

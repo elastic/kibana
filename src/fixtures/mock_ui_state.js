@@ -8,6 +8,11 @@ export default {
     keys[path] = val;
     return val;
   },
+  setSilent: function (path, val) {
+    keys[path] = val;
+    return val;
+  },
+  emit: _.noop,
   on: _.noop,
   off: _.noop
 };

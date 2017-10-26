@@ -20,13 +20,11 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
   class MapsVisualization {
 
     constructor(element, vis) {
-
       this.vis = vis;
       this.$el = $(element);
       this._$container = this.$el;
       this._geohashLayer = null;
       this._kibanaMap = null;
-      this._kibanaMapReady = this._makeKibanaMap();
       this._baseLayerDirty = true;
       this._currentParams = null;
     }
@@ -35,6 +33,11 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
       if (this._kibanaMap) {
         this._kibanaMap.destroy();
       }
+    }
+
+    init() {
+      this._kibanaMapReady = this._makeKibanaMap();
+      return this._kibanaMapReady;
     }
 
     async render(esResponse, status) {
@@ -66,7 +69,6 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
 
     //**********************************************************************************************************
     async _makeKibanaMap() {
-
       try {
         this._tmsService = await serviceSettings.getTMSService();
         this._tmsError = null;
@@ -88,8 +90,8 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
       options.center = centerFromUIState ? centerFromUIState : this.vis.type.visConfig.defaults.mapCenter;
 
       this._kibanaMap = new KibanaMap(containerElement, options);
-      uiState.set('mapZoom', this._kibanaMap.getZoomLevel());
-      uiState.set('mapBounds', this._kibanaMap.getUntrimmedBounds());
+      this.vis.sessionState.mapBounds = this._kibanaMap.getUntrimmedBounds();
+
       this._kibanaMap.addDrawControl();
       this._kibanaMap.addFitControl();
       this._kibanaMap.addLegendControl();
@@ -170,7 +172,6 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
      * called on options change (vis.params change)
      */
     async _updateParams() {
-
       const mapParams = this._getMapsParams();
       if (_.eq(this._currentParams, mapParams)) {
         return;
@@ -254,14 +255,26 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
       };
     }
 
-    _doRenderComplete(resolve) {
-      if (this._baseLayerDirty) {//as long as the baselayer is dirty, we cannot fire the render complete event
-        setTimeout(() => {
-          this._doRenderComplete(resolve);
-        }, 10);
+    _doRenderCompleteWhenBaseLayerIsLoaded(resolve, endTime) {
+      if (this._baseLayerDirty) {
+        if (Date.now() <= endTime) {
+          setTimeout(() => {
+            this._doRenderCompleteWhenBaseLayerIsLoaded(resolve, endTime);
+          }, 10);
+        } else {
+          //wait time exceeded. If the baselayer cannot load, we will still fire a render-complete.
+          //This is because slow or unstable network connections cause tiles to get dropped.
+          //It is unfortunate that tiles get dropped, but we should not drop the render-complete because of it.
+          resolve();
+        }
       } else {
         resolve();
       }
+    }
+
+    _doRenderComplete(resolve) {
+      const msAllowedForBaseLayerToLoad = 10000;
+      this._doRenderCompleteWhenBaseLayerIsLoaded(resolve, Date.now() + msAllowedForBaseLayerToLoad);
     }
 
     addSpatialFilter(agg, filterName, filterData) {
@@ -271,10 +284,40 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
 
       const indexPatternName = agg.vis.indexPattern.id;
       const field = agg.fieldName();
-      const filter = { meta: { negate: false, index: indexPatternName } };
-      filter[filterName] = { ignore_unmapped: true };
-      filter[filterName][field] = filterData;
-      getAppState().$newFilters = [filter];
+      const query = this.vis.API.queryManager.getQuery();
+      const language = query.language;
+
+      if (language === 'lucene') {
+        const filter = { meta: { negate: false, index: indexPatternName } };
+        filter[filterName] = { ignore_unmapped: true };
+        filter[filterName][field] = filterData;
+
+        this.vis.API.queryFilter.addFilters([filter]);
+      }
+      else if (language === 'kuery') {
+        const { fromKueryExpression, toKueryExpression, nodeTypes } = this.vis.API.kuery;
+        let newQuery;
+
+        if (filterName === 'geo_bounding_box') {
+          newQuery = nodeTypes.function.buildNode('geoBoundingBox', field, _.mapKeys(filterData, (value, key) => _.camelCase(key)));
+        }
+        else if (filterName === 'geo_polygon') {
+          newQuery = nodeTypes.function.buildNode('geoPolygon', field, filterData.points);
+        }
+        else {
+          throw new Error(`Kuery does not support ${filterName} queries`);
+        }
+
+        const allQueries = _.isEmpty(query.query)
+          ? [newQuery]
+          : [fromKueryExpression(query.query), newQuery];
+
+        this.vis.API.queryManager.setQuery({
+          query: toKueryExpression(nodeTypes.function.buildNode('and', allQueries, 'implicit')),
+          language: 'kuery'
+        });
+      }
+
       this.vis.updateState();
     }
 
@@ -287,7 +330,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
         searchSource.aggs(function () {
           const geoBoundsAgg = new AggConfig(agg.vis, {
             type: 'geo_bounds',
-            enabled:true,
+            enabled: true,
             params: {
               field: agg.getField()
             },
