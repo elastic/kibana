@@ -20,7 +20,6 @@ export function runApi(server) {
         reply(resp);
       });
     } catch (e) {
-      console.log('LOL UR FUCKRF', e);
       reply({ error: e.message }).code(500);
     }
   };
