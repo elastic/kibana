@@ -8,11 +8,11 @@ import mathjs from 'mathjs';
 
 const limitedEval = mathjs.eval;
 mathjs.import({
-  'import':     function () { throw new Error('Function import is not allowed in your expression.'); },
+  'import': function () { throw new Error('Function import is not allowed in your expression.'); },
   'createUnit': function () { throw new Error('Function createUnit is not allowed in your expression.'); },
-  'eval':       function () { throw new Error('Function eval is not allowed in your expression.'); },
-  'parse':      function () { throw new Error('Function parse is not allowed in your expression.'); },
-  'simplify':   function () { throw new Error('Function simplify is not allowed in your expression.'); },
+  'eval': function () { throw new Error('Function eval is not allowed in your expression.'); },
+  'parse': function () { throw new Error('Function parse is not allowed in your expression.'); },
+  'simplify': function () { throw new Error('Function simplify is not allowed in your expression.'); },
   'derivative': function () { throw new Error('Function derivative is not allowed in your expression.'); }
 }, { override: true });
 
