@@ -2,10 +2,15 @@ import Hbars from 'handlebars/dist/handlebars';
 import { math } from './math.js';
 import { pivotObjectArray } from './pivot_object_array.js';
 
+// example use: {{math rows 'mean(price - cost)' 2}}
 Hbars.registerHelper('math', (rows, expression, precision) => {
   if (!Array.isArray(rows)) return 'MATH ERROR: first argument must be an array';
   const value = math.eval(expression, pivotObjectArray(rows));
-  return (precision) ? value.toFixed(precision) : value;
+  try {
+    return (precision) ? value.toFixed(precision) : value;
+  } catch (e) {
+    return value;
+  }
 });
 
 export const Handlebars = Hbars;
