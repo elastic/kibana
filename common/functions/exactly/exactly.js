@@ -8,7 +8,7 @@ export const exactly = {
   help: 'Create a filter that matches a given column for a perfectly exact value',
   args: {
     column: {
-      type: ['string'],
+      types: ['string'],
       aliases: ['field', 'c'],
       help: 'The column or field to attach the filter to',
     },
