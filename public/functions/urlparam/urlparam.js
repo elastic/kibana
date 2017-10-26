@@ -4,7 +4,7 @@ export const urlparam = {
   name: 'urlparam',
   aliases: [],
   type: 'string',
-  help: 'Access URL hash parameters and use them in expressions',
+  help: 'Access URL parameters and use them in expressions. Eg https://localhost:5601/app/canvas?myVar=20. This will always return a string',
   context: {},
   args: {
     _: {

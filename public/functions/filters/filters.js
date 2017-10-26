@@ -7,7 +7,7 @@ import { interpretAst } from '../../lib/interpreter';
 export const filters = {
   name: 'filters',
   type: 'filter',
-  help: 'Collect the workpad filters, usually to provide them to a data source',
+  help: 'Collect element filters on the workpad, usually to provide them to a data source',
   fn: () => {
     const filterExpression = getGlobalFilterExpression(getState());
 
