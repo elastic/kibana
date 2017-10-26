@@ -8,7 +8,7 @@ import { getHighlightHtml } from 'ui/highlight';
 export function stringifyUrl(Private) {
 
   const FieldFormat = Private(IndexPatternsFieldFormatProvider);
-
+  const whitelistUrlSchemes = ['http://', 'https://'];
 
   _.class(Url).inherits(FieldFormat);
   function Url(params) {
@@ -102,6 +102,11 @@ export function stringifyUrl(Private) {
 
           return `<img src="${url}" alt="${imageLabel}">`;
         default:
+          const inWhitelist = whitelistUrlSchemes.some(scheme => url.indexOf(scheme) === 0);
+          if (!inWhitelist) {
+            return url;
+          }
+
           let linkLabel;
 
           if (hit && hit.highlight && hit.highlight[field.name]) {
