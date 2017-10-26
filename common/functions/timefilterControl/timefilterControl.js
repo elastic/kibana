@@ -2,6 +2,9 @@ export const timefilterControl = {
   name: 'timefilterControl',
   aliases: [],
   type: 'render',
+  context: {
+    types: ['null'],
+  },
   help: 'Configure a time filter control element',
   args: {
     column: {

@@ -7,7 +7,9 @@ export const image = {
   aliases: [],
   type: 'image',
   help: 'Create a base64 encoded image',
-  context: {},
+  context: {
+    types: ['null'],
+  },
   args: {
     dataurl: {
       // This was accepting dataurl, but there was no facility in fn for checking type and handling a dataurl type.

@@ -5,6 +5,9 @@ export const geoip = {
   name: 'geoip',
   aliases: [],
   type: 'location',
+  context: {
+    types: ['null'],
+  },
   help: 'Uses an online service to perform a lookup on your own, or another, IP',
   context: {},
   args: {

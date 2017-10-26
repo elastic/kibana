@@ -3,6 +3,9 @@ import { noop } from 'lodash';
 export const location = {
   name: 'location',
   type: 'location',
+  context: {
+    types: ['null'],
+  },
   help: 'Use the browser\'s location functionality to get your current location. Usually quite slow, but fairly accurate',
   fn: () => {
     return new Promise((resolve) => {
