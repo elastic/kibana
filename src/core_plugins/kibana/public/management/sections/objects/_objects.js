@@ -205,8 +205,9 @@ uiModules.get('apps/management')
         })
         .then((overwriteAll) => {
           const conflictedIndexPatterns = [];
+          const conflictedSearchDocs = [];
 
-          function importDocument(doc) {
+          function importDocument(swallowErrors, doc) {
             const { service } = find($scope.services, { type: doc._type }) || {};
 
             if (!service) {
@@ -228,11 +229,17 @@ uiModules.get('apps/management')
                     return obj.save({ confirmOverwrite : !overwriteAll });
                   })
                   .catch((err) => {
-                    if (err instanceof SavedObjectNotFound && err.savedObjectType === 'index-pattern') {
-                      conflictedIndexPatterns.push({ obj, doc });
-                      return;
-                    }
+                    if (swallowErrors && err instanceof SavedObjectNotFound) {
+                      if (err.savedObjectType === 'search') {
+                        conflictedSearchDocs.push(doc);
+                        return;
+                      }
 
+                      if (err.savedObjectType === 'index-pattern') {
+                        conflictedIndexPatterns.push({ obj, doc });
+                        return;
+                      }
+                    }
                     // swallow errors here so that the remaining promise chain executes
                     err.message = `Importing ${obj.title} (${obj.id}) failed: ${err.message}`;
                     notify.error(err);
@@ -258,35 +265,38 @@ uiModules.get('apps/management')
             }, defaultDocTypes);
           }
 
+          function resolveConflicts(objs, { obj }) {
+            const oldIndexId = obj.searchSource.getOwn('index');
+            const newIndexId = objs.find(({ oldId }) => oldId === oldIndexId).newId;
+            if (newIndexId === oldIndexId) {
+              // Skip
+              return;
+            }
+            return obj.hydrateIndexPattern(newIndexId)
+              .then(() => obj.save({ confirmOverwrite : !overwriteAll }));
+          }
+
           const docTypes = groupByType(docs);
 
-          return Promise.map(docTypes.searches, importDocument)
-            .then(() => Promise.map(docTypes.other, importDocument))
+          return Promise.map(docTypes.searches, importDocument.bind(null, true))
+            .then(() => Promise.map(docTypes.other, importDocument.bind(null, true)))
             .then(() => {
               if (conflictedIndexPatterns.length) {
-                showChangeIndexModal(
-                  (objs) => {
-                    return Promise.map(
-                      conflictedIndexPatterns,
-                      ({ obj }) => {
-                        const oldIndexId = obj.searchSource.getOwn('index');
-                        const newIndexId = objs.find(({ oldId }) => oldId === oldIndexId).newId;
-                        if (newIndexId === oldIndexId) {
-                          // Skip
-                          return;
-                        }
-                        return obj.hydrateIndexPattern(newIndexId)
-                          .then(() => obj.save({ confirmOverwrite : !overwriteAll }));
-                      }
-                    ).then(refreshData);
-                  },
-                  conflictedIndexPatterns,
-                  $route.current.locals.indexPatterns,
-                );
-              } else {
-                return refreshData();
+                return new Promise((resolve, reject) => {
+                  showChangeIndexModal(
+                    (objs) => {
+                      Promise.map(conflictedIndexPatterns, resolveConflicts.bind(null, objs))
+                        .then(resolve)
+                        .catch(reject);
+                    },
+                    conflictedIndexPatterns,
+                    $route.current.locals.indexPatterns,
+                  );
+                });
               }
             })
+            .then(() => Promise.map(conflictedSearchDocs, importDocument.bind(null, false)))
+            .then(refreshData)
             .catch(notify.error);
         });
       };
