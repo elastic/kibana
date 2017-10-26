@@ -184,7 +184,9 @@ export class KuiContextMenuPanel extends Component {
     }
 
     // Focus on the panel as a last resort.
-    this.panel.focus();
+    if (!this.panel.contains(document.activeElement)) {
+      this.panel.focus();
+    }
   }
 
   onTransitionComplete = () => {
