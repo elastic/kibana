@@ -2,6 +2,7 @@ define(function (require) {
   return function UrlFormatProvider(Private, highlightFilter) {
     let _ = require('lodash');
 
+    let whitelistUrlSchemes = ['http://', 'https://'];
     let FieldFormat = Private(require('ui/index_patterns/_field_format/FieldFormat'));
 
     require('ui/field_format_editor/pattern/pattern');
@@ -92,6 +93,11 @@ define(function (require) {
           case 'img':
             return '<img src="' + url + '" alt="' + label + '" title="' + label + '">';
           default:
+            let inWhitelist = whitelistUrlSchemes.some(scheme => url.indexOf(scheme) === 0);
+            if (!inWhitelist) {
+              return url;
+            }
+
             if (hit && hit.highlight && hit.highlight[field.name]) {
               label = highlightFilter(label, hit.highlight[field.name]);
             }
