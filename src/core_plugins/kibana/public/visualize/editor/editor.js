@@ -119,6 +119,11 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     dirty: !savedVis.id
   };
 
+  $scope.elementSize = {};
+  this.getSharingPreserveLayoutDimensions = () => {
+    return $scope.elementSize.get();
+  };
+
   if (savedVis.id) {
     docTitle.change(savedVis.title);
   }

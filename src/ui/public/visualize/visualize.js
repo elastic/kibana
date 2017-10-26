@@ -40,7 +40,8 @@ uiModules
         appState: '=?',
         uiState: '=?',
         savedId: '=?',
-        timeRange: '=?'
+        timeRange: '=?',
+        elementSize: '=?',
       },
       template: visualizeTemplate,
       link: async function ($scope, $el) {
@@ -49,6 +50,13 @@ uiModules
         if (!$scope.savedObj) throw(`saved object was not provided to <visualize> directive`);
         if (!$scope.appState) $scope.appState = getAppState();
         if (!$scope.uiState) $scope.uiState = new PersistedState({});
+
+        $scope.elementSize.get = () => {
+          return {
+            height: $el.height(),
+            width: $el.width(),
+          };
+        };
 
         $scope.vis = $scope.savedObj.vis;
         $scope.vis.visualizeScope = true;
