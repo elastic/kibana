@@ -17,8 +17,8 @@ export const demoprices = {
   args: {
     bucket: {
       types: ['string'],
-      help: 'Time interval to bucket by',
-      default: 'second', // second, minute, hour, day, etc
+      help: 'Time interval to bucket by. Second and minute will produce a lot of rows, so maybe don\'t use those.',
+      default: 'hour', // second, minute, hour, day, etc
     },
   },
   fn: (context, args) => {
