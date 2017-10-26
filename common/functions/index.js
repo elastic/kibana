@@ -2,10 +2,10 @@ import { alterColumn } from './alterColumn/alterColumn';
 import { compare } from './compare/compare';
 import { containerStyle } from './containerStyle/containerStyle';
 import { date } from './date/date';
-import { droprows } from './droprows/droprows';
 import { exactly } from './exactly/exactly';
 import { font } from './font/font';
 import { grid } from './grid/grid';
+import { head } from './head/head';
 import { ifFn } from './if/if';
 import { image } from './image/image';
 import { jsonquery } from './jsonquery/jsonquery';
@@ -23,6 +23,7 @@ import { size } from './size/size';
 import { sleep } from './sleep/sleep';
 import { sort } from './sort/sort';
 import { table } from './table/table';
+import { tail } from './tail/tail';
 import { timefilter } from './timefilter/timefilter';
 import { timefilterControl } from './timefilterControl/timefilterControl';
 
@@ -31,10 +32,10 @@ export const commonFunctions = [
   containerStyle,
   compare,
   date,
-  droprows,
   exactly,
   font,
   grid,
+  head,
   ifFn,
   image,
   jsonquery,
@@ -52,6 +53,7 @@ export const commonFunctions = [
   sort,
   sleep,
   table,
+  tail,
   timefilter,
   timefilterControl,
 ];
