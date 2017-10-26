@@ -30,11 +30,12 @@ export class KuiContextMenuPanel extends Component {
     transitionType: PropTypes.oneOf(['in', 'out']),
     transitionDirection: PropTypes.oneOf(['next', 'previous']),
     onTransitionComplete: PropTypes.func,
+    onUseKeyboardToNavigate: PropTypes.func,
     hasFocus: PropTypes.bool,
     items: PropTypes.array,
     showNextPanel: PropTypes.func,
     showPreviousPanel: PropTypes.func,
-    focusedItemIndex: PropTypes.number,
+    initialFocusedItemIndex: PropTypes.number,
   }
 
   static defaultProps = {
@@ -47,20 +48,50 @@ export class KuiContextMenuPanel extends Component {
 
     this.menuItems = [];
     this.state = {
-      pressedArrowDirection: undefined,
       isTransitioning: Boolean(props.transitionType),
+      focusedItemIndex: props.initialFocusedItemIndex,
     };
   }
+
+  incrementFocusedItemIndex = amount => {
+    let nextFocusedItemIndex;
+
+    if (this.state.focusedItemIndex === undefined) {
+      // If this is the beginning of the user's keyboard navigation of the menu, then we'll focus
+      // either the first or last item.
+      nextFocusedItemIndex = amount < 0 ? this.menuItems.length - 1 : 0;
+    } else {
+      nextFocusedItemIndex = this.state.focusedItemIndex + amount;
+
+      if (nextFocusedItemIndex < 0) {
+        nextFocusedItemIndex = this.menuItems.length - 1;
+      } else if (nextFocusedItemIndex === this.menuItems.length) {
+        nextFocusedItemIndex = 0;
+      }
+    }
+
+    this.setState({
+      focusedItemIndex: nextFocusedItemIndex,
+    });
+  };
 
   onKeyDown = e => {
     // If this panel contains items you can use the left arrow key to go back at any time.
     // But if it doesn't contain items, then you have to focus on the back button specifically,
     // since there could be content inside the panel which requires use of the left arrow key,
     // e.g. text inputs.
-    if (this.props.items.length || document.activeElement === this.backButton) {
+    if (
+      this.props.items.length
+      || document.activeElement === this.backButton
+      || document.activeElement === this.panel
+    ) {
       if (e.keyCode === cascadingMenuKeyCodes.LEFT) {
         if (this.props.showPreviousPanel) {
           this.props.showPreviousPanel();
+
+          if (this.props.onUseKeyboardToNavigate) {
+            this.props.onUseKeyboardToNavigate();
+          }
         }
       }
     }
@@ -68,23 +99,43 @@ export class KuiContextMenuPanel extends Component {
     if (this.props.items.length) {
       switch (e.keyCode) {
         case cascadingMenuKeyCodes.TAB:
-          // Normal tabbing doesn't work within panels with items.
-          e.preventDefault();
+          // We need to sync up with the user if s/he is tabbing through the items.
+          const focusedItemIndex = this.menuItems.indexOf(document.activeElement);
+
+          this.setState({
+            focusedItemIndex:
+              (focusedItemIndex >= 0 && focusedItemIndex < this.menuItems.length)
+              ? focusedItemIndex
+              : undefined,
+          });
           break;
 
         case cascadingMenuKeyCodes.UP:
           e.preventDefault();
-          this.setState({ pressedArrowDirection: 'up' });
+          this.incrementFocusedItemIndex(-1);
+
+          if (this.props.onUseKeyboardToNavigate) {
+            this.props.onUseKeyboardToNavigate();
+          }
           break;
 
         case cascadingMenuKeyCodes.DOWN:
           e.preventDefault();
-          this.setState({ pressedArrowDirection: 'down' });
+          this.incrementFocusedItemIndex(1);
+
+          if (this.props.onUseKeyboardToNavigate) {
+            this.props.onUseKeyboardToNavigate();
+          }
           break;
 
         case cascadingMenuKeyCodes.RIGHT:
           if (this.props.showNextPanel) {
-            this.props.showNextPanel(this.getFocusedMenuItemIndex());
+            e.preventDefault();
+            this.props.showNextPanel(this.state.focusedItemIndex);
+
+            if (this.props.onUseKeyboardToNavigate) {
+              this.props.onUseKeyboardToNavigate();
+            }
           }
           break;
 
@@ -94,19 +145,10 @@ export class KuiContextMenuPanel extends Component {
     }
   };
 
-  isMenuItemFocused() {
-    const indexOfActiveElement = this.menuItems.indexOf(document.activeElement);
-    return indexOfActiveElement !== -1;
-  }
-
-  getFocusedMenuItemIndex() {
-    return this.menuItems.indexOf(document.activeElement);
-  }
-
-  updateFocusedMenuItem() {
-    // If this panel isn't active, don't focus any items.
+  updateFocus() {
+    // If this panel has lost focus, then none of its content should be focused.
     if (!this.props.hasFocus) {
-      if (this.isMenuItemFocused()) {
+      if (this.panel.contains(document.activeElement)) {
         document.activeElement.blur();
       }
       return;
@@ -118,53 +160,31 @@ export class KuiContextMenuPanel extends Component {
       return;
     }
 
-    // If we're active, but nothing is focused then we should focus the first item.
-    if (!this.isMenuItemFocused()) {
-      if (this.props.focusedItemIndex !== undefined) {
-        this.menuItems[this.props.focusedItemIndex].focus();
+    // If there aren't any items then this is probably a form or something.
+    if (!this.menuItems.length) {
+      // If we've already focused on something inside the panel, everything's fine.
+      if (this.panel.contains(document.activeElement)) {
         return;
       }
 
-      if (this.menuItems.length !== 0) {
-        this.menuItems[0].focus();
-        return;
-      }
-
-      // Focus first tabbable item.
-      const tabbableItems = tabbable(this.panel);
-      if (tabbableItems.length) {
-        tabbableItems[0].focus();
+      // Otherwise let's focus the first tabbable item and expedite input from the user.
+      if (this.content) {
+        const tabbableItems = tabbable(this.content);
+        if (tabbableItems.length) {
+          tabbableItems[0].focus();
+        }
       }
       return;
     }
 
-    // Update focused state based on arrow key navigation.
-    if (this.state.pressedArrowDirection) {
-      const indexOfActiveElement = this.getFocusedMenuItemIndex();
-      let nextFocusedMenuItemIndex;
-
-      switch (this.state.pressedArrowDirection) {
-        case 'up':
-          nextFocusedMenuItemIndex =
-            (indexOfActiveElement - 1) !== -1
-            ? indexOfActiveElement - 1
-            : this.menuItems.length - 1;
-          break;
-
-        case 'down':
-          nextFocusedMenuItemIndex =
-            (indexOfActiveElement + 1) !== this.menuItems.length
-            ? indexOfActiveElement + 1
-            : 0;
-          break;
-
-        default:
-          break;
-      }
-
-      this.menuItems[nextFocusedMenuItemIndex].focus();
-      this.setState({ pressedArrowDirection: undefined });
+    // If an item is focused, focus it.
+    if (this.state.focusedItemIndex !== undefined) {
+      this.menuItems[this.state.focusedItemIndex].focus();
+      return;
     }
+
+    // Focus on the panel as a last resort.
+    this.panel.focus();
   }
 
   onTransitionComplete = () => {
@@ -175,6 +195,10 @@ export class KuiContextMenuPanel extends Component {
     if (this.props.onTransitionComplete) {
       this.props.onTransitionComplete();
     }
+  }
+
+  componentDidMount() {
+    this.updateFocus();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -190,16 +214,8 @@ export class KuiContextMenuPanel extends Component {
     }
   }
 
-  componentDidMount() {
-    this.updateFocusedMenuItem();
-  }
-
   componentDidUpdate() {
-    this.updateFocusedMenuItem();
-  }
-
-  componentWillUnmount() {
-    this.panel.removeEventListener('animationend', this.onTransitionComplete);
+    this.updateFocus();
   }
 
   menuItemRef = (index, node) => {
@@ -212,15 +228,18 @@ export class KuiContextMenuPanel extends Component {
   };
 
   panelRef = node => {
-    if (node) {
-      this.panel = node;
-      this.panel.addEventListener('animationend', this.onTransitionComplete);
+    this.panel = node;
 
+    if (this.panel) {
       if (this.props.onHeightChange) {
-        this.props.onHeightChange(node.clientHeight);
+        this.props.onHeightChange(this.panel.clientHeight);
       }
     }
-  }
+  };
+
+  contentRef = node => {
+    this.content = node;
+  };
 
   render() {
     const {
@@ -232,9 +251,10 @@ export class KuiContextMenuPanel extends Component {
       transitionType,
       transitionDirection,
       onTransitionComplete, // eslint-disable-line no-unused-vars
+      onUseKeyboardToNavigate, // eslint-disable-line no-unused-vars
       hasFocus, // eslint-disable-line no-unused-vars
       items,
-      focusedItemIndex, // eslint-disable-line no-unused-vars
+      initialFocusedItemIndex, // eslint-disable-line no-unused-vars
       showNextPanel, // eslint-disable-line no-unused-vars
       showPreviousPanel, // eslint-disable-line no-unused-vars
       ...rest,
@@ -286,10 +306,15 @@ export class KuiContextMenuPanel extends Component {
         ref={this.panelRef}
         className={classes}
         onKeyDown={this.onKeyDown}
+        tabIndex="0"
+        onAnimationEnd={this.onTransitionComplete}
         {...rest}
       >
         {panelTitle}
-        {content}
+
+        <div ref={this.contentRef}>
+          {content}
+        </div>
       </div>
     );
   }

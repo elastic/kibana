@@ -884,7 +884,13 @@ main {
 .kuiContextMenuPanel {
   width: 100%;
   visibility: visible;
-  background-color: #ffffff; }
+  background-color: #ffffff;
+  /**
+   * 1. Override global focus style.
+   */ }
+  .kuiContextMenuPanel:focus {
+    box-shadow: none;
+    /* 1 */ }
   .kuiContextMenuPanel.kuiContextMenuPanel-txInLeft {
     pointer-events: none;
     -webkit-animation: kuiContextMenuPanelTxInLeft 250ms cubic-bezier(0.694, 0.0482, 0.335, 1);
@@ -1475,6 +1481,11 @@ main {
   .kuiCheckBox:disabled {
     opacity: 0.3;
     cursor: not-allowed; }
+  .theme-dark .kuiCheckBox {
+    background-color: #444444;
+    border-color: #444444; }
+    .theme-dark .kuiCheckBox:checked {
+      background-color: #0079a5; }
 
 .kuiCheckBoxLabel {
   display: -webkit-box;
@@ -2327,7 +2338,12 @@ main {
 .kuiLocalDropdownPanel--right {
   margin-left: 30px; }
 
+/**
+ * 1. Override inherited styles.
+ */
 .kuiLocalDropdownTitle {
+  margin-top: 0;
+  /* 1 */
   margin-bottom: 12px;
   font-size: 18px;
   color: #2d2d2d; }
@@ -2354,9 +2370,14 @@ main {
           justify-content: space-between;
   margin-bottom: 6px; }
 
+/**
+   * 1. Override inherited styles.
+   */
 .kuiLocalDropdownHeader__label {
   font-size: 14px;
   font-weight: 700;
+  margin-bottom: 0;
+  /* 1 */
   color: #2d2d2d; }
   .theme-dark .kuiLocalDropdownHeader__label {
     color: #cecece; }

@@ -23,58 +23,38 @@ exports[`renders DashboardGrid 1`] = `
   }
   onLayoutChange={[Function]}
 >
-  <div>
-    <DashboardPanel
-      dashboardViewMode="edit"
-      getContainerApi={[Function]}
-      getEmbeddableHandler={[Function]}
-      isExpanded={false}
-      isFullScreenMode={false}
-      onDeletePanel={[Function]}
-      onPanelBlurred={[Function]}
-      onPanelFocused={[Function]}
-      onToggleExpanded={[Function]}
-      panel={
+  <div
+    className=""
+  >
+    <Connect(DashboardPanel)
+      embeddableHandler={
         Object {
-          "gridData": Object {
-            "h": 6,
-            "i": 1,
-            "w": 6,
-            "x": 0,
-            "y": 0,
-          },
-          "id": "123",
-          "panelIndex": "1",
-          "type": "visualization",
+          "getEditPath": [Function],
+          "getTitleFor": [Function],
+          "render": [Function],
         }
       }
+      getContainerApi={[Function]}
+      onPanelBlurred={[Function]}
+      onPanelFocused={[Function]}
+      panelId="1"
     />
   </div>
-  <div>
-    <DashboardPanel
-      dashboardViewMode="edit"
-      getContainerApi={[Function]}
-      getEmbeddableHandler={[Function]}
-      isExpanded={false}
-      isFullScreenMode={false}
-      onDeletePanel={[Function]}
-      onPanelBlurred={[Function]}
-      onPanelFocused={[Function]}
-      onToggleExpanded={[Function]}
-      panel={
+  <div
+    className=""
+  >
+    <Connect(DashboardPanel)
+      embeddableHandler={
         Object {
-          "gridData": Object {
-            "h": 6,
-            "i": 2,
-            "w": 6,
-            "x": 6,
-            "y": 6,
-          },
-          "id": "456",
-          "panelIndex": "2",
-          "type": "visualization",
+          "getEditPath": [Function],
+          "getTitleFor": [Function],
+          "render": [Function],
         }
       }
+      getContainerApi={[Function]}
+      onPanelBlurred={[Function]}
+      onPanelFocused={[Function]}
+      panelId="2"
     />
   </div>
 </SizeMe(ResponsiveGrid)>

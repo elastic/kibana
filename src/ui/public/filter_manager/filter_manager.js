@@ -8,7 +8,7 @@ export function FilterManagerProvider(Private) {
   const filterManager = {};
 
   filterManager.generate = (field, values, operation, index) => {
-    values = _.isArray(values) ? values : [values];
+    values = Array.isArray(values) ? values : [values];
     const fieldName = _.isObject(field) ? field.name : field;
     const filters = _.flatten([queryFilter.getAppFilters()]);
     const newFilters = [];

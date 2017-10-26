@@ -33,7 +33,7 @@ uiModules
 
     return {
       restrict: 'E',
-      scope : {
+      scope: {
         showSpyPanel: '=?',
         editorMode: '=?',
         savedObj: '=?',

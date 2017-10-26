@@ -135,6 +135,35 @@ describe('KuiPopover', () => {
       });
     });
 
+    describe('isFocusable', () => {
+      test('defaults to false', () => {
+        const component = render(
+          <KuiPopover
+            isOpen
+            button={<button />}
+            closePopover={() => {}}
+          />
+        );
+
+        expect(component)
+          .toMatchSnapshot();
+      });
+
+      test('renders true', () => {
+        const component = render(
+          <KuiPopover
+            isOpen
+            isFocusable
+            button={<button />}
+            closePopover={() => {}}
+          />
+        );
+
+        expect(component)
+          .toMatchSnapshot();
+      });
+    });
+
     describe('panelClassName', () => {
       test('is rendered', () => {
         const component = render(

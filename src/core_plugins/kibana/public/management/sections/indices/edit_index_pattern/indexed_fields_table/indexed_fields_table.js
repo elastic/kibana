@@ -26,7 +26,7 @@ uiModules.get('apps/management')
         { title: 'type' },
         { title: 'format' },
         { title: 'searchable', info: 'These fields can be used in the filter bar' },
-        { title: 'aggregatable' , info: 'These fields can be used in visualization aggregations' },
+        { title: 'aggregatable', info: 'These fields can be used in visualization aggregations' },
         { title: 'excluded', info: 'Fields that are excluded from _source when it is fetched' },
         { title: 'controls', sortable: false }
       ];

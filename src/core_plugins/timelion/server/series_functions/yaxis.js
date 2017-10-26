@@ -2,13 +2,13 @@ import _ from 'lodash';
 import alter from '../lib/alter.js';
 import Chainable from '../lib/classes/chainable';
 const tickFormatters = {
-  'bits':'bits',
-  'bits/s':'bits/s',
-  'bytes':'bytes',
-  'bytes/s':'bytes/s',
-  'currency':'currency(:ISO 4217 currency code)',
-  'percent':'percent',
-  'custom':'custom(:prefix:suffix)'
+  'bits': 'bits',
+  'bits/s': 'bits/s',
+  'bytes': 'bytes',
+  'bytes/s': 'bytes/s',
+  'currency': 'currency(:ISO 4217 currency code)',
+  'percent': 'percent',
+  'custom': 'custom(:prefix:suffix)'
 };
 
 export default new Chainable('yaxis', {
