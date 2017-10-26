@@ -458,24 +458,39 @@ main {
   color: #0079a5 !important;
   /* 2 */
   background-color: transparent; }
+  .theme-dark .kuiButton--hollow {
+    color: #b7e2ea !important;
+    /* 2 */ }
   .kuiButton--hollow:enabled:hover {
     color: #006E8A !important;
     /* 1 */
     text-decoration: underline; }
+    .theme-dark .kuiButton--hollow:enabled:hover {
+      color: #def2f6 !important;
+      /* 2 */ }
   a.kuiButton--hollow:not(.kuiButton-isDisabled):hover {
     /* 1 */
     color: #006E8A !important;
     /* 1 */
     text-decoration: underline; }
+    .theme-dark a.kuiButton--hollow:not(.kuiButton-isDisabled):hover {
+      color: #def2f6 !important;
+      /* 2 */ }
   .kuiButton--hollow:enabled:active {
     color: #006E8A !important;
     /* 1 */
     text-decoration: underline; }
+    .theme-dark .kuiButton--hollow:enabled:active {
+      color: #def2f6 !important;
+      /* 2 */ }
   a.kuiButton--hollow:not(.kuiButton-isDisabled):active {
     /* 1 */
     color: #006E8A !important;
     /* 1 */
     text-decoration: underline; }
+    .theme-dark a.kuiButton--hollow:not(.kuiButton-isDisabled):active {
+      color: #def2f6 !important;
+      /* 2 */ }
 
 .kuiButton--secondary {
   color: #0079a5 !important;
@@ -2996,15 +3011,22 @@ main {
   background-color: rgba(0, 0, 0, 0.5); }
 
 .kuiModal {
+  box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1);
   line-height: 1.5;
   background-color: #FFF;
   border: 1px solid #D9D9D9;
   border-radius: 4px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
-  z-index: 1001; }
+  z-index: 1001;
+  -webkit-animation: kuiModal 350ms cubic-bezier(0.34, 1.61, 0.7, 1);
+          animation: kuiModal 350ms cubic-bezier(0.34, 1.61, 0.7, 1); }
   .theme-dark .kuiModal {
     background-color: #525252;
     border-color: #000; }
+
+.kuiModal--confirmation {
+  width: 450px;
+  min-width: auto; }
 
 .kuiModalHeader {
   display: -webkit-box;
@@ -3068,6 +3090,26 @@ main {
   padding-top: 10px; }
   .kuiModalFooter > * + * {
     margin-left: 5px; }
+
+@-webkit-keyframes kuiModal {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(32px);
+            transform: translateY(32px); }
+  100% {
+    opacity: 1;
+    -webkit-transform: translateY(0);
+            transform: translateY(0); } }
+
+@keyframes kuiModal {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(32px);
+            transform: translateY(32px); }
+  100% {
+    opacity: 1;
+    -webkit-transform: translateY(0);
+            transform: translateY(0); } }
 
 .kuiNotice {
   padding: 40px 60px 48px;
@@ -3998,6 +4040,8 @@ main {
   font-weight: 400;
   /* 1 */
   font-size: 22px; }
+  .theme-dark .kuiTitle {
+    color: #cecece; }
 
 /**
  * 1. Override h2, h3, etc.
@@ -4008,6 +4052,8 @@ main {
   font-weight: 400;
   /* 1 */
   font-size: 18px; }
+  .theme-dark .kuiSubTitle {
+    color: #cecece; }
 
 /**
  * 1. Override p.
@@ -4019,6 +4065,8 @@ main {
   /* 1 */
   line-height: 1.5;
   font-size: 14px; }
+  .theme-dark .kuiTextTitle {
+    color: #cecece; }
 
 /**
  * 1. Override p.
@@ -4030,6 +4078,8 @@ main {
   /* 1 */
   line-height: 1.5;
   font-size: 14px; }
+  .theme-dark .kuiText {
+    color: #cecece; }
 
 .kuiSubText {
   margin: 0;
@@ -4038,6 +4088,8 @@ main {
   /* 1 */
   line-height: 1.5;
   font-size: 12px; }
+  .theme-dark .kuiSubText {
+    color: #cecece; }
 
 .kuiSubduedText {
   color: #666 !important; }
