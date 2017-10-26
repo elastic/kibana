@@ -19,7 +19,6 @@ import { render } from './render/render';
 import { replace } from './replace/replace';
 import { rounddate } from './rounddate/rounddate';
 import { seriesStyle } from './seriesStyle/seriesStyle';
-import { size } from './size/size';
 import { sleep } from './sleep/sleep';
 import { sort } from './sort/sort';
 import { table } from './table/table';
@@ -49,7 +48,6 @@ export const commonFunctions = [
   replace,
   rounddate,
   seriesStyle,
-  size,
   sort,
   sleep,
   table,
