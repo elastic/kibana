@@ -2,7 +2,7 @@ export const timefilterControl = {
   name: 'timefilterControl',
   aliases: [],
   type: 'render',
-  help: 'Create a timefilter for querying a source',
+  help: 'Configure a time filter control element',
   args: {
     column: {
       type: ['string'],
