@@ -5,10 +5,10 @@ export const ifFn = {
     _: {
       types: [
         'boolean',
+        'null',
       ],
-      default: 0,
       'aliases': ['condition'],
-      help: 'A boolean true or false, usually returned by a subexpression',
+      help: 'A boolean true or false, usually returned by a subexpression. If this is not supplied then the input context will be used',
     },
     then: {
       help: 'The return value if true',
@@ -24,8 +24,13 @@ export const ifFn = {
     },
   },
   fn: (context, args) => {
-    if (args._) return args.then;
-    if (typeof args.else !== 'undefined') return args.else;
+    if (typeof args._ === 'undefined') {
+      if (args._) return args.then;
+      if (typeof args.else !== 'undefined') return args.else;
+    } else {
+      if (args._) return args.then;
+      if (typeof args.else !== 'undefined') return args.else;
+    }
     return context;
   },
 };
