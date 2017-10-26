@@ -5,6 +5,9 @@ import { getESFieldTypes } from '../../routes/es_fields/get_es_field_types';
 
 export const esdocs = {
   name: 'esdocs',
+  type: 'datatable',
+  help: 'Query elasticsearch and get back raw documents. We recommend you specify the fields you want, ' +
+  'especially if you are going to ask for a lot of rows',
   context: {
     types: ['filter'],
   },
@@ -20,15 +23,16 @@ export const esdocs = {
       default: '-_index:.kibana',
     },
     sort: {
-      types: ['string'],
+      types: ['string', 'null'],
       help: 'Sort directions as "field, direction". Eg "@timestamp, desc" or "bytes, asc"',
     },
     fields: {
       help: 'Comma seperated list of fields. Fewer fields will perform better.',
-      types: ['string'],
+      types: ['string', 'null'],
     },
     metaFields: {
       help: 'Comma seperated list of meta fields, eg "_index,_type"',
+      types: ['string', 'null'],
     },
     count: {
       types: ['number'],
@@ -36,8 +40,6 @@ export const esdocs = {
       help: 'The number of docs to pull back. Smaller numbers perform better',
     },
   },
-  type: 'datatable',
-  help: 'Query elasticsearch and get back raw documents.',
   fn: (context, args, handlers) => {
     context.and = context.and
       .concat([{ // q
