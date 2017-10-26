@@ -3,8 +3,10 @@ import { socketApi } from './socket';
 import { translate } from './translate';
 import { esFields } from './es_fields';
 import { esIndices } from './es_indices';
+import { runApi } from './run';
 
 export function routes(server) {
+  runApi(server);
   workpad(server);
   socketApi(server);
   translate(server);

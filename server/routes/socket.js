@@ -24,7 +24,7 @@ export function socketApi(server) {
         const interpret = socketInterpreterProvider({
           types: typesRegistry.toJS(),
           functions: functionsRegistry.toJS(),
-          handlers: createHandlers(socket, server),
+          handlers: createHandlers(socket.handshake, server),
           referableFunctions: clientFunctions,
           socket: socket,
         });
