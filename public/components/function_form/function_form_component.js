@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import './function_form.less';
 
-// compose the above branch components, to short-circuit rending this ArgType component
 export const FunctionFormComponent = ({ expressionType, ...passedProps }) => (
   <div className="canvas__function">
     { expressionType.render(passedProps) }

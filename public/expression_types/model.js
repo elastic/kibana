@@ -3,12 +3,12 @@ import { Registry } from '../../common/lib/registry';
 import { FunctionForm } from './function_form';
 
 const NO_NEXT_EXP = 'no next expression';
-const NO_MODEL_ARGS = 'no model args';
+const MISSING_MODEL_ARGS = 'missing model args';
 
 function getModelArgs(expressionType) {
   if (!expressionType) return NO_NEXT_EXP;
-  if (!expressionType.modelArgs) return NO_MODEL_ARGS;
-  return (expressionType.modelArgs.length > 0) ? expressionType.modelArgs : NO_MODEL_ARGS;
+  if (!expressionType.modelArgs) return MISSING_MODEL_ARGS;
+  return (expressionType.modelArgs.length > 0) ? expressionType.modelArgs : MISSING_MODEL_ARGS;
 }
 
 export class Model extends FunctionForm {
@@ -29,8 +29,8 @@ export class Model extends FunctionForm {
     const { nextExpressionType } = props;
     const modelArgs = getModelArgs(nextExpressionType);
 
-    // if modelArgs is false, something went wrong here
-    if (modelArgs === NO_MODEL_ARGS) {
+    // if modelArgs are missing, something went wrong here
+    if (modelArgs === MISSING_MODEL_ARGS) {
       // if there is a next expression, it is lacking modelArgs, so we throw
       throw new Error(`${nextExpressionType.displayName} modelArgs Error:
         The modelArgs value is empty. Either it should contain an arg,
@@ -38,9 +38,19 @@ export class Model extends FunctionForm {
       `);
     }
 
+    // if there is no following expression, argument is skipped
+    if (modelArgs === NO_NEXT_EXP) return { skipRender: true };
+
     // if argument is missing from modelArgs, mark it as skipped
+    const argName = get(dataArg, 'arg.name');
+    const modelArg = modelArgs.find((modelArg) => {
+      if (Array.isArray(modelArg)) return modelArg[0] === argName;
+      return modelArg === argName;
+    });
+
     return {
-      skipRender: modelArgs !== NO_NEXT_EXP && !modelArgs.includes(get(dataArg, 'arg.name')),
+      label: Array.isArray(modelArg) && get(modelArg[1], 'label'),
+      skipRender: !modelArg,
     };
   }
 }

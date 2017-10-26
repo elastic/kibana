@@ -39,7 +39,7 @@ export class Arg {
   }
 
   // TODO: Document what these otherProps are. Maybe make them named arguments?
-  render({ onValueChange, onValueRemove, argValue, key, ...otherProps }) {
+  render({ onValueChange, onValueRemove, argValue, key, label, ...otherProps }) {
     // This is everything the template needs to render
     const templateProps = {
       ...otherProps,
@@ -53,6 +53,7 @@ export class Arg {
       key,
       argTypeInstance: this,
       valueMissing: (this.required && argValue == null),
+      label,
       onValueChange,
       onValueRemove,
       templateProps,

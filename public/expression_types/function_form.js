@@ -19,34 +19,28 @@ export class FunctionForm extends BaseForm {
 
   renderArg(props, dataArg) {
     const { onValueRemove, onValueChange, ...passedProps } = props;
-    const { arg, argValues, skipRender } = dataArg;
+    const { arg, argValues, skipRender, label } = dataArg;
     const { argType, expressionIndex } = passedProps;
 
     // TODO: show some information to the user than an argument was skipped
     if (!arg || skipRender) return null;
 
-    // If value in expression, render the argument's template, wrapped in a remove control
-    if (!argValues && arg.required) {
-      return arg.render({
-        key: `${argType}-${expressionIndex}-${arg.name}-0`,
-        ...passedProps,
-        valueIndex: 0,
-        argValue: { type: undefined, value: '' },
-        onValueChange: onValueChange(arg.name, 0),
-        onValueRemove: onValueRemove(arg.name, 0),
-      });
-    }
+    const renderArgWithProps = (argValue, valueIndex) => arg.render({
+      key: `${argType}-${expressionIndex}-${arg.name}-${valueIndex}`,
+      ...passedProps,
+      label,
+      valueIndex,
+      argValue,
+      onValueChange: onValueChange(arg.name, valueIndex),
+      onValueRemove: onValueRemove(arg.name, valueIndex),
+    });
 
-    return argValues && argValues.map((argValue, valueIndex) =>
-      arg.render({
-        key: `${argType}-${expressionIndex}-${arg.name}-${valueIndex}`,
-        ...passedProps,
-        valueIndex,
-        argValue,
-        onValueChange: onValueChange(arg.name, valueIndex),
-        onValueRemove: onValueRemove(arg.name, valueIndex),
-      })
-    );
+    // render the argument's template, wrapped in a remove control
+    // if the argument is required but not included, render the control anyway
+    if (!argValues && arg.required) return renderArgWithProps({ type: undefined, value: '' }, 0);
+
+    // render all included argument controls
+    return argValues && argValues.map(renderArgWithProps);
   }
 
   // TODO: What a complete disaster. This is terribly hard to read. Ask Rashid why this is so bad, it's his fault. I hate that guy.
