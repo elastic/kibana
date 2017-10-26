@@ -6,7 +6,6 @@ export const navigator = {
   context: {},
   args: {
     _: {
-      name: '_',
       types: [
         'string',
       ],

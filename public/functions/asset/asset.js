@@ -4,10 +4,9 @@ import { getAssetById } from '../../state/selectors/assets';
 export const asset = {
   name: 'asset',
   aliases: [],
-  help: 'Use Canvas asset objects to provide argument values',
+  help: 'Use Canvas workpad asset objects to provide argument values',
   args: {
     _: {
-      name: '_',
       types: ['string'],
       multi: false,
     },
