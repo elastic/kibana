@@ -109,16 +109,16 @@ describe('Url Format', function () {
         const url = new Url();
 
         expect(url.convert('www.elastic.co', 'html'))
-        .to.be('<span ng-non-bindable>www.elastic.co</span>');
+        .to.be('www.elastic.co');
 
         expect(url.convert('elastic.co', 'html'))
-        .to.be('<span ng-non-bindable>elastic.co</span>');
+        .to.be('elastic.co');
 
         expect(url.convert('elastic', 'html'))
-        .to.be('<span ng-non-bindable>elastic</span>');
+        .to.be('elastic');
 
         expect(url.convert('ftp://elastic.co', 'html'))
-        .to.be('<span ng-non-bindable>ftp://elastic.co</span>');
+        .to.be('ftp://elastic.co');
       });
     });
   });
