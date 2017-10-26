@@ -52,7 +52,7 @@
     "redux-actions": "^2.0.2",
     "redux-localstorage": "^0.4.1",
     "redux-thunk": "^2.2.0",
-    "redux-thunks": "^0.2.0",
+    "redux-thunks": "^0.3.1",
     "socket.io": "^1.7.3",
     "style-it": "^1.6.12",
     "uuid": "^3.0.1"
