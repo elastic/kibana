@@ -9,7 +9,7 @@ export const grid = {
   name: 'grid',
   aliases: [],
   type: 'render',
-  help: 'Produces a single, or a grid, of values',
+  help: 'Creates a renderable element represented by a grid of icons or values. Similar to a heat map',
   context: {
     types: [
       'pointseries',
