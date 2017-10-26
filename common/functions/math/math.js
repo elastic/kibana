@@ -13,6 +13,7 @@ export const math = {
   args: {
     _: {
       types: ['string'],
+      help: 'An evaluated  MathJS expression. (See http://mathjs.org/docs/expressions/parsing.html#eval)',
     },
   },
   fn: (context, args) => {
