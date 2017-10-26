@@ -3,7 +3,8 @@ import moment from 'moment';
 export const date = {
   name: 'date',
   type: 'string',
-  help: 'Returns the time, as a string, in the current execution environment',
+  help: 'Returns the time, as a string, in the current execution environment.' +
+  ' Be careful with this if your server and client have different times',
   args: {
     _: {
       types: ['string'],
