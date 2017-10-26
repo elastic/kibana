@@ -1,6 +1,6 @@
-import { functionsRegistry } from '../../common/lib/functions';
+import { functionsRegistry } from '../../common/lib/functions_registry';
 import { interpretProvider } from '../../common/interpreter/interpret';
-import { typesRegistry } from '../../common/lib/types';
+import { typesRegistry } from '../../common/lib/types_registry';
 import { createHandlers } from '../lib/create_handlers';
 import { fromExpression } from '../../common/lib/ast';
 
