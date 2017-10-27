@@ -12,7 +12,7 @@ function getArgumentString(arg, argKey) {
   if (type === 'string') return maybeArgKey(`"${arg}"`);
   if (type === 'boolean' || type === 'null' || type === 'number') return maybeArgKey(`${arg}`);
   if (type === 'expression') return maybeArgKey(`{${getExpression(arg.chain)}}`);
-  if (type === 'partial') return maybeArgKey(`.{${getExpression(arg.chain)}}`);
+  if (type === 'partial') return maybeArgKey('${' + getExpression(arg.chain) + '}');
 
   throw new Error(`Invalid argument type in AST: ${type}`);
 }

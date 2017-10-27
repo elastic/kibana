@@ -297,7 +297,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('csv calc=.{partcalc} input="stuff\nthings"');
+      expect(expression).to.equal('csv calc=${partcalc} input="stuff\nthings"');
     });
 
     it('single expression with partial and expression arguments, with arguments', () => {
@@ -339,7 +339,7 @@ describe('ast toExpression', () => {
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('csv sep=.{partcalc type="comma"} input="stuff\nthings" break={setBreak type="newline"}');
+      expect(expression).to.equal('csv sep=${partcalc type="comma"} input="stuff\nthings" break={setBreak type="newline"}');
     });
   });
 
@@ -404,7 +404,7 @@ describe('ast toExpression', () => {
         'csv input="year,make,model,price',
         '2016,honda,cr-v,23845',
         '2016,honda,fit,15890,',
-        '2016,honda,civic,18640" | line x=.{distinct f="year"} y=.{sum f="price"} colors=.{distinct f="model"}',
+        '2016,honda,civic,18640" | line x=${distinct f="year"} y=${sum f="price"} colors=${distinct f="model"}',
       ];
       expect(expression).to.equal(expected.join('\n'));
     });
@@ -486,8 +486,8 @@ describe('ast toExpression', () => {
         'csv input="year,make,model,price',
         '2016,honda,cr-v,23845',
         '2016,honda,fit,15890,',
-        '2016,honda,civic,18640" | pointseries x=.{distinct f="year"} y=.{sum f="price"} ' +
-          'colors=.{distinct f="model"} | line pallette={getColorPallette name="elastic"}',
+        '2016,honda,civic,18640" | pointseries x=${distinct f="year"} y=${sum f="price"} ' +
+          'colors=${distinct f="model"} | line pallette={getColorPallette name="elastic"}',
       ];
       expect(expression).to.equal(expected.join('\n'));
     });
@@ -514,7 +514,7 @@ describe('ast toExpression', () => {
           }],
         },
       };
-      expect(toExpression(astObj)).to.equal('pointseries x="time" y=.{math "sum(price)"}');
+      expect(toExpression(astObj)).to.equal('pointseries x="time" y=${math "sum(price)"}');
     });
   });
 

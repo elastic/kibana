@@ -112,7 +112,7 @@ describe('ast fromExpression', () => {
       let block;
 
       beforeEach(() => {
-        expression = 'it examplePartial=.{somePartialFunction q="do something"}';
+        expression = 'it examplePartial=${somePartialFunction q="do something"}';
         astObject = fromExpression(expression);
         block = astObject.chain[0];
       });

@@ -22,7 +22,7 @@ expression
  }
 
 partial_expression
- = '.{' expression:expression '}' {
+ = '${' expression:expression '}' {
   return {
    type: 'partial',
    chain: expression.chain

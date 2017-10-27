@@ -150,8 +150,8 @@ function peg$parse(input, options) {
          chain: [first].concat(rest)
         }
        },
-      peg$c4 = ".{",
-      peg$c5 = peg$literalExpectation(".{", false),
+      peg$c4 = "${",
+      peg$c5 = peg$literalExpectation("${", false),
       peg$c6 = "}",
       peg$c7 = peg$literalExpectation("}", false),
       peg$c8 = function(expression) {
