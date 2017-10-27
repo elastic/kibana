@@ -45,7 +45,7 @@ export default class extends Component {
     return (
       <div>
         <KuiPopover
-          isFocusable
+          ownFocus
           button={(
             <KuiButton buttonType="basic" onClick={this.onButtonClick1.bind(this)}>
               Popover anchored to the right.
@@ -61,7 +61,7 @@ export default class extends Component {
         &nbsp;
 
         <KuiPopover
-          isFocusable
+          ownFocus
           button={(
             <KuiButton buttonType="basic" onClick={this.onButtonClick2.bind(this)}>
               Popover anchored to the left.
