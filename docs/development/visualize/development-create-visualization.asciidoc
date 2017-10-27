@@ -336,12 +336,12 @@ This response matches the visData property of the <visualization> directive.
 
 [[development-default-response-handler]]
 ==== default response handler
-Default response handler will convert pure elasticsearch response to tabular format. Its the recommended response
-handler to use. The response object will contain a table property, which is an array of all the tables produced (if 
-you use the split chart for example). Each of the table objects has two properties:
+The default response handler converts pure elasticsearch responses into a tabular format. 
+It is the recommended responseHandler. The response object contains a table property, 
+which is an array of all the tables in the response. Each of the table objects has two properties:
 
-- columns, array of column objects, where each column object has a title property and an aggConfig property
-- rows, array of rows, where each row is an array of non formatted cell values
+- `columns`: array of column objects, where each column object has a title property and an aggConfig property
+- `rows`: array of rows, where each row is an array of non formatted cell values
 
 Here is an example of a response with 1 table, 3 columns and 2 rows:
 
@@ -417,10 +417,10 @@ The `vis` object holds the visualization state and is the window into kibana:
 - *vis.uiStateVal(name, val)*: updates a property in UI state
 - *vis.isEditorMode()*: returns true if in editor mode
 - *vis.API.timeFilter*: allows you to access time picker
-- *vis.API.queryFilter*: allows you to query filter
-- *vis.API.queryManager*: allows you to query manager
-- *vis.API.filterManager*: allows you to filter manager
-- *vis.API.kuery*: allows you to access to kuery language API
+- *vis.API.queryFilter*: gives you access to queryFilter
+- *vis.API.queryManager*: gives you access to add filters to the filter bar
+- *vis.API.filterManager*: gives you access to filterManager
+- *vis.API.kuery*: gives you access to the experimental `keury`-language filter bar
 - *vis.API.events.click*: default click handler
 - *vis.API.events.brush*: default brush handler
 
@@ -451,9 +451,11 @@ Update the timefilter time values and call update() method on it to update time 
 [[development-aggconfig]]
 === AggConfig object
  
-Few times we mentioned the AggConfig object and you will probably have to handle with it in every visualization you 
-will create. Here we provide short description of some of the methods on it, however the best reference would be 
-to actually check the code and other visualizations.
+The AggConfig object represents an aggregation search to Elasticsearch, 
+plus some additional functionality to manage data-values that belong to this aggregation. 
+This is primarily used internally in Kibana, but you may find you have a need for it 
+when writing your own visualization. Here we provide short description of some of the methods on it, 
+however the best reference would be to actually check the source code.
  
   
 - *fieldFormatter(<type>)* : returns a function which will format your value according to field formatters defined on
