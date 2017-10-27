@@ -2,6 +2,12 @@
 
 "Never look back. The past is done. The future is a blank canvas." ― Suzy Kassem, Rise Up and Salute the Sun
 
+### Feature Questions
+
+**Why are there no tooltips**
+
+We've opted for always available data labels instead, for now. While there exists much functionality that can be used for analytical purposes in Canvas our core concern in presentational. In a hands-off presentation format, such as a report or a slideshow, there is no facility for user to mouseover a chart to see a tooltip; data labels are a better fit for us.
+
 ### Background
 
 **What is Kibana Canvas?**
