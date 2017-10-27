@@ -6,6 +6,8 @@ import { findByParam } from 'ui/utils/find_by_param';
 export function FilterBarClickHandlerProvider(Notifier) {
   return function ($state) {
     return function (event, simulate) {
+      if (!$state) return;
+
       const notify = new Notifier({
         location: 'Filter bar'
       });
