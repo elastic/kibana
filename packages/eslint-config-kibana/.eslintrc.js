@@ -27,11 +27,11 @@ module.exports = {
     camelcase: [ 'error', { properties: 'never' } ],
     'comma-dangle': [
       'error', {
-        'arrays': 'only-multiline',
-        'objects': 'only-multiline',
-        'imports': 'only-multiline',
-        'exports': 'only-multiline',
-        'functions': 'never',
+        'arrays':    'only-multiline',
+        'objects':   'only-multiline',
+        'imports':   'only-multiline',
+        'exports':   'only-multiline',
+        'functions': 'only-multiline',
       },
     ],
     'comma-spacing': ['error', { before: false, after: true }],
