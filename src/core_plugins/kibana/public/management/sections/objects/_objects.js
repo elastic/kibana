@@ -204,7 +204,12 @@ uiModules.get('apps/management')
           );
         })
         .then((overwriteAll) => {
+          // Keep a record of the index patterns assigned to our imported saved objects that do not
+          // exist. We will provide a way for the user to manually select a new index pattern for those
+          // saved objects.
           const conflictedIndexPatterns = [];
+          // We want to do the same for saved searches, but we want to keep them separate because they need
+          // to be applied _first_ because other saved objects can be depedent on those saved searches existing
           const conflictedSearchDocs = [];
 
           function importDocument(swallowErrors, doc) {
@@ -230,14 +235,13 @@ uiModules.get('apps/management')
                   })
                   .catch((err) => {
                     if (swallowErrors && err instanceof SavedObjectNotFound) {
-                      if (err.savedObjectType === 'search') {
-                        conflictedSearchDocs.push(doc);
-                        return;
-                      }
-
-                      if (err.savedObjectType === 'index-pattern') {
-                        conflictedIndexPatterns.push({ obj, doc });
-                        return;
+                      switch (err.savedObjectType) {
+                        case 'search':
+                          conflictedSearchDocs.push(doc);
+                          return;
+                        case 'index-pattern':
+                          conflictedIndexPatterns.push({ obj, doc });
+                          return;
                       }
                     }
                     // swallow errors here so that the remaining promise chain executes
@@ -268,8 +272,9 @@ uiModules.get('apps/management')
           function resolveConflicts(objs, { obj }) {
             const oldIndexId = obj.searchSource.getOwn('index');
             const newIndexId = objs.find(({ oldId }) => oldId === oldIndexId).newId;
+            // If the user did not select a new index pattern in the modal, the id
+            // will be same as before, so don't try to update it
             if (newIndexId === oldIndexId) {
-              // Skip
               return;
             }
             return obj.hydrateIndexPattern(newIndexId)
