@@ -176,10 +176,6 @@ class FlotChart extends Component {
 
   handleResize(width, height) {
     this.size = { width, height };
-    if (!this.rendered) {
-      this.renderChart();
-      return;
-    }
 
     if (this.size.height > 0 && this.size.width > 0) {
       if (!this.plot) return;
