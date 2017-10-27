@@ -54,6 +54,10 @@ export const palettes = {
     colors: ['#CCC7DF', '#130351'],
     gradient: true,
   },
+  green_blue_red: {
+    colors: ['#D3FB71','#7ECAE3','#f03b20'],
+    gradient: true,
+  },
   yellow_green: {
     colors: ['#f7fcb9','#addd8e','#31a354'],
     gradient: true,
