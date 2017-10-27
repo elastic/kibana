@@ -40,6 +40,7 @@ export default new Chainable('legend', {
 
       if (position === false) {
         eachSeries._global.legend.show = false;
+        eachSeries._global.legend.showTime = false;
       } else {
         eachSeries._global.legend.position = position;
       }
