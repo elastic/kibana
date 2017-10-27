@@ -31,7 +31,7 @@ export default class extends Component {
   render() {
     return (
       <KuiPopover
-        isFocusable
+        ownFocus
         button={(
           <KuiButton buttonType="basic" onClick={this.onButtonClick.bind(this)}>
             Custom class

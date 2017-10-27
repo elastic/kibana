@@ -4,6 +4,7 @@ import React, {
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import FocusTrap from 'focus-trap-react';
+import tabbable from 'tabbable';
 
 import { cascadingMenuKeyCodes } from '../../services';
 
@@ -37,6 +38,30 @@ export class KuiPopover extends Component {
     }
   };
 
+  updateFocus() {
+    // Wait for the DOM to update.
+    window.requestAnimationFrame(() => {
+      if (!this.panel) {
+        return;
+      }
+
+      // If we've already focused on something inside the panel, everything's fine.
+      if (this.panel.contains(document.activeElement)) {
+        return;
+      }
+
+      // Otherwise let's focus the first tabbable item and expedite input from the user.
+      const tabbableItems = tabbable(this.panel);
+      if (tabbableItems.length) {
+        tabbableItems[0].focus();
+      }
+    });
+  }
+
+  componentDidMount() {
+    this.updateFocus();
+  }
+
   componentWillReceiveProps(nextProps) {
     // The popover is being opened.
     if (!this.props.isOpen && nextProps.isOpen) {
@@ -67,12 +92,16 @@ export class KuiPopover extends Component {
     }
   }
 
+  componentDidUpdate() {
+    this.updateFocus();
+  }
+
   componentWillUnmount() {
     clearTimeout(this.closingTransitionTimeout);
   }
 
   panelRef = node => {
-    if (this.props.isFocusable) {
+    if (this.props.ownFocus) {
       this.panel = node;
     }
   };
@@ -82,7 +111,7 @@ export class KuiPopover extends Component {
       anchorPosition,
       button,
       isOpen,
-      isFocusable,
+      ownFocus,
       withTitle,
       children,
       className,
@@ -110,7 +139,7 @@ export class KuiPopover extends Component {
       let tabIndex;
       let initialFocus;
 
-      if (isFocusable) {
+      if (ownFocus) {
         tabIndex = '0';
         initialFocus = () => this.panel;
       }
@@ -152,7 +181,7 @@ export class KuiPopover extends Component {
 
 KuiPopover.propTypes = {
   isOpen: PropTypes.bool,
-  isFocusable: PropTypes.bool,
+  ownFocus: PropTypes.bool,
   withTitle: PropTypes.bool,
   closePopover: PropTypes.func.isRequired,
   button: PropTypes.node.isRequired,
@@ -164,7 +193,7 @@ KuiPopover.propTypes = {
 
 KuiPopover.defaultProps = {
   isOpen: false,
-  isFocusable: false,
+  ownFocus: false,
   anchorPosition: 'center',
   panelPaddingSize: 'm',
 };
