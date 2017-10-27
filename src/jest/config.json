@@ -15,6 +15,9 @@
   "moduleNameMapper": {
     "^ui_framework/components": "<rootDir>/ui_framework/components"
   },
+  "setupFiles": [
+    "<rootDir>/src/jest/setup/babel_polyfill.js"
+  ],
   "coverageDirectory": "<rootDir>/target/jest-coverage",
   "coverageReporters": [
     "html"
