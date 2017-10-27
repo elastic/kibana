@@ -12,13 +12,6 @@ export const DatasourcePreview = compose(
       interpretAst({
         type: 'expression',
         chain: [
-          {
-            type: 'function',
-            function: 'size',
-            arguments: {
-              _: [10],
-            },
-          },
           this.props.function,
         ],
       }).then(this.props.setDatatable);
