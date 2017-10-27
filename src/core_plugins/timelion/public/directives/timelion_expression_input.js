@@ -29,6 +29,7 @@ import grammar from 'raw-loader!../chain.peg';
 import './timelion_expression_suggestions/timelion_expression_suggestions';
 import timelionExpressionInputTemplate from './timelion_expression_input.html';
 import {
+  SUGGESTION_TYPE,
   FunctionSuggestions,
   suggest,
   insertAtLocation,
@@ -80,16 +81,34 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
           return;
         }
 
-        const functionName = `${scope.functionSuggestions.list[suggestionIndex].name}()`;
-        const { min, max } = suggestibleFunctionLocation;
+        switch (scope.functionSuggestions.type) {
+          case SUGGESTION_TYPE.FUNCTIONS: {
+            const functionName = `${scope.functionSuggestions.list[suggestionIndex].name}()`;
+            const { min, max } = suggestibleFunctionLocation;
 
-        // Update the expression with the function.
-        const updatedExpression = insertAtLocation(functionName, scope.sheet, min, max);
-        scope.sheet = updatedExpression;
+            // Update the expression with the function.
+            const updatedExpression = insertAtLocation(functionName, scope.sheet, min, max);
+            scope.sheet = updatedExpression;
 
-        // Position the caret inside of the function parentheses.
-        const newCaretOffset = min + functionName.length;
-        setCaretOffset(newCaretOffset);
+            // Position the caret inside of the function parentheses.
+            const newCaretOffset = min + functionName.length;
+            setCaretOffset(newCaretOffset);
+            break;
+          }
+          case SUGGESTION_TYPE.ARGUMENTS: {
+            const argumentName = `${scope.functionSuggestions.list[suggestionIndex].name}=`;
+            const { min, max } = suggestibleFunctionLocation;
+
+            // Update the expression with the function.
+            const updatedExpression = insertAtLocation(argumentName, scope.sheet, min, max);
+            scope.sheet = updatedExpression;
+
+            // Position the caret after the '='
+            const newCaretOffset = min + argumentName.length + 1;
+            setCaretOffset(newCaretOffset);
+            break;
+          }
+        }
       }
 
       function scrollToSuggestionAt(index) {
@@ -100,15 +119,24 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
         suggestionsList.scrollTop(suggestionListItem.offsetTop - suggestionsList[0].offsetTop);
       }
 
+      function getCursorPosition() {
+        const $selection = $('#timelionExpressionTextArea');
+        if ($selection.length) {
+          return $selection[0].selectionStart;
+        }
+        return null;
+      }
+
       function getSuggestions() {
         suggest(
           scope.sheet,
           functionReference.list,
-          Parser
+          Parser,
+          getCursorPosition()
         ).then(suggestions => {
           // We're using ES6 Promises, not $q, so we have to wrap this in $apply.
           scope.$apply(() => {
-            scope.functionSuggestions.setList(suggestions.list);
+            scope.functionSuggestions.setList(suggestions.list, suggestions.type);
             scope.functionSuggestions.show();
             suggestibleFunctionLocation = suggestions.functionLocation;
             $timeout(() => {
@@ -204,6 +232,10 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
         if (!isNavigationalKey(e.keyCode)) {
           getSuggestions();
         }
+      };
+
+      scope.onClickExpression = () => {
+        getSuggestions();
       };
 
       scope.onClickSuggestion = index => {
