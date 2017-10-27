@@ -66,7 +66,7 @@ export const grid = {
                   <th>{summary.y.expression}</th>
                 }
                 {columns.map(col => (
-                  <th key={`header-${col}`} className="canvas__element--grid-label">{col}</th>
+                  <th key={`header-${col}`} className="canvas__element--grid-label">{String(col)}</th>
                 ))}
               </tr>
             </thead>
@@ -91,7 +91,7 @@ export const grid = {
                       >
                         { (!mark && !val.text) &&  <i className={`fa fa-circle`}/>}
                         { mark && <i className={`fa fa-${mark}`}/> }
-                        { val.text && <div className="canvas__element--grid--series-label">{val.text}</div> }
+                        { val.text && <div className="canvas__element--grid--series-label">{String(val.text)}</div> }
                       </div>
                     ))}
                   </td>

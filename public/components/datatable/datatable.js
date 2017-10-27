@@ -16,6 +16,8 @@ const getIcon = (type) => {
       return (<strong>#</strong>);
     case 'date':
       return (<i className="fa fa-calendar"/>);
+    case 'boolean':
+      return (<strong>t</strong>);
     default:
       return (<strong>?</strong>);
   }
@@ -27,7 +29,7 @@ const getColumnType = col => col.type || null;
 
 const getFormattedValue = (val, type) => {
   if (type === 'date') return moment(val).format();
-  return val;
+  return String(val);
 };
 
 export const Datatable = ({ datatable, perPage, paginate }) => (
