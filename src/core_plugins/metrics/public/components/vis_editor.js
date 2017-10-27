@@ -98,6 +98,7 @@ class VisEditor extends Component {
             onCommit={handleCommit}
             onToggleAutoApply={handleAutoApplyToggle}
             onChange={handleChange}
+            title={this.props.vis.title}
             dateFormat={this.props.config.get('dateFormat')}
           />
           <div className="vis-editor-hide-for-reporting">

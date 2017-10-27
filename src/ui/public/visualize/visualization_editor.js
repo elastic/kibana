@@ -13,7 +13,6 @@ uiModules
 
   return {
     restrict: 'E',
-    require: '?renderCounter',
     scope: {
       vis: '=',
       visData: '=',
@@ -29,9 +28,7 @@ uiModules
 
       $scope.renderFunction = () => {
         if (!$scope.vis) return;
-        editor.render($scope.visData, $scope.searchSource, getUpdateStatus($scope)).then(() => {
-          $scope.$emit('renderComplete');
-        });
+        editor.render($scope.visData, $scope.searchSource, getUpdateStatus($scope));
       };
 
       $scope.$on('render', (event) => {

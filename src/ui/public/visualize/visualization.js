@@ -15,7 +15,6 @@ uiModules
 
   return {
     restrict: 'E',
-    require: '?renderCounter',
     scope: {
       showSpyPanel: '=?',
       vis: '=',
@@ -118,10 +117,7 @@ uiModules
         visualization.render($scope.visData, status)
           .then(() => {
             // renderComplete
-            $scope.$emit('renderComplete');
-            if (!$scope.vis.visualizeScope) {
-              $el.trigger('renderComplete');
-            }
+            $el.trigger('renderComplete');
           });
         $scope.$apply();
       }, 100);
