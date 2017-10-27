@@ -13,8 +13,8 @@ export default function ({ getService, getPageObjects }) {
 
       // delete .kibana index and update configDoc
       return kibanaServer.uiSettings.replace({
-        'dateFormat:tz':'UTC',
-        'defaultIndex':'logstash-*'
+        'dateFormat:tz': 'UTC',
+        'defaultIndex': 'logstash-*'
       })
       .then(function loadkibanaIndexPattern() {
         log.debug('load kibana index with default index pattern');

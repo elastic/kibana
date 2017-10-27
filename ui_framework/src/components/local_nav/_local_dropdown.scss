@@ -41,7 +41,11 @@
   margin-left: 30px;
 }
 
+/**
+ * 1. Override inherited styles.
+ */
 .kuiLocalDropdownTitle {
+  margin-top: 0; /* 1 */
   margin-bottom: 12px;
   font-size: 18px;
   color: $localNavTextColor;
@@ -66,9 +70,13 @@
   margin-bottom: 6px;
 }
 
+  /**
+   * 1. Override inherited styles.
+   */
   .kuiLocalDropdownHeader__label {
     font-size: 14px;
     font-weight: 700;
+    margin-bottom: 0; /* 1 */
     color: $localNavTextColor;
 
     @include darkTheme {

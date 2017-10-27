@@ -54,7 +54,7 @@ export default describe('conformance', function () {
 
       it('declares compatible field formats as a string or array', function () {
         expect(Type.fieldType).to.be.ok();
-        expect(_.isString(Type.fieldType) || _.isArray(Type.fieldType)).to.be(true);
+        expect(_.isString(Type.fieldType) || Array.isArray(Type.fieldType)).to.be(true);
       });
     });
 

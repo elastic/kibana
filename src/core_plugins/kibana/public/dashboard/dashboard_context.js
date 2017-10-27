@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import 'ui/state_management/app_state';
 import { luceneStringToDsl } from '../../../../ui/public/courier/data_source/build_query/lucene_string_to_dsl';
+import { migrateFilter } from 'ui/courier/data_source/_migrate_filter';
 
 export function dashboardContextProvider(Private, getAppState) {
   return () => {
@@ -29,10 +30,10 @@ export function dashboardContextProvider(Private, getAppState) {
       if (filter.meta.disabled) return;
       if (filter.meta.negate) {
         bool.must_not = bool.must_not || [];
-        if (esFilter.query || esFilter) bool.must_not.push(esFilter.query || esFilter);
+        if (esFilter.query || esFilter) bool.must_not.push(migrateFilter(esFilter.query || esFilter));
       } else {
         bool.must = bool.must || [];
-        if (esFilter.query || esFilter) bool.must.push(esFilter.query || esFilter);
+        if (esFilter.query || esFilter) bool.must.push(migrateFilter(esFilter.query || esFilter));
       }
     });
 

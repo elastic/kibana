@@ -7,7 +7,7 @@ uiModules
 
   return {
     restrict: 'E',
-    scope : {
+    scope: {
       data: '='
     },
     link: function ($scope, elem) {

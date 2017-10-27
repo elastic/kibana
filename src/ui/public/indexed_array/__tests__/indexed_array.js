@@ -6,7 +6,7 @@ import { IndexedArray } from 'ui/indexed_array';
 // this is generally a data-structure that IndexedArray is good for managing
 const users = [
   { name: 'John', id: 69, username: 'beast', group: 'admins' },
-  { name: 'Anon', id:  0, username: 'shhhh', group: 'secret' },
+  { name: 'Anon', id: 0, username: 'shhhh', group: 'secret' },
   { name: 'Fern', id: 42, username: 'kitty', group: 'editor' },
   { name: 'Mary', id: 55, username: 'sheep', group: 'editor' }
 ];
@@ -32,12 +32,12 @@ describe('IndexedArray', function () {
     });
 
     it('fails basic lodash check', function () {
-      expect(_.isArray(reg)).to.be(false);
+      expect(Array.isArray(reg)).to.be(false);
     });
 
     it('clones to an object', function () {
       expect(_.isPlainObject(_.clone(reg))).to.be(true);
-      expect(_.isArray(_.clone(reg))).to.be(false);
+      expect(Array.isArray(_.clone(reg))).to.be(false);
     });
   });
 

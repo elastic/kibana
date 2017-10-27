@@ -1,14 +1,15 @@
+import _ from 'lodash';
+
 import 'ui/validate_date_interval';
 import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';
 import { AggTypesBucketsCreateFilterHistogramProvider } from 'ui/agg_types/buckets/create_filter/histogram';
-import intervalTemplate from 'ui/agg_types/controls/interval.html';
+import intervalTemplate from 'ui/agg_types/controls/number_interval.html';
 import minDocCountTemplate from 'ui/agg_types/controls/min_doc_count.html';
 import extendedBoundsTemplate from 'ui/agg_types/controls/extended_bounds.html';
 
-export function AggTypesBucketsHistogramProvider(Private) {
+export function AggTypesBucketsHistogramProvider(Private, config) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
   const createFilter = Private(AggTypesBucketsCreateFilterHistogramProvider);
-
 
   return new BucketAggType({
     name: 'histogram',
@@ -18,6 +19,24 @@ export function AggTypesBucketsHistogramProvider(Private) {
       return aggConfig.getFieldDisplayName();
     },
     createFilter: createFilter,
+    decorateAggConfig: function () {
+      let autoBounds;
+
+      return {
+        setAutoBounds: {
+          configurable: true,
+          value(newValue) {
+            autoBounds = newValue;
+          }
+        },
+        getAutoBounds: {
+          configurable: true,
+          value() {
+            return autoBounds;
+          }
+        }
+      };
+    },
     params: [
       {
         name: 'field',
@@ -27,8 +46,55 @@ export function AggTypesBucketsHistogramProvider(Private) {
       {
         name: 'interval',
         editor: intervalTemplate,
+        modifyAggConfigOnSearchRequestStart(aggConfig, searchSource) {
+          const field = aggConfig.getField();
+          const aggBody = field.scripted
+            ? { script: { inline: field.script, lang: field.lang } }
+            : { field: field.name };
+
+          return searchSource
+            .extend()
+            .size(0)
+            .aggs({
+              maxAgg: {
+                max: aggBody
+              },
+              minAgg: {
+                min: aggBody
+              }
+            })
+            .fetchAsRejectablePromise()
+            .then((resp) => {
+              aggConfig.setAutoBounds({
+                min: _.get(resp, 'aggregations.minAgg.value'),
+                max: _.get(resp, 'aggregations.maxAgg.value')
+              });
+            });
+        },
         write: function (aggConfig, output) {
-          output.params.interval = parseFloat(aggConfig.params.interval);
+          let interval = parseFloat(aggConfig.params.interval);
+          if (interval <= 0) {
+            interval = 1;
+          }
+
+          // ensure interval does not create too many buckets and crash browser
+          if (aggConfig.getAutoBounds()) {
+            const range = aggConfig.getAutoBounds().max - aggConfig.getAutoBounds().min;
+            const bars = range / interval;
+            if (bars > config.get('histogram:maxBars')) {
+              const minInterval = range / config.get('histogram:maxBars');
+              // Round interval by order of magnitude to provide clean intervals
+              // Always round interval up so there will always be less buckets than histogram:maxBars
+              const orderOfMaginute = Math.pow(10, Math.floor(Math.log10(minInterval)));
+              let roundInterval = orderOfMaginute;
+              while (roundInterval < minInterval) {
+                roundInterval += orderOfMaginute;
+              }
+              interval = roundInterval;
+            }
+          }
+
+          output.params.interval = interval;
         }
       },
 

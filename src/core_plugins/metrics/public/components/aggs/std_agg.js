@@ -31,6 +31,7 @@ function StandardAgg(props) {
       <div className="vis_editor__item">
         <div className="vis_editor__label">Aggregation</div>
         <AggSelect
+          panelType={props.panel.type}
           siblings={props.siblings}
           value={model.type}
           onChange={handleSelectChange('type')}
