@@ -17,7 +17,7 @@ export const pointseries = {
         type: 'render',
         as: 'table',
         value: {
-          datatable: datatable.from(pointseries),
+          datatable: datatable.from.pointseries(pointseries),
         },
       };
     },
