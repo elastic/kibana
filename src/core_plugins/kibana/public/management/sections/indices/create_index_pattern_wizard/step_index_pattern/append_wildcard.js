@@ -16,10 +16,10 @@ module.directive('appendWildcard', function () {
     link: function ($scope, $elem, $attrs, $ctrl) {
       $scope.appendedWildcard = false;
 
-      function setElementValue(val, event, moveSelectionRange = false) {
+      function setElementValue(val, event, setCursorBackOneCharacter = false) {
         event.preventDefault();
         $elem.val(val);
-        if (moveSelectionRange) {
+        if (setCursorBackOneCharacter) {
           $elem[0].setSelectionRange(1, 1);
         }
       }
