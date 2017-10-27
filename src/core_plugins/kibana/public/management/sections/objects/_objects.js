@@ -278,7 +278,7 @@ uiModules.get('apps/management')
               return;
             }
             return obj.hydrateIndexPattern(newIndexId)
-              .then(() => obj.save({ confirmOverwrite : !overwriteAll }));
+              .then(() => obj.save({ confirmOverwrite: !overwriteAll }));
           }
 
           const docTypes = groupByType(docs);
