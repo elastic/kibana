@@ -3,7 +3,7 @@ import { uiModules } from 'ui/modules';
 import { callAfterBindingsWorkaround } from 'ui/compat';
 import { FILTER_OPERATOR_TYPES } from './lib/filter_operators';
 import template from './filter_editor.html';
-import '../directives/documentation_link';
+import '../directives/documentation_href';
 import './filter_query_dsl_editor';
 import './filter_field_select';
 import './filter_operator_select';

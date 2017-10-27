@@ -4,11 +4,11 @@ import { uiModules } from 'ui/modules';
 
 const module = uiModules.get('kibana');
 
-module.directive('documentationLink', function () {
+module.directive('documentationHref', function () {
   return {
     restrict: 'A',
     link: function (scope, element, attributes) {
-      element.attr('href', get(documentationLinks, attributes.documentationLink));
+      element.attr('href', get(documentationLinks, attributes.documentationHref));
     }
   };
 });

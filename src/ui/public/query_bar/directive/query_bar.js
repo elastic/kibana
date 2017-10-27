@@ -2,7 +2,7 @@ import { uiModules } from 'ui/modules';
 import { callAfterBindingsWorkaround } from 'ui/compat';
 import template from './query_bar.html';
 import { queryLanguages } from '../lib/queryLanguages';
-import '../../directives/documentation_link';
+import '../../directives/documentation_href';
 
 const module = uiModules.get('kibana');
 
