@@ -42,6 +42,7 @@ export class PanelHeader extends React.Component {
         <span
           data-test-subj="dashboardPanelTitle"
           className="panel-title"
+          title={this.props.title}
           aria-label={`Dashboard panel: ${this.props.title}`}
         >
           {this.props.title}
