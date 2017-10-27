@@ -9,6 +9,8 @@ export function FilterBarClickHandlerProvider(Notifier, Private) {
 
   return function ($state) {
     return function (event, simulate) {
+      if (!$state) return;
+
       const notify = new Notifier({
         location: 'Filter bar'
       });
@@ -25,7 +27,7 @@ export function FilterBarClickHandlerProvider(Notifier, Private) {
         aggConfigResult = event.point.aggConfigResult;
       }
 
-      if (aggConfigResult && $state) {
+      if (aggConfigResult) {
         const isLegendLabel = !!event.point.values;
         let aggBuckets = _.filter(aggConfigResult.getPath(), { type: 'bucket' });
 

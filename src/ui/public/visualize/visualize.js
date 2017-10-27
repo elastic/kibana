@@ -168,7 +168,7 @@ uiModules
         } else {
           const handleUiStateChange = () => { $scope.$broadcast('render'); };
           $scope.uiState.on('change', handleUiStateChange);
-          $scope.$on('destroy', () => {
+          $scope.$on('$destroy', () => {
             $scope.uiState.off('change', handleUiStateChange);
           });
         }
