@@ -135,7 +135,7 @@ describe('KuiPopover', () => {
       });
     });
 
-    describe('isFocusable', () => {
+    describe('ownFocus', () => {
       test('defaults to false', () => {
         const component = render(
           <KuiPopover
@@ -153,7 +153,7 @@ describe('KuiPopover', () => {
         const component = render(
           <KuiPopover
             isOpen
-            isFocusable
+            ownFocus
             button={<button />}
             closePopover={() => {}}
           />
