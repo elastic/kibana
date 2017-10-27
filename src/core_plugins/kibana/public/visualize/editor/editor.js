@@ -237,6 +237,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     $state.vis.title = savedVis.title;
     $state.vis.type = savedVis.type || $state.vis.type;
     savedVis.visState = $state.vis;
+    savedVis.visType = $state.vis.type;
     savedVis.uiStateJSON = angular.toJson($scope.uiState.getChanges());
 
     savedVis.save()

@@ -271,6 +271,7 @@ app.controller('timelion', function (
         expression: $scope.state.sheet[$scope.state.selected],
         interval: $scope.state.interval
       };
+      savedExpression.visType = 'timelion';
       savedExpression.title = title;
       savedExpression.visState.title = title;
       savedExpression.save().then(function (id) {

@@ -48,6 +48,9 @@
       "version": {
         "type": "integer"
       },
+      "visType": {
+        "type": "keyword"
+      },
       "visState": {
         "type": "text"
       }

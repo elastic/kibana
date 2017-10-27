@@ -24,7 +24,7 @@ app.service('savedVisualizations', function (Promise, kbnIndex, SavedVis, Privat
 
     let typeName = source.typeName;
     if (source.visState) {
-      try { typeName = JSON.parse(source.visState).type; }
+      try { typeName = JSON.parse(source.visState).type; } // TODO: use source.visType instead?
       catch (e) { /* missing typename handled below */ } // eslint-disable-line no-empty
     }
 
