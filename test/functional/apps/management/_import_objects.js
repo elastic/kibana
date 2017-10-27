@@ -89,5 +89,34 @@ export default function ({ getService, getPageObjects }) {
       });
       expect(rowCount).to.be(2);
     });
+
+    it('should handle saved searches and objects with saved searches properly', async function () {
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.clickKibanaSavedObjects();
+      await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects_with_saved_searches.json'));
+      await PageObjects.common.clickConfirmOnModal();
+      await PageObjects.settings.setImportIndexFieldOption(2);
+      await PageObjects.settings.clickChangeIndexConfirmButton();
+      await PageObjects.settings.clickVisualizationsTab();
+
+      const vizRowCount = await retry.try(async () => {
+        const rows = await PageObjects.settings.getVisualizationRows();
+        if (rows.length !== 2) {
+          throw 'Not loaded yet';
+        }
+        return rows.length;
+      });
+      expect(vizRowCount).to.be(2);
+
+      await PageObjects.settings.clickSearchesTab();
+      const searchRowCount = await retry.try(async () => {
+        const rows = await PageObjects.settings.getVisualizationRows();
+        if (rows.length !== 1) {
+          throw 'Not loaded yet';
+        }
+        return rows.length;
+      });
+      expect(searchRowCount).to.be(1);
+    });
   });
 }

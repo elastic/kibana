@@ -517,6 +517,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await (await testSubjects.find('objectsTab-visualizations')).click();
     }
 
+    async clickSearchesTab() {
+      await (await testSubjects.find('objectsTab-searches')).click();
+    }
+
     async getVisualizationRows() {
       return await testSubjects.findAll(`objectsTableRow`);
     }

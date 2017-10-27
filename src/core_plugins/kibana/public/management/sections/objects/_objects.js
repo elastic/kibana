@@ -204,9 +204,15 @@ uiModules.get('apps/management')
           );
         })
         .then((overwriteAll) => {
+          // Keep a record of the index patterns assigned to our imported saved objects that do not
+          // exist. We will provide a way for the user to manually select a new index pattern for those
+          // saved objects.
           const conflictedIndexPatterns = [];
+          // We want to do the same for saved searches, but we want to keep them separate because they need
+          // to be applied _first_ because other saved objects can be depedent on those saved searches existing
+          const conflictedSearchDocs = [];
 
-          function importDocument(doc) {
+          function importDocument(swallowErrors, doc) {
             const { service } = find($scope.services, { type: doc._type }) || {};
 
             if (!service) {
@@ -228,11 +234,16 @@ uiModules.get('apps/management')
                     return obj.save({ confirmOverwrite: !overwriteAll });
                   })
                   .catch((err) => {
-                    if (err instanceof SavedObjectNotFound && err.savedObjectType === 'index-pattern') {
-                      conflictedIndexPatterns.push({ obj, doc });
-                      return;
+                    if (swallowErrors && err instanceof SavedObjectNotFound) {
+                      switch (err.savedObjectType) {
+                        case 'search':
+                          conflictedSearchDocs.push(doc);
+                          return;
+                        case 'index-pattern':
+                          conflictedIndexPatterns.push({ obj, doc });
+                          return;
+                      }
                     }
-
                     // swallow errors here so that the remaining promise chain executes
                     err.message = `Importing ${obj.title} (${obj.id}) failed: ${err.message}`;
                     notify.error(err);
@@ -258,35 +269,39 @@ uiModules.get('apps/management')
             }, defaultDocTypes);
           }
 
+          function resolveConflicts(objs, { obj }) {
+            const oldIndexId = obj.searchSource.getOwn('index');
+            const newIndexId = objs.find(({ oldId }) => oldId === oldIndexId).newId;
+            // If the user did not select a new index pattern in the modal, the id
+            // will be same as before, so don't try to update it
+            if (newIndexId === oldIndexId) {
+              return;
+            }
+            return obj.hydrateIndexPattern(newIndexId)
+              .then(() => obj.save({ confirmOverwrite: !overwriteAll }));
+          }
+
           const docTypes = groupByType(docs);
 
-          return Promise.map(docTypes.searches, importDocument)
-            .then(() => Promise.map(docTypes.other, importDocument))
+          return Promise.map(docTypes.searches, importDocument.bind(null, true))
+            .then(() => Promise.map(docTypes.other, importDocument.bind(null, true)))
             .then(() => {
               if (conflictedIndexPatterns.length) {
-                showChangeIndexModal(
-                  (objs) => {
-                    return Promise.map(
-                      conflictedIndexPatterns,
-                      ({ obj }) => {
-                        const oldIndexId = obj.searchSource.getOwn('index');
-                        const newIndexId = objs.find(({ oldId }) => oldId === oldIndexId).newId;
-                        if (newIndexId === oldIndexId) {
-                          // Skip
-                          return;
-                        }
-                        return obj.hydrateIndexPattern(newIndexId)
-                          .then(() => obj.save({ confirmOverwrite: !overwriteAll }));
-                      }
-                    ).then(refreshData);
-                  },
-                  conflictedIndexPatterns,
-                  $route.current.locals.indexPatterns,
-                );
-              } else {
-                return refreshData();
+                return new Promise((resolve, reject) => {
+                  showChangeIndexModal(
+                    (objs) => {
+                      Promise.map(conflictedIndexPatterns, resolveConflicts.bind(null, objs))
+                        .then(resolve)
+                        .catch(reject);
+                    },
+                    conflictedIndexPatterns,
+                    $route.current.locals.indexPatterns,
+                  );
+                });
               }
             })
+            .then(() => Promise.map(conflictedSearchDocs, importDocument.bind(null, false)))
+            .then(refreshData)
             .catch(notify.error);
         });
       };
