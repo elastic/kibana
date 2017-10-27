@@ -19,7 +19,6 @@ import { DashboardConstants, createDashboardEditUrl } from './dashboard_constant
 import { VisualizeConstants } from 'plugins/kibana/visualize/visualize_constants';
 import { DashboardState } from './dashboard_state';
 import { notify } from 'ui/notify';
-import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import { showCloneModal } from './top_nav/show_clone_modal';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import { keyCodes } from 'ui_framework/services';
@@ -110,7 +109,6 @@ app.directive('dashboardApp', function ($injector) {
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
       const notify = new Notifier({ location: 'Dashboard' });
-      $scope.queryDocLinks = documentationLinks.query;
       const embeddableHandlers = Private(EmbeddableHandlersRegistryProvider);
       $scope.getEmbeddableHandler = panelType => embeddableHandlers.byName[panelType];
 
