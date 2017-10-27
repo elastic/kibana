@@ -18,7 +18,7 @@ export const PillSelect = ({ values, options, onChange, setTarget, setPopover, s
   function addPill(val) {
     values.push(val);
     onChange(values);
-    setPopover(false);
+    close();
   }
 
   function removePill(val) {
