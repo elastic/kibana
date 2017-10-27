@@ -3,6 +3,7 @@ import { uiModules } from 'ui/modules';
 import { callAfterBindingsWorkaround } from 'ui/compat';
 import template from './query_bar.html';
 import typeaheadItemTemplate from './typeahead_item.html';
+import typeaheadFooterTemplate from './typeahead_footer.html';
 import { queryLanguages } from '../lib/queryLanguages';
 import { documentationLinks } from '../../documentation_links/documentation_links.js';
 import { fromKueryExpression, getSuggestions } from '../../kuery';
@@ -28,6 +29,7 @@ module.directive('queryBar', function () {
     bindToController: true,
     controller: callAfterBindingsWorkaround(function ($scope, $element, $http, $timeout, config, PersistedLog, filterFilter) {
       this.typeaheadItemTemplate = typeaheadItemTemplate;
+      this.typeaheadFooterTemplate = typeaheadFooterTemplate;
       this.queryDocLinks = documentationLinks.query;
       this.appName = this.appName || 'global';
       this.availableQueryLanguages = queryLanguages;

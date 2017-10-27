@@ -6,6 +6,7 @@
   <kbn-typeahead
     items="queryBar.typeaheadItems"
     item-template="queryBar.typeaheadItemTemplate"
+    footer-template="queryBar.typeaheadFooterTemplate"
     on-select="queryBar.onTypeaheadSelect(item)"
   >
     <div
@@ -67,18 +68,6 @@
           ng-class="{'kuiLocalSearchInput-isInvalid': queryBarForm.$invalid}"
           data-test-subj="queryInput"
         >
-        <div class="kuiLocalSearchAssistedInput__assistance">
-          <p class="kuiText">
-            <a
-              id="discoverKuerySyntaxHint"
-              class="kuiLink"
-              ng-href="{{queryBar.queryDocLinks.kueryQuerySyntax}}"
-              target="_blank"
-            >
-              Uses kuery syntax
-            </a>
-          </p>
-        </div>
       </div>
 
       <select
