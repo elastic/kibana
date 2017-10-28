@@ -1,7 +1,7 @@
 <div
   class="timelionExpressionInputContainer"
   role="combobox"
-  aria-expanded="{{functionSuggestions.isVisible}}"
+  aria-expanded="{{suggestions.isVisible}}"
   aria-owns="timelionSuggestionList"
   aria-haspopup="true"
 >
@@ -31,10 +31,10 @@
   ></textarea>
 
   <timelion-expression-suggestions
-    ng-show="functionSuggestions.isVisible"
-    suggestions="functionSuggestions.list"
-    suggestions-type="functionSuggestions.type"
-    selected-index="functionSuggestions.index"
+    ng-show="suggestions.isVisible"
+    suggestions="suggestions.list"
+    suggestions-type="suggestions.type"
+    selected-index="suggestions.index"
     on-click-suggestion="onClickSuggestion(suggestionIndex)"
     should-popover="shouldPopoverSuggestions"
   ></timelion-expression-suggestions>

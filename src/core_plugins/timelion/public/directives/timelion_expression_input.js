@@ -30,7 +30,7 @@ import './timelion_expression_suggestions/timelion_expression_suggestions';
 import timelionExpressionInputTemplate from './timelion_expression_input.html';
 import {
   SUGGESTION_TYPE,
-  FunctionSuggestions,
+  Suggestions,
   suggest,
   insertAtLocation,
 } from './timelion_expression_input_helpers';
@@ -55,7 +55,7 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
       const functionReference = {};
       let suggestibleFunctionLocation = {};
 
-      scope.functionSuggestions = new FunctionSuggestions();
+      scope.suggestions = new Suggestions();
 
       function init() {
         $http.get('../api/timelion/functions').then(function (resp) {
@@ -77,17 +77,18 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
       }
 
       function insertSuggestionIntoExpression(suggestionIndex) {
-        if (scope.functionSuggestions.isEmpty()) {
+        if (scope.suggestions.isEmpty()) {
           return;
         }
 
-        switch (scope.functionSuggestions.type) {
+        switch (scope.suggestions.type) {
           case SUGGESTION_TYPE.FUNCTIONS: {
-            const functionName = `${scope.functionSuggestions.list[suggestionIndex].name}()`;
+            const functionName = `${scope.suggestions.list[suggestionIndex].name}()`;
             const { min, max } = suggestibleFunctionLocation;
 
             // Update the expression with the function.
-            const updatedExpression = insertAtLocation(functionName, scope.sheet, min, max);
+            // min advanced one to not replace function '.'
+            const updatedExpression = insertAtLocation(functionName, scope.sheet, min + 1, max);
             scope.sheet = updatedExpression;
 
             // Position the caret inside of the function parentheses.
@@ -96,7 +97,7 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
             break;
           }
           case SUGGESTION_TYPE.ARGUMENTS: {
-            const argumentName = `${scope.functionSuggestions.list[suggestionIndex].name}=`;
+            const argumentName = `${scope.suggestions.list[suggestionIndex].name}=`;
             const { min, max } = suggestibleFunctionLocation;
 
             // Update the expression with the function.
@@ -104,7 +105,7 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
             scope.sheet = updatedExpression;
 
             // Position the caret after the '='
-            const newCaretOffset = min + argumentName.length + 1;
+            const newCaretOffset = min + argumentName.length;
             setCaretOffset(newCaretOffset);
             break;
           }
@@ -134,12 +135,11 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
           Parser,
           getCursorPosition()
         ).then(suggestions => {
-          console.log("suggestions", suggestions);
           // We're using ES6 Promises, not $q, so we have to wrap this in $apply.
           scope.$apply(() => {
-            scope.functionSuggestions.setList(suggestions.list, suggestions.type);
-            scope.functionSuggestions.show();
-            suggestibleFunctionLocation = suggestions.functionLocation;
+            scope.suggestions.setList(suggestions.list, suggestions.type);
+            scope.suggestions.show();
+            suggestibleFunctionLocation = suggestions.location;
             $timeout(() => {
               const suggestionsList = $('[data-suggestions-list]');
               suggestionsList.scrollTop(0);
@@ -147,8 +147,8 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
           });
         }, (noSuggestions = {}) => {
           scope.$apply(() => {
-            suggestibleFunctionLocation = noSuggestions.functionLocation;
-            scope.functionSuggestions.reset();
+            suggestibleFunctionLocation = noSuggestions.location;
+            scope.suggestions.reset();
           });
         });
       }
@@ -165,7 +165,7 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
       };
 
       scope.onBlurInput = () => {
-        scope.functionSuggestions.hide();
+        scope.suggestions.hide();
       };
 
       scope.onKeyDownInput = e => {
@@ -177,36 +177,36 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
 
         switch (e.keyCode) {
           case comboBoxKeyCodes.UP:
-            if (scope.functionSuggestions.isVisible) {
+            if (scope.suggestions.isVisible) {
               // Up and down keys navigate through suggestions.
               e.preventDefault();
-              scope.functionSuggestions.stepForward();
-              scrollToSuggestionAt(scope.functionSuggestions.index);
+              scope.suggestions.stepForward();
+              scrollToSuggestionAt(scope.suggestions.index);
             }
             break;
 
           case comboBoxKeyCodes.DOWN:
-            if (scope.functionSuggestions.isVisible) {
+            if (scope.suggestions.isVisible) {
               // Up and down keys navigate through suggestions.
               e.preventDefault();
-              scope.functionSuggestions.stepBackward();
-              scrollToSuggestionAt(scope.functionSuggestions.index);
+              scope.suggestions.stepBackward();
+              scrollToSuggestionAt(scope.suggestions.index);
             }
             break;
 
           case comboBoxKeyCodes.TAB:
             // If there are no suggestions or none is selected, the user tabs to the next input.
-            if (scope.functionSuggestions.isEmpty() || scope.functionSuggestions.index < 0) {
+            if (scope.suggestions.isEmpty() || scope.suggestions.index < 0) {
               // Before letting the tab be handled to focus the next element
               // we need to hide the suggestions, otherwise it will focus these
               // instead of the time interval select.
-              scope.functionSuggestions.hide();
+              scope.suggestions.hide();
               return;
             }
 
             // If we have suggestions, complete the selected one.
             e.preventDefault();
-            insertSuggestionIntoExpression(scope.functionSuggestions.index);
+            insertSuggestionIntoExpression(scope.suggestions.index);
             break;
 
           case comboBoxKeyCodes.ENTER:
@@ -214,16 +214,16 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
               // Re-render the chart when the user hits CMD+ENTER.
               e.preventDefault();
               scope.updateChart();
-            } else if (!scope.functionSuggestions.isEmpty()) {
+            } else if (!scope.suggestions.isEmpty()) {
               // If the suggestions are open, complete the expression with the suggestion.
               e.preventDefault();
-              insertSuggestionIntoExpression(scope.functionSuggestions.index);
+              insertSuggestionIntoExpression(scope.suggestions.index);
             }
             break;
 
           case comboBoxKeyCodes.ESCAPE:
             e.preventDefault();
-            scope.functionSuggestions.hide();
+            scope.suggestions.hide();
             break;
         }
       };
@@ -244,8 +244,8 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
       };
 
       scope.getActiveSuggestionId = () => {
-        if(scope.functionSuggestions.isVisible && scope.functionSuggestions.index > -1) {
-          return `timelionSuggestion${scope.functionSuggestions.index}`;
+        if(scope.suggestions.isVisible && scope.suggestions.index > -1) {
+          return `timelionSuggestion${scope.suggestions.index}`;
         }
         return '';
       };

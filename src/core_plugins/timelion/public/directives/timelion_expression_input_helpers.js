@@ -6,7 +6,7 @@ export const SUGGESTION_TYPE = {
   FUNCTIONS: 'functions'
 };
 
-export class FunctionSuggestions {
+export class Suggestions {
   constructor() {
     this.reset();
   }
@@ -77,7 +77,6 @@ function extractSuggestionsFromParsed(result, cursorPosition, functionList) {
   const activeFunc = result.functions.find((func) => {
     return cursorPosition >= func.location.min && cursorPosition < func.location.max;
   });
-  console.log("activeFunc", activeFunc);
 
   if (activeFunc) {
     const funcDefinition = functionList.find((func) => {
@@ -88,19 +87,17 @@ function extractSuggestionsFromParsed(result, cursorPosition, functionList) {
     // location range includes '.', function name, and '('.
     const openParen = activeFunc.location.min + activeFunc.function.length + 2;
     if (cursorPosition < openParen) {
-      return { list: [funcDefinition], functionLocation: activeFunc.location, type: SUGGESTION_TYPE.FUNCTIONS }
+      return { list: [funcDefinition], location: activeFunc.location, type: SUGGESTION_TYPE.FUNCTIONS };
     }
 
     const args = funcDefinition.chainable ? funcDefinition.args.slice(1) : funcDefinition.args.slice(0);
     const activeArg = activeFunc.arguments.find((argument) => {
       return inLocation(cursorPosition, argument.location);
     });
-    console.log("activeArg", activeArg);
 
     // return argument_value suggestions when cursor is inside agrument value
     if (activeArg && activeArg.type === 'namedArg' && inLocation(cursorPosition, activeArg.value.location)) {
-      // TODO figure out how to build argument value suggestions list
-      return null;
+      return { list: [], location: activeArg.value.location, type: SUGGESTION_TYPE.ARGUMENT_VALUE };
     }
 
     const argumentSuggestions = args.filter(arg => {
@@ -111,17 +108,14 @@ function extractSuggestionsFromParsed(result, cursorPosition, functionList) {
       }
       return true;
     });
-    const location = activeArg ? activeArg.location : { min: cursorPosition - 1, max: cursorPosition };
-    return { list: argumentSuggestions, functionLocation: location, type: SUGGESTION_TYPE.ARGUMENTS };
+    const location = activeArg ? activeArg.location : { min: cursorPosition, max: cursorPosition };
+    return { list: argumentSuggestions, location: location, type: SUGGESTION_TYPE.ARGUMENTS };
   }
 }
 
 export function suggest(expression, functionList, Parser, cursorPosition) {
   return new Promise((resolve, reject) => {
     try {
-      console.log("expression", expression);
-      console.log("cursor", cursorPosition);
-
       // We rely on the grammar to throw an error in order to suggest function(s).
       const result = Parser.parse(expression);
 
@@ -131,20 +125,16 @@ export function suggest(expression, functionList, Parser, cursorPosition) {
       }
 
       return reject();
-
     } catch (e) {
       try {
         // The grammar will throw an error containing a message if the expression is formatted
         // correctly and is prepared to accept suggestions. If the expression is not formmated
         // correctly the grammar will just throw a regular PEG SyntaxError, and this JSON.parse
         // attempt will throw an error.
-        console.log(e);
         const message = JSON.parse(e.message);
-        const functionLocation = message.location;
-        console.log(functionLocation);
+        const location = message.location;
 
         if (message.type === 'incompleteFunction') {
-          console.log(message);
           let list;
 
           if (message.function) {
@@ -156,10 +146,9 @@ export function suggest(expression, functionList, Parser, cursorPosition) {
             list = functionList;
           }
 
-          return resolve({ list, functionLocation, type: SUGGESTION_TYPE.FUNCTIONS });
+          return resolve({ list, location, type: SUGGESTION_TYPE.FUNCTIONS });
         } else if (message.type === 'incompleteArgument') {
-          // TODO figure out how to build argument value suggestions list
-          return reject();
+          return resolve({ list: [], location, type: SUGGESTION_TYPE.ARGUMENT_VALUE });
         }
 
       } catch (e) {
@@ -172,7 +161,7 @@ export function suggest(expression, functionList, Parser, cursorPosition) {
 
 export function insertAtLocation(valueToInsert, destination, replacementRangeStart, replacementRangeEnd) {
   // Insert the value at a location caret within the destination.
-  const prefix = destination.slice(0, replacementRangeStart + 1);
+  const prefix = destination.slice(0, replacementRangeStart);
   const suffix =  destination.slice(replacementRangeEnd, destination.length);
   const result = `${prefix}${valueToInsert}${suffix}`;
   return result;
