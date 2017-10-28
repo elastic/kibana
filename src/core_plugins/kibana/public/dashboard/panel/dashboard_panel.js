@@ -2,24 +2,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import { PanelHeader } from './panel_header';
+import { PanelHeaderContainer } from './panel_header/panel_header_container';
 import { PanelError } from './panel_error';
 
 export class DashboardPanel extends React.Component {
   async componentDidMount() {
     this.props.renderEmbeddable(this.panelElement, this.props.panel);
   }
-
-  toggleExpandedPanel = () => {
-    const { isExpanded, onMaximizePanel, onMinimizePanel } = this.props;
-    if (isExpanded) {
-      onMinimizePanel();
-    } else {
-      onMaximizePanel();
-    }
-  };
-  deletePanel = () => this.props.onDeletePanel();
-  onEditPanel = () => window.location = this.props.editUrl;
 
   onFocus = () => {
     const { onPanelFocused, panel } = this.props;
@@ -58,6 +47,7 @@ export class DashboardPanel extends React.Component {
   renderEmbeddedContent() {
     return (
       <div
+        style={this.props.inAddEditDrillDownLinksMode ? { 'display': 'none' } : {}}
         id="embeddedPanel"
         className="panel-content"
         ref={panelElement => this.panelElement = panelElement}
@@ -70,7 +60,7 @@ export class DashboardPanel extends React.Component {
   }
 
   render() {
-    const { viewOnlyMode, isExpanded, title, error } = this.props;
+    const { viewOnlyMode, error, panel, embeddableHandler } = this.props;
     const classes = classNames('panel panel-default', this.props.className, {
       'panel--edit-mode': !viewOnlyMode
     });
@@ -84,13 +74,9 @@ export class DashboardPanel extends React.Component {
           className={classes}
           data-test-subj="dashboardPanel"
         >
-          <PanelHeader
-            title={title}
-            onDeletePanel={this.deletePanel}
-            onEditPanel={this.onEditPanel}
-            onToggleExpand={this.toggleExpandedPanel}
-            isExpanded={isExpanded}
-            isViewOnlyMode={viewOnlyMode}
+          <PanelHeaderContainer
+            embeddableHandler={embeddableHandler}
+            panelId={panel.panelIndex}
           />
 
           {error ? this.renderEmbeddedError() : this.renderEmbeddedContent()}
@@ -106,18 +92,13 @@ DashboardPanel.propTypes = {
     panelIndex: PropTypes.string,
   }),
   renderEmbeddable: PropTypes.func.isRequired,
-  isExpanded: PropTypes.bool.isRequired,
-  onMaximizePanel: PropTypes.func.isRequired,
-  onMinimizePanel: PropTypes.func.isRequired,
   viewOnlyMode: PropTypes.bool.isRequired,
   onDestroy: PropTypes.func.isRequired,
-  onDeletePanel: PropTypes.func,
-  editUrl: PropTypes.string,
-  title: PropTypes.string,
   onPanelFocused: PropTypes.func,
   onPanelBlurred: PropTypes.func,
   error: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.object
   ]),
+  embeddableHandler: PropTypes.object.isRequired,
 };
