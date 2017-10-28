@@ -61,13 +61,14 @@ export class FunctionSuggestions {
 }
 
 function inLocation(cursorPosition, location) {
-  return cursorPosition >= location.min && cursorPosition < location.max;
+  return cursorPosition >= location.min && cursorPosition <= location.max;
 }
 
 function extractSuggestionsFromParsed(result, cursorPosition, functionList) {
   const activeFunc = result.functions.find((func) => {
     return cursorPosition >= func.location.min && cursorPosition < func.location.max;
   });
+  console.log("activeFunc", activeFunc);
 
   if (activeFunc) {
     const funcDefinition = functionList.find((func) => {
@@ -147,7 +148,11 @@ export function suggest(expression, functionList, Parser, cursorPosition) {
           }
 
           return resolve({ list, functionLocation, type: SUGGESTION_TYPE.FUNCTIONS });
+        } else if (message.type === 'incompleteArgument') {
+          // TODO figure out how to build argument value suggestions list
+          return reject();
         }
+
       } catch (e) {
         // The expression isn't correctly formatted, so JSON.parse threw an error.
         return reject();
