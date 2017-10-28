@@ -19,7 +19,16 @@ export class FunctionSuggestions {
   }
 
   setList(list, type) {
-    this.list = list;
+    this.list = list.sort((a, b) => {
+      if (a.name < b.name) {
+        return -1;
+      }
+      if (a.name > b.name) {
+        return 1;
+      }
+      // names must be equal
+      return 0;
+    });
     this.type = type;
 
     // Only try to position index inside of list range, when it was already focused
