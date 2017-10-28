@@ -134,6 +134,7 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
           Parser,
           getCursorPosition()
         ).then(suggestions => {
+          console.log("suggestions", suggestions);
           // We're using ES6 Promises, not $q, so we have to wrap this in $apply.
           scope.$apply(() => {
             scope.functionSuggestions.setList(suggestions.list, suggestions.type);

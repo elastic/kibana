@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 export const SUGGESTION_TYPE = {
   ARGUMENTS: 'arguments',
-  ARGUMENT: 'argument',
+  ARGUMENT_VALUE: 'argument_value',
   FUNCTIONS: 'functions'
 };
 
@@ -60,6 +60,52 @@ export class FunctionSuggestions {
   }
 }
 
+function inLocation(cursorPosition, location) {
+  return cursorPosition >= location.min && cursorPosition < location.max;
+}
+
+function extractSuggestionsFromParsed(result, cursorPosition, functionList) {
+  const activeFunc = result.functions.find((func) => {
+    return cursorPosition >= func.location.min && cursorPosition < func.location.max;
+  });
+
+  if (activeFunc) {
+    const funcDefinition = functionList.find((func) => {
+      return func.name === activeFunc.function;
+    });
+
+    // return function suggestion if cursor is outside of parentheses
+    // location range includes '.', function name, and '('.
+    const openParen = activeFunc.location.min + activeFunc.function.length + 2;
+    if (cursorPosition < openParen) {
+      return { list: [funcDefinition], functionLocation: activeFunc.location, type: SUGGESTION_TYPE.FUNCTIONS }
+    }
+
+    const args = funcDefinition.chainable ? funcDefinition.args.slice(1) : funcDefinition.args.slice(0);
+    const activeArg = activeFunc.arguments.find((argument) => {
+      return inLocation(cursorPosition, argument.location);
+    });
+    console.log("activeArg", activeArg);
+
+    // return argument_value suggestions when cursor is inside agrument value
+    if (activeArg && activeArg.type === 'namedArg' && inLocation(cursorPosition, activeArg.value.location)) {
+      // TODO figure out how to build argument value suggestions list
+      return null;
+    }
+
+    const argumentSuggestions = args.filter(arg => {
+      if (_.get(activeArg, 'type') === 'namedArg') {
+        return _.startsWith(arg.name, activeArg.name);
+      } else if (activeArg) {
+        return _.startsWith(arg.name, activeArg.text);
+      }
+      return true;
+    });
+    const location = activeArg ? activeArg.location : { min: cursorPosition - 1, max: cursorPosition };
+    return { list: argumentSuggestions, functionLocation: location, type: SUGGESTION_TYPE.ARGUMENTS };
+  }
+}
+
 export function suggest(expression, functionList, Parser, cursorPosition) {
   return new Promise((resolve, reject) => {
     try {
@@ -69,36 +115,13 @@ export function suggest(expression, functionList, Parser, cursorPosition) {
       // We rely on the grammar to throw an error in order to suggest function(s).
       const result = Parser.parse(expression);
 
-      // If the grammar doesn't throw an error, then offer argument suggestions when cursor inside a function.
-      const activeFunc = result.functions.find((func) => {
-        // location range includes '.', function name, and '('. Only show arguments when cursor is inside parentheses
-        const openParen = func.location.min + func.function.length + 2;
-        return cursorPosition >= openParen && cursorPosition < func.location.max;
-      });
-      if (activeFunc) {
-        console.log(activeFunc);
-        const funcDef = functionList.find((func) => {
-          return func.name === activeFunc.function;
-        });
-        console.log(funcDef);
-        const args = funcDef.chainable ? funcDef.args.slice(1) : funcDef.args.slice(0);
-        const activeArg = activeFunc.arguments.find((argument) => {
-          return cursorPosition > argument.location.min && cursorPosition <= argument.location.max;
-        });
-        // TODO see if cursor is in value and pass argument suggestions
-        let location;
-        if (activeArg) {
-          location = activeArg.location;
-        } else {
-          location = {
-            min: cursorPosition - 1,
-            max: cursorPosition
-          };
-        }
-        return resolve({ list: args, functionLocation: location, type: SUGGESTION_TYPE.ARGUMENTS });
+      const suggestions = extractSuggestionsFromParsed(result, cursorPosition, functionList);
+      if (suggestions) {
+        return resolve(suggestions);
       }
 
       return reject();
+
     } catch (e) {
       try {
         // The grammar will throw an error containing a message if the expression is formatted
@@ -111,6 +134,7 @@ export function suggest(expression, functionList, Parser, cursorPosition) {
         console.log(functionLocation);
 
         if (message.type === 'incompleteFunction') {
+          console.log(message);
           let list;
 
           if (message.function) {
