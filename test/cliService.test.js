@@ -13,15 +13,27 @@ describe('doBackportVersion', () => {
   beforeEach(() => {
     mockBackportDirPath();
     utils.exec = jest.fn().mockReturnValue(Promise.resolve());
-    nock('https://api.github.com')
-      .post(`/repos/elastic/kibana/pulls`)
+
+    this.addLabelMock = nock('https://api.github.com')
+      .post(`/repos/elastic/kibana/issues/1337/labels`, ['backport'])
       .query(true)
-      .reply(200, {
-        html_url: 'myHtmlUrl'
-      });
+      .reply(200, {});
   });
 
   it('with pull request reference', () => {
+    this.createPRMock = nock('https://api.github.com')
+      .post(`/repos/elastic/kibana/pulls`, {
+        title: '[6.x] myCommitMessage',
+        body: 'Backports pull request #myPullRequest to 6.x',
+        head: 'sqren:backport/6.x/pr-myPullRequest',
+        base: '6.x'
+      })
+      .query(true)
+      .reply(200, {
+        number: 1337,
+        html_url: 'myHtmlUrl'
+      });
+
     return cliService
       .doBackportVersion({
         owner: 'elastic',
@@ -29,21 +41,31 @@ describe('doBackportVersion', () => {
         commit: { message: 'myCommitMessage' },
         reference: { type: 'pullRequest', value: 'myPullRequest' },
         version: '6.x',
-        username: 'sqren'
+        username: 'sqren',
+        labels: ['backport']
       })
       .then(res => {
-        expect(JSON.parse(res.config.data)).toEqual({
-          base: '6.x',
-          body: 'Backports pull request #myPullRequest to 6.x',
-          head: 'sqren:backport/6.x/pr-myPullRequest',
-          title: '[6.x] myCommitMessage'
-        });
         expect(res.config).toMatchSnapshot();
         expect(utils.exec.mock.calls).toMatchSnapshot();
+        expect(this.createPRMock.isDone()).toBe(true);
+        expect(this.addLabelMock.isDone()).toBe(true);
       });
   });
 
   it('with commit reference', () => {
+    this.createPRMock = nock('https://api.github.com')
+      .post(`/repos/elastic/kibana/pulls`, {
+        title: '[6.x] myCommitMessage',
+        body: 'Backports commit myCommitSha to 6.x',
+        head: 'sqren:backport/6.x/commit-myCommitSha',
+        base: '6.x'
+      })
+      .query(true)
+      .reply(200, {
+        number: 1337,
+        html_url: 'myHtmlUrl'
+      });
+
     return cliService
       .doBackportVersion({
         owner: 'elastic',
@@ -54,14 +76,10 @@ describe('doBackportVersion', () => {
         username: 'sqren'
       })
       .then(res => {
-        expect(JSON.parse(res.config.data)).toEqual({
-          base: '6.x',
-          body: 'Backports commit myCommitSha to 6.x',
-          head: 'sqren:backport/6.x/commit-myCommitSha',
-          title: '[6.x] myCommitMessage'
-        });
         expect(res.config).toMatchSnapshot();
         expect(utils.exec.mock.calls).toMatchSnapshot();
+        expect(this.createPRMock.isDone()).toBe(true);
+        expect(this.addLabelMock.isDone()).toBe(false);
       });
   });
 });

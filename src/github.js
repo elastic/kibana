@@ -55,6 +55,15 @@ function createPullRequest(owner, repoName, payload) {
     .catch(throwGithubError);
 }
 
+function addLabels(owner, repoName, pullNumber, labels) {
+  return axios
+    .post(
+      `https://api.github.com/repos/${owner}/${repoName}/issues/${pullNumber}/labels?access_token=${accessToken}`,
+      labels
+    )
+    .catch(throwGithubError);
+}
+
 function getPullRequestByCommit(owner, repoName, commitSha) {
   return axios(
     `https://api.github.com/search/issues?q=repo:${owner}/${repoName}+${commitSha}&access_token=${accessToken}`
@@ -69,6 +78,7 @@ function setAccessToken(_accessToken) {
 
 module.exports = {
   setAccessToken,
+  addLabels,
   createPullRequest,
   getCommits,
   getPullRequestByCommit

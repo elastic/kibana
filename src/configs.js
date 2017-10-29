@@ -27,6 +27,10 @@ function ensureConfigAndFoldersExists() {
     });
 }
 
+function getRepoConfig(owner, repoName, repositories) {
+  return repositories.find(repo => repo.name === `${owner}/${repoName}`);
+}
+
 function getConfigTemplate() {
   return utils.readFile(path.join(__dirname, 'configTemplate.json'), 'utf8');
 }
@@ -63,5 +67,6 @@ function getConfig() {
 module.exports = {
   ensureConfigAndFoldersExists,
   getConfig,
+  getRepoConfig,
   validateConfig
 };

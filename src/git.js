@@ -79,16 +79,11 @@ function resetAndPullMaster(owner, repoName) {
   );
 }
 
-function getCommit(repo, sha) {
-  return repo.getCommit(sha);
-}
-
 module.exports = {
   resetAndPullMaster,
   cherrypick,
   cloneRepo,
   createAndCheckoutBranch,
-  getCommit,
   repoExists,
   setupRepo,
   push

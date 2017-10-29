@@ -15,13 +15,6 @@ const {
   setupRepo
 } = require('./git');
 
-function sequentially(items, handler) {
-  return items.reduce(
-    (p, item) => p.then(() => handler(item)),
-    Promise.resolve()
-  );
-}
-
 const service = {};
 service.doBackportVersions = ({
   owner,
@@ -29,7 +22,8 @@ service.doBackportVersions = ({
   commit,
   reference,
   versions,
-  username
+  username,
+  labels
 }) => {
   return sequentially(versions, version => {
     return service
@@ -39,7 +33,8 @@ service.doBackportVersions = ({
         commit,
         reference,
         version,
-        username
+        username,
+        labels
       })
       .then(res => console.log(`View pull request: ${res.data.html_url}\n`))
       .catch(service.handleErrors);
@@ -52,13 +47,12 @@ service.doBackportVersion = ({
   commit,
   reference,
   version,
-  username
+  username,
+  labels = []
 }) => {
   const backportBranchName = getBackportBranchName(version, reference);
 
-  console.log(
-    `Backporting ${service.getReferenceValue(reference)} to ${version}`
-  );
+  console.log(`Backporting ${getReferenceLong(reference)} to ${version}`);
 
   return withSpinner(
     resetAndPullMaster(owner, repoName).then(() =>
@@ -81,7 +75,14 @@ service.doBackportVersion = ({
         username
       );
       return withSpinner(
-        github.createPullRequest(owner, repoName, payload),
+        github.createPullRequest(owner, repoName, payload).then(res => {
+          if (labels.length > 0) {
+            return github
+              .addLabels(owner, repoName, res.data.number, labels)
+              .then(() => res);
+          }
+          return res;
+        }),
         'Creating pull request'
       );
     });
@@ -108,9 +109,7 @@ service.promptRepoInfo = (repositories, cwd) => {
         console.log(`Repository: ${currentFullRepoName}`);
         return currentFullRepoName;
       }
-      return prompts
-        .listFullRepoName(fullRepoNames)
-        .then(({ fullRepoName }) => fullRepoName);
+      return prompts.listFullRepoName(fullRepoNames);
     })
     .then(fullRepoName => {
       const [owner, repoName] = fullRepoName.split('/');
@@ -140,22 +139,13 @@ service.promptCommit = (owner, repoName, username) => {
     .then(commits => {
       spinner.stop();
       return prompts.listCommits(commits);
-    })
-    .then(({ commit }) => commit);
+    });
 };
 
-service.promptVersions = (
-  owner,
-  repoName,
-  repositories,
-  multipleChoice = false
-) => {
-  const versions = getVersions(owner, repoName, repositories);
-  if (multipleChoice) {
-    return prompts.checkboxVersions(versions).then(({ versions }) => versions);
-  }
-
-  return prompts.listVersions(versions).then(({ version }) => [version]);
+service.promptVersions = (versions, multipleChoice = false) => {
+  return multipleChoice
+    ? prompts.checkboxVersions(versions)
+    : prompts.listVersions(versions);
 };
 
 service.handleErrors = e => {
@@ -207,15 +197,27 @@ service.handleErrors = e => {
   }
 };
 
-service.getReferenceValue = reference => {
-  return reference.type === 'pullRequest'
-    ? `pull request #${reference.value}`
-    : `commit ${reference.value}`;
-};
+function sequentially(items, handler) {
+  return items.reduce(
+    (p, item) => p.then(() => handler(item)),
+    Promise.resolve()
+  );
+}
 
-function getVersions(owner, repoName, repositories) {
-  return repositories.find(repo => repo.name === `${owner}/${repoName}`)
-    .versions;
+function getReferenceValue({ type, value }, { short }) {
+  if (type === 'pullRequest') {
+    return short ? `pr-${value}` : `pull request #${value}`;
+  }
+
+  return short ? `commit-${value}` : `commit ${value}`;
+}
+
+function getReferenceLong(reference) {
+  return getReferenceValue(reference, { short: false });
+}
+
+function getReferenceShort(reference) {
+  return getReferenceValue(reference, { short: true });
 }
 
 function isCherrypickConflict(e) {
@@ -235,7 +237,7 @@ function cherrypickAndPrompt(owner, repoName, sha) {
       throw e;
     }
 
-    return prompts.confirmConflictResolved().then(({ isConflictResolved }) => {
+    return prompts.confirmConflictResolved().then(isConflictResolved => {
       if (!isConflictResolved) {
         const error = new Error(constants.CHERRYPICK_CONFLICT_NOT_HANDLED);
         error.details = e.message;
@@ -246,14 +248,8 @@ function cherrypickAndPrompt(owner, repoName, sha) {
 }
 
 function getBackportBranchName(version, reference) {
-  const refValue = getReferenceValueShort(reference);
+  const refValue = getReferenceShort(reference);
   return `backport/${version}/${refValue}`;
-}
-
-function getReferenceValueShort(reference) {
-  return reference.type === 'pullRequest'
-    ? `pr-${reference.value}`
-    : `commit-${reference.value}`;
 }
 
 function getCurrentFullRepoName(fullRepoNames, cwd) {
@@ -263,7 +259,7 @@ function getCurrentFullRepoName(fullRepoNames, cwd) {
 
 function getPullRequestPayload(commitMessage, version, reference, username) {
   const backportBranchName = getBackportBranchName(version, reference);
-  const refValue = service.getReferenceValue(reference);
+  const refValue = getReferenceLong(reference);
 
   return {
     title: `[${version}] ${commitMessage}`,

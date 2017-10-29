@@ -1,5 +1,9 @@
 const github = require('./github');
-const { ensureConfigAndFoldersExists, validateConfig } = require('./configs');
+const {
+  ensureConfigAndFoldersExists,
+  validateConfig,
+  getRepoConfig
+} = require('./configs');
 const {
   promptRepoInfo,
   promptCommit,
@@ -11,7 +15,7 @@ const {
 } = require('./cliService');
 
 function init(config, options) {
-  let commit, versions, reference, owner, repoName;
+  let commit, versions, reference, owner, repoName, repoConfig;
 
   return ensureConfigAndFoldersExists()
     .then(() => validateConfig(config))
@@ -20,14 +24,13 @@ function init(config, options) {
     .then(({ owner: _owner, repoName: _repoName }) => {
       owner = _owner;
       repoName = _repoName;
+      repoConfig = getRepoConfig(owner, repoName, config.repositories);
     })
     .then(() =>
       promptCommit(owner, repoName, options.own ? config.username : null)
     )
     .then(c => (commit = c))
-    .then(() =>
-      promptVersions(owner, repoName, config.repositories, options.multiple)
-    )
+    .then(() => promptVersions(repoConfig.versions, options.multiple))
     .then(v => (versions = v))
     .then(() => getReference(owner, repoName, commit.sha))
     .then(ref => (reference = ref))
@@ -39,7 +42,8 @@ function init(config, options) {
         commit,
         reference,
         versions,
-        username: config.username
+        username: config.username,
+        labels: repoConfig.labels
       })
     )
     .catch(handleErrors);
