@@ -114,7 +114,7 @@ describe('KuiSelect', () => {
           </KuiSelect>
         );
 
-        wrapper.simulate('change','bread');
+        wrapper.simulate('change', 'bread');
         sinon.assert.calledOnce(onChangeHandler);
       });
     });

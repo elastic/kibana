@@ -6,15 +6,15 @@ import {
 
 class KuiSelectExample extends React.Component {
   state = {
-    value1:'',
-    value2:'',
-    value3:'',
-    value4:'',
-    value5:'',
+    value1: '',
+    value2: '',
+    value3: '',
+    value4: '',
+    value5: '',
   };
 
   handleChange = (event, key) => {
-    this.setState({ [key]:event.target.value });
+    this.setState({ [key]: event.target.value });
   }
 
   render() {
@@ -22,7 +22,7 @@ class KuiSelectExample extends React.Component {
       <div>
         <KuiSelect
           value={this.state.value1}
-          onChange={event => this.handleChange(event,'value1')}
+          onChange={event => this.handleChange(event, 'value1')}
         >
           <option value="apple" >Apple</option>
           <option value="bread" >Bread</option>
@@ -31,7 +31,7 @@ class KuiSelectExample extends React.Component {
         <hr className="guideBreak"/>
         <KuiSelect
           value={this.state.value2}
-          onChange={event => this.handleChange(event,'value2')}
+          onChange={event => this.handleChange(event, 'value2')}
           isDisabled
         >
           <option>Disabled</option>
@@ -39,7 +39,7 @@ class KuiSelectExample extends React.Component {
         <hr className="guideBreak"/>
         <KuiSelect
           value={this.state.value3}
-          onChange={event => this.handleChange(event,'value3')}
+          onChange={event => this.handleChange(event, 'value3')}
           isInvalid
         >
           <option>Invalid</option>
@@ -47,7 +47,7 @@ class KuiSelectExample extends React.Component {
         <hr className="guideBreak"/>
         <KuiSelect
           value={this.state.value4}
-          onChange={event => this.handleChange(event,'value4')}
+          onChange={event => this.handleChange(event, 'value4')}
           size="small"
         >
           <option>Small</option>
@@ -55,7 +55,7 @@ class KuiSelectExample extends React.Component {
         <hr className="guideBreak"/>
         <KuiSelect
           value={this.state.value5}
-          onChange={event => this.handleChange(event,'value5')}
+          onChange={event => this.handleChange(event, 'value5')}
           size="large"
         >
           <option>Large</option>

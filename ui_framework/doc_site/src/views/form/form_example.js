@@ -26,7 +26,7 @@ const labelHtml2 = renderToHtml(Label);
 
 const TextInput = require('./text_input');
 const textInputSource2 = require('!!raw!./text_input');
-const textInputHtml2 = renderToHtml(TextInput,{ id:'1' });
+const textInputHtml2 = renderToHtml(TextInput, { id: '1' });
 
 const TextArea = require('./text_area');
 const textAreaSource2 = require('!!raw!./text_area');
