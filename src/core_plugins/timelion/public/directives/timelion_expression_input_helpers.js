@@ -82,6 +82,9 @@ function extractSuggestionsFromParsed(result, cursorPosition, functionList) {
     const funcDefinition = functionList.find((func) => {
       return func.name === activeFunc.function;
     });
+    const alreadyProvidedArguments = activeFunc.arguments.map((arg) => {
+      return arg.name;
+    });
 
     // return function suggestion if cursor is outside of parentheses
     // location range includes '.', function name, and '('.
@@ -101,6 +104,11 @@ function extractSuggestionsFromParsed(result, cursorPosition, functionList) {
     }
 
     const argumentSuggestions = args.filter(arg => {
+      // ignore arguments that are all ready provided in function declaration
+      if (alreadyProvidedArguments.includes(arg.name)) {
+        return false;
+      }
+
       if (_.get(activeArg, 'type') === 'namedArg') {
         return _.startsWith(arg.name, activeArg.name);
       } else if (activeArg) {
