@@ -89,7 +89,7 @@ describe('KuiCheckBoxLabel', () => {
           />
         );
 
-        wrapper.find('input').simulate('change');
+        wrapper.find('KuiCheckBox').simulate('change');
         sinon.assert.calledOnce(onChangeHandler);
       });
     });

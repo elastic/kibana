@@ -4,8 +4,6 @@ import classNames from 'classnames';
 
 export const KuiLabel = ({
   className,
-  text,
-  htmlFor,
   children,
   ...rest
 }) => {
@@ -14,10 +12,8 @@ export const KuiLabel = ({
   return (
     <label
       className={classes}
-      htmlFor={htmlFor}
       {...rest}
     >
-      {text}
       {children}
     </label>
   );
@@ -25,7 +21,5 @@ export const KuiLabel = ({
 
 KuiLabel.propTypes = {
   className: PropTypes.string,
-  text: PropTypes.string,
-  htmlFor: PropTypes.string,
   children: PropTypes.node,
 };

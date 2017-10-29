@@ -16,25 +16,4 @@ describe('KuiLabel', () => {
 
     expect(render(component)).toMatchSnapshot();
   });
-
-  describe('Props', () => {
-    test('text', () => {
-      const component = (
-        <KuiLabel text="other label"/>
-      );
-
-      expect(render(component)).toMatchSnapshot();
-    });
-
-    test('htmlFor', () => {
-      const component = (
-        <div>
-          <input type="text" id="input1"/>
-          <KuiLabel htmlFor="input1" text="other label"/>
-        </div>
-      );
-
-      expect(render(component)).toMatchSnapshot();
-    });
-  });
 });

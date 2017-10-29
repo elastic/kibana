@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { KuiCheckBox } from './check_box';
 
 export const KuiCheckBoxLabel = ({
   className,
@@ -17,13 +18,10 @@ export const KuiCheckBoxLabel = ({
       className={classes}
       {...rest}
     >
-      <input
-        type="checkbox"
-        className="kuiCheckBox"
-        checked={isChecked}
-        disabled={isDisabled}
+      <KuiCheckBox
+        isChecked={isChecked}
+        isDisabled={isDisabled}
         onChange={onChange}
-        {...rest}
       />
       <span className="kuiCheckBoxLabel__text">
         {text}

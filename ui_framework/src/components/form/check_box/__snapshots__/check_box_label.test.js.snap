@@ -81,9 +81,7 @@ exports[`KuiCheckBoxLabel renders 1`] = `
   data-test-subj="test subject string"
 >
   <input
-    aria-label="aria-label"
     class="kuiCheckBox"
-    data-test-subj="test subject string"
     type="checkbox"
   />
   <span

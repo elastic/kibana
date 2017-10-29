@@ -4,7 +4,7 @@ import {
 } from '../../../../components';
 
 const KuiLabelExample = () => {
-  return <KuiLabel text="Label"/>;
+  return <KuiLabel>Label</KuiLabel>;
 };
 
 export default KuiLabelExample;
