@@ -1,18 +1,18 @@
 import React from 'react';
 import { render, shallow } from 'enzyme';
-import { requiredProps } from '../../test/required_props';
+import { requiredProps } from '../../../test/required_props';
 import sinon from 'sinon';
 
 import {
-  KuiTextInput,
-  TEXTINPUT_SIZE
-} from './text_input';
+  KuiTextArea,
+  TEXTAREA_SIZE
+} from './text_area';
 
-describe('KuiTextInput', () => {
+describe('KuiTextArea', () => {
   test('renders', () => {
     const component = (
-      <KuiTextInput
-        value="text input"
+      <KuiTextArea
+        value="text area"
         onChange={()=>{}}
         {...requiredProps}
       />
@@ -24,7 +24,7 @@ describe('KuiTextInput', () => {
   describe('Props', () => {
     test('placeholder', () => {
       const component = (
-        <KuiTextInput
+        <KuiTextArea
           placeholder="placeholder"
           onChange={()=>{}}
         />
@@ -35,7 +35,7 @@ describe('KuiTextInput', () => {
 
     test('value', () => {
       const component = (
-        <KuiTextInput
+        <KuiTextArea
           value="value"
           onChange={()=>{}}
         />
@@ -44,34 +44,10 @@ describe('KuiTextInput', () => {
       expect(render(component)).toMatchSnapshot();
     });
 
-    describe('autoFocus', () => {
-      test('true renders auto focused', () => {
-        const component = (
-          <KuiTextInput
-            autoFocus={true}
-            onChange={()=>{}}
-          />
-        );
-
-        expect(render(component)).toMatchSnapshot();
-      });
-
-      test('false renders non auto focused', () => {
-        const component = (
-          <KuiTextInput
-            autoFocus={false}
-            onChange={()=>{}}
-          />
-        );
-
-        expect(render(component)).toMatchSnapshot();
-      });
-    });
-
     describe('isInvalid', () => {
       test('true renders invalid', () => {
         const component = (
-          <KuiTextInput
+          <KuiTextArea
             isInvalid={true}
             onChange={()=>{}}
           />
@@ -82,8 +58,32 @@ describe('KuiTextInput', () => {
 
       test('false renders valid', () => {
         const component = (
-          <KuiTextInput
+          <KuiTextArea
             isInvalid={false}
+            onChange={()=>{}}
+          />
+        );
+
+        expect(render(component)).toMatchSnapshot();
+      });
+    });
+
+    describe('isNonResizable', () => {
+      test('true renders non-resizable', () => {
+        const component = (
+          <KuiTextArea
+            isNonResizable={true}
+            onChange={()=>{}}
+          />
+        );
+
+        expect(render(component)).toMatchSnapshot();
+      });
+
+      test('false renders resizable', () => {
+        const component = (
+          <KuiTextArea
+            isNonResizable={false}
             onChange={()=>{}}
           />
         );
@@ -95,7 +95,7 @@ describe('KuiTextInput', () => {
     describe('isDisabled', () => {
       test('true renders disabled', () => {
         const component = (
-          <KuiTextInput
+          <KuiTextArea
             isDisabled={true}
             onChange={()=>{}}
           />
@@ -106,7 +106,7 @@ describe('KuiTextInput', () => {
 
       test('false renders enabled', () => {
         const component = (
-          <KuiTextInput
+          <KuiTextArea
             isDisabled={false}
             onChange={()=>{}}
           />
@@ -117,10 +117,10 @@ describe('KuiTextInput', () => {
     });
 
     describe('size', () => {
-      TEXTINPUT_SIZE.forEach(size=>{
+      TEXTAREA_SIZE.forEach(size=>{
         test(`renders ${size}`, () => {
           const component = (
-            <KuiTextInput
+            <KuiTextArea
               size={size}
               onChange={()=>{}}
             />
@@ -132,11 +132,11 @@ describe('KuiTextInput', () => {
     });
 
     describe('onChange', () => {
-      test(`is called when input is changed`, () => {
+      test(`is called when textarea is written`, () => {
         const onChangeHandler = sinon.spy();
 
         const wrapper = shallow(
-          <KuiTextInput
+          <KuiTextArea
             onChange={onChangeHandler}
           />
         );
