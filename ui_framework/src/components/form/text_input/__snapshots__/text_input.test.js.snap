@@ -1,19 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`KuiTextInput Props autoFocus false renders non auto focused 1`] = `
-<input
-  class="kuiTextInput"
-  type="text"
-/>
-`;
-
-exports[`KuiTextInput Props autoFocus true renders auto focused 1`] = `
-<input
-  class="kuiTextInput"
-  type="text"
-/>
-`;
-
 exports[`KuiTextInput Props isDisabled false renders enabled 1`] = `
 <input
   class="kuiTextInput"

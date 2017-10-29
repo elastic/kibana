@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, shallow } from 'enzyme';
+import { render, shallow, mount } from 'enzyme';
 import { requiredProps } from '../../../test/required_props';
 import sinon from 'sinon';
 
@@ -45,26 +45,31 @@ describe('KuiTextInput', () => {
     });
 
     describe('autoFocus', () => {
-      test('true renders auto focused', () => {
-        const component = (
+      test('sets focus on the element', () => {
+        const component = mount(
           <KuiTextInput
-            autoFocus={true}
+            autoFocus
             onChange={()=>{}}
+            data-test-subj="input"
           />
         );
 
-        expect(render(component)).toMatchSnapshot();
+        expect(
+          component.find('[data-test-subj="input"]').matchesElement(document.activeElement)
+        ).toBe(true);
       });
 
-      test('false renders non auto focused', () => {
-        const component = (
+      test('does not focus the element by default', () => {
+        const component = mount(
           <KuiTextInput
-            autoFocus={false}
             onChange={()=>{}}
+            data-test-subj="input"
           />
         );
 
-        expect(render(component)).toMatchSnapshot();
+        expect(
+          component.find('[data-test-subj="input"]').matchesElement(document.activeElement)
+        ).toBe(false);
       });
     });
 
