@@ -75,7 +75,7 @@ describe('Timelion expression suggestions', () => {
 
     describe('parse cleanly', () => {
       describe('cursor in function name', () => {
-        it('should return function suggestion when cursor is over function name', async () => {
+        it('should return function suggestion', async () => {
           const expression = '.func1()';
           const cursorPosition = 1;
           const suggestions = await suggest(expression, functionList, Parser, cursorPosition);

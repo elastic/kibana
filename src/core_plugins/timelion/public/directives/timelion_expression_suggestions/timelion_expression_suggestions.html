@@ -60,6 +60,7 @@
       <div ng-switch-when="arguments">
         <h4>
           <strong>{{suggestion.name}}: </strong>
+          <em>{{suggestion.types.join(', ')}}</em>
           <small id="timelionSuggestionDescription{{$index}}">
             {{suggestion.help}}
           </small>
