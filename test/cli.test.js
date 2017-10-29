@@ -12,8 +12,7 @@ function setup() {
   const owner = 'elastic';
   const repoName = 'backport-cli-test';
   const fullRepoName = `${owner}/${repoName}`;
-  const host = 'http://localhost';
-  axios.defaults.host = host;
+  axios.defaults.host = 'http://localhost';
   axios.defaults.adapter = httpAdapter;
 
   mockBackportDirPath();

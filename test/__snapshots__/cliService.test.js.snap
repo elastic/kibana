@@ -1,0 +1,113 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`doBackportVersion with commit reference 1`] = `
+Object {
+  "adapter": [Function],
+  "data": "{\\"title\\":\\"[6.x] myCommitMessage\\",\\"body\\":\\"Backports commit myCommitSha to 6.x\\",\\"head\\":\\"sqren:backport/6.x/commit-myCommitSha\\",\\"base\\":\\"6.x\\"}",
+  "headers": Object {
+    "Accept": "application/json, text/plain, */*",
+    "Content-Length": 138,
+    "Content-Type": "application/json;charset=utf-8",
+    "User-Agent": "axios/0.17.0",
+  },
+  "host": "http://localhost",
+  "maxContentLength": -1,
+  "method": "post",
+  "timeout": 0,
+  "transformRequest": Object {
+    "0": [Function],
+  },
+  "transformResponse": Object {
+    "0": [Function],
+  },
+  "url": "https://api.github.com/repos/elastic/kibana/pulls?access_token=undefined",
+  "validateStatus": [Function],
+  "xsrfCookieName": "XSRF-TOKEN",
+  "xsrfHeaderName": "X-XSRF-TOKEN",
+}
+`;
+
+exports[`doBackportVersion with commit reference 2`] = `
+Array [
+  Array [
+    "git reset --hard && git checkout master && git pull origin master",
+    Object {
+      "cwd": "homefolder/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
+    "git fetch origin 6.x && git branch backport/6.x/commit-myCommitSha origin/6.x --force && git checkout backport/6.x/commit-myCommitSha ",
+    Object {
+      "cwd": "homefolder/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
+    "git cherry-pick undefined",
+    Object {
+      "cwd": "homefolder/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
+    "git push sqren backport/6.x/commit-myCommitSha --force",
+    Object {
+      "cwd": "homefolder/.backport/repositories/elastic/kibana",
+    },
+  ],
+]
+`;
+
+exports[`doBackportVersion with pull request reference 1`] = `
+Object {
+  "adapter": [Function],
+  "data": "{\\"title\\":\\"[6.x] myCommitMessage\\",\\"body\\":\\"Backports pull request #myPullRequest to 6.x\\",\\"head\\":\\"sqren:backport/6.x/pr-myPullRequest\\",\\"base\\":\\"6.x\\"}",
+  "headers": Object {
+    "Accept": "application/json, text/plain, */*",
+    "Content-Length": 145,
+    "Content-Type": "application/json;charset=utf-8",
+    "User-Agent": "axios/0.17.0",
+  },
+  "host": "http://localhost",
+  "maxContentLength": -1,
+  "method": "post",
+  "timeout": 0,
+  "transformRequest": Object {
+    "0": [Function],
+  },
+  "transformResponse": Object {
+    "0": [Function],
+  },
+  "url": "https://api.github.com/repos/elastic/kibana/pulls?access_token=undefined",
+  "validateStatus": [Function],
+  "xsrfCookieName": "XSRF-TOKEN",
+  "xsrfHeaderName": "X-XSRF-TOKEN",
+}
+`;
+
+exports[`doBackportVersion with pull request reference 2`] = `
+Array [
+  Array [
+    "git reset --hard && git checkout master && git pull origin master",
+    Object {
+      "cwd": "homefolder/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
+    "git fetch origin 6.x && git branch backport/6.x/pr-myPullRequest origin/6.x --force && git checkout backport/6.x/pr-myPullRequest ",
+    Object {
+      "cwd": "homefolder/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
+    "git cherry-pick undefined",
+    Object {
+      "cwd": "homefolder/.backport/repositories/elastic/kibana",
+    },
+  ],
+  Array [
+    "git push sqren backport/6.x/pr-myPullRequest --force",
+    Object {
+      "cwd": "homefolder/.backport/repositories/elastic/kibana",
+    },
+  ],
+]
+`;

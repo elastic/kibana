@@ -41,6 +41,7 @@ service.doBackportVersions = ({
         version,
         username
       })
+      .then(res => console.log(`View pull request: ${res.data.html_url}\n`))
       .catch(service.handleErrors);
   });
 };
@@ -83,8 +84,7 @@ service.doBackportVersion = ({
         github.createPullRequest(owner, repoName, payload),
         'Creating pull request'
       );
-    })
-    .then(res => console.log(`View pull request: ${res.data.html_url}\n`));
+    });
 };
 
 service.getReference = (owner, repoName, commitSha) => {
