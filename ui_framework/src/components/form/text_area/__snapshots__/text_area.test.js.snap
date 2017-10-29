@@ -3,7 +3,6 @@
 exports[`KuiTextArea Props isDisabled false renders enabled 1`] = `
 <textarea
   class="kuiTextArea"
-  placeholder=""
 />
 `;
 
@@ -11,35 +10,30 @@ exports[`KuiTextArea Props isDisabled true renders disabled 1`] = `
 <textarea
   class="kuiTextArea"
   disabled=""
-  placeholder=""
 />
 `;
 
 exports[`KuiTextArea Props isInvalid false renders valid 1`] = `
 <textarea
   class="kuiTextArea"
-  placeholder=""
 />
 `;
 
 exports[`KuiTextArea Props isInvalid true renders invalid 1`] = `
 <textarea
   class="kuiTextArea kuiTextArea-isInvalid"
-  placeholder=""
 />
 `;
 
 exports[`KuiTextArea Props isNonResizable false renders resizable 1`] = `
 <textarea
   class="kuiTextArea"
-  placeholder=""
 />
 `;
 
 exports[`KuiTextArea Props isNonResizable true renders non-resizable 1`] = `
 <textarea
   class="kuiTextArea kuiTextArea--nonResizable"
-  placeholder=""
 />
 `;
 
@@ -53,28 +47,24 @@ exports[`KuiTextArea Props placeholder 1`] = `
 exports[`KuiTextArea Props size renders large 1`] = `
 <textarea
   class="kuiTextArea kuiTextArea--large"
-  placeholder=""
 />
 `;
 
 exports[`KuiTextArea Props size renders medium 1`] = `
 <textarea
   class="kuiTextArea"
-  placeholder=""
 />
 `;
 
 exports[`KuiTextArea Props size renders small 1`] = `
 <textarea
   class="kuiTextArea kuiTextArea--small"
-  placeholder=""
 />
 `;
 
 exports[`KuiTextArea Props value 1`] = `
 <textarea
   class="kuiTextArea"
-  placeholder=""
 >
   value
 </textarea>
@@ -85,7 +75,6 @@ exports[`KuiTextArea renders 1`] = `
   aria-label="aria-label"
   class="kuiTextArea testClass1 testClass2"
   data-test-subj="test subject string"
-  placeholder=""
 >
   text area
 </textarea>

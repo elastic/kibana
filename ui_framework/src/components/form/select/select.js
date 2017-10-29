@@ -2,16 +2,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-export const SELECT_SIZE = [
-  'small',
-  'medium',
-  'large',
-];
+const sizeToClassNameMap = {
+  small: 'kuiSelect--small',
+  medium: undefined,
+  large: 'kuiSelect--large',
+};
+
+export const SELECT_SIZE = Object.keys(sizeToClassNameMap);
 
 export const KuiSelect = ({
   className,
   onChange,
-  value,
   isInvalid,
   isDisabled,
   size,
@@ -19,16 +20,13 @@ export const KuiSelect = ({
   ...rest
 }) => {
   const classes = classNames('kuiSelect', className, {
-    'kuiSelect-isInvalid': isInvalid,
-    'kuiSelect--small': size === 'small',
-    'kuiSelect--large': size === 'large'
-  });
+    'kuiSelect-isInvalid': isInvalid
+  }, sizeToClassNameMap[size]);
 
   return (
     <select
       className={classes}
       onChange={onChange}
-      value={value}
       disabled={isDisabled}
       {...rest}
     >
@@ -38,7 +36,6 @@ export const KuiSelect = ({
 };
 
 KuiSelect.defaultProps = {
-  value: '',
   isInvalid: false,
   isDisabled: false,
   size: 'medium'
@@ -47,7 +44,6 @@ KuiSelect.defaultProps = {
 KuiSelect.propTypes = {
   className: PropTypes.string,
   onChange: PropTypes.func.isRequired,
-  value: PropTypes.string,
   isInvalid: PropTypes.bool,
   isDisabled: PropTypes.bool,
   size: PropTypes.oneOf(SELECT_SIZE),

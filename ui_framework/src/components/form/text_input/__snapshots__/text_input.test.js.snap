@@ -3,27 +3,21 @@
 exports[`KuiTextInput Props autoFocus false renders non auto focused 1`] = `
 <input
   class="kuiTextInput"
-  placeholder=""
   type="text"
-  value=""
 />
 `;
 
 exports[`KuiTextInput Props autoFocus true renders auto focused 1`] = `
 <input
   class="kuiTextInput"
-  placeholder=""
   type="text"
-  value=""
 />
 `;
 
 exports[`KuiTextInput Props isDisabled false renders enabled 1`] = `
 <input
   class="kuiTextInput"
-  placeholder=""
   type="text"
-  value=""
 />
 `;
 
@@ -31,27 +25,21 @@ exports[`KuiTextInput Props isDisabled true renders disabled 1`] = `
 <input
   class="kuiTextInput"
   disabled=""
-  placeholder=""
   type="text"
-  value=""
 />
 `;
 
 exports[`KuiTextInput Props isInvalid false renders valid 1`] = `
 <input
   class="kuiTextInput"
-  placeholder=""
   type="text"
-  value=""
 />
 `;
 
 exports[`KuiTextInput Props isInvalid true renders invalid 1`] = `
 <input
   class="kuiTextInput kuiTextInput-isInvalid"
-  placeholder=""
   type="text"
-  value=""
 />
 `;
 
@@ -60,41 +48,33 @@ exports[`KuiTextInput Props placeholder 1`] = `
   class="kuiTextInput"
   placeholder="placeholder"
   type="text"
-  value=""
 />
 `;
 
 exports[`KuiTextInput Props size renders large 1`] = `
 <input
   class="kuiTextInput kuiTextInput--large"
-  placeholder=""
   type="text"
-  value=""
 />
 `;
 
 exports[`KuiTextInput Props size renders medium 1`] = `
 <input
   class="kuiTextInput"
-  placeholder=""
   type="text"
-  value=""
 />
 `;
 
 exports[`KuiTextInput Props size renders small 1`] = `
 <input
   class="kuiTextInput kuiTextInput--small"
-  placeholder=""
   type="text"
-  value=""
 />
 `;
 
 exports[`KuiTextInput Props value 1`] = `
 <input
   class="kuiTextInput"
-  placeholder=""
   type="text"
   value="value"
 />
@@ -105,7 +85,6 @@ exports[`KuiTextInput renders 1`] = `
   aria-label="aria-label"
   class="kuiTextInput testClass1 testClass2"
   data-test-subj="test subject string"
-  placeholder=""
   type="text"
   value="text input"
 />

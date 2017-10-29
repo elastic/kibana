@@ -2,17 +2,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-export const TEXTAREA_SIZE = [
-  'small',
-  'medium',
-  'large',
-];
+const sizeToClassNameMap = {
+  small: 'kuiTextArea--small',
+  medium: undefined,
+  large: 'kuiTextArea--large',
+};
+
+export const TEXTAREA_SIZE = Object.keys(sizeToClassNameMap);
 
 export const KuiTextArea = ({
   className,
   onChange,
-  placeholder,
-  value,
   isInvalid,
   isNonResizable,
   isDisabled,
@@ -21,17 +21,14 @@ export const KuiTextArea = ({
 }) => {
   const classes = classNames('kuiTextArea', className, {
     'kuiTextArea-isInvalid': isInvalid,
-    'kuiTextArea--nonResizable': isNonResizable,
-    'kuiTextArea--small': size === 'small',
-    'kuiTextArea--large': size === 'large'
-  });
+    'kuiTextArea--nonResizable': isNonResizable
+  }, sizeToClassNameMap[size]
+);
 
   return (
     <textarea
       className={classes}
       onChange={onChange}
-      placeholder={placeholder}
-      value={value}
       disabled={isDisabled}
       {...rest}
     />
@@ -39,8 +36,6 @@ export const KuiTextArea = ({
 };
 
 KuiTextArea.defaultProps = {
-  placeholder: '',
-  value: '',
   isInvalid: false,
   isNonResizable: false,
   isDisabled: false,
@@ -50,8 +45,6 @@ KuiTextArea.defaultProps = {
 KuiTextArea.propTypes = {
   className: PropTypes.string,
   onChange: PropTypes.func.isRequired,
-  placeholder: PropTypes.string,
-  value: PropTypes.string,
   isInvalid: PropTypes.bool,
   isNonResizable: PropTypes.bool,
   isDisabled: PropTypes.bool,

@@ -2,37 +2,32 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-export const TEXTINPUT_SIZE = [
-  'small',
-  'medium',
-  'large',
-];
+const sizeToClassNameMap = {
+  small: 'kuiTextInput--small',
+  medium: undefined,
+  large: 'kuiTextInput--large',
+};
+
+export const TEXTINPUT_SIZE = Object.keys(sizeToClassNameMap);
 
 export const KuiTextInput = ({
   className,
   onChange,
-  placeholder,
-  value,
-  autoFocus,
   isInvalid,
   isDisabled,
   size,
   ...rest
 }) => {
   const classes = classNames('kuiTextInput', className, {
-    'kuiTextInput-isInvalid': isInvalid,
-    'kuiTextInput--small': size === 'small',
-    'kuiTextInput--large': size === 'large',
-  });
+    'kuiTextInput-isInvalid': isInvalid
+  }, sizeToClassNameMap[size]
+);
 
   return (
     <input
       type="text"
       className={classes}
       onChange={onChange}
-      placeholder={placeholder}
-      value={value}
-      autoFocus={autoFocus}
       disabled={isDisabled}
       {...rest}
     />
@@ -40,9 +35,6 @@ export const KuiTextInput = ({
 };
 
 KuiTextInput.defaultProps = {
-  placeholder: '',
-  value: '',
-  autoFocus: false,
   isInvalid: false,
   isDisabled: false,
   size: 'medium'
@@ -51,9 +43,6 @@ KuiTextInput.defaultProps = {
 KuiTextInput.propTypes = {
   className: PropTypes.string,
   onChange: PropTypes.func.isRequired,
-  placeholder: PropTypes.string,
-  value: PropTypes.string,
-  autoFocus: PropTypes.bool,
   isInvalid: PropTypes.bool,
   isDisabled: PropTypes.bool,
   size: PropTypes.oneOf(TEXTINPUT_SIZE)
