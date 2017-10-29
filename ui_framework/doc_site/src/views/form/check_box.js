@@ -1,11 +1,13 @@
-import React from 'react';
+import React, {
+  Component,
+} from 'react';
 import {
   KuiCheckBox,
   KuiCheckBoxLabel
 } from '../../../../components';
 
 
-class KuiCheckBoxExample extends React.Component {
+class KuiCheckBoxExample extends Component {
   state = {
     value1: false,
     value2: true,

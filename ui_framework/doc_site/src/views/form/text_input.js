@@ -1,10 +1,12 @@
-import React from 'react';
+import React, {
+  Component,
+} from 'react';
 import {
   KuiTextInput,
 } from '../../../../components';
 
 
-class KuiTextInputExample extends React.Component {
+class KuiTextInputExample extends Component {
   state = {
     value1: '',
     value2: 'Entered text',

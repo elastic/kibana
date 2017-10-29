@@ -1,10 +1,12 @@
-import React from 'react';
+import React, {
+  Component,
+} from 'react';
 import {
   KuiTextArea,
 } from '../../../../components';
 
 
-class KuiTextAreaNonResizableExample extends React.Component {
+class KuiTextAreaNonResizableExample extends Component {
   state = {
     value1: 'Non-resizable',
   };

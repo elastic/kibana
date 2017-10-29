@@ -1,10 +1,12 @@
-import React from 'react';
+import React, {
+  Component,
+} from 'react';
 import {
   KuiSelect,
 } from '../../../../components';
 
 
-class KuiSelectExample extends React.Component {
+class KuiSelectExample extends Component {
   state = {
     value1: '',
     value2: '',
