@@ -1,7 +1,7 @@
 import { store } from '../../store';
 import { embeddableRenderError, embeddableRenderFinished } from '../actions';
-import { getEmbeddableError, getEmbeddableTitle } from '../reducers';
-import { getDashboard } from '../../reducers';
+import { getEmbeddableError, getEmbeddableTitle } from '../selectors';
+import { getDashboard } from '../../selectors';
 
 describe('embeddable reducers', () => {
   test('embeddableRenderError stores an error on the embeddable', () => {

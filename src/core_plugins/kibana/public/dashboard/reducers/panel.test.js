@@ -1,7 +1,7 @@
 import { store } from '../../store';
 import { updatePanel, updatePanels } from '../actions';
-import { getPanel } from '../reducers';
-import { getDashboard } from '../../reducers';
+import { getPanel } from '../selectors';
+import { getDashboard } from '../../selectors';
 
 test('UpdatePanel updates a panel', () => {
   store.dispatch(updatePanels([{ panelIndex: '1', gridData: {} }]));

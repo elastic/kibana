@@ -8,9 +8,6 @@ import {
 
 import {
   embeddable,
-  getTitle,
-  getEditUrl,
-  getError,
 } from './embeddable';
 
 export const embeddables = handleActions({
@@ -25,8 +22,3 @@ export const embeddables = handleActions({
     [action.payload.panelId]: embeddable(state[action.payload.panelId], action),
   }),
 }, {});
-
-export const getEmbeddable = (state, panelId) => state[panelId];
-export const getEmbeddableTitle = (state, panelId) => getTitle(getEmbeddable(state, panelId));
-export const getEmbeddableEditUrl = (state, panelId) => getEditUrl(getEmbeddable(state, panelId));
-export const getEmbeddableError = (state, panelId) => getError(getEmbeddable(state, panelId));
