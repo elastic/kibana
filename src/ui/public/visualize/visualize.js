@@ -122,7 +122,7 @@ uiModules
         }, 100);
 
         //todo: clean this one up as well
-        const visUpdateHandler = () => {
+        const handleVisUpdate = () => {
           if ($scope.editorMode) {
             $scope.appState.vis = $scope.vis.getState();
             $scope.appState.save();
@@ -130,7 +130,7 @@ uiModules
             $scope.fetch();
           }
         };
-        $scope.vis.on('update', visUpdateHandler);
+        $scope.vis.on('update', handleVisUpdate);
 
 
         const reload = () => {
@@ -190,6 +190,7 @@ uiModules
         });
 
         $scope.$on('$destroy', () => {
+          $scope.vis.removeListener('update', handleVisUpdate);
           queryFilter.off('update', handleQueryUpdate);
           resizeChecker.destroy();
         });
