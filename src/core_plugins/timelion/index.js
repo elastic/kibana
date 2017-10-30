@@ -28,7 +28,6 @@ export default function (kibana) {
           };
         },
         uses: [
-          'kbnDirectory',
           'savedObjectTypes'
         ]
       },
