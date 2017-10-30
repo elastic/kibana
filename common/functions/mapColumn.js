@@ -10,35 +10,40 @@ export const mapColumn = {
     _: {
       types: ['string'],
       aliases: ['column'],
-      help: 'The column containing values to pass into the expression',
+      help: 'The name of the resulting column',
     },
     expression: {
       types: ['function'],
       aliases: ['exp', 'fn'],
-      help: 'A canvas expression to pass each value in the column to',
-    },
-    destination: {
-      aliases: ['dest', 'd'],
-      types: ['string', 'null'],
-      help: 'Instead of overwriting the column value, put the new value in this column. Use alterColumn if you need to change the type',
+      help: 'A canvas expression which will be passed each row as a single row datatable',
     },
   },
   fn: (context, args) => {
-    if (args.destination) {
-      context.columns.push({ name: args.destination, type: 'string' });
-      context.columns[args.destination] = { type: 'string' };
-    } else {
-      args.destination = args._;
-    }
-
     const rowPromises = context.rows.map(row => {
-      return args.expression(row[args._])
-        .then(val => {
-          return Object.assign({}, row, { [args.destination]: val });
-        });
+      return args.expression({
+        type: 'datatable',
+        columns: context.columns,
+        rows: [row],
+      })
+      .then(val => {
+        if (typeof val === 'object' && val !== null) throw new Error ('Expression must return a literal, eg a string, number, boolean');
+        return Object.assign({}, row, { [args._]: val });
+      });
     });
 
 
-    return Promise.all(rowPromises).then(rows => Object.assign({}, context, { rows: rows }));
+
+
+    return Promise.all(rowPromises).then(rows => {
+      Object.assign({}, context, { rows: rows });
+
+      context.columns.push({ name: args._, type: typeof rows[0][args._] });
+
+      return {
+        type: 'datatable',
+        columns: context.columns,
+        rows,
+      };
+    });
   },
 };
