@@ -1,3 +1,4 @@
+import './home.less';
 import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import template from './home_ng_wrapper.html';
@@ -27,14 +28,3 @@ function getRoute() {
 // redirect us to the default page by encountering a url it isn't marked as being able to handle.
 routes.when('/home', getRoute());
 routes.when('/home/feature_directory', getRoute());
-
-KbnDirectoryRegistryProvider.register(() => {
-  return {
-    id: 'integrations',
-    title: 'Integrations',
-    description: 'Start ingesting data with a data source.',
-    path: '/app/kibana#/home/tutorial_directory',
-    showOnHomePage: false,
-    category: DirectoryCategory.ADMIN
-  };
-});

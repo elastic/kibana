@@ -15,20 +15,30 @@ export class FeatureDirectory extends React.Component {
   constructor(props) {
     super(props);
 
-    this.tabs = [{
+    const tabs = [{
       id: ALL,
       name: 'All',
-    }, {
-      id: props.directoryCategories.DATA,
-      name: 'Explore & Visualize',
-    }, {
-      id: props.directoryCategories.ADMIN,
-      name: 'Administrative',
-    }, {
-      id: props.directoryCategories.OTHER,
-      name: 'Other',
     }];
+    if (props.directories.some(directory => directory.category === props.directoryCategories.DATA)) {
+      tabs.push({
+        id: props.directoryCategories.DATA,
+        name: 'Explore & Visualize'
+      });
+    }
+    if (props.directories.some(directory => directory.category === props.directoryCategories.ADMIN)) {
+      tabs.push({
+        id: props.directoryCategories.ADMIN,
+        name: 'Administrative',
+      });
+    }
+    if (props.directories.some(directory => directory.category === props.directoryCategories.OTHER)) {
+      tabs.push({
+        id: props.directoryCategories.OTHER,
+        name: 'Other',
+      });
+    }
 
+    this.tabs = tabs;
     this.state = {
       selectedTabId: ALL
     };
@@ -76,16 +86,16 @@ export class FeatureDirectory extends React.Component {
 
   render() {
     return (
-      <div className="kuiView">
+      <div className="kuiView home">
         <div className="kuiViewContent kuiViewContent--constrainedWidth">
           <a className="kuiLink" href="#/home">Home</a> / Directory
           <h2 className="kuiTitle">
             Feature Directory
           </h2>
-          <KuiTabs>
+          <KuiTabs className="featureDirectoryTabs">
             {this.renderTabs()}
           </KuiTabs>
-          <KuiFlexGrid columns={4}>
+          <KuiFlexGrid columns={4} className="featureDirectory">
             { this.renderDirectories() }
           </KuiFlexGrid>
         </div>
