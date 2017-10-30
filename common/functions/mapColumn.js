@@ -2,7 +2,7 @@ export const mapColumn = {
   name: 'mapColumn',
   aliases: ['mc'], // midnight commander. So many times I've launched midnight commander instead of moving a file.
   type: 'datatable',
-  help: 'Replace value in column with output of an expression that will receive the current value of the column',
+  help: 'Add a column calculated as the result of other columns, or not',
   context: {
     types: ['datatable'],
   },
