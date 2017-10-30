@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import detectIE from './is-ie';
+import { detectIE } from './detect_ie';
 
 export default (handleChange) => {
   return (name, defaultValue) => (e) => {

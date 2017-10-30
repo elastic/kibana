@@ -1,4 +1,4 @@
-export default function detectIE() {
+export function detectIE() {
   const ua = window.navigator.userAgent;
 
   const msie = ua.indexOf('MSIE ');
