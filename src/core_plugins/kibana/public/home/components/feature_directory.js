@@ -8,7 +8,7 @@ import {
   KuiFlexGrid,
 } from 'ui_framework/components';
 
-const allCategories = 'all';
+const ALL = 'all';
 
 export class FeatureDirectory extends React.Component {
 
@@ -16,7 +16,7 @@ export class FeatureDirectory extends React.Component {
     super(props);
 
     this.tabs = [{
-      id: allCategories,
+      id: ALL,
       name: 'All',
     }, {
       id: props.directoryCategories.DATA,
@@ -30,7 +30,7 @@ export class FeatureDirectory extends React.Component {
     }];
 
     this.state = {
-      selectedTabId: allCategories
+      selectedTabId: ALL
     };
   }
 
@@ -41,7 +41,7 @@ export class FeatureDirectory extends React.Component {
   };
 
   renderTabs = () => {
-    return this.tabs.map((tab,index) => (
+    return this.tabs.map((tab, index) => (
       <KuiTab
         onClick={() => this.onSelectedTabChanged(tab.id)}
         isSelected={tab.id === this.state.selectedTabId}
@@ -55,7 +55,7 @@ export class FeatureDirectory extends React.Component {
   renderDirectories = () => {
     return this.props.directories.inTitleOrder
     .filter((directory) => {
-      if (this.state.selectedTabId === allCategories) {
+      if (this.state.selectedTabId === ALL) {
         return true;
       }
       return this.state.selectedTabId === directory.category;

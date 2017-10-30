@@ -94,7 +94,7 @@ export function Home({ addBasePath, directories, directoryCategories }) {
             <KuiCardFooter>
               <KuiLinkButton
                 buttonType="secondary"
-                href={addBasePath('/app/kibana#/home/tutorial_directory')}
+                href={addBasePath('/app/kibana#/home/tutorial_directory/logging')}
               >
                 Select data source
               </KuiLinkButton>
@@ -120,7 +120,7 @@ export function Home({ addBasePath, directories, directoryCategories }) {
             <KuiCardFooter>
               <KuiLinkButton
                 buttonType="secondary"
-                href={addBasePath('/app/kibana#/home/tutorial_directory')}
+                href={addBasePath('/app/kibana#/home/tutorial_directory/metrics')}
               >
                 Select data source
               </KuiLinkButton>
@@ -146,7 +146,7 @@ export function Home({ addBasePath, directories, directoryCategories }) {
             <KuiCardFooter>
               <KuiLinkButton
                 buttonType="secondary"
-                href={addBasePath('/app/kibana#/home/tutorial_directory')}
+                href={addBasePath('/app/kibana#/home/tutorial_directory/security')}
               >
                 Select data source
               </KuiLinkButton>
