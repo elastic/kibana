@@ -18,7 +18,6 @@ import { uiModules } from 'ui/modules';
 import editorTemplate from 'plugins/kibana/visualize/editor/editor.html';
 import { DashboardConstants } from 'plugins/kibana/dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';
-import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import { KibanaParsedUrl } from 'ui/url/kibana_parsed_url';
 import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
@@ -160,8 +159,6 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     $scope.indexPattern = vis.indexPattern;
     $scope.searchSource = searchSource;
     $scope.state = $state;
-    $scope.queryDocLinks = documentationLinks.query;
-    $scope.dateDocLinks = documentationLinks.date;
 
     // Create a PersistedState instance.
     $scope.uiState = $state.makeStateful('uiState');
