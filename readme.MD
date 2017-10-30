@@ -45,11 +45,13 @@ You need to update the config file with your Github username and a Github Access
   "repositories": [
     {
       "name": "elastic/x-pack-kibana",
-      "versions": ["6.x", "6.0", "5.6", "5.5", "5.4"]
+      "versions": ["6.x", "6.0", "5.6", "5.5", "5.4"],
+      "labels": ["backport"]
     },
     {
       "name": "elastic/kibana",
-      "versions": ["6.x", "6.0", "5.6", "5.5", "5.4"]
+      "versions": ["6.x", "6.0", "5.6", "5.5", "5.4"],
+      "labels": ["backport"]
     }
   ]
 }
