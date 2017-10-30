@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import { DashboardViewport } from './dashboard_viewport';
-import { getMaximizedPanelId, getPanels } from '../reducers';
+import { getMaximizedPanelId, getPanels } from '../selectors';
 
 const mapStateToProps = ({ dashboard }) => {
   const maximizedPanelId = getMaximizedPanelId(dashboard);
