@@ -41,7 +41,7 @@ export default class extends Component {
         icon: (
           <span className="kuiIcon fa-search" />
         ),
-        onClick: () => window.alert('Show fullscreen'),
+        onClick: () => { this.closePopover(); window.alert('Show fullscreen'); },
       }, {
         name: 'Share this dasbhoard',
         icon: <span className="kuiIcon fa-user" />,
@@ -51,11 +51,11 @@ export default class extends Component {
           items: [{
             name: 'PDF reports',
             icon: <span className="kuiIcon fa-user" />,
-            onClick: () => window.alert('PDF reports'),
+            onClick: () => { this.closePopover(); window.alert('PDF reports'); },
           }, {
             name: 'CSV reports',
             icon: <span className="kuiIcon fa-user" />,
-            onClick: () => window.alert('CSV reports'),
+            onClick: () => { this.closePopover(); window.alert('CSV reports'); },
           }, {
             name: 'Embed code',
             icon: <span className="kuiIcon fa-user" />,
@@ -95,38 +95,38 @@ export default class extends Component {
           }, {
             name: 'Permalinks',
             icon: <span className="kuiIcon fa-user" />,
-            onClick: () => window.alert('Permalinks'),
+            onClick: () => { this.closePopover(); window.alert('Permalinks'); },
           }],
         },
       }, {
         name: 'Edit / add panels',
         icon: <span className="kuiIcon fa-user" />,
-        onClick: () => window.alert('Edit / add panels'),
+        onClick: () => { this.closePopover(); window.alert('Edit / add panels'); },
       }, {
         name: 'Display options',
         icon: <span className="kuiIcon fa-user" />,
-        onClick: () => window.alert('Display options'),
+        onClick: () => { this.closePopover(); window.alert('Display options'); },
       }],
     };
 
     this.panels = flattenPanelTree(panelTree);
   }
 
-  onButtonClick() {
-    this.setState({
-      isPopoverOpen: !this.state.isPopoverOpen,
-    });
-  }
+  onButtonClick = () => {
+    this.setState(prevState => ({
+      isPopoverOpen: !prevState.isPopoverOpen,
+    }));
+  };
 
-  closePopover() {
+  closePopover = () => {
     this.setState({
       isPopoverOpen: false,
     });
-  }
+  };
 
   render() {
     const button = (
-      <KuiButton buttonType="basic" onClick={this.onButtonClick.bind(this)}>
+      <KuiButton buttonType="basic" onClick={this.onButtonClick}>
         Click me to load a context menu
       </KuiButton>
     );
@@ -135,14 +135,13 @@ export default class extends Component {
       <KuiPopover
         button={button}
         isOpen={this.state.isPopoverOpen}
-        closePopover={this.closePopover.bind(this)}
+        closePopover={this.closePopover}
         panelPaddingSize="none"
         withTitle
         anchorPosition="left"
       >
         <KuiContextMenu
           initialPanelId={0}
-          isVisible={this.state.isPopoverOpen}
           panels={this.panels}
         />
       </KuiPopover>

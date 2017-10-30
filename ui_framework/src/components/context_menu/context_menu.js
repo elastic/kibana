@@ -57,12 +57,10 @@ export class KuiContextMenu extends Component {
     className: PropTypes.string,
     panels: PropTypes.array,
     initialPanelId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    isVisible: PropTypes.bool.isRequired,
   }
 
   static defaultProps = {
     panels: [],
-    isVisible: true,
   }
 
   constructor(props) {
@@ -79,6 +77,7 @@ export class KuiContextMenu extends Component {
       transitionDirection: undefined,
       isOutgoingPanelVisible: false,
       focusedItemIndex: undefined,
+      isUsingKeyboardToNavigate: false,
     };
   }
 
@@ -99,6 +98,12 @@ export class KuiContextMenu extends Component {
   showNextPanel = itemIndex => {
     const nextPanelId = this.idAndItemIndexToPanelIdMap[this.state.incomingPanelId][itemIndex];
     if (nextPanelId) {
+      if (this.state.isUsingKeyboardToNavigate) {
+        this.setState({
+          focusedItemIndex: 0,
+        });
+      }
+
       this.showPanel(nextPanelId, 'next');
     }
   };
@@ -128,13 +133,21 @@ export class KuiContextMenu extends Component {
     this.setState({
       height,
     });
-  }
+  };
 
   onOutGoingPanelTransitionComplete = () => {
     this.setState({
       isOutgoingPanelVisible: false,
     });
-  }
+  };
+
+  onUseKeyboardToNavigate = () => {
+    if (!this.state.isUsingKeyboardToNavigate) {
+      this.setState({
+        isUsingKeyboardToNavigate: true,
+      });
+    }
+  };
 
   updatePanelMaps(panels) {
     this.idToPanelMap = mapIdsToPanels(panels);
@@ -147,16 +160,6 @@ export class KuiContextMenu extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    // If the user is opening the context menu, reset the state.
-    if (nextProps.isVisible && !this.props.isVisible) {
-      this.setState({
-        outgoingPanelId: undefined,
-        incomingPanelId: nextProps.initialPanelId,
-        transitionDirection: undefined,
-        focusedItemIndex: undefined,
-      });
-    }
-
     if (nextProps.panels !== this.props.panels) {
       this.updatePanelMaps(nextProps.panels);
     }
@@ -222,12 +225,8 @@ export class KuiContextMenu extends Component {
         transitionDirection={this.state.isOutgoingPanelVisible ? this.state.transitionDirection : undefined}
         hasFocus={transitionType === 'in'}
         items={this.renderItems(panel.items)}
-        focusedItemIndex={
-          // Set focus on the item which shows the panel we're leaving.
-          transitionType === 'in' && this.state.transitionDirection === 'previous'
-          ? this.state.focusedItemIndex
-          : undefined
-        }
+        initialFocusedItemIndex={this.state.isUsingKeyboardToNavigate ? this.state.focusedItemIndex : undefined}
+        onUseKeyboardToNavigate={this.onUseKeyboardToNavigate}
         showNextPanel={this.showNextPanel}
         showPreviousPanel={this.showPreviousPanel}
       >
@@ -241,7 +240,6 @@ export class KuiContextMenu extends Component {
       panels, // eslint-disable-line no-unused-vars
       className,
       initialPanelId, // eslint-disable-line no-unused-vars
-      isVisible, // eslint-disable-line no-unused-vars
       ...rest,
     } = this.props;
 

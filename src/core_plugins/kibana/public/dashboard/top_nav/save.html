@@ -2,14 +2,22 @@
   role="form"
   ng-submit="opts.save()"
 >
-  <div class="kuiLocalDropdownTitle">Save {{opts.displayName}}</div>
+  <h2 class="kuiLocalDropdownTitle">
+    Save {{opts.displayName}}
+  </h2>
+
   <div class="kuiLocalDropdownSection">
     <div class="kuiLocalDropdownHeader">
-      <div class="kuiLocalDropdownHeader__label">
+      <label
+        class="kuiLocalDropdownHeader__label"
+        for="saveDashboardTitle"
+      >
         Title
-      </div>
+      </label>
     </div>
+
     <input
+      id="saveDashboardTitle"
       class="kuiLocalDropdownInput"
       data-test-subj="dashboardTitle"
       type="text"
@@ -18,13 +26,19 @@
       input-focus="select"
     >
   </div>
+
   <div class="kuiLocalDropdownSection">
     <div class="kuiLocalDropdownHeader">
-      <div class="kuiLocalDropdownHeader__label">
+      <label
+        class="kuiLocalDropdownHeader__label"
+        for="saveDashboardDescription"
+      >
         Description
-      </div>
+      </label>
     </div>
+
     <input
+      id="saveDashboardDescription"
       class="kuiLocalDropdownInput"
       data-test-subj="dashboardDescription"
       type="text"
@@ -33,26 +47,36 @@
     >
   </div>
 
-  <saved-object-save-as-check-box saved-object="opts.dashboard"></saved-object-save-as-check-box>
+  <saved-object-save-as-check-box
+    class="kuiVerticalRhythmSmall"
+    saved-object="opts.dashboard"
+  ></saved-object-save-as-check-box>
 
-  <div class="form-group">
-    <label>
+  <div class="kuiVerticalRhythm">
+    <label class="kuiCheckBoxLabel kuiVerticalRhythmSmall">
       <input
+        class="kuiCheckBox"
         type="checkbox"
         ng-model="model.timeRestore"
         ng-checked="model.timeRestore"
         data-test-subj="storeTimeWithDashboard"
       >
-      Store time with {{opts.displayName}}
-      <kbn-info placement="bottom" info="Change the time filter to the currently selected time each time this dashboard is loaded"></kbn-info>
+
+      <span class="kuiCheckBoxLabel__text">
+        Store time with {{opts.displayName}}
+      </span>
     </label>
+
+    <div class="kuiLocalDropdownFormNote kuiVerticalRhythmSmall">
+      This changes the time filter to the currently selected time each time this dashboard is loaded.
+    </div>
   </div>
 
   <button
     data-test-subj="confirmSaveDashboardButton"
     type="submit"
     ng-disabled="!model.title"
-    class="kuiButton kuiButton--primary"
+    class="kuiButton kuiButton--primary kuiVerticalRhythm"
     aria-label="Save dashboard"
   >
     Save

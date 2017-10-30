@@ -10,7 +10,7 @@ import {
 
 describe('promiseFromStreams', () => {
   it('pipes together an array of streams', async () => {
-    const str1 = createListStream([1,2,3]);
+    const str1 = createListStream([1, 2, 3]);
     const str2 = createReduceStream((acc, n) => acc + n, 0);
     const sumPromise = new Promise(resolve => str2.once('data', resolve));
     createPromiseFromStreams([str1, str2]);

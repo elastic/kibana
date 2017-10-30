@@ -25,7 +25,7 @@ export function EventsProvider(Private, Promise) {
    * @return {Events} - this, for chaining
    */
   Events.prototype.on = function (name, handler) {
-    if (!_.isArray(this._listeners[name])) {
+    if (!Array.isArray(this._listeners[name])) {
       this._listeners[name] = [];
     }
 

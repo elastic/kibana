@@ -16,7 +16,7 @@ import invoke from './helpers/invoke_series_fn.js';
 function stubResponse(response) {
   return {
     server: {
-      plugins:{
+      plugins: {
         elasticsearch: {
           getCluster: sinon.stub().withArgs('data').returns({
             callWithRequest: function () {
@@ -153,7 +153,7 @@ describe(filename, () => {
             from: 1,
             to: 5,
           },
-          request: { payload: { extended: { es: { filter:{
+          request: { payload: { extended: { es: { filter: {
             bool: {
               must: [
                 { query: { query_string: { query: 'foo' } } }
@@ -229,7 +229,7 @@ describe(filename, () => {
         ];
 
         expect(fn(buckets)).to.eql({
-          count:[[1000,3],[2000,14],[3000,15]]
+          count: [[1000, 3], [2000, 14], [3000, 15]]
         });
       });
 
@@ -241,8 +241,8 @@ describe(filename, () => {
         ];
 
         expect(fn(buckets)).to.eql({
-          count:[[1000,3],[2000,14],[3000,15]],
-          max: [[1000,92],[2000,65],[3000,35]]
+          count: [[1000, 3], [2000, 14], [3000, 15]],
+          max: [[1000, 92], [2000, 65], [3000, 35]]
         });
       });
     });
@@ -250,82 +250,82 @@ describe(filename, () => {
     it('should throw an error', () => {
       expect(aggResponse.default(esResponse.aggregations, config)).to.eql([
         {
-          data: [[1000,264],[2000,264]],
+          data: [[1000, 264], [2000, 264]],
           fit: 'nearest',
           label: 'q:QueryA > FieldA:ValueA > FieldB:Value2A > MetricA',
           type: 'series',
-        },{
-          data: [[1000,398],[2000,1124]],
+        }, {
+          data: [[1000, 398], [2000, 1124]],
           fit: 'nearest',
           label: 'q:QueryA > FieldA:ValueA > FieldB:Value2A > MetricB',
           type: 'series',
-        },{
-          data: [[1000,699],[2000,110]],
+        }, {
+          data: [[1000, 699], [2000, 110]],
           fit: 'nearest',
           label: 'q:QueryA > FieldA:ValueA > FieldB:Value2B > MetricA',
           type: 'series',
-        },{
-          data: [[1000,457],[2000,506]],
+        }, {
+          data: [[1000, 457], [2000, 506]],
           fit: 'nearest',
           label: 'q:QueryA > FieldA:ValueA > FieldB:Value2B > MetricB',
           type: 'series',
-        },{
-          data: [[1000,152],[2000,518]],
+        }, {
+          data: [[1000, 152], [2000, 518]],
           fit: 'nearest',
           label: 'q:QueryA > FieldA:ValueB > FieldB:Value2B > MetricA',
           type: 'series',
-        },{
-          data: [[1000,61],[2000,77]],
+        }, {
+          data: [[1000, 61], [2000, 77]],
           fit: 'nearest',
           label: 'q:QueryA > FieldA:ValueB > FieldB:Value2B > MetricB',
           type: 'series',
-        },{
-          data: [[1000,114],[2000,264]],
+        }, {
+          data: [[1000, 114], [2000, 264]],
           fit: 'nearest',
           label: 'q:QueryA > FieldA:ValueB > FieldB:Value2A > MetricA',
           type: 'series',
-        },{
-          data: [[1000,23],[2000,45]],
+        }, {
+          data: [[1000, 23], [2000, 45]],
           fit: 'nearest',
           label: 'q:QueryA > FieldA:ValueB > FieldB:Value2A > MetricB',
           type: 'series',
-        },{
-          data: [[1000,621],[2000,751]],
+        }, {
+          data: [[1000, 621], [2000, 751]],
           fit: 'nearest',
           label: 'q:QueryB > FieldA:ValueA > FieldB:Value2B > MetricA',
           type: 'series',
-        },{
-          data: [[1000,12],[2000,12]],
+        }, {
+          data: [[1000, 12], [2000, 12]],
           fit: 'nearest',
           label: 'q:QueryB > FieldA:ValueA > FieldB:Value2B > MetricB',
           type: 'series',
-        },{
-          data: [[1000,110],[2000,648]],
+        }, {
+          data: [[1000, 110], [2000, 648]],
           fit: 'nearest',
           label: 'q:QueryB > FieldA:ValueA > FieldB:Value2A > MetricA',
           type: 'series',
-        },{
-          data: [[1000,11],[2000,12]],
+        }, {
+          data: [[1000, 11], [2000, 12]],
           fit: 'nearest',
           label: 'q:QueryB > FieldA:ValueA > FieldB:Value2A > MetricB',
           type: 'series',
-        },{
-          data: [[1000,755],[2000,713]],
+        }, {
+          data: [[1000, 755], [2000, 713]],
           fit: 'nearest',
           label: 'q:QueryB > FieldA:ValueC > FieldB:Value2C > MetricA',
           type: 'series',
-        },{
-          data: [[1000,10],[2000,18]],
+        }, {
+          data: [[1000, 10], [2000, 18]],
           fit: 'nearest',
           label: 'q:QueryB > FieldA:ValueC > FieldB:Value2C > MetricB',
           type: 'series',
-        },{
-          data: [[1000,391],[2000,802]],
+        }, {
+          data: [[1000, 391], [2000, 802]],
           fit: 'nearest',
           label: 'q:QueryB > FieldA:ValueC > FieldB:Value2A > MetricA',
           type: 'series',
-        },{
-          data: [[1000,4],[2000,4]],
+        }, {
+          data: [[1000, 4], [2000, 4]],
           fit: 'nearest',
           label: 'q:QueryB > FieldA:ValueC > FieldB:Value2A > MetricB',
           type: 'series',

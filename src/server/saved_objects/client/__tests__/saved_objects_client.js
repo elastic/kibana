@@ -515,7 +515,7 @@ describe('SavedObjectsClient', () => {
 
     it('reports error on missed objects', async () => {
       callAdminCluster.returns(Promise.resolve({
-        docs:[{
+        docs: [{
           _type: 'doc',
           _id: 'config:good',
           found: true,

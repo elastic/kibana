@@ -1,15 +1,23 @@
 .kuiModal {
+  @include kuiBottomShadow;
+
   line-height: $kuiLineHeight;
   background-color: $modalBackgroundColor;
   border: 1px solid $modalBorderColor;
   border-radius: $kuiBorderRadius;
   box-shadow: $kuiBoxShadow;
   z-index: $kuiModalDepth + 1;
+  animation: kuiModal $kuiAnimSpeedSlow $kuiAnimSlightBounce;
 
   @include darkTheme {
     background-color: $modalBackgroundColor--darkTheme;
     border-color: $modalBorderColor--darkTheme;
   }
+}
+
+.kuiModal--confirmation {
+  width: 450px;
+  min-width: auto;
 }
 
 .kuiModalHeader {
@@ -58,5 +66,16 @@
 
   > * + * {
     margin-left: 5px;
+  }
+}
+
+@keyframes kuiModal {
+  0% {
+    opacity: 0;
+    transform: translateY($kuiSizeXL);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

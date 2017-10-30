@@ -11,7 +11,7 @@ import {
 
 import { createFormatArchiveStreams } from '../format';
 
-const INPUTS = [1, 2, { foo: 'bar' }, [1,2]];
+const INPUTS = [1, 2, { foo: 'bar' }, [1, 2]];
 const INPUT_JSON = INPUTS.map(i => JSON.stringify(i, null, 2)).join('\n\n');
 
 describe('esArchiver createFormatArchiveStreams', () => {
@@ -55,7 +55,7 @@ describe('esArchiver createFormatArchiveStreams', () => {
 
     it('streams consume js values and produces buffers', async () => {
       const output = await createPromiseFromStreams([
-        createListStream([1, 2, { foo: 'bar' }, [1,2]]),
+        createListStream([1, 2, { foo: 'bar' }, [1, 2]]),
         ...createFormatArchiveStreams({ gzip: true }),
         createConcatStream([])
       ]);
