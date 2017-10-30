@@ -8,13 +8,15 @@ import {
   KuiFlexGrid,
 } from 'ui_framework/components';
 
+const ALL = 'all';
+
 export class TutorialDirectory extends React.Component {
 
   constructor(props) {
     super(props);
 
     this.tabs = [{
-      id: 'all',
+      id: ALL,
       name: 'All',
     }, {
       id: 'logging',
@@ -27,8 +29,12 @@ export class TutorialDirectory extends React.Component {
       name: 'Security analytics',
     }];
 
+    let openTab = ALL;
+    if (props.openTab && this.tabs.some(tab => { return tab.id === props.openTab; })) {
+      openTab = props.openTab;
+    }
     this.state = {
-      selectedTabId: 'all'
+      selectedTabId: openTab
     };
   }
 
@@ -39,7 +45,7 @@ export class TutorialDirectory extends React.Component {
   };
 
   renderTabs = () => {
-    return this.tabs.map((tab,index) => (
+    return this.tabs.map((tab, index) => (
       <KuiTab
         onClick={() => this.onSelectedTabChanged(tab.id)}
         isSelected={tab.id === this.state.selectedTabId}
@@ -52,6 +58,12 @@ export class TutorialDirectory extends React.Component {
 
   renderTutorials = () => {
     return this.props.tutorials.inNameOrder
+    .filter((tutorial) => {
+      if (this.state.selectedTabId === ALL) {
+        return true;
+      }
+      return this.state.selectedTabId === tutorial.category;
+    })
     .map((tutorial) => {
       return (
         <KuiFlexItem key={tutorial.name}>
@@ -97,5 +109,6 @@ export class TutorialDirectory extends React.Component {
 
 TutorialDirectory.propTypes = {
   addBasePath: PropTypes.func.isRequired,
+  openTab: PropTypes.string,
   tutorials: PropTypes.object.isRequired
 };

@@ -30,6 +30,16 @@ export function HomeApp({ addBasePath, directories, directoryCategories, tutoria
     );
   };
 
+  const renderTutorialDirectory = (props) => {
+    return (
+      <TutorialDirectory
+        addBasePath={addBasePath}
+        tutorials={tutorials}
+        openTab={props.match.params.tab}
+      />
+    );
+  };
+
   return (
     <Router>
       <Switch>
@@ -38,13 +48,9 @@ export function HomeApp({ addBasePath, directories, directoryCategories, tutoria
           render={renderTutorial}
         />
         <Route
-          path="/home/tutorial_directory"
-        >
-          <TutorialDirectory
-            addBasePath={addBasePath}
-            tutorials={tutorials}
-          />
-        </Route>
+          path="/home/tutorial_directory/:tab?"
+          render={renderTutorialDirectory}
+        />
         <Route
           path="/home/feature_directory"
         >
