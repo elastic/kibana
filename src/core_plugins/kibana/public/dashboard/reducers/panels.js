@@ -7,7 +7,7 @@ import {
   updatePanels,
 } from '../actions';
 
-import { panel, } from './panel';
+import { panel } from './panel';
 
 export const panels = handleActions({
   [updatePanels]: (state, { payload }) => _.cloneDeep(payload),
