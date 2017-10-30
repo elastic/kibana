@@ -30,14 +30,14 @@ const init = function () {
 
     // Add some parameters to it
     const timefilter = {
-      time : {
+      time: {
         from: moment().subtract(15, 'minutes'),
         to: moment(),
         mode: undefined
       },
-      refreshInterval : {
-        value : 0,
-        display : 'Off'
+      refreshInterval: {
+        value: 0,
+        display: 'Off'
       }
     };
     $parentScope.timefilter = timefilter;
@@ -101,19 +101,19 @@ describe('timepicker directive', function () {
     });
 
     it('should have a $scope.setRefreshInterval() that calls handler', function () {
-      $scope.setRefreshInterval({ value : 10000  });
+      $scope.setRefreshInterval({ value: 10000  });
       sinon.assert.calledOnce($parentScope.updateInterval);
       expect($parentScope.updateInterval.firstCall.args[0]).to.have.property('value', 10000);
     });
 
     it('should unpause when setRefreshInterval is called without pause:true', function () {
-      $scope.setRefreshInterval({ value : 1000, pause: true });
+      $scope.setRefreshInterval({ value: 1000, pause: true });
       expect($parentScope.updateInterval.getCall(0).args[0]).to.have.property('pause', true);
 
-      $scope.setRefreshInterval({ value : 1000, pause: false });
+      $scope.setRefreshInterval({ value: 1000, pause: false });
       expect($parentScope.updateInterval.getCall(1).args[0]).to.have.property('pause', false);
 
-      $scope.setRefreshInterval({ value : 1000 });
+      $scope.setRefreshInterval({ value: 1000 });
       expect($parentScope.updateInterval.getCall(2).args[0]).to.have.property('pause', false);
     });
 
@@ -132,14 +132,14 @@ describe('timepicker directive', function () {
     });
 
     it('should highlight the right mode', function () {
-      expect($elem.find('.kbn-timepicker-modes .active').text().trim()).to.be('quick');
+      expect($elem.find('.kbn-timepicker-modes .active').text().trim()).to.be('Quick');
 
       // Each of the 3 modes
       const modes = ['absolute', 'relative', 'quick'];
       _.each(modes, function (mode) {
         $scope.setMode(mode);
         $scope.$digest();
-        expect($elem.find('.kbn-timepicker-modes .active').text().trim()).to.be(mode);
+        expect($elem.find('.kbn-timepicker-modes .active').text().trim().toLowerCase()).to.be(mode);
       });
     });
   });

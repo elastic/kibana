@@ -69,7 +69,7 @@ export default function MetricVisType(Private) {
           name: 'metric',
           title: 'Metric',
           min: 1,
-          aggFilter: ['!derivative', '!geo_centroid','!geo_bounds'],
+          aggFilter: ['!derivative', '!geo_centroid', '!geo_bounds'],
           defaults: [
             { schema: 'metric', type: 'count' }
           ]

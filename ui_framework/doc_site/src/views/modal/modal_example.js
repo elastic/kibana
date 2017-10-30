@@ -3,19 +3,21 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
+  GuideCode,
   GuideDemo,
   GuidePage,
   GuideSection,
   GuideSectionTypes,
+  GuideText,
 } from '../../components';
 
-import { StaticConfirmModal } from './static';
-const staticConfirmModalSource = require('!!raw!./static');
-const staticConfirmModalHtml = renderToHtml(StaticConfirmModal);
+import { ModalExample } from './modal';
+const modalSource = require('!!raw!./modal');
+const modalHtml = renderToHtml(ModalExample);
 
-import { ConfirmModalExample } from './confirm_modal_example';
-const showConfirmModalSource = require('!!raw!./confirm_modal_example');
-const showConfirmModalHtml = renderToHtml(ConfirmModalExample);
+import { ConfirmModalExample } from './confirm_modal';
+const confirmModalSource = require('!!raw!./confirm_modal');
+const confirmModalHtml = renderToHtml(ConfirmModalExample);
 
 export default props => (
   <GuidePage title={props.route.name}>
@@ -24,17 +26,23 @@ export default props => (
       title="Confirmation Modal"
       source={[{
         type: GuideSectionTypes.JS,
-        code: staticConfirmModalSource,
+        code: modalSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: staticConfirmModalHtml,
+        code: modalHtml,
       }]}
     >
+      <GuideText>
+        Use a <GuideCode>KuiModal</GuideCode> to temporarily escape the current UX and create
+        another UX within it.
+      </GuideText>
+
       <GuideDemo>
-        <StaticConfirmModal />
+        <ModalExample />
       </GuideDemo>
+
       <GuideDemo isDarkTheme>
-        <StaticConfirmModal />
+        <ModalExample />
       </GuideDemo>
     </GuideSection>
 
@@ -42,10 +50,10 @@ export default props => (
       title="Pop up Confirmation Modal with Overlay"
       source={[{
         type: GuideSectionTypes.JS,
-        code: showConfirmModalSource,
+        code: confirmModalSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: showConfirmModalHtml,
+        code: confirmModalHtml,
       }]}
     >
       <GuideDemo>

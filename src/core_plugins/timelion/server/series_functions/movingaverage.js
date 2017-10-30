@@ -67,13 +67,13 @@ export default new Chainable('movingaverage', {
         eachSeries.data = _.map(pairs, function (point, i) {
           const cursor = i + 1;
           if (cursor < _window) return [point[0], null];
-          return toPoint(point, pairs.slice(cursor - _window , cursor));
+          return toPoint(point, pairs.slice(cursor - _window, cursor));
         });
 
       } else if (_position === 'right') {
         eachSeries.data = _.map(pairs, function (point, i) {
           if (i > pairsLen - _window) return [point[0], null];
-          return toPoint(point, pairs.slice(i , i + _window));
+          return toPoint(point, pairs.slice(i, i + _window));
         });
 
       }

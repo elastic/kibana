@@ -47,65 +47,6 @@ export default function ({ getService, getPageObjects }) {
       expect(inViewMode).to.equal(true);
     });
 
-    describe('panel edit controls', function () {
-      it('are hidden in view mode', async function () {
-        await PageObjects.dashboard.gotoDashboardLandingPage();
-        await PageObjects.dashboard.clickDashboardByLinkText(dashboardName);
-
-        const panelToggleMenu = await testSubjects.exists('dashboardPanelToggleMenuIcon');
-        expect(panelToggleMenu).to.equal(false);
-      });
-
-      it('are shown in edit mode', async function () {
-        await PageObjects.dashboard.clickEdit();
-
-        const panelToggleMenu = await testSubjects.exists('dashboardPanelToggleMenuIcon');
-        expect(panelToggleMenu).to.equal(true);
-        await testSubjects.click('dashboardPanelToggleMenuIcon');
-        const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
-        const removeExists = await testSubjects.exists('dashboardPanelRemoveIcon');
-
-        expect(editLinkExists).to.equal(true);
-        expect(removeExists).to.equal(true);
-      });
-
-      describe('on an expanded panel', function () {
-        it('are hidden in view mode', async function () {
-          await PageObjects.dashboard.saveDashboard(dashboardName);
-          await PageObjects.header.clickToastOK();
-          await PageObjects.dashboard.toggleExpandPanel();
-
-          const panelToggleMenu = await testSubjects.exists('dashboardPanelToggleMenuIcon');
-          expect(panelToggleMenu).to.equal(false);
-        });
-
-        it('in edit mode hides remove icons ', async function () {
-          await PageObjects.dashboard.clickEdit();
-
-          const panelToggleMenu = await testSubjects.exists('dashboardPanelToggleMenuIcon');
-          expect(panelToggleMenu).to.equal(true);
-          await testSubjects.click('dashboardPanelToggleMenuIcon');
-          const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
-          const removeExists = await testSubjects.exists('dashboardPanelRemoveIcon');
-
-          expect(editLinkExists).to.equal(true);
-          expect(removeExists).to.equal(false);
-
-          await PageObjects.dashboard.toggleExpandPanel();
-        });
-      });
-    });
-
-    // Panel expand should also be shown in view mode, but only on mouse hover.
-    describe('panel expand control', function () {
-      it('shown in edit mode', async function () {
-        await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-        await testSubjects.click('dashboardPanelToggleMenuIcon');
-        const expandExists = await testSubjects.exists('dashboardPanelExpandIcon');
-        expect(expandExists).to.equal(true);
-      });
-    });
-
     describe('save', function () {
       it('auto exits out of edit mode', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);

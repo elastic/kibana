@@ -8,7 +8,7 @@ export function PointSeriesGetSeriesProvider(Private) {
 
   return function getSeries(rows, chart) {
     const aspects = chart.aspects;
-    const multiY = _.isArray(aspects.y);
+    const multiY = Array.isArray(aspects.y);
     const yScale = chart.yScale;
     const partGetPoint = _.partial(getPoint, aspects.x, aspects.series, yScale);
 

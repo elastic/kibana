@@ -8,7 +8,7 @@ export function buildNodeParams(fieldName) {
 }
 
 export function toElasticsearchQuery(node, indexPattern) {
-  const { arguments:  [ fieldNameArg ] } = node;
+  const { arguments: [ fieldNameArg ] } = node;
   const fieldName = literal.toElasticsearchQuery(fieldNameArg);
   const field = indexPattern.fields.byName[fieldName];
 

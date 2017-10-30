@@ -7,3 +7,4 @@ export const EmbeddableHandlersRegistryProvider = uiRegistry({
   name: 'embeddableHandlers',
   index: ['name']
 });
+

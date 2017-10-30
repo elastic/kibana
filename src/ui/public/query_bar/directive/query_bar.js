@@ -5,10 +5,11 @@ import template from './query_bar.html';
 import typeaheadItemTemplate from './typeahead_item.html';
 import typeaheadFooterTemplate from './typeahead_footer.html';
 import { queryLanguages } from '../lib/queryLanguages';
-import { documentationLinks } from '../../documentation_links/documentation_links.js';
+
 import { fromKueryExpression, getSuggestions } from '../../kuery';
 import { functions } from '../../kuery/functions';
 import chrome from 'ui/chrome';
+import '../../directives/documentation_href';
 
 const module = uiModules.get('kibana');
 const baseUrl = chrome.addBasePath('/api/kibana/suggestions/values');
@@ -30,7 +31,6 @@ module.directive('queryBar', function () {
     controller: callAfterBindingsWorkaround(function ($scope, $element, $http, $timeout, config, PersistedLog, filterFilter) {
       this.typeaheadItemTemplate = typeaheadItemTemplate;
       this.typeaheadFooterTemplate = typeaheadFooterTemplate;
-      this.queryDocLinks = documentationLinks.query;
       this.appName = this.appName || 'global';
       this.availableQueryLanguages = queryLanguages;
       this.showLanguageSwitcher = config.get('search:queryLanguage:switcher:enable');

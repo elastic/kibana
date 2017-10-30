@@ -114,7 +114,7 @@ describe('Promise service', function () {
       expect(time).to.not.be.greaterThan(2000);
     });
     it('allows non-promises in the array', async () => {
-      expect(await Promise.race([1,2,3])).to.be(1);
+      expect(await Promise.race([1, 2, 3])).to.be(1);
     });
     describe('argument is undefined', () => {
       it('rejects the promise', async () => {

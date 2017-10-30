@@ -72,8 +72,8 @@ uiModules
       return self.vis ? self._updateVis() : self._createVis();
     })
     .then(function () {
-      self.searchSource.onRequestStart(() => {
-        return self.vis.requesting();
+      self.searchSource.onRequestStart((searchSource, searchRequest) => {
+        return self.vis.onSearchRequestStart(searchSource, searchRequest);
       });
 
       self.searchSource.aggs(function () {

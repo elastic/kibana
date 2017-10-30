@@ -8,49 +8,44 @@ import {
 
 let onClone;
 let onClose;
+let component;
 
 beforeEach(() => {
   onClone = sinon.spy();
   onClose = sinon.spy();
 });
 
+function createComponent(creationMethod = mount) {
+  component = creationMethod(
+    <DashboardCloneModal
+      title="dash title"
+      onClose={onClose}
+      onClone={onClone}
+    />
+  );
+}
+
 test('renders DashboardCloneModal', () => {
-  const component = render(<DashboardCloneModal
-    title="dash title"
-    onClose={onClose}
-    onClone={onClone}
-  />);
+  createComponent(render);
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 
 test('onClone', () => {
-  const component = mount(<DashboardCloneModal
-    title="dash title"
-    onClose={onClose}
-    onClone={onClone}
-  />);
+  createComponent();
   component.find('[data-test-subj="cloneConfirmButton"]').simulate('click');
   sinon.assert.calledWith(onClone, 'dash title');
   sinon.assert.notCalled(onClose);
 });
 
 test('onClose', () => {
-  const component = mount(<DashboardCloneModal
-    title="dash title"
-    onClose={onClose}
-    onClone={onClone}
-  />);
+  createComponent();
   component.find('[data-test-subj="cloneCancelButton"]').simulate('click');
   sinon.assert.calledOnce(onClose);
   sinon.assert.notCalled(onClone);
 });
 
 test('title', () => {
-  const component = mount(<DashboardCloneModal
-    title="dash title"
-    onClose={onClose}
-    onClone={onClone}
-  />);
+  createComponent();
   const event = { target: { value: 'a' } };
   component.find('input').simulate('change', event);
   component.find('[data-test-subj="cloneConfirmButton"]').simulate('click');
