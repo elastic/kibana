@@ -9,26 +9,25 @@ import {
 describe('Timelion expression suggestions', () => {
 
   describe('getSuggestions', () => {
-    const functionList = [
-      {
-        name: 'func1',
-        chainable: true,
-        args: [
-          { name: 'inputSeries' },
-          { name: 'argA' },
-          { name: 'argAB' }
-        ]
-      },
-      {
-        name: 'myFunc2',
-        chainable: false,
-        args: [
-          { name: 'argA' },
-          { name: 'argAB' },
-          { name: 'argABC' }
-        ]
-      }
-    ];
+    const func1 = {
+      name: 'func1',
+      chainable: true,
+      args: [
+        { name: 'inputSeries' },
+        { name: 'argA' },
+        { name: 'argAB' }
+      ]
+    };
+    const myFunc2 = {
+      name: 'myFunc2',
+      chainable: false,
+      args: [
+        { name: 'argA' },
+        { name: 'argAB' },
+        { name: 'argABC' }
+      ]
+    };
+    const functionList = [func1, myFunc2];
     let Parser;
     beforeEach(function () {
       Parser = PEG.buildParser(grammar);
@@ -41,21 +40,27 @@ describe('Timelion expression suggestions', () => {
           const expression = '.';
           const cursorPosition = 1;
           const suggestions = await suggest(expression, functionList, Parser, cursorPosition);
-          expect(suggestions.type).to.equal(SUGGESTION_TYPE.FUNCTIONS);
-          expect(suggestions.list.length).to.equal(2);
-          expect(suggestions.list[0].name).to.equal('func1');
-          expect(suggestions.location.min).to.equal(0);
-          expect(suggestions.location.max).to.equal(1);
+          expect(suggestions).to.eql({
+            'list': [func1, myFunc2],
+            'location': {
+              'min': 0,
+              'max': 1
+            },
+            'type': 'functions'
+          });
         });
         it('should filter function suggestions by function name', async () => {
           const expression = '.myF';
           const cursorPosition = 4;
           const suggestions = await suggest(expression, functionList, Parser, cursorPosition);
-          expect(suggestions.type).to.equal(SUGGESTION_TYPE.FUNCTIONS);
-          expect(suggestions.list.length).to.equal(1);
-          expect(suggestions.list[0].name).to.equal('myFunc2');
-          expect(suggestions.location.min).to.equal(0);
-          expect(suggestions.location.max).to.equal(4);
+          expect(suggestions).to.eql({
+            'list': [myFunc2],
+            'location': {
+              'min': 0,
+              'max': 4
+            },
+            'type': 'functions'
+          });
         });
       });
 
@@ -64,10 +69,14 @@ describe('Timelion expression suggestions', () => {
           const expression = '.func1(argA=)';
           const cursorPosition = 11;
           const suggestions = await suggest(expression, functionList, Parser, cursorPosition);
-          expect(suggestions.type).to.equal(SUGGESTION_TYPE.ARGUMENT_VALUE);
-          expect(suggestions.list.length).to.equal(0);
-          expect(suggestions.location.min).to.equal(7);
-          expect(suggestions.location.max).to.equal(12);
+          expect(suggestions).to.eql({
+            'list': [],
+            'location': {
+              'min': 7,
+              'max': 12
+            },
+            'type': 'argument_value'
+          });
         });
       });
 
@@ -79,11 +88,14 @@ describe('Timelion expression suggestions', () => {
           const expression = '.func1()';
           const cursorPosition = 1;
           const suggestions = await suggest(expression, functionList, Parser, cursorPosition);
-          expect(suggestions.type).to.equal(SUGGESTION_TYPE.FUNCTIONS);
-          expect(suggestions.list.length).to.equal(1);
-          expect(suggestions.list[0].name).to.equal('func1');
-          expect(suggestions.location.min).to.equal(0);
-          expect(suggestions.location.max).to.equal(8);
+          expect(suggestions).to.eql({
+            'list': [func1],
+            'location': {
+              'min': 0,
+              'max': 8
+            },
+            'type': 'functions'
+          });
         });
       });
 
@@ -93,38 +105,54 @@ describe('Timelion expression suggestions', () => {
             const expression = '.myFunc2()';
             const cursorPosition = 9;
             const suggestions = await suggest(expression, functionList, Parser, cursorPosition);
-            expect(suggestions.type).to.equal(SUGGESTION_TYPE.ARGUMENTS);
-            expect(suggestions.list.length).to.equal(3);
-            expect(suggestions.list[0].name).to.equal('argA');
-            expect(suggestions.location.min).to.equal(9);
-            expect(suggestions.location.max).to.equal(9);
+            expect(suggestions).to.eql({
+              'list': myFunc2.args,
+              'location': {
+                'min': 9,
+                'max': 9
+              },
+              'type': 'arguments'
+            });
           });
           it('should not provide argument suggestions for argument that is all ready set in function def', async () => {
             const expression = '.myFunc2(argAB=provided,)';
             const cursorPosition = 24;
             const suggestions = await suggest(expression, functionList, Parser, cursorPosition);
             expect(suggestions.type).to.equal(SUGGESTION_TYPE.ARGUMENTS);
-            expect(suggestions.list.length).to.equal(2);
-            expect(suggestions.list[0].name).to.equal('argA');
-            expect(suggestions.list[1].name).to.equal('argABC');
+            expect(suggestions).to.eql({
+              'list': [{ name: 'argA' }, { name: 'argABC' }],
+              'location': {
+                'min': 24,
+                'max': 24
+              },
+              'type': 'arguments'
+            });
           });
-          it('should filter argument suggestions provided arguments', async () => {
+          it('should filter argument suggestions by argument name', async () => {
             const expression = '.myFunc2(argAB,)';
             const cursorPosition = 14;
             const suggestions = await suggest(expression, functionList, Parser, cursorPosition);
-            expect(suggestions.type).to.equal(SUGGESTION_TYPE.ARGUMENTS);
-            expect(suggestions.list.length).to.equal(2);
-            expect(suggestions.list[0].name).to.equal('argAB');
-            expect(suggestions.location.min).to.equal(9);
-            expect(suggestions.location.max).to.equal(14);
+            expect(suggestions).to.eql({
+              'list': [{ name: 'argAB' }, { name: 'argABC' }],
+              'location': {
+                'min': 9,
+                'max': 14
+              },
+              'type': 'arguments'
+            });
           });
           it('should not show first argument for chainable functions', async () => {
             const expression = '.func1()';
             const cursorPosition = 7;
             const suggestions = await suggest(expression, functionList, Parser, cursorPosition);
-            expect(suggestions.type).to.equal(SUGGESTION_TYPE.ARGUMENTS);
-            expect(suggestions.list.length).to.equal(2);
-            expect(suggestions.list[0].name).to.equal('argA');
+            expect(suggestions).to.eql({
+              'list': [{ name: 'argA' }, { name: 'argAB' }],
+              'location': {
+                'min': 7,
+                'max': 7
+              },
+              'type': 'arguments'
+            });
           });
         });
         describe('cursor in argument value', () => {
@@ -132,10 +160,14 @@ describe('Timelion expression suggestions', () => {
             const expression = '.myFunc2(argA=42)';
             const cursorPosition = 14;
             const suggestions = await suggest(expression, functionList, Parser, cursorPosition);
-            expect(suggestions.type).to.equal(SUGGESTION_TYPE.ARGUMENT_VALUE);
-            expect(suggestions.list.length).to.equal(0);
-            expect(suggestions.location.min).to.equal(14);
-            expect(suggestions.location.max).to.equal(16);
+            expect(suggestions).to.eql({
+              'list': [],
+              'location': {
+                'min': 14,
+                'max': 16
+              },
+              'type': 'argument_value'
+            });
           });
         });
       });

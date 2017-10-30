@@ -73,52 +73,56 @@ function inLocation(cursorPosition, location) {
   return cursorPosition >= location.min && cursorPosition <= location.max;
 }
 
-function extractSuggestionsFromParsed(result, cursorPosition, functionList) {
+function extractSuggestionsFromParsedResult(result, cursorPosition, functionList) {
   const activeFunc = result.functions.find((func) => {
     return cursorPosition >= func.location.min && cursorPosition < func.location.max;
   });
 
-  if (activeFunc) {
-    const funcDefinition = functionList.find((func) => {
-      return func.name === activeFunc.function;
-    });
-    const alreadyProvidedArguments = activeFunc.arguments.map((arg) => {
-      return arg.name;
-    });
-
-    // return function suggestion if cursor is outside of parentheses
-    // location range includes '.', function name, and '('.
-    const openParen = activeFunc.location.min + activeFunc.function.length + 2;
-    if (cursorPosition < openParen) {
-      return { list: [funcDefinition], location: activeFunc.location, type: SUGGESTION_TYPE.FUNCTIONS };
-    }
-
-    const args = funcDefinition.chainable ? funcDefinition.args.slice(1) : funcDefinition.args.slice(0);
-    const activeArg = activeFunc.arguments.find((argument) => {
-      return inLocation(cursorPosition, argument.location);
-    });
-
-    // return argument_value suggestions when cursor is inside agrument value
-    if (activeArg && activeArg.type === 'namedArg' && inLocation(cursorPosition, activeArg.value.location)) {
-      return { list: [], location: activeArg.value.location, type: SUGGESTION_TYPE.ARGUMENT_VALUE };
-    }
-
-    const argumentSuggestions = args.filter(arg => {
-      // ignore arguments that are all ready provided in function declaration
-      if (alreadyProvidedArguments.includes(arg.name)) {
-        return false;
-      }
-
-      if (_.get(activeArg, 'type') === 'namedArg') {
-        return _.startsWith(arg.name, activeArg.name);
-      } else if (activeArg) {
-        return _.startsWith(arg.name, activeArg.text);
-      }
-      return true;
-    });
-    const location = activeArg ? activeArg.location : { min: cursorPosition, max: cursorPosition };
-    return { list: argumentSuggestions, location: location, type: SUGGESTION_TYPE.ARGUMENTS };
+  if (!activeFunc) {
+    return;
   }
+
+  const funcDefinition = functionList.find((func) => {
+    return func.name === activeFunc.function;
+  });
+  const providedArguments = activeFunc.arguments.map((arg) => {
+    return arg.name;
+  });
+
+  // return function suggestion if cursor is outside of parentheses
+  // location range includes '.', function name, and '('.
+  const openParen = activeFunc.location.min + activeFunc.function.length + 2;
+  if (cursorPosition < openParen) {
+    return { list: [funcDefinition], location: activeFunc.location, type: SUGGESTION_TYPE.FUNCTIONS };
+  }
+
+  // Do not provide 'inputSeries' as argument suggestion for chainable functions
+  const args = funcDefinition.chainable ? funcDefinition.args.slice(1) : funcDefinition.args.slice(0);
+
+  const activeArg = activeFunc.arguments.find((argument) => {
+    return inLocation(cursorPosition, argument.location);
+  });
+  // return argument_value suggestions when cursor is inside agrument value
+  if (activeArg && activeArg.type === 'namedArg' && inLocation(cursorPosition, activeArg.value.location)) {
+    // TODO - provide argument value suggestions once function list contains required data
+    return { list: [], location: activeArg.value.location, type: SUGGESTION_TYPE.ARGUMENT_VALUE };
+  }
+
+  const argumentSuggestions = args.filter(arg => {
+    // ignore arguments that are all ready provided in function declaration
+    if (providedArguments.includes(arg.name)) {
+      return false;
+    }
+
+    if (_.get(activeArg, 'type') === 'namedArg') {
+      return _.startsWith(arg.name, activeArg.name);
+    } else if (activeArg) {
+      return _.startsWith(arg.name, activeArg.text);
+    }
+    return true;
+  });
+  const location = activeArg ? activeArg.location : { min: cursorPosition, max: cursorPosition };
+  return { list: argumentSuggestions, location: location, type: SUGGESTION_TYPE.ARGUMENTS };
 }
 
 export function suggest(expression, functionList, Parser, cursorPosition) {
@@ -127,7 +131,7 @@ export function suggest(expression, functionList, Parser, cursorPosition) {
       // We rely on the grammar to throw an error in order to suggest function(s).
       const result = Parser.parse(expression);
 
-      const suggestions = extractSuggestionsFromParsed(result, cursorPosition, functionList);
+      const suggestions = extractSuggestionsFromParsedResult(result, cursorPosition, functionList);
       if (suggestions) {
         return resolve(suggestions);
       }
@@ -156,6 +160,7 @@ export function suggest(expression, functionList, Parser, cursorPosition) {
 
           return resolve({ list, location, type: SUGGESTION_TYPE.FUNCTIONS });
         } else if (message.type === 'incompleteArgument') {
+          // TODO - provide argument value suggestions once function list contains required data
           return resolve({ list: [], location, type: SUGGESTION_TYPE.ARGUMENT_VALUE });
         }
 
