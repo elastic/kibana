@@ -44,11 +44,11 @@ describe('Url Format', function () {
 
     describe('url template', function () {
       it('accepts a template', function () {
-        const url = new Url({ urlTemplate: 'http://{{ value }}' });
+        const url = new Url({ urlTemplate: 'url: {{ value }}' });
         const $a = unwrap($(url.convert('url', 'html')));
         expect($a.is('a')).to.be(true);
         expect($a.size()).to.be(1);
-        expect($a.attr('href')).to.be('http://url');
+        expect($a.attr('href')).to.be('url: url');
         expect($a.attr('target')).to.be('_blank');
         expect($a.children().size()).to.be(0);
       });
@@ -61,11 +61,11 @@ describe('Url Format', function () {
 
     describe('label template', function () {
       it('accepts a template', function () {
-        const url = new Url({ labelTemplate: 'extension: {{ value }}', urlTemplate: 'http://www.{{value}}.com' });
+        const url = new Url({ labelTemplate: 'extension: {{ value }}' });
         const $a = unwrap($(url.convert('php', 'html')));
         expect($a.is('a')).to.be(true);
         expect($a.size()).to.be(1);
-        expect($a.attr('href')).to.be('http://www.php.com');
+        expect($a.attr('href')).to.be('php');
         expect($a.html()).to.be('extension: php');
       });
 
@@ -107,24 +107,6 @@ describe('Url Format', function () {
           const url = new Url({ urlTemplate: '{{ toString }}' });
           expect(url.convert('url', 'text')).to.be('');
         });
-      });
-    });
-
-    describe('whitelist', function () {
-      it('should spit out the raw value if the value is not in the whitelist', function () {
-        const url = new Url();
-
-        expect(url.convert('www.elastic.co', 'html'))
-        .to.be('<span ng-non-bindable>www.elastic.co</span>');
-
-        expect(url.convert('elastic.co', 'html'))
-        .to.be('<span ng-non-bindable>elastic.co</span>');
-
-        expect(url.convert('elastic', 'html'))
-        .to.be('<span ng-non-bindable>elastic</span>');
-
-        expect(url.convert('ftp://elastic.co', 'html'))
-        .to.be('<span ng-non-bindable>ftp://elastic.co</span>');
       });
     });
   });
