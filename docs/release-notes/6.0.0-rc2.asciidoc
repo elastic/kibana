@@ -1,0 +1,65 @@
+[[release-notes-6.0.0-rc2]]
+== 6.0.0-rc2 Release Notes
+
+Also see <<breaking-changes-6.0>>.
+
+
+[float]
+[[bug-6.0.0-rc2]]
+=== Bug fixes
+Design::
+* [UI Framework] Fix margin for KuiLocalTabs which are applied to typographic elements. {pull}14451[#14451]
+* [DESIGN]: Remove truncate from viz form text, remove additional wrapper {pull}14311[#14311]
+Discover::
+* [Fixes #14270] Handle strings in source mapped as numbers in filter editor {pull}14318[#14318]
+* [Fixes #7767] Fix invisible filters caused by missing index pattern {pull}14131[#14131]
+* [Fixes #14319] Loosen check for dashboard queries in filters array {pull}14338[#14338]
+Management::
+* [Fixes #14350] [Management] Fix FF quirk with max width in the import saved object modal {pull}14352[#14352]
+* [Fixes #14592] [Management] Handle saved search import better {pull}14625[#14625]
+Operations::
+* Eslint/remove last amd modules {pull}14282[#14282]
+* Add (GPL-2.0 OR MIT) license as allowed {pull}14439[#14439]
+* [Fixes #14468] Fix crash when hitting shift+return in console {pull}14478[#14478]
+Platform::
+* [Fixes #14255] Use Boom.boomify instead of deprecated Boom.wrap {pull}14325[#14325]
+* [Fixes #14497] Import Babel polyfill when running Jest tests {pull}14508[#14508]
+Sharing::
+* Set pie chart border to match background in dark mode {pull}14375[#14375]
+* [Fixes #14462] Prevent event handlers from being triggered after they are &quot;off&quot;ed {pull}14463[#14463]
+Visualization::
+* [Fixes #13983] Fix Timelion suggestions broken by upgrading to Angular 1.6.5 {pull}14316[#14316]
+* [TSVB] Greater Than or Equal to Interval Pattern {pull}13872[#13872]
+* [Fixes #14470] [TSVB] Fixes #14470 - Remove field restriction on cardinality agg {pull}14483[#14483]
+* [TSVB] Fix CSS Bug with Top N Values {pull}14254[#14254]
+* [Fixes #14357] Fixes #14357 - Add courier's migrateFilters to dashboard context {pull}14481[#14481]
+* [Fixes #14040, #13997] Show query and filter bars even when there's a linked search {pull}14212[#14212]
+* [Fixes #13287] adds stroke back to area charts {pull}14149[#14149]
+* [Fixes #13193] fixes legend refreshing {pull}14150[#14150]
+* [Fixes #13252] fixes error when expanding gauge to full screen {pull}14114[#14114]
+* pie chart design guidelines {pull}13661[#13661]
+* [Fixes #14028] removing check for vis type on saved visualizations {pull}14093[#14093]
+* [Fixes #10543] fixing ordering of series in legend {pull}14113[#14113]
+  - order of legend for series should be same as provided in the configuration.
+* [Fixes #14078] fixes console error when selecting a pipeline aggregation {pull}14148[#14148]
+* allows visualize to load saved vis {pull}14146[#14146]
+* [Fixes #13570] don't show spy panel with tsvb or timelion {pull}14090[#14090]
+* moving shouldShowSpyPanel to visualize {pull}14269[#14269]
+* refactor tagcloud to use tabify responseHandler {pull}14266[#14266]
+* some updates to visualize loader {pull}14404[#14404]
+* Visualize loader updates {pull}14528[#14528]
+* [Fixes #13705] use correct element for size {pull}14105[#14105]
+* [Fixes #12953] remove junk tests {pull}14191[#14191]
+* use tabify for regionmap {pull}14364[#14364]
+* use proper SVG APIs to readout contents {pull}14458[#14458]
+* [Fixes #13144] Fixes 13144 - Add ability to select percentiles in pipeline aggs {pull}13453[#13453]
+* [Fixes #12069] apply field formatter to tag cloud {pull}14230[#14230]
+* [Fixes #12134] add tickDecimals option to yaxis {pull}14371[#14371]
+* [Fixes #14457] Set configurable to true so AggConfig decorated properties can be deleted {pull}14569[#14569]
+* [Fixes #10236, #9053] Timelion .fit() - avoid removing values that are zero {pull}14560[#14560]
+* [Fixes #13874] Allow panning beyond dateline {pull}13955[#13955]
+  - Users can now pan and zoom the map beyond the date line.
+* [TSVB] Allow negative time offsets {pull}14494[#14494]
+* [Fixes #14565] Fix tagcloud sync issues, fix #14565 {pull}14566[#14566]
+* Add tooltip to long title. {pull}14167[#14167]
+
