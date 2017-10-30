@@ -38,11 +38,11 @@ describe('Url Format', function () {
 
     describe('url template', function () {
       it('accepts a template', function () {
-        let url = new Url({ urlTemplate: 'http://{{ value }}' });
+        let url = new Url({ urlTemplate: 'url: {{ value }}' });
         let $a = $(url.convert('url', 'html'));
         expect($a.is('a')).to.be(true);
         expect($a.size()).to.be(1);
-        expect($a.attr('href')).to.be('http://url');
+        expect($a.attr('href')).to.be('url: url');
         expect($a.attr('target')).to.be('_blank');
         expect($a.children().size()).to.be(0);
       });
@@ -55,11 +55,11 @@ describe('Url Format', function () {
 
     describe('label template', function () {
       it('accepts a template', function () {
-        let url = new Url({ labelTemplate: 'extension: {{ value }}', urlTemplate: 'http://www.{{value}}.com' });
+        let url = new Url({ labelTemplate: 'extension: {{ value }}' });
         let $a = $(url.convert('php', 'html'));
         expect($a.is('a')).to.be(true);
         expect($a.size()).to.be(1);
-        expect($a.attr('href')).to.be('http://www.php.com');
+        expect($a.attr('href')).to.be('php');
         expect($a.html()).to.be('extension: php');
       });
 
@@ -101,24 +101,6 @@ describe('Url Format', function () {
           let url = new Url({ urlTemplate: '{{ toString }}' });
           expect(url.convert('url', 'text')).to.be('');
         });
-      });
-    });
-
-    describe('whitelist', function () {
-      it('should spit out the raw value if the value is not in the whitelist', function () {
-        const url = new Url();
-
-        expect(url.convert('www.elastic.co', 'html'))
-        .to.be('www.elastic.co');
-
-        expect(url.convert('elastic.co', 'html'))
-        .to.be('elastic.co');
-
-        expect(url.convert('elastic', 'html'))
-        .to.be('elastic');
-
-        expect(url.convert('ftp://elastic.co', 'html'))
-        .to.be('ftp://elastic.co');
       });
     });
   });
