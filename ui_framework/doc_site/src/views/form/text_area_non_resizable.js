@@ -5,7 +5,6 @@ import {
   KuiTextArea,
 } from '../../../../components';
 
-
 class KuiTextAreaNonResizableExample extends Component {
   state = {
     value1: 'Non-resizable',

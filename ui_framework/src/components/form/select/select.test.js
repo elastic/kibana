@@ -42,7 +42,7 @@ describe('KuiSelect', () => {
       test('true renders invalid', () => {
         const component = (
           <KuiSelect
-            isInvalid={true}
+            isInvalid
             onChange={()=>{}}
           />
         );
@@ -66,7 +66,7 @@ describe('KuiSelect', () => {
       test('true renders disabled', () => {
         const component = (
           <KuiSelect
-            isDisabled={true}
+            isDisabled
             onChange={()=>{}}
           />
         );

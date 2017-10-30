@@ -5,7 +5,6 @@ import {
   KuiTextInput,
 } from '../../../../components';
 
-
 class KuiTextInputExample extends Component {
   state = {
     value1: '',

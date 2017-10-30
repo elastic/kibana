@@ -44,7 +44,6 @@ const CheckBox = require('./check_box');
 const checkBoxSource2 = require('!!raw!./check_box');
 const checkBoxHtml2 = renderToHtml(CheckBox);
 
-
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
@@ -57,9 +56,9 @@ export default props => (
 
       <GuideText>
         Never forget to label every input element. You can either
-        use a <code>label</code> element with a <code>for</code> attribute
-        referencing the <code>id</code> of the input field, wrap the <code>input</code> field
-        within the <code>label</code> element or use <code>aria-label</code> or <code>aria-labelledby</code>.
+        use a <GuideCode>label</GuideCode> element with a <GuideCode>for</GuideCode> attribute
+        referencing the <GuideCode>id</GuideCode> of the input field, wrap the <GuideCode>input</GuideCode> field
+        within the <GuideCode>label</GuideCode> element or use <GuideCode>aria-label</GuideCode> or <GuideCode>aria-labelledby</GuideCode>.
       </GuideText>
 
       <GuideText>
@@ -86,9 +85,9 @@ export default props => (
 
       <GuideText>
         Never forget to label every input element. You can either
-        use a <code>label</code> element with a <code>for</code> attribute
-        referencing the <code>id</code> of the input field, wrap the <code>input</code> field
-        within the <code>label</code> element or use <code>aria-label</code> or <code>aria-labelledby</code>.
+        use a <GuideCode>label</GuideCode> element with a <GuideCode>for</GuideCode> attribute
+        referencing the <GuideCode>id</GuideCode> of the input field, wrap the <GuideCode>input</GuideCode> field
+        within the <GuideCode>label</GuideCode> element or use <GuideCode>aria-label</GuideCode> or <GuideCode>aria-labelledby</GuideCode>.
       </GuideText>
 
       <GuideText>

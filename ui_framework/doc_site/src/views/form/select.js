@@ -5,7 +5,6 @@ import {
   KuiSelect,
 } from '../../../../components';
 
-
 class KuiSelectExample extends Component {
   state = {
     value1: '',

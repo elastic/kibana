@@ -5,7 +5,6 @@ import {
   KuiTextArea,
 } from '../../../../components';
 
-
 class KuiTextAreaExample extends Component {
   state = {
     value1: '',

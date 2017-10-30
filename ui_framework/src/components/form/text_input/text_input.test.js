@@ -77,7 +77,7 @@ describe('KuiTextInput', () => {
       test('true renders invalid', () => {
         const component = (
           <KuiTextInput
-            isInvalid={true}
+            isInvalid
             onChange={()=>{}}
           />
         );
@@ -101,7 +101,7 @@ describe('KuiTextInput', () => {
       test('true renders disabled', () => {
         const component = (
           <KuiTextInput
-            isDisabled={true}
+            isDisabled
             onChange={()=>{}}
           />
         );

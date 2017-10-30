@@ -48,7 +48,7 @@ describe('KuiTextArea', () => {
       test('true renders invalid', () => {
         const component = (
           <KuiTextArea
-            isInvalid={true}
+            isInvalid
             onChange={()=>{}}
           />
         );
@@ -72,7 +72,7 @@ describe('KuiTextArea', () => {
       test('true renders non-resizable', () => {
         const component = (
           <KuiTextArea
-            isNonResizable={true}
+            isNonResizable
             onChange={()=>{}}
           />
         );
@@ -96,7 +96,7 @@ describe('KuiTextArea', () => {
       test('true renders disabled', () => {
         const component = (
           <KuiTextArea
-            isDisabled={true}
+            isDisabled
             onChange={()=>{}}
           />
         );

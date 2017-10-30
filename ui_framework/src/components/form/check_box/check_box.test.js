@@ -24,7 +24,7 @@ describe('KuiCheckBox', () => {
       test('true renders checked', () => {
         const component = (
           <KuiCheckBox
-            isChecked={true}
+            isChecked
             onChange={()=>{}}
           />
         );
@@ -48,7 +48,7 @@ describe('KuiCheckBox', () => {
       test('true renders disabled', () => {
         const component = (
           <KuiCheckBox
-            isDisabled={true}
+            isDisabled
             onChange={()=>{}}
           />
         );
