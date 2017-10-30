@@ -44,9 +44,8 @@ You need to update the config file with your Github username and a Github Access
   // Repositories and the versions that will be available in backport cli
   "repositories": [
     {
-      "name": "elastic/x-pack-kibana",
-      "versions": ["6.x", "6.0", "5.6", "5.5", "5.4"],
-      "labels": ["backport"]
+      "name": "elastic/elasticsearch",
+      "versions": ["6.x", "6.0", "5.6", "5.5", "5.4"]
     },
     {
       "name": "elastic/kibana",
