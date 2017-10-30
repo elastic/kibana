@@ -39,6 +39,9 @@ export default function (kibana) {
       visTypes: [
         'plugins/timelion/vis'
       ],
+      kbnDirectory: [
+        'plugins/timelion/kbn_directory'
+      ],
       mappings: require('./mappings.json'),
 
       uiSettingDefaults: {
