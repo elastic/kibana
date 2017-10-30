@@ -8,13 +8,6 @@ import {
   KuiBarSection,
   KuiFieldGroup,
   KuiFieldGroupSection,
-  KuiCardGroup,
-  KuiCard,
-  KuiCardDescription,
-  KuiCardDescriptionTitle,
-  KuiCardDescriptionText,
-  KuiCardFooter,
-  KuiLinkButton,
   KuiFlexGroup,
   KuiFlexItem,
   KuiFlexGrid,
@@ -41,130 +34,16 @@ export function Home({ addBasePath, directories, directoryCategories }) {
     });
   };
 
-  const renderPromo = () => {
-    const cardStyle = {
-      width: '250px',
-      'minWidth': '200px'
-    };
-    return (
-      <div className="kuiVerticalRhythm">
-        <KuiCardGroup>
-          <KuiCard style={cardStyle}>
-            <KuiCardDescription>
-              <KuiCardDescriptionTitle>
-                <img
-                  src={addBasePath('/plugins/kibana/assets/app_apm.svg')}
-                />
-                <p>
-                  APM
-                </p>
-              </KuiCardDescriptionTitle>
-
-              <KuiCardDescriptionText>
-                APM helps you locate and fix performance bottlenecks in your application
-              </KuiCardDescriptionText>
-            </KuiCardDescription>
-
-            <KuiCardFooter>
-              <KuiLinkButton
-                buttonType="secondary"
-                href={addBasePath('/app/kibana#/home/tutorial_directory')}
-              >
-                Learn more
-              </KuiLinkButton>
-            </KuiCardFooter>
-          </KuiCard>
-
-          <KuiCard style={cardStyle}>
-            <KuiCardDescription>
-              <KuiCardDescriptionTitle>
-                <img
-                  src={addBasePath('/plugins/kibana/assets/app_logging.svg')}
-                />
-                <p>
-                  Logging
-                </p>
-              </KuiCardDescriptionTitle>
-
-              <KuiCardDescriptionText>
-                Ingest data from popular logging platforms and get immediate dashboards.
-              </KuiCardDescriptionText>
-            </KuiCardDescription>
-
-            <KuiCardFooter>
-              <KuiLinkButton
-                buttonType="secondary"
-                href={addBasePath('/app/kibana#/home/tutorial_directory/logging')}
-              >
-                Select data source
-              </KuiLinkButton>
-            </KuiCardFooter>
-          </KuiCard>
-
-          <KuiCard style={cardStyle}>
-            <KuiCardDescription>
-              <KuiCardDescriptionTitle>
-                <img
-                  src={addBasePath('/plugins/kibana/assets/app_monitoring.svg')}
-                />
-                <p>
-                  Metrics
-                </p>
-              </KuiCardDescriptionTitle>
-
-              <KuiCardDescriptionText>
-                Choose from Apache, MongoDB, Docker, MySQL, and more...
-              </KuiCardDescriptionText>
-            </KuiCardDescription>
-
-            <KuiCardFooter>
-              <KuiLinkButton
-                buttonType="secondary"
-                href={addBasePath('/app/kibana#/home/tutorial_directory/metrics')}
-              >
-                Select data source
-              </KuiLinkButton>
-            </KuiCardFooter>
-          </KuiCard>
-
-          <KuiCard style={cardStyle}>
-            <KuiCardDescription>
-              <KuiCardDescriptionTitle>
-                <img
-                  src={addBasePath('/plugins/kibana/assets/app_security.svg')}
-                />
-                <p>
-                  Security analytics
-                </p>
-              </KuiCardDescriptionTitle>
-
-              <KuiCardDescriptionText>
-                Ingest data from popular security solutions and get immediately insights.
-              </KuiCardDescriptionText>
-            </KuiCardDescription>
-
-            <KuiCardFooter>
-              <KuiLinkButton
-                buttonType="secondary"
-                href={addBasePath('/app/kibana#/home/tutorial_directory/security')}
-              >
-                Select data source
-              </KuiLinkButton>
-            </KuiCardFooter>
-          </KuiCard>
-        </KuiCardGroup>
-      </div>
-    );
-  };
 
   return (
     <div className="kuiView home">
       <div className="kuiViewContent kuiViewContent--constrainedWidth">
+
         <div className="kuiViewContentItem kuiVerticalRhythmXLarge">
           <KuiBar className="kuiVerticalRhythmSmall">
             <KuiBarSection>
               <div className="kuiTitle">
-                Integrations
+                Welcome to Kibana
               </div>
             </KuiBarSection>
 
@@ -183,14 +62,6 @@ export function Home({ addBasePath, directories, directoryCategories }) {
               </KuiFieldGroup>
             </KuiBarSection>
           </KuiBar>
-
-          <p className="kuiText kuiSubduedText kuiVerticalRhythm kuiVerticalRhythmSmall">
-            These turn-key solutions will help you quickly add data into Kibana and turn it into
-            pre-built dashboards / monitoring systems.
-          </p>
-
-          { renderPromo() }
-
         </div>
 
         <div className="kuiViewContentItem kuiVerticalRhythmXLarge">
