@@ -27,20 +27,18 @@ module.directive('appendWildcard', function () {
           return;
         }
 
-        // If the user is holdinng down ctrl/cmd, they are performing some shortcut
+        // If the user is holding down ctrl/cmd, they are performing some shortcut
         // and do not interpret literally
         if (e.metaKey) {
           return;
         }
 
         let indexPatternName = $elem.val() + e.key;
-        if (indexPatternName && indexPatternName.length === 1) {
-          if (indexPatternName !== '*') {
-            indexPatternName += '*';
-            e.preventDefault();
-            $elem.val(indexPatternName);
-            $elem[0].setSelectionRange(1, 1);
-          }
+        if (indexPatternName.length === 1 && indexPatternName !== '*') {
+          indexPatternName += '*';
+          e.preventDefault();
+          $elem.val(indexPatternName);
+          $elem[0].setSelectionRange(1, 1);
         }
 
         $ctrl.$setViewValue(indexPatternName);
