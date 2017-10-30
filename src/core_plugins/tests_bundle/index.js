@@ -17,7 +17,10 @@ export default (kibana) => {
         let modules = [];
         const config = kibana.config;
 
-        const testGlobs = ['src/ui/public/**/*.js'];
+        const testGlobs = [
+          'src/ui/public/**/*.js',
+          '!src/ui/public/flot-charts/**/*',
+        ];
         const testingPluginIds = config.get('tests_bundle.pluginId');
 
         if (testingPluginIds) {
