@@ -4,19 +4,19 @@
 }
 
 .kuiStatusText--info {
-  color: $globalInfoColor;
+  color: $kuiInfoColor;
 }
 
 .kuiStatusText--success {
-  color: $globalSuccessColor;
+  color: $kuiSuccessColor;
 }
 
 .kuiStatusText--warning {
-  color: $globalWarningColor;
+  color: $kuiWarningColor;
 }
 
 .kuiStatusText--error {
-  color: $globalDangerColor;
+  color: $kuiDangerColor;
 }
 
 /**

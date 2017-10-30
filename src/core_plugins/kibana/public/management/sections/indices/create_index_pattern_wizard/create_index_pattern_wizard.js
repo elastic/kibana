@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { IndexPatternMissingIndices } from 'ui/errors';
 import 'ui/directives/validate_index_pattern';
 import 'ui/directives/auto_select_if_only_one';
-import { documentationLinks } from 'ui/documentation_links/documentation_links';
+import 'ui/directives/documentation_href';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './create_index_pattern_wizard.html';
@@ -28,7 +28,13 @@ uiModules.get('apps/management')
   Notifier,
   Promise
 ) {
+  // This isn't ideal. We want to avoid searching for 20 indices
+  // then filtering out the majority of them because they are sysetm indices.
+  // We'd like to filter system indices out in the query
+  // so if we can accomplish that in the future, this logic can go away
+  const ESTIMATED_NUMBER_OF_SYSTEM_INDICES = 20;
   const MAX_NUMBER_OF_MATCHING_INDICES = 20;
+  const MAX_SEARCH_SIZE = MAX_NUMBER_OF_MATCHING_INDICES + ESTIMATED_NUMBER_OF_SYSTEM_INDICES;
   const notify = new Notifier();
   const disabledDividerOption = {
     isDisabled: true,
@@ -37,8 +43,6 @@ uiModules.get('apps/management')
   const noTimeFieldOption = {
     display: `I don't want to use the Time Filter`,
   };
-
-  this.documentationLinks = documentationLinks;
 
   // Configure the new index pattern we're going to create.
   this.formValues = {
@@ -73,7 +77,7 @@ uiModules.get('apps/management')
     });
   }
 
-  function getIndices(pattern, limit = MAX_NUMBER_OF_MATCHING_INDICES) {
+  function getIndices(pattern, limit = MAX_SEARCH_SIZE) {
     const params = {
       index: pattern,
       ignore: [404],
@@ -109,12 +113,12 @@ uiModules.get('apps/management')
       return indices;
     }
 
-    if (this.doesIncludeSystemIndices) {
-      return indices;
-    }
+    const acceptableIndices = this.doesIncludeSystemIndices
+      ? indices
+      // All system indices begin with a period.
+      : indices.filter(index => !index.name.startsWith('.'));
 
-    // All system indices begin with a period.
-    return indices.filter(index => !index.name.startsWith('.'));
+    return acceptableIndices.slice(0, MAX_NUMBER_OF_MATCHING_INDICES);
   };
 
   const updateWhiteListedIndices = () => {
@@ -165,10 +169,10 @@ uiModules.get('apps/management')
 
   this.fetchExistingIndices = () => {
     this.isFetchingExistingIndices = true;
-    const allExistingLocalAndRemoteIndicesPattern = '*,*:*';
+    const allExistingLocalIndicesPattern = '*';
 
     Promise.all([
-      getIndices(allExistingLocalAndRemoteIndicesPattern),
+      getIndices(allExistingLocalIndicesPattern),
       createReasonableWait()
     ])
     .then(([allIndicesResponse]) => {
@@ -178,6 +182,7 @@ uiModules.get('apps/management')
       this.isFetchingExistingIndices = false;
     }).catch(error => {
       notify.error(error);
+      this.isFetchingExistingIndices = false;
     });
   };
 

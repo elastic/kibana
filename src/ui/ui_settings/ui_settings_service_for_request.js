@@ -11,19 +11,14 @@ import { uiSettingsServiceFactory } from './ui_settings_service_factory';
  *  @param {Object} [options={}]
  *  @property {AsyncFunction} [options.getDefaults] async function that returns defaults/details about
  *                            the uiSettings.
- *  @property {AsyncFunction} [options.readInterceptor] async function that is called when the
- *                            UiSettingsService does a read() and has an oportunity to intercept the
- *                            request and return an alternate `_source` value to use.
  *  @return {UiSettingsService}
  */
 export function getUiSettingsServiceForRequest(server, request, options = {}) {
   const {
-    readInterceptor,
     getDefaults
   } = options;
 
   const uiSettingsService = uiSettingsServiceFactory(server, {
-    readInterceptor,
     getDefaults,
     savedObjectsClient: request.getSavedObjectsClient()
   });

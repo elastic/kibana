@@ -110,6 +110,7 @@ class DataFormatPicker extends Component {
           </div>
           <div className="vis_editor__label">Decimal Places</div>
           <input
+            style={{ width: 60 }}
             className="vis_editor__input"
             defaultValue={decimals}
             ref={(el) => this.decimals = el}
@@ -126,6 +127,7 @@ class DataFormatPicker extends Component {
             Format String (See <a href="http://numeraljs.com/" target="_BLANK">Numeral.js</a>)
           </div>
           <input
+            style={{ width: 100 }}
             className="vis_editor__input"
             defaultValue={value}
             ref={(el) => this.custom = el}

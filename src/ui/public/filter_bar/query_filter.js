@@ -59,7 +59,7 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
     const appState = getAppState();
     const filterState = (global) ? globalState : appState;
 
-    if (!_.isArray(filters)) {
+    if (!Array.isArray(filters)) {
       filters = [filters];
     }
 
@@ -165,8 +165,8 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
     if (!appState) return filter;
 
     // ensure that both states have a filters property
-    if (!_.isArray(globalState.filters)) globalState.filters = [];
-    if (!_.isArray(appState.filters)) appState.filters = [];
+    if (!Array.isArray(globalState.filters)) globalState.filters = [];
+    if (!Array.isArray(appState.filters)) appState.filters = [];
 
     const appIndex = _.findIndex(appState.filters, appFilter => _.isEqual(appFilter, filter));
 

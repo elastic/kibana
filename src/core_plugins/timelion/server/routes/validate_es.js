@@ -10,7 +10,7 @@ export default function (server) {
 
         const body = {
           index: uiSettings['es.default_index'],
-          fields:timefield
+          fields: timefield
         };
 
         callWithRequest(request, 'fieldStats', body).then(function (resp) {

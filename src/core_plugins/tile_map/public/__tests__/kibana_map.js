@@ -37,7 +37,7 @@ describe('kibana_map tests', function () {
       kibanaMap = new KibanaMap(domNode, {
         minZoom: 1,
         maxZoom: 10,
-        center: [0,0],
+        center: [0, 0],
         zoom: 0
       });
     });
@@ -86,7 +86,7 @@ describe('kibana_map tests', function () {
         kibanaMap = new KibanaMap(domNode, {
           minZoom: 1,
           maxZoom: 10,
-          center: [0,0],
+          center: [0, 0],
           zoom: 2
         });
       });
@@ -106,7 +106,7 @@ describe('kibana_map tests', function () {
         kibanaMap = new KibanaMap(noHeightNode, {
           minZoom: 1,
           maxZoom: 10,
-          center: [0,0],
+          center: [0, 0],
           zoom: 10
         });
       });
@@ -130,7 +130,7 @@ describe('kibana_map tests', function () {
         kibanaMap = new KibanaMap(noWidthNode, {
           minZoom: 1,
           maxZoom: 10,
-          center: [0,0],
+          center: [0, 0],
           zoom: 10
         });
       });
@@ -199,7 +199,7 @@ describe('kibana_map tests', function () {
       kibanaMap = new KibanaMap(domNode, {
         minZoom: 1,
         maxZoom: 10,
-        center: [0,0],
+        center: [0, 0],
         zoom: 0
       });
     });

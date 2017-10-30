@@ -1,47 +1,45 @@
 import React from 'react';
 import _ from 'lodash';
 import { mount } from 'enzyme';
-import { DashboardViewMode } from '../dashboard_view_mode';
 import { DashboardPanel } from './dashboard_panel';
+import { PanelError } from '../panel/panel_error';
 
-const containerApiMock = {
-  addFilter: () => {},
-  getAppState: () => {},
-  createChildUistate: () => {},
-  registerPanelIndexPattern: () => {},
-  updatePanel: () => {}
-};
-
-const embeddableHandlerMock = {
-  getEditPath: () => Promise.resolve('editPath'),
-  getTitleFor: () => Promise.resolve('title'),
-  render: jest.fn()
-};
+import {
+  takeMountedSnapshot,
+} from 'ui_framework/src/test';
 
 function getProps(props = {}) {
   const defaultTestProps = {
-    dashboardViewMode: DashboardViewMode.EDIT,
+    viewOnlyMode: false,
     isFullScreenMode: false,
-    panel: {
-      gridData: { x: 0, y: 0, w: 6, h: 6, i: 1 },
-      panelIndex: '1',
-      type: 'visualization',
-      id: 'foo1'
-    },
-    getEmbeddableHandler: () => embeddableHandlerMock,
+    onMaximizePanel: () => {},
+    onMinimizePanel: () => {},
+    panelId: 'foo1',
+    renderEmbeddable: jest.fn(),
     isExpanded: false,
-    getContainerApi: () => containerApiMock,
-    onToggleExpanded: () => {},
-    onDeletePanel: () => {}
+    onDestroy: () => {}
   };
   return _.defaultsDeep(props, defaultTestProps);
 }
 
 test('DashboardPanel matches snapshot', () => {
   const component = mount(<DashboardPanel {...getProps()} />);
-  expect(component).toMatchSnapshot();
+  expect(takeMountedSnapshot(component)).toMatchSnapshot();
 });
 
-test('and calls render', () => {
-  expect(embeddableHandlerMock.render.mock.calls.length).toBe(1);
+test('Calls render', () => {
+  const props = getProps();
+  mount(<DashboardPanel {...props} />);
+  expect(props.renderEmbeddable.mock.calls.length).toBe(1);
 });
+
+test('renders an error when error prop is passed', () => {
+  const props = getProps({
+    error: 'Simulated error'
+  });
+
+  const component = mount(<DashboardPanel {...props} />);
+  const panelError = component.find(PanelError);
+  expect(panelError.length).toBe(1);
+});
+

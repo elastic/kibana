@@ -19,6 +19,9 @@ export function createDataCluster(server) {
 
   server.plugins.elasticsearch.createCluster(
     'data',
-    Object.assign({ log: DataClientLogging }, getConfig())
+    {
+      log: DataClientLogging,
+      ...getConfig()
+    }
   );
 }

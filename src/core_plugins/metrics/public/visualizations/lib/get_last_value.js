@@ -13,7 +13,7 @@ export default (data, lookback = 2) => {
   let value;
   while (lookback > lookbackCounter && !value) {
     const next = data[data.length - ++lookbackCounter];
-    value =  _.isArray(next) && next[1] || 0;
+    value =  Array.isArray(next) && next[1] || 0;
   }
   return value || 0;
 };

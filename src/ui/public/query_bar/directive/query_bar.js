@@ -2,7 +2,7 @@ import { uiModules } from 'ui/modules';
 import { callAfterBindingsWorkaround } from 'ui/compat';
 import template from './query_bar.html';
 import { queryLanguages } from '../lib/queryLanguages';
-import { documentationLinks } from '../../documentation_links/documentation_links.js';
+import '../../directives/documentation_href';
 
 const module = uiModules.get('kibana');
 
@@ -20,7 +20,6 @@ module.directive('queryBar', function () {
     controllerAs: 'queryBar',
     bindToController: true,
     controller: callAfterBindingsWorkaround(function ($scope, config) {
-      this.queryDocLinks = documentationLinks.query;
       this.appName = this.appName || 'global';
       this.availableQueryLanguages = queryLanguages;
       this.showLanguageSwitcher = config.get('search:queryLanguage:switcher:enable');
@@ -36,7 +35,9 @@ module.directive('queryBar', function () {
       };
 
       $scope.$watch('queryBar.query', (newQuery) => {
-        this.localQuery = Object.assign({}, newQuery);
+        this.localQuery = {
+          ...newQuery
+        };
       }, true);
     })
   };

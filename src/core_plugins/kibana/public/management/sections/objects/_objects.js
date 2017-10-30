@@ -7,10 +7,25 @@ import 'ui/directives/file_upload';
 import uiRoutes from 'ui/routes';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import { uiModules } from 'ui/modules';
+import { showChangeIndexModal } from './show_change_index_modal';
+import { SavedObjectNotFound } from 'ui/errors';
+
+const indexPatternsResolutions = {
+  indexPatterns: function (Private) {
+    const savedObjectsClient = Private(SavedObjectsClientProvider);
+
+    return savedObjectsClient.find({
+      type: 'index-pattern',
+      fields: ['title'],
+      perPage: 10000
+    }).then(response => response.savedObjects);
+  }
+};
 
 uiRoutes
 .when('/management/kibana/objects', {
-  template: objectIndexHTML
+  template: objectIndexHTML,
+  resolve: indexPatternsResolutions
 });
 
 uiRoutes
@@ -19,7 +34,7 @@ uiRoutes
 });
 
 uiModules.get('apps/management')
-.directive('kbnManagementObjects', function (kbnIndex, Notifier, Private, kbnUrl, Promise, confirmModal) {
+.directive('kbnManagementObjects', function ($route, kbnIndex, Notifier, Private, kbnUrl, Promise, confirmModal) {
   const savedObjectsClient = Private(SavedObjectsClientProvider);
 
   return {
@@ -43,7 +58,7 @@ uiModules.get('apps/management')
       const getData = function (filter) {
         const services = savedObjectManagementRegistry.all().map(function (obj) {
           const service = $injector.get(obj.service);
-          return service.find(filter).then(function (data) {
+          return service.findAll(filter).then(function (data) {
             return {
               service: service,
               serviceName: obj.service,
@@ -188,61 +203,107 @@ uiModules.get('apps/management')
             }
           );
         })
-          .then((overwriteAll) => {
-            function importDocument(doc) {
-              const { service } = find($scope.services, { type: doc._type }) || {};
+        .then((overwriteAll) => {
+          // Keep a record of the index patterns assigned to our imported saved objects that do not
+          // exist. We will provide a way for the user to manually select a new index pattern for those
+          // saved objects.
+          const conflictedIndexPatterns = [];
+          // We want to do the same for saved searches, but we want to keep them separate because they need
+          // to be applied _first_ because other saved objects can be depedent on those saved searches existing
+          const conflictedSearchDocs = [];
 
-              if (!service) {
-                const msg = `Skipped import of "${doc._source.title}" (${doc._id})`;
-                const reason = `Invalid type: "${doc._type}"`;
+          function importDocument(swallowErrors, doc) {
+            const { service } = find($scope.services, { type: doc._type }) || {};
 
-                notify.warning(`${msg}, ${reason}`, {
-                  lifetime: 0,
-                });
+            if (!service) {
+              const msg = `Skipped import of "${doc._source.title}" (${doc._id})`;
+              const reason = `Invalid type: "${doc._type}"`;
 
-                return;
+              notify.warning(`${msg}, ${reason}`, {
+                lifetime: 0,
+              });
+
+              return;
+            }
+
+            return service.get()
+              .then(function (obj) {
+                obj.id = doc._id;
+                return obj.applyESResp(doc)
+                  .then(() => {
+                    return obj.save({ confirmOverwrite: !overwriteAll });
+                  })
+                  .catch((err) => {
+                    if (swallowErrors && err instanceof SavedObjectNotFound) {
+                      switch (err.savedObjectType) {
+                        case 'search':
+                          conflictedSearchDocs.push(doc);
+                          return;
+                        case 'index-pattern':
+                          conflictedIndexPatterns.push({ obj, doc });
+                          return;
+                      }
+                    }
+                    // swallow errors here so that the remaining promise chain executes
+                    err.message = `Importing ${obj.title} (${obj.id}) failed: ${err.message}`;
+                    notify.error(err);
+                  });
+              });
+          }
+
+          function groupByType(docs) {
+            const defaultDocTypes = {
+              searches: [],
+              other: [],
+            };
+
+            return docs.reduce((types, doc) => {
+              switch (doc._type) {
+                case 'search':
+                  types.searches.push(doc);
+                  break;
+                default:
+                  types.other.push(doc);
               }
+              return types;
+            }, defaultDocTypes);
+          }
 
-              return service.get()
-                .then(function (obj) {
-                  obj.id = doc._id;
-                  return obj.applyESResp(doc)
-                    .then(() => {
-                      return obj.save({ confirmOverwrite : !overwriteAll });
-                    })
-                    .catch((err) => {
-                      // swallow errors here so that the remaining promise chain executes
-                      err.message = `Importing ${obj.title} (${obj.id}) failed: ${err.message}`;
-                      notify.error(err);
-                    });
+          function resolveConflicts(objs, { obj }) {
+            const oldIndexId = obj.searchSource.getOwn('index');
+            const newIndexId = objs.find(({ oldId }) => oldId === oldIndexId).newId;
+            // If the user did not select a new index pattern in the modal, the id
+            // will be same as before, so don't try to update it
+            if (newIndexId === oldIndexId) {
+              return;
+            }
+            return obj.hydrateIndexPattern(newIndexId)
+              .then(() => obj.save({ confirmOverwrite: !overwriteAll }));
+          }
+
+          const docTypes = groupByType(docs);
+
+          return Promise.map(docTypes.searches, importDocument.bind(null, true))
+            .then(() => Promise.map(docTypes.other, importDocument.bind(null, true)))
+            .then(() => {
+              if (conflictedIndexPatterns.length) {
+                return new Promise((resolve, reject) => {
+                  showChangeIndexModal(
+                    (objs) => {
+                      Promise.map(conflictedIndexPatterns, resolveConflicts.bind(null, objs))
+                        .then(resolve)
+                        .catch(reject);
+                    },
+                    conflictedIndexPatterns,
+                    $route.current.locals.indexPatterns,
+                  );
                 });
-            }
-
-            function groupByType(docs) {
-              const defaultDocTypes = {
-                searches: [],
-                other: [],
-              };
-
-              return docs.reduce((types, doc) => {
-                switch (doc._type) {
-                  case 'search':
-                    types.searches.push(doc);
-                    break;
-                  default:
-                    types.other.push(doc);
-                }
-                return types;
-              }, defaultDocTypes);
-            }
-
-            const docTypes = groupByType(docs);
-
-            return Promise.map(docTypes.searches, importDocument)
-              .then(() => Promise.map(docTypes.other, importDocument))
-              .then(refreshData)
-              .catch(notify.error);
-          });
+              }
+            })
+            .then(() => Promise.map(conflictedSearchDocs, importDocument.bind(null, false)))
+            .then(refreshData)
+            .catch(notify.error);
+        });
       };
 
       // TODO: Migrate all scope methods to the controller.

@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import dateMath from '@elastic/datemath';
 import { uiModules } from 'ui/modules';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import visualizeTemplate from 'ui/visualize/visualize.html';
@@ -9,6 +10,7 @@ import 'angular-sanitize';
 import './visualization';
 import './visualization_editor';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
+import { PersistedState } from 'ui/persisted_state';
 
 
 import {
@@ -31,29 +33,60 @@ uiModules
 
     return {
       restrict: 'E',
-      scope : {
+      scope: {
         showSpyPanel: '=?',
         editorMode: '=?',
-        savedObj: '=',
-        appState: '=',
-        uiState: '=?'
+        savedObj: '=?',
+        appState: '=?',
+        uiState: '=?',
+        savedId: '=?',
+        timeRange: '=?'
       },
       template: visualizeTemplate,
-      link: function ($scope, $el) {
+      link: async function ($scope, $el) {
         const resizeChecker = new ResizeChecker($el);
 
+        if (!$scope.savedObj) throw(`saved object was not provided to <visualize> directive`);
+        if (!$scope.appState) $scope.appState = getAppState();
+        if (!$scope.uiState) $scope.uiState = new PersistedState({});
+
         $scope.vis = $scope.savedObj.vis;
-        $scope.editorMode = $scope.editorMode || false;
-        $scope.vis.editorMode = $scope.editorMode;
         $scope.vis.visualizeScope = true;
 
-        if (!$scope.appState) $scope.appState = getAppState();
+        if ($scope.timeRange) {
+          $scope.vis.params.timeRange = {
+            min: dateMath.parse($scope.timeRange.min),
+            max: dateMath.parse($scope.timeRange.max)
+          };
+
+          $scope.vis.aggs.forEach(agg => {
+            if (agg.type.name !== 'date_histogram') return;
+            agg.setTimeRange($scope.vis.params.timeRange);
+          });
+
+          const searchSource = $scope.savedObj.searchSource;
+          const filter = timefilter.get(searchSource.index(), $scope.vis.params.timeRange);
+          const searchSourceFilters = searchSource.get('filter');
+          if (searchSourceFilters instanceof Array) {
+            searchSourceFilters.push(filter);
+            searchSource.skipTimeRangeFilter = true;
+          }
+        }
+
+        $scope.editorMode = $scope.editorMode || false;
+        $scope.vis.editorMode = $scope.editorMode;
+
+        // spy panel is supported only with courier request handler
+        $scope.shouldShowSpyPanel = () => {
+          if ($scope.vis.type.requestHandler !== 'courier') return false;
+          return $scope.vis.type.requiresSearch && $scope.showSpyPanel;
+        };
 
         const requestHandler = getHandler(requestHandlers, $scope.vis.type.requestHandler);
         const responseHandler = getHandler(responseHandlers, $scope.vis.type.responseHandler);
 
         $scope.fetch = _.debounce(function () {
-          if (!$scope.vis.initialized) return;
+          if (!$scope.vis.initialized || !$scope.savedObj) return;
           // searchSource is only there for courier request handler
           requestHandler($scope.vis, $scope.appState, $scope.uiState, queryFilter, $scope.savedObj.searchSource)
           .then(requestHandlerResponse => {
@@ -132,6 +165,12 @@ uiModules
           $scope.$on('$destroy', () => {
             stateMonitor.destroy();
           });
+        } else {
+          const handleUiStateChange = () => { $scope.$broadcast('render'); };
+          $scope.uiState.on('change', handleUiStateChange);
+          $scope.$on('$destroy', () => {
+            $scope.uiState.off('change', handleUiStateChange);
+          });
         }
 
         let resizeInit = false;
@@ -154,7 +193,7 @@ uiModules
         $scope.$watch('vis.initialized', $scope.fetch);
 
         $scope.fetch();
-        $scope.$root.$broadcast('ready:vis');
+        $scope.$emit('ready:vis');
       }
     };
   });

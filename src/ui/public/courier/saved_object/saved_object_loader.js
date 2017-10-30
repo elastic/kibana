@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { Scanner } from 'ui/utils/scanner';
 import { StringUtils } from 'ui/utils/string_utils';
 import { SavedObjectsClient } from 'ui/saved_objects';
@@ -40,7 +39,7 @@ export class SavedObjectLoader {
   }
 
   delete(ids) {
-    ids = !_.isArray(ids) ? [ids] : ids;
+    ids = !Array.isArray(ids) ? [ids] : ids;
 
     const deletions = ids.map(id => {
       const savedObject = new this.Class(id);
@@ -88,7 +87,7 @@ export class SavedObjectLoader {
    * @param size
    * @returns {Promise}
    */
-  find(search = '', size = 100) {
+  findAll(search = '', size = 100) {
     return this.savedObjectsClient.find(
       {
         type: this.lowercaseType,
@@ -99,8 +98,18 @@ export class SavedObjectLoader {
       }).then((resp) => {
         return {
           total: resp.total,
-          hits: resp.savedObjects.map((savedObject) => this.mapSavedObjectApiHits(savedObject))
+          hits: resp.savedObjects
+            .map((savedObject) => this.mapSavedObjectApiHits(savedObject))
         };
       });
+  }
+
+  find(search = '', size = 100) {
+    return this.findAll(search, size).then(resp => {
+      return {
+        total: resp.total,
+        hits: resp.hits.filter(savedObject => !savedObject.error)
+      };
+    });
   }
 }

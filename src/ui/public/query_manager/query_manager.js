@@ -1,14 +1,15 @@
 import _ from 'lodash';
 
-export function queryManagerFactory(state) {
+export function queryManagerFactory(getState) {
 
   function getQuery() {
     return {
-      ...state.query
+      ...getState().query
     };
   }
 
-  function updateQuery(newQuery) {
+  function setQuery(newQuery) {
+    const state = getState();
     state.query = newQuery;
 
     if (_.isFunction(state.save)) {
@@ -18,7 +19,7 @@ export function queryManagerFactory(state) {
 
   return {
     getQuery,
-    updateQuery,
+    setQuery,
   };
 
 }

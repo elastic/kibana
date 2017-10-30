@@ -13,15 +13,15 @@ describe('Vislib Gauge Split Function Test Suite', function () {
     const data = {
       rows: [
         {
-          hits      : 621,
-          label     : '',
-          ordered   : {
-            date    : true,
+          hits: 621,
+          label: '',
+          ordered: {
+            date: true,
             interval: 30000,
-            max     : 1408734982458,
-            min     : 1408734082458
+            max: 1408734982458,
+            min: 1408734082458
           },
-          series    : [
+          series: [
             {
               values: [
                 {
@@ -71,15 +71,15 @@ describe('Vislib Gauge Split Function Test Suite', function () {
           yAxisLabel: 'Count'
         },
         {
-          hits      : 621,
-          label     : '',
-          ordered   : {
-            date    : true,
+          hits: 621,
+          label: '',
+          ordered: {
+            date: true,
             interval: 30000,
-            max     : 1408734982458,
-            min     : 1408734082458
+            max: 1408734982458,
+            min: 1408734082458
           },
-          series    : [
+          series: [
             {
               values: [
                 {

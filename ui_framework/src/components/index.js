@@ -40,6 +40,12 @@ export {
 } from './collapse_button';
 
 export {
+  KuiContextMenu,
+  KuiContextMenuPanel,
+  KuiContextMenuItem,
+} from './context_menu';
+
+export {
   KuiEmptyTablePrompt,
   KuiEmptyTablePromptMessage,
   KuiEmptyTablePromptPanel,
@@ -54,10 +60,15 @@ export {
 } from './event';
 
 export {
-  KuiExpressionItem,
-  KuiExpressionItemButton,
-  KuiExpressionItemPopover,
+  KuiExpression,
+  KuiExpressionButton,
 } from './expression';
+
+export {
+  KuiFlexGroup,
+  KuiFlexGrid,
+  KuiFlexItem,
+} from './flex';
 
 export {
   KuiFieldGroup,
@@ -66,10 +77,10 @@ export {
 
 export {
   KuiGallery,
-  KuiGalleryButton,
-  KuiGalleryButtonIcon,
-  KuiGalleryButtonImage,
-  KuiGalleryButtonLabel,
+  KuiGalleryItem,
+  KuiGalleryItemIcon,
+  KuiGalleryItemImage,
+  KuiGalleryItemLabel,
 } from './gallery';
 
 export {
@@ -99,7 +110,6 @@ export {
   KuiConfirmModal,
   KuiModal,
   KuiModalBody,
-  KuiModalBodyText,
   KuiModalFooter,
   KuiModalHeader,
   KuiModalHeaderTitle,
@@ -116,7 +126,12 @@ export {
 } from './pager';
 
 export {
+  KuiPanelSimple,
+} from './panel_simple';
+
+export {
   KuiPopover,
+  KuiPopoverTitle,
 } from './popover';
 
 export {
@@ -135,6 +150,11 @@ export {
   KuiTableHeaderCheckBoxCell,
   KuiTableHeader,
   KuiTableBody,
+  KuiListingTable,
+  KuiListingTableCreateButton,
+  KuiListingTableDeleteButton,
+  KuiListingTableNoMatchesPrompt,
+  KuiListingTableLoadingPrompt
 } from './table';
 
 export {

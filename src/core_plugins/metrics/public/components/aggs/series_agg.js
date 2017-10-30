@@ -8,7 +8,7 @@ import createSelectHandler from '../lib/create_select_handler';
 import { htmlIdGenerator } from 'ui_framework/services';
 
 function SeriesAgg(props) {
-  const { model } = props;
+  const { panel, model } = props;
 
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
@@ -27,6 +27,24 @@ function SeriesAgg(props) {
     { label: 'Cumlative Sum', value: 'cumlative_sum' },
   ];
 
+  if (panel.type === 'table') {
+    return (
+      <AggRow
+        disableDelete={props.disableDelete}
+        model={props.model}
+        onAdd={props.onAdd}
+        onDelete={props.onDelete}
+        siblings={props.siblings}
+      >
+        <div className="vis_editor__item">
+          <div className="vis_editor__label">
+            Series Agg is not compatible with the table visualization.
+          </div>
+        </div>
+      </AggRow>
+    );
+  }
+
   return (
     <AggRow
       disableDelete={props.disableDelete}
@@ -38,6 +56,7 @@ function SeriesAgg(props) {
       <div className="vis_editor__item">
         <div className="vis_editor__label">Aggregation</div>
         <AggSelect
+          panelType={panel.type}
           siblings={props.siblings}
           value={model.type}
           onChange={handleSelectChange('type')}

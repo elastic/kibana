@@ -55,12 +55,13 @@ export default class ServerStatus {
   }
 
   overall() {
-    const state = _(this._created)
-    .map(function (status) {
-      return states.get(status.state);
-    })
-    .sortBy('severity')
-    .pop();
+    const state = Object
+      // take all created status objects
+      .values(this._created)
+      // get the state descriptor for each status
+      .map(status => states.get(status.state))
+      // reduce to the state with the highest severity, defaulting to green
+      .reduce((a, b) => a.severity > b.severity ? a : b, states.get('green'));
 
     const statuses = _.where(this._created, { state: state.id });
     const since = _.get(_.sortBy(statuses, 'since'), [0, 'since']);

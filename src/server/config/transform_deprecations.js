@@ -1,4 +1,4 @@
-import _ , { partial } from 'lodash';
+import _, { partial } from 'lodash';
 import { createTransform, Deprecations } from '../../deprecation';
 
 const { rename, unused } = Deprecations;
@@ -17,6 +17,7 @@ const deprecations = [
   //server
   rename('server.ssl.cert', 'server.ssl.certificate'),
   unused('server.xsrf.token'),
+  unused('uiSettings.enabled'),
   serverSslEnabled,
 ];
 

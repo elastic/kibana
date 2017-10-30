@@ -154,7 +154,7 @@ export function SearchSourceProvider(Promise, Private, config) {
     const self = this;
     if (self._parent === false) return;
     if (self._parent) return self._parent;
-    return onlyHardLinked ? undefined : Private(RootSearchSourceProvider).get();
+    return onlyHardLinked || this.skipTimeRangeFilter ? undefined : Private(RootSearchSourceProvider).get();
   };
 
   /**
@@ -240,7 +240,7 @@ export function SearchSourceProvider(Promise, Private, config) {
       case 'filter':
         let verifiedFilters = val;
         if (config.get('courier:ignoreFilterIfFieldNotInIndex')) {
-          if (!_.isArray(val)) val = [val];
+          if (!Array.isArray(val)) val = [val];
           verifiedFilters = val.filter(function (el) {
             if ('meta' in el && 'index' in state) {
               const field = state.index.fields.byName[el.meta.key];

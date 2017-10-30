@@ -60,7 +60,7 @@ describe('SavedObjectsClient', () => {
 
       savedObjectsClient._request('POST', '/api/path', params);
 
-      expect($http.calledOnce).to.be(true);
+      sinon.assert.calledOnce($http);
     });
 
     it('throws error when body is provided for GET', async () => {
@@ -227,8 +227,9 @@ describe('SavedObjectsClient', () => {
 
       savedObjectsClient.update('index-pattern', 'logstash-*', attributes, options);
       sinon.assert.calledOnce($http);
-
-      expect($http.getCall(0).args[0].data).to.eql(body);
+      sinon.assert.calledWithExactly($http, sinon.match({
+        data: body
+      }));
     });
   });
 
@@ -268,7 +269,9 @@ describe('SavedObjectsClient', () => {
       savedObjectsClient.create('index-pattern', attributes, { id: 'myId' });
 
       sinon.assert.calledOnce($http);
-      expect($http.getCall(0).args[0].url).to.eql(url);
+      sinon.assert.calledWithExactly($http, sinon.match({
+        url
+      }));
     });
 
     it('makes HTTP call', () => {
@@ -276,7 +279,12 @@ describe('SavedObjectsClient', () => {
       savedObjectsClient.create('index-pattern', attributes);
 
       sinon.assert.calledOnce($http);
-      expect($http.getCall(0).args[0].data.attributes).to.eql(attributes);
+      sinon.assert.calledWithExactly($http, sinon.match({
+        url: sinon.match.string,
+        data: {
+          attributes
+        }
+      }));
     });
   });
 
@@ -295,31 +303,30 @@ describe('SavedObjectsClient', () => {
       const body = { type: 'index-pattern', invalid: true };
 
       savedObjectsClient.find(body);
-      expect($http.calledOnce).to.be(true);
-
-      const options = $http.getCall(0).args[0];
-      expect(options.url).to.eql(`${basePath}/api/saved_objects/?type=index-pattern&invalid=true`);
+      sinon.assert.calledOnce($http);
+      sinon.assert.calledWithExactly($http, sinon.match({
+        url: `${basePath}/api/saved_objects/?type=index-pattern&invalid=true`
+      }));
     });
 
     it('accepts fields', () => {
       const body = { fields: ['title', 'description'] };
 
       savedObjectsClient.find(body);
-      expect($http.calledOnce).to.be(true);
-
-      const options = $http.getCall(0).args[0];
-      expect(options.url).to.eql(`${basePath}/api/saved_objects/?fields=title&fields=description`);
+      sinon.assert.calledOnce($http);
+      sinon.assert.calledWithExactly($http, sinon.match({
+        url: `${basePath}/api/saved_objects/?fields=title&fields=description`
+      }));
     });
 
     it('accepts from/size', () => {
       const body = { from: 50, size: 10 };
 
       savedObjectsClient.find(body);
-      expect($http.calledOnce).to.be(true);
-
-      const options = $http.getCall(0).args[0];
-      expect(options.url).to.eql(`${basePath}/api/saved_objects/?from=50&size=10`);
-
+      sinon.assert.calledOnce($http);
+      sinon.assert.alwaysCalledWith($http, sinon.match({
+        url: `${basePath}/api/saved_objects/?from=50&size=10`
+      }));
     });
   });
 });

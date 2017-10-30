@@ -155,7 +155,6 @@ export function VislibVisualizationsPieChartProvider(Private) {
         return 'slice';
       })
       .call(self._addIdentifier, 'name')
-      .style('stroke', '#fff')
       .style('fill', function (d) {
         if (d.depth === 0) {
           return 'none';

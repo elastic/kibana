@@ -1,0 +1,26 @@
+@mixin kuiBottomShadow {
+  box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1);
+}
+
+@mixin kuiBottomShadowSmall {
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+@mixin kuiBottomShadowMedium {
+  box-shadow: 0 4px 4px -2px rgba(0, 0, 0, 0.2);
+}
+
+@mixin kuiSlightShadow {
+  box-shadow:
+    0 2px 2px -1px rgba(0, 0, 0, 0.15),
+}
+
+@mixin kuiSlightShadowHover {
+  box-shadow:
+    0 4px 4px -2px rgba(0, 0, 0, 0.1),
+}
+
+@mixin kuiSlightShadowActive {
+  box-shadow:
+    0 1px 1px 0px rgba(0, 0, 0, 0.2),
+}

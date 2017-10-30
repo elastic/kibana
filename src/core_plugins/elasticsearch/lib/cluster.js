@@ -8,7 +8,9 @@ import { parseConfig } from './parse_config';
 
 export class Cluster {
   constructor(config) {
-    this._config = Object.assign({}, config);
+    this._config = {
+      ...config
+    };
     this.errors = elasticsearch.errors;
 
     this._clients = new Set();
@@ -52,12 +54,12 @@ export class Cluster {
   }
 
   createClient = configOverrides => {
-    const options = parseConfig({
+    const config = {
       ...this._getClientConfig(),
       ...configOverrides
-    });
+    };
 
-    const client = new elasticsearch.Client(options);
+    const client = new elasticsearch.Client(parseConfig(config));
     this._clients.add(client);
     return client;
   }
@@ -98,7 +100,7 @@ function callAPI(client, endpoint, clientParams = {}, options = {}) {
       return Promise.reject(err);
     }
 
-    const boomError = Boom.wrap(err, err.statusCode);
+    const boomError = Boom.boomify(err, { statusCode: err.statusCode });
     const wwwAuthHeader = get(err, 'body.error.header[WWW-Authenticate]');
     boomError.output.headers['WWW-Authenticate'] = wwwAuthHeader || 'Basic realm="Authorization Required"';
 

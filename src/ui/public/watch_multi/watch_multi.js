@@ -34,7 +34,7 @@ uiModules.get('kibana')
      * @return {Function} - an unwatch function, just like the return value of $watch
      */
     $delegate.constructor.prototype.$watchMulti = function (expressions, fn) {
-      if (!_.isArray(expressions)) throw new TypeError('expected an array of expressions to watch');
+      if (!Array.isArray(expressions)) throw new TypeError('expected an array of expressions to watch');
       if (!_.isFunction(fn)) throw new TypeError('expected a function that is triggered on each watch');
 
       const $scope = this;

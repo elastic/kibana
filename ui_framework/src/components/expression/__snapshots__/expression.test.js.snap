@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiExpression Props children is rendered 1`] = `
+<div
+  class="kuiExpression"
+>
+  some expression
+</div>
+`;
+
+exports[`KuiExpression renders 1`] = `
+<div
+  aria-label="aria-label"
+  class="kuiExpression testClass1 testClass2"
+  data-test-subj="test subject string"
+/>
+`;
