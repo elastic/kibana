@@ -13,6 +13,7 @@ export class Cluster {
     };
     this.errors = elasticsearch.errors;
 
+    this._clients = new Set();
     this._client = this.createClient();
     this._noAuthClient = this.createClient({ auth: false });
 
@@ -45,13 +46,11 @@ export class Cluster {
   getClient = () => this._client;
 
   close() {
-    if (this._client) {
-      this._client.close();
+    for (const client of this._clients) {
+      client.close();
     }
 
-    if (this._noAuthClient) {
-      this._noAuthClient.close();
-    }
+    this._clients.clear();
   }
 
   createClient = configOverrides => {
@@ -59,7 +58,10 @@ export class Cluster {
       ...this._getClientConfig(),
       ...configOverrides
     };
-    return new elasticsearch.Client(parseConfig(config));
+
+    const client = new elasticsearch.Client(parseConfig(config));
+    this._clients.add(client);
+    return client;
   }
 
   _getClientConfig = () => {
