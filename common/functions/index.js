@@ -4,6 +4,7 @@ import { containerStyle } from './containerStyle';
 import { date } from './date';
 import { exactly } from './exactly';
 import { font } from './font';
+import { getCell } from './getCell';
 import { grid } from './grid';
 import { head } from './head';
 import { ifFn } from './if';
@@ -33,6 +34,7 @@ export const commonFunctions = [
   date,
   exactly,
   font,
+  getCell,
   grid,
   head,
   ifFn,
