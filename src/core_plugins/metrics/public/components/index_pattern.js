@@ -18,7 +18,7 @@ export const IndexPattern = props => {
   const defaults = {
     [indexPatternName]: '*',
     [intervalName]: 'auto',
-    [dropBucketName]: 0
+    [dropBucketName]: 1
   };
 
   const htmlId = htmlIdGenerator();
