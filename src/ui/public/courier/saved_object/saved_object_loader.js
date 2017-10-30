@@ -21,7 +21,9 @@ export class SavedObjectLoader {
       nouns: `${ this.lowercaseType }s`,
     };
 
-    this.savedObjectsClient = new SavedObjectsClient($http);
+    this.savedObjectsClient = new SavedObjectsClient({
+      $http
+    });
   }
 
   /**

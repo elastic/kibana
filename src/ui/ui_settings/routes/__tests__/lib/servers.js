@@ -22,18 +22,6 @@ export async function startServers() {
   await kbnServer.server.plugins.elasticsearch.waitUntilReady();
 }
 
-export async function waitUntilNextHealthCheck() {
-  // make sure the kibana index is still missing so that waitUntilReady()
-  // won't resolve until the next health check is complete
-  await es.getClient().indices.delete({
-    index: kbnServer.config.get('kibana.index'),
-    ignore: [404],
-  });
-
-  // wait for healthcheck to recreate the kibana index
-  await kbnServer.server.plugins.elasticsearch.waitUntilReady();
-}
-
 export function getServices() {
   if (services) {
     return services;
