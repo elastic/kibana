@@ -27,6 +27,9 @@ export default function ({ getService, getPageObjects }) {
         })
         .then(function clickMetric() {
           return PageObjects.visualBuilder.clickMetric();
+        })
+        .then(function sleep() {
+          return PageObjects.common.sleep(1003);
         });
     });
 

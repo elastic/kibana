@@ -35,7 +35,7 @@ class KuiTabsExample extends React.Component {
   };
 
   renderTabs() {
-    return this.tabs.map((tab,index) => (
+    return this.tabs.map((tab, index) => (
       <KuiTab
         onClick={() => this.onSelectedTabChanged(tab.id)}
         isSelected={tab.id === this.state.selectedTabId}

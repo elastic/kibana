@@ -89,7 +89,7 @@ uiModules
 
     if (timefield) {
       const bounds = this.getBounds();
-      filter = { range : {} };
+      filter = { range: {} };
       filter.range[timefield.name] = {
         gte: range ? range.min.valueOf() : bounds.min.valueOf(),
         lte: range ? range.max.valueOf() : bounds.max.valueOf(),

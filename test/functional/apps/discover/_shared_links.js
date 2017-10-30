@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }) {
       log.debug('baseUrl = ' + baseUrl);
       // browsers don't show the ':port' if it's 80 or 443 so we have to
       // remove that part so we can get a match in the tests.
-      baseUrl = baseUrl.replace(':80','').replace(':443','');
+      baseUrl = baseUrl.replace(':80', '').replace(':443', '');
       log.debug('New baseUrl = ' + baseUrl);
 
       const fromTime = '2015-09-19 06:31:44.000';
@@ -78,8 +78,8 @@ export default function ({ getService, getPageObjects }) {
         return PageObjects.discover.getSharedUrl()
         .then(function (actualUrl) {
           // strip the timestamp out of each URL
-          expect(actualUrl.replace(/_t=\d{13}/,'_t=TIMESTAMP'))
-            .to.be(expectedUrl.replace(/_t=\d{13}/,'_t=TIMESTAMP'));
+          expect(actualUrl.replace(/_t=\d{13}/, '_t=TIMESTAMP'))
+            .to.be(expectedUrl.replace(/_t=\d{13}/, '_t=TIMESTAMP'));
         });
       });
 

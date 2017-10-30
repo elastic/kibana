@@ -3,6 +3,7 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
+  GuideCode,
   GuideDemo,
   GuidePage,
   GuideSection,
@@ -13,6 +14,10 @@ import {
 import Popover from './popover';
 const popoverSource = require('!!raw!./popover');
 const popoverHtml = renderToHtml(Popover);
+
+import TrapFocus from './trap_focus';
+const trapFocusSource = require('!!raw!./trap_focus');
+const trapFocusHtml = renderToHtml(TrapFocus);
 
 import PopoverAnchorPosition from './popover_anchor_position';
 const popoverAnchorPositionSource = require('!!raw!./popover_anchor_position');
@@ -44,6 +49,26 @@ export default props => (
 
       <GuideDemo>
         <Popover />
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="Trap focus"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: trapFocusSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: trapFocusHtml,
+      }]}
+    >
+      <GuideText>
+        If the Popover should be responsible for trapping the focus within itself (as opposed
+        to a child component), then you should set <GuideCode>ownFocus</GuideCode>.
+      </GuideText>
+
+      <GuideDemo>
+        <TrapFocus />
       </GuideDemo>
     </GuideSection>
 
