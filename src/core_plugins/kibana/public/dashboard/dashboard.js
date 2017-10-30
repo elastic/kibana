@@ -24,7 +24,6 @@ import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_ha
 import { DashboardState } from './dashboard_state';
 import { notify } from 'ui/notify';
 import './panel/get_object_loaders_for_dashboard';
-import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import { showCloneModal } from './top_nav/show_clone_modal';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import { QueryManagerProvider } from 'ui/query_manager';
@@ -96,7 +95,6 @@ app.directive('dashboardApp', function ($injector) {
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
       const notify = new Notifier({ location: 'Dashboard' });
-      $scope.queryDocLinks = documentationLinks.query;
 
       const dash = $scope.dash = $route.current.locals.dash;
       if (dash.id) {

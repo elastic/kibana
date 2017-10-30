@@ -26,7 +26,6 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import indexTemplate from 'plugins/kibana/discover/index.html';
 import { StateProvider } from 'ui/state_management/state';
-import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import { QueryManagerProvider } from 'ui/query_manager';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
@@ -122,7 +121,6 @@ function discoverController(
     location: 'Discover'
   });
 
-  $scope.queryDocLinks = documentationLinks.query;
   $scope.intervalOptions = Private(AggTypesBucketsIntervalOptionsProvider);
   $scope.showInterval = false;
   $scope.minimumVisibleRows = 50;
