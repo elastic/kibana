@@ -52,15 +52,5 @@ describe('plugins/elasticsearch', function () {
       expect(logger.tags).to.eql(['admin']);
       expect(logger.logQueries).to.eql(true);
     });
-
-    it('close cluster of server close', () => {
-      const clusterClose = server.on.getCall(0).args[1];
-
-      clusterClose();
-
-      sinon.assert.calledOnce(cluster.close);
-      sinon.assert.calledOnce(server.on);
-      expect(server.on.getCall(0).args[0]).to.eql('close');
-    });
   });
 });
