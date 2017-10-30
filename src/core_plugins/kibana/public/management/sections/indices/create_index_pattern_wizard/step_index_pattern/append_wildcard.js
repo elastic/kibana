@@ -14,35 +14,32 @@ module.directive('appendWildcard', function () {
   return {
     require: 'ngModel',
     link: function ($scope, $elem, $attrs, $ctrl) {
-      $scope.appendedWildcard = false;
-
-      function setElementValue(val, event, setCursorBackOneCharacter = false) {
-        event.preventDefault();
-        $elem.val(val);
-        if (setCursorBackOneCharacter) {
-          $elem[0].setSelectionRange(1, 1);
-        }
-      }
-
       $elem.on('keydown', (e) => {
-        const charStr = String.fromCharCode(e.keyCode);
-        if (!/[a-z0-9]/i.test(charStr)) {
+        // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode
+        // is not recommended so we need to rely on `key` but browser support
+        // is still spotty (https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key)
+        // so just bail if it's not supported
+        if (!e.key) {
+          return;
+        }
+
+        if (!/[a-z0-9]/i.test(e.key)) {
+          return;
+        }
+
+        // If the user is holdinng down ctrl/cmd, they are performing some shortcut
+        // and do not interpret literally
+        if (e.metaKey) {
           return;
         }
 
         let indexPatternName = $elem.val() + e.key;
-
         if (indexPatternName && indexPatternName.length === 1) {
-          if (indexPatternName === '*') {
-            if ($scope.appendedWildcard) {
-              indexPatternName = '';
-              setElementValue(indexPatternName, e);
-              $scope.appendedWildcard = false;
-            }
-          } else {
+          if (indexPatternName !== '*') {
             indexPatternName += '*';
-            $scope.appendedWildcard = true;
-            setElementValue(indexPatternName, e, true);
+            e.preventDefault();
+            $elem.val(indexPatternName);
+            $elem[0].setSelectionRange(1, 1);
           }
         }
 
