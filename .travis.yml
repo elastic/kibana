@@ -3,3 +3,6 @@ node_js:
   - "6"
   - "8"
 cache: yarn
+script:
+  - npm run lint
+  - npm test
