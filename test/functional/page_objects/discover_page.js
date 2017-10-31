@@ -45,6 +45,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       });
     }
 
+    async getColumnHeaders() {
+      const headerElements = await testSubjects.findAll('docTableHeaderField');
+      return await Promise.all(headerElements.map(el => el.getVisibleText()));
+    }
+
     async loadSavedSearch(searchName) {
       await this.clickLoadSavedSearchButton();
       const searchLink = await find.byPartialLinkText(searchName);
@@ -274,6 +279,11 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('removeAllFilters');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.common.waitUntilUrlIncludes('filters:!()');
+    }
+
+    async removeHeaderColumn(name) {
+      await testSubjects.moveMouseTo(`docTableHeader-${name}`);
+      await testSubjects.click(`docTableRemoveHeader-${name}`);
     }
   }
 
