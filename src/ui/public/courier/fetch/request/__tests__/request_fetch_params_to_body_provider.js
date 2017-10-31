@@ -1,4 +1,3 @@
-import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
 import StubIndexPatternProvider from 'test_utils/stub_index_pattern';
@@ -18,7 +17,7 @@ describe('RequestFetchParamsToBodyProvider', () => {
   }));
 
   describe('when passed IndexPatterns', () => {
-    test(' that are out of range, queries .kibana', () => {
+    it(' that are out of range, queries .kibana', () => {
       // Check out https://github.com/elastic/kibana/issues/10905 for the reasons behind this
       // test. When an IndexPattern is out of time range, it returns an array that is then stored in a cache.  This
       // cached object was being modified in a following function, which was a subtle side affect - it looked like

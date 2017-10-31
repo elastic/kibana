@@ -6,7 +6,9 @@ function requestFetchParamsToBodyWithDefaults(paramOverrides) {
     requestFetchParams: [],
     indexToListMapping: {},
     Promise,
-    timeBounds: {},
+    timeFilter: {
+      getActiveBounds: () => undefined,
+    },
     kbnIndex: '.kibana',
     sessionId: '1',
   };
@@ -80,4 +82,3 @@ describe('when indexList is empty', () => {
     });
   });
 });
-
