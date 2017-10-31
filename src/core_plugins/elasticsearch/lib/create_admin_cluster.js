@@ -1,4 +1,3 @@
-import { bindKey } from 'lodash';
 import { clientLogger } from './client_logger';
 
 export function createAdminCluster(server) {
@@ -10,13 +9,11 @@ export function createAdminCluster(server) {
     logQueries = config.get('elasticsearch.logQueries');
   }
 
-  const adminCluster = server.plugins.elasticsearch.createCluster(
+  server.plugins.elasticsearch.createCluster(
     'admin',
     {
       log: AdminClientLogging,
       ...config.get('elasticsearch')
     }
   );
-
-  server.on('close', bindKey(adminCluster, 'close'));
 }
