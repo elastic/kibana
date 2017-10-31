@@ -128,7 +128,7 @@ export function AggTypesBucketsGeoHashProvider(Private, config) {
           aggs.push(new AggConfig(agg.vis, {
             type: 'filter',
             id: 'filter_agg',
-            enabled:true,
+            enabled: true,
             params: {
               geo_bounding_box: boundingBox
             },
@@ -144,7 +144,7 @@ export function AggTypesBucketsGeoHashProvider(Private, config) {
       if (agg.params.useGeocentroid) {
         aggs.push(new AggConfig(agg.vis, {
           type: 'geo_centroid',
-          enabled:true,
+          enabled: true,
           params: {
             field: agg.getField()
           },

@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 import { DashboardGrid } from './dashboard_grid';
 import { updatePanel } from '../actions';
-import { getPanels, getViewMode } from '../reducers';
+import { getPanels, getViewMode } from '../selectors';
 
 const mapStateToProps = ({ dashboard }) => ({
   panels: getPanels(dashboard),

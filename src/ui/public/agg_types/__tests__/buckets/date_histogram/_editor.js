@@ -33,7 +33,7 @@ describe('editor', function () {
     render = function (params) {
       vis = new Vis(indexPattern, {
         type: 'histogram',
-        aggs:[
+        aggs: [
           { schema: 'metric', type: 'avg', params: { field: 'bytes' } },
           { schema: 'segment', type: 'date_histogram', params: params || {} }
         ]

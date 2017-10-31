@@ -12,7 +12,7 @@ describe(filename, function () {
   let seriesList;
   beforeEach(function () {
     seriesList = require('./fixtures/seriesList.js')();
-    comparable = getSeriesList('',[
+    comparable = getSeriesList('', [
       [moment.utc('1980-01-01T00:00:00.000Z'), 12],
       [moment.utc('1981-01-01T00:00:00.000Z'), 33],
       [moment.utc('1982-01-01T00:00:00.000Z'), 82],

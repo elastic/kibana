@@ -63,12 +63,14 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
           }
         },
         setTimeRange: {
+          configurable: true,
           value(newValue) {
             timeRange = newValue;
             setBounds(this, true);
           }
         },
         getTimeRange: {
+          configurable: true,
           value() {
             return timeRange;
           }

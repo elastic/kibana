@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
-import $ from '../lib/flot';
+import $ from 'ui/flot-charts';
 import eventBus from '../lib/events';
 import Resize from './resize';
 import calculateBarWidth from '../lib/calculate_bar_width';
@@ -176,15 +176,9 @@ class FlotChart extends Component {
 
   handleResize(width, height) {
     this.size = { width, height };
-    console.log(this.size);
-    if (!this.rendered) {
-      this.renderChart();
-      return;
-    }
 
     if (this.size.height > 0 && this.size.width > 0) {
       if (!this.plot) return;
-      console.log('here');
       this.plot.resize();
       this.plot.setupGrid();
       this.plot.draw();
@@ -193,21 +187,16 @@ class FlotChart extends Component {
   }
 
   renderChart() {
-    console.log('here 2');
 
     if (this.size.height > 0 && this.size.width > 0) {
-      console.log('here 2.3');
 
       this.rendered = true;
       const { series } = this.props;
       const data = this.calculateData(series, this.props.show);
-      console.log('here 2.3.3.2');
 
       this.plot = $.plot(this.target, data, this.getOptions(this.props));
-      console.log('here 2.3.3');
 
       this.handleDraw(this.plot);
-      console.log('here 3');
 
       _.defer(() => this.handleResize());
 
@@ -263,7 +252,6 @@ class FlotChart extends Component {
   }
 
   render() {
-    console.log('render');
     return (
       <div className="rhythm_chart__timeseries-container">
         <div ref={el => (this.target = el)} className="rhythm_chart__timeseries-container" />

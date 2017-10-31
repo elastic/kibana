@@ -210,7 +210,7 @@ define('ace/lib/oop', ['require', 'exports', 'module' ], function (require, expo
   };
 
 });
-define('ace/worker/mirror', ['require', 'exports', 'module' , 'ace/document', 'ace/lib/lang'], function (require, exports) {
+define('ace/worker/mirror', ['require', 'exports', 'module', 'ace/document', 'ace/lib/lang'], function (require, exports) {
   "use strict";
 
   var Document = require("../document").Document;
@@ -259,7 +259,7 @@ define('ace/worker/mirror', ['require', 'exports', 'module' , 'ace/document', 'a
 
 });
 
-define('ace/document', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/lib/event_emitter',
+define('ace/document', ['require', 'exports', 'module', 'ace/lib/oop', 'ace/lib/event_emitter',
   'ace/range', 'ace/anchor'], function (require, exports) {
   "use strict";
 
@@ -988,7 +988,7 @@ define('ace/range', ['require', 'exports', 'module' ], function (require, export
   exports.Range = Range;
 });
 
-define('ace/anchor', ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/lib/event_emitter'], function (require, exports) {
+define('ace/anchor', ['require', 'exports', 'module', 'ace/lib/oop', 'ace/lib/event_emitter'], function (require, exports) {
   "use strict";
 
   var oop = require("./lib/oop");
@@ -1738,7 +1738,7 @@ define("sense_editor/mode/worker_parser", ['require', 'exports', 'module' ], fun
 });
 
 
-define("sense_editor/mode/worker", ['require', 'exports', 'module' , 'ace/lib/oop', 'ace/worker/mirror',
+define("sense_editor/mode/worker", ['require', 'exports', 'module', 'ace/lib/oop', 'ace/worker/mirror',
   'sense_editor/mode/worker_parser'], function (require, exports) {
   "use strict";
 

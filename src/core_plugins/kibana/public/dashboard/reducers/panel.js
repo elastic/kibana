@@ -14,5 +14,3 @@ export const panel = handleActions({
   version: undefined,
   gridData: {}
 });
-
-export const getPanelType = state => state.type;
