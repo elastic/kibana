@@ -12,11 +12,11 @@ import {
 } from '../../components';
 
 import { ModalExample } from './modal';
-const modalSource = require('!!raw!./modal');
+const modalSource = require('!!raw-loader!./modal');
 const modalHtml = renderToHtml(ModalExample);
 
 import { ConfirmModalExample } from './confirm_modal';
-const confirmModalSource = require('!!raw!./confirm_modal');
+const confirmModalSource = require('!!raw-loader!./confirm_modal');
 const confirmModalHtml = renderToHtml(ConfirmModalExample);
 
 export default props => (
