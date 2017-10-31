@@ -5,7 +5,7 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import indexTemplate from 'plugins/kibana/management/sections/indices/index.html';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
-import { KbnDirectoryRegistryProvider, DirectoryCategory } from 'ui/registry/kbn_directory';
+import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
 const indexPatternsResolutions = {
   indexPatterns: function (Private) {
@@ -66,7 +66,7 @@ management.getSection('kibana').register('indices', {
   url: '#/management/kibana/indices/'
 });
 
-KbnDirectoryRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'index_patterns',
     title: 'Index Patterns',
@@ -74,6 +74,6 @@ KbnDirectoryRegistryProvider.register(() => {
     icon: '/plugins/kibana/assets/app_dashboard.svg',
     path: '/app/kibana#/management/kibana/indices',
     showOnHomePage: true,
-    category: DirectoryCategory.ADMIN
+    category: FeatureCatalogueCategory.ADMIN
   };
 });

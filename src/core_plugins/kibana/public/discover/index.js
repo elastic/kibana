@@ -6,9 +6,9 @@ import 'plugins/kibana/discover/components/field_chooser/field_chooser';
 import 'plugins/kibana/discover/controllers/discover';
 import 'plugins/kibana/discover/styles/main.less';
 import 'ui/doc_table/components/table_row';
-import { KbnDirectoryRegistryProvider, DirectoryCategory } from 'ui/registry/kbn_directory';
+import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
-KbnDirectoryRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'discover',
     title: 'Discover',
@@ -16,6 +16,6 @@ KbnDirectoryRegistryProvider.register(() => {
     icon: '/plugins/kibana/assets/app_discover.svg',
     path: '/app/kibana#/discover',
     showOnHomePage: true,
-    category: DirectoryCategory.DATA
+    category: FeatureCatalogueCategory.DATA
   };
 });

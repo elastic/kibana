@@ -119,7 +119,7 @@ export default class UiExports {
       case 'managementSections':
       case 'devTools':
       case 'docViews':
-      case 'kbnDirectory':
+      case 'home':
       case 'hacks':
         return (plugin, spec) => {
           this.aliases[type] = _.union(this.aliases[type] || [], spec);

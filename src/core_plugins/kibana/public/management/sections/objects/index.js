@@ -4,7 +4,7 @@ import 'plugins/kibana/management/sections/objects/_objects';
 import 'ace';
 import 'ui/directives/confirm_click';
 import { uiModules } from 'ui/modules';
-import { KbnDirectoryRegistryProvider, DirectoryCategory } from 'ui/registry/kbn_directory';
+import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
 // add the module deps to this module
 uiModules.get('apps/management');
@@ -15,7 +15,7 @@ management.getSection('kibana').register('objects', {
   url: '#/management/kibana/objects'
 });
 
-KbnDirectoryRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'saved_objects',
     title: 'Saved objects',
@@ -23,6 +23,6 @@ KbnDirectoryRegistryProvider.register(() => {
     icon: '/plugins/kibana/assets/app_dashboard.svg',
     path: '/app/kibana#/management/kibana/objects',
     showOnHomePage: true,
-    category: DirectoryCategory.ADMIN
+    category: FeatureCatalogueCategory.ADMIN
   };
 });

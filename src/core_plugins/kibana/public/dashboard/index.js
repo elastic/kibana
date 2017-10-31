@@ -11,7 +11,7 @@ import dashboardListingTemplate from './listing/dashboard_listing.html';
 import { DashboardListingController } from './listing/dashboard_listing';
 import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 import { SavedObjectNotFound } from 'ui/errors';
-import { KbnDirectoryRegistryProvider, DirectoryCategory } from 'ui/registry/kbn_directory';
+import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
 uiRoutes
   .defaults(/dashboard/, {
@@ -58,7 +58,7 @@ uiRoutes
     }
   });
 
-KbnDirectoryRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'dashboard',
     title: 'Dashboards',
@@ -66,6 +66,6 @@ KbnDirectoryRegistryProvider.register(() => {
     icon: '/plugins/kibana/assets/app_dashboard.svg',
     path: '/app/kibana#/dashboard',
     showOnHomePage: true,
-    category: DirectoryCategory.DATA
+    category: FeatureCatalogueCategory.DATA
   };
 });

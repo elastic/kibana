@@ -5,7 +5,7 @@ import { management } from 'ui/management';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import indexTemplate from 'plugins/kibana/management/sections/settings/index.html';
-import { KbnDirectoryRegistryProvider, DirectoryCategory } from 'ui/registry/kbn_directory';
+import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
 uiRoutes
 .when('/management/kibana/settings', {
@@ -46,7 +46,7 @@ management.getSection('kibana').register('settings', {
   url: '#/management/kibana/settings'
 });
 
-KbnDirectoryRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'advanced_settings',
     title: 'Advanced settings',
@@ -54,6 +54,6 @@ KbnDirectoryRegistryProvider.register(() => {
     icon: '/plugins/kibana/assets/app_dashboard.svg',
     path: '/app/kibana#/management/kibana/settings',
     showOnHomePage: false,
-    category: DirectoryCategory.ADMIN
+    category: FeatureCatalogueCategory.ADMIN
   };
 });

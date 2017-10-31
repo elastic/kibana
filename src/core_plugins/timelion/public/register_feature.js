@@ -1,6 +1,6 @@
-import { KbnDirectoryRegistryProvider, DirectoryCategory } from 'ui/registry/kbn_directory';
+import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
-KbnDirectoryRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'timelion',
     title: 'Timelion',
@@ -8,6 +8,6 @@ KbnDirectoryRegistryProvider.register(() => {
     icon: '/plugins/kibana/assets/app_timelion.svg',
     path: '/app/timelion',
     showOnHomePage: true,
-    category: DirectoryCategory.DATA
+    category: FeatureCatalogueCategory.DATA
   };
 });

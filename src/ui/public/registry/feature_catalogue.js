@@ -1,13 +1,13 @@
 import { uiRegistry } from 'ui/registry/_registry';
 
-export const KbnDirectoryRegistryProvider = uiRegistry({
-  name: 'kbnDirectory',
+export const FeatureCatalogueRegistryProvider = uiRegistry({
+  name: 'featureCatalogue',
   index: ['id'],
   group: ['category'],
   order: ['title']
 });
 
-export const DirectoryCategory = {
+export const FeatureCatalogueCategory = {
   ADMIN: 'admin',
   DATA: 'data',
   OTHER: 'other'

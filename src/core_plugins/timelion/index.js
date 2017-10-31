@@ -38,8 +38,8 @@ export default function (kibana) {
       visTypes: [
         'plugins/timelion/vis'
       ],
-      kbnDirectory: [
-        'plugins/timelion/kbn_directory'
+      home: [
+        'plugins/timelion/register_feature'
       ],
       mappings: require('./mappings.json'),
 

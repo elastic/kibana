@@ -13,7 +13,7 @@ import uiRoutes from 'ui/routes';
 import visualizeListingTemplate from './listing/visualize_listing.html';
 import { VisualizeListingController } from './listing/visualize_listing';
 import { VisualizeConstants } from './visualize_constants';
-import { KbnDirectoryRegistryProvider, DirectoryCategory } from 'ui/registry/kbn_directory';
+import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
 uiRoutes
 .defaults(/visualize/, {
@@ -25,7 +25,7 @@ uiRoutes
   controllerAs: 'listingController',
 });
 
-KbnDirectoryRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'visualize',
     title: 'Visualize',
@@ -33,6 +33,6 @@ KbnDirectoryRegistryProvider.register(() => {
     icon: '/plugins/kibana/assets/app_visualize.svg',
     path: '/app/kibana#/visualize',
     showOnHomePage: true,
-    category: DirectoryCategory.DATA
+    category: FeatureCatalogueCategory.DATA
   };
 });

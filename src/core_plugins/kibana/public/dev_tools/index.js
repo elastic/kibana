@@ -1,6 +1,6 @@
 import uiRoutes from 'ui/routes';
 import { DevToolsRegistryProvider } from 'ui/registry/dev_tools';
-import { KbnDirectoryRegistryProvider, DirectoryCategory } from 'ui/registry/kbn_directory';
+import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import 'plugins/kibana/dev_tools/directives/dev_tools_app';
 
 uiRoutes
@@ -13,7 +13,7 @@ uiRoutes
   }
 });
 
-KbnDirectoryRegistryProvider.register(() => {
+FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'console',
     title: 'Console',
@@ -21,6 +21,6 @@ KbnDirectoryRegistryProvider.register(() => {
     icon: '/plugins/kibana/assets/app_devtools.svg',
     path: '/app/kibana#/dev_tools/console',
     showOnHomePage: true,
-    category: DirectoryCategory.ADMIN
+    category: FeatureCatalogueCategory.ADMIN
   };
 });
