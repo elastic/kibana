@@ -22,7 +22,10 @@
     data-test-subj="docTableHeaderField"
     scope="col"
   >
-    <span class="table-header-name">
+    <span
+      class="table-header-name"
+      data-test-subj="docTableHeader-{{name}}"
+    >
       {{name | shortDots}}
       <button
         data-test-subj="docTableHeaderFieldSort_{{name}}"
@@ -43,6 +46,7 @@
       tooltip-append-to-body="1"
       tooltip="Remove column"
       aria-label="Remove {{name}} column"
+      data-test-subj="docTableRemoveHeader-{{name}}"
     ></button>
     <button
       class="fa fa-angle-double-left table-header-move"
