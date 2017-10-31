@@ -84,6 +84,9 @@ export default class BaseOptimizer {
           {
             loader: 'css-loader',
             options: {
+              // importLoaders needs to know the number of loaders that follow this one,
+              // so we add 1 (for the postcss-loader) to the length of the preProcessors
+              // array that we merge into this array
               importLoaders: 1 + preProcessors.length,
             },
           },
@@ -220,11 +223,11 @@ export default class BaseOptimizer {
       }
     };
 
-    // In the test env we need to add react-addons (and a few other bits) for the
-    // enzyme tests to work.
-    // https://github.com/airbnb/enzyme/blob/master/docs/guides/webpack.md
     if (this.env.context.env === 'development') {
       return webpackMerge(commonConfig, {
+        // In the test env we need to add react-addons (and a few other bits) for the
+        // enzyme tests to work.
+        // https://github.com/airbnb/enzyme/blob/master/docs/guides/webpack.md
         externals: {
           'react/lib/ExecutionEnvironment': true,
           'react/addons': true,
