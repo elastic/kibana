@@ -43,7 +43,7 @@ module.directive('globalNav', (globalNavState, chrome) => {
 
       scope.getHref = path => {
         return chrome.addBasePath(path);
-      }
+      };
 
       scope.toggleGlobalNav = event => {
         event.preventDefault();
