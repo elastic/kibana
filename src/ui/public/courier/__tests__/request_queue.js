@@ -17,16 +17,6 @@ describe('Courier Request Queue', function () {
   }
 
   describe('#getStartable()', function () {
-    it('returns all requests when no default startable value is passed in', function () {
-      requestQueue.push(
-        new MockReq(),
-        new MockReq(),
-        new MockReq()
-      );
-
-      expect(requestQueue.getStartable()).to.have.length(3);
-    });
-
     it('returns only startable requests', function () {
       requestQueue.push(
         new MockReq(false),
