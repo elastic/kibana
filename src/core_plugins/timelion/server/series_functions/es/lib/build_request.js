@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import createDateAgg from './create_date_agg';
 
-export default function buildRequest(config, tlConfig) {
+export default async function buildRequest(config, tlConfig) {
 
   const bool = { must: [] };
 
@@ -45,7 +45,8 @@ export default function buildRequest(config, tlConfig) {
     }
   });
 
-  _.assign(aggCursor, createDateAgg(config, tlConfig));
+  const dateAgg = await createDateAgg(config, tlConfig);
+  _.assign(aggCursor, dateAgg);
 
 
   return {

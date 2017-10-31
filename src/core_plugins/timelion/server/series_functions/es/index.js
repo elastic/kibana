@@ -47,7 +47,7 @@ export default new Datasource('es', {
   ],
   help: 'Pull data from an elasticsearch instance',
   aliases: ['elasticsearch'],
-  fn: function esFn(args, tlConfig) {
+  fn: async function esFn(args, tlConfig) {
 
     const config = _.defaults(_.clone(args.byName), {
       q: '*',
@@ -61,14 +61,13 @@ export default new Datasource('es', {
 
     const { callWithRequest } = tlConfig.server.plugins.elasticsearch.getCluster('data');
 
-    const body = buildRequest(config, tlConfig);
+    const body = await buildRequest(config, tlConfig);
 
-    return callWithRequest(tlConfig.request, 'search', body).then(function (resp) {
-      if (!resp._shards.total) throw new Error('Elasticsearch index not found: ' + config.index);
-      return {
-        type: 'seriesList',
-        list: toSeriesList(resp.aggregations, config)
-      };
-    });
+    const resp = await callWithRequest(tlConfig.request, 'search', body);
+    if (!resp._shards.total) throw new Error('Elasticsearch index not found: ' + config.index);
+    return {
+      type: 'seriesList',
+      list: toSeriesList(resp.aggregations, config)
+    };
   }
 });

@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export default function createDateAgg(config, tlConfig) {
+export default async function createDateAgg(config, tlConfig) {
   const dateAgg = {
     time_buckets: {
       meta: { type: 'time_buckets' },
@@ -17,6 +17,24 @@ export default function createDateAgg(config, tlConfig) {
     }
   };
 
+  const savedObjectsClient = tlConfig.request.getSavedObjectsClient();
+  const resp = await savedObjectsClient.find({
+    type: 'index-pattern',
+    fields: ['title', 'fields'],
+    search: config.index,
+    search_fields: ['title']
+  });
+  const indexPatternSavedObject = resp.saved_objects.find(savedObject => {
+    return savedObject.attributes.title === config.index;
+  });
+  let scriptedFields = [];
+  if (indexPatternSavedObject) {
+    const fields = JSON.parse(indexPatternSavedObject.attributes.fields);
+    scriptedFields = fields.filter(field => {
+      return field.scripted;
+    });
+  }
+
   dateAgg.time_buckets.aggs = {};
   _.each(config.metric, function (metric) {
     metric = metric.split(':');
@@ -32,7 +50,19 @@ export default function createDateAgg(config, tlConfig) {
     } else if (metric[0] && metric[1]) {
       const metricName = metric[0] + '(' + metric[1] + ')';
       dateAgg.time_buckets.aggs[metricName] = {};
-      dateAgg.time_buckets.aggs[metricName][metric[0]] = { field: metric[1] };
+      const scriptedField = scriptedFields.find(field => {
+        return field.name === metric[1];
+      });
+      if (scriptedField) {
+        dateAgg.time_buckets.aggs[metricName][metric[0]] = {
+          script: {
+            inline: scriptedField.script,
+            lang: scriptedField.lang
+          }
+        };
+      } else {
+        dateAgg.time_buckets.aggs[metricName][metric[0]] = { field: metric[1] };
+      }
     } else {
       throw new Error ('`metric` requires metric:field or simply count');
     }
