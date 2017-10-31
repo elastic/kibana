@@ -15,7 +15,7 @@ export function FetchSoonProvider(Private, Promise) {
 
   const fetchNow = Private(FetchNowProvider);
 
-  const debouncedFetchThese = _.debounce(() => {
+  const debouncedFetchNow = _.debounce(() => {
     const requests = requestQueue.filter(req => req.isFetchRequestedAndPending());
     fetchNow(requests);
   }, {
@@ -30,7 +30,7 @@ export function FetchSoonProvider(Private, Promise) {
    */
   this.these = (requests) => {
     requests.forEach(req => req._setFetchRequested());
-    debouncedFetchThese();
+    debouncedFetchNow();
     return Promise.all(requests.map(req => req.getCompletePromise()));
   };
 
