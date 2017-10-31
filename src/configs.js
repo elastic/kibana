@@ -16,7 +16,8 @@ function ensureConfigAndFoldersExists() {
     .then(configTemplate => {
       return utils
         .writeFile(CONFIG_FILE_PATH, configTemplate, {
-          flag: 'wx' // create and write file. Error if it already exists
+          flag: 'wx', // create and write file. Error if it already exists
+          mode: 0o600 // give the owner read-write privleges, no access for others
         })
         .catch(e => {
           const FILE_ALREADY_EXISTS = 'EEXIST';
@@ -54,13 +55,27 @@ function validateConfig({ username, accessToken, repositories }) {
 function getConfig() {
   try {
     const CONFIG_FILE_PATH = env.getConfigFilePath();
+    const stat = fs.statSync(CONFIG_FILE_PATH);
+    const hasGroupRead = stat.mode & fs.constants.S_IRGRP;
+    const hasOthersRead = stat.mode & fs.constants.S_IROTH;
+    if (hasGroupRead || hasOthersRead) {
+      const error = new Error(
+        `Config file at ${CONFIG_FILE_PATH} needs to have more restrictive permissions. Run the ` +
+          'following to limit access to the file to just your user account:\n' +
+          '\n' +
+          `  chmod 600 "${CONFIG_FILE_PATH}"\n`
+      );
+      error.code = constants.CONFIG_FILE_PERMISSION_ERROR;
+      throw error;
+    }
     const res = fs.readFileSync(CONFIG_FILE_PATH, 'utf8');
     return JSON.parse(stripJsonComments(res));
   } catch (e) {
     if (e.code === 'ENOENT') {
       return {};
     }
-    console.log(e);
+
+    throw e;
   }
 }
 

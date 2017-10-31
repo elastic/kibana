@@ -143,6 +143,7 @@ Array [
 ",
     Object {
       "flag": "wx",
+      "mode": 384,
     },
   ],
 ]
