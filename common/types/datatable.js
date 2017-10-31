@@ -2,6 +2,11 @@ import { map } from 'lodash';
 
 export const datatable = {
   name: 'datatable',
+  validate: (datatable) => {
+    if (!datatable.columns || !datatable.columns.length) throw new Error ('datatable must have at least 1 column');
+    if (!datatable.columns[0].name === '_rowId') throw new Error ('The first column in a datatable must be _rowId');
+    if (!datatable.rows) throw new Error ('datatable must have a rows array, even if it is empty');
+  },
   from: {
     null: () => {
       return {
