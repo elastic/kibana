@@ -200,8 +200,9 @@ export default class BaseOptimizer {
         mainFields: ['browser', 'main'],
         modules: [
           'webpackShims',
-          'node_modules',
           fromRoot('webpackShims'),
+
+          'node_modules',
           fromRoot('node_modules'),
         ],
         alias: this.env.aliases,
