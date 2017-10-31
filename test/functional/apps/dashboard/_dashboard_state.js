@@ -6,7 +6,7 @@ import {
 } from '../../../../src/core_plugins/kibana/public/dashboard/dashboard_constants';
 
 export default function ({ getService, getPageObjects }) {
-  const PageObjects = getPageObjects(['dashboard', 'visualize', 'header']);
+  const PageObjects = getPageObjects(['dashboard', 'visualize', 'header', 'discover']);
   const testSubjects = getService('testSubjects');
   const remote = getService('remote');
   const retry = getService('retry');
@@ -65,11 +65,45 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+    it('Saved search with column changes will not update when the saved object changes', async () => {
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.dashboard.setTimepickerInDataRange();
+
+      await PageObjects.header.clickDiscover();
+      await PageObjects.discover.clickFieldListItemAdd('bytes');
+      await PageObjects.discover.clickFieldListItemAdd('agent');
+      await PageObjects.discover.saveSearch('my search');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.header.clickToastOK();
+
+      await PageObjects.header.clickDashboard();
+      await PageObjects.dashboard.addSavedSearch('my search');
+      await PageObjects.discover.removeHeaderColumn('bytes');
+      await PageObjects.dashboard.saveDashboard('Has local edits');
+      await PageObjects.header.clickToastOK();
+
+      await PageObjects.header.clickDiscover();
+      await PageObjects.discover.clickFieldListItemAdd('clientip');
+      await PageObjects.discover.saveSearch('my search');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.header.clickToastOK();
+
+      await PageObjects.header.clickDashboard();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const headers = await PageObjects.discover.getColumnHeaders();
+      expect(headers.length).to.be(2);
+      expect(headers[1]).to.be('agent');
+    });
+
     it('Tile map with no changes will update with visualization changes', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.setTimepickerInDataRange();
+
       await PageObjects.dashboard.addVisualizations(['Visualization TileMap']);
       await PageObjects.dashboard.saveDashboard('No local edits');
       await PageObjects.header.clickToastOK();
@@ -96,6 +130,5 @@ export default function ({ getService, getPageObjects }) {
 
       expect(changedTileMapData.length).to.not.equal(tileMapData.length);
     });
-
   });
 }
