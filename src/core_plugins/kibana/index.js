@@ -27,7 +27,7 @@ export default function (kibana) {
     config: function (Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
-        defaultAppId: Joi.string().default('discover'),
+        defaultAppId: Joi.string().default('home'),
         index: Joi.string().default('.kibana')
       }).default();
     },
@@ -47,6 +47,7 @@ export default function (kibana) {
         description: 'the kibana you know and love',
         main: 'plugins/kibana/kibana',
         uses: [
+          'kbnDirectory',
           'visTypes',
           'visResponseHandlers',
           'visRequestHandlers',

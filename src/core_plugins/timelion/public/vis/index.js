@@ -3,6 +3,7 @@ import { CATEGORY } from 'ui/vis/vis_category';
 import image from '../images/icon-timelion.svg';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { TimelionRequestHandlerProvider } from './timelion_request_handler';
+import { KbnDirectoryRegistryProvider, DirectoryCategory } from 'ui/registry/kbn_directory';
 
 // we also need to load the controller and directive used by the template
 import 'plugins/timelion/vis/timelion_vis_controller';
@@ -46,3 +47,15 @@ export default function TimelionVisProvider(Private) {
     }
   });
 }
+
+KbnDirectoryRegistryProvider.register(() => {
+  return {
+    id: 'timelion',
+    title: 'Timelion',
+    description: 'Build powerful time based visualizations thru expressions.',
+    icon: '/plugins/kibana/assets/app_timelion.svg',
+    path: '/app/timelion',
+    showOnHomePage: true,
+    category: DirectoryCategory.DATA
+  };
+});
