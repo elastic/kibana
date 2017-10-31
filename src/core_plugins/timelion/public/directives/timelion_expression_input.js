@@ -25,7 +25,7 @@ import _ from 'lodash';
 import $ from 'jquery';
 import PEG from 'pegjs';
 
-import grammar from 'raw!../chain.peg';
+import grammar from 'raw-loader!../chain.peg';
 import './timelion_expression_suggestions/timelion_expression_suggestions';
 import timelionExpressionInputTemplate from './timelion_expression_input.html';
 import {

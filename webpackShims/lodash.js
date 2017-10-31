@@ -5,7 +5,7 @@
  * var _ = require('lodash');
  */
 
-var _ = require('node_modules/lodash/index.js').runInContext();
+var _ = require('../node_modules/lodash/index.js').runInContext();
 var lodashLangMixin = require('ui/utils/lodash-mixins/lang').lodashLangMixin;
 var lodashObjectMixin = require('ui/utils/lodash-mixins/object').lodashObjectMixin;
 var lodashCollectionMixin = require('ui/utils/lodash-mixins/collection').lodashCollectionMixin;

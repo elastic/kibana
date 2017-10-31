@@ -12,7 +12,7 @@ import {
 
 import Example from './info_button';
 
-const basicSource = require('!!raw!./info_button');
+const basicSource = require('!!raw-loader!./info_button');
 const basicHtml = renderToHtml(Example);
 
 export default props => (
