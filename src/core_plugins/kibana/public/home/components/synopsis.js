@@ -11,6 +11,7 @@ export function Synopsis({ description, iconUrl, title, url }) {
   if (iconUrl) {
     img = (
       <img
+        className="synopsisIcon"
         src={iconUrl}
       />
     );

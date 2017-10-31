@@ -36,14 +36,14 @@ export function Home({ addBasePath, directories, directoryCategories }) {
 
   return (
     <div className="kuiView home">
-      <div className="kuiViewContent kuiViewContent--constrainedWidth">
+      <div className="kuiViewContent">
 
         <div className="kuiViewContentItem kuiVerticalRhythmXLarge">
           <KuiBar className="kuiVerticalRhythmSmall">
             <KuiBarSection>
-              <div className="kuiTitle">
+              <h1>
                 Welcome to Kibana
-              </div>
+              </h1>
             </KuiBarSection>
 
             <KuiBarSection>
@@ -70,7 +70,7 @@ export function Home({ addBasePath, directories, directoryCategories }) {
                 <h3 className="kuiSubTitle kuiVerticalRhythm">
                   Visualize and explore data
                 </h3>
-                <KuiFlexGrid className="kuiVerticalRhythmSmall" columns={2}>
+                <KuiFlexGrid className="kuiVerticalRhythmSmall topFeatures" columns={2}>
                   { renderDirectories(directoryCategories.DATA) }
                 </KuiFlexGrid>
               </div>
@@ -80,7 +80,7 @@ export function Home({ addBasePath, directories, directoryCategories }) {
                 <h3 className="kuiSubTitle kuiVerticalRhythm">
                   Manage and administer the Elastic stack
                 </h3>
-                <KuiFlexGrid className="kuiVerticalRhythmSmall" columns={2}>
+                <KuiFlexGrid className="kuiVerticalRhythmSmall topFeatures" columns={2}>
                   { renderDirectories(directoryCategories.ADMIN) }
                 </KuiFlexGrid>
               </div>
