@@ -17,7 +17,9 @@ export const KuiTableRowCell = ({
 }) => {
   const classes = classNames('kuiTableRowCell', className, {
     'kuiTableRowCell--alignRight': align === RIGHT_ALIGNMENT,
-    'kuiTableRowCell--textOnly': textOnly,
+    // We're doing this rigamarole instead of creating kuiTabelRowCell--textOnly for BWC
+    // purposes for the time-being.
+    'kuiTableRowCell--overflowingContent': !textOnly,
   });
 
   return (
@@ -28,6 +30,7 @@ export const KuiTableRowCell = ({
     </td>
   );
 };
+
 KuiTableRowCell.propTypes = {
   align: PropTypes.oneOf(ALIGNMENT),
   children: PropTypes.node,

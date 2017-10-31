@@ -3607,18 +3607,33 @@ main {
   color: #191E23;
   border-top: 1px solid #D9D9D9; }
 
+/**
+   * 1. Vertically align all children.
+   * 2. The padding on this div allows the ellipsis to show if the content is truncated. If
+   *    the padding was on the cell, the ellipsis would be cropped.
+   * 3. Truncate content with an ellipsis.
+   */
+.kuiTableRowCell__liner {
+  padding: 7px 8px 8px;
+  /* 2 */
+  line-height: 1.5;
+  /* 1 */
+  overflow: hidden;
+  /* 3 */
+  text-overflow: ellipsis;
+  /* 3 */
+  white-space: nowrap;
+  /* 3 */ }
+  .kuiTableRowCell__liner > * {
+    vertical-align: middle;
+    /* 1 */ }
+
 .kuiTableRowCell--wrap .kuiTableRowCell__liner {
   white-space: normal; }
 
-.kuiTableRowCell--textOnly {
-  /**
-   * 1. Truncate text with an ellipsis.
-   */ }
-  .kuiTableRowCell--textOnly .kuiTableRowCell__liner {
-    overflow: hidden;
-    /* 2 */
-    text-overflow: ellipsis;
-    /* 2 */ }
+.kuiTableRowCell--overflowingContent .kuiTableRowCell__liner {
+  overflow: visible;
+  white-space: normal; }
 
 /**
  * 1. We don't want to create too strong a disconnect between the original row and the row
@@ -3627,23 +3642,6 @@ main {
 .kuiTableRowCell--expanded {
   border-top-color: #f0f0f0;
   /* 1 */ }
-
-/**
-   * 1. Vertically align all children.
-   * 2. The padding on this div allows the ellipsis to show if the content is truncated. If
-   *    the padding was on the cell, the ellipsis would be cropped.
-   * 3. Support wrapping.
-   */
-.kuiTableRowCell__liner {
-  padding: 7px 8px 8px;
-  /* 2 */
-  line-height: 1.5;
-  /* 1 */
-  white-space: nowrap;
-  /* 3 */ }
-  .kuiTableRowCell__liner > * {
-    vertical-align: middle;
-    /* 1 */ }
 
 .kuiTableRowCell--alignRight {
   text-align: right; }
