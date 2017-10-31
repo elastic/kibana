@@ -87,7 +87,7 @@ export class FeatureDirectory extends React.Component {
   render() {
     return (
       <div className="kuiView home">
-        <div className="kuiViewContent kuiViewContent--constrainedWidth">
+        <div className="kuiViewContent">
           <div className="kuiViewContentItem kuiVerticalRhythmXLarge">
             <h1 className="kuiTitle ">
               Feature Directory
