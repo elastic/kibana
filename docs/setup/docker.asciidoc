@@ -54,7 +54,7 @@ With +docker-compose+, the bind-mount can be specified like this:
 
 ["source","yaml",subs="attributes"]
 --------------------------------------------
-version: '3'
+version: '2'
 services:
   kibana:
     image: {docker-image}
@@ -91,7 +91,7 @@ These variables can be set with +docker-compose+ like this:
 
 ["source","yaml",subs="attributes"]
 ----------------------------------------------------------
-version: '3'
+version: '2'
 services:
   kibana:
     image: {docker-image}
