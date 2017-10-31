@@ -218,6 +218,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
     }
 
+    async addFilterExists() {
+      return await testSubjects.exists('addFilter');
+    }
+
     async filterVizNames(vizName) {
       const visFilter = await find.byCssSelector('input[placeholder="Visualizations Filter..."]');
       await visFilter.click();
