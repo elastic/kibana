@@ -25,7 +25,7 @@ export const ifFn = {
   },
   fn: (context, args) => {
     if (typeof args._ === 'undefined') {
-      if (args._) return args.then;
+      if (context) return args.then;
       if (typeof args.else !== 'undefined') return args.else;
     } else {
       if (args._) return args.then;
