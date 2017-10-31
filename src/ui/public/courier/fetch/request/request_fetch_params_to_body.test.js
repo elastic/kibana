@@ -4,7 +4,6 @@ import _ from 'lodash';
 function requestFetchParamsToBodyWithDefaults(paramOverrides) {
   const paramDefaults = {
     requestFetchParams: [],
-    indexToListMapping: {},
     Promise,
     timeFilter: {
       getActiveBounds: () => undefined,
@@ -16,9 +15,8 @@ function requestFetchParamsToBodyWithDefaults(paramOverrides) {
 
   return requestFetchParamsToBody(
     params.requestFetchParams,
-    params.indexToListMapping,
     Promise,
-    params.timeBounds,
+    params.timeFilter,
     params.kbnIndex,
     params.sessionId,
   );

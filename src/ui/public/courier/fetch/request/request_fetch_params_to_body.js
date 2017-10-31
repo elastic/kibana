@@ -16,20 +16,23 @@ function emptySearch() {
 /**
  *
  * @param requestsFetchParams {Array.<Object>}
- * @param indexToListMapping
  * @param Promise
- * @param timeBounds
+ * @param timeFilter - Only needed for time based interval indexes, which support has been removed from in 6.0. Come
+ * 7.0 we can completely rip this code out and break them completely. See
+ *   https://github.com/elastic/kibana/issues/12242 and
+ *   https://github.com/elastic/kibana/pull/12158 for more background
  * @param kbnIndex
  * @param sessionId
  * @return {Promise.<string>}
  */
 export function requestFetchParamsToBody(
   requestsFetchParams,
-  indexToListMapping,
   Promise,
-  timeBounds,
+  timeFilter,
   kbnIndex,
   sessionId) {
+  const indexToListMapping = {};
+  const timeBounds = timeFilter.getActiveBounds();
   const promises = requestsFetchParams.map(function (fetchParams) {
     return Promise.resolve(fetchParams.index)
       .then(function (indexList) {
