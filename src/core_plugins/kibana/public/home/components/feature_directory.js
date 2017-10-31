@@ -63,25 +63,25 @@ export class FeatureDirectory extends React.Component {
   }
 
   renderDirectories = () => {
-    return this.props.directories.inTitleOrder
-    .filter((directory) => {
-      if (this.state.selectedTabId === ALL) {
-        return true;
-      }
-      return this.state.selectedTabId === directory.category;
-    })
-    .map((directory) => {
-      return (
-        <KuiFlexItem key={directory.id}>
-          <Synopsis
-            description={directory.description}
-            iconUrl={this.props.addBasePath(directory.icon)}
-            title={directory.title}
-            url={this.props.addBasePath(directory.path)}
-          />
-        </KuiFlexItem>
-      );
-    });
+    return this.props.directories
+      .filter((directory) => {
+        if (this.state.selectedTabId === ALL) {
+          return true;
+        }
+        return this.state.selectedTabId === directory.category;
+      })
+      .map((directory) => {
+        return (
+          <KuiFlexItem key={directory.id}>
+            <Synopsis
+              description={directory.description}
+              iconUrl={this.props.addBasePath(directory.icon)}
+              title={directory.title}
+              url={this.props.addBasePath(directory.path)}
+            />
+          </KuiFlexItem>
+        );
+      });
   };
 
   render() {
@@ -109,5 +109,13 @@ export class FeatureDirectory extends React.Component {
 
 FeatureDirectory.propTypes = {
   addBasePath: PropTypes.func.isRequired,
-  directories: PropTypes.object.isRequired
+  directories: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
+    icon: PropTypes.string.isRequired,
+    path: PropTypes.string.isRequired,
+    showOnHomePage: PropTypes.bool.isRequired,
+    category: PropTypes.string.isRequired
+  }))
 };

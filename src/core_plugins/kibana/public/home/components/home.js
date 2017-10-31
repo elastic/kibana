@@ -11,7 +11,7 @@ import {
 export function Home({ addBasePath, directories, directoryCategories }) {
 
   const renderDirectories = (category) => {
-    return directories.inTitleOrder
+    return directories
     .filter((directory) => {
       return directory.showOnHomePage && directory.category === category;
     })
@@ -112,6 +112,14 @@ export function Home({ addBasePath, directories, directoryCategories }) {
 
 Home.propTypes = {
   addBasePath: PropTypes.func.isRequired,
-  directories: PropTypes.object.isRequired,
+  directories: PropTypes.arrayOf(PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
+    icon: PropTypes.string.isRequired,
+    path: PropTypes.string.isRequired,
+    showOnHomePage: PropTypes.bool.isRequired,
+    category: PropTypes.string.isRequired
+  })),
   directoryCategories: PropTypes.object.isRequired
 };

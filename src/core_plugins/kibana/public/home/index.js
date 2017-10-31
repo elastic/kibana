@@ -18,7 +18,7 @@ function getRoute() {
     template,
     controller($scope, Private) {
       $scope.addBasePath = chrome.addBasePath;
-      $scope.directories = Private(FeatureCatalogueRegistryProvider);
+      $scope.directories = Private(FeatureCatalogueRegistryProvider).inTitleOrder;
       $scope.directoryCategories = FeatureCatalogueCategory;
     }
   };

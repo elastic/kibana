@@ -31,7 +31,7 @@ FeatureCatalogueRegistryProvider.register(() => {
     title: 'Visualize',
     description: 'Build a variety of graphs for your data.',
     icon: '/plugins/kibana/assets/app_visualize.svg',
-    path: '/app/kibana#/visualize',
+    path: `/app/kibana#${VisualizeConstants.LANDING_PAGE_PATH}`,
     showOnHomePage: true,
     category: FeatureCatalogueCategory.DATA
   };

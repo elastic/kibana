@@ -64,7 +64,7 @@ FeatureCatalogueRegistryProvider.register(() => {
     title: 'Dashboards',
     description: 'Create visual landing pages made up of content from other apps',
     icon: '/plugins/kibana/assets/app_dashboard.svg',
-    path: '/app/kibana#/dashboard',
+    path: `/app/kibana#${DashboardConstants.LANDING_PAGE_PATH}`,
     showOnHomePage: true,
     category: FeatureCatalogueCategory.DATA
   };
