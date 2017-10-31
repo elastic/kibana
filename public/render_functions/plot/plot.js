@@ -2,7 +2,6 @@ import { debounce, includes } from 'lodash';
 import { size } from './plugins/size';
 import { text } from './plugins/text';
 
-import '../../lib/flot';
 import './plot.less';
 
 const render = (domNode, config, handlers) => {
