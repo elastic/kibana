@@ -88,16 +88,19 @@ export class FeatureDirectory extends React.Component {
     return (
       <div className="kuiView home">
         <div className="kuiViewContent kuiViewContent--constrainedWidth">
-          <a className="kuiLink" href="#/home">Home</a> / Directory
-          <h2 className="kuiTitle">
-            Feature Directory
-          </h2>
-          <KuiTabs className="featureDirectoryTabs">
-            {this.renderTabs()}
-          </KuiTabs>
-          <KuiFlexGrid columns={4} className="featureDirectory">
-            { this.renderDirectories() }
-          </KuiFlexGrid>
+          <div className="kuiViewContentItem kuiVerticalRhythmXLarge">
+            <h1 className="kuiTitle ">
+              Feature Directory
+            </h1>
+          </div>
+          <div className="kuiViewContentItem kuiVerticalRhythmXLarge">
+            <KuiTabs className="featureDirectoryTabs">
+              {this.renderTabs()}
+            </KuiTabs>
+            <KuiFlexGrid columns={4} className="featureDirectory">
+              { this.renderDirectories() }
+            </KuiFlexGrid>
+          </div>
         </div>
       </div>
     );

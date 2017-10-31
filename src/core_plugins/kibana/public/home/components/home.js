@@ -3,10 +3,6 @@ import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
 import {
   KuiButton,
-  KuiBar,
-  KuiBarSection,
-  KuiFieldGroup,
-  KuiFieldGroupSection,
   KuiFlexGroup,
   KuiFlexItem,
   KuiFlexGrid,
@@ -21,7 +17,7 @@ export function Home({ addBasePath, directories, directoryCategories }) {
     })
     .map((directory) => {
       return (
-        <KuiFlexItem key={directory.id}>
+        <KuiFlexItem style={{ minHeight: 64 }} key={directory.id}>
           <Synopsis
             description={directory.description}
             iconUrl={addBasePath(directory.icon)}
@@ -39,28 +35,34 @@ export function Home({ addBasePath, directories, directoryCategories }) {
       <div className="kuiViewContent">
 
         <div className="kuiViewContentItem kuiVerticalRhythmXLarge">
-          <KuiBar className="kuiVerticalRhythmSmall">
-            <KuiBarSection>
-              <h1>
+          <KuiFlexGroup
+            className="kuiVerticalRhythmSmall"
+            justifyContent="spaceBetween"
+            alignItems="flexEnd"
+          >
+            <KuiFlexItem>
+              <h1 className="kuiTitle">
                 Welcome to Kibana
               </h1>
-            </KuiBarSection>
+            </KuiFlexItem>
 
-            <KuiBarSection>
-              <KuiFieldGroup>
-                <KuiFieldGroupSection>
+            <KuiFlexItem grow={false}>
+              <KuiFlexGroup alignItems="center">
+                <KuiFlexItem grow={false}>
                   <p className="kuiText kuiSubduedText">
                     Data already in Elasticsearch?
                   </p>
-                </KuiFieldGroupSection>
-                <KuiFieldGroupSection>
+                </KuiFlexItem>
+
+                <KuiFlexItem grow={false}>
                   <KuiButton buttonType="secondary">
                     <a href={addBasePath('/app/kibana#/management/kibana/index')}>Set up index patterns</a>
                   </KuiButton>
-                </KuiFieldGroupSection>
-              </KuiFieldGroup>
-            </KuiBarSection>
-          </KuiBar>
+                </KuiFlexItem>
+              </KuiFlexGroup>
+
+            </KuiFlexItem>
+          </KuiFlexGroup>
         </div>
 
         <div className="kuiViewContentItem kuiVerticalRhythmXLarge">
