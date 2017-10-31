@@ -13,6 +13,16 @@ function emptySearch() {
   };
 }
 
+/**
+ *
+ * @param requestsFetchParams {Array.<Object>}
+ * @param indexToListMapping
+ * @param Promise
+ * @param timeBounds
+ * @param kbnIndex
+ * @param sessionId
+ * @return {Promise.<string>}
+ */
 export function requestFetchParamsToBody(
   requestsFetchParams,
   indexToListMapping,
@@ -20,7 +30,7 @@ export function requestFetchParamsToBody(
   timeBounds,
   kbnIndex,
   sessionId) {
-  return Promise.map(requestsFetchParams, function (fetchParams) {
+  const promises = requestsFetchParams.map(function (fetchParams) {
     return Promise.resolve(fetchParams.index)
       .then(function (indexList) {
         if (!_.isFunction(_.get(indexList, 'toIndexList'))) {
@@ -54,6 +64,7 @@ export function requestFetchParamsToBody(
         } else {
           index = indexList;
         }
+
         return JSON.stringify({
           index,
           type: fetchParams.type,
@@ -64,8 +75,9 @@ export function requestFetchParamsToBody(
         + '\n'
         + toJson(body, JSON.stringify);
       });
-  })
-  .then(function (requests) {
+  });
+
+  return Promise.all(promises).then(function (requests) {
     return requests.join('\n') + '\n';
   });
 }
