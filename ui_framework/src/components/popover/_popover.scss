@@ -10,7 +10,6 @@
     .kuiPopover__panel {
       opacity: 1;
       visibility: visible;
-      z-index: $kuiZContentMenu;
       margin-top: $kuiSizeS;
       pointer-events: auto;
     }
@@ -20,7 +19,7 @@
   // Animation happens on the panel.
   .kuiPopover__panel {
     position: absolute;
-    min-width: $kuiSize * 16; // Can expand further, but this size is good for our menus.
+    z-index: $kuiZContentMenu;
     top: 100%;
     left: 50%;
     transform: translateX(-50%) translateY($kuiSizeS) translateZ(0);

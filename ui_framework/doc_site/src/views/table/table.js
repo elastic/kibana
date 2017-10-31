@@ -5,6 +5,11 @@ import React, {
 import classNames from 'classnames';
 
 import {
+  KuiButton,
+  KuiButtonIcon,
+  KuiPopover,
+  KuiContextMenuPanel,
+  KuiContextMenuItem,
   KuiTable,
   KuiTableBody,
   KuiTableHeader,
@@ -32,6 +37,7 @@ export class Table extends Component {
     this.state = {
       sortedColumn: 'title',
       rowToSelectedStateMap: new Map(),
+      rowToOpenActionsPopoverMap: new Map(),
     };
 
     this.items = [{
@@ -39,27 +45,23 @@ export class Table extends Component {
       isLink: true,
       status: 'success',
       dateCreated: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
-      dateModified: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
     }, {
       title: 'Boomerang',
       isLink: false,
       status: 'success',
       dateCreated: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
-      dateModified: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
       details: 'All kinds of crazy information about boomerangs could go in here.',
     }, {
       title: 'Celebration of some very long content that will affect cell width and should eventually become truncated',
       isLink: true,
       status: 'warning',
       dateCreated: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
-      dateModified: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
     }, {
       title: 'You can also specify that really long content wraps instead of becoming truncated with an ellipsis (which is the default behavior)', // eslint-disable-line max-len
       isLink: true,
       isWrapped: true,
       status: 'danger',
       dateCreated: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
-      dateModified: 'Tue Dec 06 2016 12:56:15 GMT-0800 (PST)',
     }];
 
     this.sortableProperties = new SortableProperties([{
@@ -91,6 +93,26 @@ export class Table extends Component {
 
   isItemChecked = item => {
     return this.state.rowToSelectedStateMap.get(item);
+  };
+
+  togglePopover = item => {
+    this.setState(previousState => {
+      const rowToOpenActionsPopoverMap = new Map(previousState.rowToOpenActionsPopoverMap);
+      rowToOpenActionsPopoverMap.set(item, !rowToOpenActionsPopoverMap.get(item));
+      return { rowToOpenActionsPopoverMap };
+    });
+  };
+
+  closePopover = item => {
+    this.setState(previousState => {
+      const rowToOpenActionsPopoverMap = new Map(previousState.rowToOpenActionsPopoverMap);
+      rowToOpenActionsPopoverMap.set(item, false);
+      return { rowToOpenActionsPopoverMap };
+    });
+  };
+
+  isPopoverOpen = item => {
+    return this.state.rowToOpenActionsPopoverMap.get(item);
   };
 
   renderStatusIcon(status) {
@@ -133,8 +155,53 @@ export class Table extends Component {
             {item.dateCreated}
           </KuiTableRowCell>
 
-          <KuiTableRowCell>
-            {item.dateModified}
+          <KuiTableRowCell textOnly={false}>
+            <KuiPopover
+              button={(
+                <KuiButton
+                  buttonType="basic"
+                  onClick={() => this.togglePopover(item)}
+                  icon={<KuiButtonIcon className="fa-angle-down" />}
+                  iconPosition="right"
+                >
+                  Actions
+                </KuiButton>
+              )}
+              isOpen={this.isPopoverOpen(item)}
+              closePopover={() => this.closePopover(item)}
+              panelPaddingSize="none"
+              withTitle
+              anchorPosition="right"
+            >
+              <KuiContextMenuPanel
+                style={{ width: '100px' }}
+                items={[(
+                  <KuiContextMenuItem
+                    key="A"
+                    icon={<span className="kuiIcon fa-pencil" />}
+                    onClick={() => { this.closePopover(item); window.alert('Edit'); }}
+                  >
+                    Edit
+                  </KuiContextMenuItem>
+                ), (
+                  <KuiContextMenuItem
+                    key="B"
+                    icon={<span className="kuiIcon fa-share" />}
+                    onClick={() => { this.closePopover(item); window.alert('Share'); }}
+                  >
+                    Share
+                  </KuiContextMenuItem>
+                ), (
+                  <KuiContextMenuItem
+                    key="C"
+                    icon={<span className="kuiIcon fa-trash-o" />}
+                    onClick={() => { this.closePopover(item); window.alert('Delete'); }}
+                  >
+                    Delete
+                  </KuiContextMenuItem>
+                )]}
+              />
+            </KuiPopover>
           </KuiTableRowCell>
         </KuiTableRow>
       );
@@ -187,8 +254,8 @@ export class Table extends Component {
             Date created
           </KuiTableHeaderCell>
 
-          <KuiTableHeaderCell>
-            Date last modified
+          <KuiTableHeaderCell width="110px">
+            Actions
           </KuiTableHeaderCell>
         </KuiTableHeader>
 

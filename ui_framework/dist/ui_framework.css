@@ -883,7 +883,14 @@ main {
 .kuiContextMenu__panel {
   position: absolute; }
 
+/**
+   * 1. Ensure icon is centered within a container with a consistent width.
+   */
 .kuiContextMenu__icon {
+  width: 16px;
+  /* 1 */
+  text-align: center;
+  /* 1 */
   margin-right: 8px; }
 
 .kuiContextMenu__itemLayout {
@@ -3341,13 +3348,12 @@ main {
   .kuiPopover.kuiPopover-isOpen .kuiPopover__panel {
     opacity: 1;
     visibility: visible;
-    z-index: 2000;
     margin-top: 8px;
     pointer-events: auto; }
 
 .kuiPopover__panel {
   position: absolute;
-  min-width: 256px;
+  z-index: 2000;
   top: 100%;
   left: 50%;
   -webkit-transform: translateX(-50%) translateY(8px) translateZ(0);
@@ -3601,7 +3607,32 @@ main {
   color: #191E23;
   border-top: 1px solid #D9D9D9; }
 
+/**
+   * 1. Vertically align all children.
+   * 2. The padding on this div allows the ellipsis to show if the content is truncated. If
+   *    the padding was on the cell, the ellipsis would be cropped.
+   * 3. Truncate content with an ellipsis.
+   */
+.kuiTableRowCell__liner {
+  padding: 7px 8px 8px;
+  /* 2 */
+  line-height: 1.5;
+  /* 1 */
+  overflow: hidden;
+  /* 3 */
+  text-overflow: ellipsis;
+  /* 3 */
+  white-space: nowrap;
+  /* 3 */ }
+  .kuiTableRowCell__liner > * {
+    vertical-align: middle;
+    /* 1 */ }
+
 .kuiTableRowCell--wrap .kuiTableRowCell__liner {
+  white-space: normal; }
+
+.kuiTableRowCell--overflowingContent .kuiTableRowCell__liner {
+  overflow: visible;
   white-space: normal; }
 
 /**
@@ -3611,26 +3642,6 @@ main {
 .kuiTableRowCell--expanded {
   border-top-color: #f0f0f0;
   /* 1 */ }
-
-/**
-   * 1. Vertically align all children.
-   * 2. Truncate text with an ellipsis. The padding on this div allows the ellipsis to show. If
-   *    the padding was on the cell, the ellipsis would be cropped.
-   */
-.kuiTableRowCell__liner {
-  white-space: nowrap;
-  /* 2 */
-  overflow: hidden;
-  /* 2 */
-  text-overflow: ellipsis;
-  /* 2 */
-  padding: 7px 8px 8px;
-  /* 2 */
-  line-height: 1.5;
-  /* 1 */ }
-  .kuiTableRowCell__liner > * {
-    vertical-align: middle;
-    /* 1 */ }
 
 .kuiTableRowCell--alignRight {
   text-align: right; }
