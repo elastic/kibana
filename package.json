@@ -1,7 +1,7 @@
 {
   "name": "canvas",
-  "version": "1.0.0-milestone1",
-  "description": "data driven workpads for kibana",
+  "version": "0.1.1492",
+  "description": "Data driven workpads for kibana",
   "main": "index.js",
   "kibana": {
     "version": "kibana"
@@ -86,7 +86,7 @@
     "husky": "^0.13.3",
     "pegjs": "^0.10.0",
     "proxyquire": "1.7.11",
-    "semver": "^5.3.0",
+    "semver": "^5.4.1",
     "simple-git": "^1.70.0",
     "sinon": "^2.3.2",
     "through2": "^2.0.3",
