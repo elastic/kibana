@@ -12,7 +12,7 @@ import {
   getSelectedPage,
 } from '../../state/selectors/workpad';
 import { getState, getValue, getError } from '../../lib/resolved_arg';
-import { elementsRegistry } from '../../lib/elements_registry';
+import { renderFunctionsRegistry } from '../../lib/render_functions_registry';
 import { createHandlers } from './lib/handlers';
 
 const mapStateToProps = (state, { element }) => ({
@@ -41,7 +41,7 @@ const mergeProps = (stateProps, dispatchProps, { element }) => {
     removeElement: dispatchProps.removeElement(selectedPage),
     handlers: dispatchProps.handlers(selectedPage),
     isSelected: isSelected,
-    elementTypeDefintion: elementsRegistry.get(get(renderable, 'as')),
+    renderFunction: renderFunctionsRegistry.get(get(renderable, 'as')),
     state: getState(resolvedArg),
     error: getError(resolvedArg),
     renderable,

@@ -15,7 +15,7 @@ export const ElementControls = pure((props) => {
     // We could pull off the relevant properties of the following two objects,
     // but since they aren't used in the parent it would actually make this more
     // annoying to test and read
-    elementTypeDefintion,
+    renderFunction,
     renderable,
     state,
     size,
@@ -49,7 +49,7 @@ export const ElementControls = pure((props) => {
         <ElementContent
            state={state}
            renderable={renderable}
-           elementTypeDefintion={elementTypeDefintion}
+           renderFunction={renderFunction}
            size={size}
            handlers={handlers}
          />
@@ -66,7 +66,7 @@ ElementControls.propTypes = {
   selectElement: PropTypes.func,
   removeElement: PropTypes.func,
   isSelected: PropTypes.bool,
-  elementTypeDefintion: PropTypes.object,
+  renderFunction: PropTypes.object,
   renderable: PropTypes.object,
   size: PropTypes.object,
   state: PropTypes.string,

@@ -1,10 +1,4 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import Markdown from 'markdown-it';
 import header from './header.png';
-import './markdown.less';
-
-const md = new Markdown();
 
 export const markdown = {
   name: 'markdown',
@@ -25,16 +19,4 @@ The datatable contains
 You can use standard Markdown in here, but you can also access your piped-in data using Handlebars. If you want to know more, check out the [Handlebars Documentation](http://handlebarsjs.com/expressions.html)
 
 #### Enjoy!"`,
-  render(domNode, config, handlers) {
-    const html = { __html: md.render(String(config.content)) };
-    const fontStyle = config.font ? config.font.spec : {};
-
-    ReactDOM.render((
-      <div
-        className="canvas__element__markdown"
-        style={fontStyle}
-        dangerouslySetInnerHTML={html}/>
-    ), domNode);
-    handlers.done();
-  },
 };

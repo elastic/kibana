@@ -14,6 +14,4 @@ export function Element(config) {
   if (!config.expression) throw new Error('Element types must have a default expression');
   this.expression = config.expression;
   this.filter = config.filter;
-
-  this.render = config.render || function render(domNode, data, done) {done();};
 }

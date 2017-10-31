@@ -9,7 +9,7 @@ export const ElementWrapper = (props) => {
     selectElement,
     removeElement,
     isSelected,
-    elementTypeDefintion,
+    renderFunction,
     renderable,
     position,
     setPosition,
@@ -34,7 +34,7 @@ export const ElementWrapper = (props) => {
         selectElement={selectElement}
         removeElement={removeElement}
         isSelected={isSelected}
-        elementTypeDefintion={elementTypeDefintion}
+        renderFunction={renderFunction}
         renderable={renderable}
         state={state}
         handlers={handlers}
@@ -47,7 +47,7 @@ ElementWrapper.propTypes = {
   selectElement: PropTypes.func,
   removeElement: PropTypes.func,
   isSelected: PropTypes.bool,
-  elementTypeDefintion: PropTypes.object,
+  renderFunction: PropTypes.object,
   state: PropTypes.string,
   error: PropTypes.object,
   renderable: PropTypes.object,

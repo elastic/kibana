@@ -3,6 +3,7 @@ import { RenderElement as Component } from './render_element';
 import PropTypes from 'prop-types';
 import { isEqual, cloneDeep } from 'lodash';
 import { ElementHandlers } from './lib/handlers';
+import { notify } from '../../lib/notify';
 
 export const RenderElement = compose(
   withState('domNode', 'setDomNode'), // Still don't like this, seems to be the only way todo it.
@@ -17,22 +18,44 @@ export const RenderElement = compose(
     ),
   })),
   lifecycle({
+    componentDidMount() {
+      this.firstRender = true;
+      this.renderTarget = null;
+    },
+
+    componentWillReceiveProps({ domNode, renderFn }) {
+      const newDomNode = domNode && this.props.domNode !== domNode;
+      const newRenderFunction = renderFn !== this.props.renderFn;
+
+      if (newDomNode || newRenderFunction) this.resetRenderTarget(domNode);
+    },
+
     componentDidUpdate(prevProps) {
-      const { handlers, config, domNode, size, renderFn } = this.props;
+      const {
+        handlers,
+        domNode,
+        config,
+        size,
+        renderFn,
+        reuseNode,
+      } = this.props;
 
       // Config changes
       if (this.shouldFullRerender(prevProps)) {
-        handlers.destroy();
-
         // This should be the only place you call renderFn
         // TODO: We should wait until handlers.done() is called before replacing the element content?
-        while(domNode.firstChild)
-        {
-          domNode.removeChild(domNode.firstChild);
+        if (!reuseNode) this.resetRenderTarget(domNode);
+        // else if (!firstRender) handlers.destroy();
+
+        const renderConfig = cloneDeep(config);
+
+        // TODO: this is hacky, but it works. it stops Kibana from blowing up when a render throws
+        try {
+          renderFn(this.renderTarget, renderConfig, handlers);
+          this.firstRender = false;
+        } catch (err) {
+          notify.error(err);
         }
-        const newNode = this.createNode();
-        domNode.appendChild(newNode);
-        renderFn(newNode, cloneDeep(config), handlers);
       }
 
       // Size changes
@@ -47,7 +70,24 @@ export const RenderElement = compose(
       this.props.handlers.destroy();
     },
 
-    createNode() {
+    resetRenderTarget(domNode) {
+      const { handlers } = this.props;
+
+      if (!domNode) throw new Error('RenderElement can not reset undefined target node');
+
+      // call destroy on existing element
+      if (!this.firstRender) handlers.destroy();
+
+      while(domNode.firstChild) {
+        domNode.removeChild(domNode.firstChild);
+      }
+
+      this.firstRender = true;
+      this.renderTarget = this.createRenderTarget();
+      domNode.appendChild(this.renderTarget);
+    },
+
+    createRenderTarget() {
       const div = document.createElement('div');
       div.style.width = '100%';
       div.style.height = '100%';
@@ -70,6 +110,8 @@ export const RenderElement = compose(
 
 RenderElement.propTypes = {
   renderFn: PropTypes.func.isRequired,
+  reuseNode: PropTypes.bool,
+  handlers: PropTypes.object,
   destroyFn: PropTypes.func,
   config: PropTypes.object,
   size: PropTypes.object,

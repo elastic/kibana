@@ -27,16 +27,16 @@ const branches = [
   }, renderComponent(Loading)),
 
   // renderable is available, but no matching element is found, render invalid
-  branch(({ renderable, elementTypeDefintion }) => {
-    return (renderable && getType(renderable) !== 'render' && !elementTypeDefintion);
+  branch(({ renderable, renderFunction }) => {
+    return (renderable && getType(renderable) !== 'render' && !renderFunction);
   }, renderComponent(InvalidElementType)),
 
   // error state, render invalid expression notice
-  branch(({ renderable, elementTypeDefintion, state }) => {
+  branch(({ renderable, renderFunction, state }) => {
     return (
       state === 'error' || // The renderable has an error
       getType(renderable) !== 'render' || // The renderable isn't, well, renderable
-      !elementTypeDefintion // We can't find an element in the registry for this
+      !renderFunction // We can't find an element in the registry for this
     );
   }, renderComponent(InvalidExpression)),
 ];
@@ -44,12 +44,13 @@ const branches = [
 export const ElementContent = compose(
   pure,
   ...branches,
-)(({ elementTypeDefintion, renderable, size, handlers }) => {
+)(({ renderFunction, renderable, size, handlers }) => {
   return Style.it(renderable.css,
     <div style={Object.assign({}, renderable.containerStyle, size)}>
       <div className="canvas__element--content">
         <RenderElement
-          renderFn={elementTypeDefintion.render}
+          renderFn={renderFunction.render}
+          reuseNode={renderFunction.reuseDomNode}
           config={renderable.value}
           css={renderable.css} // This is an actual CSS stylesheet string, it will be scoped by RenderElement
           size={size} // Size is only passed for the purpose of triggering the resize event, it isn't really used otherwise
@@ -61,7 +62,7 @@ export const ElementContent = compose(
 });
 
 ElementContent.propTypes = {
-  elementTypeDefintion: PropTypes.object,
+  renderFunction: PropTypes.object,
   renderable: PropTypes.object,
   state: PropTypes.string,
   size: PropTypes.object,
