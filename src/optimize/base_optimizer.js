@@ -14,7 +14,6 @@ import webpackMerge from 'webpack-merge';
 import { defaults } from 'lodash';
 
 import { fromRoot } from '../utils';
-import pkg from '../../package.json';
 
 import { PUBLIC_PATH_PLACEHOLDER } from './public_path_placeholder';
 
@@ -208,19 +207,6 @@ export default class BaseOptimizer {
         alias: this.env.aliases,
         unsafeCache: this.unsafeCache,
       },
-
-      resolveLoader: {
-        alias: Object.keys(pkg.dependencies || {}).reduce((acc, key) => {
-          if (!key.endsWith('-loader')) {
-            return acc;
-          }
-
-          return {
-            ...acc,
-            [key]: require.resolve(key)
-          };
-        }, {})
-      }
     };
 
     if (this.env.context.env === 'development') {
