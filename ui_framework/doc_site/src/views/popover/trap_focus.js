@@ -44,30 +44,32 @@ export default class extends Component {
         isOpen={this.state.isPopoverOpen}
         closePopover={this.closePopover.bind(this)}
       >
-        <div className="kuiVerticalRhythmSmall">
-          <KuiFieldGroup>
-            <KuiFieldGroupSection isWide>
-              <div className="kuiSearchInput">
-                <div className="kuiSearchInput__icon kuiIcon fa-search" />
-                <input
-                  className="kuiSearchInput__input"
-                  type="text"
-                />
-              </div>
-            </KuiFieldGroupSection>
+        <div style={{ width: '300px' }}>
+          <div className="kuiVerticalRhythmSmall">
+            <KuiFieldGroup>
+              <KuiFieldGroupSection isWide>
+                <div className="kuiSearchInput">
+                  <div className="kuiSearchInput__icon kuiIcon fa-search" />
+                  <input
+                    className="kuiSearchInput__input"
+                    type="text"
+                  />
+                </div>
+              </KuiFieldGroupSection>
 
-            <KuiFieldGroupSection>
-              <select className="kuiSelect">
-                <option>Animal</option>
-                <option>Mineral</option>
-                <option>Vegetable</option>
-              </select>
-            </KuiFieldGroupSection>
-          </KuiFieldGroup>
-        </div>
+              <KuiFieldGroupSection>
+                <select className="kuiSelect">
+                  <option>Animal</option>
+                  <option>Mineral</option>
+                  <option>Vegetable</option>
+                </select>
+              </KuiFieldGroupSection>
+            </KuiFieldGroup>
+          </div>
 
-        <div className="kuiVerticalRhythmSmall">
-          <KuiButton buttonType="primary">Save</KuiButton>
+          <div className="kuiVerticalRhythmSmall">
+            <KuiButton buttonType="primary">Save</KuiButton>
+          </div>
         </div>
       </KuiPopover>
     );
