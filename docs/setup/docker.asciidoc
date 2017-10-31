@@ -7,9 +7,9 @@ https://github.com/elastic/kibana-docker/tree/{branch}[GitHub].
 
 === Image types
 
-The images are available in two different configurations or "flavours". The
-`x-pack` flavour, which is the default, ships with X-Pack features
-pre-installed. The `oss` flavour does not include X-Pack, and contains only
+The images are available in two different configurations or "flavors". The
+`x-pack` flavor, which is the default, ships with X-Pack features
+pre-installed. The `oss` flavor does not include X-Pack, and contains only
 open-source Kibana.
 
 NOTE: https://www.elastic.co/guide/en/x-pack/current/index.html[X-Pack] is
