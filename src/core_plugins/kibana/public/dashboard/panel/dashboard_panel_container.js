@@ -1,13 +1,11 @@
 import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 
 import { DashboardPanel } from './dashboard_panel';
 import { DashboardViewMode } from '../dashboard_view_mode';
 
 import {
   renderEmbeddable,
-  maximizePanel,
-  minimizePanel,
-  deletePanel,
   destroyEmbeddable
 } from '../actions';
 
@@ -46,3 +44,16 @@ export const DashboardPanelContainer = connect(
   mapStateToProps,
   mapDispatchToProps
 )(DashboardPanel);
+
+DashboardPanelContainer.propTypes = {
+  panelId: PropTypes.string.isRequired,
+  /**
+   * @type {EmbeddableHandler}
+   */
+  embeddableHandler: PropTypes.shape({
+    destroy: PropTypes.func.isRequired,
+    render: PropTypes.func.isRequired,
+    addDestroyEmeddable: PropTypes.func.isRequired,
+  }).isRequired,
+  getContainerApi: PropTypes.func.isRequired,
+};

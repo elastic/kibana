@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 import { PanelHeader } from './panel_header';
@@ -67,3 +68,15 @@ export const PanelHeaderContainer = connect(
   mapDispatchToProps,
   mergeProps,
 )(PanelHeader);
+
+PanelHeaderContainer.propTypes = {
+  panelId: PropTypes.string.isRequired,
+  /**
+   * @type {EmbeddableHandler}
+   */
+  embeddableHandler: PropTypes.shape({
+    destroy: PropTypes.func.isRequired,
+    render: PropTypes.func.isRequired,
+    addDestroyEmeddable: PropTypes.func.isRequired,
+  }).isRequired,
+};
