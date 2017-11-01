@@ -74,7 +74,7 @@ export function Home({ addBasePath, directories }) {
               <h3 className="kuiSubTitle kuiVerticalRhythm">
                 Visualize and explore data
               </h3>
-              <KuiFlexGrid className="kuiVerticalRhythmSmall topFeatures" columns={2}>
+              <KuiFlexGrid className="kuiVerticalRhythmSmall homeTopFeatures" columns={2}>
                 { renderDirectories(FeatureCatalogueCategory.DATA) }
               </KuiFlexGrid>
             </KuiFlexItem>
@@ -82,14 +82,14 @@ export function Home({ addBasePath, directories }) {
               <h3 className="kuiSubTitle kuiVerticalRhythm">
                 Manage and administer the Elastic stack
               </h3>
-              <KuiFlexGrid className="kuiVerticalRhythmSmall topFeatures" columns={2}>
+              <KuiFlexGrid className="kuiVerticalRhythmSmall homeTopFeatures" columns={2}>
                 { renderDirectories(FeatureCatalogueCategory.ADMIN) }
               </KuiFlexGrid>
             </KuiFlexItem>
           </KuiFlexGroup>
         </div>
 
-        <div className="kuiViewContentItem kuiVerticalRhythmXLarge center">
+        <div className="kuiViewContentItem kuiVerticalRhythmXLarge text-center">
 
           <h4 className="kuiSubduedText kuiVerticalRhythmSmall">
             {`Didn't find what you were looking for?`}

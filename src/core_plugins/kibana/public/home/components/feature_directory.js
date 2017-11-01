@@ -52,7 +52,7 @@ export class FeatureDirectory extends React.Component {
   renderTabs = () => {
     return this.tabs.map((tab, index) => (
       <KuiTab
-        className="featureCategoryTab"
+        className="homeFeatureCategoryTab"
         onClick={() => this.onSelectedTabChanged(tab.id)}
         isSelected={tab.id === this.state.selectedTabId}
         key={index}
@@ -97,10 +97,10 @@ export class FeatureDirectory extends React.Component {
             </h1>
           </div>
           <div className="kuiViewContentItem kuiVerticalRhythmXLarge">
-            <KuiTabs className="featureDirectoryTabs">
+            <KuiTabs className="homeFeatureDirectoryTabs">
               {this.renderTabs()}
             </KuiTabs>
-            <KuiFlexGrid columns={4} className="featureDirectory">
+            <KuiFlexGrid columns={4} className="homeFeatureDirectory">
               { this.renderDirectories() }
             </KuiFlexGrid>
           </div>

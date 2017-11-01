@@ -3741,6 +3741,7 @@ main {
   .kuiTab.kuiTab-isSelected {
     cursor: default;
     color: #191E23;
+    background-color: #FFF;
     border-bottom-color: #FFF; }
     .theme-dark .kuiTab.kuiTab-isSelected {
       color: #cecece;
