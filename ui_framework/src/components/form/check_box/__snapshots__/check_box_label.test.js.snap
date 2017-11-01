@@ -1,0 +1,91 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiCheckBoxLabel Props isChecked false renders unchecked 1`] = `
+<label
+  class="kuiCheckBoxLabel"
+>
+  <input
+    class="kuiCheckBox"
+    type="checkbox"
+  />
+  <span
+    class="kuiCheckBoxLabel__text"
+  />
+</label>
+`;
+
+exports[`KuiCheckBoxLabel Props isChecked true renders checked 1`] = `
+<label
+  class="kuiCheckBoxLabel"
+>
+  <input
+    checked=""
+    class="kuiCheckBox"
+    type="checkbox"
+  />
+  <span
+    class="kuiCheckBoxLabel__text"
+  />
+</label>
+`;
+
+exports[`KuiCheckBoxLabel Props isDisabled false renders enabled 1`] = `
+<label
+  class="kuiCheckBoxLabel"
+>
+  <input
+    class="kuiCheckBox"
+    type="checkbox"
+  />
+  <span
+    class="kuiCheckBoxLabel__text"
+  />
+</label>
+`;
+
+exports[`KuiCheckBoxLabel Props isDisabled true renders disabled 1`] = `
+<label
+  class="kuiCheckBoxLabel"
+>
+  <input
+    class="kuiCheckBox"
+    disabled=""
+    type="checkbox"
+  />
+  <span
+    class="kuiCheckBoxLabel__text"
+  />
+</label>
+`;
+
+exports[`KuiCheckBoxLabel Props text 1`] = `
+<label
+  class="kuiCheckBoxLabel"
+>
+  <input
+    class="kuiCheckBox"
+    type="checkbox"
+  />
+  <span
+    class="kuiCheckBoxLabel__text"
+  >
+    text
+  </span>
+</label>
+`;
+
+exports[`KuiCheckBoxLabel renders 1`] = `
+<label
+  aria-label="aria-label"
+  class="kuiCheckBoxLabel testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <input
+    class="kuiCheckBox"
+    type="checkbox"
+  />
+  <span
+    class="kuiCheckBoxLabel__text"
+  />
+</label>
+`;
