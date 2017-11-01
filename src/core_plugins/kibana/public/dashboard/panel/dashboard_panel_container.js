@@ -39,12 +39,6 @@ const mapDispatchToProps = (dispatch, { embeddableHandler, panelId, getContainer
   renderEmbeddable: (panelElement, panel) => (
     dispatch(renderEmbeddable(embeddableHandler, panelElement, panel, getContainerApi()))
   ),
-  onDeletePanel: () => {
-    dispatch(deletePanel(panelId));
-    dispatch(destroyEmbeddable(panelId, embeddableHandler));
-  },
-  onMaximizePanel: () => dispatch(maximizePanel(panelId)),
-  onMinimizePanel: () => dispatch(minimizePanel()),
   onDestroy: () => dispatch(destroyEmbeddable(panelId, embeddableHandler)),
 });
 
