@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-export default async function createDateAgg(config, tlConfig) {
+export default function createDateAgg(config, tlConfig, scriptedFields) {
   const dateAgg = {
     time_buckets: {
       meta: { type: 'time_buckets' },
@@ -16,24 +16,6 @@ export default async function createDateAgg(config, tlConfig) {
       }
     }
   };
-
-  const savedObjectsClient = tlConfig.request.getSavedObjectsClient();
-  const resp = await savedObjectsClient.find({
-    type: 'index-pattern',
-    fields: ['title', 'fields'],
-    search: config.index,
-    search_fields: ['title']
-  });
-  const indexPatternSavedObject = resp.saved_objects.find(savedObject => {
-    return savedObject.attributes.title === config.index;
-  });
-  let scriptedFields = [];
-  if (indexPatternSavedObject) {
-    const fields = JSON.parse(indexPatternSavedObject.attributes.fields);
-    scriptedFields = fields.filter(field => {
-      return field.scripted;
-    });
-  }
 
   dateAgg.time_buckets.aggs = {};
   _.each(config.metric, function (metric) {

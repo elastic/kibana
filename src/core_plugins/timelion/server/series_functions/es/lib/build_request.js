@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import createDateAgg from './create_date_agg';
 
-export default async function buildRequest(config, tlConfig) {
+export default function buildRequest(config, tlConfig, scriptedFields) {
 
   const bool = { must: [] };
 
@@ -31,12 +31,23 @@ export default async function buildRequest(config, tlConfig) {
   _.each(config.split, function (clause) {
     clause = clause.split(':');
     if (clause[0] && clause[1]) {
+      const termsAgg = {
+        size: parseInt(clause[1], 10)
+      };
+      const scriptedField = scriptedFields.find(field => {
+        return field.name === clause[0];
+      });
+      if (scriptedField) {
+        termsAgg.script = {
+          inline: scriptedField.script,
+          lang: scriptedField.lang
+        };
+      } else {
+        termsAgg.field = clause[0];
+      }
       aggCursor[clause[0]] = {
         meta: { type: 'split' },
-        terms: {
-          field: clause[0],
-          size: parseInt(clause[1], 10)
-        },
+        terms: termsAgg,
         aggs: {}
       };
       aggCursor = aggCursor[clause[0]].aggs;
@@ -45,8 +56,7 @@ export default async function buildRequest(config, tlConfig) {
     }
   });
 
-  const dateAgg = await createDateAgg(config, tlConfig);
-  _.assign(aggCursor, dateAgg);
+  _.assign(aggCursor, createDateAgg(config, tlConfig, scriptedFields));
 
 
   return {

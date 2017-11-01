@@ -59,10 +59,26 @@ export default new Datasource('es', {
       fit: 'nearest'
     });
 
+    const findResp = await tlConfig.request.getSavedObjectsClient().find({
+      type: 'index-pattern',
+      fields: ['title', 'fields'],
+      search: config.index,
+      search_fields: ['title']
+    });
+    const indexPatternSavedObject = findResp.saved_objects.find(savedObject => {
+      return savedObject.attributes.title === config.index;
+    });
+    let scriptedFields = [];
+    if (indexPatternSavedObject) {
+      const fields = JSON.parse(indexPatternSavedObject.attributes.fields);
+      scriptedFields = fields.filter(field => {
+        return field.scripted;
+      });
+    }
+
+    const body = buildRequest(config, tlConfig, scriptedFields);
+
     const { callWithRequest } = tlConfig.server.plugins.elasticsearch.getCluster('data');
-
-    const body = await buildRequest(config, tlConfig);
-
     const resp = await callWithRequest(tlConfig.request, 'search', body);
     if (!resp._shards.total) throw new Error('Elasticsearch index not found: ' + config.index);
     return {
