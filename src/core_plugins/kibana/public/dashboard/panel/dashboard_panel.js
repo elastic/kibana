@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
-import { PanelHeaderContainer } from './panel_header/panel_header_container';
+import { PanelHeader } from './panel_header';
 import { PanelError } from './panel_error';
 
 export class DashboardPanel extends React.Component {
@@ -74,7 +74,7 @@ export class DashboardPanel extends React.Component {
           className={classes}
           data-test-subj="dashboardPanel"
         >
-          <PanelHeaderContainer
+          <PanelHeader
             embeddableHandler={embeddableHandler}
             panelId={panel.panelIndex}
           />
