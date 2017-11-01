@@ -110,7 +110,8 @@ uiModules.get('kibana/courier')
       }
     });
 
-    Notifier.fatalCallbacks.push(() => self.close());
+    const closeOnFatal = _.once(self.close);
+    Notifier.fatalCallbacks.push(closeOnFatal);
   }
 
   return new Courier();
