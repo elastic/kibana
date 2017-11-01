@@ -21,7 +21,7 @@ export class FeatureDirectory extends React.Component {
   constructor(props) {
     super(props);
 
-    const tabs = [{
+    this.tabs = [{
       id: ALL_TAB_ID,
       name: 'All',
     }, {
@@ -31,15 +31,13 @@ export class FeatureDirectory extends React.Component {
       id: FeatureCatalogueCategory.ADMIN,
       name: 'Administrative',
     }];
-
     if (props.directories.some(isOtherCategory)) {
-      tabs.push({
+      this.tabs.push({
         id: OTHERS_TAB_ID,
         name: 'Other',
       });
     }
 
-    this.tabs = tabs;
     this.state = {
       selectedTabId: ALL_TAB_ID
     };
