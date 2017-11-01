@@ -21,13 +21,10 @@ export class PanelOptionsMenu extends React.Component {
   closePopover = () => this.setState({ isPopoverOpen: false });
 
   onEditPanel = () => {
-    this.closePopover();
     window.location = this.props.editUrl;
   };
 
   onDeletePanel = () => {
-    this.closePopover();
-
     if (this.props.onDeletePanel) {
       this.props.onDeletePanel();
     }

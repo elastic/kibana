@@ -39,7 +39,6 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { isExpanded, isViewOnlyMode, title } = stateProps;
   const { onMaximizePanel, onMinimizePanel } = dispatchProps;
   const { panelId, embeddableHandler } = ownProps;
-  const toggleExpandedPanel = () => isExpanded ? onMinimizePanel() : onMaximizePanel();
   let actions;
 
   if (isViewOnlyMode) {
@@ -50,9 +49,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     actions = (
       <PanelOptionsMenuContainer
         panelId={panelId}
-        toggleExpandedPanel={toggleExpandedPanel}
         embeddableHandler={embeddableHandler}
-        isExpanded={isExpanded}
       />
     );
   }

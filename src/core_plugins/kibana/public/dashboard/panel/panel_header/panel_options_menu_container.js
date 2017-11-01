@@ -5,18 +5,22 @@ import { PanelOptionsMenu } from './panel_options_menu';
 
 import {
   deletePanel,
-  destroyEmbeddable
+  destroyEmbeddable,
+  maximizePanel,
+  minimizePanel,
 } from '../../actions';
 
 import {
   getEmbeddable,
   getEmbeddableEditUrl,
+  getMaximizedPanelId,
 } from '../../reducers';
 
 const mapStateToProps = ({ dashboard }, { panelId }) => {
   const embeddable = getEmbeddable(dashboard, panelId);
   return {
     editUrl: embeddable ? getEmbeddableEditUrl(dashboard, panelId) : '',
+    isExpanded: getMaximizedPanelId(dashboard) === panelId,
   };
 };
 
@@ -29,12 +33,28 @@ const mapDispatchToProps = (dispatch, { embeddableHandler, panelId }) => ({
   onDeletePanel: () => {
     dispatch(deletePanel(panelId));
     dispatch(destroyEmbeddable(panelId, embeddableHandler));
-  }
+  },
+  onMaximizePanel: () => dispatch(maximizePanel(panelId)),
+  onMinimizePanel: () => dispatch(minimizePanel()),
 });
+
+const mergeProps = (stateProps, dispatchProps) => {
+  const { isExpanded, editUrl } = stateProps;
+  const { onMaximizePanel, onMinimizePanel, onDeletePanel } = dispatchProps;
+  const toggleExpandedPanel = () => isExpanded ? onMinimizePanel() : onMaximizePanel();
+
+  return {
+    toggleExpandedPanel,
+    isExpanded,
+    editUrl,
+    onDeletePanel
+  };
+};
 
 export const PanelOptionsMenuContainer = connect(
   mapStateToProps,
-  mapDispatchToProps
+  mapDispatchToProps,
+  mergeProps,
 )(PanelOptionsMenu);
 
 PanelOptionsMenuContainer.propTypes = {
