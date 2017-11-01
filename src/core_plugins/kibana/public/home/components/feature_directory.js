@@ -52,6 +52,7 @@ export class FeatureDirectory extends React.Component {
   renderTabs = () => {
     return this.tabs.map((tab, index) => (
       <KuiTab
+        className="featureCategoryTab"
         onClick={() => this.onSelectedTabChanged(tab.id)}
         isSelected={tab.id === this.state.selectedTabId}
         key={index}

@@ -20,8 +20,8 @@ export function Synopsis({ description, iconUrl, title, url }) {
   return (
     <KuiFlexGroup>
       <KuiFlexItem grow={false}>{img}</KuiFlexItem>
-      <KuiFlexItem className="synopsisText">
-        <h4 className="kuiTextTitle">
+      <KuiFlexItem className="synopsis">
+        <h4 className="kuiTextTitle synopsisTitle">
           <a href={url} className="kuiLink">
             {title}
           </a>

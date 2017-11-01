@@ -70,25 +70,21 @@ export function Home({ addBasePath, directories }) {
 
         <div className="kuiViewContentItem kuiVerticalRhythmXLarge">
           <KuiFlexGroup className="kuiVerticalRhythm">
-            <KuiFlexItem className="kuiPanel">
-              <div className="kuiPanelBody">
-                <h3 className="kuiSubTitle kuiVerticalRhythm">
-                  Visualize and explore data
-                </h3>
-                <KuiFlexGrid className="kuiVerticalRhythmSmall topFeatures" columns={2}>
-                  { renderDirectories(FeatureCatalogueCategory.DATA) }
-                </KuiFlexGrid>
-              </div>
+            <KuiFlexItem className="kuiPanel homePanel">
+              <h3 className="kuiSubTitle kuiVerticalRhythm">
+                Visualize and explore data
+              </h3>
+              <KuiFlexGrid className="kuiVerticalRhythmSmall topFeatures" columns={2}>
+                { renderDirectories(FeatureCatalogueCategory.DATA) }
+              </KuiFlexGrid>
             </KuiFlexItem>
-            <KuiFlexItem className="kuiPanel">
-              <div className="kuiPanelBody">
-                <h3 className="kuiSubTitle kuiVerticalRhythm">
-                  Manage and administer the Elastic stack
-                </h3>
-                <KuiFlexGrid className="kuiVerticalRhythmSmall topFeatures" columns={2}>
-                  { renderDirectories(FeatureCatalogueCategory.ADMIN) }
-                </KuiFlexGrid>
-              </div>
+            <KuiFlexItem className="kuiPanel homePanel">
+              <h3 className="kuiSubTitle kuiVerticalRhythm">
+                Manage and administer the Elastic stack
+              </h3>
+              <KuiFlexGrid className="kuiVerticalRhythmSmall topFeatures" columns={2}>
+                { renderDirectories(FeatureCatalogueCategory.ADMIN) }
+              </KuiFlexGrid>
             </KuiFlexItem>
           </KuiFlexGroup>
         </div>

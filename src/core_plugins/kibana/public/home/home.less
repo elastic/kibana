@@ -3,30 +3,15 @@
 .home {
   background-color: @globalColorLightestGray;
   min-height: 100vh;
+}
 
-  .kuiPanelBody {
-    padding: 24px;
-  }
+.homePanel {
+  padding: 24px;
+  background-color: @white;
 }
 
 .topFeatures {
   margin-top: 12px;
-}
-
-.kuiCard__descriptionTitle img {
-  display: inline-block;
-  width: 64px;
-  height: 64px;
-  margin-bottom: 10px;
-}
-
-.kuiCardGroup .kuiCard {
-  flex: 1 1 0 !important;
-  background-color: white;
-}
-
-.kuiPanel {
-  background-color: white;
 }
 
 .center {
@@ -34,19 +19,18 @@
 }
 
 .featureDirectory {
-  background: white;
+  background: @white;
   margin: 0;
-  border-left: 1px solid #D9D9D9;
-  border-right: 1px solid #D9D9D9;
-  border-bottom: 1px solid #D9D9D9;
+  border-left: 1px solid @globalColorLightGray;
+  border-right: 1px solid @globalColorLightGray;
+  border-bottom: 1px solid @globalColorLightGray;
   padding: 24px;
 }
 
-.featureDirectoryTabs {
-  .kuiTab {
-    background-color: @globalColorLightestGray;
-  }
-  .kuiTab.kuiTab-isSelected {
-    background-color: white;
+.featureCategoryTab {
+  background-color: @globalColorLightestGray;
+
+  &.kuiTab-isSelected {
+    background-color: @white;
   }
 }
