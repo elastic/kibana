@@ -334,3 +334,18 @@ dashboard-viewport-provider {
     overflow: auto; /* 1 */
   }
 }
+
+/**
+ * The dashboard background color is the same as the panel color by default. When the user wants to use margins, we
+ * need to give a different background color so the panels are distinguishable from the background.
+ */
+.layout-with-margins {
+  background-color: @dashboard-bg-with-margins;
+  .panel {
+    border: 1px solid #D9D9D9;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+  }
+}
+.dashboard-viewport-with-margins {
+  background-color: @dashboard-bg-with-margins;
+}

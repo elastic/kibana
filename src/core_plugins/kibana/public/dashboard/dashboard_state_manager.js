@@ -5,7 +5,13 @@ import { DashboardViewMode } from './dashboard_view_mode';
 import { FilterUtils } from './lib/filter_utils';
 import { PanelUtils } from './panel/panel_utils';
 import { store } from '../store';
-import { updateViewMode, updatePanels, updateIsFullScreenMode, minimizePanel } from './actions';
+import {
+  updateViewMode,
+  updatePanels,
+  updateUseMargins,
+  updateIsFullScreenMode,
+  minimizePanel
+} from './actions';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { createPanelState, getPersistedStateId } from './panel';
 import { getAppStateDefaults } from './lib';
@@ -14,6 +20,7 @@ import {
   getFullScreenMode,
   getPanels,
   getPanel,
+  getUseMargins,
 } from '../selectors';
 
 /**
@@ -73,6 +80,7 @@ export class DashboardStateManager {
     store.dispatch(minimizePanel());
     store.dispatch(updatePanels(this.getPanels()));
     store.dispatch(updateViewMode(this.getViewMode()));
+    store.dispatch(updateUseMargins(this.getUseMargins()));
     store.dispatch(updateIsFullScreenMode(this.getFullScreenMode()));
 
     this.changeListeners = [];
@@ -118,6 +126,10 @@ export class DashboardStateManager {
     const state = store.getState();
     if (getViewMode(state) !== this.getViewMode()) {
       store.dispatch(updateViewMode(this.getViewMode()));
+    }
+
+    if (getUseMargins(state) !== this.getUseMargins()) {
+      store.dispatch(updateUseMargins(this.getUseMargins()));
     }
 
     if (getFullScreenMode(state) !== this.getFullScreenMode()) {
@@ -231,6 +243,15 @@ export class DashboardStateManager {
 
   getQuery() {
     return this.appState.query;
+  }
+
+  getUseMargins() {
+    return !!this.appState.options.useMargins;
+  }
+
+  setUseMargins(useMargins) {
+    this.appState.options.useMargins = useMargins;
+    this.saveState();
   }
 
   getDarkTheme() {
