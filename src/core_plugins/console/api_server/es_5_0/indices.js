@@ -169,7 +169,7 @@ export default function (api) {
   });
 
   api.addEndpointDescription('_get_index_settings', {
-    methods: ['GET',],
+    methods: ['GET', ],
     patterns: [
       "{indices}/_settings",
     ],
@@ -179,7 +179,7 @@ export default function (api) {
   });
 
   api.addEndpointDescription('_get_index', {
-    methods: ['GET',],
+    methods: ['GET', ],
     patterns: [
       "{indices}",
       "{indices}/{feature}"

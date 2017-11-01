@@ -17,7 +17,7 @@ export function buildNodeParams(fieldName, value, serializeStyle = 'operator') {
 }
 
 export function toElasticsearchQuery(node, indexPattern) {
-  const { arguments:  [ fieldNameArg, valueArg ] } = node;
+  const { arguments: [ fieldNameArg, valueArg ] } = node;
   const fieldName = literal.toElasticsearchQuery(fieldNameArg);
   const field = indexPattern.fields.byName[fieldName];
   const value = !_.isUndefined(valueArg) ? literal.toElasticsearchQuery(valueArg) : valueArg;
@@ -61,7 +61,7 @@ export function toKueryExpression(node) {
     throw new Error(`Cannot serialize "is" function as "${node.serializeStyle}"`);
   }
 
-  const { arguments:  [ fieldNameArg, valueArg ] } = node;
+  const { arguments: [ fieldNameArg, valueArg ] } = node;
   const fieldName = literal.toKueryExpression(fieldNameArg);
   const value = !_.isUndefined(valueArg) ? literal.toKueryExpression(valueArg) : valueArg;
 

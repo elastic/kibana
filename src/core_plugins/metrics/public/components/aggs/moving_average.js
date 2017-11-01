@@ -48,6 +48,7 @@ export const MovingAverageAgg = props => {
           <div className="vis_editor__row_item">
             <div className="vis_editor__label">Aggregation</div>
             <AggSelect
+              panelType={props.panel.type}
               siblings={props.siblings}
               value={model.type}
               onChange={handleSelectChange('type')}
@@ -95,6 +96,18 @@ export const MovingAverageAgg = props => {
               onChange={handleSelectChange('minimize')}
               value={model.minimize}
               options={minimizeOptions}
+            />
+          </div>
+          <div className="vis_editor__row_item">
+            <label className="vis_editor__label" htmlFor={htmlId('windowSize')}>
+              Predict
+            </label>
+            <input
+              id={htmlId('predict')}
+              className="vis_editor__input-grows-100"
+              type="text"
+              onChange={handleNumberChange('predict')}
+              value={model.predict}
             />
           </div>
         </div>

@@ -1,7 +1,6 @@
 import { uiModules } from 'ui/modules';
 import './step_index_pattern.less';
 import template from './step_index_pattern.html';
-import { documentationLinks } from 'ui/documentation_links/documentation_links';
 
 const module = uiModules.get('apps/management');
 
@@ -58,8 +57,6 @@ module.directive('stepIndexPattern', function () {
     },
     controller: function () {
       this.matchingIndicesListType = 'noMatches';
-      this.documentationLinks = documentationLinks;
-
       this.canGoToNextStep = () => (
         !this.isFetchingMatchingIndices
         && !this.indexPatternNameForm.$invalid

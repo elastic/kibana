@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import _ from 'lodash';
 import getLastValue from '../lib/get_last_value';
 import reactcss from 'reactcss';
 
@@ -61,9 +60,7 @@ class TopN extends Component {
       return lastValue > max ? lastValue : max;
     }, 0);
 
-    const rows = _.sortBy(this.props.series, s => getLastValue(s.data, s.data.length))
-      .reverse()
-      .map(this.renderRow(maxValue));
+    const rows = this.props.series.map(this.renderRow(maxValue));
     let className = 'rhythm_top_n';
     if (this.props.reversed) {
       className += ' reversed';
@@ -84,14 +81,16 @@ class TopN extends Component {
 
 TopN.defaultProps = {
   tickFormatter: n => n,
-  onClick: i => i
+  onClick: i => i,
+  direction: 'desc'
 };
 
 TopN.propTypes = {
   tickFormatter: PropTypes.func,
   onClick: PropTypes.func,
   series: PropTypes.array,
-  reversed: PropTypes.bool
+  reversed: PropTypes.bool,
+  direction: PropTypes.string
 };
 
 export default TopN;

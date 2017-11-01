@@ -17,6 +17,8 @@ export default function splitByTerm(req, panel, series) {
         to
       }  = getTimerange(req);
 
+      const direction = series.terms_direction || 'desc';
+
       _.set(doc, `aggs.${series.id}.terms.field`, series.terms_field);
       _.set(doc, `aggs.${series.id}.terms.size`, series.terms_size);
       const metric = series.metrics.find(item => item.id === series.terms_order_by);
@@ -25,7 +27,7 @@ export default function splitByTerm(req, panel, series) {
         const fn = bucketTransform[metric.type];
         const bucketPath = getBucketsPath(series.terms_order_by, series.metrics)
           .replace(series.terms_order_by, `${sortAggKey} > SORT`);
-        _.set(doc, `aggs.${series.id}.terms.order`, { [bucketPath]: 'desc' });
+        _.set(doc, `aggs.${series.id}.terms.order`, { [bucketPath]: direction });
         _.set(doc, `aggs.${series.id}.aggs`, {
           [sortAggKey]: {
             filter: {
@@ -40,6 +42,10 @@ export default function splitByTerm(req, panel, series) {
             aggs: { SORT: fn(metric) }
           }
         });
+      } else if (['_term', '_count'].includes(series.terms_order_by)) {
+        _.set(doc, `aggs.${series.id}.terms.order`, { [series.terms_order_by]: direction });
+      } else {
+        _.set(doc, `aggs.${series.id}.terms.order`, { _count: direction });
       }
     }
     return next(doc);

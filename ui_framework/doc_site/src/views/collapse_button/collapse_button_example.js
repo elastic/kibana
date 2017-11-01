@@ -10,11 +10,11 @@ import {
 } from '../../components';
 
 import CollapseButton from './collapse_button';
-const collapseButtonSource = require('!!raw!./collapse_button');
+const collapseButtonSource = require('!!raw-loader!./collapse_button');
 const collapseButtonHtml = renderToHtml(CollapseButton);
 
 import CollapseButtonAria from './collapse_button_aria';
-const collapseButtonAriaSource = require('!!raw!./collapse_button_aria');
+const collapseButtonAriaSource = require('!!raw-loader!./collapse_button_aria');
 const collapseButtonAriaHtml = renderToHtml(CollapseButtonAria);
 
 export default props => (

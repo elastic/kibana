@@ -63,6 +63,33 @@ exports[`KuiPopover props isOpen renders true 1`] = `
 </div>
 `;
 
+exports[`KuiPopover props ownFocus defaults to false 1`] = `
+<div
+  class="kuiPopover"
+>
+  <button />
+  <div>
+    <div
+      class="kuiPanelSimple kuiPanelSimple--paddingMedium kuiPanelSimple--shadow kuiPopover__panel"
+    />
+  </div>
+</div>
+`;
+
+exports[`KuiPopover props ownFocus renders true 1`] = `
+<div
+  class="kuiPopover"
+>
+  <button />
+  <div>
+    <div
+      class="kuiPanelSimple kuiPanelSimple--paddingMedium kuiPanelSimple--shadow kuiPopover__panel"
+      tabindex="0"
+    />
+  </div>
+</div>
+`;
+
 exports[`KuiPopover props panelClassName is rendered 1`] = `
 <div
   class="kuiPopover"

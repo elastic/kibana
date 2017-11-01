@@ -24,7 +24,7 @@ export default function chainRunner(tlConfig) {
     const functionDef = tlConfig.server.plugins.timelion.getFunction(fnName);
 
     function resolveArgument(item) {
-      if (_.isArray(item)) {
+      if (Array.isArray(item)) {
         return Promise.all(_.map(item, resolveArgument));
       }
 
@@ -93,7 +93,7 @@ export default function chainRunner(tlConfig) {
     }
 
     return promise.then(function (result) {
-      return invokeChain({ type:'chain', chain: chain }, [result]);
+      return invokeChain({ type: 'chain', chain: chain }, [result]);
     });
 
   }

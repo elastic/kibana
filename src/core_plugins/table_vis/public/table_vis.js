@@ -58,7 +58,7 @@ function TableVisTypeProvider(Private) {
           group: 'metrics',
           name: 'metric',
           title: 'Metric',
-          aggFilter: ['!geo_centroid','!geo_bounds'],
+          aggFilter: ['!geo_centroid', '!geo_bounds'],
           min: 1,
           defaults: [
             { type: 'count', schema: 'metric' }

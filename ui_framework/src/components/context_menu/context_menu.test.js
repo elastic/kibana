@@ -54,28 +54,24 @@ describe('KuiContextMenu', () => {
   });
 
   describe('props', () => {
-    describe('idToPanelMap and initialPanelId', () => {
+    describe('panels and initialPanelId', () => {
       it('renders the referenced panel', () => {
         const component = render(
           <KuiContextMenu
             panels={panels}
             initialPanelId={2}
-            isVisible
           />
         );
 
         expect(component)
           .toMatchSnapshot();
       });
-    });
 
-    describe('idToPreviousPanelIdMap', () => {
-      it('allows you to click the title button to go back to the previous panel', done => {
+      it('allows you to click the title button to go back to the previous panel', () => {
         const component = mount(
           <KuiContextMenu
             panels={panels}
             initialPanelId={2}
-            isVisible
           />
         );
 
@@ -90,28 +86,6 @@ describe('KuiContextMenu', () => {
             .toMatchSnapshot();
           done();
         });
-      });
-    });
-
-    describe('isVisible', () => {
-      it('causes the first panel to be shown when it becomes true', () => {
-        const component = mount(
-          <KuiContextMenu
-            panels={panels}
-            initialPanelId={2}
-            isVisible
-          />
-        );
-
-        // Navigate to a different panel.
-        component.find('[data-test-subj="contextMenuPanelTitleButton"]').simulate('click');
-
-        // Hide and then show the menu to reset the panel to the initial one.
-        component.setProps({ isVisible: false });
-        component.setProps({ isVisible: true });
-
-        expect(takeMountedSnapshot(component))
-          .toMatchSnapshot();
       });
     });
   });

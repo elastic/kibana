@@ -45,7 +45,7 @@ export function SearchStrategyProvider(Private, Promise, timefilter, kbnIndex, s
           // with an msearch without any index patterns, elasticsearch would
           // handle that request by querying *all* indexes, which is the
           // opposite of what we want in this case.
-          if (_.isArray(indexList) && indexList.length === 0) {
+          if (Array.isArray(indexList) && indexList.length === 0) {
             index.push(kbnIndex);
             body = emptySearch();
           } else {
