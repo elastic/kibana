@@ -56,9 +56,11 @@ export function Home({ addBasePath, directories }) {
                 </KuiFlexItem>
 
                 <KuiFlexItem grow={false}>
-                  <KuiButton buttonType="secondary">
-                    <a href={addBasePath('/app/kibana#/management/kibana/index')}>Set up index patterns</a>
-                  </KuiButton>
+                  <a href={addBasePath('/app/kibana#/management/kibana/index')}>
+                    <KuiButton buttonType="secondary">
+                      Set up index patterns
+                    </KuiButton>
+                  </a>
                 </KuiFlexItem>
               </KuiFlexGroup>
 
@@ -97,12 +99,14 @@ export function Home({ addBasePath, directories }) {
             {`Didn't find what you were looking for?`}
           </h4>
 
-          <KuiButton
-            className="kuiVerticalRhythmSmall"
-            buttonType="secondary"
-          >
-            <a href="#/home/feature_directory">View full directory of Kibana features</a>
-          </KuiButton>
+          <a href="#/home/feature_directory">
+            <KuiButton
+              className="kuiVerticalRhythmSmall"
+              buttonType="secondary"
+            >
+              View full directory of Kibana features
+            </KuiButton>
+          </a>
 
         </div>
 
