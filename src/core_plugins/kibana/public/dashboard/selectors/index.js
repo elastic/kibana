@@ -16,6 +16,11 @@ import {
   getMaximizedPanelId as getMaximizedPanelIdFromView
 } from './view';
 
+import {
+  getTitle as getTitleFromMetadata,
+  getDescription as getDescriptionFromMetadata
+} from './metadata';
+
 /**
  * @typedef {Object} DashboardState
  * @property {Object} PanelsState
@@ -94,3 +99,19 @@ export const getFullScreenMode = dashboard => getFullScreenModeFromView(getView(
  * @return {string|undefined}
  */
 export const getMaximizedPanelId = dashboard => getMaximizedPanelIdFromView(getView(dashboard));
+
+/**
+ * @param dashboard {DashboardState}
+ * @return {MetadataState}
+ */
+export const getMetadata = dashboard => dashboard.metadata;
+/**
+ * @param dashboard {MetadataState}
+ * @return {string}
+ */
+export const getTitle = dashboard => getTitleFromMetadata(getMetadata(dashboard));
+/**
+ * @param dashboard {MetadataState}
+ * @return {string}
+ */
+export const getDescription = dashboard => getDescriptionFromMetadata(getMetadata(dashboard));

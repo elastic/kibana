@@ -7,11 +7,15 @@ export function DashboardViewport({
   maximizedPanelId,
   getEmbeddableHandler,
   panelCount,
+  title,
+  description,
 }) {
   return (
     <div
       data-shared-items-count={panelCount}
       data-shared-items-container
+      data-title={title}
+      data-description={description}
     >
       <DashboardGridContainer
         getEmbeddableHandler={getEmbeddableHandler}
@@ -27,4 +31,6 @@ DashboardViewport.propTypes = {
   getEmbeddableHandler: PropTypes.func,
   maximizedPanelId: PropTypes.string,
   panelCount: PropTypes.number,
+  title: PropTypes.string,
+  description: PropTypes.string,
 };

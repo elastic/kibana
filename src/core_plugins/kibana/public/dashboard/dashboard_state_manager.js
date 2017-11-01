@@ -5,7 +5,7 @@ import { DashboardViewMode } from './dashboard_view_mode';
 import { FilterUtils } from './lib/filter_utils';
 import { PanelUtils } from './panel/panel_utils';
 import { store } from '../store';
-import { updateViewMode, updatePanels, updateIsFullScreenMode, minimizePanel } from './actions';
+import { updateViewMode, updatePanels, updateIsFullScreenMode, minimizePanel, updateTitle, updateDescription } from './actions';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { createPanelState, getPersistedStateId } from './panel';
 import { getAppStateDefaults } from './lib';
@@ -14,6 +14,8 @@ import {
   getFullScreenMode,
   getPanels,
   getPanel,
+  getTitle,
+  getDescription,
 } from '../selectors';
 
 /**
@@ -122,6 +124,14 @@ export class DashboardStateManager {
 
     if (getFullScreenMode(state) !== this.getFullScreenMode()) {
       store.dispatch(updateIsFullScreenMode(this.getFullScreenMode()));
+    }
+
+    if (getTitle(state) !== this.getTitle()) {
+      store.dispatch(updateTitle(this.getTitle()));
+    }
+
+    if (getDescription(state) !== this.getDescription()) {
+      store.dispatch(updateDescription(this.getDescription()));
     }
   }
 

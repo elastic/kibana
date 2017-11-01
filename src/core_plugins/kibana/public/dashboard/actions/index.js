@@ -17,3 +17,8 @@ export {
   embeddableRenderError,
   destroyEmbeddable,
 } from './embeddables';
+
+export {
+  updateDescription,
+  updateTitle,
+} from './metadata';
