@@ -24,7 +24,7 @@ function getSortedPluginNames(plugins: Map<PluginName, Plugin<any, any>>) {
 }
 
 export class PluginSystem {
-  private readonly plugins = new Map<PluginName, Plugin<{}, {}>>();
+  private readonly plugins = new Map<PluginName, Plugin<any, any>>();
   private readonly log: Logger;
   private startedPlugins: PluginName[] = [];
 

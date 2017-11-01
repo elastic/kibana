@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "dependencies": {
     "kbn-types": "file:..",
-    "typescript": "2.5.1"
+    "typescript": "2.6.1"
   },
   "scripts": {
     "build": "tsc",
