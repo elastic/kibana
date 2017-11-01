@@ -7,6 +7,7 @@ import {
   KuiFlexItem,
   KuiFlexGrid,
 } from 'ui_framework/components';
+import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
 const ALL = 'all';
 
@@ -19,21 +20,21 @@ export class FeatureDirectory extends React.Component {
       id: ALL,
       name: 'All',
     }];
-    if (props.directories.some(directory => directory.category === props.directoryCategories.DATA)) {
+    if (props.directories.some(directory => directory.category === FeatureCatalogueCategory.DATA)) {
       tabs.push({
-        id: props.directoryCategories.DATA,
+        id: FeatureCatalogueCategory.DATA,
         name: 'Explore & Visualize'
       });
     }
-    if (props.directories.some(directory => directory.category === props.directoryCategories.ADMIN)) {
+    if (props.directories.some(directory => directory.category === FeatureCatalogueCategory.ADMIN)) {
       tabs.push({
-        id: props.directoryCategories.ADMIN,
+        id: FeatureCatalogueCategory.ADMIN,
         name: 'Administrative',
       });
     }
-    if (props.directories.some(directory => directory.category === props.directoryCategories.OTHER)) {
+    if (props.directories.some(directory => directory.category === FeatureCatalogueCategory.OTHER)) {
       tabs.push({
-        id: props.directoryCategories.OTHER,
+        id: FeatureCatalogueCategory.OTHER,
         name: 'Other',
       });
     }

@@ -8,7 +8,7 @@ import {
   Route
 } from 'react-router-dom';
 
-export function HomeApp({ addBasePath, directories, directoryCategories }) {
+export function HomeApp({ addBasePath, directories }) {
   return (
     <Router>
       <Switch>
@@ -18,7 +18,6 @@ export function HomeApp({ addBasePath, directories, directoryCategories }) {
           <FeatureDirectory
             addBasePath={addBasePath}
             directories={directories}
-            directoryCategories={directoryCategories}
           />
         </Route>
         <Route
@@ -27,7 +26,6 @@ export function HomeApp({ addBasePath, directories, directoryCategories }) {
           <Home
             addBasePath={addBasePath}
             directories={directories}
-            directoryCategories={directoryCategories}
           />
         </Route>
       </Switch>
@@ -45,6 +43,5 @@ HomeApp.propTypes = {
     path: PropTypes.string.isRequired,
     showOnHomePage: PropTypes.bool.isRequired,
     category: PropTypes.string.isRequired
-  })),
-  directoryCategories: PropTypes.object.isRequired,
+  }))
 };

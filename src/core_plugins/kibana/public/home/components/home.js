@@ -7,8 +7,9 @@ import {
   KuiFlexItem,
   KuiFlexGrid,
 } from 'ui_framework/components';
+import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
-export function Home({ addBasePath, directories, directoryCategories }) {
+export function Home({ addBasePath, directories }) {
 
   const renderDirectories = (category) => {
     return directories
@@ -73,7 +74,7 @@ export function Home({ addBasePath, directories, directoryCategories }) {
                   Visualize and explore data
                 </h3>
                 <KuiFlexGrid className="kuiVerticalRhythmSmall topFeatures" columns={2}>
-                  { renderDirectories(directoryCategories.DATA) }
+                  { renderDirectories(FeatureCatalogueCategory.DATA) }
                 </KuiFlexGrid>
               </div>
             </KuiFlexItem>
@@ -83,7 +84,7 @@ export function Home({ addBasePath, directories, directoryCategories }) {
                   Manage and administer the Elastic stack
                 </h3>
                 <KuiFlexGrid className="kuiVerticalRhythmSmall topFeatures" columns={2}>
-                  { renderDirectories(directoryCategories.ADMIN) }
+                  { renderDirectories(FeatureCatalogueCategory.ADMIN) }
                 </KuiFlexGrid>
               </div>
             </KuiFlexItem>
@@ -120,6 +121,5 @@ Home.propTypes = {
     path: PropTypes.string.isRequired,
     showOnHomePage: PropTypes.bool.isRequired,
     category: PropTypes.string.isRequired
-  })),
-  directoryCategories: PropTypes.object.isRequired
+  }))
 };

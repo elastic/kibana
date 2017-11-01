@@ -2,7 +2,7 @@ import './home.less';
 import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import template from './home_ng_wrapper.html';
-import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+import { FeatureCatalogueRegistryProvider } from 'ui/registry/feature_catalogue';
 import { uiModules } from 'ui/modules';
 import {
   HomeApp
@@ -19,7 +19,6 @@ function getRoute() {
     controller($scope, Private) {
       $scope.addBasePath = chrome.addBasePath;
       $scope.directories = Private(FeatureCatalogueRegistryProvider).inTitleOrder;
-      $scope.directoryCategories = FeatureCatalogueCategory;
     }
   };
 }
