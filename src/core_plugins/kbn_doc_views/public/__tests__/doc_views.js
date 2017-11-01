@@ -32,7 +32,7 @@ let docViews;
 const init = function ($elem, props) {
   ngMock.inject(function ($rootScope, $compile) {
     $parentScope = $rootScope;
-    _.assign($parentScope, props);
+    Object.assign($parentScope, props);
     $compile($elem)($parentScope);
     $elem.scope().$digest();
     $scope = $elem.isolateScope();

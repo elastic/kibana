@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import _ from 'lodash';
 import uuid from 'uuid';
 import AggRow from './agg_row';
 import AggSelect from './agg_select';
@@ -16,9 +15,10 @@ class CalculationAgg extends Component {
 
   componentWillMount() {
     if (!this.props.model.variables) {
-      this.props.onChange(_.assign({}, this.props.model, {
+      this.props.onChange({
+        ...this.props.model,
         variables: [{ id: uuid.v1() }]
-      }));
+      });
     }
   }
 

@@ -122,7 +122,7 @@ export default function chainRunner(tlConfig) {
           val.cell = i;
           return val;
         });
-        queries = _.extend(queries, queriesInCell);
+        queries = Object.assign(queries, queriesInCell);
       } catch (e) {
         throwWithCell(i, e);
       }

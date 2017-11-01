@@ -41,9 +41,9 @@ export function applyDiff(target, source) {
   });
 
   // Assign the changed to the source to the target
-  _.assign(target, _.pick(source, diff.changed));
+  Object.assign(target, _.pick(source, diff.changed));
   // Assign the added to the source to the target
-  _.assign(target, _.pick(source, diff.added));
+  Object.assign(target, _.pick(source, diff.added));
 
   return diff;
 

@@ -18,6 +18,6 @@ export default function tlConfigFn(setup) {
     }
   };
 
-  tlConfig = _.extend(tlConfig, setup);
+  tlConfig = Object.assign(tlConfig, setup);
   return tlConfig;
 }

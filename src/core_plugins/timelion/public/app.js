@@ -217,7 +217,7 @@ app.controller('timelion', function (
 
     const httpResult = $http.post('../api/timelion/run', {
       sheet: $scope.state.sheet,
-      time: _.extend(timefilter.time, {
+      time: Object.assign(timefilter.time, {
         interval: $scope.state.interval,
         timezone: timezone
       }),

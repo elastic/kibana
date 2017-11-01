@@ -38,7 +38,10 @@ function GaugeVisualization(props) {
         newProps.formatter = tickFormatter(seriesDef.formatter, seriesDef.value_template);
       }
       if (i === 0 && colors.gauge) newProps.color = colors.gauge;
-      return _.assign({}, row, newProps);
+      return {
+        ...row,
+        ...newProps
+      };
     });
   const params = {
     metric: series[0],

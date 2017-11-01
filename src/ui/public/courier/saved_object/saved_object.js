@@ -162,7 +162,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
           // If there is not id, then there is no document to fetch from elasticsearch
           if (!this.id) {
             // just assign the defaults and be done
-            _.assign(this, this.defaults);
+            Object.assign(this, this.defaults);
             return this.hydrateIndexPattern().then(() => {
               return afterESResp.call(this);
             });
@@ -212,7 +212,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
       });
 
       // Give obj all of the values in _source.fields
-      _.assign(this, this._source);
+      Object.assign(this, this._source);
       this.lastSavedTitle = this.title;
 
       return Promise.try(() => {

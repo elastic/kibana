@@ -128,7 +128,7 @@ export default class TransformObjStream extends Stream.Transform {
       data.error = serializeError(event.data);
     }
     else if (_.isPlainObject(event.data) && event.data.tmpl) {
-      _.assign(data, event.data);
+      Object.assign(data, event.data);
       data.tmpl = undefined;
       data.message = _.template(event.data.tmpl)(event.data);
     }

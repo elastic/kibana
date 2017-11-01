@@ -233,12 +233,11 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
     }
 
     _getMapsParams() {
-      return _.assign(
-        {},
-        this.vis.type.visConfig.defaults,
-        { type: this.vis.type.name },
-        this.vis.params
-      );
+      return {
+        ...this.vis.type.visConfig.defaults,
+        type: this.vis.type.name,
+        ...this.vis.params
+      };
     }
 
     _getGeohashOptions() {

@@ -1,6 +1,5 @@
 
 import angular from 'angular';
-import _ from 'lodash';
 import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
@@ -27,7 +26,7 @@ describe('discoverField', function () {
     `);
     indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
-    _.assign($rootScope, {
+    Object.assign($rootScope, {
       field: indexPattern.fields.byName.extension,
       addField: sinon.spy(() => $rootScope.field.display = true),
       removeField: sinon.spy(() => $rootScope.field.display = false),

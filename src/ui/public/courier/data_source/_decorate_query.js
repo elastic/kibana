@@ -10,7 +10,7 @@ export function DecorateQueryProvider(config) {
     const queryOptions = config.get('query:queryString:options');
 
     if (_.has(query, 'query_string.query')) {
-      _.extend(query.query_string, queryOptions);
+      Object.assign(query.query_string, queryOptions);
     }
 
     return query;

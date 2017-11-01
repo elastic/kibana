@@ -55,7 +55,7 @@ export class I18n {
     });
 
     return Promise.all(translations)
-    .then(() => _.assign({}, localeTranslations));
+    .then(() => ({ ...localeTranslations }));
   }
 
   /**
@@ -131,6 +131,6 @@ export class I18n {
     });
 
     return Promise.all(translations)
-    .then(translations => _.assign({}, ...translations));
+    .then(translations => Object.assign({}, ...translations));
   }
 }

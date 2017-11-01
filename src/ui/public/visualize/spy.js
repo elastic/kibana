@@ -56,10 +56,11 @@ uiModules
           $scope.spy.mode = selectedSpyMode;
           $scope.selectedModeName = selectedSpyMode.name;
 
-          currentSpy = _.assign({
+          currentSpy = {
             $scope: $scope.$new(),
-            $container: $('<div class="visualize-spy-content">').appendTo($container)
-          }, $scope.spy.mode);
+            $container: $('<div class="visualize-spy-content">').appendTo($container),
+            ...$scope.spy.mode
+          };
 
           currentSpy.$container.append($compile(newMode.template)(currentSpy.$scope));
           newMode.link && newMode.link(currentSpy.$scope, currentSpy.$container);

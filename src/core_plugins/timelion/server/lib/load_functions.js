@@ -29,7 +29,7 @@ export default function (directory) {
   const functions = _.zipObject(files.concat(directories));
 
   _.each(functions, function (func) {
-    _.assign(functions, processFunctionDefinition(func));
+    Object.assign(functions, processFunctionDefinition(func));
   });
 
   return functions;

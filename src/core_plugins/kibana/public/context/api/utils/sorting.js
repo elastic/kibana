@@ -90,9 +90,10 @@ function reverseSortDirective(sortDirective) {
  */
 function reverseSortDirection(sortDirection) {
   if (_.isPlainObject(sortDirection)) {
-    return _.assign({}, sortDirection, {
-      order: reverseSortDirection(sortDirection.order),
-    });
+    return {
+      ...sortDirection,
+      order: reverseSortDirection(sortDirection.order)
+    };
   } else {
     return (sortDirection === 'asc' ? 'desc' : 'asc');
   }

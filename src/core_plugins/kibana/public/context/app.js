@@ -110,7 +110,7 @@ function ContextAppController($scope, config, Private, timefilter) {
       successorCount: this.state.queryParameters.successorCount,
     }),
     (newParameters) => {
-      _.assign(this, newParameters);
+      Object.assign(this, newParameters);
     },
   );
 }

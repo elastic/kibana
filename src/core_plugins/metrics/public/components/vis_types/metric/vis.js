@@ -38,7 +38,10 @@ function MetricVisualization(props) {
         newProps.formatter = tickFormatter(seriesDef.formatter, seriesDef.value_template);
       }
       if (i === 0 && colors.color) newProps.color = colors.color;
-      return _.assign({}, _.pick(row, ['label', 'data']), newProps);
+      return {
+        ..._.pick(row, ['label', 'data']),
+        ...newProps
+      };
     });
   const params = {
     metric: series[0],

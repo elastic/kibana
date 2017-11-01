@@ -4,7 +4,7 @@ import angular from 'angular';
 
 export function BaseObject(attributes) {
   // Set the attributes or default to an empty object
-  _.assign(this, attributes);
+  Object.assign(this, attributes);
 }
 
 /**

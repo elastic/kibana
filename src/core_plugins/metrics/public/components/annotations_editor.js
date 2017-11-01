@@ -34,7 +34,10 @@ class AnnotationsEditor extends Component {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       const part = {};
       part[name] = _.get(e, 'value', _.get(e, 'target.value'));
-      handleChange(_.assign({}, item, part));
+      handleChange({
+        ...item,
+        ...part
+      });
     };
   }
 
@@ -43,7 +46,10 @@ class AnnotationsEditor extends Component {
     const model = { ...defaults, ...row };
     const handleChange = (part) => {
       const fn = collectionActions.handleChange.bind(null, this.props);
-      fn(_.assign({}, model, part));
+      fn({
+        ...model,
+        ...part
+      });
     };
     const htmlId = htmlIdGenerator(model.id);
     const handleAdd = collectionActions.handleAdd

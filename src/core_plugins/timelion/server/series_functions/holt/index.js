@@ -90,7 +90,7 @@ export default new Chainable('holt', {
         points = tes(points, alpha, beta, gamma, season, sample);
       }
 
-      _.assign(series.data, _.zip(times, points));
+      Object.assign(series.data, _.zip(times, points));
     });
 
     return newSeries;

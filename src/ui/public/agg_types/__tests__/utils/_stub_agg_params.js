@@ -31,7 +31,7 @@ export default function stubParamClasses(Private) {
   const BaseAggParam = Private.stub(
     BaseParamTypeProvider,
     new ParamClassStub(null, function (config) {
-      _.assign(this, config);
+      Object.assign(this, config);
     })
   );
 

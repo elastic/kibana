@@ -17,7 +17,10 @@ class CalculationVars extends Component {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
       const part = {};
       part[name] = _.get(e, 'value', _.get(e, 'target.value'));
-      handleChange(_.assign({}, item, part));
+      handleChange({
+        ...item,
+        ...part
+      });
     };
   }
 

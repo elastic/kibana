@@ -15,9 +15,10 @@ class FilterItems extends Component {
   handleChange(item, name) {
     return (e) => {
       const handleChange = collectionActions.handleChange.bind(null, this.props);
-      handleChange(_.assign({}, item, {
+      handleChange({
+        ...item,
         [name]: _.get(e, 'value', _.get(e, 'target.value'))
-      }));
+      });
     };
   }
 
@@ -26,7 +27,10 @@ class FilterItems extends Component {
     const model = { ...defaults, ...row };
     const handleChange = (part) => {
       const fn = collectionActions.handleChange.bind(null, this.props);
-      fn(_.assign({}, model, part));
+      fn({
+        ...model,
+        ...part
+      });
     };
     const newFilter = () => ({ color: this.props.model.color, id: uuid.v1() });
     const handleAdd = collectionActions.handleAdd

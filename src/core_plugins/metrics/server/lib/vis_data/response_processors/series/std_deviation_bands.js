@@ -1,14 +1,20 @@
-import _ from 'lodash';
 import getSplits from '../../helpers/get_splits';
 import getLastMetric from '../../helpers/get_last_metric';
 import mapBucket from '../../helpers/map_bucket';
+
 export default function stdDeviationBands(resp, panel, series) {
   return next => results => {
     const metric = getLastMetric(series);
     if (metric.type === 'std_deviation' && metric.mode === 'band') {
       getSplits(resp, panel, series).forEach((split) => {
-        const upper = split.timeseries.buckets.map(mapBucket(_.assign({}, metric, { mode: 'upper' })));
-        const lower = split.timeseries.buckets.map(mapBucket(_.assign({}, metric, { mode: 'lower' })));
+        const upper = split.timeseries.buckets.map(mapBucket({
+          ...metric,
+          mode: 'upper'
+        }));
+        const lower = split.timeseries.buckets.map(mapBucket({
+          ...metric,
+          mode: 'lower'
+        }));
         results.push({
           id: `${split.id}:upper`,
           label: split.label,

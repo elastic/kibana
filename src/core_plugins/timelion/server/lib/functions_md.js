@@ -6,7 +6,10 @@ import _ from 'lodash';
 export default (function () {
   const functionArray = _.map(functions, function (val, key) {
     // TODO: This won't work on frozen objects, it should be removed when everything is converted to datasources and chainables
-    return _.extend({}, val, { name: key });
+    return {
+      ...val,
+      name: key
+    };
   });
 
   function toDocBlock(fn) {

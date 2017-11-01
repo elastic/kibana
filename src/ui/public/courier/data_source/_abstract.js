@@ -325,7 +325,7 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
         flatState.body.script_fields = flatState.body.script_fields || {};
         flatState.body.docvalue_fields = flatState.body.docvalue_fields || [];
 
-        _.extend(flatState.body.script_fields, computedFields.scriptFields);
+        Object.assign(flatState.body.script_fields, computedFields.scriptFields);
         flatState.body.docvalue_fields = _.union(flatState.body.docvalue_fields, computedFields.docvalueFields);
 
         if (flatState.body._source) {

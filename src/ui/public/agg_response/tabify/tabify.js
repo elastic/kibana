@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { TabbedAggResponseWriterProvider } from 'ui/agg_response/tabify/_response_writer';
 import { AggResponseBucketsProvider } from 'ui/agg_response/tabify/_buckets';
 
@@ -10,9 +9,10 @@ export function AggResponseTabifyProvider(Private, Notifier) {
   function tabifyAggResponse(vis, esResponse, respOpts) {
     const write = new TabbedAggResponseWriter(vis, respOpts);
 
-    const topLevelBucket = _.assign({}, esResponse.aggregations, {
+    const topLevelBucket = {
+      ...esResponse.aggregations,
       doc_count: esResponse.hits.total
-    });
+    };
 
     collectBucket(write, topLevelBucket, '', 1);
 

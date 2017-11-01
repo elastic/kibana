@@ -46,11 +46,11 @@ export default new Chainable('props', {
     const properties = unflatten(_.omit(args.byName, 'inputSeries', 'global'));
 
     if (args.byName.global) {
-      _.assign(args.byName.inputSeries, properties);
+      Object.assign(args.byName.inputSeries, properties);
       return args.byName.inputSeries;
     } else {
       return alter(args, function (eachSeries) {
-        _.assign(eachSeries, properties);
+        Object.assign(eachSeries, properties);
         return eachSeries;
       });
     }

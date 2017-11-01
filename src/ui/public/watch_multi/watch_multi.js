@@ -90,25 +90,25 @@ uiModules.get('kibana')
         deep: false
       };
 
-      if (_.isFunction(expr)) return _.assign(norm, { get: expr });
-      if (_.isObject(expr)) return _.assign(norm, expr);
+      if (_.isFunction(expr)) return Object.assign(norm, { get: expr });
+      if (_.isObject(expr)) return Object.assign(norm, expr);
       if (!_.isString(expr)) return;
 
       if (expr.substr(0, 2) === '[]') {
-        return _.assign(norm, {
+        return Object.assign(norm, {
           fn: $scope.$watchCollection,
           get: expr.substr(2)
         });
       }
 
       if (expr.charAt(0) === '=') {
-        return _.assign(norm, {
+        return Object.assign(norm, {
           deep: true,
           get: expr.substr(1)
         });
       }
 
-      return _.assign(norm, { get: expr });
+      return Object.assign(norm, { get: expr });
     }
 
     return $delegate;

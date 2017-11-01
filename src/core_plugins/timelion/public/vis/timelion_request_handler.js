@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import { dashboardContextProvider } from 'plugins/kibana/dashboard/dashboard_context';
 
 import { timezoneProvider } from 'ui/vis/lib/timezone';
@@ -35,7 +34,7 @@ const TimelionRequestHandlerProvider = function (Private, Notifier, $http, $root
               filter: dashboardContext()
             }
           },
-          time: _.extend(timeFilter, {
+          time: Object.assign(timeFilter, {
             interval: vis.params.interval,
             timezone: timezone
           }),

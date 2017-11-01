@@ -261,7 +261,7 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
       if (!match) return;
 
       // matching filter in globalState, update global and remove from appState
-      _.assign(match.meta, filter.meta);
+      Object.assign(match.meta, filter.meta);
       appFilters.splice(i, 1);
     });
 

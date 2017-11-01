@@ -76,7 +76,7 @@ class Timeseries extends Component {
         }
       });
     } else {
-      _.assign(values, this.getLastValues(this.props));
+      Object.assign(values, this.getLastValues(this.props));
     }
 
     this.setState({ values });
