@@ -7,7 +7,7 @@ export function wrapRouteWithPrep(route, setup) {
 
   const userWork = new WorkQueue();
   // the point at which we will consider the queue "full"
-  userWork.limit = _.keys(route.resolve).length;
+  userWork.limit = Object.keys(route.resolve || {}).length;
 
   const resolve = {
     __prep__: function ($injector) {

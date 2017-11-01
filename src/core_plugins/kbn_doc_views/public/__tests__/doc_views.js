@@ -77,17 +77,17 @@ describe('docViews', function () {
       initView(docViews.byName.Table);
     });
     it('should have a row for each field', function () {
-      expect($elem.find('tr').length).to.be(_.keys(flattened).length);
+      expect($elem.find('tr').length).to.be(Object.keys(flattened).length);
     });
 
     it('should have the field name in the first column', function () {
-      _.each(_.keys(flattened), function (field) {
+      _.each(Object.keys(flattened), function (field) {
         expect($elem.find('td[title="' + field + '"]').length).to.be(1);
       });
     });
 
     it('should have the a value for each field', function () {
-      _.each(_.keys(flattened), function (field) {
+      _.each(Object.keys(flattened), function (field) {
         const cellValue = $elem.find('td[title="' + field + '"]').siblings().find('.doc-viewer-value').text();
 
         // This sucks, but testing the filter chain is too hairy ATM

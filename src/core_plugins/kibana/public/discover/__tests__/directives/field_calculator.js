@@ -51,7 +51,7 @@ describe('fieldCalculator', function () {
     });
 
     it('should have a a key for value in the array when not grouping array terms', function () {
-      expect(_.keys(groups).length).to.be(3);
+      expect(Object.keys(groups).length).to.be(3);
       expect(groups.foo).to.be.a(Object);
       expect(groups.bar).to.be.a(Object);
       expect(groups.baz).to.be.a(Object);
@@ -71,7 +71,7 @@ describe('fieldCalculator', function () {
       });
 
       it('should group array terms when passed params.grouped', function () {
-        expect(_.keys(groups).length).to.be(4);
+        expect(Object.keys(groups).length).to.be(4);
         expect(groups['foo,bar']).to.be.a(Object);
       });
 

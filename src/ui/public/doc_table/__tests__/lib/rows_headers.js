@@ -346,7 +346,7 @@ describe('Doc Table', function () {
     });
 
     it('should render even when the row source contains a field with the same name as a meta field', function () {
-      expect($details.find('tr').length).to.be(_.keys($parentScope.indexPattern.flattenHit($scope.row)).length);
+      expect($details.find('tr').length).to.be(Object.keys($parentScope.indexPattern.flattenHit($scope.row)).length);
     });
   });
 

@@ -21,14 +21,14 @@ export default new Chainable('aggregate', {
     {
       name: 'function',
       types: ['string'],
-      help: 'One of ' + _.keys(functions).join(', ')
+      help: 'One of ' + Object.keys(functions).join(', ')
     }
   ],
   help: 'Creates a static line based on result of processing all points in the series.' +
-  ' Available functions: ' + _.keys(functions).join(', '),
+  ' Available functions: ' + Object.keys(functions).join(', '),
   fn: function aggregateFn(args) {
     const fn = functions[args.byName.function];
-    if (!fn) throw new Error('.aggregate() function must be one of: ' + _.keys(functions).join(', '));
+    if (!fn) throw new Error('.aggregate() function must be one of: ' + Object.keys(functions).join(', '));
 
     return alter(args, function (eachSeries) {
       const times = _.map(eachSeries.data, 0);

@@ -15,7 +15,7 @@ class Timeseries extends Component {
     this.state = {
       showLegend: props.legend != null ? props.legend : true,
       values: values || {},
-      show: _.keys(values) || [],
+      show: Object.keys(values) || [],
       ignoreLegendUpdates: false,
       ignoreVisabilityUpdates: false
     };
@@ -26,7 +26,7 @@ class Timeseries extends Component {
 
   filterLegend(id) {
     if (!_.has(this.state.values, id)) return [];
-    const notAllShown = _.keys(this.state.values).length !== this.state.show.length;
+    const notAllShown = Object.keys(this.state.values).length !== this.state.show.length;
     const isCurrentlyShown = _.includes(this.state.show, id);
     const show = [];
     if (notAllShown && isCurrentlyShown) {
@@ -86,8 +86,8 @@ class Timeseries extends Component {
     if (props.legend !== this.props.legend) this.setState({ showLegend: props.legend });
     if (!this.state.ignoreLegendUpdates) {
       const values = this.getLastValues(props);
-      const currentKeys = _.keys(this.state.values);
-      const keys = _.keys(values);
+      const currentKeys = Object.keys(this.state.values);
+      const keys = Object.keys(values);
       const diff = _.difference(keys, currentKeys);
       const nextState = { values: values };
       if (diff.length && !this.state.ignoreVisabilityUpdates) {

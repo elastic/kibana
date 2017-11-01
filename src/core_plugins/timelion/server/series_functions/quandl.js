@@ -44,7 +44,7 @@ export default new Datasource ('quandl', {
 
     if (!config.interval) {
       throw new Error('quandl() unsupported interval: ' + tlConfig.time.interval +
-      '. quandl() supports: ' + _.keys(intervalMap).join(', '));
+      '. quandl() supports: ' + Object.keys(intervalMap).join(', '));
     }
 
     const time = {

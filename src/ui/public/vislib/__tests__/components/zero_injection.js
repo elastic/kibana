@@ -364,7 +364,7 @@ describe('Vislib Zero Injection Module Test Suite', function () {
     });
 
     it('should return an object of unique keys', function () {
-      expect(_.uniq(_.keys(results)).length).to.be(_.keys(results).length);
+      expect(_.uniq(Object.keys(results)).length).to.be(Object.keys(results).length);
     });
   });
 

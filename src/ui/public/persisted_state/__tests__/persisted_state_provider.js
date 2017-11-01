@@ -169,7 +169,7 @@ describe('Persisted State Provider', function () {
 
       // parent should contain original props and first child path, but not the second child path
       const parentState = persistedState.get();
-      _.keys(persistedStateValue).forEach(function (key) {
+      Object.keys(persistedStateValue).forEach(function (key) {
         expect(parentState).to.have.property(key);
       });
       expect(parentState).to.have.property(children[0].path);

@@ -21,7 +21,7 @@ export function NormalizeSortRequestProvider(config) {
   */
   function normalize(sortable, indexPattern) {
     const normalized = {};
-    let sortField = _.keys(sortable)[0];
+    let sortField = Object.keys(sortable)[0];
     let sortValue = sortable[sortField];
     const indexField = indexPattern.fields.byName[sortField];
 

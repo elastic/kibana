@@ -21,7 +21,7 @@ DocViewsRegistryProvider.register(function () {
         $scope.mapping = $scope.indexPattern.fields.byName;
         $scope.flattened = $scope.indexPattern.flattenHit($scope.hit);
         $scope.formatted = $scope.indexPattern.formatHit($scope.hit);
-        $scope.fields = _.keys($scope.flattened).sort();
+        $scope.fields = Object.keys($scope.flattened).sort();
 
         $scope.canToggleColumns = function canToggleColumn() {
           return (
