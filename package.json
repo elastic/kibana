@@ -150,6 +150,7 @@
     "leaflet.heat": "0.2.0",
     "less": "2.7.1",
     "less-loader": "4.0.5",
+    "libesvm": "3.8.8",
     "lodash": "3.10.1",
     "lru-cache": "4.1.1",
     "markdown-it": "8.3.2",
