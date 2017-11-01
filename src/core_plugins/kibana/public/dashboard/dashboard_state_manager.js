@@ -9,6 +9,12 @@ import { updateViewMode, updatePanels, updateIsFullScreenMode, minimizePanel } f
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { createPanelState, getPersistedStateId } from './panel';
 import { getAppStateDefaults } from './lib';
+import {
+  getViewMode,
+  getFullScreenMode,
+  getPanels,
+  getPanel,
+} from '../selectors';
 
 /**
  * Dashboard state manager handles connecting angular and redux state between the angular and react portions of the
@@ -83,12 +89,13 @@ export class DashboardStateManager {
   }
 
   _areStoreAndAppStatePanelsEqual() {
-    const { dashboard } = store.getState();
+    const state = store.getState();
     // We need to run this comparison check or we can enter an infinite loop.
     let differencesFound = false;
     for (let i = 0; i < this.appState.panels.length; i++) {
       const appStatePanel = this.appState.panels[i];
-      if (!_.isEqual(appStatePanel, dashboard.panels[appStatePanel.panelIndex])) {
+      const storePanel = getPanel(state, appStatePanel.panelIndex);
+      if (!_.isEqual(appStatePanel, storePanel)) {
         differencesFound = true;
         break;
       }
@@ -108,12 +115,12 @@ export class DashboardStateManager {
       store.dispatch(updatePanels(this.getPanels()));
     }
 
-    const { dashboard } = store.getState();
-    if (dashboard.viewMode !== this.getViewMode()) {
+    const state = store.getState();
+    if (getViewMode(state) !== this.getViewMode()) {
       store.dispatch(updateViewMode(this.getViewMode()));
     }
 
-    if (dashboard.view.isFullScreenMode !== this.getFullScreenMode()) {
+    if (getFullScreenMode(state) !== this.getFullScreenMode()) {
       store.dispatch(updateIsFullScreenMode(this.getFullScreenMode()));
     }
   }
@@ -123,13 +130,14 @@ export class DashboardStateManager {
       return;
     }
 
-    const { dashboard } = store.getState();
+    const state = store.getState();
     // The only state that the store deals with that appState cares about is the panels array. Every other state change
     // (that appState cares about) is initiated from appState (e.g. view mode).
     this.appState.panels = [];
-    _.map(dashboard.panels, panel => {
+    _.map(getPanels(state), panel => {
       this.appState.panels.push(panel);
     });
+
     this.changeListeners.forEach(function (listener) {
       return listener({ dirty: true, clean: false });
     });
@@ -346,13 +354,10 @@ export class DashboardStateManager {
   }
 
   updatePanel(panelIndex, panelAttributes) {
-    const originalPanel = this.getPanels().find((panel) => panel.panelIndex === panelIndex);
-    const updatedPanel = {
-      ...originalPanel,
-      ...panelAttributes,
-    };
+    const panel = this.getPanels().find((panel) => panel.panelIndex === panelIndex);
+    Object.assign(panel, panelAttributes);
     this.saveState();
-    return updatedPanel;
+    return panel;
   }
 
   /**

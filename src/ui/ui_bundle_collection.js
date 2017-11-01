@@ -1,3 +1,5 @@
+import { createHash } from 'crypto';
+
 import UiBundle from './ui_bundle';
 import appEntryTemplate from './app_entry_template';
 import { transform, pluck } from 'lodash';
@@ -66,6 +68,15 @@ export default class UiBundleCollection {
         await bundle.clearBundleFile();
       }
     }
+  }
+
+  hashBundleEntries() {
+    const hash = createHash('sha1');
+    for (const bundle of this.each) {
+      hash.update(`bundleEntryPath:${bundle.entryPath}`);
+      hash.update(`bundleEntryContent:${bundle.renderContent()}`);
+    }
+    return hash.digest('hex');
   }
 
   async getInvalidBundles() {

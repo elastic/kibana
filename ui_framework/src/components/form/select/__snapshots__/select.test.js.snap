@@ -1,0 +1,81 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiSelect Props isDisabled false renders enabled 1`] = `
+<select
+  class="kuiSelect"
+/>
+`;
+
+exports[`KuiSelect Props isDisabled true renders disabled 1`] = `
+<select
+  class="kuiSelect"
+  disabled=""
+/>
+`;
+
+exports[`KuiSelect Props isInvalid false renders valid 1`] = `
+<select
+  class="kuiSelect"
+/>
+`;
+
+exports[`KuiSelect Props isInvalid true renders invalid 1`] = `
+<select
+  class="kuiSelect kuiSelect-isInvalid"
+/>
+`;
+
+exports[`KuiSelect Props size renders large 1`] = `
+<select
+  class="kuiSelect kuiSelect--large"
+/>
+`;
+
+exports[`KuiSelect Props size renders medium 1`] = `
+<select
+  class="kuiSelect"
+/>
+`;
+
+exports[`KuiSelect Props size renders small 1`] = `
+<select
+  class="kuiSelect kuiSelect--small"
+/>
+`;
+
+exports[`KuiSelect Props value 1`] = `
+<select
+  class="kuiSelect"
+>
+  <option
+    selected=""
+    value="apple"
+  >
+    Apple
+  </option>
+  <option
+    value="bread"
+  >
+    Bread
+  </option>
+</select>
+`;
+
+exports[`KuiSelect renders 1`] = `
+<select
+  aria-label="aria-label"
+  class="kuiSelect testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <option
+    value="apple"
+  >
+    Apple
+  </option>
+  <option
+    value="bread"
+  >
+    Bread
+  </option>
+</select>
+`;

@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { IndexPatternMissingIndices } from 'ui/errors';
 import 'ui/directives/validate_index_pattern';
 import 'ui/directives/auto_select_if_only_one';
-import { documentationLinks } from 'ui/documentation_links/documentation_links';
+import 'ui/directives/documentation_href';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './create_index_pattern_wizard.html';
@@ -43,8 +43,6 @@ uiModules.get('apps/management')
   const noTimeFieldOption = {
     display: `I don't want to use the Time Filter`,
   };
-
-  this.documentationLinks = documentationLinks;
 
   // Configure the new index pattern we're going to create.
   this.formValues = {

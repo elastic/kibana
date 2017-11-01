@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
-import $ from '../lib/flot';
+import $ from 'ui/flot-charts';
 import eventBus from '../lib/events';
 import Resize from './resize';
 import calculateBarWidth from '../lib/calculate_bar_width';

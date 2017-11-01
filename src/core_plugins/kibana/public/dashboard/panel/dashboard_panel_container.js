@@ -18,7 +18,7 @@ import {
   getEmbeddableEditUrl,
   getMaximizedPanelId,
   getEmbeddableError,
-} from '../reducers';
+} from '../selectors';
 
 const mapStateToProps = ({ dashboard }, { panelId }) => {
   const embeddable = getEmbeddable(dashboard, panelId);
