@@ -19,19 +19,13 @@ export class FeatureDirectory extends React.Component {
     const tabs = [{
       id: ALL,
       name: 'All',
+    }, {
+      id: FeatureCatalogueCategory.DATA,
+      name: 'Explore & Visualize',
+    }, {
+      id: FeatureCatalogueCategory.ADMIN,
+      name: 'Administrative',
     }];
-    if (props.directories.some(directory => directory.category === FeatureCatalogueCategory.DATA)) {
-      tabs.push({
-        id: FeatureCatalogueCategory.DATA,
-        name: 'Explore & Visualize'
-      });
-    }
-    if (props.directories.some(directory => directory.category === FeatureCatalogueCategory.ADMIN)) {
-      tabs.push({
-        id: FeatureCatalogueCategory.ADMIN,
-        name: 'Administrative',
-      });
-    }
     if (props.directories.some(directory => directory.category === FeatureCatalogueCategory.OTHER)) {
       tabs.push({
         id: FeatureCatalogueCategory.OTHER,
