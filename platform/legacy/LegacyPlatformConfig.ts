@@ -1,4 +1,4 @@
-import { RawConfig } from '../config/RawConfigService';
+import { RawConfig } from '../config/RawConfig';
 import { ConfigPath } from '../config/ConfigService';
 
 /**

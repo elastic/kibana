@@ -1,41 +1,10 @@
 import { BehaviorSubject, Observable } from 'rxjs';
-import { get, has, isEqual, isPlainObject, set } from 'lodash';
+import { isEqual, isPlainObject } from 'lodash';
 import typeDetect from 'type-detect';
 
-import { ConfigPath } from './ConfigService';
 import { getConfigFromFile } from './readConfig';
-
-/**
- * Represents raw config store.
- */
-export interface RawConfig {
-  /**
-   * Returns whether or not there is a config value located at the specified path.
-   * @param configPath Path to locate value at.
-   * @returns Whether or not a value exists at the path.
-   */
-  has(configPath: ConfigPath): boolean;
-
-  /**
-   * Returns config value located at the specified path.
-   * @param configPath Path to locate value at.
-   * @returns Config value.
-   */
-  get(configPath: ConfigPath): any;
-
-  /**
-   * Sets config value at the specified path.
-   * @param configPath Path to set value for.
-   * @param value Value to set for the specified path.
-   */
-  set(configPath: ConfigPath, value: any): void;
-
-  /**
-   * Returns full flattened list of the config paths that config contains.
-   * @returns List of the string config paths.
-   */
-  getFlattenedPaths(): string[];
-}
+import { RawConfig } from './RawConfig';
+import { ObjectToRawConfigAdapter } from './ObjectToRawConfigAdapter';
 
 // Used to indicate that no config has been received yet
 const notRead = Symbol('config not yet read');
@@ -102,45 +71,5 @@ export class RawConfigService {
 
   getConfig$() {
     return this.config$;
-  }
-}
-
-/**
- * Allows plain javascript object to behave like `RawConfig` instance.
- * @internal
- */
-export class ObjectToRawConfigAdapter implements RawConfig {
-  constructor(private readonly rawValue: { [key: string]: any }) {}
-
-  has(configPath: ConfigPath) {
-    return has(this.rawValue, configPath);
-  }
-
-  get(configPath: ConfigPath) {
-    return get(this.rawValue, configPath);
-  }
-
-  set(configPath: ConfigPath, value: any) {
-    set(this.rawValue, configPath, value);
-  }
-
-  getFlattenedPaths() {
-    return [...ObjectToRawConfigAdapter.flattenObjectKeys(this.rawValue)];
-  }
-
-  private static *flattenObjectKeys(
-    obj: { [key: string]: any },
-    accKey: string = ''
-  ): IterableIterator<string> {
-    if (typeof obj !== 'object') {
-      yield accKey;
-    } else {
-      for (const [key, value] of Object.entries(obj)) {
-        yield* ObjectToRawConfigAdapter.flattenObjectKeys(
-          value,
-          (accKey !== '' ? accKey + '.' : '') + key
-        );
-      }
-    }
   }
 }

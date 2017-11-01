@@ -5,7 +5,7 @@ import { Env } from './Env';
 import { Logger, LoggerFactory } from '../logging';
 import * as schema from '../lib/schema';
 import { ConfigWithSchema } from './ConfigWithSchema';
-import { RawConfig } from './RawConfigService';
+import { RawConfig } from './RawConfig';
 
 export type ConfigPath = string | string[];
 
