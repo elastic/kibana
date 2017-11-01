@@ -9,7 +9,12 @@ import {
 } from 'ui_framework/components';
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
-const ALL = 'all';
+const ALL_TAB_ID = 'all';
+const OTHERS_TAB_ID = 'others';
+
+const isOtherCategory = (directory) => {
+  return directory.category !== FeatureCatalogueCategory.DATA && directory.category !== FeatureCatalogueCategory.ADMIN;
+};
 
 export class FeatureDirectory extends React.Component {
 
@@ -17,7 +22,7 @@ export class FeatureDirectory extends React.Component {
     super(props);
 
     const tabs = [{
-      id: ALL,
+      id: ALL_TAB_ID,
       name: 'All',
     }, {
       id: FeatureCatalogueCategory.DATA,
@@ -26,16 +31,17 @@ export class FeatureDirectory extends React.Component {
       id: FeatureCatalogueCategory.ADMIN,
       name: 'Administrative',
     }];
-    if (props.directories.some(directory => directory.category === FeatureCatalogueCategory.OTHER)) {
+
+    if (props.directories.some(isOtherCategory)) {
       tabs.push({
-        id: FeatureCatalogueCategory.OTHER,
+        id: OTHERS_TAB_ID,
         name: 'Other',
       });
     }
 
     this.tabs = tabs;
     this.state = {
-      selectedTabId: ALL
+      selectedTabId: ALL_TAB_ID
     };
   }
 
@@ -60,8 +66,11 @@ export class FeatureDirectory extends React.Component {
   renderDirectories = () => {
     return this.props.directories
       .filter((directory) => {
-        if (this.state.selectedTabId === ALL) {
+        if (this.state.selectedTabId === ALL_TAB_ID) {
           return true;
+        }
+        if (this.state.selectedTabId === OTHERS_TAB_ID) {
+          return isOtherCategory(directory);
         }
         return this.state.selectedTabId === directory.category;
       })
