@@ -12,7 +12,7 @@
     "fix": "gulp lint-fix",
     "lint": "gulp lint",
     "test": "gulp test",
-    "docs": "NODE_ENV=production gulp docs",
+    "docs": "gulp docs",
     "test:plugin": "gulp test:plugin",
     "test:common": "gulp test:common",
     "test:server": "gulp test:server",
