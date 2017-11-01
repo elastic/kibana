@@ -101,6 +101,7 @@ class VisEditorVisualization extends Component {
           data-shared-items-container
           data-shared-item
           data-title={this.props.title}
+          data-description={this.props.description}
         >
           <Visualization
             backgroundColor={visBackgroundColor}

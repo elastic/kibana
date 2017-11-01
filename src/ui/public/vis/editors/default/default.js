@@ -12,9 +12,10 @@ const defaultEditor = function ($rootScope, $compile) {
   return class DefaultEditor {
     static key = 'default';
 
-    constructor(el, vis) {
+    constructor(el, vis, savedObj) {
       this.el = $(el);
       this.vis = vis;
+      this.savedObj = savedObj;
 
       if (!this.vis.type.editorConfig.optionTabs && this.vis.type.editorConfig.optionsTemplate) {
         this.vis.type.editorConfig.optionTabs = [
@@ -28,6 +29,7 @@ const defaultEditor = function ($rootScope, $compile) {
 
       const updateScope = () => {
         $scope.vis = this.vis;
+        $scope.savedObj = this.savedObj;
         $scope.visData = visData;
         $scope.uiState = this.vis.getUiState();
         $scope.searchSource = searchSource;

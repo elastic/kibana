@@ -17,14 +17,16 @@ uiModules
       vis: '=',
       visData: '=',
       uiState: '=?',
-      searchSource: '='
+      searchSource: '=',
+      savedObj: '='
     },
     link: function ($scope, element) {
       // Clone the _vis instance.
       const vis = $scope.vis;
+      const savedObj = $scope.savedObj;
       const Editor = typeof vis.type.editor === 'function' ? vis.type.editor :
         editorTypes.find(editor => editor.key === vis.type.editor);
-      const editor = new Editor(element[0], vis);
+      const editor = new Editor(element[0], vis, savedObj);
 
       $scope.renderFunction = () => {
         if (!$scope.vis) return;
