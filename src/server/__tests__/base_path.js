@@ -20,18 +20,13 @@ describe('Server basePath config', function () {
     await kbnServer.close();
   });
 
-  it('appends the basePath to root redirect', function (done) {
-    const options = {
+  it('includes the basePath in root redirect', async () => {
+    const resp = await kbnServer.inject({
       url: '/',
       method: 'GET'
-    };
-    kbnTestServer.makeRequest(kbnServer, options, function (res) {
-      try {
-        expect(res.payload).to.match(/defaultRoute = '\/kibana\/app\/kibana'/);
-        done();
-      } catch (e) {
-        done(e);
-      }
     });
+
+    expect(resp).to.have.property('statusCode', 302);
+    expect(resp.headers).to.have.property('location', `${basePath}/app/kibana`);
   });
 });
