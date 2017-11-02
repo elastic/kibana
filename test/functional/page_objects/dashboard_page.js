@@ -218,6 +218,21 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
     }
 
+    async isMarginsOn() {
+      log.debug('isMarginsOn');
+      await this.openOptions();
+      const marginsCheckbox = await testSubjects.find('dashboardMarginsCheckbox');
+      return await marginsCheckbox.getProperty('checked');
+    }
+
+    async useMargins(on = true) {
+      await this.openOptions();
+      const isMarginsOn = await this.isMarginsOn();
+      if (isMarginsOn !== on) {
+        return await testSubjects.click('dashboardMarginsCheckbox');
+      }
+    }
+
     async filterVizNames(vizName) {
       const visFilter = await find.byCssSelector('input[placeholder="Visualizations Filter..."]');
       await visFilter.click();
