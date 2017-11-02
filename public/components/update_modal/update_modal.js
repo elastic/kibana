@@ -13,7 +13,7 @@ import './update_modal.less';
 
 import { Button } from 'react-bootstrap';
 
-export const UpdateModal = ({ build }) => {
+export const UpdateModal = ({ build, setBuild }) => {
   if (!build) return null;
   return (
     <KuiModalOverlay>
@@ -45,15 +45,23 @@ export const UpdateModal = ({ build }) => {
             <p>
               Updating Canvas is easy, you can probably do it yourself, or get your good friend in operations to update it for you.
               If you don't have friends in operations, you might have to bribe them.
-              Try beer, those operations people are all degenerates. In any case you'll need this command:
+              Try beer, those operations people are all degenerates. In any case you'll need these steps:
             </p>
             <p>
+              <h5>1. Stop Kibana and remove the old version of Canvas</h5>
+              <code>
+                ./bin/kibana-plugin remove canvas
+              </code>
+
+              <h5>2. Install the new version</h5>
               <code>
                 ./bin/kibana-plugin install https://s3.amazonaws.com/download.elasticsearch.org/kibana/canvas/kibana_canvas-0.1.{ build }.zip
               </code>
+              <h5>3. Start Kibana and refresh your browser</h5>
+              You should be good to go. Good luck!
             </p>
 
-            <p> Go ahead and do that, restart Kibana, and refresh your browser. You should be all set! </p>
+
 
           </KuiModalBodyText>
         </KuiModalBody>
@@ -61,7 +69,7 @@ export const UpdateModal = ({ build }) => {
         <KuiModalFooter>
           <p style={{ flexGrow: 1 }}><small>*Uhg. I'm going to fire our transcriptionist</small></p>
           <Button
-            onClick={ () => {} }
+            onClick={ () => setBuild(null) }
           >
             Dismiss
           </Button>
@@ -73,4 +81,5 @@ export const UpdateModal = ({ build }) => {
 
 UpdateModal.propTypes = {
   build: PropTypes.any,
+  setBuild: PropTypes.func,
 };
