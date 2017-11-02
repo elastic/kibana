@@ -1,4 +1,7 @@
-<dashboard-app class="app-container dashboard-container">
+<dashboard-app
+  class="app-container dashboard-container"
+  ng-class="{'dashboard-container-with-margins': model.useMargins}"
+>
   <div class="fullScreenModePlaceholder">
     <div
       aria-label="Exit full screen mode"

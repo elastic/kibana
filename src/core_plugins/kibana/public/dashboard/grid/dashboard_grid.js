@@ -27,7 +27,15 @@ function ensureWindowScrollsToBottom(layout, oldResizeItem, l, placeholder, even
   }
 }
 
-function ResponsiveGrid({ size, isViewMode, layout, onLayoutChange, children, maximizedPanelId }) {
+function ResponsiveGrid({
+  size,
+  isViewMode,
+  layout,
+  onLayoutChange,
+  children,
+  maximizedPanelId,
+  useMargins,
+}) {
   // This is to prevent a bug where view mode changes when the panel is expanded.  View mode changes will trigger
   // the grid to re-render, but when a panel is expanded, the size will be 0. Minimizing the panel won't cause the
   // grid to re-render so it'll show a grid with a width of 0.
@@ -36,8 +44,10 @@ function ResponsiveGrid({ size, isViewMode, layout, onLayoutChange, children, ma
     'layout-view': isViewMode,
     'layout-edit': !isViewMode,
     'layout-maximized-panel': maximizedPanelId !== undefined,
+    'layout-with-margins': useMargins,
   });
 
+  const MARGINS = useMargins ? 8 : 0;
   // We can't take advantage of isDraggable or isResizable due to performance concerns:
   // https://github.com/STRML/react-grid-layout/issues/240
   return (
@@ -46,7 +56,7 @@ function ResponsiveGrid({ size, isViewMode, layout, onLayoutChange, children, ma
       className={classes}
       isDraggable={true}
       isResizable={true}
-      margin={[0, 0]}
+      margin={[MARGINS, MARGINS]}
       cols={DASHBOARD_GRID_COLUMN_COUNT}
       rowHeight={100}
       draggableHandle={isViewMode ? '.doesnt-exist' : '.panel-title'}
@@ -160,7 +170,7 @@ export class DashboardGrid extends React.Component {
   }
 
   render() {
-    const { dashboardViewMode, maximizedPanelId } = this.props;
+    const { dashboardViewMode, maximizedPanelId, useMargins } = this.props;
     const isViewMode = dashboardViewMode === DashboardViewMode.VIEW;
     return (
       <ResponsiveSizedGrid
@@ -168,6 +178,7 @@ export class DashboardGrid extends React.Component {
         layout={this.buildLayoutFromPanels()}
         onLayoutChange={this.onLayoutChange}
         maximizedPanelId={maximizedPanelId}
+        useMargins={useMargins}
       >
         {this.renderDOM()}
       </ResponsiveSizedGrid>
@@ -182,4 +193,5 @@ DashboardGrid.propTypes = {
   dashboardViewMode: PropTypes.oneOf([DashboardViewMode.EDIT, DashboardViewMode.VIEW]).isRequired,
   onPanelUpdated: PropTypes.func.isRequired,
   maximizedPanelId: PropTypes.string,
+  useMargins: PropTypes.bool.isRequired,
 };
