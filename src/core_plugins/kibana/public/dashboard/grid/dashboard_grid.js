@@ -50,7 +50,7 @@ function ResponsiveGrid({ size, isViewMode, layout, onLayoutChange, children, ma
       layout={layout}
       onLayoutChange={onLayoutChange}
       measureBeforeMount={false}
-      onResize={_.debounce(ensureWindowScrollsToBottom, 20)}
+      onResize={ensureWindowScrollsToBottom}
     >
       {children}
     </ReactGridLayout>
