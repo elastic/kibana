@@ -280,10 +280,23 @@ dashboard-viewport-provider {
     .visualize-show-spy {
       visibility: hidden;
     }
+    /**
+     * 1. Use opacity to make this element accessible to screen readers and keyboard.
+     * 2. Show on focus to enable keyboard accessibility.
+     */
+    .viewModeExpandPanelToggle {
+      opacity: 0; /* 1 */
+      &:focus {
+        opacity: 1; /* 2 */
+      }
+    }
 
     &:hover {
       .visualize-show-spy {
         visibility: visible;
+      }
+      .viewModeExpandPanelToggle {
+        opacity: 1;
       }
     }
 

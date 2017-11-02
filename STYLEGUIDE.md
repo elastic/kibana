@@ -11,7 +11,7 @@ recommended for the development of all Kibana plugins.
 - [HTML](style_guides/html_style_guide.md)
 - [API](style_guides/api_style_guide.md)
 - [Architecture](style_guides/architecture_style_guide.md)
-- [Accessibility](style_guides/acecssibility_guide.md)
+- [Accessibility](style_guides/accessibility_guide.md)
 
 ## Filenames
 

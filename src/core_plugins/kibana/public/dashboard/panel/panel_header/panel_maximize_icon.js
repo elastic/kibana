@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 export function PanelMaximizeIcon({ onMaximize }) {
   return (
     <button
-      className="kuiMicroButton"
+      className="kuiMicroButton viewModeExpandPanelToggle"
       aria-label="Maximize panel"
       data-test-subj="dashboardPanelExpandIcon"
       onClick={onMaximize}
