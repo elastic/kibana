@@ -1,5 +1,3 @@
-import { noop } from 'lodash';
-
 import { UiNavLink } from '../ui_nav_links';
 
 export class UiApp {
@@ -14,9 +12,9 @@ export class UiApp {
       icon,
       hidden,
       linkToLastSubUrl,
-      listed = !hidden,
+      listed,
       templateName = 'ui_app',
-      injectVars = noop,
+      injectVars,
       url = `/app/${id}`,
       uses = []
     } = spec;
@@ -40,7 +38,7 @@ export class UiApp {
     this._icon = icon;
     this._linkToLastSubUrl = linkToLastSubUrl;
     this._hidden = hidden;
-    this._listed = !hidden && listed;
+    this._listed = listed;
     this._templateName = templateName;
     this._url = url;
     this._pluginId = pluginId;
@@ -70,7 +68,7 @@ export class UiApp {
       // unless an app is hidden it gets a navlink, but we only respond to `getNavLink()`
       // if the app is also listed. This means that all apps in the kibanaPayload will
       // have a navLink property since that list includes all normally accessible apps
-      this._navLink = new UiNavLink(kbnServer, {
+      this._navLink = new UiNavLink(kbnServer.config.get('server.basePath'), {
         id: this._id,
         title: this._title,
         order: this._order,
@@ -98,8 +96,15 @@ export class UiApp {
     return !!this._hidden;
   }
 
+  isListed() {
+    return (
+      !this.isHidden() &&
+      (this._listed == null || !!this._listed)
+    );
+  }
+
   getNavLink() {
-    if (this._listed) {
+    if (this.isListed()) {
       return this._navLink;
     }
   }
