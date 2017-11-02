@@ -1,6 +1,6 @@
 {
   "name": "canvas",
-  "version": "0.1.1508",
+  "version": "0.1.1509",
   "description": "Data driven workpads for kibana",
   "main": "index.js",
   "kibana": {
@@ -98,6 +98,7 @@
     "metalsmith-permalinks": "^0.5.0",
     "pegjs": "^0.10.0",
     "proxyquire": "1.7.11",
+    "run-sequence": "^2.2.0",
     "semver": "^5.4.1",
     "simple-git": "^1.70.0",
     "sinon": "^2.3.2",
