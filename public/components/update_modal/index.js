@@ -9,7 +9,7 @@ export const UpdateModal = compose(
   lifecycle({
     componentDidMount() {
       const { setBuild } = this.props;
-      const currentBuild = get(pkg, 'build.count');
+      const currentBuild = Number(get(pkg, 'build.git.count'));
       fetch(`https://elastic.github.io/kibana-canvas/preview-microsite/build.json`, {
         method: 'GET',
       })
