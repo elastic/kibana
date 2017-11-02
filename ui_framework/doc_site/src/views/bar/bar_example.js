@@ -10,15 +10,15 @@ import {
 } from '../../components';
 
 import Bar from './bar';
-const barSource = require('!!raw!./bar');
+const barSource = require('!!raw-loader!./bar');
 const barHtml = renderToHtml(Bar);
 
 import BarOneSection from './bar_one_section';
-const barOneSectionSource = require('!!raw!./bar_one_section');
+const barOneSectionSource = require('!!raw-loader!./bar_one_section');
 const barOneSectionHtml = renderToHtml(BarOneSection);
 
 import BarThreeSections from './bar_three_sections';
-const barThreeSectionsSource = require('!!raw!./bar_three_sections');
+const barThreeSectionsSource = require('!!raw-loader!./bar_three_sections');
 const barThreeSectionsHtml = renderToHtml(BarThreeSections);
 
 export default props => (

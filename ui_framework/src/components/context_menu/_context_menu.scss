@@ -1,0 +1,31 @@
+$kuiContextMenuWidth: $kuiSize * 16;
+
+.kuiContextMenu {
+  width: $kuiContextMenuWidth;
+  position: relative;
+  overflow: hidden;
+  transition: height $kuiAnimSpeedFast $kuiAnimSlightResistance;
+  border-radius: $kuiBorderRadius;
+
+  .kuiContextMenu__content {
+    padding: $kuiSizeS;
+  }
+}
+
+  .kuiContextMenu__panel {
+    position: absolute;
+  }
+
+  /**
+   * 1. Ensure icon is centered within a container with a consistent width.
+   */
+  .kuiContextMenu__icon {
+    width: $kuiSize; /* 1 */
+    text-align: center; /* 1 */
+    margin-right: $kuiSizeS;
+  }
+
+  .kuiContextMenu__itemLayout {
+    display: flex;
+    align-items: center;
+  }

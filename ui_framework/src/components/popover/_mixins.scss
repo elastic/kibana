@@ -1,0 +1,12 @@
+@mixin kuiPopoverTitle {
+  background-color: $kuiColorLightestShade;
+  border-bottom: $kuiBorderThin;
+  padding: $kuiSizeM;
+  font-size: $kuiFontSize;
+
+  @include darkTheme {
+    background-color: $kuiBackgroundColor--darkTheme;
+    border-color: $kuiInputBorderColor--darkTheme;
+    color: #ffffff;
+  }
+}

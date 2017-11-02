@@ -72,7 +72,7 @@ export default function GoalVisType(Private) {
           min: 1,
           aggFilter: [
             '!std_dev', '!geo_centroid', '!percentiles', '!percentile_ranks',
-            '!derivative', '!serial_diff', '!moving_avg', '!cumulative_sum','!geo_bounds'],
+            '!derivative', '!serial_diff', '!moving_avg', '!cumulative_sum', '!geo_bounds'],
           defaults: [
             { schema: 'metric', type: 'count' }
           ]

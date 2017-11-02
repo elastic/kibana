@@ -7,12 +7,13 @@ import Bluebird from 'bluebird';
 const readFile = (file) => readFileSync(file, 'utf8');
 
 export function parseConfig(serverConfig = {}) {
-  const config = Object.assign({
-    keepAlive: true
-  }, pick(serverConfig, [
-    'plugins', 'apiVersion', 'keepAlive', 'pingTimeout',
-    'requestTimeout', 'log', 'logQueries'
-  ]));
+  const config = {
+    keepAlive: true,
+    ...pick(serverConfig, [
+      'plugins', 'apiVersion', 'keepAlive', 'pingTimeout',
+      'requestTimeout', 'log', 'logQueries'
+    ])
+  };
 
   const uri = url.parse(serverConfig.url);
   config.host = {

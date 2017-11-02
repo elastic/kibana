@@ -1,6 +1,6 @@
 {
   "name": "@elastic/eslint-config-kibana",
-  "version": "0.11.0",
+  "version": "0.13.0",
   "description": "The eslint config used by the kibana team",
   "main": ".eslintrc.js",
   "scripts": {
@@ -24,6 +24,7 @@
     "eslint-plugin-import": "^2.6.0",
     "eslint-plugin-jest": "^21.0.0",
     "eslint-plugin-mocha": "^4.9.0",
+    "eslint-plugin-prefer-object-spread": "^1.2.1",
     "eslint-plugin-react": "^7.1.0"
   }
 }

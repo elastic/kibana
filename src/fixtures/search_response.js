@@ -9,8 +9,8 @@ export default {
     failed: 0
   },
   hits: {
-    total : 49487,
-    max_score : 1.0,
+    total: 49487,
+    max_score: 1.0,
     hits: hits
   }
 };

@@ -7,7 +7,6 @@ import {
   KuiModalHeader,
   KuiModalHeaderTitle,
   KuiModalBody,
-  KuiModalBodyText,
   KuiModalFooter,
   KuiButton,
   KuiModalOverlay,
@@ -120,16 +119,16 @@ export class ChangeIndexModal extends React.Component {
     const TableComponent = () => (
       <KuiTable className="kuiVerticalRhythm">
         <KuiTableHeader>
-          <KuiTableHeaderCell width="300">
+          <KuiTableHeaderCell style={{ maxWidth: '300px', width: '300px' }}>
             ID
           </KuiTableHeaderCell>
-          <KuiTableHeaderCell width="50">
+          <KuiTableHeaderCell style={{ maxWidth: '50px', width: '50px' }}>
             Count
           </KuiTableHeaderCell>
           <KuiTableHeaderCell>
             Sample of affected objects
           </KuiTableHeaderCell>
-          <KuiTableHeaderCell width="200">
+          <KuiTableHeaderCell style={{ maxWidth: '200px', width: '200px' }}>
             New index pattern
           </KuiTableHeaderCell>
         </KuiTableHeader>
@@ -146,6 +145,7 @@ export class ChangeIndexModal extends React.Component {
           aria-label="Index does not exist"
           className="managementChangeIndexModal"
           onKeyDown={this.onKeyDown}
+          onClose={this.props.onClose}
         >
           <KuiModalHeader>
             <KuiModalHeaderTitle>
@@ -153,15 +153,13 @@ export class ChangeIndexModal extends React.Component {
             </KuiModalHeaderTitle>
           </KuiModalHeader>
           <KuiModalBody>
-            <KuiModalBodyText>
-              <p>
-                The following saved objects use index patterns that do not exist.
-                Please select the index patterns you&apos;d like re-associated them with.
-              </p>
-            </KuiModalBodyText>
+            <p className="kuiText kuiVerticalRhythm">
+              The following saved objects use index patterns that do not exist.
+              Please select the index patterns you&apos;d like re-associated them with.
+            </p>
             { totalIndexPatterns > perPage
               ?
-                <KuiControlledTable>
+                <KuiControlledTable className="kuiVerticalRhythm">
                   <KuiToolBar>
                     <KuiToolBarSection>
                       <KuiPager

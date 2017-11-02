@@ -458,24 +458,39 @@ main {
   color: #0079a5 !important;
   /* 2 */
   background-color: transparent; }
+  .theme-dark .kuiButton--hollow {
+    color: #b7e2ea !important;
+    /* 2 */ }
   .kuiButton--hollow:enabled:hover {
     color: #006E8A !important;
     /* 1 */
     text-decoration: underline; }
+    .theme-dark .kuiButton--hollow:enabled:hover {
+      color: #def2f6 !important;
+      /* 2 */ }
   a.kuiButton--hollow:not(.kuiButton-isDisabled):hover {
     /* 1 */
     color: #006E8A !important;
     /* 1 */
     text-decoration: underline; }
+    .theme-dark a.kuiButton--hollow:not(.kuiButton-isDisabled):hover {
+      color: #def2f6 !important;
+      /* 2 */ }
   .kuiButton--hollow:enabled:active {
     color: #006E8A !important;
     /* 1 */
     text-decoration: underline; }
+    .theme-dark .kuiButton--hollow:enabled:active {
+      color: #def2f6 !important;
+      /* 2 */ }
   a.kuiButton--hollow:not(.kuiButton-isDisabled):active {
     /* 1 */
     color: #006E8A !important;
     /* 1 */
     text-decoration: underline; }
+    .theme-dark a.kuiButton--hollow:not(.kuiButton-isDisabled):active {
+      color: #def2f6 !important;
+      /* 2 */ }
 
 .kuiButton--secondary {
   color: #0079a5 !important;
@@ -856,6 +871,226 @@ main {
   /* 2 */
   width: 100%; }
 
+.kuiContextMenu {
+  width: 256px;
+  position: relative;
+  overflow: hidden;
+  transition: height 150ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+  border-radius: 4px; }
+  .kuiContextMenu .kuiContextMenu__content {
+    padding: 8px; }
+
+.kuiContextMenu__panel {
+  position: absolute; }
+
+/**
+   * 1. Ensure icon is centered within a container with a consistent width.
+   */
+.kuiContextMenu__icon {
+  width: 16px;
+  /* 1 */
+  text-align: center;
+  /* 1 */
+  margin-right: 8px; }
+
+.kuiContextMenu__itemLayout {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -webkit-align-items: center;
+      -ms-flex-align: center;
+          align-items: center; }
+
+.kuiContextMenuPanel {
+  width: 100%;
+  visibility: visible;
+  background-color: #ffffff;
+  /**
+   * 1. Override global focus style.
+   */ }
+  .kuiContextMenuPanel:focus {
+    box-shadow: none;
+    /* 1 */ }
+  .kuiContextMenuPanel.kuiContextMenuPanel-txInLeft {
+    pointer-events: none;
+    -webkit-animation: kuiContextMenuPanelTxInLeft 250ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+            animation: kuiContextMenuPanelTxInLeft 250ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+  .kuiContextMenuPanel.kuiContextMenuPanel-txOutLeft {
+    pointer-events: none;
+    -webkit-animation: kuiContextMenuPanelTxOutLeft 250ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+            animation: kuiContextMenuPanelTxOutLeft 250ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+  .kuiContextMenuPanel.kuiContextMenuPanel-txInRight {
+    pointer-events: none;
+    -webkit-animation: kuiContextMenuPanelTxInRight 250ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+            animation: kuiContextMenuPanelTxInRight 250ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+  .kuiContextMenuPanel.kuiContextMenuPanel-txOutRight {
+    pointer-events: none;
+    -webkit-animation: kuiContextMenuPanelTxOutRight 250ms cubic-bezier(0.694, 0.0482, 0.335, 1);
+            animation: kuiContextMenuPanelTxOutRight 250ms cubic-bezier(0.694, 0.0482, 0.335, 1); }
+  .theme-dark .kuiContextMenuPanel {
+    background-color: #777777; }
+
+.kuiContextMenuPanel--next {
+  -webkit-transform: translateX(256px);
+          transform: translateX(256px);
+  visibility: hidden; }
+
+.kuiContextMenuPanel--previous {
+  -webkit-transform: translateX(-256px);
+          transform: translateX(-256px);
+  visibility: hidden; }
+
+/**
+ * 1. Button reset.
+ */
+.kuiContextMenuPanelTitle {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  /* 1 */
+  border: none;
+  /* 1 */
+  cursor: pointer;
+  /* 1 */
+  background-color: #e6e6e6;
+  border-bottom: 1px solid #D9D9D9;
+  padding: 12px;
+  font-size: 14px;
+  width: 100%;
+  text-align: left;
+  /**
+   * 1. Overwrite default style.
+   */ }
+  .theme-dark .kuiContextMenuPanelTitle {
+    background-color: #777777;
+    border-color: #444444;
+    color: #ffffff; }
+  .kuiContextMenuPanelTitle:hover .kuiContextMenu__text, .kuiContextMenuPanelTitle:focus .kuiContextMenu__text {
+    text-decoration: underline; }
+  .kuiContextMenuPanelTitle:focus {
+    box-shadow: none;
+    /* 1 */ }
+
+@-webkit-keyframes kuiContextMenuPanelTxInLeft {
+  0% {
+    -webkit-transform: translateX(100%);
+            transform: translateX(100%); }
+  100% {
+    -webkit-transform: translateX(0);
+            transform: translateX(0); } }
+
+@keyframes kuiContextMenuPanelTxInLeft {
+  0% {
+    -webkit-transform: translateX(100%);
+            transform: translateX(100%); }
+  100% {
+    -webkit-transform: translateX(0);
+            transform: translateX(0); } }
+
+@-webkit-keyframes kuiContextMenuPanelTxOutLeft {
+  0% {
+    -webkit-transform: translateX(0);
+            transform: translateX(0); }
+  100% {
+    -webkit-transform: translateX(-100%);
+            transform: translateX(-100%); } }
+
+@keyframes kuiContextMenuPanelTxOutLeft {
+  0% {
+    -webkit-transform: translateX(0);
+            transform: translateX(0); }
+  100% {
+    -webkit-transform: translateX(-100%);
+            transform: translateX(-100%); } }
+
+@-webkit-keyframes kuiContextMenuPanelTxInRight {
+  0% {
+    -webkit-transform: translateX(-100%);
+            transform: translateX(-100%); }
+  100% {
+    -webkit-transform: translateX(0);
+            transform: translateX(0); } }
+
+@keyframes kuiContextMenuPanelTxInRight {
+  0% {
+    -webkit-transform: translateX(-100%);
+            transform: translateX(-100%); }
+  100% {
+    -webkit-transform: translateX(0);
+            transform: translateX(0); } }
+
+@-webkit-keyframes kuiContextMenuPanelTxOutRight {
+  0% {
+    -webkit-transform: translateX(0);
+            transform: translateX(0); }
+  100% {
+    -webkit-transform: translateX(100%);
+            transform: translateX(100%); } }
+
+@keyframes kuiContextMenuPanelTxOutRight {
+  0% {
+    -webkit-transform: translateX(0);
+            transform: translateX(0); }
+  100% {
+    -webkit-transform: translateX(100%);
+            transform: translateX(100%); } }
+
+/**
+ * 1. Button reset.
+ * 2. Ensure buttons stack.
+ */
+.kuiContextMenuItem {
+  -webkit-appearance: none;
+     -moz-appearance: none;
+          appearance: none;
+  /* 1 */
+  background-color: transparent;
+  /* 1 */
+  font-size: 14px;
+  /* 1 */
+  border: none;
+  /* 1 */
+  cursor: pointer;
+  /* 1 */
+  display: block;
+  /* 2 */
+  padding: 12px;
+  width: 100%;
+  text-align: left;
+  color: #2d2d2d;
+  /**
+   * 1. Overwrite default style.
+   */ }
+  .kuiContextMenuItem:hover .kuiContextMenuItem__text, .kuiContextMenuItem:focus .kuiContextMenuItem__text {
+    text-decoration: underline; }
+  .kuiContextMenuItem:focus {
+    background-color: rgba(63, 168, 199, 0.2);
+    box-shadow: none;
+    /* 1 */ }
+    .theme-dark .kuiContextMenuItem:focus {
+      background-color: transparent; }
+  .theme-dark .kuiContextMenuItem {
+    color: #ffffff; }
+
+.kuiContextMenuItem__inner {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex; }
+
+.kuiContextMenuItem__text {
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1; }
+
+.kuiContextMenuItem__arrow {
+  -webkit-align-self: flex-end;
+      -ms-flex-item-align: end;
+          align-self: flex-end; }
+
 .kuiEvent {
   display: -webkit-box;
   display: -webkit-flex;
@@ -887,13 +1122,11 @@ main {
   line-height: 1.5;
   color: #666; }
 
-.kuiExpressionItem {
-  display: inline-block;
-  position: relative; }
-  .kuiExpressionItem + .kuiExpressionItem {
-    margin-left: 10px; }
+.kuiExpression {
+  padding: 20px;
+  white-space: nowrap; }
 
-.kuiExpressionItem__button {
+.kuiExpressionButton {
   background-color: transparent;
   padding: 5px 0px;
   border: none;
@@ -901,94 +1134,305 @@ main {
   font-size: 14px;
   cursor: pointer; }
 
-.kuiExpressionItem__buttonDescription {
+.kuiExpressionButton__description {
   color: #00A69B;
   text-transform: uppercase; }
 
-.kuiExpressionItem__buttonValue {
+.kuiExpressionButton__value {
   color: #2d2d2d;
   text-transform: lowercase; }
 
-.kuiExpressionItem__button--isActive {
+.kuiExpressionButton-isActive {
   border-bottom: solid 2px #00A69B; }
 
-.kuiExpressionItem__popover {
-  position: absolute;
-  top: calc(100% + 15px);
+.kuiFlexGroup {
   display: -webkit-box;
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+  .kuiFlexGroup .kuiFlexItem {
+    -webkit-box-flex: 1;
+    -webkit-flex-grow: 1;
+        -ms-flex-positive: 1;
+            flex-grow: 1;
+    -webkit-flex-basis: 0;
+        -ms-flex-preferred-size: 0;
+            flex-basis: 0; }
+  .kuiFlexGroup.kuiFlexGroup--gutterSmall > .kuiFlexItem + .kuiFlexItem {
+    margin-left: 8px; }
+  .kuiFlexGroup.kuiFlexGroup--gutterMedium > .kuiFlexItem + .kuiFlexItem {
+    margin-left: 16px; }
+  .kuiFlexGroup.kuiFlexGroup--gutterLarge > .kuiFlexItem + .kuiFlexItem {
+    margin-left: 24px; }
+  .kuiFlexGroup.kuiFlexGroup--gutterExtraLarge > .kuiFlexItem + .kuiFlexItem {
+    margin-left: 40px; }
+  .kuiFlexGroup.kuiFlexGroup--justifyContentSpaceBetween {
+    -webkit-box-pack: justify;
+    -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+            justify-content: space-between; }
+  .kuiFlexGroup.kuiFlexGroup--justifyContentSpaceAround {
+    -webkit-justify-content: space-around;
+        -ms-flex-pack: distribute;
+            justify-content: space-around; }
+  .kuiFlexGroup.kuiFlexGroup--justifyContentCenter {
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+        -ms-flex-pack: center;
+            justify-content: center; }
+  .kuiFlexGroup.kuiFlexGroup--justifyContentFlexEnd {
+    -webkit-box-pack: end;
+    -webkit-justify-content: flex-end;
+        -ms-flex-pack: end;
+            justify-content: flex-end; }
+  .kuiFlexGroup.kuiFlexGroup--alignItemsStart {
+    -webkit-box-align: start;
+    -webkit-align-items: flex-start;
+        -ms-flex-align: start;
+            align-items: flex-start; }
+  .kuiFlexGroup.kuiFlexGroup--alignItemsCenter {
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+        -ms-flex-align: center;
+            align-items: center; }
+  .kuiFlexGroup.kuiFlexGroup--alignItemsEnd {
+    -webkit-box-align: end;
+    -webkit-align-items: flex-end;
+        -ms-flex-align: end;
+            align-items: flex-end; }
+
+@media only screen and (max-width: 768px) {
+  .kuiFlexGroup {
+    -webkit-flex-wrap: wrap;
+        -ms-flex-wrap: wrap;
+            flex-wrap: wrap; } }
+
+.kuiFlexGrid {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+      -ms-flex-wrap: wrap;
+          flex-wrap: wrap;
+  margin-bottom: 0; }
+  .kuiFlexGrid > .kuiFlexItem {
+    -webkit-box-flex: 0;
+    -webkit-flex-grow: 0;
+        -ms-flex-positive: 0;
+            flex-grow: 0; }
+    .kuiFlexGrid > .kuiFlexItem.kuiFlexItem--flexGrowZero {
+      -webkit-box-flex: 0 !important;
+      -webkit-flex-grow: 0 !important;
+          -ms-flex-positive: 0 !important;
+              flex-grow: 0 !important;
+      -webkit-flex-basis: auto !important;
+          -ms-flex-preferred-size: auto !important;
+              flex-basis: auto !important; }
+
+/**
+   * Uncouple the gutter margin from the column widths to support cases where we use a FlexGrid
+   * without columns.
+   */
+.kuiFlexGrid--gutterSmall > .kuiFlexItem {
+  margin: 4px; }
+
+.kuiFlexGrid--gutterSmall {
+  margin: -4px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+  .kuiFlexGrid--gutterSmall.kuiFlexGrid--fourths > .kuiFlexItem {
+    -webkit-flex-basis: calc(25% - 8px);
+        -ms-flex-preferred-size: calc(25% - 8px);
+            flex-basis: calc(25% - 8px); }
+
+.kuiFlexGrid--gutterSmall {
+  margin: -4px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+  .kuiFlexGrid--gutterSmall.kuiFlexGrid--thirds > .kuiFlexItem {
+    -webkit-flex-basis: calc(33.3% - 8px);
+        -ms-flex-preferred-size: calc(33.3% - 8px);
+            flex-basis: calc(33.3% - 8px); }
+
+.kuiFlexGrid--gutterSmall {
+  margin: -4px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+  .kuiFlexGrid--gutterSmall.kuiFlexGrid--halves > .kuiFlexItem {
+    -webkit-flex-basis: calc(50% - 8px);
+        -ms-flex-preferred-size: calc(50% - 8px);
+            flex-basis: calc(50% - 8px); }
+
+/**
+   * Uncouple the gutter margin from the column widths to support cases where we use a FlexGrid
+   * without columns.
+   */
+.kuiFlexGrid--gutterMedium > .kuiFlexItem {
+  margin: 8px; }
+
+.kuiFlexGrid--gutterMedium {
+  margin: -8px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+  .kuiFlexGrid--gutterMedium.kuiFlexGrid--fourths > .kuiFlexItem {
+    -webkit-flex-basis: calc(25% - 16px);
+        -ms-flex-preferred-size: calc(25% - 16px);
+            flex-basis: calc(25% - 16px); }
+
+.kuiFlexGrid--gutterMedium {
+  margin: -8px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+  .kuiFlexGrid--gutterMedium.kuiFlexGrid--thirds > .kuiFlexItem {
+    -webkit-flex-basis: calc(33.3% - 16px);
+        -ms-flex-preferred-size: calc(33.3% - 16px);
+            flex-basis: calc(33.3% - 16px); }
+
+.kuiFlexGrid--gutterMedium {
+  margin: -8px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+  .kuiFlexGrid--gutterMedium.kuiFlexGrid--halves > .kuiFlexItem {
+    -webkit-flex-basis: calc(50% - 16px);
+        -ms-flex-preferred-size: calc(50% - 16px);
+            flex-basis: calc(50% - 16px); }
+
+/**
+   * Uncouple the gutter margin from the column widths to support cases where we use a FlexGrid
+   * without columns.
+   */
+.kuiFlexGrid--gutterLarge > .kuiFlexItem {
+  margin: 12px; }
+
+.kuiFlexGrid--gutterLarge {
+  margin: -12px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+  .kuiFlexGrid--gutterLarge.kuiFlexGrid--fourths > .kuiFlexItem {
+    -webkit-flex-basis: calc(25% - 24px);
+        -ms-flex-preferred-size: calc(25% - 24px);
+            flex-basis: calc(25% - 24px); }
+
+.kuiFlexGrid--gutterLarge {
+  margin: -12px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+  .kuiFlexGrid--gutterLarge.kuiFlexGrid--thirds > .kuiFlexItem {
+    -webkit-flex-basis: calc(33.3% - 24px);
+        -ms-flex-preferred-size: calc(33.3% - 24px);
+            flex-basis: calc(33.3% - 24px); }
+
+.kuiFlexGrid--gutterLarge {
+  margin: -12px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+  .kuiFlexGrid--gutterLarge.kuiFlexGrid--halves > .kuiFlexItem {
+    -webkit-flex-basis: calc(50% - 24px);
+        -ms-flex-preferred-size: calc(50% - 24px);
+            flex-basis: calc(50% - 24px); }
+
+/**
+   * Uncouple the gutter margin from the column widths to support cases where we use a FlexGrid
+   * without columns.
+   */
+.kuiFlexGrid--gutterXLarge > .kuiFlexItem {
+  margin: 16px; }
+
+.kuiFlexGrid--gutterXLarge {
+  margin: -16px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+  .kuiFlexGrid--gutterXLarge.kuiFlexGrid--fourths > .kuiFlexItem {
+    -webkit-flex-basis: calc(25% - 32px);
+        -ms-flex-preferred-size: calc(25% - 32px);
+            flex-basis: calc(25% - 32px); }
+
+.kuiFlexGrid--gutterXLarge {
+  margin: -16px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+  .kuiFlexGrid--gutterXLarge.kuiFlexGrid--thirds > .kuiFlexItem {
+    -webkit-flex-basis: calc(33.3% - 32px);
+        -ms-flex-preferred-size: calc(33.3% - 32px);
+            flex-basis: calc(33.3% - 32px); }
+
+.kuiFlexGrid--gutterXLarge {
+  margin: -16px;
+  -webkit-box-align: stretch;
+  -webkit-align-items: stretch;
+      -ms-flex-align: stretch;
+          align-items: stretch; }
+  .kuiFlexGrid--gutterXLarge.kuiFlexGrid--halves > .kuiFlexItem {
+    -webkit-flex-basis: calc(50% - 32px);
+        -ms-flex-preferred-size: calc(50% - 32px);
+            flex-basis: calc(50% - 32px); }
+
+/**
+ * 1. Allow KuiPanels to expand to fill the item.
+ */
+.kuiFlexItem {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  /* 1 */
   -webkit-box-orient: vertical;
   -webkit-box-direction: normal;
   -webkit-flex-direction: column;
       -ms-flex-direction: column;
           flex-direction: column;
-  -webkit-box-flex: 1;
-  -webkit-flex: 1 1 auto;
-      -ms-flex: 1 1 auto;
-          flex: 1 1 auto;
-  background-color: white;
-  border: 1px solid #D9D9D9;
-  border-radius: 6px;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
-  visibility: visible;
-  opacity: 1;
-  -webkit-transform: translateY(-5px) translateZ(0);
-          transform: translateY(-5px) translateZ(0);
-  transition: opacity 250ms cubic-bezier(0.34, 1.61, 0.7, 1), -webkit-transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
-  transition: transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1), opacity 250ms cubic-bezier(0.34, 1.61, 0.7, 1);
-  transition: transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1), opacity 250ms cubic-bezier(0.34, 1.61, 0.7, 1), -webkit-transform 250ms cubic-bezier(0.34, 1.61, 0.7, 1); }
-  .kuiExpressionItem__popover.ng-hide {
-    display: block !important;
-    visibility: hidden;
-    opacity: 0;
-    -webkit-transform: translateY(0px) translateZ(0);
-            transform: translateY(0px) translateZ(0); }
-  .kuiExpressionItem__popover:before {
-    position: absolute;
-    content: "";
-    top: -8px;
-    left: 20px;
-    height: 0;
-    width: 0;
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-bottom: 8px solid #D9D9D9; }
-  .kuiExpressionItem__popover:after {
-    position: absolute;
-    content: "";
-    top: -7px;
-    left: 20px;
-    height: 0;
-    width: 0;
-    border-left: 8px solid transparent;
-    border-right: 8px solid transparent;
-    border-bottom: 8px solid #e6e6e6; }
-  .kuiExpressionItem__popover.kuiExpressionItem__popover--alignRight {
-    right: 0; }
-    .kuiExpressionItem__popover.kuiExpressionItem__popover--alignRight:before, .kuiExpressionItem__popover.kuiExpressionItem__popover--alignRight:after {
-      left: auto;
-      right: 20px; }
+  /* 1 */
+  /*
+   * 1. We need the extra specificity here to override the FlexGroup > FlexItem styles.
+   * 2. FlexItem can be manually set to not grow if needed.
+   */ }
+  .kuiFlexItem.kuiFlexItem--flexGrowZero {
+    /* 1 */
+    -webkit-box-flex: 0;
+    -webkit-flex-grow: 0;
+        -ms-flex-positive: 0;
+            flex-grow: 0;
+    /* 2 */
+    -webkit-flex-basis: auto;
+        -ms-flex-preferred-size: auto;
+            flex-basis: auto;
+    /* 2 */ }
 
-.kuiExpressionItem__popoverTitle {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-box-flex: 1;
-  -webkit-flex: 1 1 auto;
-      -ms-flex: 1 1 auto;
-          flex: 1 1 auto;
-  background-color: #e6e6e6;
-  border-radius: 4px 4px 0 0;
-  color: #2d2d2d;
-  padding: 5px 10px;
-  line-height: 1.5; }
-
-.kuiExpressionItem__popoverContent {
-  padding: 20px;
-  white-space: nowrap; }
+@media only screen and (max-width: 768px) {
+  .kuiFlexItem {
+    width: 100% !important;
+    -webkit-flex-basis: 100% !important;
+        -ms-flex-preferred-size: 100% !important;
+            flex-basis: 100% !important;
+    margin-left: 0 !important;
+    margin-bottom: 16px !important; } }
 
 /**
  * 1. Set inline-block so this wrapper shrinks to fit the input.
@@ -1059,6 +1503,11 @@ main {
   .kuiCheckBox:disabled {
     opacity: 0.3;
     cursor: not-allowed; }
+  .theme-dark .kuiCheckBox {
+    background-color: #444444;
+    border-color: #444444; }
+    .theme-dark .kuiCheckBox:checked {
+      background-color: #0079a5; }
 
 .kuiCheckBoxLabel {
   display: -webkit-box;
@@ -1911,7 +2360,12 @@ main {
 .kuiLocalDropdownPanel--right {
   margin-left: 30px; }
 
+/**
+ * 1. Override inherited styles.
+ */
 .kuiLocalDropdownTitle {
+  margin-top: 0;
+  /* 1 */
   margin-bottom: 12px;
   font-size: 18px;
   color: #2d2d2d; }
@@ -1938,9 +2392,14 @@ main {
           justify-content: space-between;
   margin-bottom: 6px; }
 
+/**
+   * 1. Override inherited styles.
+   */
 .kuiLocalDropdownHeader__label {
   font-size: 14px;
   font-weight: 700;
+  margin-bottom: 0;
+  /* 1 */
   color: #2d2d2d; }
   .theme-dark .kuiLocalDropdownHeader__label {
     color: #cecece; }
@@ -2323,6 +2782,9 @@ main {
           align-items: flex-end;
   height: 100%; }
 
+/**
+   * 1. Override inherited typographic styles.
+   */
 .kuiLocalTab {
   padding: 5px 0 6px 0;
   font-size: 18px;
@@ -2330,6 +2792,10 @@ main {
   border-bottom: 2px solid transparent;
   text-decoration: none;
   cursor: pointer;
+  margin-top: 0 !important;
+  /* 1 */
+  margin-bottom: 0 !important;
+  /* 1 */
   /**
      * 1. We may want to show a tooltip to explain why the tab is disabled, so we will just show
      *    a regular cursor instead of setting pointer-events: none.
@@ -2552,15 +3018,22 @@ main {
   background-color: rgba(0, 0, 0, 0.5); }
 
 .kuiModal {
+  box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1);
   line-height: 1.5;
   background-color: #FFF;
   border: 1px solid #D9D9D9;
   border-radius: 4px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
-  z-index: 1001; }
+  z-index: 1001;
+  -webkit-animation: kuiModal 350ms cubic-bezier(0.34, 1.61, 0.7, 1);
+          animation: kuiModal 350ms cubic-bezier(0.34, 1.61, 0.7, 1); }
   .theme-dark .kuiModal {
     background-color: #525252;
     border-color: #000; }
+
+.kuiModal--confirmation {
+  width: 450px;
+  min-width: auto; }
 
 .kuiModalHeader {
   display: -webkit-box;
@@ -2624,6 +3097,26 @@ main {
   padding-top: 10px; }
   .kuiModalFooter > * + * {
     margin-left: 5px; }
+
+@-webkit-keyframes kuiModal {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(32px);
+            transform: translateY(32px); }
+  100% {
+    opacity: 1;
+    -webkit-transform: translateY(0);
+            transform: translateY(0); } }
+
+@keyframes kuiModal {
+  0% {
+    opacity: 0;
+    -webkit-transform: translateY(32px);
+            transform: translateY(32px); }
+  100% {
+    opacity: 1;
+    -webkit-transform: translateY(0);
+            transform: translateY(0); } }
 
 .kuiNotice {
   padding: 40px 60px 48px;
@@ -2823,38 +3316,58 @@ main {
 .kuiPanelBody {
   padding: 10px; }
 
+.kuiPanelSimple {
+  box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+  background-color: #FFF;
+  border: 1px solid #D9D9D9;
+  border-radius: 4px;
+  -webkit-box-flex: 1;
+  -webkit-flex-grow: 1;
+      -ms-flex-positive: 1;
+          flex-grow: 1; }
+  .kuiPanelSimple.kuiPanelSimple--paddingSmall {
+    padding: 8px; }
+  .kuiPanelSimple.kuiPanelSimple--paddingMedium {
+    padding: 16px; }
+  .kuiPanelSimple.kuiPanelSimple--paddingLarge {
+    padding: 24px; }
+  .kuiPanelSimple.kuiPanelSimple--shadow {
+    box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1); }
+  .kuiPanelSimple.kuiPanelSimple--flexGrowZero {
+    -webkit-box-flex: 0;
+    -webkit-flex-grow: 0;
+        -ms-flex-positive: 0;
+            flex-grow: 0; }
+  .theme-dark .kuiPanelSimple {
+    background-color: #777777;
+    border-color: #444444; }
+
 .kuiPopover {
   display: inline-block;
   position: relative; }
-  .kuiPopover.kuiPopover-isOpen .kuiPopover__body {
+  .kuiPopover.kuiPopover-isOpen .kuiPopover__panel {
     opacity: 1;
     visibility: visible;
-    display: inline-block;
-    z-index: 1;
-    margin-top: 10px;
-    box-shadow: 0 16px 16px -8px rgba(0, 0, 0, 0.1); }
+    margin-top: 8px;
+    pointer-events: auto; }
 
-.kuiPopover__body {
-  line-height: 1.5;
-  font-size: 14px;
+.kuiPopover__panel {
   position: absolute;
-  min-width: 256px;
+  z-index: 2000;
   top: 100%;
   left: 50%;
-  background: #FFF;
-  border: 1px solid #D9D9D9;
-  border-radius: 4px 0 4px 4px;
-  padding: 16px;
   -webkit-transform: translateX(-50%) translateY(8px) translateZ(0);
           transform: translateX(-50%) translateY(8px) translateZ(0);
   -webkit-backface-visibility: hidden;
           backface-visibility: hidden;
+  transition: opacity cubic-bezier(0.34, 1.61, 0.7, 1) 350ms, visibility cubic-bezier(0.34, 1.61, 0.7, 1) 350ms, margin-top cubic-bezier(0.34, 1.61, 0.7, 1) 350ms;
   -webkit-transform-origin: center top;
           transform-origin: center top;
   opacity: 0;
-  display: none;
-  margin-top: 32px; }
-  .kuiPopover__body:before {
+  visibility: hidden;
+  pointer-events: none;
+  margin-top: 24px; }
+  .kuiPopover__panel:before {
     position: absolute;
     content: "";
     top: -16px;
@@ -2865,7 +3378,9 @@ main {
     border-left: 16px solid transparent;
     border-right: 16px solid transparent;
     border-bottom: 16px solid #D9D9D9; }
-  .kuiPopover__body:after {
+    .theme-dark .kuiPopover__panel:before {
+      border-bottom-color: #444444; }
+  .kuiPopover__panel:after {
     position: absolute;
     content: "";
     top: -15px;
@@ -2876,24 +3391,41 @@ main {
     width: 0;
     border-left: 16px solid transparent;
     border-right: 16px solid transparent;
-    border-bottom: 16px solid #FFF; }
+    border-bottom: 16px solid #ffffff; }
+    .theme-dark .kuiPopover__panel:after {
+      border-bottom-color: #777777; }
 
-.kuiPopover--anchorLeft .kuiPopover__body {
+.kuiPopover--withTitle .kuiPopover__panel:after {
+  border-bottom-color: #e6e6e6; }
+  .theme-dark .kuiPopover--withTitle .kuiPopover__panel:after {
+    border-bottom-color: #777777; }
+
+.kuiPopover--anchorLeft .kuiPopover__panel {
   left: 0;
   -webkit-transform: translateX(0%) translateY(8px) translateZ(0);
           transform: translateX(0%) translateY(8px) translateZ(0); }
-  .kuiPopover--anchorLeft .kuiPopover__body:before, .kuiPopover--anchorLeft .kuiPopover__body:after {
+  .kuiPopover--anchorLeft .kuiPopover__panel:before, .kuiPopover--anchorLeft .kuiPopover__panel:after {
     right: auto;
-    left: 8px;
+    left: 16px;
     margin: 0; }
 
-.kuiPopover--anchorRight .kuiPopover__body {
+.kuiPopover--anchorRight .kuiPopover__panel {
   left: 100%;
   -webkit-transform: translateX(-100%) translateY(8px) translateZ(0);
           transform: translateX(-100%) translateY(8px) translateZ(0); }
-  .kuiPopover--anchorRight .kuiPopover__body:before, .kuiPopover--anchorRight .kuiPopover__body:after {
-    right: 8px;
+  .kuiPopover--anchorRight .kuiPopover__panel:before, .kuiPopover--anchorRight .kuiPopover__panel:after {
+    right: 16px;
     left: auto; }
+
+.kuiPopoverTitle {
+  background-color: #e6e6e6;
+  border-bottom: 1px solid #D9D9D9;
+  padding: 12px;
+  font-size: 14px; }
+  .theme-dark .kuiPopoverTitle {
+    background-color: #777777;
+    border-color: #444444;
+    color: #ffffff; }
 
 .kuiEmptyTablePrompt {
   display: -webkit-box;
@@ -3075,7 +3607,32 @@ main {
   color: #191E23;
   border-top: 1px solid #D9D9D9; }
 
+/**
+   * 1. Vertically align all children.
+   * 2. The padding on this div allows the ellipsis to show if the content is truncated. If
+   *    the padding was on the cell, the ellipsis would be cropped.
+   * 3. Truncate content with an ellipsis.
+   */
+.kuiTableRowCell__liner {
+  padding: 7px 8px 8px;
+  /* 2 */
+  line-height: 1.5;
+  /* 1 */
+  overflow: hidden;
+  /* 3 */
+  text-overflow: ellipsis;
+  /* 3 */
+  white-space: nowrap;
+  /* 3 */ }
+  .kuiTableRowCell__liner > * {
+    vertical-align: middle;
+    /* 1 */ }
+
 .kuiTableRowCell--wrap .kuiTableRowCell__liner {
+  white-space: normal; }
+
+.kuiTableRowCell--overflowingContent .kuiTableRowCell__liner {
+  overflow: visible;
   white-space: normal; }
 
 /**
@@ -3085,26 +3642,6 @@ main {
 .kuiTableRowCell--expanded {
   border-top-color: #f0f0f0;
   /* 1 */ }
-
-/**
-   * 1. Vertically align all children.
-   * 2. Truncate text with an ellipsis. The padding on this div allows the ellipsis to show. If
-   *    the padding was on the cell, the ellipsis would be cropped.
-   */
-.kuiTableRowCell__liner {
-  white-space: nowrap;
-  /* 2 */
-  overflow: hidden;
-  /* 2 */
-  text-overflow: ellipsis;
-  /* 2 */
-  padding: 7px 8px 8px;
-  /* 2 */
-  line-height: 1.5;
-  /* 1 */ }
-  .kuiTableRowCell__liner > * {
-    vertical-align: middle;
-    /* 1 */ }
 
 .kuiTableRowCell--alignRight {
   text-align: right; }
@@ -3514,6 +4051,8 @@ main {
   font-weight: 400;
   /* 1 */
   font-size: 22px; }
+  .theme-dark .kuiTitle {
+    color: #cecece; }
 
 /**
  * 1. Override h2, h3, etc.
@@ -3524,6 +4063,8 @@ main {
   font-weight: 400;
   /* 1 */
   font-size: 18px; }
+  .theme-dark .kuiSubTitle {
+    color: #cecece; }
 
 /**
  * 1. Override p.
@@ -3535,6 +4076,8 @@ main {
   /* 1 */
   line-height: 1.5;
   font-size: 14px; }
+  .theme-dark .kuiTextTitle {
+    color: #cecece; }
 
 /**
  * 1. Override p.
@@ -3546,6 +4089,8 @@ main {
   /* 1 */
   line-height: 1.5;
   font-size: 14px; }
+  .theme-dark .kuiText {
+    color: #cecece; }
 
 .kuiSubText {
   margin: 0;
@@ -3554,6 +4099,8 @@ main {
   /* 1 */
   line-height: 1.5;
   font-size: 12px; }
+  .theme-dark .kuiSubText {
+    color: #cecece; }
 
 .kuiSubduedText {
   color: #666 !important; }

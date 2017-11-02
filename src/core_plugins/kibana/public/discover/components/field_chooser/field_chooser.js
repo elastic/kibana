@@ -214,17 +214,15 @@ app.directive('discFieldChooser', function ($location, globalState, config, $rou
 
       $scope.computeDetails = function (field, recompute) {
         if (_.isUndefined(field.details) || recompute) {
-          field.details = Object.assign(
-            {
-              visualizeUrl: field.visualizable ? getVisualizeUrl(field) : null,
-            },
-            fieldCalculator.getFieldValueCounts({
+          field.details = {
+            visualizeUrl: field.visualizable ? getVisualizeUrl(field) : null,
+            ...fieldCalculator.getFieldValueCounts({
               hits: $scope.hits,
               field: field,
               count: 5,
               grouped: false
             }),
-          );
+          };
           _.each(field.details.buckets, function (bucket) {
             bucket.display = field.format.convert(bucket.value);
           });

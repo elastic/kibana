@@ -42,7 +42,7 @@ export function VisAggConfigsProvider(Private) {
     if (vis && vis.type && vis.type.schemas && vis.type.schemas.all) {
       _(vis.type.schemas.all)
       .filter(function (schema) {
-        return _.isArray(schema.defaults) && schema.defaults.length > 0;
+        return Array.isArray(schema.defaults) && schema.defaults.length > 0;
       })
       .each(function (schema) {
         if (!self.bySchemaName[schema.name]) {

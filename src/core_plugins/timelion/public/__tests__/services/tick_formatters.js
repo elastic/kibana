@@ -129,7 +129,21 @@ describe('Tick Formatters', function () {
           units: {}
         }
       };
-      expect(percentFormatter(0.1234, axis)).to.equal('12.34%');
+      expect(percentFormatter(0.1234, axis)).to.equal('12%');
+    });
+
+    it('formats with % with decimal precision', function () {
+      const tickDecimals = 3;
+      const tickDecimalShift = 2;
+      const axis = {
+        tickDecimals: tickDecimals + tickDecimalShift,
+        options: {
+          units: {
+            tickDecimalsShift: tickDecimalShift
+          }
+        }
+      };
+      expect(percentFormatter(0.12345, axis)).to.equal('12.345%');
     });
   });
 

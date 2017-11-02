@@ -98,17 +98,14 @@ function GaugeSeries(props) {
     );
   }
 
-  let colorPicker;
-  if (props.colorPicker) {
-    colorPicker = (
-      <ColorPicker
-        disableTrash={true}
-        onChange={props.onChange}
-        name="color"
-        value={model.color}
-      />
-    );
-  }
+  const colorPicker = (
+    <ColorPicker
+      disableTrash={true}
+      onChange={props.onChange}
+      name="color"
+      value={model.color}
+    />
+  );
 
   let dragHandle;
   if (!props.disableDelete) {
@@ -123,7 +120,6 @@ function GaugeSeries(props) {
 
   return (
     <div
-      aria-hidden="true"
       className={`${props.className} vis_editor__series`}
       style={props.style}
       onMouseDown={props.onMouseDown}

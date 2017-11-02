@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import dateMath from '@elastic/datemath';
 import { uiModules } from 'ui/modules';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import visualizeTemplate from 'ui/visualize/visualize.html';
@@ -18,7 +19,7 @@ import {
 
 uiModules
 .get('kibana/directive', ['ngSanitize'])
-  .directive('visualize', function (Notifier, Private, timefilter, getAppState, Promise, savedVisualizations) {
+  .directive('visualize', function (Notifier, Private, timefilter, getAppState, Promise) {
     const notify = new Notifier({ location: 'Visualize' });
     const requestHandlers = Private(VisRequestHandlersRegistryProvider);
     const responseHandlers = Private(VisResponseHandlersRegistryProvider);
@@ -32,11 +33,11 @@ uiModules
 
     return {
       restrict: 'E',
-      scope : {
+      scope: {
         showSpyPanel: '=?',
         editorMode: '=?',
         savedObj: '=?',
-        appState: '=',
+        appState: '=?',
         uiState: '=?',
         savedId: '=?',
         timeRange: '=?'
@@ -45,35 +46,41 @@ uiModules
       link: async function ($scope, $el) {
         const resizeChecker = new ResizeChecker($el);
 
-        if (!$scope.savedObj) {
-          if (!$scope.savedId) throw(`saved object was not provided to <visualize> directive`);
-          $scope.savedObj = await savedVisualizations.get($scope.savedId);
-        }
+        if (!$scope.savedObj) throw(`saved object was not provided to <visualize> directive`);
         if (!$scope.appState) $scope.appState = getAppState();
         if (!$scope.uiState) $scope.uiState = new PersistedState({});
 
         $scope.vis = $scope.savedObj.vis;
-        $scope.editorMode = $scope.editorMode || false;
-        $scope.vis.editorMode = $scope.editorMode;
         $scope.vis.visualizeScope = true;
 
         if ($scope.timeRange) {
+          $scope.vis.params.timeRange = {
+            min: dateMath.parse($scope.timeRange.min),
+            max: dateMath.parse($scope.timeRange.max)
+          };
+
           $scope.vis.aggs.forEach(agg => {
             if (agg.type.name !== 'date_histogram') return;
-            agg.setTimeRange({
-              min: new Date($scope.timeRange.min),
-              max: new Date($scope.timeRange.max)
-            });
+            agg.setTimeRange($scope.vis.params.timeRange);
           });
+
+          const searchSource = $scope.savedObj.searchSource;
+          const filter = timefilter.get(searchSource.index(), $scope.vis.params.timeRange);
+          const searchSourceFilters = searchSource.get('filter');
+          if (searchSourceFilters instanceof Array) {
+            searchSourceFilters.push(filter);
+            searchSource.skipTimeRangeFilter = true;
+          }
         }
+
+        $scope.editorMode = $scope.editorMode || false;
+        $scope.vis.editorMode = $scope.editorMode;
 
         // spy panel is supported only with courier request handler
         $scope.shouldShowSpyPanel = () => {
           if ($scope.vis.type.requestHandler !== 'courier') return false;
           return $scope.vis.type.requiresSearch && $scope.showSpyPanel;
         };
-
-        if (!$scope.appState) $scope.appState = getAppState();
 
         const requestHandler = getHandler(requestHandlers, $scope.vis.type.requestHandler);
         const responseHandler = getHandler(responseHandlers, $scope.vis.type.responseHandler);
@@ -114,14 +121,17 @@ uiModules
           });
         }, 100);
 
-        $scope.vis.on('update', () => {
+        //todo: clean this one up as well
+        const handleVisUpdate = () => {
           if ($scope.editorMode) {
             $scope.appState.vis = $scope.vis.getState();
             $scope.appState.save();
           } else {
             $scope.fetch();
           }
-        });
+        };
+        $scope.vis.on('update', handleVisUpdate);
+
 
         const reload = () => {
           $scope.vis.reload = true;
@@ -132,7 +142,13 @@ uiModules
         $scope.$on('courier:searchRefresh', reload);
       // dashboard will fire fetch event when it wants to refresh
         $scope.$on('fetch', reload);
-        queryFilter.on('update', $scope.fetch);
+
+
+
+        const handleQueryUpdate = ()=> {
+          $scope.fetch();
+        };
+        queryFilter.on('update', handleQueryUpdate);
 
         if ($scope.appState) {
           let oldUiState;
@@ -158,6 +174,12 @@ uiModules
           $scope.$on('$destroy', () => {
             stateMonitor.destroy();
           });
+        } else {
+          const handleUiStateChange = () => { $scope.$broadcast('render'); };
+          $scope.uiState.on('change', handleUiStateChange);
+          $scope.$on('$destroy', () => {
+            $scope.uiState.off('change', handleUiStateChange);
+          });
         }
 
         let resizeInit = false;
@@ -174,13 +196,15 @@ uiModules
         });
 
         $scope.$on('$destroy', () => {
+          $scope.vis.removeListener('update', handleVisUpdate);
+          queryFilter.off('update', handleQueryUpdate);
           resizeChecker.destroy();
         });
 
         $scope.$watch('vis.initialized', $scope.fetch);
 
         $scope.fetch();
-        $scope.$root.$broadcast('ready:vis');
+        $scope.$emit('ready:vis');
       }
     };
   });

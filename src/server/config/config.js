@@ -144,7 +144,7 @@ export default class Config {
       }
     }
 
-    if (_.isArray(key)) {
+    if (Array.isArray(key)) {
       // TODO: add .has() support for array keys
       key = key.join('.');
     }

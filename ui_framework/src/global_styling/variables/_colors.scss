@@ -10,6 +10,8 @@ $kuiColorDarkGray: #666;
 $kuiColorDarkestGray: #3F3F3F;
 $kuiColorBlack: #000;
 $kuiColorWhite: #FFF;
+$kuiColorEmptyShade: $kuiColorWhite;
+$kuiColorLightestShade: lighten($kuiColorLightGray, 5%);
 
 // Normal colors
 
@@ -38,6 +40,7 @@ $kuiSuccessColor: #417505;
 $kuiWarningColor: #ec9800;
 $kuiDangerColor: $kuiColorRed;
 $kuiFocusColor: $kuiColorBlue;
+$kuiFocusAltBackgroundColor: rgba($kuiInfoColor, 0.2);
 $kuiFocusDangerColor: #ff523c;
 $kuiFocusWarningColor: #ffa500;
 $kuiFocusBackgroundColor: #ffffff;

@@ -1,6 +1,7 @@
 {
   "rootDir": "../../",
   "roots": [
+    "<rootDir>/src/ui/public",
     "<rootDir>/src/core_plugins",
     "<rootDir>/ui_framework/"
   ],
@@ -21,6 +22,7 @@
     "\\.(css|less|scss)$": "<rootDir>/src/jest/mocks/style_mock.js"
   },
   "setupFiles": [
+    "<rootDir>/src/jest/setup/babel_polyfill.js",
     "<rootDir>/src/jest/setup/request_animation_frame_polyfill.js"
   ],
   "coverageDirectory": "<rootDir>/target/jest-coverage",

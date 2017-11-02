@@ -1,6 +1,6 @@
 
 <visualization-editor
-  ng-if="editorMode==true"
+  ng-if="editorMode===true"
   vis="vis"
   vis-data="visData"
   ui-state="uiState"
@@ -9,7 +9,7 @@
   show-spy-panel="shouldShowSpyPanel()"
 />
 <visualization
-  ng-if="editorMode==false"
+  ng-if="editorMode!==true"
   class={{vis.type.name}}
   vis="vis"
   vis-data="visData"
@@ -17,4 +17,3 @@
   search-source="savedObj.searchSource"
   show-spy-panel="shouldShowSpyPanel()"
 />
-

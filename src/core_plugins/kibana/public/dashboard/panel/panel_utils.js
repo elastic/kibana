@@ -31,13 +31,15 @@ export class PanelUtils {
       y: panel.row - 1,
       w: panel.size_x || DEFAULT_PANEL_WIDTH,
       h: panel.size_y || DEFAULT_PANEL_HEIGHT,
-      i: panel.panelIndex.toString(),
-      version: chrome.getKibanaVersion(),
+      i: panel.panelIndex.toString()
     };
+    panel.version = chrome.getKibanaVersion();
     delete panel.size_x;
     delete panel.size_y;
     delete panel.row;
     delete panel.col;
+
+    return panel;
   }
 
   /**
