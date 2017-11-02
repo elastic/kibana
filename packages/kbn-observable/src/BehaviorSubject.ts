@@ -25,7 +25,9 @@ export class BehaviorSubject<T> extends Subject<T> {
   }
 
   next(value: T) {
-    this.value = value;
+    if (!this.isStopped) {
+      this.value = value;
+    }
     return super.next(value);
   }
 }

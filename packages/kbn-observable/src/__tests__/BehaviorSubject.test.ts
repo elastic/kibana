@@ -27,11 +27,16 @@ test('should have a getValue() method to retrieve the current value', () => {
   expect(subject.getValue()).toEqual('bar');
 });
 
-test('should still allow you to retrieve the value from the value property', () => {
-  const subject = new BehaviorSubject('fuzzy');
-  expect(subject.getValue()).toEqual('fuzzy');
-  subject.next('bunny');
-  expect(subject.getValue()).toEqual('bunny');
+test('should not update value after completed', () => {
+  const subject = new BehaviorSubject('foo');
+
+  expect(subject.getValue()).toEqual('foo');
+
+  subject.next('bar');
+  subject.complete();
+  subject.next('quux');
+
+  expect(subject.getValue()).toEqual('bar');
 });
 
 test('should start with an initialization value', done => {
