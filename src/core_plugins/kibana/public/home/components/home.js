@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
 import {
-  KuiButton,
+  KuiLinkButton,
   KuiFlexGroup,
   KuiFlexItem,
   KuiFlexGrid,
@@ -56,11 +56,12 @@ export function Home({ addBasePath, directories }) {
                 </KuiFlexItem>
 
                 <KuiFlexItem grow={false}>
-                  <a href={addBasePath('/app/kibana#/management/kibana/index')}>
-                    <KuiButton buttonType="secondary">
-                      Set up index patterns
-                    </KuiButton>
-                  </a>
+                  <KuiLinkButton
+                    buttonType="secondary"
+                    href={addBasePath('/app/kibana#/management/kibana/index')}
+                  >
+                    Set up index patterns
+                  </KuiLinkButton>
                 </KuiFlexItem>
               </KuiFlexGroup>
 
@@ -90,20 +91,15 @@ export function Home({ addBasePath, directories }) {
         </div>
 
         <div className="kuiViewContentItem kuiVerticalRhythmXLarge text-center">
-
           <h4 className="kuiSubduedText kuiVerticalRhythmSmall">
             {`Didn't find what you were looking for?`}
           </h4>
-
-          <a href="#/home/feature_directory">
-            <KuiButton
-              className="kuiVerticalRhythmSmall"
-              buttonType="secondary"
-            >
-              View full directory of Kibana features
-            </KuiButton>
-          </a>
-
+          <KuiLinkButton
+            buttonType="secondary"
+            href="#/home/feature_directory"
+          >
+            View full directory of Kibana features
+          </KuiLinkButton>
         </div>
 
       </div>

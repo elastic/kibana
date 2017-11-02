@@ -13,6 +13,7 @@ export function Synopsis({ description, iconUrl, title, url }) {
       <img
         className="synopsisIcon"
         src={iconUrl}
+        alt=""
       />
     );
   }
