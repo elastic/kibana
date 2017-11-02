@@ -13,9 +13,6 @@ import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { compareFilters } from './lib/compare_filters';
 import { uiModules } from 'ui/modules';
 
-export { disableFilter, enableFilter, toggleFilterDisabled } from './lib/disable_filter';
-
-
 const module = uiModules.get('kibana');
 
 module.directive('filterBar', function (Private, Promise, getAppState) {

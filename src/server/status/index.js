@@ -40,24 +40,23 @@ export default function (kbnServer, server, config) {
   }));
 
   server.decorate('reply', 'renderStatusPage', async function () {
-    const app = kbnServer.uiExports.getHiddenApp('status_page');
-    const response = await getResponse(this);
-    response.code(kbnServer.status.isGreen() ? 200 : 503);
-    return response;
+    const app = server.getHiddenUiAppById('status_page');
+    const reply = this;
+    const response = app
+      ? await reply.renderApp(app)
+      : reply(kbnServer.status.toString());
 
-    function getResponse(ctx) {
-      if (app) {
-        return ctx.renderApp(app);
-      }
-      return ctx(kbnServer.status.toString());
+    if (response) {
+      response.code(kbnServer.status.isGreen() ? 200 : 503);
+      return response;
     }
   });
 
   server.route(wrapAuth({
     method: 'GET',
     path: '/status',
-    handler: function (request, reply) {
-      return reply.renderStatusPage();
+    handler(request, reply) {
+      reply.renderStatusPage();
     }
   }));
 }

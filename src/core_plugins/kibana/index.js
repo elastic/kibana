@@ -40,6 +40,10 @@ export default function (kibana) {
         'plugins/kibana/discover/saved_searches/saved_search_register',
         'plugins/kibana/dashboard/saved_dashboard/saved_dashboard_register',
       ],
+      embeddableHandlers: [
+        'plugins/kibana/visualize/embeddable/visualize_embeddable_handler_provider',
+        'plugins/kibana/discover/embeddable/search_embeddable_handler_provider',
+      ],
       app: {
         id: 'kibana',
         title: 'Kibana',
