@@ -74,6 +74,7 @@ export function $combineLatest<T>(
 
         error(error) {
           observer.error(error);
+          values.length = 0;
         },
 
         complete() {
@@ -81,6 +82,7 @@ export function $combineLatest<T>(
 
           if (activeCount === 0) {
             observer.complete();
+            values.length = 0;
           }
         }
       })
@@ -90,6 +92,7 @@ export function $combineLatest<T>(
       subs.forEach(sub => {
         sub.unsubscribe();
       });
+      values.length = 0;
     };
   });
 }
