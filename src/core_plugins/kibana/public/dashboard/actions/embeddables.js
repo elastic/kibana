@@ -1,18 +1,36 @@
 import { createAction } from 'redux-actions';
 
-export const destroyEmbeddable =
-  createAction('DESTROY_EMBEDDABLE', (panelId, embeddableHandler) => {
+export const destroyEmbeddable = createAction('DESTROY_EMBEDDABLE',
+  /**
+   *
+   * @param panelId {string}
+   * @param embeddableHandler {EmbeddableHandler}
+   * @return {string} - the panel id
+   */
+  (panelId, embeddableHandler) => {
     if (embeddableHandler) {
       embeddableHandler.destroy(panelId);
     }
     return panelId;
-  });
+  }
+);
 
-export const embeddableRenderFinished =
-  createAction('EMBEDDABLE_RENDER_FINISHED', (panelId, embeddable) => ({ embeddable, panelId }));
+export const embeddableRenderFinished = createAction('EMBEDDABLE_RENDER_FINISHED',
+  /**
+   * @param panelId {string}
+   * @param embeddable {Embeddable}
+   */
+  (panelId, embeddable) => ({ embeddable, panelId })
+);
 
-export const embeddableRenderError =
-  createAction('EMBEDDABLE_RENDER_ERROR', (panelId, error) => ({ panelId, error }));
+export const embeddableRenderError = createAction('EMBEDDABLE_RENDER_ERROR',
+  /**
+   *
+   * @param panelId {string}
+   * @param error {string|object}
+   */
+  (panelId, error) => ({ panelId, error })
+);
 
 /**
  *
