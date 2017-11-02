@@ -14,7 +14,7 @@ export class Suggestions {
   reset() {
     this.index = -1;
     this.list = [];
-    this.type;
+    this.type = null;
     this.isVisible = false;
   }
 

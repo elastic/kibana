@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import PEG from 'pegjs';
-import grammar from 'raw!../../chain.peg';
+import grammar from 'raw-loader!../../chain.peg';
 import {
   SUGGESTION_TYPE,
   suggest
