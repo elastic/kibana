@@ -11,7 +11,7 @@ import {
 } from '../../components';
 
 import Tabs from './tabs';
-const tabsSource = require('!!raw!./tabs');
+const tabsSource = require('!!raw-loader!./tabs');
 const tabsHtml = renderToHtml(Tabs);
 
 export default props => (

@@ -70,7 +70,7 @@ webpack shim for jQuery:
 -----------
 // webpackShims/jquery.js
 
-module.exports = window.jQuery = window.$ = require('node_modules/jquery/dist/jquery');
+module.exports = window.jQuery = window.$ = require('../node_modules/jquery/dist/jquery');
 require('ui/jquery/findTestSubject')(window.$);
 -----------
 
@@ -88,8 +88,8 @@ Here is what our webpack shim for angular looks like:
 // webpackShims/angular.js
 
 require('jquery');
-require('node_modules/angular/angular');
-require('node_modules/angular-elastic/elastic');
+require('../node_modules/angular/angular');
+require('../node_modules/angular-elastic/elastic');
 require('ui/modules').get('kibana', ['monospaced.elastic']);
 module.exports = window.angular;
 -----------

@@ -91,6 +91,15 @@ export {
 export { KuiInfoButton } from './info_button';
 
 export {
+  KuiLabel,
+  KuiTextInput,
+  KuiTextArea,
+  KuiSelect,
+  KuiCheckBox,
+  KuiCheckBoxLabel,
+} from './form';
+
+export {
   KuiLocalNav,
   KuiLocalNavRow,
   KuiLocalNavRowSection,

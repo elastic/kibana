@@ -12,7 +12,7 @@ import {
 } from '../../components';
 
 import <%= componentExampleName %> from './<%= fileName %>';
-const <%= componentExamplePrefix %>Source = require('!!raw!./<%= fileName %>');
+const <%= componentExamplePrefix %>Source = require('!!raw-loader!./<%= fileName %>');
 const <%= componentExamplePrefix %>Html = renderToHtml(<%= componentExampleName %>);
 
 export default props => (
