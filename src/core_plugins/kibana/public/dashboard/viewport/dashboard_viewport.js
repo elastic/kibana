@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { DashboardGridContainer } from '../grid/dashboard_grid_container';
+import { DashboardGrid } from '../grid';
 
 export function DashboardViewport({
   getContainerApi,
@@ -12,7 +12,7 @@ export function DashboardViewport({
     <div
       data-shared-items-count={panelCount}
     >
-      <DashboardGridContainer
+      <DashboardGrid
         getEmbeddableHandler={getEmbeddableHandler}
         getContainerApi={getContainerApi}
         maximizedPanelId={maximizedPanelId}
