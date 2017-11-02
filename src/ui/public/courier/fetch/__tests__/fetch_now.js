@@ -5,13 +5,13 @@ import ngMock from 'ng_mock';
 import { CallClientProvider } from 'ui/courier/fetch/call_client';
 import { CallResponseHandlersProvider } from 'ui/courier/fetch/call_response_handlers';
 import { ContinueIncompleteProvider } from 'ui/courier/fetch/continue_incomplete';
-import { FetchTheseProvider } from '../fetch_these';
+import { FetchNowProvider } from '../fetch_now';
 
-describe('FetchTheseProvider', () => {
+describe('FetchNowProvider', () => {
 
   let Promise;
   let $rootScope;
-  let fetchThese;
+  let fetchNow;
   let request;
   let requests;
   let fakeResponses;
@@ -34,7 +34,7 @@ describe('FetchTheseProvider', () => {
   beforeEach(ngMock.inject((Private, $injector) => {
     $rootScope = $injector.get('$rootScope');
     Promise = $injector.get('Promise');
-    fetchThese = Private(FetchTheseProvider);
+    fetchNow = Private(FetchNowProvider);
     request = mockRequest();
     requests = [ request ];
   }));
@@ -43,14 +43,14 @@ describe('FetchTheseProvider', () => {
     beforeEach(() => requests.forEach(req => req.started = false));
 
     it('starts request', () => {
-      fetchThese(requests);
+      fetchNow(requests);
       expect(request.start.called).to.be(true);
       expect(request.continue.called).to.be(false);
     });
 
     it('waits for returned promise from start() to be fulfilled', () => {
       request.start = sinon.stub().returns(Promise.resolve(request));
-      fetchThese(requests);
+      fetchNow(requests);
 
       expect(request.start.callCount).to.be(1);
       expect(fakeResponses.callCount).to.be(0);
@@ -60,7 +60,7 @@ describe('FetchTheseProvider', () => {
 
     it('invokes request failure handler if starting fails', () => {
       request.start = sinon.stub().returns(Promise.reject('some error'));
-      fetchThese(requests);
+      fetchNow(requests);
       $rootScope.$apply();
       sinon.assert.calledWith(request.handleFailure, 'some error');
     });
@@ -68,13 +68,13 @@ describe('FetchTheseProvider', () => {
 
   describe('when request has already started', () => {
     it('continues request', () => {
-      fetchThese(requests);
+      fetchNow(requests);
       expect(request.start.called).to.be(false);
       expect(request.continue.called).to.be(true);
     });
     it('waits for returned promise to be fulfilled', () => {
       request.continue = sinon.stub().returns(Promise.resolve(request));
-      fetchThese(requests);
+      fetchNow(requests);
 
       expect(request.continue.callCount).to.be(1);
       expect(fakeResponses.callCount).to.be(0);
@@ -83,7 +83,7 @@ describe('FetchTheseProvider', () => {
     });
     it('invokes request failure handler if continuing fails', () => {
       request.continue = sinon.stub().returns(Promise.reject('some error'));
-      fetchThese(requests);
+      fetchNow(requests);
       $rootScope.$apply();
       sinon.assert.calledWith(request.handleFailure, 'some error');
     });

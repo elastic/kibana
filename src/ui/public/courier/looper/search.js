@@ -1,11 +1,9 @@
-import { FetchProvider } from '../fetch';
-import { SearchStrategyProvider } from '../fetch/strategy/search';
+import { FetchSoonProvider } from '../fetch';
 import { requestQueue } from '../_request_queue';
 import { LooperProvider } from './_looper';
 
-export function SearchLooperProvider(Private, Promise, Notifier, $rootScope) {
-  const fetch = Private(FetchProvider);
-  const searchStrategy = Private(SearchStrategyProvider);
+export function SearchLooperProvider(Private, Promise, $rootScope) {
+  const fetchSoon = Private(FetchSoonProvider);
 
   const Looper = Private(LooperProvider);
 
@@ -15,11 +13,11 @@ export function SearchLooperProvider(Private, Promise, Notifier, $rootScope) {
    */
   const searchLooper = new Looper(null, function () {
     $rootScope.$broadcast('courier:searchRefresh');
-    const requests = requestQueue.getInactive(searchStrategy);
+    const requests = requestQueue.getInactive();
     // promise returned from fetch.these() only resolves when
     // the requests complete, but we want to continue even if
     // the requests abort so we make our own
-    fetch.these(requests);
+    fetchSoon.these(requests);
     return Promise.all(requests.map(request => request.getCompleteOrAbortedPromise()));
   });
 
