@@ -6,6 +6,7 @@
           ng-if="editingId"
           href="#/management/kibana/index"
           class="kuiButton kuiButton--primary kuiButton--small"
+          data-test-subj="openCreateIndexPatternBtn"
         >
           <span aria-hidden="true" class="kuiIcon fa-plus"></span>
           <span>Create Index Pattern</span>
@@ -29,7 +30,7 @@
         ng-repeat="pattern in indexPatternList | orderBy:['-default','title'] track by pattern.id"
         class="sidebar-item"
       >
-        <a href="{{::pattern.url}}" class="show">
+        <a href="{{::pattern.url}}" class="show" data-test-subj="indexPattern-{{::pattern.title}}">
           <div class="{{::pattern.class}}">
             <i aria-hidden="true" ng-if="pattern.default" class="fa fa-star"></i>
             <span ng-bind="::pattern.title"></span>
