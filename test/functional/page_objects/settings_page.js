@@ -300,6 +300,8 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         await this.navigateTo();
         await this.clickKibanaIndices();
+        await this.removeIndexPatternIfExists(indexPatternName);
+        await this.openCreateIndexPattern();
         await this.setIndexPatternField(indexPatternName);
         await PageObjects.common.sleep(2000);
         await (await this.getCreateIndexPatternGoToStep2Button()).click();
@@ -332,6 +334,14 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       return indexPatternId;
     }
 
+    async openCreateIndexPattern() {
+      // when no index patterns exist then button will not exist and the page is all ready displaying the create GUI
+      const openBtnExists = await testSubjects.exists('openCreateIndexPatternBtn');
+      if (openBtnExists) {
+        await testSubjects.click('openCreateIndexPatternBtn');
+      }
+    }
+
     async setIndexPatternField(indexPatternName = 'logstash-') {
       log.debug(`setIndexPatternField(${indexPatternName})`);
       const field = await this.getIndexPatternField();
@@ -345,6 +355,17 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
 
     async getCreateIndexPatternCreateButton() {
       return await testSubjects.find('createIndexPatternCreateButton');
+    }
+
+    async removeIndexPatternIfExists(indexPatternName) {
+      log.debug(`removeIndexPatternIfExists`);
+      const indexPatternTag = `indexPattern-${indexPatternName}*`;
+      const indexPatternExists = await testSubjects.exists(indexPatternTag);
+      log.debug(`index pattern ${indexPatternName} exists? ${indexPatternExists}`);
+      if (indexPatternExists) {
+        await testSubjects.click(indexPatternTag);
+        await this.removeIndexPattern();
+      }
     }
 
     async removeIndexPattern() {
