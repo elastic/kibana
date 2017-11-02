@@ -33,5 +33,5 @@ export const view = handleActions({
   isFullScreenMode: false,
   viewMode: DashboardViewMode.VIEW,
   maximizedPanelId: undefined,
-  useMargins: false,
+  useMargins: true,
 });

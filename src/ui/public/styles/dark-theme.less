@@ -521,7 +521,7 @@
 
 // /src/core_plugins/kibana/public/dashboard/styles/main.less
   .start-screen {
-    background-color: @dashboard-bg;
+    background-color: @dashboard-bg-with-margins;
   }
 
   .react-grid-layout {
@@ -740,7 +740,14 @@
       border: 1px solid #444444;
     }
   }
+  .dashboard-viewport {
+    background-color: @dashboard-bg;
+  }
   .dashboard-viewport-with-margins {
+    background-color: @dashboard-bg-with-margins;
+  }
+
+  .dashboard-container-with-margins {
     background-color: @dashboard-bg-with-margins;
   }
 }

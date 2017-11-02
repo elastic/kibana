@@ -12,7 +12,7 @@ export function DashboardViewport({
   return (
     <div
       data-shared-items-count={panelCount}
-      className={useMargins ? 'dashboard-viewport-with-margins' : ''}
+      className={useMargins ? 'dashboard-viewport-with-margins' : 'dashboard-viewport'}
     >
       <DashboardGridContainer
         getEmbeddableHandler={getEmbeddableHandler}

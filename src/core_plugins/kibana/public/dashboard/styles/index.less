@@ -100,6 +100,7 @@
   background-color: @dashboard-bg;
 }
 
+
 .dashboardCloneModal {
   width: 450px;
 }
@@ -113,7 +114,6 @@
 
 .start-screen {
   margin: 20px auto;
-  background-color: @dashboard-bg;
   max-width: 800px;
   background: tint(@globalColorBlue, 90%);
   padding: 40px;
@@ -167,6 +167,10 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+}
+
+.dashboard-container-with-margins {
+  background-color: @dashboard-bg-with-margins;
 }
 
 /**
@@ -348,6 +352,10 @@ dashboard-viewport-provider {
     border: 1px solid #D9D9D9;
     box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
   }
+}
+
+.dashboard-viewport {
+  background-color: @dashboard-bg;
 }
 .dashboard-viewport-with-margins {
   background-color: @dashboard-bg-with-margins;

@@ -25,7 +25,8 @@ module.factory('SavedDashboard', function (courier, config) {
         description: '',
         panelsJSON: '[]',
         optionsJSON: angular.toJson({
-          darkTheme: config.get('dashboard:defaultDarkTheme')
+          darkTheme: config.get('dashboard:defaultDarkTheme'),
+          useMargins: true,
         }),
         uiStateJSON: '{}',
         version: 1,

@@ -246,7 +246,8 @@ export class DashboardStateManager {
   }
 
   getUseMargins() {
-    return !!this.appState.options.useMargins;
+    // Existing dashboards that don't define this should default to false.
+    return this.appState.options.useMargins === undefined ? false : this.appState.options.useMargins;
   }
 
   setUseMargins(useMargins) {
