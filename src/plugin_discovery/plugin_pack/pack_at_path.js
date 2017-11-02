@@ -1,4 +1,4 @@
-import { $from } from '../utils';
+import { Observable } from 'rxjs';
 import { isAbsolute, resolve } from 'path';
 import { createInvalidPackError } from '../errors';
 
@@ -36,7 +36,7 @@ async function createPackAtPath(path) {
 }
 
 export const createPackAtPath$ = (path) => (
-  $from(createPackAtPath(path))
+  Observable.from(createPackAtPath(path))
     .map(pack => ({ pack }))
     .catch(error => [{ error }])
 );

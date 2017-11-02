@@ -1,4 +1,4 @@
-import { $merge } from './utils';
+import { Observable } from 'rxjs';
 
 import { transformDeprecations, Config } from '../server/config';
 
@@ -42,7 +42,7 @@ function waitForComplete(observable) {
  */
 export function findPluginSpecs(settings, config = defaultConfig(settings)) {
   // find plugin packs in configured paths/dirs
-  const find$ = $merge(
+  const find$ = Observable.merge(
     ...config.get('plugins.paths').map(createPackAtPath$),
     ...config.get('plugins.scanDirs').map(createPacksInDirectory$)
   )

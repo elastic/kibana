@@ -2,8 +2,8 @@ import { stat, readdir } from 'fs';
 import { resolve } from 'path';
 
 import { fromNode as fcb } from 'bluebird';
+import { Observable } from 'rxjs';
 
-import { $fcb, $fromPromise } from '../../utils';
 import { createInvalidDirectoryError } from '../../errors';
 
 async function statTest(path, test) {
@@ -42,7 +42,8 @@ export async function isDirectory(path) {
  *  @return {Promise<Array<string>>}
  */
 export const createChildDirectory$ = (path) => (
-  $fcb(cb => readdir(path, cb))
+  Observable
+    .fromPromise(fcb(cb => readdir(path, cb)))
     .catch(error => {
       throw createInvalidDirectoryError(error, path);
     })
@@ -50,7 +51,8 @@ export const createChildDirectory$ = (path) => (
     .filter(name => !name.startsWith('.'))
     .map(name => resolve(path, name))
     .mergeMap(v => (
-      $fromPromise(isDirectory(path))
+      Observable
+        .fromPromise(isDirectory(path))
         .mergeMap(pass => pass ? [v] : [])
     ))
 );
