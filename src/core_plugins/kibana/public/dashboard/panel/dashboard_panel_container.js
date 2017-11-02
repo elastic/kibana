@@ -29,7 +29,7 @@ const mapStateToProps = ({ dashboard }, { panelId }) => {
 
     viewOnlyMode: getFullScreenMode(dashboard) || getViewMode(dashboard) === DashboardViewMode.VIEW,
     isExpanded: getMaximizedPanelId(dashboard) === panelId,
-    panel: getPanel(dashboard, panelId)
+    panel: getPanel(dashboard, panelId),
   };
 };
 

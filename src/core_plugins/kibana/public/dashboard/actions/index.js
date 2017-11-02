@@ -1,9 +1,4 @@
-export {
-  updateViewMode,
-  updateIsFullScreenMode,
-  minimizePanel,
-  maximizePanel
-} from './view';
+export * from './view';
 
 export {
   updatePanel,
