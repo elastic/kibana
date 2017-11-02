@@ -121,9 +121,8 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
       }
 
       function getCursorPosition() {
-        const $selection = $('#timelionExpressionTextArea');
-        if ($selection.length) {
-          return $selection[0].selectionStart;
+        if (expressionInput.length) {
+          return expressionInput[0].selectionStart;
         }
         return null;
       }
