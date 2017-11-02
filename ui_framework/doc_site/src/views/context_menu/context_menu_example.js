@@ -12,11 +12,11 @@ import {
 } from '../../components';
 
 import ContextMenu from './context_menu';
-const contextMenuSource = require('!!raw!./context_menu');
+const contextMenuSource = require('!!raw-loader!./context_menu');
 const contextMenuHtml = renderToHtml(ContextMenu);
 
 import SinglePanel from './single_panel';
-const singlePanelSource = require('!!raw!./single_panel');
+const singlePanelSource = require('!!raw-loader!./single_panel');
 const singlePanelHtml = renderToHtml(SinglePanel);
 
 export default props => (
