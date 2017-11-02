@@ -3,6 +3,12 @@ import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
 import {
   KuiLinkButton,
+  KuiCardGroup,
+  KuiCard,
+  KuiCardDescription,
+  KuiCardDescriptionTitle,
+  KuiCardDescriptionText,
+  KuiCardFooter,
 } from 'ui_framework/components';
 
 import {
@@ -39,6 +45,95 @@ export function Home({ addBasePath, directories }) {
       });
   };
 
+  const renderPromo = () => {
+    const cardStyle = {
+      width: '250px',
+      'minWidth': '200px'
+    };
+    return (
+      <div className="kuiVerticalRhythm">
+        <KuiCardGroup>
+          <KuiCard style={cardStyle}>
+            <KuiCardDescription>
+              <KuiCardDescriptionTitle>
+                <img
+                  src={addBasePath('/plugins/kibana/assets/app_logging.svg')}
+                />
+                <p>
+                  Logging
+                </p>
+              </KuiCardDescriptionTitle>
+
+              <KuiCardDescriptionText>
+                Ingest logs from popular data sources and easily visualize in preconfigured dashboards.
+              </KuiCardDescriptionText>
+            </KuiCardDescription>
+
+            <KuiCardFooter>
+              <KuiLinkButton
+                buttonType="secondary"
+                href={addBasePath('/app/kibana#/home/tutorial_directory/logging')}
+              >
+                Add data
+              </KuiLinkButton>
+            </KuiCardFooter>
+          </KuiCard>
+
+          <KuiCard style={cardStyle}>
+            <KuiCardDescription>
+              <KuiCardDescriptionTitle>
+                <img
+                  src={addBasePath('/plugins/kibana/assets/app_monitoring.svg')}
+                />
+                <p>
+                  Metrics
+                </p>
+              </KuiCardDescriptionTitle>
+
+              <KuiCardDescriptionText>
+                Collect metrics from the operating system and services running on your servers.
+              </KuiCardDescriptionText>
+            </KuiCardDescription>
+
+            <KuiCardFooter>
+              <KuiLinkButton
+                buttonType="secondary"
+                href={addBasePath('/app/kibana#/home/tutorial_directory/metrics')}
+              >
+                Add data
+              </KuiLinkButton>
+            </KuiCardFooter>
+          </KuiCard>
+
+          <KuiCard style={cardStyle}>
+            <KuiCardDescription>
+              <KuiCardDescriptionTitle>
+                <img
+                  src={addBasePath('/plugins/kibana/assets/app_security.svg')}
+                />
+                <p>
+                  Security Analytics
+                </p>
+              </KuiCardDescriptionTitle>
+
+              <KuiCardDescriptionText>
+                Centralize security events for interactive investigation in ready-to-go visualizations.
+              </KuiCardDescriptionText>
+            </KuiCardDescription>
+
+            <KuiCardFooter>
+              <KuiLinkButton
+                buttonType="secondary"
+                href={addBasePath('/app/kibana#/home/tutorial_directory/security')}
+              >
+                Add data
+              </KuiLinkButton>
+            </KuiCardFooter>
+          </KuiCard>
+        </KuiCardGroup>
+      </div>
+    );
+  };
 
   return (
     <EuiPage className="home">
@@ -49,7 +144,7 @@ export function Home({ addBasePath, directories }) {
       >
         <EuiFlexItem>
           <EuiTitle size="l">
-            <h1>Welcome to Kibana</h1>
+            <h1>Add Data to Kibana</h1>
           </EuiTitle>
         </EuiFlexItem>
 
@@ -73,6 +168,15 @@ export function Home({ addBasePath, directories }) {
 
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
+
+      <p className="kuiText kuiSubduedText">
+        These turnkey solutions will help you quickly add data into Kibana and turn it into
+        pre-built dashboards and monitoring systems.
+      </p>
+
+      { renderPromo() }
 
       <EuiSpacer size="l" />
 
