@@ -76,6 +76,8 @@ export class DashboardStateManager {
     store.dispatch(updatePanels(this.getPanels()));
     store.dispatch(updateViewMode(this.getViewMode()));
     store.dispatch(updateIsFullScreenMode(this.getFullScreenMode()));
+    store.dispatch(updateTitle(this.getTitle()));
+    store.dispatch(updateDescription(this.getDescription()));
 
     this.changeListeners = [];
 
