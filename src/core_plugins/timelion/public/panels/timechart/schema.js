@@ -29,7 +29,7 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
         $scope.search = $scope.search || _.noop;
 
         let legendValueNumbers;
-        let legendTable;
+        let legendCaption;
         const debouncedSetLegendNumbers = _.debounce(setLegendNumbers, SET_LEGEND_NUMBERS_DELAY, {
           maxWait: SET_LEGEND_NUMBERS_DELAY,
           leading: true,
@@ -142,10 +142,8 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
           let i;
           let j;
           const dataset = plot.getData();
-          if (_.get(dataset, '[0]._global.legend.showTime', true)) {
-            legendTable.find('caption').remove();
-            const formattedTime = moment(pos.x).format(_.get(dataset, '[0]._global.legend.timeFormat', DEFAULT_TIME_FORMAT));
-            legendTable.append(`<caption>${formattedTime}</caption>`);
+          if (legendCaption) {
+            legendCaption.text(moment(pos.x).format(_.get(dataset, '[0]._global.legend.timeFormat', DEFAULT_TIME_FORMAT)));
           }
           for (i = 0; i < dataset.length; ++i) {
 
@@ -179,7 +177,9 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
         }
 
         function clearLegendNumbers() {
-          legendTable.find('caption').remove();
+          if (legendCaption) {
+            legendCaption.empty();
+          }
           _.each(legendValueNumbers, function (num) {
             $(num).empty();
           });
@@ -282,7 +282,10 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
             $compile(elem)(legendScope);
           });
 
-          legendTable = canvasElem.find('div.legend table');
+          if (_.get($scope.plot.getData(), '[0]._global.legend.showTime', true)) {
+            legendCaption = $('<caption class="timelionLegendCaption"></caption>');
+            canvasElem.find('div.legend table').append(legendCaption);
+          }
         }
         $scope.$watch('chart', drawPlot);
       }
