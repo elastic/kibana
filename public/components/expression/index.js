@@ -1,8 +1,9 @@
 import { connect } from 'react-redux';
-import { compose, withState, withHandlers, lifecycle, withPropsOnChange } from 'recompose';
+import { compose, withState, withHandlers, lifecycle, withPropsOnChange, branch, renderComponent } from 'recompose';
 import { Expression as Component } from './expression';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
 import { setExpression, flushContext } from '../../state/actions/elements';
+import { ElementNotSelected } from './element_not_selected';
 import { fromExpression } from '../../../common/lib/ast';
 
 const mapStateToProps = (state) => ({
@@ -66,4 +67,5 @@ export const Expression = compose(
       }
     }()),
   })),
+  branch(props => !props.element, renderComponent(ElementNotSelected)),
 )(Component);

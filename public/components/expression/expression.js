@@ -1,13 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { compose, branch, renderComponent } from 'recompose';
 import { FormGroup, FormControl, Button, ButtonToolbar } from 'react-bootstrap';
-import { ElementNotSelected } from './element_not_selected';
 import './expression.less';
 
-const noSelected = branch(props => !props.element, renderComponent(ElementNotSelected));
 
-const Component = ({ formState, updateValue, setExpression, done, error }) => {
+export const Expression = ({ formState, updateValue, setExpression, done, error }) => {
   let input;
 
   return (
@@ -35,12 +32,10 @@ const Component = ({ formState, updateValue, setExpression, done, error }) => {
   );
 };
 
-Component.propTypes = {
+Expression.propTypes = {
   formState: PropTypes.object,
   updateValue: PropTypes.func,
   setExpression: PropTypes.func,
   done: PropTypes.func,
   error: PropTypes.string,
 };
-
-export const Expression = compose(noSelected)(Component);
