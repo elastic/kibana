@@ -13,6 +13,20 @@ import sizeMe from 'react-sizeme';
 const config = { monitorWidth: true };
 let lastValidGridSize = 0;
 
+/**
+ * This is a fix for a bug that stopped the browser window from automatically scrolling down when panels were made
+ * taller than the current grid.
+ * see https://github.com/elastic/kibana/issues/14710.
+ */
+function ensureWindowScrollsToBottom(layout, oldResizeItem, l, placeholder, event) {
+  // The buffer is to handle the case where the browser is maximized and it's impossible for the mouse to move below
+  // the screen, out of the window.  see https://github.com/elastic/kibana/issues/14737
+  const WINDOW_BUFFER = 10;
+  if (event.clientY > window.innerHeight - WINDOW_BUFFER) {
+    window.scrollTo(0, event.pageY + WINDOW_BUFFER - window.innerHeight);
+  }
+}
+
 function ResponsiveGrid({
   size,
   isViewMode,
@@ -49,6 +63,7 @@ function ResponsiveGrid({
       layout={layout}
       onLayoutChange={onLayoutChange}
       measureBeforeMount={false}
+      onResize={ensureWindowScrollsToBottom}
     >
       {children}
     </ReactGridLayout>
