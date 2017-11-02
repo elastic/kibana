@@ -6,7 +6,7 @@ import classNames from 'classnames';
 
 import { PanelUtils } from '../panel/panel_utils';
 import { DashboardViewMode } from '../dashboard_view_mode';
-import { DashboardPanelContainer } from '../panel/dashboard_panel_container';
+import { DashboardPanel } from '../panel';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../dashboard_constants';
 import sizeMe from 'react-sizeme';
 
@@ -142,7 +142,7 @@ export class DashboardGrid extends React.Component {
           key={panel.panelIndex.toString()}
           ref={reactGridItem => { this.gridItems[panel.panelIndex] = reactGridItem; }}
         >
-          <DashboardPanelContainer
+          <DashboardPanel
             panelId={`${panel.panelIndex}`}
             getContainerApi={getContainerApi}
             embeddableHandler={getEmbeddableHandler(panel.type)}

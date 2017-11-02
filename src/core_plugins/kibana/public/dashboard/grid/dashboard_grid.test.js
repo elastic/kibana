@@ -12,7 +12,6 @@ jest.mock('ui/chrome', () => ({ getKibanaVersion: () => '6.0.0' }), { virtual: t
 function getProps(props = {}) {
   const defaultTestProps = {
     dashboardViewMode: DashboardViewMode.EDIT,
-    isFullScreenMode: false,
     panels: {
       '1': {
         gridData: { x: 0, y: 0, w: 6, h: 6, i: 1 },
@@ -31,9 +30,6 @@ function getProps(props = {}) {
     },
     getEmbeddableHandler: () => getEmbeddableHandlerMock(),
     getContainerApi: () => getContainerApiMock(),
-    isExpanded: false,
-    expandPanel: () => {},
-    onPanelRemoved: () => {},
     onPanelUpdated: () => {},
   };
   return Object.assign(defaultTestProps, props);

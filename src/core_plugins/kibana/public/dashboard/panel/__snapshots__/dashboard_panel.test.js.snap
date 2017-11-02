@@ -12,9 +12,10 @@ exports[`DashboardPanel matches snapshot 1`] = `
       class="panel-heading"
     >
       <span
-        aria-label="Dashboard panel: undefined"
+        aria-label="Dashboard panel: "
         class="panel-title"
         data-test-subj="dashboardPanelTitle"
+        title=""
       />
       <div
         class="kuiMicroButtonGroup"
