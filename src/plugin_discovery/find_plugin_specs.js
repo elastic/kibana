@@ -23,6 +23,14 @@ function defaultConfig(settings) {
   );
 }
 
+function waitForComplete(observable) {
+  return observable
+    // buffer all results into a single array
+    .toArray()
+    // merge the array back into the stream when complete
+    .mergeMap(array => array);
+}
+
 /**
  *  Creates a collection of observables for discovering pluginSpecs
  *  using Kibana's defaults, settings, and config service
@@ -54,17 +62,27 @@ export function findPluginSpecs(settings, config = defaultConfig(settings)) {
         deprecations.push({ spec, message });
       });
 
-      // if the pluginSpec is disabled then disable the extension
-      // we made to the config service
-      const enabled = spec.isEnabled(config);
-      if (!enabled) {
+      return {
+        spec,
+        deprecations,
+      };
+    })
+    // extend the config with all plugins before determining enabled status
+    .let(waitForComplete)
+    .map(result => {
+      const enabled = result.spec.isEnabled(config);
+      return {
+        ...result,
+        enabledSpecs: enabled ? [result.spec] : [],
+        disabledSpecs: enabled ? [] : [result.spec]
+      };
+    })
+    // determin which plugins are disabled before actually removing things from the config
+    .let(waitForComplete)
+    .do(result => {
+      for (const spec of result.disabledSpecs) {
         disableConfigExtension(spec, config);
       }
-
-      return {
-        deprecations,
-        enabledSpecs: enabled ? [spec] : [],
-      };
     })
     .share();
 
