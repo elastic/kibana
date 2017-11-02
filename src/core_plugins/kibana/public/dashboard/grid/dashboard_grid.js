@@ -33,7 +33,7 @@ function ResponsiveGrid({
     'layout-with-margins': useMargins,
   });
 
-  const margins = useMargins ? 8 : 0;
+  const MARGINS = useMargins ? 8 : 0;
   // We can't take advantage of isDraggable or isResizable due to performance concerns:
   // https://github.com/STRML/react-grid-layout/issues/240
   return (
@@ -42,7 +42,7 @@ function ResponsiveGrid({
       className={classes}
       isDraggable={true}
       isResizable={true}
-      margin={[margins, margins]}
+      margin={[MARGINS, MARGINS]}
       cols={DASHBOARD_GRID_COLUMN_COUNT}
       rowHeight={100}
       draggableHandle={isViewMode ? '.doesnt-exist' : '.panel-title'}
