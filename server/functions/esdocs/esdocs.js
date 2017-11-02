@@ -80,7 +80,7 @@ export const esdocs = {
 
       const columnNames = keys(flatHits[0]);
 
-      return getESFieldTypes(args.index, columnNames)
+      return getESFieldTypes(args.index, columnNames, handlers.elasticsearchClient)
       .then(typedFields => {
         return {
           type: 'datatable',
