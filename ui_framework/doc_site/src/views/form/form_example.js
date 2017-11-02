@@ -17,27 +17,27 @@ const searchInputHtml = require('./search_input.html');
 const staticInputHtml = require('./static_input.html');
 
 const Label = require('./label');
-const labelSource = require('!!raw!./label');
+const labelSource = require('!!raw-loader!./label');
 const labelHtml = renderToHtml(Label);
 
 const TextInput = require('./text_input');
-const textInputSource = require('!!raw!./text_input');
+const textInputSource = require('!!raw-loader!./text_input');
 const textInputHtml = renderToHtml(TextInput, { id: '1' });
 
 const TextArea = require('./text_area');
-const textAreaSource = require('!!raw!./text_area');
+const textAreaSource = require('!!raw-loader!./text_area');
 const textAreaHtml = renderToHtml(TextArea);
 
 const TextAreaNonResizable = require('./text_area_non_resizable');
-const textAreaNonResizableSource = require('!!raw!./text_area_non_resizable');
+const textAreaNonResizableSource = require('!!raw-loader!./text_area_non_resizable');
 const textAreaNonResizableHtml = renderToHtml(TextAreaNonResizable);
 
 const Select = require('./select');
-const selectSource = require('!!raw!./select');
+const selectSource = require('!!raw-loader!./select');
 const selectHtml = renderToHtml(Select);
 
 const CheckBox = require('./check_box');
-const checkBoxSource = require('!!raw!./check_box');
+const checkBoxSource = require('!!raw-loader!./check_box');
 const checkBoxHtml = renderToHtml(CheckBox);
 
 export default props => (
