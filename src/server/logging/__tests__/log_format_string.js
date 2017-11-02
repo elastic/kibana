@@ -8,11 +8,11 @@ import {
 
 import KbnLoggerStringFormat from '../log_format_string';
 
-const time = moment('2010-01-01T05:15:59Z', moment.ISO_8601);
+const time = +moment('2010-01-01T05:15:59Z', moment.ISO_8601);
 
 const makeEvent = () => ({
   event: 'log',
-  timestamp: time.valueOf(),
+  timestamp: time,
   tags: ['tag'],
   pid: 1,
   data: 'my log message'
@@ -30,7 +30,7 @@ describe('KbnLoggerStringFormat', () => {
     ]);
 
     expect(String(result))
-      .to.contain(time.clone().utc().format('HH:mm:ss.SSS'));
+      .to.contain(moment.utc(time).format('HH:mm:ss.SSS'));
   });
 
   it('logs in local timezone when useUTC is false', async () => {
@@ -44,6 +44,6 @@ describe('KbnLoggerStringFormat', () => {
     ]);
 
     expect(String(result)).to
-      .contain(time.clone().format('HH:mm:ss.SSS'));
+      .contain(moment(time).format('HH:mm:ss.SSS'));
   });
 });

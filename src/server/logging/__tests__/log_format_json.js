@@ -8,11 +8,11 @@ import {
 
 import KbnLoggerJsonFormat from '../log_format_json';
 
-const time = moment('2010-01-01T05:15:59Z', moment.ISO_8601);
+const time = +moment('2010-01-01T05:15:59Z', moment.ISO_8601);
 
 const makeEvent = () => ({
   event: 'log',
-  timestamp: time.valueOf(),
+  timestamp: time,
   tags: ['tag'],
   pid: 1,
   data: 'my log message'
@@ -30,7 +30,7 @@ describe('KbnLoggerJsonFormat', () => {
     ]);
 
     const { '@timestamp': timestamp } = JSON.parse(result);
-    expect(timestamp).to.eql(time.clone().utc().format());
+    expect(timestamp).to.eql(moment.utc(time).format());
   });
 
   it('logs in local timezone when useUTC is false', async () => {
@@ -44,6 +44,6 @@ describe('KbnLoggerJsonFormat', () => {
     ]);
 
     const { '@timestamp': timestamp } = JSON.parse(result);
-    expect(timestamp).to.eql(time.clone().format());
+    expect(timestamp).to.eql(moment(time).format());
   });
 });
