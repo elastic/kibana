@@ -9,7 +9,7 @@ import {
 } from '../../components';
 
 import HeaderBarSandboxContent from './header_bar_sandbox_content';
-const headerBarSandboxContentSource = require('!!raw!./header_bar_sandbox_content');
+const headerBarSandboxContentSource = require('!!raw-loader!./header_bar_sandbox_content');
 const headerBarSandboxContentHtml = renderToHtml(HeaderBarSandboxContent);
 
 export default props => (

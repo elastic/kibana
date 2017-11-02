@@ -1,21 +1,27 @@
 import { resolve } from 'path';
 import { writeFile } from 'fs';
 
-import webpack from 'webpack';
 import Boom from 'boom';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
+import webpack from 'webpack';
 import CommonsChunkPlugin from 'webpack/lib/optimize/CommonsChunkPlugin';
 import DefinePlugin from 'webpack/lib/DefinePlugin';
 import UglifyJsPlugin from 'webpack/lib/optimize/UglifyJsPlugin';
-import { defaults, transform } from 'lodash';
+import NoEmitOnErrorsPlugin from 'webpack/lib/NoEmitOnErrorsPlugin';
+import Stats from 'webpack/lib/Stats';
+import webpackMerge from 'webpack-merge';
+
+import { defaults } from 'lodash';
 
 import { fromRoot } from '../utils';
-import pkg from '../../package.json';
 
 import { PUBLIC_PATH_PLACEHOLDER } from './public_path_placeholder';
-import { setLoaderQueryParam, makeLoaderString } from './loaders';
 
-const babelExclude = [/[\/\\](webpackShims|node_modules|bower_components)[\/\\]/];
+const POSTCSS_CONFIG_PATH = require.resolve('./postcss.config');
+const BABEL_PRESET_PATH = require.resolve('../babel-preset/webpack');
+const BABEL_EXCLUDE_RE = [
+  /[\/\\](webpackShims|node_modules|bower_components)[\/\\]/,
+];
 
 export default class BaseOptimizer {
   constructor(opts) {
@@ -65,31 +71,38 @@ export default class BaseOptimizer {
   }
 
   getConfig() {
-    const loaderWithSourceMaps = (loader) =>
-      setLoaderQueryParam(loader, 'sourceMap', !!this.sourceMaps);
+    const cacheDirectory = resolve(this.env.workingDir, '../.cache', this.bundles.hashBundleEntries());
 
-    const makeStyleLoader = preprocessor => {
-      let loaders = [
-        loaderWithSourceMaps('css-loader?autoprefixer=false'),
-        {
-          name: 'postcss-loader',
-          query: {
-            config: require.resolve('./postcss.config')
-          }
+    function getStyleLoaders(preProcessors = [], postProcessors = []) {
+      return ExtractTextPlugin.extract({
+        fallback: {
+          loader: 'style-loader'
         },
-      ];
+        use: [
+          ...postProcessors,
+          {
+            loader: 'css-loader',
+            options: {
+              // importLoaders needs to know the number of loaders that follow this one,
+              // so we add 1 (for the postcss-loader) to the length of the preProcessors
+              // array that we merge into this array
+              importLoaders: 1 + preProcessors.length,
+            },
+          },
+          {
+            loader: 'postcss-loader',
+            options: {
+              config: {
+                path: POSTCSS_CONFIG_PATH,
+              },
+            },
+          },
+          ...preProcessors,
+        ],
+      });
+    }
 
-      if (preprocessor) {
-        loaders = [
-          ...loaders,
-          loaderWithSourceMaps(preprocessor)
-        ];
-      }
-
-      return ExtractTextPlugin.extract(makeLoaderString(loaders));
-    };
-
-    const config = {
+    const commonConfig = {
       node: { fs: 'empty' },
       context: fromRoot('.'),
       entry: this.bundles.toWebpackEntries(),
@@ -105,126 +118,139 @@ export default class BaseOptimizer {
         devtoolModuleFilenameTemplate: '[absolute-resource-path]'
       },
 
-      recordsPath: resolve(this.env.workingDir, 'webpack.records'),
-
       plugins: [
-        new webpack.NoErrorsPlugin(),
         new ExtractTextPlugin('[name].style.css', {
           allChunks: true
         }),
+
         new CommonsChunkPlugin({
           name: 'commons',
           filename: 'commons.bundle.js'
         }),
-        ...this.pluginsForEnv(this.env.context.env)
+
+        new NoEmitOnErrorsPlugin(),
       ],
 
       module: {
-        loaders: [
-          { test: /\.less$/, loader: makeStyleLoader('less-loader') },
-          { test: /\.css$/, loader: makeStyleLoader() },
-          { test: /\.jade$/, loader: 'jade-loader' },
-          { test: /\.json$/, loader: 'json-loader' },
-          { test: /\.(html|tmpl)$/, loader: 'raw-loader' },
-          { test: /\.png$/, loader: 'url-loader' },
-          { test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/, loader: 'file-loader' },
-          { test: /[\/\\]src[\/\\](core_plugins|ui)[\/\\].+\.js$/, loader: loaderWithSourceMaps('rjs-repack-loader') },
+        rules: [
+          {
+            test: /\.less$/,
+            use: getStyleLoaders(
+              ['less-loader'],
+              [{
+                loader: 'cache-loader',
+                options: {
+                  cacheDirectory: resolve(cacheDirectory, 'less'),
+                }
+              }]
+            ),
+          },
+          {
+            test: /\.css$/,
+            use: getStyleLoaders(),
+          },
+          {
+            // TODO: this doesn't seem to be used, remove?
+            test: /\.jade$/,
+            loader: 'jade-loader'
+          },
+          {
+            test: /\.(html|tmpl)$/,
+            loader: 'raw-loader'
+          },
+          {
+            test: /\.png$/,
+            loader: 'url-loader'
+          },
+          {
+            test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/,
+            loader: 'file-loader'
+          },
           {
             test: /\.js$/,
-            exclude: babelExclude.concat(this.env.noParse),
-            loader: 'babel-loader',
-            query: {
-              presets: [
-                require.resolve('../babel-preset/webpack')
-              ]
-            }
+            exclude: BABEL_EXCLUDE_RE.concat(this.env.noParse),
+            use: [
+              {
+                loader: 'cache-loader',
+                options: {
+                  cacheDirectory: resolve(cacheDirectory, 'babel'),
+                }
+              },
+              {
+                loader: 'babel-loader',
+                options: {
+                  babelrc: false,
+                  presets: [
+                    BABEL_PRESET_PATH,
+                  ],
+                },
+              },
+            ],
           },
+          ...this.env.postLoaders.map(loader => ({
+            enforce: 'post',
+            ...loader
+          })),
         ],
-        postLoaders: this.env.postLoaders || [],
         noParse: this.env.noParse,
       },
 
       resolve: {
-        extensions: ['.js', '.json', ''],
-        postfixes: [''],
-        modulesDirectories: ['webpackShims', 'node_modules'],
-        fallback: [fromRoot('webpackShims'), fromRoot('node_modules')],
-        loaderPostfixes: ['-loader', ''],
-        root: fromRoot('.'),
+        extensions: ['.js', '.json'],
+        mainFields: ['browser', 'main'],
+        modules: [
+          'webpackShims',
+          fromRoot('webpackShims'),
+
+          'node_modules',
+          fromRoot('node_modules'),
+        ],
         alias: this.env.aliases,
         unsafeCache: this.unsafeCache,
       },
-
-      resolveLoader: {
-        alias: transform(pkg.dependencies, function (aliases, version, name) {
-          if (name.endsWith('-loader')) {
-            aliases[name] = require.resolve(name);
-          }
-        }, {})
-      }
     };
 
-    // In the test env we need to add react-addons (and a few other bits) for the
-    // enzyme tests to work.
-    // https://github.com/airbnb/enzyme/blob/master/docs/guides/webpack.md
     if (this.env.context.env === 'development') {
-      config.externals = {
-        'react/lib/ExecutionEnvironment': true,
-        'react/addons': true,
-        'react/lib/ReactContext': true,
-      };
-    }
-
-    return config;
-  }
-
-  pluginsForEnv(env) {
-    if (env !== 'production') {
-      return [];
-    }
-
-    return [
-      new DefinePlugin({
-        'process.env': {
-          'NODE_ENV': '"production"'
+      return webpackMerge(commonConfig, {
+        // In the test env we need to add react-addons (and a few other bits) for the
+        // enzyme tests to work.
+        // https://github.com/airbnb/enzyme/blob/master/docs/guides/webpack.md
+        externals: {
+          'react/lib/ExecutionEnvironment': true,
+          'react/addons': true,
+          'react/lib/ReactContext': true,
         }
-      }),
-      new UglifyJsPlugin({
-        compress: {
-          warnings: false
-        },
-        sourceMap: false,
-        mangle: false
-      }),
-    ];
+      });
+    }
+
+    return webpackMerge(commonConfig, {
+      plugins: [
+        new DefinePlugin({
+          'process.env': {
+            'NODE_ENV': '"production"'
+          }
+        }),
+        new UglifyJsPlugin({
+          compress: {
+            warnings: false
+          },
+          sourceMap: false,
+          mangle: false
+        }),
+      ]
+    });
   }
 
   failedStatsToError(stats) {
-    const statFormatOpts = {
-      hash: false,  // add the hash of the compilation
-      version: false,  // add webpack version information
-      timings: false,  // add timing information
-      assets: false,  // add assets information
-      chunks: false,  // add chunk information
-      chunkModules: false,  // add built modules information to chunk information
-      modules: false,  // add built modules information
-      cached: false,  // add also information about cached (not built) modules
-      reasons: false,  // add information about the reasons why modules are included
-      source: false,  // add the source code of modules
-      errorDetails: false,  // add details to errors (like resolving log)
-      chunkOrigins: false,  // add the origins of chunks and chunk merging info
-      modulesSort: false,  // (string) sort the modules by that field
-      chunksSort: false,  // (string) sort the chunks by that field
-      assetsSort: false,  // (string) sort the assets by that field
-      children: false,
-    };
-
-    const details = stats.toString(defaults({ colors: true }, statFormatOpts));
+    const details = stats.toString(defaults(
+      { colors: true },
+      Stats.presetToOptions('minimal')
+    ));
 
     return Boom.create(
       500,
       `Optimizations failure.\n${details.split('\n').join('\n    ')}\n`,
-      stats.toJson(statFormatOpts)
+      stats.toJson(Stats.presetToOptions('detailed'))
     );
   }
 }
