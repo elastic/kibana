@@ -37,6 +37,15 @@ export default function query(req, panel, series) {
       });
     }
 
+    if (series.filter) {
+      doc.query.bool.must.push({
+        query_string: {
+          query: series.filter,
+          analyze_wildcard: true
+        }
+      });
+    }
+
     return next(doc);
 
   };
