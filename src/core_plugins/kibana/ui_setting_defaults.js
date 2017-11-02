@@ -307,6 +307,10 @@ export function getUiSettingDefaults() {
       value: 2000,
       description: 'The maximum number of buckets a single datasource can return'
     },
+    'metrics:defaultIndexPattern': {
+      value: '*',
+      description: 'The default index pattern for Time Series Visual Builder'
+    },
     'state:storeInSessionStorage': {
       value: false,
       description: 'The URL can sometimes grow to be too large for some browsers to ' +
