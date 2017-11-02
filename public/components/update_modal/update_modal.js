@@ -36,14 +36,13 @@ export const UpdateModal = ({ build, setBuild }) => {
           <KuiModalBodyText>
             <h3>That's right, an update!</h3>
             <p>
-              I know what you're thinking: <i>This is a trick</i>. Well it isn't, not everything is some conspiracy against you.
-              We update Canvas <strong>a lot</strong>, and in direct response to your feedback. Chances are this update is
-              a result of something you, or someone in your preview group told us you needed.
+              I know what you're thinking: <i>This is a trick</i>. Well it isn't, we update Canvas <strong>a lot</strong>,
+              in direct response to your feedback. Chances are this update is a result of something you, or someone in your
+              preview group told us you needed.
             </p>
 
-            <h3>How to update</h3>
             <p>
-              Updating Canvas is easy, you can probably do it yourself, or get your good friend in operations to update it for you.
+              Updating Canvas is easy, you can probably do it yourself, or get your good friends in operations to update it for you.
               If you don't have friends in operations, you might have to bribe them.
               Try beer, those operations people are all degenerates. In any case you'll need these steps:
             </p>
