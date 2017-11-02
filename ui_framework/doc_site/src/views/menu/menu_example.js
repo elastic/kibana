@@ -10,11 +10,11 @@ import {
 } from '../../components';
 
 import Menu from './menu';
-const menuSource = require('!!raw!./menu');
+const menuSource = require('!!raw-loader!./menu');
 const menuHtml = renderToHtml(Menu);
 
 import MenuContained from './menu_contained';
-const menuContainedSource = require('!!raw!./menu_contained');
+const menuContainedSource = require('!!raw-loader!./menu_contained');
 const menuContainedHtml = renderToHtml(MenuContained);
 
 export default props => (

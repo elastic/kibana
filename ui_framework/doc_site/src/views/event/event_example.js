@@ -10,11 +10,11 @@ import {
 } from '../../components';
 
 import Event from './event';
-const eventSource = require('!!raw!./event');
+const eventSource = require('!!raw-loader!./event');
 const eventHtml = renderToHtml(Event);
 
 import EventMenu from './event_menu';
-const eventMenuSource = require('!!raw!./event_menu');
+const eventMenuSource = require('!!raw-loader!./event_menu');
 const eventMenuHtml = renderToHtml(EventMenu);
 
 export default props => (

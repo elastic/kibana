@@ -12,35 +12,35 @@ import {
 } from '../../components';
 
 import FlexGroup from './flex_group';
-const flexGroupSource = require('!!raw!./flex_group');
+const flexGroupSource = require('!!raw-loader!./flex_group');
 const flexGroupHtml = renderToHtml(FlexGroup);
 
 import FlexItems from './flex_items';
-const flexItemsSource = require('!!raw!./flex_items');
+const flexItemsSource = require('!!raw-loader!./flex_items');
 const flexItemsHtml = renderToHtml(FlexItems);
 
 import FlexGutter from './flex_gutter';
-const flexGutterSource = require('!!raw!./flex_gutter');
+const flexGutterSource = require('!!raw-loader!./flex_gutter');
 const flexGutterHtml = renderToHtml(FlexGutter);
 
 import FlexGrow from './flex_grow';
-const flexGrowSource = require('!!raw!./flex_grow');
+const flexGrowSource = require('!!raw-loader!./flex_grow');
 const flexGrowHtml = renderToHtml(FlexGrow);
 
 import FlexJustify from './flex_justify';
-const flexJustifySource = require('!!raw!./flex_justify');
+const flexJustifySource = require('!!raw-loader!./flex_justify');
 const flexJustifyHtml = renderToHtml(FlexJustify);
 
 import FlexGrid from './flex_grid';
-const flexGridSource = require('!!raw!./flex_grid');
+const flexGridSource = require('!!raw-loader!./flex_grid');
 const flexGridHtml = renderToHtml(FlexGrid);
 
 import FlexGridColumns from './flex_grid_columns';
-const flexGridColumnsSource = require('!!raw!./flex_grid_columns');
+const flexGridColumnsSource = require('!!raw-loader!./flex_grid_columns');
 const flexGridColumnsHtml = renderToHtml(FlexGridColumns);
 
 import FlexNest from './flex_nest';
-const flexNestSource = require('!!raw!./flex_nest');
+const flexNestSource = require('!!raw-loader!./flex_nest');
 const flexNestHtml = renderToHtml(FlexNest);
 
 export default props => (
