@@ -3,35 +3,28 @@ import { props, reduce as reduceAsync } from 'bluebird';
 import Boom from 'boom';
 import { resolve } from 'path';
 
-function getDefaultInjectedVars(kbnServer) {
-  const { defaultInjectedVarProviders = [] } = kbnServer.uiExports;
+export function uiRenderMixin(kbnServer, server, config) {
 
-  return defaultInjectedVarProviders.reduce((allDefaults, { fn, pluginSpec }) => (
-    defaults(
-      allDefaults,
-      fn(kbnServer.server, pluginSpec.readConfigValue(kbnServer.config, []))
-    )
-  ), {});
-}
+  function replaceInjectedVars(request, injectedVars) {
+    const { injectedVarsReplacers = [] } = kbnServer.uiExports;
 
-function getReplaceInjectedVars(kbnServer) {
-  const { injectedVarsReplacers = [] } = kbnServer.uiExports;
-
-  return function replaceInjectedVars(request, injectedVars) {
     return reduceAsync(
       injectedVarsReplacers,
       async (acc, replacer) => await replacer(acc, request, kbnServer.server),
       injectedVars
     );
-  };
-}
-
-export function uiRenderMixin(kbnServer, server, config) {
-  const replaceInjectedVars = getReplaceInjectedVars(kbnServer);
+  }
 
   let defaultInjectedVars = {};
   kbnServer.afterPluginsInit(() => {
-    defaultInjectedVars = getDefaultInjectedVars(kbnServer);
+    const { defaultInjectedVarProviders = [] } = kbnServer.uiExports;
+    defaultInjectedVars = defaultInjectedVarProviders
+      .reduce((allDefaults, { fn, pluginSpec }) => (
+        defaults(
+          allDefaults,
+          fn(kbnServer.server, pluginSpec.readConfigValue(kbnServer.config, []))
+        )
+      ), {});
   });
 
   // render all views from ./views
