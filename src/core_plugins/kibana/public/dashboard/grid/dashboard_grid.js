@@ -13,6 +13,17 @@ import sizeMe from 'react-sizeme';
 const config = { monitorWidth: true };
 let lastValidGridSize = 0;
 
+/**
+ * This is a fix for a bug that stopped the browser window from automatically scrolling down when panels were made
+ * taller than the current grid.
+ * see https://github.com/elastic/kibana/issues/14710.
+ */
+function ensureWindowScrollsToBottom(layout, oldResizeItem, l, placeholder, event) {
+  if (event.clientY > window.innerHeight) {
+    window.scrollTo(0, event.pageY - window.innerHeight);
+  }
+}
+
 function ResponsiveGrid({ size, isViewMode, layout, onLayoutChange, children, maximizedPanelId }) {
   // This is to prevent a bug where view mode changes when the panel is expanded.  View mode changes will trigger
   // the grid to re-render, but when a panel is expanded, the size will be 0. Minimizing the panel won't cause the
@@ -39,6 +50,7 @@ function ResponsiveGrid({ size, isViewMode, layout, onLayoutChange, children, ma
       layout={layout}
       onLayoutChange={onLayoutChange}
       measureBeforeMount={false}
+      onResize={_.debounce(ensureWindowScrollsToBottom, 20)}
     >
       {children}
     </ReactGridLayout>
