@@ -30,6 +30,15 @@ function getBestLocaleMatch(languageTag, registeredLocales) {
 }
 
 export class I18n {
+  static async getAllTranslationsFromPaths(paths) {
+    const i18n = new I18n();
+
+    paths.forEach(path => {
+      i18n.registerTranslations(path);
+    });
+
+    return await i18n.getAllTranslations();
+  }
 
   _registeredTranslations = {};
 
