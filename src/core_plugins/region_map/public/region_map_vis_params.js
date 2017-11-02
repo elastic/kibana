@@ -1,6 +1,6 @@
 import { uiModules } from 'ui/modules';
 import regionMapVisParamsTemplate from './region_map_vis_params.html';
-import _ from 'lodash';
+import { mapToLayerWithId } from './util';
 
 uiModules.get('kibana/region_map')
   .directive('regionMapVisParams', function (serviceSettings, Notifier) {
@@ -19,22 +19,21 @@ uiModules.get('kibana/region_map')
         serviceSettings.getFileLayers()
           .then(function (layersFromService) {
 
+            layersFromService = layersFromService.map(mapToLayerWithId.bind(null, 'elastic_maps_service'));
             const newVectorLayers = $scope.collections.vectorLayers.slice();
             for (let i = 0; i < layersFromService.length; i += 1) {
               const layerFromService = layersFromService[i];
-              const alreadyAdded = newVectorLayers.some((layer) =>_.eq(layerFromService, layer));
+              const alreadyAdded = newVectorLayers.some((layer) => layerFromService.layerId === layer.layerId);
               if (!alreadyAdded) {
                 newVectorLayers.push(layerFromService);
               }
             }
 
             $scope.collections.vectorLayers = newVectorLayers;
-
             if ($scope.collections.vectorLayers[0] && !$scope.vis.params.selectedLayer) {
               $scope.vis.params.selectedLayer = $scope.collections.vectorLayers[0];
               onLayerChange();
             }
-
 
             //the dirty flag is set to true because the change in vector layers config causes an update of the scope.params
             //temp work-around. addressing this issue with the visualize refactor for 6.0
@@ -50,7 +49,6 @@ uiModules.get('kibana/region_map')
         function onLayerChange() {
           $scope.vis.params.selectedJoinField = $scope.vis.params.selectedLayer.fields[0];
         }
-
 
       }
     };
