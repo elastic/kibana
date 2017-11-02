@@ -19,8 +19,11 @@ let lastValidGridSize = 0;
  * see https://github.com/elastic/kibana/issues/14710.
  */
 function ensureWindowScrollsToBottom(layout, oldResizeItem, l, placeholder, event) {
-  if (event.clientY > window.innerHeight) {
-    window.scrollTo(0, event.pageY - window.innerHeight);
+  // The buffer is to handle the case where the browser is maximized and it's impossible for the mouse to move below
+  // the screen, out of the window.  see https://github.com/elastic/kibana/issues/14737
+  const WINDOW_BUFFER = 10;
+  if (event.clientY > window.innerHeight - WINDOW_BUFFER) {
+    window.scrollTo(0, event.pageY + WINDOW_BUFFER - window.innerHeight);
   }
 }
 
