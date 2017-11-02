@@ -23,7 +23,7 @@ export class PanelHeader extends React.Component {
     const ariaLabel = isExpanded ? 'Minimize panel' : 'Maximize panel';
     return (
       <button
-        className="kuiMicroButton"
+        className="kuiMicroButton viewModeExpandPanelToggle"
         aria-label={ariaLabel}
         data-test-subj="dashboardPanelExpandIcon"
         onClick={this.props.onToggleExpand}
