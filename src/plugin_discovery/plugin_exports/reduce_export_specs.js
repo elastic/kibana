@@ -8,7 +8,7 @@
  */
 export function reduceExportSpecs(pluginSpecs, reducers, defaults = {}) {
   return pluginSpecs.reduce((acc, pluginSpec) => {
-    const specsByType = pluginSpec.getExportSpecs();
+    const specsByType = pluginSpec.getExportSpecs() || {};
     const types = Object.keys(specsByType);
 
     return types.reduce((acc, type) => {

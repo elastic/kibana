@@ -1,10 +1,10 @@
-import { get } from 'lodash';
+import { get, noop } from 'lodash';
 
 import * as serverConfig from '../../server/config';
 import { createTransform, Deprecations } from '../../deprecation';
 
 async function getDeprecationTransformer(spec) {
-  const provider = spec.getDeprecationsProvider();
+  const provider = spec.getDeprecationsProvider() || noop;
   return createTransform(await provider(Deprecations) || []);
 }
 

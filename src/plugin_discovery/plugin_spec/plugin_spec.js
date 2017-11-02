@@ -1,7 +1,7 @@
 import { resolve, basename, isAbsolute as isAbsolutePath } from 'path';
 
 import toPath from 'lodash/internal/toPath';
-import { get, noop } from 'lodash';
+import { get } from 'lodash';
 
 export class PluginSpec {
   /**
@@ -71,7 +71,7 @@ export class PluginSpec {
       throw new TypeError('Unable to determin plugin version');
     }
 
-    if (!Array.isArray(this.getRequiredPluginIds())) {
+    if (this.getRequiredPluginIds() !== undefined && !Array.isArray(this.getRequiredPluginIds())) {
       throw new TypeError('"plugin.require" must be an array of plugin ids');
     }
 
@@ -122,7 +122,7 @@ export class PluginSpec {
   }
 
   getRequiredPluginIds() {
-    return this._require || [];
+    return this._require;
   }
 
   getPublicDir() {
@@ -138,15 +138,15 @@ export class PluginSpec {
   }
 
   getExportSpecs() {
-    return this._uiExports || {};
+    return this._uiExports;
   }
 
   getPreInitHandler() {
-    return this._preInit || noop;
+    return this._preInit;
   }
 
   getInitHandler() {
-    return this._init || noop;
+    return this._init;
   }
 
   getConfigPrefix() {
@@ -154,7 +154,7 @@ export class PluginSpec {
   }
 
   getConfigSchemaProvider() {
-    return this._configSchemaProvider || noop;
+    return this._configSchemaProvider;
   }
 
   readConfigValue(config, key) {
@@ -162,6 +162,6 @@ export class PluginSpec {
   }
 
   getDeprecationsProvider() {
-    return this._configDeprecationsProvider || noop;
+    return this._configDeprecationsProvider;
   }
 }

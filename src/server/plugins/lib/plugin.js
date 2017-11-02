@@ -1,5 +1,4 @@
-import { once, noop } from 'lodash';
-import Bluebird, { attempt, fromNode } from 'bluebird';
+import { once } from 'lodash';
 
 /**
  * The server plugin class, used to extend the server
@@ -22,8 +21,7 @@ export class Plugin {
     this.path = spec.getPath();
     this.id = spec.getId();
     this.version = spec.getVersion();
-    this.requiredIds = spec.getRequiredPluginIds();
-    this.uiExportsSpecs = spec.getExportSpecs();
+    this.requiredIds = spec.getRequiredPluginIds() || [];
     this.kibanaVersion = spec.getExpectedKibanaVersion();
     this.externalPreInit = spec.getPreInitHandler();
     this.externalInit = spec.getInitHandler();
@@ -36,7 +34,9 @@ export class Plugin {
   }
 
   async preInit() {
-    return await this.externalPreInit(this.kbnServer.server);
+    if (this.externalPreInit) {
+      return await this.externalPreInit(this.kbnServer.server);
+    }
   }
 
   async init() {
@@ -60,25 +60,24 @@ export class Plugin {
       // Many of the plugins are simply adding static assets to the server and we don't need
       // to track their "status". Since plugins must have an init() function to even set its status
       // we shouldn't even create a status unless the plugin can use it.
-      if (this.externalInit !== noop) {
+      if (this.externalInit) {
         this.status = kbnServer.status.createForPlugin(this);
         server.expose('status', this.status);
+        await this.externalInit(server, options);
       }
-
-      return await attempt(this.externalInit, [server, options], this);
     };
 
     const register = (server, options, next) => {
-      Bluebird.resolve(asyncRegister(server, options)).nodeify(next);
+      asyncRegister(server, options)
+        .then(() => next())
+        .catch(next);
     };
 
     register.attributes = { name: id, version: version };
 
-    await fromNode(cb => {
-      kbnServer.server.register({
-        register: register,
-        options: config.has(configPrefix) ? config.get(configPrefix) : null
-      }, cb);
+    await kbnServer.server.register({
+      register: register,
+      options: config.has(configPrefix) ? config.get(configPrefix) : null
     });
 
     // Only change the plugin status to green if the
