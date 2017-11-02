@@ -95,6 +95,7 @@
     "metalsmith-filter": "^1.0.2",
     "metalsmith-in-place": "^1.4.4",
     "metalsmith-layouts": "^1.4.1",
+    "metalsmith-metallic": "^2.0.2",
     "metalsmith-permalinks": "^0.5.0",
     "pegjs": "^0.10.0",
     "proxyquire": "1.7.11",
