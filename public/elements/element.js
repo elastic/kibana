@@ -1,3 +1,5 @@
+import defaultHeader from './default_header.png';
+
 export function Element(config) {
   // This must match the name of the function that is used to create the `type: render` object
   this.name = config.name;
@@ -6,7 +8,7 @@ export function Element(config) {
   this.displayName = config.displayName || name;
 
   // An image to use in the element type selector
-  this.image = config.image;
+  this.image = config.image || defaultHeader;
 
   // A sentence or few about what this element does
   this.help = config.help;
