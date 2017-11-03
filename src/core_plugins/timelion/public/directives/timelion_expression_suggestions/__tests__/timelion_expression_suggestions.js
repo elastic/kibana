@@ -24,7 +24,7 @@ describe('Timelion expression suggestions directive', function () {
       beforeEach(function () {
         element = $compile(template)(scope);
         scope.$apply(() => {
-          scope.list = [{}, {}, {}];
+          scope.list = [{ name: 'suggestion1' }, { name: 'suggestion2' }, { name: 'suggestion3' }];
         });
       });
 
