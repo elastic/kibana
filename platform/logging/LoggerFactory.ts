@@ -50,11 +50,14 @@ export class MutableLoggerFactory implements LoggerFactory {
     // config so that new loggers will be using BufferAppender until newly configured appenders are ready.
     this.config = undefined;
 
+    // Appenders must be reset, so we first dispose of the current ones, then
+    // build up a new set of appenders.
+
     for (const appender of this.appenders.values()) {
       appender.dispose();
     }
-
     this.appenders.clear();
+
     for (const [appenderKey, appenderConfig] of config.appenders.entries()) {
       this.appenders.set(
         appenderKey,
@@ -111,7 +114,7 @@ export class MutableLoggerFactory implements LoggerFactory {
     context: string
   ): LoggerConfigType {
     const loggerConfig = config.loggers.get(context);
-    if (loggerConfig) {
+    if (loggerConfig !== undefined) {
       return loggerConfig;
     }
 

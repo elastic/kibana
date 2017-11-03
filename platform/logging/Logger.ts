@@ -18,6 +18,10 @@ export interface Logger {
   log(record: LogRecord): void;
 }
 
+function isError(x: any): x is Error {
+  return x instanceof Error;
+}
+
 /** @internal */
 export class BaseLogger implements Logger {
   constructor(
@@ -65,16 +69,25 @@ export class BaseLogger implements Logger {
     errorOrMessage: string | Error,
     meta?: { [key: string]: any }
   ): LogRecord {
-    const isError = errorOrMessage instanceof Error;
-    return {
+    const record = {
       timestamp: new Date(),
       level,
       context: this.context,
-      message: isError
-        ? (errorOrMessage as Error).message
-        : errorOrMessage as string,
-      error: isError ? errorOrMessage as Error : undefined,
       meta
+    };
+
+    if (isError(errorOrMessage)) {
+      return {
+        ...record,
+        message: errorOrMessage.message,
+        error: errorOrMessage
+      };
+    }
+
+    return {
+      ...record,
+      message: errorOrMessage,
+      error: undefined
     };
   }
 }
