@@ -132,19 +132,19 @@ export class LoggingConfig {
   private fillLoggersConfig(schema: LoggingConfigType) {
     // Include `root` logger into common logger list so that it can easily be a part
     // of the logger hierarchy and put all the loggers in map for easier retrieval.
-    const loggersMap = new Map(
-      [
-        { context: ROOT_CONTEXT_NAME, ...schema.root },
-        ...schema.loggers
-      ].map(loggerConfig => {
-        return [loggerConfig.context, loggerConfig] as [
-          string,
-          LoggerConfigType
-        ];
-      })
+    const loggers = [
+      { context: ROOT_CONTEXT_NAME, ...schema.root },
+      ...schema.loggers
+    ];
+
+    const loggerConfigByContext = new Map(
+      loggers.map(
+        loggerConfig =>
+          [loggerConfig.context, loggerConfig] as [string, LoggerConfigType]
+      )
     );
 
-    for (let [loggerContext, loggerConfig] of loggersMap) {
+    for (const [loggerContext, loggerConfig] of loggerConfigByContext) {
       // We can't check whether logger config refers to the existing appenders at the config schema
       // validation step, so we should do it here.
       const unsupportedAppenderKey = loggerConfig.appenders.find(
@@ -157,22 +157,7 @@ export class LoggingConfig {
         );
       }
 
-      // If config for current context doesn't have any defined appenders we should inherit appenders
-      // from the parent context config.
-      let currentContext = loggerConfig.context;
-      let appenders = loggerConfig.appenders;
-      while (appenders.length === 0) {
-        const parentContext = LoggingConfig.getParentLoggerContext(
-          currentContext
-        );
-
-        const parentLogger = loggersMap.get(parentContext);
-        if (parentLogger) {
-          appenders = parentLogger.appenders;
-        }
-
-        currentContext = parentContext;
-      }
+      const appenders = getAppenders(loggerConfig, loggerConfigByContext);
 
       // We expect `appenders` to never be empty at this point, since the `root` context config should always
       // have at least one appender that is enforced by the config schema validation.
@@ -182,4 +167,31 @@ export class LoggingConfig {
       });
     }
   }
+}
+
+/**
+ * Get appenders for logger config.
+ *
+ * If config for current context doesn't have any defined appenders inherit
+ * appenders from the parent context config.
+ */
+function getAppenders(
+  loggerConfig: LoggerConfigType,
+  loggerConfigByContext: Map<string, LoggerConfigType>
+) {
+  let currentContext = loggerConfig.context;
+  let appenders = loggerConfig.appenders;
+
+  while (appenders.length === 0) {
+    const parentContext = LoggingConfig.getParentLoggerContext(currentContext);
+
+    const parentLogger = loggerConfigByContext.get(parentContext);
+    if (parentLogger) {
+      appenders = parentLogger.appenders;
+    }
+
+    currentContext = parentContext;
+  }
+
+  return appenders;
 }
