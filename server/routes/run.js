@@ -37,7 +37,6 @@ export function runApi(server) {
     method: 'POST',
     path: '/api/canvas/run',
     handler: function (request, reply) {
-      console.log(request.payload);
       const { expression, context } = request.payload;
       if (!expression) return reply({ error: '"expression" key is required' }).code(400);
       handleRequest(request, reply, expression, typeof context === 'undefined' ? null : context);

@@ -93,6 +93,7 @@ export function workpad(server) {
   server.route({
     method: 'POST',
     path: routePrefix,
+    config: { payload: { maxBytes: 26214400 } }, // 25MB payload limit
     handler: function (request, reply) {
       createWorkpad(request)
       .then(formatResponse(reply))
@@ -104,6 +105,7 @@ export function workpad(server) {
   server.route({
     method: 'PUT',
     path: `${routePrefix}/{id}`,
+    config: { payload: { maxBytes: 26214400 } }, // 25MB payload limit
     handler: function (request, reply) {
       updateWorkpad(request)
       .then(formatResponse(reply))
