@@ -471,4 +471,22 @@ describe('LoggerAdapter methods', () => {
       undefined
     );
   });
+
+  test('throws if trying to use internal logger', () => {
+    const internalLogger: Logger = {
+      trace: jest.fn(),
+      debug: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+      error: jest.fn(),
+      fatal: jest.fn(),
+      log: jest.fn()
+    };
+
+    const adapter = new LoggerAdapter(internalLogger);
+
+    expect(() => {
+      adapter.logger.debug('foo');
+    }).toThrowErrorMatchingSnapshot();
+  });
 });
