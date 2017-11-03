@@ -6,14 +6,36 @@ import classNames from 'classnames';
 
 import { PanelUtils } from '../panel/panel_utils';
 import { DashboardViewMode } from '../dashboard_view_mode';
-import { DashboardPanelContainer } from '../panel/dashboard_panel_container';
+import { DashboardPanel } from '../panel';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../dashboard_constants';
 import sizeMe from 'react-sizeme';
 
 const config = { monitorWidth: true };
 let lastValidGridSize = 0;
 
-function ResponsiveGrid({ size, isViewMode, layout, onLayoutChange, children, maximizedPanelId }) {
+/**
+ * This is a fix for a bug that stopped the browser window from automatically scrolling down when panels were made
+ * taller than the current grid.
+ * see https://github.com/elastic/kibana/issues/14710.
+ */
+function ensureWindowScrollsToBottom(layout, oldResizeItem, l, placeholder, event) {
+  // The buffer is to handle the case where the browser is maximized and it's impossible for the mouse to move below
+  // the screen, out of the window.  see https://github.com/elastic/kibana/issues/14737
+  const WINDOW_BUFFER = 10;
+  if (event.clientY > window.innerHeight - WINDOW_BUFFER) {
+    window.scrollTo(0, event.pageY + WINDOW_BUFFER - window.innerHeight);
+  }
+}
+
+function ResponsiveGrid({
+  size,
+  isViewMode,
+  layout,
+  onLayoutChange,
+  children,
+  maximizedPanelId,
+  useMargins,
+}) {
   // This is to prevent a bug where view mode changes when the panel is expanded.  View mode changes will trigger
   // the grid to re-render, but when a panel is expanded, the size will be 0. Minimizing the panel won't cause the
   // grid to re-render so it'll show a grid with a width of 0.
@@ -22,8 +44,10 @@ function ResponsiveGrid({ size, isViewMode, layout, onLayoutChange, children, ma
     'layout-view': isViewMode,
     'layout-edit': !isViewMode,
     'layout-maximized-panel': maximizedPanelId !== undefined,
+    'layout-with-margins': useMargins,
   });
 
+  const MARGINS = useMargins ? 8 : 0;
   // We can't take advantage of isDraggable or isResizable due to performance concerns:
   // https://github.com/STRML/react-grid-layout/issues/240
   return (
@@ -32,13 +56,14 @@ function ResponsiveGrid({ size, isViewMode, layout, onLayoutChange, children, ma
       className={classes}
       isDraggable={true}
       isResizable={true}
-      margin={[0, 0]}
+      margin={[MARGINS, MARGINS]}
       cols={DASHBOARD_GRID_COLUMN_COUNT}
       rowHeight={100}
       draggableHandle={isViewMode ? '.doesnt-exist' : '.panel-title'}
       layout={layout}
       onLayoutChange={onLayoutChange}
       measureBeforeMount={false}
+      onResize={ensureWindowScrollsToBottom}
     >
       {children}
     </ReactGridLayout>
@@ -132,7 +157,7 @@ export class DashboardGrid extends React.Component {
           key={panel.panelIndex.toString()}
           ref={reactGridItem => { this.gridItems[panel.panelIndex] = reactGridItem; }}
         >
-          <DashboardPanelContainer
+          <DashboardPanel
             panelId={`${panel.panelIndex}`}
             getContainerApi={getContainerApi}
             embeddableHandler={getEmbeddableHandler(panel.type)}
@@ -145,7 +170,7 @@ export class DashboardGrid extends React.Component {
   }
 
   render() {
-    const { dashboardViewMode, maximizedPanelId } = this.props;
+    const { dashboardViewMode, maximizedPanelId, useMargins } = this.props;
     const isViewMode = dashboardViewMode === DashboardViewMode.VIEW;
     return (
       <ResponsiveSizedGrid
@@ -153,6 +178,7 @@ export class DashboardGrid extends React.Component {
         layout={this.buildLayoutFromPanels()}
         onLayoutChange={this.onLayoutChange}
         maximizedPanelId={maximizedPanelId}
+        useMargins={useMargins}
       >
         {this.renderDOM()}
       </ResponsiveSizedGrid>
@@ -167,4 +193,5 @@ DashboardGrid.propTypes = {
   dashboardViewMode: PropTypes.oneOf([DashboardViewMode.EDIT, DashboardViewMode.VIEW]).isRequired,
   onPanelUpdated: PropTypes.func.isRequired,
   maximizedPanelId: PropTypes.string,
+  useMargins: PropTypes.bool.isRequired,
 };

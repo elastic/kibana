@@ -16,7 +16,7 @@ const popoverSource = require('!!raw-loader!./popover');
 const popoverHtml = renderToHtml(Popover);
 
 import TrapFocus from './trap_focus';
-const trapFocusSource = require('!!raw!./trap_focus');
+const trapFocusSource = require('!!raw-loader!./trap_focus');
 const trapFocusHtml = renderToHtml(TrapFocus);
 
 import PopoverAnchorPosition from './popover_anchor_position';

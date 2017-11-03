@@ -74,6 +74,7 @@
   &.kuiTab-isSelected {
     cursor: default;
     color: $kuiFontColor;
+    background-color: $tabBackgroundColor;
     border-bottom-color: $tabBackgroundColor;
 
     @include darkTheme {

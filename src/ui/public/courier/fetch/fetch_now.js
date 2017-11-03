@@ -1,34 +1,39 @@
-import { CourierNotifierProvider } from './notifier';
-import { ForEachStrategyProvider } from './for_each_strategy';
+import { courierNotifier } from './notifier';
 import { CallClientProvider } from './call_client';
 import { CallResponseHandlersProvider } from './call_response_handlers';
 import { ContinueIncompleteProvider } from './continue_incomplete';
-import { ReqStatusProvider } from './req_status';
+import { RequestStatus } from './req_status';
 
-export function FetchTheseProvider(Private, Promise) {
-  const notify = Private(CourierNotifierProvider);
-  const forEachStrategy = Private(ForEachStrategyProvider);
-
+/**
+ * Fetch now provider should be used if you want the results searched and returned immediately.
+ * This can be slightly inefficient if a large number of requests are queued up, we can batch these
+ * by using fetchSoon. This introduces a slight delay which allows other requests to queue up before
+ * sending out requests in a batch.
+ *
+ * @param Private
+ * @param Promise
+ * @return {fetchNow}
+ * @constructor
+ */
+export function FetchNowProvider(Private, Promise) {
   // core tasks
   const callClient = Private(CallClientProvider);
   const callResponseHandlers = Private(CallResponseHandlersProvider);
   const continueIncomplete = Private(ContinueIncompleteProvider);
 
-  const ABORTED = Private(ReqStatusProvider).ABORTED;
-  const DUPLICATE = Private(ReqStatusProvider).DUPLICATE;
-  const INCOMPLETE = Private(ReqStatusProvider).INCOMPLETE;
+  const ABORTED = RequestStatus.ABORTED;
+  const DUPLICATE = RequestStatus.DUPLICATE;
+  const INCOMPLETE = RequestStatus.INCOMPLETE;
 
-  function fetchThese(requests) {
-    return forEachStrategy(requests, function (strategy, reqsForStrategy) {
-      return fetchWithStrategy(strategy, reqsForStrategy.map(function (req) {
-        if (!req.started) return req;
-        return req.retry();
-      }));
-    })
-    .catch(notify.fatal);
+  function fetchNow(requests) {
+    return fetchSearchResults(requests.map(function (req) {
+      if (!req.started) return req;
+      return req.retry();
+    }))
+    .catch(courierNotifier.fatal);
   }
 
-  function fetchWithStrategy(strategy, requests) {
+  function fetchSearchResults(requests) {
     function replaceAbortedRequests() {
       requests = requests.map(r => r.aborted ? ABORTED : r);
     }
@@ -37,7 +42,7 @@ export function FetchTheseProvider(Private, Promise) {
     return startRequests(requests)
     .then(function () {
       replaceAbortedRequests();
-      return callClient(strategy, requests);
+      return callClient(requests);
     })
     .then(function (responses) {
       replaceAbortedRequests();
@@ -45,7 +50,7 @@ export function FetchTheseProvider(Private, Promise) {
     })
     .then(function (responses) {
       replaceAbortedRequests();
-      return continueIncomplete(strategy, requests, responses, fetchWithStrategy);
+      return continueIncomplete(requests, responses, fetchSearchResults);
     })
     .then(function (responses) {
       replaceAbortedRequests();
@@ -77,5 +82,5 @@ export function FetchTheseProvider(Private, Promise) {
     });
   }
 
-  return fetchThese;
+  return fetchNow;
 }

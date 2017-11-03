@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { DashboardGridContainer } from '../grid/dashboard_grid_container';
+import { DashboardGrid } from '../grid';
 
 export function DashboardViewport({
   getContainerApi,
@@ -9,6 +9,7 @@ export function DashboardViewport({
   panelCount,
   title,
   description,
+  useMargins,
 }) {
   return (
     <div
@@ -16,8 +17,9 @@ export function DashboardViewport({
       data-shared-items-container
       data-title={title}
       data-description={description}
+      className={useMargins ? 'dashboard-viewport-with-margins' : 'dashboard-viewport'}
     >
-      <DashboardGridContainer
+      <DashboardGrid
         getEmbeddableHandler={getEmbeddableHandler}
         getContainerApi={getContainerApi}
         maximizedPanelId={maximizedPanelId}
@@ -33,4 +35,5 @@ DashboardViewport.propTypes = {
   panelCount: PropTypes.number,
   title: PropTypes.string,
   description: PropTypes.string,
+  useMargins: PropTypes.bool.isRequired,
 };

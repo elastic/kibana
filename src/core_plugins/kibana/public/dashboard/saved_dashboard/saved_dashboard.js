@@ -25,7 +25,9 @@ module.factory('SavedDashboard', function (courier, config) {
         description: '',
         panelsJSON: '[]',
         optionsJSON: angular.toJson({
-          darkTheme: config.get('dashboard:defaultDarkTheme')
+          darkTheme: config.get('dashboard:defaultDarkTheme'),
+          // for BWC reasons we can't default dashboards that already exist without this setting to true.
+          useMargins: id ? false : true,
         }),
         uiStateJSON: '{}',
         version: 1,

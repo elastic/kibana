@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import { DashboardViewport } from './dashboard_viewport';
-import { getMaximizedPanelId, getPanels, getTitle, getDescription } from '../selectors';
+import { getMaximizedPanelId, getPanels, getTitle, getDescription, getUseMargins } from '../selectors';
 
 const mapStateToProps = ({ dashboard }) => {
   const maximizedPanelId = getMaximizedPanelId(dashboard);
@@ -9,6 +9,7 @@ const mapStateToProps = ({ dashboard }) => {
     panelCount: Object.keys(getPanels(dashboard)).length,
     description: getDescription(dashboard),
     title: getTitle(dashboard),
+    useMargins: getUseMargins(dashboard),
   };
 };
 

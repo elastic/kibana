@@ -14,7 +14,8 @@ const findSourceFiles = async (patterns, cwd = fromRoot('.')) => {
       ignore: [
         'node_modules/**/*',
         'bower_components/**/*',
-        '**/_*.js'
+        '**/_*.js',
+        '**/*.test.js'
       ],
       symlinks: findSourceFiles.symlinks,
       statCache: findSourceFiles.statCache,
