@@ -17,8 +17,11 @@ function getFieldQueryHash(field, query = '', size = 10) {
 }
 
 function terms(field, query, size) {
-  if (!_.get(field, 'aggregatable') || field.type !== 'string') {
-    return Promise.resolve([]);
+  if (!_.get(field, 'aggregatable')) {
+    return Promise.reject('Unable to execute terms aggregation on field that is not aggregatable');
+  }
+  if (field.type !== 'string' && query) {
+    return Promise.reject(`Unable to filter terms aggregation on non-string field type. ${field.name} is of type ${field.type}`);
   }
 
   const params = {

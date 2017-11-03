@@ -25,7 +25,7 @@ export async function listControlFactory(controlParams, kbnApi) {
     controlParams,
     new PhraseFilterManager(controlParams.id, controlParams.fieldName, indexPattern, kbnApi.queryFilter, listControlDelimiter),
     terms.map((term) => {
-      return { label: term, value: term };
+      return { label: term.toString(), value: term.toString() };
     })
   );
 }

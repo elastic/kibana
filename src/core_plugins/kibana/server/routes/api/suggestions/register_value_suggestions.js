@@ -32,19 +32,23 @@ function getBody({ field, query, size = 10 }) {
   // the amount of information that needs to be transmitted to the coordinating node
   const shardSize = 10;
 
+  const termsAgg = {
+    field,
+    size: size,
+    shard_size: shardSize
+  }
+  if (query) {
+    termsAgg.include = `${getEscapedQuery(query)}.*`;
+    termsAgg.execution_hint = executionHint;
+  }
+
   return {
     size: 0,
     timeout: '1s',
     terminate_after: terminateAfter,
     aggs: {
       suggestions: {
-        terms: {
-          field,
-          include: `${getEscapedQuery(query)}.*`,
-          execution_hint: executionHint,
-          size: size,
-          shard_size: shardSize
-        }
+        terms: termsAgg
       }
     }
   };
