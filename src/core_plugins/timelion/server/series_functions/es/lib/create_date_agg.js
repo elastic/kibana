@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { buildAggBody } from './agg_body';
 
 export default function createDateAgg(config, tlConfig, scriptedFields) {
   const dateAgg = {
@@ -32,19 +33,7 @@ export default function createDateAgg(config, tlConfig, scriptedFields) {
     } else if (metric[0] && metric[1]) {
       const metricName = metric[0] + '(' + metric[1] + ')';
       dateAgg.time_buckets.aggs[metricName] = {};
-      const scriptedField = scriptedFields.find(field => {
-        return field.name === metric[1];
-      });
-      if (scriptedField) {
-        dateAgg.time_buckets.aggs[metricName][metric[0]] = {
-          script: {
-            inline: scriptedField.script,
-            lang: scriptedField.lang
-          }
-        };
-      } else {
-        dateAgg.time_buckets.aggs[metricName][metric[0]] = { field: metric[1] };
-      }
+      dateAgg.time_buckets.aggs[metricName][metric[0]] = buildAggBody(metric[1], scriptedFields);
     } else {
       throw new Error ('`metric` requires metric:field or simply count');
     }

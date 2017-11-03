@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { buildAggBody } from './agg_body';
 import createDateAgg from './create_date_agg';
 
 export default function buildRequest(config, tlConfig, scriptedFields) {
@@ -31,20 +32,8 @@ export default function buildRequest(config, tlConfig, scriptedFields) {
   _.each(config.split, function (clause) {
     clause = clause.split(':');
     if (clause[0] && clause[1]) {
-      const termsAgg = {
-        size: parseInt(clause[1], 10)
-      };
-      const scriptedField = scriptedFields.find(field => {
-        return field.name === clause[0];
-      });
-      if (scriptedField) {
-        termsAgg.script = {
-          inline: scriptedField.script,
-          lang: scriptedField.lang
-        };
-      } else {
-        termsAgg.field = clause[0];
-      }
+      const termsAgg = buildAggBody(clause[0], scriptedFields);
+      termsAgg.size = parseInt(clause[1], 10);
       aggCursor[clause[0]] = {
         meta: { type: 'split' },
         terms: termsAgg,
