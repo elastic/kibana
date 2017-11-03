@@ -6,28 +6,28 @@ import { Keystore } from '../../server/keystore';
 import { remove } from '../remove';
 
 describe('Kibana keystore', () => {
-  const sandbox = sinon.sandbox.create();
-
-  const keystoreData = {
-    version: 1,
-    ciphertext: 'cf360ea4c88ce1eebec4e5a03cf5e514b006d8abc52aee058d8213765c',
-    tag: '746d6042037a5d5c8550a3a70886de0c'
-  };
-
-  beforeEach(() => {
-    mockFs({
-      '/tmp': {
-        'test.keystore': JSON.stringify(keystoreData),
-      }
-    });
-  });
-
-  afterEach(() => {
-    mockFs.restore();
-    sandbox.restore();
-  });
-
   describe('remove', () => {
+    const sandbox = sinon.sandbox.create();
+
+    const keystoreData = {
+      version: 1,
+      ciphertext: 'cf360ea4c88ce1eebec4e5a03cf5e514b006d8abc52aee058d8213765c',
+      tag: '746d6042037a5d5c8550a3a70886de0c'
+    };
+
+    beforeEach(() => {
+      mockFs({
+        '/tmp': {
+          'test.keystore': JSON.stringify(keystoreData),
+        }
+      });
+    });
+
+    afterEach(() => {
+      mockFs.restore();
+      sandbox.restore();
+    });
+
     it('removes key', () => {
       const keystore = new Keystore('/tmp/test.keystore');
 

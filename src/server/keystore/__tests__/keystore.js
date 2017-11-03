@@ -6,6 +6,8 @@ import { readFileSync } from 'fs';
 import { Keystore } from '../keystore';
 
 describe('Keystore', () => {
+  const sandbox = sinon.sandbox.create();
+
   const protoctedKeystoreData = {
     version: 1,
     ciphertext: 'f2df8454c218de9a20bad0f7d2050a8832cd3a0b19b22d6099956bff41',
@@ -32,6 +34,7 @@ describe('Keystore', () => {
 
   afterEach(() => {
     mockFs.restore();
+    sandbox.restore();
   });
 
   describe('save', () => {
@@ -64,7 +67,7 @@ describe('Keystore', () => {
 
   describe('load', () => {
     it('is called on initialization', () => {
-      const load = sinon.spy(Keystore.prototype, 'load');
+      const load = sandbox.spy(Keystore.prototype, 'load');
 
       new Keystore('/tmp/protected.keystore', 'changeme');
 
