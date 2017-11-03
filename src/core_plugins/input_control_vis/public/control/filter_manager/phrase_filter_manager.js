@@ -6,8 +6,8 @@ import { buildPhrasesFilter } from 'ui/filter_manager/lib/phrases';
 const EMPTY_VALUE = '';
 
 export class PhraseFilterManager extends FilterManager {
-  constructor(fieldName, indexPattern, queryFilter, delimiter) {
-    super(fieldName, indexPattern, queryFilter, EMPTY_VALUE);
+  constructor(controlId, fieldName, indexPattern, queryFilter, delimiter) {
+    super(controlId, fieldName, indexPattern, queryFilter, EMPTY_VALUE);
 
     this.delimiter = delimiter;
   }
@@ -22,56 +22,20 @@ export class PhraseFilterManager extends FilterManager {
    */
   createFilter(value) {
     const phrases = value.split(this.delimiter);
+    let newFilter;
     if (phrases.length === 1) {
-      return buildPhraseFilter(
+      newFilter = buildPhraseFilter(
         this.indexPattern.fields.byName[this.fieldName],
         phrases[0],
         this.indexPattern);
     } else {
-      return buildPhrasesFilter(
+      newFilter = buildPhrasesFilter(
         this.indexPattern.fields.byName[this.fieldName],
         phrases,
         this.indexPattern);
     }
-  }
-
-  findFilters() {
-    const kbnFilters = _.flatten([this.queryFilter.getAppFilters(), this.queryFilter.getGlobalFilters()]);
-    return kbnFilters.filter((kbnFilter) => {
-      return this._findFilter(kbnFilter);
-    });
-  }
-
-  _findFilter(kbnFilter) {
-    // bool filter - multiple phrase filters
-    if (_.has(kbnFilter, 'query.bool.should')) {
-      const subFilters = _.get(kbnFilter, 'query.bool.should')
-      .map((kbnFilter) => {
-        return this._findFilter(kbnFilter);
-      });
-      return subFilters.reduce((a, b) => {
-        return a || b;
-      });
-    }
-
-    // scripted field filter
-    if (_.has(kbnFilter, 'script')
-      && _.get(kbnFilter, 'meta.index') === this.indexPattern.id
-      && _.get(kbnFilter, 'meta.field') === this.fieldName) {
-      return true;
-    }
-
-    // single phrase filter
-    if (_.has(kbnFilter, ['query', 'match', this.fieldName])) {
-      return true;
-    }
-
-    // single phrase filter from bool filter
-    if (_.has(kbnFilter, ['match_phrase', this.fieldName])) {
-      return true;
-    }
-
-    return false;
+    newFilter.meta.controlledBy = this.controlId;
+    return newFilter;
   }
 
   getValueFromFilterBar() {
