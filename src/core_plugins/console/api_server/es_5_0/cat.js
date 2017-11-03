@@ -32,10 +32,25 @@ function addNodeattrsCat(api) {
   });
 }
 
+function addHelpCat(api) {
+  api.addEndpointDescription('_cat', {
+    methods: ['GET'],
+    patterns: [
+      '_cat'
+    ],
+    'url_params': {}
+  })
+}
+
 export default function (api) {
+  addHelpCat(api)
+
   addSimpleCat('_cat/aliases', api);
   addSimpleCat('_cat/allocation', api, null, ['_cat/allocation', '_cat/allocation/{nodes}']);
   addSimpleCat('_cat/count', api);
+  addSimpleCat('_cat/fielddata', api, null, [
+    '_cat/fielddata', '_cat/fielddata/{fields}'
+  ]);
   addSimpleCat('_cat/health', api, [
     { "ts": ["false", "true"] }
   ]);
@@ -45,12 +60,19 @@ export default function (api) {
     ],
     ['_cat/indices', '_cat/indices/{indices}']);
   addSimpleCat('_cat/master', api);
+  addNodeattrsCat(api);
   addSimpleCat('_cat/nodes', api);
   addSimpleCat('_cat/pending_tasks', api);
+  addSimpleCat('_cat/plugins', api);
   addSimpleCat('_cat/recovery', api);
+  addSimpleCat('_cat/repositories', api);
   addSimpleCat('_cat/thread_pool', api);
   addSimpleCat('_cat/shards', api);
-  addSimpleCat('_cat/plugins', api);
   addSimpleCat('_cat/segments', api);
-  addNodeattrsCat(api);
+  addSimpleCat('_cat/snapshots', api, null, [
+    '_cat/snapshots', '_cat/snapshots/{repository}'
+  ]);
+  addSimpleCat('_cat/templates', api, [
+    '_cat/templates', '_cat/templates/{template}'
+  ]);
 }

@@ -163,7 +163,13 @@ var parametrizedComponentFactories = {
   },
   'node': function (name, parent) {
     return new autocomplete_engine.ListComponent(name, [], parent, false)
-  }
+  },
+  'repository': function (name, parent) {
+    return new autocomplete_engine.ListComponent(name, [], parent, false)
+  },
+  'template': function (name, parent) {
+    return new autocomplete_engine.ListComponent(name, [], parent, false)
+  },
 };
 
 export function getUnmatchedEndpointComponents() {
