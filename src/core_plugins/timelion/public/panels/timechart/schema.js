@@ -4,7 +4,7 @@ import _ from 'lodash';
 import $ from 'jquery';
 import moment from 'moment-timezone';
 import observeResize from 'plugins/timelion/lib/observe_resize';
-import { calculateInterval } from '../../../common/lib';
+import { calculateInterval, DEFAULT_TIME_FORMAT } from '../../../common/lib';
 
 const SET_LEGEND_NUMBERS_DELAY = 50;
 
@@ -29,6 +29,7 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
         $scope.search = $scope.search || _.noop;
 
         let legendValueNumbers;
+        let legendCaption;
         const debouncedSetLegendNumbers = _.debounce(setLegendNumbers, SET_LEGEND_NUMBERS_DELAY, {
           maxWait: SET_LEGEND_NUMBERS_DELAY,
           leading: true,
@@ -141,6 +142,9 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
           let i;
           let j;
           const dataset = plot.getData();
+          if (legendCaption) {
+            legendCaption.text(moment(pos.x).format(_.get(dataset, '[0]._global.legend.timeFormat', DEFAULT_TIME_FORMAT)));
+          }
           for (i = 0; i < dataset.length; ++i) {
 
             const series = dataset[i];
@@ -173,6 +177,9 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
         }
 
         function clearLegendNumbers() {
+          if (legendCaption) {
+            legendCaption.empty();
+          }
           _.each(legendValueNumbers, function (num) {
             $(num).empty();
           });
@@ -274,6 +281,11 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
           _.each(canvasElem.find('.ngLegendValue'), function (elem) {
             $compile(elem)(legendScope);
           });
+
+          if (_.get($scope.plot.getData(), '[0]._global.legend.showTime', true)) {
+            legendCaption = $('<caption class="timelionLegendCaption"></caption>');
+            canvasElem.find('div.legend table').append(legendCaption);
+          }
         }
         $scope.$watch('chart', drawPlot);
       }
