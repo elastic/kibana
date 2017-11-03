@@ -7,6 +7,7 @@ export function PanelHeader({ title, actions }) {
       <span
         data-test-subj="dashboardPanelTitle"
         className="panel-title"
+        tooltip={title}
         title={title}
         aria-label={`Dashboard panel: ${title}`}
       >
