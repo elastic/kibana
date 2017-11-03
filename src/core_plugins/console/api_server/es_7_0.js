@@ -1,36 +1,36 @@
 let _ = require("lodash");
 let Api = require('./api');
 let parts = [
-  require('./es_5_0/aliases'),
-  require('./es_5_0/aggregations'),
-  require('./es_5_0/cat'),
-  require('./es_5_0/cluster'),
-  require('./es_5_0/count'),
-  require('./es_5_0/document'),
-  require('./es_5_0/field_stats'),
-  require('./es_5_0/filter'),
-  require('./es_5_0/nodes'),
-  require('./es_5_0/globals'),
-  require('./es_5_0/indices'),
-  require('./es_5_0/ingest'),
-  require('./es_5_0/mappings'),
-  require('./es_5_0/percolator'),
-  require('./es_5_0/query'),
-  require('./es_5_0/reindex'),
-  require('./es_5_0/snapshot_restore'),
-  require('./es_5_0/search'),
-  require('./es_5_0/settings'),
-  require('./es_5_0/templates')
+  require('./es_7_0/aliases'),
+  require('./es_7_0/aggregations'),
+  require('./es_7_0/cat'),
+  require('./es_7_0/cluster'),
+  require('./es_7_0/count'),
+  require('./es_7_0/document'),
+  require('./es_7_0/field_stats'),
+  require('./es_7_0/filter'),
+  require('./es_7_0/nodes'),
+  require('./es_7_0/globals'),
+  require('./es_7_0/indices'),
+  require('./es_7_0/ingest'),
+  require('./es_7_0/mappings'),
+  require('./es_7_0/percolator'),
+  require('./es_7_0/query'),
+  require('./es_7_0/reindex'),
+  require('./es_7_0/snapshot_restore'),
+  require('./es_7_0/search'),
+  require('./es_7_0/settings'),
+  require('./es_7_0/templates')
 ];
 
-function ES_5_0() {
-  Api.call(this, "es_5_0");
+function ES_7_0() {
+  Api.call(this, "es_7_0");
   _.each(parts, function (apiSection) {
     apiSection(this);
   }, this);
 }
 
-ES_5_0.prototype = _.create(Api.prototype, { 'constructor': ES_5_0 });
+ES_7_0.prototype = _.create(Api.prototype, { 'constructor': ES_7_0 });
 
 (function (cls) {
   cls.addEndpointDescription = function (endpoint, description) {
@@ -51,8 +51,8 @@ ES_5_0.prototype = _.create(Api.prototype, { 'constructor': ES_5_0 });
     }
     Object.getPrototypeOf(cls).addEndpointDescription.call(this, endpoint, description);
   };
-})(ES_5_0.prototype);
+})(ES_7_0.prototype);
 
-const instance = new ES_5_0();
+const instance = new ES_7_0();
 
 export default instance;

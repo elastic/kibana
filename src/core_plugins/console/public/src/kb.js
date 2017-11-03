@@ -229,7 +229,7 @@ export function setActiveApi(api) {
   ACTIVE_API = api;
 }
 
-setActiveApi('es_5_0');
+setActiveApi('es_7_0');
 
 export const _test = {
   loadApisFromJson: loadApisFromJson
