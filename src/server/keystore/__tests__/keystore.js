@@ -22,7 +22,7 @@ describe('Keystore', () => {
 
   beforeEach(() => {
     mockFs({
-      '/tmp': {
+      '/data': {
         'protected.keystore': JSON.stringify(protoctedKeystoreData),
         'unprotected.keystore': JSON.stringify(unprotectedKeystoreData),
       },
@@ -52,7 +52,7 @@ describe('Keystore', () => {
     });
 
     it('creates keystore', () => {
-      const path = '/tmp/test.keystore';
+      const path = '/data/test.keystore';
 
       const keystore = new Keystore(path, 'changeme');
       keystore.save();
@@ -69,19 +69,19 @@ describe('Keystore', () => {
     it('is called on initialization', () => {
       const load = sandbox.spy(Keystore.prototype, 'load');
 
-      new Keystore('/tmp/protected.keystore', 'changeme');
+      new Keystore('/data/protected.keystore', 'changeme');
 
       expect(load.calledOnce).to.be(true);
     });
 
     it('can load a password protected keystore', () => {
-      const keystore = new Keystore('/tmp/protected.keystore', 'changeme');
+      const keystore = new Keystore('/data/protected.keystore', 'changeme');
       expect(keystore.data).to.eql({ 'a1.b2.c3': 'foo', 'a2': 'bar' });
     });
 
     it('throws unable to read keystore', () => {
       try {
-        new Keystore('/tmp/protected.keystore', 'wrongpassword');
+        new Keystore('/data/protected.keystore', 'wrongpassword');
 
         expect().fail('should throw error');
       } catch(e) {
@@ -90,13 +90,13 @@ describe('Keystore', () => {
     });
 
     it('gracefully handles keystore not found', () => {
-      new Keystore('/tmp/nonexistent.keystore');
+      new Keystore('/data/nonexistent.keystore');
     });
   });
 
   describe('keys', () => {
     it('lists object keys', () => {
-      const keystore = new Keystore('/tmp/unprotected.keystore');
+      const keystore = new Keystore('/data/unprotected.keystore');
       const keys = keystore.keys();
 
       expect(keys).to.eql(['a1.b2.c3', 'a2']);
@@ -105,13 +105,13 @@ describe('Keystore', () => {
 
   describe('has', () => {
     it('returns true if key exists', () => {
-      const keystore = new Keystore('/tmp/unprotected.keystore');
+      const keystore = new Keystore('/data/unprotected.keystore');
 
       expect(keystore.has('a2')).to.be(true);
     });
 
     it('returns false if key does not exist', () => {
-      const keystore = new Keystore('/tmp/unprotected.keystore');
+      const keystore = new Keystore('/data/unprotected.keystore');
 
       expect(keystore.has('invalid')).to.be(false);
     });
@@ -119,7 +119,7 @@ describe('Keystore', () => {
 
   describe('add', () => {
     it('adds a key/value pair', () => {
-      const keystore = new Keystore('/tmp/unprotected.keystore');
+      const keystore = new Keystore('/data/unprotected.keystore');
       keystore.add('a3', 'baz');
 
       expect(keystore.data).to.eql({
@@ -132,7 +132,7 @@ describe('Keystore', () => {
 
   describe('remove', () => {
     it('removes a key/value pair', () => {
-      const keystore = new Keystore('/tmp/unprotected.keystore');
+      const keystore = new Keystore('/data/unprotected.keystore');
       keystore.remove('a1.b2.c3');
 
       expect(keystore.data).to.eql({

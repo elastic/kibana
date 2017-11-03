@@ -19,7 +19,7 @@ describe('Kibana keystore', () => {
 
     beforeEach(() => {
       mockFs({
-        '/tmp': {
+        '/data': {
           'test.keystore': JSON.stringify(keystoreData),
         }
       });
@@ -34,7 +34,7 @@ describe('Kibana keystore', () => {
     });
 
     it('returns an error for a nonexistent keystore', async () => {
-      const keystore = new Keystore('/tmp/nonexistent.keystore');
+      const keystore = new Keystore('/data/nonexistent.keystore');
       const message = 'ERROR: Kibana keystore not found. Use \'create\' command to create one.';
 
       await add(keystore, 'foo');
@@ -44,7 +44,7 @@ describe('Kibana keystore', () => {
     });
 
     it('does not attempt to create a keystore', async () => {
-      const keystore = new Keystore('/tmp/nonexistent.keystore');
+      const keystore = new Keystore('/data/nonexistent.keystore');
       sandbox.stub(keystore, 'save');
 
       await add(keystore, 'foo');
@@ -58,7 +58,7 @@ describe('Kibana keystore', () => {
         value: 'bar'
       }));
 
-      const keystore = new Keystore('/tmp/test.keystore');
+      const keystore = new Keystore('/data/test.keystore');
       await add(keystore, 'a2');
 
       sinon.assert.calledTwice(inquirer.prompt);
@@ -73,7 +73,7 @@ describe('Kibana keystore', () => {
         overwrite: false
       }));
 
-      const keystore = new Keystore('/tmp/test.keystore');
+      const keystore = new Keystore('/data/test.keystore');
       await add(keystore, 'a2');
 
       sinon.assert.calledOnce(Logger.prototype.log);
@@ -85,7 +85,7 @@ describe('Kibana keystore', () => {
         value: 'bar'
       }));
 
-      const keystore = new Keystore('/tmp/test.keystore');
+      const keystore = new Keystore('/data/test.keystore');
       sandbox.stub(keystore, 'save');
 
       await add(keystore, 'a2', { force: true });
@@ -98,7 +98,7 @@ describe('Kibana keystore', () => {
         value: 'bar\n'
       }));
 
-      const keystore = new Keystore('/tmp/test.keystore');
+      const keystore = new Keystore('/data/test.keystore');
       sandbox.stub(keystore, 'save');
 
       await add(keystore, 'foo');
@@ -111,7 +111,7 @@ describe('Kibana keystore', () => {
         value: 'bar\n'
       }));
 
-      const keystore = new Keystore('/tmp/test.keystore');
+      const keystore = new Keystore('/data/test.keystore');
       sandbox.stub(keystore, 'save');
 
       await add(keystore, 'foo');
@@ -120,7 +120,7 @@ describe('Kibana keystore', () => {
     });
 
     it('accepts stdin', async () => {
-      const keystore = new Keystore('/tmp/test.keystore');
+      const keystore = new Keystore('/data/test.keystore');
       sandbox.stub(keystore, 'save');
 
       sandbox.stub(process.stdin, 'on');

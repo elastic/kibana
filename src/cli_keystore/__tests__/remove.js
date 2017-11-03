@@ -17,7 +17,7 @@ describe('Kibana keystore', () => {
 
     beforeEach(() => {
       mockFs({
-        '/tmp': {
+        '/data': {
           'test.keystore': JSON.stringify(keystoreData),
         }
       });
@@ -29,7 +29,7 @@ describe('Kibana keystore', () => {
     });
 
     it('removes key', () => {
-      const keystore = new Keystore('/tmp/test.keystore');
+      const keystore = new Keystore('/data/test.keystore');
 
       remove(keystore, 'a2');
 
@@ -37,7 +37,7 @@ describe('Kibana keystore', () => {
     });
 
     it('persists the keystore', () => {
-      const keystore = new Keystore('/tmp/test.keystore');
+      const keystore = new Keystore('/data/test.keystore');
       sandbox.stub(keystore, 'save');
 
       remove(keystore, 'a2');

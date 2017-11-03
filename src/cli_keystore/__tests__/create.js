@@ -19,7 +19,7 @@ describe('Kibana keystore', () => {
 
     beforeEach(() => {
       mockFs({
-        '/tmp': {
+        '/data': {
           'test.keystore': JSON.stringify(keystoreData),
         }
       });
@@ -34,7 +34,7 @@ describe('Kibana keystore', () => {
     });
 
     it('creates keystore file', async () => {
-      const keystore = new Keystore('/tmp/foo.keystore');
+      const keystore = new Keystore('/data/foo.keystore');
       sandbox.stub(keystore, 'save');
 
       await create(keystore);
@@ -43,7 +43,7 @@ describe('Kibana keystore', () => {
     });
 
     it('logs successful keystore creating', async () => {
-      const path = '/tmp/foo.keystore';
+      const path = '/data/foo.keystore';
       const keystore = new Keystore(path);
 
       await create(keystore);
@@ -57,7 +57,7 @@ describe('Kibana keystore', () => {
         { overwrite: true })
       );
 
-      const keystore = new Keystore('/tmp/test.keystore');
+      const keystore = new Keystore('/data/test.keystore');
       await create(keystore);
 
       sinon.assert.calledOnce(inquirer.prompt);
@@ -72,7 +72,7 @@ describe('Kibana keystore', () => {
         { overwrite: false })
       );
 
-      const keystore = new Keystore('/tmp/test.keystore');
+      const keystore = new Keystore('/data/test.keystore');
       sandbox.stub(keystore, 'save');
 
       await create(keystore);

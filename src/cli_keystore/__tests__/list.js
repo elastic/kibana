@@ -17,7 +17,7 @@ describe('Kibana keystore', () => {
 
     beforeEach(() => {
       mockFs({
-        '/tmp': {
+        '/data': {
           'test.keystore': JSON.stringify(keystoreData),
         }
       });
@@ -32,7 +32,7 @@ describe('Kibana keystore', () => {
     });
 
     it('outputs keys', () => {
-      const keystore = new Keystore('/tmp/test.keystore');
+      const keystore = new Keystore('/data/test.keystore');
       list(keystore);
 
       sinon.assert.calledOnce(Logger.prototype.log);
@@ -40,7 +40,7 @@ describe('Kibana keystore', () => {
     });
 
     it('handles a nonexistent keystore', () => {
-      const keystore = new Keystore('/tmp/nonexistent.keystore');
+      const keystore = new Keystore('/data/nonexistent.keystore');
       list(keystore);
 
       sinon.assert.calledOnce(Logger.prototype.log);
