@@ -6,7 +6,7 @@ import toSeriesList from './lib/agg_response_to_series_list';
 // workaround until saved objects 'title' can be searched as 'keyword' instead of being anaylized
 function removeStopChars(value) {
   if (value) {
-    return value.replace('-', '');
+    return value.replace('-', ' ');
   }
 }
 
