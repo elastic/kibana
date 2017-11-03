@@ -15,11 +15,11 @@ class VisEditor extends Component {
     this.state = { model: props.vis.params, dirty: false, autoApply: true, reversed };
     this.onBrush = brushHandler(props.vis.API.timeFilter);
     this.handleUiState = this.handleUiState.bind(this, props.vis);
+    this.handleAppStateChange = this.handleAppStateChange.bind(this);
   }
 
   handleUiState(vis, ...args) {
     vis.uiStateVal(...args);
-    this.handleAppStateChange = this.handleAppStateChange.bind(this);
   }
 
   componentWillMount() {
