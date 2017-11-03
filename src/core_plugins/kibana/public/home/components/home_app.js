@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Home } from './home';
 import { FeatureDirectory } from './feature_directory';
 import { TutorialDirectory } from './tutorial_directory';
-import { Tutorial } from './tutorial';
+import { Tutorial } from './tutorial/tutorial';
 import {
   HashRouter as Router,
   Switch,
