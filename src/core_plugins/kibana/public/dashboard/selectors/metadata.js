@@ -8,9 +8,9 @@
  * @param metadata {MetadataState}
  * @return {string|undefined}
  */
-export const getTitle = dashboard => dashboard.title;
+export const getTitle = metadata => metadata.title;
 /**
- * @param metadata {DashboardState}
+ * @param metadata {MetadataState}
  * @return {string|undefined}
  */
-export const getDescription = dashboard => dashboard.description;
+export const getDescription = metadata => metadata.description;
