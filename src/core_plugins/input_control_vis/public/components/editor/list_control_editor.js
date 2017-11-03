@@ -4,7 +4,7 @@ import { IndexPatternSelect } from './index_pattern_select';
 import { FieldSelect } from './field_select';
 
 function filterField(field) {
-  return field.aggregatable && ['string'].includes(field.type);
+  return field.aggregatable && ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type);
 }
 
 export function ListControlEditor(props) {
