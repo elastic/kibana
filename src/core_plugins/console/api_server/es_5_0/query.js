@@ -288,9 +288,6 @@ export default function (api) {
       allow_leading_wildcard: {
         __one_of: [true, false]
       },
-      lowercase_expanded_terms: {
-        __one_of: [true, false]
-      },
       enable_position_increments: {
         __one_of: [true, false]
       },
@@ -325,7 +322,6 @@ export default function (api) {
       default_operator: { __one_of: ["OR", "AND"] },
       analyzer: "",
       flags: "OR|AND|PREFIX",
-      lowercase_expanded_terms: { __one_of: [true, false] },
       locale: "ROOT",
       lenient: { __one_of: [true, false] }
     },
