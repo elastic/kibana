@@ -2,8 +2,8 @@ export const keymap = {
   EDITOR: {
     UNDO: 'ctrl+z',
     REDO: 'ctrl+shift+y',
-    NEXT: 'alt+right',
-    PREV: 'alt+left',
+    NEXT: 'alt+]',
+    PREV: 'alt+[',
     FULLSCREEN: ['alt+p', 'alt+f'],
     EDITING: ['alt+e'],
     REFRESH: 'alt+r',
