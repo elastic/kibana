@@ -12,6 +12,7 @@ import { DashboardListingController } from './listing/dashboard_listing';
 import { DashboardConstants, createDashboardEditUrl } from './dashboard_constants';
 import { SavedObjectNotFound } from 'ui/errors';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 
 uiRoutes
   .defaults(/dashboard/, {
@@ -20,7 +21,30 @@ uiRoutes
   .when(DashboardConstants.LANDING_PAGE_PATH, {
     template: dashboardListingTemplate,
     controller: DashboardListingController,
-    controllerAs: 'listingController'
+    controllerAs: 'listingController',
+    resolve: {
+      dash: function ($route, Private, courier, kbnUrl) {
+        const savedObjectsClient = Private(SavedObjectsClientProvider);
+        const title = $route.current.params.title;
+        if (title) {
+          return savedObjectsClient.find({
+            search: `"${title}"`,
+            search_fields: 'title',
+            type: 'dashboard',
+          }).then(results => {
+            // The search isn't an exact match, lets see if we can find a single exact match to use
+            const matchingDashboards = results.savedObjects.filter(dashboard => dashboard.attributes.title === title);
+            if (matchingDashboards.length === 1) {
+              kbnUrl.redirect(createDashboardEditUrl(matchingDashboards[0].id));
+            } else {
+              kbnUrl.redirect(`${DashboardConstants.LANDING_PAGE_PATH}?filter="${title}"`);
+            }
+          }).catch(courier.redirectWhenMissing({
+            'dashboard': DashboardConstants.LANDING_PAGE_PATH
+          }));
+        }
+      }
+    }
   })
   .when(DashboardConstants.CREATE_NEW_DASHBOARD_URL, {
     template: dashboardTemplate,
