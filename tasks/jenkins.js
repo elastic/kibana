@@ -29,7 +29,6 @@ module.exports = function (grunt) {
     'jenkins:env',
     'rejectRejFiles',
 
-    'docker:docs',
     'eslint:source',
     'licenses',
     'test:server',
