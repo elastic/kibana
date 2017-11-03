@@ -1,18 +1,28 @@
 import expect from 'expect.js';
+import sinon from 'sinon';
+
 import { stdin } from '../stdin';
 
 describe('stdin', () => {
+  const sandbox = sinon.sandbox.create();
+
+  beforeEach(() => {
+    sandbox.stub(process.stdin, 'read');
+    sandbox.stub(process.stdin, 'on');
+  });
+
+  afterEach(() => {
+    sandbox.restore();
+  });
+
   it('resolves with input', async () => {
-    process.stdin.removeAllListeners('readable');
-    process.stdin.removeAllListeners('end');
+    process.stdin.on = ((_, fn) => { fn(); });
 
-    const promise = stdin();
+    process.stdin.read.onCall(0).returns('kib');
+    process.stdin.read.onCall(1).returns('ana');
+    process.stdin.read.onCall(2).returns(null);
 
-    process.stdin.push('kib');
-  	process.stdin.push('ana');
-  	process.stdin.emit('end');
-
-    const text = (await promise).trim();
+    const text = await stdin();
     expect(text).to.eql('kibana');
   });
 });

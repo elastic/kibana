@@ -123,14 +123,13 @@ describe('Kibana keystore', () => {
       const keystore = new Keystore('/tmp/test.keystore');
       sandbox.stub(keystore, 'save');
 
-      process.stdin.removeAllListeners('readable');
-      process.stdin.removeAllListeners('end');
+      sandbox.stub(process.stdin, 'on');
+      process.stdin.on = ((_, fn) => { fn(); });
 
-      setTimeout(() => {
-        process.stdin.push('kib');
-      	process.stdin.push('ana');
-      	process.stdin.emit('end');
-      }, 0);
+      sandbox.stub(process.stdin, 'read');
+      process.stdin.read.onCall(0).returns('kib');
+      process.stdin.read.onCall(1).returns('ana');
+      process.stdin.read.onCall(2).returns(null);
 
       await add(keystore, 'foo', { stdin: true });
 
