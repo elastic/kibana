@@ -94,3 +94,5 @@ export const getFullScreenMode = dashboard => getFullScreenModeFromView(getView(
  * @return {string|undefined}
  */
 export const getMaximizedPanelId = dashboard => getMaximizedPanelIdFromView(getView(dashboard));
+
+export const getUseMargins = dashboard => getView(dashboard).useMargins;
