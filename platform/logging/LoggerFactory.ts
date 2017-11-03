@@ -1,7 +1,8 @@
 import { Env } from '../config/Env';
 import { LoggingConfig, LoggerConfigType } from './LoggingConfig';
 import { LogLevel } from './LogLevel';
-import { Logger, BaseLogger, LoggerAdapter } from './Logger';
+import { Logger, BaseLogger } from './Logger';
+import { LoggerAdapter } from './LoggerAdapter';
 import { Appenders, DisposableAppender } from './appenders/Appenders';
 import { BufferAppender } from './appenders/buffer/BufferAppender';
 
