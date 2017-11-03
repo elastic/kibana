@@ -43,8 +43,10 @@ export function decorateFormController($delegate, $injector) {
 
     _markInvalidTouched(event) {
       if (this.errorCount()) {
-        event.preventDefault();
-        event.stopImmediatePropagation();
+        if (event) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        }
         this.$setTouched();
       }
     }
