@@ -84,7 +84,8 @@ export default function (api) {
         'max_expansions': 10,
         'analyzer': '',
         'fuzziness': 1.0,
-        'prefix_length': 1
+        'prefix_length': 1,
+        'minimum_should_match': 1
       }
     },
     match_phrase: {
