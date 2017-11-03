@@ -1,6 +1,10 @@
 import { Schema, typeOfSchema } from '../types/schema';
 import { Appenders, AppenderConfigType } from './appenders/Appenders';
 
+// We need this helper for the types to be correct
+// (otherwise it assumes an array of A|B instead of a tuple [A,B])
+const toTuple = <A, B>(a: A, b: B): [A, B] => [a, b];
+
 /**
  * Separator string that used within nested context name (eg. plugins.pid).
  */
@@ -49,7 +53,7 @@ const createLoggingSchema = (schema: Schema) => {
 
   return object({
     appenders: mapOf(string(), Appenders.createConfigSchema(schema), {
-      defaultValue: new Map()
+      defaultValue: new Map<string, AppenderConfigType>()
     }),
     root: object({
       level: createLevelSchema(schema),
@@ -58,7 +62,9 @@ const createLoggingSchema = (schema: Schema) => {
         minSize: 1
       })
     }),
-    loggers: arrayOf(createLoggerSchema(schema), { defaultValue: [] })
+    loggers: arrayOf(createLoggerSchema(schema), {
+      defaultValue: []
+    })
   });
 };
 
@@ -125,7 +131,7 @@ export class LoggingConfig {
 
   private fillAppendersConfig(schema: LoggingConfigType) {
     for (const [appenderKey, appenderSchema] of schema.appenders) {
-      this.appenders.set(appenderKey, appenderSchema as AppenderConfigType);
+      this.appenders.set(appenderKey, appenderSchema);
     }
   }
 
@@ -138,15 +144,11 @@ export class LoggingConfig {
     ];
 
     const loggerConfigByContext = new Map(
-      loggers.map(
-        loggerConfig =>
-          [loggerConfig.context, loggerConfig] as [string, LoggerConfigType]
-      )
+      loggers.map(loggerConfig => toTuple(loggerConfig.context, loggerConfig))
     );
 
     for (const [loggerContext, loggerConfig] of loggerConfigByContext) {
-      // We can't check whether logger config refers to the existing appenders at the config schema
-      // validation step, so we should do it here.
+      // Ensure logger config only contains valid appenders.
       const unsupportedAppenderKey = loggerConfig.appenders.find(
         appenderKey => !this.appenders.has(appenderKey)
       );
