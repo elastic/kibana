@@ -153,13 +153,13 @@ export default function (api) {
           "{field}",
           ["{field}"],
           {
-            "include": {
+            "includes": {
               __one_of: [
                 "{field}",
                 ["{field}"]
               ]
             },
-            "exclude": {
+            "excludes": {
               __one_of: [
                 "{field}",
                 ["{field}"]
