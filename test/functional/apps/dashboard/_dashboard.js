@@ -7,6 +7,7 @@ import {
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
+  const dashboardVisualizations = getService('dashboardVisualizations');
   const remote = getService('remote');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize']);
 
@@ -32,6 +33,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.clickDashboard();
 
       await PageObjects.dashboard.clickNewDashboard();
+      await dashboardVisualizations.createAndAddTSVBVisualization();
       await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
 
       log.debug('done adding visualizations');
@@ -58,7 +60,7 @@ export default function ({ getService, getPageObjects }) {
         return PageObjects.dashboard.getPanelTitles()
         .then(function (panelTitles) {
           log.info('visualization titles = ' + panelTitles);
-          expect(panelTitles).to.eql(PageObjects.dashboard.getTestVisualizationNames());
+          expect(panelTitles).to.eql(['TSVB', ...PageObjects.dashboard.getTestVisualizationNames()]);
         });
       })
       .then(function () {
