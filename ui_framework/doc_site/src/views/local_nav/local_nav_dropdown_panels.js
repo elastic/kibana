@@ -25,8 +25,8 @@ export function LocalNavWithDropdownPanels() {
         <KuiLocalNavRowSection>
           <div className="kuiLocalMenu">
             <div className="kuiLocalMenuItem kuiLocalMenuItem-isSelected">New</div>
-            <div className="kuiLocalMenuItem">Save</div>
-            <div className="kuiLocalMenuItem">Open</div>
+            <button className="kuiLocalMenuItem">Save</button>
+            <button className="kuiLocalMenuItem">Open</button>
             <button className="kuiLocalMenuItem">
               <div className="kuiLocalMenuItem__icon kuiIcon fa-clock-o" />
               Last 5 minutes
