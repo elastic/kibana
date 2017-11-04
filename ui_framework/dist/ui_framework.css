@@ -2599,7 +2599,7 @@ input[type="button"] {
  *    of this container using padding.
  */
 .kuiLocalNavRow--secondary {
-  padding: 0 10px 10px;
+  padding: 0 10px;
   /* 1 */
   -webkit-box-align: start;
   -webkit-align-items: flex-start;
@@ -2612,7 +2612,8 @@ input[type="button"] {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  width: 100%; }
+  width: 100%;
+  margin-bottom: 10px; }
 
 .kuiLocalSearchInput {
   -webkit-appearance: none;
