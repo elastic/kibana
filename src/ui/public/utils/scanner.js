@@ -93,7 +93,8 @@ Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
         resolve(allResults);
       } else {
         this.client.scroll({
-          scrollId
+          scrollId,
+          scroll: '1m'
         }, getMoreUntilDone);
       }
     };
