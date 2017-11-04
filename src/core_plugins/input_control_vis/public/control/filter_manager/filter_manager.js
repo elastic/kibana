@@ -1,6 +1,9 @@
+import _ from 'lodash';
+
 export class FilterManager {
 
-  constructor(fieldName, indexPattern, queryFilter, unsetValue) {
+  constructor(controlId, fieldName, indexPattern, queryFilter, unsetValue) {
+    this.controlId = controlId;
     this.fieldName = fieldName;
     this.indexPattern = indexPattern;
     this.queryFilter = queryFilter;
@@ -12,7 +15,10 @@ export class FilterManager {
   }
 
   findFilters() {
-    throw new Error('Must implement findFilters.');
+    const kbnFilters = _.flatten([this.queryFilter.getAppFilters(), this.queryFilter.getGlobalFilters()]);
+    return kbnFilters.filter((kbnFilter) => {
+      return _.get(kbnFilter, 'meta.controlledBy') === this.controlId;
+    });
   }
 
   getValueFromFilterBar() {
