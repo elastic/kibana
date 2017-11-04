@@ -32,18 +32,11 @@ export function registerValueSuggestions(server) {
   });
 }
 
-// workaround until saved objects 'title' can be searched as 'keyword' instead of being anaylized
-function removeStopChars(value) {
-  if (value) {
-    return value.replace('-', ' ');
-  }
-}
-
 async function getIndexPatternField(savedObjectClient, index, fieldName) {
   const findResp = await savedObjectClient.find({
     type: 'index-pattern',
     fields: ['title', 'fields'],
-    search: removeStopChars(index),
+    search: `"${index}"`,
     search_fields: ['title']
   });
   const indexPatternSavedObject = findResp.saved_objects.find(savedObject => {
