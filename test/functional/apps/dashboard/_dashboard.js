@@ -9,7 +9,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const dashboardVisualizations = getService('dashboardVisualizations');
   const remote = getService('remote');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'discover']);
 
   describe('dashboard tab', function describeIndexTests() {
     before(async function () {
@@ -35,12 +35,20 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardVisualizations.createAndAddTSVBVisualization();
       await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
+      await dashboardVisualizations.createAndAddSavedSearch('saved search');
 
       log.debug('done adding visualizations');
     });
 
     it('set the timepicker time to that which contains our test data', async function setTimepicker() {
       await PageObjects.dashboard.setTimepickerInDataRange();
+    });
+
+    it('saved search loaded with columns', async () => {
+      const headers = await PageObjects.discover.getColumnHeaders();
+      expect(headers.length).to.be(3);
+      expect(headers[1]).to.be('bytes');
+      expect(headers[2]).to.be('agent');
     });
 
     it('should save and load dashboard', async function saveAndLoadDashboard() {
@@ -60,7 +68,11 @@ export default function ({ getService, getPageObjects }) {
         return PageObjects.dashboard.getPanelTitles()
         .then(function (panelTitles) {
           log.info('visualization titles = ' + panelTitles);
-          expect(panelTitles).to.eql(['TSVB', ...PageObjects.dashboard.getTestVisualizationNames()]);
+          expect(panelTitles).to.eql([
+            'saved search',
+            'TSVB',
+            ...PageObjects.dashboard.getTestVisualizationNames()
+          ]);
         });
       })
       .then(function () {
