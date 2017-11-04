@@ -8,23 +8,19 @@ import { Keystore } from '../keystore';
 describe('Keystore', () => {
   const sandbox = sinon.sandbox.create();
 
-  const protoctedKeystoreData = {
-    version: 1,
-    ciphertext: 'f2df8454c218de9a20bad0f7d2050a8832cd3a0b19b22d6099956bff41',
-    tag: '53c04cb53dde233af4a9100294d855e4'
-  };
+  const protoctedKeystoreData = 'g2xOu2Cj+M+3X1ZmjH6NiB8csZ6eq1dLfAuX+aL3b49oV'
+        + 'yKNsNC/01deiFB1sMUKk/ZlHgYAvLdtmjnsUJHeExQuQQW08PAIBBhkR7sSNxHRsKc2'
+        + 'SB8NypWQPkSoCJeVMd8cQ5D8HdEfrCMJDVAFpg2QY3jJH4Gn9w==:1';
 
-  const unprotectedKeystoreData = {
-    version: 1,
-    ciphertext: 'cf360ea4c88ce1eebec4e5a03cf5e514b006d8abc52aee058d8213765c',
-    tag: '746d6042037a5d5c8550a3a70886de0c'
-  };
+  const unprotectedKeystoreData = 'vlXZaImfDAKf2ZvBRCKrr7u6/MYjuREUGho0/usYajy'
+        + 'hmbQY63S99pjzJ9eA+IRmE2wj3Prd0LV3Z5ed144LnNIPc0I3RPNDVyxvZdQgkfe8HI'
+        + 'FhIu7RAPsAmPzYyHGWdQtcREAlg3bxxjz85QX4p3SnCx8MXETcDQ==:1';
 
   beforeEach(() => {
     mockFs({
       '/data': {
-        'protected.keystore': JSON.stringify(protoctedKeystoreData),
-        'unprotected.keystore': JSON.stringify(unprotectedKeystoreData),
+        'protected.keystore': protoctedKeystoreData,
+        'unprotected.keystore': unprotectedKeystoreData,
       },
       '/inaccessible': mockFs.directory({
         mode: '0000',
@@ -51,17 +47,18 @@ describe('Keystore', () => {
       }
     });
 
-    it('creates keystore', () => {
+    it('creates keystore with version', () => {
       const path = '/data/test.keystore';
 
-      const keystore = new Keystore(path, 'changeme');
+      const keystore = new Keystore(path);
       keystore.save();
 
       const fileBuffer = readFileSync(path);
-      const data = JSON.parse(fileBuffer.toString());
+      const contents = fileBuffer.toString();
+      const [data, version] = contents.split(':');
 
-      expect(data).to.only.have.keys(['version', 'ciphertext', 'tag']);
-      expect(data.version).to.be(1);
+      expect(version).to.eql(1);
+      expect(data.length).to.be.greaterThan(100);
     });
   });
 
@@ -142,53 +139,51 @@ describe('Keystore', () => {
   });
 
   describe('encrypt', () => {
-    const text = 'foo';
-    const ciphertext = '5317de';
-    const tag = 'b2ff8c731cd2b026ad0a96ee8b34244e';
-    const password = 'mypassword';
+    it('has randomness ', () => {
+      const text = 'foo';
+      const password = 'changeme';
 
-    it('provides symmetric encryption', () => {
-      const data = Keystore.encrypt(text, password);
+      const dataOne = Keystore.encrypt(text, password);
+      const dataTwo = Keystore.encrypt(text, password);
 
-      expect(data).to.eql({
-        ciphertext,
-        tag
-      });
+      expect(dataOne).to.not.eql(dataTwo);
+    });
+
+    it('can immediately be decrypted', () => {
+      const password = 'changeme';
+      const secretText = 'foo';
+
+      const data = Keystore.encrypt(secretText, password);
+      const text = Keystore.decrypt(data, password);
+
+      expect(text).to.eql(secretText);
     });
   });
 
   describe('decrypt', () => {
     const text = 'foo';
-    const ciphertext = '5317de';
-    const tag = 'b2ff8c731cd2b026ad0a96ee8b34244e';
-    const password = 'mypassword';
+    const password = 'changeme';
+    const ciphertext = 'Ali0DwsgNdODeso01GdelOAX6ZcfdiLz79RbXnL3MCcu1YnX9KKfyb'
+          + 'rKtoo9ffTQwcpPhofbsrbxwJ3Gdc2GlDsD8g3PuyqQcXy3ufwpPL2bBzDg2yJ86SW'
+          + 'b8SThyCg=';
 
     it('can decrypt data', () => {
-      const data = Keystore.decrypt(ciphertext, tag, password);
+      const data = Keystore.decrypt(ciphertext, password);
       expect(data).to.eql(text);
     });
 
     it('throws error for invalid password', () => {
       try {
-        Keystore.decrypt(ciphertext, tag, 'invalid');
+        Keystore.decrypt(ciphertext, 'invalid');
         expect().fail('should throw error');
       } catch(e) {
         expect(e).to.be.a(Keystore.errors.UnableToReadKeystore);
       }
     });
 
-    it('throws error for invalid tag', () => {
+    it('throws error for corrupt ciphertext', () => {
       try {
-        Keystore.decrypt(ciphertext, 'invalid', password);
-        expect().fail('should throw error');
-      } catch(e) {
-        expect(e).to.be.a(Keystore.errors.UnableToReadKeystore);
-      }
-    });
-
-    it('throws error for missing tag', () => {
-      try {
-        Keystore.decrypt(ciphertext, null, password);
+        Keystore.decrypt('thisisinvalid', password);
         expect().fail('should throw error');
       } catch(e) {
         expect(e).to.be.a(Keystore.errors.UnableToReadKeystore);

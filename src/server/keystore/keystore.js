@@ -1,9 +1,10 @@
 import { writeFileSync, readFileSync, existsSync } from 'fs';
-import { createCipher, createDecipher } from 'crypto';
+import { createCipheriv, createDecipheriv, randomBytes, pbkdf2Sync } from 'crypto';
 import * as errors from './errors';
 
 const VERSION = 1;
 const ALGORITHM = 'aes-256-gcm';
+const ITERATIONS = 250;
 
 export class Keystore {
   constructor(path, password = '') {
@@ -16,27 +17,35 @@ export class Keystore {
 
   static errors = errors;
 
-  static encrypt(data, password = '') {
-    const cipher = createCipher(ALGORITHM, password);
+  static encrypt(text, password = '') {
+    const iv = randomBytes(12);
+    const salt = randomBytes(64);
+    const key = pbkdf2Sync(password, salt, ITERATIONS, 32, 'sha512');
 
-    let ciphertext = cipher.update(data, 'utf8', 'hex');
-    ciphertext += cipher.final('hex');
+    const cipher = createCipheriv(ALGORITHM, key, iv);
 
-    return {
-      ciphertext,
-      tag: cipher.getAuthTag().toString('hex')
-    };
+    const ciphertext = Buffer.concat([cipher.update(text, 'utf8'), cipher.final()]);
+    const tag = cipher.getAuthTag();
+
+    return Buffer.concat([salt, iv, tag, ciphertext]).toString('base64');
   }
 
-  static decrypt(ciphertext, tag, password = '') {
+  static decrypt(data, password = '') {
     try {
-      const decipher = createDecipher(ALGORITHM, password);
-      decipher.setAuthTag(new Buffer(tag, 'hex'));
+      const bData = new Buffer(data, 'base64');
 
-      let text = decipher.update(ciphertext, 'hex', 'utf8');
-      text += decipher.final('utf8');
+      // convert data to buffers
+      const salt = bData.slice(0, 64);
+      const iv = bData.slice(64, 76);
+      const tag = bData.slice(76, 92);
+      const text = bData.slice(92);
 
-      return text;
+      const key = pbkdf2Sync(password, salt, ITERATIONS, 32, 'sha512');
+
+      const decipher = createDecipheriv(ALGORITHM, key, iv);
+      decipher.setAuthTag(tag);
+
+      return decipher.update(text, 'binary', 'utf8') + decipher.final('utf8');
     } catch (e) {
       throw new errors.UnableToReadKeystore();
     }
@@ -44,20 +53,25 @@ export class Keystore {
 
   save() {
     const text = JSON.stringify(this.data);
-    const keystore = {
-      version: VERSION,
-      ...Keystore.encrypt(text, this.password)
-    };
 
-    writeFileSync(this.path, JSON.stringify(keystore));
+    // The encrypted text and the version are colon delimited to make
+    // it easy to visually read the version as we could have easily
+    // included it with the buffer
+
+    const keystore = [
+      Keystore.encrypt(text, this.password),
+      VERSION
+    ].join(':');
+
+    writeFileSync(this.path, keystore);
   }
 
   load() {
     try {
       const keystore = readFileSync(this.path);
-      const data = JSON.parse(keystore.toString());
+      const [data, ] = keystore.toString().split(':');
 
-      this.data = JSON.parse(Keystore.decrypt(data.ciphertext, data.tag, this.password));
+      this.data = JSON.parse(Keystore.decrypt(data, this.password));
     } catch (e) {
       if (e.code === 'ENOENT') {
         return;
