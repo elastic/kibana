@@ -11,11 +11,9 @@ describe('Kibana keystore', () => {
   describe('add', () => {
     const sandbox = sinon.sandbox.create();
 
-    const keystoreData = {
-      version: 1,
-      ciphertext: 'cf360ea4c88ce1eebec4e5a03cf5e514b006d8abc52aee058d8213765c',
-      tag: '746d6042037a5d5c8550a3a70886de0c'
-    };
+    const keystoreData = 'vlXZaImfDAKf2ZvBRCKrr7u6/MYjuREUGho0/usYajyhmbQY63S9'
+          + '9pjzJ9eA+IRmE2wj3Prd0LV3Z5ed144LnNIPc0I3RPNDVyxvZdQgkfe8HIFhIu7RA'
+          + 'PsAmPzYyHGWdQtcREAlg3bxxjz85QX4p3SnCx8MXETcDQ==:1';
 
     beforeEach(() => {
       mockFs({
