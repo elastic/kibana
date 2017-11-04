@@ -3,13 +3,6 @@ import Datasource from '../../lib/classes/datasource';
 import buildRequest from './lib/build_request';
 import toSeriesList from './lib/agg_response_to_series_list';
 
-// workaround until saved objects 'title' can be searched as 'keyword' instead of being anaylized
-function removeStopChars(value) {
-  if (value) {
-    return value.replace('-', ' ');
-  }
-}
-
 export default new Datasource('es', {
   args: [
     {
@@ -69,7 +62,7 @@ export default new Datasource('es', {
     const findResp = await tlConfig.request.getSavedObjectsClient().find({
       type: 'index-pattern',
       fields: ['title', 'fields'],
-      search: removeStopChars(config.index),
+      search: `"${config.index}"`,
       search_fields: ['title']
     });
     const indexPatternSavedObject = findResp.saved_objects.find(savedObject => {
