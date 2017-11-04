@@ -44,3 +44,18 @@ export function toKueryExpression(node) {
     return queryStrings.join(' and ');
   }
 }
+
+export function getSuggestions(node, cursorPosition) {
+  const childAtCursor = ast.getChildAtCursor(node, cursorPosition) || {};
+  const { type, location, value = '' } = childAtCursor;
+  if (type && type !== 'literal') {
+    return ast.getSuggestions(childAtCursor, cursorPosition);
+  }
+
+  const start = location ? location.min : cursorPosition;
+  const end = location ? location.max : cursorPosition;
+  const types = ['function', 'field'];
+  const params = value;
+
+  return { start, end, types, params };
+}

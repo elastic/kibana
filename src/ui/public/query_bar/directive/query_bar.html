@@ -3,11 +3,22 @@
   name="queryBarForm"
   ng-submit="queryBar.submit()"
 >
-  <div class="typeahead" kbn-typeahead="{{queryBar.typeaheadKey()}}" on-select="queryBar.submit()" role="search">
-    <div class="kuiLocalSearch">
+  <kbn-typeahead
+    items="queryBar.typeaheadItems"
+    item-template="queryBar.typeaheadItemTemplate"
+    footer-template="queryBar.typeaheadFooterTemplate"
+    on-select="queryBar.onTypeaheadSelect(item)"
+  >
+    <div
+      class="kuiLocalSearch"
+      role="search"
+    >
 
       <!-- Lucene input -->
-      <div class="kuiLocalSearchAssistedInput" ng-if="queryBar.localQuery.language === 'lucene'">
+      <div
+        class="kuiLocalSearchAssistedInput"
+        ng-if="queryBar.localQuery.language === 'lucene'"
+      >
         <input
           parse-query
           input-focus
@@ -37,9 +48,15 @@
       </div>
 
       <!-- kuery input -->
-      <div class="kuiLocalSearchAssistedInput" ng-if="queryBar.localQuery.language === 'kuery'">
+      <div
+        class="kuiLocalSearchAssistedInput"
+        ng-if="queryBar.localQuery.language === 'kuery'"
+      >
         <input
           ng-model="queryBar.localQuery.query"
+          ng-trim="false"
+          ng-keyup="queryBar.updateSuggestions()"
+          ng-click="queryBar.updateSuggestions()"
           input-focus
           disable-input-focus="queryBar.disableAutoFocus"
           kbn-typeahead-input
@@ -51,18 +68,6 @@
           ng-class="{'kuiLocalSearchInput-isInvalid': queryBarForm.$invalid}"
           data-test-subj="queryInput"
         >
-        <div class="kuiLocalSearchAssistedInput__assistance">
-          <p class="kuiText">
-            <a
-              id="discoverKuerySyntaxHint"
-              class="kuiLink"
-              documentation-href="query.kueryQuerySyntax"
-              target="_blank"
-            >
-              Uses kuery syntax
-            </a>
-          </p>
-        </div>
       </div>
 
       <select
@@ -85,6 +90,5 @@
         <span class="fa fa-search" aria-hidden="true"></span>
       </button>
     </div>
-    <kbn-typeahead-items></kbn-typeahead-items>
-  </div>
+  </kbn-typeahead>
 </form>

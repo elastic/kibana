@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import * as literal from '../node_types/literal';
+import * as ast from '../ast';
 import { getPhraseScript } from 'ui/filter_manager/lib/phrase';
 
 export function buildNodeParams(fieldName, value, serializeStyle = 'operator') {
@@ -66,4 +67,29 @@ export function toKueryExpression(node) {
   const value = !_.isUndefined(valueArg) ? literal.toKueryExpression(valueArg) : valueArg;
 
   return `${fieldName}:${value}`;
+}
+
+export function getSuggestions(node, cursorPosition) {
+  const childAtCursor = ast.getChildAtCursor(node, cursorPosition) || {};
+  const { location, value = '' } = childAtCursor;
+
+  const start = location ? location.min : cursorPosition;
+  const end = location ? location.max : cursorPosition;
+
+  const { arguments: [ fieldNameArg ] } = node;
+
+  let types;
+  let params;
+  if (!fieldNameArg || value === fieldNameArg.value) {
+    types = ['field'];
+    params = { query: value };
+  } else {
+    types = ['value'];
+    params = {
+      fieldName: fieldNameArg.value,
+      query: value
+    };
+  }
+
+  return { start, end, types, params };
 }

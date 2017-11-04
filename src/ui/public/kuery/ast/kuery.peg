@@ -47,7 +47,7 @@ start
     return query;
   }
   / whitespace:[\ \t\r\n]* {
-    return addMeta(nodeTypes.function.buildNode('is', '*', '*'), text(), location());
+    return addMeta(nodeTypes.function.buildNode('and', [], 'implicit'), text(), location());
   }
 
 OrQuery
@@ -78,7 +78,7 @@ Clause
   / Term
 
 Term
-  = field:literal_arg_type ':' value:literal_arg_type {
+  = field:literal_arg_type ':' value:literal_arg_type? {
     return addMeta(nodeTypes.function.buildNodeWithArgumentNodes('is', [field, value], 'operator'), text(), location());
   }
   / field:literal_arg_type ':[' space? gt:literal_arg_type space 'to'i space lt:literal_arg_type space? ']' {

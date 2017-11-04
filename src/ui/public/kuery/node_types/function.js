@@ -52,3 +52,8 @@ export function toKueryExpression(node) {
 
   return `${node.function}(${functionArguments.join(', ')})`;
 }
+
+export function getSuggestions(node, cursorPosition) {
+  const kueryFunction = functions[node.function];
+  return kueryFunction.getSuggestions(node, cursorPosition);
+}

@@ -1,225 +1,99 @@
-import _ from 'lodash';
-import 'ui/typeahead/typeahead.less';
-import 'ui/typeahead/_input';
-import 'ui/typeahead/_items';
-import { uiModules } from 'ui/modules';
+import './typeahead.less';
+import './typeahead_input';
+import './typeahead_item';
+import './typeahead_footer';
+import template from './typeahead.html';
 import { comboBoxKeyCodes } from 'ui_framework/services';
+import { uiModules } from 'ui/modules';
 
+const { UP, DOWN, ENTER, TAB, ESCAPE } = comboBoxKeyCodes;
 const typeahead = uiModules.get('kibana/typeahead');
 
 typeahead.directive('kbnTypeahead', function () {
   return {
-    restrict: 'A',
+    template,
+    transclude: true,
+    restrict: 'E',
     scope: {
-      historyKey: '@kbnTypeahead',
-      onSelect: '&'
+      items: '=',
+      itemTemplate: '=',
+      onSelect: '&',
+      footerTemplate: '='
     },
+    bindToController: true,
     controllerAs: 'typeahead',
+    controller: function () {
+      this.isHidden = true;
+      this.selectedIndex = null;
 
-    controller: function ($scope, PersistedLog, config) {
-      const self = this;
-      self.query = '';
-      self.hidden = true;
-      self.focused = false;
-      self.mousedOver = false;
-
-      self.setInputModel = function (model) {
-        $scope.inputModel = model;
-
-        // watch for changes to the query parameter, delegate to typeaheadCtrl
-        $scope.$watch('inputModel.$viewValue', self.filterItemsByQuery);
+      this.submit = () => {
+        const item = this.items[this.selectedIndex];
+        this.onSelect({ item });
+        this.selectedIndex = null;
       };
 
-      self.setHidden = function (hidden) {
-        self.hidden = !!(hidden);
+      this.setSelectedIndex = (index) => {
+        this.selectedIndex = (index + this.items.length) % this.items.length;
       };
 
-      self.setFocused = function (focused) {
-        self.focused = !!(focused);
+      this.selectPrevious = () => {
+        const previousIndex = (this.selectedIndex === null ? 0 : this.selectedIndex) - 1;
+        this.setSelectedIndex(previousIndex);
       };
 
-      self.setMouseover = function (mousedOver) {
-        self.mousedOver = !!(mousedOver);
+      this.selectNext = () => {
+        const nextIndex = (this.selectedIndex === null ? -1 : this.selectedIndex) + 1;
+        this.setSelectedIndex(nextIndex);
       };
 
-      // activation methods
-      self.activateItem = function (item) {
-        self.active = item;
+      this.isVisible = () => {
+        // Blur fires before click so if we don't show even after blur then the click won't fire
+        return this.items.length > 0 && !this.isHidden && (this.isFocused || this.isMousedOver);
       };
 
-      self.getActiveIndex = function () {
-        if (!self.active) {
-          return;
-        }
+      this.onKeyDown = (event) => {
+        // Prevent up/down from moving the cursor in the input
+        const isUpOrDownArrow = [UP, DOWN].includes(event.keyCode);
 
-        return $scope.filteredItems.indexOf(self.active);
-      };
+        // Prevent enter from submitting the form if there is a selection
+        const isEnterWithSelection = event.keyCode === ENTER && this.selectedIndex !== null;
 
-      self.getItems = function () {
-        return $scope.filteredItems;
-      };
-
-      self.activateNext = function () {
-        let index = self.getActiveIndex();
-        if (index == null) {
-          index = 0;
-        } else if (index < $scope.filteredItems.length - 1) {
-          ++index;
-        }
-
-        self.activateItem($scope.filteredItems[index]);
-      };
-
-      self.activatePrev = function () {
-        let index = self.getActiveIndex();
-
-        if (index > 0 && index != null) {
-          --index;
-        } else if (index === 0) {
-          self.active = false;
-          return;
-        }
-
-        self.activateItem($scope.filteredItems[index]);
-      };
-
-      self.isActive = function (item) {
-        return item === self.active;
-      };
-
-      // selection methods
-      self.selectItem = function (item, ev) {
-        self.hidden = true;
-        self.active = false;
-        $scope.inputModel.$setViewValue(item);
-        $scope.inputModel.$render();
-        self.persistEntry();
-
-        if (ev && ev.type === 'click') {
-          $scope.onSelect();
+        if (this.isVisible() && (isUpOrDownArrow || isEnterWithSelection)) {
+          event.preventDefault();
         }
       };
 
-      self.persistEntry = function () {
-        if ($scope.inputModel.$viewValue.length) {
-          // push selection into the history
-          $scope.items = self.history.add($scope.inputModel.$viewValue);
+      this.onKeyUp = (event) => {
+        const { keyCode } = event;
+
+        this.isHidden = (keyCode === ESCAPE);
+
+        if ([TAB, ENTER].includes(keyCode) && this.selectedIndex !== null) {
+          this.submit();
+        } else if (keyCode === UP) {
+          this.selectPrevious();
+        } else if (keyCode === DOWN) {
+          this.selectNext();
+        } else {
+          this.selectedIndex = null;
         }
       };
 
-      self.selectActive = function () {
-        if (self.active) {
-          self.selectItem(self.active);
-        }
+      this.onFocus = () => {
+        this.isFocused = true;
       };
 
-      self.keypressHandler = function (ev) {
-        const keyCode = ev.which || ev.keyCode;
-
-        if (self.focused) {
-          self.hidden = false;
-        }
-
-        // hide on escape
-        if (_.contains([comboBoxKeyCodes.ESCAPE], keyCode)) {
-          self.hidden = true;
-          self.active = false;
-        }
-
-        // change selection with arrow up/down
-        // on down key, attempt to load all items if none are loaded
-        if (_.contains([comboBoxKeyCodes.DOWN], keyCode) && $scope.filteredItems.length === 0) {
-          $scope.filteredItems = $scope.items;
-          $scope.$digest();
-        } else if (_.contains([comboBoxKeyCodes.UP, comboBoxKeyCodes.DOWN], keyCode)) {
-          if (self.isVisible() && $scope.filteredItems.length) {
-            ev.preventDefault();
-
-            if (keyCode === comboBoxKeyCodes.DOWN) {
-              self.activateNext();
-            } else {
-              self.activatePrev();
-            }
-          }
-        }
-
-        // persist selection on enter, when not selecting from the list
-        if (_.contains([comboBoxKeyCodes.ENTER], keyCode)) {
-          if (!self.active) {
-            self.persistEntry();
-          }
-        }
-
-        // select on enter or tab
-        if (_.contains([comboBoxKeyCodes.ENTER, comboBoxKeyCodes.TAB], keyCode)) {
-          self.selectActive();
-          self.hidden = true;
-        }
+      this.onBlur = () => {
+        this.isFocused = false;
       };
 
-      self.filterItemsByQuery = function (query) {
-        // cache query so we can call it again if needed
-        if (query) {
-          self.query = query;
-        }
-
-        // if the query is empty, clear the list items
-        if (!self.query.length) {
-          $scope.filteredItems = [];
-          return;
-        }
-
-        // update the filteredItems using the query
-        const beginningMatches = $scope.items.filter(function (item) {
-          return item.indexOf(query) === 0;
-        });
-
-        const otherMatches = $scope.items.filter(function (item) {
-          return item.indexOf(query) > 0;
-        });
-
-        $scope.filteredItems = beginningMatches.concat(otherMatches);
+      this.onMouseEnter = () => {
+        this.isMousedOver = true;
       };
 
-      self.isVisible = function () {
-        return !self.hidden && ($scope.filteredItems.length > 0) && (self.focused || self.mousedOver);
+      this.onMouseLeave = () => {
+        this.isMousedOver = false;
       };
-
-      $scope.$watch('historyKey', () => {
-        self.history = new PersistedLog('typeahead:' + $scope.historyKey, {
-          maxLength: config.get('history:limit'),
-          filterDuplicates: true
-        });
-
-        $scope.items = self.history.get();
-        $scope.filteredItems = [];
-      });
-
-      // handle updates to parent scope history
-      $scope.$watch('items', function () {
-        if (self.query) {
-          self.filterItemsByQuery(self.query);
-        }
-      });
-
-      // watch for changes to the filtered item list
-      $scope.$watch('filteredItems', function (filteredItems) {
-
-        // if list is empty, or active item is missing, unset active item
-        if (!filteredItems.length || !_.contains(filteredItems, self.active)) {
-          self.active = false;
-        }
-      });
-    },
-
-    link: function ($scope, $el, attrs) {
-      if (!_.has(attrs, 'onSelect')) {
-        throw new Error('on-select must be defined');
-      }
-
-      $scope.$watch('typeahead.isVisible()', function (vis) {
-        $el.toggleClass('visible', vis);
-      });
     }
   };
 });

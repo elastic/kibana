@@ -1,0 +1,21 @@
+<div class="typeahead-{{item.type}}">
+  <div class="typeahead-type">
+    <div ng-switch="item.type">
+      <div ng-switch-when="function">
+        FN
+      </div>
+      <div ng-switch-when="value">
+        VL
+      </div>
+      <div ng-switch-when="field">
+        FD
+      </div>
+    </div>
+  </div>
+  <div class="typeahead-value">
+    {{item.value}}
+  </div>
+  <div class="typeahead-description">
+    Some complicated, longwinded description.
+  </div>
+</div>

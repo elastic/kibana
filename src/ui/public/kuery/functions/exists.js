@@ -1,3 +1,4 @@
+import * as ast from '../ast';
 import * as literal from '../node_types/literal';
 
 export function buildNodeParams(fieldName) {
@@ -17,4 +18,17 @@ export function toElasticsearchQuery(node, indexPattern) {
   return {
     exists: { field: fieldName }
   };
+}
+
+export function getSuggestions(node, cursorPosition) {
+  const childAtCursor = ast.getChildAtCursor(node, cursorPosition) || {};
+  const { location, value = '' } = childAtCursor;
+
+  const start = location ? location.min : cursorPosition;
+  const end = location ? location.max : cursorPosition;
+
+  const types = ['field'];
+  const params = { query: value };
+
+  return { start, end, types, params };
 }
