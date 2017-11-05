@@ -28,19 +28,18 @@ export default function ({ getService, getPageObjects }) {
       const panels = await find.allByCssSelector('.panel-title');
 
       const thirdPanel = panels[2];
-      const thirdPanelTitle = await thirdPanel.getVisibleText();
+      const position1 = await thirdPanel.getPosition();
 
       remote
         .moveMouseTo(thirdPanel)
         .pressMouseButton()
-        .moveMouseTo(panels[0], 0, -15)
+        .moveMouseTo(null, -20, -400)
         .releaseMouseButton();
 
       const panelsMoved = await find.allByCssSelector('.panel-title');
-      const firstPanel = panelsMoved[0];
-      const firstPanelTitle = await firstPanel.getVisibleText();
+      const position2 = await panelsMoved[2].getPosition();
 
-      expect(firstPanelTitle).to.equal(thirdPanelTitle);
+      expect(position1.y).to.be.greaterThan(position2.y);
     });
   });
 }
