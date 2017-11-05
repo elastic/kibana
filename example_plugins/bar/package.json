@@ -9,6 +9,6 @@
   "types": "./target/tsc-types/index.d.ts",
   "devDependencies": {
     "kbn-types": "file:../../packages/kbn-types",
-    "typescript": "^2.5.3"
+    "typescript": "2.6.1"
   }
 }

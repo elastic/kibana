@@ -9,6 +9,6 @@
     "start": "tsc --watch"
   },
   "devDependencies": {
-    "typescript": "2.5.1"
+    "typescript": "2.6.1"
   }
 }

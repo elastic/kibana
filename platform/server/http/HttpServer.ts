@@ -27,11 +27,13 @@ export class HttpServer {
   }
 
   async start(config: HttpConfig) {
-    this.server = this.initializeServer(config);
+    const server = this.initializeServer(config);
+
+    this.server = server;
 
     const legacyKbnServer = this.env.getLegacyKbnServer();
     if (legacyKbnServer !== undefined) {
-      legacyKbnServer.newPlatformProxyListener.bind(this.server);
+      legacyKbnServer.newPlatformProxyListener.bind(server);
 
       // We register Kibana proxy middleware right before we start server to allow
       // all new platform plugins register their endpoints, so that kbnServer
@@ -43,11 +45,7 @@ export class HttpServer {
 
     this.log.info(`starting http server [${config.host}:${config.port}]`);
 
-    await promisify(this.server.listen).call(
-      this.server,
-      config.port,
-      config.host
-    );
+    await promisify(server.listen).call(this.server, config.port, config.host);
   }
 
   async stop() {
@@ -63,8 +61,17 @@ export class HttpServer {
   }
 
   private initializeServer(config: HttpConfig) {
+    // TODO This was forced to `any` because of the following problem with the
+    // express declaration file, and can be removed once that is fixed:
+    //
+    // ```
+    // Argument of type 'Application' is not assignable to parameter of type
+    // '((request: IncomingMessage, response: ServerResponse) => void) | undefined'
+    // ```
+    const app = this.app as any;
+
     if (!config.ssl.enabled) {
-      return http.createServer(this.app);
+      return http.createServer(app);
     }
 
     // TODO: add support for `secureOptions`.
@@ -82,7 +89,7 @@ export class HttpServer {
         // We use the server's cipher order rather than the client's to prevent the BEAST attack.
         honorCipherOrder: true
       },
-      this.app
+      app
     );
   }
 }

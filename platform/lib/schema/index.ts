@@ -575,6 +575,75 @@ export function mapOf<K, V>(
   return new MapOfSetting(keySetting, valueSetting, options);
 }
 
+export function oneOf<A, B, C, D, E, F, G, H, I, J>(
+  types: [
+    Setting<A>,
+    Setting<B>,
+    Setting<C>,
+    Setting<D>,
+    Setting<E>,
+    Setting<F>,
+    Setting<G>,
+    Setting<H>,
+    Setting<I>,
+    Setting<J>
+  ],
+  options?: SettingOptions<A | B | C | D | E | F | G | H | I | J>
+): Setting<A | B | C | D | E | F | G | H | I | J>;
+export function oneOf<A, B, C, D, E, F, G, H, I>(
+  types: [
+    Setting<A>,
+    Setting<B>,
+    Setting<C>,
+    Setting<D>,
+    Setting<E>,
+    Setting<F>,
+    Setting<G>,
+    Setting<H>,
+    Setting<I>
+  ],
+  options?: SettingOptions<A | B | C | D | E | F | G | H | I>
+): Setting<A | B | C | D | E | F | G | H | I>;
+export function oneOf<A, B, C, D, E, F, G, H>(
+  types: [
+    Setting<A>,
+    Setting<B>,
+    Setting<C>,
+    Setting<D>,
+    Setting<E>,
+    Setting<F>,
+    Setting<G>,
+    Setting<H>
+  ],
+  options?: SettingOptions<A | B | C | D | E | F | G | H>
+): Setting<A | B | C | D | E | F | G | H>;
+export function oneOf<A, B, C, D, E, F, G>(
+  types: [
+    Setting<A>,
+    Setting<B>,
+    Setting<C>,
+    Setting<D>,
+    Setting<E>,
+    Setting<F>,
+    Setting<G>
+  ],
+  options?: SettingOptions<A | B | C | D | E | F | G>
+): Setting<A | B | C | D | E | F | G>;
+export function oneOf<A, B, C, D, E, F>(
+  types: [
+    Setting<A>,
+    Setting<B>,
+    Setting<C>,
+    Setting<D>,
+    Setting<E>,
+    Setting<F>
+  ],
+  options?: SettingOptions<A | B | C | D | E | F>
+): Setting<A | B | C | D | E | F>;
+export function oneOf<A, B, C, D, E>(
+  types: [Setting<A>, Setting<B>, Setting<C>, Setting<D>, Setting<E>],
+  options?: SettingOptions<A | B | C | D | E>
+): Setting<A | B | C | D | E>;
 export function oneOf<A, B, C, D>(
   types: [Setting<A>, Setting<B>, Setting<C>, Setting<D>],
   options?: SettingOptions<A | B | C | D>

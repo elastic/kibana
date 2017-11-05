@@ -9,7 +9,10 @@
     "noImplicitReturns": false,
     "noUnusedLocals": true,
     "sourceMap": true,
-    "target": "esnext"
+    "target": "esnext",
+    // TODO The `skipLibCheck` setting can be removed when
+    // https://github.com/ReactiveX/rxjs/issues/3031 is resolved.
+    "skipLibCheck": true
   },
   "exclude": [
     "node_modules"

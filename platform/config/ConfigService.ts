@@ -120,6 +120,7 @@ export class ConfigService {
   }
 
   private markAsHandled(path: ConfigPath) {
+    this.log.debug(`Marking config path as handled: ${path}`);
     this.handledPaths.push(path);
   }
 
