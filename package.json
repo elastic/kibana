@@ -1,9 +1,9 @@
 {
   "name": "backport",
   "version": "1.1.1",
-  "main": "./src/index.js",
+  "main": "./src/cli/index.js",
   "bin": {
-    "backport": "./src/index.js"
+    "backport": "./src/cli/index.js"
   },
   "license": "MIT",
   "scripts": {

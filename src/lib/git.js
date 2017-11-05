@@ -1,12 +1,9 @@
-const promisify = require('es6-promisify');
-const mkdirp = promisify(require('mkdirp'));
-const fs = require('fs');
-const stat = promisify(fs.stat);
 const env = require('./env');
-const utils = require('./utils');
+const rpc = require('./rpc');
 
 function folderExists(path) {
-  return stat(path)
+  return rpc
+    .stat(path)
     .then(stats => stats.isDirectory())
     .catch(e => {
       if (e.code === 'ENOENT') {
@@ -23,7 +20,7 @@ function repoExists(owner, repoName) {
 
 // Clone repo and add remotes
 function setupRepo(owner, repoName, username) {
-  return mkdirp(env.getRepoOwnerDirPath(owner)).then(() => {
+  return rpc.mkdirp(env.getRepoOwnerDirPath(owner)).then(() => {
     return cloneRepo(owner, repoName).then(() =>
       addRemote(owner, repoName, username)
     );
@@ -35,13 +32,13 @@ function getRemoteUrl(owner, repoName) {
 }
 
 function cloneRepo(owner, repoName) {
-  return utils.exec(`git clone ${getRemoteUrl(owner, repoName)}`, {
+  return rpc.exec(`git clone ${getRemoteUrl(owner, repoName)}`, {
     cwd: env.getRepoOwnerDirPath(owner)
   });
 }
 
 function addRemote(owner, repoName, username) {
-  return utils.exec(
+  return rpc.exec(
     `git remote add ${username} ${getRemoteUrl(username, repoName)}`,
     {
       cwd: env.getRepoPath(owner, repoName)
@@ -50,13 +47,13 @@ function addRemote(owner, repoName, username) {
 }
 
 function cherrypick(owner, repoName, sha) {
-  return utils.exec(`git cherry-pick ${sha}`, {
+  return rpc.exec(`git cherry-pick ${sha}`, {
     cwd: env.getRepoPath(owner, repoName)
   });
 }
 
 function createAndCheckoutBranch(owner, repoName, baseBranch, featureBranch) {
-  return utils.exec(
+  return rpc.exec(
     `git fetch origin ${baseBranch} && git branch ${featureBranch} origin/${baseBranch} --force && git checkout ${featureBranch} `,
     {
       cwd: env.getRepoPath(owner, repoName)
@@ -65,13 +62,13 @@ function createAndCheckoutBranch(owner, repoName, baseBranch, featureBranch) {
 }
 
 function push(owner, repoName, username, branchName) {
-  return utils.exec(`git push ${username} ${branchName} --force`, {
+  return rpc.exec(`git push ${username} ${branchName} --force`, {
     cwd: env.getRepoPath(owner, repoName)
   });
 }
 
 function resetAndPullMaster(owner, repoName) {
-  return utils.exec(
+  return rpc.exec(
     `git reset --hard && git checkout master && git pull origin master`,
     {
       cwd: env.getRepoPath(owner, repoName)

@@ -1,9 +1,9 @@
-const github = require('./github');
+const github = require('../lib/github');
 const {
   ensureConfigAndFoldersExists,
   validateConfig,
   getRepoConfig
-} = require('./configs');
+} = require('../lib/configs');
 const {
   promptRepoInfo,
   promptCommit,
@@ -14,7 +14,7 @@ const {
   maybeSetupRepo
 } = require('./cliService');
 
-function init(config, options) {
+function initSteps(config, options) {
   let commit, versions, reference, owner, repoName, repoConfig;
 
   return ensureConfigAndFoldersExists()
@@ -49,6 +49,4 @@ function init(config, options) {
     .catch(handleErrors);
 }
 
-module.exports = {
-  init
-};
+module.exports = initSteps;

@@ -1,12 +1,14 @@
-const inquirer = require('inquirer');
 const axios = require('axios');
+const inquirer = require('inquirer');
 const nock = require('nock');
+const os = require('os');
 const httpAdapter = require('axios/lib/adapters/http');
-const { init } = require('../src/cli');
-const github = require('../src/github');
+
 const commitsMock = require('./mocks/commits.json');
-const { mockBackportDirPath } = require('./testHelpers');
-const utils = require('../src/utils');
+
+const initSteps = require('../steps');
+const github = require('../../lib/github');
+const rpc = require('../../lib/rpc');
 
 function setup() {
   const owner = 'elastic';
@@ -15,9 +17,12 @@ function setup() {
   axios.defaults.host = 'http://localhost';
   axios.defaults.adapter = httpAdapter;
 
-  mockBackportDirPath();
-  utils.exec = jest.fn().mockReturnValue(Promise.resolve());
-  utils.writeFile = jest.fn().mockReturnValue(Promise.resolve());
+  os.homedir = jest.fn(() => '/homefolder');
+  rpc.exec = jest.fn().mockReturnValue(Promise.resolve());
+  rpc.writeFile = jest.fn().mockReturnValue(Promise.resolve());
+  rpc.mkdirp = jest.fn().mockReturnValue(Promise.resolve());
+  rpc.statSync = jest.fn(() => ({ mode: 33152 }));
+
   github.getCommits = jest.fn(github.getCommits);
   github.createPullRequest = jest.fn(github.createPullRequest);
 
@@ -64,7 +69,7 @@ function setup() {
       html_url: 'myHtmlUrl'
     });
 
-  return init(
+  return initSteps(
     {
       username: 'sqren',
       accessToken: 'myAccessToken',
@@ -108,10 +113,10 @@ describe('select commit that originated from pull request', () => {
   });
 
   it('exec should be called with correct args', () => {
-    expect(utils.exec.mock.calls).toMatchSnapshot();
+    expect(rpc.exec.mock.calls).toMatchSnapshot();
   });
 
   it('writeFile should be called with correct args', () => {
-    expect(utils.writeFile.mock.calls).toMatchSnapshot();
+    expect(rpc.writeFile.mock.calls).toMatchSnapshot();
   });
 });

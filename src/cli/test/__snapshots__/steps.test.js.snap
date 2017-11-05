@@ -5,37 +5,37 @@ Array [
   Array [
     "git clone git@github.com:elastic/backport-cli-test",
     Object {
-      "cwd": "homefolder/.backport/repositories/elastic",
+      "cwd": "/homefolder/.backport/repositories/elastic",
     },
   ],
   Array [
     "git remote add sqren git@github.com:sqren/backport-cli-test",
     Object {
-      "cwd": "homefolder/.backport/repositories/elastic/backport-cli-test",
+      "cwd": "/homefolder/.backport/repositories/elastic/backport-cli-test",
     },
   ],
   Array [
     "git reset --hard && git checkout master && git pull origin master",
     Object {
-      "cwd": "homefolder/.backport/repositories/elastic/backport-cli-test",
+      "cwd": "/homefolder/.backport/repositories/elastic/backport-cli-test",
     },
   ],
   Array [
     "git fetch origin 6.2 && git branch backport/6.2/pr-myPullRequest origin/6.2 --force && git checkout backport/6.2/pr-myPullRequest ",
     Object {
-      "cwd": "homefolder/.backport/repositories/elastic/backport-cli-test",
+      "cwd": "/homefolder/.backport/repositories/elastic/backport-cli-test",
     },
   ],
   Array [
     "git cherry-pick mySha",
     Object {
-      "cwd": "homefolder/.backport/repositories/elastic/backport-cli-test",
+      "cwd": "/homefolder/.backport/repositories/elastic/backport-cli-test",
     },
   ],
   Array [
     "git push sqren backport/6.2/pr-myPullRequest --force",
     Object {
-      "cwd": "homefolder/.backport/repositories/elastic/backport-cli-test",
+      "cwd": "/homefolder/.backport/repositories/elastic/backport-cli-test",
     },
   ],
 ]
@@ -116,7 +116,7 @@ Array [
 exports[`select commit that originated from pull request writeFile should be called with correct args 1`] = `
 Array [
   Array [
-    "homefolder/.backport/config.json",
+    "/homefolder/.backport/config.json",
     "{
   // Github personal access token. Must be created here: https://github.com/settings/tokens/new
   // Must have \\"Repo: Full control of private repositories\\"

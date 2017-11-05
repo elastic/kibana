@@ -5,8 +5,9 @@ let accessToken;
 
 function throwGithubError(e) {
   if (e.response && e.response.data) {
-    const error = new Error(constants.GITHUB_ERROR);
+    const error = new Error('An error occured while communicating with Github');
     error.details = e.response.data;
+    error.code = constants.GITHUB_ERROR;
     throw error;
   }
 

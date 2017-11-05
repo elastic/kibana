@@ -32,25 +32,25 @@ Array [
   Array [
     "git reset --hard && git checkout master && git pull origin master",
     Object {
-      "cwd": "homefolder/.backport/repositories/elastic/kibana",
+      "cwd": "/homefolder/.backport/repositories/elastic/kibana",
     },
   ],
   Array [
     "git fetch origin 6.x && git branch backport/6.x/commit-myCommitSha origin/6.x --force && git checkout backport/6.x/commit-myCommitSha ",
     Object {
-      "cwd": "homefolder/.backport/repositories/elastic/kibana",
+      "cwd": "/homefolder/.backport/repositories/elastic/kibana",
     },
   ],
   Array [
     "git cherry-pick undefined",
     Object {
-      "cwd": "homefolder/.backport/repositories/elastic/kibana",
+      "cwd": "/homefolder/.backport/repositories/elastic/kibana",
     },
   ],
   Array [
     "git push sqren backport/6.x/commit-myCommitSha --force",
     Object {
-      "cwd": "homefolder/.backport/repositories/elastic/kibana",
+      "cwd": "/homefolder/.backport/repositories/elastic/kibana",
     },
   ],
 ]
@@ -88,25 +88,25 @@ Array [
   Array [
     "git reset --hard && git checkout master && git pull origin master",
     Object {
-      "cwd": "homefolder/.backport/repositories/elastic/kibana",
+      "cwd": "/homefolder/.backport/repositories/elastic/kibana",
     },
   ],
   Array [
     "git fetch origin 6.x && git branch backport/6.x/pr-myPullRequest origin/6.x --force && git checkout backport/6.x/pr-myPullRequest ",
     Object {
-      "cwd": "homefolder/.backport/repositories/elastic/kibana",
+      "cwd": "/homefolder/.backport/repositories/elastic/kibana",
     },
   ],
   Array [
     "git cherry-pick undefined",
     Object {
-      "cwd": "homefolder/.backport/repositories/elastic/kibana",
+      "cwd": "/homefolder/.backport/repositories/elastic/kibana",
     },
   ],
   Array [
     "git push sqren backport/6.x/pr-myPullRequest --force",
     Object {
-      "cwd": "homefolder/.backport/repositories/elastic/kibana",
+      "cwd": "/homefolder/.backport/repositories/elastic/kibana",
     },
   ],
 ]

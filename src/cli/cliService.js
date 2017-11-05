@@ -1,10 +1,9 @@
 const ora = require('ora');
 const path = require('path');
-const prompts = require('./prompts');
-const { withSpinner } = require('./utils');
-const github = require('./github');
-const constants = require('./constants');
-const { getConfigFilePath, getRepoPath } = require('./env');
+const prompts = require('../lib/prompts');
+const github = require('../lib/github');
+const constants = require('../lib/constants');
+const { getRepoPath } = require('../lib/env');
 
 const {
   resetAndPullMaster,
@@ -13,10 +12,9 @@ const {
   push,
   repoExists,
   setupRepo
-} = require('./git');
+} = require('../lib/git');
 
-const service = {};
-service.doBackportVersions = ({
+function doBackportVersions({
   owner,
   repoName,
   commit,
@@ -24,24 +22,23 @@ service.doBackportVersions = ({
   versions,
   username,
   labels
-}) => {
+}) {
   return sequentially(versions, version => {
-    return service
-      .doBackportVersion({
-        owner,
-        repoName,
-        commit,
-        reference,
-        version,
-        username,
-        labels
-      })
+    return doBackportVersion({
+      owner,
+      repoName,
+      commit,
+      reference,
+      version,
+      username,
+      labels
+    })
       .then(res => console.log(`View pull request: ${res.data.html_url}\n`))
-      .catch(service.handleErrors);
+      .catch(handleErrors);
   });
-};
+}
 
-service.doBackportVersion = ({
+function doBackportVersion({
   owner,
   repoName,
   commit,
@@ -49,9 +46,8 @@ service.doBackportVersion = ({
   version,
   username,
   labels = []
-}) => {
+}) {
   const backportBranchName = getBackportBranchName(version, reference);
-
   console.log(`Backporting ${getReferenceLong(reference)} to ${version}`);
 
   return withSpinner(
@@ -86,9 +82,9 @@ service.doBackportVersion = ({
         'Creating pull request'
       );
     });
-};
+}
 
-service.getReference = (owner, repoName, commitSha) => {
+function getReference(owner, repoName, commitSha) {
   return github
     .getPullRequestByCommit(owner, repoName, commitSha)
     .then(pullRequest => {
@@ -98,9 +94,9 @@ service.getReference = (owner, repoName, commitSha) => {
 
       return { type: 'commit', value: commitSha.slice(0, 7) };
     });
-};
+}
 
-service.promptRepoInfo = (repositories, cwd) => {
+function promptRepoInfo(repositories, cwd) {
   return Promise.resolve()
     .then(() => {
       const fullRepoNames = repositories.map(repo => repo.name);
@@ -115,9 +111,9 @@ service.promptRepoInfo = (repositories, cwd) => {
       const [owner, repoName] = fullRepoName.split('/');
       return { owner, repoName };
     });
-};
+}
 
-service.maybeSetupRepo = (owner, repoName, username) => {
+function maybeSetupRepo(owner, repoName, username) {
   return repoExists(owner, repoName).then(exists => {
     if (!exists) {
       return withSpinner(
@@ -126,9 +122,9 @@ service.maybeSetupRepo = (owner, repoName, username) => {
       );
     }
   });
-};
+}
 
-service.promptCommit = (owner, repoName, username) => {
+function promptCommit(owner, repoName, username) {
   const spinner = ora('Loading commits...').start();
   return github
     .getCommits(owner, repoName, username)
@@ -140,48 +136,18 @@ service.promptCommit = (owner, repoName, username) => {
       spinner.stop();
       return prompts.listCommits(commits);
     });
-};
+}
 
-service.promptVersions = (versions, multipleChoice = false) => {
+function promptVersions(versions, multipleChoice = false) {
   return multipleChoice
     ? prompts.checkboxVersions(versions)
     : prompts.listVersions(versions);
-};
+}
 
-service.handleErrors = e => {
-  switch (e.message) {
+function handleErrors(e) {
+  switch (e.code) {
     case constants.INVALID_CONFIG:
-      switch (e.details) {
-        case 'username_and_access_token':
-          console.log(
-            `Welcome to the Backport tool. Please add your Github username, and a Github access token to the config: ${getConfigFilePath()}`
-          );
-          break;
-
-        case 'username':
-          console.log(
-            `Please add your username to the config: ${getConfigFilePath()}`
-          );
-          break;
-
-        case 'access_token':
-          console.log(
-            `Please add a Github access token to the config: ${getConfigFilePath()}`
-          );
-          break;
-
-        case 'repositories':
-          console.log(
-            `You must add at least 1 repository: ${getConfigFilePath()}`
-          );
-          break;
-
-        default:
-          console.log(
-            `There seems to be an issue with your config file. Please fix it: ${getConfigFilePath()}`
-          );
-      }
-
+      console.log(e.message);
       break;
 
     case constants.GITHUB_ERROR:
@@ -189,13 +155,14 @@ service.handleErrors = e => {
       break;
 
     case constants.CHERRYPICK_CONFLICT_NOT_HANDLED:
-      console.error('Merge conflict was not resolved', e.details);
+      console.error('Merge conflict was not resolved', e.message);
       break;
 
     default:
+      console.log(e.message);
       console.error(e);
   }
-};
+}
 
 function sequentially(items, handler) {
   return items.reduce(
@@ -239,9 +206,8 @@ function cherrypickAndPrompt(owner, repoName, sha) {
 
     return prompts.confirmConflictResolved().then(isConflictResolved => {
       if (!isConflictResolved) {
-        const error = new Error(constants.CHERRYPICK_CONFLICT_NOT_HANDLED);
-        error.details = e.message;
-        throw error;
+        e.code = constants.CHERRYPICK_CONFLICT_NOT_HANDLED;
+        throw e;
       }
     });
   });
@@ -269,4 +235,29 @@ function getPullRequestPayload(commitMessage, version, reference, username) {
   };
 }
 
-module.exports = service;
+function withSpinner(promise, text, errorText) {
+  const spinner = ora(text).start();
+  return promise
+    .then(res => {
+      spinner.succeed();
+      return res;
+    })
+    .catch(e => {
+      if (errorText) {
+        spinner.text = errorText;
+      }
+      spinner.fail();
+      throw e;
+    });
+}
+
+module.exports = {
+  doBackportVersions,
+  handleErrors,
+  doBackportVersion,
+  getReference,
+  promptRepoInfo,
+  maybeSetupRepo,
+  promptCommit,
+  promptVersions
+};

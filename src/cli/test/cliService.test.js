@@ -1,18 +1,20 @@
 const axios = require('axios');
 const inquirer = require('inquirer');
 const nock = require('nock');
+const os = require('os');
 const httpAdapter = require('axios/lib/adapters/http');
-const cliService = require('../src/cliService');
-const utils = require('../src/utils');
-const { mockBackportDirPath } = require('./testHelpers');
+
+const cliService = require('../cliService');
+const rpc = require('../../lib/rpc');
 
 axios.defaults.host = 'http://localhost';
 axios.defaults.adapter = httpAdapter;
 
 describe('doBackportVersion', () => {
   beforeEach(() => {
-    mockBackportDirPath();
-    utils.exec = jest.fn().mockReturnValue(Promise.resolve());
+    os.homedir = jest.fn(() => '/homefolder');
+    rpc.exec = jest.fn().mockReturnValue(Promise.resolve());
+    rpc.mkdirp = jest.fn().mockReturnValue(Promise.resolve());
 
     this.addLabelMock = nock('https://api.github.com')
       .post(`/repos/elastic/kibana/issues/1337/labels`, ['backport'])
@@ -46,7 +48,7 @@ describe('doBackportVersion', () => {
       })
       .then(res => {
         expect(res.config).toMatchSnapshot();
-        expect(utils.exec.mock.calls).toMatchSnapshot();
+        expect(rpc.exec.mock.calls).toMatchSnapshot();
         expect(this.createPRMock.isDone()).toBe(true);
         expect(this.addLabelMock.isDone()).toBe(true);
       });
@@ -77,7 +79,7 @@ describe('doBackportVersion', () => {
       })
       .then(res => {
         expect(res.config).toMatchSnapshot();
-        expect(utils.exec.mock.calls).toMatchSnapshot();
+        expect(rpc.exec.mock.calls).toMatchSnapshot();
         expect(this.createPRMock.isDone()).toBe(true);
         expect(this.addLabelMock.isDone()).toBe(false);
       });
