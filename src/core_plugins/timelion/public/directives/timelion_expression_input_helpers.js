@@ -125,7 +125,7 @@ function extractSuggestionsFromParsedResult(result, cursorPosition, functionList
   return { list: argumentSuggestions, location: location, type: SUGGESTION_TYPE.ARGUMENTS };
 }
 
-export function suggest(expression, functionList, Parser, cursorPosition) {
+export function suggest(expression, functionList, Parser, cursorPosition, getArgValueSuggestions) {
   return new Promise((resolve, reject) => {
     try {
       // We rely on the grammar to throw an error in order to suggest function(s).
@@ -160,8 +160,21 @@ export function suggest(expression, functionList, Parser, cursorPosition) {
 
           return resolve({ list, location, type: SUGGESTION_TYPE.FUNCTIONS });
         } else if (message.type === 'incompleteArgument') {
-          // TODO - provide argument value suggestions once function list contains required data
-          return resolve({ list: [], location, type: SUGGESTION_TYPE.ARGUMENT_VALUE });
+
+          const functionHelp = functionList.find((func) => {
+            return func.name === message.currentFunction;
+          });
+          let argHelp;
+          if (functionHelp) {
+            argHelp = functionHelp.args.find((arg) => {
+              return arg.name === message.name;
+            });
+          }
+
+          return resolve({
+            list: getArgValueSuggestions(null, argHelp, message.currentFunction, message.currentArgs, message.name),
+            location: { min: cursorPosition, max: cursorPosition },
+            type: SUGGESTION_TYPE.ARGUMENT_VALUE });
         }
 
       } catch (e) {

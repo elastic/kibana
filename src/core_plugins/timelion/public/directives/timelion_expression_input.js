@@ -35,11 +35,12 @@ import {
   insertAtLocation,
 } from './timelion_expression_input_helpers';
 import { comboBoxKeyCodes } from 'ui_framework/services';
+import { ArgValueSuggestionsProvider } from './timelion_expression_suggestions/arg_value_suggestions';
 
 const Parser = PEG.buildParser(grammar);
 const app = require('ui/modules').get('apps/timelion', []);
 
-app.directive('timelionExpressionInput', function ($document, $http, $interval, $timeout) {
+app.directive('timelionExpressionInput', function ($document, $http, $interval, $timeout, Private) {
   return {
     restrict: 'E',
     scope: {
@@ -51,6 +52,7 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
     replace: true,
     template: timelionExpressionInputTemplate,
     link: function (scope, elem) {
+      const getArgValueSuggestions = Private(ArgValueSuggestionsProvider);
       const expressionInput = elem.find('[data-expression-input]');
       const functionReference = {};
       let suggestibleFunctionLocation = {};
@@ -109,6 +111,19 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
             setCaretOffset(newCaretOffset);
             break;
           }
+          case SUGGESTION_TYPE.ARGUMENT_VALUE: {
+            const argumentName = `${scope.suggestions.list[suggestionIndex].name}`;
+            const { min, max } = suggestibleFunctionLocation;
+
+            // Update the expression with the function.
+            const updatedExpression = insertAtLocation(argumentName, scope.sheet, min, max);
+            scope.sheet = updatedExpression;
+
+            // Position the caret after the '='
+            const newCaretOffset = min + argumentName.length;
+            setCaretOffset(newCaretOffset);
+            break;
+          }
         }
       }
 
@@ -132,7 +147,8 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
           scope.sheet,
           functionReference.list,
           Parser,
-          getCursorPosition()
+          getCursorPosition(),
+          getArgValueSuggestions
         ).then(suggestions => {
           // We're using ES6 Promises, not $q, so we have to wrap this in $apply.
           scope.$apply(() => {
