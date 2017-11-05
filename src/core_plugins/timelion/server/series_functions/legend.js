@@ -16,16 +16,20 @@ export default new Chainable('legend', {
         {
           name: 'false',
           help: 'disable legend',
-        }, {
+        },
+        {
           name: 'nw',
           help: 'place legend in north west corner'
-        }, {
+        },
+        {
           name: 'ne',
           help: 'place legend in north east corner'
-        }, {
+        },
+        {
           name: 'se',
           help: 'place legend in south east corner'
-        }, {
+        },
+        {
           name: 'sw',
           help: 'place legend in south west corner'
         }
