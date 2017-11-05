@@ -69,7 +69,7 @@ function push(owner, repoName, username, branchName) {
 
 function resetAndPullMaster(owner, repoName) {
   return rpc.exec(
-    `git reset --hard && git checkout master && git pull origin master`,
+    `git reset --hard && git clean -d --force && git checkout master && git pull origin master`,
     {
       cwd: env.getRepoPath(owner, repoName)
     }

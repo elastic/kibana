@@ -30,7 +30,7 @@ Object {
 exports[`doBackportVersion with commit reference 2`] = `
 Array [
   Array [
-    "git reset --hard && git checkout master && git pull origin master",
+    "git reset --hard && git clean -d --force && git checkout master && git pull origin master",
     Object {
       "cwd": "/homefolder/.backport/repositories/elastic/kibana",
     },
@@ -86,7 +86,7 @@ Object {
 exports[`doBackportVersion with pull request reference 2`] = `
 Array [
   Array [
-    "git reset --hard && git checkout master && git pull origin master",
+    "git reset --hard && git clean -d --force && git checkout master && git pull origin master",
     Object {
       "cwd": "/homefolder/.backport/repositories/elastic/kibana",
     },
