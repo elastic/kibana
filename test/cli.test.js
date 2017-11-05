@@ -23,10 +23,10 @@ function setup() {
 
   inquirer.prompt = jest
     .fn()
-    .mockReturnValueOnce(Promise.resolve({ fullRepoName }))
+    .mockReturnValueOnce(Promise.resolve({ promptResult: fullRepoName }))
     .mockReturnValueOnce(
       Promise.resolve({
-        commit: {
+        promptResult: {
           message: 'myCommitMessage',
           sha: 'mySha'
         }
@@ -34,7 +34,7 @@ function setup() {
     )
     .mockReturnValueOnce(
       Promise.resolve({
-        version: '6.2'
+        promptResult: '6.2'
       })
     );
 

@@ -8,7 +8,14 @@
   "license": "MIT",
   "scripts": {
     "test": "jest",
-    "lint": "eslint ./src"
+    "testWithCoverage": "jest --coverage",
+    "format": "prettier \"./src/**/*.js\" --write",
+    "lint": "eslint ./src",
+    "prepush": "npm run lint",
+    "precommit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.js": ["prettier --write", "git add"]
   },
   "repository": {
     "type": "git",
@@ -30,7 +37,9 @@
     "eslint-config-prettier": "^2.4.0",
     "eslint-plugin-import": "^2.7.0",
     "eslint-plugin-prettier": "^2.2.0",
+    "husky": "^0.14.3",
     "jest": "^21.2.1",
+    "lint-staged": "^4.3.0",
     "prettier": "^1.7.4"
   }
 }

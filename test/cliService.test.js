@@ -117,7 +117,7 @@ describe('promptRepoInfo', () => {
   function mockPrompt() {
     inquirer.prompt = jest
       .fn()
-      .mockReturnValueOnce(Promise.resolve({ fullRepoName: 'elastic/kibana' }));
+      .mockReturnValueOnce(Promise.resolve({ promptResult: 'elastic/kibana' }));
   }
 
   describe('without matching cwd', () => {
