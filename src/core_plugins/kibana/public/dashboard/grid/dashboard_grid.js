@@ -96,7 +96,8 @@ export class DashboardGrid extends React.Component {
   }
 
   onLayoutChange = (layout) => {
-    const { onPanelUpdated } = this.props;
+    const { onPanelsUpdated } = this.props;
+    const updatedPanels = [];
     layout.forEach(panelLayout => {
       const updatedPanel = {
         panelIndex: panelLayout.i,
@@ -108,8 +109,9 @@ export class DashboardGrid extends React.Component {
           i: panelLayout.i,
         }
       };
-      onPanelUpdated(updatedPanel);
+      updatedPanels.push(updatedPanel);
     });
+    onPanelsUpdated(updatedPanels);
   };
 
   onPanelFocused = panelIndex => {
@@ -191,7 +193,7 @@ DashboardGrid.propTypes = {
   getContainerApi: PropTypes.func.isRequired,
   getEmbeddableHandler: PropTypes.func.isRequired,
   dashboardViewMode: PropTypes.oneOf([DashboardViewMode.EDIT, DashboardViewMode.VIEW]).isRequired,
-  onPanelUpdated: PropTypes.func.isRequired,
+  onPanelsUpdated: PropTypes.func.isRequired,
   maximizedPanelId: PropTypes.string,
   useMargins: PropTypes.bool.isRequired,
 };
