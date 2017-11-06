@@ -193,7 +193,7 @@ uiModules
         $scope.$watch('vis.initialized', $scope.fetch);
 
         $scope.fetch();
-        $scope.$emit('ready:vis');
+        $scope.$root.$broadcast('ready:vis');
       }
     };
   });
