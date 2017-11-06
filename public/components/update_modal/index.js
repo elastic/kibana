@@ -15,7 +15,7 @@ export const UpdateModal = compose(
       })
       .then(res => {
         if (!currentBuild) return;
-        if (currentBuild < Number(get(res, 'data.count'))) setBuild(res.data.count);
+        if (currentBuild < Number(get(res, 'data.buildNumber'))) setBuild(res.data.count);
       })
       .catch(() => {
         console.log('Could not fetch remote build info');
