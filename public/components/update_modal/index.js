@@ -10,12 +10,14 @@ export const UpdateModal = compose(
     componentDidMount() {
       const { setBuild } = this.props;
       const currentBuild = Number(get(pkg, 'build.git.count'));
+      if (!currentBuild) return;
+
       fetch(`https://elastic.github.io/kibana-canvas/preview-microsite/build.json`, {
         method: 'GET',
       })
       .then(res => {
-        if (!currentBuild) return;
-        if (currentBuild < Number(get(res, 'data.buildNumber'))) setBuild(res.data.count);
+        const buildNum = Number(get(res, 'data.buildNumber'));
+        if (currentBuild < buildNum) setBuild(buildNum);
       })
       .catch(() => {
         console.log('Could not fetch remote build info');

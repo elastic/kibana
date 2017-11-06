@@ -11,7 +11,7 @@ import './app.less';
 export const AppComponent = ({ editing, deselectElement }) => (
   <div className="canvas">
     <div className="canvas__main">
-      <UpdateModal/>
+      <UpdateModal />
       <div className="canvas__app--workspace" onMouseDown={deselectElement}>
         <WorkpadHeader />
         <div className="canvas__app--workpad">
