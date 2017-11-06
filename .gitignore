@@ -39,3 +39,4 @@ yarn.lock
 package-lock.json
 .yo-rc.json
 /.vscode
+npm-debug.log*
