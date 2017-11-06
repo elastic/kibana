@@ -5,11 +5,13 @@ import {
   deletePanel,
   updatePanel,
   updatePanels,
+  setPanels,
 } from '../actions';
 
 import { panel } from './panel';
 
 export const panels = handleActions({
+  [setPanels]: (state, { payload }) => _.cloneDeep(payload),
   [updatePanels]: (state, { payload }) => {
     const stateCopy = { ...state };
     Object.values(payload).forEach(updatedPanel => {
