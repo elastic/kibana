@@ -36,26 +36,12 @@ export class RangeFilterManager extends FilterManager {
    * @return {object} range filter
    */
   createFilter(value) {
-    return buildRangeFilter(
+    const newFilter = buildRangeFilter(
       this.indexPattern.fields.byName[this.fieldName],
       toRange(value),
       this.indexPattern);
-  }
-
-  findFilters() {
-    const kbnFilters = _.flatten([this.queryFilter.getAppFilters(), this.queryFilter.getGlobalFilters()]);
-    return kbnFilters.filter((kbnFilter) => {
-      if (_.has(kbnFilter, 'script')
-        && _.get(kbnFilter, 'meta.index') === this.indexPattern.id
-        && _.get(kbnFilter, 'meta.field') === this.fieldName) {
-        //filter is a scripted filter for this index/field
-        return true;
-      } else if (_.has(kbnFilter, ['range', this.fieldName]) && _.get(kbnFilter, 'meta.index') === this.indexPattern.id) {
-        //filter is a match filter for this index/field
-        return true;
-      }
-      return false;
-    });
+    newFilter.meta.controlledBy = this.controlId;
+    return newFilter;
   }
 
   getValueFromFilterBar() {
