@@ -1,5 +1,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
+import sizeMe from 'react-sizeme';
+
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { getContainerApiMock } from '../__tests__/get_container_api_mock';
 import { getEmbeddableHandlerMock } from '../__tests__/get_embeddable_handlers_mock';
@@ -12,7 +14,6 @@ jest.mock('ui/chrome', () => ({ getKibanaVersion: () => '6.0.0' }), { virtual: t
 function getProps(props = {}) {
   const defaultTestProps = {
     dashboardViewMode: DashboardViewMode.EDIT,
-    isFullScreenMode: false,
     panels: {
       '1': {
         gridData: { x: 0, y: 0, w: 6, h: 6, i: 1 },
@@ -31,13 +32,21 @@ function getProps(props = {}) {
     },
     getEmbeddableHandler: () => getEmbeddableHandlerMock(),
     getContainerApi: () => getContainerApiMock(),
-    isExpanded: false,
-    expandPanel: () => {},
-    onPanelRemoved: () => {},
     onPanelUpdated: () => {},
+    useMargins: true,
   };
   return Object.assign(defaultTestProps, props);
 }
+
+beforeAll(() => {
+  // sizeme detects the width to be 0 in our test environment. noPlaceholder will mean that the grid contents will
+  // get rendered even when width is 0, which will improve our tests.
+  sizeMe.noPlaceholders = true;
+});
+
+afterAll(() => {
+  sizeMe.noPlaceholders = false;
+});
 
 test('renders DashboardGrid', () => {
   const component = shallow(<DashboardGrid {...getProps()} />);

@@ -60,6 +60,18 @@ export const SeriesConfig = props => {
             disabled={!model.override_index_pattern}
           />
         </div>
+        <div className="vis_editor__series_config-row">
+          <label className="vis_editor__label" htmlFor={htmlId('series_filter')}>
+            Filter
+          </label>
+          <input
+            id={htmlId('series_filter')}
+            className="vis_editor__input-grows"
+            type="text"
+            onChange={handleTextChange('filter')}
+            value={model.filter}
+          />
+        </div>
       </div>
     </div>
   );

@@ -12,35 +12,35 @@ import {
 } from '../../components';
 
 import { SimpleLocalNav } from './local_nav_simple';
-import simpleLocalNavSource from '!!raw!./local_nav_simple';
+import simpleLocalNavSource from '!!raw-loader!./local_nav_simple';
 const SimpleLocalNavHtml = renderToHtml(SimpleLocalNav);
 
 import { LocalNavWithBreadcrumbs } from './local_nav_breadcrumbs';
-import localNavWithBreadcrumbsSource from '!!raw!./local_nav_breadcrumbs';
+import localNavWithBreadcrumbsSource from '!!raw-loader!./local_nav_breadcrumbs';
 const localNavWithBreadcrumbsHtml = renderToHtml(LocalNavWithBreadcrumbs);
 
 import { LocalNavWithSearch } from './local_nav_search';
-import localNavWithSearchSource from '!!raw!./local_nav_search';
+import localNavWithSearchSource from '!!raw-loader!./local_nav_search';
 const localNavWithSearchHtml = renderToHtml(LocalNavWithSearch);
 
 import { LocalNavWithSearchError } from './local_nav_search_error';
-import localNavWithSearchErrorSource from '!!raw!./local_nav_search_error';
+import localNavWithSearchErrorSource from '!!raw-loader!./local_nav_search_error';
 const localNavWithSearchErrorHtml = renderToHtml(LocalNavWithSearchError);
 
 import { LocalNavWithMenuItemStates } from './local_nav_menu_item_states';
-import localNavWithMenuItemStatesSource from '!!raw!./local_nav_menu_item_states';
+import localNavWithMenuItemStatesSource from '!!raw-loader!./local_nav_menu_item_states';
 const localNavWithMenuItemStatesHtml = renderToHtml(LocalNavWithMenuItemStates);
 
 import { LocalNavWithDropdown } from './local_nav_dropdown';
-import localNavWithDropdownSource from '!!raw!./local_nav_dropdown';
+import localNavWithDropdownSource from '!!raw-loader!./local_nav_dropdown';
 const localNavWithDropdownHtml = renderToHtml(LocalNavWithDropdown);
 
 import { LocalNavWithDropdownPanels } from './local_nav_dropdown_panels';
-import localNavWithDropdownPanelsSource from '!!raw!./local_nav_dropdown_panels';
+import localNavWithDropdownPanelsSource from '!!raw-loader!./local_nav_dropdown_panels';
 const localNavWithDropdownPanelsHtml = renderToHtml(LocalNavWithDropdownPanels);
 
 import { LocalNavWithTabs } from './local_nav_tabs';
-import localNavWithTabsSource from '!!raw!./local_nav_tabs';
+import localNavWithTabsSource from '!!raw-loader!./local_nav_tabs';
 const localNavWithTabsHtml = renderToHtml(LocalNavWithTabs);
 
 const datePickerHtml = require('./local_nav_date_picker.html');

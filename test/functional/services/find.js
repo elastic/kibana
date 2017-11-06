@@ -129,20 +129,26 @@ export function FindProvider({ getService }) {
 
     async clickByPartialLinkText(linkText, timeout = defaultFindTimeout) {
       log.debug(`clickByPartialLinkText(${linkText})`);
-      const element = await retry.try(async () => await this.byPartialLinkText(linkText, timeout));
-      await element.click();
+      await retry.try(async () => {
+        const element = await this.byPartialLinkText(linkText, timeout);
+        await element.click();
+      });
     }
 
     async clickByLinkText(linkText, timeout = defaultFindTimeout) {
       log.debug(`clickByLinkText(${linkText})`);
-      const element = await this.byLinkText(linkText, timeout);
-      await element.click();
+      await retry.try(async () => {
+        const element = await this.byLinkText(linkText, timeout);
+        await element.click();
+      });
     }
 
     async clickByCssSelector(selector, timeout = defaultFindTimeout) {
       log.debug(`clickByCssSelector(${selector})`);
-      const element = await this.byCssSelector(selector, timeout);
-      await element.click();
+      await retry.try(async () => {
+        const element = await this.byCssSelector(selector, timeout);
+        await element.click();
+      });
     }
   }
 

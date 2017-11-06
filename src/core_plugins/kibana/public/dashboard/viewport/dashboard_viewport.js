@@ -1,18 +1,20 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { DashboardGridContainer } from '../grid/dashboard_grid_container';
+import { DashboardGrid } from '../grid';
 
 export function DashboardViewport({
   getContainerApi,
   maximizedPanelId,
   getEmbeddableHandler,
   panelCount,
+  useMargins,
 }) {
   return (
     <div
       data-shared-items-count={panelCount}
+      className={useMargins ? 'dashboard-viewport-with-margins' : 'dashboard-viewport'}
     >
-      <DashboardGridContainer
+      <DashboardGrid
         getEmbeddableHandler={getEmbeddableHandler}
         getContainerApi={getContainerApi}
         maximizedPanelId={maximizedPanelId}
@@ -26,4 +28,5 @@ DashboardViewport.propTypes = {
   getEmbeddableHandler: PropTypes.func,
   maximizedPanelId: PropTypes.string,
   panelCount: PropTypes.number,
+  useMargins: PropTypes.bool.isRequired,
 };

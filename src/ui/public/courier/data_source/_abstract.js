@@ -4,18 +4,18 @@ import angular from 'angular';
 import 'ui/promises';
 
 import { requestQueue } from '../_request_queue';
-import { FetchProvider } from '../fetch';
+import { FetchSoonProvider } from '../fetch';
 import { FieldWildcardProvider } from '../../field_wildcard';
 import { getHighlightRequest } from '../../../../core_plugins/kibana/common/highlight';
 import { BuildESQueryProvider } from './build_query';
 
 export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, config) {
-  const courierFetch = Private(FetchProvider);
+  const fetchSoon = Private(FetchSoonProvider);
   const buildESQuery = Private(BuildESQueryProvider);
   const { fieldWildcardFilter } = Private(FieldWildcardProvider);
   const getConfig = (...args) => config.get(...args);
 
-  function SourceAbstract(initialState, strategy) {
+  function SourceAbstract(initialState) {
     const self = this;
     self._instanceid = _.uniqueId('data_source');
 
@@ -46,7 +46,6 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
     });
 
     self.history = [];
-    self._fetchStrategy = strategy;
     self._requestStartHandlers = [];
   }
 
@@ -168,7 +167,7 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
       req = self._createRequest();
     }
 
-    courierFetch.these([req]);
+    fetchSoon.these([req]);
 
     return req.getCompletePromise();
   };
@@ -193,7 +192,7 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
       request.abort();
     });
 
-    courierFetch.these([req]);
+    fetchSoon.these([req]);
 
     return req.getCompletePromise();
   };
@@ -203,7 +202,7 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
    * @async
    */
   SourceAbstract.prototype.fetchQueued = function () {
-    return courierFetch.these(this._myStartableQueued());
+    return fetchSoon.these(this._myStartableQueued());
   };
 
   /**
@@ -212,9 +211,8 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
    */
   SourceAbstract.prototype.cancelQueued = function () {
     requestQueue
-    .get(this._fetchStrategy)
-    .filter(req => req.source === this)
-    .forEach(req => req.abort());
+      .filter(req => req.source === this)
+      .forEach(req => req.abort());
   };
 
   /**
@@ -264,7 +262,7 @@ export function AbstractDataSourceProvider(Private, Promise, PromiseEmitter, con
 
   SourceAbstract.prototype._myStartableQueued = function () {
     return requestQueue
-    .getStartable(this._fetchStrategy)
+    .getStartable()
     .filter(req => req.source === this);
   };
 

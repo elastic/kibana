@@ -19,6 +19,7 @@ module.exports = function (grunt) {
       '_build:notice',
       '_build:removePkgJsonDeps',
       'clean:testsFromModules',
+      'clean:examplesFromModules',
       'run:optimizeBuild',
       'stop:optimizeBuild',
       '_build:versionedLinks',

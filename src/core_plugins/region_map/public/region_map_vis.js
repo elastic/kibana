@@ -8,12 +8,13 @@ import { CATEGORY } from 'ui/vis/vis_category';
 import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
+import { mapToLayerWithId } from './util';
 
 VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmapsConfig) {
   const VisFactory = Private(VisFactoryProvider);
   const Schemas = Private(VisSchemasProvider);
 
-  const vectorLayers = regionmapsConfig.layers;
+  const vectorLayers = regionmapsConfig.layers.map(mapToLayerWithId.bind(null, 'self_hosted'));
   const selectedLayer = vectorLayers[0];
   const selectedJoinField = selectedLayer ? vectorLayers[0].fields[0] : null;
 
