@@ -1,4 +1,4 @@
-import { BehaviorSubject } from 'kbn-observable';
+import { BehaviorSubject } from '@elastic/kbn-observable';
 import { MutableLoggerFactory } from '../LoggerFactory';
 import { LoggingConfig } from '../LoggingConfig';
 import { LoggingService } from '../LoggingService';

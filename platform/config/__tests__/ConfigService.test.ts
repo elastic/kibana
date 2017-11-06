@@ -1,4 +1,4 @@
-import { BehaviorSubject, k$, first, toPromise } from 'kbn-observable';
+import { BehaviorSubject, k$, first, toPromise } from '@elastic/kbn-observable';
 
 import { ConfigService, ObjectToRawConfigAdapter } from '..';
 import { Env } from '../Env';

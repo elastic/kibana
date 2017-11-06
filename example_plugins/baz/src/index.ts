@@ -1,4 +1,4 @@
-import { KibanaPluginConfig } from 'kbn-types';
+import { KibanaPluginConfig } from '@elastic/kbn-types';
 import { BazService } from './BazService';
 import { registerEndpoints } from './registerEndpoints';
 

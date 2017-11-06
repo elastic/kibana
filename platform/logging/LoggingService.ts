@@ -1,4 +1,4 @@
-import { Observable, Subscription } from 'kbn-observable';
+import { Observable, Subscription } from '@elastic/kbn-observable';
 
 import { MutableLoggerFactory } from './LoggerFactory';
 import { LoggingConfig } from './LoggingConfig';

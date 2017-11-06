@@ -5,7 +5,7 @@ jest.mock('../HttpServer', () => ({
 }));
 
 import { noop } from 'lodash';
-import { BehaviorSubject } from 'kbn-observable';
+import { BehaviorSubject } from '@elastic/kbn-observable';
 
 import { Env } from '../../../config/Env';
 import { HttpService } from '../HttpService';

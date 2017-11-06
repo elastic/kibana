@@ -6,4 +6,4 @@ export {
   SubscriptionObserver,
   Observer,
   PartialObserver
-} from 'kbn-internal-native-observable';
+} from '@elastic/kbn-internal-native-observable';

@@ -1,6 +1,6 @@
-import { k$, Observable, $combineLatest, map, first, toPromise } from 'kbn-observable';
+import { k$, Observable, $combineLatest, map, first, toPromise } from '@elastic/kbn-observable';
 
-import { ElasticsearchService, KibanaConfig, KibanaRequest } from 'kbn-types';
+import { ElasticsearchService, KibanaConfig, KibanaRequest } from '@elastic/kbn-types';
 
 export class BazService {
   constructor(

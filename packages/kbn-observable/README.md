@@ -15,7 +15,7 @@ observables.
 ## Example
 
 ```js
-import { Observable, k$, map, last } from 'kbn-observable';
+import { Observable, k$, map, last } from '@elastic/kbn-observable';
 
 const source = Observable.from(1, 2, 3);
 

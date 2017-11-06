@@ -1,4 +1,4 @@
-import { Router, LoggerFactory, Schema } from 'kbn-types';
+import { Router, LoggerFactory, Schema } from '@elastic/kbn-types';
 import { BazService } from './BazService';
 
 export function registerEndpoints(

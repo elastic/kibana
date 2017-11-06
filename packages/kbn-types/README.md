@@ -4,7 +4,7 @@ This package contains external types for Kibana, which enables plugins to use
 the types, e.g.:
 
 ```ts
-import { KibanaFunctionalPlugin } from 'kbn-types';
+import { KibanaFunctionalPlugin } from '@elastic/kbn-types';
 
 export const plugin: KibanaFunctionalPlugin<{}> = function(core) {
   const router = core.http.createAndRegisterRouter('/some-path');

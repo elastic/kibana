@@ -6,7 +6,7 @@ import {
   filter,
   switchMap,
   shareLast
-} from 'kbn-observable';
+} from '@elastic/kbn-observable';
 
 import { ElasticsearchClusterType } from './ElasticsearchConfig';
 import { ElasticsearchConfigs } from './ElasticsearchConfigs';

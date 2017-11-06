@@ -77,6 +77,7 @@
   "dependencies": {
     "@elastic/datemath": "2.3.0",
     "@elastic/filesaver": "1.1.2",
+    "@elastic/kbn-observable": "file:packages/kbn-observable",
     "@elastic/numeral": "2.2.1",
     "@elastic/test-subj-selector": "0.2.1",
     "@elastic/ui-ace": "0.2.3",
@@ -144,7 +145,6 @@
     "js-yaml": "3.9.1",
     "json-stringify-safe": "5.0.1",
     "jstimezonedetect": "1.0.5",
-    "kbn-observable": "file:packages/kbn-observable",
     "leaflet": "1.0.3",
     "leaflet-draw": "0.4.10",
     "leaflet-responsive-popup": "0.2.0",

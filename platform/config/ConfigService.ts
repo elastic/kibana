@@ -5,7 +5,7 @@ import {
   first,
   skipRepeats,
   toPromise
-} from 'kbn-observable';
+} from '@elastic/kbn-observable';
 import { isEqual } from 'lodash';
 
 import { Env } from './Env';

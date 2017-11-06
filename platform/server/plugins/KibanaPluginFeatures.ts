@@ -1,4 +1,4 @@
-import { Observable } from 'kbn-observable';
+import { Observable } from '@elastic/kbn-observable';
 
 import { Schema } from '../../types/schema';
 import * as schemaLib from '../../lib/schema';

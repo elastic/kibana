@@ -28,7 +28,7 @@ const mockMutableLoggerFactory = jest.fn(() => logger);
 
 const mockLoggingService = jest.fn(() => loggingService);
 
-import { BehaviorSubject } from 'kbn-observable';
+import { BehaviorSubject } from '@elastic/kbn-observable';
 
 jest.mock('../../config', () => ({ ConfigService: mockConfigService }));
 jest.mock('../../server', () => ({ Server: mockServer }));

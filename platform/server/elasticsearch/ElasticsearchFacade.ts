@@ -1,4 +1,4 @@
-import { k$, first, toPromise } from 'kbn-observable';
+import { k$, first, toPromise } from '@elastic/kbn-observable';
 
 import { ElasticsearchService } from './ElasticsearchService';
 import { ElasticsearchClusterType } from './ElasticsearchConfig';

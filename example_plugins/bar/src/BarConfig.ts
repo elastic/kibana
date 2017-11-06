@@ -1,4 +1,4 @@
-import { Schema, typeOfSchema } from 'kbn-types';
+import { Schema, typeOfSchema } from '@elastic/kbn-types';
 
 const createBarConfig = (schema: Schema) =>
   schema.object({

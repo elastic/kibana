@@ -1,4 +1,4 @@
-import { Observable } from 'kbn-observable';
+import { Observable } from '@elastic/kbn-observable';
 
 import { Server } from '../server';
 import { ConfigService, Env, RawConfig } from '../config';

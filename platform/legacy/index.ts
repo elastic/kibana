@@ -8,7 +8,7 @@ export {
 /**@internal**/
 export { LegacyKbnServer } from './LegacyKbnServer';
 
-import { k$, map, BehaviorSubject } from 'kbn-observable';
+import { k$, map, BehaviorSubject } from '@elastic/kbn-observable';
 import { Root } from '../root';
 import { Env } from '../config';
 import {

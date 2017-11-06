@@ -1,4 +1,4 @@
-import { Observable } from 'kbn-observable';
+import { Observable } from '@elastic/kbn-observable';
 
 import { ElasticsearchService } from './ElasticsearchService';
 import { ElasticsearchRequestHelpers } from './ElasticsearchFacade';

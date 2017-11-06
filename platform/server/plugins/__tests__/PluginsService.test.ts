@@ -1,6 +1,6 @@
 import { pick } from 'lodash';
 import { resolve } from 'path';
-import { BehaviorSubject } from 'kbn-observable';
+import { BehaviorSubject } from '@elastic/kbn-observable';
 
 import { PluginsService } from '../PluginsService';
 import { PluginsConfig } from '../PluginsConfig';

@@ -1,8 +1,8 @@
 {
-  "name": "kbn-types-example",
+  "name": "@elastic/kbn-types-example",
   "version": "1.0.0",
   "dependencies": {
-    "kbn-types": "file:..",
+    "@elastic/kbn-types": "file:..",
     "typescript": "2.5.1"
   },
   "scripts": {
