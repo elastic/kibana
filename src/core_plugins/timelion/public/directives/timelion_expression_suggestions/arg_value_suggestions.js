@@ -62,6 +62,7 @@ export function ArgValueSuggestionsProvider(Private, indexPatterns) {
           return [
             { name: 'avg:' },
             { name: 'cardinality:' },
+            { name: 'count' },
             { name: 'max:' },
             { name: 'min:' },
             { name: 'sum:' }
