@@ -9,6 +9,6 @@
   "devDependencies": {
     "@elastic/kbn-types": "file:../../packages/kbn-types",
     "example-plugin-bar": "file:../bar",
-    "typescript": "^2.5.3"
+    "typescript": "2.6.1"
   }
 }

@@ -5,9 +5,9 @@ import { Headers, filterHeaders } from './headers';
 import { ObjectSetting, Props, Any, TypeOf } from '../../../lib/schema';
 
 export interface Route<
-  Params extends ObjectSetting<{}>,
-  Query extends ObjectSetting<{}>,
-  Body extends ObjectSetting<{}>
+  Params extends ObjectSetting<any>,
+  Query extends ObjectSetting<any>,
+  Body extends ObjectSetting<any>
 > {
   path: string;
   validate?: {
