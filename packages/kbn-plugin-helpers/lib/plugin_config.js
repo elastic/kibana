@@ -1,11 +1,12 @@
 const resolve = require('path').resolve;
 const statSync = require('fs').statSync;
+const readFileSync = require('fs').readFileSync;
 const configFile = require('./config_file');
 
 module.exports = function (root) {
   if (!root) root = process.cwd();
 
-  const pkg = require(resolve(root, 'package.json'));
+  const pkg = JSON.parse(readFileSync(resolve(root, 'package.json')));
   const config = configFile(root);
 
   const buildSourcePatterns = [
