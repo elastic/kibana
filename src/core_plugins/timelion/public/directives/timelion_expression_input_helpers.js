@@ -125,64 +125,63 @@ function extractSuggestionsFromParsedResult(result, cursorPosition, functionList
   return { list: argumentSuggestions, location: location, type: SUGGESTION_TYPE.ARGUMENTS };
 }
 
-export function suggest(expression, functionList, Parser, cursorPosition, getArgValueSuggestions) {
-  return new Promise((resolve, reject) => {
+export async function suggest(expression, functionList, Parser, cursorPosition, getArgValueSuggestions) {
+  try {
+    // We rely on the grammar to throw an error in order to suggest function(s).
+    const result = await Parser.parse(expression);
+
+    const suggestions = extractSuggestionsFromParsedResult(result, cursorPosition, functionList);
+    if (suggestions) {
+      return suggestions;
+    }
+
+    return;
+  } catch (e) {
     try {
-      // We rely on the grammar to throw an error in order to suggest function(s).
-      const result = Parser.parse(expression);
+      // The grammar will throw an error containing a message if the expression is formatted
+      // correctly and is prepared to accept suggestions. If the expression is not formmated
+      // correctly the grammar will just throw a regular PEG SyntaxError, and this JSON.parse
+      // attempt will throw an error.
+      const message = JSON.parse(e.message);
+      const location = message.location;
 
-      const suggestions = extractSuggestionsFromParsedResult(result, cursorPosition, functionList);
-      if (suggestions) {
-        return resolve(suggestions);
-      }
+      if (message.type === 'incompleteFunction') {
+        let list;
 
-      return reject();
-    } catch (e) {
-      try {
-        // The grammar will throw an error containing a message if the expression is formatted
-        // correctly and is prepared to accept suggestions. If the expression is not formmated
-        // correctly the grammar will just throw a regular PEG SyntaxError, and this JSON.parse
-        // attempt will throw an error.
-        const message = JSON.parse(e.message);
-        const location = message.location;
-
-        if (message.type === 'incompleteFunction') {
-          let list;
-
-          if (message.function) {
-            // The user has start typing a function name, so we'll filter the list down to only
-            // possible matches.
-            list = functionList.filter(func => _.startsWith(func.name, message.function));
-          } else {
-            // The user hasn't typed anything yet, so we'll just return the entire list.
-            list = functionList;
-          }
-
-          return resolve({ list, location, type: SUGGESTION_TYPE.FUNCTIONS });
-        } else if (message.type === 'incompleteArgument') {
-
-          const functionHelp = functionList.find((func) => {
-            return func.name === message.currentFunction;
-          });
-          let argHelp;
-          if (functionHelp) {
-            argHelp = functionHelp.args.find((arg) => {
-              return arg.name === message.name;
-            });
-          }
-
-          return resolve({
-            list: getArgValueSuggestions(null, argHelp, message.currentFunction, message.currentArgs, message.name),
-            location: { min: cursorPosition, max: cursorPosition },
-            type: SUGGESTION_TYPE.ARGUMENT_VALUE });
+        if (message.function) {
+          // The user has start typing a function name, so we'll filter the list down to only
+          // possible matches.
+          list = functionList.filter(func => _.startsWith(func.name, message.function));
+        } else {
+          // The user hasn't typed anything yet, so we'll just return the entire list.
+          list = functionList;
         }
 
-      } catch (e) {
-        // The expression isn't correctly formatted, so JSON.parse threw an error.
-        return reject();
+        return { list, location, type: SUGGESTION_TYPE.FUNCTIONS };
+      } else if (message.type === 'incompleteArgument') {
+
+        const functionHelp = functionList.find((func) => {
+          return func.name === message.currentFunction;
+        });
+        let argHelp;
+        if (functionHelp) {
+          argHelp = functionHelp.args.find((arg) => {
+            return arg.name === message.name;
+          });
+        }
+
+        const valueSuggestions = await getArgValueSuggestions(null, argHelp, message.currentFunction, message.currentArgs, message.name);
+        return {
+          list: valueSuggestions,
+          location: { min: cursorPosition, max: cursorPosition },
+          type: SUGGESTION_TYPE.ARGUMENT_VALUE };
       }
+
+    } catch (e) {
+      // The expression isn't correctly formatted, so JSON.parse threw an error.
+      return;
     }
-  });
+  }
 }
 
 export function insertAtLocation(valueToInsert, destination, replacementRangeStart, replacementRangeEnd) {

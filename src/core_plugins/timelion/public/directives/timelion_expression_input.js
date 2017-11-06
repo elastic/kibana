@@ -142,16 +142,18 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
         return null;
       }
 
-      function getSuggestions() {
-        suggest(
+      async function getSuggestions() {
+        const suggestions = await suggest(
           scope.sheet,
           functionReference.list,
           Parser,
           getCursorPosition(),
           getArgValueSuggestions
-        ).then(suggestions => {
-          // We're using ES6 Promises, not $q, so we have to wrap this in $apply.
-          scope.$apply(() => {
+        );
+
+        // We're using ES6 Promises, not $q, so we have to wrap this in $apply.
+        scope.$apply(() => {
+          if (suggestions) {
             scope.suggestions.setList(suggestions.list, suggestions.type);
             scope.suggestions.show();
             suggestibleFunctionLocation = suggestions.location;
@@ -159,12 +161,11 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
               const suggestionsList = $('[data-suggestions-list]');
               suggestionsList.scrollTop(0);
             }, 0);
-          });
-        }, (noSuggestions = {}) => {
-          scope.$apply(() => {
-            suggestibleFunctionLocation = noSuggestions.location;
-            scope.suggestions.reset();
-          });
+            return;
+          }
+
+          suggestibleFunctionLocation = undefined;
+          scope.suggestions.reset();
         });
       }
 
