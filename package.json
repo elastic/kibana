@@ -13,6 +13,7 @@
     "lint": "gulp lint",
     "test": "gulp test",
     "docs": "gulp docs",
+    "release": "gulp release",
     "test:plugin": "gulp test:plugin",
     "test:common": "gulp test:common",
     "test:server": "gulp test:server",
