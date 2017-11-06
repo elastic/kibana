@@ -117,6 +117,7 @@ uiModules
         visualization.render($scope.visData, status)
           .then(() => {
             // renderComplete
+            $scope.$emit('renderComplete');
             $el.trigger('renderComplete');
           });
         $scope.$apply();
