@@ -8,7 +8,11 @@
     "build": "tsc",
     "start": "tsc --watch"
   },
+  "dependencies": {
+    "@elastic/kbn-observable": "link:../kbn-observable"
+  },
   "devDependencies": {
+    "@elastic/platform": "link:../../platform",
     "typescript": "2.6.1"
   }
 }

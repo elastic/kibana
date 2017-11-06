@@ -66,8 +66,6 @@
     "uiFramework:build": "grunt uiFramework:build",
     "uiFramework:createComponent": "yo ./ui_framework/generator-kui/app/component.js",
     "uiFramework:documentComponent": "yo ./ui_framework/generator-kui/app/documentation.js",
-    "ts:build": "tsc -p platform",
-    "ts:start": "tsc -p platform --watch",
     "prettier": "prettier --single-quote --write '**/*.ts'"
   },
   "repository": {
@@ -77,8 +75,8 @@
   "dependencies": {
     "@elastic/datemath": "2.3.0",
     "@elastic/filesaver": "1.1.2",
-    "@elastic/kbn-observable": "file:packages/kbn-observable",
     "@elastic/numeral": "2.3.1",
+    "@elastic/platform": "link:platform",
     "@elastic/test-subj-selector": "0.2.1",
     "@elastic/ui-ace": "0.2.3",
     "JSONStream": "1.1.1",
@@ -223,9 +221,10 @@
     "yauzl": "2.7.0"
   },
   "devDependencies": {
-    "@elastic/eslint-config-kibana": "0.14.0",
+    "@elastic/eslint-config-kibana": "link:packages/eslint-config-kibana",
     "@elastic/eslint-import-resolver-kibana": "0.9.0",
-    "@elastic/eslint-plugin-kibana-custom": "1.1.0",
+    "@elastic/eslint-plugin-kibana-custom": "link:packages/eslint-plugin-kibana-custom",
+    "@types/bluebird": "3.5.18",
     "@types/body-parser": "1.16.4",
     "@types/chalk": "0.4.31",
     "@types/chance": "0.7.34",

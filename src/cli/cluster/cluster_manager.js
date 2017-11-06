@@ -101,6 +101,9 @@ export default class ClusterManager {
       fromRoot('src/ui'),
       fromRoot('src/utils'),
       fromRoot('config'),
+      fromRoot('platform/target/tsc'),
+      fromRoot('packages/kbn-observable/target/tsc'),
+      fromRoot('packages/kbn-internal-native-observable/target'),
       ...extraPaths
     ].map(path => resolve(path));
 

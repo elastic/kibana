@@ -5,7 +5,8 @@
   "types": "./index.d.ts",
   "scripts": {
     "prepare": "npm run build",
-    "build": "webpack"
+    "build": "webpack",
+    "start": "webpack --watch"
   },
   "dependencies": {
     "symbol-observable": "1.0.4"

@@ -1,0 +1,10 @@
+{
+  "version": "0.0.7",
+  "packages": [
+    ".",
+    "../kibana-extra/*",
+    "platform/",
+    "packages/*",
+    "example_plugins/*"
+  ]
+}
