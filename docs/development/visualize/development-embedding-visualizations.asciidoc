@@ -5,6 +5,23 @@ There are two different angular directives you can use to insert a visualization
 To display an already saved visualization, use the `<visualize>` directive. 
 To reuse an existing Visualization implementation for a more custom purpose, use the `<visualization>` directive instead.
 
+==== VisualizeLoader
+The `VisualizeLoader` class i the easiest way to embed a visualization into your plugin. It exposes
+two methods:
+
+- `getVisualizationList()`: which returns promise which gets resolved with list of saved visualizations
+- `embedVisualizationWithId(container, savedId, params)`: which embeds visualization by id
+- `embedVisualizationWithSavedObject(container, savedObject, params)`: which embeds visualization from saved object
+
+`container` should be a dom element to which visualization should be embedded
+`params` is a parameter object where the following properties can be defined:
+
+- `timeRange`: time range to pass to `<visualize>` directive
+- `uiState`: uiState to pass to `<visualize>` directive
+- `appState`: appState to pass to `<visualize>` directive
+- `showSpyPanel`: showSpyPanel property to pass to `<visualize>` directive
+
+
 ==== `<visualize>` directive
 The `<visualize>` directive takes care of loading data, parsing data, rendering the editor 
 (if the Visualization is in edit mode) and rendering the visualization. 

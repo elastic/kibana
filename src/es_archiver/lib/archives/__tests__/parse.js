@@ -76,7 +76,7 @@ describe('esArchiver createParseArchiveStreams', () => {
         expect(await receivedPromise).to.eql({ a: 1 });
         input.write(Buffer.from('{"a": 2}'));
         input.end();
-        expect(await finalPromise).to.eql([{ a: 1 }, { a:2 }]);
+        expect(await finalPromise).to.eql([{ a: 1 }, { a: 2 }]);
       });
     });
 

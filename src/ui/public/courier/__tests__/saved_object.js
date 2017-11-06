@@ -85,7 +85,7 @@ describe('Saved Object', function () {
     describe('with confirmOverwrite', function () {
       function stubConfirmOverwrite() {
         window.confirm = sinon.stub().returns(true);
-        sinon.stub(esDataStub, 'create').returns(BluebirdPromise.reject({ status : 409 }));
+        sinon.stub(esDataStub, 'create').returns(BluebirdPromise.reject({ status: 409 }));
       }
 
       describe('when true', function () {
@@ -100,7 +100,7 @@ describe('Saved Object', function () {
 
             savedObject.lastSavedTitle = 'original title';
             savedObject.title = 'new title';
-            return savedObject.save({ confirmOverwrite : true })
+            return savedObject.save({ confirmOverwrite: true })
               .then(() => {
                 expect(window.confirm.called).to.be(true);
                 expect(savedObject.id).to.be('myId');
@@ -120,7 +120,7 @@ describe('Saved Object', function () {
 
             savedObject.lastSavedTitle = 'original title';
             savedObject.title = 'new title';
-            return savedObject.save({ confirmOverwrite : true })
+            return savedObject.save({ confirmOverwrite: true })
               .then(() => {
                 expect(savedObject.id).to.be('HI');
                 expect(savedObject.isSaving).to.be(false);
@@ -157,7 +157,7 @@ describe('Saved Object', function () {
 
           sinon.stub(savedObjectsClientStub, 'create').returns(BluebirdPromise.resolve({ id: 'myId' }));
 
-          return savedObject.save({ confirmOverwrite : false }).then(() => {
+          return savedObject.save({ confirmOverwrite: false }).then(() => {
             expect(window.confirm.called).to.be(false);
           });
         });

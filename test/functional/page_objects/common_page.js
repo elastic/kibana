@@ -57,8 +57,8 @@ export function CommonPageProvider({ getService, getPageObjects }) {
                 log.debug(' >>>>>>>> WARNING Navigating to [' + appName + '] with defaultIndex=' + defaultIndex);
                 log.debug(' >>>>>>>> Setting defaultIndex to "logstash-*""');
                 return kibanaServer.uiSettings.update({
-                  'dateFormat:tz':'UTC',
-                  'defaultIndex':'logstash-*'
+                  'dateFormat:tz': 'UTC',
+                  'defaultIndex': 'logstash-*'
                 });
               }
             }
@@ -107,7 +107,7 @@ export function CommonPageProvider({ getService, getPageObjects }) {
 
             // Browsers don't show the ':port' if it's 80 or 443 so we have to
             // remove that part so we can get a match in the tests.
-            const navSuccessful = new RegExp(appUrl.replace(':80','').replace(':443','')
+            const navSuccessful = new RegExp(appUrl.replace(':80', '').replace(':443', '')
              + '.{0,' + maxAdditionalLengthOnNavUrl + '}$')
             .test(currentUrl);
 

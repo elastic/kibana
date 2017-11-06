@@ -25,7 +25,7 @@ describe('Filter Bar pushFilter()', function () {
     let filter;
 
     beforeEach(ngMock.inject(function () {
-      $state = { $newFilters:[] };
+      $state = { $newFilters: [] };
       pushFilter = pushFilterFn($state);
       filter = { query: { query_string: { query: '' } } };
     }));

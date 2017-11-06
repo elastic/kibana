@@ -119,7 +119,7 @@ describe('AggTable Directive', function () {
           { type: 'min', schema: 'metric', params: { field: '@timestamp' } },
           { type: 'terms', schema: 'bucket', params: { field: 'extension' } },
           { type: 'date_histogram', schema: 'bucket', params: { field: '@timestamp', interval: 'd' } },
-          { type: 'derivative', schema: 'metric', params: { metricAgg: 'custom', customMetric: { id:'5-orderAgg', type: 'count' } } },
+          { type: 'derivative', schema: 'metric', params: { metricAgg: 'custom', customMetric: { id: '5-orderAgg', type: 'count' } } },
           { type: 'top_hits', schema: 'metric', params: { field: 'bytes', aggregate: { val: 'min' }, size: 1 } }
         ]
       });

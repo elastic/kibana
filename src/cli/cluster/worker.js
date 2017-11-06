@@ -94,7 +94,7 @@ export default class Worker extends EventEmitter {
   }
 
   parseIncomingMessage(msg) {
-    if (!_.isArray(msg)) return;
+    if (!Array.isArray(msg)) return;
     this.onMessage(...msg);
   }
 

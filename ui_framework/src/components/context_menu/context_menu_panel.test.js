@@ -159,12 +159,12 @@ describe('KuiContextMenuPanel', () => {
       });
     });
 
-    describe('focusedItemIndex', () => {
+    describe('initialFocusedItemIndex', () => {
       it('sets focus on the item occupying that index', () => {
         const component = mount(
           <KuiContextMenuPanel
             items={items}
-            focusedItemIndex={1}
+            initialFocusedItemIndex={1}
           />
         );
 
@@ -173,13 +173,117 @@ describe('KuiContextMenuPanel', () => {
         ).toBe(true);
       });
     });
+
+    describe('onUseKeyboardToNavigate', () => {
+      it('is called when up arrow is pressed', () => {
+        const onUseKeyboardToNavigateHandler = sinon.stub();
+
+        const component = mount(
+          <KuiContextMenuPanel
+            items={items}
+            onUseKeyboardToNavigate={onUseKeyboardToNavigateHandler}
+          />
+        );
+
+        component.simulate('keydown', { keyCode: keyCodes.UP });
+        sinon.assert.calledOnce(onUseKeyboardToNavigateHandler);
+      });
+
+      it('is called when down arrow is pressed', () => {
+        const onUseKeyboardToNavigateHandler = sinon.stub();
+
+        const component = mount(
+          <KuiContextMenuPanel
+            items={items}
+            onUseKeyboardToNavigate={onUseKeyboardToNavigateHandler}
+          />
+        );
+
+        component.simulate('keydown', { keyCode: keyCodes.UP });
+        sinon.assert.calledOnce(onUseKeyboardToNavigateHandler);
+      });
+
+      describe('left arrow', () => {
+        it('calls handler if showPreviousPanel exists', () => {
+          const onUseKeyboardToNavigateHandler = sinon.stub();
+
+          const component = mount(
+            <KuiContextMenuPanel
+              items={items}
+              showPreviousPanel={() => {}}
+              onUseKeyboardToNavigate={onUseKeyboardToNavigateHandler}
+            />
+          );
+
+          component.simulate('keydown', { keyCode: keyCodes.LEFT });
+          sinon.assert.calledOnce(onUseKeyboardToNavigateHandler);
+        });
+
+        it(`doesn't call handler if showPreviousPanel doesn't exist`, () => {
+          const onUseKeyboardToNavigateHandler = sinon.stub();
+
+          const component = mount(
+            <KuiContextMenuPanel
+              items={items}
+              onUseKeyboardToNavigate={onUseKeyboardToNavigateHandler}
+            />
+          );
+
+          component.simulate('keydown', { keyCode: keyCodes.LEFT });
+          sinon.assert.notCalled(onUseKeyboardToNavigateHandler);
+        });
+      });
+
+      describe('right arrow', () => {
+        it('calls handler if showNextPanel exists', () => {
+          const onUseKeyboardToNavigateHandler = sinon.stub();
+
+          const component = mount(
+            <KuiContextMenuPanel
+              items={items}
+              showNextPanel={() => {}}
+              onUseKeyboardToNavigate={onUseKeyboardToNavigateHandler}
+            />
+          );
+
+          component.simulate('keydown', { keyCode: keyCodes.RIGHT });
+          sinon.assert.calledOnce(onUseKeyboardToNavigateHandler);
+        });
+
+        it(`doesn't call handler if showNextPanel doesn't exist`, () => {
+          const onUseKeyboardToNavigateHandler = sinon.stub();
+
+          const component = mount(
+            <KuiContextMenuPanel
+              items={items}
+              onUseKeyboardToNavigate={onUseKeyboardToNavigateHandler}
+            />
+          );
+
+          component.simulate('keydown', { keyCode: keyCodes.RIGHT });
+          sinon.assert.notCalled(onUseKeyboardToNavigateHandler);
+        });
+      });
+    });
   });
 
   describe('behavior', () => {
     describe('focus', () => {
-      it('is set on the first focusable element by default, if there are no items', () => {
+      it('is set on the first focusable element by default if there are no items and hasFocus is true', () => {
         const component = mount(
           <KuiContextMenuPanel>
+            <button data-test-subj="button" />
+          </KuiContextMenuPanel>
+        );
+
+        expect(
+          component.find('[data-test-subj="button"]').matchesElement(document.activeElement)
+        ).toBe(true);
+      });
+
+      it('is not set on anything if hasFocus is false', () => {
+        const component = mount(
+          <KuiContextMenuPanel hasFocus={false}>
             <button data-test-subj="button" />
           </KuiContextMenuPanel>
         );
@@ -208,13 +312,20 @@ describe('KuiContextMenuPanel', () => {
         );
       });
 
-      it('focuses the first menu item by default, if there are items', () => {
+      it(`doesn't focus an item by default`, () => {
+        expect(component.find('[data-test-subj]').contains(document.activeElement)).toBe(false);
+      });
+
+      it('down arrow key focuses the first menu item', () => {
+        component.simulate('keydown', { keyCode: keyCodes.DOWN });
+
         expect(
           component.find('[data-test-subj="itemA"]').matchesElement(document.activeElement)
         ).toBe(true);
       });
 
-      it('down arrow key focuses the next menu item', () => {
+      it('subsequently, down arrow key focuses the next menu item', () => {
+        component.simulate('keydown', { keyCode: keyCodes.DOWN });
         component.simulate('keydown', { keyCode: keyCodes.DOWN });
 
         expect(
@@ -222,7 +333,16 @@ describe('KuiContextMenuPanel', () => {
         ).toBe(true);
       });
 
-      it('up arrow key focuses the previous menu item', () => {
+      it('down arrow key wraps to first menu item', () => {
+        component.simulate('keydown', { keyCode: keyCodes.UP });
+        component.simulate('keydown', { keyCode: keyCodes.DOWN });
+
+        expect(
+          component.find('[data-test-subj="itemA"]').matchesElement(document.activeElement)
+        ).toBe(true);
+      });
+
+      it('up arrow key focuses the last menu item', () => {
         component.simulate('keydown', { keyCode: keyCodes.UP });
 
         expect(
@@ -230,7 +350,26 @@ describe('KuiContextMenuPanel', () => {
         ).toBe(true);
       });
 
-      it('right arrow key shows next panel', () => {
+      it('subsequently, up arrow key focuses the previous menu item', () => {
+        component.simulate('keydown', { keyCode: keyCodes.UP });
+        component.simulate('keydown', { keyCode: keyCodes.UP });
+
+        expect(
+          component.find('[data-test-subj="itemB"]').matchesElement(document.activeElement)
+        ).toBe(true);
+      });
+
+      it('up arrow key wraps to last menu item', () => {
+        component.simulate('keydown', { keyCode: keyCodes.DOWN });
+        component.simulate('keydown', { keyCode: keyCodes.UP });
+
+        expect(
+          component.find('[data-test-subj="itemC"]').matchesElement(document.activeElement)
+        ).toBe(true);
+      });
+
+      it(`right arrow key shows next panel with focused item's index`, () => {
+        component.simulate('keydown', { keyCode: keyCodes.DOWN });
         component.simulate('keydown', { keyCode: keyCodes.RIGHT });
         sinon.assert.calledWith(showNextPanelHandler, 0);
       });

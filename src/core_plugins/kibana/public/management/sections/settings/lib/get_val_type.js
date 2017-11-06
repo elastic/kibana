@@ -1,5 +1,3 @@
-import _ from 'lodash';
-
 /**
  * @param {object} advanced setting definition object
  * @param {?} current value of the setting
@@ -10,7 +8,7 @@ export function getValType(def, value) {
     return def.type;
   }
 
-  if (_.isArray(value) || _.isArray(def.value)) {
+  if (Array.isArray(value) || Array.isArray(def.value)) {
     return 'array';
   }
 

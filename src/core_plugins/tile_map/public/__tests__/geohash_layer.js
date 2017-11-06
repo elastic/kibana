@@ -56,7 +56,7 @@ describe('kibana_map tests', function () {
 
     [
       {
-        options:  { mapType: 'Scaled Circle Markers' },
+        options: { mapType: 'Scaled Circle Markers' },
         expected: scaledCircleMarkersPng
       },
       {

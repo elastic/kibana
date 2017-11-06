@@ -11,11 +11,11 @@ import {
 } from '../../components';
 
 import ActionItem from './action_item';
-const actionItemSource = require('!!raw!./action_item');
+const actionItemSource = require('!!raw-loader!./action_item');
 const actionItemHtml = renderToHtml(ActionItem);
 
 import ActionItemInMenu from './action_items_in_menu';
-const actionItemInMenuSource = require('!!raw!./action_items_in_menu');
+const actionItemInMenuSource = require('!!raw-loader!./action_items_in_menu');
 const actionItemInMenuHtml = renderToHtml(ActionItemInMenu);
 
 export default props => (

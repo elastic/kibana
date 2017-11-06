@@ -1,17 +1,17 @@
 import _ from 'lodash';
 import { Notifier } from 'ui/notify/notifier';
-import { SearchRequestProvider } from './search';
+import { SearchRequestProvider } from './search_request';
 import { SegmentedHandleProvider } from './segmented_handle';
 
-export function SegmentedRequestProvider(es, Private, Promise, timefilter, config) {
-  const SearchReq = Private(SearchRequestProvider);
+export function SegmentedRequestProvider(Private, timefilter, config) {
+  const SearchRequest = Private(SearchRequestProvider);
   const SegmentedHandle = Private(SegmentedHandleProvider);
 
   const notify = new Notifier({
     location: 'Segmented Fetch'
   });
 
-  class SegmentedReq extends SearchReq {
+  class SegmentedReq extends SearchRequest {
     constructor(source, defer, initFn) {
       super(source, defer);
 
