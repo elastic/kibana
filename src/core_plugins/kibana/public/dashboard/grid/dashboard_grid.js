@@ -84,6 +84,13 @@ export class DashboardGrid extends React.Component {
     this.state = {
       layout: this.buildLayoutFromPanels()
     };
+    // A mapping of panel type to embeddable handlers. Because this function reaches out of react and into angular,
+    // if done in the render method, it appears to be triggering a scope.apply, which appears to be trigging a setState
+    // call inside TSVB visualizations.  Moving the function out of render appears to fix the issue.  See
+    // https://github.com/elastic/kibana/issues/14802 for more info.
+    // This is probably a better implementation anyway so the handlers are cached.
+    // @type {Object.<string, EmbeddableHandler>}
+    this.embeddableHandlerMap = {};
   }
 
   buildLayoutFromPanels() {
@@ -93,6 +100,22 @@ export class DashboardGrid extends React.Component {
       }
       return panel.gridData;
     });
+  }
+
+  createEmbeddableHandlersMap(panels) {
+    Object.values(panels).map(panel => {
+      if (!this.embeddableHandlerMap[panel.type]) {
+        this.embeddableHandlerMap[panel.type] = this.props.getEmbeddableHandler(panel.type);
+      }
+    });
+  }
+
+  componentWillMount() {
+    this.createEmbeddableHandlersMap(this.props.panels);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.createEmbeddableHandlersMap(nextProps.panels);
   }
 
   onLayoutChange = (layout) => {
@@ -131,7 +154,6 @@ export class DashboardGrid extends React.Component {
   renderDOM() {
     const {
       panels,
-      getEmbeddableHandler,
       getContainerApi,
       maximizedPanelId
     } = this.props;
@@ -162,7 +184,7 @@ export class DashboardGrid extends React.Component {
           <DashboardPanel
             panelId={`${panel.panelIndex}`}
             getContainerApi={getContainerApi}
-            embeddableHandler={getEmbeddableHandler(panel.type)}
+            embeddableHandler={this.embeddableHandlerMap[panel.type]}
             onPanelFocused={this.onPanelFocused}
             onPanelBlurred={this.onPanelBlurred}
           />
