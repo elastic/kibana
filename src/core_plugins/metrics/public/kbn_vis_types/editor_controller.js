@@ -8,10 +8,9 @@ function ReactEditorControllerProvider(Private, localStorage, config) {
   const fetchFields = Private(FetchFieldsProvider);
 
   class ReactEditorController {
-    constructor(el, savedObj) {
+    constructor(el, vis) {
       this.el = el;
-      this.savedObj = savedObj;
-      this.vis = savedObj.vis;
+      this.vis = vis;
       this.vis.fields = {};
 
       const autoApply = localStorage.get(AUTO_APPLY_KEY);
@@ -26,7 +25,7 @@ function ReactEditorControllerProvider(Private, localStorage, config) {
         fetchFields(indexPatterns).then(fields => {
           this.vis.fields = { ...fields, ...this.vis.fields };
           const Component = this.vis.type.editorConfig.component;
-          render(<Component config={config} vis={this.vis} visData={visData} renderComplete={resolve} savedObj={this.savedObj}/>, this.el);
+          render(<Component config={config} vis={this.vis} visData={visData} renderComplete={resolve}/>, this.el);
         });
       });
     }

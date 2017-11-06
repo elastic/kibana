@@ -25,7 +25,7 @@ uiModules
       const vis = $scope.vis;
       const Editor = typeof vis.type.editor === 'function' ? vis.type.editor :
         editorTypes.find(editor => editor.key === vis.type.editor);
-      const editor = new Editor(element[0], $scope.savedObj);
+      const editor = new Editor(element[0], $scope.vis);
 
       $scope.renderFunction = () => {
         if (!$scope.vis) return;

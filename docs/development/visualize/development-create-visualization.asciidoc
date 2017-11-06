@@ -240,10 +240,10 @@ You can make your controller take extra configuration which is passed to the edi
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 
 class MyEditorController {
-    constructor(el, savedObj) {
+    constructor(el, vis) {
       this.el = el;
-      this.vis = savedObj.vis;
-      this.config = this.vis.type.editorConfig;
+      this.vis = vis;
+      this.config = vis.type.editorConfig;
    }
    async render(visData) {
       return new Promise(resolve => {

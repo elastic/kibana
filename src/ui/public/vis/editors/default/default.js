@@ -12,10 +12,9 @@ const defaultEditor = function ($rootScope, $compile) {
   return class DefaultEditor {
     static key = 'default';
 
-    constructor(el, savedObj) {
+    constructor(el, vis) {
       this.el = $(el);
-      this.savedObj = savedObj;
-      this.vis = savedObj.vis;
+      this.vis = vis;
 
       if (!this.vis.type.editorConfig.optionTabs && this.vis.type.editorConfig.optionsTemplate) {
         this.vis.type.editorConfig.optionTabs = [
