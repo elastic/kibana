@@ -58,6 +58,8 @@ export class KuiCodeEditor extends Component {
       width,
       height,
       onBlur, // eslint-disable-line no-unused-vars
+      isReadOnly,
+      setOptions,
       ...rest,
     } = this.props;
 
@@ -65,11 +67,18 @@ export class KuiCodeEditor extends Component {
       'kuiCodeEditorKeyboardHint-isInactive': !this.state.isHintActive
     });
 
-    return (
-      <div
-        className="kuiCodeEditorWrapper"
-        style={{ width, height }}
-      >
+    let prompt;
+
+    const options = { ...setOptions };
+
+    if (isReadOnly) {
+      Object.assign(options, {
+        readOnly: true,
+        highlightActiveLine: false,
+        highlightGutterLine: false,
+      });
+    } else {
+      prompt = (
         <div
           className={classes}
           id={this.idGenerator('codeEditor')}
@@ -88,12 +97,22 @@ export class KuiCodeEditor extends Component {
             When you&rsquo;re done, press Escape to stop editing.
           </p>
         </div>
+      );
+    }
+
+    return (
+      <div
+        className="kuiCodeEditorWrapper"
+        style={{ width, height }}
+      >
+        {prompt}
 
         <AceEditor
           ref={this.aceEditorRef}
           width={width}
           height={height}
           onBlur={this.onBlurAce}
+          setOptions={options}
           {...rest}
         />
       </div>
@@ -105,4 +124,10 @@ KuiCodeEditor.propTypes = {
   width: PropTypes.string,
   height: PropTypes.string,
   onBlur: PropTypes.func,
+  isReadOnly: PropTypes.bool,
+  setOptions: PropTypes.object,
+};
+
+KuiCodeEditor.defaultProps = {
+  setOptions: {},
 };
