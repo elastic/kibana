@@ -1,16 +1,18 @@
 import { esTestConfig } from '../../src/test_utils/es';
 import { kibanaTestServerUrlParts } from '../../test/kibana_test_server_url_parts';
 import { resolve, join } from 'path';
+import { platform as getPlatform } from 'os';
 
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 const HOUR = 60 * MINUTE;
+const PLATFORM = getPlatform();
 
 module.exports = function (grunt) {
   const binScript =  `node`;
   const pkgVersion = grunt.config.get('pkg.version');
   const releaseBinScript = `./build/kibana-${pkgVersion}-linux-x86_64/bin/kibana`;
-
+  const optimizeScript = /^win/.test(PLATFORM) ? '.\\build\\kibana\\bin\\kibana.bat' : './build/kibana/bin/kibana';
   const binArgs = [
     join('scripts', 'kibana'),
   ];
@@ -200,9 +202,8 @@ module.exports = function (grunt) {
         ready: /Optimization .+ complete/,
         quiet: true
       },
-      cmd: binScript,
+      cmd: optimizeScript,
       args: [
-        ...binArgs,
         '--env.name=production',
         '--logging.json=false',
         '--plugins.initialize=false',
