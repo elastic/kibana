@@ -1,6 +1,10 @@
 import './instruction.less';
 import React from 'react';
 import PropTypes from 'prop-types';
+import {
+  KuiCodeEditor
+} from 'ui_framework/components';
+import 'brace/mode/sh';
 
 export function Instruction({ commands, textPost, textPre }) {
   let pre;
@@ -21,16 +25,27 @@ export function Instruction({ commands, textPost, textPre }) {
     );
   }
 
+  const aceOptions = {
+    fontSize: '14px',
+    maxLines: commands.length,
+    readOnly: true,
+    highlightActiveLine: false,
+    highlightGutterLine: false
+  };
+
   return (
     <div className="instruction">
 
       {pre}
 
-      <pre className="kuiVerticalRhythm">
-        <code>
-          {commands.map(command => (command))}
-        </code>
-      </pre>
+      <KuiCodeEditor
+        className="kuiVerticalRhythm"
+        mode="sh"
+        theme="github"
+        width="100%"
+        value={commands.join('\n')}
+        setOptions={aceOptions}
+      />
 
       {post}
 
