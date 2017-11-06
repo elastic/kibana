@@ -67,7 +67,7 @@ export class MutableLoggerFactory implements LoggerFactory {
     }
 
     for (const [loggerKey, loggerAdapter] of this.loggers.entries()) {
-      loggerAdapter.logger = this.createLogger(loggerKey, config);
+      loggerAdapter.updateLogger(this.createLogger(loggerKey, config));
     }
 
     this.config = config;

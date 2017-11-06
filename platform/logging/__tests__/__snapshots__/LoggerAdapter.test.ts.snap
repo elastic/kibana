@@ -1,3 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`throws if trying to use internal logger 1`] = `"Do not use the internal logger directly, instead use the log methods"`;

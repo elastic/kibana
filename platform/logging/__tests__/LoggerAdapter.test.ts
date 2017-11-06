@@ -82,7 +82,7 @@ test('forwards all method calls to new internal logger if it is updated.', () =>
   );
   (oldInternalLogger.trace as jest.Mock<Function>).mockReset();
 
-  adapter.logger = newInternalLogger;
+  adapter.updateLogger(newInternalLogger);
   adapter.trace('trace-message');
   expect(oldInternalLogger.trace).not.toHaveBeenCalled();
   expect(newInternalLogger.trace).toHaveBeenCalledTimes(1);
@@ -90,22 +90,4 @@ test('forwards all method calls to new internal logger if it is updated.', () =>
     'trace-message',
     undefined
   );
-});
-
-test('throws if trying to use internal logger', () => {
-  const internalLogger: Logger = {
-    trace: jest.fn(),
-    debug: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    fatal: jest.fn(),
-    log: jest.fn()
-  };
-
-  const adapter = new LoggerAdapter(internalLogger);
-
-  expect(() => {
-    adapter.logger.debug('foo');
-  }).toThrowErrorMatchingSnapshot();
 });

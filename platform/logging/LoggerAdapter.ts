@@ -8,22 +8,13 @@ export class LoggerAdapter implements Logger {
   /**
    * The current logger can be updated "on the fly", e.g. when the log config
    * has changed.
-   */
-  set logger(logger: Logger) {
-    this._logger = logger;
-  }
-
-  /**
-   * The internal logger is not intended as a public api. Instead the log
-   * methods should be used.
    *
-   * This getter is only added here for clarity, as we have added the setter to
-   * update the internal logger.
+   * This is not intended for external use, only internally in Kibana
+   *
+   * @internal
    */
-  get logger() {
-    throw new Error(
-      'Do not use the internal logger directly, instead use the log methods'
-    );
+  updateLogger(logger: Logger) {
+    this._logger = logger;
   }
 
   trace(message: string, meta?: LogMeta): void {
