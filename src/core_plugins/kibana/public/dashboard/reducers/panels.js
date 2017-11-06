@@ -8,6 +8,18 @@ import {
   setPanels,
 } from '../actions';
 
+/**
+ *
+ * @param panel {PanelState} - new panel data (can be partial data) to merge with possibly existing panel data in
+ * the panels mapping.
+ * @param panel.panelIndex {String} The new panel data must specify the panelIndex so we know which panel to merge with.
+ * @param panels {Object.<string, PanelState>}
+ * @return {PanelState} - a new PanelState which has the merged data.
+ */
+function mergePanelData(panel, panels) {
+  return _.defaultsDeep(panel, panels[panel.panelIndex]);
+}
+
 export const panels = handleActions({
   [setPanels]:
     /**
@@ -27,8 +39,8 @@ export const panels = handleActions({
      */
     (panels, { payload }) => {
       const panelsCopy = { ...panels };
-      Object.values(payload).forEach(updatedPanel => {
-        panelsCopy[updatedPanel.panelIndex] = _.defaultsDeep(updatedPanel, panelsCopy[updatedPanel.panelIndex]);
+      Object.values(payload).forEach(panel => {
+        panelsCopy[panel.panelIndex] = mergePanelData(panel, panels);
       });
       return panelsCopy;
     },
@@ -55,6 +67,6 @@ export const panels = handleActions({
      */
     (panels, { payload }) => ({
       ...panels,
-      [payload.panelIndex]: _.defaultsDeep(payload, panels[[payload.panelIndex]]),
+      [payload.panelIndex]: mergePanelData(payload, panels),
     }),
 }, {});
