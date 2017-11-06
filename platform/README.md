@@ -1,28 +1,29 @@
 # New platform
 
 ## Dev setup
-
-Make sure you're running the Node version specified in `../.node-version`.
+While in this directory, make sure you're running the Node version specified in `../.node-version`.
 
 If you've upgraded your npm version, you might need to delete your `node_modules`
 folder and re-run `npm install`.
 
 ## Running code
 
-Make sure to build the code first, e.g. `npm run ts:build` or `npm run ts:start`.
+While in this directory, make sure to build the code first, e.g. `npm run ts:build` or `npm run ts:start`.
 
-This builds the code into `./target/` for now. If you get into a weird state you
+This builds the code into `../target/` for now. If you get into a weird state you
 might clean the `target` directory.
 
 When this completes you can start the server and plugins as a standalone Node application:
 
 ```bash
+cd ..
 node scripts/platform.js
 ```
 
 Or load it as a part of the legacy platform:
 
 ```bash
+cd ..
 npm start
 ```
 
@@ -36,6 +37,7 @@ records are forwarded to the legacy platform so that it can layout and output th
 Run Jest:
 
 ```
+cd ..
 node scripts/jest.js
 ```
 
