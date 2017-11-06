@@ -59,7 +59,8 @@ export const PageManager = (props) => {
 
       <ConfirmModal
         isOpen={deleteId != null}
-        message={'Are you sure you want to remove this page?'}
+        title="Remove Page"
+        message="Are you sure you want to remove this page?"
         confirmButtonText="Remove"
         onConfirm={doDelete}
         onCancel={resetDelete}
