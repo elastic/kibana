@@ -35,7 +35,7 @@ module.exports = function createDateAgg(config, tlConfig) {
       dateAgg.time_buckets.aggs[metricName][metric[0]] = { field: metric[1] };
       if (metric[0] === 'percentiles' && metric[2]) {
         let percentList = metric[2].split(',');
-        percentList = percentList.map(x => parseInt(x));
+        percentList = percentList.map(x => parseFloat(x));
         dateAgg.time_buckets.aggs[metricName][metric[0]] = {
           field: metric[1],
           percents: percentList
