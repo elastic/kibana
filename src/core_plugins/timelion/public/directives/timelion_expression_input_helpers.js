@@ -170,7 +170,7 @@ export async function suggest(expression, functionList, Parser, cursorPosition, 
           });
         }
 
-        const valueSuggestions = await getArgValueSuggestions(null, argHelp, message.currentFunction, message.currentArgs, message.name);
+        const valueSuggestions = await getArgValueSuggestions(message.name, null, argHelp, message.currentFunction, message.currentArgs);
         return {
           list: valueSuggestions,
           location: { min: cursorPosition, max: cursorPosition },
