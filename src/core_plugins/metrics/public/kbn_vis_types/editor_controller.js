@@ -8,15 +8,15 @@ function ReactEditorControllerProvider(Private, localStorage, config) {
   const fetchFields = Private(FetchFieldsProvider);
 
   class ReactEditorController {
-    constructor(el, vis, savedObj) {
+    constructor(el, savedObj) {
       this.el = el;
-      this.vis = vis;
-      this.vis.fields = {};
       this.savedObj = savedObj;
+      this.vis = savedObj.vis;
+      this.vis.fields = {};
 
       const autoApply = localStorage.get(AUTO_APPLY_KEY);
-      vis.autoApply = autoApply != null ? autoApply : true;
-      vis.initialized = true;
+      this.vis.autoApply = autoApply != null ? autoApply : true;
+      this.vis.initialized = true;
     }
 
     render(visData) {

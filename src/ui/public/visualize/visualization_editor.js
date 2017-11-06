@@ -23,10 +23,9 @@ uiModules
     link: function ($scope, element) {
       // Clone the _vis instance.
       const vis = $scope.vis;
-      const savedObj = $scope.savedObj;
       const Editor = typeof vis.type.editor === 'function' ? vis.type.editor :
         editorTypes.find(editor => editor.key === vis.type.editor);
-      const editor = new Editor(element[0], vis, savedObj);
+      const editor = new Editor(element[0], $scope.savedObj);
 
       $scope.renderFunction = () => {
         if (!$scope.vis) return;
