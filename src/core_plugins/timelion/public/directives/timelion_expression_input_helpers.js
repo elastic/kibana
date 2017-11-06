@@ -73,7 +73,7 @@ function inLocation(cursorPosition, location) {
   return cursorPosition >= location.min && cursorPosition <= location.max;
 }
 
-function extractSuggestionsFromParsedResult(result, cursorPosition, functionList) {
+async function extractSuggestionsFromParsedResult(result, cursorPosition, functionList, getArgValueSuggestions) {
   const activeFunc = result.functions.find((func) => {
     return cursorPosition >= func.location.min && cursorPosition < func.location.max;
   });
@@ -82,7 +82,7 @@ function extractSuggestionsFromParsedResult(result, cursorPosition, functionList
     return;
   }
 
-  const funcDefinition = functionList.find((func) => {
+  const functionHelp = functionList.find((func) => {
     return func.name === activeFunc.function;
   });
   const providedArguments = activeFunc.arguments.map((arg) => {
@@ -93,19 +93,26 @@ function extractSuggestionsFromParsedResult(result, cursorPosition, functionList
   // location range includes '.', function name, and '('.
   const openParen = activeFunc.location.min + activeFunc.function.length + 2;
   if (cursorPosition < openParen) {
-    return { list: [funcDefinition], location: activeFunc.location, type: SUGGESTION_TYPE.FUNCTIONS };
+    return { list: [functionHelp], location: activeFunc.location, type: SUGGESTION_TYPE.FUNCTIONS };
   }
 
   // Do not provide 'inputSeries' as argument suggestion for chainable functions
-  const args = funcDefinition.chainable ? funcDefinition.args.slice(1) : funcDefinition.args.slice(0);
+  const args = functionHelp.chainable ? functionHelp.args.slice(1) : functionHelp.args.slice(0);
 
   const activeArg = activeFunc.arguments.find((argument) => {
     return inLocation(cursorPosition, argument.location);
   });
   // return argument_value suggestions when cursor is inside agrument value
   if (activeArg && activeArg.type === 'namedArg' && inLocation(cursorPosition, activeArg.value.location)) {
-    // TODO - provide argument value suggestions once function list contains required data
-    return { list: [], location: activeArg.value.location, type: SUGGESTION_TYPE.ARGUMENT_VALUE };
+    const valueSuggestions = await getArgValueSuggestions(
+      activeArg.name,
+      activeArg.value.text,
+      functionHelp.args.find((arg) => {
+        return arg.name === activeArg.name;
+      }),
+      activeFunc.function,
+      activeFunc.arguments);
+    return { list: valueSuggestions, location: activeArg.value.location, type: SUGGESTION_TYPE.ARGUMENT_VALUE };
   }
 
   const argumentSuggestions = args.filter(arg => {
@@ -127,15 +134,8 @@ function extractSuggestionsFromParsedResult(result, cursorPosition, functionList
 
 export async function suggest(expression, functionList, Parser, cursorPosition, getArgValueSuggestions) {
   try {
-    // We rely on the grammar to throw an error in order to suggest function(s).
     const result = await Parser.parse(expression);
-
-    const suggestions = extractSuggestionsFromParsedResult(result, cursorPosition, functionList);
-    if (suggestions) {
-      return suggestions;
-    }
-
-    return;
+    return await extractSuggestionsFromParsedResult(result, cursorPosition, functionList, getArgValueSuggestions);
   } catch (e) {
     try {
       // The grammar will throw an error containing a message if the expression is formatted

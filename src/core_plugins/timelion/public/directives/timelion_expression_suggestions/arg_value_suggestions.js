@@ -33,22 +33,71 @@ export function ArgValueSuggestionsProvider(Private, indexPatterns) {
     return await indexPatterns.get(indexPatternSavedObject.id);
   }
 
+  function containsFieldName(partial, field) {
+    if (!partial) {
+      return true;
+    }
+    return field.name.includes(partial);
+  }
+
   // Argument value suggestion handlers requiring custom client side code
   // Could not put with function definition since functions are defined on server
   const customHandlers = {
     es: {
       index: async function (partial) {
-        const search = partial ? `"${partial}"` : '*';
+        const search = partial ? `${partial}*` : '*';
         const resp = await savedObjectsClient.find({
           type: 'index-pattern',
           fields: ['title'],
           search: `${search}`,
           search_fields: ['title'],
-          perPage: 10
+          perPage: 25
         });
         return resp.savedObjects.map(savedObject => {
           return { name: savedObject.attributes.title };
         });
+      },
+      metric: async function (partial, functionArgs) {
+        if (!partial || !partial.includes(':')) {
+          return [
+            { name: 'avg:' },
+            { name: 'cardinality:' },
+            { name: 'max:' },
+            { name: 'min:' },
+            { name: 'sum:' }
+          ];
+        }
+
+        const indexPattern = await getIndexPattern(functionArgs);
+        if (!indexPattern) {
+          return [];
+        }
+
+        const valueSplit = partial.split(':');
+        return indexPattern.fields
+          .filter(field => {
+            return field.aggregatable && 'number' === field.type && containsFieldName(valueSplit[1], field);
+          })
+          .map(field => {
+            return { name: `${valueSplit[0]}:${field.name}`, help: field.type };
+          });
+
+      },
+      split: async function (partial, functionArgs) {
+        const indexPattern = await getIndexPattern(functionArgs);
+        if (!indexPattern) {
+          return [];
+        }
+
+        return indexPattern.fields
+          .filter(field => {
+            return field.aggregatable
+              && ['number', 'boolean', 'date', 'ip', 'string'].includes(field.type)
+              && containsFieldName(partial, field);
+          })
+          .map(field => {
+            return { name: field.name, help: field.type };
+          });
       },
       timefield: async function (partial, functionArgs) {
         const indexPattern = await getIndexPattern(functionArgs);
@@ -58,7 +107,7 @@ export function ArgValueSuggestionsProvider(Private, indexPatterns) {
 
         return indexPattern.fields
           .filter(field => {
-            return 'date' === field.type;
+            return 'date' === field.type && containsFieldName(partial, field);
           })
           .map(field => {
             return { name: field.name };
