@@ -1,10 +1,5 @@
 export * from './view';
-
-export {
-  updatePanel,
-  updatePanels,
-  deletePanel,
-} from './panels';
+export * from './panels';
 
 export {
   renderEmbeddable,

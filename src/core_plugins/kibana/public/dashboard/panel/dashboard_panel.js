@@ -47,7 +47,6 @@ export class DashboardPanel extends React.Component {
   renderEmbeddedContent() {
     return (
       <div
-        style={this.props.inAddEditDrillDownLinksMode ? { 'display': 'none' } : {}}
         id="embeddedPanel"
         className="panel-content"
         ref={panelElement => this.panelElement = panelElement}
