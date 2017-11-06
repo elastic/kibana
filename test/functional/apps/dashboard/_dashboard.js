@@ -10,6 +10,8 @@ export default function ({ getService, getPageObjects }) {
   const dashboardVisualizations = getService('dashboardVisualizations');
   const remote = getService('remote');
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'discover']);
+  const testVisualizationTitles = [];
+  const testVisualizationDescriptions = [];
 
   describe('dashboard tab', function describeIndexTests() {
     before(async function () {
@@ -33,11 +35,18 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.clickDashboard();
 
       await PageObjects.dashboard.clickNewDashboard();
-      await dashboardVisualizations.createAndAddTSVBVisualization();
+      await dashboardVisualizations.createAndAddTSVBVisualization('TSVB');
       await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
       await dashboardVisualizations.createAndAddSavedSearch('saved search');
+      testVisualizationTitles.push('TSVB');
+      testVisualizationTitles.splice(1, 0, ...PageObjects.dashboard.getTestVisualizationNames());
+      testVisualizationTitles.push('saved search');
 
-      log.debug('done adding visualizations');
+      testVisualizationDescriptions.push('');
+      testVisualizationDescriptions.splice(
+        1, 0, ...PageObjects.dashboard.getTestVisualizations().map(visualization => visualization.description)
+      );
+      testVisualizationDescriptions.push('');
     });
 
     it('set the timepicker time to that which contains our test data', async function setTimepicker() {
@@ -67,12 +76,7 @@ export default function ({ getService, getPageObjects }) {
       return retry.tryForTime(10000, function () {
         return PageObjects.dashboard.getPanelTitles()
         .then(function (panelTitles) {
-          log.info('visualization titles = ' + panelTitles);
-          expect(panelTitles).to.eql([
-            'saved search',
-            'TSVB',
-            ...PageObjects.dashboard.getTestVisualizationNames()
-          ]);
+          expect(panelTitles).to.eql(testVisualizationTitles);
         });
       })
       .then(function () {
@@ -102,21 +106,19 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should have data-shared-items-count set to the number of visualizations', function checkSavedItemsCount() {
-      const visualizations = PageObjects.dashboard.getTestVisualizations();
       return retry.tryForTime(10000, () => PageObjects.dashboard.getSharedItemsCount())
       .then(function (count) {
         log.info('data-shared-items-count = ' + count);
-        expect(count).to.eql(visualizations.length);
+        expect(count).to.eql(testVisualizationTitles.length);
       });
     });
 
     it('should have panels with expected data-shared-item title and description', function () {
-      const visualizations = PageObjects.dashboard.getTestVisualizations();
       return retry.tryForTime(10000, function () {
         return PageObjects.dashboard.getPanelSharedItemData()
         .then(function (data) {
-          expect(data.map(item => item.title)).to.eql(visualizations.map(v => v.name));
-          expect(data.map(item => item.description)).to.eql(visualizations.map(v => v.description));
+          expect(data.map(item => item.title)).to.eql(testVisualizationTitles);
+          expect(data.map(item => item.description)).to.eql(testVisualizationDescriptions);
         });
       });
     });
@@ -170,8 +172,7 @@ export default function ({ getService, getPageObjects }) {
         // being a CSS update is causing the UI to change slower than grabbing the panels?
         retry.try(async () => {
           const panels = await PageObjects.dashboard.getDashboardPanels();
-          const visualizations = PageObjects.dashboard.getTestVisualizations();
-          expect(panels.length).to.eql(visualizations.length);
+          expect(panels.length).to.eql(testVisualizationTitles.length);
         });
       });
     });
@@ -265,10 +266,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.saveVisualization('visualization from add new link');
         await PageObjects.header.clickToastOK();
 
-        const visualizations = PageObjects.dashboard.getTestVisualizations();
         return retry.try(async () => {
           const panelCount = await PageObjects.dashboard.getPanelCount();
-          expect(panelCount).to.eql(visualizations.length + 1);
+          expect(panelCount).to.eql(testVisualizationTitles.length + 1);
         });
       });
 

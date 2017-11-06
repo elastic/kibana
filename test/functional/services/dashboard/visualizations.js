@@ -13,7 +13,7 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickAddVisualization();
       await PageObjects.dashboard.clickAddNewVisualizationLink();
       await PageObjects.visualize.clickVisualBuilder();
-      await PageObjects.visualize.saveVisualization('TSVB');
+      await PageObjects.visualize.saveVisualization(name);
       await PageObjects.header.clickToastOK();
     }
 
