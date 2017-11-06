@@ -6,15 +6,15 @@ const env = require('./env');
 const rpc = require('./rpc');
 
 function ensureConfigAndFoldersExists() {
-  const REPOSITORIES_DIR_PATH = env.getRepositoriesDirPath();
-  const CONFIG_FILE_PATH = env.getConfigFilePath();
+  const REPOS_PATH = env.getReposPath();
+  const CONFIG_PATH = env.getConfigPath();
 
   return rpc
-    .mkdirp(REPOSITORIES_DIR_PATH)
+    .mkdirp(REPOS_PATH)
     .then(getConfigTemplate)
     .then(configTemplate => {
       return rpc
-        .writeFile(CONFIG_FILE_PATH, configTemplate, {
+        .writeFile(CONFIG_PATH, configTemplate, {
           flag: 'wx', // create and write file. Error if it already exists
           mode: 0o600 // give the owner read-write privleges, no access for others
         })
@@ -44,55 +44,55 @@ class InvalidConfigError extends Error {
 }
 
 function validateConfig({ username, accessToken, repositories }) {
-  const configFilePath = env.getConfigFilePath();
-  const hasCorrectPerms = hasConfigCorrectPermissions(configFilePath);
+  const CONFIG_PATH = env.getConfigPath();
+  const hasCorrectPerms = hasConfigCorrectPermissions(CONFIG_PATH);
 
   if (!username && !accessToken) {
     throw new InvalidConfigError(
-      `Welcome to the Backport tool. Please add your Github username, and a Github access token to the config: ${configFilePath}`
+      `Welcome to the Backport tool. Please add your Github username, and a Github access token to the config: ${CONFIG_PATH}`
     );
   }
 
   if (!username) {
     throw new InvalidConfigError(
-      `Please add your username to the config: ${configFilePath}`
+      `Please add your username to the config: ${CONFIG_PATH}`
     );
   }
 
   if (!accessToken) {
     throw new InvalidConfigError(
-      `Please add a Github access token to the config: ${configFilePath}`
+      `Please add a Github access token to the config: ${CONFIG_PATH}`
     );
   }
 
   if (!repositories || repositories.length === 0) {
     throw new InvalidConfigError(
-      `You must add at least 1 repository: ${configFilePath}`
+      `You must add at least 1 repository: ${CONFIG_PATH}`
     );
   }
 
   if (!hasCorrectPerms) {
     throw new InvalidConfigError(
-      `Config file at ${configFilePath} needs to have more restrictive permissions. Run the ` +
+      `Config file at ${CONFIG_PATH} needs to have more restrictive permissions. Run the ` +
         'following to limit access to the file to just your user account:\n' +
         '\n' +
-        `  chmod 600 "${configFilePath}"\n`
+        `  chmod 600 "${CONFIG_PATH}"\n`
     );
   }
 }
 
-function hasConfigCorrectPermissions(configFilePath) {
-  const stat = rpc.statSync(configFilePath);
+function hasConfigCorrectPermissions(CONFIG_PATH) {
+  const stat = rpc.statSync(CONFIG_PATH);
   const hasGroupRead = stat.mode & fs.constants.S_IRGRP;
   const hasOthersRead = stat.mode & fs.constants.S_IROTH;
   return !hasGroupRead && !hasOthersRead;
 }
 
 function getConfig() {
-  const CONFIG_FILE_PATH = env.getConfigFilePath();
+  const CONFIG_PATH = env.getConfigPath();
 
   try {
-    const res = fs.readFileSync(CONFIG_FILE_PATH, 'utf8');
+    const res = fs.readFileSync(CONFIG_PATH, 'utf8');
     return JSON.parse(stripJsonComments(res));
   } catch (e) {
     if (e.code === 'ENOENT') {

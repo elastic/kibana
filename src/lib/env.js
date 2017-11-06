@@ -1,17 +1,17 @@
 const path = require('path');
 const os = require('os');
 
-const getConfigFilePath = () => {
+const getConfigPath = () => {
   const homedir = os.homedir();
   return path.join(homedir, '.backport', 'config.json');
 };
 
-const getRepositoriesDirPath = () => {
+const getReposPath = () => {
   const homedir = os.homedir();
   return path.join(homedir, '.backport', 'repositories');
 };
 
-const getRepoOwnerDirPath = owner => {
+const getRepoOwnerPath = owner => {
   const homedir = os.homedir();
   return path.join(homedir, '.backport', 'repositories', owner);
 };
@@ -22,8 +22,8 @@ const getRepoPath = (owner, repoName) => {
 };
 
 module.exports = {
-  getRepositoriesDirPath,
-  getConfigFilePath,
-  getRepoOwnerDirPath,
+  getConfigPath,
+  getReposPath,
+  getRepoOwnerPath,
   getRepoPath
 };

@@ -20,7 +20,7 @@ function repoExists(owner, repoName) {
 
 // Clone repo and add remotes
 function setupRepo(owner, repoName, username) {
-  return rpc.mkdirp(env.getRepoOwnerDirPath(owner)).then(() => {
+  return rpc.mkdirp(env.getRepoOwnerPath(owner)).then(() => {
     return cloneRepo(owner, repoName).then(() =>
       addRemote(owner, repoName, username)
     );
@@ -33,7 +33,7 @@ function getRemoteUrl(owner, repoName) {
 
 function cloneRepo(owner, repoName) {
   return rpc.exec(`git clone ${getRemoteUrl(owner, repoName)}`, {
-    cwd: env.getRepoOwnerDirPath(owner)
+    cwd: env.getRepoOwnerPath(owner)
   });
 }
 
