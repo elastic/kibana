@@ -151,7 +151,7 @@ function handleErrors(e) {
       break;
 
     case constants.GITHUB_ERROR:
-      console.error(JSON.stringify(e.details, null, 4));
+      console.error(JSON.stringify(e.response, null, 4));
       break;
 
     case constants.CHERRYPICK_CONFLICT_NOT_HANDLED:
@@ -159,7 +159,6 @@ function handleErrors(e) {
       break;
 
     default:
-      console.log(e.message);
       console.error(e);
   }
 }

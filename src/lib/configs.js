@@ -35,10 +35,12 @@ function getConfigTemplate() {
   return rpc.readFile(path.join(__dirname, 'configTemplate.json'), 'utf8');
 }
 
-function InvalidConfigError(message) {
-  const e = new Error(message);
-  e.code = constants.INVALID_CONFIG;
-  return e;
+class InvalidConfigError extends Error {
+  constructor(...args) {
+    super(...args);
+    Error.captureStackTrace(this, InvalidConfigError);
+    this.code = constants.INVALID_CONFIG;
+  }
 }
 
 function validateConfig({ username, accessToken, repositories }) {
@@ -46,31 +48,31 @@ function validateConfig({ username, accessToken, repositories }) {
   const hasCorrectPerms = hasConfigCorrectPermissions(configFilePath);
 
   if (!username && !accessToken) {
-    throw InvalidConfigError(
+    throw new InvalidConfigError(
       `Welcome to the Backport tool. Please add your Github username, and a Github access token to the config: ${configFilePath}`
     );
   }
 
   if (!username) {
-    throw InvalidConfigError(
+    throw new InvalidConfigError(
       `Please add your username to the config: ${configFilePath}`
     );
   }
 
   if (!accessToken) {
-    throw InvalidConfigError(
+    throw new InvalidConfigError(
       `Please add a Github access token to the config: ${configFilePath}`
     );
   }
 
   if (!repositories || repositories.length === 0) {
-    throw InvalidConfigError(
+    throw new InvalidConfigError(
       `You must add at least 1 repository: ${configFilePath}`
     );
   }
 
   if (!hasCorrectPerms) {
-    throw InvalidConfigError(
+    throw new InvalidConfigError(
       `Config file at ${configFilePath} needs to have more restrictive permissions. Run the ` +
         'following to limit access to the file to just your user account:\n' +
         '\n' +
