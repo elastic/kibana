@@ -17,8 +17,7 @@ uiModules
       vis: '=',
       visData: '=',
       uiState: '=?',
-      searchSource: '=',
-      savedObj: '='
+      searchSource: '='
     },
     link: function ($scope, element) {
       // Clone the _vis instance.
