@@ -1,7 +1,8 @@
 import { Env } from '../config/Env';
 import { LoggingConfig, LoggerConfigType } from './LoggingConfig';
 import { LogLevel } from './LogLevel';
-import { Logger, BaseLogger, LoggerAdapter } from './Logger';
+import { Logger, BaseLogger } from './Logger';
+import { LoggerAdapter } from './LoggerAdapter';
 import { Appenders, DisposableAppender } from './appenders/Appenders';
 import { BufferAppender } from './appenders/buffer/BufferAppender';
 
@@ -50,11 +51,14 @@ export class MutableLoggerFactory implements LoggerFactory {
     // config so that new loggers will be using BufferAppender until newly configured appenders are ready.
     this.config = undefined;
 
+    // Appenders must be reset, so we first dispose of the current ones, then
+    // build up a new set of appenders.
+
     for (const appender of this.appenders.values()) {
       appender.dispose();
     }
-
     this.appenders.clear();
+
     for (const [appenderKey, appenderConfig] of config.appenders.entries()) {
       this.appenders.set(
         appenderKey,
@@ -63,7 +67,7 @@ export class MutableLoggerFactory implements LoggerFactory {
     }
 
     for (const [loggerKey, loggerAdapter] of this.loggers.entries()) {
-      loggerAdapter.logger = this.createLogger(loggerKey, config);
+      loggerAdapter.updateLogger(this.createLogger(loggerKey, config));
     }
 
     this.config = config;
@@ -111,7 +115,7 @@ export class MutableLoggerFactory implements LoggerFactory {
     context: string
   ): LoggerConfigType {
     const loggerConfig = config.loggers.get(context);
-    if (loggerConfig) {
+    if (loggerConfig !== undefined) {
       return loggerConfig;
     }
 

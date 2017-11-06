@@ -1,6 +1,10 @@
 import { Schema, typeOfSchema } from '../types/schema';
 import { Appenders, AppenderConfigType } from './appenders/Appenders';
 
+// We need this helper for the types to be correct
+// (otherwise it assumes an array of A|B instead of a tuple [A,B])
+const toTuple = <A, B>(a: A, b: B): [A, B] => [a, b];
+
 /**
  * Separator string that used within nested context name (eg. plugins.pid).
  */
@@ -49,7 +53,7 @@ const createLoggingSchema = (schema: Schema) => {
 
   return object({
     appenders: mapOf(string(), Appenders.createConfigSchema(schema), {
-      defaultValue: new Map()
+      defaultValue: new Map<string, AppenderConfigType>()
     }),
     root: object({
       level: createLevelSchema(schema),
@@ -58,7 +62,9 @@ const createLoggingSchema = (schema: Schema) => {
         minSize: 1
       })
     }),
-    loggers: arrayOf(createLoggerSchema(schema), { defaultValue: [] })
+    loggers: arrayOf(createLoggerSchema(schema), {
+      defaultValue: []
+    })
   });
 };
 
@@ -125,28 +131,24 @@ export class LoggingConfig {
 
   private fillAppendersConfig(schema: LoggingConfigType) {
     for (const [appenderKey, appenderSchema] of schema.appenders) {
-      this.appenders.set(appenderKey, appenderSchema as AppenderConfigType);
+      this.appenders.set(appenderKey, appenderSchema);
     }
   }
 
   private fillLoggersConfig(schema: LoggingConfigType) {
     // Include `root` logger into common logger list so that it can easily be a part
     // of the logger hierarchy and put all the loggers in map for easier retrieval.
-    const loggersMap = new Map(
-      [
-        { context: ROOT_CONTEXT_NAME, ...schema.root },
-        ...schema.loggers
-      ].map(loggerConfig => {
-        return [loggerConfig.context, loggerConfig] as [
-          string,
-          LoggerConfigType
-        ];
-      })
+    const loggers = [
+      { context: ROOT_CONTEXT_NAME, ...schema.root },
+      ...schema.loggers
+    ];
+
+    const loggerConfigByContext = new Map(
+      loggers.map(loggerConfig => toTuple(loggerConfig.context, loggerConfig))
     );
 
-    for (let [loggerContext, loggerConfig] of loggersMap) {
-      // We can't check whether logger config refers to the existing appenders at the config schema
-      // validation step, so we should do it here.
+    for (const [loggerContext, loggerConfig] of loggerConfigByContext) {
+      // Ensure logger config only contains valid appenders.
       const unsupportedAppenderKey = loggerConfig.appenders.find(
         appenderKey => !this.appenders.has(appenderKey)
       );
@@ -157,22 +159,7 @@ export class LoggingConfig {
         );
       }
 
-      // If config for current context doesn't have any defined appenders we should inherit appenders
-      // from the parent context config.
-      let currentContext = loggerConfig.context;
-      let appenders = loggerConfig.appenders;
-      while (appenders.length === 0) {
-        const parentContext = LoggingConfig.getParentLoggerContext(
-          currentContext
-        );
-
-        const parentLogger = loggersMap.get(parentContext);
-        if (parentLogger) {
-          appenders = parentLogger.appenders;
-        }
-
-        currentContext = parentContext;
-      }
+      const appenders = getAppenders(loggerConfig, loggerConfigByContext);
 
       // We expect `appenders` to never be empty at this point, since the `root` context config should always
       // have at least one appender that is enforced by the config schema validation.
@@ -182,4 +169,31 @@ export class LoggingConfig {
       });
     }
   }
+}
+
+/**
+ * Get appenders for logger config.
+ *
+ * If config for current context doesn't have any defined appenders inherit
+ * appenders from the parent context config.
+ */
+function getAppenders(
+  loggerConfig: LoggerConfigType,
+  loggerConfigByContext: Map<string, LoggerConfigType>
+) {
+  let currentContext = loggerConfig.context;
+  let appenders = loggerConfig.appenders;
+
+  while (appenders.length === 0) {
+    const parentContext = LoggingConfig.getParentLoggerContext(currentContext);
+
+    const parentLogger = loggerConfigByContext.get(parentContext);
+    if (parentLogger) {
+      appenders = parentLogger.appenders;
+    }
+
+    currentContext = parentContext;
+  }
+
+  return appenders;
 }

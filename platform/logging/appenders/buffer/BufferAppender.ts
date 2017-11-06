@@ -2,7 +2,7 @@ import { LogRecord } from '../../LogRecord';
 import { DisposableAppender } from '../Appenders';
 
 /**
- * Simple appender that just buffers `LogRecord` instances it receives. It is *reserved* appender
+ * Simple appender that just buffers `LogRecord` instances it receives. It is a *reserved* appender
  * that can't be set via configuration file.
  * @internal
  */

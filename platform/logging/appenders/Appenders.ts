@@ -60,14 +60,17 @@ export class Appenders {
     switch (config.kind) {
       case 'console':
         return new ConsoleAppender(Layouts.create(config.layout));
+
       case 'file':
         return new FileAppender(Layouts.create(config.layout), config.path);
+
       case 'legacy-appender':
         const legacyKbnServer = env.getLegacyKbnServer();
         if (legacyKbnServer === undefined) {
           throw new Error('Legacy appender requires kbnServer.');
         }
         return new LegacyAppender(legacyKbnServer);
+
       default:
         return assertNever(config);
     }

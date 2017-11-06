@@ -34,8 +34,10 @@ export class Layouts {
     switch (config.kind) {
       case 'json':
         return new JsonLayout();
+
       case 'pattern':
         return new PatternLayout(config.pattern, config.highlight);
+
       default:
         return assertNever(config);
     }
