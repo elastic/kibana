@@ -14,8 +14,8 @@ function ReactEditorControllerProvider(Private, localStorage, config) {
       this.vis.fields = {};
 
       const autoApply = localStorage.get(AUTO_APPLY_KEY);
-      this.vis.autoApply = autoApply != null ? autoApply : true;
-      this.vis.initialized = true;
+      vis.autoApply = autoApply != null ? autoApply : true;
+      vis.initialized = true;
     }
 
     render(visData) {
