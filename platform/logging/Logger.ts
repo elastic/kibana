@@ -71,23 +71,22 @@ export class BaseLogger implements Logger {
     errorOrMessage: string | Error,
     meta?: LogMeta
   ): LogRecord {
-    const record = {
-      timestamp: new Date(),
-      level,
-      context: this.context,
-      meta
-    };
-
     if (isError(errorOrMessage)) {
       return {
-        ...record,
+        timestamp: new Date(),
+        level,
+        context: this.context,
+        meta,
         message: errorOrMessage.message,
         error: errorOrMessage
       };
     }
 
     return {
-      ...record,
+      timestamp: new Date(),
+      level,
+      context: this.context,
+      meta,
       message: errorOrMessage
     };
   }
