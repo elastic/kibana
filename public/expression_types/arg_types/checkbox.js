@@ -7,8 +7,6 @@ const template = ({ onValueChange, argValue }) => {
     onValueChange(!argValue);
   }
 
-
-  console.log(argValue);
   return (
     <input
       type="checkbox"
