@@ -88,8 +88,7 @@ export class BaseLogger implements Logger {
 
     return {
       ...record,
-      message: errorOrMessage,
-      error: undefined
+      message: errorOrMessage
     };
   }
 }
