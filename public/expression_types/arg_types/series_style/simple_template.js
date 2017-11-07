@@ -11,7 +11,6 @@ export const simpleTemplate = (props) => {
   const chainArgs = get(chain, 'arguments', {});
   const color = get(chainArgs, 'color.0', '');
 
-
   const handleChange = (argName, ev) => {
     const fn = ev.target.value === '' ? del : set;
 

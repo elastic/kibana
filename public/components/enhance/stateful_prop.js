@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export function statefulProp(fieldname, updater = 'updateValue') {
+export function createStatefulPropHoc(fieldname, updater = 'updateValue') {
   return (Comp) => {
     class WrappedControlledInput extends React.PureComponent {
       constructor(props) {
