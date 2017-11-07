@@ -1,1 +1,1 @@
-export { AbstractRequestProvider } from './request';
+export { SearchRequestProvider } from './search_request';

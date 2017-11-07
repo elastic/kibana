@@ -34,6 +34,7 @@ export class PanelUtils {
       i: panel.panelIndex.toString()
     };
     panel.version = chrome.getKibanaVersion();
+    panel.panelIndex = panel.panelIndex.toString();
     delete panel.size_x;
     delete panel.size_y;
     delete panel.row;
