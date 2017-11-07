@@ -11,7 +11,7 @@ export function getUiSettingDefaults() {
     },
     'query:queryString:options': {
       value: '{ "analyze_wildcard": true, "default_field": "*" }',
-      description: '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html" target="_blank">Options</a> for the lucene query string parser',
+      description: '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-query-string-query.html" target="_blank" rel="noopener noreferrer">Options</a> for the lucene query string parser',
       type: 'json'
     },
     'search:queryLanguage': {
@@ -26,12 +26,12 @@ export function getUiSettingDefaults() {
     },
     'sort:options': {
       value: '{ "unmapped_type": "boolean" }',
-      description: '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html" target="_blank">Options</a> for the Elasticsearch sort parameter',
+      description: '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-sort.html" target="_blank" rel="noopener noreferrer">Options</a> for the Elasticsearch sort parameter',
       type: 'json'
     },
     'dateFormat': {
       value: 'MMMM Do YYYY, HH:mm:ss.SSS',
-      description: 'When displaying a pretty formatted date, use this <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank">format</a>',
+      description: 'When displaying a pretty formatted date, use this <a href="http://momentjs.com/docs/#/displaying/format/" target="_blank" rel="noopener noreferrer">format</a>',
     },
     'dateFormat:tz': {
       value: 'Browser',
@@ -54,7 +54,7 @@ export function getUiSettingDefaults() {
         'Values that define the format used in situations where timebased' +
         ' data is rendered in order, and formatted timestamps should adapt to the' +
         ' interval between measurements. Keys are' +
-        ' <a href="http://en.wikipedia.org/wiki/ISO_8601#Time_intervals" target="_blank">' +
+        ' <a href="http://en.wikipedia.org/wiki/ISO_8601#Time_intervals" target="_blank" rel="noopener noreferrer">' +
         'ISO8601 intervals.</a>'
       )
     },
@@ -127,7 +127,8 @@ export function getUiSettingDefaults() {
       description: 'The maximum geoHash precision displayed on tile maps: 7 is high, 10 is very high, ' +
       '12 is the max. ' +
       '<a href="http://www.elastic.co/guide/en/elasticsearch/reference/current/' +
-      'search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator" target="_blank">' +
+      'search-aggregations-bucket-geohashgrid-aggregation.html#_cell_dimensions_at_the_equator" ' +
+      'target="_blank" rel="noopener noreferrer">' +
       'Explanation of cell dimensions</a>',
     },
     'visualization:tileMap:WMSdefaults': {
@@ -144,7 +145,7 @@ export function getUiSettingDefaults() {
         }
       }, null, 2),
       type: 'json',
-      description: 'Default <a href="http://leafletjs.com/reference.html#tilelayer-wms" target="_blank">properties</a> for the WMS map server support in the coordinate map'
+      description: 'Default <a href="http://leafletjs.com/reference.html#tilelayer-wms" target="_blank" rel="noopener noreferrer">properties</a> for the WMS map server support in the coordinate map'
     },
     'visualization:regionmap:showWarnings': {
       value: true,
@@ -215,22 +216,22 @@ export function getUiSettingDefaults() {
     'format:number:defaultPattern': {
       type: 'string',
       value: '0,0.[000]',
-      description: 'Default <a href="http://numeraljs.com/" target="_blank">numeral format</a> for the "number" format'
+      description: 'Default <a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">numeral format</a> for the "number" format'
     },
     'format:bytes:defaultPattern': {
       type: 'string',
       value: '0,0.[000]b',
-      description: 'Default <a href="http://numeraljs.com/" target="_blank">numeral format</a> for the "bytes" format'
+      description: 'Default <a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">numeral format</a> for the "bytes" format'
     },
     'format:percent:defaultPattern': {
       type: 'string',
       value: '0,0.[000]%',
-      description: 'Default <a href="http://numeraljs.com/" target="_blank">numeral format</a> for the "percent" format'
+      description: 'Default <a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">numeral format</a> for the "percent" format'
     },
     'format:currency:defaultPattern': {
       type: 'string',
       value: '($0,0.[00])',
-      description: 'Default <a href="http://numeraljs.com/" target="_blank">numeral format</a> for the "currency" format'
+      description: 'Default <a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">numeral format</a> for the "currency" format'
     },
     'savedObjects:perPage': {
       type: 'number',
@@ -276,7 +277,7 @@ export function getUiSettingDefaults() {
     },
     'notifications:banner': {
       type: 'markdown',
-      description: 'A custom banner intended for temporary notices to all users. <a href="https://help.github.com/articles/basic-writing-and-formatting-syntax/" target="_blank">Markdown supported</a>.',
+      description: 'A custom banner intended for temporary notices to all users. <a href="https://help.github.com/articles/basic-writing-and-formatting-syntax/" target="_blank" rel="noopener noreferrer">Markdown supported</a>.',
       value: ''
     },
     'notifications:lifetime:banner': {
