@@ -60,6 +60,7 @@ export class KuiCodeEditor extends Component {
       onBlur, // eslint-disable-line no-unused-vars
       isReadOnly,
       setOptions,
+      cursorStart,
       ...rest,
     } = this.props;
 
@@ -68,16 +69,23 @@ export class KuiCodeEditor extends Component {
     });
 
     let prompt;
+    let filteredCursorStart;
 
     const options = { ...setOptions };
 
     if (isReadOnly) {
+      // Put the cursor at the beginning of the editor, so that it doesn't look like
+      // a prompt to begin typing.
+      filteredCursorStart = -1;
+
       Object.assign(options, {
         readOnly: true,
         highlightActiveLine: false,
         highlightGutterLine: false,
       });
     } else {
+      filteredCursorStart = cursorStart;
+
       prompt = (
         <div
           className={classes}
@@ -113,6 +121,7 @@ export class KuiCodeEditor extends Component {
           height={height}
           onBlur={this.onBlurAce}
           setOptions={options}
+          cursorStart={filteredCursorStart}
           {...rest}
         />
       </div>
@@ -126,6 +135,7 @@ KuiCodeEditor.propTypes = {
   onBlur: PropTypes.func,
   isReadOnly: PropTypes.bool,
   setOptions: PropTypes.object,
+  cursorStart: PropTypes.number,
 };
 
 KuiCodeEditor.defaultProps = {
