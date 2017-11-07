@@ -9,7 +9,7 @@
   "scripts": {
     "test": "npm run build && mocha --compilers js:babel-core/register",
     "build": "babel src --out-dir lib",
-    "prepublish": "npm run test"
+    "prepublishOnly": "npm run test"
   },
   "author": "Elastic",
   "license": "Apache-2.0",
