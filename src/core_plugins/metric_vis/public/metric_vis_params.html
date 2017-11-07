@@ -179,7 +179,7 @@
     <div id="metricOptionsStyle" ng-if="showStyle" class="kuiSideBarCollapsibleSection">
 
       <div class="kuiSideBarSection">
-        <div class="kuiSideBarFormRow">
+        <div class="kuiSideBarFormRow" ng-show="vis.params.metric.colorsRange.length > 1">
           <label class="kuiSideBarFormRow__label" for="metricColorMode">
             Color
           </label>

@@ -99,11 +99,13 @@ module.controller('KbnMetricVisController', function ($scope, $element) {
             }
           }
 
+          const shouldColor = config.colorsRange.length > 1;
+
           metrics.push({
             label: title,
             value: value,
-            color: config.style.labelColor ? color : null,
-            bgColor: config.style.bgColor ? color : null
+            color: shouldColor && config.style.labelColor ? color : null,
+            bgColor: shouldColor && config.style.bgColor ? color : null
           });
         });
       });
