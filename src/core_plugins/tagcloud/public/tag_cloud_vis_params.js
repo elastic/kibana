@@ -35,12 +35,20 @@ uiModules.get('kibana/table_vis')
          */
         $scope.$watch('vis.params.minFontSize', (val) => {
           val = parseInt(val);
+          if (val > $scope.vis.params.maxFontSize) {
+            $scope.vis.params.minFontSize = $scope.vis.params.maxFontSize;
+            val = $scope.vis.params.minFontSize;
+          }
           if (slider.noUiSlider.get()[0] !== val) {
             slider.noUiSlider.set([val, null]);
           }
         });
         $scope.$watch('vis.params.maxFontSize', (val) => {
           val = parseInt(val);
+          if (val < $scope.vis.params.minFontSize) {
+            $scope.vis.params.maxFontSize = $scope.vis.params.minFontSize;
+            val = $scope.vis.params.maxFontSize;
+          }
           if (slider.noUiSlider.get()[1] !== val) {
             slider.noUiSlider.set([null, val]);
           }
