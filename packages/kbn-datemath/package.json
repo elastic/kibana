@@ -27,7 +27,6 @@
     "sinon": "~1.17.3"
   },
   "dependencies": {
-    "lodash": "~3.10.1",
     "moment": "~2.13.0"
   }
 }
