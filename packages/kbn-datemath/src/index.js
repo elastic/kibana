@@ -1,11 +1,10 @@
-import _ from 'lodash';
 import moment from 'moment';
 
 const units = ['y', 'M', 'w', 'd', 'h', 'm', 's', 'ms'];
-const unitsAsc = _.sortBy(units, function (unit) {
-  return moment.duration(1, unit).valueOf();
-});
+const unitsAsc = units.sort((prev, val) => prev - moment.duration(1, val).valueOf());
 const unitsDesc = unitsAsc.reverse();
+
+const isDate = d => toString.call(d) === '[object Date]';
 
 /*
  * This is a simplified version of elasticsearch's date parser.
@@ -16,7 +15,7 @@ const unitsDesc = unitsAsc.reverse();
 function parse(text, roundUp, momentInstance = moment) {
   if (!text) return undefined;
   if (momentInstance.isMoment(text)) return text;
-  if (_.isDate(text)) return momentInstance(text);
+  if (isDate(text)) return momentInstance(text);
 
   let time;
   let mathString = '';
@@ -99,7 +98,7 @@ function parseDateMath(mathString, time, roundUp) {
       else break;
     }
 
-    if (!_.contains(units, unit)) {
+    if (units.indexOf(unit) === -1) {
       return;
     } else {
       if (type === 0) {
