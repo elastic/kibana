@@ -4,7 +4,6 @@ import kibanaVersion from './kibana_version';
 import { ensureEsVersion } from './ensure_es_version';
 import { ensureNotTribe } from './ensure_not_tribe';
 import { patchKibanaIndex } from './patch_kibana_index';
-import { format } from 'util';
 
 const NoConnections = elasticsearch.errors.NoConnections;
 
@@ -18,7 +17,7 @@ export default function (plugin, server) {
   function waitForPong(callWithInternalUser, url) {
     return callWithInternalUser('ping').catch(function (err) {
       if (!(err instanceof NoConnections)) throw err;
-      plugin.status.red(format('Unable to connect to Elasticsearch at %s.', url));
+      plugin.status.red(`Unable to connect to Elasticsearch at ${url}.`);
 
       return Promise.delay(REQUEST_DELAY).then(waitForPong.bind(null, callWithInternalUser, url));
     });
