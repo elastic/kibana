@@ -83,48 +83,36 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
           return;
         }
 
+        const { min, max } = suggestibleFunctionLocation;
+        let insertedValue;
+        let insertPositionMinOffset = 0;
+
         switch (scope.suggestions.type) {
           case SUGGESTION_TYPE.FUNCTIONS: {
-            const functionName = `${scope.suggestions.list[suggestionIndex].name}()`;
-            const { min, max } = suggestibleFunctionLocation;
-
-            // Update the expression with the function.
-            // min advanced one to not replace function '.'
-            const updatedExpression = insertAtLocation(functionName, scope.sheet, min + 1, max);
-            scope.sheet = updatedExpression;
-
             // Position the caret inside of the function parentheses.
-            const newCaretOffset = min + functionName.length;
-            setCaretOffset(newCaretOffset);
+            insertedValue = `${scope.suggestions.list[suggestionIndex].name}()`;
+
+            // min advanced one to not replace function '.'
+            insertPositionMinOffset = 1;
             break;
           }
           case SUGGESTION_TYPE.ARGUMENTS: {
-            const argumentName = `${scope.suggestions.list[suggestionIndex].name}=`;
-            const { min, max } = suggestibleFunctionLocation;
-
-            // Update the expression with the function.
-            const updatedExpression = insertAtLocation(argumentName, scope.sheet, min, max);
-            scope.sheet = updatedExpression;
-
             // Position the caret after the '='
-            const newCaretOffset = min + argumentName.length;
-            setCaretOffset(newCaretOffset);
+            insertedValue = `${scope.suggestions.list[suggestionIndex].name}=`;
             break;
           }
           case SUGGESTION_TYPE.ARGUMENT_VALUE: {
-            const argumentName = `${scope.suggestions.list[suggestionIndex].name}`;
-            const { min, max } = suggestibleFunctionLocation;
-
-            // Update the expression with the function.
-            const updatedExpression = insertAtLocation(argumentName, scope.sheet, min, max);
-            scope.sheet = updatedExpression;
-
-            // Position the caret after the '='
-            const newCaretOffset = min + argumentName.length;
-            setCaretOffset(newCaretOffset);
+            // Position the caret after the argument value
+            insertedValue = `${scope.suggestions.list[suggestionIndex].name}`;
             break;
           }
         }
+
+        const updatedExpression = insertAtLocation(insertedValue, scope.sheet, min + insertPositionMinOffset, max);
+        scope.sheet = updatedExpression;
+
+        const newCaretOffset = min + insertedValue.length;
+        setCaretOffset(newCaretOffset);
       }
 
       function scrollToSuggestionAt(index) {
