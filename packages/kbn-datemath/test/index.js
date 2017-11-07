@@ -1,5 +1,4 @@
 import dateMath from '../lib/index';
-import _ from 'lodash';
 import moment from 'moment';
 import sinon from 'sinon';
 import expect from 'expect.js';
@@ -101,8 +100,8 @@ describe('dateMath', function () {
       clock.restore();
     });
 
-    _.each([5, 12, 247], function (len) {
-      _.each(spans, function (span) {
+    [5, 12, 247].forEach((len) => {
+      spans.forEach((span) => {
         const nowEx = `now-${len}${span}`;
         const thenEx =  `${anchor}||-${len}${span}`;
 
@@ -131,8 +130,8 @@ describe('dateMath', function () {
       clock.restore();
     });
 
-    _.each([5, 12, 247], function (len) {
-      _.each(spans, function (span) {
+    [5, 12, 247].forEach((len) => {
+      spans.forEach((span) => {
         const nowEx = `now+${len}${span}`;
         const thenEx =  `${anchor}||+${len}${span}`;
 
@@ -159,7 +158,7 @@ describe('dateMath', function () {
       clock.restore();
     });
 
-    _.each(spans, function (span) {
+    spans.forEach((span) => {
       it('should round now to the beginning of the ' + span, function () {
         expect(dateMath.parse('now/' + span).format(format)).to.eql(now.startOf(span).format(format));
       });
