@@ -6,7 +6,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('_build:copyNode', function () {
     const rootPath = grunt.config.get('root');
-    const nodePath = join(rootPath, 'build/kibana/node');
+    const nodeDestination = join(rootPath, 'build/kibana/node');
     const currentPlatform = getPlatform();
     const platformMap = {
       'linux-x86_64': 'linux',
@@ -18,6 +18,6 @@ module.exports = function (grunt) {
       return platformMap[platform.name] === currentPlatform;
     });
 
-    exec('cp', ['-r', nodeDir, nodePath]);
+    exec('cp', ['-r', nodeDir, nodeDestination]);
   });
 };
