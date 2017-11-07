@@ -1,16 +1,18 @@
-# `k$`
+# `kbn-observable`
 
-k$ is an observable library based on "native observables", aka the `Observable`
-functionality proposed in https://github.com/tc39/proposal-observable.
+kbn-observable is an observable library based on the [proposed `Observable`][proposal]
+feature. In includes several factory functions and operators, that all return
+"native" observable.
 
-Where all other observable libraries put operators and other methods on their
-own implementation of a base `Observable`, we want to use the proposed
-`Observable` without adding anything to its `prototype`. By doing this, any
-operator will always return an instance of the "native" observable.
+Why build this? The main reason is that we don't want to tie our plugin apis
+heavily to a large dependency, but rather expose something that's much closer
+to "native" observables, and something we have control over ourselves. Also, all
+other observable libraries have their own base `Observable` class, while we
+wanted to rely on the proposed functionality.
 
-The reason we want this is that we don't want to expose "heavy" observables
-with lots of functionality in our plugin apis, but rather expose "native"
-observables.
+In addition, kbn-observable includes `System.observable`, which enables interop
+between observable libraries, which means plugins can use whatever observable
+library they want, if they don't want to use `kbn-observable`.
 
 ## Example
 
@@ -32,7 +34,7 @@ TODO: Docs, videos, other intros. This needs to be good enough for people to
 easily jump in and understand the basics of observables.
 
 If you are just getting started with observables, a great place to start is with
-Andre Staltz' [The introduction to Reactive Programming you've been missing](https://gist.github.com/staltz/868e7e9bc2a7b8c1f754),
+Andre Staltz' [The introduction to Reactive Programming you've been missing][staltz-intro],
 which is a great introduction to the ideas and concepts.
 
 ## Factories
@@ -48,9 +50,9 @@ See [./src/factories](./src/factories) for more info about each factory.
 Operators are functions that take some arguments and produce an operator
 function. Operators aren't anything fancy, just a function that takes an
 observable and returns a new observable with the requested modifications
-applied. When using `k$` you don't even have to think much about it being an
-observable in many cases, as it's just a pure function that receives a value as
-an argument and returns a value, e.g.
+applied.
+
+Some examples:
 
 ```js
 map(i => 2017 + i);
@@ -68,26 +70,56 @@ applied, e.g. like the example above with `map` and `last`.
 
 See [./src/operators](./src/operators) for more info about each operator.
 
-## Why `k$`?
-
-TODO
-
-- We want to expose something minimal, and preferably something close to the
-  [proposed native observables](https://github.com/tc39/proposal-observable).
-- RxJS is great, but a heavy dep to push on all plugins, especially with regards
-  to updates etc.
-
-## Caveats
-
-TODO
-
-Why `k$(source)(...operators)` instead of `k$(source, [...operators])`?
-
 ## More advanced topics
 
 TODO: Hot/cold. Multicasting.
+
+## Why `k$`?
+
+While exploring how to handle observables in Kibana we went through multiple
+PoCs. We initially used RxJS directly, but we didn't find a simple way to
+consistently transform RxJS observables into "native" observables in the plugin
+apis. This was something we wanted because of our earlier experiences with
+exposing large libraries in our apis, which causes problems e.g. when we need to
+perform major upgrades of a lib that has breaking changes, but we can't ship a
+new major version of Kibana yet, even though this will cause breaking changes
+in our plugin apis.
+
+Then we built the initial version of `kbn-observable` based on the Observable
+spec, and we included the `k$` helper and several operators that worked like
+this:
+
+```js
+import { k$, Observable, map, first } from 'kbn-observable';
+
+// general structure:
+const resultObservable = k$(sourceObservable, [...operators]);
+
+// e.g.
+const source = Observable.from(1,2,3);
+const observable = k$(source, [map(x => x + 1), first()]);
+```
+
+Here `Observable` is a copy of the Observable class from the spec. This
+would enable us to always work with these spec-ed observables. This api for `k$`
+worked nicely in pure JavaScript, but caused a problem with TypeScript, as
+TypeScript wasn't able to correctly type the operators array when more than one
+operator was specified.
+
+Because of that problem we ended up with `k$(source)(...operators)`. With this
+change TypeScript is able to corretly type the operator arguments.
+
+We've also discussed adding a `pipe` method to the `Observable.prototype`, so we
+could do `source.pipe(...operators)` instead, but we decided against it because
+we didn't want to start adding features directly on the `Observable` object, but
+rather follow the spec as close as possible, and only update whenever the spec
+receives updates.
 
 ## Inspiration
 
 This code is heavily inspired by and based on RxJS, which is licensed under the
 Apache License, Version 2.0, see https://github.com/ReactiveX/rxjs.
+
+[proposal]: https://github.com/tc39/proposal-observable
+[rxjs]: http://reactivex.io/rxjs/
+[staltz-intro]: https://gist.github.com/staltz/868e7e9bc2a7b8c1f754
