@@ -198,10 +198,6 @@ export default () => Joi.object({
     }))
   }).default(),
 
-  savedObjects: Joi.object({
-    indexCheckTimeout: Joi.number().default(5000)
-  }).default(),
-
   i18n: Joi.object({
     defaultLocale: Joi.string().default('en'),
   }).default(),

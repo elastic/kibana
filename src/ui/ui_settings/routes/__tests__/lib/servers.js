@@ -11,13 +11,7 @@ export async function startServers() {
   this.timeout(es.getStartTimeout());
   await es.start();
 
-  kbnServer = kbnTestServer.createServerWithCorePlugins({
-    // speed up the index check timeout so that the healthCheck doesn't
-    // have time to recreate the index before we get a response
-    savedObjects: {
-      indexCheckTimeout: 1000
-    }
-  });
+  kbnServer = kbnTestServer.createServerWithCorePlugins();
   await kbnServer.ready();
   await kbnServer.server.plugins.elasticsearch.waitUntilReady();
 }
