@@ -7,9 +7,6 @@ function createWorkpadIndex(client, indexPrefix) {
       index: {
         number_of_shards: 1,
         number_of_replicas: 0,
-        mapper: {
-          dynamic: false,
-        },
       },
     },
     mappings : {
