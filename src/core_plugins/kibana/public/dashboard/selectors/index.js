@@ -1,106 +1,89 @@
-import {
-  getEmbeddableTitle as getEmbeddableTitleFromEmbeddables,
-  getEmbeddableEditUrl as getEmbeddableEditUrlFromEmbeddables,
-  getEmbeddableError as getEmbeddableErrorFromEmbeddables,
-  getEmbeddable as getEmbeddableFromEmbeddables,
-} from './embeddables';
+/**
+ * @typedef {Object} ViewState
+ * @property {DashboardViewMode} viewMode
+ * @property {boolean} isFullScreenMode
+ * @property {string|undefined} maximizedPanelId
+ */
 
-import {
-  getPanel as getPanelFromPanels,
-  getPanelType as getPanelTypeFromPanels
-} from './panels';
-
-import {
-  getViewMode as getViewModeFromView,
-  getFullScreenMode as getFullScreenModeFromView,
-  getMaximizedPanelId as getMaximizedPanelIdFromView
-} from './view';
-
-import {
-  getTitle as getTitleFromMetadata,
-  getDescription as getDescriptionFromMetadata
-} from './metadata';
+/**
+ * @typedef {Object} EmbeddableState
+ * @property {string} title
+ * @property {string} editUrl
+ * @property {string|object} error
+ */
 
 /**
  * @typedef {Object} DashboardState
- * @property {Object} PanelsState
- * @property {Object} EmbeddablesState
- * @property {Object} ViewState
+ * @property {Object.<string, PanelState>} panels
+ * @property {Object.<string, EmbeddableState>} embeddables
+ * @property {ViewState} view
  */
 
 /**
  * @param dashboard {DashboardState}
- * @return {PanelsState}
+ * @return {Object.<string, PanelState>}
  */
 export const getPanels = dashboard => dashboard.panels;
+
 /**
  * @param dashboard {DashboardState}
  * @param panelId {string}
  * @return {PanelState}
  */
-export const getPanel = (dashboard, panelId) => getPanelFromPanels(getPanels(dashboard), panelId);
+export const getPanel = (dashboard, panelId) => getPanels(dashboard)[panelId];
 /**
  * @param dashboard {DashboardState}
  * @param panelId {string}
  * @return {string}
  */
-export const getPanelType = (dashboard, panelId) => getPanelTypeFromPanels(getPanels(dashboard), panelId);
+export const getPanelType = (dashboard, panelId) => getPanel(dashboard, panelId).type;
 
-/**
- * @param dashboard {DashboardState}
- * @return {EmbeddablesState}
- */
-export const getEmbeddables = dashboard => dashboard.embeddables;
 /**
  * @param dashboard {DashboardState}
  * @param panelId {string}
  * @return {EmbeddableState}
  */
-export const getEmbeddable = (dashboard, panelId) => getEmbeddableFromEmbeddables(getEmbeddables(dashboard), panelId);
+export const getEmbeddable = (dashboard, panelId) => dashboard.embeddables[panelId];
+
 /**
  * @param dashboard {DashboardState}
  * @param panelId {string}
  * @return {string|Object}
  */
-export const getEmbeddableError =
-  (dashboard, panelId) => getEmbeddableErrorFromEmbeddables(getEmbeddables(dashboard), panelId);
+export const getEmbeddableError = (dashboard, panelId) => getEmbeddable(dashboard, panelId).error;
 /**
  * @param dashboard {DashboardState}
  * @param panelId {string}
  * @return {string}
  */
-export const getEmbeddableTitle =
-  (dashboard, panelId) => getEmbeddableTitleFromEmbeddables(getEmbeddables(dashboard), panelId);
+export const getEmbeddableTitle = (dashboard, panelId) => getEmbeddable(dashboard, panelId).title;
 /**
  * @param dashboard {DashboardState}
  * @param panelId {string}
  * @return {string}
  */
-export const getEmbeddableEditUrl =
-  (dashboard, panelId) => getEmbeddableEditUrlFromEmbeddables(getEmbeddables(dashboard), panelId);
+export const getEmbeddableEditUrl = (dashboard, panelId) => getEmbeddable(dashboard, panelId).editUrl;
 
-/**
- * @param dashboard {DashboardState}
- * @return {ViewState}
- */
-export const getView = dashboard => dashboard.view;
-/**
- * @param dashboard {DashboardState}
- * @return {DashboardViewMode}
- */
-export const getViewMode = dashboard => getViewModeFromView(getView(dashboard));
 /**
  * @param dashboard {DashboardState}
  * @return {boolean}
  */
-export const getFullScreenMode = dashboard => getFullScreenModeFromView(getView(dashboard));
+export const getUseMargins = dashboard => dashboard.view.useMargins;
+/**
+ * @param dashboard {DashboardState}
+ * @return {DashboardViewMode}
+ */
+export const getViewMode = dashboard => dashboard.view.viewMode;
+/**
+ * @param dashboard {DashboardState}
+ * @return {boolean}
+ */
+export const getFullScreenMode = dashboard => dashboard.view.isFullScreenMode;
 /**
  * @param dashboard {DashboardState}
  * @return {string|undefined}
  */
-export const getMaximizedPanelId = dashboard => getMaximizedPanelIdFromView(getView(dashboard));
-
-export const getUseMargins = dashboard => getView(dashboard).useMargins;
+export const getMaximizedPanelId = dashboard => dashboard.view.maximizedPanelId;
 
 /**
  * @param dashboard {DashboardState}
@@ -111,9 +94,9 @@ export const getMetadata = dashboard => dashboard.metadata;
  * @param dashboard {MetadataState}
  * @return {string}
  */
-export const getTitle = dashboard => getTitleFromMetadata(getMetadata(dashboard));
+export const getTitle = dashboard => dashboard.metadata.title;
 /**
  * @param dashboard {MetadataState}
  * @return {string}
  */
-export const getDescription = dashboard => getDescriptionFromMetadata(getMetadata(dashboard));
+export const getDescription = dashboard => dashboard.metadata.description;

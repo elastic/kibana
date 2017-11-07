@@ -84,6 +84,13 @@ export class DashboardGrid extends React.Component {
     this.state = {
       layout: this.buildLayoutFromPanels()
     };
+    // A mapping of panel type to embeddable handlers. Because this function reaches out of react and into angular,
+    // if done in the render method, it appears to be triggering a scope.apply, which appears to be trigging a setState
+    // call inside TSVB visualizations.  Moving the function out of render appears to fix the issue.  See
+    // https://github.com/elastic/kibana/issues/14802 for more info.
+    // This is probably a better implementation anyway so the handlers are cached.
+    // @type {Object.<string, EmbeddableHandler>}
+    this.embeddableHandlerMap = {};
   }
 
   buildLayoutFromPanels() {
@@ -95,8 +102,25 @@ export class DashboardGrid extends React.Component {
     });
   }
 
+  createEmbeddableHandlersMap(panels) {
+    Object.values(panels).map(panel => {
+      if (!this.embeddableHandlerMap[panel.type]) {
+        this.embeddableHandlerMap[panel.type] = this.props.getEmbeddableHandler(panel.type);
+      }
+    });
+  }
+
+  componentWillMount() {
+    this.createEmbeddableHandlersMap(this.props.panels);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.createEmbeddableHandlersMap(nextProps.panels);
+  }
+
   onLayoutChange = (layout) => {
-    const { onPanelUpdated } = this.props;
+    const { onPanelsUpdated } = this.props;
+    const updatedPanels = [];
     layout.forEach(panelLayout => {
       const updatedPanel = {
         panelIndex: panelLayout.i,
@@ -108,8 +132,9 @@ export class DashboardGrid extends React.Component {
           i: panelLayout.i,
         }
       };
-      onPanelUpdated(updatedPanel);
+      updatedPanels.push(updatedPanel);
     });
+    onPanelsUpdated(updatedPanels);
   };
 
   onPanelFocused = panelIndex => {
@@ -129,7 +154,6 @@ export class DashboardGrid extends React.Component {
   renderDOM() {
     const {
       panels,
-      getEmbeddableHandler,
       getContainerApi,
       maximizedPanelId
     } = this.props;
@@ -154,13 +178,13 @@ export class DashboardGrid extends React.Component {
       return (
         <div
           className={classes}
-          key={panel.panelIndex.toString()}
+          key={panel.panelIndex}
           ref={reactGridItem => { this.gridItems[panel.panelIndex] = reactGridItem; }}
         >
           <DashboardPanel
-            panelId={`${panel.panelIndex}`}
+            panelId={panel.panelIndex}
             getContainerApi={getContainerApi}
-            embeddableHandler={getEmbeddableHandler(panel.type)}
+            embeddableHandler={this.embeddableHandlerMap[panel.type]}
             onPanelFocused={this.onPanelFocused}
             onPanelBlurred={this.onPanelBlurred}
           />
@@ -191,7 +215,7 @@ DashboardGrid.propTypes = {
   getContainerApi: PropTypes.func.isRequired,
   getEmbeddableHandler: PropTypes.func.isRequired,
   dashboardViewMode: PropTypes.oneOf([DashboardViewMode.EDIT, DashboardViewMode.VIEW]).isRequired,
-  onPanelUpdated: PropTypes.func.isRequired,
+  onPanelsUpdated: PropTypes.func.isRequired,
   maximizedPanelId: PropTypes.string,
   useMargins: PropTypes.bool.isRequired,
 };

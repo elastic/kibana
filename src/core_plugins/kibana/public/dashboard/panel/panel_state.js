@@ -96,7 +96,7 @@ export function createPanelState(id, type, panelIndex, currentPanels) {
       i: panelIndex.toString()
     },
     version: chrome.getKibanaVersion(),
-    panelIndex: panelIndex,
+    panelIndex: panelIndex.toString(),
     type: type,
     id: id
   };

@@ -7,7 +7,7 @@ import { PanelUtils } from './panel/panel_utils';
 import { store } from '../store';
 import {
   updateViewMode,
-  updatePanels,
+  setPanels,
   updateUseMargins,
   updateIsFullScreenMode,
   minimizePanel,
@@ -82,7 +82,7 @@ export class DashboardStateManager {
 
     // Always start out with all panels minimized when a dashboard is first loaded.
     store.dispatch(minimizePanel());
-    store.dispatch(updatePanels(this.getPanels()));
+    store.dispatch(setPanels(this.getPanels()));
     store.dispatch(updateViewMode(this.getViewMode()));
     store.dispatch(updateUseMargins(this.getUseMargins()));
     store.dispatch(updateIsFullScreenMode(this.getFullScreenMode()));
@@ -126,7 +126,7 @@ export class DashboardStateManager {
     // We need these checks, or you can get into a loop where a change is triggered by the store, which updates
     // AppState, which then dispatches the change here, which will end up triggering setState warnings.
     if (!this._areStoreAndAppStatePanelsEqual()) {
-      store.dispatch(updatePanels(this.getPanels()));
+      store.dispatch(setPanels(this.getPanels()));
     }
 
     const state = store.getState();
