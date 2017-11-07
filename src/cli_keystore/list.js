@@ -11,7 +11,6 @@ export function listCli(program, keystore) {
   program
     .command('list')
     .description('List entries in the keystore')
-    .option('-v, --verbose', 'turns on verbose logging')
     .option('-s, --silent', 'prevent all logging')
     .action(list.bind(null, keystore));
 }

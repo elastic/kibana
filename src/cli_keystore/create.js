@@ -21,7 +21,6 @@ export function createCli(program, keystore) {
   program
     .command('create')
     .description('Creates a new Kibana keystore')
-    .option('-v, --verbose', 'turns on verbose logging')
     .option('-s, --silent', 'prevent all logging')
     .action(create.bind(null, keystore));
 }

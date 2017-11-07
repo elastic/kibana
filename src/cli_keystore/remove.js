@@ -7,7 +7,6 @@ export function removeCli(program, keystore) {
   program
     .command('remove <key>')
     .description('Remove a setting from the keystore')
-    .option('-v, --verbose', 'turns on verbose logging')
     .option('-s, --silent', 'prevent all logging')
     .action(remove.bind(null, keystore));
 }

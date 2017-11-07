@@ -33,7 +33,6 @@ export function addCli(program, keystore) {
     .description('Add a string setting to the keystore')
     .option('-f, --force', 'overwrite existing setting without prompting')
     .option('-x, --stdin', 'read setting value from stdin')
-    .option('-v, --verbose', 'turns on verbose logging')
     .option('-s, --silent', 'prevent all logging')
     .action(add.bind(null, keystore));
 }
