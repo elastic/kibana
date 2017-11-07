@@ -45,7 +45,7 @@ const workerType = process.env.kbnWorkerType ? `${type(process.env.kbnWorkerType
 
 export default class KbnLoggerStringFormat extends LogFormat {
   format(data) {
-    const time = color('time')(this.formatTimestamp(data, 'HH:mm:ss.SSS'));
+    const time = color('time')(this.extractAndFormatTimestamp(data, 'HH:mm:ss.SSS'));
     const msg = data.error ? color('error')(data.error.stack) : color('message')(data.message);
 
     const tags = _(data.tags)

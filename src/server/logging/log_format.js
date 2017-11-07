@@ -46,7 +46,7 @@ export default class TransformObjStream extends Stream.Transform {
     next();
   }
 
-  formatTimestamp(data, format) {
+  extractAndFormatTimestamp(data, format) {
     const { useUTC } = this.config;
     const date = moment(data['@timestamp']);
     if (useUTC) {

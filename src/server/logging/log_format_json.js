@@ -8,7 +8,7 @@ const stripColors = function (string) {
 export default class KbnLoggerJsonFormat extends LogFormat {
   format(data) {
     data.message = stripColors(data.message);
-    data['@timestamp'] = this.formatTimestamp(data);
+    data['@timestamp'] = this.extractAndFormatTimestamp(data);
     return stringify(data);
   }
 }
