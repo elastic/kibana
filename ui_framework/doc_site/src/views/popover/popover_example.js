@@ -12,7 +12,7 @@ import {
 } from '../../components';
 
 import Popover from './popover';
-const popoverSource = require('!!raw!./popover');
+const popoverSource = require('!!raw-loader!./popover');
 const popoverHtml = renderToHtml(Popover);
 
 import TrapFocus from './trap_focus';
@@ -20,15 +20,15 @@ const trapFocusSource = require('!!raw!./trap_focus');
 const trapFocusHtml = renderToHtml(TrapFocus);
 
 import PopoverAnchorPosition from './popover_anchor_position';
-const popoverAnchorPositionSource = require('!!raw!./popover_anchor_position');
+const popoverAnchorPositionSource = require('!!raw-loader!./popover_anchor_position');
 const popoverAnchorPositionHtml = renderToHtml(PopoverAnchorPosition);
 
 import PopoverPanelClassName from './popover_panel_class_name';
-const popoverPanelClassNameSource = require('!!raw!./popover_panel_class_name');
+const popoverPanelClassNameSource = require('!!raw-loader!./popover_panel_class_name');
 const popoverPanelClassNameHtml = renderToHtml(PopoverPanelClassName);
 
 import PopoverWithTitle from './popover_with_title';
-const popoverWithTitleSource = require('!!raw!./popover_with_title');
+const popoverWithTitleSource = require('!!raw-loader!./popover_with_title');
 const popoverWithTitleHtml = renderToHtml(PopoverWithTitle);
 
 export default props => (

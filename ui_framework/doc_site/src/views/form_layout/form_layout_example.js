@@ -9,7 +9,7 @@ import {
 } from '../../components';
 
 import FieldGroup from './field_group';
-const fieldGroupSource = require('!!raw!./field_group');
+const fieldGroupSource = require('!!raw-loader!./field_group');
 const fieldGroupHtml = renderToHtml(FieldGroup);
 
 export default props => (
