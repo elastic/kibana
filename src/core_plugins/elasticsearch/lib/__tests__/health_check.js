@@ -117,14 +117,13 @@ describe('plugins/elasticsearch', () => {
       return health.run()
         .then(function () {
           sinon.assert.calledOnce(plugin.status.yellow);
-          expect(plugin.status.yellow.args[0][0]).to.be('Waiting for Elasticsearch');
+          sinon.assert.calledWithExactly(plugin.status.yellow, 'Waiting for Elasticsearch');
 
           sinon.assert.calledOnce(cluster.callWithInternalUser.withArgs('ping'));
           sinon.assert.calledTwice(cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any));
           sinon.assert.notCalled(plugin.status.red);
           sinon.assert.calledOnce(plugin.status.green);
-
-          expect(plugin.status.green.args[0][0]).to.be('Ready');
+          sinon.assert.calledWithExactly(plugin.status.green, 'Ready');
         });
     });
 
@@ -136,17 +135,18 @@ describe('plugins/elasticsearch', () => {
       return health.run()
         .then(function () {
           sinon.assert.calledOnce(plugin.status.yellow);
-          expect(plugin.status.yellow.args[0][0]).to.be('Waiting for Elasticsearch');
+          sinon.assert.calledWithExactly(plugin.status.yellow, 'Waiting for Elasticsearch');
 
           sinon.assert.calledOnce(plugin.status.red);
-          expect(plugin.status.red.args[0][0]).to.be(
+          sinon.assert.calledWithExactly(
+            plugin.status.red,
             `Unable to connect to Elasticsearch at ${esUrl}.`
           );
 
           sinon.assert.calledTwice(ping);
           sinon.assert.calledTwice(cluster.callWithInternalUser.withArgs('nodes.info', sinon.match.any));
           sinon.assert.calledOnce(plugin.status.green);
-          expect(plugin.status.green.args[0][0]).to.be('Ready');
+          sinon.assert.calledWithExactly(plugin.status.green, 'Ready');
         });
     });
 
