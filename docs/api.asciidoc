@@ -1,0 +1,12 @@
+[[apis]]
+= REST APIs
+
+[partintro]
+--
+Kibana exposes REST APIs that are used by the UI components and can be called
+directly.
+
+* <<saved-objects-api>>
+--
+
+include::api/saved-objects.asciidoc[]
