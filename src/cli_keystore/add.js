@@ -1,7 +1,5 @@
-import inquirer from 'inquirer';
-
 import Logger from '../cli_plugin/lib/logger';
-import { stdin } from '../utils';
+import { stdin, confirm, question } from '../utils';
 
 export async function add(keystore, key, options = {}) {
   const logger = new Logger(options);
@@ -12,13 +10,7 @@ export async function add(keystore, key, options = {}) {
   }
 
   if (!options.force && keystore.has(key)) {
-    const { overwrite } = await inquirer.prompt([{
-      type: 'confirm',
-      name: 'overwrite',
-      message: `Setting ${key} already exists. Overwrite?`,
-      mask: '*',
-      default: false
-    }]);
+    const overwrite = await confirm(`Setting ${key} already exists. Overwrite?`);
 
     if (!overwrite) {
       return logger.log('Exiting without modifying keystore.');
@@ -28,12 +20,7 @@ export async function add(keystore, key, options = {}) {
   if (options.stdin) {
     value = await stdin();
   } else {
-    ({ value } = await inquirer.prompt([{
-      type: 'password',
-      name: 'value',
-      message: `Enter value for ${key}`,
-      mask: '*'
-    }]));
+    value = await question(`Enter value for ${key}`, { mask: '*' });
   }
 
   keystore.add(key, value.trim());

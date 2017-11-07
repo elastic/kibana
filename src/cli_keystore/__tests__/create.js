@@ -1,11 +1,11 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import mockFs from 'mock-fs';
-import inquirer from 'inquirer';
 
 import { Keystore } from '../../server/keystore';
 import { create } from '../create';
 import Logger from '../../cli_plugin/lib/logger';
+import * as prompt from '../../utils/prompt';
 
 describe('Kibana keystore', () => {
   describe('create', () => {
@@ -51,24 +51,19 @@ describe('Kibana keystore', () => {
     });
 
     it('prompts for overwrite', async () => {
-      sandbox.stub(inquirer, 'prompt').returns(Promise.resolve(
-        { overwrite: true })
-      );
+      sandbox.stub(prompt, 'confirm').returns(Promise.resolve(true));
 
       const keystore = new Keystore('/data/test.keystore');
       await create(keystore);
 
-      sinon.assert.calledOnce(inquirer.prompt);
-      const args = inquirer.prompt.getCall(0).args[0][0];
+      sinon.assert.calledOnce(prompt.confirm);
+      const { args } = prompt.confirm.getCall(0);
 
-      expect(args.message).to.eql('A Kibana keystore already exists. Overwrite?');
-      expect(args.default).to.be(false);
+      expect(args[0]).to.eql('A Kibana keystore already exists. Overwrite?');
     });
 
     it('aborts if overwrite is denied', async () => {
-      sandbox.stub(inquirer, 'prompt').returns(Promise.resolve(
-        { overwrite: false })
-      );
+      sandbox.stub(prompt, 'confirm').returns(Promise.resolve(false));
 
       const keystore = new Keystore('/data/test.keystore');
       sandbox.stub(keystore, 'save');

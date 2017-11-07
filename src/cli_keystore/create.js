@@ -1,16 +1,11 @@
-import inquirer from 'inquirer';
 import Logger from '../cli_plugin/lib/logger';
+import { confirm } from '../utils';
 
 export async function create(keystore, command, options) {
   const logger = new Logger(options);
 
   if (keystore.exists()) {
-    const { overwrite } = await inquirer.prompt([{
-      type: 'confirm',
-      name: 'overwrite',
-      message: 'A Kibana keystore already exists. Overwrite?',
-      default: false
-    }]);
+    const overwrite = await confirm('A Kibana keystore already exists. Overwrite?');
 
     if (!overwrite) {
       return logger.log('Exiting without modifying keystore.');

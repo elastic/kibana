@@ -133,7 +133,6 @@
     "http-proxy-agent": "1.0.0",
     "imports-loader": "0.7.1",
     "inert": "4.0.2",
-    "inquirer": "3.3.0",
     "jade": "1.11.0",
     "jade-loader": "0.8.0",
     "joi": "10.4.1",

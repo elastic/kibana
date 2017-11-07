@@ -1,11 +1,11 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import mockFs from 'mock-fs';
-import inquirer from 'inquirer';
 
 import { Keystore } from '../../server/keystore';
 import { add } from '../add';
 import Logger from '../../cli_plugin/lib/logger';
+import * as prompt from '../../utils/prompt';
 
 describe('Kibana keystore', () => {
   describe('add', () => {
@@ -21,6 +21,9 @@ describe('Kibana keystore', () => {
           'test.keystore': JSON.stringify(keystoreData),
         }
       });
+
+      sandbox.stub(prompt, 'confirm');
+      sandbox.stub(prompt, 'question');
 
       sandbox.stub(Logger.prototype, 'log');
       sandbox.stub(Logger.prototype, 'error');
@@ -51,50 +54,46 @@ describe('Kibana keystore', () => {
     });
 
     it('prompts for existing key', async () => {
-      sandbox.stub(inquirer, 'prompt').returns(Promise.resolve({
-        overwrite: true,
-        value: 'bar'
-      }));
+      prompt.confirm.returns(Promise.resolve(true));
+      prompt.question.returns(Promise.resolve('bar'));
 
       const keystore = new Keystore('/data/test.keystore');
       await add(keystore, 'a2');
 
-      sinon.assert.calledTwice(inquirer.prompt);
-      const args = inquirer.prompt.getCall(0).args[0][0];
+      sinon.assert.calledOnce(prompt.confirm);
+      sinon.assert.calledOnce(prompt.question);
 
-      expect(args.message).to.eql('Setting a2 already exists. Overwrite?');
-      expect(args.default).to.be(false);
+      const { args } = prompt.confirm.getCall(0);
+
+      expect(args[0]).to.eql('Setting a2 already exists. Overwrite?');
     });
 
     it('aborts if overwrite is denied', async () => {
-      sandbox.stub(inquirer, 'prompt').returns(Promise.resolve({
-        overwrite: false
-      }));
+      prompt.confirm.returns(Promise.resolve(false));
 
       const keystore = new Keystore('/data/test.keystore');
       await add(keystore, 'a2');
+
+      sinon.assert.notCalled(prompt.question);
 
       sinon.assert.calledOnce(Logger.prototype.log);
       sinon.assert.calledWith(Logger.prototype.log, 'Exiting without modifying keystore.');
     });
 
     it('overwrites without prompt if force is supplied', async () => {
-      sandbox.stub(inquirer, 'prompt').returns(Promise.resolve({
-        value: 'bar'
-      }));
+      prompt.question.returns(Promise.resolve('bar'));
 
       const keystore = new Keystore('/data/test.keystore');
       sandbox.stub(keystore, 'save');
 
       await add(keystore, 'a2', { force: true });
 
+      sinon.assert.notCalled(prompt.confirm);
       sinon.assert.calledOnce(keystore.save);
     });
 
     it('trims value', async () => {
-      sandbox.stub(inquirer, 'prompt').returns(Promise.resolve({
-        value: 'bar\n'
-      }));
+      prompt.question.returns(Promise.resolve('bar\n'));
 
       const keystore = new Keystore('/data/test.keystore');
       sandbox.stub(keystore, 'save');
@@ -105,9 +104,8 @@ describe('Kibana keystore', () => {
     });
 
     it('persists updated keystore', async () => {
-      sandbox.stub(inquirer, 'prompt').returns(Promise.resolve({
-        value: 'bar\n'
-      }));
+      prompt.question.returns(Promise.resolve('bar\n'));
+
 
       const keystore = new Keystore('/data/test.keystore');
       sandbox.stub(keystore, 'save');
