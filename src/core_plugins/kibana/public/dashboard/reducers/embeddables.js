@@ -4,6 +4,7 @@ import {
   embeddableRenderFinished,
   embeddableRenderError,
   destroyEmbeddable,
+  embeddableRenderComplete,
 } from '../actions';
 
 export const embeddables = handleActions({
@@ -54,6 +55,23 @@ export const embeddables = handleActions({
         [payload.panelId]: {
           ...embeddables[payload.panelId],
           error: payload.error,
+        }
+      };
+    },
+
+  [embeddableRenderComplete]:
+    /**
+     *
+     * @param embeddables {Object.<string, EmbeddableState>}
+     * @param payload {String} - the panel id of the embeddable that finished rendering
+     * @return {Object.<string, EmbeddableState>}
+     */
+    (embeddables, { payload }) => {
+      return {
+        ...embeddables,
+        [payload]: {
+          ...embeddables[payload],
+          renderComplete: true,
         }
       };
     }

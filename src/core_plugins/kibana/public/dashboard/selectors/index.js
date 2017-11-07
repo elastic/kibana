@@ -46,6 +46,18 @@ export const getPanelType = (dashboard, panelId) => getPanel(dashboard, panelId)
 export const getEmbeddable = (dashboard, panelId) => dashboard.embeddables[panelId];
 
 /**
+ *
+ * @param dashboard {DashboardState}
+ * @return {boolean} true if all embeddables have finished rendering.
+ */
+export const getAllEmbeddablesFinishedRendering = (dashboard) => {
+  return (
+    dashboard.embeddables.length === dashboard.panels.length &&
+    Object.values(dashboard.embeddables).every(embeddable => embeddable.renderComplete)
+  );
+};
+
+/**
  * @param dashboard {DashboardState}
  * @param panelId {string}
  * @return {string|Object}

@@ -1,5 +1,7 @@
 import { createAction } from 'redux-actions';
 
+export const embeddableRenderComplete = createAction('EMBEDDABLE_RENDER_COMPLETE');
+
 export const destroyEmbeddable = createAction('DESTROY_EMBEDDABLE',
   /**
    *
@@ -33,6 +35,20 @@ export const embeddableRenderError = createAction('EMBEDDABLE_RENDER_ERROR',
 );
 
 /**
+ * Converts the returned Embeddable object supplied by the embeddable handler into something we want to store on
+ * state.  We may need to store a cache of these somewhere so we can still have access to functionality.
+ * @param embeddable{Embeddable}
+ * @return embeddableState {EmbeddableState}
+ */
+function convertEmbeddableToState(embeddable) {
+  return {
+    title: embeddable.title,
+    editUrl: embeddable.editUrl,
+    renderComplete: false,
+  };
+}
+
+/**
  *
  * @param embeddableHandler {EmbeddableHandler}
  * @param panelElement {Node}
@@ -49,7 +65,11 @@ export function renderEmbeddable(embeddableHandler, panelElement, panel, contain
 
     return embeddableHandler.render(panelElement, panel, containerApi)
       .then(embeddable => {
-        return dispatch(embeddableRenderFinished(panel.panelIndex, embeddable));
+        const embeddableState = convertEmbeddableToState(embeddable);
+
+        embeddable.renderComplete.then(() => dispatch(embeddableRenderComplete(panel.panelIndex)));
+
+        return dispatch(embeddableRenderFinished(panel.panelIndex, embeddableState));
       })
       .catch(error => {
         dispatch(embeddableRenderError(panel.panelIndex, error));
