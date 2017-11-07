@@ -6,7 +6,7 @@ import {
   createDeleteRoute,
   createFindRoute,
   createGetRoute,
-  createUpdateRoute
+  createUpdateRoute,
 } from './routes';
 
 export function savedObjectsMixin(kbnServer, server) {
@@ -15,7 +15,7 @@ export function savedObjectsMixin(kbnServer, server) {
       assign: 'savedObjectsClient',
       method(req, reply) {
         reply(req.getSavedObjectsClient());
-      }
+      },
     },
   };
 
@@ -36,22 +36,22 @@ export function savedObjectsMixin(kbnServer, server) {
         body: {
           template: index,
           settings: {
-            number_of_shards: 1
+            number_of_shards: 1,
           },
-          mappings: server.getKibanaIndexMappingsDsl()
-        }
+          mappings: server.getKibanaIndexMappingsDsl(),
+        },
       });
     } catch (error) {
       server.log(['debug', 'savedObjects'], {
         tmpl: 'Attempt to write indexTemplate for SavedObjects index failed: <%= err.message %>',
         es: {
           resp: error.body,
-          status: error.status
+          status: error.status,
         },
         err: {
           message: error.message,
           stack: error.stack,
-        }
+        },
       });
 
       // We reject with `es.ServiceUnavailable` because writing an index
