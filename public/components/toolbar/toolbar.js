@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 import { Navbar } from '../navbar';
 import { Tray } from './tray';
 import { NavbarButton } from '../navbar_button';
+import { FeedbackButton } from '../feedback_button';
+
 import { NavbarDivider } from '../navbar_divider';
 import { Expression } from '../expression';
 import { Datasource } from '../datasource';
@@ -102,6 +104,7 @@ export const Toolbar = (props) => {
             </NavbarButton>
           </span>
         )}
+        <FeedbackButton/>
 
       </Navbar>
     </div>
