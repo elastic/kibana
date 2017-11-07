@@ -1,0 +1,1 @@
+export { DashboardVisualizationProvider } from './visualizations';
