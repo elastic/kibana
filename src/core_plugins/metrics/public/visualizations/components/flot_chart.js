@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
-import $ from '../lib/flot';
+import $ from 'ui/flot-charts';
 import eventBus from '../lib/events';
 import Resize from './resize';
 import calculateBarWidth from '../lib/calculate_bar_width';
@@ -176,10 +176,6 @@ class FlotChart extends Component {
 
   handleResize(width, height) {
     this.size = { width, height };
-    if (!this.rendered) {
-      this.renderChart();
-      return;
-    }
 
     if (this.size.height > 0 && this.size.width > 0) {
       if (!this.plot) return;

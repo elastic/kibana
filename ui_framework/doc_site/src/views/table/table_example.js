@@ -10,31 +10,31 @@ import {
 } from '../../components';
 
 import { Table } from './table';
-const tableSource = require('!!raw!./table');
+const tableSource = require('!!raw-loader!./table');
 const tableHtml = renderToHtml(Table);
 
 import { TableWithMenuButtons } from './table_with_menu_buttons';
-const tableWithMenuButtonsSource = require('!!raw!./table_with_menu_buttons');
+const tableWithMenuButtonsSource = require('!!raw-loader!./table_with_menu_buttons');
 const tableWithMenuButtonsHtml = renderToHtml(TableWithMenuButtons);
 
 import { FluidTable } from './fluid_table';
-const fluidTableSource = require('!!raw!./fluid_table');
+const fluidTableSource = require('!!raw-loader!./fluid_table');
 const fluidTableHtml = renderToHtml(FluidTable);
 
 import { ListingTable } from './listing_table';
-const listingTableSource = require('!!raw!./listing_table');
+const listingTableSource = require('!!raw-loader!./listing_table');
 const listingTableHtml = renderToHtml(ListingTable);
 
 import { ListingTableWithEmptyPrompt } from './listing_table_with_empty_prompt';
-const listingTableWithEmptyPromptSource = require('!!raw!./listing_table_with_empty_prompt');
+const listingTableWithEmptyPromptSource = require('!!raw-loader!./listing_table_with_empty_prompt');
 const listingTableWithEmptyPromptHtml = renderToHtml(ListingTableWithEmptyPrompt);
 
 import { ListingTableWithNoItems } from './listing_table_with_no_items';
-const listingTableWithNoItemsSource = require('!!raw!./listing_table_with_no_items');
+const listingTableWithNoItemsSource = require('!!raw-loader!./listing_table_with_no_items');
 const listingTableWithNoItemsHtml = renderToHtml(ListingTableWithNoItems);
 
 import { ListingTableLoadingItems } from './listing_table_loading_items';
-const listingTableLoadingItemsSource = require('!!raw!./listing_table_loading_items');
+const listingTableLoadingItemsSource = require('!!raw-loader!./listing_table_loading_items');
 const listingTableLoadingItemsHtml = renderToHtml(ListingTableLoadingItems);
 
 export default props => (

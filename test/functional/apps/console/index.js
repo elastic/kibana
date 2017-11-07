@@ -3,7 +3,7 @@ export default function ({ getService, loadTestFile }) {
 
   describe('console app', function () {
     before(async function () {
-      await remote.setWindowSize(1200,800);
+      await remote.setWindowSize(1200, 800);
     });
 
     loadTestFile(require.resolve('./_console'));

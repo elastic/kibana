@@ -5,10 +5,23 @@ import { DashboardViewMode } from './dashboard_view_mode';
 import { FilterUtils } from './lib/filter_utils';
 import { PanelUtils } from './panel/panel_utils';
 import { store } from '../store';
-import { updateViewMode, updatePanels, updateIsFullScreenMode, minimizePanel } from './actions';
+import {
+  updateViewMode,
+  setPanels,
+  updateUseMargins,
+  updateIsFullScreenMode,
+  minimizePanel
+} from './actions';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { createPanelState, getPersistedStateId } from './panel';
 import { getAppStateDefaults } from './lib';
+import {
+  getViewMode,
+  getFullScreenMode,
+  getPanels,
+  getPanel,
+  getUseMargins,
+} from '../selectors';
 
 /**
  * Dashboard state manager handles connecting angular and redux state between the angular and react portions of the
@@ -65,8 +78,9 @@ export class DashboardStateManager {
 
     // Always start out with all panels minimized when a dashboard is first loaded.
     store.dispatch(minimizePanel());
-    store.dispatch(updatePanels(this.getPanels()));
+    store.dispatch(setPanels(this.getPanels()));
     store.dispatch(updateViewMode(this.getViewMode()));
+    store.dispatch(updateUseMargins(this.getUseMargins()));
     store.dispatch(updateIsFullScreenMode(this.getFullScreenMode()));
 
     this.changeListeners = [];
@@ -83,12 +97,13 @@ export class DashboardStateManager {
   }
 
   _areStoreAndAppStatePanelsEqual() {
-    const { dashboard } = store.getState();
+    const state = store.getState();
     // We need to run this comparison check or we can enter an infinite loop.
     let differencesFound = false;
     for (let i = 0; i < this.appState.panels.length; i++) {
       const appStatePanel = this.appState.panels[i];
-      if (!_.isEqual(appStatePanel, dashboard.panels[appStatePanel.panelIndex])) {
+      const storePanel = getPanel(state, appStatePanel.panelIndex);
+      if (!_.isEqual(appStatePanel, storePanel)) {
         differencesFound = true;
         break;
       }
@@ -105,15 +120,19 @@ export class DashboardStateManager {
     // We need these checks, or you can get into a loop where a change is triggered by the store, which updates
     // AppState, which then dispatches the change here, which will end up triggering setState warnings.
     if (!this._areStoreAndAppStatePanelsEqual()) {
-      store.dispatch(updatePanels(this.getPanels()));
+      store.dispatch(setPanels(this.getPanels()));
     }
 
-    const { dashboard } = store.getState();
-    if (dashboard.viewMode !== this.getViewMode()) {
+    const state = store.getState();
+    if (getViewMode(state) !== this.getViewMode()) {
       store.dispatch(updateViewMode(this.getViewMode()));
     }
 
-    if (dashboard.view.isFullScreenMode !== this.getFullScreenMode()) {
+    if (getUseMargins(state) !== this.getUseMargins()) {
+      store.dispatch(updateUseMargins(this.getUseMargins()));
+    }
+
+    if (getFullScreenMode(state) !== this.getFullScreenMode()) {
       store.dispatch(updateIsFullScreenMode(this.getFullScreenMode()));
     }
   }
@@ -123,13 +142,14 @@ export class DashboardStateManager {
       return;
     }
 
-    const { dashboard } = store.getState();
+    const state = store.getState();
     // The only state that the store deals with that appState cares about is the panels array. Every other state change
     // (that appState cares about) is initiated from appState (e.g. view mode).
     this.appState.panels = [];
-    _.map(dashboard.panels, panel => {
+    _.map(getPanels(state), panel => {
       this.appState.panels.push(panel);
     });
+
     this.changeListeners.forEach(function (listener) {
       return listener({ dirty: true, clean: false });
     });
@@ -223,6 +243,16 @@ export class DashboardStateManager {
 
   getQuery() {
     return this.appState.query;
+  }
+
+  getUseMargins() {
+    // Existing dashboards that don't define this should default to false.
+    return this.appState.options.useMargins === undefined ? false : this.appState.options.useMargins;
+  }
+
+  setUseMargins(useMargins) {
+    this.appState.options.useMargins = useMargins;
+    this.saveState();
   }
 
   getDarkTheme() {
@@ -346,13 +376,10 @@ export class DashboardStateManager {
   }
 
   updatePanel(panelIndex, panelAttributes) {
-    const originalPanel = this.getPanels().find((panel) => panel.panelIndex === panelIndex);
-    const updatedPanel = {
-      ...originalPanel,
-      ...panelAttributes,
-    };
+    const panel = this.getPanels().find((panel) => panel.panelIndex === panelIndex);
+    Object.assign(panel, panelAttributes);
     this.saveState();
-    return updatedPanel;
+    return panel;
   }
 
   /**

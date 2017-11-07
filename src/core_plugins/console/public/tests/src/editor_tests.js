@@ -2,7 +2,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 let ace = require('ace');
 import { initializeInput } from '../../src/input';
-let editor_input1 = require('raw!./editor_input1.txt');
+let editor_input1 = require('raw-loader!./editor_input1.txt');
 let utils = require('../../src/utils');
 
 var aceRange = ace.require("ace/range");

@@ -33,7 +33,7 @@ uiModules
 
     return {
       restrict: 'E',
-      scope : {
+      scope: {
         showSpyPanel: '=?',
         editorMode: '=?',
         savedObj: '=?',
@@ -121,14 +121,17 @@ uiModules
           });
         }, 100);
 
-        $scope.vis.on('update', () => {
+        //todo: clean this one up as well
+        const handleVisUpdate = () => {
           if ($scope.editorMode) {
             $scope.appState.vis = $scope.vis.getState();
             $scope.appState.save();
           } else {
             $scope.fetch();
           }
-        });
+        };
+        $scope.vis.on('update', handleVisUpdate);
+
 
         const reload = () => {
           $scope.vis.reload = true;
@@ -139,7 +142,13 @@ uiModules
         $scope.$on('courier:searchRefresh', reload);
       // dashboard will fire fetch event when it wants to refresh
         $scope.$on('fetch', reload);
-        queryFilter.on('update', $scope.fetch);
+
+
+
+        const handleQueryUpdate = ()=> {
+          $scope.fetch();
+        };
+        queryFilter.on('update', handleQueryUpdate);
 
         if ($scope.appState) {
           let oldUiState;
@@ -165,6 +174,12 @@ uiModules
           $scope.$on('$destroy', () => {
             stateMonitor.destroy();
           });
+        } else {
+          const handleUiStateChange = () => { $scope.$broadcast('render'); };
+          $scope.uiState.on('change', handleUiStateChange);
+          $scope.$on('$destroy', () => {
+            $scope.uiState.off('change', handleUiStateChange);
+          });
         }
 
         let resizeInit = false;
@@ -181,13 +196,15 @@ uiModules
         });
 
         $scope.$on('$destroy', () => {
+          $scope.vis.removeListener('update', handleVisUpdate);
+          queryFilter.off('update', handleQueryUpdate);
           resizeChecker.destroy();
         });
 
         $scope.$watch('vis.initialized', $scope.fetch);
 
         $scope.fetch();
-        $scope.$emit('ready:vis');
+        $scope.$root.$broadcast('ready:vis');
       }
     };
   });

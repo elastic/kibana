@@ -57,7 +57,7 @@ export async function listControlFactory(controlParams, kbnApi) {
 
   return new ListControl(
     controlParams,
-    new PhraseFilterManager(controlParams.fieldName, indexPattern, kbnApi.queryFilter, listControlDelimiter),
+    new PhraseFilterManager(controlParams.id, controlParams.fieldName, indexPattern, kbnApi.queryFilter, listControlDelimiter),
     _.get(resp, 'aggregations.termsAgg.buckets', []).map((bucket) => {
       return { label: bucket.key.toString(), value: bucket.key.toString() };
     })

@@ -1,11 +1,23 @@
 import { handleActions, combineActions } from 'redux-actions';
-import { updateViewMode, maximizePanel, minimizePanel, updateIsFullScreenMode } from '../actions';
+import {
+  updateViewMode,
+  maximizePanel,
+  minimizePanel,
+  updateUseMargins,
+  updateIsFullScreenMode,
+} from '../actions';
+
 import { DashboardViewMode } from '../dashboard_view_mode';
 
 export const view = handleActions({
   [updateViewMode]: (state, { payload }) => ({
     ...state,
     viewMode: payload
+  }),
+
+  [updateUseMargins]: (state, { payload }) => ({
+    ...state,
+    useMargins: payload
   }),
 
   [combineActions(maximizePanel, minimizePanel)]: (state, { payload }) => ({
@@ -20,10 +32,6 @@ export const view = handleActions({
 }, {
   isFullScreenMode: false,
   viewMode: DashboardViewMode.VIEW,
-  maximizedPanelId: undefined
+  maximizedPanelId: undefined,
+  useMargins: true,
 });
-
-
-export const getViewMode = state => state.viewMode;
-export const getFullScreenMode = state => state.isFullScreenMode;
-export const getMaximizedPanelId = state => state.maximizedPanelId;

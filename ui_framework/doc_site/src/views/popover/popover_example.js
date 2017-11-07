@@ -3,6 +3,7 @@ import React from 'react';
 import { renderToHtml } from '../../services';
 
 import {
+  GuideCode,
   GuideDemo,
   GuidePage,
   GuideSection,
@@ -11,19 +12,23 @@ import {
 } from '../../components';
 
 import Popover from './popover';
-const popoverSource = require('!!raw!./popover');
+const popoverSource = require('!!raw-loader!./popover');
 const popoverHtml = renderToHtml(Popover);
 
+import TrapFocus from './trap_focus';
+const trapFocusSource = require('!!raw-loader!./trap_focus');
+const trapFocusHtml = renderToHtml(TrapFocus);
+
 import PopoverAnchorPosition from './popover_anchor_position';
-const popoverAnchorPositionSource = require('!!raw!./popover_anchor_position');
+const popoverAnchorPositionSource = require('!!raw-loader!./popover_anchor_position');
 const popoverAnchorPositionHtml = renderToHtml(PopoverAnchorPosition);
 
 import PopoverPanelClassName from './popover_panel_class_name';
-const popoverPanelClassNameSource = require('!!raw!./popover_panel_class_name');
+const popoverPanelClassNameSource = require('!!raw-loader!./popover_panel_class_name');
 const popoverPanelClassNameHtml = renderToHtml(PopoverPanelClassName);
 
 import PopoverWithTitle from './popover_with_title';
-const popoverWithTitleSource = require('!!raw!./popover_with_title');
+const popoverWithTitleSource = require('!!raw-loader!./popover_with_title');
 const popoverWithTitleHtml = renderToHtml(PopoverWithTitle);
 
 export default props => (
@@ -44,6 +49,26 @@ export default props => (
 
       <GuideDemo>
         <Popover />
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="Trap focus"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: trapFocusSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: trapFocusHtml,
+      }]}
+    >
+      <GuideText>
+        If the Popover should be responsible for trapping the focus within itself (as opposed
+        to a child component), then you should set <GuideCode>ownFocus</GuideCode>.
+      </GuideText>
+
+      <GuideDemo>
+        <TrapFocus />
       </GuideDemo>
     </GuideSection>
 

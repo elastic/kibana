@@ -5,6 +5,7 @@ import ReactDOM from 'react-dom';
 export function showChangeIndexModal(onChange, conflictedObjects, indices = []) {
   const container = document.createElement('div');
   const closeModal = () => {
+    ReactDOM.unmountComponentAtNode(container);
     document.body.removeChild(container);
   };
 

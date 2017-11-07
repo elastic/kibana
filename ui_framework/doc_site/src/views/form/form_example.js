@@ -1,4 +1,5 @@
 import React from 'react';
+import { renderToHtml } from '../../services';
 
 import {
   GuideCode,
@@ -9,21 +10,44 @@ import {
   GuideText,
 } from '../../components';
 
-const textInputHtml = require('./text_input.html');
-const labelHtml = require('./label.html');
 const assistedInputHtml = require('./assisted_input.html');
+
 const searchInputHtml = require('./search_input.html');
+
 const staticInputHtml = require('./static_input.html');
-const textAreaHtml = require('./text_area.html');
-const textAreaNonResizableHtml = require('./text_area_non_resizable.html');
-const checkBoxHtml = require('./check_box.html');
-const selectHtml = require('./select.html');
+
+const Label = require('./label');
+const labelSource = require('!!raw-loader!./label');
+const labelHtml = renderToHtml(Label);
+
+const TextInput = require('./text_input');
+const textInputSource = require('!!raw-loader!./text_input');
+const textInputHtml = renderToHtml(TextInput, { id: '1' });
+
+const TextArea = require('./text_area');
+const textAreaSource = require('!!raw-loader!./text_area');
+const textAreaHtml = renderToHtml(TextArea);
+
+const TextAreaNonResizable = require('./text_area_non_resizable');
+const textAreaNonResizableSource = require('!!raw-loader!./text_area_non_resizable');
+const textAreaNonResizableHtml = renderToHtml(TextAreaNonResizable);
+
+const Select = require('./select');
+const selectSource = require('!!raw-loader!./select');
+const selectHtml = renderToHtml(Select);
+
+const CheckBox = require('./check_box');
+const checkBoxSource = require('!!raw-loader!./check_box');
+const checkBoxHtml = renderToHtml(CheckBox);
 
 export default props => (
   <GuidePage title={props.route.name}>
     <GuideSection
       title="Label"
       source={[{
+        type: GuideSectionTypes.JS,
+        code: labelSource,
+      }, {
         type: GuideSectionTypes.HTML,
         code: labelHtml,
       }]}
@@ -31,9 +55,9 @@ export default props => (
 
       <GuideText>
         Never forget to label every input element. You can either
-        use a <code>label</code> element with a <code>for</code> attribute
-        referencing the <code>id</code> of the input field, wrap the <code>input</code> field
-        within the <code>label</code> element or use <code>aria-label</code> or <code>aria-labelledby</code>.
+        use a <GuideCode>label</GuideCode> element with a <GuideCode>for</GuideCode> attribute
+        referencing the <GuideCode>id</GuideCode> of the input field, wrap the <GuideCode>input</GuideCode> field
+        within the <GuideCode>label</GuideCode> element or use <GuideCode>aria-label</GuideCode> or <GuideCode>aria-labelledby</GuideCode>.
       </GuideText>
 
       <GuideText>
@@ -41,26 +65,29 @@ export default props => (
         this page correctly.
       </GuideText>
 
-      <GuideDemo
-        html={labelHtml}
-      />
+      <GuideDemo>
+        <Label/>
+      </GuideDemo>
+
     </GuideSection>
 
     <GuideSection
       title="TextInput"
       source={[{
+        type: GuideSectionTypes.JS,
+        code: textInputSource,
+      }, {
         type: GuideSectionTypes.HTML,
         code: textInputHtml,
       }]}
     >
-      <GuideDemo
-        html={textInputHtml}
-      />
+      <GuideDemo>
+        <TextInput/>
+      </GuideDemo>
 
-      <GuideDemo
-        html={textInputHtml}
-        isDarkTheme
-      />
+      <GuideDemo isDarkTheme={true}>
+        <TextInput/>
+      </GuideDemo>
     </GuideSection>
 
     <GuideSection
@@ -123,64 +150,73 @@ export default props => (
     <GuideSection
       title="TextArea"
       source={[{
+        type: GuideSectionTypes.JS,
+        code: textAreaSource,
+      }, {
         type: GuideSectionTypes.HTML,
         code: textAreaHtml,
       }]}
     >
-      <GuideDemo
-        html={textAreaHtml}
-      />
+      <GuideDemo>
+        <TextArea/>
+      </GuideDemo>
 
-      <GuideDemo
-        html={textAreaHtml}
-        isDarkTheme
-      />
+      <GuideDemo isDarkTheme={true}>
+        <TextArea/>
+      </GuideDemo>
     </GuideSection>
 
     <GuideSection
       title="TextArea, non-resizable"
       source={[{
+        type: GuideSectionTypes.JS,
+        code: textAreaNonResizableSource,
+      }, {
         type: GuideSectionTypes.HTML,
         code: textAreaNonResizableHtml,
       }]}
     >
-      <GuideDemo
-        html={textAreaNonResizableHtml}
-      />
+      <GuideDemo>
+        <TextAreaNonResizable/>
+      </GuideDemo>
     </GuideSection>
 
     <GuideSection
       title="CheckBox"
       source={[{
+        type: GuideSectionTypes.JS,
+        code: checkBoxSource,
+      }, {
         type: GuideSectionTypes.HTML,
         code: checkBoxHtml,
       }]}
     >
-      <GuideDemo
-        html={checkBoxHtml}
-      />
+      <GuideDemo>
+        <CheckBox/>
+      </GuideDemo>
 
-      <GuideDemo
-        html={checkBoxHtml}
-        isDarkTheme
-      />
+      <GuideDemo isDarkTheme={true}>
+        <CheckBox/>
+      </GuideDemo>
     </GuideSection>
 
     <GuideSection
       title="Select"
       source={[{
+        type: GuideSectionTypes.JS,
+        code: selectSource,
+      }, {
         type: GuideSectionTypes.HTML,
         code: selectHtml,
       }]}
     >
-      <GuideDemo
-        html={selectHtml}
-      />
+      <GuideDemo>
+        <Select/>
+      </GuideDemo>
 
-      <GuideDemo
-        html={selectHtml}
-        isDarkTheme
-      />
+      <GuideDemo isDarkTheme={true}>
+        <Select/>
+      </GuideDemo>
     </GuideSection>
   </GuidePage>
 );

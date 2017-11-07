@@ -6,7 +6,7 @@ import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import { IndexPatternsFieldProvider } from 'ui/index_patterns/_field';
 import { uiModules } from 'ui/modules';
 import fieldEditorTemplate from 'ui/field_editor/field_editor.html';
-import { documentationLinks } from '../documentation_links/documentation_links';
+import '../directives/documentation_href';
 import './field_editor.less';
 import { GetEnabledScriptingLanguagesProvider, getSupportedScriptingLanguages } from '../scripting_languages';
 import { getKbnTypeNames } from '../../../utils';
@@ -37,7 +37,6 @@ uiModules
       const self = this;
       const notify = new Notifier({ location: 'Field Editor' });
 
-      self.docLinks = documentationLinks.scriptedFields;
       getScriptingLangs().then((langs) => {
         self.scriptingLangs = _.intersection(langs, ['expression', 'painless']);
         if (!_.includes(self.scriptingLangs, self.field.lang)) {

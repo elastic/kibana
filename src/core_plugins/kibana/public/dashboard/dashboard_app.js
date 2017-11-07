@@ -16,7 +16,6 @@ import { DashboardConstants, createDashboardEditUrl } from './dashboard_constant
 import { VisualizeConstants } from 'plugins/kibana/visualize/visualize_constants';
 import { DashboardStateManager } from './dashboard_state_manager';
 import { saveDashboard } from './lib';
-import { documentationLinks } from 'ui/documentation_links/documentation_links';
 import { showCloneModal } from './top_nav/show_clone_modal';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 import { keyCodes } from 'ui_framework/services';
@@ -60,7 +59,6 @@ app.directive('dashboardApp', function ($injector) {
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
       const notify = new Notifier({ location: 'Dashboard' });
-      $scope.queryDocLinks = documentationLinks.query;
       const embeddableHandlers = Private(EmbeddableHandlersRegistryProvider);
       $scope.getEmbeddableHandler = panelType => embeddableHandlers.byName[panelType];
 
@@ -93,6 +91,7 @@ app.directive('dashboardApp', function ($injector) {
         // https://github.com/angular/angular.js/wiki/Understanding-Scopes
         $scope.model = {
           query: dashboardStateManager.getQuery(),
+          useMargins: dashboardStateManager.getUseMargins(),
           darkTheme: dashboardStateManager.getDarkTheme(),
           timeRestore: dashboardStateManager.getTimeRestore(),
           title: dashboardStateManager.getTitle(),
@@ -199,7 +198,9 @@ app.directive('dashboardApp', function ($injector) {
         dashboardStateManager.addNewPanel(hit.id, 'search');
         notify.info(`Search successfully added to your dashboard`);
       };
-
+      $scope.$watch('model.useMargins', () => {
+        dashboardStateManager.setUseMargins($scope.model.useMargins);
+      });
       $scope.$watch('model.darkTheme', () => {
         dashboardStateManager.setDarkTheme($scope.model.darkTheme);
         updateTheme();

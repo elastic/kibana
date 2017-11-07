@@ -1,0 +1,81 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiTextArea Props isDisabled false renders enabled 1`] = `
+<textarea
+  class="kuiTextArea"
+/>
+`;
+
+exports[`KuiTextArea Props isDisabled true renders disabled 1`] = `
+<textarea
+  class="kuiTextArea"
+  disabled=""
+/>
+`;
+
+exports[`KuiTextArea Props isInvalid false renders valid 1`] = `
+<textarea
+  class="kuiTextArea"
+/>
+`;
+
+exports[`KuiTextArea Props isInvalid true renders invalid 1`] = `
+<textarea
+  class="kuiTextArea kuiTextArea-isInvalid"
+/>
+`;
+
+exports[`KuiTextArea Props isNonResizable false renders resizable 1`] = `
+<textarea
+  class="kuiTextArea"
+/>
+`;
+
+exports[`KuiTextArea Props isNonResizable true renders non-resizable 1`] = `
+<textarea
+  class="kuiTextArea kuiTextArea--nonResizable"
+/>
+`;
+
+exports[`KuiTextArea Props placeholder 1`] = `
+<textarea
+  class="kuiTextArea"
+  placeholder="placeholder"
+/>
+`;
+
+exports[`KuiTextArea Props size renders large 1`] = `
+<textarea
+  class="kuiTextArea kuiTextArea--large"
+/>
+`;
+
+exports[`KuiTextArea Props size renders medium 1`] = `
+<textarea
+  class="kuiTextArea"
+/>
+`;
+
+exports[`KuiTextArea Props size renders small 1`] = `
+<textarea
+  class="kuiTextArea kuiTextArea--small"
+/>
+`;
+
+exports[`KuiTextArea Props value 1`] = `
+<textarea
+  class="kuiTextArea"
+>
+  value
+</textarea>
+`;
+
+exports[`KuiTextArea renders 1`] = `
+<textarea
+  aria-label="aria-label"
+  class="kuiTextArea testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  text area
+</textarea>
+`;

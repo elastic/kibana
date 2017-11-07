@@ -19,7 +19,7 @@ export default new Chainable('label', {
     }
   ],
   help: 'Change the label of the series. Use %s reference the existing label',
-  fn:  function labelFn(args) {
+  fn: function labelFn(args) {
     const config = args.byName;
     return alter(args, function (eachSeries) {
       if (config.regex) {

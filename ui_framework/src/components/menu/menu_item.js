@@ -20,5 +20,5 @@ export const KuiMenuItem = ({
 
 KuiMenuItem.propTypes = {
   className: PropTypes.string,
-  children:  PropTypes.node
+  children: PropTypes.node
 };

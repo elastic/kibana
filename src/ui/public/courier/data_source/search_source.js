@@ -55,15 +55,13 @@ import _ from 'lodash';
 import { NormalizeSortRequestProvider } from './_normalize_sort_request';
 import { RootSearchSourceProvider } from './_root_search_source';
 import { AbstractDataSourceProvider } from './_abstract';
-import { SearchRequestProvider } from '../fetch/request/search';
+import { SearchRequestProvider } from '../fetch/request';
 import { SegmentedRequestProvider } from '../fetch/request/segmented';
-import { SearchStrategyProvider } from '../fetch/strategy/search';
 
 export function SearchSourceProvider(Promise, Private, config) {
   const SourceAbstract = Private(AbstractDataSourceProvider);
   const SearchRequest = Private(SearchRequestProvider);
   const SegmentedRequest = Private(SegmentedRequestProvider);
-  const searchStrategy = Private(SearchStrategyProvider);
   const normalizeSortRequest = Private(NormalizeSortRequestProvider);
 
   const forIp = Symbol('for which index pattern?');
@@ -74,7 +72,7 @@ export function SearchSourceProvider(Promise, Private, config) {
 
   _.class(SearchSource).inherits(SourceAbstract);
   function SearchSource(initialState) {
-    SearchSource.Super.call(this, initialState, searchStrategy);
+    SearchSource.Super.call(this, initialState);
   }
 
   /*****

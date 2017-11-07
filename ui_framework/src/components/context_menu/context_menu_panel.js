@@ -80,7 +80,11 @@ export class KuiContextMenuPanel extends Component {
     // But if it doesn't contain items, then you have to focus on the back button specifically,
     // since there could be content inside the panel which requires use of the left arrow key,
     // e.g. text inputs.
-    if (this.props.items.length || document.activeElement === this.backButton) {
+    if (
+      this.props.items.length
+      || document.activeElement === this.backButton
+      || document.activeElement === this.panel
+    ) {
       if (e.keyCode === cascadingMenuKeyCodes.LEFT) {
         if (this.props.showPreviousPanel) {
           this.props.showPreviousPanel();
@@ -157,8 +161,13 @@ export class KuiContextMenuPanel extends Component {
     }
 
     // If there aren't any items then this is probably a form or something.
-    // So let's focus the first tabbable item and expedite input from the user.
     if (!this.menuItems.length) {
+      // If we've already focused on something inside the panel, everything's fine.
+      if (this.panel.contains(document.activeElement)) {
+        return;
+      }
+
+      // Otherwise let's focus the first tabbable item and expedite input from the user.
       if (this.content) {
         const tabbableItems = tabbable(this.content);
         if (tabbableItems.length) {
@@ -174,13 +183,10 @@ export class KuiContextMenuPanel extends Component {
       return;
     }
 
-    // If we've already focused on something inside the panel, everything's fine.
-    if (this.panel.contains(document.activeElement)) {
-      return;
-    }
-
     // Focus on the panel as a last resort.
-    this.panel.focus();
+    if (!this.panel.contains(document.activeElement)) {
+      this.panel.focus();
+    }
   }
 
   onTransitionComplete = () => {

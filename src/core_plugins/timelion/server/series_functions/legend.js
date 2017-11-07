@@ -1,5 +1,6 @@
 import alter from '../lib/alter.js';
 import Chainable from '../lib/classes/chainable';
+import { DEFAULT_TIME_FORMAT } from '../../common/lib';
 
 export default new Chainable('legend', {
   args: [
@@ -17,16 +18,29 @@ export default new Chainable('legend', {
       types: ['number', 'null'],
       help: 'Number of columns to divide the legend into'
     },
+    {
+      name: 'showTime',
+      types: ['boolean'],
+      help: 'Show time value in legend when hovering over graph. Default: true'
+    },
+    {
+      name: 'timeFormat',
+      types: ['string'],
+      help: `moment.js format pattern. Default: ${DEFAULT_TIME_FORMAT}`
+    }
   ],
   help: 'Set the position and style of the legend on the plot',
   fn: function legendFn(args) {
-    return alter(args, function (eachSeries, position, columns) {
+    return alter(args, function (eachSeries, position, columns, showTime = true, timeFormat = DEFAULT_TIME_FORMAT) {
       eachSeries._global = eachSeries._global || {};
       eachSeries._global.legend = eachSeries._global.legend || {};
       eachSeries._global.legend.noColumns = columns;
+      eachSeries._global.legend.showTime = showTime;
+      eachSeries._global.legend.timeFormat = timeFormat;
 
       if (position === false) {
         eachSeries._global.legend.show = false;
+        eachSeries._global.legend.showTime = false;
       } else {
         eachSeries._global.legend.position = position;
       }
