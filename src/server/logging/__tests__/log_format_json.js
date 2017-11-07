@@ -30,7 +30,7 @@ describe('KbnLoggerJsonFormat', () => {
     ]);
 
     const { '@timestamp': timestamp } = JSON.parse(result);
-    expect(timestamp).to.eql(moment.utc(time).format());
+    expect(timestamp).to.be(moment.utc(time).format());
   });
 
   it('logs in local timezone when useUTC is false', async () => {
@@ -44,6 +44,6 @@ describe('KbnLoggerJsonFormat', () => {
     ]);
 
     const { '@timestamp': timestamp } = JSON.parse(result);
-    expect(timestamp).to.eql(moment(time).format());
+    expect(timestamp).to.be(moment(time).format());
   });
 });
