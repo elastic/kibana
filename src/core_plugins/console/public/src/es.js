@@ -12,7 +12,8 @@ module.exports.send = function (method, path, data) {
   var wrappedDfd = $.Deferred();
 
   console.log("Calling " + path);
-  if (data && method == "GET") {
+  var isGetRequest = /^get$/i.test(method)
+  if (data && isGetRequest) {
     method = "POST";
   }
 
