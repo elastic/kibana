@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import { DashboardGrid } from './dashboard_grid';
-import { updatePanel } from '../actions';
+import { updatePanels } from '../actions';
 import {
   getPanels,
   getViewMode,
@@ -14,7 +14,7 @@ const mapStateToProps = ({ dashboard }) => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  onPanelUpdated: updatedPanel => dispatch(updatePanel(updatedPanel)),
+  onPanelsUpdated: updatedPanels => dispatch(updatePanels(updatedPanels)),
 });
 
 export const DashboardGridContainer = connect(
