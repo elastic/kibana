@@ -281,7 +281,7 @@ class TagCloud extends EventEmitter {
           y: tag.y,
           rotate: tag.rotate,
           size: tag.size,
-          rawText: tag.text,
+          rawText: tag.rawText || tag.text,
           displayText: tag.displayText
         };
       })
