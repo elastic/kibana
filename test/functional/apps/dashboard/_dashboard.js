@@ -125,7 +125,9 @@ export default function ({ getService, getPageObjects }) {
 
     describe('expanding a panel', () => {
       it('hides other panels', async () => {
-        await PageObjects.dashboard.toggleExpandPanel();
+        // Don't expand TSVB since it doesn't have the spy panel.
+        const panels = await PageObjects.dashboard.getDashboardPanels();
+        await PageObjects.dashboard.toggleExpandPanel(panels[1]);
         await retry.try(async () => {
           const panels = await PageObjects.dashboard.getDashboardPanels();
           expect(panels.length).to.eql(1);
@@ -158,7 +160,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.loadSavedDashboard('spy pane test');
         const panels = await PageObjects.dashboard.getDashboardPanels();
         // Simulate hover
-        await remote.moveMouseTo(panels[0]);
+        await remote.moveMouseTo(panels[1]);
         const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
         expect(spyToggleExists).to.be(true);
       });
