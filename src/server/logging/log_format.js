@@ -46,10 +46,19 @@ export default class TransformObjStream extends Stream.Transform {
     next();
   }
 
+  extractAndFormatTimestamp(data, format) {
+    const { useUTC } = this.config;
+    const date = moment(data['@timestamp']);
+    if (useUTC) {
+      date.utc();
+    }
+    return date.format(format);
+  }
+
   readEvent(event) {
     const data = {
       type: event.event,
-      '@timestamp': moment.utc(event.timestamp).format(),
+      '@timestamp': event.timestamp,
       tags: [].concat(event.tags || []),
       pid: event.pid
     };
