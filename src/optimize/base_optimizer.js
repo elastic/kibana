@@ -216,6 +216,7 @@ export default class BaseOptimizer {
         // enzyme tests to work.
         // https://github.com/airbnb/enzyme/blob/master/docs/guides/webpack.md
         externals: {
+          'mocha': 'mocha',
           'react/lib/ExecutionEnvironment': true,
           'react/addons': true,
           'react/lib/ReactContext': true,
