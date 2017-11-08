@@ -17,6 +17,20 @@ export async function RemoteProvider({ getService }) {
 
   log.info('Remote initialized');
 
+  const windowSizeStack = [];
+  lifecycle.on('beforeTopLevelSuite', async () => {
+    windowSizeStack.unshift(await command.getWindowSize());
+    await command.setWindowSize(
+      config.get('remote.defaultWindowWidth'),
+      config.get('remote.defaultWindowHeight'),
+    );
+  });
+
+  lifecycle.on('afterTopLevelSuite', async () => {
+    const { width, height } = windowSizeStack.shift();
+    await command.setWindowSize(width, height);
+  });
+
   return new Proxy({}, {
     get(obj, prop) {
       if (prop === 'then' || prop === 'catch' || prop === 'finally') {
