@@ -13,28 +13,30 @@ import {
 
 import { keyCodes } from '../../services';
 
-const items = [(
-  <KuiContextMenuItem
-    key="A"
-    data-test-subj="itemA"
-  >
-    Option A
-  </KuiContextMenuItem>
-), (
-  <KuiContextMenuItem
+const items = [
+  (
+    <KuiContextMenuItem
+      key="A"
+      data-test-subj="itemA"
+    >
+      Option A
+    </KuiContextMenuItem>
+  ), (
+    <KuiContextMenuItem
       key="B"
       data-test-subj="itemB"
     >
-    Option B
+      Option B
     </KuiContextMenuItem>
   ), (
     <KuiContextMenuItem
       key="C"
       data-test-subj="itemC"
     >
-    Option C
+      Option C
     </KuiContextMenuItem>
-  )];
+  )
+];
 
 describe('KuiContextMenuPanel', () => {
   test('is rendered', () => {
