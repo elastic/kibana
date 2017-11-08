@@ -339,7 +339,7 @@ class TagCloud extends EventEmitter {
     debug.positions = this._completedJob ? this._completedJob.words.map(tag => {
       return {
         displayText: tag.displayText,
-        rawText: tag.text,
+        rawText: tag.rawText || tag.text,
         x: tag.x,
         y: tag.y,
         rotate: tag.rotate
