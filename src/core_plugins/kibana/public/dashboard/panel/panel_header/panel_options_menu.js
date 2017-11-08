@@ -38,6 +38,7 @@ export class PanelOptionsMenu extends React.Component {
     const mainPanelMenuItems = [
       {
         name: 'Edit visualization',
+        'data-test-subj': 'dashboardPanelEditLink',
         icon: <span
           aria-hidden="true"
           className="kuiButton__icon kuiIcon fa-edit"
@@ -46,6 +47,7 @@ export class PanelOptionsMenu extends React.Component {
       },
       {
         name: 'Panel options',
+        'data-test-subj': 'dashboardPanelOptionsSubMenuLink',
         icon: <span
           aria-hidden="true"
           className="kuiButton__icon kuiIcon fa-edit"
@@ -54,6 +56,7 @@ export class PanelOptionsMenu extends React.Component {
       },
       {
         name: isExpanded ? 'Minimize' : 'Full screen',
+        'data-test-subj': 'dashboardPanelExpandIcon',
         icon: <span
           aria-hidden="true"
           className={`kuiButton__icon kuiIcon ${isExpanded ? 'fa-compress' : 'fa-expand'}`}
@@ -64,6 +67,7 @@ export class PanelOptionsMenu extends React.Component {
     if (!this.props.isExpanded) {
       mainPanelMenuItems.push({
         name: 'Delete visualization',
+        'data-test-subj': 'dashboardPanelRemoveIcon',
         icon: <span
           aria-hidden="true"
           className="kuiButton__icon kuiIcon fa-trash"
