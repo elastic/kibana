@@ -34,7 +34,7 @@ export function decorateMochaUi(lifecycle, context) {
 
         const [name, provider] = argumentsList;
         if (typeof name !== 'string' || typeof provider !== 'function') {
-          throw new Error(`Unexpected arguments to mocha ${target.name} function`);
+          throw new Error(`Unexpected arguments to ${name}(${argumentsList.join(', ')})`);
         }
 
         argumentsList[1] = function () {
