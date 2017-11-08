@@ -197,7 +197,7 @@ export default class BaseOptimizer {
 
       resolve: {
         extensions: ['.js', '.json'],
-        mainFields: ['browser', 'main'],
+        mainFields: ['browser', 'browserify', 'main'],
         modules: [
           'webpackShims',
           fromRoot('webpackShims'),
