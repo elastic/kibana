@@ -60,6 +60,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByPartialLinkText('Visual Builder');
     }
 
+    async clickEditorSidebarCollapse() {
+      await testSubjects.click('collapseSideBarButton');
+    }
+
     async selectTagCloudTag(tagDisplayText) {
       await testSubjects.click(tagDisplayText);
     }
