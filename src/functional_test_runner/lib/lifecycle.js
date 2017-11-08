@@ -2,7 +2,9 @@ export function createLifecycle() {
   const listeners = {
     beforeLoadTests: [],
     beforeTests: [],
+    beforeTopLevelSuite: [],
     beforeEachTest: [],
+    afterTopLevelSuite: [],
     testFailure: [],
     testHookFailure: [],
     cleanup: [],
