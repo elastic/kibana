@@ -15,7 +15,7 @@ export function Introduction({ description, previewUrl, title }) {
     );
   }
   return (
-    <div className="tutorialIntroduction kuiVerticalRhythm">
+    <div className="introduction kuiVerticalRhythm">
       <div className="kuiFlexGroup kuiFlexGroup--gutterLarge">
 
         <div className="kuiFlexItem">
