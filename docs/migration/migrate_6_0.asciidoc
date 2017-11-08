@@ -8,8 +8,9 @@ your application to Kibana 6.0.
 === Types removed from Kibana index
 *Details:* With the imminent {es-ref}/removal-of-types.html[removal of types in Elasticsearch], we have updated our index to not rely on types. Kibana 5.6.x can support both of these mappings to minimize downtime. A UI is provided with X-Pack to assist with the migration of the Elastic stack.
 
-*Impact:* You will need migrate your Kibana index either {kibana-ref}/migrating-6.0-index.html[manually], or through the Upgrade Assistant in X-Pack.
-
+*Impact:*
+* Types have been removed from the `.kibana` index. You will need migrate your Kibana index either {kibana-ref}/migrating-6.0-index.html[manually], or through the Upgrade Assistant in X-Pack.
+* Upon upgrade of a typical deployment with indices created on a regular basis (e.g. coming from Logstash) to 6.0, new indices will have to not include `_type`. If the information encoded in `_type` is valuable, we recommend to move it to another field. Any dashboards relying on filtering and aggregating on `_type` will continue to work, but will not show any meaningful data. Users will need to update dashboards to rely on aggregating and filtering on the new field, instead of `_type`, if they want to leverage that information going forward.
 
 [float]
 === Removed option to use unsupported scripting languages
