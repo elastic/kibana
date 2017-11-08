@@ -13,7 +13,7 @@ export function KuiPager({
     hasNextPage,
     onNextPage,
     onPreviousPage,
-    ...rest,
+    ...rest
   }) {
   const classes = classNames('kuiPager', className);
   return (

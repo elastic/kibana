@@ -75,7 +75,7 @@ export class KuiCodeEditor extends Component {
       isReadOnly,
       setOptions,
       cursorStart,
-      ...rest,
+      ...rest
     } = this.props;
 
     const classes = classNames('kuiCodeEditorWrapper', {

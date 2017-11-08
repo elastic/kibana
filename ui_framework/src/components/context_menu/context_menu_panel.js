@@ -259,7 +259,7 @@ export class KuiContextMenuPanel extends Component {
       initialFocusedItemIndex, // eslint-disable-line no-unused-vars
       showNextPanel, // eslint-disable-line no-unused-vars
       showPreviousPanel, // eslint-disable-line no-unused-vars
-      ...rest,
+      ...rest
     } = this.props;
     let panelTitle;
 
