@@ -1,15 +1,8 @@
 import * as constants from '../../common/lib/constants';
 
-function createWorkpadIndex(client, indexPrefix) {
-  const indexName = `${indexPrefix}${constants.INDEX_WORKPAD_SUFFIX}`;
-  const indexBody = {
-    settings: {
-      index: {
-        number_of_shards: 1,
-        number_of_replicas: 0,
-      },
-    },
-    mappings : {
+function createWorkpadType(client, kibanaIndex) {
+  const body = {
+    properties: {
       [constants.CANVAS_TYPE]: {
         dynamic: false,
         properties: {
@@ -29,26 +22,21 @@ function createWorkpadIndex(client, indexPrefix) {
     },
   };
 
-  return client.indices.exists({
-    index: indexName,
-  })
-  .then((exists) => {
-    if (exists) return true;
-
-    return client.indices.create({
-      index: indexName,
-      body: indexBody,
-    });
+  return client.indices.putMapping({
+    index: kibanaIndex,
+    type: 'doc',
+    body: body,
   });
+
 }
 
 export function createIndices(server) {
   const { getClient } = server.plugins.elasticsearch.getCluster('admin');
   const client = getClient();
   const config = server.config();
-  const indexPrefix = config.get('canvas.indexPrefix');
+  const kibanaIndex = config.get('kibana.index');
 
   return Promise.all([
-    createWorkpadIndex(client, indexPrefix),
+    createWorkpadType(client, kibanaIndex),
   ]);
 }

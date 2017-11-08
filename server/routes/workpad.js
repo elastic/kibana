@@ -1,12 +1,12 @@
 import boom from 'boom';
-import { INDEX_WORKPAD_SUFFIX, CANVAS_TYPE, API_ROUTE_WORKPAD } from '../../common/lib/constants';
+import { CANVAS_TYPE, API_ROUTE_WORKPAD } from '../../common/lib/constants';
 import { getId } from '../../public/lib/get_id.js';
 
 export function workpad(server) {
   const config = server.config();
   const { callWithRequest, errors:esErrors } = server.plugins.elasticsearch.getCluster('data');
   const routePrefix = API_ROUTE_WORKPAD;
-  const indexName = `${config.get('canvas.indexPrefix')}${INDEX_WORKPAD_SUFFIX}`;
+  const indexName = config.get('kibana.index');
 
   function formatResponse(reply, returnResponse = false) {
     return (resp) => {
@@ -23,12 +23,15 @@ export function workpad(server) {
     const doc = {
       refresh: 'wait_for',
       index: indexName,
-      type: CANVAS_TYPE,
+      type: 'doc',
       id: id || request.payload.id || getId('workpad'),
       body: {
-        ...request.payload,
-        '@timestamp': now,
-        '@created': now,
+        type: CANVAS_TYPE,
+        [CANVAS_TYPE]: {
+          ...request.payload,
+          '@timestamp': now,
+          '@created': now,
+        },
       },
     };
 
@@ -39,23 +42,26 @@ export function workpad(server) {
     const workpadId = request.params.id;
     const findDoc = {
       index: indexName,
-      type: CANVAS_TYPE,
+      type: 'doc',
       id: workpadId,
     };
 
     return callWithRequest(request, 'get', findDoc)
     .then(({ _source }) => {
       const body = {
-        ...request.payload,
-        '@created': _source['@created'] || (new Date()).toISOString(),
-        '@timestamp': (new Date()).toISOString(),
+        type: CANVAS_TYPE,
+        [CANVAS_TYPE]: {
+          ...request.payload,
+          '@created': _source['@created'] || (new Date()).toISOString(),
+          '@timestamp': (new Date()).toISOString(),
+        },
       };
 
       // const srcElements = get(_source, '')
       const doc = {
         refresh: 'wait_for',
         index: indexName,
-        type: CANVAS_TYPE,
+        type: 'doc',
         id: workpadId,
         body: body,
       };
@@ -78,13 +84,13 @@ export function workpad(server) {
     handler: function (request, reply) {
       const doc = {
         index: indexName,
-        type: CANVAS_TYPE,
+        type: 'doc',
         id: request.params.id,
       };
 
       callWithRequest(request, 'get', doc)
       .then(formatResponse(reply, true))
-      .then(resp => reply(resp._source))
+      .then(resp => reply(resp._source[CANVAS_TYPE]))
       .catch(formatResponse(reply));
     },
   });
@@ -120,7 +126,7 @@ export function workpad(server) {
     handler: function (request, reply) {
       const doc = {
         index: indexName,
-        type: CANVAS_TYPE,
+        type: 'doc',
         id: request.params.id,
       };
 
@@ -140,16 +146,20 @@ export function workpad(server) {
       const offset = (page && page >= 1) ? (page - 1) * limit : 0;
 
       const getQuery = (name) => {
+        const nameField = `${CANVAS_TYPE}.name`;
+        const nameFieldKeyword = `${nameField}.keyword`;
+
         if (name != null) {
           return { bool: { should: [
-            { match: { 'name': name } },
-            { wildcard: { 'name': `*${name}` } },
-            { wildcard: { 'name': `${name}*` } },
-            { wildcard: { 'name': `*${name}*` } },
-            { match: { 'name.keyword': name } },
-            { wildcard: { 'name.keyword': `*${name}` } },
-            { wildcard: { 'name.keyword': `${name}*` } },
-            { wildcard: { 'name.keyword': `*${name}*` } },
+            { match: { type: CANVAS_TYPE } },
+            { match: { [nameField]: name } },
+            { wildcard: { [nameField]: `*${name}` } },
+            { wildcard: { [nameField]: `${name}*` } },
+            { wildcard: { [nameField]: `*${name}*` } },
+            { match: { [nameFieldKeyword]: name } },
+            { wildcard: { [nameFieldKeyword]: `*${name}` } },
+            { wildcard: { [nameFieldKeyword]: `${name}*` } },
+            { wildcard: { [nameFieldKeyword]: `*${name}*` } },
           ] } };
         }
 
@@ -158,11 +168,11 @@ export function workpad(server) {
 
       const doc = {
         index: indexName,
-        type: CANVAS_TYPE,
+        type: 'doc',
         body: {
           query: getQuery(name),
-          _source: ['name', 'id', '@timestamp', '@created'],
-          sort: [{ '@timestamp': { order: 'desc' } }],
+          _source: ['name', 'id', '@timestamp', '@created'].map(name => `${CANVAS_TYPE}.${name}`),
+          sort: [{ [`${CANVAS_TYPE}.@timestamp`]: { order: 'desc' } }],
           // TODO: Don't you hate this? Kibana did this, drives people nuts. Welcome to nut town. Nutball.
           size: limit,
           from: offset,
@@ -174,7 +184,7 @@ export function workpad(server) {
       .then((resp) => {
         reply({
           total: resp.hits.total,
-          workpads: resp.hits.hits.map(hit => hit._source),
+          workpads: resp.hits.hits.map(hit => hit._source[CANVAS_TYPE]),
         });
       })
       .catch(formatResponse(reply));
