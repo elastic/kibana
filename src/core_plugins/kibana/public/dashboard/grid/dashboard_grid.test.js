@@ -3,8 +3,8 @@ import { shallow } from 'enzyme';
 import sizeMe from 'react-sizeme';
 
 import { DashboardViewMode } from '../dashboard_view_mode';
-import { getContainerApiMock } from '../__tests__/get_container_api_mock';
-import { getEmbeddableHandlerMock } from '../__tests__/get_embeddable_handlers_mock';
+import { getContainerApiMock } from '../__tests__/get_container_api_mock.test';
+import { getEmbeddableHandlerMock } from '../__tests__/get_embeddable_handlers_mock.test';
 
 import { DashboardGrid } from './dashboard_grid';
 

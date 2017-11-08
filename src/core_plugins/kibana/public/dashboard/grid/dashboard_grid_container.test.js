@@ -4,8 +4,8 @@ import { Provider } from 'react-redux';
 import _ from 'lodash';
 import sizeMe from 'react-sizeme';
 
-import { getContainerApiMock } from '../__tests__/get_container_api_mock';
-import { getEmbeddableHandlerMock } from '../__tests__/get_embeddable_handlers_mock';
+import { getContainerApiMock } from '../__tests__/get_container_api_mock.test';
+import { getEmbeddableHandlerMock } from '../__tests__/get_embeddable_handlers_mock.test';
 import { store } from '../../store';
 import { DashboardGridContainer } from './dashboard_grid_container';
 import { updatePanels } from '../actions';
