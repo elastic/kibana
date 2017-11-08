@@ -84,13 +84,6 @@ export const schema = Joi.object().keys({
     url: Joi.string().uri({ scheme: /https?/ }).default('http://localhost:9515')
   }).default(),
 
-  remote: Joi.object().keys({
-    defaultWindowSize: Joi.object().keys({
-      width: Joi.number().default(1600),
-      height: Joi.number().default(1000),
-    }).default(),
-  }).default(),
-
   // definition of apps that work with `common.navigateToApp()`
   apps: Joi.object().pattern(
     ID_PATTERN,

@@ -17,9 +17,10 @@ export async function RemoteProvider({ getService }) {
 
   log.info('Remote initialized');
 
-  const defaultSize = config.get('remote.defaultWindowSize');
   lifecycle.on('beforeTests', async () => {
-    await command.setWindowSize(defaultSize.width, defaultSize.height);
+    // hard coded default, can be overriden per suite using `remote.setWindowSize()`
+    // and will be automatically reverted after each suite
+    await command.setWindowSize(1600, 1000);
   });
 
   const windowSizeStack = [];
