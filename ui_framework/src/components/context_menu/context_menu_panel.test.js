@@ -22,19 +22,19 @@ const items = [(
   </KuiContextMenuItem>
 ), (
   <KuiContextMenuItem
-    key="B"
-    data-test-subj="itemB"
-  >
+      key="B"
+      data-test-subj="itemB"
+    >
     Option B
-  </KuiContextMenuItem>
-), (
-  <KuiContextMenuItem
-    key="C"
-    data-test-subj="itemC"
-  >
+    </KuiContextMenuItem>
+  ), (
+    <KuiContextMenuItem
+      key="C"
+      data-test-subj="itemC"
+    >
     Option C
-  </KuiContextMenuItem>
-)];
+    </KuiContextMenuItem>
+  )];
 
 describe('KuiContextMenuPanel', () => {
   test('is rendered', () => {

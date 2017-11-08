@@ -28,7 +28,7 @@ export const createFieldsForTimePatternRoute = pre => ({
           lookBack,
           metaFields
         })
-        .then(fields => ({ fields }))
+          .then(fields => ({ fields }))
       );
     }
   }

@@ -19,11 +19,11 @@ export function VislibComponentsZeroInjectionFlattenDataProvider() {
     }
 
     return _(charts ? charts : [obj])
-    .pluck('series')
-    .flattenDeep()
-    .pluck('values')
-    .flattenDeep()
-    .filter(Boolean)
-    .value();
+      .pluck('series')
+      .flattenDeep()
+      .pluck('values')
+      .flattenDeep()
+      .filter(Boolean)
+      .value();
   };
 }

@@ -18,27 +18,27 @@ export default function (grunt) {
     const sourcePathGlobs = cli.resolveFileGlobPatterns(eslintSourcePaths);
 
     const files = grunt.config
-    .get('filesToCommit')
-    .filter(isStaged)
-    .map(getFilename)
-    .map(file => relative(root, resolve(file))) // resolve to pwd, then get relative from the root
-    .filter(file => {
-      if (!sourcePathGlobs.some(glob => minimatch(file, glob))) {
-        if (extname(file) === '.js') {
-          grunt.log.writeln(`${red('WARNING:')} ${file} not selected by grunt eslint config`);
+      .get('filesToCommit')
+      .filter(isStaged)
+      .map(getFilename)
+      .map(file => relative(root, resolve(file))) // resolve to pwd, then get relative from the root
+      .filter(file => {
+        if (!sourcePathGlobs.some(glob => minimatch(file, glob))) {
+          if (extname(file) === '.js') {
+            grunt.log.writeln(`${red('WARNING:')} ${file} not selected by grunt eslint config`);
+          }
+          return false;
         }
-        return false;
-      }
 
-      if (cli.isPathIgnored(file)) {
-        if (extname(file) === '.js') {
-          grunt.log.writeln(`${blue('DEBUG:')} ${file} ignored by .eslintignore`);
+        if (cli.isPathIgnored(file)) {
+          if (extname(file) === '.js') {
+            grunt.log.writeln(`${blue('DEBUG:')} ${file} ignored by .eslintignore`);
+          }
+          return false;
         }
-        return false;
-      }
 
-      return true;
-    });
+        return true;
+      });
 
     grunt.config.set('eslint.staged.options.paths', files);
     grunt.task.run(['eslint:staged']);

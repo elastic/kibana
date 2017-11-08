@@ -15,12 +15,12 @@ export function ContinueIncompleteProvider() {
     if (!incomplete.length) return responses;
 
     return fetchSearchResults(incomplete)
-    .then(function (completedResponses) {
-      return responses.map(function (prevResponse) {
-        if (prevResponse !== INCOMPLETE) return prevResponse;
-        return completedResponses.shift();
+      .then(function (completedResponses) {
+        return responses.map(function (prevResponse) {
+          if (prevResponse !== INCOMPLETE) return prevResponse;
+          return completedResponses.shift();
+        });
       });
-    });
   }
 
   return continueIncompleteRequests;

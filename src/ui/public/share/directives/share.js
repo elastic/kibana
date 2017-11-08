@@ -126,9 +126,9 @@ app.directive('share', function (Private) {
 
         if (this.urlFlags.shortSnapshot) {
           urlShortener.shortenUrl(this.urls.snapshot)
-          .then(shortUrl => {
-            this.urls.shortSnapshot = shortUrl;
-          });
+            .then(shortUrl => {
+              this.urls.shortSnapshot = shortUrl;
+            });
         }
       };
 
@@ -138,9 +138,9 @@ app.directive('share', function (Private) {
         if (this.urlFlags.shortSnapshotIframe) {
           const snapshotIframe = this.makeUrlEmbeddable(this.urls.snapshot);
           urlShortener.shortenUrl(snapshotIframe)
-          .then(shortUrl => {
-            this.urls.shortSnapshotIframe = shortUrl;
-          });
+            .then(shortUrl => {
+              this.urls.shortSnapshotIframe = shortUrl;
+            });
         }
       };
 

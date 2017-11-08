@@ -15,7 +15,7 @@ export function EmptyTablePrompt() {
         >
             Add a new item
         </KuiLinkButton>
-        }
+      }
       message="Uh oh, You have no items!"
     />
   );

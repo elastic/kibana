@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('and doesn\'t save', async() => {
+    it('and doesn\'t save', async () => {
       await PageObjects.common.clickCancelOnModal();
       await PageObjects.dashboard.cancelClone();
 

@@ -20,12 +20,12 @@ import { keyCodes } from 'ui_framework/services';
 let aceKeyboardModeId = 0;
 
 uiModules.get('kibana')
-.factory('kbnUiAceKeyboardModeService', () => ({
-  initialize(scope, element) {
-    const uniqueId = `uiAceKeyboardHint-${scope.$id}-${aceKeyboardModeId++}`;
+  .factory('kbnUiAceKeyboardModeService', () => ({
+    initialize(scope, element) {
+      const uniqueId = `uiAceKeyboardHint-${scope.$id}-${aceKeyboardModeId++}`;
 
-    const hint = angular.element(
-      `<div
+      const hint = angular.element(
+        `<div
         class="uiAceKeyboardHint"
         id="${uniqueId}"
         tabindex="0"
@@ -40,47 +40,47 @@ uiModules.get('kibana')
       </div>
     `);
 
-    const uiAceTextbox = element.find('textarea');
+      const uiAceTextbox = element.find('textarea');
 
-    function startEditing() {
+      function startEditing() {
       // We are not using ng-class in the element, so that we won't need to $compile it
-      hint.addClass('uiAceKeyboardHint-isInactive');
-      uiAceTextbox.focus();
-    }
-
-    function enableOverlay() {
-      hint.removeClass('uiAceKeyboardHint-isInactive');
-    }
-
-    hint.keydown((ev) => {
-      if (ev.keyCode === keyCodes.ENTER) {
-        ev.preventDefault();
-        startEditing();
+        hint.addClass('uiAceKeyboardHint-isInactive');
+        uiAceTextbox.focus();
       }
-    });
 
-    uiAceTextbox.blur(() => {
-      enableOverlay();
-    });
+      function enableOverlay() {
+        hint.removeClass('uiAceKeyboardHint-isInactive');
+      }
 
-    uiAceTextbox.keydown((ev) => {
-      if (ev.keyCode === keyCodes.ESCAPE) {
-        ev.preventDefault();
-        ev.stopPropagation();
+      hint.keydown((ev) => {
+        if (ev.keyCode === keyCodes.ENTER) {
+          ev.preventDefault();
+          startEditing();
+        }
+      });
+
+      uiAceTextbox.blur(() => {
         enableOverlay();
-        hint.focus();
-      }
-    });
+      });
 
-    hint.click(startEditing);
-    // Prevent tabbing into the ACE textarea, we now handle all focusing for it
-    uiAceTextbox.attr('tabindex', '-1');
-    element.prepend(hint);
-  }
-}))
-.directive('kbnUiAceKeyboardMode', (kbnUiAceKeyboardModeService) => ({
-  restrict: 'A',
-  link(scope, element) {
-    kbnUiAceKeyboardModeService.initialize(scope, element);
-  }
-}));
+      uiAceTextbox.keydown((ev) => {
+        if (ev.keyCode === keyCodes.ESCAPE) {
+          ev.preventDefault();
+          ev.stopPropagation();
+          enableOverlay();
+          hint.focus();
+        }
+      });
+
+      hint.click(startEditing);
+      // Prevent tabbing into the ACE textarea, we now handle all focusing for it
+      uiAceTextbox.attr('tabindex', '-1');
+      element.prepend(hint);
+    }
+  }))
+  .directive('kbnUiAceKeyboardMode', (kbnUiAceKeyboardModeService) => ({
+    restrict: 'A',
+    link(scope, element) {
+      kbnUiAceKeyboardModeService.initialize(scope, element);
+    }
+  }));

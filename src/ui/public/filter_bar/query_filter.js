@@ -64,13 +64,13 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
     }
 
     return mapAndFlattenFilters(filters)
-    .then(function (filters) {
-      if (!filterState.filters) {
-        filterState.filters = [];
-      }
+      .then(function (filters) {
+        if (!filterState.filters) {
+          filterState.filters = [];
+        }
 
-      filterState.filters = filterState.filters.concat(filters);
-    });
+        filterState.filters = filterState.filters.concat(filters);
+      });
   };
 
   /**
@@ -327,10 +327,10 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
         // save states and emit the required events
         saveState();
         queryFilter.emit('update')
-        .then(function () {
-          if (!doFetch) return;
-          queryFilter.emit('fetch');
-        });
+          .then(function () {
+            if (!doFetch) return;
+            queryFilter.emit('fetch');
+          });
 
         // iterate over each state type, checking for changes
         function getActions() {

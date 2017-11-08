@@ -53,8 +53,8 @@ export function TimeBucketsProvider(Private, timefilter, config) {
     }
 
     const moments = _(bounds)
-    .map(_.ary(moment, 1))
-    .sortBy(Number);
+      .map(_.ary(moment, 1))
+      .sortBy(Number);
 
     const valid = moments.size() === 2 && moments.every(isValidMoment);
     if (!valid) {
