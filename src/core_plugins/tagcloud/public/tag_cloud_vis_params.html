@@ -16,7 +16,7 @@
           <input
             type="number"
             min="1"
-            max="100"
+            max="{{vis.params.maxFontSize}}"
             class="form-control tag-cloud-fontsize-inputfield"
             ng-model="vis.params.minFontSize"
             aria-label="Minimum tag font size"
@@ -27,7 +27,7 @@
         <div class="tag-cloud-fontsize-input">
           <input
             type="number"
-            min="1"
+            min="{{vis.params.minFontSize}}"
             max="100"
             class="form-control tag-cloud-fontsize-inputfield"
             ng-model="vis.params.maxFontSize"
