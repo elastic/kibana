@@ -12,7 +12,7 @@ export function apacheLogsSpecProvider() {
                      ' You can read more about the Filebeat Apache module in the [documentation].',
     //iconPath: '', TODO
     completionTimeMinutes: 10,
-    previewImagePath: 'kibana-apache2.png',
+    previewImagePath: '/plugins/kibana/home/tutorial_resources/apacheLogs/kibana-apache2.png',
     instructionSets: [
       {
         title: 'Getting Started',

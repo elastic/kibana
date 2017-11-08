@@ -24,6 +24,7 @@ export function HomeApp({ addBasePath, directories }) {
   const renderTutorial = (props) => {
     return (
       <Tutorial
+        addBasePath={addBasePath}
         tutorialId={props.match.params.id}
       />
     );

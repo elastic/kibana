@@ -1,4 +1,3 @@
-import './tutorial.less';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Introduction } from './introduction';
@@ -57,14 +56,19 @@ export class Tutorial extends React.Component {
       );
     }
     if (this.state.tutorial) {
+      let previewUrl;
+      if (this.state.tutorial.previewImagePath) {
+        previewUrl = this.props.addBasePath(this.state.tutorial.previewImagePath);
+      }
       content = (
         <div>
           <Introduction
             title={this.state.tutorial.name}
             description={this.state.tutorial.longDescription}
+            previewUrl={previewUrl}
           />
 
-          <div className="homePanel">
+          <div className="homePanel kuiVerticalRhythm">
             {this.renderInstructionSets()}
           </div>
         </div>
@@ -81,5 +85,6 @@ export class Tutorial extends React.Component {
 }
 
 Tutorial.propTypes = {
+  addBasePath: PropTypes.func.isRequired,
   tutorialId: PropTypes.string.isRequired
 };
