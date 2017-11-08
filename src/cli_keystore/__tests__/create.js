@@ -5,7 +5,7 @@ import mockFs from 'mock-fs';
 import { Keystore } from '../../server/keystore';
 import { create } from '../create';
 import Logger from '../../cli_plugin/lib/logger';
-import * as prompt from '../../utils/prompt';
+import * as prompt from '../../server/utils/prompt';
 
 describe('Kibana keystore', () => {
   describe('create', () => {

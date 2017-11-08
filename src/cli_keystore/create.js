@@ -1,5 +1,5 @@
 import Logger from '../cli_plugin/lib/logger';
-import { confirm } from '../utils';
+import { confirm } from '../server/utils';
 
 export async function create(keystore, command, options) {
   const logger = new Logger(options);

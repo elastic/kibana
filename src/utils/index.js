@@ -8,8 +8,6 @@ export { encodeQueryComponent } from './encode_query_component';
 export { modifyUrl } from './modify_url';
 export { createToolingLog } from './tooling_log';
 export { getFlattenedObject } from './get_flattened_object';
-export { stdin } from './stdin';
-export { confirm, question } from './prompt';
 
 export {
   getKbnTypeNames,
