@@ -6,6 +6,7 @@ import {
   KuiCodeEditor
 } from 'ui_framework/components';
 import 'brace/mode/sh';
+import { replaceTemplateStrings } from './replace_template_strings';
 
 export function Instruction({ commands, textPost, textPre }) {
   let pre;
@@ -36,7 +37,7 @@ export function Instruction({ commands, textPost, textPre }) {
         mode="sh"
         theme="github"
         width="100%"
-        value={commands.join('\n')}
+        value={commands.map(cmd => { return replaceTemplateStrings(cmd); }).join('\n')}
         setOptions={aceOptions}
       />
 
