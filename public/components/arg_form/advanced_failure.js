@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { compose, withProps, withPropsOnChange } from 'recompose';
 import { Button, FormGroup, FormControl } from 'react-bootstrap';
-import { statefulProp } from '../../lib/stateful_component';
+import { createStatefulPropHoc } from '../../components/enhance/stateful_prop';
 import { fromExpression, toExpression } from '../../../common/lib/ast';
 
 export const AdvancedFailureComponent = (props) => {
@@ -69,7 +69,7 @@ export const AdvancedFailure = compose(
   withProps(({ argValue }) => ({
     argExpression: toExpression(argValue, 'argument'),
   })),
-  statefulProp('argExpression', 'updateArgExpression'),
+  createStatefulPropHoc('argExpression', 'updateArgExpression'),
   withPropsOnChange(['argExpression'], ({ argExpression }) => ({
     valid: (function () {
       try {

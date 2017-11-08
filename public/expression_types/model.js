@@ -49,7 +49,7 @@ export class Model extends FunctionForm {
     });
 
     return {
-      label: Array.isArray(modelArg) && get(modelArg[1], 'label'),
+      label: Array.isArray(modelArg) ? get(modelArg[1], 'label') : null,
       skipRender: !modelArg,
     };
   }

@@ -10,9 +10,9 @@ window.onerror = (err, url, line) => {
 
   const msg = err.message || err.toString();
 
-  const knownError = knownErrors.find(errorName => (msg.indexOf(errorName) >= 0));
+  const isKnownError = knownErrors.find(errorName => msg.indexOf(errorName) >= 0);
 
-  if (!knownError) {
+  if (!isKnownError) {
     oldHandler(err, url, line);
   }
 };

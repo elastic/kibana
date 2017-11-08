@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormGroup, FormControl, Button } from 'react-bootstrap';
 import { get } from 'lodash';
-import { statefulProp } from '../../lib/stateful_component';
+import { createStatefulPropHoc } from '../../components/enhance/stateful_prop';
 import { compose, withProps } from 'recompose';
 
 const component = ({ updateValue, value, confirm, commit, renderError }) => {
@@ -40,7 +40,7 @@ const template = compose(
     commit: onValueChange,
     value: argValue,
   })),
-  statefulProp('value'),
+  createStatefulPropHoc('value'),
 )(component);
 
 template.propTypes = {
