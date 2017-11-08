@@ -117,31 +117,40 @@ export function ArgValueSuggestionsProvider(Private, indexPatterns) {
     }
   };
 
-  /**
-   * @param {string} argName - user provided argument name
-   * @param {string} partial - user provided argument value
-   * @param {object} help - arugment help definition object fetched from '/api/timelion/functions'
-   * @param {string} functionName - user provided function name containing argument
-   * @param {object} functionArgs - user provided function arguments parsed ahead of current argument
-   * @return {array} array of suggestions
-   */
-  async function getSuggestions(argName, partial, help, functionName, functionArgs) {
-    if (_.has(customHandlers, [functionName, argName])) {
-      return await customHandlers[functionName][argName](partial, functionArgs);
-    }
+  return {
+    /**
+     * @param {string} functionName - user provided function name containing argument
+     * @param {string} argName - user provided argument name
+     * @return {boolean} true when dynamic suggestion handler provided for function argument
+     */
+    hasDynamicSuggestionsForArgument: (functionName, argName) => {
+      return (customHandlers[functionName] && customHandlers[functionName][argName]);
+    },
 
-    if (_.has(help, 'suggestions')) {
-      if (partial) {
-        return help.suggestions.filter(suggestion => {
-          return suggestion.name.includes(partial);
+    /**
+     * @param {string} functionName - user provided function name containing argument
+     * @param {string} argName - user provided argument name
+     * @param {object} functionArgs - user provided function arguments parsed ahead of current argument
+     * @param {string} partial - user provided argument value
+     * @return {array} array of dynamic suggestions matching partial
+     */
+    getDynamicSuggestionsForArgument: async (functionName, argName, functionArgs, partialInput = '') => {
+      return await customHandlers[functionName][argName](partialInput, functionArgs);
+    },
+
+    /**
+     * @param {string} partial - user provided argument value
+     * @param {array} staticSuggestions - arugment value suggestions
+     * @return {array} array of static suggestions matching partial
+     */
+    getStaticSuggestionsForInput: (partialInput = '', staticSuggestions = []) => {
+      if (partialInput) {
+        return staticSuggestions.filter(suggestion => {
+          return suggestion.name.includes(partialInput);
         });
       }
 
-      return help.suggestions;
-    }
-
-    return [];
-  }
-
-  return getSuggestions;
+      return staticSuggestions;
+    },
+  };
 }

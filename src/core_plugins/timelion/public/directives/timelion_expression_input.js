@@ -52,7 +52,7 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
     replace: true,
     template: timelionExpressionInputTemplate,
     link: function (scope, elem) {
-      const getArgValueSuggestions = Private(ArgValueSuggestionsProvider);
+      const argValueSuggestions = Private(ArgValueSuggestionsProvider);
       const expressionInput = elem.find('[data-expression-input]');
       const functionReference = {};
       let suggestibleFunctionLocation = {};
@@ -136,7 +136,7 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
           functionReference.list,
           Parser,
           getCursorPosition(),
-          getArgValueSuggestions
+          argValueSuggestions
         );
 
         // We're using ES6 Promises, not $q, so we have to wrap this in $apply.
