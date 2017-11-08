@@ -1,4 +1,5 @@
-import { defaultsDeep, noop } from 'lodash';
+import { defaultsDeep } from 'lodash';
+import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
 
 function hydrateUserSettings(userSettings) {
   return Object.keys(userSettings)
@@ -9,35 +10,38 @@ function hydrateUserSettings(userSettings) {
 
 /**
  *  Service that provides access to the UiSettings stored in elasticsearch.
- *
  *  @class UiSettingsService
- *  @param {Object} options
- *  @property {string} options.index Elasticsearch index name where settings are stored
- *  @property {string} options.type type of ui settings Elasticsearch doc
- *  @property {string} options.id id of ui settings Elasticsearch doc
- *  @property {AsyncFunction} options.callCluster function that accepts a method name and
- *                            param object which causes a request via some elasticsearch client
- *  @property {AsyncFunction} [options.readInterceptor] async function that is called when the
- *                            UiSettingsService does a read() an has an oportunity to intercept the
- *                            request and return an alternate `_source` value to use.
  */
 export class UiSettingsService {
+  /**
+   *  @constructor
+   *  @param {Object} options
+   *  @property {string} options.type type of SavedConfig object
+   *  @property {string} options.id id of SavedConfig object
+   *  @property {number} options.buildNum
+   *  @property {SavedObjectsClient} options.savedObjectsClient
+   *  @property {Function} [options.getDefaults]
+   *  @property {Function} [options.log]
+   */
   constructor(options) {
     const {
       type,
       id,
+      buildNum,
       savedObjectsClient,
-      readInterceptor = noop,
       // we use a function for getDefaults() so that defaults can be different in
       // different scenarios, and so they can change over time
       getDefaults = () => ({}),
+      // function that accepts log messages in the same format as server.log
+      log = () => {},
     } = options;
 
-    this._savedObjectsClient = savedObjectsClient;
-    this._getDefaults = getDefaults;
-    this._readInterceptor = readInterceptor;
     this._type = type;
     this._id = id;
+    this._buildNum = buildNum;
+    this._savedObjectsClient = savedObjectsClient;
+    this._getDefaults = getDefaults;
+    this._log = log;
   }
 
   async getDefaults() {
@@ -72,7 +76,7 @@ export class UiSettingsService {
   }
 
   async setMany(changes) {
-    await this._write(changes);
+    await this._write({ changes });
   }
 
   async set(key, value) {
@@ -91,16 +95,30 @@ export class UiSettingsService {
     await this.setMany(changes);
   }
 
-  async _write(changes) {
-    await this._savedObjectsClient.update(this._type, this._id, changes);
+  async _write({ changes, autoCreateOrUpgradeIfMissing = true }) {
+    try {
+      await this._savedObjectsClient.update(this._type, this._id, changes);
+    } catch (error) {
+      const { isNotFoundError } = this._savedObjectsClient.errors;
+      if (!isNotFoundError(error) || !autoCreateOrUpgradeIfMissing) {
+        throw error;
+      }
+
+      await createOrUpgradeSavedConfig({
+        savedObjectsClient: this._savedObjectsClient,
+        version: this._id,
+        buildNum: this._buildNum,
+        log: this._log,
+      });
+
+      await this._write({
+        changes,
+        autoCreateOrUpgradeIfMissing: false
+      });
+    }
   }
 
   async _read(options = {}) {
-    const interceptValue = await this._readInterceptor(options);
-    if (interceptValue != null) {
-      return interceptValue;
-    }
-
     const {
       ignore401Errors = false
     } = options;

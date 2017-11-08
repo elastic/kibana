@@ -1,4 +1,3 @@
-
 export default function (kibana) {
   let mainFile = 'plugins/timelion/app';
 
@@ -29,7 +28,7 @@ export default function (kibana) {
           };
         },
         uses: [
-          'savedObjectTypes',
+          'savedObjectTypes'
         ]
       },
       hacks: [
@@ -38,6 +37,9 @@ export default function (kibana) {
       ],
       visTypes: [
         'plugins/timelion/vis'
+      ],
+      home: [
+        'plugins/timelion/register_feature'
       ],
       mappings: require('./mappings.json'),
 

@@ -31,6 +31,14 @@
   }
 }
 
+/**
+ * 1. Need to override the react grid layout height when a single panel is expanded. Important is required because
+ * otherwise the heigh is set inline.
+ */
+.layout-maximized-panel {
+  height: 100% !important; /* 1. */
+}
+
 .exitFullScreenMode {
   height: 40px;
   left: 0px;
@@ -42,7 +50,6 @@
   background: none;
   z-index: 5;
 }
-
 
 .exitFullScreenMode:hover,
 .exitFullScreenMode:focus {
@@ -93,6 +100,7 @@
   background-color: @dashboard-bg;
 }
 
+
 .dashboardCloneModal {
   width: 450px;
 }
@@ -106,24 +114,20 @@
 
 .start-screen {
   margin: 20px auto;
-  background-color: @dashboard-bg;
   max-width: 800px;
   background: tint(@globalColorBlue, 90%);
   padding: 40px;
   border-radius: 4px;
 }
 
-/**
- * 1. Not entirely sure why but when the panel is within the grid, it requires height 100%. When it's an expanded
- * panel, however, outside the grid, height: 100% will cause the panel not to expand properly.
- * 2. We need this so the panel menu pop up shows up outside the boundaries of a panel.
+/**.
+ * 1. We need this so the panel menu pop up shows up outside the boundaries of a panel.
  */
 .react-grid-layout {
   background-color: @dashboard-bg;
 
   .dashboard-panel {
-    height: 100%; /* 1. */
-    overflow: visible; /* 2. */
+    overflow: visible; /* 1. */
   }
 
   .gs-w {
@@ -133,6 +137,19 @@
 
 .panel {
   border: 2px dashed transparent;
+}
+
+/**
+ * 1. For expanded panel mode, we want to hide the grid, but keep it rendered so it doesn't cause all visualizations
+ * to re-render once the panel is minimized, which is a time consuming operation.
+ */
+.panel--hidden-mode {
+  display: none; /* 1. */
+}
+
+.panel--expanded-mode {
+  height: 100%;
+  width: 100%;
 }
 
 .panel--edit-mode {
@@ -152,9 +169,35 @@
   flex-direction: column;
 }
 
-dashboard-panel {
+.dashboard-container-with-margins {
+  background-color: @dashboard-bg-with-margins;
+}
+
+/**
+ * Needs to correspond with the react root nested inside angular.
+ */
+dashboard-viewport-provider {
   flex: 1;
   display: flex;
+  [data-reactroot] {
+    flex: 1;
+  }
+}
+
+/**
+ * When a single panel is expanded, all the other panels are hidden in the grid.
+ */
+.grid-item--hidden {
+  display: none;
+}
+
+/**
+ * We need to mark this as important because react grid layout sets the width and height of the panels inline.
+ */
+.grid-item--expanded {
+  height: 100% !important; /* 1. */
+  width: 100% !important; /* 1. */
+  transform: none !important; /* 1. */
 }
 
 /**
@@ -167,6 +210,7 @@ dashboard-panel {
   flex: 1;
   display: flex;
   flex-direction: column;
+  height: 100%;
 
   background: @dashboard-panel-bg;
   color: @dashboard-panel-color;
@@ -215,21 +259,6 @@ dashboard-panel {
         z-index: 25;
       }
 
-      .dashboardPanelMenuItem {
-        padding: 10px;
-        color: @text-color;
-
-        p {
-          display: inline;
-          padding: 0 0 0 5px;
-        }
-
-        &:hover {
-          color: @link-hover-color;
-        }
-
-      }
-
       .panel-title {
         font-size: inherit;
 
@@ -255,10 +284,23 @@ dashboard-panel {
     .visualize-show-spy {
       visibility: hidden;
     }
+    /**
+     * 1. Use opacity to make this element accessible to screen readers and keyboard.
+     * 2. Show on focus to enable keyboard accessibility.
+     */
+    .viewModeExpandPanelToggle {
+      opacity: 0; /* 1 */
+      &:focus {
+        opacity: 1; /* 2 */
+      }
+    }
 
     &:hover {
       .visualize-show-spy {
         visibility: visible;
+      }
+      .viewModeExpandPanelToggle {
+        opacity: 1;
       }
     }
 
@@ -295,4 +337,26 @@ dashboard-panel {
     flex: 1 1 0; /* 1 */
     overflow: auto; /* 1 */
   }
+}
+
+/**
+ * The dashboard background color is the same as the panel color by default. When the user wants to use margins, we
+ * need to give a different background color so the panels are distinguishable from the background.
+ */
+.layout-with-margins {
+  background-color: @dashboard-bg-with-margins;
+  .panel-content {
+    background-color: @panel-bg-with-margins;
+  }
+  .panel {
+    border: 1px solid #D9D9D9;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.dashboard-viewport {
+  background-color: @dashboard-bg;
+}
+.dashboard-viewport-with-margins {
+  background-color: @dashboard-bg-with-margins;
 }

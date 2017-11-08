@@ -2,8 +2,8 @@
   position: relative;
   padding: 10px $localNavSideSpacing 14px;
   background-color: $localDropdownBackgroundColor;
-  border-bottom: solid 1px $globalColorLightGray;
-  border-top: solid 1px $globalColorLightGray;
+  border-bottom: solid 1px $kuiColorLightGray;
+  border-top: solid 1px $kuiColorLightGray;
   margin-bottom: 10px;
   line-height: 20px;
 
@@ -41,7 +41,11 @@
   margin-left: 30px;
 }
 
+/**
+ * 1. Override inherited styles.
+ */
 .kuiLocalDropdownTitle {
+  margin-top: 0; /* 1 */
   margin-bottom: 12px;
   font-size: 18px;
   color: $localNavTextColor;
@@ -66,9 +70,13 @@
   margin-bottom: 6px;
 }
 
+  /**
+   * 1. Override inherited styles.
+   */
   .kuiLocalDropdownHeader__label {
     font-size: 14px;
     font-weight: 700;
+    margin-bottom: 0; /* 1 */
     color: $localNavTextColor;
 
     @include darkTheme {
@@ -81,7 +89,7 @@
   }
 
   .kuiLocalDropdownHeader__action {
-    color: $globalLinkColor;
+    color: $kuiLinkColor;
     font-size: 12px;
     text-decoration: none;
     cursor: pointer;
@@ -92,15 +100,15 @@
 
     &:hover,
     &:active {
-      color: $globalLinkColor-isHover;
+      color: $kuiLinkColor-isHover;
     }
 
     @include darkTheme {
-      color: $globalLinkColor--darkTheme;
+      color: $kuiLinkColor--darkTheme;
 
       &:hover,
       &:active {
-        color: $globalLinkColor-isHover--darkTheme;
+        color: $kuiLinkColor-isHover--darkTheme;
       }
     }
   }
@@ -111,22 +119,22 @@
   margin-bottom: 12px;
   padding: 5px 15px;
   font-size: 14px;
-  color: $globalInputTextColor;
-  background-color: $globalInputBackgroundColor;
-  border: 1px solid $globalInputBorderColor;
+  color: $kuiInputTextColor;
+  background-color: $kuiInputBackgroundColor;
+  border: 1px solid $kuiInputBorderColor;
   border-radius: 4px;
 
   &:focus {
-    border-color: $globalFocusColor;
+    border-color: $kuiFocusColor;
   }
 
   @include darkTheme {
-    color: $globalInputTextColor--darkTheme;
-    background-color: $globalInputBackgroundColor--darkTheme;
-    border-color: $globalInputBorderColor--darkTheme;
+    color: $kuiInputTextColor--darkTheme;
+    background-color: $kuiInputBackgroundColor--darkTheme;
+    border-color: $kuiInputBorderColor--darkTheme;
 
     &:focus {
-      border-color: $globalFocusColor;
+      border-color: $kuiFocusColor;
     }
   }
 }
@@ -144,7 +152,7 @@
   margin-bottom: 16px;
   padding: 6px 10px;
   font-size: 14px;
-  color: $globalTextColor;
+  color: $kuiTextColor;
   background-color: $localNavBackgroundColor;
 
   @include darkTheme {

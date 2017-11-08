@@ -9,6 +9,8 @@ export function FilterBarClickHandlerProvider(Notifier, Private) {
 
   return function ($state) {
     return function (event, simulate) {
+      if (!$state) return;
+
       const notify = new Notifier({
         location: 'Filter bar'
       });

@@ -27,7 +27,6 @@ export default async (kbnServer, server, config) => {
 
   const bundlerEnv = new UiBundlerEnv(config.get('optimize.bundleDir'));
   bundlerEnv.addContext('env', config.get('env.name'));
-  bundlerEnv.addContext('urlBasePath', config.get('server.basePath'));
   bundlerEnv.addContext('sourceMaps', config.get('optimize.sourceMaps'));
   bundlerEnv.addContext('kbnVersion', config.get('pkg.version'));
   bundlerEnv.addContext('buildNum', config.get('pkg.buildNum'));
@@ -66,7 +65,7 @@ export default async (kbnServer, server, config) => {
           await reply.renderStatusPage();
         }
       } catch (err) {
-        reply(Boom.wrap(err));
+        reply(Boom.boomify(err));
       }
     }
   });

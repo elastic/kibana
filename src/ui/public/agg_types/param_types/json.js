@@ -61,7 +61,7 @@ export function JsonParamTypeProvider(Private) {
 
       function compare(a, b) {
         if (_.isPlainObject(a) && _.isPlainObject(b)) return mergeObjs(a, b);
-        if (_.isArray(a) && _.isArray(b)) return mergeArrays(a, b);
+        if (Array.isArray(a) && Array.isArray(b)) return mergeArrays(a, b);
         if (b === null) return undefined;
         if (b !== undefined) return b;
         return a;

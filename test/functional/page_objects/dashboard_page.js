@@ -1,6 +1,8 @@
 import _ from 'lodash';
 import { DashboardConstants } from '../../../src/core_plugins/kibana/public/dashboard/dashboard_constants';
 
+export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
+
 export function DashboardPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
   const find = getService('find');
@@ -18,8 +20,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async initTests() {
       const logstash = esArchiver.loadIfNeeded('logstash_functional');
       await kibanaServer.uiSettings.replace({
-        'dateFormat:tz':'UTC',
-        'defaultIndex':'logstash-*'
+        'dateFormat:tz': 'UTC',
+        'defaultIndex': 'logstash-*'
       });
 
       log.debug('load kibana index with visualizations');
@@ -216,10 +218,26 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
     }
 
+    async isMarginsOn() {
+      log.debug('isMarginsOn');
+      await this.openOptions();
+      const marginsCheckbox = await testSubjects.find('dashboardMarginsCheckbox');
+      return await marginsCheckbox.getProperty('checked');
+    }
+
+    async useMargins(on = true) {
+      await this.openOptions();
+      const isMarginsOn = await this.isMarginsOn();
+      if (isMarginsOn !== on) {
+        return await testSubjects.click('dashboardMarginsCheckbox');
+      }
+    }
+
     async filterVizNames(vizName) {
       const visFilter = await find.byCssSelector('input[placeholder="Visualizations Filter..."]');
       await visFilter.click();
       await remote.pressKeys(vizName);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickVizNameLink(vizName) {
@@ -236,19 +254,30 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await this.clickEdit();
     }
 
+    async filterSearchNames(name) {
+      await testSubjects.setValue('savedObjectFinderSearchInput', name);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async clickSavedSearchTab() {
+      await testSubjects.click('addSavedSearchTab');
+    }
+
+    async addSavedSearch(searchName) {
+      await this.clickAddVisualization();
+      await this.clickSavedSearchTab();
+      await this.filterSearchNames(searchName);
+
+      await find.clickByPartialLinkText(searchName);
+      await PageObjects.header.clickToastOK();
+      await this.clickAddVisualization();
+    }
+
     async addVisualization(vizName) {
       await this.clickAddVisualization();
       log.debug('filter visualization (' + vizName + ')');
       await this.filterVizNames(vizName);
-      // this second wait is usually enough to avoid the
-      // 'stale element reference: element is not attached to the page document'
-      // on the next step
-      await PageObjects.common.sleep(1000);
-        // but wrap in a try loop since it can still happen
-      await retry.try(() => {
-        log.debug('click visualization (' + vizName + ')');
-        return this.clickVizNameLink(vizName);
-      });
+      await this.clickVizNameLink(vizName);
       await PageObjects.header.clickToastOK();
       // this second click of 'Add' collapses the Add Visualization pane
       await this.clickAddVisualization();
@@ -327,7 +356,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         await searchFilter.clearValue();
         await searchFilter.click();
         // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
-        await searchFilter.type(dashName.replace('-',' '));
+        await searchFilter.type(dashName.replace('-', ' '));
       });
 
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -401,7 +430,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     getTestVisualizations() {
       return [
-        { name: 'Visualization PieChart', description: 'PieChart' },
+        { name: PIE_CHART_VIS_NAME, description: 'PieChart' },
         { name: 'Visualization☺ VerticalBarChart', description: 'VerticalBarChart' },
         { name: 'Visualization漢字 AreaChart', description: 'AreaChart' },
         { name: 'Visualization☺漢字 DataTable', description: 'DataTable' },
@@ -413,6 +442,22 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     getTestVisualizationNames() {
       return this.getTestVisualizations().map(visualization => visualization.name);
+    }
+
+    async showPanelEditControlsDropdownMenu() {
+      const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
+      if (editLinkExists) return;
+      await testSubjects.click('dashboardPanelToggleMenuIcon');
+    }
+
+    async clickDashboardPanelEditLink() {
+      await this.showPanelEditControlsDropdownMenu();
+      await testSubjects.click('dashboardPanelEditLink');
+    }
+
+    async clickDashboardPanelRemoveIcon() {
+      await this.showPanelEditControlsDropdownMenu();
+      await testSubjects.click('dashboardPanelRemoveIcon');
     }
 
     async addVisualizations(visualizations) {
@@ -467,11 +512,15 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async toggleExpandPanel() {
+    async toggleExpandPanel(panel) {
       log.debug('toggleExpandPanel');
+      await (panel ? remote.moveMouseTo(panel) : testSubjects.moveMouseTo('dashboardPanelTitle'));
       const expandShown = await testSubjects.exists('dashboardPanelExpandIcon');
       if (!expandShown) {
-        await testSubjects.click('dashboardPanelToggleMenuIcon');
+        const toggleMenuItem = panel ?
+          await testSubjects.findDescendant('dashboardPanelToggleMenuIcon', panel) :
+          testSubjects.find('dashboardPanelToggleMenuIcon');
+        await toggleMenuItem.click();
       }
       await testSubjects.click('dashboardPanelExpandIcon');
     }

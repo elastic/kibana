@@ -1,0 +1,26 @@
+.kuiTextArea {
+  width: $kuiFormFieldDefaultWidth;
+
+  @include formControl;
+
+  &:focus {
+    box-shadow: none;
+    @include formControlFocus;
+  }
+
+  &.kuiTextArea-isInvalid {
+    @include formControlInvalid;
+  }
+}
+
+.kuiTextArea--nonResizable {
+  resize: none;
+}
+
+.kuiTextArea--small {
+  width: $kuiFormFieldSmallWidth;
+}
+
+.kuiTextArea--large {
+  width: $kuiFormFieldLargeWidth;
+}

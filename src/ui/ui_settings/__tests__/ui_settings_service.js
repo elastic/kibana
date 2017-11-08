@@ -2,9 +2,10 @@ import { isEqual } from 'lodash';
 import expect from 'expect.js';
 import { errors as esErrors } from 'elasticsearch';
 import Chance from 'chance';
+import sinon from 'sinon';
 
 import { UiSettingsService } from '../ui_settings_service';
-
+import * as createOrUpgradeSavedConfigNS from '../create_or_upgrade_saved_config/create_or_upgrade_saved_config';
 import {
   createObjectsClientStub,
   savedObjectsClientErrors,
@@ -12,33 +13,41 @@ import {
 
 const TYPE = 'config';
 const ID = 'kibana-version';
+const BUILD_NUM = 1234;
 const chance = new Chance();
 
-function setup(options = {}) {
-  const {
-    readInterceptor,
-    getDefaults,
-    defaults = {},
-    esDocSource = {},
-    savedObjectsClient = createObjectsClientStub(TYPE, ID, esDocSource)
-  } = options;
-
-  const uiSettings = new UiSettingsService({
-    type: TYPE,
-    id: ID,
-    getDefaults: getDefaults || (() => defaults),
-    readInterceptor,
-    savedObjectsClient,
-  });
-
-  return {
-    uiSettings,
-    assertGetQuery: savedObjectsClient.assertGetQuery,
-    assertUpdateQuery: savedObjectsClient.assertUpdateQuery,
-  };
-}
-
 describe('ui settings', () => {
+  const sandbox = sinon.sandbox.create();
+
+  function setup(options = {}) {
+    const {
+      getDefaults,
+      defaults = {},
+      esDocSource = {},
+      savedObjectsClient = createObjectsClientStub(TYPE, ID, esDocSource)
+    } = options;
+
+    const uiSettings = new UiSettingsService({
+      type: TYPE,
+      id: ID,
+      buildNum: BUILD_NUM,
+      getDefaults: getDefaults || (() => defaults),
+      savedObjectsClient,
+    });
+
+    const createOrUpgradeSavedConfig = sandbox.stub(createOrUpgradeSavedConfigNS, 'createOrUpgradeSavedConfig');
+
+    return {
+      uiSettings,
+      savedObjectsClient,
+      createOrUpgradeSavedConfig,
+      assertGetQuery: savedObjectsClient.assertGetQuery,
+      assertUpdateQuery: savedObjectsClient.assertUpdateQuery,
+    };
+  }
+
+  afterEach(() => sandbox.restore());
+
   describe('overview', () => {
     it('has expected api surface', () => {
       const { uiSettings } = setup();
@@ -61,15 +70,43 @@ describe('ui settings', () => {
     });
 
     it('updates a single value in one operation', async () => {
-      const { uiSettings, assertUpdateQuery } = setup();
+      const { uiSettings, savedObjectsClient } = setup();
       await uiSettings.setMany({ one: 'value' });
-      assertUpdateQuery({ one: 'value' });
+      savedObjectsClient.assertUpdateQuery({ one: 'value' });
     });
 
     it('updates several values in one operation', async () => {
-      const { uiSettings, assertUpdateQuery } = setup();
+      const { uiSettings, savedObjectsClient } = setup();
       await uiSettings.setMany({ one: 'value', another: 'val' });
-      assertUpdateQuery({ one: 'value', another: 'val' });
+      savedObjectsClient.assertUpdateQuery({ one: 'value', another: 'val' });
+    });
+
+    it('automatically creates the savedConfig if it is missing', async () => {
+      const { uiSettings, savedObjectsClient, createOrUpgradeSavedConfig } = setup();
+      savedObjectsClient.update
+        .onFirstCall()
+          .throws(savedObjectsClientErrors.createGenericNotFoundError())
+        .onSecondCall()
+          .returns({});
+
+      await uiSettings.setMany({ foo: 'bar' });
+      sinon.assert.calledTwice(savedObjectsClient.update);
+      sinon.assert.calledOnce(createOrUpgradeSavedConfig);
+    });
+
+    it('only tried to auto create once and throws NotFound', async () => {
+      const { uiSettings, savedObjectsClient, createOrUpgradeSavedConfig } = setup();
+      savedObjectsClient.update.throws(savedObjectsClientErrors.createGenericNotFoundError());
+
+      try {
+        await uiSettings.setMany({ foo: 'bar' });
+        throw new Error('expected setMany to throw a NotFound error');
+      } catch (error) {
+        expect(savedObjectsClientErrors.isNotFoundError(error)).to.be(true);
+      }
+
+      sinon.assert.calledTwice(savedObjectsClient.update);
+      sinon.assert.calledOnce(createOrUpgradeSavedConfig);
     });
   });
 
@@ -80,9 +117,9 @@ describe('ui settings', () => {
     });
 
     it('updates single values by (key, value)', async () => {
-      const { uiSettings, assertUpdateQuery } = setup();
+      const { uiSettings, savedObjectsClient } = setup();
       await uiSettings.set('one', 'value');
-      assertUpdateQuery({ one: 'value' });
+      savedObjectsClient.assertUpdateQuery({ one: 'value' });
     });
   });
 
@@ -93,9 +130,9 @@ describe('ui settings', () => {
     });
 
     it('removes single values by key', async () => {
-      const { uiSettings, assertUpdateQuery } = setup();
+      const { uiSettings, savedObjectsClient } = setup();
       await uiSettings.remove('one');
-      assertUpdateQuery({ one: null });
+      savedObjectsClient.assertUpdateQuery({ one: null });
     });
   });
 
@@ -106,15 +143,15 @@ describe('ui settings', () => {
     });
 
     it('removes a single value', async () => {
-      const { uiSettings, assertUpdateQuery } = setup();
+      const { uiSettings, savedObjectsClient } = setup();
       await uiSettings.removeMany(['one']);
-      assertUpdateQuery({ one: null });
+      savedObjectsClient.assertUpdateQuery({ one: null });
     });
 
     it('updates several values in one operation', async () => {
-      const { uiSettings, assertUpdateQuery } = setup();
+      const { uiSettings, savedObjectsClient } = setup();
       await uiSettings.removeMany(['one', 'two', 'three']);
-      assertUpdateQuery({ one: null, two: null, three: null });
+      savedObjectsClient.assertUpdateQuery({ one: null, two: null, three: null });
     });
   });
 
@@ -145,9 +182,9 @@ describe('ui settings', () => {
 
   describe('#getUserProvided()', () => {
     it('pulls user configuration from ES', async () => {
-      const { uiSettings, assertGetQuery } = setup();
+      const { uiSettings, savedObjectsClient } = setup();
       await uiSettings.getUserProvided();
-      assertGetQuery();
+      savedObjectsClient.assertGetQuery();
     });
 
     it('returns user configuration', async () => {
@@ -240,9 +277,9 @@ describe('ui settings', () => {
   describe('#getRaw()', () => {
     it('pulls user configuration from ES', async () => {
       const esDocSource = {};
-      const { uiSettings, assertGetQuery } = setup({ esDocSource });
+      const { uiSettings, savedObjectsClient } = setup({ esDocSource });
       await uiSettings.getRaw();
-      assertGetQuery();
+      savedObjectsClient.assertGetQuery();
     });
 
     it(`without user configuration it's equal to the defaults`, async () => {
@@ -273,9 +310,9 @@ describe('ui settings', () => {
   describe('#getAll()', () => {
     it('pulls user configuration from ES', async () => {
       const esDocSource = {};
-      const { uiSettings, assertGetQuery } = setup({ esDocSource });
+      const { uiSettings, savedObjectsClient } = setup({ esDocSource });
       await uiSettings.getAll();
-      assertGetQuery();
+      savedObjectsClient.assertGetQuery();
     });
 
     it(`returns defaults when es doc is empty`, async () => {
@@ -310,9 +347,9 @@ describe('ui settings', () => {
   describe('#get()', () => {
     it('pulls user configuration from ES', async () => {
       const esDocSource = {};
-      const { uiSettings, assertGetQuery } = setup({ esDocSource });
+      const { uiSettings, savedObjectsClient } = setup({ esDocSource });
       await uiSettings.get();
-      assertGetQuery();
+      savedObjectsClient.assertGetQuery();
     });
 
     it(`returns the promised value for a key`, async () => {
@@ -335,49 +372,6 @@ describe('ui settings', () => {
       const { uiSettings } = setup({ esDocSource });
       const result = await uiSettings.get('dateFormat');
       expect(result).to.equal('YYYY-MM-DD');
-    });
-  });
-
-  describe('readInterceptor() argument', () => {
-    describe('#getUserProvided()', () => {
-      it('returns a promise when interceptValue doesn\'t', () => {
-        const { uiSettings } = setup({ readInterceptor: () => ({}) });
-        expect(uiSettings.getUserProvided()).to.be.a(Promise);
-      });
-
-      it('returns intercept values', async () => {
-        const { uiSettings } = setup({
-          readInterceptor: () => ({
-            foo: 'bar'
-          })
-        });
-
-        expect(await uiSettings.getUserProvided()).to.eql({
-          foo: {
-            userValue: 'bar'
-          }
-        });
-      });
-    });
-
-    describe('#getAll()', () => {
-      it('merges intercept value with defaults', async () => {
-        const { uiSettings } = setup({
-          defaults: {
-            foo: { value: 'foo' },
-            bar: { value: 'bar' },
-          },
-
-          readInterceptor: () => ({
-            foo: 'not foo'
-          }),
-        });
-
-        expect(await uiSettings.getAll()).to.eql({
-          foo: 'not foo',
-          bar: 'bar'
-        });
-      });
     });
   });
 });

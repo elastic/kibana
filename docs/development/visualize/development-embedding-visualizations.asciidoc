@@ -1,0 +1,123 @@
+[[development-embedding-visualizations]]
+=== Embedding Visualizations
+
+There are two different angular directives you can use to insert a visualization in your page. 
+To display an already saved visualization, use the `<visualize>` directive. 
+To reuse an existing Visualization implementation for a more custom purpose, use the `<visualization>` directive instead.
+
+==== VisualizeLoader
+The `VisualizeLoader` class i the easiest way to embed a visualization into your plugin. It exposes
+two methods:
+
+- `getVisualizationList()`: which returns promise which gets resolved with list of saved visualizations
+- `embedVisualizationWithId(container, savedId, params)`: which embeds visualization by id
+- `embedVisualizationWithSavedObject(container, savedObject, params)`: which embeds visualization from saved object
+
+`container` should be a dom element to which visualization should be embedded
+`params` is a parameter object where the following properties can be defined:
+
+- `timeRange`: time range to pass to `<visualize>` directive
+- `uiState`: uiState to pass to `<visualize>` directive
+- `appState`: appState to pass to `<visualize>` directive
+- `showSpyPanel`: showSpyPanel property to pass to `<visualize>` directive
+
+
+==== `<visualize>` directive
+The `<visualize>` directive takes care of loading data, parsing data, rendering the editor 
+(if the Visualization is in edit mode) and rendering the visualization. 
+The directive takes a savedVis object for its configuration. 
+It is the easiest way to add visualization to your page under the assumption that 
+the visualization you are trying to display is saved in kibana. 
+If that is not the case, take a look at using `<visualization>` directive.
+
+The simplest way is to just pass `saved-id` to `<visualize>`:
+
+`<visualize saved-id="'447d2930-9eb2-11e7-a956-5558df96e706'"></visualize>`
+
+For the above to work with time based visualizations time picker must be present (enabled) on the page. For scenarios
+where timepicker is not available time range can be passed in as additional parameter:
+
+`<visualize saved-id="'447d2930-9eb2-11e7-a956-5558df96e706'" 
+time-range="{ max: '2017-09-21T21:59:59.999Z', min: '2017-09-18T22:00:00.000Z' }"></visualize>`
+
+Once <visualize> is done rendering the element will emit `renderComplete` event.
+
+When more control is required over the visualization you may prefer to load the saved object yourself and then pass it
+to `<visualize>`
+
+`<visualize saved-obj='savedVis' app-state='appState' ui-state='uiState' editor-mode='false'></visualize>` where
+
+`savedVis` is an instance of savedVisualization object, which can be retrieved using `savedVisualizations` service
+which is explained later in this documentation.
+
+`appState` is an instance of `AppState`. <visualize> is expecting two keys defined on AppState:
+
+- `filters` which is an instance of searchSource filter object and
+- `query` which is an instance of searchSource query object
+
+If `appState` is not provided, `<visualize>` will not monitor the `AppState`.
+
+`uiState` should be an instance of `PersistedState`. if not provided visualize will generate one, 
+but you will have no access to it. It is used to store viewer specific information like whether the legend is toggled on or off.
+
+`editor-mode` defines if <visualize> should render in editor or in view mode.
+
+*code example: Showing a saved visualization, without linking to querybar or filterbar.*
+["source","html"]
+-----------
+<div ng-controller="KbnTestController" class="test_vis">
+  <visualize saved-obj='savedVis'></visualize>
+</div>
+-----------
+["source","js"]
+-----------
+import { uiModules } from 'ui/modules';
+
+uiModules.get('kibana')
+.controller('KbnTestController', function ($scope, AppState, savedVisualizations) {
+  const visId = 'enter_your_vis_id';
+  savedVisualizations.get(visId).then(savedVis => $scope.savedObj = savedVis);
+});
+-----------
+
+When <visualize> is ready it will emit `ready:vis` event on the root scope.
+When <visualize> is done rendering it will emit `renderComplete` event on the element.
+
+==== `<visualization>` directive
+The `<visualization>` directive takes a visualization configuration and data.
+
+`<visualization vis='vis' vis-data='visData' ui-state='uiState' ></visualization>` where
+
+`vis` is an instance of `Vis` object. The constructor takes 3 parameters:
+
+- `indexPattern` <string>: the indexPattern you want to pass to the visualization
+- `visConfig` <object>: the configuration object
+- `uiState` <object>: uiState object you want to pass to Vis. If not provided Vis will create its own.
+
+`visData` is the data object. Each visualization defines a `responseHandler`, which defines the format of this object.
+
+`uiState` is an instance of PersistedState. Visualizations use it to keep track of their current state. If not provided 
+`<visualization>` will create its own (but you won't be able to check its values)
+
+*code example: create single metric visualization*
+["source","html"]
+-----------
+<div ng-controller="KbnTestController" class="test_vis">
+  <visualization vis='vis' vis-data='visData'></visualize>
+</div>
+-----------
+["source","js"]
+-----------
+import { uiModules } from 'ui/modules';
+
+uiModules.get('kibana')
+.controller('KbnTestController', function ($scope) {
+  const visConfig = {
+    type: 'metric'
+  };
+  $scope.vis = new Vis('.logstash*', visConfig);
+  $scope.visData = [{ columns: [{ title: 'Count' }], rows: [[ 1024 ], [ 256 ]] }];
+});
+-----------
+
+<visualization> will trigger `renderComplete` event on the element once it's done rendering.

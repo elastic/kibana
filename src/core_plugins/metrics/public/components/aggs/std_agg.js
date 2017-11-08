@@ -14,7 +14,7 @@ function StandardAgg(props) {
   const handleSelectChange = createSelectHandler(handleChange);
   let restrict = 'numeric';
   if (model.type === 'cardinality') {
-    restrict = 'string';
+    restrict = 'none';
   }
 
   const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
@@ -31,6 +31,7 @@ function StandardAgg(props) {
       <div className="vis_editor__item">
         <div className="vis_editor__label">Aggregation</div>
         <AggSelect
+          panelType={props.panel.type}
           siblings={props.siblings}
           value={model.type}
           onChange={handleSelectChange('type')}

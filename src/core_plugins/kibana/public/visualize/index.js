@@ -13,6 +13,7 @@ import uiRoutes from 'ui/routes';
 import visualizeListingTemplate from './listing/visualize_listing.html';
 import { VisualizeListingController } from './listing/visualize_listing';
 import { VisualizeConstants } from './visualize_constants';
+import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
 uiRoutes
 .defaults(/visualize/, {
@@ -24,3 +25,14 @@ uiRoutes
   controllerAs: 'listingController',
 });
 
+FeatureCatalogueRegistryProvider.register(() => {
+  return {
+    id: 'visualize',
+    title: 'Visualize',
+    description: 'Build a variety of graphs for your data.',
+    icon: '/plugins/kibana/assets/app_visualize.svg',
+    path: `/app/kibana#${VisualizeConstants.LANDING_PAGE_PATH}`,
+    showOnHomePage: true,
+    category: FeatureCatalogueCategory.DATA
+  };
+});

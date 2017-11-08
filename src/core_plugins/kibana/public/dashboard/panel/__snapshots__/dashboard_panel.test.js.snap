@@ -1,202 +1,42 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DashboardPanel matches snapshot 1`] = `
-<DashboardPanel
-  dashboardViewMode="edit"
-  getContainerApi={[Function]}
-  getEmbeddableHandler={[Function]}
-  isExpanded={false}
-  isFullScreenMode={false}
-  onDeletePanel={[Function]}
-  onToggleExpanded={[Function]}
-  panel={
-    Object {
-      "gridData": Object {
-        "h": 6,
-        "i": 1,
-        "w": 6,
-        "x": 0,
-        "y": 0,
-      },
-      "id": "foo1",
-      "panelIndex": "1",
-      "type": "visualization",
-    }
-  }
+<div
+  class="dashboard-panel"
 >
   <div
-    className="dashboard-panel"
-    onBlur={[Function]}
-    onFocus={[Function]}
+    class="panel panel-default panel--edit-mode"
+    data-test-subj="dashboardPanel"
   >
     <div
-      className="panel panel-default panel--edit-mode"
-      data-test-subj="dashboardPanel"
+      class="panel-heading"
     >
-      <PanelHeader
-        isExpanded={false}
-        isViewOnlyMode={false}
-        onDeletePanel={[Function]}
-        onEditPanel={[Function]}
-        onToggleExpand={[Function]}
+      <span
+        aria-label="Dashboard panel: "
+        class="panel-title"
+        data-test-subj="dashboardPanelTitle"
+        title=""
+      />
+      <div
+        class="kuiMicroButtonGroup"
       >
         <div
-          className="panel-heading"
+          class="kuiPopover kuiPopover--anchorRight dashboardPanelPopOver"
         >
           <span
-            aria-label="Dashboard panel: undefined"
-            className="panel-title"
-            data-test-subj="dashboardPanelTitle"
+            aria-label="Panel options"
+            class="kuiButton__icon kuiIcon panel-dropdown fa fa-caret-down"
+            data-test-subj="dashboardPanelToggleMenuIcon"
+            role="button"
+            tabindex="0"
           />
-          <div
-            className="kuiMicroButtonGroup"
-          >
-            <PanelOptionsMenu
-              isExpanded={false}
-              onDeletePanel={[Function]}
-              onEditPanel={[Function]}
-              onToggleExpandPanel={[Function]}
-            >
-              <KuiPopover
-                anchorPosition="right"
-                button={
-                  <KuiKeyboardAccessible>
-                    <span
-                      aria-label="Click for more panel options"
-                      className="kuiButton__icon kuiIcon panel-dropdown fa fa-caret-down"
-                      data-test-subj="dashboardPanelToggleMenuIcon"
-                      onClick={[Function]}
-                    />
-                  </KuiKeyboardAccessible>
-                }
-                className="dashboardPanelPopOver"
-                closePopover={[Function]}
-                isOpen={false}
-              >
-                <KuiOutsideClickDetector
-                  onOutsideClick={[Function]}
-                >
-                  <div
-                    className="kuiPopover kuiPopover--anchorRight dashboardPanelPopOver"
-                  >
-                    <KuiKeyboardAccessible>
-                      <span
-                        aria-label="Click for more panel options"
-                        className="kuiButton__icon kuiIcon panel-dropdown fa fa-caret-down"
-                        data-test-subj="dashboardPanelToggleMenuIcon"
-                        onClick={[Function]}
-                        onKeyDown={[Function]}
-                        onKeyUp={[Function]}
-                        role="button"
-                        tabIndex="0"
-                      />
-                    </KuiKeyboardAccessible>
-                    <div
-                      className="kuiPopover__body"
-                    >
-                      <KuiMenu>
-                        <ul
-                          className="kuiMenu"
-                        >
-                          <PanelMenuItem
-                            data-test-subj="dashboardPanelEditLink"
-                            iconClass="fa-edit"
-                            label="Edit Visualization"
-                            onClick={[Function]}
-                          >
-                            <KuiMenuItem
-                              className="dashboardPanelMenuItem"
-                              data-test-subj="dashboardPanelEditLink"
-                              onClick={[Function]}
-                            >
-                              <li
-                                className="kuiMenuItem dashboardPanelMenuItem"
-                                data-test-subj="dashboardPanelEditLink"
-                                onClick={[Function]}
-                              >
-                                <span
-                                  aria-hidden="true"
-                                  className="kuiButton__icon kuiIcon fa-edit"
-                                />
-                                <p
-                                  className="kuiText"
-                                >
-                                  Edit Visualization
-                                </p>
-                              </li>
-                            </KuiMenuItem>
-                          </PanelMenuItem>
-                          <PanelMenuItem
-                            data-test-subj="dashboardPanelExpandIcon"
-                            iconClass="fa-expand"
-                            label="Full screen"
-                            onClick={[Function]}
-                          >
-                            <KuiMenuItem
-                              className="dashboardPanelMenuItem"
-                              data-test-subj="dashboardPanelExpandIcon"
-                              onClick={[Function]}
-                            >
-                              <li
-                                className="kuiMenuItem dashboardPanelMenuItem"
-                                data-test-subj="dashboardPanelExpandIcon"
-                                onClick={[Function]}
-                              >
-                                <span
-                                  aria-hidden="true"
-                                  className="kuiButton__icon kuiIcon fa-expand"
-                                />
-                                <p
-                                  className="kuiText"
-                                >
-                                  Full screen
-                                </p>
-                              </li>
-                            </KuiMenuItem>
-                          </PanelMenuItem>
-                          <PanelMenuItem
-                            data-test-subj="dashboardPanelRemoveIcon"
-                            iconClass="fa-trash"
-                            label="Delete from dashboard"
-                            onClick={[Function]}
-                          >
-                            <KuiMenuItem
-                              className="dashboardPanelMenuItem"
-                              data-test-subj="dashboardPanelRemoveIcon"
-                              onClick={[Function]}
-                            >
-                              <li
-                                className="kuiMenuItem dashboardPanelMenuItem"
-                                data-test-subj="dashboardPanelRemoveIcon"
-                                onClick={[Function]}
-                              >
-                                <span
-                                  aria-hidden="true"
-                                  className="kuiButton__icon kuiIcon fa-trash"
-                                />
-                                <p
-                                  className="kuiText"
-                                >
-                                  Delete from dashboard
-                                </p>
-                              </li>
-                            </KuiMenuItem>
-                          </PanelMenuItem>
-                        </ul>
-                      </KuiMenu>
-                    </div>
-                  </div>
-                </KuiOutsideClickDetector>
-              </KuiPopover>
-            </PanelOptionsMenu>
-          </div>
         </div>
-      </PanelHeader>
-      <div
-        className="panel-content"
-        id="embeddedPanel"
-      />
+      </div>
     </div>
+    <div
+      class="panel-content"
+      id="embeddedPanel"
+    />
   </div>
-</DashboardPanel>
+</div>
 `;

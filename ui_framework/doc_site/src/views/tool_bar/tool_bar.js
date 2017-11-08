@@ -45,10 +45,12 @@ export const ToolBar = () => (
       <KuiButtonGroup isUnited>
         <KuiButton
           buttonType="basic"
+          aria-label="Previous"
           icon={<KuiButtonIcon type="previous" />}
         />
         <KuiButton
           buttonType="basic"
+          aria-label="Next"
           icon={<KuiButtonIcon type="next" />}
         />
       </KuiButtonGroup>

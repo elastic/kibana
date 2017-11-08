@@ -466,10 +466,6 @@
   .config {
     border-bottom: 0 none transparent;
 
-    .config-close {
-      background-color: @config-close-bg;
-    }
-
     .container-fluid {
       background-color: @config-bg;
     }
@@ -525,7 +521,7 @@
 
 // /src/core_plugins/kibana/public/dashboard/styles/main.less
   .start-screen {
-    background-color: @dashboard-bg;
+    background-color: @dashboard-bg-with-margins;
   }
 
   .react-grid-layout {
@@ -584,6 +580,10 @@
         color: #ffffff;
       }
     }
+  }
+
+  .slice {
+    stroke: @panel-bg;
   }
 }
 
@@ -719,5 +719,35 @@
 
   .markdown-body blockquote {
     color: @dimmed-text-color;
+  }
+
+  /**
+ * The dashboard background color is the same as the panel color by default. When the user wants to use margins, we
+ * need to give a different background color so the panels are distinguishable from the background.
+ */
+  .layout-with-margins {
+    background-color: @dashboard-bg-with-margins;
+    .panel-default {
+      & > .panel-heading {
+        background-color: @panel-bg-with-margins;
+      }
+    }
+    .panel-content {
+      background-color: @panel-bg-with-margins;
+    }
+    .panel {
+      background-color: @panel-bg-with-margins;
+      border: 1px solid #444444;
+    }
+  }
+  .dashboard-viewport {
+    background-color: @dashboard-bg;
+  }
+  .dashboard-viewport-with-margins {
+    background-color: @dashboard-bg-with-margins;
+  }
+
+  .dashboard-container-with-margins {
+    background-color: @dashboard-bg-with-margins;
   }
 }

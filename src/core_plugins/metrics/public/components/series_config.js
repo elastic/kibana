@@ -26,6 +26,7 @@ export const SeriesConfig = props => {
             Template (eg.<code>{'{{value}}/s'}</code>)
           </label>
           <input
+            style={{ width: 100 }}
             id={htmlId('template')}
             className="vis_editor__input-grows"
             onChange={handleTextChange('value_template')}
@@ -35,6 +36,7 @@ export const SeriesConfig = props => {
             Offset series time by (1m, 1h, 1w, 1d)
           </label>
           <input
+            style={{ width: 100 }}
             id={htmlId('offsetSeries')}
             className="vis_editor__input-grows"
             type="text"
@@ -56,6 +58,18 @@ export const SeriesConfig = props => {
             prefix="series_"
             className="vis_editor__row_item vis_editor__row"
             disabled={!model.override_index_pattern}
+          />
+        </div>
+        <div className="vis_editor__series_config-row">
+          <label className="vis_editor__label" htmlFor={htmlId('series_filter')}>
+            Filter
+          </label>
+          <input
+            id={htmlId('series_filter')}
+            className="vis_editor__input-grows"
+            type="text"
+            onChange={handleTextChange('filter')}
+            value={model.filter}
           />
         </div>
       </div>

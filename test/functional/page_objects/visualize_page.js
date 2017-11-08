@@ -60,6 +60,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByPartialLinkText('Visual Builder');
     }
 
+    async clickEditorSidebarCollapse() {
+      await testSubjects.click('collapseSideBarButton');
+    }
+
+    async selectTagCloudTag(tagDisplayText) {
+      await testSubjects.click(tagDisplayText);
+    }
+
     async getTextTag() {
       const elements = await find.allByCssSelector('text');
       return await Promise.all(elements.map(async element => await element.getVisibleText()));
@@ -340,7 +348,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async setNumericInterval(newValue) {
       const input = await find.byCssSelector('input[name="interval"]');
-      await input.type(newValue);
+      await input.clearValue();
+      await input.type(newValue + '');
     }
 
     async clickGo() {
@@ -397,7 +406,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // can't uses dashes in saved visualizations when filtering
       // or extended character sets
       // https://github.com/elastic/kibana/issues/6300
-      await input.type(vizName.replace('-',' '));
+      await input.type(vizName.replace('-', ' '));
     }
 
     async clickVisualizationByName(vizName) {
@@ -464,7 +473,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // by a bunch of 'L'ines from that point to the next.  Those points are
       // the values we're going to use to calculate the data values we're testing.
       // So git rid of the one 'M' and split the rest on the 'L's.
-      const tempArray = data.replace('M','').split('L');
+      const tempArray = data.replace('M', '').split('L');
       const chartSections = tempArray.length / 2;
       log.debug('chartSections = ' + chartSections + ' height = ' + yAxisHeight + ' yAxisLabel = ' + yAxisLabel);
       const chartData = [];

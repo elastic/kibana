@@ -1,4 +1,4 @@
-import grammar from 'raw!./kuery.peg';
+import grammar from 'raw-loader!./kuery.peg';
 import PEG from 'pegjs';
 import _ from 'lodash';
 import { nodeTypes } from '../node_types/index';
@@ -10,7 +10,10 @@ export function fromKueryExpression(expression, parseOptions = {}) {
     throw new Error('expression must be a string, got undefined instead');
   }
 
-  parseOptions = Object.assign({}, parseOptions, { helpers: { nodeTypes } });
+  parseOptions = {
+    ...parseOptions,
+    helpers: { nodeTypes }
+  };
 
   return kueryParser.parse(expression, parseOptions);
 }

@@ -51,7 +51,7 @@ export const IndexPattern = props => {
         />
       </div>
       <label className="vis_editor__label" htmlFor={htmlId('interval')}>
-        Interval (auto, 1m, 1d, 1w, 1y, &gt;=1m)
+        Interval (auto, 1m, 1d, 7d, 1y, &gt;=1m)
       </label>
       <input
         id={htmlId('interval')}

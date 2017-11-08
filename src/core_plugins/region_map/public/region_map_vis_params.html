@@ -1,45 +1,46 @@
-<div class="form-group">
+<div class="kuiSideBarSection">
+  <div class="form-group">
+    <div class="kuiSideBarSectionTitle">
+      <div class="kuiSideBarSectionTitle__text">
+        Layer Settings
+      </div>
+    </div>
 
+    <div class="kuiSideBarFormRow">
+      <label class="kuiSideBarFormRow__label" for="regionMap">
+        Vector map
+      </label>
+      <div class="kuiSideBarFormRow__control">
+        <select
+          id="regionMap"
+          class="kuiSelect kuiSideBarSelect"
+          ng-model="vis.params.selectedLayer"
+          ng-options="layer.name for layer in collections.vectorLayers track by layer.layerId"
+          ng-change="onLayerChange()"
+        ></select>
+      </div>
+    </div>
+
+    <div class="kuiSideBarFormRow">
+      <label class="kuiSideBarFormRow__label" for="joinField">
+        Join field
+      </label>
+      <div class="kuiSideBarFormRow__control">
+        <select id="joinField"
+          class="kuiSelect kuiSideBarSelect"
+          ng-model="vis.params.selectedJoinField"
+          ng-options="field.description for field in vis.params.selectedLayer.fields track by field.name"
+        >
+          <option value=''>Select</option></select>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="kuiSideBarSection">
   <div class="kuiSideBarSectionTitle">
-    <div class="kuiSideBarSectionTitle__text">
-      Layer Settings
-    </div>
+    <div class="kuiSideBarSectionTitle__text">Style settings</div>
   </div>
-
-  <div class="kuiSideBarFormRow">
-    <label class="kuiSideBarFormRow__label" for="regionMap">
-      Vector map
-    </label>
-    <div class="kuiSideBarFormRow__control">
-      <select
-        id="regionMap"
-        class="kuiSelect kuiSideBarSelect"
-        ng-model="vis.params.selectedLayer"
-        ng-options="layer.name for layer in collections.vectorLayers track by layer.url"
-        ng-change="onLayerChange()"
-      ></select>
-    </div>
-  </div>
-
-  <div class="kuiSideBarFormRow">
-    <label class="kuiSideBarFormRow__label" for="joinField">
-      Join field
-    </label>
-    <div class="kuiSideBarFormRow__control">
-      <select id="joinField"
-              ng-model="vis.params.selectedJoinField"
-              ng-options="field.description for field in vis.params.selectedLayer.fields track by field.name"
-      >
-        <option value=''>Select</option></select>
-    </div>
-  </div>
-
-  <div class="kuiSideBarSectionTitle">
-    <div class="kuiSideBarSectionTitle__text">
-      Style Settings
-    </div>
-  </div>
-
   <div class="kuiSideBarFormRow" >
     <label class="kuiSideBarFormRow__label" for="colorSchema">
       Color Schema
@@ -53,16 +54,11 @@
       ></select>
     </div>
   </div>
+</div>
 
-
+<div class="kuiSideBarSection">
   <div class="kuiSideBarSectionTitle">
-    <div class="kuiSideBarSectionTitle__text">
-      Basic Settings
-    </div>
+    <div class="kuiSideBarSectionTitle__text">Basic settings</div>
   </div>
-
-
   <vislib-basic-options></vislib-basic-options>
-
-
 </div>

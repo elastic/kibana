@@ -1,47 +1,51 @@
 import React from 'react';
 import _ from 'lodash';
 import { mount } from 'enzyme';
-import { DashboardViewMode } from '../dashboard_view_mode';
 import { DashboardPanel } from './dashboard_panel';
+import { DashboardViewMode } from '../dashboard_view_mode';
+import { PanelError } from '../panel/panel_error';
+import { store } from '../../store';
+import { updateViewMode } from '../actions';
+import { Provider } from 'react-redux';
+import { getEmbeddableHandlerMock } from '../__tests__/get_embeddable_handlers_mock';
 
-const containerApiMock = {
-  addFilter: () => {},
-  getAppState: () => {},
-  createChildUistate: () => {},
-  registerPanelIndexPattern: () => {},
-  updatePanel: () => {}
-};
-
-const embeddableHandlerMock = {
-  getEditPath: () => Promise.resolve('editPath'),
-  getTitleFor: () => Promise.resolve('title'),
-  render: jest.fn()
-};
+import {
+  takeMountedSnapshot,
+} from 'ui_framework/src/test';
 
 function getProps(props = {}) {
   const defaultTestProps = {
-    dashboardViewMode: DashboardViewMode.EDIT,
-    isFullScreenMode: false,
-    panel: {
-      gridData: { x: 0, y: 0, w: 6, h: 6, i: 1 },
-      panelIndex: '1',
-      type: 'visualization',
-      id: 'foo1'
-    },
-    getEmbeddableHandler: () => embeddableHandlerMock,
-    isExpanded: false,
-    getContainerApi: () => containerApiMock,
-    onToggleExpanded: () => {},
-    onDeletePanel: () => {}
+    panel: { panelIndex: 'foo1' },
+    renderEmbeddable: jest.fn(),
+    viewOnlyMode: false,
+    onDestroy: () => {},
+    embeddableHandler: getEmbeddableHandlerMock(),
   };
   return _.defaultsDeep(props, defaultTestProps);
 }
 
-test('DashboardPanel matches snapshot', () => {
-  const component = mount(<DashboardPanel {...getProps()} />);
-  expect(component).toMatchSnapshot();
+beforeAll(() => {
+  store.dispatch(updateViewMode(DashboardViewMode.EDIT));
 });
 
-test('and calls render', () => {
-  expect(embeddableHandlerMock.render.mock.calls.length).toBe(1);
+test('DashboardPanel matches snapshot', () => {
+  const component = mount(<Provider store={store}><DashboardPanel {...getProps()} /></Provider>);
+  expect(takeMountedSnapshot(component)).toMatchSnapshot();
 });
+
+test('Calls render', () => {
+  const props = getProps();
+  mount(<Provider store={store}><DashboardPanel {...props} /></Provider>);
+  expect(props.renderEmbeddable.mock.calls.length).toBe(1);
+});
+
+test('renders an error when error prop is passed', () => {
+  const props = getProps({
+    error: 'Simulated error'
+  });
+
+  const component = mount(<Provider store={store}><DashboardPanel {...props} /></Provider>);
+  const panelError = component.find(PanelError);
+  expect(panelError.length).toBe(1);
+});
+

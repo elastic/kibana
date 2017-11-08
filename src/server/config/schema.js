@@ -108,7 +108,9 @@ export default () => Joi.object({
       is: 'stdout',
       then: Joi.default(!process.stdout.isTTY),
       otherwise: Joi.default(true)
-    })
+    }),
+
+    useUTC: Joi.boolean().default(true),
   })
   .default(),
 
@@ -197,12 +199,9 @@ export default () => Joi.object({
       }))
     }))
   }).default(),
-  uiSettings: Joi.object({
-    // this is used to prevent the uiSettings from initializing. Since they
-    // require the elasticsearch plugin in order to function we need to turn
-    // them off when we turn off the elasticsearch plugin (like we do in the
-    // optimizer half of the dev server)
-    enabled: Joi.boolean().default(true)
+
+  savedObjects: Joi.object({
+    indexCheckTimeout: Joi.number().default(5000)
   }).default(),
 
   i18n: Joi.object({

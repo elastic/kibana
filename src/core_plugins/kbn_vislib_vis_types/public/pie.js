@@ -2,7 +2,7 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
 import { CATEGORY } from 'ui/vis/vis_category';
 import pieTemplate from 'plugins/kbn_vislib_vis_types/editors/pie.html';
-import image from './images/icon-pie.svg';
+import image from './images/icon-donut.svg';
 
 export default function HistogramVisType(Private) {
   const VisFactory = Private(VisFactoryProvider);
@@ -20,7 +20,7 @@ export default function HistogramVisType(Private) {
         addTooltip: true,
         addLegend: true,
         legendPosition: 'right',
-        isDonut: false
+        isDonut: true
       },
     },
     editorConfig: {

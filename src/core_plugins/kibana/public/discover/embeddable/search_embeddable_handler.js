@@ -4,8 +4,7 @@ import 'ui/doc_table';
 
 import * as columnActions from 'ui/doc_table/actions/columns';
 import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
-import { EmbeddableHandler } from 'ui/embeddable';
-
+import { EmbeddableHandler, Embeddable } from 'ui/embeddable';
 
 export class SearchEmbeddableHandler extends EmbeddableHandler {
 
@@ -19,7 +18,7 @@ export class SearchEmbeddableHandler extends EmbeddableHandler {
   }
 
   getEditPath(panelId) {
-    return this.Promise.resolve(this.searchLoader.urlFor(panelId));
+    return this.searchLoader.urlFor(panelId);
   }
 
   getTitleFor(panelId) {
@@ -28,46 +27,41 @@ export class SearchEmbeddableHandler extends EmbeddableHandler {
 
   render(domNode, panel, container) {
     const searchScope = this.$rootScope.$new();
-    return this.getEditPath(panel.id)
-      .then(editPath => {
-        searchScope.editPath = editPath;
-        return this.searchLoader.get(panel.id);
-      })
+    searchScope.editPath = this.getEditPath(panel.id);
+    return this.searchLoader.get(panel.id)
       .then(savedObject => {
         searchScope.savedObj = savedObject;
         searchScope.panel = panel;
         container.registerPanelIndexPattern(panel.panelIndex, savedObject.searchSource.get('index'));
 
-        // This causes changes to a saved search to be hidden, but also allows
-        // the user to locally modify and save changes to a saved search only in a dashboard.
-        // See https://github.com/elastic/kibana/issues/9523 for more details.
-        searchScope.panel = container.updatePanel(searchScope.panel.panelIndex, {
-          columns: searchScope.panel.columns || searchScope.savedObj.columns,
-          sort: searchScope.panel.sort || searchScope.savedObj.sort
-        });
+        // If there is column or sort data on the panel, that means the original columns or sort settings have
+        // been overridden in a dashboard.
+        searchScope.columns = searchScope.panel.columns || searchScope.savedObj.columns;
+        searchScope.sort = searchScope.panel.sort || searchScope.savedObj.sort;
 
         const uiState = savedObject.uiStateJSON ? JSON.parse(savedObject.uiStateJSON) : {};
         searchScope.uiState = container.createChildUistate(getPersistedStateId(panel), uiState);
 
         searchScope.setSortOrder = function setSortOrder(columnName, direction) {
           searchScope.panel = container.updatePanel(searchScope.panel.panelIndex, { sort: [columnName, direction] });
+          searchScope.sort = searchScope.panel.sort;
         };
 
         searchScope.addColumn = function addColumn(columnName) {
           savedObject.searchSource.get('index').popularizeField(columnName, 1);
-          columnActions.addColumn(searchScope.panel.columns, columnName);
-          searchScope.panel = container.updatePanel(searchScope.panel.panelIndex, { columns: searchScope.panel.columns });
+          columnActions.addColumn(searchScope.columns, columnName);
+          searchScope.panel = container.updatePanel(searchScope.panel.panelIndex, { columns: searchScope.columns });
         };
 
         searchScope.removeColumn = function removeColumn(columnName) {
           savedObject.searchSource.get('index').popularizeField(columnName, 1);
-          columnActions.removeColumn(searchScope.panel.columns, columnName);
-          searchScope.panel = container.updatePanel(searchScope.panel.panelIndex, { columns: searchScope.panel.columns });
+          columnActions.removeColumn(searchScope.columns, columnName);
+          searchScope.panel = container.updatePanel(searchScope.panel.panelIndex, { columns: searchScope.columns });
         };
 
         searchScope.moveColumn = function moveColumn(columnName, newIndex) {
-          columnActions.moveColumn(searchScope.panel.columns, columnName, newIndex);
-          searchScope.panel = container.updatePanel(searchScope.panel.panelIndex, { columns: searchScope.panel.columns });
+          columnActions.moveColumn(searchScope.columns, columnName, newIndex);
+          searchScope.panel = container.updatePanel(searchScope.panel.panelIndex, { columns: searchScope.columns });
         };
 
         searchScope.filter = function (field, value, operator) {
@@ -79,11 +73,16 @@ export class SearchEmbeddableHandler extends EmbeddableHandler {
         const rootNode = angular.element(domNode);
         rootNode.append(searchInstance);
 
-        return () => {
+        this.addDestroyEmeddable(panel.panelIndex, () => {
           searchInstance.remove();
           searchScope.savedObj.destroy();
           searchScope.$destroy();
-        };
+        });
+
+        return new Embeddable({
+          title: savedObject.title,
+          editUrl: searchScope.editPath
+        });
       });
   }
 }

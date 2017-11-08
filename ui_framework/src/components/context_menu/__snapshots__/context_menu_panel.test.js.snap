@@ -1,0 +1,94 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiContextMenuPanel is rendered 1`] = `
+<div
+  aria-label="aria-label"
+  class="kuiContextMenuPanel testClass1 testClass2"
+  data-test-subj="test subject string"
+  tabindex="0"
+>
+  <div>
+    Hello
+  </div>
+</div>
+`;
+
+exports[`KuiContextMenuPanel props onClose renders a button as a title 1`] = `
+<div
+  class="kuiContextMenuPanel"
+  tabindex="0"
+>
+  <button
+    class="kuiContextMenuPanelTitle"
+    data-test-subj="contextMenuPanelTitleButton"
+  >
+    <span
+      class="kuiContextMenu__itemLayout"
+    >
+      <span
+        class="kuiContextMenu__icon kuiIcon fa-angle-left"
+      />
+      <span
+        class="kuiContextMenu__text"
+      >
+        Title
+      </span>
+    </span>
+  </button>
+  <div />
+</div>
+`;
+
+exports[`KuiContextMenuPanel props title is rendered 1`] = `
+<div
+  class="kuiContextMenuPanel"
+  tabindex="0"
+>
+  <div
+    class="kuiPopoverTitle"
+  >
+    <span
+      class="kuiContextMenu__itemLayout"
+    >
+      Title
+    </span>
+  </div>
+  <div />
+</div>
+`;
+
+exports[`KuiContextMenuPanel props transitionDirection next with transitionType in is rendered 1`] = `
+<div
+  class="kuiContextMenuPanel kuiContextMenuPanel-txInLeft"
+  tabindex="0"
+>
+  <div />
+</div>
+`;
+
+exports[`KuiContextMenuPanel props transitionDirection next with transitionType out is rendered 1`] = `
+<div
+  class="kuiContextMenuPanel kuiContextMenuPanel-txOutLeft"
+  tabindex="0"
+>
+  <div />
+</div>
+`;
+
+exports[`KuiContextMenuPanel props transitionDirection previous with transitionType in is rendered 1`] = `
+<div
+  class="kuiContextMenuPanel kuiContextMenuPanel-txInRight"
+  tabindex="0"
+>
+  <div />
+</div>
+`;
+
+exports[`KuiContextMenuPanel props transitionDirection previous with transitionType out is rendered 1`] = `
+<div
+  class="kuiContextMenuPanel kuiContextMenuPanel-txOutRight"
+  tabindex="0"
+>
+  <div />
+</div>
+`;

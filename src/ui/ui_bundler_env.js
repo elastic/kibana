@@ -1,5 +1,6 @@
 import { fromRoot } from '../utils';
-import { includes } from 'lodash';
+import { includes, escapeRegExp } from 'lodash';
+import { isAbsolute } from 'path';
 
 const arr = v => [].concat(v || []);
 
@@ -29,6 +30,8 @@ export default class UiBundlerEnv {
     // webpack aliases, like require paths, mapping a prefix to a directory
     this.aliases = {
       ui: fromRoot('src/ui/public'),
+      ui_framework: fromRoot('ui_framework'),
+      packages: fromRoot('packages'),
       test_harness: fromRoot('src/test_harness/public'),
       querystring: 'querystring-browser',
       moment$: fromRoot('webpackShims/moment'),
@@ -60,7 +63,9 @@ export default class UiBundlerEnv {
     switch (type) {
       case 'noParse':
         return (plugin, spec) => {
-          for (const re of arr(spec)) this.addNoParse(re);
+          for (const rule of arr(spec)) {
+            this.noParse.push(this.getNoParseRegexp(rule));
+          }
         };
 
       case '__globalImportAliases__':
@@ -80,7 +85,15 @@ export default class UiBundlerEnv {
     this.postLoaders.push(loader);
   }
 
-  addNoParse(regExp) {
-    this.noParse.push(regExp);
+  getNoParseRegexp(rule) {
+    if (typeof rule === 'string') {
+      return new RegExp(`${isAbsolute(rule) ? '^' : ''}${escapeRegExp(rule)}`);
+    }
+
+    if (rule instanceof RegExp) {
+      return rule;
+    }
+
+    throw new Error('Expected noParse rule to be a string or regexp');
   }
 }

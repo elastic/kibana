@@ -154,6 +154,7 @@ export default {
     if (bucket.gap_policy) body.moving_avg.gap_policy = bucket.gap_policy;
     if (bucket.window) body.moving_avg.window = Number(bucket.window);
     if (bucket.minimize) body.moving_avg.minimize = Boolean(bucket.minimize);
+    if (bucket.predict) body.moving_avg.predict = Number(bucket.predict);
     if (bucket.settings) body.moving_avg.settings = parseSettings(bucket.settings);
     return body;
   },

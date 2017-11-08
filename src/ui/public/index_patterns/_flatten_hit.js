@@ -21,7 +21,7 @@ export function IndexPatternsFlattenHitProvider(config) {
 
         if (deep) {
           const isNestedField = fields[key] && fields[key].type === 'nested';
-          const isArrayOfObjects = _.isArray(val) && _.isPlainObject(_.first(val));
+          const isArrayOfObjects = Array.isArray(val) && _.isPlainObject(_.first(val));
           if (isArrayOfObjects && !isNestedField) {
             _.each(val, v => flatten(v, key));
             return;
@@ -36,7 +36,7 @@ export function IndexPatternsFlattenHitProvider(config) {
         if (hasValidMapping || isValue) {
           if (!flat[key]) {
             flat[key] = val;
-          } else if (_.isArray(flat[key])) {
+          } else if (Array.isArray(flat[key])) {
             flat[key].push(val);
           } else {
             flat[key] = [ flat[key], val ];
@@ -57,7 +57,7 @@ export function IndexPatternsFlattenHitProvider(config) {
     // unwrap computed fields
     _.forOwn(hit.fields, function (val, key) {
       if (key[0] === '_' && !_.contains(metaFields, key)) return;
-      flat[key] = _.isArray(val) && val.length === 1 ? val[0] : val;
+      flat[key] = Array.isArray(val) && val.length === 1 ? val[0] : val;
     });
 
     return flat;

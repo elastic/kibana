@@ -35,8 +35,8 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('default request response should contain .kibana' , function () {
-      const expectedResponseContains = '"_index": ".kibana",';
+    it('default request response should include `"timed_out": false`', function () {
+      const expectedResponseContains = '"timed_out": false,';
 
       return PageObjects.console.clickPlay()
       .then(function () {

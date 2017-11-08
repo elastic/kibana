@@ -49,5 +49,5 @@ export function convertEsError(indices, error) {
 
   const statusCode = error.statusCode;
   const message = error.body ? error.body.error : undefined;
-  return Boom.wrap(error, statusCode, message);
+  return Boom.boomify(error, { statusCode, message });
 }

@@ -70,6 +70,11 @@
     }
   }
 
+  .vis-editor-content-fullEditor {
+    .flex-parent();
+    z-index: 0;
+  }
+
   .vis-editor-sidebar {
     .flex-parent(1, 0, auto);
 
@@ -139,9 +144,6 @@
 
     label {
       flex: 2 0 0;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      overflow: hidden;
       margin-bottom: 0;
       font-size: 12px;
     }

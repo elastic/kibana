@@ -1,18 +1,17 @@
 import expect from 'expect.js';
 
 import {
-  DEFAULT_PANEL_WIDTH,
-} from '../../../../src/core_plugins/kibana/public/dashboard/dashboard_constants';
-
-import {
   VisualizeConstants
 } from '../../../../src/core_plugins/kibana/public/visualize/visualize_constants';
 
 export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const log = getService('log');
+  const dashboardVisualizations = getService('dashboardVisualizations');
   const remote = getService('remote');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize']);
+  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'visualize', 'discover']);
+  const testVisualizationTitles = [];
+  const testVisualizationDescriptions = [];
 
   describe('dashboard tab', function describeIndexTests() {
     before(async function () {
@@ -36,13 +35,29 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.clickDashboard();
 
       await PageObjects.dashboard.clickNewDashboard();
+      await dashboardVisualizations.createAndAddTSVBVisualization('TSVB');
       await PageObjects.dashboard.addVisualizations(PageObjects.dashboard.getTestVisualizationNames());
+      await dashboardVisualizations.createAndAddSavedSearch('saved search');
+      testVisualizationTitles.push('TSVB');
+      testVisualizationTitles.splice(1, 0, ...PageObjects.dashboard.getTestVisualizationNames());
+      testVisualizationTitles.push('saved search');
 
-      log.debug('done adding visualizations');
+      testVisualizationDescriptions.push('');
+      testVisualizationDescriptions.splice(
+        1, 0, ...PageObjects.dashboard.getTestVisualizations().map(visualization => visualization.description)
+      );
+      testVisualizationDescriptions.push('');
     });
 
     it('set the timepicker time to that which contains our test data', async function setTimepicker() {
       await PageObjects.dashboard.setTimepickerInDataRange();
+    });
+
+    it('saved search loaded with columns', async () => {
+      const headers = await PageObjects.discover.getColumnHeaders();
+      expect(headers.length).to.be(3);
+      expect(headers[1]).to.be('bytes');
+      expect(headers[2]).to.be('agent');
     });
 
     it('should save and load dashboard', async function saveAndLoadDashboard() {
@@ -61,8 +76,7 @@ export default function ({ getService, getPageObjects }) {
       return retry.tryForTime(10000, function () {
         return PageObjects.dashboard.getPanelTitles()
         .then(function (panelTitles) {
-          log.info('visualization titles = ' + panelTitles);
-          expect(panelTitles).to.eql(PageObjects.dashboard.getTestVisualizationNames());
+          expect(panelTitles).to.eql(testVisualizationTitles);
         });
       })
       .then(function () {
@@ -92,60 +106,28 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('should have data-shared-items-count set to the number of visualizations', function checkSavedItemsCount() {
-      const visualizations = PageObjects.dashboard.getTestVisualizations();
       return retry.tryForTime(10000, () => PageObjects.dashboard.getSharedItemsCount())
       .then(function (count) {
         log.info('data-shared-items-count = ' + count);
-        expect(count).to.eql(visualizations.length);
+        expect(count).to.eql(testVisualizationTitles.length);
       });
     });
 
     it('should have panels with expected data-shared-item title and description', function () {
-      const visualizations = PageObjects.dashboard.getTestVisualizations();
       return retry.tryForTime(10000, function () {
         return PageObjects.dashboard.getPanelSharedItemData()
         .then(function (data) {
-          expect(data.map(item => item.title)).to.eql(visualizations.map(v => v.name));
-          expect(data.map(item => item.description)).to.eql(visualizations.map(v => v.description));
-        });
-      });
-    });
-
-    describe('Directly modifying url updates dashboard state', () => {
-      it('for query parameter', async function () {
-        const currentQuery = await PageObjects.dashboard.getQuery();
-        expect(currentQuery).to.equal('');
-        const currentUrl = await remote.getCurrentUrl();
-        const newUrl = currentUrl.replace('query:%27%27', 'query:%27hi%27');
-        // Don't add the timestamp to the url or it will cause a hard refresh and we want to test a
-        // soft refresh.
-        await remote.get(newUrl.toString(), false);
-        const newQuery = await PageObjects.dashboard.getQuery();
-        expect(newQuery).to.equal('hi');
-      });
-
-      it('for panel size parameters', async function () {
-        const currentUrl = await remote.getCurrentUrl();
-        const currentPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
-        const newUrl = currentUrl.replace(`w:${DEFAULT_PANEL_WIDTH}`, `w:${DEFAULT_PANEL_WIDTH * 2}`);
-        await remote.get(newUrl.toString(), false);
-        await retry.try(async () => {
-          const newPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
-          if (newPanelDimensions.length < 0) {
-            throw new Error('No panel dimensions...');
-          }
-          // Some margin of error is allowed, I've noticed it being off by one pixel. Probably something to do with
-          // an odd width and dividing by two. Note that if we add margins, we'll have to adjust this as well.
-          const marginOfError = 5;
-          expect(newPanelDimensions[0].width).to.be.lessThan(currentPanelDimensions[0].width * 2 + marginOfError);
-          expect(newPanelDimensions[0].width).to.be.greaterThan(currentPanelDimensions[0].width * 2 - marginOfError);
+          expect(data.map(item => item.title)).to.eql(testVisualizationTitles);
+          expect(data.map(item => item.description)).to.eql(testVisualizationDescriptions);
         });
       });
     });
 
     describe('expanding a panel', () => {
       it('hides other panels', async () => {
-        await PageObjects.dashboard.toggleExpandPanel();
+        // Don't expand TSVB since it doesn't have the spy panel.
+        const panels = await PageObjects.dashboard.getDashboardPanels();
+        await PageObjects.dashboard.toggleExpandPanel(panels[1]);
         await retry.try(async () => {
           const panels = await PageObjects.dashboard.getDashboardPanels();
           expect(panels.length).to.eql(1);
@@ -178,7 +160,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.loadSavedDashboard('spy pane test');
         const panels = await PageObjects.dashboard.getDashboardPanels();
         // Simulate hover
-        await remote.moveMouseTo(panels[0]);
+        await remote.moveMouseTo(panels[1]);
         const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
         expect(spyToggleExists).to.be(true);
       });
@@ -187,9 +169,13 @@ export default function ({ getService, getPageObjects }) {
         // Panels are all minimized on a fresh open of a dashboard, so we need to re-expand in order to then minimize.
         await PageObjects.dashboard.toggleExpandPanel();
         await PageObjects.dashboard.toggleExpandPanel();
-        const panels = await PageObjects.dashboard.getDashboardPanels();
-        const visualizations = PageObjects.dashboard.getTestVisualizations();
-        expect(panels.length).to.eql(visualizations.length);
+
+        // Add a retry to fix https://github.com/elastic/kibana/issues/14574.  Perhaps the recent changes to this
+        // being a CSS update is causing the UI to change slower than grabbing the panels?
+        retry.try(async () => {
+          const panels = await PageObjects.dashboard.getDashboardPanels();
+          expect(panels.length).to.eql(testVisualizationTitles.length);
+        });
       });
     });
 
@@ -282,10 +268,9 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.saveVisualization('visualization from add new link');
         await PageObjects.header.clickToastOK();
 
-        const visualizations = PageObjects.dashboard.getTestVisualizations();
         return retry.try(async () => {
           const panelCount = await PageObjects.dashboard.getPanelCount();
-          expect(panelCount).to.eql(visualizations.length + 1);
+          expect(panelCount).to.eql(testVisualizationTitles.length + 1);
         });
       });
 

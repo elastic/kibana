@@ -1,0 +1,185 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiContextMenu is rendered 1`] = `
+<div
+  aria-label="aria-label"
+  class="kuiContextMenu testClass1 testClass2"
+  data-test-subj="test subject string"
+/>
+`;
+
+exports[`KuiContextMenu props panels and initialPanelId allows you to click the title button to go back to the previous panel 1`] = `
+<div
+  class="kuiContextMenu"
+  style="height: 0px;"
+>
+  <div
+    class="kuiContextMenuPanel kuiContextMenu__panel"
+    tabindex="0"
+  >
+    <button
+      class="kuiContextMenuPanelTitle"
+      data-test-subj="contextMenuPanelTitleButton"
+    >
+      <span
+        class="kuiContextMenu__itemLayout"
+      >
+        <span
+          class="kuiContextMenu__icon kuiIcon fa-angle-left"
+        />
+        <span
+          class="kuiContextMenu__text"
+        >
+          2
+        </span>
+      </span>
+    </button>
+    <div>
+      <div>
+        2
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`KuiContextMenu props panels and initialPanelId allows you to click the title button to go back to the previous panel 2`] = `
+<div
+  class="kuiContextMenu"
+  style="height: 0px;"
+>
+  <div
+    class="kuiContextMenuPanel kuiContextMenu__panel kuiContextMenuPanel-txOutRight"
+    tabindex="0"
+  >
+    <button
+      class="kuiContextMenuPanelTitle"
+      data-test-subj="contextMenuPanelTitleButton"
+    >
+      <span
+        class="kuiContextMenu__itemLayout"
+      >
+        <span
+          class="kuiContextMenu__icon kuiIcon fa-angle-left"
+        />
+        <span
+          class="kuiContextMenu__text"
+        >
+          2
+        </span>
+      </span>
+    </button>
+    <div>
+      <div>
+        2
+      </div>
+    </div>
+  </div>
+  <div
+    class="kuiContextMenuPanel kuiContextMenu__panel kuiContextMenuPanel-txInRight"
+    tabindex="0"
+  >
+    <button
+      class="kuiContextMenuPanelTitle"
+      data-test-subj="contextMenuPanelTitleButton"
+    >
+      <span
+        class="kuiContextMenu__itemLayout"
+      >
+        <span
+          class="kuiContextMenu__icon kuiIcon fa-angle-left"
+        />
+        <span
+          class="kuiContextMenu__text"
+        >
+          1
+        </span>
+      </span>
+    </button>
+    <div>
+      <button
+        class="kuiContextMenuItem"
+      >
+        <span
+          class="kuiContextMenu__itemLayout"
+        >
+          <span
+            class="kuiContextMenuItem__text"
+          >
+            2a
+          </span>
+          <span
+            class="kuiContextMenu__arrow kuiIcon fa-angle-right"
+          />
+        </span>
+      </button>
+      <button
+        class="kuiContextMenuItem"
+      >
+        <span
+          class="kuiContextMenu__itemLayout"
+        >
+          <span
+            class="kuiContextMenuItem__text"
+          >
+            2b
+          </span>
+          <span
+            class="kuiContextMenu__arrow kuiIcon fa-angle-right"
+          />
+        </span>
+      </button>
+      <button
+        class="kuiContextMenuItem"
+      >
+        <span
+          class="kuiContextMenu__itemLayout"
+        >
+          <span
+            class="kuiContextMenuItem__text"
+          >
+            2c
+          </span>
+          <span
+            class="kuiContextMenu__arrow kuiIcon fa-angle-right"
+          />
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`KuiContextMenu props panels and initialPanelId renders the referenced panel 1`] = `
+<div
+  class="kuiContextMenu"
+>
+  <div
+    class="kuiContextMenuPanel kuiContextMenu__panel"
+    tabindex="0"
+  >
+    <button
+      class="kuiContextMenuPanelTitle"
+      data-test-subj="contextMenuPanelTitleButton"
+    >
+      <span
+        class="kuiContextMenu__itemLayout"
+      >
+        <span
+          class="kuiContextMenu__icon kuiIcon fa-angle-left"
+        />
+        <span
+          class="kuiContextMenu__text"
+        >
+          2
+        </span>
+      </span>
+    </button>
+    <div>
+      <div>
+        2
+      </div>
+    </div>
+  </div>
+</div>
+`;

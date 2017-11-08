@@ -19,6 +19,6 @@
     ng-style="loadingStyle"
     ng-class="{ loading: vis.type.requiresSearch && searchSource.activeFetchCount > 0 }"
     class="visualize-chart"></div>
-  <visualize-legend aria-hidden="{{!vis.type.isAccessible}}" ng-if="addLegend"></visualize-legend>
+  <visualize-legend ng-if="addLegend"></visualize-legend>
 </div>
-<visualize-spy ng-if="vis.type.requiresSearch && showSpyPanel"></visualize-spy>
+<visualize-spy ng-if="showSpyPanel"></visualize-spy>
