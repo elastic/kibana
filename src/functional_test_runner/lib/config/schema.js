@@ -85,8 +85,10 @@ export const schema = Joi.object().keys({
   }).default(),
 
   remote: Joi.object().keys({
-    defaultWindowWidth: Joi.number().default(1600),
-    defaultWindowHeight: Joi.number().default(1000),
+    defaultWindowSize: Joi.object().keys({
+      width: Joi.number().default(1600),
+      height: Joi.number().default(1000),
+    }).default(),
   }).default(),
 
   // definition of apps that work with `common.navigateToApp()`

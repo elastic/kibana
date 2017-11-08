@@ -32,24 +32,22 @@ export function decorateMochaUi(lifecycle, context) {
           `);
         }
 
-        if (suiteLevel === 0) {
-          const [name, provider] = argumentsList;
-          if (typeof name !== 'string' || typeof provider !== 'function') {
-            throw new Error(`Unexpected arguments to mocha ${target.name} function`);
-          }
-
-          argumentsList[1] = function () {
-            before(async () => {
-              await lifecycle.trigger('beforeTopLevelSuite', this);
-            });
-
-            provider.call(this);
-
-            after(async () => {
-              await lifecycle.trigger('afterTopLevelSuite', this);
-            });
-          };
+        const [name, provider] = argumentsList;
+        if (typeof name !== 'string' || typeof provider !== 'function') {
+          throw new Error(`Unexpected arguments to mocha ${target.name} function`);
         }
+
+        argumentsList[1] = function () {
+          before(async () => {
+            await lifecycle.trigger('beforeTestSuite', this);
+          });
+
+          provider.call(this);
+
+          after(async () => {
+            await lifecycle.trigger('afterTestSuite', this);
+          });
+        };
 
         suiteCount += 1;
         suiteLevel += 1;
