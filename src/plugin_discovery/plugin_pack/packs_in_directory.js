@@ -20,8 +20,10 @@ export const createPacksInDirectory$ = (path) => (
   createChildDirectory$(path)
     .mergeMap(createPackAtPath$)
     .catch(error => {
+      // this error is produced by createChildDirectory$() when the path
+      // is invalid, we return them as an error result similar to how
+      // createPackAtPath$ works when it finds invalid packs in a directory
       if (isInvalidDirectoryError(path)) {
-        // these are expected errors that we should return as "results"
         return [{ error }];
       }
 
