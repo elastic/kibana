@@ -4,7 +4,7 @@ import sizeMe from 'react-sizeme';
 
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { getContainerApiMock } from '../__tests__/get_container_api_mock';
-import { getEmbeddableHandlerMock } from '../__tests__/get_embeddable_handlers_mock';
+import { getEmbeddableFactoryMock } from '../__tests__/get_embeddable_factories_mock';
 
 import { DashboardGrid } from './dashboard_grid';
 
@@ -30,7 +30,7 @@ function getProps(props = {}) {
         version: '7.0.0',
       }
     },
-    getEmbeddableHandler: () => getEmbeddableHandlerMock(),
+    getEmbeddableFactory: () => getEmbeddableFactoryMock(),
     getContainerApi: () => getContainerApiMock(),
     onPanelUpdated: () => {},
     useMargins: true,

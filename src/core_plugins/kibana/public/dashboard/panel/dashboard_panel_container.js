@@ -33,11 +33,11 @@ const mapStateToProps = ({ dashboard }, { panelId }) => {
   };
 };
 
-const mapDispatchToProps = (dispatch, { embeddableHandler, panelId, getContainerApi }) => ({
+const mapDispatchToProps = (dispatch, { embeddableFactory, panelId, getContainerApi }) => ({
   renderEmbeddable: (panelElement, panel) => (
-    dispatch(renderEmbeddable(embeddableHandler, panelElement, panel, getContainerApi()))
+    dispatch(renderEmbeddable(embeddableFactory, panelElement, panel, getContainerApi()))
   ),
-  onDestroy: () => dispatch(destroyEmbeddable(panelId, embeddableHandler)),
+  onDestroy: () => dispatch(destroyEmbeddable(panelId, embeddableFactory)),
 });
 
 export const DashboardPanelContainer = connect(
@@ -48,9 +48,9 @@ export const DashboardPanelContainer = connect(
 DashboardPanelContainer.propTypes = {
   panelId: PropTypes.string.isRequired,
   /**
-   * @type {EmbeddableHandler}
+   * @type {EmbeddableFactory}
    */
-  embeddableHandler: PropTypes.shape({
+  embeddableFactory: PropTypes.shape({
     destroy: PropTypes.func.isRequired,
     render: PropTypes.func.isRequired,
     addDestroyEmeddable: PropTypes.func.isRequired,
