@@ -25,7 +25,7 @@ export function LocalNavWithMenuItemStates() {
         <KuiLocalNavRowSection>
           <div className="kuiLocalMenu">
             <div className="kuiLocalMenuItem kuiLocalMenuItem-isSelected">New</div>
-            <div className="kuiLocalMenuItem">Save</div>
+            <button className="kuiLocalMenuItem">Save</button>
             <div className="kuiLocalMenuItem kuiLocalMenuItem-isDisabled">Open</div>
             <button className="kuiLocalMenuItem">
               <div className="kuiLocalMenuItem__icon kuiIcon fa-clock-o" />

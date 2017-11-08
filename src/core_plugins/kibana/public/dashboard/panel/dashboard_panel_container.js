@@ -1,13 +1,11 @@
 import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 
 import { DashboardPanel } from './dashboard_panel';
 import { DashboardViewMode } from '../dashboard_view_mode';
 
 import {
   renderEmbeddable,
-  maximizePanel,
-  minimizePanel,
-  deletePanel,
   destroyEmbeddable
 } from '../actions';
 
@@ -31,7 +29,7 @@ const mapStateToProps = ({ dashboard }, { panelId }) => {
 
     viewOnlyMode: getFullScreenMode(dashboard) || getViewMode(dashboard) === DashboardViewMode.VIEW,
     isExpanded: getMaximizedPanelId(dashboard) === panelId,
-    panel: getPanel(dashboard, panelId)
+    panel: getPanel(dashboard, panelId),
   };
 };
 
@@ -39,12 +37,6 @@ const mapDispatchToProps = (dispatch, { embeddableHandler, panelId, getContainer
   renderEmbeddable: (panelElement, panel) => (
     dispatch(renderEmbeddable(embeddableHandler, panelElement, panel, getContainerApi()))
   ),
-  onDeletePanel: () => {
-    dispatch(deletePanel(panelId));
-    dispatch(destroyEmbeddable(panelId, embeddableHandler));
-  },
-  onMaximizePanel: () => dispatch(maximizePanel(panelId)),
-  onMinimizePanel: () => dispatch(minimizePanel()),
   onDestroy: () => dispatch(destroyEmbeddable(panelId, embeddableHandler)),
 });
 
@@ -52,3 +44,16 @@ export const DashboardPanelContainer = connect(
   mapStateToProps,
   mapDispatchToProps
 )(DashboardPanel);
+
+DashboardPanelContainer.propTypes = {
+  panelId: PropTypes.string.isRequired,
+  /**
+   * @type {EmbeddableHandler}
+   */
+  embeddableHandler: PropTypes.shape({
+    destroy: PropTypes.func.isRequired,
+    render: PropTypes.func.isRequired,
+    addDestroyEmeddable: PropTypes.func.isRequired,
+  }).isRequired,
+  getContainerApi: PropTypes.func.isRequired,
+};

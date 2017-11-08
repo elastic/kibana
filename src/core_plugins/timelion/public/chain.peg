@@ -49,6 +49,15 @@ argument
    text: text()
   }
  }
+ / name:function_name space? '=' {
+  var exception = {
+   type: 'incompleteArgument',
+   name: name,
+   location: simpleLocation(location()),
+   text: text()
+  }
+  error(JSON.stringify(exception));
+ }
  / element:arg_type {return element}
 
 arg_type

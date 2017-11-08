@@ -1,15 +1,5 @@
-export {
-  updateViewMode,
-  updateIsFullScreenMode,
-  minimizePanel,
-  maximizePanel
-} from './view';
-
-export {
-  updatePanel,
-  updatePanels,
-  deletePanel,
-} from './panels';
+export * from './view';
+export * from './panels';
 
 export {
   renderEmbeddable,

@@ -1,15 +1,21 @@
 [[docker]]
 == Running Kibana on Docker
 Docker images for Kibana are available from the Elastic Docker registry. The
-base image is https://hub.docker.com/_/centos/[centos:7] and the source code
-can be found on
-https://github.com/elastic/kibana-docker/tree/{branch}[GitHub].
+base image is https://hub.docker.com/_/centos/[centos:7].
 
-The images are shipped with https://www.elastic.co/products/x-pack[X-Pack]
-installed.
+A list of all published Docker images and tags can be found at
+https://www.docker.elastic.co[www.docker.elastic.co]. The source code can be
+found on https://github.com/elastic/elasticsearch-docker/tree/{branch}[GitHub].
+
+=== Image types
+
+The images are available in two different configurations or "flavors". The
+`x-pack` flavor, which is the default, ships with X-Pack features
+pre-installed. The `oss` flavor does not include X-Pack, and contains only
+open source Kibana.
 
 NOTE: https://www.elastic.co/guide/en/x-pack/current/index.html[X-Pack] is
-pre-installed in this image. With X-Pack installed, Kibana expects to
+pre-installed in the default image. With X-Pack installed, Kibana expects to
 connect to an Elasticsearch cluster that is also running X-Pack.
 
 === Pulling the image
@@ -25,22 +31,22 @@ endif::[]
 
 ifeval::["{release-state}"!="unreleased"]
 
-The Docker image for Kibana {version} can be retrieved with the following
-command:
+Docker images can be retrieved with the following commands:
 
-["source","sh",subs="attributes"]
+["source","txt",subs="attributes"]
 --------------------------------------------
-docker pull {docker-image}
+docker pull {docker-repo}:{version}
+docker pull {docker-repo}-oss:{version}
 --------------------------------------------
 
 endif::[]
 
 === Configuring Kibana on Docker
 
-The Docker image provides several methods for configuring Kibana. The conventional
-approach is to provide a `kibana.yml` file as described in {kibana-ref}/settings.html[Configuring
-Kibana], but it's
-also possible to use environment variables to define settings.
+The Docker images provide several methods for configuring Kibana. The
+conventional approach is to provide a `kibana.yml` file as described in
+{kibana-ref}/settings.html[Configuring Kibana], but it's also possible to use
+environment variables to define settings.
 
 [[docker-bind-mount-config]]
 ==== Bind-mounted configuration
@@ -50,7 +56,7 @@ With +docker-compose+, the bind-mount can be specified like this:
 
 ["source","yaml",subs="attributes"]
 --------------------------------------------
-version: '3'
+version: '2'
 services:
   kibana:
     image: {docker-image}
@@ -87,7 +93,7 @@ These variables can be set with +docker-compose+ like this:
 
 ["source","yaml",subs="attributes"]
 ----------------------------------------------------------
-version: '3'
+version: '2'
 services:
   kibana:
     image: {docker-image}
@@ -100,11 +106,17 @@ Since environment variables are translated to CLI arguments, they take
 precedence over settings configured in `kibana.yml`.
 
 ==== Docker defaults
-The following settings have different default values when using the Docker image:
+The following settings have different default values when using the Docker
+images:
 
 [horizontal]
+`server.name`:: `kibana`
 `server.host`:: `"0"`
 `elasticsearch.url`:: `http://elasticsearch:9200`
+
+In the `x-pack` image, the following additional defaults are also set:
+
+[horizontal]
 `elasticsearch.username`:: `elastic`
 `elasticsearch.password`:: `changeme`
 `xpack.monitoring.ui.container.elasticsearch.enabled`:: `true`
@@ -112,3 +124,7 @@ The following settings have different default values when using the Docker image
 These settings are defined in the default `kibana.yml`. They can be overridden
 with a <<docker-bind-mount-config,custom `kibana.yml`>> or via
 <<docker-env-config,environment variables>>.
+
+IMPORTANT: If replacing `kibana.yml` with a custom version, be sure to copy the
+above defaults to the custom file if you want to retain them. If not, they will
+be "masked" by the new file.
