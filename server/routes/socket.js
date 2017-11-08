@@ -1,5 +1,6 @@
 import { map } from 'lodash';
 import socket from 'socket.io';
+import { getAuthHeader } from './get_auth/get_auth_header';
 import { createHandlers } from '../lib/create_handlers';
 import { socketInterpreterProvider } from '../../common/interpreter/socket_interpret';
 import { functionsRegistry } from '../../common/lib/functions_registry';
@@ -11,6 +12,11 @@ export function socketApi(server) {
   io.on('connection', (socket) => {
     console.log('User connected, attaching handlers');
 
+    // This is the HAPI request object
+    const request = socket.handshake;
+
+    const authHeader = getAuthHeader(request, server);
+
     // Create the function list
     socket.emit('getFunctionList');
     const getClientFunctions = new Promise((resolve) => socket.once('functionList', resolve));
@@ -20,11 +26,20 @@ export function socketApi(server) {
     });
 
     const handler = (msg) => {
-      getClientFunctions.then((clientFunctions) => {
+      Promise.all([
+        getClientFunctions,
+        authHeader,
+      ])
+      .then(([
+        clientFunctions,
+        authHeader,
+      ]) => {
+        if (server.plugins.security) request.headers.authorization = authHeader;
+
         const interpret = socketInterpreterProvider({
           types: typesRegistry.toJS(),
           functions: functionsRegistry.toJS(),
-          handlers: createHandlers(socket.handshake, server),
+          handlers: createHandlers(request, server),
           referableFunctions: clientFunctions,
           socket: socket,
         });
