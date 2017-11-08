@@ -10,29 +10,21 @@ import {
   Route
 } from 'react-router-dom';
 
-export function HomeApp({ addBasePath, directories, tutorials }) {
+export function HomeApp({ addBasePath, directories }) {
 
   const renderTutorialDirectory = (props) => {
     return (
       <TutorialDirectory
         addBasePath={addBasePath}
-        tutorials={tutorials}
         openTab={props.match.params.tab}
       />
     );
   };
 
   const renderTutorial = (props) => {
-    const tutorial = tutorials.find(tutorial => {
-      return tutorial.id === props.match.params.id;
-    });
-    if (!tutorial) {
-      return renderTutorialDirectory(props);
-    }
-
     return (
       <Tutorial
-        tutorial={tutorial}
+        tutorialId={props.match.params.id}
       />
     );
   };
@@ -79,6 +71,5 @@ HomeApp.propTypes = {
     path: PropTypes.string.isRequired,
     showOnHomePage: PropTypes.bool.isRequired,
     category: PropTypes.string.isRequired
-  })),
-  tutorials: PropTypes.array.isRequired,
+  }))
 };

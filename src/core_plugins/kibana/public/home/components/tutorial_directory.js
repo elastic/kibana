@@ -7,6 +7,7 @@ import {
   KuiFlexItem,
   KuiFlexGrid,
 } from 'ui_framework/components';
+import { getTutorials } from '../tutorials';
 
 const ALL = 'all';
 
@@ -34,8 +35,16 @@ export class TutorialDirectory extends React.Component {
       openTab = props.openTab;
     }
     this.state = {
-      selectedTabId: openTab
+      selectedTabId: openTab,
+      tutorials: []
     };
+  }
+
+  async componentWillMount() {
+    const tutorials = await getTutorials();
+    this.setState({
+      tutorials: tutorials,
+    });
   }
 
   onSelectedTabChanged = id => {
@@ -58,7 +67,7 @@ export class TutorialDirectory extends React.Component {
   }
 
   renderTutorials = () => {
-    return this.props.tutorials
+    return this.state.tutorials
       .filter((tutorial) => {
         if (this.state.selectedTabId === ALL) {
           return true;
@@ -113,6 +122,5 @@ export class TutorialDirectory extends React.Component {
 
 TutorialDirectory.propTypes = {
   addBasePath: PropTypes.func.isRequired,
-  openTab: PropTypes.string,
-  tutorials: PropTypes.array.isRequired
+  openTab: PropTypes.string
 };

@@ -6,7 +6,7 @@ import {
 } from 'ui_framework/components';
 import { Instruction } from './instruction';
 import { Step } from './step';
-import { getDisplayText } from '../../instruction_variant';
+import { getDisplayText } from '../../../../common/tutorials/instruction_variant';
 
 export class InstructionSet extends React.Component {
 
