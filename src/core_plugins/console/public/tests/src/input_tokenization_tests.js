@@ -1,4 +1,4 @@
-let ace = require('ace');
+let ace = require('../../vendor/ace');
 let $ = require('jquery');
 import { initializeInput } from '../../src/input';
 let input;

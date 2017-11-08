@@ -1,5 +1,5 @@
-let ace = require('ace');
-require('ace/mode-json');
+let ace = require('../../../vendor/ace');
+require('../../../vendor/ace/mode-json');
 let x_json = require('./x_json_highlight_rules');
 
 var oop = ace.require("ace/lib/oop");

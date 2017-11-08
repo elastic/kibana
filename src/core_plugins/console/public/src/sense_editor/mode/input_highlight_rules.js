@@ -1,4 +1,4 @@
-let ace = require('ace');
+let ace = require('../../../vendor/ace');
 let x_json = require('./x_json_highlight_rules');
 
 var oop = ace.require("ace/lib/oop");

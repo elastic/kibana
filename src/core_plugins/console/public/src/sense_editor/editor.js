@@ -1,5 +1,5 @@
 let _ = require('lodash');
-let ace = require('ace');
+let ace = require('../../vendor/ace');
 let $ = require('jquery');
 let curl = require('../curl');
 let RowParser = require('./row_parser');

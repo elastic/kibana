@@ -1,6 +1,6 @@
-let acequire = require('acequire');
-require('ace');
-require('ace/mode-json');
+let acequire = require('../../../vendor/acequire');
+require('../../../vendor/ace');
+require('../../../vendor/ace/mode-json');
 
 var oop = acequire("ace/lib/oop");
 var TextMode = acequire("ace/mode/text").Mode;

@@ -1,4 +1,4 @@
-let ace = require('ace');
+let ace = require('../../vendor/ace');
 let $ = require('jquery');
 let RowParser = require('../../src/sense_editor/row_parser');
 import { initializeOutput } from '../../src/output';

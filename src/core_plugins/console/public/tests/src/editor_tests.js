@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import _ from 'lodash';
-let ace = require('ace');
+let ace = require('../../vendor/ace');
 import { initializeInput } from '../../src/input';
 let editor_input1 = require('raw-loader!./editor_input1.txt');
 let utils = require('../../src/utils');

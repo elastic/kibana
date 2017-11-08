@@ -1,7 +1,7 @@
 import Boom from 'boom';
 import { resolveApi } from './api_server/server';
 import { existsSync } from 'fs';
-import { resolve, join, sep } from 'path';
+import { resolve, sep } from 'path';
 import { has, isEmpty } from 'lodash';
 import setHeaders from '../elasticsearch/lib/set_headers';
 
@@ -12,9 +12,6 @@ import {
 } from './server';
 
 export default function (kibana) {
-  const modules = resolve(__dirname, 'public/webpackShims/');
-  const src = resolve(__dirname, 'public/src/');
-
   const apps = [];
 
   if (existsSync(resolve(__dirname, 'public/tests'))) {
@@ -139,9 +136,9 @@ export default function (kibana) {
       },
 
       noParse: [
-        join(modules, 'ace' + sep),
-        join(modules, 'moment_src/moment' + sep),
-        join(src, 'sense_editor/mode/worker.js')
+        resolve(__dirname, 'public/vendor/ace') + sep,
+        resolve(__dirname, 'public/vendor/moment_src/moment') + sep,
+        resolve(__dirname, 'public/src/sense_editor/mode/worker.js'),
       ]
     }
   });

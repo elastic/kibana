@@ -1,6 +1,6 @@
 let $ = require('jquery');
-require('ace');
-require('ace/ext-searchbox');
+require('../vendor/ace');
+require('../vendor/ace/ext-searchbox');
 let Autocomplete = require('./autocomplete');
 let SenseEditor = require('./sense_editor/editor');
 let settings = require('./settings');

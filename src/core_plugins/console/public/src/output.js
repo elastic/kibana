@@ -1,5 +1,5 @@
 import _ from 'lodash';
-let ace = require('ace');
+let ace = require('../vendor/ace');
 let settings = require('./settings');
 let OutputMode = require('./sense_editor/mode/output');
 const smartResize = require('./smart_resize');
