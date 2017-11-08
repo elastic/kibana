@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Content } from './content';
 
 export function Introduction({ description, title }) {
   return (
@@ -9,9 +10,7 @@ export function Introduction({ description, title }) {
         {title}
       </h1>
 
-      <p className="kuiText kuiSubduedText kuiVerticalRhythm kuiVerticalRhythmSmall">
-        {description}
-      </p>
+      <Content text={description}/>
 
     </div>
   );

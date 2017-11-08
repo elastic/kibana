@@ -1,6 +1,7 @@
 import './instruction.less';
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Content } from './content';
 import {
   KuiCodeEditor
 } from 'ui_framework/components';
@@ -9,20 +10,12 @@ import 'brace/mode/sh';
 export function Instruction({ commands, textPost, textPre }) {
   let pre;
   if (textPre) {
-    pre = (
-      <p className="kuiText kuiSubduedText kuiVerticalRhythm kuiVerticalRhythmSmall">
-        {textPre}
-      </p>
-    );
+    pre = <Content text={textPre}/>;
   }
 
   let post;
   if (textPost) {
-    post = (
-      <p className="kuiText kuiSubduedText kuiVerticalRhythm kuiVerticalRhythmSmall">
-        {textPost}
-      </p>
-    );
+    post = <Content text={textPost}/>;
   }
 
   const aceOptions = {
