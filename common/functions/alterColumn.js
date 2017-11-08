@@ -34,7 +34,7 @@ export const alterColumn = {
 
     const type = args.type || column.type;
 
-    let handler = _.noop;
+    let handler = val => val;
     if (args.type) {
       handler = (function getHandler() {
         switch (type) {
