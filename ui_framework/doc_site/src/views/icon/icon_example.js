@@ -17,7 +17,7 @@ const warningHtml = require('./icon_warning.html');
 const errorHtml = require('./icon_error.html');
 const inactiveHtml = require('./icon_inactive.html');
 const spinnerHtml = require('./icon_spinner.html');
-const spinnerJs = require('raw!./icon_spinner.js');
+const spinnerJs = require('raw-loader!./icon_spinner.js');
 
 export default props => (
   <GuidePage title={props.route.name}>

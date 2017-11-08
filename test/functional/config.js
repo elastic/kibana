@@ -21,6 +21,7 @@ import {
   TestSubjectsProvider,
   DocTableProvider,
   ScreenshotsProvider,
+  DashboardVisualizationProvider,
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -63,6 +64,7 @@ export default async function ({ readConfigFile }) {
       testSubjects: TestSubjectsProvider,
       docTable: DocTableProvider,
       screenshots: ScreenshotsProvider,
+      dashboardVisualizations: DashboardVisualizationProvider,
     },
     servers: commonConfig.get('servers'),
     apps: {

@@ -65,22 +65,39 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('Saved search with column changes will not update when the saved object changes', async () => {
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-
-      await PageObjects.dashboard.clickNewDashboard();
+    it('Saved search with no changes will update when the saved object changes', async () => {
+      await PageObjects.header.clickDiscover();
       await PageObjects.dashboard.setTimepickerInDataRange();
+      await PageObjects.discover.clickFieldListItemAdd('bytes');
+      await PageObjects.discover.saveSearch('my search');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.header.clickToastOK();
+
+      await PageObjects.header.clickDashboard();
+      await PageObjects.dashboard.clickNewDashboard();
+
+      await PageObjects.dashboard.addSavedSearch('my search');
+      await PageObjects.dashboard.saveDashboard('No local edits');
+      await PageObjects.header.clickToastOK();
 
       await PageObjects.header.clickDiscover();
-      await PageObjects.discover.clickFieldListItemAdd('bytes');
       await PageObjects.discover.clickFieldListItemAdd('agent');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.header.clickToastOK();
 
       await PageObjects.header.clickDashboard();
-      await PageObjects.dashboard.addSavedSearch('my search');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      const headers = await PageObjects.discover.getColumnHeaders();
+      expect(headers.length).to.be(3);
+      expect(headers[1]).to.be('bytes');
+      expect(headers[2]).to.be('agent');
+    });
+
+    it('Saved search with column changes will not update when the saved object changes', async () => {
       await PageObjects.discover.removeHeaderColumn('bytes');
+      await PageObjects.dashboard.clickEdit();
       await PageObjects.dashboard.saveDashboard('Has local edits');
       await PageObjects.header.clickToastOK();
 

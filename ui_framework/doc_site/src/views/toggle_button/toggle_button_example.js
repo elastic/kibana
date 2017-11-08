@@ -13,10 +13,10 @@ import {
 } from 'react-router';
 
 const toggleButtonHtml = require('./toggle_button.html');
-const toggleButtonJs = require('raw!./toggle_button.js');
+const toggleButtonJs = require('raw-loader!./toggle_button.js');
 const toggleButtonDisabledHtml = require('./toggle_button_disabled.html');
 const togglePanelHtml = require('./toggle_panel.html');
-const togglePanelJs = require('raw!./toggle_panel.js');
+const togglePanelJs = require('raw-loader!./toggle_panel.js');
 
 export default props => (
   <GuidePage title={props.route.name}>
