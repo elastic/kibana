@@ -91,6 +91,7 @@ app.directive('dashboardApp', function ($injector) {
         // https://github.com/angular/angular.js/wiki/Understanding-Scopes
         $scope.model = {
           query: dashboardStateManager.getQuery(),
+          useMargins: dashboardStateManager.getUseMargins(),
           darkTheme: dashboardStateManager.getDarkTheme(),
           timeRestore: dashboardStateManager.getTimeRestore(),
           title: dashboardStateManager.getTitle(),
@@ -185,7 +186,9 @@ app.directive('dashboardApp', function ($injector) {
         dashboardStateManager.addNewPanel(hit.id, 'search');
         notify.info(`Search successfully added to your dashboard`);
       };
-
+      $scope.$watch('model.useMargins', () => {
+        dashboardStateManager.setUseMargins($scope.model.useMargins);
+      });
       $scope.$watch('model.darkTheme', () => {
         dashboardStateManager.setDarkTheme($scope.model.darkTheme);
         updateTheme();

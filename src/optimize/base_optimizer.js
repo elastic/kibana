@@ -196,7 +196,7 @@ export default class BaseOptimizer {
 
       resolve: {
         extensions: ['.js', '.json'],
-        mainFields: ['browser', 'main'],
+        mainFields: ['browser', 'browserify', 'main'],
         modules: [
           'webpackShims',
           fromRoot('webpackShims'),
@@ -215,6 +215,7 @@ export default class BaseOptimizer {
         // enzyme tests to work.
         // https://github.com/airbnb/enzyme/blob/master/docs/guides/webpack.md
         externals: {
+          'mocha': 'mocha',
           'react/lib/ExecutionEnvironment': true,
           'react/addons': true,
           'react/lib/ReactContext': true,

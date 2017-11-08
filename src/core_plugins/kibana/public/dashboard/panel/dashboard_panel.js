@@ -10,17 +10,6 @@ export class DashboardPanel extends React.Component {
     this.props.renderEmbeddable(this.panelElement, this.props.panel);
   }
 
-  toggleExpandedPanel = () => {
-    const { isExpanded, onMaximizePanel, onMinimizePanel } = this.props;
-    if (isExpanded) {
-      onMinimizePanel();
-    } else {
-      onMaximizePanel();
-    }
-  };
-  deletePanel = () => this.props.onDeletePanel();
-  onEditPanel = () => window.location = this.props.editUrl;
-
   onFocus = () => {
     const { onPanelFocused, panel } = this.props;
     if (onPanelFocused) {
@@ -70,7 +59,7 @@ export class DashboardPanel extends React.Component {
   }
 
   render() {
-    const { viewOnlyMode, isExpanded, title, error } = this.props;
+    const { viewOnlyMode, error, panel, embeddableHandler } = this.props;
     const classes = classNames('panel panel-default', this.props.className, {
       'panel--edit-mode': !viewOnlyMode
     });
@@ -85,12 +74,8 @@ export class DashboardPanel extends React.Component {
           data-test-subj="dashboardPanel"
         >
           <PanelHeader
-            title={title}
-            onDeletePanel={this.deletePanel}
-            onEditPanel={this.onEditPanel}
-            onToggleExpand={this.toggleExpandedPanel}
-            isExpanded={isExpanded}
-            isViewOnlyMode={viewOnlyMode}
+            embeddableHandler={embeddableHandler}
+            panelId={panel.panelIndex}
           />
 
           {error ? this.renderEmbeddedError() : this.renderEmbeddedContent()}
@@ -106,18 +91,13 @@ DashboardPanel.propTypes = {
     panelIndex: PropTypes.string,
   }),
   renderEmbeddable: PropTypes.func.isRequired,
-  isExpanded: PropTypes.bool.isRequired,
-  onMaximizePanel: PropTypes.func.isRequired,
-  onMinimizePanel: PropTypes.func.isRequired,
   viewOnlyMode: PropTypes.bool.isRequired,
   onDestroy: PropTypes.func.isRequired,
-  onDeletePanel: PropTypes.func,
-  editUrl: PropTypes.string,
-  title: PropTypes.string,
   onPanelFocused: PropTypes.func,
   onPanelBlurred: PropTypes.func,
   error: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.object
   ]),
+  embeddableHandler: PropTypes.object.isRequired,
 };

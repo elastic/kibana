@@ -18,6 +18,8 @@
    */
   .react-resizable-handle {
     z-index: 10; /* 1 */
+    right: 4px;
+    bottom: 4px;
   }
 }
 
@@ -100,6 +102,7 @@
   background-color: @dashboard-bg;
 }
 
+
 .dashboardCloneModal {
   width: 450px;
 }
@@ -113,7 +116,6 @@
 
 .start-screen {
   margin: 20px auto;
-  background-color: @dashboard-bg;
   max-width: 800px;
   background: tint(@globalColorBlue, 90%);
   padding: 40px;
@@ -136,7 +138,7 @@
 }
 
 .panel {
-  border: 2px dashed transparent;
+  border: solid 1px transparent;
 }
 
 /**
@@ -153,13 +155,26 @@
 }
 
 .panel--edit-mode {
-  border-color: @kibanaGray4;
+  border-color: @globalColorLightGray;
+
+  &:hover {
+    border-color: @globalColorBlue;
+
+    .panel-title:hover {
+      color: @globalColorBlue;
+    }
+
+    .panel-heading {
+      background-color: rgba(0,0,0,.05) !important;
+    }
+  }
+
   .visualize-show-spy {
     visibility: visible;
   }
 
   .panel-heading {
-    cursor: pointer;
+    cursor: move;
   }
 }
 
@@ -167,6 +182,10 @@
   flex: 1;
   display: flex;
   flex-direction: column;
+}
+
+.dashboard-container-with-margins {
+  background-color: @dashboard-bg-with-margins;
 }
 
 /**
@@ -178,6 +197,14 @@ dashboard-viewport-provider {
   [data-reactroot] {
     flex: 1;
   }
+}
+
+/**
+ * Overwrites red coloring that comes from this library by default.
+ */
+.react-grid-item.react-grid-placeholder {
+  border-radius: 4px;
+  background: @globalColorBlue;
 }
 
 /**
@@ -227,7 +254,7 @@ dashboard-viewport-provider {
     justify-content: flex-start;
 
     .panel-heading {
-      padding: 2px 10px 2px 5px;
+      padding: 8px;
       flex: 0 0 auto;
       white-space: nowrap;
       display: flex;
@@ -237,18 +264,10 @@ dashboard-viewport-provider {
       border: none;
 
       /**
-       * 1. The popover aligns with the right side of this icon, so we want the right edge as far so the right as
-       * possible to make the arrows line up.
-       */
-      .dashboardPanelPopOver {
-        margin-right: -10px; /* 1. */
-      }
-
-      /**
        * 1. Required to get the pop up component arrow to line up with the menu icon.
        */
-      .panel-dropdown {
-        padding: 0 20px; /* 1. */
+      .panel-dropdown:hover {
+        color: @globalColorBlue;
       }
 
       .kuiPopover__body {
@@ -323,6 +342,7 @@ dashboard-viewport-provider {
       flex: 1 1 100%;
       height: auto;
       z-index: 1; /* 1. */
+      padding: 0 8px 8px 8px;
     }
   }
 
@@ -333,4 +353,40 @@ dashboard-viewport-provider {
     flex: 1 1 0; /* 1 */
     overflow: auto; /* 1 */
   }
+}
+
+/**
+ * The dashboard background color is the same as the panel color by default. When the user wants to use margins, we
+ * need to give a different background color so the panels are distinguishable from the background.
+ */
+.layout-with-margins {
+  background-color: @dashboard-bg-with-margins;
+  .panel-heading {
+    border-top-left-radius: 4px !important;
+    border-top-right-radius: 4px !important;
+  }
+
+  .panel-content {
+    background-color: @panel-bg-with-margins;
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+  }
+
+  .panel {
+    border: 1px solid #D9D9D9;
+    border-radius: 4px;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+  }
+
+  .panel--edit-mode:hover {
+    border-color: @globalColorBlue;
+    box-shadow: 0 4px 4px -1px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.dashboard-viewport {
+  background-color: @dashboard-bg;
+}
+.dashboard-viewport-with-margins {
+  background-color: @dashboard-bg-with-margins;
 }

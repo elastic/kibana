@@ -2,6 +2,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { Provider } from 'react-redux';
 import _ from 'lodash';
+import sizeMe from 'react-sizeme';
 
 import { getContainerApiMock } from '../__tests__/get_container_api_mock';
 import { getEmbeddableHandlerMock } from '../__tests__/get_embeddable_handlers_mock';
@@ -23,6 +24,16 @@ function getProps(props = {}) {
 function createOldPanelData(col, id, row, sizeX, sizeY, panelIndex) {
   return { col, id, row, size_x: sizeX, size_y: sizeY, type: 'visualization', panelIndex };
 }
+
+beforeAll(() => {
+  // sizeme detects the width to be 0 in our test environment. noPlaceholder will mean that the grid contents will
+  // get rendered even when width is 0, which will improve our tests.
+  sizeMe.noPlaceholders = true;
+});
+
+afterAll(() => {
+  sizeMe.noPlaceholders = false;
+});
 
 test('loads old panel data in the right order', () => {
   const panelData = [
@@ -46,7 +57,7 @@ test('loads old panel data in the right order', () => {
 
   store.dispatch(updatePanels(panelData));
 
-  mount(<Provider store={store}><DashboardGridContainer {...getProps()} /></Provider>);
+  const grid = mount(<Provider store={store}><DashboardGridContainer {...getProps()} /></Provider>);
 
   const panels = store.getState().dashboard.panels;
   expect(Object.keys(panels).length).toBe(16);
@@ -55,4 +66,6 @@ test('loads old panel data in the right order', () => {
   expect(foo8Panel.row).toBe(undefined);
   expect(foo8Panel.gridData.y).toBe(7);
   expect(foo8Panel.gridData.x).toBe(0);
+
+  grid.unmount();
 });

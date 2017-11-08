@@ -143,7 +143,11 @@
   }
 
   .panel--edit-mode {
-    border-color: @panel-default-border;
+    border-color: #222;
+  }
+
+  .panel--edit-mode:hover {
+    border-color: @globalColorBlue;
   }
 
   .panel-default {
@@ -521,7 +525,7 @@
 
 // /src/core_plugins/kibana/public/dashboard/styles/main.less
   .start-screen {
-    background-color: @dashboard-bg;
+    background-color: @dashboard-bg-with-margins;
   }
 
   .react-grid-layout {
@@ -533,6 +537,7 @@
     color: @dashboard-panel-color;
 
     .panel {
+
       .panel-heading {
         a {
           color: @dashboard-panel-heading-link-color;
@@ -548,6 +553,7 @@
           opacity: 1;
         }
       }
+
 
       .load-error {
         .fa-exclamation-triangle {
@@ -719,5 +725,39 @@
 
   .markdown-body blockquote {
     color: @dimmed-text-color;
+  }
+
+  /**
+ * The dashboard background color is the same as the panel color by default. When the user wants to use margins, we
+ * need to give a different background color so the panels are distinguishable from the background.
+ */
+  .layout-with-margins {
+    background-color: @dashboard-bg-with-margins;
+    .panel-default {
+      & > .panel-heading {
+        background-color: @panel-bg-with-margins;
+      }
+    }
+    .panel-content {
+      background-color: @panel-bg-with-margins;
+    }
+    .panel {
+      background-color: @panel-bg-with-margins;
+      border: 1px solid #444444;
+    }
+  }
+  .dashboard-viewport {
+    background-color: @dashboard-bg;
+  }
+  .dashboard-viewport-with-margins {
+    background-color: @dashboard-bg-with-margins;
+  }
+
+  .dashboard-container-with-margins {
+    background-color: @dashboard-bg-with-margins;
+  }
+
+  .react-grid-item > .react-resizable-handle {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6' viewBox='0 0 6 6'%3E%3Cpolygon fill='%23EFEEEE' points='6 6 0 6 0 4.2 4 4.2 4.2 4.2 4.2 0 6 0' opacity='.302'/%3E%3C/svg%3E%0A");
   }
 }
