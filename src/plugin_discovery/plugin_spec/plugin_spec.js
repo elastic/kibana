@@ -3,6 +3,9 @@ import { resolve, basename, isAbsolute as isAbsolutePath } from 'path';
 import toPath from 'lodash/internal/toPath';
 import { get } from 'lodash';
 
+import { createInvalidPluginError } from '../errors';
+import { isVersionCompatible } from './is_version_compatible';
+
 export class PluginSpec {
   /**
    *  @param {PluginPack} pack - The plugin pack that produced this spec
@@ -36,6 +39,7 @@ export class PluginSpec {
     const {
       id,
       require,
+      version,
       kibanaVersion,
       uiExports,
       publicDir,
@@ -49,6 +53,7 @@ export class PluginSpec {
 
     this._id = id;
     this._pack = pack;
+    this._version = version;
     this._kibanaVersion = kibanaVersion;
     this._require = require;
 
@@ -64,23 +69,23 @@ export class PluginSpec {
     this._init = init;
 
     if (!this.getId()) {
-      throw new Error('Unable to determine plugin id');
+      throw createInvalidPluginError(this, 'Unable to determine plugin id');
     }
 
     if (!this.getVersion()) {
-      throw new TypeError('Unable to determin plugin version');
+      throw createInvalidPluginError(this, 'Unable to determine plugin version');
     }
 
     if (this.getRequiredPluginIds() !== undefined && !Array.isArray(this.getRequiredPluginIds())) {
-      throw new TypeError('"plugin.require" must be an array of plugin ids');
+      throw createInvalidPluginError(this, '"plugin.require" must be an array of plugin ids');
     }
 
     if (this._publicDir) {
       if (!isAbsolutePath(this._publicDir)) {
-        throw new Error('plugin.publicDir must be an absolute path');
+        throw createInvalidPluginError(this, 'plugin.publicDir must be an absolute path');
       }
       if (basename(this._publicDir) !== 'public') {
-        throw new Error(`publicDir for plugin ${this.getId()} must end with a "public" directory.`);
+        throw createInvalidPluginError(this, `publicDir for plugin ${this.getId()} must end with a "public" directory.`);
       }
     }
   }
@@ -102,7 +107,7 @@ export class PluginSpec {
   }
 
   getVersion() {
-    return this.getPkg().version;
+    return this._version || this.getPkg().version;
   }
 
   isEnabled(config) {
@@ -119,6 +124,10 @@ export class PluginSpec {
     // to diverge, they can specify a kibana.version in the package to indicate the
     // version of kibana the plugin is intended to work with.
     return this._kibanaVersion || get(this.getPack().getPkg(), 'kibana.version') || this.getVersion();
+  }
+
+  isVersionCompatible(actualKibanaVersion) {
+    return isVersionCompatible(this.getExpectedKibanaVersion(), actualKibanaVersion);
   }
 
   getRequiredPluginIds() {

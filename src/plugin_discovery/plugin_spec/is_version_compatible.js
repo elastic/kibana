@@ -1,7 +1,7 @@
 import {
   cleanVersion,
   versionSatisfies
-} from '../../../utils/version';
+} from '../../utils/version';
 
 export function isVersionCompatible(version, compatibleWith) {
   // the special "kibana" version can be used to always be compatible,

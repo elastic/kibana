@@ -52,9 +52,6 @@ export default class KbnServer {
       // find plugins and set this.plugins
       Plugins.scanMixin,
 
-      // disable the plugins that are incompatible with the current version of Kibana
-      Plugins.checkVersionsMixin,
-
       // tell the config we are done loading plugins
       configCompleteMixin,
 

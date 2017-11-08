@@ -31,3 +31,33 @@ export function createInvalidPackError(path, reason) {
 export function isInvalidPackError(error) {
   return error && error[$code] === ERROR_INVALID_PACK;
 }
+
+/**
+ *  Thrown when trying to load a PluginSpec that is invalid for some reason
+ *  @type {String}
+ */
+const ERROR_INVALID_PLUGIN = 'ERROR_INVALID_PLUGIN';
+export function createInvalidPluginError(spec, reason) {
+  const error = new Error(`Plugin from ${spec.getId()} from ${spec.getPack().getPath()} is invalid because ${reason}`);
+  error[$code] = ERROR_INVALID_PLUGIN;
+  error.spec = spec;
+  return error;
+}
+export function isInvalidPluginError(error) {
+  return error && error[$code] === ERROR_INVALID_PLUGIN;
+}
+
+/**
+ *  Thrown when trying to load a PluginSpec whose version is incompatible
+ *  @type {String}
+ */
+const ERROR_INCOMPATIBLE_PLUGIN_VERSION = 'ERROR_INCOMPATIBLE_PLUGIN_VERSION';
+export function createIncompatiblePluginVersionError(spec) {
+  const error = new Error(`Plugin ${spec.getId()} is only compatible with Kibana version ${spec.getExpectedKibanaVersion()}`);
+  error[$code] = ERROR_INCOMPATIBLE_PLUGIN_VERSION;
+  error.spec = spec;
+  return error;
+}
+export function isIncompatiblePluginVersionError(error) {
+  return error && error[$code] === ERROR_INCOMPATIBLE_PLUGIN_VERSION;
+}

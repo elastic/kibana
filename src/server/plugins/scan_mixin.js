@@ -9,6 +9,7 @@ export async function scanMixin(kbnServer, server, config) {
     invalidDirectoryError$,
     invalidPackError$,
     deprecation$,
+    invalidVersionSpecs$,
     spec$,
   } = findPluginSpecs(kbnServer.settings, config);
 
@@ -34,6 +35,18 @@ export async function scanMixin(kbnServer, server, config) {
         path: error.path
       });
     }),
+
+    invalidVersionSpecs$
+      .map(spec => {
+        const name = spec.getId();
+        const pluginVersion = spec.getExpectedKibanaVersion();
+        const kibanaVersion = config.get('pkg.version');
+        return `Plugin "${name}" was disabled because it expected Kibana version "${pluginVersion}", and found "${kibanaVersion}".`;
+      })
+      .distinct()
+      .do(message => {
+        server.log(['plugin', 'warning'], message);
+      }),
 
     deprecation$.do(({ spec, message }) => {
       server.log(['warning', spec.getConfigPrefix(), 'config', 'deprecation'], message);

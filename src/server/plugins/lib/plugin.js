@@ -22,7 +22,6 @@ export class Plugin {
     this.id = spec.getId();
     this.version = spec.getVersion();
     this.requiredIds = spec.getRequiredPluginIds() || [];
-    this.kibanaVersion = spec.getExpectedKibanaVersion();
     this.externalPreInit = spec.getPreInitHandler();
     this.externalInit = spec.getInitHandler();
     this.enabled = spec.isEnabled(kbnServer.config);
