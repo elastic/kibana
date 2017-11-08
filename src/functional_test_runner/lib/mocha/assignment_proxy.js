@@ -11,7 +11,7 @@ export function createAssignmentProxy(object, interceptor) {
     },
 
     get(target, property) {
-      if (property === 'revertAssignments') {
+      if (property === 'revertProxiedAssignments') {
         return function () {
           for (const [property, value] of originalValues) {
             object[property] = value;

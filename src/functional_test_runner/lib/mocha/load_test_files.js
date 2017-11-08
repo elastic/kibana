@@ -54,7 +54,7 @@ export const loadTestFiles = (mocha, log, lifecycle, providers, paths) => {
 
       mocha.suite.emit('require', returnVal, path, mocha);
       mocha.suite.emit('post-require', global, path, mocha);
-      context.revertAssignments();
+      context.revertProxiedAssignments();
     });
   };
 
