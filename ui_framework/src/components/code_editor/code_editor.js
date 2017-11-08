@@ -58,7 +58,7 @@ export class KuiCodeEditor extends Component {
       width,
       height,
       onBlur, // eslint-disable-line no-unused-vars
-      ...rest,
+      ...rest
     } = this.props;
 
     const classes = classNames('kuiCodeEditorKeyboardHint', {
