@@ -36,6 +36,11 @@ export function AggResponseBucketsProvider() {
     }
   };
 
+  Buckets.prototype._isRangeEqual = function (range1, range2) {
+    return _.get(range1, 'from', null) === _.get(range2, 'from', null)
+      && _.get(range1, 'to', null) === _.get(range2, 'to', null);
+  };
+
   Buckets.prototype._orderBucketsAccordingToParams = function (params) {
     if (params.filters && this.objectMode) {
       this._keys = params.filters.map(filter => {
@@ -43,7 +48,7 @@ export function AggResponseBucketsProvider() {
       });
     } else if (params.ranges && this.objectMode) {
       this._keys = params.ranges.map(range => {
-        return _.findKey(this.buckets, el => el.from === range.from && el.to === range.to);
+        return _.findKey(this.buckets, el => this._isRangeEqual(el, range));
       });
     } else if (params.ranges && params.field.type !== 'date') {
       let ranges = params.ranges;
@@ -52,7 +57,7 @@ export function AggResponseBucketsProvider() {
       }
       this.buckets = ranges.map(range => {
         if (range.mask) return this.buckets.find(el => el.key === range.mask);
-        return this.buckets.find(el => el.from === range.from && el.to === range.to);
+        return this.buckets.find(el => this._isRangeEqual(el, range));
       });
     }
   };

@@ -56,6 +56,29 @@ export default function ({ getService, getPageObjects }) {
         expect(data.trim().split('\n').join(',')).to.eql(expectedData);
       });
 
+      it('should change results after changing layer to world', async function () {
+
+        await PageObjects.visualize.clickOptions();
+        await  PageObjects.visualize.selectFieldById('World Countries', 'regionMap');
+
+        await PageObjects.common.sleep(1000);//give angular time to go update UI state
+
+        //ensure all fields are there
+        await  PageObjects.visualize.selectFieldById('Two letter abbreviation', 'joinField');
+        await  PageObjects.visualize.selectFieldById('Three letter abbreviation', 'joinField');
+        await  PageObjects.visualize.selectFieldById('Country name', 'joinField');
+        await  PageObjects.visualize.selectFieldById('Two letter abbreviation', 'joinField');
+
+        await PageObjects.common.sleep(2000);//need some time for the data to load
+
+        await PageObjects.visualize.openSpyPanel();
+        const actualData = await PageObjects.visualize.getDataTableData();
+        const expectedData = 'CN,2,592,IN,2,373,US,1,194,ID,489,BR,415';
+        expect(actualData.trim().split('\n').join(',')).to.eql(expectedData);
+
+
+      });
+
     });
   });
 

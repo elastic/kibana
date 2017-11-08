@@ -22,3 +22,9 @@ body {
 main {
   display: block; /* 1 */
 }
+
+button,
+input[type="submit"],
+input[type="button"] {
+  border-radius: 0;
+}

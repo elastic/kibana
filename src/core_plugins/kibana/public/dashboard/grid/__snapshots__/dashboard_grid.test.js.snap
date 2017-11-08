@@ -22,6 +22,7 @@ exports[`renders DashboardGrid 1`] = `
     ]
   }
   onLayoutChange={[Function]}
+  useMargins={true}
 >
   <div
     className=""
@@ -29,6 +30,8 @@ exports[`renders DashboardGrid 1`] = `
     <Connect(DashboardPanel)
       embeddableHandler={
         Object {
+          "addDestroyEmeddable": [Function],
+          "destroy": [Function],
           "getEditPath": [Function],
           "getTitleFor": [Function],
           "render": [Function],
@@ -46,6 +49,8 @@ exports[`renders DashboardGrid 1`] = `
     <Connect(DashboardPanel)
       embeddableHandler={
         Object {
+          "addDestroyEmeddable": [Function],
+          "destroy": [Function],
           "getEditPath": [Function],
           "getTitleFor": [Function],
           "render": [Function],
@@ -65,5 +70,6 @@ exports[`renders DashboardGrid with no visualizations 1`] = `
   isViewMode={false}
   layout={Array []}
   onLayoutChange={[Function]}
+  useMargins={true}
 />
 `;

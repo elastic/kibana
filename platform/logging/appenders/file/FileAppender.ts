@@ -27,7 +27,7 @@ export class FileAppender implements DisposableAppender {
   /**
    * Writable file stream to write formatted `LogRecord` to.
    */
-  private outputStream: WriteStream | null = null;
+  private outputStream?: WriteStream;
 
   /**
    * Creates FileAppender instance with specified layout and file path.
@@ -41,7 +41,7 @@ export class FileAppender implements DisposableAppender {
    * @param record `LogRecord` instance to be logged.
    */
   append(record: LogRecord) {
-    if (this.outputStream === null) {
+    if (this.outputStream === undefined) {
       this.outputStream = createWriteStream(this.path, {
         flags: 'a',
         defaultEncoding: 'utf8'
@@ -56,12 +56,12 @@ export class FileAppender implements DisposableAppender {
    */
   async dispose() {
     await new Promise(resolve => {
-      if (this.outputStream === null) {
+      if (this.outputStream === undefined) {
         return resolve();
       }
 
       this.outputStream.end(undefined, undefined, () => {
-        this.outputStream = null;
+        this.outputStream = undefined;
         resolve();
       });
     });

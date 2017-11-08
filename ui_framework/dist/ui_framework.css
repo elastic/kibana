@@ -77,6 +77,11 @@ main {
   display: block;
   /* 1 */ }
 
+button,
+input[type="submit"],
+input[type="button"] {
+  border-radius: 0; }
+
 .kuiScreenReaderOnly {
   position: absolute;
   left: -10000px;
@@ -2594,7 +2599,7 @@ main {
  *    of this container using padding.
  */
 .kuiLocalNavRow--secondary {
-  padding: 0 10px 10px;
+  padding: 0 10px;
   /* 1 */
   -webkit-box-align: start;
   -webkit-align-items: flex-start;
@@ -2607,7 +2612,8 @@ main {
   display: -webkit-flex;
   display: -ms-flexbox;
   display: flex;
-  width: 100%; }
+  width: 100%;
+  margin-bottom: 10px; }
 
 .kuiLocalSearchInput {
   -webkit-appearance: none;
@@ -3741,6 +3747,7 @@ main {
   .kuiTab.kuiTab-isSelected {
     cursor: default;
     color: #191E23;
+    background-color: #FFF;
     border-bottom-color: #FFF; }
     .theme-dark .kuiTab.kuiTab-isSelected {
       color: #cecece;
@@ -4110,6 +4117,12 @@ main {
 
 .kuiVerticalRhythmSmall + .kuiVerticalRhythmSmall {
   margin-top: 5px; }
+
+.kuiVerticalRhythmLarge + .kuiVerticalRhythmLarge {
+  margin-top: 20px; }
+
+.kuiVerticalRhythmXLarge + .kuiVerticalRhythmXLarge {
+  margin-top: 40px; }
 
 .kuiView {
   background-color: #FFF;
