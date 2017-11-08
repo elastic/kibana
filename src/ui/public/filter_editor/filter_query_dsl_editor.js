@@ -1,4 +1,4 @@
-import 'ace';
+import 'ui/ace';
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import template from './filter_query_dsl_editor.html';

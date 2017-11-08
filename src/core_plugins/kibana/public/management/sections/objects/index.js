@@ -1,7 +1,7 @@
 import { management } from 'ui/management';
 import 'plugins/kibana/management/sections/objects/_view';
 import 'plugins/kibana/management/sections/objects/_objects';
-import 'ace';
+import 'ui/ace';
 import 'ui/directives/confirm_click';
 import { uiModules } from 'ui/modules';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
