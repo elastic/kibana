@@ -137,7 +137,7 @@ KuiListingTable.PropTypes = {
         isSorted: PropTypes.bool,
       }),
     ]
-  )),
+    )),
   rows: PropTypes.arrayOf(PropTypes.shape({
     id: PropTypes.string,
     cells: PropTypes.arrayOf(
@@ -148,7 +148,7 @@ KuiListingTable.PropTypes = {
           align: PropTypes.oneOf([LEFT_ALIGNMENT, RIGHT_ALIGNMENT]),
         }),
       ],
-    )),
+      )),
   })),
   pager: PropTypes.node,
   onItemSelectionChanged: PropTypes.func.isRequired,

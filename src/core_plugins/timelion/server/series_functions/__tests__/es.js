@@ -49,18 +49,18 @@ describe(filename, () => {
         _shards: { total: 0 }
       });
       return invoke(es, [5], tlConfig)
-      .then(expect.fail)
-      .catch((e) => {
-        expect(e).to.be.an('error');
-      });
+        .then(expect.fail)
+        .catch((e) => {
+          expect(e).to.be.an('error');
+        });
     });
 
     it('returns a seriesList', () => {
       tlConfig = stubRequestAndServer(esResponse);
       return invoke(es, [5], tlConfig)
-      .then((r) => {
-        expect(r.output.type).to.eql('seriesList');
-      });
+        .then((r) => {
+          expect(r.output.type).to.eql('seriesList');
+        });
     });
   });
 

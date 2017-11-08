@@ -14,44 +14,44 @@ export default function (opts) {
   let defaultRequiredToasts = null;
 
   uiRoutes
-  .addSetupWork(function loadDefaultIndexPattern(Private, Promise, $route, config) {
-    const getIds = Private(IndexPatternsGetProvider)('id');
-    const route = _.get($route, 'current.$$route');
+    .addSetupWork(function loadDefaultIndexPattern(Private, Promise, $route, config) {
+      const getIds = Private(IndexPatternsGetProvider)('id');
+      const route = _.get($route, 'current.$$route');
 
-    return getIds()
-    .then(function (patterns) {
-      let defaultId = config.get('defaultIndex');
-      let defined = !!defaultId;
-      const exists = _.contains(patterns, defaultId);
+      return getIds()
+        .then(function (patterns) {
+          let defaultId = config.get('defaultIndex');
+          let defined = !!defaultId;
+          const exists = _.contains(patterns, defaultId);
 
-      if (defined && !exists) {
-        config.remove('defaultIndex');
-        defaultId = defined = false;
-      }
+          if (defined && !exists) {
+            config.remove('defaultIndex');
+            defaultId = defined = false;
+          }
 
-      if (!defined && route.requireDefaultIndex) {
-        // If there is only one index pattern, set it as default
-        if (patterns.length === 1) {
-          defaultId = patterns[0];
-          config.set('defaultIndex', defaultId);
-        } else {
-          throw new NoDefaultIndexPattern();
-        }
-      }
-    });
-  })
-  .afterWork(
+          if (!defined && route.requireDefaultIndex) {
+            // If there is only one index pattern, set it as default
+            if (patterns.length === 1) {
+              defaultId = patterns[0];
+              config.set('defaultIndex', defaultId);
+            } else {
+              throw new NoDefaultIndexPattern();
+            }
+          }
+        });
+    })
+    .afterWork(
     // success
-    null,
+      null,
 
-    // failure
-    function (err, kbnUrl) {
-      const hasDefault = !(err instanceof NoDefaultIndexPattern);
-      if (hasDefault || !whenMissingRedirectTo) throw err; // rethrow
+      // failure
+      function (err, kbnUrl) {
+        const hasDefault = !(err instanceof NoDefaultIndexPattern);
+        if (hasDefault || !whenMissingRedirectTo) throw err; // rethrow
 
-      kbnUrl.change(whenMissingRedirectTo);
-      if (!defaultRequiredToasts) defaultRequiredToasts = [];
-      else defaultRequiredToasts.push(notify.error(err));
-    }
-  );
+        kbnUrl.change(whenMissingRedirectTo);
+        if (!defaultRequiredToasts) defaultRequiredToasts = [];
+        else defaultRequiredToasts.push(notify.error(err));
+      }
+    );
 }

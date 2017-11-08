@@ -23,7 +23,7 @@ export const KuiTextArea = ({
     'kuiTextArea-isInvalid': isInvalid,
     'kuiTextArea--nonResizable': isNonResizable
   }, sizeToClassNameMap[size]
-);
+  );
 
   return (
     <textarea

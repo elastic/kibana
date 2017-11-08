@@ -12,39 +12,39 @@ export default function ({ getService, getPageObjects }) {
 
       log.debug('navigateToApp visualize');
       return PageObjects.common.navigateToUrl('visualize', 'new')
-      .then(function () {
-        log.debug('clickLineChart');
-        return PageObjects.visualize.clickLineChart();
-      })
-      .then(function clickNewSearch() {
-        return PageObjects.visualize.clickNewSearch();
-      })
-      .then(function setAbsoluteRange() {
-        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-        return PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      })
-      .then(function clickBucket() {
-        log.debug('Bucket = Split Chart');
-        return PageObjects.visualize.clickBucket('Split Chart');
-      })
-      .then(function selectAggregation() {
-        log.debug('Aggregation = Terms');
-        return PageObjects.visualize.selectAggregation('Terms');
-      })
-      .then(function selectField() {
-        log.debug('Field = extension');
-        return PageObjects.visualize.selectField('extension.raw');
-      })
-      .then(function setInterval() {
-        log.debug('switch from Rows to Columns');
-        return PageObjects.visualize.clickColumns();
-      })
-      .then(function clickGo() {
-        return PageObjects.visualize.clickGo();
-      })
-      .then(function () {
-        return PageObjects.header.waitUntilLoadingHasFinished();
-      });
+        .then(function () {
+          log.debug('clickLineChart');
+          return PageObjects.visualize.clickLineChart();
+        })
+        .then(function clickNewSearch() {
+          return PageObjects.visualize.clickNewSearch();
+        })
+        .then(function setAbsoluteRange() {
+          log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+          return PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        })
+        .then(function clickBucket() {
+          log.debug('Bucket = Split Chart');
+          return PageObjects.visualize.clickBucket('Split Chart');
+        })
+        .then(function selectAggregation() {
+          log.debug('Aggregation = Terms');
+          return PageObjects.visualize.selectAggregation('Terms');
+        })
+        .then(function selectField() {
+          log.debug('Field = extension');
+          return PageObjects.visualize.selectField('extension.raw');
+        })
+        .then(function setInterval() {
+          log.debug('switch from Rows to Columns');
+          return PageObjects.visualize.clickColumns();
+        })
+        .then(function clickGo() {
+          return PageObjects.visualize.clickGo();
+        })
+        .then(function () {
+          return PageObjects.header.waitUntilLoadingHasFinished();
+        });
     });
 
     describe('line charts', function indexPatternCreation() {
@@ -58,20 +58,20 @@ export default function ({ getService, getPageObjects }) {
 
         // sleep a bit before trying to get the chart data
         return PageObjects.common.sleep(3000)
-        .then(function () {
-          return PageObjects.visualize.getLineChartData('fill="#00a69b"')
-          .then(function showData(data) {
-            log.debug('data=' + data);
-            const tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
-            for (let x = 0; x < data.length; x++) {
-              log.debug('x=' + x + ' expectedChartData[x].split(\' \')[1] = ' +
+          .then(function () {
+            return PageObjects.visualize.getLineChartData('fill="#00a69b"')
+              .then(function showData(data) {
+                log.debug('data=' + data);
+                const tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
+                for (let x = 0; x < data.length; x++) {
+                  log.debug('x=' + x + ' expectedChartData[x].split(\' \')[1] = ' +
                 (expectedChartData[x].split(' ')[1]).replace(',', '') + '  data[x]=' + data[x] +
                 ' diff=' + Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]));
-              expect(Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]) < tolerance).to.be.ok();
-            }
-            log.debug('Done');
+                  expect(Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]) < tolerance).to.be.ok();
+                }
+                log.debug('Done');
+              });
           });
-        });
       });
 
 
@@ -83,25 +83,25 @@ export default function ({ getService, getPageObjects }) {
 
         log.debug('Order By = Term');
         return PageObjects.visualize.selectOrderBy('_term')
-        .then(function clickGo() {
-          return PageObjects.visualize.clickGo();
-        })
-        .then(function () {
-          return retry.try(function () {
-            return PageObjects.visualize.getLineChartData('fill="#00a69b"')
-            .then(function showData(data) {
-              log.debug('data=' + data);
-              const tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
-              for (let x = 0; x < data.length; x++) {
-                log.debug('x=' + x + ' expectedChartData[x].split(\' \')[1] = ' +
+          .then(function clickGo() {
+            return PageObjects.visualize.clickGo();
+          })
+          .then(function () {
+            return retry.try(function () {
+              return PageObjects.visualize.getLineChartData('fill="#00a69b"')
+                .then(function showData(data) {
+                  log.debug('data=' + data);
+                  const tolerance = 10; // the y-axis scale is 10000 so 10 is 0.1%
+                  for (let x = 0; x < data.length; x++) {
+                    log.debug('x=' + x + ' expectedChartData[x].split(\' \')[1] = ' +
                   (expectedChartData[x].split(' ')[1]).replace(',', '') + '  data[x]=' + data[x] +
                   ' diff=' + Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]));
-                expect(Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]) < tolerance).to.be.ok();
-              }
-              log.debug('Done');
+                    expect(Math.abs(expectedChartData[x].split(' ')[1].replace(',', '') - data[x]) < tolerance).to.be.ok();
+                  }
+                  log.debug('Done');
+                });
             });
           });
-        });
       });
 
 
@@ -110,32 +110,32 @@ export default function ({ getService, getPageObjects }) {
         const expectedChartData = ['png', '1,373', 'php', '445', 'jpg', '9,109', 'gif', '918', 'css', '2,159'];
 
         return PageObjects.visualize.toggleSpyPanel()
-        .then(function getDataTableData() {
-          return PageObjects.visualize.getDataTableData();
-        })
-        .then(function showData(data) {
-          log.debug(data.split('\n'));
-          expect(data.trim().split('\n')).to.eql(expectedChartData);
-        });
+          .then(function getDataTableData() {
+            return PageObjects.visualize.getDataTableData();
+          })
+          .then(function showData(data) {
+            log.debug(data.split('\n'));
+            expect(data.trim().split('\n')).to.eql(expectedChartData);
+          });
       });
 
 
       it('should be able to save and load', function () {
 
         return PageObjects.visualize.saveVisualization(vizName1)
-        .then(function (message) {
-          log.debug('Saved viz message = ' + message);
-          expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
-        })
-        .then(function testVisualizeWaitForToastMessageGone() {
-          return PageObjects.header.waitForToastMessageGone();
-        })
-        .then(function () {
-          return PageObjects.visualize.loadSavedVisualization(vizName1);
-        })
-        .then(function waitForVisualization() {
-          return PageObjects.visualize.waitForVisualization();
-        });
+          .then(function (message) {
+            log.debug('Saved viz message = ' + message);
+            expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
+          })
+          .then(function testVisualizeWaitForToastMessageGone() {
+            return PageObjects.header.waitForToastMessageGone();
+          })
+          .then(function () {
+            return PageObjects.visualize.loadSavedVisualization(vizName1);
+          })
+          .then(function waitForVisualization() {
+            return PageObjects.visualize.waitForVisualization();
+          });
       });
 
 

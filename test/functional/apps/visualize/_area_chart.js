@@ -12,48 +12,48 @@ export default function ({ getService, getPageObjects }) {
 
       log.debug('navigateToApp visualize');
       return PageObjects.common.navigateToUrl('visualize', 'new')
-      .then(function () {
-        log.debug('clickAreaChart');
-        return PageObjects.visualize.clickAreaChart();
-      })
-      .then(function clickNewSearch() {
-        log.debug('clickNewSearch');
-        return PageObjects.visualize.clickNewSearch();
-      })
-      .then(function setAbsoluteRange() {
-        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-        return PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      })
-      .then(function clickBucket() {
-        log.debug('Click X-Axis');
-        return PageObjects.visualize.clickBucket('X-Axis');
-      })
-      .then(function selectAggregation() {
-        log.debug('Click Date Histogram');
-        return PageObjects.visualize.selectAggregation('Date Histogram');
-      })
-      .then(function getField() {
-        log.debug('Check field value');
-        return PageObjects.visualize.getField();
-      })
-      .then(function (fieldValue) {
-        log.debug('fieldValue = ' + fieldValue);
-        expect(fieldValue).to.be('@timestamp');
-      })
-      .then(function getInterval() {
-        return PageObjects.visualize.getInterval();
-      })
-      .then(function (intervalValue) {
-        log.debug('intervalValue = ' + intervalValue);
-        expect(intervalValue).to.be('Auto');
-      })
-      .then(function clickGo() {
-        return PageObjects.visualize.clickGo();
-      })
-      .then(function waitUntilLoadingHasFinished() {
-        log.debug('Waiting...');
-        return PageObjects.header.waitUntilLoadingHasFinished();
-      });
+        .then(function () {
+          log.debug('clickAreaChart');
+          return PageObjects.visualize.clickAreaChart();
+        })
+        .then(function clickNewSearch() {
+          log.debug('clickNewSearch');
+          return PageObjects.visualize.clickNewSearch();
+        })
+        .then(function setAbsoluteRange() {
+          log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+          return PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        })
+        .then(function clickBucket() {
+          log.debug('Click X-Axis');
+          return PageObjects.visualize.clickBucket('X-Axis');
+        })
+        .then(function selectAggregation() {
+          log.debug('Click Date Histogram');
+          return PageObjects.visualize.selectAggregation('Date Histogram');
+        })
+        .then(function getField() {
+          log.debug('Check field value');
+          return PageObjects.visualize.getField();
+        })
+        .then(function (fieldValue) {
+          log.debug('fieldValue = ' + fieldValue);
+          expect(fieldValue).to.be('@timestamp');
+        })
+        .then(function getInterval() {
+          return PageObjects.visualize.getInterval();
+        })
+        .then(function (intervalValue) {
+          log.debug('intervalValue = ' + intervalValue);
+          expect(intervalValue).to.be('Auto');
+        })
+        .then(function clickGo() {
+          return PageObjects.visualize.clickGo();
+        })
+        .then(function waitUntilLoadingHasFinished() {
+          log.debug('Waiting...');
+          return PageObjects.header.waitUntilLoadingHasFinished();
+        });
     });
 
     describe('area charts', function indexPatternCreation() {
@@ -62,13 +62,13 @@ export default function ({ getService, getPageObjects }) {
       it('should save and load with special characters', function () {
         const vizNamewithSpecialChars = vizName1 + '/?&=%';
         return PageObjects.visualize.saveVisualization(vizNamewithSpecialChars)
-        .then(function (message) {
-          log.debug(`Saved viz message = ${message}`);
-          expect(message).to.be(`Visualization Editor: Saved Visualization "${vizNamewithSpecialChars}"`);
-        })
-        .then(function testVisualizeWaitForToastMessageGone() {
-          return PageObjects.header.waitForToastMessageGone();
-        });
+          .then(function (message) {
+            log.debug(`Saved viz message = ${message}`);
+            expect(message).to.be(`Visualization Editor: Saved Visualization "${vizNamewithSpecialChars}"`);
+          })
+          .then(function testVisualizeWaitForToastMessageGone() {
+            return PageObjects.header.waitForToastMessageGone();
+          });
       });
 
       it('should save and load with non-ascii characters', async function () {
@@ -83,25 +83,25 @@ export default function ({ getService, getPageObjects }) {
 
       it('should save and load', function () {
         return PageObjects.visualize.saveVisualization(vizName1)
-        .then(function (message) {
-          log.debug('Saved viz message = ' + message);
-          expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
-        })
-        .then(function testVisualizeWaitForToastMessageGone() {
-          return PageObjects.header.waitForToastMessageGone();
-        })
-        .then(function loadSavedVisualization() {
-          return PageObjects.visualize.loadSavedVisualization(vizName1);
-        })
-        .then(function () {
-          return PageObjects.visualize.waitForVisualization();
-        })
+          .then(function (message) {
+            log.debug('Saved viz message = ' + message);
+            expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
+          })
+          .then(function testVisualizeWaitForToastMessageGone() {
+            return PageObjects.header.waitForToastMessageGone();
+          })
+          .then(function loadSavedVisualization() {
+            return PageObjects.visualize.loadSavedVisualization(vizName1);
+          })
+          .then(function () {
+            return PageObjects.visualize.waitForVisualization();
+          })
         // We have to sleep sometime between loading the saved visTitle
         // and trying to access the chart below with getXAxisLabels
         // otherwise it hangs.
-        .then(function sleep() {
-          return PageObjects.common.sleep(2000);
-        });
+          .then(function sleep() {
+            return PageObjects.common.sleep(2000);
+          });
       });
 
       it('should show correct chart, take screenshot', function () {
@@ -115,26 +115,26 @@ export default function ({ getService, getPageObjects }) {
 
         return retry.try(function tryingForTime() {
           return PageObjects.visualize.getXAxisLabels()
-          .then(function compareLabels(labels) {
-            log.debug('X-Axis labels = ' + labels);
-            expect(labels).to.eql(xAxisLabels);
+            .then(function compareLabels(labels) {
+              log.debug('X-Axis labels = ' + labels);
+              expect(labels).to.eql(xAxisLabels);
+            });
+        })
+          .then(function getYAxisLabels() {
+            return PageObjects.visualize.getYAxisLabels();
+          })
+          .then(function (labels) {
+            log.debug('Y-Axis labels = ' + labels);
+            expect(labels).to.eql(yAxisLabels);
+          })
+          .then(function getAreaChartData() {
+            return PageObjects.visualize.getAreaChartData('Count');
+          })
+          .then(function (paths) {
+            log.debug('expectedAreaChartData = ' + expectedAreaChartData);
+            log.debug('actual chart data =     ' + paths);
+            expect(paths).to.eql(expectedAreaChartData);
           });
-        })
-        .then(function getYAxisLabels() {
-          return PageObjects.visualize.getYAxisLabels();
-        })
-        .then(function (labels) {
-          log.debug('Y-Axis labels = ' + labels);
-          expect(labels).to.eql(yAxisLabels);
-        })
-        .then(function getAreaChartData() {
-          return PageObjects.visualize.getAreaChartData('Count');
-        })
-        .then(function (paths) {
-          log.debug('expectedAreaChartData = ' + expectedAreaChartData);
-          log.debug('actual chart data =     ' + paths);
-          expect(paths).to.eql(expectedAreaChartData);
-        });
       });
 
       it('should show correct data', function () {
@@ -165,16 +165,16 @@ export default function ({ getService, getPageObjects }) {
         ];
 
         return PageObjects.visualize.toggleSpyPanel()
-        .then(function setPageSize() {
-          return PageObjects.settings.setPageSize('All');
-        })
-        .then(function getDataTableData() {
-          return PageObjects.visualize.getDataTableData();
-        })
-        .then(function showData(data) {
-          log.debug('getDataTableData = ' + data.split('\n'));
-          expect(data.trim().split('\n')).to.eql(expectedTableData);
-        });
+          .then(function setPageSize() {
+            return PageObjects.settings.setPageSize('All');
+          })
+          .then(function getDataTableData() {
+            return PageObjects.visualize.getDataTableData();
+          })
+          .then(function showData(data) {
+            log.debug('getDataTableData = ' + data.split('\n'));
+            expect(data.trim().split('\n')).to.eql(expectedTableData);
+          });
       });
     });
   });

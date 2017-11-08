@@ -25,29 +25,29 @@ export default function ({ getService, getPageObjects }) {
     it('should show the default request', function () {
       // collapse the help pane because we only get the VISIBLE TEXT, not the part that is scrolled
       return PageObjects.console.collapseHelp()
-      .then(function () {
-        return retry.try(function () {
-          return PageObjects.console.getRequest()
-          .then(function (actualRequest) {
-            expect(actualRequest.trim()).to.eql(DEFAULT_REQUEST);
+        .then(function () {
+          return retry.try(function () {
+            return PageObjects.console.getRequest()
+              .then(function (actualRequest) {
+                expect(actualRequest.trim()).to.eql(DEFAULT_REQUEST);
+              });
           });
         });
-      });
     });
 
     it('default request response should include `"timed_out": false`', function () {
       const expectedResponseContains = '"timed_out": false,';
 
       return PageObjects.console.clickPlay()
-      .then(function () {
-        return retry.try(function () {
-          return PageObjects.console.getResponse()
-          .then(function (actualResponse) {
-            log.debug(actualResponse);
-            expect(actualResponse).to.contain(expectedResponseContains);
+        .then(function () {
+          return retry.try(function () {
+            return PageObjects.console.getResponse()
+              .then(function (actualResponse) {
+                log.debug(actualResponse);
+                expect(actualResponse).to.contain(expectedResponseContains);
+              });
           });
         });
-      });
     });
 
     it('settings should allow changing the text size', async function () {

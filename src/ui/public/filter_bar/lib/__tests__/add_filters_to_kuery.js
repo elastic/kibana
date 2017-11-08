@@ -60,9 +60,9 @@ describe('addFiltersToKuery', function () {
       query: { query: '', language: 'kuery' }
     };
     return addFiltersToKuery(state, filters)
-    .then(() => {
-      expect(state.query.query).to.be('"machine.os":"osx"');
-    });
+      .then(() => {
+        expect(state.query.query).to.be('"machine.os":"osx"');
+      });
   });
 
   it('time field filters should update the global time filter instead of modifying the query', function () {
@@ -83,11 +83,11 @@ describe('addFiltersToKuery', function () {
       }
     };
     return addFiltersToKuery(state, [timestampFilter])
-    .then(() => {
-      expect(state.query.query).to.be('');
-      expect(startTime.isSame(timefilter.time.from)).to.be(true);
-      expect(endTime.isSame(timefilter.time.to)).to.be(true);
-    });
+      .then(() => {
+        expect(state.query.query).to.be('');
+        expect(startTime.isSame(timefilter.time.from)).to.be(true);
+        expect(endTime.isSame(timefilter.time.to)).to.be(true);
+      });
   });
 
 

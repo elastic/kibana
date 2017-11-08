@@ -90,7 +90,7 @@ describe('kuery functions', function () {
       it('should throw an error for nodes with unknown or undefined serialize styles', function () {
         const node = nodeTypes.function.buildNode('and', [childNode1, childNode2], 'notValid');
         expect(and.toKueryExpression)
-        .withArgs(node).to.throwException(/Cannot serialize "and" function as "notValid"/);
+          .withArgs(node).to.throwException(/Cannot serialize "and" function as "notValid"/);
       });
 
     });

@@ -185,21 +185,21 @@ export class Table extends Component {
                   </KuiContextMenuItem>
                 ), (
                   <KuiContextMenuItem
-                    key="B"
-                    icon={<span className="kuiIcon fa-share" />}
-                    onClick={() => { this.closePopover(item); window.alert('Share'); }}
-                  >
+                      key="B"
+                      icon={<span className="kuiIcon fa-share" />}
+                      onClick={() => { this.closePopover(item); window.alert('Share'); }}
+                    >
                     Share
-                  </KuiContextMenuItem>
-                ), (
-                  <KuiContextMenuItem
-                    key="C"
-                    icon={<span className="kuiIcon fa-trash-o" />}
-                    onClick={() => { this.closePopover(item); window.alert('Delete'); }}
-                  >
+                    </KuiContextMenuItem>
+                  ), (
+                    <KuiContextMenuItem
+                      key="C"
+                      icon={<span className="kuiIcon fa-trash-o" />}
+                      onClick={() => { this.closePopover(item); window.alert('Delete'); }}
+                    >
                     Delete
-                  </KuiContextMenuItem>
-                )]}
+                    </KuiContextMenuItem>
+                  )]}
               />
             </KuiPopover>
           </KuiTableRowCell>

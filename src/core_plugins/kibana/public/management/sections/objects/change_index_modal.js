@@ -160,9 +160,9 @@ export class ChangeIndexModal extends React.Component {
             { totalIndexPatterns > perPage
               ?
                 <KuiControlledTable className="kuiVerticalRhythm">
-                  <KuiToolBar>
+                <KuiToolBar>
                     <KuiToolBarSection>
-                      <KuiPager
+                    <KuiPager
                         startNumber={page + 1}
                         hasPreviousPage={page >= 1}
                         hasNextPage={page < totalIndexPatterns}
@@ -171,12 +171,12 @@ export class ChangeIndexModal extends React.Component {
                         onNextPage={() => this.setState({ page: page + 1 })}
                         onPreviousPage={() => this.setState({ page: page - 1 })}
                       />
-                    </KuiToolBarSection>
+                  </KuiToolBarSection>
                   </KuiToolBar>
-                  <TableComponent/>
-                </KuiControlledTable>
-              :
                 <TableComponent/>
+              </KuiControlledTable>
+              :
+              <TableComponent/>
             }
           </KuiModalBody>
 

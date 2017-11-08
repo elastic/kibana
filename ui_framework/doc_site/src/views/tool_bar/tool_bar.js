@@ -56,4 +56,4 @@ export const ToolBar = () => (
       </KuiButtonGroup>
     </div>
   </KuiToolBar>
-  );
+);
