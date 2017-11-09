@@ -8,7 +8,7 @@ import {
 
 const TEMPLATE_TAGS = ['{', '}'];
 
-export function replaceTemplateStrings(text) {
+export function replaceTemplateStrings(text, params = {}) {
   const variables = {
     config: {
       docs: {
@@ -22,7 +22,8 @@ export function replaceTemplateStrings(text) {
       kibana: {
         version: metadata.version
       }
-    }
+    },
+    params: params
   };
   Mustache.parse(text, TEMPLATE_TAGS);
   return Mustache.render(text, variables);

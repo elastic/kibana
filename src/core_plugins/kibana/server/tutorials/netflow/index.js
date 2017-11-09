@@ -1,3 +1,4 @@
+import { PARAM_TYPES } from '../../../common/tutorials/param_types';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { INSTRUCTION_VARIANT } from '../../../common/tutorials/instruction_variant';
 
@@ -17,10 +18,9 @@ export function netflowSpecProvider() {
     //previewImagePath: 'kibana-apache.png', TODO
     params: [
       {
-        'netflow.var.input.udp.port': {
-          type: 'number', // TODO: Make this a const as well?
-          defaultValue: 2055
-        }
+        id: 'netflow_var_input_udp_port',
+        type: PARAM_TYPES.NUMBER,
+        defaultValue: 2055
       }
     ],
     instructionSets: [
@@ -53,7 +53,7 @@ export function netflowSpecProvider() {
               {
                 title: 'Start Logstash',
                 commands: [
-                  './bin/logstash --modules netflow -M netflow.var.input.udp.port={params.netflow.var.input.udp.port}'
+                  './bin/logstash --modules netflow -M netflow.var.input.udp.port={params.netflow_var_input_udp_port}'
                 ]
               }
             ]

@@ -11,6 +11,7 @@ export class Tutorial extends React.Component {
 
     this.state = {
       notFound: false,
+      paramValues: {},
       tutorial: null
     };
   }
@@ -18,8 +19,15 @@ export class Tutorial extends React.Component {
   async componentWillMount() {
     const tutorial = await getTutorial(this.props.tutorialId);
     if (tutorial) {
+      const paramValues = {};
+      if (tutorial.params) {
+        tutorial.params.forEach((param => {
+          paramValues[param.id] = param.defaultValue;
+        }));
+      }
       this.setState({
-        tutorial: tutorial,
+        paramValues: paramValues,
+        tutorial: tutorial
       });
     } else {
       this.setState({
@@ -38,6 +46,7 @@ export class Tutorial extends React.Component {
           title={instructionSet.title}
           instructionVariants={instructionSet.instructionVariants}
           offset={currentOffset}
+          paramValues={this.state.paramValues}
           key={index}
         />
       );

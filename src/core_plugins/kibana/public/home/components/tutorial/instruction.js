@@ -8,7 +8,7 @@ import {
 import 'brace/mode/sh';
 import { replaceTemplateStrings } from './replace_template_strings';
 
-export function Instruction({ commands, textPost, textPre }) {
+export function Instruction({ commands, paramValues, textPost, textPre }) {
   let pre;
   if (textPre) {
     pre = <Content text={textPre}/>;
@@ -37,7 +37,7 @@ export function Instruction({ commands, textPost, textPre }) {
         mode="sh"
         theme="github"
         width="100%"
-        value={commands.map(cmd => { return replaceTemplateStrings(cmd); }).join('\n')}
+        value={commands.map(cmd => { return replaceTemplateStrings(cmd, paramValues); }).join('\n')}
         setOptions={aceOptions}
       />
 
@@ -49,6 +49,7 @@ export function Instruction({ commands, textPost, textPre }) {
 
 Instruction.propTypes = {
   commands: PropTypes.array.isRequired,
+  paramValues: PropTypes.object.isRequired,
   textPost: PropTypes.string,
   textPre: PropTypes.string,
 };

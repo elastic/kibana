@@ -62,6 +62,7 @@ export class InstructionSet extends React.Component {
       >
         <Instruction
           commands={instruction.commands}
+          paramValues={this.props.paramValues}
           textPre={instruction.textPre}
           textPost={instruction.textPost}
         />
@@ -97,5 +98,6 @@ export class InstructionSet extends React.Component {
 InstructionSet.propTypes = {
   title: PropTypes.string.isRequired,
   instructionVariants: PropTypes.array.isRequired,
-  offset: PropTypes.number.isRequired
+  offset: PropTypes.number.isRequired,
+  paramValues: PropTypes.object.isRequired
 };
