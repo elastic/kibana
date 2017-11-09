@@ -79,9 +79,14 @@ export class SearchEmbeddableHandler extends EmbeddableHandler {
           searchScope.$destroy();
         });
 
+        const renderComplete = new Promise(resolve => {
+          searchScope.$on('ready:vis', resolve);
+        });
+
         return new Embeddable({
           title: savedObject.title,
-          editUrl: searchScope.editPath
+          editUrl: searchScope.editPath,
+          renderComplete,
         });
       });
   }

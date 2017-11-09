@@ -23,7 +23,8 @@ import { DashboardContainerAPI } from './dashboard_container_api';
 import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { EmbeddableHandlersRegistryProvider } from 'ui/embeddable/embeddable_handlers_registry';
-
+import { store } from '../store';
+import { getAllEmbeddablesFinishedRendering } from './selectors';
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
 
 const app = uiModules.get('app/dashboard', [
@@ -116,8 +117,6 @@ app.directive('dashboardApp', function ($injector) {
         dashboardStateManager.getQuery() || { query: '', language: config.get('search:queryLanguage') },
         filterBar.getFilters()
       );
-      let pendingVisCount = _.size(dashboardStateManager.getPanels());
-
       timefilter.enabled = true;
       dash.searchSource.highlightAll(true);
       dash.searchSource.version(true);
@@ -125,10 +124,13 @@ app.directive('dashboardApp', function ($injector) {
 
       updateState();
 
+
+
       $scope.refresh = (...args) => {
         $rootScope.$broadcast('fetch');
         courier.fetch(...args);
       };
+
       $scope.timefilter = timefilter;
       $scope.expandedPanel = null;
       $scope.dashboardViewMode = dashboardStateManager.getViewMode();
@@ -174,7 +176,6 @@ app.directive('dashboardApp', function ($injector) {
 
       // called by the saved-object-finder when a user clicks a vis
       $scope.addVis = function (hit, showToast = true) {
-        pendingVisCount++;
         dashboardStateManager.addNewPanel(hit.id, 'visualization');
         if (showToast) {
           notify.info(`Visualization successfully added to your dashboard`);
@@ -182,7 +183,6 @@ app.directive('dashboardApp', function ($injector) {
       };
 
       $scope.addSearch = function (hit) {
-        pendingVisCount++;
         dashboardStateManager.addNewPanel(hit.id, 'search');
         notify.info(`Search successfully added to your dashboard`);
       };
@@ -367,12 +367,18 @@ app.directive('dashboardApp', function ($injector) {
         chrome.addApplicationClass('theme-light');
       }
 
-      $scope.$on('ready:vis', function () {
-        if (pendingVisCount > 0) pendingVisCount--;
-        if (pendingVisCount === 0) {
-          dashboardStateManager.saveState();
+      let previousAllEmbeddablesFinishedRendering = false;
+      store.subscribe(() => {
+        const currentAllEmbeddablesFinishedRendering =
+          getAllEmbeddablesFinishedRendering(store.getState().dashboard);
+
+        // Make sure we only call this when it was previously false (waiting for embeddables to finish rendering)
+        // and switched to true (they are now done).
+        if (currentAllEmbeddablesFinishedRendering !== previousAllEmbeddablesFinishedRendering &&
+            currentAllEmbeddablesFinishedRendering) {
           $scope.refresh();
         }
+        previousAllEmbeddablesFinishedRendering = currentAllEmbeddablesFinishedRendering;
       });
 
       if ($route.current.params && $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM]) {

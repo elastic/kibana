@@ -57,9 +57,14 @@ export class VisualizeEmbeddableHandler extends EmbeddableHandler {
           visualizeScope.$destroy();
         });
 
+        const renderComplete = new Promise(resolve => {
+          visualizeScope.$on('ready:vis', resolve);
+        });
+
         return new Embeddable({
           title: savedObject.title,
-          editUrl: visualizeScope.editUrl
+          editUrl: visualizeScope.editUrl,
+          renderComplete,
         });
       });
   }

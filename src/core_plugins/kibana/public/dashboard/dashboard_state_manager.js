@@ -138,22 +138,22 @@ export class DashboardStateManager {
   }
 
   _handleStoreChanges() {
-    if (this._areStoreAndAppStatePanelsEqual()) {
-      return;
+    let dirty = false;
+    if (!this._areStoreAndAppStatePanelsEqual()) {
+      const state = store.getState();
+      // The only state that the store deals with that appState cares about is the panels array. Every other state change
+      // (that appState cares about) is initiated from appState (e.g. view mode).
+      this.appState.panels = [];
+      _.map(getPanels(state), panel => {
+        this.appState.panels.push(panel);
+      });
+      dirty = true;
+      this.saveState();
     }
 
-    const state = store.getState();
-    // The only state that the store deals with that appState cares about is the panels array. Every other state change
-    // (that appState cares about) is initiated from appState (e.g. view mode).
-    this.appState.panels = [];
-    _.map(getPanels(state), panel => {
-      this.appState.panels.push(panel);
-    });
-
     this.changeListeners.forEach(function (listener) {
-      return listener({ dirty: true, clean: false });
+      return listener({ dirty, clean: !dirty });
     });
-    this.saveState();
   }
 
   getFullScreenMode() {
