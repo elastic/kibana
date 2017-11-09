@@ -38,6 +38,10 @@ The ideas in `kbn-observable` is heavily based on [RxJS][rxjs], so the
 [RxJS docs][rxjs-docs] are also a good source of introduction to observables and
 how they work in this library.
 
+**NOTE**: Do you know about good articles, videos or other resources that does
+a great job at explaining observables? Add them here, so it becomes easier for
+the next person to learn about them!
+
 ## Factories
 
 Just like the `k$` function, factories take arguments and produce an observable.
@@ -73,9 +77,16 @@ See [./src/operators](./src/operators) for more info about each operator.
 
 ## More advanced topics
 
-TODO: Hot/cold. Multicasting.
+This library contains implementations of both `Observable` and `Subject`. To
+better understand the difference between them, it's important to understand the
+difference between hot and cold observables. Ben Lesh's
+[Hot vs Cold Observables][hot-vs-cold] is a great introduction to this topic.
 
-## Why `k$`?
+**NOTE**: Do you know about good articles, videos or other resources that goes
+deeper into Observables and related topics? Make sure we get them added to this
+list!
+
+## Why `kbn-observable`?
 
 While exploring how to handle observables in Kibana we went through multiple
 PoCs. We initially used RxJS directly, but we didn't find a simple way to
