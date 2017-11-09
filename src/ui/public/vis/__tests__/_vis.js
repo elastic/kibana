@@ -2,7 +2,7 @@ import _ from 'ui/lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import { VisProvider } from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
 describe('Vis Class', function () {
@@ -25,7 +25,7 @@ describe('Vis Class', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(StubLogstashIndexPatternProvider);
     visTypes = Private(VisTypesRegistryProvider);
   }));
 

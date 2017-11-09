@@ -2,12 +2,12 @@ import d3 from 'd3';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import _ from 'ui/lodash';
-import fixtures from 'fixtures/fake_hierarchical_data';
+import { threeTermBuckets } from 'ui/agg_response/__tests__/fixtures';
 import $ from 'ui/jquery';
-import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
+import { VisFixtureProvider } from '../fixtures/_vis_fixture';
 import { VisProvider } from 'ui/vis';
 import 'ui/persisted_state';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 import { BuildHierarchicalDataProvider } from 'ui/agg_response/hierarchical/build_hierarchical_data';
 
 const rowAgg = [
@@ -75,11 +75,11 @@ describe('No global chart settings', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
-    chart1 = Private(FixturesVislibVisFixtureProvider)(visLibParams1);
-    chart2 = Private(FixturesVislibVisFixtureProvider)(visLibParams2);
+    chart1 = Private(VisFixtureProvider)(visLibParams1);
+    chart2 = Private(VisFixtureProvider)(visLibParams2);
     Vis = Private(VisProvider);
     persistedState = new ($injector.get('PersistedState'))();
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(StubLogstashIndexPatternProvider);
     buildHierarchicalData = Private(BuildHierarchicalDataProvider);
 
     let id1 = 1;
@@ -101,8 +101,8 @@ describe('No global chart settings', function () {
       agg.id = 'agg_' + id2++;
     });
 
-    data1 = buildHierarchicalData(stubVis1, fixtures.threeTermBuckets);
-    data2 = buildHierarchicalData(stubVis2, fixtures.threeTermBuckets);
+    data1 = buildHierarchicalData(stubVis1, threeTermBuckets);
+    data2 = buildHierarchicalData(stubVis2, threeTermBuckets);
 
     chart1.render(data1, persistedState);
     chart2.render(data2, persistedState);
@@ -170,10 +170,10 @@ aggArray.forEach(function (dataAgg, i) {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private, $injector) {
-      vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
+      vis = Private(VisFixtureProvider)(visLibParams);
       Vis = Private(VisProvider);
       persistedState = new ($injector.get('PersistedState'))();
-      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      indexPattern = Private(StubLogstashIndexPatternProvider);
       buildHierarchicalData = Private(BuildHierarchicalDataProvider);
 
       let id = 1;
@@ -185,7 +185,7 @@ aggArray.forEach(function (dataAgg, i) {
       // We need to set the aggs to a known value.
       _.each(stubVis.aggs, function (agg) { agg.id = 'agg_' + id++; });
 
-      data = buildHierarchicalData(stubVis, fixtures.threeTermBuckets);
+      data = buildHierarchicalData(stubVis, threeTermBuckets);
 
       vis.render(data, persistedState);
     }));

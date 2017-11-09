@@ -5,7 +5,7 @@ import { AggTypesMetricsBucketAvgProvider } from 'ui/agg_types/metrics/bucket_av
 import { AggTypesMetricsBucketMinProvider } from 'ui/agg_types/metrics/bucket_min';
 import { AggTypesMetricsBucketMaxProvider } from 'ui/agg_types/metrics/bucket_max';
 import { VisProvider } from 'ui/vis';
-import StubbedIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 
 const metrics = [
   { name: 'sum_bucket', title: 'Overall Sum', provider: AggTypesMetricsBucketSumProvider },
@@ -26,7 +26,7 @@ describe('sibling pipeline aggs', function () {
         ngMock.module('kibana');
         ngMock.inject(function (Private) {
           const Vis = Private(VisProvider);
-          const indexPattern = Private(StubbedIndexPattern);
+          const indexPattern = Private(StubLogstashIndexPatternProvider);
           indexPattern.stubSetFieldFormat('bytes', 'bytes');
           metricAgg = Private(metric.provider);
 

@@ -7,7 +7,7 @@ import { AggResponseTabifyTableGroupProvider } from 'ui/agg_response/tabify/_tab
 import { AggResponseBucketsProvider } from 'ui/agg_response/tabify/_buckets';
 import { AggResponseGetColumnsProvider } from 'ui/agg_response/tabify/_get_columns';
 import { VisProvider } from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 
 describe('ResponseWriter class', function () {
   let Vis;
@@ -32,7 +32,7 @@ describe('ResponseWriter class', function () {
       TableGroup = Private(AggResponseTabifyTableGroupProvider);
       Buckets = Private(AggResponseBucketsProvider);
       Vis = Private(VisProvider);
-      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      indexPattern = Private(StubLogstashIndexPatternProvider);
     }));
   }
 

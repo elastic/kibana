@@ -2,7 +2,8 @@ import _ from 'ui/lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import sinon from 'ui/sinon';
-import MockState from 'fixtures/mock_state';
+import { StubState } from 'ui/state_management/__tests__/stubs';
+import { StubCourierProvider } from 'ui/courier/__tests__/stubs';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 
 describe('toggle filters', function () {
@@ -17,14 +18,14 @@ describe('toggle filters', function () {
     'kibana/courier',
     'kibana/global_state',
     function ($provide) {
-      $provide.service('courier', require('fixtures/mock_courier'));
+      $provide.service('courier', StubCourierProvider);
 
-      appState = new MockState({ filters: [] });
+      appState = new StubState({ filters: [] });
       $provide.service('getAppState', function () {
         return function () { return appState; };
       });
 
-      globalState = new MockState({ filters: [] });
+      globalState = new StubState({ filters: [] });
       $provide.service('globalState', function () {
         return globalState;
       });

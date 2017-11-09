@@ -2,7 +2,7 @@ import sinon from 'ui/sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
-import StubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
+import { StubSearchSourceProvider } from 'ui/courier/__tests__/stubs';
 
 import { SegmentedRequestProvider } from '../segmented';
 
@@ -20,7 +20,7 @@ describe('ui/courier/fetch/request/segmented/_createQueue', () => {
 
     MockSource = class {
       constructor() {
-        return $injector.invoke(StubbedSearchSourceProvider);
+        return $injector.invoke(StubSearchSourceProvider);
       }
     };
   }));

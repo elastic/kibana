@@ -3,7 +3,8 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'ui/sinon';
 
-import MockState from 'fixtures/mock_state';
+import { StubState } from 'ui/state_management/__tests__/stubs';
+import { StubCourierProvider } from 'ui/courier/__tests__/stubs';
 import $ from 'ui/jquery';
 import 'ui/filter_bar';
 import { FilterBarLibMapFilterProvider } from 'ui/filter_bar/lib/map_filter';
@@ -20,7 +21,7 @@ describe('Filter Bar Directive', function () {
 
   beforeEach(ngMock.module('kibana/global_state', function ($provide) {
     $provide.service('getAppState', _.constant(_.constant(
-      appState = new MockState({ filters: [] })
+      appState = new StubState({ filters: [] })
     )));
   }));
 
@@ -29,7 +30,7 @@ describe('Filter Bar Directive', function () {
     ngMock.module('kibana');
 
     ngMock.module('kibana/courier', function ($provide) {
-      $provide.service('courier', require('fixtures/mock_courier'));
+      $provide.service('courier', StubCourierProvider);
     });
 
     ngMock.inject(function (Private, $injector, _$rootScope_, _$compile_) {

@@ -2,7 +2,7 @@ import _ from 'ui/lodash';
 import { VisProvider } from 'ui/vis';
 import { AggTypesIndexProvider } from 'ui/agg_types/index';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
 
 // eslint-disable-next-line @elastic/kibana-custom/no-default-export
@@ -10,7 +10,7 @@ export default function AggParamWriterHelper(Private) {
   const Vis = Private(VisProvider);
   const aggTypes = Private(AggTypesIndexProvider);
   const visTypes = Private(VisTypesRegistryProvider);
-  const stubbedLogstashIndexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+  const stubbedLogstashIndexPattern = Private(StubLogstashIndexPatternProvider);
   const AggConfig = Private(VisAggConfigProvider);
 
   /**

@@ -5,7 +5,7 @@ import sinon from 'ui/sinon';
 
 import HitSortFnProv from 'plugins/kibana/discover/_hit_sort_fn';
 import NoDigestPromises from 'test_utils/no_digest_promises';
-import StubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
+import { StubSearchSourceProvider } from 'ui/courier/__tests__/stubs';
 
 import { SegmentedRequestProvider } from '../segmented';
 
@@ -25,7 +25,7 @@ describe('Segmented Request Index Selection', function () {
 
     MockSource = class {
       constructor() {
-        return $injector.invoke(StubbedSearchSourceProvider);
+        return $injector.invoke(StubSearchSourceProvider);
       }
     };
   }));

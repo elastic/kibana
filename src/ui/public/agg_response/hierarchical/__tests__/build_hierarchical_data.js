@@ -1,11 +1,11 @@
 
 import _ from 'ui/lodash';
-import fixtures from 'fixtures/fake_hierarchical_data';
+import * as fixtures from 'ui/agg_response/__tests__/fixtures';
 import sinon from 'ui/sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 import { BuildHierarchicalDataProvider } from 'ui/agg_response/hierarchical/build_hierarchical_data';
 
 let Vis;
@@ -23,7 +23,7 @@ describe('buildHierarchicalData', function () {
     sandbox.stub(Notifier.prototype, 'error');
 
     Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(StubLogstashIndexPatternProvider);
     buildHierarchicalData = Private(BuildHierarchicalDataProvider);
   }));
 

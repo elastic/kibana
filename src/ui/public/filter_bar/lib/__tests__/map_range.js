@@ -1,6 +1,7 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { FilterBarLibMapRangeProvider } from 'ui/filter_bar/lib/map_range';
+import { StubCourierProvider } from 'ui/courier/__tests__/stubs';
 
 describe('Filter Bar Directive', function () {
   describe('mapRange()', function () {
@@ -11,7 +12,7 @@ describe('Filter Bar Directive', function () {
       'kibana',
       'kibana/courier',
       function ($provide) {
-        $provide.service('courier', require('fixtures/mock_courier'));
+        $provide.service('courier', StubCourierProvider);
       }
     ));
 

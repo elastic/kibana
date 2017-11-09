@@ -5,13 +5,12 @@ import expect from 'expect.js';
 import Promise from 'bluebird';
 import { DuplicateField } from 'ui/errors';
 import { IndexedArray } from 'ui/indexed_array';
-import FixturesLogstashFieldsProvider from 'fixtures/logstash_fields';
-import { FixturesStubbedSavedObjectIndexPatternProvider } from 'fixtures/stubbed_saved_object_index_pattern';
 import { IndexPatternsIntervalsProvider } from 'ui/index_patterns/_intervals';
 import { IndexPatternProvider } from 'ui/index_patterns/_index_pattern';
 import NoDigestPromises from 'test_utils/no_digest_promises';
 import { Notifier } from 'ui/notify';
 
+import { createStubIndexPatternSavedObject, createStubLogstashFields } from './stubs';
 import { FieldsFetcherProvider } from '../fields_fetcher_provider';
 import { StubIndexPatternsApiClientModule } from './stub_index_patterns_api_client';
 import { IndexPatternsApiClientProvider } from '../index_patterns_api_client_provider';
@@ -27,7 +26,6 @@ describe('index pattern', function () {
   let fieldsFetcher;
   let mockLogstashFields;
   let savedObjectsClient;
-  let savedObjectsResponse;
   const indexPatternId = 'test-pattern';
   let indexPattern;
   let intervals;
@@ -43,9 +41,8 @@ describe('index pattern', function () {
   }));
 
   beforeEach(ngMock.inject(function (Private) {
-    mockLogstashFields = Private(FixturesLogstashFieldsProvider);
+    mockLogstashFields = createStubLogstashFields();
     defaultTimeField = mockLogstashFields.find(f => f.type === 'date');
-    savedObjectsResponse = Private(FixturesStubbedSavedObjectIndexPatternProvider);
 
     savedObjectsClient = Private(SavedObjectsClientProvider);
     sinon.stub(savedObjectsClient, 'create');
@@ -74,7 +71,7 @@ describe('index pattern', function () {
   // helper function to create index patterns
   function create(id, payload) {
     const indexPattern = new IndexPattern(id);
-    payload = _.defaults(payload || {}, savedObjectsResponse(id));
+    payload = _.defaults(payload || {}, createStubIndexPatternSavedObject(id));
 
     savedObjectsClient.create.returns(Promise.resolve(payload));
     setDocsourcePayload(payload);

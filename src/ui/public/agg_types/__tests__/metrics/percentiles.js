@@ -2,7 +2,7 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { AggTypesMetricsPercentilesProvider } from 'ui/agg_types/metrics/percentiles';
 import { VisProvider } from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 
 describe('AggTypesMetricsPercentilesProvider class', function () {
 
@@ -13,7 +13,7 @@ describe('AggTypesMetricsPercentilesProvider class', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(StubLogstashIndexPatternProvider);
     aggTypeMetricPercentiles = Private(AggTypesMetricsPercentilesProvider);
   }));
 

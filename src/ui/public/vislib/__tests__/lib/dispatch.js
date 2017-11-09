@@ -4,8 +4,8 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
 // Data
-import data from 'fixtures/vislib/mock_data/date_histogram/_series';
-import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
+import data from '../fixtures/mock_data/date_histogram/_series';
+import { VisFixtureProvider } from '../fixtures/_vis_fixture';
 import 'ui/persisted_state';
 import { SimpleEmitter } from 'ui/utils/simple_emitter';
 
@@ -25,7 +25,7 @@ describe('Vislib Dispatch Class Test Suite', function () {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private, $injector) {
-      vis = Private(FixturesVislibVisFixtureProvider)();
+      vis = Private(VisFixtureProvider)();
       persistedState = new ($injector.get('PersistedState'))();
       vis.render(data, persistedState);
     }));
@@ -49,7 +49,7 @@ describe('Vislib Dispatch Class Test Suite', function () {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private, $injector) {
-      vis = Private(FixturesVislibVisFixtureProvider)();
+      vis = Private(VisFixtureProvider)();
       persistedState = new ($injector.get('PersistedState'))();
       vis.on('brush', _.noop);
       vis.render(data, persistedState);
@@ -119,7 +119,7 @@ describe('Vislib Dispatch Class Test Suite', function () {
       let persistedState;
       ngMock.module('kibana');
       ngMock.inject(function (Private, $injector) {
-        vis = Private(FixturesVislibVisFixtureProvider)();
+        vis = Private(VisFixtureProvider)();
         persistedState = new ($injector.get('PersistedState'))();
         vis.on('someEvent', _.noop);
         vis.render(data, persistedState);
@@ -138,7 +138,7 @@ describe('Vislib Dispatch Class Test Suite', function () {
       let persistedState;
       ngMock.module('kibana');
       ngMock.inject(function (Private, $injector) {
-        vis = Private(FixturesVislibVisFixtureProvider)();
+        vis = Private(VisFixtureProvider)();
         persistedState = new ($injector.get('PersistedState'))();
         vis.render(data, persistedState);
         vis.on('someEvent', _.noop);

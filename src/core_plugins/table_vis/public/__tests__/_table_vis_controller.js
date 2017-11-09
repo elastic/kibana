@@ -5,8 +5,9 @@ import ngMock from 'ng_mock';
 import sinon from 'ui/sinon';
 import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
 import { VisProvider } from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 import { AppStateProvider } from 'ui/state_management/app_state';
+import { oneRangeBucket } from 'ui/agg_response/__tests__/fixtures';
 
 describe('Controller', function () {
   let $rootScope;
@@ -15,7 +16,6 @@ describe('Controller', function () {
   let $scope;
   let $el;
   let Vis;
-  let fixtures;
   let AppState;
   let tabify;
 
@@ -25,14 +25,13 @@ describe('Controller', function () {
     tabify = Private(AggResponseTabifyProvider);
     $rootScope = $injector.get('$rootScope');
     $compile = $injector.get('$compile');
-    fixtures = require('fixtures/fake_hierarchical_data');
     AppState = Private(AppStateProvider);
     Vis = Private(VisProvider);
   }));
 
   function OneRangeVis(params) {
     return new Vis(
-      Private(FixturesStubbedLogstashIndexPatternProvider),
+      Private(StubLogstashIndexPatternProvider),
       {
         type: 'table',
         params: params || {},
@@ -89,7 +88,7 @@ describe('Controller', function () {
     expect(!$scope.tableGroups).to.be.ok();
     expect(!$scope.hasSomeRows).to.be.ok();
 
-    attachEsResponseToScope(tabify(vis, fixtures.oneRangeBucket));
+    attachEsResponseToScope(tabify(vis, oneRangeBucket));
 
     expect($scope.hasSomeRows).to.be(true);
     expect($scope.tableGroups).to.have.property('tables');
@@ -102,7 +101,7 @@ describe('Controller', function () {
     const vis = new OneRangeVis();
     initController(vis);
 
-    attachEsResponseToScope(tabify(vis, fixtures.oneRangeBucket));
+    attachEsResponseToScope(tabify(vis, oneRangeBucket));
     removeEsResponseFromScope();
 
     expect(!$scope.hasSomeRows).to.be.ok();
@@ -118,7 +117,7 @@ describe('Controller', function () {
     initController(vis);
 
     // modify the data to not have any buckets
-    const resp = _.cloneDeep(fixtures.oneRangeBucket);
+    const resp = _.cloneDeep(oneRangeBucket);
     resp.aggregations.agg_2.buckets = {};
 
     attachEsResponseToScope(tabify(vis, resp));
@@ -132,7 +131,7 @@ describe('Controller', function () {
     initController(vis);
 
     // modify the data to not have any buckets
-    const resp = _.cloneDeep(fixtures.oneRangeBucket);
+    const resp = _.cloneDeep(oneRangeBucket);
     resp.aggregations.agg_2.buckets = {};
 
     attachEsResponseToScope(tabify(vis, resp));
@@ -148,7 +147,7 @@ describe('Controller', function () {
 
     const vis = new OneRangeVis({ showPartialRows: true });
     initController(vis);
-    attachEsResponseToScope(spiedTabify(vis, fixtures.oneRangeBucket));
+    attachEsResponseToScope(spiedTabify(vis, oneRangeBucket));
 
     expect(spiedTabify).to.have.property('callCount', 1);
     expect(spiedTabify.firstCall.args[0].isHierarchical()).to.equal(true);
@@ -161,7 +160,7 @@ describe('Controller', function () {
 
     const vis = new OneRangeVis({ showPartialRows: false });
     initController(vis);
-    attachEsResponseToScope(spiedTabify(vis, fixtures.oneRangeBucket));
+    attachEsResponseToScope(spiedTabify(vis, oneRangeBucket));
 
     expect(spiedTabify).to.have.property('callCount', 1);
     expect(spiedTabify.firstCall.args[0].isHierarchical()).to.equal(false);

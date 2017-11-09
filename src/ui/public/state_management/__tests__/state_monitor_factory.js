@@ -19,14 +19,14 @@ describe('stateMonitorFactory', function () {
     if (emit) mockState.emit(eventTypes[0]);
   }
 
-  function createMockState(state = {}) {
+  function createStubState(state = {}) {
     const mockState = new SimpleEmitter();
     setState(mockState, state, false);
     return mockState;
   }
 
   beforeEach(() => {
-    mockState = createMockState({});
+    mockState = createStubState({});
   });
 
   it('should have a create method', function () {
@@ -110,7 +110,7 @@ describe('stateMonitorFactory', function () {
     describe('ignoreProps', function () {
       it('should not set status to dirty when ignored properties change', function () {
         let status;
-        const mockState = createMockState({ messages: { world: 'hello', foo: 'bar' } });
+        const mockState = createStubState({ messages: { world: 'hello', foo: 'bar' } });
         const monitor = stateMonitorFactory.create(mockState);
         const changeStub = sinon.stub();
         monitor.ignoreProps('messages.world');
@@ -201,7 +201,7 @@ describe('stateMonitorFactory', function () {
         let status;
 
         // initial state and monitor setup
-        const mockState = createMockState(defaultState);
+        const mockState = createStubState(defaultState);
         const monitor = stateMonitorFactory.create(mockState);
         monitor.onChange(handlerFn);
         sinon.assert.notCalled(handlerFn);

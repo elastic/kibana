@@ -3,7 +3,7 @@ import moment from 'ui/moment';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import AggParamWriterProvider from '../../agg_param_writer';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 import { AggTypesIndexProvider } from 'ui/agg_types/index';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
 
@@ -20,7 +20,7 @@ describe('params', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
     const AggParamWriter = Private(AggParamWriterProvider);
-    const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    const indexPattern = Private(StubLogstashIndexPatternProvider);
     const timefilter = $injector.get('timefilter');
 
     timeField = indexPattern.timeFieldName;

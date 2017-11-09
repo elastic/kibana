@@ -3,8 +3,8 @@ import _ from 'ui/lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import FixturesAggRespGeohashGridProvider from 'fixtures/agg_resp/geohash_grid';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
+import { createGeohashGridAggResponse } from './fixtures/geohash_grid_agg_response';
 import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
 import { AggResponseGeoJsonProvider } from 'ui/agg_response/geo_json/geo_json';
 
@@ -20,9 +20,9 @@ describe('GeoJson Agg Response Converter', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
     const Vis = Private(VisProvider);
-    const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    const indexPattern = Private(StubLogstashIndexPatternProvider);
 
-    esResponse = Private(FixturesAggRespGeohashGridProvider);
+    esResponse = createGeohashGridAggResponse();
     tabify = Private(AggResponseTabifyProvider);
     convert = Private(AggResponseGeoJsonProvider);
 

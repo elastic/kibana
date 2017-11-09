@@ -2,7 +2,7 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { AggResponseGetColumnsProvider } from 'ui/agg_response/tabify/_get_columns';
 import { VisProvider } from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 describe('get columns', function () {
   let getColumns;
   let Vis;
@@ -12,7 +12,7 @@ describe('get columns', function () {
   beforeEach(ngMock.inject(function (Private) {
     getColumns = Private(AggResponseGetColumnsProvider);
     Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(StubLogstashIndexPatternProvider);
   }));
 
   it('should inject a count metric if no aggs exist', function () {

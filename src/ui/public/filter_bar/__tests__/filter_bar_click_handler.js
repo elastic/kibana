@@ -1,12 +1,12 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
-import MockState from 'fixtures/mock_state';
+import { StubState } from 'ui/state_management/__tests__/stubs';
 import { notify } from 'ui/notify';
 import AggConfigResult from 'ui/vis/agg_config_result';
 
 import { VisProvider } from 'ui/vis';
-import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 
 describe('filterBarClickHandler', function () {
@@ -17,7 +17,7 @@ describe('filterBarClickHandler', function () {
     setup = function () {
       const Vis = Private(VisProvider);
       const createClickHandler = Private(FilterBarClickHandlerProvider);
-      const indexPattern = Private(StubbedLogstashIndexPatternProvider);
+      const indexPattern = Private(StubLogstashIndexPatternProvider);
 
       const vis = new Vis(indexPattern, {
         type: 'histogram',
@@ -32,7 +32,7 @@ describe('filterBarClickHandler', function () {
       });
       const aggConfigResult = new AggConfigResult(vis.aggs[1], void 0, 'apache', 'apache');
 
-      const $state = new MockState({ filters: [] });
+      const $state = new StubState({ filters: [] });
       const clickHandler = createClickHandler($state);
 
       return { clickHandler, $state, aggConfigResult };

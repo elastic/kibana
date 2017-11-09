@@ -1,5 +1,4 @@
 /optimize
-/src/fixtures/vislib/mock_data
 /src/ui/public/angular-bootstrap
 /src/ui/public/flot-charts
 /test/fixtures/scenarios
@@ -7,4 +6,5 @@
 /src/core_plugins/console/public/tests/vendor
 /src/ui/public/utils/decode_geo_hash.js
 /src/core_plugins/timelion/public/webpackShims/jquery.flot.*
+/src/ui/public/vislib/__tests__/fixtures/mock_data/**/*
 /ui_framework/doc_site/build

@@ -5,7 +5,7 @@ import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
 import { PointSeriesGetAspectsProvider } from 'ui/agg_response/point_series/_get_aspects';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 
 describe('getAspects', function () {
   let Vis;
@@ -18,7 +18,7 @@ describe('getAspects', function () {
     Vis = Private(VisProvider);
     AggConfig = Private(VisAggConfigProvider);
     getAspects = Private(PointSeriesGetAspectsProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(StubLogstashIndexPatternProvider);
   }));
 
   let vis;

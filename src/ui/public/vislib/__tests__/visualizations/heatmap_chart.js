@@ -4,13 +4,13 @@ import _ from 'ui/lodash';
 import d3 from 'd3';
 
 // Data
-import series from 'fixtures/vislib/mock_data/date_histogram/_series';
-import seriesPosNeg from 'fixtures/vislib/mock_data/date_histogram/_series_pos_neg';
-import seriesNeg from 'fixtures/vislib/mock_data/date_histogram/_series_neg';
-import termsColumns from 'fixtures/vislib/mock_data/terms/_columns';
-import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
+import series from '../fixtures/mock_data/date_histogram/_series';
+import seriesPosNeg from '../fixtures/mock_data/date_histogram/_series_pos_neg';
+import seriesNeg from '../fixtures/mock_data/date_histogram/_series_neg';
+import termsColumns from '../fixtures/mock_data/terms/_columns';
+import stackedSeries from '../fixtures/mock_data/date_histogram/_stacked_series';
 import $ from 'ui/jquery';
-import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
+import { VisFixtureProvider } from '../fixtures/_vis_fixture';
 import 'ui/persisted_state';
 
 // tuple, with the format [description, mode, data]
@@ -54,7 +54,7 @@ describe('Vislib Heatmap Chart Test Suite', function () {
 
       beforeEach(ngMock.module('kibana'));
       beforeEach(ngMock.inject(function (Private, $injector) {
-        vislibVis = Private(FixturesVislibVisFixtureProvider);
+        vislibVis = Private(VisFixtureProvider);
         PersistedState = $injector.get('PersistedState');
         generateVis();
       }));

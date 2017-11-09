@@ -1,5 +1,5 @@
 import { buildQueryFromKuery } from '../from_kuery';
-import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 import ngMock from 'ng_mock';
 import { expectDeepEqual } from '../../../../../../test_utils/expect_deep_equal.js';
 import { fromKueryExpression, toElasticsearchQuery } from '../../../../kuery';
@@ -12,7 +12,7 @@ describe('build query', function () {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      indexPattern = Private(StubbedLogstashIndexPatternProvider);
+      indexPattern = Private(StubLogstashIndexPatternProvider);
     }));
 
     it('should return the parameters of an Elasticsearch bool query', function () {

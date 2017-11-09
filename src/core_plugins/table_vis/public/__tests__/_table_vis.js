@@ -3,7 +3,9 @@ import _ from 'ui/lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
+import { oneRangeBucket, threeTermBuckets } from 'ui/agg_response/__tests__/fixtures';
+import { createStubUiState } from 'ui/visualize/__tests__/stubs';
 
 describe('Integration', function () {
   let $rootScope;
@@ -11,15 +13,13 @@ describe('Integration', function () {
   let $el;
   let Vis;
   let indexPattern;
-  let fixtures;
 
   beforeEach(ngMock.module('kibana', 'kibana/table_vis'));
   beforeEach(ngMock.inject(function (Private, $injector) {
     $rootScope = $injector.get('$rootScope');
     $compile = $injector.get('$compile');
-    fixtures = require('fixtures/fake_hierarchical_data');
     Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(StubLogstashIndexPatternProvider);
   }));
 
   // basically a parameterized beforeEach
@@ -28,7 +28,7 @@ describe('Integration', function () {
 
     $rootScope.vis = vis;
     $rootScope.esResponse = esResponse;
-    $rootScope.uiState = require('fixtures/mock_ui_state');
+    $rootScope.uiState = createStubUiState();
     $el = $('<visualization vis="vis" vis-data="esResponse" ui-state="uiState">');
     $compile($el)($rootScope);
     $rootScope.$apply();
@@ -88,7 +88,7 @@ describe('Integration', function () {
   }
 
   it('passes the table groups to the kbnAggTableGroup directive', function () {
-    init(new OneRangeVis(), fixtures.oneRangeBucket);
+    init(new OneRangeVis(), oneRangeBucket);
 
     $rootScope.$on('renderComplete', () => {
       const $atg = $el.find('kbn-agg-table-group').first();
@@ -117,7 +117,7 @@ describe('Integration', function () {
       metricsAtAllLevels: true
     };
 
-    const resp = _.cloneDeep(fixtures.threeTermBuckets);
+    const resp = _.cloneDeep(threeTermBuckets);
     resp.aggregations.agg_2.buckets.forEach(function (extensionBucket) {
       extensionBucket.agg_3.buckets.forEach(function (countryBucket) {
         // clear all the machine os buckets

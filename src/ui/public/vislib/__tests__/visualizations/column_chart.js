@@ -4,16 +4,16 @@ import _ from 'ui/lodash';
 import d3 from 'd3';
 
 // Data
-import series from 'fixtures/vislib/mock_data/date_histogram/_series';
-import seriesPosNeg from 'fixtures/vislib/mock_data/date_histogram/_series_pos_neg';
-import seriesNeg from 'fixtures/vislib/mock_data/date_histogram/_series_neg';
-import termsColumns from 'fixtures/vislib/mock_data/terms/_columns';
-import histogramRows from 'fixtures/vislib/mock_data/histogram/_rows';
-import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
-import { seriesMonthlyInterval } from 'fixtures/vislib/mock_data/date_histogram/_series_monthly_interval';
-import { rowsSeriesWithHoles } from 'fixtures/vislib/mock_data/date_histogram/_rows_series_with_holes';
+import series from '../fixtures/mock_data/date_histogram/_series';
+import seriesPosNeg from '../fixtures/mock_data/date_histogram/_series_pos_neg';
+import seriesNeg from '../fixtures/mock_data/date_histogram/_series_neg';
+import termsColumns from '../fixtures/mock_data/terms/_columns';
+import histogramRows from '../fixtures/mock_data/histogram/_rows';
+import stackedSeries from '../fixtures/mock_data/date_histogram/_stacked_series';
+import { seriesMonthlyInterval } from '../fixtures/mock_data/date_histogram/_series_monthly_interval';
+import { rowsSeriesWithHoles } from '../fixtures/mock_data/date_histogram/_rows_series_with_holes';
 import $ from 'ui/jquery';
-import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
+import { VisFixtureProvider } from '../fixtures/_vis_fixture';
 import 'ui/persisted_state';
 
 // tuple, with the format [description, mode, data]
@@ -48,7 +48,7 @@ dataTypesArray.forEach(function (dataType) {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private, $injector) {
-      vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
+      vis = Private(VisFixtureProvider)(visLibParams);
       persistedState = new ($injector.get('PersistedState'))();
       vis.on('brush', _.noop);
       vis.render(data, persistedState);
@@ -204,7 +204,7 @@ describe('datumWidth - split chart data set with holes', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
-    vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
+    vis = Private(VisFixtureProvider)(visLibParams);
     persistedState = new ($injector.get('PersistedState'))();
     vis.on('brush', _.noop);
     vis.render(rowsSeriesWithHoles, persistedState);
@@ -239,7 +239,7 @@ describe('datumWidth - monthly interval', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
-    vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
+    vis = Private(VisFixtureProvider)(visLibParams);
     persistedState = new ($injector.get('PersistedState'))();
     vis.on('brush', _.noop);
     vis.render(seriesMonthlyInterval, persistedState);

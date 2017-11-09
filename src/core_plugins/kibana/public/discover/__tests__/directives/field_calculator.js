@@ -4,7 +4,8 @@ import ngMock from 'ng_mock';
 import { fieldCalculator } from 'plugins/kibana/discover/components/field_chooser/lib/field_calculator';
 import expect from 'expect.js';
 import 'ui/private';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
+import { REAL_HITS } from './fixtures/real_hits';
 
 // Load the kibana app dependencies.
 
@@ -13,7 +14,7 @@ let indexPattern;
 describe('fieldCalculator', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(StubLogstashIndexPatternProvider);
   }));
 
 
@@ -91,7 +92,7 @@ describe('fieldCalculator', function () {
     let hits;
 
     beforeEach(function () {
-      hits = _.each(require('fixtures/real_hits.js'), indexPattern.flattenHit);
+      hits = _.each(REAL_HITS, indexPattern.flattenHit);
     });
 
     it('Should return an array of values for _source fields', function () {
@@ -114,7 +115,7 @@ describe('fieldCalculator', function () {
     let params;
     beforeEach(function () {
       params = {
-        hits: require('fixtures/real_hits.js'),
+        hits: REAL_HITS,
         field: indexPattern.fields.byName.extension,
         count: 3
       };

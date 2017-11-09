@@ -2,8 +2,8 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import $ from 'ui/jquery';
 import _ from 'ui/lodash';
-import data from 'fixtures/vislib/mock_data/terms/_seriesMultiple';
-import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
+import data from '../fixtures/mock_data/terms/_series_multiple';
+import { VisFixtureProvider } from '../fixtures/_vis_fixture';
 import 'ui/persisted_state';
 
 describe('Vislib Gauge Chart Test Suite', function () {
@@ -69,7 +69,7 @@ describe('Vislib Gauge Chart Test Suite', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector) {
-    vislibVis = Private(FixturesVislibVisFixtureProvider);
+    vislibVis = Private(VisFixtureProvider);
     PersistedState = $injector.get('PersistedState');
     generateVis();
   }));

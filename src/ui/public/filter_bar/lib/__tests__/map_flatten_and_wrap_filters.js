@@ -3,6 +3,7 @@ import _ from 'ui/lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { FilterBarLibMapFlattenAndWrapFiltersProvider } from 'ui/filter_bar/lib/map_flatten_and_wrap_filters';
+import { StubCourierProvider } from 'ui/courier/__tests__/stubs';
 
 describe('Filter Bar Directive', function () {
   describe('mapFlattenAndWrapFilters()', function () {
@@ -13,7 +14,7 @@ describe('Filter Bar Directive', function () {
       'kibana',
       'kibana/courier',
       function ($provide) {
-        $provide.service('courier', require('fixtures/mock_courier'));
+        $provide.service('courier', StubCourierProvider);
       }
     ));
 

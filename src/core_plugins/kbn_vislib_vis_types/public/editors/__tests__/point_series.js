@@ -3,7 +3,7 @@ import _ from 'ui/lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import $ from 'ui/jquery';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 import LineVisTypeProvider from 'plugins/kbn_vislib_vis_types/line';
 import { VisProvider } from 'ui/vis';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
@@ -34,7 +34,7 @@ describe('point series editor', function () {
     AggConfig = Private(VisAggConfigProvider);
     lineVisType = Private(LineVisTypeProvider);
     Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(StubLogstashIndexPatternProvider);
     $parentScope = $rootScope;
     $parentScope.vis = new Vis(indexPattern, makeConfig());
     $parentScope.savedVis = {};

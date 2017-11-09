@@ -6,7 +6,7 @@ import ngMock from 'ng_mock';
 import 'ui/render_directive';
 import 'plugins/kbn_doc_views/views/table';
 import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
-import StubbedLogstashIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 const hit = {
   '_index': 'logstash-2014.09.09',
   '_type': 'apache',
@@ -53,7 +53,7 @@ describe('docViews', function () {
     const aggs = 'index-pattern="indexPattern" hit="hit" filter="filter"';
     $elem = angular.element(`<render-directive ${aggs} definition="view.directive"></render-directive>`);
     ngMock.inject(function (Private) {
-      indexPattern = Private(StubbedLogstashIndexPattern);
+      indexPattern = Private(StubLogstashIndexPatternProvider);
       flattened = indexPattern.flattenHit(hit);
       docViews = Private(DocViewsRegistryProvider);
     });

@@ -1,7 +1,7 @@
 import _ from 'ui/lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import MockState from 'fixtures/mock_state';
+import { StubState } from 'ui/state_management/__tests__/stubs';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 
 describe('get filters', function () {
@@ -17,12 +17,12 @@ describe('get filters', function () {
     'kibana',
     'kibana/global_state',
     function ($provide) {
-      appState = new MockState({ filters: [] });
+      appState = new StubState({ filters: [] });
       $provide.service('getAppState', function () {
         return function () { return appState; };
       });
 
-      globalState = new MockState({ filters: [] });
+      globalState = new StubState({ filters: [] });
       $provide.service('globalState', function () {
         return globalState;
       });

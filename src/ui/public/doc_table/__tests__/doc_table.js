@@ -4,8 +4,7 @@ import _ from 'ui/lodash';
 import ngMock from 'ng_mock';
 import 'ui/private';
 import 'ui/doc_table';
-import FixturesStubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
-
+import { StubSearchSourceProvider } from 'ui/courier/__tests__/stubs';
 // Load the kibana app dependencies.
 
 
@@ -50,7 +49,7 @@ describe('docTable', function () {
   beforeEach(function () {
     $elem = angular.element('<doc-table search-source="searchSource" columns="columns" sorting="sorting"></doc-table>');
     ngMock.inject(function (Private) {
-      searchSource = Private(FixturesStubbedSearchSourceProvider);
+      searchSource = Private(StubSearchSourceProvider);
     });
     init($elem, {
       searchSource: searchSource,

@@ -2,7 +2,7 @@ import expect from 'expect.js';
 import * as and from '../and';
 import { nodeTypes } from '../../node_types';
 import * as ast from '../../ast';
-import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 import ngMock from 'ng_mock';
 import { expectDeepEqual } from '../../../../../test_utils/expect_deep_equal';
 
@@ -17,7 +17,7 @@ describe('kuery functions', function () {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      indexPattern = Private(StubbedLogstashIndexPatternProvider);
+      indexPattern = Private(StubLogstashIndexPatternProvider);
     }));
 
     describe('buildNodeParams', function () {

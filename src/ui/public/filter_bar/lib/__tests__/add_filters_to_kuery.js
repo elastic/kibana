@@ -1,5 +1,6 @@
 import { AddFiltersToKueryProvider } from '../add_filters_to_kuery';
 import { FilterManagerProvider } from 'ui/filter_manager';
+import { StubCourierProvider } from 'ui/courier/__tests__/stubs';
 import NoDigestPromises from 'test_utils/no_digest_promises';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
@@ -17,7 +18,7 @@ describe('addFiltersToKuery', function () {
     'kibana',
     'kibana/courier',
     function ($provide) {
-      $provide.service('courier', require('fixtures/mock_courier'));
+      $provide.service('courier', StubCourierProvider);
     }
   ));
 

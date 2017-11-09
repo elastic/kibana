@@ -2,8 +2,8 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';
 import { VisProvider } from 'ui/vis';
-import fixtures from 'fixtures/fake_hierarchical_data';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { threeTermBuckets } from 'ui/agg_response/__tests__/fixtures';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 
 const rowAgg = [
   { id: 'agg_1', type: 'avg', schema: 'metric', params: { field: 'bytes' } },
@@ -22,7 +22,7 @@ describe('Basic Response Handler', function () {
   beforeEach(ngMock.inject(function (Private) {
     basicResponseHandler = Private(BasicResponseHandlerProvider).handler;
     Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(StubLogstashIndexPatternProvider);
   }));
 
   it('calls hierarchical converter if isHierarchical is set to true', () => {
@@ -30,7 +30,7 @@ describe('Basic Response Handler', function () {
       type: 'pie',
       aggs: rowAgg
     });
-    basicResponseHandler(vis, fixtures.threeTermBuckets).then(data => {
+    basicResponseHandler(vis, threeTermBuckets).then(data => {
       expect(data).to.not.be.an('undefined');
       expect(data.rows[0].slices).to.not.be.an('undefined');
       expect(data.rows[0].series).to.be.an('undefined');
@@ -49,7 +49,7 @@ describe('Basic Response Handler', function () {
       type: 'histogram',
       aggs: rowAgg.slice(0, 3)
     });
-    basicResponseHandler(vis, fixtures.threeTermBuckets).then(data => {
+    basicResponseHandler(vis, threeTermBuckets).then(data => {
       expect(data).to.not.be.an('undefined');
       expect(data.rows[0].slices).to.be.an('undefined');
       expect(data.rows[0].series).to.not.be.an('undefined');
