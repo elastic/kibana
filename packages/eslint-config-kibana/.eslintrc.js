@@ -7,6 +7,7 @@ module.exports = {
     'react',
     'import',
     'prefer-object-spread',
+    '@elastic/eslint-plugin-kibana-custom',
   ],
 
   env: {
@@ -135,5 +136,29 @@ module.exports = {
     'import/no-duplicates': 'error',
 
     'prefer-object-spread/prefer-object-spread': 'error',
-  }
+  },
+
+  overrides: [
+    {
+      files: ['**/public/**/*','**/common/**/*'],
+      rules: {
+        '@elastic/kibana-custom/no-direct-import': ['error', {
+          blacklist: {
+            'angular': 'ui/angular',
+            'angular-ui-select': 'ui/angular-ui-select',
+            'elasticsearch-browser': 'ui/elasticsearch',
+            'elasticsearch': 'ui/elasticsearch',
+            'jquery': 'ui/jquery',
+            'leaflet': 'ui/leaflet',
+            'lodash': 'ui/lodash',
+            'moment-timezone': 'ui/moment-timezone',
+            'moment': 'ui/moment',
+            'numeral': '@elastic/numeral',
+            'sinon': 'ui/sinon',
+            'ui-bootstrap': 'ui/ui-bootstrap',
+          }
+        }]
+      }
+    }
+  ],
 }

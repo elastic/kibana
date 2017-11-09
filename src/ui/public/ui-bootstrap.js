@@ -1,13 +1,14 @@
 require('angular');
 require('ui/angular-bootstrap');
-var uiModules = require('ui/modules').uiModules;
-var chrome = require('ui/chrome');
 
-var kibana = uiModules.get('kibana', ['ui.bootstrap', 'pascalprecht.translate']);
+const { uiModules } = require('ui/modules');
+const chrome = require('ui/chrome');
 
-module.exports = kibana.config(function ($tooltipProvider) {
-  $tooltipProvider.setTriggers({ 'mouseenter': 'mouseleave click' });
-})
+module.exports = uiModules
+  .get('kibana', ['ui.bootstrap', 'pascalprecht.translate'])
+  .config(function ($tooltipProvider) {
+    $tooltipProvider.setTriggers({ 'mouseenter': 'mouseleave click' });
+  })
   .config(function ($translateProvider) {
     $translateProvider.translations('default', chrome.getTranslations());
     $translateProvider.preferredLanguage('default');
