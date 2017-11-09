@@ -30,12 +30,13 @@ k$(source)(map(i => 2017 + i), last())
 
 ## Just getting started with Observables?
 
-TODO: Docs, videos, other intros. This needs to be good enough for people to
-easily jump in and understand the basics of observables.
-
 If you are just getting started with observables, a great place to start is with
 Andre Staltz' [The introduction to Reactive Programming you've been missing][staltz-intro],
 which is a great introduction to the ideas and concepts.
+
+The ideas in `kbn-observable` is heavily based on [RxJS][rxjs], so the
+[RxJS docs][rxjs-docs] are also a good source of introduction to observables and
+how they work in this library.
 
 ## Factories
 
@@ -122,4 +123,5 @@ Apache License, Version 2.0, see https://github.com/ReactiveX/rxjs.
 
 [proposal]: https://github.com/tc39/proposal-observable
 [rxjs]: http://reactivex.io/rxjs/
+[rxjs-docs]: http://reactivex.io/rxjs/manual/index.html
 [staltz-intro]: https://gist.github.com/staltz/868e7e9bc2a7b8c1f754
