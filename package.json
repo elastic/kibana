@@ -24,7 +24,7 @@
     "prepush": "gulp test"
   },
   "dependencies": {
-    "@elastic/datemath": "^2.3.0",
+    "@elastic/datemath": "^3.0.0",
     "axios": "^0.16.1",
     "base64-js": "^1.2.1",
     "boom": "^5.2.0",

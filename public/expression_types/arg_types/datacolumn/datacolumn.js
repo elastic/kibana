@@ -55,6 +55,8 @@ const simpleTemplate = ({ onValueChange, columns, argValue, renderError }) => {
   };
 
   const formValues = getFormObject();
+  const column = columns.map(col => col.name).find(colName => colName === formValues.column) || '';
+
   return (
     <div className="canvas__argtype--datacolumn">
       <SimpleMathFunction
@@ -65,7 +67,7 @@ const simpleTemplate = ({ onValueChange, columns, argValue, renderError }) => {
       <FormControl
         componentClass="select"
         placeholder="select"
-        value={formValues.column}
+        value={column}
         inputRef={ref => inputRefs.column = ref}
         onChange={updateFunctionValue}
       >
