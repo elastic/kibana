@@ -60,6 +60,11 @@ import { rxjsToEsObservable } from '../lib';
  *   }
  * });
  * ```
+ *
+ * **NOTE** This depends on RxJS directly just for a simpler implementation in
+ * the short-term, and not because of some other overlying strategy. The
+ * intention is to move this to a "home-made" implementation, so we can remove
+ * the direct RxJS dependency.
  */
 export function shareLast<T>(): MonoTypeOperatorFunction<T> {
   return function shareLastOperation(source) {
