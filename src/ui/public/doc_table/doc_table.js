@@ -11,7 +11,7 @@ import { uiModules } from 'ui/modules';
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 
 uiModules.get('kibana')
-.directive('docTable', function (config, Notifier, getAppState, pagerFactory, $filter, courier) {
+.directive('docTable', function (config, Notifier, getAppState, pagerFactory, $filter) {
   return {
     restrict: 'E',
     template: html,
@@ -54,7 +54,6 @@ uiModules.get('kibana')
             if (fns.length) {
               _.pull(fns, fn);
               if (!fns.length) {
-                courier.fetch();
                 $scope.$root.$broadcast('ready:vis');
               }
             }
