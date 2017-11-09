@@ -4,6 +4,7 @@ export const pie = {
   name: 'pie',
   displayName: 'Pie chart',
   help: 'Render a pie chart from data',
+  reuseDomNode: false,
   render(domNode, config, handlers) {
     config.options.legend.labelBoxBorderColor = 'transparent';
 
@@ -12,16 +13,11 @@ export const pie = {
       if (domNode.clientHeight < 1 || domNode.clientWidth < 1) return;
 
       try {
-        if (!plot) {
-          if (!config.data || !config.data.length) {
-            $(domNode).empty();
-          } else {
-            plot = $.plot($(domNode), config.data, config.options);
-            $('.pieLabel > div', domNode).css(config.font.spec);
-          }
+        $(domNode).empty();
+        if (!config.data || !config.data.length) {
+          $(domNode).empty();
         } else {
-          plot.resize();
-          plot.draw();
+          plot = $.plot($(domNode), config.data, config.options);
           $('.pieLabel > div', domNode).css(config.font.spec);
         }
       } catch (e) {
