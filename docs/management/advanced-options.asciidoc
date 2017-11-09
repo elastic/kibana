@@ -83,6 +83,7 @@ Markdown.
 `notifications:lifetime:warning`:: Specifies the duration in milliseconds for warning notification displays. The default value is 10000. Set this field to `Infinity` to disable warning notifications.
 `notifications:lifetime:info`:: Specifies the duration in milliseconds for information notification displays. The default value is 5000. Set this field to `Infinity` to disable information notifications.
 `metrics:max_buckets`:: The maximum numbers of buckets that cannot be exceeded. For example, this can arise when the user selects a short interval like (e.g. 1s) for a long time period (e.g. 1 year)
+`metrics:defaultIndexPattern`:: The default index pattern used by Time Series Visual Builder
 `timelion:showTutorial`:: Set this property to `true` to show the Timelion tutorial to users when they first open Timelion.
 `timelion:es.timefield`:: Default field containing a timestamp when using the `.es()` query.
 `timelion:es.default_index`:: Default index when using the `.es()` query.

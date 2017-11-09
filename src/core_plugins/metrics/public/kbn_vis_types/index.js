@@ -10,7 +10,7 @@ import { CATEGORY } from 'ui/vis/vis_category';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 VisTypesRegistryProvider.register(MetricsVisProvider);
 
-export default function MetricsVisProvider(Private) {
+export default function MetricsVisProvider(Private, config) {
   const VisFactory = Private(VisFactoryProvider);
   const ReactEditorController = Private(ReactEditorControllerProvider).handler;
   const metricsRequestHandler = Private(MetricsRequestHandlerProvider).handler;
@@ -46,7 +46,7 @@ export default function MetricsVisProvider(Private) {
             stacked: 'none'
           }],
         time_field: '@timestamp',
-        index_pattern: '*',
+        index_pattern: config.get('metrics:defaultIndexPattern'),
         interval: 'auto',
         axis_position: 'left',
         axis_formatter: 'number',
