@@ -1,2 +1,5 @@
 ---
 extends: "@elastic/kibana"
+
+rules:
+  prefer-object-spread/prefer-object-spread: 0

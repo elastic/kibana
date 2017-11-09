@@ -1,14 +1,14 @@
-var program = require('commander');
+const program = require('commander');
 
-var pkg = require('./package.json');
-var run = require('./lib/run');
-var docs = require('./lib/docs');
-var enableCollectingUnknownOptions = require('./lib/enable_collecting_unknown_options');
+const pkg = require('./package.json');
+const run = require('./lib/run');
+const docs = require('./lib/docs');
+const enableCollectingUnknownOptions = require('./lib/enable_collecting_unknown_options');
 
 function taskRunner(fn) {
   return function actionWrapper() {
-    var args = [].slice.apply(arguments);
-    var command = args.pop();
+    const args = [].slice.apply(arguments);
+    const command = args.pop();
     fn.apply(null, [command].concat(args));
   };
 }
@@ -50,7 +50,7 @@ program
   .command('test')
   .description('Run the server and browser tests')
   .on('--help', docs('test/all'))
-  .action(taskRunner(function (command, files) {
+  .action(taskRunner(function (command) {
     run('testAll');
   }));
 

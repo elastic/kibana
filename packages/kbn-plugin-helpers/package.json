@@ -13,9 +13,9 @@
   "author": "Spencer Alger <email@spalger.com>",
   "license": "Apache-2.0",
   "scripts": {
-    "test": "npm run lint && npm run jest",
-    "test:only": "npm run jest",
-    "jest": "jest",
+    "test": "npm run lint && jest",
+    "test:only": "jest",
+    "test:dev": "jest --watch",
     "lint": "eslint bin/ help/ tasks/"
   },
   "dependencies": {
@@ -27,17 +27,23 @@
     "through2-map": "^3.0.0",
     "vinyl-fs": "2.3.1"
   },
+  "devDependencies": {
+    "@elastic/eslint-config-kibana": "^0.13.0",
+    "babel-eslint": "^7.2.3",
+    "eslint": "^4.1.0",
+    "eslint-plugin-babel": "^4.1.1",
+    "eslint-plugin-import": "^2.6.0",
+    "eslint-plugin-jest": "^21.0.0",
+    "eslint-plugin-mocha": "^4.9.0",
+    "eslint-plugin-prefer-object-spread": "^1.2.1",
+    "eslint-plugin-react": "^7.1.0",
+    "jest": "^17.0.3"
+  },
+  "engines" : {
+    "node" : "^6.11.5 || ^8.8.0"
+  },
   "directories": {
     "doc": "docs"
-  },
-  "devDependencies": {
-    "@elastic/eslint-config-kibana": "0.5.0",
-    "babel-eslint": "6.1.2",
-    "eslint": "3.11.1",
-    "eslint-plugin-babel": "4.0.0",
-    "eslint-plugin-mocha": "4.7.0",
-    "eslint-plugin-react": "6.10.3",
-    "jest": "^17.0.3"
   },
   "repository": {
     "type": "git",
