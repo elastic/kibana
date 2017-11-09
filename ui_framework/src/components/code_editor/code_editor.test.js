@@ -14,53 +14,64 @@ jest.mock('../../services/accessibility/html_id_generator', () => ({
 }));
 
 describe('KuiCodeEditor', () => {
-  let element;
-
-  beforeEach(() => {
-    element = mount(<KuiCodeEditor/>);
-  });
-
   test('is rendered', () => {
-    const component = mount(<KuiCodeEditor {...requiredProps}/>);
+    const component = mount(<KuiCodeEditor {...requiredProps} />);
     expect(takeMountedSnapshot(component)).toMatchSnapshot();
   });
 
-  describe('hint element', () => {
-    test('should be tabable', () => {
-      expect(element.find('[data-test-subj="codeEditorHint"]').prop('tabIndex')).toBe('0');
-    });
-
-    test('should be disabled when the ui ace box gains focus', () => {
-      const hint = element.find('[data-test-subj="codeEditorHint"]');
-      hint.simulate('keydown', { keyCode: keyCodes.ENTER });
-      expect(hint).toMatchSnapshot();
-    });
-
-    test('should be enabled when the ui ace box loses focus', () => {
-      const hint = element.find('[data-test-subj="codeEditorHint"]');
-      hint.simulate('keydown', { keyCode: keyCodes.ENTER });
-      element.instance().onBlurAce();
-      expect(hint).toMatchSnapshot();
+  describe('props', () => {
+    describe('isReadOnly', () => {
+      test(`renders alternate hint text`, () => {
+        const component = mount(<KuiCodeEditor isReadOnly />);
+        expect(takeMountedSnapshot(component)).toMatchSnapshot();
+      });
     });
   });
 
-  describe('interaction', () => {
-    test('bluring the ace textbox should call a passed onBlur prop', () => {
-      const blurSpy = sinon.spy();
-      const el = mount(<KuiCodeEditor onBlur={blurSpy}/>);
-      el.instance().onBlurAce();
-      expect(blurSpy.called).toBe(true);
+  describe('behavior', () => {
+    let component;
+
+    beforeEach(() => {
+      component = mount(<KuiCodeEditor/>);
     });
 
-    test('pressing escape in ace textbox will enable overlay', () => {
-      element.instance().onKeydownAce({
-        preventDefault: () => {},
-        stopPropagation: () => {},
-        keyCode: keyCodes.ESCAPE
+    describe('hint element', () => {
+      test('should be tabable', () => {
+        expect(component.find('[data-test-subj="codeEditorHint"]').prop('tabIndex')).toBe('0');
       });
-      expect(
-        element.find('[data-test-subj="codeEditorHint"]').matchesElement(document.activeElement)
-      ).toBe(true);
+
+      test('should be disabled when the ui ace box gains focus', () => {
+        const hint = component.find('[data-test-subj="codeEditorHint"]');
+        hint.simulate('keydown', { keyCode: keyCodes.ENTER });
+        expect(hint).toMatchSnapshot();
+      });
+
+      test('should be enabled when the ui ace box loses focus', () => {
+        const hint = component.find('[data-test-subj="codeEditorHint"]');
+        hint.simulate('keydown', { keyCode: keyCodes.ENTER });
+        component.instance().onBlurAce();
+        expect(hint).toMatchSnapshot();
+      });
+    });
+
+    describe('interaction', () => {
+      test('bluring the ace textbox should call a passed onBlur prop', () => {
+        const blurSpy = sinon.spy();
+        const el = mount(<KuiCodeEditor onBlur={blurSpy}/>);
+        el.instance().onBlurAce();
+        expect(blurSpy.called).toBe(true);
+      });
+
+      test('pressing escape in ace textbox will enable overlay', () => {
+        component.instance().onKeydownAce({
+          preventDefault: () => {},
+          stopPropagation: () => {},
+          keyCode: keyCodes.ESCAPE
+        });
+        expect(
+          component.find('[data-test-subj="codeEditorHint"]').matchesElement(document.activeElement)
+        ).toBe(true);
+      });
     });
   });
 });
