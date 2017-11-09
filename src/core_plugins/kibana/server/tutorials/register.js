@@ -6,6 +6,7 @@ import { nginxLogsSpecProvider } from './nginxLogs';
 import { nginxMetricsSpecProvider } from './nginxMetrics';
 import { mysqlLogsSpecProvider } from './mysqlLogs';
 import { mysqlMetricsSpecProvider } from './mysqlMetrics';
+import { netflowSpecProvider } from './netflow';
 
 export function registerTutorials(server) {
   server.registerTutorial(systemLogsSpecProvider);
@@ -16,4 +17,5 @@ export function registerTutorials(server) {
   server.registerTutorial(nginxMetricsSpecProvider);
   server.registerTutorial(mysqlLogsSpecProvider);
   server.registerTutorial(mysqlMetricsSpecProvider);
+  server.registerTutorial(netflowSpecProvider);
 }
