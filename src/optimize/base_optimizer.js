@@ -20,7 +20,7 @@ import { PUBLIC_PATH_PLACEHOLDER } from './public_path_placeholder';
 const POSTCSS_CONFIG_PATH = require.resolve('./postcss.config');
 const BABEL_PRESET_PATH = require.resolve('../babel-preset/webpack');
 const BABEL_EXCLUDE_RE = [
-  /[\/\\](webpackShims|node_modules|bower_components)[\/\\]/,
+  /[\/\\](vendor|node_modules|bower_components)[\/\\]/,
 ];
 
 export default class BaseOptimizer {
@@ -199,9 +199,6 @@ export default class BaseOptimizer {
         extensions: ['.js', '.json'],
         mainFields: ['browser', 'browserify', 'main'],
         modules: [
-          'webpackShims',
-          fromRoot('webpackShims'),
-
           'node_modules',
           fromRoot('node_modules'),
         ],

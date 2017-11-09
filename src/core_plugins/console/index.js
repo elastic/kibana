@@ -1,7 +1,7 @@
 import Boom from 'boom';
 import { resolveApi } from './api_server/server';
 import { existsSync } from 'fs';
-import { resolve, sep } from 'path';
+import { resolve } from 'path';
 import { has, isEmpty } from 'lodash';
 import setHeaders from '../elasticsearch/lib/set_headers';
 
@@ -134,12 +134,6 @@ export default function (kibana) {
           elasticsearchUrl: server.config().get('elasticsearch.url')
         };
       },
-
-      noParse: [
-        resolve(__dirname, 'public/vendor/ace') + sep,
-        resolve(__dirname, 'public/vendor/moment_src/moment') + sep,
-        resolve(__dirname, 'public/src/sense_editor/mode/worker.js'),
-      ]
     }
   });
 }

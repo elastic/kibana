@@ -54,7 +54,7 @@ export default (kibana) => {
         if (config.get('tests_bundle.instrument')) {
           env.addPostLoader({
             test: /\.js$/,
-            exclude: /[\/\\](__tests__|node_modules|bower_components|webpackShims)[\/\\]/,
+            exclude: /[\/\\](__tests__|node_modules|bower_components|vendor)[\/\\]/,
             loader: 'istanbul-instrumenter'
           });
         }
@@ -75,7 +75,7 @@ export default (kibana) => {
 
       __globalImportAliases__: {
         ng_mock$: fromRoot('src/core_plugins/dev_mode/public/ng_mock'),
-        'angular-mocks$': require.resolve('./webpackShims/angular-mocks'),
+        'angular-mocks$': require.resolve('./vendor/angular-mocks'),
         fixtures: fromRoot('src/fixtures'),
         test_utils: fromRoot('src/test_utils/public'),
       }

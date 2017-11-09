@@ -10,5 +10,4 @@ export const DEFAULT_ESLINT_PATHS = [
   'ui_framework/doc_site/src',
   'ui_framework/generator_kui',
   'utilities',
-  'webpackShims'
 ];

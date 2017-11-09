@@ -51,7 +51,6 @@ Here is how import/require statements are resolved to a file:
   * match if `moduleName` is or starts with one of these aliases
     ** replace the alias with the match and continue to ***3***
   * match when any of these conditions are met:
-    ** `./webpackShims/${moduleName}` is a directory
     ** `./node_modules/${moduleName}` is a directory
   * if no match was found
     ** move to the parent directory
