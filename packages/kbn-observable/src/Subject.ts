@@ -6,13 +6,11 @@ import { Observable, SubscriptionObserver } from './Observable';
  * subscribed Observer owns an independent execution of the Observable),
  * Subjects are multicast.
  *
- * A Subject is like an Observable, but can multicast to many Observers.
- * Subjects are like EventEmitters: they maintain a registry of many listeners.
- *
- * Every Subject is an Observable. Given a Subject, you can subscribe to it,
- * providing an Observer, which will start receiving values normally. From the
- * perspective of the Observer, it cannot tell whether the Observable execution
- * is coming from a plain unicast Observable or a Subject.
+ * Every Subject is an Observable. Given a Subject, you can subscribe to it in
+ * the same way you subscribe to any Observable, and you will start receiving
+ * values normally. From the perspective of the Observer, it cannot tell whether
+ * the Observable execution is coming from a plain unicast Observable or a
+ * Subject.
  *
  * Internally to the Subject, `subscribe` does not invoke a new execution that
  * delivers values. It simply registers the given Observer in a list of
@@ -23,6 +21,10 @@ import { Observable, SubscriptionObserver } from './Observable';
  * `error(e)`, and `complete()`. To feed a new value to the Subject, just call
  * `next(theValue)`, and it will be multicasted to the Observers registered to
  * listen to the Subject.
+ *
+ * Learn more about Subjects:
+ * - http://reactivex.io/documentation/subject.html
+ * - http://davesexton.com/blog/post/To-Use-Subject-Or-Not-To-Use-Subject.aspx
  */
 export class Subject<T> extends Observable<T> {
   protected observers: Set<SubscriptionObserver<T>> = new Set();

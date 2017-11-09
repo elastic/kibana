@@ -19,7 +19,7 @@ library they want, if they don't want to use `kbn-observable`.
 ```js
 import { Observable, k$, map, last } from '@elastic/kbn-observable';
 
-const source = Observable.from(1, 2, 3);
+const source = Observable.of(1, 2, 3);
 
 // When `k$` is called with the source observable it returns a function that
 // can be called with "operators" that modify the input value and return an
@@ -96,7 +96,7 @@ import { k$, Observable, map, first } from 'kbn-observable';
 const resultObservable = k$(sourceObservable, [...operators]);
 
 // e.g.
-const source = Observable.from(1,2,3);
+const source = Observable.of(1,2,3);
 const observable = k$(source, [map(x => x + 1), first()]);
 ```
 
@@ -107,7 +107,7 @@ TypeScript wasn't able to correctly type the operators array when more than one
 operator was specified.
 
 Because of that problem we ended up with `k$(source)(...operators)`. With this
-change TypeScript is able to corretly type the operator arguments.
+change TypeScript is able to correctly type the operator arguments.
 
 We've also discussed adding a `pipe` method to the `Observable.prototype`, so we
 could do `source.pipe(...operators)` instead, but we decided against it because
