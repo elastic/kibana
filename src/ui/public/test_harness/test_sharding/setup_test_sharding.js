@@ -33,6 +33,7 @@ export function setupTestSharding() {
   before(() => {
     const ignoredCount = ignoredDescribeShards.length;
     const ignoredFrom = uniq(ignoredDescribeShards).join(', ');
+    // eslint-disable-next-line no-console
     console.log(`Ignored ${ignoredCount} top-level suites from ${ignoredFrom}`);
   });
 
@@ -44,5 +45,6 @@ export function setupTestSharding() {
     ignoredDescribeShards.push(describeShardNum);
   });
 
+  // eslint-disable-next-line no-console
   console.log(`ready to load tests for shard ${shardNum} of ${shardTotal}`);
 }
