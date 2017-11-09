@@ -21,10 +21,7 @@ export function Instruction({ commands, paramValues, textPost, textPre }) {
 
   const aceOptions = {
     fontSize: '14px',
-    maxLines: commands.length,
-    readOnly: true,
-    highlightActiveLine: false,
-    highlightGutterLine: false
+    maxLines: commands.length
   };
 
   return (
@@ -39,6 +36,7 @@ export function Instruction({ commands, paramValues, textPost, textPre }) {
         width="100%"
         value={commands.map(cmd => { return replaceTemplateStrings(cmd, paramValues); }).join('\n')}
         setOptions={aceOptions}
+        isReadOnly
       />
 
       {post}
