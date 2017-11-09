@@ -21,7 +21,7 @@ describe('KuiCodeEditor', () => {
 
   describe('props', () => {
     describe('isReadOnly', () => {
-      test(`doesn't render hint`, () => {
+      test(`renders alternate hint text`, () => {
         const component = mount(<KuiCodeEditor isReadOnly />);
         expect(takeMountedSnapshot(component)).toMatchSnapshot();
       });

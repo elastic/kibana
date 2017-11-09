@@ -13,12 +13,16 @@ exports[`KuiCodeEditor behavior hint element should be disabled when the ui ace 
   <p
     className="kuiText kuiVerticalRhythmSmall"
   >
-    Press Enter to start editing.
+    Press Enter to start 
+    editing
+    .
   </p>
   <p
     className="kuiText kuiVerticalRhythmSmall"
   >
-    When you’re done, press Escape to stop editing.
+    When you’re done, press Escape to stop 
+    editing
+    .
   </p>
 </div>
 `;
@@ -36,12 +40,16 @@ exports[`KuiCodeEditor behavior hint element should be enabled when the ui ace b
   <p
     className="kuiText kuiVerticalRhythmSmall"
   >
-    Press Enter to start editing.
+    Press Enter to start 
+    editing
+    .
   </p>
   <p
     className="kuiText kuiVerticalRhythmSmall"
   >
-    When you’re done, press Escape to stop editing.
+    When you’re done, press Escape to stop 
+    editing
+    .
   </p>
 </div>
 `;
@@ -60,12 +68,28 @@ exports[`KuiCodeEditor is rendered 1`] = `
     <p
       class="kuiText kuiVerticalRhythmSmall"
     >
-      Press Enter to start editing.
+      <!-- react-text: 4 -->
+      Press Enter to start 
+      <!-- /react-text -->
+      <!-- react-text: 5 -->
+      editing
+      <!-- /react-text -->
+      <!-- react-text: 6 -->
+      .
+      <!-- /react-text -->
     </p>
     <p
       class="kuiText kuiVerticalRhythmSmall"
     >
-      When you’re done, press Escape to stop editing.
+      <!-- react-text: 8 -->
+      When you’re done, press Escape to stop 
+      <!-- /react-text -->
+      <!-- react-text: 9 -->
+      editing
+      <!-- /react-text -->
+      <!-- react-text: 10 -->
+      .
+      <!-- /react-text -->
     </p>
   </div>
   <div
@@ -159,10 +183,44 @@ exports[`KuiCodeEditor is rendered 1`] = `
 </div>
 `;
 
-exports[`KuiCodeEditor props isReadOnly doesn't render hint 1`] = `
+exports[`KuiCodeEditor props isReadOnly renders alternate hint text 1`] = `
 <div
   class="kuiCodeEditorWrapper"
 >
+  <div
+    class="kuiCodeEditorKeyboardHint"
+    data-test-subj="codeEditorHint"
+    id="42"
+    role="button"
+    tabindex="0"
+  >
+    <p
+      class="kuiText kuiVerticalRhythmSmall"
+    >
+      <!-- react-text: 4 -->
+      Press Enter to start 
+      <!-- /react-text -->
+      <!-- react-text: 5 -->
+      interacting with the code
+      <!-- /react-text -->
+      <!-- react-text: 6 -->
+      .
+      <!-- /react-text -->
+    </p>
+    <p
+      class="kuiText kuiVerticalRhythmSmall"
+    >
+      <!-- react-text: 8 -->
+      When you’re done, press Escape to stop 
+      <!-- /react-text -->
+      <!-- react-text: 9 -->
+      interacting with the code
+      <!-- /react-text -->
+      <!-- react-text: 10 -->
+      .
+      <!-- /react-text -->
+    </p>
+  </div>
   <div
     class=" ace_editor ace-tm"
     id="brace-editor"
