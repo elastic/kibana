@@ -1,14 +1,6 @@
 module.exports = {
   rules: {
-    'no-default-export': {
-      meta: {
-        schema: []
-      },
-      create: context => ({
-        ExportDefaultDeclaration: (node) => {
-          context.report(node, 'Default exports not allowed.');
-        }
-      })
-    }
+    'no-default-export': require('./rules/no_default_export'),
+    'no-direct-import': require('./rules/no_direct_import'),
   }
 };
