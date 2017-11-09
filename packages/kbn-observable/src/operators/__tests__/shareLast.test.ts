@@ -172,7 +172,7 @@ test('should completely restart for subsequent subscriptions if source errors', 
   expect(results).toEqual(['1/a', '1/b', '1/c', '2/a', '3/a']);
 });
 
-test('restarts if refCount hits 0 due to unsubscriptions', () => {
+test('restarts if number of subscriptions hits 0 due to unsubscriptions', () => {
   let subscriptions = 0;
   let observer: SubscriptionObserver<string>;
 
