@@ -5,11 +5,11 @@ import visualizationTemplate from './visualize_template.html';
 import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
 import { UtilsBrushEventProvider as utilsBrushEventProvider } from 'ui/utils/brush_event';
 import { FilterBarClickHandlerProvider as filterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
-import { EmbeddableHandler, Embeddable } from 'ui/embeddable';
+import { EmbeddableFactory, Embeddable } from 'ui/embeddable';
 
 import chrome from 'ui/chrome';
 
-export class VisualizeEmbeddableHandler extends EmbeddableHandler {
+export class VisualizeEmbeddableFactory extends EmbeddableFactory {
   constructor($compile, $rootScope, visualizeLoader, timefilter, Notifier, Promise, Private) {
     super();
     this.$compile = $compile;

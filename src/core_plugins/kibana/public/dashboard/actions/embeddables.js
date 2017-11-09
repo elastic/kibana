@@ -4,12 +4,12 @@ export const destroyEmbeddable = createAction('DESTROY_EMBEDDABLE',
   /**
    *
    * @param panelId {string}
-   * @param embeddableHandler {EmbeddableHandler}
+   * @param embeddableFactory {EmbeddableFactory}
    * @return {string} - the panel id
    */
-  (panelId, embeddableHandler) => {
-    if (embeddableHandler) {
-      embeddableHandler.destroy(panelId);
+  (panelId, embeddableFactory) => {
+    if (embeddableFactory) {
+      embeddableFactory.destroy(panelId);
     }
     return panelId;
   }
@@ -34,20 +34,20 @@ export const embeddableRenderError = createAction('EMBEDDABLE_RENDER_ERROR',
 
 /**
  *
- * @param embeddableHandler {EmbeddableHandler}
+ * @param embeddableFactory {EmbeddableFactory}
  * @param panelElement {Node}
  * @param panel {PanelState}
  * @param containerApi {ContainerAPI}
  * @return {function(*, *)}
  */
-export function renderEmbeddable(embeddableHandler, panelElement, panel, containerApi) {
+export function renderEmbeddable(embeddableFactory, panelElement, panel, containerApi) {
   return (dispatch) => {
-    if (!embeddableHandler) {
+    if (!embeddableFactory) {
       dispatch(embeddableRenderError(panel.panelIndex, new Error(`Invalid embeddable type "${panel.type}"`)));
       return;
     }
 
-    return embeddableHandler.render(panelElement, panel, containerApi)
+    return embeddableFactory.render(panelElement, panel, containerApi)
       .then(embeddable => {
         return dispatch(embeddableRenderFinished(panel.panelIndex, embeddable));
       })
