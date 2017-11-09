@@ -688,6 +688,10 @@ input[type="button"] {
 
 .kuiCodeEditorWrapper {
   position: relative; }
+  .kuiCodeEditorWrapper .ace_hidden-cursors {
+    opacity: 0; }
+  .kuiCodeEditorWrapper.kuiCodeEditorWrapper-isEditing .ace_hidden-cursors {
+    opacity: 1; }
 
 .kuiCodeEditorKeyboardHint {
   position: absolute;
