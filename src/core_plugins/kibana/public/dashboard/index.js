@@ -33,12 +33,14 @@ uiRoutes
             type: 'dashboard',
           }).then(results => {
             // The search isn't an exact match, lets see if we can find a single exact match to use
-            const matchingDashboards = results.savedObjects.filter(dashboard => dashboard.attributes.title === title);
+            const matchingDashboards = results.savedObjects.filter(
+              dashboard => dashboard.attributes.title.toLowerCase() === title.toLowerCase());
             if (matchingDashboards.length === 1) {
               kbnUrl.redirect(createDashboardEditUrl(matchingDashboards[0].id));
             } else {
               kbnUrl.redirect(`${DashboardConstants.LANDING_PAGE_PATH}?filter="${title}"`);
             }
+            throw uiRoutes.WAIT_FOR_URL_CHANGE_TOKEN;
           }).catch(courier.redirectWhenMissing({
             'dashboard': DashboardConstants.LANDING_PAGE_PATH
           }));
