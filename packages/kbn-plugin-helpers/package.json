@@ -1,6 +1,6 @@
 {
   "name": "@elastic/plugin-helpers",
-  "version": "7.1.1",
+  "version": "7.1.2",
   "description": "Just some helpers for kibana plugin devs.",
   "main": "lib/index.js",
   "bin": {
@@ -39,8 +39,8 @@
     "eslint-plugin-react": "^7.1.0",
     "jest": "^17.0.3"
   },
-  "engines" : {
-    "node" : "^6.11.5 || ^8.8.0"
+  "engines": {
+    "node": "^6.11.5 || ^8.8.0"
   },
   "directories": {
     "doc": "docs"
