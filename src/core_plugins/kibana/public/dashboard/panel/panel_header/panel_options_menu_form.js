@@ -11,6 +11,7 @@ export function PanelOptionsMenuForm({ title, onReset, onUpdatePanelTitle }) {
   }
   return (
     <div
+      style={{ padding: 16 }}
       data-test-subj="dashboardPanelTitleInputMenuItem"
     >
       <label className="kuiFormLabel" htmlFor="panelTitleInput">Panel title</label>
