@@ -1,5 +1,5 @@
 import Wreck from 'wreck';
-import { get } from 'ui/lodash';
+import { get } from 'lodash';
 
 const MINUTE = 60 * 1000;
 const HOUR = 60 * MINUTE;

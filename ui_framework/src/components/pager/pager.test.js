@@ -1,5 +1,5 @@
 import React from 'react';
-import sinon from 'sinon';
+import sinon from 'ui/sinon';
 import { render, mount } from 'enzyme';
 import { requiredProps } from '../../test/required_props';
 

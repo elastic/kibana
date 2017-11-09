@@ -1,4 +1,4 @@
-import { includes, startsWith } from 'ui/lodash';
+import { includes, startsWith } from 'lodash';
 import lookup from './agg_lookup';
 const paths = [
   'cumulative_sum',
@@ -49,4 +49,3 @@ export default function calculateLabel(metric, metrics) {
 
   return `${lookup[metric.type]} of ${metric.field}`;
 }
-

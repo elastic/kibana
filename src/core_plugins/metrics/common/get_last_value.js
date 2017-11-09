@@ -1,4 +1,5 @@
-import _ from 'ui/lodash';
+import _ from 'lodash';
+
 export default (data, lookback = 2) => {
   if (_.isNumber(data)) return data;
   if (!Array.isArray(data)) return 0;
@@ -17,5 +18,3 @@ export default (data, lookback = 2) => {
   }
   return value || 0;
 };
-
-

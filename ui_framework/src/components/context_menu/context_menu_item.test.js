@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, shallow } from 'enzyme';
-import sinon from 'sinon';
+import sinon from 'ui/sinon';
 import { requiredProps } from '../../test/required_props';
 
 import { KuiContextMenuItem } from './context_menu_item';

@@ -140,7 +140,10 @@ module.exports = {
 
   overrides: [
     {
-      files: ['**/public/**/*','**/common/**/*'],
+      files: [
+        'src/**/public/**/*',
+        'ui_framework/src/**/*'
+      ],
       rules: {
         '@elastic/kibana-custom/no-direct-import': ['error', {
           blacklist: {

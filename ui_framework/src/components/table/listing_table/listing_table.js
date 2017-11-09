@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 import { KuiListingTableToolBar } from './listing_table_tool_bar';
 import { KuiListingTableToolBarFooter } from './listing_table_tool_bar_footer';

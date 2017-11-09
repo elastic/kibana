@@ -1,4 +1,4 @@
-import _ from 'ui/lodash';
+import _ from 'lodash';
 import { FieldFormat } from '../../../../../ui/field_formats/field_format';
 import { getHighlightHtml } from '../../highlight/highlight_html';
 

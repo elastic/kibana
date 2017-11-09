@@ -1,4 +1,4 @@
-import moment from 'ui/moment';
+import moment from 'moment';
 import { FieldFormat } from '../../../../../ui/field_formats/field_format';
 
 const ratioToSeconds = {

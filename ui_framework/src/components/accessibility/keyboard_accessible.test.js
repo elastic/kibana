@@ -3,7 +3,7 @@ import {
   render,
   shallow,
 } from 'enzyme';
-import sinon from 'sinon';
+import sinon from 'ui/sinon';
 
 import { KuiKeyboardAccessible } from './keyboard_accessible';
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import sinon from 'sinon';
+import sinon from 'ui/sinon';
 import { mount } from 'enzyme';
 import { KuiCodeEditor } from './code_editor';
 import { keyCodes } from '../../services';

@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, mount } from 'enzyme';
-import sinon from 'sinon';
+import sinon from 'ui/sinon';
 import { requiredProps } from '../../test/required_props';
 
 import { KuiPopover } from './popover';

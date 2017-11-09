@@ -1,4 +1,4 @@
-import _ from 'ui/lodash';
+import _ from 'lodash';
 import { Numeral } from './_numeral';
 
 export const PercentFormat = Numeral.factory({

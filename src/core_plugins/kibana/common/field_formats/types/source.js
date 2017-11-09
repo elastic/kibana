@@ -1,4 +1,4 @@
-import _ from 'ui/lodash';
+import _ from 'lodash';
 import { noWhiteSpace } from '../../utils/no_white_space';
 import { toJson } from '../../utils/aggressive_parse';
 import { FieldFormat } from '../../../../../ui/field_formats/field_format';
