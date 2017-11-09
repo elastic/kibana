@@ -1,5 +1,5 @@
-import sinon from 'sinon';
-import $ from 'jquery';
+import sinon from 'ui/sinon';
+import $ from 'ui/jquery';
 
 import history from '../history';
 import mappings from '../mappings';

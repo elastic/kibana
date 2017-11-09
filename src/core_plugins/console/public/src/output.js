@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 let ace = require('../vendor/ace');
 let settings = require('./settings');
 let OutputMode = require('./sense_editor/mode/output');

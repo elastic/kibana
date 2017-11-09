@@ -1,4 +1,4 @@
-const $ = require('jquery');
+const $ = require('ui/jquery');
 const storage = require('./storage');
 
 export default function (input, output) {

@@ -1,4 +1,4 @@
-let _ = require('lodash');
+let _ = require('ui/lodash');
 let engine = require('./engine');
 
 export function ParamComponent(name, parent, description) {

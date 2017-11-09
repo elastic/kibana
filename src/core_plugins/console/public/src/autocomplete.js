@@ -7,7 +7,7 @@ import {
 import utils from './utils';
 import { populateContext } from './autocomplete/engine';
 import { URL_PATH_END_MARKER } from './autocomplete/url_pattern_matcher';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import ace from '../vendor/ace';
 import '../vendor/ace/ext-language_tools';
 

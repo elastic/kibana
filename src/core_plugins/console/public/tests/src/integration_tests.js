@@ -1,9 +1,9 @@
 import { initializeInput } from '../../src/input';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 let input;
 let kb = require('../../src/kb');
 let mappings = require('../../src/mappings');
-let $ = require('jquery');
+let $ = require('ui/jquery');
 
 var { module, ok, asyncTest, deepEqual, equal, start } = window.QUnit;
 

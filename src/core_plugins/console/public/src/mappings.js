@@ -1,5 +1,5 @@
-let $ = require('jquery');
-let _ = require('lodash');
+let $ = require('ui/jquery');
+let _ = require('ui/lodash');
 let es = require('./es');
 let settings = require('./settings');
 

@@ -1,4 +1,4 @@
-let _ = require('lodash');
+let _ = require('ui/lodash');
 let url_pattern_matcher = require('../autocomplete/url_pattern_matcher');
 let url_params = require('../autocomplete/url_params');
 let body_completer = require('../autocomplete/body_completer');

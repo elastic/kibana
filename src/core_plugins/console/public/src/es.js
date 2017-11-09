@@ -1,5 +1,5 @@
 import { stringify as formatQueryString } from 'querystring'
-import $ from 'jquery';
+import $ from 'ui/jquery';
 
 let esVersion = [];
 

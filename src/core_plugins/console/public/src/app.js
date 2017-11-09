@@ -1,4 +1,4 @@
-var $ = require('jquery');
+var $ = require('ui/jquery');
 
 let history = require('./history');
 let mappings = require('./mappings');

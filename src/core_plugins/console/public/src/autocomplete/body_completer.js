@@ -1,4 +1,4 @@
-const _ = require('lodash');
+const _ = require('ui/lodash');
 const engine = require('./engine');
 
 function CompilingContext(endpoint_id, parametrizedComponentFactories) {

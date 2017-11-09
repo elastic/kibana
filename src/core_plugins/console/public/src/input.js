@@ -1,4 +1,4 @@
-let $ = require('jquery');
+let $ = require('ui/jquery');
 require('../vendor/ace');
 require('../vendor/ace/ext-searchbox');
 let Autocomplete = require('./autocomplete');

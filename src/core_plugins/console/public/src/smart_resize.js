@@ -1,4 +1,4 @@
-import { get, throttle } from 'lodash';
+import { get, throttle } from 'ui/lodash';
 
 export default function (editor) {
   const resize = editor.resize;

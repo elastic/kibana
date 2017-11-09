@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 let kb = require('../../src/kb');
 let mappings = require('../../src/mappings');
 let autocomplete_engine = require('../../src/autocomplete/engine');
