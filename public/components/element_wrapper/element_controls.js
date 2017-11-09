@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Shortcuts } from 'react-shortcuts';
 import { ElementContent } from './element_content';
 import { pure } from 'recompose';
 import { RemoveIcon } from '../remove_icon';
@@ -31,10 +30,6 @@ export const ElementControls = pure((props) => {
     removeElement();
   };
 
-  const handleShortcuts = (action) => {
-    if (action === 'DELETE' && isSelected) return removeElement();
-  };
-
   return (
     <div
       className={`canvas__workpad--element ${isSelected ? 'selected' : ''}`}
@@ -45,19 +40,17 @@ export const ElementControls = pure((props) => {
         bunch of logic for error handling. Its actually pretty nice to keep them seperate.
       */}
 
-      <Shortcuts name="ELEMENT" handler={handleShortcuts}>
-        <ElementContent
-           state={state}
-           renderable={renderable}
-           renderFunction={renderFunction}
-           size={size}
-           handlers={handlers}
-         />
+      <ElementContent
+         state={state}
+         renderable={renderable}
+         renderFunction={renderFunction}
+         size={size}
+         handlers={handlers}
+       />
 
-        {!isSelected ? null :
-          (<RemoveIcon style={{ position: 'absolute', top: -20, right: -20 }} onClick={removeHandler}/>)
-        }
-      </Shortcuts>
+      {!isSelected ? null :
+        (<RemoveIcon style={{ position: 'absolute', top: -20, right: -20 }} onClick={removeHandler}/>)
+      }
     </div>
   );
 });
