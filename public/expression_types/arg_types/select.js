@@ -10,20 +10,23 @@ const template = ({ typeInstance, onValueChange, argValue }) => {
     onValueChange(ev.target.value);
   }
 
-  const options = choices.map(choice => (
-    <option value={choice.value} key={choice.value}>{choice.name}</option>
-  ));
+  const choice = choices.map(c => c.name).find(n => n === argValue.value) || '';
 
   return (
-    <FormControl componentClass="select" value={argValue.value} onChange={handleChange}>
-      {options}
+    <FormControl componentClass="select" value={choice} onChange={handleChange}>
+      <option value="" disabled>select column</option>
+      {choices.map(choice => (
+        <option value={choice.value} key={choice.value}>{choice.name}</option>
+      ))}
     </FormControl>
   );
 };
 
 template.propTypes = {
   onValueChange: PropTypes.func.isRequired,
-  argValue: PropTypes.any.isRequired,
+  argValue: PropTypes.shape({
+    value: PropTypes.string.isRequired,
+  }).isRequired,
   typeInstance: PropTypes.object,
 };
 
