@@ -4,9 +4,9 @@ import 'ui/doc_table';
 
 import * as columnActions from 'ui/doc_table/actions/columns';
 import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
-import { EmbeddableHandler, Embeddable } from 'ui/embeddable';
+import { EmbeddableFactory, Embeddable } from 'ui/embeddable';
 
-export class SearchEmbeddableHandler extends EmbeddableHandler {
+export class SearchEmbeddableFactory extends EmbeddableFactory {
 
   constructor($compile, $rootScope, searchLoader, Promise) {
     super();
