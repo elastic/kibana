@@ -1,5 +1,5 @@
 {
-  "name": "kbn-types",
+  "name": "@elastic/kbn-types",
   "version": "0.0.1",
   "main": "./lib",
   "types": "./types/packages/kbn-types/index.d.ts",

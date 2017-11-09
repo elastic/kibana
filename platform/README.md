@@ -9,10 +9,35 @@ folder and re-run `npm install`.
 
 ## Running code
 
-Make sure to build the code first, e.g. `npm run ts:build` or `npm run ts:start`.
+To get this stuff running locally (as we don't have a proper build system yet):
 
-This builds the code into `./target/` for now. If you get into a weird state you
-might clean the `target` directory.
+From a clean setup locally (the best is probably to just `rm` your
+`node_modules`), run:
+
+```sh
+cd packages/kbn-internal-native-observable
+npm install && npm run build
+cd -
+
+cd packages/kbn-observable
+npm install && npm run build
+cd -
+
+#  from root directory
+npm install
+
+cd packages/kbn-types
+npm install
+cd -
+
+# from root directory
+npm run ts:build
+```
+
+(Yeah, this is horrible — yeah, this is something I'm currently working on fixing properly)
+
+If you get into a weird state you might clean the `target` directories,
+`find . -name "target"`, or the `node_modules` directories.
 
 When this completes you can start the server and plugins as a standalone Node application:
 

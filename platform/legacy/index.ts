@@ -8,7 +8,7 @@ export {
 /**@internal**/
 export { LegacyKbnServer } from './LegacyKbnServer';
 
-import { BehaviorSubject } from 'rxjs';
+import { k$, map, BehaviorSubject } from '@elastic/kbn-observable';
 import { Root } from '../root';
 import { Env } from '../config';
 import {
@@ -23,8 +23,8 @@ import {
  */
 export const injectIntoKbnServer = (rawKbnServer: any) => {
   const legacyConfig$ = new BehaviorSubject(rawKbnServer.config);
-  const config$ = legacyConfig$.map(
-    legacyConfig => new LegacyConfigToRawConfigAdapter(legacyConfig)
+  const config$ = k$(legacyConfig$)(
+    map(legacyConfig => new LegacyConfigToRawConfigAdapter(legacyConfig))
   );
 
   rawKbnServer.newPlatform = {

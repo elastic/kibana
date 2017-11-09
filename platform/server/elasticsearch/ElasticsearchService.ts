@@ -1,4 +1,12 @@
-import { Observable, Subscription } from 'rxjs';
+import {
+  Observable,
+  Subscription,
+  k$,
+  map,
+  filter,
+  switchMap,
+  shareLast
+} from '@elastic/kbn-observable';
 
 import { ElasticsearchClusterType } from './ElasticsearchConfig';
 import { ElasticsearchConfigs } from './ElasticsearchConfigs';
@@ -18,16 +26,16 @@ export class ElasticsearchService implements CoreService {
   ) {
     const log = logger.get('elasticsearch');
 
-    this.clusters$ = config$
-      .filter(() => {
+    this.clusters$ = k$(config$)(
+      filter(() => {
         if (this.subscription !== undefined) {
           log.error('clusters cannot be changed after they are created');
           return false;
         }
 
         return true;
-      })
-      .switchMap(
+      }),
+      switchMap(
         configs =>
           new Observable<Clusters>(observer => {
             log.info('creating Elasticsearch clusters');
@@ -46,11 +54,12 @@ export class ElasticsearchService implements CoreService {
               clusters.admin.close();
             };
           })
-      )
+      ),
       // We only want a single subscription of this as we only want to create a
       // single set of clusters at a time. We therefore share these, plus we
       // always replay the latest set of clusters when subscribing.
-      .shareReplay(1);
+      shareLast()
+    );
   }
 
   async start() {
@@ -66,6 +75,6 @@ export class ElasticsearchService implements CoreService {
   }
 
   getClusterOfType$(type: ElasticsearchClusterType) {
-    return this.clusters$.map(clusters => clusters[type]);
+    return k$(this.clusters$)(map(clusters => clusters[type]));
   }
 }

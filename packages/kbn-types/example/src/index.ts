@@ -1,4 +1,4 @@
-import { KibanaFunctionalPlugin, Logger } from 'kbn-types';
+import { KibanaFunctionalPlugin, Logger } from '@elastic/kbn-types';
 
 const plugin: KibanaFunctionalPlugin<{}> = core => {
   const { elasticsearch, http, logger } = core;

@@ -4,7 +4,8 @@
     "<rootDir>/src/ui/public",
     "<rootDir>/src/core_plugins",
     "<rootDir>/ui_framework/",
-    "<rootDir>/platform/"
+    "<rootDir>/platform/",
+    "<rootDir>/packages/"
   ],
   "collectCoverageFrom": [
     "platform/**/*.ts",

@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import { Observable } from '@elastic/kbn-observable';
 
 import { Schema } from '../../types/schema';
 import * as schemaLib from '../../lib/schema';
@@ -28,6 +28,10 @@ export interface KibanaPluginFeatures {
     service: ElasticsearchService;
     config$: Observable<ElasticsearchConfigs>;
   };
+
+  /**
+   * Core Kibana functionality
+   */
   kibana: {
     config$: Observable<KibanaConfig>;
   };

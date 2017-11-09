@@ -1,4 +1,4 @@
-import { KibanaPluginConfig } from 'kbn-types';
+import { KibanaPluginConfig } from '@elastic/kbn-types';
 import { BarPluginType } from 'example-plugin-bar';
 
 export const plugin: KibanaPluginConfig<BarPluginType> = {

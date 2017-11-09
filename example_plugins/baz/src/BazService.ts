@@ -1,6 +1,6 @@
-import { Observable } from 'rxjs';
+import { k$, Observable, $combineLatest, map, first, toPromise } from '@elastic/kbn-observable';
 
-import { ElasticsearchService, KibanaConfig, KibanaRequest } from 'kbn-types';
+import { ElasticsearchService, KibanaConfig, KibanaRequest } from '@elastic/kbn-types';
 
 export class BazService {
   constructor(
@@ -13,7 +13,7 @@ export class BazService {
     const { page = 1, perPage = 20, type } = options;
 
     const [kibanaIndex, adminCluster] = await latestValues(
-      this.kibanaConfig$.map(config => config.index),
+      k$(this.kibanaConfig$)(map(config => config.index)),
       this.elasticsearchService.getClusterOfType$('admin')
     );
 
@@ -64,7 +64,7 @@ function latestValues<A, B, C, D>(
   d: Observable<D>
 ): Promise<[A, B, C, D]>;
 function latestValues(...values: Observable<any>[]) {
-  return Observable.combineLatest(values)
-    .first()
-    .toPromise();
+  return k$($combineLatest(values))(
+    first(),
+    toPromise());
 }

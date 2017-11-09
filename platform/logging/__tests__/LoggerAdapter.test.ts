@@ -16,17 +16,11 @@ test('proxies all method calls to the internal logger.', () => {
 
   adapter.trace('trace-message');
   expect(internalLogger.trace).toHaveBeenCalledTimes(1);
-  expect(internalLogger.trace).toHaveBeenCalledWith(
-    'trace-message',
-    undefined
-  );
+  expect(internalLogger.trace).toHaveBeenCalledWith('trace-message', undefined);
 
   adapter.debug('debug-message');
   expect(internalLogger.debug).toHaveBeenCalledTimes(1);
-  expect(internalLogger.debug).toHaveBeenCalledWith(
-    'debug-message',
-    undefined
-  );
+  expect(internalLogger.debug).toHaveBeenCalledWith('debug-message', undefined);
 
   adapter.info('info-message');
   expect(internalLogger.info).toHaveBeenCalledTimes(1);
@@ -38,17 +32,11 @@ test('proxies all method calls to the internal logger.', () => {
 
   adapter.error('error-message');
   expect(internalLogger.error).toHaveBeenCalledTimes(1);
-  expect(internalLogger.error).toHaveBeenCalledWith(
-    'error-message',
-    undefined
-  );
+  expect(internalLogger.error).toHaveBeenCalledWith('error-message', undefined);
 
   adapter.fatal('fatal-message');
   expect(internalLogger.fatal).toHaveBeenCalledTimes(1);
-  expect(internalLogger.fatal).toHaveBeenCalledWith(
-    'fatal-message',
-    undefined
-  );
+  expect(internalLogger.fatal).toHaveBeenCalledWith('fatal-message', undefined);
 });
 
 test('forwards all method calls to new internal logger if it is updated.', () => {

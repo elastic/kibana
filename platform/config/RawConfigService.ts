@@ -1,4 +1,11 @@
-import { BehaviorSubject, Observable } from 'rxjs';
+import {
+  k$,
+  BehaviorSubject,
+  Observable,
+  map,
+  filter,
+  skipRepeats
+} from '@elastic/kbn-observable';
 import { isEqual, isPlainObject } from 'lodash';
 import typeDetect from 'type-detect';
 
@@ -27,10 +34,9 @@ export class RawConfigService {
   private readonly config$: Observable<RawConfig>;
 
   constructor(readonly configFile: string) {
-    this.config$ = this.rawConfigFromFile$
-      .asObservable()
-      .filter(rawConfig => rawConfig !== notRead)
-      .map(rawConfig => {
+    this.config$ = k$(this.rawConfigFromFile$)(
+      filter(rawConfig => rawConfig !== notRead),
+      map(rawConfig => {
         // If the raw config is null, e.g. if empty config file, we default to
         // an empty config
         if (rawConfig == null) {
@@ -45,9 +51,10 @@ export class RawConfigService {
         throw new Error(
           `the raw config must be an object, got [${typeDetect(rawConfig)}]`
         );
-      })
+      }),
       // We only want to update the config if there are changes to it
-      .distinctUntilChanged((current, next) => isEqual(current, next));
+      skipRepeats(isEqual)
+    );
   }
 
   /**

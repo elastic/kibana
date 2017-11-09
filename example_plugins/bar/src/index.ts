@@ -1,4 +1,4 @@
-import { KibanaPluginConfig } from 'kbn-types';
+import { KibanaPluginConfig } from '@elastic/kbn-types';
 
 import { BarConfig } from './BarConfig';
 import { BarExports, BarPluginType } from './BarExports';

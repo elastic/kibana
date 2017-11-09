@@ -3,11 +3,7 @@ import { LoggingConfig } from '../LoggingConfig';
 import { LogLevel } from '../LogLevel';
 import { Logger, BaseLogger } from '../Logger';
 
-const context = LoggingConfig.getLoggerContext([
-  'context',
-  'parent',
-  'child'
-]);
+const context = LoggingConfig.getLoggerContext(['context', 'parent', 'child']);
 let appenderMocks: Appender[];
 let logger: BaseLogger;
 
@@ -246,11 +242,7 @@ test('`log()` just passes the record to all appenders.', () => {
 });
 
 test('logger with `Off` level does not pass any records to appenders.', () => {
-  const turnedOffLogger = new BaseLogger(
-    context,
-    LogLevel.Off,
-    appenderMocks
-  );
+  const turnedOffLogger = new BaseLogger(context, LogLevel.Off, appenderMocks);
   turnedOffLogger.trace('trace-message');
   turnedOffLogger.debug('debug-message');
   turnedOffLogger.info('info-message');

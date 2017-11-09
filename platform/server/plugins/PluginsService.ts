@@ -1,7 +1,17 @@
 import { readdir, stat } from 'fs';
 import { resolve } from 'path';
-import { Observable } from 'rxjs';
-import { promisify } from 'util';
+import {
+  Observable,
+  k$,
+  first,
+  map,
+  mergeMap,
+  filter,
+  toArray,
+  toPromise,
+  $bindNodeCallback,
+  $fromPromise
+} from '@elastic/kbn-observable';
 
 import { Plugin } from './Plugin';
 import { PluginName } from './types';
@@ -11,8 +21,8 @@ import { Logger, LoggerFactory } from '../../logging';
 import { CoreService } from '../../types/CoreService';
 import { ConfigService } from '../../config';
 
-const fsReadDirAsync = promisify(readdir);
-const fsStatAsync = promisify(stat);
+const $fsReadDir = $bindNodeCallback(readdir);
+const $fsStat = $bindNodeCallback(stat);
 
 export class PluginsService implements CoreService {
   private readonly log: Logger;
@@ -27,12 +37,12 @@ export class PluginsService implements CoreService {
   }
 
   async start() {
-    await this.getAllPlugins()
-      .mergeMap(
-        plugin => this.isPluginEnabled(plugin),
+    const plugins = await k$(this.getAllPlugins())(
+      mergeMap(
+        plugin => $fromPromise(this.isPluginEnabled(plugin)),
         (plugin, isEnabled) => ({ plugin, isEnabled })
-      )
-      .filter(obj => {
+      ),
+      filter(obj => {
         if (obj.isEnabled) {
           return true;
         }
@@ -42,11 +52,14 @@ export class PluginsService implements CoreService {
         );
 
         return false;
-      })
-      .do(plugin => {
-        this.pluginSystem.addPlugin(plugin.plugin);
-      })
-      .toPromise();
+      }),
+      toArray(),
+      toPromise()
+    );
+
+    plugins.forEach(plugin => {
+      this.pluginSystem.addPlugin(plugin.plugin);
+    });
 
     this.pluginSystem.startPlugins();
   }
@@ -56,24 +69,25 @@ export class PluginsService implements CoreService {
   }
 
   private getAllPlugins() {
-    return this.pluginsConfig$
-      .first()
-      .mergeMap(config => config.scanDirs)
-      .mergeMap(
-        dir => fsReadDirAsync(dir),
+    return k$(this.pluginsConfig$)(
+      first(),
+      mergeMap(config => config.scanDirs),
+      mergeMap(
+        dir => $fsReadDir(dir),
         (dir, pluginNames) =>
           pluginNames.map(pluginName => ({
             name: pluginName,
             path: resolve(dir, pluginName)
           }))
-      )
-      .mergeMap(plugins => plugins)
-      .mergeMap(
-        plugin => fsStatAsync(plugin.path),
+      ),
+      mergeMap(plugins => plugins),
+      mergeMap(
+        plugin => $fsStat(plugin.path),
         (plugin, stat) => ({ ...plugin, isDir: stat.isDirectory() })
-      )
-      .filter(plugin => plugin.isDir)
-      .map(plugin => this.createPlugin(plugin.name, plugin.path));
+      ),
+      filter(plugin => plugin.isDir),
+      map(plugin => this.createPlugin(plugin.name, plugin.path))
+    );
   }
 
   private createPlugin(name: PluginName, pluginPath: string) {

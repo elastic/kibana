@@ -1,0 +1,15 @@
+{
+  "name": "@elastic/kbn-internal-native-observable",
+  "version": "0.0.1",
+  "main": "./target/index.js",
+  "types": "./index.d.ts",
+  "scripts": {
+    "build": "webpack"
+  },
+  "dependencies": {
+    "symbol-observable": "1.0.4"
+  },
+  "devDependencies": {
+    "webpack": "^3.5.5"
+  }
+}

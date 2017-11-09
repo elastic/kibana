@@ -7,7 +7,7 @@
     "start": "tsc --watch"
   },
   "devDependencies": {
-    "kbn-types": "file:../../packages/kbn-types",
+    "@elastic/kbn-types": "file:../../packages/kbn-types",
     "example-plugin-bar": "file:../bar",
     "typescript": "2.6.1"
   }
