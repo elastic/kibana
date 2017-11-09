@@ -59,7 +59,7 @@ export class PanelOptionsMenu extends React.Component {
       <KuiKeyboardAccessible>
         <span
           aria-label="Panel options"
-          className="kuiButton__icon kuiIcon panel-dropdown fa fa-caret-down"
+          className="kuiButton__icon kuiIcon panel-dropdown fa fa-gear"
           data-test-subj="dashboardPanelToggleMenuIcon"
           onClick={this.toggleMenu}
         />

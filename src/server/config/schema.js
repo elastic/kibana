@@ -108,7 +108,9 @@ export default () => Joi.object({
       is: 'stdout',
       then: Joi.default(!process.stdout.isTTY),
       otherwise: Joi.default(true)
-    })
+    }),
+
+    useUTC: Joi.boolean().default(true),
   })
   .default(),
 

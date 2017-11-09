@@ -25,7 +25,7 @@ exports[`DashboardPanel matches snapshot 1`] = `
         >
           <span
             aria-label="Panel options"
-            class="kuiButton__icon kuiIcon panel-dropdown fa fa-caret-down"
+            class="kuiButton__icon kuiIcon panel-dropdown fa fa-gear"
             data-test-subj="dashboardPanelToggleMenuIcon"
             role="button"
             tabindex="0"
