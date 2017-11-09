@@ -1,5 +1,5 @@
 import { parse } from 'eslint/lib/options';
-import { DEFAULT_ESLINT_PATHS } from './default_eslint_paths';
+import { DEFAULT_ESLINT_PATHS } from './eslint';
 
 const options = parse(process.argv);
 
