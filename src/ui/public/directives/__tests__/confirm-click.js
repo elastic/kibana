@@ -1,10 +1,10 @@
-import angular from 'angular';
+import angular from 'ui/angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import 'ui/directives/confirm_click';
 import 'plugins/kibana/discover/index';
-import sinon from 'sinon';
+import sinon from 'ui/sinon';
 
 let $window;
 

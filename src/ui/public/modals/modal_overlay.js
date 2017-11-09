@@ -1,4 +1,4 @@
-import angular from 'angular';
+import angular from 'ui/angular';
 import modalOverlayTemplate from './modal_overlay.html';
 
 /**

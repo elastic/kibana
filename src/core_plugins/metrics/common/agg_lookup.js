@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 const lookup = {
   'count': 'Count',
   'calculation': 'Bucket Script',

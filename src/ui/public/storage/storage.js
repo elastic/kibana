@@ -1,5 +1,5 @@
 import { uiModules } from 'ui/modules';
-import angular from 'angular';
+import angular from 'ui/angular';
 
 export function Storage(store) {
   const self = this;

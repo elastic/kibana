@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { uiModules } from 'ui/modules';
 const NL_RE = /\n/g;
 const events = 'keydown keypress keyup change';

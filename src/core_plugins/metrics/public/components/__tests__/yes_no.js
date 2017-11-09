@@ -1,7 +1,7 @@
 import React from 'react';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
-import sinon from 'sinon';
+import sinon from 'ui/sinon';
 import YesNo from '../yes_no';
 
 describe('<YesNo />', () => {

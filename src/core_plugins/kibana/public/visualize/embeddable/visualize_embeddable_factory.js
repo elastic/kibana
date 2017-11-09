@@ -1,4 +1,4 @@
-import angular from 'angular';
+import angular from 'ui/angular';
 import 'ui/visualize';
 
 import visualizationTemplate from './visualize_template.html';

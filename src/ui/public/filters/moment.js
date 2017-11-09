@@ -1,5 +1,5 @@
-import moment from 'moment';
-import _ from 'lodash';
+import moment from 'ui/moment';
+import _ from 'ui/lodash';
 import { uiModules } from 'ui/modules';
 
 uiModules

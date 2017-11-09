@@ -1,6 +1,6 @@
 import d3 from 'd3';
-import _ from 'lodash';
-import $ from 'jquery';
+import _ from 'ui/lodash';
+import $ from 'ui/jquery';
 import { TooltipProvider } from 'ui/vis/components/tooltip';
 import { VislibVisualizationsChartProvider } from './_chart';
 import { VislibVisualizationsTimeMarkerProvider } from './time_marker';

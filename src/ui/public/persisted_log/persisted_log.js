@@ -1,5 +1,5 @@
 import { uiModules } from 'ui/modules';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 uiModules.get('kibana/persisted_log')
   .factory('PersistedLog', function ($window, localStorage) {

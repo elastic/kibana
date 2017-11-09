@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 /**
  * Filters out a list by a given filter. This is currently used to impelment:

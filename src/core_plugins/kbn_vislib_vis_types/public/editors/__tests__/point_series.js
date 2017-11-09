@@ -1,8 +1,8 @@
-import angular from 'angular';
-import _ from 'lodash';
+import angular from 'ui/angular';
+import _ from 'ui/lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import LineVisTypeProvider from 'plugins/kbn_vislib_vis_types/line';
 import { VisProvider } from 'ui/vis';

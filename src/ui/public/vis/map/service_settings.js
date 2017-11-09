@@ -1,5 +1,5 @@
 import { uiModules } from 'ui/modules';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import MarkdownIt from 'markdown-it';
 import { modifyUrl } from 'ui/url';
 

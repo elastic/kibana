@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import sinon from 'sinon';
-import $ from 'jquery';
+import sinon from 'ui/sinon';
+import $ from 'ui/jquery';
 
 describe('ui/modals/confirm_modal_promise', function () {
 

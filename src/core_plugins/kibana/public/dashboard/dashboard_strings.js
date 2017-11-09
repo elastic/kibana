@@ -1,5 +1,5 @@
 import { DashboardViewMode } from './dashboard_view_mode';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 /**
  * @param list {Array.<string>}

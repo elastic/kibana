@@ -1,5 +1,5 @@
 
-import { words } from 'lodash';
+import { words } from 'ui/lodash';
 
 /**
  * @name {string} the name of the configuration object

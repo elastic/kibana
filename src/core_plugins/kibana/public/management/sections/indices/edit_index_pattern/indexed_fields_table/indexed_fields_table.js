@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import 'ui/paginated_table';
 import fieldNameHtml from './field_name.html';
 import fieldTypeHtml from './field_type.html';

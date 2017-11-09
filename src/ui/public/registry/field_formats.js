@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { uiRegistry } from 'ui/registry/_registry';
 
 export const RegistryFieldFormatsProvider = uiRegistry({

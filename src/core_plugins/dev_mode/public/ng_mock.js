@@ -1,4 +1,4 @@
-import angular from 'angular';
+import angular from 'ui/angular';
 import 'angular-mocks';
 import 'mocha';
 

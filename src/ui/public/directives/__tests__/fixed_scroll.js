@@ -2,8 +2,8 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import 'ui/fixed_scroll';
-import $ from 'jquery';
-import sinon from 'sinon';
+import $ from 'ui/jquery';
+import sinon from 'ui/sinon';
 
 describe('FixedScroll directive', function () {
   const sandbox = sinon.sandbox.create();

@@ -1,10 +1,10 @@
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
 import { IndexPatternsFieldProvider } from 'ui/index_patterns/_field';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 describe('FieldEditor directive', function () {
 

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { PointSeriesGetPointProvider } from 'ui/agg_response/point_series/_get_point';
 import { PointSeriesAddToSiriProvider } from 'ui/agg_response/point_series/_add_to_siri';
 

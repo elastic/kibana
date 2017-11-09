@@ -1,4 +1,4 @@
-import sinon from 'sinon';
+import sinon from 'ui/sinon';
 import { expect } from 'chai';
 import { dashboardContextProvider } from '../dashboard_context';
 

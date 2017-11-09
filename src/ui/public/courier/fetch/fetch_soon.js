@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { requestQueue } from '../_request_queue';
 import { FetchNowProvider } from './fetch_now';
 

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import expect from 'expect.js';
 import { filterToKueryAST } from '../filter_to_kuery';
 import { expectDeepEqual } from '../../../../../test_utils/expect_deep_equal.js';

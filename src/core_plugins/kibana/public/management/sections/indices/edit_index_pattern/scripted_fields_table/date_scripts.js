@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 export function dateScripts(indexPattern) {
   const dateScripts = {};

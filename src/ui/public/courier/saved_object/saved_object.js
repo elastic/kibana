@@ -9,8 +9,8 @@
  * service and the saved object api.
  */
 
-import angular from 'angular';
-import _ from 'lodash';
+import angular from 'ui/angular';
+import _ from 'ui/lodash';
 
 import { SavedObjectNotFound } from 'ui/errors';
 import MappingSetupProvider from 'ui/utils/mapping_setup';

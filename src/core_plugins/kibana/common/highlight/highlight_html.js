@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { highlightTags } from './highlight_tags';
 import { htmlTags } from './html_tags';
 

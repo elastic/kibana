@@ -21,8 +21,8 @@
  *     that has more than a single consecutive newline.
  */
 
-import _ from 'lodash';
-import $ from 'jquery';
+import _ from 'ui/lodash';
+import $ from 'ui/jquery';
 import PEG from 'pegjs';
 
 import grammar from 'raw-loader!../chain.peg';

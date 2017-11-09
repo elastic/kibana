@@ -51,7 +51,7 @@
  * For these reasons, HashedItemStore doesn't concern itself with this constraint.
  */
 
-import { pull, sortBy } from 'lodash';
+import { pull, sortBy } from 'ui/lodash';
 
 export class HashedItemStore {
 

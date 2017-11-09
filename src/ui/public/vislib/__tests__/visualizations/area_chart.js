@@ -1,9 +1,9 @@
 import d3 from 'd3';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import 'ui/persisted_state';
 const dataTypesArray = {

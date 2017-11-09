@@ -8,7 +8,7 @@
  * ability to destroy those mappings.
  */
 
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { uiModules } from 'ui/modules';
 import { StateProvider } from 'ui/state_management/state';
 import 'ui/persisted_state';

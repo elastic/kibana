@@ -1,5 +1,5 @@
-import $ from 'jquery';
-import _ from 'lodash';
+import $ from 'ui/jquery';
+import _ from 'ui/lodash';
 import { uiModules } from 'ui/modules';
 
 const SCROLLER_HEIGHT = 20;

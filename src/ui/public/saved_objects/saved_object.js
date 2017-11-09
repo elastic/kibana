@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 export class SavedObject {
   constructor(client, { id, type, version, attributes } = {}) {

@@ -4,7 +4,8 @@
  * @extends Events
  */
 
-import _ from 'lodash';
+import _ from 'ui/lodash';
+// eslint-disable-next-line @elastic/kibana-custom/no-direct-import
 import toPath from 'lodash/internal/toPath';
 import { PersistedStateError } from 'ui/errors';
 import { SimpleEmitter } from 'ui/utils/simple_emitter';

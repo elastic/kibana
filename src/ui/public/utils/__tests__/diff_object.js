@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { applyDiff } from 'ui/utils/diff_object';
 
 describe('ui/utils/diff_object', function () {

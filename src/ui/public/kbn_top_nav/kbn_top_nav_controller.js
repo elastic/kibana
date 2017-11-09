@@ -1,4 +1,4 @@
-import { capitalize, isArray, isFunction } from 'lodash';
+import { capitalize, isArray, isFunction } from 'ui/lodash';
 
 import chrome from 'ui/chrome';
 import filterTemplate from 'ui/chrome/config/filter.html';

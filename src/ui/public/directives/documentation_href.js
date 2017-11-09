@@ -1,4 +1,4 @@
-import { get } from 'lodash';
+import { get } from 'ui/lodash';
 import { documentationLinks } from '../documentation_links';
 import { uiModules } from 'ui/modules';
 

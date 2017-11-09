@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { asPrettyString } from '../../utils/as_pretty_string';
 import { DEFAULT_COLOR } from './color_default';
 import { FieldFormat } from '../../../../../ui/field_formats/field_format';

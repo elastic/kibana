@@ -1,6 +1,6 @@
 import 'ui/pager_control';
 import 'ui/pager';
-import { last } from 'lodash';
+import { last } from 'ui/lodash';
 import { uiModules } from 'ui/modules';
 import { callAfterBindingsWorkaround } from 'ui/compat';
 import './matching_indices_list.less';

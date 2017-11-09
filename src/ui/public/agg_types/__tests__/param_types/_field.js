@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import { reject } from 'lodash';
+import { reject } from 'ui/lodash';
 import ngMock from 'ng_mock';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { BaseParamTypeProvider } from '../../param_types/base';

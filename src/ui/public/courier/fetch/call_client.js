@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 import { ErrorAllowExplicitIndexProvider } from 'ui/error_allow_explicit_index';
 import { IsRequestProvider } from './is_request';

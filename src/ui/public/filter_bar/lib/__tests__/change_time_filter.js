@@ -1,5 +1,5 @@
 
-import moment from 'moment';
+import moment from 'ui/moment';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import { FilterBarLibChangeTimeFilterProvider } from 'ui/filter_bar/lib/change_time_filter';

@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import * as exists from '../exists';
 import { nodeTypes } from '../../node_types';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import ngMock from 'ng_mock';
 

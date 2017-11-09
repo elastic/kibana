@@ -1,4 +1,4 @@
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import { createColorPalette } from 'ui/vis/components/color/color_palette';
 import { uiModules } from 'ui/modules';
 

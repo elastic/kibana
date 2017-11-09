@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import chrome from 'ui/chrome';
 
 const baseUrl = chrome.addBasePath('/api/kibana/suggestions/values');

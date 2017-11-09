@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import moment from 'moment';
+import _ from 'ui/lodash';
+import moment from 'ui/moment';
 import AggConfigResult from 'ui/vis/agg_config_result';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';

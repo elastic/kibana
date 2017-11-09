@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { Control } from './control';
 import { RangeFilterManager } from './filter_manager/range_filter_manager';
 

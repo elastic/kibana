@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { groupBy, mapValues, take, get } from 'lodash';
+import { groupBy, mapValues, take, get } from 'ui/lodash';
 
 import {
   KuiModal,

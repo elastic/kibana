@@ -1,4 +1,4 @@
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import { uiModules } from 'ui/modules';
 import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
 

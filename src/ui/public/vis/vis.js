@@ -9,7 +9,7 @@
  */
 
 import { EventEmitter } from 'events';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VisAggConfigsProvider } from 'ui/vis/agg_configs';
 import { PersistedState } from 'ui/persisted_state';

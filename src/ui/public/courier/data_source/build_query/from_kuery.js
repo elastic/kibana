@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { fromKueryExpression, toElasticsearchQuery, nodeTypes } from '../../../kuery';
 
 export function buildQueryFromKuery(indexPattern, queries) {

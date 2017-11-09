@@ -1,4 +1,4 @@
-import { get } from 'lodash';
+import { get } from 'ui/lodash';
 
 import uiRoutes from 'ui/routes';
 import { KbnUrlProvider } from 'ui/url';

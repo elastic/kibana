@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { FilterUtils } from './filter_utils';
 
 export function updateSavedDashboard(savedDashboard, appState, uiState, timeFilter, toJson) {

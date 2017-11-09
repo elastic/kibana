@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
 

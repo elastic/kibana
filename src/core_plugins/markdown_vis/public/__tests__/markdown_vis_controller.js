@@ -1,6 +1,6 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import $ from 'jquery';
+import $ from 'ui/jquery';
 
 describe('markdown vis controller', function () {
   let $scope;

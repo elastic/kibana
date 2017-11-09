@@ -1,6 +1,6 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { SavedObjectNotFound, DuplicateField, IndexPatternMissingIndices } from 'ui/errors';
-import angular from 'angular';
+import angular from 'ui/angular';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
 import { Notifier } from 'ui/notify';

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import 'ui/notify';
 import { uiModules } from 'ui/modules';
 

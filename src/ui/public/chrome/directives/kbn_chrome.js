@@ -1,5 +1,5 @@
-import $ from 'jquery';
-import { remove } from 'lodash';
+import $ from 'ui/jquery';
+import { remove } from 'ui/lodash';
 
 import './kbn_chrome.less';
 import { uiModules } from 'ui/modules';

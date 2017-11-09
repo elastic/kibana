@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { migrateFilter } from '../_migrate_filter';
 
 /**

@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import $ from 'jquery';
+import _ from 'ui/lodash';
+import $ from 'ui/jquery';
 
 const OFFSET = 10;
 let $clone;

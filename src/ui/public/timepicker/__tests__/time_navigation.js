@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import moment from 'moment';
+import moment from 'ui/moment';
 import { timeNavigation } from '../time_navigation';
 
 describe('timeNavigation', () => {

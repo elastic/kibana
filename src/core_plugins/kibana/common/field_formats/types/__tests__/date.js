@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import moment from 'moment-timezone';
+import moment from 'ui/moment-timezone';
 import { DateFormat } from '../date';
 
 describe('Date Format', function () {

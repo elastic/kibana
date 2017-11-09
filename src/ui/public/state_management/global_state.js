@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { QueryString } from 'ui/utils/query_string';
 import { StateProvider } from 'ui/state_management/state';
 import { uiModules } from 'ui/modules';

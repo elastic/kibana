@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import React, { Component, PropTypes } from 'react';
 import ticFormatter from '../../lib/tick_formatter';
 import calculateLabel from '../../../../common/calculate_label';

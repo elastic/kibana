@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import angular from 'angular';
+import _ from 'ui/lodash';
+import angular from 'ui/angular';
 import rison from 'rison-node';
 import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 import objectViewHTML from 'plugins/kibana/management/sections/objects/_view.html';

@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import sinon from 'sinon';
+import _ from 'ui/lodash';
+import sinon from 'ui/sinon';
 import Promise from 'bluebird';
 import { IndexPatternProvider, getRoutes } from 'ui/index_patterns/_index_pattern';
 import { formatHit } from 'ui/index_patterns/_format_hit';

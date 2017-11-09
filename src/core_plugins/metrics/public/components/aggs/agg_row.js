@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import AddDeleteButtons from '../add_delete_buttons';
 import Tooltip from '../tooltip';
 

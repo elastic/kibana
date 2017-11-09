@@ -1,5 +1,5 @@
 
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import ngMock from 'ng_mock';
 import { fieldCalculator } from 'plugins/kibana/discover/components/field_chooser/lib/field_calculator';
 import expect from 'expect.js';

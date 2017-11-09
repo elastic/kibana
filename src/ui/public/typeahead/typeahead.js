@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import 'ui/typeahead/typeahead.less';
 import 'ui/typeahead/_input';
 import 'ui/typeahead/_items';

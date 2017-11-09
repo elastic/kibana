@@ -1,8 +1,8 @@
-import $ from 'jquery';
-import _ from 'lodash';
+import $ from 'ui/jquery';
+import _ from 'ui/lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import sinon from 'sinon';
+import sinon from 'ui/sinon';
 import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
 import { VisProvider } from 'ui/vis';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';

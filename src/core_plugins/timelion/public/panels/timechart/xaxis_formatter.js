@@ -1,4 +1,4 @@
-import moment from 'moment';
+import moment from 'ui/moment';
 
 export default function xaxisFormatterProvider(config) {
 

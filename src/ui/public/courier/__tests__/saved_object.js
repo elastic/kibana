@@ -1,6 +1,6 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import sinon from 'sinon';
+import sinon from 'ui/sinon';
 import BluebirdPromise from 'bluebird';
 
 import { SavedObjectProvider } from '../saved_object/saved_object';

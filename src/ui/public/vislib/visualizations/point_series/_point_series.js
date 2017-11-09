@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { InvalidLogScaleValues } from 'ui/errors';
 
 export function VislibVisualizationsPointSeriesProvider() {

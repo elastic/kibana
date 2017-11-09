@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { VisProvider } from 'ui/vis';
 import { AggTypesIndexProvider } from 'ui/agg_types/index';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';

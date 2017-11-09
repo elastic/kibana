@@ -1,6 +1,6 @@
 import { format as formatUrl } from 'url';
 
-import elasticsearch from 'elasticsearch';
+import elasticsearch from 'ui/elasticsearch';
 
 export function EsProvider({ getService }) {
   const config = getService('config');

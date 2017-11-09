@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import $ from 'jquery';
-import _ from 'lodash';
+import $ from 'ui/jquery';
+import _ from 'ui/lodash';
 import data from 'fixtures/vislib/mock_data/terms/_seriesMultiple';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import 'ui/persisted_state';

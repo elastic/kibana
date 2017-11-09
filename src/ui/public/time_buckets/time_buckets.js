@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import moment from 'moment';
+import _ from 'ui/lodash';
+import moment from 'ui/moment';
 import { parseInterval } from 'ui/utils/parse_interval';
 import { TimeBucketsCalcAutoIntervalProvider } from 'ui/time_buckets/calc_auto_interval';
 import { TimeBucketsCalcEsIntervalProvider } from 'ui/time_buckets/calc_es_interval';

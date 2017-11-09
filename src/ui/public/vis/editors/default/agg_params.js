@@ -1,4 +1,4 @@
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import aggSelectHtml from './agg_select.html';
 import advancedToggleHtml from './advanced_toggle.html';
 import 'ui/filters/match_any';

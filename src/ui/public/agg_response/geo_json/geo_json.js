@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { convertRowsToFeatures } from 'ui/agg_response/geo_json/rows_to_features';
 import { TileMapTooltipFormatterProvider } from 'ui/agg_response/geo_json/_tooltip_formatter';
 import { gridDimensions } from './grid_dimensions';

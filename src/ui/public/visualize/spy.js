@@ -1,5 +1,5 @@
-import $ from 'jquery';
-import _ from 'lodash';
+import $ from 'ui/jquery';
+import _ from 'ui/lodash';
 import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
 import { uiModules } from 'ui/modules';
 import spyTemplate from 'ui/visualize/spy.html';

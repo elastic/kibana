@@ -1,6 +1,6 @@
-import _ from 'lodash';
-import angular from 'angular';
-import $ from 'jquery';
+import _ from 'ui/lodash';
+import angular from 'ui/angular';
+import $ from 'ui/jquery';
 import { metadata } from 'ui/metadata';
 import { formatMsg } from 'ui/notify/lib/_format_msg';
 import fatalSplashScreen from 'ui/notify/partials/fatal_splash_screen.html';

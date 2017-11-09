@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { FILTER_OPERATORS } from './filter_operators';
 
 export function getQueryDslFromFilter(filter) {

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { onlyDisabled } from 'ui/filter_bar/lib/only_disabled';
 import { onlyStateChanged } from 'ui/filter_bar/lib/only_state_changed';
 import { uniqFilters } from 'ui/filter_bar/lib/uniq_filters';

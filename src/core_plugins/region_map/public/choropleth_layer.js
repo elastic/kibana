@@ -1,6 +1,6 @@
-import $ from 'jquery';
-import L from 'leaflet';
-import _ from 'lodash';
+import $ from 'ui/jquery';
+import L from 'ui/leaflet';
+import _ from 'ui/lodash';
 import d3 from 'd3';
 import { KibanaMapLayer } from '../../tile_map/public/kibana_map_layer';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';

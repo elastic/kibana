@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import sinon from 'sinon';
+import _ from 'ui/lodash';
+import sinon from 'ui/sinon';
 import noDigestPromises from 'test_utils/no_digest_promises';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';

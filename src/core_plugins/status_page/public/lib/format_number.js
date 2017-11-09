@@ -1,6 +1,6 @@
 
-import moment from 'moment';
-import numeral from 'numeral';
+import moment from 'ui/moment';
+import numeral from '@elastic/numeral';
 
 export default function formatNumber(num, which) {
   let format = '0.00';

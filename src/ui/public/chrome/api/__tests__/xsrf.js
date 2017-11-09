@@ -1,6 +1,6 @@
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import expect from 'expect.js';
-import sinon from 'sinon';
+import sinon from 'ui/sinon';
 import ngMock from 'ng_mock';
 
 import { initChromeXsrfApi } from '../xsrf';

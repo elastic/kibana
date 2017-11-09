@@ -12,7 +12,7 @@
  * accessibility issue anymore.
  */
 
-import angular from 'angular';
+import angular from 'ui/angular';
 import { uiModules } from 'ui/modules';
 import './kbn_ui_ace_keyboard_mode.less';
 import { keyCodes } from 'ui_framework/services';

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
 
 import tableHtml from './table.html';

@@ -1,6 +1,6 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import sinon from 'sinon';
+import sinon from 'ui/sinon';
 
 import { requestQueue } from '../_request_queue';
 

@@ -1,7 +1,7 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import { pluck } from 'lodash';
-import sinon from 'sinon';
+import { pluck } from 'ui/lodash';
+import sinon from 'ui/sinon';
 import { KbnTopNavControllerProvider } from '../kbn_top_nav_controller';
 
 describe('KbnTopNavController', function () {

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 function getAncestors(siblings, item) {
   const ancestors = item.id && [item.id] || [];

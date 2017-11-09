@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { VislibComponentsLabelsDataArrayProvider } from './data_array';
 import { VislibComponentsLabelsUniqLabelsProvider } from './uniq_labels';
 

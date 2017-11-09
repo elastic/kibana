@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { parseRange } from 'ui/utils/range';
 import 'ui/number_list/number_list_input';
 import { uiModules } from 'ui/modules';

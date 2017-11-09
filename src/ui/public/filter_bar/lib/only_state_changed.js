@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { compareFilters } from 'ui/filter_bar/lib/compare_filters';
 const compareOptions = { disabled: true, negate: true };
 

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import AggConfigResult from 'ui/vis/agg_config_result';
 import { AggResponseTabifyTableProvider } from 'ui/agg_response/tabify/_table';
 import { AggResponseTabifyTableGroupProvider } from 'ui/agg_response/tabify/_table_group';

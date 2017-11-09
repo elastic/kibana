@@ -1,6 +1,6 @@
 import html from 'ui/tooltip/tooltip.html';
 
-require('ui-bootstrap')
+require('ui/ui-bootstrap')
   .config(function ($tooltipProvider) {
     $tooltipProvider.options({
       placement: 'bottom',

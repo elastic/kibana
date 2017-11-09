@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import './index_header';
 import './indexed_fields_table';
 import './scripted_fields_table';

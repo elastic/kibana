@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import './agg_group';
 import './vis_options';
 import { uiModules } from 'ui/modules';

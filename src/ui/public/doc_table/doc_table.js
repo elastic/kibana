@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import html from 'ui/doc_table/doc_table.html';
 import { getSort } from 'ui/doc_table/lib/get_sort';
 import 'ui/doc_table/doc_table.less';

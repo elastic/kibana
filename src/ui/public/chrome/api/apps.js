@@ -1,4 +1,4 @@
-import { clone, get } from 'lodash';
+import { clone, get } from 'ui/lodash';
 import { resolve } from 'url';
 
 // eslint-disable-next-line @elastic/kibana-custom/no-default-export

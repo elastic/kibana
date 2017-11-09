@@ -1,5 +1,5 @@
 import d3 from 'd3';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 export function VislibGridProvider() {
 

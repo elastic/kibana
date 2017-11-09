@@ -1,9 +1,9 @@
-import angular from 'angular';
+import angular from 'ui/angular';
 import ngMock from 'ng_mock';
-import _ from 'lodash';
-import sinon from 'sinon';
+import _ from 'ui/lodash';
+import sinon from 'ui/sinon';
 import expect from 'expect.js';
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import 'ui/private';
 import 'plugins/kibana/discover/components/field_chooser/field_chooser';
 import FixturesHitsProvider from 'fixtures/hits';

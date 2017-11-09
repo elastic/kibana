@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { uiModules } from 'ui/modules';
 import paginateControlsTemplate from 'ui/partials/paginate_controls.html';
 

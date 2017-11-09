@@ -1,4 +1,4 @@
-import { isPlainObject } from 'lodash';
+import { isPlainObject } from 'ui/lodash';
 import { uiModules } from 'ui/modules';
 import { ApplyScopeBindingsProvider } from './apply_scope_bindings';
 

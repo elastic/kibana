@@ -1,5 +1,5 @@
 import { uiModules } from 'ui/modules';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 const module = uiModules.get('app/timelion');
 
 // Used only by the savedSheets service, usually no reason to change this

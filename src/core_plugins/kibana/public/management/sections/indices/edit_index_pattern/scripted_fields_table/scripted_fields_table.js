@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import 'ui/paginated_table';
 import fieldControlsHtml from '../field_controls.html';
 import { dateScripts } from './date_scripts';

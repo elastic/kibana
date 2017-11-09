@@ -4,7 +4,7 @@ import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index
 import NoDigestPromises from 'test_utils/no_digest_promises';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import sinon from 'sinon';
+import sinon from 'ui/sinon';
 
 describe('doc table filter actions', function () {
   NoDigestPromises.activateForSuite();

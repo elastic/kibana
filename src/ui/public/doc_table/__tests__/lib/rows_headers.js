@@ -1,10 +1,10 @@
-import angular from 'angular';
-import _ from 'lodash';
-import sinon from 'sinon';
+import angular from 'ui/angular';
+import _ from 'ui/lodash';
+import sinon from 'ui/sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import getFakeRow from 'fixtures/fake_row';
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import 'plugins/kibana/discover/index';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 

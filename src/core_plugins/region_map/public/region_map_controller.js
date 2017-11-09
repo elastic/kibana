@@ -1,6 +1,6 @@
 import { uiModules } from 'ui/modules';
 import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import AggConfigResult from 'ui/vis/agg_config_result';
 import { KibanaMap } from '../../tile_map/public/kibana_map';
 import ChoroplethLayer from './choropleth_layer';

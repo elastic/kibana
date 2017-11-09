@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 export default function executorProvider(Promise, $timeout, timefilter) {
 
   const queue = [];

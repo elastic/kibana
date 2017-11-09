@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { PointSeriesInitXAxisProvider } from 'ui/agg_response/point_series/_init_x_axis';

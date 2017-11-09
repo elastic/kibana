@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { uiModules } from 'ui/modules';
 // Debounce service, angularized version of lodash debounce
 // borrowed heavily from https://github.com/shahata/angular-debounce

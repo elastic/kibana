@@ -1,4 +1,4 @@
-import { find, each, escape, invoke, size, without } from 'lodash';
+import { find, each, escape, invoke, size, without } from 'ui/lodash';
 
 import { uiModules } from 'ui/modules';
 import { Notifier } from 'ui/notify/notifier';

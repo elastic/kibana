@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 function YesNo(props) {
   const { name, value } = props;

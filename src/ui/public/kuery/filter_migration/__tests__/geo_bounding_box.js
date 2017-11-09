@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import expect from 'expect.js';
 import { convertGeoBoundingBox } from '../geo_bounding_box';
 

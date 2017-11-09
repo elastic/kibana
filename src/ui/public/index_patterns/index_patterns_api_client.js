@@ -1,6 +1,6 @@
 import { resolve as resolveUrl, format as formatUrl } from 'url';
 
-import { pick, mapValues } from 'lodash';
+import { pick, mapValues } from 'ui/lodash';
 
 import { IndexPatternMissingIndices } from 'ui/errors';
 import { Notifier } from 'ui/notify';

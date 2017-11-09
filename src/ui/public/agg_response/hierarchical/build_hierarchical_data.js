@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { extractBuckets } from 'ui/agg_response/hierarchical/_extract_buckets';
 import { createRawData } from 'ui/agg_response/hierarchical/_create_raw_data';
 import { arrayToLinkedList } from 'ui/agg_response/hierarchical/_array_to_linked_list';

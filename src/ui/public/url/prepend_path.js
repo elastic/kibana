@@ -1,5 +1,5 @@
 import { parse, format } from 'url';
-import { isString } from 'lodash';
+import { isString } from 'ui/lodash';
 
 /**
  *

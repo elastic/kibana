@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import sinon from 'sinon';
+import sinon from 'ui/sinon';
 
 import { StateProvider } from 'ui/state_management/state';
 import { unhashUrl } from 'ui/state_management/state_hashing';

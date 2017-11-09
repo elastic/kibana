@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 export default (handleChange) => {
   return (name) => (value) => {
     if (_.isFunction(handleChange)) {

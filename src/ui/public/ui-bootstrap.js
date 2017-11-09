@@ -1,4 +1,4 @@
-require('angular');
+require('ui/angular');
 require('ui/angular-bootstrap');
 
 const { uiModules } = require('ui/modules');

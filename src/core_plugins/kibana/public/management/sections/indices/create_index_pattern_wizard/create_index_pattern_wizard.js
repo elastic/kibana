@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { IndexPatternMissingIndices } from 'ui/errors';
 import 'ui/directives/validate_index_pattern';
 import 'ui/directives/auto_select_if_only_one';

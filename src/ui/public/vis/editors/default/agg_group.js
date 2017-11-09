@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import './agg';
 import './agg_add';
 import './nesting_indicator';

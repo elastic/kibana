@@ -1,6 +1,6 @@
 import d3 from 'd3';
-import _ from 'lodash';
-import $ from 'jquery';
+import _ from 'ui/lodash';
+import $ from 'ui/jquery';
 import { PieContainsAllZeros, ContainerTooSmall } from 'ui/errors';
 import { VislibVisualizationsChartProvider } from './_chart';
 

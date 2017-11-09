@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 export function luceneStringToDsl(query) {
   if (!_.isString(query)) {

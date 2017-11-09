@@ -1,5 +1,5 @@
 import dateTemplate from './date.html';
-import moment from 'moment';
+import moment from 'ui/moment';
 
 export function dateEditor() {
   return {

@@ -1,5 +1,5 @@
 import { initAngularApi } from '../angular';
-import { noop } from 'lodash';
+import { noop } from 'ui/lodash';
 
 describe('Chrome API :: Angular', () => {
   describe('location helper methods', () => {

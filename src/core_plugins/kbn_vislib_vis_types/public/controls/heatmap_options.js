@@ -1,6 +1,6 @@
 import { uiModules } from 'ui/modules';
 import heatmapOptionsTemplate from 'plugins/kbn_vislib_vis_types/controls/heatmap_options.html';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 const module = uiModules.get('kibana');
 
 module.directive('heatmapOptions', function () {

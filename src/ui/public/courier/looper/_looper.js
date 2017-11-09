@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 import 'ui/promises';
 import { Notifier } from 'ui/notify/notifier';

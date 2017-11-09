@@ -1,8 +1,8 @@
 import d3 from 'd3';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { Binder } from 'ui/binder';
 import { positionTooltip } from './position_tooltip';
-import $ from 'jquery';
+import $ from 'ui/jquery';
 
 let allContents = [];
 

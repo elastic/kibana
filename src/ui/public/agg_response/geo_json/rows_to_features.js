@@ -1,6 +1,6 @@
 import { decodeGeoHash } from 'ui/utils/decode_geo_hash';
 import AggConfigResult from 'ui/vis/agg_config_result';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 function getAcr(val) {
   return val instanceof AggConfigResult ? val : null;

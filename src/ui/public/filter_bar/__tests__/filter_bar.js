@@ -1,10 +1,10 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import sinon from 'sinon';
+import sinon from 'ui/sinon';
 
 import MockState from 'fixtures/mock_state';
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import 'ui/filter_bar';
 import { FilterBarLibMapFilterProvider } from 'ui/filter_bar/lib/map_filter';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';

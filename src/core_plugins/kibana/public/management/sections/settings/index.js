@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { toEditableConfig } from 'plugins/kibana/management/sections/settings/lib/to_editable_config';
 import 'plugins/kibana/management/sections/settings/advanced_row';
 import { management } from 'ui/management';

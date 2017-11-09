@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import angular from 'angular';
+import _ from 'ui/lodash';
+import angular from 'ui/angular';
 
 /**
  * Take text from the model and present it to the user as a string

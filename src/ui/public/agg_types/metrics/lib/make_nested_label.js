@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 const makeNestedLabel = function (aggConfig, label) {
   const uppercaseLabel = _.startCase(label);

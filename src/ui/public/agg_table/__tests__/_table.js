@@ -1,10 +1,10 @@
-import _ from 'lodash';
-import $ from 'jquery';
-import moment from 'moment';
+import _ from 'ui/lodash';
+import $ from 'ui/jquery';
+import moment from 'ui/moment';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import fixtures from 'fixtures/fake_hierarchical_data';
-import sinon from 'sinon';
+import sinon from 'ui/sinon';
 import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { VisProvider } from 'ui/vis';

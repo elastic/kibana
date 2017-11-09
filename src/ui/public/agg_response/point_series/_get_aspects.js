@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { PointSeriesFakeXAxisProvider } from 'ui/agg_response/point_series/_fake_x_aspect';
 
 export function PointSeriesGetAspectsProvider(Private) {

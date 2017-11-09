@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import AggConfigResult from 'ui/vis/agg_config_result';
 
 import { uiModules } from 'ui/modules';

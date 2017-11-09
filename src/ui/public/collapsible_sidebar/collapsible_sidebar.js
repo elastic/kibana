@@ -1,6 +1,6 @@
 import 'ui/collapsible_sidebar/collapsible_sidebar.less';
-import _ from 'lodash';
-import $ from 'jquery';
+import _ from 'ui/lodash';
+import $ from 'ui/jquery';
 import { uiModules } from 'ui/modules';
 
 

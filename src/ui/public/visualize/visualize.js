@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import dateMath from '@elastic/datemath';
 import { uiModules } from 'ui/modules';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';

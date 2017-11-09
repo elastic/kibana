@@ -1,5 +1,5 @@
 import { uiModules } from 'ui/modules';
-import { assign } from 'lodash';
+import { assign } from 'ui/lodash';
 
 // get the kibana/table_vis module, and make sure that it requires the "kibana" module if it
 // didn't already

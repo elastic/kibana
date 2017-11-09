@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import chrome from 'ui/chrome';
 
 export const Scanner = function ($http, { index, type } = {}) {

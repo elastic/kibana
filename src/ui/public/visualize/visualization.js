@@ -1,7 +1,7 @@
 import 'ui/visualize/spy';
 import 'ui/visualize/visualize.less';
 import 'ui/visualize/visualize_legend';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { uiModules } from 'ui/modules';
 import { ResizeCheckerProvider } from 'ui/resize_checker';
 import visualizationTemplate from 'ui/visualize/visualization.html';

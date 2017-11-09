@@ -1,5 +1,5 @@
 import React from 'react';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 export default props => (row, i) => {
 
   function tickFormatter(value) {

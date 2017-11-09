@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { Notifier } from 'ui/notify/notifier';
 import { NoDefaultIndexPattern } from 'ui/errors';
 import { IndexPatternsGetProvider } from '../_get';

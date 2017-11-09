@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import color from 'color';
 import Markdown from 'react-markdown';
 import replaceVars from '../../lib/replace_vars';

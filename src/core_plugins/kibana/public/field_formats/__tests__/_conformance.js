@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
@@ -69,12 +69,12 @@ export default describe('conformance', function () {
     expect(_.difference(fieldFormats.raw, formatIds.map(fieldFormats.getType))).to.eql([]);
   });
 
-  describe('Bytes format', basicPatternTests('bytes', require('numeral')));
-  describe('Percent Format', basicPatternTests('percent', require('numeral')));
-  describe('Date Format', basicPatternTests('date', require('moment')));
+  describe('Bytes format', basicPatternTests('bytes', require('@elastic/numeral')));
+  describe('Percent Format', basicPatternTests('percent', require('@elastic/numeral')));
+  describe('Date Format', basicPatternTests('date', require('ui/moment')));
 
   describe('Number Format', function () {
-    basicPatternTests('number', require('numeral'))();
+    basicPatternTests('number', require('@elastic/numeral'))();
 
     it('tries to parse strings', function () {
       const number = new (fieldFormats.getType('number'))({ pattern: '0.0b' }, getConfig);

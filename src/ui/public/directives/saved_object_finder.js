@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import rison from 'rison-node';
 import { keyMap } from 'ui/utils/key_map';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';

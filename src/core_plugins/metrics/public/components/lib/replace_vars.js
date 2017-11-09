@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import handlebars from 'handlebars/dist/handlebars';
 export default function replaceVars(str, args = {}, vars = {}) {
   try {

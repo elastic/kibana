@@ -1,5 +1,5 @@
 import d3 from 'd3';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { VislibLibErrorHandlerProvider } from './_error_handler';
 import { TooltipProvider } from 'ui/vis/components/tooltip';
 

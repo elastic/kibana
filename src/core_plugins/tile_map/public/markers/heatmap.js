@@ -1,5 +1,5 @@
-import L from 'leaflet';
-import _ from 'lodash';
+import L from 'ui/leaflet';
+import _ from 'ui/lodash';
 import d3 from 'd3';
 import { EventEmitter } from 'events';
 

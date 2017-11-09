@@ -1,5 +1,5 @@
 import d3 from 'd3';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import { VislibLibChartTitleProvider } from 'ui/vislib/lib/chart_title';

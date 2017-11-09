@@ -1,4 +1,4 @@
-import sinon from 'sinon';
+import sinon from 'ui/sinon';
 import ngMock from 'ng_mock';
 import { EventsProvider } from 'ui/events';
 

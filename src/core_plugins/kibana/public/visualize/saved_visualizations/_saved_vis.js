@@ -6,7 +6,7 @@
  * NOTE: It's a type of SavedObject, but specific to visualizations.
  */
 
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { VisProvider } from 'ui/vis';
 import { uiModules } from 'ui/modules';
 

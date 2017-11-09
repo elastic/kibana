@@ -1,5 +1,5 @@
 import { CATEGORY } from '../vis_category';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 export function VisTypeProvider() {
   class VisType {

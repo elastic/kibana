@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { uiModules } from 'ui/modules';
 // Gets all fields of a given type.
 // You may also pass "*" to get all types

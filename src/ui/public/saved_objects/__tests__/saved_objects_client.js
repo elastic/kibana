@@ -1,4 +1,4 @@
-import sinon from 'sinon';
+import sinon from 'ui/sinon';
 import expect from 'expect.js';
 import { SavedObjectsClient } from '../saved_objects_client';
 import { SavedObject } from '../saved_object';

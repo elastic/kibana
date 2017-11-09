@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import html from 'ui/visualize/visualize_legend.html';
 import { VislibLibDataProvider } from 'ui/vislib/lib/data';
 import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { FilterBarLibMapFilterProvider } from 'ui/filter_bar/lib/map_filter';
 
 export function FilterBarLibMapAndFlattenFiltersProvider(Private, Promise) {

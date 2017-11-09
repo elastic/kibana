@@ -1,4 +1,4 @@
-import { includes, startsWith } from 'lodash';
+import { includes, startsWith } from 'ui/lodash';
 import lookup from './agg_lookup';
 const paths = [
   'cumulative_sum',

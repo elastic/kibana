@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import sinon from 'sinon';
+import sinon from 'ui/sinon';
 
 import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
 

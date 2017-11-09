@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 import { FilterManagerProvider } from 'ui/filter_manager';
 import {

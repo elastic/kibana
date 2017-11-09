@@ -1,4 +1,4 @@
-import { isString, startsWith } from 'lodash';
+import { isString, startsWith } from 'ui/lodash';
 
 /**
  * Serializes the given object into a JSON string

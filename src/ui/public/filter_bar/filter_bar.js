@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import template from 'ui/filter_bar/filter_bar.html';
 import 'ui/directives/json_input';
 import '../filter_editor';

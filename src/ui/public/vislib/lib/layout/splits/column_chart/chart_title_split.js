@@ -1,5 +1,5 @@
 import d3 from 'd3';
-import $ from 'jquery';
+import $ from 'ui/jquery';
 
 export function VislibLibLayoutSplitsColumnChartChartTitleSplitProvider() {
   /*

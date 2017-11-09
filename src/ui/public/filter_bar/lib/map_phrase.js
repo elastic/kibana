@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { SavedObjectNotFound } from '../../errors';
 
 export function FilterBarLibMapPhraseProvider(Promise, courier) {

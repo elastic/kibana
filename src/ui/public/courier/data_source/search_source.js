@@ -50,7 +50,7 @@
  *    `appSearchSource`.
  */
 
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 import { NormalizeSortRequestProvider } from './_normalize_sort_request';
 import { RootSearchSourceProvider } from './_root_search_source';

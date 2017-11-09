@@ -1,4 +1,4 @@
-import sinon from 'sinon';
+import sinon from 'ui/sinon';
 import expect from 'expect.js';
 import { findObjectByTitle } from '../find_object_by_title';
 import { SavedObject } from '../saved_object';

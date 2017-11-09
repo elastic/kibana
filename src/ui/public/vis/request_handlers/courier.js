@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 import { VisRequestHandlersRegistryProvider } from 'ui/registry/vis_request_handlers';
 

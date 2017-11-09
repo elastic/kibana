@@ -5,8 +5,8 @@
  * elasticsearch.angular.js client.
  */
 
-import 'elasticsearch-browser';
-import _ from 'lodash';
+import 'ui/elasticsearch';
+import _ from 'ui/lodash';
 import { uiModules } from 'ui/modules';
 
 const plugins = [function (Client, config) {

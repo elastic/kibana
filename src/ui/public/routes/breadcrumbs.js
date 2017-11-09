@@ -1,4 +1,4 @@
-import { trim, startCase } from 'lodash';
+import { trim, startCase } from 'ui/lodash';
 
 /**
  *  Take a path (from $location.path() usually) and parse

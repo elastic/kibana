@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 const OPERANDS_IN_RANGE = 2;
 
 export function buildRangeFilter(field, params, indexPattern, formattedValue) {

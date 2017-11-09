@@ -1,6 +1,6 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import ngMock from 'ng_mock';
-import sinon from 'sinon';
+import sinon from 'ui/sinon';
 import RouteManager from 'ui/routes/route_manager';
 import expect from 'expect.js';
 

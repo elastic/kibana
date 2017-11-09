@@ -1,4 +1,4 @@
-import { uniq, defaults } from 'lodash';
+import { uniq, defaults } from 'ui/lodash';
 
 import { findTestBundleUrl } from './find_test_bundle_url';
 import { getShardingParamsFromUrl } from './get_sharding_params_from_url';

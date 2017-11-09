@@ -3,8 +3,8 @@ import { FilterManagerProvider } from 'ui/filter_manager';
 import NoDigestPromises from 'test_utils/no_digest_promises';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import sinon from 'sinon';
-import moment from 'moment';
+import sinon from 'ui/sinon';
+import moment from 'ui/moment';
 
 describe('addFiltersToKuery', function () {
   NoDigestPromises.activateForSuite();

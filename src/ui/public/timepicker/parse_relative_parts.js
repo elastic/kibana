@@ -1,6 +1,6 @@
 import dateMath from '@elastic/datemath';
-import moment from 'moment';
-import _ from 'lodash';
+import moment from 'ui/moment';
+import _ from 'ui/lodash';
 import { relativeOptions } from './relative_options';
 
 export function parseRelativeString(part) {

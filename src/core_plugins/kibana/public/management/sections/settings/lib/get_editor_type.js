@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 const NAMED_EDITORS = ['json', 'array', 'boolean', 'select', 'markdown'];
 const NORMAL_EDITOR = ['number', 'string', 'null', 'undefined'];

@@ -1,3 +1,3 @@
-import $ from 'jquery';
+import $ from 'ui/jquery';
 export default $({});
 

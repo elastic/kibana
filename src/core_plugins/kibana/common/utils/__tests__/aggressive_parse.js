@@ -1,6 +1,6 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import expect from 'expect.js';
-import sinon from 'sinon';
+import sinon from 'ui/sinon';
 import * as aggressiveParse from '../aggressive_parse';
 
 describe('aggressiveParse', () => {

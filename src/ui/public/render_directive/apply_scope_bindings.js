@@ -1,4 +1,4 @@
-import { forOwn, noop } from 'lodash';
+import { forOwn, noop } from 'ui/lodash';
 
 import 'ui/bind';
 

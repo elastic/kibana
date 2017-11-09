@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 export function collectKeys(children) {
   const nextChildren = _.pluck(children, 'children');
   const keys = _.pluck(children, 'name');

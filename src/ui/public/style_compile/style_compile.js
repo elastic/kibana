@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import $ from 'jquery';
+import _ from 'ui/lodash';
+import $ from 'ui/jquery';
 import 'ui/config';
 import { uiModules } from 'ui/modules';
 const $style = $('<style>').appendTo('head').attr('id', 'style-compile');

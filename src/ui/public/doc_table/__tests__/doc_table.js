@@ -1,6 +1,6 @@
-import angular from 'angular';
+import angular from 'ui/angular';
 import expect from 'expect.js';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import ngMock from 'ng_mock';
 import 'ui/private';
 import 'ui/doc_table';

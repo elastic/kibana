@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import d3 from 'd3';
 
 // Data
@@ -12,7 +12,7 @@ import histogramRows from 'fixtures/vislib/mock_data/histogram/_rows';
 import stackedSeries from 'fixtures/vislib/mock_data/date_histogram/_stacked_series';
 import { seriesMonthlyInterval } from 'fixtures/vislib/mock_data/date_histogram/_series_monthly_interval';
 import { rowsSeriesWithHoles } from 'fixtures/vislib/mock_data/date_histogram/_rows_series_with_holes';
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
 import 'ui/persisted_state';
 

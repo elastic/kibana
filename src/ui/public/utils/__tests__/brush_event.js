@@ -1,6 +1,6 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import expect from 'expect.js';
-import moment from 'moment';
+import moment from 'ui/moment';
 import ngMock from 'ng_mock';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { UtilsBrushEventProvider } from 'ui/utils/brush_event';

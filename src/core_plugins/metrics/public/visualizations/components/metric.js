@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import getLastValue from '../lib/get_last_value';
 import reactcss from 'reactcss';
 import calculateCorrdinates from '../lib/calculate_corrdinates';

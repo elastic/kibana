@@ -1,4 +1,4 @@
-import moment from 'moment';
+import moment from 'ui/moment';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('kibana');
 

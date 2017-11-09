@@ -1,4 +1,4 @@
-import { groupBy, has } from 'lodash';
+import { groupBy, has } from 'ui/lodash';
 import { DecorateQueryProvider } from '../_decorate_query';
 import { buildQueryFromKuery } from './from_kuery';
 import { buildQueryFromFilters } from './from_filters';

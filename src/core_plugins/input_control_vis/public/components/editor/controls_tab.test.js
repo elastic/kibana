@@ -1,5 +1,5 @@
 import React from 'react';
-import sinon from 'sinon';
+import sinon from 'ui/sinon';
 import { mount, shallow } from 'enzyme';
 
 import {

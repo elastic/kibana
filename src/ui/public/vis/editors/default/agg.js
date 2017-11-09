@@ -1,7 +1,7 @@
 import './agg_params';
 import './agg_add';
 import { Direction } from './keyboard_move';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { uiModules } from 'ui/modules';
 import aggTemplate from './agg.html';
 uiModules

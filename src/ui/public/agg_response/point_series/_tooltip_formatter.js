@@ -1,4 +1,4 @@
-import $ from 'jquery';
+import $ from 'ui/jquery';
 
 export function PointSeriesTooltipFormatter($compile, $rootScope) {
 

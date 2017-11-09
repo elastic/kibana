@@ -1,5 +1,5 @@
 import ngMock from 'ng_mock';
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import expect from 'expect.js';
 
 import { chromeNavControlsRegistry } from 'ui/registry/chrome_nav_controls';

@@ -1,5 +1,5 @@
 import { SavedObjectNotFound } from 'ui/errors';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import editorHtml from '../controls/field.html';
 import { BaseParamTypeProvider } from './base';
 import 'ui/filters/field_type';

@@ -1,5 +1,5 @@
 import 'ui/filters/label';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { IndexedArray } from 'ui/indexed_array';
 import { FieldParamTypeProvider } from './param_types/field';
 import { OptionedParamTypeProvider } from './param_types/optioned';

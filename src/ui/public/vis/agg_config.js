@@ -5,7 +5,7 @@
  * the Visualize app.
  */
 
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 
 export function VisAggConfigProvider(Private, Promise) {

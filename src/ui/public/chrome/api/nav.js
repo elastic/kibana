@@ -1,4 +1,4 @@
-import { remove } from 'lodash';
+import { remove } from 'ui/lodash';
 import { prependPath } from 'ui/url/prepend_path';
 import { relativeToAbsolute } from 'ui/url/relative_to_absolute';
 import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';

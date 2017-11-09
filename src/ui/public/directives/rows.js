@@ -1,5 +1,5 @@
-import $ from 'jquery';
-import _ from 'lodash';
+import $ from 'ui/jquery';
+import _ from 'ui/lodash';
 import AggConfigResult from 'ui/vis/agg_config_result';
 import { FilterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 import { uiModules } from 'ui/modules';

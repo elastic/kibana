@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { format as formatUrl, parse as parseUrl } from 'url';
 
 import { uiModules } from 'ui/modules';

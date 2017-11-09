@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { AggTypesMetricsMetricAggTypeProvider } from 'ui/agg_types/metrics/metric_agg_type';
 import topSortEditor from 'ui/agg_types/controls/top_sort.html';
 import aggregateAndSizeEditor from 'ui/agg_types/controls/top_aggregate_and_size.html';

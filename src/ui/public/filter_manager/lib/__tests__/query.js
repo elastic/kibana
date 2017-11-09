@@ -1,6 +1,6 @@
 import { buildQueryFilter } from 'ui/filter_manager/lib/query';
 import expect from 'expect.js';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import ngMock from 'ng_mock';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 

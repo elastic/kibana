@@ -1,4 +1,4 @@
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import expect from 'expect.js';
 import simulateKeys from 'test_utils/simulate_keys';
 import ngMock from 'ng_mock';

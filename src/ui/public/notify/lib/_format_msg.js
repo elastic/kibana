@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { formatESMsg } from 'ui/notify/lib/_format_es_msg';
 const has = _.has;
 

@@ -1,4 +1,4 @@
-import { values } from 'lodash';
+import { values } from 'ui/lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import resp from 'fixtures/agg_resp/range';

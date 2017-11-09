@@ -1,4 +1,4 @@
-require('jquery');
+require('ui/jquery');
 require('../../../node_modules/angular/angular');
 require('../../../node_modules/angular-translate');
 require('../../../node_modules/angular-elastic/elastic');

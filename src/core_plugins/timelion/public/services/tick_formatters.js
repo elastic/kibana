@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 function baseTickFormatter(value, axis) {
   const factor = axis.tickDecimals ? Math.pow(10, axis.tickDecimals) : 1;

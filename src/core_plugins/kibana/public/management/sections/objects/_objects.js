@@ -1,6 +1,6 @@
 import { saveAs } from '@elastic/filesaver';
-import { find, flattenDeep, pluck, sortBy } from 'lodash';
-import angular from 'angular';
+import { find, flattenDeep, pluck, sortBy } from 'ui/lodash';
+import angular from 'ui/angular';
 import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_object_registry';
 import objectIndexHTML from 'plugins/kibana/management/sections/objects/_objects.html';
 import 'ui/directives/file_upload';

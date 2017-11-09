@@ -3,7 +3,7 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import series from 'fixtures/vislib/mock_data/date_histogram/_series';
 import terms from 'fixtures/vislib/mock_data/terms/_columns';
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import { VislibVisualizationsTimeMarkerProvider } from 'ui/vislib/visualizations/time_marker';
 
 describe('Vislib Time Marker Test Suite', function () {

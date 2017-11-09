@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { functions } from '../functions';
 import { nodeTypes } from '../node_types';
 

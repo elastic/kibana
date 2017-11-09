@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import moment from 'moment';
+import _ from 'ui/lodash';
+import moment from 'ui/moment';
 import dateMath from '@elastic/datemath';
 import 'ui/state_management/global_state';
 import 'ui/config';

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 require('angular-sortable-view');
 require('plugins/timelion/directives/chart/chart');

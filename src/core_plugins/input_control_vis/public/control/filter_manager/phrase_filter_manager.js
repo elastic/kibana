@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { FilterManager } from './filter_manager.js';
 import { buildPhraseFilter } from 'ui/filter_manager/lib/phrase';
 import { buildPhrasesFilter } from 'ui/filter_manager/lib/phrases';

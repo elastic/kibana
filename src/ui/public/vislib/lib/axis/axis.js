@@ -1,6 +1,6 @@
 import d3 from 'd3';
-import _ from 'lodash';
-import $ from 'jquery';
+import _ from 'ui/lodash';
+import $ from 'ui/jquery';
 import { VislibLibErrorHandlerProvider } from '../_error_handler';
 import { VislibLibAxisTitleProvider } from './axis_title';
 import { VislibAxisLabelsProvider } from './axis_labels';

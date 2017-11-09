@@ -1,7 +1,7 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import sinon from 'sinon';
+import sinon from 'ui/sinon';
 import 'ui/private';
 import { AggTypesAggParamsProvider } from 'ui/agg_types/agg_params';
 import { VisProvider } from 'ui/vis';

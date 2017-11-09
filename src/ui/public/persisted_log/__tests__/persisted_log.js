@@ -1,5 +1,5 @@
 
-import sinon from 'sinon';
+import sinon from 'ui/sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import 'ui/persisted_log';

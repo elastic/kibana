@@ -1,7 +1,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { Provider } from 'react-redux';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import sizeMe from 'react-sizeme';
 
 import { getContainerApiMock } from '../__tests__/get_container_api_mock.test';

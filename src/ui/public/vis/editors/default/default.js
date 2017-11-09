@@ -1,9 +1,9 @@
 import './sidebar';
 import './vis_options';
-import $ from 'jquery';
+import $ from 'ui/jquery';
 
-import _ from 'lodash';
-import angular from 'angular';
+import _ from 'ui/lodash';
+import angular from 'ui/angular';
 import defaultEditorTemplate from './default.html';
 
 import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';

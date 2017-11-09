@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import moment from 'moment-timezone';
+import moment from 'ui/moment-timezone';
 import { RelativeDateFormat } from '../relative_date';
 
 describe('Relative Date Format', function () {

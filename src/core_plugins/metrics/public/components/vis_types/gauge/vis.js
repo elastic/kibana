@@ -2,7 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { visWithSplits } from '../../vis_with_splits';
 import tickFormatter from '../../lib/tick_formatter';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import Gauge from 'plugins/metrics/visualizations/components/gauge';
 import getLastValue from 'plugins/metrics/visualizations/lib/get_last_value';
 import color from 'color';

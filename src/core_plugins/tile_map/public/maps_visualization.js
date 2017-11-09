@@ -1,7 +1,7 @@
 import 'ui/vislib';
 import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
-import $ from 'jquery';
-import _ from 'lodash';
+import $ from 'ui/jquery';
+import _ from 'ui/lodash';
 import { KibanaMap } from './kibana_map';
 import { GeohashLayer } from './geohash_layer';
 import { SearchSourceProvider } from 'ui/courier/data_source/search_source';

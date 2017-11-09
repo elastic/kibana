@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import 'plugins/kibana/visualize/saved_visualizations/saved_visualizations';
 import 'ui/vis/editors/default/sidebar';
 import 'plugins/kibana/visualize/editor/agg_filter';
@@ -7,7 +7,7 @@ import 'ui/collapsible_sidebar';
 import 'ui/share';
 import 'ui/query_bar';
 import chrome from 'ui/chrome';
-import angular from 'angular';
+import angular from 'ui/angular';
 import { Notifier } from 'ui/notify/notifier';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { DocTitleProvider } from 'ui/doc_title';

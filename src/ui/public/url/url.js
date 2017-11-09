@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import 'ui/filters/uriescape';
 import 'ui/filters/rison';
 import { uiModules } from 'ui/modules';

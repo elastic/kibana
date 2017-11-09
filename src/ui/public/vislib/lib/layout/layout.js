@@ -1,6 +1,6 @@
 import d3 from 'd3';
-import _ from 'lodash';
-import $ from 'jquery';
+import _ from 'ui/lodash';
+import $ from 'ui/jquery';
 import { VislibLibLayoutLayoutTypesProvider } from './layout_types';
 import { VislibLibAxisProvider } from 'ui/vislib/lib/axis';
 import { VislibLibChartTitleProvider } from 'ui/vislib/lib/chart_title';

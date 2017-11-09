@@ -1,7 +1,7 @@
 
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import fixtures from 'fixtures/fake_hierarchical_data';
-import sinon from 'sinon';
+import sinon from 'ui/sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';

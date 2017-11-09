@@ -1,8 +1,8 @@
-import angular from 'angular';
+import angular from 'ui/angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import sinon from 'sinon';
-import _ from 'lodash';
+import sinon from 'ui/sinon';
+import _ from 'ui/lodash';
 
 describe('ui/modals/confirm_modal', function () {
   let confirmModal;

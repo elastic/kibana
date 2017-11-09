@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import AddDeleteButtons from '../add_delete_buttons';
 import * as collectionActions from '../lib/collection_actions';
 import MetricSelect from './metric_select';

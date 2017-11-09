@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { AggTypesAggParamsProvider } from 'ui/agg_types/agg_params';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 

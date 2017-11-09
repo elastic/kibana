@@ -1,4 +1,4 @@
-import { has, get } from 'lodash';
+import { has, get } from 'ui/lodash';
 import { SavedObjectNotFound } from '../../errors';
 
 export function FilterBarLibMapRangeProvider(Promise, courier) {

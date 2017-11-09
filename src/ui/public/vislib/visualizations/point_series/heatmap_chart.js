@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import moment from 'moment';
+import _ from 'ui/lodash';
+import moment from 'ui/moment';
 import { VislibVisualizationsPointSeriesProvider } from './_point_series';
 import { getHeatmapColors } from 'ui/vislib/components/color/heatmap_color';
 

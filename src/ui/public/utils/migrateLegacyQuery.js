@@ -1,4 +1,4 @@
-import { has } from 'lodash';
+import { has } from 'ui/lodash';
 
 /**
  * Creates a standardized query object from old queries that were either strings or pure ES query DSL

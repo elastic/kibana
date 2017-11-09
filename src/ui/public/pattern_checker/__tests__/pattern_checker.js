@@ -1,7 +1,7 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import _ from 'lodash';
-import sinon from 'sinon';
+import _ from 'ui/lodash';
+import sinon from 'ui/sinon';
 
 describe('pattern checker', function () {
   let $httpBackend;

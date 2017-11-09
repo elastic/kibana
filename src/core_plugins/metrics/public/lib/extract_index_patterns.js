@@ -1,4 +1,4 @@
-import { uniq } from 'lodash';
+import { uniq } from 'ui/lodash';
 export function extractIndexPatterns(vis) {
   const patternsToFetch = [];
 

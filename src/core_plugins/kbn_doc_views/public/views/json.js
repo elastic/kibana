@@ -1,4 +1,4 @@
-import angular from 'angular';
+import angular from 'ui/angular';
 import 'ui/ace';
 import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
 
