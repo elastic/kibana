@@ -32,7 +32,7 @@ function getProps(props = {}) {
     },
     getEmbeddableHandler: () => getEmbeddableHandlerMock(),
     getContainerApi: () => getContainerApiMock(),
-    onPanelUpdated: () => {},
+    onPanelsUpdated: () => {},
     useMargins: true,
   };
   return Object.assign(defaultTestProps, props);
