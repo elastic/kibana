@@ -18,7 +18,6 @@ import { DashboardStateManager } from './dashboard_state_manager';
 import { saveDashboard } from './lib';
 import { showCloneModal } from './top_nav/show_clone_modal';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
-import { keyCodes } from 'ui_framework/services';
 import { DashboardContainerAPI } from './dashboard_container_api';
 import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
@@ -86,6 +85,25 @@ app.directive('dashboardApp', function ($injector) {
         dashboardStateManager.syncTimefilterWithDashboard(timefilter, quickRanges);
       }
 
+      let onRouteChange;
+      const setFullScreenMode = fullScreenMode => {
+        if (dashboardStateManager.getFullScreenMode() !== fullScreenMode) {
+          dashboardStateManager.setFullScreenMode(fullScreenMode);
+        }
+        chrome.setVisible(!fullScreenMode);
+
+        // Make sure that if we exit the dashboard app, the chrome becomes visible again
+        // (e.g. if the user clicks the back button).
+        if (fullScreenMode) {
+          onRouteChange = $scope.$on('$routeChangeStart', () => {
+            chrome.setVisible(true);
+            onRouteChange();
+          });
+        } else if (onRouteChange) {
+          onRouteChange();
+        }
+      };
+
       const updateState = () => {
         // Following the "best practice" of always have a '.' in your ng-models –
         // https://github.com/angular/angular.js/wiki/Understanding-Scopes
@@ -98,8 +116,8 @@ app.directive('dashboardApp', function ($injector) {
           description: dashboardStateManager.getDescription(),
         };
         $scope.panels = dashboardStateManager.getPanels();
-        $scope.fullScreenMode = dashboardStateManager.getFullScreenMode();
         $scope.indexPatterns = dashboardStateManager.getPanelIndexPatterns();
+        setFullScreenMode(dashboardStateManager.getFullScreenMode());
       };
 
       // Part of the exposed plugin API - do not remove without careful consideration.
@@ -268,46 +286,14 @@ app.directive('dashboardApp', function ($injector) {
           }).catch(notify.error);
       };
 
-      $scope.showFilterBar = () => filterBar.getFilters().length > 0 || !$scope.fullScreenMode;
-      let onRouteChange;
-      const setFullScreenMode = (fullScreenMode) => {
-        $scope.fullScreenMode = fullScreenMode;
-        dashboardStateManager.setFullScreenMode(fullScreenMode);
-        chrome.setVisible(!fullScreenMode);
-        $scope.$broadcast('reLayout');
-
-        // Make sure that if we exit the dashboard app, the chrome becomes visible again
-        // (e.g. if the user clicks the back button).
-        if (fullScreenMode) {
-          onRouteChange = $scope.$on('$routeChangeStart', () => {
-            chrome.setVisible(true);
-            onRouteChange();
-          });
-        } else if (onRouteChange) {
-          onRouteChange();
-        }
-      };
-
-      $scope.$watch('fullScreenMode', () => setFullScreenMode(dashboardStateManager.getFullScreenMode()));
-
-      $scope.exitFullScreenMode = () => setFullScreenMode(false);
-
-      document.addEventListener('keydown', (e) => {
-        if (e.keyCode === keyCodes.ESCAPE) {
-          setFullScreenMode(false);
-        }
-      }, false);
+      $scope.showFilterBar = () => filterBar.getFilters().length > 0 || !dashboardStateManager.getFullScreenMode();
 
       $scope.showAddPanel = () => {
-        if ($scope.fullScreenMode) {
-          $scope.exitFullScreenMode();
-        }
+        setFullScreenMode(false);
         $scope.kbnTopNav.open('add');
       };
       $scope.enterEditMode = () => {
-        if ($scope.fullScreenMode) {
-          $scope.exitFullScreenMode();
-        }
+        setFullScreenMode(false);
         $scope.kbnTopNav.click('edit');
       };
       const navActions = {};

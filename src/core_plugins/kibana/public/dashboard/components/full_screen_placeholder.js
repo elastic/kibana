@@ -1,0 +1,53 @@
+import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
+
+import {
+  KuiKeyboardAccessible,
+} from 'ui_framework/components';
+import {
+  keyCodes,
+} from 'ui_framework/services';
+
+export class FullScreenModePlaceholder extends PureComponent {
+
+  onKeyDown = (e) => {
+    if (e.keyCode === keyCodes.ESCAPE) {
+      this.props.onExitFullScreenMode();
+    }
+  };
+
+  componentWillMount() {
+    document.addEventListener('keydown', this.onKeyDown, false);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener('keydown', this.onKeyDown, false);
+  }
+
+  render() {
+    return (
+      <div
+        className="fullScreenModePlaceholder"
+      >
+        <KuiKeyboardAccessible>
+          <div
+            aria-label="Exit full screen mode"
+            className="exitFullScreenMode"
+            onClick={this.props.onExitFullScreenMode}
+          >
+            <span className="exitFullScreenModeLogo" data-test-subj="exitFullScreenModeLogo"/>
+            <span className="exitFullScreenModeText" data-test-subj="exitFullScreenModeText">
+              Exit full screen
+              <span className="kuiIcon fa fa-angle-left"/>
+            </span>
+          </div>
+        </KuiKeyboardAccessible>
+      </div>
+    );
+  }
+}
+
+FullScreenModePlaceholder.propTypes = {
+  onExitFullScreenMode: PropTypes.func.isRequired,
+};
+
