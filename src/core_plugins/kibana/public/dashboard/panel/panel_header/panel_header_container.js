@@ -38,7 +38,7 @@ const mapDispatchToProps = (dispatch, { panelId }) => ({
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { isExpanded, isViewOnlyMode, title } = stateProps;
   const { onMaximizePanel, onMinimizePanel } = dispatchProps;
-  const { panelId, embeddableHandler } = ownProps;
+  const { panelId, embeddableFactory } = ownProps;
   let actions;
 
   if (isViewOnlyMode) {
@@ -49,7 +49,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     actions = (
       <PanelOptionsMenuContainer
         panelId={panelId}
-        embeddableHandler={embeddableHandler}
+        embeddableFactory={embeddableFactory}
       />
     );
   }
@@ -69,9 +69,9 @@ export const PanelHeaderContainer = connect(
 PanelHeaderContainer.propTypes = {
   panelId: PropTypes.string.isRequired,
   /**
-   * @type {EmbeddableHandler}
+   * @type {EmbeddableFactory}
    */
-  embeddableHandler: PropTypes.shape({
+  embeddableFactory: PropTypes.shape({
     destroy: PropTypes.func.isRequired,
     render: PropTypes.func.isRequired,
     addDestroyEmeddable: PropTypes.func.isRequired,
