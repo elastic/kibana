@@ -16,7 +16,7 @@ import { OperatorFunction } from '../interfaces';
  * receive new config values (or when we stop the pid service).
  * 
  * ```js
- * .switchMap(config => {
+ * switchMap(config => {
  *   return new Observable(() => {
  *     const pid = new PidFile(config);
  *     pid.writeFile();
@@ -36,7 +36,7 @@ import { OperatorFunction } from '../interfaces';
  * timeout, e.g.
  * 
  * ```js
- * .switchMap(value => {
+ * switchMap(value => {
  *   return new Observable(observer => {
  *     const id = setTimeout(() => {
  *       observer.next(value);
