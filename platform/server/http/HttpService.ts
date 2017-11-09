@@ -1,4 +1,10 @@
-import { Observable, Subscription, k$, first, toPromise } from '@elastic/kbn-observable';
+import {
+  Observable,
+  Subscription,
+  k$,
+  first,
+  toPromise
+} from '@elastic/kbn-observable';
 
 import { Env } from '../../config';
 import { HttpServer } from './HttpServer';
