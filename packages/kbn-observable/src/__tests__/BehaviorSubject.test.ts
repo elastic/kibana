@@ -1,6 +1,7 @@
 import { Observable } from '../Observable';
 import { Subject } from '../Subject';
 import { BehaviorSubject } from '../BehaviorSubject';
+import { collect } from '../lib/collect';
 
 test('should extend Subject', () => {
   const subject = new BehaviorSubject(null);
@@ -39,45 +40,30 @@ test('should not update value after completed', () => {
   expect(subject.getValue()).toEqual('bar');
 });
 
-test('should start with an initialization value', done => {
+test('should start with an initialization value', async () => {
   const subject = new BehaviorSubject('foo');
-  const expected = ['foo', 'bar'];
-  let i = 0;
-
-  subject.subscribe({
-    next: x => {
-      expect(x).toEqual(expected[i++]);
-    },
-    complete: done
-  });
+  const res = collect(subject);
 
   subject.next('bar');
   subject.complete();
+
+  expect(await res).toEqual(['foo', 'bar', 'C']);
 });
 
-test('should pump values to multiple subscribers', done => {
+test('should pump values to multiple subscribers', async () => {
   const subject = new BehaviorSubject('init');
-  const expected = ['init', 'foo', 'bar'];
-  let i = 0;
-  let j = 0;
+  const expected = ['init', 'foo', 'bar', 'C'];
 
-  subject.subscribe({
-    next: x => {
-      expect(x).toEqual(expected[i++]);
-    }
-  });
-
-  subject.subscribe({
-    next: x => {
-      expect(x).toEqual(expected[j++]);
-    },
-    complete: done
-  });
+  const res1 = collect(subject);
+  const res2 = collect(subject);
 
   expect((subject as any).observers.size).toEqual(2);
   subject.next('foo');
   subject.next('bar');
   subject.complete();
+
+  expect(await res1).toEqual(expected);
+  expect(await res2).toEqual(expected);
 });
 
 test('should not pass values nexted after a complete', () => {
@@ -99,23 +85,19 @@ test('should not pass values nexted after a complete', () => {
   expect(results).toEqual(['init', 'foo']);
 });
 
-test('should clean out unsubscribed subscribers', done => {
+test('should clean out unsubscribed subscribers', () => {
   const subject = new BehaviorSubject('init');
 
-  const sub1 = subject.subscribe(x => {
-    expect(x).toEqual('init');
-  });
-
-  const sub2 = subject.subscribe(x => {
-    expect(x).toEqual('init');
-  });
+  const sub1 = subject.subscribe();
+  const sub2 = subject.subscribe();
 
   expect((subject as any).observers.size).toEqual(2);
+
   sub1.unsubscribe();
   expect((subject as any).observers.size).toEqual(1);
+
   sub2.unsubscribe();
   expect((subject as any).observers.size).toEqual(0);
-  done();
 });
 
 test('should replay the previous value when subscribed', () => {
@@ -172,25 +154,14 @@ test('should emit complete when subscribed after completed', () => {
   expect(complete).toHaveBeenCalledTimes(1);
 });
 
-test('should be an Observer which can be given to Observable.subscribe', done => {
+test('should be an Observer which can be given to Observable.subscribe', async () => {
   const source = Observable.of(1, 2, 3, 4, 5);
   const subject = new BehaviorSubject(0);
 
-  const actual: number[] = [];
-
-  subject.subscribe(
-    x => {
-      actual.push(x);
-    },
-    x => {
-      done(new Error('should not be called'));
-    },
-    () => {
-      done();
-    }
-  );
+  const res = collect(subject);
 
   source.subscribe(subject);
 
-  expect(actual).toEqual([0, 1, 2, 3, 4, 5]);
+  expect(await res).toEqual([0, 1, 2, 3, 4, 5, 'C']);
+  expect(subject.getValue()).toBe(5);
 });
