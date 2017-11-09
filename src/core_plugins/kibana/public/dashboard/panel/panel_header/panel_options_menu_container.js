@@ -25,7 +25,7 @@ const mapStateToProps = ({ dashboard }, { panelId }) => {
   const embeddableTitle = embeddable ? embeddable.title : '';
   return {
     panelTitle: panel.title === undefined ? embeddableTitle : panel.title,
-    editUrl: embeddable ? getEmbeddableEditUrl(dashboard, panelId) : '',
+    editUrl: embeddable ? getEmbeddableEditUrl(dashboard, panelId) : null,
     isExpanded: getMaximizedPanelId(dashboard) === panelId,
   };
 };

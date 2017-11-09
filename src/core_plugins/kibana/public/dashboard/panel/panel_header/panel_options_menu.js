@@ -43,7 +43,7 @@ export class PanelOptionsMenu extends React.Component {
           aria-hidden="true"
           className="kuiButton__icon kuiIcon fa-edit"
         />,
-        onClick: this.onEditPanel,
+        onClick: this.props.editUrl ? this.onEditPanel : undefined,
       },
       {
         name: 'Customize panel',
@@ -138,7 +138,7 @@ PanelOptionsMenu.propTypes = {
   panelTitle: PropTypes.string,
   onUpdatePanelTitle: PropTypes.func.isRequired,
   onResetPanelTitle: PropTypes.func.isRequired,
-  editUrl: PropTypes.string.isRequired,
+  editUrl: PropTypes.string, // May be empty if the embeddable is still loading
   toggleExpandedPanel: PropTypes.func.isRequired,
   isExpanded: PropTypes.bool.isRequired,
   onDeletePanel: PropTypes.func, // Not available when the panel is expanded.
