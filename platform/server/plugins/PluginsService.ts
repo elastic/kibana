@@ -21,8 +21,8 @@ import { Logger, LoggerFactory } from '../../logging';
 import { CoreService } from '../../types/CoreService';
 import { ConfigService } from '../../config';
 
-const fsReadDir$ = $bindNodeCallback(readdir);
-const fsStat$ = $bindNodeCallback(stat);
+const $fsReadDir = $bindNodeCallback(readdir);
+const $fsStat = $bindNodeCallback(stat);
 
 export class PluginsService implements CoreService {
   private readonly log: Logger;
@@ -73,7 +73,7 @@ export class PluginsService implements CoreService {
       first(),
       mergeMap(config => config.scanDirs),
       mergeMap(
-        dir => fsReadDir$(dir),
+        dir => $fsReadDir(dir),
         (dir, pluginNames) =>
           pluginNames.map(pluginName => ({
             name: pluginName,
@@ -82,7 +82,7 @@ export class PluginsService implements CoreService {
       ),
       mergeMap(plugins => plugins),
       mergeMap(
-        plugin => fsStat$(plugin.path),
+        plugin => $fsStat(plugin.path),
         (plugin, stat) => ({ ...plugin, isDir: stat.isDirectory() })
       ),
       filter(plugin => plugin.isDir),
