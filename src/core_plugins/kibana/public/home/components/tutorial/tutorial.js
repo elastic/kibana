@@ -1,7 +1,9 @@
+import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Introduction } from './introduction';
 import { InstructionSet } from './instruction_set';
+import { ParameterForm } from './parameter_form';
 import { getTutorial } from '../../tutorials';
 
 export class Tutorial extends React.Component {
@@ -34,6 +36,14 @@ export class Tutorial extends React.Component {
         notFound: true,
       });
     }
+  }
+
+  setParameter = (paramId, newValue) => {
+    this.setState(previousState => {
+      const paramValues = _.cloneDeep(previousState.paramValues);
+      paramValues[paramId] = newValue;
+      return { paramValues: paramValues };
+    });
   }
 
   renderInstructionSets = () => {
@@ -69,6 +79,16 @@ export class Tutorial extends React.Component {
       if (this.state.tutorial.previewImagePath) {
         previewUrl = this.props.addBasePath(this.state.tutorial.previewImagePath);
       }
+      let params;
+      if (this.state.tutorial.params) {
+        params = (
+          <ParameterForm
+            params={this.state.tutorial.params}
+            paramValues={this.state.paramValues}
+            setParameter={this.setParameter}
+          />
+        );
+      }
       content = (
         <div>
           <Introduction
@@ -78,6 +98,7 @@ export class Tutorial extends React.Component {
           />
 
           <div className="homePanel kuiVerticalRhythm">
+            {params}
             {this.renderInstructionSets()}
           </div>
         </div>

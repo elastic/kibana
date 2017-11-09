@@ -19,6 +19,7 @@ export function netflowSpecProvider() {
     params: [
       {
         id: 'netflow_var_input_udp_port',
+        label: 'netflow.var.input.udp.port',
         type: PARAM_TYPES.NUMBER,
         defaultValue: 2055
       }

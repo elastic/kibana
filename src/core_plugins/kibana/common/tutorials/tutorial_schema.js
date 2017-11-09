@@ -22,6 +22,7 @@ const instructionSetSchema = Joi.object({
 const paramSchema = Joi.object({
   defaultValue: Joi.required(),
   id: Joi.string().regex(/^[a-zA-Z_]+$/).required(),
+  label: Joi.string().required(),
   type: Joi.string().valid(Object.values(PARAM_TYPES)).required()
 });
 
