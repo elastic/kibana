@@ -3,8 +3,7 @@
 
 Some settings are sensitive, and relying on filesystem permissions to protect
 their values is not sufficient. For this use case, Kibana provides a
-keystore, which may be password protected, and the `kibana-keystore`
-tool to manage the settings in the keystore.
+keystore, and the `kibana-keystore` tool to manage the settings in the keystore.
 
 NOTE: All commands here should be run as the user which will run Kibana.
 
