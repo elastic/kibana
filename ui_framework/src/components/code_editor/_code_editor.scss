@@ -1,5 +1,15 @@
 .kuiCodeEditorWrapper {
   position: relative;
+
+  .ace_hidden-cursors {
+    opacity: 0;
+  }
+
+  &.kuiCodeEditorWrapper-isEditing {
+    .ace_hidden-cursors {
+      opacity: 1;
+    }
+  }
 }
 
 .kuiCodeEditorKeyboardHint {

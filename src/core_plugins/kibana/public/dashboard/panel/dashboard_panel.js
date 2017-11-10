@@ -59,7 +59,7 @@ export class DashboardPanel extends React.Component {
   }
 
   render() {
-    const { viewOnlyMode, error, panel, embeddableHandler } = this.props;
+    const { viewOnlyMode, error, panel, embeddableFactory } = this.props;
     const classes = classNames('panel panel-default', this.props.className, {
       'panel--edit-mode': !viewOnlyMode
     });
@@ -74,7 +74,7 @@ export class DashboardPanel extends React.Component {
           data-test-subj="dashboardPanel"
         >
           <PanelHeader
-            embeddableHandler={embeddableHandler}
+            embeddableFactory={embeddableFactory}
             panelId={panel.panelIndex}
           />
 
@@ -99,5 +99,5 @@ DashboardPanel.propTypes = {
     PropTypes.string,
     PropTypes.object
   ]),
-  embeddableHandler: PropTypes.object.isRequired,
+  embeddableFactory: PropTypes.object.isRequired,
 };

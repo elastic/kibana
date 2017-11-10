@@ -89,8 +89,8 @@ export class DashboardGrid extends React.Component {
     // call inside TSVB visualizations.  Moving the function out of render appears to fix the issue.  See
     // https://github.com/elastic/kibana/issues/14802 for more info.
     // This is probably a better implementation anyway so the handlers are cached.
-    // @type {Object.<string, EmbeddableHandler>}
-    this.embeddableHandlerMap = {};
+    // @type {Object.<string, EmbeddableFactory>}
+    this.embeddableFactoryMap = {};
   }
 
   buildLayoutFromPanels() {
@@ -102,20 +102,20 @@ export class DashboardGrid extends React.Component {
     });
   }
 
-  createEmbeddableHandlersMap(panels) {
+  createEmbeddableFactoriesMap(panels) {
     Object.values(panels).map(panel => {
-      if (!this.embeddableHandlerMap[panel.type]) {
-        this.embeddableHandlerMap[panel.type] = this.props.getEmbeddableHandler(panel.type);
+      if (!this.embeddableFactoryMap[panel.type]) {
+        this.embeddableFactoryMap[panel.type] = this.props.getEmbeddableFactory(panel.type);
       }
     });
   }
 
   componentWillMount() {
-    this.createEmbeddableHandlersMap(this.props.panels);
+    this.createEmbeddableFactoriesMap(this.props.panels);
   }
 
   componentWillReceiveProps(nextProps) {
-    this.createEmbeddableHandlersMap(nextProps.panels);
+    this.createEmbeddableFactoriesMap(nextProps.panels);
   }
 
   onLayoutChange = (layout) => {
@@ -184,7 +184,7 @@ export class DashboardGrid extends React.Component {
           <DashboardPanel
             panelId={panel.panelIndex}
             getContainerApi={getContainerApi}
-            embeddableHandler={this.embeddableHandlerMap[panel.type]}
+            embeddableFactory={this.embeddableFactoryMap[panel.type]}
             onPanelFocused={this.onPanelFocused}
             onPanelBlurred={this.onPanelBlurred}
           />
@@ -213,7 +213,7 @@ export class DashboardGrid extends React.Component {
 DashboardGrid.propTypes = {
   panels: PropTypes.object.isRequired,
   getContainerApi: PropTypes.func.isRequired,
-  getEmbeddableHandler: PropTypes.func.isRequired,
+  getEmbeddableFactory: PropTypes.func.isRequired,
   dashboardViewMode: PropTypes.oneOf([DashboardViewMode.EDIT, DashboardViewMode.VIEW]).isRequired,
   onPanelsUpdated: PropTypes.func.isRequired,
   maximizedPanelId: PropTypes.string,
