@@ -25,7 +25,7 @@ export async function RemoteProvider({ getService }) {
 
   const windowSizeStack = [];
   lifecycle.on('beforeTestSuite', async () => {
-    windowSizeStack.push(await command.getWindowSize());
+    windowSizeStack.unshift(await command.getWindowSize());
   });
 
   lifecycle.on('afterTestSuite', async () => {
