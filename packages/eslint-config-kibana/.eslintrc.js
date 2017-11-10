@@ -154,7 +154,7 @@ module.exports = {
             'jquery': 'ui/jquery',
             'leaflet': 'ui/leaflet',
             'lodash': 'ui/lodash',
-            'moment-timezone': 'ui/moment-timezone',
+            'moment-timezone': 'ui/moment',
             'moment': 'ui/moment',
             'numeral': '@elastic/numeral',
             'sinon': 'ui/sinon',

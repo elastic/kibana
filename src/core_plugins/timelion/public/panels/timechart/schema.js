@@ -2,7 +2,7 @@ require('./flot');
 require('plugins/timelion/panels/timechart/timechart.less');
 import _ from 'ui/lodash';
 import $ from 'ui/jquery';
-import moment from 'ui/moment-timezone';
+import moment from 'ui/moment';
 import observeResize from 'plugins/timelion/lib/observe_resize';
 import { calculateInterval, DEFAULT_TIME_FORMAT } from '../../../common/lib';
 

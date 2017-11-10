@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import moment from 'ui/moment-timezone';
+import moment from 'ui/moment';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 describe('Date Format', function () {
   let fieldFormats;

@@ -1,5 +1,5 @@
 import _ from 'ui/lodash';
-import moment from 'ui/moment-timezone';
+import moment from 'ui/moment';
 
 import { DocTitleProvider } from 'ui/doc_title';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
