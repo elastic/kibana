@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 
 import chrome from 'ui/chrome';
 import { hideEmptyDevTools } from '../hide_empty_tools';

@@ -2,7 +2,7 @@ import { Scanner } from 'ui/utils/scanner';
 import expect from 'expect.js';
 import 'ui/elasticsearch';
 import ngMock from 'ng_mock';
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 
 describe('Scanner', function () {
   let http;

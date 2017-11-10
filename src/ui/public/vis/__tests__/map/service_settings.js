@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import url from 'url';
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 
 describe('service_settings (FKA tilemaptest)', function () {
 

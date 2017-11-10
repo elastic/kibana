@@ -1,7 +1,7 @@
 import angular from 'ui/angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 import { Direction } from '../keyboard_move';
 import { keyCodes } from 'ui_framework/services';
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, shallow } from 'enzyme';
 import { requiredProps } from '../../test/required_props';
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 
 import {
   KuiTab,

@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 
 describe('Promise service', function () {
   let Promise;

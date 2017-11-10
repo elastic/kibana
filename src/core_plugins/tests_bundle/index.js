@@ -73,6 +73,10 @@ export default (kibana) => {
         });
       },
 
+      noParse: [
+        /[\\\/]sinon[\\\/]/
+      ],
+
       __globalImportAliases__: {
         ng_mock$: fromRoot('src/core_plugins/dev_mode/public/ng_mock'),
         'angular-mocks$': require.resolve('./public/angular_mocks'),

@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 import moment from 'ui/moment';
 import ngMock from 'ng_mock';
 import 'ui/filters/moment';

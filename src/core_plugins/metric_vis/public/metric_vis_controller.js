@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { uiModules } from 'ui/modules';
 import { getHeatmapColors } from 'ui/vislib/components/color/heatmap_color';
 // get the kibana/metric_vis module, and make sure that it requires the "kibana" module if it

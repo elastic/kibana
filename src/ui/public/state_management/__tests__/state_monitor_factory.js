@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 import { cloneDeep } from 'ui/lodash';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { SimpleEmitter } from 'ui/utils/simple_emitter';

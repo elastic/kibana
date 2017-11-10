@@ -2,7 +2,7 @@
 import _ from 'ui/lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 
 describe('$scope.$watchMulti', function () {
 

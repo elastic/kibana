@@ -1,4 +1,4 @@
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 import { createStubHits } from './hits';
 import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 

@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import $ from 'ui/jquery';
 import _ from 'ui/lodash';
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 import { positionTooltip } from '../position_tooltip';
 
 describe('Tooltip Positioning', function () {

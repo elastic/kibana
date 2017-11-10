@@ -1,6 +1,6 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import $ from 'jquery';
+import $ from 'ui/jquery';
 
 describe('metric vis', function () {
   let $scope;

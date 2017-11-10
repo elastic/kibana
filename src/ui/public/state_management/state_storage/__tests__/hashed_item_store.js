@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 
 import StubBrowserStorage from 'test_utils/stub_browser_storage';
 import { HashedItemStore } from '../hashed_item_store';

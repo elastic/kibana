@@ -4,7 +4,7 @@ import moment from 'ui/moment';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import * as fixtures from 'ui/agg_response/__tests__/fixtures';
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
 import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 import { VisProvider } from 'ui/vis';

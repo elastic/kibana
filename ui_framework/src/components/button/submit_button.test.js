@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, shallow } from 'enzyme';
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 
 import {
   BUTTON_TYPES,

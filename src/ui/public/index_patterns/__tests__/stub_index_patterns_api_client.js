@@ -1,5 +1,5 @@
 import { createStubLogstashFields } from './stubs';
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 
 import { IndexPatternsApiClientProvider } from '../index_patterns_api_client_provider';
 

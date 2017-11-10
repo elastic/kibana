@@ -1,5 +1,5 @@
 import _ from 'ui/lodash';
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 import { BaseParamTypeProvider } from '../../param_types/base';
 import { FieldParamTypeProvider } from '../../param_types/field';
 import { OptionedParamTypeProvider } from '../../param_types/optioned';

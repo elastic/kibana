@@ -1,7 +1,7 @@
 import _ from 'ui/lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 
 import { StubState } from 'ui/state_management/__tests__/stubs';
 import { StubCourierProvider } from 'ui/courier/__tests__/stubs';

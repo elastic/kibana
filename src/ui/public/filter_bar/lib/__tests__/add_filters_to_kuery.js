@@ -4,7 +4,7 @@ import { StubCourierProvider } from 'ui/courier/__tests__/stubs';
 import NoDigestPromises from 'test_utils/no_digest_promises';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 import moment from 'ui/moment';
 
 describe('addFiltersToKuery', function () {

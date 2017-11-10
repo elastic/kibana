@@ -157,7 +157,6 @@ module.exports = {
             'moment-timezone': 'ui/moment',
             'moment': 'ui/moment',
             'numeral': '@elastic/numeral',
-            'sinon': 'ui/sinon',
             'ui-bootstrap': 'ui/ui-bootstrap',
           }
         }]

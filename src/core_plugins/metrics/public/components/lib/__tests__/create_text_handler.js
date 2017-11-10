@@ -1,4 +1,4 @@
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 import { expect } from 'chai';
 import createTextHandler from '../create_text_handler';
 

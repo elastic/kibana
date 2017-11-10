@@ -1,6 +1,6 @@
 import moment from 'ui/moment';
 import _ from 'ui/lodash';
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { PointSeriesOrderedDateAxisProvider } from 'ui/agg_response/point_series/_ordered_date_axis';

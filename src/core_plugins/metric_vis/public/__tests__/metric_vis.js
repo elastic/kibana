@@ -1,9 +1,9 @@
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
 import { VisProvider } from 'ui/vis';
-import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 import MetricVisProvider from '../metric_vis';
 
 describe('metric_vis', () => {
@@ -15,7 +15,7 @@ describe('metric_vis', () => {
     setup = () => {
       const Vis = Private(VisProvider);
       const metricVisType = Private(MetricVisProvider);
-      const indexPattern = Private(LogstashIndexPatternStubProvider);
+      const indexPattern = Private(StubIndexPatternProvider);
 
       indexPattern.stubSetFieldFormat('ip', 'url', {
         urlTemplate: 'http://ip.info?address={{value}}',

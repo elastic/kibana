@@ -1,4 +1,4 @@
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 
 export function StubCourierProvider(Private, Promise) {

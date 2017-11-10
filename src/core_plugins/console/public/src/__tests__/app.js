@@ -1,4 +1,4 @@
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 import $ from 'ui/jquery';
 
 import history from '../history';

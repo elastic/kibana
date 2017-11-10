@@ -5,7 +5,7 @@ import { StubCourierProvider } from 'ui/courier/__tests__/stubs';
 import NoDigestPromises from 'test_utils/no_digest_promises';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 
 describe('doc table filter actions', function () {
   NoDigestPromises.activateForSuite();

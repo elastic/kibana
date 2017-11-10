@@ -106,8 +106,8 @@ export class KuiCodeEditor extends Component {
 
     const activity =
       isReadOnly
-      ? 'interacting with the code'
-      : 'editing';
+        ? 'interacting with the code'
+        : 'editing';
 
     const prompt = (
       <div

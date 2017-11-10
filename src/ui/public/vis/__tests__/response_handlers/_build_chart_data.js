@@ -1,7 +1,7 @@
 import _ from 'ui/lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 import { AggResponseTabifyTableProvider } from 'ui/agg_response/tabify/_table';
 import { AggResponseIndexProvider } from 'ui/agg_response/index';
 import { BasicResponseHandlerProvider } from 'ui/vis/response_handlers/basic';

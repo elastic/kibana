@@ -1,7 +1,7 @@
 import React from 'react';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 import AddDeleteButtons from '../add_delete_buttons';
 
 describe('<AddDeleteButtons />', () => {

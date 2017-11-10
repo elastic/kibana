@@ -1,7 +1,7 @@
 
 import _ from 'ui/lodash';
 import * as fixtures from 'ui/agg_response/__tests__/fixtures';
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';

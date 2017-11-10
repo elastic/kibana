@@ -1,7 +1,7 @@
 import angular from 'ui/angular';
 import ngMock from 'ng_mock';
 import _ from 'ui/lodash';
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 import expect from 'expect.js';
 import $ from 'ui/jquery';
 import 'ui/private';

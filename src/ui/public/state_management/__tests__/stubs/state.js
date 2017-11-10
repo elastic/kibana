@@ -1,5 +1,5 @@
 import _ from 'ui/lodash';
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 
 export function StubState(defaults) {
   this.on = _.noop;

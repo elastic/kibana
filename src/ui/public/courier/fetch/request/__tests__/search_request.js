@@ -1,5 +1,5 @@
 import ngMock from 'ng_mock';
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 import expect from 'expect.js';
 
 import { SearchRequestProvider } from '../search_request';

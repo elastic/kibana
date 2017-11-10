@@ -2,7 +2,7 @@ import _ from 'ui/lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { WorkQueue } from 'ui/routes/work_queue';
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 import 'ui/promises';
 
 describe('work queue', function () {

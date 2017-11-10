@@ -4,7 +4,7 @@ import ngMock from 'ng_mock';
 import $ from 'ui/jquery';
 import 'ui/directives/confirm_click';
 import 'plugins/kibana/discover/index';
-import sinon from 'ui/sinon';
+import sinon from 'sinon';
 
 let $window;
 
