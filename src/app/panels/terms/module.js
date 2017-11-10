@@ -335,7 +335,7 @@ function (angular, app, _, $, kbn) {
                 var labelFormat = function(label, series){
                   return '<div ng-click="build_search(panel.field,\''+label+'\')'+
                     ' "style="font-size:8pt;text-align:center;padding:2px;color:white;">'+
-                    label+'<br/>'+Math.round(series.percent)+'%</div>';
+                    htmlEscape(label)+'<br/>'+Math.round(series.percent)+'%</div>';
                 };
 
                 plot = $.plot(elem, chartData, {
@@ -396,7 +396,7 @@ function (angular, app, _, $, kbn) {
             $tooltip
               .html(
                 kbn.query_color_dot(item.series.color, 20) + ' ' +
-                item.series.label + " (" + value.toFixed(0)+")"
+                htmlEscape(item.series.label) + " (" + value.toFixed(0)+")"
               )
               .place_tt(pos.pageX, pos.pageY);
           } else {
