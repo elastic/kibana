@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 export default function byType(type) {
   return (field) => {
     switch (type) {

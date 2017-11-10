@@ -93,8 +93,8 @@ UrlFormat.prototype._convert = {
         // is tell screen readers where the image comes from.
         const imageLabel =
           label === url
-          ? `A dynamically-specified image located at ${url}`
-          : label;
+            ? `A dynamically-specified image located at ${url}`
+            : label;
 
         return `<img src="${url}" alt="${imageLabel}">`;
       default:

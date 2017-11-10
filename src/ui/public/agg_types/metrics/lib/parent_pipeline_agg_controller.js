@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { safeMakeLabel } from './safe_make_label';
 
 const parentPipelineAggController = function ($scope) {

@@ -19,7 +19,6 @@ module.exports = function () {
         'ui_framework/services/**',
         'ui_framework/dist/**',
         'ui_framework/src/**',
-        'webpackShims/**',
         'config/kibana.yml',
       ],
       dest: 'build/kibana',

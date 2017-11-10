@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { dedupFilters } from 'ui/filter_bar/lib/dedup_filters';
 
 /**

@@ -1,6 +1,0 @@
-plugins: [
-  '@elastic/kibana-custom'
-]
-rules:
-  no-console: 2
-  kibana-custom/no-default-export: error

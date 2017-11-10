@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { ordinalSuffix } from 'ui/utils/ordinal_suffix';
 import expect from 'expect.js';
 

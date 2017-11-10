@@ -5,7 +5,7 @@ import classNames from 'classnames';
 export const <%= componentName %> = ({
   children,
   className,
-  ...rest,
+  ...rest
 }) => {
   const classes = classNames('<%= cssClassName %>', className);
 

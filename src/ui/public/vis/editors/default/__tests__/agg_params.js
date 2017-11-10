@@ -1,13 +1,13 @@
 
-import angular from 'angular';
-import _ from 'lodash';
+import angular from 'ui/angular';
+import _ from 'ui/lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import '../agg_params';
 import { VisProvider } from 'ui/vis';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
 import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 
 
 describe('Vis-Editor-Agg-Params plugin directive', function () {
@@ -34,7 +34,7 @@ describe('Vis-Editor-Agg-Params plugin directive', function () {
     compile = $compile;
 
     Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(StubLogstashIndexPatternProvider);
     Schemas = Private(VisSchemasProvider);
     AggConfig = Private(VisAggConfigProvider);
   }));

@@ -82,8 +82,8 @@ export default class BasePathProxy {
                 });
               }
             })
-            .return(undefined)
-            .nodeify(reply);
+              .return(undefined)
+              .nodeify(reply);
           }
         ],
       },

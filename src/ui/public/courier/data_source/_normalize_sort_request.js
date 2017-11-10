@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 export function NormalizeSortRequestProvider(config) {
   const defaultSortOptions = config.get('sort:options');

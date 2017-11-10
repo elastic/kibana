@@ -1,12 +1,12 @@
-import _ from 'lodash';
-import $ from 'jquery';
-import moment from 'moment';
+import _ from 'ui/lodash';
+import $ from 'ui/jquery';
+import moment from 'ui/moment';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import fixtures from 'fixtures/fake_hierarchical_data';
+import * as fixtures from 'ui/agg_response/__tests__/fixtures';
 import sinon from 'sinon';
 import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 import { VisProvider } from 'ui/vis';
 describe('AggTable Directive', function () {
 
@@ -20,7 +20,7 @@ describe('AggTable Directive', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector, Private, config) {
     tabifyAggResponse = Private(AggResponseTabifyProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(StubLogstashIndexPatternProvider);
     Vis = Private(VisProvider);
     settings = config;
 

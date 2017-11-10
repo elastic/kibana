@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import chrome from 'ui/chrome';
 
 export const Scanner = function ($http, { index, type } = {}) {
@@ -80,7 +80,7 @@ Scanner.prototype.scanAndMap = function (searchString, options, mapFn) {
       scrollId = response._scroll_id || scrollId;
 
       let hits = response.hits.hits
-      .slice(0, allResults.total - allResults.hits.length);
+        .slice(0, allResults.total - allResults.hits.length);
 
       hits = hits.map(hit => {
         if (hit._type === 'doc') {

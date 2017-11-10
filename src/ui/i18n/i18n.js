@@ -49,13 +49,13 @@ export class I18n {
     const locales = this._getRegisteredTranslationLocales();
     const translations = _.map(locales, (locale) => {
       return this._getTranslationsForLocale(locale)
-      .then(function (translations) {
-        localeTranslations[locale] = translations;
-      });
+        .then(function (translations) {
+          localeTranslations[locale] = translations;
+        });
     });
 
     return Promise.all(translations)
-    .then(() => _.assign({}, localeTranslations));
+      .then(() => _.assign({}, localeTranslations));
   }
 
   /**
@@ -121,16 +121,16 @@ export class I18n {
     const translationFiles = this._registeredTranslations[locale];
     const translations = _.map(translationFiles, (filename) => {
       return asyncReadFile(filename, 'utf8')
-      .then(fileContents => JSON.parse(fileContents))
-      .catch(SyntaxError, function () {
-        throw new Error('Invalid json in ' + filename);
-      })
-      .catch(function () {
-        throw new Error('Cannot read file ' + filename);
-      });
+        .then(fileContents => JSON.parse(fileContents))
+        .catch(SyntaxError, function () {
+          throw new Error('Invalid json in ' + filename);
+        })
+        .catch(function () {
+          throw new Error('Cannot read file ' + filename);
+        });
     });
 
     return Promise.all(translations)
-    .then(translations => _.assign({}, ...translations));
+      .then(translations => _.assign({}, ...translations));
   }
 }

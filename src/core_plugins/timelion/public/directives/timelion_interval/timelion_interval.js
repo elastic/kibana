@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import $ from 'jquery';
+import _ from 'ui/lodash';
+import $ from 'ui/jquery';
 
 const app = require('ui/modules').get('apps/timelion', []);
 import template from './timelion_interval.html';

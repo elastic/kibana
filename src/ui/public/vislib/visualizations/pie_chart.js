@@ -1,6 +1,6 @@
 import d3 from 'd3';
-import _ from 'lodash';
-import $ from 'jquery';
+import _ from 'ui/lodash';
+import $ from 'ui/jquery';
 import { PieContainsAllZeros, ContainerTooSmall } from 'ui/errors';
 import { VislibVisualizationsChartProvider } from './_chart';
 
@@ -60,9 +60,9 @@ export function VislibVisualizationsPieChartProvider(Private) {
       const events = this.events;
 
       return element
-      .call(events.addHoverEvent())
-      .call(events.addMouseoutEvent())
-      .call(events.addClickEvent());
+        .call(events.addHoverEvent())
+        .call(events.addMouseoutEvent())
+        .call(events.addClickEvent());
     }
 
     convertToPercentage(slices) {
@@ -112,55 +112,55 @@ export function VislibVisualizationsPieChartProvider(Private) {
       const isTooltip = self._attr.addTooltip;
 
       const partition = d3.layout.partition()
-      .sort(null)
-      .value(function (d) {
-        return d.percentOfParent * 100;
-      });
+        .sort(null)
+        .value(function (d) {
+          return d.percentOfParent * 100;
+        });
       const x = d3.scale.linear()
-      .range([0, 2 * Math.PI]);
+        .range([0, 2 * Math.PI]);
       const y = d3.scale.sqrt()
-      .range([0, radius]);
+        .range([0, radius]);
       const arc = d3.svg.arc()
-      .startAngle(function (d) {
-        return Math.max(0, Math.min(2 * Math.PI, x(d.x)));
-      })
-      .endAngle(function (d) {
-        if (d.dx < 1e-8) return x(d.x);
-        return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx)));
-      })
-      .innerRadius(function (d) {
+        .startAngle(function (d) {
+          return Math.max(0, Math.min(2 * Math.PI, x(d.x)));
+        })
+        .endAngle(function (d) {
+          if (d.dx < 1e-8) return x(d.x);
+          return Math.max(0, Math.min(2 * Math.PI, x(d.x + d.dx)));
+        })
+        .innerRadius(function (d) {
         // option for a single layer, i.e pie chart
-        if (d.depth === 1 && !isDonut) {
+          if (d.depth === 1 && !isDonut) {
           // return no inner radius
-          return 0;
-        }
+            return 0;
+          }
 
-        return Math.max(0, y(d.y));
-      })
-      .outerRadius(function (d) {
-        return Math.max(0, y(d.y + d.dy));
-      });
+          return Math.max(0, y(d.y));
+        })
+        .outerRadius(function (d) {
+          return Math.max(0, y(d.y + d.dy));
+        });
 
       const path = svg
-      .datum(slices)
-      .selectAll('path')
-      .data(partition.nodes)
-      .enter()
-      .append('path')
-      .attr('d', arc)
-      .attr('class', function (d) {
-        if (d.depth === 0) {
-          return;
-        }
-        return 'slice';
-      })
-      .call(self._addIdentifier, 'name')
-      .style('fill', function (d) {
-        if (d.depth === 0) {
-          return 'none';
-        }
-        return color(d.name);
-      });
+        .datum(slices)
+        .selectAll('path')
+        .data(partition.nodes)
+        .enter()
+        .append('path')
+        .attr('d', arc)
+        .attr('class', function (d) {
+          if (d.depth === 0) {
+            return;
+          }
+          return 'slice';
+        })
+        .call(self._addIdentifier, 'name')
+        .style('fill', function (d) {
+          if (d.depth === 0) {
+            return 'none';
+          }
+          return color(d.name);
+        });
 
       if (isTooltip) {
         path.call(tooltip.render());
@@ -200,10 +200,10 @@ export function VislibVisualizationsPieChartProvider(Private) {
           self._validateContainerSize(width, height);
 
           const svg = div.append('svg')
-          .attr('width', width)
-          .attr('height', height)
-          .append('g')
-          .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
+            .attr('width', width)
+            .attr('height', height)
+            .append('g')
+            .attr('transform', 'translate(' + width / 2 + ',' + height / 2 + ')');
 
           const path = self.addPath(width, height, svg, slices);
           self.addPathEvents(path);

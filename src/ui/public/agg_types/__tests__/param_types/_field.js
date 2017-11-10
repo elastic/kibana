@@ -1,7 +1,7 @@
 import expect from 'expect.js';
-import { reject } from 'lodash';
+import { reject } from 'ui/lodash';
 import ngMock from 'ng_mock';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 import { BaseParamTypeProvider } from '../../param_types/base';
 import { FieldParamTypeProvider } from '../../param_types/field';
 
@@ -16,7 +16,7 @@ describe('Field', function () {
   beforeEach(ngMock.inject(function (Private) {
     BaseParamType = Private(BaseParamTypeProvider);
     FieldParamType = Private(FieldParamTypeProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(StubLogstashIndexPatternProvider);
   }));
 
   describe('constructor', function () {

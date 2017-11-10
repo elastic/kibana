@@ -1,13 +1,13 @@
-import angular from 'angular';
+import angular from 'ui/angular';
 import ngMock from 'ng_mock';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import 'ui/private';
 import 'plugins/kibana/discover/components/field_chooser/field_chooser';
-import FixturesHitsProvider from 'fixtures/hits';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { createStubHits } from 'ui/courier/__tests__/stubs';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 import { SavedObject } from 'ui/saved_objects';
 
 // Load the kibana app dependencies.
@@ -69,8 +69,8 @@ describe('discover field chooser directives', function () {
   }));
 
   beforeEach(ngMock.inject(function (Private) {
-    hits = Private(FixturesHitsProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    hits = createStubHits();
+    indexPattern = Private(StubLogstashIndexPatternProvider);
     indexPatternList = [
       new SavedObject(undefined, { id: '0', attributes: { title: 'b' } }),
       new SavedObject(undefined, { id: '1', attributes: { title: 'a' } }),
@@ -160,7 +160,7 @@ describe('discover field chooser directives', function () {
       init($elem, {
         columns: [],
         toggle: sinon.spy(),
-        hits: require('fixtures/hits'),
+        hits: createStubHits(),
         filter: sinon.spy(),
         indexPattern: indexPattern
       });

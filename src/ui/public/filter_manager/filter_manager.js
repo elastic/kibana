@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { getPhraseScript } from './lib/phrase';
 

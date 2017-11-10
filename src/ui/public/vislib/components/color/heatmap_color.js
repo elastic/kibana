@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { vislibColorMaps } from './colormaps';
 
 function enforceBounds(x) {

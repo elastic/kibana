@@ -1,4 +1,4 @@
-import moment from 'moment';
+import moment from 'ui/moment';
 export default (timefilter) => ranges => {
   //$scope.$evalAsync(() => {
   timefilter.time.from = moment(ranges.xaxis.from).toISOString();

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { FilterBarLibGenerateMappingChainProvider } from './generate_mapping_chain';
 import { FilterBarLibMapMatchAllProvider } from './map_match_all';
 import { FilterBarLibMapPhraseProvider } from './map_phrase';

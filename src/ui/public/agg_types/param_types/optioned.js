@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { IndexedArray } from 'ui/indexed_array';
 import { BaseParamTypeProvider } from './base';
 

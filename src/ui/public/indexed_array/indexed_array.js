@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { inflector } from './inflector';
 
 const pathGetter = _(_.get).rearg(1, 0).ary(2);

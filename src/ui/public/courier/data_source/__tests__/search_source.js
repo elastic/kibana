@@ -4,7 +4,7 @@ import sinon from 'sinon';
 
 import { requestQueue } from '../../_request_queue';
 import { SearchSourceProvider } from '../search_source';
-import StubIndexPatternProv from 'test_utils/stub_index_pattern';
+import { StubIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 
 describe('SearchSource', function () {
   require('test_utils/no_digest_promises').activateForSuite();
@@ -17,7 +17,7 @@ describe('SearchSource', function () {
   beforeEach(ngMock.inject(function (Private) {
     SearchSource = Private(SearchSourceProvider);
 
-    const IndexPattern = Private(StubIndexPatternProv);
+    const IndexPattern = Private(StubIndexPatternProvider);
     indexPattern = new IndexPattern('test-*', null, []);
     indexPattern2 = new IndexPattern('test2-*', null, []);
     expect(indexPattern).to.not.be(indexPattern2);

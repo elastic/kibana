@@ -2,7 +2,7 @@ import numeral from '@elastic/numeral';
 import handlebars from 'handlebars/dist/handlebars';
 import { durationInputOptions } from './durations';
 import { DurationFormat } from '../../../../kibana/common/field_formats/types/duration';
-import { capitalize, isNumber } from 'lodash';
+import { capitalize, isNumber } from 'ui/lodash';
 
 const formatLookup = {
   'bytes': '0.0b',

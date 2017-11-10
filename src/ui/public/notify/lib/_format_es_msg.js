@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 /**
  * Utilize the extended error information returned from elasticsearch

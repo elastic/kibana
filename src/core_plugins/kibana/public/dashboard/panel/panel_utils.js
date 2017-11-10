@@ -1,7 +1,7 @@
 import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from '../dashboard_constants';
 import chrome from 'ui/chrome';
 
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 export class PanelUtils {
   /**

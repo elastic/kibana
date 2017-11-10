@@ -1,4 +1,4 @@
-import moment from 'moment-timezone';
+import moment from 'ui/moment';
 
 export function KibanaRootController($scope, courier, config) {
   // wait for the application to finish loading

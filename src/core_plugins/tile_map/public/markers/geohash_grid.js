@@ -1,4 +1,4 @@
-import L from 'leaflet';
+import L from 'ui/leaflet';
 import { ScaledCirclesMarkers } from './scaled_circles';
 
 export class GeohashGridMarkers extends ScaledCirclesMarkers {

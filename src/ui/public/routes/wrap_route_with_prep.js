@@ -1,5 +1,5 @@
-import angular from 'angular';
-import _ from 'lodash';
+import angular from 'ui/angular';
+import _ from 'ui/lodash';
 import { WorkQueue } from 'ui/routes/work_queue';
 
 export function wrapRouteWithPrep(route, setup) {

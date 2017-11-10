@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
 

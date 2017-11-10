@@ -1,9 +1,9 @@
 import './sidebar';
 import './vis_options';
-import $ from 'jquery';
+import $ from 'ui/jquery';
 
-import _ from 'lodash';
-import angular from 'angular';
+import _ from 'ui/lodash';
+import angular from 'ui/angular';
 import defaultEditorTemplate from './default.html';
 
 import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
@@ -69,9 +69,9 @@ const defaultEditor = function ($rootScope, $compile) {
                 return _.get(agg, 'schema.group') === 'metrics';
               });
             }
-              // this can fail when the agg.type is changed but the
-              // params have not been set yet. watcher will trigger again
-              // when the params update
+            // this can fail when the agg.type is changed but the
+            // params have not been set yet. watcher will trigger again
+            // when the params update
             catch (e) {} // eslint-disable-line no-empty
           }, true);
 

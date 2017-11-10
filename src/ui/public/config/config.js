@@ -1,5 +1,5 @@
-import angular from 'angular';
-import { cloneDeep, defaultsDeep, isPlainObject } from 'lodash';
+import angular from 'ui/angular';
+import { cloneDeep, defaultsDeep, isPlainObject } from 'ui/lodash';
 import { uiModules } from 'ui/modules';
 import { Notifier } from 'ui/notify/notifier';
 import { ConfigDelayedUpdaterProvider } from 'ui/config/_delayed_updater';

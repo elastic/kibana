@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
 
 export function AggResponseGetColumnsProvider(Private) {

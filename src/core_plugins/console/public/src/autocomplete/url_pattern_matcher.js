@@ -1,4 +1,4 @@
-let _ = require('lodash');
+let _ = require('ui/lodash');
 let engine = require('./engine');
 
 export const URL_PATH_END_MARKER = "__url_path_end__";

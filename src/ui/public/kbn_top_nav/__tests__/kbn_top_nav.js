@@ -1,7 +1,7 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import { assign, pluck } from 'lodash';
-import $ from 'jquery';
+import { assign, pluck } from 'ui/lodash';
+import $ from 'ui/jquery';
 
 import '../kbn_top_nav';
 import { KbnTopNavControllerProvider } from '../kbn_top_nav_controller';

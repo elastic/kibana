@@ -1,8 +1,8 @@
-import _ from 'lodash';
-import $ from 'jquery';
+import _ from 'ui/lodash';
+import $ from 'ui/jquery';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 import { VisProvider } from 'ui/vis';
 import { AggTypesBucketsIntervalOptionsProvider } from 'ui/agg_types/buckets/_interval_options';
 
@@ -16,7 +16,7 @@ describe('editor', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private, $injector, $compile) {
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(StubLogstashIndexPatternProvider);
 
     const Vis = Private(VisProvider);
 

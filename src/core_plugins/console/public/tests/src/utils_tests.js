@@ -1,4 +1,4 @@
-let _ = require('lodash');
+let _ = require('ui/lodash');
 let utils = require('../../src/utils');
 let collapsingTests = require('raw-loader!./utils_string_collapsing.txt');
 let expandingTests = require('raw-loader!./utils_string_expanding.txt');

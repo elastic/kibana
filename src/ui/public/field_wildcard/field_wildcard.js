@@ -1,4 +1,4 @@
-import { escapeRegExp, memoize } from 'lodash';
+import { escapeRegExp, memoize } from 'ui/lodash';
 
 export function FieldWildcardProvider(config) {
   const metaFields = config.get('metaFields');

@@ -1,6 +1,6 @@
 import d3 from 'd3';
-import _ from 'lodash';
-import $ from 'jquery';
+import _ from 'ui/lodash';
+import $ from 'ui/jquery';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import { VislibLibAxisTitleProvider } from 'ui/vislib/lib/axis/axis_title';
@@ -93,16 +93,16 @@ describe('Vislib AxisTitle Class Test Suite', function () {
     el.append('div')
       .attr('class', 'axis-wrapper-bottom')
       .append('div')
-        .attr('class', 'axis-title y-axis-title')
-        .style('height', '20px')
-        .style('width', '20px');
+      .attr('class', 'axis-title y-axis-title')
+      .style('height', '20px')
+      .style('width', '20px');
 
     el.append('div')
       .attr('class', 'axis-wrapper-left')
       .append('div')
-        .attr('class', 'axis-title x-axis-title')
-        .style('height', '20px')
-        .style('width', '20px');
+      .attr('class', 'axis-title x-axis-title')
+      .style('height', '20px')
+      .style('width', '20px');
 
 
     dataObj = new Data(data, new PersistedState());

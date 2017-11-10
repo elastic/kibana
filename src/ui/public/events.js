@@ -4,7 +4,7 @@
  * @extends SimpleEmitter
  */
 
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { Notifier } from 'ui/notify/notifier';
 import { SimpleEmitter } from 'ui/utils/simple_emitter';
 

@@ -1,4 +1,4 @@
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import uiRoutes from 'ui/routes';
 import 'ui/visualize';
 

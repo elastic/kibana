@@ -1,5 +1,5 @@
 import d3 from 'd3';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { VislibLibErrorHandlerProvider } from './_error_handler';
 import { TooltipProvider } from 'ui/vis/components/tooltip';
 
@@ -71,19 +71,19 @@ export function VislibLibChartTitleProvider(Private) {
           self.validateWidthandHeight(width, height);
 
           div.append('svg')
-          .attr('width', width)
-          .attr('height', height)
-          .append('text')
-          .attr('transform', function () {
-            if (dataType === 'rows') {
-              return 'translate(' + txtHtOffset + ',' + height / 2 + ')rotate(270)';
-            }
-            return 'translate(' + width / 2 + ',' + txtHtOffset + ')';
-          })
-          .attr('text-anchor', 'middle')
-          .text(function (d) {
-            return d.label;
-          });
+            .attr('width', width)
+            .attr('height', height)
+            .append('text')
+            .attr('transform', function () {
+              if (dataType === 'rows') {
+                return 'translate(' + txtHtOffset + ',' + height / 2 + ')rotate(270)';
+              }
+              return 'translate(' + width / 2 + ',' + txtHtOffset + ')';
+            })
+            .attr('text-anchor', 'middle')
+            .text(function (d) {
+              return d.label;
+            });
 
           // truncate long chart titles
           div.selectAll('text').call(self.truncate(size));

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { SavedObjectNotFound } from '../../errors';
 
 export function FilterBarLibMapGeoBoundingBoxProvider(Promise, courier) {
@@ -25,15 +25,15 @@ export function FilterBarLibMapGeoBoundingBoxProvider(Promise, courier) {
       }
 
       return courier
-      .indexPatterns
-      .get(filter.meta.index)
-      .then(getParams)
-      .catch((error) => {
-        if (error instanceof SavedObjectNotFound) {
-          return getParams();
-        }
-        throw error;
-      });
+        .indexPatterns
+        .get(filter.meta.index)
+        .then(getParams)
+        .catch((error) => {
+          if (error instanceof SavedObjectNotFound) {
+            return getParams();
+          }
+          throw error;
+        });
     }
     return Promise.reject(filter);
   };

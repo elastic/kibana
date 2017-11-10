@@ -1,5 +1,5 @@
-const $ = require('jquery');
-const _ = require('lodash');
+const $ = require('ui/jquery');
+const _ = require('ui/lodash');
 const mappings = require('./mappings');
 const Api = require('./kb/api');
 const autocomplete_engine = require('./autocomplete/engine');

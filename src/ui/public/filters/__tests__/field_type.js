@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import ngMock from 'ng_mock';
 import 'plugins/kibana/discover/index';
 import 'ui/filters/field_type';

@@ -1,5 +1,5 @@
 import d3 from 'd3';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { VislibComponentsZeroInjectionInjectZerosProvider } from '../components/zero_injection/inject_zeros';
 import { VislibComponentsZeroInjectionOrderedXKeysProvider } from '../components/zero_injection/ordered_x_keys';
 import { VislibComponentsLabelsLabelsProvider } from '../components/labels/labels';
@@ -315,13 +315,13 @@ export function VislibLibDataProvider(Private) {
         const namedObj = this.returnNames(slices.children, 0, columns);
 
         return _(namedObj)
-        .sortBy(function (obj) {
-          return obj.index;
-        })
-        .unique(function (d) {
-          return d.label;
-        })
-        .value();
+          .sortBy(function (obj) {
+            return obj.index;
+          })
+          .unique(function (d) {
+            return d.label;
+          })
+          .value();
       }
     }
 

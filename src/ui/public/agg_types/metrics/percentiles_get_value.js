@@ -1,4 +1,4 @@
-import { find } from 'lodash';
+import { find } from 'ui/lodash';
 
 export function getPercentileValue(agg, bucket) {
   const values = bucket[agg.parentId] && bucket[agg.parentId].values;

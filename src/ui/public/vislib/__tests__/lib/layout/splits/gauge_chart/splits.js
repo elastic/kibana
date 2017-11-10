@@ -1,7 +1,7 @@
 import d3 from 'd3';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import VislibLibLayoutSplitsGaugeChartChartSplitProvider from 'ui/vislib/lib/layout/splits/gauge_chart/chart_split';
 import VislibLibLayoutSplitsGaugeChartChartTitleSplitProvider from 'ui/vislib/lib/layout/splits/gauge_chart/chart_title_split';
 

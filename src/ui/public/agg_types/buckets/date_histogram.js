@@ -1,6 +1,6 @@
 import { jstz as tzDetect } from 'jstimezonedetect';
-import _ from 'lodash';
-import moment from 'moment';
+import _ from 'ui/lodash';
+import moment from 'ui/moment';
 import 'ui/filters/field_type';
 import 'ui/validate_date_interval';
 import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';

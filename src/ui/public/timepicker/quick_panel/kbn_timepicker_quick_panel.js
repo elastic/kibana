@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import template from './kbn_timepicker_quick_panel.html';
 import { uiModules } from 'ui/modules';
 

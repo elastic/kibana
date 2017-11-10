@@ -1,6 +1,6 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import rison from 'rison-node';
-import angular from 'angular';
+import angular from 'ui/angular';
 
 export function BaseObject(attributes) {
   // Set the attributes or default to an empty object

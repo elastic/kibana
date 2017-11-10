@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 import { callAfterBindingsWorkaround } from 'ui/compat';
 import { uiModules } from 'ui/modules';

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 export default function executorProvider(Promise, $timeout, timefilter) {
 
   const queue = [];
@@ -58,7 +58,7 @@ export default function executorProvider(Promise, $timeout, timefilter) {
         .then(service.handleResponse || noop)
         .catch(service.handleError || noop);
     }))
-    .finally(reset);
+      .finally(reset);
   }
 
   function reFetch() {

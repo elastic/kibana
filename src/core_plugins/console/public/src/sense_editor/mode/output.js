@@ -1,5 +1,5 @@
-let ace = require('ace');
-require('ace/mode-json');
+let ace = require('../../../vendor/ace');
+require('../../../vendor/ace/mode-json');
 require('./output_highlight_rules');
 
 

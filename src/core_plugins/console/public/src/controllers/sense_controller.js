@@ -1,6 +1,6 @@
 import 'ui/doc_title';
 import { useResizeCheckerProvider } from '../sense_editor_resize';
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import { initializeInput } from '../input';
 import { initializeOutput } from '../output';
 import init from '../app';

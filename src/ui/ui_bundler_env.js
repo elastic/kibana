@@ -23,7 +23,7 @@ export default class UiBundlerEnv {
 
     // regular expressions which will prevent webpack from parsing the file
     this.noParse = [
-      /node_modules[\/\\](angular|elasticsearch-browser)[\/\\]/,
+      /node_modules[\/\\](elasticsearch-browser)[\/\\]/,
       /node_modules[\/\\](mocha|moment)[\/\\]/
     ];
 
@@ -31,11 +31,8 @@ export default class UiBundlerEnv {
     this.aliases = {
       ui: fromRoot('src/ui/public'),
       ui_framework: fromRoot('ui_framework'),
-      packages: fromRoot('packages'),
       test_harness: fromRoot('src/test_harness/public'),
-      querystring: 'querystring-browser',
-      moment$: fromRoot('webpackShims/moment'),
-      'moment-timezone$': fromRoot('webpackShims/moment-timezone')
+      querystring: 'querystring-browser'
     };
 
     // map of which plugins created which aliases

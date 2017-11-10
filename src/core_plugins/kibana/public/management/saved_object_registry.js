@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 const registry = [];
 export const savedObjectManagementRegistry = {
   register: function (service) {

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { toKueryExpression, fromKueryExpression, nodeTypes } from 'ui/kuery';
 
 export function addFilter(field, values = [], operation, index, state, filterManager) {

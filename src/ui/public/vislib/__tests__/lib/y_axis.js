@@ -1,8 +1,8 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import d3 from 'd3';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import 'ui/persisted_state';
 import { VislibLibAxisProvider } from 'ui/vislib/lib/axis';
 import { VislibVisConfigProvider } from 'ui/vislib/lib/vis_config';
@@ -63,14 +63,14 @@ function createData(seriesData) {
     height: 40,
     width: 40
   })
-  .appendTo('body')
-  .addClass('y-axis-wrapper')
-  .get(0);
+    .appendTo('body')
+    .addClass('y-axis-wrapper')
+    .get(0);
 
   el = d3.select(node).datum(data);
 
   yAxisDiv = el.append('div')
-  .attr('class', 'y-axis-div');
+    .attr('class', 'y-axis-div');
 
   buildYAxis = function (params) {
     const visConfig = new VisConfig({

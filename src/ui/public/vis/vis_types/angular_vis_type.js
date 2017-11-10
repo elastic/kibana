@@ -1,5 +1,5 @@
 import { VisTypeProvider } from 'ui/vis/vis_types';
-import $ from 'jquery';
+import $ from 'ui/jquery';
 
 
 export function AngularVisTypeProvider(Private, $compile, $rootScope) {

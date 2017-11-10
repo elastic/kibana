@@ -1,12 +1,12 @@
-import angular from 'angular';
-import _ from 'lodash';
+import angular from 'ui/angular';
+import _ from 'ui/lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import getFakeRow from 'fixtures/fake_row';
-import $ from 'jquery';
+import { getFakeRow } from '../fixtures/fake_row';
+import $ from 'ui/jquery';
 import 'plugins/kibana/discover/index';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 
 
 const SORTABLE_FIELDS = ['bytes', '@timestamp'];
@@ -27,7 +27,7 @@ describe('Doc Table', function () {
   beforeEach(ngMock.inject(function (_config_, $rootScope, Private) {
     config = _config_;
     $parentScope = $rootScope;
-    $parentScope.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    $parentScope.indexPattern = Private(StubLogstashIndexPatternProvider);
     mapping = $parentScope.indexPattern.fields.byName;
   }));
 
@@ -310,7 +310,7 @@ describe('Doc Table', function () {
   describe('kbnTableRow meta', function () {
 
     const $elem = angular.element(
-        '<tr kbn-table-row="row" ' +
+      '<tr kbn-table-row="row" ' +
         'columns="columns" ' +
         'sorting="sorting"' +
         'filtering="filtering"' +
@@ -364,16 +364,16 @@ describe('Doc Table', function () {
       $root.filtering = sinon.spy();
       $root.maxLength = 50;
       $root.mapping = mapping;
-      $root.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      $root.indexPattern = Private(StubLogstashIndexPatternProvider);
 
       $row = $('<tr>')
-      .attr({
-        'kbn-table-row': 'row',
-        'columns': 'columns',
-        'sorting': 'sortin',
-        'filtering': 'filtering',
-        'index-pattern': 'indexPattern',
-      });
+        .attr({
+          'kbn-table-row': 'row',
+          'columns': 'columns',
+          'sorting': 'sortin',
+          'filtering': 'filtering',
+          'index-pattern': 'indexPattern',
+        });
 
       $scope = $root.$new();
       $compile($row)($scope);

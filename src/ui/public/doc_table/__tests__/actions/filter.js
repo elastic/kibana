@@ -1,6 +1,7 @@
 import { addFilter } from '../../actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
-import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
+import { StubCourierProvider } from 'ui/courier/__tests__/stubs';
 import NoDigestPromises from 'test_utils/no_digest_promises';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
@@ -16,12 +17,12 @@ describe('doc table filter actions', function () {
     'kibana',
     'kibana/courier',
     function ($provide) {
-      $provide.service('courier', require('fixtures/mock_courier'));
+      $provide.service('courier', StubCourierProvider);
     }
   ));
 
   beforeEach(ngMock.inject(function (Private) {
-    indexPattern = Private(StubbedLogstashIndexPatternProvider);
+    indexPattern = Private(StubLogstashIndexPatternProvider);
     filterManager = Private(FilterManagerProvider);
     sinon.stub(filterManager, 'add');
   }));

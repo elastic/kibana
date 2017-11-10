@@ -1,7 +1,7 @@
-import angular from 'angular';
-import moment from 'moment';
+import angular from 'ui/angular';
+import moment from 'ui/moment';
 import expect from 'expect.js';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import sinon from 'sinon';
 import ngMock from 'ng_mock';
 import 'plugins/kibana/visualize/index';

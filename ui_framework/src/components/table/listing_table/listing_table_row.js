@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 import {
   KuiTableRow,
@@ -62,7 +62,7 @@ KuiListingTableRow.PropTypes = {
           align: PropTypes.oneOf([LEFT_ALIGNMENT, RIGHT_ALIGNMENT]),
         })
       ],
-    )),
+      )),
   }).isRequired,
   onSelectionChanged: PropTypes.func.isRequired,
   isSelected: PropTypes.bool,

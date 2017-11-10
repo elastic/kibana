@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { VisColorMappedColorsProvider } from './mapped_colors';
 
 export function VislibComponentsColorColorProvider(Private) {

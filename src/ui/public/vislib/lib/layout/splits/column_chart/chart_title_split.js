@@ -1,5 +1,5 @@
 import d3 from 'd3';
-import $ from 'jquery';
+import $ from 'ui/jquery';
 
 export function VislibLibLayoutSplitsColumnChartChartTitleSplitProvider() {
   /*
@@ -16,10 +16,10 @@ export function VislibLibLayoutSplitsColumnChartChartTitleSplitProvider() {
 
       if (!data.series) {
         div.selectAll('.chart-title')
-        .data(function (d) {
-          return d.rows ? d.rows : d.columns;
-        })
-        .enter()
+          .data(function (d) {
+            return d.rows ? d.rows : d.columns;
+          })
+          .enter()
           .append('div')
           .attr('class', 'chart-title');
 

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import 'ui/filters/short_dots';
 import headerHtml from 'ui/doc_table/components/table_header.html';
 import { uiModules } from 'ui/modules';
@@ -90,8 +90,8 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
         const [currentColumnName, currentDirection = 'asc'] = $scope.sortOrder;
         const newDirection = (
           (columnName === currentColumnName && currentDirection === 'asc')
-          ? 'desc'
-          : 'asc'
+            ? 'desc'
+            : 'asc'
         );
 
         $scope.onChangeSortOrder(columnName, newDirection);

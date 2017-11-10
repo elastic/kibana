@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { toJson } from '../../../../../core_plugins/kibana/common/utils/aggressive_parse';
 
 function emptySearch() {

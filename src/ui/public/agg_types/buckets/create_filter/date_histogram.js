@@ -1,4 +1,4 @@
-import moment from 'moment';
+import moment from 'ui/moment';
 import { buildRangeFilter } from 'ui/filter_manager/lib/range';
 
 export function AggTypesBucketsCreateFilterDateHistogramProvider() {

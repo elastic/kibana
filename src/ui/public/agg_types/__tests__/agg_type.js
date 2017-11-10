@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
@@ -7,7 +7,7 @@ import { AggTypesAggParamsProvider } from 'ui/agg_types/agg_params';
 import { VisProvider } from 'ui/vis';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import { AggTypesAggTypeProvider } from 'ui/agg_types/agg_type';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 
 describe('AggType Class', function () {
   let AggType;
@@ -25,7 +25,7 @@ describe('AggType Class', function () {
     Vis = Private(VisProvider);
     fieldFormat = Private(RegistryFieldFormatsProvider);
     AggType = Private(AggTypesAggTypeProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(StubLogstashIndexPatternProvider);
   }));
 
   describe('constructor', function () {

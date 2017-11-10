@@ -4,7 +4,7 @@ import 'ui/directives/paginated_selectable_list';
 import 'plugins/kibana/discover/saved_searches/saved_searches';
 import './wizard.less';
 
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { CATEGORY } from 'ui/vis/vis_category';
 import { DashboardConstants } from 'plugins/kibana/dashboard/dashboard_constants';
 import { VisualizeConstants } from '../visualize_constants';
@@ -143,8 +143,8 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
   $scope.getVisTypeUrl = function (visType) {
     const baseUrl =
       visType.requiresSearch && visType.options.showIndexSelection
-      ? `#${VisualizeConstants.WIZARD_STEP_2_PAGE_PATH}?`
-      : `#${VisualizeConstants.CREATE_PATH}?`;
+        ? `#${VisualizeConstants.WIZARD_STEP_2_PAGE_PATH}?`
+        : `#${VisualizeConstants.CREATE_PATH}?`;
 
     const params = [`type=${encodeURIComponent(visType.name)}`];
 

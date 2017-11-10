@@ -1,7 +1,7 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import getLastValue from '../../visualizations/lib/get_last_value';
 import tickFormatter from './tick_formatter';
-import moment from 'moment';
+import moment from 'ui/moment';
 export default (series, model, dateFormat = 'lll') => {
   const variables = {};
   model.series.forEach(seriesModel => {

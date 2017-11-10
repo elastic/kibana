@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { detectIE } from './detect_ie';
 
 export default (handleChange) => {

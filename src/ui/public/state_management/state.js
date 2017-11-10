@@ -6,8 +6,8 @@
  * @description Persists generic "state" to and reads it from the URL.
  */
 
-import _ from 'lodash';
-import angular from 'angular';
+import _ from 'ui/lodash';
+import angular from 'ui/angular';
 import rison from 'rison-node';
 import { applyDiff } from 'ui/utils/diff_object';
 import { EventsProvider } from 'ui/events';

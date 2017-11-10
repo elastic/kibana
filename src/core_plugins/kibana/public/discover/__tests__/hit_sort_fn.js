@@ -1,5 +1,5 @@
 
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import PluginsKibanaDiscoverHitSortFnProvider from 'plugins/kibana/discover/_hit_sort_fn';
@@ -31,10 +31,10 @@ describe('hit sort function', function () {
     });
 
     hits.sort(createHitSortFn(dir))
-    .forEach(function (hit, i) {
-      const group = Math.floor(i / groupSize);
-      expect(hit.sort).to.eql(sortOpts[group]);
-    });
+      .forEach(function (hit, i) {
+        const group = Math.floor(i / groupSize);
+        expect(hit.sort).to.eql(sortOpts[group]);
+      });
   };
 
 

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 export function extractBuckets(bucket, agg) {
   if (bucket && _.isPlainObject(bucket.buckets)) {

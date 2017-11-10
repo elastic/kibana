@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
@@ -7,7 +7,7 @@ import { AggResponseTabifyTableGroupProvider } from 'ui/agg_response/tabify/_tab
 import { AggResponseBucketsProvider } from 'ui/agg_response/tabify/_buckets';
 import { AggResponseGetColumnsProvider } from 'ui/agg_response/tabify/_get_columns';
 import { VisProvider } from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 
 describe('ResponseWriter class', function () {
   let Vis;
@@ -32,7 +32,7 @@ describe('ResponseWriter class', function () {
       TableGroup = Private(AggResponseTabifyTableGroupProvider);
       Buckets = Private(AggResponseBucketsProvider);
       Vis = Private(VisProvider);
-      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      indexPattern = Private(StubLogstashIndexPatternProvider);
     }));
   }
 
@@ -255,17 +255,17 @@ describe('ResponseWriter class', function () {
 
     describe('#cell()', function () {
       it('logs a cell in the ResponseWriters row buffer, calls the block arg, then removes the value from the buffer',
-      function () {
-        const vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
-        const writer = new ResponseWriter(vis);
+        function () {
+          const vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
+          const writer = new ResponseWriter(vis);
 
-        expect(writer.rowBuffer).to.have.length(0);
-        writer.cell({}, 500, function () {
-          expect(writer.rowBuffer).to.have.length(1);
-          expect(writer.rowBuffer[0]).to.be(500);
+          expect(writer.rowBuffer).to.have.length(0);
+          writer.cell({}, 500, function () {
+            expect(writer.rowBuffer).to.have.length(1);
+            expect(writer.rowBuffer[0]).to.be(500);
+          });
+          expect(writer.rowBuffer).to.have.length(0);
         });
-        expect(writer.rowBuffer).to.have.length(0);
-      });
     });
 
     describe('#row()', function () {

@@ -1,5 +1,5 @@
 
-let ace = require('ace');
+let ace = require('../../../vendor/ace');
 let oop = ace.require("ace/lib/oop");
 let TextHighlightRules = ace.require("ace/mode/text_highlight_rules").TextHighlightRules;
 

@@ -1,6 +1,6 @@
 import expect from 'expect.js';
-import $ from 'jquery';
-import _ from 'lodash';
+import $ from 'ui/jquery';
+import _ from 'ui/lodash';
 import sinon from 'sinon';
 import { positionTooltip } from '../position_tooltip';
 
@@ -26,7 +26,7 @@ describe('Tooltip Positioning', function () {
       height: size.height,
       visibility: 'hidden'
     })
-    .appendTo('body');
+      .appendTo('body');
 
     if ($children) {
       $el.append($children);

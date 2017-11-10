@@ -1,4 +1,4 @@
-import { has, get } from 'lodash';
+import { has, get } from 'ui/lodash';
 import { SavedObjectNotFound } from '../../errors';
 
 export function FilterBarLibMapRangeProvider(Promise, courier) {
@@ -33,15 +33,15 @@ export function FilterBarLibMapRangeProvider(Promise, courier) {
     }
 
     return courier
-    .indexPatterns
-    .get(filter.meta.index)
-    .then(getParams)
-    .catch((error) => {
-      if (error instanceof SavedObjectNotFound) {
-        return getParams();
-      }
-      throw error;
-    });
+      .indexPatterns
+      .get(filter.meta.index)
+      .then(getParams)
+      .catch((error) => {
+        if (error instanceof SavedObjectNotFound) {
+          return getParams();
+        }
+        throw error;
+      });
 
   };
 }

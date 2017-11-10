@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { VislibComponentsZeroInjectionFlattenDataProvider } from './flatten_data';
 
 export function VislibComponentsZeroInjectionUniqKeysProvider(Private) {

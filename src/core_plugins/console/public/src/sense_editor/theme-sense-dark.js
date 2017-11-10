@@ -1,5 +1,5 @@
 /* eslint import/no-unresolved: 0 */
-let ace = require('ace');
+let ace = require('../../../vendor/ace');
 
 ace.define("ace/theme/sense-dark", ['require', 'exports', 'module'],
   function (require, exports) {
@@ -113,4 +113,3 @@ background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAACCAYAAACZgb
     var dom = require("ace/lib/dom");
     dom.importCssString(exports.cssText, exports.cssClass);
   });
-

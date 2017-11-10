@@ -1,7 +1,7 @@
 import { keyCodes } from 'ui_framework/services';
 
-var { memoize } = require('lodash');
-let moment = require('moment');
+var { memoize } = require('ui/lodash');
+let moment = require('ui/moment');
 
 var history = require('../history');
 require('./sense_history_viewer');

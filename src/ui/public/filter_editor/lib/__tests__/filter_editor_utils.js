@@ -8,9 +8,8 @@ import {
   phrasesFilter,
   rangeFilter,
   existsFilter
-} from 'fixtures/filters';
-import stubbedLogstashIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
-import stubbedLogstashFields from 'fixtures/logstash_fields';
+} from './fixtures';
+import { StubLogstashIndexPatternProvider, createStubLogstashFields } from 'ui/index_patterns/__tests__/stubs';
 import { FILTER_OPERATORS } from '../filter_operators';
 import {
   getQueryDslFromFilter,
@@ -30,8 +29,8 @@ describe('FilterEditorUtils', function () {
   let fields;
   beforeEach(function () {
     ngMock.inject(function (Private) {
-      indexPattern = Private(stubbedLogstashIndexPattern);
-      fields = stubbedLogstashFields();
+      indexPattern = Private(StubLogstashIndexPatternProvider);
+      fields = createStubLogstashFields();
     });
   });
 

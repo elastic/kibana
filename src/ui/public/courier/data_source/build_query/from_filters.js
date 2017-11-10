@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { migrateFilter } from '../_migrate_filter';
 
 /**
@@ -48,16 +48,16 @@ export function buildQueryFromFilters(filters, decorateQuery) {
 
   return {
     must: (filters || [])
-    .filter(filterNegate(false))
-    .map(translateToQuery)
-    .map(cleanFilter)
-    .map(migrateFilter),
+      .filter(filterNegate(false))
+      .map(translateToQuery)
+      .map(cleanFilter)
+      .map(migrateFilter),
     filter: [],
     should: [],
     must_not: (filters || [])
-    .filter(filterNegate(true))
-    .map(translateToQuery)
-    .map(cleanFilter)
-    .map(migrateFilter)
+      .filter(filterNegate(true))
+      .map(translateToQuery)
+      .map(cleanFilter)
+      .map(migrateFilter)
   };
 }

@@ -1,4 +1,4 @@
-const { transform, keys, startsWith } = require('lodash');
+const { transform, keys, startsWith } = require('ui/lodash');
 
 class Storage {
   constructor(engine, prefix) {

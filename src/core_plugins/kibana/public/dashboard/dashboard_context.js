@@ -1,5 +1,5 @@
 // This file is used by Timelion and TSVB
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import 'ui/state_management/app_state';
 import { luceneStringToDsl } from '../../../../ui/public/courier/data_source/build_query/lucene_string_to_dsl';

@@ -1,4 +1,4 @@
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import { delay } from 'bluebird';
 import expect from 'expect.js';
 import sinon from 'sinon';

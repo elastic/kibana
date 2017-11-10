@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { dashboardContextProvider } from 'plugins/kibana/dashboard/dashboard_context';
 
 import { timezoneProvider } from 'ui/vis/lib/timezone';

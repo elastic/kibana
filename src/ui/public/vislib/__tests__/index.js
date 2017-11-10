@@ -1,5 +1,5 @@
 
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import 'ui/vislib/styles/main.less';

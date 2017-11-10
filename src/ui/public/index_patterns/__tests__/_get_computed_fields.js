@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 import { getComputedFields } from 'ui/index_patterns/_get_computed_fields';
 
 describe('get computed fields', function () {
@@ -10,7 +10,7 @@ describe('get computed fields', function () {
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function (Private) {
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(StubLogstashIndexPatternProvider);
     indexPattern.getComputedFields = getComputedFields.bind(indexPattern);
     fn = indexPattern.getComputedFields;
   }));

@@ -1,4 +1,4 @@
-let _ = require("lodash");
+let _ = require('ui/lodash');
 let ScriptHighlightRules = require("./script_highlight_rules").ScriptHighlightRules;
 
 var jsonRules = function (root) {

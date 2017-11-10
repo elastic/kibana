@@ -1,5 +1,5 @@
 import d3 from 'd3';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { dataLabel } from 'ui/vislib/lib/_data_label';
 import { VislibLibDispatchProvider } from '../lib/dispatch';
 import { TooltipProvider } from 'ui/vis/components/tooltip';

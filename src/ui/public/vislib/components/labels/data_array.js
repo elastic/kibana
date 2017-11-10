@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { VislibComponentsLabelsFlattenSeriesProvider } from './flatten_series';
 
 export function VislibComponentsLabelsDataArrayProvider(Private) {

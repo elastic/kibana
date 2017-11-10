@@ -1,9 +1,9 @@
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import fixtures from 'fixtures/fake_hierarchical_data';
+import { metricOnly, threeTermBuckets } from 'ui/agg_response/__tests__/fixtures';
 import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 import { VisProvider } from 'ui/vis';
 describe('AggTableGroup Directive', function () {
 
@@ -16,7 +16,7 @@ describe('AggTableGroup Directive', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector, Private) {
     tabifyAggResponse = Private(AggResponseTabifyProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(StubLogstashIndexPatternProvider);
     Vis = Private(VisProvider);
 
     $rootScope = $injector.get('$rootScope');
@@ -34,7 +34,7 @@ describe('AggTableGroup Directive', function () {
 
   it('renders a simple split response properly', function () {
     const vis = new Vis(indexPattern, 'table');
-    $scope.group = tabifyAggResponse(vis, fixtures.metricOnly);
+    $scope.group = tabifyAggResponse(vis, metricOnly);
     $scope.sort = {
       columnIndex: null,
       direction: null
@@ -76,7 +76,7 @@ describe('AggTableGroup Directive', function () {
       agg.id = 'agg_' + (i + 1);
     });
 
-    const group = $scope.group = tabifyAggResponse(vis, fixtures.threeTermBuckets);
+    const group = $scope.group = tabifyAggResponse(vis, threeTermBuckets);
     const $el = $('<kbn-agg-table-group group="group"></kbn-agg-table-group>');
     $compile($el)($scope);
     $scope.$digest();

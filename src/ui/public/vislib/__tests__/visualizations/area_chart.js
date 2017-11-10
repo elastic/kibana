@@ -1,18 +1,18 @@
 import d3 from 'd3';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
-import $ from 'jquery';
-import FixturesVislibVisFixtureProvider from 'fixtures/vislib/_vis_fixture';
+import $ from 'ui/jquery';
+import { VisFixtureProvider } from '../fixtures/_vis_fixture';
 import 'ui/persisted_state';
 const dataTypesArray = {
-  'series pos': require('fixtures/vislib/mock_data/date_histogram/_series'),
-  'series pos neg': require('fixtures/vislib/mock_data/date_histogram/_series_pos_neg'),
-  'series neg': require('fixtures/vislib/mock_data/date_histogram/_series_neg'),
-  'term columns': require('fixtures/vislib/mock_data/terms/_columns'),
-  'range rows': require('fixtures/vislib/mock_data/range/_rows'),
-  'stackedSeries': require('fixtures/vislib/mock_data/date_histogram/_stacked_series')
+  'series pos': require('../fixtures/mock_data/date_histogram/_series'),
+  'series pos neg': require('../fixtures/mock_data/date_histogram/_series_pos_neg'),
+  'series neg': require('../fixtures/mock_data/date_histogram/_series_neg'),
+  'term columns': require('../fixtures/mock_data/terms/_columns'),
+  'range rows': require('../fixtures/mock_data/range/_rows'),
+  'stackedSeries': require('../fixtures/mock_data/date_histogram/_stacked_series')
 };
 
 const visLibParams = {
@@ -30,7 +30,7 @@ _.forOwn(dataTypesArray, function (dataType, dataTypeName) {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private, $injector) {
-      vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
+      vis = Private(VisFixtureProvider)(visLibParams);
       persistedState = new ($injector.get('PersistedState'))();
       vis.on('brush', _.noop);
       vis.render(dataType, persistedState);

@@ -1,7 +1,7 @@
-import _ from 'lodash';
-import $ from 'jquery';
+import _ from 'ui/lodash';
+import $ from 'ui/jquery';
 import collectBranch from 'ui/agg_response/hierarchical/_collect_branch';
-import numeral from 'numeral';
+import numeral from '@elastic/numeral';
 
 export function HierarchicalTooltipFormatterProvider($rootScope, $compile, $sce) {
   const $tooltip = $(require('ui/agg_response/hierarchical/_tooltip.html'));

@@ -2,7 +2,7 @@ import RouteManager from 'ui/routes/route_manager';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import 'ui/private';
 
 
@@ -36,38 +36,38 @@ describe('wrapRouteWithPrep fn', function () {
 
 
       routes
-      .addSetupWork(function () {
-        return new Promise(function (resolve) {
-          setTimeout(function () {
-            setupComplete = true;
-            resolve();
-          }, delaySetup);
+        .addSetupWork(function () {
+          return new Promise(function (resolve) {
+            setTimeout(function () {
+              setupComplete = true;
+              resolve();
+            }, delaySetup);
+          });
         });
-      });
 
       routes
-      .when('/', {
-        resolve: {
-          test: function () {
-            expect(setupComplete).to.be(true);
-            userWorkComplete = true;
+        .when('/', {
+          resolve: {
+            test: function () {
+              expect(setupComplete).to.be(true);
+              userWorkComplete = true;
+            }
           }
-        }
-      })
-      .config({
-        when: function (p, _r) { route = _r; }
-      });
+        })
+        .config({
+          when: function (p, _r) { route = _r; }
+        });
 
       return new Promise(function (resolve, reject) {
         setTimeout(function () {
           Promise.all(_.map(route.resolve, function (fn) {
             return $injector.invoke(fn);
           }))
-          .then(function () {
-            expect(setupComplete).to.be(true);
-            expect(userWorkComplete).to.be(true);
-          })
-          .then(resolve, reject);
+            .then(function () {
+              expect(setupComplete).to.be(true);
+              expect(userWorkComplete).to.be(true);
+            })
+            .then(resolve, reject);
 
         }, delayUserWork);
       });

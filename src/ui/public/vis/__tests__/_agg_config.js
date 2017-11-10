@@ -4,7 +4,7 @@ import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';
 import { AggTypesAggTypeProvider } from 'ui/agg_types/agg_type';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 
 describe('AggConfig', function () {
@@ -20,7 +20,7 @@ describe('AggConfig', function () {
     Vis = Private(VisProvider);
     AggType = Private(AggTypesAggTypeProvider);
     AggConfig = Private(VisAggConfigProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(StubLogstashIndexPatternProvider);
     fieldFormat = Private(RegistryFieldFormatsProvider);
   }));
 

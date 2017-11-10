@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import d3 from 'd3';
 import { createColorPalette } from './color_palette';
 

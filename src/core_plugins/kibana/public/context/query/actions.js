@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 import { fetchAnchorProvider } from '../api/anchor';
 import { fetchContextProvider } from '../api/context';

@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React from 'react';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 import timeseries from './vis_types/timeseries/vis';
 import metric from './vis_types/metric/vis';

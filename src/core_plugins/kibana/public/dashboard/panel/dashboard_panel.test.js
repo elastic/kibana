@@ -1,5 +1,5 @@
 import React from 'react';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { mount } from 'enzyme';
 import { DashboardPanel } from './dashboard_panel';
 import { DashboardViewMode } from '../dashboard_view_mode';
@@ -48,4 +48,3 @@ test('renders an error when error prop is passed', () => {
   const panelError = component.find(PanelError);
   expect(panelError.length).toBe(1);
 });
-

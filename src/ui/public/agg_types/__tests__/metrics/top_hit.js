@@ -1,9 +1,9 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { AggTypesMetricsTopHitProvider } from 'ui/agg_types/metrics/top_hit';
 import { VisProvider } from 'ui/vis';
-import StubbedIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 
 describe('Top hit metric', function () {
   let aggDsl;
@@ -14,7 +14,7 @@ describe('Top hit metric', function () {
     ngMock.module('kibana');
     ngMock.inject(function (Private) {
       const Vis = Private(VisProvider);
-      const indexPattern = Private(StubbedIndexPattern);
+      const indexPattern = Private(StubLogstashIndexPatternProvider);
       topHitMetric = Private(AggTypesMetricsTopHitProvider);
 
       const params = {};
@@ -305,50 +305,50 @@ describe('Top hit metric', function () {
           result: null
         }
       ]
-      .forEach(agg => {
-        it(`should return the result of the ${agg.type} aggregation over the last doc - ${agg.description}`, function () {
-          const bucket = {
-            '1': {
-              hits: {
-                hits: [
-                  {
-                    _source: {
-                      bytes: agg.data
+        .forEach(agg => {
+          it(`should return the result of the ${agg.type} aggregation over the last doc - ${agg.description}`, function () {
+            const bucket = {
+              '1': {
+                hits: {
+                  hits: [
+                    {
+                      _source: {
+                        bytes: agg.data
+                      }
                     }
-                  }
-                ]
+                  ]
+                }
               }
-            }
-          };
+            };
 
-          init({ field: 'bytes', aggregate: agg.type });
-          expect(topHitMetric.getValue(aggConfig, bucket)).to.eql(agg.result);
-        });
+            init({ field: 'bytes', aggregate: agg.type });
+            expect(topHitMetric.getValue(aggConfig, bucket)).to.eql(agg.result);
+          });
 
-        it(`should return the result of the ${agg.type} aggregation over the last X docs - ${agg.description}`, function () {
-          const bucket = {
-            '1': {
-              hits: {
-                hits: [
-                  {
-                    _source: {
-                      bytes: _.dropRight(agg.data, 1)
+          it(`should return the result of the ${agg.type} aggregation over the last X docs - ${agg.description}`, function () {
+            const bucket = {
+              '1': {
+                hits: {
+                  hits: [
+                    {
+                      _source: {
+                        bytes: _.dropRight(agg.data, 1)
+                      }
+                    },
+                    {
+                      _source: {
+                        bytes: _.last(agg.data)
+                      }
                     }
-                  },
-                  {
-                    _source: {
-                      bytes: _.last(agg.data)
-                    }
-                  }
-                ]
+                  ]
+                }
               }
-            }
-          };
+            };
 
-          init({ field: 'bytes', aggregate: agg.type });
-          expect(topHitMetric.getValue(aggConfig, bucket)).to.eql(agg.result);
+            init({ field: 'bytes', aggregate: agg.type });
+            expect(topHitMetric.getValue(aggConfig, bucket)).to.eql(agg.result);
+          });
         });
-      });
     });
   });
 });

@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import $ from 'jquery';
+import $ from 'ui/jquery';
 
 function $make(subject) {
   return $('<div>').attr('data-test-subj', subject);

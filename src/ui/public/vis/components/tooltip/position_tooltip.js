@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import $ from 'jquery';
+import _ from 'ui/lodash';
+import $ from 'ui/jquery';
 
 const OFFSET = 10;
 let $clone;
@@ -68,20 +68,20 @@ function getOverflow(size, pos, containers) {
   const overflow = {};
 
   containers.map(getBounds)
-  .sort(function (a, b) {
+    .sort(function (a, b) {
     // ensure smallest containers are merged first
-    return a.area - b.area;
-  })
-  .forEach(function (bounds) {
+      return a.area - b.area;
+    })
+    .forEach(function (bounds) {
     // number of pixels that the toolip would overflow it's far
     // side, if we placed it that way. (negative === no overflow)
-    mergeOverflows(overflow, {
-      north: bounds.top - pos.north,
-      east: (pos.east + size.width) - bounds.right,
-      south: (pos.south + size.height) - bounds.bottom,
-      west: bounds.left - pos.west
+      mergeOverflows(overflow, {
+        north: bounds.top - pos.north,
+        east: (pos.east + size.width) - bounds.right,
+        south: (pos.south + size.height) - bounds.bottom,
+        west: bounds.left - pos.west
+      });
     });
-  });
 
   (window.overflows || (window.overflows = [])).push(overflow);
   return overflow;

@@ -1,4 +1,4 @@
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import expect from 'expect.js';
 import sinon from 'sinon';
 import ngMock from 'ng_mock';

@@ -1,5 +1,5 @@
-import L from 'leaflet';
-import _ from 'lodash';
+import L from 'ui/leaflet';
+import _ from 'ui/lodash';
 
 import { KibanaMapLayer } from './kibana_map_layer';
 import { HeatmapMarkers } from './markers/heatmap';

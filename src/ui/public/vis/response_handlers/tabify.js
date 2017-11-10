@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { AggResponseIndexProvider } from 'ui/agg_response/index';
 import { VisResponseHandlersRegistryProvider } from 'ui/registry/vis_response_handlers';
 

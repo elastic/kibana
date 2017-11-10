@@ -19,15 +19,15 @@ import 'ui/agg_response';
 import 'ui/agg_types';
 import 'ui/timepicker';
 import { Notifier } from 'ui/notify/notifier';
-import 'leaflet';
+import 'ui/leaflet';
 import { KibanaRootController } from './kibana_root_controller';
 
 routes.enable();
 
 routes
-.otherwise({
-  redirectTo: `/${chrome.getInjected('kbnDefaultAppId', 'discover')}`
-});
+  .otherwise({
+    redirectTo: `/${chrome.getInjected('kbnDefaultAppId', 'discover')}`
+  });
 
 chrome.setRootController('kibana', KibanaRootController);
 

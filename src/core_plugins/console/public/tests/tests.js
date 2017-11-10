@@ -1,4 +1,4 @@
-require('ace');
+require('../vendor/ace');
 
 const module = require('ui/modules').get('app/sense');
 
@@ -10,10 +10,10 @@ module.run(function () {
 require('ui/chrome')
   .setRootTemplate(require('./index.html'))
   .setRootController(function () {
-    window.QUnit = require('qunit-1.10.0');
+    window.QUnit = require('./vendor/qunit-1.10.0');
 
-    require('qunit-1.10.0.css');
-    require('ace');
+    require('./vendor/qunit-1.10.0.css');
+    require('../vendor/ace');
     /* global QUnit */
     QUnit.config.autostart = false;
     QUnit.init();

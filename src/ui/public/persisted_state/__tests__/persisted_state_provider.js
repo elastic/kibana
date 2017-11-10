@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import sinon from 'sinon';
 import noDigestPromises from 'test_utils/no_digest_promises';
 import ngMock from 'ng_mock';

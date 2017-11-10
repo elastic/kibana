@@ -1,4 +1,4 @@
-import { get } from 'lodash';
+import { get } from 'ui/lodash';
 
 import uiRoutes from 'ui/routes';
 import { KbnUrlProvider } from 'ui/url';
@@ -7,7 +7,7 @@ import './error_allow_explicit_index.less';
 import template from './error_allow_explicit_index.html';
 
 uiRoutes
-.when('/error/multi.allow_explicit_index', { template });
+  .when('/error/multi.allow_explicit_index', { template });
 
 export function ErrorAllowExplicitIndexProvider(Private, Promise) {
   const kbnUrl = Private(KbnUrlProvider);

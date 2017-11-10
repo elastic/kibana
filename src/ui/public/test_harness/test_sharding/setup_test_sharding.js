@@ -1,4 +1,4 @@
-import { uniq, defaults } from 'lodash';
+import { uniq, defaults } from 'ui/lodash';
 
 import { findTestBundleUrl } from './find_test_bundle_url';
 import { getShardingParamsFromUrl } from './get_sharding_params_from_url';
@@ -33,6 +33,7 @@ export function setupTestSharding() {
   before(() => {
     const ignoredCount = ignoredDescribeShards.length;
     const ignoredFrom = uniq(ignoredDescribeShards).join(', ');
+    // eslint-disable-next-line no-console
     console.log(`Ignored ${ignoredCount} top-level suites from ${ignoredFrom}`);
   });
 
@@ -44,5 +45,6 @@ export function setupTestSharding() {
     ignoredDescribeShards.push(describeShardNum);
   });
 
+  // eslint-disable-next-line no-console
   console.log(`ready to load tests for shard ${shardNum} of ${shardTotal}`);
 }

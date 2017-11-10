@@ -1,5 +1,5 @@
-import 'ace';
-import _ from 'lodash';
+import 'ui/ace';
+import _ from 'ui/lodash';
 import { uiModules } from 'ui/modules';
 import template from './filter_query_dsl_editor.html';
 import 'ui/accessibility/kbn_ui_ace_keyboard_mode';

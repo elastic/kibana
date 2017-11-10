@@ -1,6 +1,6 @@
-let acequire = require('acequire');
-require('ace');
-require('ace/mode-json');
+let acequire = require('../../../vendor/acequire');
+require('../../../vendor/ace');
+require('../../../vendor/ace/mode-json');
 
 var oop = acequire("ace/lib/oop");
 var TextMode = acequire("ace/mode/text").Mode;
@@ -13,7 +13,7 @@ var AceTokenizer = acequire("ace/tokenizer").Tokenizer;
 
 var HighlightRules = require("./input_highlight_rules").InputHighlightRules;
 
-acequire("ace/config").setModuleUrl("sense_editor/mode/worker", require("file-loader!./worker.js"));
+acequire("ace/config").setModuleUrl("sense_editor/mode/worker", require("file-loader!../../../vendor/sense_editor_worker.js"));
 
 export function Mode() {
   this.$tokenizer = new AceTokenizer(new HighlightRules().getRules());

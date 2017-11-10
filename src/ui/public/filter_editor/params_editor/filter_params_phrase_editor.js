@@ -1,4 +1,4 @@
-import 'angular-ui-select';
+import 'ui/angular-ui-select';
 import { uiModules } from 'ui/modules';
 import template from './filter_params_phrase_editor.html';
 import { filterParamsPhraseController } from './filter_params_phrase_controller';

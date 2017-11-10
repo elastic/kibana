@@ -1,4 +1,4 @@
-import { mapValues } from 'lodash';
+import { mapValues } from 'ui/lodash';
 
 export function unhashQueryString(parsedQueryString, states) {
   return mapValues(parsedQueryString, (val, key) => {

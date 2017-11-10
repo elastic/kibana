@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import * as literal from '../node_types/literal';
 import { getPhraseScript } from 'ui/filter_manager/lib/phrase';
 

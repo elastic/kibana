@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
 import RouteManager from 'ui/routes/route_manager';

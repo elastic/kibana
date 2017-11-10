@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { FilterBarLibMapAndFlattenFiltersProvider } from 'ui/filter_bar/lib/map_and_flatten_filters';
 import { FilterBarLibExtractTimeFilterProvider } from 'ui/filter_bar/lib/extract_time_filter';
 import { FilterBarLibChangeTimeFilterProvider } from 'ui/filter_bar/lib/change_time_filter';
@@ -13,27 +13,27 @@ export function AddFiltersToKueryProvider(Private) {
 
   return async function addFiltersToKuery(state, filters) {
     return mapAndFlattenFilters(filters)
-    .then((results) => {
-      extractTimeFilter(results)
-      .then((timeFilter) => {
-        if (timeFilter) {
-          changeTimeFilter(timeFilter);
-        }
-      });
-      return results;
-    })
-    .then(filterOutTimeBasedFilter)
-    .then((results) => {
-      const newQueries = results.map(filterToKueryAST);
-      const allQueries = _.isEmpty(state.query.query)
-        ? newQueries
-        : [fromKueryExpression(state.query.query), ...newQueries];
+      .then((results) => {
+        extractTimeFilter(results)
+          .then((timeFilter) => {
+            if (timeFilter) {
+              changeTimeFilter(timeFilter);
+            }
+          });
+        return results;
+      })
+      .then(filterOutTimeBasedFilter)
+      .then((results) => {
+        const newQueries = results.map(filterToKueryAST);
+        const allQueries = _.isEmpty(state.query.query)
+          ? newQueries
+          : [fromKueryExpression(state.query.query), ...newQueries];
 
-      state.query = {
-        query: toKueryExpression(nodeTypes.function.buildNode('and', allQueries, 'implicit')),
-        language: 'kuery'
-      };
-    });
+        state.query = {
+          query: toKueryExpression(nodeTypes.function.buildNode('and', allQueries, 'implicit')),
+          language: 'kuery'
+        };
+      });
 
   };
 }

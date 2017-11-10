@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { Control } from './control';
 import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
 

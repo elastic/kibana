@@ -1,5 +1,5 @@
-import $ from 'jquery';
-import { set } from 'lodash';
+import $ from 'ui/jquery';
+import { set } from 'ui/lodash';
 
 export function initChromeXsrfApi(chrome, internals) {
 

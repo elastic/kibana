@@ -1,4 +1,4 @@
-import moment from 'moment';
+import moment from 'ui/moment';
 
 export const dateRange = {
   toString: function (range, format) {

@@ -1,6 +1,6 @@
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import html from 'plugins/kibana/discover/components/field_chooser/discover_field.html';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import 'ui/directives/css_truncate';
 import 'ui/directives/field_name';
 import detailsHtml from 'plugins/kibana/discover/components/field_chooser/lib/detail_views/string.html';

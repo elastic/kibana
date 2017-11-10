@@ -1,7 +1,7 @@
-import angular from 'angular';
+import angular from 'ui/angular';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 const objectList = [
   { title: 'apple' },

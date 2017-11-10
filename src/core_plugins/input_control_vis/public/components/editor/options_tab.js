@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { KuiFieldGroup, KuiFieldGroupSection } from 'ui_framework/components';

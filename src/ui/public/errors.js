@@ -1,5 +1,5 @@
-import angular from 'angular';
-import _ from 'lodash';
+import angular from 'ui/angular';
+import _ from 'ui/lodash';
 
 const canStack = (function () {
   const err = new Error();
@@ -38,7 +38,7 @@ _.class(KbnError).inherits(Error);
 export class SearchTimeout extends KbnError {
   constructor() {
     super('All or part of your request has timed out. The data shown may be incomplete.',
-          SearchTimeout);
+      SearchTimeout);
   }
 }
 
@@ -51,7 +51,7 @@ export class RequestFailure extends KbnError {
   constructor(err, resp) {
     err = err || false;
     super(`Request to Elasticsearch failed: ${angular.toJson(resp || err.message)}`,
-          RequestFailure);
+      RequestFailure);
 
     this.origError = err;
     this.resp = resp;

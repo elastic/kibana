@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import d3 from 'd3';
 import { seedColors } from 'ui/vis/components/color/seed_colors';
 import { VislibComponentsColorColorProvider } from 'ui/vis/components/color/color';

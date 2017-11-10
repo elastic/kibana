@@ -1,6 +1,7 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { FilterBarLibMapPhraseProvider } from '../map_phrase';
+import { StubCourierProvider } from 'ui/courier/__tests__/stubs';
 
 describe('Filter Bar Directive', function () {
   describe('mapPhrase()', function () {
@@ -11,7 +12,7 @@ describe('Filter Bar Directive', function () {
       'kibana',
       'kibana/courier',
       function ($provide) {
-        $provide.service('courier', require('fixtures/mock_courier'));
+        $provide.service('courier', StubCourierProvider);
       }
     ));
 

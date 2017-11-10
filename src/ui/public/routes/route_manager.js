@@ -1,10 +1,10 @@
-import { cloneDeep, defaultsDeep, wrap } from 'lodash';
+import { cloneDeep, defaultsDeep, wrap } from 'ui/lodash';
 
 import { wrapRouteWithPrep } from './wrap_route_with_prep';
 import { RouteSetupManager } from './route_setup_manager';
 import { parsePathToBreadcrumbs } from './breadcrumbs';
 
-// eslint-disable-next-line kibana-custom/no-default-export
+// eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default function RouteManager() {
   const self = this;
   const setup = new RouteSetupManager();

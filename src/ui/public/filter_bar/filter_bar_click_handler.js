@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { dedupFilters } from './lib/dedup_filters';
 import { uniqFilters } from './lib/uniq_filters';
 import { findByParam } from 'ui/utils/find_by_param';
@@ -40,17 +40,17 @@ export function FilterBarClickHandlerProvider(Notifier, Private) {
         }
 
         let filters = _(aggBuckets)
-        .map(function (result) {
-          try {
-            return result.createFilter();
-          } catch (e) {
-            if (!simulate) {
-              notify.warning(e.message);
+          .map(function (result) {
+            try {
+              return result.createFilter();
+            } catch (e) {
+              if (!simulate) {
+                notify.warning(e.message);
+              }
             }
-          }
-        })
-        .filter(Boolean)
-        .value();
+          })
+          .filter(Boolean)
+          .value();
 
         if (!filters.length) return;
 
@@ -69,11 +69,11 @@ export function FilterBarClickHandlerProvider(Notifier, Private) {
           }
           else if ($state.query.language === 'kuery') {
             addFiltersToKuery($state, filters)
-            .then(() => {
-              if (_.isFunction($state.save)) {
-                $state.save();
-              }
-            });
+              .then(() => {
+                if (_.isFunction($state.save)) {
+                  $state.save();
+                }
+              });
           }
         }
         return filters;

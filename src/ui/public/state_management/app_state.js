@@ -8,7 +8,7 @@
  * ability to destroy those mappings.
  */
 
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { uiModules } from 'ui/modules';
 import { StateProvider } from 'ui/state_management/state';
 import 'ui/persisted_state';
@@ -108,10 +108,10 @@ export function AppStateProvider(Private, $rootScope, $location, $injector) {
 }
 
 uiModules.get('kibana/global_state')
-.factory('AppState', function (Private) {
-  return Private(AppStateProvider);
-})
-.service('getAppState', function (Private) {
-  return Private(AppStateProvider).getAppState;
-});
+  .factory('AppState', function (Private) {
+    return Private(AppStateProvider);
+  })
+  .service('getAppState', function (Private) {
+    return Private(AppStateProvider).getAppState;
+  });
 

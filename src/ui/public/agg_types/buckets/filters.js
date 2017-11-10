@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import angular from 'angular';
+import _ from 'ui/lodash';
+import angular from 'ui/angular';
 import { luceneStringToDsl } from '../../courier/data_source/build_query/lucene_string_to_dsl.js';
 
 import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';

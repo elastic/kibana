@@ -1,6 +1,6 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import dateMath from '@elastic/datemath';
-import moment from 'moment';
+import moment from 'ui/moment';
 import 'ui/timepicker/quick_ranges';
 import 'ui/timepicker/time_units';
 import { uiModules } from 'ui/modules';

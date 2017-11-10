@@ -1,6 +1,6 @@
 import { relativeOptions } from '../../../../../ui/public/timepicker/relative_options';
-import _ from 'lodash';
-import moment from 'moment';
+import _ from 'ui/lodash';
+import moment from 'ui/moment';
 const unitLookup = {
   s: 'seconds',
   m: 'minutes',

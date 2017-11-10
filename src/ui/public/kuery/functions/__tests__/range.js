@@ -1,8 +1,8 @@
 import expect from 'expect.js';
 import * as range from '../range';
 import { nodeTypes } from '../../node_types';
-import _ from 'lodash';
-import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import _ from 'ui/lodash';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 import ngMock from 'ng_mock';
 
 let indexPattern;
@@ -13,7 +13,7 @@ describe('kuery functions', function () {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      indexPattern = Private(StubbedLogstashIndexPatternProvider);
+      indexPattern = Private(StubLogstashIndexPatternProvider);
     }));
 
     describe('buildNodeParams', function () {
@@ -97,14 +97,14 @@ describe('kuery functions', function () {
       it('should throw an error for nodes with unknown or undefined serialize styles', function () {
         const node = nodeTypes.function.buildNode('range', 'bytes', { gte: 1000, lte: 8000 }, 'notValid');
         expect(range.toKueryExpression)
-        .withArgs(node).to.throwException(/Cannot serialize "range" function as "notValid"/);
+          .withArgs(node).to.throwException(/Cannot serialize "range" function as "notValid"/);
       });
 
       it('should not support exclusive ranges in the operator syntax', function () {
         const node = nodeTypes.function.buildNode('range', 'bytes', { gt: 1000, lt: 8000 });
         node.serializeStyle = 'operator';
         expect(range.toKueryExpression)
-        .withArgs(node).to.throwException(/Operator syntax only supports inclusive ranges/);
+          .withArgs(node).to.throwException(/Operator syntax only supports inclusive ranges/);
       });
 
     });

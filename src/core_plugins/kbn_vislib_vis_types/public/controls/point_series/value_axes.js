@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { uiModules } from 'ui/modules';
 import vislibValueAxesTemplate from 'plugins/kbn_vislib_vis_types/controls/point_series/value_axes.html';
 const module = uiModules.get('kibana');

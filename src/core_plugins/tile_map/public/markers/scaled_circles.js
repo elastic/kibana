@@ -1,7 +1,7 @@
-import L from 'leaflet';
-import _ from 'lodash';
+import L from 'ui/leaflet';
+import _ from 'ui/lodash';
 import d3 from 'd3';
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import { EventEmitter } from 'events';
 
 export class ScaledCirclesMarkers extends EventEmitter {

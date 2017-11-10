@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { UtilsDiffTimePickerValsProvider } from 'ui/utils/diff_time_picker_vals';
 
 export function TimefilterLibDiffIntervalProvider(Private) {

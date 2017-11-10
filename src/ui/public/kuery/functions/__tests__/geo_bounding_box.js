@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import * as geoBoundingBox from '../geo_bounding_box';
 import { nodeTypes } from '../../node_types';
-import StubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 import ngMock from 'ng_mock';
 
 let indexPattern;
@@ -22,7 +22,7 @@ describe('kuery functions', function () {
 
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      indexPattern = Private(StubbedLogstashIndexPatternProvider);
+      indexPattern = Private(StubLogstashIndexPatternProvider);
     }));
 
     describe('buildNodeParams', function () {
@@ -76,7 +76,7 @@ describe('kuery functions', function () {
       it('should throw an error for scripted fields', function () {
         const node = nodeTypes.function.buildNode('geoBoundingBox', 'script number', params);
         expect(geoBoundingBox.toElasticsearchQuery)
-        .withArgs(node, indexPattern).to.throwException(/Geo bounding box query does not support scripted fields/);
+          .withArgs(node, indexPattern).to.throwException(/Geo bounding box query does not support scripted fields/);
       });
     });
   });

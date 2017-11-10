@@ -75,12 +75,12 @@ export default function ({ getService, getPageObjects }) {
     it('should have all the expected visualizations', function checkVisualizations() {
       return retry.tryForTime(10000, function () {
         return PageObjects.dashboard.getPanelTitles()
-        .then(function (panelTitles) {
-          expect(panelTitles).to.eql(testVisualizationTitles);
-        });
+          .then(function (panelTitles) {
+            expect(panelTitles).to.eql(testVisualizationTitles);
+          });
       })
-      .then(function () {
-      });
+        .then(function () {
+        });
     });
 
     describe('filters', async function () {
@@ -107,19 +107,19 @@ export default function ({ getService, getPageObjects }) {
 
     it('should have data-shared-items-count set to the number of visualizations', function checkSavedItemsCount() {
       return retry.tryForTime(10000, () => PageObjects.dashboard.getSharedItemsCount())
-      .then(function (count) {
-        log.info('data-shared-items-count = ' + count);
-        expect(count).to.eql(testVisualizationTitles.length);
-      });
+        .then(function (count) {
+          log.info('data-shared-items-count = ' + count);
+          expect(count).to.eql(testVisualizationTitles.length);
+        });
     });
 
     it('should have panels with expected data-shared-item title and description', function () {
       return retry.tryForTime(10000, function () {
         return PageObjects.dashboard.getPanelSharedItemData()
-        .then(function (data) {
-          expect(data.map(item => item.title)).to.eql(testVisualizationTitles);
-          expect(data.map(item => item.description)).to.eql(testVisualizationDescriptions);
-        });
+          .then(function (data) {
+            expect(data.map(item => item.title)).to.eql(testVisualizationTitles);
+            expect(data.map(item => item.description)).to.eql(testVisualizationDescriptions);
+          });
       });
     });
 

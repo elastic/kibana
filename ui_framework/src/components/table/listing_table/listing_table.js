@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 import { KuiListingTableToolBar } from './listing_table_tool_bar';
 import { KuiListingTableToolBarFooter } from './listing_table_tool_bar_footer';
@@ -137,7 +137,7 @@ KuiListingTable.PropTypes = {
         isSorted: PropTypes.bool,
       }),
     ]
-  )),
+    )),
   rows: PropTypes.arrayOf(PropTypes.shape({
     id: PropTypes.string,
     cells: PropTypes.arrayOf(
@@ -148,7 +148,7 @@ KuiListingTable.PropTypes = {
           align: PropTypes.oneOf([LEFT_ALIGNMENT, RIGHT_ALIGNMENT]),
         }),
       ],
-    )),
+      )),
   })),
   pager: PropTypes.node,
   onItemSelectionChanged: PropTypes.func.isRequired,

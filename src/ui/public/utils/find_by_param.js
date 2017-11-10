@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 // given an object or array of objects, return the value of the passed param
 // if the param is missing, return undefined

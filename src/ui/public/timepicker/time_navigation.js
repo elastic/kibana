@@ -1,4 +1,4 @@
-import moment from 'moment';
+import moment from 'ui/moment';
 
 export const timeNavigation = {
   // travel forward in time based on the interval between from and to

@@ -1,10 +1,10 @@
-import _ from 'lodash';
-import fixtures from 'fixtures/fake_hierarchical_data';
+import _ from 'ui/lodash';
+import { metricOnly, threeTermBuckets } from 'ui/agg_response/__tests__/fixtures';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { AggResponseTabifyProvider } from 'ui/agg_response/tabify/tabify';
 import { VisProvider } from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 
 describe('tabifyAggResponse Integration', function () {
   let Vis;
@@ -15,7 +15,7 @@ describe('tabifyAggResponse Integration', function () {
   beforeEach(ngMock.inject(function (Private) {
     tabifyAggResponse = Private(AggResponseTabifyProvider);
     Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(StubLogstashIndexPatternProvider);
   }));
 
   function normalizeIds(vis) {
@@ -31,7 +31,7 @@ describe('tabifyAggResponse Integration', function () {
     });
     normalizeIds(vis);
 
-    const resp = tabifyAggResponse(vis, fixtures.metricOnly, { canSplit: false });
+    const resp = tabifyAggResponse(vis, metricOnly, { canSplit: false });
 
     expect(resp).to.not.have.property('tables');
     expect(resp).to.have.property('rows').and.property('columns');
@@ -69,7 +69,7 @@ describe('tabifyAggResponse Integration', function () {
       src = vis.aggs[2];
       os = vis.aggs[3];
 
-      esResp = _.cloneDeep(fixtures.threeTermBuckets);
+      esResp = _.cloneDeep(threeTermBuckets);
       // remove the buckets for css              in MX
       esResp.aggregations.agg_2.buckets[1].agg_3.buckets[0].agg_4.buckets = [];
     });
@@ -127,13 +127,13 @@ describe('tabifyAggResponse Integration', function () {
     // check for an empty cell
     function expectEmpty(val) {
       expect(val)
-      .to.be('');
+        .to.be('');
     }
 
     // check for an OS term
     function expectOS(val) {
       expect(val)
-      .to.match(/^(win|mac|linux)$/);
+        .to.match(/^(win|mac|linux)$/);
     }
 
     // check for something like an average bytes result

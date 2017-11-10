@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_bucket_agg_type';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
 import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';

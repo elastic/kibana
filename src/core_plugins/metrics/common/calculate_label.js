@@ -49,4 +49,3 @@ export default function calculateLabel(metric, metrics) {
 
   return `${lookup[metric.type]} of ${metric.field}`;
 }
-

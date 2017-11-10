@@ -1,5 +1,5 @@
 import createBrushHandler from '../create_brush_handler';
-import moment from 'moment';
+import moment from 'ui/moment';
 import { expect } from 'chai';
 
 describe('createBrushHandler', () => {

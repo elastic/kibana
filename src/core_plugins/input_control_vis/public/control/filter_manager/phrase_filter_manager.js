@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { FilterManager } from './filter_manager.js';
 import { buildPhraseFilter } from 'ui/filter_manager/lib/phrase';
 import { buildPhrasesFilter } from 'ui/filter_manager/lib/phrases';
@@ -55,16 +55,16 @@ export class PhraseFilterManager extends FilterManager {
     // bool filter - multiple phrase filters
     if (_.has(kbnFilter, 'query.bool.should')) {
       return _.get(kbnFilter, 'query.bool.should')
-      .map((kbnFilter) => {
-        return this._getValueFromFilter(kbnFilter);
-      })
-      .filter((value) => {
-        if (value) {
-          return true;
-        }
-        return false;
-      })
-      .join(this.delimiter);
+        .map((kbnFilter) => {
+          return this._getValueFromFilter(kbnFilter);
+        })
+        .filter((value) => {
+          if (value) {
+            return true;
+          }
+          return false;
+        })
+        .join(this.delimiter);
     }
 
     // scripted field filter

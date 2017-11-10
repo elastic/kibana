@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { AggTypesAggTypeProvider } from 'ui/agg_types/agg_type';
 
 export function AggTypesBucketsBucketAggTypeProvider(Private) {

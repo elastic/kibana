@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 export function VislibComponentsLabelsUniqLabelsProvider() {
 
@@ -12,8 +12,8 @@ export function VislibComponentsLabelsUniqLabelsProvider() {
     }
 
     return _(arr)
-    .pluck('label')
-    .unique()
-    .value();
+      .pluck('label')
+      .unique()
+      .value();
   };
 }

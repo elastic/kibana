@@ -1,5 +1,5 @@
 import ngMock from 'ng_mock';
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import expect from 'expect.js';
 
 import { chromeNavControlsRegistry } from 'ui/registry/chrome_nav_controls';
@@ -65,8 +65,8 @@ describe('chrome nav controls', function () {
     const $el = compile();
     expect(
       $el.find('.testControl')
-      .toArray()
-      .map(el => el.id)
+        .toArray()
+        .map(el => el.id)
     ).to.eql(['3', '2', '1']);
   });
 });

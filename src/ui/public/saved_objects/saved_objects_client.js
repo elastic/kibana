@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import chrome from 'ui/chrome';
 
 import { resolve as resolveUrl, format as formatUrl } from 'url';

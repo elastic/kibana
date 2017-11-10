@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 export function VislibComponentsZeroInjectionFlattenDataProvider() {
 
@@ -19,11 +19,11 @@ export function VislibComponentsZeroInjectionFlattenDataProvider() {
     }
 
     return _(charts ? charts : [obj])
-    .pluck('series')
-    .flattenDeep()
-    .pluck('values')
-    .flattenDeep()
-    .filter(Boolean)
-    .value();
+      .pluck('series')
+      .flattenDeep()
+      .pluck('values')
+      .flattenDeep()
+      .filter(Boolean)
+      .value();
   };
 }

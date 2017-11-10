@@ -1,6 +1,6 @@
 const filename = require('path').basename(__filename);
 const fn = require(`../calculate_interval`);
-const moment = require('moment');
+const moment = require('ui/moment');
 const expect = require('chai').expect;
 
 

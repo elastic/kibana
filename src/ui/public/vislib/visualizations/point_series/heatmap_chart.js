@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import moment from 'moment';
+import _ from 'ui/lodash';
+import moment from 'ui/moment';
 import { VislibVisualizationsPointSeriesProvider } from './_point_series';
 import { getHeatmapColors } from 'ui/vislib/components/color/heatmap_color';
 
@@ -209,8 +209,8 @@ export function VislibVisualizationsHeatmapChartProvider(Private) {
           Math.abs(squareHeight / Math.sin(rotateRad))
         ) - cellPadding;
         const maxHeight = Math.min(
-            Math.abs(squareWidth / Math.sin(rotateRad)),
-            Math.abs(squareHeight / Math.cos(rotateRad))
+          Math.abs(squareWidth / Math.sin(rotateRad)),
+          Math.abs(squareHeight / Math.cos(rotateRad))
         ) - cellPadding;
 
         let hiddenLabels = false;

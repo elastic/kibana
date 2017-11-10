@@ -3,8 +3,75 @@ extends:
   - '@elastic/eslint-config-kibana'
   - '@elastic/eslint-config-kibana/jest'
 
-settings:
-  import/resolver:
-    '@elastic/eslint-import-resolver-kibana':
-      rootPackageName: 'kibana'
-      kibanaPath: .
+overrides:
+
+  ## for the code that has been migrated to use named exports
+  - files:
+      - "src/ui/public/**/*"
+      - "src/core_plugins/kibana/public/**/*"
+    rules:
+      no-console: error
+      '@elastic/kibana-custom/no-default-export': error
+
+
+  ## code in src/**/public and ui_framework/src is always built using the optimizer, so
+  ## resolve imports with it's webpack config. common directories are intentionally excluded
+  ## because they need to function in both webpack and node module loaders
+  - files:
+      - "src/**/public/**/*"
+      - "ui_framework/src/**/*"
+    settings:
+      import/resolver:
+        '@elastic/eslint-import-resolver-kibana':
+          rootPackageName: 'kibana'
+          kibanaPath: .
+
+
+  ## ui framework doc site uses its own webpack config
+  - files:
+      - "ui_framework/doc_site/src/**/*"
+    settings:
+      import/resolver:
+        'eslint-import-resolver-webpack': ui_framework/doc_site/webpack.config.js
+
+
+  ## the console source code is mostly copied from an old repo and has not been
+  ## updated to follow the Kibana style guide, as such we disable a bunch of eslint
+  ## rules for the code.
+  - files:
+      - "src/core_plugins/console/public/**/*"
+      - "src/core_plugins/console/api_server/**/*"
+    rules:
+      block-scoped-var: off
+      camelcase: off
+      curly: off
+      dot-location: off
+      dot-notation: off
+      eqeqeq: off
+      guard-for-in: off
+      indent: off
+      max-len: off
+      new-cap: off
+      no-caller: off
+      no-empty: off
+      no-extend-native: off
+      no-loop-func: off
+      no-multi-str: off
+      no-nested-ternary: off
+      no-proto: off
+      no-sequences: off
+      no-use-before-define: off
+      one-var: off
+      quotes: off
+      space-before-blocks: off
+      space-in-parens: off
+      space-infix-ops: off
+      semi: off
+      strict: off
+      wrap-iife: off
+      no-var: off
+      prefer-const: off
+  - files:
+      - "src/core_plugins/console/api_server/**/*"
+    rules:
+      no-undef: off

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { onlyDisabled } from 'ui/filter_bar/lib/only_disabled';
 import { onlyStateChanged } from 'ui/filter_bar/lib/only_state_changed';
 import { uniqFilters } from 'ui/filter_bar/lib/uniq_filters';
@@ -64,13 +64,13 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
     }
 
     return mapAndFlattenFilters(filters)
-    .then(function (filters) {
-      if (!filterState.filters) {
-        filterState.filters = [];
-      }
+      .then(function (filters) {
+        if (!filterState.filters) {
+          filterState.filters = [];
+        }
 
-      filterState.filters = filterState.filters.concat(filters);
-    });
+        filterState.filters = filterState.filters.concat(filters);
+      });
   };
 
   /**
@@ -327,10 +327,10 @@ export function FilterBarQueryFilterProvider(Private, $rootScope, getAppState, g
         // save states and emit the required events
         saveState();
         queryFilter.emit('update')
-        .then(function () {
-          if (!doFetch) return;
-          queryFilter.emit('fetch');
-        });
+          .then(function () {
+            if (!doFetch) return;
+            queryFilter.emit('fetch');
+          });
 
         // iterate over each state type, checking for changes
         function getActions() {

@@ -1,5 +1,5 @@
 import { requestFetchParamsToBody } from './request_fetch_params_to_body';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 function requestFetchParamsToBodyWithDefaults(paramOverrides) {
   const paramDefaults = {

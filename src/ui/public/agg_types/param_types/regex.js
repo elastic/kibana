@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import editorHtml from '../controls/regular_expression.html';
 import { BaseParamTypeProvider } from './base';
 

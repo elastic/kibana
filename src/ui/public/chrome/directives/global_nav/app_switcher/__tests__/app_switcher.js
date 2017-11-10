@@ -3,8 +3,8 @@ import ngMock from 'ng_mock';
 import expect from 'expect.js';
 
 import { DomLocationProvider } from 'ui/dom_location';
-import { constant, cloneDeep } from 'lodash';
-import $ from 'jquery';
+import { constant, cloneDeep } from 'ui/lodash';
+import $ from 'ui/jquery';
 import 'ui/chrome';
 import '../app_switcher';
 

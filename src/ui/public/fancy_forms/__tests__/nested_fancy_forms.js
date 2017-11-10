@@ -1,7 +1,7 @@
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import sinon from 'sinon';
-import $ from 'jquery';
+import $ from 'ui/jquery';
 
 const template = `
   <form name="person" ng-submit="onSubmit()">

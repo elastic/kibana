@@ -1,5 +1,5 @@
 
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import collectBranch from 'ui/agg_response/hierarchical/_collect_branch';
 import expect from 'expect.js';
 describe('collectBranch()', function () {

@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import angular from 'angular';
+import _ from 'ui/lodash';
+import angular from 'ui/angular';
 
 export function UtilsDiffTimePickerValsProvider() {
 

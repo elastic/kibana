@@ -3,7 +3,7 @@ import ngMock from 'ng_mock';
 import { BaseParamTypeProvider } from '../../param_types/base';
 import { RegexParamTypeProvider } from '../../param_types/regex';
 import { VisProvider } from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 
 describe('Regex', function () {
 
@@ -18,7 +18,7 @@ describe('Regex', function () {
     BaseParamType = Private(BaseParamTypeProvider);
     RegexParamType = Private(RegexParamTypeProvider);
     Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(StubLogstashIndexPatternProvider);
   }));
 
   describe('constructor', function () {

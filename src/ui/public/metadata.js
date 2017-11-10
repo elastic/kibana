@@ -1,5 +1,5 @@
-import $ from 'jquery';
-import _ from 'lodash';
+import $ from 'ui/jquery';
+import _ from 'ui/lodash';
 
 export const metadata = deepFreeze(getState());
 

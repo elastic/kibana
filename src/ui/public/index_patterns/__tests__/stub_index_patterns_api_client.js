@@ -1,4 +1,4 @@
-import MockLogstashFieldsProvider from 'fixtures/logstash_fields';
+import { createStubLogstashFields } from './stubs';
 import sinon from 'sinon';
 
 import { IndexPatternsApiClientProvider } from '../index_patterns_api_client_provider';
@@ -7,8 +7,8 @@ import { IndexPatternsApiClientProvider } from '../index_patterns_api_client_pro
 export function StubIndexPatternsApiClientModule(PrivateProvider) {
   PrivateProvider.swap(
     IndexPatternsApiClientProvider,
-    (Private, Promise) => {
-      let nonScriptedFields = Private(MockLogstashFieldsProvider).filter(field => (
+    (Promise) => {
+      let nonScriptedFields = createStubLogstashFields().filter(field => (
         field.scripted !== true
       ));
 

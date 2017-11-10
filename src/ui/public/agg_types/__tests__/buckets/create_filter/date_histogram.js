@@ -1,10 +1,10 @@
-import _ from 'lodash';
-import moment from 'moment';
-import aggResp from 'fixtures/agg_resp/date_histogram';
+import _ from 'ui/lodash';
+import moment from 'ui/moment';
+import { DATE_HISTOGRAM_RESPONSE } from './fixtures/date_histogram_response';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
 import { VisProvider } from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 import { AggTypesBucketsCreateFilterDateHistogramProvider } from 'ui/agg_types/buckets/create_filter/date_histogram';
 import { AggTypesBucketsIntervalOptionsProvider } from 'ui/agg_types/buckets/_interval_options';
 
@@ -23,7 +23,7 @@ describe('AggConfig Filters', function () {
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
       const Vis = Private(VisProvider);
-      const indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+      const indexPattern = Private(StubLogstashIndexPatternProvider);
       const createFilter = Private(AggTypesBucketsCreateFilterDateHistogramProvider);
       intervalOptions = Private(AggTypesBucketsIntervalOptionsProvider);
 
@@ -44,7 +44,7 @@ describe('AggConfig Filters', function () {
         });
 
         agg = vis.aggs[0];
-        bucketKey = _.sample(aggResp.aggregations['1'].buckets).key;
+        bucketKey = _.sample(DATE_HISTOGRAM_RESPONSE.aggregations['1'].buckets).key;
         bucketStart = moment(bucketKey);
 
         const timePad = moment.duration(duration / 2);

@@ -1,9 +1,9 @@
 
 import { buildInlineScriptForPhraseFilter, buildPhraseFilter } from 'ui/filter_manager/lib/phrase';
 import expect from 'expect.js';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import ngMock from 'ng_mock';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 
 let indexPattern;
 let expected;
@@ -12,8 +12,12 @@ describe('Filter Manager', function () {
   describe('Phrase filter builder', function () {
     beforeEach(ngMock.module('kibana'));
     beforeEach(ngMock.inject(function (Private) {
-      indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-      expected = _.cloneDeep(require('fixtures/filter_skeleton'));
+      indexPattern = Private(StubLogstashIndexPatternProvider);
+      expected = {
+        meta: {
+          index: 'logstash-*'
+        }
+      };
     }));
 
     it('should be a function', function () {

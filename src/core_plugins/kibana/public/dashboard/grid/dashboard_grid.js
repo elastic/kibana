@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import ReactGridLayout from 'react-grid-layout';
 import classNames from 'classnames';
 

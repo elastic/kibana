@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 const pluckDisabled = function (filter) {
   return _.get(filter, 'meta.disabled');

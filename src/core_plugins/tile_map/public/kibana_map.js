@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events';
-import L from 'leaflet';
-import $ from 'jquery';
-import _ from 'lodash';
+import L from 'ui/leaflet';
+import $ from 'ui/jquery';
+import _ from 'ui/lodash';
 import { zoomToPrecision } from 'ui/utils/zoom_to_precision';
 
 function makeFitControl(fitContainer, kibanaMap) {

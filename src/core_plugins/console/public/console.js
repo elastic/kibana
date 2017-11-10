@@ -1,8 +1,8 @@
 import uiRoutes from 'ui/routes';
 import template from './index.html';
 
-require('ace');
-require('ui-bootstrap-custom');
+require('./vendor/ace');
+require('./vendor/ui-bootstrap');
 
 require('ui/modules').get('kibana', ['sense.ui.bootstrap']);
 require('ui/tooltip');

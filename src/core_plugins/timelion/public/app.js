@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import moment from 'moment-timezone';
+import _ from 'ui/lodash';
+import moment from 'ui/moment';
 
 import { DocTitleProvider } from 'ui/doc_title';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
@@ -39,28 +39,28 @@ require('ui/routes')
     resolve: {
       savedSheet: function (courier, savedSheets, $route) {
         return savedSheets.get($route.current.params.id)
-        .catch(courier.redirectWhenMissing({
-          'search': '/'
-        }));
+          .catch(courier.redirectWhenMissing({
+            'search': '/'
+          }));
       }
     }
   });
 
 app.controller('timelion', function (
-    $http,
-    $route,
-    $routeParams,
-    $scope,
-    $timeout,
-    AppState,
-    config,
-    confirmModal,
-    courier,
-    kbnUrl,
-    Notifier,
-    Private,
-    timefilter
-  ) {
+  $http,
+  $route,
+  $routeParams,
+  $scope,
+  $timeout,
+  AppState,
+  config,
+  confirmModal,
+  courier,
+  kbnUrl,
+  Notifier,
+  Private,
+  timefilter
+) {
 
   // Keeping this at app scope allows us to keep the current page when the user
   // switches to say, the timepicker.
@@ -222,30 +222,30 @@ app.controller('timelion', function (
         timezone: timezone
       }),
     })
-    .then(resp => resp.data)
-    .catch(resp => { throw resp.data; });
+      .then(resp => resp.data)
+      .catch(resp => { throw resp.data; });
 
     httpResult
-    .then(function (resp) {
-      dismissNotifications();
-      $scope.stats = resp.stats;
-      $scope.sheet = resp.sheet;
-      _.each(resp.sheet, function (cell) {
-        if (cell.exception) {
-          $scope.state.selected = cell.plot;
-        }
+      .then(function (resp) {
+        dismissNotifications();
+        $scope.stats = resp.stats;
+        $scope.sheet = resp.sheet;
+        _.each(resp.sheet, function (cell) {
+          if (cell.exception) {
+            $scope.state.selected = cell.plot;
+          }
+        });
+        $scope.running = false;
+      })
+      .catch(function (resp) {
+        $scope.sheet = [];
+        $scope.running = false;
+
+        const err = new Error(resp.message);
+        err.stack = resp.stack;
+        notify.error(err);
+
       });
-      $scope.running = false;
-    })
-    .catch(function (resp) {
-      $scope.sheet = [];
-      $scope.running = false;
-
-      const err = new Error(resp.message);
-      err.stack = resp.stack;
-      notify.error(err);
-
-    });
   };
 
   $scope.safeSearch = _.debounce($scope.search, 500);

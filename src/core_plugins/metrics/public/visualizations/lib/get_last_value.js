@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 export default (data, lookback = 2) => {
   if (_.isNumber(data)) return data;
   if (!Array.isArray(data)) return 0;

@@ -1,6 +1,6 @@
 import d3 from 'd3';
-import _ from 'lodash';
-import $ from 'jquery';
+import _ from 'ui/lodash';
+import $ from 'ui/jquery';
 import { TooltipProvider } from 'ui/vis/components/tooltip';
 import { VislibVisualizationsChartProvider } from './_chart';
 import { VislibVisualizationsTimeMarkerProvider } from './time_marker';
@@ -49,13 +49,13 @@ export function VislibVisualizationsPointSeriesProvider(Private) {
       const startY = 0;
 
       return svg
-      .append('rect')
-      .attr('x', startX)
-      .attr('y', startY)
-      .attr('width', width)
-      .attr('height', height)
-      .attr('fill', 'transparent')
-      .attr('class', 'background');
+        .append('rect')
+        .attr('x', startX)
+        .attr('y', startY)
+        .attr('width', width)
+        .attr('height', height)
+        .attr('fill', 'transparent')
+        .attr('class', 'background');
     }
 
     addGrid(svg) {
@@ -74,13 +74,13 @@ export function VislibVisualizationsPointSeriesProvider(Private) {
 
       // Creating clipPath
       return svg
-      .append('clipPath')
-      .attr('id', this.clipPathId)
-      .append('rect')
-      .attr('x', startX)
-      .attr('y', startY)
-      .attr('width', width)
-      .attr('height', height);
+        .append('clipPath')
+        .attr('id', this.clipPathId)
+        .append('rect')
+        .attr('x', startX)
+        .attr('y', startY)
+        .attr('width', width)
+        .attr('height', height);
     }
 
     addEvents(svg) {
@@ -216,8 +216,8 @@ export function VislibVisualizationsPointSeriesProvider(Private) {
           div = d3.select(el);
 
           svg = div.append('svg')
-          .attr('width', width)
-          .attr('height', height);
+            .attr('width', width)
+            .attr('height', height);
 
           self.addBackground(svg, width, height);
           self.addGrid(svg);

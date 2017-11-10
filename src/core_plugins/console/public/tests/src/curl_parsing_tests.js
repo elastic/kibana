@@ -1,4 +1,4 @@
-let _ = require('lodash');
+let _ = require('ui/lodash');
 let curl = require('../../src/curl');
 let curlTests = require('raw-loader!./curl_parsing_tests.txt');
 

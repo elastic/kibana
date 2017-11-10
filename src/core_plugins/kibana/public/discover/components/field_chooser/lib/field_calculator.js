@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 function getFieldValues(hits, field) {
   const name = field.name;

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { BaseObject } from 'ui/utils/base_object';
 
 /**

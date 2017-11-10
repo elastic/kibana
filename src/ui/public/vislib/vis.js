@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import d3 from 'd3';
 import { KbnError } from 'ui/errors';
 import { EventsProvider } from 'ui/events';

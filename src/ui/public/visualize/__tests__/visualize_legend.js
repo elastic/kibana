@@ -1,9 +1,11 @@
-import $ from 'jquery';
-import _ from 'lodash';
+import $ from 'ui/jquery';
+import _ from 'ui/lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
+import { oneRangeBucket } from 'ui/agg_response/__tests__/fixtures';
+import { createStubUiState } from './stubs';
 
 describe('visualize_legend directive', function () {
   let $rootScope;
@@ -12,16 +14,14 @@ describe('visualize_legend directive', function () {
   let $el;
   let Vis;
   let indexPattern;
-  let fixtures;
 
   beforeEach(ngMock.module('kibana', 'kibana/table_vis'));
   beforeEach(ngMock.inject(function (Private, $injector) {
     $rootScope = $injector.get('$rootScope');
     $compile = $injector.get('$compile');
     $timeout = $injector.get('$timeout');
-    fixtures = require('fixtures/fake_hierarchical_data');
     Vis = Private(VisProvider);
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
+    indexPattern = Private(StubLogstashIndexPatternProvider);
   }));
 
   // basically a parameterized beforeEach
@@ -30,7 +30,7 @@ describe('visualize_legend directive', function () {
 
     $rootScope.vis = vis;
     $rootScope.visData = esResponse;
-    $rootScope.uiState = require('fixtures/mock_ui_state');
+    $rootScope.uiState = createStubUiState();
     $el = $('<visualize-legend>');
     $compile($el)($rootScope);
     $rootScope.$apply();
@@ -65,7 +65,7 @@ describe('visualize_legend directive', function () {
   it('calls hightlight handler when hightlight function is called', () => {
     const requiresSearch = false;
     const vis = new CreateVis(null, requiresSearch);
-    init(vis, fixtures.oneRangeBucket);
+    init(vis, oneRangeBucket);
     let highlight = 0;
     _.set(vis, 'vislibVis.handler.highlight', () => { highlight++; });
     $rootScope.highlight({ currentTarget: null });
@@ -75,7 +75,7 @@ describe('visualize_legend directive', function () {
   it('calls unhighlight handler when unhighlight function is called', () => {
     const requiresSearch = false;
     const vis = new CreateVis(null, requiresSearch);
-    init(vis, fixtures.oneRangeBucket);
+    init(vis, oneRangeBucket);
     let unhighlight = 0;
     _.set(vis, 'vislibVis.handler.unHighlight', () => { unhighlight++; });
     $rootScope.unhighlight({ currentTarget: null });
@@ -86,7 +86,7 @@ describe('visualize_legend directive', function () {
     beforeEach(() => {
       const requiresSearch = false;
       const vis = new CreateVis(null, requiresSearch);
-      init(vis, fixtures.oneRangeBucket);
+      init(vis, oneRangeBucket);
     });
 
     it('sets the color in the UI state', () => {
@@ -102,7 +102,7 @@ describe('visualize_legend directive', function () {
     beforeEach(() => {
       const requiresSearch = false;
       vis = new CreateVis(null, requiresSearch);
-      init(vis, fixtures.oneRangeBucket);
+      init(vis, oneRangeBucket);
     });
 
     it('sets the color in the UI state', () => {
@@ -133,7 +133,7 @@ describe('visualize_legend directive', function () {
     const requiresSearch = false;
     const vis = new CreateVis(null, requiresSearch);
     vis.vislibVis = {};
-    init(vis, fixtures.oneRangeBucket);
+    init(vis, oneRangeBucket);
     expect(() => {
       $rootScope.highlight({ currentTarget: null });
       $rootScope.unhighlight({ currentTarget: null });
@@ -143,7 +143,7 @@ describe('visualize_legend directive', function () {
   it('getToggleLegendClasses returns correct class', () => {
     const requiresSearch = false;
     const vis = new CreateVis(null, requiresSearch);
-    init(vis, fixtures.oneRangeBucket);
+    init(vis, oneRangeBucket);
 
     $rootScope.vis.params.legendPosition = 'top';
     $rootScope.open = true;

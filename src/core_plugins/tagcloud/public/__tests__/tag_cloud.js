@@ -1,5 +1,5 @@
 import expect from 'expect.js';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import TagCloud from 'plugins/tagcloud/tag_cloud';
 import d3 from 'd3';
 import { fromNode, delay } from 'bluebird';

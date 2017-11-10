@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { TabbedAggResponseWriterProvider } from 'ui/agg_response/tabify/_response_writer';
 import { AggResponseBucketsProvider } from 'ui/agg_response/tabify/_buckets';
 

@@ -1,7 +1,7 @@
 import d3 from 'd3';
 import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import { VislibLibLayoutSplitsColumnChartChartSplitProvider } from 'ui/vislib/lib/layout/splits/column_chart/chart_split';
 import { VislibLibLayoutSplitsColumnChartChartTitleSplitProvider } from 'ui/vislib/lib/layout/splits/column_chart/chart_title_split';
 import { VislibLibLayoutSplitsColumnChartXAxisSplitProvider } from 'ui/vislib/lib/layout/splits/column_chart/x_axis_split';

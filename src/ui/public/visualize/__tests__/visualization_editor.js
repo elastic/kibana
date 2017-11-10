@@ -1,11 +1,13 @@
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import FixturesStubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
-import MockState from 'fixtures/mock_state';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
+import { StubSearchSourceProvider } from 'ui/courier/__tests__/stubs';
+import { StubState } from 'ui/state_management/__tests__/stubs';
 import { AggResponseIndexProvider } from 'ui/agg_response';
+import { oneRangeBucket } from 'ui/agg_response/__tests__/fixtures';
+import { createStubUiState } from './stubs';
 
 describe('visualization_editor directive', function () {
   let $rootScope;
@@ -14,7 +16,6 @@ describe('visualization_editor directive', function () {
   let $el;
   let Vis;
   let indexPattern;
-  let fixtures;
   let searchSource;
   let appState;
   let $timeout;
@@ -26,17 +27,16 @@ describe('visualization_editor directive', function () {
     $rootScope = $injector.get('$rootScope');
     $compile = $injector.get('$compile');
     $timeout = $injector.get('$timeout');
-    fixtures = require('fixtures/fake_hierarchical_data');
     Vis = Private(VisProvider);
-    appState = new MockState({ filters: [] });
+    appState = new StubState({ filters: [] });
     appState.toJSON = () => { return {}; };
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    searchSource = Private(FixturesStubbedSearchSourceProvider);
+    indexPattern = Private(StubLogstashIndexPatternProvider);
+    searchSource = Private(StubSearchSourceProvider);
     aggResponse = Private(AggResponseIndexProvider);
 
     const requiresSearch = false;
     vis = new CreateVis(null, requiresSearch);
-    init(vis, fixtures.oneRangeBucket);
+    init(vis, oneRangeBucket);
     $timeout.flush();
     $timeout.verifyNoPendingTasks();
   }));
@@ -47,7 +47,7 @@ describe('visualization_editor directive', function () {
 
     $rootScope.vis = vis;
     $rootScope.visData = aggResponse.tabify(vis, esResponse);
-    $rootScope.uiState = require('fixtures/mock_ui_state');
+    $rootScope.uiState = createStubUiState();
     $rootScope.searchSource = searchSource;
     $el = $('<visualization-editor vis="vis" vis-data="visData" ui-state="uiState" search-source="searchSource">');
     $compile($el)($rootScope);

@@ -1,5 +1,5 @@
 import d3 from 'd3';
-import $ from 'jquery';
+import $ from 'ui/jquery';
 import { VislibVisualizationsChartProvider } from './_chart';
 import { GaugeTypesProvider } from './gauges/gauge_types';
 

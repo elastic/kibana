@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 export function VislibComponentsLabelsFlattenSeriesProvider() {
 
@@ -14,8 +14,8 @@ export function VislibComponentsLabelsFlattenSeriesProvider() {
     obj = obj.rows ? obj.rows : obj.columns;
 
     return _.chain(obj)
-    .pluck('series')
-    .flattenDeep()
-    .value();
+      .pluck('series')
+      .flattenDeep()
+      .value();
   };
 }

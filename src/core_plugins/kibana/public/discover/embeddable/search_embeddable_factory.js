@@ -1,5 +1,5 @@
 import searchTemplate from './search_template.html';
-import angular from 'angular';
+import angular from 'ui/angular';
 import 'ui/doc_table';
 
 import * as columnActions from 'ui/doc_table/actions/columns';

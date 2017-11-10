@@ -1,11 +1,12 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import sinon from 'sinon';
-import MockState from 'fixtures/mock_state';
+import { StubState } from 'ui/state_management/__tests__/stubs';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { FilterManagerProvider } from 'ui/filter_manager';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 import { getPhraseScript } from '../lib/phrase';
+import { StubCourierProvider } from 'ui/courier/__tests__/stubs';
 let queryFilter;
 let filterManager;
 let appState;
@@ -27,9 +28,9 @@ describe('Filter Manager', function () {
     'kibana/courier',
     'kibana/global_state',
     function ($provide) {
-      $provide.service('courier', require('fixtures/mock_courier'));
+      $provide.service('courier', StubCourierProvider);
 
-      appState = new MockState({ filters: [] });
+      appState = new StubState({ filters: [] });
       $provide.service('getAppState', function () {
         return function () { return appState; };
       });

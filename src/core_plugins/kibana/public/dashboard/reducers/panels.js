@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { handleActions } from 'redux-actions';
 
 import {

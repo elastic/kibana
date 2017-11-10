@@ -1,5 +1,5 @@
-import L from 'leaflet';
-import _ from 'lodash';
+import L from 'ui/leaflet';
+import _ from 'ui/lodash';
 import { ScaledCirclesMarkers } from './scaled_circles';
 
 export class ShadedCirclesMarkers extends ScaledCirclesMarkers {

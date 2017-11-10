@@ -1,4 +1,4 @@
-import { includes, mapValues } from 'lodash';
+import { includes, mapValues } from 'ui/lodash';
 import { Notifier } from 'ui/notify/notifier';
 
 /*

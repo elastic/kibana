@@ -1,5 +1,5 @@
-import moment from 'moment';
-import _ from 'lodash';
+import moment from 'ui/moment';
+import _ from 'ui/lodash';
 import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 export const SUGGESTION_TYPE = {
   ARGUMENTS: 'arguments',

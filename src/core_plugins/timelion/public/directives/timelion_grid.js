@@ -1,4 +1,4 @@
-import $ from 'jquery';
+import $ from 'ui/jquery';
 
 const app = require('ui/modules').get('apps/timelion', []);
 app.directive('timelionGrid', function () {

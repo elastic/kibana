@@ -1,4 +1,4 @@
-import { find } from 'lodash';
+import { find } from 'ui/lodash';
 
 /**
  * Returns an object matching a given title

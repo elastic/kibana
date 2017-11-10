@@ -1,6 +1,6 @@
-import _ from 'lodash';
-import angular from 'angular';
-import $ from 'jquery';
+import _ from 'ui/lodash';
+import angular from 'ui/angular';
+import $ from 'ui/jquery';
 import { metadata } from 'ui/metadata';
 import { formatMsg } from 'ui/notify/lib/_format_msg';
 import fatalSplashScreen from 'ui/notify/partials/fatal_splash_screen.html';
@@ -348,8 +348,8 @@ Notifier.prototype._showFatal = function (err) {
   if (!$container.size()) {
     $(document.body)
       // in case the app has not completed boot
-    .removeAttr('ng-cloak')
-    .html(fatalSplashScreen);
+      .removeAttr('ng-cloak')
+      .html(fatalSplashScreen);
 
     $container = $('#fatal-splash-screen');
   }

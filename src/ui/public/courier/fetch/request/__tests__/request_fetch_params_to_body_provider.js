@@ -1,6 +1,7 @@
 import ngMock from 'ng_mock';
+import expect from 'expect.js';
 
-import StubIndexPatternProvider from 'test_utils/stub_index_pattern';
+import { StubIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 
 import { RequestFetchParamsToBodyProvider } from '../request_fetch_params_to_body_provider';
 

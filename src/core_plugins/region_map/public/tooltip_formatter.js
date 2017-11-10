@@ -1,4 +1,4 @@
-import $ from 'jquery';
+import $ from 'ui/jquery';
 export default function TileMapTooltipFormatter($compile, $rootScope) {
 
   const $tooltipScope = $rootScope.$new();

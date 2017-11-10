@@ -5,7 +5,7 @@ import { AggTypesMetricsCumulativeSumProvider } from 'ui/agg_types/metrics/cumul
 import { AggTypesMetricsMovingAvgProvider } from 'ui/agg_types/metrics/moving_avg';
 import { AggTypesMetricsSerialDiffProvider } from 'ui/agg_types/metrics/serial_diff';
 import { VisProvider } from 'ui/vis';
-import StubbedIndexPattern from 'fixtures/stubbed_logstash_index_pattern';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 
 const metrics = [
   { name: 'derivative', title: 'Derivative', provider: AggTypesMetricsDerivativeProvider },
@@ -26,7 +26,7 @@ describe('parent pipeline aggs', function () {
         ngMock.module('kibana');
         ngMock.inject(function (Private) {
           const Vis = Private(VisProvider);
-          const indexPattern = Private(StubbedIndexPattern);
+          const indexPattern = Private(StubLogstashIndexPatternProvider);
           indexPattern.stubSetFieldFormat('bytes', 'bytes');
           metricAgg = Private(metric.provider);
 

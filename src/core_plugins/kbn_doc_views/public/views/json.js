@@ -1,5 +1,5 @@
-import angular from 'angular';
-import 'ace';
+import angular from 'ui/angular';
+import 'ui/ace';
 import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
 
 import jsonHtml from './json.html';

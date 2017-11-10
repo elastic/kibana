@@ -1,11 +1,13 @@
-import $ from 'jquery';
-import _ from 'lodash';
+import $ from 'ui/jquery';
+import _ from 'ui/lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import { VisProvider } from 'ui/vis';
-import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
-import FixturesStubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
-import MockState from 'fixtures/mock_state';
+import { StubLogstashIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
+import { StubSearchSourceProvider } from 'ui/courier/__tests__/stubs';
+import { StubState } from 'ui/state_management/__tests__/stubs';
+import { oneRangeBucket } from 'ui/agg_response/__tests__/fixtures';
+import { createStubUiState } from './stubs';
 
 describe('visualize spy directive', function () {
   let $rootScope;
@@ -13,7 +15,6 @@ describe('visualize spy directive', function () {
   let $el;
   let Vis;
   let indexPattern;
-  let fixtures;
   let searchSource;
   let appState;
   let vis;
@@ -22,15 +23,14 @@ describe('visualize spy directive', function () {
   beforeEach(ngMock.inject(function (Private, $injector) {
     $rootScope = $injector.get('$rootScope');
     $compile = $injector.get('$compile');
-    fixtures = require('fixtures/fake_hierarchical_data');
     Vis = Private(VisProvider);
-    appState = new MockState({ filters: [] });
+    appState = new StubState({ filters: [] });
     appState.toJSON = () => { return {}; };
-    indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
-    searchSource = Private(FixturesStubbedSearchSourceProvider);
+    indexPattern = Private(StubLogstashIndexPatternProvider);
+    searchSource = Private(StubSearchSourceProvider);
     const requiresSearch = false;
     vis = new CreateVis(null, requiresSearch);
-    init(vis, fixtures.oneRangeBucket);
+    init(vis, oneRangeBucket);
   }));
 
   // basically a parameterized beforeEach
@@ -39,7 +39,7 @@ describe('visualize spy directive', function () {
     $rootScope.spy = {};
     $rootScope.vis = vis;
     $rootScope.esResponse = esResponse;
-    $rootScope.uiState = require('fixtures/mock_ui_state');
+    $rootScope.uiState = createStubUiState();
     $rootScope.searchSource = searchSource;
     $el = $('<visualize-spy>');
     $compile($el)($rootScope);

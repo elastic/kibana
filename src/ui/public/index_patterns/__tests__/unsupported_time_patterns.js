@@ -4,7 +4,7 @@ import Chance from 'chance';
 
 import { Storage } from 'ui/storage';
 import StubBrowserStorage from 'test_utils/stub_browser_storage';
-import StubIndexPatternProvider from 'test_utils/stub_index_pattern';
+import { StubIndexPatternProvider } from 'ui/index_patterns/__tests__/stubs';
 import { IsUserAwareOfUnsupportedTimePatternProvider } from '../unsupported_time_patterns';
 
 const chance = new Chance();

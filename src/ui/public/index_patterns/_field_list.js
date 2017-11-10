@@ -1,5 +1,5 @@
 import { IndexedArray } from 'ui/indexed_array';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 import { IndexPatternsFieldProvider } from 'ui/index_patterns/_field';
 
 export function IndexPatternsFieldListProvider(Private) {

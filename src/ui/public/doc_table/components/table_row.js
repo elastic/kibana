@@ -1,5 +1,5 @@
-import _ from 'lodash';
-import $ from 'jquery';
+import _ from 'ui/lodash';
+import $ from 'ui/jquery';
 import rison from 'rison-node';
 import 'ui/doc_viewer';
 import 'ui/filters/trust_as_html';

@@ -1,5 +1,5 @@
 import { uiModules } from 'ui/modules';
-import { words, capitalize } from 'lodash';
+import { words, capitalize } from 'ui/lodash';
 
 uiModules
   .get('kibana')

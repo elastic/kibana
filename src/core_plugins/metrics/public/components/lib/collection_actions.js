@@ -1,5 +1,5 @@
 import uuid from 'uuid';
-import _ from 'lodash';
+import _ from 'ui/lodash';
 
 const newFn = () => ({ id: uuid.v1() });
 

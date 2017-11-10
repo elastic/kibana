@@ -1,4 +1,4 @@
-import 'angular';
+import 'ui/angular';
 import 'ui/chrome';
 import 'ui/bind';
 import 'ui/kbn_top_nav';
