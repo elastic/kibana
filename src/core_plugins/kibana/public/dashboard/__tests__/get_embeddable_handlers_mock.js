@@ -1,3 +1,4 @@
+/* global jest */
 export function getEmbeddableHandlerMock(config) {
   const embeddableHandlerMockDefaults = {
     getEditPath: () => {},
