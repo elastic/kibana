@@ -7,7 +7,7 @@ import { PanelError } from '../panel/panel_error';
 import { store } from '../../store';
 import { updateViewMode } from '../actions';
 import { Provider } from 'react-redux';
-import { getEmbeddableFactoryMock } from '../__tests__/get_embeddable_factories_mock.test';
+import { getEmbeddableFactoryMock } from '../__tests__/get_embeddable_factories_mock';
 
 import {
   takeMountedSnapshot,
