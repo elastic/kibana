@@ -1,7 +1,6 @@
 import testSubjSelector from '@elastic/test-subj-selector';
 
-// eslint-disable-next-line @elastic/kibana-custom/no-default-export
-export default function bindToJquery($) {
+export function bindToJquery($) {
 
   /**
    * Find elements with the `data-test-subj` attribute by the terms in that attribute.

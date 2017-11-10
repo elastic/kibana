@@ -1,1 +1,1 @@
-export default from './jquery';
+module.exports = require('./jquery');
