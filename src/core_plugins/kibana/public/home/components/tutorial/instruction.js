@@ -11,12 +11,12 @@ import { replaceTemplateStrings } from './replace_template_strings';
 export function Instruction({ commands, paramValues, textPost, textPre }) {
   let pre;
   if (textPre) {
-    pre = <Content text={textPre}/>;
+    pre = <Content className="kuiVerticalRhythm" text={textPre}/>;
   }
 
   let post;
   if (textPost) {
-    post = <Content text={textPost}/>;
+    post = <Content className="kuiVerticalRhythm" text={textPost}/>;
   }
 
   const aceOptions = {
@@ -29,15 +29,16 @@ export function Instruction({ commands, paramValues, textPost, textPre }) {
 
       {pre}
 
-      <KuiCodeEditor
-        className="kuiVerticalRhythm"
-        mode="sh"
-        theme="github"
-        width="100%"
-        value={commands.map(cmd => { return replaceTemplateStrings(cmd, paramValues); }).join('\n')}
-        setOptions={aceOptions}
-        isReadOnly
-      />
+      <div className="kuiVerticalRhythm">
+        <KuiCodeEditor
+          mode="sh"
+          theme="github"
+          width="100%"
+          value={commands.map(cmd => { return replaceTemplateStrings(cmd, paramValues); }).join('\n')}
+          setOptions={aceOptions}
+          isReadOnly
+        />
+      </div>
 
       {post}
 

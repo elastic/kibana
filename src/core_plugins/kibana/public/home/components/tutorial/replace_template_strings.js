@@ -17,6 +17,7 @@ export function replaceTemplateStrings(text, params = {}) {
           filebeat: documentationLinks.filebeat.base,
           metricbeat: documentationLinks.metricbeat.base
         },
+        logstash: documentationLinks.logstash.base,
         version: DOC_LINK_VERSION
       },
       kibana: {

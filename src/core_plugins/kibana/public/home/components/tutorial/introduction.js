@@ -19,10 +19,10 @@ export function Introduction({ description, previewUrl, title }) {
       <div className="kuiFlexGroup kuiFlexGroup--gutterLarge">
 
         <div className="kuiFlexItem">
-          <h1 className="kuiTitle">
+          <h1 className="kuiTitle kuiVerticalRhythm">
             {title}
           </h1>
-          <Content text={description}/>
+          <Content className="kuiVerticalRhythm" text={description}/>
         </div>
 
         <div className="kuiFlexItem kuiFlexItem--flexGrowZero">
