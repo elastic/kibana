@@ -35,10 +35,6 @@ Specify the position of the subdomain the URL with the token `{s}`.
 Each layer object points to an external vector file that contains a geojson FeatureCollection.
 The file must use the [WGS84 coordinate reference system](https://en.wikipedia.org/wiki/World_Geodetic_System) and only include polygons. 
 If the file is hosted on a separate domain from Kibana, the server needs to be CORS-enabled so Kibana can download the file.
-The url field also serves as a unique identifier for the file.
-Each layer can contain multiple fields to indicate what properties from the geojson features you want to expose.
-The field.description is the human readable text that is shown in the Region Map visualization's field menu.
-An optional attribution value can be added as well.
 The following example shows a valid regionmap configuration.
 
     regionmap:
@@ -51,6 +47,13 @@ The following example shows a valid regionmap configuration.
                 description: "Full department name"
               - name: "INSEE"
                 description: "INSEE numeric identifier"
+
+`name:`:: Mandatory. A description of the map being provided.
+`url:`:: Mandatory. The location of the geojson file as provided by a webserver. This field also serves as a unique identifier for the file.
+`attribution:`:: Optional. References the originating source of the geojson file.
+`fields:`:: Mandatory. Each layer can contain multiple fields to indicate what properties from the geojson features you wish to expose. The example above shows how to define multiple properties.
+`fields.name:`:: Mandatory. This value is used to do an inner-join between the document stored in Elasticsearch and the geojson file. eg if the field in the Elasticsearch is called `Location`, it must match a field in the geojson of the exact same name that Kibana can then use to lookup for the geoshape data.
+`fields.description:`:: Mandatory. The human readable text that is shown under the Options tab when building the Region Map visualization.
 
 `elasticsearch.username:` and `elasticsearch.password:`:: If your Elasticsearch is protected with basic authentication,
 these settings provide the username and password that the Kibana server uses to perform maintenance on the Kibana index at
