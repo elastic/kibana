@@ -75,7 +75,7 @@ export default (kibana) => {
 
       __globalImportAliases__: {
         ng_mock$: fromRoot('src/core_plugins/dev_mode/public/ng_mock'),
-        'angular-mocks$': require.resolve('./vendor/angular-mocks'),
+        'angular-mocks$': require.resolve('./public/angular_mocks'),
         fixtures: fromRoot('src/fixtures'),
         test_utils: fromRoot('src/test_utils/public'),
       }
