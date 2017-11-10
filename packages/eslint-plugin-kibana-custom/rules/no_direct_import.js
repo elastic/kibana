@@ -1,63 +1,66 @@
-function parseRequest(request) {
-  let loaders = null;
-  let subPath = null;
-  let name = request;
-
-  if (name.includes('!')) {
-    // remove webpack loaders from name
-    const parts = name.split('!');
-    loaders = parts.slice(0, -1).join('!');
-    name = parts.pop();
+function stripLoaders(request) {
+  if (!request.includes('!')) {
+    return request;
   }
 
-  if (name.includes('/')) {
+  // remove webpack loaders from request
+  const parts = request.split('!');
+  return parts.pop();
+}
+
+function parseRequest(request) {
+  const fullModule = stripLoaders(request);
+  const modules = [];
+
+  if (fullModule.includes('/')) {
     // extract module name from request with sub path
-    const parts = name.split('/');
+    const parts = fullModule.split('/');
     if (parts[0].startsWith('@')) {
-      name = `${parts.shift()}/${parts.shift()}`;
+      modules.unshift(`${parts.shift()}/${parts.shift()}`);
     } else {
-      name = parts.shift();
+      modules.unshift(parts.shift());
     }
 
-    if (parts.length) {
-      subPath = parts.join('/');
+    while (parts.length) {
+      modules.unshift(`${modules[modules.length - 1]}/${parts.shift()}`);
     }
   }
 
   return {
-    loaders,
-    subPath,
-    name
+    request,
+    modules,
   };
 }
 
 function check(context, node) {
   const [{ blacklist }] = context.options;
 
-  const req = parseRequest(node.value);
+  const { request, modules } = parseRequest(node.value);
 
-  if (!blacklist.hasOwnProperty(req.name)) {
+  const blacklistedModule = modules.find(m => blacklist.hasOwnProperty(m));
+  if (!blacklistedModule) {
     return;
   }
 
-  if (blacklist[req.name] && !req.subPath && !req.loaders) {
+  const replacement = blacklist[blacklistedModule];
+  if (replacement) {
     context.report({
       node,
       message: `Direct imports of the "{{name}}" are not allowed. Use "{{replacement}}" instead.`,
       data: {
-        name: req.name,
-        replacement: blacklist[req.name],
+        name: blacklistedModule,
+        replacement,
       },
-      fix(fixer) {
-        return fixer.replaceText(node, `'${blacklist[req.name]}'`);
-      }
+      fix: blacklistedModule === request
+        ? fixer => fixer.replaceText(node, `'${replacement}'`)
+        : false
     });
   } else {
     context.report({
       node,
-      message: `Direct imports of the "${req.name}" are not allowed.`,
+      message: `Direct imports of the "{{name}}" are not allowed.`,
       data: {
-        name: req.name
+        name: blacklistedModule
       }
     });
   }
