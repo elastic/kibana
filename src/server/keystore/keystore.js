@@ -4,7 +4,7 @@ import * as errors from './errors';
 
 const VERSION = 1;
 const ALGORITHM = 'aes-256-gcm';
-const ITERATIONS = 250;
+const ITERATIONS = 10000;
 
 export class Keystore {
   constructor(path, password = '') {
@@ -59,8 +59,8 @@ export class Keystore {
     // included it with the buffer
 
     const keystore = [
-      Keystore.encrypt(text, this.password),
-      VERSION
+      VERSION,
+      Keystore.encrypt(text, this.password)
     ].join(':');
 
     writeFileSync(this.path, keystore);
@@ -69,7 +69,7 @@ export class Keystore {
   load() {
     try {
       const keystore = readFileSync(this.path);
-      const [data, ] = keystore.toString().split(':');
+      const [, data] = keystore.toString().split(':');
 
       this.data = JSON.parse(Keystore.decrypt(data, this.password));
     } catch (e) {

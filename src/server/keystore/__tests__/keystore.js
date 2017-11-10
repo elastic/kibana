@@ -8,13 +8,13 @@ import { Keystore } from '../keystore';
 describe('Keystore', () => {
   const sandbox = sinon.sandbox.create();
 
-  const protoctedKeystoreData = 'g2xOu2Cj+M+3X1ZmjH6NiB8csZ6eq1dLfAuX+aL3b49oV'
-        + 'yKNsNC/01deiFB1sMUKk/ZlHgYAvLdtmjnsUJHeExQuQQW08PAIBBhkR7sSNxHRsKc2'
-        + 'SB8NypWQPkSoCJeVMd8cQ5D8HdEfrCMJDVAFpg2QY3jJH4Gn9w==:1';
+  const protoctedKeystoreData = '1:4BnWfydL8NwFIQJg+VQKe0jlIs7uXtty6+++yaWPbSB'
+    + 'KIX3d9nPfQ20K1C6Xh26E/gMJAQ9jh7BxK0+W3lt/iDJBJn44wqX3pQ0189iGkNBL0ibDCc'
+    + 'tz4mRy6+hqwiLxiukpH8ELAJsff8LNNHr+gNzX/2k/GvB7nQ==';
 
-  const unprotectedKeystoreData = 'vlXZaImfDAKf2ZvBRCKrr7u6/MYjuREUGho0/usYajy'
-        + 'hmbQY63S99pjzJ9eA+IRmE2wj3Prd0LV3Z5ed144LnNIPc0I3RPNDVyxvZdQgkfe8HI'
-        + 'FhIu7RAPsAmPzYyHGWdQtcREAlg3bxxjz85QX4p3SnCx8MXETcDQ==:1';
+  const unprotectedKeystoreData = '1:IxR0geiUTMJp8ueHDkqeUJ0I9eEw4NJPXIJi22UDy'
+    + 'fGfJSy4mHBBuGPkkAix/x/YFfIxo4tiKGdJ2oVTtU8LgKDkVoGdL+z7ylY4n3myatt6osqh'
+    + 'I4lzJ9MRy21UcAJki2qFUTj4TYuvhta3LId+RM5UX/dJ2468hQ==';
 
   beforeEach(() => {
     mockFs({
@@ -55,7 +55,7 @@ describe('Keystore', () => {
 
       const fileBuffer = readFileSync(path);
       const contents = fileBuffer.toString();
-      const [data, version] = contents.split(':');
+      const [version, data] = contents.split(':');
 
       expect(version).to.eql(1);
       expect(data.length).to.be.greaterThan(100);
@@ -163,9 +163,9 @@ describe('Keystore', () => {
   describe('decrypt', () => {
     const text = 'foo';
     const password = 'changeme';
-    const ciphertext = 'Ali0DwsgNdODeso01GdelOAX6ZcfdiLz79RbXnL3MCcu1YnX9KKfyb'
-          + 'rKtoo9ffTQwcpPhofbsrbxwJ3Gdc2GlDsD8g3PuyqQcXy3ufwpPL2bBzDg2yJ86SW'
-          + 'b8SThyCg=';
+    const ciphertext = 'ctvRsD0l0u958QoPuINQX+wgspbXt2+7IJ7gNbCND2dCGZxYOCwMH9'
+    + 'MEdZZG4cevSrnhYOaxh24POFhtisSdCSlLWsKNQU8NK1zqNQ3RRP8HxayZJB7ly9uOLbDS+'
+    + 'Ew=';
 
     it('can decrypt data', () => {
       const data = Keystore.decrypt(ciphertext, password);
