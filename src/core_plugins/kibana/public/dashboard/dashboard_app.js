@@ -22,7 +22,7 @@ import { keyCodes } from 'ui_framework/services';
 import { DashboardContainerAPI } from './dashboard_container_api';
 import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
-import { EmbeddableHandlersRegistryProvider } from 'ui/embeddable/embeddable_handlers_registry';
+import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
 
@@ -59,8 +59,8 @@ app.directive('dashboardApp', function ($injector) {
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
       const notify = new Notifier({ location: 'Dashboard' });
-      const embeddableHandlers = Private(EmbeddableHandlersRegistryProvider);
-      $scope.getEmbeddableHandler = panelType => embeddableHandlers.byName[panelType];
+      const embeddableFactories = Private(EmbeddableFactoriesRegistryProvider);
+      $scope.getEmbeddableFactory = panelType => embeddableFactories.byName[panelType];
 
       const dash = $scope.dash = $route.current.locals.dash;
       if (dash.id) {

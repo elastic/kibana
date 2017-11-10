@@ -5,7 +5,7 @@ import _ from 'lodash';
 import sizeMe from 'react-sizeme';
 
 import { getContainerApiMock } from '../__tests__/get_container_api_mock';
-import { getEmbeddableHandlerMock } from '../__tests__/get_embeddable_handlers_mock';
+import { getEmbeddableFactoryMock } from '../__tests__/get_embeddable_factories_mock';
 import { store } from '../../store';
 import { DashboardGridContainer } from './dashboard_grid_container';
 import { updatePanels } from '../actions';
@@ -15,7 +15,7 @@ jest.mock('ui/chrome', () => ({ getKibanaVersion: () => '6.0.0' }), { virtual: t
 function getProps(props = {}) {
   const defaultTestProps = {
     hidden: false,
-    getEmbeddableHandler: () => getEmbeddableHandlerMock(),
+    getEmbeddableFactory: () => getEmbeddableFactoryMock(),
     getContainerApi: () => getContainerApiMock(),
   };
   return Object.assign(defaultTestProps, props);

@@ -1,11 +1,11 @@
 /* global jest */
-export function getEmbeddableHandlerMock(config) {
-  const embeddableHandlerMockDefaults = {
+export function getEmbeddableFactoryMock(config) {
+  const embeddableFactoryMockDefaults = {
     getEditPath: () => {},
     getTitleFor: () => {},
     render: jest.fn(),
     destroy: () => {},
     addDestroyEmeddable: () => {},
   };
-  return Object.assign(embeddableHandlerMockDefaults, config);
+  return Object.assign(embeddableFactoryMockDefaults, config);
 }
