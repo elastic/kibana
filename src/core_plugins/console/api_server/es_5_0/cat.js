@@ -72,6 +72,7 @@ export default function (api) {
   addSimpleCat('_cat/snapshots', api, null, [
     '_cat/snapshots', '_cat/snapshots/{repository}'
   ]);
+  addSimpleCat('_cat/tasks', api);
   addSimpleCat('_cat/templates', api, [
     '_cat/templates', '_cat/templates/{template}'
   ]);
