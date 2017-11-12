@@ -302,6 +302,52 @@ test('invalid body', async () => {
     });
 });
 
+test('handles putting', async () => {
+  const router = new Router('/foo');
+
+  router.put({ path: '/' }, async (val, req, res) => {
+    return res.ok(req.body);
+  });
+
+  server.registerRouter(router);
+
+  await server.start(config);
+
+  await supertest((server as any).server)
+    .put('/foo')
+    .send({ key: 'new value' })
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ key: 'new value' });
+    });
+});
+
+test('handles deleting', async () => {
+  const router = new Router('/foo');
+
+  router.delete({
+    path: '/:id',
+    validate: {
+      params: schema.object({
+        id: schema.number()
+      })
+    }
+  }, async (val, req, res) => {
+    return res.ok({ key: req.params.id });
+  });
+
+  server.registerRouter(router);
+
+  await server.start(config);
+
+  await supertest((server as any).server)
+    .delete('/foo/3')
+    .expect(200)
+    .then(res => {
+      expect(res.body).toEqual({ key: 3 });
+    });
+});
+
 test('returns 200 OK if returning object', async () => {
   const router = new Router('/foo');
 
