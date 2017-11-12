@@ -24,7 +24,7 @@
   "dependencies": {
     "axios": "^0.17.0",
     "es6-promisify": "^5.0.0",
-    "inquirer": "^3.3.0",
+    "inquirer": "^4.0.0",
     "mkdirp": "^0.5.1",
     "nock": "^9.0.22",
     "ora": "^1.3.0",
