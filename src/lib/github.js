@@ -19,9 +19,9 @@ function getCommits(owner, repoName, author) {
   }
 
   return axios(
-    `https://api.github.com/repos/${owner}/${repoName}/commits?${querystring.stringify(
-      urlArgs
-    )}`
+    `https://api.github.com/repos/${owner}/${
+      repoName
+    }/commits?${querystring.stringify(urlArgs)}`
   )
     .catch(handleError)
     .then(res =>
@@ -39,7 +39,9 @@ function getCommits(owner, repoName, author) {
 function createPullRequest(owner, repoName, payload) {
   return axios
     .post(
-      `https://api.github.com/repos/${owner}/${repoName}/pulls?access_token=${accessToken}`,
+      `https://api.github.com/repos/${owner}/${repoName}/pulls?access_token=${
+        accessToken
+      }`,
       payload
     )
     .catch(handleError);
@@ -48,7 +50,9 @@ function createPullRequest(owner, repoName, payload) {
 function addLabels(owner, repoName, pullNumber, labels) {
   return axios
     .post(
-      `https://api.github.com/repos/${owner}/${repoName}/issues/${pullNumber}/labels?access_token=${accessToken}`,
+      `https://api.github.com/repos/${owner}/${repoName}/issues/${
+        pullNumber
+      }/labels?access_token=${accessToken}`,
       labels
     )
     .catch(handleError);
@@ -56,7 +60,9 @@ function addLabels(owner, repoName, pullNumber, labels) {
 
 function getPullRequestByCommit(owner, repoName, commitSha) {
   return axios(
-    `https://api.github.com/search/issues?q=repo:${owner}/${repoName}+${commitSha}&access_token=${accessToken}`
+    `https://api.github.com/search/issues?q=repo:${owner}/${repoName}+${
+      commitSha
+    }&access_token=${accessToken}`
   )
     .catch(handleError)
     .then(res => res.data.items[0] && res.data.items[0].number);

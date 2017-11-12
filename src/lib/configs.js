@@ -49,7 +49,9 @@ function validateConfig({ username, accessToken, repositories }) {
 
   if (!username && !accessToken) {
     throw new InvalidConfigError(
-      `Welcome to the Backport tool. Please add your Github username, and a Github access token to the config: ${CONFIG_PATH}`
+      `Welcome to the Backport tool. Please add your Github username, and a Github access token to the config: ${
+        CONFIG_PATH
+      }`
     );
   }
 
@@ -73,7 +75,9 @@ function validateConfig({ username, accessToken, repositories }) {
 
   if (!hasCorrectPerms) {
     throw new InvalidConfigError(
-      `Config file at ${CONFIG_PATH} needs to have more restrictive permissions. Run the ` +
+      `Config file at ${
+        CONFIG_PATH
+      } needs to have more restrictive permissions. Run the ` +
         'following to limit access to the file to just your user account:\n' +
         '\n' +
         `  chmod 600 "${CONFIG_PATH}"\n`
