@@ -11,8 +11,7 @@ export function netflowSpecProvider() {
     longDescription: 'The Logstash Netflow module simplifies the collection, normalization, and visualization of network flow data. ' +
       'With a single command, the module parses network flow data, indexes the events into Elasticsearch, and installs a suite of Kibana ' +
       'dashboards to get you exploring your data immediately. Logstash modules support Netflow Version 5 and 9. [Learn more]' +
-      '({config.elastic_docs.website_url}/guide/en/logstash/{config.elastic_docs.link_version}/netflow-module.html) about the Netflow ' +
-      'module.',
+      '({config.docs.logstash}/netflow-module.html) about the Netflow module',
     //iconPath: '', TODO
     completionTimeMinutes: 10,
     //previewImagePath: 'kibana-apache.png', TODO
