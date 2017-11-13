@@ -16,11 +16,11 @@ From a clean setup locally (the best is probably to just `rm` your
 
 ```sh
 cd packages/kbn-internal-native-observable
-npm install && npm run build
+npm install
 cd -
 
 cd packages/kbn-observable
-npm install && npm run build
+npm install
 cd -
 
 #  from root directory
@@ -51,7 +51,7 @@ Or load it as a part of the legacy platform:
 npm start
 ```
 
-In the latter case, all Kibana requests will hit the new platform first and it will decide whether request can be 
+In the latter case, all Kibana requests will hit the new platform first and it will decide whether request can be
 solely handled by the new platform or request should be forwarded to the legacy platform. In this mode new platform does
 not read config file directly, but rather transforms config provided by the legacy platform. In addition to that all log
 records are forwarded to the legacy platform so that it can layout and output them properly.
