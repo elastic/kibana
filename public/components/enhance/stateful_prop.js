@@ -33,7 +33,7 @@ export function createStatefulPropHoc(fieldname, updater = 'updateValue') {
     }
 
     WrappedControlledInput.propTypes = {
-      [fieldname]: PropTypes.string,
+      [fieldname]: PropTypes.any,
     };
 
     return WrappedControlledInput;
