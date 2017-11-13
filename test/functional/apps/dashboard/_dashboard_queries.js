@@ -7,6 +7,7 @@ import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
  * with nested queries and filters on the visualizations themselves.
  */
 export default function ({ getService, getPageObjects }) {
+  const retry = getService('retry');
   const dashboardVisualizations = getService('dashboardVisualizations');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
 
@@ -76,8 +77,13 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.setQuery('bytes:>100');
       await PageObjects.dashboard.clickFilterButton();
       await PageObjects.header.waitUntilLoadingHasFinished();
-      pieSlicesCount = await PageObjects.dashboard.getPieSliceCount();
-      expect(pieSlicesCount).to.equal(0);
+
+      // There appears to be a slight delay between the page loading and the visualization reacting to the
+      // filter which is causing this to sometimes be greater than 0, hence the retry.
+      retry.try(async () => {
+        pieSlicesCount = await PageObjects.dashboard.getPieSliceCount();
+        expect(pieSlicesCount).to.equal(0);
+      });
     });
 
     it('Pie chart attached to saved search filters shows no data with conflicting dashboard query', async () => {
