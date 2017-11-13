@@ -34,20 +34,21 @@
           <option value=''>Select</option></select>
       </div>
     </div>
+    <div class="kuiSideBarFormRow">
+      <label class="kuiSideBarFormRow__label" for="displayWarnings">
+        Display warnings &nbsp;
+        <kbn-info info="Turns on/off warnings. When turned off, no warning will be shown when terms in the result that could not be joined to the vector layer."></kbn-info>
+      </label>
+
+      <div class="kuiSideBarFormRow__control">
+        <input id="displayWarnings" type="checkbox" ng-model="vis.params.isDisplayWarning">
+      </div>
+    </div>
   </div>
 </div>
 
 <div class="kuiSideBarSection">
-  <div class="kuiSideBarFormRow">
-    <label class="kuiSideBarFormRow__label" for="displayWarnings">
-      Display warnings
-      <kbn-info info="Turns on/of warnings from the Visualization. When turned off, no warning will be shown about terms in the result that could not be joined to the vector layer."></kbn-info>
-    </label>
 
-    <div class="kuiSideBarFormRow__control">
-      <input id="displayWarnings" type="checkbox" ng-model="vis.params.isDisplayWarning">
-    </div>
-  </div>
   <div class="kuiSideBarSectionTitle">
     <div class="kuiSideBarSectionTitle__text">Style settings</div>
   </div>
