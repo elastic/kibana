@@ -6,7 +6,8 @@ your application to Kibana 6.0.
 
 [float]
 === Types removed from Kibana index
-*Details:* With the imminent {es-ref}/removal-of-types.html[removal of types in Elasticsearch], we have updated our index to not rely on types. Kibana 5.6.x can support both of these mappings to minimize downtime. A new UI is provided with X-Pack to assist with the migration of the Elastic stack. 
+*Details:* 
+With the imminent {es-ref}/removal-of-types.html[removal of types in Elasticsearch], we have updated our index to not rely on types. Kibana 5.6.x can support both of these mappings to minimize downtime. A new UI is provided with X-Pack to assist with the migration of the Elastic stack. 
 
 *Impact:*
 
