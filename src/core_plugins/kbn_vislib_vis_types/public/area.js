@@ -18,7 +18,8 @@ export default function PointSeriesVisType(Private) {
       defaults: {
         type: 'area',
         grid: {
-          categoryLines: false,
+          categoryLines: true,
+          valueAxis: 'ValueAxis-1',
           style: {
             color: '#eee'
           }
@@ -72,7 +73,7 @@ export default function PointSeriesVisType(Private) {
             id: '1'
           },
           drawLinesBetweenPoints: true,
-          showCircles: true,
+          showCircles: false,
           interpolate: 'linear',
           valueAxis: 'ValueAxis-1'
         }],

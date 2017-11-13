@@ -21,9 +21,6 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
         // TODO: I wonder if we should supply our own moment that sets this every time?
         // could just use angular's injection to provide a moment service?
         moment.tz.setDefault(config.get('dateFormat:tz'));
-
-        const render = $scope.seriesList.render || {};
-
         $scope.chart = $scope.seriesList.list;
         $scope.interval = $scope.interval;
         $scope.search = $scope.search || _.noop;
@@ -38,10 +35,34 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
 
         const defaultOptions = {
           xaxis: {
+            show: true,
+            position: 'bottom',
             mode: 'time',
-            tickLength: 5,
+            tickLength: null,
             timezone: 'browser',
+            font: {
+              size: 14,
+              family: '"Open Sans", Helvetica, Arial, sans-serif',
+              color: '#848e96'
+            }
           },
+          yaxes: [{
+            tickLength: null,
+            font: {
+              size: 14,
+              family: '"Open Sans", Helvetica, Arial, sans-serif',
+              color: '#848e96'
+            }
+          },
+          {
+            tickLength: null,
+            font: {
+              size: 14,
+              family: '"Open Sans", Helvetica, Arial, sans-serif',
+              color: '#848e96'
+            }
+          }
+          ],
           selection: {
             mode: 'x',
             color: '#ccc'
@@ -52,9 +73,14 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
             lineWidth: 2
           },
           grid: {
-            show: render.grid,
-            borderWidth: 0,
-            borderColor: null,
+            show: true,
+            borderWidth: {
+              top: 0,
+              right: 0,
+              bottom: 2,
+              left: 2
+            },
+            borderColor: '#D9D9D9',
             margin: 10,
             hoverable: true,
             autoHighlight: false
@@ -226,7 +252,7 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
             series = _.cloneDeep(_.defaults(series, {
               shadowSize: 0,
               lines: {
-                lineWidth: 3
+                lineWidth: 2
               }
             }));
             series._id = index;
