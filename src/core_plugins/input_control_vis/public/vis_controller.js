@@ -57,7 +57,8 @@ class VisController {
     let controlWidth;
     if (this.controls.length > 1 && this.isHorizontalLayout(panelWidth, panelHeight)) {
       // horizontal layout - display each control in seperate column by sizing controls to fit in single row
-      controlWidth = (usableWidth - (2 * flexGridSmallMargin)) / this.controls.length;
+      const widthLostByFlexItemMargin = 2 * flexGridSmallMargin * this.controls.length;
+      controlWidth = Math.floor((usableWidth - widthLostByFlexItemMargin) / this.controls.length);
     } else {
       // vertical layout - display each control in seperate row by sizing control to fill entrie width
       controlWidth = usableWidth - (2 * flexGridSmallMargin);
