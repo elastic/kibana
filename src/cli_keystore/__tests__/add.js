@@ -1,6 +1,7 @@
 import expect from 'expect.js';
 import sinon from 'sinon';
 import mockFs from 'mock-fs';
+import { PassThrough } from 'stream';
 
 import { Keystore } from '../../server/keystore';
 import { add } from '../add';
@@ -119,15 +120,13 @@ describe('Kibana keystore', () => {
       const keystore = new Keystore('/data/test.keystore');
       sandbox.stub(keystore, 'save');
 
-      sandbox.stub(process.stdin, 'on');
-      process.stdin.on = ((_, fn) => { fn(); });
+      const stdin = new PassThrough();
+      process.nextTick(() => {
+        stdin.write('kibana\n');
+        stdin.end();
+      });
 
-      sandbox.stub(process.stdin, 'read');
-      process.stdin.read.onCall(0).returns('kib');
-      process.stdin.read.onCall(1).returns('ana');
-      process.stdin.read.onCall(2).returns(null);
-
-      await add(keystore, 'foo', { stdin: true });
+      await add(keystore, 'foo', { stdin });
 
       expect(keystore.data.foo).to.eql('kibana');
     });

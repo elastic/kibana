@@ -1,5 +1,14 @@
 import Logger from '../cli_plugin/lib/logger';
-import { stdin, confirm, question } from '../server/utils';
+import { confirm, question } from '../server/utils';
+import { createPromiseFromStreams, createConcatStream } from '../utils';
+
+/**
+ * @param {Keystore} keystore
+ * @param {String} key
+ * @param {Object|null} options
+ * @property {Boolean} options.force - if true, will overwrite without prompting
+ * @property {Stream|Boolean} options.stdin - if true, uses process.stdin
+ */
 
 export async function add(keystore, key, options = {}) {
   const logger = new Logger(options);
@@ -18,7 +27,10 @@ export async function add(keystore, key, options = {}) {
   }
 
   if (options.stdin) {
-    value = await stdin();
+    value = await createPromiseFromStreams([
+      options.stdin || process.stdin,
+      createConcatStream('')
+    ]);
   } else {
     value = await question(`Enter value for ${key}`, { mask: '*' });
   }
