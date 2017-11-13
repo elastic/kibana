@@ -4,7 +4,11 @@ import { Notifier } from 'ui/notify/notifier';
 const notify = new Notifier({ location: 'Scripting Language Service' });
 
 export function getSupportedScriptingLanguages() {
-  return ['expression', 'painless'];
+  return ['painless'];
+}
+
+export function getDeprecatedScriptingLanguages() {
+  return [];
 }
 
 export function GetEnabledScriptingLanguagesProvider($http) {
