@@ -4,6 +4,7 @@
   "main": "./target/index.js",
   "types": "./index.d.ts",
   "scripts": {
+    "prepare": "npm run build",
     "build": "webpack"
   },
   "dependencies": {
