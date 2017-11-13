@@ -122,10 +122,6 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
     options.zoom = !isNaN(zoomFromUiState) ? zoomFromUiState : DEFAULT_ZOOM_SETTINGS.zoom;
     options.center = centerFromUIState ? centerFromUIState : DEFAULT_ZOOM_SETTINGS.mapCenter;
     kibanaMap = new KibanaMap($element[0], options);
-
-    const tmsUrl = tmsSettings.getUrl();
-    const tmsOptions = tmsSettings.getTMSOptions();
-    kibanaMap.setBaseLayer({ baseLayerType: 'tms', options: { tmsUrl, ...tmsOptions } });
     kibanaMap.addLegendControl();
     kibanaMap.addFitControl();
     kibanaMap.persistUiStateForVisualization($scope.vis);
