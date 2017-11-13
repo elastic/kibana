@@ -17,8 +17,9 @@ export const pie = () => ({
   }, {
     name: 'seriesStyle',
     displayName: 'Series Style',
+    help: 'Set the color of a specific slice, expand to select series',
     argType: 'seriesStyle',
-    default: '{seriesStyle points=5}',
+    default: '{seriesStyle}',
     multi: true,
   }],
   resolve({ context }) {

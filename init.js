@@ -7,6 +7,8 @@ import { commonFunctions } from './common/functions';
 import { typeSpecs } from './common/types';
 
 export default function (server, /*options*/) {
+  const elasticsearch = server.plugins.elasticsearch;
+
   server.plugins.canvas = {
     kibanaType: 'canvas_1',
     /*
@@ -24,7 +26,7 @@ export default function (server, /*options*/) {
   };
 
   // create the canvas indicies
-  createIndices(server);
+  elasticsearch.status.once('green', () => createIndices(server));
 
   // register all of the functions and types using the plugin's methods
   const { addFunction, addType } = server.plugins.canvas;

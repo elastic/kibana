@@ -34,6 +34,7 @@ export const plot = () => ({
   }, {
     name: 'seriesStyle',
     displayName: 'Series style',
+    help: 'Set color, select line sizes, and more. Expand to select the series you want to style',
     argType: 'seriesStyle',
     default: '{seriesStyle points=5}',
     options: {
