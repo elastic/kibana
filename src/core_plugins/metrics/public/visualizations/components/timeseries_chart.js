@@ -2,6 +2,7 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import moment from 'moment';
 import reactcss from 'reactcss';
+import { findIndex } from 'lodash';
 import FlotChart from './flot_chart';
 import Annotation from './annotation';
 
@@ -61,23 +62,28 @@ class TimeseriesChart extends Component {
   }
 
   handleMouseOver(e, pos, item, plot) {
-
     if (typeof this.state.mouseHoverTimer === 'number') {
       window.clearTimeout(this.state.mouseHoverTimer);
     }
 
     if (item) {
+      const offset = plot.offset();
+      const width = plot.width();
+      const height = plot.height();
       const plotOffset = plot.getPlotOffset();
-      const point = plot.pointOffset({ x: item.datapoint[0], y: item.datapoint[1] });
+      const mouseX = Math.max(0, Math.min(pos.pageX - offset.left, width));
+      const mouseY = Math.max(0, Math.min(pos.pageY - offset.top, height));
       const [left, right ] = this.calculateLeftRight(item, plot);
-      const top = point.top;
       this.setState({
         showTooltip: true,
         item,
         left,
         right,
-        top: top + 10,
-        bottom: plotOffset.bottom
+        mouseX,
+        mouseY,
+        width,
+        leftOffset: plotOffset.left,
+        rightOffset: plotOffset.right
       });
     }
   }
@@ -102,18 +108,38 @@ class TimeseriesChart extends Component {
   }
 
   render() {
-    const { item, right, top, left } = this.state;
+    const { item, right, left, mouseX, mouseY, width, leftOffset, rightOffset } = this.state;
     const { series } = this.props;
     let tooltip;
+    let timestamp;
+    let dataPoints = [];
+
+    if (item) {
+      timestamp = item.datapoint[0];
+      dataPoints = series.reduce((points, series) => {
+        const index = findIndex(series.data, (d => d[0] === timestamp));
+        if (index > -1) {
+          const datapoint = series.data[index];
+          if (datapoint) {
+            const point = {
+              series,
+              datapoint,
+            };
+            points = [...points, point];
+          }
+        }
+        return points;
+      }, []);
+    }
 
     const styles = reactcss({
       showTooltip: {
         tooltipContainer: {
           pointerEvents: 'none',
           position: 'absolute',
-          top: top - 28,
-          left,
-          right,
+          top: mouseY - (dataPoints.length * 17 + 10) / 2,
+          left: left ? mouseX + leftOffset : null,
+          right: right ? width - mouseX + rightOffset : null,
           zIndex: 100,
           display: 'flex',
           alignItems: 'center',
@@ -137,17 +163,22 @@ class TimeseriesChart extends Component {
         date: {
           color: this.props.reversed ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.7)',
           fontSize: '12px',
-          lineHeight: '12px'
+          lineHeight: '12px',
+          marginTop: 2
         },
         items: {
           display: 'flex',
-          alignItems: 'center'
+          alignItems: 'center',
+          height: '17px'
         },
         text: {
           whiteSpace: 'nowrap',
           fontSize: '12px',
           lineHeight: '12px',
-          marginRight: 5
+          marginRight: 5,
+          maxWidth: '300px',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis'
         },
         icon: {
           marginRight: 5
@@ -156,7 +187,7 @@ class TimeseriesChart extends Component {
           fontSize: '12px',
           flexShrink: 0,
           lineHeight: '12px',
-          marginLeft: 5
+          marginLeft: 'auto'
         }
       },
       hideTooltip: {
@@ -168,21 +199,28 @@ class TimeseriesChart extends Component {
     });
 
     if (item) {
-      const metric = series.find(r => r.id === item.series.id);
-      const formatter = metric && metric.tickFormatter || this.props.tickFormatter || ((v) => v);
-      const value = item.datapoint[2] ? item.datapoint[1] - item.datapoint[2] : item.datapoint[1];
+      const rows = dataPoints.map(point => {
+        const metric = series.find(r => r.id === point.series.id);
+        const formatter = metric && metric.tickFormatter || this.props.tickFormatter || ((v) => v);
+        const value = point.datapoint[2] ? point.datapoint[1] - point.datapoint[2] : point.datapoint[1];
+
+        return (
+          <div key={point.series.id} style={styles.items}>
+            <div style={styles.icon}>
+              <i className="fa fa-circle" style={{ color: point.series.color }}/>
+            </div>
+            <div style={styles.text}>{point.series.label}</div>
+            <div style={styles.value}>{formatter(value)}</div>
+          </div>
+        );
+      }, this);
+
       tooltip = (
         <div style={styles.tooltipContainer}>
           <i className="fa fa-caret-left" style={styles.leftCaret} />
           <div style={styles.tooltip}>
-            <div style={styles.items}>
-              <div style={styles.icon}>
-                <i className="fa fa-circle" style={{ color: item.series.color }} />
-              </div>
-              <div style={styles.text}>{ item.series.label }</div>
-              <div style={styles.value}>{ formatter(value) }</div>
-            </div>
-            <div style={styles.date}>{ moment(item.datapoint[0]).format(this.props.dateFormat) }</div>
+            {rows}
+            <div style={styles.date}>{ moment(timestamp).format(this.props.dateFormat) }</div>
           </div>
           <i className="fa fa-caret-right" style={styles.rightCaret} />
         </div>
