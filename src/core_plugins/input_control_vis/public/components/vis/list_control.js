@@ -3,6 +3,8 @@ import React, { Component } from 'react';
 import Select from 'react-select';
 import { FormRow } from './form_row';
 
+export const listControlMinWidth = 100;
+
 export class ListControl extends Component {
   constructor(props) {
     super(props);
@@ -31,6 +33,7 @@ export class ListControl extends Component {
       <FormRow
         id={this.props.control.id}
         label={this.props.control.label}
+        controlIndex={this.props.controlIndex}
       >
         <Select
           className="list-control-react-select"

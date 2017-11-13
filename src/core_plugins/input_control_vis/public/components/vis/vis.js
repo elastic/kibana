@@ -1,8 +1,14 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { RangeControl } from './range_control';
-import { ListControl } from './list_control';
-import { KuiFieldGroup, KuiFieldGroupSection, KuiButton } from 'ui_framework/components';
+import { RangeControl, rangeControlMinWidth } from './range_control';
+import { ListControl, listControlMinWidth } from './list_control';
+import {
+  KuiFieldGroup,
+  KuiFieldGroupSection,
+  KuiButton,
+  KuiFlexGrid,
+  KuiFlexItem
+} from 'ui_framework/components';
 
 export class InputControlVis extends Component {
   constructor(props) {
@@ -26,10 +32,15 @@ export class InputControlVis extends Component {
   }
 
   renderControls() {
+
     return this.props.controls.map((control, index) => {
       let controlComponent = null;
+      let controlWidth = this.props.controlWidth;
       switch (control.type) {
         case 'list':
+          if (controlWidth < listControlMinWidth) {
+            controlWidth = listControlMinWidth;
+          }
           controlComponent = (
             <ListControl
               control={control}
@@ -39,6 +50,9 @@ export class InputControlVis extends Component {
           );
           break;
         case 'range':
+          if (controlWidth < rangeControlMinWidth) {
+            controlWidth = rangeControlMinWidth;
+          }
           controlComponent = (
             <RangeControl
               control={control}
@@ -51,12 +65,9 @@ export class InputControlVis extends Component {
           throw new Error(`Unhandled control type ${control.type}`);
       }
       return (
-        <div
-          key={control.id}
-          data-test-subj={'inputControl' + index}
-        >
+        <KuiFlexItem key={control.id} style={{ width: `${controlWidth}px` }}>
           {controlComponent}
-        </div>
+        </KuiFlexItem>
       );
     });
   }
@@ -109,7 +120,9 @@ export class InputControlVis extends Component {
 
     return (
       <div className="inputControlVis">
-        {this.renderControls()}
+        <KuiFlexGrid gutterSize="small">
+          {this.renderControls()}
+        </KuiFlexGrid>
         {stagingButtons}
       </div>
     );
@@ -124,5 +137,6 @@ InputControlVis.propTypes = {
   controls: PropTypes.array.isRequired,
   updateFiltersOnChange: PropTypes.bool,
   hasChanges: PropTypes.func.isRequired,
-  hasValues: PropTypes.func.isRequired
+  hasValues: PropTypes.func.isRequired,
+  controlWidth: PropTypes.number.isRequired
 };

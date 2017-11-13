@@ -1,7 +1,13 @@
+import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { InputControlVis } from './components/vis/vis';
 import { controlFactory } from './control/control_factory';
+
+const panelMargin = 1;
+const embeddedPanelPadding = 8;
+const inputControlVisMargin = 5;
+const flexGridSmallMargin = 4;
 
 class VisController {
   constructor(el, vis) {
@@ -20,6 +26,10 @@ class VisController {
       this.drawVis();
       return;
     }
+    if (status.resize) {
+      this.drawVis();
+      return;
+    }
     return;
   }
 
@@ -28,7 +38,30 @@ class VisController {
     unmountComponentAtNode(this.el);
   }
 
+  isHorizontalLayout(panelWidth, panelHeight) {
+    return panelWidth > (1.5 * panelHeight) || panelWidth < 200;
+  }
+
   drawVis() {
+    // unable to use this.el dimensions because this.el.clientWidth does not shrink
+    // once controlWidth has been set to a large number
+    const panelNode = this.getPanelNode();
+    if (!panelNode) {
+      throw new Error('Unable to find panel node in ancestor tree');
+    }
+    const panelWidth = panelNode.clientWidth;
+    const panelHeight = panelNode.clientHeight;
+    // todo - how do we make this less fragile to css changes?
+    const lostWidth = (panelMargin + embeddedPanelPadding + inputControlVisMargin) * 2;
+    const usableWidth = panelWidth - lostWidth;
+    let controlWidth;
+    if (this.controls.length > 1 && this.isHorizontalLayout(panelWidth, panelHeight)) {
+      // horizontal layout - display each control in seperate column by sizing controls to fit in single row
+      controlWidth = (usableWidth - (2 * flexGridSmallMargin)) / this.controls.length;
+    } else {
+      // vertical layout - display each control in seperate row by sizing control to fill entrie width
+      controlWidth = usableWidth - (2 * flexGridSmallMargin);
+    }
     render(
       <InputControlVis
         updateFiltersOnChange={this.vis.params.updateFiltersOnChange}
@@ -39,6 +72,7 @@ class VisController {
         clearControls={this.clearControls.bind(this)}
         hasChanges={this.hasChanges.bind(this)}
         hasValues={this.hasValues.bind(this)}
+        controlWidth={controlWidth}
       />,
       this.el);
   }
@@ -120,6 +154,19 @@ class VisController {
       .reduce((a, b) => {
         return a || b;
       });
+  }
+
+  getPanelNode() {
+    let parent = this.el.parentNode;
+    let panelNode;
+    while (parent) {
+      if (_.includes(parent.className, 'dashboard-panel') || _.includes(parent.className, 'vis-editor-canvas')) {
+        panelNode = parent;
+        break;
+      }
+      parent = parent.parentNode;
+    }
+    return panelNode;
   }
 }
 

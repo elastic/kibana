@@ -4,6 +4,8 @@ import React, { Component } from 'react';
 import InputRange from 'react-input-range';
 import { FormRow } from './form_row';
 
+export const rangeControlMinWidth = 200;
+
 const toState = (props) => {
   const state = {
     sliderValue: props.control.value,
@@ -84,6 +86,7 @@ export class RangeControl extends Component {
       <FormRow
         id={this.props.control.id}
         label={this.props.control.label}
+        controlIndex={this.props.controlIndex}
       >
         <input
           id={`${this.props.control.id}_min`}
