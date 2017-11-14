@@ -113,7 +113,7 @@ UrlFormat.prototype._convert = {
     return this._formatLabel(value);
   },
 
-  html: function (rawValue, field, hit) {
+  html: function (rawValue, field, hit, basePath) {
     const url = _.escape(this._formatUrl(rawValue));
     const label = _.escape(this._formatLabel(rawValue, url));
 
@@ -129,9 +129,9 @@ UrlFormat.prototype._convert = {
         return `<img src="${url}" alt="${imageLabel}">`;
       default:
         const inWhitelist = whitelistUrlSchemes.some(scheme => url.indexOf(scheme) === 0);
-        if (!inWhitelist) {
-          return url;
-        }
+        const prefix = inWhitelist
+          ? ''
+          : `${window.location.origin}${basePath}/app/`;
 
         let linkLabel;
 
@@ -144,8 +144,12 @@ UrlFormat.prototype._convert = {
 
           const linkTarget = this.param('openLinkInCurrentTab') ? '_self' : '_blank';
 
+<<<<<<< HEAD
           return `<a href="${url}" target="${linkTarget}" rel="noopener noreferrer">${linkLabel}</a>`;
       }
+=======
+        return `<a href="${prefix}${url}" target="${linkTarget}" rel="noopener noreferrer">${linkLabel}</a>`;
+>>>>>>> Initial pass
     }
   };
 
