@@ -75,7 +75,7 @@ export class PluginsService implements CoreService {
       mergeMap(config => config.scanDirs),
       mergeMap(dir =>
         k$($fsReadDir(dir))(
-          map(pluginNames =>
+          mergeMap(pluginNames =>
             pluginNames.map(pluginName => ({
               name: pluginName,
               path: resolve(dir, pluginName)
@@ -83,7 +83,6 @@ export class PluginsService implements CoreService {
           )
         )
       ),
-      mergeMap(plugins => plugins),
       mergeMap(plugin =>
         k$($fsStat(plugin.path))(
           map(stat => ({ ...plugin, isDir: stat.isDirectory() }))
