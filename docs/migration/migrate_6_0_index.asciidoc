@@ -6,7 +6,7 @@
 The following will make transformations to your Kibana index. It is recommended you https://www.elastic.co/guide/en/elasticsearch/reference/5.6/modules-snapshots.html[backup your Kibana index] prior to running any of the following commands.
 ==============================================
 
-In order to migrate to Kibana 6, your Kibana index needs to be reindexed. This will make transformations to the data model, removing types which are being {es-ref}/removal-of-types.html[removed in Elasticsearch].
+In order to migrate to Kibana 6, your Kibana index needs to be reindexed. This will make transformations to the data model, removing types which are being {ref}/removal-of-types.html[removed in Elasticsearch].
 
 A UI is available in X-Pack 5.6 to assist with the migration. The following is provided should you be required to run the migration manually. The commands assume you're using the default `.kibana` index, without an alias. If `kibana.index` is set to something different in your `kibana.yml`, or you're using an alias, you will need to modify the commands.
 
