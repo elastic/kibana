@@ -21,6 +21,10 @@ module.exports = function (grunt) {
     process.env.PATH = path.join(delimiter);
   });
 
+  grunt.registerTask('jenkins:docs', [
+    'docker:docs'
+  ]);
+
   grunt.registerTask('jenkins:unit', [
     'jenkins:env',
     'rejectRejFiles',
