@@ -11,30 +11,30 @@
     <div class="form-group">
       <label>Font Size</label>
       <div class="tag-cloud-fontsize-slider"></div>
-      <div class="tag-cloud-fontsize-inputs">
-        <div class="tag-cloud-fontsize-input">
+      <div class="kuiBar">
+        <div class="kuiBarSection">
           <input
             type="number"
             min="1"
             max="{{vis.params.maxFontSize}}"
-            class="form-control tag-cloud-fontsize-inputfield"
+            class="kuiTextInput tag-cloud-fontsize-slider__input"
             ng-model="vis.params.minFontSize"
             aria-label="Minimum tag font size"
             aria-describedby="tagCloudFontSliderMinUnit"
           >
-          <span id="tagCloudFontSliderMinUnit">px</span>
+          <span id="tagCloudFontSliderMinUnit" aria-label="pixels">px</span>
         </div>
-        <div class="tag-cloud-fontsize-input">
+        <div class="kuiBarSection">
           <input
             type="number"
             min="{{vis.params.minFontSize}}"
             max="100"
-            class="form-control tag-cloud-fontsize-inputfield"
+            class="kuiTextInput tag-cloud-fontsize-slider__input"
             ng-model="vis.params.maxFontSize"
             aria-label="Maximum tag font size"
             aria-describedby="tagCloudFontSliderMaxUnit"
           >
-          <span id="tagCloudFontSliderMaxUnit">px</span>
+          <span id="tagCloudFontSliderMaxUnit" aria-label="pixels">px</span>
         </div>
       </div>
     </div>
