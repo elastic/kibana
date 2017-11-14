@@ -1,4 +1,4 @@
-import { KibanaPluginFeatures } from './KibanaPluginFeatures';
+import { KibanaPluginApi } from './KibanaPluginApi';
 
 export type PluginName = string;
 export type PluginConfigPath = string | string[];
@@ -24,7 +24,7 @@ export type KibanaPluginConfig<
 export type KibanaFunctionalPlugin<
   DependenciesType extends BasePluginsType,
   ExposableType = void
-> = (kibana: KibanaPluginFeatures, plugins: DependenciesType) => ExposableType;
+> = (kibana: KibanaPluginApi, plugins: DependenciesType) => ExposableType;
 
 /**
  * Defines the "static side" of the Kibana class plugin.
@@ -40,10 +40,9 @@ export interface KibanaClassPluginStatic<
   DependenciesType extends BasePluginsType,
   ExposableType = void
 > {
-  new (
-    kibana: KibanaPluginFeatures,
-    plugins: DependenciesType
-  ): KibanaClassPlugin<ExposableType>;
+  new (kibana: KibanaPluginApi, plugins: DependenciesType): KibanaClassPlugin<
+    ExposableType
+  >;
 }
 
 /**

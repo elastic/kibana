@@ -8,7 +8,7 @@ import { KibanaConfig } from '../kibana';
 import { ElasticsearchService, ElasticsearchConfigs } from '../elasticsearch';
 import { LoggerFactory } from '../../logging';
 
-export interface KibanaPluginFeatures {
+export interface KibanaPluginApi {
   /**
    * Plugin-scoped logger
    */
