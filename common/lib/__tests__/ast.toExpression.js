@@ -151,6 +151,42 @@ describe('ast toExpression', () => {
       expect(expression).to.equal('csv input="stuff\nthings"');
     });
 
+    it('single expression string value with a backslash', () => {
+      const astObj = {
+        type: 'expression',
+        chain: [{
+          type: 'function',
+          function: 'csv',
+          arguments: {
+            input: [
+              'slash \\\\ slash',
+            ],
+          },
+        }],
+      };
+
+      const expression = toExpression(astObj);
+      expect(expression).to.equal('csv input="slash \\\\ slash"');
+    });
+
+    it('single expression string value with a double quote', () => {
+      const astObj = {
+        type: 'expression',
+        chain: [{
+          type: 'function',
+          function: 'csv',
+          arguments: {
+            input: [
+              'stuff\nthings\n"such"',
+            ],
+          },
+        }],
+      };
+
+      const expression = toExpression(astObj);
+      expect(expression).to.equal('csv input="stuff\nthings\n\\"such\\""');
+    });
+
     it('single expression with number argument', () => {
       const astObj = {
         type: 'expression',
