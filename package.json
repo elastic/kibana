@@ -214,9 +214,9 @@
     "yauzl": "2.7.0"
   },
   "devDependencies": {
-    "@elastic/eslint-config-kibana": "file:./packages/eslint-config-kibana",
+    "@elastic/eslint-config-kibana": "0.14.0",
     "@elastic/eslint-import-resolver-kibana": "0.9.0",
-    "@elastic/eslint-plugin-kibana-custom": "file:./packages/eslint-plugin-kibana-custom",
+    "@elastic/eslint-plugin-kibana-custom": "1.1.0",
     "angular-mocks": "1.4.7",
     "babel-eslint": "8.0.2",
     "backport": "1.1.1",
