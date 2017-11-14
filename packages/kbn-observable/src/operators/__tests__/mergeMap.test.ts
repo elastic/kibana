@@ -125,26 +125,3 @@ test('should mergeMap many outer to an array for each value', async () => {
 
   expect(await res).toEqual(['a', 'b', 'c', 'a', 'b', 'c', 'a', 'b', 'c', 'C']);
 });
-
-test('should mergeMap many outer to inner arrays, using resultSelector', async () => {
-  expect.assertions(1);
-
-  const source = Observable.from([1, 2, 3]);
-  const project = (num: number, str: string) => `${num}/${str}`;
-
-  const observable = k$(source)(mergeMap(() => $of('a', 'b', 'c'), project));
-  const res = collect(observable);
-
-  expect(await res).toEqual([
-    '1/a',
-    '1/b',
-    '1/c',
-    '2/a',
-    '2/b',
-    '2/c',
-    '3/a',
-    '3/b',
-    '3/c',
-    'C'
-  ]);
-});
