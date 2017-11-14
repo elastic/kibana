@@ -85,10 +85,10 @@ export class PluginsService implements CoreService {
       ),
       mergeMap(plugin =>
         k$($fsStat(plugin.path))(
-          map(stat => ({ ...plugin, isDir: stat.isDirectory() }))
+          filter(stat => stat.isDirectory()),
+          map(() => plugin)
         )
       ),
-      filter(plugin => plugin.isDir),
       map(plugin => this.createPlugin(plugin.name, plugin.path))
     );
   }
