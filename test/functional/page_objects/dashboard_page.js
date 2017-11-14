@@ -292,10 +292,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     /**
      *
      * @param dashName {String}
-     * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean}}
+     * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean, needsConfirm: false}}
      */
     async saveDashboard(dashName, saveOptions = {}) {
       await this.enterDashboardTitleAndClickSave(dashName, saveOptions);
+
+      if (saveOptions.needsConfirm) {
+        await PageObjects.common.clickConfirmOnModal();
+      }
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -344,6 +348,11 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         const searchFilter = await testSubjects.find('searchFilter');
         await searchFilter.clearValue();
       });
+    }
+
+    async getSearchFilterValue() {
+      const searchFilter = await testSubjects.find('searchFilter');
+      return await searchFilter.getProperty('value');
     }
 
     async searchForDashboardWithName(dashName) {

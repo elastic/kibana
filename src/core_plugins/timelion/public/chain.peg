@@ -18,6 +18,9 @@
   }
  }
 
+ var currentFunction;
+ var currentArgs = [];
+
  var functions = [];
  var args = [];
  var variables = {};
@@ -40,18 +43,22 @@ arg_list
  }
 
 argument
- = name:function_name space? '=' space? value:arg_type {
-  return {
+ = name:argument_name space? '=' space? value:arg_type {
+  var arg = {
    type: 'namedArg',
    name: name,
    value: value,
    location: simpleLocation(location()),
    text: text()
-  }
+  };
+  currentArgs.push(arg);
+  return arg;
  }
- / name:function_name space? '=' {
+ / name:argument_name space? '=' {
   var exception = {
    type: 'incompleteArgument',
+   currentArgs: currentArgs,
+   currentFunction: currentFunction,
    name: name,
    location: simpleLocation(location()),
    text: text()
@@ -71,7 +78,7 @@ arg_type
  }
 
 variable_get
- = '$' name:function_name {
+ = '$' name:argument_name {
   if (variables[name]) {
    return variables[name];
   } else {
@@ -80,7 +87,7 @@ variable_get
  }
 
 variable_set
- = '$' name:function_name space? '=' space? value:arg_type {
+ = '$' name:argument_name space? '=' space? value:arg_type {
   variables[name] = value;
  }
 
@@ -97,6 +104,13 @@ series
  }
 
 function_name
+ = first:[a-zA-Z]+ rest:[.a-zA-Z0-9_-]* {
+  currentFunction = first.join('') + rest.join('');
+  currentArgs = [];
+  return currentFunction;
+}
+
+argument_name
  = first:[a-zA-Z]+ rest:[.a-zA-Z0-9_-]* { return first.join('') + rest.join('') }
 
 function "function"
