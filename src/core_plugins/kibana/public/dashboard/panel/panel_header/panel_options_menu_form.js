@@ -5,13 +5,24 @@ import {
   KuiButton,
 } from 'ui_framework/components';
 
-export function PanelOptionsMenuForm({ title, onReset, onUpdatePanelTitle }) {
+import {
+  keyCodes,
+} from 'ui_framework/services';
+
+export function PanelOptionsMenuForm({ title, onReset, onUpdatePanelTitle, onClose }) {
   function onInputChange(event) {
     onUpdatePanelTitle(event.target.value);
   }
+
+  function onKeyDown(event) {
+    if (event.keyCode === keyCodes.ENTER) {
+      onClose();
+    }
+  }
+
   return (
     <div
-      style={{ padding: 16 }}
+      className="kuiVerticalRhythm dashboardPanelMenuOptionsForm"
       data-test-subj="dashboardPanelTitleInputMenuItem"
     >
       <label className="kuiFormLabel" htmlFor="panelTitleInput">Panel title</label>
@@ -22,18 +33,14 @@ export function PanelOptionsMenuForm({ title, onReset, onUpdatePanelTitle }) {
         className="kuiTextInput"
         value={title}
         onChange={onInputChange}
+        onKeyDown={onKeyDown}
       />
       <KuiButton
-        buttonType="basic"
+        buttonType="hollow"
         onClick={onReset}
-        aria-label="Reset panel title"
-        icon={
-          <span
-            aria-hidden="true"
-            className="kuiButton__icon kuiIcon fa-undo"
-          />
-       }
-      />
+      >
+        Reset title
+      </KuiButton>
     </div>
   );
 }
@@ -42,4 +49,5 @@ PanelOptionsMenuForm.propTypes = {
   title: PropTypes.string,
   onUpdatePanelTitle: PropTypes.func.isRequired,
   onReset: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
 };

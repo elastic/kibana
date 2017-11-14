@@ -90,6 +90,7 @@ export class PanelOptionsMenu extends React.Component {
         onReset={this.props.onResetPanelTitle}
         onUpdatePanelTitle={this.props.onUpdatePanelTitle}
         title={this.props.panelTitle}
+        onClose={this.closePopover}
       />,
     };
   }
