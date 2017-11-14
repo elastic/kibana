@@ -35,13 +35,13 @@ import { $from } from '../factories';
  * ```js
  * mergeMap(val =>
  *   k$(someFn(val))(
- *     map(newVal => ({ val, oldVal })
+ *     map(newVal => ({ val, newVal })
  *   )
  * )
  * ```
  *
  * Here you would go from having an observable of `val`s, to having an
- * observable of `{ val, oldVal }` objects.
+ * observable of `{ val, newVal }` objects.
  *
  * @param project A function that, when applied to an item emitted by the source
  * Observable, returns an Observable.
