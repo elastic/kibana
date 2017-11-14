@@ -5,7 +5,7 @@ import { MonoTypeOperatorFunction } from '../interfaces';
 /**
  * Emits the first value emitted by the source Observable, then immediately
  * completes.
- * 
+ *
  * @throws {EmptyError} Delivers an EmptyError to the Observer's `error`
  * callback if the Observable completes before any `next` notification was sent.
  *

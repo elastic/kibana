@@ -207,7 +207,7 @@ export class Router<V> {
     const value =
       this.options.onRequest !== undefined
         ? this.options.onRequest(kibanaRequest)
-        : {} as V;
+        : ({} as V);
 
     try {
       const kibanaResponse = await handler(

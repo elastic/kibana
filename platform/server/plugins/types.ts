@@ -19,7 +19,7 @@ export type KibanaPluginConfig<
 };
 
 /**
- * 
+ *
  */
 export type KibanaFunctionalPlugin<
   DependenciesType extends BasePluginsType,
@@ -28,13 +28,13 @@ export type KibanaFunctionalPlugin<
 
 /**
  * Defines the "static side" of the Kibana class plugin.
- * 
+ *
  * When a class implements an interface, only the instance side of the class is
  * checked, so you can't include static methods there. Because of that we have
  * a seprate interface for the static side, which we can use to specify that we
  * want a _class_ (not an instance) that matches this interface.
- * 
- * See https://www.typescriptlang.org/docs/handbook/interfaces.html#difference-between-the-static-and-instance-sides-of-classes 
+ *
+ * See https://www.typescriptlang.org/docs/handbook/interfaces.html#difference-between-the-static-and-instance-sides-of-classes
  */
 export interface KibanaClassPluginStatic<
   DependenciesType extends BasePluginsType,
