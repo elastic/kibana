@@ -38,9 +38,10 @@ export class PluginsService implements CoreService {
 
   async start() {
     const plugins = await k$(this.getAllPlugins())(
-      mergeMap(
-        plugin => $fromPromise(this.isPluginEnabled(plugin)),
-        (plugin, isEnabled) => ({ plugin, isEnabled })
+      mergeMap(plugin =>
+        k$($fromPromise(this.isPluginEnabled(plugin)))(
+          map(isEnabled => ({ plugin, isEnabled }))
+        )
       ),
       filter(obj => {
         if (obj.isEnabled) {
@@ -72,20 +73,22 @@ export class PluginsService implements CoreService {
     return k$(this.pluginsConfig$)(
       first(),
       mergeMap(config => config.scanDirs),
-      mergeMap(
-        dir => $fsReadDir(dir),
-        (dir, pluginNames) =>
-          pluginNames.map(pluginName => ({
-            name: pluginName,
-            path: resolve(dir, pluginName)
-          }))
+      mergeMap(dir =>
+        k$($fsReadDir(dir))(
+          mergeMap(pluginNames =>
+            pluginNames.map(pluginName => ({
+              name: pluginName,
+              path: resolve(dir, pluginName)
+            }))
+          )
+        )
       ),
-      mergeMap(plugins => plugins),
-      mergeMap(
-        plugin => $fsStat(plugin.path),
-        (plugin, stat) => ({ ...plugin, isDir: stat.isDirectory() })
+      mergeMap(plugin =>
+        k$($fsStat(plugin.path))(
+          filter(stat => stat.isDirectory()),
+          map(() => plugin)
+        )
       ),
-      filter(plugin => plugin.isDir),
       map(plugin => this.createPlugin(plugin.name, plugin.path))
     );
   }
