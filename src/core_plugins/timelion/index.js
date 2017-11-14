@@ -28,6 +28,7 @@ export default function (kibana) {
           };
         },
         uses: [
+          'fieldFormats',
           'savedObjectTypes'
         ]
       },

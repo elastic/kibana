@@ -2,9 +2,11 @@ import _ from 'lodash';
 import { statSync } from 'fs';
 import { isWorker } from 'cluster';
 import { resolve } from 'path';
+
 import { fromRoot } from '../../utils';
 import { getConfig } from '../../server/path';
-import readYamlConfig from './read_yaml_config';
+import { readYamlConfig } from './read_yaml_config';
+import { readKeystore } from './read_keystore';
 
 import { DEV_SSL_CERT_PATH, DEV_SSL_KEY_PATH } from '../dev_ssl';
 
@@ -67,6 +69,7 @@ function readServerSettings(opts, extraCliOptions) {
     opts.pluginPath
   )));
 
+  merge(readKeystore());
   merge(extraCliOptions);
 
   return settings;

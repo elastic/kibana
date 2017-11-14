@@ -70,6 +70,15 @@
         </div>
       </div>
 
+      <div ng-switch-when="argument_value">
+        <h4>
+          <strong>{{suggestion.name}}</strong>
+          <small id="timelionSuggestionDescription{{$index}}">
+            {{suggestion.help}}
+          </small>
+        </h4>
+      </div>
+
     </div>
   </div>
 </div>

@@ -27,7 +27,8 @@ export default new Datasource('es', {
     {
       name: 'index',
       types: ['string', 'null'],
-      help: 'Index to query, wildcards accepted. Provide Index Pattern name for scripted field support.'
+      help: 'Index to query, wildcards accepted. Provide Index Pattern name for scripted fields and ' +
+        'field name type ahead suggestions for metrics, split, and timefield arguments.'
     },
     {
       name: 'timefield',

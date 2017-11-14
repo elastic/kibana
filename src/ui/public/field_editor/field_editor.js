@@ -1,3 +1,4 @@
+
 import 'ui/field_format_editor';
 import 'angular-bootstrap-colorpicker';
 import 'angular-bootstrap-colorpicker/css/colorpicker.css';
@@ -8,7 +9,11 @@ import { uiModules } from 'ui/modules';
 import fieldEditorTemplate from 'ui/field_editor/field_editor.html';
 import '../directives/documentation_href';
 import './field_editor.less';
-import { GetEnabledScriptingLanguagesProvider, getSupportedScriptingLanguages } from '../scripting_languages';
+import {
+  GetEnabledScriptingLanguagesProvider,
+  getSupportedScriptingLanguages,
+  getDeprecatedScriptingLanguages
+} from '../scripting_languages';
 import { getKbnTypeNames } from '../../../utils';
 
 uiModules
@@ -38,7 +43,7 @@ uiModules
         const notify = new Notifier({ location: 'Field Editor' });
 
         getScriptingLangs().then((langs) => {
-          self.scriptingLangs = _.intersection(langs, ['expression', 'painless']);
+          self.scriptingLangs = langs;
           if (!_.includes(self.scriptingLangs, self.field.lang)) {
             self.field.lang = undefined;
           }
@@ -101,6 +106,10 @@ uiModules
             `Are you sure want to delete '${self.field.name}'? This action is irreversible!`,
             confirmModalOptions
           );
+        };
+
+        self.isDeprecatedLang = function (lang) {
+          return _.contains(getDeprecatedScriptingLanguages(), lang);
         };
 
         $scope.$watch('editor.selectedFormatId', function (cur, prev) {
@@ -179,7 +188,7 @@ uiModules
         function getScriptingLangs() {
           return getEnabledScriptingLanguages()
             .then((enabledLanguages) => {
-              return _.intersection(enabledLanguages, getSupportedScriptingLanguages());
+              return _.intersection(enabledLanguages, _.union(getSupportedScriptingLanguages(), getDeprecatedScriptingLanguages()));
             });
         }
 
