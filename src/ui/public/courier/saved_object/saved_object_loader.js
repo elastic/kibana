@@ -96,7 +96,7 @@ export class SavedObjectLoader {
         search: search ? `${search}*` : undefined,
         perPage: size,
         page: 1,
-        searchFields: ['title^3', 'description']
+        searchFields: ['title^3', 'title.keyword^2', 'description']
       }).then((resp) => {
       return {
         total: resp.total,

@@ -45,8 +45,9 @@ export function getQueryParams(mappings, type, search, searchFields) {
   if (search) {
     bool.must = [
       {
-        simple_query_string: {
+        query_string: {
           query: search,
+          minimum_should_match: search.split(' ').length,
           ...getFieldsForTypes(
             searchFields,
             type ? [type] : Object.keys(getRootProperties(mappings))
