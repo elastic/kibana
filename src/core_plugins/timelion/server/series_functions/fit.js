@@ -13,7 +13,10 @@ export default new Chainable('fit', {
     {
       name: 'mode',
       types: ['string'],
-      help: 'The algorithm to use for fitting the series to the target. One of: ' + _.keys(fitFunctions).join(', ')
+      help: `The algorithm to use for fitting the series to the target. One of: ${_.keys(fitFunctions).join(', ')}`,
+      suggestions: _.keys(fitFunctions).map(key => {
+        return { name: key };
+      })
     }
   ],
   help: 'Fills null values using a defined fit function',
