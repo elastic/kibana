@@ -154,7 +154,11 @@ export class Router<V> {
     Q extends ObjectSetting<any>,
     B extends ObjectSetting<any>
   >(route: Route<P, Q, B>, handler: RequestHandler<V, P, Q, B>) {
-    // TODO
+    this.router.put(
+      route.path,
+      ...Router.getBodyParsers(),
+      async (req, res) => await this.handle(route, req, res, handler)
+    );
   }
 
   delete<
@@ -162,7 +166,10 @@ export class Router<V> {
     Q extends ObjectSetting<any>,
     B extends ObjectSetting<any>
   >(route: Route<P, Q, B>, handler: RequestHandler<V, P, Q, B>) {
-    // TODO
+    this.router.delete(
+      route.path,
+      async (req, res) => await this.handle(route, req, res, handler)
+    );
   }
 
   /**
