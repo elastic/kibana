@@ -6,6 +6,7 @@ import { getWorkpadColors } from '../selectors/workpad';
 import { fetchAllRenderables } from './elements';
 import { setAssets, resetAssets } from './assets';
 import { getDefaultWorkpad } from '../defaults';
+import fileSaver from 'file-saver';
 
 export const sizeWorkpad = createAction('sizeWorkpad');
 export const setName = createAction('setName');
@@ -36,6 +37,14 @@ export const loadWorkpad = createThunk('loadWorkpad', ({ dispatch }, workpadId) 
   workpadService.get(workpadId).then(({ assets, ...workpad }) => {
     dispatch(setWorkpad(workpad));
     dispatch(setAssets(assets));
+  });
+});
+
+export const downloadWorkpad = createThunk('downloadWorkpad', ({ dispatch }, workpadId) => {
+  // TODO: handle the failed loading state
+  workpadService.get(workpadId).then(resp => {
+    console.log(resp);
+    fileSaver.saveAs(new Blob([JSON.stringify(resp)], { type: 'application/json' }), `canvas-workpad-${resp.name}-${resp.id}.json`);
   });
 });
 

@@ -17,6 +17,7 @@ export const WorkpadLoader = (props) => {
     findWorkpads,
     loadWorkpad,
     removeWorkpad,
+    downloadWorkpad,
     deleteWorkpad,
     setDeleteWorkpad,
     onClose,
@@ -101,11 +102,13 @@ export const WorkpadLoader = (props) => {
             <tr
               key={wp.id}
               className="canvas__workpad_loader--workpad"
-              onClick={() => load(wp.id)}
             >
-              <td width="97%" className="canvas__workpad_loader--name">{wp.name}</td>
-              <td width="1%" className="canvas__workpad_loader--created">{formatDate(wp['@created'])}</td>
-              <td width="1%" className="canvas__workpad_loader--updated">{formatDate(wp['@timestamp'])}</td>
+              <td width="97%" className="canvas__workpad_loader--name" onClick={() => load(wp.id)}>{wp.name}</td>
+              <td width="1%" className="canvas__workpad_loader--created" onClick={() => load(wp.id)}>{formatDate(wp['@created'])}</td>
+              <td width="1%" className="canvas__workpad_loader--updated" onClick={() => load(wp.id)}>{formatDate(wp['@timestamp'])}</td>
+              <td width="1%" className="canvas__workpad_loader--export">
+                <span onClick={() => downloadWorkpad(wp.id)} className="fa fa-download" />
+              </td>
               <td width="1%" className="canvas__workpad_loader--delete">
                 <span onClick={() => removeConfirm(wp)} className="fa fa-trash" />
               </td>
@@ -134,6 +137,7 @@ WorkpadLoader.propTypes = {
   createPending: PropTypes.bool.isRequired,
   setCreatePending: PropTypes.func.isRequired,
   createWorkpad: PropTypes.func.isRequired,
+  downloadWorkpad: PropTypes.func.isRequired,
   loadWorkpad: PropTypes.func.isRequired,
   findWorkpads: PropTypes.func.isRequired,
   removeWorkpad: PropTypes.func.isRequired,

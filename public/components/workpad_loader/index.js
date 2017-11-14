@@ -2,7 +2,7 @@ import { connect } from 'react-redux';
 import { compose, withState, withHandlers, lifecycle } from 'recompose';
 import { find as findWorkpads, remove } from '../../lib/workpad_service';
 import { getWorkpad } from '../../state/selectors/workpad';
-import { createWorkpad, loadWorkpad } from '../../state/actions/workpad';
+import { createWorkpad, loadWorkpad, downloadWorkpad } from '../../state/actions/workpad';
 import { WorkpadLoader as Component } from './workpad_loader';
 
 const mapStateToProps = (state) => ({
@@ -12,6 +12,7 @@ const mapStateToProps = (state) => ({
 const mapDispatchToProps = ({
   createWorkpad,
   loadWorkpad,
+  downloadWorkpad,
 });
 
 export const WorkpadLoader = compose(
