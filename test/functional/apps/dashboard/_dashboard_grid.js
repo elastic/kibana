@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.dashboard.addVisualizations(['Visualization InputControl']);
         });
 
-        it('Should wrap controls in horizontal layout when width cannot fit all controls min width', async () => {
+        it('Horizontal layout should wrap controls when single row cannot fit all controls min width', async () => {
           const controls = await find.allByCssSelector('.inputControlVis .kuiFlexItem');
           expect(controls.length).to.equal(3);
 
@@ -74,7 +74,9 @@ export default function ({ getService, getPageObjects }) {
             .pressMouseButton()
             .moveMouseTo(null, 300, 0)
             .releaseMouseButton();
-          await PageObjects.common.sleep(500); //give time for vis to redraw
+
+          // give time for vis to redraw - cannot use retry because elements already exist, they just need time to redraw
+          await PageObjects.common.sleep(500);
 
           const controls = await find.allByCssSelector('.inputControlVis .kuiFlexItem');
           expect(controls.length).to.equal(3);
@@ -94,7 +96,9 @@ export default function ({ getService, getPageObjects }) {
             .pressMouseButton()
             .moveMouseTo(null, -400, 200)
             .releaseMouseButton();
-          await PageObjects.common.sleep(500); //give time for vis to redraw
+
+          // give time for vis to redraw - cannot use retry because elements already exist, they just need time to redraw
+          await PageObjects.common.sleep(500);
 
           const controls = await find.allByCssSelector('.inputControlVis .kuiFlexItem');
           expect(controls.length).to.equal(3);
