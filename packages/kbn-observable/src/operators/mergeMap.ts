@@ -68,9 +68,7 @@ export function mergeMap<T, R>(
 
           $from(result).subscribe({
             next(innerValue) {
-              let result: R = innerValue;
-
-              destination.next(result);
+              destination.next(innerValue);
             },
             error(err) {
               destination.error(err);
