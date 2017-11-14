@@ -13,7 +13,7 @@ import {
   resetPanelTitle,
   embeddableRenderFinished,
 } from '../../actions';
-import { getEmbeddableHandlerMock } from '../../__tests__/get_embeddable_handlers_mock';
+import { getEmbeddableFactoryMock } from '../../__tests__/get_embeddable_factories_mock';
 import {
   TestSubjects,
 } from 'ui_framework/src/test';
@@ -21,7 +21,7 @@ import {
 function getProps(props = {}) {
   const defaultTestProps = {
     panelId: 'foo1',
-    embeddableHandler: getEmbeddableHandlerMock(),
+    embeddableFactory: getEmbeddableFactoryMock(),
   };
   return _.defaultsDeep(props, defaultTestProps);
 }
