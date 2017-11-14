@@ -5,7 +5,13 @@
 --
 This section discusses the changes that you need to be aware of when migrating
 your application from one version of Kibana to another.
---
 
+* <<breaking-changes-6.0>>
+* <<migrating-6.0-index>>
+ifdef::include-xpack[]
+* <<breaking-changes-xpackkb>>
+endif::include-xpack[]
+
+--
 include::migration/migrate_6_0.asciidoc[]
 include::migration/migrate_6_0_index.asciidoc[]
