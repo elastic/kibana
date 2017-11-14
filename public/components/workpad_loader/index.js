@@ -2,7 +2,7 @@ import { connect } from 'react-redux';
 import { compose, withState, withHandlers, lifecycle } from 'recompose';
 import { find as findWorkpads, remove } from '../../lib/workpad_service';
 import { getWorkpad } from '../../state/selectors/workpad';
-import { createWorkpad, loadWorkpad, downloadWorkpad } from '../../state/actions/workpad';
+import { createWorkpad, loadWorkpadById, downloadWorkpadById, loadWorkpad } from '../../state/actions/workpad';
 import { WorkpadLoader as Component } from './workpad_loader';
 
 const mapStateToProps = (state) => ({
@@ -11,8 +11,9 @@ const mapStateToProps = (state) => ({
 
 const mapDispatchToProps = ({
   createWorkpad,
+  loadWorkpadById,
   loadWorkpad,
-  downloadWorkpad,
+  downloadWorkpadById,
 });
 
 export const WorkpadLoader = compose(
@@ -21,11 +22,12 @@ export const WorkpadLoader = compose(
   withState('createPending', 'setCreatePending', false),
   withState('searchText', 'setSearchText', ''),
   withState('workpads', 'setWorkpads', null),
+  withState('dropping', 'setDropping', false),
   withHandlers({
     findWorkpads: ({ setWorkpads }) => (searchText) => {
       return findWorkpads(searchText).then(setWorkpads);
     },
-    removeWorkpad: ({ setWorkpads, workpadId, workpads, loadWorkpad }) => (id) => {
+    removeWorkpad: ({ setWorkpads, workpadId, workpads, loadWorkpadById }) => (id) => {
       remove(id).then(() => {
         // update the workpad list, filtering out the removed workpad
         setWorkpads({
@@ -36,7 +38,7 @@ export const WorkpadLoader = compose(
         // if load the first available workpad if the active one was removed
         if (workpadId === id) {
           const nextWorkpad = workpads.workpads.find(w => w.id !== id);
-          loadWorkpad(nextWorkpad.id);
+          loadWorkpadById(nextWorkpad.id);
         }
       });
     },

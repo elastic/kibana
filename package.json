@@ -48,6 +48,7 @@
     "react-bootstrap": "^0.31.0",
     "react-datetime": "^2.10.1",
     "react-dom": "^16.0.0",
+    "react-dropzone": "^4.2.1",
     "react-redux": "^5.0.4",
     "react-shortcuts": "^2.0.0",
     "recompose": "^0.25.0",

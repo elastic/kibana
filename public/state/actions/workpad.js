@@ -32,11 +32,21 @@ export const setWorkpad = createThunk('setWorkpad', ({ dispatch }, workpad) => {
   dispatch(initializeWorkpad());
 });
 
-export const loadWorkpad = createThunk('loadWorkpad', ({ dispatch }, workpadId) => {
+export const loadWorkpad = createThunk('loadWorkpad', ({ dispatch }, { assets, ...workpad }) => {
+  dispatch(setWorkpad(workpad));
+  dispatch(setAssets(assets));
+});
+
+export const loadWorkpadById = createThunk('loadWorkpadById', ({ dispatch }, workpadId) => {
   // TODO: handle the failed loading state
-  workpadService.get(workpadId).then(({ assets, ...workpad }) => {
-    dispatch(setWorkpad(workpad));
-    dispatch(setAssets(assets));
+  workpadService.get(workpadId).then(workpad => dispatch(loadWorkpad(workpad)));
+});
+
+export const downloadWorkpadById = createThunk('downloadWorkpadbyId', ({ dispatch }, workpadId) => {
+  // TODO: handle the failed loading state
+  workpadService.get(workpadId).then(resp => {
+    console.log(resp);
+    fileSaver.saveAs(new Blob([JSON.stringify(resp)], { type: 'application/json' }), `canvas-workpad-${resp.name}-${resp.id}.json`);
   });
 });
 
