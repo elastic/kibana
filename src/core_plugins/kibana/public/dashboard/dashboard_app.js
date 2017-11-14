@@ -85,25 +85,6 @@ app.directive('dashboardApp', function ($injector) {
         dashboardStateManager.syncTimefilterWithDashboard(timefilter, quickRanges);
       }
 
-      let onRouteChange;
-      const setFullScreenMode = fullScreenMode => {
-        if (dashboardStateManager.getFullScreenMode() !== fullScreenMode) {
-          dashboardStateManager.setFullScreenMode(fullScreenMode);
-        }
-        chrome.setVisible(!fullScreenMode);
-
-        // Make sure that if we exit the dashboard app, the chrome becomes visible again
-        // (e.g. if the user clicks the back button).
-        if (fullScreenMode) {
-          onRouteChange = $scope.$on('$routeChangeStart', () => {
-            chrome.setVisible(true);
-            onRouteChange();
-          });
-        } else if (onRouteChange) {
-          onRouteChange();
-        }
-      };
-
       const updateState = () => {
         // Following the "best practice" of always have a '.' in your ng-models –
         // https://github.com/angular/angular.js/wiki/Understanding-Scopes
@@ -117,7 +98,6 @@ app.directive('dashboardApp', function ($injector) {
         };
         $scope.panels = dashboardStateManager.getPanels();
         $scope.indexPatterns = dashboardStateManager.getPanelIndexPatterns();
-        setFullScreenMode(dashboardStateManager.getFullScreenMode());
       };
 
       // Part of the exposed plugin API - do not remove without careful consideration.
@@ -289,15 +269,16 @@ app.directive('dashboardApp', function ($injector) {
       $scope.showFilterBar = () => filterBar.getFilters().length > 0 || !dashboardStateManager.getFullScreenMode();
 
       $scope.showAddPanel = () => {
-        setFullScreenMode(false);
+        dashboardStateManager.setFullScreenMode(false);
         $scope.kbnTopNav.open('add');
       };
       $scope.enterEditMode = () => {
-        setFullScreenMode(false);
+        dashboardStateManager.setFullScreenMode(false);
         $scope.kbnTopNav.click('edit');
       };
       const navActions = {};
-      navActions[TopNavIds.FULL_SCREEN] = () => setFullScreenMode(true);
+      navActions[TopNavIds.FULL_SCREEN] = () =>
+        dashboardStateManager.setFullScreenMode(true);
       navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.VIEW);
       navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.EDIT);
       navActions[TopNavIds.CLONE] = () => {

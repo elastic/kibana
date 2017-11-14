@@ -1,5 +1,6 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
+import chrome from 'ui/chrome';
 
 import {
   KuiKeyboardAccessible,
@@ -18,10 +19,12 @@ export class FullScreenModePlaceholder extends PureComponent {
 
   componentWillMount() {
     document.addEventListener('keydown', this.onKeyDown, false);
+    chrome.setVisible(false);
   }
 
   componentWillUnmount() {
     document.removeEventListener('keydown', this.onKeyDown, false);
+    chrome.setVisible(true);
   }
 
   render() {
