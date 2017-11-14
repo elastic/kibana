@@ -1,6 +1,7 @@
 import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
+  const retry = getService('retry');
   const find = getService('find');
   const remote = getService('remote');
   const PageObjects = getPageObjects(['dashboard', 'header', 'common']);
@@ -75,17 +76,15 @@ export default function ({ getService, getPageObjects }) {
             .moveMouseTo(null, 300, 0)
             .releaseMouseButton();
 
-          // give time for vis to redraw - cannot use retry because elements already exist, they just need time to redraw
-          await PageObjects.common.sleep(500);
-
-          const controls = await find.allByCssSelector('.inputControlVis .kuiFlexItem');
-          expect(controls.length).to.equal(3);
-
-          const control0Position = await controls[0].getPosition();
-          const control1Position = await controls[1].getPosition();
-          const control2Position = await controls[2].getPosition();
-          expect(control0Position.y).to.equal(control1Position.y);
-          expect(control1Position.y).to.equal(control2Position.y);
+          await retry.try(async () => {
+            const controls = await find.allByCssSelector('.inputControlVis .kuiFlexItem');
+            expect(controls.length).to.equal(3);
+            const control0Position = await controls[0].getPosition();
+            const control1Position = await controls[1].getPosition();
+            const control2Position = await controls[2].getPosition();
+            expect(control0Position.y).to.equal(control1Position.y);
+            expect(control1Position.y).to.equal(control2Position.y);
+          });
         });
 
         it('Should position controls in vertical layout when panel is tall and skinny', async () => {
@@ -97,17 +96,16 @@ export default function ({ getService, getPageObjects }) {
             .moveMouseTo(null, -400, 200)
             .releaseMouseButton();
 
-          // give time for vis to redraw - cannot use retry because elements already exist, they just need time to redraw
-          await PageObjects.common.sleep(500);
+          await retry.try(async () => {
+            const controls = await find.allByCssSelector('.inputControlVis .kuiFlexItem');
+            expect(controls.length).to.equal(3);
+            const control0Position = await controls[0].getPosition();
+            const control1Position = await controls[1].getPosition();
+            const control2Position = await controls[2].getPosition();
+            expect(control2Position.y).to.be.greaterThan(control1Position.y);
+            expect(control1Position.y).to.be.greaterThan(control0Position.y);
+          });
 
-          const controls = await find.allByCssSelector('.inputControlVis .kuiFlexItem');
-          expect(controls.length).to.equal(3);
-
-          const control0Position = await controls[0].getPosition();
-          const control1Position = await controls[1].getPosition();
-          const control2Position = await controls[2].getPosition();
-          expect(control2Position.y).to.be.greaterThan(control1Position.y);
-          expect(control1Position.y).to.be.greaterThan(control0Position.y);
         });
 
         it('Should position controls inside panel', async () => {
@@ -120,7 +118,6 @@ export default function ({ getService, getPageObjects }) {
           const panels = await find.allByCssSelector('.dashboard-panel');
           expect(panels.length).to.equal(1);
           const panelSize = await panels[0].getSize();
-
           expect(control0Size.width).to.be.lessThan(panelSize.width);
           expect(control1Size.width).to.be.lessThan(panelSize.width);
           expect(control2Size.width).to.be.lessThan(panelSize.width);
