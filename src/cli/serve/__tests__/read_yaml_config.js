@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 import { join, relative, resolve } from 'path';
-import readYamlConfig from '../read_yaml_config';
+import { readYamlConfig } from '../read_yaml_config';
 
 function fixture(name) {
   return resolve(__dirname, 'fixtures', name);
