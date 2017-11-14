@@ -31,11 +31,10 @@ export default new Chainable('color', {
 
     let i = 0;
     return alter(args, function (eachSeries) {
-      if (colors.length === 1 || gradientStops === 1) {
+      if (gradient) {
+        eachSeries.color = gradient[i++].toHexString();
+      } else if (colors.length === 1) {
         eachSeries.color = colors[0];
-      } else if (gradient) {
-        eachSeries.color = gradient[i].toHexString();
-        i++;
       } else {
         throw new Error('color not provided');
       }
