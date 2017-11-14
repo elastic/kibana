@@ -1,0 +1,10 @@
+.aws-config.json
+.signing-config.json
+.node_binaries
+node_modules
+optimize
+target
+build
+html_docs
+esvm
+plugins

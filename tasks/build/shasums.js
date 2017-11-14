@@ -1,8 +1,6 @@
 import { promisify } from 'bluebird';
 const readdir = promisify(require('fs').readdir);
 const exec = promisify(require('child_process').exec);
-const platform = require('os').platform();
-const cmd = /^win/.test(platform) ? 'sha1sum ' : 'shasum ';
 
 module.exports = function (grunt) {
   grunt.registerTask('_build:shasums', function () {
@@ -16,7 +14,7 @@ module.exports = function (grunt) {
       // only sha the archives and packages
       if (!archive.match(/\.zip$|\.tar.gz$|\.deb$|\.rpm$/)) return;
 
-      return exec(cmd + archive + ' > ' + archive + '.sha1.txt', {
+      return exec(`shasum ${archive} > ${archive}.sha1.txt`, {
         cwd: targetDir
       });
     })

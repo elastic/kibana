@@ -51,7 +51,7 @@
     "test:coverage": "grunt test:coverage",
     "test:visualRegression": "grunt test:visualRegression:buildGallery",
     "checkLicenses": "grunt licenses",
-    "build": "grunt build",
+    "build": "grunt docker:packages",
     "release": "grunt release",
     "start": "sh ./bin/kibana --dev",
     "precommit": "grunt precommit",
