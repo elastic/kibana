@@ -7,17 +7,12 @@ import { PluginsConfig } from './plugins/PluginsConfig';
 import { PluginsService } from './plugins/PluginsService';
 import { PluginSystem } from './plugins/PluginSystem';
 
-import { TestPlugin } from '../test_plugin';
-import { TestConfig } from '../test_plugin/TestConfig';
-
 export class Server {
   private readonly elasticsearch: ElasticsearchModule;
   private readonly http: HttpModule;
   private readonly kibana: KibanaModule;
   private readonly plugins: PluginsService;
   private readonly log: Logger;
-
-  testPlugin: TestPlugin;
 
   constructor(
     private readonly configService: ConfigService,
@@ -40,10 +35,6 @@ export class Server {
     this.elasticsearch = new ElasticsearchModule(elasticsearchConfigs$, logger);
     this.kibana = new KibanaModule(kibanaConfig$);
     this.http = new HttpModule(httpConfig$, logger, env);
-    this.testPlugin = new TestPlugin(configService.atPath(
-      ['__newPlatform', 'test'],
-      TestConfig
-    ), logger);
 
     const core = {
       elasticsearch: this.elasticsearch,
@@ -65,8 +56,6 @@ export class Server {
     this.log.info('starting server :tada:');
 
     this.http.service.registerRouter(this.elasticsearch.createRoutes());
-
-    this.http.service.registerRouter(this.testPlugin.createRoutes());
 
     await this.elasticsearch.service.start();
     await this.plugins.start();
