@@ -30,7 +30,6 @@ module.factory('SavedDashboard', function (courier, config) {
           useMargins: id ? false : true,
           hidePanelTitles: false,
         }),
-        uiStateJSON: '{}',
         version: 1,
         timeRestore: false,
         timeTo: undefined,

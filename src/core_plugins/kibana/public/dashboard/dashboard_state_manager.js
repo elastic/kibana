@@ -16,7 +16,7 @@ import {
   updateHidePanelTitles,
 } from './actions';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
-import { createPanelState, getPersistedStateId } from './panel';
+import { createPanelState } from './panel';
 import { getAppStateDefaults } from './lib';
 import {
   getViewMode,
@@ -39,7 +39,6 @@ import {
  *  - description
  *  - timeRestore
  *  - query
- *  - uiState
  *  - filters
  *
  * State that is only stored in the Store:
@@ -67,7 +66,6 @@ export class DashboardStateManager {
     this.stateDefaults = getAppStateDefaults(this.savedDashboard, this.hideWriteControls);
 
     this.appState = new AppState(this.stateDefaults);
-    this.uiState = this.appState.makeStateful('uiState');
     this.isDirty = false;
 
     // We can't compare the filters stored on this.appState to this.savedDashboard because in order to apply
@@ -428,7 +426,6 @@ export class DashboardStateManager {
   removePanel(panelIndex) {
     _.remove(this.getPanels(), (panel) => {
       if (panel.panelIndex === panelIndex) {
-        this.uiState.removeChild(getPersistedStateId(panel));
         delete this.panelIndexPatternMapping[panelIndex];
         return true;
       } else {
