@@ -9,6 +9,18 @@ import landingTemplate from 'plugins/kibana/management/landing.html';
 import { management } from 'ui/management';
 import 'ui/kbn_top_nav';
 
+import { ManagementLandingPage } from './management_landing_page';
+
+const app = uiModules.get('apps/management', ['react']);
+app.directive('managementLandingPage', function (reactDirective) {
+  return reactDirective(ManagementLandingPage, [
+    'version',
+    'addBasePath',
+    // Prevent the 'Maximum call stack exceeded' error.
+    ['sections', {  watchDepth: 'collection' }],
+  ]);
+});
+
 uiRoutes
 .when('/management', {
   template: landingTemplate
@@ -23,9 +35,7 @@ require('ui/index_patterns/route_setup/load_default')({
   whenMissingRedirectTo: '/management/kibana/index'
 });
 
-uiModules
-.get('apps/management')
-.directive('kbnManagementApp', function (Private, $location, timefilter) {
+app.directive('kbnManagementApp', function (Private, $location, timefilter) {
   return {
     restrict: 'E',
     template: appTemplate,
@@ -50,12 +60,11 @@ uiModules
   };
 });
 
-uiModules
-.get('apps/management')
-.directive('kbnManagementLanding', function (kbnVersion) {
+app.directive('kbnManagementLanding', function (kbnVersion, chrome) {
   return {
     restrict: 'E',
     link: function ($scope) {
+      $scope.addBasePath = chrome.addBasePath;
       $scope.sections = management.items.inOrder;
       $scope.kbnVersion = kbnVersion;
     }
