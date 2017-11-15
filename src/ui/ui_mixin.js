@@ -1,4 +1,4 @@
-import { collectUiExports } from './ui_exports';
+import { uiExportsMixin } from './ui_exports';
 import { fieldFormatsMixin } from './field_formats';
 import { uiAppsMixin } from './ui_apps';
 import { uiI18nMixin } from './ui_i18n';
@@ -8,10 +8,7 @@ import { uiRenderMixin } from './ui_render';
 import { uiSettingsMixin } from './ui_settings';
 
 export async function uiMixin(kbnServer) {
-  kbnServer.uiExports = collectUiExports(
-    kbnServer.pluginSpecs
-  );
-
+  await kbnServer.mixin(uiExportsMixin);
   await kbnServer.mixin(uiAppsMixin);
   await kbnServer.mixin(uiBundlesMixin);
   await kbnServer.mixin(uiSettingsMixin);
