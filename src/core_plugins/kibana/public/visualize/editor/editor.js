@@ -299,5 +299,19 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     $scope.fetch();
   };
 
+
+  $scope.getExperimentalMessage = () => {
+    const feedbackUrl = vis.type.feedbackUrl || 'https://github.com/elastic/kibana/issues/new';
+
+    if ($scope.vis.type.isLabs) {
+      return `This visualization is in labs mode. 
+The feature set is subject to change with each release and in non-backwards compatible ways if required.
+        Have feedback? Please create an issue in <a ng-href="${feedbackUrl}" rel="noopener noreferrer">GitHub</a>`;
+    } else {
+      return `This visualization is marked as experimental. 
+Have feedback? Please create an issue in <a ng-href="${feedbackUrl}" rel="noopener noreferrer">GitHub</a>`;
+    }
+  };
+
   init();
 }
