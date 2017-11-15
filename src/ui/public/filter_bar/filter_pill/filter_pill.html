@@ -69,12 +69,18 @@
     <button
       class="action filter-edit"
       ng-click="pill.onEditFilter(pill.filter)"
+      ng-disabled="pill.isControlledByPanel()"
       ng-focus="pill.activateActions()"
       ng-blur="pill.deactivateActions()"
       aria-label="Edit filter"
       data-test-subj="editFilter"
     >
-      <i class="fa fa-fw fa-edit"></i>
+      <i
+        ng-show="pill.isControlledByPanel()"
+        tooltip="Edit disabled because filter is controlled by panel"
+        class="fa fa-fw fa-edit fa-disabled"
+      ></i>
+      <i ng-hide="pill.isControlledByPanel()" class="fa fa-fw fa-edit"></i>
     </button>
 
   </div>
