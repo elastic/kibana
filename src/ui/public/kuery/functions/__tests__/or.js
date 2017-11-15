@@ -81,7 +81,7 @@ describe('kuery functions', function () {
       it('should throw an error for nodes with unknown or undefined serialize styles', function () {
         const node = nodeTypes.function.buildNode('or', [childNode1, childNode2], 'notValid');
         expect(or.toKueryExpression)
-        .withArgs(node).to.throwException(/Cannot serialize "or" function as "notValid"/);
+          .withArgs(node).to.throwException(/Cannot serialize "or" function as "notValid"/);
       });
 
     });

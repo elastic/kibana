@@ -12,7 +12,7 @@ export const KuiTableHeaderCell = ({
   className,
   ariaLabel,
   align,
-  ...rest,
+  ...rest
 }) => {
   const classes = classNames('kuiTableHeaderCell', className, {
     'kuiTableHeaderCell--alignRight': align === RIGHT_ALIGNMENT,

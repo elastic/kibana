@@ -28,30 +28,30 @@ const linkReqRespStats = function ($scope) {
 };
 
 SpyModesRegistryProvider
-.register(function () {
-  return {
-    name: 'request',
-    display: 'Request',
-    order: 2,
-    template: reqRespStatsHTML,
-    link: linkReqRespStats
-  };
-})
-.register(function () {
-  return {
-    name: 'response',
-    display: 'Response',
-    order: 3,
-    template: reqRespStatsHTML,
-    link: linkReqRespStats
-  };
-})
-.register(function () {
-  return {
-    name: 'stats',
-    display: 'Statistics',
-    order: 4,
-    template: reqRespStatsHTML,
-    link: linkReqRespStats
-  };
-});
+  .register(function () {
+    return {
+      name: 'request',
+      display: 'Request',
+      order: 2,
+      template: reqRespStatsHTML,
+      link: linkReqRespStats
+    };
+  })
+  .register(function () {
+    return {
+      name: 'response',
+      display: 'Response',
+      order: 3,
+      template: reqRespStatsHTML,
+      link: linkReqRespStats
+    };
+  })
+  .register(function () {
+    return {
+      name: 'stats',
+      display: 'Statistics',
+      order: 4,
+      template: reqRespStatsHTML,
+      link: linkReqRespStats
+    };
+  });

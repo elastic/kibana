@@ -57,10 +57,10 @@ export default class UiApp {
       this.uiExports.find(get(this, 'spec.uses', [])),
       this.uiExports.find(['chromeNavControls', 'hacks']),
     ])
-    .flatten()
-    .uniq()
-    .unshift(this.main)
-    .value();
+      .flatten()
+      .uniq()
+      .unshift(this.main)
+      .value();
   }
 
   toJSON() {

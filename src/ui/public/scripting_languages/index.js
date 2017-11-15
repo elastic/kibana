@@ -14,10 +14,10 @@ export function getDeprecatedScriptingLanguages() {
 export function GetEnabledScriptingLanguagesProvider($http) {
   return () => {
     return $http.get(chrome.addBasePath('/api/kibana/scripts/languages'))
-    .then((res) => res.data)
-    .catch(() => {
-      notify.error('Error getting available scripting languages from Elasticsearch');
-      return [];
-    });
+      .then((res) => res.data)
+      .catch(() => {
+        notify.error('Error getting available scripting languages from Elasticsearch');
+        return [];
+      });
   };
 }

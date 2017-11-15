@@ -37,49 +37,49 @@ export default function (plugin, server) {
       index: config.get('kibana.index'),
       ignore: [408]
     })
-    .then(function (resp) {
+      .then(function (resp) {
       // if "timed_out" === true then elasticsearch could not
       // find any idices matching our filter within 5 seconds
-      if (!resp || resp.timed_out) {
-        return NO_INDEX;
-      }
+        if (!resp || resp.timed_out) {
+          return NO_INDEX;
+        }
 
-      // If status === "red" that means that index(es) were found
-      // but the shards are not ready for queries
-      if (resp.status === 'red') {
-        return INITIALIZING;
-      }
+        // If status === "red" that means that index(es) were found
+        // but the shards are not ready for queries
+        if (resp.status === 'red') {
+          return INITIALIZING;
+        }
 
-      return READY;
-    });
+        return READY;
+      });
   }
 
   function waitUntilReady() {
     return getHealth()
-    .then(function (health) {
-      if (health !== READY) {
-        return Promise.delay(REQUEST_DELAY).then(waitUntilReady);
-      }
+      .then(function (health) {
+        if (health !== READY) {
+          return Promise.delay(REQUEST_DELAY).then(waitUntilReady);
+        }
 
-      return new Promise((resolve) => {
-        plugin.status.once('green', resolve);
+        return new Promise((resolve) => {
+          plugin.status.once('green', resolve);
+        });
       });
-    });
   }
 
   function waitForShards() {
     return getHealth()
-    .then(function (health) {
-      if (health === NO_INDEX) {
-        plugin.status.yellow('No existing Kibana index found');
-        return createKibanaIndex(server);
-      }
+      .then(function (health) {
+        if (health === NO_INDEX) {
+          plugin.status.yellow('No existing Kibana index found');
+          return createKibanaIndex(server);
+        }
 
-      if (health === INITIALIZING) {
-        plugin.status.red('Elasticsearch is still initializing the kibana index.');
-        return Promise.delay(REQUEST_DELAY).then(waitForShards);
-      }
-    });
+        if (health === INITIALIZING) {
+          plugin.status.red('Elasticsearch is still initializing the kibana index.');
+          return Promise.delay(REQUEST_DELAY).then(waitForShards);
+        }
+      });
   }
 
   function waitForEsVersion() {
@@ -96,26 +96,26 @@ export default function (plugin, server) {
   function check() {
     const healthCheck =
       waitForPong(callAdminAsKibanaUser, config.get('elasticsearch.url'))
-      .then(waitForEsVersion)
-      .then(() => ensureNotTribe(callAdminAsKibanaUser))
-      .then(waitForShards)
-      .then(() => patchKibanaIndex({
-        callCluster: callAdminAsKibanaUser,
-        log: (...args) => server.log(...args),
-        indexName: config.get('kibana.index'),
-        kibanaIndexMappingsDsl: server.getKibanaIndexMappingsDsl()
-      }))
-      .then(() => {
-        const tribeUrl = config.get('elasticsearch.tribe.url');
-        if (tribeUrl) {
-          return waitForPong(callDataAsKibanaUser, tribeUrl)
-          .then(() => ensureEsVersion(server, kibanaVersion.get(), callDataAsKibanaUser));
-        }
-      });
+        .then(waitForEsVersion)
+        .then(() => ensureNotTribe(callAdminAsKibanaUser))
+        .then(waitForShards)
+        .then(() => patchKibanaIndex({
+          callCluster: callAdminAsKibanaUser,
+          log: (...args) => server.log(...args),
+          indexName: config.get('kibana.index'),
+          kibanaIndexMappingsDsl: server.getKibanaIndexMappingsDsl()
+        }))
+        .then(() => {
+          const tribeUrl = config.get('elasticsearch.tribe.url');
+          if (tribeUrl) {
+            return waitForPong(callDataAsKibanaUser, tribeUrl)
+              .then(() => ensureEsVersion(server, kibanaVersion.get(), callDataAsKibanaUser));
+          }
+        });
 
     return healthCheck
-    .then(setGreenStatus)
-    .catch(err => plugin.status.red(err));
+      .then(setGreenStatus)
+      .catch(err => plugin.status.red(err));
   }
 
 

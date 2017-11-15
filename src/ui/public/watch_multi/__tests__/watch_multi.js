@@ -86,34 +86,34 @@ describe('$scope.$watchMulti', function () {
     });
 
     it('passes an array of the current and previous values, in order',
-    function () {
-      const stub = sinon.spy(function () {});
+      function () {
+        const stub = sinon.spy(function () {});
 
-      $scope.one = 'a';
-      $scope.two = 'b';
-      $scope.three = 'c';
-      $scope.$watchMulti([
-        'one',
-        'two',
-        'three'
-      ], stub);
+        $scope.one = 'a';
+        $scope.two = 'b';
+        $scope.three = 'c';
+        $scope.$watchMulti([
+          'one',
+          'two',
+          'three'
+        ], stub);
 
-      $rootScope.$apply();
-      expect(stub.firstCall.args).to.eql([
-        ['a', 'b', 'c'],
-        ['a', 'b', 'c']
-      ]);
+        $rootScope.$apply();
+        expect(stub.firstCall.args).to.eql([
+          ['a', 'b', 'c'],
+          ['a', 'b', 'c']
+        ]);
 
-      $scope.one = 'do';
-      $scope.two = 're';
-      $scope.three = 'mi';
-      $rootScope.$apply();
+        $scope.one = 'do';
+        $scope.two = 're';
+        $scope.three = 'mi';
+        $rootScope.$apply();
 
-      expect(stub.secondCall.args).to.eql([
-        ['do', 're', 'mi'],
-        ['a', 'b', 'c']
-      ]);
-    });
+        expect(stub.secondCall.args).to.eql([
+          ['do', 're', 'mi'],
+          ['a', 'b', 'c']
+        ]);
+      });
 
     it('always has an up to date value', function () {
       let count = 0;

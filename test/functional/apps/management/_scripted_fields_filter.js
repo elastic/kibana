@@ -1,3 +1,4 @@
+
 import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
@@ -29,13 +30,13 @@ export default function ({ getService, getPageObjects }) {
       const scriptedFieldLangsBefore = await PageObjects.settings.getScriptedFieldLangs();
       await log.debug('add scripted field');
       await PageObjects.settings
-      .addScriptedField(scriptedExpressionFieldName,
-        'expression', 'number', null, '1', 'doc[\'machine.ram\'].value / (1024 * 1024 * 1024)'
-      );
+        .addScriptedField(scriptedExpressionFieldName,
+          'expression', 'number', null, '1', 'doc[\'machine.ram\'].value / (1024 * 1024 * 1024)'
+        );
       await PageObjects.settings
-      .addScriptedField(scriptedPainlessFieldName,
-        'painless', 'number', null, '1', 'doc[\'machine.ram\'].value / (1024 * 1024 * 1024)'
-      );
+        .addScriptedField(scriptedPainlessFieldName,
+          'painless', 'number', null, '1', 'doc[\'machine.ram\'].value / (1024 * 1024 * 1024)'
+        );
 
       // confirm two additional scripted fields were created
       await retry.try(async function () {
