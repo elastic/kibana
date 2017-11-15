@@ -8,3 +8,4 @@ your application from one version of Kibana to another.
 --
 
 include::migration/migrate_5_0.asciidoc[]
+include::migration/migrate_6_0_index.asciidoc[]
