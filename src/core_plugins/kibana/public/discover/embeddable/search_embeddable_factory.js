@@ -8,13 +8,14 @@ import { EmbeddableFactory, Embeddable } from 'ui/embeddable';
 
 export class SearchEmbeddableFactory extends EmbeddableFactory {
 
-  constructor($compile, $rootScope, searchLoader, Promise) {
+  constructor($compile, $rootScope, searchLoader, Promise, courier) {
     super();
     this.$compile = $compile;
     this.searchLoader = searchLoader;
     this.$rootScope = $rootScope;
     this.name = 'search';
     this.Promise = Promise;
+    this.courier = courier;
   }
 
   getEditPath(panelId) {
@@ -72,6 +73,9 @@ export class SearchEmbeddableFactory extends EmbeddableFactory {
         const searchInstance = this.$compile(searchTemplate)(searchScope);
         const rootNode = angular.element(domNode);
         rootNode.append(searchInstance);
+
+        // TODO: There is probably a better way to do this.
+        searchScope.$on('ready:vis', () => this.courier.fetch());
 
         this.addDestroyEmeddable(panel.panelIndex, () => {
           searchInstance.remove();
