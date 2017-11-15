@@ -5,7 +5,7 @@ import { get } from 'lodash';
 import { createStatefulPropHoc } from '../../components/enhance/stateful_prop';
 import { compose, withProps } from 'recompose';
 
-const component = ({ updateValue, value, confirm, commit }) => (
+const StringArgInput = ({ updateValue, value, confirm, commit }) => (
   <Form inline>
     <FormGroup>
       <FormControl
@@ -20,7 +20,7 @@ const component = ({ updateValue, value, confirm, commit }) => (
   </Form>
 );
 
-component.propTypes = {
+StringArgInput.propTypes = {
   updateValue: PropTypes.func.isRequired,
   value: PropTypes.string.isRequired,
   confirm: PropTypes.string,
@@ -34,7 +34,7 @@ const template = compose(
     value: argValue,
   })),
   createStatefulPropHoc('value'),
-)(component);
+)(StringArgInput);
 
 template.propTypes = {
   argValue: PropTypes.any.isRequired,

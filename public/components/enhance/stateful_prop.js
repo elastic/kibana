@@ -1,6 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+const getDisplayName = (Comp) => Comp.displayName || Comp.name || 'UnnamedComponent';
+
 export function createStatefulPropHoc(fieldname, updater = 'updateValue') {
   return (Comp) => {
     class WrappedControlledInput extends React.PureComponent {
@@ -35,6 +37,9 @@ export function createStatefulPropHoc(fieldname, updater = 'updateValue') {
     WrappedControlledInput.propTypes = {
       [fieldname]: PropTypes.any,
     };
+
+    // set the display name of the wrapped component, for easier debugging
+    WrappedControlledInput.displayName = `statefulProp(${getDisplayName(Comp)})`;
 
     return WrappedControlledInput;
   };

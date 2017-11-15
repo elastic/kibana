@@ -28,7 +28,6 @@ export const AdvancedFailureComponent = (props) => {
 
   const confirmReset = (ev) => {
     ev.preventDefault();
-
     resetErrorState(); // when setting a new value, attempt to reset the error state
     onValueChange(fromExpression(defaultValue, 'argument'));
   };
@@ -57,8 +56,8 @@ export const AdvancedFailureComponent = (props) => {
 };
 
 AdvancedFailureComponent.propTypes = {
+  defaultValue: PropTypes.string,
   onValueChange: PropTypes.func.isRequired,
-  defaultValue: PropTypes.string.isRequired,
   argExpression: PropTypes.string.isRequired,
   updateArgExpression: PropTypes.func.isRequired,
   resetErrorState: PropTypes.func.isRequired,

@@ -42,7 +42,7 @@ function getFormObject(argValue) {
   }
 }
 
-const simpleTemplateComponent = ({ onValueChange, columns, mathValue, setMathFunction, renderError }) => {
+const DatacolumnArgInput = ({ onValueChange, columns, mathValue, setMathFunction, renderError }) => {
   if (mathValue.error) return renderError();
 
   const inputRefs = {};
@@ -83,7 +83,7 @@ const simpleTemplateComponent = ({ onValueChange, columns, mathValue, setMathFun
   );
 };
 
-simpleTemplateComponent.propTypes = {
+DatacolumnArgInput.propTypes = {
   columns: PropTypes.array.isRequired,
   onValueChange: PropTypes.func.isRequired,
   mathValue: PropTypes.object.isRequired,
@@ -107,7 +107,7 @@ const simpleTemplate = compose(
   withHandlers({
     setMathFunction: ({ mathValue, setMathValue }) => (fn) => setMathValue({ ...mathValue, fn }),
   })
-)(simpleTemplateComponent);
+)(DatacolumnArgInput);
 
 simpleTemplate.propTypes = {
   argValue: PropTypes.oneOfType([

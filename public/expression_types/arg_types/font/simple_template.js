@@ -12,6 +12,8 @@ export const simpleTemplate = (/*props*/) => {
   );
 };
 
+simpleTemplate.displayName = 'FontArgSimpleInput';
+
 simpleTemplate.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.any.isRequired,

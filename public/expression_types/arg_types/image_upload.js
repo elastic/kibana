@@ -4,7 +4,7 @@ import { FormGroup, ControlLabel } from 'react-bootstrap';
 import { withState } from 'recompose';
 import { encode } from '../../../common/lib/dataurl';
 
-const template = ({ typeInstance, onAssetAdd, onValueChange, setLoading, isLoading }) => {
+const ImageUploadArgInput = ({ typeInstance, onAssetAdd, onValueChange, setLoading, isLoading }) => {
   const { name } = typeInstance;
 
   function handleUpload(ev) {
@@ -41,7 +41,7 @@ const template = ({ typeInstance, onAssetAdd, onValueChange, setLoading, isLoadi
   );
 };
 
-template.propTypes = {
+ImageUploadArgInput.propTypes = {
   onAssetAdd: PropTypes.func.isRequired,
   onValueChange: PropTypes.func.isRequired,
   typeInstance: PropTypes.object.isRequired,
@@ -53,5 +53,5 @@ export const imageUpload = () => ({
   name: 'imageUpload',
   displayName: 'Image Upload',
   help: 'Select or upload an image',
-  template: withState('isLoading', 'setLoading', false)(template),
+  template: withState('isLoading', 'setLoading', false)(ImageUploadArgInput),
 });

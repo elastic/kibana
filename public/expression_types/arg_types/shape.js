@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { ShapePicker } from '../../components/shape_picker/shape_picker.js';
 
-const template = ({ argValue, onValueChange }) => {
+const ShapeArgInput = ({ argValue, onValueChange }) => {
   const onChange = val => onValueChange(val);
 
   return (
@@ -12,7 +12,7 @@ const template = ({ argValue, onValueChange }) => {
   );
 };
 
-template.propTypes = {
+ShapeArgInput.propTypes = {
   argValue: PropTypes.string,
   onValueChange: PropTypes.func,
 };
@@ -22,5 +22,5 @@ export const shape = () => ({
   displayName: 'Shape',
   help: 'Shape selector',
   default: 'circle',
-  simpleTemplate: template,
+  simpleTemplate: ShapeArgInput,
 });

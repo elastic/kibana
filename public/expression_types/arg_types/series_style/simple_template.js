@@ -51,6 +51,8 @@ export const simpleTemplate = (props) => {
   );
 };
 
+simpleTemplate.displayName = 'SeriesStyleArgSimpleInput';
+
 simpleTemplate.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.any.isRequired,

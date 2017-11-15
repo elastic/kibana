@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-const template = ({ onValueChange, argValue }) => {
+const CheckboxArgInput = ({ onValueChange, argValue }) => {
 
   function handleChange() {
     onValueChange(!argValue);
@@ -18,7 +18,7 @@ const template = ({ onValueChange, argValue }) => {
   );
 };
 
-template.propTypes = {
+CheckboxArgInput.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.any.isRequired,
 };
@@ -27,5 +27,5 @@ export const checkbox = () => ({
   name: 'checkbox',
   displayName: 'Checkbox',
   help: 'A true/false checkbox toggle',
-  simpleTemplate: template,
+  simpleTemplate: CheckboxArgInput,
 });
