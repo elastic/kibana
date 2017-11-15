@@ -1,4 +1,9 @@
 
+/**
+ * Tracks the individual queue for each kbnServer, rather than attaching
+ * it to the kbnServer object via a property or something
+ * @type {WeakMap}
+ */
 const queues = new WeakMap();
 
 export function waitForInitSetupMixin(kbnServer) {
