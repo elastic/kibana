@@ -57,12 +57,13 @@ export class UiApp {
     };
 
     const { appExtensions = [] } = kbnServer.uiExports;
-    this._modules = [].concat(
-      this._main,
-      ...uses.map(type => appExtensions[type] || []),
-      appExtensions.chromeNavControls || [],
-      appExtensions.hacks || []
-    );
+    this._modules = []
+      .concat(this._main, ...uses.map(type => appExtensions[type] || []))
+      .reduce((modules, item) => (
+        modules.includes(item)
+          ? modules
+          : modules.concat(item)
+      ), []);
 
     if (!this.isHidden()) {
       // unless an app is hidden it gets a navlink, but we only respond to `getNavLink()`

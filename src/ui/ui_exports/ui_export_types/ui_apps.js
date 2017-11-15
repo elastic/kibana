@@ -37,8 +37,8 @@ function applySpecDefaults(spec, type, pluginSpec) {
     url,
     uses: uniq([
       ...uses,
+      'chromeNavControls',
       'hacks',
-      'chromeNavControls'
     ]),
   };
 }
