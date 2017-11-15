@@ -25,7 +25,7 @@ describe('UiExports', function () {
       expect(uiExports.find(['foo', 'bar'])).to.eql(['a', 'b', 'c']);
     });
   });
-//
+  //
   describe('#defaultInjectedVars', function () {
     describe('two plugins, two sync', function () {
       this.slow(10000);

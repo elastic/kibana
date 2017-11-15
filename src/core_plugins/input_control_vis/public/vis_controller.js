@@ -49,10 +49,10 @@ class VisController {
         // ignore controls that do not have indexPattern or field
         return controlParams.indexPattern && controlParams.fieldName;
       })
-      .map((controlParams) => {
-        const factory = controlFactory(controlParams);
-        return factory(controlParams, this.vis.API);
-      })
+        .map((controlParams) => {
+          const factory = controlFactory(controlParams);
+          return factory(controlParams, this.vis.API);
+        })
     );
   }
 
@@ -73,12 +73,12 @@ class VisController {
     });
 
     const newFilters = stagedControls
-    .filter((control) => {
-      return control.hasKbnFilter();
-    })
-    .map((control) => {
-      return control.getKbnFilter();
-    });
+      .filter((control) => {
+        return control.hasKbnFilter();
+      })
+      .map((control) => {
+        return control.getKbnFilter();
+      });
 
     stagedControls.forEach((control) => {
       // to avoid duplicate filters, remove any old filters for control
@@ -108,18 +108,18 @@ class VisController {
     return this.controls.map((control) => {
       return control.hasChanged();
     })
-    .reduce((a, b) => {
-      return a || b;
-    });
+      .reduce((a, b) => {
+        return a || b;
+      });
   }
 
   hasValues() {
     return this.controls.map((control) => {
       return control.hasValue();
     })
-    .reduce((a, b) => {
-      return a || b;
-    });
+      .reduce((a, b) => {
+        return a || b;
+      });
   }
 }
 

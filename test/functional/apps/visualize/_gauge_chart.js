@@ -12,17 +12,17 @@ export default function ({ getService, getPageObjects }) {
     before(function () {
       log.debug('navigateToApp visualize');
       return PageObjects.common.navigateToUrl('visualize', 'new')
-      .then(function () {
-        log.debug('clickGauge');
-        return PageObjects.visualize.clickGauge();
-      })
-      .then(function clickNewSearch() {
-        return PageObjects.visualize.clickNewSearch();
-      })
-      .then(function setAbsoluteRange() {
-        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-        return PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      });
+        .then(function () {
+          log.debug('clickGauge');
+          return PageObjects.visualize.clickGauge();
+        })
+        .then(function clickNewSearch() {
+          return PageObjects.visualize.clickNewSearch();
+        })
+        .then(function setAbsoluteRange() {
+          log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+          return PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        });
     });
 
     describe('gauge chart', function indexPatternCreation() {
@@ -33,9 +33,9 @@ export default function ({ getService, getPageObjects }) {
         // initial metric of "Count" is selected by default
         return retry.try(function tryingForTime() {
           return PageObjects.visualize.getGaugeValue()
-          .then(function (metricValue) {
-            expect(expectedCount).to.eql(metricValue[0].split('\n'));
-          });
+            .then(function (metricValue) {
+              expect(expectedCount).to.eql(metricValue[0].split('\n'));
+            });
         });
       });
 

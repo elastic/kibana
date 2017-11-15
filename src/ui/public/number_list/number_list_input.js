@@ -8,175 +8,175 @@ const VALIDATION_ERROR = 'numberListRangeAndOrder';
 const DIRECTIVE_ATTR = 'kbn-number-list-input';
 
 uiModules
-.get('kibana')
-.directive('kbnNumberListInput', function ($parse) {
-  return {
-    restrict: 'A',
-    require: ['ngModel', '^kbnNumberList'],
-    link: function ($scope, $el, attrs, controllers) {
-      const ngModelCntr = controllers[0];
-      const numberListCntr = controllers[1];
+  .get('kibana')
+  .directive('kbnNumberListInput', function ($parse) {
+    return {
+      restrict: 'A',
+      require: ['ngModel', '^kbnNumberList'],
+      link: function ($scope, $el, attrs, controllers) {
+        const ngModelCntr = controllers[0];
+        const numberListCntr = controllers[1];
 
-      const $setModel = $parse(attrs.ngModel).assign;
-      const $repeater = $el.closest('[ng-repeat]');
+        const $setModel = $parse(attrs.ngModel).assign;
+        const $repeater = $el.closest('[ng-repeat]');
 
-      const handlers = {
-        up: change(add, 1),
-        'shift-up': change(addTenth, 1),
+        const handlers = {
+          up: change(add, 1),
+          'shift-up': change(addTenth, 1),
 
-        down: change(add, -1),
-        'shift-down': change(addTenth, -1),
+          down: change(add, -1),
+          'shift-down': change(addTenth, -1),
 
-        tab: go('next'),
-        'shift-tab': go('prev'),
+          tab: go('next'),
+          'shift-tab': go('prev'),
 
-        'shift-enter': numberListCntr.add,
+          'shift-enter': numberListCntr.add,
 
-        backspace: removeIfEmpty,
-        delete: removeIfEmpty
-      };
-
-      function removeIfEmpty(event) {
-        if (!ngModelCntr.$viewValue) {
-          $get('prev').focus();
-          numberListCntr.remove($scope.$index);
-          event.preventDefault();
-        }
-
-        return false;
-      }
-
-      function $get(dir) {
-        return $repeater[dir]().find('[' + DIRECTIVE_ATTR + ']');
-      }
-
-      function go(dir) {
-        return function () {
-          const $to = $get(dir);
-          if ($to.size()) $to.focus();
-          else return false;
+          backspace: removeIfEmpty,
+          delete: removeIfEmpty
         };
-      }
 
-      function idKey(event) {
-        const id = [];
-        if (event.ctrlKey) id.push('ctrl');
-        if (event.shiftKey) id.push('shift');
-        if (event.metaKey) id.push('meta');
-        if (event.altKey) id.push('alt');
-        id.push(keyMap[event.keyCode] || event.keyCode);
-        return id.join('-');
-      }
-
-      function add(n, val) {
-        return parse(val + n);
-      }
-
-      function addTenth(n, val, str) {
-        let int = Math.floor(val);
-        let dec = parseInt(str.split('.')[1] || 0, 10);
-        dec = dec + parseInt(n, 10);
-
-        if (dec < 0 || dec > 9) {
-          int += Math.floor(dec / 10);
-          if (dec < 0) {
-            dec = 10 + (dec % 10);
-          } else {
-            dec = dec % 10;
+        function removeIfEmpty(event) {
+          if (!ngModelCntr.$viewValue) {
+            $get('prev').focus();
+            numberListCntr.remove($scope.$index);
+            event.preventDefault();
           }
+
+          return false;
         }
 
-        return parse(int + '.' + dec);
-      }
-
-      function change(using, mod) {
-        return function () {
-          const str = String(ngModelCntr.$viewValue);
-          const val = parse(str);
-          if (val === INVALID) return;
-
-          const next = using(mod, val, str);
-          if (next === INVALID) return;
-
-          $el.val(next);
-          ngModelCntr.$setViewValue(next);
-        };
-      }
-
-      function onKeydown(event) {
-        const handler = handlers[idKey(event)];
-        if (!handler) return;
-
-        if (handler(event) !== false) {
-          event.preventDefault();
+        function $get(dir) {
+          return $repeater[dir]().find('[' + DIRECTIVE_ATTR + ']');
         }
 
-        $scope.$apply();
-      }
+        function go(dir) {
+          return function () {
+            const $to = $get(dir);
+            if ($to.size()) $to.focus();
+            else return false;
+          };
+        }
 
-      $el.on('keydown', onKeydown);
-      $scope.$on('$destroy', function () {
-        $el.off('keydown', onKeydown);
-      });
+        function idKey(event) {
+          const id = [];
+          if (event.ctrlKey) id.push('ctrl');
+          if (event.shiftKey) id.push('shift');
+          if (event.metaKey) id.push('meta');
+          if (event.altKey) id.push('alt');
+          id.push(keyMap[event.keyCode] || event.keyCode);
+          return id.join('-');
+        }
 
-      function parse(viewValue) {
-        let num = viewValue;
+        function add(n, val) {
+          return parse(val + n);
+        }
 
-        if (typeof num !== 'number' || isNaN(num)) {
+        function addTenth(n, val, str) {
+          let int = Math.floor(val);
+          let dec = parseInt(str.split('.')[1] || 0, 10);
+          dec = dec + parseInt(n, 10);
+
+          if (dec < 0 || dec > 9) {
+            int += Math.floor(dec / 10);
+            if (dec < 0) {
+              dec = 10 + (dec % 10);
+            } else {
+              dec = dec % 10;
+            }
+          }
+
+          return parse(int + '.' + dec);
+        }
+
+        function change(using, mod) {
+          return function () {
+            const str = String(ngModelCntr.$viewValue);
+            const val = parse(str);
+            if (val === INVALID) return;
+
+            const next = using(mod, val, str);
+            if (next === INVALID) return;
+
+            $el.val(next);
+            ngModelCntr.$setViewValue(next);
+          };
+        }
+
+        function onKeydown(event) {
+          const handler = handlers[idKey(event)];
+          if (!handler) return;
+
+          if (handler(event) !== false) {
+            event.preventDefault();
+          }
+
+          $scope.$apply();
+        }
+
+        $el.on('keydown', onKeydown);
+        $scope.$on('$destroy', function () {
+          $el.off('keydown', onKeydown);
+        });
+
+        function parse(viewValue) {
+          let num = viewValue;
+
+          if (typeof num !== 'number' || isNaN(num)) {
           // parse non-numbers
-          num = String(viewValue || 0).trim();
-          if (!FLOATABLE.test(num)) return INVALID;
+            num = String(viewValue || 0).trim();
+            if (!FLOATABLE.test(num)) return INVALID;
 
-          num = parseFloat(num);
-          if (isNaN(num)) return INVALID;
-        }
-
-        const range = numberListCntr.range;
-        if (!range.within(num)) return INVALID;
-
-        if (numberListCntr.validateAscOrder && $scope.$index > 0) {
-          const i = $scope.$index - 1;
-          const list = numberListCntr.getList();
-          const prev = list[i];
-          if (num <= prev) return INVALID;
-        }
-
-        return num;
-      }
-
-      $scope.$watchMulti([
-        '$index',
-        {
-          fn: $scope.$watchCollection,
-          get: function () {
-            return numberListCntr.getList();
+            num = parseFloat(num);
+            if (isNaN(num)) return INVALID;
           }
+
+          const range = numberListCntr.range;
+          if (!range.within(num)) return INVALID;
+
+          if (numberListCntr.validateAscOrder && $scope.$index > 0) {
+            const i = $scope.$index - 1;
+            const list = numberListCntr.getList();
+            const prev = list[i];
+            if (num <= prev) return INVALID;
+          }
+
+          return num;
         }
-      ], function () {
-        const valid = parse(ngModelCntr.$viewValue) !== INVALID;
-        ngModelCntr.$setValidity(VALIDATION_ERROR, valid);
-      });
 
-      function validate(then) {
-        return function (input) {
-          let value = parse(input);
-          const valid = value !== INVALID;
-          value = valid ? value : input;
+        $scope.$watchMulti([
+          '$index',
+          {
+            fn: $scope.$watchCollection,
+            get: function () {
+              return numberListCntr.getList();
+            }
+          }
+        ], function () {
+          const valid = parse(ngModelCntr.$viewValue) !== INVALID;
           ngModelCntr.$setValidity(VALIDATION_ERROR, valid);
-          then && then(input, value);
-          return value;
-        };
-      }
+        });
 
-      ngModelCntr.$parsers.push(validate());
-      ngModelCntr.$formatters.push(validate(function (input, value) {
-        if (input !== value) $setModel($scope, value);
-      }));
+        function validate(then) {
+          return function (input) {
+            let value = parse(input);
+            const valid = value !== INVALID;
+            value = valid ? value : input;
+            ngModelCntr.$setValidity(VALIDATION_ERROR, valid);
+            then && then(input, value);
+            return value;
+          };
+        }
 
-      if (parse(ngModelCntr.$viewValue) === INVALID) {
-        ngModelCntr.$setTouched();
+        ngModelCntr.$parsers.push(validate());
+        ngModelCntr.$formatters.push(validate(function (input, value) {
+          if (input !== value) $setModel($scope, value);
+        }));
+
+        if (parse(ngModelCntr.$viewValue) === INVALID) {
+          ngModelCntr.$setTouched();
+        }
       }
-    }
-  };
-});
+    };
+  });
 

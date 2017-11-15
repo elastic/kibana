@@ -26,12 +26,12 @@ export default function downloadNodeBuilds(grunt) {
         throw new Error(`${shaSumsUri} failed with a ${resp.statusCode} response`);
       }
       payload
-      .toString('utf8')
-      .split('\n')
-      .forEach(line => {
-        const [sha, platform] = line.split('  ');
-        shaSums[platform] = sha;
-      });
+        .toString('utf8')
+        .split('\n')
+        .forEach(line => {
+          const [sha, platform] = line.split('  ');
+          shaSums[platform] = sha;
+        });
     });
   };
 
@@ -66,13 +66,13 @@ export default function downloadNodeBuilds(grunt) {
     }
 
     return wreckGetAsync(platform.nodeUrl)
-    .then(([resp, payload]) => {
-      if (resp.statusCode !== 200) {
-        throw new Error(`${platform.nodeUrl} failed with a ${resp.statusCode} response`);
-      }
-      return payload;
-    })
-    .then(payload => writeFileAsync(filePath, payload));
+      .then(([resp, payload]) => {
+        if (resp.statusCode !== 200) {
+          throw new Error(`${platform.nodeUrl} failed with a ${resp.statusCode} response`);
+        }
+        return payload;
+      })
+      .then(payload => writeFileAsync(filePath, payload));
 
   };
 
@@ -108,8 +108,8 @@ export default function downloadNodeBuilds(grunt) {
   grunt.registerTask('_build:downloadNodeBuilds', function () {
     const done = this.async();
     getShaSums()
-    .then(() => map(platforms, start))
-    .nodeify(done);
+      .then(() => map(platforms, start))
+      .nodeify(done);
   });
 
   const extractNodeBuild = async (platform) => {
@@ -127,7 +127,7 @@ export default function downloadNodeBuilds(grunt) {
     });
   };
 
-  const extract = async(platform) => {
+  const extract = async (platform) => {
     const file = basename(platform.nodeUrl);
     const downloadDir = join(platform.nodeDir, '..');
     const filePath = resolve(downloadDir, file);

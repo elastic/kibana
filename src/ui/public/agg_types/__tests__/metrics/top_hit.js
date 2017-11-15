@@ -305,50 +305,50 @@ describe('Top hit metric', function () {
           result: null
         }
       ]
-      .forEach(agg => {
-        it(`should return the result of the ${agg.type} aggregation over the last doc - ${agg.description}`, function () {
-          const bucket = {
-            '1': {
-              hits: {
-                hits: [
-                  {
-                    _source: {
-                      bytes: agg.data
+        .forEach(agg => {
+          it(`should return the result of the ${agg.type} aggregation over the last doc - ${agg.description}`, function () {
+            const bucket = {
+              '1': {
+                hits: {
+                  hits: [
+                    {
+                      _source: {
+                        bytes: agg.data
+                      }
                     }
-                  }
-                ]
+                  ]
+                }
               }
-            }
-          };
+            };
 
-          init({ field: 'bytes', aggregate: agg.type });
-          expect(topHitMetric.getValue(aggConfig, bucket)).to.eql(agg.result);
-        });
+            init({ field: 'bytes', aggregate: agg.type });
+            expect(topHitMetric.getValue(aggConfig, bucket)).to.eql(agg.result);
+          });
 
-        it(`should return the result of the ${agg.type} aggregation over the last X docs - ${agg.description}`, function () {
-          const bucket = {
-            '1': {
-              hits: {
-                hits: [
-                  {
-                    _source: {
-                      bytes: _.dropRight(agg.data, 1)
+          it(`should return the result of the ${agg.type} aggregation over the last X docs - ${agg.description}`, function () {
+            const bucket = {
+              '1': {
+                hits: {
+                  hits: [
+                    {
+                      _source: {
+                        bytes: _.dropRight(agg.data, 1)
+                      }
+                    },
+                    {
+                      _source: {
+                        bytes: _.last(agg.data)
+                      }
                     }
-                  },
-                  {
-                    _source: {
-                      bytes: _.last(agg.data)
-                    }
-                  }
-                ]
+                  ]
+                }
               }
-            }
-          };
+            };
 
-          init({ field: 'bytes', aggregate: agg.type });
-          expect(topHitMetric.getValue(aggConfig, bucket)).to.eql(agg.result);
+            init({ field: 'bytes', aggregate: agg.type });
+            expect(topHitMetric.getValue(aggConfig, bucket)).to.eql(agg.result);
+          });
         });
-      });
     });
   });
 });

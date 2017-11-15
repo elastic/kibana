@@ -244,36 +244,36 @@ export default function ({ getService, getPageObjects }) {
       it('should zoom in to level 10', function () {
         // 6
         return PageObjects.visualize.clickMapZoomIn()
-        .then(function () {
+          .then(function () {
           // 7
-          return PageObjects.visualize.clickMapZoomIn();
-        })
-        .then(function () {
+            return PageObjects.visualize.clickMapZoomIn();
+          })
+          .then(function () {
           // 8
-          return PageObjects.visualize.clickMapZoomIn();
-        })
-        .then(function () {
+            return PageObjects.visualize.clickMapZoomIn();
+          })
+          .then(function () {
           // 9
-          return PageObjects.visualize.clickMapZoomIn();
-        })
-        .then(function () {
-          return retry.try(function tryingForTime() {
-            return PageObjects.visualize.getMapZoomInEnabled()
-            .then(function (enabled) {
-              expect(enabled).to.be(true);
+            return PageObjects.visualize.clickMapZoomIn();
+          })
+          .then(function () {
+            return retry.try(function tryingForTime() {
+              return PageObjects.visualize.getMapZoomInEnabled()
+                .then(function (enabled) {
+                  expect(enabled).to.be(true);
+                });
             });
-          });
-        })
-        .then(function () {
-          return PageObjects.visualize.clickMapZoomIn();
-        })
-        .then(function () {
-          return PageObjects.visualize.getMapZoomInEnabled();
-        })
+          })
+          .then(function () {
+            return PageObjects.visualize.clickMapZoomIn();
+          })
+          .then(function () {
+            return PageObjects.visualize.getMapZoomInEnabled();
+          })
         // now we're at level 10 and zoom out should be disabled
-        .then(function (enabled) {
-          expect(enabled).to.be(false);
-        });
+          .then(function (enabled) {
+            expect(enabled).to.be(false);
+          });
       });
 
       it('wms switch should change allow to zoom in further', async function () {

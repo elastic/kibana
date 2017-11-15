@@ -33,15 +33,15 @@ export function FilterBarLibMapRangeProvider(Promise, courier) {
     }
 
     return courier
-    .indexPatterns
-    .get(filter.meta.index)
-    .then(getParams)
-    .catch((error) => {
-      if (error instanceof SavedObjectNotFound) {
-        return getParams();
-      }
-      throw error;
-    });
+      .indexPatterns
+      .get(filter.meta.index)
+      .then(getParams)
+      .catch((error) => {
+        if (error instanceof SavedObjectNotFound) {
+          return getParams();
+        }
+        throw error;
+      });
 
   };
 }

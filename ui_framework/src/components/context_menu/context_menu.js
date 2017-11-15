@@ -172,7 +172,7 @@ export class KuiContextMenu extends Component {
         name,
         icon,
         onClick,
-        ...rest,
+        ...rest
       } = item;
 
       const onClickHandler = panel
@@ -240,7 +240,7 @@ export class KuiContextMenu extends Component {
       panels, // eslint-disable-line no-unused-vars
       className,
       initialPanelId, // eslint-disable-line no-unused-vars
-      ...rest,
+      ...rest
     } = this.props;
 
     const incomingPanel = this.renderPanel(this.state.incomingPanelId, 'in');

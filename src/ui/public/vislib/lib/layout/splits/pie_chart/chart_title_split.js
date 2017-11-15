@@ -15,11 +15,11 @@ export function VislibLibLayoutSplitsPieChartChartTitleSplitProvider() {
 
       if (!data.slices) {
         div.selectAll('.chart-title')
-        .append('div')
-        .data(function (d) {
-          return d.rows ? d.rows : d.columns;
-        })
-        .enter()
+          .append('div')
+          .data(function (d) {
+            return d.rows ? d.rows : d.columns;
+          })
+          .enter()
           .append('div')
           .attr('class', 'chart-title');
 
