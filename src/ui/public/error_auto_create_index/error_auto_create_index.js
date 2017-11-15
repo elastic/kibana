@@ -7,7 +7,7 @@ import './error_auto_create_index.less';
 import template from './error_auto_create_index.html';
 
 uiRoutes
-.when('/error/action.auto_create_index', { template });
+  .when('/error/action.auto_create_index', { template });
 
 export function ErrorAutoCreateIndexProvider(Private, Promise) {
   const kbnUrl = Private(KbnUrlProvider);
