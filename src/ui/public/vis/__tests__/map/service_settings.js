@@ -139,13 +139,13 @@ describe('service_settings (FKA tilemaptest)', function () {
         });
       }
 
-      it('accepts an object', async() => {
+      it('accepts an object', async () => {
         serviceSettings.addQueryParams({ foo: 'bar' });
         tilemapSettings = await serviceSettings.getTMSService();
         assertQuery({ foo: 'bar' });
       });
 
-      it('merged additions with previous values', async() => {
+      it('merged additions with previous values', async () => {
         // ensure that changes are always additive
         serviceSettings.addQueryParams({ foo: 'bar' });
         serviceSettings.addQueryParams({ bar: 'stool' });
@@ -153,7 +153,7 @@ describe('service_settings (FKA tilemaptest)', function () {
         assertQuery({ foo: 'bar', bar: 'stool' });
       });
 
-      it('overwrites conflicting previous values', async() => {
+      it('overwrites conflicting previous values', async () => {
         // ensure that conflicts are overwritten
         serviceSettings.addQueryParams({ foo: 'bar' });
         serviceSettings.addQueryParams({ bar: 'stool' });
@@ -162,7 +162,7 @@ describe('service_settings (FKA tilemaptest)', function () {
         assertQuery({ foo: 'tstool', bar: 'stool' });
       });
 
-      it('when overridden, should continue to work', async() => {
+      it('when overridden, should continue to work', async () => {
         mapsConfig.manifestServiceUrl = manifestUrl2;
         serviceSettings.addQueryParams({ foo: 'bar' });
         tilemapSettings = await serviceSettings.getTMSService();

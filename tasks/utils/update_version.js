@@ -61,72 +61,72 @@ function updateVersion(version, expr) {
   const parts = _.chain(version.split('.'))
 
   // ensure that their are three pieces, either x.x.x or x.x.x-y
-  .tap(function (versionNumbers) {
-    if (versionNumbers.length !== 3) {
-      throw new Error('Version number "' + version + '" should have two dots, like 4.1.0');
-    }
-  })
+    .tap(function (versionNumbers) {
+      if (versionNumbers.length !== 3) {
+        throw new Error('Version number "' + version + '" should have two dots, like 4.1.0');
+      }
+    })
 
-  // describe all of the version parts with a name, parse
-  // the numbers, and extract tag from patch
-  .transform(function (parts, v, i) {
-    const name = versions[i];
+    // describe all of the version parts with a name, parse
+    // the numbers, and extract tag from patch
+    .transform(function (parts, v, i) {
+      const name = versions[i];
 
-    if (name !== 'patch') {
-      parts[name] = _.parseInt(v);
-      return;
-    }
+      if (name !== 'patch') {
+        parts[name] = _.parseInt(v);
+        return;
+      }
 
-    // patch is two parts, a version number and an optional tag
-    v = v.split('-');
-    parts.patch = _.parseInt(v.shift());
-    parts.tag = v.join('-');
-  }, {})
+      // patch is two parts, a version number and an optional tag
+      v = v.split('-');
+      parts.patch = _.parseInt(v.shift());
+      parts.tag = v.join('-');
+    }, {})
 
-  // sanity check
-  .tap(function (parts) {
+    // sanity check
+    .tap(function (parts) {
 
-    let valid = true;
-    valid = valid && _.isNumber(parts.major);
-    valid = valid && _.isNumber(parts.minor);
-    valid = valid && _.isNumber(parts.patch);
-    valid = valid && _.isString(parts.tag);
+      let valid = true;
+      valid = valid && _.isNumber(parts.major);
+      valid = valid && _.isNumber(parts.minor);
+      valid = valid && _.isNumber(parts.patch);
+      valid = valid && _.isString(parts.tag);
 
-    if (!valid) {
-      throw new Error('Unable to parse version "' + version + '"');
-    }
+      if (!valid) {
+        throw new Error('Unable to parse version "' + version + '"');
+      }
 
-  })
+    })
 
-  // perform the change on parts
-  .tap(function (parts) {
-    if (change.name === 'tag' && change.val && !parts.tag) {
+    // perform the change on parts
+    .tap(function (parts) {
+      if (change.name === 'tag' && change.val && !parts.tag) {
       // special operation that doesn't follow the natural rules
-      parts.minor += 1;
-      parts.patch = 0;
-      parts.tag = change.val;
-      return;
-    }
+        parts.minor += 1;
+        parts.patch = 0;
+        parts.tag = change.val;
+        return;
+      }
 
-    // since the version parts are in order from left to right, the update
-    // reset all of the values to the right of it:
-    //
-    // 0.12.3-beta -> 1.0.0 (increment major, reset everything else)
+      // since the version parts are in order from left to right, the update
+      // reset all of the values to the right of it:
+      //
+      // 0.12.3-beta -> 1.0.0 (increment major, reset everything else)
 
-    // primary update
-    if (change.name === 'tag') {
-      parts[change.name] = change.val;
-    } else {
-      parts[change.name] = (change.val == null) ? parts[change.name] + 1 : change.val;
-    }
+      // primary update
+      if (change.name === 'tag') {
+        parts[change.name] = change.val;
+      } else {
+        parts[change.name] = (change.val == null) ? parts[change.name] + 1 : change.val;
+      }
 
-    // properties that are zero-d by the previous update
-    const emptyUpdates = versions.slice(versions.indexOf(change.name) + 1);
-    while (emptyUpdates.length) {
-      parts[emptyUpdates.shift()] = '';
-    }
-  })
-  .value();
+      // properties that are zero-d by the previous update
+      const emptyUpdates = versions.slice(versions.indexOf(change.name) + 1);
+      while (emptyUpdates.length) {
+        parts[emptyUpdates.shift()] = '';
+      }
+    })
+    .value();
 
   return (parts.major || 0) + '.' +
          (parts.minor || 0) + '.' +

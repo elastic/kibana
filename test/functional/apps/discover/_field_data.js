@@ -28,44 +28,44 @@ export default function ({ getService, getPageObjects }) {
       it('search php should show the correct hit count', function () {
         const expectedHitCount = '445';
         return PageObjects.discover.query('php')
-        .then(function () {
-          return retry.try(function tryingForTime() {
-            return PageObjects.discover.getHitCount()
-            .then(function compareData(hitCount) {
-              expect(hitCount).to.be(expectedHitCount);
+          .then(function () {
+            return retry.try(function tryingForTime() {
+              return PageObjects.discover.getHitCount()
+                .then(function compareData(hitCount) {
+                  expect(hitCount).to.be(expectedHitCount);
+                });
             });
           });
-        });
       });
 
       it('the search term should be highlighted in the field data', function () {
         // marks is the style that highlights the text in yellow
         return PageObjects.discover.getMarks()
-        .then(function (marks) {
-          expect(marks.length).to.be(50);
-          expect(marks.indexOf('php')).to.be(0);
-        });
+          .then(function (marks) {
+            expect(marks.length).to.be(50);
+            expect(marks.indexOf('php')).to.be(0);
+          });
       });
 
       it('search type:apache should show the correct hit count', function () {
         const expectedHitCount = '11,156';
         return PageObjects.discover.query('type:apache')
-        .then(function () {
-          return retry.try(function tryingForTime() {
-            return PageObjects.discover.getHitCount()
-            .then(function compareData(hitCount) {
-              expect(hitCount).to.be(expectedHitCount);
+          .then(function () {
+            return retry.try(function tryingForTime() {
+              return PageObjects.discover.getHitCount()
+                .then(function compareData(hitCount) {
+                  expect(hitCount).to.be(expectedHitCount);
+                });
             });
           });
-        });
       });
 
       it('doc view should show Time and _source columns', function () {
         const expectedHeader = 'Time _source';
         return PageObjects.discover.getDocHeader()
-        .then(function (header) {
-          expect(header).to.be(expectedHeader);
-        });
+          .then(function (header) {
+            expect(header).to.be(expectedHeader);
+          });
       });
 
       it('doc view should show oldest time first', function () {
@@ -114,9 +114,9 @@ export default function ({ getService, getPageObjects }) {
           + ' 2014, 16:00:51.000, November 27th 2014, 16:28:42.000 relatedContent.article:published_time:July 26th'
           + ' 2007, 19:42:30.000, December 13th 2007, 20:19:35.000';
         return PageObjects.discover.getDocTableIndex(1)
-        .then(function (rowData) {
-          expect(rowData).to.be(ExpectedDoc);
-        });
+          .then(function (rowData) {
+            expect(rowData).to.be(ExpectedDoc);
+          });
       });
 
       it('doc view should sort ascending', function () {
@@ -194,35 +194,35 @@ export default function ({ getService, getPageObjects }) {
           + ' 01:03:42.000, December 13th 2006, 20:12:04.000, April 4th 2008, 23:00:00.000, April 25th 2008,'
           + ' 14:26:41.000';
         return PageObjects.discover.clickDocSortDown()
-        .then(function () {
+          .then(function () {
           // we don't technically need this sleep here because the tryForTime will retry and the
           // results will match on the 2nd or 3rd attempt, but that debug output is huge in this
           // case and it can be avoided with just a few seconds sleep.
-          return PageObjects.common.sleep(2000);
-        })
-        .then(function () {
-          return retry.try(function tryingForTime() {
-            return PageObjects.discover.getDocTableIndex(1)
-            .then(function (rowData) {
-              expect(rowData).to.be(ExpectedDoc);
+            return PageObjects.common.sleep(2000);
+          })
+          .then(function () {
+            return retry.try(function tryingForTime() {
+              return PageObjects.discover.getDocTableIndex(1)
+                .then(function (rowData) {
+                  expect(rowData).to.be(ExpectedDoc);
+                });
             });
           });
-        });
       });
 
 
       it('a bad syntax query should show an error message', function () {
         const expectedError = 'Discover: Failed to parse query [xxx(yyy]';
         return PageObjects.discover.query('xxx(yyy')
-        .then(function () {
-          return PageObjects.header.getToastMessage();
-        })
-        .then(function (toastMessage) {
-          expect(toastMessage).to.contain(expectedError);
-        })
-        .then(function () {
-          return PageObjects.header.clickToastOK();
-        });
+          .then(function () {
+            return PageObjects.header.getToastMessage();
+          })
+          .then(function (toastMessage) {
+            expect(toastMessage).to.contain(expectedError);
+          })
+          .then(function () {
+            return PageObjects.header.clickToastOK();
+          });
       });
     });
   });

@@ -13,21 +13,21 @@ export function initVerboseRemoteLogging(log, server) {
     }
 
     return original.call(server, path, requestData, pathParts)
-    .then(result => {
-      log.verbose(`[remote]  < %s %s ${green('OK')}`, httpMethod, url);
-      return result;
-    })
-    .catch(error => {
-      let message;
-      try {
-        message = JSON.parse(error.response.data).value.message;
-      } catch (err) {
-        message = err.message;
-      }
+      .then(result => {
+        log.verbose(`[remote]  < %s %s ${green('OK')}`, httpMethod, url);
+        return result;
+      })
+      .catch(error => {
+        let message;
+        try {
+          message = JSON.parse(error.response.data).value.message;
+        } catch (err) {
+          message = err.message;
+        }
 
-      log.verbose(`[remote]  < %s %s ${magenta('ERR')} %j`, httpMethod, url, message.split(/\r?\n/)[0]);
-      throw error;
-    });
+        log.verbose(`[remote]  < %s %s ${magenta('ERR')} %j`, httpMethod, url, message.split(/\r?\n/)[0]);
+        throw error;
+      });
   };
 
   server._get = wrap(server._get, 'GET');

@@ -55,16 +55,16 @@ export class PhraseFilterManager extends FilterManager {
     // bool filter - multiple phrase filters
     if (_.has(kbnFilter, 'query.bool.should')) {
       return _.get(kbnFilter, 'query.bool.should')
-      .map((kbnFilter) => {
-        return this._getValueFromFilter(kbnFilter);
-      })
-      .filter((value) => {
-        if (value) {
-          return true;
-        }
-        return false;
-      })
-      .join(this.delimiter);
+        .map((kbnFilter) => {
+          return this._getValueFromFilter(kbnFilter);
+        })
+        .filter((value) => {
+          if (value) {
+            return true;
+          }
+          return false;
+        })
+        .join(this.delimiter);
     }
 
     // scripted field filter

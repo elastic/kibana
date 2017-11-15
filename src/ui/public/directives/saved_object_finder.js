@@ -263,14 +263,14 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
 
         prevSearch = filter;
         self.service.find(filter)
-        .then(function (hits) {
+          .then(function (hits) {
           // ensure that we don't display old results
           // as we can't really cancel requests
-          if (currentFilter === filter) {
-            self.hitCount = hits.total;
-            self.hits = _.sortBy(hits.hits, 'title');
-          }
-        });
+            if (currentFilter === filter) {
+              self.hitCount = hits.total;
+              self.hits = _.sortBy(hits.hits, 'title');
+            }
+          });
       }
     }
   };

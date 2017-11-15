@@ -127,13 +127,13 @@ describe('tabifyAggResponse Integration', function () {
     // check for an empty cell
     function expectEmpty(val) {
       expect(val)
-      .to.be('');
+        .to.be('');
     }
 
     // check for an OS term
     function expectOS(val) {
       expect(val)
-      .to.match(/^(win|mac|linux)$/);
+        .to.match(/^(win|mac|linux)$/);
     }
 
     // check for something like an average bytes result

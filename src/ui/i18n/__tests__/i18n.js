@@ -206,21 +206,21 @@ describe('ui/i18n module', function () {
 
 function checkTranslations(expectedTranslations, languageTags, i18nObj) {
   return i18nObj.getTranslations(...languageTags)
-  .then(function (actualTranslations) {
-    expect(_.isEqual(actualTranslations, expectedTranslations)).to.be(true);
-  });
+    .then(function (actualTranslations) {
+      expect(_.isEqual(actualTranslations, expectedTranslations)).to.be(true);
+    });
 }
 
 function checkAllTranslations(expectedTranslations, i18nObj) {
   return i18nObj.getAllTranslations()
-  .then(function (actualTranslations) {
-    expect(_.isEqual(actualTranslations, expectedTranslations)).to.be(true);
-  });
+    .then(function (actualTranslations) {
+      expect(_.isEqual(actualTranslations, expectedTranslations)).to.be(true);
+    });
 }
 
 function checkTranslationsForDefaultLocale(expectedTranslations, i18nObj) {
   return i18nObj.getTranslationsForDefaultLocale()
-  .then(function (actualTranslations) {
-    expect(_.isEqual(actualTranslations, expectedTranslations)).to.be(true);
-  });
+    .then(function (actualTranslations) {
+      expect(_.isEqual(actualTranslations, expectedTranslations)).to.be(true);
+    });
 }

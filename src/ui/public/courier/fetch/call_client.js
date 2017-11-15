@@ -47,10 +47,10 @@ export function CallClientProvider(Private, Promise, es) {
             return responses[index];
         }
       })
-      .then(
-        (res) => defer.resolve(res),
-        (err) => defer.reject(err)
-      );
+        .then(
+          (res) => defer.resolve(res),
+          (err) => defer.reject(err)
+        );
     };
 
 
@@ -94,52 +94,52 @@ export function CallClientProvider(Private, Promise, es) {
         .then(value => ({ resolved: value }))
         .catch(error => ({ rejected: error }));
     })
-    .then(function (results) {
-      const requestsWithFetchParams = [];
-      // Gather the fetch param responses from all the successful requests.
-      results.forEach((result, index) => {
-        if (result.resolved) {
-          requestsWithFetchParams.push(result.resolved);
-        } else {
-          const request = requestsToFetch[index];
-          request.handleFailure(result.rejected);
-          requestsToFetch[index] = undefined;
-        }
-      });
-      // The index of the request inside requestsToFetch determines which response is mapped to it. If a request
-      // won't generate a response, since it already failed, we need to remove the request
-      // from the requestsToFetch array so the indexes will continue to match up to the responses correctly.
-      requestsToFetch = requestsToFetch.filter(request => request !== undefined);
-      return requestFetchParamsToBody(requestsWithFetchParams);
-    })
-    .then(function (body) {
+      .then(function (results) {
+        const requestsWithFetchParams = [];
+        // Gather the fetch param responses from all the successful requests.
+        results.forEach((result, index) => {
+          if (result.resolved) {
+            requestsWithFetchParams.push(result.resolved);
+          } else {
+            const request = requestsToFetch[index];
+            request.handleFailure(result.rejected);
+            requestsToFetch[index] = undefined;
+          }
+        });
+        // The index of the request inside requestsToFetch determines which response is mapped to it. If a request
+        // won't generate a response, since it already failed, we need to remove the request
+        // from the requestsToFetch array so the indexes will continue to match up to the responses correctly.
+        requestsToFetch = requestsToFetch.filter(request => request !== undefined);
+        return requestFetchParamsToBody(requestsWithFetchParams);
+      })
+      .then(function (body) {
       // while the strategy was converting, our request was aborted
-      if (esPromise === ABORTED) {
-        throw ABORTED;
-      }
+        if (esPromise === ABORTED) {
+          throw ABORTED;
+        }
 
-      return (esPromise = es.msearch({ body }));
-    })
-    .then((clientResponse => respond(clientResponse.responses)))
-    .catch(function (error) {
-      if (errorAllowExplicitIndex.test(error)) {
-        return errorAllowExplicitIndex.takeover();
-      }
+        return (esPromise = es.msearch({ body }));
+      })
+      .then((clientResponse => respond(clientResponse.responses)))
+      .catch(function (error) {
+        if (errorAllowExplicitIndex.test(error)) {
+          return errorAllowExplicitIndex.takeover();
+        }
 
-      if (error === ABORTED) respond();
-      else defer.reject(error);
-    });
+        if (error === ABORTED) respond();
+        else defer.reject(error);
+      });
 
     // return our promise, but catch any errors we create and
     // send them to the requests
     return defer.promise
-    .catch(function (err) {
-      requests.forEach(function (req, i) {
-        if (statuses[i] !== ABORTED) {
-          req.handleFailure(err);
-        }
+      .catch(function (err) {
+        requests.forEach(function (req, i) {
+          if (statuses[i] !== ABORTED) {
+            req.handleFailure(err);
+          }
+        });
       });
-    });
 
   }
 
