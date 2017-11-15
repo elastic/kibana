@@ -49,7 +49,7 @@ export default class KbnServer {
       // writes pid file
       pidMixin,
 
-      // find plugins and set this.plugins
+      // find plugins and set this.plugins and this.pluginSpecs
       Plugins.scanMixin,
 
       // tell the config we are done loading plugins
