@@ -43,25 +43,25 @@ export default function (plugin, server) {
   function check() {
     const healthCheck =
       waitForPong(callAdminAsKibanaUser, config.get('elasticsearch.url'))
-      .then(waitForEsVersion)
-      .then(() => ensureNotTribe(callAdminAsKibanaUser))
-      .then(() => patchKibanaIndex({
-        callCluster: callAdminAsKibanaUser,
-        log: (...args) => server.log(...args),
-        indexName: config.get('kibana.index'),
-        kibanaIndexMappingsDsl: server.getKibanaIndexMappingsDsl()
-      }))
-      .then(() => {
-        const tribeUrl = config.get('elasticsearch.tribe.url');
-        if (tribeUrl) {
-          return waitForPong(callDataAsKibanaUser, tribeUrl)
-          .then(() => ensureEsVersion(server, kibanaVersion.get(), callDataAsKibanaUser));
-        }
-      });
+        .then(waitForEsVersion)
+        .then(() => ensureNotTribe(callAdminAsKibanaUser))
+        .then(() => patchKibanaIndex({
+          callCluster: callAdminAsKibanaUser,
+          log: (...args) => server.log(...args),
+          indexName: config.get('kibana.index'),
+          kibanaIndexMappingsDsl: server.getKibanaIndexMappingsDsl()
+        }))
+        .then(() => {
+          const tribeUrl = config.get('elasticsearch.tribe.url');
+          if (tribeUrl) {
+            return waitForPong(callDataAsKibanaUser, tribeUrl)
+              .then(() => ensureEsVersion(server, kibanaVersion.get(), callDataAsKibanaUser));
+          }
+        });
 
     return healthCheck
-    .then(setGreenStatus)
-    .catch(err => plugin.status.red(err));
+      .then(setGreenStatus)
+      .catch(err => plugin.status.red(err));
   }
 
 

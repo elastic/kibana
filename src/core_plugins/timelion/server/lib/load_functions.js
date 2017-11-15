@@ -17,14 +17,14 @@ export default function (directory) {
 
   // Get a list of all directories with an index.js, use the directory name as the key in the object
   const directories = _.chain(glob.sync(path.resolve(__dirname, '../' + directory + '/*/index.js')))
-  .filter(function (file) {
-    return file.match(/__test__/) == null;
-  })
-  .map(function (file) {
-    const parts = file.split('/');
-    const name = parts[parts.length - 2];
-    return getTuple(directory, name);
-  }).value();
+    .filter(function (file) {
+      return file.match(/__test__/) == null;
+    })
+    .map(function (file) {
+      const parts = file.split('/');
+      const name = parts[parts.length - 2];
+      return getTuple(directory, name);
+    }).value();
 
   const functions = _.zipObject(files.concat(directories));
 

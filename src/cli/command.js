@@ -8,7 +8,7 @@ Command.prototype.error = function (err) {
   if (err && err.message) err = err.message;
 
   console.log(
-`
+    `
 ${red(' ERROR ')} ${err}
 
 ${help(this, '  ')}
@@ -20,7 +20,7 @@ ${help(this, '  ')}
 
 Command.prototype.defaultHelp = function () {
   console.log(
-`
+    `
 ${help(this, '  ')}
 
 `

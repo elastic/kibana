@@ -158,7 +158,7 @@ class TagCloud extends EventEmitter {
 
   async _pickPendingJob() {
     return await new Promise((resolve) => {
-      this._setTimeoutId = setTimeout(async() => {
+      this._setTimeoutId = setTimeout(async () => {
         const job = this._pendingJob;
         this._pendingJob = null;
         this._setTimeoutId = null;

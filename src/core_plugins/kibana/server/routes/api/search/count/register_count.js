@@ -13,14 +13,14 @@ export default function registerCount(server) {
         allowNoIndices: false,
         index: req.params.id
       })
-      .then(
-        function (res) {
-          reply({ count: res.count });
-        },
-        function (error) {
-          reply(handleESError(error));
-        }
-      );
+        .then(
+          function (res) {
+            reply({ count: res.count });
+          },
+          function (error) {
+            reply(handleESError(error));
+          }
+        );
     }
   });
 }

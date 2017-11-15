@@ -22,4 +22,4 @@ export default async function (kbnServer, server, config) {
   }
 
   return;
-};
+}

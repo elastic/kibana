@@ -118,7 +118,7 @@ export class KuiPopover extends Component {
       closePopover,
       panelClassName,
       panelPaddingSize,
-      ...rest,
+      ...rest
     } = this.props;
 
     const classes = classNames(

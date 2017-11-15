@@ -26,7 +26,7 @@ describe('Tooltip Positioning', function () {
       height: size.height,
       visibility: 'hidden'
     })
-    .appendTo('body');
+      .appendTo('body');
 
     if ($children) {
       $el.append($children);

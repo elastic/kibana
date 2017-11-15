@@ -348,8 +348,8 @@ Notifier.prototype._showFatal = function (err) {
   if (!$container.size()) {
     $(document.body)
       // in case the app has not completed boot
-    .removeAttr('ng-cloak')
-    .html(fatalSplashScreen);
+      .removeAttr('ng-cloak')
+      .html(fatalSplashScreen);
 
     $container = $('#fatal-splash-screen');
   }

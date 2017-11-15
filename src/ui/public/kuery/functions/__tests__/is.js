@@ -113,7 +113,7 @@ describe('kuery functions', function () {
       it('should throw an error for nodes with unknown or undefined serialize styles', function () {
         const node = nodeTypes.function.buildNode('is', 'response', 200, 'notValid');
         expect(is.toKueryExpression)
-        .withArgs(node).to.throwException(/Cannot serialize "is" function as "notValid"/);
+          .withArgs(node).to.throwException(/Cannot serialize "is" function as "notValid"/);
       });
 
     });

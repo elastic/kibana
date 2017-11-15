@@ -310,7 +310,7 @@ describe('Doc Table', function () {
   describe('kbnTableRow meta', function () {
 
     const $elem = angular.element(
-        '<tr kbn-table-row="row" ' +
+      '<tr kbn-table-row="row" ' +
         'columns="columns" ' +
         'sorting="sorting"' +
         'filtering="filtering"' +
@@ -367,13 +367,13 @@ describe('Doc Table', function () {
       $root.indexPattern = Private(FixturesStubbedLogstashIndexPatternProvider);
 
       $row = $('<tr>')
-      .attr({
-        'kbn-table-row': 'row',
-        'columns': 'columns',
-        'sorting': 'sortin',
-        'filtering': 'filtering',
-        'index-pattern': 'indexPattern',
-      });
+        .attr({
+          'kbn-table-row': 'row',
+          'columns': 'columns',
+          'sorting': 'sortin',
+          'filtering': 'filtering',
+          'index-pattern': 'indexPattern',
+        });
 
       $scope = $root.$new();
       $compile($row)($scope);

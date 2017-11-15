@@ -39,20 +39,20 @@ function StandardAgg(props) {
       </div>
       {
         model.type !== 'count'
-        ? (
-          <div className="vis_editor__item">
-            <label className="vis_editor__label" htmlFor={htmlId('field')}>Field</label>
-            <FieldSelect
-              id={htmlId('field')}
-              fields={fields}
-              type={model.type}
-              restrict={restrict}
-              indexPattern={indexPattern}
-              value={model.field}
-              onChange={handleSelectChange('field')}
-            />
-          </div>
-        ) : null
+          ? (
+            <div className="vis_editor__item">
+              <label className="vis_editor__label" htmlFor={htmlId('field')}>Field</label>
+              <FieldSelect
+                id={htmlId('field')}
+                fields={fields}
+                type={model.type}
+                restrict={restrict}
+                indexPattern={indexPattern}
+                value={model.field}
+                onChange={handleSelectChange('field')}
+              />
+            </div>
+          ) : null
       }
     </AggRow>
   );

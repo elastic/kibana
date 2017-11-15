@@ -121,7 +121,7 @@ describe('es/healthCheck/patchKibanaIndex()', () => {
       } catch (error) {
         expect(error)
           .to.have.property('message')
-            .contain('Your Kibana index is out of date');
+          .contain('Your Kibana index is out of date');
       }
     });
   });
