@@ -8,32 +8,27 @@ import { isVersionCompatible } from './is_version_compatible';
 
 export class PluginSpec {
   /**
-   *  @param {PluginPack} pack - The plugin pack that produced this spec
-   *  @param {Object} opts - the options for this plugin
-   *  @param {String} [opts.id=pkg.name] - the id for this plugin.
-   *  @param {Object} [opts.uiExports] - a mapping of UiExport types
-   *                                   to UI modules or metadata about
-   *                                   the UI module
-   *  @param {Array} [opts.require] - the other plugins that this plugin
-   *                                requires. These plugins must exist and
-   *                                be enabled for this plugin to function.
-   *                                The require'd plugins will also be
-   *                                initialized first, in order to make sure
-   *                                that dependencies provided by these plugins
-   *                                are available
-   *  @param {String} [opts.version=pkg.version] - the version of this plugin
-   *  @param {Function} [opts.init] - A function that will be called to initialize
-   *                                this plugin at the appropriate time.
-   *  @param {Function} [opts.configPrefix=this.id] - The prefix to use for configuration
-   *                                values in the main configuration service
-   *  @param {Function} [opts.config] - A function that produces a configuration
-   *                                  schema using Joi, which is passed as its
-   *                                  first argument.
-   *  @param {String|False} [opts.publicDir=path + '/public']
-   *     - the public directory for this plugin. The final directory must
-   *     have the name "public", though it can be located somewhere besides
-   *     the root of the plugin. Set this to false to disable exposure of a
-   *     public directory
+   * @param {PluginPack} pack The plugin pack that produced this spec
+   * @param {Object} opts the options for this plugin
+   * @param {String} [opts.id=pkg.name] the id for this plugin.
+   * @param {Object} [opts.uiExports] a mapping of UiExport types to
+   * UI modules or metadata about the UI module
+   * @param {Array} [opts.require] the other plugins that this plugin
+   * requires. These plugins must exist and be enabled for this plugin
+   * to function. The require'd plugins will also be initialized first,
+   * in order to make sure that dependencies provided by these plugins
+   * are available
+   * @param {String} [opts.version=pkg.version] the version of this plugin
+   * @param {Function} [opts.init] A function that will be called to initialize
+   * this plugin at the appropriate time.
+   * @param {Function} [opts.configPrefix=this.id] The prefix to use for
+   * configuration values in the main configuration service
+   * @param {Function} [opts.config] A function that produces a configuration
+   * schema using Joi, which is passed as its first argument.
+   * @param {String|False} [opts.publicDir=path + '/public'] the public
+   * directory for this plugin. The final directory must have the name "public",
+   * though it can be located somewhere besides the root of the plugin. Set
+   * this to false to disable exposure of a public directory
    */
   constructor(pack, options) {
     const {
