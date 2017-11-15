@@ -85,9 +85,9 @@ describe('ui settings', () => {
       const { uiSettings, savedObjectsClient, createOrUpgradeSavedConfig } = setup();
       savedObjectsClient.update
         .onFirstCall()
-          .throws(savedObjectsClientErrors.createGenericNotFoundError())
+        .throws(savedObjectsClientErrors.createGenericNotFoundError())
         .onSecondCall()
-          .returns({});
+        .returns({});
 
       await uiSettings.setMany({ foo: 'bar' });
       sinon.assert.calledTwice(savedObjectsClient.update);

@@ -119,7 +119,7 @@ export default async function (kbnServer, server, config) {
         search: req.url.search,
         pathname: pathPrefix + path.slice(0, -1),
       }))
-      .permanent(true);
+        .permanent(true);
     }
   });
 
@@ -169,4 +169,4 @@ export default async function (kbnServer, server, config) {
   kbnServer.mixin(versionCheckMixin);
 
   return kbnServer.mixin(xsrfMixin);
-};
+}

@@ -102,11 +102,11 @@ describe('SimpleEmitter class', function () {
       const four = sinon.spy(incr);
 
       emitter
-      .on('a', one)
-      .on('a', two)
-      .on('a', three)
-      .on('a', four)
-      .emit('a');
+        .on('a', one)
+        .on('a', two)
+        .on('a', three)
+        .on('a', four)
+        .emit('a');
 
       expect(one).to.have.property('callCount', 1);
       expect(one.returned(1)).to.be.ok();
@@ -137,20 +137,20 @@ describe('SimpleEmitter class', function () {
 
     it('applies all arguments except the first', function () {
       emitter
-      .on('a', function (a, b, c) {
-        expect(a).to.be('foo');
-        expect(b).to.be('bar');
-        expect(c).to.be('baz');
-      })
-      .emit('a', 'foo', 'bar', 'baz');
+        .on('a', function (a, b, c) {
+          expect(a).to.be('foo');
+          expect(b).to.be('bar');
+          expect(c).to.be('baz');
+        })
+        .emit('a', 'foo', 'bar', 'baz');
     });
 
     it('uses the SimpleEmitter as the this context', function () {
       emitter
-      .on('a', function () {
-        expect(this).to.be(emitter);
-      })
-      .emit('a');
+        .on('a', function () {
+          expect(this).to.be(emitter);
+        })
+        .emit('a');
     });
   });
 });

@@ -88,7 +88,7 @@ describe('GET /api/saved_objects/{type?}', () => {
     expect(options).to.eql({ perPage: 10, page: 50 });
   });
 
-  it('accepts the query parameter search_fields', async() => {
+  it('accepts the query parameter search_fields', async () => {
     const request = {
       method: 'GET',
       url: '/api/saved_objects?search_fields=title'

@@ -62,10 +62,10 @@ export default function ($el, sequence) {
       switch (event.type) {
         case 'press':
           return Promise.resolve()
-          .then(_.partial(fire, 'keydown', event.key))
-          .then(_.partial(fire, 'keypress', event.key))
-          .then(_.partial(doList, event.events))
-          .then(_.partial(fire, 'keyup', event.key));
+            .then(_.partial(fire, 'keydown', event.key))
+            .then(_.partial(fire, 'keypress', event.key))
+            .then(_.partial(doList, event.events))
+            .then(_.partial(fire, 'keyup', event.key));
 
         case 'wait':
           return Promise.delay(event.ms);
@@ -75,18 +75,18 @@ export default function ($el, sequence) {
             if (!remaining) return Promise.resolve();
             remaining = remaining - 1;
             return Promise.resolve()
-            .then(_.partial(fire, 'keydown', event.key, true))
-            .then(_.partial(fire, 'keypress', event.key, true))
-            .then(_.partial(again, remaining));
+              .then(_.partial(fire, 'keydown', event.key, true))
+              .then(_.partial(fire, 'keypress', event.key, true))
+              .then(_.partial(again, remaining));
           }(event.count));
 
         default:
           throw new TypeError('invalid event type "' + event.type + '"');
       }
     })
-    .then(function () {
-      if (_.size(list) > 1) return doList(list.slice(1));
-    });
+      .then(function () {
+        if (_.size(list) > 1) return doList(list.slice(1));
+      });
   }
 
   function fire(type, key) {

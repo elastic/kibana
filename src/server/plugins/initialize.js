@@ -19,4 +19,4 @@ export default async function (kbnServer, server, config) {
   });
 
   await pluginInit(plugins);
-};
+}
