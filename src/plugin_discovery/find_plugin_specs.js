@@ -46,7 +46,7 @@ export function findPluginSpecs(settings, config = defaultConfig(settings)) {
     ...config.get('plugins.paths').map(createPackAtPath$),
     ...config.get('plugins.scanDirs').map(createPacksInDirectory$)
   )
-  .share();
+    .share();
 
   const extendConfig$ = find$
     // get the specs for each found plugin pack
