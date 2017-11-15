@@ -9,7 +9,7 @@ import {
   keyCodes,
 } from 'ui_framework/services';
 
-export class FullScreenModePlaceholder extends PureComponent {
+export class ExitFullScreenButton extends PureComponent {
 
   onKeyDown = (e) => {
     if (e.keyCode === keyCodes.ESCAPE) {
@@ -30,7 +30,7 @@ export class FullScreenModePlaceholder extends PureComponent {
   render() {
     return (
       <div
-        className="fullScreenModePlaceholder"
+        className="exitFullScreenButton"
       >
         <KuiKeyboardAccessible>
           <div
@@ -50,7 +50,7 @@ export class FullScreenModePlaceholder extends PureComponent {
   }
 }
 
-FullScreenModePlaceholder.propTypes = {
+ExitFullScreenButton.propTypes = {
   onExitFullScreenMode: PropTypes.func.isRequired,
 };
 
