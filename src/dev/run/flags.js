@@ -19,7 +19,7 @@ export function getFlags(argv) {
 
 export function getHelp() {
   return (
-`
+    `
   node ${relative(process.cwd(), process.argv[1], '.js')}
 
   Runs a dev task
