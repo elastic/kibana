@@ -23,13 +23,6 @@ export class UiApp {
       throw new Error('Every app must specify an id');
     }
 
-    if (spec.autoload) {
-      console.warn(
-        `"autoload" (used by ${id} app) is no longer a valid app configuration directive.` +
-        'Use the \`ui/autoload/*\` modules instead.'
-      );
-    }
-
     this._id = id;
     this._main = main;
     this._title = title;
