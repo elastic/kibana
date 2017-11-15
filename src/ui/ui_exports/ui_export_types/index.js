@@ -28,9 +28,10 @@ export {
   devTools,
   docViews,
   hacks,
+  home,
   visTypeEnhancers,
   aliases,
-} from './ui_extensions';
+} from './ui_app_extensions';
 
 export {
   translations,
