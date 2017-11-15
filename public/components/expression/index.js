@@ -61,7 +61,7 @@ export const Expression = compose(
       try {
         // TODO: We should merge the advanced UI input and this into a single validated expression input.
         fromExpression(formState.expression);
-        return undefined;
+        return null;
       } catch (e) {
         return e.message;
       }
