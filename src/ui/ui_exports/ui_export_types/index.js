@@ -52,4 +52,5 @@ export {
 export {
   noParse,
   __globalImportAliases__,
+  __bundleProvider__,
 } from './webpack_customizations';
