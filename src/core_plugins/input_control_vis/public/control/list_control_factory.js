@@ -7,9 +7,10 @@ const termsAgg = (field, size, direction) => {
     size = 1;
   }
   const terms = {
-    'size': size,
-    'order': {
-      '_count': direction
+    size: size,
+    shard_size: 10,
+    order: {
+      _count: direction
     }
   };
   if (field.scripted) {
@@ -52,6 +53,8 @@ export async function listControlFactory(controlParams, kbnApi) {
     indexPattern.fields.byName[controlParams.fieldName],
     _.get(controlParams, 'options.size', 5),
     'desc'));
+  searchSource.set('timeout', '1s');
+  searchSource.set('terminate_after', 100000);
 
   const resp = await searchSource.fetch();
 
