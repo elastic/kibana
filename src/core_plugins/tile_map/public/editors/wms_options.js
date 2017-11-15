@@ -6,6 +6,6 @@ module.directive('wmsOptions', function () {
   return {
     restrict: 'E',
     template: wmsOptionsTemplate,
-    replace: true
+    replace: true,
   };
 });
