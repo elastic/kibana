@@ -68,8 +68,7 @@ export class Plugin {
 
     const register = (server, options, next) => {
       asyncRegister(server, options)
-        .then(() => next())
-        .catch(next);
+        .then(() => next(), next);
     };
 
     register.attributes = { name: id, version: version };
