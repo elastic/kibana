@@ -11,7 +11,7 @@ import 'ui/vis/map/service_settings';
 
 const module = uiModules.get('kibana/region_map', ['kibana']);
 module.controller('KbnRegionMapController', function ($scope, $element, Private, Notifier, getAppState,
-                                                       serviceSettings, config) {
+  serviceSettings, config) {
 
   const DEFAULT_ZOOM_SETTINGS = {
     zoom: 2,

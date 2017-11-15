@@ -67,10 +67,10 @@ describe(filename, function () {
 
   it('should throw an error is passed an unsupported interval', function () {
     return invoke(fn, [], { time: { interval: '2d' } })
-    .then(expect.fail)
-    .catch(function (r) {
-      expect(r).to.be.an('error');
-    });
+      .then(expect.fail)
+      .catch(function (r) {
+        expect(r).to.be.an('error');
+      });
   });
 
   it('should use the configured API key when talking to quandl', function () {

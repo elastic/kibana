@@ -24,22 +24,22 @@ module.directive('patternChecker', function () {
 
       this.validateInstall = () => {
         $http.post(chrome.addBasePath(`/api/kibana/${this.pattern}/_count`))
-        .then(
-          (response) => {
-            this.resultCount = response.data.count;
-          },
-          (error) => {
-            if (error.status === 404) {
-              this.resultCount = 0;
+          .then(
+            (response) => {
+              this.resultCount = response.data.count;
+            },
+            (error) => {
+              if (error.status === 404) {
+                this.resultCount = 0;
+              }
+              else {
+                notify.fatal(error);
+              }
             }
-            else {
-              notify.fatal(error);
-            }
-          }
-        )
-        .then(() => {
-          validationTimeout = $timeout(this.validateInstall, 5000);
-        });
+          )
+          .then(() => {
+            validationTimeout = $timeout(this.validateInstall, 5000);
+          });
       };
 
       $scope.$on('$destroy', () => {

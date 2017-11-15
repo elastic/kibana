@@ -49,14 +49,14 @@ export default class KbnLoggerStringFormat extends LogFormat {
     const msg = data.error ? color('error')(data.error.stack) : color('message')(data.message);
 
     const tags = _(data.tags)
-    .sortBy(function (tag) {
-      if (color(tag) === _.identity) return `2${tag}`;
-      if (_.includes(statuses, tag)) return `0${tag}`;
-      return `1${tag}`;
-    })
-    .reduce(function (s, t) {
-      return s + `[${ color(t)(t) }]`;
-    }, '');
+      .sortBy(function (tag) {
+        if (color(tag) === _.identity) return `2${tag}`;
+        if (_.includes(statuses, tag)) return `0${tag}`;
+        return `1${tag}`;
+      })
+      .reduce(function (s, t) {
+        return s + `[${ color(t)(t) }]`;
+      }, '');
 
     return `${workerType}${type(data.type)} [${time}] ${tags} ${msg}`;
   }

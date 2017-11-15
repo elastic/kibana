@@ -1,6 +1,6 @@
 let i = 0;
 
-// eslint-disable-next-line kibana-custom/no-default-export
+// eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default function AggConfigResult(aggConfig, parent, value, key) {
   this.key = key;
   this.value = value;

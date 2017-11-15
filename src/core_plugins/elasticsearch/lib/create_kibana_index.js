@@ -10,16 +10,16 @@ export default function (server) {
       mappings: server.getKibanaIndexMappingsDsl()
     }
   })
-  .catch(() => {
-    throw new Error(`Unable to create Kibana index "${index}"`);
-  })
-  .then(function () {
-    return callWithInternalUser('cluster.health', {
-      waitForStatus: 'yellow',
-      index: index
-    })
     .catch(() => {
-      throw new Error(`Waiting for Kibana index "${index}" to come online failed.`);
+      throw new Error(`Unable to create Kibana index "${index}"`);
+    })
+    .then(function () {
+      return callWithInternalUser('cluster.health', {
+        waitForStatus: 'yellow',
+        index: index
+      })
+        .catch(() => {
+          throw new Error(`Waiting for Kibana index "${index}" to come online failed.`);
+        });
     });
-  });
 }

@@ -49,10 +49,10 @@ Tooltip.prototype.$get = _.once(function () {
  */
 Tooltip.prototype.$getSizer = _.once(function () {
   return this.$get()
-  .clone()
-  .removeClass(this.tooltipClass)
-  .addClass(this.tooltipSizerClass)
-  .appendTo(document.body);
+    .clone()
+    .removeClass(this.tooltipClass)
+    .addClass(this.tooltipSizerClass)
+    .appendTo(document.body);
 });
 
 /**
@@ -147,10 +147,10 @@ Tooltip.prototype.render = function () {
         if (html) allContents.push({ id: id, html: html, order: order });
 
         const allHtml = _(allContents)
-        .sortBy('order')
-        .pluck('html')
-        .compact()
-        .join('\n');
+          .sortBy('order')
+          .pluck('html')
+          .compact()
+          .join('\n');
 
         if (allHtml) {
           $tooltip.html(allHtml);

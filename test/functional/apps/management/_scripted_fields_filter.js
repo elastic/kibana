@@ -1,3 +1,4 @@
+
 import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
@@ -36,9 +37,9 @@ export default function ({ getService, getPageObjects }) {
       // The expression scripted field has been pre-created in the management esArchiver pack since it is no longer
       // possible to create an expression script via the UI
       await PageObjects.settings
-      .addScriptedField(scriptedPainlessFieldName,
-        'painless', 'number', null, '1', 'doc[\'machine.ram\'].value / (1024 * 1024 * 1024)'
-      );
+        .addScriptedField(scriptedPainlessFieldName,
+          'painless', 'number', null, '1', 'doc[\'machine.ram\'].value / (1024 * 1024 * 1024)'
+        );
 
       // confirm two additional scripted fields were created
       await retry.try(async function () {

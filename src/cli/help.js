@@ -13,7 +13,7 @@ export default function help(command, spaces) {
   const cmdDef = !defCmd ? '' : `=${defCmd._name}`;
 
   return (
-`
+    `
 Usage: ${command._name} [command${cmdDef}] [options]
 
 ${desc}
@@ -58,7 +58,7 @@ function cmdHelp(cmd) {
   if (!cmd) return '';
   return (
 
-`
+    `
 "${cmd._name}" Options:
 
 ${indent(cmd.optionHelp(), 2)}

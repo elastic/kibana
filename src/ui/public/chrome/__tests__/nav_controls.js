@@ -65,8 +65,8 @@ describe('chrome nav controls', function () {
     const $el = compile();
     expect(
       $el.find('.testControl')
-      .toArray()
-      .map(el => el.id)
+        .toArray()
+        .map(el => el.id)
     ).to.eql(['3', '2', '1']);
   });
 });

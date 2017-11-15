@@ -58,9 +58,9 @@ export default new Chainable('movingaverage', {
 
       function toPoint(point, pairSlice) {
         const average = _.chain(pairSlice)
-        .map(1).reduce(function (memo, num) {
-          return (memo + num);
-        }).value() / _window;
+          .map(1).reduce(function (memo, num) {
+            return (memo + num);
+          }).value() / _window;
 
         return [point[0], average];
       }
