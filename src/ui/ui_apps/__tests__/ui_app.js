@@ -2,8 +2,9 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 
 import { UiApp } from '../ui_app';
+import { UiNavLink } from '../../ui_nav_links';
 
-function getMockSpec(extraParams) {
+function createStubUiAppSpec(extraParams) {
   return {
     id: 'uiapp-test',
     main: 'main.js',
@@ -13,109 +14,163 @@ function getMockSpec(extraParams) {
     icon: 'ui_app_test.svg',
     linkToLastSubUrl: true,
     hidden: false,
-    listed: null,
+    listed: false,
     templateName: 'ui_app_test',
+    uses: [
+      'visTypes',
+      'chromeNavControls',
+      'hacks',
+    ],
+    injectVars() {
+      return { foo: 'bar' };
+    },
     ...extraParams
   };
 }
 
-function getMockKbnServer() {
+function createStubKbnServer() {
   return {
     plugins: [],
-    uiExports: {},
+    uiExports: {
+      appExtensions: {
+        hacks: [
+          'plugins/foo/hack'
+        ]
+      }
+    },
     config: {
       get: sinon.stub()
         .withArgs('server.basePath')
         .returns('')
-    }
+    },
+    server: {}
   };
+}
+
+function createUiApp(spec = createStubUiAppSpec(), kbnServer = createStubKbnServer()) {
+  return new UiApp(kbnServer, spec);
 }
 
 describe('UiApp', () => {
   describe('constructor', () => {
     it('throws an exception if an ID is not given', () => {
-      function newAppMissingID() {
-        const spec = {}; // should have id property
-        const kbnServer = getMockKbnServer();
-        const newApp = new UiApp(kbnServer, spec);
-        return newApp;
-      }
-      expect(newAppMissingID).to.throwException();
+      const spec = {}; // should have id property
+      expect(() => createUiApp(spec)).to.throwException();
     });
 
     describe('defaults', () => {
       const spec = { id: 'uiapp-test-defaults' };
-      const kbnServer = getMockKbnServer();
-      let newApp;
-      beforeEach(() => {
-        newApp = new UiApp(kbnServer, spec);
-      });
+      const app = createUiApp(spec);
 
       it('has the ID from the spec', () => {
-        expect(newApp.getId()).to.be(spec.id);
+        expect(app.getId()).to.be(spec.id);
       });
 
-      it('has a navLink', () => {
-        expect(!!newApp.getNavLink()).to.be(true);
+      it('has no plugin ID', () => {
+        expect(app.getPluginId()).to.be(undefined);
       });
 
       it('has a default template name of ui_app', () => {
-        expect(newApp.getTemplateName()).to.be('ui_app');
+        expect(app.getTemplateName()).to.be('ui_app');
       });
 
-      describe('uiApp.getInjectedVars()', () => {
-        it('returns undefined by default', () => {
-          expect(newApp.getInjectedVars()).to.be(undefined);
-        });
+      it('is not hidden', () => {
+        expect(app.isHidden()).to.be(false);
       });
 
-      describe('JSON representation', () => {
-        it('has defaults', () => {
-          expect(JSON.parse(JSON.stringify(newApp))).to.eql({
-            id: spec.id,
-            navLink: {
-              id: 'uiapp-test-defaults',
-              order: 0,
-              url: '/app/uiapp-test-defaults',
-              subUrlBase: '/app/uiapp-test-defaults',
-              linkToLastSubUrl: true,
-              hidden: false,
-              disabled: false,
-              tooltip: ''
-            },
-          });
+      it('is listed', () => {
+        expect(app.isListed()).to.be(true);
+      });
+
+      it('has a navLink', () => {
+        expect(app.getNavLink()).to.be.a(UiNavLink);
+      });
+
+      it('has no injected vars', () => {
+        expect(app.getInjectedVars()).to.be(undefined);
+      });
+
+      it('has an empty modules list', () => {
+        expect(app.getModules()).to.eql([]);
+      });
+
+      it('has a mostly empty JSON representation', () => {
+        expect(JSON.parse(JSON.stringify(app))).to.eql({
+          id: spec.id,
+          navLink: {
+            id: 'uiapp-test-defaults',
+            order: 0,
+            url: '/app/uiapp-test-defaults',
+            subUrlBase: '/app/uiapp-test-defaults',
+            linkToLastSubUrl: true,
+            hidden: false,
+            disabled: false,
+            tooltip: ''
+          },
         });
       });
     });
 
     describe('mock spec', () => {
-      describe('JSON representation', () => {
-        it('has defaults and values from spec', () => {
-          const kbnServer = getMockKbnServer();
-          const spec = getMockSpec();
-          const uiApp = new UiApp(kbnServer, spec);
+      const spec = createStubUiAppSpec();
+      const app = createUiApp(spec);
 
-          expect(JSON.parse(JSON.stringify(uiApp))).to.eql({
-            id: spec.id,
-            title: spec.title,
-            description: spec.description,
-            icon: spec.icon,
-            main: spec.main,
-            linkToLastSubUrl: spec.linkToLastSubUrl,
-            navLink: {
-              id: 'uiapp-test',
-              title: 'UIApp Test',
-              order: 9000,
-              url: '/app/uiapp-test',
-              subUrlBase: '/app/uiapp-test',
-              description: 'Test of UI App Constructor',
-              icon: 'ui_app_test.svg',
-              linkToLastSubUrl: true,
-              hidden: false,
-              disabled: false,
-              tooltip: ''
-            },
-          });
+      it('has the ID from the spec', () => {
+        expect(app.getId()).to.be(spec.id);
+      });
+
+      it('has no plugin ID', () => {
+        expect(app.getPluginId()).to.be(undefined);
+      });
+
+      it('uses the specs template', () => {
+        expect(app.getTemplateName()).to.be(spec.templateName);
+      });
+
+      it('is not hidden', () => {
+        expect(app.isHidden()).to.be(false);
+      });
+
+      it('is also not listed', () => {
+        expect(app.isListed()).to.be(false);
+      });
+
+      it('has no navLink', () => {
+        expect(app.getNavLink()).to.be(undefined);
+      });
+
+      it('has injected vars', () => {
+        expect(app.getInjectedVars()).to.eql({ foo: 'bar' });
+      });
+
+      it('includes main and hack modules', () => {
+        expect(app.getModules()).to.eql([
+          'main.js',
+          'plugins/foo/hack'
+        ]);
+      });
+
+      it('has spec values in JSON representation', () => {
+        expect(JSON.parse(JSON.stringify(app))).to.eql({
+          id: spec.id,
+          title: spec.title,
+          description: spec.description,
+          icon: spec.icon,
+          main: spec.main,
+          linkToLastSubUrl: spec.linkToLastSubUrl,
+          navLink: {
+            id: 'uiapp-test',
+            title: 'UIApp Test',
+            order: 9000,
+            url: '/app/uiapp-test',
+            subUrlBase: '/app/uiapp-test',
+            description: 'Test of UI App Constructor',
+            icon: 'ui_app_test.svg',
+            linkToLastSubUrl: true,
+            hidden: false,
+            disabled: false,
+            tooltip: ''
+          },
         });
       });
     });
@@ -128,7 +183,7 @@ describe('UiApp', () => {
     describe('hidden flag', () => {
       describe('is cast to boolean value', () => {
         it('when undefined', () => {
-          const kbnServer = getMockKbnServer();
+          const kbnServer = createStubKbnServer();
           const spec = {
             id: 'uiapp-test',
           };
@@ -137,7 +192,7 @@ describe('UiApp', () => {
         });
 
         it('when null', () => {
-          const kbnServer = getMockKbnServer();
+          const kbnServer = createStubKbnServer();
           const spec = {
             id: 'uiapp-test',
             hidden: null,
@@ -147,7 +202,7 @@ describe('UiApp', () => {
         });
 
         it('when 0', () => {
-          const kbnServer = getMockKbnServer();
+          const kbnServer = createStubKbnServer();
           const spec = {
             id: 'uiapp-test',
             hidden: 0,
@@ -157,7 +212,7 @@ describe('UiApp', () => {
         });
 
         it('when true', () => {
-          const kbnServer = getMockKbnServer();
+          const kbnServer = createStubKbnServer();
           const spec = {
             id: 'uiapp-test',
             hidden: true,
@@ -167,7 +222,7 @@ describe('UiApp', () => {
         });
 
         it('when 1', () => {
-          const kbnServer = getMockKbnServer();
+          const kbnServer = createStubKbnServer();
           const spec = {
             id: 'uiapp-test',
             hidden: 1,
@@ -181,7 +236,7 @@ describe('UiApp', () => {
     describe('listed flag', () => {
       describe('defaults to the opposite value of hidden', () => {
         it(`when it's null and hidden is true`, () => {
-          const kbnServer = getMockKbnServer();
+          const kbnServer = createStubKbnServer();
           const spec = {
             id: 'uiapp-test',
             hidden: true,
@@ -192,7 +247,7 @@ describe('UiApp', () => {
         });
 
         it(`when it's null and hidden is false`, () => {
-          const kbnServer = getMockKbnServer();
+          const kbnServer = createStubKbnServer();
           const spec = {
             id: 'uiapp-test',
             hidden: false,
@@ -203,7 +258,7 @@ describe('UiApp', () => {
         });
 
         it(`when it's undefined and hidden is false`, () => {
-          const kbnServer = getMockKbnServer();
+          const kbnServer = createStubKbnServer();
           const spec = {
             id: 'uiapp-test',
             hidden: false,
@@ -213,7 +268,7 @@ describe('UiApp', () => {
         });
 
         it(`when it's undefined and hidden is true`, () => {
-          const kbnServer = getMockKbnServer();
+          const kbnServer = createStubKbnServer();
           const spec = {
             id: 'uiapp-test',
             hidden: true,
@@ -224,7 +279,7 @@ describe('UiApp', () => {
       });
 
       it(`is set to true when it's passed as true`, () => {
-        const kbnServer = getMockKbnServer();
+        const kbnServer = createStubKbnServer();
         const spec = {
           id: 'uiapp-test',
           listed: true,
@@ -234,7 +289,7 @@ describe('UiApp', () => {
       });
 
       it(`is set to false when it's passed as false`, () => {
-        const kbnServer = getMockKbnServer();
+        const kbnServer = createStubKbnServer();
         const spec = {
           id: 'uiapp-test',
           listed: false,
@@ -245,25 +300,58 @@ describe('UiApp', () => {
     });
   });
 
-  describe('getModules', () => {
-    it('gets modules from kbnServer', () => {
-      const spec = getMockSpec();
-      const kbnServer = {
-        ...getMockKbnServer(),
-        uiExports: {
-          appExtensions: {
-            chromeNavControls: [ 'plugins/ui_app_test/views/nav_control' ],
-            hacks: [ 'plugins/ui_app_test/hacks/init' ]
-          }
-        }
-      };
+  describe('pluginId', () => {
+    describe('not specified', () => {
+      it('passes the root server and undefined for plugin/optoins to injectVars()', () => {
+        const injectVars = sinon.stub();
+        const kbnServer = createStubKbnServer();
+        createUiApp(createStubUiAppSpec({ injectVars }), kbnServer).getInjectedVars();
 
-      const newApp = new UiApp(kbnServer, spec);
-      expect(newApp.getModules()).to.eql([
-        'main.js',
-        'plugins/ui_app_test/views/nav_control',
-        'plugins/ui_app_test/hacks/init'
-      ]);
+        sinon.assert.calledOnce(injectVars);
+        sinon.assert.calledOn(injectVars, sinon.match.same(undefined));
+        sinon.assert.calledWithExactly(
+          injectVars,
+          // server arg, uses root server because there is no plugin
+          sinon.match.same(kbnServer.server),
+          // options is undefined because there is no plugin
+          sinon.match.same(undefined)
+        );
+      });
+    });
+    describe('matches a kbnServer plugin', () => {
+      it('passes the plugin/server/options from the plugin to injectVars()', () => {
+        const server = {};
+        const options = {};
+        const plugin = {
+          id: 'test plugin id',
+          getServer() {
+            return server;
+          },
+          getOptions() {
+            return options;
+          }
+        };
+
+        const kbnServer = createStubKbnServer();
+        kbnServer.plugins.push(plugin);
+
+        const injectVars = sinon.stub();
+        const spec = createStubUiAppSpec({ pluginId: plugin.id, injectVars });
+        createUiApp(spec, kbnServer).getInjectedVars();
+
+        sinon.assert.calledOnce(injectVars);
+        sinon.assert.calledOn(injectVars, sinon.match.same(plugin));
+        sinon.assert.calledWithExactly(injectVars, sinon.match.same(server), sinon.match.same(options));
+      });
+    });
+    describe('does not match a kbnServer plugin', () => {
+      it('throws an error at instantiation', () => {
+        expect(() => {
+          createUiApp(createStubUiAppSpec({ pluginId: 'foo' }));
+        }).to.throwException((error) => {
+          expect(error.message).to.match(/Unknown plugin id/);
+        });
+      });
     });
   });
 });

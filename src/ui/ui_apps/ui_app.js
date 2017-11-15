@@ -34,24 +34,18 @@ export class UiApp {
     this._listed = listed;
     this._templateName = templateName;
     this._url = url;
+    this._injectedVarsProvider = injectVars;
     this._pluginId = pluginId;
+    this._kbnServer = kbnServer;
 
-    const plugin = kbnServer.plugins
-      .find(plugin => plugin.id === this._pluginId);
-
-    this._injectVars = () => {
-      if (!injectVars) {
-        return;
-      }
-
-      const server = plugin.getServer();
-      const options = plugin.getOptions();
-      return injectVars.call(plugin, server, options);
-    };
+    if (this._pluginId && !this._getPlugin()) {
+      throw new Error(`Unknown plugin id "${this._pluginId}"`);
+    }
 
     const { appExtensions = [] } = kbnServer.uiExports;
     this._modules = []
       .concat(this._main, ...uses.map(type => appExtensions[type] || []))
+      .filter(Boolean)
       .reduce((modules, item) => (
         modules.includes(item)
           ? modules
@@ -79,7 +73,8 @@ export class UiApp {
   }
 
   getPluginId() {
-    return this._pluginId;
+    const plugin = this._getPlugin();
+    return plugin ? plugin.id : undefined;
   }
 
   getTemplateName() {
@@ -104,11 +99,35 @@ export class UiApp {
   }
 
   getInjectedVars() {
-    return this._injectVars();
+    const provider = this._injectedVarsProvider;
+    const plugin = this._getPlugin();
+
+    if (!provider) {
+      return;
+    }
+
+    return provider.call(
+      plugin,
+      plugin
+        ? plugin.getServer()
+        : this._kbnServer.server,
+      plugin
+        ? plugin.getOptions()
+        : undefined
+    );
   }
 
   getModules() {
     return this._modules;
+  }
+
+  _getPlugin() {
+    const pluginId = this._pluginId;
+    const { plugins } = this._kbnServer;
+
+    return pluginId
+      ? plugins.find(plugin => plugin.id === pluginId)
+      : undefined;
   }
 
   toJSON() {
