@@ -3541,7 +3541,7 @@ input[type="button"] {
   max-width: 20px;
   /* 1 */
   line-height: 1.5;
-  color: #a7a7a7; }
+  color: #666; }
 
 .kuiTableHeaderCell__liner {
   display: inline-block;
