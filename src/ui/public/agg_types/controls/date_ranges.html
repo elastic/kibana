@@ -11,7 +11,7 @@
 
       <tr
         ng-repeat="range in agg.params.ranges track by $index">
-        <td class="kbn-timepicker">
+        <td>
           <input
             aria-labelledby="visEditorDateRangeFrom{{agg.id}}"
             ng-model="range.from"
@@ -20,7 +20,7 @@
             class="form-control"
             name="range.from" />
         </td>
-        <td class="kbn-timepicker">
+        <td>
           <input
             aria-labelledby="visEditorDateRangeTo{{agg.id}}"
             ng-model="range.to"

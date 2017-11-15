@@ -1,4 +1,5 @@
 import ngMock from 'ng_mock';
+import expect from 'expect.js';
 
 import StubIndexPatternProvider from 'test_utils/stub_index_pattern';
 

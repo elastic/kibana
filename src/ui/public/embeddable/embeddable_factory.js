@@ -1,8 +1,7 @@
 /**
- * The EmbeddableHandler defines how to render and embed any object into the Dashboard, or some other
- * container that supports EmbeddableHandlers.
+ * The EmbeddableFactory renders an embeddable of a certain type at a given dom node.
  */
-export class EmbeddableHandler {
+export class EmbeddableFactory {
   constructor() {
     this.destroyEmbeddableMap = {};
   }

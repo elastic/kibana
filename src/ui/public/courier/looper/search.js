@@ -25,12 +25,12 @@ export function SearchLooperProvider(Private, Promise, $rootScope) {
     if (searchLooper.afterHastyQueued) return;
 
     searchLooper.afterHastyQueued = Promise.resolve(searchLooper.active)
-    .then(function () {
-      return searchLooper._loopTheLoop();
-    })
-    .finally(function () {
-      searchLooper.afterHastyQueued = null;
-    });
+      .then(function () {
+        return searchLooper._loopTheLoop();
+      })
+      .finally(function () {
+        searchLooper.afterHastyQueued = null;
+      });
   };
 
   return searchLooper;

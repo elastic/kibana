@@ -13,21 +13,21 @@ export function Home({ addBasePath, directories }) {
 
   const renderDirectories = (category) => {
     return directories
-    .filter((directory) => {
-      return directory.showOnHomePage && directory.category === category;
-    })
-    .map((directory) => {
-      return (
-        <KuiFlexItem style={{ minHeight: 64 }} key={directory.id}>
-          <Synopsis
-            description={directory.description}
-            iconUrl={addBasePath(directory.icon)}
-            title={directory.title}
-            url={addBasePath(directory.path)}
-          />
-        </KuiFlexItem>
-      );
-    });
+      .filter((directory) => {
+        return directory.showOnHomePage && directory.category === category;
+      })
+      .map((directory) => {
+        return (
+          <KuiFlexItem style={{ minHeight: 64 }} key={directory.id}>
+            <Synopsis
+              description={directory.description}
+              iconUrl={addBasePath(directory.icon)}
+              title={directory.title}
+              url={addBasePath(directory.path)}
+            />
+          </KuiFlexItem>
+        );
+      });
   };
 
 

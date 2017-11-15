@@ -20,17 +20,17 @@ export function RetryProvider({ getService }) {
         }
 
         return bluebird
-        .try(block)
-        .catch(function tryForTimeCatch(err) {
-          if (err.message === prevMessage) {
-            log.debug('--- tryForTime failed again with the same message  ...');
-          } else {
-            prevMessage = err.message;
-            log.debug('--- tryForTime failure: ' + prevMessage);
-          }
-          finalMessage = err.stack || err.message;
-          return bluebird.delay(retryDelay).then(attempt);
-        });
+          .try(block)
+          .catch(function tryForTimeCatch(err) {
+            if (err.message === prevMessage) {
+              log.debug('--- tryForTime failed again with the same message  ...');
+            } else {
+              prevMessage = err.message;
+              log.debug('--- tryForTime failure: ' + prevMessage);
+            }
+            finalMessage = err.stack || err.message;
+            return bluebird.delay(retryDelay).then(attempt);
+          });
       }
 
       return bluebird.try(attempt);

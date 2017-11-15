@@ -16,36 +16,36 @@ export default function ({ getService, getPageObjects }) {
         'dateFormat:tz': 'UTC',
         'defaultIndex': 'logstash-*'
       })
-      .then(function loadkibanaIndexPattern() {
-        log.debug('load kibana index with default index pattern');
-        return esArchiver.load('visualize_source-filters');
-      })
+        .then(function loadkibanaIndexPattern() {
+          log.debug('load kibana index with default index pattern');
+          return esArchiver.load('visualize_source-filters');
+        })
       // and load a set of makelogs data
-      .then(function loadIfEmptyMakelogs() {
-        return esArchiver.loadIfNeeded('logstash_functional');
-      })
-      .then(function () {
-        log.debug('discover');
-        return PageObjects.common.navigateToApp('discover');
-      })
-      .then(function () {
-        log.debug('setAbsoluteRange');
-        return PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      })
-      .then(function () {
+        .then(function loadIfEmptyMakelogs() {
+          return esArchiver.loadIfNeeded('logstash_functional');
+        })
+        .then(function () {
+          log.debug('discover');
+          return PageObjects.common.navigateToApp('discover');
+        })
+        .then(function () {
+          log.debug('setAbsoluteRange');
+          return PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        })
+        .then(function () {
         //After hiding the time picker, we need to wait for
         //the refresh button to hide before clicking the share button
-        return PageObjects.common.sleep(1000);
-      });
+          return PageObjects.common.sleep(1000);
+        });
     });
 
     it('should not get the field referer', function () {
       return PageObjects.discover.getAllFieldNames()
-      .then(function (fieldNames) {
-        expect(fieldNames).to.not.contain('referer');
-        const relatedContentFields = fieldNames.filter((fieldName) => fieldName.indexOf('relatedContent') === 0);
-        expect(relatedContentFields).to.have.length(0);
-      });
+        .then(function (fieldNames) {
+          expect(fieldNames).to.not.contain('referer');
+          const relatedContentFields = fieldNames.filter((fieldName) => fieldName.indexOf('relatedContent') === 0);
+          expect(relatedContentFields).to.have.length(0);
+        });
     });
   });
 }

@@ -28,7 +28,7 @@ exports[`renders DashboardGrid 1`] = `
     className=""
   >
     <Connect(DashboardPanel)
-      embeddableHandler={
+      embeddableFactory={
         Object {
           "addDestroyEmeddable": [Function],
           "destroy": [Function],
@@ -47,7 +47,7 @@ exports[`renders DashboardGrid 1`] = `
     className=""
   >
     <Connect(DashboardPanel)
-      embeddableHandler={
+      embeddableFactory={
         Object {
           "addDestroyEmeddable": [Function],
           "destroy": [Function],

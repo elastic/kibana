@@ -16,9 +16,9 @@ const globProm = Promise.promisify(glob);
  */
 export function getTranslationKeys(translationPattern, filesPatterns) {
   return getFilesToVerify(filesPatterns)
-  .then(function (filesToVerify) {
-    return getKeys(translationPattern, filesToVerify);
-  });
+    .then(function (filesToVerify) {
+      return getKeys(translationPattern, filesToVerify);
+    });
 }
 
 /**
@@ -46,15 +46,15 @@ function getFilesToVerify(verifyFilesPatterns) {
     const baseSearchDir = path.dirname(verifyFilesPattern);
     const pattern = path.join('**', path.basename(verifyFilesPattern));
     return globProm(pattern, { cwd: baseSearchDir, matchBase: true })
-    .then(function (files) {
-      for (const file of files) {
-        filesToVerify.push(path.join(baseSearchDir, file));
-      }
-    });
+      .then(function (files) {
+        for (const file of files) {
+          filesToVerify.push(path.join(baseSearchDir, file));
+        }
+      });
   })
-  .then(function () {
-    return filesToVerify;
-  });
+    .then(function () {
+      return filesToVerify;
+    });
 }
 
 function getKeys(translationPattern, filesToVerify) {
@@ -63,18 +63,18 @@ function getKeys(translationPattern, filesToVerify) {
 
   const filePromises = _.map(filesToVerify, (file) => {
     return readFile(file, 'utf8')
-    .then(function (fileContents) {
-      let regexMatch;
-      while ((regexMatch = translationRegEx.exec(fileContents)) !== null) {
-        if (regexMatch.length >= 2) {
-          const translationKey = regexMatch[1];
-          translationKeys.push(translationKey);
+      .then(function (fileContents) {
+        let regexMatch;
+        while ((regexMatch = translationRegEx.exec(fileContents)) !== null) {
+          if (regexMatch.length >= 2) {
+            const translationKey = regexMatch[1];
+            translationKeys.push(translationKey);
+          }
         }
-      }
-    });
+      });
   });
   return Promise.all(filePromises)
-  .then(function () {
-    return _.uniq(translationKeys);
-  });
+    .then(function () {
+      return _.uniq(translationKeys);
+    });
 }

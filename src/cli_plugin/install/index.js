@@ -22,28 +22,28 @@ function processCommand(command, options) {
 
 export default function pluginInstall(program) {
   program
-  .command('install <plugin/url>')
-  .option('-q, --quiet', 'disable all process messaging except errors')
-  .option('-s, --silent', 'disable all process messaging')
-  .option(
-    '-c, --config <path>',
-    'path to the config file',
-    getConfig()
-  )
-  .option(
-    '-t, --timeout <duration>',
-    'length of time before failing; 0 for never fail',
-    parseMilliseconds
-  )
-  .option(
-    '-d, --plugin-dir <path>',
-    'path to the directory where plugins are stored',
-    fromRoot('plugins')
-  )
-  .description('install a plugin',
-`Common examples:
+    .command('install <plugin/url>')
+    .option('-q, --quiet', 'disable all process messaging except errors')
+    .option('-s, --silent', 'disable all process messaging')
+    .option(
+      '-c, --config <path>',
+      'path to the config file',
+      getConfig()
+    )
+    .option(
+      '-t, --timeout <duration>',
+      'length of time before failing; 0 for never fail',
+      parseMilliseconds
+    )
+    .option(
+      '-d, --plugin-dir <path>',
+      'path to the directory where plugins are stored',
+      fromRoot('plugins')
+    )
+    .description('install a plugin',
+      `Common examples:
   install x-pack
   install file:///Path/to/my/x-pack.zip
   install https://path.to/my/x-pack.zip`)
-  .action(processCommand);
+    .action(processCommand);
 }

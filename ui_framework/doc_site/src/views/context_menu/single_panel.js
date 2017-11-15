@@ -37,31 +37,33 @@ export default class extends Component {
       </KuiButton>
     );
 
-    const items = [(
-      <KuiContextMenuItem
-        key="A"
-        icon={<span className="kuiIcon fa-user" />}
-        onClick={() => { this.closePopover(); window.alert('A'); }}
-      >
+    const items = [
+      (
+        <KuiContextMenuItem
+          key="A"
+          icon={<span className="kuiIcon fa-user" />}
+          onClick={() => { this.closePopover(); window.alert('A'); }}
+        >
         Option A
-      </KuiContextMenuItem>
-    ), (
-      <KuiContextMenuItem
-        key="B"
-        icon={<span className="kuiIcon fa-user" />}
-        onClick={() => { this.closePopover(); window.alert('B'); }}
-      >
+        </KuiContextMenuItem>
+      ), (
+        <KuiContextMenuItem
+          key="B"
+          icon={<span className="kuiIcon fa-user" />}
+          onClick={() => { this.closePopover(); window.alert('B'); }}
+        >
         Option B
-      </KuiContextMenuItem>
-    ), (
-      <KuiContextMenuItem
-        key="C"
-        icon={<span className="kuiIcon fa-user" />}
-        onClick={() => { this.closePopover(); window.alert('C'); }}
-      >
+        </KuiContextMenuItem>
+      ), (
+        <KuiContextMenuItem
+          key="C"
+          icon={<span className="kuiIcon fa-user" />}
+          onClick={() => { this.closePopover(); window.alert('C'); }}
+        >
         Option C
-      </KuiContextMenuItem>
-    )];
+        </KuiContextMenuItem>
+      )
+    ];
 
     return (
       <KuiPopover
