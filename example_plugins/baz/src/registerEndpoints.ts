@@ -1,10 +1,20 @@
-import { Router, LoggerFactory, Schema } from '@elastic/kbn-types';
+import {
+  Router,
+  LoggerFactory,
+  Schema,
+  ElasticsearchService,
+  KibanaConfig,
+  HttpService,
+} from '@elastic/kbn-types';
 import { BazService } from './BazService';
 
 export function registerEndpoints(
   router: Router<BazService>,
   logger: LoggerFactory,
-  schema: Schema
+  schema: Schema,
+  elasticsearch: ElasticsearchService,
+  http: HttpService,
+  config: KibanaConfig,
 ) {
   const { object, string, number, maybe } = schema;
   const log = logger.get('routes');
@@ -13,7 +23,7 @@ export function registerEndpoints(
     {
       path: '/fail'
     },
-    async (bazService, req, res) => {
+    async (req, res) => {
       log.info(`GET should fail`);
 
       return res.badRequest(new Error('nope'));
@@ -41,9 +51,16 @@ export function registerEndpoints(
         })
       }
     },
-    async (bazService, req, res) => {
+    async (req, res) => {
+      log.info('handle Baz route');
       const { params, query } = req;
 
+      log.info('create Baz Service instance');
+      // TODO: but BazService needs request's headers
+      // the validated object may not have this now
+      const bazService = new BazService(req, config, elasticsearch);
+
+      log.info('use Baz Service instance to hit elasticsearch with the right cluster');
       const items = await bazService.find({
         type: params.type,
         page: query.page,
