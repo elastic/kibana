@@ -12,9 +12,9 @@ export const uiRoutes = Object.create(defaultRouteManager, {
   enable: {
     value() {
       uiModules
-      .get('kibana', ['ngRoute'])
-      .config(defaultRouteManager.config)
-      .run(defaultRouteManager.run);
+        .get('kibana', ['ngRoute'])
+        .config(defaultRouteManager.config)
+        .run(defaultRouteManager.run);
     }
   }
 });

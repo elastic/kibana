@@ -33,4 +33,4 @@ export default async function (kbnServer, server) {
   }
 
   return;
-};
+}

@@ -3,205 +3,205 @@ import { uiModules } from 'ui/modules';
 import paginateControlsTemplate from 'ui/partials/paginate_controls.html';
 
 uiModules.get('kibana')
-.directive('paginate', function ($parse, $compile) {
-  return {
-    restrict: 'E',
-    scope: true,
-    link: {
-      pre: function ($scope, $el, attrs) {
-        if (_.isUndefined(attrs.bottomControls)) attrs.bottomControls = true;
-        if ($el.find('paginate-controls.paginate-bottom').size() === 0 && attrs.bottomControls) {
-          $el.append($compile('<paginate-controls class="paginate-bottom">')($scope));
+  .directive('paginate', function ($parse, $compile) {
+    return {
+      restrict: 'E',
+      scope: true,
+      link: {
+        pre: function ($scope, $el, attrs) {
+          if (_.isUndefined(attrs.bottomControls)) attrs.bottomControls = true;
+          if ($el.find('paginate-controls.paginate-bottom').size() === 0 && attrs.bottomControls) {
+            $el.append($compile('<paginate-controls class="paginate-bottom">')($scope));
+          }
+        },
+        post: function ($scope, $el, attrs) {
+          if (_.isUndefined(attrs.topControls)) attrs.topControls = false;
+          if ($el.find('paginate-controls.paginate-top').size() === 0 && attrs.topControls) {
+            $el.prepend($compile('<paginate-controls class="paginate-top">')($scope));
+          }
+
+          const paginate = $scope.paginate;
+
+          // add some getters to the controller powered by attributes
+          paginate.getList = $parse(attrs.list);
+          paginate.perPageProp = attrs.perPageProp;
+
+          if (attrs.perPage) {
+            paginate.perPage = attrs.perPage;
+            $scope.showSelector = false;
+          } else {
+            $scope.showSelector = true;
+          }
+
+          paginate.otherWidthGetter = $parse(attrs.otherWidth);
+
+          paginate.init();
         }
       },
-      post: function ($scope, $el, attrs) {
-        if (_.isUndefined(attrs.topControls)) attrs.topControls = false;
-        if ($el.find('paginate-controls.paginate-top').size() === 0 && attrs.topControls) {
-          $el.prepend($compile('<paginate-controls class="paginate-top">')($scope));
-        }
+      controllerAs: 'paginate',
+      controller: function ($scope, $document) {
+        const self = this;
+        const ALL = 0;
 
-        const paginate = $scope.paginate;
+        self.sizeOptions = [
+          { title: '10', value: 10 },
+          { title: '25', value: 25 },
+          { title: '100', value: 100 },
+          { title: 'All', value: ALL }
+        ];
 
-        // add some getters to the controller powered by attributes
-        paginate.getList = $parse(attrs.list);
-        paginate.perPageProp = attrs.perPageProp;
+        // setup the watchers, called in the post-link function
+        self.init = function () {
 
-        if (attrs.perPage) {
-          paginate.perPage = attrs.perPage;
-          $scope.showSelector = false;
-        } else {
-          $scope.showSelector = true;
-        }
+          self.perPage = _.parseInt(self.perPage) || $scope[self.perPageProp];
 
-        paginate.otherWidthGetter = $parse(attrs.otherWidth);
+          $scope.$watchMulti([
+            'paginate.perPage',
+            self.perPageProp,
+            self.otherWidthGetter
+          ], function (vals, oldVals) {
+            const intChanges = vals[0] !== oldVals[0];
 
-        paginate.init();
-      }
-    },
-    controllerAs: 'paginate',
-    controller: function ($scope, $document) {
-      const self = this;
-      const ALL = 0;
-
-      self.sizeOptions = [
-        { title: '10', value: 10 },
-        { title: '25', value: 25 },
-        { title: '100', value: 100 },
-        { title: 'All', value: ALL }
-      ];
-
-      // setup the watchers, called in the post-link function
-      self.init = function () {
-
-        self.perPage = _.parseInt(self.perPage) || $scope[self.perPageProp];
-
-        $scope.$watchMulti([
-          'paginate.perPage',
-          self.perPageProp,
-          self.otherWidthGetter
-        ], function (vals, oldVals) {
-          const intChanges = vals[0] !== oldVals[0];
-
-          if (intChanges) {
-            if (!setPerPage(self.perPage)) {
+            if (intChanges) {
+              if (!setPerPage(self.perPage)) {
               // if we are not able to set the external value,
               // render now, otherwise wait for the external value
               // to trigger the watcher again
-              self.renderList();
+                self.renderList();
+              }
+              return;
             }
-            return;
+
+            self.perPage = _.parseInt(self.perPage) || $scope[self.perPageProp];
+            if (self.perPage == null) {
+              self.perPage = ALL;
+              return;
+            }
+
+            self.renderList();
+          });
+
+          $scope.$watch('page', self.changePage);
+          $scope.$watchCollection(self.getList, function (list) {
+            $scope.list = list;
+            self.renderList();
+          });
+        };
+
+        self.goToPage = function (number) {
+          if (number) {
+            if (number.hasOwnProperty('number')) number = number.number;
+            $scope.page = $scope.pages[number - 1] || $scope.pages[0];
           }
+        };
 
-          self.perPage = _.parseInt(self.perPage) || $scope[self.perPageProp];
-          if (self.perPage == null) {
-            self.perPage = ALL;
-            return;
-          }
+        self.goToTop = function goToTop() {
+          $document.scrollTop(0);
+        };
 
-          self.renderList();
-        });
+        self.renderList = function () {
+          $scope.pages = [];
+          if (!$scope.list) return;
 
-        $scope.$watch('page', self.changePage);
-        $scope.$watchCollection(self.getList, function (list) {
-          $scope.list = list;
-          self.renderList();
-        });
-      };
+          const perPage = _.parseInt(self.perPage);
+          const count = perPage ? Math.ceil($scope.list.length / perPage) : 1;
 
-      self.goToPage = function (number) {
-        if (number) {
-          if (number.hasOwnProperty('number')) number = number.number;
-          $scope.page = $scope.pages[number - 1] || $scope.pages[0];
-        }
-      };
+          _.times(count, function (i) {
+            let page;
 
-      self.goToTop = function goToTop() {
-        $document.scrollTop(0);
-      };
+            if (perPage) {
+              const start = perPage * i;
+              page = $scope.list.slice(start, start + perPage);
+            } else {
+              page = $scope.list.slice(0);
+            }
 
-      self.renderList = function () {
-        $scope.pages = [];
-        if (!$scope.list) return;
+            page.number = i + 1;
+            page.i = i;
 
-        const perPage = _.parseInt(self.perPage);
-        const count = perPage ? Math.ceil($scope.list.length / perPage) : 1;
+            page.count = count;
+            page.first = page.number === 1;
+            page.last = page.number === count;
+            page.firstItem = (page.number - 1) * perPage + 1;
+            page.lastItem = Math.min(page.number * perPage, $scope.list.length);
 
-        _.times(count, function (i) {
-          let page;
+            page.prev = $scope.pages[i - 1];
+            if (page.prev) page.prev.next = page;
 
-          if (perPage) {
-            const start = perPage * i;
-            page = $scope.list.slice(start, start + perPage);
+            $scope.pages.push(page);
+          });
+
+          // set the new page, or restore the previous page number
+          if ($scope.page && $scope.page.i < $scope.pages.length) {
+            $scope.page = $scope.pages[$scope.page.i];
           } else {
-            page = $scope.list.slice(0);
+            $scope.page = $scope.pages[0];
           }
 
-          page.number = i + 1;
-          page.i = i;
+          if ($scope.page && $scope.onPageChanged) {
+            $scope.onPageChanged($scope.page);
+          }
+        };
 
-          page.count = count;
-          page.first = page.number === 1;
-          page.last = page.number === count;
-          page.firstItem = (page.number - 1) * perPage + 1;
-          page.lastItem = Math.min(page.number * perPage, $scope.list.length);
+        self.changePage = function (page) {
+          if (!page) {
+            $scope.otherPages = null;
+            return;
+          }
 
-          page.prev = $scope.pages[i - 1];
-          if (page.prev) page.prev.next = page;
+          // setup the list of the other pages to link to
+          $scope.otherPages = [];
+          const width = +self.otherWidthGetter($scope) || 5;
+          let left = page.i - Math.round((width - 1) / 2);
+          let right = left + width - 1;
 
-          $scope.pages.push(page);
-        });
+          // shift neg count from left to right
+          if (left < 0) {
+            right += 0 - left;
+            left = 0;
+          }
 
-        // set the new page, or restore the previous page number
-        if ($scope.page && $scope.page.i < $scope.pages.length) {
-          $scope.page = $scope.pages[$scope.page.i];
-        } else {
-          $scope.page = $scope.pages[0];
-        }
+          // shift extra right nums to left
+          const lastI = page.count - 1;
+          if (right > lastI) {
+            right = lastI;
+            left = right - width + 1;
+          }
 
-        if ($scope.page && $scope.onPageChanged) {
-          $scope.onPageChanged($scope.page);
-        }
-      };
+          for (let i = left; i <= right; i++) {
+            const other = $scope.pages[i];
 
-      self.changePage = function (page) {
-        if (!page) {
-          $scope.otherPages = null;
-          return;
-        }
+            if (!other) continue;
 
-        // setup the list of the other pages to link to
-        $scope.otherPages = [];
-        const width = +self.otherWidthGetter($scope) || 5;
-        let left = page.i - Math.round((width - 1) / 2);
-        let right = left + width - 1;
+            $scope.otherPages.push(other);
+            if (other.last) $scope.otherPages.containsLast = true;
+            if (other.first) $scope.otherPages.containsFirst = true;
+          }
 
-        // shift neg count from left to right
-        if (left < 0) {
-          right += 0 - left;
-          left = 0;
-        }
+          if ($scope.onPageChanged) {
+            $scope.onPageChanged($scope.page);
+          }
+        };
 
-        // shift extra right nums to left
-        const lastI = page.count - 1;
-        if (right > lastI) {
-          right = lastI;
-          left = right - width + 1;
-        }
+        function setPerPage(val) {
+          let $ppParent = $scope;
 
-        for (let i = left; i <= right; i++) {
-          const other = $scope.pages[i];
+          while ($ppParent && !_.has($ppParent, self.perPageProp)) {
+            $ppParent = $ppParent.$parent;
+          }
 
-          if (!other) continue;
-
-          $scope.otherPages.push(other);
-          if (other.last) $scope.otherPages.containsLast = true;
-          if (other.first) $scope.otherPages.containsFirst = true;
-        }
-
-        if ($scope.onPageChanged) {
-          $scope.onPageChanged($scope.page);
-        }
-      };
-
-      function setPerPage(val) {
-        let $ppParent = $scope;
-
-        while ($ppParent && !_.has($ppParent, self.perPageProp)) {
-          $ppParent = $ppParent.$parent;
-        }
-
-        if ($ppParent) {
-          $ppParent[self.perPageProp] = val;
-          return true;
+          if ($ppParent) {
+            $ppParent[self.perPageProp] = val;
+            return true;
+          }
         }
       }
-    }
-  };
-})
-.directive('paginateControls', function () {
+    };
+  })
+  .directive('paginateControls', function () {
   // this directive is automatically added by paginate if not found within it's $el
-  return {
-    restrict: 'E',
-    template: paginateControlsTemplate
-  };
-});
+    return {
+      restrict: 'E',
+      template: paginateControlsTemplate
+    };
+  });

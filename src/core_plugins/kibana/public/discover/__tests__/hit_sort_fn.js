@@ -31,10 +31,10 @@ describe('hit sort function', function () {
     });
 
     hits.sort(createHitSortFn(dir))
-    .forEach(function (hit, i) {
-      const group = Math.floor(i / groupSize);
-      expect(hit.sort).to.eql(sortOpts[group]);
-    });
+      .forEach(function (hit, i) {
+        const group = Math.floor(i / groupSize);
+        expect(hit.sort).to.eql(sortOpts[group]);
+      });
   };
 
 
