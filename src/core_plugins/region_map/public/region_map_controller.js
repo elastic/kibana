@@ -161,8 +161,8 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
       if (event.mismatches.length > 0 && shouldShowWarning) {
         notify.warning(
           `Could not show ${event.mismatches.length} ${event.mismatches.length > 1 ? 'results' : 'result'} on the map.`
-          + ` To avoid this, ensure that each term can be joined to a corresponding shape on that shape's join field.`
-          + ` Could not join following terms: ${event.mismatches.join(',')}`
+          + ` To avoid this, ensure that each term can be matched to a corresponding shape on that shape's join field.`
+          + ` Could not match following terms: ${event.mismatches.join(',')}`
         );
       }
     });
