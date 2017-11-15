@@ -370,37 +370,6 @@ test('returns 200 OK if returning object', async () => {
     });
 });
 
-test('returns result from `onRequest` handler as first param in route handler', async () => {
-  expect.assertions(1);
-
-  const router = new Router('/foo', {
-    onRequest(req) {
-      return {
-        q: req.query
-      };
-    }
-  });
-
-  let receivedValue: any;
-
-  router.get({ path: '/' }, async (val, req, res) => {
-    receivedValue = val;
-    return res.noContent();
-  });
-
-  server.registerRouter(router);
-
-  await server.start(config);
-
-  await supertest((server as any).server).get('/foo?bar=quux');
-
-  expect(receivedValue).toEqual({
-    q: {
-      bar: 'quux'
-    }
-  });
-});
-
 test('filtered headers', async () => {
   expect.assertions(1);
 

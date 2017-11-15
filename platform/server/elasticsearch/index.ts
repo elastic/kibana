@@ -26,9 +26,7 @@ export class ElasticsearchModule {
   }
 
   createRoutes() {
-    const router = new Router('/elasticsearch', {
-      onRequest: req => new ElasticsearchRequestHelpers(this.service)
-    });
+    const router = new Router('/elasticsearch');
 
     return registerElasticsearchRoutes(router, this.logger);
   }
