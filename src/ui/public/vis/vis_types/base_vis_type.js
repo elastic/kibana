@@ -32,7 +32,8 @@ export function VisTypeProvider() {
           showIndexSelection: true,
           hierarchicalData: false  // we should get rid of this i guess ?
         },
-        isExperimental: false
+        isExperimental: false,
+        isLabs: false,
       };
 
       _.defaultsDeep(this, opts, _defaults);

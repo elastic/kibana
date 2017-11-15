@@ -122,6 +122,10 @@ export function getUiSettingDefaults() {
       value: 100,
       description: 'Never show more than this many bars in date histograms, scale values if needed',
     },
+    'visualize:enableLabsVisualizations': {
+      value: true,
+      description: 'Enable lab mode in visualize'
+    },
     'visualization:tileMap:maxPrecision': {
       value: 7,
       description: 'The maximum geoHash precision displayed on tile maps: 7 is high, 10 is very high, ' +

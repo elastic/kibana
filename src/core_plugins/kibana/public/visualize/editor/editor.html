@@ -50,6 +50,13 @@
     index-patterns="[indexPattern]"
   ></filter-bar>
 
+  <div class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm" ng-if="vis.type.isExperimental">
+    <div class="kuiInfoPanelBody">
+      <div class="kuiInfoPanelBody__message" ng-bind-html="getExperimentalMessage()">
+      </div>
+    </div>
+  </div>
+
   <visualize
     saved-obj="savedVis"
     ui-state="uiState"
