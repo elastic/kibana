@@ -10,7 +10,7 @@ In order to migrate to Kibana 6, your Kibana index needs to be reindexed. This w
 
 A UI is available in X-Pack 5.6 to assist with the migration. The following is provided should you be required to run the migration manually. The commands assume you're using the default `.kibana` index, without an alias. If `kibana.index` is set to something different in your `kibana.yml`, or you're using an alias, you will need to modify the commands.
 
-NOTE: To perform this migration without downtime, you will need to be running Kibana 5.6. This is the only version which supports both of the index types. If you are running a version prior to 5.6, you will need to remove `index.format` from the second step and if you are running 5.6, it's advised to add `index.mapping.single_type: true`.
+NOTE: To perform this migration without downtime, you will need to be running Kibana 5.6. This is the only version which supports both of the index types.
 
 . Set `.kibana` index to read-only:
 +
@@ -24,6 +24,11 @@ PUT .kibana/_settings
 --------------------------------------------------
 // CONSOLE
 --
+
+NOTE: Running a version prior to version 5.6? You will need to remove `index.format` from the following step
+
+NOTE: Running version 5.6? Add `"index.mapping.single_type": true` under settings in the following step to ensure additional types will not be added after migrating.
+
 
 . Create `.kibana-6` index
 +
