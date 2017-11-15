@@ -1,4 +1,5 @@
 import handleESError from '../../../lib/handle_es_error';
+import Boom from 'boom';
 
 export function registerValueSuggestions(server) {
   server.route({
@@ -6,9 +7,20 @@ export function registerValueSuggestions(server) {
     method: ['POST'],
     handler: async function (req, reply) {
       const { index } = req.params;
-      const { field, query } = req.payload;
+      const { field: fieldName, query, size } = req.payload;
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
-      const body = getBody({ field, query });
+
+      const field = await getIndexPatternField(req.getSavedObjectsClient(), index, fieldName);
+      if (!field) {
+        reply(Boom.badRequest(`Unable to find field ${fieldName} in index-pattern ${index}`));
+        return;
+      }
+      if (field.type !== 'string' && query) {
+        reply(Boom.badRequest(`Unable to filter terms aggregation on non-string field type. ${field.name} is of type ${field.type}`));
+        return;
+      }
+
+      const body = getBody({ field, query, size });
       try {
         const response = await callWithRequest(req, 'search', { index, body });
         const suggestions = response.aggregations.suggestions.buckets.map(bucket => bucket.key);
@@ -20,7 +32,26 @@ export function registerValueSuggestions(server) {
   });
 }
 
-function getBody({ field, query }) {
+async function getIndexPatternField(savedObjectClient, index, fieldName) {
+  const findResp = await savedObjectClient.find({
+    type: 'index-pattern',
+    fields: ['title', 'fields'],
+    search: `"${index}"`,
+    search_fields: ['title']
+  });
+  const indexPatternSavedObject = findResp.saved_objects.find(savedObject => {
+    return savedObject.attributes.title === index;
+  });
+  if (indexPatternSavedObject) {
+    const fields = JSON.parse(indexPatternSavedObject.attributes.fields);
+    const field = fields.find(field => {
+      return field.name === fieldName;
+    });
+    return field;
+  }
+}
+
+function getBody({ field, query, size = 10 }) {
   // Helps ensure that the regex is not evaluated eagerly against the terms dictionary
   const executionHint = 'map';
 
@@ -32,18 +63,32 @@ function getBody({ field, query }) {
   // the amount of information that needs to be transmitted to the coordinating node
   const shardSize = 10;
 
+  const termsAgg = {
+    size: size,
+    shard_size: shardSize
+  };
+
+  if (field.scripted) {
+    termsAgg.script = {
+      inline: field.script,
+      lang: field.lang
+    };
+  } else {
+    termsAgg.field = field.name;
+  }
+
+  if (query) {
+    termsAgg.include = `${getEscapedQuery(query)}.*`;
+    termsAgg.execution_hint = executionHint;
+  }
+
   return {
     size: 0,
     timeout: '1s',
     terminate_after: terminateAfter,
     aggs: {
       suggestions: {
-        terms: {
-          field,
-          include: `${getEscapedQuery(query)}.*`,
-          execution_hint: executionHint,
-          shard_size: shardSize
-        }
+        terms: termsAgg
       }
     }
   };

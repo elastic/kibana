@@ -7,28 +7,24 @@ export default function ({ getService, getPageObjects }) {
 
   const FIELD_NAME = 'machine.os.raw';
 
-  describe('visualize control app', () => {
-    before(async () => {
-      await PageObjects.common.navigateToUrl('visualize', 'new');
-      await PageObjects.visualize.clickInputControlVis();
-      await PageObjects.visualize.clickVisEditorTab('controls');
-      await PageObjects.visualize.addInputControl();
-      await PageObjects.visualize.setReactSelect('.index-pattern-react-select', 'logstash');
-      await PageObjects.common.sleep(1000); // give time for index-pattern to be fetched
-      await PageObjects.visualize.setReactSelect('.field-react-select', FIELD_NAME);
-      await PageObjects.visualize.clickGo();
+  describe('input control visualization', () => {
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
-    });
+    describe('interaction with filter bar', () => {
 
-    describe('input control visualization', () => {
+      before(async () => {
+        await PageObjects.common.navigateToUrl('visualize', 'new');
+        await PageObjects.visualize.clickInputControlVis();
+        await PageObjects.visualize.clickVisEditorTab('controls');
+        await PageObjects.visualize.addInputControl();
+        await PageObjects.visualize.setReactSelect('.index-pattern-react-select', 'logstash');
+        await PageObjects.common.sleep(1000); // give time for index-pattern to be fetched
+        await PageObjects.visualize.setReactSelect('.field-react-select', FIELD_NAME);
+        await PageObjects.visualize.clickGo();
+
+        await PageObjects.header.waitUntilLoadingHasFinished();
+      });
 
       describe('updateFiltersOnChange is false', () => {
-
-        it('should contain dropdown with terms aggregation results as options', async () => {
-          const menu = await PageObjects.visualize.getReactSelectOptions('inputControl0');
-          expect(menu.trim().split('\n').join()).to.equal('win 8,win xp,win 7,ios,osx');
-        });
 
         it('should display staging control buttons', async () => {
           const submitButtonExists = await testSubjects.exists('inputControlSubmitBtn');
@@ -132,6 +128,37 @@ export default function ({ getService, getPageObjects }) {
           expect(hasFilter).to.equal(true);
         });
       });
+    });
+
+    describe('options list', () => {
+
+      before(async () => {
+        await PageObjects.common.navigateToUrl('visualize', 'new');
+        await PageObjects.visualize.clickInputControlVis();
+        await PageObjects.visualize.clickVisEditorTab('controls');
+        await PageObjects.visualize.addInputControl();
+        await PageObjects.visualize.setReactSelect('.index-pattern-react-select', 'logstash');
+        await PageObjects.common.sleep(1000); // give time for index-pattern to be fetched
+      });
+
+      it('should contain dropdown with terms aggregation results as options for string field', async () => {
+        await PageObjects.visualize.setReactSelect('.field-react-select', FIELD_NAME);
+        await PageObjects.visualize.clickGo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const menu = await PageObjects.visualize.getReactSelectOptions('inputControl0');
+        expect(menu.trim().split('\n').join()).to.equal('win 8,win xp,win 7,ios,osx');
+      });
+
+      it('should contain dropdown with terms aggregation results as options for number field', async () => {
+        await PageObjects.visualize.setReactSelect('.field-react-select', 'bytes');
+        await PageObjects.visualize.clickGo();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const menu = await PageObjects.visualize.getReactSelectOptions('inputControl0');
+        expect(menu.trim().split('\n').join()).to.equal('0,1810,2168,3954,6497');
+      });
+
     });
   });
 }

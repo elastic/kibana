@@ -88,6 +88,7 @@
     "angular-translate": "2.13.1",
     "ansicolors": "0.3.2",
     "autoprefixer": "6.5.4",
+    "axios": "0.17.0",
     "babel-core": "6.21.0",
     "babel-jest": "21.0.0",
     "babel-loader": "7.1.2",
