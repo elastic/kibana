@@ -114,7 +114,7 @@ export default function ({ getService, getPageObjects }) {
         await log.debug('add scripted field');
         await PageObjects.settings
           .addScriptedField(scriptedPainlessFieldName2, 'painless', 'string', null, '1',
-          'if (doc[\'response.raw\'].value == \'200\') { return \'good\'} else { return \'bad\'}');
+            'if (doc[\'response.raw\'].value == \'200\') { return \'good\'} else { return \'bad\'}');
         await retry.try(async function () {
           expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(startingCount + 1);
         });
@@ -178,7 +178,7 @@ export default function ({ getService, getPageObjects }) {
         await log.debug('add scripted field');
         await PageObjects.settings
           .addScriptedField(scriptedPainlessFieldName2, 'painless', 'boolean', null, '1',
-          'doc[\'response.raw\'].value == \'200\'');
+            'doc[\'response.raw\'].value == \'200\'');
         await retry.try(async function () {
           expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(startingCount + 1);
         });
@@ -242,8 +242,8 @@ export default function ({ getService, getPageObjects }) {
         await log.debug('add scripted field');
         await PageObjects.settings
           .addScriptedField(scriptedPainlessFieldName2, 'painless', 'date',
-          { format: 'Date', datePattern: 'YYYY-MM-DD HH:00' }, '1',
-          'doc[\'utc_time\'].value.getMillis() + (1000) * 60 * 60');
+            { format: 'Date', datePattern: 'YYYY-MM-DD HH:00' }, '1',
+            'doc[\'utc_time\'].value.getMillis() + (1000) * 60 * 60');
         await retry.try(async function () {
           expect(parseInt(await PageObjects.settings.getScriptedFieldsTabCount())).to.be(startingCount + 1);
         });

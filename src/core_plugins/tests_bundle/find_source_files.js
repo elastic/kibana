@@ -25,10 +25,10 @@ const findSourceFiles = async (patterns, cwd = fromRoot('.')) => {
   });
 
   return chain(matches)
-  .flatten()
-  .uniq()
-  .map(match => resolve(cwd, match))
-  .value();
+    .flatten()
+    .uniq()
+    .map(match => resolve(cwd, match))
+    .value();
 };
 
 findSourceFiles.symlinks = {};

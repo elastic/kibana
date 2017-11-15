@@ -48,4 +48,3 @@ test('renders an error when error prop is passed', () => {
   const panelError = component.find(PanelError);
   expect(panelError.length).toBe(1);
 });
-

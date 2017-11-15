@@ -1,6 +1,6 @@
 {
   "name": "@elastic/eslint-config-kibana",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "description": "The eslint config used by the kibana team",
   "main": ".eslintrc.js",
   "scripts": {
@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/elastic/eslint-config-kibana#readme",
   "peerDependencies": {
-    "babel-eslint": "^7.2.3",
+    "babel-eslint": "^8.0.0",
     "eslint": "^4.1.0",
     "eslint-plugin-babel": "^4.1.1",
     "eslint-plugin-import": "^2.6.0",

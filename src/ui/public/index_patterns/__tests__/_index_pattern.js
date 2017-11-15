@@ -353,10 +353,10 @@ describe('index pattern', function () {
       describe('with sort order', function () {
         it('passes the sort order to the intervals module', function () {
           return indexPattern.toIndexList(1, 2, 'SORT_DIRECTION')
-          .then(function () {
-            expect(intervals.toIndexList.callCount).to.be(1);
-            expect(intervals.toIndexList.getCall(0).args[4]).to.be('SORT_DIRECTION');
-          });
+            .then(function () {
+              expect(intervals.toIndexList.callCount).to.be(1);
+              expect(intervals.toIndexList.getCall(0).args[4]).to.be('SORT_DIRECTION');
+            });
         });
       });
     });

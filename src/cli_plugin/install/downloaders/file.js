@@ -60,4 +60,4 @@ export default async function copyLocalFile(logger, sourcePath, targetPath) {
     logger.error(err);
     throw err;
   }
-};
+}

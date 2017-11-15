@@ -28,7 +28,7 @@ export function KuiConfirmModal({
   confirmButtonText,
   className,
   defaultFocusedButton,
-  ...rest,
+  ...rest
 }) {
   const classes = classnames('kuiModal--confirmation', className);
 

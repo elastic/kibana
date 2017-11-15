@@ -8,12 +8,12 @@ export default function ({ getService, getPageObjects }) {
     beforeEach(function () {
       // delete .kibana index and then wait for Kibana to re-create it
       return kibanaServer.uiSettings.replace({})
-      .then(function () {
-        return PageObjects.settings.navigateTo();
-      })
-      .then(function () {
-        return PageObjects.settings.clickKibanaIndices();
-      });
+        .then(function () {
+          return PageObjects.settings.navigateTo();
+        })
+        .then(function () {
+          return PageObjects.settings.clickKibanaIndices();
+        });
     });
 
     describe('step 1 next button', function () {

@@ -8,37 +8,37 @@ import indexTemplate from 'plugins/kibana/management/sections/settings/index.htm
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
 uiRoutes
-.when('/management/kibana/settings', {
-  template: indexTemplate
-});
+  .when('/management/kibana/settings', {
+    template: indexTemplate
+  });
 
 uiModules.get('apps/management')
-.directive('kbnManagementAdvanced', function (config) {
-  return {
-    restrict: 'E',
-    link: function ($scope) {
+  .directive('kbnManagementAdvanced', function (config) {
+    return {
+      restrict: 'E',
+      link: function ($scope) {
       // react to changes of the config values
-      config.watchAll(changed, $scope);
+        config.watchAll(changed, $scope);
 
-      // initial config setup
-      changed();
+        // initial config setup
+        changed();
 
-      function changed() {
-        const all = config.getAll();
-        const editable = _(all)
-          .map((def, name) => toEditableConfig({
-            def,
-            name,
-            value: def.userValue,
-            isCustom: config.isCustom(name)
-          }))
-          .value();
-        const writable = _.reject(editable, 'readonly');
-        $scope.configs = writable;
+        function changed() {
+          const all = config.getAll();
+          const editable = _(all)
+            .map((def, name) => toEditableConfig({
+              def,
+              name,
+              value: def.userValue,
+              isCustom: config.isCustom(name)
+            }))
+            .value();
+          const writable = _.reject(editable, 'readonly');
+          $scope.configs = writable;
+        }
       }
-    }
-  };
-});
+    };
+  });
 
 management.getSection('kibana').register('settings', {
   display: 'Advanced Settings',
