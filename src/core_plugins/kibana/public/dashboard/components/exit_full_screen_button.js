@@ -3,8 +3,9 @@ import PropTypes from 'prop-types';
 import chrome from 'ui/chrome';
 
 import {
-  KuiKeyboardAccessible,
+  KuiButton,
 } from 'ui_framework/components';
+
 import {
   keyCodes,
 } from 'ui_framework/services';
@@ -32,19 +33,18 @@ export class ExitFullScreenButton extends PureComponent {
       <div
         className="exitFullScreenButton"
       >
-        <KuiKeyboardAccessible>
-          <div
-            aria-label="Exit full screen mode"
-            className="exitFullScreenMode"
-            onClick={this.props.onExitFullScreenMode}
-          >
-            <span className="exitFullScreenModeLogo" data-test-subj="exitFullScreenModeLogo"/>
-            <span className="exitFullScreenModeText" data-test-subj="exitFullScreenModeText">
-              Exit full screen
-              <span className="kuiIcon fa fa-angle-left"/>
-            </span>
-          </div>
-        </KuiKeyboardAccessible>
+        <KuiButton
+          type="hollow"
+          aria-label="Exit full screen mode"
+          className="exitFullScreenMode"
+          onClick={this.props.onExitFullScreenMode}
+        >
+          <span className="exitFullScreenModeLogo" data-test-subj="exitFullScreenModeLogo"/>
+          <span className="exitFullScreenModeText" data-test-subj="exitFullScreenModeText">
+            Exit full screen
+            <span className="kuiIcon fa fa-angle-left"/>
+          </span>
+        </KuiButton>
       </div>
     );
   }
