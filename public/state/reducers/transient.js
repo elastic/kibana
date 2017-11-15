@@ -3,6 +3,7 @@ import { set, del } from 'object-path-immutable';
 import { restoreHistory } from '../actions/history';
 import * as actions from '../actions/transient';
 import { removeElement } from '../actions/elements';
+import { setRefreshInterval } from '../actions/workpad';
 
 export const transientReducer = handleActions({
   // clear all the resolved args when restoring the history
@@ -30,5 +31,9 @@ export const transientReducer = handleActions({
       ...transientState,
       selectedElement: payload || null,
     };
+  },
+
+  [setRefreshInterval]: (transientState, { payload }) => {
+    return { ...transientState, refresh: { interval: Number(payload) || 0 } };
   },
 }, {});

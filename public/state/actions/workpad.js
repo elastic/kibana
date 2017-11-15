@@ -11,6 +11,7 @@ import fileSaver from 'file-saver';
 export const sizeWorkpad = createAction('sizeWorkpad');
 export const setName = createAction('setName');
 export const setColors = createAction('setColors');
+export const setRefreshInterval = createAction('setRefreshInterval');
 
 export const initializeWorkpad = createThunk('initializeWorkpad', ({ dispatch }) => {
   dispatch(fetchAllRenderables());
@@ -26,10 +27,10 @@ export const removeColor = createThunk('removeColor', ({ dispatch, getState }, c
   dispatch(setColors(without(getWorkpadColors(getState()), color)));
 });
 
-export const setWorkpad = createThunk('setWorkpad', ({ dispatch }, workpad) => {
-  const setWorkpadAction = createAction('setWorkpad');
-  dispatch(setWorkpadAction(workpad));
-  dispatch(initializeWorkpad());
+export const setWorkpad = createThunk('setWorkpad', ({ dispatch, type }, workpad) => {
+  dispatch(createAction(type)(workpad)); // set the workpad object in state
+  dispatch(setRefreshInterval(0)); // disable refresh interval
+  dispatch(initializeWorkpad()); // load all the elements on the workpad
 });
 
 export const loadWorkpad = createThunk('loadWorkpad', ({ dispatch }, { assets, ...workpad }) => {

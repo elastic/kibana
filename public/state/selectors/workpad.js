@@ -101,3 +101,7 @@ export function getSelectedResolvedArgs(state, path) {
 export function getContextForIndex(state, index) {
   return getSelectedResolvedArgs(state, ['expressionContext', index - 1]);
 }
+
+export function getRefreshInterval(state) {
+  return get(state, 'transient.refresh.interval', 0);
+}
