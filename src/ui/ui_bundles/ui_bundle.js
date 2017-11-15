@@ -1,9 +1,5 @@
-import { promisify } from 'bluebird';
-
-const read = promisify(require('fs').readFile);
-const write = promisify(require('fs').writeFile);
-const unlink = promisify(require('fs').unlink);
-const stat = promisify(require('fs').stat);
+import { fromNode as fcb } from 'bluebird';
+import { readFile, writeFile, unlink, stat } from 'fs';
 
 export class UiBundle {
   constructor(options) {
@@ -48,7 +44,7 @@ export class UiBundle {
 
   async readEntryFile() {
     try {
-      const content = await read(this.getEntryPath());
+      const content = await fcb(cb => readFile(this.getEntryPath(), cb));
       return content.toString('utf8');
     }
     catch (e) {
@@ -57,17 +53,22 @@ export class UiBundle {
   }
 
   async writeEntryFile() {
-    return await write(this.getEntryPath(), this.renderContent(), { encoding: 'utf8' });
+    return await fcb(cb => (
+      writeFile(this.getEntryPath(), this.renderContent(), 'utf8', cb)
+    ));
   }
 
   async clearBundleFile() {
-    try { await unlink(this.getOutputPath()); }
-    catch (e) { return null; }
+    try {
+      await fcb(cb => unlink(this.getOutputPath(), cb));
+    } catch (e) {
+      return null;
+    }
   }
 
   async isCacheValid() {
     try {
-      await stat(this.getOutputPath());
+      await fcb(cb => stat(this.getOutputPath(), cb));
       return true;
     }
     catch (e) {
