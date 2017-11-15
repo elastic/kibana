@@ -46,7 +46,7 @@ export class PanelOptionsMenu extends React.Component {
         onClick: this.onEditPanel,
       },
       {
-        name: 'Panel options',
+        name: 'Customize panel',
         'data-test-subj': 'dashboardPanelOptionsSubMenuLink',
         icon: <span
           aria-hidden="true"
@@ -77,7 +77,7 @@ export class PanelOptionsMenu extends React.Component {
     }
 
     return {
-      title: 'Panel settings',
+      title: 'Options',
       id: 'mainMenu',
       items: mainPanelMenuItems,
     };
@@ -85,7 +85,7 @@ export class PanelOptionsMenu extends React.Component {
 
   buildPanelOptionsSubMenu() {
     return {
-      title: 'Panel options',
+      title: 'Customize panel',
       id: 'panelSubOptionsMenu',
       content: <PanelOptionsMenuForm
         onReset={this.props.onResetPanelTitle}
