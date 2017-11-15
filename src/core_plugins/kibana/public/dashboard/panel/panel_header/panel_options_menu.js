@@ -77,6 +77,7 @@ export class PanelOptionsMenu extends React.Component {
     }
 
     return {
+      title: 'Panel settings',
       id: 'mainMenu',
       items: mainPanelMenuItems,
     };
@@ -122,6 +123,7 @@ export class PanelOptionsMenu extends React.Component {
         closePopover={this.closePopover}
         panelPaddingSize="none"
         anchorPosition="right"
+        withTitle
       >
         <KuiContextMenu
           initialPanelId="mainMenu"
