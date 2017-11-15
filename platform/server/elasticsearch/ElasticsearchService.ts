@@ -77,4 +77,18 @@ export class ElasticsearchService implements CoreService {
   getClusterOfType$(type: ElasticsearchClusterType) {
     return k$(this.clusters$)(map(clusters => clusters[type]));
   }
+
+  // TODO: implement `getCluster` and `callWithRequest`
+  //
+  // getScopedCluster is not the name I want to use. I really
+  // want `getCluster`, but that exists.
+  // Maybe we supplant that one with this.
+  //
+  // This method is really transparent. It does the two things
+  // we currently do. I think we could work Observables
+  // into this so we get updated stuff.
+  getScopedCluster(type: ElasticsearchClusterType, headers: string) {
+    const { callWithRequest } = this.getCluster(type);
+    return (...args) => this.callWithRequest(headers, ...args);
+  }
 }

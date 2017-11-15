@@ -3,11 +3,11 @@ import { registerEndpoints } from './registerEndpoints';
 
 export const plugin: KibanaPluginConfig<{}> = {
   plugin: kibana => {
-    log.info('create Baz plugin');
-
     const { elasticsearch, logger, util, http, config } = kibana;
 
     const log = logger.get();
+
+    log.info('create Baz plugin');
 
     const router = http.createAndRegisterRouter('/api/baz');
 

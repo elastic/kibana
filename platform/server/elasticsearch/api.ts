@@ -1,6 +1,7 @@
 import { Router } from '../http';
 import { object, string, maybe } from '../../lib/schema';
 import { ElasticsearchRequestHelpers } from './ElasticsearchFacade';
+import { ElasticsearchService } from './ElasticsearchService';
 import { LoggerFactory } from '../../logging';
 
 export function registerElasticsearchRoutes(
@@ -23,10 +24,24 @@ export function registerElasticsearchRoutes(
         })
       }
     },
-    async (elasticsearch, req) => {
+    async (req, res) => {
       // WOHO! Both of these are typed!
       log.info(`field param: ${req.params.field}`);
       log.info(`query param: ${req.query.key}`);
+
+      // NB: All right, so at this point when we're
+      // exposing the es API, shouldn't we have an
+      // instance of ElasticsearchService already
+      // from kibana-core? I'm a bit confused.
+      //
+      // My understanding is that this const elasticsearch is the
+      // underlying elasticsearch-js client. But this whole
+      // code lives inside of a kibana-core system that we're
+      // also calling elasticsearch.
+      //
+      // The following code needs work. We don't have `withRequest`
+      // anymore.
+      const elasticsearch = new ElasticsearchService(req);
 
       log.info('request received on [data] cluster');
 
