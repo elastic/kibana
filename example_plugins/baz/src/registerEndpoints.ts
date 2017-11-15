@@ -58,7 +58,9 @@ export function registerEndpoints(
       log.info('create Baz Service instance');
       // TODO: but BazService needs request's headers
       // the validated object may not have this now
-      const bazService = new BazService(req, config, elasticsearch);
+      // This is where BazService's underlying elasticsearch service
+      // should be bound to the right cluster
+      const bazService = new BazService(req.headers, config, elasticsearch);
 
       log.info('use Baz Service instance to hit elasticsearch with the right cluster');
       const items = await bazService.find({
