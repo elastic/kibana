@@ -35,11 +35,12 @@ import {
   insertAtLocation,
 } from './timelion_expression_input_helpers';
 import { comboBoxKeyCodes } from 'ui_framework/services';
+import { ArgValueSuggestionsProvider } from './timelion_expression_suggestions/arg_value_suggestions';
 
 const Parser = PEG.buildParser(grammar);
 const app = require('ui/modules').get('apps/timelion', []);
 
-app.directive('timelionExpressionInput', function ($document, $http, $interval, $timeout) {
+app.directive('timelionExpressionInput', function ($document, $http, $interval, $timeout, Private) {
   return {
     restrict: 'E',
     scope: {
@@ -51,6 +52,7 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
     replace: true,
     template: timelionExpressionInputTemplate,
     link: function (scope, elem) {
+      const argValueSuggestions = Private(ArgValueSuggestionsProvider);
       const expressionInput = elem.find('[data-expression-input]');
       const functionReference = {};
       let suggestibleFunctionLocation = {};
@@ -81,35 +83,36 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
           return;
         }
 
+        const { min, max } = suggestibleFunctionLocation;
+        let insertedValue;
+        let insertPositionMinOffset = 0;
+
         switch (scope.suggestions.type) {
           case SUGGESTION_TYPE.FUNCTIONS: {
-            const functionName = `${scope.suggestions.list[suggestionIndex].name}()`;
-            const { min, max } = suggestibleFunctionLocation;
-
-            // Update the expression with the function.
-            // min advanced one to not replace function '.'
-            const updatedExpression = insertAtLocation(functionName, scope.sheet, min + 1, max);
-            scope.sheet = updatedExpression;
-
             // Position the caret inside of the function parentheses.
-            const newCaretOffset = min + functionName.length;
-            setCaretOffset(newCaretOffset);
+            insertedValue = `${scope.suggestions.list[suggestionIndex].name}()`;
+
+            // min advanced one to not replace function '.'
+            insertPositionMinOffset = 1;
             break;
           }
           case SUGGESTION_TYPE.ARGUMENTS: {
-            const argumentName = `${scope.suggestions.list[suggestionIndex].name}=`;
-            const { min, max } = suggestibleFunctionLocation;
-
-            // Update the expression with the function.
-            const updatedExpression = insertAtLocation(argumentName, scope.sheet, min, max);
-            scope.sheet = updatedExpression;
-
             // Position the caret after the '='
-            const newCaretOffset = min + argumentName.length;
-            setCaretOffset(newCaretOffset);
+            insertedValue = `${scope.suggestions.list[suggestionIndex].name}=`;
+            break;
+          }
+          case SUGGESTION_TYPE.ARGUMENT_VALUE: {
+            // Position the caret after the argument value
+            insertedValue = `${scope.suggestions.list[suggestionIndex].name}`;
             break;
           }
         }
+
+        const updatedExpression = insertAtLocation(insertedValue, scope.sheet, min + insertPositionMinOffset, max);
+        scope.sheet = updatedExpression;
+
+        const newCaretOffset = min + insertedValue.length;
+        setCaretOffset(newCaretOffset);
       }
 
       function scrollToSuggestionAt(index) {
@@ -127,15 +130,18 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
         return null;
       }
 
-      function getSuggestions() {
-        suggest(
+      async function getSuggestions() {
+        const suggestions = await suggest(
           scope.sheet,
           functionReference.list,
           Parser,
-          getCursorPosition()
-        ).then(suggestions => {
-          // We're using ES6 Promises, not $q, so we have to wrap this in $apply.
-          scope.$apply(() => {
+          getCursorPosition(),
+          argValueSuggestions
+        );
+
+        // We're using ES6 Promises, not $q, so we have to wrap this in $apply.
+        scope.$apply(() => {
+          if (suggestions) {
             scope.suggestions.setList(suggestions.list, suggestions.type);
             scope.suggestions.show();
             suggestibleFunctionLocation = suggestions.location;
@@ -143,12 +149,11 @@ app.directive('timelionExpressionInput', function ($document, $http, $interval, 
               const suggestionsList = $('[data-suggestions-list]');
               suggestionsList.scrollTop(0);
             }, 0);
-          });
-        }, (noSuggestions = {}) => {
-          scope.$apply(() => {
-            suggestibleFunctionLocation = noSuggestions.location;
-            scope.suggestions.reset();
-          });
+            return;
+          }
+
+          suggestibleFunctionLocation = undefined;
+          scope.suggestions.reset();
         });
       }
 
