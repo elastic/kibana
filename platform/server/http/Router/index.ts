@@ -34,12 +34,10 @@ const responseFactory: ResponseFactory = {
 };
 
 export type RequestHandler<
-  RequestValue,
   Params extends Any,
   Query extends Any,
   Body extends Any
 > = (
-  onRequestValue: RequestValue,
   req: KibanaRequest<TypeOf<Params>, TypeOf<Query>, TypeOf<Body>>,
   createResponse: ResponseFactory
 ) => Promise<KibanaResponse<any> | { [key: string]: any }>;
@@ -117,14 +115,10 @@ export class KibanaRequest<
   }
 }
 
-export interface RouterOptions<T> {
-  onRequest?: (req: KibanaRequest) => T;
-}
-
 export class Router<V> {
   readonly router: express.Router = express.Router();
 
-  constructor(readonly path: string, readonly options: RouterOptions<V> = {}) {}
+  constructor(readonly path: string) {}
 
   get<
     P extends ObjectSetting<any>,
@@ -210,11 +204,6 @@ export class Router<V> {
       valid.query,
       valid.body
     );
-
-    const value =
-      this.options.onRequest !== undefined
-        ? this.options.onRequest(kibanaRequest)
-        : ({} as V);
 
     try {
       const kibanaResponse = await handler(

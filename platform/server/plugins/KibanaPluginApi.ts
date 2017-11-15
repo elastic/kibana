@@ -42,13 +42,9 @@ export interface KibanaPluginApi {
   http: {
     /**
      * Create and register a router at the specified path.
-     *
-     * The return value of the `onRequest` router option will be injected as the
-     * first param in any route handler registered on the router.
      */
     createAndRegisterRouter: <T>(
       path: string,
-      options: RouterOptions<T>
     ) => Router<T>;
   };
 
