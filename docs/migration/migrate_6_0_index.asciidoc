@@ -25,10 +25,7 @@ PUT .kibana/_settings
 // CONSOLE
 --
 
-NOTE: Running a version prior to version 5.6? You will need to remove `index.format` from the following step
-
-NOTE: Running version 5.6? Add `"index.mapping.single_type": true` under settings in the following step to ensure additional types will not be added after migrating.
-
+NOTE: Running version 5.6? Add `"index.format": 6` and `"index.mapping.single_type": true` under settings in the following step to ensure additional types will not be added after migrating.
 
 . Create `.kibana-6` index
 +
@@ -39,7 +36,6 @@ PUT .kibana-6
 {
   "settings" : {
     "number_of_shards" : 1,
-    "index.format": 6,
     "index.mapper.dynamic": false
   },
   "mappings" : {
