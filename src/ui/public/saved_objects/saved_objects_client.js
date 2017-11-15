@@ -180,13 +180,7 @@ export class SavedObjectsClient {
 
     return resolveUrl(this._apiBaseUrl, formatUrl({
       pathname: join(...path),
-      query: _.pick(query, value => {
-        if (Array.isArray(value)) {
-          return !!value.length;
-        }
-
-        return value != null;
-      })
+      query: _.pick(query, value => value != null)
     }));
   }
 
