@@ -17,16 +17,15 @@ uiModules.get('kibana/table_vis')
         noUiSlider.create(slider, {
           start: [$scope.vis.params.minFontSize, $scope.vis.params.maxFontSize],
           connect: true,
-          tooltips: true,
           step: 1,
           range: { 'min': 1, 'max': 100 },
-          format: { to: (value) => parseInt(value) + 'px', from: value => parseInt(value) }
+          format: { to: (value) => parseInt(value), from: value => parseInt(value) }
         });
-        slider.noUiSlider.on('change', function () {
+        slider.noUiSlider.on('slide', function () {
           const fontSize = slider.noUiSlider.get();
           $scope.$apply(() => {
-            $scope.vis.params.minFontSize = parseInt(fontSize[0], 10);
-            $scope.vis.params.maxFontSize = parseInt(fontSize[1], 10);
+            $scope.vis.params.minFontSize = fontSize[0];
+            $scope.vis.params.maxFontSize = fontSize[1];
           });
         });
 
@@ -35,10 +34,16 @@ uiModules.get('kibana/table_vis')
          * set the uislider value to the new value.
          */
         $scope.$watch('vis.params.minFontSize', (val) => {
-          slider.noUiSlider.set([val, null]);
+          val = parseInt(val);
+          if (slider.noUiSlider.get()[0] !== val) {
+            slider.noUiSlider.set([val, null]);
+          }
         });
         $scope.$watch('vis.params.maxFontSize', (val) => {
-          slider.noUiSlider.set([null, val]);
+          val = parseInt(val);
+          if (slider.noUiSlider.get()[1] !== val) {
+            slider.noUiSlider.set([null, val]);
+          }
         });
       }
     };
