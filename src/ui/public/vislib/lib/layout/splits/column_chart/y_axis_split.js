@@ -15,12 +15,12 @@ export function VislibLibLayoutSplitsColumnChartYAxisSplitProvider() {
       let rows;
 
       div.selectAll('.y-axis-div')
-      .append('div')
-      .data(function (d) {
-        rows = d.rows ? d.rows.length : 1;
-        return d.rows ? d.rows : [d];
-      })
-      .enter()
+        .append('div')
+        .data(function (d) {
+          rows = d.rows ? d.rows.length : 1;
+          return d.rows ? d.rows : [d];
+        })
+        .enter()
         .append('div')
         .attr('class', (d, i) => {
           let divClass = '';

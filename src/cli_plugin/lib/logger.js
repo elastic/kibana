@@ -3,7 +3,7 @@
  */
 export default class Logger {
 
-  constructor(settings) {
+  constructor(settings = {}) {
     this.previousLineEnded = true;
     this.silent = !!settings.silent;
     this.quiet = !!settings.quiet;

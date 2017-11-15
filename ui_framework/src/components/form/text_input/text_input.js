@@ -21,7 +21,7 @@ export const KuiTextInput = ({
   const classes = classNames('kuiTextInput', className, {
     'kuiTextInput-isInvalid': isInvalid
   }, sizeToClassNameMap[size]
-);
+  );
 
   return (
     <input

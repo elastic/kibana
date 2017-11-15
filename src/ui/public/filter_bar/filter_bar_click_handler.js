@@ -40,17 +40,17 @@ export function FilterBarClickHandlerProvider(Notifier, Private) {
         }
 
         let filters = _(aggBuckets)
-        .map(function (result) {
-          try {
-            return result.createFilter();
-          } catch (e) {
-            if (!simulate) {
-              notify.warning(e.message);
+          .map(function (result) {
+            try {
+              return result.createFilter();
+            } catch (e) {
+              if (!simulate) {
+                notify.warning(e.message);
+              }
             }
-          }
-        })
-        .filter(Boolean)
-        .value();
+          })
+          .filter(Boolean)
+          .value();
 
         if (!filters.length) return;
 
@@ -69,11 +69,11 @@ export function FilterBarClickHandlerProvider(Notifier, Private) {
           }
           else if ($state.query.language === 'kuery') {
             addFiltersToKuery($state, filters)
-            .then(() => {
-              if (_.isFunction($state.save)) {
-                $state.save();
-              }
-            });
+              .then(() => {
+                if (_.isFunction($state.save)) {
+                  $state.save();
+                }
+              });
           }
         }
         return filters;

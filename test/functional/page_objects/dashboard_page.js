@@ -292,10 +292,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     /**
      *
      * @param dashName {String}
-     * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean}}
+     * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean, needsConfirm: false}}
      */
     async saveDashboard(dashName, saveOptions = {}) {
       await this.enterDashboardTitleAndClickSave(dashName, saveOptions);
+
+      if (saveOptions.needsConfirm) {
+        await PageObjects.common.clickConfirmOnModal();
+      }
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -344,6 +348,11 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         const searchFilter = await testSubjects.find('searchFilter');
         await searchFilter.clearValue();
       });
+    }
+
+    async getSearchFilterValue() {
+      const searchFilter = await testSubjects.find('searchFilter');
+      return await searchFilter.getProperty('value');
     }
 
     async searchForDashboardWithName(dashName) {
@@ -512,12 +521,15 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async toggleExpandPanel() {
+    async toggleExpandPanel(panel) {
       log.debug('toggleExpandPanel');
-      await testSubjects.moveMouseTo('dashboardPanelTitle');
+      await (panel ? remote.moveMouseTo(panel) : testSubjects.moveMouseTo('dashboardPanelTitle'));
       const expandShown = await testSubjects.exists('dashboardPanelExpandIcon');
       if (!expandShown) {
-        await testSubjects.click('dashboardPanelToggleMenuIcon');
+        const toggleMenuItem = panel ?
+          await testSubjects.findDescendant('dashboardPanelToggleMenuIcon', panel) :
+          testSubjects.find('dashboardPanelToggleMenuIcon');
+        await toggleMenuItem.click();
       }
       await testSubjects.click('dashboardPanelExpandIcon');
     }

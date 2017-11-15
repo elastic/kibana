@@ -63,14 +63,14 @@ function createData(seriesData) {
     height: 40,
     width: 40
   })
-  .appendTo('body')
-  .addClass('y-axis-wrapper')
-  .get(0);
+    .appendTo('body')
+    .addClass('y-axis-wrapper')
+    .get(0);
 
   el = d3.select(node).datum(data);
 
   yAxisDiv = el.append('div')
-  .attr('class', 'y-axis-div');
+    .attr('class', 'y-axis-div');
 
   buildYAxis = function (params) {
     const visConfig = new VisConfig({

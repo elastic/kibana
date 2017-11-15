@@ -90,97 +90,97 @@ function name(fn) {
 }
 
 uiModules.get('kibana/private')
-.provider('Private', function () {
-  const provider = this;
+  .provider('Private', function () {
+    const provider = this;
 
-  // one cache/swaps per Provider
-  const cache = {};
-  const swaps = {};
+    // one cache/swaps per Provider
+    const cache = {};
+    const swaps = {};
 
-  // return the uniq id for this function
-  function identify(fn) {
-    if (typeof fn !== 'function') {
-      throw new TypeError('Expected private module "' + fn + '" to be a function');
+    // return the uniq id for this function
+    function identify(fn) {
+      if (typeof fn !== 'function') {
+        throw new TypeError('Expected private module "' + fn + '" to be a function');
+      }
+
+      if (fn.$$id) return fn.$$id;
+      else return (fn.$$id = nextId());
     }
 
-    if (fn.$$id) return fn.$$id;
-    else return (fn.$$id = nextId());
-  }
-
-  provider.stub = function (fn, instance) {
-    cache[identify(fn)] = instance;
-    return instance;
-  };
-
-  provider.swap = function (fn, prov) {
-    const id = identify(fn);
-    swaps[id] = prov;
-  };
-
-  provider.$get = ['$injector', function PrivateFactory($injector) {
-
-    // prevent circular deps by tracking where we came from
-    const privPath = [];
-    const pathToString = function () {
-      return privPath.map(name).join(' -> ');
+    provider.stub = function (fn, instance) {
+      cache[identify(fn)] = instance;
+      return instance;
     };
 
-    // call a private provider and return the instance it creates
-    function instantiate(prov, locals) {
-      if (~privPath.indexOf(prov)) {
-        throw new Error(
-          'Circular reference to "' + name(prov) + '"' +
+    provider.swap = function (fn, prov) {
+      const id = identify(fn);
+      swaps[id] = prov;
+    };
+
+    provider.$get = ['$injector', function PrivateFactory($injector) {
+
+    // prevent circular deps by tracking where we came from
+      const privPath = [];
+      const pathToString = function () {
+        return privPath.map(name).join(' -> ');
+      };
+
+      // call a private provider and return the instance it creates
+      function instantiate(prov, locals) {
+        if (~privPath.indexOf(prov)) {
+          throw new Error(
+            'Circular reference to "' + name(prov) + '"' +
           ' found while resolving private deps: ' + pathToString()
-        );
+          );
+        }
+
+        privPath.push(prov);
+
+        const context = {};
+        let instance = $injector.invoke(prov, context, locals);
+        if (!_.isObject(instance)) instance = context;
+
+        privPath.pop();
+        return instance;
       }
 
-      privPath.push(prov);
+      // retrieve an instance from cache or create and store on
+      function get(id, prov, $delegateId, $delegateProv) {
+        if (cache[id]) return cache[id];
 
-      const context = {};
-      let instance = $injector.invoke(prov, context, locals);
-      if (!_.isObject(instance)) instance = context;
+        let instance;
 
-      privPath.pop();
-      return instance;
-    }
+        if ($delegateId != null && $delegateProv != null) {
+          instance = instantiate(prov, {
+            $decorate: _.partial(get, $delegateId, $delegateProv)
+          });
+        } else {
+          instance = instantiate(prov);
+        }
 
-    // retrieve an instance from cache or create and store on
-    function get(id, prov, $delegateId, $delegateProv) {
-      if (cache[id]) return cache[id];
-
-      let instance;
-
-      if ($delegateId != null && $delegateProv != null) {
-        instance = instantiate(prov, {
-          $decorate: _.partial(get, $delegateId, $delegateProv)
-        });
-      } else {
-        instance = instantiate(prov);
+        return (cache[id] = instance);
       }
 
-      return (cache[id] = instance);
-    }
+      // main api, get the appropriate instance for a provider
+      function Private(prov) {
+        let id = identify(prov);
+        let $delegateId;
+        let $delegateProv;
 
-    // main api, get the appropriate instance for a provider
-    function Private(prov) {
-      let id = identify(prov);
-      let $delegateId;
-      let $delegateProv;
+        if (swaps[id]) {
+          $delegateId = id;
+          $delegateProv = prov;
 
-      if (swaps[id]) {
-        $delegateId = id;
-        $delegateProv = prov;
+          prov = swaps[$delegateId];
+          id = identify(prov);
+        }
 
-        prov = swaps[$delegateId];
-        id = identify(prov);
+        return get(id, prov, $delegateId, $delegateProv);
       }
 
-      return get(id, prov, $delegateId, $delegateProv);
-    }
+      Private.stub = provider.stub;
+      Private.swap = provider.swap;
 
-    Private.stub = provider.stub;
-    Private.swap = provider.swap;
-
-    return Private;
-  }];
-});
+      return Private;
+    }];
+  });

@@ -12,55 +12,32 @@ export default function ({ getService, getPageObjects }) {
     before(function () {
       log.debug('navigateToApp visualize');
       return PageObjects.common.navigateToUrl('visualize', 'new')
-      .then(function () {
-        log.debug('clickHeatmapChart');
-        return PageObjects.visualize.clickHeatmapChart();
-      })
-      .then(function clickNewSearch() {
-        return PageObjects.visualize.clickNewSearch();
-      })
-      .then(function setAbsoluteRange() {
-        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-        return PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      })
-      .then(function clickBucket() {
-        log.debug('Bucket = X-Axis');
-        return PageObjects.visualize.clickBucket('X-Axis');
-      })
-      .then(function selectAggregation() {
-        log.debug('Aggregation = Date Histogram');
-        return PageObjects.visualize.selectAggregation('Date Histogram');
-      })
-      .then(function selectField() {
-        log.debug('Field = @timestamp');
-        return PageObjects.visualize.selectField('@timestamp');
-      })
-      // leaving Interval set to Auto
-      .then(function clickGo() {
-        return PageObjects.visualize.clickGo();
-      })
-      .then(function () {
-        return PageObjects.header.waitUntilLoadingHasFinished();
-      })
-      .then(function waitForVisualization() {
-        return PageObjects.visualize.waitForVisualization();
-      });
-    });
-
-    describe('heatmap chart', function indexPatternCreation() {
-      const vizName1 = 'Visualization HeatmapChart';
-
-      it('should save and load', function () {
-        return PageObjects.visualize.saveVisualization(vizName1)
-        .then(function (message) {
-          log.debug('Saved viz message = ' + message);
-          expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
-        })
-        .then(function testVisualizeWaitForToastMessageGone() {
-          return PageObjects.header.waitForToastMessageGone();
-        })
         .then(function () {
-          return PageObjects.visualize.loadSavedVisualization(vizName1);
+          log.debug('clickHeatmapChart');
+          return PageObjects.visualize.clickHeatmapChart();
+        })
+        .then(function clickNewSearch() {
+          return PageObjects.visualize.clickNewSearch();
+        })
+        .then(function setAbsoluteRange() {
+          log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+          return PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        })
+        .then(function clickBucket() {
+          log.debug('Bucket = X-Axis');
+          return PageObjects.visualize.clickBucket('X-Axis');
+        })
+        .then(function selectAggregation() {
+          log.debug('Aggregation = Date Histogram');
+          return PageObjects.visualize.selectAggregation('Date Histogram');
+        })
+        .then(function selectField() {
+          log.debug('Field = @timestamp');
+          return PageObjects.visualize.selectField('@timestamp');
+        })
+      // leaving Interval set to Auto
+        .then(function clickGo() {
+          return PageObjects.visualize.clickGo();
         })
         .then(function () {
           return PageObjects.header.waitUntilLoadingHasFinished();
@@ -68,6 +45,29 @@ export default function ({ getService, getPageObjects }) {
         .then(function waitForVisualization() {
           return PageObjects.visualize.waitForVisualization();
         });
+    });
+
+    describe('heatmap chart', function indexPatternCreation() {
+      const vizName1 = 'Visualization HeatmapChart';
+
+      it('should save and load', function () {
+        return PageObjects.visualize.saveVisualization(vizName1)
+          .then(function (message) {
+            log.debug('Saved viz message = ' + message);
+            expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
+          })
+          .then(function testVisualizeWaitForToastMessageGone() {
+            return PageObjects.header.waitForToastMessageGone();
+          })
+          .then(function () {
+            return PageObjects.visualize.loadSavedVisualization(vizName1);
+          })
+          .then(function () {
+            return PageObjects.header.waitUntilLoadingHasFinished();
+          })
+          .then(function waitForVisualization() {
+            return PageObjects.visualize.waitForVisualization();
+          });
       });
 
       it('should show correct chart, take screenshot', async function () {
@@ -100,13 +100,13 @@ export default function ({ getService, getPageObjects }) {
         ];
 
         return PageObjects.visualize.toggleSpyPanel()
-        .then(function showData() {
-          return PageObjects.visualize.getDataTableData();
-        })
-        .then(function showData(data) {
-          log.debug(data.split('\n'));
-          expect(data.trim().split('\n')).to.eql(expectedChartData);
-        });
+          .then(function showData() {
+            return PageObjects.visualize.getDataTableData();
+          })
+          .then(function showData(data) {
+            log.debug(data.split('\n'));
+            expect(data.trim().split('\n')).to.eql(expectedChartData);
+          });
       });
     });
   });

@@ -22,7 +22,7 @@ import { keyCodes } from 'ui_framework/services';
 import { DashboardContainerAPI } from './dashboard_container_api';
 import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
-import { EmbeddableHandlersRegistryProvider } from 'ui/embeddable/embeddable_handlers_registry';
+import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_factories_registry';
 
 import { DashboardViewportProvider } from './viewport/dashboard_viewport_provider';
 
@@ -59,8 +59,8 @@ app.directive('dashboardApp', function ($injector) {
       const filterBar = Private(FilterBarQueryFilterProvider);
       const docTitle = Private(DocTitleProvider);
       const notify = new Notifier({ location: 'Dashboard' });
-      const embeddableHandlers = Private(EmbeddableHandlersRegistryProvider);
-      $scope.getEmbeddableHandler = panelType => embeddableHandlers.byName[panelType];
+      const embeddableFactories = Private(EmbeddableFactoriesRegistryProvider);
+      $scope.getEmbeddableFactory = panelType => embeddableFactories.byName[panelType];
 
       const dash = $scope.dash = $route.current.locals.dash;
       if (dash.id) {
@@ -116,7 +116,6 @@ app.directive('dashboardApp', function ($injector) {
         dashboardStateManager.getQuery() || { query: '', language: config.get('search:queryLanguage') },
         filterBar.getFilters()
       );
-      let pendingVisCount = _.size(dashboardStateManager.getPanels());
 
       timefilter.enabled = true;
       dash.searchSource.highlightAll(true);
@@ -174,7 +173,6 @@ app.directive('dashboardApp', function ($injector) {
 
       // called by the saved-object-finder when a user clicks a vis
       $scope.addVis = function (hit, showToast = true) {
-        pendingVisCount++;
         dashboardStateManager.addNewPanel(hit.id, 'visualization');
         if (showToast) {
           notify.info(`Visualization successfully added to your dashboard`);
@@ -182,7 +180,6 @@ app.directive('dashboardApp', function ($injector) {
       };
 
       $scope.addSearch = function (hit) {
-        pendingVisCount++;
         dashboardStateManager.addNewPanel(hit.id, 'search');
         notify.info(`Search successfully added to your dashboard`);
       };
@@ -366,14 +363,6 @@ app.directive('dashboardApp', function ($injector) {
         chrome.removeApplicationClass(['theme-dark']);
         chrome.addApplicationClass('theme-light');
       }
-
-      $scope.$on('ready:vis', function () {
-        if (pendingVisCount > 0) pendingVisCount--;
-        if (pendingVisCount === 0) {
-          dashboardStateManager.saveState();
-          $scope.refresh();
-        }
-      });
 
       if ($route.current.params && $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM]) {
         // Hide the toast message since they will already see a notification from saving the visualization,

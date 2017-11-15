@@ -2,6 +2,9 @@ import alter from '../lib/alter.js';
 import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
 
+const validSymbols = ['triangle', 'cross', 'square', 'diamond', 'circle'];
+const defaultSymbol = 'circle';
+
 export default new Chainable('points', {
   args: [
     {
@@ -30,8 +33,15 @@ export default new Chainable('points', {
     },
     {
       name: 'symbol',
-      help: 'cross, circle, triangle, square or diamond',
-      types: ['string', 'null']
+      help: `point symbol. One of: ${validSymbols.join(', ')}`,
+      types: ['string', 'null'],
+      suggestions: validSymbols.map(symbol => {
+        const suggestion = { name: symbol };
+        if (symbol === defaultSymbol) {
+          suggestion.help = 'default';
+        }
+        return suggestion;
+      })
     },
     {
       name: 'show',
@@ -57,9 +67,8 @@ export default new Chainable('points', {
         eachSeries.points.lineWidth = weight;
       }
 
-      symbol = symbol || 'circle';
-      const validSymbols = ['triangle', 'cross', 'square', 'diamond', 'circle'];
-      if (!_.contains(['triangle', 'cross', 'square', 'diamond', 'circle'], symbol)) {
+      symbol = symbol || defaultSymbol;
+      if (!_.contains(validSymbols, symbol)) {
         throw new Error('Valid symbols are: ' + validSymbols.join(', '));
       }
 

@@ -5,7 +5,7 @@ import { DashboardGrid } from '../grid';
 export function DashboardViewport({
   getContainerApi,
   maximizedPanelId,
-  getEmbeddableHandler,
+  getEmbeddableFactory,
   panelCount,
   title,
   description,
@@ -20,7 +20,7 @@ export function DashboardViewport({
       className={useMargins ? 'dashboard-viewport-with-margins' : 'dashboard-viewport'}
     >
       <DashboardGrid
-        getEmbeddableHandler={getEmbeddableHandler}
+        getEmbeddableFactory={getEmbeddableFactory}
         getContainerApi={getContainerApi}
         maximizedPanelId={maximizedPanelId}
       />
@@ -30,7 +30,7 @@ export function DashboardViewport({
 
 DashboardViewport.propTypes = {
   getContainerApi: PropTypes.func,
-  getEmbeddableHandler: PropTypes.func,
+  getEmbeddableFactory: PropTypes.func,
   maximizedPanelId: PropTypes.string,
   panelCount: PropTypes.number,
   title: PropTypes.string,

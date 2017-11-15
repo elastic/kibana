@@ -6,7 +6,7 @@ export const KuiFieldGroupSection = ({
   isWide,
   children,
   className,
-   ...rest
+  ...rest
 }) => {
   const classes = classNames('kuiFieldGroupSection', className, {
     'kuiFieldGroupSection--wide': isWide

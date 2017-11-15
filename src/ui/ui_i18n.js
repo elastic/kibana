@@ -33,7 +33,7 @@ export class UiI18n {
     return defaults({}, requestedTranslations, defaultTranslations);
   }
 
-   /**
+  /**
    *  uiExport consumers help the uiExports module know what to
    *  do with the uiExports defined by each plugin.
    *

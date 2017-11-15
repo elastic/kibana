@@ -83,26 +83,13 @@ describe('splitByTerms(req, panel, series)', () => {
             field: 'host',
             size: 10,
             order: {
-              'avgmetric-SORT > SORT': 'desc'
+              'avgmetric-SORT': 'desc'
             }
           },
           aggs: {
             'avgmetric-SORT': {
-              aggs: {
-                SORT: {
-                  avg: {
-                    field: 'cpu'
-                  }
-                }
-              },
-              filter: {
-                range: {
-                  timestamp: {
-                    format: 'epoch_millis',
-                    gte: 1483232355000,
-                    lte: 1483232400000
-                  }
-                }
+              avg: {
+                field: 'cpu'
               }
             }
           }

@@ -70,9 +70,9 @@ const defaultEditor = function ($rootScope, $compile) {
                 return _.get(agg, 'schema.group') === 'metrics';
               });
             }
-              // this can fail when the agg.type is changed but the
-              // params have not been set yet. watcher will trigger again
-              // when the params update
+            // this can fail when the agg.type is changed but the
+            // params have not been set yet. watcher will trigger again
+            // when the params update
             catch (e) {} // eslint-disable-line no-empty
           }, true);
 

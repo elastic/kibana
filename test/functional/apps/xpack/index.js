@@ -10,21 +10,21 @@ export default function ({ getService, getPageObjects }) {
 
       // find class toaster and see if there's any list items in it?
       return PageObjects.settings.navigateTo()
-      .then(() => {
-        return PageObjects.monitoring.getToasterContents();
-      })
-      .then((contents) => {
+        .then(() => {
+          return PageObjects.monitoring.getToasterContents();
+        })
+        .then((contents) => {
         // Welcome to X-Pack!
         // Sharing your cluster statistics with us helps us improve. Your data is never shared with anyone. Not interested? Opt out here.
         // Dismiss
-        log.debug('Toast banner contents = ' + contents);
-        if (contents.includes('X-Pack')) {
-          return PageObjects.monitoring.clickOptOut()
-          .then(() => {
-            return PageObjects.monitoring.dismissWelcome();
-          });
-        }
-      });
+          log.debug('Toast banner contents = ' + contents);
+          if (contents.includes('X-Pack')) {
+            return PageObjects.monitoring.clickOptOut()
+              .then(() => {
+                return PageObjects.monitoring.dismissWelcome();
+              });
+          }
+        });
 
     });
 

@@ -188,6 +188,14 @@ var rules = {
       },
       "field": "{field}",
       "interval": 50,
+      "extended_bounds": {
+        "__template": {
+          "min": 0,
+          "max": 50
+        },
+        "min": 0,
+        "max": 50
+      },
       "min_doc_count": 0,
       "order": {
         __template: {
@@ -208,6 +216,14 @@ var rules = {
       "field": "{field}",
       "interval": { __one_of: ["year", "quarter", "week", "day", "hour", "minute", "second"] },
       "min_doc_count": 0,
+      "extended_bounds": {
+        "__template": {
+          "min": "now/d",
+          "max": "now/d"
+        },
+        "min": "now/d",
+        "max": "now/d"
+      },
       "order": {
         __template: {
           "_key": "asc"

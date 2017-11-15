@@ -12,40 +12,40 @@ export default function ({ getService, getPageObjects }) {
     before(function () {
       log.debug('navigateToApp visualize');
       return PageObjects.common.navigateToUrl('visualize', 'new')
-      .then(function () {
-        log.debug('clickDataTable');
-        return PageObjects.visualize.clickDataTable();
-      })
-      .then(function clickNewSearch() {
-        log.debug('clickNewSearch');
-        return PageObjects.visualize.clickNewSearch();
-      })
-      .then(function setAbsoluteRange() {
-        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-        return PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      })
-      .then(function clickBucket() {
-        log.debug('Bucket = Split Rows');
-        return PageObjects.visualize.clickBucket('Split Rows');
-      })
-      .then(function selectAggregation() {
-        log.debug('Aggregation = Histogram');
-        return PageObjects.visualize.selectAggregation('Histogram');
-      })
-      .then(function selectField() {
-        log.debug('Field = bytes');
-        return PageObjects.visualize.selectField('bytes');
-      })
-      .then(function setInterval() {
-        log.debug('Interval = 2000');
-        return PageObjects.visualize.setNumericInterval('2000');
-      })
-      .then(function clickGo() {
-        return PageObjects.visualize.clickGo();
-      })
-      .then(function () {
-        return PageObjects.header.waitUntilLoadingHasFinished();
-      });
+        .then(function () {
+          log.debug('clickDataTable');
+          return PageObjects.visualize.clickDataTable();
+        })
+        .then(function clickNewSearch() {
+          log.debug('clickNewSearch');
+          return PageObjects.visualize.clickNewSearch();
+        })
+        .then(function setAbsoluteRange() {
+          log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+          return PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        })
+        .then(function clickBucket() {
+          log.debug('Bucket = Split Rows');
+          return PageObjects.visualize.clickBucket('Split Rows');
+        })
+        .then(function selectAggregation() {
+          log.debug('Aggregation = Histogram');
+          return PageObjects.visualize.selectAggregation('Histogram');
+        })
+        .then(function selectField() {
+          log.debug('Field = bytes');
+          return PageObjects.visualize.selectField('bytes');
+        })
+        .then(function setInterval() {
+          log.debug('Interval = 2000');
+          return PageObjects.visualize.setNumericInterval('2000');
+        })
+        .then(function clickGo() {
+          return PageObjects.visualize.clickGo();
+        })
+        .then(function () {
+          return PageObjects.header.waitUntilLoadingHasFinished();
+        });
     });
 
     describe('data table', function indexPatternCreation() {
@@ -53,19 +53,19 @@ export default function ({ getService, getPageObjects }) {
 
       it('should be able to save and load', function () {
         return PageObjects.visualize.saveVisualization(vizName1)
-        .then(function (message) {
-          log.debug('Saved viz message = ' + message);
-          expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
-        })
-        .then(function testVisualizeWaitForToastMessageGone() {
-          return PageObjects.header.waitForToastMessageGone();
-        })
-        .then(function () {
-          return PageObjects.visualize.loadSavedVisualization(vizName1);
-        })
-        .then(function () {
-          return PageObjects.visualize.waitForVisualization();
-        });
+          .then(function (message) {
+            log.debug('Saved viz message = ' + message);
+            expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
+          })
+          .then(function testVisualizeWaitForToastMessageGone() {
+            return PageObjects.header.waitForToastMessageGone();
+          })
+          .then(function () {
+            return PageObjects.visualize.loadSavedVisualization(vizName1);
+          })
+          .then(function () {
+            return PageObjects.visualize.waitForVisualization();
+          });
       });
 
       it('should show correct data, take screenshot', function () {
@@ -76,10 +76,10 @@ export default function ({ getService, getPageObjects }) {
 
         return retry.try(function () {
           return PageObjects.visualize.getDataTableData()
-          .then(function showData(data) {
-            log.debug(data.split('\n'));
-            expect(data.split('\n')).to.eql(expectedChartData);
-          });
+            .then(function showData(data) {
+              log.debug(data.split('\n'));
+              expect(data.split('\n')).to.eql(expectedChartData);
+            });
         });
       });
 

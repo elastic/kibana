@@ -16,14 +16,14 @@ import { VisualizeConstants } from './visualize_constants';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
 uiRoutes
-.defaults(/visualize/, {
-  requireDefaultIndex: true
-})
-.when(VisualizeConstants.LANDING_PAGE_PATH, {
-  template: visualizeListingTemplate,
-  controller: VisualizeListingController,
-  controllerAs: 'listingController',
-});
+  .defaults(/visualize/, {
+    requireDefaultIndex: true
+  })
+  .when(VisualizeConstants.LANDING_PAGE_PATH, {
+    template: visualizeListingTemplate,
+    controller: VisualizeListingController,
+    controllerAs: 'listingController',
+  });
 
 FeatureCatalogueRegistryProvider.register(() => {
   return {
