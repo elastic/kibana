@@ -66,7 +66,7 @@ export class PanelOptionsMenu extends React.Component {
     ];
     if (!this.props.isExpanded) {
       mainPanelMenuItems.push({
-        name: 'Delete visualization',
+        name: 'Delete from dashboard',
         'data-test-subj': 'dashboardPanelRemoveIcon',
         icon: <span
           aria-hidden="true"
