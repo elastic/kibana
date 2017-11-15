@@ -49,10 +49,10 @@ The following example shows a valid regionmap configuration.
                 description: "INSEE numeric identifier"
 
 `name:`:: Mandatory. A description of the map being provided.
-`url:`:: Mandatory. The location of the geojson file as provided by a webserver. This field also serves as a unique identifier for the file.
+`url:`:: Mandatory. The location of the geojson file as provided by a webserver.
 `attribution:`:: Optional. References the originating source of the geojson file.
 `fields:`:: Mandatory. Each layer can contain multiple fields to indicate what properties from the geojson features you wish to expose. The example above shows how to define multiple properties.
-`fields.name:`:: Mandatory. This value is used to do an inner-join between the document stored in Elasticsearch and the geojson file. eg if the field in the Elasticsearch is called `Location`, it must match a field in the geojson of the exact same name that Kibana can then use to lookup for the geoshape data.
+`fields.name:`:: Mandatory. This value is used to do an inner-join between the document stored in Elasticsearch and the geojson file. e.g. if the field in the geojson is called `Location` and has city names, there must be a field in Elasticsearch that holds the same values that Kibana can then use to lookup for the geoshape data.
 `fields.description:`:: Mandatory. The human readable text that is shown under the Options tab when building the Region Map visualization.
 
 `elasticsearch.username:` and `elasticsearch.password:`:: If your Elasticsearch is protected with basic authentication,
