@@ -22,7 +22,7 @@ export function fieldFormatsMixin(kbnServer, server) {
     return new FieldFormatsService(fieldFormatClasses, getConfig);
   });
 
-  server.decorate('server', 'registerFieldFormatClass', (FieldFormat) => {
+  server.decorate('server', 'registerFieldFormat', (FieldFormat) => {
     fieldFormatClasses.push(FieldFormat);
   });
 }
