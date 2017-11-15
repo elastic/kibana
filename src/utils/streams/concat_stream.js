@@ -1,4 +1,4 @@
-import { createReduceStream } from './';
+import { createReduceStream } from './reduce_stream';
 
 /**
  *  Creates a Transform stream that consumes all provided
