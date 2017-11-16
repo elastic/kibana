@@ -15,7 +15,7 @@ import {
 
 import {
   getEmbeddable,
-  getEmbeddableTitle,
+  getPanel,
   getMaximizedPanelId,
   getFullScreenMode,
   getViewMode
@@ -23,8 +23,10 @@ import {
 
 const mapStateToProps = ({ dashboard }, { panelId }) => {
   const embeddable = getEmbeddable(dashboard, panelId);
+  const panel = getPanel(dashboard, panelId);
+  const embeddableTitle = embeddable ? embeddable.title : '';
   return {
-    title: embeddable ? getEmbeddableTitle(dashboard, panelId) : '',
+    title: panel.title === undefined ? embeddableTitle : panel.title,
     isExpanded: getMaximizedPanelId(dashboard) === panelId,
     isViewOnlyMode: getFullScreenMode(dashboard) || getViewMode(dashboard) === DashboardViewMode.VIEW,
   };
@@ -57,6 +59,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   return {
     title,
     actions,
+    isViewOnlyMode,
   };
 };
 
