@@ -90,16 +90,16 @@ describe('UrlFormat', function () {
       });
 
       expect(url.convert('www.elastic.co', 'html'))
-      .to.be('<span ng-non-bindable><a href="http://kibana/app/www.elastic.co" target="_blank" rel="noopener noreferrer">www.elastic.co</a></span>');
+        .to.be('<span ng-non-bindable><a href="http://kibana/app/www.elastic.co" target="_blank" rel="noopener noreferrer">www.elastic.co</a></span>');
 
       expect(url.convert('elastic.co', 'html'))
-      .to.be('<span ng-non-bindable><a href="http://kibana/app/elastic.co" target="_blank" rel="noopener noreferrer">elastic.co</a></span>');
+        .to.be('<span ng-non-bindable><a href="http://kibana/app/elastic.co" target="_blank" rel="noopener noreferrer">elastic.co</a></span>');
 
       expect(url.convert('elastic', 'html'))
-      .to.be('<span ng-non-bindable><a href="http://kibana/app/elastic" target="_blank" rel="noopener noreferrer">elastic</a></span>');
+        .to.be('<span ng-non-bindable><a href="http://kibana/app/elastic" target="_blank" rel="noopener noreferrer">elastic</a></span>');
 
       expect(url.convert('ftp://elastic.co', 'html'))
-      .to.be('<span ng-non-bindable><a href="http://kibana/app/ftp://elastic.co" target="_blank" rel="noopener noreferrer">ftp://elastic.co</a></span>');
+        .to.be('<span ng-non-bindable><a href="http://kibana/app/ftp://elastic.co" target="_blank" rel="noopener noreferrer">ftp://elastic.co</a></span>');
     });
 
     it('should rely on currentUrlParts', function () {
@@ -111,17 +111,17 @@ describe('UrlFormat', function () {
       });
 
       expect(url.convert('../app/kibana', 'html'))
-      .to.be('<span ng-non-bindable><a href="http://kibana.host.com/abc/app/../app/kibana" target="_blank" rel="noopener noreferrer">../app/kibana</a></span>');
+        .to.be('<span ng-non-bindable><a href="http://kibana.host.com/abc/app/../app/kibana" target="_blank" rel="noopener noreferrer">../app/kibana</a></span>');
     });
 
     it('should fail gracefully if there are no currentUrlParts provided', function () {
       const url = new UrlFormat();
 
       expect(url.convert('../app/kibana', 'html'))
-      .to.be('<span ng-non-bindable>../app/kibana</span>');
+        .to.be('<span ng-non-bindable>../app/kibana</span>');
 
       expect(url.convert('http://www.elastic.co', 'html'))
-      .to.be('<span ng-non-bindable><a href="http://www.elastic.co" target="_blank" rel="noopener noreferrer">http://www.elastic.co</a></span>');
+        .to.be('<span ng-non-bindable><a href="http://www.elastic.co" target="_blank" rel="noopener noreferrer">http://www.elastic.co</a></span>');
     });
   });
 });
