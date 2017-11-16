@@ -6,50 +6,60 @@
     flex-grow: 1;
     flex-basis: 0;
   }
+}
 
-  $gutterTypes: (
-    gutterSmall: $kuiSizeS,
-    gutterMedium: $kuiSize,
-    gutterLarge: $kuiSizeL,
-    gutterExtraLarge: $kuiSizeXXL,
-  );
+$gutterTypes: (
+  gutterSmall: $kuiSizeS,
+  gutterMedium: $kuiSize,
+  gutterLarge: $kuiSizeL,
+  gutterExtraLarge: $kuiSizeXXL,
+);
 
-  // Gutter Sizes
-  @each $gutterName, $gutterSize in $gutterTypes {
-    &.kuiFlexGroup--#{$gutterName} > .kuiFlexItem + .kuiFlexItem {
-      margin-left: $gutterSize;
+// Gutter Sizes
+@each $gutterName, $gutterSize in $gutterTypes {
+  $halfGutterSize: $gutterSize * 0.5;
+
+  &.kuiFlexGroup--#{$gutterName} {
+    margin: -$halfGutterSize;
+
+    & > .kuiFlexItem {
+      margin: $halfGutterSize;
     }
   }
+}
 
-  // Justify the grid
-  &.kuiFlexGroup--justifyContentSpaceBetween {
-    justify-content: space-between;
-  }
+// Justify the grid
+.kuiFlexGroup--justifyContentSpaceBetween {
+  justify-content: space-between;
+}
 
-  &.kuiFlexGroup--justifyContentSpaceAround {
-    justify-content: space-around;
-  }
+.kuiFlexGroup--justifyContentSpaceAround {
+  justify-content: space-around;
+}
 
-  &.kuiFlexGroup--justifyContentCenter {
-    justify-content: center;
-  }
+.kuiFlexGroup--justifyContentCenter {
+  justify-content: center;
+}
 
-  &.kuiFlexGroup--justifyContentFlexEnd {
-    justify-content: flex-end;
-  }
+.kuiFlexGroup--justifyContentFlexEnd {
+  justify-content: flex-end;
+}
 
-  // Align Items
-  &.kuiFlexGroup--alignItemsStart {
-    align-items: flex-start;
-  }
+// Align Items
+.kuiFlexGroup--alignItemsStart {
+  align-items: flex-start;
+}
 
-  &.kuiFlexGroup--alignItemsCenter {
-    align-items: center;
-  }
+.kuiFlexGroup--alignItemsCenter {
+  align-items: center;
+}
 
-  &.kuiFlexGroup--alignItemsEnd {
-    align-items: flex-end;
-  }
+.kuiFlexGroup--alignItemsEnd {
+  align-items: flex-end;
+}
+
+.kuiFlexGroup--wrap {
+  flex-wrap: wrap;
 }
 
 @include screenXSmall {

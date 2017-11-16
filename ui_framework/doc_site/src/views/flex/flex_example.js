@@ -15,6 +15,10 @@ import FlexGroup from './flex_group';
 const flexGroupSource = require('!!raw-loader!./flex_group');
 const flexGroupHtml = renderToHtml(FlexGroup);
 
+import FlexGroupWrap from './flex_group_wrap';
+const flexGroupWrapSource = require('!!raw-loader!./flex_group_wrap');
+const flexGroupWrapHtml = renderToHtml(FlexGroupWrap);
+
 import FlexItems from './flex_items';
 const flexItemsSource = require('!!raw-loader!./flex_items');
 const flexItemsHtml = renderToHtml(FlexItems);
@@ -66,6 +70,25 @@ export default props => (
       </GuideText>
 
       <GuideDemo className="guideDemo__highlightGrid"><FlexGroup /></GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="FlexGroup can wrap its items"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: flexGroupWrapSource,
+      }, {
+        type: GuideSectionTypes.HTML,
+        code: flexGroupWrapHtml,
+      }]}
+    >
+      <GuideText>
+        You can set <GuideCode>wrap</GuideCode> on <GuideCode>FlexGroup</GuideCode> if it
+        contains <GuideCode>FlexItem</GuideCode>s with minimum widths, which you want to wrap as
+        the container becomes narrower.
+      </GuideText>
+
+      <GuideDemo className="guideDemo__highlightGrid"><FlexGroupWrap /></GuideDemo>
     </GuideSection>
 
     <GuideSection
