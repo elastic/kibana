@@ -204,7 +204,6 @@ uiModules
         $scope.$watch('vis.initialized', $scope.fetch);
 
         $scope.fetch();
-        $scope.$root.$broadcast('ready:vis');
       }
     };
   });

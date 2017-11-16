@@ -348,56 +348,58 @@ function discoverController(
           'rows',
           'fetchStatus'
         ], (function updateResultState() {
-            let prev = {};
-            const status = {
-              LOADING: 'loading', // initial data load
-              READY: 'ready', // results came back
-              NO_RESULTS: 'none' // no results came back
+          let prev = {};
+          const status = {
+            LOADING: 'loading', // initial data load
+            READY: 'ready', // results came back
+            NO_RESULTS: 'none' // no results came back
+          };
+
+          function pick(rows, oldRows, fetchStatus) {
+            // initial state, pretend we are loading
+            if (rows == null && oldRows == null) return status.LOADING;
+
+            const rowsEmpty = _.isEmpty(rows);
+            // An undefined fetchStatus means the requests are still being
+            // prepared to be sent. When all requests are completed,
+            // fetchStatus is set to null, so it's important that we
+            // specifically check for undefined to determine a loading status.
+            const preparingForFetch = _.isUndefined(fetchStatus);
+            if (preparingForFetch) return status.LOADING;
+            else if (rowsEmpty && fetchStatus) return status.LOADING;
+            else if (!rowsEmpty) return status.READY;
+            else return status.NO_RESULTS;
+          }
+
+          return function () {
+            const current = {
+              rows: $scope.rows,
+              fetchStatus: $scope.fetchStatus
             };
 
-            function pick(rows, oldRows, fetchStatus) {
-              // initial state, pretend we are loading
-              if (rows == null && oldRows == null) return status.LOADING;
+            $scope.resultState = pick(
+              current.rows,
+              prev.rows,
+              current.fetchStatus,
+              prev.fetchStatus
+            );
 
-              const rowsEmpty = _.isEmpty(rows);
-              // An undefined fetchStatus means the requests are still being
-              // prepared to be sent. When all requests are completed,
-              // fetchStatus is set to null, so it's important that we
-              // specifically check for undefined to determine a loading status.
-              const preparingForFetch = _.isUndefined(fetchStatus);
-              if (preparingForFetch) return status.LOADING;
-              else if (rowsEmpty && fetchStatus) return status.LOADING;
-              else if (!rowsEmpty) return status.READY;
-              else return status.NO_RESULTS;
-            }
+            prev = current;
+          };
+        }()));
 
-            return function () {
-              const current = {
-                rows: $scope.rows,
-                fetchStatus: $scope.fetchStatus
-              };
+        // function initForTime() {
+        //   return setupVisualization().then($scope.updateTime);
+        // }
 
-              $scope.resultState = pick(
-                current.rows,
-                prev.rows,
-                current.fetchStatus,
-                prev.fetchStatus
-              );
-
-              prev = current;
-            };
-          }()));
-
-        function initForTime() {
-          return setupVisualization().then($scope.updateTime);
+        if ($scope.opts.timefield) {
+          setupVisualization();
+          $scope.updateTime();
         }
 
-        return Promise.resolve($scope.opts.timefield && initForTime())
-          .then(function () {
-            init.complete = true;
-            $state.replace();
-            $scope.$emit('application.load');
-          });
+        init.complete = true;
+        $state.replace();
+        $scope.$emit('application.load');
       });
   });
 
@@ -637,11 +639,9 @@ function discoverController(
     $scope.minimumVisibleRows = $scope.hits;
   };
 
-  let loadingVis;
   function setupVisualization() {
     // If we're not setting anything up we need to return an empty promise
-    if (!$scope.opts.timefield) return Promise.resolve();
-    if (loadingVis) return loadingVis;
+    if (!$scope.opts.timefield) return;
 
     const visStateAggs = [
       {
@@ -664,39 +664,25 @@ function discoverController(
       visState.aggs = visStateAggs;
 
       $scope.vis.setState(visState);
-      return Promise.resolve($scope.vis);
+    } else {
+      $scope.vis = new Vis($scope.indexPattern, {
+        title: savedSearch.title,
+        type: 'histogram',
+        params: {
+          addLegend: false,
+          addTimeMarker: true
+        },
+        aggs: visStateAggs
+      });
+
+      $scope.searchSource.onRequestStart((searchSource, searchRequest) => {
+        return $scope.vis.onSearchRequestStart(searchSource, searchRequest);
+      });
+
+      $scope.searchSource.aggs(function () {
+        return $scope.vis.getAggConfig().toDsl();
+      });
     }
-
-    $scope.vis = new Vis($scope.indexPattern, {
-      title: savedSearch.title,
-      type: 'histogram',
-      params: {
-        addLegend: false,
-        addTimeMarker: true
-      },
-      aggs: visStateAggs
-    });
-
-    $scope.searchSource.onRequestStart((searchSource, searchRequest) => {
-      return $scope.vis.onSearchRequestStart(searchSource, searchRequest);
-    });
-
-    $scope.searchSource.aggs(function () {
-      return $scope.vis.getAggConfig().toDsl();
-    });
-
-    // stash this promise so that other calls to setupVisualization will have to wait
-    loadingVis = new Promise(function (resolve) {
-      $scope.$on('ready:vis', function () {
-        resolve($scope.vis);
-      });
-    })
-      .finally(function () {
-      // clear the loading flag
-        loadingVis = null;
-      });
-
-    return loadingVis;
   }
 
   function resolveIndexPatternLoading() {
