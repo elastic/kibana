@@ -28,6 +28,7 @@ const defaultEditor = function ($rootScope, $compile) {
 
       const updateScope = () => {
         $scope.vis = this.vis;
+        $scope.savedObj = this.savedObj;
         $scope.visData = visData;
         $scope.uiState = this.vis.getUiState();
         $scope.searchSource = searchSource;
