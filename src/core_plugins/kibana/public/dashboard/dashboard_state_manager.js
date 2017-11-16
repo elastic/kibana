@@ -10,7 +10,9 @@ import {
   setPanels,
   updateUseMargins,
   updateIsFullScreenMode,
-  minimizePanel
+  minimizePanel,
+  updateTitle,
+  updateDescription,
 } from './actions';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { createPanelState, getPersistedStateId } from './panel';
@@ -20,6 +22,8 @@ import {
   getFullScreenMode,
   getPanels,
   getPanel,
+  getTitle,
+  getDescription,
   getUseMargins,
 } from '../selectors';
 
@@ -82,6 +86,8 @@ export class DashboardStateManager {
     store.dispatch(updateViewMode(this.getViewMode()));
     store.dispatch(updateUseMargins(this.getUseMargins()));
     store.dispatch(updateIsFullScreenMode(this.getFullScreenMode()));
+    store.dispatch(updateTitle(this.getTitle()));
+    store.dispatch(updateDescription(this.getDescription()));
 
     this.changeListeners = [];
 
@@ -134,6 +140,14 @@ export class DashboardStateManager {
 
     if (getFullScreenMode(state) !== this.getFullScreenMode()) {
       store.dispatch(updateIsFullScreenMode(this.getFullScreenMode()));
+    }
+
+    if (getTitle(state) !== this.getTitle()) {
+      store.dispatch(updateTitle(this.getTitle()));
+    }
+
+    if (getDescription(state) !== this.getDescription()) {
+      store.dispatch(updateDescription(this.getDescription()));
     }
   }
 
