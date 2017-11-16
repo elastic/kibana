@@ -9,9 +9,3 @@ The changes listed below have been released for the first time in {kib}
 === Breaking Changes
 
 No breaking changes have been made yet.
-
-ifdef::include-xpack[]
-:edit_url!:
-include::{xkb-repo-dir}/release-notes/7.0.0-alpha1.asciidoc[]
-endif::include-xpack[]
-:edit_url:
