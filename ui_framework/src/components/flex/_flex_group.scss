@@ -7,21 +7,18 @@
     flex-basis: 0;
   }
 
+  $gutterTypes: (
+    gutterSmall: $kuiSizeS,
+    gutterMedium: $kuiSize,
+    gutterLarge: $kuiSizeL,
+    gutterExtraLarge: $kuiSizeXXL,
+  );
+
   // Gutter Sizes
-  &.kuiFlexGroup--gutterSmall > .kuiFlexItem + .kuiFlexItem {
-    margin-left: $kuiSizeS;
-  }
-
-  &.kuiFlexGroup--gutterMedium > .kuiFlexItem + .kuiFlexItem {
-    margin-left: $kuiSize;
-  }
-
-  &.kuiFlexGroup--gutterLarge > .kuiFlexItem + .kuiFlexItem {
-    margin-left: $kuiSizeL;
-  }
-
-  &.kuiFlexGroup--gutterExtraLarge > .kuiFlexItem + .kuiFlexItem {
-    margin-left: $kuiSizeXXL;
+  @each $gutterName, $gutterSize in $gutterTypes {
+    &.kuiFlexGroup--#{$gutterName} > .kuiFlexItem + .kuiFlexItem {
+      margin-left: $gutterSize;
+    }
   }
 
   // Justify the grid
