@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }) {
           'c 1,319 { "lat": 47.72720855392425, "lon": -109.84745063951028 }',
           'b 999 { "lat": 62.04130042948433, "lon": -155.28087269195967 }',
           'f 187 { "lat": 45.656166475784175, "lon": -82.45831044201545 }',
-          '8 108 { "lat": 18.85260305600241, "lon": -156.5148810390383 }'];
+          '8 108 { "lat": 18.85260305600241, "lon": -156.5148810390383 }'].sort();
         //level 1
         await PageObjects.visualize.clickMapZoomOut();
         //level 0
@@ -112,7 +112,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.settings.setPageSize('All');
         await PageObjects.visualize.selectTableInSpyPaneSelect();
         const actualTableData = await PageObjects.visualize.getDataTableData();
-        compareTableData(expectedTableData, actualTableData.trim().split('\n'));
+        compareTableData(expectedTableData, prepData(actualTableData));
         await PageObjects.visualize.closeSpyPanel();
       });
 
@@ -135,13 +135,13 @@ export default function ({ getService, getPageObjects }) {
           '- 9q 722 { "lat": 36.51360723008776, "lon": -119.18302692440686 }',
           '- 9w 475 { "lat": 36.39264289740669, "lon": -106.91102287667363 }',
           '- cb 457 { "lat": 46.70940601270996, "lon": -95.81077801137022 }'
-        ];
+        ].sort();
 
         await PageObjects.visualize.clickMapFitDataBounds();
         await PageObjects.visualize.openSpyPanel();
         await PageObjects.visualize.selectTableInSpyPaneSelect();
         const data = await PageObjects.visualize.getDataTableData();
-        await compareTableData(expectedPrecision2DataTable, data.trim().split('\n'));
+        await compareTableData(expectedPrecision2DataTable, prepData(data));
         await PageObjects.visualize.closeSpyPanel();
       });
 
@@ -171,11 +171,11 @@ export default function ({ getService, getPageObjects }) {
        ** check some data after we save the viz, then zoom in and check that the data
        ** changed, then open the saved viz and check that it's back to the original data.
        */
-      it('should save with zoom level and load, take screenshot', async function () {
+      it('zoom in to top level, check required behaviors on the way dwn', async function () {
 
         // const expectedZoom5Data = [
-        //   `- 9q5 91 { "lat": 34.2934322102855, "lon": -118.57068326651722 }`,
         //   `- 9qc 89 { "lat": 38.64546895785822, "lon": -121.59105236401383 }`,
+        //   `- 9q5 91 { "lat": 34.2934322102855, "lon": -118.57068326651722 }`,
         //   `- 9qh 74 { "lat": 34.18319454366291, "lon": -117.426273193009 }`,
         //   `- 9y7 73 { "lat": 35.87868071952197, "lon": -96.3330221912275 }`,
         //   `- 9ys 71 { "lat": 37.31065319536228, "lon": -94.82038319412567 }`,
@@ -184,8 +184,8 @@ export default function ({ getService, getPageObjects }) {
         //   `- 9zv 65 { "lat": 44.39887339514322, "lon": -93.34879252386207 }`,
         //   `- 9yu 65 { "lat": 38.83211174621605, "lon": -94.76601768729205 }`,
         //   `- 9y6 64 { "lat": 35.743489960441366, "lon": -97.75019769280334 }`
-        // ];
-
+        // ].sort();
+        //
         // const expectedZoom6Data = [
         //   `- c20g 16 { "lat": 45.59211894578766, "lon": -122.47455075674225 }`,
         //   `- c28c 13 { "lat": 48.0181491561234, "lon": -122.43847891688347 }`,
@@ -197,7 +197,7 @@ export default function ({ getService, getPageObjects }) {
         //   `- c2mq 9 { "lat": 47.547698873095214, "lon": -116.18850083090365 }`,
         //   `- c27x 9 { "lat": 47.753206375055015, "lon": -118.7438936624676 }`,
         //   `- c25p 9 { "lat": 46.30563497543335, "lon": -119.30418533273041 }`
-        // ];
+        // ].sort();
         const vizName1 = 'Visualization TileMap';
 
         // For some reason the map bounds right after saving a tile map for the first time are slightly different
@@ -206,93 +206,75 @@ export default function ({ getService, getPageObjects }) {
         // In order to get this test to pass we'll re-open the saved visualization from the landing page.
         await PageObjects.visualize.loadSavedVisualization(vizName1);
 
-        // const firstMapBounds = await PageObjects.visualize.getMapBounds();
+        const firstMapBounds = await PageObjects.visualize.getMapBounds();
 
-        //TODO: this has been failing intermettingly: https://github.com/elastic/kibana/issues/14920
-        await PageObjects.visualize.openSpyPanel();
+        // await PageObjects.visualize.openSpyPanel();
         // await PageObjects.visualize.selectTableInSpyPaneSelect();
         // const actualZoom5Data = await PageObjects.visualize.getDataTableData();
-        // compareTableData(expectedZoom5Data, actualZoom5Data.trim().split('\n'));
+        // compareTableData(expectedZoom5Data, prepData(actualZoom5Data));
 
-        await PageObjects.visualize.closeSpyPanel();
-        await PageObjects.visualize.clickMapZoomIn();
-
-
-        //no clear resolution at this point, so comment out
-        // await PageObjects.visualize.openSpyPanel();
-        //
-        // const actualZoom6Data = await PageObjects.visualize.getDataTableData();
-        // compareTableData(expectedZoom6Data, actualZoom6Data.trim().split('\n'));
-        //
         // await PageObjects.visualize.closeSpyPanel();
-        //
-        // await PageObjects.visualize.loadSavedVisualization(vizName1);
-        // await PageObjects.visualize.waitForVisualization();
-        //
-        // const secondMapBounds = await PageObjects.visualize.getMapBounds();
-        //
-        // expect(firstMapBounds.top_left.lat).to.equal(secondMapBounds.top_left.lat);
-        // expect(firstMapBounds.top_left.long).to.equal(secondMapBounds.top_left.long);
-        // expect(firstMapBounds.bottom_right.lat).to.equal(secondMapBounds.bottom_right.lat);
-        // expect(firstMapBounds.bottom_right.long).to.equal(secondMapBounds.bottom_right.long);
-        //
+
+        await PageObjects.visualize.clickMapZoomIn();
         // await PageObjects.visualize.openSpyPanel();
-        //
+
+        // const actualZoom6Data = await PageObjects.visualize.getDataTableData();
+        // compareTableData(expectedZoom6Data, prepData(actualZoom6Data));
+        // await PageObjects.visualize.closeSpyPanel();
+
+        await PageObjects.visualize.loadSavedVisualization(vizName1);
+        await PageObjects.visualize.waitForVisualization();
+
+        const secondMapBounds = await PageObjects.visualize.getMapBounds();
+
+        expect(firstMapBounds.top_left.lat).to.equal(secondMapBounds.top_left.lat);
+        expect(firstMapBounds.top_left.long).to.equal(secondMapBounds.top_left.long);
+        expect(firstMapBounds.bottom_right.lat).to.equal(secondMapBounds.bottom_right.lat);
+        expect(firstMapBounds.bottom_right.long).to.equal(secondMapBounds.bottom_right.long);
+
+        await PageObjects.visualize.openSpyPanel();
+
         // await PageObjects.visualize.selectTableInSpyPaneSelect();
         // const actualReOpenedZoom5Data = await PageObjects.visualize.getDataTableData();
         // compareTableData(expectedZoom5Data, actualReOpenedZoom5Data.trim().split('\n'));
-        //
-        // await PageObjects.visualize.closeSpyPanel();
-      });
 
-      it('should zoom in to level 10', function () {
-        // 6
-        return PageObjects.visualize.clickMapZoomIn()
-          .then(function () {
-          // 7
-            return PageObjects.visualize.clickMapZoomIn();
-          })
-          .then(function () {
-          // 8
-            return PageObjects.visualize.clickMapZoomIn();
-          })
-          .then(function () {
-          // 9
-            return PageObjects.visualize.clickMapZoomIn();
-          })
-          .then(function () {
-            return retry.try(function tryingForTime() {
-              return PageObjects.visualize.getMapZoomInEnabled()
-                .then(function (enabled) {
-                  expect(enabled).to.be(true);
-                });
+        await PageObjects.visualize.closeSpyPanel();
+
+        //zoom to level 10
+        //6
+        await PageObjects.visualize.clickMapZoomIn();
+        await PageObjects.visualize.clickMapZoomIn();
+        await PageObjects.visualize.clickMapZoomIn();
+        await PageObjects.visualize.clickMapZoomIn();
+
+        await retry.try(function tryingForTime() {
+          return PageObjects.visualize.getMapZoomInEnabled()
+            .then(function (enabled) {
+              expect(enabled).to.be(true);
             });
-          })
-          .then(function () {
-            return PageObjects.visualize.clickMapZoomIn();
-          })
-          .then(function () {
-            return PageObjects.visualize.getMapZoomInEnabled();
-          })
-        // now we're at level 10 and zoom out should be disabled
-          .then(function (enabled) {
-            expect(enabled).to.be(false);
-          });
-      });
+        });
+        await PageObjects.visualize.clickMapZoomIn();
+        const notEnabled = await PageObjects.visualize.getMapZoomInEnabled();
+        expect(notEnabled).to.be(false);
 
-      it('wms switch should change allow to zoom in further', async function () {
         await PageObjects.visualize.openSpyPanel();
         await PageObjects.visualize.clickOptions();
         await PageObjects.visualize.selectWMS();
         await PageObjects.visualize.clickGo();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.common.sleep(2000);
-        let enabled = await PageObjects.visualize.getMapZoomInEnabled();
-        expect(enabled).to.be(true);
+        const isEnabled = await PageObjects.visualize.getMapZoomInEnabled();
+        expect(isEnabled).to.be(true);
         await PageObjects.visualize.clickMapZoomIn();
-        enabled = await PageObjects.visualize.getMapZoomInEnabled();
-        expect(enabled).to.be(true);
+        const notEnabledAgain = await PageObjects.visualize.getMapZoomInEnabled();
+        expect(notEnabledAgain).to.be(true);
       });
+
+      function prepData(data) {
+        return data.trim().split('\n').sort();
+      }
+
+
     });
   });
 }
