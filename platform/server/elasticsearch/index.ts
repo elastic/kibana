@@ -12,7 +12,7 @@ export { Cluster } from './Cluster';
 export {
   ElasticsearchService,
   ElasticsearchRequestHelpers,
-  ElasticsearchConfigs
+  ElasticsearchConfigs,
 };
 
 export class ElasticsearchModule {
@@ -28,6 +28,6 @@ export class ElasticsearchModule {
   createRoutes() {
     const router = new Router('/elasticsearch');
 
-    return registerElasticsearchRoutes(router, this.logger);
+    return registerElasticsearchRoutes(router, this.logger, this.service);
   }
 }
