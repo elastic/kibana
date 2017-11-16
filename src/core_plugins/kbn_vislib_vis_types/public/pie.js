@@ -22,8 +22,8 @@ export default function HistogramVisType(Private) {
         legendPosition: 'right',
         isDonut: true,
         labels: {
-          show: true,
-          values: false,
+          show: false,
+          values: true,
           last_level: true,
           truncate: 100
         }

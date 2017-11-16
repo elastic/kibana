@@ -198,7 +198,7 @@ export function VislibVisualizationsPieChartProvider(Private) {
         };
 
         const labelLayout = d3.geom.quadtree()
-          .extent([[-svgBBox.width,-svgBBox.height], [svgBBox.width, svgBBox.height] ])
+          .extent([[-svgBBox.width, -svgBBox.height], [svgBBox.width, svgBBox.height] ])
           .x(function (d) { return d.position.x; })
           .y(function (d) { return d.position.y; })
           ([]);
@@ -210,6 +210,7 @@ export function VislibVisualizationsPieChartProvider(Private) {
           .append('text')
           .text(function (d) {
             if (d.depth === 0) {
+              this.parentElement.remove();
               return;
             }
             if (showValues) {

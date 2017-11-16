@@ -17,7 +17,7 @@ const truncateLabel = function (text, size) {
     while (str[endChar - 1] === ' ' || str[endChar - 1] === '-' || str[endChar - 1] === ',') {
       endChar = endChar - 1;
     }
-    str = str.substr(0, endChar) + '...';
+    str = str.substr(0, endChar) + '…';
   }
   return str;
 };
