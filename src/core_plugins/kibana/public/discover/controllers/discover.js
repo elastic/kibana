@@ -388,10 +388,6 @@ function discoverController(
           };
         }()));
 
-        // function initForTime() {
-        //   return setupVisualization().then($scope.updateTime);
-        // }
-
         if ($scope.opts.timefield) {
           setupVisualization();
           $scope.updateTime();
