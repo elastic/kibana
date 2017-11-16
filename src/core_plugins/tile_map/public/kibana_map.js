@@ -256,6 +256,7 @@ export class KibanaMap extends EventEmitter {
         listener.layer.removeListener(listener.name, listener.handle);
       }
     });
+    kibanaLayer.destroy();
 
     //must readd all attributions, because we might have removed dupes
     this._layers.forEach((layer) => this._addAttributions(layer.getAttributions()));

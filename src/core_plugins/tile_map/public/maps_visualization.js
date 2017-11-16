@@ -164,6 +164,9 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
 
       const geohashOptions = this._getGeohashOptions();
       this._geohashLayer = new GeohashLayer(this._chartData.geoJson, geohashOptions, this._kibanaMap.getZoomLevel(), this._kibanaMap);
+      this._geohashLayer.on('changeOpacity', (opacity) => {
+        this.vis.uiStateVal('geohashOpacity', opacity);
+      });
       this._kibanaMap.addLayer(this._geohashLayer);
     }
 
@@ -249,6 +252,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
         mapType: newParams.mapType,
         isFilteredByCollar: this._isFilteredByCollar(),
         fetchBounds: this.getGeohashBounds.bind(this),
+        opacity: this.vis.getUiState().get('geohashOpacity', 0.8),
         heatmap: {
           heatClusterSize: newParams.heatClusterSize
         }

@@ -23,11 +23,18 @@ export class GeohashLayer extends KibanaMapLayer {
     this._lastBounds = null;
   }
 
+  destroy() {
+    if (this._geohashMarkers) {
+      this._geohashMarkers.destroy();
+    }
+  }
+
   _createGeohashMarkers() {
     const markerOptions = {
       isFilteredByCollar: this._geohashOptions.isFilteredByCollar,
       valueFormatter: this._geohashOptions.valueFormatter,
-      tooltipFormatter: this._geohashOptions.tooltipFormatter
+      tooltipFormatter: this._geohashOptions.tooltipFormatter,
+      opacity: this._geohashOptions.opacity
     };
     switch (this._geohashOptions.mapType) {
       case 'Scaled Circle Markers':
@@ -62,6 +69,7 @@ export class GeohashLayer extends KibanaMapLayer {
 
     this._geohashMarkers.on('showTooltip', (event) => this.emit('showTooltip', event));
     this._geohashMarkers.on('hideTooltip', (event) => this.emit('hideTooltip', event));
+    this._geohashMarkers.on('changeOpacity', (event) => this.emit('changeOpacity', event));
     this._leafletLayer = this._geohashMarkers.getLeafletLayer();
   }
 
