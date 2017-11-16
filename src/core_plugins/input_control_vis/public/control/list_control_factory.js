@@ -45,7 +45,10 @@ class ListControl extends Control {
 
 export async function listControlFactory(controlParams, kbnApi) {
   const indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
-  const searchSource = new kbnApi.SearchSource();
+  const searchSource = new kbnApi.SearchSource({
+    timeout: '1s',
+    terminate_after: 100000
+  });
   searchSource.inherits(false); //Do not filter by time so can not inherit from rootSearchSource
   searchSource.size(0);
   searchSource.index(indexPattern);
@@ -53,8 +56,6 @@ export async function listControlFactory(controlParams, kbnApi) {
     indexPattern.fields.byName[controlParams.fieldName],
     _.get(controlParams, 'options.size', 5),
     'desc'));
-  searchSource.set('timeout', '1s');
-  searchSource.set('terminate_after', 100000);
 
   const resp = await searchSource.fetch();
 

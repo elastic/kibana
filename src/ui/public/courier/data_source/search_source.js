@@ -98,9 +98,7 @@ export function SearchSourceProvider(Promise, Private, config) {
     'size',
     'source',
     'version',
-    'fields',
-    'timeout',
-    'terminate_after'
+    'fields'
   ];
 
   SearchSource.prototype.index = function (indexPattern) {
