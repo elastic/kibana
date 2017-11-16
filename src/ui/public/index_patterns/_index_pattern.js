@@ -74,6 +74,7 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
       ...mapping.params,
       currentUrlParts: {
         origin: window.location.origin,
+        pathname: window.location.pathname,
         basePath: chrome.getBasePath(),
       }
     };

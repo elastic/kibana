@@ -161,6 +161,22 @@ describe('Url Format', function () {
         expect(url.convert('http://www.elastic.co', 'html'))
           .to.be('<span ng-non-bindable><a href="http://www.elastic.co" target="_blank" rel="noopener noreferrer">http://www.elastic.co</a></span>');
       });
+
+      it('should support multiple types of relative urls', function () {
+        const url = new Url({
+          currentUrlParts: {
+            origin: 'http://kibana.host.com',
+            pathname: '/nbc/app/kibana#/discover',
+            basePath: '/nbc',
+          },
+        });
+
+        expect(url.convert('#/foo', 'html'))
+          .to.be('<span ng-non-bindable><a href="http://kibana.host.com/nbc/app/kibana#/discover#/foo" target="_blank" rel="noopener noreferrer">#/foo</a></span>');
+
+        expect(url.convert('../foo/bar', 'html'))
+          .to.be('<span ng-non-bindable><a href="http://kibana.host.com/nbc/app/../foo/bar" target="_blank" rel="noopener noreferrer">../foo/bar</a></span>');
+      });
     });
   });
 });

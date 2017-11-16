@@ -135,9 +135,12 @@ UrlFormat.prototype._convert = {
           return url;
         }
 
-        const prefix = inWhitelist
-          ? ''
-          : `${currentUrlParts.origin}${currentUrlParts.basePath}/app/`;
+        let prefix = '';
+        if (!inWhitelist) {
+          prefix = url[0] === '#'
+            ? `${currentUrlParts.origin}${currentUrlParts.pathname}`
+            : `${currentUrlParts.origin}${currentUrlParts.basePath}/app/`;
+        }
 
         let linkLabel;
 
