@@ -388,8 +388,6 @@ app.directive('dashboardApp', function ($injector) {
         addSearch: $scope.addSearch,
         timefilter: $scope.timefilter
       };
-
-      $scope.$emit('application.load');
     }
   };
 });

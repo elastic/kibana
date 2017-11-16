@@ -399,7 +399,6 @@ function discoverController(
 
         init.complete = true;
         $state.replace();
-        $scope.$emit('application.load');
       });
   });
 
