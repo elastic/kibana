@@ -27,7 +27,14 @@ function listCommits(commits, multipleChoice) {
         short: commit.message
       }))
       .concat(commits.length > pageSize ? new inquirer.Separator() : [])
-  }).then(commit => (multipleChoice ? commit.reverse() : [commit]));
+  })
+    .then(commit => (multipleChoice ? commit.reverse() : [commit]))
+    .then(
+      selectedCommits =>
+        selectedCommits.length === 0
+          ? listCommits(commits, multipleChoice)
+          : selectedCommits
+    );
 }
 
 function listVersions(versions, multipleChoice) {
@@ -35,7 +42,14 @@ function listVersions(versions, multipleChoice) {
     type: multipleChoice ? 'checkbox' : 'list',
     message: 'Select version to backport to',
     choices: versions
-  }).then(version => (multipleChoice ? version : [version]));
+  })
+    .then(version => (multipleChoice ? version : [version]))
+    .then(
+      selectedVersions =>
+        selectedVersions.length === 0
+          ? listCommits(versions, multipleChoice)
+          : selectedVersions
+    );
 }
 
 function confirmConflictResolved() {
