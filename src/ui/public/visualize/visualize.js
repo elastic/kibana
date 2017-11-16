@@ -40,7 +40,7 @@ uiModules
         appState: '=?',
         uiState: '=?',
         savedId: '=?',
-        timeRange: '=?'
+        timeRange: '=?',
       },
       template: visualizeTemplate,
       link: async function ($scope, $el) {
@@ -52,6 +52,7 @@ uiModules
 
         $scope.vis = $scope.savedObj.vis;
         $scope.vis.visualizeScope = true;
+        $scope.vis.description = $scope.savedObj.description;
 
         if ($scope.timeRange) {
           $scope.vis.params.timeRange = {
