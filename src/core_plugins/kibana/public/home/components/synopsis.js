@@ -19,19 +19,19 @@ export function Synopsis({ description, iconUrl, title, url }) {
   }
 
   return (
-    <KuiFlexGroup>
-      <KuiFlexItem grow={false}>{img}</KuiFlexItem>
-      <KuiFlexItem className="synopsis">
-        <h4 className="kuiTextTitle synopsisTitle">
-          <a href={url} className="kuiLink">
+    <a href={url} className="kuiLink synopsis">
+      <KuiFlexGroup>
+        <KuiFlexItem grow={false}>{img}</KuiFlexItem>
+        <KuiFlexItem className="synopsisContent">
+          <h4 className="kuiTextTitle synopsisTitle">
             {title}
-          </a>
-        </h4>
-        <p className="kuiText kuiSubduedText">
-          {description}
-        </p>
-      </KuiFlexItem>
-    </KuiFlexGroup>
+          </h4>
+          <p className="kuiText kuiSubduedText">
+            {description}
+          </p>
+        </KuiFlexItem>
+      </KuiFlexGroup>
+    </a>
   );
 }
 
