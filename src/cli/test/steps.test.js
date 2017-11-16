@@ -101,7 +101,7 @@ describe('select commit that originated from pull request', () => {
       'backport-cli-test',
       {
         base: '6.2',
-        body: 'Backports pull request #myPullRequest to 6.2',
+        body: `Backports the following commits to 6.2:\n - myCommitMessage (#myPullRequest)`,
         head: 'sqren:backport/6.2/pr-myPullRequest',
         title: '[6.2] myCommitMessage'
       }

@@ -10,7 +10,6 @@ A simple CLI tool for backporting commits
 
 ![Demonstration gif](https://i.makeagif.com/media/10-05-2017/kEJLqe.gif)
 
-
 ### Install
 
 ```
@@ -25,18 +24,20 @@ npm install -g backport
 
 ### Options
 
-| Option | Description | Accepts |
-| --- | --- | --- |
-| --multiple     | Backport to multiple versions   | boolean (defaults to true) |
-| --own          | Only show own commits           | boolean (defaults to true) |
-| --config       | Show configuration file         |                            |
-| --help         | Show help                       |                            |
-| -v, --version  | Show version number             |                            |
+| Option        | Description                         | Accepts                    |
+| ------------- | ----------------------------------- | -------------------------- |
+| --multiple    | Select multiple versions or commits | boolean (defaults to true) |
+| --own         | Only show own commits               | boolean (defaults to true) |
+| --config      | Show configuration file             |                            |
+| --help        | Show help                           |                            |
+| -v, --version | Show version number                 |                            |
 
 ### Configuration
 
-The first time you run `backport` a skeleton configuration file will be created in `/<homedir>/.backport/config.json`.
-You need to update the config file with your Github username and a Github Access Token (can be created [here](https://github.com/settings/tokens/new)).
+The first time you run `backport` a skeleton configuration file will be created
+in `/<homedir>/.backport/config.json`. You need to update the config file with
+your Github username and a Github Access Token (can be created
+[here](https://github.com/settings/tokens/new)).
 
 <details>
 <summary>View config sample</summary>
@@ -53,7 +54,7 @@ You need to update the config file with your Github username and a Github Access
   // Only allow picking own commits to backport
   "own": true,
 
-  // Allow picking multiple versions to backporting to
+  // Allow picking multiple versions and/or commits
   "multiple": true,
 
   // Repositories and the versions that will be available in backport cli
@@ -69,11 +70,14 @@ You need to update the config file with your Github username and a Github Access
     }
   ]
 }
-
 ```
+
 </details>
 
 ### Troubleshooting
 
-`backport` never touches your local repositories or files. Instead a separate clone of your repositories are created in `/<homedir>/.backport/repositories/`. This is also where you'll need to solve merge conflicts.
-If you are experiencing issues, you can try deleting the repository, or the entire `.backport` folder - it will be recreated next time you run `backport`.
+`backport` never touches your local repositories or files. Instead a separate
+clone of your repositories are created in `/<homedir>/.backport/repositories/`.
+This is also where you'll need to solve merge conflicts. If you are experiencing
+issues, you can try deleting the repository, or the entire `.backport` folder -
+it will be recreated next time you run `backport`.

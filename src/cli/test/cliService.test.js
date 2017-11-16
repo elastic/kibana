@@ -25,9 +25,10 @@ describe('doBackportVersion', () => {
   it('with pull request reference', () => {
     this.createPRMock = nock('https://api.github.com')
       .post(`/repos/elastic/kibana/pulls`, {
-        title: '[6.x] myCommitMessage',
-        body: 'Backports pull request #myPullRequest to 6.x',
-        head: 'sqren:backport/6.x/pr-myPullRequest',
+        title: '[6.x] myCommitMessage | myOtherCommitMessage',
+        body:
+          'Backports the following commits to 6.x:\n - myCommitMessage (#myPullRequest)\n - myOtherCommitMessage (#myOtherPullRequest)',
+        head: 'sqren:backport/6.x/pr-myPullRequest_pr-myOtherPullRequest',
         base: '6.x'
       })
       .query(true)
@@ -40,8 +41,18 @@ describe('doBackportVersion', () => {
       .doBackportVersion({
         owner: 'elastic',
         repoName: 'kibana',
-        commit: { message: 'myCommitMessage' },
-        reference: { type: 'pullRequest', value: 'myPullRequest' },
+        commits: [
+          {
+            sha: 'mySha',
+            message: 'myCommitMessage',
+            pullRequest: 'myPullRequest'
+          },
+          {
+            sha: 'mySha2',
+            message: 'myOtherCommitMessage',
+            pullRequest: 'myOtherPullRequest'
+          }
+        ],
         version: '6.x',
         username: 'sqren',
         labels: ['backport']
@@ -54,12 +65,13 @@ describe('doBackportVersion', () => {
       });
   });
 
-  it('with commit reference', () => {
+  it('without pull request reference', () => {
     this.createPRMock = nock('https://api.github.com')
       .post(`/repos/elastic/kibana/pulls`, {
         title: '[6.x] myCommitMessage',
-        body: 'Backports commit myCommitSha to 6.x',
-        head: 'sqren:backport/6.x/commit-myCommitSha',
+        body:
+          'Backports the following commits to 6.x:\n - myCommitMessage (mySha)',
+        head: 'sqren:backport/6.x/commit-mySha',
         base: '6.x'
       })
       .query(true)
@@ -72,8 +84,12 @@ describe('doBackportVersion', () => {
       .doBackportVersion({
         owner: 'elastic',
         repoName: 'kibana',
-        commit: { message: 'myCommitMessage' },
-        reference: { type: 'commit', value: 'myCommitSha' },
+        commits: [
+          {
+            sha: 'mySha',
+            message: 'myCommitMessage'
+          }
+        ],
         version: '6.x',
         username: 'sqren'
       })
@@ -86,7 +102,7 @@ describe('doBackportVersion', () => {
   });
 });
 
-describe('getReference', () => {
+describe('withPullRequest', () => {
   function mockGithubIssuesResponse(res) {
     return nock('https://api.github.com')
       .get(`/search/issues`)
@@ -94,24 +110,36 @@ describe('getReference', () => {
       .reply(200, res);
   }
 
-  it('should use pull request when available', () => {
+  it('should decorate commit with pull request if available', () => {
     mockGithubIssuesResponse({
       items: [{ number: 'myPullRequest' }]
     });
 
     return cliService
-      .getReference('elastic', 'kibana', 'myCommitSha')
+      .withPullRequest('elastic', 'kibana', [{ message: 'myCommitMessage' }])
       .then(res =>
-        expect(res).toEqual({ type: 'pullRequest', value: 'myPullRequest' })
+        expect(res).toEqual([
+          { message: 'myCommitMessage', pullRequest: 'myPullRequest' }
+        ])
       );
   });
 
-  it('should use (short) commit sha when pull request is not available', () => {
+  it('should not decorate commit, when pull request is not available', () => {
     mockGithubIssuesResponse({ items: [] });
 
     return cliService
-      .getReference('elastic', 'kibana', 'myCommitSha')
-      .then(res => expect(res).toEqual({ type: 'commit', value: 'myCommi' }));
+      .withPullRequest('elastic', 'kibana', [
+        { sha: 'myCommitSha', message: 'myCommitMessage' }
+      ])
+      .then(res =>
+        expect(res).toEqual([
+          {
+            sha: 'myCommitSha',
+            message: 'myCommitMessage',
+            pullRequest: undefined
+          }
+        ])
+      );
   });
 });
 

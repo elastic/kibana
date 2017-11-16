@@ -9,7 +9,7 @@
   // Only allow picking own commits to backport
   "own": true,
 
-  // Allow picking multiple versions to backporting to
+  // Allow picking multiple versions and/or commits
   "multiple": true,
 
   // Repositories and the versions that will be available in backport cli

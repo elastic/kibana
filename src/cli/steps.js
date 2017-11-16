@@ -8,14 +8,13 @@ const {
   promptRepoInfo,
   promptCommit,
   promptVersions,
-  getReference,
   doBackportVersions,
   handleErrors,
   maybeSetupRepo
 } = require('./cliService');
 
 function initSteps(config, options) {
-  let commit, versions, reference, owner, repoName, repoConfig;
+  let commits, versions, owner, repoName, repoConfig;
 
   return ensureConfigAndFoldersExists()
     .then(() => validateConfig(config))
@@ -27,20 +26,22 @@ function initSteps(config, options) {
       repoConfig = getRepoConfig(owner, repoName, config.repositories);
     })
     .then(() =>
-      promptCommit(owner, repoName, options.own ? config.username : null)
+      promptCommit(
+        owner,
+        repoName,
+        options.own ? config.username : null,
+        options.multiple
+      )
     )
-    .then(c => (commit = c))
+    .then(c => (commits = c))
     .then(() => promptVersions(repoConfig.versions, options.multiple))
     .then(v => (versions = v))
-    .then(() => getReference(owner, repoName, commit.sha))
-    .then(ref => (reference = ref))
     .then(() => maybeSetupRepo(owner, repoName, config.username))
     .then(() =>
       doBackportVersions({
         owner,
         repoName,
-        commit,
-        reference,
+        commits,
         versions,
         username: config.username,
         labels: repoConfig.labels

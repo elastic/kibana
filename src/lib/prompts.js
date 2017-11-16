@@ -14,11 +14,11 @@ function listFullRepoName(repoNames) {
   });
 }
 
-function listCommits(commits) {
+function listCommits(commits, multipleChoice) {
   const pageSize = Math.min(10, commits.length);
   return prompt({
     pageSize,
-    type: 'list',
+    type: multipleChoice ? 'checkbox' : 'list',
     message: 'Select commit to backport',
     choices: commits
       .map(commit => ({
@@ -27,23 +27,15 @@ function listCommits(commits) {
         short: commit.message
       }))
       .concat(commits.length > pageSize ? new inquirer.Separator() : [])
-  });
+  }).then(commit => (multipleChoice ? commit.reverse() : [commit]));
 }
 
-function listVersions(versions) {
+function listVersions(versions, multipleChoice) {
   return prompt({
-    type: 'list',
+    type: multipleChoice ? 'checkbox' : 'list',
     message: 'Select version to backport to',
     choices: versions
-  }).then(version => [version]);
-}
-
-function checkboxVersions(versions) {
-  return prompt({
-    type: 'checkbox',
-    message: 'Select version to backport to',
-    choices: versions
-  });
+  }).then(version => (multipleChoice ? version : [version]));
 }
 
 function confirmConflictResolved() {
@@ -57,6 +49,5 @@ module.exports = {
   confirmConflictResolved,
   listCommits,
   listFullRepoName,
-  listVersions,
-  checkboxVersions
+  listVersions
 };

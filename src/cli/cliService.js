@@ -17,22 +17,23 @@ const {
 function doBackportVersions({
   owner,
   repoName,
-  commit,
-  reference,
+  commits,
   versions,
   username,
   labels
 }) {
   return sequentially(versions, version => {
-    return doBackportVersion({
-      owner,
-      repoName,
-      commit,
-      reference,
-      version,
-      username,
-      labels
-    })
+    return withPullRequest(owner, repoName, commits)
+      .then(commitsWithPullRequest => {
+        return doBackportVersion({
+          owner,
+          repoName,
+          commits: commitsWithPullRequest,
+          version,
+          username,
+          labels
+        });
+      })
       .then(res => console.log(`View pull request: ${res.data.html_url}\n`))
       .catch(handleErrors);
   });
@@ -41,14 +42,14 @@ function doBackportVersions({
 function doBackportVersion({
   owner,
   repoName,
-  commit,
-  reference,
+  commits,
   version,
   username,
   labels = []
 }) {
-  const backportBranchName = getBackportBranchName(version, reference);
-  console.log(`Backporting ${getReferenceLong(reference)} to ${version}`);
+  const backportBranchName = getBackportBranchName(version, commits);
+  const refValues = commits.map(commit => getReferenceLong(commit)).join(', ');
+  console.log(`Backporting ${refValues} to ${version}`);
 
   return withSpinner(
     resetAndPullMaster(owner, repoName).then(() =>
@@ -56,7 +57,11 @@ function doBackportVersion({
     ),
     'Pulling latest changes'
   )
-    .then(() => cherrypickAndPrompt(owner, repoName, commit.sha))
+    .then(() =>
+      sequentially(commits, commit =>
+        cherrypickAndPrompt(owner, repoName, commit.sha)
+      )
+    )
     .then(() =>
       withSpinner(
         push(owner, repoName, username, backportBranchName),
@@ -64,12 +69,7 @@ function doBackportVersion({
       )
     )
     .then(() => {
-      const payload = getPullRequestPayload(
-        commit.message,
-        version,
-        reference,
-        username
-      );
+      const payload = getPullRequestPayload(version, commits, username);
       return withSpinner(
         github.createPullRequest(owner, repoName, payload).then(res => {
           if (labels.length > 0) {
@@ -84,16 +84,15 @@ function doBackportVersion({
     });
 }
 
-function getReference(owner, repoName, commitSha) {
-  return github
-    .getPullRequestByCommit(owner, repoName, commitSha)
-    .then(pullRequest => {
-      if (pullRequest) {
-        return { type: 'pullRequest', value: pullRequest };
-      }
-
-      return { type: 'commit', value: commitSha.slice(0, 7) };
-    });
+// Add pull request info to commit if it exists
+function withPullRequest(owner, repoName, commits) {
+  return Promise.all(
+    commits.map(commit => {
+      return github
+        .getPullRequestByCommit(owner, repoName, commit.sha)
+        .then(pullRequest => Object.assign({}, commit, { pullRequest }));
+    })
+  );
 }
 
 function promptRepoInfo(repositories, cwd) {
@@ -124,7 +123,7 @@ function maybeSetupRepo(owner, repoName, username) {
   });
 }
 
-function promptCommit(owner, repoName, username) {
+function promptCommit(owner, repoName, username, multipleChoice) {
   const spinner = ora('Loading commits...').start();
   return github
     .getCommits(owner, repoName, username)
@@ -134,14 +133,12 @@ function promptCommit(owner, repoName, username) {
     })
     .then(commits => {
       spinner.stop();
-      return prompts.listCommits(commits);
+      return prompts.listCommits(commits, multipleChoice);
     });
 }
 
 function promptVersions(versions, multipleChoice = false) {
-  return multipleChoice
-    ? prompts.checkboxVersions(versions)
-    : prompts.listVersions(versions);
+  return prompts.listVersions(versions, multipleChoice);
 }
 
 function handleErrors(e) {
@@ -170,20 +167,29 @@ function sequentially(items, handler) {
   );
 }
 
-function getReferenceValue({ type, value }, { short }) {
-  if (type === 'pullRequest') {
-    return short ? `pr-${value}` : `pull request #${value}`;
+function getBackportBranchName(version, commits) {
+  const refValues = commits
+    .map(commit => getReferenceShort(commit))
+    .join('_')
+    .slice(0, 200);
+  return `backport/${version}/${refValues}`;
+}
+
+function getReference(commit, { short }) {
+  if (commit.pullRequest) {
+    return short ? `pr-${commit.pullRequest}` : `#${commit.pullRequest}`;
   }
 
-  return short ? `commit-${value}` : `commit ${value}`;
+  const shortCommit = commit.sha.slice(0, 7);
+  return short ? `commit-${shortCommit}` : `${shortCommit}`;
 }
 
-function getReferenceLong(reference) {
-  return getReferenceValue(reference, { short: false });
+function getReferenceLong(commit) {
+  return getReference(commit, { short: false });
 }
 
-function getReferenceShort(reference) {
-  return getReferenceValue(reference, { short: true });
+function getReferenceShort(commit) {
+  return getReference(commit, { short: true });
 }
 
 function isCherrypickConflict(e) {
@@ -212,23 +218,28 @@ function cherrypickAndPrompt(owner, repoName, sha) {
   });
 }
 
-function getBackportBranchName(version, reference) {
-  const refValue = getReferenceShort(reference);
-  return `backport/${version}/${refValue}`;
-}
-
 function getCurrentFullRepoName(fullRepoNames, cwd) {
   const currentDir = path.basename(cwd);
   return fullRepoNames.find(name => name.endsWith(`/${currentDir}`));
 }
 
-function getPullRequestPayload(commitMessage, version, reference, username) {
-  const backportBranchName = getBackportBranchName(version, reference);
-  const refValue = getReferenceLong(reference);
+function getPullRequestPayload(version, commits, username) {
+  const backportBranchName = getBackportBranchName(version, commits);
+  const commitRefs = commits
+    .map(commit => {
+      const ref = getReferenceLong(commit);
+      return ` - ${commit.message.replace(`(${ref})`, '')} (${ref})`;
+    })
+    .join('\n');
+
+  const commitMessages = commits
+    .map(commit => commit.message)
+    .join(' | ')
+    .slice(0, 200);
 
   return {
-    title: `[${version}] ${commitMessage}`,
-    body: `Backports ${refValue} to ${version}`,
+    title: `[${version}] ${commitMessages}`,
+    body: `Backports the following commits to ${version}:\n${commitRefs}`,
     head: `${username}:${backportBranchName}`,
     base: `${version}`
   };
@@ -254,9 +265,9 @@ module.exports = {
   doBackportVersions,
   handleErrors,
   doBackportVersion,
-  getReference,
   promptRepoInfo,
   maybeSetupRepo,
   promptCommit,
-  promptVersions
+  promptVersions,
+  withPullRequest
 };

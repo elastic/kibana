@@ -10,7 +10,7 @@ const args = yargs
   .usage('$0 [args]')
   .option('multiple', {
     default: isBool(config.multiple) ? config.multiple : true,
-    description: 'Backport to multiple versions',
+    description: 'Select multiple versions and/or commits',
     type: 'boolean'
   })
   .option('own', {
