@@ -113,7 +113,7 @@ UrlFormat.prototype._convert = {
     return this._formatLabel(value);
   },
 
-  html: function (rawValue, field, hit, basePath) {
+  html: function (rawValue, field, hit) {
     const url = _.escape(this._formatUrl(rawValue));
     const label = _.escape(this._formatLabel(rawValue, url));
 
@@ -129,9 +129,15 @@ UrlFormat.prototype._convert = {
         return `<img src="${url}" alt="${imageLabel}">`;
       default:
         const inWhitelist = whitelistUrlSchemes.some(scheme => url.indexOf(scheme) === 0);
+        const { currentUrlParts } = this._params;
+
+        if (!inWhitelist && !currentUrlParts) {
+          return url;
+        }
+
         const prefix = inWhitelist
           ? ''
-          : `${window.location.origin}${basePath}/app/`;
+          : `${currentUrlParts.origin}${currentUrlParts.basePath}/app/`;
 
         let linkLabel;
 

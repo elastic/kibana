@@ -4,13 +4,13 @@ import { getHighlightHtml } from '../../core_plugins/kibana/common/highlight/hig
 
 const types = {
   html: function (format, convert) {
-    function recurse(value, field, hit, basePath) {
+    function recurse(value, field, hit) {
       if (value == null) {
         return asPrettyString(value);
       }
 
       if (!value || typeof value.map !== 'function') {
-        return convert.call(format, value, field, hit, basePath);
+        return convert.call(format, value, field, hit);
       }
 
       const subVals = value.map(v => {

@@ -24,7 +24,7 @@ describe('UrlFormat', function () {
     it('accepts a template', function () {
       const url = new UrlFormat({ urlTemplate: 'http://{{ value }}' });
       expect(url.convert('url', 'html'))
-        .to.be('<span ng-non-bindable><a href="http://url" target="_blank" rel="noopener">http://url</a></span>');
+        .to.be('<span ng-non-bindable><a href="http://url" target="_blank" rel="noopener noreferrer">http://url</a></span>');
     });
 
     it('only outputs the url if the contentType === "text"', function () {
@@ -37,7 +37,7 @@ describe('UrlFormat', function () {
     it('accepts a template', function () {
       const url = new UrlFormat({ labelTemplate: 'extension: {{ value }}', urlTemplate: 'http://www.{{value}}.com' });
       expect(url.convert('php', 'html'))
-        .to.be('<span ng-non-bindable><a href="http://www.php.com" target="_blank" rel="noopener">extension: php</a></span>');
+        .to.be('<span ng-non-bindable><a href="http://www.php.com" target="_blank" rel="noopener noreferrer">extension: php</a></span>');
     });
 
     it('uses the label template for text formating', function () {
@@ -81,20 +81,47 @@ describe('UrlFormat', function () {
   });
 
   describe('whitelist', function () {
-    it('should spit out the raw value if the value is not in the whitelist', function () {
-      const url = new UrlFormat();
+    it('should assume a relative url if the value is not in the whitelist', function () {
+      const url = new UrlFormat({
+        currentUrlParts: {
+          origin: 'http://kibana',
+          basePath: '',
+        },
+      });
 
       expect(url.convert('www.elastic.co', 'html'))
-      .to.be('<span ng-non-bindable>www.elastic.co</span>');
+      .to.be('<span ng-non-bindable><a href="http://kibana/app/www.elastic.co" target="_blank" rel="noopener noreferrer">www.elastic.co</a></span>');
 
       expect(url.convert('elastic.co', 'html'))
-      .to.be('<span ng-non-bindable>elastic.co</span>');
+      .to.be('<span ng-non-bindable><a href="http://kibana/app/elastic.co" target="_blank" rel="noopener noreferrer">elastic.co</a></span>');
 
       expect(url.convert('elastic', 'html'))
-      .to.be('<span ng-non-bindable>elastic</span>');
+      .to.be('<span ng-non-bindable><a href="http://kibana/app/elastic" target="_blank" rel="noopener noreferrer">elastic</a></span>');
 
       expect(url.convert('ftp://elastic.co', 'html'))
-      .to.be('<span ng-non-bindable>ftp://elastic.co</span>');
+      .to.be('<span ng-non-bindable><a href="http://kibana/app/ftp://elastic.co" target="_blank" rel="noopener noreferrer">ftp://elastic.co</a></span>');
+    });
+
+    it('should rely on currentUrlParts', function () {
+      const url = new UrlFormat({
+        currentUrlParts: {
+          origin: 'http://kibana.host.com',
+          basePath: '/abc',
+        },
+      });
+
+      expect(url.convert('../app/kibana', 'html'))
+      .to.be('<span ng-non-bindable><a href="http://kibana.host.com/abc/app/../app/kibana" target="_blank" rel="noopener noreferrer">../app/kibana</a></span>');
+    });
+
+    it('should fail gracefully if there are no currentUrlParts provided', function () {
+      const url = new UrlFormat();
+
+      expect(url.convert('../app/kibana', 'html'))
+      .to.be('<span ng-non-bindable>../app/kibana</span>');
+
+      expect(url.convert('http://www.elastic.co', 'html'))
+      .to.be('<span ng-non-bindable><a href="http://www.elastic.co" target="_blank" rel="noopener noreferrer">http://www.elastic.co</a></span>');
     });
   });
 });

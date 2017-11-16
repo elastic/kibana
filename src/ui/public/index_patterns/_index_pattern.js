@@ -4,6 +4,7 @@ import angular from 'angular';
 import { RegistryFieldFormatsProvider } from 'ui/registry/field_formats';
 import UtilsMappingSetupProvider from 'ui/utils/mapping_setup';
 import { Notifier } from 'ui/notify';
+import chrome from 'ui/chrome';
 
 import { getComputedFields } from './_get_computed_fields';
 import { formatHit } from './_format_hit';
@@ -69,7 +70,14 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
 
   function deserializeFieldFormatMap(mapping) {
     const FieldFormat = fieldformats.byId[mapping.id];
-    return FieldFormat && new FieldFormat(mapping.params, getConfig);
+    const args = {
+      ...mapping.params,
+      currentUrlParts: {
+        origin: window.location.origin,
+        basePath: chrome.getBasePath(),
+      }
+    };
+    return FieldFormat && new FieldFormat(args, getConfig);
   }
 
   function updateFromElasticSearch(indexPattern, response) {
