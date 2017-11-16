@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export function PanelHeader({ title, actions, isViewOnlyMode }) {
-  if (isViewOnlyMode && !title) {
+export function PanelHeader({ title, actions, isViewOnlyMode, hidePanelTitles }) {
+  if (isViewOnlyMode && (!title || hidePanelTitles)) {
     return (
       <div className="panel-heading-floater">
         <div className="kuiMicroButtonGroup">
@@ -34,4 +34,5 @@ PanelHeader.propTypes = {
   isViewOnlyMode: PropTypes.bool,
   title: PropTypes.string,
   actions: PropTypes.node,
+  hidePanelTitles: PropTypes.bool.isRequired,
 };
