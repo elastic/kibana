@@ -635,7 +635,7 @@ function discoverController(
   };
 
   function setupVisualization() {
-    // If we're not setting anything up we need to return an empty promise
+    // If no timefield has been specified we don't create a histogram of messages
     if (!$scope.opts.timefield) return;
 
     const visStateAggs = [
