@@ -41,6 +41,11 @@ export default function pluginInstall(program) {
     'path to the directory where plugins are stored',
     fromRoot('plugins')
   )
+  .option(
+    '--skip-optimize',
+    'avoid the mandatory optimization after each plugin installation. \n' +
+    'Require a manual "kibana-plugin optimize" command to update bundle and reload the available plugins list'
+  )
   .description('install a plugin',
 `Common examples:
   install x-pack

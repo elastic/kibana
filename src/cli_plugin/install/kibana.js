@@ -18,6 +18,13 @@ export function existingInstall(settings, logger) {
 }
 
 export async function rebuildCache(settings, logger) {
+
+  if (settings.skipOptimize) {
+    logger.log('Skip optimize task due to given settings (--skip-optimize). ' +
+      'Remember to run a dedicated optimization task before starting Kibana !');
+    return;
+  }
+
   logger.log('Optimizing and caching browser bundles...');
   const serverConfig = _.merge(
     readYamlConfig(settings.config),
