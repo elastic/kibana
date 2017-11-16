@@ -113,35 +113,6 @@ describe('plugins/elasticsearch', function () {
           headers: headers
         });
       });
-
-      describe('wrap401Errors', () => {
-        let handler;
-        let error;
-
-        beforeEach(() => {
-          error = new Error('Authentication required');
-          error.statusCode = 401;
-
-          handler = sinon.stub();
-        });
-
-        it('ensures WWW-Authenticate header', async () => {
-          set(client, 'mock.401', sinon.stub().returns(Promise.reject(error)));
-          await cluster.callWithRequest({}, 'mock.401', {}, { wrap401Errors: true }).catch(handler);
-
-          sinon.assert.calledOnce(handler);
-          expect(handler.getCall(0).args[0].output.headers['WWW-Authenticate']).to.eql('Basic realm="Authorization Required"');
-        });
-
-        it('persists WWW-Authenticate header', async () => {
-          set(error, 'body.error.header[WWW-Authenticate]', 'Basic realm="Test"');
-          set(client, 'mock.401', sinon.stub().returns(Promise.reject(error)));
-          await cluster.callWithRequest({}, 'mock.401', {}, { wrap401Errors: true }).catch(handler);
-
-          sinon.assert.calledOnce(handler);
-          expect(handler.getCall(0).args[0].output.headers['WWW-Authenticate']).to.eql('Basic realm="Test"');
-        });
-      });
     });
   });
 });
