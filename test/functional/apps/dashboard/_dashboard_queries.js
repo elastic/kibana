@@ -71,9 +71,11 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.saveVisualization('memory with bytes < 90 pie');
       await PageObjects.header.clickToastOK();
 
-      let pieSlicesCount = await PageObjects.dashboard.getPieSliceCount();
+      const pieSlicesCount = await PageObjects.dashboard.getPieSliceCount();
       expect(pieSlicesCount).to.equal(3);
+    });
 
+    it('Pie chart attached to saved search filters shows no data with conflicting dashboard query', async () => {
       await PageObjects.dashboard.setQuery('bytes:>100');
       await PageObjects.dashboard.clickFilterButton();
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -81,17 +83,9 @@ export default function ({ getService, getPageObjects }) {
       // There appears to be a slight delay between the page loading and the visualization reacting to the
       // filter which is causing this to sometimes be greater than 0, hence the retry.
       retry.try(async () => {
-        pieSlicesCount = await PageObjects.dashboard.getPieSliceCount();
+        const pieSlicesCount = await PageObjects.dashboard.getPieSliceCount();
         expect(pieSlicesCount).to.equal(0);
       });
-    });
-
-    it('Pie chart attached to saved search filters shows no data with conflicting dashboard query', async () => {
-      await PageObjects.dashboard.setQuery('bytes:>100');
-      await PageObjects.dashboard.clickFilterButton();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const pieSlicesCount = await PageObjects.dashboard.getPieSliceCount();
-      expect(pieSlicesCount).to.equal(0);
     });
   });
 }
