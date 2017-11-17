@@ -1,5 +1,5 @@
 
-const $code = Symbol('FindErrorCode');
+const errorCodeProperty = Symbol('pluginDiscovery/errorCode');
 
 /**
  *  Thrown when reading a plugin directory fails, wraps failure
@@ -7,12 +7,12 @@ const $code = Symbol('FindErrorCode');
  */
 const ERROR_INVALID_DIRECTORY = 'ERROR_INVALID_DIRECTORY';
 export function createInvalidDirectoryError(sourceError, path) {
-  sourceError[$code] = ERROR_INVALID_DIRECTORY;
+  sourceError[errorCodeProperty] = ERROR_INVALID_DIRECTORY;
   sourceError.path = path;
   return sourceError;
 }
 export function isInvalidDirectoryError(error) {
-  return error && error[$code] === ERROR_INVALID_DIRECTORY;
+  return error && error[errorCodeProperty] === ERROR_INVALID_DIRECTORY;
 }
 
 
@@ -24,12 +24,12 @@ export function isInvalidDirectoryError(error) {
 const ERROR_INVALID_PACK = 'ERROR_INVALID_PACK';
 export function createInvalidPackError(path, reason) {
   const error = new Error(`PluginPack${path ? ` at "${path}"` : ''} ${reason}`);
-  error[$code] = ERROR_INVALID_PACK;
+  error[errorCodeProperty] = ERROR_INVALID_PACK;
   error.path = path;
   return error;
 }
 export function isInvalidPackError(error) {
-  return error && error[$code] === ERROR_INVALID_PACK;
+  return error && error[errorCodeProperty] === ERROR_INVALID_PACK;
 }
 
 /**
@@ -39,12 +39,12 @@ export function isInvalidPackError(error) {
 const ERROR_INVALID_PLUGIN = 'ERROR_INVALID_PLUGIN';
 export function createInvalidPluginError(spec, reason) {
   const error = new Error(`Plugin from ${spec.getId()} from ${spec.getPack().getPath()} is invalid because ${reason}`);
-  error[$code] = ERROR_INVALID_PLUGIN;
+  error[errorCodeProperty] = ERROR_INVALID_PLUGIN;
   error.spec = spec;
   return error;
 }
 export function isInvalidPluginError(error) {
-  return error && error[$code] === ERROR_INVALID_PLUGIN;
+  return error && error[errorCodeProperty] === ERROR_INVALID_PLUGIN;
 }
 
 /**
@@ -54,10 +54,10 @@ export function isInvalidPluginError(error) {
 const ERROR_INCOMPATIBLE_PLUGIN_VERSION = 'ERROR_INCOMPATIBLE_PLUGIN_VERSION';
 export function createIncompatiblePluginVersionError(spec) {
   const error = new Error(`Plugin ${spec.getId()} is only compatible with Kibana version ${spec.getExpectedKibanaVersion()}`);
-  error[$code] = ERROR_INCOMPATIBLE_PLUGIN_VERSION;
+  error[errorCodeProperty] = ERROR_INCOMPATIBLE_PLUGIN_VERSION;
   error.spec = spec;
   return error;
 }
 export function isIncompatiblePluginVersionError(error) {
-  return error && error[$code] === ERROR_INCOMPATIBLE_PLUGIN_VERSION;
+  return error && error[errorCodeProperty] === ERROR_INCOMPATIBLE_PLUGIN_VERSION;
 }
