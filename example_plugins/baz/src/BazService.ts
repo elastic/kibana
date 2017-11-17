@@ -7,11 +7,9 @@ import {
   toPromise
 } from '@elastic/kbn-observable';
 
-import { ElasticsearchService, KibanaConfig } from '@elastic/kbn-types';
+import { Cluster, KibanaConfig } from '@elastic/kbn-types';
 
 export class BazService {
-  private readonly _esService: any; // help, this is really a function
-
   // NB: When we finally create BazService, we have a request
   // object. That's why we can pass in headers and get an elasticsearch
   // service scoped to the request.
@@ -19,9 +17,8 @@ export class BazService {
   // But we can also choose the cluster to bind all our elasticsearch
   // calls to. What if we could do both in one step at this high level?
   constructor(
-    private readonly headers: string,
+    private readonly cluster: Cluster,
     private readonly kibanaConfig$: Observable<KibanaConfig>,
-    private readonly elasticsearchService: ElasticsearchService
   ) {
     // NB: This is where we should bind to the right cluster for
     // elasticsearch service.
@@ -41,31 +38,23 @@ export class BazService {
     // and then immediately handling the request, so I think it's fine,
     // but there's nothing enforcing plugin developers to write
     // this way.
-
-    this._esService = this.elasticsearchService.getScopedCluster(
-      'admin',
-      this.headers
-    );
   }
 
   async find(options: { type: string; page?: number; perPage?: number }) {
     const { page = 1, perPage = 20, type } = options;
 
-    // NB: May need to actually set the _esService here instead
-    // so that it is the latestValue
     const [kibanaIndex] = await latestValues(
       k$(this.kibanaConfig$)(map(config => config.index))
     );
 
-    // NB: Use the new scoped es service something like this:
-    const response = await this._esService.search({
+    const response = await this.cluster.callWithRequest('endpoint', {
       index: kibanaIndex,
       type,
       size: perPage,
       from: perPage * (page - 1)
     });
 
-    const data = response.hits.hits.map(hit => ({
+    const data = response.hits.hits.map((hit: any) => ({
       id: hit._id,
       type: hit._type,
       version: hit._version,

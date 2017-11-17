@@ -15,6 +15,7 @@ import { ElasticsearchConfigs } from './ElasticsearchConfigs';
 import { Cluster } from './Cluster';
 import { LoggerFactory } from '../../logging';
 import { CoreService } from '../../types/CoreService';
+import { Headers } from '../http/Router/headers';
 
 type Clusters = { [type in ElasticsearchClusterType]: Cluster };
 
@@ -93,8 +94,9 @@ export class ElasticsearchService implements CoreService {
   // This method is really transparent. It does the two things
   // we currently do. I think we could work Observables
   // into this so we get updated stuff.
-  getScopedCluster(type: ElasticsearchClusterType, headers: string): Cluster {
-    const { callWithRequest } = this.getCluster(type);
-    return (...args) => this.callWithRequest(headers, ...args);
+  async getScopedCluster(type: ElasticsearchClusterType, headers: Headers): Promise<Cluster> {
+    //const { callWithRequest } = this.getCluster(type);
+    //return (...args) => this.callWithRequest(headers, ...args);
+    return await this.getClusterOfType(type);
   }
 }

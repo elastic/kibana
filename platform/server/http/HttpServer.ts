@@ -22,7 +22,7 @@ export class HttpServer {
     return this.server !== undefined && this.server.listening;
   }
 
-  registerRouter(router: Router<any>) {
+  registerRouter(router: Router) {
     this.app.use(router.path, router.router);
   }
 
