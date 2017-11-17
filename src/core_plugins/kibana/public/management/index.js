@@ -11,16 +11,6 @@ import 'ui/kbn_top_nav';
 
 import { ManagementLandingPage } from './management_landing_page';
 
-const app = uiModules.get('apps/management', ['react']);
-app.directive('managementLandingPage', function (reactDirective) {
-  return reactDirective(ManagementLandingPage, [
-    'version',
-    'addBasePath',
-    // Prevent the 'Maximum call stack exceeded' error.
-    ['sections', {  watchDepth: 'collection' }],
-  ]);
-});
-
 uiRoutes
 .when('/management', {
   template: landingTemplate
@@ -33,6 +23,17 @@ uiRoutes
 
 require('ui/index_patterns/route_setup/load_default')({
   whenMissingRedirectTo: '/management/kibana/index'
+});
+
+const app = uiModules.get('apps/management', ['react']);
+
+app.directive('managementLandingPage', function (reactDirective) {
+  return reactDirective(ManagementLandingPage, [
+    'version',
+    'addBasePath',
+    // Prevent the 'Maximum call stack exceeded' error.
+    ['sections', {  watchDepth: 'collection' }],
+  ]);
 });
 
 app.directive('kbnManagementApp', function (Private, $location, timefilter) {
