@@ -38,7 +38,8 @@ export const loadTestFiles = (mocha, log, lifecycle, providers, paths) => {
     loadTracer(provider, `testProvider[${path}]`, () => {
       // mocha.suite hocus-pocus comes from: https://git.io/vDnXO
 
-      mocha.suite.emit('pre-require', decorateMochaUi(lifecycle, global), path, mocha);
+      const context = decorateMochaUi(lifecycle, global);
+      mocha.suite.emit('pre-require', context, path, mocha);
 
       const returnVal = provider({
         loadTestFile: innerLoadTestFile,
@@ -53,6 +54,7 @@ export const loadTestFiles = (mocha, log, lifecycle, providers, paths) => {
 
       mocha.suite.emit('require', returnVal, path, mocha);
       mocha.suite.emit('post-require', global, path, mocha);
+      context.revertProxiedAssignments();
     });
   };
 
