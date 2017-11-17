@@ -154,9 +154,9 @@ export class DashboardStateManager {
   _handleStoreChanges() {
     let dirty = false;
     if (!this._areStoreAndAppStatePanelsEqual()) {
-      const state = store.getState();
+      const panels = getPanels(store.getState());
       this.appState.panels = [];
-      _.map(getPanels(state), panel => {
+      Object.values(panels).map(panel => {
         this.appState.panels.push(panel);
       });
       dirty = true;
