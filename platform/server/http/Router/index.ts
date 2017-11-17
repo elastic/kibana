@@ -36,7 +36,7 @@ const responseFactory: ResponseFactory = {
 export type RequestHandler<
   Params extends Any,
   Query extends Any,
-  Body extends Any,
+  Body extends Any
 > = (
   req: KibanaRequest<TypeOf<Params>, TypeOf<Query>, TypeOf<Body>>,
   createResponse: ResponseFactory
@@ -202,14 +202,11 @@ export class Router {
       request,
       valid.params,
       valid.query,
-      valid.body,
+      valid.body
     );
 
     try {
-      const kibanaResponse = await handler(
-        kibanaRequest,
-        responseFactory,
-      );
+      const kibanaResponse = await handler(kibanaRequest, responseFactory);
 
       if (kibanaResponse instanceof KibanaResponse) {
         response.status(kibanaResponse.status);

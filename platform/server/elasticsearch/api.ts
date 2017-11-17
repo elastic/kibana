@@ -7,7 +7,7 @@ import { LoggerFactory } from '../../logging';
 export function registerElasticsearchRoutes(
   router: Router<ElasticsearchRequestHelpers>,
   logger: LoggerFactory,
-  service: ElasticsearchService,
+  service: ElasticsearchService
 ) {
   const log = logger.get('elasticsearch', 'routes');
 
@@ -18,12 +18,12 @@ export function registerElasticsearchRoutes(
       path: '/:field',
       validate: {
         params: object({
-          field: string(),
+          field: string()
         }),
         query: object({
-          key: maybe(string()),
-        }),
-      },
+          key: maybe(string())
+        })
+      }
     },
     async (req, res) => {
       // WOHO! Both of these are typed!

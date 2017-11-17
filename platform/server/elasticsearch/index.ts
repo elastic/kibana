@@ -12,7 +12,7 @@ export { Cluster } from './Cluster';
 export {
   ElasticsearchService,
   ElasticsearchRequestHelpers,
-  ElasticsearchConfigs,
+  ElasticsearchConfigs
 };
 
 export class ElasticsearchModule {

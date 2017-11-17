@@ -4,7 +4,7 @@ import {
   Schema,
   ElasticsearchService,
   KibanaConfig,
-  HttpService,
+  HttpService
 } from '@elastic/kbn-types';
 import { BazService } from './BazService';
 
@@ -14,7 +14,7 @@ export function registerEndpoints(
   schema: Schema,
   elasticsearch: ElasticsearchService,
   http: HttpService,
-  config: KibanaConfig,
+  config: KibanaConfig
 ) {
   const { object, string, number, maybe } = schema;
   const log = logger.get('routes');
@@ -62,7 +62,9 @@ export function registerEndpoints(
       // should be bound to the right cluster
       const bazService = new BazService(req.headers, config, elasticsearch);
 
-      log.info('use Baz Service instance to hit elasticsearch with the right cluster');
+      log.info(
+        'use Baz Service instance to hit elasticsearch with the right cluster'
+      );
       const items = await bazService.find({
         type: params.type,
         page: query.page,

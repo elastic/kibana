@@ -101,7 +101,7 @@ export class Plugin<DependenciesType extends BasePluginsType, ExposableType> {
     //   throw new Error('plugin cannot return a promise')
     // }
 
-    this.exposedValues = value === undefined ? ({} as ExposableType) : value;
+    this.exposedValues = value === undefined ? {} as ExposableType : value;
   }
 
   stop() {

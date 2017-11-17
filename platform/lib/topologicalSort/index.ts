@@ -51,9 +51,7 @@ export function topologicalSort<T>(graph: Map<T, T[]>) {
   if (clonedGraph.size > 0) {
     const edgesLeft = JSON.stringify([...clonedGraph.entries()]);
     throw new Error(
-      `Topological ordering did not complete, these edges could not be ordered: ${
-        edgesLeft
-      }`
+      `Topological ordering did not complete, these edges could not be ordered: ${edgesLeft}`
     );
   }
 
