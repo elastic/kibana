@@ -8,7 +8,6 @@ const termsAgg = (field, size, direction) => {
   }
   const terms = {
     size: size,
-    shard_size: 10,
     order: {
       _count: direction
     }
@@ -45,6 +44,7 @@ class ListControl extends Control {
 
 export async function listControlFactory(controlParams, kbnApi) {
   const indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
+  // TODO replace SearchSource with call to suggestions API
   const searchSource = new kbnApi.SearchSource({
     timeout: '1s',
     terminate_after: 100000
