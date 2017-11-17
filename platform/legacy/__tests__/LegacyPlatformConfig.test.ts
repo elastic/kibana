@@ -4,7 +4,9 @@ import { LegacyConfigMock } from '../__mocks__/LegacyConfigMock';
 let legacyConfigMock: LegacyConfigMock;
 let configAdapter: LegacyConfigToRawConfigAdapter;
 beforeEach(() => {
-  legacyConfigMock = new LegacyConfigMock();
+  legacyConfigMock = new LegacyConfigMock(
+    new Map<string, any>([['__newPlatform', null]])
+  );
   configAdapter = new LegacyConfigToRawConfigAdapter(legacyConfigMock);
 });
 
@@ -24,11 +26,19 @@ describe('#get', () => {
   });
 
   test('returns new platform config values if they exist', () => {
-    legacyConfigMock.__rawData = new Map<string, any>([
-      ['__newPlatform.plugins', ['foo']]
-    ]);
-
-    expect(configAdapter.get(['__newPlatform', 'plugins'])).toEqual(['foo']);
+    configAdapter = new LegacyConfigToRawConfigAdapter(
+      new LegacyConfigMock(
+        new Map<string, any>([
+          ['__newPlatform', { plugins: { scanDirs: ['foo'] } }]
+        ])
+      )
+    );
+    expect(configAdapter.get(['__newPlatform', 'plugins'])).toEqual({
+      scanDirs: ['foo']
+    });
+    expect(configAdapter.get('__newPlatform.plugins')).toEqual({
+      scanDirs: ['foo']
+    });
   });
 
   test('correctly handles paths that do not need to be transformed.', () => {
@@ -99,6 +109,21 @@ describe('#set', () => {
     expect(legacyConfigMock.__rawData.get('known.sub1')).toEqual('sub-value-1');
     expect(legacyConfigMock.__rawData.get('known.sub2')).toEqual('sub-value-2');
   });
+
+  test('correctly sets values for new platform config.', () => {
+    const legacyConfigMock = new LegacyConfigMock(
+      new Map<string, any>([
+        ['__newPlatform', { plugins: { scanDirs: ['foo'] } }]
+      ])
+    );
+    configAdapter = new LegacyConfigToRawConfigAdapter(legacyConfigMock);
+
+    configAdapter.set(['__newPlatform', 'plugins', 'scanDirs'], ['bar']);
+    expect(legacyConfigMock.__rawData.get('__newPlatform')).toMatchSnapshot();
+
+    configAdapter.set('__newPlatform.plugins.scanDirs', ['baz']);
+    expect(legacyConfigMock.__rawData.get('__newPlatform')).toMatchSnapshot();
+  });
 });
 
 describe('#has', () => {
@@ -106,6 +131,11 @@ describe('#has', () => {
     expect(configAdapter.has('unknown')).toBe(false);
     expect(configAdapter.has(['unknown', 'sub1'])).toBe(false);
     expect(configAdapter.has('unknown.sub2')).toBe(false);
+  });
+
+  test('returns false if new platform config is not set', () => {
+    expect(configAdapter.has('__newPlatform.unknown')).toBe(false);
+    expect(configAdapter.has(['__newPlatform', 'unknown'])).toBe(false);
   });
 
   test('returns true if config is set.', () => {
@@ -119,14 +149,32 @@ describe('#has', () => {
     expect(configAdapter.has(['known', 'sub1'])).toBe(true);
     expect(configAdapter.has('known.sub2')).toBe(true);
   });
+
+  test('returns true if new platform config is set.', () => {
+    const legacyConfigMock = new LegacyConfigMock(
+      new Map<string, any>([
+        ['__newPlatform', { known: 'foo', known2: { sub: 'bar' } }]
+      ])
+    );
+    configAdapter = new LegacyConfigToRawConfigAdapter(legacyConfigMock);
+
+    expect(configAdapter.has('__newPlatform.known')).toBe(true);
+    expect(configAdapter.has('__newPlatform.known2')).toBe(true);
+    expect(configAdapter.has('__newPlatform.known2.sub')).toBe(true);
+    expect(configAdapter.has(['__newPlatform', 'known'])).toBe(true);
+    expect(configAdapter.has(['__newPlatform', 'known2'])).toBe(true);
+    expect(configAdapter.has(['__newPlatform', 'known2', 'sub'])).toBe(true);
+  });
 });
 
-test('`getFlattenedPaths` always returns empty array.', () => {
-  expect(configAdapter.getFlattenedPaths()).toHaveLength(0);
+test('`getFlattenedPaths` returns paths from new platform config only.', () => {
+  const legacyConfigMock = new LegacyConfigMock(
+    new Map<string, any>([
+      ['__newPlatform', { known: 'foo', known2: { sub: 'bar' } }],
+      ['legacy', { known: 'baz' }]
+    ])
+  );
+  configAdapter = new LegacyConfigToRawConfigAdapter(legacyConfigMock);
 
-  legacyConfigMock.__rawData = new Map([
-    ['one', 'two'],
-    ['three.four', 'three four']
-  ]);
-  expect(configAdapter.getFlattenedPaths()).toHaveLength(0);
+  expect(configAdapter.getFlattenedPaths()).toMatchSnapshot();
 });
