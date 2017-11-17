@@ -167,9 +167,7 @@ export class DashboardStateManager {
       this.setFullScreenMode(fullScreen);
     }
 
-    this.changeListeners.forEach(function (listener) {
-      return listener({ dirty });
-    });
+    this.changeListeners.forEach(listener => listener({ dirty }));
     this.saveState();
   }
 
