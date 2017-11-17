@@ -40,8 +40,7 @@ export function GaugeChartProvider(Private) {
           if (height < 0 || width < 0) return;
 
           div
-            .style('text-align', 'center')
-            .style('overflow-y', 'auto');
+            .style('text-align', 'center');
 
           data.series.forEach(series => {
             const svg = div.append('svg')
