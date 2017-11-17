@@ -8,5 +8,5 @@ export function createFailError(reason, exitCode = 1) {
 }
 
 export function isFailError(error) {
-  return error && error[FAIL_TAG];
+  return Boolean(error && error[FAIL_TAG]);
 }
