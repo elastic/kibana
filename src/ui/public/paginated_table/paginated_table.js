@@ -10,6 +10,13 @@ import {
   EuiKeyboardAccessible,
   EuiPagination,
   EuiPopover,
+  EuiSpacer,
+  EuiTable,
+  EuiTableBody,
+  EuiTableHeader,
+  EuiTableHeaderCell,
+  EuiTableRow,
+  EuiTableRowCell,
   SortableProperties,
 } from '@elastic/eui';
 
@@ -128,12 +135,25 @@ export class PaginatedTable extends Component {
     this.calculateItemsOnPage(nextProps.rows);
   }
 
-  renderColumns() {
+  renderHeaderCells() {
     return this.props.columns.map((column, index) => {
       const {
         class: colClass,
         title,
+        text,
+        sortable,
       } = column;
+
+      return (
+        <EuiTableHeaderCell
+          key={index}
+          onSort={sortable !== false ? () => { this.sortColumn(index); } : undefined}
+          isSorted={title === this.state.sortedColumn}
+          isSortAscending={this.sortableProperties.isAscendingByName(title)}
+        >
+          {text}
+        </EuiTableHeaderCell>
+      );
 
       return (
         <EuiKeyboardAccessible key={index}>
@@ -160,10 +180,22 @@ export class PaginatedTable extends Component {
 
   renderRows() {
     return this.state.pageOfItems.map((item, index) => {
+      const cells = item.map((cell, cellIndex) => {
+        return (
+          <EuiTableRowCell
+            key={cellIndex}
+          >
+            {cell.render()}
+          </EuiTableRowCell>
+        );
+      });
+
       return (
-        <tr key={index}>
-          {item.map(cell => cell.render())}
-        </tr>
+        <EuiTableRow
+          key={index}
+        >
+          {cells}
+        </EuiTableRow>
       );
     });
   }
@@ -262,6 +294,7 @@ export class PaginatedTable extends Component {
         </th>
       ));
 
+      // TODO: Add footer to EUI Table.
       footer = (
         <tfoot>
           <tr>
@@ -273,24 +306,18 @@ export class PaginatedTable extends Component {
 
     return (
       <div>
-        <table className="table table-condensed">
-          <thead data-test-subj="paginated-table-header">
-            <tr>
-              {this.renderColumns()}
-            </tr>
-          </thead>
+        <EuiTable compressed>
+          <EuiTableHeader data-test-subj="paginated-table-header">
+            {this.renderHeaderCells()}
+          </EuiTableHeader>
 
-          {/*<tbody
-            data-test-subj="paginated-table-body"
-            kbn-rows="page"
-            kbn-rows-min="paginatedTable.rowsToShow(perPage, page.length)"
-          >*/}
-          <tbody data-test-subj="paginated-table-body">
+          <EuiTableBody data-test-subj="paginated-table-body">
             {this.renderRows()}
-          </tbody>
+            {footer}
+          </EuiTableBody>
+        </EuiTable>
 
-          {footer}
-        </table>
+        <EuiSpacer size="m" />
 
         {this.renderPaginationControls()}
       </div>

@@ -4,7 +4,7 @@ import { uiModules } from 'ui/modules';
 import { FieldWildcardProvider } from 'ui/field_wildcard';
 import template from './indexed_fields_table.html';
 
-const renderBooleanForCondition = (condition, key) => {
+const renderBooleanForCondition = condition => {
   return () => {
     let content;
 
@@ -12,7 +12,7 @@ const renderBooleanForCondition = (condition, key) => {
       content = <span className="fa fa-check" aria-label="yes" />;
     }
 
-    return <td key={key}>{content}</td>;
+    return <div>{content}</div>;
   };
 };
 
@@ -28,13 +28,31 @@ uiModules.get('apps/management')
     link: function ($scope) {
       $scope.perPage = 25;
       $scope.columns = [
-        { title: 'name' },
-        { title: 'type' },
-        { title: 'format' },
-        { title: 'searchable', info: 'These fields can be used in the filter bar' },
-        { title: 'aggregatable', info: 'These fields can be used in visualization aggregations' },
-        { title: 'excluded', info: 'Fields that are excluded from _source when it is fetched' },
-        { title: 'controls', sortable: false }
+        {
+          title: 'name',
+          text: 'Name', },
+        {
+          title: 'type',
+          text: 'Type', },
+        {
+          title: 'format',
+          text: 'Format', },
+        {
+          title: 'searchable',
+          text: 'Searchable',
+          info: 'These fields can be used in the filter bar' },
+        {
+          title: 'aggregatable',
+          ext: 'Aggregatable',
+          info: 'These fields can be used in visualization aggregations' },
+        {
+          title: 'excluded',
+          text: 'Excluded',
+          info: 'Fields that are excluded from _source when it is fetched' },
+        {
+          title: 'controls',
+          text: '',
+          sortable: false }
       ];
 
       $scope.$watchMulti(['[]indexPattern.fields', 'fieldFilter', 'indexedFieldTypeFilter'], refreshRows);
@@ -68,14 +86,13 @@ uiModules.get('apps/management')
                 }
 
                 return (
-                  <td
+                  <div
                     data-test-subj="indexedFieldName"
-                    key="indexedFieldName"
                   >
                     <span>{field.displayName}</span>
                     &nbsp;
                     {content}
-                  </td>
+                  </div>
                 );
               },
               value: field.displayName,
@@ -94,28 +111,27 @@ uiModules.get('apps/management')
                 }
 
                 return (
-                  <td
+                  <div
                     data-test-subj="indexedFieldType"
-                    key="indexedFieldType"
                   >
                     <span>{field.type}</span>
                     {info}
-                  </td>
+                  </div>
                 );
               },
               value: field.type,
             }, {
               // TODO: What is this?
               // _.get($scope.indexPattern, ['fieldFormatMap', field.name, 'type', 'title']),
-              render: () => <td key="fieldFormatMapType" />
+              render: () => '',
             }, {
-              render: renderBooleanForCondition(field.searchable, 'searchable'),
+              render: renderBooleanForCondition(field.searchable),
               value: field.searchable
             }, {
-              render: renderBooleanForCondition(field.aggregatable, 'aggregatable'),
+              render: renderBooleanForCondition(field.aggregatable),
               value: field.aggregatable
             }, {
-              render: renderBooleanForCondition(excluded, 'excluded'),
+              render: renderBooleanForCondition(excluded),
               value: excluded
             }, {
               render: () => {
@@ -135,7 +151,7 @@ uiModules.get('apps/management')
                 }
 
                 return (
-                  <td key="actions">
+                  <div>
                     <div className="actions">
                       <a
                         data-test-subj="indexPatternFieldEditButton"
@@ -148,7 +164,7 @@ uiModules.get('apps/management')
 
                       {deleteButton}
                     </div>
-                  </td>
+                  </div>
                 );
 
               },
