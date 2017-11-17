@@ -1,8 +1,8 @@
 [[development-embedding-visualizations]]
 === Embedding Visualizations
 
-There are two different angular directives you can use to insert a visualization in your page. 
-To display an already saved visualization, use the `<visualize>` directive. 
+There are two different angular directives you can use to insert a visualization in your page.
+To display an already saved visualization, use the `<visualize>` directive.
 To reuse an existing Visualization implementation for a more custom purpose, use the `<visualization>` directive instead.
 
 ==== VisualizeLoader
@@ -23,11 +23,11 @@ two methods:
 
 
 ==== `<visualize>` directive
-The `<visualize>` directive takes care of loading data, parsing data, rendering the editor 
-(if the Visualization is in edit mode) and rendering the visualization. 
-The directive takes a savedVis object for its configuration. 
-It is the easiest way to add visualization to your page under the assumption that 
-the visualization you are trying to display is saved in kibana. 
+The `<visualize>` directive takes care of loading data, parsing data, rendering the editor
+(if the Visualization is in edit mode) and rendering the visualization.
+The directive takes a savedVis object for its configuration.
+It is the easiest way to add visualization to your page under the assumption that
+the visualization you are trying to display is saved in kibana.
 If that is not the case, take a look at using `<visualization>` directive.
 
 The simplest way is to just pass `saved-id` to `<visualize>`:
@@ -37,7 +37,7 @@ The simplest way is to just pass `saved-id` to `<visualize>`:
 For the above to work with time based visualizations time picker must be present (enabled) on the page. For scenarios
 where timepicker is not available time range can be passed in as additional parameter:
 
-`<visualize saved-id="'447d2930-9eb2-11e7-a956-5558df96e706'" 
+`<visualize saved-id="'447d2930-9eb2-11e7-a956-5558df96e706'"
 time-range="{ max: '2017-09-21T21:59:59.999Z', min: '2017-09-18T22:00:00.000Z' }"></visualize>`
 
 Once <visualize> is done rendering the element will emit `renderComplete` event.
@@ -57,7 +57,7 @@ which is explained later in this documentation.
 
 If `appState` is not provided, `<visualize>` will not monitor the `AppState`.
 
-`uiState` should be an instance of `PersistedState`. if not provided visualize will generate one, 
+`uiState` should be an instance of `PersistedState`. if not provided visualize will generate one,
 but you will have no access to it. It is used to store viewer specific information like whether the legend is toggled on or off.
 
 `editor-mode` defines if <visualize> should render in editor or in view mode.
@@ -80,7 +80,6 @@ uiModules.get('kibana')
 });
 -----------
 
-When <visualize> is ready it will emit `ready:vis` event on the root scope.
 When <visualize> is done rendering it will emit `renderComplete` event on the element.
 
 ==== `<visualization>` directive
@@ -96,7 +95,7 @@ The `<visualization>` directive takes a visualization configuration and data.
 
 `visData` is the data object. Each visualization defines a `responseHandler`, which defines the format of this object.
 
-`uiState` is an instance of PersistedState. Visualizations use it to keep track of their current state. If not provided 
+`uiState` is an instance of PersistedState. Visualizations use it to keep track of their current state. If not provided
 `<visualization>` will create its own (but you won't be able to check its values)
 
 *code example: create single metric visualization*
