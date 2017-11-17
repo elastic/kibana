@@ -4,7 +4,7 @@
     <label>
       <input type="checkbox"
              name="wms.enabled"
-             ng-model="vis.params.wms.enabled">
+             ng-model="options.enabled">
 
       WMS compliant map server
 
@@ -12,7 +12,7 @@
     </label>
   </div>
 
-  <div ng-show="vis.params.wms.enabled" class="well">
+  <div ng-show="options.enabled" class="well">
     <div class="vis-option-item form-group">
       <p>WMS is an OGC standard for map image services. For more information, go <a href="http://www.opengeospatial.org/standards/wms">here</a>.</p>
       <label>
@@ -20,7 +20,7 @@
       </label>
       <input type="text" class="form-control"
              name="wms.url"
-             ng-model="vis.params.wms.url">
+             ng-model="options.url">
     </div>
 
     <div class="vis-option-item form-group">
@@ -28,8 +28,8 @@
         WMS layers* <kbn-info info="A comma seperated list of layers to use."></kbn-info>
       </label>
       <input type="text" class="form-control"
-             ng-require="vis.params.wms.enabled"
-             ng-model="vis.params.wms.options.layers"
+             ng-require="options.enabled"
+             ng-model="options.options.layers"
              name="wms.options.layers">
     </div>
 
@@ -39,7 +39,7 @@
       </label>
       <input type="text" class="form-control"
              name="wms.options.version"
-             ng-model="vis.params.wms.options.version">
+             ng-model="options.options.version">
     </div>
 
     <div class="vis-option-item form-group">
@@ -48,7 +48,7 @@
       </label>
       <input type="text" class="form-control"
              name="wms.options.format"
-             ng-model="vis.params.wms.options.format">
+             ng-model="options.options.format">
     </div>
 
     <div class="vis-option-item form-group">
@@ -57,7 +57,7 @@
       </label>
       <input type="text" class="form-control"
              name="wms.options.attribution"
-             ng-model="vis.params.wms.options.attribution">
+             ng-model="options.options.attribution">
     </div>
 
     <div class="vis-option-item form-group">
@@ -66,7 +66,7 @@
       </label>
       <input type="text" class="form-control"
              name="wms.options.styles"
-             ng-model="vis.params.wms.options.styles">
+             ng-model="options.options.styles">
     </div>
 
     <p>* if this parameter is incorrect, maps will fail to load.</p>

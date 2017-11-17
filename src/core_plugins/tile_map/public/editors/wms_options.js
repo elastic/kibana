@@ -7,5 +7,8 @@ module.directive('wmsOptions', function () {
     restrict: 'E',
     template: wmsOptionsTemplate,
     replace: true,
+    scope: {
+      'options': '='
+    }
   };
 });
