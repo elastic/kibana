@@ -1,5 +1,3 @@
-import expect from 'expect.js';
-
 import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 
 /**
@@ -7,7 +5,7 @@ import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
  * with nested queries and filters on the visualizations themselves.
  */
 export default function ({ getService, getPageObjects }) {
-  const retry = getService('retry');
+  const dashboardExpect = getService('dashboardExpect');
   const dashboardVisualizations = getService('dashboardVisualizations');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
 
@@ -45,8 +43,7 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.header.clickDashboard();
 
-      const pieSlicesCount = await PageObjects.dashboard.getPieSliceCount();
-      expect(pieSlicesCount).to.equal(2);
+      await dashboardExpect.pieSliceCount(2);
     });
 
     it('Pie chart attached to saved search filters data as expected', async () => {
@@ -71,8 +68,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.saveVisualization('memory with bytes < 90 pie');
       await PageObjects.header.clickToastOK();
 
-      const pieSlicesCount = await PageObjects.dashboard.getPieSliceCount();
-      expect(pieSlicesCount).to.equal(3);
+      await dashboardExpect.pieSliceCount(3);
     });
 
     it('Pie chart attached to saved search filters shows no data with conflicting dashboard query', async () => {
@@ -80,12 +76,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickFilterButton();
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      // There appears to be a slight delay between the page loading and the visualization reacting to the
-      // filter which is causing this to sometimes be greater than 0, hence the retry.
-      retry.try(async () => {
-        const pieSlicesCount = await PageObjects.dashboard.getPieSliceCount();
-        expect(pieSlicesCount).to.equal(0);
-      });
+      await dashboardExpect.pieSliceCount(0);
     });
   });
 }
