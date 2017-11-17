@@ -1,6 +1,7 @@
 import { PARAM_TYPES } from '../../../common/tutorials/param_types';
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { INSTRUCTION_VARIANT } from '../../../common/tutorials/instruction_variant';
+import { LOGSTASH_INSTRUCTIONS } from '../../../common/tutorials/logstash_instructions';
 
 export function netflowSpecProvider() {
   return {
@@ -30,16 +31,7 @@ export function netflowSpecProvider() {
           {
             id: INSTRUCTION_VARIANT.OSX,
             instructions: [
-              {
-                title: 'Download and install Logstash',
-                textPre: 'Skip this step if Logstash is already installed. First time using Logstash? See the ' +
-                         '[Getting Started Guide]({config.elastic_docs.website_url}/guide/en/logstash/{config.elastic_docs.link_version}' +
-                         '/getting-started-with-logstash.html).',
-                commands: [
-                  'curl -L -O https://artifacts.elastic.co/downloads/logstash/logstash-{config.kibana.version}.tar.gz',
-                  'tar xzvf logstash-{config.kibana.version}.tar.gz'
-                ]
-              },
+              ...LOGSTASH_INSTRUCTIONS.INSTALL.OSX,
               {
                 title: 'Set up the Netflow module',
                 textPre: 'In the Logstash install directory, run the following command to set up the Netflow module.',
