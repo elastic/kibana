@@ -35,7 +35,7 @@ export async function getInstalledPackages(options = {}) {
       const {
         licenses: detectedLicenses,
         realPath,
-        repository,
+        repository
       } = licenseInfo[key];
 
       const licenses = [].concat(

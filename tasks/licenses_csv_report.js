@@ -37,7 +37,7 @@ export default function licensesCSVReport(grunt) {
 
     try {
       const options = grunt.config('licenses', { overrides: {} });
-      const file = grunt.option('output');
+      const file = grunt.option('out');
 
       const packages = await getInstalledPackages({
         directory: grunt.config.get('root'),
@@ -60,7 +60,7 @@ export default function licensesCSVReport(grunt) {
         grunt.log.writeln(`wrote to ${file}`);
       } else {
         grunt.log.writeln(csv);
-        grunt.log.writeln('\nspecify "--output [path]" to output to a file');
+        grunt.log.writeln('\nspecify "--out [filepath]" to write the data to a specific file');
       }
 
       done();
