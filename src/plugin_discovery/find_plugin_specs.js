@@ -80,7 +80,7 @@ export function findPluginSpecs(settings, config = defaultConfig(settings)) {
         invalidVersionSpecs: isRightVersion ? [] : [spec],
       };
     })
-    // determin which plugins are disabled before actually removing things from the config
+    // determine which plugins are disabled before actually removing things from the config
     .let(waitForComplete)
     .do(result => {
       for (const spec of result.disabledSpecs) {
@@ -108,7 +108,7 @@ export function findPluginSpecs(settings, config = defaultConfig(settings)) {
         isInvalidPackError(result.error) ? [result.error] : []
       )),
 
-    // { spec, message } objects produces when transforming deprecated
+    // { spec, message } objects produced when transforming deprecated
     // settings for a plugin spec
     deprecation$: extendConfig$
       .mergeMap(result => result.deprecations),
