@@ -5,6 +5,8 @@ import {
   EuiKeyboardAccessible,
 } from '@elastic/eui';
 
+import { Pager } from 'ui/pager';
+
 export class PaginatedTable extends Component {
   constructor(props) {
     super(props);
@@ -13,12 +15,16 @@ export class PaginatedTable extends Component {
       { text: '10', value: 10 },
       { text: '25', value: 25 },
       { text: '100', value: 100 },
-      { text: 'All', value: 0 }
+      { text: 'All', value: 0 },
     ];
+
+    const initialRowsPerPage = this.rowsPerPageOptions[1].value;
+    this.pager = new Pager(props.rows.length, initialRowsPerPage, 1);
 
     this.state = {
       pageCount: 10,
-      rowsPerPage: this.rowsPerPageOptions[1].value,
+      pageOfItems: [],
+      rowsPerPage: initialRowsPerPage,
     };
   }
 
@@ -27,12 +33,33 @@ export class PaginatedTable extends Component {
   };
 
   onChangeRowsPerPage = event => {
-    this.setState({ rowsPerPage: event.target.value });
+    const rowsPerPage = event.target.value;
+    this.setState({ rowsPerPage });
+    this.pager.setPageSize(rowsPerPage);
+    this.calculateItemsOnPage();
   };
 
   sortColumn = () => {
     // TODO: Reimplement sorting.
   };
+
+  calculateItemsOnPage = (items = this.props.rows) => {
+    // const sortedRows = this.sortableProperties.sortItems(rows);
+    this.pager.setTotalItems(items.length);
+    const pageOfItems = items.slice(this.pager.startIndex, this.pager.startIndex + this.pager.pageSize);
+    this.setState({
+      pageOfItems,
+      // pageStartNumber: this.pager.startItem,
+    });
+  };
+
+  componentDidMount() {
+    this.calculateItemsOnPage();
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.calculateItemsOnPage(nextProps.rows);
+  }
 
   renderColumns() {
     return this.props.columns.map((column, index) => {
@@ -65,10 +92,10 @@ export class PaginatedTable extends Component {
   }
 
   renderRows() {
-    return this.props.rows.map((row, index) => {
+    return this.state.pageOfItems.map((item, index) => {
       return (
         <tr key={index}>
-          {row.map(cell => cell.render())}
+          {item.map(cell => cell.render())}
         </tr>
       );
     });
