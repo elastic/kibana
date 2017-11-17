@@ -7,31 +7,33 @@ import { REPO_ROOT } from './constants';
 export class File {
   constructor(path) {
     this._path = resolve(path);
+    this._relativePath = relative(REPO_ROOT, this._path);
+    this._ext = extname(this._path);
   }
 
   getRelativePath() {
-    return relative(REPO_ROOT, this._path);
+    return this._relativePath;
   }
 
   isJs() {
-    return extname(this._path) === '.js';
+    return this._ext === '.js';
   }
 
   matchesRegex(regex) {
-    return this.getRelativePath().match(regex);
+    return this._relativePath.match(regex);
   }
 
   matchesAnyGlob(globs) {
-    return globs.some(pattern => minimatch(this.getRelativePath(), pattern, {
+    return globs.some(pattern => minimatch(this._relativePath, pattern, {
       dot: true
     }));
   }
 
   toString() {
-    return this.getRelativePath();
+    return this._relativePath;
   }
 
   toJSON() {
-    return this.getRelativePath();
+    return this._relativePath;
   }
 }
