@@ -34,9 +34,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async clickEditVisualization() {
       log.debug('clickEditVisualization');
       await testSubjects.click('dashboardPanelToggleMenuIcon');
-      await testSubjects.click('dashboardPanelEditLink');
 
+      // Edit link may sometimes be disabled if the embeddable isn't rendered yet.
       await retry.try(async () => {
+        await testSubjects.click('dashboardPanelEditLink');
         const current = await remote.getCurrentUrl();
         if (current.indexOf('visualize') < 0) {
           throw new Error('not on visualize page');
@@ -510,6 +511,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         '.filter-bar > .filter > .filter-description',
         timeout);
       return _.map(filters, async (filter) => await filter.getVisibleText());
+    }
+
+    async getPieSliceCount() {
+      log.debug('getPieSliceCount');
+      return await retry.try(async () => {
+        const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
+        return slices.length;
+      });
     }
 
     async filterOnPieSlice() {
