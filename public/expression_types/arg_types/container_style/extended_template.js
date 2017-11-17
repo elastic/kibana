@@ -27,6 +27,8 @@ export const extendedTemplate = ({ getArgValue, setArgValue }) => (
   </div>
 );
 
+extendedTemplate.displayName = 'ContainerStyleArgExtendedInput';
+
 extendedTemplate.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.any.isRequired,

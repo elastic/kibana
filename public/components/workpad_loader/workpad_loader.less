@@ -2,6 +2,7 @@
 
 .canvas__workpad_loader {
   height: 400px;
+  display: flex;
 
   .canvas__workpad_loader--created, .canvas__workpad_loader--updated {
     white-space: nowrap;
@@ -9,6 +10,10 @@
 
   .canvas__workpad_loader--delete:hover {
     color: @colorDanger;
+  }
+
+  .canvas__workpad_loader--export:hover {
+    color: @colorSecondary;
   }
 
   .canvas__workpad_loader--workpad {
@@ -26,6 +31,6 @@
   }
 
   .canvas__workpad_loader--new {
-    margin-right: @spacingS;
+    margin-right: @spacingM;
   }
 }

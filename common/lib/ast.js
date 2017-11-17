@@ -3,13 +3,16 @@ import { getType } from '../lib/get_type';
 
 function getArgumentString(arg, argKey) {
   const type = getType(arg);
-  // TODO: MAJOR -- This breaks for single quoted strings that contain double quotes!
 
   function maybeArgKey(argString) {
     return (argKey == null || argKey === '_') ? argString : `${argKey}=${argString}`;
   }
 
-  if (type === 'string') return maybeArgKey(`"${arg}"`);
+  // TODO: this works, but seems a little hacky. it removes existing escaped chars on quotes
+  // and adds the escaping onto all other double quotes it finds in the string
+  const escapeQuotes = (val) => val.replace(/\\\"/g, '"').replace(/\"/g, '\\"');
+
+  if (type === 'string') return maybeArgKey(`"${escapeQuotes(arg)}"`);
   if (type === 'boolean' || type === 'null' || type === 'number') return maybeArgKey(`${arg}`);
   if (type === 'expression') return maybeArgKey(`{${getExpression(arg.chain)}}`);
   if (type === 'partial') return maybeArgKey('${' + getExpression(arg.chain) + '}');

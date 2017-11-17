@@ -9,6 +9,9 @@ export const getInitialState = (path) => {
       fullscreen: false,
       selectedElement: null,
       resolvedArgs: {},
+      refresh: {
+        interval: 0,
+      },
       // values in resolvedArgs should live under a unique index so they can be looked up.
       // The ID of the element is a great example.
       // In there will live an object with a status (string), value (any), and error (Error) property.

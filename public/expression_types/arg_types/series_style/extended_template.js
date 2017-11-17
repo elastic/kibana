@@ -83,6 +83,8 @@ export const extendedTemplate = (props) => {
   );
 };
 
+extendedTemplate.displayName = 'SeriesStyleArgAdvancedInput';
+
 extendedTemplate.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.any.isRequired,

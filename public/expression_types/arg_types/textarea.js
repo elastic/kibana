@@ -5,8 +5,7 @@ import { get } from 'lodash';
 import { createStatefulPropHoc } from '../../components/enhance/stateful_prop';
 import { compose, withProps } from 'recompose';
 
-const component = ({ updateValue, value, confirm, commit, renderError }) => {
-
+const TextAreaArgInput = ({ updateValue, value, confirm, commit, renderError }) => {
   if (typeof value !== 'string') renderError();
 
   return (
@@ -26,9 +25,12 @@ const component = ({ updateValue, value, confirm, commit, renderError }) => {
   );
 };
 
-component.propTypes = {
+TextAreaArgInput.propTypes = {
   updateValue: PropTypes.func.isRequired,
-  value: PropTypes.string.isRequired,
+  value: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.object,
+  ]).isRequired,
   confirm: PropTypes.string,
   commit: PropTypes.func.isRequired,
   renderError: PropTypes.func,
@@ -41,7 +43,7 @@ const template = compose(
     value: argValue,
   })),
   createStatefulPropHoc('value'),
-)(component);
+)(TextAreaArgInput);
 
 template.propTypes = {
   argValue: PropTypes.any.isRequired,

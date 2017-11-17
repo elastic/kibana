@@ -7,7 +7,7 @@ const basePath = chrome.getBasePath();
 const apiPath = `${basePath}${API_ROUTE_WORKPAD}`;
 
 export function create(workpad) {
-  return fetch.post(apiPath, { ...workpad, assets: {} });
+  return fetch.post(apiPath, { ...workpad, assets: workpad.assets || {} });
 }
 
 export function get(workpadId) {

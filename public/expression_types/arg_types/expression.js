@@ -1,6 +1,6 @@
 import React from 'react';
 
-const template = (props = {}) => {
+const ExpressionArgInput = (props = {}) => {
   return (
     <div className="canvas__argtype--expression">
       <div>expression args:</div>
@@ -16,5 +16,5 @@ export const expression = () => ({
   displayName: 'Expression',
   help: 'Manually enter a custom expression',
   args: [],
-  template,
+  ExpressionArgInput,
 });

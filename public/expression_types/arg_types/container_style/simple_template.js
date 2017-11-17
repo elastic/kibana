@@ -10,6 +10,8 @@ export const simpleTemplate = ({ getArgValue, setArgValue }) => (
   </div>
 );
 
+simpleTemplate.displayName = 'ContainerStyleArgSimpleInput';
+
 simpleTemplate.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.any.isRequired,

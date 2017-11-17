@@ -2,12 +2,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Toggle } from '../toggle';
 import { FullscreenControl } from '../fullscreen_control';
+import { RefreshControl } from '../refresh_control';
 import { Shortcuts } from 'react-shortcuts';
 import './workpad_header.less';
 
 const btnClass = 'canvas__workpad_header--button';
 
-export const WorkpadHeader = ({ workpadName, editing, inFlight, toggleEditing, doRefresh }) => {
+export const WorkpadHeader = ({ workpadName, editing, toggleEditing }) => {
   const keyHandler = (action) => {
     if (action === 'EDITING') toggleEditing();
   };
@@ -16,9 +17,8 @@ export const WorkpadHeader = ({ workpadName, editing, inFlight, toggleEditing, d
     <div className="canvas__workpad_header">
       <h2>
         { workpadName }
-        <span className={`canvas__workpad_header--editToggle ${btnClass}`}>
-          <i className={`fa fa-refresh ${inFlight && 'canvas__in_flight'}`} onClick={doRefresh}/>
-        </span>
+
+        <RefreshControl className={`canvas__workpad_header--refresh ${btnClass}`} />
 
         <FullscreenControl>
           {({ onFullscreen }) => (
@@ -40,7 +40,5 @@ export const WorkpadHeader = ({ workpadName, editing, inFlight, toggleEditing, d
 WorkpadHeader.propTypes = {
   workpadName: PropTypes.string,
   editing: PropTypes.bool,
-  inFlight: PropTypes.bool,
   toggleEditing: PropTypes.func,
-  doRefresh: PropTypes.func,
 };

@@ -6,10 +6,12 @@ import { getWorkpadColors } from '../selectors/workpad';
 import { fetchAllRenderables } from './elements';
 import { setAssets, resetAssets } from './assets';
 import { getDefaultWorkpad } from '../defaults';
+import fileSaver from 'file-saver';
 
 export const sizeWorkpad = createAction('sizeWorkpad');
 export const setName = createAction('setName');
 export const setColors = createAction('setColors');
+export const setRefreshInterval = createAction('setRefreshInterval');
 
 export const initializeWorkpad = createThunk('initializeWorkpad', ({ dispatch }) => {
   dispatch(fetchAllRenderables());
@@ -25,17 +27,35 @@ export const removeColor = createThunk('removeColor', ({ dispatch, getState }, c
   dispatch(setColors(without(getWorkpadColors(getState()), color)));
 });
 
-export const setWorkpad = createThunk('setWorkpad', ({ dispatch }, workpad) => {
-  const setWorkpadAction = createAction('setWorkpad');
-  dispatch(setWorkpadAction(workpad));
-  dispatch(initializeWorkpad());
+export const setWorkpad = createThunk('setWorkpad', ({ dispatch, type }, workpad) => {
+  dispatch(createAction(type)(workpad)); // set the workpad object in state
+  dispatch(setRefreshInterval(0)); // disable refresh interval
+  dispatch(initializeWorkpad()); // load all the elements on the workpad
 });
 
-export const loadWorkpad = createThunk('loadWorkpad', ({ dispatch }, workpadId) => {
+export const loadWorkpad = createThunk('loadWorkpad', ({ dispatch }, { assets, ...workpad }) => {
+  dispatch(setWorkpad(workpad));
+  dispatch(setAssets(assets));
+});
+
+export const loadWorkpadById = createThunk('loadWorkpadById', ({ dispatch }, workpadId) => {
   // TODO: handle the failed loading state
-  workpadService.get(workpadId).then(({ assets, ...workpad }) => {
-    dispatch(setWorkpad(workpad));
-    dispatch(setAssets(assets));
+  workpadService.get(workpadId).then(workpad => dispatch(loadWorkpad(workpad)));
+});
+
+export const downloadWorkpadById = createThunk('downloadWorkpadbyId', ({ dispatch }, workpadId) => {
+  // TODO: handle the failed loading state
+  workpadService.get(workpadId).then(resp => {
+    console.log(resp);
+    fileSaver.saveAs(new Blob([JSON.stringify(resp)], { type: 'application/json' }), `canvas-workpad-${resp.name}-${resp.id}.json`);
+  });
+});
+
+export const downloadWorkpad = createThunk('downloadWorkpad', ({ dispatch }, workpadId) => {
+  // TODO: handle the failed loading state
+  workpadService.get(workpadId).then(resp => {
+    console.log(resp);
+    fileSaver.saveAs(new Blob([JSON.stringify(resp)], { type: 'application/json' }), `canvas-workpad-${resp.name}-${resp.id}.json`);
   });
 });
 

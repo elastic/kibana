@@ -34,6 +34,8 @@ export const extendedTemplate = (props) => {
   );
 };
 
+extendedTemplate.displayName = 'FontArgExtendedInput';
+
 extendedTemplate.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   argValue: PropTypes.any.isRequired,

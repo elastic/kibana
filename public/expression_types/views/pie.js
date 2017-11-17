@@ -4,7 +4,7 @@ import { map, uniq } from 'lodash';
 export const pie = () => ({
   name: 'pie',
   displayName: 'Chart Style',
-  modelArgs: ['color', 'size'],
+  modelArgs: [['color', { label: 'Slice Labels' }], ['size', { label: 'Slice Angles' }]],
   args: [{
     name: 'font',
     displayName: 'Text settings',
@@ -17,8 +17,9 @@ export const pie = () => ({
   }, {
     name: 'seriesStyle',
     displayName: 'Series Style',
+    help: 'Set the color of a specific slice, expand to select series',
     argType: 'seriesStyle',
-    default: '{seriesStyle points=5}',
+    default: '{seriesStyle}',
     multi: true,
   }],
   resolve({ context }) {

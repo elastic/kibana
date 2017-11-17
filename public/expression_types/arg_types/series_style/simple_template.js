@@ -22,6 +22,7 @@ export const simpleTemplate = (props) => {
 
   return (
     <div className="canvas__argtype--seriesStyle--color">
+      <label style={{ paddingRight: '4px' }}>Color </label>
       { !color || color.length === 0 ? (
         <div className="canvas__argtype--seriesStyle--color-picker">
           <div>
@@ -49,6 +50,8 @@ export const simpleTemplate = (props) => {
     </div>
   );
 };
+
+simpleTemplate.displayName = 'SeriesStyleArgSimpleInput';
 
 simpleTemplate.propTypes = {
   onValueChange: PropTypes.func.isRequired,
