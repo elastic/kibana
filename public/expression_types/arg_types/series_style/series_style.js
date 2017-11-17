@@ -5,7 +5,6 @@ import { simpleTemplate } from './simple_template';
 import { extendedTemplate } from './extended_template';
 import './series_style.less';
 
-
 const wrappedTemplate = lifecycle({
   formatLabel(label) {
     if (typeof label !== 'string') this.props.renderError();
