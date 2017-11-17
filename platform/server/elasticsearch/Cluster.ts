@@ -1,7 +1,6 @@
 import { Client } from 'elasticsearch';
 
 import { ElasticsearchConfig } from './ElasticsearchConfig';
-import { KibanaRequest } from '../http';
 import { Logger, LoggerFactory } from '../../logging';
 
 export class Cluster {
@@ -13,9 +12,9 @@ export class Cluster {
     private readonly config: ElasticsearchConfig,
     logger: LoggerFactory
   ) {
-    this.log = logger.get('elasticsearch', 'client', config.clusterType);
+    this.log = logger.get('elasticsearch', 'client', this.config.clusterType);
 
-    this.client = new Client(config.toElasticsearchClientConfig());
+    this.client = new Client(this.config.toElasticsearchClientConfig());
     this.noAuthClient = new Client(
       config.toElasticsearchClientConfig({
         shouldAuth: false
