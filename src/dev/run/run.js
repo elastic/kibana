@@ -4,13 +4,14 @@ import { getFlags, getHelp } from './flags';
 
 export async function run(body) {
   const flags = getFlags(process.argv.slice(2));
-  const log = createToolingLog(pickLevelFromFlags(flags));
-  log.pipe(process.stdout);
 
   if (flags.help) {
     process.stderr.write(getHelp());
     process.exit(1);
   }
+
+  const log = createToolingLog(pickLevelFromFlags(flags));
+  log.pipe(process.stdout);
 
   try {
     await body({ log, flags });
