@@ -20,7 +20,7 @@ export function PanelHeader({ title, actions, isViewOnlyMode, hidePanelTitles })
         title={title}
         aria-label={`Dashboard panel: ${title}`}
       >
-        {title}
+        {hidePanelTitles ? '' : title}
       </span>
 
       <div className="kuiMicroButtonGroup">
