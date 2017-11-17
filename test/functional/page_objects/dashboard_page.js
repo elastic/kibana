@@ -516,7 +516,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async getPieSliceCount() {
       log.debug('getPieSliceCount');
       return await retry.try(async () => {
-        const slices = await find.allByCssSelector('svg > g > path.slice');
+        const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
         return slices.length;
       });
     }
