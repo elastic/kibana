@@ -157,7 +157,9 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
       $scope.vis.API.events.filter({ point: { aggConfigResult: aggConfigResult } });
     });
     choroplethLayer.on('styleChanged', function (event) {
-      const shouldShowWarning = $scope.vis.params.isDisplayWarning && config.get('visualization:regionmap:showWarnings');
+      const shouldShowWarning = $scope.vis.isEditorMode()
+        && $scope.vis.params.isDisplayWarning
+        && config.get('visualization:regionmap:showWarnings');
       if (event.mismatches.length > 0 && shouldShowWarning) {
         notify.warning(
           `Could not show ${event.mismatches.length} ${event.mismatches.length > 1 ? 'results' : 'result'} on the map.`
