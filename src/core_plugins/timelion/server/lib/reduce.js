@@ -26,10 +26,10 @@ export default async function reduce(argsPromises, fn) {
       if (seriesList.list.length !== argument.list.length) {
         throw new Error ('Unable to reduce seriesList on a per-label basis, number of series are not the same');
       }
-      const indexedByLabel = _.indexBy(argument.list, 'label');
+      const indexedByLabel = _.indexBy(argument.list, 'parentLabel');
       seriesList.list.forEach((series) => {
-        if (!indexedByLabel[series.label]) {
-          throw new Error (`series could not be found for label ${series.label}`);
+        if (!indexedByLabel[series.parentLabel]) {
+          throw new Error (`series could not be found for label ${series.parentLabel}`);
         }
       });
 
@@ -37,7 +37,7 @@ export default async function reduce(argsPromises, fn) {
       const labelwiseSeriesList = { type: 'seriesList', list: [] };
       seriesList.list.forEach(async (series) => {
         const first = { type: 'seriesList', list: [series] };
-        const second = { type: 'seriesList', list: [indexedByLabel[series.label]] };
+        const second = { type: 'seriesList', list: [indexedByLabel[series.parentLabel]] };
         const labelSeriesList = await reduce([first, second], fn);
         const labelSeries = labelSeriesList.list[0];
         labelwiseSeriesList.list.push(labelSeries);

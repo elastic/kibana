@@ -29,8 +29,12 @@ export function flattenBucket(bucket, path, result) {
       });
     } else if (_.get(val, 'meta.type') === 'time_buckets') {
       const metrics = timeBucketsToPairs(val.buckets);
+      const parentLabel = path.slice(-1).pop(); // last element in path
       _.each(metrics, function (pairs, metricName) {
-        result[path.concat([metricName]).join(' > ')] = pairs;
+        result[path.concat([metricName]).join(' > ')] = {
+          pairs: pairs,
+          parentLabel: parentLabel
+        };
       });
     }
   });
@@ -40,10 +44,11 @@ export function flattenBucket(bucket, path, result) {
 export default function toSeriesList(aggs, config) {
   return _.map(flattenBucket(aggs), function (values, name) {
     return {
-      data: values,
+      data: values.pairs,
       type: 'series',
       fit: config.fit,
-      label: name
+      label: name,
+      parentLabel: values.parentLabel
     };
   });
 }
