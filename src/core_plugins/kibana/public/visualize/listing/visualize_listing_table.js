@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import _ from 'lodash';
 
 import { SortableProperties } from 'ui_framework/services';
 import { Pager } from 'ui/pager';
@@ -48,6 +49,19 @@ export class VisualizeListingTable extends Component {
     );
     this.items = [];
     this.pager = new Pager(this.items.length, 20, 1);
+
+    this.debouncedFetch = _.debounce(filter => {
+      this.props.fetchItems(filter)
+        .then(items => {
+          this.setState({
+            isFetchingItems: false,
+            selectedRowIds: [],
+            filter,
+          });
+          this.items = items;
+          this.calculateItemsOnPage();
+        });
+    }, 200);
   }
 
   calculateItemsOnPage = () => {
@@ -75,18 +89,8 @@ export class VisualizeListingTable extends Component {
   };
 
   fetchItems = (filter) => {
-    this.setState({ isFetchingItems: true });
-
-    this.props.fetchItems(filter)
-      .then(items => {
-        this.setState({
-          isFetchingItems: false,
-          selectedRowIds: [],
-          filter,
-        });
-        this.items = items;
-        this.calculateItemsOnPage();
-      });
+    this.setState({ isFetchingItems: true, filter });
+    this.debouncedFetch(filter);
   };
 
   componentDidMount() {
