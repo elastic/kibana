@@ -13,7 +13,7 @@ import { expect } from 'chai';
 import sinon from 'sinon';
 import invoke from './helpers/invoke_series_fn.js';
 
-function stubResponse(response) {
+function stubRequestAndServer(response, indexPatternSavedObjects = []) {
   return {
     server: {
       plugins: {
@@ -25,6 +25,17 @@ function stubResponse(response) {
           })
         }
       }
+    },
+    request: {
+      getSavedObjectsClient: function () {
+        return {
+          find: function () {
+            return Promise.resolve({
+              saved_objects: indexPatternSavedObjects
+            });
+          }
+        };
+      }
     }
   };
 }
@@ -34,22 +45,22 @@ describe(filename, () => {
 
   describe('seriesList processor', () => {
     it('throws an error then the index is missing', () => {
-      tlConfig = stubResponse({
+      tlConfig = stubRequestAndServer({
         _shards: { total: 0 }
       });
       return invoke(es, [5], tlConfig)
-      .then(expect.fail)
-      .catch((e) => {
-        expect(e).to.be.an('error');
-      });
+        .then(expect.fail)
+        .catch((e) => {
+          expect(e).to.be.an('error');
+        });
     });
 
     it('returns a seriesList', () => {
-      tlConfig = stubResponse(esResponse);
+      tlConfig = stubRequestAndServer(esResponse);
       return invoke(es, [5], tlConfig)
-      .then((r) => {
-        expect(r.output.type).to.eql('seriesList');
-      });
+        .then((r) => {
+          expect(r.output.type).to.eql('seriesList');
+        });
     });
   });
 
@@ -92,16 +103,36 @@ describe(filename, () => {
     });
 
     describe('metric aggs', () => {
+      const emptyScriptedFields = [];
+
       it('adds a metric agg for each metric', () => {
         config.metric = ['sum:beer', 'avg:bytes'];
-        agg = createDateAgg(config, tlConfig);
+        agg = createDateAgg(config, tlConfig, emptyScriptedFields);
         expect(agg.time_buckets.aggs['sum(beer)']).to.eql({ sum: { field: 'beer' } });
         expect(agg.time_buckets.aggs['avg(bytes)']).to.eql({ avg: { field: 'bytes' } });
       });
 
+      it('adds a scripted metric agg for each scripted metric', () => {
+        config.metric = ['avg:scriptedBytes'];
+        const scriptedFields = [{
+          name: 'scriptedBytes',
+          script: 'doc["bytes"].value',
+          lang: 'painless'
+        }];
+        agg = createDateAgg(config, tlConfig, scriptedFields);
+        expect(agg.time_buckets.aggs['avg(scriptedBytes)']).to.eql({
+          avg: {
+            script: {
+              inline: 'doc["bytes"].value',
+              lang: 'painless'
+            }
+          }
+        });
+      });
+
       it('has a special `count` metric that uses a script', () => {
         config.metric = ['count'];
-        agg = createDateAgg(config, tlConfig);
+        agg = createDateAgg(config, tlConfig, emptyScriptedFields);
         expect(agg.time_buckets.aggs.count.bucket_script).to.be.an('object');
         expect(agg.time_buckets.aggs.count.bucket_script.buckets_path).to.eql('_count');
       });
@@ -110,6 +141,7 @@ describe(filename, () => {
 
   describe('buildRequest', () => {
     const fn = buildRequest;
+    const emptyScriptedFields = [];
     let tlConfig;
     let config;
     beforeEach(() => {
@@ -124,20 +156,20 @@ describe(filename, () => {
 
     it('sets the index on the request', () => {
       config.index = 'beer';
-      const request = fn(config, tlConfig);
+      const request = fn(config, tlConfig, emptyScriptedFields);
 
       expect(request.index).to.equal('beer');
     });
 
     it('always sets body.size to 0', () => {
-      const request = fn(config, tlConfig);
+      const request = fn(config, tlConfig, emptyScriptedFields);
 
       expect(request.body.size).to.equal(0);
     });
 
     it('creates a filters agg that contains each of the queries passed', () => {
       config.q = ['foo', 'bar'];
-      const request = fn(config, tlConfig);
+      const request = fn(config, tlConfig, emptyScriptedFields);
 
       expect(request.body.aggs.q.meta.type).to.equal('split');
 
@@ -169,7 +201,7 @@ describe(filename, () => {
 
       it('adds the contents of payload.extended.es.filter to a filter clause of the bool', () => {
         config.kibana = true;
-        const request = fn(config, tlConfig);
+        const request = fn(config, tlConfig, emptyScriptedFields);
         const filter = request.body.query.bool.filter.bool;
         expect(filter.must.length).to.eql(1);
         expect(filter.must_not.length).to.eql(2);
@@ -177,12 +209,12 @@ describe(filename, () => {
 
       it('does not include filters if config.kibana = false', () => {
         config.kibana = false;
-        const request = fn(config, tlConfig);
+        const request = fn(config, tlConfig, emptyScriptedFields);
         expect(request.body.query.bool.filter).to.eql(undefined);
       });
 
       it('adds a time filter to the bool querys must clause', () => {
-        let request = fn(config, tlConfig);
+        let request = fn(config, tlConfig, emptyScriptedFields);
         expect(request.body.query.bool.must.length).to.eql(1);
         expect(request.body.query.bool.must[0]).to.eql({ range: { '@timestamp': {
           lte: 5,
@@ -191,24 +223,59 @@ describe(filename, () => {
         } } });
 
         config.kibana = true;
-        request = fn(config, tlConfig);
+        request = fn(config, tlConfig, emptyScriptedFields);
         expect(request.body.query.bool.must.length).to.eql(1);
       });
     });
 
-    it('config.split adds terms aggs, in order, under the filters agg', () => {
-      config.split = ['beer:5', 'wine:10'];
-      const request = fn(config, tlConfig);
+    describe('config.split', () => {
+      it('adds terms aggs, in order, under the filters agg', () => {
+        config.split = ['beer:5', 'wine:10'];
+        const request = fn(config, tlConfig, emptyScriptedFields);
 
-      const aggs = request.body.aggs.q.aggs;
+        const aggs = request.body.aggs.q.aggs;
 
-      expect(aggs.beer.meta.type).to.eql('split');
-      expect(aggs.beer.terms.field).to.eql('beer');
-      expect(aggs.beer.terms.size).to.eql(5);
+        expect(aggs.beer.meta.type).to.eql('split');
+        expect(aggs.beer.terms.field).to.eql('beer');
+        expect(aggs.beer.terms.size).to.eql(5);
 
-      expect(aggs.beer.aggs.wine.meta.type).to.eql('split');
-      expect(aggs.beer.aggs.wine.terms.field).to.eql('wine');
-      expect(aggs.beer.aggs.wine.terms.size).to.eql(10);
+        expect(aggs.beer.aggs.wine.meta.type).to.eql('split');
+        expect(aggs.beer.aggs.wine.terms.field).to.eql('wine');
+        expect(aggs.beer.aggs.wine.terms.size).to.eql(10);
+      });
+
+      it('adds scripted terms aggs, in order, under the filters agg', () => {
+        config.split = ['scriptedBeer:5', 'scriptedWine:10'];
+        const scriptedFields = [
+          {
+            name: 'scriptedBeer',
+            script: 'doc["beer"].value',
+            lang: 'painless'
+          },
+          {
+            name: 'scriptedWine',
+            script: 'doc["wine"].value',
+            lang: 'painless'
+          }
+        ];
+        const request = fn(config, tlConfig, scriptedFields);
+
+        const aggs = request.body.aggs.q.aggs;
+
+        expect(aggs.scriptedBeer.meta.type).to.eql('split');
+        expect(aggs.scriptedBeer.terms.script).to.eql({
+          inline: 'doc["beer"].value',
+          lang: 'painless'
+        });
+        expect(aggs.scriptedBeer.terms.size).to.eql(5);
+
+        expect(aggs.scriptedBeer.aggs.scriptedWine.meta.type).to.eql('split');
+        expect(aggs.scriptedBeer.aggs.scriptedWine.terms.script).to.eql({
+          inline: 'doc["wine"].value',
+          lang: 'painless'
+        });
+        expect(aggs.scriptedBeer.aggs.scriptedWine.terms.size).to.eql(10);
+      });
     });
   });
 

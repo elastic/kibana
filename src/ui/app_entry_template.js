@@ -1,12 +1,12 @@
 export default function ({ env, bundle }) {
 
   const pluginSlug = env.pluginInfo.sort()
-  .map(p => ' *  - ' + p)
-  .join('\n');
+    .map(p => ' *  - ' + p)
+    .join('\n');
 
   const requires = bundle.modules
-  .map(m => `require('${m}');`)
-  .join('\n');
+    .map(m => `require('${m}');`)
+    .join('\n');
 
   return `
 /**

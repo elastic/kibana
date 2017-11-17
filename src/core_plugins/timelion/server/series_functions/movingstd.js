@@ -26,18 +26,18 @@ export default new Chainable('movingstd', {
         if (i < _window) { return [point[0], null]; }
 
         const average = _.chain(pairs.slice(i - _window, i))
-        .map(function (point) {
-          return point[1];
-        }).reduce(function (memo, num) {
-          return (memo + num);
-        }).value() / _window;
+          .map(function (point) {
+            return point[1];
+          }).reduce(function (memo, num) {
+            return (memo + num);
+          }).value() / _window;
 
         const variance = _.chain(pairs.slice(i - _window, i))
-        .map(function (point) {
-          return point[1];
-        }).reduce(function (memo, num) {
-          return memo + Math.pow(num - average, 2);
-        }).value() / (_window - 1);
+          .map(function (point) {
+            return point[1];
+          }).reduce(function (memo, num) {
+            return memo + Math.pow(num - average, 2);
+          }).value() / (_window - 1);
 
         return [point[0], Math.sqrt(variance)];
       });

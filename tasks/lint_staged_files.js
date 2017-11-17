@@ -1,8 +1,11 @@
+
 import { extname, resolve, relative } from 'path';
 import { isStaged, getFilename } from './utils/files_to_commit';
 import { CLIEngine } from 'eslint';
 import { red, blue } from 'ansicolors';
 import minimatch from 'minimatch';
+
+import { DEFAULT_ESLINT_PATHS } from '../src/dev/default_eslint_paths';
 
 const root = resolve(__dirname, '..');
 
@@ -12,35 +15,39 @@ export default function (grunt) {
 
     // convert eslint paths to globs
     const cli = new CLIEngine();
-    const eslintSourcePaths = grunt.config.get('eslint.options.paths');
-    if (!eslintSourcePaths) grunt.fail.warn('eslint.options.paths is not defined');
-
-    const sourcePathGlobs = cli.resolveFileGlobPatterns(eslintSourcePaths);
+    const sourcePathGlobs = cli.resolveFileGlobPatterns(DEFAULT_ESLINT_PATHS);
 
     const files = grunt.config
-    .get('filesToCommit')
-    .filter(isStaged)
-    .map(getFilename)
-    .map(file => relative(root, resolve(file))) // resolve to pwd, then get relative from the root
-    .filter(file => {
-      if (!sourcePathGlobs.some(glob => minimatch(file, glob))) {
-        if (extname(file) === '.js') {
-          grunt.log.writeln(`${red('WARNING:')} ${file} not selected by grunt eslint config`);
+      .get('filesToCommit')
+      .filter(isStaged)
+      .map(getFilename)
+      .map(file => relative(root, resolve(file))) // resolve to pwd, then get relative from the root
+      .filter(file => {
+        if (!sourcePathGlobs.some(glob => minimatch(file, glob))) {
+          if (extname(file) === '.js') {
+            grunt.log.writeln(`${red('WARNING:')} ${file} not selected by src/eslint/default_eslint_paths`);
+          }
+          return false;
         }
-        return false;
-      }
 
-      if (cli.isPathIgnored(file)) {
-        if (extname(file) === '.js') {
-          grunt.log.writeln(`${blue('DEBUG:')} ${file} ignored by .eslintignore`);
+        if (cli.isPathIgnored(file)) {
+          if (extname(file) === '.js') {
+            grunt.log.writeln(`${blue('DEBUG:')} ${file} ignored by .eslintignore`);
+          }
+          return false;
         }
-        return false;
-      }
 
-      return true;
-    });
+        return true;
+      });
 
-    grunt.config.set('eslint.staged.options.paths', files);
-    grunt.task.run(['eslint:staged']);
+    if (files.length) {
+      const args = grunt.config.get('run.eslintStaged.args');
+      grunt.config.set('run.eslintStaged.args', [
+        ...args,
+        ...files
+      ]);
+
+      grunt.task.run(['run:eslintStaged']);
+    }
   });
 }

@@ -37,16 +37,16 @@ export function VislibLibAxisTitleProvider() {
             .attr('class', `axis-title ${axisPrefix}-axis-title`);
 
           const bbox = svg.append('text')
-          .attr('transform', function () {
-            if (config.isHorizontal()) {
-              return `translate(${width / 2},${titlePadding})`;
-            }
-            return `translate(${titlePadding},${height / 2}) rotate(270)`;
-          })
-          .attr('text-anchor', 'middle')
-          .text(config.get('title.text'))
-          .node()
-          .getBBox();
+            .attr('transform', function () {
+              if (config.isHorizontal()) {
+                return `translate(${width / 2},${titlePadding})`;
+              }
+              return `translate(${titlePadding},${height / 2}) rotate(270)`;
+            })
+            .attr('text-anchor', 'middle')
+            .text(config.get('title.text'))
+            .node()
+            .getBBox();
 
           if (config.isHorizontal()) {
             svg.attr('height', Math.ceil(bbox.height));

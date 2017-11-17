@@ -60,14 +60,14 @@ export function SegmentedRequestProvider(Private, timefilter, config) {
         if (_.isFunction(this._initFn)) this._initFn(this._handle);
         return this._createQueue();
       })
-      .then((queue) => {
-        if (this.stopped) return;
+        .then((queue) => {
+          if (this.stopped) return;
 
-        this._all = queue.slice(0);
+          this._all = queue.slice(0);
 
-        // Send the initial fetch status
-        return this._reportStatus();
-      });
+          // Send the initial fetch status
+          return this._reportStatus();
+        });
     }
 
     continue() {
@@ -183,11 +183,11 @@ export function SegmentedRequestProvider(Private, timefilter, config) {
       this._queueCreated = false;
 
       return indexPattern.toDetailedIndexList(timeBounds.min, timeBounds.max, this._direction)
-      .then(queue => {
-        this._queue = queue;
-        this._queueCreated = true;
-        return queue;
-      });
+        .then(queue => {
+          this._queue = queue;
+          this._queueCreated = true;
+          return queue;
+        });
     }
 
     _reportStatus() {

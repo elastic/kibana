@@ -42,7 +42,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
 
     async render(esResponse, status) {
 
-      return new Promise(async(resolve) => {
+      return new Promise(async (resolve) => {
 
         await this._kibanaMapReady;
         if (status.resize) {

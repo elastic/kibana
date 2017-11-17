@@ -27,7 +27,8 @@ export default new Datasource('es', {
     {
       name: 'index',
       types: ['string', 'null'],
-      help: 'Index to query, wildcards accepted'
+      help: 'Index to query, wildcards accepted. Provide Index Pattern name for scripted fields and ' +
+        'field name type ahead suggestions for metrics, split, and timefield arguments.'
     },
     {
       name: 'timefield',
@@ -47,7 +48,7 @@ export default new Datasource('es', {
   ],
   help: 'Pull data from an elasticsearch instance',
   aliases: ['elasticsearch'],
-  fn: function esFn(args, tlConfig) {
+  fn: async function esFn(args, tlConfig) {
 
     const config = _.defaults(_.clone(args.byName), {
       q: '*',
@@ -59,16 +60,31 @@ export default new Datasource('es', {
       fit: 'nearest'
     });
 
-    const { callWithRequest } = tlConfig.server.plugins.elasticsearch.getCluster('data');
-
-    const body = buildRequest(config, tlConfig);
-
-    return callWithRequest(tlConfig.request, 'search', body).then(function (resp) {
-      if (!resp._shards.total) throw new Error('Elasticsearch index not found: ' + config.index);
-      return {
-        type: 'seriesList',
-        list: toSeriesList(resp.aggregations, config)
-      };
+    const findResp = await tlConfig.request.getSavedObjectsClient().find({
+      type: 'index-pattern',
+      fields: ['title', 'fields'],
+      search: `"${config.index}"`,
+      search_fields: ['title']
     });
+    const indexPatternSavedObject = findResp.saved_objects.find(savedObject => {
+      return savedObject.attributes.title === config.index;
+    });
+    let scriptedFields = [];
+    if (indexPatternSavedObject) {
+      const fields = JSON.parse(indexPatternSavedObject.attributes.fields);
+      scriptedFields = fields.filter(field => {
+        return field.scripted;
+      });
+    }
+
+    const body = buildRequest(config, tlConfig, scriptedFields);
+
+    const { callWithRequest } = tlConfig.server.plugins.elasticsearch.getCluster('data');
+    const resp = await callWithRequest(tlConfig.request, 'search', body);
+    if (!resp._shards.total) throw new Error('Elasticsearch index not found: ' + config.index);
+    return {
+      type: 'seriesList',
+      list: toSeriesList(resp.aggregations, config)
+    };
   }
 });

@@ -34,23 +34,23 @@ const directionMapping = {
 };
 
 uiModules.get('kibana')
-.directive('keyboardMove', ($parse, $timeout) => ({
-  restrict: 'A',
-  link(scope, el, attr) {
-    const callbackFn = $parse(attr.keyboardMove);
-    el.keydown((ev) => {
-      if (ev.which in directionMapping) {
-        ev.preventDefault();
-        const direction = directionMapping[ev.which];
-        scope.$apply(() => callbackFn(scope, { direction }));
-        // Keep focus on that element, even though it might be attached somewhere
-        // else in the DOM (e.g. because it has a new position in an ng-repeat).
-        $timeout(() => el.focus());
-      }
-    });
+  .directive('keyboardMove', ($parse, $timeout) => ({
+    restrict: 'A',
+    link(scope, el, attr) {
+      const callbackFn = $parse(attr.keyboardMove);
+      el.keydown((ev) => {
+        if (ev.which in directionMapping) {
+          ev.preventDefault();
+          const direction = directionMapping[ev.which];
+          scope.$apply(() => callbackFn(scope, { direction }));
+          // Keep focus on that element, even though it might be attached somewhere
+          // else in the DOM (e.g. because it has a new position in an ng-repeat).
+          $timeout(() => el.focus());
+        }
+      });
 
-    scope.$on('$destroy', () => {
-      el.off('keydown');
-    });
-  }
-}));
+      scope.$on('$destroy', () => {
+        el.off('keydown');
+      });
+    }
+  }));

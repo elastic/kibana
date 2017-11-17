@@ -41,19 +41,19 @@ export function VisAggConfigsProvider(Private) {
     // set anything.
     if (vis && vis.type && vis.type.schemas && vis.type.schemas.all) {
       _(vis.type.schemas.all)
-      .filter(function (schema) {
-        return Array.isArray(schema.defaults) && schema.defaults.length > 0;
-      })
-      .each(function (schema) {
-        if (!self.bySchemaName[schema.name]) {
-          const defaults = schema.defaults.slice(0, schema.max);
-          _.each(defaults, function (defaultState) {
-            const state = _.defaults({ id: AggConfig.nextId(self) }, defaultState);
-            self.push(new AggConfig(vis, state));
-          });
-        }
-      })
-      .commit();
+        .filter(function (schema) {
+          return Array.isArray(schema.defaults) && schema.defaults.length > 0;
+        })
+        .each(function (schema) {
+          if (!self.bySchemaName[schema.name]) {
+            const defaults = schema.defaults.slice(0, schema.max);
+            _.each(defaults, function (defaultState) {
+              const state = _.defaults({ id: AggConfig.nextId(self) }, defaultState);
+              self.push(new AggConfig(vis, state));
+            });
+          }
+        })
+        .commit();
     }
   }
 
@@ -98,51 +98,51 @@ export function VisAggConfigsProvider(Private) {
     if (this.vis.isHierarchical()) {
       // collect all metrics, and filter out the ones that we won't be copying
       nestedMetrics = _(this.vis.aggs.bySchemaGroup.metrics)
-      .filter(function (agg) {
-        return agg.type.name !== 'count';
-      })
-      .map(function (agg) {
-        return {
-          config: agg,
-          dsl: agg.toDsl()
-        };
-      })
-      .value();
+        .filter(function (agg) {
+          return agg.type.name !== 'count';
+        })
+        .map(function (agg) {
+          return {
+            config: agg,
+            dsl: agg.toDsl()
+          };
+        })
+        .value();
     }
     this.getRequestAggs()
-    .filter(function (config) {
-      return !config.type.hasNoDsl;
-    })
-    .forEach(function nestEachConfig(config, i, list) {
-      if (!dslLvlCursor) {
+      .filter(function (config) {
+        return !config.type.hasNoDsl;
+      })
+      .forEach(function nestEachConfig(config, i, list) {
+        if (!dslLvlCursor) {
         // start at the top level
-        dslLvlCursor = dslTopLvl;
-      } else {
-        const prevConfig = list[i - 1];
-        const prevDsl = dslLvlCursor[prevConfig.id];
+          dslLvlCursor = dslTopLvl;
+        } else {
+          const prevConfig = list[i - 1];
+          const prevDsl = dslLvlCursor[prevConfig.id];
 
-        // advance the cursor and nest under the previous agg, or
-        // put it on the same level if the previous agg doesn't accept
-        // sub aggs
-        dslLvlCursor = prevDsl.aggs || dslLvlCursor;
-      }
+          // advance the cursor and nest under the previous agg, or
+          // put it on the same level if the previous agg doesn't accept
+          // sub aggs
+          dslLvlCursor = prevDsl.aggs || dslLvlCursor;
+        }
 
-      const dsl = dslLvlCursor[config.id] = config.toDsl();
-      let subAggs;
+        const dsl = dslLvlCursor[config.id] = config.toDsl();
+        let subAggs;
 
-      parseParentAggs(dslLvlCursor, dsl);
+        parseParentAggs(dslLvlCursor, dsl);
 
-      if (config.schema.group === 'buckets' && i < list.length - 1) {
+        if (config.schema.group === 'buckets' && i < list.length - 1) {
         // buckets that are not the last item in the list accept sub-aggs
-        subAggs = dsl.aggs || (dsl.aggs = {});
-      }
+          subAggs = dsl.aggs || (dsl.aggs = {});
+        }
 
-      if (subAggs && nestedMetrics) {
-        nestedMetrics.forEach(function (agg) {
-          subAggs[agg.config.id] = agg.dsl;
-        });
-      }
-    });
+        if (subAggs && nestedMetrics) {
+          nestedMetrics.forEach(function (agg) {
+            subAggs[agg.config.id] = agg.dsl;
+          });
+        }
+      });
 
     removeParentAggs(dslTopLvl);
     return dslTopLvl;

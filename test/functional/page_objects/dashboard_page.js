@@ -34,9 +34,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async clickEditVisualization() {
       log.debug('clickEditVisualization');
       await testSubjects.click('dashboardPanelToggleMenuIcon');
-      await testSubjects.click('dashboardPanelEditLink');
 
+      // Edit link may sometimes be disabled if the embeddable isn't rendered yet.
       await retry.try(async () => {
+        await testSubjects.click('dashboardPanelEditLink');
         const current = await remote.getCurrentUrl();
         if (current.indexOf('visualize') < 0) {
           throw new Error('not on visualize page');
@@ -292,10 +293,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     /**
      *
      * @param dashName {String}
-     * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean}}
+     * @param saveOptions {{storeTimeWithDashboard: boolean, saveAsNew: boolean, needsConfirm: false}}
      */
     async saveDashboard(dashName, saveOptions = {}) {
       await this.enterDashboardTitleAndClickSave(dashName, saveOptions);
+
+      if (saveOptions.needsConfirm) {
+        await PageObjects.common.clickConfirmOnModal();
+      }
 
       await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -344,6 +349,11 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         const searchFilter = await testSubjects.find('searchFilter');
         await searchFilter.clearValue();
       });
+    }
+
+    async getSearchFilterValue() {
+      const searchFilter = await testSubjects.find('searchFilter');
+      return await searchFilter.getProperty('value');
     }
 
     async searchForDashboardWithName(dashName) {
@@ -503,21 +513,32 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return _.map(filters, async (filter) => await filter.getVisibleText());
     }
 
+    async getPieSliceCount() {
+      log.debug('getPieSliceCount');
+      return await retry.try(async () => {
+        const slices = await find.allByCssSelector('svg > g > path.slice');
+        return slices.length;
+      });
+    }
+
     async filterOnPieSlice() {
       log.debug('Filtering on a pie slice');
       await retry.try(async () => {
-        const slices = await find.allByCssSelector('svg > g > path.slice');
+        const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
         log.debug('Slices found:' + slices.length);
         return slices[0].click();
       });
     }
 
-    async toggleExpandPanel() {
+    async toggleExpandPanel(panel) {
       log.debug('toggleExpandPanel');
-      await testSubjects.moveMouseTo('dashboardPanelTitle');
+      await (panel ? remote.moveMouseTo(panel) : testSubjects.moveMouseTo('dashboardPanelTitle'));
       const expandShown = await testSubjects.exists('dashboardPanelExpandIcon');
       if (!expandShown) {
-        await testSubjects.click('dashboardPanelToggleMenuIcon');
+        const toggleMenuItem = panel ?
+          await testSubjects.findDescendant('dashboardPanelToggleMenuIcon', panel) :
+          testSubjects.find('dashboardPanelToggleMenuIcon');
+        await toggleMenuItem.click();
       }
       await testSubjects.click('dashboardPanelExpandIcon');
     }

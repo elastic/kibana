@@ -22,9 +22,9 @@ export default class UiExports {
       visEditorTypes: [
         'ui/vis/editors/default/default',
       ],
-      embeddableHandlers: [
-        'plugins/kibana/visualize/embeddable/visualize_embeddable_handler_provider',
-        'plugins/kibana/discover/embeddable/search_embeddable_handler_provider',
+      embeddableFactories: [
+        'plugins/kibana/visualize/embeddable/visualize_embeddable_factory_provider',
+        'plugins/kibana/discover/embeddable/search_embeddable_factory_provider',
       ],
     };
     this.urlBasePath = urlBasePath;
@@ -110,7 +110,7 @@ export default class UiExports {
       case 'visRequestHandlers':
       case 'visEditorTypes':
       case 'savedObjectTypes':
-      case 'embeddableHandlers':
+      case 'embeddableFactories':
       case 'fieldFormats':
       case 'fieldFormatEditors':
       case 'spyModes':
@@ -168,14 +168,14 @@ export default class UiExports {
     const matcher = _.partialRight(minimatch.filter, { matchBase: true });
 
     return _.chain(patterns)
-    .map(function (pattern) {
-      return names.filter(matcher(pattern));
-    })
-    .flattenDeep()
-    .reduce(function (found, name) {
-      return found.concat(aliases[name]);
-    }, [])
-    .value();
+      .map(function (pattern) {
+        return names.filter(matcher(pattern));
+      })
+      .flattenDeep()
+      .reduce(function (found, name) {
+        return found.concat(aliases[name]);
+      }, [])
+      .value();
   }
 
   getAllApps() {

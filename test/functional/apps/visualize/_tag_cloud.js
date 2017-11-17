@@ -15,10 +15,10 @@ export default function ({ getService, getPageObjects }) {
 
       log.debug('navigateToApp visualize');
       return PageObjects.common.navigateToUrl('visualize', 'new')
-         .then(function () {
-           log.debug('clickTagCloud');
-           return PageObjects.visualize.clickTagCloud();
-         })
+        .then(function () {
+          log.debug('clickTagCloud');
+          return PageObjects.visualize.clickTagCloud();
+        })
         .then(function () {
           return PageObjects.visualize.clickNewSearch();
         })
@@ -60,12 +60,24 @@ export default function ({ getService, getPageObjects }) {
         expect(data).to.eql([ '32,212,254,720', '21,474,836,480', '20,401,094,656', '19,327,352,832', '18,253,611,008' ]);
       });
 
+      it('should still show all tags after sidebar has been collapsed', async function () {
+        await PageObjects.visualize.clickEditorSidebarCollapse();
+        // Give d3 tag cloud some time to rearrange tags
+        await PageObjects.common.sleep(1000);
+        await PageObjects.visualize.clickEditorSidebarCollapse();
+        // Give d3 tag cloud some time to rearrange tags
+        await PageObjects.common.sleep(1000);
+        const data = await PageObjects.visualize.getTextTag();
+        log.debug(data);
+        expect(data).to.eql([ '32,212,254,720', '21,474,836,480', '20,401,094,656', '19,327,352,832', '18,253,611,008' ]);
+      });
+
       it('should save and load', function () {
         return PageObjects.visualize.saveVisualization(vizName1)
-        .then(function (message) {
-          log.debug('Saved viz message = ' + message);
-          expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
-        })
+          .then(function (message) {
+            log.debug('Saved viz message = ' + message);
+            expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
+          })
           .then(function testVisualizeWaitForToastMessageGone() {
             return PageObjects.header.waitForToastMessageGone();
           })
@@ -83,10 +95,10 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show the tags and relative size', function () {
         return PageObjects.visualize.getTextSizes()
-        .then(function (results) {
-          log.debug('results here ' + results);
-          expect(results).to.eql(['72px', '63px', '25px', '32px',  '18px' ]);
-        });
+          .then(function (results) {
+            log.debug('results here ' + results);
+            expect(results).to.eql(['72px', '63px', '25px', '32px',  '18px' ]);
+          });
       });
 
 

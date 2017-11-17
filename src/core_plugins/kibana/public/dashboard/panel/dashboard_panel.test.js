@@ -5,9 +5,12 @@ import { DashboardPanel } from './dashboard_panel';
 import { DashboardViewMode } from '../dashboard_view_mode';
 import { PanelError } from '../panel/panel_error';
 import { store } from '../../store';
-import { updateViewMode } from '../actions';
+import {
+  updateViewMode,
+  setPanels,
+} from '../actions';
 import { Provider } from 'react-redux';
-import { getEmbeddableHandlerMock } from '../__tests__/get_embeddable_handlers_mock';
+import { getEmbeddableFactoryMock } from '../__tests__/get_embeddable_factories_mock';
 
 import {
   takeMountedSnapshot,
@@ -19,13 +22,14 @@ function getProps(props = {}) {
     renderEmbeddable: jest.fn(),
     viewOnlyMode: false,
     onDestroy: () => {},
-    embeddableHandler: getEmbeddableHandlerMock(),
+    embeddableFactory: getEmbeddableFactoryMock(),
   };
   return _.defaultsDeep(props, defaultTestProps);
 }
 
 beforeAll(() => {
   store.dispatch(updateViewMode(DashboardViewMode.EDIT));
+  store.dispatch(setPanels([{ panelIndex: 'foo1' }]));
 });
 
 test('DashboardPanel matches snapshot', () => {
@@ -48,4 +52,3 @@ test('renders an error when error prop is passed', () => {
   const panelError = component.find(PanelError);
   expect(panelError.length).toBe(1);
 });
-

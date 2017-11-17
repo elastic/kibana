@@ -76,7 +76,7 @@ describe('kuery functions', function () {
       it('should throw an error for scripted fields', function () {
         const node = nodeTypes.function.buildNode('geoBoundingBox', 'script number', params);
         expect(geoBoundingBox.toElasticsearchQuery)
-        .withArgs(node, indexPattern).to.throwException(/Geo bounding box query does not support scripted fields/);
+          .withArgs(node, indexPattern).to.throwException(/Geo bounding box query does not support scripted fields/);
       });
     });
   });

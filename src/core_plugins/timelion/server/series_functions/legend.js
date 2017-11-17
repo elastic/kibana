@@ -11,7 +11,29 @@ export default new Chainable('legend', {
     {
       name: 'position',
       types: ['string', 'boolean', 'null'],
-      help: 'Corner to place the legend in: nw, ne, se, or sw. You can also pass false to disable the legend'
+      help: 'Corner to place the legend in: nw, ne, se, or sw. You can also pass false to disable the legend',
+      suggestions: [
+        {
+          name: 'false',
+          help: 'disable legend',
+        },
+        {
+          name: 'nw',
+          help: 'place legend in north west corner'
+        },
+        {
+          name: 'ne',
+          help: 'place legend in north east corner'
+        },
+        {
+          name: 'se',
+          help: 'place legend in south east corner'
+        },
+        {
+          name: 'sw',
+          help: 'place legend in south west corner'
+        }
+      ]
     },
     {
       name: 'columns',

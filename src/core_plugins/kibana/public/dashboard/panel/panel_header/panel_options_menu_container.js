@@ -8,46 +8,55 @@ import {
   destroyEmbeddable,
   maximizePanel,
   minimizePanel,
+  resetPanelTitle,
+  setPanelTitle,
 } from '../../actions';
 
 import {
   getEmbeddable,
   getEmbeddableEditUrl,
   getMaximizedPanelId,
+  getPanel,
 } from '../../selectors';
 
 const mapStateToProps = ({ dashboard }, { panelId }) => {
   const embeddable = getEmbeddable(dashboard, panelId);
+  const panel = getPanel(dashboard, panelId);
+  const embeddableTitle = embeddable ? embeddable.title : '';
   return {
-    editUrl: embeddable ? getEmbeddableEditUrl(dashboard, panelId) : '',
+    panelTitle: panel.title === undefined ? embeddableTitle : panel.title,
+    editUrl: embeddable ? getEmbeddableEditUrl(dashboard, panelId) : null,
     isExpanded: getMaximizedPanelId(dashboard) === panelId,
   };
 };
 
 /**
  * @param dispatch {Function}
- * @param embeddableHandler {EmbeddableHandler}
+ * @param embeddableFactory {EmbeddableFactory}
  * @param panelId {string}
  */
-const mapDispatchToProps = (dispatch, { embeddableHandler, panelId }) => ({
+const mapDispatchToProps = (dispatch, { embeddableFactory, panelId }) => ({
   onDeletePanel: () => {
     dispatch(deletePanel(panelId));
-    dispatch(destroyEmbeddable(panelId, embeddableHandler));
+    dispatch(destroyEmbeddable(panelId, embeddableFactory));
   },
   onMaximizePanel: () => dispatch(maximizePanel(panelId)),
   onMinimizePanel: () => dispatch(minimizePanel()),
+  onResetPanelTitle: () => dispatch(resetPanelTitle(panelId)),
+  onUpdatePanelTitle: (newTitle) => dispatch(setPanelTitle(newTitle, panelId)),
 });
 
 const mergeProps = (stateProps, dispatchProps) => {
-  const { isExpanded, editUrl } = stateProps;
-  const { onMaximizePanel, onMinimizePanel, onDeletePanel } = dispatchProps;
+  const { isExpanded, editUrl, panelTitle } = stateProps;
+  const { onMaximizePanel, onMinimizePanel, ...dispatchers } = dispatchProps;
   const toggleExpandedPanel = () => isExpanded ? onMinimizePanel() : onMaximizePanel();
 
   return {
+    panelTitle,
     toggleExpandedPanel,
     isExpanded,
     editUrl,
-    onDeletePanel
+    ...dispatchers,
   };
 };
 
@@ -60,9 +69,9 @@ export const PanelOptionsMenuContainer = connect(
 PanelOptionsMenuContainer.propTypes = {
   panelId: PropTypes.string.isRequired,
   /**
-   * @type {EmbeddableHandler}
+   * @type {EmbeddableFactory}
    */
-  embeddableHandler: PropTypes.shape({
+  embeddableFactory: PropTypes.shape({
     destroy: PropTypes.func.isRequired,
     render: PropTypes.func.isRequired,
     addDestroyEmeddable: PropTypes.func.isRequired,
