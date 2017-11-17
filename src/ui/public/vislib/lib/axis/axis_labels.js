@@ -1,5 +1,6 @@
 import d3 from 'd3';
 import $ from 'jquery';
+import { truncateLabel } from '../../components/labels/truncate_labels';
 
 export function VislibAxisLabelsProvider() {
   class AxisLabels {
@@ -56,34 +57,14 @@ export function VislibAxisLabelsProvider() {
       };
     }
 
-    truncateLabel(text, size) {
-      const node = d3.select(text).node();
-      let str = $(node).text();
-      const width = node.getBBox().width;
-      const chars = str.length;
-      const pxPerChar = width / chars;
-      let endChar = 0;
-      const ellipsesPad = 4;
-
-      if (width > size) {
-        endChar = Math.floor((size / pxPerChar) - ellipsesPad);
-        while (str[endChar - 1] === ' ' || str[endChar - 1] === '-' || str[endChar - 1] === ',') {
-          endChar = endChar - 1;
-        }
-        str = str.substr(0, endChar) + '...';
-      }
-      return str;
-    }
-
     truncateLabels() {
-      const self = this;
       const config = this.axisConfig;
       return function (selection) {
         if (!config.get('labels.truncate')) return;
 
         selection.selectAll('.tick text')
           .text(function () {
-            return self.truncateLabel(this, config.get('labels.truncate'));
+            return truncateLabel(this, config.get('labels.truncate'));
           });
       };
     }
