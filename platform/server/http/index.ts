@@ -5,7 +5,7 @@ import { HttpService } from './HttpService';
 import { HttpConfig } from './HttpConfig';
 import { LoggerFactory } from '../../logging';
 
-export { Router, RouterOptions, KibanaRequest } from './Router';
+export { Router, KibanaRequest } from './Router';
 export { HttpService };
 
 export { HttpConfig };

@@ -30,8 +30,18 @@ export class Cluster {
 
     this.log.info('cluster client stopped');
   }
-  //TODO: removed withRequest, need to implement
-  //callWithRequest or something
-  // Should `callWithRequest`/`getCluster` even live here,
-  // or in ElasticsearchService.ts?
+
+  callWithRequest(endpoint: string, clientParams = {}, options = {}): any {
+    return {};
+    //if (req.headers) {
+    //  const filteredHeaders = filterHeaders(req.headers, this.getRequestHeadersWhitelist());
+    //  set(clientParams, 'headers', filteredHeaders);
+    //}
+
+    //return callAPI(this._noAuthClient, endpoint, clientParams, options);
+  }
+
+  //callWithInternalUser = (endpoint, clientParams = {}, options = {}) => {
+  //  return callAPI(this._client, endpoint, clientParams, options);
+  //}
 }

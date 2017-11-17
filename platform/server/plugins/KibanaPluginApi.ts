@@ -3,7 +3,7 @@ import { Observable } from '@elastic/kbn-observable';
 import { Schema } from '../../types/schema';
 import * as schemaLib from '../../lib/schema';
 import { ConfigWithSchema } from '../../config';
-import { Router, RouterOptions } from '../http';
+import { Router } from '../http';
 import { KibanaConfig } from '../kibana';
 import { ElasticsearchService, ElasticsearchConfigs } from '../elasticsearch';
 import { LoggerFactory } from '../../logging';
@@ -43,7 +43,7 @@ export interface KibanaPluginApi {
     /**
      * Create and register a router at the specified path.
      */
-    createAndRegisterRouter: <T>(path: string) => Router<T>;
+    createAndRegisterRouter: (path: string) => Router;
   };
 
   /**

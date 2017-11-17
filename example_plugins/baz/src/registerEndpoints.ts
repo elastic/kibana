@@ -1,20 +1,20 @@
+import { Observable } from '@elastic/kbn-observable';
 import {
   Router,
   LoggerFactory,
   Schema,
   ElasticsearchService,
   KibanaConfig,
-  HttpService
+  Cluster
 } from '@elastic/kbn-types';
 import { BazService } from './BazService';
 
 export function registerEndpoints(
-  router: Router<BazService>,
+  router: Router,
   logger: LoggerFactory,
   schema: Schema,
   elasticsearch: ElasticsearchService,
-  http: HttpService,
-  config: KibanaConfig
+  config$: Observable<KibanaConfig>
 ) {
   const { object, string, number, maybe } = schema;
   const log = logger.get('routes');
@@ -60,7 +60,8 @@ export function registerEndpoints(
       // the validated object may not have this now
       // This is where BazService's underlying elasticsearch service
       // should be bound to the right cluster
-      const bazService = new BazService(req.headers, config, elasticsearch);
+      const cluster: Cluster = await elasticsearch.getScopedCluster('admin', req.headers);
+      const bazService = new BazService(cluster, config$);
 
       log.info(
         'use Baz Service instance to hit elasticsearch with the right cluster'

@@ -11,7 +11,9 @@ export const plugin: KibanaPluginConfig<{}> = {
 
     const router = http.createAndRegisterRouter('/api/baz');
 
+    //TODO: wrap `config` in an observable
+
     log.info('register Baz endpoints');
-    registerEndpoints(router, logger, util.schema, elasticsearch, http, config);
+    registerEndpoints(router, logger, util.schema, elasticsearch.service, config);
   }
 };
