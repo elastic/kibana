@@ -33,6 +33,11 @@ export class Pager {
     this.updateMeta();
   }
 
+  setPage(page) {
+    this.currentPage = page;
+    this.updateMeta();
+  }
+
   setTotalItems(count) {
     this.totalItems = count;
     this.updateMeta();

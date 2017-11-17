@@ -2,7 +2,15 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 
 import {
+  EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiKeyboardAccessible,
+  EuiPagination,
+  EuiPopover,
+  SortableProperties,
 } from '@elastic/eui';
 
 import { Pager } from 'ui/pager';
@@ -11,20 +19,47 @@ export class PaginatedTable extends Component {
   constructor(props) {
     super(props);
 
+    // ngReact will double-instantiate as noted in https://github.com/ngReact/ngReact/issues/198.
+    // In the initial instantiationm columns will be undefined, tthrowing an Error "Cannot read
+    // property '0' of undefined".
+    const initialSortedColumnName = props.columns[props.initialSortedColumn].title;
+
+    this.sortableProperties = new SortableProperties(props.columns
+      .filter(column => column.sortable !== false)
+      .map(column => {
+        return {
+          name: column.title,
+          getValue: item => {
+            const sortedColumnName = this.sortableProperties.getSortedProperty().name;
+            const sortedColumnIndex = this.props.columns.findIndex(
+              column => column.title === sortedColumnName
+            );
+            const cell = item[sortedColumnIndex];
+            return (cell && cell.value) ? cell.value : '';
+          },
+          isAscending: true,
+        };
+      }),
+      initialSortedColumnName,
+    );
+
     this.rowsPerPageOptions = [
       { text: '10', value: 10 },
       { text: '25', value: 25 },
       { text: '100', value: 100 },
-      { text: 'All', value: 0 },
+      { text: 'All', value: 'All' },
     ];
 
-    const initialRowsPerPage = this.rowsPerPageOptions[1].value;
-    this.pager = new Pager(props.rows.length, initialRowsPerPage, 1);
+    const initialRowsPerPage = this.rowsPerPageOptions[1];
+    this.pager = new Pager(props.rows.length, initialRowsPerPage.value, 1);
 
     this.state = {
       pageCount: 10,
       pageOfItems: [],
       rowsPerPage: initialRowsPerPage,
+      isPageSizePopoverOpen: false,
+      sortedColumn: this.sortableProperties.getSortedProperty(),
+      sortedColumnDirection: this.sortableProperties.isCurrentSortAscending() ? 'ASC' : 'DESC',
     };
   }
 
@@ -32,24 +67,56 @@ export class PaginatedTable extends Component {
     window.scrollTo({ top: 0 });
   };
 
-  onChangeRowsPerPage = event => {
-    const rowsPerPage = event.target.value;
-    this.setState({ rowsPerPage });
-    this.pager.setPageSize(rowsPerPage);
+  goToPage = page => {
+    this.pager.setPage(page + 1);
     this.calculateItemsOnPage();
   };
 
-  sortColumn = () => {
-    // TODO: Reimplement sorting.
+  onPageSizeButtonClick = () => {
+    this.setState({
+      isPageSizePopoverOpen: !this.state.isPageSizePopoverOpen,
+    });
+  };
+
+  closePageSizePopover = () => {
+    this.setState({
+      isPageSizePopoverOpen: false,
+    });
+  };
+
+  onChangeRowsPerPage = rowsPerPageValue => {
+    const rowsPerPageOption = this.rowsPerPageOptions.find(option => option.value === rowsPerPageValue);
+    const numberOfRowsPerPage =
+      (rowsPerPageValue === 'All')
+      ? this.props.rows.length
+      : rowsPerPageValue;
+
+    this.pager.setPageSize(numberOfRowsPerPage);
+
+    this.setState({
+      rowsPerPage: rowsPerPageOption,
+      isPageSizePopoverOpen: false,
+    });
+
+    this.calculateItemsOnPage();
+  };
+
+  sortColumn = columnIndex => {
+    const propertyName = this.props.columns[columnIndex].title;
+    this.sortableProperties.sortOn(propertyName);
+    this.setState({
+      sortedColumn: this.sortableProperties.getSortedProperty(),
+      sortedColumnDirection: this.sortableProperties.isCurrentSortAscending() ? 'ASC' : 'DESC',
+    });
+    this.calculateItemsOnPage();
   };
 
   calculateItemsOnPage = (items = this.props.rows) => {
-    // const sortedRows = this.sortableProperties.sortItems(rows);
-    this.pager.setTotalItems(items.length);
-    const pageOfItems = items.slice(this.pager.startIndex, this.pager.startIndex + this.pager.pageSize);
+    const sortedRows = this.sortableProperties.sortItems(items);
+    this.pager.setTotalItems(sortedRows.length);
+    const pageOfItems = sortedRows.slice(this.pager.startIndex, this.pager.startIndex + this.pager.pageSize);
     this.setState({
       pageOfItems,
-      // pageStartNumber: this.pager.startItem,
     });
   };
 
@@ -104,71 +171,76 @@ export class PaginatedTable extends Component {
   renderPaginationControls() {
     const {
       linkToTop,
-      perPage,
     } = this.props;
 
     let goToTopButton;
 
     if (linkToTop) {
       goToTopButton = (
-        <button
-          className="kuiLink"
-          onClick={this.goToTop}
-          data-test-subj="paginateControlsLinkToTop"
-        >
-          Scroll to top
-        </button>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            onClick={this.goToTop}
+            data-test-subj="paginateControlsLinkToTop"
+          >
+            Scroll to top
+          </EuiButtonEmpty>
+        </EuiFlexItem>
       );
     }
 
-    let paginationControls;
+    const button = (
+      <EuiButtonEmpty
+        size="s"
+        color="text"
+        iconType="arrowDown"
+        iconSide="right"
+        onClick={this.onPageSizeButtonClick}
+      >
+        Rows per page: {this.state.rowsPerPage.text}
+      </EuiButtonEmpty>
+    );
 
-    if (this.state.pageCount > 1) {
-      paginationControls = 'pagination controls';
-    }
-
-    let rowsPerPageSelector;
-
-    if (perPage > 0) {
-      rowsPerPageSelector = (
-        <form className="form-inline pagination-size">
-          <div className="form-group">
-            <label>Page Size</label>
-
-            <select
-              value={this.state.rowsPerPage}
-              onChange={this.onChangeRowsPerPage}
-              data-test-subj="paginateControlsPageSizeSelect"
-            >
-              {this.rowsPerPageOptions.map((option, index) => {
-                return (
-                  <option
-                    value={option.value}
-                    key={index}
-                  >
-                    {option.text}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-        </form>
-      );
-    }
+    const rowsPerPageOptions = this.rowsPerPageOptions.map((option, index) => (
+      <EuiContextMenuItem
+        key={index}
+        icon={option.value === this.state.rowsPerPage.value ? 'check' : 'empty'}
+        onClick={() => { this.onChangeRowsPerPage(option.value); }}
+      >
+        {option.text}
+      </EuiContextMenuItem>
+    ));
 
     return (
-      <div>
-        {goToTopButton}
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center">
+            {goToTopButton}
 
-        <div
-          className="pagination-other-pages"
-          data-test-subj="paginationControls"
-        >
-          {paginationControls}
-        </div>
+            <EuiFlexItem grow={false}>
+              <EuiPopover
+                id="customizablePagination"
+                button={button}
+                isOpen={this.state.isPageSizePopoverOpen}
+                closePopover={this.closePageSizePopover}
+                panelPaddingSize="none"
+                withTitle
+              >
+                <EuiContextMenuPanel
+                  items={rowsPerPageOptions}
+                />
+              </EuiPopover>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
 
-        {rowsPerPageSelector}
-      </div>
+        <EuiFlexItem grow={false}>
+          <EuiPagination
+            pageCount={this.pager.totalPages}
+            activePage={this.pager.currentPage - 1}
+            onPageClick={this.goToPage}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
@@ -233,10 +305,11 @@ PaginatedTable.propTypes = {
   perPage: PropTypes.number,
   showBlankRows: PropTypes.bool,
   showTotal: PropTypes.bool,
+  initialSortedColumn: PropTypes.number,
 };
 
 PaginatedTable.defaultProps = {
   rows: [],
-  columns: [],
   perPage: 0,
+  initialSortedColumn: 0,
 };
