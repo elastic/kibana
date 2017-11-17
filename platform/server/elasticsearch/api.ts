@@ -30,8 +30,6 @@ export function registerElasticsearchRoutes(
       log.info(`field param: ${req.params.field}`);
       log.info(`query param: ${req.query.key}`);
 
-      // The following code needs work. We don't have `withRequest`
-      // anymore.
       log.info('request received on [data] cluster');
 
       const cluster = await service.getScopedCluster('data', req.headers);
