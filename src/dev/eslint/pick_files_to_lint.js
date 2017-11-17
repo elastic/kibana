@@ -8,7 +8,7 @@ import { DEFAULT_ESLINT_PATHS } from './default_eslint_paths';
  * script without arguments) and then filtering those files by the eslint ignored
  * paths in .eslintignore.
  *
- * When any JS file is ignored by either mechanism a warning message is logged
+ * When any JS file is ignored by either mechanism a warning message is logged.
  *
  * @param  {ToolingLog} log
  * @param  {Array<File>} files
@@ -29,7 +29,7 @@ export function pickFilesToLint(log, files) {
 
     // warn about modified JS files that are not being linted
     if (!isNormallyLinted && file.isJs()) {
-      log.warning('%j not selected by src/eslint/default_eslint_paths', file);
+      log.warning('%j not selected by src/dev/eslint/default_eslint_paths', file);
     }
 
     // warn about modified JS files that are explicitly excluded from linting
