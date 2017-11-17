@@ -264,10 +264,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await input.type(newValue);
     }
 
-    async clickSavedSearch() {
-      await find.clickByCssSelector('li[ng-click="stepTwoMode=\'saved\'"]');
-    }
-
     async selectSearch(searchName) {
       await find.clickByLinkText(searchName);
     }
