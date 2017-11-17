@@ -19,7 +19,9 @@ const Parameters = Object.freeze({
  * with the actual data.
  */
 const PATTERN_REGEX = new RegExp(
-  `${Parameters.Timestamp}|${Parameters.Level}|${Parameters.Context}|${Parameters.Message}`,
+  `${Parameters.Timestamp}|${Parameters.Level}|${Parameters.Context}|${
+    Parameters.Message
+  }`,
   'gi'
 );
 
@@ -38,7 +40,9 @@ const LEVEL_COLORS = new Map([
 /**
  * Default pattern used by PatternLayout if it's not overridden in the configuration.
  */
-const DEFAULT_PATTERN = `[${Parameters.Timestamp}][${Parameters.Level}][${Parameters.Context}] ${Parameters.Message}`;
+const DEFAULT_PATTERN = `[${Parameters.Timestamp}][${Parameters.Level}][${
+  Parameters.Context
+}] ${Parameters.Message}`;
 
 const createSchema = ({ boolean, literal, maybe, object, string }: Schema) => {
   return object({
