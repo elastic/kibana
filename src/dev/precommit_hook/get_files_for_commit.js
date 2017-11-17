@@ -1,5 +1,7 @@
 import SimpleGit from 'simple-git';
 import { fromNode as fcb } from 'bluebird';
+
+import { REPO_ROOT } from '../constants';
 import { File } from '../file';
 
 /**
@@ -9,8 +11,8 @@ import { File } from '../file';
  * @param  {String} repoPath
  * @return {Promise<Array<File>>}
  */
-export async function getFilesForCommit(repoPath) {
-  const simpleGit = new SimpleGit(repoPath);
+export async function getFilesForCommit() {
+  const simpleGit = new SimpleGit(REPO_ROOT);
 
   const output = await fcb(cb => simpleGit.diff(['--name-status', '--cached'], cb));
 

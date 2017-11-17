@@ -1,10 +1,7 @@
-import { dirname } from 'path';
-
 import { CLIEngine } from 'eslint';
 
 import { createFailError } from '../run';
-
-const ROOT = dirname(require.resolve('../../../package.json'));
+import { REPO_ROOT } from '../constants';
 
 /**
  * Lints a list of files with eslint. eslint reports are written to the log
@@ -17,7 +14,7 @@ const ROOT = dirname(require.resolve('../../../package.json'));
 export function lintFiles(log, files) {
   const cli = new CLIEngine({
     cache: true,
-    cwd: ROOT,
+    cwd: REPO_ROOT,
   });
 
   const paths = files.map(file => file.getRelativePath());

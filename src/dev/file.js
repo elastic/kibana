@@ -1,8 +1,8 @@
-import { resolve, dirname, relative, extname } from 'path';
+import { resolve, relative, extname } from 'path';
 
 import minimatch from 'minimatch';
 
-export const ROOT = dirname(require.resolve('../../package.json'));
+import { REPO_ROOT } from './constants';
 
 export class File {
   constructor(path) {
@@ -10,7 +10,7 @@ export class File {
   }
 
   getRelativePath() {
-    return relative(ROOT, this._path);
+    return relative(REPO_ROOT, this._path);
   }
 
   isJs() {
