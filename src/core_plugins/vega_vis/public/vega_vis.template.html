@@ -1,0 +1,7 @@
+<ul ng-if="vega.messages.length" class="vega-messages">
+  <li ng-repeat="message in vega.messages"
+      ng-class="{error: 'vega-message-err', warning: 'vega-message-warn'}[message.type]"
+  >
+    <pre>{{message.data}}</pre>
+  </li>
+</ul>

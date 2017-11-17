@@ -1,0 +1,22 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
+  "title": "Tesla Motors Daily Stock Price",
+  "data": {
+    // A CSV file with the Tesla stock prices, from
+    // https://www.quandl.com/api/v3/datasets/WIKI/TSLA.csv
+    "url": "https://gist.githubusercontent.com/nyurik/2419ec5f0edf34852ab62b1bc0e9ad70/raw/8b09ff7084a2f930e0130c1391858d62ae703d16/TSLA.csv"
+  },
+  "mark": "line",
+  "encoding": {
+    "x": {
+      "field": "Date",
+      "type": "temporal",
+      "axis": {"title": false}
+    },
+    "y": {
+      "field": "Close",
+      "type": "quantitative",
+      "axis": {"title": "Closing Price"}
+    }
+  }
+}
