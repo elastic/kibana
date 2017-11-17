@@ -23,20 +23,17 @@ export async function getFilesForCommit() {
     // git diff --name-status outputs lines with two OR three parts
     // separated by a tab character
     .map(line => line.trim().split('\t'))
-    .map(parts => {
-      // the status is always the first part in each line
-      // .. If the file is edited the line will only have two elements
-      // .. If the file is renamed it will have three
-      // .. In any case, the last element is the CURRENT name of the file
-      const status = parts[0];
-      const path = parts[parts.length - 1];
-
+    .map(([status, ...paths]) => {
       // ignore deleted files
       if (status === 'D') {
         return undefined;
       }
 
-      return new File(path);
+      // the status is always in the first column
+      // .. If the file is edited the line will only have two columns
+      // .. If the file is renamed it will have three columns
+      // .. In any case, the last column is the CURRENT path to the file
+      return new File(paths[paths.length - 1]);
     })
     .filter(Boolean);
 }
