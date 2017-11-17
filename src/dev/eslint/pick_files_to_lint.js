@@ -28,12 +28,12 @@ export function pickFilesToLint(log, files) {
     }
 
     // warn about modified JS files that are not being linted
-    if (file.isJs() && !isNormallyLinted) {
+    if (!isNormallyLinted && file.isJs()) {
       log.warning('%j not selected by src/eslint/default_eslint_paths', file);
     }
 
     // warn about modified JS files that are explicitly excluded from linting
-    if (file.isJs() && isExplicitlyIgnored) {
+    if (isExplicitlyIgnored && file.isJs()) {
       log.warning(`%j ignored by .eslintignore`, file);
     }
 
