@@ -198,8 +198,13 @@ describe('Notifier', function () {
       expect(notify('info').title).to.equal('Debug');
     });
 
-    it('sets lifetime to 5000', function () {
+    it('defaults lifetime to 5000', function () {
       expect(notify('info').lifetime).to.equal(5000);
+    });
+
+    it('allows setting custom lifetime with opts', function () {
+      const customLifetime = 10000;
+      expect(notify('info', { lifetime: customLifetime }).lifetime).to.equal(customLifetime);
     });
 
     it('does not allow reporting', function () {
@@ -410,8 +415,8 @@ describe('Notifier', function () {
     });
   });
 
-  function notify(fnName) {
-    notifier[fnName](message);
+  function notify(fnName, opts) {
+    notifier[fnName](message, opts);
     return latestNotification();
   }
 
