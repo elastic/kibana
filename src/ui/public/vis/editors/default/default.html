@@ -2,6 +2,13 @@
   <vis-editor-sidebar class="vis-editor-sidebar" />
 </div>
 
-<div class="vis-editor-canvas">
+<div
+  class="vis-editor-canvas"
+  data-shared-item
+  data-shared-items-container
+  render-counter
+  data-title="{{vis.title}}"
+  data-description="{{vis.description}}"
+>
   <visualization vis="vis" vis-data="visData" ui-state="uiState" search-source="searchSource" show-spy-panel="true" />
 </div>

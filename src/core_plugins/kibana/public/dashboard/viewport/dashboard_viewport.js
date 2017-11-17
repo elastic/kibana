@@ -7,11 +7,16 @@ export function DashboardViewport({
   maximizedPanelId,
   getEmbeddableFactory,
   panelCount,
+  title,
+  description,
   useMargins,
 }) {
   return (
     <div
       data-shared-items-count={panelCount}
+      data-shared-items-container
+      data-title={title}
+      data-description={description}
       className={useMargins ? 'dashboard-viewport-with-margins' : 'dashboard-viewport'}
     >
       <DashboardGrid
@@ -28,5 +33,7 @@ DashboardViewport.propTypes = {
   getEmbeddableFactory: PropTypes.func,
   maximizedPanelId: PropTypes.string,
   panelCount: PropTypes.number,
+  title: PropTypes.string,
+  description: PropTypes.string,
   useMargins: PropTypes.bool.isRequired,
 };

@@ -209,10 +209,6 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       $scope.vis.forceReload();
     };
 
-    $scope.$on('ready:vis', function () {
-      $scope.$emit('application.load');
-    });
-
     $scope.$on('$destroy', function () {
       savedVis.destroy();
       stateMonitor.destroy();
