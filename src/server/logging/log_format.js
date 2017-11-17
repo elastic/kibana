@@ -8,7 +8,7 @@ import querystring from 'querystring';
 import applyFiltersToKeys from './apply_filters_to_keys';
 import { inspect } from 'util';
 
-function serializeError(err) {
+function serializeError(err = {}) {
   return {
     message: err.message,
     name: err.name,
@@ -69,13 +69,14 @@ export default class TransformObjStream extends Stream.Transform {
         'statusCode'
       ]));
 
+      const source = _.get(event, 'source', {});
       data.req = {
         url: event.path,
-        method: event.method,
+        method: event.method || '',
         headers: event.headers,
-        remoteAddress: event.source.remoteAddress,
-        userAgent: event.source.remoteAddress,
-        referer: event.source.referer
+        remoteAddress: source.remoteAddress,
+        userAgent: source.remoteAddress,
+        referer: source.referer
       };
 
       let contentLength = 0;
@@ -94,8 +95,7 @@ export default class TransformObjStream extends Stream.Transform {
       const query = querystring.stringify(event.query);
       if (query) data.req.url += '?' + query;
 
-
-      data.message  = data.req.method.toUpperCase() + ' ';
+      data.message = data.req.method.toUpperCase() + ' ';
       data.message += data.req.url;
       data.message += ' ';
       data.message += levelColor(data.res.statusCode);
@@ -111,30 +111,35 @@ export default class TransformObjStream extends Stream.Transform {
         'load'
       ]));
       data.message  = ansicolors.brightBlack('memory: ');
-      data.message += numeral(data.proc.mem.heapUsed).format('0.0b');
+      data.message += numeral(_.get(data, 'proc.mem.heapUsed')).format('0.0b');
       data.message += ' ';
       data.message += ansicolors.brightBlack('uptime: ');
-      data.message += numeral(data.proc.uptime).format('00:00:00');
+      data.message += numeral(_.get(data, 'proc.uptime')).format('00:00:00');
       data.message += ' ';
       data.message += ansicolors.brightBlack('load: [');
-      data.message += data.os.load.map(function (val) {
+      data.message += _.get(data, 'os.load', []).map(function (val) {
         return numeral(val).format('0.00');
       }).join(' ');
       data.message += ansicolors.brightBlack(']');
       data.message += ' ';
       data.message += ansicolors.brightBlack('delay: ');
-      data.message += numeral(data.proc.delay).format('0.000');
+      data.message += numeral(_.get(data, 'proc.delay')).format('0.000');
     }
     else if (data.type === 'error') {
       data.level = 'error';
-      data.message = event.error.message;
       data.error = serializeError(event.error);
       data.url = event.url;
+
+      const message = _.get(event, 'error.message');
+      data.message = (message && message !== '') ? message : JSON.stringify(event);
     }
     else if (event.data instanceof Error) {
+      data.type = 'error';
       data.level = _.contains(event.tags, 'fatal') ? 'fatal' : 'error';
-      data.message = event.data.message;
       data.error = serializeError(event.data);
+
+      const message = _.get(event, 'data.message');
+      data.message = (message && message !== '') ? message : JSON.stringify(event);
     }
     else if (_.isPlainObject(event.data) && event.data.tmpl) {
       _.assign(data, event.data);
