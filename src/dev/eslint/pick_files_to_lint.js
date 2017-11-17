@@ -1,6 +1,6 @@
 import { CLIEngine } from 'eslint';
 
-import { DEFAULT_ESLINT_PATHS } from '../eslint/default_eslint_paths';
+import { DEFAULT_ESLINT_PATHS } from './default_eslint_paths';
 
 /**
  * Filters a list of files that should be linted. This is done by comparing the
