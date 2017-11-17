@@ -1,4 +1,3 @@
-import 'ui/paginated_table';
 import 'ui/compile_recursive_directive';
 import 'ui/agg_table/agg_table.less';
 import _ from 'lodash';

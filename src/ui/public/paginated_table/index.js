@@ -1,1 +1,1 @@
-import './paginated_table';
+export { PaginatedTable } from './paginated_table';

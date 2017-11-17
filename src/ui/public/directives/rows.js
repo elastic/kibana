@@ -16,6 +16,7 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
           return $(document.createElement('td'));
         }
 
+        // TODO: Reimplement this in React.
         function createFilterableCell(aggConfigResult) {
           const $template = $(tableCellFilterHtml);
           $template.addClass('cell-hover');
@@ -39,6 +40,7 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
         let $cell;
         let $cellContent;
 
+        // TODO: Reimplement this in React.
         if (contents instanceof AggConfigResult) {
           const field = contents.aggConfig.getField();
           const isCellContentFilterable =
@@ -60,6 +62,8 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
 
           // TODO: It would be better to actually check the type of the field, but we don't have
           // access to it here. This may become a problem with the switch to BigNumber
+
+          // TODO: Reimplement this in React.
           if (_.isNumeric(contents)) {
             $cell.addClass('numeric-value');
           }

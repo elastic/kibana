@@ -38,7 +38,7 @@ uiRoutes
   }
 });
 
-uiModules.get('apps/management')
+uiModules.get('apps/management', ['app/kibana'])
 .controller('managementIndicesEdit', function (
     $scope, $location, $route, config, courier, Notifier, Private, AppState, docTitle, confirmModal) {
   const notify = new Notifier();
