@@ -36,7 +36,7 @@ const responseFactory: ResponseFactory = {
 export type RequestHandler<
   Params extends Any,
   Query extends Any,
-  Body extends Any
+  Body extends Any,
 > = (
   req: KibanaRequest<TypeOf<Params>, TypeOf<Query>, TypeOf<Body>>,
   createResponse: ResponseFactory
@@ -115,7 +115,7 @@ export class KibanaRequest<
   }
 }
 
-export class Router<V> {
+export class Router {
   readonly router: express.Router = express.Router();
 
   constructor(readonly path: string) {}
@@ -124,7 +124,7 @@ export class Router<V> {
     P extends ObjectSetting<any>,
     Q extends ObjectSetting<any>,
     B extends ObjectSetting<any>
-  >(route: Route<P, Q, B>, handler: RequestHandler<V, P, Q, B>) {
+  >(route: Route<P, Q, B>, handler: RequestHandler<P, Q, B>) {
     this.router.get(
       route.path,
       async (req, res) => await this.handle(route, req, res, handler)
@@ -135,7 +135,7 @@ export class Router<V> {
     P extends ObjectSetting<any>,
     Q extends ObjectSetting<any>,
     B extends ObjectSetting<any>
-  >(route: Route<P, Q, B>, handler: RequestHandler<V, P, Q, B>) {
+  >(route: Route<P, Q, B>, handler: RequestHandler<P, Q, B>) {
     this.router.post(
       route.path,
       ...Router.getBodyParsers(),
@@ -147,7 +147,7 @@ export class Router<V> {
     P extends ObjectSetting<any>,
     Q extends ObjectSetting<any>,
     B extends ObjectSetting<any>
-  >(route: Route<P, Q, B>, handler: RequestHandler<V, P, Q, B>) {
+  >(route: Route<P, Q, B>, handler: RequestHandler<P, Q, B>) {
     this.router.put(
       route.path,
       ...Router.getBodyParsers(),
@@ -159,7 +159,7 @@ export class Router<V> {
     P extends ObjectSetting<any>,
     Q extends ObjectSetting<any>,
     B extends ObjectSetting<any>
-  >(route: Route<P, Q, B>, handler: RequestHandler<V, P, Q, B>) {
+  >(route: Route<P, Q, B>, handler: RequestHandler<P, Q, B>) {
     this.router.delete(
       route.path,
       async (req, res) => await this.handle(route, req, res, handler)
@@ -185,7 +185,7 @@ export class Router<V> {
     route: Route<P, Q, B>,
     request: express.Request,
     response: express.Response,
-    handler: RequestHandler<V, P, Q, B>
+    handler: RequestHandler<P, Q, B>
   ) {
     let valid: { params: TypeOf<P>; query: TypeOf<P>; body: TypeOf<B> };
 
@@ -202,14 +202,13 @@ export class Router<V> {
       request,
       valid.params,
       valid.query,
-      valid.body
+      valid.body,
     );
 
     try {
       const kibanaResponse = await handler(
-        value,
         kibanaRequest,
-        responseFactory
+        responseFactory,
       );
 
       if (kibanaResponse instanceof KibanaResponse) {
