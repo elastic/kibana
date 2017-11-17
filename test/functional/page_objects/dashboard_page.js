@@ -1,4 +1,5 @@
 import _ from 'lodash';
+
 import { DashboardConstants } from '../../../src/core_plugins/kibana/public/dashboard/dashboard_constants';
 
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
@@ -516,7 +517,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async getPieSliceCount() {
       log.debug('getPieSliceCount');
       return await retry.try(async () => {
-        const slices = await find.allByCssSelector('svg > g > path.slice');
+        const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
         return slices.length;
       });
     }
