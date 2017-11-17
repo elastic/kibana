@@ -7,7 +7,7 @@ import {
   switchMap,
   shareLast,
   first,
-  toPromise,
+  toPromise
 } from '@elastic/kbn-observable';
 
 import { ElasticsearchClusterType } from './ElasticsearchConfig';
@@ -24,7 +24,7 @@ export class ElasticsearchService implements CoreService {
 
   constructor(
     config$: Observable<ElasticsearchConfigs>,
-    logger: LoggerFactory,
+    logger: LoggerFactory
   ) {
     const log = logger.get('elasticsearch');
 
@@ -81,10 +81,7 @@ export class ElasticsearchService implements CoreService {
   }
 
   getClusterOfType(type: ElasticsearchClusterType): Promise<Cluster> {
-    return k$(this.getClusterOfType$(type))(
-      first(),
-      toPromise(),
-    );
+    return k$(this.getClusterOfType$(type))(first(), toPromise());
   }
 
   // TODO: implement `getCluster` and `callWithRequest`

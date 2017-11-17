@@ -7,10 +7,7 @@ import {
   toPromise
 } from '@elastic/kbn-observable';
 
-import {
-  ElasticsearchService,
-  KibanaConfig,
-} from '@elastic/kbn-types';
+import { ElasticsearchService, KibanaConfig } from '@elastic/kbn-types';
 
 export class BazService {
   private readonly _esService: any; // help, this is really a function
@@ -45,7 +42,10 @@ export class BazService {
     // but there's nothing enforcing plugin developers to write
     // this way.
 
-    this._esService = this.elasticsearchService.getScopedCluster('admin', this.headers);
+    this._esService = this.elasticsearchService.getScopedCluster(
+      'admin',
+      this.headers
+    );
   }
 
   async find(options: { type: string; page?: number; perPage?: number }) {
@@ -54,7 +54,7 @@ export class BazService {
     // NB: May need to actually set the _esService here instead
     // so that it is the latestValue
     const [kibanaIndex] = await latestValues(
-      k$(this.kibanaConfig$)(map(config => config.index)),
+      k$(this.kibanaConfig$)(map(config => config.index))
     );
 
     // NB: Use the new scoped es service something like this:

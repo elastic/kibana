@@ -107,18 +107,16 @@ class StringSetting extends Setting<string> {
 
     if (this.minLength && value.length < this.minLength) {
       throw new SettingError(
-        `value is [${value}] but it must have a minimum length of [${
-          this.minLength
-        }].`,
+        `value is [${value}] but it must have a minimum length of [${this
+          .minLength}].`,
         context
       );
     }
 
     if (this.maxLength && value.length > this.maxLength) {
       throw new SettingError(
-        `value is [${value}] but it must have a maximum length of [${
-          this.maxLength
-        }].`,
+        `value is [${value}] but it must have a maximum length of [${this
+          .maxLength}].`,
         context
       );
     }
@@ -201,18 +199,16 @@ class NumberSetting extends Setting<number> {
 
     if (this.min && value < this.min) {
       throw new SettingError(
-        `Value is [${value}] but it must be equal to or greater than [${
-          this.min
-        }].`,
+        `Value is [${value}] but it must be equal to or greater than [${this
+          .min}].`,
         context
       );
     }
 
     if (this.max && value > this.max) {
       throw new SettingError(
-        `Value is [${value}] but it must be equal to or lower than [${
-          this.max
-        }].`,
+        `Value is [${value}] but it must be equal to or lower than [${this
+          .max}].`,
         context
       );
     }
@@ -402,18 +398,16 @@ class ArraySetting<T> extends Setting<Array<T>> {
 
     if (this.minSize != null && value.length < this.minSize) {
       throw new SettingError(
-        `array size is [${value.length}], but cannot be smaller than [${
-          this.minSize
-        }]`,
+        `array size is [${value.length}], but cannot be smaller than [${this
+          .minSize}]`,
         context
       );
     }
 
     if (this.maxSize != null && value.length > this.maxSize) {
       throw new SettingError(
-        `array size is [${value.length}], but cannot be greater than [${
-          this.maxSize
-        }]`,
+        `array size is [${value.length}], but cannot be greater than [${this
+          .maxSize}]`,
         context
       );
     }

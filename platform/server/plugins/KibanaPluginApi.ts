@@ -43,9 +43,7 @@ export interface KibanaPluginApi {
     /**
      * Create and register a router at the specified path.
      */
-    createAndRegisterRouter: <T>(
-      path: string,
-    ) => Router<T>;
+    createAndRegisterRouter: <T>(path: string) => Router<T>;
   };
 
   /**

@@ -155,9 +155,7 @@ export class LoggingConfig {
 
       if (unsupportedAppenderKey) {
         throw new Error(
-          `Logger "${loggerContext}" contains unsupported appender key "${
-            unsupportedAppenderKey
-          }".`
+          `Logger "${loggerContext}" contains unsupported appender key "${unsupportedAppenderKey}".`
         );
       }
 
