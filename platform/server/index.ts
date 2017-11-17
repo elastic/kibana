@@ -1,7 +1,8 @@
 import { ConfigService, Env } from '../config';
-import { HttpModule, HttpConfig } from './http';
 import { ElasticsearchModule, ElasticsearchConfigs } from './elasticsearch';
 import { KibanaModule, KibanaConfig } from './kibana';
+import { HttpModule, HttpConfig } from './http';
+import { SavedObjectsModule, SavedObjectsConfig } from './saved_objects';
 import { Logger, LoggerFactory } from '../logging';
 import { PluginsConfig } from './plugins/PluginsConfig';
 import { PluginsService } from './plugins/PluginsService';
@@ -9,46 +10,50 @@ import { PluginSystem } from './plugins/PluginSystem';
 
 export class Server {
   private readonly elasticsearch: ElasticsearchModule;
-  private readonly http: HttpModule;
   private readonly kibana: KibanaModule;
+  private readonly http: HttpModule;
+  private readonly savedObjects: SavedObjectsModule;
   private readonly plugins: PluginsService;
   private readonly log: Logger;
 
   constructor(
     private readonly configService: ConfigService,
     logger: LoggerFactory,
-    env: Env
+    env: Env,
   ) {
     this.log = logger.get('server');
 
     const kibanaConfig$ = configService.atPath('kibana', KibanaConfig);
     const httpConfig$ = configService.atPath('server', HttpConfig);
+    const savedObjectsConfig$ = configService.atPath('savedObjects', SavedObjectsConfig);
     const elasticsearchConfigs$ = configService.atPath(
       'elasticsearch',
-      ElasticsearchConfigs
+      ElasticsearchConfigs,
     );
     const pluginsConfig$ = configService.atPath(
       ['__newPlatform', 'plugins'],
-      PluginsConfig
+      PluginsConfig,
     );
 
     this.elasticsearch = new ElasticsearchModule(elasticsearchConfigs$, logger);
     this.kibana = new KibanaModule(kibanaConfig$);
     this.http = new HttpModule(httpConfig$, logger, env);
+    this.savedObjects = new SavedObjectsModule(savedObjectsConfig$);
 
     const core = {
       elasticsearch: this.elasticsearch,
       kibana: this.kibana,
       http: this.http,
+      savedObjects: this.savedObjects,
       configService,
-      logger
+      logger,
     };
 
     this.plugins = new PluginsService(
       pluginsConfig$,
       new PluginSystem(core, logger),
       configService,
-      logger
+      logger,
     );
   }
 
