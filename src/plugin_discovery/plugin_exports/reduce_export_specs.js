@@ -2,8 +2,8 @@
  *  Combine the exportSpecs from a list of pluginSpecs
  *  by calling the reducers for each export type
  *  @param {Array<PluginSpecs>} pluginSpecs
- *  @param {Object<exportType,reducer>} exportTypes
- *  @param {Object<exportType,exports} [defaults={}]
+ *  @param {Object<exportType,reducer>} reducers
+ *  @param {Object<exportType,exports>} [defaults={}]
  *  @return {Object<exportType,exports>}
  */
 export function reduceExportSpecs(pluginSpecs, reducers, defaults = {}) {
