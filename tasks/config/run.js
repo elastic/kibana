@@ -41,14 +41,6 @@ module.exports = function (grunt) {
       ]
     },
 
-    eslintStaged: {
-      cmd: process.execPath,
-      args: [
-        require.resolve('../../scripts/eslint'),
-        // staged paths are written here by lintStagedFiles task
-      ]
-    },
-
     testServer: {
       options: {
         wait: false,
