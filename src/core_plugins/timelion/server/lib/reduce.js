@@ -22,17 +22,20 @@ export default async function reduce(argsPromises, fn) {
 
   if (_.isObject(argument) && argument.type === 'seriesList') {
     if (argument.list.length > 1) {
-      // reduce seriesList on a per-label basis
+      // ensure seriesList contain same labels
       if (seriesList.list.length !== argument.list.length) {
         throw new Error ('Unable to reduce seriesList on a per-label basis, number of series are not the same');
       }
-
-      const labelwiseSeriesList = { type: 'seriesList', list: [] };
       const indexedByLabel = _.indexBy(argument.list, 'label');
-      seriesList.list.forEach(async (series) => {
+      seriesList.list.forEach((series) => {
         if (!indexedByLabel[series.label]) {
           throw new Error (`series could not be found for label ${series.label}`);
         }
+      });
+
+      // reduce seriesList on a per-label basis
+      const labelwiseSeriesList = { type: 'seriesList', list: [] };
+      seriesList.list.forEach(async (series) => {
         const first = { type: 'seriesList', list: [series] };
         const second = { type: 'seriesList', list: [indexedByLabel[series.label]] };
         const labelSeriesList = await reduce([first, second], fn);
