@@ -75,9 +75,6 @@ export class SearchEmbeddableFactory extends EmbeddableFactory {
         const rootNode = angular.element(domNode);
         rootNode.append(searchInstance);
 
-        // TODO: There is probably a better way to do this.
-        searchScope.$on('ready:vis', () => this.courier.fetch());
-
         this.addDestroyEmeddable(panel.panelIndex, () => {
           searchInstance.remove();
           searchScope.savedObj.destroy();
