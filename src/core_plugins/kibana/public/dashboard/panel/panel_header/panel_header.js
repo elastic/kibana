@@ -1,7 +1,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export function PanelHeader({ title, actions }) {
+export function PanelHeader({ title, actions, isViewOnlyMode }) {
+  if (isViewOnlyMode && !title) {
+    return (
+      <div className="panel-heading-floater">
+        <div className="kuiMicroButtonGroup">
+          {actions}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="panel-heading">
       <span
@@ -21,6 +31,7 @@ export function PanelHeader({ title, actions }) {
 }
 
 PanelHeader.propTypes = {
+  isViewOnlyMode: PropTypes.bool,
   title: PropTypes.string,
   actions: PropTypes.node,
 };

@@ -31,6 +31,7 @@ export class SearchEmbeddableFactory extends EmbeddableFactory {
     searchScope.editPath = this.getEditPath(panel.id);
     return this.searchLoader.get(panel.id)
       .then(savedObject => {
+        searchScope.sharedItemTitle = panel.title !== undefined ? panel.title : savedObject.title;
         searchScope.savedObj = savedObject;
         searchScope.panel = panel;
         container.registerPanelIndexPattern(panel.panelIndex, savedObject.searchSource.get('index'));
@@ -73,9 +74,6 @@ export class SearchEmbeddableFactory extends EmbeddableFactory {
         const searchInstance = this.$compile(searchTemplate)(searchScope);
         const rootNode = angular.element(domNode);
         rootNode.append(searchInstance);
-
-        // TODO: There is probably a better way to do this.
-        searchScope.$on('ready:vis', () => this.courier.fetch());
 
         this.addDestroyEmeddable(panel.panelIndex, () => {
           searchInstance.remove();
