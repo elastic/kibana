@@ -98,7 +98,7 @@ export function SearchSourceProvider(Promise, Private, config) {
     'size',
     'source',
     'version',
-    'fields',
+    'fields'
   ];
 
   SearchSource.prototype.index = function (indexPattern) {
