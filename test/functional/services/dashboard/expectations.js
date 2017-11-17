@@ -26,7 +26,7 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
     async selectedLegendColorCount(color, expectedCount) {
       log.debug(`DashboardExpect.selectedLegendColorCount(${color}, ${expectedCount})`);
       await retry.try(async () => {
-        const selectedLegendColor = await testSubjects.findAll(`legendSelectColor-${color}`);
+        const selectedLegendColor = await testSubjects.findAll(`legendSelectedColor-${color}`);
         expect(selectedLegendColor.length).to.be(expectedCount);
       });
     }
