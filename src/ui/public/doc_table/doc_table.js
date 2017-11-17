@@ -11,7 +11,7 @@ import { uiModules } from 'ui/modules';
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
 
 uiModules.get('kibana')
-  .directive('docTable', function (config, Notifier, getAppState, pagerFactory, $filter) {
+  .directive('docTable', function (config, Notifier, getAppState, pagerFactory, $filter, courier) {
     return {
       restrict: 'E',
       template: html,
@@ -42,24 +42,6 @@ uiModules.get('kibana')
           columns: $scope.columns
         };
 
-        const prereq = (function () {
-          const fns = [];
-
-          return function register(fn) {
-            fns.push(fn);
-
-            return function () {
-              fn.apply(this, arguments);
-
-              if (fns.length) {
-                _.pull(fns, fn);
-                if (!fns.length) {
-                  $scope.$root.$broadcast('ready:vis');
-                }
-              }
-            };
-          };
-        }());
         const limitTo = $filter('limitTo');
         const calculateItemsOnPage = () => {
           $scope.pager.setTotalItems($scope.hits.length);
@@ -90,7 +72,7 @@ uiModules.get('kibana')
         });
 
 
-        $scope.$watch('searchSource', prereq(function () {
+        $scope.$watch('searchSource', function () {
           if (!$scope.searchSource) return;
 
           $scope.indexPattern = $scope.searchSource.get('index');
@@ -139,7 +121,8 @@ uiModules.get('kibana')
               });
           }
           startSearching();
-        }));
+          courier.fetch();
+        });
 
         $scope.pageOfItems = [];
         $scope.onPageNext = () => {
