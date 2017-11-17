@@ -34,13 +34,13 @@ export function registerElasticsearchRoutes(
       // anymore.
       log.info('request received on [data] cluster');
 
-      const cluster = await service.getClusterOfType$('data');
+      const cluster = await service.getScopedCluster('data', req.headers);
 
-      log.info('got [data] cluster, now calling it');
+      log.info('got scoped [data] cluster, now calling it');
 
-      const response = await cluster.withRequest(req, (client, headers) =>
-        client.search({})
-      );
+      // TODO: for some reason my typescript
+      // is saying `search` isn't on this object
+      const response = await cluster.search({});
 
       return {
         params: req.params,
