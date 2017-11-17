@@ -1,6 +1,7 @@
 import { alterColumn } from './alterColumn';
 import { compare } from './compare';
 import { containerStyle } from './containerStyle';
+import { columns } from './columns';
 import { date } from './date';
 import { exactly } from './exactly';
 import { font } from './font';
@@ -31,6 +32,7 @@ export const commonFunctions = [
   alterColumn,
   containerStyle,
   compare,
+  columns,
   date,
   exactly,
   font,
