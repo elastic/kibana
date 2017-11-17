@@ -70,14 +70,14 @@ export function findPluginSpecs(settings, config = defaultConfig(settings)) {
     // extend the config with all plugins before determining enabled status
     .let(waitForComplete)
     .map(({ spec, deprecations }) => {
-      const rightVersion = spec.isVersionCompatible(config.get('pkg.version'));
-      const enabled = rightVersion && spec.isEnabled(config);
+      const isRightVersion = spec.isVersionCompatible(config.get('pkg.version'));
+      const enabled = isRightVersion && spec.isEnabled(config);
       return {
         spec,
         deprecations,
         enabledSpecs: enabled ? [spec] : [],
         disabledSpecs: enabled ? [] : [spec],
-        invalidVersionSpecs: rightVersion ? [] : [spec],
+        invalidVersionSpecs: isRightVersion ? [] : [spec],
       };
     })
     // determin which plugins are disabled before actually removing things from the config
