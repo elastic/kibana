@@ -5,7 +5,9 @@ import {
   map,
   filter,
   switchMap,
-  shareLast
+  shareLast,
+  first,
+  toPromise,
 } from '@elastic/kbn-observable';
 
 import { ElasticsearchClusterType } from './ElasticsearchConfig';
@@ -22,7 +24,7 @@ export class ElasticsearchService implements CoreService {
 
   constructor(
     config$: Observable<ElasticsearchConfigs>,
-    logger: LoggerFactory
+    logger: LoggerFactory,
   ) {
     const log = logger.get('elasticsearch');
 
@@ -78,6 +80,13 @@ export class ElasticsearchService implements CoreService {
     return k$(this.clusters$)(map(clusters => clusters[type]));
   }
 
+  getClusterOfType(type: ElasticsearchClusterType): Promise<Cluster> {
+    return k$(this.getClusterOfType$(type))(
+      first(),
+      toPromise(),
+    );
+  }
+
   // TODO: implement `getCluster` and `callWithRequest`
   //
   // getScopedCluster is not the name I want to use. I really
@@ -87,7 +96,7 @@ export class ElasticsearchService implements CoreService {
   // This method is really transparent. It does the two things
   // we currently do. I think we could work Observables
   // into this so we get updated stuff.
-  getScopedCluster(type: ElasticsearchClusterType, headers: string) {
+  getScopedCluster(type: ElasticsearchClusterType, headers: string): Cluster {
     const { callWithRequest } = this.getCluster(type);
     return (...args) => this.callWithRequest(headers, ...args);
   }
