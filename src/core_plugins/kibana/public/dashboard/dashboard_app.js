@@ -116,7 +116,6 @@ app.directive('dashboardApp', function ($injector) {
         dashboardStateManager.getQuery() || { query: '', language: config.get('search:queryLanguage') },
         filterBar.getFilters()
       );
-      let pendingVisCount = _.size(dashboardStateManager.getPanels());
 
       timefilter.enabled = true;
       dash.searchSource.highlightAll(true);
@@ -174,7 +173,6 @@ app.directive('dashboardApp', function ($injector) {
 
       // called by the saved-object-finder when a user clicks a vis
       $scope.addVis = function (hit, showToast = true) {
-        pendingVisCount++;
         dashboardStateManager.addNewPanel(hit.id, 'visualization');
         if (showToast) {
           notify.info(`Visualization successfully added to your dashboard`);
@@ -182,7 +180,6 @@ app.directive('dashboardApp', function ($injector) {
       };
 
       $scope.addSearch = function (hit) {
-        pendingVisCount++;
         dashboardStateManager.addNewPanel(hit.id, 'search');
         notify.info(`Search successfully added to your dashboard`);
       };
@@ -367,14 +364,6 @@ app.directive('dashboardApp', function ($injector) {
         chrome.addApplicationClass('theme-light');
       }
 
-      $scope.$on('ready:vis', function () {
-        if (pendingVisCount > 0) pendingVisCount--;
-        if (pendingVisCount === 0) {
-          dashboardStateManager.saveState();
-          $scope.refresh();
-        }
-      });
-
       if ($route.current.params && $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM]) {
         // Hide the toast message since they will already see a notification from saving the visualization,
         // and one is sufficient (especially given how the screen jumps down a bit for each unique notification).
@@ -399,8 +388,6 @@ app.directive('dashboardApp', function ($injector) {
         addSearch: $scope.addSearch,
         timefilter: $scope.timefilter
       };
-
-      $scope.$emit('application.load');
     }
   };
 });

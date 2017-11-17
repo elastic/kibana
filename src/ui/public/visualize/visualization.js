@@ -119,9 +119,7 @@ uiModules
             .then(() => {
             // renderComplete
               $scope.$emit('renderComplete');
-              if (!$scope.vis.visualizeScope) {
-                $el.trigger('renderComplete');
-              }
+              $el.trigger('renderComplete');
             });
           $scope.$apply();
         }, 100);

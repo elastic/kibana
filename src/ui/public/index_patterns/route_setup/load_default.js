@@ -7,11 +7,15 @@ const notify = new Notifier({
   location: 'Index Patterns'
 });
 
+const NO_DEFAULT_INDEX_PATTERN_MSG = `
+In order to visualize and explore data in Kibana,
+you'll need to create an index pattern to retrieve data from Elasticsearch.
+`;
+
 // eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default function (opts) {
   opts = opts || {};
   const whenMissingRedirectTo = opts.whenMissingRedirectTo || null;
-  let defaultRequiredToasts = null;
 
   uiRoutes
     .addSetupWork(function loadDefaultIndexPattern(Private, Promise, $route, config) {
@@ -41,7 +45,7 @@ export default function (opts) {
         });
     })
     .afterWork(
-    // success
+      // success
       null,
 
       // failure
@@ -50,8 +54,10 @@ export default function (opts) {
         if (hasDefault || !whenMissingRedirectTo) throw err; // rethrow
 
         kbnUrl.change(whenMissingRedirectTo);
-        if (!defaultRequiredToasts) defaultRequiredToasts = [];
-        else defaultRequiredToasts.push(notify.error(err));
+
+        // Avoid being hostile to new users who don't have an index pattern setup yet
+        // give them a friendly info message instead of a terse error message
+        notify.info(NO_DEFAULT_INDEX_PATTERN_MSG, { lifetime: 15000 });
       }
     );
 }

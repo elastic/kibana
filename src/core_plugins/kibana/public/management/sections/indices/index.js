@@ -54,8 +54,6 @@ uiModules.get('apps/management')
             };
           });
         });
-
-        $scope.$emit('application.load');
       }
     };
   });

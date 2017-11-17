@@ -421,7 +421,7 @@ Notifier.prototype.info = function (msg, opts, cb) {
     content: formatMsg(msg, this.from),
     icon: 'info-circle',
     title: 'Debug',
-    lifetime: Notifier.config.infoLifetime,
+    lifetime: _.get(opts, 'lifetime', Notifier.config.infoLifetime),
     actions: ['accept']
   }, _.pick(opts, overrideableOptions));
   return add(config, cb);
