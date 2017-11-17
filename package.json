@@ -211,7 +211,15 @@
     "webpack": "3.6.0",
     "webpack-merge": "4.1.0",
     "wreck": "12.4.0",
-    "yauzl": "2.7.0"
+    "yauzl": "2.7.0",
+    "compare-versions": "^3.1.0",
+    "hjson": "^3.1.0",
+    "json-stringify-pretty-compact": "^1.0.4",
+    "leaflet-vega": "^0.5.3",
+    "split.js": "^1.3.5",
+    "vega": "^3.0.7",
+    "vega-lite": "^2.0.0",
+    "vega-schema-url-parser": "^1.0.0-beta.3"
   },
   "devDependencies": {
     "@elastic/eslint-config-kibana": "0.14.0",
