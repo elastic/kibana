@@ -8,24 +8,26 @@ export function DashboardExpectProvider({ getService, getPageObjects }) {
 
   return new class DashboardExpect {
     async pieSliceCount(expectedCount) {
-      log.debug(`expectPieSliceCount(${expectedCount})`);
-      return await retry.try(async () => {
+      log.debug(`DashboardExpect.expectPieSliceCount(${expectedCount})`);
+      await retry.try(async () => {
         const slicesCount = await PageObjects.dashboard.getPieSliceCount();
-        expect(slicesCount).to.eql(expectedCount);
+        expect(slicesCount).to.be(expectedCount);
       });
     }
 
     async panelCount(expectedCount) {
-      return retry.try(async () => {
+      log.debug(`DashboardExpect.panelCount(${expectedCount})`);
+      await retry.try(async () => {
         const panelCount = await PageObjects.dashboard.getPanelCount();
-        expect(panelCount).to.eql(expectedCount);
+        expect(panelCount).to.be(expectedCount);
       });
     }
 
-    async selectedLegendColorCount(color, count) {
-      return retry.try(async () => {
-        const selectedLegendColor = await testSubjects.findAll(`legendSelectColor-${color}`);
-        expect(selectedLegendColor).to.eql(count);
+    async selectedLegendColorCount(color, expectedCount) {
+      log.debug(`DashboardExpect.selectedLegendColorCount(${color}, ${expectedCount})`);
+      await retry.try(async () => {
+        const selectedLegendColor = await testSubjects.findAll(`legendSelectedColor-${color}`);
+        expect(selectedLegendColor.length).to.be(expectedCount);
       });
     }
   };
