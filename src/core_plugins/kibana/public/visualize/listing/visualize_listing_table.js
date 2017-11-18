@@ -67,7 +67,7 @@ export class VisualizeListingTable extends Component {
   componentWillUnmount() {
     this.debouncedFetch.cancel();
   }
- 
+
   calculateItemsOnPage = () => {
     this.items = this.sortableProperties.sortItems(this.items);
     this.pager.setTotalItems(this.items.length);
