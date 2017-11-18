@@ -137,7 +137,14 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
   };
 
   $scope.getVisTypeTooltip = type => {
-    const prefix = type.isExperimental ? '(Experimental)' : '';
+    //to not clutter the tooltip, just only notify if labs or experimental.
+    //labs is more important in this regard.
+    let prefix = '';
+    if (type.isLabs) {
+      prefix = '(Labs)';
+    } else if (type.isExperimental) {
+      prefix = '(Experimental)';
+    }
     return `${prefix} ${type.description}`;
   };
 
