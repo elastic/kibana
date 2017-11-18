@@ -20,8 +20,8 @@ VisTypesRegistryProvider.register(function VegaVisProvider(Private) {
   // Vis object of this type.
   return VisFactory.createAngularVisualization({
     name: 'vega',
-    title: 'Vega Vis',
-    description: 'Build Vega and VegaLite data visualizations into Kibana',
+    title: 'Vega',
+    description: 'Create custom visualizations using Vega and VegaLite',
     icon: 'fa-code',
     category: CATEGORY.OTHER,
     visConfig: {
@@ -33,7 +33,9 @@ VisTypesRegistryProvider.register(function VegaVisProvider(Private) {
     editor: VegaEditor,
     requestHandler: vegaRequestHandler,
     responseHandler: 'none',
-    requiresSearch: false,
+    options: {
+      showIndexSelection: false
+    },
     isExperimental: true,
   });
 });
