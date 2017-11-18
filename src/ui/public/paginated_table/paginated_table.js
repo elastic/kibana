@@ -18,6 +18,7 @@ import {
   EuiTableRow,
   EuiTableRowCell,
   SortableProperties,
+  LEFT_ALIGNMENT,
 } from '@elastic/eui';
 
 import { Pager } from 'ui/pager';
@@ -150,6 +151,7 @@ export class PaginatedTable extends Component {
           onSort={sortable !== false ? () => { this.sortColumn(index); } : undefined}
           isSorted={title === this.state.sortedColumn}
           isSortAscending={this.sortableProperties.isAscendingByName(title)}
+          align={column.align || LEFT_ALIGNMENT}
         >
           {text}
         </EuiTableHeaderCell>
@@ -181,9 +183,12 @@ export class PaginatedTable extends Component {
   renderRows() {
     return this.state.pageOfItems.map((item, index) => {
       const cells = item.map((cell, cellIndex) => {
+        const column = this.props.columns[cellIndex];
+
         return (
           <EuiTableRowCell
             key={cellIndex}
+            align={column.align || LEFT_ALIGNMENT}
           >
             {cell.render()}
           </EuiTableRowCell>

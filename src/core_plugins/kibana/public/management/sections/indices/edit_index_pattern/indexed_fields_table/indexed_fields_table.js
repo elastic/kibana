@@ -4,6 +4,10 @@ import { uiModules } from 'ui/modules';
 import { FieldWildcardProvider } from 'ui/field_wildcard';
 import template from './indexed_fields_table.html';
 
+import {
+ RIGHT_ALIGNMENT,
+} from '@elastic/eui';
+
 const renderBooleanForCondition = condition => {
   return () => {
     let content;
@@ -52,7 +56,9 @@ uiModules.get('apps/management')
         {
           title: 'controls',
           text: '',
-          sortable: false }
+          sortable: false,
+          align: RIGHT_ALIGNMENT,
+        },
       ];
 
       $scope.$watchMulti(['[]indexPattern.fields', 'fieldFilter', 'indexedFieldTypeFilter'], refreshRows);
