@@ -124,7 +124,7 @@ export function getUiSettingDefaults() {
     },
     'visualize:enableLabsVisualizations': {
       value: true,
-      description: 'Enable lab mode in visualize'
+      description: 'Enable lab visualizations in Visualize.'
     },
     'visualization:tileMap:maxPrecision': {
       value: 7,

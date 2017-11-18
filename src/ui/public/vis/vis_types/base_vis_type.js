@@ -3,6 +3,7 @@ import _ from 'lodash';
 
 export function VisTypeProvider() {
   class VisType {
+
     constructor(opts) {
       opts = opts || {};
 
@@ -39,6 +40,12 @@ export function VisTypeProvider() {
       _.defaultsDeep(this, opts, _defaults);
 
       this.requiresSearch = !(this.requestHandler === 'none');
+    }
+
+    shouldMarkAsExperimentalOrLabsInUI() {
+      //we are not making a distinction in the UI if a plugin is experimental and/or labs.
+      //we just want to indicate it is special. the current flask icon is sufficient for that.
+      return this.isExperimental || this.isLabs;
     }
   }
 
