@@ -301,14 +301,13 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
 
   $scope.getExperimentalMessage = () => {
-    const feedbackUrl = vis.type.feedbackUrl || 'https://github.com/elastic/kibana/issues/new';
-
+    const feedbackUrl = 'https://github.com/elastic/kibana/issues/new';
     if ($scope.vis.type.isLabs) {
-      return `This visualization is in labs mode. The feature set is subject to change with each release.
-        Have feedback? Please create an issue in <a ng-href="${feedbackUrl}" rel="noopener noreferrer">GitHub</a>`;
+      return `This visualization is a labs feature. This means that capabilities of this feature are subject to change across release.
+        Have feedback? Please create an issue in <a ng-href="${feedbackUrl}" rel="noopener noreferrer">GitHub</a>.`;
     } else {
       return `This visualization is marked as experimental. 
-Have feedback? Please create an issue in <a ng-href="${feedbackUrl}" rel="noopener noreferrer">GitHub</a>`;
+Have feedback? Please create an issue in <a ng-href="${feedbackUrl}" rel="noopener noreferrer">GitHub</a>.`;
     }
   };
 
