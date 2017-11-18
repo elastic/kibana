@@ -63,7 +63,11 @@ export class VisualizeListingTable extends Component {
         });
     }, 200);
   }
-
+  
+  componentWillUnmount() {
+    this.debouncedFetch.cancel();
+  }
+ 
   calculateItemsOnPage = () => {
     this.items = this.sortableProperties.sortItems(this.items);
     this.pager.setTotalItems(this.items.length);
