@@ -55,7 +55,7 @@ function listVersions(versions, multipleChoice) {
 function confirmConflictResolved() {
   return prompt({
     type: 'confirm',
-    message: 'Have you solved the merge conflict?'
+    message: 'Press enter when you have commited all changes'
   });
 }
 

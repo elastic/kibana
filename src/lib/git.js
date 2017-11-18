@@ -52,6 +52,15 @@ function cherrypick(owner, repoName, sha) {
   });
 }
 
+function isIndexDirty(owner, repoName) {
+  return rpc
+    .exec(`git diff-index --quiet HEAD --`, {
+      cwd: env.getRepoPath(owner, repoName)
+    })
+    .then(() => false)
+    .catch(() => true);
+}
+
 function createAndCheckoutBranch(owner, repoName, baseBranch, featureBranch) {
   return rpc.exec(
     `git fetch origin ${baseBranch} && git branch ${featureBranch} origin/${
@@ -79,11 +88,12 @@ function resetAndPullMaster(owner, repoName) {
 }
 
 module.exports = {
-  resetAndPullMaster,
   cherrypick,
   cloneRepo,
   createAndCheckoutBranch,
+  isIndexDirty,
+  push,
   repoExists,
-  setupRepo,
-  push
+  resetAndPullMaster,
+  setupRepo
 };
