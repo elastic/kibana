@@ -63,7 +63,7 @@ export class VisualizeListingTable extends Component {
         });
     }, 200);
   }
-  
+
   componentWillUnmount() {
     this.debouncedFetch.cancel();
   }
