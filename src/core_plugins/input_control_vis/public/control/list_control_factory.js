@@ -7,9 +7,9 @@ const termsAgg = (field, size, direction) => {
     size = 1;
   }
   const terms = {
-    'size': size,
-    'order': {
-      '_count': direction
+    size: size,
+    order: {
+      _count: direction
     }
   };
   if (field.scripted) {
@@ -44,7 +44,11 @@ class ListControl extends Control {
 
 export async function listControlFactory(controlParams, kbnApi) {
   const indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
-  const searchSource = new kbnApi.SearchSource();
+  // TODO replace SearchSource with call to suggestions API
+  const searchSource = new kbnApi.SearchSource({
+    timeout: '1s',
+    terminate_after: 100000
+  });
   searchSource.inherits(false); //Do not filter by time so can not inherit from rootSearchSource
   searchSource.size(0);
   searchSource.index(indexPattern);
