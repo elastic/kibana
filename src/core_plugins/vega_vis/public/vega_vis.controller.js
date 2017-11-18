@@ -78,7 +78,8 @@ export function createVegaVisController(Private, /*$scope,*/ timefilter, es, ser
         [
           '=vega.vis.params',
           '=timefilter',
-          'vega.visData'
+          'vega.visData',
+          { get: dashboardContext, deep: true }
         ],
         createGraph
       );
