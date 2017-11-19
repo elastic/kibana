@@ -49,8 +49,8 @@ management.getSection('kibana').register('settings', {
 FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'advanced_settings',
-    title: 'Advanced settings',
-    description: 'Use to customize your kibana instance.',
+    title: 'Advanced Settings',
+    description: 'Directly edit settings that control behavior in Kibana.',
     icon: '/plugins/kibana/assets/app_dashboard.svg',
     path: '/app/kibana#/management/kibana/settings',
     showOnHomePage: false,

@@ -17,7 +17,7 @@ FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'console',
     title: 'Console',
-    description: 'Manipulate your ES data directly with console.',
+    description: 'Skip cURL and use this JSON interface to work with your data directly.',
     icon: '/plugins/kibana/assets/app_devtools.svg',
     path: '/app/kibana#/dev_tools/console',
     showOnHomePage: true,

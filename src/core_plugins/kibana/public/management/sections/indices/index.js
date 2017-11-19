@@ -70,7 +70,7 @@ FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'index_patterns',
     title: 'Index Patterns',
-    description: 'Make your ES data usable from within kibana.',
+    description: 'Manage the index patterns that help retrieve your data from Elasticsearch.',
     icon: '/plugins/kibana/assets/app_dashboard.svg',
     path: '/app/kibana#/management/kibana/indices',
     showOnHomePage: true,
