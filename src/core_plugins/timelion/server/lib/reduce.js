@@ -8,6 +8,47 @@ function allSeriesContainKey(seriesList, key) {
 }
 
 /**
+ * Pairwise reduce seriesList
+ * @params {seriesList} left
+ * @params {seriesList} right
+ * @params {Function} fn - Function used to combine points at same index in each array of each series in the seriesList.
+ * @return {seriesList}
+ */
+async function pairwiseReduce(left, right, fn) {
+  if (left.list.length !== right.list.length) {
+    throw new Error ('Unable to pairwise reduce seriesLists, number of series are not the same');
+  }
+
+  let pairwiseField = 'label';
+  if (allSeriesContainKey(left, 'split') && allSeriesContainKey(right, 'split')) {
+    pairwiseField = 'split';
+  }
+  const indexedList = _.indexBy(right.list, pairwiseField);
+
+  // ensure seriesLists contain same pairwise labels
+  left.list.forEach((leftSeries) => {
+    if (!indexedList[leftSeries[pairwiseField]]) {
+      const rightSeriesLables = right.list.map((rightSeries) => {
+        return `"${rightSeries[pairwiseField]}"`;
+      }).join(',');
+      throw new Error (`Matching series could not be found for "${leftSeries[pairwiseField]}" in [${rightSeriesLables}]`);
+    }
+  });
+
+  // pairwise reduce seriesLists
+  const pairwiseSeriesList = { type: 'seriesList', list: [] };
+  left.list.forEach(async (leftSeries) => {
+    const first = { type: 'seriesList', list: [leftSeries] };
+    const second = { type: 'seriesList', list: [indexedList[leftSeries[pairwiseField]]] };
+    const reducedSeriesList = await reduce([first, second], fn);
+    const reducedSeries = reducedSeriesList.list[0];
+    reducedSeries.label = leftSeries[pairwiseField];
+    pairwiseSeriesList.list.push(reducedSeries);
+  });
+  return pairwiseSeriesList;
+}
+
+/**
  * Reduces multiple arrays into a single array using a function
  * @param {Array} args - args[0] must always be a {type: 'seriesList'}
  *
@@ -17,7 +58,7 @@ function allSeriesContainKey(seriesList, key) {
  * @params {Function} fn - Function used to combine points at same index in each array of each series in the seriesList.
  * @return {seriesList}
  */
-export default async function reduce(argsPromises, fn) {
+async function reduce(argsPromises, fn) {
   const args = await Promise.all(argsPromises);
 
   const seriesList = args.shift();
@@ -29,37 +70,7 @@ export default async function reduce(argsPromises, fn) {
 
   if (_.isObject(argument) && argument.type === 'seriesList') {
     if (argument.list.length > 1) {
-      if (seriesList.list.length !== argument.list.length) {
-        throw new Error ('Unable to pairwise reduce seriesLists, number of series are not the same');
-      }
-
-      let pairwiseField = 'label';
-      if (allSeriesContainKey(seriesList, 'split') && allSeriesContainKey(argument, 'split')) {
-        pairwiseField = 'split';
-      }
-      const indexedList = _.indexBy(argument.list, pairwiseField);
-
-      // ensure seriesLists contain same pairwise labels
-      seriesList.list.forEach((series) => {
-        if (!indexedList[series[pairwiseField]]) {
-          const pairwiseLables = argument.list.map((argumentSeries) => {
-            return `"${argumentSeries[pairwiseField]}"`;
-          }).join(',');
-          throw new Error (`Matching series could not be found for "${series[pairwiseField]}" in [${pairwiseLables}]`);
-        }
-      });
-
-      // pairwise reduce seriesLists
-      const pairwiseSeriesList = { type: 'seriesList', list: [] };
-      seriesList.list.forEach(async (series) => {
-        const first = { type: 'seriesList', list: [series] };
-        const second = { type: 'seriesList', list: [indexedList[series[pairwiseField]]] };
-        const reducedSeriesList = await reduce([first, second], fn);
-        const reducedSeries = reducedSeriesList.list[0];
-        reducedSeries.label = series[pairwiseField];
-        pairwiseSeriesList.list.push(reducedSeries);
-      });
-      return pairwiseSeriesList;
+      return await pairwiseReduce(seriesList, argument, fn);
     } else {
       argument = argument.list[0];
     }
@@ -112,3 +123,5 @@ export default async function reduce(argsPromises, fn) {
   seriesList.list = reduced;
   return seriesList;
 }
+
+export default reduce;
