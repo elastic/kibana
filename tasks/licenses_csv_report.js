@@ -32,7 +32,7 @@ function formatCsvValues(fields, values) {
 
 export default function licensesCSVReport(grunt) {
   grunt.registerTask('licenses:csv_report', 'Report of 3rd party dependencies', async function () {
-    const fields = ['name', 'version', 'revision', 'url', 'license', 'copyright'];
+    const fields = ['name', 'version', 'url', 'license'];
     const done = this.async();
 
     try {
