@@ -17,7 +17,7 @@ export function timeBucketsToPairs(buckets) {
   });
 }
 
-export function flattenBucket(bucket, path, result) {
+export function flattenBucket(bucket, splitKey, path, result) {
   result = result || {};
   path = path || [];
   _.forOwn(bucket, function (val, key) {
@@ -25,15 +25,14 @@ export function flattenBucket(bucket, path, result) {
     if (_.get(val, 'meta.type') === 'split') {
       _.each(val.buckets, function (bucket, bucketKey) {
         if (bucket.key == null) bucket.key = bucketKey; // For handling "keyed" response formats, eg filters agg
-        flattenBucket(bucket, path.concat([key + ':' + bucket.key]), result);
+        flattenBucket(bucket, bucket.key, path.concat([key + ':' + bucket.key]), result);
       });
     } else if (_.get(val, 'meta.type') === 'time_buckets') {
       const metrics = timeBucketsToPairs(val.buckets);
-      const parentLabel = path.slice(-1).pop(); // last element in path
       _.each(metrics, function (pairs, metricName) {
         result[path.concat([metricName]).join(' > ')] = {
-          pairs: pairs,
-          parentLabel: parentLabel
+          data: pairs,
+          splitKey: splitKey
         };
       });
     }
@@ -42,13 +41,13 @@ export function flattenBucket(bucket, path, result) {
 }
 
 export default function toSeriesList(aggs, config) {
-  return _.map(flattenBucket(aggs), function (values, name) {
+  return _.map(flattenBucket(aggs), function (metrics, name) {
     return {
-      data: values.pairs,
+      data: metrics.data,
       type: 'series',
       fit: config.fit,
       label: name,
-      parentLabel: values.parentLabel
+      splitKey: metrics.splitKey
     };
   });
 }

@@ -1,5 +1,12 @@
 import _ from 'lodash';
 
+function allSeriesContainKey(seriesList, key) {
+  const containsKeyInitialValue = true;
+  return seriesList.list.reduce((containsKey, series) => {
+    return containsKey && _.has(series, key);
+  }, containsKeyInitialValue);
+}
+
 /**
  * Reduces multiple arrays into a single array using a function
  * @param {Array} args - args[0] must always be a {type: 'seriesList'}
@@ -22,14 +29,20 @@ export default async function reduce(argsPromises, fn) {
 
   if (_.isObject(argument) && argument.type === 'seriesList') {
     if (argument.list.length > 1) {
-      // ensure seriesList contain same labels
       if (seriesList.list.length !== argument.list.length) {
         throw new Error ('Unable to reduce seriesList on a per-label basis, number of series are not the same');
       }
-      const indexedByLabel = _.indexBy(argument.list, 'parentLabel');
+
+      let reduceField = 'label';
+      if (allSeriesContainKey(seriesList, 'splitKey') && allSeriesContainKey(argument, 'splitKey')) {
+        reduceField = 'splitKey';
+      }
+      const indexedList = _.indexBy(argument.list, reduceField);
+
+      // ensure seriesList contain same labels
       seriesList.list.forEach((series) => {
-        if (!indexedByLabel[series.parentLabel]) {
-          throw new Error (`series could not be found for label ${series.parentLabel}`);
+        if (!indexedList[series[reduceField]]) {
+          throw new Error (`series could not be found for label ${series[reduceField]}`);
         }
       });
 
@@ -37,10 +50,11 @@ export default async function reduce(argsPromises, fn) {
       const labelwiseSeriesList = { type: 'seriesList', list: [] };
       seriesList.list.forEach(async (series) => {
         const first = { type: 'seriesList', list: [series] };
-        const second = { type: 'seriesList', list: [indexedByLabel[series.parentLabel]] };
-        const labelSeriesList = await reduce([first, second], fn);
-        const labelSeries = labelSeriesList.list[0];
-        labelwiseSeriesList.list.push(labelSeries);
+        const second = { type: 'seriesList', list: [indexedList[series[reduceField]]] };
+        const reducedSeriesList = await reduce([first, second], fn);
+        const reducedSeries = reducedSeriesList.list[0];
+        reducedSeries.label = series[reduceField];
+        labelwiseSeriesList.list.push(reducedSeries);
       });
       return labelwiseSeriesList;
     } else {
