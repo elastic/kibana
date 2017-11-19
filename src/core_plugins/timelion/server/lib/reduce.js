@@ -30,33 +30,36 @@ export default async function reduce(argsPromises, fn) {
   if (_.isObject(argument) && argument.type === 'seriesList') {
     if (argument.list.length > 1) {
       if (seriesList.list.length !== argument.list.length) {
-        throw new Error ('Unable to reduce seriesList on a per-label basis, number of series are not the same');
+        throw new Error ('Unable to pairwise reduce seriesLists, number of series are not the same');
       }
 
-      let reduceField = 'label';
-      if (allSeriesContainKey(seriesList, 'splitKey') && allSeriesContainKey(argument, 'splitKey')) {
-        reduceField = 'splitKey';
+      let pairwiseField = 'label';
+      if (allSeriesContainKey(seriesList, 'split') && allSeriesContainKey(argument, 'split')) {
+        pairwiseField = 'split';
       }
-      const indexedList = _.indexBy(argument.list, reduceField);
+      const indexedList = _.indexBy(argument.list, pairwiseField);
 
-      // ensure seriesList contain same labels
+      // ensure seriesLists contain same pairwise labels
       seriesList.list.forEach((series) => {
-        if (!indexedList[series[reduceField]]) {
-          throw new Error (`series could not be found for label ${series[reduceField]}`);
+        if (!indexedList[series[pairwiseField]]) {
+          const pairwiseLables = argument.list.map((argumentSeries) => {
+            return `"${argumentSeries[pairwiseField]}"`;
+          }).join(',');
+          throw new Error (`Matching series could not be found for "${series[pairwiseField]}" in [${pairwiseLables}]`);
         }
       });
 
-      // reduce seriesList on a per-label basis
-      const labelwiseSeriesList = { type: 'seriesList', list: [] };
+      // pairwise reduce seriesLists
+      const pairwiseSeriesList = { type: 'seriesList', list: [] };
       seriesList.list.forEach(async (series) => {
         const first = { type: 'seriesList', list: [series] };
-        const second = { type: 'seriesList', list: [indexedList[series[reduceField]]] };
+        const second = { type: 'seriesList', list: [indexedList[series[pairwiseField]]] };
         const reducedSeriesList = await reduce([first, second], fn);
         const reducedSeries = reducedSeriesList.list[0];
-        reducedSeries.label = series[reduceField];
-        labelwiseSeriesList.list.push(reducedSeries);
+        reducedSeries.label = series[pairwiseField];
+        pairwiseSeriesList.list.push(reducedSeries);
       });
-      return labelwiseSeriesList;
+      return pairwiseSeriesList;
     } else {
       argument = argument.list[0];
     }

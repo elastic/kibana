@@ -47,7 +47,7 @@ export default function toSeriesList(aggs, config) {
       type: 'series',
       fit: config.fit,
       label: name,
-      splitKey: metrics.splitKey
+      split: metrics.splitKey
     };
   });
 }
