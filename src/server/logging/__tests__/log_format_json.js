@@ -110,7 +110,7 @@ describe('KbnLoggerJsonFormat', () => {
         const { level, message, error } = JSON.parse(result);
 
         expect(level).to.be('error');
-        expect(message).to.be('');
+        expect(message).to.be('Event Error stack: undefined');
         expect(error).to.eql({});
       });
 
@@ -160,6 +160,7 @@ describe('KbnLoggerJsonFormat', () => {
         const event = {
           data: new Error(''),
         };
+        event.data.stack = 'Event Data Stack from Error'; // overwrite the stack for testability
         const result = await createPromiseFromStreams([
           createListStream([event]),
           format
@@ -167,7 +168,7 @@ describe('KbnLoggerJsonFormat', () => {
         const { level, message, error } = JSON.parse(result);
 
         expect(level).to.be('error');
-        expect(message).to.be('');
+        expect(message).to.be('Event Data Error stack: Event Data Stack from Error');
 
         expect(error.message).to.be(event.data.message);
         expect(error.name).to.be(event.data.name);
