@@ -64,7 +64,7 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
       return;
     }
 
-    if (!isLabsEnabled && visType.isLabs) {
+    if (!isLabsEnabled && visType.stage === 'lab') {
       return;
     }
 
@@ -140,9 +140,9 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
     //to not clutter the tooltip, just only notify if labs or experimental.
     //labs is more important in this regard.
     let prefix = '';
-    if (type.isLabs) {
+    if (type.stage === 'lab') {
       prefix = '(Labs)';
-    } else if (type.isExperimental) {
+    } else if (type.stage === 'experimental') {
       prefix = '(Experimental)';
     }
     return `${prefix} ${type.description}`;

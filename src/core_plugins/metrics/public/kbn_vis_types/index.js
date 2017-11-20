@@ -21,7 +21,7 @@ export default function MetricsVisProvider(Private) {
     description: 'Build time-series using a visual pipeline interface',
     category: CATEGORY.TIME,
     image,
-    isExperimental: true,
+    stage: 'experimental',
     visConfig: {
       defaults: {
         id: '61ca57f0-469d-11e7-af02-69e470af7417',

@@ -33,7 +33,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
       .then(savedObject => {
         const isLabsEnabled = this._config.get('visualize:enableLabsVisualizations');
 
-        if (!isLabsEnabled && savedObject.vis.type.isLabs) {
+        if (!isLabsEnabled && savedObject.vis.type.stage === 'lab') {
           domNode.innerHTML = `
 <div class="disabledLabVisualization">
   <div class="kuiVerticalRhythm disabledLabVisualization__icon kuiIcon fa-flask" aria-hidden="true"></div>

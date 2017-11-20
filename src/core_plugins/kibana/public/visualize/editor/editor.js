@@ -298,15 +298,9 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
   $scope.getAdditionalMessage = () => {
     const feedbackUrl = 'https://github.com/elastic/kibana/issues/new';
-    //to not clutter the banner, only show a single message.
-    //labs precedes experimental.
-    if ($scope.vis.type.isLabs) {
-      return `This visualization is a labs feature. This means that the capabilities of this plugin may change over time.
-        Have feedback? Please create an issue in <a ng-href="${feedbackUrl}" rel="noopener noreferrer">GitHub</a>.`;
-    } else {
-      return `This visualization is marked as experimental. 
+
+    return `This visualization is marked as experimental. 
 Have feedback? Please create an issue in <a ng-href="${feedbackUrl}" rel="noopener noreferrer">GitHub</a>.`;
-    }
   };
 
   init();

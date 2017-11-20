@@ -152,7 +152,7 @@ export class VisualizeListingTable extends Component {
   renderRowCells(item) {
 
     let flaskHolder;
-    if (item.type.shouldMarkAsExperimentalOrLabsInUI()) {
+    if (item.type.shouldMarkAsExperimentalInUI()) {
       flaskHolder = <span className="kuiIcon fa-flask ng-scope">&nbsp;</span>;
     }else{
       flaskHolder = <span />;

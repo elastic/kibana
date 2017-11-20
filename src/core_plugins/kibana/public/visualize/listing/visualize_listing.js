@@ -30,7 +30,7 @@ export function VisualizeListingController($injector) {
         this.totalItems = result.total;
         this.showLimitError = result.total > config.get('savedObjects:listingLimit');
         this.listingLimit = config.get('savedObjects:listingLimit');
-        return result.hits.filter(result => (isLabsEnabled || !result.type.isLabs));
+        return result.hits.filter(result => (isLabsEnabled || !result.type.stage === 'lab'));
       });
   };
 
