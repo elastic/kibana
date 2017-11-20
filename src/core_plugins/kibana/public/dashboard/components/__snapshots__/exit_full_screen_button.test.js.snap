@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`is rendered 1`] = `
+<div
+  class="exitFullScreenButton"
+>
+  <button
+    aria-label="Exit full screen mode"
+    class="kuiButton exitFullScreenMode"
+    type="hollow"
+  >
+    <span
+      class="kuiButton__inner"
+    >
+      <span>
+        <span
+          class="exitFullScreenModeLogo"
+          data-test-subj="exitFullScreenModeLogo"
+        />
+        <span
+          class="exitFullScreenModeText"
+          data-test-subj="exitFullScreenModeText"
+        >
+          Exit full screen
+          <span
+            class="kuiIcon fa fa-angle-left"
+          />
+        </span>
+      </span>
+    </span>
+  </button>
+</div>
+`;
