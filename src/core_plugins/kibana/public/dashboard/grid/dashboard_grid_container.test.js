@@ -29,6 +29,15 @@ beforeAll(() => {
   // sizeme detects the width to be 0 in our test environment. noPlaceholder will mean that the grid contents will
   // get rendered even when width is 0, which will improve our tests.
   sizeMe.noPlaceholders = true;
+
+  // react-grid-layout calls getSelection which isn't support by jsdom
+  // it's used regardless of whether we need to remove selection,
+  // and in this case we don't need to remove selection
+  window.getSelection = () => {
+    return {
+      removeAllRanges: () => {}
+    };
+  };
 });
 
 afterAll(() => {
