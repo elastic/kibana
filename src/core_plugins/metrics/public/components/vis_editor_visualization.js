@@ -32,10 +32,9 @@ class VisEditorVisualization extends Component {
   componentWillMount() {
     this.handleMouseMove = (event) => {
       if (this.state.dragging) {
-        const height = this.state.height + event.movementY;
-        if (height > MIN_CHART_HEIGHT) {
-          this.setState({ height });
-        }
+        this.setState((prevState) => ({
+          height: Math.max(MIN_CHART_HEIGHT, prevState.height + event.movementY)
+        }));
       }
     };
     window.addEventListener('mousemove', this.handleMouseMove);
