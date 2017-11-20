@@ -1,40 +1,52 @@
+import React from 'react';
 import _ from 'lodash';
-import fieldControlsHtml from '../field_controls.html';
-import { dateScripts } from './date_scripts';
 import { uiModules } from 'ui/modules';
 import template from './scripted_fields_table.html';
 
-uiModules.get('apps/management')
-.directive('scriptedFieldsTable', function (kbnUrl, Notifier, $filter, confirmModal) {
-  const rowScopes = []; // track row scopes, so they can be destroyed as needed
-  const filter = $filter('filter');
+import {
+ RIGHT_ALIGNMENT,
+} from '@elastic/eui';
 
-  const notify = new Notifier();
+uiModules.get('apps/management')
+.directive('scriptedFieldsTable', function (kbnUrl, $filter, confirmModal, chrome) {
+  const filter = $filter('filter');
 
   return {
     restrict: 'E',
     template,
     scope: true,
     link: function ($scope) {
-
-      const fieldCreatorPath = '/management/kibana/indices/{{ indexPattern }}/scriptedField';
-      const fieldEditorPath = fieldCreatorPath + '/{{ fieldName }}';
-
       $scope.perPage = 25;
       $scope.columns = [
-        { title: 'name' },
-        { title: 'lang' },
-        { title: 'script' },
-        { title: 'format' },
-        { title: 'controls', sortable: false }
+        {
+          title: 'name',
+          text: 'Name',
+        }, {
+          title: 'lang',
+          text: 'Lang',
+        }, {
+          title: 'script',
+          text: 'Script',
+        }, {
+          title: 'format',
+          text: 'Format',
+        }, {
+          title: 'controls',
+          text: '',
+          sortable: false,
+          align: RIGHT_ALIGNMENT,
+        },
       ];
 
-      $scope.$watchMulti(['[]indexPattern.fields', 'fieldFilter', 'scriptedFieldLanguageFilter'], refreshRows);
+      const remove = field => {
+        const confirmModalOptions = {
+          confirmButtonText: 'Delete field',
+          onConfirm: () => { $scope.indexPattern.removeScriptedField(field.name); }
+        };
+        confirmModal(`Are you sure want to delete ${field.name}? This action is irreversible!`, confirmModalOptions);
+      };
 
       function refreshRows() {
-        _.invoke(rowScopes, '$destroy');
-        rowScopes.length = 0;
-
         const fields = filter($scope.indexPattern.getScriptedFields(), {
           name: $scope.fieldFilter,
           lang: $scope.scriptedFieldLanguageFilter
@@ -42,73 +54,74 @@ uiModules.get('apps/management')
         _.find($scope.editSections, { index: 'scriptedFields' }).count = fields.length; // Update the tab count
 
         $scope.rows = fields.map(function (field) {
-          const rowScope = $scope.$new();
-          rowScope.field = field;
-          rowScopes.push(rowScope);
-
           return [
-            _.escape(field.name),
             {
-              markup: field.lang,
-              attr: {
-                'data-test-subj': 'scriptedFieldLang'
-              }
-            },
-            _.escape(field.script),
-            _.get($scope.indexPattern, ['fieldFormatMap', field.name, 'type', 'title']),
-            {
-              markup: fieldControlsHtml,
-              scope: rowScope
+              render: () => (
+                <div>
+                  {_.escape(field.name)}
+                </div>
+              ),
+            }, {
+              render: () => (
+                <div data-test-subj="scriptedFieldLang">
+                  {field.lang}
+                </div>
+              ),
+            }, {
+              render: () => (
+                <div>
+                  {_.escape(field.script)}
+                </div>
+              ),
+            }, {
+              render: () => (
+                <div>
+                  {_.get($scope.indexPattern, ['fieldFormatMap', field.name, 'type', 'title'])}
+                </div>
+              ),
+            }, {
+              render: () => {
+                let deleteButton;
+
+                if (field.scripted) {
+                  deleteButton = (
+                    <button
+                      onClick={() => { remove(field); }}
+                      className="kuiButton kuiButton--danger kuiButton--small"
+                      aria-label="Delete"
+                    >
+                      <span aria-hidden="true" className="kuiIcon fa-trash" />
+                    </button>
+                  );
+                }
+
+                return (
+                  <div>
+                    <div className="actions">
+                      <a
+                        data-test-subj="indexPatternFieldEditButton"
+                        href={chrome.addBasePath(kbnUrl.getRouteHref(field, 'edit'))}
+                        aria-label="Edit"
+                        className="kuiButton kuiButton--basic kuiButton--small"
+                      >
+                        <span aria-hidden="true" className="kuiIcon fa-pencil" />
+                      </a>
+
+                      {deleteButton}
+                    </div>
+                  </div>
+                );
+              },
             }
           ];
         });
       }
 
-      $scope.addDateScripts = function () {
-        const conflictFields = [];
-        let fieldsAdded = 0;
-        _.each(dateScripts($scope.indexPattern), function (script, field) {
-          try {
-            $scope.indexPattern.addScriptedField(field, script, 'number');
-            fieldsAdded++;
-          } catch (e) {
-            conflictFields.push(field);
-          }
-        });
-
-        if (fieldsAdded > 0) {
-          notify.info(fieldsAdded + ' script fields created');
-        }
-
-        if (conflictFields.length > 0) {
-          notify.info('Not adding ' + conflictFields.length + ' duplicate fields: ' + conflictFields.join(', '));
-        }
-      };
-
-      $scope.create = function () {
-        const params = {
-          indexPattern: $scope.indexPattern.id
-        };
-
-        kbnUrl.change(fieldCreatorPath, params);
-      };
-
-      $scope.edit = function (field) {
-        const params = {
-          indexPattern: $scope.indexPattern.id,
-          fieldName: field.name
-        };
-
-        kbnUrl.change(fieldEditorPath, params);
-      };
-
-      $scope.remove = function (field) {
-        const confirmModalOptions = {
-          confirmButtonText: 'Delete field',
-          onConfirm: () => { $scope.indexPattern.removeScriptedField(field.name); }
-        };
-        confirmModal(`Are you sure want to delete ${field.name}? This action is irreversible!`, confirmModalOptions);
-      };
+      $scope.$watchMulti([
+        '[]indexPattern.fields',
+        'fieldFilter',
+        'scriptedFieldLanguageFilter',
+      ], refreshRows);
     }
   };
 });

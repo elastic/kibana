@@ -1,13 +1,16 @@
-import { find, each, escape, invoke, size, without } from 'lodash';
+import React from 'react';
+import { find, each, escape, size, without } from 'lodash';
 
 import { uiModules } from 'ui/modules';
 import { Notifier } from 'ui/notify/notifier';
 import { FieldWildcardProvider } from 'ui/field_wildcard';
 
-import controlsHtml from './controls.html';
-import filterHtml from './filter.html';
 import template from './source_filters_table.html';
 import './source_filters_table.less';
+
+import {
+ RIGHT_ALIGNMENT,
+} from '@elastic/eui';
 
 const notify = new Notifier();
 
@@ -15,7 +18,6 @@ uiModules.get('kibana')
 .directive('sourceFiltersTable', function (Private, $filter, confirmModal) {
   const angularFilter = $filter('filter');
   const { fieldWildcardMatcher } = Private(FieldWildcardProvider);
-  const rowScopes = []; // track row scopes, so they can be destroyed as needed
 
   return {
     restrict: 'E',
@@ -33,16 +35,20 @@ uiModules.get('kibana')
         $scope.perPage = 25;
         $scope.columns = [
           {
-            title: 'filter'
+            title: 'filter',
+            text: 'Filter',
           },
           {
             title: 'matches',
+            text: 'Matches',
             sortable: false,
             info: 'The source fields that match the filter.'
           },
           {
             title: 'controls',
-            sortable: false
+            text: '',
+            sortable: false,
+            align: RIGHT_ALIGNMENT,
           }
         ];
 
@@ -53,9 +59,6 @@ uiModules.get('kibana')
         this.placeHolder = 'source filter, accepts wildcards (e.g., `user*` to filter fields starting with \'user\')';
 
         $scope.$watchMulti([ '[]indexPattern.sourceFilters', '$parent.fieldFilter' ], () => {
-          invoke(rowScopes, '$destroy');
-          rowScopes.length = 0;
-
           if ($scope.indexPattern.sourceFilters) {
             $scope.rows = [];
             each($scope.indexPattern.sourceFilters, (filter) => {
@@ -65,19 +68,95 @@ uiModules.get('kibana')
               if ($scope.$parent.fieldFilter && !angularFilter(matches, $scope.$parent.fieldFilter).length) {
                 return;
               }
-              // compute the rows
-              const rowScope = $scope.$new();
-              rowScope.filter = filter;
-              rowScopes.push(rowScope);
+
               $scope.rows.push([
                 {
-                  markup: filterHtml,
-                  scope: rowScope
-                },
-                size(matches) ? escape(matches.join(', ')) : '<em>The source filter doesn\'t match any known fields.</em>',
-                {
-                  markup: controlsHtml,
-                  scope: rowScope
+                  render: () => {
+                    let content;
+                    if (filter === this.editing) {
+                      // TODO: Ensure value changes during onChange.
+                      content = (
+                        <input
+                          className="form-control"
+                          value={filter.value}
+                          onChange={e => {
+                            $scope.$apply(() => {
+                              filter.value = e.target.value;
+                            });
+                          }}
+                          placeholder={this.placeHolder}
+                          type="text"
+                          required
+                        />
+                      );
+                    } else {
+                      content = <span>{filter.value}</span>;
+                    }
+
+                    return (
+                      <div className="value">
+                        {content}
+                      </div>
+                    );
+                  },
+                }, {
+                  render: () => {
+                    return (
+                      <div>
+                        {
+                          size(matches)
+                            ? escape(matches.join(', '))
+                            : <em>The source filter doesn&rsquo;t match any known fields.</em>
+                        }
+                      </div>
+                    );
+                  },
+                }, {
+                  render: () => {
+                    let button;
+
+                    if (filter === this.editing) {
+                      button = (
+                        <button
+                          aria-label="Save"
+                          onClick={this.save}
+                          disabled={!filter.value}
+                          type="button"
+                          className="kuiButton kuiButton--primary kuiButton--small"
+                        >
+                          <span aria-hidden="true" className="kuiIcon fa-save" />
+                        </button>
+                      );
+                    } else {
+                      // TODO: Are these onClicks handled correctly? Do we depend upon
+                      // $scope.$digest being triggered?
+                      button = (
+                        <button
+                          aria-label="Edit"
+                          onClick={() => { this.editing = filter; }}
+                          type="button"
+                          className="kuiButton kuiButton--basic kuiButton--small"
+                        >
+                          <span aria-hidden="true" className="kuiIcon fa-pencil" />
+                        </button>
+                      );
+                    }
+
+                    return (
+                      <div className="actions">
+                        {button}
+
+                        <button
+                          aria-label="Delete"
+                          onClick={() => { this.delete(filter); }}
+                          type="button"
+                          className="kuiButton kuiButton--danger kuiButton--small"
+                        >
+                          <span aria-hidden="true" className="kuiIcon fa-trash" />
+                        </button>
+                      </div>
+                    );
+                  },
                 }
               ]);
             });

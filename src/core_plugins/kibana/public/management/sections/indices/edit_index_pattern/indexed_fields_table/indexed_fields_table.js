@@ -34,26 +34,26 @@ uiModules.get('apps/management')
       $scope.columns = [
         {
           title: 'name',
-          text: 'Name', },
-        {
+          text: 'Name',
+        }, {
           title: 'type',
-          text: 'Type', },
-        {
+          text: 'Type',
+        }, {
           title: 'format',
-          text: 'Format', },
-        {
+          text: 'Format',
+        }, {
           title: 'searchable',
           text: 'Searchable',
-          info: 'These fields can be used in the filter bar' },
-        {
+          info: 'These fields can be used in the filter bar'
+        }, {
           title: 'aggregatable',
           ext: 'Aggregatable',
-          info: 'These fields can be used in visualization aggregations' },
-        {
+          info: 'These fields can be used in visualization aggregations'
+        }, {
           title: 'excluded',
           text: 'Excluded',
-          info: 'Fields that are excluded from _source when it is fetched' },
-        {
+          info: 'Fields that are excluded from _source when it is fetched'
+        }, {
           title: 'controls',
           text: '',
           sortable: false,
@@ -128,8 +128,11 @@ uiModules.get('apps/management')
               value: field.type,
             }, {
               // TODO: What is this?
-              // _.get($scope.indexPattern, ['fieldFormatMap', field.name, 'type', 'title']),
-              render: () => '',
+              render: () => (
+                <div>
+                  {_.get($scope.indexPattern, ['fieldFormatMap', field.name, 'type', 'title'])}
+                </div>
+              ),
             }, {
               render: renderBooleanForCondition(field.searchable),
               value: field.searchable
@@ -141,21 +144,6 @@ uiModules.get('apps/management')
               value: excluded
             }, {
               render: () => {
-                let deleteButton;
-
-                if (field.scripted) {
-                  deleteButton = (
-                    <button
-                      ng-if=""
-                      onClick="remove(field)"
-                      className="kuiButton kuiButton--danger kuiButton--small"
-                      aria-label="Delete"
-                    >
-                      <span aria-hidden="true" className="kuiIcon fa-trash" />
-                    </button>
-                  );
-                }
-
                 return (
                   <div>
                     <div className="actions">
@@ -167,12 +155,9 @@ uiModules.get('apps/management')
                       >
                         <span aria-hidden="true" className="kuiIcon fa-pencil" />
                       </a>
-
-                      {deleteButton}
                     </div>
                   </div>
                 );
-
               },
             }
           ];

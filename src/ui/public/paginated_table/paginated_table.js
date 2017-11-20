@@ -260,6 +260,7 @@ export class PaginatedTable extends Component {
                 isOpen={this.state.isPageSizePopoverOpen}
                 closePopover={this.closePageSizePopover}
                 panelPaddingSize="none"
+                anchorPosition="upLeft"
                 withTitle
               >
                 <EuiContextMenuPanel
