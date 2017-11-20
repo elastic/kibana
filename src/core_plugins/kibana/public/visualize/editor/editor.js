@@ -297,10 +297,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
 
   $scope.getAdditionalMessage = () => {
-    const feedbackUrl = 'https://github.com/elastic/kibana/issues/new';
-
-    return `This visualization is marked as experimental. 
-Have feedback? Please create an issue in <a ng-href="${feedbackUrl}" rel="noopener noreferrer">GitHub</a>.`;
+    return `This visualization is marked as experimental. ${vis.type.feedbackMessage}`;
   };
 
   init();

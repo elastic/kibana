@@ -33,7 +33,8 @@ export function VisTypeProvider() {
           showIndexSelection: true,
           hierarchicalData: false  // we should get rid of this i guess ?
         },
-        stage: 'production'
+        stage: 'production',
+        feedbackMessage: ''
       };
 
       _.defaultsDeep(this, opts, _defaults);
