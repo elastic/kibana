@@ -160,10 +160,10 @@ nvm install "$(cat .node-version)"
 
 Install the latest version of [yarn](https://yarnpkg.com).
 
-Install dependencies
+Bootstrap Kibana and install all the dependencies
 
 ```bash
-yarn
+node scripts/kbn bootstrap
 ```
 
 Start elasticsearch.
