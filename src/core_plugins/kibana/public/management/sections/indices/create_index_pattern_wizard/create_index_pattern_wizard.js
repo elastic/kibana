@@ -105,6 +105,14 @@ uiModules.get('apps/management')
               name: bucket.key
             };
           }), 'name');
+        })
+        .catch(err => {
+          if (err.body && err.body.error && err.body.error.caused_by.type === 'index_not_found_exception') {
+            // This happens in a CSS environment when the controlling node returns a 500 even though the data
+            // nodes returned a 404. Remove this when/if this is handled: https://github.com/elastic/elasticsearch/issues/27461
+            return [];
+          }
+          throw err;
         });
     }
 
