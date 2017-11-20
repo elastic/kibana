@@ -291,6 +291,7 @@
     "strip-ansi": "^3.0.1",
     "supertest": "3.0.0",
     "supertest-as-promised": "2.0.2",
+    "svg-sprite-loader": "3.4.1",
     "tree-kill": "1.1.0",
     "webpack-dev-server": "2.9.1",
     "yeoman-generator": "1.1.1",

@@ -8,6 +8,7 @@ import CommonsChunkPlugin from 'webpack/lib/optimize/CommonsChunkPlugin';
 import DefinePlugin from 'webpack/lib/DefinePlugin';
 import UglifyJsPlugin from 'webpack/lib/optimize/UglifyJsPlugin';
 import NoEmitOnErrorsPlugin from 'webpack/lib/NoEmitOnErrorsPlugin';
+import SpriteLoaderPlugin from 'svg-sprite-loader/plugin';
 import Stats from 'webpack/lib/Stats';
 import webpackMerge from 'webpack-merge';
 
@@ -129,6 +130,8 @@ export default class BaseOptimizer {
         }),
 
         new NoEmitOnErrorsPlugin(),
+
+        new SpriteLoaderPlugin(),
       ],
 
       module: {
@@ -163,7 +166,11 @@ export default class BaseOptimizer {
             loader: 'url-loader'
           },
           {
-            test: /\.(woff|woff2|ttf|eot|svg|ico)(\?|$)/,
+            test: /\.svg$/,
+            use: 'svg-sprite-loader'
+          },
+          {
+            test: /\.(woff|woff2|ttf|eot|ico)(\?|$)/,
             loader: 'file-loader'
           },
           {
