@@ -131,7 +131,7 @@ export default class TransformObjStream extends Stream.Transform {
       data.url = event.url;
 
       const message = _.get(event, 'error.message');
-      data.message = (message && message !== '') ? message : JSON.stringify(event);
+      data.message = (message && message !== '') ? message : ''; // TODO: static string for error?
     }
     else if (event.data instanceof Error) {
       data.type = 'error';
@@ -139,7 +139,7 @@ export default class TransformObjStream extends Stream.Transform {
       data.error = serializeError(event.data);
 
       const message = _.get(event, 'data.message');
-      data.message = (message && message !== '') ? message : JSON.stringify(event);
+      data.message = (message && message !== '') ? message : ''; // TODO: static string for error?
     }
     else if (_.isPlainObject(event.data) && event.data.tmpl) {
       _.assign(data, event.data);
