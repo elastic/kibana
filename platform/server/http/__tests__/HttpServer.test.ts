@@ -325,16 +325,19 @@ test('handles putting', async () => {
 test('handles deleting', async () => {
   const router = new Router('/foo');
 
-  router.delete({
-    path: '/:id',
-    validate: {
-      params: schema.object({
-        id: schema.number()
-      })
+  router.delete(
+    {
+      path: '/:id',
+      validate: {
+        params: schema.object({
+          id: schema.number()
+        })
+      }
+    },
+    async (val, req, res) => {
+      return res.ok({ key: req.params.id });
     }
-  }, async (val, req, res) => {
-    return res.ok({ key: req.params.id });
-  });
+  );
 
   server.registerRouter(router);
 
