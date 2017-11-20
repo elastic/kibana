@@ -136,10 +136,30 @@ UrlFormat.prototype._convert = {
         }
 
         let prefix = '';
+        /**
+         * This code attempts to convert a relative url into a kibana absolute url
+         *
+         * SUPPORTED:
+         *  - /app/kibana/
+         *  - ../app/kibana
+         *  - #/discover
+         *
+         * UNSUPPORTED
+         *  - app/kibana
+         */
         if (!inWhitelist) {
-          prefix = url[0] === '#'
-            ? `${currentUrlParts.origin}${currentUrlParts.pathname}`
-            : `${currentUrlParts.origin}${currentUrlParts.basePath}/app/`;
+          // Handles urls like: `#/discover`
+          if (url[0] === '#') {
+            prefix = `${currentUrlParts.origin}${currentUrlParts.pathname}`;
+          }
+          // Handle urls like: `/app/kibana` or `/xyz/app/kibana`
+          else if (url.indexOf(currentUrlParts.basePath || '/') === 0) {
+            prefix = `${currentUrlParts.origin}`;
+          }
+          // Handle urls like: `../app/kibana`
+          else {
+            prefix = `${currentUrlParts.origin}${currentUrlParts.basePath}/app/`;
+          }
         }
 
         let linkLabel;
