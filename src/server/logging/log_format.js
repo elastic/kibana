@@ -1,6 +1,6 @@
 import Stream from 'stream';
 import moment from 'moment';
-import _ from 'lodash';
+import { get, _ } from 'lodash';
 import numeral from '@elastic/numeral';
 import ansicolors from 'ansicolors';
 import stringify from 'json-stringify-safe';
@@ -69,7 +69,7 @@ export default class TransformObjStream extends Stream.Transform {
         'statusCode'
       ]));
 
-      const source = _.get(event, 'source', {});
+      const source = get(event, 'source', {});
       data.req = {
         url: event.path,
         method: event.method || '',
@@ -111,33 +111,33 @@ export default class TransformObjStream extends Stream.Transform {
         'load'
       ]));
       data.message  = ansicolors.brightBlack('memory: ');
-      data.message += numeral(_.get(data, 'proc.mem.heapUsed')).format('0.0b');
+      data.message += numeral(get(data, 'proc.mem.heapUsed')).format('0.0b');
       data.message += ' ';
       data.message += ansicolors.brightBlack('uptime: ');
-      data.message += numeral(_.get(data, 'proc.uptime')).format('00:00:00');
+      data.message += numeral(get(data, 'proc.uptime')).format('00:00:00');
       data.message += ' ';
       data.message += ansicolors.brightBlack('load: [');
-      data.message += _.get(data, 'os.load', []).map(function (val) {
+      data.message += get(data, 'os.load', []).map(function (val) {
         return numeral(val).format('0.00');
       }).join(' ');
       data.message += ansicolors.brightBlack(']');
       data.message += ' ';
       data.message += ansicolors.brightBlack('delay: ');
-      data.message += numeral(_.get(data, 'proc.delay')).format('0.000');
+      data.message += numeral(get(data, 'proc.delay')).format('0.000');
     }
     else if (data.type === 'error') {
       data.level = 'error';
       data.error = serializeError(event.error);
       data.url = event.url;
-      const message =  _.get(event, 'error.message');
-      data.message = message || `Event Error stack: ${_.get(event, 'error.stack')}`;
+      const message =  get(event, 'error.message');
+      data.message = message || `Event Error stack: ${get(event, 'error.stack')}`;
     }
     else if (event.data instanceof Error) {
       data.type = 'error';
       data.level = _.contains(event.tags, 'fatal') ? 'fatal' : 'error';
       data.error = serializeError(event.data);
-      const message =  _.get(event, 'data.message');
-      data.message = message || `Event Data Error stack: ${_.get(event, 'data.stack')}`;
+      const message =  get(event, 'data.message');
+      data.message = message || `Event Data Error stack: ${get(event, 'data.stack')}`;
     }
     else if (_.isPlainObject(event.data) && event.data.tmpl) {
       _.assign(data, event.data);
