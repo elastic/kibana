@@ -33,7 +33,25 @@ export class IndexedArray {
     this._indexNames = _.union(
       this._setupIndex(config.group, inflectIndex, _.organizeBy),
       this._setupIndex(config.index, inflectIndex, _.indexBy),
-      this._setupIndex(config.order, inflectOrder, _.sortBy)
+      this._setupIndex(config.order, inflectOrder, (raw, pluckValue) => {
+        const copyOfRaw = _.cloneDeep(raw);
+        return copyOfRaw.sort((itemA, itemB) => {
+          const a = pluckValue(itemA);
+          const b = pluckValue(itemB);
+
+          if (typeof a === 'string' && typeof b === 'string') {
+            return a.toLowerCase().localeCompare(b.toLowerCase());
+          }
+
+          if (a > b) {
+            return 1;
+          } else if (a < b) {
+            return -1;
+          } else {
+            return 0;
+          }
+        });
+      })
     );
 
     if (config.initialSet) {
