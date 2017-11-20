@@ -68,7 +68,7 @@ FeatureCatalogueRegistryProvider.register(() => {
     id: 'management',
     title: 'Management',
     description: 'Your center console for managing the Elastic Stack.',
-    icon: '/plugins/kibana/assets/app_dashboard.svg',
+    icon: '/plugins/kibana/assets/app_management.svg',
     path: '/app/kibana#/management',
     showOnHomePage: false,
     category: FeatureCatalogueCategory.ADMIN

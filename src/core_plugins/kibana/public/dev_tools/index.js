@@ -18,7 +18,7 @@ FeatureCatalogueRegistryProvider.register(() => {
     id: 'console',
     title: 'Console',
     description: 'Skip cURL and use this JSON interface to work with your data directly.',
-    icon: '/plugins/kibana/assets/app_devtools.svg',
+    icon: '/plugins/kibana/assets/app_console.svg',
     path: '/app/kibana#/dev_tools/console',
     showOnHomePage: true,
     category: FeatureCatalogueCategory.ADMIN
