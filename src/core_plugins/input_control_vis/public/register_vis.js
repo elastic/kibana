@@ -18,7 +18,7 @@ function InputControlVisProvider(Private) {
     image,
     description: 'Create interactive controls for easy dashboard manipulation.',
     category: CATEGORY.OTHER,
-    isExperimental: true,
+    isLabs: true,
     visualization: VisController,
     visConfig: {
       defaults: {

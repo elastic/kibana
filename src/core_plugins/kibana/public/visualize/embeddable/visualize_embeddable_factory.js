@@ -10,8 +10,9 @@ import { EmbeddableFactory, Embeddable } from 'ui/embeddable';
 import chrome from 'ui/chrome';
 
 export class VisualizeEmbeddableFactory extends EmbeddableFactory {
-  constructor($compile, $rootScope, visualizeLoader, timefilter, Notifier, Promise, Private) {
+  constructor($compile, $rootScope, visualizeLoader, timefilter, Notifier, Promise, Private, config) {
     super();
+    this._config = config;
     this.$compile = $compile;
     this.visualizeLoader = visualizeLoader;
     this.$rootScope = $rootScope;
@@ -26,10 +27,26 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
   }
 
   render(domNode, panel, container) {
+
     const visualizeScope = this.$rootScope.$new();
     visualizeScope.editUrl = this.getEditPath(panel.id);
     return this.visualizeLoader.get(panel.id)
       .then(savedObject => {
+        const isLabsEnabled = this._config.get('visualize:enableLabsVisualizations');
+
+        if (!isLabsEnabled && savedObject.vis.type.isLabs) {
+          domNode.innerHTML = `
+<div class="disabledLabVisualization">
+  <div class="kuiVerticalRhythm disabledLabVisualization__icon kuiIcon fa-flask" aria-hidden="true"></div>
+  <div class="kuiVerticalRhythm"><em>${savedObject.title}</em> is a labs visualization.</div>
+  <div class="kuiVerticalRhythm">Please turn on lab-mode in the advanced settings to see labs visualizations.</div>
+</div>
+`;
+          return new Embeddable({
+            title: savedObject.title
+          });
+        }
+
         visualizeScope.sharedItemTitle = panel.title !== undefined ? panel.title : savedObject.title;
         visualizeScope.savedObj = savedObject;
         visualizeScope.panel = panel;
@@ -38,6 +55,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
         visualizeScope.uiState = container.createChildUistate(getPersistedStateId(panel), uiState);
 
         visualizeScope.savedObj.vis.setUiState(visualizeScope.uiState);
+
 
         visualizeScope.savedObj.vis.listeners.click = this.filterBarClickHandler(container.getAppState());
         visualizeScope.savedObj.vis.listeners.brush = this.brushEvent(container.getAppState());
