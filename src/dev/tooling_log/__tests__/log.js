@@ -4,9 +4,9 @@ import Chance from 'chance';
 import {
   createConcatStream,
   createPromiseFromStreams
-} from '../../streams';
+} from '../../../utils';
 
-import { createToolingLog } from '../';
+import { createToolingLog } from '../tooling_log';
 
 const chance = new Chance();
 const capture = (level, block) => {
