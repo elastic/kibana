@@ -31,8 +31,9 @@ $ plugin-helpers help
 
 Plugin Helpers | Kibana
 -------------- | ------
-7.x | 4.6+ (node 6+ only)
-6.x | 4.6+
+8.x | 7.0+
+7.x | 4.6.x to 6.x (node 6+ only)
+6.x | 4.6.x to 6.x
 5.x | 4.x
 
 ## Configuration
