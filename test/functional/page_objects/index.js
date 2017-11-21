@@ -4,6 +4,7 @@ export { ShieldPageProvider } from './shield_page';
 export { ContextPageProvider } from './context_page';
 export { DiscoverPageProvider } from './discover_page';
 export { HeaderPageProvider } from './header_page';
+export { HomePageProvider } from './home_page';
 export { DashboardPageProvider } from './dashboard_page';
 export { VisualizePageProvider } from './visualize_page';
 export { SettingsPageProvider } from './settings_page';
