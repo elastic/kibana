@@ -409,9 +409,9 @@
                     ng-show="function.args.length > (function.chainable ? 1: 0)"
                   >
                     <thead>
-                      <th>Argument Name</th>
-                      <th>Accepted Types</th>
-                      <th>Information</th>
+                      <th scope="col">Argument Name</th>
+                      <th scope="col">Accepted Types</th>
+                      <th scope="col">Information</th>
                     </thead>
                     <tr
                       ng-repeat="arg in function.args"
