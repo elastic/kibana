@@ -1,17 +1,43 @@
+import { relative } from 'path';
 import { createFailError } from '../run';
+import { matchesAnyGlob } from '../globs';
+
+import {
+  IGNORE_DIRECTORY_GLOBS,
+  IGNORE_FILE_GLOBS,
+  TEMPORARILY_IGNORED_PATHS,
+} from './casing_check_config';
 
 const NON_SNAKE_CASE_RE = /[A-Z \-]/;
-const ALLOW_NON_SNAKE_CASE = [
-  'docs/**/*',
-  'packages/eslint-*/**/*',
-  'src/babel-*/**/*',
-  'tasks/config/**/*',
-];
 
 function listFileNames(files) {
   return files
     .map(file => ` - ${file.getRelativePath()}`)
     .join('\n');
+}
+
+/**
+ * IGNORE_DIRECTORY_GLOBS patterns match directories which should
+ * be ignored from casing validation. When one of the parent directories
+ * of a file matches these rules this function strips it from the
+ * path that is validated.
+ *
+ * if `file = new File('foo/bar/BAZ/index.js')` and `/foo/bar/BAZ`
+ * is matched by an `IGNORE_DIRECTORY_GLOBS` pattern then this
+ * function will return 'index.js' and only that part of the path
+ * will be validated.
+ *
+ * @param  {File} file
+ * @return {string} pathToCheck
+ */
+function getPathWithoutIgnoredParents(file) {
+  for (const parent of file.getParentDirs()) {
+    if (matchesAnyGlob(parent, IGNORE_DIRECTORY_GLOBS)) {
+      return relative(parent, file.getRelativePath());
+    }
+  }
+
+  return file.getRelativePath();
 }
 
 /**
@@ -33,12 +59,22 @@ export async function checkFileCasing(log, files) {
   const warnings = [];
 
   files.forEach(file => {
-    const invalid = file.matchesRegex(NON_SNAKE_CASE_RE);
-    const allowed = file.matchesAnyGlob(ALLOW_NON_SNAKE_CASE);
+    const path = file.getRelativePath();
+
+    if (TEMPORARILY_IGNORED_PATHS.includes(path)) {
+      warnings.push(file);
+      return;
+    }
+
+    const ignored = matchesAnyGlob(path, IGNORE_FILE_GLOBS);
+    if (ignored) {
+      log.debug('%j ignored', file);
+      return;
+    }
+
+    const invalid = NON_SNAKE_CASE_RE.test(getPathWithoutIgnoredParents(file));
     if (!invalid) {
       log.debug('%j uses valid casing', file);
-    } else if (allowed) {
-      warnings.push(file);
     } else {
       errors.push(file);
     }
