@@ -113,7 +113,7 @@ UrlFormat.prototype._convert = {
     return this._formatLabel(value);
   },
 
-  html: function (rawValue, field, hit) {
+  html: function (rawValue, field, hit, parsedUrl) {
     const url = _.escape(this._formatUrl(rawValue));
     const label = _.escape(this._formatLabel(rawValue, url));
 
@@ -129,9 +129,7 @@ UrlFormat.prototype._convert = {
         return `<img src="${url}" alt="${imageLabel}">`;
       default:
         const inWhitelist = whitelistUrlSchemes.some(scheme => url.indexOf(scheme) === 0);
-        const { currentUrlParts } = this._params;
-
-        if (!inWhitelist && !currentUrlParts) {
+        if (!inWhitelist && !parsedUrl) {
           return url;
         }
 
@@ -150,15 +148,15 @@ UrlFormat.prototype._convert = {
         if (!inWhitelist) {
           // Handles urls like: `#/discover`
           if (url[0] === '#') {
-            prefix = `${currentUrlParts.origin}${currentUrlParts.pathname}`;
+            prefix = `${parsedUrl.origin}${parsedUrl.pathname}`;
           }
           // Handle urls like: `/app/kibana` or `/xyz/app/kibana`
-          else if (url.indexOf(currentUrlParts.basePath || '/') === 0) {
-            prefix = `${currentUrlParts.origin}`;
+          else if (url.indexOf(parsedUrl.basePath || '/') === 0) {
+            prefix = `${parsedUrl.origin}`;
           }
           // Handle urls like: `../app/kibana`
           else {
-            prefix = `${currentUrlParts.origin}${currentUrlParts.basePath}/app/`;
+            prefix = `${parsedUrl.origin}${parsedUrl.basePath}/app/`;
           }
         }
 
