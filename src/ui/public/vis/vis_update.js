@@ -1,10 +1,4 @@
 const updateVisualizationConfig = (stateConfig, config) => {
-
-  if (config.type === 'gauge' && config.fontSize) {
-    config.gauge.style.fontSize = config.fontSize;
-    delete config.fontSize;
-  }
-
   if (!stateConfig || stateConfig.seriesParams) return;
   if (!['line', 'area', 'histogram'].includes(config.type)) return;
 
