@@ -23,7 +23,7 @@ function resolveKibanaPath(path) {
 }
 
 function createToolingLog(level) {
-  return require(resolveKibanaPath('src/utils')).createToolingLog(level);
+  return require(resolveKibanaPath('src/dev')).createToolingLog(level);
 }
 
 function readFtrConfigFile(log, path, settingOverrides) {
