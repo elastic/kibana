@@ -1,5 +1,8 @@
 import expect from 'expect.js';
-import { StringFormat } from '../string';
+import { createStringFormat } from '../string';
+import { FieldFormat } from '../../../../../../ui/field_formats/field_format';
+
+const StringFormat = createStringFormat(FieldFormat);
 
 describe('String Format', function () {
 

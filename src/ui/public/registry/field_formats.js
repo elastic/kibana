@@ -1,10 +1,20 @@
 import _ from 'lodash';
 import { uiRegistry } from 'ui/registry/_registry';
+import { FieldFormat } from '../../field_formats/field_format';
 
 export const RegistryFieldFormatsProvider = uiRegistry({
   name: 'fieldFormats',
   index: ['id'],
   group: ['fieldType'],
+
+  invokeProviders(providers) {
+    // in order to ensure that FieldFormats can be instantiated on the
+    // server and the browser we don't provide them access to the Angular
+    // injector, just the FieldFormat class.
+    return providers.map(createSomeFormat => (
+      createSomeFormat(FieldFormat)
+    ));
+  },
 
   constructor: function (config) {
     const getConfig = (...args) => config.get(...args);

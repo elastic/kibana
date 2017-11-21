@@ -95,6 +95,26 @@ describe('Registry', function () {
     });
   });
 
+  describe('spec.invokeProviders', () => {
+    it('is called with the registered providers and defines the initial set of values in the registry', () => {
+      const reg = uiRegistry({
+        invokeProviders(providers) {
+          return providers.map(i => i * 1000);
+        }
+      });
+
+      reg.register(1);
+      reg.register(2);
+      reg.register(3);
+      expect(Private(reg).toJSON()).to.eql([1000, 2000, 3000]);
+    });
+    it('does not get assigned as a property of the registry', () => {
+      expect(uiRegistry({
+        invokeProviders() {}
+      })).to.not.have.property('invokeProviders');
+    });
+  });
+
   describe('spec[any]', function () {
     it('mixes the extra properties into the module list', function () {
       const reg = uiRegistry({

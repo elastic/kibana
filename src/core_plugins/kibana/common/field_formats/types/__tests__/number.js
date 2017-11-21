@@ -1,5 +1,8 @@
 import expect from 'expect.js';
-import { NumberFormat } from '../number';
+import { createNumberFormat } from '../number';
+import { FieldFormat } from '../../../../../../ui/field_formats/field_format';
+
+const NumberFormat = createNumberFormat(FieldFormat);
 
 describe('NumberFormat', function () {
 
