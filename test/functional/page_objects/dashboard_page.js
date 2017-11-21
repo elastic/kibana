@@ -80,6 +80,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('exitFullScreenModeText');
     }
 
+    async getDashboardIdFromCurrentUrl() {
+      const currentUrl = await remote.getCurrentUrl();
+      const urlSubstring = 'kibana#/dashboard/';
+      const startOfIdIndex = currentUrl.indexOf(urlSubstring) + urlSubstring.length;
+      const endIndex = currentUrl.indexOf('?');
+      return currentUrl.substring(startOfIdIndex, endIndex);
+    }
+
     /**
      * Returns true if already on the dashboard landing page (that page doesn't have a link to itself).
      * @returns {Promise<boolean>}
