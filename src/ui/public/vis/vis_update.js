@@ -1,27 +1,4 @@
 const updateVisualizationConfig = (stateConfig, config) => {
-
-  if (config.type === 'gauge' && config.fontSize) {
-    config.gauge.style.fontSize = config.fontSize;
-    delete config.fontSize;
-  }
-
-  // update old metric to the new one
-  if (config.type === 'gauge' && config.gauge.gaugeType === 'Metric') {
-    config.type = 'metric';
-    config.metric = config.gauge;
-    delete config.gauge;
-    delete config.metric.gaugeType;
-    delete config.metric.gaugeStyle;
-    delete config.metric.backStyle;
-    delete config.metric.scale;
-    delete config.metric.type;
-    delete config.metric.orientation;
-    delete config.metric.verticalSplit;
-    delete config.metric.autoExtend;
-    config.metric.metricColorMode = config.metric.gaugeColorMode;
-    delete config.metric.gaugeColorMode;
-  }
-
   if (!stateConfig || stateConfig.seriesParams) return;
   if (!['line', 'area', 'histogram'].includes(config.type)) return;
 
