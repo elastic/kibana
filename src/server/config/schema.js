@@ -188,6 +188,7 @@ export default () => Joi.object({
     }).default()
   }).default(),
   regionmap: Joi.object({
+    includeElasticMapsService: Joi.boolean().default(true),
     layers: Joi.array().items(Joi.object({
       url: Joi.string(),
       type: Joi.string(),

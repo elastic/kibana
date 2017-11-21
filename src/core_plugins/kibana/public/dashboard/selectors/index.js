@@ -81,7 +81,27 @@ export const getViewMode = dashboard => dashboard.view.viewMode;
 export const getFullScreenMode = dashboard => dashboard.view.isFullScreenMode;
 /**
  * @param dashboard {DashboardState}
+ * @return {boolean}
+ */
+export const getHidePanelTitles = dashboard => dashboard.view.hidePanelTitles;
+/**
+ * @param dashboard {DashboardState}
  * @return {string|undefined}
  */
 export const getMaximizedPanelId = dashboard => dashboard.view.maximizedPanelId;
 
+/**
+ * @param dashboard {DashboardState}
+ * @return {MetadataState}
+ */
+export const getMetadata = dashboard => dashboard.metadata;
+/**
+ * @param dashboard {MetadataState}
+ * @return {string}
+ */
+export const getTitle = dashboard => dashboard.metadata.title;
+/**
+ * @param dashboard {MetadataState}
+ * @return {string}
+ */
+export const getDescription = dashboard => dashboard.metadata.description;

@@ -298,8 +298,17 @@
   text-align: center;
   color: @grayLight;
   cursor: row-resize;
+  width: 100%;
+  display: block;
+  appearance: none;
+  background: none;
+  border: none;
   &:hover {
     color: @gray;
+  }
+  &:focus {
+    color: @esBlue;
+    box-shadow: none;
   }
 }
 

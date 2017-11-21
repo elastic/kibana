@@ -22,6 +22,7 @@ import {
   DocTableProvider,
   ScreenshotsProvider,
   DashboardVisualizationProvider,
+  DashboardExpectProvider,
 } from './services';
 
 export default async function ({ readConfigFile }) {
@@ -65,6 +66,7 @@ export default async function ({ readConfigFile }) {
       docTable: DocTableProvider,
       screenshots: ScreenshotsProvider,
       dashboardVisualizations: DashboardVisualizationProvider,
+      dashboardExpect: DashboardExpectProvider,
     },
     servers: commonConfig.get('servers'),
     apps: {

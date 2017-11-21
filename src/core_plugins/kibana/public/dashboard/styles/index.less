@@ -4,7 +4,7 @@
 @import "~react-grid-layout/css/styles.css";
 @import "~react-resizable/css/styles.css";
 
-.fullScreenModePlaceholder {
+.exitFullScreenButton {
   text-align: center;
   width: 100%;
   height: 0;
@@ -299,6 +299,23 @@ dashboard-viewport-provider {
     .visualize-show-spy {
       visibility: hidden;
     }
+
+    /**
+     * 1. Use opacity to make this element accessible to screen readers and keyboard.
+     * 2. Show on focus to enable keyboard accessibility.
+     */
+    .panel-heading-floater {
+      opacity: 0; /* 1 */
+      position: absolute;
+      right: 1px;
+      top: 1px;
+      background-color: @dashboard-panel-bg;
+      z-index: 5;
+      &:focus {
+        opacity: 1; /* 2 */
+      }
+    }
+
     /**
      * 1. Use opacity to make this element accessible to screen readers and keyboard.
      * 2. Show on focus to enable keyboard accessibility.
@@ -311,6 +328,9 @@ dashboard-viewport-provider {
     }
 
     &:hover {
+      .panel-heading-floater {
+        opacity: 1;
+      }
       .visualize-show-spy {
         visibility: visible;
       }
@@ -342,7 +362,6 @@ dashboard-viewport-provider {
       flex: 1 1 100%;
       height: auto;
       z-index: 1; /* 1. */
-      padding: 0 8px 8px 8px;
     }
   }
 
@@ -389,4 +408,12 @@ dashboard-viewport-provider {
 }
 .dashboard-viewport-with-margins {
   background-color: @dashboard-bg-with-margins;
+}
+
+.dashboardPanelMenuOptionsForm {
+  padding: 16px;
+  input {
+    width: 100%;
+    display: block;
+  }
 }

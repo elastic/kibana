@@ -1,4 +1,5 @@
 import { uiModules } from 'ui/modules';
+import { appendWildcard } from './lib/append_wildcard';
 
 const module = uiModules.get('apps/management');
 
@@ -15,33 +16,13 @@ module.directive('appendWildcard', function () {
     require: 'ngModel',
     link: function ($scope, $elem, $attrs, $ctrl) {
       $elem.on('keydown', (e) => {
-        // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode
-        // is not recommended so we need to rely on `key` but browser support
-        // is still spotty (https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key)
-        // so just bail if it's not supported
-        if (!e.key) {
-          return;
-        }
-
-        if (!/[a-z0-9]/i.test(e.key)) {
-          return;
-        }
-
-        // If the user is holding down ctrl/cmd, they are performing some shortcut
-        // and do not interpret literally
-        if (e.metaKey) {
-          return;
-        }
-
-        let indexPatternName = $elem.val() + e.key;
-        if (indexPatternName.length === 1 && indexPatternName !== '*') {
-          indexPatternName += '*';
+        const newIndexPattern = appendWildcard(e, $elem.val());
+        if (newIndexPattern) {
           e.preventDefault();
-          $elem.val(indexPatternName);
+          $elem.val(newIndexPattern);
           $elem[0].setSelectionRange(1, 1);
+          $ctrl.$setViewValue(newIndexPattern);
         }
-
-        $ctrl.$setViewValue(indexPatternName);
       });
     }
   };

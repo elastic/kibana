@@ -24,13 +24,30 @@ export function decorateMochaUi(lifecycle, context) {
    */
   function wrapSuiteFunction(name, fn) {
     return wrapFunction(fn, {
-      before() {
+      before(target, thisArg, argumentsList) {
         if (suiteCount > 0 && suiteLevel === 0) {
           throw new Error(`
             Test files must only define a single top-level suite. Please ensure that
             all calls to \`describe()\` are within a single \`describe()\` call in this file.
           `);
         }
+
+        const [name, provider] = argumentsList;
+        if (typeof name !== 'string' || typeof provider !== 'function') {
+          throw new Error(`Unexpected arguments to ${name}(${argumentsList.join(', ')})`);
+        }
+
+        argumentsList[1] = function () {
+          before(async () => {
+            await lifecycle.trigger('beforeTestSuite', this);
+          });
+
+          provider.call(this);
+
+          after(async () => {
+            await lifecycle.trigger('afterTestSuite', this);
+          });
+        };
 
         suiteCount += 1;
         suiteLevel += 1;

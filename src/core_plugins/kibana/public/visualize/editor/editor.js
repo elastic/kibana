@@ -209,10 +209,6 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       $scope.vis.forceReload();
     };
 
-    $scope.$on('ready:vis', function () {
-      $scope.$emit('application.load');
-    });
-
     $scope.$on('$destroy', function () {
       savedVis.destroy();
       stateMonitor.destroy();
@@ -297,6 +293,11 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     searchSource.inherits(parentsParent);
 
     $scope.fetch();
+  };
+
+
+  $scope.getAdditionalMessage = () => {
+    return `This visualization is marked as experimental. ${vis.type.feedbackMessage}`;
   };
 
   init();

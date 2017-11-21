@@ -7,6 +7,7 @@ import { uiModules } from 'ui/modules';
 import appTemplate from 'plugins/kibana/management/app.html';
 import landingTemplate from 'plugins/kibana/management/landing.html';
 import { management } from 'ui/management';
+import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import 'ui/kbn_top_nav';
 
 uiRoutes
@@ -61,3 +62,15 @@ uiModules
       }
     };
   });
+
+FeatureCatalogueRegistryProvider.register(() => {
+  return {
+    id: 'management',
+    title: 'Management',
+    description: 'Your center console for managing the Elastic Stack.',
+    icon: '/plugins/kibana/assets/app_management.svg',
+    path: '/app/kibana#/management',
+    showOnHomePage: false,
+    category: FeatureCatalogueCategory.ADMIN
+  };
+});

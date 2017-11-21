@@ -8,13 +8,14 @@ import { EmbeddableFactory, Embeddable } from 'ui/embeddable';
 
 export class SearchEmbeddableFactory extends EmbeddableFactory {
 
-  constructor($compile, $rootScope, searchLoader, Promise) {
+  constructor($compile, $rootScope, searchLoader, Promise, courier) {
     super();
     this.$compile = $compile;
     this.searchLoader = searchLoader;
     this.$rootScope = $rootScope;
     this.name = 'search';
     this.Promise = Promise;
+    this.courier = courier;
   }
 
   getEditPath(panelId) {
@@ -30,6 +31,9 @@ export class SearchEmbeddableFactory extends EmbeddableFactory {
     searchScope.editPath = this.getEditPath(panel.id);
     return this.searchLoader.get(panel.id)
       .then(savedObject => {
+        if (!container.getHidePanelTitles()) {
+          searchScope.sharedItemTitle = panel.title !== undefined ? panel.title : savedObject.title;
+        }
         searchScope.savedObj = savedObject;
         searchScope.panel = panel;
         container.registerPanelIndexPattern(panel.panelIndex, savedObject.searchSource.get('index'));
