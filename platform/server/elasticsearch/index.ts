@@ -1,7 +1,6 @@
 import { Observable } from '@elastic/kbn-observable';
 
 import { ElasticsearchService } from './ElasticsearchService';
-import { ElasticsearchRequestHelpers } from './ElasticsearchFacade';
 import { registerElasticsearchRoutes } from './api';
 import { Router } from '../http';
 import { ElasticsearchConfigs } from './ElasticsearchConfigs';
@@ -11,7 +10,6 @@ export { ElasticsearchClusterType } from './ElasticsearchConfig';
 export { Cluster } from './Cluster';
 export {
   ElasticsearchService,
-  ElasticsearchRequestHelpers,
   ElasticsearchConfigs
 };
 
