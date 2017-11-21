@@ -30,7 +30,9 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
     visualizeScope.editUrl = this.getEditPath(panel.id);
     return this.visualizeLoader.get(panel.id)
       .then(savedObject => {
-        visualizeScope.sharedItemTitle = panel.title !== undefined ? panel.title : savedObject.title;
+        if (!container.getHidePanelTitles()) {
+          visualizeScope.sharedItemTitle = panel.title !== undefined ? panel.title : savedObject.title;
+        }
         visualizeScope.savedObj = savedObject;
         visualizeScope.panel = panel;
 
