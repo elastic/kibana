@@ -20,17 +20,18 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
   class DashboardPage {
     async initTests() {
-      const logstash = esArchiver.loadIfNeeded('logstash_functional');
+      log.debug('load kibana index with visualizations and log data');
+      await Promise.all([
+        esArchiver.load('dashboard'),
+        esArchiver.loadIfNeeded('logstash_functional')
+      ]);
 
-      log.debug('load kibana index with visualizations');
-      await esArchiver.load('dashboard');
       await kibanaServer.uiSettings.replace({
-        'dateFormat:tz':'UTC',
-        'defaultIndex':'logstash-*'
+        'dateFormat:tz': 'UTC',
+        'defaultIndex': 'logstash-*'
       });
 
       await PageObjects.common.navigateToApp('dashboard');
-      return logstash;
     }
 
     /**
@@ -178,15 +179,15 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     clickVizNameLink(vizName) {
       return retry.try(() => getRemote()
-      .findByPartialLinkText(vizName)
-      .click());
+        .findByPartialLinkText(vizName)
+        .click());
     }
 
     closeAddVizualizationPanel() {
       log.debug('closeAddVizualizationPanel');
       return retry.try(() => getRemote()
-      .findByCssSelector('i.fa fa-chevron-up')
-      .click());
+        .findByCssSelector('i.fa fa-chevron-up')
+        .click());
     }
 
     async gotoDashboardEditMode(dashboardName) {
@@ -202,7 +203,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       // 'stale element reference: element is not attached to the page document'
       // on the next step
       await PageObjects.common.sleep(1000);
-        // but wrap in a try loop since it can still happen
+      // but wrap in a try loop since it can still happen
       await retry.try(() => {
         log.debug('click visualization (' + vizName + ')');
         return this.clickVizNameLink(vizName);
@@ -267,8 +268,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     clickDashboardByLinkText(dashName) {
       return getRemote()
-      .findByLinkText(dashName)
-      .click();
+        .findByLinkText(dashName)
+        .click();
     }
 
     async clearSearchValue() {
@@ -292,7 +293,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         await searchFilter.clearValue();
         await searchFilter.click();
         // Note: this replacement of - to space is to preserve original logic but I'm not sure why or if it's needed.
-        await searchFilter.type(dashName.replace('-',' '));
+        await searchFilter.type(dashName.replace('-', ' '));
       });
 
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -324,66 +325,66 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     getPanelTitles() {
       log.debug('in getPanelTitles');
       return testSubjects.findAll('dashboardPanelTitle')
-      .then(function (titleObjects) {
+        .then(function (titleObjects) {
 
-        function getTitles(chart) {
-          return chart.getVisibleText();
-        }
+          function getTitles(chart) {
+            return chart.getVisibleText();
+          }
 
-        const getTitlePromises = titleObjects.map(getTitles);
-        return Promise.all(getTitlePromises);
-      });
+          const getTitlePromises = titleObjects.map(getTitles);
+          return Promise.all(getTitlePromises);
+        });
     }
 
     getPanelSizeData() {
       log.debug('in getPanelSizeData');
       return getRemote()
-      .findAllByCssSelector('li.gs-w') // These are gridster-defined elements and classes
-      .then(function (titleObjects) {
+        .findAllByCssSelector('li.gs-w') // These are gridster-defined elements and classes
+        .then(function (titleObjects) {
 
-        function getTitles(chart) {
-          let obj = {};
-          return chart.getAttribute('data-col')
-          .then(theData => {
-            obj = { dataCol:theData };
-            return chart;
-          })
-          .then(chart => {
-            return chart.getAttribute('data-row')
-            .then(theData => {
-              obj.dataRow = theData;
-              return chart;
-            });
-          })
-          .then(chart => {
-            return chart.getAttribute('data-sizex')
-            .then(theData => {
-              obj.dataSizeX = theData;
-              return chart;
-            });
-          })
-          .then(chart => {
-            return chart.getAttribute('data-sizey')
-            .then(theData => {
-              obj.dataSizeY = theData;
-              return chart;
-            });
-          })
-          .then(chart => {
-            return chart.findByCssSelector('[data-test-subj="dashboardPanelTitle"]')
-            .then(function (titleElement) {
-              return titleElement.getVisibleText();
-            })
-            .then(theData => {
-              obj.title = theData;
-              return obj;
-            });
-          });
-        }
+          function getTitles(chart) {
+            let obj = {};
+            return chart.getAttribute('data-col')
+              .then(theData => {
+                obj = { dataCol: theData };
+                return chart;
+              })
+              .then(chart => {
+                return chart.getAttribute('data-row')
+                  .then(theData => {
+                    obj.dataRow = theData;
+                    return chart;
+                  });
+              })
+              .then(chart => {
+                return chart.getAttribute('data-sizex')
+                  .then(theData => {
+                    obj.dataSizeX = theData;
+                    return chart;
+                  });
+              })
+              .then(chart => {
+                return chart.getAttribute('data-sizey')
+                  .then(theData => {
+                    obj.dataSizeY = theData;
+                    return chart;
+                  });
+              })
+              .then(chart => {
+                return chart.findByCssSelector('[data-test-subj="dashboardPanelTitle"]')
+                  .then(function (titleElement) {
+                    return titleElement.getVisibleText();
+                  })
+                  .then(theData => {
+                    obj.title = theData;
+                    return obj;
+                  });
+              });
+          }
 
-        const getTitlePromises = titleObjects.map(getTitles);
-        return Promise.all(getTitlePromises);
-      });
+          const getTitlePromises = titleObjects.map(getTitles);
+          return Promise.all(getTitlePromises);
+        });
     }
 
     getTestVisualizations() {
@@ -471,29 +472,29 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       log.debug('in getSharedItemsCount');
       const attributeName = 'data-shared-items-count';
       return getRemote()
-      .findByCssSelector(`[${attributeName}]`)
-      .then(function (element) {
-        if (element) {
-          return element.getAttribute(attributeName);
-        }
+        .findByCssSelector(`[${attributeName}]`)
+        .then(function (element) {
+          if (element) {
+            return element.getAttribute(attributeName);
+          }
 
-        throw new Error('no element');
-      });
+          throw new Error('no element');
+        });
     }
 
     getPanelSharedItemData() {
       log.debug('in getPanelSharedItemData');
       return getRemote()
-      .findAllByCssSelector('li.gs-w')
-      .then(function (elements) {
-        return Promise.all(elements.map(async element => {
-          const sharedItem = await element.findByCssSelector('[data-shared-item]');
-          return {
-            title: await sharedItem.getAttribute('data-title'),
-            description: await sharedItem.getAttribute('data-description')
-          };
-        }));
-      });
+        .findAllByCssSelector('li.gs-w')
+        .then(function (elements) {
+          return Promise.all(elements.map(async element => {
+            const sharedItem = await element.findByCssSelector('[data-shared-item]');
+            return {
+              title: await sharedItem.getAttribute('data-title'),
+              description: await sharedItem.getAttribute('data-description')
+            };
+          }));
+        });
     }
   }
 
