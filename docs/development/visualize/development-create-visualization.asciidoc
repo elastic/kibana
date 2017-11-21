@@ -72,7 +72,10 @@ The list of common parameters:
 - *options.showQueryBar*: <bool> show or hide query bar (defaults to true)
 - *options.showFilterBar*: <bool> show or hide filter bar (defaults to true)
 - *options.showIndexSelection*: <bool> show or hide index selection (defaults to true)
-- *isExperimental*: <bool> mark visualization as experimental (defaults to false)
+- *stage*: <string> Set this to "experimental" or "labs" to mark your visualization as experimental. 
+Labs visualizations can also be disabled from the advanced settings. (defaults to "production")
+- *feedbackMessage*: <string> You can provide a message (which can contain HTML), that will be appended 
+to the experimental notification in visualize, if your visualization is experimental or in lab mode.
 
 
 Each of the factories have some of the custom parameters, which will be described below.
