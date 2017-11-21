@@ -23,7 +23,10 @@ function resolveKibanaPath(path) {
 }
 
 function createToolingLog(level) {
-  return require(resolveKibanaPath('src/utils')).createToolingLog(level);
+  // The tooling log location changed in 6.1.0, see https://github.com/elastic/kibana/pull/14890
+  const utils = require(resolveKibanaPath('src/utils'));
+  if (utils.createToolingLog) return utils.createToolingLog(level);
+  return require(resolveKibanaPath('src/dev')).createToolingLog(level);
 }
 
 function readFtrConfigFile(log, path, settingOverrides) {
