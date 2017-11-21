@@ -38,6 +38,7 @@ exports[`renders KuiListingTable 1`] = `
       <tr>
         <th
           class="kuiTableHeaderCell kuiTableHeaderCell--checkBox"
+          scope="col"
         >
           <div
             class="kuiTableHeaderCell__liner"
@@ -51,6 +52,7 @@ exports[`renders KuiListingTable 1`] = `
         </th>
         <th
           class="kuiTableHeaderCell"
+          scope="col"
         >
           <div
             class="kuiTableHeaderCell__liner"
@@ -60,6 +62,7 @@ exports[`renders KuiListingTable 1`] = `
         </th>
         <th
           class="kuiTableHeaderCell"
+          scope="col"
         >
           <div
             class="kuiTableHeaderCell__liner"
