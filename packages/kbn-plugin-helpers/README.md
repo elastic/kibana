@@ -44,14 +44,20 @@ It will also observe a `.kibana-plugin-helpers.dev.json`, much like Kibana does,
 
 All configuration setting listed below can simply can be included in the json config files. If you intend to inline the command, you will need to convert the setting to snake case (ie. `skipArchive` becomes `--skip-archive`).
 
-### `start`
+## Global settings
+
+Setting | Description
+------- | -----------
+`kibanaRoot` | Path to your checkout of Kibana, relative paths are ok
+
+### Settings for `start`
 
 Setting | Description
 ------- | -----------
 `includePlugins` | Intended to be used in a config file, an array of additional plugin paths to include, absolute or relative to the plugin root
 `*` | Any options/flags included will be passed unmodified to the Kibana binary
 
-### `build`
+### Settings for `build`
 
 Setting | Description
 ------- | -----------
