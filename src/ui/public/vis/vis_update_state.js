@@ -1,6 +1,7 @@
 import _ from 'lodash';
 
 export const updateOldState = (visState) => {
+  if (!visState) return visState;
   const newState = _.cloneDeep(visState);
 
   if (visState.type === 'gauge' && visState.fontSize) {
