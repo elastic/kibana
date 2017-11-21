@@ -12,7 +12,7 @@ FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'discover',
     title: 'Discover',
-    description: 'Search and explore your data.',
+    description: 'Interactively explore your data by querying and filtering raw documents.',
     icon: '/plugins/kibana/assets/app_discover.svg',
     path: '/app/kibana#/discover',
     showOnHomePage: true,
