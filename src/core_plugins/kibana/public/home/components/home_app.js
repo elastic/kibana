@@ -21,7 +21,7 @@ export function HomeApp({ addBasePath, directories }) {
           />
         </Route>
         <Route
-          path="/"
+          path="/home"
         >
           <Home
             addBasePath={addBasePath}
