@@ -166,46 +166,6 @@ export default function ({ getService, getPageObjects }) {
         expect(afterSaveMapBounds).to.not.be(undefined);
       });
 
-      it('should zoom in to level 10', function () {
-        const vizName1 = 'Visualization TileMap';
-
-        return PageObjects.visualize.loadSavedVisualization(vizName1)
-          .then(function () {
-          // 6
-            return PageObjects.visualize.clickMapZoomIn();
-          })
-          .then(function () {
-          // 7
-            return PageObjects.visualize.clickMapZoomIn();
-          })
-          .then(function () {
-          // 8
-            return PageObjects.visualize.clickMapZoomIn();
-          })
-          .then(function () {
-          // 9
-            return PageObjects.visualize.clickMapZoomIn();
-          })
-          .then(function () {
-            return retry.try(function tryingForTime() {
-              return PageObjects.visualize.getMapZoomInEnabled()
-                .then(function (enabled) {
-                  expect(enabled).to.be(true);
-                });
-            });
-          })
-          .then(function () {
-            return PageObjects.visualize.clickMapZoomIn();
-          })
-          .then(function () {
-            return PageObjects.visualize.getMapZoomInEnabled();
-          })
-        // now we're at level 10 and zoom out should be disabled
-          .then(function (enabled) {
-            expect(enabled).to.be(false);
-          });
-      });
-
     });
   });
 }
