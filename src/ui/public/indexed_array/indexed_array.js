@@ -34,7 +34,7 @@ export class IndexedArray {
       this._setupIndex(config.group, inflectIndex, _.organizeBy),
       this._setupIndex(config.index, inflectIndex, _.indexBy),
       this._setupIndex(config.order, inflectOrder, (raw, pluckValue) => {
-        return raw.slice().sort((itemA, itemB) => {
+        return [...raw].sort((itemA, itemB) => {
           const a = pluckValue(itemA);
           const b = pluckValue(itemB);
 
