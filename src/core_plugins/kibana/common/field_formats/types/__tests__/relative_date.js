@@ -1,6 +1,9 @@
 import expect from 'expect.js';
 import moment from 'moment-timezone';
-import { RelativeDateFormat } from '../relative_date';
+import { createRelativeDateFormat } from '../relative_date';
+import { FieldFormat } from '../../../../../../ui/field_formats/field_format';
+
+const RelativeDateFormat = createRelativeDateFormat(FieldFormat);
 
 describe('Relative Date Format', function () {
   let convert;
