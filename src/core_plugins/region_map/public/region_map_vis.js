@@ -10,7 +10,7 @@ import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 import { mapToLayerWithId } from './util';
 
-VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmapsConfig) {
+VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmapsConfig, config) {
   const VisFactory = Private(VisFactoryProvider);
   const Schemas = Private(VisSchemasProvider);
 
@@ -32,7 +32,9 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
         addTooltip: true,
         colorSchema: 'Yellow to Red',
         selectedLayer: selectedLayer,
-        selectedJoinField: selectedJoinField
+        selectedJoinField: selectedJoinField,
+        isDisplayWarning: true,
+        wms: config.get('visualization:tileMap:WMSdefaults')
       },
       template: regionTemplate,
     },
