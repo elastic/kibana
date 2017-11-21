@@ -1,4 +1,3 @@
-//import { k$, Observable } from '@elastic/kbn-observable';
 import { KibanaPluginConfig } from '@elastic/kbn-types';
 import { registerEndpoints } from './registerEndpoints';
 
