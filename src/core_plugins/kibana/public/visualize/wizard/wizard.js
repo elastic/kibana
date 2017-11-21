@@ -47,7 +47,7 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
   kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
 
   const visTypes = Private(VisTypesRegistryProvider);
-  const isLabsEnabled = config.get('visualize:enableLabsVisualizations');
+  const isLabsEnabled = config.get('visualize:enableLabs');
   $scope.toggleLabView = () => {
     $route.current.params.lab = !$route.current.params.lab;
     $route.updateParams($route.current.params);

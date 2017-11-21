@@ -24,7 +24,7 @@ export function VisualizeListingController($injector) {
   const notify = new Notifier({ location: 'Visualize' });
 
   this.fetchItems = (filter) => {
-    const isLabsEnabled = config.get('visualize:enableLabsVisualizations');
+    const isLabsEnabled = config.get('visualize:enableLabs');
     return visualizationService.find(filter, config.get('savedObjects:listingLimit'))
       .then(result => {
         this.totalItems = result.total;

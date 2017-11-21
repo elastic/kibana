@@ -31,7 +31,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
     visualizeScope.editUrl = this.getEditPath(panel.id);
     return this.visualizeLoader.get(panel.id)
       .then(savedObject => {
-        const isLabsEnabled = this._config.get('visualize:enableLabsVisualizations');
+        const isLabsEnabled = this._config.get('visualize:enableLabs');
 
         if (!isLabsEnabled && savedObject.vis.type.stage === 'lab') {
           domNode.innerHTML = `

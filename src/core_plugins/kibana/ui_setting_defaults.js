@@ -122,7 +122,7 @@ export function getUiSettingDefaults() {
       value: 100,
       description: 'Never show more than this many bars in date histograms, scale values if needed',
     },
-    'visualize:enableLabsVisualizations': {
+    'visualize:enableLabs': {
       value: true,
       description: 'Enable lab visualizations in Visualize.'
     },

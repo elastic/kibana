@@ -263,7 +263,7 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
 
         prevSearch = filter;
 
-        const isLabsEnabled = config.get('visualize:enableLabsVisualizations');
+        const isLabsEnabled = config.get('visualize:enableLabs');
         self.service.find(filter)
           .then(function (hits) {
 
