@@ -9,8 +9,9 @@ export function visualizeEmbeddableFactoryProvider(Private) {
     timefilter,
     Notifier,
     Promise,
-    Private) => {
-    return new VisualizeEmbeddableFactory($compile, $rootScope, savedVisualizations, timefilter, Notifier, Promise, Private);
+    Private,
+    config) => {
+    return new VisualizeEmbeddableFactory($compile, $rootScope, savedVisualizations, timefilter, Notifier, Promise, Private, config);
   };
   return Private(VisualizeEmbeddableFactoryProvider);
 }
