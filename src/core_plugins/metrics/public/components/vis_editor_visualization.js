@@ -1,20 +1,24 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { findDOMNode } from 'react-dom';
+import { keyCodes } from 'ui_framework/services';
 import Visualization from './visualization';
 import Toggle from 'react-toggle';
 import 'react-toggle/style.css';
+
+const MIN_CHART_HEIGHT = 250;
 
 class VisEditorVisualization extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      height: 250,
+      height: MIN_CHART_HEIGHT,
       dragging: false
     };
 
     this.handleMouseUp = this.handleMouseUp.bind(this);
     this.handleMouseDown = this.handleMouseDown.bind(this);
+    this.onSizeHandleKeyDown = this.onSizeHandleKeyDown.bind(this);
   }
 
   handleMouseDown() {
@@ -28,10 +32,9 @@ class VisEditorVisualization extends Component {
   componentWillMount() {
     this.handleMouseMove = (event) => {
       if (this.state.dragging) {
-        const height = this.state.height + event.movementY;
-        if (height > 250) {
-          this.setState({ height });
-        }
+        this.setState((prevState) => ({
+          height: Math.max(MIN_CHART_HEIGHT, prevState.height + event.movementY)
+        }));
       }
     };
     window.addEventListener('mousemove', this.handleMouseMove);
@@ -46,6 +49,25 @@ class VisEditorVisualization extends Component {
   componentDidMount() {
     const el = findDOMNode(this.visDiv);
     el.setAttribute('render-counter', 'disabled');
+  }
+
+  /**
+   * Resize the chart height when pressing up/down while the drag handle
+   * for resizing has the focus.
+   * We use 15px steps to do the scaling and make sure the chart has at least its
+   * defined minimum width (MIN_CHART_HEIGHT).
+   */
+  onSizeHandleKeyDown(ev) {
+    const { keyCode } = ev;
+    if (keyCode === keyCodes.UP || keyCode === keyCodes.DOWN) {
+      ev.preventDefault();
+      this.setState((prevState) => {
+        const newHeight = prevState.height + (keyCode === keyCodes.UP ? -15 : 15);
+        return {
+          height: Math.max(MIN_CHART_HEIGHT, newHeight)
+        };
+      });
+    }
   }
 
   render() {
@@ -117,14 +139,15 @@ class VisEditorVisualization extends Component {
         </div>
         <div className="vis-editor-hide-for-reporting">
           {applyButton}
-          <div
-            aria-hidden="true"
+          <button
             className="vis_editor__visualization-draghandle"
             onMouseDown={this.handleMouseDown}
             onMouseUp={this.handleMouseUp}
+            onKeyDown={this.onSizeHandleKeyDown}
+            aria-label="Press up/down to adjust the chart size"
           >
             <i className="fa fa-ellipsis-h" />
-          </div>
+          </button>
         </div>
       </div>
     );

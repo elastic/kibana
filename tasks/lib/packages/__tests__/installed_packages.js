@@ -40,6 +40,7 @@ describe('tasks/lib/packages', () => {
           name: 'dep1',
           version: '0.0.2',
           licenses: [ 'Apache-2.0' ],
+          repository: 'https://github.com/mycorp/dep1',
           directory: resolve(FIXTURE1_ROOT, 'node_modules/dep1'),
           relative: 'node_modules/dep1',
         }

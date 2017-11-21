@@ -3,7 +3,7 @@ import expect from 'expect.js';
 
 import { createEsTestCluster } from '../../../../test_utils/es';
 import { createServerWithCorePlugins } from '../../../../test_utils/kbn_server';
-import { createToolingLog } from '../../../../utils';
+import { createToolingLog } from '../../../../dev';
 import { createOrUpgradeSavedConfig } from '../create_or_upgrade_saved_config';
 
 describe('createOrUpgradeSavedConfig()', () => {

@@ -18,7 +18,6 @@ import { DashboardStateManager } from './dashboard_state_manager';
 import { saveDashboard } from './lib';
 import { showCloneModal } from './top_nav/show_clone_modal';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
-import { keyCodes } from 'ui_framework/services';
 import { DashboardContainerAPI } from './dashboard_container_api';
 import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
@@ -92,13 +91,13 @@ app.directive('dashboardApp', function ($injector) {
         $scope.model = {
           query: dashboardStateManager.getQuery(),
           useMargins: dashboardStateManager.getUseMargins(),
+          hidePanelTitles: dashboardStateManager.getHidePanelTitles(),
           darkTheme: dashboardStateManager.getDarkTheme(),
           timeRestore: dashboardStateManager.getTimeRestore(),
           title: dashboardStateManager.getTitle(),
           description: dashboardStateManager.getDescription(),
         };
         $scope.panels = dashboardStateManager.getPanels();
-        $scope.fullScreenMode = dashboardStateManager.getFullScreenMode();
         $scope.indexPatterns = dashboardStateManager.getPanelIndexPatterns();
       };
 
@@ -183,6 +182,9 @@ app.directive('dashboardApp', function ($injector) {
         dashboardStateManager.addNewPanel(hit.id, 'search');
         notify.info(`Search successfully added to your dashboard`);
       };
+      $scope.$watch('model.hidePanelTitles', () => {
+        dashboardStateManager.setHidePanelTitles($scope.model.hidePanelTitles);
+      });
       $scope.$watch('model.useMargins', () => {
         dashboardStateManager.setUseMargins($scope.model.useMargins);
       });
@@ -268,50 +270,19 @@ app.directive('dashboardApp', function ($injector) {
           }).catch(notify.error);
       };
 
-      $scope.showFilterBar = () => filterBar.getFilters().length > 0 || !$scope.fullScreenMode;
-      let onRouteChange;
-      const setFullScreenMode = (fullScreenMode) => {
-        $scope.fullScreenMode = fullScreenMode;
-        dashboardStateManager.setFullScreenMode(fullScreenMode);
-        chrome.setVisible(!fullScreenMode);
-        $scope.$broadcast('reLayout');
-
-        // Make sure that if we exit the dashboard app, the chrome becomes visible again
-        // (e.g. if the user clicks the back button).
-        if (fullScreenMode) {
-          onRouteChange = $scope.$on('$routeChangeStart', () => {
-            chrome.setVisible(true);
-            onRouteChange();
-          });
-        } else if (onRouteChange) {
-          onRouteChange();
-        }
-      };
-
-      $scope.$watch('fullScreenMode', () => setFullScreenMode(dashboardStateManager.getFullScreenMode()));
-
-      $scope.exitFullScreenMode = () => setFullScreenMode(false);
-
-      document.addEventListener('keydown', (e) => {
-        if (e.keyCode === keyCodes.ESCAPE) {
-          setFullScreenMode(false);
-        }
-      }, false);
+      $scope.showFilterBar = () => filterBar.getFilters().length > 0 || !dashboardStateManager.getFullScreenMode();
 
       $scope.showAddPanel = () => {
-        if ($scope.fullScreenMode) {
-          $scope.exitFullScreenMode();
-        }
+        dashboardStateManager.setFullScreenMode(false);
         $scope.kbnTopNav.open('add');
       };
       $scope.enterEditMode = () => {
-        if ($scope.fullScreenMode) {
-          $scope.exitFullScreenMode();
-        }
+        dashboardStateManager.setFullScreenMode(false);
         $scope.kbnTopNav.click('edit');
       };
       const navActions = {};
-      navActions[TopNavIds.FULL_SCREEN] = () => setFullScreenMode(true);
+      navActions[TopNavIds.FULL_SCREEN] = () =>
+        dashboardStateManager.setFullScreenMode(true);
       navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.VIEW);
       navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.EDIT);
       navActions[TopNavIds.CLONE] = () => {

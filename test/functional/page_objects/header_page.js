@@ -54,13 +54,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async isTimepickerOpen() {
-      remote.setFindTimeout(2000);
-      try {
-        await remote.findDisplayedByCssSelector('.kbn-timepicker');
-        return true;
-      } catch (error) {
-        return false;
-      }
+      return await testSubjects.exists('timePicker');
     }
 
     async isAbsoluteSectionShowing() {
@@ -138,11 +132,14 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async ensureTimePickerIsOpen() {
+      log.debug('ensureTimePickerIsOpen');
       const isOpen = await this.isTimepickerOpen();
-      log.debug(`ensureTimePickerIsOpen: ${isOpen}`);
       if (!isOpen) {
-        log.debug('--Opening time picker');
-        await this.clickTimepicker();
+        await retry.try(async () => {
+          await this.clickTimepicker();
+          const isOpen = await this.isTimepickerOpen();
+          if (!isOpen) throw new Error('Time picker still not open, try again.');
+        });
       }
     }
 
