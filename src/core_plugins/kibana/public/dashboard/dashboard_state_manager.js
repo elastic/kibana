@@ -13,6 +13,7 @@ import {
   minimizePanel,
   updateTitle,
   updateDescription,
+  updateHidePanelTitles,
 } from './actions';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import { createPanelState, getPersistedStateId } from './panel';
@@ -25,6 +26,7 @@ import {
   getTitle,
   getDescription,
   getUseMargins,
+  getHidePanelTitles,
 } from '../selectors';
 
 /**
@@ -85,6 +87,7 @@ export class DashboardStateManager {
     store.dispatch(setPanels(this.getPanels()));
     store.dispatch(updateViewMode(this.getViewMode()));
     store.dispatch(updateUseMargins(this.getUseMargins()));
+    store.dispatch(updateHidePanelTitles(this.getHidePanelTitles()));
     store.dispatch(updateIsFullScreenMode(this.getFullScreenMode()));
     store.dispatch(updateTitle(this.getTitle()));
     store.dispatch(updateDescription(this.getDescription()));
@@ -136,6 +139,10 @@ export class DashboardStateManager {
 
     if (getUseMargins(state) !== this.getUseMargins()) {
       store.dispatch(updateUseMargins(this.getUseMargins()));
+    }
+
+    if (getHidePanelTitles(state) !== this.getHidePanelTitles()) {
+      store.dispatch(updateHidePanelTitles(this.getHidePanelTitles()));
     }
 
     if (getFullScreenMode(state) !== this.getFullScreenMode()) {
@@ -267,6 +274,15 @@ export class DashboardStateManager {
 
   setUseMargins(useMargins) {
     this.appState.options.useMargins = useMargins;
+    this.saveState();
+  }
+
+  getHidePanelTitles() {
+    return this.appState.options.hidePanelTitles;
+  }
+
+  setHidePanelTitles(hidePanelTitles) {
+    this.appState.options.hidePanelTitles = hidePanelTitles;
     this.saveState();
   }
 

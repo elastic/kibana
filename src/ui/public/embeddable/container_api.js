@@ -48,4 +48,8 @@ export class ContainerAPI {
   updatePanel(/*paneIndex, panelAttributes */) {
     throw new Error('Must implement updatePanel.');
   }
+
+  getHidePanelTitles() {
+    return this.dashboardState.getHidePanelTitles();
+  }
 }
