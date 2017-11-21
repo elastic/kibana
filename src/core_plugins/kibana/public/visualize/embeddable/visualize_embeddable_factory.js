@@ -37,8 +37,8 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
           domNode.innerHTML = `
 <div class="disabledLabVisualization">
   <div class="kuiVerticalRhythm disabledLabVisualization__icon kuiIcon fa-flask" aria-hidden="true"></div>
-  <div class="kuiVerticalRhythm"><em>${savedObject.title}</em> is a labs visualization.</div>
-  <div class="kuiVerticalRhythm">Please turn on lab-mode in the advanced settings to see labs visualizations.</div>
+  <div class="kuiVerticalRhythm"><em>${savedObject.title}</em> is a lab visualization.</div>
+  <div class="kuiVerticalRhythm">Please turn on lab-mode in the advanced settings to see lab visualizations.</div>
 </div>
 `;
           return new Embeddable({

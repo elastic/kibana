@@ -141,7 +141,7 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
     //labs is more important in this regard.
     let prefix = '';
     if (type.stage === 'lab') {
-      prefix = '(Labs)';
+      prefix = '(Lab)';
     } else if (type.stage === 'experimental') {
       prefix = '(Experimental)';
     }
