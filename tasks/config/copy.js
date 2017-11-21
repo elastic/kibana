@@ -14,6 +14,7 @@ module.exports = function () {
         '!src/ui_framework/doc_site/**',
         '!src/es_archiver/**',
         '!src/functional_test_runner/**',
+        '!src/dev/**',
         'bin/**',
         'ui_framework/components/**',
         'ui_framework/services/**',
