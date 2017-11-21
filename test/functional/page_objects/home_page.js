@@ -1,25 +1,14 @@
-import _ from 'lodash';
 
-export function HomePageProvider({ getService, getPageObjects }) {
-  const log = getService('log');
-  const find = getService('find');
-  const retry = getService('retry');
-  const config = getService('config');
-  const remote = getService('remote');
-  const esArchiver = getService('esArchiver');
-  const kibanaServer = getService('kibanaServer');
+export function HomePageProvider({ getService }) {
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'header']);
-
-  const defaultFindTimeout = config.get('timeouts.find');
-
+  //const PageObjects = getPageObjects(['common', 'header']);
   class HomePage {
 
     async clickKibanaIcon() {
       await testSubjects.click('kibanaLogo');
     }
 
-    async clickSynopsis(title){
+    async clickSynopsis(title) {
       await testSubjects.click(`homeSynopsisLink${title}`);
     }
 

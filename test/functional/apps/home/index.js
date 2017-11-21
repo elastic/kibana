@@ -1,5 +1,4 @@
 export default function ({ getService, loadTestFile }) {
-  const esArchiver = getService('esArchiver');
   const remote = getService('remote');
 
   describe('homepage app', function () {
@@ -8,6 +7,5 @@ export default function ({ getService, loadTestFile }) {
     });
 
     loadTestFile(require.resolve('./_home'));
-
   });
 }
