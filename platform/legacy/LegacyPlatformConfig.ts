@@ -1,4 +1,8 @@
-import { RawConfig } from '../config/RawConfig';
+import {
+  NEW_PLATFORM_CONFIG_ROOT,
+  ObjectToRawConfigAdapter,
+  RawConfig
+} from '../config';
 import { ConfigPath } from '../config/ConfigService';
 
 /**
@@ -27,30 +31,31 @@ interface LegacyLoggingConfig {
  * supported by the current platform.
  */
 export class LegacyConfigToRawConfigAdapter implements RawConfig {
-  constructor(private readonly legacyConfig: LegacyConfig) {}
+  private newPlatformConfig: ObjectToRawConfigAdapter;
+
+  constructor(private readonly legacyConfig: LegacyConfig) {
+    this.newPlatformConfig = new ObjectToRawConfigAdapter({
+      [NEW_PLATFORM_CONFIG_ROOT]:
+        legacyConfig.get(NEW_PLATFORM_CONFIG_ROOT) || {}
+    });
+  }
 
   has(configPath: ConfigPath) {
+    if (LegacyConfigToRawConfigAdapter.isNewPlatformConfig(configPath)) {
+      return this.newPlatformConfig.has(configPath);
+    }
+
     return this.legacyConfig.has(
       LegacyConfigToRawConfigAdapter.flattenConfigPath(configPath)
     );
   }
 
   get(configPath: ConfigPath) {
-    configPath = LegacyConfigToRawConfigAdapter.flattenConfigPath(configPath);
-
-    if (
-      configPath.startsWith('__newPlatform') &&
-      !this.legacyConfig.has(configPath)
-    ) {
-      // Whenever we handle a config for the new platform and it isn't defined
-      // in the current platform, we want the new platform to handle the missing
-      // config value, e.g. by applying defaults.
-      //
-      // NB! Note that you might need to update the Kibana schema if the `has`
-      // check is failing for something that is present in the config, as the
-      // `has` check depends on the schema itself in the current platform.
-      return undefined;
+    if (LegacyConfigToRawConfigAdapter.isNewPlatformConfig(configPath)) {
+      return this.newPlatformConfig.get(configPath);
     }
+
+    configPath = LegacyConfigToRawConfigAdapter.flattenConfigPath(configPath);
 
     const configValue = this.legacyConfig.get(configPath);
 
@@ -65,6 +70,10 @@ export class LegacyConfigToRawConfigAdapter implements RawConfig {
   }
 
   set(configPath: ConfigPath, value: any) {
+    if (LegacyConfigToRawConfigAdapter.isNewPlatformConfig(configPath)) {
+      return this.newPlatformConfig.set(configPath, value);
+    }
+
     this.legacyConfig.set(
       LegacyConfigToRawConfigAdapter.flattenConfigPath(configPath),
       value
@@ -72,10 +81,10 @@ export class LegacyConfigToRawConfigAdapter implements RawConfig {
   }
 
   getFlattenedPaths() {
-    // This method is only used to detect unused config paths, but when we
-    // run new platform within the legacy one then the legacy platform is in
-    // charge of this check.
-    return [];
+    // This method is only used to detect unused config paths, but when we run
+    // new platform within the legacy one then the new platform is in charge of
+    // only `__newPlatform` config node and the legacy platform will check the rest.
+    return this.newPlatformConfig.getFlattenedPaths();
   }
 
   private static flattenConfigPath(configPath: ConfigPath) {
@@ -113,5 +122,13 @@ export class LegacyConfigToRawConfigAdapter implements RawConfig {
       basePath: configValue.basePath,
       ssl: configValue.ssl
     };
+  }
+
+  private static isNewPlatformConfig(configPath: ConfigPath) {
+    if (Array.isArray(configPath)) {
+      return configPath[0] === NEW_PLATFORM_CONFIG_ROOT;
+    }
+
+    return configPath.startsWith(NEW_PLATFORM_CONFIG_ROOT);
   }
 }

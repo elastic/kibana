@@ -1,4 +1,4 @@
-import { ConfigService, Env } from '../config';
+import { ConfigService, Env, NEW_PLATFORM_CONFIG_ROOT } from '../config';
 import { HttpModule, HttpConfig } from './http';
 import { ElasticsearchModule, ElasticsearchConfigs } from './elasticsearch';
 import { KibanaModule, KibanaConfig } from './kibana';
@@ -28,7 +28,7 @@ export class Server {
       ElasticsearchConfigs
     );
     const pluginsConfig$ = configService.atPath(
-      ['__newPlatform', 'plugins'],
+      [NEW_PLATFORM_CONFIG_ROOT, 'plugins'],
       PluginsConfig
     );
 
