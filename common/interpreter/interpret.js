@@ -4,6 +4,19 @@ import { getType } from '../lib/get_type';
 import { fromExpression } from '../lib/ast';
 import { typesRegistry } from '../lib/types_registry';
 
+const createError = (err, { name, context, args }) => ({
+  type: 'error',
+  error: {
+    stack: err.stack,
+    message: typeof err === 'string' ? err : err.message,
+  },
+  info: {
+    context,
+    args,
+    functionName: name,
+  },
+});
+
 export function interpretProvider(config) {
   const cast = castProvider(config.types);
   const { functions, onFunctionNotFound, handlers } = config;
@@ -33,28 +46,38 @@ export function interpretProvider(config) {
 
     const chain = clone(chainArr);
     const link = chain.shift(); // Every thing in the chain will always be a function right?
-    const name = link.function;
-    const args = link.arguments;
+    const { function: fnName, arguments: fnArgs } = link;
 
-    const fnDef = functions[name];
+    const fnDef = functions[fnName];
     if (!fnDef) {
       chain.unshift(link);
       return onFunctionNotFound({ type: 'expression', chain: chain }, context);
     }
 
     // TODO: handle errors here
-    return resolveArgs(name, context, args) // Resolve arguments before passing to function
+    return resolveArgs(fnName, context, fnArgs) // Resolve arguments before passing to function
     .then((resolvedArgs) => {
-      return invokeFunction(name, context, resolvedArgs) // Then invoke function with resolved arguments
-      .then(newContext => invokeChain(chain, newContext)) // Continue re-invoking chain until its empty
-      .catch(e => {
-        console.log(`common/interpret: Function "${name}" rejected`);
-        throw e;
+      return invokeFunction(fnName, context, resolvedArgs) // Then invoke function with resolved arguments
+      .then(newContext => {
+        // if something failed, just return the failure
+        if(getType(newContext) === 'error') {
+          console.log('error', newContext);
+          return newContext;
+        }
+
+        // Continue re-invoking chain until its empty
+        return invokeChain(chain, newContext);
+      })
+      .catch((err) => {
+        console.error(`common/interpret ${fnName}: invokeFunction rejected`);
+        // throw e;
+        return createError(err, { name: fnName, context, args: fnArgs });
       });
     })
-    .catch(e => {
-      console.log('common/interpret: Args rejected', e);
-      throw e;
+    .catch((err) => {
+      console.error(`common/interpret ${fnName}: resolveArgs rejected`, err);
+      // throw e;
+      return createError(err, { name: fnName, context, args: fnArgs });
     });
   }
 
@@ -63,7 +86,8 @@ export function interpretProvider(config) {
     const fnDef = functions[name];
     const acceptableContext =  cast(context, fnDef.context.types);
 
-    return fnDef.fn(acceptableContext, args, handlers).then((output) => {
+    return fnDef.fn(acceptableContext, args, handlers)
+    .then((output) => {
       // Validate that the function returned the type it said it would.
       // This isn't really required, but it keeps function developers honest.
       const returnType = getType(output);
@@ -83,7 +107,8 @@ export function interpretProvider(config) {
       }
 
       return output;
-    });
+    })
+    .catch(err => createError(err, { name: fnDef.name, context, args }));
   }
 
   // Processes the multi-valued AST argument values into arguments that can be passed to the function
