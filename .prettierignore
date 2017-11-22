@@ -1,6 +1,6 @@
-/node_modules
-/.git
-/package.json
+node_modules
+.git
+package.json
 
 /bin/*
 /config/*
