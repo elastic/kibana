@@ -1,8 +1,15 @@
 {
   "name": "kibana",
-  "description":
-    "Kibana is an open source (Apache Licensed), browser based analytics and search dashboard for Elasticsearch. Kibana is a snap to setup and start using. Kibana strives to be easy to get started with, while also being flexible and powerful, just like Elasticsearch.",
-  "keywords": ["kibana", "elasticsearch", "logstash", "analytics", "visualizations", "dashboards", "dashboarding"],
+  "description": "Kibana is an open source (Apache Licensed), browser based analytics and search dashboard for Elasticsearch. Kibana is a snap to setup and start using. Kibana strives to be easy to get started with, while also being flexible and powerful, just like Elasticsearch.",
+  "keywords": [
+    "kibana",
+    "elasticsearch",
+    "logstash",
+    "analytics",
+    "visualizations",
+    "dashboards",
+    "dashboarding"
+  ],
   "private": false,
   "version": "7.0.0-alpha1",
   "branch": "master",
@@ -14,9 +21,14 @@
   "bugs": {
     "url": "http://github.com/elastic/kibana/issues"
   },
-  "pre-commit": ["pre-commit"],
+  "pre-commit": [
+    "pre-commit"
+  ],
   "lint-staged": {
-    "*.js": ["prettier --write", "git add"]
+    "*.js": [
+      "prettier --write",
+      "git add"
+    ]
   },
   "license": "Apache-2.0",
   "author": "Rashid Khan <rashid.khan@elastic.co>",
@@ -51,7 +63,7 @@
     "build": "grunt build",
     "release": "grunt release",
     "start": "sh ./bin/kibana --dev",
-    "prettier": "./node_modules/prettier/bin/prettier.js \"./**/*.js\" --write",
+    "prettier": "prettier \"./**/*.js\" --write",
     "precommit": "node scripts/precommit_hook",
     "karma": "karma start",
     "elasticsearch": "grunt esvm:dev:keepalive",
@@ -214,8 +226,6 @@
     "yauzl": "2.7.0"
   },
   "devDependencies": {
-    "lint-staged": "5.0.0",
-    "prettier": "1.8.2",
     "@elastic/eslint-config-kibana": "0.14.0",
     "@elastic/eslint-import-resolver-kibana": "0.9.0",
     "@elastic/eslint-plugin-kibana-custom": "1.1.0",
@@ -274,6 +284,7 @@
     "keymirror": "0.1.1",
     "leadfoot": "1.7.1",
     "license-checker": "5.1.2",
+    "lint-staged": "5.0.0",
     "load-grunt-config": "0.19.2",
     "makelogs": "4.0.2",
     "marked-text-renderer": "0.1.0",
@@ -284,6 +295,7 @@
     "nock": "8.0.0",
     "node-sass": "4.5.3",
     "pixelmatch": "4.0.2",
+    "prettier": "1.8.2",
     "proxyquire": "1.7.10",
     "sass-loader": "6.0.6",
     "simple-git": "1.37.0",
