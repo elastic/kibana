@@ -9,3 +9,42 @@
   }
 
 }
+
+.autocomplete {
+  position: relative;
+
+  .autocompleteProposals {
+    border: @borderStyle;
+    background: @background;
+    position: absolute;
+    top: 32px;
+    z-index: 1;
+    box-shadow: 0px 4px 8px rgba(0,0,0,.1);
+    border-radius: 4px;
+
+    .autocompleteProposal {
+      border-bottom: @borderStyle;
+      padding: 0.5em;
+      color: black;
+      background: white;
+    }
+
+    .autocompleteProposal.active {
+      background: darkgray;
+      color: white;
+    }
+
+    .autocompleteProposal div {
+      display: inline-block;
+    }
+
+    .autocompleteProposal :first-child {
+      width: 100px;
+      font-weight: bold;
+    }
+  }
+
+  .autocompleteProposals.hidden {
+    display: none;
+  }
+}

@@ -54,7 +54,7 @@ function_name
 
 function_at_cursor = &{ return parseCursor; } prefix:function_name? cursor suffix:function_name? {
  return {
-  suggest: 'function',
+  $cursor$: true,
   prefix: prefix,
   suffix: suffix,
   location: location()
@@ -72,7 +72,7 @@ argument_assignment
 
  argument_at_cursor = &{ return parseCursor; } prefix:function_name? cursor suffix:function_name? {
   return {
-   suggest: 'argument',
+   $cursor$: true,
    prefix: prefix,
    suffix: suffix,
    location: location()
@@ -90,8 +90,8 @@ arg_list
   const orderedArgs = first ? [first, ...rest] : [];
   const args = {};
   orderedArgs.forEach((arg) => {
-   if (arg.suggest) {
-    args['$cursor$'] = arg;
+   if (arg.$cursor$) {
+    args.$cursor$ = arg;
    } else {
     args[arg.name] = args[arg.name] || [];
     args[arg.name].push(arg.value)

@@ -176,7 +176,7 @@ function peg$parse(input, options) {
       peg$c14 = function() { return parseCursor; },
       peg$c15 = function(prefix, suffix) {
        return {
-        suggest: 'function',
+        $cursor$: true,
         prefix: prefix,
         suffix: suffix,
         location: location()
@@ -190,7 +190,7 @@ function peg$parse(input, options) {
       peg$c19 = function(value) {return {name: '_', value: value}},
       peg$c20 = function(prefix, suffix) {
         return {
-         suggest: 'argument',
+         $cursor$: true,
          prefix: prefix,
          suffix: suffix,
          location: location()
@@ -204,8 +204,8 @@ function peg$parse(input, options) {
         const orderedArgs = first ? [first, ...rest] : [];
         const args = {};
         orderedArgs.forEach((arg) => {
-         if (arg.suggest) {
-          args['$cursor$'] = arg;
+         if (arg.$cursor$) {
+          args.$cursor$ = arg;
          } else {
           args[arg.name] = args[arg.name] || [];
           args[arg.name].push(arg.value)
