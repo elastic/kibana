@@ -4,6 +4,8 @@ import {
   getRootProperties
 } from '../../../server/mappings';
 
+import { isEqual } from 'lodash';
+
 /**
  *  Checks that the root type in the kibana index has all of the
  *  root properties specified by the kibanaIndexMappings.
@@ -31,12 +33,18 @@ export async function patchKibanaIndex(options) {
     return;
   }
 
-  const missingProperties = await getMissingRootProperties(currentMappingsDsl, kibanaIndexMappingsDsl);
-
-  const missingPropertyNames = Object.keys(missingProperties);
+  let autoUpdate = false;
+  let missingProperties = await getMissingRootProperties(currentMappingsDsl, kibanaIndexMappingsDsl);
+  let missingPropertyNames = Object.keys(missingProperties);
   if (!missingPropertyNames.length) {
     // all expected properties are in current mapping
-    return;
+    missingProperties = await getMissingFieldProperties(currentMappingsDsl, kibanaIndexMappingsDsl);
+    missingPropertyNames = Object.keys(missingProperties);
+    if (!missingPropertyNames.length) {
+      return;
+    }
+    autoUpdate = true;
+    console.log('Found missing properties', JSON.stringify(missingProperties));
   }
 
   // log about new properties
@@ -54,6 +62,27 @@ export async function patchKibanaIndex(options) {
     },
     update_all_types: true
   });
+
+  if (autoUpdate) {
+    log(['info', 'elasticsearch'], {
+      tmpl: `Running 'updateByQuery' to re-save saved objects to propogate mapping changes for types "<%= names.join('", "') %>"`,
+      names: missingPropertyNames
+    });
+
+    const bools = missingPropertyNames.map(type => ({ match: { type } }));
+    await callCluster('updateByQuery', {
+      conflicts: 'proceed',
+      index: indexName,
+      type: rootEsType,
+      body: {
+        query: {
+          bool: {
+            should: bools,
+          },
+        },
+      },
+    });
+  }
 }
 
 /**
@@ -105,6 +134,43 @@ async function getMissingRootProperties(currentMappingsDsl, expectedMappingsDsl)
   return Object.keys(expectedProps)
     .reduce((acc, prop) => {
       if (existingProps[prop]) {
+        return acc;
+      } else {
+        return { ...acc, [prop]: expectedProps[prop] };
+      }
+    }, {});
+}
+
+async function getMissingFieldProperties(currentMappingsDsl, expectedMappingsDsl) {
+  const expectedProps = getRootProperties(expectedMappingsDsl);
+  const existingProps = getRootProperties(currentMappingsDsl);
+
+  return Object.keys(expectedProps)
+    .reduce((acc, prop) => {
+      const expectedFieldProperties = expectedProps[prop].properties;
+      const existingFieldProperties = existingProps[prop].properties;
+
+      if (!expectedFieldProperties && !existingFieldProperties) {
+        return acc;
+      }
+
+      const fieldPropertiesMatch = Object.keys(expectedFieldProperties).every(fieldPropertyName => {
+        if (!existingFieldProperties[fieldPropertyName]) {
+          return false;
+        }
+
+        const expectedFieldPropertyMappings = expectedFieldProperties[fieldPropertyName];
+        const existingFieldPropertyMappings = existingFieldProperties[fieldPropertyName];
+
+        // Just do a raw object comparison - if there are differences, we need to update mappings
+        if (!isEqual(expectedFieldPropertyMappings, existingFieldPropertyMappings)) {
+          return false;
+        }
+
+        return true;
+      });
+
+      if (fieldPropertiesMatch) {
         return acc;
       } else {
         return { ...acc, [prop]: expectedProps[prop] };
