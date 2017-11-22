@@ -57,7 +57,6 @@ export default async function ({ readConfigFile }) {
       es: commonConfig.get('services.es'),
       esArchiver: commonConfig.get('services.esArchiver'),
       kibanaServer: commonConfig.get('services.kibanaServer'),
-      kibanaIndex: commonConfig.get('services.kibanaIndex'),
       retry: commonConfig.get('services.retry'),
       remote: RemoteProvider,
       filterBar: FilterBarProvider,

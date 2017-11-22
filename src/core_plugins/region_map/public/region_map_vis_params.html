@@ -34,10 +34,21 @@
           <option value=''>Select</option></select>
       </div>
     </div>
+    <div class="kuiSideBarFormRow">
+      <label class="kuiSideBarFormRow__label" for="displayWarnings">
+        Display warnings &nbsp;
+        <kbn-info info="Turns on/off warnings. When turned on, warning will be shown for each term that cannot be matched to a shape in the vector layer based on the join field. When turned off, these warnings will be turned off."></kbn-info>
+      </label>
+
+      <div class="kuiSideBarFormRow__control">
+        <input id="displayWarnings" type="checkbox" ng-model="vis.params.isDisplayWarning">
+      </div>
+    </div>
   </div>
 </div>
 
 <div class="kuiSideBarSection">
+
   <div class="kuiSideBarSectionTitle">
     <div class="kuiSideBarSectionTitle__text">Style settings</div>
   </div>
@@ -56,9 +67,12 @@
   </div>
 </div>
 
+
 <div class="kuiSideBarSection">
   <div class="kuiSideBarSectionTitle">
-    <div class="kuiSideBarSectionTitle__text">Basic settings</div>
+    <div class="kuiSideBarSectionTitle__text">
+      Base Layer Settings
+    </div>
   </div>
-  <vislib-basic-options></vislib-basic-options>
+  <wms-options></wms-options>
 </div>

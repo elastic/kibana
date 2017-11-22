@@ -188,6 +188,7 @@ export default () => Joi.object({
     }).default()
   }).default(),
   regionmap: Joi.object({
+    includeElasticMapsService: Joi.boolean().default(true),
     layers: Joi.array().items(Joi.object({
       url: Joi.string(),
       type: Joi.string(),
@@ -198,10 +199,6 @@ export default () => Joi.object({
         description: Joi.string()
       }))
     }))
-  }).default(),
-
-  savedObjects: Joi.object({
-    indexCheckTimeout: Joi.number().default(5000)
   }).default(),
 
   i18n: Joi.object({

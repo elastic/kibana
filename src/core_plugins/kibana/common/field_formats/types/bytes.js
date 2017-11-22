@@ -1,6 +1,8 @@
-import { Numeral } from './_numeral';
+import { createNumeralFormat } from './_numeral';
 
-export const BytesFormat = Numeral.factory({
-  id: 'bytes',
-  title: 'Bytes'
-});
+export function createBytesFormat(FieldFormat) {
+  return createNumeralFormat(FieldFormat, {
+    id: 'bytes',
+    title: 'Bytes'
+  });
+}

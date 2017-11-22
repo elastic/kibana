@@ -16,10 +16,18 @@ const join = (...uriComponents) => (
 const BATCH_INTERVAL = 100;
 
 export class SavedObjectsClient {
-  constructor($http, basePath = chrome.getBasePath(), PromiseCtor = Promise) {
+  constructor(options) {
+    const {
+      $http,
+      basePath = chrome.getBasePath(),
+      PromiseConstructor = Promise,
+      onCreateFailure = () => {},
+    } = options;
+
     this._$http = $http;
     this._apiBaseUrl = `${basePath}/api/saved_objects/`;
-    this._PromiseCtor = PromiseCtor;
+    this._PromiseCtor = PromiseConstructor;
+    this._onCreateFailure = onCreateFailure;
     this.batchQueue = [];
   }
 
@@ -40,9 +48,9 @@ export class SavedObjectsClient {
 
     const url = this._getUrl([type, options.id], _.pick(options, ['overwrite']));
 
-    return this._request('POST', url, { attributes }).then(resp => {
-      return this.createSavedObject(resp);
-    });
+    return this._request('POST', url, { attributes })
+      .catch(this._onCreateFailure)
+      .then(resp => this.createSavedObject(resp));
   }
 
   /**

@@ -1,5 +1,6 @@
 import _ from 'lodash';
-import { FieldFormatsService } from './field_formats/field_formats_service';
+import { FieldFormatsService } from './field_formats_service';
+import { FieldFormat } from './field_format';
 
 export function fieldFormatsMixin(kbnServer, server) {
   const fieldFormatClasses = [];
@@ -22,7 +23,7 @@ export function fieldFormatsMixin(kbnServer, server) {
     return new FieldFormatsService(fieldFormatClasses, getConfig);
   });
 
-  server.decorate('server', 'registerFieldFormatClass', (FieldFormat) => {
-    fieldFormatClasses.push(FieldFormat);
+  server.decorate('server', 'registerFieldFormat', (createFormat) => {
+    fieldFormatClasses.push(createFormat(FieldFormat));
   });
 }

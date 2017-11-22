@@ -28,6 +28,7 @@ module.factory('SavedDashboard', function (courier, config) {
           darkTheme: config.get('dashboard:defaultDarkTheme'),
           // for BWC reasons we can't default dashboards that already exist without this setting to true.
           useMargins: id ? false : true,
+          hidePanelTitles: false,
         }),
         uiStateJSON: '{}',
         version: 1,

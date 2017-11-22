@@ -81,6 +81,11 @@ export const getViewMode = dashboard => dashboard.view.viewMode;
 export const getFullScreenMode = dashboard => dashboard.view.isFullScreenMode;
 /**
  * @param dashboard {DashboardState}
+ * @return {boolean}
+ */
+export const getHidePanelTitles = dashboard => dashboard.view.hidePanelTitles;
+/**
+ * @param dashboard {DashboardState}
  * @return {string|undefined}
  */
 export const getMaximizedPanelId = dashboard => dashboard.view.maximizedPanelId;

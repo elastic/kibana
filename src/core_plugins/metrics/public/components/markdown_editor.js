@@ -115,8 +115,8 @@ class MarkdownEditor extends Component {
           <table className="table">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Value</th>
+                <th scope="col">Name</th>
+                <th scope="col">Value</th>
               </tr>
             </thead>
             <tbody>{rows}</tbody>

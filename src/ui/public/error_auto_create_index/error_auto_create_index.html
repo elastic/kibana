@@ -1,0 +1,42 @@
+<div class="app-container error-auto-create-index">
+  <h3 class="kuiVerticalRhythm">
+    <i aria-hidden="true" class="fa fa-warning text-danger"></i> Oh no!
+  </h3>
+
+  <p class="kuiVerticalRhythm">
+    It looks like your Elasticsearch cluster's <code>action.auto_create_index</code> setting is preventing Kibana from automatically creating an index to store saved objects. Kibana uses this Elasticsearch feature because it is the best way to make sure that the saved object index uses the correct mappings/schema, and it allows Kibana to poll Elasticsearch less often.
+  </p>
+
+  <p class="kuiVerticalRhythm">
+    Unfortunately, until this issue is fixed you won't be able to save anything in Kibana.
+  </p>
+
+  <h3 class="kuiVerticalRhythm">
+    Ok, how do I fix this?
+  </h3>
+
+  <ol class="kuiVerticalRhythm">
+    <li>Remove <code>action.auto_create_index: false</code> from your Elasticsearch configuration file</li>
+    <li>Restart elasticsearch.</li>
+    <li>Use the browser's back button to return to what you were doing.</li>
+  </ol>
+
+  <div class="kuiInfoPanel kuiInfoPanel--info kuiVerticalRhythm">
+    <div class="kuiInfoPanelHeader">
+      <span
+        class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--info fa-info"
+        aria-label="Info"
+        role="img"
+      ></span>
+      <span class="kuiInfoPanelHeader__title">
+        Note:
+      </span>
+    </div>
+
+    <div class="kuiInfoPanelBody">
+      <div class="kuiInfoPanelBody__message">
+        The <code>action.auto_create_index</code> can also define a whitelist of patterns where this feature should be enabled. We don't discuss how to use the setting that way here because it requires knowing all of the other plugins/interations that rely on the feature for the same reasons that Kibana does.
+      </div>
+    </div>
+  </div>
+</div>

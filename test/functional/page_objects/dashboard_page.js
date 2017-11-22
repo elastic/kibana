@@ -19,17 +19,18 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
   class DashboardPage {
     async initTests() {
-      const logstash = esArchiver.loadIfNeeded('logstash_functional');
+      log.debug('load kibana index with visualizations and log data');
+      await Promise.all([
+        esArchiver.load('dashboard'),
+        esArchiver.loadIfNeeded('logstash_functional')
+      ]);
+
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'UTC',
         'defaultIndex': 'logstash-*'
       });
 
-      log.debug('load kibana index with visualizations');
-      await esArchiver.load('dashboard');
-
       await PageObjects.common.navigateToApp('dashboard');
-      return logstash;
     }
 
     async clickEditVisualization() {
@@ -77,6 +78,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async clickExitFullScreenTextButton() {
       await testSubjects.click('exitFullScreenModeText');
+    }
+
+    async getDashboardIdFromCurrentUrl() {
+      const currentUrl = await remote.getCurrentUrl();
+      const urlSubstring = 'kibana#/dashboard/';
+      const startOfIdIndex = currentUrl.indexOf(urlSubstring) + urlSubstring.length;
+      const endIndex = currentUrl.indexOf('?');
+      return currentUrl.substring(startOfIdIndex, endIndex);
     }
 
     /**
