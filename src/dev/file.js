@@ -17,22 +17,22 @@ export class File {
     return this._ext === '.js';
   }
 
-  getParentDirs() {
-    const parent = dirname(this._relativePath);
-    if (parent === '.') {
-      return [];
-    }
+  getRelativeParentDirs() {
+    const parents = [];
 
-    const parents = [parent];
     while (true) {
-      // NOTE: resolve() produces absolute paths, so we have to use join()
-      const parentOfParent = join(parents[parents.length - 1], '..');
-      if (parentOfParent === '..' || parentOfParent === '.') {
+      const parent = parents.length
+        // NOTE: resolve() produces absolute paths, so we have to use join()
+        ? join(parents[parents.length - 1], '..')
+        : dirname(this._relativePath);
+
+      if (parent === '..' || parent === '.') {
         break;
       } else {
-        parents.push(parentOfParent);
+        parents.push(parent);
       }
     }
+
     return parents;
   }
 

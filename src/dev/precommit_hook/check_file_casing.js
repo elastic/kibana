@@ -31,7 +31,7 @@ function listFileNames(files) {
  * @return {string} pathToCheck
  */
 function getPathWithoutIgnoredParents(file) {
-  for (const parent of file.getParentDirs()) {
+  for (const parent of file.getRelativeParentDirs()) {
     if (matchesAnyGlob(parent, IGNORE_DIRECTORY_GLOBS)) {
       return relative(parent, file.getRelativePath());
     }
