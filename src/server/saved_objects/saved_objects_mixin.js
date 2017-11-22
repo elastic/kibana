@@ -6,7 +6,7 @@ import {
   createDeleteRoute,
   createFindRoute,
   createGetRoute,
-  createUpdateRoute
+  createUpdateRoute,
 } from './routes';
 
 export function savedObjectsMixin(kbnServer, server) {
@@ -15,7 +15,7 @@ export function savedObjectsMixin(kbnServer, server) {
       assign: 'savedObjectsClient',
       method(req, reply) {
         reply(req.getSavedObjectsClient());
-      }
+      },
     },
   };
 
@@ -30,30 +30,34 @@ export function savedObjectsMixin(kbnServer, server) {
     const adminCluster = server.plugins.elasticsearch.getCluster('admin');
 
     try {
-      await adminCluster.callWithInternalUser('cluster.health', {
-        timeout: `${server.config().get('savedObjects.indexCheckTimeout')}ms`,
-        index: server.config().get('kibana.index'),
-        waitForStatus: 'yellow',
+      const index = server.config().get('kibana.index');
+      await adminCluster.callWithInternalUser('indices.putTemplate', {
+        name: `kibana_index_template:${index}`,
+        body: {
+          template: index,
+          settings: {
+            number_of_shards: 1,
+          },
+          mappings: server.getKibanaIndexMappingsDsl(),
+        },
       });
     } catch (error) {
-      // This check is designed to emulate our planned index template move until
-      // we get there, and once we do the plan is to just post the index template
-      // and attempt the request.
-      //
-      // Because of this we only throw NotFound() when the status is red AND
-      // there are no shards. All other red statuses indicate real problems that
-      // will be described in better detail when the write fails.
-      if (
-        error &&
-        error.body &&
-        error.body.status === 'red' &&
-        !error.body.unassigned_shards &&
-        !error.body.initializing_shards &&
-        !error.body.delayed_unassigned_shards
-      ) {
-        server.log(['debug', 'savedObjects'], `Attempted to write to the Kibana index when it didn't exist.`);
-        throw new adminCluster.errors.NotFound();
-      }
+      server.log(['debug', 'savedObjects'], {
+        tmpl: 'Attempt to write indexTemplate for SavedObjects index failed: <%= err.message %>',
+        es: {
+          resp: error.body,
+          status: error.status,
+        },
+        err: {
+          message: error.message,
+          stack: error.stack,
+        },
+      });
+
+      // We reject with `es.ServiceUnavailable` because writing an index
+      // template is a very simple operation so if we get an error here
+      // then something must be very broken
+      throw new adminCluster.errors.ServiceUnavailable();
     }
   }
 

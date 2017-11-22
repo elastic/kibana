@@ -18,7 +18,10 @@ describe('SavedObjectsClient', () => {
 
   beforeEach(() => {
     $http = sandbox.stub();
-    savedObjectsClient = new SavedObjectsClient($http, basePath);
+    savedObjectsClient = new SavedObjectsClient({
+      $http,
+      basePath
+    });
   });
 
   afterEach(() => {
