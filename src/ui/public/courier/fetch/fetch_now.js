@@ -30,7 +30,7 @@ export function FetchNowProvider(Private, Promise) {
       if (!req.started) return req;
       return req.retry();
     }))
-    .catch(courierNotifier.fatal);
+      .catch(courierNotifier.fatal);
   }
 
   function fetchSearchResults(requests) {
@@ -40,32 +40,32 @@ export function FetchNowProvider(Private, Promise) {
 
     replaceAbortedRequests();
     return startRequests(requests)
-    .then(function () {
-      replaceAbortedRequests();
-      return callClient(requests);
-    })
-    .then(function (responses) {
-      replaceAbortedRequests();
-      return callResponseHandlers(requests, responses);
-    })
-    .then(function (responses) {
-      replaceAbortedRequests();
-      return continueIncomplete(requests, responses, fetchSearchResults);
-    })
-    .then(function (responses) {
-      replaceAbortedRequests();
-      return responses.map(function (resp) {
-        switch (resp) {
-          case ABORTED:
-            return null;
-          case DUPLICATE:
-          case INCOMPLETE:
-            throw new Error('Failed to clear incomplete or duplicate request from responses.');
-          default:
-            return resp;
-        }
+      .then(function () {
+        replaceAbortedRequests();
+        return callClient(requests);
+      })
+      .then(function (responses) {
+        replaceAbortedRequests();
+        return callResponseHandlers(requests, responses);
+      })
+      .then(function (responses) {
+        replaceAbortedRequests();
+        return continueIncomplete(requests, responses, fetchSearchResults);
+      })
+      .then(function (responses) {
+        replaceAbortedRequests();
+        return responses.map(function (resp) {
+          switch (resp) {
+            case ABORTED:
+              return null;
+            case DUPLICATE:
+            case INCOMPLETE:
+              throw new Error('Failed to clear incomplete or duplicate request from responses.');
+            default:
+              return resp;
+          }
+        });
       });
-    });
   }
 
   function startRequests(requests) {
@@ -78,7 +78,7 @@ export function FetchNowProvider(Private, Promise) {
         const action = req.started ? req.continue : req.start;
         resolve(action.call(req));
       })
-      .catch(err => req.handleFailure(err));
+        .catch(err => req.handleFailure(err));
     });
   }
 

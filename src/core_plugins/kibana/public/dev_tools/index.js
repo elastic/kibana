@@ -4,21 +4,21 @@ import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/r
 import 'plugins/kibana/dev_tools/directives/dev_tools_app';
 
 uiRoutes
-.when('/dev_tools', {
-  resolve: {
-    redirect(Private, kbnUrl) {
-      const items = Private(DevToolsRegistryProvider).inOrder;
-      kbnUrl.redirect(items[0].url.substring(1));
+  .when('/dev_tools', {
+    resolve: {
+      redirect(Private, kbnUrl) {
+        const items = Private(DevToolsRegistryProvider).inOrder;
+        kbnUrl.redirect(items[0].url.substring(1));
+      }
     }
-  }
-});
+  });
 
 FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'console',
     title: 'Console',
-    description: 'Manipulate your ES data directly with console.',
-    icon: '/plugins/kibana/assets/app_devtools.svg',
+    description: 'Skip cURL and use this JSON interface to work with your data directly.',
+    icon: '/plugins/kibana/assets/app_console.svg',
     path: '/app/kibana#/dev_tools/console',
     showOnHomePage: true,
     category: FeatureCatalogueCategory.ADMIN

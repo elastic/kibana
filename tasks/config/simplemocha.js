@@ -13,6 +13,7 @@ module.exports = {
       'src/**/__tests__/**/*.js',
       'tasks/**/__tests__/**/*.js',
       'test/fixtures/__tests__/*.js',
+      '!**/__tests__/fixtures/**/*',
       '!src/**/public/**',
       '!**/_*.js'
     ]

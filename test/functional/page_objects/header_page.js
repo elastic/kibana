@@ -54,13 +54,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async isTimepickerOpen() {
-      remote.setFindTimeout(2000);
-      try {
-        await remote.findDisplayedByCssSelector('.kbn-timepicker');
-        return true;
-      } catch (error) {
-        return false;
-      }
+      return await testSubjects.exists('timePicker');
     }
 
     async isAbsoluteSectionShowing() {
@@ -89,7 +83,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
         await this.showAbsoluteSection();
         remote.setFindTimeout(defaultFindTimeout);
         return await remote.findByCssSelector('input[ng-model=\'absolute.from\']')
-        .getProperty('value');
+          .getProperty('value');
       });
     }
 
@@ -100,7 +94,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
         await this.showAbsoluteSection();
         remote.setFindTimeout(defaultFindTimeout);
         return await remote.findByCssSelector('input[ng-model=\'absolute.to\']')
-        .getProperty('value');
+          .getProperty('value');
       });
     }
 
@@ -111,8 +105,8 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
         await this.showAbsoluteSection();
         remote.setFindTimeout(defaultFindTimeout);
         await remote.findByCssSelector('input[ng-model=\'absolute.from\']')
-        .clearValue()
-        .type(timeString);
+          .clearValue()
+          .type(timeString);
       });
     }
 
@@ -123,8 +117,8 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
         await this.showAbsoluteSection();
         remote.setFindTimeout(defaultFindTimeout);
         await remote.findByCssSelector('input[ng-model=\'absolute.to\']')
-        .clearValue()
-        .type(timeString);
+          .clearValue()
+          .type(timeString);
       });
     }
 
@@ -138,11 +132,14 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async ensureTimePickerIsOpen() {
+      log.debug('ensureTimePickerIsOpen');
       const isOpen = await this.isTimepickerOpen();
-      log.debug(`ensureTimePickerIsOpen: ${isOpen}`);
       if (!isOpen) {
-        log.debug('--Opening time picker');
-        await this.clickTimepicker();
+        await retry.try(async () => {
+          await this.clickTimepicker();
+          const isOpen = await this.isTimepickerOpen();
+          if (!isOpen) throw new Error('Time picker still not open, try again.');
+        });
       }
     }
 
@@ -164,7 +161,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       log.debug('--Clicking Quick button');
       await this.clickQuickButton();
       await remote.setFindTimeout(defaultFindTimeout)
-      .findByLinkText(quickTime).click();
+        .findByLinkText(quickTime).click();
     }
 
     async getToastMessage(findTimeout = defaultFindTimeout) {
@@ -185,7 +182,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       await retry.try(async () => {
         remote.setFindTimeout(defaultFindTimeout);
         await remote.findByCssSelector('button[ng-if="notif.accept"]')
-        .click();
+          .click();
       });
     }
 

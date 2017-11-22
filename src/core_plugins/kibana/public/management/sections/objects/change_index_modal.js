@@ -158,7 +158,7 @@ export class ChangeIndexModal extends React.Component {
               Please select the index patterns you&apos;d like re-associated them with.
             </p>
             { totalIndexPatterns > perPage
-              ?
+              ? (
                 <KuiControlledTable className="kuiVerticalRhythm">
                   <KuiToolBar>
                     <KuiToolBarSection>
@@ -175,8 +175,9 @@ export class ChangeIndexModal extends React.Component {
                   </KuiToolBar>
                   <TableComponent/>
                 </KuiControlledTable>
-              :
+              ) : (
                 <TableComponent/>
+              )
             }
           </KuiModalBody>
 

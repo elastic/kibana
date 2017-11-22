@@ -528,6 +528,13 @@ export class KibanaMap extends EventEmitter {
     this._updateExtent();
   }
 
+  setMinZoom(zoom) {
+    this._leafletMap.setMinZoom(zoom);
+  }
+
+  setMaxZoom(zoom) {
+    this._leafletMap.setMaxZoom(zoom);
+  }
 
   getLeafletBaseLayer() {
     return this._leafletBaseLayer;

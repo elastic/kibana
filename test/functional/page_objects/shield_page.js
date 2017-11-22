@@ -7,16 +7,16 @@ export function ShieldPageProvider({ getService }) {
   class ShieldPage {
     login(user, pwd) {
       return remote.setFindTimeout(defaultFindTimeout)
-      .findById('username')
-      .type(user)
-      .then(function () {
-        return remote.findById('password')
-        .type(pwd);
-      })
-      .then(function () {
-        return remote.findByCssSelector('button')
-        .click();
-      });
+        .findById('username')
+        .type(user)
+        .then(function () {
+          return remote.findById('password')
+            .type(pwd);
+        })
+        .then(function () {
+          return remote.findByCssSelector('button')
+            .click();
+        });
     }
   }
 

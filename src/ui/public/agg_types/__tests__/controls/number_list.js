@@ -66,9 +66,9 @@ describe('NumberList directive', function () {
         function () { return $el.find('input').first(); },
         ['up', 'up', 'up']
       )
-      .then(function () {
-        expect(onlyValidValues()).to.eql([4]);
-      });
+        .then(function () {
+          expect(onlyValidValues()).to.eql([4]);
+        });
     });
 
     it('shift-up increases by 0.1', function () {
@@ -90,9 +90,9 @@ describe('NumberList directive', function () {
         function () { return $el.find('input').first(); },
         seq
       )
-      .then(function () {
-        expect(onlyValidValues()).to.eql([5.1]);
-      });
+        .then(function () {
+          expect(onlyValidValues()).to.eql([5.1]);
+        });
     });
 
     it('down arrow decreases by 1', function () {
@@ -102,9 +102,9 @@ describe('NumberList directive', function () {
         function () { return $el.find('input').first(); },
         ['down', 'down', 'down']
       )
-      .then(function () {
-        expect(onlyValidValues()).to.eql([2]);
-      });
+        .then(function () {
+          expect(onlyValidValues()).to.eql([2]);
+        });
     });
 
     it('shift-down decreases by 0.1', function () {
@@ -126,9 +126,9 @@ describe('NumberList directive', function () {
         function () { return $el.find('input').first(); },
         seq
       )
-      .then(function () {
-        expect(onlyValidValues()).to.eql([4.8]);
-      });
+        .then(function () {
+          expect(onlyValidValues()).to.eql([4.8]);
+        });
     });
 
     it('maintains valid number', function () {
@@ -142,9 +142,9 @@ describe('NumberList directive', function () {
       const getEl = function () { return $el.find('input').eq(1); };
 
       return simulateKeys(getEl, seq)
-      .then(function () {
-        expect(onlyValidValues()).to.eql([9, 10, 13]);
-      });
+        .then(function () {
+          expect(onlyValidValues()).to.eql([9, 10, 13]);
+        });
     });
   });
 });

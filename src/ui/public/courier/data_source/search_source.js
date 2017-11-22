@@ -98,7 +98,7 @@ export function SearchSourceProvider(Promise, Private, config) {
     'size',
     'source',
     'version',
-    'fields',
+    'fields'
   ];
 
   SearchSource.prototype.index = function (indexPattern) {
@@ -227,9 +227,9 @@ export function SearchSourceProvider(Promise, Private, config) {
     if (typeof val === 'function') {
       const source = this;
       return Promise.cast(val(this))
-      .then(function (newVal) {
-        return source._mergeProp(state, newVal, key);
-      });
+        .then(function (newVal) {
+          return source._mergeProp(state, newVal, key);
+        });
     }
 
     if (val == null || !key || !_.isString(key)) return;
@@ -249,12 +249,12 @@ export function SearchSourceProvider(Promise, Private, config) {
         }
         // user a shallow flatten to detect if val is an array, and pull the values out if it is
         state.filters = _([ state.filters || [], verifiedFilters ])
-        .flatten()
-        // Yo Dawg! I heard you needed to filter out your filters
-        .reject(function (filter) {
-          return !filter || _.get(filter, 'meta.disabled');
-        })
-        .value();
+          .flatten()
+          // Yo Dawg! I heard you needed to filter out your filters
+          .reject(function (filter) {
+            return !filter || _.get(filter, 'meta.disabled');
+          })
+          .value();
         return;
       case 'index':
       case 'type':

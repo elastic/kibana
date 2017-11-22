@@ -6,6 +6,7 @@ module.exports = function () {
         '(BSD-2-Clause OR MIT)',
         '(GPL-2.0 OR MIT)',
         '(MIT AND CC-BY-3.0)',
+        '(MIT AND Zlib)',
         '(MIT OR Apache-2.0)',
         'AFLv2.1',
         'Apache 2.0',

@@ -19,12 +19,12 @@ Bluebird.longStackTraces();
 let active = false;
 
 uiModules
-.get('kibana')
-.config(function ($provide) {
-  $provide.decorator('Promise', function ($delegate) {
-    return active ? Bluebird : $delegate;
+  .get('kibana')
+  .config(function ($provide) {
+    $provide.decorator('Promise', function ($delegate) {
+      return active ? Bluebird : $delegate;
+    });
   });
-});
 
 function activate() { active = true; }
 function deactivate() { active = false; }

@@ -11,9 +11,6 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
     scope.timeRange = params.timeRange;
     scope.showSpyPanel = params.showSpyPanel;
     scope.editorMode = params.editorMode;
-    scope.$on('ready:vis', $event => {
-      $event.stopPropagation();
-    });
 
     const container = el instanceof $ ? el : $(el);
 

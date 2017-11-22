@@ -1,4 +1,5 @@
 import _ from 'lodash';
+
 import { DashboardConstants } from '../../../src/core_plugins/kibana/public/dashboard/dashboard_constants';
 
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
@@ -18,25 +19,27 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
   class DashboardPage {
     async initTests() {
-      const logstash = esArchiver.loadIfNeeded('logstash_functional');
+      log.debug('load kibana index with visualizations and log data');
+      await Promise.all([
+        esArchiver.load('dashboard'),
+        esArchiver.loadIfNeeded('logstash_functional')
+      ]);
+
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'UTC',
         'defaultIndex': 'logstash-*'
       });
 
-      log.debug('load kibana index with visualizations');
-      await esArchiver.load('dashboard');
-
       await PageObjects.common.navigateToApp('dashboard');
-      return logstash;
     }
 
     async clickEditVisualization() {
       log.debug('clickEditVisualization');
       await testSubjects.click('dashboardPanelToggleMenuIcon');
-      await testSubjects.click('dashboardPanelEditLink');
 
+      // Edit link may sometimes be disabled if the embeddable isn't rendered yet.
       await retry.try(async () => {
+        await testSubjects.click('dashboardPanelEditLink');
         const current = await remote.getCurrentUrl();
         if (current.indexOf('visualize') < 0) {
           throw new Error('not on visualize page');
@@ -75,6 +78,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async clickExitFullScreenTextButton() {
       await testSubjects.click('exitFullScreenModeText');
+    }
+
+    async getDashboardIdFromCurrentUrl() {
+      const currentUrl = await remote.getCurrentUrl();
+      const urlSubstring = 'kibana#/dashboard/';
+      const startOfIdIndex = currentUrl.indexOf(urlSubstring) + urlSubstring.length;
+      const endIndex = currentUrl.indexOf('?');
+      return currentUrl.substring(startOfIdIndex, endIndex);
     }
 
     /**
@@ -512,10 +523,18 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return _.map(filters, async (filter) => await filter.getVisibleText());
     }
 
+    async getPieSliceCount() {
+      log.debug('getPieSliceCount');
+      return await retry.try(async () => {
+        const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
+        return slices.length;
+      });
+    }
+
     async filterOnPieSlice() {
       log.debug('Filtering on a pie slice');
       await retry.try(async () => {
-        const slices = await find.allByCssSelector('svg > g > path.slice');
+        const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
         log.debug('Slices found:' + slices.length);
         return slices[0].click();
       });

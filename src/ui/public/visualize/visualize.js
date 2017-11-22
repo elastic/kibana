@@ -18,7 +18,7 @@ import {
 } from '../elasticsearch_errors';
 
 uiModules
-.get('kibana/directive', ['ngSanitize'])
+  .get('kibana/directive', ['ngSanitize'])
   .directive('visualize', function (Notifier, Private, timefilter, getAppState, Promise) {
     const notify = new Notifier({ location: 'Visualize' });
     const requestHandlers = Private(VisRequestHandlersRegistryProvider);
@@ -40,7 +40,7 @@ uiModules
         appState: '=?',
         uiState: '=?',
         savedId: '=?',
-        timeRange: '=?'
+        timeRange: '=?',
       },
       template: visualizeTemplate,
       link: async function ($scope, $el) {
@@ -52,6 +52,7 @@ uiModules
 
         $scope.vis = $scope.savedObj.vis;
         $scope.vis.visualizeScope = true;
+        $scope.vis.description = $scope.savedObj.description;
 
         if ($scope.timeRange) {
           $scope.vis.params.timeRange = {
@@ -89,36 +90,36 @@ uiModules
           if (!$scope.vis.initialized || !$scope.savedObj) return;
           // searchSource is only there for courier request handler
           requestHandler($scope.vis, $scope.appState, $scope.uiState, queryFilter, $scope.savedObj.searchSource)
-          .then(requestHandlerResponse => {
+            .then(requestHandlerResponse => {
 
             //No need to call the response handler when there have been no data nor has been there changes
             //in the vis-state (response handler does not depend on uiStat
-            const canSkipResponseHandler = (
-              $scope.previousRequestHandlerResponse && $scope.previousRequestHandlerResponse === requestHandlerResponse &&
+              const canSkipResponseHandler = (
+                $scope.previousRequestHandlerResponse && $scope.previousRequestHandlerResponse === requestHandlerResponse &&
               $scope.previousVisState && _.isEqual($scope.previousVisState, $scope.vis.getState())
-            );
+              );
 
-            $scope.previousVisState = $scope.vis.getState();
-            $scope.previousRequestHandlerResponse = requestHandlerResponse;
-            return canSkipResponseHandler ? $scope.visData : Promise.resolve(responseHandler($scope.vis, requestHandlerResponse));
-          }, e => {
-            $scope.savedObj.searchSource.cancelQueued();
-            $el.trigger('renderComplete');
-            if (isTermSizeZeroError(e)) {
-              return notify.error(
-                `Your visualization ('${$scope.vis.title}') has an error: it has a term ` +
+              $scope.previousVisState = $scope.vis.getState();
+              $scope.previousRequestHandlerResponse = requestHandlerResponse;
+              return canSkipResponseHandler ? $scope.visData : Promise.resolve(responseHandler($scope.vis, requestHandlerResponse));
+            }, e => {
+              $scope.savedObj.searchSource.cancelQueued();
+              $el.trigger('renderComplete');
+              if (isTermSizeZeroError(e)) {
+                return notify.error(
+                  `Your visualization ('${$scope.vis.title}') has an error: it has a term ` +
                 `aggregation with a size of 0. Please set it to a number greater than 0 to resolve ` +
                 `the error.`
-              );
-            }
-            notify.error(e);
-          })
-          .then(resp => {
-            $scope.visData = resp;
-            $scope.$apply();
-            $scope.$broadcast('render');
-            return resp;
-          });
+                );
+              }
+              notify.error(e);
+            })
+            .then(resp => {
+              $scope.visData = resp;
+              $scope.$apply();
+              $scope.$broadcast('render');
+              return resp;
+            });
         }, 100);
 
         //todo: clean this one up as well
@@ -138,9 +139,9 @@ uiModules
           $scope.fetch();
         };
         $scope.vis.on('reload', reload);
-      // auto reload will trigger this event
+        // auto reload will trigger this event
         $scope.$on('courier:searchRefresh', reload);
-      // dashboard will fire fetch event when it wants to refresh
+        // dashboard will fire fetch event when it wants to refresh
         $scope.$on('fetch', reload);
 
 
@@ -189,7 +190,7 @@ uiModules
         }, 200);
         resizeChecker.on('resize',  resizeFunc);
 
-      // visualize needs to know about timeFilter
+        // visualize needs to know about timeFilter
         $scope.$listen(timefilter, 'fetch', $scope.fetch);
         $scope.$on('renderComplete', () => {
           $el.trigger('renderComplete');
@@ -204,7 +205,6 @@ uiModules
         $scope.$watch('vis.initialized', $scope.fetch);
 
         $scope.fetch();
-        $scope.$root.$broadcast('ready:vis');
       }
     };
   });

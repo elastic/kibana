@@ -42,7 +42,7 @@ export class GuideDemo extends Component {
       js, // eslint-disable-line no-unused-vars
       html, // eslint-disable-line no-unused-vars
       css, // eslint-disable-line no-unused-vars
-      ...rest,
+      ...rest
     } = this.props;
 
     const classes = classNames('guideDemo', className, {

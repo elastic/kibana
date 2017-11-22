@@ -3,6 +3,9 @@ import _ from 'lodash';
 import Chainable from '../lib/classes/chainable';
 import toMS from '../lib/to_milliseconds.js';
 
+const validPositions = ['left', 'right', 'center'];
+const defaultPosition = 'center';
+
 export default new Chainable('movingaverage', {
   args: [
     {
@@ -19,7 +22,14 @@ export default new Chainable('movingaverage', {
     {
       name: 'position',
       types: ['string', 'null'],
-      help: 'Position of the averaged points relative to the result time.  Options are left, right, and center (default).'
+      help: `Position of the averaged points relative to the result time. One of: ${validPositions.join(', ')}`,
+      suggestions: validPositions.map(position => {
+        const suggestion = { name: position };
+        if (position === defaultPosition) {
+          suggestion.help = 'default';
+        }
+        return suggestion;
+      })
     }
   ],
   aliases: ['mvavg'],
@@ -39,8 +49,7 @@ export default new Chainable('movingaverage', {
         _window = Math.round(windowMilliseconds / intervalMilliseconds) || 1;
       }
 
-      _position = _position || 'center';
-      const validPositions = ['left', 'right', 'center'];
+      _position = _position || defaultPosition;
       if (!_.contains(validPositions, _position)) throw new Error('Valid positions are: ' + validPositions.join(', '));
 
       const pairs = eachSeries.data;
@@ -49,9 +58,9 @@ export default new Chainable('movingaverage', {
 
       function toPoint(point, pairSlice) {
         const average = _.chain(pairSlice)
-        .map(1).reduce(function (memo, num) {
-          return (memo + num);
-        }).value() / _window;
+          .map(1).reduce(function (memo, num) {
+            return (memo + num);
+          }).value() / _window;
 
         return [point[0], average];
       }

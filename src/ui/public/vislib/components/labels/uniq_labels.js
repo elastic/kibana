@@ -12,8 +12,8 @@ export function VislibComponentsLabelsUniqLabelsProvider() {
     }
 
     return _(arr)
-    .pluck('label')
-    .unique()
-    .value();
+      .pluck('label')
+      .unique()
+      .value();
   };
 }

@@ -112,29 +112,29 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
         // users to decide what they want to apply.
         if (filters.length > 1) {
           return mapFlattenAndWrapFilters(filters)
-          .then(function (results) {
-            extractTimeFilter(results).then(function (filter) {
-              $scope.changeTimeFilter = filter;
+            .then(function (results) {
+              extractTimeFilter(results).then(function (filter) {
+                $scope.changeTimeFilter = filter;
+              });
+              return results;
+            })
+            .then(filterOutTimeBasedFilter)
+            .then(function (results) {
+              $scope.newFilters = results;
             });
-            return results;
-          })
-          .then(filterOutTimeBasedFilter)
-          .then(function (results) {
-            $scope.newFilters = results;
-          });
         }
 
         // Just add single filters to the state.
         if (filters.length === 1) {
           Promise.resolve(filters).then(function (filters) {
             extractTimeFilter(filters)
-            .then(function (timeFilter) {
-              if (timeFilter) changeTimeFilter(timeFilter);
-            });
+              .then(function (timeFilter) {
+                if (timeFilter) changeTimeFilter(timeFilter);
+              });
             return filters;
           })
-          .then(filterOutTimeBasedFilter)
-          .then(addAndInvertFilters);
+            .then(filterOutTimeBasedFilter)
+            .then(addAndInvertFilters);
         }
       });
 

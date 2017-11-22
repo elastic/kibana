@@ -10,8 +10,8 @@ export function MonitoringPageProvider({ getService }) {
   class MonitoringPage {
     getWelcome() {
       return getRemote()
-      .findDisplayedByCssSelector('render-directive')
-      .getVisibleText();
+        .findDisplayedByCssSelector('render-directive')
+        .getVisibleText();
     }
 
     dismissWelcome() {
@@ -20,8 +20,8 @@ export function MonitoringPageProvider({ getService }) {
 
     getToasterContents() {
       return getRemote()
-      .findByCssSelector('div.toaster-container.ng-isolate-scope')
-      .getVisibleText();
+        .findByCssSelector('div.toaster-container.ng-isolate-scope')
+        .getVisibleText();
     }
 
     clickOptOut() {
