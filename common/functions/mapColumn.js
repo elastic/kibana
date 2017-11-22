@@ -15,12 +15,18 @@ export const mapColumn = {
     expression: {
       types: ['function'],
       aliases: ['exp', 'fn'],
-      help: 'A canvas expression which will be passed each row as a single row datatable',
+      help: 'A canvas expression which will be passed each row as a single row datatable unless you set context=false',
+    },
+    context: {
+      types: ['boolean'],
+      default: 'true',
+      help: 'Should I pass context into `expression`?',
     },
   },
   fn: (context, args) => {
     const rowPromises = context.rows.map(row => {
-      return args.expression({
+      return args.expression(!args.context ? null :
+      {
         type: 'datatable',
         columns: context.columns,
         rows: [row],

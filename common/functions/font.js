@@ -24,7 +24,6 @@ export const font = {
     },
     weight: {
       types: ['string'],
-      default: 'normal',
       help: 'normal, bold, bolder, lighter',
     },
     underline: {
@@ -39,7 +38,6 @@ export const font = {
     },
     align: {
       types: ['string'],
-      default: 'left',
       help: 'Horizontal text alignment',
     },
   },
@@ -50,9 +48,14 @@ export const font = {
       fontWeight: args.weight,
       fontStyle: args.italic ? 'italic' : 'normal',
       textDecoration: args.underline ? 'underline' : 'none',
-      textAlign: args.align,
     };
+
+    // conditionally apply styles based on input
     if (args.color) spec.color = args.color;
+    if (args.weight) spec.fontWeight = args.weight;
+    if (args.align) spec.textAlign = args.align;
+
+    // apply font size as a pixel setting
     if (args.size) spec.fontSize = `${args.size}px`;
 
     return {
