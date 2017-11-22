@@ -1,15 +1,8 @@
 {
   "name": "kibana",
-  "description": "Kibana is an open source (Apache Licensed), browser based analytics and search dashboard for Elasticsearch. Kibana is a snap to setup and start using. Kibana strives to be easy to get started with, while also being flexible and powerful, just like Elasticsearch.",
-  "keywords": [
-    "kibana",
-    "elasticsearch",
-    "logstash",
-    "analytics",
-    "visualizations",
-    "dashboards",
-    "dashboarding"
-  ],
+  "description":
+    "Kibana is an open source (Apache Licensed), browser based analytics and search dashboard for Elasticsearch. Kibana is a snap to setup and start using. Kibana strives to be easy to get started with, while also being flexible and powerful, just like Elasticsearch.",
+  "keywords": ["kibana", "elasticsearch", "logstash", "analytics", "visualizations", "dashboards", "dashboarding"],
   "private": false,
   "version": "7.0.0-alpha1",
   "branch": "master",
@@ -20,6 +13,10 @@
   "homepage": "https://www.elastic.co/products/kibana",
   "bugs": {
     "url": "http://github.com/elastic/kibana/issues"
+  },
+  "pre-commit": ["pre-commit"],
+  "lint-staged": {
+    "*.js": ["prettier --write", "git add"]
   },
   "license": "Apache-2.0",
   "author": "Rashid Khan <rashid.khan@elastic.co>",
@@ -54,6 +51,7 @@
     "build": "grunt build",
     "release": "grunt release",
     "start": "sh ./bin/kibana --dev",
+    "prettier": "./node_modules/prettier/bin/prettier.js \"./**/*.js\" --write",
     "precommit": "node scripts/precommit_hook",
     "karma": "karma start",
     "elasticsearch": "grunt esvm:dev:keepalive",
@@ -62,6 +60,7 @@
     "makelogs": "echo 'use `node scripts/makelogs`' && false",
     "mocha": "echo 'use `node scripts/mocha`' && false",
     "sterilize": "grunt sterilize",
+    "pre-commit": "lint-staged",
     "uiFramework:start": "grunt uiFramework:start",
     "uiFramework:build": "grunt uiFramework:build",
     "uiFramework:createComponent": "yo ./ui_framework/generator-kui/app/component.js",
@@ -215,6 +214,8 @@
     "yauzl": "2.7.0"
   },
   "devDependencies": {
+    "lint-staged": "5.0.0",
+    "prettier": "1.8.2",
     "@elastic/eslint-config-kibana": "0.14.0",
     "@elastic/eslint-import-resolver-kibana": "0.9.0",
     "@elastic/eslint-plugin-kibana-custom": "1.1.0",
