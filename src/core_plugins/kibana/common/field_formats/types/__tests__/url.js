@@ -1,5 +1,8 @@
 import expect from 'expect.js';
-import { UrlFormat } from '../url';
+import { createUrlFormat } from '../url';
+import { FieldFormat } from '../../../../../../ui/field_formats/field_format';
+
+const UrlFormat = createUrlFormat(FieldFormat);
 
 describe('UrlFormat', function () {
 
