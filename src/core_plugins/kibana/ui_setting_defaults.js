@@ -1,8 +1,12 @@
 import moment from 'moment-timezone';
+import numeralLanguages from '@elastic/numeral/languages';
 
 export function getUiSettingDefaults() {
   const weekdays = moment.weekdays().slice();
   const [defaultWeekday] = weekdays;
+  const numeralLanguageIds = numeralLanguages.map(function (numeralLanguage) {
+    return numeralLanguage.id;
+  });
 
   // wrapped in provider so that a new instance is given to each app/test
   return {
@@ -236,6 +240,12 @@ export function getUiSettingDefaults() {
       type: 'string',
       value: '($0,0.[00])',
       description: 'Default <a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">numeral format</a> for the "currency" format'
+    },
+    'format:number:defaultLocale': {
+      value: 'en',
+      type: 'select',
+      options: numeralLanguageIds,
+      description: '<a href="http://numeraljs.com/" target="_blank" rel="noopener">numeral language</a>'
     },
     'savedObjects:perPage': {
       type: 'number',
