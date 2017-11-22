@@ -4,13 +4,14 @@ import { FormControl } from 'react-bootstrap';
 
 export const SimpleMathFunction = ({ onChange, value, inputRef }) => {
   const options = [
-    'median',
-    'mean',
-    'sum',
-    'min',
-    'max',
-    'mode',
-    'size',
+    { label: 'Value', value: '' },
+    { label: 'Average', value: 'mean' },
+    { label: 'Sum', value: 'sum' },
+    { label: 'Count', value: 'size' },
+    { label: 'Max', value: 'max' },
+    { label: 'Min', value: 'min' },
+    { label: 'Median', value: 'median' },
+    { label: 'Mode', value: 'mode' },
   ];
 
   const onSelect = (ev) => onChange(ev.target.value);
@@ -24,8 +25,9 @@ export const SimpleMathFunction = ({ onChange, value, inputRef }) => {
         onChange={onSelect}
         inputRef={inputRef}
       >
-        <option value="">value</option>
-        { options.map(option => (<option key={option} value={option}>{option}</option>))}
+        { options.map(option => (
+          <option key={option.value} value={option.value}>{option.label}</option>
+        ))}
       </FormControl>
     </div>
   );
