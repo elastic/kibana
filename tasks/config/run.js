@@ -1,17 +1,21 @@
 import { esTestConfig } from '../../src/test_utils/es';
 import { kibanaTestServerUrlParts } from '../../test/kibana_test_server_url_parts';
-import { resolve } from 'path';
+import { resolve, join } from 'path';
+import { platform as getPlatform } from 'os';
 
 const SECOND = 1000;
 const MINUTE = 60 * SECOND;
 const HOUR = 60 * MINUTE;
+const PLATFORM = getPlatform();
 
 module.exports = function (grunt) {
-  const platform = require('os').platform();
-  const binScript =  /^win/.test(platform) ? '.\\bin\\kibana.bat' : './bin/kibana';
-  const buildScript =  /^win/.test(platform) ? '.\\build\\kibana\\bin\\kibana.bat' : './build/kibana/bin/kibana';
+  const binScript =  `node`;
   const pkgVersion = grunt.config.get('pkg.version');
   const releaseBinScript = `./build/kibana-${pkgVersion}-linux-x86_64/bin/kibana`;
+  const optimizeScript = /^win/.test(PLATFORM) ? '.\\build\\kibana\\bin\\kibana.bat' : './build/kibana/bin/kibana';
+  const binArgs = [
+    join('scripts', 'kibana'),
+  ];
 
   const stdDevArgs = [
     '--env.name=development',
@@ -33,6 +37,14 @@ module.exports = function (grunt) {
   }, []);
 
   return {
+    eslint: {
+      cmd: process.execPath,
+      args: [
+        require.resolve('../../scripts/eslint'),
+        '--no-cache'
+      ]
+    },
+
     testServer: {
       options: {
         wait: false,
@@ -42,6 +54,7 @@ module.exports = function (grunt) {
       },
       cmd: binScript,
       args: [
+        ...binArgs,
         ...buildTestsArgs,
         '--server.port=5610',
         ...kbnServerFlags,
@@ -57,6 +70,7 @@ module.exports = function (grunt) {
       },
       cmd: binScript,
       args: [
+        ...binArgs,
         ...stdDevArgs,
         '--optimize.enabled=false',
         '--elasticsearch.url=' + esTestConfig.getUrl(),
@@ -76,6 +90,7 @@ module.exports = function (grunt) {
       },
       cmd: binScript,
       args: [
+        ...binArgs,
         ...stdDevArgs,
         '--dev',
         '--no-base-path',
@@ -96,6 +111,7 @@ module.exports = function (grunt) {
       },
       cmd: binScript,
       args: [
+        ...binArgs,
         ...stdDevArgs,
         '--server.port=' + kibanaTestServerUrlParts.port,
         '--elasticsearch.url=' + esTestConfig.getUrl(),
@@ -128,6 +144,7 @@ module.exports = function (grunt) {
       },
       cmd: binScript,
       args: [
+        ...binArgs,
         ...stdDevArgs,
         '--server.port=' + kibanaTestServerUrlParts.port,
         '--elasticsearch.url=' + esTestConfig.getUrl(),
@@ -149,6 +166,7 @@ module.exports = function (grunt) {
       },
       cmd: binScript,
       args: [
+        ...binArgs,
         ...buildTestsArgs,
         '--server.port=5610',
         '--tests_bundle.instrument=true',
@@ -165,6 +183,7 @@ module.exports = function (grunt) {
       },
       cmd: binScript,
       args: [
+        ...binArgs,
         ...buildTestsArgs,
         '--dev',
         '--no-watch',
@@ -183,7 +202,7 @@ module.exports = function (grunt) {
         ready: /Optimization .+ complete/,
         quiet: true
       },
-      cmd: buildScript,
+      cmd: optimizeScript,
       args: [
         '--env.name=production',
         '--logging.json=false',

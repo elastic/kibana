@@ -3,7 +3,6 @@ import { resolve } from 'path';
 import _ from 'lodash';
 import Boom from 'boom';
 import Hapi from 'hapi';
-import getDefaultRoute from './get_default_route';
 import versionCheckMixin from './version_check';
 import { handleShortUrlError } from './short_url_error';
 import { shortUrlAssertValid } from './short_url_assert_valid';
@@ -98,11 +97,10 @@ export default async function (kbnServer, server, config) {
   server.route({
     path: '/',
     method: 'GET',
-    handler: function (req, reply) {
-      return reply.view('root_redirect', {
-        hashRoute: `${config.get('server.basePath')}/app/kibana`,
-        defaultRoute: getDefaultRoute(kbnServer),
-      });
+    handler(req, reply) {
+      const basePath = config.get('server.basePath');
+      const defaultRoute = config.get('server.defaultRoute');
+      reply.redirect(`${basePath}${defaultRoute}`);
     }
   });
 
@@ -119,7 +117,7 @@ export default async function (kbnServer, server, config) {
         search: req.url.search,
         pathname: pathPrefix + path.slice(0, -1),
       }))
-      .permanent(true);
+        .permanent(true);
     }
   });
 
@@ -169,4 +167,4 @@ export default async function (kbnServer, server, config) {
   kbnServer.mixin(versionCheckMixin);
 
   return kbnServer.mixin(xsrfMixin);
-};
+}

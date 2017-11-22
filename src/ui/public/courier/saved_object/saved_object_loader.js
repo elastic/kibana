@@ -21,7 +21,9 @@ export class SavedObjectLoader {
       nouns: `${ this.lowercaseType }s`,
     };
 
-    this.savedObjectsClient = new SavedObjectsClient($http);
+    this.savedObjectsClient = new SavedObjectsClient({
+      $http
+    });
   }
 
   /**
@@ -96,12 +98,12 @@ export class SavedObjectLoader {
         page: 1,
         searchFields: ['title^3', 'description']
       }).then((resp) => {
-        return {
-          total: resp.total,
-          hits: resp.savedObjects
-            .map((savedObject) => this.mapSavedObjectApiHits(savedObject))
-        };
-      });
+      return {
+        total: resp.total,
+        hits: resp.savedObjects
+          .map((savedObject) => this.mapSavedObjectApiHits(savedObject))
+      };
+    });
   }
 
   find(search = '', size = 100) {

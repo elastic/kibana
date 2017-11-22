@@ -2,13 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {
   KuiPopover,
-  KuiContextMenuPanel,
+  KuiContextMenu,
   KuiKeyboardAccessible,
 } from 'ui_framework/components';
 
-import { EditMenuItem } from './edit_menu_item';
-import { DeleteMenuItem } from './delete_menu_item';
-import { ExpandOrCollapseMenuItem } from './expand_or_collapse_menu_item';
+import { PanelOptionsMenuForm } from './panel_options_menu_form';
 
 export class PanelOptionsMenu extends React.Component {
   state = {
@@ -35,23 +33,74 @@ export class PanelOptionsMenu extends React.Component {
     this.props.toggleExpandedPanel();
   };
 
-  renderItems() {
-    const items = [
-      <EditMenuItem
-        key="0"
-        onEditPanel={this.onEditPanel}
-      />,
-      <ExpandOrCollapseMenuItem
-        key="2"
-        onToggleExpand={this.onToggleExpandPanel}
-        isExpanded={this.props.isExpanded}
-      />
+  buildMainMenuPanel() {
+    const { isExpanded } = this.props;
+    const mainPanelMenuItems = [
+      {
+        name: 'Edit visualization',
+        'data-test-subj': 'dashboardPanelEditLink',
+        icon: <span
+          aria-hidden="true"
+          className="kuiButton__icon kuiIcon fa-edit"
+        />,
+        onClick: this.props.editUrl ? this.onEditPanel : undefined,
+      },
+      {
+        name: 'Customize panel',
+        'data-test-subj': 'dashboardPanelOptionsSubMenuLink',
+        icon: <span
+          aria-hidden="true"
+          className="kuiButton__icon kuiIcon fa-edit"
+        />,
+        panel: 'panelSubOptionsMenu',
+      },
+      {
+        name: isExpanded ? 'Minimize' : 'Full screen',
+        'data-test-subj': 'dashboardPanelExpandIcon',
+        icon: <span
+          aria-hidden="true"
+          className={`kuiButton__icon kuiIcon ${isExpanded ? 'fa-compress' : 'fa-expand'}`}
+        />,
+        onClick: this.onToggleExpandPanel,
+      }
     ];
     if (!this.props.isExpanded) {
-      items.push(<DeleteMenuItem key="3" onDeletePanel={this.onDeletePanel} />);
+      mainPanelMenuItems.push({
+        name: 'Delete from dashboard',
+        'data-test-subj': 'dashboardPanelRemoveIcon',
+        icon: <span
+          aria-hidden="true"
+          className="kuiButton__icon kuiIcon fa-trash"
+        />,
+        onClick: this.onDeletePanel,
+      });
     }
 
-    return items;
+    return {
+      title: 'Options',
+      id: 'mainMenu',
+      items: mainPanelMenuItems,
+    };
+  }
+
+  buildPanelOptionsSubMenu() {
+    return {
+      title: 'Customize panel',
+      id: 'panelSubOptionsMenu',
+      content: <PanelOptionsMenuForm
+        onReset={this.props.onResetPanelTitle}
+        onUpdatePanelTitle={this.props.onUpdatePanelTitle}
+        title={this.props.panelTitle}
+        onClose={this.closePopover}
+      />,
+    };
+  }
+
+  renderPanels() {
+    return [
+      this.buildMainMenuPanel(),
+      this.buildPanelOptionsSubMenu(),
+    ];
   }
 
   render() {
@@ -74,10 +123,11 @@ export class PanelOptionsMenu extends React.Component {
         closePopover={this.closePopover}
         panelPaddingSize="none"
         anchorPosition="right"
+        withTitle
       >
-        <KuiContextMenuPanel
-          onClose={this.closePopover}
-          items={this.renderItems()}
+        <KuiContextMenu
+          initialPanelId="mainMenu"
+          panels={this.renderPanels()}
         />
       </KuiPopover>
     );
@@ -85,7 +135,10 @@ export class PanelOptionsMenu extends React.Component {
 }
 
 PanelOptionsMenu.propTypes = {
-  editUrl: PropTypes.string.isRequired,
+  panelTitle: PropTypes.string,
+  onUpdatePanelTitle: PropTypes.func.isRequired,
+  onResetPanelTitle: PropTypes.func.isRequired,
+  editUrl: PropTypes.string, // May be empty if the embeddable is still loading
   toggleExpandedPanel: PropTypes.func.isRequired,
   isExpanded: PropTypes.bool.isRequired,
   onDeletePanel: PropTypes.func, // Not available when the panel is expanded.

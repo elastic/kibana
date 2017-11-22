@@ -177,12 +177,12 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
 
   function fetchFields(indexPattern) {
     return Promise.resolve()
-    .then(() => fieldsFetcher.fetch(indexPattern))
-    .then(fields => {
-      const scripted = indexPattern.getScriptedFields();
-      const all = fields.concat(scripted);
-      initFields(indexPattern, all);
-    });
+      .then(() => fieldsFetcher.fetch(indexPattern))
+      .then(fields => {
+        const scripted = indexPattern.getScriptedFields();
+        const all = fields.concat(scripted);
+        initFields(indexPattern, all);
+      });
   }
 
   class IndexPattern {
@@ -391,17 +391,17 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
             const confirmMessage = 'Are you sure you want to overwrite this?';
 
             return confirmModalPromise(confirmMessage, { confirmButtonText: 'Overwrite' })
-            .then(() => Promise
-              .try(() => {
-                const cached = patternCache.get(this.id);
-                if (cached) {
-                  return cached.then(pattern => pattern.destroy());
-                }
-              })
-              .then(() => savedObjectsClient.create(type, body, { id: this.id, overwrite: true }))
-              .then(response => setId(this, response.id)),
+              .then(() => Promise
+                .try(() => {
+                  const cached = patternCache.get(this.id);
+                  if (cached) {
+                    return cached.then(pattern => pattern.destroy());
+                  }
+                })
+                .then(() => savedObjectsClient.create(type, body, { id: this.id, overwrite: true }))
+                .then(response => setId(this, response.id)),
               _.constant(false) // if the user doesn't overwrite, resolve with false
-            );
+              );
           });
       });
     }
@@ -413,21 +413,21 @@ export function IndexPatternProvider(Private, config, Promise, confirmModalPromi
 
     refreshFields() {
       return fetchFields(this)
-      .then(() => this.save())
-      .catch((err) => {
-        notify.error(err);
-        // https://github.com/elastic/kibana/issues/9224
-        // This call will attempt to remap fields from the matching
-        // ES index which may not actually exist. In that scenario,
-        // we still want to notify the user that there is a problem
-        // but we do not want to potentially make any pages unusable
-        // so do not rethrow the error here
-        if (err instanceof IndexPatternMissingIndices) {
-          return [];
-        }
+        .then(() => this.save())
+        .catch((err) => {
+          notify.error(err);
+          // https://github.com/elastic/kibana/issues/9224
+          // This call will attempt to remap fields from the matching
+          // ES index which may not actually exist. In that scenario,
+          // we still want to notify the user that there is a problem
+          // but we do not want to potentially make any pages unusable
+          // so do not rethrow the error here
+          if (err instanceof IndexPatternMissingIndices) {
+            return [];
+          }
 
-        throw err;
-      });
+          throw err;
+        });
     }
 
     toJSON() {

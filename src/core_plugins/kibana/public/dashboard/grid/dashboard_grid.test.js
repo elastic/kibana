@@ -59,4 +59,3 @@ test('renders DashboardGrid with no visualizations', () => {
   const component = shallow(<DashboardGrid {...getProps({ panels: {} })} />);
   expect(component).toMatchSnapshot();
 });
-

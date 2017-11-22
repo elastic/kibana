@@ -29,8 +29,8 @@ describe('uiSettings/routes', function () {
   this.timeout(10000);
 
   before(startServers);
-  describe('doc exists', docExistsSuite);
-  describe('doc missing', docMissingSuite);
   describe('index missing', indexMissingSuite);
+  describe('doc missing', docMissingSuite);
+  describe('doc exists', docExistsSuite);
   after(stopServers);
 });

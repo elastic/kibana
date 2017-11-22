@@ -9,16 +9,16 @@ import contextAppRouteTemplate from './index.html';
 
 
 uiRoutes
-.when('/context/:indexPatternId/:type/:id*', {
-  controller: ContextAppRouteController,
-  controllerAs: 'contextAppRoute',
-  resolve: {
-    indexPattern: function ($route, courier) {
-      return courier.indexPatterns.get($route.current.params.indexPatternId);
+  .when('/context/:indexPatternId/:type/:id*', {
+    controller: ContextAppRouteController,
+    controllerAs: 'contextAppRoute',
+    resolve: {
+      indexPattern: function ($route, courier) {
+        return courier.indexPatterns.get($route.current.params.indexPatternId);
+      },
     },
-  },
-  template: contextAppRouteTemplate,
-});
+    template: contextAppRouteTemplate,
+  });
 
 
 function ContextAppRouteController(

@@ -11,7 +11,7 @@ import 'ui/vis/map/service_settings';
 
 const module = uiModules.get('kibana/region_map', ['kibana']);
 module.controller('KbnRegionMapController', function ($scope, $element, Private, Notifier, getAppState,
-                                                       serviceSettings, config) {
+  serviceSettings, config) {
 
   const DEFAULT_ZOOM_SETTINGS = {
     zoom: 2,
@@ -32,7 +32,6 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
   });
 
   $scope.$watch('esResponse', async function (tableGroup) {
-
     kibanaMapReady.then(() => {
 
       let results;
@@ -52,7 +51,6 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
       }
 
       updateChoroplethLayer($scope.vis.params.selectedLayer.url, $scope.vis.params.selectedLayer.attribution);
-
       const metricsAgg = _.first($scope.vis.getAggConfig().bySchemaName.metric);
       choroplethLayer.setMetrics(results, metricsAgg);
       setTooltipFormatter();
@@ -78,6 +76,10 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
       choroplethLayer.setColorRamp(truncatedColorMaps[visParams.colorSchema]);
       setTooltipFormatter();
 
+
+      updateBaseLayer(visParams);
+
+
       kibanaMap.setShowTooltip(visParams.addTooltip);
       kibanaMap.setLegendPosition(visParams.legendPosition);
       kibanaMap.useUiStateFromVisualization($scope.vis);
@@ -86,25 +88,44 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
     });
   });
 
-  async function makeKibanaMap() {
+  async function updateBaseLayer(visParams) {
     const tmsSettings = await serviceSettings.getTMSService();
-    const minMaxZoom = tmsSettings.getMinMaxZoom(false);
+    let baseLayerOptions;
+    let minMaxZoom;
+    if (visParams.wms.enabled) {
+      minMaxZoom = tmsSettings.getMinMaxZoom(true);
+      baseLayerOptions = {
+        baseLayerType: 'wms',
+        options: {
+          minZoom: minMaxZoom.minZoom,
+          maxZoom: minMaxZoom.maxZoom,
+          url: visParams.wms.url,
+          ...visParams.wms.options
+        }
+      };
+    } else {
+      minMaxZoom = tmsSettings.getMinMaxZoom(false);
+      const tmsUrl = tmsSettings.getUrl();
+      const tmsOptions = tmsSettings.getTMSOptions();
+      baseLayerOptions = { baseLayerType: 'tms', options: { tmsUrl, ...tmsOptions } };
+    }
+    kibanaMap.setMinZoom(minMaxZoom.minZoom);
+    kibanaMap.setMaxZoom(minMaxZoom.maxZoom);
+    kibanaMap.setBaseLayer(baseLayerOptions);
+  }
 
-    const options = { ...minMaxZoom };
+  async function makeKibanaMap() {
+    const options = {};
     const uiState = $scope.vis.getUiState();
     const zoomFromUiState = parseInt(uiState.get('mapZoom'));
     const centerFromUIState = uiState.get('mapCenter');
     options.zoom = !isNaN(zoomFromUiState) ? zoomFromUiState : DEFAULT_ZOOM_SETTINGS.zoom;
     options.center = centerFromUIState ? centerFromUIState : DEFAULT_ZOOM_SETTINGS.mapCenter;
     kibanaMap = new KibanaMap($element[0], options);
-
-
-    const tmsUrl = tmsSettings.getUrl();
-    const tmsOptions = tmsSettings.getTMSOptions();
-    kibanaMap.setBaseLayer({ baseLayerType: 'tms', options: { tmsUrl, ...tmsOptions } });
     kibanaMap.addLegendControl();
     kibanaMap.addFitControl();
     kibanaMap.persistUiStateForVisualization($scope.vis);
+    await updateBaseLayer($scope.vis.params);
   }
 
   function setTooltipFormatter() {
@@ -136,11 +157,12 @@ module.controller('KbnRegionMapController', function ($scope, $element, Private,
       $scope.vis.API.events.filter({ point: { aggConfigResult: aggConfigResult } });
     });
     choroplethLayer.on('styleChanged', function (event) {
-      if (event.mismatches.length > 0 && config.get('visualization:regionmap:showWarnings')) {
+      const shouldShowWarning = $scope.vis.params.isDisplayWarning && config.get('visualization:regionmap:showWarnings');
+      if (event.mismatches.length > 0 && shouldShowWarning) {
         notify.warning(
           `Could not show ${event.mismatches.length} ${event.mismatches.length > 1 ? 'results' : 'result'} on the map.`
-            + ` To avoid this, ensure that each term can be joined to a corresponding shape on that shape's join field.`
-          + ` Could not join following terms: ${event.mismatches.join(',')}`
+          + ` To avoid this, ensure that each term can be matched to a corresponding shape on that shape's join field.`
+          + ` Could not match following terms: ${event.mismatches.join(',')}`
         );
       }
     });

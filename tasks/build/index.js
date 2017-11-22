@@ -20,6 +20,7 @@ module.exports = function (grunt) {
       '_build:removePkgJsonDeps',
       'clean:testsFromModules',
       'clean:examplesFromModules',
+      '_build:copyNode',
       'run:optimizeBuild',
       'stop:optimizeBuild',
       '_build:versionedLinks',

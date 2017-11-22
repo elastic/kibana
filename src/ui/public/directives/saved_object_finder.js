@@ -262,15 +262,21 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
         if (prevSearch === filter) return;
 
         prevSearch = filter;
+
+        const isLabsEnabled = config.get('visualize:enableLabs');
         self.service.find(filter)
-        .then(function (hits) {
-          // ensure that we don't display old results
-          // as we can't really cancel requests
-          if (currentFilter === filter) {
-            self.hitCount = hits.total;
-            self.hits = _.sortBy(hits.hits, 'title');
-          }
-        });
+          .then(function (hits) {
+
+            hits.hits = hits.hits.filter((hit) => (isLabsEnabled || !hit.type.stage === 'lab'));
+            hits.total = hits.hits.length;
+
+            // ensure that we don't display old results
+            // as we can't really cancel requests
+            if (currentFilter === filter) {
+              self.hitCount = hits.total;
+              self.hits = _.sortBy(hits.hits, 'title');
+            }
+          });
       }
     }
   };

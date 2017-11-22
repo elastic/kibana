@@ -50,7 +50,10 @@ export default new Chainable('yaxis', {
     {
       name: 'units',
       types: ['string', 'null'],
-      help: 'The function to use for formatting y-axis labels. One of: ' + _.values(tickFormatters).join(', ')
+      help: `The function to use for formatting y-axis labels. One of: ${_.values(tickFormatters).join(', ')}`,
+      suggestions: _.keys(tickFormatters).map(key => {
+        return { name: key, help: tickFormatters[key] };
+      })
     },
     {
       name: 'tickDecimals',

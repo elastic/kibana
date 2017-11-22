@@ -13,21 +13,21 @@ export function Home({ addBasePath, directories }) {
 
   const renderDirectories = (category) => {
     return directories
-    .filter((directory) => {
-      return directory.showOnHomePage && directory.category === category;
-    })
-    .map((directory) => {
-      return (
-        <KuiFlexItem style={{ minHeight: 64 }} key={directory.id}>
-          <Synopsis
-            description={directory.description}
-            iconUrl={addBasePath(directory.icon)}
-            title={directory.title}
-            url={addBasePath(directory.path)}
-          />
-        </KuiFlexItem>
-      );
-    });
+      .filter((directory) => {
+        return directory.showOnHomePage && directory.category === category;
+      })
+      .map((directory) => {
+        return (
+          <KuiFlexItem style={{ minHeight: 64 }} key={directory.id}>
+            <Synopsis
+              description={directory.description}
+              iconUrl={addBasePath(directory.icon)}
+              title={directory.title}
+              url={addBasePath(directory.path)}
+            />
+          </KuiFlexItem>
+        );
+      });
   };
 
 
@@ -73,7 +73,7 @@ export function Home({ addBasePath, directories }) {
           <KuiFlexGroup className="kuiVerticalRhythm">
             <KuiFlexItem className="kuiPanel homePanel">
               <h3 className="kuiSubTitle kuiVerticalRhythm">
-                Visualize and explore data
+                Visualize and Explore Data
               </h3>
               <KuiFlexGrid className="kuiVerticalRhythmSmall homeTopFeatures" columns={2}>
                 { renderDirectories(FeatureCatalogueCategory.DATA) }
@@ -81,7 +81,7 @@ export function Home({ addBasePath, directories }) {
             </KuiFlexItem>
             <KuiFlexItem className="kuiPanel homePanel">
               <h3 className="kuiSubTitle kuiVerticalRhythm">
-                Manage and administer the Elastic stack
+                Manage and Administer the Elastic Stack
               </h3>
               <KuiFlexGrid className="kuiVerticalRhythmSmall homeTopFeatures" columns={2}>
                 { renderDirectories(FeatureCatalogueCategory.ADMIN) }
@@ -92,13 +92,13 @@ export function Home({ addBasePath, directories }) {
 
         <div className="kuiViewContentItem kuiVerticalRhythmXLarge text-center">
           <h4 className="kuiSubduedText kuiVerticalRhythmSmall">
-            {`Didn't find what you were looking for?`}
+            Didn’t find what you were looking for?
           </h4>
           <KuiLinkButton
             buttonType="secondary"
             href="#/home/feature_directory"
           >
-            View full directory of Kibana features
+            View full directory of Kibana plugins
           </KuiLinkButton>
         </div>
 

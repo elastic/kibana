@@ -18,7 +18,6 @@ import { DashboardStateManager } from './dashboard_state_manager';
 import { saveDashboard } from './lib';
 import { showCloneModal } from './top_nav/show_clone_modal';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
-import { keyCodes } from 'ui_framework/services';
 import { DashboardContainerAPI } from './dashboard_container_api';
 import * as filterActions from 'ui/doc_table/actions/filter';
 import { FilterManagerProvider } from 'ui/filter_manager';
@@ -92,13 +91,13 @@ app.directive('dashboardApp', function ($injector) {
         $scope.model = {
           query: dashboardStateManager.getQuery(),
           useMargins: dashboardStateManager.getUseMargins(),
+          hidePanelTitles: dashboardStateManager.getHidePanelTitles(),
           darkTheme: dashboardStateManager.getDarkTheme(),
           timeRestore: dashboardStateManager.getTimeRestore(),
           title: dashboardStateManager.getTitle(),
           description: dashboardStateManager.getDescription(),
         };
         $scope.panels = dashboardStateManager.getPanels();
-        $scope.fullScreenMode = dashboardStateManager.getFullScreenMode();
         $scope.indexPatterns = dashboardStateManager.getPanelIndexPatterns();
       };
 
@@ -116,7 +115,6 @@ app.directive('dashboardApp', function ($injector) {
         dashboardStateManager.getQuery() || { query: '', language: config.get('search:queryLanguage') },
         filterBar.getFilters()
       );
-      let pendingVisCount = _.size(dashboardStateManager.getPanels());
 
       timefilter.enabled = true;
       dash.searchSource.highlightAll(true);
@@ -174,7 +172,6 @@ app.directive('dashboardApp', function ($injector) {
 
       // called by the saved-object-finder when a user clicks a vis
       $scope.addVis = function (hit, showToast = true) {
-        pendingVisCount++;
         dashboardStateManager.addNewPanel(hit.id, 'visualization');
         if (showToast) {
           notify.info(`Visualization successfully added to your dashboard`);
@@ -182,10 +179,12 @@ app.directive('dashboardApp', function ($injector) {
       };
 
       $scope.addSearch = function (hit) {
-        pendingVisCount++;
         dashboardStateManager.addNewPanel(hit.id, 'search');
         notify.info(`Search successfully added to your dashboard`);
       };
+      $scope.$watch('model.hidePanelTitles', () => {
+        dashboardStateManager.setHidePanelTitles($scope.model.hidePanelTitles);
+      });
       $scope.$watch('model.useMargins', () => {
         dashboardStateManager.setUseMargins($scope.model.useMargins);
       });
@@ -271,50 +270,19 @@ app.directive('dashboardApp', function ($injector) {
           }).catch(notify.error);
       };
 
-      $scope.showFilterBar = () => filterBar.getFilters().length > 0 || !$scope.fullScreenMode;
-      let onRouteChange;
-      const setFullScreenMode = (fullScreenMode) => {
-        $scope.fullScreenMode = fullScreenMode;
-        dashboardStateManager.setFullScreenMode(fullScreenMode);
-        chrome.setVisible(!fullScreenMode);
-        $scope.$broadcast('reLayout');
-
-        // Make sure that if we exit the dashboard app, the chrome becomes visible again
-        // (e.g. if the user clicks the back button).
-        if (fullScreenMode) {
-          onRouteChange = $scope.$on('$routeChangeStart', () => {
-            chrome.setVisible(true);
-            onRouteChange();
-          });
-        } else if (onRouteChange) {
-          onRouteChange();
-        }
-      };
-
-      $scope.$watch('fullScreenMode', () => setFullScreenMode(dashboardStateManager.getFullScreenMode()));
-
-      $scope.exitFullScreenMode = () => setFullScreenMode(false);
-
-      document.addEventListener('keydown', (e) => {
-        if (e.keyCode === keyCodes.ESCAPE) {
-          setFullScreenMode(false);
-        }
-      }, false);
+      $scope.showFilterBar = () => filterBar.getFilters().length > 0 || !dashboardStateManager.getFullScreenMode();
 
       $scope.showAddPanel = () => {
-        if ($scope.fullScreenMode) {
-          $scope.exitFullScreenMode();
-        }
+        dashboardStateManager.setFullScreenMode(false);
         $scope.kbnTopNav.open('add');
       };
       $scope.enterEditMode = () => {
-        if ($scope.fullScreenMode) {
-          $scope.exitFullScreenMode();
-        }
+        dashboardStateManager.setFullScreenMode(false);
         $scope.kbnTopNav.click('edit');
       };
       const navActions = {};
-      navActions[TopNavIds.FULL_SCREEN] = () => setFullScreenMode(true);
+      navActions[TopNavIds.FULL_SCREEN] = () =>
+        dashboardStateManager.setFullScreenMode(true);
       navActions[TopNavIds.EXIT_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.VIEW);
       navActions[TopNavIds.ENTER_EDIT_MODE] = () => onChangeViewMode(DashboardViewMode.EDIT);
       navActions[TopNavIds.CLONE] = () => {
@@ -367,14 +335,6 @@ app.directive('dashboardApp', function ($injector) {
         chrome.addApplicationClass('theme-light');
       }
 
-      $scope.$on('ready:vis', function () {
-        if (pendingVisCount > 0) pendingVisCount--;
-        if (pendingVisCount === 0) {
-          dashboardStateManager.saveState();
-          $scope.refresh();
-        }
-      });
-
       if ($route.current.params && $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM]) {
         // Hide the toast message since they will already see a notification from saving the visualization,
         // and one is sufficient (especially given how the screen jumps down a bit for each unique notification).
@@ -399,8 +359,6 @@ app.directive('dashboardApp', function ($injector) {
         addSearch: $scope.addSearch,
         timefilter: $scope.timefilter
       };
-
-      $scope.$emit('application.load');
     }
   };
 });

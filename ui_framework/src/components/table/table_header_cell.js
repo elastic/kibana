@@ -12,7 +12,8 @@ export const KuiTableHeaderCell = ({
   className,
   ariaLabel,
   align,
-  ...rest,
+  scope,
+  ...rest
 }) => {
   const classes = classNames('kuiTableHeaderCell', className, {
     'kuiTableHeaderCell--alignRight': align === RIGHT_ALIGNMENT,
@@ -35,6 +36,7 @@ export const KuiTableHeaderCell = ({
     return (
       <th
         className={classes}
+        scope={scope}
         {...rest}
       >
         <button
@@ -55,6 +57,7 @@ export const KuiTableHeaderCell = ({
     <th
       className={classes}
       aria-label={ariaLabel}
+      scope={scope}
       {...rest}
     >
       <div className="kuiTableHeaderCell__liner">
@@ -71,8 +74,10 @@ KuiTableHeaderCell.propTypes = {
   isSorted: PropTypes.bool,
   isSortAscending: PropTypes.bool,
   align: PropTypes.oneOf([LEFT_ALIGNMENT, RIGHT_ALIGNMENT]),
+  scope: PropTypes.oneOf(['col', 'row', 'colgroup', 'rowgroup']),
 };
 
 KuiTableHeaderCell.defaultProps = {
-  align: LEFT_ALIGNMENT
+  align: LEFT_ALIGNMENT,
+  scope: 'col',
 };

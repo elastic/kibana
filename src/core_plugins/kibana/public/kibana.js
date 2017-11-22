@@ -25,9 +25,9 @@ import { KibanaRootController } from './kibana_root_controller';
 routes.enable();
 
 routes
-.otherwise({
-  redirectTo: `/${chrome.getInjected('kbnDefaultAppId', 'discover')}`
-});
+  .otherwise({
+    redirectTo: `/${chrome.getInjected('kbnDefaultAppId', 'discover')}`
+  });
 
 chrome.setRootController('kibana', KibanaRootController);
 

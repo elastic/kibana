@@ -24,4 +24,7 @@ export class DashboardContainerAPI extends ContainerAPI {
     this.dashboardState.saveState();
   }
 
+  getHidePanelTitles() {
+    return this.dashboardState.getHidePanelTitles();
+  }
 }

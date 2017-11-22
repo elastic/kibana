@@ -23,52 +23,52 @@ import { absoluteToParsedUrl } from 'ui/url/absolute_to_parsed_url';
 import { migrateLegacyQuery } from 'ui/utils/migrateLegacyQuery';
 
 uiRoutes
-.when(VisualizeConstants.CREATE_PATH, {
-  template: editorTemplate,
-  resolve: {
-    savedVis: function (savedVisualizations, courier, $route, Private) {
-      const visTypes = Private(VisTypesRegistryProvider);
-      const visType = _.find(visTypes, { name: $route.current.params.type });
-      const shouldHaveIndex = visType.requiresSearch && visType.options.showIndexSelection;
-      const hasIndex = $route.current.params.indexPattern || $route.current.params.savedSearchId;
-      if (shouldHaveIndex && !hasIndex) {
-        throw new Error('You must provide either an indexPattern or a savedSearchId');
-      }
+  .when(VisualizeConstants.CREATE_PATH, {
+    template: editorTemplate,
+    resolve: {
+      savedVis: function (savedVisualizations, courier, $route, Private) {
+        const visTypes = Private(VisTypesRegistryProvider);
+        const visType = _.find(visTypes, { name: $route.current.params.type });
+        const shouldHaveIndex = visType.requiresSearch && visType.options.showIndexSelection;
+        const hasIndex = $route.current.params.indexPattern || $route.current.params.savedSearchId;
+        if (shouldHaveIndex && !hasIndex) {
+          throw new Error('You must provide either an indexPattern or a savedSearchId');
+        }
 
-      return savedVisualizations.get($route.current.params)
-      .catch(courier.redirectWhenMissing({
-        '*': '/visualize'
-      }));
+        return savedVisualizations.get($route.current.params)
+          .catch(courier.redirectWhenMissing({
+            '*': '/visualize'
+          }));
+      }
     }
-  }
-})
-.when(`${VisualizeConstants.EDIT_PATH}/:id`, {
-  template: editorTemplate,
-  resolve: {
-    savedVis: function (savedVisualizations, courier, $route) {
-      return savedVisualizations.get($route.current.params.id)
-      .catch(courier.redirectWhenMissing({
-        'visualization': '/visualize',
-        'search': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
-        'index-pattern': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
-        'index-pattern-field': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id
-      }));
+  })
+  .when(`${VisualizeConstants.EDIT_PATH}/:id`, {
+    template: editorTemplate,
+    resolve: {
+      savedVis: function (savedVisualizations, courier, $route) {
+        return savedVisualizations.get($route.current.params.id)
+          .catch(courier.redirectWhenMissing({
+            'visualization': '/visualize',
+            'search': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+            'index-pattern': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id,
+            'index-pattern-field': '/management/kibana/objects/savedVisualizations/' + $route.current.params.id
+          }));
+      }
     }
-  }
-});
+  });
 
 uiModules
-.get('app/visualize', [
-  'kibana/notify',
-  'kibana/courier'
-])
-.directive('visualizeApp', function () {
-  return {
-    restrict: 'E',
-    controllerAs: 'visualizeApp',
-    controller: VisEditor,
-  };
-});
+  .get('app/visualize', [
+    'kibana/notify',
+    'kibana/courier'
+  ])
+  .directive('visualizeApp', function () {
+    return {
+      restrict: 'E',
+      controllerAs: 'visualizeApp',
+      controller: VisEditor,
+    };
+  });
 
 function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courier, Private, Promise, config, kbnBaseUrl) {
   const docTitle = Private(DocTitleProvider);
@@ -145,9 +145,9 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       Promise.try(function () {
         vis.setState(appState.vis);
       })
-      .catch(courier.redirectWhenMissing({
-        'index-pattern-field': '/visualize'
-      }));
+        .catch(courier.redirectWhenMissing({
+          'index-pattern-field': '/visualize'
+        }));
     }
 
     return appState;
@@ -209,10 +209,6 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       $scope.vis.forceReload();
     };
 
-    $scope.$on('ready:vis', function () {
-      $scope.$emit('application.load');
-    });
-
     $scope.$on('$destroy', function () {
       savedVis.destroy();
       stateMonitor.destroy();
@@ -240,36 +236,36 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     savedVis.uiStateJSON = angular.toJson($scope.uiState.getChanges());
 
     savedVis.save()
-    .then(function (id) {
-      stateMonitor.setInitialState($state.toJSON());
-      $scope.kbnTopNav.close('save');
+      .then(function (id) {
+        stateMonitor.setInitialState($state.toJSON());
+        $scope.kbnTopNav.close('save');
 
-      if (id) {
-        notify.info('Saved Visualization "' + savedVis.title + '"');
-        if ($scope.isAddToDashMode()) {
-          const savedVisualizationParsedUrl = new KibanaParsedUrl({
-            basePath: chrome.getBasePath(),
-            appId: kbnBaseUrl.slice('/app/'.length),
-            appPath: kbnUrl.eval(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id }),
-          });
-          // Manually insert a new url so the back button will open the saved visualization.
-          $window.history.pushState({}, '', savedVisualizationParsedUrl.getRootRelativePath());
-          // Since we aren't reloading the page, only inserting a new browser history item, we need to manually update
-          // the last url for this app, so directly clicking on the Visualize tab will also bring the user to the saved
-          // url, not the unsaved one.
-          chrome.trackSubUrlForApp('kibana:visualize', savedVisualizationParsedUrl);
+        if (id) {
+          notify.info('Saved Visualization "' + savedVis.title + '"');
+          if ($scope.isAddToDashMode()) {
+            const savedVisualizationParsedUrl = new KibanaParsedUrl({
+              basePath: chrome.getBasePath(),
+              appId: kbnBaseUrl.slice('/app/'.length),
+              appPath: kbnUrl.eval(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id }),
+            });
+            // Manually insert a new url so the back button will open the saved visualization.
+            $window.history.pushState({}, '', savedVisualizationParsedUrl.getRootRelativePath());
+            // Since we aren't reloading the page, only inserting a new browser history item, we need to manually update
+            // the last url for this app, so directly clicking on the Visualize tab will also bring the user to the saved
+            // url, not the unsaved one.
+            chrome.trackSubUrlForApp('kibana:visualize', savedVisualizationParsedUrl);
 
-          const lastDashboardAbsoluteUrl = chrome.getNavLinkById('kibana:dashboard').lastSubUrl;
-          const dashboardParsedUrl = absoluteToParsedUrl(lastDashboardAbsoluteUrl, chrome.getBasePath());
-          dashboardParsedUrl.addQueryParameter(DashboardConstants.NEW_VISUALIZATION_ID_PARAM, savedVis.id);
-          kbnUrl.change(dashboardParsedUrl.appPath);
-        } else if (savedVis.id === $route.current.params.id) {
-          docTitle.change(savedVis.lastSavedTitle);
-        } else {
-          kbnUrl.change(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id });
+            const lastDashboardAbsoluteUrl = chrome.getNavLinkById('kibana:dashboard').lastSubUrl;
+            const dashboardParsedUrl = absoluteToParsedUrl(lastDashboardAbsoluteUrl, chrome.getBasePath());
+            dashboardParsedUrl.addQueryParameter(DashboardConstants.NEW_VISUALIZATION_ID_PARAM, savedVis.id);
+            kbnUrl.change(dashboardParsedUrl.appPath);
+          } else if (savedVis.id === $route.current.params.id) {
+            docTitle.change(savedVis.lastSavedTitle);
+          } else {
+            kbnUrl.change(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id });
+          }
         }
-      }
-    }, notify.error);
+      }, notify.error);
   };
 
   $scope.unlink = function () {
@@ -286,17 +282,22 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
     // copy over all state except "aggs", "query" and "filter"
     _(parent.toJSON())
-    .omit(['aggs', 'filter', 'query'])
-    .forOwn(function (val, key) {
-      searchSource.set(key, val);
-    })
-    .commit();
+      .omit(['aggs', 'filter', 'query'])
+      .forOwn(function (val, key) {
+        searchSource.set(key, val);
+      })
+      .commit();
 
     $state.query = searchSource.get('query');
     $state.filters = searchSource.get('filter');
     searchSource.inherits(parentsParent);
 
     $scope.fetch();
+  };
+
+
+  $scope.getAdditionalMessage = () => {
+    return `This visualization is marked as experimental. ${vis.type.feedbackMessage}`;
   };
 
   init();
