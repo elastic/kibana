@@ -9,7 +9,7 @@ uiModules
       restrict: 'A',
       require: 'ngModel',
       link: function ($scope, elem, attr, ngModel) {
-        const illegalCharacters = ['\\', '/', '?', '"', '<', '>', '|', ' ', ','];
+        const illegalCharacters = ['\\', '/', '?', '"', '<', '>', '|', ' '];
 
         const allowWildcard =
           !_.isUndefined(attr.validateIndexPatternAllowWildcard)

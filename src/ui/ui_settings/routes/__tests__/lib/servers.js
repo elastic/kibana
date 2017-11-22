@@ -11,26 +11,8 @@ export async function startServers() {
   this.timeout(es.getStartTimeout());
   await es.start();
 
-  kbnServer = kbnTestServer.createServerWithCorePlugins({
-    // speed up the index check timeout so that the healthCheck doesn't
-    // have time to recreate the index before we get a response
-    savedObjects: {
-      indexCheckTimeout: 1000
-    }
-  });
+  kbnServer = kbnTestServer.createServerWithCorePlugins();
   await kbnServer.ready();
-  await kbnServer.server.plugins.elasticsearch.waitUntilReady();
-}
-
-export async function waitUntilNextHealthCheck() {
-  // make sure the kibana index is still missing so that waitUntilReady()
-  // won't resolve until the next health check is complete
-  await es.getClient().indices.delete({
-    index: kbnServer.config.get('kibana.index'),
-    ignore: [404],
-  });
-
-  // wait for healthcheck to recreate the kibana index
   await kbnServer.server.plugins.elasticsearch.waitUntilReady();
 }
 
