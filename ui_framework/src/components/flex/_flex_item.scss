@@ -13,6 +13,12 @@
     flex-grow: 0; /* 2 */
     flex-basis: auto; /* 2 */
   }
+
+  @for $i from 1 through 10 {
+    &.kuiFlexItem--flexGrow#{$i} {
+      flex-grow: $i
+    }
+  }
 }
 
 // On mobile we force them to stack and act the same.

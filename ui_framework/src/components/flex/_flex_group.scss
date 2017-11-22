@@ -6,53 +6,60 @@
     flex-grow: 1;
     flex-basis: 0;
   }
+}
 
-  // Gutter Sizes
-  &.kuiFlexGroup--gutterSmall > .kuiFlexItem + .kuiFlexItem {
-    margin-left: $kuiSizeS;
-  }
+$gutterTypes: (
+  gutterSmall: $kuiSizeS,
+  gutterMedium: $kuiSize,
+  gutterLarge: $kuiSizeL,
+  gutterExtraLarge: $kuiSizeXXL,
+);
 
-  &.kuiFlexGroup--gutterMedium > .kuiFlexItem + .kuiFlexItem {
-    margin-left: $kuiSize;
-  }
+// Gutter Sizes
+@each $gutterName, $gutterSize in $gutterTypes {
+  $halfGutterSize: $gutterSize * 0.5;
 
-  &.kuiFlexGroup--gutterLarge > .kuiFlexItem + .kuiFlexItem {
-    margin-left: $kuiSizeL;
-  }
+  &.kuiFlexGroup--#{$gutterName} {
+    margin: -$halfGutterSize;
 
-  &.kuiFlexGroup--gutterExtraLarge > .kuiFlexItem + .kuiFlexItem {
-    margin-left: $kuiSizeXXL;
+    & > .kuiFlexItem {
+      margin: $halfGutterSize;
+    }
   }
+}
 
-  // Justify the grid
-  &.kuiFlexGroup--justifyContentSpaceBetween {
-    justify-content: space-between;
-  }
+// Justify the grid
+.kuiFlexGroup--justifyContentSpaceBetween {
+  justify-content: space-between;
+}
 
-  &.kuiFlexGroup--justifyContentSpaceAround {
-    justify-content: space-around;
-  }
+.kuiFlexGroup--justifyContentSpaceAround {
+  justify-content: space-around;
+}
 
-  &.kuiFlexGroup--justifyContentCenter {
-    justify-content: center;
-  }
+.kuiFlexGroup--justifyContentCenter {
+  justify-content: center;
+}
 
-  &.kuiFlexGroup--justifyContentFlexEnd {
-    justify-content: flex-end;
-  }
+.kuiFlexGroup--justifyContentFlexEnd {
+  justify-content: flex-end;
+}
 
-  // Align Items
-  &.kuiFlexGroup--alignItemsStart {
-    align-items: flex-start;
-  }
+// Align Items
+.kuiFlexGroup--alignItemsStart {
+  align-items: flex-start;
+}
 
-  &.kuiFlexGroup--alignItemsCenter {
-    align-items: center;
-  }
+.kuiFlexGroup--alignItemsCenter {
+  align-items: center;
+}
 
-  &.kuiFlexGroup--alignItemsEnd {
-    align-items: flex-end;
-  }
+.kuiFlexGroup--alignItemsEnd {
+  align-items: flex-end;
+}
+
+.kuiFlexGroup--wrap {
+  flex-wrap: wrap;
 }
 
 @include screenXSmall {
