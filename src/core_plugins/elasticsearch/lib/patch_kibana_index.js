@@ -44,7 +44,6 @@ export async function patchKibanaIndex(options) {
       return;
     }
     autoUpdate = true;
-    console.log('Found missing properties', JSON.stringify(missingProperties));
   }
 
   // log about new properties
