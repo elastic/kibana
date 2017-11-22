@@ -5,6 +5,7 @@ import Sortable from 'react-anything-sortable';
 import Tooltip from '../../tooltip';
 import createTextHandler from '../../lib/create_text_handler';
 import createAggRowRender from '../../lib/create_agg_row_render';
+import { createUpDownHandler } from '../../lib/sort_keyhandler';
 
 function TopNSeries(props) {
   const {
@@ -84,9 +85,13 @@ function TopNSeries(props) {
   if (!props.disableDelete) {
     dragHandle = (
       <Tooltip text="Sort">
-        <div className="vis_editor__sort thor__button-outlined-default sm">
+        <button
+          className="vis_editor__sort thor__button-outlined-default sm"
+          aria-label="Sort series by pressing up/down"
+          onKeyDown={createUpDownHandler(props.onShouldSortItem)}
+        >
           <i className="fa fa-sort" />
-        </div>
+        </button>
       </Tooltip>
     );
   }
@@ -155,4 +160,3 @@ TopNSeries.propTypes = {
 };
 
 export default TopNSeries;
-

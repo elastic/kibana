@@ -111,6 +111,7 @@ class TableVis extends Component {
           className="tsvb-table__columnName"
           onClick={handleClick}
           key={item.id}
+          scope="col"
         >
           {headerContent}
         </th>
@@ -137,7 +138,7 @@ class TableVis extends Component {
     };
     return (
       <tr>
-        <th onClick={handleSortClick}>{label} {sortComponent}</th>
+        <th scope="col" onClick={handleSortClick}>{label} {sortComponent}</th>
         { columns }
       </tr>
     );

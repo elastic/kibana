@@ -91,6 +91,7 @@ app.directive('dashboardApp', function ($injector) {
         $scope.model = {
           query: dashboardStateManager.getQuery(),
           useMargins: dashboardStateManager.getUseMargins(),
+          hidePanelTitles: dashboardStateManager.getHidePanelTitles(),
           darkTheme: dashboardStateManager.getDarkTheme(),
           timeRestore: dashboardStateManager.getTimeRestore(),
           title: dashboardStateManager.getTitle(),
@@ -181,6 +182,9 @@ app.directive('dashboardApp', function ($injector) {
         dashboardStateManager.addNewPanel(hit.id, 'search');
         notify.info(`Search successfully added to your dashboard`);
       };
+      $scope.$watch('model.hidePanelTitles', () => {
+        dashboardStateManager.setHidePanelTitles($scope.model.hidePanelTitles);
+      });
       $scope.$watch('model.useMargins', () => {
         dashboardStateManager.setUseMargins($scope.model.useMargins);
       });

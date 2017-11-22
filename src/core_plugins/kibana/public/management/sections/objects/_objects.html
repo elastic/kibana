@@ -131,7 +131,7 @@
       <table class="kuiTable" ng-if="service.data.length" data-test-subj="objectsTable-{{service.title}}">
         <thead>
           <tr>
-            <th class="kuiTableHeaderCell kuiTableHeaderCell--checkBox">
+            <th scope="col" class="kuiTableHeaderCell kuiTableHeaderCell--checkBox">
               <div class="kuiTableHeaderCell__liner">
                 <input
                   type="checkbox"
@@ -144,7 +144,7 @@
               </div>
             </th>
 
-            <th class="kuiTableHeaderCell">
+            <th scope="col" class="kuiTableHeaderCell">
               <div class="kuiTableHeaderCell__liner">
                 Title
               </div>
