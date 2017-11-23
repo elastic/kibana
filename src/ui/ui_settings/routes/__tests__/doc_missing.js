@@ -5,17 +5,21 @@ import {
   getServices,
   chance,
   assertSinonMatch,
-  waitUntilNextHealthCheck,
 } from './lib';
 
 export function docMissingSuite() {
-  // health check doesn't create config doc so we
-  // only have to wait once
-  before(waitUntilNextHealthCheck);
-
   // ensure the kibana index has no documents
   beforeEach(async () => {
     const { kbnServer, callCluster } = getServices();
+
+    // write a setting to ensure kibana index is created
+    await kbnServer.inject({
+      method: 'POST',
+      url: '/api/kibana/settings/defaultIndex',
+      payload: { value: 'abc' }
+    });
+
+    // delete all docs from kibana index to ensure savedConfig is not found
     await callCluster('deleteByQuery', {
       index: kbnServer.config.get('kibana.index'),
       body: {

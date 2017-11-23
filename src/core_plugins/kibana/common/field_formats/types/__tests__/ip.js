@@ -1,5 +1,8 @@
 import expect from 'expect.js';
-import { IpFormat } from '../ip';
+import { createIpFormat } from '../ip';
+import { FieldFormat } from '../../../../../../ui/field_formats/field_format';
+
+const IpFormat = createIpFormat(FieldFormat);
 
 describe('IP Address Format', function () {
   let ip;

@@ -24,12 +24,13 @@ export function VisualizeListingController($injector) {
   const notify = new Notifier({ location: 'Visualize' });
 
   this.fetchItems = (filter) => {
+    const isLabsEnabled = config.get('visualize:enableLabs');
     return visualizationService.find(filter, config.get('savedObjects:listingLimit'))
       .then(result => {
         this.totalItems = result.total;
         this.showLimitError = result.total > config.get('savedObjects:listingLimit');
         this.listingLimit = config.get('savedObjects:listingLimit');
-        return result.hits;
+        return result.hits.filter(result => (isLabsEnabled || !result.type.stage === 'lab'));
       });
   };
 

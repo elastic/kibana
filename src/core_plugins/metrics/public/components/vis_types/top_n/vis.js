@@ -1,6 +1,6 @@
 import tickFormatter from '../../lib/tick_formatter';
 import TopN from 'plugins/metrics/visualizations/components/top_n';
-import getLastValue from 'plugins/metrics/visualizations/lib/get_last_value';
+import getLastValue from '../../../../common/get_last_value';
 import color from 'color';
 import replaceVars from '../../lib/replace_vars';
 import PropTypes from 'prop-types';
@@ -37,7 +37,7 @@ function TopNVisualization(props) {
       const seriesConfig = model.series.find(s => s.id === id);
       if (seriesConfig) {
         const formatter = tickFormatter(seriesConfig.formatter, seriesConfig.value_template);
-        const value = getLastValue(item.data, item.data.length);
+        const value = getLastValue(item.data);
         let color = item.color || seriesConfig.color;
         if (model.bar_color_rules) {
           model.bar_color_rules.forEach(rule => {

@@ -295,5 +295,10 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     $scope.fetch();
   };
 
+
+  $scope.getAdditionalMessage = () => {
+    return `This visualization is marked as experimental. ${vis.type.feedbackMessage}`;
+  };
+
   init();
 }

@@ -7,10 +7,10 @@
   <div ng-show="agg.params.ipRangeType != 'mask'">
     <table class="vis-editor-agg-editor-ranges form-group" ng-show="agg.params.ranges.fromTo.length">
       <tr>
-        <th>
+        <th scope="col">
           <label id="visEditorIpRangeFromLabel{{agg.id}}">From</label>
         </th>
-        <th colspan="2">
+        <th scope="col" colspan="2">
           <label id="visEditorIpRangeToLabel{{agg.id}}">To</label>
         </th>
       </tr>
@@ -65,7 +65,7 @@
   <div ng-show="agg.params.ipRangeType == 'mask'">
     <table class="vis-editor-agg-editor-ranges form-group" ng-show="agg.params.ranges.mask.length">
       <tr>
-        <th>
+        <th scope="col">
           <label id="visEditorIpRangeCidrLabel{{agg.id}}">CIDR Mask</label>
         </th>
       </tr>

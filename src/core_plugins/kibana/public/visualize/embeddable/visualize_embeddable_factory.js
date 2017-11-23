@@ -10,8 +10,9 @@ import { EmbeddableFactory, Embeddable } from 'ui/embeddable';
 import chrome from 'ui/chrome';
 
 export class VisualizeEmbeddableFactory extends EmbeddableFactory {
-  constructor($compile, $rootScope, visualizeLoader, timefilter, Notifier, Promise, Private) {
+  constructor($compile, $rootScope, visualizeLoader, timefilter, Notifier, Promise, Private, config) {
     super();
+    this._config = config;
     this.$compile = $compile;
     this.visualizeLoader = visualizeLoader;
     this.$rootScope = $rootScope;
@@ -30,7 +31,24 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
     visualizeScope.editUrl = this.getEditPath(panel.id);
     return this.visualizeLoader.get(panel.id)
       .then(savedObject => {
-        visualizeScope.sharedItemTitle = panel.title !== undefined ? panel.title : savedObject.title;
+        const isLabsEnabled = this._config.get('visualize:enableLabs');
+
+        if (!isLabsEnabled && savedObject.vis.type.stage === 'lab') {
+          domNode.innerHTML = `
+<div class="disabledLabVisualization">
+  <div class="kuiVerticalRhythm disabledLabVisualization__icon kuiIcon fa-flask" aria-hidden="true"></div>
+  <div class="kuiVerticalRhythm"><em>${savedObject.title}</em> is a lab visualization.</div>
+  <div class="kuiVerticalRhythm">Please turn on lab-mode in the advanced settings to see lab visualizations.</div>
+</div>
+`;
+          return new Embeddable({
+            title: savedObject.title
+          });
+        }
+
+        if (!container.getHidePanelTitles()) {
+          visualizeScope.sharedItemTitle = panel.title !== undefined ? panel.title : savedObject.title;
+        }
         visualizeScope.savedObj = savedObject;
         visualizeScope.panel = panel;
 
