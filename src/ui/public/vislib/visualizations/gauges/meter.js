@@ -150,7 +150,7 @@ export function MeterGaugeProvider() {
       const marginFactor = 0.95;
       const tooltip = this.gaugeChart.tooltip;
       const isTooltip = this.gaugeChart.handler.visConfig.get('addTooltip');
-      const isDisplayWarning = this.gaugeChart.handler.visConfig.get('isDisplayWarning');
+      const isDisplayWarning = this.gaugeChart.handler.visConfig.get('isDisplayWarning', true);
       const maxAngle = this.gaugeConfig.maxAngle;
       const minAngle = this.gaugeConfig.minAngle;
       const angleFactor = this.gaugeConfig.gaugeType === 'Meter' ? 0.75 : 1;
