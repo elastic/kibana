@@ -3,7 +3,6 @@
   "version": "7.0.0-alpha1",
   "main": "./target/tsc/",
   "scripts": {
-    "prepare": "tsc",
     "build": "tsc",
     "start": "tsc --watch"
   },

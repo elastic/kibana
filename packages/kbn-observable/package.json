@@ -4,7 +4,6 @@
   "main": "target/tsc/index.js",
   "types": "./target/tsc-types/index.d.ts",
   "scripts": {
-    "prepare": "npm run build",
     "build": "tsc",
     "start": "tsc --watch"
   },
