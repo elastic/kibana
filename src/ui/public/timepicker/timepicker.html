@@ -3,50 +3,49 @@
   <div class="tab-content kbn-timepicker-content">
     <!-- Filters -->
     <div ng-show="activeTab === 'filter'" role="tabpanel" class="tab-pane active">
-      <div class="kbn-timepicker-title kuiVerticalRhythmSmall">
+      <div class="kbn-timepicker-title">
         <h2 class="kuiLocalDropdownTitle kbn-timepicker-title__text">
           Time Range
         </h2>
+      </div>
 
-        <div
-          role="tablist"
-          class="kbn-timepicker-modes kbn-timepicker-title__section"
-        >
-          <a
+      <div class="kuiVerticalRhythmSmall">
+        <div role="tablist" class="euiTabs euiTabs--small kbn-timepicker-modes kbn-timepicker-title__section">
+          <button
             id="timepickerQuick"
             role="tab"
-            class="kbn-timerpicker-nav-button"
-            ng-class="{active: mode === 'quick' }"
+            class="euiTab"
+            ng-class="{'euiTab-isSelected': mode === 'quick' }"
             ng-click="setMode('quick')"
             aria-selected="{{mode === 'quick'}}"
             kbn-accessible-click
           >
             Quick
-          </a>
+          </button>
 
-          <a
+          <button
             id="timepickerRelative"
             role="tab"
-            class="kbn-timerpicker-nav-button"
-            ng-class="{active: mode === 'relative' }"
+            class="euiTab"
+            ng-class="{'euiTab-isSelected': mode === 'relative' }"
             ng-click="setMode('relative')"
             aria-selected="{{mode === 'relative'}}"
             kbn-accessible-click
           >
             Relative
-          </a>
+          </button>
 
-          <a
+          <button
             id="timepickerAbsolute"
             role="tab"
-            class="kbn-timerpicker-nav-button"
-            ng-class="{active: mode === 'absolute' }"
+            class="euiTab"
+            ng-class="{'euiTab-isSelected': mode === 'absolute' }"
             ng-click="setMode('absolute')"
             aria-selected="{{mode === 'absolute'}}"
             kbn-accessible-click
           >
             Absolute
-          </a>
+          </button>
         </div>
       </div>
 
