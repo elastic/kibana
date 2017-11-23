@@ -134,6 +134,7 @@ export function SimpleGaugeProvider() {
     drawGauge(svg, data, width) {
       const tooltip = this.gaugeChart.tooltip;
       const isTooltip = this.gaugeChart.handler.visConfig.get('addTooltip');
+      const isDisplayWarning = this.gaugeChart.handler.visConfig.get('isDisplayWarning');
       const fontSize = this.gaugeChart.handler.visConfig.get('gauge.style.fontSize');
 
       const labelColor = this.gaugeConfig.style.labelColor;
@@ -237,7 +238,7 @@ export function SimpleGaugeProvider() {
         });
       }
 
-      if (hiddenLabels) {
+      if (hiddenLabels && isDisplayWarning) {
         this.gaugeChart.handler.alerts.show('Some labels were hidden due to size constraints');
       }
 

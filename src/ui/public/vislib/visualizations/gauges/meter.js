@@ -150,6 +150,7 @@ export function MeterGaugeProvider() {
       const marginFactor = 0.95;
       const tooltip = this.gaugeChart.tooltip;
       const isTooltip = this.gaugeChart.handler.visConfig.get('addTooltip');
+      const isDisplayWarning = this.gaugeChart.handler.visConfig.get('isDisplayWarning');
       const maxAngle = this.gaugeConfig.maxAngle;
       const minAngle = this.gaugeConfig.minAngle;
       const angleFactor = this.gaugeConfig.gaugeType === 'Meter' ? 0.75 : 1;
@@ -290,7 +291,7 @@ export function MeterGaugeProvider() {
         });
       }
 
-      if (hiddenLabels) {
+      if (hiddenLabels && isDisplayWarning) {
         this.gaugeChart.handler.alerts.show('Some labels were hidden due to size constraints');
       }
 

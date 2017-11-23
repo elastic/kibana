@@ -21,7 +21,7 @@ export default function GaugeVisType(Private) {
         type: 'gauge',
         addTooltip: true,
         addLegend: true,
-
+        isDisplayWarning: true,
         gauge: {
           verticalSplit: false,
           extendRange: true,
