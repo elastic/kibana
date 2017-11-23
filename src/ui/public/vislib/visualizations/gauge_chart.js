@@ -71,7 +71,7 @@ export function GaugeChartProvider(Private) {
             } else {
               svg.attr('height', height);
               const transformX = width / 2;
-              const transformY = height / 2;
+              const transformY = self.gaugeConfig.gaugeType === 'Arc' ? height / (2 * 0.75) : height / 2;
               g.attr('transform', `translate(${transformX}, ${transformY})`);
             }
 
