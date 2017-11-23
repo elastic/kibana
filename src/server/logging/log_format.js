@@ -130,14 +130,14 @@ export default class TransformObjStream extends Stream.Transform {
       data.error = serializeError(event.error);
       data.url = event.url;
       const message =  get(event, 'error.message');
-      data.message = message || `Event Error stack: ${get(event, 'error.stack')}`;
+      data.message = message || 'Unknown error (no message)';
     }
     else if (event.data instanceof Error) {
       data.type = 'error';
       data.level = _.contains(event.tags, 'fatal') ? 'fatal' : 'error';
       data.error = serializeError(event.data);
       const message =  get(event, 'data.message');
-      data.message = message || `Event Data Error stack: ${get(event, 'data.stack')}`;
+      data.message = message || 'Unknown error object (no message)';
     }
     else if (_.isPlainObject(event.data) && event.data.tmpl) {
       _.assign(data, event.data);
