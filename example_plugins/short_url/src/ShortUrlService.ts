@@ -2,8 +2,16 @@ import crypto from 'crypto';
 import { get } from 'lodash';
 import { shortUrlAssertValid } from './short_url_assert_valid';
 
-export class ShortUrlLookup {
-  constructor(log, savedObjectsService) {
+import {
+  SavedObjectsService,
+  Logger,
+} from '@elastic/kbn-types';
+
+export class ShortUrlService {
+  constructor(
+    private readonly log: Logger,
+    private readonly savedObjectsService: SavedObjectsService,
+  ) {
     this.log = log;
     this.savedObjectsService = savedObjectsService;
   }

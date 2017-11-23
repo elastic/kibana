@@ -3,8 +3,15 @@ import { BazService } from './BazService';
 import { registerEndpoints } from './registerEndpoints';
 
 export const plugin: KibanaPluginConfig<{}> = {
-  plugin: kibana => {
-    const { kibana: _kibana, elasticsearch, logger, util, http } = kibana;
+  // index patterns isn't needed in every place in kibana, so we can
+  // make it a separate dependency
+  depedencies: ['indexPatterns'],
+  plugin: (kibana, dependencies) => {
+    // uisettings and savedObjects seem like they're needed in a lot of
+    // places in kibana, so make them part of core
+    const { kibana: _kibana, elasticsearch, logger, util, http, UiSettingsService, SavedObjectsService } = kibana;
+
+    const { indexPatterns } = dependencies;
 
     const log = logger.get();
 

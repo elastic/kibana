@@ -1,14 +1,10 @@
 import _ from 'lodash';
 import { collectDashboards } from './collect_dashboards';
 
+export async function exportDashboards(dashboards, config, savedObjectsService) {
+  const ids = _.flatten([dashboards]);
 
-export async function exportDashboards(req) {
-  const ids = _.flatten([req.query.dashboard]);
-  const config = req.server.config();
-
-  const savedObjectsClient = req.getSavedObjectsClient();
-
-  const objects = await collectDashboards(savedObjectsClient, ids);
+  const objects = await collectDashboards(savedObjectsService, ids);
   return {
     version: config.get('pkg.version'),
     objects

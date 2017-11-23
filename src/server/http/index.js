@@ -5,17 +5,22 @@ import Boom from 'boom';
 import Hapi from 'hapi';
 import versionCheckMixin from './version_check';
 import { handleShortUrlError } from './short_url_error';
-import { shortUrlAssertValid } from './short_url_assert_valid';
-import shortUrlLookupProvider from './short_url_lookup';
+import ShortUrlLookup from './short_url_lookup';
 import setupConnectionMixin from './setup_connection';
 import setupRedirectMixin from './setup_redirect_server';
 import registerHapiPluginsMixin from './register_hapi_plugins';
 import xsrfMixin from './xsrf';
 
-export default async function (kbnServer, server, config) {
+export default async function (kbnServer, server, config, deps) {
   server = kbnServer.server = new Hapi.Server();
 
-  const shortUrlLookup = shortUrlLookupProvider(server);
+  const {
+    SavedObjectsService,
+    UiSettingsService,
+    elasticsearch,
+    //IndexPatternsService,
+  } = deps;
+
   await kbnServer.mixin(setupConnectionMixin);
   await kbnServer.mixin(setupRedirectMixin);
   await kbnServer.mixin(registerHapiPluginsMixin);
@@ -126,11 +131,15 @@ export default async function (kbnServer, server, config) {
     path: '/goto/{urlId}',
     handler: async function (request, reply) {
       try {
-        const url = await shortUrlLookup.getUrl(request.params.urlId, request);
-        shortUrlAssertValid(url);
+        const savedObjectsService = new SavedObjectsService(request, elasticsearch);
 
-        const uiSettings = request.getUiSettingsService();
-        const stateStoreInSessionStorage = await uiSettings.get('state:storeInSessionStorage');
+        const uiSettingsService = new UiSettingsService(server, request, savedObjectsService);
+
+        const shortUrlLookup = new ShortUrlLookup(server.log, savedObjectsService);
+
+        const url = await shortUrlLookup.getUrl(request.params.urlId);
+
+        const stateStoreInSessionStorage = await uiSettingsService.get('state:storeInSessionStorage');
         if (!stateStoreInSessionStorage) {
           reply().redirect(config.get('server.basePath') + url);
           return;
@@ -151,8 +160,11 @@ export default async function (kbnServer, server, config) {
     path: '/shorten',
     handler: async function (request, reply) {
       try {
-        shortUrlAssertValid(request.payload.url);
-        const urlId = await shortUrlLookup.generateUrlId(request.payload.url, request);
+        const savedObjectsService = new SavedObjectsService(request);
+
+        const shortUrlLookup = new ShortUrlLookup(server.log, savedObjectsService);
+
+        const urlId = await shortUrlLookup.generateUrlId(request.payload.url);
         reply(urlId);
       } catch (err) {
         reply(handleShortUrlError(err));
