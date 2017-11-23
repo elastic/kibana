@@ -48,7 +48,7 @@ export default function MetricsVisProvider(Private) {
             stacked: 'none'
           }],
         time_field: '@timestamp',
-        index_pattern: '*',
+        index_pattern: '',
         interval: 'auto',
         axis_position: 'left',
         axis_formatter: 'number',
