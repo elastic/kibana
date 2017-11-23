@@ -158,7 +158,7 @@ describe('FieldEditor directive', function () {
           .respond(['expression', 'painless', 'groovy']);
 
         $httpBackend.flush();
-        expect(editor.scriptingLangs).to.eql(['expression', 'painless']);
+        expect(editor.scriptingLangs).to.eql(['painless']);
       });
 
       it('provides specific type when language is painless', function () {

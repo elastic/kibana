@@ -1,12 +1,12 @@
 import 'ui/vislib';
 import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
+import './editors/wms_options';
 import $ from 'jquery';
 import _ from 'lodash';
 import { KibanaMap } from './kibana_map';
 import { GeohashLayer } from './geohash_layer';
 import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
-// import './lib/service_settings';
 import 'ui/vis/map/service_settings';
 import './styles/_tilemap.less';
 
@@ -42,7 +42,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
 
     async render(esResponse, status) {
 
-      return new Promise(async(resolve) => {
+      return new Promise(async (resolve) => {
 
         await this._kibanaMapReady;
         if (status.resize) {
@@ -172,6 +172,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
      * called on options change (vis.params change)
      */
     async _updateParams() {
+
       const mapParams = this._getMapsParams();
       if (_.eq(this._currentParams, mapParams)) {
         return;
@@ -181,12 +182,13 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
       const { minZoom, maxZoom } = this._getMinMaxZoom();
 
       if (mapParams.wms.enabled) {
-        //Switch to WMS
+        // Switch to WMS
         if (maxZoom > this._kibanaMap.getMaxZoomLevel()) {
           //need to recreate the map with less restrictive zoom
+          this._kibanaMap.removeLayer(this._geohashLayer);
           this._geohashLayer = null;
-          this._kibanaMapReady = this._makeKibanaMap();
-          await this._kibanaMapReady;
+          this._kibanaMap.setMinZoom(minZoom);
+          this._kibanaMap.setMaxZoom(maxZoom);
         }
 
         this._kibanaMap.setBaseLayer({
@@ -200,13 +202,13 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
         });
       } else {
 
-        //switch to regular
+        // switch to tms
         if (maxZoom < this._kibanaMap.getMaxZoomLevel()) {
           //need to recreate the map with more restrictive zoom level
+          this._kibanaMap.removeLayer(this._geohashLayer);
           this._geohashLayer = null;
-          this._kibanaMapReady = this._makeKibanaMap();
-          await this._kibanaMapReady;
-
+          this._kibanaMap.setMinZoom(minZoom);
+          this._kibanaMap.setMaxZoom(maxZoom);
           if (this._kibanaMap.getZoomLevel() > maxZoom) {
             this._kibanaMap.setZoomLevel(maxZoom);
           }
@@ -221,6 +223,7 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
           });
         }
       }
+
       const geohashOptions = this._getGeohashOptions();
       if (!this._geohashLayer || !this._geohashLayer.isReusable(geohashOptions)) {
         this._recreateGeohashLayer(this._chartData);

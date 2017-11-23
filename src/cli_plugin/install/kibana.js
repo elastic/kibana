@@ -2,7 +2,7 @@ import _ from 'lodash';
 import path from 'path';
 import { fromRoot } from '../../utils';
 import KbnServer from '../../server/kbn_server';
-import readYamlConfig from '../../cli/serve/read_yaml_config';
+import { readYamlConfig } from '../../cli/serve/read_yaml_config';
 import { versionSatisfies, cleanVersion } from '../../utils/version';
 import { statSync } from 'fs';
 

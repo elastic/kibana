@@ -161,7 +161,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async getReactSelectOptions(containerSelector) {
       await testSubjects.click(containerSelector);
       const menu = await retry.try(
-          async () => find.byCssSelector('.Select-menu-outer'));
+        async () => find.byCssSelector('.Select-menu-outer'));
       return await menu.getVisibleText();
     }
 
@@ -176,7 +176,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       }
 
       const valueElement = await retry.try(
-          async () => find.byCssSelector(className + ' * .Select-value-label'));
+        async () => find.byCssSelector(className + ' * .Select-value-label'));
       return await valueElement.getVisibleText();
     }
 
@@ -264,10 +264,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await input.type(newValue);
     }
 
-    async clickSavedSearch() {
-      await find.clickByCssSelector('li[ng-click="stepTwoMode=\'saved\'"]');
-    }
-
     async selectSearch(searchName) {
       await find.clickByLinkText(searchName);
     }
@@ -325,7 +321,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async orderBy(fieldValue) {
       await find.clickByCssSelector(
-          'select.form-control.ng-pristine.ng-valid.ng-untouched.ng-valid-required[ng-model="agg.params.orderBy"] ' +
+        'select.form-control.ng-pristine.ng-valid.ng-untouched.ng-valid-required[ng-model="agg.params.orderBy"] ' +
           'option.ng-binding.ng-scope:contains("' + fieldValue + '")');
     }
 
@@ -414,9 +410,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
       return retry.try(function tryingForTime() {
         return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByPartialLinkText(vizName)
-        .click();
+          .setFindTimeout(defaultFindTimeout)
+          .findByPartialLinkText(vizName)
+          .click();
       });
     }
 
@@ -492,7 +488,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const yLabel = await maxYAxisMarker.getVisibleText();
       const yAxisLabel = yLabel.replace(/,/g, '');
 
-        // 2). find and save the y-axis pixel size (the chart height)
+      // 2). find and save the y-axis pixel size (the chart height)
       const rectangle = await find.byCssSelector('clipPath rect');
       const theHeight = await rectangle.getAttribute('height');
       const yAxisHeight = theHeight;

@@ -2,7 +2,7 @@ import { resolve } from 'path';
 
 import { Command } from 'commander';
 
-import { createToolingLog } from '../utils';
+import { createToolingLog } from '../dev';
 import { createFunctionalTestRunner } from './functional_test_runner';
 
 const cmd = new Command('node scripts/functional_test_runner');

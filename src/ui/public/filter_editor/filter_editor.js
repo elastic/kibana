@@ -87,13 +87,17 @@ module.directive('filterEditor', function ($timeout, indexPatterns) {
         $timeout(() => $scope.$broadcast(`focus-${name}`));
       };
 
-      this.showQueryDslEditor = () => {
+      this.toggleEditingQueryDsl = () => {
+        this.isEditingQueryDsl = !this.isEditingQueryDsl;
+      };
+
+      this.isQueryDslEditorVisible = () => {
         const { type, isNew } = this.filter.meta;
         return this.isEditingQueryDsl || (!isNew && !FILTER_OPERATOR_TYPES.includes(type));
       };
 
       this.isValid = () => {
-        if (this.showQueryDslEditor()) {
+        if (this.isQueryDslEditorVisible()) {
           return _.isObject(this.queryDsl);
         }
         const { field, operator, params } = this;
@@ -104,7 +108,7 @@ module.directive('filterEditor', function ($timeout, indexPatterns) {
         const { filter, field, operator, params, alias } = this;
 
         let newFilter;
-        if (this.showQueryDslEditor()) {
+        if (this.isQueryDslEditorVisible()) {
           const meta = _.pick(filter.meta, ['negate', 'index']);
           meta.index = meta.index || this.indexPatterns[0].id;
           newFilter = Object.assign(this.queryDsl, { meta });

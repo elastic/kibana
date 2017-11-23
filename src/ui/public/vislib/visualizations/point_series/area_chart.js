@@ -72,19 +72,19 @@ export function VislibVisualizationsAreaChartProvider(Private) {
 
       // Data layers
       const layer = svg.append('g')
-      .attr('class', function (d, i) {
-        return 'series series-' + i;
-      });
+        .attr('class', function (d, i) {
+          return 'series series-' + i;
+        });
 
       // Append path
       const path = layer.append('path')
-      .attr('data-label', data.label)
-      .style('fill', () => color(data.label))
-      .style('stroke', () => color(data.label))
-      .classed('overlap_area', function () {
-        return isOverlapping;
-      })
-      .attr('clip-path', 'url(#' + this.baseChart.clipPathId + ')');
+        .attr('data-label', data.label)
+        .style('fill', () => color(data.label))
+        .style('stroke', () => color(data.label))
+        .classed('overlap_area', function () {
+          return isOverlapping;
+        })
+        .attr('clip-path', 'url(#' + this.baseChart.clipPathId + ')');
 
       function x(d) {
         if (isTimeSeries) {
@@ -122,10 +122,10 @@ export function VislibVisualizationsAreaChartProvider(Private) {
       path
         .attr('d', function () {
           const area = getArea()
-          .defined(function (d) {
-            return !_.isNull(d.y);
-          })
-          .interpolate(interpolate);
+            .defined(function (d) {
+              return !_.isNull(d.y);
+            })
+            .interpolate(interpolate);
           return area(data.values.filter(function (d) {
             return !_.isNull(d.y);
           }));
@@ -161,25 +161,25 @@ export function VislibVisualizationsAreaChartProvider(Private) {
 
       // append the circles
       const circles = layer.selectAll('circles')
-      .data(function appendData() {
-        return data.values.filter(function isZeroOrNull(d) {
-          return d.y !== 0 && !_.isNull(d.y);
+        .data(function appendData() {
+          return data.values.filter(function isZeroOrNull(d) {
+            return d.y !== 0 && !_.isNull(d.y);
+          });
         });
-      });
 
       // exit
       circles.exit().remove();
 
       // enter
       circles
-      .enter()
-      .append('circle')
-      .attr('data-label', data.label)
-      .attr('stroke', () => {
-        return color(data.label);
-      })
-      .attr('fill', 'transparent')
-      .attr('stroke-width', circleStrokeWidth);
+        .enter()
+        .append('circle')
+        .attr('data-label', data.label)
+        .attr('stroke', () => {
+          return color(data.label);
+        })
+        .attr('fill', 'transparent')
+        .attr('stroke-width', circleStrokeWidth);
 
       function cx(d) {
         if (ordered && ordered.date) {
@@ -198,9 +198,9 @@ export function VislibVisualizationsAreaChartProvider(Private) {
 
       // update
       circles
-      .attr('cx', isHorizontal ? cx : cy)
-      .attr('cy', isHorizontal ? cy : cx)
-      .attr('r', circleRadius);
+        .attr('cx', isHorizontal ? cx : cy)
+        .attr('cy', isHorizontal ? cy : cx)
+        .attr('r', circleRadius);
 
       // Add tooltip
       if (isTooltip) {

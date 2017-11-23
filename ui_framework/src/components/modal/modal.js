@@ -19,7 +19,7 @@ export class KuiModal extends Component {
       className,
       children,
       onClose, // eslint-disable-line no-unused-vars
-      ...rest,
+      ...rest
     } = this.props;
 
     const classes = classnames('kuiModal', className);

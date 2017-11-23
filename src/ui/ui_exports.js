@@ -168,14 +168,14 @@ export default class UiExports {
     const matcher = _.partialRight(minimatch.filter, { matchBase: true });
 
     return _.chain(patterns)
-    .map(function (pattern) {
-      return names.filter(matcher(pattern));
-    })
-    .flattenDeep()
-    .reduce(function (found, name) {
-      return found.concat(aliases[name]);
-    }, [])
-    .value();
+      .map(function (pattern) {
+        return names.filter(matcher(pattern));
+      })
+      .flattenDeep()
+      .reduce(function (found, name) {
+        return found.concat(aliases[name]);
+      }, [])
+      .value();
   }
 
   getAllApps() {

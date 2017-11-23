@@ -2,11 +2,12 @@ import _ from 'lodash';
 import { statSync } from 'fs';
 import { isWorker } from 'cluster';
 import { resolve } from 'path';
+
 import { fromRoot } from '../../utils';
 import { getConfig } from '../../server/path';
 import Config from '../../server/config/config';
-import { transformDeprecations } from '../../server/config/transform_deprecations';
-import readYamlConfig from './read_yaml_config';
+import { readYamlConfig } from './read_yaml_config';
+import { readKeystore } from './read_keystore';
 
 import { DEV_SSL_CERT_PATH, DEV_SSL_KEY_PATH } from '../dev_ssl';
 
@@ -69,6 +70,7 @@ function readServerSettings(opts, extraCliOptions) {
     opts.pluginPath
   )));
 
+  merge(readKeystore());
   merge(extraCliOptions);
 
   return settings;
@@ -78,116 +80,116 @@ export default function (program) {
   const command = program.command('serve');
 
   command
-  .description('Run the kibana server')
-  .collectUnknownOptions()
-  .option('-e, --elasticsearch <uri>', 'Elasticsearch instance')
-  .option(
-    '-c, --config <path>',
-    'Path to the config file, can be changed with the CONFIG_PATH environment variable as well. ' +
+    .description('Run the kibana server')
+    .collectUnknownOptions()
+    .option('-e, --elasticsearch <uri>', 'Elasticsearch instance')
+    .option(
+      '-c, --config <path>',
+      'Path to the config file, can be changed with the CONFIG_PATH environment variable as well. ' +
     'Use multiple --config args to include multiple config files.',
-    configPathCollector,
-    [ getConfig() ]
-  )
-  .option('-p, --port <port>', 'The port to bind to', parseInt)
-  .option('-q, --quiet', 'Prevent all logging except errors')
-  .option('-Q, --silent', 'Prevent all logging')
-  .option('--verbose', 'Turns on verbose logging')
-  .option('-H, --host <host>', 'The host to bind to')
-  .option('-l, --log-file <path>', 'The file to log to')
-  .option(
-    '--plugin-dir <path>',
-    'A path to scan for plugins, this can be specified multiple ' +
+      configPathCollector,
+      [ getConfig() ]
+    )
+    .option('-p, --port <port>', 'The port to bind to', parseInt)
+    .option('-q, --quiet', 'Prevent all logging except errors')
+    .option('-Q, --silent', 'Prevent all logging')
+    .option('--verbose', 'Turns on verbose logging')
+    .option('-H, --host <host>', 'The host to bind to')
+    .option('-l, --log-file <path>', 'The file to log to')
+    .option(
+      '--plugin-dir <path>',
+      'A path to scan for plugins, this can be specified multiple ' +
     'times to specify multiple directories',
-    pluginDirCollector,
-    [
-      fromRoot('plugins'),
-      fromRoot('src/core_plugins')
-    ]
-  )
-  .option(
-    '--plugin-path <path>',
-    'A path to a plugin which should be included by the server, ' +
+      pluginDirCollector,
+      [
+        fromRoot('plugins'),
+        fromRoot('src/core_plugins')
+      ]
+    )
+    .option(
+      '--plugin-path <path>',
+      'A path to a plugin which should be included by the server, ' +
     'this can be specified multiple times to specify multiple paths',
-    pluginPathCollector,
-    []
-  )
-  .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector);
+      pluginPathCollector,
+      []
+    )
+    .option('--plugins <path>', 'an alias for --plugin-dir', pluginDirCollector);
 
   if (canCluster) {
     command
-    .option('--dev', 'Run the server with development mode defaults')
-    .option('--ssl', 'Run the dev server using HTTPS')
-    .option('--no-base-path', 'Don\'t put a proxy in front of the dev server, which adds a random basePath')
-    .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode');
+      .option('--dev', 'Run the server with development mode defaults')
+      .option('--ssl', 'Run the dev server using HTTPS')
+      .option('--no-base-path', 'Don\'t put a proxy in front of the dev server, which adds a random basePath')
+      .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode');
   }
 
   command
-  .action(async function (opts) {
-    if (opts.dev) {
-      try {
-        const kbnDevConfig = fromRoot('config/kibana.dev.yml');
-        if (statSync(kbnDevConfig).isFile()) {
-          opts.config.push(kbnDevConfig);
-        }
-      } catch (err) {
+    .action(async function (opts) {
+      if (opts.dev) {
+        try {
+          const kbnDevConfig = fromRoot('config/kibana.dev.yml');
+          if (statSync(kbnDevConfig).isFile()) {
+            opts.config.push(kbnDevConfig);
+          }
+        } catch (err) {
         // ignore, kibana.dev.yml does not exist
+        }
       }
-    }
 
-    const getCurrentSettings = () => readServerSettings(opts, this.getUnknownOptions());
-    const settings = getCurrentSettings();
+      const getCurrentSettings = () => readServerSettings(opts, this.getUnknownOptions());
+      const settings = getCurrentSettings();
 
-    if (canCluster && opts.dev && !isWorker) {
+      if (canCluster && opts.dev && !isWorker) {
       // stop processing the action and handoff to cluster manager
-      const ClusterManager = require('../cluster/cluster_manager');
-      new ClusterManager(opts, settings);
-      return;
-    }
-
-    let kbnServer = {};
-    const KbnServer = require('../../server/kbn_server');
-    try {
-      kbnServer = new KbnServer(settings);
-      await kbnServer.ready();
-    } catch (error) {
-      const { server } = kbnServer;
-
-      switch (error.code) {
-        case 'EADDRINUSE':
-          logFatal(`Port ${error.port} is already in use. Another instance of Kibana may be running!`, server);
-          break;
-
-        case 'InvalidConfig':
-          logFatal(error.message, server);
-          break;
-
-        default:
-          logFatal(error, server);
-          break;
+        const ClusterManager = require('../cluster/cluster_manager');
+        new ClusterManager(opts, settings);
+        return;
       }
 
-      kbnServer.close();
-      const exitCode = error.processExitCode == null ? 1 : error.processExitCode;
-      // eslint-disable-next-line no-process-exit
-      process.exit(exitCode);
-    }
+      let kbnServer = {};
+      const KbnServer = require('../../server/kbn_server');
+      try {
+        kbnServer = new KbnServer(settings);
+        await kbnServer.ready();
+      } catch (error) {
+        const { server } = kbnServer;
 
-    process.on('SIGHUP', function reloadConfig() {
-      const settings = transformDeprecations(getCurrentSettings());
-      const config = new Config(kbnServer.config.getSchema(), settings);
+        switch (error.code) {
+          case 'EADDRINUSE':
+            logFatal(`Port ${error.port} is already in use. Another instance of Kibana may be running!`, server);
+            break;
 
-      kbnServer.server.log(['info', 'config'], 'Reloading logging configuration due to SIGHUP.');
-      kbnServer.applyLoggingConfiguration(config);
-      kbnServer.server.log(['info', 'config'], 'Reloaded logging configuration due to SIGHUP.');
+          case 'InvalidConfig':
+            logFatal(error.message, server);
+            break;
 
-      // If new platform config subscription is active, let's notify it with the updated config.
-      if (kbnServer.newPlatform) {
-        kbnServer.newPlatform.updateConfig(config);
+          default:
+            logFatal(error, server);
+            break;
+        }
+
+        kbnServer.close();
+        const exitCode = error.processExitCode == null ? 1 : error.processExitCode;
+        // eslint-disable-next-line no-process-exit
+        process.exit(exitCode);
       }
+
+      process.on('SIGHUP', function reloadConfig() {
+        const settings = transformDeprecations(getCurrentSettings());
+        const config = new Config(kbnServer.config.getSchema(), settings);
+
+        kbnServer.server.log(['info', 'config'], 'Reloading logging configuration due to SIGHUP.');
+        kbnServer.applyLoggingConfiguration(config);
+        kbnServer.server.log(['info', 'config'], 'Reloaded logging configuration due to SIGHUP.');
+
+        // If new platform config subscription is active, let's notify it with the updated config.
+        if (kbnServer.newPlatform) {
+          kbnServer.newPlatform.updateConfig(config);
+        }
+      });
+
+      return kbnServer;
     });
-
-    return kbnServer;
-  });
 }
 
 function logFatal(message, server) {

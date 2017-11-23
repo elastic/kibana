@@ -3,11 +3,10 @@ import { writeFileSync } from 'fs';
 import { relative, resolve } from 'path';
 import { safeDump } from 'js-yaml';
 import es from 'event-stream';
-import readYamlConfig from '../read_yaml_config';
+import { readYamlConfig } from '../read_yaml_config';
 import expect from 'expect.js';
 
 const testConfigFile = follow(`fixtures/reload_logging_config/kibana.test.yml`);
-const cli = follow(`../../../../bin/kibana`);
 
 function follow(file) {
   return relative(process.cwd(), resolve(__dirname, file));
@@ -34,7 +33,8 @@ describe(`Server logging configuration`, function () {
       let asserted = false;
       let json = Infinity;
       setLoggingJson(true);
-      const child = spawn(cli, [`--config`, testConfigFile]);
+      const kibanaPath = follow(`../../../../scripts/kibana.js`);
+      const child = spawn('node', [kibanaPath, '--config', testConfigFile]);
 
       child.on('error', err => {
         done(new Error(`error in child process while attempting to reload config. ${err.stack || err.message || err}`));

@@ -28,12 +28,33 @@
 
   <div ng-if="editor.field.scripted" class="form-group">
     <label for="scriptedFieldLang">Language</label>
+    <div class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm" ng-if="editor.field.lang && editor.isDeprecatedLang(editor.field.lang)">
+      <div class="kuiInfoPanelHeader">
+        <span
+          class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--warning fa-bolt"
+          aria-label="Warning"
+          role="img"
+        ></span>
+        <span class="kuiInfoPanelHeader__title">
+          Deprecation Warning
+        </span>
+      </div>
+
+      <div class="kuiInfoPanelBody">
+        <div class="kuiInfoPanelBody__message">
+          <span class="text-capitalize">{{editor.field.lang}}</span> is deprecated and support will be removed in the
+          next major version of Kibana and Elasticsearch. We recommend using
+          <a class="kuiLink" ng-href="{{editor.docLinks.painless}}">Painless</a>
+          for new scripted fields.
+        </div>
+      </div>
+    </div>
     <select
       ng-model="editor.field.lang"
       id="scriptedFieldLang"
       ng-options="lang as lang for lang in editor.scriptingLangs"
       required
-      class="form-control"
+      class="form-control kuiVerticalRhythm"
       data-test-subj="editorFieldLang">
       <option value="">-- Select Language --</option>
     </select>
@@ -220,8 +241,8 @@
       The type of this field changes across indices. It is unavailable for many analysis functions. The indices per type are as follows:
       <table class="table">
       <thead>
-        <th> Field Type </th>
-        <th> Index Names </th>
+        <th scope="col"> Field Type </th>
+        <th scope="col"> Index Names </th>
       </thead>
       <tbody>
       <tr ng-repeat="(type, indices) in editor.field.conflictDescriptions">

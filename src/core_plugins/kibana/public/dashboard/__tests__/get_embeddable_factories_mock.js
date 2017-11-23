@@ -1,3 +1,4 @@
+/* global jest */
 export function getEmbeddableFactoryMock(config) {
   const embeddableFactoryMockDefaults = {
     getEditPath: () => {},

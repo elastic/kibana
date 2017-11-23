@@ -1,6 +1,9 @@
 import expect from 'expect.js';
 import moment from 'moment-timezone';
-import { DateFormat } from '../date';
+import { createDateFormat } from '../date';
+import { FieldFormat } from '../../../../../../ui/field_formats/field_format';
+
+const DateFormat = createDateFormat(FieldFormat);
 
 describe('Date Format', function () {
   let convert;

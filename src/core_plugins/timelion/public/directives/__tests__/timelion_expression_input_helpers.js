@@ -5,6 +5,7 @@ import {
   SUGGESTION_TYPE,
   suggest
 } from '../timelion_expression_input_helpers';
+import { ArgValueSuggestionsProvider } from '../timelion_expression_suggestions/arg_value_suggestions';
 
 describe('Timelion expression suggestions', () => {
 
@@ -15,7 +16,10 @@ describe('Timelion expression suggestions', () => {
       args: [
         { name: 'inputSeries' },
         { name: 'argA' },
-        { name: 'argAB' }
+        {
+          name: 'argAB',
+          suggestions: [{ name: 'value1' }]
+        }
       ]
     };
     const myFunc2 = {
@@ -29,6 +33,13 @@ describe('Timelion expression suggestions', () => {
     };
     const functionList = [func1, myFunc2];
     let Parser;
+    const privateStub = () => {
+      return {};
+    };
+    const indexPatternsStub = {
+
+    };
+    const argValueSuggestions = ArgValueSuggestionsProvider(privateStub, indexPatternsStub); // eslint-disable-line new-cap
     beforeEach(function () {
       Parser = PEG.buildParser(grammar);
     });
@@ -39,7 +50,7 @@ describe('Timelion expression suggestions', () => {
         it('should return function suggestions', async () => {
           const expression = '.';
           const cursorPosition = 1;
-          const suggestions = await suggest(expression, functionList, Parser, cursorPosition);
+          const suggestions = await suggest(expression, functionList, Parser, cursorPosition, argValueSuggestions);
           expect(suggestions).to.eql({
             'list': [func1, myFunc2],
             'location': {
@@ -52,7 +63,7 @@ describe('Timelion expression suggestions', () => {
         it('should filter function suggestions by function name', async () => {
           const expression = '.myF';
           const cursorPosition = 4;
-          const suggestions = await suggest(expression, functionList, Parser, cursorPosition);
+          const suggestions = await suggest(expression, functionList, Parser, cursorPosition, argValueSuggestions);
           expect(suggestions).to.eql({
             'list': [myFunc2],
             'location': {
@@ -65,15 +76,29 @@ describe('Timelion expression suggestions', () => {
       });
 
       describe('incompleteArgument', () => {
-        it('should return argument value suggestions', async () => {
+        it('should return no argument value suggestions when not provided by help', async () => {
           const expression = '.func1(argA=)';
           const cursorPosition = 11;
-          const suggestions = await suggest(expression, functionList, Parser, cursorPosition);
+          const suggestions = await suggest(expression, functionList, Parser, cursorPosition, argValueSuggestions);
           expect(suggestions).to.eql({
             'list': [],
             'location': {
-              'min': 7,
-              'max': 12
+              'min': 11,
+              'max': 11
+            },
+            'type': 'argument_value'
+          });
+        });
+
+        it('should return argument value suggestions when provided by help', async () => {
+          const expression = '.func1(argAB=)';
+          const cursorPosition = 11;
+          const suggestions = await suggest(expression, functionList, Parser, cursorPosition, argValueSuggestions);
+          expect(suggestions).to.eql({
+            'list': [{ name: 'value1' }],
+            'location': {
+              'min': 11,
+              'max': 11
             },
             'type': 'argument_value'
           });
@@ -87,7 +112,7 @@ describe('Timelion expression suggestions', () => {
         it('should return function suggestion', async () => {
           const expression = '.func1()';
           const cursorPosition = 1;
-          const suggestions = await suggest(expression, functionList, Parser, cursorPosition);
+          const suggestions = await suggest(expression, functionList, Parser, cursorPosition, argValueSuggestions);
           expect(suggestions).to.eql({
             'list': [func1],
             'location': {
@@ -104,7 +129,7 @@ describe('Timelion expression suggestions', () => {
           it('should return argument suggestions', async () => {
             const expression = '.myFunc2()';
             const cursorPosition = 9;
-            const suggestions = await suggest(expression, functionList, Parser, cursorPosition);
+            const suggestions = await suggest(expression, functionList, Parser, cursorPosition, argValueSuggestions);
             expect(suggestions).to.eql({
               'list': myFunc2.args,
               'location': {
@@ -117,7 +142,7 @@ describe('Timelion expression suggestions', () => {
           it('should not provide argument suggestions for argument that is all ready set in function def', async () => {
             const expression = '.myFunc2(argAB=provided,)';
             const cursorPosition = 24;
-            const suggestions = await suggest(expression, functionList, Parser, cursorPosition);
+            const suggestions = await suggest(expression, functionList, Parser, cursorPosition, argValueSuggestions);
             expect(suggestions.type).to.equal(SUGGESTION_TYPE.ARGUMENTS);
             expect(suggestions).to.eql({
               'list': [{ name: 'argA' }, { name: 'argABC' }],
@@ -131,7 +156,7 @@ describe('Timelion expression suggestions', () => {
           it('should filter argument suggestions by argument name', async () => {
             const expression = '.myFunc2(argAB,)';
             const cursorPosition = 14;
-            const suggestions = await suggest(expression, functionList, Parser, cursorPosition);
+            const suggestions = await suggest(expression, functionList, Parser, cursorPosition, argValueSuggestions);
             expect(suggestions).to.eql({
               'list': [{ name: 'argAB' }, { name: 'argABC' }],
               'location': {
@@ -144,9 +169,9 @@ describe('Timelion expression suggestions', () => {
           it('should not show first argument for chainable functions', async () => {
             const expression = '.func1()';
             const cursorPosition = 7;
-            const suggestions = await suggest(expression, functionList, Parser, cursorPosition);
+            const suggestions = await suggest(expression, functionList, Parser, cursorPosition, argValueSuggestions);
             expect(suggestions).to.eql({
-              'list': [{ name: 'argA' }, { name: 'argAB' }],
+              'list': [{ name: 'argA' }, { name: 'argAB', suggestions: [{ name: 'value1' }] }],
               'location': {
                 'min': 7,
                 'max': 7
@@ -156,14 +181,28 @@ describe('Timelion expression suggestions', () => {
           });
         });
         describe('cursor in argument value', () => {
-          it('should return argument value suggestions', async () => {
+          it('should return no argument value suggestions when not provided by help', async () => {
             const expression = '.myFunc2(argA=42)';
             const cursorPosition = 14;
-            const suggestions = await suggest(expression, functionList, Parser, cursorPosition);
+            const suggestions = await suggest(expression, functionList, Parser, cursorPosition, argValueSuggestions);
             expect(suggestions).to.eql({
               'list': [],
               'location': {
                 'min': 14,
+                'max': 16
+              },
+              'type': 'argument_value'
+            });
+          });
+
+          it('should return no argument value suggestions when provided by help', async () => {
+            const expression = '.func1(argAB=val)';
+            const cursorPosition = 16;
+            const suggestions = await suggest(expression, functionList, Parser, cursorPosition, argValueSuggestions);
+            expect(suggestions).to.eql({
+              'list': [{ name: 'value1' }],
+              'location': {
+                'min': 13,
                 'max': 16
               },
               'type': 'argument_value'

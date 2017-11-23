@@ -31,7 +31,7 @@ routes.when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
   controller: 'VisualizeWizardStep1',
 });
 
-module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, timefilter, Private) {
+module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, timefilter, Private, config) {
   timefilter.enabled = false;
 
   const visTypeCategoryToHumanReadableMap = {
@@ -47,13 +47,26 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
   kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
 
   const visTypes = Private(VisTypesRegistryProvider);
+  const isLabsEnabled = config.get('visualize:enableLabs');
+  $scope.toggleLabView = () => {
+    $route.current.params.lab = !$route.current.params.lab;
+    $route.updateParams($route.current.params);
+    $route.reload();
+  };
 
   const categoryToVisTypesMap = {};
 
   visTypes.forEach(visType => {
+
     const categoryName = visType.category;
 
-    if (categoryName === CATEGORY.HIDDEN) return;
+    if (categoryName === CATEGORY.HIDDEN) {
+      return;
+    }
+
+    if (!isLabsEnabled && visType.stage === 'lab') {
+      return;
+    }
 
     // Create category object if it doesn't exist yet.
     if (!categoryToVisTypesMap[categoryName]) {
@@ -66,7 +79,6 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
     const categoryVisTypes = categoryToVisTypesMap[categoryName];
 
     // Add the visType to the list and sort them by their title.
-    // categoryVisTypes.list.push(visType);
     categoryVisTypes.list = _.sortBy(
       categoryVisTypes.list.concat(visType),
       type => type.title
@@ -125,7 +137,14 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
   };
 
   $scope.getVisTypeTooltip = type => {
-    const prefix = type.isExperimental ? '(Experimental)' : '';
+    //to not clutter the tooltip, just only notify if labs or experimental.
+    //labs is more important in this regard.
+    let prefix = '';
+    if (type.stage === 'lab') {
+      prefix = '(Lab)';
+    } else if (type.stage === 'experimental') {
+      prefix = '(Experimental)';
+    }
     return `${prefix} ${type.description}`;
   };
 
@@ -143,8 +162,8 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
   $scope.getVisTypeUrl = function (visType) {
     const baseUrl =
       visType.requiresSearch && visType.options.showIndexSelection
-      ? `#${VisualizeConstants.WIZARD_STEP_2_PAGE_PATH}?`
-      : `#${VisualizeConstants.CREATE_PATH}?`;
+        ? `#${VisualizeConstants.WIZARD_STEP_2_PAGE_PATH}?`
+        : `#${VisualizeConstants.CREATE_PATH}?`;
 
     const params = [`type=${encodeURIComponent(visType.name)}`];
 

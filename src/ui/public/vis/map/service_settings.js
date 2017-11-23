@@ -47,7 +47,7 @@ uiModules.get('kibana')
       }
       _invalidateSettings() {
 
-        this._loadCatalogue = _.once(async() => {
+        this._loadCatalogue = _.once(async () => {
           try {
             const response = await this._getManifest(mapConfig.manifestServiceUrl, this._queryParams);
             return response.data;
@@ -63,7 +63,7 @@ uiModules.get('kibana')
         });
 
 
-        this._loadFileLayers = _.once(async() => {
+        this._loadFileLayers = _.once(async () => {
           const catalogue = await this._loadCatalogue();
           const fileService = catalogue.services.filter((service) => service.type === 'file')[0];
           const manifest = await this._getManifest(fileService.manifest, this._queryParams);
@@ -75,7 +75,7 @@ uiModules.get('kibana')
           return layers;
         });
 
-        this._loadTMSServices = _.once(async() => {
+        this._loadTMSServices = _.once(async () => {
 
           if (tilemapsConfig.deprecated.isOverridden) {//use settings from yml (which are overridden)
             const tmsService = _.cloneDeep(tmsOptionsFromConfig);

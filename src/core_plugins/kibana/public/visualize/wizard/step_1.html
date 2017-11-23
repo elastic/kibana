@@ -15,9 +15,11 @@
 <div class="kuiViewContent kuiViewContent--constrainedWidth">
   <div class="kuiViewContentItem">
     <!-- Header -->
-    <h1 class="kuiTitle kuiVerticalRhythm kuiVerticalRhythm--medium">
-      Select visualization type
-    </h1>
+    <div class="visualizeViewContentHeader kuiVerticalRhythm kuiVerticalRhythm--medium">
+      <h1 class="kuiTitle">
+        Select visualization type
+      </h1>
+    </div>
 
     <!-- Search -->
     <div class="kuiSearchInput kuiVerticalRhythm kuiVerticalRhythm--medium fullWidth" role="search">
@@ -29,7 +31,6 @@
         ng-model="searchTerm"
       >
     </div>
-
     <div
       class="kuiVerticalRhythm kuiVerticalRhythm--medium"
       ng-repeat="category in filteredVisTypeCategories"
@@ -75,7 +76,7 @@
 
           <div
             class="kuiGalleryItem__icon kuiIcon fa-flask"
-            ng-if="type.isExperimental"
+            ng-if="type.shouldMarkAsExperimentalInUI()"
           ></div>
 
           <span

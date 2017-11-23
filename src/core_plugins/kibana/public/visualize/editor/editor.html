@@ -50,16 +50,21 @@
     index-patterns="[indexPattern]"
   ></filter-bar>
 
+  <div class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm" ng-if="vis.type.shouldMarkAsExperimentalInUI()">
+    <div class="kuiInfoPanelBody">
+      <div class="kuiInfoPanelBody__message" ng-bind-html="getAdditionalMessage()">
+      </div>
+    </div>
+  </div>
+
   <visualize
     saved-obj="savedVis"
     ui-state="uiState"
     app-state="state"
     editor-mode="true"
-    data-shared-item
-    render-counter
-    data-title="{{savedVis.lastSavedTitle}}"
-    data-description="{{savedVis.description}}"
-    show-spy-panel="chrome.getVisible()">
+    show-spy-panel="chrome.getVisible()"
+    >
+
   </visualize>
 
 </visualize-app>

@@ -9,6 +9,7 @@ import angular from 'angular';
 export function toUser(text) {
   if (text == null) return '';
   if (_.isObject(text)) {
+    if (text.match_all) return '';
     if (text.query_string) return toUser(text.query_string.query);
     return angular.toJson(text);
   }
