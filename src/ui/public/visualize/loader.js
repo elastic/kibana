@@ -16,7 +16,11 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
     const container = angular.element(el);
 
     const visHtml = $compile(visTemplate)(scope);
-    container.html(visHtml);
+    if (params.append) {
+      container.append(visHtml);
+    } else {
+      container.html(visHtml);
+    }
 
     const handler = { destroy: scope.$destroy };
 
@@ -66,8 +70,10 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
      * @param {object} params.timeRange An object with a min/max key, that must be
      *    either a date in ISO format, or a valid datetime Elasticsearch expression,
      *    e.g.: { min: 'now-7d/d', max: 'now' }
-     * @param {boolean} showSpyPanel Whether or not the spy panel should be available
+     * @param {boolean} params.showSpyPanel Whether or not the spy panel should be available
      *    on this chart. (default: false)
+     * @param {boolean} params.append If set to true, the visualization will be appended
+     *    to the passed element instead of replacing all its content. (default: false)
      * @returns {Promise} A promise, that will resolve with a handler to the visualization.
      *    The handler has the following properties:
      *    - handler.destroy: A method that destroys the underlying Angualr scope of
