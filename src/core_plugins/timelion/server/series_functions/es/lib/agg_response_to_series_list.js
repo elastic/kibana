@@ -6,8 +6,16 @@ export function timeBucketsToPairs(buckets) {
   _.each(buckets, function (bucket) {
     _.forOwn(bucket, function (val, key) {
       if (_.isPlainObject(val)) {
-        series[key] = series[key] || [];
-        series[key].push(val.value);
+        if (val.values) {
+          _.forOwn(val.values, function (bucketValue, bucketKey) {
+            const k = key + ':' + bucketKey;
+            series[k] = series[k] || [];
+            series[k].push(bucketValue);
+          });
+        } else {
+          series[key] = series[key] || [];
+          series[key].push(val.value);
+        }
       }
     });
   });

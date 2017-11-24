@@ -106,10 +106,11 @@ describe(filename, () => {
       const emptyScriptedFields = [];
 
       it('adds a metric agg for each metric', () => {
-        config.metric = ['sum:beer', 'avg:bytes'];
+        config.metric = ['sum:beer', 'avg:bytes', 'percentiles:bytes'];
         agg = createDateAgg(config, tlConfig, emptyScriptedFields);
         expect(agg.time_buckets.aggs['sum(beer)']).to.eql({ sum: { field: 'beer' } });
         expect(agg.time_buckets.aggs['avg(bytes)']).to.eql({ avg: { field: 'bytes' } });
+        expect(agg.time_buckets.aggs['percentiles(bytes)']).to.eql({ percentiles: { field: 'bytes' } });
       });
 
       it('adds a scripted metric agg for each scripted metric', () => {
