@@ -21,6 +21,13 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
       visHtml.addClass(params.cssClass);
     }
 
+    // Apply data- attributes to the element if specified
+    if (params.dataAttrs) {
+      Object.keys(params.dataAttrs).forEach(key => {
+        visHtml.attr(`data-${key}`, params.dataAttrs[key]);
+      });
+    }
+
     // If params.append was true append instead of replace content
     if (params.append) {
       container.append(visHtml);
@@ -85,6 +92,9 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
      *    to the passed element instead of replacing all its content. (default: false)
      * @param {String} params.cssClass If specified this CSS class (or classes with space separated)
      *    will be set to the root visuzalize element.
+     * @param {Object} params.dataAttrs An object of key-value pairs, that will be set
+     *    as data-{key}="{value}" attributes on the visualization element.
+     *
      * @returns {Promise} A promise, that will resolve once the visualization is rendered
      *    with a handler to the visualization. The handler has the following properties:
      *    - handler.destroy: A method that destroys the underlying Angualr scope of
