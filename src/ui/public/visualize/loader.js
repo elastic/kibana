@@ -21,7 +21,10 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
       container.html(visHtml);
     }
 
-    const handler = { destroy: scope.$destroy };
+    const handler = {
+      destroy: scope.$destroy,
+      element: visHtml,
+    };
 
     return new Promise((resolve) => {
       visHtml.on('renderComplete', () => {
@@ -77,6 +80,7 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
      *    with a handler to the visualization. The handler has the following properties:
      *    - handler.destroy: A method that destroys the underlying Angualr scope of
      *          the visualization.
+     *    - handler.element: A jQuery wrapped reference to the added vis DOM element.
      */
     embedVisualizationWithSavedObject: (el, savedObj, params) => {
       return renderVis(el, savedObj, params);
