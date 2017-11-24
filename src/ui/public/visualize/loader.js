@@ -28,7 +28,6 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
         resolve(handler);
       });
     });
-
   };
 
   return {
@@ -42,7 +41,8 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
      * @param {Object} params A list of parameters that will influence rendering.
      *    See the `embedVisualizationWithSavedObject` documentation for a list of
      *    all accepted parameters.
-     * @return {Promise} A promise, that will resolve with a handler to the visualization.
+     * @return {Promise} A promise, that will resolve once the visualization finished
+     *    rendering with a handler to the visualization.
      *    See the `embedVisualizationWithSavedObject` function for more information.
      */
     embedVisualizationWithId: async (element, id, params) => {
@@ -73,8 +73,8 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
      *    on this chart. (default: false)
      * @param {boolean} params.append If set to true, the visualization will be appended
      *    to the passed element instead of replacing all its content. (default: false)
-     * @returns {Promise} A promise, that will resolve with a handler to the visualization.
-     *    The handler has the following properties:
+     * @returns {Promise} A promise, that will resolve once the visualization is rendered
+     *    with a handler to the visualization. The handler has the following properties:
      *    - handler.destroy: A method that destroys the underlying Angualr scope of
      *          the visualization.
      */
