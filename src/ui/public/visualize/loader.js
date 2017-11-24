@@ -1,4 +1,4 @@
-import $ from 'jquery';
+import angular from 'angular';
 import uiRoutes from 'ui/routes';
 import 'ui/visualize';
 import visTemplate from './loader_template.html';
@@ -13,7 +13,7 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
     scope.showSpyPanel = params.showSpyPanel;
     scope.editorMode = params.editorMode;
 
-    const container = el instanceof $ ? el : $(el);
+    const container = angular.element(el);
 
     const visHtml = $compile(visTemplate)(scope);
     container.html(visHtml);
