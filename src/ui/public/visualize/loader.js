@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import uiRoutes from 'ui/routes';
 import 'ui/visualize';
+import visTemplate from './loader_template.html';
 
 const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
   const renderVis = (el, savedObj, params) => {
@@ -14,16 +15,13 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
 
     const container = el instanceof $ ? el : $(el);
 
-    container.html('');
-    const visEl = $('<visualize saved-obj="savedObj" app-state="appState" ui-state="uiState" ' +
-      'time-range="timeRange" editor-mode="editorMode" show-spy-panel="showSpyPanel"></visualize>');
-    const visHtml = $compile(visEl)(scope);
+    const visHtml = $compile(visTemplate)(scope);
     container.html(visHtml);
 
     const handler = { destroy: scope.$destroy };
 
     return new Promise((resolve) => {
-      visEl.on('renderComplete', () => {
+      visHtml.on('renderComplete', () => {
         resolve(handler);
       });
     });
