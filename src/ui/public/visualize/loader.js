@@ -49,27 +49,22 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
   };
 };
 
-
-let visualizeLoader = null;
-let pendingPromise = null;
-let pendingResolve = null;
-uiRoutes.addSetupWork(function (Private) {
-  visualizeLoader = Private(VisualizeLoaderProvider);
-
-  if (pendingResolve) {
-    pendingResolve(visualizeLoader);
-  }
+// Setup the visualize loader via uiRoutes.addSetupWork and resolve this promise
+// (that is also returned by getVisualizeLoader) once the the visualizeLoader
+// could be created.
+const visualizeLoaderPromise = new Promise((resolve) => {
+  uiRoutes.addSetupWork((Private) => {
+    const visualizeLoader = Private(VisualizeLoaderProvider);
+    resolve(visualizeLoader);
+  });
 });
 
-async function getVisualizeLoader() {
-  if (!pendingResolve) {
-    pendingPromise = new Promise((resolve)=> {
-      pendingResolve = resolve;
-      if (visualizeLoader) resolve(visualizeLoader);
-    });
-  }
-  return pendingPromise;
+/**
+ * Returns a promise, that resolves with the visualize loader, once it's ready.
+ * @return {Promise} A promise, that resolves to the visualize loader.
+ */
+function getVisualizeLoader() {
+  return visualizeLoaderPromise;
 }
-
 
 export { getVisualizeLoader, VisualizeLoaderProvider };
