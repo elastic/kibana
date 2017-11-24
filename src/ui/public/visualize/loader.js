@@ -15,6 +15,13 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
     const container = angular.element(el);
 
     const visHtml = $compile(visTemplate)(scope);
+
+    // If params specified cssClass, we will set this to the element.
+    if (params.cssClass) {
+      visHtml.addClass(params.cssClass);
+    }
+
+    // If params.append was true append instead of replace content
     if (params.append) {
       container.append(visHtml);
     } else {
@@ -76,6 +83,8 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
      *    on this chart. (default: false)
      * @param {boolean} params.append If set to true, the visualization will be appended
      *    to the passed element instead of replacing all its content. (default: false)
+     * @param {String} params.cssClass If specified this CSS class (or classes with space separated)
+     *    will be set to the root visuzalize element.
      * @returns {Promise} A promise, that will resolve once the visualization is rendered
      *    with a handler to the visualization. The handler has the following properties:
      *    - handler.destroy: A method that destroys the underlying Angualr scope of
