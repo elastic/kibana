@@ -29,18 +29,59 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
   };
 
   return {
-    embedVisualizationWithId: async (el, savedVisualizationId, params) => {
+    /**
+     * Renders a saved visualization specified by its id into a DOM element.
+     *
+     * @param {Element} element The DOM element to render the visualization into.
+     *    You can alternatively pass a jQuery element instead.
+     * @param {String} id The id of the saved visualization. This is the id of the
+     *    saved object that is stored in the .kibana index.
+     * @param {Object} params A list of parameters that will influence rendering.
+     *    See the `embedVisualizationWithSavedObject` documentation for a list of
+     *    all accepted parameters.
+     * @return {Promise} A promise, that will resolve with a handler to the visualization.
+     *    See the `embedVisualizationWithSavedObject` function for more information.
+     */
+    embedVisualizationWithId: async (element, id, params) => {
       return new Promise((resolve) => {
-        savedVisualizations.get(savedVisualizationId).then(savedObj => {
-          renderVis(el, savedObj, params).then(handler => {
+        savedVisualizations.get(id).then(savedObj => {
+          renderVis(element, savedObj, params).then(handler => {
             resolve(handler);
           });
         });
       });
     },
+    /**
+     * Renders a saved visualization specified by its savedObject into a DOM element.
+     * In most of the cases you will need this method, since it allows you to specify
+     * filters, handlers, queries, etc. on the savedObject before rendering.
+     *
+     * @param {Element} element The DOM element to render the visualization into.
+     *    You can alternatively pass a jQuery element instead.
+     * @param {Object} savedObj The savedObject as it could be retrieved by the
+     *    `savedVisualizations` service.
+     * @param {Object} params A list of paramters that will influence rendering.
+     * @param {AppState} params.appState The current appState of the application.
+     * @param {UiState} params.uiState The current uiState of the application.
+     * @param {object} params.timeRange An object with a min/max key, that must be
+     *    either a date in ISO format, or a valid datetime Elasticsearch expression,
+     *    e.g.: { min: 'now-7d/d', max: 'now' }
+     * @param {boolean} showSpyPanel Whether or not the spy panel should be available
+     *    on this chart. (default: false)
+     * @returns {Promise} A promise, that will resolve with a handler to the visualization.
+     *    The handler has the following properties:
+     *    - handler.destroy: A method that destroys the underlying Angualr scope of
+     *          the visualization.
+     */
     embedVisualizationWithSavedObject: (el, savedObj, params) => {
       return renderVis(el, savedObj, params);
     },
+    /**
+     * Returns a promise, that resolves to a list of all saved visualizations.
+     *
+     * @return {Promise} Resolves with a list of all saved visualizations as
+     *    returned by the `savedVisualizations` service in Kibana.
+     */
     getVisualizationList: () => {
       return savedVisualizations.find().then(result => result.hits);
     },
