@@ -61,7 +61,8 @@ class EmbeddedVisualizeHandler {
     return this.onRenderComplete()
       .then(...args)
       .then(() => {
-        return { destroy: this._scope.$destroy };
+        // The previous API only had the destroy method.
+        return { destroy: this.destroy };
       });
   }
 }
