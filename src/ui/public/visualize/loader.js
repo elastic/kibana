@@ -44,32 +44,12 @@ class EmbeddedVisualizeHandler {
     return this._renderComplete;
   }
 
-  /**
-   * This function is a fallback for the previous API of the loader. The embed
-   * functions earlier returned a promise, that would resolve with the handler,
-   * as soon as the visualization finished rendering.
-   * Since most functions don't require the rendering to be finished, the handler
-   * can be returned immediately and waiting for the rendering to be completed
-   * can now be listened to via the `handler.onRenderComplete()` promise.
-   *
-   * TODO: Remove this function with 7.0.0.
-   */
-  then(...args) {
-    // TODO: Log a deprecation warning here
-    // console.warn('[DEPRECATED] The use of embedVisualizationWith...().then() is deprecated. ' +
-    // 'Use embedVisualizationWith...().onRenderComplete().then() instead.');
-    return this.onRenderComplete()
-      .then(...args)
-      .then(() => {
-        // The previous API only had the destroy method.
-        return { destroy: this.destroy };
-      });
-  }
 }
 
 const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
   const renderVis = (el, savedObj, params) => {
     const scope = $rootScope.$new();
+    params = params || {};
     scope.savedObj = savedObj;
     scope.appState = params.appState;
     scope.uiState = params.uiState;
@@ -113,14 +93,14 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
      * @param {Object} params A list of parameters that will influence rendering.
      *    See the `embedVisualizationWithSavedObject` documentation for a list of
      *    all accepted parameters.
-     * @return {EmbeddedVisualizeHandler} The handler to the visualization.
+     * @return {Promise.<EmbeddedVisualizeHandler>} A promise that resolves to the
+     *    handler for this visualization as soon as the saved object could be found.
      */
     embedVisualizationWithId: async (element, id, params) => {
       return new Promise((resolve) => {
         savedVisualizations.get(id).then(savedObj => {
-          renderVis(element, savedObj, params).then(handler => {
-            resolve(handler);
-          });
+          const handler = renderVis(element, savedObj, params);
+          resolve(handler);
         });
       });
     },
