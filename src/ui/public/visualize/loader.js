@@ -3,6 +3,69 @@ import { uiModules } from 'ui/modules';
 import 'ui/visualize';
 import visTemplate from './loader_template.html';
 
+
+/**
+ * A handler to the embedded visualization. It offers several methods to interact
+ * with the visualization.
+ */
+class EmbeddedVisualizeHandler {
+  constructor(element, scope) {
+    this._element = element;
+    this._scope = scope;
+    this._renderComplete = new Promise(resolve => {
+      this._element.on('renderComplete', resolve);
+    });
+  }
+
+  /**
+   * Destroy the underlying Angular scope of the visualization. This should be
+   * called whenever you remove the visualization.
+   */
+  destroy() {
+    this._scope.$destroy();
+  }
+
+  /**
+   * Return the actual DOM element (wrapped in jQuery) of the rendered visualization.
+   * This is especially useful if you used `append: true` in the parameters where
+   * the visualization will be appended to the specified container.
+   */
+  get element() {
+    return this._element;
+  }
+
+  /**
+   * Returns a promise, that will resolve (without a value) once the rendering of
+   * the visualization has finished.
+   *
+   * @returns {Promise} Promise, that resolves as soon as the visualization is done rendering.
+   */
+  onRenderComplete() {
+    return this._renderComplete;
+  }
+
+  /**
+   * This function is a fallback for the previous API of the loader. The embed
+   * functions earlier returned a promise, that would resolve with the handler,
+   * as soon as the visualization finished rendering.
+   * Since most functions don't require the rendering to be finished, the handler
+   * can be returned immediately and waiting for the rendering to be completed
+   * can now be listened to via the `handler.onRenderComplete()` promise.
+   *
+   * TODO: Remove this function with 7.0.0.
+   */
+  then(...args) {
+    // TODO: Log a deprecation warning here
+    // console.warn('[DEPRECATED] The use of embedVisualizationWith...().then() is deprecated. ' +
+    // 'Use embedVisualizationWith...().onRenderComplete().then() instead.');
+    return this.onRenderComplete()
+      .then(...args)
+      .then(() => {
+        return { destroy: this._scope.$destroy };
+      });
+  }
+}
+
 const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
   const renderVis = (el, savedObj, params) => {
     const scope = $rootScope.$new();
@@ -35,16 +98,7 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
       container.html(visHtml);
     }
 
-    const handler = {
-      destroy: scope.$destroy,
-      element: visHtml,
-    };
-
-    return new Promise((resolve) => {
-      visHtml.on('renderComplete', () => {
-        resolve(handler);
-      });
-    });
+    return new EmbeddedVisualizeHandler(visHtml, scope);
   };
 
   return {
@@ -58,9 +112,7 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
      * @param {Object} params A list of parameters that will influence rendering.
      *    See the `embedVisualizationWithSavedObject` documentation for a list of
      *    all accepted parameters.
-     * @return {Promise} A promise, that will resolve once the visualization finished
-     *    rendering with a handler to the visualization.
-     *    See the `embedVisualizationWithSavedObject` function for more information.
+     * @return {EmbeddedVisualizeHandler} The handler to the visualization.
      */
     embedVisualizationWithId: async (element, id, params) => {
       return new Promise((resolve) => {
@@ -95,11 +147,7 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
      * @param {Object} params.dataAttrs An object of key-value pairs, that will be set
      *    as data-{key}="{value}" attributes on the visualization element.
      *
-     * @returns {Promise} A promise, that will resolve once the visualization is rendered
-     *    with a handler to the visualization. The handler has the following properties:
-     *    - handler.destroy: A method that destroys the underlying Angualr scope of
-     *          the visualization.
-     *    - handler.element: A jQuery wrapped reference to the added vis DOM element.
+     * @return {EmbeddedVisualizeHandler} The handler to the visualization.
      */
     embedVisualizationWithSavedObject: (el, savedObj, params) => {
       return renderVis(el, savedObj, params);
