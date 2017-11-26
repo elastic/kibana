@@ -163,4 +163,4 @@ function getVisualizeLoader() {
   return visualizeLoaderPromise;
 }
 
-export { getVisualizeLoader, VisualizeLoaderProvider };
+export { getVisualizeLoader, VisualizeLoaderProvider, EmbeddedVisualizeHandler };
