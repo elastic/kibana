@@ -97,11 +97,11 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
      *    handler for this visualization as soon as the saved object could be found.
      */
     embedVisualizationWithId: async (element, id, params) => {
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
         savedVisualizations.get(id).then(savedObj => {
           const handler = renderVis(element, savedObj, params);
           resolve(handler);
-        });
+        }, reject);
       });
     },
     /**
