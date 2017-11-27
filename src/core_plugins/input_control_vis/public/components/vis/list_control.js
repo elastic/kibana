@@ -3,8 +3,6 @@ import React, { Component } from 'react';
 import Select from 'react-select';
 import { FormRow } from './form_row';
 
-export const listControlMinWidth = 100;
-
 export class ListControl extends Component {
   constructor(props) {
     super(props);
