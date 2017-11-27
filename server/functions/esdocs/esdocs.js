@@ -72,22 +72,18 @@ export const esdocs = {
     return handlers.elasticsearchClient('search', esRequest)
     .then(resp => {
 
+      const metaFields = args.metaFields ? args.metaFields.split(',').map(field => field.trim()) : [];
       // TODO: This doesn't work for complex fields such as geo objects. This is really important to fix.
       // we need to pull the field caps for the index first, then use that knowledge to flatten the documents
-      const flatHits = map(resp.hits.hits, (hit, i) => {
-        return Object.assign(flattenHit(hit, args.metaFields ? args.metaFields.split(',') : []), { _rowId: i });
-      });
-
+      const flatHits = map(resp.hits.hits, hit => flattenHit(hit, metaFields));
       const columnNames = keys(flatHits[0]);
 
       return getESFieldTypes(args.index, columnNames, handlers.elasticsearchClient)
       .then(typedFields => {
         return {
           type: 'datatable',
-          columns: [
-            { name: '_rowId', type: 'number' },
-          ].concat(map(typedFields, (type, name) => ({ name, type }))),
-          rows: flatHits.map((row, i) => Object.assign(row, { _rowId: i })),
+          columns: map(typedFields, (type, name) => ({ name, type })),
+          rows: flatHits,
         };
       });
 

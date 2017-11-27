@@ -49,9 +49,9 @@ export const Datatable = ({ datatable, perPage, paginate }) => (
             </thead>
             <tbody>
               {rows.map((row, i) => (
-                <tr key={`row-${row._rowId || i}`}>
+                <tr key={i}>
                   {datatable.columns.map(col => (
-                    <td key={`row-${row._rowId || i}-${getColumnName(col)}`}>{
+                    <td key={`row-${i}-${getColumnName(col)}`}>{
                       getFormattedValue(row[getColumnName(col)], getColumnType(col))
                     }</td>
                   ))}

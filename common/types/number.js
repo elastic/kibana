@@ -20,15 +20,11 @@ export const number = {
         type: 'datatable',
         columns: [
           {
-            name: '_rowId',
-            type: 'number',
-          },
-          {
             name: 'value',
             type: 'number',
           },
         ],
-        rows: [{ _rowId: 0, value }],
+        rows: [{ value }],
       };
     },
   },

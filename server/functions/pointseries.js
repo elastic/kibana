@@ -88,6 +88,9 @@ export const pointseries = {
       return { type: getType(context.columns, arg), role: isMeasure(mathScope, arg) ? 'measure' : 'dimension', expression: arg };
     });
 
+    const PRIMARY_KEY = '%%CANVAS_POINTSERIES_PRIMARY_KEY%%';
+    const rows = context.rows.map((row, i) => Object.assign({}, row, { [PRIMARY_KEY]: i }));
+
     function normalizeValue(expression, value) {
       switch (getType(context.columns, expression)) {
         case 'string':
@@ -102,9 +105,9 @@ export const pointseries = {
     }
 
     // Dimensions
-    // Group rows by their dimension values, using the argument values and preserving the _rowId
+    // Group rows by their dimension values, using the argument values and preserving the PRIMARY_KEY
     // There's probably a better way to do this
-    const results = context.rows.reduce((acc, row, i) => {
+    const results = rows.reduce((acc, row, i) => {
       const newRow = dimensionNames.reduce((acc, dimension) => {
         const colName = args[dimension];
         try {
@@ -114,17 +117,15 @@ export const pointseries = {
           acc[dimension] = '_all';
         }
         return acc;
-      }, { _rowId: row._rowId });
+      }, { [PRIMARY_KEY]: row[PRIMARY_KEY] });
 
-      return Object.assign(acc, { [row._rowId]: newRow });
-      // acc[row._rowId] = newRow;
-      // return acc;
+      return Object.assign(acc, { [row[PRIMARY_KEY]]: newRow });
     }, {});
 
     // Measures
     // First group up all of the distinct dimensioned bits. Each of these will be reduced to just 1 value
     // for each measure
-    const measureKeys = groupBy(context.rows, (row) => {
+    const measureKeys = groupBy(rows, (row) => {
       const dimensions = dimensionNames.map(dimension => args[dimension] ? row[args[dimension]] : '_all');
       return dimensions.join('::%BURLAP%::');
     });
@@ -142,17 +143,17 @@ export const pointseries = {
       });
 
       rows.forEach(row => {
-        Object.assign(results[row._rowId], zipObject(measureNames, measureValues));
+        Object.assign(results[row[PRIMARY_KEY]], zipObject(measureNames, measureValues));
       });
     });
 
     // It only makes sense to uniq the rows in a point series as 2 values can not exist in the exact same place at the same time.
-    const rows = uniqBy(Object.values(results), row => JSON.stringify(omit(row, '_rowId')));
+    const resultingRows = uniqBy(Object.values(results).map(row => omit(row, PRIMARY_KEY)), JSON.stringify);
 
     return {
       type: 'pointseries',
       columns: columns,
-      rows: rows,
+      rows: resultingRows,
     };
   },
 };

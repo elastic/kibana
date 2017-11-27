@@ -24,7 +24,6 @@ export const demodata = {
     const sets = {
       ci: {
         columns: [
-          { name: '_rowId', type: 'number' },
           { name: 'time', type: 'date' },
           { name: 'cost', type: 'number' },
           { name: 'username', type: 'string' },
@@ -34,14 +33,12 @@ export const demodata = {
           { name: 'state', type: 'string' },
           { name: 'project', type: 'string' },
         ],
-        rows: map(cloneDeep(ci), (row, i) => assign(row, {
-          _rowId: i,
+        rows: map(cloneDeep(ci), row => assign(row, {
           time: moment(moment(row.time).format('YYYY-MM-DD'), 'YYYY-MM-DD').format(),
         })),
       },
       shirts: {
         columns: [
-          { name: '_rowId', type: 'number' },
           { name: 'size', type: 'string' },
           { name: 'color', type: 'string' },
           { name: 'price', type: 'number' },

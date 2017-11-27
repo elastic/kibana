@@ -13,7 +13,7 @@ export const getCell = {
     row: {
       types: ['number'],
       aliases: ['r'],
-      help: 'The row number, note is the index of the row, NOT the _rowId',
+      help: 'The row number, starting at 0',
       default: 0,
     },
   },
