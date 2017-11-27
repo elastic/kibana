@@ -1,16 +1,17 @@
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { INSTRUCTION_VARIANT } from '../../../common/tutorials/instruction_variant';
-import { FILEBEAT_INSTRUCTIONS } from '../../../common/tutorials/tutorial_beats_instructions';
+import { FILEBEAT_INSTRUCTIONS } from '../../../common/tutorials/filebeat_instructions';
 
 export function systemLogsSpecProvider() {
   return {
     id: 'systemLogs',
     name: 'System logs',
     category: TUTORIAL_CATEGORY.LOGGING,
-    shortDescription: 'This module parses logs written by the local Syslog server.',
-    longDescription: 'This module collects and parses logs created by the system logging service of common' +
+    shortDescription: 'Collect and parse logs written by the local Syslog server.',
+    longDescription: 'The system Filebeat module collects and parses logs created by the system logging service of common' +
                      ' Unix/Linux based distributions. This module is not available on Windows.' +
-                     ' You can read more about the Filebeat System module in the [documentation].',
+                     ' [Learn more]({config.docs.beats.filebeat}/filebeat-module-system.html)' +
+                     ' about the system module.',
     //iconPath: '', TODO
     completionTimeMinutes: 10,
     //previewImagePath: '', TODO
@@ -23,12 +24,12 @@ export function systemLogsSpecProvider() {
             instructions: [
               FILEBEAT_INSTRUCTIONS.INSTALL.OSX,
               {
-                title: 'Enable and configure the System module',
-                textPre: 'In the Filebeat install directory, run the following commands to enable the System module.',
+                title: 'Enable and configure the system module',
+                textPre: 'From the installation directory, run:',
                 commands: [
                   './filebeat modules enable system',
                 ],
-                textPost: 'Optional: Modify the module settings in the `modules.d/system.yml` file.'
+                textPost: 'Modify the settings in the `modules.d/system.yml` file.'
               },
               FILEBEAT_INSTRUCTIONS.START.OSX
             ]
@@ -38,12 +39,11 @@ export function systemLogsSpecProvider() {
             instructions: [
               FILEBEAT_INSTRUCTIONS.INSTALL.DEB,
               {
-                title: 'Enable and configure the System module',
-                textPre: 'Run the following commands to enable the System module.',
+                title: 'Enable and configure the system module',
                 commands: [
                   'sudo filebeat modules enable system',
                 ],
-                textPost: 'Optional: Modify the module settings in the `/etc/filebeat/modules.d/system.yml` file.'
+                textPost: 'Modify the settings in the `/etc/filebeat/modules.d/system.yml` file.'
               },
               FILEBEAT_INSTRUCTIONS.START.DEB
             ]
@@ -53,12 +53,11 @@ export function systemLogsSpecProvider() {
             instructions: [
               FILEBEAT_INSTRUCTIONS.INSTALL.RPM,
               {
-                title: 'Enable and configure the System module',
-                textPre: 'Run the following commands to enable the System module.',
+                title: 'Enable and configure the system module',
                 commands: [
                   'sudo filebeat modules enable system',
                 ],
-                textPost: 'Optional: Modify the module settings in the `/etc/filebeat/modules.d/system.yml` file.'
+                textPost: 'Modify the settings in the `/etc/filebeat/modules.d/system.yml` file.'
               },
               FILEBEAT_INSTRUCTIONS.START.RPM
             ]

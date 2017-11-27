@@ -1,15 +1,16 @@
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { INSTRUCTION_VARIANT } from '../../../common/tutorials/instruction_variant';
-import { FILEBEAT_INSTRUCTIONS } from '../../../common/tutorials/tutorial_beats_instructions';
+import { FILEBEAT_INSTRUCTIONS } from '../../../common/tutorials/filebeat_instructions';
 
 export function mysqlLogsSpecProvider() {
   return {
     id: 'mysqlLogs',
     name: 'MySQL logs',
     category: TUTORIAL_CATEGORY.LOGGING,
-    shortDescription: 'This module parses slow logs and error logs created by MySQL.',
-    longDescription: 'This module parses slow logs and error logs created by MySQL.' +
-                     ' You can read more about the Filebeat MySQL module in the [documentation].',
+    shortDescription: 'Collect and parse error and slow logs created by MySQL.',
+    longDescription: 'The mysql Filebeat module parses error and slow logs created by MySQL.' +
+                     ' [Learn more]({config.docs.beats.filebeat}/filebeat-module-mysql.html)' +
+                     ' about the mysql module.',
     //iconPath: '', TODO
     completionTimeMinutes: 10,
     //previewImagePath: '', TODO
@@ -22,12 +23,12 @@ export function mysqlLogsSpecProvider() {
             instructions: [
               FILEBEAT_INSTRUCTIONS.INSTALL.OSX,
               {
-                title: 'Enable and configure the MySQL module',
-                textPre: 'In the Filebeat install directory, run the following commands to enable the MySQL module.',
+                title: 'Enable and configure the mysql module',
+                textPre: 'From the installation directory, run:',
                 commands: [
                   './filebeat modules enable mysql',
                 ],
-                textPost: 'Optional: Modify the module settings in the `modules.d/mysql.yml` file.'
+                textPost: 'Modify the settings in the `modules.d/mysql.yml` file.'
               },
               FILEBEAT_INSTRUCTIONS.START.OSX
             ]
@@ -37,12 +38,11 @@ export function mysqlLogsSpecProvider() {
             instructions: [
               FILEBEAT_INSTRUCTIONS.INSTALL.DEB,
               {
-                title: 'Enable and configure the MySQL module',
-                textPre: 'Run the following commands to enable the MySQL module.',
+                title: 'Enable and configure the mysql module',
                 commands: [
                   'sudo filebeat modules enable mysql',
                 ],
-                textPost: 'Optional: Modify the module settings in the `/etc/filebeat/modules.d/mysql.yml` file.'
+                textPost: 'Modify the settings in the `/etc/filebeat/modules.d/mysql.yml` file.'
               },
               FILEBEAT_INSTRUCTIONS.START.DEB
             ]
@@ -52,12 +52,11 @@ export function mysqlLogsSpecProvider() {
             instructions: [
               FILEBEAT_INSTRUCTIONS.INSTALL.RPM,
               {
-                title: 'Enable and configure the MySQL module',
-                textPre: 'Run the following commands to enable the MySQL module.',
+                title: 'Enable and configure the mysql module',
                 commands: [
                   'sudo filebeat modules enable mysql',
                 ],
-                textPost: 'Optional: Modify the module settings in the `/etc/filebeat/modules.d/mysql.yml` file.'
+                textPost: 'Modify the settings in the `/etc/filebeat/modules.d/mysql.yml` file.'
               },
               FILEBEAT_INSTRUCTIONS.START.RPM
             ]
@@ -67,12 +66,12 @@ export function mysqlLogsSpecProvider() {
             instructions: [
               FILEBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
               {
-                title: 'Enable and configure the MySQL module',
-                textPre: 'In the `C:\\Program Files\\Filebeat` folder, run the following commands to enable the MySQL module.',
+                title: 'Enable and configure the mysql module',
+                textPre: 'From the `C:\\Program Files\\Filebeat` folder, run:',
                 commands: [
                   'PS C:\\Program Files\\Filebeat> filebeat.exe modules enable mysql',
                 ],
-                textPost: 'Optional: Modify the module settings in the `modules.d/mysql.yml` file.'
+                textPost: 'Modify the settings in the `modules.d/mysql.yml` file.'
               },
               FILEBEAT_INSTRUCTIONS.START.WINDOWS
             ]

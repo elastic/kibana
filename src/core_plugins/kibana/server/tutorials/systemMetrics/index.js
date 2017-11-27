@@ -1,15 +1,17 @@
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { INSTRUCTION_VARIANT } from '../../../common/tutorials/instruction_variant';
+import { METRICBEAT_INSTRUCTIONS } from '../../../common/tutorials/metricbeat_instructions';
 
 export function systemMetricsSpecProvider() {
   return {
     id: 'systemMetrics',
     name: 'System metrics',
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'This module collects CPU, memory, network, and disk statistics from the host.',
-    longDescription: 'This module CPU, memory, network, and disk statistics from the host.' +
+    shortDescription: 'Collects CPU, memory, network, and disk statistics from the host.',
+    longDescription: 'The system Metricbeat module collects CPU, memory, network, and disk statistics from the host.' +
                      ' It collects system wide statistics as well as per process and per filesystem statistics.' +
-                     ' You can read more about the Metricbeat System module in the [documentation].',
+                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-system.html)' +
+                     ' about the system module.',
     //iconPath: '', TODO
     completionTimeMinutes: 10,
     //previewImagePath: 'kibana-system.png', TODO
@@ -20,154 +22,65 @@ export function systemMetricsSpecProvider() {
           {
             id: INSTRUCTION_VARIANT.OSX,
             instructions: [
+              METRICBEAT_INSTRUCTIONS.INSTALL.OSX,
               {
-                title: 'Download and install Metricbeat',
-                textPre: 'Download and install Metricbeat by running the commands below.' +
-                         ' Skip this step if you already have Metricbeat installed.' +
-                         ' If you are installing Metricbeat for the first time, we recommend reading the [Getting Started]' +
-                         ' guide in the online documentation.',
-                commands: [
-                  'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
-                  'tar xzvf metricbeat-{config.kibana.version}-darwin-x86_64.tar.gz'
-                ],
-                textPost: 'Edit the `metricbeat-{config.kibana.version}-darwin-x86_64/metricbeat.yml` file and ' +
-                           'adjust the `output.elasticsearch` settings if needed.'
-              },
-              {
-                title: 'Enable and configure the System module',
-                textPre: 'In the Metricbeat install directory, run the following commands to enable the System module.' +
-                         ' Note that the System module is enabled by default.',
+                title: 'Enable and configure the system module',
+                textPre: 'From the installation directory, run:',
                 commands: [
                   './metricbeat modules enable system',
                 ],
-                textPost: 'Optional: Modify the module settings in the `modules.d/system.yml` file.'
+                textPost: 'Modify the settings in the `modules.d/system.yml` file.'
               },
               {
-                title: 'Start Metricbeat',
-                textPre: 'Setup the Kibana dashboards and start Metricbeat with the following commands.' +
-                         ' Skip this step if you already have Metricbeat installed.',
+                title: 'Optional: Test the module',
+                textPre: 'You can do a dry-run fetch by running the following command.',
                 commands: [
-                  './metricbeat -e --setup',
-                ],
-                textPost: 'The `--setup` flag loads the Kibana dashboards. If the dashboards are already setup, ' +
-                          'you don\'t need to use this flag.'
-              }
+                  './metricbeat test modules system'
+                ]
+              },
+              METRICBEAT_INSTRUCTIONS.START.OSX
             ]
           },
           {
             id: INSTRUCTION_VARIANT.DEB,
             instructions: [
+              METRICBEAT_INSTRUCTIONS.INSTALL.DEB,
               {
-                title: 'Download and install Metricbeat',
-                textPre: 'Download and install Metricbeat by running the commands below.' +
-                         ' Skip this step if you already have Metricbeat installed.' +
-                         ' If you are installing Metricbeat for the first time, we recommend reading the [Getting Started]' +
-                         ' guide in the online documentation.',
-                commands: [
-                  'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-amd64.deb',
-                  'sudo dpkg -i metricbeat-{config.kibana.version}-amd64.deb'
-                ],
-                textPost: 'Edit the `/etc/metricbeat/metricbeat.yml` file and ' +
-                           'adjust the `output.elasticsearch` settings if needed.'
-              },
-              {
-                title: 'Enable and configure the System module',
-                textPre: 'Run the following commands to enable the System module.' +
-                         ' Note that the System module is enabled by default.',
+                title: 'Enable and configure the system module',
                 commands: [
                   'sudo metricbeat modules enable system',
                 ],
-                textPost: 'Optional: Modify the module settings in the `/etc/metricbeat/modules.d/system.yml` file.'
+                textPost: 'Modify the settings in the `/etc/filebeat/modules.d/system.yml` file.'
               },
               {
-                title: 'Start Metricbeat',
-                textPre: 'Setup the Kibana dashboards and start Metricbeat with the following commands.',
+                title: 'Optional: Test the module',
+                textPre: 'You can do a dry-run fetch by running the following command.',
                 commands: [
-                  'sudo metricbeat setup -e',
-                  'sudo service metricbeat start',
-                ],
-                textPost: 'The `setup` command loads the Kibana dashboards. If the dashboards are already installed, ' +
-                          'you don\'t need to run it again.'
-              }
+                  'sudo metricbeat test modules system'
+                ]
+              },
+              METRICBEAT_INSTRUCTIONS.START.DEB
             ]
           },
           {
             id: INSTRUCTION_VARIANT.RPM,
             instructions: [
+              METRICBEAT_INSTRUCTIONS.INSTALL.RPM,
               {
-                title: 'Download and install Metricbeat',
-                textPre: 'Download and install Metricbeat by running the commands below.' +
-                         ' Skip this step if you already have Metricbeat installed.' +
-                         ' If you are installing Metricbeat for the first time, we recommend reading the [Getting Started]' +
-                         ' guide in the online documentation.',
-                commands: [
-                  'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-x86_64.rpm',
-                  'sudo rpm -vi metricbeat-{config.kibana.version}-x86_64.rpm'
-                ],
-                textPost: 'Edit the `/etc/metricbeat/metricbeat.yml` file and ' +
-                           'adjust the `output.elasticsearch` settings if needed.'
-              },
-              {
-                title: 'Enable and configure the System module',
-                textPre: 'Run the following commands to enable the System module.' +
-                         ' Note that the System module is enabled by default.',
+                title: 'Enable and configure the system module',
                 commands: [
                   'sudo metricbeat modules enable system',
                 ],
-                textPost: 'Optional: Modify the module settings in the `/etc/metricbeat/modules.d/system.yml` file.'
+                textPost: 'Modify the settings in the `/etc/filebeat/modules.d/system.yml` file.'
               },
               {
-                title: 'Start Metricbeat',
-                textPre: 'Setup the Kibana dashboards and start Metricbeat with the following commands.',
+                title: 'Optional: Test the module',
+                textPre: 'You can do a dry-run fetch by running the following command.',
                 commands: [
-                  'sudo metricbeat setup -e',
-                  'sudo service metricbeat start',
-                ],
-                textPost: 'The `setup` command loads the Kibana dashboards. If the dashboards are already installed, ' +
-                          'you don\'t need to run it again.'
-              }
-            ]
-          },
-          {
-            id: INSTRUCTION_VARIANT.WINDOWS,
-            instructions: [
-              {
-                title: 'Download and install Metricbeat',
-                textPre: 'Skip this step if you already have Metricbeat installed.' +
-                         ' If you are installing Metricbeat for the first time, we recommend reading the [Getting Started]' +
-                         ' guide in the online documentation\n' +
-                          '1. Download the Metricbeat Windows zip file from the [downloads](https://www.elastic.co/downloads/beats) page.\n' +
-                          '2. Extract the contents of the zip file into `C:\\Program Files`.\n' +
-                          '3. Rename the metricbeat-{config.kibana.version}-windows directory to Metricbeat.\n' +
-                          '4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select' +
-                          ' Run As Administrator). If you are running Windows XP, you may need to download and install PowerShell.\n' +
-                          '5. From the PowerShell prompt, run the following commands to install Metricbeat as a Windows service.',
-                commands: [
-                  'PS > cd C:\\Program Files\\Metricbeat',
-                  'PS C:\\Program Files\\Metricbeat> .\\install-service-metricbeat.ps1'
-                ],
-                textPost: 'Edit the `C:\\Program Files\\Metricbeat\\metricbeat.yml` file and ' +
-                           'adjust the `output.elasticsearch` settings if needed.'
+                  'sudo metricbeat test modules system'
+                ]
               },
-              {
-                title: 'Enable and configure the System module',
-                textPre: 'In the `C:\\Program Files\\Metricbeat` folder, run the following commands to enable the System module.' +
-                         ' Note that the System module is enabled by default.',
-                commands: [
-                  'PS C:\\Program Files\\Metricbeat> metricbeat.exe modules enable system',
-                ],
-                textPost: 'Optional: Modify the module settings in the `modules.d/system.yml` file.'
-              },
-              {
-                title: 'Start Metricbeat',
-                textPre: 'Setup the Kibana dashboards and start Metricbeat as a service with the following commands.',
-                commands: [
-                  'PS C:\\Program Files\\Metricbeat> metricbeat.exe setup -e',
-                  'PS C:\\Program Files\\Metricbeat> Service-Start metricbeat',
-                ],
-                textPost: 'The `setup` command loads the Kibana dashboards. If the dashboards are already installed, ' +
-                          'you don\'t need to run it again.'
-              }
+              METRICBEAT_INSTRUCTIONS.START.RPM
             ]
           }
         ]

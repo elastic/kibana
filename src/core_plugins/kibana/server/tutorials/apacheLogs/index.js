@@ -1,15 +1,16 @@
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { INSTRUCTION_VARIANT } from '../../../common/tutorials/instruction_variant';
-import { FILEBEAT_INSTRUCTIONS } from '../../../common/tutorials/tutorial_beats_instructions';
+import { FILEBEAT_INSTRUCTIONS } from '../../../common/tutorials/filebeat_instructions';
 
 export function apacheLogsSpecProvider() {
   return {
     id: 'apacheLogs',
     name: 'Apache logs',
     category: TUTORIAL_CATEGORY.LOGGING,
-    shortDescription: 'This module parses access and error logs created by the Apache HTTP server.',
-    longDescription: 'This module parses access and error logs created by the Apache 2 HTTP server.' +
-                     ' You can read more about the Filebeat Apache module in the [documentation].',
+    shortDescription: 'Collect and parse access and error logs created by the Apache HTTP server.',
+    longDescription: 'The apache2 Filebeat module parses access and error logs created by the Apache 2 HTTP server.' +
+                     ' [Learn more]({config.docs.beats.filebeat}/filebeat-module-apache2.html)' +
+                     ' about the apache2 module.',
     //iconPath: '', TODO
     completionTimeMinutes: 10,
     previewImagePath: '/plugins/kibana/home/tutorial_resources/apacheLogs/kibana-apache2.png',
@@ -22,12 +23,12 @@ export function apacheLogsSpecProvider() {
             instructions: [
               FILEBEAT_INSTRUCTIONS.INSTALL.OSX,
               {
-                title: 'Enable and configure the Apache module',
-                textPre: 'In the Filebeat install directory, run the following commands to enable the Apache module.',
+                title: 'Enable and configure the apache2 module',
+                textPre: 'From the installation directory, run:',
                 commands: [
                   './filebeat modules enable apache2',
                 ],
-                textPost: 'Optional: Modify the module settings in the `modules.d/apache2.yml` file.'
+                textPost: 'Modify the settings in the `modules.d/apache2.yml` file.'
               },
               FILEBEAT_INSTRUCTIONS.START.OSX
             ]
@@ -37,12 +38,11 @@ export function apacheLogsSpecProvider() {
             instructions: [
               FILEBEAT_INSTRUCTIONS.INSTALL.DEB,
               {
-                title: 'Enable and configure the Apache module',
-                textPre: 'Run the following commands to enable the Apache module.',
+                title: 'Enable and configure the apache2 module',
                 commands: [
                   'sudo filebeat modules enable apache2',
                 ],
-                textPost: 'Optional: Modify the module settings in the `/etc/filebeat/modules.d/apache2.yml` file.'
+                textPost: 'Modify the settings in the `/etc/filebeat/modules.d/apache2.yml` file.'
               },
               FILEBEAT_INSTRUCTIONS.START.DEB
             ]
@@ -52,12 +52,11 @@ export function apacheLogsSpecProvider() {
             instructions: [
               FILEBEAT_INSTRUCTIONS.INSTALL.RPM,
               {
-                title: 'Enable and configure the Apache module',
-                textPre: 'Run the following commands to enable the Apache module.',
+                title: 'Enable and configure the apache2 module',
                 commands: [
                   'sudo filebeat modules enable apache2',
                 ],
-                textPost: 'Optional: Modify the module settings in the `/etc/filebeat/modules.d/apache2.yml` file.'
+                textPost: 'Modify the settings in the `/etc/filebeat/modules.d/apache2.yml` file.'
               },
               FILEBEAT_INSTRUCTIONS.START.RPM
             ]
@@ -67,12 +66,12 @@ export function apacheLogsSpecProvider() {
             instructions: [
               FILEBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
               {
-                title: 'Enable and configure the Apache module',
-                textPre: 'In the `C:\\Program Files\\Filebeat` folder, run the following commands to enable the Apache module.',
+                title: 'Enable and configure the apache2 module',
+                textPre: 'From the `C:\\Program Files\\Filebeat` folder, run:',
                 commands: [
                   'PS C:\\Program Files\\Filebeat> filebeat.exe modules enable apache2',
                 ],
-                textPost: 'Optional: Modify the module settings in the `modules.d/apache2.yml` file.'
+                textPost: 'Modify the settings in the `modules.d/apache2.yml` file.'
               },
               FILEBEAT_INSTRUCTIONS.START.WINDOWS
             ]
