@@ -25,10 +25,11 @@ export function socketInterpreterProvider({ types, functions, handlers, referabl
       // Get the list of functions that are known elsewhere
       return Promise.resolve(referableFunctions).then((referableFunctionArray) => {
         // Check if the not-found function is in the list of alternatives, if not, throw
-        if (!_.includes(referableFunctionArray, functionName)) throw new Error(`Function not found: ${functionName}`);
+        if (!_.includes(referableFunctionArray, functionName)) {
+          throw new Error(`Function not found: ${functionName}`);
+        }
 
-        // Keep a counter so we understand what message ID we're on. We might need a UUID at some point for when we're
-        // resolving multiple expressions
+        // set a unique message ID so the code knows what response to process
         const id = uuid();
 
         return new Promise((resolve, reject) => {

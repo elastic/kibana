@@ -1,6 +1,7 @@
 import { boolean } from './boolean';
 import { datatable } from './datatable';
 import { dataurl } from './dataurl';
+import { error } from './error';
 import { filter } from './filter';
 import { image } from './image';
 import { location } from './location';
@@ -11,15 +12,16 @@ import { string } from './string';
 import { style } from './style';
 
 export const typeSpecs = [
-  datatable,
-  style,
-  pointseries,
-  number,
-  string,
-  dataurl,
-  image,
-  filter,
-  render,
-  location,
   boolean,
+  datatable,
+  dataurl,
+  error,
+  filter,
+  image,
+  location,
+  number,
+  pointseries,
+  render,
+  string,
+  style,
 ];

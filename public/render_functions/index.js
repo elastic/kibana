@@ -1,5 +1,6 @@
 import { advancedFilter } from './advanced_filter';
 import { debug } from './debug';
+import { error } from './error';
 import { grid } from './grid';
 import { image } from './image';
 import { markdown } from './markdown';
@@ -11,6 +12,7 @@ import { timeFilter } from './time_filter';
 export const renderFunctions = [
   advancedFilter,
   debug,
+  error,
   grid,
   image,
   markdown,

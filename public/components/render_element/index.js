@@ -1,7 +1,7 @@
 import { compose, withState, lifecycle, withPropsOnChange, withProps } from 'recompose';
-import { RenderElement as Component } from './render_element';
 import PropTypes from 'prop-types';
 import { isEqual, cloneDeep } from 'lodash';
+import { RenderElement as Component } from './render_element';
 import { ElementHandlers } from './lib/handlers';
 import { notify } from '../../lib/notify';
 
@@ -38,6 +38,7 @@ export const RenderElement = compose(
         size,
         renderFn,
         reuseNode,
+        name: functionName,
       } = this.props;
 
       // Config changes
@@ -54,7 +55,8 @@ export const RenderElement = compose(
           renderFn(this.renderTarget, renderConfig, handlers);
           this.firstRender = false;
         } catch (err) {
-          notify.error(err);
+          console.error('renderFn threw', err);
+          notify.error(`Rendering ${functionName || 'function'} failed: ${err}`);
         }
       }
 
@@ -109,6 +111,7 @@ export const RenderElement = compose(
 )(Component);
 
 RenderElement.propTypes = {
+  name: PropTypes.string,
   renderFn: PropTypes.func.isRequired,
   reuseNode: PropTypes.bool,
   handlers: PropTypes.object,
