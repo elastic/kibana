@@ -18,7 +18,7 @@ export const documentationLinks = {
     base: `${ELASTIC_WEBSITE_URL}guide/en/beats/metricbeat/${DOC_LINK_VERSION}`
   },
   logstash: {
-    base: `${ELASTIC_WEBSITE_URL}guide/en/beats/logstash/${DOC_LINK_VERSION}`
+    base: `${ELASTIC_WEBSITE_URL}guide/en/logstash/${DOC_LINK_VERSION}`
   },
   scriptedFields: {
     scriptFields: `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/search-request-script-fields.html`,
