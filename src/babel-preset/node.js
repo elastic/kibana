@@ -10,15 +10,16 @@ module.exports = {
           // version 8 and babel will stop transpiling async/await
           // because they are supported in the "current" version of node
           node: 'current',
+          include: ['babel-plugin-for-await']
         },
 
         // replaces `import "babel-polyfill"` with a list of require statements
         // for just the polyfills that the target versions don't already supply
         // on their own
-        useBuiltIns: true,
-      },
+        useBuiltIns: true
+      }
     ],
-    require('./common'),
+    require('./common')
   ],
   plugins: [
     [
