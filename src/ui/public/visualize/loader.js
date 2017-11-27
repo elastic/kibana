@@ -1,3 +1,8 @@
+/**
+ * IMPORTANT: If you make changes to this API, please make sure to check that
+ * the docs (docs/development/visualize/development-create-visualization.asciidoc)
+ * are up to date.
+ */
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
 import 'ui/visualize';
@@ -115,7 +120,10 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
      *    `savedVisualizations` service.
      * @param {Object} params A list of paramters that will influence rendering.
      * @param {AppState} params.appState The current appState of the application.
-     * @param {UiState} params.uiState The current uiState of the application.
+     * @param {UiState} params.uiState The current uiState of the application. If you
+     *    don't pass a uiState, the visualization will creates it's own uiState to
+     *    store information like whether the legend is open or closed, but you don't
+     *    have access to it from the outside. Pass one in if you need that access.
      * @param {object} params.timeRange An object with a min/max key, that must be
      *    either a date in ISO format, or a valid datetime Elasticsearch expression,
      *    e.g.: { min: 'now-7d/d', max: 'now' }
