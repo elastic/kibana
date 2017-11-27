@@ -81,15 +81,12 @@ function getArgumentsHelp(functionHelp, functionArgs = []) {
   // Do not provide 'inputSeries' as argument suggestion for chainable functions
   const argsHelp = functionHelp.chainable ? functionHelp.args.slice(1) : functionHelp.args.slice(0);
 
-  // ignore arguments that are all ready provided in function declaration
-  const providedArguments = functionArgs.map((arg) => {
+  // ignore arguments that are already provided in function declaration
+  const functionArgNames = functionArgs.map((arg) => {
     return arg.name;
   });
   return argsHelp.filter(arg => {
-    if (providedArguments.includes(arg.name)) {
-      return false;
-    }
-    return true;
+    return !functionArgNames.includes(arg.name);
   });
 }
 
