@@ -254,17 +254,6 @@ export function SearchSourceProvider(Promise, Private, config) {
           .reject(function (filter) {
             return !filter || _.get(filter, 'meta.disabled');
           })
-          // excluding any filter property that starts with `$`
-          // we used to leave these alone, but they relied on the behavior of the angular.toJSON to remove
-          // them before executing the query against Elasitcsearch, but this isn't always the case
-          .map(function (filter) {
-            return Object.keys(filter)
-              .filter(prop => !prop.startsWith('$'))
-              .reduce((acc, prop) => {
-                acc[prop] = filter[prop];
-                return acc;
-              }, {});
-          })
           .value();
         return;
       case 'index':
