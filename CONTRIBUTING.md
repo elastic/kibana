@@ -207,7 +207,9 @@ Kibana includes a self-signed certificate that can be used for development purpo
 
 ### Linting
 
-A note about linting: We use [eslint](http://eslint.org) to check that the [styleguide](STYLEGUIDE.md) is being followed. It runs in a pre-commit hook and as a part of the tests, but most contributors integrate it with their code editors for real-time feedback.
+A note about linting: We are currently migrating to using [Prettier](https://prettier.) As such, we recommend you setup your editor to format your work using [Prettier's editor intigration guide](https://prettier.io/docs/en/editors.html) as our prettier setup just prevents prettier formatted sections of kibana from being committed with non-prettier formts.
+
+For dealing with non-formatted sections of Kibana ([See the .prettierignore file to see what directories are not yet prettier formatted](.prettierignore)) we use [eslint](http://eslint.org) to check that the [styleguide](STYLEGUIDE.md) is being followed. It runs in a pre-commit hook and as a part of the tests, but most contributors integrate it with their code editors for real-time feedback.
 
 Here are some hints for getting eslint setup in your favorite editor:
 
