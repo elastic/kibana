@@ -4,7 +4,7 @@ import {
   getRootProperties
 } from '../../../server/mappings';
 
-import { isEqual } from 'lodash';
+import { get } from 'lodash';
 
 /**
  *  Checks that the root type in the kibana index has all of the
@@ -33,18 +33,25 @@ export async function patchKibanaIndex(options) {
     return;
   }
 
-  let autoUpdate = false;
-  let missingProperties = await getMissingRootProperties(currentMappingsDsl, kibanaIndexMappingsDsl);
-  let missingPropertyNames = Object.keys(missingProperties);
-  if (!missingPropertyNames.length) {
+  const {
+    missingPropertyNames: missingRootPropertyNames,
+    updatedMappings: updatedRootMappings
+  } = await getMissingRootProperties(currentMappingsDsl, kibanaIndexMappingsDsl);
+
+  const {
+    missingPropertyNames: missingTitleFieldPropertyNames,
+    updatedMappings: updatedTitleFieldMappings
+  } = await getMissingUnanalyzedTitleFields(currentMappingsDsl, kibanaIndexMappingsDsl);
+
+  if (!missingRootPropertyNames.length && !missingTitleFieldPropertyNames.length) {
     // all expected properties are in current mapping
-    missingProperties = await getMissingFieldProperties(currentMappingsDsl, kibanaIndexMappingsDsl);
-    missingPropertyNames = Object.keys(missingProperties);
-    if (!missingPropertyNames.length) {
-      return;
-    }
-    autoUpdate = true;
+    return;
   }
+
+  const missingPropertyNames = [
+    ...missingRootPropertyNames,
+    ...missingTitleFieldPropertyNames,
+  ];
 
   // log about new properties
   log(['info', 'elasticsearch'], {
@@ -52,23 +59,33 @@ export async function patchKibanaIndex(options) {
     names: missingPropertyNames
   });
 
-  // add the new properties to the index mapping
+  // add the new root properties to the index mapping
   await callCluster('indices.putMapping', {
     index: indexName,
     type: rootEsType,
     body: {
-      properties: missingProperties
+      properties: updatedRootMappings
     },
     update_all_types: true
   });
 
-  if (autoUpdate) {
+  // add the updated title field mappings
+  await callCluster('indices.putMapping', {
+    index: indexName,
+    type: rootEsType,
+    body: {
+      properties: updatedTitleFieldMappings
+    },
+    update_all_types: true,
+  });
+
+  if (missingTitleFieldPropertyNames.length) {
     log(['info', 'elasticsearch'], {
       tmpl: `Running 'updateByQuery' to re-save saved objects to propogate mapping changes for types "<%= names.join('", "') %>"`,
-      names: missingPropertyNames
+      names: missingTitleFieldPropertyNames
     });
 
-    const bools = missingPropertyNames.map(type => ({ match: { type } }));
+    const bools = missingTitleFieldPropertyNames.map(type => ({ match: { type } }));
     await callCluster('updateByQuery', {
       conflicts: 'proceed',
       index: indexName,
@@ -130,49 +147,51 @@ async function getMissingRootProperties(currentMappingsDsl, expectedMappingsDsl)
   const expectedProps = getRootProperties(expectedMappingsDsl);
   const existingProps = getRootProperties(currentMappingsDsl);
 
-  return Object.keys(expectedProps)
-    .reduce((acc, prop) => {
-      if (existingProps[prop]) {
-        return acc;
-      } else {
-        return { ...acc, [prop]: expectedProps[prop] };
-      }
-    }, {});
+  const missingPropertyNames = [];
+  const updatedMappings = {};
+
+  Object.keys(expectedProps).forEach(prop => {
+    if (!existingProps[prop]) {
+      missingPropertyNames.push(prop);
+      updatedMappings[prop] = expectedProps[prop];
+    }
+  });
+
+  return {
+    missingPropertyNames,
+    updatedMappings,
+  };
 }
 
-async function getMissingFieldProperties(currentMappingsDsl, expectedMappingsDsl) {
+async function getMissingUnanalyzedTitleFields(currentMappingsDsl, expectedMappingsDsl) {
   const expectedProps = getRootProperties(expectedMappingsDsl);
   const existingProps = getRootProperties(currentMappingsDsl);
 
-  return Object.keys(expectedProps)
-    .reduce((acc, prop) => {
-      const expectedFieldProperties = expectedProps[prop].properties;
-      const existingFieldProperties = existingProps[prop].properties;
+  const missingPropertyNames = [];
+  const updatedMappings = {};
 
-      if (!expectedFieldProperties && !existingFieldProperties) {
-        return acc;
-      }
+  Object.keys(expectedProps).forEach(prop => {
+    const expectedFieldProperties = expectedProps[prop] && expectedProps[prop].properties;
+    const existingFieldProperties = existingProps[prop] && existingProps[prop].properties;
 
-      const fieldPropertiesMatch = Object.keys(expectedFieldProperties).every(fieldPropertyName => {
-        if (!existingFieldProperties[fieldPropertyName]) {
-          return false;
-        }
+    if (!expectedFieldProperties && !existingFieldProperties) {
+      return;
+    }
 
-        const expectedFieldPropertyMappings = expectedFieldProperties[fieldPropertyName];
-        const existingFieldPropertyMappings = existingFieldProperties[fieldPropertyName];
+    const expectedTitleKeyword = get(expectedFieldProperties, 'title.fields.keyword.type');
+    const existingTitleKeyword = get(existingFieldProperties, 'title.fields.keyword.type');
 
-        // Just do a raw object comparison - if there are differences, we need to update mappings
-        if (!isEqual(expectedFieldPropertyMappings, existingFieldPropertyMappings)) {
-          return false;
-        }
+    if (expectedTitleKeyword && !existingTitleKeyword) {
+      missingPropertyNames.push(prop);
+      updatedMappings[`${prop}.title`] = {
+        ...existingFieldProperties ? existingFieldProperties.title : {},
+        ...expectedFieldProperties.title,
+      };
+    }
+  });
 
-        return true;
-      });
-
-      if (fieldPropertiesMatch) {
-        return acc;
-      } else {
-        return { ...acc, [prop]: expectedProps[prop] };
-      }
-    }, {});
+  return {
+    missingPropertyNames,
+    updatedMappings,
+  };
 }
