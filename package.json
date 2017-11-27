@@ -21,12 +21,9 @@
   "bugs": {
     "url": "http://github.com/elastic/kibana/issues"
   },
-  "pre-commit": [
-    "pre-commit"
-  ],
   "lint-staged": {
     "*.js": [
-      "prettier --write",
+      "prettier --list-different",
       "git add"
     ]
   },
@@ -62,9 +59,9 @@
     "checkLicenses": "grunt licenses",
     "build": "grunt build",
     "release": "grunt release",
+    "start": "sh ./bin/kibana --dev",
     "prettier": "prettier \"./**/*.js\" --write",
-    "start": "node scripts/kibana --dev",
-    "precommit": "node scripts/precommit_hook",
+    "precommit": "node scripts/precommit_hook && lint-staged",
     "karma": "karma start",
     "elasticsearch": "grunt esvm:dev:keepalive",
     "lint": "echo 'use `node scripts/eslint`' && false",
@@ -72,7 +69,6 @@
     "makelogs": "echo 'use `node scripts/makelogs`' && false",
     "mocha": "echo 'use `node scripts/mocha`' && false",
     "sterilize": "grunt sterilize",
-    "pre-commit": "lint-staged",
     "uiFramework:start": "grunt uiFramework:start",
     "uiFramework:build": "grunt uiFramework:build",
     "uiFramework:createComponent": "yo ./ui_framework/generator-kui/app/component.js",
