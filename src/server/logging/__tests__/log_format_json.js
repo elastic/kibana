@@ -177,34 +177,4 @@ describe('KbnLoggerJsonFormat', () => {
       });
     });
   });
-
-  describe('useUTC', () => {
-    it('logs in UTC when useUTC is true', async () => {
-      const format = new KbnLoggerJsonFormat({
-        useUTC: true
-      });
-
-      const result = await createPromiseFromStreams([
-        createListStream([makeEvent('log')]),
-        format
-      ]);
-
-      const { '@timestamp': timestamp } = JSON.parse(result);
-      expect(timestamp).to.be(moment.utc(time).format());
-    });
-
-    it('logs in local timezone when useUTC is false', async () => {
-      const format = new KbnLoggerJsonFormat({
-        useUTC: false
-      });
-
-      const result = await createPromiseFromStreams([
-        createListStream([makeEvent('log')]),
-        format
-      ]);
-
-      const { '@timestamp': timestamp } = JSON.parse(result);
-      expect(timestamp).to.be(moment(time).format());
-    });
-  });
 });
