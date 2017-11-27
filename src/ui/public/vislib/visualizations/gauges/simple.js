@@ -217,7 +217,7 @@ export function SimpleGaugeProvider() {
             const percentage = Math.round(100 * (d.y - min) / (max - min));
             return `${percentage}%`;
           }
-          if (d.aggConfig) {
+          if (d.aggConfigResult && d.aggConfigResult.aggConfig) {
             const fieldFormatter = d.aggConfigResult.aggConfig.fieldFormatter('text');
             return fieldFormatter(d.y);
           }
