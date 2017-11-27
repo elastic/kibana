@@ -1,6 +1,7 @@
 import { debounce, includes } from 'lodash';
 import { size } from './plugins/size';
 import { text } from './plugins/text';
+import 'ui/flot-charts';
 
 import './plot.less';
 
