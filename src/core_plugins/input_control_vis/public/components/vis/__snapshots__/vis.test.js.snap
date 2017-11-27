@@ -4,15 +4,17 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
 <div
   className="inputControlVis"
 >
-  <KuiFlexGrid
-    columns={0}
-    gutterSize="small"
+  <KuiFlexGroup
+    alignItems="stretch"
+    gutterSize="large"
+    justifyContent="flexStart"
+    wrap={true}
   >
     <KuiFlexItem
       grow={true}
       style={
         Object {
-          "width": "undefinedpx",
+          "minWidth": "250px",
         }
       }
     >
@@ -44,7 +46,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
         stageFilter={[Function]}
       />
     </KuiFlexItem>
-  </KuiFlexGrid>
+  </KuiFlexGroup>
   <KuiFieldGroup
     className="actions"
     isAlignedTop={false}
@@ -96,15 +98,17 @@ exports[`Clear btns enabled when there are values 1`] = `
 <div
   className="inputControlVis"
 >
-  <KuiFlexGrid
-    columns={0}
-    gutterSize="small"
+  <KuiFlexGroup
+    alignItems="stretch"
+    gutterSize="large"
+    justifyContent="flexStart"
+    wrap={true}
   >
     <KuiFlexItem
       grow={true}
       style={
         Object {
-          "width": "undefinedpx",
+          "minWidth": "250px",
         }
       }
     >
@@ -136,7 +140,7 @@ exports[`Clear btns enabled when there are values 1`] = `
         stageFilter={[Function]}
       />
     </KuiFlexItem>
-  </KuiFlexGrid>
+  </KuiFlexGroup>
   <KuiFieldGroup
     className="actions"
     isAlignedTop={false}
@@ -188,15 +192,17 @@ exports[`Renders list control 1`] = `
 <div
   className="inputControlVis"
 >
-  <KuiFlexGrid
-    columns={0}
-    gutterSize="small"
+  <KuiFlexGroup
+    alignItems="stretch"
+    gutterSize="large"
+    justifyContent="flexStart"
+    wrap={true}
   >
     <KuiFlexItem
       grow={true}
       style={
         Object {
-          "width": "undefinedpx",
+          "minWidth": "250px",
         }
       }
     >
@@ -228,7 +234,7 @@ exports[`Renders list control 1`] = `
         stageFilter={[Function]}
       />
     </KuiFlexItem>
-  </KuiFlexGrid>
+  </KuiFlexGroup>
   <KuiFieldGroup
     className="actions"
     isAlignedTop={false}
@@ -280,15 +286,17 @@ exports[`Renders range control 1`] = `
 <div
   className="inputControlVis"
 >
-  <KuiFlexGrid
-    columns={0}
-    gutterSize="small"
+  <KuiFlexGroup
+    alignItems="stretch"
+    gutterSize="large"
+    justifyContent="flexStart"
+    wrap={true}
   >
     <KuiFlexItem
       grow={true}
       style={
         Object {
-          "width": "undefinedpx",
+          "minWidth": "250px",
         }
       }
     >
@@ -314,7 +322,7 @@ exports[`Renders range control 1`] = `
         stageFilter={[Function]}
       />
     </KuiFlexItem>
-  </KuiFlexGrid>
+  </KuiFlexGroup>
   <KuiFieldGroup
     className="actions"
     isAlignedTop={false}

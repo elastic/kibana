@@ -1,12 +1,12 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { RangeControl, rangeControlMinWidth } from './range_control';
-import { ListControl, listControlMinWidth } from './list_control';
+import { RangeControl } from './range_control';
+import { ListControl } from './list_control';
 import {
   KuiFieldGroup,
   KuiFieldGroupSection,
   KuiButton,
-  KuiFlexGrid,
+  KuiFlexGroup,
   KuiFlexItem
 } from 'ui_framework/components';
 
@@ -35,12 +35,8 @@ export class InputControlVis extends Component {
 
     return this.props.controls.map((control, index) => {
       let controlComponent = null;
-      let controlWidth = this.props.controlWidth;
       switch (control.type) {
         case 'list':
-          if (controlWidth < listControlMinWidth) {
-            controlWidth = listControlMinWidth;
-          }
           controlComponent = (
             <ListControl
               control={control}
@@ -50,9 +46,6 @@ export class InputControlVis extends Component {
           );
           break;
         case 'range':
-          if (controlWidth < rangeControlMinWidth) {
-            controlWidth = rangeControlMinWidth;
-          }
           controlComponent = (
             <RangeControl
               control={control}
@@ -65,7 +58,7 @@ export class InputControlVis extends Component {
           throw new Error(`Unhandled control type ${control.type}`);
       }
       return (
-        <KuiFlexItem key={control.id} style={{ width: `${controlWidth}px` }}>
+        <KuiFlexItem key={control.id} style={{ minWidth: '250px' }}>
           {controlComponent}
         </KuiFlexItem>
       );
@@ -120,9 +113,9 @@ export class InputControlVis extends Component {
 
     return (
       <div className="inputControlVis">
-        <KuiFlexGrid gutterSize="small">
+        <KuiFlexGroup wrap>
           {this.renderControls()}
-        </KuiFlexGrid>
+        </KuiFlexGroup>
         {stagingButtons}
       </div>
     );
@@ -137,6 +130,5 @@ InputControlVis.propTypes = {
   controls: PropTypes.array.isRequired,
   updateFiltersOnChange: PropTypes.bool,
   hasChanges: PropTypes.func.isRequired,
-  hasValues: PropTypes.func.isRequired,
-  controlWidth: PropTypes.number.isRequired
+  hasValues: PropTypes.func.isRequired
 };

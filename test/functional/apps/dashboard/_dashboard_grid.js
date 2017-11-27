@@ -56,17 +56,6 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.dashboard.addVisualizations(['Visualization InputControl']);
         });
 
-        it('Horizontal layout should wrap controls when single row cannot fit all controls min width', async () => {
-          const controls = await find.allByCssSelector('.inputControlVis .kuiFlexItem');
-          expect(controls.length).to.equal(3);
-
-          const control0Position = await controls[0].getPosition();
-          const control1Position = await controls[1].getPosition();
-          const control2Position = await controls[2].getPosition();
-          expect(control0Position.y).to.equal(control1Position.y);
-          expect(control2Position.y).to.be.greaterThan(control0Position.y);
-        });
-
         it('Should position controls in horizontal layout when panel is short and long', async () => {
           const resizeIcons = await find.allByCssSelector('.react-resizable-handle');
           expect(resizeIcons.length).to.equal(1);
