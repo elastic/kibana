@@ -2,7 +2,12 @@ import LogFormat from './log_format';
 import stringify from 'json-stringify-safe';
 
 const stripColors = function (string) {
-  return string.replace(/\u001b[^m]+m/g, '');
+  try {
+    return string.replace(/\u001b[^m]+m/g, '');
+  }
+  catch (err) {
+    return string;
+  }
 };
 
 export default class KbnLoggerJsonFormat extends LogFormat {
