@@ -74,7 +74,7 @@
   "dependencies": {
     "@elastic/datemath": "2.3.0",
     "@elastic/filesaver": "1.1.2",
-    "@elastic/numeral": "2.2.1",
+    "@elastic/numeral": "2.3.0",
     "@elastic/test-subj-selector": "0.2.1",
     "@elastic/ui-ace": "0.2.3",
     "JSONStream": "1.1.1",
@@ -272,7 +272,6 @@
     "karma-safari-launcher": "1.0.0",
     "keymirror": "0.1.1",
     "leadfoot": "1.7.1",
-    "libesvm": "3.8.8",
     "license-checker": "5.1.2",
     "load-grunt-config": "0.19.2",
     "makelogs": "4.0.2",

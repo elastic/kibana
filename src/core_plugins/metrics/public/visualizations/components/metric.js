@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
-import getLastValue from '../lib/get_last_value';
+import getLastValue from '../../../common/get_last_value';
 import reactcss from 'reactcss';
 import calculateCorrdinates from '../lib/calculate_corrdinates';
 
