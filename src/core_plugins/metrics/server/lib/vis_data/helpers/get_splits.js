@@ -5,6 +5,7 @@ import getLastMetric from './get_last_metric';
 import getSplitColors from './get_split_colors';
 import { formatKey } from './format_key';
 export default function getSplits(resp, panel, series) {
+  const meta = _.get(resp, `aggregations.${series.id}.meta`);
   const color = new Color(series.color);
   const metric = getLastMetric(series);
   if (_.has(resp, `aggregations.${series.id}.buckets`)) {
@@ -16,6 +17,7 @@ export default function getSplits(resp, panel, series) {
         bucket.id = `${series.id}:${bucket.key}`;
         bucket.label = formatKey(bucket.key, series);
         bucket.color = panel.type === 'top_n' ? color.hex() : colors.shift();
+        bucket.meta = meta;
         return bucket;
       });
     }
@@ -27,6 +29,7 @@ export default function getSplits(resp, panel, series) {
         bucket.key = filter.id;
         bucket.color = filter.color;
         bucket.label = filter.label || filter.filter || '*';
+        bucket.meta = meta;
         return bucket;
       });
     }
@@ -46,7 +49,8 @@ export default function getSplits(resp, panel, series) {
       id: series.id,
       label: series.label || calculateLabel(metric, series.metrics),
       color: color.hex(),
-      ...mergeObj
+      ...mergeObj,
+      meta
     }
   ];
 }
