@@ -59,6 +59,16 @@ function TimeseriesVisualization(props) {
         .filter(r => _.startsWith(r.id, s.id))
         .forEach(r => delete r.label);
     }
+    if (s.stacked !== 'none') {
+      series
+        .filter(r => _.startsWith(r.id, s.id))
+        .forEach(row => {
+          row.data = row.data.map(point => {
+            if (!point[1]) return [point[0], 0];
+            return point;
+          });
+        });
+    }
     if (s.stacked === 'percent') {
       s.seperate_axis = true;
       s.axisFormatter = 'percent';
