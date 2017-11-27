@@ -19,16 +19,13 @@ export function Instruction({ commands, paramValues, textPost, textPre }) {
     post = <Content className="kuiVerticalRhythm" text={textPost}/>;
   }
 
-  const aceOptions = {
-    fontSize: '14px',
-    maxLines: commands.length
-  };
-
-  return (
-    <div className="instruction">
-
-      {pre}
-
+  let commandsMarkup;
+  if (commands) {
+    const aceOptions = {
+      fontSize: '14px',
+      maxLines: commands.length
+    };
+    commandsMarkup = (
       <div className="kuiVerticalRhythm">
         <KuiCodeEditor
           mode="sh"
@@ -39,7 +36,14 @@ export function Instruction({ commands, paramValues, textPost, textPre }) {
           isReadOnly
         />
       </div>
+    );
+  }
 
+  return (
+    <div className="instruction">
+
+      {pre}
+      {commandsMarkup}
       {post}
 
     </div>
@@ -47,7 +51,7 @@ export function Instruction({ commands, paramValues, textPost, textPre }) {
 }
 
 Instruction.propTypes = {
-  commands: PropTypes.array.isRequired,
+  commands: PropTypes.array,
   paramValues: PropTypes.object.isRequired,
   textPost: PropTypes.string,
   textPre: PropTypes.string,
