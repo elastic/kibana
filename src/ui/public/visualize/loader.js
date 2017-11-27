@@ -4,7 +4,7 @@
  * are up to date.
  */
 import angular from 'angular';
-import { uiModules } from 'ui/modules';
+import uiRoutes from 'ui/routes';
 import 'ui/visualize';
 import visTemplate from './loader_template.html';
 
@@ -157,7 +157,7 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
 // (that is also returned by getVisualizeLoader) once the the visualizeLoader
 // could be created.
 const visualizeLoaderPromise = new Promise((resolve) => {
-  uiModules.get('kibana').run((Private) => {
+  uiRoutes.addSetupWork((Private) => {
     const visualizeLoader = Private(VisualizeLoaderProvider);
     resolve(visualizeLoader);
   });
