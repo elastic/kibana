@@ -1,5 +1,6 @@
 export function DocTableProvider({ getService }) {
   const testSubjects = getService('testSubjects');
+  const retry = getService('retry');
 
   class DocTable {
     async getTable() {
@@ -54,7 +55,12 @@ export function DocTableProvider({ getService }) {
 
     async toggleRowExpanded(row) {
       const rowExpandToggle = await this.getRowExpandToggle(row);
-      return await rowExpandToggle.click();
+      await rowExpandToggle.click();
+
+      const detailsRow = await row.findByXpath('./following-sibling::tr');
+      return await retry.try(async () => {
+        return detailsRow.findByCssSelector('doc-viewer');
+      });
     }
   }
 
