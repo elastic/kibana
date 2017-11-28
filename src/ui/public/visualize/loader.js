@@ -119,7 +119,10 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
      * @param {Object} savedObj The savedObject as it could be retrieved by the
      *    `savedVisualizations` service.
      * @param {Object} params A list of paramters that will influence rendering.
-     * @param {AppState} params.appState The current appState of the application.
+     * @param {AppState} params.appState The appState this visualization should use.
+     *    If you don't spyecify it, the global AppState (that is decoded in the URL)
+     *    will be used. Usually you don't need to overwrite this, unless you don't
+     *    want the visualization to use the global AppState.
      * @param {UiState} params.uiState The current uiState of the application. If you
      *    don't pass a uiState, the visualization will creates it's own uiState to
      *    store information like whether the legend is open or closed, but you don't
