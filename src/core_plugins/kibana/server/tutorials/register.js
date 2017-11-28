@@ -1,11 +1,11 @@
-import { systemLogsSpecProvider } from './systemLogs';
-import { systemMetricsSpecProvider } from './systemMetrics';
-import { apacheLogsSpecProvider } from './apacheLogs';
-import { apacheMetricsSpecProvider } from './apacheMetrics';
-import { nginxLogsSpecProvider } from './nginxLogs';
-import { nginxMetricsSpecProvider } from './nginxMetrics';
-import { mysqlLogsSpecProvider } from './mysqlLogs';
-import { mysqlMetricsSpecProvider } from './mysqlMetrics';
+import { systemLogsSpecProvider } from './system_logs';
+import { systemMetricsSpecProvider } from './system_metrics';
+import { apacheLogsSpecProvider } from './apache_logs';
+import { apacheMetricsSpecProvider } from './apache_metrics';
+import { nginxLogsSpecProvider } from './nginx_logs';
+import { nginxMetricsSpecProvider } from './nginx_metrics';
+import { mysqlLogsSpecProvider } from './mysql_logs';
+import { mysqlMetricsSpecProvider } from './mysql_metrics';
 import { netflowSpecProvider } from './netflow';
 
 export function registerTutorials(server) {

@@ -6,6 +6,16 @@ import { Introduction } from './introduction';
 import { InstructionSet } from './instruction_set';
 import { ParameterForm } from './parameter_form';
 import { getTutorial } from '../../tutorials';
+import {
+  KuiButtonGroup,
+  KuiButton
+} from 'ui_framework/components';
+
+const INSTRUCTIONS_TYPE = {
+  ELASTIC_CLOUD: 'elasticCloud',
+  ON_PREM: 'onPrem',
+  ON_PREM_ELASTIC_CLOUD: 'onPremElasticCloud'
+};
 
 export class Tutorial extends React.Component {
 
@@ -15,28 +25,58 @@ export class Tutorial extends React.Component {
     this.state = {
       notFound: false,
       paramValues: {},
-      tutorial: null
+      tutorial: null,
+      visibleInstructions: INSTRUCTIONS_TYPE.ON_PREM
     };
   }
 
   async componentWillMount() {
     const tutorial = await getTutorial(this.props.tutorialId);
     if (tutorial) {
-      const paramValues = {};
-      if (tutorial.params) {
-        tutorial.params.forEach((param => {
-          paramValues[param.id] = param.defaultValue;
-        }));
-      }
       this.setState({
-        paramValues: paramValues,
         tutorial: tutorial
-      });
+      }, this.setParamDefaults);
     } else {
       this.setState({
         notFound: true,
       });
     }
+  }
+
+  getInstructions = () => {
+    if (!this.state.tutorial) {
+      return { instructionSets: [] };
+    }
+
+    switch(this.state.visibleInstructions) {
+      case INSTRUCTIONS_TYPE.ELASTIC_CLOUD:
+        return this.state.tutorial.elasticCloud;
+      case INSTRUCTIONS_TYPE.ON_PREM:
+        return this.state.tutorial.onPrem;
+      case INSTRUCTIONS_TYPE.ON_PREM_ELASTIC_CLOUD:
+        return this.state.tutorial.onPremElasticCloud;
+      default:
+        throw new Error(`Unhandled instruction type ${this.state.visibleInstructions}`);
+    }
+  }
+
+  setParamDefaults = () => {
+    const instructions = this.getInstructions();
+    const paramValues = {};
+    if (instructions.params) {
+      instructions.params.forEach((param => {
+        paramValues[param.id] = param.defaultValue;
+      }));
+    }
+    this.setState({
+      paramValues: paramValues
+    });
+  }
+
+  setVisibleInstructions = (instructionsType) => {
+    this.setState({
+      visibleInstructions: instructionsType
+    }, this.setParamDefaults);
   }
 
   setParameter = (paramId, newValue) => {
@@ -47,9 +87,17 @@ export class Tutorial extends React.Component {
     });
   }
 
-  renderInstructionSets = () => {
+  onPrem = () => {
+    this.setVisibleInstructions(INSTRUCTIONS_TYPE.ON_PREM);
+  }
+
+  onPremElasticCloud = () => {
+    this.setVisibleInstructions(INSTRUCTIONS_TYPE.ON_PREM_ELASTIC_CLOUD);
+  }
+
+  renderInstructionSets = (instructions) => {
     let offset = 1;
-    return this.state.tutorial.instructionSets.map((instructionSet, index) => {
+    return instructions.instructionSets.map((instructionSet, index) => {
       const currentOffset = offset;
       offset += instructionSet.instructionVariants[0].instructions.length;
       return (
@@ -65,6 +113,7 @@ export class Tutorial extends React.Component {
   }
 
   render() {
+    const instructions = this.getInstructions();
     let content;
     if (this.state.notFound) {
       content = (
@@ -81,10 +130,10 @@ export class Tutorial extends React.Component {
         previewUrl = this.props.addBasePath(this.state.tutorial.previewImagePath);
       }
       let params;
-      if (this.state.tutorial.params) {
+      if (instructions.params) {
         params = (
           <ParameterForm
-            params={this.state.tutorial.params}
+            params={instructions.params}
             paramValues={this.state.paramValues}
             setParameter={this.setParameter}
           />
@@ -98,9 +147,21 @@ export class Tutorial extends React.Component {
             previewUrl={previewUrl}
           />
 
+          <div>
+            <KuiButtonGroup isUnited>
+              <KuiButton buttonType="basic" onClick={this.onPrem}>
+                On premise
+              </KuiButton>
+
+              <KuiButton buttonType="basic" onClick={this.onPremElasticCloud}>
+                Elastic cloud
+              </KuiButton>
+            </KuiButtonGroup>
+          </div>
+
           <div className="homePanel kuiVerticalRhythm">
             {params}
-            {this.renderInstructionSets()}
+            {this.renderInstructionSets(instructions)}
           </div>
         </div>
       );
