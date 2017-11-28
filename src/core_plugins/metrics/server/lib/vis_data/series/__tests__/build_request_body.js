@@ -99,6 +99,11 @@ describe('buildRequestBody(req)', () => {
           'filter': {
             'match_all': {}
           },
+          'meta': {
+            'timeField': '@timestamp',
+            'bucketSize': 10,
+            'intervalString': '10s'
+          },
           'aggs': {
             'timeseries': {
               'date_histogram': {
