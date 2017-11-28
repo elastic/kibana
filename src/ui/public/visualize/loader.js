@@ -101,9 +101,9 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
      * @return {Promise.<EmbeddedVisualizeHandler>} A promise that resolves to the
      *    handler for this visualization as soon as the saved object could be found.
      */
-    embedVisualizationWithId: async (element, id, params) => {
+    embedVisualizationWithId: async (element, savedVisualizationId, params) => {
       return new Promise((resolve, reject) => {
-        savedVisualizations.get(id).then(savedObj => {
+        savedVisualizations.get(savedVisualizationId).then(savedObj => {
           const handler = renderVis(element, savedObj, params);
           resolve(handler);
         }, reject);
