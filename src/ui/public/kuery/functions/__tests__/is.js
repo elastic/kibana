@@ -57,6 +57,20 @@ describe('kuery functions', function () {
         expectDeepEqual(result, expected);
       });
 
+      it('should return an ES multi_match query using default_field when fieldName is null', function () {
+        const expected = {
+          multi_match: {
+            query: 200,
+            type: 'phrase',
+            lenient: true,
+          }
+        };
+
+        const node = nodeTypes.function.buildNode('is', null, 200);
+        const result = is.toElasticsearchQuery(node, indexPattern);
+        expectDeepEqual(result, expected);
+      });
+
       it('should return an ES multi_match query when fieldName is "*"', function () {
         const expected = {
           multi_match: {
