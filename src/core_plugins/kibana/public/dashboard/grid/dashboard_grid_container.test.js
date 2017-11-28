@@ -25,13 +25,14 @@ function createOldPanelData(col, id, row, sizeX, sizeY, panelIndex) {
   return { col, id, row, size_x: sizeX, size_y: sizeY, type: 'visualization', panelIndex };
 }
 
+const getSelection = window.getSelection;
 beforeAll(() => {
   // sizeme detects the width to be 0 in our test environment. noPlaceholder will mean that the grid contents will
   // get rendered even when width is 0, which will improve our tests.
   sizeMe.noPlaceholders = true;
 
   // react-grid-layout calls getSelection which isn't support by jsdom
-  // it's used regardless of whether we need to remove selection,
+  // it's called regardless of whether we need to remove selection,
   // and in this case we don't need to remove selection
   window.getSelection = () => {
     return {
@@ -42,6 +43,7 @@ beforeAll(() => {
 
 afterAll(() => {
   sizeMe.noPlaceholders = false;
+  window.getSelection = getSelection;
 });
 
 test('loads old panel data in the right order', () => {
