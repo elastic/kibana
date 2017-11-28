@@ -29,8 +29,6 @@ export async function add(keystore, key, options = {}) {
         return logger.log('Exiting without modifying keystore.');
       }
     }
-  } else {
-    logger.log(`Setting ${key} already exists, overwriting.`);
   }
 
   if (options.stdin) {
