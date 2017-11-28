@@ -19,6 +19,7 @@
     "lint": "eslint bin/ help/ tasks/"
   },
   "dependencies": {
+    "argv-split": "^2.0.1",
     "commander": "^2.9.0",
     "del": "^2.2.2",
     "gulp-rename": "1.2.2",
