@@ -3,6 +3,10 @@ import PropTypes from 'prop-types';
 import { FormGroup, FormControl, Button, ButtonToolbar } from 'react-bootstrap';
 import './expression.less';
 
+function getOffsetTop({ expression, selection: { start } }) {
+  return expression.substr(0, start).split('\n').length * 22 + 8;
+}
+
 export const Expression = ({
   formState,
   updateValue,
@@ -33,7 +37,10 @@ export const Expression = ({
             onChange={updateValue}
             value={formState.expression}
           />
-          <div className={'autocompleteProposals ' + (showAutocompleteProposals ? '' : 'hidden')}>
+          <div
+            className={'autocompleteProposals ' + (showAutocompleteProposals ? '' : 'hidden')}
+            style={{ top: getOffsetTop(formState) + 'px' }}
+          >
             { autocompleteProposals.map((proposal, i) => (
                 <div
                   key={i}

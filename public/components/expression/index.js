@@ -139,16 +139,17 @@ export const Expression = compose(
       setSelectedIndex,
       autocompleteProposals,
       acceptAutocompleteProposal,
+      showAutocompleteProposals,
       setShowAutocompleteProposals,
     }) => event => {
       const { key } = event;
-      if (key === 'ArrowUp') {
+      if (key === 'ArrowUp' && showAutocompleteProposals && autocompleteProposals.length) {
         event.preventDefault();
         setSelectedIndex((selectedIndex || autocompleteProposals.length) - 1);
-      } else if (key === 'ArrowDown') {
+      } else if (key === 'ArrowDown' && showAutocompleteProposals && autocompleteProposals.length) {
         event.preventDefault();
         setSelectedIndex((selectedIndex + 1) % autocompleteProposals.length);
-      } else if (key === 'Enter' && selectedIndex >= 0) {
+      } else if (key === 'Enter' && selectedIndex >= 0 && showAutocompleteProposals && autocompleteProposals.length) {
         event.preventDefault();
         acceptAutocompleteProposal(autocompleteProposals[selectedIndex]);
       } else if (key === 'Escape') {
