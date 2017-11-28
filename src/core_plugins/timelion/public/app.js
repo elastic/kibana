@@ -70,8 +70,8 @@ app.controller('timelion', function (
   // TODO: For some reason the Kibana core doesn't correctly do this for all apps.
   moment.tz.setDefault(config.get('dateFormat:tz'));
 
-  timefilter.enableAutoRefresh();
-  timefilter.enableTimeRange();
+  timefilter.enableAutoRefreshSelector();
+  timefilter.enableTimeRangeSelector();
 
   const notify = new Notifier({
     location: 'Timelion'

@@ -38,8 +38,8 @@ uiModules
       },
 
       link: function ($scope) {
-        timefilter.disableAutoRefresh();
-        timefilter.disableTimeRange();
+        timefilter.disableAutoRefreshSelector();
+        timefilter.disableTimeRangeSelector();
         $scope.sections = management.items.inOrder;
         $scope.section = management.getSection($scope.sectionName) || management;
 

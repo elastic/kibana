@@ -24,26 +24,26 @@ describe('kbnGlobalTimepicker', function () {
     expect($el.attr('data-test-subj')).to.be('globalTimepicker');
   });
 
-  it('sets data-shared-timefilter to true when timefilter.isAutoRefreshEnabled is true', function () {
+  it('sets data-shared-timefilter to true when auto-refresh selector is enabled', function () {
     scope.timefilter = {
-      isAutoRefreshEnabled: true,
-      isTimeRangeEnabled: false
+      isAutoRefreshSelectorEnabled: true,
+      isTimeRangeSelectorEnabled: false
     };
     const $el = compile();
     expect($el.attr('data-shared-timefilter')).to.eql('true');
   });
-  it('sets data-shared-timefilter to true when timefilter.isTimeRangeEnabled is true', function () {
+  it('sets data-shared-timefilter to true when time range selector is enabled', function () {
     scope.timefilter = {
-      isAutoRefreshEnabled: false,
-      isTimeRangeEnabled: true
+      isAutoRefreshSelectorEnabled: false,
+      isTimeRangeSelectorEnabled: true
     };
     const $el = compile();
     expect($el.attr('data-shared-timefilter')).to.eql('true');
   });
-  it('sets data-shared-timefilter to false when timefilter.isAutoRefreshEnabled and timefilter.isTimeRangeEnabled are false', function () {
+  it(`sets data-shared-timefilter to false when auto-refresh and time range selectors are both disabled`, function () {
     scope.timefilter = {
-      isAutoRefreshEnabled: false,
-      isTimeRangeEnabled: false
+      isAutoRefreshSelectorEnabled: false,
+      isTimeRangeSelectorEnabled: false
     };
     const $el = compile();
     expect($el.attr('data-shared-timefilter')).to.eql('false');

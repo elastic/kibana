@@ -16,8 +16,8 @@ export function VisualizeListingController($injector) {
   const timefilter = $injector.get('timefilter');
   const config = $injector.get('config');
 
-  timefilter.disableAutoRefresh();
-  timefilter.disableTimeRange();
+  timefilter.disableAutoRefreshSelector();
+  timefilter.disableTimeRangeSelector();
 
   // TODO: Extract this into an external service.
   const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;

@@ -32,8 +32,8 @@ uiRoutes
 
 app.controller('doc', function ($scope, $route, es, timefilter) {
 
-  timefilter.disableAutoRefresh();
-  timefilter.disableTimeRange();
+  timefilter.disableAutoRefreshSelector();
+  timefilter.disableTimeRangeSelector();
 
   // Pretty much only need this for formatting, not actually using it for fetching anything.
   $scope.indexPattern = $route.current.locals.indexPattern;

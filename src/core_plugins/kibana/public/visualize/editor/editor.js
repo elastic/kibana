@@ -198,11 +198,11 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       const showTimeFilter = Boolean((!index || index.timeFieldName) && requiresTimePicker);
 
       if (showTimeFilter) {
-        timefilter.enableAutoRefresh();
-        timefilter.enableTimeRange();
+        timefilter.enableAutoRefreshSelector();
+        timefilter.enableTimeRangeSelector();
       } else {
-        timefilter.disableAutoRefresh();
-        timefilter.disableTimeRange();
+        timefilter.disableAutoRefreshSelector();
+        timefilter.disableTimeRangeSelector();
       }
     });
 

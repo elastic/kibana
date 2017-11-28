@@ -325,11 +325,11 @@ function discoverController(
 
         $scope.$watch('opts.timefield', function (timefield) {
           if (Boolean(timefield)) {
-            timefilter.enableAutoRefresh();
-            timefilter.enableTimeRange();
+            timefilter.enableAutoRefreshSelector();
+            timefilter.enableTimeRangeSelector();
           } else {
-            timefilter.disableAutoRefresh();
-            timefilter.disableTimeRange();
+            timefilter.disableAutoRefreshSelector();
+            timefilter.disableTimeRangeSelector();
           }
         });
 

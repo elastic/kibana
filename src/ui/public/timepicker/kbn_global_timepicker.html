@@ -1,9 +1,9 @@
-<div ng-show="timefilter.isAutoRefreshEnabled || timefilter.isTimeRangeEnabled" data-shared-timefilter="{{timefilter.isAutoRefreshEnabled || timefilter.isTimeRangeEnabled}}" class="kuiLocalMenu" data-test-subj="globalTimepicker">
+<div ng-show="timefilter.isAutoRefreshSelectorEnabled || timefilter.isTimeRangeSelectorEnabled" data-shared-timefilter="{{timefilter.isAutoRefreshSelectorEnabled || timefilter.isTimeRangeSelectorEnabled}}" class="kuiLocalMenu" data-test-subj="globalTimepicker">
   <button
     class="kuiLocalMenuItem"
     aria-label="{{ timefilter.refreshInterval.pause ? 'Resume refreshing data' : 'Pause refreshing data' }}"
     ng-click="toggleRefresh()"
-    ng-show="timefilter.isAutoRefreshEnabled && (timefilter.refreshInterval.value > 0)"
+    ng-show="timefilter.isAutoRefreshSelectorEnabled && (timefilter.refreshInterval.value > 0)"
   >
     <span
       class="kuiIcon"
@@ -15,7 +15,7 @@
   <button
     class="kuiLocalMenuItem navbar-timepicker-auto-refresh-desc"
     ng-class="{'kuiLocalMenuItem-isSelected': kbnTopNav.isCurrent('interval') }"
-    ng-show="timefilter.isAutoRefreshEnabled"
+    ng-show="timefilter.isAutoRefreshSelectorEnabled"
     ng-click="kbnTopNav.toggle('interval')"
   >
     <span ng-show="timefilter.refreshInterval.value === 0">
@@ -31,7 +31,7 @@
   </button>
 
   <button
-    ng-show="timefilter.isTimeRangeEnabled"
+    ng-show="timefilter.isTimeRangeSelectorEnabled"
     class="kuiLocalMenuItem"
     ng-click="back()"
     aria-label="Move backward in time"
@@ -44,7 +44,7 @@
   </button>
 
   <button
-    ng-show="timefilter.isTimeRangeEnabled"
+    ng-show="timefilter.isTimeRangeSelectorEnabled"
     data-test-subj="globalTimepickerButton"
     class="kuiLocalMenuItem navbar-timepicker-time-desc"
     ng-class="{'kuiLocalMenuItem-isSelected': kbnTopNav.isCurrent('filter')}"
@@ -61,7 +61,7 @@
   </button>
 
   <button
-    ng-show="timefilter.isTimeRangeEnabled"
+    ng-show="timefilter.isTimeRangeSelectorEnabled"
     class="kuiLocalMenuItem"
     ng-click="forward()"
     aria-label="Move forward in time"

@@ -32,8 +32,8 @@ uiModules
       const diffTime = Private(TimefilterLibDiffTimeProvider)(self);
       const diffInterval = Private(TimefilterLibDiffIntervalProvider)(self);
 
-      self.isTimeRangeEnabled = false;
-      self.isAutoRefreshEnabled = false;
+      self.isTimeRangeSelectorEnabled = false;
+      self.isAutoRefreshSelectorEnabled = false;
 
       self.init = _.once(function () {
         const timeDefaults = config.get('timepicker:timeDefaults');
@@ -109,35 +109,35 @@ uiModules
     };
 
     Timefilter.prototype.getActiveBounds = function () {
-      if (this.isTimeRangeEnabled) return this.getBounds();
+      if (this.isTimeRangeSelectorEnabled) return this.getBounds();
     };
 
     /**
      * Show the time bounds selector part of the time filter
      */
-    Timefilter.prototype.enableTimeRange = function () {
-      this.isTimeRangeEnabled = true;
+    Timefilter.prototype.enableTimeRangeSelector = function () {
+      this.isTimeRangeSelectorEnabled = true;
     };
 
     /**
      * Hide the time bounds selector part of the time filter
      */
-    Timefilter.prototype.disableTimeRange = function () {
-      this.isTimeRangeEnabled = false;
+    Timefilter.prototype.disableTimeRangeSelector = function () {
+      this.isTimeRangeSelectorEnabled = false;
     };
 
     /**
      * Show the auto refresh part of the time filter
      */
-    Timefilter.prototype.enableAutoRefresh = function () {
-      this.isAutoRefreshEnabled = true;
+    Timefilter.prototype.enableAutoRefreshSelector = function () {
+      this.isAutoRefreshSelectorEnabled = true;
     };
 
     /**
      * Hide the auto refresh part of the time filter
      */
-    Timefilter.prototype.disableAutoRefresh = function () {
-      this.isAutoRefreshEnabled = false;
+    Timefilter.prototype.disableAutoRefreshSelector = function () {
+      this.isAutoRefreshSelectorEnabled = false;
     };
 
     return new Timefilter();
