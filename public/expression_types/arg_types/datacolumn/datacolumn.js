@@ -48,16 +48,24 @@ const DatacolumnArgInput = ({ onValueChange, columns, mathValue, setMathFunction
   const inputRefs = {};
   const valueNotSet = val => !val || val.length === 0;
   const updateFunctionValue = () => {
+    // if setting size, auto-select the first column if no column is already set
+    if (inputRefs.fn.value === 'size') {
+      const col = inputRefs.column.value || columns[0] && columns[0].name;
+      if (col) return onValueChange(`${inputRefs.fn.value}(${col})`);
+    }
+
     // inputRefs.column is the column selection, if there is no value, do nothing
     if (valueNotSet(inputRefs.column.value)) {
-      setMathFunction(inputRefs.fn.value);
-    } else if (valueNotSet(inputRefs.fn.value)) {
-      // inputRefs.fn is the math.js function to use, if it's not set, just use the value input
-      onValueChange(inputRefs.column.value);
-    } else {
-      // inputRefs.fn has a value, so use it as a math.js expression
-      onValueChange(`${inputRefs.fn.value}(${inputRefs.column.value})`);
+      return setMathFunction(inputRefs.fn.value);
     }
+
+    // inputRefs.fn is the math.js function to use, if it's not set, just use the value input
+    if (valueNotSet(inputRefs.fn.value)) {
+      return onValueChange(inputRefs.column.value);
+    }
+
+    // inputRefs.fn has a value, so use it as a math.js expression
+    onValueChange(`${inputRefs.fn.value}(${inputRefs.column.value})`);
   };
 
   const column = columns.map(col => col.name).find(colName => colName === mathValue.column) || '';
@@ -77,7 +85,9 @@ const DatacolumnArgInput = ({ onValueChange, columns, mathValue, setMathFunction
         onChange={updateFunctionValue}
       >
         <option value="" disabled>select column</option>
-        { sortBy(columns, 'name').map(column => <option key={column.name} value={column.name}>{column.name}</option>) }
+        { sortBy(columns, 'name').map(column => (
+          <option key={column.name} value={column.name}>{column.name}</option>
+        )) }
       </FormControl>
     </div>
   );

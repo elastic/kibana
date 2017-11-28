@@ -25,14 +25,14 @@ export const columns = {
     let result = { ...context };
 
     if (exclude) {
-      const fields = exclude.split(',').map(field => field.trim()).filter(field =>  field !== '_rowId');
+      const fields = exclude.split(',').map(field => field.trim());
       const rows = result.rows.map(row => omit(row, fields));
       const columns = result.columns.filter(col => !fields.includes(col.name));
       result = { ...result, rows, columns };
     }
 
     if (include) {
-      const fields = include.split(',').map(field => field.trim()).concat(['_rowId']);
+      const fields = include.split(',').map(field => field.trim());
       const rows = result.rows.map(row => pick(row, fields));
       const columns = result.columns.filter(col => fields.includes(col.name));
       result = { ...result, rows, columns };

@@ -49,6 +49,7 @@ export const ElementContent = compose(
     <div style={Object.assign({}, renderable.containerStyle, size)}>
       <div className="canvas__element--content">
         <RenderElement
+          name={renderFunction.name}
           renderFn={renderFunction.render}
           reuseNode={renderFunction.reuseDomNode}
           config={renderable.value}

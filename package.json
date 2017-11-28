@@ -1,6 +1,6 @@
 {
   "name": "canvas",
-  "version": "0.1.1590",
+  "version": "0.1.1594",
   "description": "Data driven workpads for kibana",
   "main": "index.js",
   "kibana": {
@@ -66,7 +66,7 @@
     "@elastic/eslint-config-kibana": "^0.5.0",
     "@elastic/eslint-import-resolver-kibana": "^0.8.1",
     "@elastic/eslint-plugin-kibana-custom": "^1.0.3",
-    "@elastic/plugin-helpers": "^7.1.0",
+    "@elastic/plugin-helpers": "^8.0.0",
     "aws-sdk": "^2.141.0",
     "babel-core": "^6.24.1",
     "babel-eslint": "6.1.2",

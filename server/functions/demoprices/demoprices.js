@@ -3,7 +3,7 @@ import rows from './mock.json';
 import { queryDatatable } from '../../../common/lib/datatable/query';
 
 function mapRecord(row, i, adjustedTime) {
-  return Object.assign({}, row, { _rowId: i, time: adjustedTime || row.time });
+  return Object.assign({}, row, { time: adjustedTime || row.time });
 }
 
 export const demoprices = {
@@ -45,7 +45,6 @@ export const demoprices = {
         if (isLastRow || firstRow.time !== adjustedTime) {
           const avgPrice = acc.pending.reduce((a, r) => a += r.price, 0) / acc.pending.length;
           acc.bucketed.push({
-            _rowId: `${i}`,
             time: adjustedTime,
             name: row.name,
             price: avgPrice,
@@ -66,7 +65,6 @@ export const demoprices = {
     return queryDatatable({
       type: 'datatable',
       columns: [
-        { name: '_rowId', type: 'number' },
         { name: 'price', type: 'number' },
         { name: 'name', type: 'string' },
         { name: 'time', type: 'date' },

@@ -83,13 +83,11 @@ export const timelion = {
 
       const rows = flatten(seriesList.map(series =>
         series.data.map(row => ({ '@timestamp': row[0], value: row[1], label: series.label }))
-      ))
-      .map((row, i) => ({ ...row, _rowId: i }));
+      ));
 
       return {
         type: 'datatable',
         columns: [
-          { name: '_rowId',     type: 'number'  },
           { name: '@timestamp', type: 'date'    },
           { name: 'value',      type: 'number'  },
           { name: 'label',      type: 'string'  },

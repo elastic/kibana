@@ -1,4 +1,6 @@
 import { debounce } from 'lodash';
+import 'ui/flot-charts';
+
 
 export const pie = {
   name: 'pie',

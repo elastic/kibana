@@ -46,11 +46,6 @@ export default function (kibana) {
         'plugins/canvas/lib/load_types.js',
         'plugins/canvas/lib/load_render_functions.js',
         'plugins/canvas/lib/load_elements.js',
-        'plugins/canvas/hacks/jquery.flot.js',
-        'plugins/canvas/hacks/jquery.flot.pie.js',
-        'plugins/canvas/hacks/jquery.flot.stack.js',
-        'plugins/canvas/hacks/jquery.flot.time.js',
-
       ],
     },
 
