@@ -4055,6 +4055,8 @@ input[type="button"] {
 
 /**
  * 1. Put 10px of space between each child.
+ * 2. Fix IE11 bug which causes this item to grow too wide when there is only a single
+ *    kuiToolBarSection sibling.
  */
 .kuiToolBarSearch {
   display: -webkit-box;
@@ -4071,7 +4073,8 @@ input[type="button"] {
   -webkit-flex: 1 1 auto;
       -ms-flex: 1 1 auto;
           flex: 1 1 auto;
-  max-width: 800px;
+  max-width: 100%;
+  /* 2 */
   line-height: 1.5; }
   .kuiToolBarSearch:first-child {
     margin-left: 0; }
@@ -4087,7 +4090,8 @@ input[type="button"] {
       -ms-flex: 1 1 auto;
           flex: 1 1 auto;
   position: relative;
-  font-size: 14px; }
+  font-size: 14px;
+  max-width: 800px; }
 
 .kuiToolBarSearchBox__icon {
   position: absolute;
