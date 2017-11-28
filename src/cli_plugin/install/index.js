@@ -1,9 +1,10 @@
-import { fromRoot, pkg } from '../../utils';
+import { pkg } from '../../utils';
 import install from './install';
 import Logger from '../lib/logger';
 import { getConfig } from '../../server/path';
 import { parse, parseMilliseconds } from './settings';
 import logWarnings from '../lib/log_warnings';
+import { pluginDirExplanation } from '../lib/plugin_dir';
 
 function processCommand(command, options) {
   let settings;
@@ -35,11 +36,10 @@ export default function pluginInstall(program) {
       'length of time before failing; 0 for never fail',
       parseMilliseconds
     )
-    .option(
-      '-d, --plugin-dir <path>',
-      'path to the directory where plugins are stored',
-      fromRoot('plugins')
-    )
+    .onUnknownOptions(['--plugin-dir', '-d'], () => {
+      console.error(pluginDirExplanation);
+      process.exit(1);
+    })
     .description('install a plugin',
       `Common examples:
   install x-pack

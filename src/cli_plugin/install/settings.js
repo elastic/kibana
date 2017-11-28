@@ -1,5 +1,6 @@
 import expiry from 'expiry-js';
 import { resolve } from 'path';
+import { fromRoot } from '../../utils';
 
 function generateUrls({ version, plugin }) {
   return [
@@ -29,7 +30,7 @@ export function parse(command, options, kbnPackage) {
     config: options.config || '',
     plugin: command,
     version: kbnPackage.version,
-    pluginDir: options.pluginDir || ''
+    pluginDir: fromRoot('plugins')
   };
 
   settings.urls = generateUrls(settings);

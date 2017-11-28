@@ -1,9 +1,9 @@
-import { fromRoot } from '../../utils';
 import remove from './remove';
 import Logger from '../lib/logger';
 import { parse } from './settings';
 import { getConfig } from '../../server/path';
 import logWarnings from '../lib/log_warnings';
+import { pluginDirExplanation } from '../lib/plugin_dir';
 
 function processCommand(command, options) {
   let settings;
@@ -30,11 +30,10 @@ export default function pluginRemove(program) {
       'path to the config file',
       getConfig()
     )
-    .option(
-      '-d, --plugin-dir <path>',
-      'path to the directory where plugins are stored',
-      fromRoot('plugins')
-    )
+    .onUnknownOptions(['--plugin-dir', '-d'], () => {
+      console.error(pluginDirExplanation);
+      process.exit(1);
+    })
     .description('remove a plugin',
       `common examples:
   remove x-pack`)

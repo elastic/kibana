@@ -69,7 +69,7 @@ describe('kibana cli', function () {
         let options = {};
         const kbnPackage = { version: 1234 };
         beforeEach(function () {
-          options = { pluginDir: fromRoot('plugins') };
+          options = {};
         });
 
         describe('timeout option', function () {
@@ -148,11 +148,11 @@ describe('kibana cli', function () {
             expect(settings.pluginDir).to.be(fromRoot('plugins'));
           });
 
-          it('should set settings.config property', function () {
+          it('cannot be changed', function () {
             options.pluginDir = 'foo bar baz';
             const settings = parse(command, options, kbnPackage);
 
-            expect(settings.pluginDir).to.be('foo bar baz');
+            expect(settings.pluginDir).to.be(fromRoot('plugins'));
           });
 
         });
@@ -185,9 +185,8 @@ describe('kibana cli', function () {
         describe('workingPath value', function () {
 
           it('should set settings.workingPath property', function () {
-            options.pluginDir = 'foo/bar/baz';
             const settings = parse(command, options, kbnPackage);
-            const expected = resolve('foo/bar/baz', '.plugin.installing');
+            const expected = resolve(fromRoot('plugins'), '.plugin.installing');
 
             expect(settings.workingPath).to.be(expected);
           });
@@ -197,9 +196,8 @@ describe('kibana cli', function () {
         describe('tempArchiveFile value', function () {
 
           it('should set settings.tempArchiveFile property', function () {
-            options.pluginDir = 'foo/bar/baz';
             const settings = parse(command, options, kbnPackage);
-            const expected = resolve('foo/bar/baz', '.plugin.installing', 'archive.part');
+            const expected = resolve(fromRoot('plugins'), '.plugin.installing', 'archive.part');
 
             expect(settings.tempArchiveFile).to.be(expected);
           });
@@ -209,9 +207,8 @@ describe('kibana cli', function () {
         describe('tempPackageFile value', function () {
 
           it('should set settings.tempPackageFile property', function () {
-            options.pluginDir = 'foo/bar/baz';
             const settings = parse(command, options, kbnPackage);
-            const expected = resolve('foo/bar/baz', '.plugin.installing', 'package.json');
+            const expected = resolve(fromRoot('plugins'), '.plugin.installing', 'package.json');
 
             expect(settings.tempPackageFile).to.be(expected);
           });
