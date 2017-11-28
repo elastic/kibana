@@ -324,7 +324,13 @@ function discoverController(
         $scope.$listen(queryFilter, 'fetch', $scope.fetch);
 
         $scope.$watch('opts.timefield', function (timefield) {
-          timefilter.enabled = !!timefield;
+          if (Boolean(timefield)) {
+            timefilter.enableAutoRefresh();
+            timefilter.enableTimeRange();
+          } else {
+            timefilter.disableAutoRefresh();
+            timefilter.disableTimeRange();
+          }
         });
 
         $scope.$watch('state.interval', function () {

@@ -15,7 +15,8 @@ export function DashboardListingController($injector, $scope, $location) {
   const config = $injector.get('config');
   const dashboardConfig = $injector.get('dashboardConfig');
 
-  timefilter.enabled = false;
+  timefilter.disableAutoRefresh();
+  timefilter.disableTimeRange();
 
   const limitTo = $filter('limitTo');
   // TODO: Extract this into an external service.

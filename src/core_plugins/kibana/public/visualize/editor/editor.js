@@ -195,7 +195,15 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
       'searchSource.get("index")',
       'vis.type.options.showTimePicker',
     ], function ([index, requiresTimePicker]) {
-      timefilter.enabled = Boolean((!index || index.timeFieldName) && requiresTimePicker);
+      const showTimeFilter = Boolean((!index || index.timeFieldName) && requiresTimePicker);
+
+      if (showTimeFilter) {
+        timefilter.enableAutoRefresh();
+        timefilter.enableTimeRange();
+      } else {
+        timefilter.disableAutoRefresh();
+        timefilter.disableTimeRange();
+      }
     });
 
     // update the searchSource when filters update

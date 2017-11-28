@@ -121,7 +121,8 @@ describe('Doc app controller', function () {
 
   it('should disable the time filter', function (done) {
     init();
-    expect(timefilter.enabled).to.be(false);
+    expect(timefilter.isAutoRefreshEnabled).to.be(false);
+    expect(timefilter.isTimeRangeEnabled).to.be(false);
     done();
   });
 
