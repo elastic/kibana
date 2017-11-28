@@ -12,6 +12,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
   class VisualizePage {
 
+    async waitForVisualizationSelectPage() {
+      await testSubjects.find('visualizeSelectTypePage');
+    }
+
     async clickAreaChart() {
       await find.clickByPartialLinkText('Area');
     }
@@ -106,6 +110,31 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       }
       const getChartTypesPromises = chartTypes.map(getChartType);
       return await Promise.all(getChartTypesPromises);
+    }
+
+    async selectVisSourceIfRequired() {
+      log.debug('selectVisSourceIfRequired');
+      const selectPage = await testSubjects.findAll('visualizeSelectSearch');
+      if (selectPage.length) {
+        log.debug('a search is required for this visualization');
+        await this.clickNewSearch();
+      }
+    }
+
+    async getLabTypeLinks() {
+      return await remote.findAllByPartialLinkText('(Lab)');
+    }
+
+    async getExperimentalTypeLinks() {
+      return await remote.findAllByPartialLinkText('(Experimental)');
+    }
+
+    async isExperimentalInfoShown() {
+      return await testSubjects.exists('experimentalVisInfo');
+    }
+
+    async getExperimentalInfo() {
+      return await testSubjects.find('experimentalVisInfo');
     }
 
     async clickAbsoluteButton() {
