@@ -15,7 +15,7 @@ export function toElasticsearchQuery(node, indexPattern) {
     bool: {
       should: children.map((child) => {
         if (child.type === 'literal') {
-          child = nodeTypes.function.buildNode('is', '*', child.value);
+          child = nodeTypes.function.buildNode('is', null, child.value);
         }
 
         return ast.toElasticsearchQuery(child, indexPattern);
