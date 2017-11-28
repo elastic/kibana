@@ -48,5 +48,5 @@ translationsApi(chrome, internals);
 
 chrome.bootstrap = function () {
   chrome.setupAngular();
-  angular.bootstrap(document, ['kibana']);
+  angular.bootstrap(document.body, ['kibana']);
 };
