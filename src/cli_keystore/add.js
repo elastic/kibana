@@ -20,11 +20,17 @@ export async function add(keystore, key, options = {}) {
   }
 
   if (!options.force && keystore.has(key)) {
-    const overwrite = await confirm(`Setting ${key} already exists. Overwrite?`);
+    if (options.stdin) {
+      return logger.log(`Setting ${key} already exists, exiting without modifying keystore.`);
+    } else {
+      const overwrite = await confirm(`Setting ${key} already exists. Overwrite?`);
 
-    if (!overwrite) {
-      return logger.log('Exiting without modifying keystore.');
+      if (!overwrite) {
+        return logger.log('Exiting without modifying keystore.');
+      }
     }
+  } else {
+    logger.log(`Setting ${key} already exists, overwriting.`);
   }
 
   if (options.stdin) {
