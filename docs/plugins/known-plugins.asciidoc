@@ -55,5 +55,7 @@ This list of plugins is not guaranteed to work on your version of Kibana. Instea
 * https://github.com/Webiks/kibana-API.git[Kibana-API] (webiks) Exposes an API with Kibana functionality.
 Use it to create, edit and embed visualizations, and also to search inside an embedded dashboard.
 
+https://github.com/bondib/kibana-iframe-communicator-plugin[Kibana-Iframe-Communicator] (bondib) A kibana plugin that enables  to communicate directly with Kibana hosted inside an IFrame, without the need to reload the iframe
+
 
 NOTE: If you want your plugin to be added to this page, open a {repo}tree/{branch}/docs/plugins/known-plugins.asciidoc[pull request].
