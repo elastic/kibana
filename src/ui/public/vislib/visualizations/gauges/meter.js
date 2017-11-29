@@ -152,7 +152,7 @@ export function MeterGaugeProvider() {
       const isTooltip = this.gaugeChart.handler.visConfig.get('addTooltip');
       const maxAngle = this.gaugeConfig.maxAngle;
       const minAngle = this.gaugeConfig.minAngle;
-      const angleFactor = this.gaugeConfig.gaugeType === 'Meter' ? 0.75 : 1;
+      const angleFactor = this.gaugeConfig.gaugeType === 'Arc' ? 0.75 : 1;
       const maxRadius = (Math.min(width, height / angleFactor) / 2) * marginFactor;
 
       const extendRange = this.gaugeConfig.extendRange;
