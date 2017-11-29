@@ -226,6 +226,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       .click();
     }
 
+    closeMetricEditor() {
+      return remote
+        .setFindTimeout(defaultFindTimeout)
+        .findByCssSelector('button[aria-label="Close Editor"]')
+        .click();
+    }
+
     clickNewSearch() {
       return remote
       .setFindTimeout(defaultFindTimeout)
@@ -377,6 +384,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return remote
       .setFindTimeout(defaultFindTimeout)
       .findByCssSelector('input[name="interval"]')
+      .type(newValue);
+    }
+
+    setSize(newValue) {
+      return remote
+      .setFindTimeout(defaultFindTimeout)
+      .findByCssSelector('input[name="size"]')
+      .clearValue()
       .type(newValue);
     }
 
