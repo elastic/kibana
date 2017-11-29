@@ -142,11 +142,4 @@ describe('Vislib Gauge Chart Test Suite', function () {
       'rgb(247, 251, 255)'
     ]);
   });
-
-  it('label can split into multiple lines', function () {
-    generateVis({
-      gauge: { type: 'simple' }
-    });
-    expect($(chartEl).find('svg:nth-child(4) > g > text > tspan').length).to.be.above(0);
-  });
 });
