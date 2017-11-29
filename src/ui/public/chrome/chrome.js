@@ -66,7 +66,7 @@ const waitForBootstrap = new Promise(resolve => {
  * be really sure you know what you are doing!
  *
  * When using this method inside your code, you will need to stub it while running
- * tests. Look into 'src/fixtures/stub_get_active_injector' for more information.
+ * tests. Look into 'src/test_utils/public/stub_get_active_injector' for more information.
  */
 chrome.dangerouslyGetActiveInjector = () => {
   return waitForBootstrap.then(() => {
