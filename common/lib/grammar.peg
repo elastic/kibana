@@ -38,7 +38,7 @@ partial_expression
  /* ----- Functions ----- */
 
 function "function"
- = function_at_cursor
+ = cursor
  / name:function_name arg_list:arg_list? {
   return {
     type: 'function',
@@ -52,51 +52,29 @@ function_name
   return name.join('')
  }
 
-function_at_cursor = &{ return parseCursor; } prefix:function_name? cursor suffix:function_name? {
- return {
-  $cursor$: true,
-  prefix: prefix,
-  suffix: suffix,
-  location: location()
- };
-}
-
  /* ----- Arguments ----- */
 
 argument_assignment
- = argument_at_cursor
- / space? name:function_name space? '=' space? value:argument {
+ = space? name:function_name space? '=' space? value:argument {
   return {name: name, value: value};
  }
  / value:argument {return {name: '_', value: value}}
 
- argument_at_cursor = &{ return parseCursor; } prefix:function_name? cursor suffix:function_name? {
-  return {
-   $cursor$: true,
-   prefix: prefix,
-   suffix: suffix,
-   location: location()
-  };
- }
-
 argument
- = '{' space? expression:expression space? '}' { return expression; }
+ = cursor
+ / '{' space? expression:expression space? '}' { return expression; }
  / partial_expression
  / literal
 
 
 arg_list
  = space first:argument_assignment? rest:(space arg:argument_assignment {return arg})* space? {
-  const orderedArgs = first ? [first, ...rest] : [];
+  const orderedArgs = first !== null ? [first, ...rest] : [];
   const args = {};
   orderedArgs.forEach((arg) => {
-   if (arg.$cursor$) {
-    args.$cursor$ = arg;
-   } else {
     args[arg.name] = args[arg.name] || [];
     args[arg.name].push(arg.value)
-   }
-  })
+  });
   return args;
  }
 
@@ -145,4 +123,11 @@ sq_char
   / [^'] // everything except '
 
 cursor
- = '$cursor$'
+ = &{ return parseCursor; } prefix:function_name? '$cursor$' suffix:function_name? {
+   return {
+    cursor: true,
+    prefix,
+    suffix,
+    location: location()
+   };
+ }
