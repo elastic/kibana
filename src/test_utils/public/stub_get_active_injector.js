@@ -34,6 +34,10 @@ export function teardownInjectorStub() {
   });
 }
 
+/**
+ * This method compines setupInjectorStub and teardownInjectorStub in one method.
+ * It can be used if you can call the other two methods directly behind each other.
+ */
 export function setupAndTeardownInjectorStub() {
   setupInjectorStub();
   teardownInjectorStub();
