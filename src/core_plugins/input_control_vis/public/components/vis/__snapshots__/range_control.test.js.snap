@@ -2,6 +2,7 @@
 
 exports[`renders RangeControl 1`] = `
 <Component
+  controlIndex={0}
   id="mock-range-control"
   label="range control"
 >
