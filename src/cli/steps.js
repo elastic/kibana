@@ -30,11 +30,11 @@ function initSteps(config, options) {
         owner,
         repoName,
         options.own ? config.username : null,
-        options.multiple
+        options.multipleCommits
       )
     )
     .then(c => (commits = c))
-    .then(() => promptVersions(repoConfig.versions, options.multiple))
+    .then(() => promptVersions(repoConfig.versions, options.multipleVersions))
     .then(v => (versions = v))
     .then(() => maybeSetupRepo(owner, repoName, config.username))
     .then(() =>

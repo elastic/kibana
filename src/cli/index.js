@@ -9,8 +9,18 @@ const isBool = value => typeof value === 'boolean';
 const args = yargs
   .usage('$0 [args]')
   .option('multiple', {
-    default: isBool(config.multiple) ? config.multiple : true,
+    default: undefined,
     description: 'Select multiple versions and/or commits',
+    type: 'boolean'
+  })
+  .option('multiple-commits', {
+    default: isBool(config.multipleCommits) ? config.multipleCommits : false,
+    description: 'Backport multiple commits',
+    type: 'boolean'
+  })
+  .option('multiple-versions', {
+    default: isBool(config.multipleVersions) ? config.multipleVersions : true,
+    description: 'Backport to multiple version',
     type: 'boolean'
   })
   .option('own', {
@@ -31,6 +41,18 @@ if (args.config) {
   return;
 }
 
-const options = Object.assign({}, args, { cwd: process.cwd() });
+const options = Object.assign(
+  {},
+  args,
+  {
+    multipleVersions: isBool(args.multiple)
+      ? args.multiple
+      : args.multipleVersions,
+    multipleCommits: isBool(args.multiple)
+      ? args.multiple
+      : args.multipleCommits
+  },
+  { cwd: process.cwd() }
+);
 
 initSteps(config, options);

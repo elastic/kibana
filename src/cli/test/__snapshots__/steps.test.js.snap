@@ -128,8 +128,11 @@ Array [
   // Only allow picking own commits to backport
   \\"own\\": true,
 
-  // Allow picking multiple versions and/or commits
-  \\"multiple\\": true,
+  // Backport multiple commits
+  \\"multipleCommits\\": false,
+
+  // Backport to multiple versions
+  \\"multipleVersions\\": true,
 
   // Repositories and the versions that will be available in backport cli
   \\"repositories\\": [
