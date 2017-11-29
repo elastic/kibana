@@ -49,24 +49,26 @@ export function GaugeChartProvider(Private) {
               .style('overflow', 'hidden')
               .attr('width', width);
 
+            if (self.gaugeConfig.type === 'simple') {
+              svg.attr('height', height);
+            }
+
             const g = svg.append('g');
 
             const gauges = self.gauge.drawGauge(g, series, width, height);
 
             if (self.gaugeConfig.type === 'simple') {
               const bbox = svg.node().firstChild.getBBox();
-              const finalWidth = bbox.width + containerMargin * 2;
-              const finalHeight = bbox.height + containerMargin * 2;
               svg
                 .attr('width', () => {
-                  return finalWidth;
+                  return bbox.width;
                 })
                 .attr('height', () => {
-                  return finalHeight;
+                  return bbox.height;
                 });
 
-              const transformX = finalWidth / 2;
-              const transformY = finalHeight / 2;
+              const transformX = bbox.width / 2;
+              const transformY = bbox.height / 2;
               g.attr('transform', `translate(${transformX}, ${transformY})`);
             } else {
               svg.attr('height', height);
@@ -78,10 +80,12 @@ export function GaugeChartProvider(Private) {
             self.addEvents(gauges);
           });
 
-          div.append('div')
-            .attr('class', 'chart-title')
-            .style('text-align', 'center')
-            .text(data.label || data.yAxisLabel);
+          if (self.gaugeConfig.type !== 'simple') {
+            div.append('div')
+              .attr('class', 'chart-title')
+              .style('text-align', 'center')
+              .text(data.label || data.yAxisLabel);
+          }
 
           self.events.emit('rendered', {
             chart: data
