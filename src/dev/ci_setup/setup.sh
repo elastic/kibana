@@ -30,7 +30,7 @@ if [ -x "$nodeDir/bin/node" ] && [ "$($nodeDir/bin/node --version)" == "v$nodeVe
   echo " -- reusing node.js install"
 else
   if [ -d "$nodeDir" ]; then
-    echo " -- clearing invalid node.js install"
+    echo " -- clearing previous node.js install"
     rm -rf "$nodeDir"
   fi
 
