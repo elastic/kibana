@@ -45,15 +45,15 @@ module.exports = function () {
     'build/kibana/src/core_plugins/testbed'
   ];
 
-  const extraneousBuildFiles = [].concat(
+  const preBuild = [].concat(
     moduleGlobs,
     srcGlobs
   );
 
-
   return {
     build: 'build',
     target: 'target',
-    extraneousBuildFiles,
+    preBuild,
+    postBuild: 'build/kibana/optimize/.cache'
   };
 };
