@@ -41,8 +41,8 @@ describe('Kibana keystore', () => {
       const keystore = new Keystore('/data/nonexistent.keystore');
       list(keystore);
 
-      sinon.assert.calledOnce(Logger.prototype.log);
-      sinon.assert.calledWith(Logger.prototype.log, '');
+      sinon.assert.calledOnce(Logger.prototype.error);
+      sinon.assert.calledWith(Logger.prototype.error, 'ERROR: Kibana keystore not found. Use \'create\' command to create one.');
     });
   });
 });
