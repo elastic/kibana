@@ -63,11 +63,17 @@ your Github username and a Github Access Token (can be created
   "repositories": [
     {
       "name": "elastic/elasticsearch",
-      "versions": ["6.x", "6.0", "5.6", "5.5", "5.4"]
+      "versions": ["6.x", "6.1", "6.0"]
     },
     {
       "name": "elastic/kibana",
-      "versions": ["6.x", "6.0", "5.6", "5.5", "5.4"],
+
+      // You can pre-select versions you use often
+      "versions": [
+        { "name": "6.x", "checked": true },
+        { "name": "6.1", "checked": true },
+        "6.0"
+      ]
       "labels": ["backport"]
     }
   ]
