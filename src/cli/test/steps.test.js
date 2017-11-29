@@ -12,7 +12,7 @@ const rpc = require('../../lib/rpc');
 
 function setup() {
   const owner = 'elastic';
-  const repoName = 'backport-cli-test';
+  const repoName = 'kibana';
   const fullRepoName = `${owner}/${repoName}`;
   axios.defaults.host = 'http://localhost';
   axios.defaults.adapter = httpAdapter;
@@ -51,7 +51,7 @@ function setup() {
   nock('https://api.github.com')
     .get(`/search/issues`)
     .query({
-      q: 'repo:elastic/backport-cli-test mySha',
+      q: 'repo:elastic/kibana mySha',
       access_token: 'myAccessToken'
     })
     .reply(200, {
@@ -90,22 +90,18 @@ describe('select commit that originated from pull request', () => {
   it('getCommit should be called with correct args', () => {
     expect(github.getCommits).toHaveBeenCalledWith(
       'elastic',
-      'backport-cli-test',
+      'kibana',
       'sqren'
     );
   });
 
   it('createPullRequest should be called with correct args', () => {
-    expect(github.createPullRequest).toHaveBeenCalledWith(
-      'elastic',
-      'backport-cli-test',
-      {
-        base: '6.2',
-        body: `Backports the following commits to 6.2:\n - myCommitMessage (#myPullRequest)`,
-        head: 'sqren:backport/6.2/pr-myPullRequest',
-        title: '[6.2] myCommitMessage'
-      }
-    );
+    expect(github.createPullRequest).toHaveBeenCalledWith('elastic', 'kibana', {
+      base: '6.2',
+      body: `Backports the following commits to 6.2:\n - myCommitMessage (#myPullRequest)`,
+      head: 'sqren:backport/6.2/pr-myPullRequest',
+      title: '[6.2] myCommitMessage'
+    });
   });
 
   it('prompt calls should match snapshot', () => {
