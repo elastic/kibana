@@ -377,6 +377,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await input.type(newValue + '');
     }
 
+    async setSize(newValue) {
+      const input = await find.byCssSelector('input[name="size"]');
+      await input.clearValue();
+      await input.type(newValue);
+    }
+
     async clickGo() {
       await testSubjects.click('visualizeEditorRenderButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
