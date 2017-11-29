@@ -17,6 +17,7 @@ import { math } from './math';
 import { palette } from './palette';
 import { pie } from './pie';
 import { plot } from './plot';
+import { ply } from './ply';
 import { render } from './render';
 import { replace } from './replace';
 import { rounddate } from './rounddate';
@@ -48,6 +49,7 @@ export const commonFunctions = [
   palette,
   plot,
   pie,
+  ply,
   render,
   replace,
   rounddate,
