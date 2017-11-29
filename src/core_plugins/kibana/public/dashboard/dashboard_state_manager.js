@@ -16,8 +16,8 @@ import {
   updateHidePanelTitles,
 } from './actions';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
-import { createPanelState, getPersistedStateId } from './panel';
-import { getAppStateDefaults } from './lib';
+import { createPanelState } from './panel';
+import { getAppStateDefaults, migrateAppState } from './lib';
 import {
   getViewMode,
   getFullScreenMode,
@@ -39,7 +39,6 @@ import {
  *  - description
  *  - timeRestore
  *  - query
- *  - uiState
  *  - filters
  *
  * State that is only stored in the Store:
@@ -67,7 +66,13 @@ export class DashboardStateManager {
     this.stateDefaults = getAppStateDefaults(this.savedDashboard, this.hideWriteControls);
 
     this.appState = new AppState(this.stateDefaults);
-    this.uiState = this.appState.makeStateful('uiState');
+
+    // Initializing appState does two things - first it translates the defaults into AppState, second it updates
+    // appState based on the URL (the url trumps the defaults). This means if we update the state format at all and
+    // want to handle BWC, we must not only migrate the data stored with saved Dashboard, but also any old state in the
+    // url.
+    migrateAppState(this.appState);
+
     this.isDirty = false;
 
     // We can't compare the filters stored on this.appState to this.savedDashboard because in order to apply
@@ -428,7 +433,6 @@ export class DashboardStateManager {
   removePanel(panelIndex) {
     _.remove(this.getPanels(), (panel) => {
       if (panel.panelIndex === panelIndex) {
-        this.uiState.removeChild(getPersistedStateId(panel));
         delete this.panelIndexPatternMapping[panelIndex];
         return true;
       } else {
