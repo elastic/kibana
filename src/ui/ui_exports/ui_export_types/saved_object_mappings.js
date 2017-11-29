@@ -1,5 +1,12 @@
 import { concat } from './reduce';
-import { wrap, debug } from './modify_reduce';
+import { alias, mapSpec, wrap } from './modify_reduce';
 
 // mapping types
-export const mappings = wrap(debug, concat);
+export const mappings = wrap(
+  alias('savedObjectMappings'),
+  mapSpec((spec, type, pluginSpec) => ({
+    pluginId: pluginSpec.getId(),
+    properties: spec
+  })),
+  concat
+);

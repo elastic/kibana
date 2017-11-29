@@ -55,12 +55,12 @@ export default class KbnServer {
       // tell the config we are done loading plugins
       configCompleteMixin,
 
-      // setup kbnServer.mappings and server.getKibanaIndexMappingsDsl()
-      kibanaIndexMappingsMixin,
-
       // setup this.uiExports and this.uiBundles
       uiMixin,
       indexPatternsMixin,
+
+      // setup server.getKibanaIndexMappingsDsl()
+      kibanaIndexMappingsMixin,
 
       // setup saved object routes
       savedObjectsMixin,
