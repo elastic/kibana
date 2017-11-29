@@ -113,6 +113,7 @@ uiModules
 
         const renderFunction = _.debounce(() => {
           const container = getVisContainer();
+          if (!container) return;
           $scope.vis.size = [container.width(), container.height()];
           const status = getUpdateStatus($scope);
           visualization.render($scope.visData, status)
