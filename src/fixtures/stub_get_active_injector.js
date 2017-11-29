@@ -20,7 +20,7 @@ import sinon from 'sinon';
  */
 export function setupInjectorStub() {
   beforeEach(ngMock.inject(($injector) => {
-    sinon.stub(chrome, 'getActiveInjector').returns(Promise.resolve($injector));
+    sinon.stub(chrome, 'dangerouslyGetActiveInjector').returns(Promise.resolve($injector));
   }));
 }
 

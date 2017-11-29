@@ -68,7 +68,7 @@ const waitForBootstrap = new Promise(resolve => {
  * When using this method inside your code, you will need to stub it while running
  * tests. Look into 'src/fixtures/stub_get_active_injector' for more information.
  */
-chrome.getActiveInjector = () => {
+chrome.dangerouslyGetActiveInjector = () => {
   return waitForBootstrap.then(() => {
     const $injector = angular.element(document.body).injector();
     if (!$injector) {
