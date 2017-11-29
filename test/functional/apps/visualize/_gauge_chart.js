@@ -67,6 +67,29 @@ export default function ({ getService, getPageObjects }) {
           });
       });
 
+      it('should show correct values for fields with fieldFormatters', async function () {
+        const expectedTexts = [ '2,904\nwin 8: Count', '5.528KB' ];
+
+
+        await PageObjects.visualize.clickMetricEditor();
+        await PageObjects.visualize.clickBucket('Split Group');
+        await PageObjects.visualize.selectAggregation('Terms');
+        await PageObjects.visualize.selectField('machine.os.raw');
+        await PageObjects.visualize.setSize('1');
+        await PageObjects.visualize.clickAddMetric();
+        await PageObjects.visualize.clickBucket('Metric');
+        await PageObjects.visualize.selectAggregation('Average', 'metrics');
+        await PageObjects.visualize.selectField('bytes', 'metrics');
+        await PageObjects.visualize.clickGo();
+
+        return retry.try(function tryingForTime() {
+          return PageObjects.visualize.getGaugeValue()
+            .then(function (metricValue) {
+              expect(expectedTexts).to.eql(metricValue);
+            });
+        });
+      });
+
     });
   });
 }
