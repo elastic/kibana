@@ -20,24 +20,6 @@ export class BazService {
     private readonly cluster: Cluster,
     private readonly kibanaConfig$: Observable<KibanaConfig>,
   ) {
-    // NB: This is where we should bind to the right cluster for
-    // elasticsearch service.
-    //
-    // We could do it directly in the exposed BazService methods,
-    // but that feels too late, and it also feels like a lot of
-    // extra cruft for plugin developers.
-    //
-    // We can assume all the routes for a service will call internal
-    // services (like elasticsearch) with the same settings.
-    // If Baz Plugin needs to hit a different cluster, then there
-    // can be a BazBarService, sister to BazService, that binds to
-    // that other cluster.
-    //
-    // The drawback might be: is this too early to bind, since
-    // the configuration could change? We're creating this service
-    // and then immediately handling the request, so I think it's fine,
-    // but there's nothing enforcing plugin developers to write
-    // this way.
   }
 
   async find(options: { type: string; page?: number; perPage?: number }) {
