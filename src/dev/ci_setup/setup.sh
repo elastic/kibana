@@ -2,11 +2,13 @@
 
 set -e
 
+dir="$(pwd)"
+cacheDir="${CACHE_DIR:-"/tmp/kibana"}"
+
 
 ###
-### determine directory of kibana project
+### check that we seem to be in a kibana project
 ###
-dir="$(pwd)"
 if [ -f "$dir/package.json" ] && [ -f "$dir/.node-version" ]; then
   echo "Setting up node.js and npm in $dir"
 else
@@ -20,7 +22,7 @@ fi
 ###
 nodeVersion="$(cat $dir/.node-version)"
 nodeUrl="https://nodejs.org/download/release/v$nodeVersion/node-v$nodeVersion-linux-x64.tar.gz"
-nodeDir="${NODE_DIR:-"$dir/.node"}/$nodeVersion"
+nodeDir="$cacheDir/node/$nodeVersion"
 echo " -- node: version=v${nodeVersion} dir=$nodeDir"
 
 echo " -- setting up node.js"
@@ -48,4 +50,4 @@ export PATH="$nodeDir/bin:$PATH"
 ### install dependencies
 ###
 echo " -- installing node.js dependencies"
-npm install
+npm install --cache "$cacheDir/npm"
