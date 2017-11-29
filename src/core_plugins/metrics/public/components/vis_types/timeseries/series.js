@@ -8,6 +8,7 @@ import Tooltip from '../../tooltip';
 import Split from '../../split';
 import createAggRowRender from '../../lib/create_agg_row_render';
 import createTextHandler from '../../lib/create_text_handler';
+import { createUpDownHandler } from '../../lib/sort_keyhandler';
 
 function TimeseriesSeries(props) {
   const {
@@ -111,9 +112,13 @@ function TimeseriesSeries(props) {
   if (!props.disableDelete) {
     dragHandle = (
       <Tooltip text="Sort">
-        <div className="vis_editor__sort thor__button-outlined-default sm">
+        <button
+          className="vis_editor__sort thor__button-outlined-default sm"
+          aria-label="Sort series by pressing up/down"
+          onKeyDown={createUpDownHandler(props.onShouldSortItem)}
+        >
           <i className="fa fa-sort" />
-        </div>
+        </button>
       </Tooltip>
     );
   }
@@ -175,6 +180,7 @@ TimeseriesSeries.propTypes = {
   onClone: PropTypes.func,
   onDelete: PropTypes.func,
   onMouseDown: PropTypes.func,
+  onShouldSortItem: PropTypes.func.isRequired,
   onSortableItemMount: PropTypes.func,
   onSortableItemReadyToMove: PropTypes.func,
   onTouchStart: PropTypes.func,

@@ -11,6 +11,7 @@ import {
   MonitoringPageProvider,
   PointSeriesPageProvider,
   VisualBuilderPageProvider,
+  TimelionPageProvider,
 } from './page_objects';
 
 import {
@@ -36,6 +37,7 @@ export default async function ({ readConfigFile }) {
       require.resolve('./apps/discover'),
       require.resolve('./apps/management'),
       require.resolve('./apps/status_page'),
+      require.resolve('./apps/timelion'),
       require.resolve('./apps/visualize'),
       require.resolve('./apps/xpack'),
     ],
@@ -52,12 +54,12 @@ export default async function ({ readConfigFile }) {
       monitoring: MonitoringPageProvider,
       pointSeries: PointSeriesPageProvider,
       visualBuilder: VisualBuilderPageProvider,
+      timelion: TimelionPageProvider
     },
     services: {
       es: commonConfig.get('services.es'),
       esArchiver: commonConfig.get('services.esArchiver'),
       kibanaServer: commonConfig.get('services.kibanaServer'),
-      kibanaIndex: commonConfig.get('services.kibanaIndex'),
       retry: commonConfig.get('services.retry'),
       remote: RemoteProvider,
       filterBar: FilterBarProvider,
@@ -93,6 +95,9 @@ export default async function ({ readConfigFile }) {
       settings: {
         pathname: '/app/kibana',
         hash: '/management',
+      },
+      timelion: {
+        pathname: '/app/timelion',
       },
       console: {
         pathname: '/app/kibana',

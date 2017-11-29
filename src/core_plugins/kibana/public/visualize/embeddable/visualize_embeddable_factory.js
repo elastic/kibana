@@ -2,16 +2,17 @@ import angular from 'angular';
 import 'ui/visualize';
 
 import visualizationTemplate from './visualize_template.html';
-import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
 import { UtilsBrushEventProvider as utilsBrushEventProvider } from 'ui/utils/brush_event';
 import { FilterBarClickHandlerProvider as filterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 import { EmbeddableFactory, Embeddable } from 'ui/embeddable';
+import { PersistedState } from 'ui/persisted_state';
 
 import chrome from 'ui/chrome';
 
 export class VisualizeEmbeddableFactory extends EmbeddableFactory {
-  constructor($compile, $rootScope, visualizeLoader, timefilter, Notifier, Promise, Private) {
+  constructor($compile, $rootScope, visualizeLoader, timefilter, Notifier, Promise, Private, config) {
     super();
+    this._config = config;
     this.$compile = $compile;
     this.visualizeLoader = visualizeLoader;
     this.$rootScope = $rootScope;
@@ -30,12 +31,39 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
     visualizeScope.editUrl = this.getEditPath(panel.id);
     return this.visualizeLoader.get(panel.id)
       .then(savedObject => {
-        visualizeScope.sharedItemTitle = panel.title !== undefined ? panel.title : savedObject.title;
+        const isLabsEnabled = this._config.get('visualize:enableLabs');
+
+        if (!isLabsEnabled && savedObject.vis.type.stage === 'lab') {
+          domNode.innerHTML = `
+<div class="disabledLabVisualization">
+  <div class="kuiVerticalRhythm disabledLabVisualization__icon kuiIcon fa-flask" aria-hidden="true"></div>
+  <div class="kuiVerticalRhythm"><em>${savedObject.title}</em> is a lab visualization.</div>
+  <div class="kuiVerticalRhythm">Please turn on lab-mode in the advanced settings to see lab visualizations.</div>
+</div>
+`;
+          return new Embeddable({
+            title: savedObject.title
+          });
+        }
+
+        if (!container.getHidePanelTitles()) {
+          visualizeScope.sharedItemTitle = panel.title !== undefined ? panel.title : savedObject.title;
+        }
         visualizeScope.savedObj = savedObject;
         visualizeScope.panel = panel;
 
-        const uiState = savedObject.uiStateJSON ? JSON.parse(savedObject.uiStateJSON) : {};
-        visualizeScope.uiState = container.createChildUistate(getPersistedStateId(panel), uiState);
+        const parsedUiState = savedObject.uiStateJSON ? JSON.parse(savedObject.uiStateJSON) : {};
+        visualizeScope.uiState = new PersistedState({
+          ...parsedUiState,
+          ...panel.embeddableConfig,
+        });
+        const uiStateChangeHandler = () => {
+          visualizeScope.panel = container.updatePanel(
+            visualizeScope.panel.panelIndex,
+            { embeddableConfig: visualizeScope.uiState.toJSON() }
+          );
+        };
+        visualizeScope.uiState.on('change', uiStateChangeHandler);
 
         visualizeScope.savedObj.vis.setUiState(visualizeScope.uiState);
 
@@ -53,6 +81,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
         rootNode.append(visualizationInstance);
 
         this.addDestroyEmeddable(panel.panelIndex, () => {
+          visualizeScope.uiState.off('change', uiStateChangeHandler);
           visualizationInstance.remove();
           visualizeScope.savedObj.destroy();
           visualizeScope.$destroy();

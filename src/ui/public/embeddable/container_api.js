@@ -21,17 +21,6 @@ export class ContainerAPI {
   }
 
   /**
-   * Creates a new state for the panel. It's passed the ui state object to use, and is returned
-   * a PersistedState.
-   * @param path {String} - the unique path for this ui state.
-   * @param initialState {Object} - the initial state to use for the child.
-   * @returns {PersistedState}
-   */
-  createChildUistate(/* path, initialState */) {
-    throw new Error('Must implement getInitalState.');
-  }
-
-  /**
    * Call this to tell the container that this panel uses a particular index pattern.
    * @param {string} panelIndex - a unique id that identifies the panel to update.
    * @param {string} indexPattern - an index pattern the panel uses
@@ -47,5 +36,9 @@ export class ContainerAPI {
    */
   updatePanel(/*paneIndex, panelAttributes */) {
     throw new Error('Must implement updatePanel.');
+  }
+
+  getHidePanelTitles() {
+    return this.dashboardState.getHidePanelTitles();
   }
 }

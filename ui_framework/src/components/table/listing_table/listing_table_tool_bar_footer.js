@@ -18,6 +18,16 @@ export function KuiListingTableToolBarFooter({ pager, itemsSelectedCount }) {
     return `${itemsSelectedCount} items selected`;
   };
 
+  let pagerSection;
+
+  if (pager) {
+    pagerSection = (
+      <KuiToolBarFooterSection>
+        {pager}
+      </KuiToolBarFooterSection>
+    );
+  }
+
   return (
     <KuiToolBarFooter>
       <KuiToolBarFooterSection>
@@ -26,9 +36,7 @@ export function KuiListingTableToolBarFooter({ pager, itemsSelectedCount }) {
         </KuiToolBarText>
       </KuiToolBarFooterSection>
 
-      <KuiToolBarFooterSection>
-        {pager}
-      </KuiToolBarFooterSection>
+      {pagerSection}
     </KuiToolBarFooter>
   );
 }

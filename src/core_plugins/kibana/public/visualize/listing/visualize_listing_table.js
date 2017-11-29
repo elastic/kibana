@@ -64,6 +64,10 @@ export class VisualizeListingTable extends Component {
     }, 200);
   }
 
+  componentWillUnmount() {
+    this.debouncedFetch.cancel();
+  }
+
   calculateItemsOnPage = () => {
     this.items = this.sortableProperties.sortItems(this.items);
     this.pager.setTotalItems(this.items.length);
@@ -146,10 +150,21 @@ export class VisualizeListingTable extends Component {
   }
 
   renderRowCells(item) {
+
+    let flaskHolder;
+    if (item.type.shouldMarkAsExperimentalInUI()) {
+      flaskHolder = <span className="kuiIcon fa-flask ng-scope">&nbsp;</span>;
+    }else{
+      flaskHolder = <span />;
+    }
+
     return [
-      <a className="kuiLink" href={this.getUrlForItem(item)}>
-        {item.title}
-      </a>,
+      <span>
+        {flaskHolder}
+        <a className="kuiLink" href={this.getUrlForItem(item)}>
+          {item.title}
+        </a>
+      </span>,
       <span className="kuiStatusText">
         {this.renderItemTypeIcon(item)}
         {item.type.title}

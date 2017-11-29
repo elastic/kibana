@@ -57,5 +57,45 @@ describe('server/config', function () {
         expect(log.called).to.be(false);
       });
     });
+
+    describe('savedObjects.indexCheckTimeout', () => {
+      it('removes the indexCheckTimeout and savedObjects properties', () => {
+        const settings = {
+          savedObjects: {
+            indexCheckTimeout: 123
+          }
+        };
+
+        expect(transformDeprecations(settings)).to.eql({});
+      });
+
+      it('keeps the savedObjects property if it has other keys', () => {
+        const settings = {
+          savedObjects: {
+            indexCheckTimeout: 123,
+            foo: 'bar'
+          }
+        };
+
+        expect(transformDeprecations(settings)).to.eql({
+          savedObjects: {
+            foo: 'bar'
+          }
+        });
+      });
+
+      it('logs that the setting is no longer necessary', () => {
+        const settings = {
+          savedObjects: {
+            indexCheckTimeout: 123
+          }
+        };
+
+        const log = sinon.spy();
+        transformDeprecations(settings, log);
+        sinon.assert.calledOnce(log);
+        sinon.assert.calledWithExactly(log, sinon.match('savedObjects.indexCheckTimeout'));
+      });
+    });
   });
 });

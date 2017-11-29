@@ -19,6 +19,7 @@ export default function GoalVisType(Private) {
       defaults: {
         addTooltip: true,
         addLegend: false,
+        isDisplayWarning: false,
         type: 'gauge',
         gauge: {
           verticalSplit: false,
@@ -58,7 +59,7 @@ export default function GoalVisType(Private) {
     },
     editorConfig: {
       collections: {
-        gaugeTypes: ['Arc', 'Circle', 'Metric'],
+        gaugeTypes: ['Arc', 'Circle'],
         gaugeColorMode: ['None', 'Labels', 'Background'],
         scales: ['linear', 'log', 'square root'],
         colorSchemas: Object.keys(vislibColorMaps),

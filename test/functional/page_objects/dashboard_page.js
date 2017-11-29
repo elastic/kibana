@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { DashboardConstants } from '../../../src/core_plugins/kibana/public/dashboard/dashboard_constants';
 
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
+export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
 
 export function DashboardPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
@@ -19,17 +20,18 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
   class DashboardPage {
     async initTests() {
-      const logstash = esArchiver.loadIfNeeded('logstash_functional');
+      log.debug('load kibana index with visualizations and log data');
+      await Promise.all([
+        esArchiver.load('dashboard'),
+        esArchiver.loadIfNeeded('logstash_functional')
+      ]);
+
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'UTC',
         'defaultIndex': 'logstash-*'
       });
 
-      log.debug('load kibana index with visualizations');
-      await esArchiver.load('dashboard');
-
       await PageObjects.common.navigateToApp('dashboard');
-      return logstash;
     }
 
     async clickEditVisualization() {
@@ -77,6 +79,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async clickExitFullScreenTextButton() {
       await testSubjects.click('exitFullScreenModeText');
+    }
+
+    async getDashboardIdFromCurrentUrl() {
+      const currentUrl = await remote.getCurrentUrl();
+      const urlSubstring = 'kibana#/dashboard/';
+      const startOfIdIndex = currentUrl.indexOf(urlSubstring) + urlSubstring.length;
+      const endIndex = currentUrl.indexOf('?');
+      return currentUrl.substring(startOfIdIndex, endIndex);
     }
 
     /**
@@ -443,7 +453,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return [
         { name: PIE_CHART_VIS_NAME, description: 'PieChart' },
         { name: 'Visualization☺ VerticalBarChart', description: 'VerticalBarChart' },
-        { name: 'Visualization漢字 AreaChart', description: 'AreaChart' },
+        { name: AREA_CHART_VIS_NAME, description: 'AreaChart' },
         { name: 'Visualization☺漢字 DataTable', description: 'DataTable' },
         { name: 'Visualization漢字 LineChart', description: 'LineChart' },
         { name: 'Visualization TileMap', description: 'TileMap' },
