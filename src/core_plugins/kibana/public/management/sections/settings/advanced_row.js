@@ -71,6 +71,11 @@ uiModules.get('apps/management')
           || conf.value === ''
           || String(conf.value) === String(conf.defVal);
         };
+
+        $scope.onImageChange = (event, fileObjects) => {
+          const fileObject = fileObjects[0];
+          $scope.conf.unsavedValue = `data:${fileObject.filetype};base64,${fileObject.base64}`;
+        };
       }
     };
   });

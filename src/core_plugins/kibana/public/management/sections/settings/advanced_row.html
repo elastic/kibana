@@ -98,6 +98,25 @@
           ng-options="option as option for option in conf.options"
           class="kuiSelect"
         ></select>
+
+        <input
+          ng-if="conf.image"
+          ng-model="conf.unsavedValue"
+          input-base-sixty-four
+          max="100"
+          accept=".jpg,.jpeg,.png"
+          type="file"
+          class="kuiTextInput fullWidth"
+          on-change="onImageChange"
+        >
+
+        <p
+          class="kuiSubText"
+          ng-show="forms.configEdit.$error.maxSize"
+        >
+          Maximum size exceeded
+        </p>
+
       </form>
 
       <!-- Setting display formats -->

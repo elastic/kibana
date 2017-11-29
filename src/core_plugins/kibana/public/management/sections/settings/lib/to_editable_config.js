@@ -30,6 +30,7 @@ export function toEditableConfig({ def, name, value, isCustom }) {
   conf.bool = editor === 'boolean';
   conf.array = editor === 'array';
   conf.markdown = editor === 'markdown';
+  conf.image = editor === 'image';
   conf.normal = editor === 'normal';
   conf.tooComplex = !editor;
 
