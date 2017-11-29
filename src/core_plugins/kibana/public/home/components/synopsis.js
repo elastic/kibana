@@ -19,7 +19,11 @@ export function Synopsis({ description, iconUrl, title, url }) {
   }
 
   return (
-    <a href={url} className="kuiLink synopsis">
+    <a
+      href={url}
+      className="kuiLink synopsis"
+      data-test-subj={`homeSynopsisLink${title.toLowerCase()}`}
+    >
       <KuiFlexGroup>
         <KuiFlexItem grow={false}>{img}</KuiFlexItem>
         <KuiFlexItem className="synopsisContent">
