@@ -6,17 +6,17 @@ export function IndexPatternsFieldFormatContentTypesProvider() {
 
   const types = {
     html: function (format, convert) {
-      function recurse(value, field, hit) {
+      function recurse(value, field, hit, meta) {
         if (value == null) {
           return _.asPrettyString(value);
         }
 
         if (!value || typeof value.map !== 'function') {
-          return convert.call(format, value, field, hit);
+          return convert.call(format, value, field, hit, meta);
         }
 
         const subVals = value.map(function (v) {
-          return recurse(v, field, hit);
+          return recurse(v, field, hit, meta);
         });
         const useMultiLine = subVals.some(function (sub) {
           return sub.indexOf('\n') > -1;
