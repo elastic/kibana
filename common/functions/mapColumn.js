@@ -37,13 +37,12 @@ export const mapColumn = {
       });
     });
 
-
-
-
     return Promise.all(rowPromises).then(rows => {
       Object.assign({}, context, { rows: rows });
 
-      context.columns.push({ name: args._, type: typeof rows[0][args._] });
+      if (!context.columns.find(column => column.name === args._)) {
+        context.columns.push({ name: args._, type: typeof rows[0][args._] });
+      }
 
       return {
         type: 'datatable',
