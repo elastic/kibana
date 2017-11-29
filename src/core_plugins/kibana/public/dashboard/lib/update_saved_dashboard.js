@@ -1,12 +1,11 @@
 import _ from 'lodash';
 import { FilterUtils } from './filter_utils';
 
-export function updateSavedDashboard(savedDashboard, appState, uiState, timeFilter, toJson) {
+export function updateSavedDashboard(savedDashboard, appState, timeFilter, toJson) {
   savedDashboard.title = appState.title;
   savedDashboard.description = appState.description;
   savedDashboard.timeRestore = appState.timeRestore;
   savedDashboard.panelsJSON = toJson(appState.panels);
-  savedDashboard.uiStateJSON = toJson(uiState.getChanges());
   savedDashboard.optionsJSON = toJson(appState.options);
 
   savedDashboard.timeFrom = savedDashboard.timeRestore ?
