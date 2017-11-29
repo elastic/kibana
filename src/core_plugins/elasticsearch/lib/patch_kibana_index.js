@@ -33,59 +33,11 @@ export async function patchKibanaIndex(options) {
     return;
   }
 
-  const {
-    missingPropertyNames: missingRootPropertyNames,
-    updatedMappings: updatedRootMappings
-  } = await getMissingRootProperties(currentMappingsDsl, kibanaIndexMappingsDsl);
-
-  const {
-    missingPropertyNames: missingTitleFieldPropertyNames,
-    updatedMappings: updatedTitleFieldMappings
-  } = await getMissingUnanalyzedTitleFields(currentMappingsDsl, kibanaIndexMappingsDsl);
-
-  if (!missingRootPropertyNames.length && !missingTitleFieldPropertyNames.length) {
-    // all expected properties are in current mapping
-    return;
-  }
-
-  const missingPropertyNames = [
-    ...missingRootPropertyNames,
-    ...missingTitleFieldPropertyNames,
-  ];
-
-  // log about new properties
-  log(['info', 'elasticsearch'], {
-    tmpl: `Adding mappings to kibana index for SavedObject types "<%= names.join('", "') %>"`,
-    names: missingPropertyNames
-  });
-
-  // add the new root properties to the index mapping
-  await callCluster('indices.putMapping', {
-    index: indexName,
-    type: rootEsType,
-    body: {
-      properties: updatedRootMappings
-    },
-    update_all_types: true
-  });
-
-  // add the updated title field mappings
-  await callCluster('indices.putMapping', {
-    index: indexName,
-    type: rootEsType,
-    body: {
-      properties: updatedTitleFieldMappings
-    },
-    update_all_types: true,
-  });
-
-  if (missingTitleFieldPropertyNames.length) {
+  const updateByQuery = async type => {
     log(['info', 'elasticsearch'], {
-      tmpl: `Running 'updateByQuery' to re-save saved objects to propogate mapping changes for types "<%= names.join('", "') %>"`,
-      names: missingTitleFieldPropertyNames
+      tmpl: `Refreshing all ${type}s`,
     });
 
-    const bools = missingTitleFieldPropertyNames.map(type => ({ match: { type } }));
     await callCluster('updateByQuery', {
       conflicts: 'proceed',
       index: indexName,
@@ -93,12 +45,84 @@ export async function patchKibanaIndex(options) {
       body: {
         query: {
           bool: {
-            should: bools,
+            should: {
+              match: {
+                type,
+              }
+            },
           },
         },
       },
     });
-  }
+  };
+
+  const putMapping = async (propertyNames, properties) => {
+    // log about new properties
+    log(['info', 'elasticsearch'], {
+      tmpl: `Adding mappings to kibana index for SavedObject types "<%= names.join('", "') %>"`,
+      names: propertyNames,
+    });
+
+    // add the new properties to the index mapping
+    await callCluster('indices.putMapping', {
+      index: indexName,
+      type: rootEsType,
+      body: {
+        properties,
+      },
+      update_all_types: true
+    });
+  };
+
+  const patchMissingProperties = {
+    getUpdatedProperties: async mapping => {
+      return await getMissingRootProperties(mapping, kibanaIndexMappingsDsl);
+    }
+  };
+
+  const patchMissingTitleKeywordFields = {
+    getUpdatedProperties: mapping => {
+      const properties = getRootProperties(mapping);
+      const hasKeyword = !!get(properties, 'index-pattern.properties.title.fields.keyword');
+      if (!hasKeyword) {
+        const titleMapping = get(properties, 'index-pattern.properties.title');
+        return {
+          'index-pattern': {
+            properties: {
+              title: {
+                ...titleMapping,
+                fields: {
+                  keyword: {
+                    type: 'keyword',
+                  }
+                }
+              }
+            }
+          }
+        };
+      }
+    },
+    applyChanges: async () => {
+      await updateByQuery('index-pattern');
+    }
+  };
+
+  const patchwork = [
+    patchMissingProperties,
+    patchMissingTitleKeywordFields,
+  ];
+
+  patchwork.forEach(async patch => {
+    const properties = await patch.getUpdatedProperties(currentMappingsDsl);
+    const missingPropertyNames = Object.keys(properties || {});
+    if (missingPropertyNames.length) {
+      await putMapping(missingPropertyNames, properties);
+
+      if (patch.applyChanges) {
+        await patch.applyChanges();
+      }
+    }
+  });
 }
 
 /**
@@ -147,51 +171,12 @@ async function getMissingRootProperties(currentMappingsDsl, expectedMappingsDsl)
   const expectedProps = getRootProperties(expectedMappingsDsl);
   const existingProps = getRootProperties(currentMappingsDsl);
 
-  const missingPropertyNames = [];
-  const updatedMappings = {};
-
-  Object.keys(expectedProps).forEach(prop => {
-    if (!existingProps[prop]) {
-      missingPropertyNames.push(prop);
-      updatedMappings[prop] = expectedProps[prop];
-    }
-  });
-
-  return {
-    missingPropertyNames,
-    updatedMappings,
-  };
-}
-
-async function getMissingUnanalyzedTitleFields(currentMappingsDsl, expectedMappingsDsl) {
-  const expectedProps = getRootProperties(expectedMappingsDsl);
-  const existingProps = getRootProperties(currentMappingsDsl);
-
-  const missingPropertyNames = [];
-  const updatedMappings = {};
-
-  Object.keys(expectedProps).forEach(prop => {
-    const expectedFieldProperties = expectedProps[prop] && expectedProps[prop].properties;
-    const existingFieldProperties = existingProps[prop] && existingProps[prop].properties;
-
-    if (!expectedFieldProperties && !existingFieldProperties) {
-      return;
-    }
-
-    const expectedTitleKeyword = get(expectedFieldProperties, 'title.fields.keyword.type');
-    const existingTitleKeyword = get(existingFieldProperties, 'title.fields.keyword.type');
-
-    if (expectedTitleKeyword && !existingTitleKeyword) {
-      missingPropertyNames.push(prop);
-      updatedMappings[`${prop}.title`] = {
-        ...existingFieldProperties ? existingFieldProperties.title : {},
-        ...expectedFieldProperties.title,
-      };
-    }
-  });
-
-  return {
-    missingPropertyNames,
-    updatedMappings,
-  };
+  return Object.keys(expectedProps)
+    .reduce((acc, prop) => {
+      if (existingProps[prop]) {
+        return acc;
+      } else {
+        return { ...acc, [prop]: expectedProps[prop] };
+      }
+    }, {});
 }
