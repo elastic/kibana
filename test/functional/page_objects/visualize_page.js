@@ -724,6 +724,18 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
         });
       }
     }
+
+    async clickLegendOption(name) {
+      await testSubjects.click(`legend-${name}`);
+    }
+
+    async selectNewLegendColorChoice(color) {
+      await testSubjects.click(`legendSelectColor-${color}`);
+    }
+
+    async doesSelectedLegendColorExist(color) {
+      return await testSubjects.exists(`legendSelectedColor-${color}`);
+    }
   }
 
   return new VisualizePage();
