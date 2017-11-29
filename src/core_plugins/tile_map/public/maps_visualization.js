@@ -35,20 +35,20 @@ export function MapsVisualizationProvider(serviceSettings, Notifier, getAppState
       }
     }
 
-    init() {
-      this._kibanaMapReady = this._makeKibanaMap();
-      return this._kibanaMapReady;
-    }
-
     async render(esResponse, status) {
 
       return new Promise(async (resolve) => {
 
-        await this._kibanaMapReady;
+        if (!this._kibanaMap) {
+          await this._makeKibanaMap();
+        }
+
         if (status.resize) {
           this._kibanaMap.resize();
         }
-        if (status.params || status.aggs) await this._updateParams();
+        if (status.params || status.aggs) {
+          await this._updateParams();
+        }
 
         if (esResponse && typeof esResponse.geohashGridAgg === 'undefined') {
           return resolve();
