@@ -142,23 +142,23 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      // it('should filter by scripted field value in Discover', async function () {
-      //   await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);
-      //   await log.debug('filter by the first value (14) in the expanded scripted field list');
-      //   await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName, '14');
-      //   await PageObjects.header.waitUntilLoadingHasFinished();
-      //   await PageObjects.visualize.waitForVisualization();
-      //   await retry.try(async function () {
-      //     expect(await PageObjects.discover.getHitCount()).to.be('31');
-      //   });
-      // });
+      it('should filter by scripted field value in Discover', async function () {
+        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);
+        await log.debug('filter by the first value (14) in the expanded scripted field list');
+        await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName, '14');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.visualize.waitForVisualization();
+        await retry.try(async function () {
+          expect(await PageObjects.discover.getHitCount()).to.be('31');
+        });
+      });
 
       it('should visualize scripted field in vertical bar chart', async function () {
         const expectedChartValues = [ '14', '31', '10', '29', '7', '24', '11', '24', '12', '23',
           '20', '23', '19', '21', '6', '20', '17', '20', '30', '20', '13', '19', '18', '18', '16', '17', '5', '16',
           '8', '16', '15', '14', '3', '13', '2', '12', '9', '10', '4', '9'
         ];
-        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName);
+        await PageObjects.discover.removeAllFilters();
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
@@ -210,20 +210,19 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      // it('should filter by scripted field value in Discover', async function () {
-      //   await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
-      //   await log.debug('filter by "bad" in the expanded scripted field list');
-      //   await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, 'bad');
-      //   await PageObjects.header.waitUntilLoadingHasFinished();
-      //   await PageObjects.visualize.waitForVisualization();
-      //   await retry.try(async function () {
-      //     expect(await PageObjects.discover.getHitCount()).to.be('27');
-      //   });
-      //   await PageObjects.discover.removeAllFilters();
-      // });
+      it('should filter by scripted field value in Discover', async function () {
+        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
+        await log.debug('filter by "bad" in the expanded scripted field list');
+        await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, 'bad');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.visualize.waitForVisualization();
+        await retry.try(async function () {
+          expect(await PageObjects.discover.getHitCount()).to.be('27');
+        });
+        await PageObjects.discover.removeAllFilters();
+      });
 
       it('should visualize scripted field in vertical bar chart', async function () {
-        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
@@ -275,20 +274,19 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      // it('should filter by scripted field value in Discover', async function () {
-      //   await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
-      //   await log.debug('filter by "true" in the expanded scripted field list');
-      //   await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, 'true');
-      //   await PageObjects.header.waitUntilLoadingHasFinished();
-      //   await PageObjects.visualize.waitForVisualization();
-      //   await retry.try(async function () {
-      //     expect(await PageObjects.discover.getHitCount()).to.be('359');
-      //   });
-      //   await PageObjects.discover.removeAllFilters();
-      // });
+      it('should filter by scripted field value in Discover', async function () {
+        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
+        await log.debug('filter by "true" in the expanded scripted field list');
+        await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, 'true');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.visualize.waitForVisualization();
+        await retry.try(async function () {
+          expect(await PageObjects.discover.getHitCount()).to.be('359');
+        });
+        await PageObjects.discover.removeAllFilters();
+      });
 
       it('should visualize scripted field in vertical bar chart', async function () {
-        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
@@ -340,20 +338,19 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      // it('should filter by scripted field value in Discover', async function () {
-      //   await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
-      //   await log.debug('filter by "2015-09-17 23:00" in the expanded scripted field list');
-      //   await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, '2015-09-17 23:00');
-      //   await PageObjects.header.waitUntilLoadingHasFinished();
-      //   await PageObjects.visualize.waitForVisualization();
-      //   await retry.try(async function () {
-      //     expect(await PageObjects.discover.getHitCount()).to.be('1');
-      //   });
-      //   await PageObjects.discover.removeAllFilters();
-      // });
+      it('should filter by scripted field value in Discover', async function () {
+        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
+        await log.debug('filter by "2015-09-17 23:00" in the expanded scripted field list');
+        await PageObjects.discover.clickFieldListPlusFilter(scriptedPainlessFieldName2, '2015-09-17 23:00');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.visualize.waitForVisualization();
+        await retry.try(async function () {
+          expect(await PageObjects.discover.getHitCount()).to.be('1');
+        });
+        await PageObjects.discover.removeAllFilters();
+      });
 
       it('should visualize scripted field in vertical bar chart', async function () {
-        await PageObjects.discover.clickFieldListItem(scriptedPainlessFieldName2);
         await PageObjects.discover.clickFieldListItemVisualize(scriptedPainlessFieldName2);
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.visualize.waitForVisualization();
