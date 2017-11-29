@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, shallow } from 'enzyme';
+import { render, shallow, mount } from 'enzyme';
 import sinon from 'sinon';
 import { requiredProps } from '../../test/required_props';
 
@@ -50,6 +50,18 @@ describe('KuiContextMenuItem', () => {
         component.simulate('click');
 
         sinon.assert.calledOnce(onClickHandler);
+      });
+
+      test('is not called when the item is clicked but set to disabled', () => {
+        const onClickHandler = sinon.stub();
+
+        const component = mount(
+          <KuiContextMenuItem disabled={true} onClick={onClickHandler} />
+        );
+
+        component.simulate('click');
+
+        sinon.assert.notCalled(onClickHandler);
       });
     });
 
