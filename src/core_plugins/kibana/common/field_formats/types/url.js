@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { getHighlightHtml } from '../../highlight/highlight_html';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
+const whitelistUrlSchemes = ['http://', 'https://'];
 
 export function createUrlFormat(FieldFormat) {
   class UrlFormat extends FieldFormat {
@@ -83,7 +84,7 @@ export function createUrlFormat(FieldFormat) {
       return this._formatLabel(value);
     },
 
-    html: function (rawValue, field, hit) {
+    html: function (rawValue, field, hit, parsedUrl) {
       const url = _.escape(this._formatUrl(rawValue));
       const label = _.escape(this._formatLabel(rawValue, url));
 
@@ -98,6 +99,38 @@ export function createUrlFormat(FieldFormat) {
 
           return `<img src="${url}" alt="${imageLabel}">`;
         default:
+          const inWhitelist = whitelistUrlSchemes.some(scheme => url.indexOf(scheme) === 0);
+          if (!inWhitelist && !parsedUrl) {
+            return url;
+          }
+
+          let prefix = '';
+          /**
+           * This code attempts to convert a relative url into a kibana absolute url
+           *
+           * SUPPORTED:
+           *  - /app/kibana/
+           *  - ../app/kibana
+           *  - #/discover
+           *
+           * UNSUPPORTED
+           *  - app/kibana
+           */
+          if (!inWhitelist) {
+            // Handles urls like: `#/discover`
+            if (url[0] === '#') {
+              prefix = `${parsedUrl.origin}${parsedUrl.pathname}`;
+            }
+            // Handle urls like: `/app/kibana` or `/xyz/app/kibana`
+            else if (url.indexOf(parsedUrl.basePath || '/') === 0) {
+              prefix = `${parsedUrl.origin}`;
+            }
+            // Handle urls like: `../app/kibana`
+            else {
+              prefix = `${parsedUrl.origin}${parsedUrl.basePath}/app/`;
+            }
+          }
+
           let linkLabel;
 
           if (hit && hit.highlight && hit.highlight[field.name]) {
@@ -106,7 +139,7 @@ export function createUrlFormat(FieldFormat) {
             linkLabel = label;
           }
 
-          return `<a href="${url}" target="_blank">${linkLabel}</a>`;
+          return `<a href="${prefix}${url}" target="_blank">${linkLabel}</a>`;
       }
     }
   };
