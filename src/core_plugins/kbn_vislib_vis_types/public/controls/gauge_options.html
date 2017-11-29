@@ -38,11 +38,11 @@
   <div class="kuiSideBarFormRow">
     <label class="kuiSideBarFormRow__label" for="displayWarnings">
       Display warnings &nbsp;
-      <kbn-info info="Turns on/off warnings. When turned on, warning will be shown for each term that cannot be matched to a shape in the vector layer based on the join field. When turned off, these warnings will be turned off."></kbn-info>
+      <kbn-info info="Turns on/off warnings. When turned on, a warning will be shown if not all labels could be displayed."></kbn-info>
     </label>
 
     <div class="kuiSideBarFormRow__control">
-      <input id="displayWarnings" type="checkbox" ng-model="vis.params.isDisplayWarning">
+      <input class="kuiCheckBox" id="displayWarnings" type="checkbox" ng-model="vis.params.isDisplayWarning">
     </div>
   </div>
 

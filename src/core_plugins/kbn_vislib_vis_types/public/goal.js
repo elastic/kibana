@@ -19,7 +19,7 @@ export default function GoalVisType(Private) {
       defaults: {
         addTooltip: true,
         addLegend: false,
-        isDisplayWarning: true,
+        isDisplayWarning: false,
         type: 'gauge',
         gauge: {
           verticalSplit: false,
