@@ -246,9 +246,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async filterVizNames(vizName) {
-      const visFilter = await find.byCssSelector('input[placeholder="Visualizations Filter..."]');
-      await visFilter.click();
-      await remote.pressKeys(vizName);
+      await testSubjects.setValue('savedObjectFinderSearchInput', vizName);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
