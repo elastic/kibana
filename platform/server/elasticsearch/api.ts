@@ -35,8 +35,7 @@ export function registerElasticsearchRoutes(
 
       log.info('got scoped [data] cluster, now calling it');
 
-      // TODO: for some reason my typescript
-      // is saying `search` isn't on this object
+      //TODO: fix this in follow-up. search is on callWithRequest
       //const response = await cluster.search({});
       let response: any = cluster;
       response = { hits: { total: 0 } };
