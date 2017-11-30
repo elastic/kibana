@@ -4,6 +4,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
   const dashboardExpect = getService('dashboardExpect');
   const remote = getService('remote');
+  const retry = getService('retry');
   let kibanaBaseUrl;
 
   const urlQuery = `` +
@@ -41,8 +42,12 @@ export default function ({ getService, getPageObjects }) {
         await remote.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const query = await PageObjects.dashboard.getQuery();
-        expect(query).to.equal('memory:>220000');
+        // The above "waitUntilLoadingHasFinished" isn't always sufficient because the loading indicator can pop up
+        // and be hidden quite a few times when hard refreshing a page.
+        retry.try(async () => {
+          const query = await PageObjects.dashboard.getQuery();
+          expect(query).to.equal('memory:>220000');
+        });
 
         await dashboardExpect.pieSliceCount(5);
         await dashboardExpect.panelCount(2);
@@ -59,8 +64,12 @@ export default function ({ getService, getPageObjects }) {
         await remote.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        const query = await PageObjects.dashboard.getQuery();
-        expect(query).to.equal('memory:>220000');
+        // The above "waitUntilLoadingHasFinished" isn't always sufficient because the loading indicator can pop up
+        // and be hidden quite a few times when hard refreshing a page.
+        retry.try(async () => {
+          const query = await PageObjects.dashboard.getQuery();
+          expect(query).to.equal('memory:>220000');
+        });
 
         await dashboardExpect.pieSliceCount(5);
         await dashboardExpect.panelCount(2);
