@@ -5,7 +5,6 @@ import {
   Schema,
   ElasticsearchService,
   KibanaConfig,
-  DataCluster,
 } from '@elastic/kbn-types';
 import { BazService } from './BazService';
 
@@ -57,9 +56,11 @@ export function registerEndpoints(
 
       log.info('create Baz Service instance');
 
-      // TODO: validate headers
-      const cluster = new DataCluster(req.headers);
-      const bazService = new BazService(cluster, config$);
+      // TODO: keep headers on all requests
+
+      const client = await elasticsearch.getScopedDataClient(req.headers);
+
+      const bazService = new BazService(client, config$);
 
       log.info(
         'use Baz Service instance to hit elasticsearch with the right cluster'

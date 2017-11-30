@@ -13,6 +13,12 @@ export const plugin: KibanaPluginConfig<{}> = {
     const router = http.createAndRegisterRouter('/api/baz');
 
     log.info('register Baz endpoints');
-    registerEndpoints(router, logger, util.schema, elasticsearch.service, config$);
+    registerEndpoints(
+      router,
+      logger,
+      util.schema,
+      elasticsearch.service,
+      config$,
+    );
   }
 };

@@ -31,7 +31,7 @@ export function registerElasticsearchRoutes(
 
       log.info('request received on [data] cluster');
 
-      const cluster = await service.getScopedCluster('data', req.headers);
+      const cluster = await service.getScopedDataClient(req.headers);
 
       log.info('got scoped [data] cluster, now calling it');
 

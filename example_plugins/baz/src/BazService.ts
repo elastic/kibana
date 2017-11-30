@@ -7,17 +7,11 @@ import {
   toPromise
 } from '@elastic/kbn-observable';
 
-import { DataCluster, KibanaConfig } from '@elastic/kbn-types';
+import { ScopedDataClient, KibanaConfig } from '@elastic/kbn-types';
 
 export class BazService {
-  // NB: When we finally create BazService, we have a request
-  // object. That's why we can pass in headers and get an elasticsearch
-  // service scoped to the request.
-  //
-  // But we can also choose the cluster to bind all our elasticsearch
-  // calls to. What if we could do both in one step at this high level?
   constructor(
-    private readonly cluster: DataCluster,
+    private readonly client: ScopedDataClient,
     private readonly kibanaConfig$: Observable<KibanaConfig>,
   ) {
   }
@@ -26,10 +20,10 @@ export class BazService {
     const { page = 1, perPage = 20, type } = options;
 
     const [kibanaIndex] = await latestValues(
-      k$(this.kibanaConfig$)(map(config => config.index))
+      k$(this.kibanaConfig$)(map(config => config.index)),
     );
 
-    const response = await this.cluster.call('endpoint', {
+    const response = await this.client.call('endpoint', {
       index: kibanaIndex,
       type,
       size: perPage,
