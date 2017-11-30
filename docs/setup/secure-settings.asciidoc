@@ -49,7 +49,7 @@ through stdin, use the `--stdin` flag:
 
 [source,sh]
 ----------------------------------------------------------------
-cat /file/containing/setting/value | bin/kibana-keystore add --stdin the.setting.name.to.set
+cat /file/containing/setting/value | bin/kibana-keystore add the.setting.name.to.set --stdin
 ----------------------------------------------------------------
 
 [float]
