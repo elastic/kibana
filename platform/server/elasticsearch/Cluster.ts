@@ -33,15 +33,5 @@ export class Cluster {
 
   callWithRequest(endpoint: string, clientParams = {}, options = {}): any {
     return {};
-    //if (req.headers) {
-    //  const filteredHeaders = filterHeaders(req.headers, this.getRequestHeadersWhitelist());
-    //  set(clientParams, 'headers', filteredHeaders);
-    //}
-
-    //return callAPI(this._noAuthClient, endpoint, clientParams, options);
   }
-
-  //callWithInternalUser = (endpoint, clientParams = {}, options = {}) => {
-  //  return callAPI(this._client, endpoint, clientParams, options);
-  //}
 }
