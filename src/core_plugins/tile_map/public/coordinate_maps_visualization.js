@@ -19,8 +19,8 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
       this._notify = new Notifier({ location: 'Coordinate Map' });
     }
 
-    isDataNotUsable(esResponse) {
-      return esResponse && typeof esResponse.geohashGridAgg === 'undefined';
+    isDataUsable(esResponse) {
+      return !(esResponse && typeof esResponse.geohashGridAgg === 'undefined');
     }
 
 

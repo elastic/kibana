@@ -132,7 +132,6 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
       }
     }
 
-
   };
 
 }

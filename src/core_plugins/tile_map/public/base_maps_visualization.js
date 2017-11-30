@@ -5,6 +5,11 @@ import 'ui/vis/map/service_settings';
 
 export function BaseMapsVisualizationProvider(serviceSettings) {
 
+  /**
+   * Abstract base class for a visualization consisting of a map with a single baselayer.
+   * @class BaseMapsVisualization
+   * @constructor
+   */
   return class BaseMapsVisualization {
 
     constructor(element, vis) {
@@ -12,6 +17,10 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
       this._container = element;
       this._kibanaMap = null;
       this._baseLayerDirty = true;
+      this._mapIsLoaded = new Promise(async (resolve) => {
+        await this._makeKibanaMap();
+        resolve();
+      });
     }
 
     destroy() {
@@ -20,17 +29,26 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
       }
     }
 
-    isDataNotUsable() {
-      return false;
+    /**
+     * checks whether the data is usable.
+     * @return {boolean}
+     */
+    isDataUsable() {
+      return true;
     }
 
+    /**
+     * Implementation of Visualization#render.
+     * Child-classes can extend this method if the render-complete function requires more time until rendering has completed.
+     * @param esResponse
+     * @param status
+     * @return {Promise}
+     */
     async render(esResponse, status) {
 
       return new Promise(async (resolve) => {
 
-        if (!this._kibanaMap) {
-          await this._makeKibanaMap();
-        }
+        await this._mapIsLoaded;
 
         if (status.resize) {
           this._kibanaMap.resize();
@@ -39,7 +57,7 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
           await this._updateParams();
         }
 
-        if (this.isDataNotUsable(esResponse)) {
+        if (!this.isDataUsable(esResponse)) {
           return resolve();
         }
 
@@ -55,12 +73,17 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
       });
     }
 
+    /**
+     * Creates an instance of a kibana-map with a single baselayer and assigns it to the this._kibanaMap property.
+     * Clients can override this method to customize the initialization.
+     * @private
+     */
     async _makeKibanaMap() {
 
       if (this._kibanaMap) {
         this._kibanaMap.destroy();
       }
-      const options = _.clone({});
+      const options = {};
       const uiState = this.vis.getUiState();
       const zoomFromUiState = parseInt(uiState.get('mapZoom'));
       const centerFromUIState = uiState.get('mapCenter');
@@ -74,6 +97,7 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
 
       const mapparams = this._getMapsParams();
       await this._updateBaseLayer(mapparams);
+
 
     }
 
@@ -145,9 +169,8 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
     }
 
     async _updateData() {
-      //should be implemented
+      throw new Error('Child should implement this method to respond to data-update');
     }
-
 
     /**
      * called on options change (vis.params change)
