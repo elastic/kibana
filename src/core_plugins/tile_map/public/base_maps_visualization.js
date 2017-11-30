@@ -26,7 +26,7 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
 
     async render(esResponse, status) {
 
-      return new Promise(async (resolve)=> {
+      return new Promise(async (resolve) => {
 
         if (!this._kibanaMap) {
           await this._makeKibanaMap();
@@ -50,8 +50,8 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
           this._kibanaMap.useUiStateFromVisualization(this.vis);
         }
 
+        console.log('basemap..');
         this._doRenderComplete(resolve);
-
 
       });
     }
@@ -183,11 +183,13 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
           resolve();
         }
       } else {
+        console.log('base layer no longer diirrrrty...');
         resolve();
       }
     }
 
     _doRenderComplete(resolve) {
+      console.log('do render complete...');
       const msAllowedForBaseLayerToLoad = 10000;
       this._doRenderCompleteWhenBaseLayerIsLoaded(resolve, Date.now() + msAllowedForBaseLayerToLoad);
     }

@@ -54,13 +54,16 @@ export default class ChoroplethLayer extends KibanaMapLayer {
         this._leafletLayer.addData(data);
         this._loaded = true;
         this._setStyle();
+        this.emit('dataLoaded');
       },
       error: () => {
         this._loaded = true;
         this._error = true;
+        this.emit('dataLoaded');
       }
     });
   }
+
 
   _setStyle() {
     if (this._error || (!this._loaded || !this._metrics || !this._joinField)) {
@@ -76,7 +79,6 @@ export default class ChoroplethLayer extends KibanaMapLayer {
       const quantizeDomain = (min !== max) ? [min, max] : d3.scale.quantize().domain();
       this._legendQuantizer = d3.scale.quantize().domain(quantizeDomain).range(this._legendColors);
     }
-
     this._boundsOfData = styler.getLeafletBounds();
     this.emit('styleChanged', {
       mismatches: styler.getMismatches()
@@ -116,7 +118,11 @@ export default class ChoroplethLayer extends KibanaMapLayer {
   }
 
 
-  setMetrics(metrics, metricsAgg) {
+  isDataLoaded() {
+    return this._loaded;
+  }
+
+  async setMetrics(metrics, metricsAgg) {
     this._metrics = metrics;
     this._metricsAgg = metricsAgg;
     this._valueFormatter = this._metricsAgg.fieldFormatter();

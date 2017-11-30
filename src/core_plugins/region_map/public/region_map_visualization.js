@@ -10,7 +10,6 @@ import 'ui/vis/map/service_settings';
 export function RegionMapsVisualizationProvider(Private, Notifier, config) {
 
   const tooltipFormatter = Private(AggResponsePointSeriesTooltipFormatterProvider);
-  const notify = new Notifier({ location: 'Region map' });
   const BaseMapsVisualization = Private(BaseMapsVisualizationProvider);
 
   return class RegionMapsVisualization extends BaseMapsVisualization {
@@ -19,11 +18,28 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
       super(container, vis);
       this._vis = this.vis;
       this._choroplethLayer = null;
+      this._notify = new Notifier({ location: 'Region map' });
     }
 
-    _doRenderComplete(resolve) {
-      resolve();
+
+    async render(esReponse, status) {
+      await super.render(esReponse, status);
+
+      if (!this._choroplethLayer) {
+        return;
+      }
+
+      if (this._choroplethLayer.isDataLoaded()) {
+        return;
+      }
+
+      return new Promise((resolve) => {
+        this._choroplethLayer.once('dataLoaded', () => {
+          resolve();
+        });
+      });
     }
+
 
     async _updateData(tableGroup) {
 
@@ -96,8 +112,7 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
       this._choroplethLayer.on('styleChanged', (event) => {
         const shouldShowWarning = this._vis.params.isDisplayWarning && config.get('visualization:regionmap:showWarnings');
         if (event.mismatches.length > 0 && shouldShowWarning) {
-          notify.warning(
-            `Could not show ${event.mismatches.length} ${event.mismatches.length > 1 ? 'results' : 'result'} on the map.`
+          this._notify.warning(`Could not show ${event.mismatches.length} ${event.mismatches.length > 1 ? 'results' : 'result'} on the map.`
             + ` To avoid this, ensure that each term can be matched to a corresponding shape on that shape's join field.`
             + ` Could not match following terms: ${event.mismatches.join(',')}`
           );
