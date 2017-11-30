@@ -1100,6 +1100,14 @@ input[type="button"] {
       -ms-flex-item-align: end;
           align-self: flex-end; }
 
+.kuiContextMenuItem-disabled {
+  color: #9B9B9B;
+  cursor: default; }
+  .theme-dark .kuiContextMenuItem-disabled {
+    color: #9B9B9B; }
+  .kuiContextMenuItem-disabled:hover .kuiContextMenuItem__text, .kuiContextMenuItem-disabled:focus .kuiContextMenuItem__text {
+    text-decoration: none; }
+
 .kuiEvent {
   display: -webkit-box;
   display: -webkit-flex;
