@@ -12,6 +12,7 @@ export async function create(keystore, command, options) {
     }
   }
 
+  keystore.reset();
   keystore.save();
 
   logger.log(`Created Kibana keystore in ${keystore.path}`);
