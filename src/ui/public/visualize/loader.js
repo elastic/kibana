@@ -4,7 +4,7 @@
  * are up to date.
  */
 import angular from 'angular';
-import uiRoutes from 'ui/routes';
+import chrome from 'ui/chrome';
 import 'ui/visualize';
 import visTemplate from './loader_template.html';
 
@@ -156,22 +156,15 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
   };
 };
 
-// Setup the visualize loader via uiRoutes.addSetupWork and resolve this promise
-// (that is also returned by getVisualizeLoader) once the the visualizeLoader
-// could be created.
-const visualizeLoaderPromise = new Promise((resolve) => {
-  uiRoutes.addSetupWork((Private) => {
-    const visualizeLoader = Private(VisualizeLoaderProvider);
-    resolve(visualizeLoader);
-  });
-});
-
 /**
  * Returns a promise, that resolves with the visualize loader, once it's ready.
  * @return {Promise} A promise, that resolves to the visualize loader.
  */
 function getVisualizeLoader() {
-  return visualizeLoaderPromise;
+  return chrome.dangerouslyGetActiveInjector().then($injector => {
+    const Private = $injector.get('Private');
+    return Private(VisualizeLoaderProvider);
+  });
 }
 
 export { getVisualizeLoader, VisualizeLoaderProvider, EmbeddedVisualizeHandler };

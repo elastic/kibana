@@ -3,6 +3,8 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
 
+import { setupAndTeardownInjectorStub } from 'test_utils/stub_get_active_injector';
+
 import FixturesStubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
@@ -79,6 +81,7 @@ describe('visualize loader', () => {
       id === 'exists' ? Promise.resolve(mockedSavedObject) : Promise.reject()
     );
   }));
+  setupAndTeardownInjectorStub();
   beforeEach(async () => {
     loader = await getVisualizeLoader();
   });
