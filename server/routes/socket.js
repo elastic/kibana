@@ -1,4 +1,3 @@
-import { map } from 'lodash';
 import socket from 'socket.io';
 import { getAuthHeader } from './get_auth/get_auth_header';
 import { createHandlers } from '../lib/create_handlers';
@@ -22,7 +21,7 @@ export function socketApi(server) {
     const getClientFunctions = new Promise((resolve) => socket.once('functionList', resolve));
 
     socket.on('getFunctionList', () => {
-      socket.emit('functionList', map(functionsRegistry.toJS(), 'name'));
+      socket.emit('functionList', functionsRegistry.toJS());
     });
 
     const handler = (msg) => {

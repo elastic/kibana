@@ -7,6 +7,10 @@
  * You shouldn't be futzing around in the grammar very often anyway.
  */
 
+ {
+  var parseCursor = Boolean(options.parseCursor);
+ }
+
  /* ----- Expressions ----- */
 
 start
@@ -29,11 +33,11 @@ partial_expression
   }
  }
 
-
  /* ----- Functions ----- */
 
 function "function"
- = name:function_name arg_list:arg_list? {
+ = cursor
+ / name:function_name arg_list:arg_list? {
   return {
     type: 'function',
     function: name,
@@ -55,19 +59,20 @@ argument_assignment
  / value:argument {return {name: '_', value: value}}
 
 argument
- = '{' space? expression:expression space? '}' { return expression; }
+ = cursor
+ / '{' space? expression:expression space? '}' { return expression; }
  / partial_expression
  / literal
 
 
 arg_list
- = space first:argument_assignment* rest:(space arg:argument_assignment {return arg})* space? {
-  const orderedArgs = first.concat(rest);
+ = space first:argument_assignment? rest:(space arg:argument_assignment {return arg})* space? {
+  const orderedArgs = first !== null ? [first, ...rest] : [];
   const args = {};
   orderedArgs.forEach((arg) => {
-   args[arg.name] = args[arg.name] || [];
-   args[arg.name].push(arg.value)
-  })
+    args[arg.name] = args[arg.name] || [];
+    args[arg.name].push(arg.value)
+  });
   return args;
  }
 
@@ -114,3 +119,13 @@ dq_char
 sq_char
   = "\\" sequence:("'" / "\\") { return sequence; }
   / [^'] // everything except '
+
+cursor
+ = &{ return parseCursor; } prefix:function_name? '$cursor$' suffix:function_name? {
+   return {
+    cursor: true,
+    prefix,
+    suffix,
+    location: location()
+   };
+ }

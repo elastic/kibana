@@ -6,7 +6,7 @@ import { functionsRegistry } from './functions_registry';
 
 // Create the function list
 socket.emit('getFunctionList');
-const getServerFunctions = new Promise((resolve) => socket.once('functionList', resolve));
+export const getServerFunctions = new Promise((resolve) => socket.once('functionList', resolve));
 
 // Use the above promise to seed the interpreter with the functions it can defer to
 export function interpretAst(ast, context) {

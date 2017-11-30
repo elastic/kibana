@@ -9,3 +9,50 @@
   }
 
 }
+
+.autocomplete {
+  position: relative;
+
+  .autocompleteProposals {
+    border: @borderStyle;
+    background: @background;
+    position: absolute;
+    z-index: 1;
+    box-shadow: 0px 4px 8px rgba(0,0,0,.1);
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+
+    .autocompleteProposal {
+      border-bottom: @borderStyle;
+      padding: 0.5em;
+      color: black;
+      background: white;
+      display: flex;
+      align-self: flex-start;
+      width: 100%;
+    }
+
+    .autocompleteProposal.active {
+      background: darkgray;
+      color: white;
+    }
+
+    .autocompleteProposal div {
+      align-self: flex-start;
+    }
+
+    .autocompleteProposal :first-child {
+      width: 120px;
+      font-weight: bold;
+    }
+
+    .autocompleteProposal :last-child {
+      flex-grow: 1;
+    }
+  }
+
+  .autocompleteProposals.hidden {
+    display: none;
+  }
+}
