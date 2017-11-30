@@ -1,10 +1,12 @@
 import {
   getTypes,
   getRootType,
-  getRootProperties
 } from '../../../server/mappings';
 
-import { get } from 'lodash';
+import { PatchMissingProperties } from './kibana_index_patches/patch_missing_properties';
+import { PatchMissingTitleKeywordFields } from './kibana_index_patches/patch_missing_title_keyword_fields';
+
+import { ChangeMistypedTypeField } from './kibana_index_changes/change_mistyped_type_field';
 
 /**
  *  Checks that the root type in the kibana index has all of the
@@ -19,7 +21,6 @@ import { get } from 'lodash';
  */
 export async function patchKibanaIndex(options) {
   const {
-    log,
     indexName,
     callCluster,
     kibanaIndexMappingsDsl
@@ -33,96 +34,28 @@ export async function patchKibanaIndex(options) {
     return;
   }
 
-  const updateByQuery = async type => {
-    log(['info', 'elasticsearch'], {
-      tmpl: `Refreshing all ${type}s`,
-    });
-
-    await callCluster('updateByQuery', {
-      conflicts: 'proceed',
-      index: indexName,
-      type: rootEsType,
-      body: {
-        query: {
-          bool: {
-            should: {
-              match: {
-                type,
-              }
-            },
-          },
-        },
-      },
-    });
+  const enhancedOptions = {
+    ...options,
+    currentMappingsDsl,
+    rootEsType,
   };
 
-  const putMapping = async (propertyNames, properties) => {
-    // log about new properties
-    log(['info', 'elasticsearch'], {
-      tmpl: `Adding mappings to kibana index for SavedObject types "<%= names.join('", "') %>"`,
-      names: propertyNames,
-    });
-
-    // add the new properties to the index mapping
-    await callCluster('indices.putMapping', {
-      index: indexName,
-      type: rootEsType,
-      body: {
-        properties,
-      },
-      update_all_types: true
-    });
-  };
-
-  const patchMissingProperties = {
-    getUpdatedProperties: async mapping => {
-      return await getMissingRootProperties(mapping, kibanaIndexMappingsDsl);
-    }
-  };
-
-  const patchMissingTitleKeywordFields = {
-    getUpdatedProperties: mapping => {
-      const properties = getRootProperties(mapping);
-      const hasKeyword = !!get(properties, 'index-pattern.properties.title.fields.keyword');
-      if (!hasKeyword) {
-        const titleMapping = get(properties, 'index-pattern.properties.title');
-        return {
-          'index-pattern': {
-            properties: {
-              title: {
-                ...titleMapping,
-                fields: {
-                  keyword: {
-                    type: 'keyword',
-                  }
-                }
-              }
-            }
-          }
-        };
-      }
-    },
-    applyChanges: async () => {
-      await updateByQuery('index-pattern');
-    }
-  };
-
-  const patchwork = [
-    patchMissingProperties,
-    patchMissingTitleKeywordFields,
+  const patchesToApply = [
+    new PatchMissingProperties(enhancedOptions),
+    new PatchMissingTitleKeywordFields(enhancedOptions),
   ];
 
-  patchwork.forEach(async patch => {
-    const properties = await patch.getUpdatedProperties(currentMappingsDsl);
-    const missingPropertyNames = Object.keys(properties || {});
-    if (missingPropertyNames.length) {
-      await putMapping(missingPropertyNames, properties);
+  const changesToApply = [
+    new ChangeMistypedTypeField(enhancedOptions),
+  ];
 
-      if (patch.applyChanges) {
-        await patch.applyChanges();
-      }
-    }
-  });
+  for (const change of changesToApply) {
+    await change.applyChange();
+  }
+
+  for (const patch of patchesToApply) {
+    await patch.applyPatch();
+  }
 }
 
 /**
@@ -156,27 +89,4 @@ async function getCurrentMappings(callCluster, indexName, rootEsType) {
   }
 
   return currentMappingsDsl;
-}
-
-/**
- *  Get the properties that are in the expectedMappingsDsl but not the
- *  currentMappingsDsl. Properties will be an object of properties normally
- *  found at `[index]mappings[typeName].properties` is es mapping responses
- *
- *  @param  {EsMappingsDsl} currentMappingsDsl
- *  @param  {EsMappingsDsl} expectedMappingsDsl
- *  @return {PropertyMappings}
- */
-async function getMissingRootProperties(currentMappingsDsl, expectedMappingsDsl) {
-  const expectedProps = getRootProperties(expectedMappingsDsl);
-  const existingProps = getRootProperties(currentMappingsDsl);
-
-  return Object.keys(expectedProps)
-    .reduce((acc, prop) => {
-      if (existingProps[prop]) {
-        return acc;
-      } else {
-        return { ...acc, [prop]: expectedProps[prop] };
-      }
-    }, {});
 }
