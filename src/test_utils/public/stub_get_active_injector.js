@@ -1,5 +1,5 @@
 /**
- * This test file contains stubs for chrome.getActiveInjector, that you will
+ * This test file contains stubs for chrome.dangerouslyGetActiveInjector, that you will
  * need to load if any part of the code you are testing relies on that method.
  * You will need to call setupInjectorStub and teardownInjectorStub in specific
  * places inside your test file to setup and teardown the stub.
@@ -13,7 +13,7 @@ import chrome from 'ui/chrome';
 import sinon from 'sinon';
 
 /**
- * This method setups the stub for chrome.getActiveInjector. You must call it in
+ * This method setups the stub for chrome.dangerouslyGetActiveInjector. You must call it in
  * a place where beforeEach is allowed to be called (read: inside your describe)
  * method. You must call this AFTER you've called `ngMock.module` to setup the modules,
  * but BEFORE you first execute code, that uses chrome.getActiveInjector.
@@ -25,7 +25,7 @@ export function setupInjectorStub() {
 }
 
 /**
- * This methods tears down the stub for chrome.getActiveInjector. You must call it
+ * This methods tears down the stub for chrome.dangerouslyGetActiveInjector. You must call it
  * in a place where afterEach is allowed to be called.
  */
 export function teardownInjectorStub() {
