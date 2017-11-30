@@ -14,16 +14,13 @@ exports[`renders OptionsTab 1`] = `
         <KuiFieldGroupSection
           isWide={false}
         >
-          <label>
-            <input
-              checked={false}
-              className="kuiCheckBox"
-              data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"
-              onChange={[Function]}
-              type="checkbox"
-            />
-            Update kibana filters on each change
-          </label>
+          <KuiCheckBoxLabel
+            data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"
+            isChecked={false}
+            isDisabled={false}
+            onChange={[Function]}
+            text="Update Kibana filters on each change"
+          />
         </KuiFieldGroupSection>
       </KuiFieldGroup>
     </div>
