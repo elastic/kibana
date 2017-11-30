@@ -32,7 +32,7 @@
               >
                 <a
                   data-test-subj="{{::item.name}}"
-                  class="management-panel__link"
+                  class="euiLink euiLink--primary management-panel__link"
                   ng-class="{ 'management-panel__link--disabled': item.disabled || !item.url }"
                   kbn-href="{{::item.disabled ? '' : item.url}}"
                   tooltip="{{::item.tooltip}}"
