@@ -8,6 +8,8 @@ import { LoggerFactory } from '../../logging';
 
 export { ElasticsearchClusterType } from './ElasticsearchConfig';
 export { Cluster } from './Cluster';
+export { AdminCluster } from './AdminCluster';
+export { DataCluster } from './DataCluster';
 export {
   ElasticsearchService,
   ElasticsearchConfigs
