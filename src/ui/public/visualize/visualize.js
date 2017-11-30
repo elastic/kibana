@@ -183,9 +183,7 @@ uiModules
           });
         }
 
-        let resizeInit = false;
         const resizeFunc = _.debounce(() => {
-          if (!resizeInit) return resizeInit = true;
           $scope.$broadcast('render');
         }, 200);
         resizeChecker.on('resize',  resizeFunc);
