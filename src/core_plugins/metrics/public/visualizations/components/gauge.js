@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import getLastValue from '../lib/get_last_value';
+import getLastValue from '../../../common/get_last_value';
 import getValueBy from '../lib/get_value_by';
 import GaugeVis from './gauge_vis';
 import reactcss from 'reactcss';
@@ -56,7 +56,7 @@ class Gauge extends Component {
       translateX,
       translateY
     } = this.state;
-    const value = metric && getLastValue(metric.data, 5) || 0;
+    const value = metric && getLastValue(metric.data) || 0;
     const max = metric && getValueBy('max', metric.data) || 1;
     const formatter = (metric && (metric.tickFormatter || metric.formatter)) ||
       this.props.tickFormatter || ((v) => v);

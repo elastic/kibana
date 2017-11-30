@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { DashboardConstants } from '../../../src/core_plugins/kibana/public/dashboard/dashboard_constants';
 
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
+export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
 
 export function DashboardPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
@@ -35,10 +36,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async clickEditVisualization() {
       log.debug('clickEditVisualization');
-      await testSubjects.click('dashboardPanelToggleMenuIcon');
 
       // Edit link may sometimes be disabled if the embeddable isn't rendered yet.
       await retry.try(async () => {
+        await this.showPanelEditControlsDropdownMenu();
         await testSubjects.click('dashboardPanelEditLink');
         const current = await remote.getCurrentUrl();
         if (current.indexOf('visualize') < 0) {
@@ -452,7 +453,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return [
         { name: PIE_CHART_VIS_NAME, description: 'PieChart' },
         { name: 'Visualization☺ VerticalBarChart', description: 'VerticalBarChart' },
-        { name: 'Visualization漢字 AreaChart', description: 'AreaChart' },
+        { name: AREA_CHART_VIS_NAME, description: 'AreaChart' },
         { name: 'Visualization☺漢字 DataTable', description: 'DataTable' },
         { name: 'Visualization漢字 LineChart', description: 'LineChart' },
         { name: 'Visualization TileMap', description: 'TileMap' },
@@ -465,6 +466,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async showPanelEditControlsDropdownMenu() {
+      log.debug('showPanelEditControlsDropdownMenu');
       const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
       if (editLinkExists) return;
       await testSubjects.click('dashboardPanelToggleMenuIcon');

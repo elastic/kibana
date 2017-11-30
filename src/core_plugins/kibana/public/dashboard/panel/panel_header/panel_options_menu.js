@@ -43,7 +43,8 @@ export class PanelOptionsMenu extends React.Component {
           aria-hidden="true"
           className="kuiButton__icon kuiIcon fa-edit"
         />,
-        onClick: this.props.editUrl ? this.onEditPanel : undefined,
+        onClick: this.onEditPanel,
+        disabled: !this.props.editUrl,
       },
       {
         name: 'Customize panel',
@@ -108,7 +109,7 @@ export class PanelOptionsMenu extends React.Component {
       <KuiKeyboardAccessible>
         <span
           aria-label="Panel options"
-          className="kuiButton__icon kuiIcon panel-dropdown fa fa-caret-down"
+          className="kuiButton__icon kuiIcon panel-dropdown fa fa-gear"
           data-test-subj="dashboardPanelToggleMenuIcon"
           onClick={this.toggleMenu}
         />
