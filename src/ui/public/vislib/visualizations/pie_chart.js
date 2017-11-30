@@ -195,7 +195,7 @@ export function VislibVisualizationsPieChartProvider(Private) {
         const svgParentNode = svg.node().parentNode.parentNode;
         const svgBBox = {
           width: svgParentNode.clientWidth,
-          height: svgParentNode.clientWidth
+          height: svgParentNode.clientHeight
         };
 
         const labelLayout = d3.geom.quadtree()
