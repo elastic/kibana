@@ -7,7 +7,7 @@ export default function ({ getService, getPageObjects }) {
 
   const FIELD_NAME = 'machine.os.raw';
 
-  describe('visualize control app', () => {
+  describe('visualize app', () => {
     before(async () => {
       await PageObjects.common.navigateToUrl('visualize', 'new');
       await PageObjects.visualize.clickInputControlVis();
@@ -22,6 +22,11 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('input control visualization', () => {
+
+      it('should not display spy panel toggle button', async function () {
+        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+        expect(spyToggleExists).to.be(false);
+      });
 
       describe('updateFiltersOnChange is false', () => {
 
