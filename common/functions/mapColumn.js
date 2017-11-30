@@ -1,3 +1,5 @@
+import { getType } from '../lib/get_type';
+
 export const mapColumn = {
   name: 'mapColumn',
   aliases: ['mc'], // midnight commander. So many times I've launched midnight commander instead of moving a file.
@@ -32,7 +34,9 @@ export const mapColumn = {
         rows: [row],
       })
       .then(val => {
-        if (typeof val === 'object' && val !== null) throw new Error ('Expression must return a literal, eg a string, number, boolean');
+        if (typeof val === 'object' && val !== null) {
+          throw new Error ('Expression must return a literal, eg a string, number, boolean, null');
+        }
         return Object.assign({}, row, { [args._]: val });
       });
     });
@@ -41,7 +45,7 @@ export const mapColumn = {
       Object.assign({}, context, { rows: rows });
 
       if (!context.columns.find(column => column.name === args._)) {
-        context.columns.push({ name: args._, type: typeof rows[0][args._] });
+        context.columns.push({ name: args._, type: getType(rows[0][args._]) });
       }
 
       return {
