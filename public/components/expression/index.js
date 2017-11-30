@@ -142,6 +142,7 @@ export const Expression = compose(
       showAutocompleteProposals,
       setShowAutocompleteProposals,
     }) => event => {
+      // TODO: Move this into a separate HOC for handling typeahead stuff
       const { key } = event;
       if (key === 'ArrowUp' && showAutocompleteProposals && autocompleteProposals.length) {
         event.preventDefault();

@@ -2,6 +2,8 @@ const pairs = ['()', '[]', '{}', `''`, '""'];
 const openers = pairs.map(pair => pair[0]);
 const closers = pairs.map(pair => pair[1]);
 
+// TODO: This shouldn't get the event, that seems outside the realm of
+// responsibility for this module.
 export function autocompletePairs({ value, selection }, event) {
   const { start, end } = selection;
   const { key } = event;
