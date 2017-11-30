@@ -20,6 +20,7 @@ export function saveDashboard(toJson, timeFilter, dashboardStateManager) {
 
   return savedDashboard.save()
     .then((id) => {
+      dashboardStateManager.lastSavedDashboardFilters = dashboardStateManager.getFilterState();
       dashboardStateManager.resetState();
       return id;
     });
