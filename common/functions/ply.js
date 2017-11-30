@@ -1,5 +1,5 @@
 // TODO: pointseries performs poorly, that's why we run it on the server.
-import { groupBy, map, findIndex, flatten } from 'lodash';
+import { groupBy, findIndex, flatten, pick } from 'lodash';
 import { getType } from '../lib/get_type';
 
 
@@ -21,6 +21,7 @@ export const ply = {
     by: {
       types: ['string'],
       help: 'The column to subdivide on',
+      multi: true,
     },
     expression: {
       types: ['function'],
@@ -36,36 +37,45 @@ export const ply = {
   },
   fn: (context, args) => {
 
-    const byColumn = context.columns.find(column => column.name === args.by);
-    if (!byColumn) throw new Error (`No such column: ${args.by}`);
+    const byColumns = args.by.map(by => {
+      const column = context.columns.find(column => column.name === by);
+      if (!column) throw new Error (`No such column: ${by}`);
+      return column;
+    });
 
     // TODO: Need to handle multiple expressions. So much Promise.all
-    const keyedDatatables = groupBy(context.rows, args.by);
-    const byValues = Object.keys(keyedDatatables);
-    const datatablePromises = map(keyedDatatables, rows => args.expression({
+    const keyedDatatables = groupBy(context.rows, row => JSON.stringify(pick(row, args.by)));
+    const originalDatatables = Object.values(keyedDatatables).map(rows => ({
       ...context,
       rows,
     }));
+    const datatablePromises = originalDatatables.map(args.expression);
 
-    return Promise.all(datatablePromises).then(datatables => {
+    return Promise.all(datatablePromises).then(newDatatables => {
 
-      const referenceTable = checkDatatableType(datatables[0]);
+      const referenceTable = checkDatatableType(newDatatables[0]);
 
-      // Check if each table is consisent, they should all have the same number of rows
       const columns = referenceTable.columns.slice(0);
-      // Make sure new datatable includes the column from args.by
-      if (!columns.find(column => column.name === args.by)) {
-        columns.unshift(byColumn);
-      }
+      // Make sure new datatable includes the columns from args.by
+      byColumns.forEach(byColumn => {
+        if (!columns.find(column => column.name === byColumn.name)) {
+          columns.unshift(byColumn);
+        }
+      });
 
       const targetRowLength = referenceTable.rows.length;
-      const rows  = flatten(datatables.map((dt, i) => {
-        const by = byValues[i]; // We don't have promise.props, so we need to do this by index;
+      const rows  = flatten(newDatatables.map((dt, i) => {
+        // False, we don't need this at all, we can get the "by" part of the row by looking at the first row in the original datatable
+        //const by = byValues[i]; // We don't have promise.props, so we need to do this by index;
+        console.log('YO ROW SUF', originalDatatables[i]);
+        const byColumns = pick(originalDatatables[i].rows[0], args.by);
 
+        // Everything has to be a datatable
         if (getType(dt) !== 'datatable') {
           throw new Error ('All ply expressions must return a datatable. Use `as` to turn a literal (eg string, number) into a datatable');
         }
 
+        // Check if each table is consisent, they should all have the same number of rows
         if (dt.rows.length !== targetRowLength) {
           throw new Error ('All datatables returned by ply expressions must have the same number of rows');
         }
@@ -79,7 +89,7 @@ export const ply = {
         });
 
         return dt.rows.map(row => ({
-          [args.by]: by,
+          ...byColumns,
           ...row,
         }));
       }));
