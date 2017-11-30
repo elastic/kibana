@@ -84,6 +84,7 @@ export class RangeControl extends Component {
       <FormRow
         id={this.props.control.id}
         label={this.props.control.label}
+        controlIndex={this.props.controlIndex}
       >
         <input
           id={`${this.props.control.id}_min`}

@@ -2,6 +2,7 @@
 
 exports[`renders ListControl 1`] = `
 <Component
+  controlIndex={0}
   id="mock-list-control"
   label="list control"
 >
