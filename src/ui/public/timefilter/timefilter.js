@@ -109,7 +109,9 @@ uiModules
     };
 
     Timefilter.prototype.getActiveBounds = function () {
-      if (this.isTimeRangeSelectorEnabled) return this.getBounds();
+      if (this.isTimeRangeSelectorEnabled) {
+        return this.getBounds();
+      }
     };
 
     /**
