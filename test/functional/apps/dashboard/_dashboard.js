@@ -83,19 +83,6 @@ export default function ({ getService, getPageObjects }) {
         });
     });
 
-    describe('filters', async function () {
-      it('are not selected by default', async function () {
-        const filters = await PageObjects.dashboard.getFilters(1000);
-        expect(filters.length).to.equal(0);
-      });
-
-      it('are added when a pie chart slice is clicked', async function () {
-        await PageObjects.dashboard.filterOnPieSlice();
-        const filters = await PageObjects.dashboard.getFilters();
-        expect(filters.length).to.equal(1);
-      });
-    });
-
     it('retains dark theme in state', async function () {
       await PageObjects.dashboard.clickEdit();
       await PageObjects.dashboard.useDarkTheme(true);
