@@ -1,6 +1,4 @@
-import { resolve, relative, extname } from 'path';
-
-import minimatch from 'minimatch';
+import { dirname, join, resolve, relative, extname } from 'path';
 
 import { REPO_ROOT } from './constants';
 
@@ -19,14 +17,23 @@ export class File {
     return this._ext === '.js';
   }
 
-  matchesRegex(regex) {
-    return this._relativePath.match(regex);
-  }
+  getRelativeParentDirs() {
+    const parents = [];
 
-  matchesAnyGlob(globs) {
-    return globs.some(pattern => minimatch(this._relativePath, pattern, {
-      dot: true
-    }));
+    while (true) {
+      const parent = parents.length
+        // NOTE: resolve() produces absolute paths, so we have to use join()
+        ? join(parents[parents.length - 1], '..')
+        : dirname(this._relativePath);
+
+      if (parent === '..' || parent === '.') {
+        break;
+      } else {
+        parents.push(parent);
+      }
+    }
+
+    return parents;
   }
 
   toString() {
