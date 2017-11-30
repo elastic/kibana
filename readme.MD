@@ -24,15 +24,15 @@ npm install -g backport
 
 ### Options
 
-| Option              | Description                               | Accepts                    |
-| ------------------- | ----------------------------------------- | -------------------------- |
-| --multiple          | Backport multiple commits and/or versions | boolean (defaults to true) |
-| --multiple-commits  | Backport multiple commits                 | boolean (defaults to true) |
-| --multiple-versions | Backport to multiple versions             | boolean (defaults to true) |
-| --own               | Only show own commits                     | boolean (defaults to true) |
-| --config            | Show configuration file                   |                            |
-| --help              | Show help                                 |                            |
-| -v, --version       | Show version number                       |                            |
+| Option              | Description                               | Accepts                     |
+| ------------------- | ----------------------------------------- | --------------------------- |
+| --multiple          | Backport multiple commits and/or versions | boolean                     |
+| --multiple-commits  | Backport multiple commits                 | boolean (defaults to false) |
+| --multiple-versions | Backport to multiple versions             | boolean (defaults to true)  |
+| --own               | Only show own commits                     | boolean (defaults to true)  |
+| --config            | Show configuration file                   |                             |
+| --help              | Show help                                 |                             |
+| -v, --version       | Show version number                       |                             |
 
 ### Configuration
 
