@@ -122,7 +122,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
     return this._loaded;
   }
 
-  async setMetrics(metrics, metricsAgg) {
+  setMetrics(metrics, metricsAgg) {
     this._metrics = metrics;
     this._metricsAgg = metricsAgg;
     this._valueFormatter = this._metricsAgg.fieldFormatter();
