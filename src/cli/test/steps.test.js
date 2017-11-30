@@ -69,19 +69,19 @@ function setup() {
       html_url: 'myHtmlUrl'
     });
 
-  return initSteps(
-    {
-      username: 'sqren',
-      accessToken: 'myAccessToken',
-      repositories: [
-        {
-          name: fullRepoName,
-          versions: ['6.x', '6.0', '5.6', '5.5', '5.4']
-        }
-      ]
-    },
-    { cwd: '/my/path', own: true, multiple: false }
-  );
+  return initSteps({
+    username: 'sqren',
+    accessToken: 'myAccessToken',
+    repositories: [
+      {
+        name: fullRepoName,
+        versions: ['6.x', '6.0', '5.6', '5.5', '5.4']
+      }
+    ],
+    cwd: '/my/path',
+    own: true,
+    multiple: false
+  });
 }
 
 describe('select commit that originated from pull request', () => {

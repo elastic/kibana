@@ -36,6 +36,20 @@ function getCommits(owner, repoName, author) {
     );
 }
 
+function getCommit(owner, repoName, sha) {
+  return axios(
+    `https://api.github.com/repos/${owner}/${repoName}/commits/${
+      sha
+    }?access_token=${accessToken}`
+  )
+    .catch(handleError)
+    .then(res => ({
+      message: res.data.commit.message,
+      sha: res.data.sha,
+      date: res.data.commit.author.date
+    }));
+}
+
 function createPullRequest(owner, repoName, payload) {
   return axios
     .post(
@@ -93,6 +107,7 @@ module.exports = {
   setAccessToken,
   addLabels,
   createPullRequest,
+  getCommit,
   getCommits,
   getPullRequestByCommit
 };

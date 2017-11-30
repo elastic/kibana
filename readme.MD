@@ -29,6 +29,7 @@ npm install -g backport
 | --multiple          | Backport multiple commits and/or versions | boolean                     |
 | --multiple-commits  | Backport multiple commits                 | boolean (defaults to false) |
 | --multiple-versions | Backport to multiple versions             | boolean (defaults to true)  |
+| --sha               | Supply a commit sha to backport           | string                      |
 | --own               | Only show own commits                     | boolean (defaults to true)  |
 | --config            | Show configuration file                   |                             |
 | --help              | Show help                                 |                             |
@@ -56,8 +57,11 @@ your Github username and a Github Access Token (can be created
   // Only allow picking own commits to backport
   "own": true,
 
-  // Allow picking multiple versions and/or commits
-  "multiple": true,
+  // Backport multiple commits
+  "multipleCommits": false,
+
+  // Backport to multiple versions
+  "multipleVersions": true,
 
   // Repositories and the versions that will be available in backport cli
   "repositories": [

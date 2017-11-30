@@ -23,6 +23,10 @@ const args = yargs
     description: 'Backport to multiple version',
     type: 'boolean'
   })
+  .option('sha', {
+    description: 'Supply a commit sha to backport',
+    type: 'string'
+  })
   .option('own', {
     default: isBool(config.own) ? config.own : true,
     description: 'Only show own commits',
@@ -43,6 +47,7 @@ if (args.config) {
 
 const options = Object.assign(
   {},
+  config,
   args,
   {
     multipleVersions: isBool(args.multiple)
@@ -55,4 +60,4 @@ const options = Object.assign(
   { cwd: process.cwd() }
 );
 
-initSteps(config, options);
+initSteps(options);

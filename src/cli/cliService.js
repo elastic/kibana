@@ -4,6 +4,7 @@ const prompts = require('../lib/prompts');
 const github = require('../lib/github');
 const constants = require('../lib/constants');
 const { getRepoPath } = require('../lib/env');
+const chalk = require('chalk');
 
 const {
   resetAndPullMaster,
@@ -122,6 +123,32 @@ function maybeSetupRepo(owner, repoName, username) {
       );
     }
   });
+}
+
+function getCommits(owner, repoName, options) {
+  if (options.sha) {
+    const spinner = ora().start();
+    return github
+      .getCommit(owner, repoName, options.sha)
+      .catch(err => {
+        spinner.stop();
+        throw err;
+      })
+      .then(commit => {
+        spinner.stopAndPersist({
+          symbol: chalk.green('?'),
+          text: `${chalk.bold('Select commit')} ${chalk.cyan(commit.message)}`
+        });
+        return [commit];
+      });
+  }
+
+  return promptCommit(
+    owner,
+    repoName,
+    options.own ? options.username : null,
+    options.multipleCommits
+  );
 }
 
 function promptCommit(owner, repoName, username, multipleChoice) {
@@ -268,7 +295,7 @@ module.exports = {
   doBackportVersion,
   promptRepoInfo,
   maybeSetupRepo,
-  promptCommit,
+  getCommits,
   promptVersions,
   withPullRequest
 };
