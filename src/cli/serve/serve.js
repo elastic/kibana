@@ -187,7 +187,7 @@ export default function (program) {
 function logFatal(message, server) {
   if (server) {
     server.log(['fatal'], message);
-  } else {
-    console.error('FATAL', message);
   }
+
+  console.error('FATAL', message);
 }
