@@ -2,7 +2,13 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { RangeControl } from './range_control';
 import { ListControl } from './list_control';
-import { KuiFieldGroup, KuiFieldGroupSection, KuiButton } from 'ui_framework/components';
+import {
+  KuiFieldGroup,
+  KuiFieldGroupSection,
+  KuiButton,
+  KuiFlexGroup,
+  KuiFlexItem
+} from 'ui_framework/components';
 
 export class InputControlVis extends Component {
   constructor(props) {
@@ -26,6 +32,7 @@ export class InputControlVis extends Component {
   }
 
   renderControls() {
+
     return this.props.controls.map((control, index) => {
       let controlComponent = null;
       switch (control.type) {
@@ -51,12 +58,9 @@ export class InputControlVis extends Component {
           throw new Error(`Unhandled control type ${control.type}`);
       }
       return (
-        <div
-          key={control.id}
-          data-test-subj={'inputControl' + index}
-        >
+        <KuiFlexItem key={control.id} style={{ minWidth: '250px' }}>
           {controlComponent}
-        </div>
+        </KuiFlexItem>
       );
     });
   }
@@ -109,7 +113,9 @@ export class InputControlVis extends Component {
 
     return (
       <div className="inputControlVis">
-        {this.renderControls()}
+        <KuiFlexGroup wrap>
+          {this.renderControls()}
+        </KuiFlexGroup>
         {stagingButtons}
       </div>
     );
