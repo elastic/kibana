@@ -25,7 +25,7 @@
     </div>
   </div>
 
-  <div class="sidebar-list-header">
+  <div class="discover-sidebar-list-header sidebar-list-header">
     <h3 class="sidebar-list-header-label" id="selected_fields" tabindex="0">Selected Fields</h3>
   </div>
   <ul class="list-unstyled discover-selected-fields" >
@@ -40,15 +40,25 @@
     </discover-field>
   </ul>
 
-  <div class="sidebar-list-header sidebar-item">
-    <h3 class="sidebar-list-header-label" id="available_fields" tabindex="0">Available Fields
-      <span
-        ng-class="{ 'fa-chevron-right': !showFields, 'fa-chevron-down': showFields }"
+  <div class="sidebar-list-header sidebar-item euiFlexGroup euiFlexGroup--gutterMedium">
+    <h3 class="euiFlexItem sidebar-list-header-label" id="available_fields" tabindex="0">
+      Available Fields
+    </h3>
+
+    <div class="euiFlexItem euiFlexItem--flexGrowZero">
+      <button
         ng-click="showFields = !showFields"
         aria-hidden="true"
-        class="fa visible-xs visible-sm pull-right field-collapse-toggle"
-      ></span>
-
+        class="kuiButton kuiButton--small visible-xs visible-sm pull-right field-collapse-toggle"
+      >
+        <span
+          aria-hidden="true"
+          class="kuiIcon"
+          ng-class="{ 'fa-chevron-right': !showFields, 'fa-chevron-down': showFields }"
+        ></span>
+      </button>
+    </div>
+    <div class="euiFlexItem euiFlexItem--flexGrowZero">
       <button
         type="button"
         ng-class="{ 'kuiButton--basic': !filter.active, 'kuiButton--primary': filter.active, 'hidden-xs': !showFields, 'hidden-sm': !showFields }"
@@ -60,7 +70,7 @@
       >
         <span aria-hidden="true" class="kuiIcon fa-gear"></span>
       </button>
-    </h3>
+    </div>
   </div>
 
   <div class="sidebar-item discover-field-details" ng-show="showFilter" id="discoverFieldFilter">
