@@ -62,7 +62,7 @@ export default function ({ getService, getPageObjects }) {
           remote
             .moveMouseTo(resizeIcons[0])
             .pressMouseButton()
-            .moveMouseTo(null, 300, 0)
+            .moveMouseTo(null, 400, 0)
             .releaseMouseButton();
 
           await retry.try(async () => {
