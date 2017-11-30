@@ -7,7 +7,7 @@ import {
   toPromise
 } from '@elastic/kbn-observable';
 
-import { Cluster, KibanaConfig } from '@elastic/kbn-types';
+import { DataCluster, KibanaConfig } from '@elastic/kbn-types';
 
 export class BazService {
   // NB: When we finally create BazService, we have a request
@@ -17,7 +17,7 @@ export class BazService {
   // But we can also choose the cluster to bind all our elasticsearch
   // calls to. What if we could do both in one step at this high level?
   constructor(
-    private readonly cluster: Cluster,
+    private readonly cluster: DataCluster,
     private readonly kibanaConfig$: Observable<KibanaConfig>,
   ) {
   }
@@ -29,7 +29,7 @@ export class BazService {
       k$(this.kibanaConfig$)(map(config => config.index))
     );
 
-    const response = await this.cluster.callWithRequest('endpoint', {
+    const response = await this.cluster.call('endpoint', {
       index: kibanaIndex,
       type,
       size: perPage,

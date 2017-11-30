@@ -5,7 +5,7 @@ import {
   Schema,
   ElasticsearchService,
   KibanaConfig,
-  Cluster
+  DataCluster,
 } from '@elastic/kbn-types';
 import { BazService } from './BazService';
 
@@ -56,12 +56,9 @@ export function registerEndpoints(
       const { params, query } = req;
 
       log.info('create Baz Service instance');
-      // TODO: but BazService needs request's headers
-      // the validated object may not have this now
-      //
-      // This is where BazService's underlying elasticsearch service
-      // should be bound to the right cluster
-      const cluster = await elasticsearch.getScopedCluster('admin', req.headers);
+
+      // TODO: validate headers
+      const cluster = new DataCluster(req.headers);
       const bazService = new BazService(cluster, config$);
 
       log.info(
