@@ -324,7 +324,7 @@ function discoverController(
         $scope.$listen(queryFilter, 'fetch', $scope.fetch);
 
         $scope.$watch('opts.timefield', function (timefield) {
-          if (Boolean(timefield)) {
+          if (!!timefield) {
             timefilter.enableAutoRefreshSelector();
             timefilter.enableTimeRangeSelector();
           } else {
