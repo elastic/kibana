@@ -35,9 +35,7 @@ module.exports = function () {
     '.flowconfig',
     '.documentup.json',
     '.yarn-metadata.json',
-    '.travis.yml',
-    '*.txt',
-    '*.md',
+    '.travis.yml'
   ].map(p => `build/kibana/node_modules/**/${p}`);
 
 
