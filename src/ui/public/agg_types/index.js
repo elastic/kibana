@@ -27,6 +27,7 @@ import { AggTypesBucketsFilterProvider } from 'ui/agg_types/buckets/filter';
 import { AggTypesBucketsFiltersProvider } from 'ui/agg_types/buckets/filters';
 import { AggTypesBucketsSignificantTermsProvider } from 'ui/agg_types/buckets/significant_terms';
 import { AggTypesBucketsGeoHashProvider } from 'ui/agg_types/buckets/geo_hash';
+import { AggTypesBucketsMissingProvider } from 'ui/agg_types/buckets/missing';
 import { AggTypesMetricsBucketSumProvider } from 'ui/agg_types/metrics/bucket_sum';
 import { AggTypesMetricsBucketAvgProvider } from 'ui/agg_types/metrics/bucket_avg';
 import { AggTypesMetricsBucketMinProvider } from 'ui/agg_types/metrics/bucket_min';
@@ -70,6 +71,7 @@ export function AggTypesIndexProvider(Private) {
       Private(AggTypesBucketsFiltersProvider),
       Private(AggTypesBucketsSignificantTermsProvider),
       Private(AggTypesBucketsGeoHashProvider),
+      Private(AggTypesBucketsMissingProvider),
     ]
   };
 

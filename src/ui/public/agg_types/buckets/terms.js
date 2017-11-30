@@ -66,6 +66,11 @@ export function AggTypesBucketsTermsProvider(Private) {
         filterFieldTypes: ['number', 'boolean', 'date', 'ip',  'string']
       },
       {
+        name: 'missing',
+        default: false,
+        write: _.noop
+      },
+      {
         name: 'exclude',
         type: 'string',
         advanced: true,
@@ -170,6 +175,18 @@ export function AggTypesBucketsTermsProvider(Private) {
             output.params.valueType = agg.getField().type === 'number' ? 'float' : agg.getField().type;
           }
 
+          if (agg.params.missing) {
+            const missingAgg = new AggConfig(agg.vis, {
+              type: 'missing',
+              id: agg.id + '-missing',
+              schema: {
+                group: 'buckets'
+              }
+            });
+            missingAgg.params.field = agg.params.field;
+            output.parentAggs = [missingAgg];
+          }
+
           if (!orderAgg) {
             order[agg.params.orderBy || '_count'] = dir;
             return;
@@ -190,6 +207,10 @@ export function AggTypesBucketsTermsProvider(Private) {
 
           output.subAggs = (output.subAggs || []).concat(orderAgg);
           order[orderAggId] = dir;
+
+          if (agg.params.missing) {
+            output.parentAggs[0].subAggs = output.subAggs;
+          }
         }
       },
       {

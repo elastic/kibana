@@ -59,6 +59,13 @@ export function createRawData(vis, resp) {
       record = [];
     }
 
+    if (agg.params.missing) {
+      data[agg.id].buckets.push({
+        key: 'missing',
+        ...data[agg.id + '-missing']
+      });
+    }
+
     // iterate through all the buckets
     _.each(extractBuckets(data[agg.id], agg), function (bucket) {
 

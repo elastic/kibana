@@ -114,12 +114,14 @@ export function VisAggConfigsProvider(Private) {
         return !config.type.hasNoDsl;
       })
       .forEach(function nestEachConfig(config, i, list) {
+        let prevDsl;
+        let prevConfig;
         if (!dslLvlCursor) {
         // start at the top level
           dslLvlCursor = dslTopLvl;
         } else {
-          const prevConfig = list[i - 1];
-          const prevDsl = dslLvlCursor[prevConfig.id];
+          prevConfig = list[i - 1];
+          prevDsl = dslLvlCursor[prevConfig.id];
 
           // advance the cursor and nest under the previous agg, or
           // put it on the same level if the previous agg doesn't accept
@@ -131,6 +133,10 @@ export function VisAggConfigsProvider(Private) {
         let subAggs;
 
         parseParentAggs(dslLvlCursor, dsl);
+
+        if (_.has(prevDsl, 'prevDsl.parentAggs[prevConfig.id + "-missing"].aggs')) {
+          prevDsl.parentAggs[prevConfig.id + '-missing'].aggs[config.id] = config.toDsl();
+        }
 
         if (config.schema.group === 'buckets' && i < list.length - 1) {
         // buckets that are not the last item in the list accept sub-aggs

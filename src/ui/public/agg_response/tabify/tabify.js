@@ -35,6 +35,13 @@ export function AggResponseTabifyProvider(Private, Notifier) {
 
     switch (agg.schema.group) {
       case 'buckets':
+        if (agg.params.missing && bucket[agg.id + '-missing']) {
+          bucket[agg.id].buckets.push({
+            key: 'missing',
+            ...bucket[agg.id + '-missing']
+          });
+          delete bucket[agg.id + '-missing'];
+        }
         const buckets = new Buckets(bucket[agg.id], agg.params);
         if (buckets.length) {
           const splitting = write.canSplit && agg.schema.name === 'split';
