@@ -20,7 +20,11 @@ module.exports = new Chainable('fit', {
   fn: function absFn(args) {
     return alter(args, function (eachSeries, mode) {
 
-      const noNulls = _.filter(eachSeries.data, 1);
+      const noNulls = eachSeries.data.filter((item) => (item[1] === 0 || item[1]));
+
+      if (noNulls.length === 0) {
+        return eachSeries;
+      }
 
       eachSeries.data = fitFunctions[mode](noNulls, eachSeries.data);
       return eachSeries;
