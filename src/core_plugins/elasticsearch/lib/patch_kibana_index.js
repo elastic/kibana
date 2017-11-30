@@ -6,8 +6,6 @@ import {
 import { PatchMissingProperties } from './kibana_index_patches/patch_missing_properties';
 import { PatchMissingTitleKeywordFields } from './kibana_index_patches/patch_missing_title_keyword_fields';
 
-import { ChangeMistypedTypeField } from './kibana_index_changes/change_mistyped_type_field';
-
 /**
  *  Checks that the root type in the kibana index has all of the
  *  root properties specified by the kibanaIndexMappings.
@@ -44,14 +42,6 @@ export async function patchKibanaIndex(options) {
     new PatchMissingProperties(enhancedOptions),
     new PatchMissingTitleKeywordFields(enhancedOptions),
   ];
-
-  const changesToApply = [
-    new ChangeMistypedTypeField(enhancedOptions),
-  ];
-
-  for (const change of changesToApply) {
-    await change.applyChange();
-  }
 
   for (const patch of patchesToApply) {
     await patch.applyPatch();
