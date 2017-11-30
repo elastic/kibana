@@ -32,7 +32,7 @@ export class OptionsTab extends Component {
             <KuiFieldGroup>
               <KuiFieldGroupSection>
                 <KuiCheckBoxLabel
-                  text="Update kibana filters on each change"
+                  text="Update Kibana filters on each change"
                   isChecked={this.props.scope.vis.params.updateFiltersOnChange}
                   onChange={this.handleUpdateFiltersChange}
                   data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"
