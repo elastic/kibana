@@ -71,8 +71,8 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show correct data, take screenshot', function () {
         const expectedChartData = [
-          '0', '2,088', '2,000', '2,748', '4,000', '2,707', '6,000', '2,876',
-          '8,000', '2,863', '10,000', '147', '12,000', '148', '14,000', '129', '16,000', '161', '18,000', '137'
+          '0B', '2,088', '1.953KB', '2,748', '3.906KB', '2,707', '5.859KB', '2,876', '7.813KB',
+          '2,863', '9.766KB', '147', '11.719KB', '148', '13.672KB', '129', '15.625KB', '161', '17.578KB', '137'
         ];
 
         return retry.try(function () {
