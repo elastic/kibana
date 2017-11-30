@@ -80,6 +80,16 @@ export class RangeControl extends Component {
   }
 
   render() {
+    let disabled = false;
+    let disableMsg;
+    if (!this.props.control.isEnabled()) {
+      disabled = true;
+      disableMsg = (
+        <p className="kuiStatusText kuiStatusText--warning">
+          This filter is disabled {this.props.control.disabledReason}
+        </p>
+      );
+    }
     return (
       <FormRow
         id={this.props.control.id}
@@ -88,6 +98,7 @@ export class RangeControl extends Component {
       >
         <input
           id={`${this.props.control.id}_min`}
+          disabled={disabled}
           name="min"
           type="number"
           className="kuiTextInput"
@@ -98,6 +109,7 @@ export class RangeControl extends Component {
         />
         <div className="inputRangeContainer">
           <InputRange
+            disabled={disabled}
             maxValue={this.props.control.max}
             minValue={this.props.control.min}
             step={this.props.control.options.step}
@@ -111,6 +123,7 @@ export class RangeControl extends Component {
         </div>
         <input
           id={`${this.props.control.id}_max`}
+          disabled={disabled}
           name="max"
           type="number"
           className="kuiTextInput"
@@ -119,6 +132,7 @@ export class RangeControl extends Component {
           max={this.props.control.max}
           onChange={this.handleInputChange}
         />
+        {disableMsg}
       </FormRow>
     );
   }
