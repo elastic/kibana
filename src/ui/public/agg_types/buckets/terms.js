@@ -66,6 +66,11 @@ export function AggTypesBucketsTermsProvider(Private) {
         filterFieldTypes: ['number', 'boolean', 'date', 'ip',  'string']
       },
       {
+        name: 'otherBucket',
+        default: false,
+        write: _.noop
+      },
+      {
         name: 'exclude',
         type: 'string',
         advanced: true,
