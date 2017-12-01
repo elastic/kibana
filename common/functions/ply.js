@@ -1,5 +1,5 @@
 // TODO: pointseries performs poorly, that's why we run it on the server.
-import { groupBy, findIndex, flatten, pick } from 'lodash';
+import { groupBy, flatten, pick, map, find, times } from 'lodash';
 import { getType } from '../lib/get_type';
 
 
@@ -8,6 +8,45 @@ function checkDatatableType(datatable) {
     throw new Error ('All ply expressions must return a datatable. Use `as` to turn a literal (eg string, number) into a datatable');
   }
   return datatable;
+}
+
+function combineColumns(arrayOfColumnsArrays) {
+  return arrayOfColumnsArrays.reduce((resultingColumns, columns) => {
+    columns.forEach(column => {
+      if(find(resultingColumns, resultingColumn => resultingColumn.name === column.name)) return;
+      else resultingColumns.push(column);
+    });
+
+    return resultingColumns;
+  }, []);
+}
+
+// This handles merging the tables produced by multiple expressions run on a single member of the `by` split.
+// Thus all tables must be the same length, although their columns do not need to be the same, we will handle combining the columns
+function combineAcross(datatableArray) {
+  const referenceTable = checkDatatableType(datatableArray[0]);
+  const targetRowLength = referenceTable.rows.length;
+
+  // Sanity check
+  datatableArray.forEach(datatable => {
+    checkDatatableType(datatable);
+    if (datatable.rows.length !== targetRowLength) throw new Error ('All expressions must return the same number of rows');
+  });
+
+  // Merge columns and rows.
+  const arrayOfRowsArrays = map(datatableArray, 'rows');
+  const rows = times(targetRowLength, i => {
+    const rowsAcross = map(arrayOfRowsArrays, i);
+    return Object.assign({}, ...rowsAcross);
+  });
+
+  const columns = combineColumns(map(datatableArray, 'columns'));
+
+  return {
+    type: 'datatable',
+    rows,
+    columns,
+  };
 }
 
 export const ply = {
@@ -25,6 +64,7 @@ export const ply = {
     },
     expression: {
       types: ['function'],
+      multi: true,
       aliases: ['fn', 'function'],
       help: 'An expression to pass each resulting data table into. Tips: \n' +
       ' Expressions must return a datatable. Use `as` to turn literals into datatables.\n' +
@@ -49,47 +89,20 @@ export const ply = {
       ...context,
       rows,
     }));
-    const datatablePromises = originalDatatables.map(args.expression);
+
+    const datatablePromises = originalDatatables.map(originalDatatable => {
+      const expressionResultPromises = args.expression.map(expression => expression(originalDatatable));
+      return Promise.all(expressionResultPromises).then(combineAcross);
+    });
 
     return Promise.all(datatablePromises).then(newDatatables => {
 
-      const referenceTable = checkDatatableType(newDatatables[0]);
-
-      const columns = referenceTable.columns.slice(0);
-      // Make sure new datatable includes the columns from args.by
-      byColumns.forEach(byColumn => {
-        if (!columns.find(column => column.name === byColumn.name)) {
-          columns.unshift(byColumn);
-        }
-      });
-
-      const targetRowLength = referenceTable.rows.length;
+      // Here we're just merging each for the by splits, so it doesn't actually matter if the rows are the same length
+      const columns = combineColumns([byColumns].concat(map(newDatatables, 'columns')));
       const rows  = flatten(newDatatables.map((dt, i) => {
-        // False, we don't need this at all, we can get the "by" part of the row by looking at the first row in the original datatable
-        //const by = byValues[i]; // We don't have promise.props, so we need to do this by index;
-        console.log('YO ROW SUF', originalDatatables[i]);
-        const byColumns = pick(originalDatatables[i].rows[0], args.by);
-
-        // Everything has to be a datatable
-        if (getType(dt) !== 'datatable') {
-          throw new Error ('All ply expressions must return a datatable. Use `as` to turn a literal (eg string, number) into a datatable');
-        }
-
-        // Check if each table is consisent, they should all have the same number of rows
-        if (dt.rows.length !== targetRowLength) {
-          throw new Error ('All datatables returned by ply expressions must have the same number of rows');
-        }
-
-        dt.columns.forEach((column) => {
-          // if columns has the same name, overwrite. Probably slow.
-          const existingColumnIndex = findIndex(columns, newColumn => newColumn.name === column.name);
-          if (existingColumnIndex > -1) columns[existingColumnIndex] = column;
-          // if column didn't overwrite another, append to newColumns
-          else columns.push(column);
-        });
-
+        const byColumnValues = pick(originalDatatables[i].rows[0], args.by);
         return dt.rows.map(row => ({
-          ...byColumns,
+          ...byColumnValues,
           ...row,
         }));
       }));
