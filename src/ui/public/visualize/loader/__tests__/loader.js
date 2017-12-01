@@ -209,15 +209,52 @@ describe('visualize loader', () => {
         expect(handler.getElement().jquery).to.be.ok();
       });
 
-      it('should have onRenderComplete returns a promise resolving on renderComplete event', async () => {
+      it('should have whenFirstRenderComplete returns a promise resolving on first renderComplete event', async () => {
         const container = newContainer();
         const handler = loader.embedVisualizationWithSavedObject(container, createSavedObject(), {});
         const spy = sinon.spy();
-        handler.onRenderComplete().then(spy);
+        handler.whenFirstRenderComplete().then(spy);
         expect(spy.notCalled).to.be(true);
         container.find('visualize').trigger('renderComplete');
         await timeout();
         expect(spy.calledOnce).to.be(true);
+      });
+
+      it('should add listeners via addRenderCompleteListener that triggers on renderComplete events', async () => {
+        const container = newContainer();
+        const handler = loader.embedVisualizationWithSavedObject(container, createSavedObject(), {});
+        const spy = sinon.spy();
+        handler.addRenderCompleteListener(spy);
+        expect(spy.notCalled).to.be(true);
+        container.find('visualize').trigger('renderComplete');
+        await timeout();
+        expect(spy.calledOnce).to.be(true);
+      });
+
+      it('should call render complete listeners once per renderComplete event', async () => {
+        const container = newContainer();
+        const handler = loader.embedVisualizationWithSavedObject(container, createSavedObject(), {});
+        const spy = sinon.spy();
+        handler.addRenderCompleteListener(spy);
+        expect(spy.notCalled).to.be(true);
+        container.find('visualize').trigger('renderComplete');
+        container.find('visualize').trigger('renderComplete');
+        container.find('visualize').trigger('renderComplete');
+        expect(spy.callCount).to.be(3);
+      });
+
+      it('should successfully remove listeners from render complete', async () => {
+        const container = newContainer();
+        const handler = loader.embedVisualizationWithSavedObject(container, createSavedObject(), {});
+        const spy = sinon.spy();
+        handler.addRenderCompleteListener(spy);
+        expect(spy.notCalled).to.be(true);
+        container.find('visualize').trigger('renderComplete');
+        expect(spy.calledOnce).to.be(true);
+        spy.reset();
+        handler.removeRenderCompleteListener(spy);
+        container.find('visualize').trigger('renderComplete');
+        expect(spy.notCalled).to.be(true);
       });
     });
 
