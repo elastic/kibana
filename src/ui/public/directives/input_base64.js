@@ -2,12 +2,11 @@ import { uiModules } from 'ui/modules';
 import { Observable } from 'rxjs/Rx';
 const module = uiModules.get('kibana');
 
-const $readFileContents = (file) => {
+const createFileContent$ = (file) => {
   return Observable.create(observer => {
     const reader = new FileReader();
     reader.onerror = (err) => {
       observer.error(err);
-      observer.complete();
     };
 
     reader.onload = () => {
@@ -43,7 +42,9 @@ module.directive('inputBaseSixtyFour', function () {
 
       const validators = [ maxSizeValidator ];
 
-      const unsubscribe = Observable.fromEvent($elem, 'change')
+      // produce fileContent$ whenever the $element 'change' event is triggered.
+      const fileContent$ = Observable
+        .fromEvent($elem, 'change')
         .map(e => e.target.files)
         .switchMap(files => {
           if (files.length === 0) {
@@ -54,21 +55,27 @@ module.directive('inputBaseSixtyFour', function () {
             throw new Error('Only one file is supported at this time');
           }
 
-          return $readFileContents(files[0]);
+          return createFileContent$(files[0]);
         })
-        .map(dataUrl => {
-          const validations = validators.map(validator => validator(dataUrl));
+        .share();
 
-          return { dataUrl, validations };
-        })
-        .subscribe(({ dataUrl, validations }) => {
+      // validate the content of the files after it is loaded
+      const validations$ = fileContent$
+        .map(fileContent => (
+          validators.map(validator => validator(fileContent))
+        ));
+
+      // push results from input/validation to the ngModel
+      const unsubscribe = Observable
+        .combineLatest(fileContent$, validations$)
+        .subscribe(([ fileContent, validations ]) => {
           $scope.$evalAsync(() => {
             validations.forEach(validation => {
               ngModel.$setValidity(validation.errorKey, validation.isValid);
             });
 
             if (validations.every(validation => validation.isValid)) {
-              ngModel.$setViewValue(dataUrl);
+              ngModel.$setViewValue(fileContent);
             }
           });
         }, (err) => {
