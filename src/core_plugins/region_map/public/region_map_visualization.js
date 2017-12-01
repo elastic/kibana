@@ -29,15 +29,7 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
         return;
       }
 
-      if (this._choroplethLayer.isDataLoaded()) {
-        return;
-      }
-
-      return new Promise((resolve) => {
-        this._choroplethLayer.once('dataLoaded', () => {
-          resolve();
-        });
-      });
+      await this._choroplethLayer.whenDataLoaded();
     }
 
 

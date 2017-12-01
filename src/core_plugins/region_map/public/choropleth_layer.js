@@ -47,20 +47,22 @@ export default class ChoroplethLayer extends KibanaMapLayer {
 
     this._loaded = false;
     this._error = false;
-    $.ajax({
-      dataType: 'json',
-      url: geojsonUrl,
-      success: (data) => {
-        this._leafletLayer.addData(data);
-        this._loaded = true;
-        this._setStyle();
-        this.emit('dataLoaded');
-      },
-      error: () => {
-        this._loaded = true;
-        this._error = true;
-        this.emit('dataLoaded');
-      }
+    this._whenDataLoaded = new Promise((resolve) => {
+      $.ajax({
+        dataType: 'json',
+        url: geojsonUrl,
+        success: (data) => {
+          this._leafletLayer.addData(data);
+          this._loaded = true;
+          this._setStyle();
+          resolve(true);
+        },
+        error: () => {
+          this._loaded = true;
+          this._error = true;
+          resolve(true);
+        }
+      });
     });
   }
 
@@ -118,8 +120,8 @@ export default class ChoroplethLayer extends KibanaMapLayer {
   }
 
 
-  isDataLoaded() {
-    return this._loaded;
+  whenDataLoaded() {
+    return this._whenDataLoaded;
   }
 
   setMetrics(metrics, metricsAgg) {
@@ -143,11 +145,10 @@ export default class ChoroplethLayer extends KibanaMapLayer {
 
   getBounds() {
     const bounds = super.getBounds();
-    return (this._boundsOfData) ? this._boundsOfData  : bounds;
+    return (this._boundsOfData) ? this._boundsOfData : bounds;
   }
 
   appendLegendContents(jqueryDiv) {
-
 
     if (!this._legendColors || !this._legendQuantizer || !this._metricsAgg) {
       return;
@@ -251,7 +252,7 @@ function makeChoroplethStyler(data, colorramp, joinField) {
       return outstandingFeatures.map((bucket) => bucket.term);
     },
     getLeafletBounds: function () {
-      return boundsOfAllFeatures.isValid() ?  boundsOfAllFeatures : null;
+      return boundsOfAllFeatures.isValid() ? boundsOfAllFeatures : null;
     }
   };
 
