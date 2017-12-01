@@ -137,6 +137,12 @@
           ng-if="conf.markdown"
           ng-bind-html="conf.value | markdown"
         ></span>
+        <img
+          alt="Image"
+          ng-if="conf.image"
+          src="{{ conf.value }}"
+          class="advancedSettingsTableRowImage"
+        ></img>
       </span>
     </div>
   </td>
