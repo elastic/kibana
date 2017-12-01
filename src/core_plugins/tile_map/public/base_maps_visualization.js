@@ -18,10 +18,7 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
       this._container = element;
       this._kibanaMap = null;
       this._baseLayerDirty = true;
-      this._mapIsLoaded = new Promise(async (resolve) => {
-        await this._makeKibanaMap();
-        resolve();
-      });
+      this._mapIsLoaded = this._makeKibanaMap();
     }
 
     destroy() {
@@ -77,9 +74,6 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
      */
     async _makeKibanaMap() {
 
-      if (this._kibanaMap) {
-        this._kibanaMap.destroy();
-      }
       const options = {};
       const uiState = this.vis.getUiState();
       const zoomFromUiState = parseInt(uiState.get('mapZoom'));
