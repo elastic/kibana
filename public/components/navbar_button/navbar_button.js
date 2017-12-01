@@ -5,7 +5,7 @@ import './navbar_button.less';
 export const NavbarButton = ({ children, onClick, className }) => {
 
   return (
-    <button className={`canvas__navbarButton ${className}`} onClick={onClick}>
+    <button className={`canvas__navbarButton ${className || ''}`} onClick={onClick}>
       {children}
     </button>
   );

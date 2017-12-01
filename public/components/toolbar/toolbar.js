@@ -22,6 +22,7 @@ export const Toolbar = (props) => {
     tray,
     setTray,
     addElement,
+    duplicateElement,
     elementLayer,
     previousPage,
     nextPage,
@@ -87,6 +88,9 @@ export const Toolbar = (props) => {
             <NavbarButton onClick={() => showHideTray('expression')}>
               <i className="fa fa-terminal" /> Code
             </NavbarButton>
+            <NavbarButton onClick={() => duplicateElement()}>
+              <i className="fa fa-clone" /> Clone
+            </NavbarButton>
 
             <NavbarDivider/>
 
@@ -117,6 +121,7 @@ Toolbar.propTypes = {
   tray: PropTypes.node,
   setTray: PropTypes.func.isRequired,
   addElement: PropTypes.func.isRequired,
+  duplicateElement: PropTypes.func.isRequired,
   elementLayer: PropTypes.func,
   nextPage: PropTypes.func.isRequired,
   previousPage: PropTypes.func.isRequired,

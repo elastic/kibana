@@ -56,8 +56,8 @@ export const ElementControls = pure((props) => {
 });
 
 ElementControls.propTypes = {
-  selectElement: PropTypes.func,
-  removeElement: PropTypes.func,
+  selectElement: PropTypes.func.isRequired,
+  removeElement: PropTypes.func.isRequired,
   isSelected: PropTypes.bool,
   renderFunction: PropTypes.object,
   renderable: PropTypes.object,

@@ -26,7 +26,6 @@ function moveElementLayer(workpadState, pageId, elementId, movement) {
   const elements = get(workpadState, ['pages', pageIndex, 'elements']);
   const from = elementIndex;
 
-
   const to = (function () {
     if (movement < Infinity && movement > -Infinity) return elementIndex + movement;
     if (movement === Infinity) return elements.length - 1;
@@ -57,14 +56,20 @@ export const elementsReducer = handleActions({
     const { position, pageId, elementId } = payload;
     return assignElementProperties(workpadState, pageId, elementId, { position });
   },
+  [actions.elementLayer]: (workpadState, { payload: { pageId, elementId, movement } }) => {
+    return moveElementLayer(workpadState, pageId, elementId, movement);
+  },
   [actions.addElement]: (workpadState, { payload: { pageId, element } }) => {
     const pageIndex = getPageIndexById(workpadState, pageId);
     if (pageIndex < 0) return workpadState;
 
     return push(workpadState, ['pages', pageIndex, 'elements'], element);
   },
-  [actions.elementLayer]: (workpadState, { payload: { pageId, elementId, movement } }) => {
-    return moveElementLayer(workpadState, pageId, elementId, movement);
+  [actions.duplicateElement]: (workpadState, { payload: { pageId, element } }) => {
+    const pageIndex = getPageIndexById(workpadState, pageId);
+    if (pageIndex < 0) return workpadState;
+
+    return push(workpadState, ['pages', pageIndex, 'elements'], element);
   },
   [actions.removeElement]: (workpadState, { payload: { pageId, elementId } }) => {
     const pageIndex = getPageIndexById(workpadState, pageId);

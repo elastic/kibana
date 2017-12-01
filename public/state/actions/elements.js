@@ -3,6 +3,7 @@ import { get, omit } from 'lodash';
 import { set, del } from 'object-path-immutable';
 import { createThunk } from 'redux-thunks';
 import * as args from './resolved_args';
+import { selectElement } from './transient';
 import { getPages, getElementById } from '../selectors/workpad';
 import { getValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
@@ -134,6 +135,23 @@ export const fetchAllRenderables = createThunk('fetchAllRenderables', ({ dispatc
   });
 });
 
+export const duplicateElement = createThunk('duplicateElement', ({ dispatch, type }, element, pageId) => {
+  const newElement = Object.assign({}, getDefaultElement(), omit(element, 'id'));
+  // move the element so users can see that it was added
+  newElement.position.top = newElement.position.top + 10;
+  newElement.position.left = newElement.position.left + 10;
+  const _duplicateElement = createAction(type);
+  dispatch(_duplicateElement({ pageId, element: newElement }));
+
+  // TODO: should something special happen to filters when duplicating an element?
+  // refresh all elements if there's a filter, otherwise just render the new element
+  if (element.filter) dispatch(fetchAllRenderables());
+  else dispatch(fetchRenderable(newElement));
+
+  // select the new element
+  dispatch(selectElement(newElement.id));
+});
+
 export const removeElement = createThunk('removeElement', ({ dispatch, getState }, elementId, pageId) => {
   const element = getElementById(getState(), elementId, pageId);
   const shouldRefresh = element.filter != null && element.filter.length > 0;
@@ -255,6 +273,8 @@ export const addElement = createThunk('addElement', ({ dispatch }, pageId, eleme
   const newElement = Object.assign({}, getDefaultElement(), omit(element, 'id'));
   const _addElement = createAction('addElement');
   dispatch(_addElement({ pageId, element: newElement }));
+
+  // refresh all elements if there's a filter, otherwise just render the new element
   if (element.filter) dispatch(fetchAllRenderables());
   else dispatch(fetchRenderable(newElement));
 });
