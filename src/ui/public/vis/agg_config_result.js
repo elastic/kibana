@@ -1,3 +1,5 @@
+import chrome from 'ui/chrome';
+
 let i = 0;
 
 // eslint-disable-next-line kibana-custom/no-default-export
@@ -36,7 +38,12 @@ AggConfigResult.prototype.createFilter = function () {
 };
 
 AggConfigResult.prototype.toString = function (contentType) {
-  return this.aggConfig.fieldFormatter(contentType)(this.value);
+  const parsedUrl = {
+    origin: window.location.origin,
+    pathname: window.location.pathname,
+    basePath: chrome.getBasePath(),
+  };
+  return this.aggConfig.fieldFormatter(contentType)(this.value, null, null, parsedUrl);
 };
 
 AggConfigResult.prototype.valueOf = function () {
