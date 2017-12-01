@@ -18,7 +18,7 @@ export {
   visRequestHandlers,
   visEditorTypes,
   savedObjectTypes,
-  embeddableHandlers,
+  embeddableFactories,
   fieldFormats,
   fieldFormatEditors,
   spyModes,
