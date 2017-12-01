@@ -9,6 +9,30 @@ import 'ui/visualize';
 import visTemplate from './loader_template.html';
 import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';
 
+/**
+ * The parameters accepted by the embedVisualize calls.
+ * @typedef {object} VisualizeLoaderParams
+ * @property {AppState} params.appState The appState this visualization should use.
+ *    If you don't spyecify it, the global AppState (that is decoded in the URL)
+ *    will be used. Usually you don't need to overwrite this, unless you don't
+ *    want the visualization to use the global AppState.
+ * @property {UiState} params.uiState The current uiState of the application. If you
+ *    don't pass a uiState, the visualization will creates it's own uiState to
+ *    store information like whether the legend is open or closed, but you don't
+ *    have access to it from the outside. Pass one in if you need that access.
+ * @property {object} params.timeRange An object with a min/max key, that must be
+ *    either a date in ISO format, or a valid datetime Elasticsearch expression,
+ *    e.g.: { min: 'now-7d/d', max: 'now' }
+ * @property {boolean} params.showSpyPanel Whether or not the spy panel should be available
+ *    on this chart. (default: false)
+ * @property {boolean} params.append If set to true, the visualization will be appended
+ *    to the passed element instead of replacing all its content. (default: false)
+ * @property {string} params.cssClass If specified this CSS class (or classes with space separated)
+ *    will be set to the root visuzalize element.
+ * @property {object} params.dataAttrs An object of key-value pairs, that will be set
+ *    as data-{key}="{value}" attributes on the visualization element.
+ */
+
 const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
   const renderVis = (el, savedObj, params) => {
     const scope = $rootScope.$new();
@@ -53,9 +77,8 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
      *    You can alternatively pass a jQuery element instead.
      * @param {String} id The id of the saved visualization. This is the id of the
      *    saved object that is stored in the .kibana index.
-     * @param {Object} params A list of parameters that will influence rendering.
-     *    See the `embedVisualizationWithSavedObject` documentation for a list of
-     *    all accepted parameters.
+     * @param {VisualizeLoaderParams} params A list of parameters that will influence rendering.
+     *
      * @return {Promise.<EmbeddedVisualizeHandler>} A promise that resolves to the
      *    handler for this visualization as soon as the saved object could be found.
      */
@@ -76,26 +99,7 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
      *    You can alternatively pass a jQuery element instead.
      * @param {Object} savedObj The savedObject as it could be retrieved by the
      *    `savedVisualizations` service.
-     * @param {Object} params A list of paramters that will influence rendering.
-     * @param {AppState} params.appState The appState this visualization should use.
-     *    If you don't spyecify it, the global AppState (that is decoded in the URL)
-     *    will be used. Usually you don't need to overwrite this, unless you don't
-     *    want the visualization to use the global AppState.
-     * @param {UiState} params.uiState The current uiState of the application. If you
-     *    don't pass a uiState, the visualization will creates it's own uiState to
-     *    store information like whether the legend is open or closed, but you don't
-     *    have access to it from the outside. Pass one in if you need that access.
-     * @param {object} params.timeRange An object with a min/max key, that must be
-     *    either a date in ISO format, or a valid datetime Elasticsearch expression,
-     *    e.g.: { min: 'now-7d/d', max: 'now' }
-     * @param {boolean} params.showSpyPanel Whether or not the spy panel should be available
-     *    on this chart. (default: false)
-     * @param {boolean} params.append If set to true, the visualization will be appended
-     *    to the passed element instead of replacing all its content. (default: false)
-     * @param {String} params.cssClass If specified this CSS class (or classes with space separated)
-     *    will be set to the root visuzalize element.
-     * @param {Object} params.dataAttrs An object of key-value pairs, that will be set
-     *    as data-{key}="{value}" attributes on the visualization element.
+     * @param {VisualizeLoaderParams} params A list of paramters that will influence rendering.
      *
      * @return {EmbeddedVisualizeHandler} The handler to the visualization.
      */
