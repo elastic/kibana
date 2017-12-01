@@ -7,49 +7,7 @@ import angular from 'angular';
 import chrome from 'ui/chrome';
 import 'ui/visualize';
 import visTemplate from './loader_template.html';
-
-
-/**
- * A handler to the embedded visualization. It offers several methods to interact
- * with the visualization.
- */
-class EmbeddedVisualizeHandler {
-  constructor(element, scope) {
-    this._element = element;
-    this._scope = scope;
-    this._renderComplete = new Promise(resolve => {
-      this._element.on('renderComplete', resolve);
-    });
-  }
-
-  /**
-   * Destroy the underlying Angular scope of the visualization. This should be
-   * called whenever you remove the visualization.
-   */
-  destroy() {
-    this._scope.$destroy();
-  }
-
-  /**
-   * Return the actual DOM element (wrapped in jQuery) of the rendered visualization.
-   * This is especially useful if you used `append: true` in the parameters where
-   * the visualization will be appended to the specified container.
-   */
-  get element() {
-    return this._element;
-  }
-
-  /**
-   * Returns a promise, that will resolve (without a value) once the rendering of
-   * the visualization has finished.
-   *
-   * @returns {Promise} Promise, that resolves as soon as the visualization is done rendering.
-   */
-  onRenderComplete() {
-    return this._renderComplete;
-  }
-
-}
+import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';
 
 const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
   const renderVis = (el, savedObj, params) => {
@@ -167,4 +125,4 @@ function getVisualizeLoader() {
   });
 }
 
-export { getVisualizeLoader, VisualizeLoaderProvider, EmbeddedVisualizeHandler };
+export { getVisualizeLoader, VisualizeLoaderProvider };

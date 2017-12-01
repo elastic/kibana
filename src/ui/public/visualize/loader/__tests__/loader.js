@@ -9,7 +9,8 @@ import FixturesStubbedSearchSourceProvider from 'fixtures/stubbed_search_source'
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 
 import { VisProvider } from 'ui/vis';
-import { getVisualizeLoader, EmbeddedVisualizeHandler } from '../loader';
+import { getVisualizeLoader } from '../loader';
+import { EmbeddedVisualizeHandler } from '../embedded_visualize_handler';
 
 describe('visualize loader', () => {
 
