@@ -28,6 +28,10 @@ module.directive('inputBaseSixtyFour', function () {
     require: 'ngModel',
     scope: 'isolate',
     link: function ($scope, $elem, attrs, ngModel) {
+      if ($elem.prop('multiple')) {
+        throw new Error('Cannot use input-base-sixty-four directive on input with `multiple` attribute');
+      }
+
       const maxSizeValidator = (dataUrl) => {
         const base64ToKb = (length) => {
           const totalBits = length * 6; // 6 bits per character in base64
@@ -52,7 +56,7 @@ module.directive('inputBaseSixtyFour', function () {
           }
 
           if (files.length > 1) {
-            throw new Error('Only one file is supported at this time');
+            throw new Error('Cannot use input-base-sixty-four directive on input with `multiple` attribute');
           }
 
           return createFileContent$(files[0]);
