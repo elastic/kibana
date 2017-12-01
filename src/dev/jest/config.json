@@ -1,5 +1,5 @@
 {
-  "rootDir": "../../",
+  "rootDir": "../../..",
   "roots": [
     "<rootDir>/src/ui/public",
     "<rootDir>/src/core_plugins",
@@ -18,12 +18,12 @@
     "^ui_framework/services": "<rootDir>/ui_framework/services",
     "^ui_framework/src/test": "<rootDir>/ui_framework/src/test",
     "^ui/(.*)": "<rootDir>/src/ui/public/$1",
-    "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/src/jest/mocks/file_mock.js",
-    "\\.(css|less|scss)$": "<rootDir>/src/jest/mocks/style_mock.js"
+    "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/src/dev/jest/mocks/file_mock.js",
+    "\\.(css|less|scss)$": "<rootDir>/src/dev/jest/mocks/style_mock.js"
   },
   "setupFiles": [
-    "<rootDir>/src/jest/setup/babel_polyfill.js",
-    "<rootDir>/src/jest/setup/request_animation_frame_polyfill.js"
+    "<rootDir>/src/dev/jest/setup/babel_polyfill.js",
+    "<rootDir>/src/dev/jest/setup/request_animation_frame_polyfill.js"
   ],
   "coverageDirectory": "<rootDir>/target/jest-coverage",
   "coverageReporters": [
@@ -42,12 +42,13 @@
     "<rootDir>/ui_framework/generator-kui/"
   ],
   "transform": {
-    "^.+\\.js$": "<rootDir>/src/jest/babelTransform.js"
+    "^.+\\.js$": "<rootDir>/src/dev/jest/babel_transform.js"
   },
   "transformIgnorePatterns": [
     "[/\\\\]node_modules[/\\\\].+\\.js$"
   ],
   "snapshotSerializers": [
     "<rootDir>/node_modules/enzyme-to-json/serializer"
-  ]
+  ],
+  "testResultsProcessor": "<rootDir>/src/dev/jest/result_processor.js"
 }
