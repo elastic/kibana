@@ -189,5 +189,6 @@ function logFatal(message, server) {
     server.log(['fatal'], message);
   }
 
+  // It's possible for the Hapi logger to not be setup
   console.error('FATAL', message);
 }
