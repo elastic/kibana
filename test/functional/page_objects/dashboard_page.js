@@ -36,10 +36,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async clickEditVisualization() {
       log.debug('clickEditVisualization');
-      await testSubjects.click('dashboardPanelToggleMenuIcon');
 
       // Edit link may sometimes be disabled if the embeddable isn't rendered yet.
       await retry.try(async () => {
+        await this.showPanelEditControlsDropdownMenu();
         await testSubjects.click('dashboardPanelEditLink');
         const current = await remote.getCurrentUrl();
         if (current.indexOf('visualize') < 0) {
@@ -466,6 +466,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async showPanelEditControlsDropdownMenu() {
+      log.debug('showPanelEditControlsDropdownMenu');
       const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
       if (editLinkExists) return;
       await testSubjects.click('dashboardPanelToggleMenuIcon');
