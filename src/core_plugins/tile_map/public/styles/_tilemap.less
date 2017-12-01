@@ -96,9 +96,11 @@
 
 .leaflet-container {
   background: @tilemap-leaflet-container-bg !important;
-  min-width: 1px !important;//the heatmap layer plugin logs an error to the console when the map is in a 0-sized container
-  min-height: 1px !important;//the heatmap layer plugin logs an error to the console when the map is in a 0-sized container
   outline: 0 !important;
+
+  //the heatmap layer plugin logs an error to the console when the map is in a 0-sized container
+  min-width: 1px !important;
+  min-height: 1px !important;
 }
 
 .leaflet-popup-content-wrapper {
