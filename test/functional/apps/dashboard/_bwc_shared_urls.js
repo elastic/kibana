@@ -4,7 +4,6 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
   const dashboardExpect = getService('dashboardExpect');
   const remote = getService('remote');
-  const retry = getService('retry');
   let kibanaBaseUrl;
 
   const urlQuery = `` +
@@ -36,45 +35,42 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('6.0 urls', () => {
+
       it('loads an unsaved dashboard', async function () {
         const url = `${kibanaBaseUrl}#/dashboard?${urlQuery}`;
 
         await remote.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        // The above "waitUntilLoadingHasFinished" isn't always sufficient because the loading indicator can pop up
-        // and be hidden quite a few times when hard refreshing a page.
-        retry.try(async () => {
-          const query = await PageObjects.dashboard.getQuery();
-          expect(query).to.equal('memory:>220000');
-        });
+        const query = await PageObjects.dashboard.getQuery();
+        expect(query).to.equal('memory:>220000');
 
         await dashboardExpect.pieSliceCount(5);
         await dashboardExpect.panelCount(2);
         await dashboardExpect.selectedLegendColorCount('#F9D9F9', 5);
       });
 
-      it('loads a saved dashboard', async function () {
-        await PageObjects.dashboard.saveDashboard('saved with colors', { storeTimeWithDashboard: true });
+      for (let i = 0; i < 25; i++) {
+        it('loads a saved dashboard', async function () {
+          await PageObjects.dashboard.saveDashboard(`saved with colors - ${i}`, { storeTimeWithDashboard: true });
 
-        const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
+          const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
 
-        const url = `${kibanaBaseUrl}#/dashboard/${id}`;
+          const url = `${kibanaBaseUrl}#/dashboard/${id}`;
 
-        await remote.get(url, true);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+          await remote.get(url, true);
+          await PageObjects.header.waitUntilLoadingHasFinished();
 
-        // The above "waitUntilLoadingHasFinished" isn't always sufficient because the loading indicator can pop up
-        // and be hidden quite a few times when hard refreshing a page.
-        retry.try(async () => {
           const query = await PageObjects.dashboard.getQuery();
           expect(query).to.equal('memory:>220000');
-        });
 
-        await dashboardExpect.pieSliceCount(5);
-        await dashboardExpect.panelCount(2);
-        await dashboardExpect.selectedLegendColorCount('#F9D9F9', 5);
-      });
+          await dashboardExpect.pieSliceCount(5);
+          await dashboardExpect.panelCount(2);
+          await dashboardExpect.selectedLegendColorCount('#F9D9F9', 5);
+
+          await PageObjects.dashboard.clickEdit();
+        });
+      }
 
       it('uiState in url takes precedence over saved dashboard state', async function () {
         const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
