@@ -1,3 +1,5 @@
+import chrome from 'ui/chrome';
+
 define(function () {
   let i = 0;
 
@@ -36,7 +38,12 @@ define(function () {
   };
 
   AggConfigResult.prototype.toString = function (contentType) {
-    return this.aggConfig.fieldFormatter(contentType)(this.value);
+    const parsedUrl = {
+      origin: window.location.origin,
+      pathname: window.location.pathname,
+      basePath: chrome.getBasePath(),
+    };
+    return this.aggConfig.fieldFormatter(contentType)(this.value, null, null, parsedUrl);
   };
 
   AggConfigResult.prototype.valueOf = function () {
