@@ -30,9 +30,14 @@ module.directive('inputBaseSixtyFour', function () {
     scope: 'isolate',
     link: function ($scope, $elem, attrs, ngModel) {
       const maxSizeValidator = (dataUrl) => {
+        const base64ToKb = (length) => {
+          const totalBits = length * 6; // 6 bits per character in base64
+          return totalBits / 8 / 1024;
+        };
+
         return {
           errorKey: 'maxSize',
-          isValid: dataUrl.length <= attrs.max * 8 * 1024 / 6
+          isValid: base64ToKb(dataUrl.length) <= attrs.max
         };
       };
 

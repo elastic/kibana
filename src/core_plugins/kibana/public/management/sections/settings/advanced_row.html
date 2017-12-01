@@ -103,7 +103,7 @@
           ng-if="conf.image"
           ng-model="conf.unsavedValue"
           input-base-sixty-four
-          max="100"
+          max="200"
           accept=".jpg,.jpeg,.png"
           type="file"
           class="kuiTextInput fullWidth"
@@ -114,7 +114,7 @@
           class="kuiSubText"
           ng-show="forms.configEdit.$error.maxSize"
         >
-          Maximum size exceeded
+          Image is too large, maximum size is 200kB
         </p>
 
       </form>
