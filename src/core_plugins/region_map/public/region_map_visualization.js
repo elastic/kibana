@@ -25,10 +25,6 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
     async render(esReponse, status) {
       await super.render(esReponse, status);
 
-      if (!this._choroplethLayer) {
-        return;
-      }
-
       await this._choroplethLayer.whenDataLoaded();
     }
 

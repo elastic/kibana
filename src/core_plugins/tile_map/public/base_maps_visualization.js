@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { KibanaMap } from './kibana_map';
+import { Observable } from 'rxjs/Rx';
 import 'ui/vis/map/service_settings';
 
 
@@ -46,31 +47,27 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
      */
     async render(esResponse, status) {
 
-      return new Promise(async (resolve) => {
+      await this._mapIsLoaded;
 
-        await this._mapIsLoaded;
+      if (status.resize) {
+        this._kibanaMap.resize();
+      }
+      if (status.params || status.aggs) {
+        await this._updateParams();
+      }
 
-        if (status.resize) {
-          this._kibanaMap.resize();
-        }
-        if (status.params || status.aggs) {
-          await this._updateParams();
-        }
+      if (!this.isDataUsable(esResponse)) {
+        return;
+      }
 
-        if (!this.isDataUsable(esResponse)) {
-          return resolve();
-        }
+      if (status.data) {
+        await this._updateData(esResponse);
+      }
+      if (status.uiState) {
+        this._kibanaMap.useUiStateFromVisualization(this.vis);
+      }
 
-        if (status.data) {
-          await this._updateData(esResponse);
-        }
-        if (status.uiState) {
-          this._kibanaMap.useUiStateFromVisualization(this.vis);
-        }
-
-        this._doRenderComplete(resolve);
-
-      });
+      await this._whenBaseLayerIsLoaded();
     }
 
     /**
@@ -94,6 +91,13 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
       this._kibanaMap.addLegendControl();
       this._kibanaMap.addFitControl();
       this._kibanaMap.persistUiStateForVisualization(this.vis);
+
+      this._kibanaMap.on('baseLayer:loaded', () => {
+        this._baseLayerDirty = false;
+      });
+      this._kibanaMap.on('baseLayer:loading', () => {
+        this._baseLayerDirty = true;
+      });
 
       const mapparams = this._getMapsParams();
       await this._updateBaseLayer(mapparams);
@@ -192,26 +196,14 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
       );
     }
 
-    _doRenderCompleteWhenBaseLayerIsLoaded(resolve, endTime) {
-      if (this._baseLayerDirty) {
-        if (Date.now() <= endTime) {
-          setTimeout(() => {
-            this._doRenderCompleteWhenBaseLayerIsLoaded(resolve, endTime);
-          }, 10);
-        } else {
-          //wait time exceeded. If the baselayer cannot load, we will still fire a render-complete.
-          //This is because slow or unstable network connections cause tiles to get dropped.
-          //It is unfortunate that tiles get dropped, but we should not drop the render-complete because of it.
-          resolve();
-        }
-      } else {
-        resolve();
-      }
-    }
+    _whenBaseLayerIsLoaded() {
 
-    _doRenderComplete(resolve) {
-      const msAllowedForBaseLayerToLoad = 10000;
-      this._doRenderCompleteWhenBaseLayerIsLoaded(resolve, Date.now() + msAllowedForBaseLayerToLoad);
+      const maxTimeForBaseLayer = 10000;
+      const interval$ = Observable.interval(10).filter(() => !this._baseLayerDirty);
+      const timer$ = Observable.timer(maxTimeForBaseLayer);
+
+      return Observable.race(interval$, timer$).first().toPromise();
+
     }
 
   };

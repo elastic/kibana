@@ -60,12 +60,6 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
       this._kibanaMap.on('drawCreated:polygon', event => {
         this.addSpatialFilter(_.get(this._chartData, 'geohashGridAgg'), 'geo_polygon', { points: event.points });
       });
-      this._kibanaMap.on('baseLayer:loaded', () => {
-        this._baseLayerDirty = false;
-      });
-      this._kibanaMap.on('baseLayer:loading', () => {
-        this._baseLayerDirty = true;
-      });
     }
 
     async _updateData(esResponse) {
