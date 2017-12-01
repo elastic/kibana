@@ -36,7 +36,7 @@ module.directive('inputBaseSixtyFour', function () {
 
         return {
           errorKey: 'maxSize',
-          isValid: base64ToKb(dataUrl.length) <= attrs.max
+          isValid: attrs.max === '' || base64ToKb(dataUrl.length) <= parseInt(attrs.max)
         };
       };
 
