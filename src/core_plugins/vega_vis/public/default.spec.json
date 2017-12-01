@@ -1,22 +1,80 @@
 {
+  // Use the "reformat" buttons above to remove comments
+
   "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
-  "title": "Tesla Motors Daily Stock Price",
+  "title": "Event counts from all indexes",
+
+  // Define the data source
   "data": {
-    // A CSV file with the Tesla stock prices, from
-    // https://www.quandl.com/api/v3/datasets/WIKI/TSLA.csv
-    "url": "https://gist.githubusercontent.com/nyurik/2419ec5f0edf34852ab62b1bc0e9ad70/raw/8b09ff7084a2f930e0130c1391858d62ae703d16/TSLA.csv"
+    // When url is set to an object instead of a string,
+    // it is treated as an Elasticsearch query.
+    // This query counts the number of documents per time interval,
+    // assuming you have a @timestamp field in your data
+    "url": {
+      // Which indexes to search
+      "index": "_all",
+      // Connect dashboard context (the date range and filters)
+      "%context_query%": "@timestamp",
+      // The body element may contain "aggs" and "query" subfields
+      "body": {
+        "aggs": {
+          "time_buckets": {
+            "date_histogram": {
+              // Use date histogram aggregation on @timestamp field
+              "field": "@timestamp",
+              // interval value will depend on the daterange picker
+              // Use an integer to set approximate bucket count
+              "interval": {"%autointerval%": true},
+              // Make sure we get an entire range, even if it has no data
+              "extended_bounds": {
+                "min": {"%timefilter%": "min"},
+                "max": {"%timefilter%": "max"}
+              },
+              // Use this for linear (e.g. line, area) graphs
+              // Without it, empty buckets will not show up
+              "min_doc_count": 0
+            }
+          }
+        }
+      },
+      // Speed up the response by only including aggregation results
+      "size": 0
+    },
+    // The full ES result has this structure, but for this graph we only need
+    // the list of bucket values, so use format.property:
+    // {
+    //   "aggregations": {
+    //     "time_buckets": {
+    //       "buckets": [{
+    //           "key_as_string": "2015-11-30T22:00:00.000Z",
+    //           "key": 1448920800000,
+    //           "doc_count": 0
+    //         }, {
+    //           "key_as_string": "2015-11-30T23:00:00.000Z",
+    //           "key": 1448924400000,
+    //           "doc_count": 0
+    //         }, ...
+    "format": {"property": "aggregations.time_buckets.buckets"}
   },
+
+  // Define how data should be shown
+  // Other mark values: area, bar, circle, line, point, rect, rule, square, text, and tick
+  // See https://vega.github.io/vega-lite/docs/mark.html
   "mark": "line",
+
+  // See https://vega.github.io/vega-lite/docs/encoding.html
   "encoding": {
     "x": {
-      "field": "Date",
+      // The "key" value is the timestamp in milliseconds. Use it for X axis.
+      "field": "key",
       "type": "temporal",
-      "axis": {"title": false}
+      "axis": {"title": false} // Customize X axis format
     },
     "y": {
-      "field": "Close",
+      // The "doc_count" is the count per bucket. Use it for Y axis.
+      "field": "doc_count",
       "type": "quantitative",
-      "axis": {"title": "Closing Price"}
+      "axis": {"title": "Document count"}
     }
   }
 }

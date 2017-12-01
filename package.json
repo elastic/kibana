@@ -218,8 +218,8 @@
     "json-stringify-pretty-compact": "^1.0.4",
     "leaflet-vega": "^0.5.3",
     "split.js": "^1.3.5",
-    "vega": "^3.0.7",
-    "vega-lite": "^2.0.0",
+    "vega": "^3.0.8",
+    "vega-lite": "^2.0.2",
     "vega-schema-url-parser": "^1.0.0-beta.3"
   },
   "devDependencies": {
