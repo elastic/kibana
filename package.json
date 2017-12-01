@@ -72,7 +72,7 @@
   "dependencies": {
     "@elastic/datemath": "2.3.0",
     "@elastic/filesaver": "1.1.2",
-    "@elastic/numeral": "2.2.1",
+    "@elastic/numeral": "2.2.2",
     "@elastic/test-subj-selector": "0.2.1",
     "@elastic/ui-ace": "0.2.3",
     "@elastic/webpack-directory-name-as-main": "2.0.2",
