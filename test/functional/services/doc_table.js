@@ -16,7 +16,7 @@ export function DocTableProvider({ getService }) {
     }
 
     async getAnchorDetailsRow(table) {
-      return await table.findByCssSelector('[data-test-subj~="docTableAnchorRow"] + tr');
+      return await table.findByCssSelector('[data-test-subj~="docTableAnchorRow"] + [data-test-subj~="docTableDetailsRow"]');
     }
 
     async getRowExpandToggle(row) {
@@ -24,7 +24,7 @@ export function DocTableProvider({ getService }) {
     }
 
     async getDetailsRows(table) {
-      return await table.findAllByCssSelector('[data-test-subj~="docTableRow"] + tr');
+      return await table.findAllByCssSelector('[data-test-subj~="docTableRow"] + [data-test-subj~="docTableDetailsRow"]');
     }
 
     async getRowActions(row) {
@@ -57,9 +57,9 @@ export function DocTableProvider({ getService }) {
       const rowExpandToggle = await this.getRowExpandToggle(row);
       await rowExpandToggle.click();
 
-      const detailsRow = await row.findByXpath('./following-sibling::tr');
+      const detailsRow = await row.findByXpath('./following-sibling::*[@data-test-subj="docTableDetailsRow"]');
       return await retry.try(async () => {
-        return detailsRow.findByCssSelector('doc-viewer');
+        return detailsRow.findByCssSelector('[data-test-subj~=docViewer]');
       });
     }
   }
