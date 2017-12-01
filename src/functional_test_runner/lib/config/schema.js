@@ -2,8 +2,6 @@ import { resolve, dirname } from 'path';
 
 import Joi from 'joi';
 
-import { ConsoleReporterProvider } from '../reporters';
-
 // valid pattern for ID
 // enforced camel-case identifiers for consistency
 const ID_PATTERN = /^[a-zA-Z0-9_]+$/;
@@ -62,7 +60,12 @@ export const schema = Joi.object().keys({
     slow: Joi.number().default(30000),
     timeout: Joi.number().default(INSPECTING ? Infinity : 120000),
     ui: Joi.string().default('bdd'),
-    reporterProvider: Joi.func().default(ConsoleReporterProvider),
+  }).default(),
+
+  junit: Joi.object().keys({
+    enabled: Joi.boolean().default(!!process.env.CI),
+    reportName: Joi.string(),
+    testRootDirectory: Joi.string()
   }).default(),
 
   users: Joi.object().pattern(
