@@ -1,5 +1,6 @@
 import { CLIEngine } from 'eslint';
 
+import { matchesAnyGlob } from '../globs';
 import { DEFAULT_ESLINT_PATHS } from './default_eslint_paths';
 
 /**
@@ -19,8 +20,9 @@ export function pickFilesToLint(log, files) {
   const sourcePathGlobs = cli.resolveFileGlobPatterns(DEFAULT_ESLINT_PATHS);
 
   return files.filter(file => {
-    const isNormallyLinted = file.matchesAnyGlob(sourcePathGlobs);
-    const isExplicitlyIgnored = isNormallyLinted && cli.isPathIgnored(file.getRelativePath());
+    const path = file.getRelativePath();
+    const isNormallyLinted = matchesAnyGlob(path, sourcePathGlobs);
+    const isExplicitlyIgnored = isNormallyLinted && cli.isPathIgnored(path);
 
     if (isNormallyLinted && !isExplicitlyIgnored) {
       log.debug('linting %j', file);

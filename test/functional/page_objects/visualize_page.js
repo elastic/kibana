@@ -377,6 +377,12 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await input.type(newValue + '');
     }
 
+    async setSize(newValue) {
+      const input = await find.byCssSelector('input[name="size"]');
+      await input.clearValue();
+      await input.type(newValue);
+    }
+
     async clickGo() {
       await testSubjects.click('visualizeEditorRenderButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -717,6 +723,18 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
           if (!onLandingPage) throw new Error('Not on the landing page.');
         });
       }
+    }
+
+    async clickLegendOption(name) {
+      await testSubjects.click(`legend-${name}`);
+    }
+
+    async selectNewLegendColorChoice(color) {
+      await testSubjects.click(`legendSelectColor-${color}`);
+    }
+
+    async doesSelectedLegendColorExist(color) {
+      return await testSubjects.exists(`legendSelectedColor-${color}`);
     }
   }
 
