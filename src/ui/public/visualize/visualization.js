@@ -102,14 +102,7 @@ uiModules
         const Visualization = $scope.vis.type.visualization;
         const visualization = new Visualization(getVisEl()[0], $scope.vis);
 
-        if (visualization.init) {
-          visualization.init().then(() => {
-            $scope.vis.initialized = true;
-            $scope.$emit('render');
-          });
-        } else {
-          $scope.vis.initialized = true;
-        }
+        $scope.vis.initialized = true;
 
         const renderFunction = _.debounce(() => {
           const container = getVisContainer();
