@@ -24,7 +24,7 @@ export class EmbeddedVisualizeHandler {
    * This is especially useful if you used `append: true` in the parameters where
    * the visualization will be appended to the specified container.
    */
-  get element() {
+  getElement() {
     return this._element;
   }
 

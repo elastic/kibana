@@ -200,13 +200,13 @@ describe('visualize loader', () => {
       it('should give access to the visualzie element', () => {
         const container = newContainer();
         const handler = loader.embedVisualizationWithSavedObject(container, createSavedObject(), {});
-        expect(handler.element[0]).to.be(container.find('visualize')[0]);
+        expect(handler.getElement()[0]).to.be(container.find('visualize')[0]);
       });
 
       it('should use a jquery wrapper for handler.element', () => {
         const handler = loader.embedVisualizationWithSavedObject(newContainer(), createSavedObject(), {});
         // Every jquery wrapper has a .jquery property with the version number
-        expect(handler.element.jquery).to.be.ok();
+        expect(handler.getElement().jquery).to.be.ok();
       });
 
       it('should have onRenderComplete returns a promise resolving on renderComplete event', async () => {

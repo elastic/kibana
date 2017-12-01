@@ -50,7 +50,7 @@ found. It will reject, if the `id` is invalid.
 The returned `EmbeddedVisualizeHandler` itself has the following methods and properties:
 
 - `destroy()`: destroys the underlying Angualr scope of the visualization
-- `element`: a reference to the jQuery wrapped DOM element, that renders the visualization
+- `getElement()`: a reference to the jQuery wrapped DOM element, that renders the visualization
 - `onRenderComplete()`: will return a promise, that resolves as soon as the visualization has
   finished rendering
 
