@@ -71,6 +71,8 @@ module.directive('inputBaseSixtyFour', function () {
               ngModel.$setViewValue(dataUrl);
             }
           });
+        }, (err) => {
+          throw err;
         });
 
       $scope.$on('destroy', unsubscribe);
