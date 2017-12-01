@@ -55,12 +55,12 @@ export default class ChoroplethLayer extends KibanaMapLayer {
           this._leafletLayer.addData(data);
           this._loaded = true;
           this._setStyle();
-          resolve(true);
+          resolve();
         },
         error: () => {
           this._loaded = true;
           this._error = true;
-          resolve(true);
+          resolve();
         }
       });
     });
