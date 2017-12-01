@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import { extractBuckets } from 'ui/agg_response/hierarchical/_extract_buckets';
+import { combineMissingBucket } from 'ui/agg_response/combine_missing_bucket';
 
 export function createRawData(vis, resp) {
 
@@ -60,10 +61,7 @@ export function createRawData(vis, resp) {
     }
 
     if (agg.params.missing) {
-      data[agg.id].buckets.push({
-        key: 'missing',
-        ...data[agg.id + '-missing']
-      });
+      combineMissingBucket(agg.id, data);
     }
 
     // iterate through all the buckets

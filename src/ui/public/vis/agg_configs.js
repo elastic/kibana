@@ -134,8 +134,10 @@ export function VisAggConfigsProvider(Private) {
 
         parseParentAggs(dslLvlCursor, dsl);
 
-        if (_.has(prevDsl, 'prevDsl.parentAggs[prevConfig.id + "-missing"].aggs')) {
-          prevDsl.parentAggs[prevConfig.id + '-missing'].aggs[config.id] = config.toDsl();
+        if (prevConfig && _.has(prevDsl, `parentAggs["${prevConfig.id}-missing"]`)) {
+          const missingAgg = prevDsl.parentAggs[prevConfig.id + '-missing'];
+          if (!missingAgg.aggs) missingAgg.aggs = {};
+          missingAgg.aggs[config.id] = config.toDsl();
         }
 
         if (config.schema.group === 'buckets' && i < list.length - 1) {

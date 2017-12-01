@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { TabbedAggResponseWriterProvider } from 'ui/agg_response/tabify/_response_writer';
 import { AggResponseBucketsProvider } from 'ui/agg_response/tabify/_buckets';
+import { combineMissingBucket } from 'ui/agg_response/combine_missing_bucket';
 
 export function AggResponseTabifyProvider(Private, Notifier) {
   const TabbedAggResponseWriter = Private(TabbedAggResponseWriterProvider);
@@ -35,12 +36,8 @@ export function AggResponseTabifyProvider(Private, Notifier) {
 
     switch (agg.schema.group) {
       case 'buckets':
-        if (agg.params.missing && bucket[agg.id + '-missing']) {
-          bucket[agg.id].buckets.push({
-            key: 'missing',
-            ...bucket[agg.id + '-missing']
-          });
-          delete bucket[agg.id + '-missing'];
+        if (agg.params.missing) {
+          combineMissingBucket(agg.id, bucket);
         }
         const buckets = new Buckets(bucket[agg.id], agg.params);
         if (buckets.length) {
