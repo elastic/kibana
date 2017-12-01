@@ -3,10 +3,19 @@ import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
 import {
   KuiLinkButton,
-  KuiFlexGroup,
-  KuiFlexItem,
-  KuiFlexGrid,
 } from 'ui_framework/components';
+
+import {
+  EuiPage,
+  EuiPanel,
+  EuiTitle,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlexGrid,
+  EuiText,
+} from '@elastic/eui';
+
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
 export function Home({ addBasePath, directories }) {
@@ -18,92 +27,102 @@ export function Home({ addBasePath, directories }) {
       })
       .map((directory) => {
         return (
-          <KuiFlexItem style={{ minHeight: 64 }} key={directory.id}>
+          <EuiFlexItem style={{ minHeight: 64 }} key={directory.id}>
             <Synopsis
               description={directory.description}
               iconUrl={addBasePath(directory.icon)}
               title={directory.title}
               url={addBasePath(directory.path)}
             />
-          </KuiFlexItem>
+          </EuiFlexItem>
         );
       });
   };
 
 
   return (
-    <div className="kuiView home">
-      <div className="kuiViewContent">
+    <EuiPage className="home">
 
-        <div className="kuiViewContentItem kuiVerticalRhythmXLarge">
-          <KuiFlexGroup
-            className="kuiVerticalRhythmSmall"
-            justifyContent="spaceBetween"
-            alignItems="flexEnd"
-          >
-            <KuiFlexItem>
-              <h1 className="kuiTitle">
-                Welcome to Kibana
-              </h1>
-            </KuiFlexItem>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        alignItems="flexEnd"
+      >
+        <EuiFlexItem>
+          <EuiTitle size="l">
+            <h1>Welcome to Kibana</h1>
+          </EuiTitle>
+        </EuiFlexItem>
 
-            <KuiFlexItem grow={false}>
-              <KuiFlexGroup alignItems="center">
-                <KuiFlexItem grow={false}>
-                  <p className="kuiText kuiSubduedText">
-                    Data already in Elasticsearch?
-                  </p>
-                </KuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={false}>
+              <p className="kuiText kuiSubduedText">
+                Data already in Elasticsearch?
+              </p>
+            </EuiFlexItem>
 
-                <KuiFlexItem grow={false}>
-                  <KuiLinkButton
-                    buttonType="secondary"
-                    href={addBasePath('/app/kibana#/management/kibana/index')}
-                  >
-                    Set up index patterns
-                  </KuiLinkButton>
-                </KuiFlexItem>
-              </KuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <KuiLinkButton
+                buttonType="secondary"
+                href={addBasePath('/app/kibana#/management/kibana/index')}
+              >
+                Set up index patterns
+              </KuiLinkButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-            </KuiFlexItem>
-          </KuiFlexGroup>
-        </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-        <div className="kuiViewContentItem kuiVerticalRhythmXLarge">
-          <KuiFlexGroup className="kuiVerticalRhythm">
-            <KuiFlexItem className="kuiPanel homePanel">
-              <h3 className="kuiSubTitle kuiVerticalRhythm">
+      <EuiSpacer size="l" />
+
+      <EuiFlexGroup className="kuiVerticalRhythm">
+        <EuiFlexItem>
+          <EuiPanel paddingSize="l">
+            <EuiTitle>
+              <h3>
                 Visualize and Explore Data
               </h3>
-              <KuiFlexGrid className="kuiVerticalRhythmSmall homeTopFeatures" columns={2}>
-                { renderDirectories(FeatureCatalogueCategory.DATA) }
-              </KuiFlexGrid>
-            </KuiFlexItem>
-            <KuiFlexItem className="kuiPanel homePanel">
-              <h3 className="kuiSubTitle kuiVerticalRhythm">
+            </EuiTitle>
+            <EuiSpacer size="m"/>
+            <EuiFlexGrid columns={2}>
+              { renderDirectories(FeatureCatalogueCategory.DATA) }
+            </EuiFlexGrid>
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiPanel paddingSize="l">
+            <EuiTitle>
+              <h3>
                 Manage and Administer the Elastic Stack
               </h3>
-              <KuiFlexGrid className="kuiVerticalRhythmSmall homeTopFeatures" columns={2}>
-                { renderDirectories(FeatureCatalogueCategory.ADMIN) }
-              </KuiFlexGrid>
-            </KuiFlexItem>
-          </KuiFlexGroup>
-        </div>
+            </EuiTitle>
+            <EuiSpacer size="m"/>
+            <EuiFlexGrid columns={2}>
+              { renderDirectories(FeatureCatalogueCategory.ADMIN) }
+            </EuiFlexGrid>
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-        <div className="kuiViewContentItem kuiVerticalRhythmXLarge text-center">
-          <h4 className="kuiSubduedText kuiVerticalRhythmSmall">
+      <EuiSpacer size="l" />
+
+      <div className="text-center">
+        <EuiText>
+          <p>
             Didn’t find what you were looking for?
-          </h4>
-          <KuiLinkButton
-            buttonType="secondary"
-            href="#/home/feature_directory"
-          >
-            View full directory of Kibana plugins
-          </KuiLinkButton>
-        </div>
-
+          </p>
+        </EuiText>
+        <EuiSpacer size="s" />
+        <KuiLinkButton
+          buttonType="secondary"
+          href="#/home/feature_directory"
+        >
+          View full directory of Kibana plugins
+        </KuiLinkButton>
       </div>
-    </div>
+
+    </EuiPage>
   );
 }
 
