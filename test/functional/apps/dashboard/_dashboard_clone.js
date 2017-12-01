@@ -32,10 +32,15 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('clone warns on duplicate name', async function () {
+    it('clone appends Copy to the dashboard title name', async () => {
       await PageObjects.dashboard.loadSavedDashboard(dashboardName);
       await PageObjects.dashboard.clickClone();
 
+      const title = await PageObjects.dashboard.getCloneTitle();
+      expect(title).to.be(clonedDashboardName);
+    });
+
+    it('and warns on duplicate name', async function () {
       await PageObjects.dashboard.confirmClone();
       const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
       expect(isConfirmOpen).to.equal(true);
