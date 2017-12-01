@@ -116,7 +116,8 @@ app.directive('dashboardApp', function ($injector) {
         filterBar.getFilters()
       );
 
-      timefilter.enabled = true;
+      timefilter.enableAutoRefreshSelector();
+      timefilter.enableTimeRangeSelector();
       dash.searchSource.highlightAll(true);
       dash.searchSource.version(true);
       courier.setRootSearchSource(dash.searchSource);

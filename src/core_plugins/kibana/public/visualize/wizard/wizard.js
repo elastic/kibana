@@ -32,7 +32,8 @@ routes.when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
 });
 
 module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, timefilter, Private, config) {
-  timefilter.enabled = false;
+  timefilter.disableAutoRefreshSelector();
+  timefilter.disableTimeRangeSelector();
 
   const visTypeCategoryToHumanReadableMap = {
     [CATEGORY.BASIC]: 'Basic Charts',
@@ -223,7 +224,8 @@ module.controller('VisualizeWizardStep2', function ($route, $scope, timefilter, 
     );
   };
 
-  timefilter.enabled = false;
+  timefilter.disableAutoRefreshSelector();
+  timefilter.disableTimeRangeSelector();
 
   $scope.indexPattern = {
     selection: null,

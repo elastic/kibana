@@ -313,7 +313,8 @@ POST _reindex
     "index": ".kibana-6"
   },
   "script": {
-    "source": "ctx._source = [ ctx._type : ctx._source ]; ctx._source.type = ctx._type; ctx._id = ctx._type + \":\" + ctx._id; ctx._type = \"doc\"; "
+    "inline": "ctx._source = [ ctx._type : ctx._source ]; ctx._source.type = ctx._type; ctx._id = ctx._type + \":\" + ctx._id; ctx._type = \"doc\"; ",
+    "lang": "painless"
   }
 }
 --------------------------------------------------
