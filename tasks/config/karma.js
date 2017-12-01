@@ -1,6 +1,8 @@
 import { times } from 'lodash';
+import { resolve, dirname } from 'path';
 
 const TOTAL_CI_SHARDS = 4;
+const ROOT = dirname(require.resolve('../../package.json'));
 
 module.exports = function (grunt) {
   const config = {
@@ -18,7 +20,20 @@ module.exports = function (grunt) {
       browsers: ['<%= karmaBrowser %>'],
 
       // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-      reporters: process.env.CI ? ['dots'] : ['progress'],
+      reporters: process.env.CI ? ['dots', 'junit'] : ['progress'],
+
+      junitReporter: {
+        outputFile: resolve(ROOT, 'target/junit/karma.xml'),
+        useBrowserName: false,
+        nameFormatter: (browser, result) => [
+          ...result.suite,
+          result.description
+        ].join(' '),
+        classNameFormatter: (browser, result) => {
+          const rootSuite = result.suite[0] || result.description;
+          return `Browser Unit Tests.${rootSuite.split('.').join('·')}`;
+        }
+      },
 
       // list of files / patterns to load in the browser
       files: [
