@@ -10,7 +10,7 @@ describe('bucketTransform', () => {
       expect(fn(metric)).to.eql({
         bucket_script: {
           buckets_path: { count: '_count' },
-          script: { inline: 'count * 1', lang: 'expression' },
+          script: { source: 'count * 1', lang: 'expression' },
           gap_policy: 'skip'
         }
       });
@@ -340,8 +340,11 @@ describe('bucketTransform', () => {
           },
           gap_policy: 'skip',
           script: {
-            inline: 'params.idle != null ? 1 - params.idle : 0',
+            source: 'params.idle != null ? 1 - params.idle : 0',
             lang: 'painless'
+          },
+          params: {
+            _interval: 10000
           }
         }
       });
@@ -382,7 +385,7 @@ describe('bucketTransform', () => {
           },
           gap_policy: 'skip',
           script: {
-            inline: 'params.value > 0 ? params.value : 0',
+            source: 'params.value > 0 ? params.value : 0',
             lang: 'painless'
           }
         }
