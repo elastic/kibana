@@ -1,4 +1,5 @@
 import { alterColumn } from './alterColumn';
+import { asFn } from './as.js';
 import { compare } from './compare';
 import { containerStyle } from './containerStyle';
 import { columns } from './columns';
@@ -31,6 +32,7 @@ import { timefilterControl } from './timefilterControl';
 
 export const commonFunctions = [
   alterColumn,
+  asFn,
   containerStyle,
   compare,
   columns,
