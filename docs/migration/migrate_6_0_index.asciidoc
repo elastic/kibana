@@ -1,0 +1,342 @@
+[[migrating-6.0-index]]
+== Preparing Kibana index for 6.0
+
+[IMPORTANT]
+==============================================
+The following will make transformations to your Kibana index. It is recommended you https://www.elastic.co/guide/en/elasticsearch/reference/5.6/modules-snapshots.html[backup your Kibana index] prior to running any of the following commands.
+==============================================
+
+In order to migrate to Kibana 6, your Kibana index needs to be reindexed. This will make transformations to the data model, removing types which are being {ref}/removal-of-types.html[removed in Elasticsearch].
+
+A UI is available in X-Pack 5.6 to assist with the migration. The following is provided should you be required to run the migration manually. The commands assume you're using the default `.kibana` index, without an alias. If `kibana.index` is set to something different in your `kibana.yml`, or you're using an alias, you will need to modify the commands.
+
+NOTE: To perform this migration without downtime, you will need to be running Kibana 5.6. This is the only version which supports both of the index types.
+
+. Set `.kibana` index to read-only:
++
+--
+[source,js]
+--------------------------------------------------
+PUT .kibana/_settings
+{
+  "index.blocks.write": true
+}
+--------------------------------------------------
+// CONSOLE
+--
+
+. Create `.kibana-6` index
+
+NOTE: When running versions other than 5.6, you will need to remove `index.format` and `index.mapping.single_type` from the settings in the following step.
+
+--
+[source,js]
+--------------------------------------------------
+PUT .kibana-6
+{
+  "settings" : {
+    "number_of_shards" : 1,
+    "index.mapper.dynamic": false,
+    "index.format": 6,
+    "index.mapping.single_type": true
+  },
+  "mappings" : {
+    "doc": {
+      "properties": {
+        "type": {
+          "type": "keyword"
+        },
+        "updated_at": {
+          "type": "date"
+        },
+        "config": {
+          "properties": {
+            "buildNum": {
+              "type": "keyword"
+            }
+          }
+        },
+        "index-pattern": {
+          "properties": {
+            "fieldFormatMap": {
+              "type": "text"
+            },
+            "fields": {
+              "type": "text"
+            },
+            "intervalName": {
+              "type": "keyword"
+            },
+            "notExpandable": {
+              "type": "boolean"
+            },
+            "sourceFilters": {
+              "type": "text"
+            },
+            "timeFieldName": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text"
+            }
+          }
+        },
+        "visualization": {
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "kibanaSavedObjectMeta": {
+              "properties": {
+                "searchSourceJSON": {
+                  "type": "text"
+                }
+              }
+            },
+            "savedSearchId": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text"
+            },
+            "uiStateJSON": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            },
+            "visState": {
+              "type": "text"
+            }
+          }
+        },
+        "search": {
+          "properties": {
+            "columns": {
+              "type": "keyword"
+            },
+            "description": {
+              "type": "text"
+            },
+            "hits": {
+              "type": "integer"
+            },
+            "kibanaSavedObjectMeta": {
+              "properties": {
+                "searchSourceJSON": {
+                  "type": "text"
+                }
+              }
+            },
+            "sort": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            }
+          }
+        },
+        "dashboard": {
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "hits": {
+              "type": "integer"
+            },
+            "kibanaSavedObjectMeta": {
+              "properties": {
+                "searchSourceJSON": {
+                  "type": "text"
+                }
+              }
+            },
+            "optionsJSON": {
+              "type": "text"
+            },
+            "panelsJSON": {
+              "type": "text"
+            },
+            "refreshInterval": {
+              "properties": {
+                "display": {
+                  "type": "keyword"
+                },
+                "pause": {
+                  "type": "boolean"
+                },
+                "section": {
+                  "type": "integer"
+                },
+                "value": {
+                  "type": "integer"
+                }
+              }
+            },
+            "timeFrom": {
+              "type": "keyword"
+            },
+            "timeRestore": {
+              "type": "boolean"
+            },
+            "timeTo": {
+              "type": "keyword"
+            },
+            "title": {
+              "type": "text"
+            },
+            "uiStateJSON": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            }
+          }
+        },
+        "url": {
+          "properties": {
+            "accessCount": {
+              "type": "long"
+            },
+            "accessDate": {
+              "type": "date"
+            },
+            "createDate": {
+              "type": "date"
+            },
+            "url": {
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword",
+                  "ignore_above": 2048
+                }
+              }
+            }
+          }
+        },
+        "server": {
+          "properties": {
+            "uuid": {
+              "type": "keyword"
+            }
+          }
+        },
+        "timelion-sheet": {
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "hits": {
+              "type": "integer"
+            },
+            "kibanaSavedObjectMeta": {
+              "properties": {
+                "searchSourceJSON": {
+                  "type": "text"
+                }
+              }
+            },
+            "timelion_chart_height": {
+              "type": "integer"
+            },
+            "timelion_columns": {
+              "type": "integer"
+            },
+            "timelion_interval": {
+              "type": "keyword"
+            },
+            "timelion_other_interval": {
+              "type": "keyword"
+            },
+            "timelion_rows": {
+              "type": "integer"
+            },
+            "timelion_sheet": {
+              "type": "text"
+            },
+            "title": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            }
+          }
+        },
+        "graph-workspace": {
+          "properties": {
+            "description": {
+              "type": "text"
+            },
+            "kibanaSavedObjectMeta": {
+              "properties": {
+                "searchSourceJSON": {
+                  "type": "text"
+                }
+              }
+            },
+            "numLinks": {
+              "type": "integer"
+            },
+            "numVertices": {
+              "type": "integer"
+            },
+            "title": {
+              "type": "text"
+            },
+            "version": {
+              "type": "integer"
+            },
+            "wsState": {
+              "type": "text"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+--------------------------------------------------
+// CONSOLE
+--
+
+. Reindex `.kibana` into `.kibana-6`:
++
+--
+[source,js]
+--------------------------------------------------
+POST _reindex
+{
+  "source": {
+    "index": ".kibana"
+  },
+  "dest": {
+    "index": ".kibana-6"
+  },
+  "script": {
+    "inline": "ctx._source = [ ctx._type : ctx._source ]; ctx._source.type = ctx._type; ctx._id = ctx._type + \":\" + ctx._id; ctx._type = \"doc\"; ",
+    "lang": "painless"
+  }
+}
+--------------------------------------------------
+// CONSOLE
+--
+
+. Alias `.kibana-6` to `.kibana` and remove legacy `.kibana` index:
++
+--
+[source,js]
+--------------------------------------------------
+POST /_aliases
+{
+  "actions" : [
+    { "add":  { "index": ".kibana-6", "alias": ".kibana" } },
+    { "remove_index": { "index": ".kibana" } }
+  ]
+}
+--------------------------------------------------
+// CONSOLE
+--
