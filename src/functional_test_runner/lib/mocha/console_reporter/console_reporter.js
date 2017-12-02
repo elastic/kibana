@@ -32,7 +32,7 @@ export function ConsoleReporterProvider({ getService }) {
           ...options,
           reporterOptions: {
             reportName: config.get('junit.reportName'),
-            testRootDirectory: config.get('junit.testRootDirectory')
+            rootDirectory: config.get('junit.rootDirectory')
           }
         });
       }

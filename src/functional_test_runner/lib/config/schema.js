@@ -65,7 +65,7 @@ export const schema = Joi.object().keys({
   junit: Joi.object().keys({
     enabled: Joi.boolean().default(!!process.env.CI),
     reportName: Joi.string(),
-    testRootDirectory: Joi.string()
+    rootDirectory: Joi.string(),
   }).default(),
 
   users: Joi.object().pattern(

@@ -6,8 +6,9 @@ import { camelCase } from 'lodash';
 import mkdirp from 'mkdirp';
 import xmlBuilder from 'xmlbuilder';
 
-const ROOT_DIR = dirname(require.resolve('../../../package.json'));
 const PATH_SEGMENTS_TO_IGNORE = [
+  '.',
+  '..',
   'src',
   '__tests__',
 ];
@@ -15,7 +16,7 @@ const PATH_SEGMENTS_TO_IGNORE = [
 export function MochaJunitReporter(runner, options) {
   const {
     reportName = 'Unnamed Mocha Tests',
-    testRootDirectory = ROOT_DIR,
+    rootDirectory = dirname(require.resolve('../../../package.json')),
   } = options.reporterOptions || {};
 
   const rootSuite = runner.suite;
@@ -48,7 +49,7 @@ export function MochaJunitReporter(runner, options) {
 
   const getPath = node => {
     if (node.file) {
-      return relative(testRootDirectory, node.file);
+      return relative(rootDirectory, node.file);
     }
 
     if (node.parent) {
@@ -143,7 +144,7 @@ export function MochaJunitReporter(runner, options) {
 
     addSuite(builder, rootSuite);
 
-    const reportPath = resolve(ROOT_DIR, `target/junit/${reportName}.xml`);
+    const reportPath = resolve(rootDirectory, `target/junit/${reportName}.xml`);
     const reportXML = builder.end({
       pretty: true,
       indent: '  ',
