@@ -1,7 +1,9 @@
+import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
+import './editors/wms_options';
 import { supports } from 'ui/utils/supports';
 import { CATEGORY } from 'ui/vis/vis_category';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
-import { MapsVisualizationProvider } from './maps_visualization';
+import { CoordinateMapsVisualizationProvider } from './coordinate_maps_visualization';
 import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
 import { AggResponseGeoJsonProvider } from 'ui/agg_response/geo_json/geo_json';
 import tileMapTemplate from './editors/tile_map.html';
@@ -14,8 +16,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
   const Schemas = Private(VisSchemasProvider);
   const geoJsonConverter = Private(AggResponseGeoJsonProvider);
   const VisFactory = Private(VisFactoryProvider);
-  const MapsVisualization = Private(MapsVisualizationProvider);
-
+  const CoordinateMapsVisualization = Private(CoordinateMapsVisualizationProvider);
 
   return VisFactory.createBaseVisualization({
     name: 'tile_map',
@@ -39,7 +40,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
     responseConverter: geoJsonConverter,
     responseHandler: 'basic',
     implementsRenderComplete: true,
-    visualization: MapsVisualization,
+    visualization: CoordinateMapsVisualization,
     editorConfig: {
       collections: {
         legendPositions: [{
