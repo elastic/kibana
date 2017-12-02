@@ -16,7 +16,7 @@ import sinon from 'sinon';
  * This method setups the stub for chrome.dangerouslyGetActiveInjector. You must call it in
  * a place where beforeEach is allowed to be called (read: inside your describe)
  * method. You must call this AFTER you've called `ngMock.module` to setup the modules,
- * but BEFORE you first execute code, that uses chrome.dangerouslyGetActiveInjector.
+ * but BEFORE you first execute code, that uses chrome.getActiveInjector.
  */
 export function setupInjectorStub() {
   beforeEach(ngMock.inject(($injector) => {
@@ -30,7 +30,7 @@ export function setupInjectorStub() {
  */
 export function teardownInjectorStub() {
   afterEach(() => {
-    chrome.dangerouslyGetActiveInjector.restore();
+    chrome.getActiveInjector.restore();
   });
 }
 
