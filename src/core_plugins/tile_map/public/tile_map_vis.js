@@ -1,12 +1,11 @@
 import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
-import './editors/wms_options';
+import './editors/tile_map_vis_params';
 import { supports } from 'ui/utils/supports';
 import { CATEGORY } from 'ui/vis/vis_category';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CoordinateMapsVisualizationProvider } from './coordinate_maps_visualization';
 import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
 import { AggResponseGeoJsonProvider } from 'ui/agg_response/geo_json/geo_json';
-import tileMapTemplate from './editors/tile_map.html';
 import image from './images/icon-tilemap.svg';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
@@ -25,7 +24,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
     description: 'Plot latitude and longitude coordinates on a map',
     category: CATEGORY.MAP,
     visConfig: {
-      canDesaturate: true,
+      canDesaturate: !!supports.cssFilters,
       defaults: {
         mapType: 'Scaled Circle Markers',
         isDesaturated: true,
@@ -61,9 +60,9 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
           'Shaded Geohash Grid',
           'Heatmap'
         ],
-        canDesaturate: !!supports.cssFilters
+        baseLayers: []
       },
-      optionsTemplate: tileMapTemplate,
+      optionsTemplate: '<tile_map-vis-params></tile_map-vis-params>',
       schemas: new Schemas([
         {
           group: 'metrics',

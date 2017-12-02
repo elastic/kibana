@@ -11,9 +11,10 @@ const markdownIt = new MarkdownIt({
 uiModules.get('kibana')
   .service('serviceSettings', function ($http, $sanitize, mapConfig, tilemapsConfig, kbnVersion) {
 
-
     const attributionFromConfig = $sanitize(markdownIt.render(tilemapsConfig.deprecated.config.options.attribution || ''));
     const tmsOptionsFromConfig = _.assign({}, tilemapsConfig.deprecated.config.options, { attribution: attributionFromConfig });
+
+    //todo: also configure min/max zoom levels if they are missing
 
     const extendUrl = (url, props) => (
       modifyUrl(url, parsed => _.merge(parsed, props))
@@ -48,6 +49,11 @@ uiModules.get('kibana')
       _invalidateSettings() {
 
         this._loadCatalogue = _.once(async () => {
+
+          if (!mapConfig.includeElasticMapsService) {
+            return { services: [] };
+          }
+
           try {
             const response = await this._getManifest(mapConfig.manifestServiceUrl, this._queryParams);
             return response.data;
@@ -65,7 +71,11 @@ uiModules.get('kibana')
 
         this._loadFileLayers = _.once(async () => {
           const catalogue = await this._loadCatalogue();
-          const fileService = catalogue.services.filter((service) => service.type === 'file')[0];
+          const fileServices = catalogue.services.filter((service) => service.type === 'file');
+          if (fileServices.length < 1) {
+            return [];
+          }
+          const fileService = fileServices[0];
           const manifest = await this._getManifest(fileService.manifest, this._queryParams);
           const layers = manifest.data.layers.filter(layer => layer.format === 'geojson');
           layers.forEach((layer) => {
@@ -77,26 +87,23 @@ uiModules.get('kibana')
 
         this._loadTMSServices = _.once(async () => {
 
-          if (tilemapsConfig.deprecated.isOverridden) {//use settings from yml (which are overridden)
-            const tmsService = _.cloneDeep(tmsOptionsFromConfig);
-            tmsService.url = tilemapsConfig.deprecated.config.url;
-            return tmsService;
-          }
-
           const catalogue = await this._loadCatalogue();
-          const tmsService = catalogue.services.filter((service) => service.type === 'tms')[0];
-          const manifest = await this._getManifest(tmsService.manifest, this._queryParams);
-          const services = manifest.data.services;
-          const firstService = _.cloneDeep(services[0]);
-          if (!firstService) {
-            throw new Error('Manifest response does not include sufficient service data.');
+          const tmsServices = catalogue.services.filter((service) => service.type === 'tms');
+          if (tmsServices.length < 1) {
+            return [];
           }
+          const tmsService = tmsServices[0];
+          const tmsManifest = await this._getManifest(tmsService.manifest, this._queryParams);
+          const preppedTMSServices = tmsManifest.data.services.map((tmsService) => {
+            const preppedService = _.cloneDeep(tmsService);
+            preppedService.attribution = $sanitize(markdownIt.render(preppedService.attribution));
+            preppedService.subdomains = preppedService.subdomains || [];
+            preppedService.url = this._extendUrlWithParams(preppedService.url);
+            return preppedService;
+          });
 
+          return preppedTMSServices;
 
-          firstService.attribution = $sanitize(markdownIt.render(firstService.attribution));
-          firstService.subdomains = firstService.subdomains || [];
-          firstService.url = this._extendUrlWithParams(firstService.url);
-          return firstService;
         });
 
       }
@@ -122,34 +129,26 @@ uiModules.get('kibana')
         return await this._loadFileLayers();
       }
 
-      async getTMSService() {
 
-        const tmsService = await this._loadTMSServices();
+      /**
+       * Returns all the services published by EMS (if configures)
+       * It also includes the service configured in tilemap (override)
+       *
+       *
+       */
+      async getTMSServices() {
 
-        return {
-          getUrl: function () {
-            return tmsService.url;
-          },
-          getMinMaxZoom: (isWMSEnabled) => {
-            if (isWMSEnabled) {
-              return {
-                minZoom: 0,
-                maxZoom: 18
-              };
-            }
-            //Otherwise, we use the settings from the yml.
-            //note that it is no longer possible to only override the zoom-settings, since all options are read from the manifest
-            //by default.
-            //For a custom configuration, users will need to override tilemap.url as well.
-            return {
-              minZoom: tmsService.minZoom,
-              maxZoom: tmsService.maxZoom
-            };
-          },
-          getTMSOptions: function () {
-            return tmsService;
-          }
-        };
+        const allServices = await this._loadTMSServices();
+
+        //todo: ensure no clashing ids
+        //todo: figure out human readable name for layer
+        if (tilemapsConfig.deprecated.isOverridden) {//use tilemap.* settings from yml
+          const tmsService = _.cloneDeep(tmsOptionsFromConfig);
+          tmsService.url = tilemapsConfig.deprecated.config.url;
+          tmsService.id = 'Tilemap layer in yml';
+          allServices.push(tmsService);
+        }
+        return allServices;
       }
 
       getFallbackZoomSettings(isWMSEnabled) {
