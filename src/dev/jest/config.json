@@ -50,5 +50,8 @@
   "snapshotSerializers": [
     "<rootDir>/node_modules/enzyme-to-json/serializer"
   ],
-  "testResultsProcessor": "<rootDir>/src/dev/jest/result_processor.js"
+  "reporters": [
+    "default",
+    "<rootDir>/src/dev/jest/junit_reporter.js"
+  ]
 }
