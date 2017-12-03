@@ -126,6 +126,16 @@ export function parseInputSpec(inputSpec, onWarning) {
     spec.autosize = { type: 'fit', contains: 'padding' };
   }
 
+  // Default category coloring to the Elastic color scheme
+  if (!spec.config) spec.config = {};
+  if (!spec.config.range) spec.config.range = {};
+  if (!spec.config.range.category) spec.config.range.category = { scheme: 'elastic' };
+
+  if (isVegaLite) {
+    if (!spec.config.mark) spec.config.mark = {};
+    if (!spec.config.mark.color) spec.config.mark.color = '#00B3A4';
+  }
+
   const vlspec = isVegaLite ? spec : undefined;
 
   if (isVegaLite) {
