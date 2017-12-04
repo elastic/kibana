@@ -59,7 +59,7 @@ export function DocTableProvider({ getService }) {
 
       const detailsRow = await row.findByXpath('./following-sibling::*[@data-test-subj="docTableDetailsRow"]');
       return await retry.try(async () => {
-        return detailsRow.findByCssSelector('[data-test-subj~=docViewer]');
+        return detailsRow.findByCssSelector('[data-test-subj~="docViewer"]');
       });
     }
   }
