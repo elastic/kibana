@@ -47,7 +47,7 @@ export async function rangeControlFactory(controlParams, kbnApi) {
   let max = _.get(resp, 'aggregations.maxAgg.value');
   if (min === null || max === null) {
     min = 0;
-    max = 0;
+    max = 1;
     minMaxReturnedFromAggregation = false;
   }
   const emptyValue = { min: min, max: min };

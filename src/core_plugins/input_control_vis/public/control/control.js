@@ -1,10 +1,9 @@
 import _ from 'lodash';
 
 export function noValuesDisableMsg(fieldName, indexPatternName) {
-  return `This control is disabled because it's filtering on the "${fieldName}" field,
-which doesn't exist on any of the documents in the "${indexPatternName}"
-index pattern. You can fix this by choosing a different field, or by
-indexing some documents which contain values for this field.`;
+  return `Filtering occurs on the "${fieldName}" field,
+which doesn't exist on any documents in the "${indexPatternName}" index pattern.
+Choose a different field or index documents that contain values for this field.`;
 }
 
 export class Control {

@@ -86,7 +86,7 @@ export class RangeControl extends Component {
       disabled = true;
       disableMsg = (
         <p className="kuiStatusText kuiStatusText--warning">
-          This filter is disabled {this.props.control.disabledReason}
+          {this.props.control.disabledReason}
         </p>
       );
     }
