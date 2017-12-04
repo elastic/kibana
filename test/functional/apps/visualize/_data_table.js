@@ -68,6 +68,11 @@ export default function ({ getService, getPageObjects }) {
           });
       });
 
+      it('should display spy panel toggle button', async function () {
+        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+        expect(spyToggleExists).to.be(true);
+      });
+
       it('should show correct data, take screenshot', function () {
         const expectedChartData = [
           '0B', '2,088', '1.953KB', '2,748', '3.906KB', '2,707', '5.859KB', '2,876', '7.813KB',

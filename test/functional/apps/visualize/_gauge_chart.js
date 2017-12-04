@@ -27,6 +27,11 @@ export default function ({ getService, getPageObjects }) {
 
     describe('gauge chart', function indexPatternCreation() {
 
+      it('should display spy panel toggle button', async function () {
+        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+        expect(spyToggleExists).to.be(true);
+      });
+
       it('should show Count', function () {
         const expectedCount = ['14,004', 'Count'];
 
