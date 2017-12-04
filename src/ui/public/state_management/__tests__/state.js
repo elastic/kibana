@@ -16,8 +16,8 @@ import { HashedItemStore } from 'ui/state_management/state_storage/hashed_item_s
 import StubBrowserStorage from 'test_utils/stub_browser_storage';
 import { EventsProvider } from 'ui/events';
 
-describe('State Management', function () {
-  describe('Enabled', function () {
+describe('State Management', () => {
+  describe('Enabled', () => {
     const notifier = new Notifier();
     let $rootScope;
     let $location;
@@ -49,8 +49,8 @@ describe('State Management', function () {
 
     afterEach(() => Notifier.prototype._notifs.splice(0));
 
-    describe('Provider', function () {
-      it('should reset the state to the defaults', function () {
+    describe('Provider', () => {
+      it('should reset the state to the defaults', () => {
         const { state, getUnhashedSearch } = setup({ initial: { message: ['test'] } });
         state.reset();
         const search = getUnhashedSearch(state);
@@ -59,19 +59,19 @@ describe('State Management', function () {
         expect(state.message).to.eql(['test']);
       });
 
-      it('should apply the defaults upon initialization', function () {
+      it('should apply the defaults upon initialization', () => {
         const { state } = setup({ initial: { message: 'test' } });
         expect(state).to.have.property('message', 'test');
       });
 
-      it('should inherit from Events', function () {
+      it('should inherit from Events', () => {
         const { state } = setup();
         expect(state).to.be.an(Events);
       });
 
-      it('should emit an event if reset with changes', function (done) {
+      it('should emit an event if reset with changes', (done) => {
         const { state } = setup({ initial: { message: ['test'] } });
-        state.on('reset_with_changes', function (keys) {
+        state.on('reset_with_changes', (keys) => {
           expect(keys).to.eql(['message']);
           done();
         });
@@ -81,9 +81,9 @@ describe('State Management', function () {
         $rootScope.$apply();
       });
 
-      it('should not emit an event if reset without changes', function () {
+      it('should not emit an event if reset without changes', () => {
         const { state } = setup({ initial: { message: 'test' } });
-        state.on('reset_with_changes', function () {
+        state.on('reset_with_changes', () => {
           expect().fail();
         });
         state.save();
@@ -93,8 +93,8 @@ describe('State Management', function () {
       });
     });
 
-    describe('Search', function () {
-      it('should save to $location.search()', function () {
+    describe('Search', () => {
+      it('should save to $location.search()', () => {
         const { state, getUnhashedSearch } = setup({ initial: { test: 'foo' } });
         state.save();
         const search = getUnhashedSearch(state);
@@ -102,9 +102,9 @@ describe('State Management', function () {
         expect(search._s).to.equal('(test:foo)');
       });
 
-      it('should emit an event if changes are saved', function (done) {
+      it('should emit an event if changes are saved', (done) => {
         const { state, getUnhashedSearch } = setup();
-        state.on('save_with_changes', function (keys) {
+        state.on('save_with_changes', (keys) => {
           expect(keys).to.eql(['test']);
           done();
         });
@@ -115,10 +115,10 @@ describe('State Management', function () {
       });
     });
 
-    describe('Fetch', function () {
-      it('should emit an event if changes are fetched', function (done) {
+    describe('Fetch', () => {
+      it('should emit an event if changes are fetched', (done) => {
         const { state } = setup();
-        state.on('fetch_with_changes', function (keys) {
+        state.on('fetch_with_changes', (keys) => {
           expect(keys).to.eql(['foo']);
           done();
         });
@@ -128,9 +128,9 @@ describe('State Management', function () {
         $rootScope.$apply();
       });
 
-      it('should have events that attach to scope', function (done) {
+      it('should have events that attach to scope', (done) => {
         const { state } = setup();
-        state.on('test', function (message) {
+        state.on('test', (message) => {
           expect(message).to.equal('foo');
           done();
         });
@@ -138,9 +138,9 @@ describe('State Management', function () {
         $rootScope.$apply();
       });
 
-      it('should fire listeners for #onUpdate() on #fetch()', function (done) {
+      it('should fire listeners for #onUpdate() on #fetch()', (done) => {
         const { state } = setup();
-        state.on('fetch_with_changes', function (keys) {
+        state.on('fetch_with_changes', (keys) => {
           expect(keys).to.eql(['foo']);
           done();
         });
@@ -150,7 +150,7 @@ describe('State Management', function () {
         $rootScope.$apply();
       });
 
-      it('should apply defaults to fetches', function () {
+      it('should apply defaults to fetches', () => {
         const { state } = setup({ initial: { message: 'test' } });
         $location.search({ _s: '(foo:bar)' });
         state.fetch();
@@ -158,14 +158,14 @@ describe('State Management', function () {
         expect(state).to.have.property('message', 'test');
       });
 
-      it('should call fetch when $routeUpdate is fired on $rootScope', function () {
+      it('should call fetch when $routeUpdate is fired on $rootScope', () => {
         const { state } = setup();
         const spy = sinon.spy(state, 'fetch');
         $rootScope.$emit('$routeUpdate', 'test');
         sinon.assert.calledOnce(spy);
       });
 
-      it('should clear state when missing form URL', function () {
+      it('should clear state when missing form URL', () => {
         let stateObj;
         const { state } = setup();
 
@@ -188,7 +188,7 @@ describe('State Management', function () {
         expect(stateObj).to.eql({});
       });
 
-      it('should clear state when it is invalid', function () {
+      it('should clear state when it is invalid', () => {
         let stateObj;
         const { state } = setup();
 
