@@ -8,19 +8,19 @@ import { uiModules } from 'ui/modules';
 
 uiModules.get('kibana/state_management')
   .provider('stateManagementConfig', class StateManagementConfigProvider {
-    enabled = true
+    _enabled = true
 
     $get(/* inject stuff */) {
       return {
-        enabled: this.enabled,
+        enabled: this._enabled,
       };
     }
 
     disable() {
-      this.enabled = false;
+      this._enabled = false;
     }
 
     enable() {
-      this.enabled = true;
+      this._enabled = true;
     }
   });
