@@ -245,13 +245,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async filterVizNames(vizName) {
-      const visFilter = await find.byCssSelector('input[placeholder="Visualizations Filter..."]');
-      await visFilter.click();
-      await remote.pressKeys(vizName);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-    }
-
     async clickVizNameLink(vizName) {
       await find.clickByPartialLinkText(vizName);
     }
@@ -266,7 +259,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await this.clickEdit();
     }
 
-    async filterSearchNames(name) {
+    async filterEmbeddableNames(name) {
       await testSubjects.setValue('savedObjectFinderSearchInput', name);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -278,7 +271,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async addSavedSearch(searchName) {
       await this.clickAddVisualization();
       await this.clickSavedSearchTab();
-      await this.filterSearchNames(searchName);
+      await this.filterEmbeddableNames(searchName);
 
       await find.clickByPartialLinkText(searchName);
       await PageObjects.header.clickToastOK();
@@ -288,7 +281,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async addVisualization(vizName) {
       await this.clickAddVisualization();
       log.debug('filter visualization (' + vizName + ')');
-      await this.filterVizNames(vizName);
+      await this.filterEmbeddableNames(vizName);
       await this.clickVizNameLink(vizName);
       await PageObjects.header.clickToastOK();
       // this second click of 'Add' collapses the Add Visualization pane
