@@ -1,4 +1,4 @@
-
+import _ from 'lodash';
 import { connect } from 'react-redux';
 import { compose, withState, withHandlers, lifecycle, withPropsOnChange, branch, renderComponent } from 'recompose';
 import { Expression as Component } from './expression';
@@ -141,7 +141,10 @@ export const Expression = compose(
       acceptAutocompleteProposal,
       showAutocompleteProposals,
       setShowAutocompleteProposals,
+      updateSelection,
     }) => event => {
+      updateSelection(event);
+
       // TODO: Move this into a separate HOC for handling typeahead stuff
       const { key } = event;
       if (key === 'ArrowUp' && showAutocompleteProposals && autocompleteProposals.length) {
@@ -158,15 +161,15 @@ export const Expression = compose(
       } else {
         setShowAutocompleteProposals(true);
         setSelectedIndex(-1);
-        const { value, selection } = autocompletePairs({
-          value: formState.expression,
-          selection: formState.selection,
-        }, event);
-        setFormState({
-          expression: value,
-          selection: selection,
-          dirty: true,
-        });
+        const { value, selection } = autocompletePairs(formState.expression, formState.selection, event.key);
+        if (value !== formState.expression || !_.isEqual(selection, formState.selection)) {
+          event.preventDefault();
+          setFormState({
+            expression: value,
+            selection: selection,
+            dirty: true,
+          });
+        }
       }
     },
   }),
