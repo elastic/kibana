@@ -8,7 +8,7 @@ import * as symbols from './symbols';
 import { ms } from './ms';
 import { writeEpilogue } from './write_epilogue';
 
-export function ConsoleReporterProvider({ getService }) {
+export function MochaReporterProvider({ getService }) {
   const log = getService('log');
   const config = getService('config');
 
