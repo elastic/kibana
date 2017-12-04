@@ -87,15 +87,7 @@ export class UiSettingsService {
   }
 
   async setMany(changes) {
-    const defaults = await this.getDefaults();
-    for (const key of Object.keys(changes)) {
-      const maxSize = defaults[key].maxSize;
-      const value = changes[key];
-      if (maxSize && maxSize.length && value !== null && value.length > maxSize.length) {
-        throw new InvalidValueError(`uiSetting ${key} exceeded the maximum length of ${maxSize.description}`);
-      }
-    }
-
+    await this._validate(changes);
     await this._write({ changes });
   }
 
@@ -113,6 +105,17 @@ export class UiSettingsService {
       changes[key] = null;
     });
     await this.setMany(changes);
+  }
+
+  async _validate(changes) {
+    const defaults = await this.getDefaults();
+    for (const key of Object.keys(changes)) {
+      const maxSize = defaults[key].maxSize;
+      const value = changes[key];
+      if (maxSize && maxSize.length && value !== null && value.length > maxSize.length) {
+        throw new InvalidValueError(`uiSetting ${key} exceeded the maximum length of ${maxSize.description}`);
+      }
+    }
   }
 
   async _write({ changes, autoCreateOrUpgradeIfMissing = true }) {
