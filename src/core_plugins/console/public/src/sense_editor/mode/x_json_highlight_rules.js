@@ -7,7 +7,7 @@ var jsonRules = function (root) {
   rules[root] = [
       {
         token: ["variable", "whitespace", "ace.punctuation.colon", "whitespace", "punctuation.start_triple_quote"],
-        regex: '("script"|"inline")(\\s*?)(:)(\\s*?)(""")',
+        regex: '("([^"]*_)?script"|"inline")(\\s*?)(:)(\\s*?)(""")',
         next: "script-start",
         merge: false,
         push: true
