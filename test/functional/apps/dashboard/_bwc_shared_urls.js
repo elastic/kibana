@@ -51,7 +51,8 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('loads a saved dashboard', async function () {
-        await PageObjects.dashboard.saveDashboard(`saved with colors`, { storeTimeWithDashboard: true });
+        await PageObjects.dashboard.saveDashboard('saved with colors', { storeTimeWithDashboard: true });
+        await PageObjects.header.clickToastOK();
 
         const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
         const url = `${kibanaBaseUrl}#/dashboard/${id}`;
