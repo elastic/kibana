@@ -65,68 +65,68 @@ describe('buildRequestBody(req)', () => {
     const series = panel.series[0];
     const doc = buildRequestBody({ payload: body }, panel, series);
     expect(doc).to.eql({
-      'size': 0,
-      'query': {
-        'bool': {
-          'must': [
+      size: 0,
+      query: {
+        bool: {
+          must: [
             {
-              'range': {
+              range: {
                 '@timestamp': {
-                  'gte': 1485463055881,
-                  'lte': 1485463955881,
-                  'format': 'epoch_millis'
+                  gte: 1485463055881,
+                  lte: 1485463955881,
+                  format: 'epoch_millis'
                 }
               }
             },
             {
-              'bool': {
-                'must': [
+              bool: {
+                must: [
                   {
-                    'query_string': {
-                      'analyze_wildcard': true,
-                      'query': '*'
+                    query_string: {
+                      analyze_wildcard: true,
+                      query: '*'
                     }
                   }
                 ],
-                'must_not': []
+                must_not: []
               }
             }
           ]
         }
       },
-      'aggs': {
+      aggs: {
         'c9b5f9c0-e403-11e6-be91-6f7688e9fac7': {
-          'filter': {
-            'match_all': {}
+          filter: {
+            match_all: {}
           },
-          'meta': {
-            'timeField': '@timestamp',
-            'bucketSize': 10,
-            'intervalString': '10s'
+          meta: {
+            timeField: '@timestamp',
+            bucketSize: 10,
+            intervalString: '10s'
           },
-          'aggs': {
-            'timeseries': {
-              'date_histogram': {
-                'field': '@timestamp',
-                'interval': '10s',
-                'min_doc_count': 0,
-                'time_zone': 'UTC',
-                'extended_bounds': {
-                  'min': 1485463055881,
-                  'max': 1485463955881
+          aggs: {
+            timeseries: {
+              date_histogram: {
+                field: '@timestamp',
+                interval: '10s',
+                min_doc_count: 0,
+                time_zone: 'UTC',
+                extended_bounds: {
+                  min: 1485463055881,
+                  max: 1485463955881
                 }
               },
-              'aggs': {
+              aggs: {
                 'c9b5f9c1-e403-11e6-be91-6f7688e9fac7': {
-                  'bucket_script': {
-                    'buckets_path': {
-                      'count': '_count'
+                  bucket_script: {
+                    buckets_path: {
+                      count: '_count'
                     },
-                    'script': {
-                      'inline': 'count * 1',
-                      'lang': 'expression'
+                    script: {
+                      source: 'count * 1',
+                      lang: 'expression'
                     },
-                    'gap_policy': 'skip'
+                    gap_policy: 'skip'
                   }
                 }
               }
@@ -137,4 +137,3 @@ describe('buildRequestBody(req)', () => {
     });
   });
 });
-
