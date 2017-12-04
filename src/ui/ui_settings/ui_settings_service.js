@@ -110,10 +110,13 @@ export class UiSettingsService {
   async _validate(changes) {
     const defaults = await this.getDefaults();
     for (const key of Object.keys(changes)) {
-      const maxSize = defaults[key].maxSize;
+      const validations = defaults[key].validations;
       const value = changes[key];
-      if (maxSize && maxSize.length && value !== null && value.length > maxSize.length) {
-        throw new InvalidValueError(`uiSetting ${key} exceeded the maximum length of ${maxSize.description}`);
+      for (const validation of Object.values(validations)) {
+        const result = validation.validate(value);
+        if (!result.isValid) {
+          throw new InvalidValueError(result.message);
+        }
       }
     }
   }

@@ -22,7 +22,7 @@ export function toEditableConfig({ def, name, value, isCustom }) {
     type: getValType(def, value),
     description: def.description,
     options: def.options,
-    maxSize: def.maxSize
+    validations: def.validations
   };
 
   const editor = getEditorType(conf);
