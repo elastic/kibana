@@ -4,7 +4,6 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
   const dashboardExpect = getService('dashboardExpect');
   const remote = getService('remote');
-  const log = getService('log');
   let kibanaBaseUrl;
 
   const urlQuery = `` +
@@ -55,12 +54,8 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.saveDashboard(`saved with colors`, { storeTimeWithDashboard: true });
 
         const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
-
-        log.debug('kibanaBaseUrl is ' + kibanaBaseUrl + ' and id is ' + id);
         const url = `${kibanaBaseUrl}#/dashboard/${id}`;
-
         await remote.get(url, true);
-        log.debug('navigating to ' + url);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const query = await PageObjects.dashboard.getQuery();
