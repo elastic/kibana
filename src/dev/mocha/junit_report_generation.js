@@ -1,17 +1,9 @@
-import { resolve, dirname, relative, sep as pathSep, extname, basename } from 'path';
+import { resolve, dirname, relative } from 'path';
 import { writeFileSync } from 'fs';
 import { inspect } from 'util';
 
-import { camelCase } from 'lodash';
 import mkdirp from 'mkdirp';
 import xmlBuilder from 'xmlbuilder';
-
-const PATH_SEGMENTS_TO_IGNORE = [
-  '.',
-  '..',
-  'src',
-  '__tests__',
-];
 
 export function setupJunitReportGeneration(runner, options = {}) {
   const {
@@ -57,18 +49,6 @@ export function setupJunitReportGeneration(runner, options = {}) {
     }
 
     return 'unknown';
-  };
-
-  const getClassName = node => {
-    const path = getPath(node);
-    const directory = dirname(path);
-    const filenameWithoutExt = basename(path, extname(path));
-    const segments = [...directory.split(pathSep), filenameWithoutExt];
-
-    return segments
-      .filter(seg => seg && !PATH_SEGMENTS_TO_IGNORE.includes(seg))
-      .map(seg => seg[0].toUpperCase() + camelCase(seg.slice(1)))
-      .join('/');
   };
 
   runner.on('start', () => {
@@ -127,7 +107,7 @@ export function setupJunitReportGeneration(runner, options = {}) {
     function addTest(parent, test) {
       const el = parent.ele('testcase', {
         name: getFullTitle(test),
-        classname: `${reportName}.${getClassName(test)}`,
+        classname: `${reportName}.${getPath(test).replace(/\./g, '·')}`,
         time: getDuration(test),
       });
 

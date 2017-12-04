@@ -1,7 +1,6 @@
-import { resolve, dirname, relative, basename, extname, sep as pathSep } from 'path';
+import { resolve, dirname, relative } from 'path';
 import { writeFileSync } from 'fs';
 
-import { camelCase } from 'lodash';
 import mkdirp from 'mkdirp';
 import xmlBuilder from 'xmlbuilder';
 
@@ -44,17 +43,6 @@ export default class JestJunitReporter {
 
     const msToIso = ms => ms ? new Date(ms).toISOString().slice(0, -5) : undefined;
     const msToSec = ms => ms ? (ms / 1000).toFixed(3) : undefined;
-    const getClassName = suite => {
-      const path = suite.testFilePath;
-      const directory = dirname(relative(rootDirectory, path));
-      const filenameWithoutExt = basename(path, extname(path));
-      const segments = [...directory.split(pathSep), filenameWithoutExt];
-
-      return segments
-        .filter(seg => seg && seg !== 'src')
-        .map(seg => seg[0].toUpperCase() + camelCase(seg.slice(1)))
-        .join('/');
-    };
 
     root.att({
       name: 'jest',
@@ -78,7 +66,8 @@ export default class JestJunitReporter {
       });
 
       // nested in there are the tests in that file
-      const classname = `${reportName}.${getClassName(suite)}`;
+      const relativePath = dirname(relative(rootDirectory, suite.testFilePath));
+      const classname = `${reportName}.${relativePath.replace(/\./g, '·')}`;
       suite.testResults.forEach(test => {
         const testEl = suiteEl.ele('testcase', {
           classname,
