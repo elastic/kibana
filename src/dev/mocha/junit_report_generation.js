@@ -79,12 +79,12 @@ export function setupJunitReportGeneration(runner, options = {}) {
     suite.startTime = Date.now();
   });
 
-  runner.on('test', (suite) => {
-    suite.startTime = Date.now();
+  runner.on('test', (test) => {
+    test.startTime = Date.now();
   });
 
-  runner.on('test end', (suite) => {
-    suite.endTime = Date.now();
+  runner.on('test end', (test) => {
+    test.endTime = Date.now();
   });
 
   runner.on('suite end', (suite) => {

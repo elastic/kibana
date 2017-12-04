@@ -8,7 +8,7 @@ import xmlBuilder from 'xmlbuilder';
 const ROOT_DIR = dirname(require.resolve('../../../package.json'));
 
 /**
- * Jest reporter that that produces JUnit report when running on CI
+ * Jest reporter that produces JUnit report when running on CI
  * @class JestJunitReporter
  */
 export default class JestJunitReporter {
