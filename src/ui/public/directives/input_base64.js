@@ -2,6 +2,8 @@ import { uiModules } from 'ui/modules';
 import { Observable } from 'rxjs/Rx';
 const module = uiModules.get('kibana');
 
+const multipleUsageErrorMessage = 'Cannot use input-base-sixty-four directive on input with `multiple` attribute';
+
 const createFileContent$ = (file) => {
   return Observable.create(observer => {
     const reader = new FileReader();
@@ -29,7 +31,7 @@ module.directive('inputBaseSixtyFour', function () {
     scope: 'isolate',
     link: function ($scope, $elem, attrs, ngModel) {
       if ($elem.prop('multiple')) {
-        throw new Error('Cannot use input-base-sixty-four directive on input with `multiple` attribute');
+        throw new Error(multipleUsageErrorMessage);
       }
 
       const maxSizeValidator = (dataUrl) => {
@@ -56,7 +58,7 @@ module.directive('inputBaseSixtyFour', function () {
           }
 
           if (files.length > 1) {
-            throw new Error('Cannot use input-base-sixty-four directive on input with `multiple` attribute');
+            throw new Error(multipleUsageErrorMessage);
           }
 
           return createFileContent$(files[0]);
