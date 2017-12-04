@@ -298,11 +298,16 @@ describe('State Management', () => {
     });
   });
 
-  describe('Disabled', () => {
+  describe('Disabled with persisted state', () => {
     let state;
     let $location;
     let $rootScope;
-    let readUrlSpy;
+    const stateParam = '_config_test';
+
+    const getLocationState = () => {
+      const search = $location.search();
+      return search[stateParam];
+    };
 
     beforeEach(ngMock.module('kibana', function (stateManagementConfigProvider) {
       stateManagementConfigProvider.disable();
@@ -314,20 +319,39 @@ describe('State Management', () => {
       Notifier.prototype._notifs.splice(0);
 
       sinon.stub(config, 'get').withArgs('state:storeInSessionStorage').returns(false);
-      state = new State();
-      readUrlSpy = sinon.spy(state, '_readFromURL');
+
+      class MockPersistedState extends State {
+        _persistAcrossApps = true
+      }
+
+      MockPersistedState.prototype._persistAcrossApps = true;
+
+      state = new MockPersistedState(stateParam);
     }));
 
     afterEach(() => Notifier.prototype._notifs.splice(0));
 
-    const methods = ['fetch', 'save', 'replace', 'reset'];
+    describe('changing state', () => {
+      const methods = ['save', 'replace', 'reset'];
 
-    methods.forEach((method) => {
-      it(`${method} should not access URL`, () => {
+      methods.forEach((method) => {
+        it(`${method} should not change the URL`, () => {
+          $location.search({ _s: '(foo:bar)' });
+          state[method]();
+          $rootScope.$apply();
+          expect(getLocationState()).to.be(undefined);
+        });
+      });
+    });
+
+    describe('reading state', () => {
+      it('should not change the URL', () => {
+        const saveSpy = sinon.spy(state, 'save');
         $location.search({ _s: '(foo:bar)' });
-        state[method]();
+        state.fetch();
         $rootScope.$apply();
-        sinon.assert.notCalled(readUrlSpy);
+        sinon.assert.notCalled(saveSpy);
+        expect(getLocationState()).to.be(undefined);
       });
     });
   });
