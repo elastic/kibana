@@ -109,7 +109,9 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
    * @returns {void}
    */
   State.prototype.fetch = function () {
-    if (!stateManagementConfig.enabled) return;
+    if (!stateManagementConfig.enabled) {
+      return;
+    }
 
     let stash = this._readFromURL();
 
@@ -136,7 +138,9 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
    * @returns {void}
    */
   State.prototype.save = function (replace) {
-    if (!stateManagementConfig.enabled) return;
+    if (!stateManagementConfig.enabled) {
+      return;
+    }
 
     let stash = this._readFromURL();
     const state = this.toObject();
@@ -169,7 +173,9 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
    * @returns {void}
    */
   State.prototype.replace = function () {
-    if (!stateManagementConfig.enabled) return;
+    if (!stateManagementConfig.enabled) {
+      return;
+    }
 
     this.save(true);
   };
@@ -180,7 +186,9 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
    * @returns {void}
    */
   State.prototype.reset = function () {
-    if (!stateManagementConfig.enabled) return;
+    if (!stateManagementConfig.enabled) {
+      return;
+    }
 
     kbnUrl.removeParam(this.getQueryParamName());
     // apply diff to attributes from defaults, this is side effecting so
