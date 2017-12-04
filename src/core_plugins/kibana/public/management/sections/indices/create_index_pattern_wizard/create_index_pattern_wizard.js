@@ -77,9 +77,10 @@ uiModules.get('apps/management')
       });
     }
 
-    function getIndices(pattern, limit = MAX_SEARCH_SIZE) {
-      // Searching for `*:` fails for CCS environments, in different
-      // ways depending on if x-pack is installed too. The search request
+    function getIndices(rawPattern, limit = MAX_SEARCH_SIZE) {
+      const pattern = rawPattern.trim();
+
+      // Searching for `*:` fails for CCS environments. The search request
       // is worthless anyways as the we should only send a request
       // for a specific query (where we do not append *) if there is at
       // least a single character being searched for.
