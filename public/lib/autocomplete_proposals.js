@@ -28,44 +28,53 @@ export function getAutocompleteProposals({ value, selection }) {
   }
 }
 
-/**
- * Traverse the chain until we find the node at the cursor. If the node is in
- * place of a function node, suggest functions. If it is in place of an
- * argument node, suggest arguments. Otherwise, don't suggest anything.
- */
 function getAutocompleteProposalsForChain(chain) {
-  for (let i = 0; i < chain.length; i++) {
-    const fn = chain[i];
-    if (fn.cursor) {
-      return getFunctionNameProposals(chain, i);
-    }
-    for (const key in (fn.arguments || {})) {
-      if (!fn.arguments.hasOwnProperty(key)) continue;
-      const args = fn.arguments[key];
-      for (let j = 0; j < args.length; j++) {
-        if (args[j].cursor) {
-          return getArgumentProposals(chain, i, key, j);
-        } else if (args[j].chain) {
-          return getAutocompleteProposalsForChain(args[j].chain);
-        }
-      }
-    }
+  return _.flatten(chain.map((fn, i) => (
+    getAutocompleteProposalsForFnNode(fn, chain[i - 1])
+  )));
+}
+
+/**
+ * If the cursor is in this function, suggest function names, otherwise look
+ * in the arguments for the cursor.
+ */
+function getAutocompleteProposalsForFnNode(fn, previousFn) {
+  if (fn.cursor) {
+    const previousFnName = _.get(previousFn, 'function');
+    const previousFnDef = allFns.find(f => f.name === previousFnName);
+    return getFunctionNameProposals(fn, _.get(previousFnDef, 'type'));
+  } else {
+    return _.flatten(_.map(fn.arguments, (args, name) => (
+      getAutocompleteProposalsForArgNode(fn, args, name)
+    )));
   }
-  return [];
+}
+
+/**
+ * If the cursor is in this arg, suggest argument names and values. If this arg
+ * has its own chain, look in the chain for the cursor.
+ */
+function getAutocompleteProposalsForArgNode(fn, args, name) {
+  return _.flatten(args.map(arg => {
+    if (arg.cursor) {
+      return getArgumentProposals(fn, name, arg);
+    } else if (arg.chain) {
+      return getAutocompleteProposalsForChain(arg.chain);
+    } else {
+      return [];
+    }
+  }));
 }
 
 /**
  * Suggest function names based on what the previous function expects, filtered
  * by the given prefix and suffix.
  */
-function getFunctionNameProposals(chain, index) {
-  const { prefix, suffix, location } = chain[index];
-  const previousFnType = (index === 0)
-    ? 'null'
-    : allFns.find(fn => fn.name === chain[index - 1].function).type;
+function getFunctionNameProposals(fn, previousFnType = 'null') {
+  const { prefix, suffix, location } = fn;
   return allFns
     .filter(({ name }) => nameMatches(name, prefix, suffix))
-    .filter(fn => canCast(previousFnType, fn.context.types))
+    .filter(f => canCast(previousFnType, f.context.types))
     .map(({ name, help }) => ({
       value: name + ' ',
       name: name,
@@ -81,11 +90,11 @@ function getFunctionNameProposals(chain, index) {
  * If we are dealing with a named argument, only suggest the corresponding
  * argument values. If it's unnamed, also suggest argument names.
  */
-function getArgumentProposals(chain, fnIndex, argKey, argIndex) {
-  return [
-    ...(argKey === '_' ? getArgumentNameProposals(chain, fnIndex, argKey, argIndex) : []),
-    ...getArgumentValueProposals(chain, fnIndex, argKey, argIndex),
-  ];
+function getArgumentProposals(fn, name, arg) {
+  return _.flatten([
+    (name === '_' ? getArgumentNameProposals(fn, arg) : []),
+    getArgumentValueProposals(fn, name, arg),
+  ]);
 }
 
 /**
@@ -93,12 +102,12 @@ function getArgumentProposals(chain, fnIndex, argKey, argIndex) {
  * arguments and those which are already in use (unless they allow multiples),
  * filtered by the given prefix and suffix.
  */
-function getArgumentNameProposals(chain, fnIndex, argKey, argIndex) {
-  const { prefix, suffix, location } = chain[fnIndex].arguments[argKey][argIndex];
-  const fn = allFns.find(fn => fn.name === chain[fnIndex].function);
-  const args = _.filter(fn.args, ({ name }) => name !== '_')
+function getArgumentNameProposals(fn, arg) {
+  const { prefix, suffix, location } = arg;
+  const fnDef = allFns.find(f => f.name === fn.function);
+  const args = _.filter(fnDef.args, ({ name }) => name !== '_')
     .filter(({ name }) => nameMatches(name, prefix, suffix))
-    .filter(({ name, multi }) => multi || !chain[fnIndex].arguments.hasOwnProperty(name));
+    .filter(({ name, multi }) => multi || !fn.arguments.hasOwnProperty(name));
   return _.uniqBy(args, 'name')
     .map(({ name, help }) => ({
       value: name + '=',
@@ -114,7 +123,7 @@ function getArgumentNameProposals(chain, fnIndex, argKey, argIndex) {
 /**
  * Defer to the function definition itself to suggest values.
  */
-function getArgumentValueProposals(/* chain, fnIndex, argKey, argIndex */) {
+function getArgumentValueProposals(/* fn, name, arg */) {
   // TODO: Implement this
   return [];
 }
