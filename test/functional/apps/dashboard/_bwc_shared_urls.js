@@ -4,6 +4,7 @@ export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
   const dashboardExpect = getService('dashboardExpect');
   const remote = getService('remote');
+  const log = getService('log');
   let kibanaBaseUrl;
 
   const urlQuery = `` +
@@ -50,27 +51,25 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.selectedLegendColorCount('#F9D9F9', 5);
       });
 
-      for (let i = 0; i < 25; i++) {
-        it('loads a saved dashboard', async function () {
-          await PageObjects.dashboard.saveDashboard(`saved with colors - ${i}`, { storeTimeWithDashboard: true });
+      it('loads a saved dashboard', async function () {
+        await PageObjects.dashboard.saveDashboard(`saved with colors`, { storeTimeWithDashboard: true });
 
-          const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
+        const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
 
-          const url = `${kibanaBaseUrl}#/dashboard/${id}`;
+        log.debug('kibanaBaseUrl is ' + kibanaBaseUrl + ' and id is ' + id);
+        const url = `${kibanaBaseUrl}#/dashboard/${id}`;
 
-          await remote.get(url, true);
-          await PageObjects.header.waitUntilLoadingHasFinished();
+        await remote.get(url, true);
+        log.debug('navigating to ' + url);
+        await PageObjects.header.waitUntilLoadingHasFinished();
 
-          const query = await PageObjects.dashboard.getQuery();
-          expect(query).to.equal('memory:>220000');
+        const query = await PageObjects.dashboard.getQuery();
+        expect(query).to.equal('memory:>220000');
 
-          await dashboardExpect.pieSliceCount(5);
-          await dashboardExpect.panelCount(2);
-          await dashboardExpect.selectedLegendColorCount('#F9D9F9', 5);
-
-          await PageObjects.dashboard.clickEdit();
-        });
-      }
+        await dashboardExpect.pieSliceCount(5);
+        await dashboardExpect.panelCount(2);
+        await dashboardExpect.selectedLegendColorCount('#F9D9F9', 5);
+      });
 
       it('uiState in url takes precedence over saved dashboard state', async function () {
         const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();

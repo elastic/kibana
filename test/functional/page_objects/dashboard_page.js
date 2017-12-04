@@ -83,9 +83,12 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async getDashboardIdFromCurrentUrl() {
       const currentUrl = await remote.getCurrentUrl();
+      log.debug(`getDashboardIdFromCurrentUrl: ${currentUrl}`);
       const urlSubstring = 'kibana#/dashboard/';
       const startOfIdIndex = currentUrl.indexOf(urlSubstring) + urlSubstring.length;
       const endIndex = currentUrl.indexOf('?');
+
+      log.debug(`getDashboardIdFromCurrentUrl: startIndex ${startOfIdIndex} and endIndex ${endIndex}`);
       return currentUrl.substring(startOfIdIndex, endIndex);
     }
 
