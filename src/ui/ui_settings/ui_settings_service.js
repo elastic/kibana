@@ -113,9 +113,9 @@ export class UiSettingsService {
       const validations = defaults[key].validations;
       const value = changes[key];
       for (const validation of Object.values(validations)) {
-        const result = validation.validate(value);
-        if (!result.isValid) {
-          throw new InvalidValueError(result.message);
+        const result = validation.schema.validate(value);
+        if (result.error) {
+          throw new InvalidValueError(result.error.message);
         }
       }
     }
