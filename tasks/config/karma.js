@@ -31,7 +31,7 @@ module.exports = function (grunt) {
         ].join(' '),
         classNameFormatter: (browser, result) => {
           const rootSuite = result.suite[0] || result.description;
-          return `Browser Unit Tests.${rootSuite.split('.').join('·')}`;
+          return `Browser Unit Tests.${rootSuite.replace(/\./g, '·')}`;
         }
       },
 
