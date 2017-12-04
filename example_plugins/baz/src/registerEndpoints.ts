@@ -11,11 +11,9 @@ import { BazService } from './BazService';
 export function registerEndpoints(
   router: Router,
   logger: LoggerFactory,
-  schema: Schema,
   elasticsearch: ElasticsearchService,
   config$: Observable<KibanaConfig>
 ) {
-  const { object, string, number, maybe } = schema;
   const log = logger.get('routes');
 
   router.get(
@@ -32,23 +30,23 @@ export function registerEndpoints(
   router.get(
     {
       path: '/:type',
-      validate: {
-        params: object({
-          type: string()
+      validate: (schema: Schema) => ({
+        params: schema.object({
+          type: schema.string()
         }),
-        query: object({
-          page: maybe(
-            number({
+        query: schema.object({
+          page: schema.maybe(
+            schema.number({
               min: 1
             })
           ),
-          per_page: maybe(
-            number({
+          per_page: schema.maybe(
+            schema.number({
               min: 1
             })
           )
         })
-      }
+      })
     },
     async (req, res) => {
       log.info('handle Baz route');

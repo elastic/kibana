@@ -3,6 +3,8 @@ import * as bodyParser from 'body-parser';
 
 import { Headers, filterHeaders } from './headers';
 import { ObjectSetting, Props, Any, TypeOf } from '../../../lib/schema';
+import { Schema } from '../../../types/schema';
+import * as schema from '../../../lib/schema';
 
 export interface Route<
   Params extends ObjectSetting<any>,
@@ -10,7 +12,7 @@ export interface Route<
   Body extends ObjectSetting<any>
 > {
   path: string;
-  validate?: {
+  validate?: (schema: Schema) => {
     params?: Params;
     query?: Query;
     body?: Body;
@@ -78,23 +80,32 @@ export class KibanaRequest<
       params = req.params;
       query = req.query;
       body = req.body;
+      return { params, query, body };
+    }
+
+    const validateResult = route.validate(schema);
+
+    if (validateResult === undefined) {
+      params = req.params;
+      query = req.query;
+      body = req.body;
     } else {
-      if (route.validate.params === undefined) {
+      if (validateResult.params === undefined) {
         params = req.params;
       } else {
-        params = route.validate.params.validate(req.params);
+        params = validateResult.params.validate(req.params);
       }
 
-      if (route.validate.query === undefined) {
+      if (validateResult.query === undefined) {
         query = req.query;
       } else {
-        query = route.validate.query.validate(req.query);
+        query = validateResult.query.validate(req.query);
       }
 
-      if (route.validate.body === undefined) {
+      if (validateResult.body === undefined) {
         body = req.body;
       } else {
-        body = route.validate.body.validate(req.body);
+        body = validateResult.body.validate(req.body);
       }
     }
 

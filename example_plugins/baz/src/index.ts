@@ -3,7 +3,7 @@ import { registerEndpoints } from './registerEndpoints';
 
 export const plugin: KibanaPluginConfig<{}> = {
   plugin: kibana => {
-    const { elasticsearch, logger, util, http } = kibana;
+    const { elasticsearch, logger, http } = kibana;
     const config$ =  kibana.kibana.config$;
 
     const log = logger.get();
@@ -16,7 +16,6 @@ export const plugin: KibanaPluginConfig<{}> = {
     registerEndpoints(
       router,
       logger,
-      util.schema,
       elasticsearch.service,
       config$,
     );

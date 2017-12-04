@@ -1,7 +1,7 @@
 import { Router } from '../http';
-import { object, string, maybe } from '../../lib/schema';
 import { ElasticsearchService } from './ElasticsearchService';
 import { LoggerFactory } from '../../logging';
+import { Schema } from '../../types/schema';
 
 export function registerElasticsearchRoutes(
   router: Router,
@@ -15,14 +15,14 @@ export function registerElasticsearchRoutes(
   router.get(
     {
       path: '/:field',
-      validate: {
-        params: object({
-          field: string()
+      validate: (schema: Schema) => ({
+        params: schema.object({
+          field: schema.string()
         }),
-        query: object({
-          key: maybe(string())
+        query: schema.object({
+          key: schema.maybe(schema.string())
         })
-      }
+      })
     },
     async (req, res) => {
       // WOHO! Both of these are typed!
