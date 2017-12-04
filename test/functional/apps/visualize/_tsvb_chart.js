@@ -36,6 +36,11 @@ export default function ({ getService, getPageObjects }) {
 
     describe('Visual Builder chart', function indexPatternCreation() {
 
+      it('should not display spy panel toggle button', async function () {
+        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+        expect(spyToggleExists).to.be(false);
+      });
+
       it('should show correct data', function () {
         const expectedMetricValue =  '156';
 
