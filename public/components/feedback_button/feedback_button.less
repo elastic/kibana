@@ -1,11 +1,21 @@
 @import (reference) "../../style/main";
 
 .canvas__feedback-modal {
-  height: 700px;
+  color: @textMain;
 
-  padding: 0px !important;
-}
+  .canvas__feedback-modal--header {
+    color: @titleColor;
+    padding: 5px !important;
+    font-size: 1.2em;
+    font-weight: bold;
+  }
 
-.canvas__feedback-modal--header {
-  padding: 5px !important;
+  .canvas__feedback-modal--body {
+    padding: 0px !important;
+    height: 800px;
+
+    .message {
+      padding: @spacingM;
+    }
+  }
 }
