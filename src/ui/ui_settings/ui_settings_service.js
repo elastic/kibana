@@ -9,6 +9,17 @@ function hydrateUserSettings(userSettings) {
 }
 
 /**
+ * Invalid value for UiSetting
+ * @class InvalidValudError
+ */
+export class InvalidValueError extends Error {
+  constructor(message) {
+    super(message);
+    Error.captureStackTrace(this, this.constructor);
+  }
+}
+
+/**
  *  Service that provides access to the UiSettings stored in elasticsearch.
  *  @class UiSettingsService
  */
@@ -76,6 +87,15 @@ export class UiSettingsService {
   }
 
   async setMany(changes) {
+    const defaults = await this.getDefaults();
+    for (const key of Object.keys(changes)) {
+      const maxSize = defaults[key].maxSize;
+      const value = changes[key];
+      if (maxSize && value !== null && JSON.stringify(value).length > maxSize.length) {
+        throw new InvalidValueError(`uiSetting ${key} exceeded the maximum length of ${maxSize.description}`);
+      }
+    }
+
     await this._write({ changes });
   }
 

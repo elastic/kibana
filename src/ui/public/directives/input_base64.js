@@ -35,14 +35,9 @@ module.directive('inputBaseSixtyFour', function () {
       }
 
       const maxSizeValidator = (dataUrl) => {
-        const base64ToKb = (length) => {
-          const totalBits = length * 6; // 6 bits per character in base64
-          return totalBits / 8 / 1024;
-        };
-
         return {
           errorKey: 'maxSize',
-          isValid: attrs.max === '' || base64ToKb(dataUrl.length) <= parseInt(attrs.max)
+          isValid: attrs.max === '' || dataUrl.length <= parseInt(attrs.max)
         };
       };
 

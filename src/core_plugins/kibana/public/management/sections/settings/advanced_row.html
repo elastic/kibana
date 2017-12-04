@@ -103,7 +103,7 @@
           ng-if="conf.image"
           ng-model="conf.unsavedValue"
           input-base-sixty-four
-          max="{{conf.options.maxSizeKB}}"
+          max="{{conf.maxSize && conf.maxSize.length}}"
           accept=".jpg,.jpeg,.png"
           type="file"
           class="fullWidth"
@@ -114,7 +114,7 @@
           class="kuiSubText"
           ng-show="forms.configEdit.$error.maxSize"
         >
-          Image is too large, maximum size is {{conf.options.maxSizeKB}}kB
+          Image is too large, maximum size is {{conf.maxSize.description}}
         </p>
 
       </form>
