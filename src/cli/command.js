@@ -79,6 +79,29 @@ Command.prototype.parseOptions = _.wrap(Command.prototype.parseOptions, function
   return opts;
 });
 
+/**
+ * Enables special handling of specified unknown options.
+ *
+ * @param {string[]} options The options to match against.
+ * @param {function} fn A function that will be called for every unknown option
+ * that matches the `options` param.
+ * @return {this}
+ */
+Command.prototype.onUnknownOptions = function (options, fn) {
+  Command.prototype.unknownOption = _.wrap(
+    Command.prototype.unknownOption,
+    function (unknownOption, flag) {
+      if (options.includes(flag)) {
+        fn(flag);
+      } else {
+        unknownOption(flag);
+      }
+    }
+  );
+
+  return this;
+};
+
 Command.prototype.action = _.wrap(Command.prototype.action, function (action, fn) {
   return action.call(this, function (...args) {
     const ret = fn.apply(this, args);

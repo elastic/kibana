@@ -41,17 +41,6 @@ $ bin/kibana-plugin install https://artifacts.elastic.co/downloads/packs/x-pack/
 You can specify URLs that use the HTTP, HTTPS, or `file` protocols.
 
 [float]
-=== Installing Plugins to an Arbitrary Directory
-
-Use the `-d` or `--plugin-dir` option after the `install` command to specify a directory for plugins, as in the following
-example:
-
-[source,shell]
-$ bin/kibana-plugin install file:///some/local/path/x-pack.zip -d path/to/directory
-
-NOTE: This command creates the specified directory if it does not already exist.
-
-[float]
 === Installing Plugins with Linux packages
 
 The Kibana server needs to be able to write to files in the `optimize` directory.  If you're installing plugins using sudo or su you'll

@@ -1,8 +1,8 @@
-import { fromRoot } from '../../utils';
 import list from './list';
 import Logger from '../lib/logger';
 import { parse } from './settings';
 import logWarnings from '../lib/log_warnings';
+import { pluginDirExplanation } from '../lib/plugin_dir';
 
 function processCommand(command, options) {
   let settings;
@@ -22,11 +22,10 @@ function processCommand(command, options) {
 export default function pluginList(program) {
   program
     .command('list')
-    .option(
-      '-d, --plugin-dir <path>',
-      'path to the directory where plugins are stored',
-      fromRoot('plugins')
-    )
     .description('list installed plugins')
+    .onUnknownOptions(['--plugin-dir', '-d'], () => {
+      console.error(pluginDirExplanation);
+      process.exit(1);
+    })
     .action(processCommand);
 }

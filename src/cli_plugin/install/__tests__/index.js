@@ -12,7 +12,8 @@ describe('kibana cli', function () {
         command: function () { return program; },
         description: function () { return program; },
         option: function () { return program; },
-        action: function () { return program; }
+        action: function () { return program; },
+        onUnknownOptions: function () { return program; }
       };
 
       it('should define the command', function () {
@@ -40,8 +41,7 @@ describe('kibana cli', function () {
           /-q/,
           /-s/,
           /-c/,
-          /-t/,
-          /-d/
+          /-t/
         ];
 
         index(program);
