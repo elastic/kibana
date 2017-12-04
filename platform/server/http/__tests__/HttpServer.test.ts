@@ -6,6 +6,7 @@ import { Env } from '../../../config/Env';
 import { Router } from '../Router';
 import { HttpServer } from '../HttpServer';
 import { HttpConfig } from '../HttpConfig';
+import { Schema } from '../../../types/schema';
 import * as schema from '../../../lib/schema';
 import { logger } from '../../../logging/__mocks__';
 
@@ -121,11 +122,11 @@ test('valid params', async () => {
   router.get(
     {
       path: '/:test',
-      validate: {
+      validate: (schema: Schema) => ({
         params: schema.object({
           test: schema.string()
         })
-      }
+      })
     },
     async (req, res) => {
       return res.ok({ key: req.params.test });
@@ -150,11 +151,11 @@ test('invalid params', async () => {
   router.get(
     {
       path: '/:test',
-      validate: {
+      validate: (schema: Schema) => ({
         params: schema.object({
           test: schema.number()
         })
-      }
+      })
     },
     async (req, res) => {
       return res.ok({ key: req.params.test });
@@ -181,12 +182,12 @@ test('valid query', async () => {
   router.get(
     {
       path: '/',
-      validate: {
+      validate: (schema: Schema) => ({
         query: schema.object({
           bar: schema.string(),
           quux: schema.number()
         })
-      }
+      })
     },
     async (req, res) => {
       return res.ok(req.query);
@@ -211,11 +212,11 @@ test('invalid query', async () => {
   router.get(
     {
       path: '/',
-      validate: {
+      validate: (schema: Schema) => ({
         query: schema.object({
           bar: schema.number()
         })
-      }
+      })
     },
     async (req, res) => {
       return res.ok(req.query);
@@ -242,12 +243,12 @@ test('valid body', async () => {
   router.post(
     {
       path: '/',
-      validate: {
+      validate: (schema: Schema) => ({
         body: schema.object({
           bar: schema.string(),
           baz: schema.number()
         })
-      }
+      })
     },
     async (req, res) => {
       return res.ok(req.body);
@@ -276,11 +277,11 @@ test('invalid body', async () => {
   router.post(
     {
       path: '/',
-      validate: {
+      validate: (schema: Schema) => ({
         body: schema.object({
           bar: schema.number()
         })
-      }
+      })
     },
     async (req, res) => {
       return res.ok(req.body);
@@ -328,11 +329,11 @@ test('handles deleting', async () => {
   router.delete(
     {
       path: '/:id',
-      validate: {
+      validate: (schema: Schema) => ({
         params: schema.object({
           id: schema.number()
         })
-      }
+      })
     },
     async (req, res) => {
       return res.ok({ key: req.params.id });
