@@ -135,9 +135,7 @@ export function setupJunitReportGeneration(runner, options = {}) {
         el
           .ele('failure')
           .dat(inspect(test.err));
-      }
-
-      if (isTestPending(test)) {
+      } else if (isTestPending(test)) {
         el.ele('skipped');
       }
     }
