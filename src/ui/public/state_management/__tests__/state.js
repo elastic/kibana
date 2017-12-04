@@ -313,13 +313,8 @@ describe('State Management', () => {
       $rootScope = _$rootScope_;
       Notifier.prototype._notifs.splice(0);
 
-      const setup = opts => {
-        const { param, initial, storeInHash } = (opts || {});
-        sinon.stub(config, 'get').withArgs('state:storeInSessionStorage').returns(!!storeInHash);
-        return new State(param, initial);
-      };
-
-      state = setup();
+      sinon.stub(config, 'get').withArgs('state:storeInSessionStorage').returns(false);
+      state = new State();
       readUrlSpy = sinon.spy(state, '_readFromURL');
     }));
 
@@ -332,7 +327,7 @@ describe('State Management', () => {
         $location.search({ _s: '(foo:bar)' });
         state[method]();
         $rootScope.$apply();
-        expect(readUrlSpy.called).to.be(false);
+        sinon.assert.notCalled(readUrlSpy);
       });
     });
   });
