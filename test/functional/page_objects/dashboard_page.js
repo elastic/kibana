@@ -141,6 +141,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await testSubjects.click('dashboardClone');
     }
 
+    async getCloneTitle() {
+      return await testSubjects.getProperty('clonedDashboardTitle', 'value');
+    }
+
     async confirmClone() {
       log.debug('Confirming clone');
       await testSubjects.click('cloneConfirmButton');
