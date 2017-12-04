@@ -3,9 +3,8 @@
 
 [partintro]
 --
-Add-on functionality for Kibana is implemented with plug-in modules. You can use the `bin/kibana-plugin`
-command to manage these modules. You can also install a plugin manually by moving the plugin file to the
-`plugins` directory and unpacking the plugin files into a new directory.
+Add-on functionality for Kibana is implemented with plug-in modules. You use the `bin/kibana-plugin`
+command to manage these modules.
 
 [IMPORTANT]
 .Plugin compatibility
