@@ -2,7 +2,7 @@ import { format } from 'util';
 
 import Mocha from 'mocha';
 
-import { MochaJunitReporter } from '../../../../dev/mocha/junit_reporter';
+import { setupJunitReportGeneration } from '../../../../dev';
 import * as colors from './colors';
 import * as symbols from './symbols';
 import { ms } from './ms';
@@ -28,12 +28,9 @@ export function ConsoleReporterProvider({ getService }) {
       runner.on('end', this.onEnd);
 
       if (config.get('junit.enabled') && config.get('junit.reportName')) {
-        new MochaJunitReporter(runner, {
-          ...options,
-          reporterOptions: {
-            reportName: config.get('junit.reportName'),
-            rootDirectory: config.get('junit.rootDirectory')
-          }
+        setupJunitReportGeneration(runner, {
+          reportName: config.get('junit.reportName'),
+          rootDirectory: config.get('junit.rootDirectory')
         });
       }
     }

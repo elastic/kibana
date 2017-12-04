@@ -1,15 +1,18 @@
-// WARNING: this file is required directly by mocha, so it isn't transpiled
+import mocha from 'mocha';
+import { setupJunitReportGeneration } from './junit_report_generation';
 
-require('../../babel-register');
-const MochaSpecReporter = require('mocha').reporters.spec;
-const { MochaJunitReporter } = require('./junit_reporter');
+const MochaSpecReporter = mocha.reporters.spec;
 
-module.exports = function (runner, options) {
-  // setup a spec reporter for console output
-  new MochaSpecReporter(runner, options);
+export function createAutoJunitReporter(junitReportOptions) {
+  return class createAutoJunitReporter {
+    constructor(runner, options) {
+      // setup a spec reporter for console output
+      new MochaSpecReporter(runner, options);
 
-  // in CI we also setup the Junit reporter
-  if (process.env.CI) {
-    new MochaJunitReporter(runner, options);
-  }
-};
+      // in CI we also setup the Junit reporter
+      if (process.env.CI) {
+        setupJunitReportGeneration(runner, junitReportOptions);
+      }
+    }
+  };
+}

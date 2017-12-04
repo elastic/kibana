@@ -13,11 +13,11 @@ const PATH_SEGMENTS_TO_IGNORE = [
   '__tests__',
 ];
 
-export function MochaJunitReporter(runner, options) {
+export function setupJunitReportGeneration(runner, options = {}) {
   const {
     reportName = 'Unnamed Mocha Tests',
     rootDirectory = dirname(require.resolve('../../../package.json')),
-  } = options.reporterOptions || {};
+  } = options;
 
   const rootSuite = runner.suite;
   const isTestFailed = test => test.state === 'failed';

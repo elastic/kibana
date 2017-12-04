@@ -1,17 +1,17 @@
-module.exports = {
+import { createAutoJunitReporter } from '../../src/dev';
+
+export default {
   options: {
     timeout: 10000,
     slow: 5000,
     ignoreLeaks: false,
-    reporter: require('../../src/dev/mocha/auto_junit_reporter'),
-    reporterOptions: {
+    reporter: createAutoJunitReporter({
       reportName: 'Server Mocha Tests'
-    },
+    }),
     globals: ['nil'],
   },
   all: {
     src: [
-      require.resolve('../../src/babel-register'),
       'test/**/__tests__/**/*.js',
       'src/**/__tests__/**/*.js',
       'tasks/**/__tests__/**/*.js',
