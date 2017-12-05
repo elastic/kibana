@@ -9,7 +9,7 @@ export async function scanMixin(kbnServer, server, config) {
     invalidDirectoryError$,
     invalidPackError$,
     deprecation$,
-    invalidVersionSpecs$,
+    invalidVersionSpec$,
     spec$,
   } = findPluginSpecs(kbnServer.settings, config);
 
@@ -36,7 +36,7 @@ export async function scanMixin(kbnServer, server, config) {
       });
     }),
 
-    invalidVersionSpecs$
+    invalidVersionSpec$
       .map(spec => {
         const name = spec.getId();
         const pluginVersion = spec.getExpectedKibanaVersion();

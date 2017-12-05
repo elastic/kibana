@@ -128,7 +128,7 @@ export function findPluginSpecs(settings, config = defaultConfig(settings)) {
       .mergeMap(result => result.disabledSpecs),
 
     // all PluginSpec objects that were disabled because their version was incompatible
-    invalidVersionSpecs$: extendConfig$
+    invalidVersionSpec$: extendConfig$
       .mergeMap(result => result.invalidVersionSpecs),
   };
 }
