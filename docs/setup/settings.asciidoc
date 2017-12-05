@@ -99,8 +99,8 @@ The following example shows a valid regionmap configuration.
 `regionmap.layers[].url:`:: Mandatory. The location of the geojson file as provided by a webserver.
 `regionmap.layers[].attribution:`:: Optional. References the originating source of the geojson file.
 `regionmap.layers[].fields[]:`:: Mandatory. Each layer can contain multiple fields to indicate what properties from the geojson features you wish to expose. The example above shows how to define multiple properties.
-`regionmap.layers[]fields[].name:`:: Mandatory. This value is used to do an inner-join between the document stored in Elasticsearch and the geojson file. e.g. if the field in the geojson is called `Location` and has city names, there must be a field in Elasticsearch that holds the same values that Kibana can then use to lookup for the geoshape data.
-`regionmap.layers[]fields[].description:`:: Mandatory. The human readable text that is shown under the Options tab when building the Region Map visualization.
+`regionmap.layers[].fields[].name:`:: Mandatory. This value is used to do an inner-join between the document stored in Elasticsearch and the geojson file. e.g. if the field in the geojson is called `Location` and has city names, there must be a field in Elasticsearch that holds the same values that Kibana can then use to lookup for the geoshape data.
+`regionmap.layers[].fields[].description:`:: Mandatory. The human readable text that is shown under the Options tab when building the Region Map visualization.
 `regionmap.includeElasticMapsService`:: turns on or off whether layers from the Elastic Maps Service should be included in the vector layer option list. 
 By turning this off, only the layers that are configured here will be included. The default is true.             
 
