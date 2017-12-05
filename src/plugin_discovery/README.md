@@ -107,18 +107,18 @@ Observable.merge(
 
 ## `reduceExportSpecs(pluginSpecs, reducers, [defaults={}])`
 
-Iterates through every export specification provided by all [`PluginSpec`][PluginSpec]s. If an exported specification value is an array each item in the array will be passed to the reducer individually. If the exported specification is `undefined` it will be ignored. The reducer is called with the signature:
+Reduces every value exported by the [`PluginSpec`][PluginSpec]s to produce a single value. If an exported value is an array each item in the array will be reduced individually. If the exported value is `undefined` it will be ignored. The reducer is called with the signature:
 
 ```js
 reducer(
   // the result of the previous reducer call, or `defaults`
   acc: any,
-  // the value exported value, found at `uiExports[type]` in the
-  // PluginSpec config
+  // the exported value, found at `uiExports[type]` or `uiExports[type][i]`
+  // in the PluginSpec config.
   spec: any, 
   // the key in `uiExports` where this export was found
   type: string,
-  // the PluginSpec which provided this export
+  // the PluginSpec which exported this spec
   pluginSpec: PluginSpec
 )
 ```
