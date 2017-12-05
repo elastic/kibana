@@ -244,7 +244,7 @@ export function VislibVisualizationsPieChartProvider(Private) {
               x: pos[0],
               y: pos[1],
               left: midAngle < Math.PI ? pos[0] : pos[0] - bbox.width,
-              right: midAngle < Math.PI ? pos[0] + bbox.width : pos[0],
+              right: midAngle > Math.PI ? pos[0] + bbox.width : pos[0],
               bottom: pos[1] + 5,
               top: pos[1] - bbox.height - 5,
             };
