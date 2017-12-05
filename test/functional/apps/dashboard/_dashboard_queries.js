@@ -92,7 +92,7 @@ export default function ({ getService, getPageObjects }) {
         expect(filters.length).to.equal(0);
       });
 
-      it('are added when a pie chart slice is clicked', async function () {
+      it.skip('are added when a pie chart slice is clicked', async function () {
         await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
         await PageObjects.dashboard.filterOnPieSlice();
         const filters = await PageObjects.dashboard.getFilters();
