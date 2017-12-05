@@ -86,7 +86,11 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       const urlSubstring = 'kibana#/dashboard/';
       const startOfIdIndex = currentUrl.indexOf(urlSubstring) + urlSubstring.length;
       const endIndex = currentUrl.indexOf('?');
-      return currentUrl.substring(startOfIdIndex, endIndex);
+      const id = currentUrl.substring(startOfIdIndex, endIndex < 0 ? currentUrl.length : endIndex);
+
+      log.debug(`Dashboard id extracted from ${currentUrl} is ${id}`);
+
+      return id;
     }
 
     /**
