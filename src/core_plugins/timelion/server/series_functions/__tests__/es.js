@@ -316,15 +316,15 @@ describe(filename, () => {
 
       it('Should convert percentiles metric aggs', () => {
         const buckets = [
-          { key: 1000, percentiles: { values: { '50.0': 54, '75.0': 65, '95.0': 73, '99.0': 75 } } },
-          { key: 2000, percentiles: { values: { '50.0': 25, '75.0': 32, '95.0': 43, '99.0': 67 } } },
+          { key: 1000, percentiles: { values: { '50.0': 'NaN', '75.0': 65, '95.0': 73, '99.0': 75 } } },
+          { key: 2000, percentiles: { values: { '50.0': 25, '75.0': 32, '95.0': 'NaN', '99.0': 67 } } },
           { key: 3000, percentiles: { values: { '50.0': 15, '75.0': 15, '95.0': 15, '99.0': 15 } } }
         ];
 
         expect(fn(buckets)).to.eql({
-          'percentiles:50.0': [[1000, 54], [2000, 25], [3000, 15]],
+          'percentiles:50.0': [[1000, NaN], [2000, 25], [3000, 15]],
           'percentiles:75.0': [[1000, 65], [2000, 32], [3000, 15]],
-          'percentiles:95.0': [[1000, 73], [2000, 43], [3000, 15]],
+          'percentiles:95.0': [[1000, 73], [2000, NaN], [3000, 15]],
           'percentiles:99.0': [[1000, 75], [2000, 67], [3000, 15]]
         });
       });

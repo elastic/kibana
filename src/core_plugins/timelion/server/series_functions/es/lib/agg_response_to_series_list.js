@@ -9,8 +9,9 @@ export function timeBucketsToPairs(buckets) {
         if (val.values) {
           _.forOwn(val.values, function (bucketValue, bucketKey) {
             const k = key + ':' + bucketKey;
+            const v = isNaN(bucketValue) ? NaN : bucketValue;
             series[k] = series[k] || [];
-            series[k].push(bucketValue);
+            series[k].push(v);
           });
         } else {
           series[key] = series[key] || [];
