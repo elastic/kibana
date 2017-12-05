@@ -1,4 +1,4 @@
-import { concatValues } from './reduce';
+import { flatConcatValuesAtType } from './reduce';
 import { mapSpec, alias, wrap } from './modify_reduce';
 
 /**
@@ -9,7 +9,7 @@ import { mapSpec, alias, wrap } from './modify_reduce';
 const appExtension = wrap(
   mapSpec((spec, type) => ({ [type]: spec })),
   alias('appExtensions'),
-  concatValues
+  flatConcatValuesAtType
 );
 
 // plain extension groups produce lists of modules that will be required by the entry
@@ -36,4 +36,4 @@ export const visTypeEnhancers = wrap(alias('visTypes'), appExtension);
 
 // adhoc extension groups can define new extension groups on the fly
 // so that plugins could concat their own
-export const aliases = concatValues;
+export const aliases = flatConcatValuesAtType;

@@ -1,4 +1,4 @@
-import { concat } from './reduce';
+import { flatConcatAtType } from './reduce';
 import { alias, mapSpec, wrap } from './modify_reduce';
 
 // mapping types
@@ -8,5 +8,5 @@ export const mappings = wrap(
     pluginId: pluginSpec.getId(),
     properties: spec
   })),
-  concat
+  flatConcatAtType
 );

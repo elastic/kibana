@@ -1,6 +1,6 @@
 import { noop, uniq } from 'lodash';
 
-import { concat } from './reduce';
+import { flatConcatAtType } from './reduce';
 import { alias, mapSpec, wrap } from './modify_reduce';
 
 function applySpecDefaults(spec, type, pluginSpec) {
@@ -43,5 +43,5 @@ function applySpecDefaults(spec, type, pluginSpec) {
   };
 }
 
-export const apps = wrap(alias('uiAppSpecs'), mapSpec(applySpecDefaults), concat);
-export const app = wrap(alias('uiAppSpecs'), mapSpec(applySpecDefaults), concat);
+export const apps = wrap(alias('uiAppSpecs'), mapSpec(applySpecDefaults), flatConcatAtType);
+export const app = wrap(alias('uiAppSpecs'), mapSpec(applySpecDefaults), flatConcatAtType);

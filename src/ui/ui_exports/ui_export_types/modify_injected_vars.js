@@ -1,7 +1,7 @@
-import { concat } from './reduce';
+import { flatConcatAtType } from './reduce';
 import { wrap, alias, mapSpec } from './modify_reduce';
 
-export const replaceInjectedVars = wrap(alias('injectedVarsReplacers'), concat);
+export const replaceInjectedVars = wrap(alias('injectedVarsReplacers'), flatConcatAtType);
 
 export const injectDefaultVars = wrap(
   alias('defaultInjectedVarProviders'),
@@ -9,5 +9,5 @@ export const injectDefaultVars = wrap(
     pluginSpec,
     fn: spec,
   })),
-  concat
+  flatConcatAtType
 );

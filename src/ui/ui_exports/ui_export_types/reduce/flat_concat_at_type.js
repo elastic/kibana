@@ -1,4 +1,4 @@
-import { mergeType } from './merge_type';
+import { createTypeReducer, flatConcat } from './lib';
 
 /**
  *  Reducer that merges two values concatenating all values
@@ -6,6 +6,4 @@ import { mergeType } from './merge_type';
  *  @param  {Any} [initial]
  *  @return {Function}
  */
-export const concat = mergeType((a, b) => (
-  [].concat(a || [], b || [])
-));
+export const flatConcatAtType = createTypeReducer(flatConcat);
