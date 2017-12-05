@@ -106,6 +106,10 @@ export class PluginSpec {
   }
 
   isEnabled(config) {
+    if (!config || typeof config.get !== 'function' || typeof config.has !== 'function') {
+      throw new TypeError('PluginSpec#isEnabled() must be called with a config service');
+    }
+
     if (this._isEnabled) {
       return this._isEnabled(config);
     }
