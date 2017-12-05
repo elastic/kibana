@@ -1,11 +1,10 @@
 import { resolve } from 'path';
-import { readdirSync } from 'fs';
 
 import expect from 'expect.js';
 import { findPluginSpecs } from '../find_plugin_specs';
 import { PluginSpec } from '../plugin_spec';
 
-const CORE_PLUGINS = resolve(__dirname, '../../core_plugins');
+const PLUGIN_FIXTURES = resolve(__dirname, 'fixtures/plugins');
 
 describe('plugin discovery', () => {
   describe('findPluginSpecs()', function () {
@@ -15,17 +14,19 @@ describe('plugin discovery', () => {
       const { spec$ } = findPluginSpecs({
         plugins: {
           paths: [
-            resolve(CORE_PLUGINS, 'console'),
-            resolve(CORE_PLUGINS, 'elasticsearch'),
+            resolve(PLUGIN_FIXTURES, 'foo'),
+            resolve(PLUGIN_FIXTURES, 'bar'),
           ]
         }
       });
 
       const specs = await spec$.toArray().toPromise();
-      expect(specs).to.have.length(2);
-      expect(specs[0]).to.be.a(PluginSpec);
-      expect(specs[0].getId()).to.be('console');
-      expect(specs[1].getId()).to.be('elasticsearch');
+      expect(specs).to.have.length(3);
+      specs.forEach(spec => {
+        expect(spec).to.be.a(PluginSpec);
+      });
+      expect(specs.map(s => s.getId()).sort())
+        .to.eql(['bar:one', 'bar:two', 'foo']);
     });
 
     it('finds all specs in scanDirs', async () => {
@@ -34,39 +35,40 @@ describe('plugin discovery', () => {
         env: 'development',
 
         plugins: {
-          scanDirs: [CORE_PLUGINS]
+          scanDirs: [PLUGIN_FIXTURES]
         }
       });
 
-      const expected = readdirSync(CORE_PLUGINS)
-        .filter(name => !name.startsWith('.'))
-        .sort((a, b) => a.localeCompare(b));
-
       const specs = await spec$.toArray().toPromise();
-      const specIds = specs
-        .map(spec => spec.getId())
-        .sort((a, b) => a.localeCompare(b));
-
-      expect(specIds).to.eql(expected);
+      expect(specs).to.have.length(3);
+      specs.forEach(spec => {
+        expect(spec).to.be.a(PluginSpec);
+      });
+      expect(specs.map(s => s.getId()).sort())
+        .to.eql(['bar:one', 'bar:two', 'foo']);
     });
 
     it('does not find disabled plugins', async () => {
       const { spec$ } = findPluginSpecs({
-        elasticsearch: {
+        'bar:one': {
           enabled: false
         },
 
         plugins: {
           paths: [
-            resolve(CORE_PLUGINS, 'elasticsearch'),
-            resolve(CORE_PLUGINS, 'kibana')
+            resolve(PLUGIN_FIXTURES, 'foo'),
+            resolve(PLUGIN_FIXTURES, 'bar')
           ]
         }
       });
 
       const specs = await spec$.toArray().toPromise();
-      expect(specs).to.have.length(1);
-      expect(specs[0].getId()).to.be('kibana');
+      expect(specs).to.have.length(2);
+      specs.forEach(spec => {
+        expect(spec).to.be.a(PluginSpec);
+      });
+      expect(specs.map(s => s.getId()).sort())
+        .to.eql(['bar:two', 'foo']);
     });
   });
 });
