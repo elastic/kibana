@@ -38,7 +38,7 @@ export function isInvalidPackError(error) {
  */
 const ERROR_INVALID_PLUGIN = 'ERROR_INVALID_PLUGIN';
 export function createInvalidPluginError(spec, reason) {
-  const error = new Error(`Plugin from ${spec.getId()} from ${spec.getPack().getPath()} is invalid because ${reason}`);
+  const error = new Error(`Plugin from ${spec.getId()} at ${spec.getPack().getPath()} is invalid because ${reason}`);
   error[errorCodeProperty] = ERROR_INVALID_PLUGIN;
   error.spec = spec;
   return error;
