@@ -1,8 +1,8 @@
 import Joi from 'joi';
 
 const STUB_CONFIG_SCHEMA = Joi.object().keys({
-  enabled: Joi.valid(false)
-});
+  enabled: Joi.valid(false).default(false)
+}).default();
 
 const DEFAULT_CONFIG_SCHEMA = Joi.object().keys({
   enabled: Joi.boolean().default(true)
