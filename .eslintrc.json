@@ -13,10 +13,12 @@
         "semi": true
       }
     ],
+    "no-underscore-dangle": "off",
+    "no-use-before-define": ["error", { "functions": false }],
+    "one-var": ["error", { "initialized": "never", "uninitialized": "always" }],
     "no-console": 0,
-    "import/no-commonjs": 0,
     "arrow-body-style": 0
   },
   "plugins": ["prettier"],
-  "extends": ["eslint:recommended", "prettier"]
+  "extends": ["airbnb-base", "prettier"]
 }

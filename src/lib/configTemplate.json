@@ -6,21 +6,6 @@
   // Github username, eg. kimchy
   "username": "",
 
-  // Only allow picking own commits to backport
-  "own": true,
-
-  // Backport multiple commits
-  "multipleCommits": false,
-
-  // Backport to multiple versions
-  "multipleVersions": true,
-
-  // Repositories and the versions that will be available in backport cli
-  "repositories": [
-    {
-      "name": "elastic/kibana",
-      "versions": ["6.x", "6.0", "5.6", "5.5", "5.4"],
-      "labels": ["backport"]
-    }
-  ]
+  // Override project-specific settings
+  "projects": []
 }

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`select commit that originated from pull request exec should be called with correct args 1`] = `
+exports[`run through steps exec should be called with correct args 1`] = `
 Array [
   Array [
     "git clone git@github.com:elastic/kibana",
@@ -41,20 +41,8 @@ Array [
 ]
 `;
 
-exports[`select commit that originated from pull request prompt calls should match snapshot 1`] = `
+exports[`run through steps prompt calls should match snapshot 1`] = `
 Array [
-  Array [
-    Array [
-      Object {
-        "choices": Array [
-          "elastic/kibana",
-        ],
-        "message": "Select repository",
-        "name": "promptResult",
-        "type": "list",
-      },
-    ],
-  ],
   Array [
     Array [
       Object {
@@ -63,7 +51,6 @@ Array [
             "name": "Update readme: Make ui-framework url a link",
             "short": "Update readme: Make ui-framework url a link",
             "value": Object {
-              "date": "2017-09-05T08:48:42Z",
               "message": "Update readme: Make ui-framework url a link",
               "sha": "7939a98aadb94ead30b54bea7974cd02dc816b02",
             },
@@ -72,7 +59,6 @@ Array [
             "name": "Update react 15.6.1 (#13672)",
             "short": "Update react 15.6.1 (#13672)",
             "value": Object {
-              "date": "2017-08-28T08:27:51Z",
               "message": "Update react 15.6.1 (#13672)",
               "sha": "52552a93efa5b4038ea57d9cb3d158ba6a1ff71d",
             },
@@ -81,7 +67,6 @@ Array [
             "name": "Mock out static files when running in Jest (#13315)",
             "short": "Mock out static files when running in Jest (#13315)",
             "value": Object {
-              "date": "2017-08-07T15:35:59Z",
               "message": "Mock out static files when running in Jest (#13315)",
               "sha": "8cfbb82cfb50aa962410a9682d96335a252d751a",
             },
@@ -104,50 +89,11 @@ Array [
           "5.5",
           "5.4",
         ],
-        "message": "Select version to backport to",
+        "message": "Select branch to backport to",
         "name": "promptResult",
         "type": "list",
       },
     ],
-  ],
-]
-`;
-
-exports[`select commit that originated from pull request writeFile should be called with correct args 1`] = `
-Array [
-  Array [
-    "/homefolder/.backport/config.json",
-    "{
-  // Github personal access token. Must be created here: https://github.com/settings/tokens/new
-  // Must have \\"Repo: Full control of private repositories\\"
-  \\"accessToken\\": \\"\\",
-
-  // Github username, eg. kimchy
-  \\"username\\": \\"\\",
-
-  // Only allow picking own commits to backport
-  \\"own\\": true,
-
-  // Backport multiple commits
-  \\"multipleCommits\\": false,
-
-  // Backport to multiple versions
-  \\"multipleVersions\\": true,
-
-  // Repositories and the versions that will be available in backport cli
-  \\"repositories\\": [
-    {
-      \\"name\\": \\"elastic/kibana\\",
-      \\"versions\\": [\\"6.x\\", \\"6.0\\", \\"5.6\\", \\"5.5\\", \\"5.4\\"],
-      \\"labels\\": [\\"backport\\"]
-    }
-  ]
-}
-",
-    Object {
-      "flag": "wx",
-      "mode": 384,
-    },
   ],
 ]
 `;

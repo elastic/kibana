@@ -6,19 +6,19 @@ function prompt(options) {
     .then(({ promptResult }) => promptResult);
 }
 
-function listFullRepoName(repoNames) {
+function listProjects(repoNames) {
   return prompt({
     type: 'list',
-    message: 'Select repository',
+    message: 'Select project',
     choices: repoNames
   });
 }
 
-function listCommits(commits, multipleChoice) {
+function listCommits(commits, isMultipleChoice) {
   const pageSize = Math.min(10, commits.length);
   return prompt({
     pageSize,
-    type: multipleChoice ? 'checkbox' : 'list',
+    type: isMultipleChoice ? 'checkbox' : 'list',
     message: 'Select commit to backport',
     choices: commits
       .map(commit => ({
@@ -28,27 +28,27 @@ function listCommits(commits, multipleChoice) {
       }))
       .concat(commits.length > pageSize ? new inquirer.Separator() : [])
   })
-    .then(commit => (multipleChoice ? commit.reverse() : [commit]))
+    .then(commit => (isMultipleChoice ? commit.reverse() : [commit]))
     .then(
       selectedCommits =>
         selectedCommits.length === 0
-          ? listCommits(commits, multipleChoice)
+          ? listCommits(commits, isMultipleChoice)
           : selectedCommits
     );
 }
 
-function listVersions(versions, multipleChoice) {
+function listBranches(branches, isMultipleChoice) {
   return prompt({
-    type: multipleChoice ? 'checkbox' : 'list',
-    message: 'Select version to backport to',
-    choices: versions
+    type: isMultipleChoice ? 'checkbox' : 'list',
+    message: 'Select branch to backport to',
+    choices: branches
   })
-    .then(version => (multipleChoice ? version : [version]))
+    .then(res => (isMultipleChoice ? res : [res]))
     .then(
-      selectedVersions =>
-        selectedVersions.length === 0
-          ? listCommits(versions, multipleChoice)
-          : selectedVersions
+      selectedBranches =>
+        selectedBranches.length === 0
+          ? listBranches(branches, isMultipleChoice)
+          : selectedBranches
     );
 }
 
@@ -62,6 +62,6 @@ function confirmConflictResolved() {
 module.exports = {
   confirmConflictResolved,
   listCommits,
-  listFullRepoName,
-  listVersions
+  listProjects,
+  listBranches
 };

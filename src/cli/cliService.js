@@ -1,10 +1,11 @@
 const ora = require('ora');
-const path = require('path');
+const chalk = require('chalk');
+
 const prompts = require('../lib/prompts');
 const github = require('../lib/github');
 const constants = require('../lib/constants');
 const { getRepoPath } = require('../lib/env');
-const chalk = require('chalk');
+const logger = require('../lib/logger');
 
 const {
   resetAndPullMaster,
@@ -20,23 +21,23 @@ function doBackportVersions({
   owner,
   repoName,
   commits,
-  versions,
+  branches,
   username,
   labels
 }) {
-  return sequentially(versions, version => {
+  return sequentially(branches, branch => {
     return withPullRequest(owner, repoName, commits)
       .then(commitsWithPullRequest => {
         return doBackportVersion({
           owner,
           repoName,
           commits: commitsWithPullRequest,
-          version,
+          branch,
           username,
           labels
         });
       })
-      .then(res => console.log(`View pull request: ${res.data.html_url}\n`))
+      .then(res => logger.log(`View pull request: ${res.data.html_url}\n`))
       .catch(handleErrors);
   });
 }
@@ -45,17 +46,17 @@ function doBackportVersion({
   owner,
   repoName,
   commits,
-  version,
+  branch,
   username,
   labels = []
 }) {
-  const backportBranchName = getBackportBranchName(version, commits);
+  const backportBranchName = getBackportBranchName(branch, commits);
   const refValues = commits.map(commit => getReferenceLong(commit)).join(', ');
-  console.log(`Backporting ${refValues} to ${version}`);
+  logger.log(`Backporting ${refValues} to ${branch}`);
 
   return withSpinner(
     resetAndPullMaster(owner, repoName).then(() =>
-      createAndCheckoutBranch(owner, repoName, version, backportBranchName)
+      createAndCheckoutBranch(owner, repoName, branch, backportBranchName)
     ),
     'Pulling latest changes'
   )
@@ -71,116 +72,92 @@ function doBackportVersion({
       )
     )
     .then(() => {
-      const payload = getPullRequestPayload(version, commits, username);
-      return withSpinner(
-        github.createPullRequest(owner, repoName, payload).then(res => {
+      const payload = getPullRequestPayload(branch, commits, username);
+      const promise = github
+        .createPullRequest(owner, repoName, payload)
+        .then(res => {
           if (labels.length > 0) {
             return github
               .addLabels(owner, repoName, res.data.number, labels)
               .then(() => res);
           }
           return res;
-        }),
-        'Creating pull request'
-      );
+        });
+
+      return withSpinner(promise, 'Creating pull request');
     });
 }
 
 // Add pull request info to commit if it exists
 function withPullRequest(owner, repoName, commits) {
-  return Promise.all(
+  const promise = Promise.all(
     commits.map(commit => {
       return github
         .getPullRequestByCommit(owner, repoName, commit.sha)
         .then(pullRequest => Object.assign({}, commit, { pullRequest }));
     })
   );
-}
-
-function promptRepoInfo(repositories, cwd) {
-  return Promise.resolve()
-    .then(() => {
-      const fullRepoNames = repositories.map(repo => repo.name);
-      const currentFullRepoName = getCurrentFullRepoName(fullRepoNames, cwd);
-      if (currentFullRepoName) {
-        console.log(`Repository: ${currentFullRepoName}`);
-        return currentFullRepoName;
-      }
-      return prompts.listFullRepoName(fullRepoNames);
-    })
-    .then(fullRepoName => {
-      const [owner, repoName] = fullRepoName.split('/');
-      return { owner, repoName };
-    });
+  return withSpinner(promise);
 }
 
 function maybeSetupRepo(owner, repoName, username) {
   return repoExists(owner, repoName).then(exists => {
-    if (!exists) {
-      return withSpinner(
-        setupRepo(owner, repoName, username),
-        'Cloning repository (may take a few minutes the first time)'
-      );
+    if (exists) {
+      return null;
     }
+
+    return withSpinner(
+      setupRepo(owner, repoName, username),
+      'Cloning repository (may take a few minutes the first time)'
+    );
   });
 }
 
-function getCommits(owner, repoName, options) {
-  if (options.sha) {
-    const spinner = ora().start();
-    return github
-      .getCommit(owner, repoName, options.sha)
-      .catch(err => {
-        spinner.stop();
-        throw err;
-      })
-      .then(commit => {
-        spinner.stopAndPersist({
-          symbol: chalk.green('?'),
-          text: `${chalk.bold('Select commit')} ${chalk.cyan(commit.message)}`
-        });
-        return [commit];
+function getCommitBySha({ owner, repoName, sha }) {
+  const spinner = ora().start();
+  return github
+    .getCommit(owner, repoName, sha)
+    .catch(e => {
+      spinner.stop();
+      throw e;
+    })
+    .then(commit => {
+      spinner.stopAndPersist({
+        symbol: chalk.green('?'),
+        text: `${chalk.bold('Select commit')} ${chalk.cyan(commit.message)}`
       });
-  }
-
-  return promptCommit(
-    owner,
-    repoName,
-    options.own ? options.username : null,
-    options.multipleCommits
-  );
+      return [commit];
+    });
 }
 
-function promptCommit(owner, repoName, username, multipleChoice) {
+function getCommitByPrompt({ owner, repoName, author, multipleCommits }) {
   const spinner = ora('Loading commits...').start();
   return github
-    .getCommits(owner, repoName, username)
+    .getCommits(owner, repoName, author)
     .catch(e => {
       spinner.fail();
       throw e;
     })
     .then(commits => {
       spinner.stop();
-      return prompts.listCommits(commits, multipleChoice);
+      return prompts.listCommits(commits, multipleCommits);
     });
 }
 
-function promptVersions(versions, multipleChoice = false) {
-  return prompts.listVersions(versions, multipleChoice);
+function getBranchesByPrompt(branches, isMultipleChoice = false) {
+  return prompts.listBranches(branches, isMultipleChoice);
 }
 
 function handleErrors(e) {
   switch (e.code) {
-    case constants.INVALID_CONFIG:
-      console.log(e.message);
-      break;
-
+    // Handled exceptions
     case constants.GITHUB_ERROR:
-      console.error(JSON.stringify(e.response, null, 4));
+      logger.error(JSON.stringify(e.message, null, 4));
       break;
 
+    // Unhandled exceptions
     default:
-      console.error(e);
+      logger.error(e);
   }
 }
 
@@ -191,12 +168,12 @@ function sequentially(items, handler) {
   );
 }
 
-function getBackportBranchName(version, commits) {
+function getBackportBranchName(branch, commits) {
   const refValues = commits
     .map(commit => getReferenceShort(commit))
     .join('_')
     .slice(0, 200);
-  return `backport/${version}/${refValues}`;
+  return `backport/${branch}/${refValues}`;
 }
 
 function getReference(commit, { short }) {
@@ -246,13 +223,8 @@ function confirmResolvedRecursive(owner, repoName) {
     );
 }
 
-function getCurrentFullRepoName(fullRepoNames, cwd) {
-  const currentDir = path.basename(cwd);
-  return fullRepoNames.find(name => name.endsWith(`/${currentDir}`));
-}
-
-function getPullRequestPayload(version, commits, username) {
-  const backportBranchName = getBackportBranchName(version, commits);
+function getPullRequestPayload(branch, commits, username) {
+  const backportBranchName = getBackportBranchName(branch, commits);
   const commitRefs = commits
     .map(commit => {
       const ref = getReferenceLong(commit);
@@ -266,10 +238,10 @@ function getPullRequestPayload(version, commits, username) {
     .slice(0, 200);
 
   return {
-    title: `[${version}] ${commitMessages}`,
-    body: `Backports the following commits to ${version}:\n${commitRefs}`,
+    title: `[${branch}] ${commitMessages}`,
+    body: `Backports the following commits to ${branch}:\n${commitRefs}`,
     head: `${username}:${backportBranchName}`,
-    base: `${version}`
+    base: `${branch}`
   };
 }
 
@@ -277,7 +249,11 @@ function withSpinner(promise, text, errorText) {
   const spinner = ora(text).start();
   return promise
     .then(res => {
-      spinner.succeed();
+      if (text) {
+        spinner.succeed();
+      } else {
+        spinner.stop();
+      }
       return res;
     })
     .catch(e => {
@@ -290,12 +266,13 @@ function withSpinner(promise, text, errorText) {
 }
 
 module.exports = {
-  doBackportVersions,
-  handleErrors,
   doBackportVersion,
-  promptRepoInfo,
+  doBackportVersions,
+  getCommitBySha,
+  getReferenceLong,
+  handleErrors,
   maybeSetupRepo,
-  getCommits,
-  promptVersions,
+  getCommitByPrompt,
+  getBranchesByPrompt,
   withPullRequest
 };

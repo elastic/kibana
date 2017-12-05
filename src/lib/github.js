@@ -1,8 +1,9 @@
 const axios = require('axios');
 const querystring = require('querystring');
+const get = require('lodash.get');
 const constants = require('./constants');
-let accessToken;
 
+let accessToken;
 function getCommitMessage(message) {
   return message.split('\n')[0].trim();
 }
@@ -29,8 +30,7 @@ function getCommits(owner, repoName, author) {
         const message = getCommitMessage(commit.commit.message);
         return {
           message,
-          sha: commit.sha,
-          date: commit.commit.author.date
+          sha: commit.sha
         };
       })
     );
@@ -45,8 +45,7 @@ function getCommit(owner, repoName, sha) {
     .catch(handleError)
     .then(res => ({
       message: res.data.commit.message,
-      sha: res.data.sha,
-      date: res.data.commit.author.date
+      sha: res.data.sha
     }));
 }
 
@@ -79,7 +78,7 @@ function getPullRequestByCommit(owner, repoName, commitSha) {
     }&access_token=${accessToken}`
   )
     .catch(handleError)
-    .then(res => res.data.items[0] && res.data.items[0].number);
+    .then(res => get(res.data.items[0], 'number'));
 }
 
 function setAccessToken(_accessToken) {
@@ -87,16 +86,16 @@ function setAccessToken(_accessToken) {
 }
 
 class GithubError extends Error {
-  constructor(response) {
+  constructor(message) {
     super();
     Error.captureStackTrace(this, GithubError);
     this.code = constants.GITHUB_ERROR;
-    this.response = response;
+    this.message = message;
   }
 }
 
 function handleError(e) {
-  if (e.response && e.response.data) {
+  if (get(e.response, 'data')) {
     throw new GithubError(e.response.data);
   }
 

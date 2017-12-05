@@ -26,16 +26,18 @@ npm install -g backport
 
 | Option              | Description                               | Accepts                     |
 | ------------------- | ----------------------------------------- | --------------------------- |
-| --multiple          | Backport multiple commits and/or versions | boolean                     |
+| --multiple          | Backport multiple commits and/or branches | boolean                     |
 | --multiple-commits  | Backport multiple commits                 | boolean (defaults to false) |
-| --multiple-versions | Backport to multiple versions             | boolean (defaults to true)  |
-| --sha               | Supply a commit sha to backport           | string                      |
+| --multiple-branches | Backport to multiple branches             | boolean (defaults to true)  |
 | --own               | Only show own commits                     | boolean (defaults to true)  |
-| --config            | Show configuration file                   |                             |
+| --show-config       | Show configuration                        |                             |
+| --sha               | Commit sha to backport                    | string                      |
 | --help              | Show help                                 |                             |
 | -v, --version       | Show version number                       |                             |
 
 ### Configuration
+
+#### Global Config
 
 The first time you run `backport` a skeleton configuration file will be created
 in `/<homedir>/.backport/config.json`. You need to update the config file with
@@ -43,7 +45,7 @@ your Github username and a Github Access Token (can be created
 [here](https://github.com/settings/tokens/new)).
 
 <details>
-<summary>View config sample</summary>
+<summary>View "config.json" sample</summary>
 
 ```js
 {
@@ -54,33 +56,42 @@ your Github username and a Github Access Token (can be created
   // Github username, eg. kimchy
   "username": "",
 
+  // Override project-specific setting
+  "projects": []
+}
+```
+
+</details>
+
+#### Project-specific config
+
+Add `.backportrc.json` to the root of your project with the following structure:
+
+<details>
+<summary>View ".backportrc.json" sample</summary>
+
+```js
+{
+  "upstream": "elastic/kibana",
+
+  // You can pre-select branches you use often
+  "branches": [
+    { "name": "6.x", "checked": true },
+    { "name": "6.1", "checked": true },
+    "6.0"
+  ]
+
   // Only allow picking own commits to backport
   "own": true,
 
   // Backport multiple commits
   "multipleCommits": false,
 
-  // Backport to multiple versions
-  "multipleVersions": true,
+  // Backport to multiple branches
+  "multipleBranches": true,
 
-  // Repositories and the versions that will be available in backport cli
-  "repositories": [
-    {
-      "name": "elastic/elasticsearch",
-      "versions": ["6.x", "6.1", "6.0"]
-    },
-    {
-      "name": "elastic/kibana",
-
-      // You can pre-select versions you use often
-      "versions": [
-        { "name": "6.x", "checked": true },
-        { "name": "6.1", "checked": true },
-        "6.0"
-      ]
-      "labels": ["backport"]
-    }
-  ]
+  // Labels will be added to the PR
+  "labels": ["backport"]
 }
 ```
 

@@ -14,7 +14,7 @@
       "name": "Jest",
       "type": "node",
       "request": "launch",
-      "args": ["--runInBand"],
+      "args": ["--runInBand", "${file}"],
       "port": 9229,
       "address": "localhost",
       "stopOnEntry": false,
