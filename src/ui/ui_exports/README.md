@@ -65,24 +65,24 @@ wrap(
   // in this example)
   alias('uiAppSpecs'),
   
-  // calls the next reducer with a modified version which merges some
-  // default values from the `PluginSpec` because we want uiAppSpecs
-  // to be useful without depending on the `PluginSpec`
+  // calls the next reducer with the `spec` set to the result of calling
+  // `applySpecDefaults(spec, type, pluginSpec)` which merges some defaults
+  // from the `PluginSpec` because we want uiAppSpecs to be useful individually
   mapSpec(applySpecDefaults),
   
   // writes this spec to `acc[type]` (`acc.uiAppSpecs` in this example since
-  // type was set by `alias()` above). It does this by using `flatConcat`,
-  // which concatenates two values into a single array. If either item
-  // is an array their items are added to the result individually. If either
-  // item is undefined it is ignored.
+  // the type was set to `uiAppSpecs` by `alias()`). It does this by concatenating
+  // the current value and the spec into an array. If either item is already
+  // an array its items are added to the result individually. If either item
+  // is undefined it is ignored.
   // 
   // NOTE: since flatConcatAtType is last it isn't a wrapper, it's
-  // just a normal reducers
+  // just a normal reducer
   flatConcatAtType
 )
 ```
 
-The reducer probably looks super foreign right now, but hopefully soon you'll be able to look back at these reducers and see that `app` and `apps` export specs are written to `kbnServer.uiExports.uiAppSpecs` with defaults applied, in an array.
+This reducer format was chosen so that it will be easier to look back at these reducers and see that `app` and `apps` export specs are written to `kbnServer.uiExports.uiAppSpecs`, with defaults applied, in an array.
 
 ### defaults
 
