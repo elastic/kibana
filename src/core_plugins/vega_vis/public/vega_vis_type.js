@@ -36,6 +36,7 @@ VisTypesRegistryProvider.register(function VegaVisProvider(Private) {
     options: {
       showIndexSelection: false
     },
-    isExperimental: true,
+    // isExperimental: true,
+    stage: 'lab',
   });
 });

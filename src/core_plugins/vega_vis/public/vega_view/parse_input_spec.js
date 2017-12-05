@@ -126,15 +126,7 @@ export function parseInputSpec(inputSpec, onWarning) {
     spec.autosize = { type: 'fit', contains: 'padding' };
   }
 
-  // Default category coloring to the Elastic color scheme
-  if (!spec.config) spec.config = {};
-  if (!spec.config.range) spec.config.range = {};
-  if (!spec.config.range.category) spec.config.range.category = { scheme: 'elastic' };
-
-  if (isVegaLite) {
-    if (!spec.config.mark) spec.config.mark = {};
-    if (!spec.config.mark.color) spec.config.mark.color = '#00B3A4';
-  }
+  injectConfigValues(spec, isVegaLite);
 
   const vlspec = isVegaLite ? spec : undefined;
 
@@ -177,4 +169,61 @@ export function parseInputSpec(inputSpec, onWarning) {
     zoom, minZoom, maxZoom, zoomControl, maxBounds,
     useResize, useHover, containerDir, controlsDir, hideWarnings
   };
+}
+
+/**
+ * Inject default colors into the spec.config
+ * @param {object} spec
+ * @param {boolean} isVegaLite
+ */
+function injectConfigValues(spec, isVegaLite) {
+  // Default category coloring to the Elastic color scheme
+  setDefaultValue(spec, ['config', 'range', 'category'], { scheme: 'elastic' });
+
+  // Set default single color to match other Kibana visualizations
+  const defaultColor = '#00A69B';
+  if (isVegaLite) {
+    // Vega-Lite: set default color, works for fill and strike --  config: { mark:  { color: '#00A69B' }}
+    setDefaultValue(spec, ['config', 'mark', 'color'], defaultColor);
+  } else {
+    // Vega - global mark has very strange behavior, must customize each mark type individually
+    // https://github.com/vega/vega/issues/1083
+    // Don't set defaults if spec.config.mark.color or fill are set
+    if (!spec.config.mark || (spec.config.mark.color === undefined && spec.config.mark.fill === undefined)) {
+      setDefaultValue(spec, ['config', 'arc', 'fill'], defaultColor);
+      setDefaultValue(spec, ['config', 'area', 'fill'], defaultColor);
+      setDefaultValue(spec, ['config', 'line', 'stroke'], defaultColor);
+      setDefaultValue(spec, ['config', 'path', 'stroke'], defaultColor);
+      setDefaultValue(spec, ['config', 'rect', 'fill'], defaultColor);
+      setDefaultValue(spec, ['config', 'rule', 'stroke'], defaultColor);
+      setDefaultValue(spec, ['config', 'shape', 'stroke'], defaultColor);
+      setDefaultValue(spec, ['config', 'symbol', 'fill'], defaultColor);
+      setDefaultValue(spec, ['config', 'trail', 'fill'], defaultColor);
+    }
+  }
+}
+
+/**
+ * Set default value if it doesn't exist.
+ * Given an object, and an array of fields, ensure that obj.fld1.fld2. ... .fldN is set to value if it doesn't exist.
+ * @param {object} obj
+ * @param {string[]} fields
+ * @param {*} value
+ */
+function setDefaultValue(obj, fields, value) {
+  let o = obj;
+  for (let i = 0; i < fields.length - 1; i++) {
+    const field = fields[i];
+    const subObj = o[field];
+    if (subObj === undefined) {
+      o[field] = {};
+    } else if (!subObj || typeof subObj !== 'object' || Array.isArray(subObj)) {
+      return;
+    }
+    o = o[field];
+  }
+  const lastField = fields[fields.length - 1];
+  if (o[lastField] === undefined) {
+    o[lastField] = value;
+  }
 }
