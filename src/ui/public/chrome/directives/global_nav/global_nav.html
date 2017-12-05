@@ -6,7 +6,7 @@
 
   <!-- Logo -->
   <div class="global-nav__logo">
-    <a href="{{ getHref('/app/kibana#/home') }}">
+    <a href="{{ getHref('/app/kibana#/home') }}" data-test-subj="kibanaLogo">
       <li
         ng-if="!logoBrand && !smallLogoBrand"
         aria-label="{{ appTitle }} Logo"

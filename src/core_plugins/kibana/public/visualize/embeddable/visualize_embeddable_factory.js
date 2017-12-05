@@ -2,10 +2,10 @@ import angular from 'angular';
 import 'ui/visualize';
 
 import visualizationTemplate from './visualize_template.html';
-import { getPersistedStateId } from 'plugins/kibana/dashboard/panel/panel_state';
 import { UtilsBrushEventProvider as utilsBrushEventProvider } from 'ui/utils/brush_event';
 import { FilterBarClickHandlerProvider as filterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 import { EmbeddableFactory, Embeddable } from 'ui/embeddable';
+import { PersistedState } from 'ui/persisted_state';
 
 import chrome from 'ui/chrome';
 
@@ -52,8 +52,18 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
         visualizeScope.savedObj = savedObject;
         visualizeScope.panel = panel;
 
-        const uiState = savedObject.uiStateJSON ? JSON.parse(savedObject.uiStateJSON) : {};
-        visualizeScope.uiState = container.createChildUistate(getPersistedStateId(panel), uiState);
+        const parsedUiState = savedObject.uiStateJSON ? JSON.parse(savedObject.uiStateJSON) : {};
+        visualizeScope.uiState = new PersistedState({
+          ...parsedUiState,
+          ...panel.embeddableConfig,
+        });
+        const uiStateChangeHandler = () => {
+          visualizeScope.panel = container.updatePanel(
+            visualizeScope.panel.panelIndex,
+            { embeddableConfig: visualizeScope.uiState.toJSON() }
+          );
+        };
+        visualizeScope.uiState.on('change', uiStateChangeHandler);
 
         visualizeScope.savedObj.vis.setUiState(visualizeScope.uiState);
 
@@ -71,6 +81,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
         rootNode.append(visualizationInstance);
 
         this.addDestroyEmeddable(panel.panelIndex, () => {
+          visualizeScope.uiState.off('change', uiStateChangeHandler);
           visualizationInstance.remove();
           visualizeScope.savedObj.destroy();
           visualizeScope.$destroy();

@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 
-import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
+import { PIE_CHART_VIS_NAME, AREA_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 import {
   DEFAULT_PANEL_WIDTH,
 } from '../../../../src/core_plugins/kibana/public/dashboard/dashboard_constants';
@@ -65,7 +65,31 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
+    it('Overriding colors on an area chart is preserved', async () => {
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.dashboard.setTimepickerInDataRange();
+
+      await PageObjects.dashboard.addVisualizations([AREA_CHART_VIS_NAME]);
+      await PageObjects.dashboard.saveDashboard('Overridden colors');
+      await PageObjects.header.clickToastOK();
+
+      await PageObjects.dashboard.clickEdit();
+      await PageObjects.visualize.clickLegendOption('Count');
+      await PageObjects.visualize.selectNewLegendColorChoice('#EA6460');
+      await PageObjects.dashboard.saveDashboard('Overridden colors');
+
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.loadSavedDashboard('Overridden colors');
+      const colorChoiceRetained = await PageObjects.visualize.doesSelectedLegendColorExist('#EA6460');
+
+      expect(colorChoiceRetained).to.be(true);
+    });
+
     it('Saved search with no changes will update when the saved object changes', async () => {
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+
       await PageObjects.header.clickDiscover();
       await PageObjects.dashboard.setTimepickerInDataRange();
       await PageObjects.discover.clickFieldListItemAdd('bytes');

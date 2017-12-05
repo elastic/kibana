@@ -10,7 +10,7 @@ export default new Chainable('multiply', {
     {
       name: 'multiplier',
       types: ['seriesList', 'number'],
-      help: 'Number or series by which to multiply. If passing a seriesList it must contain exactly 1 series.'
+      help: 'Number or series by which to multiply. SeriesList with multiple series will be applied label-wise.'
     }
   ],
   help: 'Multiply the values of one or more series in a seriesList to each position, in each series, of the input seriesList',

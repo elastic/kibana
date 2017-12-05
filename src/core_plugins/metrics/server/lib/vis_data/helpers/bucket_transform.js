@@ -1,5 +1,7 @@
 import parseSettings from './parse_settings';
 import getBucketsPath from './get_buckets_path';
+import { parseInterval } from './parse_interval';
+
 function checkMetric(metric, fields) {
   fields.forEach(field => {
     if (!metric[field]) {
@@ -39,7 +41,7 @@ export default {
       bucket_script: {
         buckets_path: { count: '_count' },
         script: {
-          inline: 'count * 1',
+          source: 'count * 1',
           lang: 'expression'
         },
         gap_policy: 'skip'
@@ -52,7 +54,7 @@ export default {
       bucket_script: {
         buckets_path: { count: '_count' },
         script: {
-          inline: bucket.value,
+          source: bucket.value,
           lang: 'painless'
         },
         gap_policy: 'skip'
@@ -159,7 +161,7 @@ export default {
     return body;
   },
 
-  calculation: (bucket, metrics) => {
+  calculation: (bucket, metrics, bucketSize) => {
     checkMetric(bucket, ['variables', 'script']);
     const body = {
       bucket_script: {
@@ -168,8 +170,11 @@ export default {
           return acc;
         }, {}),
         script: {
-          inline: bucket.script,
-          lang: 'painless'
+          source: bucket.script,
+          lang: 'painless',
+          params: {
+            _interval: parseInterval(bucketSize).asMilliseconds()
+          }
         },
         gap_policy: 'skip' // seems sane
       }
@@ -186,7 +191,7 @@ export default {
           value: getBucketsPath(bucket.field, metrics)
         },
         script: {
-          inline: 'params.value > 0 ? params.value : 0',
+          source: 'params.value > 0 ? params.value : 0',
           lang: 'painless'
         },
         gap_policy: 'skip' // seems sane
