@@ -1,25 +1,26 @@
-import { getRootProperties } from '../../../../server/mappings';
+import {
+  getRootProperties,
+  getProperty
+} from '../../../../server/mappings';
+
 import { get } from 'lodash';
 
-const propertiesWithTitles = [
-  'index-pattern',
-  'dashboard',
-  'visualization',
-  'search',
-];
 
 export const patchMissingTitleKeywordFields = {
   id: 'missing_title_keyword_fields',
 
   async getUpdatedPatchMappings(context) {
     const {
-      currentMappingsDsl
+      currentMappingsDsl,
+      kibanaIndexMappingsDsl,
     } = context;
 
     const properties = getRootProperties(currentMappingsDsl);
+    const propertiesWithTitleKeyword = Object.keys(getRootProperties(kibanaIndexMappingsDsl))
+      .filter(property => Boolean(getProperty(kibanaIndexMappingsDsl, [property, 'title', 'keyword'])));
     const mappings = {};
 
-    for (const property of propertiesWithTitles) {
+    for (const property of propertiesWithTitleKeyword) {
       const hasKeyword = !!get(properties, `${property}.properties.title.fields.keyword`);
       if (hasKeyword) {
         continue;
