@@ -1,15 +1,11 @@
 import { Observable } from 'rxjs';
-import { isAbsolute, resolve } from 'path';
+import { resolve } from 'path';
 import { createInvalidPackError } from '../errors';
 
 import { isDirectory } from './lib';
 import { PluginPack } from './plugin_pack';
 
 async function createPackAtPath(path) {
-  if (typeof path !== 'string' || !isAbsolute(path)) {
-    throw createInvalidPackError(null, 'requires an absolute path');
-  }
-
   if (!await isDirectory(path)) {
     throw createInvalidPackError(path, 'must be a directory');
   }
