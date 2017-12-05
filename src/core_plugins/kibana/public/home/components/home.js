@@ -107,20 +107,22 @@ export function Home({ addBasePath, directories }) {
 
       <EuiSpacer size="l" />
 
-      <div className="text-center">
-        <EuiText>
-          <p>
-            Didn’t find what you were looking for?
-          </p>
-        </EuiText>
-        <EuiSpacer size="s" />
-        <KuiLinkButton
-          buttonType="secondary"
-          href="#/home/feature_directory"
-        >
-          View full directory of Kibana plugins
-        </KuiLinkButton>
-      </div>
+      <EuiFlexGroup justifyContent="center">
+        <EuiFlexItem grow={false}>
+          <EuiText>
+            <p>
+              Didn’t find what you were looking for?
+            </p>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <KuiLinkButton
+            buttonType="secondary"
+            href="#/home/feature_directory"
+          >
+            View full directory of Kibana plugins
+          </KuiLinkButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
     </EuiPage>
   );

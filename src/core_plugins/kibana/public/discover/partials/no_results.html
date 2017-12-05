@@ -1,5 +1,6 @@
-<div>
-  <div class="col-md-10 col-md-offset-1" data-test-subj="discoverNoResults">
+<div class="euiPage">
+
+  <div class="euiText" data-test-subj="discoverNoResults">
 
     <h1>No results found <i aria-hidden="true" class="fa fa-meh-o"></i></h1>
 
@@ -63,21 +64,46 @@
         The search bar at the top uses Elasticsearch's support for Lucene <a class="kuiLink" documentation-href="query.luceneQuerySyntax" target="_blank" rel="noopener noreferrer">Query String syntax</a>. Let's say we're searching web server logs that have been parsed into a few fields.
       </p>
 
-      <h4>Examples:</h4>
-      Find requests that contain the number 200, in any field:
-      <pre>200</pre>
+      <h4>Examples</h4>
 
-      Or we can search in a specific field. Find 200 in the status field:
-      <pre>status:200</pre>
+      <p>Find requests that contain the number 200, in any field:</p>
+      <div class="euiCodeBlock euiCodeBlock--light euiCodeBlock--paddingSmall">
+        <code class="euiCodeBlock__code">
+          <pre class="euiCodeBlock__pre">200</pre>
+        </code>
+      </div>
+      <div class="euiSpacer euiSpacer--l"></div>
 
-      Find all status codes between 400-499:
-      <pre>status:[400 TO 499]</pre>
+      <p>Or we can search in a specific field. Find 200 in the status field:</p>
+      <div class="euiCodeBlock euiCodeBlock--light euiCodeBlock--paddingSmall">
+        <code class="euiCodeBlock__code">
+          <pre class="euiCodeBlock__pre">status:200</pre>
+        </code>
+      </div>
+      <div class="euiSpacer euiSpacer--l"></div>
 
-      Find status codes 400-499 with the extension php:
-      <pre>status:[400 TO 499] AND extension:PHP</pre>
+      <p>Find all status codes between 400-499:</p>
+      <div class="euiCodeBlock euiCodeBlock--light euiCodeBlock--paddingSmall">
+        <code class="euiCodeBlock__code">
+          <pre class="euiCodeBlock__pre">status:[400 TO 499]</pre>
+        </code>
+      </div>
+      <div class="euiSpacer euiSpacer--l"></div>
 
-      Or HTML
-      <pre>status:[400 TO 499] AND (extension:php OR extension:html)</pre>
+      <p>Find status codes 400-499 with the extension php:</p>
+      <div class="euiCodeBlock euiCodeBlock--light euiCodeBlock--paddingSmall">
+        <code class="euiCodeBlock__code">
+          <pre class="euiCodeBlock__pre">status:[400 TO 499] AND extension:PHP</pre>
+        </code>
+      </div>
+      <div class="euiSpacer euiSpacer--l"></div>
+
+      <p>Or HTML</p>
+      <div class="euiCodeBlock euiCodeBlock--light euiCodeBlock--paddingSmall">
+        <code class="euiCodeBlock__code">
+          <pre class="euiCodeBlock__pre">status:[400 TO 499] AND (extension:php OR extension:html)</pre>
+        </code>
+      </div>
     </div>
 
   </div>
