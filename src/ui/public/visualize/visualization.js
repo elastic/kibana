@@ -144,10 +144,18 @@ uiModules
             $scope.$emit('render');
           });
 
+          // the very first resize event is the initialization, which we can safely ignore.
+          // however, we also want to debounce the resize event, and not miss a resize event
+          // if it occurs within the first 200ms window
           const resizeFunc = _.debounce(() => {
             $scope.$emit('render');
           }, 200);
-          resizeChecker.on('resize',  resizeFunc);
+
+          let resizeInit = false;
+          resizeChecker.on('resize',  () => {
+            if (!resizeInit) return resizeInit = true;
+            resizeFunc();
+          });
         }
 
         function jQueryGetter(selector) {
