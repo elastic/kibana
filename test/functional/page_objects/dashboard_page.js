@@ -465,7 +465,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       log.debug('showPanelEditControlsDropdownMenu');
       const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
       if (editLinkExists) return;
-      await testSubjects.click('dashboardPanelToggleMenuIcon');
+
+      await retry.try(async () => {
+        await testSubjects.click('dashboardPanelToggleMenuIcon');
+        const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
+        if (!editLinkExists) {
+          throw new Error('No edit link exists, toggle menu not open. Try again.');
+        }
+      });
     }
 
     async clickDashboardPanelEditLink() {
