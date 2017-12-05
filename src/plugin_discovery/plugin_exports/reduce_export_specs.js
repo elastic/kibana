@@ -18,7 +18,13 @@ export function reduceExportSpecs(pluginSpecs, reducers, defaults = {}) {
         throw new Error(`Unknown export type ${type}`);
       }
 
-      const specs = [].concat(specsByType[type] || []);
+      // convert specs to an array if not already one or
+      // ignore the spec if it is undefined
+      const specs = [].concat(
+        specsByType[type] === undefined
+          ? []
+          : specsByType[type]
+      );
 
       return specs.reduce((acc, spec) => (
         reducer(acc, spec, type, pluginSpec)
