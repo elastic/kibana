@@ -244,7 +244,7 @@ export function VislibVisualizationsPieChartProvider(Private) {
               x: pos[0],
               y: pos[1],
               left: midAngle < Math.PI ? pos[0] : pos[0] - bbox.width,
-              right: midAngle > Math.PI ? pos[0] + bbox.width : pos[0],
+              right: midAngle < Math.PI ? pos[0] + bbox.width : pos[0],
               bottom: pos[1] + 5,
               top: pos[1] - bbox.height - 5,
             };
@@ -258,8 +258,8 @@ export function VislibVisualizationsPieChartProvider(Private) {
               const current = d.position;
               if (point) {
                 const horizontalConflict = (point.left < 0 && current.left < 0) || (point.left > 0 && current.left > 0);
-                const verticalConflict = (point.top > current.top && point.top <= current.bottom) ||
-                                          (point.top < current.top && point.bottom >= current.top);
+                const verticalConflict = (point.top >= current.top && point.top <= current.bottom) ||
+                                          (point.top <= current.top && point.bottom >= current.top);
 
                 if (horizontalConflict && verticalConflict) {
                   point.point = node.point;
