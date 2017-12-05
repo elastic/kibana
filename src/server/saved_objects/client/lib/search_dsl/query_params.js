@@ -47,7 +47,7 @@ export function getQueryParams(mappings, type, search, searchFields) {
       {
         query_string: {
           query: search,
-          minimum_should_match: search.split(' ').length,
+          default_operator: 'AND',
           ...getFieldsForTypes(
             searchFields,
             type ? [type] : Object.keys(getRootProperties(mappings))

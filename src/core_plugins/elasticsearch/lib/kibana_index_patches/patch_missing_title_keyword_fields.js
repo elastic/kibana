@@ -1,6 +1,5 @@
 import { getRootProperties } from '../../../../server/mappings';
 import { get } from 'lodash';
-import { KibanaIndexPatch } from './kibana_index_patch';
 
 const propertiesWithTitles = [
   'index-pattern',
@@ -9,9 +8,15 @@ const propertiesWithTitles = [
   'search',
 ];
 
-export class PatchMissingTitleKeywordFields extends KibanaIndexPatch {
-  getUpdatedPatchMappings() {
-    const properties = getRootProperties(this.currentMappingsDsl);
+export const patchMissingTitleKeywordFields = {
+  id: 'missing_title_keyword_fields',
+
+  async getUpdatedPatchMappings(context) {
+    const {
+      currentMappingsDsl
+    } = context;
+
+    const properties = getRootProperties(currentMappingsDsl);
     const mappings = {};
 
     for (const property of propertiesWithTitles) {
@@ -41,21 +46,29 @@ export class PatchMissingTitleKeywordFields extends KibanaIndexPatch {
     }
 
     return mappings;
-  }
+  },
 
-  async applyChanges(patchMappings) {
+  async applyChanges(context) {
+    const {
+      patchMappings,
+      callCluster,
+      indexName,
+      rootEsType,
+      log,
+    } = context;
+
     const properties = Object.keys(patchMappings);
     const types = properties.map(type => ({ match: { type } }));
 
-    this.log(['info', 'elasticsearch'], {
+    log(['info', 'elasticsearch'], {
       tmpl: `Updating by query for Saved Object types "<%= names.join('", "') %>"`,
       names: properties,
     });
 
-    await this.callCluster('updateByQuery', {
+    await callCluster('updateByQuery', {
       conflicts: 'proceed',
-      index: this.indexName,
-      type: this.rootEsType,
+      index: indexName,
+      type: rootEsType,
       body: {
         query: {
           bool: {
@@ -65,4 +78,4 @@ export class PatchMissingTitleKeywordFields extends KibanaIndexPatch {
       },
     });
   }
-}
+};
