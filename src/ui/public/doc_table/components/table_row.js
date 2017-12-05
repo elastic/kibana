@@ -42,7 +42,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
       onRemoveColumn: '=?',
     },
     link: function ($scope, $el) {
-      $el.after('<tr>');
+      $el.after('<tr data-test-subj="docTableDetailsRow">');
       $el.empty();
 
       // when we compile the details, we use this $scope
