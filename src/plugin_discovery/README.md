@@ -28,10 +28,37 @@ If you *never* subscribe to any of the Observables then plugin discovery won't a
 
 ### example
 
+Just get the plugin specs, only fail if there is an uncaught error of some sort:
 ```js
-import { readYamlConfig } from 'src/cli/serve/read_yaml_config'
-const settings = readYamlConfig('config/kibana.yml')
+const { pack$ } = findPluginSpecs(settings);
+const packs = await pack$.toArray().toPromise()
+```
 
+Just log the deprecation messages:
+```js
+const { deprecation$ } = findPluginSpecs(settings);
+for (const warning of await deprecation$.toArray().toPromise()) {
+  console.log('DEPRECATION:', warning)
+}
+```
+
+Get the packs but fail if any packs are invalid:
+```js
+const { pack$, invalidDirectoryError$ } = findPluginSpecs(settings);
+const packs = await Observable.merge(
+  pack$.toArray(),
+
+  // if we ever get an InvalidDirectoryError, throw it 
+  // into the stream so that all streams are unsubscribed,
+  // the discovery process is aborted, and the promise rejects
+  invalidDirectoryError$.map(error => {
+    throw error
+  }),
+).toPromise()
+```
+
+Handle everything
+```js
 const {
   pack$,
   invalidDirectoryError$,
