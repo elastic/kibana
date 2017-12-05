@@ -8,8 +8,9 @@ import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
  */
 export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
+  const log = getService('log');
   const dashboardVisualizations = getService('dashboardVisualizations');
-  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
+  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'discover']);
 
   describe('dashboard queries', function describeIndexTests() {
     before(async function () {
@@ -93,15 +94,20 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('are added when a pie chart slice is clicked', async function () {
-        await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
-        await PageObjects.dashboard.filterOnPieSlice();
-        const filters = await PageObjects.dashboard.getFilters();
-        expect(filters.length).to.equal(1);
+        for (let i = 0; i < 20; i++) {
+          log.debug(`trying round #${i}`);
+          await PageObjects.dashboard.gotoDashboardLandingPage();
+          await PageObjects.dashboard.clickNewDashboard();
+          await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
+          await PageObjects.dashboard.filterOnPieSlice();
+          const filters = await PageObjects.dashboard.getFilters();
+          expect(filters.length).to.equal(1);
 
-        await dashboardExpect.pieSliceCount(1);
+          await dashboardExpect.pieSliceCount(1);
+        }
       });
 
-      it('are preserved after saving a dashboard', async () => {
+      it.skip('are preserved after saving a dashboard', async () => {
         await PageObjects.dashboard.saveDashboard('with filters');
         await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -111,7 +117,7 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.pieSliceCount(1);
       });
 
-      it('are preserved after opening a dashboard saved with filters', async () => {
+      it.skip('are preserved after opening a dashboard saved with filters', async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.loadSavedDashboard('with filters');
         await PageObjects.header.waitUntilLoadingHasFinished();
