@@ -1,6 +1,6 @@
 # UI Exports
 
-When defining a Plugin, the `uiExports` key can be used to define a map of export types to values that will be used to configure the UI system. A common use for `uiExports` is `uiExports.app`, which defines the configuration of a [`UiApp`](UiApp) and teaches the UI System how to render, bundle and tell the user about an application.
+When defining a Plugin, the `uiExports` key can be used to define a map of export types to values that will be used to configure the UI system. A common use for `uiExports` is `uiExports.app`, which defines the configuration of a [`UiApp`][UiApp] and teaches the UI System how to render, bundle and tell the user about an application.
 
 
 ## `collectUiExports(pluginSpecs): { [type: string]: any }`
@@ -9,7 +9,7 @@ This function produces the object commonly found at `kbnServer.uiExports`. This 
 
 ### export type reducers
 
-The [`ui_export_types` module](UiExportTypes) defines the reducer used for each uiExports key (or `type`). The name of every export in [./ui_export_types/index.js](UiExportTypes) is a key that plugins can define in their `uiExports` specification and the value of those exports are reducers that `collectPluginExports()` will call to produce the merged result of all export specs.
+The [`ui_export_types` module][UiExportTypes] defines the reducer used for each uiExports key (or `type`). The name of every export in [./ui_export_types/index.js][UiExportTypes] is a key that plugins can define in their `uiExports` specification and the value of those exports are reducers that `collectPluginExports()` will call to produce the merged result of all export specs.
 
 ### example - UiApps
 
@@ -42,14 +42,14 @@ export default function (kibana) {
 }
 ```
 
-To handle this export type, the [ui_export_types](UiExportTypes) module exports two reducers, one named `app` and the other `apps`.
+To handle this export type, the [ui_export_types][UiExportTypes] module exports two reducers, one named `app` and the other `apps`.
 
 ```js
 export const app = ...
 export const apps = ...
 ```
 
-These reducers are defined in [`ui_export_types/ui_apps`](UiAppExportType) and have the exact same definition:
+These reducers are defined in [`ui_export_types/ui_apps`][UiAppExportType] and have the exact same definition:
 
 ```js
 // `wrap()` produces a reducer by wrapping a base reducer with modifiers.
@@ -86,7 +86,7 @@ The reducer probably looks super foreign right now, but hopefully soon you'll be
 
 ### defaults
 
-The [./ui_export_defaults](UiExportDefaults) module defines the default shape of the uiExports object produced by `collectUiExports()`. The defaults generally describe the `uiExports` from the UI System itself, like default visTypes and such.
+The [./ui_export_defaults][UiExportDefaults] module defines the default shape of the uiExports object produced by `collectUiExports()`. The defaults generally describe the `uiExports` from the UI System itself, like default visTypes and such.
 
 [UiApp]: ../ui_apps/ui_app.js "UiApp class definition"
 [UiExportTypes]: ./ui_export_defaults.js "uiExport defaults definition"

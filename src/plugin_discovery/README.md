@@ -5,11 +5,11 @@ The plugin discovery module defines the core plugin loading logic used by the Ki
 
 ## `findPluginSpecs(settings, [config])`
 
-Finds [`PluginSpec`](PluginSpec) objects
+Finds [`PluginSpec`][PluginSpec] objects
 
 ### params
- - `settings`: the same settings object accepted by [`KbnServer`](KbnServer)
- - `[config]`: Optional - a [`Config`](Config) service. Using this param causes `findPluginSpecs()` to modify `config`'s schema to support the configuration for each discovered [`PluginSpec`](PluginSpec). If you can, please use the [`Config`](Config) service produced by `extendedConfig$` rather than passing in an existing service so that `findPluginSpecs()` is side-effect free.
+ - `settings`: the same settings object accepted by [`KbnServer`][KbnServer]
+ - `[config]`: Optional - a [`Config`][Config] service. Using this param causes `findPluginSpecs()` to modify `config`'s schema to support the configuration for each discovered [`PluginSpec`][PluginSpec]. If you can, please use the [`Config`][Config] service produced by `extendedConfig$` rather than passing in an existing service so that `findPluginSpecs()` is side-effect free.
 
 ### return value
 
@@ -17,14 +17,14 @@ Finds [`PluginSpec`](PluginSpec) objects
 
 If you *never* subscribe to any of the Observables then plugin discovery won't actually run.
 
- - `pack$`: emits every [`PluginPack`](PluginPack) found
- - `invalidDirectoryError$: Observable<Error>`: emits [`InvalidDirectoryError`](Errors)s caused by `settings.plugins.scanDirs` values that don't point to actual directories. `findPluginSpecs()` will not abort when this error is encountered.
- - `invalidPackError$: Observable<Error>`: emits [`InvalidPackError`](Errors)s caused by children of `settings.plugins.scanDirs` or `settings.plugins.paths` values which don't meet the requirements of a [`PluginPack`](PluginPack) (probably missing a `package.json`). `findPluginSpecs()` will not abort when this error is encountered.
- - `deprecation$: Observable<string>`: emits deprecation warnings that are produces when reading each [`PluginPack`](PluginPack)'s configuration
- - `extendedConfig$: Observable<Config>`: emits the [`Config`](Config) service that was passed to `findPluginSpecs()` (or created internally if none was passed) after it has been extended with the configuration from each plugin
- - `spec$: Observable<PluginSpec>`: emits every *enabled* [`PluginSpec`](PluginSpec) defined by the discovered [`PluginPack`](PluginPack)s
- - `disabledSpecs$: Observable<PluginSpec>`: emits every *disabled* [`PluginSpec`](PluginSpec) defined by the discovered [`PluginPack`](PluginPack)s
- - `invalidVersionSpec$: Observable<PluginSpec>`: emits every [`PluginSpec`](PluginSpec) who's required kibana version does not match the version exposed by `config.get('pkg.version')`
+ - `pack$`: emits every [`PluginPack`][PluginPack] found
+ - `invalidDirectoryError$: Observable<Error>`: emits [`InvalidDirectoryError`][Errors]s caused by `settings.plugins.scanDirs` values that don't point to actual directories. `findPluginSpecs()` will not abort when this error is encountered.
+ - `invalidPackError$: Observable<Error>`: emits [`InvalidPackError`][Errors]s caused by children of `settings.plugins.scanDirs` or `settings.plugins.paths` values which don't meet the requirements of a [`PluginPack`][PluginPack] (probably missing a `package.json`). `findPluginSpecs()` will not abort when this error is encountered.
+ - `deprecation$: Observable<string>`: emits deprecation warnings that are produces when reading each [`PluginPack`][PluginPack]'s configuration
+ - `extendedConfig$: Observable<Config>`: emits the [`Config`][Config] service that was passed to `findPluginSpecs()` (or created internally if none was passed) after it has been extended with the configuration from each plugin
+ - `spec$: Observable<PluginSpec>`: emits every *enabled* [`PluginSpec`][PluginSpec] defined by the discovered [`PluginPack`][PluginPack]s
+ - `disabledSpecs$: Observable<PluginSpec>`: emits every *disabled* [`PluginSpec`][PluginSpec] defined by the discovered [`PluginPack`][PluginPack]s
+ - `invalidVersionSpec$: Observable<PluginSpec>`: emits every [`PluginSpec`][PluginSpec] who's required kibana version does not match the version exposed by `config.get('pkg.version')`
 
 ### example
 
@@ -80,7 +80,7 @@ Observable.merge(
 
 ## `reduceExportSpecs(pluginSpecs, reducers, [defaults={}])`
 
-Iterates through every export specification provided by all [`PluginSpec`](PluginSpec)s. If an exported specification value is an array each item in the array will be passed to the reducer individually. If the exported specification is `undefined` it will be ignored. The reducer is called with the signature:
+Iterates through every export specification provided by all [`PluginSpec`][PluginSpec]s. If an exported specification value is an array each item in the array will be passed to the reducer individually. If the exported specification is `undefined` it will be ignored. The reducer is called with the signature:
 
 ```js
 reducer(
