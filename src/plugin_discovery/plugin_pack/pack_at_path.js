@@ -6,7 +6,7 @@ import { isDirectory, isFile } from './lib';
 import { PluginPack } from './plugin_pack';
 
 async function createPackAtPath(path) {
-  if (!isAbsolute(path)) {
+  if (typeof path !== 'string' || !isAbsolute(path)) {
     throw createInvalidPackError(null, 'requires an absolute path');
   }
 
