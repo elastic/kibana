@@ -35,6 +35,8 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
           leading: true,
           trailing: false
         });
+        // ensure legend is the same height with or without a caption so legend items do not move around
+        const emptyCaption = '<br>';
 
         const defaultOptions = {
           xaxis: {
@@ -86,30 +88,25 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
           colors: ['#01A4A4', '#C66', '#D0D102', '#616161', '#00A1CB', '#32742C', '#F18D05', '#113F8C', '#61AE24', '#D70060']
         };
 
+        const originalColorMap = new Map();
         $scope.chart.forEach((series, seriesIndex) => {
           if (!series.color) {
             const colorIndex = seriesIndex % defaultOptions.colors.length;
             series.color = defaultOptions.colors[colorIndex];
           }
+          originalColorMap.set(series, series.color);
         });
 
-        const HIGHLIGHT_NOT_SET = -1;
-        let hightlightedSeries = HIGHLIGHT_NOT_SET;
-        function restoreColors() {
-          $scope.chart.forEach((series) => {
-            if (series._originalColor) {
-              series.color = series._originalColor;
-              delete series._originalColor;
-            }
-          });
-        }
+        let hightlightedSeries;
         function unhighlightSeries() {
-          if (hightlightedSeries === HIGHLIGHT_NOT_SET) {
+          if (hightlightedSeries === null) {
             return;
           }
 
-          hightlightedSeries = HIGHLIGHT_NOT_SET;
-          restoreColors();
+          hightlightedSeries = null;
+          $scope.chart.forEach((series) => {
+            series.color = originalColorMap.get(series); // reset the colors
+          });
           drawPlot($scope.chart);
         }
         $scope.highlightSeries = _.debounce(function (id) {
@@ -118,13 +115,11 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
           }
 
           hightlightedSeries = id;
-          restoreColors();
           $scope.chart.forEach((series, seriesIndex) => {
-            series._originalColor = series.color;
-
-            // grey series that are not highlighted
             if (seriesIndex !== id) {
-              series.color = 'rgba(128,128,128,0.1)';
+              series.color = 'rgba(128,128,128,0.1)'; // mark as grey
+            } else {
+              series.color = originalColorMap.get(series); // color it like it was
             }
           });
           drawPlot($scope.chart);
@@ -224,7 +219,7 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
 
         function clearLegendNumbers() {
           if (legendCaption) {
-            legendCaption.html('<br>');
+            legendCaption.html(emptyCaption);
           }
           _.each(legendValueNumbers, function (num) {
             $(num).empty();
@@ -330,7 +325,7 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
 
           if (_.get($scope.plot.getData(), '[0]._global.legend.showTime', true)) {
             legendCaption = $('<caption class="timelionLegendCaption"></caption>');
-            legendCaption.html('<br>');
+            legendCaption.html(emptyCaption);
             canvasElem.find('div.legend table').append(legendCaption);
           }
         }
