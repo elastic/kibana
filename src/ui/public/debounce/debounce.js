@@ -50,3 +50,7 @@ module.service('debounce', ['$timeout', function ($timeout) {
     return debounce;
   };
 }]);
+
+export function DebounceProvider(debounce) {
+  return debounce;
+}

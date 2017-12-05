@@ -175,7 +175,7 @@ angular.module( 'ui.bootstrap.tooltip', [ 'ui.bootstrap.position', 'ui.bootstrap
             }
 
             function hideTooltipBind () {
-              scope.$apply(function () {
+              scope.$evalAsync(function () {
                 hide();
               });
             }
