@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardExpect.pieSliceCount(0);
     });
 
-    describe('filters', async function () {
+    describe.skip('filters', async function () {
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
