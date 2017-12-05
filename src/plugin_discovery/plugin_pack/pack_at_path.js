@@ -39,7 +39,7 @@ async function createPackAtPath(path) {
 }
 
 export const createPackAtPath$ = (path) => (
-  Observable.fromPromise(createPackAtPath(path))
+  Observable.defer(() => createPackAtPath(path))
     .map(pack => ({ pack }))
     .catch(error => [{ error }])
 );
