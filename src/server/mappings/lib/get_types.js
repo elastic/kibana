@@ -5,5 +5,5 @@
  *  @return {Array<string>}
  */
 export function getTypes(mappings) {
-  return Object.keys(mappings);
+  return Object.keys(mappings).filter(type => !type.match(/^_default_$/));
 }
