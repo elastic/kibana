@@ -23,7 +23,7 @@ function defaultConfig(settings) {
   );
 }
 
-function waitForComplete(observable) {
+function bufferAllResults(observable) {
   return observable
     // buffer all results into a single array
     .toArray()
@@ -68,7 +68,7 @@ export function findPluginSpecs(settings, config = defaultConfig(settings)) {
       };
     })
     // extend the config with all plugins before determining enabled status
-    .let(waitForComplete)
+    .let(bufferAllResults)
     .map(({ spec, deprecations }) => {
       const isRightVersion = spec.isVersionCompatible(config.get('pkg.version'));
       const enabled = isRightVersion && spec.isEnabled(config);
@@ -81,7 +81,7 @@ export function findPluginSpecs(settings, config = defaultConfig(settings)) {
       };
     })
     // determine which plugins are disabled before actually removing things from the config
-    .let(waitForComplete)
+    .let(bufferAllResults)
     .do(result => {
       for (const spec of result.disabledSpecs) {
         disableConfigExtension(spec, config);
