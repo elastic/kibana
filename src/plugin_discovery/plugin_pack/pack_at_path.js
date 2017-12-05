@@ -21,7 +21,7 @@ async function createPackAtPath(path) {
 
   const pkg = require(pkgPath);
   if (!pkg || typeof pkg !== 'object') {
-    throw createInvalidPackError(path, 'must have a value package.json file');
+    throw createInvalidPackError(path, 'must have a valid package.json file');
   }
 
   let provider = require(path);
