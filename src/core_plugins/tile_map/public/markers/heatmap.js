@@ -30,8 +30,6 @@ export class HeatmapMarkers extends EventEmitter {
       // turn coords into a string for the memoize cache
       return [feature.geometry.coordinates[1], feature.geometry.coordinates[0]].join(',');
     });
-
-    this._currentFeature = null;
     this._addTooltips();
   }
 
@@ -64,8 +62,6 @@ export class HeatmapMarkers extends EventEmitter {
   _addTooltips() {
 
     const mouseMoveLocation = (e) => {
-
-
 
       if (!this._geojsonFeatureCollection.features.length || this._disableTooltips) {
         this.emit('hideTooltip');
