@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 import { isAbsolute, resolve } from 'path';
 import { createInvalidPackError } from '../errors';
 
-import { isDirectory, isFile } from './lib';
+import { isDirectory } from './lib';
 import { PluginPack } from './plugin_pack';
 
 async function createPackAtPath(path) {
@@ -14,12 +14,15 @@ async function createPackAtPath(path) {
     throw createInvalidPackError(path, 'must be a directory');
   }
 
-  const pkgPath = resolve(path, 'package.json');
-  if (!await isFile(pkgPath)) {
-    throw createInvalidPackError(path, 'must have a package.json file');
+  let pkg;
+  try {
+    pkg = require(resolve(path, 'package.json'));
+  } catch (error) {
+    if (error.code === 'MODULE_NOT_FOUND') {
+      throw createInvalidPackError(path, 'must have a package.json file');
+    }
   }
 
-  const pkg = require(pkgPath);
   if (!pkg || typeof pkg !== 'object') {
     throw createInvalidPackError(path, 'must have a valid package.json file');
   }

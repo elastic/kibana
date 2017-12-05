@@ -19,15 +19,6 @@ async function statTest(path, test) {
 }
 
 /**
- *  Determine if a path currently points to a file
- *  @param  {String} path
- *  @return {Promise<boolean>}
- */
-export async function isFile(path) {
-  return await statTest(path, stat => stat.isFile());
-}
-
-/**
  *  Determine if a path currently points to a directory
  *  @param  {String} path
  *  @return {Promise<boolean>}
