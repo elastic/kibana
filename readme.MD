@@ -57,7 +57,12 @@ your Github username and a Github Access Token (can be created
   "username": "",
 
   // Override project-specific setting
-  "projects": []
+  "projects": [
+    {
+      "upstream": "elastic/kibana",
+      "branches": ["6.x", "6.1", "6.0"]
+    }
+  ]
 }
 ```
 
