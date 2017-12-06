@@ -1,7 +1,7 @@
-import { brightBlack, green, yellow, red, brightWhite, brightCyan } from 'ansicolors';
+import { bold, dim, green, yellow, red, cyan } from 'chalk';
 
-export const suite = brightWhite;
-export const pending = brightCyan;
+export const suite = bold;
+export const pending = cyan;
 export const pass = green;
 export const fail = red;
 
@@ -14,6 +14,6 @@ export function speed(name, txt) {
     case 'slow':
       return red(txt);
     default:
-      return brightBlack(txt);
+      return dim(txt);
   }
 }
