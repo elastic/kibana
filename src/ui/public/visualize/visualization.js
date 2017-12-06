@@ -1,3 +1,4 @@
+import { Observable } from 'rxjs/Rx';
 import 'ui/visualize/spy';
 import 'ui/visualize/visualize.less';
 import 'ui/visualize/visualize_legend';
@@ -104,28 +105,37 @@ uiModules
 
         $scope.vis.initialized = true;
 
-        const renderFunction = _.debounce(() => {
-          const container = getVisContainer();
-          if (!container) return;
-          $scope.vis.size = [container.width(), container.height()];
-          const status = getUpdateStatus($scope);
-          visualization.render($scope.visData, status)
-            .then(() => {
-            // renderComplete
-              $scope.$emit('renderComplete');
-              $el.trigger('renderComplete');
+        const render$ = Observable.create(observer => {
+          $scope.$on('render', () => {
+            observer.next({
+              vis: $scope.vis,
+              visData: $scope.visData
             });
-          $scope.$apply();
-        }, 100);
-
-        $scope.$on('render', () => {
-          if (!$scope.vis || !$scope.vis.initialized || ($scope.vis.type.requiresSearch && !$scope.visData)) {
-            return;
-          }
-          $scope.addLegend = $scope.vis.params.addLegend;
-          $scope.vis.refreshLegend++;
-          $timeout(renderFunction);
+          });
         });
+
+        render$
+          .filter(({ vis, visData }) => vis && vis.initialized && (!vis.type.requiresSearch || visData))
+          .do(({ vis }) => {
+            $scope.addLegend = vis.params.addLegend;
+            vis.refreshLegend++;
+          })
+          .debounceTime(100)
+          .switchMap(async () => {
+            const container = getVisContainer();
+            if (!container) return;
+
+            $scope.vis.size = [container.width(), container.height()];
+            const status = getUpdateStatus($scope);
+            await visualization.render($scope.visData, status);
+          })
+          .do(() => {
+            $scope.$emit('renderComplete');
+            $el.trigger('renderComplete');
+          })
+          .subscribe(() => {
+            $scope.$apply();
+          });
 
         $scope.$on('$destroy', () => {
           resizeChecker.destroy();
@@ -137,17 +147,11 @@ uiModules
             $scope.$emit('render');
           });
 
-          // the very first resize event is the initialization, which we can safely ignore.
-          // however, we also want to debounce the resize event, and not miss a resize event
-          // if it occurs within the first 200ms window
-          const resizeFunc = _.debounce(() => {
-            $scope.$emit('render');
-          }, 200);
-
           let resizeInit = false;
           resizeChecker.on('resize',  () => {
+            // the very first resize event is the initialization, which we can safely ignore.
             if (!resizeInit) return resizeInit = true;
-            resizeFunc();
+            $scope.$emit('render');
           });
         }
 
