@@ -2,17 +2,19 @@ import { format } from 'util';
 
 import Mocha from 'mocha';
 
+import { setupJunitReportGeneration } from '../../../../dev';
 import * as colors from './colors';
 import * as symbols from './symbols';
 import { ms } from './ms';
 import { writeEpilogue } from './write_epilogue';
 
-export function ConsoleReporterProvider({ getService }) {
+export function MochaReporterProvider({ getService }) {
   const log = getService('log');
+  const config = getService('config');
 
   return class MochaReporter extends Mocha.reporters.Base {
-    constructor(runner) {
-      super(runner);
+    constructor(runner, options) {
+      super(runner, options);
       runner.on('start', this.onStart);
       runner.on('hook', this.onHookStart);
       runner.on('hook end', this.onHookEnd);
@@ -24,6 +26,13 @@ export function ConsoleReporterProvider({ getService }) {
       runner.on('test end', this.onTestEnd);
       runner.on('suite end', this.onSuiteEnd);
       runner.on('end', this.onEnd);
+
+      if (config.get('junit.enabled') && config.get('junit.reportName')) {
+        setupJunitReportGeneration(runner, {
+          reportName: config.get('junit.reportName'),
+          rootDirectory: config.get('junit.rootDirectory')
+        });
+      }
     }
 
     onStart = () => {
