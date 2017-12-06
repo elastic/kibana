@@ -1,4 +1,4 @@
-import Config from '../config';
+import { Config } from '../config';
 import expect from 'expect.js';
 import _ from 'lodash';
 import Joi from 'joi';
