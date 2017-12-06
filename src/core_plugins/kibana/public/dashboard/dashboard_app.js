@@ -2,6 +2,7 @@ import _ from 'lodash';
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
+import { applyTheme } from 'ui/theme';
 
 import 'ui/query_bar';
 
@@ -329,11 +330,13 @@ app.directive('dashboardApp', function ($injector) {
       function setDarkTheme() {
         chrome.removeApplicationClass(['theme-light']);
         chrome.addApplicationClass('theme-dark');
+        applyTheme('dark');
       }
 
       function setLightTheme() {
         chrome.removeApplicationClass(['theme-dark']);
         chrome.addApplicationClass('theme-light');
+        applyTheme('light');
       }
 
       if ($route.current.params && $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM]) {
