@@ -10,7 +10,7 @@ export default function ({ getService, getPageObjects }) {
   const dashboardExpect = getService('dashboardExpect');
   const log = getService('log');
   const dashboardVisualizations = getService('dashboardVisualizations');
-  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'discover']);
+  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'discover', 'common']);
 
   describe('dashboard queries', function describeIndexTests() {
     before(async function () {
@@ -100,6 +100,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.dashboard.clickNewDashboard();
           await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
           await PageObjects.dashboard.filterOnPieSlice();
+          await PageObjects.common.sleep(2000);
           const filters = await PageObjects.dashboard.getFilters();
           expect(filters.length).to.equal(1);
 
