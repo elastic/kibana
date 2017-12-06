@@ -1,0 +1,30 @@
+[[release-notes-5.6.5]]
+== 5.6.5 Release Notes
+
+Also see <<breaking-changes-5.0>>.
+
+[float]
+[[security-5.6.5]]
+=== Security Issues
+* ​Kibana cross site scripting issue (ESA-2017-22): Kibana versions prior to 6.0.1 and 5.6.5 had a cross-site scripting (XSS) vulnerability via URL fields that could allow an attacker to obtain sensitive information from or perform destructive actions on behalf of other Kibana users. CVE ID: CVE-2017-11481
+* Kibana open redirect flaw (ESA-2017-23) : The Kibana fix for CVE-2017-8451 was found to be incomplete. With X-Pack installed, Kibana versions before 6.0.1 and 5.6.5 have an open redirect vulnerability on the login page that would enable an attacker to craft a link that redirects to an arbitrary website. CVE ID: CVE-2017-11482
+
+Users should upgrade to Kibana version 6.0.1 or 5.6.5. There are no known workarounds for these issues.
+
+[float]
+[[bug-5.6.5]]
+=== Bug fixes
+Operations::
+* Fixes broken path to babel register {pull}14979[#14979]
+Platform::
+* Prepend relative urls {pull}14994[#14994]
+* Fix: exponent values in table view {pull}15309[#15309]
+* [eslint] add eslint dev script {pull}14889[#14889]
+* [dev/ci_setup] generalize jenkins_setup script for other CI environments {pull}15178[#15178]
+Sharing::
+* [Fixes #15336] Add parsedUrl to the code driving viz/dashboards {pull}15335[#15335]
+Visualization::
+* [Fixes #13436] allows to hide warnings in gauge {pull}15139[#15139]
+* [Fixes #13947] uses maximum space for arc gauge and center aligns it {pull}15140[#15140]
+* fixing field formatters for gauge {pull}15145[#15145]
+* [Fixes #13947] fix metric align and size {pull}15141[#15141]
