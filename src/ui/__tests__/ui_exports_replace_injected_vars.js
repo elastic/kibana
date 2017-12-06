@@ -18,7 +18,11 @@ const injectReplacer = (kbnServer, replacer) => {
   // normally the replacer would be defined in a plugin's uiExports,
   // but that requires stubbing out an entire plugin directory for
   // each test, so we fake it and jam the replacer into uiExports
-  kbnServer.uiExports.injectedVarsReplacers.push(replacer);
+  const { injectedVarsReplacers = [] } = kbnServer.uiExports;
+  kbnServer.uiExports.injectedVarsReplacers = [
+    ...injectedVarsReplacers,
+    replacer
+  ];
 };
 
 describe('UiExports', function () {
@@ -122,7 +126,6 @@ describe('UiExports', function () {
     it('starts off with the injected vars for the app merged with the default injected vars', async () => {
       const stub = sinon.stub();
       injectReplacer(kbnServer, stub);
-      kbnServer.uiExports.defaultInjectedVars.from_defaults = true;
 
       await kbnServer.inject('/app/test_app');
       sinon.assert.calledOnce(stub);
