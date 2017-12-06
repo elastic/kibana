@@ -12,7 +12,7 @@ export const UpdateModal = compose(
       const currentBuild = Number(get(pkg, 'build.git.count'));
       if (!currentBuild) return;
 
-      fetch(`https://elastic.github.io/kibana-canvas/preview-microsite/build.json`, {
+      fetch(`http://canvas.elastic.co/preview-microsite/build.json`, {
         method: 'GET',
       })
       .then(res => {
