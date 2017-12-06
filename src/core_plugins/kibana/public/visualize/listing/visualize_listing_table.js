@@ -27,7 +27,6 @@ export class VisualizeListingTable extends Component {
       showDeleteModal: false,
       filter: '',
       sortedColumn: 'title',
-      sortedColumnDirection: 'ASC',
       pageStartNumber: 1,
       isFetchingItems: false,
     };
@@ -45,7 +44,7 @@ export class VisualizeListingTable extends Component {
           isAscending: true,
         }
       ],
-      'title'
+      this.state.sortedColumn
     );
     this.items = [];
     this.pager = new Pager(this.items.length, 20, 1);
@@ -87,7 +86,6 @@ export class VisualizeListingTable extends Component {
     this.setState({
       selectedRowIds: [],
       sortedColumn: this.sortableProperties.getSortedProperty().name,
-      sortedColumnDirection: this.sortableProperties.isCurrentSortAscending() ? 'ASC' : 'DESC',
     });
     this.calculateItemsOnPage();
   };
