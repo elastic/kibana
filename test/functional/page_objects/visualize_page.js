@@ -408,21 +408,25 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       log.debug('ensureSavePanelOpen');
       let isOpen = await testSubjects.exists('saveVisualizationButton');
       await retry.try(async () => {
-        while (!isOpen) {
-          await testSubjects.click('visualizeSaveButton');
-          isOpen = await testSubjects.exists('saveVisualizationButton');
+        await testSubjects.click('visualizeSaveButton');
+        isOpen = await testSubjects.exists('saveVisualizationButton');
+        if (!isOpen) {
+          throw new Error('Save panel still not open. Trying again.');
         }
       });
     }
 
     async saveVisualization(vizName) {
-      await this.ensureSavePanelOpen();
-      await testSubjects.setValue('visTitleInput', vizName);
-      log.debug('click submit button');
-      await testSubjects.click('saveVisualizationButton');
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      log.debug(`saveVisualization ${vizName}`);
+      // It's unclear why but sometimes clicking the save visualization button is failing.
+      return await retry.try(async () => {
+        await this.ensureSavePanelOpen();
+        await testSubjects.setValue('visTitleInput', vizName);
+        await testSubjects.click('saveVisualizationButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
 
-      return await PageObjects.header.getToastMessage();
+        return await PageObjects.header.getToastMessage();
+      });
     }
 
     async clickLoadSavedVisButton() {
