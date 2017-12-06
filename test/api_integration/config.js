@@ -19,5 +19,8 @@ export default async function ({ readConfigFile }) {
       chance: ChanceProvider,
     },
     servers: commonConfig.get('servers'),
+    junit: {
+      reportName: 'API Integration Tests'
+    }
   };
 }
