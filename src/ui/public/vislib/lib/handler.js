@@ -1,6 +1,5 @@
 import d3 from 'd3';
 import _ from 'lodash';
-import $ from 'jquery';
 import MarkdownIt from 'markdown-it';
 import { NoResults } from 'ui/errors';
 import { Binder } from 'ui/binder';
@@ -213,7 +212,7 @@ export function VisHandlerProvider(Private) {
         div.append('h4').text(markdownIt.renderInline(message));
       }
 
-      $(this.el).trigger('renderComplete');
+      this.el.dispatchEvent(new CustomEvent(name, { bubbles: true }));
       return div;
     }
 

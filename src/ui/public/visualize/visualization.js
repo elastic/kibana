@@ -105,6 +105,13 @@ uiModules
 
         $scope.vis.initialized = true;
 
+        const dispatchCustomEvent = (name) => {
+          // we're using the native events so that we aren't tied to the jQuery custom events,
+          // otherwise we have to use jQuery(element).on(...) because jQuery's events sit on top
+          // of the native events per https://github.com/jquery/jquery/issues/2476
+          $el[0].dispatchEvent(new CustomEvent(name, { bubbles: true }));
+        };
+
         const render$ = Observable.create(observer => {
           $scope.$on('render', () => {
             observer.next({
@@ -114,11 +121,14 @@ uiModules
           });
         });
 
-        render$
+        const unsubscribeRender = render$
           .filter(({ vis, visData }) => vis && vis.initialized && (!vis.type.requiresSearch || visData))
           .do(({ vis }) => {
             $scope.addLegend = vis.params.addLegend;
             vis.refreshLegend++;
+          })
+          .do(() => {
+            dispatchCustomEvent('renderStart');
           })
           .debounceTime(100)
           .switchMap(async () => {
@@ -131,7 +141,7 @@ uiModules
           })
           .do(() => {
             $scope.$emit('renderComplete');
-            $el.trigger('renderComplete');
+            dispatchCustomEvent('renderComplete');
           })
           .subscribe(() => {
             $scope.$apply();
@@ -140,6 +150,7 @@ uiModules
         $scope.$on('$destroy', () => {
           resizeChecker.destroy();
           visualization.destroy();
+          unsubscribeRender();
         });
 
         if (!$scope.vis.visualizeScope) {

@@ -1,28 +1,37 @@
 import { uiModules } from 'ui/modules';
 
+const attributeName = 'data-render-complete';
+
 uiModules
   .get('kibana')
   .directive('renderCounter', () => ({
     controller($scope, $element) {
-      let counter = 0;
+      const el = $element[0];
 
-      const increment = () => {
-        counter += 1;
-        $element.attr('render-counter', counter);
+      const start = () => {
+        $element.attr(attributeName, false);
+        return true;
+      };
+
+      const complete = () => {
+        $element.attr(attributeName, true);
+        return true;
       };
 
       const teardown = () => {
-        $element.off('renderComplete', increment);
+        el.removeEventListener('renderStart', start);
+        el.removeEventListener('renderComplete', complete);
       };
 
       const setup = () => {
-        $element.attr('render-counter', counter);
-        $element.on('renderComplete', increment);
+        $element.attr(attributeName, false);
+        el.addEventListener('renderStart', start);
+        el.addEventListener('renderComplete', complete);
         $scope.$on('$destroy', teardown);
       };
 
       this.disable = () => {
-        $element.attr('render-counter', 'disabled');
+        $element.attr(attributeName, 'disabled');
         teardown();
       };
 

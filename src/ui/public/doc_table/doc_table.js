@@ -71,9 +71,16 @@ uiModules.get('kibana')
           if ($scope.columns.length === 0) $scope.columns.push('_source');
         });
 
+        const dispatchCustomEvent = (name) => {
+          // we're using the native events so that we aren't tied to the jQuery custom events,
+          // otherwise we have to use jQuery(element).on(...) because jQuery's events sit on top
+          // of the native events per https://github.com/jquery/jquery/issues/2476
+          $el[0].dispatchEvent(new CustomEvent(name, { bubbles: true }));
+        };
 
         $scope.$watch('searchSource', function () {
           if (!$scope.searchSource) return;
+          dispatchCustomEvent('renderStart');
 
           $scope.indexPattern = $scope.searchSource.get('index');
 
@@ -101,7 +108,7 @@ uiModules.get('kibana')
 
             $scope.hits = resp.hits.hits;
             if ($scope.hits.length === 0) {
-              $el.trigger('renderComplete');
+              dispatchCustomEvent('renderComplete');
             }
             // We limit the number of returned results, but we want to show the actual number of hits, not
             // just how many we retrieved.
