@@ -212,7 +212,7 @@ export function VisHandlerProvider(Private) {
         div.append('h4').text(markdownIt.renderInline(message));
       }
 
-      this.el.dispatchEvent(new CustomEvent(name, { bubbles: true }));
+      this.el.dispatchEvent(new CustomEvent('renderComplete', { bubbles: true }));
       return div;
     }
 
