@@ -548,6 +548,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         log.debug('Slices found:' + slices.length);
         return slices[0].click();
       });
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async toggleExpandPanel(panel) {
