@@ -12,24 +12,24 @@ import { EmbeddedVisualizeHandler } from './embedded_visualize_handler';
 /**
  * The parameters accepted by the embedVisualize calls.
  * @typedef {object} VisualizeLoaderParams
- * @property {AppState} params.appState The appState this visualization should use.
+ * @property {AppState} appState The appState this visualization should use.
  *    If you don't spyecify it, the global AppState (that is decoded in the URL)
  *    will be used. Usually you don't need to overwrite this, unless you don't
  *    want the visualization to use the global AppState.
- * @property {UiState} params.uiState The current uiState of the application. If you
+ * @property {UiState} uiState The current uiState of the application. If you
  *    don't pass a uiState, the visualization will creates it's own uiState to
  *    store information like whether the legend is open or closed, but you don't
  *    have access to it from the outside. Pass one in if you need that access.
- * @property {object} params.timeRange An object with a min/max key, that must be
+ * @property {object} timeRange An object with a min/max key, that must be
  *    either a date in ISO format, or a valid datetime Elasticsearch expression,
  *    e.g.: { min: 'now-7d/d', max: 'now' }
- * @property {boolean} params.showSpyPanel Whether or not the spy panel should be available
+ * @property {boolean} showSpyPanel Whether or not the spy panel should be available
  *    on this chart. (default: false)
- * @property {boolean} params.append If set to true, the visualization will be appended
+ * @property {boolean} append If set to true, the visualization will be appended
  *    to the passed element instead of replacing all its content. (default: false)
- * @property {string} params.cssClass If specified this CSS class (or classes with space separated)
+ * @property {string} cssClass If specified this CSS class (or classes with space separated)
  *    will be set to the root visuzalize element.
- * @property {object} params.dataAttrs An object of key-value pairs, that will be set
+ * @property {object} dataAttrs An object of key-value pairs, that will be set
  *    as data-{key}="{value}" attributes on the visualization element.
  */
 
