@@ -100,7 +100,6 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'src/core_plugins/timelion/server/series_functions/__tests__/fixtures/tlConfig.js',
   'src/fixtures/config_upgrade_from_4.0.0_to_4.0.1-snapshot.json',
   'src/fixtures/vislib/mock_data/terms/_seriesMultiple.js',
-  'src/jest/babelTransform.js',
   'src/ui/i18n/__tests__/fixtures/translations/test_plugin_1/es-ES.json',
   'src/ui/public/angular-bootstrap/accordion/accordion-group.html',
   'src/ui/public/angular-bootstrap/bindHtml/bindHtml.js',
