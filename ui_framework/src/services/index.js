@@ -9,6 +9,8 @@ export {
   htmlIdGenerator
 } from './accessibility';
 
+export { noOverflowPlacement } from './overflow';
+
 export { SortableProperties } from './sort';
 
 export { LEFT_ALIGNMENT, RIGHT_ALIGNMENT } from './alignment';
