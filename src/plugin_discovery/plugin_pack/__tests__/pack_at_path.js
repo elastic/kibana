@@ -43,7 +43,7 @@ describe('plugin discovery/plugin_pack', () => {
         assertInvalidDirectoryError(error);
         expect(error.message).to.contain('path must be absolute');
       }));
-      it('non-existant path', () => checkError(resolve(PLUGINS_DIR, 'baz'), error => {
+      it('non-existent path', () => checkError(resolve(PLUGINS_DIR, 'baz'), error => {
         assertInvalidPackError(error);
         expect(error.message).to.contain('must be a directory');
       }));
