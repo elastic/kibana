@@ -75,7 +75,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
           cssClass: `panel-content ${savedObject.vis.type.name}`,
           // The chrome is permanently hidden in "embed mode" in which case we don't want to show the spy pane, since
           // we deem that situation to be more public facing and want to hide more detailed information.
-          getShouldShowSpyPane: !chrome.getIsChromePermanentlyHidden(),
+          showSpyPanel: !chrome.getIsChromePermanentlyHidden(),
           dataAttrs: {
             'shared-item': '',
             title: panelTitle,
