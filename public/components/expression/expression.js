@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormGroup, FormControl, Button, ButtonToolbar } from 'react-bootstrap';
+import { FormGroup, Button, ButtonToolbar } from 'react-bootstrap';
 import './expression.less';
+import { TextareaWithSelection } from '../textarea_with_selection';
 
 function getOffsetTop({ expression, selection: { start } }) {
   return expression.substr(0, start).split('\n').length * 22 + 8;
@@ -11,7 +12,6 @@ export const Expression = ({
   formState,
   updateValue,
   setExpression,
-  setInputRef,
   onKeyDown,
   updateSelection,
   autocompleteProposals,
@@ -26,16 +26,14 @@ export const Expression = ({
     <div className="canvas__expression">
       <FormGroup controlId="formControlsTextarea" validationState={error ? 'error' : null}>
         <div className="autocomplete">
-          <FormControl
+          <TextareaWithSelection
             spellCheck={false}
-            componentClass="textarea"
-            placeholder="Enter expression..."
-            inputRef={setInputRef}
-            onKeyDown={onKeyDown}
-            onKeyUp={updateSelection}
-            onClick={updateSelection}
-            onChange={updateValue}
+            className="textarea form-control"
+            selection={formState.selection}
+            onSelectionChange={updateSelection}
             value={formState.expression}
+            onChange={updateValue}
+            onKeyDown={onKeyDown}
           />
           <div
             className={'autocompleteProposals ' + (showAutocompleteProposals ? '' : 'hidden')}
@@ -72,7 +70,6 @@ Expression.propTypes = {
   formState: PropTypes.object,
   updateValue: PropTypes.func,
   setExpression: PropTypes.func,
-  setInputRef: PropTypes.func,
   onKeyDown: PropTypes.func,
   updateSelection: PropTypes.func,
   autocompleteProposals: PropTypes.array,

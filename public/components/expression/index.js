@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { isEqual } from 'lodash';
 import { connect } from 'react-redux';
 import { compose, withState, withHandlers, lifecycle, withPropsOnChange, branch, renderComponent } from 'recompose';
 import { Expression as Component } from './expression';
@@ -47,13 +47,6 @@ const expressionLifecycle = lifecycle({
       });
     }
   },
-  componentDidUpdate() {
-    const { inputRef, formState } = this.props;
-    if (inputRef) {
-      const { start, end } = formState.selection;
-      inputRef.setSelectionRange(start, end);
-    }
-  },
 });
 
 export const Expression = compose(
@@ -66,35 +59,29 @@ export const Expression = compose(
     },
     dirty: false,
   })),
-  withState('inputRef', 'setInputRef'),
   withState('selectedIndex', 'setSelectedIndex', -1),
   withState('showAutocompleteProposals', 'setShowAutocompleteProposals', false),
   withHandlers({
     updateValue: ({ setFormState }) => ev => {
-      const { target: { value, selectionStart, selectionEnd } } = ev;
+      const expression = ev.target.value;
+      const selection = {
+        start: ev.target.selectionStart,
+        end: ev.target.selectionEnd,
+      };
       setFormState({
-        expression: value,
-        selection: {
-          start: selectionStart,
-          end: selectionEnd,
-        },
+        expression,
+        selection,
         dirty: true,
       });
     },
-    updateSelection: ({ formState, setFormState }) => ev => {
-      if (ev.target.selectionStart != null) {
-        const { target: { selectionStart, selectionEnd } } = ev;
-        setFormState({
-          ...formState,
-          selection: {
-            start: selectionStart,
-            end: selectionEnd,
-          },
-        });
-      }
+    updateSelection: ({ setFormState }) => selection => {
+      setFormState(prev => ({
+        ...prev,
+        selection,
+      }));
     },
     setExpression: ({ setExpression, setFormState }) => exp => {
-      setFormState((prev) => ({
+      setFormState(prev => ({
         ...prev,
         dirty: false,
       }));
@@ -141,10 +128,7 @@ export const Expression = compose(
       acceptAutocompleteProposal,
       showAutocompleteProposals,
       setShowAutocompleteProposals,
-      updateSelection,
     }) => event => {
-      updateSelection(event);
-
       // TODO: Move this into a separate HOC for handling typeahead stuff
       const { key } = event;
       if (key === 'ArrowUp' && showAutocompleteProposals && autocompleteProposals.length) {
@@ -162,7 +146,7 @@ export const Expression = compose(
         setShowAutocompleteProposals(true);
         setSelectedIndex(-1);
         const { value, selection } = autocompletePairs(formState.expression, formState.selection, event.key);
-        if (value !== formState.expression || !_.isEqual(selection, formState.selection)) {
+        if (value !== formState.expression || !isEqual(selection, formState.selection)) {
           event.preventDefault();
           setFormState({
             expression: value,
