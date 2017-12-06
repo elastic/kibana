@@ -28,11 +28,11 @@ export class KuiTooltip extends React.PureComponent {
       ...others
     } = this.props;
 
-    const newClasses = classnames('tooltip-container', {
-      'tooltip-container-visible': isVisible,
-      'tooltip-container-hidden': !isVisible,
-      'tooltip-hoverable': isSticky,
-      [`tooltip-${size}`]: size !== 'auto'
+    const newClasses = classnames('kuiTooltip-container', {
+      'kuiTooltip-container-visible': isVisible,
+      'kuiTooltip-container-hidden': !isVisible,
+      'kuiTooltip-hoverable': isSticky,
+      [`kuiTooltip-${size}`]: size !== 'auto'
     }, className);
 
     let tooltipTitle;
@@ -44,7 +44,7 @@ export class KuiTooltip extends React.PureComponent {
 
     return (
       <div className={newClasses} {...others}>
-        <div className="tooltip-content">
+        <div className="kuiTooltip-content">
           {tooltipTitle}
           {children}
         </div>

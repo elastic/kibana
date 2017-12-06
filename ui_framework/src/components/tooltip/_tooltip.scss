@@ -52,12 +52,12 @@ $tooltip-md-width:           $base-unit * 30;
 $tooltip-lg-width:           $base-unit * 45;
 
 //Hover Effect for HTML & CSS ONLY
-.tooltip:hover .tooltip-container:not(.tooltip-container-hidden) {
+.kuiTooltip:hover .kuiTooltip-container:not(.kuiTooltip-container-hidden) {
   visibility: visible;
   opacity: 1;
 }
 
-.tooltip-container {
+.kuiTooltip-container {
   //Hover Effect for HTML & CSS ONLY
   visibility: hidden;
   transition: opacity $tooltip-opacity-transition;
@@ -69,11 +69,11 @@ $tooltip-lg-width:           $base-unit * 45;
   margin: 0 0 $tooltip-margin 0; //space for the triangle indicator
   text-align: left;
 
-  &.tooltip-container-visible {
+  &.kuiTooltip-container-visible {
     visibility: visible;
   }
 
-  &.tooltip-hoverable {
+  &.kuiTooltip-hoverable {
     &:after {
       content:"";
       position: absolute;
@@ -85,7 +85,7 @@ $tooltip-lg-width:           $base-unit * 45;
     }
   }
 
-  .tooltip-content {
+  .kuiTooltip-content {
     white-space: nowrap;
     padding: $tooltip-padding;
     font-size: $tooltip-font-size;
@@ -129,7 +129,7 @@ $tooltip-lg-width:           $base-unit * 45;
   }
 }
 
-.tooltip {
+.kuiTooltip {
   position: relative;
   display: inline-block;
 
@@ -139,8 +139,8 @@ $tooltip-lg-width:           $base-unit * 45;
     }
   }
 
-  &.tooltip-light {
-    .tooltip-content {
+  &.kuiTooltip-light {
+    .kuiTooltip-content {
       background-color: $tooltip-light-bg;
       color: $tooltip-light-color;
       border: 1px solid $tooltip-light-border-color;
@@ -157,15 +157,15 @@ $tooltip-lg-width:           $base-unit * 45;
     }
   }
 
-  &.tooltip-bottom {
-    .tooltip-container {
+  &.kuiTooltip-bottom {
+    .kuiTooltip-container {
       top: 100%;
       bottom: auto;
       left: 50%;
       transform: translateX(-50%);
       margin: $tooltip-margin 0 0 0;
 
-      .tooltip-content {
+      .kuiTooltip-content {
         &:before {
           bottom: auto;
           top: $tooltip-arrow-pull;
@@ -182,23 +182,23 @@ $tooltip-lg-width:           $base-unit * 45;
       }
     }
 
-    &.tooltip-light {
-      .tooltip-content:before {
+    &.kuiTooltip-light {
+      .kuiTooltip-content:before {
         border-top: 1px solid $tooltip-light-border-color;
         border-left: 1px solid $tooltip-light-border-color;
       }
     }
   }
 
-  &.tooltip-right {
-    .tooltip-container {
+  &.kuiTooltip-right {
+    .kuiTooltip-container {
       top: 50%;
       bottom: auto;
       left: 100%;
       transform: translatey(-50%);
       margin: 0 0 0 $tooltip-margin;
 
-      .tooltip-content {
+      .kuiTooltip-content {
         &:before {
           bottom: auto;
           left: $tooltip-arrow-pull;
@@ -219,15 +219,15 @@ $tooltip-lg-width:           $base-unit * 45;
       }
     }
 
-    &.tooltip-light {
-      .tooltip-content:before {
+    &.kuiTooltip-light {
+      .kuiTooltip-content:before {
         border-bottom: 1px solid $tooltip-light-border-color;
         border-left: 1px solid $tooltip-light-border-color;
       }
     }
   }
-  &.tooltip-left {
-    .tooltip-container {
+  &.kuiTooltip-left {
+    .kuiTooltip-container {
       top: 50%;
       bottom: auto;
       right: 100%;
@@ -235,7 +235,7 @@ $tooltip-lg-width:           $base-unit * 45;
       transform: translatey(-50%);
       margin: 0 $tooltip-margin 0 0;
 
-      .tooltip-content {
+      .kuiTooltip-content {
         &:before {
           bottom: auto;
           right: $tooltip-arrow-pull;
@@ -258,8 +258,8 @@ $tooltip-lg-width:           $base-unit * 45;
       }
     }
 
-    &.tooltip-light {
-      .tooltip-content:before {
+    &.kuiTooltip-light {
+      .kuiTooltip-content:before {
         border-top: 1px solid $tooltip-light-border-color;
         border-right: 1px solid $tooltip-light-border-color;
       }
@@ -268,44 +268,23 @@ $tooltip-lg-width:           $base-unit * 45;
 }
 
 //Tooltip Sizes
-.tooltip-s.tooltip-container {
+.kuiTooltip-s.kuiTooltip-container {
   width: $tooltip-sm-width;
-  .tooltip-content {
+  .kuiTooltip-content {
     white-space: normal;
   }
 }
 
-.tooltip-m.tooltip-container {
+.kuiTooltip-m.kuiTooltip-container {
   width: $tooltip-md-width;
-  .tooltip-content {
+  .kuiTooltip-content {
     white-space: normal;
   }
 }
 
-.tooltip-l.tooltip-container {
+.kuiTooltip-l.kuiTooltip-container {
   width: $tooltip-lg-width;
-  .tooltip-content {
+  .kuiTooltip-content {
     white-space: normal;
-  }
-}
-
-//Overlay
-.tether-element {
-  z-index: 99;
-}
-
-.overlay-trigger {
-  color: $link-color;
-  @include transition-pui();
-
-  &:hover, &:focus {
-    color: lighten($link-color, 6%);
-    cursor: pointer;
-    outline:none;
-    text-decoration: none;
-  }
-
-  &:active, &.active{
-    color: darken($link-color, 6%);
   }
 }
