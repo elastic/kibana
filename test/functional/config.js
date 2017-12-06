@@ -95,5 +95,8 @@ export default async function ({ readConfigFile }) {
         hash: '/dev_tools/console',
       },
     },
+    junit: {
+      reportName: 'UI Functional Tests'
+    }
   };
 }
