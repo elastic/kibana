@@ -1,5 +1,5 @@
 const babelJest = require('babel-jest');
-const options = require('../optimize/babel/options');
+const options = require('../../optimize/babel/options');
 
 const babelOptions = options.node;
 

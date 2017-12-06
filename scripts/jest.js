@@ -11,5 +11,4 @@
 // See all cli options in https://facebook.github.io/jest/docs/cli.html
 
 require('../src/optimize/babel/register');
-require('../src/jest/cli');
-
+require('../src/dev/jest/cli');
