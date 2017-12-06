@@ -41,6 +41,7 @@
     "lz-string": "^1.4.4",
     "markdown-it": "^8.3.2",
     "mathjs": "^3.12.3",
+    "metalsmith-snippet": "^2.0.0",
     "moment": "^2.18.1",
     "object-path-immutable": "^0.5.1",
     "prop-types": "^15.5.8",
