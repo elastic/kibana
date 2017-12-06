@@ -16,6 +16,7 @@ cmd
   .option('--verbose', 'Log everything', false)
   .option('--quiet', 'Only log errors', false)
   .option('--silent', 'Log nothing', false)
+  .option('--updateBaselines', 'Replace baseline screenshots with whatever is generated from the test', false)
   .option('--debug', 'Run in debug mode', false)
   .parse(process.argv);
 
@@ -27,6 +28,12 @@ if (cmd.verbose) logLevel = 'verbose';
 
 const log = createToolingLog(logLevel);
 log.pipe(process.stdout);
+
+if (cmd.updateBaselines) {
+  process.env.UPDATE_BASELINES = cmd.updateBaselines;
+} else {
+  delete process.env.UPDATE_BASELINES;
+}
 
 const functionalTestRunner = createFunctionalTestRunner({
   log,
