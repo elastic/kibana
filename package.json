@@ -250,6 +250,7 @@
     "karma-coverage": "0.5.1",
     "karma-firefox-launcher": "0.1.6",
     "karma-ie-launcher": "0.2.0",
+    "karma-junit-reporter": "1.2.0",
     "karma-mocha": "0.2.0",
     "karma-safari-launcher": "0.1.1",
     "keymirror": "0.1.1",
@@ -274,7 +275,8 @@
     "supertest": "3.0.0",
     "supertest-as-promised": "2.0.2",
     "tree-kill": "1.1.0",
-    "webpack-dev-server": "1.14.1"
+    "webpack-dev-server": "1.14.1",
+    "xmlbuilder": "9.0.4"
   },
   "engines": {
     "node": "6.11.5",

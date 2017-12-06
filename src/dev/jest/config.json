@@ -1,5 +1,5 @@
 {
-  "rootDir": "../../",
+  "rootDir": "../../..",
   "roots": [
     "<rootDir>/src/core_plugins/kibana/public/dashboard",
     "<rootDir>/ui_framework/"
@@ -30,12 +30,16 @@
     "<rootDir>[/\\\\]ui_framework[/\\\\](dist|doc_site|jest)[/\\\\]"
   ],
   "transform": {
-    "^.+\\.js$": "<rootDir>/src/jest/babelTransform.js"
+    "^.+\\.js$": "<rootDir>/src/dev/jest/babel_transform.js"
   },
   "transformIgnorePatterns": [
     "[/\\\\]node_modules[/\\\\].+\\.js$"
   ],
   "snapshotSerializers": [
     "<rootDir>/node_modules/enzyme-to-json/serializer"
+  ],
+  "reporters": [
+    "default",
+    "<rootDir>/src/dev/jest/junit_reporter.js"
   ]
 }
