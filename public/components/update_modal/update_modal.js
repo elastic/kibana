@@ -1,11 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Button } from 'react-bootstrap';
+import { Changes } from './changes';
 import goat from './goat.png';
 import './update_modal.less';
 
-export const UpdateModal = ({ build, setBuild }) => {
+export const UpdateModal = ({ build, setBuild, changes }) => {
   if (!build) return null;
+
   return (
     <Modal.Dialog className="canvas__update-model">
       <Modal.Header>
@@ -26,9 +28,10 @@ export const UpdateModal = ({ build, setBuild }) => {
         <h3>That's right, an update!</h3>
         <p>
           I know what you're thinking: <i>This is a trick</i>. Well it isn't, we update Canvas <strong>a lot</strong>,
-          in direct response to your feedback. Chances are this update is a result of something you, or someone in your
-          preview group told us you needed.
+          in direct response to your feedback. Here's what's new!
         </p>
+
+        <Changes changes={changes} />
 
         <p>
           Updating Canvas is easy, you can probably do it yourself, or get your good friends in operations to update it for you.
@@ -63,6 +66,10 @@ export const UpdateModal = ({ build, setBuild }) => {
 };
 
 UpdateModal.propTypes = {
-  build: PropTypes.any,
+  build: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.number,
+  ]),
+  changes: PropTypes.string,
   setBuild: PropTypes.func,
 };

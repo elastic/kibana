@@ -1,23 +1,38 @@
 import { withState, lifecycle, compose } from 'recompose';
-import { UpdateModal as Component } from './update_modal';
+import Markdown from 'markdown-it';
 import { get } from 'lodash';
 import fetch from 'axios';
 import pkg from '../../../package.json';
+import { UpdateModal as Component } from './update_modal';
+
+const siteUrl = 'http://canvas.elastic.co';
 
 export const UpdateModal = compose(
   withState('build', 'setBuild', null),
+  withState('changes', 'setChanges', null),
   lifecycle({
     componentDidMount() {
-      const { setBuild } = this.props;
+      const { setBuild, setChanges } = this.props;
       const currentBuild = Number(get(pkg, 'build.git.count'));
       if (!currentBuild) return;
 
-      fetch(`http://canvas.elastic.co/preview-microsite/build.json`, {
-        method: 'GET',
-      })
-      .then(res => {
-        const buildNum = Number(get(res, 'data.buildNumber'));
-        if (currentBuild < buildNum) setBuild(buildNum);
+      fetch(`${siteUrl}/preview-microsite/build.json`)
+      .then((build) => {
+        const buildNum = Number(get(build, 'data.buildNumber'));
+
+        if (currentBuild < buildNum) {
+          fetch(`${siteUrl}/changelog.md`)
+          .then((changelog) => {
+            const changes = changelog.split('---')[0];
+            const md = new Markdown();
+            setChanges(md.render(String(changes)));
+            setBuild(buildNum);
+          })
+          .catch(() => {
+            console.log('Could not fetch changelog');
+            setBuild(buildNum);
+          });
+        }
       })
       .catch(() => {
         console.log('Could not fetch remote build info');
