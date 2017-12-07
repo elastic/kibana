@@ -35,6 +35,7 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('6.0 urls', () => {
+
       it('loads an unsaved dashboard', async function () {
         const url = `${kibanaBaseUrl}#/dashboard?${urlQuery}`;
 
@@ -51,11 +52,10 @@ export default function ({ getService, getPageObjects }) {
 
       it('loads a saved dashboard', async function () {
         await PageObjects.dashboard.saveDashboard('saved with colors', { storeTimeWithDashboard: true });
+        await PageObjects.header.clickToastOK();
 
         const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
-
         const url = `${kibanaBaseUrl}#/dashboard/${id}`;
-
         await remote.get(url, true);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
