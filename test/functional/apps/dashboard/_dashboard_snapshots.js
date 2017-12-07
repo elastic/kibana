@@ -34,13 +34,14 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.clickToastOK();
 
       await PageObjects.dashboard.clickFullScreenMode();
+      await PageObjects.dashboard.toggleExpandPanel();
 
       await PageObjects.dashboard.waitForRenderCounter(2);
-      const diff = await screenshot.compareAgainstBaseline('tsvb_dashboard');
+      const percentSimilar = await screenshot.compareAgainstBaseline('tsvb_dashboard');
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
 
-      expect(diff).to.be(0);
+      expect(percentSimilar).to.be(0);
     });
   });
 }
