@@ -4,7 +4,7 @@ const attributeName = 'data-render-complete';
 
 uiModules
   .get('kibana')
-  .directive('renderCounter', () => ({
+  .directive('renderComplete', () => ({
     controller($scope, $element) {
       const el = $element[0];
 

@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { findDOMNode } from 'react-dom';
 import { keyCodes } from 'ui_framework/services';
 import Visualization from './visualization';
 import Toggle from 'react-toggle';
@@ -44,11 +43,6 @@ class VisEditorVisualization extends Component {
   componentWillUnmount() {
     window.removeEventListener('mousemove', this.handleMouseMove);
     window.removeEventListener('mouseup', this.handleMouseUp);
-  }
-
-  componentDidMount() {
-    const el = findDOMNode(this.visDiv);
-    el.setAttribute('render-counter', 'disabled');
   }
 
   /**
@@ -124,6 +118,7 @@ class VisEditorVisualization extends Component {
           data-shared-item
           data-title={this.props.title}
           data-description={this.props.description}
+          data-render-complete="disabled"
         >
           <Visualization
             backgroundColor={visBackgroundColor}
