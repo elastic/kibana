@@ -105,6 +105,9 @@ html(lang='en')
       }
 
     block head
+
+    //- Load EUI component styles here. Kibana's styles are loaded afterwards by webpack, which is
+    //- good because we may use them to override EUI styles.
     style#themeCss
 
   body(kbn-chrome, id='#{appName}-body')
