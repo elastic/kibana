@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { InputControlVis } from './components/vis/vis';
+import { InputControlVis } from './components/vis/input_control_vis';
 import { controlFactory } from './control/control_factory';
 
 class VisController {

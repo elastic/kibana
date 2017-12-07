@@ -1,10 +1,11 @@
 import React from 'react';
 import sinon from 'sinon';
 import { mount, shallow } from 'enzyme';
+import { findTestSubject } from 'ui_framework/test';
 
 import {
   InputControlVis,
-} from './vis';
+} from './input_control_vis';
 
 const mockListControl = {
   id: 'mock-list-control',
@@ -114,7 +115,7 @@ test('clearControls', () => {
     hasChanges={() => { return true; }}
     hasValues={() => { return true; }}
   />);
-  component.find('[data-test-subj="inputControlClearBtn"]').simulate('click');
+  findTestSubject(component, 'inputControlClearBtn', false).simulate('click');
   sinon.assert.calledOnce(clearControls);
   sinon.assert.notCalled(submitFilters);
   sinon.assert.notCalled(resetControls);
@@ -132,7 +133,7 @@ test('submitFilters', () => {
     hasChanges={() => { return true; }}
     hasValues={() => { return true; }}
   />);
-  component.find('[data-test-subj="inputControlSubmitBtn"]').simulate('click');
+  findTestSubject(component, 'inputControlSubmitBtn', false).simulate('click');
   sinon.assert.calledOnce(submitFilters);
   sinon.assert.notCalled(clearControls);
   sinon.assert.notCalled(resetControls);
@@ -150,7 +151,7 @@ test('resetControls', () => {
     hasChanges={() => { return true; }}
     hasValues={() => { return true; }}
   />);
-  component.find('[data-test-subj="inputControlCancelBtn"]').simulate('click');
+  findTestSubject(component, 'inputControlCancelBtn', false).simulate('click');
   sinon.assert.calledOnce(resetControls);
   sinon.assert.notCalled(clearControls);
   sinon.assert.notCalled(submitFilters);
@@ -168,7 +169,7 @@ test('stageFilter list control', () => {
     hasChanges={() => { return true; }}
     hasValues={() => { return true; }}
   />);
-  const reactSelectInput = component.find(`#${mockListControl.id}`);
+  const reactSelectInput = component.find(`#${mockListControl.id}`).hostNodes();
   reactSelectInput.simulate('change', { target: { value: 'choice1' } });
   reactSelectInput.simulate('keyDown', { keyCode: 9, key: 'Tab' });
   sinon.assert.notCalled(clearControls);
