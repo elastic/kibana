@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }) {
 
         it('when a filter is deleted', async function () {
           await PageObjects.dashboard.setTimepickerInDataRange();
-          await PageObjects.dashboard.filterOnPieSlice();
+          await PageObjects.dashboard.filterOnPieSlice('0');
           await PageObjects.dashboard.saveDashboard(dashboardName);
           await PageObjects.header.clickToastOK();
 
@@ -206,7 +206,7 @@ export default function ({ getService, getPageObjects }) {
       it('when a dashboard has a filter and remains unchanged', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await PageObjects.dashboard.setTimepickerInDataRange();
-        await PageObjects.dashboard.filterOnPieSlice();
+        await PageObjects.dashboard.filterOnPieSlice('0');
         await PageObjects.dashboard.saveDashboard(dashboardName);
         await PageObjects.header.clickToastOK();
         await PageObjects.dashboard.clickEdit();

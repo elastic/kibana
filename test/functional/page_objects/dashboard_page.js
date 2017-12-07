@@ -494,6 +494,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       for (const vizName of visualizations) {
         await this.addVisualization(vizName);
       }
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async setTimepickerInDataRange() {
@@ -541,22 +542,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async filterOnPieSlice() {
-      log.debug('Filtering on a pie slice');
-      await retry.try(async () => {
-        const beforeFilterSlices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
-        log.debug('Slices found:' + beforeFilterSlices.length);
-        await beforeFilterSlices[0].click();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const afterFilterSlices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
-        // It's unclear why the original click wouldn't work but we ran into a flaky test bug here
-        // https://github.com/elastic/kibana/issues/15418 which was not a timing issue, but something to do with the
-        // click not being applied. It was unclear whether this was a legit error, something making the click event
-        // not apply the filter, or whether the click was failing to go through.
-        if (afterFilterSlices >= beforeFilterSlices) {
-          throw new Error('No filtering was applied. Attempt click again');
-        }
-      });
+    async filterOnPieSlice(sliceDataLabel) {
+      log.debug(`Filtering on pie slice ${sliceDataLabel}`);
+      await testSubjects.click(`pieChartSlice-${sliceDataLabel}`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async toggleExpandPanel(panel) {
