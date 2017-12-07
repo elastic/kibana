@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import {
   Control,
-  noValuesDisableMsg } from './control';
+  noValuesDisableMsg
+} from './control';
 import { RangeFilterManager } from './filter_manager/range_filter_manager';
 
 const minMaxAgg = (field) => {

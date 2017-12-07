@@ -3,8 +3,6 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import InputRange from 'react-input-range';
 import { FormRow } from './form_row';
-import { Tooltip } from 'pui-react-tooltip';
-import { OverlayTrigger } from 'pui-react-overlay-trigger';
 
 const toState = (props) => {
   const state = {
@@ -125,25 +123,14 @@ export class RangeControl extends Component {
   }
 
   render() {
-    let control = this.renderControl();
-    if (!this.props.control.isEnabled()) {
-      const tooltip = (
-        <Tooltip>{this.props.control.disabledReason}</Tooltip>
-      );
-      control = (
-        <OverlayTrigger placement="top" overlay={tooltip}>
-          {control}
-        </OverlayTrigger>
-      );
-    }
-
     return (
       <FormRow
         id={this.props.control.id}
         label={this.props.control.label}
         controlIndex={this.props.controlIndex}
+        control={this.props.control}
       >
-        {control}
+        {this.renderControl()}
       </FormRow>
     );
   }
