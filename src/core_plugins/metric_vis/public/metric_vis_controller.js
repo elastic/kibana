@@ -112,6 +112,13 @@ module.controller('KbnMetricVisController', function ($scope, $element) {
     });
   };
 
+  const dispatchCustomEvent = (name) => {
+    // we're using the native events so that we aren't tied to the jQuery custom events,
+    // otherwise we have to use jQuery(element).on(...) because jQuery's events sit on top
+    // of the native events per https://github.com/jquery/jquery/issues/2476
+    $element[0].dispatchEvent(new CustomEvent(name, { bubbles: true }));
+  };
+
   $scope.$watch('esResponse', function (resp) {
     if (resp) {
       metrics.length = 0;
@@ -120,7 +127,7 @@ module.controller('KbnMetricVisController', function ($scope, $element) {
       colors = getColors();
       labels = getLabels();
       $scope.processTableGroups(resp);
-      $element.trigger('renderComplete');
+      dispatchCustomEvent('renderComplete');
     }
   });
 });
