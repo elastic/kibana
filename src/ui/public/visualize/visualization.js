@@ -121,7 +121,7 @@ uiModules
           });
         });
 
-        const unsubscribeRender = render$
+        const renderSubscription = render$
           .filter(({ vis, visData }) => vis && vis.initialized && (!vis.type.requiresSearch || visData))
           .do(({ vis }) => {
             $scope.addLegend = vis.params.addLegend;
@@ -150,7 +150,7 @@ uiModules
         $scope.$on('$destroy', () => {
           resizeChecker.destroy();
           visualization.destroy();
-          unsubscribeRender();
+          renderSubscription.unsubscribe();
         });
 
         if (!$scope.vis.visualizeScope) {
