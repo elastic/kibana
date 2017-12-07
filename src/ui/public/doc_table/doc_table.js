@@ -80,7 +80,6 @@ uiModules.get('kibana')
 
         $scope.$watch('searchSource', function () {
           if (!$scope.searchSource) return;
-          dispatchCustomEvent('renderStart');
 
           $scope.indexPattern = $scope.searchSource.get('index');
 
