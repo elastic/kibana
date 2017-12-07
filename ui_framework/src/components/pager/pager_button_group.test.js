@@ -1,7 +1,7 @@
 import React from 'react';
 import sinon from 'sinon';
 import { render, mount } from 'enzyme';
-import { requiredProps } from '../../test/required_props';
+import { findTestSubject, requiredProps } from '../../test';
 
 import {
   KuiPagerButtonGroup,
@@ -27,13 +27,12 @@ test('renders KuiPagerButtonGroup', () => {
 });
 
 describe('property', () => {
-
   function findPreviousButton(pager) {
-    return pager.find('[data-test-subj="pagerPreviousButton"]');
+    return findTestSubject(pager, 'pagerPreviousButton', false);
   }
 
   function findNextButton(pager) {
-    return pager.find('[data-test-subj="pagerNextButton"]');
+    return findTestSubject(pager, 'pagerNextButton', false);
   }
 
   test('onNext', () => {

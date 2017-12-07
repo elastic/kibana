@@ -1,7 +1,7 @@
 import React from 'react';
 import sinon from 'sinon';
 import { render, mount } from 'enzyme';
-import { requiredProps } from '../../test/required_props';
+import { findTestSubject, requiredProps } from '../../test';
 
 import {
   KuiPager,
@@ -72,7 +72,7 @@ describe('property', () => {
         totalItems={20}
       />);
       const pager = mount(component);
-      pager.find('[data-test-subj="pagerPreviousButton"]').simulate('click');
+      findTestSubject(pager, 'pagerPreviousButton', false).simulate('click');
       sinon.assert.calledOnce(onPreviousPage);
       sinon.assert.notCalled(onNextPage);
     });
@@ -90,7 +90,7 @@ describe('property', () => {
         totalItems={20}
       />);
       const pager = mount(component);
-      pager.find('[data-test-subj="pagerNextButton"]').simulate('click');
+      findTestSubject(pager, 'pagerNextButton', false).simulate('click');
       sinon.assert.calledOnce(onNextPage);
       sinon.assert.notCalled(onPreviousPage);
     });
