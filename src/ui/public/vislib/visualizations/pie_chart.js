@@ -192,9 +192,10 @@ export function VislibVisualizationsPieChartProvider(Private) {
           .data(partition.nodes);
 
         // create an empty quadtree to hold label positions
+        const svgParentNode = svg.node().parentNode.parentNode;
         const svgBBox = {
-          width: svg.node().parentElement.clientWidth,
-          height: svg.node().parentElement.clientHeight
+          width: svgParentNode.clientWidth,
+          height: svgParentNode.clientHeight
         };
 
         const labelLayout = d3.geom.quadtree()
@@ -210,7 +211,7 @@ export function VislibVisualizationsPieChartProvider(Private) {
           .append('text')
           .text(function (d) {
             if (d.depth === 0) {
-              this.parentElement.remove();
+              d3.select(this.parentNode).remove();
               return;
             }
             if (showValues) {
@@ -228,9 +229,9 @@ export function VislibVisualizationsPieChartProvider(Private) {
           .each(function resolveConflicts(d) {
             if (d.depth === 0) return;
 
-            const parentElement = this.parentElement;
+            const parentNode = this.parentNode;
             if (showOnlyOnLastLevel && maxDepth !== d.depth) {
-              parentElement.remove();
+              d3.select(parentNode).remove();
               return;
             }
 
@@ -257,8 +258,8 @@ export function VislibVisualizationsPieChartProvider(Private) {
               const current = d.position;
               if (point) {
                 const horizontalConflict = (point.left < 0 && current.left < 0) || (point.left > 0 && current.left > 0);
-                const verticalConflict = (point.top > current.top && point.top <= current.bottom) ||
-                                          (point.top < current.top && point.bottom >= current.top);
+                const verticalConflict = (point.top >= current.top && point.top <= current.bottom) ||
+                                          (point.top <= current.top && point.bottom >= current.top);
 
                 if (horizontalConflict && verticalConflict) {
                   point.point = node.point;
@@ -270,7 +271,7 @@ export function VislibVisualizationsPieChartProvider(Private) {
             });
 
             if (conflicts.length) {
-              parentElement.remove();
+              d3.select(parentNode).remove();
               return;
             }
 

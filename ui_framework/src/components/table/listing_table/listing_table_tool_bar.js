@@ -8,17 +8,31 @@ import {
 } from '../../';
 
 export function KuiListingTableToolBar({ pager, actions, onFilter, filter }) {
-  return (
-    <KuiToolBar>
-      <KuiToolBarSearchBox onFilter={onFilter} filter={filter} />
+  let actionsSection;
 
+  if (actions) {
+    actionsSection = (
       <KuiToolBarSection>
         {actions}
       </KuiToolBarSection>
+    );
+  }
 
+  let pagerSection;
+
+  if (pager) {
+    pagerSection = (
       <KuiToolBarSection>
         {pager}
       </KuiToolBarSection>
+    );
+  }
+
+  return (
+    <KuiToolBar>
+      <KuiToolBarSearchBox onFilter={onFilter} filter={filter} />
+      {actionsSection}
+      {pagerSection}
     </KuiToolBar>
   );
 }

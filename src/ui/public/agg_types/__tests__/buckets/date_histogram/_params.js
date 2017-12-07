@@ -34,7 +34,8 @@ describe('params', function () {
 
     const now = moment();
     setTimeBounds = function (n, units) {
-      timefilter.enabled = true;
+      timefilter.enableAutoRefreshSelector();
+      timefilter.enableTimeRangeSelector();
       timefilter.getBounds = _.constant({
         min: now.clone().subtract(n, units),
         max: now.clone()

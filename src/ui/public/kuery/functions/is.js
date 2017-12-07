@@ -29,6 +29,15 @@ export function toElasticsearchQuery(node, indexPattern) {
       }
     };
   }
+  else if (fieldName === null) {
+    return {
+      multi_match: {
+        query: value,
+        type: 'phrase',
+        lenient: true,
+      }
+    };
+  }
   else if (fieldName === '*' && value === '*') {
     return { match_all: {} };
   }

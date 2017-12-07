@@ -104,6 +104,11 @@ export default function ({ getService, getPageObjects }) {
           });
       });
 
+      it('should display spy panel toggle button', async function () {
+        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+        expect(spyToggleExists).to.be(true);
+      });
+
       it('should show correct chart, take screenshot', function () {
         const xAxisLabels = [ '2015-09-20 00:00', '2015-09-21 00:00',
           '2015-09-22 00:00', '2015-09-23 00:00'

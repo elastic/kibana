@@ -74,7 +74,7 @@
   "dependencies": {
     "@elastic/datemath": "2.3.0",
     "@elastic/filesaver": "1.1.2",
-    "@elastic/numeral": "2.3.0",
+    "@elastic/numeral": "2.3.1",
     "@elastic/test-subj-selector": "0.2.1",
     "@elastic/ui-ace": "0.2.3",
     "JSONStream": "1.1.1",
@@ -172,7 +172,7 @@
     "react-anything-sortable": "1.6.1",
     "react-color": "2.11.7",
     "react-dom": "15.6.1",
-    "react-grid-layout": "0.14.7",
+    "react-grid-layout": "0.16.0",
     "react-input-autosize": "1.1.0",
     "react-input-range": "1.2.1",
     "react-markdown": "2.4.2",
@@ -268,6 +268,7 @@
     "karma-coverage": "1.1.1",
     "karma-firefox-launcher": "1.0.1",
     "karma-ie-launcher": "1.0.0",
+    "karma-junit-reporter": "1.2.0",
     "karma-mocha": "1.3.0",
     "karma-safari-launcher": "1.0.0",
     "keymirror": "0.1.1",
@@ -294,6 +295,7 @@
     "supertest-as-promised": "2.0.2",
     "tree-kill": "1.1.0",
     "webpack-dev-server": "2.9.1",
+    "xmlbuilder": "9.0.4",
     "yeoman-generator": "1.1.1",
     "yo": "2.0.0"
   },
