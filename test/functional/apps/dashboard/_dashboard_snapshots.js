@@ -32,10 +32,10 @@ export default function ({ getService, getPageObjects }) {
       await dashboardVisualizations.createAndAddTSVBVisualization('TSVB');
       await PageObjects.dashboard.saveDashboard('tsvb');
       await PageObjects.header.clickToastOK();
-      await PageObjects.dashboard.waitForAllSharedItemsToFinishRendering();
 
       await PageObjects.dashboard.clickFullScreenMode();
 
+      await PageObjects.dashboard.waitForRenderCounter(2);
       const diff = await screenshot.compareAgainstBaseline('tsvb_dashboard');
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
