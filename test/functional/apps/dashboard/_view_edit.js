@@ -11,6 +11,7 @@ export default function ({ getService, getPageObjects }) {
   describe('dashboard view edit mode', function viewEditModeTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
+      await PageObjects.dashboard.preserveCrossAppState();
       await kibanaServer.uiSettings.disableToastAutohide();
       await remote.refresh();
     });
@@ -20,13 +21,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('create new dashboard opens in edit mode', async function () {
-      // This flip between apps fixes the url so state is preserved when switching apps in test mode.
-      // Without this flip the url in test mode looks something like
-      // "http://localhost:5620/app/kibana?_t=1486069030837#/dashboard?_g=...."
-      // after the initial flip, the url will look like this: "http://localhost:5620/app/kibana#/dashboard?_g=...."
-      await PageObjects.header.clickVisualize();
-      await PageObjects.header.clickDashboard();
-
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.clickCancelOutOfEditMode();
     });
