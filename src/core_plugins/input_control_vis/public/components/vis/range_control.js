@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import InputRange from 'react-input-range';
 import { FormRow } from './form_row';
+import { Tooltip } from 'pui-react-tooltip';
+import { OverlayTrigger } from 'pui-react-overlay-trigger';
 
 const toState = (props) => {
   const state = {
@@ -79,26 +81,12 @@ export class RangeControl extends Component {
     return formatedValue;
   }
 
-  render() {
-    let disabled = false;
-    let disableMsg;
-    if (!this.props.control.isEnabled()) {
-      disabled = true;
-      disableMsg = (
-        <p className="kuiStatusText kuiStatusText--warning">
-          {this.props.control.disabledReason}
-        </p>
-      );
-    }
+  renderControl() {
     return (
-      <FormRow
-        id={this.props.control.id}
-        label={this.props.control.label}
-        controlIndex={this.props.controlIndex}
-      >
+      <div>
         <input
           id={`${this.props.control.id}_min`}
-          disabled={disabled}
+          disabled={!this.props.control.isEnabled()}
           name="min"
           type="number"
           className="kuiTextInput"
@@ -109,7 +97,7 @@ export class RangeControl extends Component {
         />
         <div className="inputRangeContainer">
           <InputRange
-            disabled={disabled}
+            disabled={!this.props.control.isEnabled()}
             maxValue={this.props.control.max}
             minValue={this.props.control.min}
             step={this.props.control.options.step}
@@ -123,7 +111,7 @@ export class RangeControl extends Component {
         </div>
         <input
           id={`${this.props.control.id}_max`}
-          disabled={disabled}
+          disabled={!this.props.control.isEnabled()}
           name="max"
           type="number"
           className="kuiTextInput"
@@ -132,7 +120,30 @@ export class RangeControl extends Component {
           max={this.props.control.max}
           onChange={this.handleInputChange}
         />
-        {disableMsg}
+      </div>
+    );
+  }
+
+  render() {
+    let control = this.renderControl();
+    if (!this.props.control.isEnabled()) {
+      const tooltip = (
+        <Tooltip>{this.props.control.disabledReason}</Tooltip>
+      );
+      control = (
+        <OverlayTrigger placement="top" overlay={tooltip}>
+          {control}
+        </OverlayTrigger>
+      );
+    }
+
+    return (
+      <FormRow
+        id={this.props.control.id}
+        label={this.props.control.label}
+        controlIndex={this.props.controlIndex}
+      >
+        {control}
       </FormRow>
     );
   }
