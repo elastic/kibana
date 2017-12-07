@@ -71,7 +71,7 @@ export function setupJunitReportGeneration(runner, options = {}) {
     const failedHooks = failures.filter(result => !allTests.includes(result.node));
 
     // mocha doesn't emit 'pass' or 'fail' when it skips a test
-    // or a test is pending, so we find them outselves
+    // or a test is pending, so we find them ourselves
     const skippedResults = allTests
       .filter(node => node.pending || !results.find(result => result.node === node))
       .map(node => ({ skipped: true, node }));
