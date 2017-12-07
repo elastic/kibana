@@ -22,6 +22,7 @@ export const UpdateModal = compose(
 
         if (currentBuild < buildNum) {
           fetch(`${siteUrl}/changelog.md`)
+          .then(res => res.data)
           .then((changelog) => {
             const changes = changelog.split('---')[0];
             const md = new Markdown();

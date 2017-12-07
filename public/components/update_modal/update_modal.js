@@ -27,8 +27,8 @@ export const UpdateModal = ({ build, setBuild, changes }) => {
       <Modal.Body>
         <h3>That's right, an update!</h3>
         <p>
-          I know what you're thinking: <i>This is a trick</i>. Well it isn't, we update Canvas <strong>a lot</strong>,
-          in direct response to your feedback. Here's what's new!
+          I know what you're thinking: <i>This is a trick</i>. Well it isn't, we update Canvas
+          <strong>a lot</strong>, in direct response to your feedback.
         </p>
 
         <Changes changes={changes} />
