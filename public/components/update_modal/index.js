@@ -25,7 +25,7 @@ export const UpdateModal = compose(
           .then(res => res.data)
           .then((changelog) => {
             const changes = changelog.split('---')[0];
-            const md = new Markdown();
+            const md = new Markdown({ html: false });
             setChanges(md.render(String(changes)));
             setBuild(buildNum);
           })
