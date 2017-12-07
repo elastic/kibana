@@ -105,6 +105,8 @@ html(lang='en')
       }
 
     block head
+    style#themeCss
+
   body(kbn-chrome, id='#{appName}-body')
     kbn-initial-state(data=JSON.stringify(kibanaPayload))
     block content
