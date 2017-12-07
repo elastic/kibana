@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders disabled control with tooltip 1`] = `
+<div
+  className="kuiVerticalRhythm"
+  data-test-subj="inputControl0"
+>
+  <label
+    className="kuiLabel kuiVerticalRhythmSmall"
+    htmlFor="controlId"
+  >
+    test control
+  </label>
+  <div
+    className="kuiVerticalRhythmSmall"
+  >
+    <OverlayTrigger
+      display={false}
+      overlay={<Tooltip />}
+      pin={true}
+      placement="top"
+      trigger="hover"
+    >
+      <div>
+        My Control
+      </div>
+    </OverlayTrigger>
+  </div>
+</div>
+`;
+
+exports[`renders enabled control 1`] = `
+<div
+  className="kuiVerticalRhythm"
+  data-test-subj="inputControl0"
+>
+  <label
+    className="kuiLabel kuiVerticalRhythmSmall"
+    htmlFor="controlId"
+  >
+    test control
+  </label>
+  <div
+    className="kuiVerticalRhythmSmall"
+  >
+    <div>
+      My Control
+    </div>
+  </div>
+</div>
+`;
