@@ -1,6 +1,11 @@
 import { fromNode as fcb } from 'bluebird';
 import { readFile, writeFile, unlink, stat } from 'fs';
 
+// We normalize all path separators to `/` in generated files
+function normalizePath(path) {
+  return path.replace(/[\\\/]+/g, '/');
+}
+
 export class UiBundle {
   constructor(options) {
     const {
@@ -34,7 +39,7 @@ export class UiBundle {
 
   getRequires() {
     return this._modules.map(module => (
-      `require('${module}');`
+      `require('${normalizePath(module)}');`
     ));
   }
 
