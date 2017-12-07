@@ -137,14 +137,13 @@ uiModules
 
             $scope.vis.size = [container.width(), container.height()];
             const status = getUpdateStatus($scope);
-            await visualization.render($scope.visData, status);
-          })
-          .do(() => {
-            $scope.$emit('renderComplete');
-            dispatchCustomEvent('renderComplete');
+            const renderPromise = visualization.render($scope.visData, status);
+            $scope.$apply();
+            return renderPromise;
           })
           .subscribe(() => {
-            $scope.$apply();
+            $scope.$emit('renderComplete');
+            dispatchCustomEvent('renderComplete');
           });
 
         $scope.$on('$destroy', () => {
