@@ -11,10 +11,8 @@ export function setupJunitReportGeneration(runner, options = {}) {
     rootDirectory = dirname(require.resolve('../../../package.json')),
   } = options;
 
-  const rootSuite = runner.suite;
-  const isTestFailed = test => test.state === 'failed';
-  const isTestPending = test => !!test.pending;
-  const returnTrue = () => true;
+  const stats = {};
+  const results = [];
 
   const getDuration = (node) => (
     node.startTime && node.endTime
@@ -22,17 +20,17 @@ export function setupJunitReportGeneration(runner, options = {}) {
       : null
   );
 
-  const getTimestamp = (node) => (
-    node.startTime
-      ? new Date(node.startTime).toISOString().slice(0, -5)
-      : null
+  const findAllTests = (suite) => (
+    suite.suites.reduce((acc, suite) => acc.concat(findAllTests(suite)), suite.tests)
   );
 
-  const countTests = (suite, filter = returnTrue) => (
-    suite.suites.reduce((sum, suite) => (
-      sum + countTests(suite, filter)
-    ), suite.tests.filter(filter).length)
-  );
+  const setStartTime = (node) => {
+    node.startTime = Date.now();
+  };
+
+  const setEndTime = node => {
+    node.endTime = Date.now();
+  };
 
   const getFullTitle = node => {
     const parentTitle = node.parent && getFullTitle(node.parent);
@@ -51,28 +49,33 @@ export function setupJunitReportGeneration(runner, options = {}) {
     return 'unknown';
   };
 
-  runner.on('start', () => {
-    rootSuite.startTime = Date.now();
-  });
-
-  runner.on('suite', (suite) => {
-    suite.startTime = Date.now();
-  });
-
-  runner.on('test', (test) => {
-    test.startTime = Date.now();
-  });
-
-  runner.on('test end', (test) => {
-    test.endTime = Date.now();
-  });
-
-  runner.on('suite end', (suite) => {
-    suite.endTime = Date.now();
-  });
+  runner.on('start', () => setStartTime(stats));
+  runner.on('suite', setStartTime);
+  runner.on('hook', setStartTime);
+  runner.on('hook end', setEndTime);
+  runner.on('test', setStartTime);
+  runner.on('pass', (node) => results.push({ node }));
+  runner.on('pass', setEndTime);
+  runner.on('fail', (node, error) => results.push({ failed: true, error, node }));
+  runner.on('fail', setEndTime);
+  runner.on('suite end', () => setEndTime(stats));
 
   runner.on('end', () => {
-    rootSuite.endTime = Date.now();
+    // crawl the test graph to collect all defined tests
+    const allTests = findAllTests(runner.suite);
+
+    // filter out just the failures
+    const failures = results.filter(result => result.failed);
+
+    // any failure that isn't for a test is for a hook
+    const failedHooks = failures.filter(result => !allTests.includes(result.node));
+
+    // mocha doesn't emit 'pass' or 'fail' when it skips a test
+    // or a test is pending, so we find them ourselves
+    const skippedResults = allTests
+      .filter(node => node.pending || !results.find(result => result.node === node))
+      .map(node => ({ skipped: true, node }));
+
     const builder = xmlBuilder.create(
       'testsuites',
       { encoding: 'utf-8' },
@@ -80,47 +83,34 @@ export function setupJunitReportGeneration(runner, options = {}) {
       { skipNullAttributes: true }
     );
 
-    function addSuite(parent, suite) {
-      const attributes = {
-        name: suite.title,
-        timestamp: getTimestamp(suite),
-        time: getDuration(suite),
-        tests: countTests(suite),
-        failures: countTests(suite, isTestFailed),
-        skipped: countTests(suite, isTestPending),
-        file: suite.file
-      };
+    const testsuitesEl = builder.ele('testsuite', {
+      timestamp: new Date(stats.startTime).toISOString().slice(0, -5),
+      time: getDuration(stats),
+      tests: allTests.length + failedHooks.length,
+      failures: failures.length,
+      skipped: skippedResults.length,
+    });
 
-      const el = suite === rootSuite
-        ? parent.att(attributes)
-        : parent.ele('testsuite', attributes);
-
-      suite.suites.forEach(childSuite => {
-        addSuite(el, childSuite);
-      });
-
-      suite.tests.forEach(test => {
-        addTest(el, test);
+    function addTestcaseEl(node) {
+      return testsuitesEl.ele('testcase', {
+        name: getFullTitle(node),
+        classname: `${reportName}.${getPath(node).replace(/\./g, '·')}`,
+        time: getDuration(node),
       });
     }
 
-    function addTest(parent, test) {
-      const el = parent.ele('testcase', {
-        name: getFullTitle(test),
-        classname: `${reportName}.${getPath(test).replace(/\./g, '·')}`,
-        time: getDuration(test),
-      });
+    [...results, ...skippedResults].forEach(result => {
+      const el = addTestcaseEl(result.node);
 
-      if (isTestFailed(test)) {
-        el
-          .ele('failure')
-          .dat(inspect(test.err));
-      } else if (isTestPending(test)) {
+      if (result.failed) {
+        el.ele('failure').dat(inspect(result.error));
+        return;
+      }
+
+      if (result.skipped) {
         el.ele('skipped');
       }
-    }
-
-    addSuite(builder, rootSuite);
+    });
 
     const reportPath = resolve(rootDirectory, `target/junit/${reportName}.xml`);
     const reportXML = builder.end({

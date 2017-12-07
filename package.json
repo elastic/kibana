@@ -295,6 +295,7 @@
     "supertest-as-promised": "2.0.2",
     "tree-kill": "1.1.0",
     "webpack-dev-server": "2.9.1",
+    "xml2js": "0.4.19",
     "xmlbuilder": "9.0.4",
     "yeoman-generator": "1.1.1",
     "yo": "2.0.0"
