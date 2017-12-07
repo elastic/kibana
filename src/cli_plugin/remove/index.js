@@ -4,6 +4,7 @@ import Logger from '../lib/logger';
 import { parse } from './settings';
 import { getConfig } from '../../server/path';
 import logWarnings from '../lib/log_warnings';
+import { warnIfUsingPluginDirOption } from '../lib/warn_if_plugin_dir_option';
 
 function processCommand(command, options) {
   let settings;
@@ -16,6 +17,8 @@ function processCommand(command, options) {
   }
 
   const logger = new Logger(settings);
+
+  warnIfUsingPluginDirOption(options, fromRoot('plugins'), logger);
   logWarnings(settings, logger);
   remove(settings, logger);
 }
@@ -32,7 +35,7 @@ export default function pluginRemove(program) {
     )
     .option(
       '-d, --plugin-dir <path>',
-      'path to the directory where plugins are stored',
+      'path to the directory where plugins are stored (DEPRECATED, known to not work for all plugins)',
       fromRoot('plugins')
     )
     .description('remove a plugin',

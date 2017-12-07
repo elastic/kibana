@@ -49,6 +49,11 @@ export default function ({ getService, getPageObjects }) {
 
     describe('vector map', function indexPatternCreation() {
 
+      it('should display spy panel toggle button', async function () {
+        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+        expect(spyToggleExists).to.be(true);
+      });
+
       it('should show results after clicking play (join on states)', async function () {
         const expectedData = 'CN,2,592,IN,2,373,US,1,194,ID,489,BR,415';
         await PageObjects.visualize.openSpyPanel();

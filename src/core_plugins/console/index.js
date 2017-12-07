@@ -31,6 +31,14 @@ export default function (kibana) {
     id: 'console',
     require: [ 'elasticsearch' ],
 
+    isEnabled(config) {
+      // console must be disabled when tribe mode is configured
+      return (
+        config.get('console.enabled') &&
+        !config.get('elasticsearch.tribe.url')
+      );
+    },
+
     config: function (Joi) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
@@ -115,7 +123,7 @@ export default function (kibana) {
         }
       });
 
-      const testApp = kibana.uiExports.apps.hidden.byId['sense-tests'];
+      const testApp = server.getHiddenUiAppById('sense-tests');
       if (testApp) {
         server.route({
           path: '/app/sense-tests',

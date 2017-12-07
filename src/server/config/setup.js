@@ -1,4 +1,4 @@
-import Config from './config';
+import { Config } from './config';
 import { transformDeprecations } from './transform_deprecations';
 
 export default function (kbnServer) {

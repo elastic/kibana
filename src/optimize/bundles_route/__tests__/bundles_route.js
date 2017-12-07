@@ -219,7 +219,7 @@ describe('optimizer/bundle route', () => {
       const server = createServer();
 
       const response = await server.inject({
-        url: '/bundles/non_existant.js'
+        url: '/bundles/non_existent.js'
       });
 
       expect(response.statusCode).to.be(404);
