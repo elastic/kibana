@@ -100,10 +100,14 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.dashboard.clickNewDashboard();
           await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
           await PageObjects.dashboard.filterOnPieSlice('0');
+          await PageObjects.common.sleep('2000');
           const filters = await PageObjects.dashboard.getFilters();
           expect(filters.length).to.equal(1);
 
           await dashboardExpect.pieSliceCount(1);
+          await PageObjects.header.clickToastOK();
+          await PageObjects.header.clickToastOK();
+          await PageObjects.header.clickToastOK();
         }
       });
 
