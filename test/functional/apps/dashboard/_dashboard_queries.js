@@ -99,8 +99,8 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.dashboard.gotoDashboardLandingPage();
           await PageObjects.dashboard.clickNewDashboard();
           await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
-          await PageObjects.dashboard.waitForRenderCounter(1);
-          await PageObjects.common.sleep(2000);
+          await PageObjects.dashboard.waitForRenderCounter(2);
+       //   await PageObjects.common.sleep(2000);
           await PageObjects.dashboard.filterOnPieSlice('0');
           const filters = await PageObjects.dashboard.getFilters();
           expect(filters.length).to.equal(1);

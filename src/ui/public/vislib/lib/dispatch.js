@@ -95,6 +95,9 @@ export function VislibLibDispatchProvider(Private, config) {
      */
     addEvent(event, callback) {
       return function (selection) {
+        if (event === 'click') {
+          (new Notifier()).info('adding click event to element');
+        }
         selection.each(function () {
           const element = d3.select(this);
 
@@ -162,7 +165,7 @@ export function VislibLibDispatchProvider(Private, config) {
       const addEvent = this.addEvent;
 
       function click(d, i) {
-        (new Notifier()).info('Click event captured');
+        console.log('clickEventCaptured');
         self.emit('click', self.eventResponse(d, i));
       }
 
