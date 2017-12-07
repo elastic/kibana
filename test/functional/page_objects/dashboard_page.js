@@ -572,6 +572,25 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       throw new Error('no element');
     }
 
+    async waitForRenderCounter(count) {
+      await retry.try(async () => {
+        const sharedItems = await find.allByCssSelector('[data-shared-item]');
+        const renderCounters = await Promise.all(sharedItems.map(async sharedItem => {
+          return await sharedItem.getAttribute('render-counter');
+        }));
+        if (renderCounters.length !== sharedItems.length) {
+          throw new Error('Some shared items dont have render counter attribute');
+        }
+        let totalCount = 0;
+        renderCounters.forEach(counter => {
+          totalCount += counter;
+        });
+        if (totalCount < count) {
+          throw new Error('Still waiting on more visualizations to finish rendering');
+        }
+      });
+    }
+
     async getPanelSharedItemData() {
       log.debug('in getPanelSharedItemData');
       const sharedItems = await find.allByCssSelector('[data-shared-item]');
