@@ -75,7 +75,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardExpect.pieSliceCount(0);
     });
 
-    describe.skip('filters', async function () {
+    describe('filters', async function () {
       before(async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.clickNewDashboard();
@@ -88,6 +88,10 @@ export default function ({ getService, getPageObjects }) {
 
       it('are added when a pie chart slice is clicked', async function () {
         await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
+        // Click events not added until visualization is finished rendering.
+        // See https://github.com/elastic/kibana/issues/15480#issuecomment-350195245 for more info on why
+        // this is necessary.
+        await PageObjects.dashboard.waitForRenderCounter(2);
         await PageObjects.dashboard.filterOnPieSlice();
         const filters = await PageObjects.dashboard.getFilters();
         expect(filters.length).to.equal(1);

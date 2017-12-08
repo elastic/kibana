@@ -550,6 +550,12 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async filterOnPieSlice() {
       log.debug('Filtering on a pie slice');
       await retry.try(async () => {
+        // TODO: this is a quick way to get around https://github.com/elastic/kibana/issues/15480
+        // Once we implement the new data-render-complete flag (render-counter has it's own issues) we should
+        // be able to replace this with a wait for the pie chart to finish rendering.  Ideally the slice wouldn't
+        // be available to be clicked at all, and we wouldn't need either test hack, if we can fix
+        // https://github.com/elastic/kibana/issues/15480
+        PageObjects.common.sleep(1000);
         const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
         log.debug('Slices found:' + slices.length);
         return slices[0].click();
@@ -578,6 +584,25 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
 
       throw new Error('no element');
+    }
+
+    async waitForRenderCounter(count) {
+      await retry.try(async () => {
+        const sharedItems = await find.allByCssSelector('[data-shared-item]');
+        const renderCounters = await Promise.all(sharedItems.map(async sharedItem => {
+          return await sharedItem.getAttribute('render-counter');
+        }));
+        if (renderCounters.length !== sharedItems.length) {
+          throw new Error('Some shared items dont have render counter attribute');
+        }
+        let totalCount = 0;
+        renderCounters.forEach(counter => {
+          totalCount += counter;
+        });
+        if (totalCount < count) {
+          throw new Error('Still waiting on more visualizations to finish rendering');
+        }
+      });
     }
 
     async getPanelSharedItemData() {
