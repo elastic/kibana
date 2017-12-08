@@ -1,7 +1,5 @@
-import angular from 'angular';
-import 'ui/visualize';
+import { getVisualizeLoader } from 'ui/visualize/loader';
 
-import visualizationTemplate from './visualize_template.html';
 import { UtilsBrushEventProvider as utilsBrushEventProvider } from 'ui/utils/brush_event';
 import { FilterBarClickHandlerProvider as filterBarClickHandlerProvider } from 'ui/filter_bar/filter_bar_click_handler';
 import { EmbeddableFactory, Embeddable } from 'ui/embeddable';
@@ -10,12 +8,10 @@ import { PersistedState } from 'ui/persisted_state';
 import chrome from 'ui/chrome';
 
 export class VisualizeEmbeddableFactory extends EmbeddableFactory {
-  constructor($compile, $rootScope, visualizeLoader, timefilter, Notifier, Promise, Private, config) {
+  constructor(savedVisualizations, timefilter, Notifier, Promise, Private, config) {
     super();
     this._config = config;
-    this.$compile = $compile;
-    this.visualizeLoader = visualizeLoader;
-    this.$rootScope = $rootScope;
+    this.savedVisualizations = savedVisualizations;
     this.name = 'visualization';
     this.Promise = Promise;
     this.brushEvent = utilsBrushEventProvider(timefilter);
@@ -23,14 +19,15 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
   }
 
   getEditPath(panelId) {
-    return this.visualizeLoader.urlFor(panelId);
+    return this.savedVisualizations.urlFor(panelId);
   }
 
   render(domNode, panel, container) {
-    const visualizeScope = this.$rootScope.$new();
-    visualizeScope.editUrl = this.getEditPath(panel.id);
-    return this.visualizeLoader.get(panel.id)
-      .then(savedObject => {
+    const editUrl = this.getEditPath(panel.id);
+
+    const waitFor = [ getVisualizeLoader(), this.savedVisualizations.get(panel.id) ];
+    return this.Promise.all(waitFor)
+      .then(([loader, savedObject]) => {
         const isLabsEnabled = this._config.get('visualize:enableLabs');
 
         if (!isLabsEnabled && savedObject.vis.type.stage === 'lab') {
@@ -46,52 +43,57 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
           });
         }
 
+        let panelTitle;
         if (!container.getHidePanelTitles()) {
-          visualizeScope.sharedItemTitle = panel.title !== undefined ? panel.title : savedObject.title;
+          panelTitle = panel.title !== undefined ? panel.title : savedObject.title;
         }
-        visualizeScope.savedObj = savedObject;
-        visualizeScope.panel = panel;
 
         const parsedUiState = savedObject.uiStateJSON ? JSON.parse(savedObject.uiStateJSON) : {};
-        visualizeScope.uiState = new PersistedState({
+        const uiState = new PersistedState({
           ...parsedUiState,
           ...panel.embeddableConfig,
         });
         const uiStateChangeHandler = () => {
-          visualizeScope.panel = container.updatePanel(
-            visualizeScope.panel.panelIndex,
-            { embeddableConfig: visualizeScope.uiState.toJSON() }
+          panel = container.updatePanel(
+            panel.panelIndex,
+            { embeddableConfig: uiState.toJSON() }
           );
         };
-        visualizeScope.uiState.on('change', uiStateChangeHandler);
+        uiState.on('change', uiStateChangeHandler);
 
-        visualizeScope.savedObj.vis.setUiState(visualizeScope.uiState);
+        savedObject.vis.setUiState(uiState);
 
-        visualizeScope.savedObj.vis.listeners.click = this.filterBarClickHandler(container.getAppState());
-        visualizeScope.savedObj.vis.listeners.brush = this.brushEvent(container.getAppState());
+        savedObject.vis.listeners.click = this.filterBarClickHandler(container.getAppState());
+        savedObject.vis.listeners.brush = this.brushEvent(container.getAppState());
 
-        // The chrome is permanently hidden in "embed mode" in which case we don't want to show the spy pane, since
-        // we deem that situation to be more public facing and want to hide more detailed information.
-        visualizeScope.getShouldShowSpyPane = () => !chrome.getIsChromePermanentlyHidden();
+        container.registerPanelIndexPattern(panel.panelIndex, savedObject.vis.indexPattern);
 
-        container.registerPanelIndexPattern(panel.panelIndex, visualizeScope.savedObj.vis.indexPattern);
-
-        const visualizationInstance = this.$compile(visualizationTemplate)(visualizeScope);
-        const rootNode = angular.element(domNode);
-        rootNode.append(visualizationInstance);
+        const handler = loader.embedVisualizationWithSavedObject(domNode, savedObject, {
+          uiState: uiState,
+          // Append visualization to container instead of replacing its content
+          append: true,
+          cssClass: `panel-content ${savedObject.vis.type.name}`,
+          // The chrome is permanently hidden in "embed mode" in which case we don't want to show the spy pane, since
+          // we deem that situation to be more public facing and want to hide more detailed information.
+          showSpyPanel: !chrome.getIsChromePermanentlyHidden(),
+          dataAttrs: {
+            'shared-item': '',
+            title: panelTitle,
+            description: savedObject.description,
+          }
+        });
 
         this.addDestroyEmeddable(panel.panelIndex, () => {
-          visualizeScope.uiState.off('change', uiStateChangeHandler);
-          visualizationInstance.remove();
-          visualizeScope.savedObj.destroy();
-          visualizeScope.$destroy();
+          uiState.off('change', uiStateChangeHandler);
+          handler.getElement().remove();
+          savedObject.destroy();
+          handler.destroy();
         });
 
         return new Embeddable({
           title: savedObject.title,
-          editUrl: visualizeScope.editUrl
+          editUrl: editUrl
         });
       });
   }
 }
-

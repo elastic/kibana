@@ -220,7 +220,7 @@
     "@elastic/eslint-plugin-kibana-custom": "^1.1.0",
     "angular-mocks": "^1.4.7",
     "babel-eslint": "^8.0.2",
-    "backport": "^1.1.1",
+    "backport": "^2.2.0",
     "chai": "^3.5.0",
     "chalk": "^2.0.1",
     "chance": "^1.0.6",
