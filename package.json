@@ -1,6 +1,6 @@
 {
   "name": "backport",
-  "version": "2.1.1",
+  "version": "2.2.0",
   "main": "./src/cli/index.js",
   "bin": {
     "backport": "./src/cli/index.js"
@@ -15,14 +15,19 @@
     "precommit": "lint-staged"
   },
   "lint-staged": {
-    "*.js": ["prettier --write", "git add"]
+    "*.js": [
+      "prettier --write",
+      "git add"
+    ]
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sqren/backport.git"
   },
   "jest": {
-    "setupFiles": ["./test/setup.js"]
+    "setupFiles": [
+      "./test/setup.js"
+    ]
   },
   "dependencies": {
     "axios": "^0.17.0",
