@@ -2,8 +2,8 @@ import Jimp from 'jimp';
 
 export async function comparePngs(actualPath, expectedPath, diffPath, log) {
   log.debug(`comparePngs: ${actualPath} vs ${expectedPath}`);
-  const actual = await Jimp.read(actualPath);
-  const expected = await Jimp.read(expectedPath);
+  const actual = (await Jimp.read(actualPath)).clone();
+  const expected = (await Jimp.read(expectedPath)).clone();
 
   if (actual.bitmap.width !== expected.bitmap.width || actual.bitmap.height !== expected.bitmap.height) {
     console.log('expected height ' + expected.bitmap.height + ' and width ' + expected.bitmap.width);
@@ -11,10 +11,12 @@ export async function comparePngs(actualPath, expectedPath, diffPath, log) {
 
     const width = Math.min(actual.bitmap.width, expected.bitmap.width);
     const height = Math.min(actual.bitmap.height, expected.bitmap.height);
-    actual.resize(width, height);
-    expected.resize(width, height);
-    console.log('picking height ' + height + ' and width ' + width);
+    actual.cover(width, height, Jimp.HORIZONTAL_ALIGN_LEFT | Jimp.VERTICAL_ALIGN_TOP);
+    expected.cover(width, height, Jimp.HORIZONTAL_ALIGN_LEFT | Jimp.VERTICAL_ALIGN_TOP);
   }
+
+  actual.quality(60);
+  expected.quality(60);
 
   log.debug(`calculating diff pixels...`);
   // Note that this threshold value only affects color comparison from pixel to pixel. It won't have
@@ -28,8 +30,8 @@ export async function comparePngs(actualPath, expectedPath, diffPath, log) {
     image.write(diffPath);
 
     // For debugging purposes it'll help to see the resized images and how they compare.
-    actual.write(actualPath);
-    expected.write(expectedPath);
+    actual.write(actualPath.substring(0, actualPath.length - 4) + '-resized.png');
+    expected.write(expectedPath.substring(0, expectedPath.length - 4) + '-resized.png');
   }
   return percent;
 }
