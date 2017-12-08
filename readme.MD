@@ -84,7 +84,7 @@ Add `.backportrc.json` to the root of your project with the following structure:
     { "name": "6.x", "checked": true },
     { "name": "6.1", "checked": true },
     "6.0"
-  ]
+  ],
 
   // Only allow picking own commits to backport
   "own": true,
