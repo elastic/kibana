@@ -69,6 +69,8 @@ describe('RegionMapsVisualizationTests', function () {
 
   let domNode;
   let expectCanvas;
+  let diffCanvas;
+  let actualCanvas;
   let RegionMapsVisualization;
   let Vis;
   let indexPattern;
@@ -175,6 +177,7 @@ describe('RegionMapsVisualizationTests', function () {
         data: true,
         uiState: false
       });
+
       const mismatchedPixels = await compareImage(initialPng);
       expect(mismatchedPixels < 16).to.equal(true);
 
@@ -182,76 +185,103 @@ describe('RegionMapsVisualizationTests', function () {
   });
 
 
-  async function compareImage(expectedImage) {
+  async function compareImage(expectedImageSource) {
 
     return new Promise((resolve) => {
 
 
       window.setTimeout(() => {
+
         const elementList = domNode.querySelectorAll('canvas');
         expect(elementList.length).to.equal(1);
-        const actualCanvas = elementList[0];
+        const firstCanvasOnMap = elementList[0];
+
+        const firstContextOnMap = firstCanvasOnMap.getContext('2d');
+        const actualImageDataFromFirstContextOnMap = firstContextOnMap.getImageData(0, 0, firstCanvasOnMap.width, firstCanvasOnMap.height);
         const actualContext = actualCanvas.getContext('2d');
-        const actualImageData = actualContext.getImageData(0, 0, actualCanvas.width, actualCanvas.height);
+        actualCanvas.width = firstCanvasOnMap.width;
+        actualCanvas.height = firstCanvasOnMap.height;
+        actualContext.putImageData(actualImageDataFromFirstContextOnMap, 0, 0);
 
         // convert expect PNG into pixel data by drawing in new canvas element
-        expectCanvas.id = 'expectCursor';
-        expectCanvas.width = actualCanvas.width;
-        expectCanvas.height = actualCanvas.height;
+        expectCanvas.width = firstCanvasOnMap.width;
+        expectCanvas.height = firstCanvasOnMap.height;
 
-        // const expectCtx = expectCanvas.getContext('2d');
-        // expectCtx.drawImage(actualCanvas, 0, 0, actualCanvas.width, actualCanvas.height);
-        const imageEl = new Image();
-        imageEl.onload = () => {
+        const expectedImage = new Image();
+        expectedImage.onload = () => {
+
           const expectCtx = expectCanvas.getContext('2d');
-          expectCtx.drawImage(imageEl, 0, 0, actualCanvas.width, actualCanvas.height);  // draw reference image to size of generated image
-          const expectImageData = expectCtx.getImageData(0, 0, actualCanvas.width, actualCanvas.height);
+          expectCtx.drawImage(expectedImage, 0, 0, firstCanvasOnMap.width, firstCanvasOnMap.height);  // draw reference image to size of generated image
+
+          const expectImageData = expectCtx.getImageData(0, 0, firstCanvasOnMap.width, firstCanvasOnMap.height);
+
           // compare live map vs expected pixel data
-          const diffImage = expectCtx.createImageData(actualCanvas.width, actualCanvas.height);
+          const diffImage = expectCtx.createImageData(firstCanvasOnMap.width, firstCanvasOnMap.height);
           const mismatchedPixels = pixelmatch(
-            actualImageData.data,
+            actualImageDataFromFirstContextOnMap.data,
             expectImageData.data,
             diffImage.data,
-            actualCanvas.width,
-            actualCanvas.height,
+            firstCanvasOnMap.width,
+            firstCanvasOnMap.height,
             { threshold: 0.1 });
 
-            // Display difference image for refernce
-          expectCtx.putImageData(diffImage, 0, 0);
+
+          const diffContext = diffCanvas.getContext('2d');
+          diffCanvas.width = firstCanvasOnMap.width;
+          diffCanvas.height = firstCanvasOnMap.height;
+          diffContext.putImageData(diffImage, 0, 0);
+
           resolve(mismatchedPixels);
         };
-        imageEl.src = expectedImage;
+        expectedImage.src = expectedImageSource;
       });
     });
   }
 
 
   function setupDOM(width, height) {
-    domNode = createDiv(width, height);
+    domNode = document.createElement('div');
+    domNode.style.top = '0';
+    domNode.style.left = '0';
+    domNode.style.width = width;
+    domNode.style.height = height;
+    domNode.style.position = 'fixed';
+    domNode.style.border = '1px solid blue';
+    domNode.style['pointer-events'] = 'none';
     document.body.appendChild(domNode);
 
     expectCanvas = document.createElement('canvas');
+    expectCanvas.style.position = 'fixed';
+    expectCanvas.style.right = 0;
+    expectCanvas.style.top = 0;
+    expectCanvas.style.border = '1px solid green';
     document.body.appendChild(expectCanvas);
+
+    diffCanvas = document.createElement('canvas');
+    diffCanvas.style.position = 'fixed';
+    diffCanvas.style.right = 0;
+    diffCanvas.style.bottom = 0;
+    diffCanvas.style.border = '1px solid red';
+    document.body.appendChild(diffCanvas);
+
+    actualCanvas = document.createElement('canvas');
+    actualCanvas.style.position = 'fixed';
+    actualCanvas.style.left = 0;
+    actualCanvas.style.bottom = 0;
+    actualCanvas.style.border = '1px solid yellow';
+    document.body.appendChild(actualCanvas);
+
+
+
   }
 
   function teardownDOM() {
     domNode.innerHTML = '';
     document.body.removeChild(domNode);
     document.body.removeChild(expectCanvas);
+    document.body.removeChild(diffCanvas);
+    document.body.removeChild(actualCanvas);
   }
 
-}
-);
+});
 
-
-function createDiv(width, height) {
-  const div = document.createElement('div');
-  div.style.top = '0';
-  div.style.left = '0';
-  div.style.width = width;
-  div.style.height = height;
-  div.style.position = 'fixed';
-  div.style.border = '1px solid red';
-  div.style['pointer-events'] = 'none';
-  return div;
-}
