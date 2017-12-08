@@ -58,7 +58,6 @@ export class VisualizeListingTable extends Component {
             this.setState({
               isFetchingItems: false,
               selectedRowIds: [],
-              filter,
             });
             this.items = items;
             this.calculateItemsOnPage();
