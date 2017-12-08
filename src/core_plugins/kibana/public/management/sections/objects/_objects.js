@@ -34,7 +34,7 @@ uiRoutes
   });
 
 uiModules.get('apps/management')
-  .directive('kbnManagementObjects', function ($route, kbnIndex, Notifier, Private, kbnUrl, Promise, confirmModal, chrome) {
+  .directive('kbnManagementObjects', function ($route, kbnIndex, Notifier, Private, kbnUrl, Promise, confirmModal) {
     const savedObjectsClient = Private(SavedObjectsClientProvider);
 
     return {
@@ -121,11 +121,9 @@ uiModules.get('apps/management')
         // TODO: Migrate all scope methods to the controller.
         $scope.bulkDelete = function () {
           function doBulkDelete() {
-            const deleteIds = pluck($scope.selectedItems, 'id');
-            $scope.currentTab.service.delete(deleteIds)
+            $scope.currentTab.service.delete(pluck($scope.selectedItems, 'id'))
               .then(refreshData)
               .then(function () {
-                chrome.untrackNavLinksForDeletedSavedObjects(deleteIds);
                 $scope.selectedItems.length = 0;
               })
               .catch(error => notify.error(error));
