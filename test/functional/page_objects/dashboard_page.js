@@ -500,6 +500,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       for (const vizName of visualizations) {
         await this.addVisualization(vizName);
       }
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async setTimepickerInDataRange() {
@@ -547,13 +548,10 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async filterOnPieSlice() {
-      log.debug('Filtering on a pie slice');
-      await retry.try(async () => {
-        const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
-        log.debug('Slices found:' + slices.length);
-        return slices[0].click();
-      });
+    async filterOnPieSlice(sliceDataLabel) {
+      log.debug(`Filtering on pie slice ${sliceDataLabel}`);
+      await testSubjects.click(`pieChartSlice-${sliceDataLabel}`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async toggleExpandPanel(panel) {
@@ -578,6 +576,25 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
 
       throw new Error('no element');
+    }
+
+    async waitForRenderCounter(count) {
+      await retry.try(async () => {
+        const sharedItems = await find.allByCssSelector('[data-shared-item]');
+        const renderCounters = await Promise.all(sharedItems.map(async sharedItem => {
+          return await sharedItem.getAttribute('render-counter');
+        }));
+        if (renderCounters.length !== sharedItems.length) {
+          throw new Error('Some shared items dont have render counter attribute');
+        }
+        let totalCount = 0;
+        renderCounters.forEach(counter => {
+          totalCount += counter;
+        });
+        if (totalCount < count) {
+          throw new Error('Still waiting on more visualizations to finish rendering');
+        }
+      });
     }
 
     async getPanelSharedItemData() {

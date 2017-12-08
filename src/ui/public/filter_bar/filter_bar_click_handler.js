@@ -3,12 +3,14 @@ import { dedupFilters } from './lib/dedup_filters';
 import { uniqFilters } from './lib/uniq_filters';
 import { findByParam } from 'ui/utils/find_by_param';
 import { AddFiltersToKueryProvider } from './lib/add_filters_to_kuery';
+import { Notifier } from 'ui/notify/notifier';
 
 export function FilterBarClickHandlerProvider(Notifier, Private) {
   const addFiltersToKuery = Private(AddFiltersToKueryProvider);
 
   return function ($state) {
     return function (event, simulate) {
+      (new Notifier()).info('FilterBarClickHandlerProvider following up on click event');
       if (!$state) return;
 
       const notify = new Notifier({
@@ -28,6 +30,7 @@ export function FilterBarClickHandlerProvider(Notifier, Private) {
       }
 
       if (aggConfigResult) {
+        (new Notifier()).info('aggConfigResult is something');
         const isLegendLabel = !!event.point.values;
         let aggBuckets = _.filter(aggConfigResult.getPath(), { type: 'bucket' });
 

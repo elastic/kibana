@@ -176,6 +176,9 @@ export function VislibVisualizationsPieChartProvider(Private) {
           if (d.depth > maxDepth) maxDepth = d.depth;
           return 'slice';
         })
+        .attr('data-test-subj', d => {
+          return `pieChartSlice-${d.name}`;
+        })
         .call(self._addIdentifier, 'name')
         .style('fill', function (d) {
           if (d.depth === 0) {

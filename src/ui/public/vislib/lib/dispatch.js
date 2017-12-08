@@ -2,6 +2,7 @@ import d3 from 'd3';
 import _ from 'lodash';
 import $ from 'jquery';
 import { SimpleEmitter } from 'ui/utils/simple_emitter';
+import { Notifier } from 'ui/notify/notifier';
 
 export function VislibLibDispatchProvider(Private, config) {
 
@@ -94,6 +95,9 @@ export function VislibLibDispatchProvider(Private, config) {
      */
     addEvent(event, callback) {
       return function (selection) {
+        if (event === 'click') {
+          (new Notifier()).info('adding click event to element');
+        }
         selection.each(function () {
           const element = d3.select(this);
 
@@ -161,6 +165,7 @@ export function VislibLibDispatchProvider(Private, config) {
       const addEvent = this.addEvent;
 
       function click(d, i) {
+        console.log('clickEventCaptured');
         self.emit('click', self.eventResponse(d, i));
       }
 
