@@ -1,5 +1,10 @@
 export const appendWildcard = (keyboardEvent, value) => {
-  const { key: keyPressed, metaKey } = keyboardEvent;
+  const {
+    key: keyPressed,
+    metaKey,
+    ctrlKey,
+    altKey,
+  } = keyboardEvent;
 
   // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode
   // is not recommended so we need to rely on `key` but browser support
@@ -11,7 +16,7 @@ export const appendWildcard = (keyboardEvent, value) => {
 
   // If the user is holding down ctrl/cmd, they are performing some shortcut
   // and do not interpret literally
-  if (metaKey) {
+  if (metaKey || ctrlKey || altKey) {
     return;
   }
 
