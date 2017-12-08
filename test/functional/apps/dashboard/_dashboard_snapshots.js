@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickFullScreenMode();
       await PageObjects.dashboard.toggleExpandPanel();
 
-      await PageObjects.dashboard.waitForRenderCounter(2);
+      await PageObjects.dashboard.waitForRenderCounter(6);
       const percentSimilar = await screenshot.compareAgainstBaseline('area_chart');
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
