@@ -1,6 +1,6 @@
 import * as vega from 'vega';
 
-export function createVegaLoader(es, timefilter, dashboardContext, disableExternalUrls) {
+export function createVegaLoader(es, timefilter, dashboardContext, enableExternalUrls) {
 
   const SIMPLE_QUERY = '%context_query%';
   const TIMEFILTER = '%timefilter%';
@@ -234,7 +234,7 @@ export function createVegaLoader(es, timefilter, dashboardContext, disableExtern
           return queryEsData(uri);
       }
       throw new Error('Unexpected url object');
-    } else if (disableExternalUrls) {
+    } else if (!enableExternalUrls) {
       throw new Error('External URLs have been disabled in kibana.yml');
     }
     return defaultLoad(uri, opts);

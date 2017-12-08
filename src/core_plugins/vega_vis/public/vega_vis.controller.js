@@ -5,7 +5,7 @@ import { VegaView } from './vega_view';
 import hjson from 'hjson';
 import compactStringify from 'json-stringify-pretty-compact';
 
-export function createVegaVisController(Private, /*$scope,*/ timefilter, es, serviceSettings) {
+export function createVegaVisController(Private, /*$scope,*/ timefilter, es, serviceSettings, vegaConfig) {
   const ResizeChecker = Private(ResizeCheckerProvider);
   const dashboardContext = Private(dashboardContextProvider);
 
@@ -63,7 +63,7 @@ export function createVegaVisController(Private, /*$scope,*/ timefilter, es, ser
           if (this.vegaView) {
             await this.vegaView.destroy();
           }
-          this.vegaView = new VegaView($el, spec, timefilter, dashboardContext, es, serviceSettings,
+          this.vegaView = new VegaView(vegaConfig, $el, spec, timefilter, dashboardContext, es, serviceSettings,
             this.onError.bind(this), this.onWarn.bind(this));
           await this.vegaView.init();
         } catch (error) {

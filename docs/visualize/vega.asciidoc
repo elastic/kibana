@@ -259,6 +259,9 @@ raw data response to https://gist.github.com/[gist.github.com], possibly
 with a `.json` extension, use the `[raw]` button, and use that url
 directly in your graph.
 
+To restrict Vega from using non-ES data sources, add `vega.enableExternalUrls: false`
+to your kibana.yml file.
+
 [[vega-notes]]
 Notes
 -----

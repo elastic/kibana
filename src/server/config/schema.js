@@ -205,4 +205,8 @@ export default () => Joi.object({
     defaultLocale: Joi.string().default('en'),
   }).default(),
 
+  vega: Joi.object({
+    enableExternalUrls: Joi.boolean().default(true)
+  }).default(),
+
 }).default();
