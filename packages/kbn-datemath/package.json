@@ -27,6 +27,6 @@
     "sinon": "~1.17.3"
   },
   "dependencies": {
-    "moment": "~2.13.0"
+    "moment": "^2.13.0"
   }
 }
