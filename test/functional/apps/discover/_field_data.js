@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }) {
           });
       });
 
-      it('doc view should show oldest time first', function () {
+      it.skip('doc view should show oldest time first', function () {
         // Note: Could just check the timestamp, but might as well check that the whole doc is as expected.
         const ExpectedDoc =
           'September 22nd 2015, 23:50:13.253\ntype:apache index:logstash-2015.09.22 @timestamp:September 22nd 2015, 23:50:13.253'

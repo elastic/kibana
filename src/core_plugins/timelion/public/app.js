@@ -6,6 +6,7 @@ import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_regis
 import { notify } from 'ui/notify';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 
+require('ui/autoload/all');
 require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fixed_element');
 require('plugins/timelion/directives/fullscreen/fullscreen');
