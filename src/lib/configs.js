@@ -3,10 +3,12 @@ const fs = require('fs');
 const isEmpty = require('lodash.isempty');
 const get = require('lodash.get');
 const stripJsonComments = require('strip-json-comments');
+const Joi = require('joi');
 const constants = require('./constants');
 const env = require('./env');
 const rpc = require('./rpc');
 const prompts = require('./prompts');
+const schemas = require('./schemas');
 
 function maybeCreateGlobalConfigAndFolder() {
   const REPOS_PATH = env.getReposPath();
@@ -43,37 +45,25 @@ class InvalidConfigError extends Error {
   }
 }
 
-function validateGlobalConfig(config) {
-  const { username, accessToken } = config;
-  const GLOBAL_CONFIG_PATH = env.getGlobalConfigPath();
+function validateGlobalConfig(config, filename) {
+  const { error } = Joi.validate(
+    config,
+    schemas.globalConfig,
+    schemas.joiOptions
+  );
 
-  if (!username && !accessToken) {
+  if (error) {
     throw new InvalidConfigError(
-      `Please add your Github username, and Github access token to the config: ${
-        GLOBAL_CONFIG_PATH
-      }`
+      `The global config file (${filename}) is not valid:\n${schemas.formatError(
+        error
+      )}`
     );
   }
 
-  if (!username) {
+  if (!hasRestrictedPermissions(filename)) {
     throw new InvalidConfigError(
-      `Please add your Github username to the config: ${GLOBAL_CONFIG_PATH}`
-    );
-  }
-
-  if (!accessToken) {
-    throw new InvalidConfigError(
-      `Please add your Github access token to the config: ${GLOBAL_CONFIG_PATH}`
-    );
-  }
-
-  const isConfigValid = hasRestrictedPermissions(GLOBAL_CONFIG_PATH);
-  if (!isConfigValid) {
-    throw new InvalidConfigError(
-      `Config file at ${
-        GLOBAL_CONFIG_PATH
-      } needs to have more restrictive permissions. Run the following to limit access to the file to just your user account:
-        chmod 600 "${GLOBAL_CONFIG_PATH}"\n`
+      `The global config file (${filename}) needs to have more restrictive permissions. Run the following to limit access to the file to just your user account:
+      chmod 600 "${filename}"\n`
     );
   }
 
@@ -81,10 +71,17 @@ function validateGlobalConfig(config) {
 }
 
 function validateProjectConfig(config, filepath) {
-  const { upstream } = config;
-  if (!upstream) {
+  const { error } = Joi.validate(
+    config,
+    schemas.projectConfig,
+    schemas.joiOptions
+  );
+
+  if (error) {
     throw new InvalidConfigError(
-      `Your config (${filepath}) must contain "upstream" property`
+      `The project config file (${filepath}) is not valid:\n${schemas.formatError(
+        error
+      )}`
     );
   }
   return config;
@@ -121,7 +118,7 @@ function getGlobalConfig() {
   const GLOBAL_CONFIG_PATH = env.getGlobalConfigPath();
   return maybeCreateGlobalConfigAndFolder()
     .then(() => readConfigFile(GLOBAL_CONFIG_PATH))
-    .then(validateGlobalConfig);
+    .then(config => validateGlobalConfig(config, GLOBAL_CONFIG_PATH));
 }
 
 function getProjectConfig() {
@@ -189,5 +186,7 @@ module.exports = {
   maybeCreateGlobalConfig,
   getCombinedConfig,
   _getCombinedConfig,
-  mergeConfigs
+  mergeConfigs,
+  validateProjectConfig,
+  validateGlobalConfig
 };

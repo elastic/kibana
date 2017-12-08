@@ -63,9 +63,7 @@ function isIndexDirty(owner, repoName) {
 
 function createAndCheckoutBranch(owner, repoName, baseBranch, featureBranch) {
   return rpc.exec(
-    `git fetch origin ${baseBranch} && git branch ${featureBranch} origin/${
-      baseBranch
-    } --force && git checkout ${featureBranch} `,
+    `git fetch origin ${baseBranch} && git branch ${featureBranch} origin/${baseBranch} --force && git checkout ${featureBranch} `,
     {
       cwd: env.getRepoPath(owner, repoName)
     }

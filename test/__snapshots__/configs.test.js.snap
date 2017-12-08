@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`config.js validateGlobalConfig should fail if config is invalid 1`] = `
+"The global config file (/path/to/.backport/config.json) is not valid:
+ - \\"username\\" must be a string 
+ - \\"accessToken\\" is required "
+`;
+
+exports[`config.js validateProjectConfig should fail if config is invalid 1`] = `
+"The project config file (/path/to/.backportrc.json) is not valid:
+ - \\"upstream\\" must be a string "
+`;

@@ -43,8 +43,8 @@ describe('config.js', () => {
         expect.assertions(1);
 
         return configs.getProjectConfig().catch(e => {
-          expect(e.message).toEqual(
-            'Your config (/path/to/config) must contain "upstream" property'
+          expect(e.message).toContain(
+            'The project config file (/path/to/config) is not valid'
           );
         });
       });
@@ -65,13 +65,14 @@ describe('config.js', () => {
       jest.spyOn(rpc, 'mkdirp').mockReturnValue(Promise.resolve());
       jest.spyOn(rpc, 'writeFile').mockReturnValue(Promise.resolve());
       jest.spyOn(rpc, 'statSync').mockReturnValue({ mode: 33152 });
-      jest
-        .spyOn(rpc, 'readFile')
-        .mockReturnValue(
-          Promise.resolve(
-            JSON.stringify({ accessToken: 'myAccessToken', username: 'sqren' })
-          )
-        );
+      jest.spyOn(rpc, 'readFile').mockReturnValue(
+        Promise.resolve(
+          JSON.stringify({
+            accessToken: 'myAccessToken',
+            username: 'sqren'
+          })
+        )
+      );
       return configs.getGlobalConfig().then(res => {
         this.res = res;
       });
@@ -292,6 +293,46 @@ describe('config.js', () => {
           branches: ['6.x', '6.1']
         });
       });
+    });
+  });
+
+  describe('validateProjectConfig', () => {
+    it('should fail if config is invalid', () => {
+      expect(() =>
+        configs.validateProjectConfig(
+          { upstream: 1337 },
+          '/path/to/.backportrc.json'
+        )
+      ).toThrowErrorMatchingSnapshot();
+    });
+
+    it('should return valid config', () => {
+      const config = { upstream: 'elastic/kibana', branches: ['6.1', '6.x'] };
+      expect(
+        configs.validateProjectConfig(config, '/path/to/.backportrc.json')
+      ).toBe(config);
+    });
+  });
+
+  describe('validateGlobalConfig', () => {
+    beforeEach(() => {
+      jest.spyOn(rpc, 'statSync').mockReturnValue({ mode: 33152 });
+    });
+
+    it('should fail if config is invalid', () => {
+      expect(() =>
+        configs.validateGlobalConfig(
+          { username: 1337 },
+          '/path/to/.backport/config.json'
+        )
+      ).toThrowErrorMatchingSnapshot();
+    });
+
+    it('should return valid config', () => {
+      const config = { username: 'sqren', accessToken: 'myAccessToken' };
+      expect(
+        configs.validateGlobalConfig(config, '/path/to/.backport/config.json')
+      ).toBe(config);
     });
   });
 });
