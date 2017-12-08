@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('Does not warn when you save an existing dashboard with the title it already has, and that title is a duplicate',
       async function () {
-        await PageObjects.dashboard.clickDashboardByLinkText(dashboardName);
+        await PageObjects.dashboard.selectDashboard(dashboardName);
         await PageObjects.header.isGlobalLoadingIndicatorHidden();
         await PageObjects.dashboard.clickEdit();
         await PageObjects.dashboard.saveDashboard(dashboardName);
