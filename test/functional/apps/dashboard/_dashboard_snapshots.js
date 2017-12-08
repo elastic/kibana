@@ -9,7 +9,7 @@ export default function ({ getService, getPageObjects }) {
   describe('dashboard snapshots', function describeIndexTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
-      await remote.setWindowSize(1200, 900);
+      await remote.setWindowSize(1000, 500);
     });
 
     after(async function () {
