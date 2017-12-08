@@ -204,7 +204,8 @@ class TimeseriesChart extends Component {
       showGrid: this.props.showGrid,
       show: this.props.show,
       tickFormatter: this.props.tickFormatter,
-      yaxes: this.props.yaxes
+      yaxes: this.props.yaxes,
+      xAxisFormatter: this.props.xAxisFormatter
     };
 
     const annotations = this.state.annotations.map(this.renderAnnotations);

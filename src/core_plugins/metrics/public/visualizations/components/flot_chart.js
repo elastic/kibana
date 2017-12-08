@@ -74,6 +74,7 @@ class FlotChart extends Component {
       const { series } = newProps;
       const options = this.plot.getOptions();
       _.set(options, 'series.bars.barWidth', calculateBarWidth(series));
+      _.set(options, 'xaxes[0].ticks', this.calcualteTicks());
       this.plot.setData(this.calculateData(series, newProps.show));
       this.plot.setupGrid();
       this.plot.draw();
@@ -145,7 +146,8 @@ class FlotChart extends Component {
         color: lineColor,
         timezone: 'browser',
         mode: 'time',
-        font: { color: textColor }
+        font: { color: textColor },
+        ticks: this.calcualteTicks()
       },
       series: {
         shadowSize: 0
@@ -170,8 +172,21 @@ class FlotChart extends Component {
     if (props.onBrush) {
       _.set(opts, 'selection', { mode: 'x', color: textColor });
     }
+
+    if (props.xAxisFormatter) {
+      _.set(opts, 'xaxis.tickFormatter', props.xAxisFormatter);
+    }
+
     _.set(opts, 'series.bars.barWidth', calculateBarWidth(props.series));
     return _.assign(opts, props.options);
+  }
+
+  calcualteTicks() {
+    const sample = this.props.xAxisFormatter(new Date());
+    const tickLetterWidth = 7;
+    const tickPadding = 45;
+    const ticks = Math.floor(this.target.clientWidth / ((sample.length * tickLetterWidth) + tickPadding));
+    return ticks;
   }
 
   handleResize(width, height) {
@@ -179,6 +194,8 @@ class FlotChart extends Component {
 
     if (this.size.height > 0 && this.size.width > 0) {
       if (!this.plot) return;
+      const options = this.plot.getOptions();
+      _.set(options, 'xaxes[0].ticks', this.calcualteTicks());
       this.plot.resize();
       this.plot.setupGrid();
       this.plot.draw();
@@ -222,7 +239,7 @@ class FlotChart extends Component {
         this.handlePlotover = (e, pos, item) => eventBus.trigger('thorPlotover', [pos, item, this.plot]);
         this.handlePlotleave = () => eventBus.trigger('thorPlotleave');
         this.handleThorPlotleave = e => {
-          this.plot.clearCrosshair();
+          if (this.plot) this.plot.clearCrosshair();
           if (this.props.plothover) this.props.plothover(e);
         };
 
