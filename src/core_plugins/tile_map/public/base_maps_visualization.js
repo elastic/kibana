@@ -24,6 +24,7 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
     destroy() {
       if (this._kibanaMap) {
         this._kibanaMap.destroy();
+        this._kibanaMap = null;
       }
     }
 
@@ -43,6 +44,11 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
      * @return {Promise}
      */
     async render(esResponse, status) {
+
+      if (!this._kibanaMap) {
+        //the visualization has been destroyed;
+        return;
+      }
 
       await this._mapIsLoaded;
 

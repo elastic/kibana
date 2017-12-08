@@ -9,6 +9,7 @@ import worldJson from './world.json';
 import pixelmatch from 'pixelmatch';
 import initialPng from './initial.png';
 import toiso3Png from './toiso3.png';
+import afterresizePng from './afterresize.png';
 
 const manifestUrl = 'https://staging-dot-catalogue-dot-elastic-layer.appspot.com/v1/manifest';
 const tmsManifestUrl = `"https://tiles-maps-stage.elastic.co/v2/manifest`;
@@ -74,7 +75,6 @@ describe('RegionMapsVisualizationTests', function () {
   let actualCanvas;
   let RegionMapsVisualization;
   let Vis;
-  let regionMapsVisualization;
   let indexPattern;
   let vis;
 
@@ -131,30 +131,12 @@ describe('RegionMapsVisualizationTests', function () {
       };
     });
 
-    vis = new Vis(indexPattern, {
-      type: 'region_map'
-    });
 
-    vis.params.selectedJoinField = { 'name': 'iso2', 'description': 'Two letter abbreviation' };
-    vis.params.selectedLayer = {
-      'attribution': '<p><a href="http://www.naturalearthdata.com/about/terms-of-use">Made with NaturalEarth</a> | <a href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a></p>&#10;',
-      'name': 'World Countries',
-      'format': 'geojson',
-      'url': 'https://staging-dot-elastic-layer.appspot.com/blob/5715999101812736?elastic_tile_service_tos=agree&my_app_version=7.0.0-alpha1',
-      'fields': [{ 'name': 'iso2', 'description': 'Two letter abbreviation' }, {
-        'name': 'iso3',
-        'description': 'Three letter abbreviation'
-      }, { 'name': 'name', 'description': 'Country name' }],
-      'created_at': '2017-07-31T16:00:19.996450',
-      'id': 5715999101812736,
-      'layerId': 'elastic_maps_service.World Countries'
-    };
 
   }));
 
 
   afterEach(function () {
-    regionMapsVisualization.destroy();
     ChoroplethLayer.prototype._makeJsonAjaxCall = _makeJsonAjaxCallOld;
   });
 
@@ -163,6 +145,24 @@ describe('RegionMapsVisualizationTests', function () {
 
     beforeEach(async function () {
       setupDOM('512px', '512px');
+      vis = new Vis(indexPattern, {
+        type: 'region_map'
+      });
+
+      vis.params.selectedJoinField = { 'name': 'iso2', 'description': 'Two letter abbreviation' };
+      vis.params.selectedLayer = {
+        'attribution': '<p><a href="http://www.naturalearthdata.com/about/terms-of-use">Made with NaturalEarth</a> | <a href="https://www.elastic.co/elastic-maps-service">Elastic Maps Service</a></p>&#10;',
+        'name': 'World Countries',
+        'format': 'geojson',
+        'url': 'https://staging-dot-elastic-layer.appspot.com/blob/5715999101812736?elastic_tile_service_tos=agree&my_app_version=7.0.0-alpha1',
+        'fields': [{ 'name': 'iso2', 'description': 'Two letter abbreviation' }, {
+          'name': 'iso3',
+          'description': 'Three letter abbreviation'
+        }, { 'name': 'name', 'description': 'Country name' }],
+        'created_at': '2017-07-31T16:00:19.996450',
+        'id': 5715999101812736,
+        'layerId': 'elastic_maps_service.World Countries'
+      };
     });
 
     afterEach(function () {
@@ -171,7 +171,7 @@ describe('RegionMapsVisualizationTests', function () {
 
 
     it('should instantiate at zoom level 2', async function () {
-      regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
+      const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
       await regionMapsVisualization.render(dummyTableGroup, {
         resize: false,
         params: true,
@@ -180,11 +180,12 @@ describe('RegionMapsVisualizationTests', function () {
         uiState: false
       });
       const mismatchedPixels = await compareImage(initialPng);
+      regionMapsVisualization.destroy();
       expect(mismatchedPixels < 16).to.equal(true);
     });
 
     it('should update after resetting join field', async function () {
-      regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
+      const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
       await regionMapsVisualization.render(dummyTableGroup, {
         resize: false,
         params: true,
@@ -195,6 +196,7 @@ describe('RegionMapsVisualizationTests', function () {
 
       //this will actually create an empty image
       vis.params.selectedJoinField = { 'name': 'iso3', 'description': 'Three letter abbreviation' };
+      vis.params.isDisplayWarning = false;//so we don't get notifications
       await regionMapsVisualization.render(dummyTableGroup, {
         resize: false,
         params: true,
@@ -204,8 +206,47 @@ describe('RegionMapsVisualizationTests', function () {
       });
 
       const mismatchedPixels = await compareImage(toiso3Png);
-      // console.log("mm", mismatchedPixels);
+      regionMapsVisualization.destroy();
       expect(mismatchedPixels < 16).to.equal(true);
+    });
+
+    it('should resize', async function () {
+      console.log('shoudl resize!');
+      const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
+      await regionMapsVisualization.render(dummyTableGroup, {
+        resize: false,
+        params: true,
+        aggs: true,
+        data: true,
+        uiState: false
+      });
+
+      domNode.style.width = '256px';
+      domNode.style.height = '128px';
+      await regionMapsVisualization.render(dummyTableGroup, {
+        resize: true,
+        params: false,
+        aggs: false,
+        data: false,
+        uiState: false
+      });
+
+      const mismatchedPixelsAfterFirstResize = await compareImage(afterresizePng);
+      domNode.style.width = '512px';
+      domNode.style.height = '512px';
+      await regionMapsVisualization.render(dummyTableGroup, {
+        resize: true,
+        params: false,
+        aggs: false,
+        data: false,
+        uiState: false
+      });
+
+      const mismatchedPixelsAfterSecondResize = await compareImage(initialPng);
+
+      regionMapsVisualization.destroy();
+      expect(mismatchedPixelsAfterFirstResize < 16).to.equal(true);
+      expect(mismatchedPixelsAfterSecondResize < 16).to.equal(true);
     });
 
 
@@ -303,9 +344,9 @@ describe('RegionMapsVisualizationTests', function () {
   }
 
   function teardownDOM() {
-    // if (window._skipTeardown){
-    //   return;
-    // }
+    if (window._skipTeardown) {
+      return;
+    }
     domNode.innerHTML = '';
     document.body.removeChild(domNode);
     document.body.removeChild(expectCanvas);
