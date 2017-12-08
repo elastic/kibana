@@ -31,7 +31,7 @@ module.exports = function () {
         'MIT*',
         'MIT/X11',
         'new BSD, and MIT',
-        'OFL-1.1 AND MIT',
+        '(OFL-1.1 AND MIT)',
         'Public domain',
         'Unlicense',
         'WTFPL OR ISC',
