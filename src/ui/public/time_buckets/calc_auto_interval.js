@@ -1,4 +1,5 @@
-import moment, { duration as d } from 'moment';
+import moment from 'moment';
+const { duration: d } = moment;
 
 export function TimeBucketsCalcAutoIntervalProvider() {
   // these are the rounding rules used by roundInterval()
