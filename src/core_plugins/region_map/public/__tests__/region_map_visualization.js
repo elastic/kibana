@@ -73,6 +73,9 @@ const vectorManifest = {
 };
 
 
+const THRESHOLD = 0.25;
+const PIXEL_DIFF = 64;
+
 describe('RegionMapsVisualizationTests', function () {
 
   let domNode;
@@ -187,7 +190,7 @@ describe('RegionMapsVisualizationTests', function () {
       });
       const mismatchedPixels = await compareImage(initialPng);
       regionMapsVisualization.destroy();
-      expect(mismatchedPixels < 16).to.equal(true);
+      expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
     });
 
     it('should update after resetting join field', async function () {
@@ -213,7 +216,8 @@ describe('RegionMapsVisualizationTests', function () {
 
       const mismatchedPixels = await compareImage(toiso3Png);
       regionMapsVisualization.destroy();
-      expect(mismatchedPixels < 16).to.equal(true);
+      expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
+
     });
 
     it('should resize', async function () {
@@ -250,8 +254,8 @@ describe('RegionMapsVisualizationTests', function () {
       const mismatchedPixelsAfterSecondResize = await compareImage(initialPng);
 
       regionMapsVisualization.destroy();
-      expect(mismatchedPixelsAfterFirstResize < 16).to.equal(true);
-      expect(mismatchedPixelsAfterSecondResize < 16).to.equal(true);
+      expect(mismatchedPixelsAfterFirstResize).to.be.lessThan(PIXEL_DIFF);
+      expect(mismatchedPixelsAfterSecondResize).to.be.lessThan(PIXEL_DIFF);
     });
 
     it('should redo data', async function () {
@@ -293,8 +297,8 @@ describe('RegionMapsVisualizationTests', function () {
       const mismatchedPixelsAfterDataChangeAndResize = await compareImage(afterdatachangeandresizePng);
 
       regionMapsVisualization.destroy();
-      expect(mismatchedPixelsAfterDataChange < 16).to.equal(true);
-      expect(mismatchedPixelsAfterDataChangeAndResize < 16).to.equal(true);
+      expect(mismatchedPixelsAfterDataChange).to.be.lessThan(PIXEL_DIFF);
+      expect(mismatchedPixelsAfterDataChangeAndResize).to.be.lessThan(PIXEL_DIFF);
 
     });
 
@@ -322,7 +326,7 @@ describe('RegionMapsVisualizationTests', function () {
       const mismatchedPixelsAfterDataAndColorChange = await compareImage(aftercolorchangePng);
 
       regionMapsVisualization.destroy();
-      expect(mismatchedPixelsAfterDataAndColorChange < 16).to.equal(true);
+      expect(mismatchedPixelsAfterDataAndColorChange).to.be.lessThan(PIXEL_DIFF);
 
     });
 
@@ -340,9 +344,10 @@ describe('RegionMapsVisualizationTests', function () {
         uiState: false
       });
 
-      const mismatchedPixelsAfterDataAndColorChange = await compareImage(changestartupPng);
+      const mismatchedPixels = await compareImage(changestartupPng);
       regionMapsVisualization.destroy();
-      expect(mismatchedPixelsAfterDataAndColorChange < 16).to.equal(true);
+
+      expect(mismatchedPixels).to.be.lessThan(PIXEL_DIFF);
 
     });
 
@@ -388,7 +393,7 @@ describe('RegionMapsVisualizationTests', function () {
             diffImage.data,
             firstCanvasOnMap.width,
             firstCanvasOnMap.height,
-            { threshold: 0.1 });
+            { threshold: THRESHOLD });
 
 
           const diffContext = diffCanvas.getContext('2d');
