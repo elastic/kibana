@@ -203,7 +203,7 @@
             <div class="kuiTableRowCell__liner">
               <a
                 class="kuiLink"
-                data-test-subj="dashboardListingTitleLink-{{item.title}}"
+                data-test-subj="dashboardListingTitleLink-{{item.title.split(' ').join('-')}}"
                 ng-href="{{ listingController.getUrlForItem(item) }}"
               >
                 {{ item.title }}

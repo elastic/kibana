@@ -355,7 +355,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async selectDashboard(dashName) {
-      await testSubjects.click(`dashboardListingTitleLink-${dashName}`);
+      await testSubjects.click(`dashboardListingTitleLink-${dashName.split(' ').join('-')}`);
     }
 
     async clearSearchValue() {
