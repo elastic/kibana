@@ -9,17 +9,6 @@ function hydrateUserSettings(userSettings) {
 }
 
 /**
- * Invalid value for UiSetting
- * @class InvalidValudError
- */
-export class InvalidValueError extends Error {
-  constructor(message) {
-    super(message);
-    Error.captureStackTrace(this, this.constructor);
-  }
-}
-
-/**
  *  Service that provides access to the UiSettings stored in elasticsearch.
  *  @class UiSettingsService
  */
@@ -87,7 +76,6 @@ export class UiSettingsService {
   }
 
   async setMany(changes) {
-    await this._validate(changes);
     await this._write({ changes });
   }
 
@@ -105,20 +93,6 @@ export class UiSettingsService {
       changes[key] = null;
     });
     await this.setMany(changes);
-  }
-
-  async _validate(changes) {
-    const defaults = await this.getDefaults();
-    for (const key of Object.keys(changes)) {
-      const validations = defaults[key].validations;
-      const value = changes[key];
-      for (const validation of Object.values(validations)) {
-        const result = validation.schema.validate(value);
-        if (result.error) {
-          throw new InvalidValueError(result.error.message);
-        }
-      }
-    }
   }
 
   async _write({ changes, autoCreateOrUpgradeIfMissing = true }) {

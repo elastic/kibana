@@ -21,8 +21,7 @@ export function toEditableConfig({ def, name, value, isCustom }) {
     defVal: def.value,
     type: getValType(def, value),
     description: def.description,
-    options: def.options,
-    validations: def.validations
+    options: def.options
   };
 
   const editor = getEditorType(conf);
