@@ -3,6 +3,8 @@ import * as bodyParser from 'body-parser';
 
 import { Headers, filterHeaders } from './headers';
 import { ObjectSetting, Props, Any, TypeOf } from '../../../lib/schema';
+import { Schema } from '../../../types/schema';
+import * as schema from '../../../lib/schema';
 
 export interface Route<
   Params extends ObjectSetting<any>,
@@ -10,7 +12,7 @@ export interface Route<
   Body extends ObjectSetting<any>
 > {
   path: string;
-  validate?: {
+  validate?: (schema: Schema) => {
     params?: Params;
     query?: Query;
     body?: Body;
@@ -34,12 +36,10 @@ const responseFactory: ResponseFactory = {
 };
 
 export type RequestHandler<
-  RequestValue,
   Params extends Any,
   Query extends Any,
   Body extends Any
 > = (
-  onRequestValue: RequestValue,
   req: KibanaRequest<TypeOf<Params>, TypeOf<Query>, TypeOf<Body>>,
   createResponse: ResponseFactory
 ) => Promise<KibanaResponse<any> | { [key: string]: any }>;
@@ -80,23 +80,32 @@ export class KibanaRequest<
       params = req.params;
       query = req.query;
       body = req.body;
+      return { params, query, body };
+    }
+
+    const validateResult = route.validate(schema);
+
+    if (validateResult === undefined) {
+      params = req.params;
+      query = req.query;
+      body = req.body;
     } else {
-      if (route.validate.params === undefined) {
+      if (validateResult.params === undefined) {
         params = req.params;
       } else {
-        params = route.validate.params.validate(req.params);
+        params = validateResult.params.validate(req.params);
       }
 
-      if (route.validate.query === undefined) {
+      if (validateResult.query === undefined) {
         query = req.query;
       } else {
-        query = route.validate.query.validate(req.query);
+        query = validateResult.query.validate(req.query);
       }
 
-      if (route.validate.body === undefined) {
+      if (validateResult.body === undefined) {
         body = req.body;
       } else {
-        body = route.validate.body.validate(req.body);
+        body = validateResult.body.validate(req.body);
       }
     }
 
@@ -117,20 +126,16 @@ export class KibanaRequest<
   }
 }
 
-export interface RouterOptions<T> {
-  onRequest?: (req: KibanaRequest) => T;
-}
-
-export class Router<V> {
+export class Router {
   readonly router: express.Router = express.Router();
 
-  constructor(readonly path: string, readonly options: RouterOptions<V> = {}) {}
+  constructor(readonly path: string) {}
 
   get<
     P extends ObjectSetting<any>,
     Q extends ObjectSetting<any>,
     B extends ObjectSetting<any>
-  >(route: Route<P, Q, B>, handler: RequestHandler<V, P, Q, B>) {
+  >(route: Route<P, Q, B>, handler: RequestHandler<P, Q, B>) {
     this.router.get(
       route.path,
       async (req, res) => await this.handle(route, req, res, handler)
@@ -141,7 +146,7 @@ export class Router<V> {
     P extends ObjectSetting<any>,
     Q extends ObjectSetting<any>,
     B extends ObjectSetting<any>
-  >(route: Route<P, Q, B>, handler: RequestHandler<V, P, Q, B>) {
+  >(route: Route<P, Q, B>, handler: RequestHandler<P, Q, B>) {
     this.router.post(
       route.path,
       ...Router.getBodyParsers(),
@@ -153,7 +158,7 @@ export class Router<V> {
     P extends ObjectSetting<any>,
     Q extends ObjectSetting<any>,
     B extends ObjectSetting<any>
-  >(route: Route<P, Q, B>, handler: RequestHandler<V, P, Q, B>) {
+  >(route: Route<P, Q, B>, handler: RequestHandler<P, Q, B>) {
     this.router.put(
       route.path,
       ...Router.getBodyParsers(),
@@ -165,7 +170,7 @@ export class Router<V> {
     P extends ObjectSetting<any>,
     Q extends ObjectSetting<any>,
     B extends ObjectSetting<any>
-  >(route: Route<P, Q, B>, handler: RequestHandler<V, P, Q, B>) {
+  >(route: Route<P, Q, B>, handler: RequestHandler<P, Q, B>) {
     this.router.delete(
       route.path,
       async (req, res) => await this.handle(route, req, res, handler)
@@ -191,7 +196,7 @@ export class Router<V> {
     route: Route<P, Q, B>,
     request: express.Request,
     response: express.Response,
-    handler: RequestHandler<V, P, Q, B>
+    handler: RequestHandler<P, Q, B>
   ) {
     let valid: { params: TypeOf<P>; query: TypeOf<P>; body: TypeOf<B> };
 
@@ -211,17 +216,8 @@ export class Router<V> {
       valid.body
     );
 
-    const value =
-      this.options.onRequest !== undefined
-        ? this.options.onRequest(kibanaRequest)
-        : ({} as V);
-
     try {
-      const kibanaResponse = await handler(
-        value,
-        kibanaRequest,
-        responseFactory
-      );
+      const kibanaResponse = await handler(kibanaRequest, responseFactory);
 
       if (kibanaResponse instanceof KibanaResponse) {
         response.status(kibanaResponse.status);

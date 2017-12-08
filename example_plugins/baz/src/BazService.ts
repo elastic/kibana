@@ -7,41 +7,30 @@ import {
   toPromise
 } from '@elastic/kbn-observable';
 
-import {
-  ElasticsearchService,
-  KibanaConfig,
-  KibanaRequest
-} from '@elastic/kbn-types';
+import { ScopedDataClient, KibanaConfig } from '@elastic/kbn-types';
 
 export class BazService {
   constructor(
-    private readonly req: KibanaRequest,
+    private readonly client: ScopedDataClient,
     private readonly kibanaConfig$: Observable<KibanaConfig>,
-    private readonly elasticsearchService: ElasticsearchService
-  ) {}
+  ) {
+  }
 
   async find(options: { type: string; page?: number; perPage?: number }) {
     const { page = 1, perPage = 20, type } = options;
 
-    const [kibanaIndex, adminCluster] = await latestValues(
+    const [kibanaIndex] = await latestValues(
       k$(this.kibanaConfig$)(map(config => config.index)),
-      this.elasticsearchService.getClusterOfType$('admin')
     );
 
-    const response = await adminCluster.withRequest(
-      this.req,
-      (client, headers) =>
-        client.search({
-          // headers,
-          // TODO ^ buggy elasticsearch.js typings!
-          index: kibanaIndex,
-          type,
-          size: perPage,
-          from: perPage * (page - 1)
-        })
-    );
+    const response = await this.client.call('endpoint', {
+      index: kibanaIndex,
+      type,
+      size: perPage,
+      from: perPage * (page - 1)
+    });
 
-    const data = response.hits.hits.map(hit => ({
+    const data = response.hits.hits.map((hit: any) => ({
       id: hit._id,
       type: hit._type,
       version: hit._version,

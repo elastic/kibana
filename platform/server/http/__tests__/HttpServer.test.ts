@@ -6,6 +6,7 @@ import { Env } from '../../../config/Env';
 import { Router } from '../Router';
 import { HttpServer } from '../HttpServer';
 import { HttpConfig } from '../HttpConfig';
+import { Schema } from '../../../types/schema';
 import * as schema from '../../../lib/schema';
 import { logger } from '../../../logging/__mocks__';
 
@@ -40,7 +41,7 @@ test('listening after started', async () => {
 test('200 OK with body', async () => {
   const router = new Router('/foo');
 
-  router.get({ path: '/' }, async (val, req, res) => {
+  router.get({ path: '/' }, async (req, res) => {
     return res.ok({ key: 'value' });
   });
 
@@ -59,7 +60,7 @@ test('200 OK with body', async () => {
 test('202 Accepted with body', async () => {
   const router = new Router('/foo');
 
-  router.get({ path: '/' }, async (val, req, res) => {
+  router.get({ path: '/' }, async (req, res) => {
     return res.accepted({ location: 'somewhere' });
   });
 
@@ -78,7 +79,7 @@ test('202 Accepted with body', async () => {
 test('204 No content', async () => {
   const router = new Router('/foo');
 
-  router.get({ path: '/' }, async (val, req, res) => {
+  router.get({ path: '/' }, async (req, res) => {
     return res.noContent();
   });
 
@@ -98,7 +99,7 @@ test('204 No content', async () => {
 test('400 Bad request with error', async () => {
   const router = new Router('/foo');
 
-  router.get({ path: '/' }, async (val, req, res) => {
+  router.get({ path: '/' }, async (req, res) => {
     const err = new Error('some message');
     return res.badRequest(err);
   });
@@ -121,13 +122,13 @@ test('valid params', async () => {
   router.get(
     {
       path: '/:test',
-      validate: {
+      validate: (schema: Schema) => ({
         params: schema.object({
           test: schema.string()
         })
-      }
+      })
     },
-    async (val, req, res) => {
+    async (req, res) => {
       return res.ok({ key: req.params.test });
     }
   );
@@ -150,13 +151,13 @@ test('invalid params', async () => {
   router.get(
     {
       path: '/:test',
-      validate: {
+      validate: (schema: Schema) => ({
         params: schema.object({
           test: schema.number()
         })
-      }
+      })
     },
-    async (val, req, res) => {
+    async (req, res) => {
       return res.ok({ key: req.params.test });
     }
   );
@@ -181,14 +182,14 @@ test('valid query', async () => {
   router.get(
     {
       path: '/',
-      validate: {
+      validate: (schema: Schema) => ({
         query: schema.object({
           bar: schema.string(),
           quux: schema.number()
         })
-      }
+      })
     },
-    async (val, req, res) => {
+    async (req, res) => {
       return res.ok(req.query);
     }
   );
@@ -211,13 +212,13 @@ test('invalid query', async () => {
   router.get(
     {
       path: '/',
-      validate: {
+      validate: (schema: Schema) => ({
         query: schema.object({
           bar: schema.number()
         })
-      }
+      })
     },
-    async (val, req, res) => {
+    async (req, res) => {
       return res.ok(req.query);
     }
   );
@@ -242,14 +243,14 @@ test('valid body', async () => {
   router.post(
     {
       path: '/',
-      validate: {
+      validate: (schema: Schema) => ({
         body: schema.object({
           bar: schema.string(),
           baz: schema.number()
         })
-      }
+      })
     },
-    async (val, req, res) => {
+    async (req, res) => {
       return res.ok(req.body);
     }
   );
@@ -276,13 +277,13 @@ test('invalid body', async () => {
   router.post(
     {
       path: '/',
-      validate: {
+      validate: (schema: Schema) => ({
         body: schema.object({
           bar: schema.number()
         })
-      }
+      })
     },
-    async (val, req, res) => {
+    async (req, res) => {
       return res.ok(req.body);
     }
   );
@@ -305,7 +306,7 @@ test('invalid body', async () => {
 test('handles putting', async () => {
   const router = new Router('/foo');
 
-  router.put({ path: '/' }, async (val, req, res) => {
+  router.put({ path: '/' }, async (req, res) => {
     return res.ok(req.body);
   });
 
@@ -328,13 +329,13 @@ test('handles deleting', async () => {
   router.delete(
     {
       path: '/:id',
-      validate: {
+      validate: (schema: Schema) => ({
         params: schema.object({
           id: schema.number()
         })
-      }
+      })
     },
-    async (val, req, res) => {
+    async (req, res) => {
       return res.ok({ key: req.params.id });
     }
   );
@@ -354,7 +355,7 @@ test('handles deleting', async () => {
 test('returns 200 OK if returning object', async () => {
   const router = new Router('/foo');
 
-  router.get({ path: '/' }, async (val, req, res) => {
+  router.get({ path: '/' }, async (req, res) => {
     return { key: 'value' };
   });
 
@@ -370,37 +371,6 @@ test('returns 200 OK if returning object', async () => {
     });
 });
 
-test('returns result from `onRequest` handler as first param in route handler', async () => {
-  expect.assertions(1);
-
-  const router = new Router('/foo', {
-    onRequest(req) {
-      return {
-        q: req.query
-      };
-    }
-  });
-
-  let receivedValue: any;
-
-  router.get({ path: '/' }, async (val, req, res) => {
-    receivedValue = val;
-    return res.noContent();
-  });
-
-  server.registerRouter(router);
-
-  await server.start(config);
-
-  await supertest((server as any).server).get('/foo?bar=quux');
-
-  expect(receivedValue).toEqual({
-    q: {
-      bar: 'quux'
-    }
-  });
-});
-
 test('filtered headers', async () => {
   expect.assertions(1);
 
@@ -408,7 +378,7 @@ test('filtered headers', async () => {
 
   let filteredHeaders: any;
 
-  router.get({ path: '/' }, async (val, req, res) => {
+  router.get({ path: '/' }, async (req, res) => {
     filteredHeaders = req.getFilteredHeaders(['x-kibana-foo', 'host']);
 
     return res.noContent();
@@ -447,7 +417,7 @@ describe('when run within legacy platform', () => {
     );
 
     const router = new Router('/new');
-    router.get({ path: '/' }, async (val, req, res) => {
+    router.get({ path: '/' }, async (req, res) => {
       return res.ok({ key: 'new-platform' });
     });
 

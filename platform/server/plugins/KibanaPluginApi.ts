@@ -3,7 +3,7 @@ import { Observable } from '@elastic/kbn-observable';
 import { Schema } from '../../types/schema';
 import * as schemaLib from '../../lib/schema';
 import { ConfigWithSchema } from '../../config';
-import { Router, RouterOptions } from '../http';
+import { Router } from '../http';
 import { KibanaConfig } from '../kibana';
 import { ElasticsearchService, ElasticsearchConfigs } from '../elasticsearch';
 import { LoggerFactory } from '../../logging';
@@ -42,14 +42,8 @@ export interface KibanaPluginApi {
   http: {
     /**
      * Create and register a router at the specified path.
-     *
-     * The return value of the `onRequest` router option will be injected as the
-     * first param in any route handler registered on the router.
      */
-    createAndRegisterRouter: <T>(
-      path: string,
-      options: RouterOptions<T>
-    ) => Router<T>;
+    createAndRegisterRouter: (path: string) => Router;
   };
 
   /**

@@ -86,7 +86,7 @@ export class ElasticsearchConfig {
       case 'certificate':
         ssl.rejectUnauthorized = true;
 
-        // by default NodeJS checks the server identify
+        // by default NodeJS checks the server identity
         ssl.checkServerIdentity = noop;
         break;
       case 'full':

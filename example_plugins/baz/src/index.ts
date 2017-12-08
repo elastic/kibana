@@ -1,20 +1,23 @@
 import { KibanaPluginConfig } from '@elastic/kbn-types';
-import { BazService } from './BazService';
 import { registerEndpoints } from './registerEndpoints';
 
 export const plugin: KibanaPluginConfig<{}> = {
   plugin: kibana => {
-    const { kibana: _kibana, elasticsearch, logger, util, http } = kibana;
+    const { elasticsearch, logger, http } = kibana;
+    const config$ =  kibana.kibana.config$;
 
     const log = logger.get();
 
-    log.info('creating Baz plugin');
+    log.info('create Baz plugin');
 
-    const router = http.createAndRegisterRouter('/api/baz', {
-      onRequest: req =>
-        new BazService(req, _kibana.config$, elasticsearch.service)
-    });
+    const router = http.createAndRegisterRouter('/api/baz');
 
-    registerEndpoints(router, logger, util.schema);
+    log.info('register Baz endpoints');
+    registerEndpoints(
+      router,
+      logger,
+      elasticsearch.service,
+      config$,
+    );
   }
 };

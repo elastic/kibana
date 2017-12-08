@@ -37,8 +37,8 @@ export function createKibanaValuesForPlugin(
       config$: core.kibana.config$
     },
     http: {
-      createAndRegisterRouter(path, options) {
-        const router = new Router(path, options);
+      createAndRegisterRouter(path) {
+        const router = new Router(path);
         core.http.service.registerRouter(router);
         return router;
       }

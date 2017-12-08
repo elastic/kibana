@@ -1,3 +1,4 @@
+import { Client } from 'elasticsearch';
 import {
   Observable,
   Subscription,
@@ -5,19 +6,22 @@ import {
   map,
   filter,
   switchMap,
-  shareLast
+  shareLast,
+  first,
+  toPromise
 } from '@elastic/kbn-observable';
 
-import { ElasticsearchClusterType } from './ElasticsearchConfig';
 import { ElasticsearchConfigs } from './ElasticsearchConfigs';
-import { Cluster } from './Cluster';
+import { AdminClient } from './AdminClient';
+import { ScopedDataClient } from './ScopedDataClient';
 import { LoggerFactory } from '../../logging';
 import { CoreService } from '../../types/CoreService';
+import { Headers } from '../http/Router/headers';
 
-type Clusters = { [type in ElasticsearchClusterType]: Cluster };
+type Clients = { data: Client, admin: Client };
 
 export class ElasticsearchService implements CoreService {
-  private clusters$: Observable<Clusters>;
+  private clients$: Observable<Clients>;
   private subscription?: Subscription;
 
   constructor(
@@ -26,7 +30,7 @@ export class ElasticsearchService implements CoreService {
   ) {
     const log = logger.get('elasticsearch');
 
-    this.clusters$ = k$(config$)(
+    this.clients$ = k$(config$)(
       filter(() => {
         if (this.subscription !== undefined) {
           log.error('clusters cannot be changed after they are created');
@@ -37,21 +41,23 @@ export class ElasticsearchService implements CoreService {
       }),
       switchMap(
         configs =>
-          new Observable<Clusters>(observer => {
+          new Observable<Clients>(observer => {
             log.info('creating Elasticsearch clusters');
 
-            const clusters = {
-              data: new Cluster(configs.forType('data'), logger),
-              admin: new Cluster(configs.forType('admin'), logger)
+            const clients = {
+              data: new Client(configs.forType('data').toElasticsearchClientConfig()),
+              admin: new Client(configs.forType('admin').toElasticsearchClientConfig({
+                shouldAuth: false,
+              }))
             };
 
-            observer.next(clusters);
+            observer.next(clients);
 
             return () => {
               log.info('closing Elasticsearch clusters');
 
-              clusters.data.close();
-              clusters.admin.close();
+              clients.data.close();
+              clients.admin.close();
             };
           })
       ),
@@ -65,7 +71,7 @@ export class ElasticsearchService implements CoreService {
   async start() {
     // ensure that we don't unnecessarily re-create clusters by always having
     // at least one current connection
-    this.subscription = this.clusters$.subscribe();
+    this.subscription = this.clients$.subscribe();
   }
 
   async stop() {
@@ -74,7 +80,28 @@ export class ElasticsearchService implements CoreService {
     }
   }
 
-  getClusterOfType$(type: ElasticsearchClusterType) {
-    return k$(this.clusters$)(map(clusters => clusters[type]));
+  getAdminClient$() {
+    return k$(this.clients$)(map(clients => new AdminClient(clients.admin)));
   }
+
+  getScopedDataClient$(headers: Headers) {
+    return k$(this.clients$)(map(clients => new ScopedDataClient(clients.data, headers)));
+  }
+
+  getScopedDataClient(headers: Headers) {
+    return k$(this.getScopedDataClient$(headers))(first(), toPromise());
+  }
+
+  // typed as a DataClient
+  // for health check, e.g. which uses callWithInternalUser
+  // const unscopedDataClient = elasticsearch.getUnscopedDataClient();
+
+  // SAML or Basic Auth case
+  // scoped adminClient
+  // const scopedAdminClient = elasticsearch.getScopedAdminClient(headers);
+
+  // example for adminclient
+  // adminClient is the same across requests
+  // const adminClient$ = elasticsearch.service.getAdminClient$();
+
 }

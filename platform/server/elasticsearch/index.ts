@@ -1,17 +1,16 @@
 import { Observable } from '@elastic/kbn-observable';
 
 import { ElasticsearchService } from './ElasticsearchService';
-import { ElasticsearchRequestHelpers } from './ElasticsearchFacade';
 import { registerElasticsearchRoutes } from './api';
 import { Router } from '../http';
 import { ElasticsearchConfigs } from './ElasticsearchConfigs';
 import { LoggerFactory } from '../../logging';
 
 export { ElasticsearchClusterType } from './ElasticsearchConfig';
-export { Cluster } from './Cluster';
+export { AdminClient } from './AdminClient';
+export { ScopedDataClient } from './ScopedDataClient';
 export {
   ElasticsearchService,
-  ElasticsearchRequestHelpers,
   ElasticsearchConfigs
 };
 
@@ -26,10 +25,8 @@ export class ElasticsearchModule {
   }
 
   createRoutes() {
-    const router = new Router('/elasticsearch', {
-      onRequest: req => new ElasticsearchRequestHelpers(this.service)
-    });
+    const router = new Router('/elasticsearch');
 
-    return registerElasticsearchRoutes(router, this.logger);
+    return registerElasticsearchRoutes(router, this.logger, this.service);
   }
 }

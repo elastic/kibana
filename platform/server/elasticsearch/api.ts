@@ -1,11 +1,12 @@
 import { Router } from '../http';
-import { object, string, maybe } from '../../lib/schema';
-import { ElasticsearchRequestHelpers } from './ElasticsearchFacade';
+import { ElasticsearchService } from './ElasticsearchService';
 import { LoggerFactory } from '../../logging';
+import { Schema } from '../../types/schema';
 
 export function registerElasticsearchRoutes(
-  router: Router<ElasticsearchRequestHelpers>,
-  logger: LoggerFactory
+  router: Router,
+  logger: LoggerFactory,
+  service: ElasticsearchService
 ) {
   const log = logger.get('elasticsearch', 'routes');
 
@@ -14,29 +15,30 @@ export function registerElasticsearchRoutes(
   router.get(
     {
       path: '/:field',
-      validate: {
-        params: object({
-          field: string()
+      validate: (schema: Schema) => ({
+        params: schema.object({
+          field: schema.string()
         }),
-        query: object({
-          key: maybe(string())
+        query: schema.object({
+          key: schema.maybe(schema.string())
         })
-      }
+      })
     },
-    async (elasticsearch, req) => {
+    async (req, res) => {
       // WOHO! Both of these are typed!
       log.info(`field param: ${req.params.field}`);
       log.info(`query param: ${req.query.key}`);
 
       log.info('request received on [data] cluster');
 
-      const cluster = await elasticsearch.getClusterOfType('data');
+      const cluster = await service.getScopedDataClient(req.headers);
 
-      log.info('got [data] cluster, now calling it');
+      log.info('got scoped [data] cluster, now calling it');
 
-      const response = await cluster.withRequest(req, (client, headers) =>
-        client.search({})
-      );
+      //TODO: fix this in follow-up. search is on callWithRequest
+      //const response = await cluster.search({});
+      let response: any = cluster;
+      response = { hits: { total: 0 } };
 
       return {
         params: req.params,

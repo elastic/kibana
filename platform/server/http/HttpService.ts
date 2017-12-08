@@ -55,7 +55,7 @@ export class HttpService implements CoreService {
     await this.httpServer.stop();
   }
 
-  registerRouter(router: Router<any>): void {
+  registerRouter(router: Router): void {
     if (this.httpServer.isListening()) {
       // If the server is already running we can't make any config changes
       // to it, so we warn and don't allow the config to pass through.
