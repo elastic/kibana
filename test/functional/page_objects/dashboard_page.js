@@ -36,6 +36,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async preserveCrossAppState() {
       const url = await remote.getCurrentUrl();
       await remote.get(url, false);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickEditVisualization() {
