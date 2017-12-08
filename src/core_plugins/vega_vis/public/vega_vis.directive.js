@@ -8,13 +8,13 @@ uiModules.get('kibana')
   .directive('vegaVis', () => ({
     restrict: 'E',
     controller: createVegaVisController,
-    controllerAs: 'vega',
+    controllerAs: 'vegavis',
     scope: {
       vis: '='
     },
     template,
     bindToController: true,
     link($scope, ...args) {
-      $scope.vega.link($scope, ...args);
+      $scope.vegavis.link($scope, ...args);
     }
   }));

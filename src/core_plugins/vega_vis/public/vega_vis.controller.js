@@ -59,7 +59,7 @@ export function createVegaVisController(Private, /*$scope,*/ timefilter, es, ser
         // FIXME!!  need to debounce editor changes
 
         try {
-          const spec = hjson.parse($scope.vega.vis.params.spec);
+          const spec = hjson.parse($scope.vegavis.vis.params.spec);
           if (this.vegaView) {
             await this.vegaView.destroy();
           }
@@ -76,9 +76,9 @@ export function createVegaVisController(Private, /*$scope,*/ timefilter, es, ser
       $scope.timefilter = timefilter;
       $scope.$watchMulti(
         [
-          '=vega.vis.params',
+          '=vegavis.vis.params',
           '=timefilter',
-          'vega.visData',
+          'vegavis.visData',
           { get: dashboardContext, deep: true }
         ],
         createGraph

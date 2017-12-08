@@ -19,7 +19,7 @@ VisTypesRegistryProvider.register(function VegaVisProvider(Private) {
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.
   return VisFactory.createAngularVisualization({
-    name: 'vega',
+    name: 'vegavis',
     title: 'Vega',
     description: 'Create custom visualizations using Vega and VegaLite',
     icon: 'fa-code',
@@ -36,7 +36,6 @@ VisTypesRegistryProvider.register(function VegaVisProvider(Private) {
     options: {
       showIndexSelection: false
     },
-    // isExperimental: true,
     stage: 'lab',
   });
 });
