@@ -11,8 +11,8 @@ export async function comparePngs(actualPath, expectedPath, diffPath, log) {
 
     const width = Math.min(actual.bitmap.width, expected.bitmap.width);
     const height = Math.min(actual.bitmap.height, expected.bitmap.height);
-    actual.cover(width, height, Jimp.HORIZONTAL_ALIGN_LEFT | Jimp.VERTICAL_ALIGN_TOP);
-    expected.cover(width, height, Jimp.HORIZONTAL_ALIGN_LEFT | Jimp.VERTICAL_ALIGN_TOP);
+    actual.resize(width, height);//, Jimp.HORIZONTAL_ALIGN_LEFT | Jimp.VERTICAL_ALIGN_TOP);
+    expected.resize(width, height);//, Jimp.HORIZONTAL_ALIGN_LEFT | Jimp.VERTICAL_ALIGN_TOP);
   }
 
   actual.quality(60);
