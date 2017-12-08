@@ -14,6 +14,7 @@ import toiso3Png from './toiso3.png';
 import afterresizePng from './afterresize.png';
 import afterdatachangePng from './afterdatachange.png';
 import afterdatachangeandresizePng from './afterdatachangeandresize.png';
+import aftercolorchangePng from './aftercolorchange.png';
 
 const manifestUrl = 'https://staging-dot-catalogue-dot-elastic-layer.appspot.com/v1/manifest';
 const tmsManifestUrl = `"https://tiles-maps-stage.elastic.co/v2/manifest`;
@@ -293,6 +294,34 @@ describe('RegionMapsVisualizationTests', function () {
       regionMapsVisualization.destroy();
       expect(mismatchedPixelsAfterDataChange < 16).to.equal(true);
       expect(mismatchedPixelsAfterDataChangeAndResize < 16).to.equal(true);
+
+    });
+
+    it('should redo data and color ramp', async function () {
+
+      const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
+      await regionMapsVisualization.render(dummyTableGroup, {
+        resize: false,
+        params: true,
+        aggs: true,
+        data: true,
+        uiState: false
+      });
+
+      const newTableGroup = _.cloneDeep(dummyTableGroup);
+      newTableGroup.tables[0].rows.pop();//remove one shape
+      vis.params.colorSchema = 'Blues';
+      await regionMapsVisualization.render(newTableGroup, {
+        resize: false,
+        params: true,
+        aggs: false,
+        data: true,
+        uiState: false
+      });
+      const mismatchedPixelsAfterDataAndColorChange = await compareImage(aftercolorchangePng);
+
+      regionMapsVisualization.destroy();
+      expect(mismatchedPixelsAfterDataAndColorChange < 16).to.equal(true);
 
     });
 
