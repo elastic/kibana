@@ -5,5 +5,5 @@
  *  @return {Array<string>}
  */
 export function getTypes(mappings) {
-  return Object.keys(mappings).filter(type => !type.match(/^_default_$/));
+  return Object.keys(mappings).filter(type => type !== '_default_');
 }
