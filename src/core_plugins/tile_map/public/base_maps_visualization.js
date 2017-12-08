@@ -84,8 +84,9 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
       const uiState = this.vis.getUiState();
       const zoomFromUiState = parseInt(uiState.get('mapZoom'));
       const centerFromUIState = uiState.get('mapCenter');
-      options.zoom = !isNaN(zoomFromUiState) ? zoomFromUiState : this.vis.type.visConfig.defaults.mapZoom;
-      options.center = centerFromUIState ? centerFromUIState : this.vis.type.visConfig.defaults.mapCenter;
+      options.zoom = !isNaN(zoomFromUiState) ? zoomFromUiState : this.vis.params.mapZoom;
+      options.center = centerFromUIState ? centerFromUIState : this.vis.params.mapCenter;
+
       this._kibanaMap = new KibanaMap(this._container, options);
 
       this._kibanaMap.addLegendControl();
