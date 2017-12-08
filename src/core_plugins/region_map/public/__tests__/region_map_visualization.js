@@ -6,8 +6,9 @@ import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pa
 import * as visModule from 'ui/vis';
 import sinon from 'sinon';
 import worldJson from './world.json';
-import initialPng from './initial.png';
 import pixelmatch from 'pixelmatch';
+import initialPng from './initial.png';
+import toiso3Png from './toiso3.png';
 
 const manifestUrl = 'https://staging-dot-catalogue-dot-elastic-layer.appspot.com/v1/manifest';
 const tmsManifestUrl = `"https://tiles-maps-stage.elastic.co/v2/manifest`;
@@ -73,10 +74,31 @@ describe('RegionMapsVisualizationTests', function () {
   let actualCanvas;
   let RegionMapsVisualization;
   let Vis;
+  let regionMapsVisualization;
   let indexPattern;
   let vis;
 
   const _makeJsonAjaxCallOld = ChoroplethLayer.prototype._makeJsonAjaxCall;
+
+  const dummyTableGroup = {
+    tables: [
+      {
+        columns: [{
+          'aggConfig': {
+            'id': '2',
+            'enabled': true,
+            'type': 'terms',
+            'schema': 'segment',
+            'params': { 'field': 'geo.dest', 'size': 5, 'order': 'desc', 'orderBy': '1' }
+          }, 'title': 'geo.dest: Descending'
+        }, {
+          'aggConfig': { 'id': '1', 'enabled': true, 'type': 'count', 'schema': 'metric', 'params': {} },
+          'title': 'Count'
+        }],
+        rows: [['CN', 26], ['IN', 17], ['US', 6], ['DE', 4], ['BR', 3]]
+      }
+    ]
+  };
 
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject((Private, $injector) => {
@@ -132,6 +154,7 @@ describe('RegionMapsVisualizationTests', function () {
 
 
   afterEach(function () {
+    regionMapsVisualization.destroy();
     ChoroplethLayer.prototype._makeJsonAjaxCall = _makeJsonAjaxCallOld;
   });
 
@@ -148,29 +171,21 @@ describe('RegionMapsVisualizationTests', function () {
 
 
     it('should instantiate at zoom level 2', async function () {
+      regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
+      await regionMapsVisualization.render(dummyTableGroup, {
+        resize: false,
+        params: true,
+        aggs: true,
+        data: true,
+        uiState: false
+      });
+      const mismatchedPixels = await compareImage(initialPng);
+      expect(mismatchedPixels < 16).to.equal(true);
+    });
 
-      const regionMapVisualization = new RegionMapsVisualization(domNode, vis);
-      const dummyTableGroup = {
-        tables: [
-          {
-            columns: [{
-              'aggConfig': {
-                'id': '2',
-                'enabled': true,
-                'type': 'terms',
-                'schema': 'segment',
-                'params': { 'field': 'geo.dest', 'size': 5, 'order': 'desc', 'orderBy': '1' }
-              }, 'title': 'geo.dest: Descending'
-            }, {
-              'aggConfig': { 'id': '1', 'enabled': true, 'type': 'count', 'schema': 'metric', 'params': {} },
-              'title': 'Count'
-            }],
-            rows: [['CN', 26], ['IN', 17], ['US', 6], ['DE', 4], ['BR', 3]]
-          }
-        ]
-      };
-
-      await regionMapVisualization.render(dummyTableGroup, {
+    it('should update after resetting join field', async function () {
+      regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
+      await regionMapsVisualization.render(dummyTableGroup, {
         resize: false,
         params: true,
         aggs: true,
@@ -178,10 +193,22 @@ describe('RegionMapsVisualizationTests', function () {
         uiState: false
       });
 
-      const mismatchedPixels = await compareImage(initialPng);
-      expect(mismatchedPixels < 16).to.equal(true);
+      //this will actually create an empty image
+      vis.params.selectedJoinField = { 'name': 'iso3', 'description': 'Three letter abbreviation' };
+      await regionMapsVisualization.render(dummyTableGroup, {
+        resize: false,
+        params: true,
+        aggs: false,
+        data: false,
+        uiState: false
+      });
 
+      const mismatchedPixels = await compareImage(toiso3Png);
+      // console.log("mm", mismatchedPixels);
+      expect(mismatchedPixels < 16).to.equal(true);
     });
+
+
   });
 
 
@@ -276,6 +303,9 @@ describe('RegionMapsVisualizationTests', function () {
   }
 
   function teardownDOM() {
+    // if (window._skipTeardown){
+    //   return;
+    // }
     domNode.innerHTML = '';
     document.body.removeChild(domNode);
     document.body.removeChild(expectCanvas);
