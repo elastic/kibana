@@ -1,5 +1,6 @@
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
+import _ from 'lodash';
 import { RegionMapsVisualizationProvider } from '../region_map_visualization';
 import ChoroplethLayer from '../choropleth_layer';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
@@ -7,9 +8,12 @@ import * as visModule from 'ui/vis';
 import sinon from 'sinon';
 import worldJson from './world.json';
 import pixelmatch from 'pixelmatch';
+
 import initialPng from './initial.png';
 import toiso3Png from './toiso3.png';
 import afterresizePng from './afterresize.png';
+import afterdatachangePng from './afterdatachange.png';
+import afterdatachangeandresizePng from './afterdatachangeandresize.png';
 
 const manifestUrl = 'https://staging-dot-catalogue-dot-elastic-layer.appspot.com/v1/manifest';
 const tmsManifestUrl = `"https://tiles-maps-stage.elastic.co/v2/manifest`;
@@ -211,7 +215,7 @@ describe('RegionMapsVisualizationTests', function () {
     });
 
     it('should resize', async function () {
-      console.log('shoudl resize!');
+
       const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
       await regionMapsVisualization.render(dummyTableGroup, {
         resize: false,
@@ -230,8 +234,8 @@ describe('RegionMapsVisualizationTests', function () {
         data: false,
         uiState: false
       });
-
       const mismatchedPixelsAfterFirstResize = await compareImage(afterresizePng);
+
       domNode.style.width = '512px';
       domNode.style.height = '512px';
       await regionMapsVisualization.render(dummyTableGroup, {
@@ -241,12 +245,55 @@ describe('RegionMapsVisualizationTests', function () {
         data: false,
         uiState: false
       });
-
       const mismatchedPixelsAfterSecondResize = await compareImage(initialPng);
 
       regionMapsVisualization.destroy();
       expect(mismatchedPixelsAfterFirstResize < 16).to.equal(true);
       expect(mismatchedPixelsAfterSecondResize < 16).to.equal(true);
+    });
+
+    it('should redo data', async function () {
+
+      const regionMapsVisualization = new RegionMapsVisualization(domNode, vis);
+      await regionMapsVisualization.render(dummyTableGroup, {
+        resize: false,
+        params: true,
+        aggs: true,
+        data: true,
+        uiState: false
+      });
+
+      const newTableGroup = _.cloneDeep(dummyTableGroup);
+      newTableGroup.tables[0].rows.pop();//remove one shape
+
+      await regionMapsVisualization.render(newTableGroup, {
+        // resize: true,
+        resize: false,
+        params: false,
+        aggs: false,
+        data: true,
+        uiState: false
+      });
+      const mismatchedPixelsAfterDataChange = await compareImage(afterdatachangePng);
+
+
+      const anoterTableGroup = _.cloneDeep(newTableGroup);
+      anoterTableGroup.tables[0].rows.pop();//remove one shape
+      domNode.style.width = '412px';
+      domNode.style.height = '112px';
+      await regionMapsVisualization.render(anoterTableGroup, {
+        resize: true,
+        params: false,
+        aggs: false,
+        data: true,
+        uiState: false
+      });
+      const mismatchedPixelsAfterDataChangeAndResize = await compareImage(afterdatachangeandresizePng);
+
+      regionMapsVisualization.destroy();
+      expect(mismatchedPixelsAfterDataChange < 16).to.equal(true);
+      expect(mismatchedPixelsAfterDataChangeAndResize < 16).to.equal(true);
+
     });
 
 
