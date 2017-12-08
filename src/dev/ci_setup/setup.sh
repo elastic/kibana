@@ -10,7 +10,7 @@ cacheDir="${CACHE_DIR:-"/tmp/kibana"}"
 ### check that we seem to be in a kibana project
 ###
 if [ -f "$dir/package.json" ] && [ -f "$dir/.node-version" ]; then
-  echo "Setting up node.js and npm in $dir"
+  echo "Setting up node.js and yarn in $dir"
 else
   echo "src/dev/ci_setup/setup.sh must be run within a kibana repo"
   exit 1

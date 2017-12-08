@@ -173,7 +173,7 @@ yarn
 Start elasticsearch.
 
 ```bash
-npm run elasticsearch
+yarn elasticsearch
 ```
 
 > You'll need to have a `java` binary in `PATH` or set `JAVA_HOME`.
@@ -188,12 +188,12 @@ node scripts/makelogs
 
 Start the development server.
   ```bash
-  npm start
+  yarn start
   ```
 
 > On Windows, you'll need you use Git Bash, Cygwin, or a similar shell that exposes the `sh` command.  And to successfully build you'll need Cygwin optional packages zip, tar, and shasum.
 
-Now you can point your web browser to https://localhost:5601 and start using Kibana! When running `npm start`, Kibana will also log that it is listening on port 5603 due to the base path proxy, but you should still access Kibana on port 5601.
+Now you can point your web browser to https://localhost:5601 and start using Kibana! When running `yarn start`, Kibana will also log that it is listening on port 5603 due to the base path proxy, but you should still access Kibana on port 5601.
 
 #### Customizing `config/kibana.dev.yml`
 
@@ -209,7 +209,7 @@ In development mode, Kibana runs a customized version of [Webpack](http://webpac
 
 #### Setting Up SSL
 
-Kibana includes a self-signed certificate that can be used for development purposes: `npm start -- --ssl`.
+Kibana includes a self-signed certificate that can be used for development purposes: `yarn start --ssl`.
 
 ### Linting
 
@@ -236,23 +236,23 @@ Before running the tests you will need to install the projects dependencies as d
 Once that's done, just run:
 
 ```bash
-npm run test && npm run build -- --skip-os-packages
+yarn test && yarn build --skip-os-packages
 ```
 
 ### Debugging Unit Tests
 
-The standard `npm run test` task runs several sub tasks and can take several minutes to complete, making debugging failures pretty painful. In order to ease the pain specialized tasks provide alternate methods for running the tests.
+The standard `yarn test` task runs several sub tasks and can take several minutes to complete, making debugging failures pretty painful. In order to ease the pain specialized tasks provide alternate methods for running the tests.
 
-To execute both server and browser tests, but skip linting, use `npm run test:quick`.
+To execute both server and browser tests, but skip linting, use `yarn test:quick`.
 
 ```bash
-npm run test:quick
+yarn test:quick
 ```
 
-Use `npm run test:server` when you want to run only the server tests.
+Use `yarn test:server` when you want to run only the server tests.
 
 ```bash
-npm run test:server
+yarn test:server
 ```
 
 When you'd like to execute individual server-side test files, you can use the command below. Note that this command takes care of configuring Mocha with Babel compilation for you, and you'll be better off avoiding a globally installed `mocha` package. This command is great for development and for quickly identifying bugs.
@@ -267,16 +267,16 @@ You could also add the `--debug` option so that `node` is run using the `--debug
 node scripts/mocha --debug <file>
 ```
 
-With `npm run test:browser`, you can run only the browser tests. Coverage reports are available for browser tests by running `npm run test:coverage`. You can find the results under the `coverage/` directory that will be created upon completion.
+With `yarn test:browser`, you can run only the browser tests. Coverage reports are available for browser tests by running `yarn test:coverage`. You can find the results under the `coverage/` directory that will be created upon completion.
 
 ```bash
-npm run test:browser
+yarn test:browser
 ```
 
-Using `npm run test:dev` initializes an environment for debugging the browser tests. Includes an dedicated instance of the kibana server for building the test bundle, and a karma server. When running this task the build is optimized for the first time and then a karma-owned instance of the browser is opened. Click the "debug" button to open a new tab that executes the unit tests.
+Using `yarn test:dev` initializes an environment for debugging the browser tests. Includes an dedicated instance of the kibana server for building the test bundle, and a karma server. When running this task the build is optimized for the first time and then a karma-owned instance of the browser is opened. Click the "debug" button to open a new tab that executes the unit tests.
 
 ```bash
-npm run test:dev
+yarn test:dev
 ```
 
 In the screenshot below, you'll notice the URL is `localhost:9876/debug.html`. You can append a `grep` query parameter to this URL and set it to a string value which will be used to exclude tests which don't match. For example, if you changed the URL to `localhost:9876/debug.html?query=my test` and then refreshed the browser, you'd only see tests run which contain "my test" in the test description.
@@ -291,8 +291,8 @@ This should work super if you're using the [Kibana plugin generator](https://git
 To run the tests for just your particular plugin run the following command from your plugin:
 
 ```bash
-npm run test:server
-npm run test:browser -- --dev # remove the --dev flag to run them once and close
+yarn test:server
+yarn test:browser --dev # remove the --dev flag to run them once and close
 ```
 
 ### Cross-browser Compatibility
@@ -306,7 +306,7 @@ npm run test:browser -- --dev # remove the --dev flag to run them once and close
 * Open VMWare and go to Window > Virtual Machine Library. Unzip the virtual machine and drag the .vmx file into your Virtual Machine Library.
 * Right-click on the virtual machine you just added to your library and select "Snapshots...", and then click the "Take" button in the modal that opens. You can roll back to this snapshot when the VM expires in 90 days.
 * In System Preferences > Sharing, change your computer name to be something simple, e.g. "computer".
-* Run Kibana with `npm start -- --host=computer.local` (substituting your computer name).
+* Run Kibana with `yarn start --host=computer.local` (substituting your computer name).
 * Now you can run your VM, open the browser, and navigate to `http://computer.local:5601` to test Kibana.
 
 #### Running Browser Automation Tests
@@ -321,13 +321,13 @@ Packages are built using fpm, dpkg, and rpm.  Package building has only been tes
 ```bash
 apt-get install ruby-dev rpm
 gem install fpm -v 1.5.0
-npm run build -- --skip-archives
+yarn build --skip-archives
 ```
 
 To specify a package to build you can add `rpm` or `deb` as an argument.
 
 ```bash
-npm run build -- --rpm
+yarn build --rpm
 ```
 
 Distributable packages can be found in `target/` after the build completes.

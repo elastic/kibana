@@ -10,7 +10,7 @@
 Compile the CSS with `./node_modules/grunt/bin/grunt uiFramework:compileCss` (OS X) or
 `.\node_modules\grunt\bin\grunt uiFramework:compileCss` (Windows).
 
-You can view interactive documentation by running `npm run uiFramework:start` and then visiting
+You can view interactive documentation by running `yarn uiFramework:start` and then visiting
 [http://localhost:8020/](http://localhost:8020/). This will also start watching the SCSS files, and will recompile the CSS
 automatically for you when you make changes.
 
@@ -36,7 +36,7 @@ You can do this using Yeoman (the easy way), or you can do it manually (the hard
 
 #### Create a new component
 
-From the command line, run `npm run uiFramework:createComponent`.
+From the command line, run `yarn uiFramework:createComponent`.
 
 First, you'll be prompted for what kind of component to create:
 
@@ -127,7 +127,7 @@ content.
 
 You can use the same Yeoman generator referenced above to create documentation.
 
-From the command line, run `npm run uiFramework:documentComponent`.
+From the command line, run `yarn uiFramework:documentComponent`.
 
 First, you'll be prompted for what kind of documentation to create:
 
