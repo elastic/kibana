@@ -95,8 +95,6 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
 
       const mapparams = this._getMapsParams();
       await this._updateBaseLayer(mapparams);
-
-
     }
 
 
@@ -111,7 +109,6 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
         this._notify.warning(e.message);
       }
       const { minZoom, maxZoom } = this._getMinMaxZoom();
-
       if (mapParams.wms.enabled) {
         // Switch to WMS
         if (maxZoom > this._kibanaMap.getMaxZoomLevel()) {
