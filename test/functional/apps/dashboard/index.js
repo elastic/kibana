@@ -9,6 +9,7 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./_dashboard_grid'));
     loadTestFile(require.resolve('./_panel_controls'));
     loadTestFile(require.resolve('./_view_edit'));
+
     loadTestFile(require.resolve('./_dashboard'));
     loadTestFile(require.resolve('./_dashboard'));
     loadTestFile(require.resolve('./_dashboard'));
@@ -19,6 +20,27 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./_dashboard'));
     loadTestFile(require.resolve('./_dashboard'));
     loadTestFile(require.resolve('./_dashboard'));
+    loadTestFile(require.resolve('./_dashboard'));
+    loadTestFile(require.resolve('./_dashboard'));
+    loadTestFile(require.resolve('./_dashboard'));
+    loadTestFile(require.resolve('./_dashboard'));
+    loadTestFile(require.resolve('./_dashboard'));
+    loadTestFile(require.resolve('./_dashboard'));
+    loadTestFile(require.resolve('./_dashboard'));
+    loadTestFile(require.resolve('./_dashboard'));
+    loadTestFile(require.resolve('./_dashboard'));
+    loadTestFile(require.resolve('./_dashboard'));
+    loadTestFile(require.resolve('./_dashboard'));
+    loadTestFile(require.resolve('./_dashboard'));
+    loadTestFile(require.resolve('./_dashboard'));
+    loadTestFile(require.resolve('./_dashboard'));
+    loadTestFile(require.resolve('./_dashboard'));
+    loadTestFile(require.resolve('./_dashboard'));
+    loadTestFile(require.resolve('./_dashboard'));
+    loadTestFile(require.resolve('./_dashboard'));
+    loadTestFile(require.resolve('./_dashboard'));
+    loadTestFile(require.resolve('./_dashboard'));
+
     loadTestFile(require.resolve('./_dashboard_state'));
     loadTestFile(require.resolve('./_dashboard_save'));
     loadTestFile(require.resolve('./_dashboard_time'));
