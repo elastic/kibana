@@ -4,10 +4,12 @@ export default function ({ getService, getPageObjects }) {
   const dashboardVisualizations = getService('dashboardVisualizations');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
   const screenshot = getService('screenshots');
+  const remote = getService('remote');
 
   describe('dashboard snapshots', function describeIndexTests() {
     before(async function () {
-      return PageObjects.dashboard.initTests();
+      await PageObjects.dashboard.initTests();
+      await remote.setWindowSize(1200, 900);
     });
 
     after(async function () {
