@@ -550,12 +550,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async filterOnPieSlice() {
       log.debug('Filtering on a pie slice');
       await retry.try(async () => {
-        // TODO: this is a quick way to get around https://github.com/elastic/kibana/issues/15480
-        // Once we implement the new data-render-complete flag (render-counter has it's own issues) we should
-        // be able to replace this with a wait for the pie chart to finish rendering.  Ideally the slice wouldn't
-        // be available to be clicked at all, and we wouldn't need either test hack, if we can fix
-        // https://github.com/elastic/kibana/issues/15480
-        PageObjects.common.sleep(1000);
         const slices = await find.allByCssSelector('svg > g > g.arcs > path.slice');
         log.debug('Slices found:' + slices.length);
         return slices[0].click();
