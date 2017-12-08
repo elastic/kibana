@@ -52,15 +52,18 @@ export class VisualizeListingTable extends Component {
     this.debouncedFetch = _.debounce(filter => {
       this.props.fetchItems(filter)
         .then(items => {
-          this.setState({
-            isFetchingItems: false,
-            selectedRowIds: [],
-            filter,
-          });
-          this.items = items;
-          this.calculateItemsOnPage();
+          // We need this check to handle the case where search results come back in a different
+          // order than they were sent out. Only load results for the most recent search.
+          if (filter === this.state.filter) {
+            this.setState({
+              isFetchingItems: false,
+              selectedRowIds: [],
+            });
+            this.items = items;
+            this.calculateItemsOnPage();
+          }
         });
-    }, 200);
+    }, 300);
   }
 
   componentWillUnmount() {
