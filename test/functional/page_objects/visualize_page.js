@@ -283,8 +283,18 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async clickNewSearch(indexPattern = 'logstash-*') {
-      await testSubjects.click(`paginatedListItem-${indexPattern}`);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      // This retry really should not be neccessary but for some reason, very randomly, the click on the search
+      // does nothing.  See https://github.com/elastic/kibana/issues/15504 for more info. Since it's so rare, and
+      // only shows up in tests, it's probably not investigating further at this point, and the retry will
+      // stabilize the test flakiness. Though, there may be a legit issue going on here with the lost click...
+      await retry.try(async () => {
+        await testSubjects.click(`paginatedListItem-${indexPattern}`);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const url = await remote.getCurrentUrl();
+        if (url.indexOf('create') < 0) {
+          throw new Error('Not on create visualization page, try again');
+        }
+      });
     }
 
     async setValue(newValue) {
