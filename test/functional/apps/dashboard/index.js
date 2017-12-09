@@ -6,15 +6,6 @@ export default function ({ getService, loadTestFile }) {
 
     loadTestFile(require.resolve('./_bwc_shared_urls'));
     loadTestFile(require.resolve('./_dashboard_queries'));
-    loadTestFile(require.resolve('./_dashboard_queries'));
-    loadTestFile(require.resolve('./_dashboard_queries'));
-    loadTestFile(require.resolve('./_dashboard_queries'));
-    loadTestFile(require.resolve('./_dashboard_queries'));
-    loadTestFile(require.resolve('./_dashboard_queries'));
-    loadTestFile(require.resolve('./_dashboard_queries'));
-    loadTestFile(require.resolve('./_dashboard_queries'));
-    loadTestFile(require.resolve('./_dashboard_queries'));
-    loadTestFile(require.resolve('./_dashboard_queries'));
     loadTestFile(require.resolve('./_dashboard_grid'));
     loadTestFile(require.resolve('./_panel_controls'));
     loadTestFile(require.resolve('./_view_edit'));
