@@ -61,7 +61,8 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
 
-      expect(percentSimilar).to.be(0);
+      // Testing some OS/browser differnces were shown to cause .009 percent difference.
+      expect(percentSimilar).to.be.lessThan(0.05);
     });
   });
 }
