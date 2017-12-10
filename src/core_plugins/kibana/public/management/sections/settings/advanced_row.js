@@ -44,6 +44,12 @@ uiModules.get('apps/management')
         };
 
         $scope.save = function (conf) {
+          // an empty JSON is valid as per the validateJson directive.
+          // set the value to empty JSON in this case so that its parsing upon retrieving the setting does not fail.
+          if (conf.type === 'json' && conf.unsavedValue === '') {
+            conf.unsavedValue = '{}';
+          }
+
           loading(conf, function () {
             if (conf.unsavedValue === conf.defVal) {
               return config.remove(conf.name);

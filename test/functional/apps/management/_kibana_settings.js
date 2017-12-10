@@ -28,6 +28,13 @@ export default function ({ getService, getPageObjects }) {
       expect(advancedSetting).to.be('America/Phoenix');
     });
 
+    it('should coerce an empty setting of type JSON into an empty object', async function () {
+      await PageObjects.settings.clickKibanaSettings();
+      await PageObjects.settings.setAdvancedSettingsInput('query:queryString:options', '', 'unsavedValueJsonTextArea');
+      const advancedSetting = await PageObjects.settings.getAdvancedSettings('query:queryString:options');
+      expect(advancedSetting).to.be.eql('{}');
+    });
+
     describe('state:storeInSessionStorage', () => {
       it ('defaults to false', async () => {
         await PageObjects.settings.clickKibanaSettings();
