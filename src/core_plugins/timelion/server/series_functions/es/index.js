@@ -15,8 +15,8 @@ export default new Datasource('es', {
       name: 'metric',
       types: ['string', 'null'],
       multi: true,
-      help: 'An elasticsearch single value metric agg, eg avg, sum, min, max or cardinality, followed by a field.' +
-        ' Eg "sum:bytes", or just "count"'
+      help: 'An elasticsearch metric agg: avg, sum, min, max, percentiles or cardinality, followed by a field.' +
+        ' Eg "sum:bytes", "percentiles:bytes:95,99,99.9" or just "count"'
     },
     {
       name: 'split',
