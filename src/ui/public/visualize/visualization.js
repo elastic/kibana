@@ -117,12 +117,13 @@ uiModules
             observer.next({
               vis: $scope.vis,
               visData: $scope.visData,
+              container: getVisContainer(),
             });
           });
         });
 
         const success$ = render$
-          .filter(({ vis, visData }) => vis && vis.initialized && (!vis.type.requiresSearch || visData))
+          .filter(({ vis, visData, container }) => vis && vis.initialized && container && (!vis.type.requiresSearch || visData))
           .do(({ vis }) => {
             $scope.addLegend = vis.params.addLegend;
             vis.refreshLegend++;
@@ -131,13 +132,10 @@ uiModules
             dispatchCustomEvent('renderStart');
           })
           .debounceTime(100)
-          .switchMap(async () => {
-            const container = getVisContainer();
-            if (!container) return;
-
-            $scope.vis.size = [container.width(), container.height()];
+          .switchMap(async ({ vis, visData, container }) => {
+            vis.size = [container.width(), container.height()];
             const status = getUpdateStatus($scope);
-            const renderPromise = visualization.render($scope.visData, status);
+            const renderPromise = visualization.render(visData, status);
             $scope.$apply();
             return renderPromise;
           });
