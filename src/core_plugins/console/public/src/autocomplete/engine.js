@@ -336,15 +336,14 @@ export function populateContext(tokenPath, context, editor, includeAutoComplete,
     wsToUse = _.find(walkStates, function (ws) {
       return _.isEmpty(ws.components)
     });
-    console.log("resolved ", tokenPath, 'to', walkStates);
+
     if (!wsToUse && walkStates.length > 1 && !includeAutoComplete) {
       console.info("more then one context active for current path, but autocomplete isn't requested", walkStates);
     }
+
     if (!wsToUse) {
       wsToUse = walkStates[0];
     }
-
-    console.log("resolved ", tokenPath, 'to', wsToUse, 'options were', walkStates);
 
     _.each(wsToUse.contextExtensionList, function (extension) {
       _.assign(context, extension);
