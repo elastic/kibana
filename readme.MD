@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/sqren/backport.svg?branch=master)](https://travis-ci.org/sqren/backport)
 [![dependencies Status](https://david-dm.org/sqren/backport/status.svg)](https://david-dm.org/sqren/backport)
-[![Maintainability](https://api.codeclimate.com/v1/badges/42a56ac121367ec37d19/maintainability)](https://codeclimate.com/github/sqren/backport/maintainability)
+[![Coverage Status](https://coveralls.io/repos/github/sqren/backport/badge.svg?branch=master)](https://coveralls.io/github/sqren/backport?branch=master)
 [![NPM version](https://img.shields.io/npm/v/backport.svg)](https://www.npmjs.com/package/backport)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](#badge)
 
