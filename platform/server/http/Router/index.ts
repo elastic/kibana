@@ -53,8 +53,6 @@ export class KibanaResponse<T> {
   constructor(readonly status: StatusCode, readonly payload?: T) {}
 }
 
-// TODO Explore validating headers too (can't validate _all_, but you only
-// receive the headers you _have_ validated).
 export class KibanaRequest<
   Params extends Props = {},
   Query extends Props = {},
