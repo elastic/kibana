@@ -6,34 +6,33 @@
 
   // Define the data source
   "data": {
-    // When url is set to an object instead of a string,
-    // it is treated as an Elasticsearch query.
+    // esRequest, esIndex, and esContext indicate that
+    // this data object represents Elasticsearch query.
     // This query counts the number of documents per time interval,
     // assuming you have a @timestamp field in your data
-    "url": {
-      // Which indexes to search
-      "index": "_all",
-      // Connect dashboard context (the date range and filters)
-      "%context_query%": "@timestamp",
-      // The body element may contain "aggs" and "query" subfields
-      "body": {
-        "aggs": {
-          "time_buckets": {
-            "date_histogram": {
-              // Use date histogram aggregation on @timestamp field
-              "field": "@timestamp",
-              // interval value will depend on the daterange picker
-              // Use an integer to set approximate bucket count
-              "interval": {"%autointerval%": true},
-              // Make sure we get an entire range, even if it has no data
-              "extended_bounds": {
-                "min": {"%timefilter%": "min"},
-                "max": {"%timefilter%": "max"}
-              },
-              // Use this for linear (e.g. line, area) graphs
-              // Without it, empty buckets will not show up
-              "min_doc_count": 0
-            }
+
+    // Which indexes to search
+    "esIndex": "_all",
+    // Connect dashboard context (the date range and filters)
+    "esContext": "@timestamp",
+    // The body element may contain "aggs" and "query" subfields
+    "esRequest": {
+      "aggs": {
+        "time_buckets": {
+          "date_histogram": {
+            // Use date histogram aggregation on @timestamp field
+            "field": "@timestamp",
+            // interval value will depend on the daterange picker
+            // Use an integer to set approximate bucket count
+            "interval": {"%autointerval%": true},
+            // Make sure we get an entire range, even if it has no data
+            "extended_bounds": {
+              "min": {"%timefilter%": "min"},
+              "max": {"%timefilter%": "max"}
+            },
+            // Use this for linear (e.g. line, area) graphs
+            // Without it, empty buckets will not show up
+            "min_doc_count": 0
           }
         }
       },

@@ -4,9 +4,6 @@ import 'leaflet-vega';
 import * as vega from 'vega';
 import * as vegaLite from 'vega-lite';
 
-import { parseInputSpec } from './parse_input_spec';
-import { createVegaLoader } from './vega_loader';
-
 //https://github.com/elastic/kibana/issues/13327
 vega.scheme('elastic',
   ['#00B3A4', '#3185FC', '#DB1374', '#490092', '#FEB6DB', '#F98510', '#E6C220', '#BFA180', '#920000', '#461A0A']
@@ -14,32 +11,48 @@ vega.scheme('elastic',
 
 // FIXME: handle runtime errors by overrwriting  vega.logging.error ...
 export class VegaView {
-  constructor(vegaConfig, parentEl, inputSpec, timefilter, dashboardContext, es, serviceSettings, onError, onWarn) {
+  constructor(vegaConfig, parentEl, vegaParser, serviceSettings, onError, onWarn) {
     this._onWarn = onWarn;
     this._onError = onError;
-    this._parentEl = parentEl;
+    this._parentEl = $(parentEl);
     this._serviceSettings = serviceSettings;
+    this._parser = vegaParser;
 
-    this._specParams = parseInputSpec(inputSpec, this._onWarn);
-    if (this._specParams.hideWarnings) {
-      this._onWarn = () => {};
+    if (this._parser.hideWarnings) {
+      this._onWarn = () => 0;
     }
 
-    this._parentEl.css('flex-direction', this._specParams.containerDir);
+    this._parentEl.css('flex-direction', this._parser.containerDir);
 
     this._view = null;
 
     this._viewConfig = {
-      loader: createVegaLoader(es, timefilter, dashboardContext, vegaConfig.enableExternalUrls),
       logLevel: vega.Warn,
       renderer: 'canvas',
     };
+
+    /**
+     * ... the loader instance to use for data file loading. A
+     * loader object must provide a "load" method for loading files and a
+     * "sanitize" method for checking URL/filename validity. Both methods
+     * should accept a URI and options hash as arguments, and return a Promise
+     * that resolves to the loaded file contents (load) or a hash containing
+     * sanitized URI data with the sanitized url assigned to the "href" property
+     * (sanitize).
+     */
+    if (!vegaConfig.enableExternalUrls) {
+      const loader = vega.loader();
+      loader.load = () => {
+        throw new Error('External URLs have been disabled in kibana.yml');
+      };
+      this._viewConfig.loader = loader;
+    }
   }
 
   async init() {
     this._$container = $('<div class="vega-view-container">').appendTo(this._parentEl);
     this._$controls = $('<div class="vega-controls-container">')
-      .css('flex-direction', this._specParams.controlsDir)
+      .css('flex-direction', this._parser.controlsDir)
       .appendTo(this._parentEl);
 
     this._addDestroyHandler(() => {
@@ -50,7 +63,7 @@ export class VegaView {
     });
 
     try {
-      if (this._specParams.useMap) {
+      if (this._parser.useMap) {
         await this._initLeafletVega();
       } else {
         await this._initRawVega();
@@ -61,7 +74,7 @@ export class VegaView {
   }
 
   resize() {
-    if (this._specParams.useResize && this._view && this.updateVegaSize(this._view)) {
+    if (this._parser.useResize && this._view && this.updateVegaSize(this._view)) {
       return this._view.runAsync();
     } else {
       return Promise.resolve();
@@ -92,8 +105,8 @@ export class VegaView {
   updateVegaSize(view) {
     // FIXME: for some reason the object is slightly scrollable without this
     const heightExtraPadding = 6;
-    const width = Math.max(0, this._$container.width() - this._specParams.paddingWidth);
-    const height = Math.max(0, this._$container.height() - this._specParams.paddingHeight) - heightExtraPadding;
+    const width = Math.max(0, this._$container.width() - this._parser.paddingWidth);
+    const height = Math.max(0, this._$container.height() - this._parser.paddingHeight) - heightExtraPadding;
     if (view.width() !== width || view.height() !== height) {
       view.width(width).height(height);
       return true;
@@ -105,15 +118,15 @@ export class VegaView {
     // In some cases, Vega may be initialized twice... TBD
     if (!this._$container) return;
 
-    const view = new vega.View(vega.parse(this._specParams.spec), this._viewConfig);
-    VegaView.setDebugValues(view, this._specParams.spec, this._specParams.vlspec);
+    const view = new vega.View(vega.parse(this._parser.spec), this._viewConfig);
+    VegaView.setDebugValues(view, this._parser.spec, this._parser.vlspec);
 
     view.warn = this._onWarn;
     view.error = this._onError;
-    if (this._specParams.useResize) this.updateVegaSize(view);
+    if (this._parser.useResize) this.updateVegaSize(view);
     view.initialize(this._$container.get(0), this._$controls.get(0));
 
-    if (this._specParams.useHover) view.hover();
+    if (this._parser.useHover) view.hover();
 
     this._addDestroyHandler(() => {
       this._view = null;
@@ -125,7 +138,7 @@ export class VegaView {
   }
 
   async _initLeafletVega() {
-    const specParams = this._specParams;
+    const specParams = this._parser;
     const useDefaultMap = specParams.mapStyle !== false;
 
     let limits;
@@ -229,7 +242,7 @@ export class VegaView {
       window.VEGA_DEBUG.VEGA_LITE_VERSION = vegaLite.version;
       window.VEGA_DEBUG.view = view;
       window.VEGA_DEBUG.vegaspec = spec;
-      window.VEGA_DEBUG.vlspec = vlspec;
+      window.VEGA_DEBUG.vegalitespec = vlspec;
     }
   }
 }
