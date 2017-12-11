@@ -4,11 +4,19 @@ import { callAPI } from './call_api';
 type CallAPIOptions = { wrap401Errors?: boolean };
 type CallAPIClientParams = { [key: string]: any };
 
+interface AdminClientSettings {
+  client: Client;
+}
+
 export class AdminClient {
-  constructor(private readonly client: Client) {}
+  private readonly client: Client;
+
+  constructor(settings: AdminClientSettings) {
+    this.client = settings.client;
+  }
 
   call(
-    endpoint: string | string[],
+    endpoint: string,
     clientParams: CallAPIClientParams = {},
     options: CallAPIOptions = {},
   ): any {

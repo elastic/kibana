@@ -6,25 +6,31 @@ import { ElasticsearchConfig } from '../elasticsearch/ElasticsearchConfig';
 type CallAPIOptions = { wrap401Errors?: boolean };
 type CallAPIClientParams = { [key: string]: any };
 
+interface ScopedDataClientSettings {
+  client: Client;
+  headers: Headers;
+  config: ElasticsearchConfig;
+}
+
 // TODO: eventually do this:
 //export class ScopedDataClient extends DataClient {
 export class ScopedDataClient {
-  constructor(
-    private readonly client: Client,
-    private readonly headers: Headers,
-    private readonly config: ElasticsearchConfig,
-  ) {
+  private readonly client: Client;
+  private readonly headers: Headers;
+  private readonly config: ElasticsearchConfig;
+
+  constructor(settings: ScopedDataClientSettings) {
+    this.client = settings.client;
+    this.config = settings.config;
+    this.headers = getFilteredHeaders(settings.headers, this.config.requestHeadersWhitelist);
   }
 
   call(
-    endpoint: string | string[],
+    endpoint: string,
     clientParams: CallAPIClientParams = {},
     options: CallAPIOptions = {},
   ): any {
-    if (this.headers) {
-      const filteredHeaders = getFilteredHeaders(this.headers, this.config.requestHeadersWhitelist);
-      clientParams = { ...clientParams, headers: filteredHeaders };
-    }
+    clientParams = { ...clientParams, headers: this.headers };
 
     return callAPI(this.client, endpoint, clientParams, options);
   }
