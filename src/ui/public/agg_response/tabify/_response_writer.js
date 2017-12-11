@@ -194,7 +194,7 @@ export function TabbedAggResponseWriterProvider(Private) {
         newList.unshift(injected);
       }
 
-      const newAcr = new AggConfigResult(acr.aggConfig, newList[0], acr.value, acr.aggConfig.getKey(acr));
+      const newAcr = new AggConfigResult(acr.aggConfig, newList[0], acr.value, acr.aggConfig.getKey(acr), acr.filter);
       newList.unshift(newAcr);
 
       // and replace the acr in the row buffer if its there

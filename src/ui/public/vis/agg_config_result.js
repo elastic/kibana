@@ -3,10 +3,11 @@ import chrome from 'ui/chrome';
 let i = 0;
 
 // eslint-disable-next-line @elastic/kibana-custom/no-default-export
-export default function AggConfigResult(aggConfig, parent, value, key) {
+export default function AggConfigResult(aggConfig, parent, value, key, filter) {
   this.key = key;
   this.value = value;
   this.aggConfig = aggConfig;
+  this.filter = filter;
   this.$parent = parent;
   this.$order = ++i;
 
