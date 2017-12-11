@@ -78,38 +78,29 @@ describe(`EsQueryParser.injectQueryContextVars`, () => {
     { a: { format: `epoch_millis`, gte: rangeStart, lte: rangeEnd } }));
 });
 
-describe(`parseEsRequest`, () => {
-  function test(obj, ctx, expectedRes, expectedObj) {
+describe(`EsQueryParser.parseEsRequest`, () => {
+  function test(esIndex, esContext, esRequest, ctx, expected) {
     return () => {
-      expect(create(rangeStart, rangeEnd, ctx).parseEsRequest(obj)).to.eql(expectedRes);
-      expect(obj).to.eql(expectedObj);
+      const actual = create(rangeStart, rangeEnd, ctx).parseEsRequest(esRequest, esIndex, esContext);
+      expect(actual).to.eql(expected);
     };
   }
 
-  it(`non-es`, test({}, {}, false, {}));
-  it(`esContext=true`, test(
-    { esContext: true, esIndex: '_all', x: 1 }, ctxArr,
-    { index: '_all', body: { query: ctxArr } }, { x: 1 }));
-  it(`esContext='abc'`, test(
-    { esContext: 'abc', esIndex: '_all', x: 1 }, ctxArr,
-    {
-      index: '_all',
-      body: {
-        query: {
-          bool: {
-            must: [
-              { match_all: { c: 3 } },
-              { range: { abc: { format: 'epoch_millis', gte: rangeStart, lte: rangeEnd } } }
-            ],
-            must_not: [{ 'd': 4 }]
-          }
+  it(`esContext=true`, test('_all', true, undefined, ctxArr, { index: '_all', body: { query: ctxArr } }));
+  it(`esContext='abc'`, test('_all', 'abc', undefined, ctxArr, {
+    index: '_all',
+    body: {
+      query: {
+        bool: {
+          must: [
+            { match_all: { c: 3 } },
+            { range: { abc: { format: 'epoch_millis', gte: rangeStart, lte: rangeEnd } } }
+          ],
+          must_not: [{ 'd': 4 }]
         }
       }
-    }, { x: 1 }));
-  it(`no esRequest`, test(
-    { esIndex: '_all', x: 1 }, ctxArr,
-    { index: '_all', body: {} }, { x: 1 }));
-  it(`esRequest`, test(
-    { esIndex: '_all', esRequest: { a: 2 }, x: 1 }, ctxArr,
-    { index: '_all', body: { a: 2 } }, { x: 1 }));
+    }
+  }));
+  it(`no esRequest`, test('_all', undefined, undefined, ctxArr, { index: '_all', body: {} }));
+  it(`esRequest`, test('_all', undefined, { a: 2 }, ctxArr, { index: '_all', body: { a: 2 } }));
 });

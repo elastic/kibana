@@ -10,8 +10,7 @@ export function VegaRequestHandlerProvider(Private, es, timefilter) {
     handler: (vis, appState, uiState) => {
       const vp = new VegaParser(vis.params.spec, es, timefilter, dashboardContext,
         { vis, appState, uiState });
-      return vp.parse();
-
+      return vp.parseAsync();
     }
   };
 }

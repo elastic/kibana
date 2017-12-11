@@ -138,8 +138,8 @@ export class VegaView {
   }
 
   async _initLeafletVega() {
-    const specParams = this._parser;
-    const useDefaultMap = specParams.mapStyle !== false;
+    const mapConfig = this._parser.mapConfig;
+    const useDefaultMap = mapConfig.mapStyle !== false;
 
     let limits;
     let url;
@@ -147,14 +147,14 @@ export class VegaView {
 
     if (useDefaultMap) {
       const tmsService = await this._serviceSettings.getTMSService();
+      // FIXME: In some cases, Vega may be initialized twice, e.g. after awaiting... TBD
+      if (!this._$container) return;
+
       url = tmsService.getUrl();
       limits = tmsService.getTMSOptions();
     } else {
       limits = { minZoom: 0, maxZoom: 25 };
     }
-
-    // In some cases, Vega may be initialized twice, e.g. after awaiting... TBD
-    if (!this._$container) return;
 
     const validate = (name, value, dflt, min, max) => {
       if (value === undefined) {
@@ -169,26 +169,26 @@ export class VegaView {
       return value;
     };
 
-    let minZoom = validate('minZoom', specParams.minZoom, limits.minZoom, limits.minZoom, limits.maxZoom);
-    let maxZoom = validate('maxZoom', specParams.maxZoom, limits.maxZoom, limits.minZoom, limits.maxZoom);
+    let minZoom = validate('minZoom', mapConfig.minZoom, limits.minZoom, limits.minZoom, limits.maxZoom);
+    let maxZoom = validate('maxZoom', mapConfig.maxZoom, limits.maxZoom, limits.minZoom, limits.maxZoom);
     if (minZoom > maxZoom) {
       this._onWarn('minZoom and maxZoom have been swapped');
       [minZoom, maxZoom] = [maxZoom, minZoom];
     }
-    const zoom = validate('zoom', specParams.zoom, 2, minZoom, maxZoom);
+    const zoom = validate('zoom', mapConfig.zoom, 2, minZoom, maxZoom);
 
     // let maxBounds = null;
-    // if (specParams.maxBounds) {
-    //   const b = specParams.maxBounds;
+    // if (mapConfig.maxBounds) {
+    //   const b = mapConfig.maxBounds;
     //   maxBounds = L.latLngBounds(L.latLng(b[1], b[0]), L.latLng(b[3], b[2]));
     // }
 
     const map = L.map(this._$container.get(0), {
       minZoom,
       maxZoom,
-      center: [specParams.latitude, specParams.longitude],
+      center: [mapConfig.latitude, mapConfig.longitude],
       zoom,
-      zoomControl: specParams.zoomControl,
+      zoomControl: mapConfig.zoomControl,
       attributionControl: useDefaultMap,
       // TODO: test and enable
       // maxBounds
@@ -208,10 +208,10 @@ export class VegaView {
     }
 
     const vegaLayer = L
-      .vega(specParams.spec, {
+      .vega(mapConfig.spec, {
         vega,
         bindingsContainer: this._$controls.get(0),
-        delayRepaint: specParams.delayRepaint,
+        delayRepaint: mapConfig.delayRepaint,
         viewConfig: this._viewConfig,
         onWarning: this._onWarn,
         onError: this._onError
@@ -241,8 +241,8 @@ export class VegaView {
       window.VEGA_DEBUG.VEGA_VERSION = vega.version;
       window.VEGA_DEBUG.VEGA_LITE_VERSION = vegaLite.version;
       window.VEGA_DEBUG.view = view;
-      window.VEGA_DEBUG.vegaspec = spec;
-      window.VEGA_DEBUG.vegalitespec = vlspec;
+      window.VEGA_DEBUG.vega_spec = spec;
+      window.VEGA_DEBUG.vegalite_spec = vlspec;
     }
   }
 }

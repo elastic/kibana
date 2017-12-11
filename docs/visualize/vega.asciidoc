@@ -230,14 +230,13 @@ Browser Debugging console
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Use browser debugging tools (e.g. F12 or Ctrl+Shift+J in Chrome) to
-inspect the `VEGA_DEBUG` variable: * `view` - access to the Vega View
-object. See https://vega.github.io/vega/docs/api/debugging/[Vega
-Debugging Guide] on how to inspect data and signals at runtime. For
-VegaLite, `VEGA_DEBUG.view.data('source_0')` would get the main dataset.
-For Vega, it uses the data name as defined in your Vega spec. * `spec` -
-Vega JSON specification after some modifications by this plugin. In case
-of VegaLite, this is the output of the VegaLite compiler. * `vegalitespec` -
-If this is a VegaLite graph, JSON specification of the graph before
+inspect the `VEGA_DEBUG` variable:
+* `view` - access to the Vega View object. See https://vega.github.io/vega/docs/api/debugging/[Vega Debugging Guide]
+ on how to inspect data and signals at runtime. For VegaLite, `VEGA_DEBUG.view.data('source_0')` gets the main dataset.
+ For Vega, it uses the data name as defined in your Vega spec.
+* `vega_spec` - Vega JSON specification after some modifications by this plugin. In case
+of VegaLite, this is the output of the VegaLite compiler.
+* `vegalite_spec` - If this is a VegaLite graph, JSON specification of the graph before
 VegaLite compilation.
 
 [[vega-data]]

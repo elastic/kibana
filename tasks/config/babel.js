@@ -6,7 +6,7 @@ module.exports = {
       ]
     },
     src: [
-      'build/kibana/**/*.js',
+      // 'build/kibana/**/*.js',
       '!**/public/**',
       '!**/node_modules/**',
       '!**/bower_components/**',

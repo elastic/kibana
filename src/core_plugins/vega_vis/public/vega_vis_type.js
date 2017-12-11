@@ -44,7 +44,7 @@ VisTypesRegistryProvider.register(function VegaVisProvider(Private, es, timefilt
     requestHandler: (vis/*, appState, uiState*/) => {
       const vp = new VegaParser(vis.params.spec, es, timefilter, dashboardContext,
         { serviceSettings, vegaConfig });
-      return vp.parse();
+      return vp.parseAsync();
 
     },
 

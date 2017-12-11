@@ -5,6 +5,7 @@ import schemaParser from 'vega-schema-url-parser';
 import versionCompare from 'compare-versions';
 import { EsQueryParser } from './es_query_parser';
 import hjson from 'hjson';
+import { ViewUtils } from './view_utils';
 
 const DEFAULT_SCHEMA = 'https://vega.github.io/schema/vega/v3.0.json';
 
@@ -29,13 +30,7 @@ export class VegaParser {
     this.esQueryParser = new EsQueryParser(timefilter, dashboardContext);
   }
 
-  onWarning(warning) {
-    if (!this.hideWarnings) {
-      this.warnings.push(warning);
-    }
-  }
-
-  async parse() {
+  async parseAsync() {
     if (this.isVegaLite !== undefined) throw new Error();
 
     if (typeof this.spec === 'string') {
@@ -44,43 +39,51 @@ export class VegaParser {
     if (!_.isPlainObject(this.spec)) {
       throw new Error('Invalid Vega spec');
     }
-    this.isVegaLite = this.parseSchema();
+    this.isVegaLite = this._parseSchema();
     this.useHover = !this.isVegaLite;
-    this.config = this.parseConfig();
+    this.config = this._parseConfig();
     this.hideWarnings = !!this.config.hideWarnings;
     this.useMap = this.config.type === 'map';
 
-    this.setDefaultColors();
-    this.parseControlPlacement(this.config);
+    this._setDefaultColors();
+    this._parseControlPlacement(this.config);
     if (this.useMap) {
-      this.mapConfig = this.parseMapConfig();
+      this.mapConfig = this._parseMapConfig();
     } else if (this.spec.autosize === undefined) {
       // Default autosize should be fit, unless it's a map (leaflet-vega handles that)
       this.spec.autosize = { type: 'fit', contains: 'padding' };
     }
 
-    await this.resolveEsQueries();
+    await this._resolveEsQueriesAsync();
 
     if (this.isVegaLite) {
-      this.parseVegaLite();
+      this._compileVegaLite();
     }
-    this.calcSizing();
+    this._calcSizing();
 
     return this;
   }
 
-  parseVegaLite() {
+  /**
+   * Convert VegaLite to Vega spec
+   * @private
+   */
+  _compileVegaLite() {
     if (this.useMap) {
       throw new Error('"_map" configuration is not compatible with vega-lite spec');
     }
     this.vlspec = this.spec;
 
     const logger = vega.logger(vega.Warn);
-    logger.warn = this.onWarning.bind(this);
+    logger.warn = this._onWarning.bind(this);
     this.spec = vegaLite.compile(this.vlspec, logger).spec;
   }
 
-  calcSizing() {
+  /**
+   * Process graph size and padding
+   * @private
+   */
+  _calcSizing() {
     this.useResize = !this.useMap && (this.spec.autosize === 'fit' || this.spec.autosize.type === 'fit');
 
     // Padding is not included in the width/height by default
@@ -101,15 +104,16 @@ export class VegaParser {
         delete this.spec.width;
         delete this.spec.height;
       } else {
-        this.onWarning(`The 'width' and 'height' params are ignored with autosize=fit`);
+        this._onWarning(`The 'width' and 'height' params are ignored with autosize=fit`);
       }
     }
   }
 
   /**
    * Calculate container-direction CSS property for binding placement
+   * @private
    */
-  parseControlPlacement() {
+  _parseControlPlacement() {
     this.containerDir = locToDirMap[this.config.controlsLocation];
     if (this.containerDir === undefined) {
       if (this.config.controlsLocation === undefined) {
@@ -126,7 +130,12 @@ export class VegaParser {
     this.controlsDir = dir === 'horizontal' ? 'row' : 'column';
   }
 
-  parseConfig() {
+  /**
+   * Parse {config: kibana: {...}} portion of the Vega spec (or root-level _hostConfig for backward compat)
+   * @returns {object}
+   * @private
+   */
+  _parseConfig() {
     let result;
     if (this.spec._hostConfig !== undefined) {
       result = this.spec._hostConfig;
@@ -134,7 +143,7 @@ export class VegaParser {
       if (!_.isPlainObject(result)) {
         throw new Error('If present, _hostConfig must be an object');
       }
-      this.onWarning('_hostConfig has been deprecated. Use config.kibana instead.');
+      this._onWarning('_hostConfig has been deprecated. Use config.kibana instead.');
     }
     if (_.isPlainObject(this.spec.config) && this.spec.config.kibana !== undefined) {
       result = this.spec.config.kibana;
@@ -146,57 +155,74 @@ export class VegaParser {
     return result || {};
   }
 
-  parseMapConfig() {
-    const validate = (name, val, isZoom) => {
+  /**
+   * Parse map-specific configuration
+   * @returns {{mapStyle: *|string, delayRepaint: boolean, latitude: number, longitude: number, zoom, minZoom, maxZoom, zoomControl: *|boolean, maxBounds: *}}
+   * @private
+   */
+  _parseMapConfig() {
+    const res = {
+      delayRepaint: this.config.delayRepaint === undefined ? true : this.config.delayRepaint,
+    };
+
+    const validate = (name, isZoom) => {
+      const val = this.config[name];
       if (val !== undefined) {
         const parsed = Number.parseFloat(val);
         if (Number.isFinite(parsed) && (!isZoom || (parsed >= 0 && parsed <= 30))) {
-          return parsed;
+          res[name] = parsed;
+          return;
         }
-        this.onWarning(`config.kibana.${name} is not valid`);
+        this._onWarning(`config.kibana.${name} is not valid`);
       }
-      return undefined;
+      if (!isZoom) res[name] = 0;
     };
 
-    const res = {
-      mapStyle: this.config.mapStyle,
-      delayRepaint: this.config.delayRepaint === undefined ? true : this.config.delayRepaint,
-      latitude: validate(`latitude`, this.config.latitude) || 0,
-      longitude: validate(`longitude`, this.config.longitude) || 0,
-      zoom: validate(`zoom`, this.config.zoom, true),
-      minZoom: validate(`minZoom`, this.config.minZoom, true),
-      maxZoom: validate(`maxZoom`, this.config.maxZoom, true),
-      zoomControl: this.config.zoomControl,
-      maxBounds: this.config.maxBounds,
-    };
+    validate(`latitude`, false);
+    validate(`longitude`, false);
+    validate(`zoom`, true);
+    validate(`minZoom`, true);
+    validate(`maxZoom`, true);
 
     // `false` is a valid value
-    res.mapStyle = res.mapStyle === undefined ? `default` : res.mapStyle;
+    res.mapStyle = this.config.mapStyle === undefined ? `default` : this.config.mapStyle;
     if (res.mapStyle !== `default` && res.mapStyle !== false) {
-      this.onWarning(`config.kibana.mapStyle may either be false or "default"`);
+      this._onWarning(`config.kibana.mapStyle may either be false or "default"`);
       res.mapStyle = `default`;
     }
 
-    if (res.zoomControl === undefined) {
+    const zoomControl = this.config.zoomControl;
+    if (zoomControl === undefined) {
       res.zoomControl = true;
-    } else if (typeof res.zoomControl !== 'boolean') {
-      this.onWarning('config.kibana.zoomControl must be a boolean value');
+    } else if (typeof zoomControl !== 'boolean') {
+      this._onWarning('config.kibana.zoomControl must be a boolean value');
       res.zoomControl = true;
+    } else {
+      res.zoomControl = zoomControl;
     }
 
-    if (res.maxBounds !== undefined &&
-      (!Array.isArray(res.maxBounds) || res.maxBounds.length !== 4 ||
-        !res.maxBounds.every(v => typeof v === 'number' && Number.isFinite(v)))) {
-      this.onWarning(`config.kibana.maxBounds must be an array with four numbers`);
-      res.maxBounds = undefined;
+    const maxBounds = this.config.maxBounds;
+    if (maxBounds !== undefined) {
+      if (!Array.isArray(maxBounds) || maxBounds.length !== 4 ||
+        !maxBounds.every(v => typeof v === 'number' && Number.isFinite(v))
+      ) {
+        this._onWarning(`config.kibana.maxBounds must be an array with four numbers`);
+      } else {
+        res.maxBounds = maxBounds;
+      }
     }
 
     return res;
   }
 
-  parseSchema() {
+  /**
+   * Parse Vega schema element
+   * @returns {boolean} is this a VegaLite schema?
+   * @private
+   */
+  _parseSchema() {
     if (!this.spec.$schema) {
-      this.onWarning(`The input spec does not specify a "$schema", defaulting to "${DEFAULT_SCHEMA}"`);
+      this._onWarning(`The input spec does not specify a "$schema", defaulting to "${DEFAULT_SCHEMA}"`);
       this.spec.$schema = DEFAULT_SCHEMA;
     }
 
@@ -205,9 +231,9 @@ export class VegaParser {
     const libVersion = isVegaLite ? vegaLite.version : vega.version;
 
     if (versionCompare(schema.version, libVersion) > 0) {
-      this.onWarning(
-        `The input spec uses "${schema.library}" ${schema.version}, but ` +
-        `current version of "${schema.library}" is ${libVersion}.`
+      this._onWarning(
+        `The input spec uses ${schema.library} ${schema.version}, but ` +
+        `current version of ${schema.library} is ${libVersion}.`
       );
     }
 
@@ -215,22 +241,31 @@ export class VegaParser {
   }
 
   /**
-   * Record every usage
+   * Replace all instances of ES requests with raw values
+   * @private
    */
-  async resolveEsQueries() {
-    // TODO: switch to ES _msearch, instead of doing it one by one
+  async _resolveEsQueriesAsync() {
+    // TODO: switch to ES multi-search, instead of doing it one by one
     const sources = [];
-    this.findEsRequests((obj, esReq) => sources.push({ obj, esReq }), this.spec);
+    this._findEsRequests((obj, esReq) => sources.push({ obj, esReq }), this.spec);
 
     for (const { obj, esReq } of sources) {
-      obj.values = await this.es.search(esReq);
+      const values = await this.es.search(esReq);
+      obj.values = values;
     }
   }
 
-  findEsRequests(onFind, obj, key) {
+  /**
+   * Recursively find and callback every instance of ES data object
+   * @param {function({object}, {object})} onFind Call this function for all ES queries
+   * @param {*} obj current location in the object tree
+   * @param {string} [key] field name of the current object
+   * @private
+   */
+  _findEsRequests(onFind, obj, key) {
     if (Array.isArray(obj)) {
       for (const elem of obj) {
-        this.findEsRequests(onFind, elem, key);
+        this._findEsRequests(onFind, elem, key);
       }
     } else if (_.isPlainObject(obj)) {
       if (key === 'data') {
@@ -248,7 +283,7 @@ export class VegaParser {
         }
       } else {
         for (const k of Object.keys(obj)) {
-          this.findEsRequests(onFind, obj[k], k);
+          this._findEsRequests(onFind, obj[k], k);
         }
       }
     }
@@ -256,30 +291,31 @@ export class VegaParser {
 
   /**
    * Inject default colors into the spec.config
+   * @private
    */
-  setDefaultColors() {
+  _setDefaultColors() {
     // Default category coloring to the Elastic color scheme
-    this.setDefaultValue({ scheme: 'elastic' }, 'config', 'range', 'category');
+    this._setDefaultValue({ scheme: 'elastic' }, 'config', 'range', 'category');
 
     // Set default single color to match other Kibana visualizations
     const defaultColor = '#00A69B';
     if (this.isVegaLite) {
       // Vega-Lite: set default color, works for fill and strike --  config: { mark:  { color: '#00A69B' }}
-      this.setDefaultValue(defaultColor, 'config', 'mark', 'color');
+      this._setDefaultValue(defaultColor, 'config', 'mark', 'color');
     } else {
       // Vega - global mark has very strange behavior, must customize each mark type individually
       // https://github.com/vega/vega/issues/1083
       // Don't set defaults if spec.config.mark.color or fill are set
       if (!this.spec.config.mark || (this.spec.config.mark.color === undefined && this.spec.config.mark.fill === undefined)) {
-        this.setDefaultValue(defaultColor, 'config', 'arc', 'fill');
-        this.setDefaultValue(defaultColor, 'config', 'area', 'fill');
-        this.setDefaultValue(defaultColor, 'config', 'line', 'stroke');
-        this.setDefaultValue(defaultColor, 'config', 'path', 'stroke');
-        this.setDefaultValue(defaultColor, 'config', 'rect', 'fill');
-        this.setDefaultValue(defaultColor, 'config', 'rule', 'stroke');
-        this.setDefaultValue(defaultColor, 'config', 'shape', 'stroke');
-        this.setDefaultValue(defaultColor, 'config', 'symbol', 'fill');
-        this.setDefaultValue(defaultColor, 'config', 'trail', 'fill');
+        this._setDefaultValue(defaultColor, 'config', 'arc', 'fill');
+        this._setDefaultValue(defaultColor, 'config', 'area', 'fill');
+        this._setDefaultValue(defaultColor, 'config', 'line', 'stroke');
+        this._setDefaultValue(defaultColor, 'config', 'path', 'stroke');
+        this._setDefaultValue(defaultColor, 'config', 'rect', 'fill');
+        this._setDefaultValue(defaultColor, 'config', 'rule', 'stroke');
+        this._setDefaultValue(defaultColor, 'config', 'shape', 'stroke');
+        this._setDefaultValue(defaultColor, 'config', 'symbol', 'fill');
+        this._setDefaultValue(defaultColor, 'config', 'trail', 'fill');
       }
     }
   }
@@ -289,8 +325,9 @@ export class VegaParser {
    * Given an object, and an array of fields, ensure that obj.fld1.fld2. ... .fldN is set to value if it doesn't exist.
    * @param {*} value
    * @param {string} fields
+   * @private
    */
-  setDefaultValue(value, ...fields) {
+  _setDefaultValue(value, ...fields) {
     let o = this.spec;
     for (let i = 0; i < fields.length - 1; i++) {
       const field = fields[i];
@@ -305,6 +342,16 @@ export class VegaParser {
     const lastField = fields[fields.length - 1];
     if (o[lastField] === undefined) {
       o[lastField] = value;
+    }
+  }
+
+  /**
+   * Add a warning to the warnings array
+   * @private
+   */
+  _onWarning() {
+    if (!this.hideWarnings) {
+      this.warnings.push(ViewUtils.makeWarningMsg(...arguments));
     }
   }
 }
