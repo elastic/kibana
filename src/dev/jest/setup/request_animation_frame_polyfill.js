@@ -16,3 +16,7 @@ window.requestAnimationFrame = (() => {
     }
   };
 })();
+
+window.cancelAnimationFrame = (id) => {
+  clearTimeout(id);
+};

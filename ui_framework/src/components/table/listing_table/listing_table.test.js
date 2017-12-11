@@ -1,9 +1,6 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
-import { requiredProps } from '../../../test/required_props';
-import {
-  takeMountedSnapshot,
-} from 'ui_framework/src/test';
+import { requiredProps, takeMountedSnapshot } from '../../../test';
 import {
   KuiListingTable,
 } from './listing_table';

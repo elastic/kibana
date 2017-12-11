@@ -4,6 +4,7 @@ import { mount } from 'enzyme';
 import { KuiCodeEditor } from './code_editor';
 import { keyCodes } from '../../services';
 import {
+  findTestSubject,
   requiredProps,
   takeMountedSnapshot,
 } from '../../test';
@@ -37,20 +38,21 @@ describe('KuiCodeEditor', () => {
 
     describe('hint element', () => {
       test('should be tabable', () => {
-        expect(component.find('[data-test-subj="codeEditorHint"]').prop('tabIndex')).toBe('0');
+        const hint = findTestSubject(component, 'codeEditorHint').getDOMNode();
+        expect(hint).toMatchSnapshot();
       });
 
       test('should be disabled when the ui ace box gains focus', () => {
-        const hint = component.find('[data-test-subj="codeEditorHint"]');
-        hint.simulate('keydown', { keyCode: keyCodes.ENTER });
-        expect(hint).toMatchSnapshot();
+        const hint = findTestSubject(component, 'codeEditorHint');
+        hint.simulate('keyup', { keyCode: keyCodes.ENTER });
+        expect(findTestSubject(component, 'codeEditorHint').getDOMNode()).toMatchSnapshot();
       });
 
       test('should be enabled when the ui ace box loses focus', () => {
-        const hint = component.find('[data-test-subj="codeEditorHint"]');
-        hint.simulate('keydown', { keyCode: keyCodes.ENTER });
+        const hint = findTestSubject(component, 'codeEditorHint');
+        hint.simulate('keyup', { keyCode: keyCodes.ENTER });
         component.instance().onBlurAce();
-        expect(hint).toMatchSnapshot();
+        expect(findTestSubject(component, 'codeEditorHint').getDOMNode()).toMatchSnapshot();
       });
     });
 
@@ -66,11 +68,10 @@ describe('KuiCodeEditor', () => {
         component.instance().onKeydownAce({
           preventDefault: () => {},
           stopPropagation: () => {},
-          keyCode: keyCodes.ESCAPE
+          keyCode: keyCodes.ESCAPE,
         });
-        expect(
-          component.find('[data-test-subj="codeEditorHint"]').matchesElement(document.activeElement)
-        ).toBe(true);
+        const hint = findTestSubject(component, 'codeEditorHint').getDOMNode();
+        expect(hint).toBe(document.activeElement);
       });
     });
   });
