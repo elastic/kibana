@@ -27,6 +27,7 @@ exports[`renders ControlsTab 1`] = `
     handleLabelChange={[Function]}
     handleNumberOptionChange={[Function]}
     handleRemoveControl={[Function]}
+    key="1"
     moveControl={[Function]}
   />
   <ControlEditor
@@ -51,6 +52,7 @@ exports[`renders ControlsTab 1`] = `
     handleLabelChange={[Function]}
     handleNumberOptionChange={[Function]}
     handleRemoveControl={[Function]}
+    key="2"
     moveControl={[Function]}
   />
   <div
