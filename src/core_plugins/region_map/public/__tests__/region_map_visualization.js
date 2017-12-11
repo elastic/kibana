@@ -5,9 +5,9 @@ import { RegionMapsVisualizationProvider } from '../region_map_visualization';
 import ChoroplethLayer from '../choropleth_layer';
 import LogstashIndexPatternStubProvider from 'fixtures/stubbed_logstash_index_pattern';
 import * as visModule from 'ui/vis';
+import { ImageComparator } from 'test_utils/image_comparator';
 import sinon from 'sinon';
 import worldJson from './world.json';
-import pixelmatch from 'pixelmatch';
 
 import initialPng from './initial.png';
 import toiso3Png from './toiso3.png';
@@ -79,13 +79,12 @@ const PIXEL_DIFF = 64;
 describe('RegionMapsVisualizationTests', function () {
 
   let domNode;
-  let expectCanvas;
-  let diffCanvas;
-  let actualCanvas;
   let RegionMapsVisualization;
   let Vis;
   let indexPattern;
   let vis;
+
+  let imageComparator;
 
   const _makeJsonAjaxCallOld = ChoroplethLayer.prototype._makeJsonAjaxCall;
 
@@ -154,6 +153,10 @@ describe('RegionMapsVisualizationTests', function () {
 
     beforeEach(async function () {
       setupDOM('512px', '512px');
+
+      imageComparator = new ImageComparator();
+
+
       vis = new Vis(indexPattern, {
         type: 'region_map'
       });
@@ -175,7 +178,11 @@ describe('RegionMapsVisualizationTests', function () {
     });
 
     afterEach(function () {
+      if (window._skipTeardown) {
+        return;
+      }
       teardownDOM();
+      imageComparator.destroy();
     });
 
 
@@ -356,56 +363,10 @@ describe('RegionMapsVisualizationTests', function () {
 
 
   async function compareImage(expectedImageSource) {
-
-    return new Promise((resolve) => {
-
-
-      window.setTimeout(() => {
-
-        const elementList = domNode.querySelectorAll('canvas');
-        expect(elementList.length).to.equal(1);
-        const firstCanvasOnMap = elementList[0];
-
-        const firstContextOnMap = firstCanvasOnMap.getContext('2d');
-        const actualImageDataFromFirstContextOnMap = firstContextOnMap.getImageData(0, 0, firstCanvasOnMap.width, firstCanvasOnMap.height);
-        const actualContext = actualCanvas.getContext('2d');
-        actualCanvas.width = firstCanvasOnMap.width;
-        actualCanvas.height = firstCanvasOnMap.height;
-        actualContext.putImageData(actualImageDataFromFirstContextOnMap, 0, 0);
-
-        // convert expect PNG into pixel data by drawing in new canvas element
-        expectCanvas.width = firstCanvasOnMap.width;
-        expectCanvas.height = firstCanvasOnMap.height;
-
-        const expectedImage = new Image();
-        expectedImage.onload = () => {
-
-          const expectCtx = expectCanvas.getContext('2d');
-          expectCtx.drawImage(expectedImage, 0, 0, firstCanvasOnMap.width, firstCanvasOnMap.height);  // draw reference image to size of generated image
-
-          const expectImageData = expectCtx.getImageData(0, 0, firstCanvasOnMap.width, firstCanvasOnMap.height);
-
-          // compare live map vs expected pixel data
-          const diffImage = expectCtx.createImageData(firstCanvasOnMap.width, firstCanvasOnMap.height);
-          const mismatchedPixels = pixelmatch(
-            actualImageDataFromFirstContextOnMap.data,
-            expectImageData.data,
-            diffImage.data,
-            firstCanvasOnMap.width,
-            firstCanvasOnMap.height,
-            { threshold: THRESHOLD });
-
-
-          const diffContext = diffCanvas.getContext('2d');
-          diffCanvas.width = firstCanvasOnMap.width;
-          diffCanvas.height = firstCanvasOnMap.height;
-          diffContext.putImageData(diffImage, 0, 0);
-
-          resolve(mismatchedPixels);
-        };
-        expectedImage.src = expectedImageSource;
-      });
-    });
+    const elementList = domNode.querySelectorAll('canvas');
+    expect(elementList.length).to.equal(1);
+    const firstCanvasOnMap = elementList[0];
+    return imageComparator.compareImage(firstCanvasOnMap, expectedImageSource, THRESHOLD);
   }
 
 
@@ -419,41 +380,11 @@ describe('RegionMapsVisualizationTests', function () {
     domNode.style.border = '1px solid blue';
     domNode.style['pointer-events'] = 'none';
     document.body.appendChild(domNode);
-
-    expectCanvas = document.createElement('canvas');
-    expectCanvas.style.position = 'fixed';
-    expectCanvas.style.right = 0;
-    expectCanvas.style.top = 0;
-    expectCanvas.style.border = '1px solid green';
-    document.body.appendChild(expectCanvas);
-
-    diffCanvas = document.createElement('canvas');
-    diffCanvas.style.position = 'fixed';
-    diffCanvas.style.right = 0;
-    diffCanvas.style.bottom = 0;
-    diffCanvas.style.border = '1px solid red';
-    document.body.appendChild(diffCanvas);
-
-    actualCanvas = document.createElement('canvas');
-    actualCanvas.style.position = 'fixed';
-    actualCanvas.style.left = 0;
-    actualCanvas.style.bottom = 0;
-    actualCanvas.style.border = '1px solid yellow';
-    document.body.appendChild(actualCanvas);
-
-
-
   }
 
   function teardownDOM() {
-    if (window._skipTeardown) {
-      return;
-    }
     domNode.innerHTML = '';
     document.body.removeChild(domNode);
-    document.body.removeChild(expectCanvas);
-    document.body.removeChild(diffCanvas);
-    document.body.removeChild(actualCanvas);
   }
 
 });

@@ -1,5 +1,4 @@
 import expect from 'expect.js';
-import pixelmatch from 'pixelmatch';
 import { KibanaMap } from '../kibana_map';
 import { GeohashLayer } from '../geohash_layer';
 import { GeoHashSampleData } from './geohash_sample_data';
@@ -7,12 +6,14 @@ import heatmapPng from './heatmap.png';
 import scaledCircleMarkersPng from './scaledCircleMarkers.png';
 import shadedCircleMarkersPng from './shadedCircleMarkers.png';
 import shadedGeohashGridPng from './shadedGeohashGrid.png';
+import { ImageComparator } from 'test_utils/image_comparator';
 
 describe('kibana_map tests', function () {
 
   let domNode;
   let expectCanvas;
   let kibanaMap;
+  let imageComparator;
 
   function setupDOM() {
     domNode = document.createElement('div');
@@ -38,6 +39,7 @@ describe('kibana_map tests', function () {
 
     beforeEach(async function () {
       setupDOM();
+      imageComparator = new ImageComparator();
       kibanaMap = new KibanaMap(domNode, {
         minZoom: 1,
         maxZoom: 10
@@ -52,6 +54,7 @@ describe('kibana_map tests', function () {
     afterEach(function () {
       kibanaMap.destroy();
       teardownDOM();
+      imageComparator.destroy();
     });
 
     [
@@ -78,57 +81,18 @@ describe('kibana_map tests', function () {
       }
     ].forEach(function (test) {
 
-      it(test.options.mapType, function (done) {
+      it(test.options.mapType, async function () {
 
         const geohashGridOptions = test.options;
         const geohashLayer = new GeohashLayer(GeoHashSampleData, geohashGridOptions, kibanaMap.getZoomLevel(), kibanaMap);
         kibanaMap.addLayer(geohashLayer);
 
-        // Give time for canvas to render before checking output
-        window.setTimeout(() => {
-          // Extract image data from live map
-          const elementList = domNode.querySelectorAll('canvas');
-          expect(elementList.length).to.equal(1);
-          const canvas = elementList[0];
-          const ctx = canvas.getContext('2d');
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const elementList = domNode.querySelectorAll('canvas');
+        expect(elementList.length).to.equal(1);
+        const canvas = elementList[0];
 
-          // convert expect PNG into pixel data by drawing in new canvas element
-          expectCanvas.id = 'expectCursor';
-          expectCanvas.width = canvas.width;
-          expectCanvas.height = canvas.height;
-          const imageEl = new Image();
-          imageEl.onload = () => {
-            const expectCtx = expectCanvas.getContext('2d');
-            expectCtx.drawImage(imageEl, 0, 0, canvas.width, canvas.height);  // draw reference image to size of generated image
-            const expectImageData = expectCtx.getImageData(0, 0, canvas.width, canvas.height);
-
-            // compare live map vs expected pixel data
-            const diffImage = expectCtx.createImageData(canvas.width, canvas.height);
-            const mismatchedPixels = pixelmatch(
-              imageData.data,
-              expectImageData.data,
-              diffImage.data,
-              canvas.width,
-              canvas.height,
-              { threshold: 0.1 });
-            expect(mismatchedPixels < 16).to.equal(true);
-            // Display difference image for refernce
-            expectCtx.putImageData(diffImage, 0, 0);
-
-            done();
-          };
-          imageEl.src = test.expected;
-
-          // Instructions for creating expected image PNGs
-          // Comment out imageEl creation and image loading
-          // Comment out teardown line that removes expectCanvas from DOM
-          // Uncomment out below lines. Run test, right click canvas and select "Save Image As"
-          // const expectCtx = expectCanvas.getContext('2d');
-          // expectCtx.putImageData(imageData, 0, 0);
-          // done();
-
-        }, 200);
+        const mismatchedPixels = await imageComparator.compareImage(canvas, test.expected, 0.1);
+        expect(mismatchedPixels).to.be.lessThan(16);
 
       });
     });
