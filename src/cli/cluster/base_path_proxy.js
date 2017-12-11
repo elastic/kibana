@@ -6,7 +6,7 @@ import { map as promiseMap, fromNode } from 'bluebird';
 import { Agent as HttpsAgent } from 'https';
 import { readFileSync } from 'fs';
 
-import Config from '../../server/config/config';
+import { Config } from '../../server/config/config';
 import setupConnection from '../../server/http/setup_connection';
 import registerHapiPlugins from '../../server/http/register_hapi_plugins';
 import setupLogging from '../../server/logging';

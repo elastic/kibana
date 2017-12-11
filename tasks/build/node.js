@@ -4,7 +4,7 @@ import { platform as getPlatform } from 'os';
 module.exports = function (grunt) {
   const exec = require('../utils/exec').silent;
 
-  grunt.registerTask('_build:copyNode', function () {
+  grunt.registerTask('_build:copyNodeForOptimize', function () {
     const rootPath = grunt.config.get('root');
     const nodeDestination = join(rootPath, 'build/kibana/node');
     const currentPlatform = getPlatform();
