@@ -150,9 +150,10 @@ export function MeterGaugeProvider() {
       const marginFactor = 0.95;
       const tooltip = this.gaugeChart.tooltip;
       const isTooltip = this.gaugeChart.handler.visConfig.get('addTooltip');
+      const isDisplayWarning = this.gaugeChart.handler.visConfig.get('isDisplayWarning', false);
       const maxAngle = this.gaugeConfig.maxAngle;
       const minAngle = this.gaugeConfig.minAngle;
-      const angleFactor = this.gaugeConfig.gaugeType === 'Meter' ? 0.75 : 1;
+      const angleFactor = this.gaugeConfig.gaugeType === 'Arc' ? 0.75 : 1;
       const maxRadius = (Math.min(width, height / angleFactor) / 2) * marginFactor;
 
       const extendRange = this.gaugeConfig.extendRange;
@@ -262,8 +263,9 @@ export function MeterGaugeProvider() {
             const percentage = Math.round(100 * (d.y - min) / (max - min));
             return `${percentage}%`;
           }
-          if (d.aggConfig) {
-            return d.aggConfig.fieldFormatter('text')(d.y);
+          if (_.has(d, 'aggConfigResult.aggConfig')) {
+            const fieldFormatter = d.aggConfigResult.aggConfig.fieldFormatter('text');
+            return fieldFormatter(d.y);
           }
           return d.y;
         })
@@ -290,7 +292,7 @@ export function MeterGaugeProvider() {
         });
       }
 
-      if (hiddenLabels) {
+      if (hiddenLabels && isDisplayWarning) {
         this.gaugeChart.handler.alerts.show('Some labels were hidden due to size constraints');
       }
 

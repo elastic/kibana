@@ -1,3 +1,5 @@
+import expect from 'expect.js';
+
 import { PIE_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 
 /**
@@ -11,7 +13,8 @@ export default function ({ getService, getPageObjects }) {
 
   describe('dashboard queries', function describeIndexTests() {
     before(async function () {
-      return PageObjects.dashboard.initTests();
+      await PageObjects.dashboard.initTests();
+      await PageObjects.dashboard.preserveCrossAppState();
     });
 
     after(async function () {
@@ -23,13 +26,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('Nested visualization query filters data as expected', async () => {
-      // This flip between apps fixes the url so state is preserved when switching apps in test mode.
-      // Without this flip the url in test mode looks something like
-      // "http://localhost:5620/app/kibana?_t=1486069030837#/dashboard?_g=...."
-      // after the initial flip, the url will look like this: "http://localhost:5620/app/kibana#/dashboard?_g=...."
-      await PageObjects.header.clickVisualize();
-      await PageObjects.header.clickDashboard();
-
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.setTimepickerInDataRange();
 
@@ -78,5 +74,48 @@ export default function ({ getService, getPageObjects }) {
 
       await dashboardExpect.pieSliceCount(0);
     });
+
+    describe.skip('filters', async function () {
+      before(async () => {
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.clickNewDashboard();
+      });
+
+      it('are not selected by default', async function () {
+        const filters = await PageObjects.dashboard.getFilters(1000);
+        expect(filters.length).to.equal(0);
+      });
+
+      it('are added when a pie chart slice is clicked', async function () {
+        await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
+        await PageObjects.dashboard.filterOnPieSlice();
+        const filters = await PageObjects.dashboard.getFilters();
+        expect(filters.length).to.equal(1);
+
+        await dashboardExpect.pieSliceCount(1);
+      });
+
+      it('are preserved after saving a dashboard', async () => {
+        await PageObjects.dashboard.saveDashboard('with filters');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const filters = await PageObjects.dashboard.getFilters();
+        expect(filters.length).to.equal(1);
+
+        await dashboardExpect.pieSliceCount(1);
+      });
+
+      it('are preserved after opening a dashboard saved with filters', async () => {
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.loadSavedDashboard('with filters');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const filters = await PageObjects.dashboard.getFilters();
+        expect(filters.length).to.equal(1);
+
+        await dashboardExpect.pieSliceCount(1);
+      });
+    });
+
   });
 }

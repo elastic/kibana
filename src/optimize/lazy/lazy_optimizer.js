@@ -23,7 +23,7 @@ export default class LazyOptimizer extends BaseOptimizer {
   async init() {
     this.initializing = true;
 
-    await this.bundles.writeEntryFiles();
+    await this.uiBundles.writeEntryFiles();
     await this.initCompiler();
 
     this.compiler.plugin('watch-run', (w, webpackCb) => {
@@ -59,8 +59,8 @@ export default class LazyOptimizer extends BaseOptimizer {
 
     this.initializing = false;
     this.log(['info', 'optimize'], {
-      tmpl: `Lazy optimization of ${this.bundles.desc()} ready`,
-      bundles: this.bundles.getIds()
+      tmpl: `Lazy optimization of ${this.uiBundles.getDescription()} ready`,
+      bundles: this.uiBundles.getIds()
     });
   }
 
@@ -90,14 +90,14 @@ export default class LazyOptimizer extends BaseOptimizer {
   logRunStart() {
     this.log(['info', 'optimize'], {
       tmpl: `Lazy optimization started`,
-      bundles: this.bundles.getIds()
+      bundles: this.uiBundles.getIds()
     });
   }
 
   logRunSuccess() {
     this.log(['info', 'optimize'], {
       tmpl: 'Lazy optimization <%= status %> in <%= seconds %> seconds',
-      bundles: this.bundles.getIds(),
+      bundles: this.uiBundles.getIds(),
       status: 'success',
       seconds: this.timer.end()
     });
@@ -110,7 +110,7 @@ export default class LazyOptimizer extends BaseOptimizer {
 
     this.log(['fatal', 'optimize'], {
       tmpl: 'Lazy optimization <%= status %> in <%= seconds %> seconds<%= err %>',
-      bundles: this.bundles.getIds(),
+      bundles: this.uiBundles.getIds(),
       status: 'failed',
       seconds: this.timer.end(),
       err: err

@@ -1,27 +1,23 @@
 import { constant, once, compact, flatten } from 'lodash';
-import { resolve, fromNode } from 'bluebird';
+import { fromNode } from 'bluebird';
 import { isWorker } from 'cluster';
 import { fromRoot, pkg } from '../utils';
 import loggingConfiguration from './logging/configuration';
-
 import configSetupMixin from './config/setup';
 import httpMixin from './http';
 import loggingMixin from './logging';
 import warningsMixin from './warnings';
 import statusMixin from './status';
 import pidMixin from './pid';
-import pluginsScanMixin from './plugins/scan';
-import pluginsCheckEnabledMixin from './plugins/check_enabled';
-import pluginsCheckVersionMixin from './plugins/check_version';
 import configCompleteMixin from './config/complete';
-import uiMixin from '../ui';
 import optimizeMixin from '../optimize';
-import pluginsInitializeMixin from './plugins/initialize';
+import * as Plugins from './plugins';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
 import { statsMixin } from './stats';
 import { kibanaIndexMappingsMixin } from './mappings';
 import { serverExtensionsMixin } from './server_extensions';
+import { uiMixin } from '../ui';
 import { injectIntoKbnServer as newPlatformMixin } from '../../target/platform/legacy';
 
 const rootDir = fromRoot('.');
@@ -35,6 +31,8 @@ export default class KbnServer {
     this.settings = settings || {};
 
     this.ready = constant(this.mixin(
+      Plugins.waitForInitSetupMixin,
+
       // sets this.config, reads this.settings
       configSetupMixin,
 
@@ -55,24 +53,18 @@ export default class KbnServer {
       // writes pid file
       pidMixin,
 
-      // find plugins and set this.plugins
-      pluginsScanMixin,
-
-      // disable the plugins that are disabled through configuration
-      pluginsCheckEnabledMixin,
-
-      // disable the plugins that are incompatible with the current version of Kibana
-      pluginsCheckVersionMixin,
+      // find plugins and set this.plugins and this.pluginSpecs
+      Plugins.scanMixin,
 
       // tell the config we are done loading plugins
       configCompleteMixin,
 
-      // setup kbnServer.mappings and server.getKibanaIndexMappingsDsl()
-      kibanaIndexMappingsMixin,
-
-      // setup this.uiExports and this.bundles
+      // setup this.uiExports and this.uiBundles
       uiMixin,
       indexPatternsMixin,
+
+      // setup server.getKibanaIndexMappingsDsl()
+      kibanaIndexMappingsMixin,
 
       // setup saved object routes
       savedObjectsMixin,
@@ -81,11 +73,15 @@ export default class KbnServer {
       // lazy bundle server is running
       optimizeMixin,
 
-      // finally, initialize the plugins
-      pluginsInitializeMixin,
+      // initialize the plugins
+      Plugins.initializeMixin,
+
+      // notify any deffered setup logic that plugins have intialized
+      Plugins.waitForInitResolveMixin,
+
       () => {
         if (this.config.get('server.autoListen')) {
-          this.ready = constant(resolve());
+          this.ready = constant(Promise.resolve());
           return this.listen();
         }
       }
@@ -138,17 +134,11 @@ export default class KbnServer {
   }
 
   async inject(opts) {
-    if (!this.server) await this.ready();
+    if (!this.server) {
+      await this.ready();
+    }
 
-    return await fromNode(cb => {
-      try {
-        this.server.inject(opts, (resp) => {
-          cb(null, resp);
-        });
-      } catch (err) {
-        cb(err);
-      }
-    });
+    return await this.server.inject(opts);
   }
 
   applyLoggingConfiguration(config) {

@@ -1,6 +1,5 @@
 import { uiSettingsServiceFactory } from './ui_settings_service_factory';
 import { getUiSettingsServiceForRequest } from './ui_settings_service_for_request';
-import { UiExportsConsumer } from './ui_exports_consumer';
 import {
   deleteRoute,
   getRoute,
@@ -9,12 +8,8 @@ import {
 } from './routes';
 
 export function uiSettingsMixin(kbnServer, server) {
-  // reads the "uiSettingDefaults" from uiExports
-  const uiExportsConsumer = new UiExportsConsumer();
-  kbnServer.uiExports.addConsumer(uiExportsConsumer);
-
   const getDefaults = () => (
-    uiExportsConsumer.getUiSettingDefaults()
+    kbnServer.uiExports.uiSettingDefaults
   );
 
   server.decorate('server', 'uiSettingsServiceFactory', (options = {}) => {
