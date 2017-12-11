@@ -192,9 +192,6 @@ uiModules
 
         // visualize needs to know about timeFilter
         $scope.$listen(timefilter, 'fetch', $scope.fetch);
-        $scope.$on('renderComplete', () => {
-          $el.trigger('renderComplete');
-        });
 
         $scope.$on('$destroy', () => {
           $scope.vis.removeListener('update', handleVisUpdate);
