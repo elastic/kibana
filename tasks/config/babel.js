@@ -6,11 +6,12 @@ module.exports = {
       ]
     },
     src: [
-      // 'build/kibana/**/*.js',
+      'build/kibana/**/*.js',
       '!**/public/**',
       '!**/node_modules/**',
       '!**/bower_components/**',
-      '!**/__tests__/**'
+      '!**/__tests__/**',
+      '!**/vega_vis/**',
     ],
     dest: '.',
     expand: true

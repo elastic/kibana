@@ -18,10 +18,7 @@ const locToDirMap = {
 
 export class VegaParser {
 
-  constructor(spec, es, timefilter, dashboardContext, hackVals) {
-
-    // FIXME: hackVals are a workaround, and should be passed directly to view
-    this.hackVals = hackVals;
+  constructor(spec, es, timefilter, dashboardContext) {
 
     this.spec = spec;
     this.hideWarnings = false;
