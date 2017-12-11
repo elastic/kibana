@@ -56,7 +56,7 @@ export const font = {
     if (args.align) spec.textAlign = args.align;
 
     // apply font size as a pixel setting
-    if (args.size) spec.fontSize = `${args.size}px`;
+    if (args.size != null) spec.fontSize = `${args.size}px`;
 
     return {
       type: 'style',
