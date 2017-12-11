@@ -34,7 +34,7 @@ export const demodata = {
           { name: 'project', type: 'string' },
         ],
         rows: map(cloneDeep(ci), row => assign(row, {
-          time: moment(moment(row.time).format('YYYY-MM-DD'), 'YYYY-MM-DD').format(),
+          time: moment(moment(row.time).format('YYYY-MM-DD'), 'YYYY-MM-DD').valueOf(),
         })),
       },
       shirts: {
