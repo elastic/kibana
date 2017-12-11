@@ -104,7 +104,7 @@ uiModules
               return canSkipResponseHandler ? $scope.visData : Promise.resolve(responseHandler($scope.vis, requestHandlerResponse));
             }, e => {
               $scope.savedObj.searchSource.cancelQueued();
-              $el.trigger('renderComplete');
+              $scope.vis.requestError = e;
               if (isTermSizeZeroError(e)) {
                 return notify.error(
                   `Your visualization ('${$scope.vis.title}') has an error: it has a term ` +

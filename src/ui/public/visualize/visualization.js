@@ -116,12 +116,12 @@ uiModules
           $scope.$on('render', () => {
             observer.next({
               vis: $scope.vis,
-              visData: $scope.visData
+              visData: $scope.visData,
             });
           });
         });
 
-        const renderSubscription = render$
+        const success$ = render$
           .filter(({ vis, visData }) => vis && vis.initialized && (!vis.type.requiresSearch || visData))
           .do(({ vis }) => {
             $scope.addLegend = vis.params.addLegend;
@@ -140,7 +140,11 @@ uiModules
             const renderPromise = visualization.render($scope.visData, status);
             $scope.$apply();
             return renderPromise;
-          })
+          });
+
+        const requestError$ = render$.filter(({ vis }) => vis.requestError);
+
+        const renderSubscription = Observable.merge(success$, requestError$)
           .subscribe(() => {
             $scope.$emit('renderComplete');
             dispatchCustomEvent('renderComplete');
