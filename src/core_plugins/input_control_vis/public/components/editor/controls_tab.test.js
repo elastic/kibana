@@ -1,7 +1,7 @@
 import React from 'react';
 import sinon from 'sinon';
 import { mount, shallow } from 'enzyme';
-
+import { findTestSubject } from 'ui_framework/test';
 import {
   ControlsTab,
 } from './controls_tab';
@@ -84,7 +84,7 @@ test('add control btn', () => {
     scope={scopeMock}
     stageEditorParams={stageEditorParams}
   />);
-  component.find('[data-test-subj="inputControlEditorAddBtn"]').simulate('click');
+  findTestSubject(component, 'inputControlEditorAddBtn').simulate('click');
   // Use custom match function since control.id is dynamically generated and never the same.
   sinon.assert.calledWith(stageEditorParams, sinon.match((newParams) => {
     if (newParams.controls.length !== 3) {
@@ -99,7 +99,7 @@ test('remove control btn', () => {
     scope={scopeMock}
     stageEditorParams={stageEditorParams}
   />);
-  component.find('[data-test-subj="inputControlEditorRemoveControl0"]').simulate('click');
+  findTestSubject(component, 'inputControlEditorRemoveControl0').simulate('click');
   const expectedParams = {
     'controls': [
       {
@@ -123,7 +123,7 @@ test('move down control btn', () => {
     scope={scopeMock}
     stageEditorParams={stageEditorParams}
   />);
-  component.find('[data-test-subj="inputControlEditorMoveDownControl0"]').simulate('click');
+  findTestSubject(component, 'inputControlEditorMoveDownControl0').simulate('click');
   const expectedParams = {
     'controls': [
       {
@@ -159,7 +159,7 @@ test('move up control btn', () => {
     scope={scopeMock}
     stageEditorParams={stageEditorParams}
   />);
-  component.find('[data-test-subj="inputControlEditorMoveUpControl1"]').simulate('click');
+  findTestSubject(component, 'inputControlEditorMoveUpControl1').simulate('click');
   const expectedParams = {
     'controls': [
       {

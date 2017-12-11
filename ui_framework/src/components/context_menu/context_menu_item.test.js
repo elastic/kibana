@@ -29,6 +29,17 @@ describe('KuiContextMenuItem', () => {
       });
     });
 
+    describe('disabled', () => {
+      test('is rendered', () => {
+        const component = render(
+          <KuiContextMenuItem disabled />
+        );
+
+        expect(component)
+          .toMatchSnapshot();
+      });
+    });
+
     describe('onClick', () => {
       test(`isn't called upon instantiation`, () => {
         const onClickHandler = sinon.stub();
@@ -56,7 +67,7 @@ describe('KuiContextMenuItem', () => {
         const onClickHandler = sinon.stub();
 
         const component = mount(
-          <KuiContextMenuItem disabled={true} onClick={onClickHandler} />
+          <KuiContextMenuItem disabled onClick={onClickHandler} />
         );
 
         component.simulate('click');
