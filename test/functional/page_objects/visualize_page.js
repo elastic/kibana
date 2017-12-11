@@ -795,6 +795,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await testSubjects.getVisibleText('visualizationEsRequestBody');
     }
 
+    async getVisualizationResponse() {
+      log.debug('getVisualizationResponse');
+      await this.openSpyPanel();
+      await testSubjects.click('spyModeSelect');
+      await testSubjects.click('spyModeSelect-response');
+      return await testSubjects.getVisibleText('visualizationEsResponseBody');
+    }
+
     async getMapBounds() {
       const request = await this.getVisualizationRequest();
       const requestObject = JSON.parse(request);
