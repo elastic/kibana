@@ -72,7 +72,7 @@ describe('property', () => {
         totalItems={20}
       />);
       const pager = mount(component);
-      findTestSubject(pager, 'pagerPreviousButton', false).simulate('click');
+      findTestSubject(pager, 'pagerPreviousButton').simulate('click');
       sinon.assert.calledOnce(onPreviousPage);
       sinon.assert.notCalled(onNextPage);
     });
@@ -90,7 +90,7 @@ describe('property', () => {
         totalItems={20}
       />);
       const pager = mount(component);
-      findTestSubject(pager, 'pagerNextButton', false).simulate('click');
+      findTestSubject(pager, 'pagerNextButton').simulate('click');
       sinon.assert.calledOnce(onNextPage);
       sinon.assert.notCalled(onPreviousPage);
     });

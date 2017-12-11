@@ -84,7 +84,7 @@ test('add control btn', () => {
     scope={scopeMock}
     stageEditorParams={stageEditorParams}
   />);
-  findTestSubject(component, 'inputControlEditorAddBtn', false).simulate('click');
+  findTestSubject(component, 'inputControlEditorAddBtn').simulate('click');
   // Use custom match function since control.id is dynamically generated and never the same.
   sinon.assert.calledWith(stageEditorParams, sinon.match((newParams) => {
     if (newParams.controls.length !== 3) {
@@ -99,7 +99,7 @@ test('remove control btn', () => {
     scope={scopeMock}
     stageEditorParams={stageEditorParams}
   />);
-  findTestSubject(component, 'inputControlEditorRemoveControl0', false).simulate('click');
+  findTestSubject(component, 'inputControlEditorRemoveControl0').simulate('click');
   const expectedParams = {
     'controls': [
       {
@@ -123,7 +123,7 @@ test('move down control btn', () => {
     scope={scopeMock}
     stageEditorParams={stageEditorParams}
   />);
-  findTestSubject(component, 'inputControlEditorMoveDownControl0', false).simulate('click');
+  findTestSubject(component, 'inputControlEditorMoveDownControl0').simulate('click');
   const expectedParams = {
     'controls': [
       {
@@ -159,7 +159,7 @@ test('move up control btn', () => {
     scope={scopeMock}
     stageEditorParams={stageEditorParams}
   />);
-  findTestSubject(component, 'inputControlEditorMoveUpControl1', false).simulate('click');
+  findTestSubject(component, 'inputControlEditorMoveUpControl1').simulate('click');
   const expectedParams = {
     'controls': [
       {

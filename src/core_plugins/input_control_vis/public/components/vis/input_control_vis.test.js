@@ -115,7 +115,7 @@ test('clearControls', () => {
     hasChanges={() => { return true; }}
     hasValues={() => { return true; }}
   />);
-  findTestSubject(component, 'inputControlClearBtn', false).simulate('click');
+  findTestSubject(component, 'inputControlClearBtn').simulate('click');
   sinon.assert.calledOnce(clearControls);
   sinon.assert.notCalled(submitFilters);
   sinon.assert.notCalled(resetControls);
@@ -133,7 +133,7 @@ test('submitFilters', () => {
     hasChanges={() => { return true; }}
     hasValues={() => { return true; }}
   />);
-  findTestSubject(component, 'inputControlSubmitBtn', false).simulate('click');
+  findTestSubject(component, 'inputControlSubmitBtn').simulate('click');
   sinon.assert.calledOnce(submitFilters);
   sinon.assert.notCalled(clearControls);
   sinon.assert.notCalled(resetControls);
@@ -151,7 +151,7 @@ test('resetControls', () => {
     hasChanges={() => { return true; }}
     hasValues={() => { return true; }}
   />);
-  findTestSubject(component, 'inputControlCancelBtn', false).simulate('click');
+  findTestSubject(component, 'inputControlCancelBtn').simulate('click');
   sinon.assert.calledOnce(resetControls);
   sinon.assert.notCalled(clearControls);
   sinon.assert.notCalled(submitFilters);

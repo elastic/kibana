@@ -43,7 +43,7 @@ test('onConfirm', () => {
     />
   );
 
-  findTestSubject(component, 'confirmModalConfirmButton', false).simulate('click');
+  findTestSubject(component, 'confirmModalConfirmButton').simulate('click');
   sinon.assert.calledOnce(onConfirm);
   sinon.assert.notCalled(onCancel);
 });
@@ -59,7 +59,7 @@ describe('onCancel', () => {
       />
     );
 
-    findTestSubject(component, 'confirmModalCancelButton', false).simulate('click');
+    findTestSubject(component, 'confirmModalCancelButton').simulate('click');
     sinon.assert.notCalled(onConfirm);
     sinon.assert.calledOnce(onCancel);
   });
@@ -75,7 +75,7 @@ describe('onCancel', () => {
       />
     );
 
-    findTestSubject(component, 'modal', false).simulate('keydown', { keyCode: keyCodes.ESCAPE });
+    findTestSubject(component, 'modal').simulate('keydown', { keyCode: keyCodes.ESCAPE });
     sinon.assert.notCalled(onConfirm);
     sinon.assert.calledOnce(onCancel);
   });
@@ -93,7 +93,7 @@ describe('defaultFocusedButton', () => {
       />
     );
 
-    const button = findTestSubject(component, 'confirmModalCancelButton');
+    const button = findTestSubject(component, 'confirmModalCancelButton').getDOMNode();
     expect(document.activeElement).toEqual(button);
   });
 
@@ -108,7 +108,7 @@ describe('defaultFocusedButton', () => {
       />
     );
 
-    const button = findTestSubject(component, 'confirmModalConfirmButton');
+    const button = findTestSubject(component, 'confirmModalConfirmButton').getDOMNode();
     expect(document.activeElement).toEqual(button);
   });
 

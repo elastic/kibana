@@ -55,7 +55,7 @@ describe('KuiTextInput', () => {
         );
 
         expect(
-          findTestSubject(component, 'input')
+          findTestSubject(component, 'input').getDOMNode()
         ).toBe(document.activeElement);
       });
 
@@ -68,7 +68,7 @@ describe('KuiTextInput', () => {
         );
 
         expect(
-          findTestSubject(component, 'input')
+          findTestSubject(component, 'input').getDOMNode()
         ).not.toBe(document.activeElement);
       });
     });

@@ -170,7 +170,7 @@ describe('KuiContextMenuPanel', () => {
           />
         );
 
-        expect(findTestSubject(component, 'itemB')).toBe(document.activeElement);
+        expect(findTestSubject(component, 'itemB').getDOMNode()).toBe(document.activeElement);
       });
     });
 
@@ -276,7 +276,7 @@ describe('KuiContextMenuPanel', () => {
           </KuiContextMenuPanel>
         );
 
-        expect(findTestSubject(component, 'button')).toBe(document.activeElement);
+        expect(findTestSubject(component, 'button').getDOMNode()).toBe(document.activeElement);
       });
 
       it('is not set on anything if hasFocus is false', () => {
@@ -286,7 +286,7 @@ describe('KuiContextMenuPanel', () => {
           </KuiContextMenuPanel>
         );
 
-        expect(findTestSubject(component, 'button')).not.toBe(document.activeElement);
+        expect(findTestSubject(component, 'button').getDOMNode()).not.toBe(document.activeElement);
       });
     });
 
@@ -315,41 +315,41 @@ describe('KuiContextMenuPanel', () => {
       it('down arrow key focuses the first menu item', () => {
         component.simulate('keydown', { keyCode: keyCodes.DOWN });
 
-        expect(findTestSubject(component, 'itemA')).toBe(document.activeElement);
+        expect(findTestSubject(component, 'itemA').getDOMNode()).toBe(document.activeElement);
       });
 
       it('subsequently, down arrow key focuses the next menu item', () => {
         component.simulate('keydown', { keyCode: keyCodes.DOWN });
         component.simulate('keydown', { keyCode: keyCodes.DOWN });
 
-        expect(findTestSubject(component, 'itemB')).toBe(document.activeElement);
+        expect(findTestSubject(component, 'itemB').getDOMNode()).toBe(document.activeElement);
       });
 
       it('down arrow key wraps to first menu item', () => {
         component.simulate('keydown', { keyCode: keyCodes.UP });
         component.simulate('keydown', { keyCode: keyCodes.DOWN });
 
-        expect(findTestSubject(component, 'itemA')).toBe(document.activeElement);
+        expect(findTestSubject(component, 'itemA').getDOMNode()).toBe(document.activeElement);
       });
 
       it('up arrow key focuses the last menu item', () => {
         component.simulate('keydown', { keyCode: keyCodes.UP });
 
-        expect(findTestSubject(component, 'itemC')).toBe(document.activeElement);
+        expect(findTestSubject(component, 'itemC').getDOMNode()).toBe(document.activeElement);
       });
 
       it('subsequently, up arrow key focuses the previous menu item', () => {
         component.simulate('keydown', { keyCode: keyCodes.UP });
         component.simulate('keydown', { keyCode: keyCodes.UP });
 
-        expect(findTestSubject(component, 'itemB')).toBe(document.activeElement);
+        expect(findTestSubject(component, 'itemB').getDOMNode()).toBe(document.activeElement);
       });
 
       it('up arrow key wraps to last menu item', () => {
         component.simulate('keydown', { keyCode: keyCodes.DOWN });
         component.simulate('keydown', { keyCode: keyCodes.UP });
 
-        expect(findTestSubject(component, 'itemC')).toBe(document.activeElement);
+        expect(findTestSubject(component, 'itemC').getDOMNode()).toBe(document.activeElement);
       });
 
       it(`right arrow key shows next panel with focused item's index`, () => {

@@ -38,21 +38,21 @@ describe('KuiCodeEditor', () => {
 
     describe('hint element', () => {
       test('should be tabable', () => {
-        const hint = findTestSubject(component, 'codeEditorHint');
+        const hint = findTestSubject(component, 'codeEditorHint').getDOMNode();
         expect(hint).toMatchSnapshot();
       });
 
       test('should be disabled when the ui ace box gains focus', () => {
-        const hint = findTestSubject(component, 'codeEditorHint', false);
+        const hint = findTestSubject(component, 'codeEditorHint');
         hint.simulate('keyup', { keyCode: keyCodes.ENTER });
-        expect(findTestSubject(component, 'codeEditorHint')).toMatchSnapshot();
+        expect(findTestSubject(component, 'codeEditorHint').getDOMNode()).toMatchSnapshot();
       });
 
       test('should be enabled when the ui ace box loses focus', () => {
-        const hint = findTestSubject(component, 'codeEditorHint', false);
+        const hint = findTestSubject(component, 'codeEditorHint');
         hint.simulate('keyup', { keyCode: keyCodes.ENTER });
         component.instance().onBlurAce();
-        expect(findTestSubject(component, 'codeEditorHint')).toMatchSnapshot();
+        expect(findTestSubject(component, 'codeEditorHint').getDOMNode()).toMatchSnapshot();
       });
     });
 
@@ -70,7 +70,7 @@ describe('KuiCodeEditor', () => {
           stopPropagation: () => {},
           keyCode: keyCodes.ESCAPE,
         });
-        const hint = findTestSubject(component, 'codeEditorHint');
+        const hint = findTestSubject(component, 'codeEditorHint').getDOMNode();
         expect(hint).toBe(document.activeElement);
       });
     });

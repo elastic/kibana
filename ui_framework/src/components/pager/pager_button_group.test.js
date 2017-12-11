@@ -28,11 +28,11 @@ test('renders KuiPagerButtonGroup', () => {
 
 describe('property', () => {
   function findPreviousButton(pager) {
-    return findTestSubject(pager, 'pagerPreviousButton', false);
+    return findTestSubject(pager, 'pagerPreviousButton');
   }
 
   function findNextButton(pager) {
-    return findTestSubject(pager, 'pagerNextButton', false);
+    return findTestSubject(pager, 'pagerNextButton');
   }
 
   test('onNext', () => {
