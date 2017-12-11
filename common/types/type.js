@@ -19,10 +19,10 @@ export function Type(config) {
     to: config.to || {},
   };
 
-  const castableTypeNames = (types, toOrFrom) => intersection(types, keys(fns[toOrFrom]));
+  const castableTypeNames = (types, toOrFrom) => intersection(types.concat(['*']), keys(fns[toOrFrom]));
 
-  this.castsTo = (types) => castableTypeNames(types, 'to').length > 0;
-  this.castsFrom = (types) => castableTypeNames(types, 'from').length > 0;
+  this.castsTo = (types) => castableTypeNames(types.concat(['*']), 'to').length > 0;
+  this.castsFrom = (types) => castableTypeNames(types.concat(['*']), 'from').length > 0;
   this.to = (node, types) => {
     const typeName = getType(node);
     if (typeName !== this.name) throw new Error(`Casting source type '${typeName}' does not match current type '${this.name}'`);
@@ -33,6 +33,6 @@ export function Type(config) {
   this.from = (node) => {
     const typeName = getType(node);
     if (!this.castsFrom([typeName])) throw new Error(`Can not cast '${typeName}' to any of ${this.name}`);
-    return fns.from[typeName](node);
+    return fns.from[castableTypeNames([typeName], 'from')[0]](node);
   };
 }
