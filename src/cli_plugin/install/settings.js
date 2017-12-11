@@ -23,6 +23,7 @@ export function parseMilliseconds(val) {
 
 export function parse(command, options, kbnPackage) {
   const settings = {
+    kibanaPath: kbnPackage.__dirname,
     timeout: options.timeout || 0,
     quiet: options.quiet || false,
     silent: options.silent || false,
