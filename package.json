@@ -1,6 +1,6 @@
 {
   "name": "canvas",
-  "version": "0.1.1667",
+  "version": "0.1.1670",
   "description": "Data driven workpads for kibana",
   "main": "index.js",
   "kibana": {
