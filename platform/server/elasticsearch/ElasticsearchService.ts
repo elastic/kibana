@@ -8,7 +8,8 @@ import {
   switchMap,
   shareLast,
   first,
-  toPromise
+  toPromise,
+  $combineLatest,
 } from '@elastic/kbn-observable';
 
 import { ElasticsearchConfigs } from './ElasticsearchConfigs';
@@ -25,12 +26,12 @@ export class ElasticsearchService implements CoreService {
   private subscription?: Subscription;
 
   constructor(
-    config$: Observable<ElasticsearchConfigs>,
+    private readonly configs$: Observable<ElasticsearchConfigs>,
     logger: LoggerFactory
   ) {
     const log = logger.get('elasticsearch');
 
-    this.clients$ = k$(config$)(
+    this.clients$ = k$(configs$)(
       filter(() => {
         if (this.subscription !== undefined) {
           log.error('clusters cannot be changed after they are created');
@@ -89,9 +90,7 @@ export class ElasticsearchService implements CoreService {
   }
 
   getScopedDataClient$(headers: Headers) {
-    return k$(this.clients$)(
-      map(clients => new ScopedDataClient(clients.data, headers))
-    );
+    return k$($combineLatest(this.clients$, this.configs$))(map(([clients, configs]) => new ScopedDataClient(clients.data, headers, configs.forType('data'))));
   }
 
   getScopedDataClient(headers: Headers) {
