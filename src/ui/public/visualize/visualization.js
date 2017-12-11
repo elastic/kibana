@@ -123,13 +123,13 @@ uiModules
         });
 
         const success$ = render$
+          .do(() => {
+            dispatchCustomEvent('renderStart');
+          })
           .filter(({ vis, visData, container }) => vis && vis.initialized && container && (!vis.type.requiresSearch || visData))
           .do(({ vis }) => {
             $scope.addLegend = vis.params.addLegend;
             vis.refreshLegend++;
-          })
-          .do(() => {
-            dispatchCustomEvent('renderStart');
           })
           .debounceTime(100)
           .switchMap(async ({ vis, visData, container }) => {
