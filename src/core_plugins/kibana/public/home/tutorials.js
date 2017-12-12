@@ -1,26 +1,35 @@
 import _ from 'lodash';
-import axios from 'axios';
 import chrome from 'ui/chrome';
+import { notify } from 'ui/notify';
 
 const baseUrl = chrome.addBasePath('/api/kibana/home/tutorials');
+const headers = new Headers();
+headers.append('Accept', 'application/json');
+headers.append('Content-Type', 'application/json');
+headers.append('kbn-xsrf', 'kibana');
 
-const axiosInstance = axios.create({
-  headers: {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json',
-    'kbn-xsrf': 'kibana',
-  },
-});
-
-let tutorials;
+let tutorials = [];
+let turorialsLoaded = false;
 
 async function loadTutorials() {
-  const response = await axiosInstance.get(baseUrl);
-  tutorials = response.data;
+  try {
+    const response = await fetch(baseUrl, {
+      method: 'get',
+      headers: headers
+    });
+    if (response.status >= 300) {
+      throw new Error(`Request failed with status code: ${response.status}`);
+    }
+
+    tutorials = await response.json();
+    turorialsLoaded = true;
+  } catch(err) {
+    notify.error(`Unable to load tutorials, ${err}`);
+  }
 }
 
 export async function getTutorials() {
-  if (!tutorials) {
+  if (!turorialsLoaded) {
     await loadTutorials();
   }
 
@@ -28,7 +37,7 @@ export async function getTutorials() {
 }
 
 export async function getTutorial(id) {
-  if (!tutorials) {
+  if (!turorialsLoaded) {
     await loadTutorials();
   }
 
