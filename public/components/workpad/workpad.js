@@ -1,12 +1,22 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Shortcuts } from 'react-shortcuts';
-import { ElementWrapper } from '../element_wrapper';
+import { PageStack } from '../page_stack';
 import { Fullscreen } from '../fullscreen';
 import './workpad.less';
 
-export const Workpad = (props) => {
-  const { elements, style, workpad, fetchAllRenderables, undoHistory, redoHistory, nextPage, previousPage, isFullscreen } = props;
+export const Workpad = ({
+  selectedPageId,
+  pages,
+  style,
+  workpad,
+  fetchAllRenderables,
+  undoHistory,
+  redoHistory,
+  nextPage,
+  previousPage,
+  isFullscreen,
+}) => {
   const { height, width } = workpad;
   const itsTheNewStyle = Object.assign({}, style, { height, width });
 
@@ -46,9 +56,7 @@ export const Workpad = (props) => {
                     />
                   }
 
-                  { elements.map(element => (
-                    <ElementWrapper key={element.id} element={element} />
-                  ))}
+                  <PageStack pages={pages} selectedPageId={selectedPageId} height={height} width={width} />
                 </div>
             );
           }}
@@ -58,6 +66,8 @@ export const Workpad = (props) => {
 };
 
 Workpad.propTypes = {
+  pages: PropTypes.array.isRequired,
+  selectedPageId: PropTypes.string.isRequired,
   elements: PropTypes.array.isRequired,
   isFullscreen: PropTypes.bool.isRequired,
   workpad: PropTypes.object.isRequired,
