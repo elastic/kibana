@@ -1,4 +1,3 @@
-import { isEqual } from 'lodash';
 import { connect } from 'react-redux';
 import { compose, withState, withHandlers, lifecycle, withPropsOnChange, branch, renderComponent } from 'recompose';
 import { Expression as Component } from './expression';
@@ -6,8 +5,6 @@ import { getSelectedPage, getSelectedElement } from '../../state/selectors/workp
 import { setExpression, flushContext } from '../../state/actions/elements';
 import { ElementNotSelected } from './element_not_selected';
 import { fromExpression } from '../../../common/lib/ast';
-import { autocompletePairs } from '../../lib/autocomplete_pairs';
-import { getAutocompleteProposals } from '../../lib/autocomplete_proposals';
 
 const mapStateToProps = (state) => ({
   pageId: getSelectedPage(state),
@@ -41,7 +38,6 @@ const expressionLifecycle = lifecycle({
   componentWillReceiveProps({ formState, setFormState, expression }) {
     if (this.props.expression !== expression && expression !== formState.expression) {
       setFormState({
-        ...formState,
         expression,
         dirty: false,
       });
@@ -53,32 +49,14 @@ export const Expression = compose(
   connect(mapStateToProps, mapDispatchToProps, mergeProps),
   withState('formState', 'setFormState', ({ expression }) => ({
     expression,
-    selection: {
-      start: expression.length,
-      end: expression.length,
-    },
     dirty: false,
   })),
-  withState('selectedIndex', 'setSelectedIndex', -1),
-  withState('showAutocompleteProposals', 'setShowAutocompleteProposals', false),
   withHandlers({
-    updateValue: ({ setFormState }) => ev => {
-      const expression = ev.target.value;
-      const selection = {
-        start: ev.target.selectionStart,
-        end: ev.target.selectionEnd,
-      };
+    updateValue: ({ setFormState }) => expression => {
       setFormState({
         expression,
-        selection,
         dirty: true,
       });
-    },
-    updateSelection: ({ setFormState }) => selection => {
-      setFormState(prev => ({
-        ...prev,
-        selection,
-      }));
     },
     setExpression: ({ setExpression, setFormState }) => exp => {
       setFormState(prev => ({
@@ -86,20 +64,6 @@ export const Expression = compose(
         dirty: false,
       }));
       setExpression(exp);
-    },
-    acceptAutocompleteProposal: ({ formState, setFormState, setSelectedIndex }) => proposal => {
-      const { expression } = formState;
-      const { value, location: { start, end } } = proposal;
-      setFormState({
-        ...formState,
-        expression: expression.substr(0, start) + value + expression.substr(end),
-        selection: {
-          start: start + value.length,
-          end: start + value.length,
-        },
-        dirty: true,
-      });
-      setSelectedIndex(-1);
     },
   }),
   expressionLifecycle,
@@ -113,49 +77,6 @@ export const Expression = compose(
         return e.message;
       }
     }()),
-    autocompleteProposals: getAutocompleteProposals({
-      value: formState.expression,
-      selection: formState.selection,
-    }),
   })),
-  withHandlers({
-    onKeyDown: ({
-      formState,
-      setFormState,
-      selectedIndex,
-      setSelectedIndex,
-      autocompleteProposals,
-      acceptAutocompleteProposal,
-      showAutocompleteProposals,
-      setShowAutocompleteProposals,
-    }) => event => {
-      // TODO: Move this into a separate HOC for handling typeahead stuff
-      const { key } = event;
-      if (key === 'ArrowUp' && showAutocompleteProposals && autocompleteProposals.length) {
-        event.preventDefault();
-        setSelectedIndex((selectedIndex || autocompleteProposals.length) - 1);
-      } else if (key === 'ArrowDown' && showAutocompleteProposals && autocompleteProposals.length) {
-        event.preventDefault();
-        setSelectedIndex((selectedIndex + 1) % autocompleteProposals.length);
-      } else if (key === 'Enter' && selectedIndex >= 0 && showAutocompleteProposals && autocompleteProposals.length) {
-        event.preventDefault();
-        acceptAutocompleteProposal(autocompleteProposals[selectedIndex]);
-      } else if (key === 'Escape') {
-        setShowAutocompleteProposals(false);
-      } else {
-        setShowAutocompleteProposals(true);
-        setSelectedIndex(-1);
-        const { value, selection } = autocompletePairs(formState.expression, formState.selection, event.key);
-        if (value !== formState.expression || !isEqual(selection, formState.selection)) {
-          event.preventDefault();
-          setFormState({
-            expression: value,
-            selection: selection,
-            dirty: true,
-          });
-        }
-      }
-    },
-  }),
   branch(props => !props.element, renderComponent(ElementNotSelected)),
 )(Component);

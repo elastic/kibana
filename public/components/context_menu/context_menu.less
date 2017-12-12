@@ -1,0 +1,30 @@
+@import (reference) "../../style/main";
+
+.contextMenu {
+  position: relative;
+
+  .contextMenuItems {
+    position: absolute;
+    z-index: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    background: @background;
+    border: @borderStyle;
+
+    .contextMenuItem {
+      padding: @spacingS;
+      background-color: @cardBackground;
+      border: @borderStyle;
+      color: @textMain;
+      display: flex;
+      align-self: flex-start;
+      width: 100%;
+    }
+
+    .contextMenuItem.active {
+      background-color: @darkGrey;
+      color: @textInverse;
+    }
+  }
+}
