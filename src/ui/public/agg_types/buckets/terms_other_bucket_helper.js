@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
 import { migrateFilter } from 'ui/courier/data_source/_migrate_filter';
+import { buildPhrasesFilter } from 'ui/filter_manager/lib/phrases';
 
 const getAggConfig = (aggs, aggWithOtherBucket) => {
   if (aggs[aggWithOtherBucket.id]) return aggs[aggWithOtherBucket.id];
@@ -92,32 +93,11 @@ export const OtherBucketHelperProvider = (Private) => {
     _.each(otherResponse.aggregations['other-filter'].buckets, (bucket, key) => {
       const bucketKey = key.replace(/^-/, '');
       const aggResultBuckets = getAggResultBuckets(aggsConfig, response.aggregations, otherAgg, bucketKey);
-      const requestFilter = requestAgg['other-filter'].filters.filters[key];
+      const requestFilterTerms = requestAgg['other-filter'].filters.filters[key]
+        .bool.must_not[0].terms[otherAgg.params.field.name];
 
-      const generateFilter = (requestFilter) => {
-        const termsInRequestFilter = requestFilter.bool.must_not[0].terms[otherAgg.params.field.name].length;
-        return {
-          meta: {
-            filterId: otherAgg.params.field.name,
-            alias: `not top ${termsInRequestFilter} ${otherAgg.params.field.name} terms`,
-            index: otherAgg.params.field.indexPattern.id
-          },
-          query: requestFilter,
-        };
-      };
-
-      const updateFilter = (newFilter, existingFilter) => {
-        const mergedFilterQuery = _.cloneDeep(newFilter.query);
-        mergedFilterQuery.bool.must_not[0].terms[otherAgg.params.field.name] = [
-          ...newFilter.bool.must_not[0].terms[otherAgg.params.field.name],
-          ...existingFilter.bool.must_not[0].terms[otherAgg.params.field.name]
-        ];
-        const mergedFilter = generateFilter(mergedFilterQuery);
-        mergedFilter.updateFilter = updateFilter;
-      };
-
-      bucket.filter = generateFilter(requestFilter);
-      bucket.filter.updateFilter = updateFilter;
+      bucket.filter = buildPhrasesFilter(otherAgg.params.field, requestFilterTerms, otherAgg.params.field.indexPattern);
+      bucket.filter.meta.negate = true;
       bucket.key = otherAgg.params.otherBucketLabel;
       aggResultBuckets.push(bucket);
     });

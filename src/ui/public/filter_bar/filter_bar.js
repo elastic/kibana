@@ -149,17 +149,6 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
         });
         const newFilters = _.reject(filters, (filter) => {
           return _.find(inversionFilters, _.partial(compareFilters, filter));
-        }).map(newFilter => {
-          if (newFilter.meta.filterId) {
-            const existingFilter = _.find(existingFilters, filter => {
-              return filter.meta.filterId === newFilter.meta.filterId;
-            });
-            if (existingFilter && newFilter.updateFilter) {
-              newFilter = newFilter.updateFilter(existingFilter, newFilter);
-              queryFilter.removeFilter(existingFilter);
-            }
-          }
-          return newFilter;
         });
 
         _.forEach(inversionFilters, $scope.invertFilter);
