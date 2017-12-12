@@ -140,6 +140,12 @@ export function AggTypesAggTypeProvider(Private) {
      */
     this.decorateAggConfig = config.decorateAggConfig || null;
 
+    /**
+     * A function that will be called after the main request has been made
+     * and should return an updated response
+     */
+    this.postFlightRequest = config.postFlightRequest || null;
+
     if (config.getFormat) {
       this.getFormat = config.getFormat;
     }

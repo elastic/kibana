@@ -6,6 +6,7 @@ import { AggTypesBucketsCreateFilterTermsProvider } from 'ui/agg_types/buckets/c
 import orderAggTemplate from 'ui/agg_types/controls/order_agg.html';
 import orderAndSizeTemplate from 'ui/agg_types/controls/order_and_size.html';
 import { RouteBasedNotifierProvider } from 'ui/route_based_notifier';
+import { OtherBucketHelperProvider } from './terms_other_bucket_helper';
 
 export function AggTypesBucketsTermsProvider(Private) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
@@ -13,6 +14,7 @@ export function AggTypesBucketsTermsProvider(Private) {
   const Schemas = Private(VisSchemasProvider);
   const createFilter = Private(AggTypesBucketsCreateFilterTermsProvider);
   const routeBasedNotifier = Private(RouteBasedNotifierProvider);
+  const { buildOtherBucketAgg, mergeOtherBucketAggResponse } = Private(OtherBucketHelperProvider);
 
   const aggFilter = [
     '!top_hits', '!percentiles', '!median', '!std_dev',
@@ -60,6 +62,14 @@ export function AggTypesBucketsTermsProvider(Private) {
       return agg.getFieldDisplayName() + ': ' + params.order.display;
     },
     createFilter: createFilter,
+    postFlightRequest: async (aggConfigs, aggConfig, searchSourceAggs, resp, nestedSearchSource) => {
+      const filterAgg = buildOtherBucketAgg(aggConfigs, searchSourceAggs, aggConfig, resp);
+      nestedSearchSource.set('aggs', filterAgg);
+      const response = await nestedSearchSource.fetchAsRejectablePromise();
+      // todo: refactor to not have side effects
+      mergeOtherBucketAggResponse(aggConfigs, resp, response, aggConfig, filterAgg());
+      return resp;
+    },
     params: [
       {
         name: 'field',

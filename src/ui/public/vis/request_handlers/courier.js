@@ -1,11 +1,10 @@
 import _ from 'lodash';
 import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
 import { VisRequestHandlersRegistryProvider } from 'ui/registry/vis_request_handlers';
-import { OtherBucketHelperProvider } from './other_bucket_helper';
 
 const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
   const SearchSource = Private(SearchSourceProvider);
-  const { buildOtherBucketAgg, mergeOtherBucketAggResponse } = Private(OtherBucketHelperProvider);
+
   return {
     name: 'courier',
     handler: function (vis, appState, uiState, queryFilter, searchSource) {
@@ -47,27 +46,12 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
           resolve(_.cloneDeep(searchSource.rawResponse));
         }
       }).then(async resp => {
-        // walk over the aggregation list, looking for a term agg with other bucket turned on
-        // todo: extract the below code to terms agg ... here we should look for any agg that requires a post flight req
-        // and then call that aggs post-flight method to do what happens in the promise.all below
-        const needsOtherBucket = _.filter(vis.aggs, agg => agg.type.name === 'terms' && agg.params.otherBucket);
-
-        for (let i = 0; i < needsOtherBucket.length; i++) {
-          const agg = needsOtherBucket[i];
-
-          // for each of those we'll need to run one extra request
+        for (let i = 0; i < vis.aggs.length; i++) {
+          const agg = vis.aggs[i];
+          if (!agg.type || !agg.type.postFlightRequest) continue;
           const nestedSearchSource = new SearchSource().inherits(searchSource);
-
-          const filterAgg = buildOtherBucketAgg(vis.aggs, searchSource.get('aggs')(), agg, resp);
-          nestedSearchSource.set('aggs', filterAgg);
-
-          //console.log(JSON.stringify(filterAgg()));
-
-          // and we merge the response into the original one
-          const response = await nestedSearchSource.fetchAsRejectablePromise();
-          mergeOtherBucketAggResponse(vis.aggs, resp, response, agg, filterAgg());
+          resp = await agg.type.postFlightRequest(vis.aggs, agg, searchSource.get('aggs')(), resp, nestedSearchSource);
         }
-
         return resp;
       });
     }
