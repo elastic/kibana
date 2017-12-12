@@ -184,6 +184,7 @@
         <tr
           ng-repeat="item in listingController.pageOfItems track by item.id"
           class="kuiTableRow"
+          data-test-subj="dashboardListingRow"
         >
           <td class="kuiTableRowCell kuiTableRowCell--checkBox" ng-if="!listingController.hideWriteControls">
             <div class="kuiTableRowCell__liner">
@@ -202,7 +203,7 @@
             <div class="kuiTableRowCell__liner">
               <a
                 class="kuiLink"
-                data-test-subj="dashboardListingTitleLink"
+                data-test-subj="dashboardListingTitleLink-{{item.title.split(' ').join('-')}}"
                 ng-href="{{ listingController.getUrlForItem(item) }}"
               >
                 {{ item.title }}
