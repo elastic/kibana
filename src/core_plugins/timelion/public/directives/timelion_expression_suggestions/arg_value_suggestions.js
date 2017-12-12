@@ -65,6 +65,7 @@ export function ArgValueSuggestionsProvider(Private, indexPatterns) {
             { name: 'count' },
             { name: 'max:' },
             { name: 'min:' },
+            { name: 'percentiles:' },
             { name: 'sum:' }
           ];
         }

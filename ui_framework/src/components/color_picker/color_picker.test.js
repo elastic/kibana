@@ -102,7 +102,6 @@ test('Setting a new color calls onChange', () => {
   const event = { target: { value: '#000000' } };
   const inputs = colorPicker.find('input');
   expect(inputs.length).toBe(1);
-  inputs.get(0).value = '';
   inputs.simulate('change', event);
   sinon.assert.calledOnce(onChange);
   sinon.assert.calledWith(onChange, '#000000');
