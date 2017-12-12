@@ -206,7 +206,7 @@ export class VegaView {
     }
 
     const vegaLayer = L
-      .vega(mapConfig.spec, {
+      .vega(this._parser.spec, {
         vega,
         bindingsContainer: this._$controls.get(0),
         delayRepaint: mapConfig.delayRepaint,

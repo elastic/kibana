@@ -11,15 +11,18 @@ export function VegaVisualizationProvider(vegaConfig, serviceSettings) {
       this.el = $(el);
       this.vis = vis;
 
+      // Without this class, all vega styling will not be applied
       this.el.addClass('vega-main');
 
-// <ul ng-if="vega.messages.length" class="vega-messages">
-//   <li ng-repeat="message in vega.messages"
-//       ng-class="{error: 'vega-message-err', warning: 'vega-message-warn'}[message.type]"
-//   >
-//     <pre>{{message.data}}</pre>
-//   </li>
-// </ul>
+      // FIXME: this Angular template was used before to display warnings & errors. Need to be re-applied
+
+      // <ul ng-if="vega.messages.length" class="vega-messages">
+      //   <li ng-repeat="message in vega.messages"
+      //       ng-class="{error: 'vega-message-err', warning: 'vega-message-warn'}[message.type]"
+      //   >
+      //     <pre>{{message.data}}</pre>
+      //   </li>
+      // </ul>
     }
 
     onError(error) {

@@ -1,0 +1,388 @@
+{
+  $schema: https://vega.github.io/schema/vega/v3.0.json
+  config: {
+    kibana: {
+      type: map
+      latitude: 10
+      longitude: -5
+      zoom: 2
+      delayRepaint: false
+    }
+  }
+  data: [
+    {
+      name: centroidOverrides
+      values: [
+        {code: "US", lon: -101, lat: 40}
+        {code: "CA", lon: -110, lat: 58}
+        {code: "FR", lon: 2, lat: 47}
+      ]
+      transform: [
+        {
+          type: geopoint
+          projection: projection
+          fields: ["lon", "lat"]
+        }
+        {type: "formula", expr: "[datum.x, datum.y]", as: "center"}
+      ]
+    }
+    {
+      name: allCountries
+      url: https://layers.geo.elastic.co/blob/5659313586569216?elastic_tile_service_tos=agree
+      format: {type: "json", property: "features"}
+      transform: [
+        {type: "formula", expr: "datum.properties.iso2", as: "countryCode"}
+        {
+          type: lookup
+          from: centroidOverrides
+          key: code
+          fields: ["countryCode"]
+          values: ["center"]
+          as: ["sourceOverride"]
+        }
+        {
+          type: formula
+          expr: datum.sourceOverride || geoCentroid('projection', datum)
+          as: sourceCentroid
+        }
+        {
+          type: formula
+          expr: "{x:datum.sourceCentroid[0], y:datum.sourceCentroid[1]}"
+          as: source
+        }
+      ]
+    }
+    {
+      name: logCount
+      esIndex: logstash-*
+      esContext: @timestamp
+      esRequest: {
+        size: 0
+        aggs: {
+          countries: {
+            terms: {field: "geo.src", size: 200}
+            aggs: {
+              dest: {
+                terms: {field: "geo.dest", size: 50}
+              }
+            }
+          }
+        }
+      }
+      format: {type: "json", property: "aggregations.countries.buckets"}
+      transform: [
+        {
+          type: lookup
+          from: allCountries
+          key: countryCode
+          fields: ["key"]
+          values: ["source"]
+        }
+      ]
+    }
+    {
+      name: countries
+      source: allCountries
+      transform: [
+        {
+          type: lookup
+          from: logCount
+          key: key
+          fields: ["countryCode"]
+          values: ["doc_count"]
+        }
+        {type: "filter", expr: "datum.doc_count != null"}
+      ]
+    }
+  ]
+  scales: [
+    {
+      name: color
+      type: sqrt
+      domain: {data: "countries", field: "doc_count"}
+      range: {
+        scheme: {signal: "colors"}
+      }
+    }
+  ]
+  marks: [
+    {
+      name: countrymark
+      type: shape
+      from: {data: "countries"}
+      encode: {
+        enter: {
+          tooltip: {
+            signal: datum.countryCode + ': ' + format(datum.doc_count, '0,')
+          }
+          fillOpacity: {value: 0.7}
+        }
+        update: {
+          fill: {scale: "color", field: "doc_count"}
+        }
+        hover: {
+          fill: {value: "red"}
+        }
+      }
+      transform: [
+        {type: "geoshape", projection: "projection"}
+      ]
+    }
+    {
+      type: symbol
+      from: {data: "countries"}
+      encode: {
+        update: {
+          size: {value: 5}
+          xc: {signal: "datum.source.x"}
+          yc: {signal: "datum.source.y"}
+        }
+      }
+    }
+    {
+      type: group
+      data: [
+        {
+          name: selectedDatum
+          source: logCount
+          transform: [
+            {
+              type: filter
+              expr: hover && datum.key == hover.countryCode && datum.source
+            }
+          ]
+        }
+      ]
+      marks: [
+        {
+          type: group
+          from: {
+            facet: {
+              name: facetedDatum
+              data: selectedDatum
+              field: dest.buckets
+            }
+          }
+          data: [
+            {
+              name: facetDatumElems
+              source: facetedDatum
+              transform: [
+                {
+                  type: lookup
+                  from: allCountries
+                  key: countryCode
+                  fields: ["key"]
+                  values: ["source"]
+                  as: ["target"]
+                }
+                {type: "filter", expr: "datum.target"}
+                {type: "formula", expr: "parent.source", as: "source"}
+                {
+                  type: linkpath
+                  shape: {signal: "lineshape"}
+                }
+              ]
+            }
+            {
+              name: ranks
+              source: facetDatumElems
+              transform: [
+                {
+                  type: aggregate
+                  groupby: ["key"]
+                  ops: ["sum"]
+                  fields: ["doc_count"]
+                  as: ["summary"]
+                }
+                {
+                  type: window
+                  sort: {
+                    field: ["summary", "key"]
+                    order: descending
+                  }
+                  ignorePeers: {valuea: 11}
+                  ops: ["rank"]
+                }
+              ]
+            }
+            {
+              name: summary
+              source: facetDatumElems
+              transform: [
+                {
+                  type: lookup
+                  from: ranks
+                  key: key
+                  values: ["rank"]
+                  fields: ["key"]
+                }
+                {
+                  type: formula
+                  as: Category
+                  expr: datum.rank < 5 ? datum.key : 'Other'
+                }
+                {
+                  type: aggregate
+                  groupby: ["Category"]
+                  ops: ["sum"]
+                  fields: ["doc_count"]
+                  as: ["summary"]
+                }
+                {type: "pie", field: "summary"}
+              ]
+            }
+          ]
+          scales: [
+            {
+              name: pieColors
+              type: ordinal
+              domain: {data: "summary", field: "Category"}
+              range: {scheme: "category10"}
+            }
+            {
+              name: lineThickness
+              type: log
+              domain: {data: "facetDatumElems", field: "doc_count"}
+              range: [0.1, 8]
+            }
+            {
+              name: lineOpacity
+              type: linear
+              domain: {data: "facetDatumElems", field: "doc_count"}
+              range: [0.2, 0.8]
+            }
+          ]
+          marks: [
+            {
+              from: {data: "facetDatumElems"}
+              type: path
+              interactive: false
+              encode: {
+                update: {
+                  path: {field: "path"}
+                  stroke: {value: "black"}
+                  strokeWidth: {scale: "lineThickness", field: "doc_count"}
+                  strokeOpacity: {scale: "lineOpacity", field: "doc_count"}
+                }
+              }
+            }
+            {
+              type: group
+              interactive: false
+              encode: {
+                update: {
+                  height: {value: 110}
+                  width: {value: 160}
+                  x: {value: 54}
+                  y: {value: 10}
+                  stroke: {value: "#fff"}
+                  fill: {value: "#fff"}
+                  fillOpacity: {value: 0.5}
+                }
+              }
+              marks: [
+                {
+                  type: text
+                  encode: {
+                    enter: {
+                      xc: {value: 80}
+                      y: {value: 13}
+                      align: {value: "center"}
+                      text: {value: "Source of Traffic"}
+                    }
+                  }
+                }
+                {
+                  from: {data: "summary"}
+                  type: arc
+                  interactive: false
+                  encode: {
+                    enter: {
+                      x: {value: 50}
+                      y: {value: 62}
+                      startAngle: {field: "startAngle"}
+                      endAngle: {field: "endAngle"}
+                      innerRadius: {value: 0}
+                      outerRadius: {value: 40}
+                      stroke: {value: "#fff"}
+                      fill: {scale: "pieColors", field: "Category"}
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+          legends: [
+            {
+              fill: pieColors
+              orient: none
+              encode: {
+                legend: {
+                  enter: {
+                    x: {value: 156}
+                    yc: {value: 38}
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+  signals: [
+    {
+      name: hover
+      value: null
+      on: [
+        {events: "@countrymark:mouseover", update: "datum"}
+        {events: "@countrymark:mouseout", update: "null"}
+      ]
+    }
+    {
+      name: colors
+      value: Greens
+      bind: {
+        input: select
+        options: [
+          Blues
+          Greens
+          Greys
+          Purples
+          Reds
+          Oranges
+          BlueOrange
+          BrownBlueGreen
+          PurpleGreen
+          PinkYellowGreen
+          PurpleOrange
+          RedBlue
+          RedGrey
+          RedYellowBlue
+          RedYellowGreen
+          BlueGreen
+          BluePurple
+          GreenBlue
+          OrangeRed
+          PurpleBlueGreen
+          PurpleBlue
+          PurpleRed
+          RedPurple
+          YellowGreenBlue
+          YellowGreen
+          YellowOrangeBrown
+          YellowOrangeRed
+        ]
+      }
+    }
+    {
+      name: lineshape
+      value: diagonal
+      bind: {
+        input: select
+        options: ["line", "arc", "curve", "diagonal", "orthogonal"]
+      }
+    }
+  ]
+}
