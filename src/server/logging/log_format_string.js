@@ -23,14 +23,14 @@ const typeColors = {
   info: 'green',
   error: 'red',
   warning: 'red',
-  fatal: 'magenta',
+  fatal: 'magentaBright',
   status: 'yellow',
-  debug: 'brightBlack',
-  server: 'brightBlack',
+  debug: 'gray',
+  server: 'gray',
   optmzr: 'white',
   managr: 'green',
-  optimize: 'magenta',
-  listening: 'magenta'
+  optimize: 'magentaBright',
+  listening: 'magentaBright'
 };
 
 const color = _.memoize(function (name) {

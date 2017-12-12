@@ -21,7 +21,7 @@ function serializeError(err = {}) {
 const levelColor = function (code) {
   if (code < 299) return chalk.green(code);
   if (code < 399) return chalk.yellow(code);
-  if (code < 499) return chalk.magenta(code);
+  if (code < 499) return chalk.magentaBright(code);
   return chalk.red(code);
 };
 
