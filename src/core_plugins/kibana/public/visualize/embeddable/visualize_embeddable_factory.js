@@ -5,6 +5,8 @@ import { FilterBarClickHandlerProvider as filterBarClickHandlerProvider } from '
 import { EmbeddableFactory, Embeddable } from 'ui/embeddable';
 import { PersistedState } from 'ui/persisted_state';
 
+import labDisabledTemplate from './visualize_lab_disabled.html';
+
 import chrome from 'ui/chrome';
 
 export class VisualizeEmbeddableFactory extends EmbeddableFactory {
@@ -31,13 +33,8 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
         const isLabsEnabled = this._config.get('visualize:enableLabs');
 
         if (!isLabsEnabled && savedObject.vis.type.stage === 'lab') {
-          domNode.innerHTML = `
-<div class="disabledLabVisualization">
-  <div class="kuiVerticalRhythm disabledLabVisualization__icon kuiIcon fa-flask" aria-hidden="true"></div>
-  <div class="kuiVerticalRhythm"><em>${savedObject.title}</em> is a lab visualization.</div>
-  <div class="kuiVerticalRhythm">Please turn on lab-mode in the advanced settings to see lab visualizations.</div>
-</div>
-`;
+          domNode.innerHTML = labDisabledTemplate.replace('{{title}}', savedObject.title);
+
           return new Embeddable({
             title: savedObject.title
           });
