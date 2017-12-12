@@ -27,9 +27,11 @@ function extendStats(bucket) {
 }
 
 function extendStatsBucket(bucket, metrics) {
-  const bucketsPath = 'timeseries > ' + getBucketsPath(bucket.field, metrics);
+  const bucketsPath = 'timeseries>' + getBucketsPath(bucket.field, metrics);
   const body = { extended_stats_bucket: { buckets_path: bucketsPath } };
-  if (bucket.sigma) body.extended_stats_bucket.sigma = parseInt(bucket.sigma, 10);
+  if (bucket.sigma) {
+    body.extended_stats_bucket.sigma = parseInt(bucket.sigma, 10);
+  }
   return body;
 }
 
@@ -46,7 +48,7 @@ export default {
       }
     };
   },
-  static: (bucket) => {
+  static: bucket => {
     checkMetric(bucket, ['value']);
     return {
       bucket_script: {
@@ -88,13 +90,15 @@ export default {
   std_deviation_bucket: extendStatsBucket,
   variance_bucket: extendStatsBucket,
 
-  percentile: (bucket) => {
+  percentile: bucket => {
     checkMetric(bucket, ['type', 'field', 'percentiles']);
-    let percents = bucket.percentiles.filter(p => p.value != null).map(p => p.value);
+    let percents = bucket.percentiles
+      .filter(p => p.value != null)
+      .map(p => p.value);
     if (bucket.percentiles.some(p => p.mode === 'band')) {
-      percents = percents.concat(bucket.percentiles
-        .filter(p => p.percentile)
-        .map(p => p.percentile));
+      percents = percents.concat(
+        bucket.percentiles.filter(p => p.percentile).map(p => p.percentile)
+      );
     }
     const agg = {
       percentiles: {
@@ -115,7 +119,11 @@ export default {
       }
     };
     if (bucket.gap_policy) body.derivative.gap_policy = bucket.gap_policy;
-    if (bucket.unit) body.derivative.unit = /^([\d]+)([shmdwMy]|ms)$/.test(bucket.unit) ? bucket.unit : bucketSize;
+    if (bucket.unit) {
+      body.derivative.unit = /^([\d]+)([shmdwMy]|ms)$/.test(bucket.unit)
+        ? bucket.unit
+        : bucketSize;
+    }
     return body;
   },
 
@@ -129,7 +137,9 @@ export default {
       }
     };
     if (bucket.gap_policy) body.serial_diff.gap_policy = bucket.gap_policy;
-    if (bucket.lag) body.serial_diff.lag = /^([\d]+)$/.test(bucket.lag) ? bucket.lag : 0;
+    if (bucket.lag) {
+      body.serial_diff.lag = /^([\d]+)$/.test(bucket.lag) ? bucket.lag : 0;
+    }
     return body;
   },
 
@@ -155,7 +165,9 @@ export default {
     if (bucket.window) body.moving_avg.window = Number(bucket.window);
     if (bucket.minimize) body.moving_avg.minimize = Boolean(bucket.minimize);
     if (bucket.predict) body.moving_avg.predict = Number(bucket.predict);
-    if (bucket.settings) body.moving_avg.settings = parseSettings(bucket.settings);
+    if (bucket.settings) {
+      body.moving_avg.settings = parseSettings(bucket.settings);
+    }
     return body;
   },
 
@@ -194,7 +206,4 @@ export default {
     };
     return body;
   }
-
-
 };
-
