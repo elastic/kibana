@@ -247,8 +247,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async clickFieldListItemAdd(field) {
-      const listEntry = await testSubjects.find(`field-${field}`);
-      await getRemote().moveMouseTo(listEntry);
+      await testSubjects.moveMouseTo(`field-${field}`);
       await testSubjects.click(`fieldToggle-${field}`);
     }
 
