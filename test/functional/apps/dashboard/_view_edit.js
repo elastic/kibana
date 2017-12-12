@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('existing dashboard opens in view mode', async function () {
       await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.clickDashboardByLinkText(dashboardName);
+      await PageObjects.dashboard.selectDashboard(dashboardName);
       const inViewMode = await PageObjects.dashboard.getIsInViewMode();
 
       expect(inViewMode).to.equal(true);

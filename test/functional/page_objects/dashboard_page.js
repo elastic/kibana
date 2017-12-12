@@ -37,6 +37,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async preserveCrossAppState() {
       const url = await remote.getCurrentUrl();
       await remote.get(url, false);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickEditVisualization() {
@@ -353,8 +354,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async clickDashboardByLinkText(dashName) {
-      await find.clickByLinkText(dashName);
+    async selectDashboard(dashName) {
+      await testSubjects.click(`dashboardListingTitleLink-${dashName.split(' ').join('-')}`);
     }
 
     async clearSearchValue() {
@@ -390,7 +391,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getCountOfDashboardsInListingTable() {
-      const dashboardTitles = await testSubjects.findAll('dashboardListingTitleLink');
+      const dashboardTitles = await testSubjects.findAll('dashboardListingRow');
       return dashboardTitles.length;
     }
 
@@ -409,7 +410,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
       await retry.try(async () => {
         await this.searchForDashboardWithName(dashName);
-        await this.clickDashboardByLinkText(dashName);
+        await this.selectDashboard(dashName);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const onDashboardLandingPage = await this.onDashboardLandingPage();
@@ -433,7 +434,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async getDashboardPanels() {
       return await testSubjects.findAll('dashboardPanel');
     }
-
 
     async getPanelDimensions() {
       const panels = await find.allByCssSelector('.react-grid-item'); // These are gridster-defined elements and classes
@@ -577,6 +577,25 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
 
       throw new Error('no element');
+    }
+
+    async waitForRenderCounter(count) {
+      await retry.try(async () => {
+        const sharedItems = await find.allByCssSelector('[data-shared-item]');
+        const renderCounters = await Promise.all(sharedItems.map(async sharedItem => {
+          return await sharedItem.getAttribute('render-counter');
+        }));
+        if (renderCounters.length !== sharedItems.length) {
+          throw new Error('Some shared items dont have render counter attribute');
+        }
+        let totalCount = 0;
+        renderCounters.forEach(counter => {
+          totalCount += counter;
+        });
+        if (totalCount < count) {
+          throw new Error('Still waiting on more visualizations to finish rendering');
+        }
+      });
     }
 
     async getPanelSharedItemData() {

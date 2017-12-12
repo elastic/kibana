@@ -2,10 +2,9 @@ import React from 'react';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import sinon from 'sinon';
-import AddDeleteButtons from '../add_delete_buttons';
+import AddDeleteButtons from './add_delete_buttons';
 
-describe('<AddDeleteButtons />', () => {
-
+describe('AddDeleteButtons', () => {
   it('calls onAdd={handleAdd}', () => {
     const handleAdd = sinon.spy();
     const wrapper = shallow(
@@ -61,5 +60,4 @@ describe('<AddDeleteButtons />', () => {
     );
     expect(wrapper.find({ text: 'Clone' })).to.have.length(0);
   });
-
 });

@@ -16,7 +16,7 @@ import {
 import { getEmbeddableFactoryMock } from '../../__tests__/get_embeddable_factories_mock';
 import {
   TestSubjects,
-} from 'ui_framework/src/test';
+} from 'ui_framework/test';
 
 function getProps(props = {}) {
   const defaultTestProps = {

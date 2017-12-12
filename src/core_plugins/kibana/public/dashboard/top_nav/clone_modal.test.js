@@ -1,6 +1,9 @@
 import React from 'react';
 import sinon from 'sinon';
 import { mount, render } from 'enzyme';
+import {
+  findTestSubject,
+} from 'ui_framework/test';
 
 import {
   DashboardCloneModal,
@@ -32,14 +35,14 @@ test('renders DashboardCloneModal', () => {
 
 test('onClone', () => {
   createComponent();
-  component.find('[data-test-subj="cloneConfirmButton"]').simulate('click');
+  findTestSubject(component, 'cloneConfirmButton', false).simulate('click');
   sinon.assert.calledWith(onClone, 'dash title');
   sinon.assert.notCalled(onClose);
 });
 
 test('onClose', () => {
   createComponent();
-  component.find('[data-test-subj="cloneCancelButton"]').simulate('click');
+  findTestSubject(component, 'cloneCancelButton', false).simulate('click');
   sinon.assert.calledOnce(onClose);
   sinon.assert.notCalled(onClone);
 });
@@ -48,6 +51,6 @@ test('title', () => {
   createComponent();
   const event = { target: { value: 'a' } };
   component.find('input').simulate('change', event);
-  component.find('[data-test-subj="cloneConfirmButton"]').simulate('click');
+  findTestSubject(component, 'cloneConfirmButton', false).simulate('click');
   sinon.assert.calledWith(onClone, 'a');
 });
