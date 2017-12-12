@@ -25,9 +25,14 @@ export class Tutorial extends React.Component {
     this.state = {
       notFound: false,
       paramValues: {},
-      tutorial: null,
-      visibleInstructions: INSTRUCTIONS_TYPE.ON_PREM
+      tutorial: null
     };
+
+    if (props.isCloudEnabled) {
+      this.state.visibleInstructions = INSTRUCTIONS_TYPE.ELASTIC_CLOUD;
+    } else {
+      this.state.visibleInstructions = INSTRUCTIONS_TYPE.ON_PREM;
+    }
   }
 
   async componentWillMount() {
@@ -95,6 +100,24 @@ export class Tutorial extends React.Component {
     this.setVisibleInstructions(INSTRUCTIONS_TYPE.ON_PREM_ELASTIC_CLOUD);
   }
 
+  renderInstructionSetsToggle = () => {
+    if (!this.props.isCloudEnabled) {
+      return (
+        <div>
+          <KuiButtonGroup isUnited>
+            <KuiButton buttonType="basic" onClick={this.onPrem}>
+              On premise
+            </KuiButton>
+
+            <KuiButton buttonType="basic" onClick={this.onPremElasticCloud}>
+              Elastic cloud
+            </KuiButton>
+          </KuiButtonGroup>
+        </div>
+      );
+    }
+  }
+
   renderInstructionSets = (instructions) => {
     let offset = 1;
     return instructions.instructionSets.map((instructionSet, index) => {
@@ -147,17 +170,7 @@ export class Tutorial extends React.Component {
             previewUrl={previewUrl}
           />
 
-          <div>
-            <KuiButtonGroup isUnited>
-              <KuiButton buttonType="basic" onClick={this.onPrem}>
-                On premise
-              </KuiButton>
-
-              <KuiButton buttonType="basic" onClick={this.onPremElasticCloud}>
-                Elastic cloud
-              </KuiButton>
-            </KuiButtonGroup>
-          </div>
+          {this.renderInstructionSetsToggle()}
 
           <div className="homePanel kuiVerticalRhythm">
             {params}
@@ -178,5 +191,7 @@ export class Tutorial extends React.Component {
 
 Tutorial.propTypes = {
   addBasePath: PropTypes.func.isRequired,
+  isCloudEnabled: PropTypes.bool.isRequired,
+  cloudId: PropTypes.string,
   tutorialId: PropTypes.string.isRequired
 };

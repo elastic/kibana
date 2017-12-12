@@ -10,7 +10,7 @@ import {
   Route
 } from 'react-router-dom';
 
-export function HomeApp({ addBasePath, directories }) {
+export function HomeApp({ addBasePath, cloud, directories }) {
 
   const renderTutorialDirectory = (props) => {
     return (
@@ -25,6 +25,8 @@ export function HomeApp({ addBasePath, directories }) {
     return (
       <Tutorial
         addBasePath={addBasePath}
+        isCloudEnabled={cloud.isCloudEnabled}
+        cloudId={cloud.cloudId}
         tutorialId={props.match.params.id}
       />
     );
@@ -64,6 +66,10 @@ export function HomeApp({ addBasePath, directories }) {
 
 HomeApp.propTypes = {
   addBasePath: PropTypes.func.isRequired,
+  cloud: PropTypes.shape({
+    isCloudEnabled: PropTypes.bool.isRequired,
+    cloudId: PropTypes.string
+  }),
   directories: PropTypes.arrayOf(PropTypes.shape({
     id: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
