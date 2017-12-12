@@ -1,0 +1,128 @@
+[[release-notes-6.1.0]]
+== 6.1.0 Release Notes
+
+Also see <<breaking-changes-6.0>>.
+
+
+[float]
+[[enhancement-6.1.0]]
+=== Enhancements
+Design::
+* [Fixes #12889] Make saved-object-finder and paginated-selectable-list accessible {pull}13834[#13834]
+* [Fixes #12901] [UI Framework] Add KuiCodeEditor as react-ace replacement/wrapper {pull}14026[#14026]
+* [UI Framework] KuiGalleryItem automatically becomes link or button {pull}14240[#14240]
+Dev Tools::
+* [Fixes #11522] Improve Dev Tools accessibility {pull}13496[#13496]
+  - Console no longer traps keyboard focus. You can quit editing with Escape.
+Discover::
+* [Fixes #12633, #12641] Improve accessibility of the discover app {pull}13498[#13498]
+* [Fixes #14456] [Accessibility] Improve filter bar accessibility {pull}14474[#14474]
+Management::
+* [Fixes #12867] &quot;Create index pattern&quot; wizard.  {pull}13454[#13454]
+  - Introducing a new wizard to create index patterns that makes index discovery and matching much easier than before.
+* [Fixes #12668] add an option for url types so that it can be opened in current tab (master branch) {pull}13209[#13209]
+* [Fixes #12869, #12873, #13803] Improve Management section accessibility {pull}14243[#14243]
+* Add rel=&quot;noopener noreferrer&quot; to external links {pull}14440[#14440]
+Operations::
+* [Fixes #11091] Adds keystore for storing settings {pull}14714[#14714]
+* [eslint-config-kibana] Add AirBnB linting rules for React best practices. Bump to v0.10.0. {pull}13259[#13259]
+* Add updated_at timestamp to saved objects {pull}13503[#13503]
+* [Fixes #14312] [build] Clean examples from node modules {pull}14587[#14587]
+* [SavedObjects] use constructor options {pull}14200[#14200]
+* [savedObjects] wait for Kibana index on every write {pull}14202[#14202]
+* [es/clusters] improve cleanup {pull}14188[#14188]
+* Upgrade to webpack 3 {pull}14315[#14315]
+* Upgrade to eslint 4 {pull}14862[#14862]
+* Proxy support for plugin installer {pull}12753[#12753]
+  - Kibana now respects the http_proxy, https_proxy and no_proxy environment variables to download plugins via a proxy.
+* [Fixes #13937] Make console history keyboard accessible {pull}13946[#13946]
+Platform::
+* [Fixes #8499] [server/logging] Allow opting out of UTC {pull}14705[#14705]
+* Improve performance of sort_prefix_first for large arrays {pull}14974[#14974]
+Sharing::
+* Add a feature for custom panel titles {pull}14831[#14831]
+  - Introduces the ability to specify custom titles, or remove the title entirely, for individual dashboard panels.  Just hit the reset link to restore the title to it's original value.
+* Input Control visualization {pull}13314[#13314]
+* Kibana Home page - phase one {pull}14673[#14673]
+* only show expand toggle, in view mode, on hover {pull}14706[#14706]
+* [Fixes #13948] Add new &quot;use margins&quot; option to add separation between panels {pull}14708[#14708]
+* Add new title query param to dashboard listing page {pull}14760[#14760]
+* [Fixes #12563] Hide all panel titles option at the dashboard level {pull}15006[#15006]
+Visualization::
+* [Fixes #1702] pie chart labels {pull}12174[#12174]
+  - pie charts can now have labels on them to increase readability
+* [Fixes #13519, #13103, #13968] Improve Region Maps for use without network connection {pull}15056[#15056]
+  - Improve the use of Region Maps for deployment in environments without internet access. Similar to the Coordinate Map visualization, the Region map can now use a WMS-service as a base-layer. Admins can now also setup Kibana to opt-out of connection to the Elastic Maps Service. Users can now opt-out of having the visualization display warnings.
+* Introduce lab mode for visualizations {pull}15050[#15050]
+  - Newly introduced visualizations can now be part of labs-mode. Visualizations in labs-mode introduce new more cutting-edge functionality and can be subject to change across minor releases.  Labs-mode can be turned off in the advanced settings. Labs-visualization will then no longer be available to the user. The Time Series Visual Builder is not part of labs-mode, it continues to be an experimental feature. The input controls are the first to be flagged as a lab visualization.
+* reverts metric visualization {pull}14052[#14052]
+  - The metric visualization now no longer reuses the rendering code of the gauge and goal visualizations. This improves consistency of positioning of the metric on Dashboards.
+* [TSVB] Adding the ability to sort terms split by terms and change order {pull}14213[#14213]
+* Math Aggregation to support Sibling Aggs for TSVB {pull}13681[#13681]
+* [TSVB] Add support for Math Aggregation to tables {pull}14553[#14553]
+  - This PR adds support for the Math aggregation to the new TSVB table visualization. This wasn't possible at the time of the PR because both features were separated. This also adds support for the drop last bucket feature.
+* [TSVB] Series Filter {pull}14696[#14696]
+  - This PR adds the series filter feature allowing the user to create a filter per series. This allows users to user to have a group by terms along with a filter for each series.
+* [Fixes #13992] Grab the default index pattern and use it in TSVB {pull}14739[#14739]
+  - TSVB now uses Kibana's default index pattern by default.
+* [TSVB] Add params._interval to mathjs {pull}14944[#14944]
+  - Make the bucket interval available as a parameter.
+* Upgrade kibana to leaflet 1.x {pull}12367[#12367]
+* [Fixes #1385] relative date field formatter {pull}13921[#13921]
+* Allow visualizations to specify open editor tab  {pull}13977[#13977]
+* Show the x-axis (time) value in legend when hovering over a Timelion graph {pull}14627[#14627]
+  - Hovering over a Timelion  graph now shows the corresponding x-axis value in the legend.
+* Timelion typeahead for argument names {pull}14657[#14657]
+* [Fixes #9022] Timelion query language support for scripted fields {pull}14700[#14700]
+* Timelion typeahead for argument values {pull}14801[#14801]
+* add API to embed visualizations {pull}14292[#14292]
+  - visualize loader helps with inserting visualizations into DOM elements
+* [Fixes #11533] Improve timelion accessibility {pull}13531[#13531]
+* [Fixes #11858] Allow reordering aggregation priority by keyboard {pull}13635[#13635]
+* [Fixes #12902, #12903] Improve time series visual builder accessibility {pull}13817[#13817]
+* [Fixes #11843] [Accessibility] Improve visualization legends accessibility {pull}14505[#14505]
+  - Improve the keyboard accessibility of visualization legends.
+* [Fixes #12905] [Accessibility] Refactor font slider for accessibility {pull}14817[#14817]
+* Remove ready:vis and application.load event {pull}14988[#14988]
+  - Visualizations no longer send a ready:vis event to the $rootScope once they initialized. Applications don't need to emit an application.load event anymore.
+
+[float]
+[[bug-6.1.0]]
+=== Bug fixes
+Design::
+* [Fixes #12247] [Accessibility] Make table pagination controls keyboard-accessible.  {pull}13541[#13541]
+* [Fixes #12482] [Accessibility] Give kuiTables keyboard-accessible column headers  {pull}13586[#13586]
+* [UI Framework] Reset Chrome's native styling for button border-radius {pull}14758[#14758]
+* [UI Framework] Fix spacing bug with LocalTabs. {pull}14772[#14772]
+Dev Tools::
+* [Fixes #14586] [console] Remove cluster/_nodes/stats {pull}14757[#14757]
+* [Fixes #10841, #10840, #10071, #8930, #9651, #8790] [console] assorted autocomplete fixes {pull}14770[#14770]
+Management::
+* [Fixes #12612] Create keyboard mode for ui-ace editor {pull}13339[#13339]
+  - Our code editor in several places won't trap keyboard focus anymore, by using the Tab key. When navigating by keyboard, you first need to Enter editing mode in the code editor and you can leave it by pressing Escape.
+Operations::
+* Removes webpack-directory-name-as-main dependency {pull}13584[#13584]
+Platform::
+* [Fixes #15078] Courier - $state in searchSource {pull}15166[#15166]
+Sharing::
+* Refine use of aria-label in Dashboard panel and top nav, Discover, and Management 'Edit index pattern' UI. {pull}14341[#14341]
+* [Fixes #11532] [11532] Improve local nav accessibility  {pull}14365[#14365]
+* Fix bug with Dashboard breadcrumb alignment. {pull}13580[#13580]
+* [Fixes #13421] Dashboard dark-theme fixes {pull}13690[#13690]
+* Set timeout and terminate_after parameters when fetching terms for Input Controls {pull}14977[#14977]
+* [Fixes #13458] Fix out of memory crash on auto refreshing dashboards {pull}13871[#13871]
+* [Fixes #9523] Fix issue where saved searches are not updated {pull}14452[#14452]
+  - There has been a long standing issue where if you add a saved search to a dashboard, then go edit and save that saved search, the updates are not propagated to the dashboard.  The only way, previously, to get the new changes was to remove and re-add the search from your dashboard. With this fix, that is no longer necessary. However, there is one situation when your saved search will stop updating and that is when someone has made and saved local edits to the saved search on the dashboard.  For example, if you remove a column from a saved search in a dashboard panel, then save the dashboard, that search will always show that column set, even if columns are added or removed to the underlying saved search. We did it this way to still allow users to override the configuration at the dashboard level.
+Visualization::
+* Visualization resizeInit {pull}15321[#15321]
+* [Fixes #14344] Remove aria-hidden=&quot;true&quot; from TSVB tabs and agg component to make their content screen-reader accessible. {pull}14345[#14345]
+* [TSVB] Remove console.log from Resize PR {pull}14555[#14555]
+* [TSVB] Fixes #14124 - Removes the 1w label from interval pattern {pull}14577[#14577]
+* [TSVB] Change term sorting to match Kibana Core {pull}14679[#14679]
+* [TSVB] Stacked series should not contain null values {pull}14923[#14923]
+* fix issue of duplicate TSVB flot chart creation {pull}14626[#14626]
+* Fix spatial filters when Kuery is in use {pull}14158[#14158]
+* [6.x] update spy table headers when columns update {pull}13224[#13224]
+* [Fixes #2908] Scale histogram aggregation interval to avoid crashing browser {pull}14157[#14157]
+* [Fixes #12545] [timelion] trim number of colors when there are more colors than gradient stops {pull}14906[#14906]
+
