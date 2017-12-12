@@ -18,7 +18,7 @@ function processCommand(command, options) {
 
   const logger = new Logger(settings);
 
-  warnIfUsingPluginDirOption(options, fromRoot('plugins'), logger);
+  warnIfUsingPluginDirOption(settings, fromRoot('plugins'), logger);
   logWarnings(settings, logger);
   remove(settings, logger);
 }
