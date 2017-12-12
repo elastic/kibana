@@ -3,7 +3,6 @@ const readFileSync = require('fs').readFileSync;
 
 const configFiles = [ '.kibana-plugin-helpers.json', '.kibana-plugin-helpers.dev.json' ];
 const configCache = {};
-const KIBANA_ROOT_OVERRIDE = process.env.KIBANA_ROOT ? resolve(process.env.KIBANA_ROOT) : null;
 
 module.exports = function (root) {
   if (!root) root = process.cwd();
@@ -24,27 +23,24 @@ module.exports = function (root) {
     }
   });
 
-  const deprecationMsg = 'has been deprecated and is removed in the next ' +
-    'major version of `@elastic/plugin-helpers`.\n'
+  const deprecationMsg = 'has been removed from `@elastic/plugin-helpers`. ' +
+    'During development your plugin must be located in `../kibana-extra/{pluginName}` ' +
+    'relative to the Kibana directory to work with this package.\n'
 
   if (config.kibanaRoot) {
-    process.stdout.write(
-      'WARNING: The `kibanaRoot` config option ' + deprecationMsg
+    throw new Error(
+      'The `kibanaRoot` config option ' + deprecationMsg
     );
   }
   if (process.env.KIBANA_ROOT) {
-    process.stdout.write(
-      'WARNING: The `KIBANA_ROOT` environment variable ' + deprecationMsg
+    throw new Error(
+      'The `KIBANA_ROOT` environment variable ' + deprecationMsg
     );
   }
 
   // use resolve to ensure correct resolution of paths
-  const { kibanaRoot, includePlugins } = config;
-  if (kibanaRoot) config.kibanaRoot = resolve(root, kibanaRoot);
+  const { includePlugins } = config;
   if (includePlugins) config.includePlugins = includePlugins.map(path => resolve(root, path));
-
-  // allow env setting to override kibana root from config
-  if (KIBANA_ROOT_OVERRIDE) config.kibanaRoot = KIBANA_ROOT_OVERRIDE;
 
   return config;
 };

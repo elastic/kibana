@@ -78,4 +78,10 @@ program
   }));
 
 program
+  .command('postinstall')
+  .action(taskRunner(function (command) {
+    run('postinstall');
+  }));
+
+program
   .parse(process.argv);
