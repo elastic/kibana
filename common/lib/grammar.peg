@@ -15,21 +15,12 @@
 
 start
  = expression
- / partial_expression
 
 expression
  = first:function space? rest:('|' space? fn:function {return fn})* {
   return {
    type: 'expression',
    chain: [first].concat(rest)
-  }
- }
-
-partial_expression
- = '${' expression:expression '}' {
-  return {
-   type: 'partial',
-   chain: expression.chain
   }
  }
 
@@ -61,7 +52,12 @@ argument_assignment
 argument
  = cursor
  / '{' space? expression:expression space? '}' { return expression; }
- / partial_expression
+ / '${' space? expression:expression space? '}' {
+  return {
+   type: 'partial',
+   chain: expression.chain
+  }
+ }
  / literal
 
 
