@@ -3,6 +3,11 @@ import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
 import { getRangeScript } from 'ui/filter_manager/lib/range';
 
+// Copied from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}
+
 export function buildNodeParams(fieldName, params, serializeStyle = 'operator') {
   params = _.pick(params, 'gt', 'lt', 'gte', 'lte', 'format');
   const fieldNameArg = nodeTypes.literal.buildNode(fieldName);
@@ -21,13 +26,29 @@ export function buildNodeParams(fieldName, params, serializeStyle = 'operator') 
   };
 }
 
-export function toElasticsearchQuery(node, indexPattern) {
-  const [ fieldNameArg, ...args ] = node.arguments;
-  const fieldName = nodeTypes.literal.toElasticsearchQuery(fieldNameArg);
-  const field = indexPattern.fields.byName[fieldName];
-  const namedArgs = extractArguments(args);
-  const queryParams = _.mapValues(namedArgs, ast.toElasticsearchQuery);
+function getFieldsByWildcard(pattern, indexPattern) {
+  if (pattern.includes('*')) {
+    const userInputLiterals = pattern.split('*');
+    const escapedUserInputLiterals = userInputLiterals.map(escapeRegExp);
+    const regexPattern = escapedUserInputLiterals.join('.*');
+    const regex = new RegExp(regexPattern);
 
+    const fields = indexPattern.fields.filter((field) => {
+      return regex.test(field.name);
+    });
+
+    if (_.isEmpty(fields)) {
+      throw new Error(`No fields match the pattern ${pattern}`);
+    }
+
+    return fields;
+  }
+  else {
+    return [indexPattern.fields.byName[pattern]];
+  }
+}
+
+function createRangeDSL(field, queryParams) {
   if (field && field.scripted) {
     return {
       script: {
@@ -38,9 +59,28 @@ export function toElasticsearchQuery(node, indexPattern) {
 
   return {
     range: {
-      [fieldName]: queryParams
+      [field.name]: queryParams
     }
   };
+}
+
+export function toElasticsearchQuery(node, indexPattern) {
+  const [ fieldNameArg, ...args ] = node.arguments;
+  const fieldName = nodeTypes.literal.toElasticsearchQuery(fieldNameArg);
+  const fields = getFieldsByWildcard(fieldName, indexPattern);
+  const namedArgs = extractArguments(args);
+  const queryParams = _.mapValues(namedArgs, ast.toElasticsearchQuery);
+
+  if (fields.length === 1) {
+    return createRangeDSL(fields[0], queryParams);
+  }
+  else {
+    return {
+      bool: {
+        filter: fields.map(field => createRangeDSL(field, queryParams))
+      }
+    };
+  }
 }
 
 export function toKueryExpression(node) {
