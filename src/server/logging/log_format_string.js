@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import ansicolors from 'ansicolors';
+import chalk from 'chalk';
 
 import LogFormat from './log_format';
 
@@ -34,7 +34,7 @@ const typeColors = {
 };
 
 const color = _.memoize(function (name) {
-  return ansicolors[typeColors[name]] || _.identity;
+  return chalk[typeColors[name]] || _.identity;
 });
 
 const type = _.memoize(function (t) {

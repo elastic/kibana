@@ -13,8 +13,15 @@ while [ -h "$SCRIPT" ] ; do
   fi
 done
 
+echo $SCRIPT
+echo 'that is script'
+
 DIR="$(dirname "${SCRIPT}")/.."
+echo 'dir is '
+echo $DIR
 NODE="${DIR}/node/bin/node"
+echo 'node is '
+echo $NODE
 test -x "$NODE"
 if [ ! -x "$NODE" ]; then
   echo "unable to find usable node.js executable."
