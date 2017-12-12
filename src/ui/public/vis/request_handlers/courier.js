@@ -25,7 +25,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
         return false;
       };
 
-      return new Promise(async (resolve, reject) => {
+      return new Promise((resolve, reject) => {
         if (shouldQuery()) {
           delete vis.reload;
           searchSource.onResults().then(async resp => {
