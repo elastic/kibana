@@ -1,17 +1,25 @@
-// import { ResizeCheckerProvider } from 'ui/resize_checker';
+import $ from 'jquery';
 import { VegaView, ViewUtils } from './vega_view';
-
-// import { VisFactoryProvider } from 'ui/vis/vis_factory';
-// import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
 export function VegaVisualizationProvider(vegaConfig, serviceSettings) {
   return class VegaVisualization {
     constructor(el, vis) {
-      console.log('VegaViz constructor');
+      // fixme: remove
+      console.log('VegaVisualization constructor');
 
       this.messages = [];
-      this.el = el;
+      this.el = $(el);
       this.vis = vis;
+
+      this.el.addClass('vega-main');
+
+// <ul ng-if="vega.messages.length" class="vega-messages">
+//   <li ng-repeat="message in vega.messages"
+//       ng-class="{error: 'vega-message-err', warning: 'vega-message-warn'}[message.type]"
+//   >
+//     <pre>{{message.data}}</pre>
+//   </li>
+// </ul>
     }
 
     onError(error) {
@@ -32,28 +40,46 @@ export function VegaVisualizationProvider(vegaConfig, serviceSettings) {
     /**
      *
      * @param {VegaParser} visData
+     * @param {*} status
      * @returns {Promise<void>}
      */
-    async render(visData/*, status */) {
-      this.messages = visData.warnings;
+    async render(visData, status) {
+
+      if (!visData && !this.vegaView) {
+        console.log('Unable to render without data', status);
+        return;
+      }
+
+      // fixme: remove
+      console.log('** render **', visData, status);
 
       try {
-        if (this.vegaView) {
-          await this.vegaView.destroy();
+        if (visData && (status.data || !this.vegaView)) {
+          // New data received, rebuild the graph
+          if (this.vegaView) {
+            await this.vegaView.destroy();
+            this.vegaView = null;
+          }
+          this.vegaView = new VegaView(
+            vegaConfig, this.el, visData, serviceSettings,
+            this.onError.bind(this), this.onWarn.bind(this));
+
+          await this.vegaView.init();
+        } else if (status.resize) {
+          // the graph has been resized
+          // fixme: remove
+          console.log('VegaVisualization resizing');
+          await this.vegaView.resize();
         }
 
-        // FIXME:  hackVals should be injected, not passed via visData
-        this.vegaView = new VegaView(
-          vegaConfig, this.el, visData, serviceSettings,
-          this.onError.bind(this), this.onWarn.bind(this));
-        await this.vegaView.init();
       } catch (error) {
         this.onError(error);
       }
     }
 
     destroy() {
-      console.log('VegaViz destroying');
+      // fixme: remove
+      console.log('VegaVisualization destroying');
     }
   };
 }

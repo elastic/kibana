@@ -9,12 +9,12 @@ vega.scheme('elastic',
   ['#00B3A4', '#3185FC', '#DB1374', '#490092', '#FEB6DB', '#F98510', '#E6C220', '#BFA180', '#920000', '#461A0A']
 );
 
-// FIXME: handle runtime errors by overrwriting  vega.logging.error ...
+// FIXME: handle runtime errors by overwriting  vega.logging.error ...
 export class VegaView {
-  constructor(vegaConfig, parentEl, vegaParser, serviceSettings, onError, onWarn) {
+  constructor(vegaConfig, $parentEl, vegaParser, serviceSettings, onError, onWarn) {
     this._onWarn = onWarn;
     this._onError = onError;
-    this._parentEl = $(parentEl);
+    this._parentEl = $parentEl;
     this._serviceSettings = serviceSettings;
     this._parser = vegaParser;
 
@@ -76,8 +76,6 @@ export class VegaView {
   resize() {
     if (this._parser.useResize && this._view && this.updateVegaSize(this._view)) {
       return this._view.runAsync();
-    } else {
-      return Promise.resolve();
     }
   }
 

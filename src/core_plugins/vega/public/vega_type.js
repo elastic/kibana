@@ -7,7 +7,8 @@ import { VegaRequestHandlerProvider } from './vega_request_handler';
 
 import './vega.less';
 import './vega_editor.less';
-import vegaVisTemplate from './vega_editor.template.html';
+
+import vegaEditorTemplate from './vega_editor.template.html';
 import defaultSpec from '!!raw-loader!./default.spec.json';
 
 VisTypesRegistryProvider.register((Private) => {
@@ -16,14 +17,14 @@ VisTypesRegistryProvider.register((Private) => {
   const VegaVisualization = Private(VegaVisualizationProvider);
 
   return VisFactory.createBaseVisualization({
-    name: 'vegavis',
+    name: 'vega',
     title: 'Vega',
     description: 'Create custom visualizations using Vega and VegaLite',
     icon: 'fa-code',
     category: CATEGORY.OTHER,
     visConfig: { defaults: { spec: defaultSpec } },
     editorController: 'default',
-    editorConfig: { optionsTemplate: vegaVisTemplate },
+    editorConfig: { optionsTemplate: vegaEditorTemplate },
     visualization: VegaVisualization,
     requestHandler: vegaRequestHandler,
     responseHandler: 'none',

@@ -6,8 +6,9 @@ export function VegaRequestHandlerProvider(Private, es, timefilter) {
   const dashboardContext = Private(dashboardContextProvider);
 
   return {
-    name: 'vegavis',
-    handler: (vis/*, appState, uiState*/) => {
+    name: 'vega',
+    handler: (vis, appState, uiState) => {
+      console.log('** request **', vis, appState, uiState);
       const vp = new VegaParser(vis.params.spec, es, timefilter, dashboardContext);
       return vp.parseAsync();
     }

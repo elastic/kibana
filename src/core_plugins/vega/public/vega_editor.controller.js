@@ -2,9 +2,9 @@ import hjson from 'hjson';
 import compactStringify from 'json-stringify-pretty-compact';
 import split from 'split.js';
 
-export function createVegaVisEditorController(getAppState) {
+export function createVegaEditorController(getAppState) {
 
-  class VegaVisEditorController {
+  class VegaEditorController {
     link($scope, $el /*, $attr*/) {
 
       split([$el.find('.vegaEditor').get(0), $el.find('.vegaEditorPreview').get(0)], {
@@ -58,5 +58,5 @@ export function createVegaVisEditorController(getAppState) {
     }
   }
 
-  return new VegaVisEditorController();
+  return new VegaEditorController();
 }
