@@ -28,10 +28,27 @@ export default function ({ getService, getPageObjects }) {
         .then(function clickMetric() {
           return PageObjects.visualBuilder.clickMetric();
         })
+        .then(function addSeries() {
+          return PageObjects.visualBuilder.addSeries();
+        })
+        .then(function addMetric() {
+          return PageObjects.visualBuilder.addMetric();
+        })
+        .then(function selectOverallAverage() {
+          return PageObjects.visualBuilder.selectItem('.vis_editor__series:last-child ' +
+          '.vis_editor__series-row .ui-sortable-item:last-child .vis_editor__row_item:last-child',
+          'Overall Sum');
+        })
+        .then(function selectCountMetric() {
+          return PageObjects.visualBuilder.selectItem('.vis_editor__series:last-child ' +
+          '.vis_editor__series-row .ui-sortable-item:last-child .vis_editor__std_sibling-metric',
+          'Count');
+        })
         .then(function sleep() {
-          return PageObjects.common.sleep(1003);
+          return PageObjects.common.sleep(1004);
         });
     });
+
 
 
     describe('Visual Builder chart', function indexPatternCreation() {
@@ -41,15 +58,26 @@ export default function ({ getService, getPageObjects }) {
         expect(spyToggleExists).to.be(false);
       });
 
-      it('should show correct data', function () {
+      it('should show correct primary value', function () {
         const expectedMetricValue =  '156';
 
         return PageObjects.visualBuilder.getMetricValue()
           .then(function (value) {
-            log.debug(`metric value: ${value}`);
+            log.debug(`primary metric value: ${value}`);
             expect(value).to.eql(expectedMetricValue);
           });
       });
+
+      it('should show correct secondary value', function () {
+        const expectedMetricValue =  '13,830';
+
+        return PageObjects.visualBuilder.getSecondaryMetricValue()
+          .then(function (value) {
+            log.debug(`secondary metric value: ${value}`);
+            expect(value).to.eql(expectedMetricValue);
+          });
+      });
+
     });
   });
 }
