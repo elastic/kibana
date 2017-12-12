@@ -24,7 +24,7 @@ const typeColors = {
   error: 'red',
   warning: 'red',
   fatal: 'magentaBright',
-  status: 'yellow',
+  status: 'yellowBright',
   debug: 'gray',
   server: 'gray',
   optmzr: 'white',
