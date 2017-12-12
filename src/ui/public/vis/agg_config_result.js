@@ -35,7 +35,7 @@ AggConfigResult.prototype.getPath = function () {
  * @returns {object} Elasticsearch filter
  */
 AggConfigResult.prototype.createFilter = function () {
-  return this.aggConfig.createFilter(this.key);
+  return this.filter || this.aggConfig.createFilter(this.key);
 };
 
 AggConfigResult.prototype.toString = function (contentType) {

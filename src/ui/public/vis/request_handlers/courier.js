@@ -56,12 +56,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
           const agg = needsOtherBucket[i];
 
           // for each of those we'll need to run one extra request
-          const nestedSearchSource = new SearchSource()
-            .set('index', searchSource.index())
-            .set('version', true)
-            .set('size', 1)
-            .set('query', searchSource.get('query'))
-            .set('filter', searchSource.get('filter'));
+          const nestedSearchSource = new SearchSource().inherits(searchSource);
 
           const filterAgg = buildOtherBucketAgg(vis.aggs, searchSource.get('aggs')(), agg, resp);
           nestedSearchSource.set('aggs', filterAgg);

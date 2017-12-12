@@ -60,55 +60,64 @@ export const OtherBucketHelperProvider = (Private) => {
       const currentAgg = bucketAggs[aggIndex];
       if (aggIndex < index) {
         _.each(agg.buckets, (bucket, bucketObjKey) => {
-
-          // filter aggregation behaves diff that the others (maybe we should fix that ?)
-          // it won't have bucket.key defined, agg.buckets will be object (not an array) ...
-          // however that is how the es response is ?
           const bucketKey = currentAgg.getKey(bucket, Number.isInteger(bucketObjKey) ? null : bucketObjKey);
           const filter = bucket.filter || currentAgg.createFilter(bucketKey);
           delete filter.meta;
           const migratedFilter = migrateFilter(filter.query || filter);
-          const newFilters = filters.concat([migratedFilter]);
+          const newFilters = [...filters, migratedFilter];
           walkBucketTree(newAggIndex, bucket, newAgg.id, newFilters, `${key}-${bucketKey.toString()}`);
         });
         return;
       }
 
-      filterAggDsl.filters[`${key}-other`] = {
+      filterAggDsl.filters[key] = {
         bool: { must: filters, must_not: [ { terms: {} } ] }
       };
 
-      // check if missing bucket is enabled and add it to must filters
-      if (aggs[`${aggId}-missing`]) {
-        filterAggDsl.filters[`${key}-other`].bool.must.push({
-          exists: {
-            field: bucketAggs[index].params.field.name
-          }
-        });
-      }
-
       // create not filters for all the buckets
       const notKeys = agg.buckets.map(bucket => bucket.key);
-      filterAggDsl.filters[`${key}-other`].bool.must_not[0].terms[aggWithOtherBucket.params.field.name] = notKeys;
+      filterAggDsl.filters[key].bool.must_not[0].terms[aggWithOtherBucket.params.field.name] = notKeys;
 
     };
     walkBucketTree(0, response.aggregations, bucketAggs[0].id, [], '');
 
     return () => {
       return {
-        '0-filter': resultAgg
+        'other-filter': resultAgg
       };
     };
   };
 
   const mergeOtherBucketAggResponse = (aggsConfig, response, otherResponse, otherAgg, requestAgg) => {
-    // insert new bucket
-    _.each(otherResponse.aggregations['0-filter'].buckets, (bucket, key) => {
-      // find the place where to insert
-      const bucketKey = key.replace(/-other$/, '').replace(/^-/, '');
+    _.each(otherResponse.aggregations['other-filter'].buckets, (bucket, key) => {
+      const bucketKey = key.replace(/^-/, '');
       const aggResultBuckets = getAggResultBuckets(aggsConfig, response.aggregations, otherAgg, bucketKey);
-      const requestFilter = requestAgg['0-filter'].filters.filters[key];
-      bucket.filter = requestFilter;
+      const requestFilter = requestAgg['other-filter'].filters.filters[key];
+
+      const generateFilter = (requestFilter) => {
+        const termsInRequestFilter = requestFilter.bool.must_not[0].terms[otherAgg.params.field.name].length;
+        return {
+          meta: {
+            filterId: otherAgg.params.field.name,
+            alias: `not top ${termsInRequestFilter} ${otherAgg.params.field.name} terms`,
+            index: otherAgg.params.field.indexPattern.id
+          },
+          query: requestFilter,
+        };
+      };
+
+      const updateFilter = (newFilter, existingFilter) => {
+        const mergedFilterQuery = _.cloneDeep(newFilter.query);
+        mergedFilterQuery.bool.must_not[0].terms[otherAgg.params.field.name] = [
+          ...newFilter.bool.must_not[0].terms[otherAgg.params.field.name],
+          ...existingFilter.bool.must_not[0].terms[otherAgg.params.field.name]
+        ];
+        const mergedFilter = generateFilter(mergedFilterQuery);
+        mergedFilter.updateFilter = updateFilter;
+      };
+
+      bucket.filter = generateFilter(requestFilter);
+      bucket.filter.updateFilter = updateFilter;
       bucket.key = otherAgg.params.otherBucketLabel;
       aggResultBuckets.push(bucket);
     });

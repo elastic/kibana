@@ -42,18 +42,7 @@ export function FilterBarClickHandlerProvider(Notifier, Private) {
         let filters = _(aggBuckets)
           .map(function (result) {
             try {
-              const filter = result.createFilter();
-              if (result.filter) {
-                const filterAlias = `${result.aggConfig.params.field.name}: ${result.key}`;
-                return {
-                  meta: {
-                    index: filter.meta.index,
-                    alias: filterAlias
-                  },
-                  query: result.filter
-                };
-              }
-              return filter;
+              return result.createFilter();
             } catch (e) {
               if (!simulate) {
                 notify.warning(e.message);
