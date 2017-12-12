@@ -69,6 +69,10 @@ export function AggTypesBucketsTermsProvider(Private) {
         name: 'otherBucket',
         default: false,
         write: _.noop
+      }, {
+        name: 'otherBucketLabel',
+        default: '_other_',
+        write: _.noop
       },
       {
         name: 'exclude',

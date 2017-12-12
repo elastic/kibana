@@ -105,7 +105,7 @@ export const OtherBucketHelperProvider = (Private) => {
       const aggResultBuckets = getAggResultBuckets(aggsConfig, response.aggregations, otherAgg, bucketKey);
       const requestFilter = requestAgg['0-filter'].filters.filters[key];
       bucket.filter = requestFilter;
-      bucket.key = '_other_';
+      bucket.key = otherAgg.params.otherBucketLabel;
       aggResultBuckets.push(bucket);
     });
   };
