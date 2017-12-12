@@ -15,8 +15,8 @@ const getAggResultBuckets = (aggsConfig, response, aggWithOtherBucket, key) => {
       const agg = _.values(responseAgg)[0];
       const aggKey = _.keys(responseAgg)[0];
       const aggConfig = _.find(aggsConfig, agg => agg.id === aggKey);
-      const bucket = _.find(agg.buckets, bucket => {
-        const bucketKey = aggConfig.getKey(bucket).toString();
+      const bucket = _.find(agg.buckets, (bucket, bucketObjKey) => {
+        const bucketKey = aggConfig.getKey(bucket, Number.isInteger(bucketObjKey) ? null : bucketObjKey).toString();
         return bucketKey === keyParts[i];
       });
       if (bucket) {
@@ -59,8 +59,11 @@ export const OtherBucketHelperProvider = (Private) => {
       const newAgg = bucketAggs[newAggIndex];
       const currentAgg = bucketAggs[aggIndex];
       if (aggIndex < index) {
-        _.each(agg.buckets, bucket => {
-          const bucketKey = currentAgg.getKey(bucket);
+        _.each(agg.buckets, (bucket, bucketObjKey) => {
+          // filter aggregation behaves diff that the others (maybe we should fix that ?)
+          // it won't have bucket.key defined, agg.buckets will be object (not an array) ...
+          // however that is how the es response is ?
+          const bucketKey = currentAgg.getKey(bucket, Number.isInteger(bucketObjKey) ? null : bucketObjKey);
           const filter = currentAgg.createFilter(bucketKey);
           delete filter.meta;
           const migratedFilter = migrateFilter(filter.query || filter);
