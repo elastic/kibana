@@ -422,6 +422,8 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await testSubjects.click('saveVisualizationButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
+      PageObjects.header.clickToastOK();
+      PageObjects.header.clickToastOK();
       return await PageObjects.header.getToastMessage();
     }
 
