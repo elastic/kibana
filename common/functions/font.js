@@ -6,7 +6,7 @@ export const font = {
   type: 'style',
   help: 'Create a font style',
   context: {
-    types: ['style'],
+    types: ['null'],
   },
   args: {
     size: {
@@ -43,7 +43,6 @@ export const font = {
   },
   fn: (context, args) => {
     const spec = {
-      ...context.spec,
       fontFamily: args.family,
       fontWeight: args.weight,
       fontStyle: args.italic ? 'italic' : 'normal',

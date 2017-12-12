@@ -141,7 +141,7 @@ export function interpretProvider(config) {
       // argument value is an array. We use Promise.all to turn the values into a single promise.
 
       // Note that we're resolving the argument values before even looking up their definition
-      return Promise.all(map(multiValueArg, argValue => interpret(argValue, null)));
+      return Promise.all(map(multiValueArg, argValue => interpret(argValue, context)));
     });
 
 
