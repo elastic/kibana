@@ -61,8 +61,6 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
         };
         uiState.on('change', uiStateChangeHandler);
 
-        savedObject.vis.setUiState(uiState);
-
         savedObject.vis.listeners.click = this.filterBarClickHandler(container.getAppState());
         savedObject.vis.listeners.brush = this.brushEvent(container.getAppState());
 
