@@ -12,6 +12,11 @@ import _ from 'lodash';
 import 'brace/mode/markdown';
 import 'brace/theme/github';
 
+import {
+  EuiText,
+  EuiCodeBlock,
+} from '@elastic/eui';
+
 class MarkdownEditor extends Component {
   constructor(props) {
     super(props);
@@ -105,13 +110,13 @@ class MarkdownEditor extends Component {
           />
         </div>
         <div className="vis_editor__markdown-variables">
-          <div>
+          <EuiText>
             The following variables can be used in the Markdown by using the Handlebar (mustache) syntax.{' '}
             <a href="http://handlebarsjs.com/expressions.html" target="_BLANK">
               Click here for documentation
             </a>{' '}
             on the available expressions.
-          </div>
+          </EuiText>
           <table className="table">
             <thead>
               <tr>
@@ -126,8 +131,12 @@ class MarkdownEditor extends Component {
           )}
 
           <div className="vis_editor__markdown-code-desc">
-            There is also a special variable named <code>_all</code> which you can use to access the entire tree. This is useful for
-            creating lists with data from a group by...
+            <EuiText>
+              <p>
+                There is also a special variable named <code>_all</code> which you can use to access the entire tree. This is useful for
+                creating lists with data from a group by...
+              </p>
+            </EuiText>
           </div>
 
           <EuiCodeBlock>
