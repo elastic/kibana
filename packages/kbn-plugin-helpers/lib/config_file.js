@@ -24,6 +24,20 @@ module.exports = function (root) {
     }
   });
 
+  const deprecationMsg = 'has been deprecated and is removed in the next ' +
+    'major version of `@elastic/plugin-helpers`.\n'
+
+  if (config.kibanaRoot) {
+    process.stdout.write(
+      'WARNING: The `kibanaRoot` config option ' + deprecationMsg
+    );
+  }
+  if (process.env.KIBANA_ROOT) {
+    process.stdout.write(
+      'WARNING: The `KIBANA_ROOT` environment variable ' + deprecationMsg
+    );
+  }
+
   // use resolve to ensure correct resolution of paths
   const { kibanaRoot, includePlugins } = config;
   if (kibanaRoot) config.kibanaRoot = resolve(root, kibanaRoot);

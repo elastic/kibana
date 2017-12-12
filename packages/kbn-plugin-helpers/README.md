@@ -48,7 +48,16 @@ All configuration setting listed below can simply can be included in the json co
 
 Setting | Description
 ------- | -----------
-`kibanaRoot` | Path to your checkout of Kibana, relative paths are ok
+`kibanaRoot` | DEPRECATED. Path to your checkout of Kibana, relative paths are ok.
+
+In the next major version of the plugin helpers the `kibanaRoot` setting can no longer be specified, and plugins must be located within the sibling `kibana-extra` folder, for example:
+
+```sh
+.
+├── kibana
+├── kibana-extra/foo-plugin
+└── kibana-extra/bar-plugin
+```
 
 ### Settings for `start`
 
