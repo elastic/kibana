@@ -9,6 +9,7 @@ export const alterColumn = {
   },
   args: {
     column: {
+      aliases: ['_'],
       types: ['string'],
       help: 'The name of the column to alter',
     },
