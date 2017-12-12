@@ -19,9 +19,13 @@ export const sort = {
       'multi': false, // TODO: No reason you couldn't.
       help: 'The column to sort on',
     },
+    reverse: {
+      types: ['boolean'],
+      help: 'Reverse the sort order',
+    },
   },
   fn: (context, args) =>
     _.assign(context, {
-      rows: _.sortBy(context.rows, args._),
+      rows: args.reverse ? _.sortBy(context.rows, args._).reverse() : _.sortBy(context.rows, args._),
     }),
 };
