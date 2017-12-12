@@ -15,7 +15,8 @@ async function loadTutorials() {
   try {
     const response = await fetch(baseUrl, {
       method: 'get',
-      headers: headers
+      credentials: 'include',
+      headers: headers,
     });
     if (response.status >= 300) {
       throw new Error(`Request failed with status code: ${response.status}`);
