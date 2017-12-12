@@ -31,6 +31,7 @@ $ plugin-helpers help
 
 Plugin Helpers | Kibana
 -------------- | ------
+9.x | 7.0+ (`kibanaRoot` setting removed from `plugin-helpers`)
 8.x | 7.0+
 7.x | 4.6.x to 6.x (node 6+ only)
 6.x | 4.6.x to 6.x
