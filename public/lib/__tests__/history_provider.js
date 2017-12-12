@@ -23,10 +23,25 @@ describe('historyProvider', () => {
   let state;
   let win;
 
+  function getListeners(name) {
+    return win.listeners[name] || [];
+  }
+
   beforeEach(() => {
     win = createWindow();
     history = historyProvider(win);
     state = createState();
+  });
+
+  describe('instances', () => {
+    it('should return the same instance for the same window object', () => {
+      expect(historyProvider(win)).to.be(history);
+    });
+
+    it('should return different instance for different window object', () => {
+      const win2 = createWindow();
+      expect(historyProvider(win2)).not.to.be(history);
+    });
   });
 
   describe('push updates', () => {
@@ -80,12 +95,25 @@ describe('historyProvider', () => {
     });
   });
 
-  describe('setOnChange', () => {
+  describe('onChange', () => {
     it('should set the onpopstate handler', () => {
       const handler = () => 'hello world';
-      expect(win.onpopstate).to.be(null);
-      history.setOnChange(handler);
-      expect(win.onpopstate).to.be.a('function');
+      expect(getListeners('popstate')).to.have.length(0);
+
+      history.onChange(handler);
+      expect(getListeners('popstate')).to.have.length(1);
+      expect(getListeners('popstate')[0]).to.a('function');
+    });
+
+    it('should return a method to remove the listener', () => {
+      const handler = () => 'hello world';
+      const teardownFn = history.onChange(handler);
+
+      expect(teardownFn).to.be.a('function');
+
+      expect(getListeners('popstate')).to.have.length(1);
+      teardownFn();
+      expect(getListeners('popstate')).to.have.length(0);
     });
 
     it('should pass decompress state to handler', (done) => {
@@ -96,7 +124,7 @@ describe('historyProvider', () => {
         done();
       };
 
-      history.setOnChange(handler);
+      history.onChange(handler);
       win.history._triggerChange();
     });
   });
@@ -104,11 +132,12 @@ describe('historyProvider', () => {
   describe('resetOnChange', () => {
     it('resets the onpopstate handler', () => {
       const handler = () => 'hello world';
-      history.setOnChange(handler);
-      expect(win.onpopstate).to.be.a('function');
+      history.onChange(handler);
+      expect(getListeners('popstate')).to.have.length(1);
+      expect(getListeners('popstate')[0]).to.a('function');
 
       history.resetOnChange();
-      expect(win.onpopstate).to.be(null);
+      expect(getListeners('popstate')).to.have.length(0);
     });
   });
 

@@ -1,7 +1,8 @@
 import 'ui/autoload/all';
 import uiRoutes from 'ui/routes';
-import './state/store_service';
-import './directives';
+import './angular/config';
+import './angular/services';
+import './angular/directives';
 import './apps';
 import { initialize as initializeFullscreen } from './lib/fullscreen';
 

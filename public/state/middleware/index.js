@@ -7,6 +7,7 @@ import { historyMiddleware } from './history';
 import { inFlight } from './in_flight';
 import { workpadUpdate } from './workpad_update';
 import { appReady } from './app_ready';
+import { getWindow } from '../../lib/get_window';
 
 const storageKey = 'canvas';
 
@@ -27,11 +28,6 @@ const serializer = (function () {
     return prevState;
   };
 }());
-
-// Because this will sometimes get loaded in node. Eg, docs generation.
-const getWindow = () => {
-  return typeof (window) === 'undefined' ? {} : window;
-};
 
 const middlewares = [
   applyMiddleware(

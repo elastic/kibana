@@ -8,7 +8,7 @@ export const historyMiddleware = (win) => {
 
   return ({ dispatch, getState }) => {
     // wire up history change handler (this only happens once)
-    history.setOnChange((historyState) => {
+    history.onChange((historyState) => {
       if (historyState) return dispatch(restoreHistory(historyState));
     });
 

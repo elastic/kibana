@@ -1,24 +1,24 @@
 import sinon from 'sinon';
 
 export function createWindow() {
-  // onpopstate is a noop spy by default
-  let onpopstate = null;
-
   // history stack and pointer
   let historyIndex = -1;
   let historyItems = [];
+
+  // listeners added via addListener
+  const listeners = {};
 
   const history = {
     back() {
       if (historyIndex >= -1) {
         historyIndex -= 1;
-        onpopstate && onpopstate.call(null, historyItems[historyIndex]);
+        listeners.popstate && listeners.popstate.forEach(fn => fn.call(null, historyItems[historyIndex]));
       }
     },
     forward() {
       if (historyItems.length > historyIndex + 1) {
         historyIndex += 1;
-        onpopstate && onpopstate.call(null, historyItems[historyIndex]);
+        listeners.popstate && listeners.popstate.forEach(fn => fn.call(null, historyItems[historyIndex]));
       }
     },
     pushState(state, title = '', url = '') {
@@ -41,7 +41,7 @@ export function createWindow() {
       return historyIndex;
     },
     _triggerChange() {
-      onpopstate.call(null, this._getHistory());
+      listeners.popstate && listeners.popstate.forEach(fn => fn.call(null, this._getHistory()));
     },
   };
 
@@ -53,11 +53,18 @@ export function createWindow() {
       pushState: sinon.spy(history.pushState),
       replaceState: sinon.spy(history.replaceState),
     },
-    set onpopstate(fn) {
-      onpopstate = (typeof fn === 'function') ? sinon.spy(fn) : null;
+    addEventListener(name, fn) {
+      if (!listeners[name]) listeners[name] = [];
+      listeners[name].push(fn);
     },
-    get onpopstate() {
-      return onpopstate;
+    removeEventListener(name, fn) {
+      if (!listeners[name]) return;
+
+      const listenerIndex = listeners[name].findIndex(listenFn => listenFn === fn);
+      if (~listenerIndex) listeners[name].splice(listenerIndex, 1);
+    },
+    get listeners() {
+      return { ...listeners };
     },
   };
 }

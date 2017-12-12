@@ -1,7 +1,10 @@
 import lzString from 'lz-string';
 
-export const historyProvider = (win) => {
+function createHistoryInstance(win) {
   const wh = win.history;
+  const historyState = {
+    onChange: [],
+  };
 
   return {
     undo() {
@@ -34,19 +37,43 @@ export const historyProvider = (win) => {
       wh.replaceState(this.encode(state), '');
     },
 
-    setOnChange(fn) {
-      if (fn == null) {
-        win.onpopstate = null;
-      } else {
-        win.onpopstate = ({ state }) => {
-          const stateObj = this.parse(state);
-          fn.call(null, stateObj);
-        };
-      }
+    onChange(fn) {
+      // if no handler fn passed, do nothing
+      if (fn == null) return;
+
+      // create onChange handler using fn
+      const changeFn = ({ state }) => {
+        const stateObj = this.parse(state);
+        fn.call(null, stateObj);
+      };
+
+      // add the onChange handler to the cache so it can be cleaned up later
+      historyState.onChange.push(changeFn);
+
+      win.addEventListener('popstate', changeFn, false);
+
+      // return a function to tear down the change listener
+      return () => {
+        win.removeEventListener('popstate', changeFn, false);
+      };
     },
 
     resetOnChange() {
-      this.setOnChange(null);
+      // splice to clear the onChange array, and remove listener for each fn
+      historyState.onChange.splice(0).forEach((changeFn) => {
+        win.removeEventListener('popstate', changeFn, false);
+      });
     },
   };
+}
+
+const instances = new WeakMap();
+
+export const historyProvider = (win) => {
+  const instance = instances.get(win);
+  if (instance) return instance;
+
+  const newInstance = createHistoryInstance(win);
+  instances.set(win, newInstance);
+  return newInstance;
 };
