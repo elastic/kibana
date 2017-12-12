@@ -4,7 +4,7 @@ import { migrateFilter } from 'ui/courier/data_source/_migrate_filter';
 
 const getAggConfig = (aggs, aggWithOtherBucket) => {
   if (aggs[aggWithOtherBucket.id]) return aggs[aggWithOtherBucket.id];
-  return getAggConfig(_.values(aggs)[0], aggWithOtherBucket);
+  return getAggConfig(_.values(aggs)[0].aggs, aggWithOtherBucket);
 };
 
 const getAggResultBuckets = (aggsConfig, response, aggWithOtherBucket, key) => {
@@ -60,11 +60,12 @@ export const OtherBucketHelperProvider = (Private) => {
       const currentAgg = bucketAggs[aggIndex];
       if (aggIndex < index) {
         _.each(agg.buckets, (bucket, bucketObjKey) => {
+
           // filter aggregation behaves diff that the others (maybe we should fix that ?)
           // it won't have bucket.key defined, agg.buckets will be object (not an array) ...
           // however that is how the es response is ?
           const bucketKey = currentAgg.getKey(bucket, Number.isInteger(bucketObjKey) ? null : bucketObjKey);
-          const filter = currentAgg.createFilter(bucketKey);
+          const filter = bucket.filter || currentAgg.createFilter(bucketKey);
           delete filter.meta;
           const migratedFilter = migrateFilter(filter.query || filter);
           const newFilters = filters.concat([migratedFilter]);
