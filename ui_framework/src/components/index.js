@@ -174,3 +174,8 @@ export {
   KuiToolBarFooterSection,
   KuiToolBarText
 } from './tool_bar';
+
+export {
+  KuiTooltip,
+  KuiTooltipTrigger,
+} from './tooltip';

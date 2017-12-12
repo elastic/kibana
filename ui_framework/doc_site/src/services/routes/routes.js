@@ -120,6 +120,9 @@ import ToggleButtonExample
 import ToolBarExample
   from '../../views/tool_bar/tool_bar_example';
 
+import TooltipExample
+  from '../../views/tooltip/tooltip_example';
+
 import TypographyExample
   from '../../views/typography/typography_example';
 
@@ -270,6 +273,9 @@ const components = [{
   name: 'ToolBar',
   component: ToolBarExample,
   hasReact: true,
+}, {
+  name: 'Tooltip',
+  component: TooltipExample,
 }, {
   name: 'Typography',
   component: TypographyExample,
