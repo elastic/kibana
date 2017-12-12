@@ -45,17 +45,10 @@ export const loadWorkpadById = createThunk('loadWorkpadById', ({ dispatch }, wor
 
 export const downloadWorkpadById = createThunk('downloadWorkpadbyId', ({ dispatch }, workpadId) => {
   // TODO: handle the failed loading state
-  workpadService.get(workpadId).then(resp => {
-    console.log(resp);
-    fileSaver.saveAs(new Blob([JSON.stringify(resp)], { type: 'application/json' }), `canvas-workpad-${resp.name}-${resp.id}.json`);
-  });
-});
-
-export const downloadWorkpad = createThunk('downloadWorkpad', ({ dispatch }, workpadId) => {
-  // TODO: handle the failed loading state
-  workpadService.get(workpadId).then(resp => {
-    console.log(resp);
-    fileSaver.saveAs(new Blob([JSON.stringify(resp)], { type: 'application/json' }), `canvas-workpad-${resp.name}-${resp.id}.json`);
+  workpadService.get(workpadId)
+  .then(resp => {
+    const jsonBlob = new Blob([JSON.stringify(resp)], { type: 'application/json' });
+    fileSaver.saveAs(jsonBlob, `canvas-workpad-${resp.name}-${resp.id}.json`);
   });
 });
 

@@ -1,4 +1,4 @@
-import { get, find, findIndex, map } from 'lodash';
+import { get, find, findIndex, map, omit } from 'lodash';
 import { safeElementFromExpression } from '../../../common/lib/ast';
 import { append } from '../../lib/modify_path';
 import { getAssets } from './assets';
@@ -76,8 +76,12 @@ export function getElements(state, pageId, withAst = true) {
 
   const page = getPageById(state, id);
   const elements = get(page, 'elements');
+
   if (!elements) return [];
-  if (!withAst) return elements;
+
+  // explicitely strip the ast, basically a fix for corrupted workpads
+  // due to https://github.com/elastic/kibana-canvas/issues/260
+  if (!withAst) return elements.map(el => omit(el, ['ast']));
 
   return elements.map(appendAst);
 }

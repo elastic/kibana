@@ -23,5 +23,6 @@ export function remove(id) {
 }
 
 export function find(searchTerm) {
-  return fetch.get(`${apiPath}/find?name=${_get(searchTerm, 'length') ? searchTerm : '*'}`).then(resp => resp.data);
+  return fetch.get(`${apiPath}/find?name=${_get(searchTerm, 'length') ? searchTerm : '*'}`)
+  .then(resp => resp.data);
 }

@@ -1,5 +1,5 @@
 import { createAction } from 'redux-actions';
-import { get, omit } from 'lodash';
+import { get, pick } from 'lodash';
 import { set, del } from 'object-path-immutable';
 import { createThunk } from 'redux-thunks';
 import * as args from './resolved_args';
@@ -49,6 +49,12 @@ function getSiblingContext(state, elementId, checkIndex) {
 
   // walk back up to find the closest cached context available
   return getSiblingContext(state, elementId, prevContextIndex);
+}
+
+function getBareElement(el, includeId = false) {
+  const props = ['position', 'expression', 'filters'];
+  if (includeId) return pick(el, props.concat('id'));
+  return pick(el, props);
 }
 
 export const elementLayer = createAction('elementLayer');
@@ -136,7 +142,7 @@ export const fetchAllRenderables = createThunk('fetchAllRenderables', ({ dispatc
 });
 
 export const duplicateElement = createThunk('duplicateElement', ({ dispatch, type }, element, pageId) => {
-  const newElement = Object.assign({}, getDefaultElement(), omit(element, 'id'));
+  const newElement = Object.assign({}, getDefaultElement(), getBareElement(element));
   // move the element so users can see that it was added
   newElement.position.top = newElement.position.top + 10;
   newElement.position.left = newElement.position.left + 10;
@@ -270,7 +276,7 @@ export const deleteArgumentAtIndex = createThunk('deleteArgumentAtIndex', ({ dis
   payload: element defaults. Eg {expression: 'foo'}
 */
 export const addElement = createThunk('addElement', ({ dispatch }, pageId, element) => {
-  const newElement = Object.assign({}, getDefaultElement(), omit(element, 'id'));
+  const newElement = Object.assign({}, getDefaultElement(), getBareElement(element));
   const _addElement = createAction('addElement');
   dispatch(_addElement({ pageId, element: newElement }));
 
