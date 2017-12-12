@@ -86,7 +86,7 @@ ul.navbar-inline li {
 .checkbox label {
   display: flex;
   align-items: center;
-  padding-left: 0;
+  padding-left: 0 !important;
 
   input[type="checkbox"] {
     float: none;
@@ -538,6 +538,16 @@ style-compile {
   background-color: @globalColorWhite;
   padding: 10px;
   border-radius: 4px;
+
+  label {
+    margin-bottom: 5px !important;
+    font-weight: 700;
+    display: block;
+  }
+
+  .vis-option-item label {
+    font-weight: normal !important;
+  }
 }
 
 .kuiSideBarSection .kuiSideBarSection .kuiSideBarSection{
@@ -628,7 +638,7 @@ style-compile {
  */
 .kuiSideBarFormSectionTitle {
   font-size: 12px;
-  color: @globalColorMediumGray;
+  color: @globalColorDarkGray;
   margin: 10px 0 !important; // 1
   padding-bottom: 2px;
 }
@@ -690,6 +700,11 @@ style-compile {
 .kuiGalleryItem__image img {
   width: 64px;
   height: 64px;
+}
+
+.pdf-options label {
+  padding-bottom: 5px;
+  display: block;
 }
 
 @import "~dragula/dist/dragula.css";
