@@ -57,7 +57,6 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
 
           // for each of those we'll need to run one extra request
           const nestedSearchSource = new SearchSource()
-            .inherits(false)
             .set('index', searchSource.index())
             .set('version', true)
             .set('size', 1)
