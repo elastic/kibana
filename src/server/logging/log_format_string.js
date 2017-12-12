@@ -14,7 +14,7 @@ const statuses = [
 ];
 
 const typeColors = {
-  log: 'blue',
+  log: 'white',
   req: 'green',
   res: 'green',
   ops: 'cyan',
