@@ -73,6 +73,7 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
               wrapperSpan.setAttribute('class', 'ngLegendValue');
               wrapperSpan.setAttribute('kbn-accessible-click', '');
               wrapperSpan.setAttribute('ng-click', `toggleSeries(${series._id})`);
+              wrapperSpan.setAttribute('ng-focus', `focusSeries(${series._id})`);
               wrapperSpan.setAttribute('ng-mouseover', `highlightSeries(${series._id})`);
 
               labelSpan.setAttribute('ng-non-bindable', '');
@@ -98,12 +99,14 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
         });
 
         let hightlightedSeries;
+        let focusedSeries;
         function unhighlightSeries() {
           if (hightlightedSeries === null) {
             return;
           }
 
           hightlightedSeries = null;
+          focusedSeries = null;
           $scope.chart.forEach((series) => {
             series.color = originalColorMap.get(series); // reset the colors
           });
@@ -124,6 +127,10 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
           });
           drawPlot($scope.chart);
         }, DEBOUNCE_DELAY);
+        $scope.focusSeries = function (id) {
+          focusedSeries = id;
+          $scope.highlightSeries(id);
+        };
 
         $scope.toggleSeries = function (id) {
           const series = $scope.chart[id];
@@ -327,6 +334,12 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
             legendCaption = $('<caption class="timelionLegendCaption"></caption>');
             legendCaption.html(emptyCaption);
             canvasElem.find('div.legend table').append(legendCaption);
+
+            // legend has been re-created. Apply focus on legend element when previously set
+            if (focusedSeries) {
+              const $legendLabels = canvasElem.find('div.legend table .legendLabel>span');
+              $legendLabels.get(focusedSeries).focus();
+            }
           }
         }
         $scope.$watch('chart', drawPlot);
