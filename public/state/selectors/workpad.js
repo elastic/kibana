@@ -81,6 +81,7 @@ export function getElements(state, pageId, withAst = true) {
 
   // explicitely strip the ast, basically a fix for corrupted workpads
   // due to https://github.com/elastic/kibana-canvas/issues/260
+  // TODO: remove this once it's been in the wild a bit
   if (!withAst) return elements.map(el => omit(el, ['ast']));
 
   return elements.map(appendAst);

@@ -8,17 +8,18 @@ import { UpdateModal as Component } from './update_modal';
 const siteUrl = 'http://canvas.elastic.co';
 
 export const UpdateModal = compose(
-  withState('build', 'setBuild', null),
+  withState('filename', 'setFilename', null),
   withState('changes', 'setChanges', null),
   lifecycle({
     componentDidMount() {
-      const { setBuild, setChanges } = this.props;
+      const { setFilename, setChanges } = this.props;
       const currentBuild = Number(get(pkg, 'build.git.count'));
       if (!currentBuild) return;
 
-      fetch(`${siteUrl}/preview-microsite/build.json`)
+      fetch(`${siteUrl}/build.json`)
       .then((build) => {
         const buildNum = Number(get(build, 'data.buildNumber'));
+        const buildFile = get(build, 'data.filename');
 
         if (currentBuild < buildNum) {
           fetch(`${siteUrl}/changelog.md`)
@@ -27,11 +28,11 @@ export const UpdateModal = compose(
             const changes = changelog.split('---')[0];
             const md = new Markdown({ html: false });
             setChanges(md.render(String(changes)));
-            setBuild(buildNum);
+            setFilename(buildFile);
           })
           .catch(() => {
             console.log('Could not fetch changelog');
-            setBuild(buildNum);
+            setFilename(buildFile);
           });
         }
       })

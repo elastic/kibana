@@ -5,8 +5,8 @@ import { Changes } from './changes';
 import goat from './goat.png';
 import './update_modal.less';
 
-export const UpdateModal = ({ build, setBuild, changes }) => {
-  if (!build) return null;
+export const UpdateModal = ({ filename, setFilename, changes }) => {
+  if (!filename) return null;
 
   return (
     <Modal.Dialog className="canvas__update-model">
@@ -46,7 +46,7 @@ export const UpdateModal = ({ build, setBuild, changes }) => {
 
         <h5>2. Install the new version</h5>
         <code>
-          ./bin/kibana-plugin install https://download.elastic.co/kibana/canvas/kibana-canvas-0.1.{ build }.zip
+          ./bin/kibana-plugin install https://download.elastic.co/kibana/canvas/{ filename }
         </code>
         <h5>3. Start Kibana and refresh your browser</h5>
         You should be good to go. Good luck!
@@ -55,7 +55,7 @@ export const UpdateModal = ({ build, setBuild, changes }) => {
       <Modal.Footer>
         <p style={{ flexGrow: 1, textAlign: 'left' }}><small>*Uhg. I'm going to fire our transcriptionist</small></p>
         <Button
-          onClick={ () => setBuild(null) }
+          onClick={ () => setFilename(null) }
         >
           Dismiss
         </Button>
@@ -66,10 +66,7 @@ export const UpdateModal = ({ build, setBuild, changes }) => {
 };
 
 UpdateModal.propTypes = {
-  build: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.number,
-  ]),
+  filename: PropTypes.string,
   changes: PropTypes.string,
-  setBuild: PropTypes.func,
+  setFilename: PropTypes.func,
 };
