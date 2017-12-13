@@ -336,7 +336,7 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
             canvasElem.find('div.legend table').append(legendCaption);
 
             // legend has been re-created. Apply focus on legend element when previously set
-            if (focusedSeries) {
+            if (focusedSeries || focusedSeries === 0) {
               const $legendLabels = canvasElem.find('div.legend table .legendLabel>span');
               $legendLabels.get(focusedSeries).focus();
             }
