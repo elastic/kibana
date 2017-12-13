@@ -21,7 +21,13 @@ export async function ScreenshotsProvider({ getService }) {
 
   class Screenshots {
 
-    async compareAgainstBaseline(name) {
+    /**
+     *
+     * @param name {string} name of the file to use for comparison
+     * @param updateBaselines {boolean} optional, pass true to update the baseline snapshot.
+     * @return {Promise.<number>} Percentage difference between the baseline and the current snapshot.
+     */
+    async compareAgainstBaseline(name, updateBaselines) {
       log.debug('compareAgainstBaseline');
       const sessionPath = resolve(SESSION_DIRECTORY, `${name}.png`);
       await this._take(sessionPath);
@@ -29,7 +35,7 @@ export async function ScreenshotsProvider({ getService }) {
       const baselinePath = resolve(BASELINE_DIRECTORY, `${name}.png`);
       const failurePath = resolve(FAILURE_DIRECTORY, `${name}.png`);
 
-      if (process.env.UPDATE_BASELINES) {
+      if (updateBaselines) {
         log.debug('Updating baseline snapshot');
         await writeFileAsync(baselinePath, readFileSync(sessionPath));
         return 0;

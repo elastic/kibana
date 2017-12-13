@@ -3,7 +3,7 @@ import expect from 'expect.js';
 import { AREA_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 
 
-export default function ({ getService, getPageObjects }) {
+export default function ({ getService, getPageObjects, updateBaselines }) {
   const dashboardVisualizations = getService('dashboardVisualizations');
   const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
   const screenshot = getService('screenshots');
@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.toggleExpandPanel();
 
       await PageObjects.dashboard.waitForRenderCounter(2);
-      const percentSimilar = await screenshot.compareAgainstBaseline('tsvb_dashboard');
+      const percentSimilar = await screenshot.compareAgainstBaseline('tsvb_dashboard', updateBaselines);
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
 
@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.toggleExpandPanel();
 
       await PageObjects.dashboard.waitForRenderCounter(6);
-      const percentSimilar = await screenshot.compareAgainstBaseline('area_chart');
+      const percentSimilar = await screenshot.compareAgainstBaseline('area_chart', updateBaselines);
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
 

@@ -29,12 +29,6 @@ if (cmd.verbose) logLevel = 'verbose';
 const log = createToolingLog(logLevel);
 log.pipe(process.stdout);
 
-if (cmd.updateBaselines) {
-  process.env.UPDATE_BASELINES = cmd.updateBaselines;
-} else {
-  delete process.env.UPDATE_BASELINES;
-}
-
 const functionalTestRunner = createFunctionalTestRunner({
   log,
   configFile: cmd.config,
@@ -42,7 +36,8 @@ const functionalTestRunner = createFunctionalTestRunner({
     mochaOpts: {
       bail: cmd.bail,
       grep: cmd.grep,
-    }
+    },
+    updateBaselines: cmd.updateBaselines
   }
 });
 
