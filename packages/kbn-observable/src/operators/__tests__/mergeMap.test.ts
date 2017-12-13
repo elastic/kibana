@@ -45,7 +45,7 @@ test('should mergeMap many outer values to many inner values', async () => {
 });
 
 test('should mergeMap many outer values to many inner values, early complete', async () => {
-  const outer$ = new Subject();
+  const outer$ = new Subject<number>();
   const inner$ = new Subject();
 
   const project = (value: number) => k$(inner$)(map(x => `${value}-${x}`));
@@ -88,7 +88,7 @@ test('should mergeMap many outer to many inner, and inner throws', async () => {
 });
 
 test('should mergeMap many outer to many inner, and outer throws', async () => {
-  const outer$ = new Subject();
+  const outer$ = new Subject<number>();
   const inner$ = new Subject();
 
   const project = (value: number) => k$(inner$)(map(x => `${value}-${x}`));

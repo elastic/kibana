@@ -1,7 +1,7 @@
 import { Appender } from '../appenders/Appenders';
 import { LoggingConfig } from '../LoggingConfig';
 import { LogLevel } from '../LogLevel';
-import { Logger, BaseLogger } from '../Logger';
+import { BaseLogger } from '../Logger';
 
 const context = LoggingConfig.getLoggerContext(['context', 'parent', 'child']);
 let appenderMocks: Appender[];
