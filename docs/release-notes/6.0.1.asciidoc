@@ -1,0 +1,41 @@
+[[release-notes-6.0.1]]
+== 6.0.1 Release Notes
+
+Also see <<breaking-changes-6.0>>.
+
+[float]
+[[security-6.0.1]]
+=== Security Issues
+* ​Kibana cross site scripting issue (ESA-2017-22): Kibana versions prior to 6.0.1 and 5.6.5 had a cross-site scripting (XSS) vulnerability via URL fields that could allow an attacker to obtain sensitive information from or perform destructive actions on behalf of other Kibana users. CVE ID: CVE-2017-11481
+* Kibana open redirect flaw (ESA-2017-23) : The Kibana fix for CVE-2017-8451 was found to be incomplete. With X-Pack installed, Kibana versions before 6.0.1 and 5.6.5 have an open redirect vulnerability on the login page that would enable an attacker to craft a link that redirects to an arbitrary website. CVE ID: CVE-2017-11482
+
+Users should upgrade to Kibana version 6.0.1 or 5.6.5. There are no known workarounds for these issues.
+
+[float]
+[[bug-6.0.1]]
+=== Bug fixes
+Design::
+* [UI Framework] Fix IE11 bug which caused kuiToolBarSearch to grow too wide when there is only a single kuiToolBarSection sibling. {pull}15215[#15215]
+Discover::
+* [Fixes #14634] Don't show { match_all: {} } for migrated objects {pull}14644[#14644]
+* [Fixes #15398] Solidify context app filter test {pull}15203[#15203]
+Platform::
+* Fix fieldFormat plugins {pull}14984[#14984]
+  - In 6.0.0 we accidentally included a breaking change that prevented plugins from supplying custom FieldFormatters. This has been fixed but, also changes the way that they need to be defined. Take a look at the field formatters Kibana supplies to see how you should update your custom FieldFormats.
+* Fix: exponent values in table view {pull}15309[#15309]
+* Prepend relative urls {pull}14994[#14994]
+* [eslint] add eslint dev script {pull}14889[#14889]
+* [dev/ci_setup] generalize jenkins_setup script for other CI environments {pull}15178[#15178]
+Operations::
+* Adds task to export a CSV of all dependencies {pull}15068[#15068]
+* [Logging] more tests and added robustness to log formatting {pull}15035[#15035]
+Sharing::
+* [Fixes #15333] [Timepicker] Fix alignment, consistency in error msg {pull}15343[#15343]
+* [Fixes #15336] Add parsedUrl to the code driving viz/dashboards {pull}15335[#15335]
+Visualization::
+* [Fixes #13436] allows to hide warnings in gauge {pull}15139[#15139]
+* [Fixes #14833] Fix Kibana crashing when resizing a tag cloud too small {pull}15001[#15001]
+* [Fixes #13947] uses maximum space for arc gauge and center aligns it {pull}15140[#15140]
+* [Fixes #15146] fixes the visualizeLoader error in IE {pull}15150[#15150]
+* fixing field formatters for gauge {pull}15145[#15145]
+* [Fixes #13947] fix metric align and size {pull}15141[#15141]
