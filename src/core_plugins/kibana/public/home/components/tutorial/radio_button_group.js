@@ -44,6 +44,7 @@ export class RadioButtonGroup extends React.Component {
           buttonType={buttonType}
           onClick={handleOnClick}
           key={index}
+          data-test-subj={button.dataTestSubj}
         >
           {button.label}
         </KuiButton>
@@ -66,7 +67,8 @@ export class RadioButtonGroup extends React.Component {
 RadioButtonGroup.propTypes = {
   buttons: PropTypes.arrayOf(PropTypes.shape({
     onClick: PropTypes.func.isRequired,
-    label: PropTypes.string.isRequired
+    label: PropTypes.string.isRequired,
+    dataTestSubj: PropTypes.string
   })).isRequired,
   selectedBtnLabel: PropTypes.string
 };

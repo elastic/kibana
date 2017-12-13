@@ -37,5 +37,5 @@ export function Introduction({ description, previewUrl, title }) {
 Introduction.propTypes = {
   description: PropTypes.string.isRequired,
   title: PropTypes.string.isRequired,
-  previewUrl: PropTypes.string,
+  previewUrl: PropTypes.string
 };

@@ -1,0 +1,105 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`] = `
+<div
+  className="kuiView home"
+>
+  <div
+    className="kuiViewContent kuiViewContent--constrainedWidth"
+  >
+    <div>
+      <Introduction
+        description="tutorial used to drive jest tests"
+        title="jest test tutorial"
+      />
+      <div
+        className="text-center kuiVerticalRhythm"
+      />
+      <div
+        className="homePanel kuiVerticalRhythm"
+      >
+        <InstructionSet
+          instructionVariants={
+            Array [
+              Object {
+                "id": "platform id",
+                "instructions": Array [
+                  Object {
+                    "title": "elasticCloud instructions",
+                  },
+                ],
+              },
+            ]
+          }
+          key="0"
+          offset={1}
+          paramValues={Object {}}
+          replaceTemplateStrings={[Function]}
+          title="Instruction title"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`should render ON_PREM instructions with instructions cloud toggle when isCloudEnabled is false 1`] = `
+<div
+  className="kuiView home"
+>
+  <div
+    className="kuiViewContent kuiViewContent--constrainedWidth"
+  >
+    <div>
+      <Introduction
+        description="tutorial used to drive jest tests"
+        title="jest test tutorial"
+      />
+      <div
+        className="text-center kuiVerticalRhythm"
+      >
+        <RadioButtonGroup
+          buttons={
+            Array [
+              Object {
+                "dataTestSubj": "onPremBtn",
+                "label": "On premise",
+                "onClick": [Function],
+              },
+              Object {
+                "dataTestSubj": "onPremElasticCloudBtn",
+                "label": "Elastic cloud",
+                "onClick": [Function],
+              },
+            ]
+          }
+          selectedBtnLabel="On premise"
+        />
+      </div>
+      <div
+        className="homePanel kuiVerticalRhythm"
+      >
+        <InstructionSet
+          instructionVariants={
+            Array [
+              Object {
+                "id": "platform id",
+                "instructions": Array [
+                  Object {
+                    "title": "onPrem instructions",
+                  },
+                ],
+              },
+            ]
+          }
+          key="0"
+          offset={1}
+          paramValues={Object {}}
+          replaceTemplateStrings={[Function]}
+          title="Instruction title"
+        />
+      </div>
+    </div>
+  </div>
+</div>
+`;

@@ -7,7 +7,7 @@ import {
   KuiFlexItem,
   KuiFlexGrid,
 } from 'ui_framework/components';
-import { getTutorials } from '../tutorials';
+import { getTutorials } from '../load_tutorials';
 
 const ALL = 'all';
 

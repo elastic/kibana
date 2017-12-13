@@ -6,17 +6,26 @@ import {
   KuiCodeEditor
 } from 'ui_framework/components';
 import 'brace/mode/sh';
-import { replaceTemplateStrings } from './replace_template_strings';
 
-export function Instruction({ commands, paramValues, textPost, textPre }) {
+export function Instruction({ commands, paramValues, textPost, textPre, replaceTemplateStrings }) {
   let pre;
   if (textPre) {
-    pre = <Content className="kuiVerticalRhythm" text={textPre}/>;
+    pre = (
+      <Content
+        className="kuiVerticalRhythm"
+        text={replaceTemplateStrings(textPre)}
+      />
+    );
   }
 
   let post;
   if (textPost) {
-    post = <Content className="kuiVerticalRhythm" text={textPost}/>;
+    post = (
+      <Content
+        className="kuiVerticalRhythm"
+        text={replaceTemplateStrings(textPost)}
+      />
+    );
   }
 
   let commandsMarkup;
@@ -55,4 +64,5 @@ Instruction.propTypes = {
   paramValues: PropTypes.object.isRequired,
   textPost: PropTypes.string,
   textPre: PropTypes.string,
+  replaceTemplateStrings: PropTypes.func.isRequired,
 };

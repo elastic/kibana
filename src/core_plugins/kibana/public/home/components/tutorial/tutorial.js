@@ -6,7 +6,6 @@ import { Introduction } from './introduction';
 import { InstructionSet } from './instruction_set';
 import { ParameterForm } from './parameter_form';
 import { RadioButtonGroup } from './radio_button_group';
-import { getTutorial } from '../../tutorials';
 
 const INSTRUCTIONS_TYPE = {
   ELASTIC_CLOUD: 'elasticCloud',
@@ -33,7 +32,7 @@ export class Tutorial extends React.Component {
   }
 
   async componentWillMount() {
-    const tutorial = await getTutorial(this.props.tutorialId);
+    const tutorial = await this.props.getTutorial(this.props.tutorialId);
     if (tutorial) {
       this.setState({
         tutorial: tutorial
@@ -100,8 +99,8 @@ export class Tutorial extends React.Component {
   renderInstructionSetsToggle = () => {
     if (!this.props.isCloudEnabled) {
       const radioButtons = [
-        { onClick: this.onPrem, label: 'On premise' },
-        { onClick: this.onPremElasticCloud, label: 'Elastic cloud' },
+        { onClick: this.onPrem, label: 'On premise', dataTestSubj: 'onPremBtn' },
+        { onClick: this.onPremElasticCloud, label: 'Elastic cloud', dataTestSubj: 'onPremElasticCloudBtn' },
       ];
       return (
         <RadioButtonGroup
@@ -123,6 +122,7 @@ export class Tutorial extends React.Component {
           instructionVariants={instructionSet.instructionVariants}
           offset={currentOffset}
           paramValues={this.state.paramValues}
+          replaceTemplateStrings={this.props.replaceTemplateStrings}
           key={index}
         />
       );
@@ -130,7 +130,6 @@ export class Tutorial extends React.Component {
   }
 
   render() {
-    const instructions = this.getInstructions();
     let content;
     if (this.state.notFound) {
       content = (
@@ -141,11 +140,14 @@ export class Tutorial extends React.Component {
         </div>
       );
     }
+
     if (this.state.tutorial) {
       let previewUrl;
       if (this.state.tutorial.previewImagePath) {
         previewUrl = this.props.addBasePath(this.state.tutorial.previewImagePath);
       }
+
+      const instructions = this.getInstructions();
       let params;
       if (instructions.params) {
         params = (
@@ -160,7 +162,7 @@ export class Tutorial extends React.Component {
         <div>
           <Introduction
             title={this.state.tutorial.name}
-            description={this.state.tutorial.longDescription}
+            description={this.props.replaceTemplateStrings(this.state.tutorial.longDescription)}
             previewUrl={previewUrl}
           />
 
@@ -188,6 +190,7 @@ export class Tutorial extends React.Component {
 Tutorial.propTypes = {
   addBasePath: PropTypes.func.isRequired,
   isCloudEnabled: PropTypes.bool.isRequired,
-  cloudId: PropTypes.string,
+  getTutorial: PropTypes.func.isRequired,
+  replaceTemplateStrings: PropTypes.func.isRequired,
   tutorialId: PropTypes.string.isRequired
 };

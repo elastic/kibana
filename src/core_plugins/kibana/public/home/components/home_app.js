@@ -9,6 +9,8 @@ import {
   Switch,
   Route
 } from 'react-router-dom';
+import { getTutorial } from '../load_tutorials';
+import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 
 export function HomeApp({ addBasePath, cloud, directories }) {
 
@@ -26,7 +28,8 @@ export function HomeApp({ addBasePath, cloud, directories }) {
       <Tutorial
         addBasePath={addBasePath}
         isCloudEnabled={cloud.isCloudEnabled}
-        cloudId={cloud.cloudId}
+        getTutorial={getTutorial}
+        replaceTemplateStrings={replaceTemplateStrings}
         tutorialId={props.match.params.id}
       />
     );

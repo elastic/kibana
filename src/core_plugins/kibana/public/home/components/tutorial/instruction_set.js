@@ -65,6 +65,7 @@ export class InstructionSet extends React.Component {
           paramValues={this.props.paramValues}
           textPre={instruction.textPre}
           textPost={instruction.textPost}
+          replaceTemplateStrings={this.props.replaceTemplateStrings}
         />
       </Step>
     ));
@@ -99,5 +100,6 @@ InstructionSet.propTypes = {
   title: PropTypes.string.isRequired,
   instructionVariants: PropTypes.array.isRequired,
   offset: PropTypes.number.isRequired,
-  paramValues: PropTypes.object.isRequired
+  paramValues: PropTypes.object.isRequired,
+  replaceTemplateStrings: PropTypes.func.isRequired,
 };

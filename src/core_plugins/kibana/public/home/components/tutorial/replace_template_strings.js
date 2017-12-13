@@ -1,4 +1,5 @@
 import Mustache from 'mustache';
+import chrome from 'ui/chrome';
 import { metadata } from 'ui/metadata';
 import {
   DOC_LINK_VERSION,
@@ -11,6 +12,9 @@ const TEMPLATE_TAGS = ['{', '}'];
 export function replaceTemplateStrings(text, params = {}) {
   const variables = {
     config: {
+      cloud: {
+        id: chrome.getInjected('cloudId')
+      },
       docs: {
         base_url: ELASTIC_WEBSITE_URL,
         beats: {
