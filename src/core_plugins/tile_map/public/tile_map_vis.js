@@ -39,7 +39,6 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
     },
     responseConverter: geoJsonConverter,
     responseHandler: 'basic',
-    implementsRenderComplete: true,
     visualization: CoordinateMapsVisualization,
     editorConfig: {
       collections: {
