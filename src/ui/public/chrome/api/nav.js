@@ -75,6 +75,27 @@ export function initChromeNavApi(chrome, internals) {
   }
 
   /**
+   * Clear last url for deleted saved objects to avoid loading pages with "Could not locate.."
+   */
+  chrome.untrackNavLinksForDeletedSavedObjects = (deletedIds) => {
+    function urlContainsDeletedId(url) {
+      const includedId = deletedIds.find(deletedId => {
+        return url.includes(deletedId);
+      });
+      if (includedId === undefined) {
+        return false;
+      }
+      return true;
+    }
+
+    internals.nav.forEach(link => {
+      if (link.linkToLastSubUrl && urlContainsDeletedId(link.lastSubUrl)) {
+        setLastUrl(link, link.url);
+      }
+    });
+  };
+
+  /**
    * Manually sets the last url for the given app. The last url for a given app is updated automatically during
    * normal page navigation, so this should only need to be called to insert a last url that was not actually
    * navigated to. For instance, when saving an object and redirecting to another page, the last url of the app
