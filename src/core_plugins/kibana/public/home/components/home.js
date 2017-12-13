@@ -144,7 +144,7 @@ export function Home({ addBasePath, directories }) {
       >
         <EuiFlexItem>
           <EuiTitle size="l">
-            <h1>Add Data to Kibana</h1>
+            <h1>Welcome to Kibana</h1>
           </EuiTitle>
         </EuiFlexItem>
 
@@ -169,9 +169,7 @@ export function Home({ addBasePath, directories }) {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="s" />
-
-      <p className="kuiText kuiSubduedText">
+      <p className="kuiText kuiSubduedText kuiVerticalRhythm kuiVerticalRhythmSmall">
         These turnkey solutions will help you quickly add data into Kibana and turn it into
         pre-built dashboards and monitoring systems.
       </p>

@@ -27,7 +27,7 @@ export class TutorialDirectory extends React.Component {
       name: 'Merics',
     }, {
       id: 'security',
-      name: 'Security analytics',
+      name: 'Security Analytics',
     }];
 
     let openTab = ALL;
@@ -94,7 +94,7 @@ export class TutorialDirectory extends React.Component {
 
           <div className="kuiViewContentItem kuiVerticalRhythmXLarge">
             <h1 className="kuiTitle ">
-              Add data
+              Add Data to Kibana
             </h1>
           </div>
 
