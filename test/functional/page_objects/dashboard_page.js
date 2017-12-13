@@ -126,6 +126,17 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
     }
 
+    async openDashboardPanelSpyPanel() {
+      await retry.try(async () => {
+        await testSubjects.moveMouseTo('dashboardPanel');
+        const spyToggleExists = await testSubjects.exists('spyToggleButton');
+        if (!spyToggleExists) {
+          throw new Error('Spy toggle still not showing. Try to move mouse over dashboard panel again.');
+        }
+      });
+      await PageObjects.visualize.openSpyPanel();
+    }
+
     async getQueryInputElement() {
       return await testSubjects.find('queryInput');
     }
