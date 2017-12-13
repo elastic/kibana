@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }) {
           'Count');
         })
         .then(function sleep() {
-          return PageObjects.common.sleep(1004);
+          return PageObjects.common.sleep(1003);
         });
     });
 
