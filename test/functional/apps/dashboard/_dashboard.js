@@ -241,7 +241,7 @@ export default function ({ getService, getPageObjects }) {
 
 
     // Re-endable once https://github.com/elastic/kibana/issues/15504 is fixed.
-    describe.skip('add new visualization link', () => {
+    describe('add new visualization link', () => {
       it('adds a new visualization', async () => {
         await PageObjects.dashboard.clickEdit();
         await PageObjects.dashboard.clickAddVisualization();
