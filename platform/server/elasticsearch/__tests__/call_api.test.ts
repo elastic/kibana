@@ -2,7 +2,7 @@ import { callAPI } from '../call_api';
 
 test('should call the api when it exists, with the right context and params', async () => {
   let apiContext;
-  const baz = jest.fn(function() {
+  const baz = jest.fn(function(this: any) {
     apiContext = this;
   });
   const clientParams = {};
@@ -29,7 +29,7 @@ test('should fail when endpoint does not exist on client', async () => {
 
 test('should handle top-level endpoint', async () => {
   let apiContext;
-  const fooFn = jest.fn(function() {
+  const fooFn = jest.fn(function(this: any) {
     apiContext = this;
   });
   const client: any = { foo: fooFn };
