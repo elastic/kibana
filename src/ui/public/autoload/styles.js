@@ -4,7 +4,7 @@ const theme = require('../theme');
 require('../../../../ui_framework/dist/ui_framework.css');
 
 // Elastic UI Framework, light theme
-const euiThemeLight = require('!!raw-loader!@elastic/eui/dist/eui_theme_k6.css');
+const euiThemeLight = require('!!raw-loader!@elastic/eui/dist/eui_theme_k6_light.css');
 theme.registerTheme('light', euiThemeLight);
 
 // Elastic UI Framework, dark theme
