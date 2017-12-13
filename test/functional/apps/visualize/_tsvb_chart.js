@@ -28,11 +28,20 @@ export default function ({ getService, getPageObjects }) {
         .then(function clickMetric() {
           return PageObjects.visualBuilder.clickMetric();
         })
+        .then(function sleep() {
+          return PageObjects.common.sleep(1003);
+        })
         .then(function addSeries() {
           return PageObjects.visualBuilder.addSeries();
         })
+        .then(function sleep() {
+          return PageObjects.common.sleep(1003);
+        })
         .then(function addMetric() {
           return PageObjects.visualBuilder.addMetric();
+        })
+        .then(function sleep() {
+          return PageObjects.common.sleep(1003);
         })
         .then(function selectOverallAverage() {
           return PageObjects.visualBuilder.selectItem('.vis_editor__series:last-child ' +
