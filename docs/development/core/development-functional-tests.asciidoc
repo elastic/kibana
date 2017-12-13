@@ -131,7 +131,7 @@ export default function ({ getService, getPageObject }) {
     // most suites start with a before hook that navigates to a specific
     // app/page and restores some archives into elasticsearch with esArchiver
     before(async () => {
-  await Promise.all([
+      await Promise.all([
         // start with an empty .kibana index
         esArchiver.load('empty_kibana'),
         // load some basic log data only if the index doesn't exist
