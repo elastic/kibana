@@ -2,7 +2,7 @@
   "name": "@elastic/kbn-types-example",
   "version": "1.0.0",
   "dependencies": {
-    "@elastic/kbn-types": "file:..",
+    "@elastic/kbn-types": "link:../",
     "typescript": "2.6.1"
   },
   "scripts": {

@@ -2,7 +2,7 @@ import * as express from 'express';
 import * as http from 'http';
 import * as https from 'https';
 import { Server } from 'net';
-import { promisify } from 'util';
+import { promisify } from 'bluebird';
 import { readFileSync } from 'fs';
 
 import { HttpConfig } from './HttpConfig';

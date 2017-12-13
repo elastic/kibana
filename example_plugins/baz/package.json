@@ -2,12 +2,12 @@
   "name": "example-plugin-baz",
   "version": "1.0.0",
   "scripts": {
-    "prepare": "npm run build",
     "build": "tsc",
     "start": "tsc --watch"
   },
   "devDependencies": {
-    "@elastic/kbn-types": "file:../../packages/kbn-types",
+    "@elastic/kbn-types": "link:../../packages/kbn-types",
+    "@elastic/kbn-observable": "link:../../packages/kbn-observable",
     "typescript": "2.6.1"
   }
 }

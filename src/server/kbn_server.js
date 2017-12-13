@@ -18,7 +18,7 @@ import { statsMixin } from './stats';
 import { kibanaIndexMappingsMixin } from './mappings';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
-import { injectIntoKbnServer as newPlatformMixin } from '../../target/platform/legacy';
+import { injectIntoKbnServer as newPlatformMixin } from '@elastic/platform';
 
 const rootDir = fromRoot('.');
 

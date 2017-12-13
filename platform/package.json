@@ -1,0 +1,15 @@
+{
+  "name": "@elastic/platform",
+  "version": "7.0.0-alpha1",
+  "main": "./target/tsc/",
+  "scripts": {
+    "build": "tsc",
+    "start": "tsc --watch"
+  },
+  "dependencies": {
+    "@elastic/kbn-observable": "link:../packages/kbn-observable"
+  },
+  "devDependencies": {
+    "typescript": "^2.6.1"
+  }
+}

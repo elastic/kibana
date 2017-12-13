@@ -4,11 +4,11 @@
   "main": "target/tsc/index.js",
   "types": "./target/tsc-types/index.d.ts",
   "scripts": {
-    "prepare": "npm run build",
-    "build": "tsc"
+    "build": "tsc",
+    "start": "tsc --watch"
   },
   "dependencies": {
-    "@elastic/kbn-internal-native-observable": "file:../kbn-internal-native-observable",
+    "@elastic/kbn-internal-native-observable": "link:../kbn-internal-native-observable",
     "rxjs": "5.4.3"
   },
   "devDependencies": {

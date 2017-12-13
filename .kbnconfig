@@ -1,0 +1,9 @@
+{
+  "projects": [
+    ".",
+    "../kibana-extra/*",
+    "platform/",
+    "packages/*",
+    "example_plugins/*"
+  ]
+}
