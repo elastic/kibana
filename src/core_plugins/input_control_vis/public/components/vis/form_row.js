@@ -7,7 +7,7 @@ export function FormRow(props) {
   let control = props.children;
   if (!props.control.isEnabled()) {
     const tooltip = (
-      <Tooltip>{props.control.disabledReason}</Tooltip>
+      <Tooltip className="inputControlDisabledTooltip" >{props.control.disabledReason}</Tooltip>
     );
     control = (
       <OverlayTrigger placement="top" overlay={tooltip}>
