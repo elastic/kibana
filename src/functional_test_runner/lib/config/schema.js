@@ -62,6 +62,8 @@ export const schema = Joi.object().keys({
     ui: Joi.string().default('bdd'),
   }).default(),
 
+  updateBaselines: Joi.boolean().default(false),
+
   junit: Joi.object().keys({
     enabled: Joi.boolean().default(!!process.env.CI),
     reportName: Joi.string(),
