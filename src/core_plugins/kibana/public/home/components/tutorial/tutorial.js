@@ -5,11 +5,8 @@ import PropTypes from 'prop-types';
 import { Introduction } from './introduction';
 import { InstructionSet } from './instruction_set';
 import { ParameterForm } from './parameter_form';
+import { RadioButtonGroup } from './radio_button_group';
 import { getTutorial } from '../../tutorials';
-import {
-  KuiButtonGroup,
-  KuiButton
-} from 'ui_framework/components';
 
 const INSTRUCTIONS_TYPE = {
   ELASTIC_CLOUD: 'elasticCloud',
@@ -102,18 +99,15 @@ export class Tutorial extends React.Component {
 
   renderInstructionSetsToggle = () => {
     if (!this.props.isCloudEnabled) {
+      const radioButtons = [
+        { onClick: this.onPrem, label: 'On premise' },
+        { onClick: this.onPremElasticCloud, label: 'Elastic cloud' },
+      ];
       return (
-        <div>
-          <KuiButtonGroup isUnited>
-            <KuiButton buttonType="basic" onClick={this.onPrem}>
-              On premise
-            </KuiButton>
-
-            <KuiButton buttonType="basic" onClick={this.onPremElasticCloud}>
-              Elastic cloud
-            </KuiButton>
-          </KuiButtonGroup>
-        </div>
+        <RadioButtonGroup
+          buttons={radioButtons}
+          selectedBtnLabel={radioButtons[0].label}
+        />
       );
     }
   }
@@ -170,7 +164,9 @@ export class Tutorial extends React.Component {
             previewUrl={previewUrl}
           />
 
-          {this.renderInstructionSetsToggle()}
+          <div className="text-center kuiVerticalRhythm">
+            {this.renderInstructionSetsToggle()}
+          </div>
 
           <div className="homePanel kuiVerticalRhythm">
             {params}
