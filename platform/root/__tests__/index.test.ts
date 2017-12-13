@@ -41,7 +41,7 @@ jest.mock('../../logging/LoggerFactory', () => ({
 
 import { Root } from '../';
 import { Env } from '../../config/Env';
-import { RawConfig } from '../../config/RawConfigService';
+import { RawConfig } from '../../config/RawConfig';
 
 const env = new Env('.', {});
 const config$ = new BehaviorSubject({} as RawConfig);

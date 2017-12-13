@@ -22,13 +22,13 @@ const getLastMockCallArgs = (mockFunction: jest.Mock<Function>) => {
 let factory: MutableLoggerFactory;
 let service: LoggingService;
 let updateConfigMock: jest.Mock<Function>;
-let closeMock: jest.Mock<Function>;
+
 beforeEach(() => {
   factory = new MutableLoggerFactory({} as any);
   updateConfigMock = jest
     .spyOn(factory, 'updateConfig')
     .mockImplementation(() => {});
-  closeMock = jest.spyOn(factory, 'close').mockImplementation(() => {});
+  jest.spyOn(factory, 'close').mockImplementation(() => {});
 
   service = new LoggingService(factory);
 });

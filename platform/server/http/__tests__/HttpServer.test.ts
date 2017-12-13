@@ -7,7 +7,6 @@ import { Router } from '../Router';
 import { HttpServer } from '../HttpServer';
 import { HttpConfig } from '../HttpConfig';
 import { Schema } from '../../../types/schema';
-import * as schema from '../../../lib/schema';
 import { logger } from '../../../logging/__mocks__';
 
 const chance = new Chance();
