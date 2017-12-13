@@ -160,7 +160,7 @@ function AggSelect(props) {
   };
 
   return (
-    <div className="vis_editor__row_item">
+    <div className="vis_editor__row_item vis_editor__aggregation">
       <Select
         aria-label="Select aggregation"
         clearable={false}

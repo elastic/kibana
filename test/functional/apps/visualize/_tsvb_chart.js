@@ -36,12 +36,12 @@ export default function ({ getService, getPageObjects }) {
         })
         .then(function selectOverallAverage() {
           return PageObjects.visualBuilder.selectItem('.vis_editor__series:last-child ' +
-          '.vis_editor__series-row .ui-sortable-item:last-child .vis_editor__row_item:last-child',
+          '.vis_editor__metric:last-child .vis_editor__aggregation',
           'Overall Sum');
         })
         .then(function selectCountMetric() {
           return PageObjects.visualBuilder.selectItem('.vis_editor__series:last-child ' +
-          '.vis_editor__series-row .ui-sortable-item:last-child .vis_editor__std_sibling-metric',
+          '.vis_editor__metric:last-child .vis_editor__std_sibling-metric',
           'Count');
         })
         .then(function sleep() {
