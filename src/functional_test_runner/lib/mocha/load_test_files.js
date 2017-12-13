@@ -12,7 +12,7 @@ import { decorateMochaUi } from './decorate_mocha_ui';
  *  @param  {String} path
  *  @return {undefined} - mutates mocha, no return value
  */
-export const loadTestFiles = (mocha, log, lifecycle, providers, paths) => {
+export const loadTestFiles = (mocha, log, lifecycle, providers, paths, updateBaselines) => {
   const innerLoadTestFile = (path) => {
     if (typeof path !== 'string' || !isAbsolute(path)) {
       throw new TypeError('loadTestFile() only accepts absolute paths');
@@ -46,6 +46,7 @@ export const loadTestFiles = (mocha, log, lifecycle, providers, paths) => {
         getService: providers.getService,
         getPageObject: providers.getPageObject,
         getPageObjects: providers.getPageObjects,
+        updateBaselines,
       });
 
       if (returnVal && typeof returnVal.then === 'function') {
