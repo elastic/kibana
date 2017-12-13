@@ -26,6 +26,7 @@ exports[`renders DashboardGrid 1`] = `
 >
   <div
     className=""
+    key="1"
   >
     <Connect(DashboardPanel)
       embeddableFactory={
@@ -45,6 +46,7 @@ exports[`renders DashboardGrid 1`] = `
   </div>
   <div
     className=""
+    key="2"
   >
     <Connect(DashboardPanel)
       embeddableFactory={
