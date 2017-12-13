@@ -18,10 +18,6 @@ function getRoute() {
     template,
     controller($scope, Private) {
       $scope.addBasePath = chrome.addBasePath;
-      $scope.cloud = {
-        isCloudEnabled: chrome.getInjected('isCloudEnabled', false),
-        cloudId: chrome.getInjected('cloudId')
-      };
       $scope.directories = Private(FeatureCatalogueRegistryProvider).inTitleOrder;
     }
   };

@@ -11,8 +11,9 @@ import {
 } from 'react-router-dom';
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
+import chrome from 'ui/chrome';
 
-export function HomeApp({ addBasePath, cloud, directories }) {
+export function HomeApp({ addBasePath, directories }) {
 
   const renderTutorialDirectory = (props) => {
     return (
@@ -27,7 +28,7 @@ export function HomeApp({ addBasePath, cloud, directories }) {
     return (
       <Tutorial
         addBasePath={addBasePath}
-        isCloudEnabled={cloud.isCloudEnabled}
+        isCloudEnabled={chrome.getInjected('isCloudEnabled', false)}
         getTutorial={getTutorial}
         replaceTemplateStrings={replaceTemplateStrings}
         tutorialId={props.match.params.id}
@@ -69,10 +70,6 @@ export function HomeApp({ addBasePath, cloud, directories }) {
 
 HomeApp.propTypes = {
   addBasePath: PropTypes.func.isRequired,
-  cloud: PropTypes.shape({
-    isCloudEnabled: PropTypes.bool.isRequired,
-    cloudId: PropTypes.string
-  }),
   directories: PropTypes.arrayOf(PropTypes.shape({
     id: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
