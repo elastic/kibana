@@ -2,11 +2,7 @@ import _ from 'lodash';
 import { nodeTypes } from '../node_types';
 import * as ast from '../ast';
 import { getRangeScript } from 'ui/filter_manager/lib/range';
-
-// Copied from https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Regular_Expressions
-function escapeRegExp(string) {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
-}
+import { getFieldsByWildcard } from './utils/get_fields_by_wildcard';
 
 export function buildNodeParams(fieldName, params, serializeStyle = 'operator') {
   params = _.pick(params, 'gt', 'lt', 'gte', 'lte', 'format');
@@ -24,28 +20,6 @@ export function buildNodeParams(fieldName, params, serializeStyle = 'operator') 
     arguments: [fieldNameArg, ...args],
     serializeStyle,
   };
-}
-
-function getFieldsByWildcard(pattern, indexPattern) {
-  if (pattern.includes('*')) {
-    const userInputLiterals = pattern.split('*');
-    const escapedUserInputLiterals = userInputLiterals.map(escapeRegExp);
-    const regexPattern = escapedUserInputLiterals.join('.*');
-    const regex = new RegExp(regexPattern);
-
-    const fields = indexPattern.fields.filter((field) => {
-      return regex.test(field.name);
-    });
-
-    if (_.isEmpty(fields)) {
-      throw new Error(`No fields match the pattern ${pattern}`);
-    }
-
-    return fields;
-  }
-  else {
-    return [indexPattern.fields.byName[pattern]];
-  }
 }
 
 function createRangeDSL(field, queryParams) {
