@@ -14,7 +14,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'header']);
+  const PageObjects = getPageObjects(['common', 'header', 'visualize']);
 
   const defaultFindTimeout = config.get('timeouts.find');
 
