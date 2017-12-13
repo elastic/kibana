@@ -117,15 +117,14 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
 class MyVisualization {
-   constructor(vis, el) {
+   constructor(el, vis) {
       this.el = el;
       this.vis = vis;
    }
-   render(visData, status) {
-      return new Promise(resolve => {
-         ...
-         resolve('done rendering');
-      }),
+   async render(visData, status) {
+      ...
+      return 'done rendering';
+   }
    destroy() {
       console.log('destroying');
    }
@@ -249,11 +248,10 @@ class MyEditorController {
       this.config = vis.type.editorConfig;
    }
    async render(visData) {
-      return new Promise(resolve => {
-         console.log(this.config.my);
-         ...
-         resolve('done rendering');
-      }),
+      console.log(this.config.my);
+      ...
+      return 'done rendering';
+   }
    destroy() {
       console.log('destroying');
    }
@@ -307,12 +305,9 @@ It's up to function to decide when it wants to issue a new request or return pre
 -----------
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 
-const myRequestHandler = (vis, appState, uiState, searchSource) => {
-  
-  return new Promise((resolve, reject) => {
-     const data = ... parse ...
-     resolve(data);
-  });
+const myRequestHandler = async (vis, appState, uiState, searchSource) => {
+  const data = ... parse ...
+  return data;
 };
 
 const MyNewVisType = (Private) => {

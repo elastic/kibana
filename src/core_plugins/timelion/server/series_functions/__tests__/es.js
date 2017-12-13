@@ -106,10 +106,11 @@ describe(filename, () => {
       const emptyScriptedFields = [];
 
       it('adds a metric agg for each metric', () => {
-        config.metric = ['sum:beer', 'avg:bytes'];
+        config.metric = ['sum:beer', 'avg:bytes', 'percentiles:bytes'];
         agg = createDateAgg(config, tlConfig, emptyScriptedFields);
         expect(agg.time_buckets.aggs['sum(beer)']).to.eql({ sum: { field: 'beer' } });
         expect(agg.time_buckets.aggs['avg(bytes)']).to.eql({ avg: { field: 'bytes' } });
+        expect(agg.time_buckets.aggs['percentiles(bytes)']).to.eql({ percentiles: { field: 'bytes' } });
       });
 
       it('adds a scripted metric agg for each scripted metric', () => {
@@ -310,6 +311,21 @@ describe(filename, () => {
         expect(fn(buckets)).to.eql({
           count: [[1000, 3], [2000, 14], [3000, 15]],
           max: [[1000, 92], [2000, 65], [3000, 35]]
+        });
+      });
+
+      it('Should convert percentiles metric aggs', () => {
+        const buckets = [
+          { key: 1000, percentiles: { values: { '50.0': 'NaN', '75.0': 65, '95.0': 73, '99.0': 75 } } },
+          { key: 2000, percentiles: { values: { '50.0': 25, '75.0': 32, '95.0': 'NaN', '99.0': 67 } } },
+          { key: 3000, percentiles: { values: { '50.0': 15, '75.0': 15, '95.0': 15, '99.0': 15 } } }
+        ];
+
+        expect(fn(buckets)).to.eql({
+          'percentiles:50.0': [[1000, NaN], [2000, 25], [3000, 15]],
+          'percentiles:75.0': [[1000, 65], [2000, 32], [3000, 15]],
+          'percentiles:95.0': [[1000, 73], [2000, NaN], [3000, 15]],
+          'percentiles:99.0': [[1000, 75], [2000, 67], [3000, 15]]
         });
       });
     });

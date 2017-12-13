@@ -35,8 +35,8 @@ test('renders an error when embeddableFactory.render throws an error', (done) =>
     });
   };
   const component = mount(<Provider store={store}><DashboardPanelContainer {...props} /></Provider>);
-
   setTimeout(() => {
+    component.update();
     const panelError = component.find(PanelError);
     expect(panelError.length).toBe(1);
     done();
