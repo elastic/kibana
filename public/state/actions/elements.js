@@ -52,7 +52,7 @@ function getSiblingContext(state, elementId, checkIndex) {
 }
 
 function getBareElement(el, includeId = false) {
-  const props = ['position', 'expression', 'filters'];
+  const props = ['position', 'expression', 'filter'];
   if (includeId) return pick(el, props.concat('id'));
   return pick(el, props);
 }
