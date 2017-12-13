@@ -14,7 +14,7 @@ export function AggTypesBucketsTermsProvider(Private) {
   const Schemas = Private(VisSchemasProvider);
   const createFilter = Private(AggTypesBucketsCreateFilterTermsProvider);
   const routeBasedNotifier = Private(RouteBasedNotifierProvider);
-  const { buildOtherBucketAgg, mergeOtherBucketAggResponse } = Private(OtherBucketHelperProvider);
+  const { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket } = Private(OtherBucketHelperProvider);
 
   const aggFilter = [
     '!top_hits', '!percentiles', '!median', '!std_dev',
@@ -68,6 +68,7 @@ export function AggTypesBucketsTermsProvider(Private) {
       const response = await nestedSearchSource.fetchAsRejectablePromise();
       // todo: refactor to not have side effects
       mergeOtherBucketAggResponse(aggConfigs, resp, response, aggConfig, filterAgg());
+      updateMissingBucket(resp, aggConfigs, aggConfig);
       return resp;
     },
     params: [
@@ -82,6 +83,10 @@ export function AggTypesBucketsTermsProvider(Private) {
       }, {
         name: 'otherBucketLabel',
         default: '_other_',
+        write: _.noop
+      }, {
+        name: 'missingBucketLabel',
+        default: '',
         write: _.noop
       },
       {
@@ -187,6 +192,10 @@ export function AggTypesBucketsTermsProvider(Private) {
           // be able to contain the number on the elasticsearch side
           if (output.params.script) {
             output.params.valueType = agg.getField().type === 'number' ? 'float' : agg.getField().type;
+          }
+
+          if (agg.params.missingBucketLabel !== '') {
+            output.params.missing = '__missing__';
           }
 
           if (!orderAgg) {

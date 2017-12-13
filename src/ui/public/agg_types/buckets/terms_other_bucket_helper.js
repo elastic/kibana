@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
 import { migrateFilter } from 'ui/courier/data_source/_migrate_filter';
 import { buildPhrasesFilter } from 'ui/filter_manager/lib/phrases';
+import { buildExistsFilter } from 'ui/filter_manager/lib/exists';
 
 const getAggConfig = (aggs, aggWithOtherBucket) => {
   if (aggs[aggWithOtherBucket.id]) return aggs[aggWithOtherBucket.id];
@@ -27,6 +28,23 @@ const getAggResultBuckets = (aggsConfig, response, aggWithOtherBucket, key) => {
   }
   if (responseAgg[aggWithOtherBucket.id]) return responseAgg[aggWithOtherBucket.id].buckets;
   return [];
+};
+
+const getAggConfigResult = (responseAggs, aggId, bucketKey) => {
+  let resultBuckets = [];
+  if (responseAggs[aggId]) {
+    const matchingBucket = responseAggs[aggId].buckets.find(bucket => bucket.key === bucketKey);
+    if (matchingBucket) resultBuckets.push(matchingBucket);
+    return resultBuckets;
+  }
+  _.each(responseAggs, agg => {
+    resultBuckets = [
+      ...resultBuckets,
+      ...getAggConfigResult(agg.aggs, aggId, bucketKey)
+    ];
+  });
+
+  return resultBuckets;
 };
 
 
@@ -62,7 +80,7 @@ export const OtherBucketHelperProvider = (Private) => {
       if (aggIndex < index) {
         _.each(agg.buckets, (bucket, bucketObjKey) => {
           const bucketKey = currentAgg.getKey(bucket, Number.isInteger(bucketObjKey) ? null : bucketObjKey);
-          const filter = bucket.filter || currentAgg.createFilter(bucketKey);
+          const filter = _.cloneDeep(bucket.filter) || currentAgg.createFilter(bucketKey);
           delete filter.meta;
           const migratedFilter = migrateFilter(filter.query || filter);
           const newFilters = [...filters, migratedFilter];
@@ -74,6 +92,14 @@ export const OtherBucketHelperProvider = (Private) => {
       filterAggDsl.filters[key] = {
         bool: { must: filters, must_not: [ { terms: {} } ] }
       };
+
+      if (agg.buckets.find(bucket => bucket.key === '__missing__')) {
+        filterAggDsl.filters[key].bool.must.push({
+          exists: {
+            field: aggWithOtherBucket.params.field.name
+          }
+        });
+      }
 
       // create not filters for all the buckets
       const notKeys = agg.buckets.map(bucket => bucket.key);
@@ -103,5 +129,15 @@ export const OtherBucketHelperProvider = (Private) => {
     });
   };
 
-  return { buildOtherBucketAgg, mergeOtherBucketAggResponse };
+  const updateMissingBucket = (response, aggConfigs, agg) => {
+    if (agg.params.missingBucketLabel === '') return;
+    const aggResultBuckets = getAggConfigResult(response.aggregations, agg.id, '__missing__');
+    aggResultBuckets.forEach(bucket => {
+      bucket.key = agg.params.missingBucketLabel;
+      bucket.filter = buildExistsFilter(agg.params.field, agg.params.field.indexPattern);
+      bucket.filter.meta.negate = true;
+    });
+  };
+
+  return { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket };
 };
