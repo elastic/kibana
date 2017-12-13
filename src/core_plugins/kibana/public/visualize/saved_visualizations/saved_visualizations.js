@@ -13,10 +13,10 @@ savedObjectManagementRegistry.register({
   title: 'visualizations'
 });
 
-app.service('savedVisualizations', function (Promise, kbnIndex, SavedVis, Private, kbnUrl, $http) {
+app.service('savedVisualizations', function (Promise, kbnIndex, SavedVis, Private, kbnUrl, $http, chrome) {
   const visTypes = Private(VisTypesRegistryProvider);
 
-  const saveVisualizationLoader = new SavedObjectLoader(SavedVis, kbnIndex, kbnUrl, $http);
+  const saveVisualizationLoader = new SavedObjectLoader(SavedVis, kbnIndex, kbnUrl, $http, chrome);
 
   saveVisualizationLoader.mapHitSource = function (source, id) {
     source.id = id;
