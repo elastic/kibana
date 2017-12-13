@@ -8,7 +8,7 @@ export async function callAPI(
   client: Client,
   endpoint: string,
   clientParams: CallAPIClientParams,
-  options: CallAPIOptions,
+  options: CallAPIOptions
 ) {
   const wrap401Errors = options.wrap401Errors !== false;
   const clientPath = endpoint.split('.');
@@ -18,16 +18,13 @@ export async function callAPI(
     throw new Error(`called with an invalid endpoint: ${endpoint}`);
   }
 
-  const apiContext = (clientPath.length === 1) ? client : get(client, clientPath.slice(0, -1));
+  const apiContext =
+    clientPath.length === 1 ? client : get(client, clientPath.slice(0, -1));
 
   try {
-
     return await api.call(apiContext, clientParams);
-
   } catch (err) {
-
     if (wrap401Errors && err.statusCode === 401) {
-
       // TODO: decide on using homegrown error lib or boom
       // https://github.com/elastic/kibana/issues/12464
 

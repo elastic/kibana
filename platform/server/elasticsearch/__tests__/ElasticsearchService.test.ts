@@ -1,28 +1,24 @@
 const mockCreateClient = jest.fn();
 
 jest.mock('elasticsearch', () => ({
-  Client: mockCreateClient,
+  Client: mockCreateClient
 }));
 
 import { ElasticsearchService } from '../ElasticsearchService';
 import { AdminClient } from '../AdminClient';
 import { ScopedDataClient } from '../ScopedDataClient';
 import { logger } from '../../../logging/__mocks__';
-import {
-  k$,
-  BehaviorSubject,
-  first,
-  toPromise,
-} from '@elastic/kbn-observable';
+import { k$, BehaviorSubject, first, toPromise } from '@elastic/kbn-observable';
 
-test('should not create multiple clients', async () => {
-  const forTypeContents = {
+test('should not create multiple clients while service is running', async () => {
+  const elasticsearchConfig = {
+    filterHeaders: () => {},
     toElasticsearchClientConfig: () => {},
-    requestHeadersWhitelist: [],
+    requestHeadersWhitelist: []
   };
 
   const elasticsearchConfigs = {
-    forType: () => forTypeContents,
+    forType: () => elasticsearchConfig
   };
 
   const configs$: any = new BehaviorSubject(elasticsearchConfigs);
@@ -31,19 +27,31 @@ test('should not create multiple clients', async () => {
 
   mockCreateClient.mockReset();
 
+  // Start subscribing to this.clients$,
+  // which means new elasticsearch data and admin clients are created,
+  // calling mockCreateClient once for each client (twice)
   service.start();
 
+  // Get the latest elasticsearch data client
+  // and create a ScopedDataClient around it
   await service.getScopedDataClient({ foo: 'bar' });
+  // Calling it again does not create any new elasticsearch clients
   await service.getScopedDataClient({ foo: 'bar' });
+
 
   service.stop();
 
+  // We expect it to be called only twice: once for the data client
+  // and once for the admin client.
   expect(mockCreateClient).toHaveBeenCalledTimes(2);
+
+  // TODO: check that specifically the admin client and the data client
+  // were created
 });
 
 test('should get an AdminClient', async () => {
   const elasticsearchConfigs = {
-    forType: () => ({ toElasticsearchClientConfig: () => {} }),
+    forType: () => ({ toElasticsearchClientConfig: () => {} })
   };
 
   const configs$: any = new BehaviorSubject(elasticsearchConfigs);
@@ -55,13 +63,14 @@ test('should get an AdminClient', async () => {
 });
 
 test('should get a ScopedDataClient', async () => {
-  const forTypeContents = {
+  const elasticsearchConfig = {
+    filterHeaders: () => {},
     toElasticsearchClientConfig: () => {},
-    requestHeadersWhitelist: [],
+    requestHeadersWhitelist: []
   };
 
   const elasticsearchConfigs = {
-    forType: () => forTypeContents,
+    forType: () => elasticsearchConfig
   };
 
   const configs$: any = new BehaviorSubject(elasticsearchConfigs);
@@ -73,13 +82,14 @@ test('should get a ScopedDataClient', async () => {
 });
 
 test('should get a ScopedDataClient observable', async () => {
-  const forTypeContents = {
+  const elasticsearchConfig = {
+    filterHeaders: jest.fn(),
     toElasticsearchClientConfig: () => {},
-    requestHeadersWhitelist: [],
+    requestHeadersWhitelist: []
   };
 
   const elasticsearchConfigs = {
-    forType: () => forTypeContents,
+    forType: () => elasticsearchConfig
   };
 
   const configs$: any = new BehaviorSubject(elasticsearchConfigs);
@@ -87,5 +97,10 @@ test('should get a ScopedDataClient observable', async () => {
   const service = new ElasticsearchService(configs$, logger);
   const dataClient$ = service.getScopedDataClient$({ foo: 'bar' });
 
-  expect(await k$(dataClient$)(first(), toPromise())).toBeInstanceOf(ScopedDataClient);
+  const dataClient = await k$(dataClient$)(first(), toPromise());
+
+  expect(dataClient).toBeInstanceOf(ScopedDataClient);
+  expect(elasticsearchConfig.filterHeaders).toHaveBeenCalledWith({
+    foo: 'bar',
+  });
 });

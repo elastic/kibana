@@ -9,7 +9,7 @@ import {
   shareLast,
   first,
   toPromise,
-  $combineLatest,
+  $combineLatest
 } from '@elastic/kbn-observable';
 
 import { ElasticsearchConfigs } from './ElasticsearchConfigs';
@@ -86,15 +86,19 @@ export class ElasticsearchService implements CoreService {
   }
 
   getAdminClient$() {
-    return k$(this.clients$)(map(clients => new AdminClient({ client: clients.admin })));
+    return k$(this.clients$)(map(clients => new AdminClient(clients.admin)));
   }
 
   getScopedDataClient$(headers: Headers) {
-    return k$($combineLatest(this.clients$, this.configs$))(map(([clients, configs]) => new ScopedDataClient({
-      client: clients.data,
-      headers: headers,
-      config: configs.forType('data')
-    })));
+    return k$($combineLatest(this.clients$, this.configs$))(
+      map(
+        ([clients, configs]) =>
+          new ScopedDataClient(
+            clients.data,
+            configs.forType('data').filterHeaders(headers)
+          )
+      )
+    );
   }
 
   getScopedDataClient(headers: Headers) {

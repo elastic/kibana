@@ -4,6 +4,7 @@ import { readFileSync } from 'fs';
 import { noop } from 'lodash';
 
 import { ClusterSchema } from './schema';
+import { Headers } from '../http/Router/headers';
 import { pick, assertNever } from '../../lib/utils';
 
 // TODO This can't be specified like this
@@ -20,6 +21,35 @@ export class ElasticsearchConfig {
     private readonly config: ClusterSchema
   ) {
     this.requestHeadersWhitelist = config.requestHeadersWhitelist;
+  }
+
+  /**
+   * Filter given headers by requestHeadersWhitelist
+   *
+   * e.g.
+   *
+   * ```
+   * elasticsearchConfigs.forType('data').filterHeaders(request.headers);
+   * ```
+   *
+   * @param originalHeaders Full headers (for a request)
+   *
+   */
+  filterHeaders(originalHeaders: Headers): Headers {
+    const normalizeHeader = function(header: string) {
+      if (!header) {
+        return '';
+      }
+      header = header.toString(); // TODO: may no longer be needed?
+      return header.trim().toLowerCase();
+    };
+
+    // Normalize list of headers we want to allow in upstream request
+    const normalizedHeadersToKeep = this.requestHeadersWhitelist.map(
+      normalizeHeader
+    );
+
+    return _.pick(originalHeaders, normalizedHeadersToKeep);
   }
 
   /**

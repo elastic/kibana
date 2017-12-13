@@ -1,4 +1,3 @@
-import { Client } from 'elasticsearch';
 import { callAPI } from '../call_api';
 
 test('should call the api when it exists, with the right context and params', async () => {
@@ -6,10 +5,11 @@ test('should call the api when it exists, with the right context and params', as
   const baz = jest.fn(function() {
     apiContext = this;
   });
-  const client: any = { foo: { bar: { baz: baz }}};
-  const result = await callAPI(client, 'foo.bar.baz', {}, {});
+  const clientParams = {};
+  const client: any = { foo: { bar: { baz: baz } } };
+  await callAPI(client, 'foo.bar.baz', clientParams, {});
 
-  expect(baz).toHaveBeenCalledWith({});
+  expect(baz).toHaveBeenCalledWith(clientParams);
   expect(apiContext).toBe(client.foo.bar);
 });
 
@@ -21,7 +21,9 @@ test('should fail when endpoint does not exist on client', async () => {
   try {
     await callAPI(client, 'foo.bar.baz', {}, {});
   } catch (error) {
-    expect(error.message).toEqual('called with an invalid endpoint: foo.bar.baz');
+    expect(error.message).toEqual(
+      'called with an invalid endpoint: foo.bar.baz'
+    );
   }
 });
 
@@ -31,7 +33,7 @@ test('should handle top-level endpoint', async () => {
     apiContext = this;
   });
   const client: any = { foo: fooFn };
-  const result = await callAPI(client, 'foo', {}, {});
+  await callAPI(client, 'foo', {}, {});
 
   expect(apiContext).toBe(client);
 });
