@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should render content with markdown 1`] = `
+<div
+  className="kuiText kuiSubduedText tutorialContent"
+  dangerouslySetInnerHTML={
+    Object {
+      "__html": "<p>I am <em>some</em> <a href=\\"https://en.wikipedia.org/wiki/Content\\">content</a> with <code>markdown</code></p>
+",
+    }
+  }
+/>
+`;
