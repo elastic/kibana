@@ -1200,6 +1200,12 @@ input[type="button"] {
   .kuiFlexGroup--gutterExtraLarge > .kuiFlexItem {
     margin: 20px; }
 
+.kuiFlexGroup--justifyContentSpaceEvenly {
+  -webkit-box-pack: space-evenly;
+  -webkit-justify-content: space-evenly;
+      -ms-flex-pack: space-evenly;
+          justify-content: space-evenly; }
+
 .kuiFlexGroup--justifyContentSpaceBetween {
   -webkit-box-pack: justify;
   -webkit-justify-content: space-between;
