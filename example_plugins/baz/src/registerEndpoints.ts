@@ -4,7 +4,7 @@ import {
   LoggerFactory,
   Schema,
   ElasticsearchService,
-  KibanaConfig,
+  KibanaConfig
 } from '@elastic/kbn-types';
 import { BazService } from './BazService';
 

@@ -9,10 +9,7 @@ import { LoggerFactory } from '../../logging';
 export { ElasticsearchClusterType } from './ElasticsearchConfig';
 export { AdminClient } from './AdminClient';
 export { ScopedDataClient } from './ScopedDataClient';
-export {
-  ElasticsearchService,
-  ElasticsearchConfigs
-};
+export { ElasticsearchService, ElasticsearchConfigs };
 
 export class ElasticsearchModule {
   readonly service: ElasticsearchService;

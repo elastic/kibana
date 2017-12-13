@@ -6,7 +6,11 @@ export {
 export { KibanaPluginApi } from '../../platform/server/plugins/KibanaPluginApi';
 export { Logger, LoggerFactory } from '../../platform/logging';
 export { Schema, typeOfSchema } from '../../platform/types/schema';
-export { ElasticsearchService, ScopedDataClient, AdminClient } from '../../platform/server/elasticsearch';
+export {
+  ElasticsearchService,
+  ScopedDataClient,
+  AdminClient
+} from '../../platform/server/elasticsearch';
 export { KibanaConfig } from '../../platform/server/kibana';
 export { KibanaRequest, Router, HttpService } from '../../platform/server/http';
 export { KibanaError } from '../../platform/lib/Errors';

@@ -12,15 +12,14 @@ import { ScopedDataClient, KibanaConfig } from '@elastic/kbn-types';
 export class BazService {
   constructor(
     private readonly client: ScopedDataClient,
-    private readonly kibanaConfig$: Observable<KibanaConfig>,
-  ) {
-  }
+    private readonly kibanaConfig$: Observable<KibanaConfig>
+  ) {}
 
   async find(options: { type: string; page?: number; perPage?: number }) {
     const { page = 1, perPage = 20, type } = options;
 
     const [kibanaIndex] = await latestValues(
-      k$(this.kibanaConfig$)(map(config => config.index)),
+      k$(this.kibanaConfig$)(map(config => config.index))
     );
 
     const response = await this.client.call('endpoint', {

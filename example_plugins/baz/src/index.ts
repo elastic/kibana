@@ -4,7 +4,7 @@ import { registerEndpoints } from './registerEndpoints';
 export const plugin: KibanaPluginConfig<{}> = {
   plugin: kibana => {
     const { elasticsearch, logger, http } = kibana;
-    const config$ =  kibana.kibana.config$;
+    const config$ = kibana.kibana.config$;
 
     const log = logger.get();
 
@@ -13,11 +13,6 @@ export const plugin: KibanaPluginConfig<{}> = {
     const router = http.createAndRegisterRouter('/api/baz');
 
     log.info('register Baz endpoints');
-    registerEndpoints(
-      router,
-      logger,
-      elasticsearch.service,
-      config$,
-    );
+    registerEndpoints(router, logger, elasticsearch.service, config$);
   }
 };

@@ -12,7 +12,9 @@ export interface Route<
   Body extends ObjectSetting<any>
 > {
   path: string;
-  validate?: (schema: Schema) => {
+  validate?: (
+    schema: Schema
+  ) => {
     params?: Params;
     query?: Query;
     body?: Body;

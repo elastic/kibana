@@ -18,7 +18,7 @@ import { LoggerFactory } from '../../logging';
 import { CoreService } from '../../types/CoreService';
 import { Headers } from '../http/Router/headers';
 
-type Clients = { data: Client, admin: Client };
+type Clients = { data: Client; admin: Client };
 
 export class ElasticsearchService implements CoreService {
   private clients$: Observable<Clients>;
@@ -45,10 +45,14 @@ export class ElasticsearchService implements CoreService {
             log.info('creating Elasticsearch clusters');
 
             const clients = {
-              data: new Client(configs.forType('data').toElasticsearchClientConfig()),
-              admin: new Client(configs.forType('admin').toElasticsearchClientConfig({
-                shouldAuth: false,
-              }))
+              data: new Client(
+                configs.forType('data').toElasticsearchClientConfig()
+              ),
+              admin: new Client(
+                configs.forType('admin').toElasticsearchClientConfig({
+                  shouldAuth: false
+                })
+              )
             };
 
             observer.next(clients);
@@ -85,7 +89,9 @@ export class ElasticsearchService implements CoreService {
   }
 
   getScopedDataClient$(headers: Headers) {
-    return k$(this.clients$)(map(clients => new ScopedDataClient(clients.data, headers)));
+    return k$(this.clients$)(
+      map(clients => new ScopedDataClient(clients.data, headers))
+    );
   }
 
   getScopedDataClient(headers: Headers) {
@@ -103,5 +109,4 @@ export class ElasticsearchService implements CoreService {
   // example for adminclient
   // adminClient is the same across requests
   // const adminClient$ = elasticsearch.service.getAdminClient$();
-
 }
