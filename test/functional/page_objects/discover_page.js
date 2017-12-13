@@ -243,10 +243,12 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async clickFieldListItem(field) {
+      log.debug(`clickFieldListItem(${field}`);
       return await testSubjects.click(`field-${field}`);
     }
 
     async clickFieldListItemAdd(field) {
+      log.debug(`clickFieldListItemAdd(${field}`);
       await testSubjects.moveMouseTo(`field-${field}`);
       await testSubjects.click(`fieldToggle-${field}`);
     }
