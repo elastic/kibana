@@ -117,7 +117,7 @@ import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 
 class MyVisualization {
-   constructor(vis, el) {
+   constructor(el, vis) {
       this.el = el;
       this.vis = vis;
    }
