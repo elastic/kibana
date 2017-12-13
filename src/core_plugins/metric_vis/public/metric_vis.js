@@ -83,7 +83,6 @@ function MetricVisProvider(Private) {
         }
       ])
     },
-    implementsRenderComplete: true,
   });
 }
 
