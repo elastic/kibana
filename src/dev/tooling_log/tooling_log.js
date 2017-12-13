@@ -1,7 +1,7 @@
 import { format } from 'util';
 import { PassThrough } from 'stream';
 
-import { magenta, yellow, red, blue, green, brightBlack } from 'ansicolors';
+import { magenta, yellow, red, blue, green, dim } from 'chalk';
 
 import { parseLogLevel } from './log_levels';
 
@@ -25,7 +25,7 @@ export function createToolingLog(initialLogLevelName = 'silent') {
 
     debug(...args) {
       if (!logLevel.flags.debug) return;
-      this.write(' %s ', brightBlack('debg'), format(...args));
+      this.write(' %s ', dim('debg'), format(...args));
     }
 
     info(...args) {

@@ -63,7 +63,8 @@ class CalculationAgg extends Component {
             <div className="vis_editor__row_item">
               <label className="vis_editor__label" htmlFor={htmlId('painless')}>
                 Painless Script - Variables are keys on the <code>params</code>
-                object, i.e. <code>params.&lt;name&gt;</code>
+                object, i.e. <code>params.&lt;name&gt;</code>.
+                To access the bucket interval (in milliseconds) use <code>params._interval</code>.
               </label>
               <input
                 id={htmlId('painless')}

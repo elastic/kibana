@@ -3,9 +3,8 @@
 
 [partintro]
 --
-Add-on functionality for Kibana is implemented with plug-in modules. You can use the `bin/kibana-plugin`
-command to manage these modules. You can also install a plugin manually by moving the plugin file to the
-`plugins` directory and unpacking the plugin files into a new directory.
+Add-on functionality for Kibana is implemented with plug-in modules. You use the `bin/kibana-plugin`
+command to manage these modules.
 
 [IMPORTANT]
 .Plugin compatibility
@@ -48,9 +47,11 @@ Use the `-d` or `--plugin-dir` option after the `install` command to specify a d
 example:
 
 [source,shell]
-$ bin/kibana-plugin install file:///some/local/path/x-pack.zip -d path/to/directory
+$ bin/kibana-plugin install file:///some/local/path/my-plugin.zip -d path/to/directory
 
 NOTE: This command creates the specified directory if it does not already exist.
+
+WARNING: This option is deprecated and will be removed in Kibana 7. It is known to not work with some plugins, including X-Pack.
 
 [float]
 === Installing Plugins with Linux packages

@@ -31,6 +31,7 @@ export class ListControl extends Component {
       <FormRow
         id={this.props.control.id}
         label={this.props.control.label}
+        controlIndex={this.props.controlIndex}
       >
         <Select
           className="list-control-react-select"

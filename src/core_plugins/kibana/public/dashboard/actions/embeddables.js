@@ -52,7 +52,7 @@ export function renderEmbeddable(embeddableFactory, panelElement, panel, contain
         return dispatch(embeddableRenderFinished(panel.panelIndex, embeddable));
       })
       .catch(error => {
-        dispatch(embeddableRenderError(panel.panelIndex, error));
+        dispatch(embeddableRenderError(panel.panelIndex, error.message));
       });
   };
 }

@@ -267,7 +267,7 @@ module.directive('savedObjectFinder', function ($location, $injector, kbnUrl, Pr
         self.service.find(filter)
           .then(function (hits) {
 
-            hits.hits = hits.hits.filter((hit) => (isLabsEnabled || !hit.type.stage === 'lab'));
+            hits.hits = hits.hits.filter((hit) => (isLabsEnabled || hit.type.stage !== 'lab'));
             hits.total = hits.hits.length;
 
             // ensure that we don't display old results

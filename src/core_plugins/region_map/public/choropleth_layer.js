@@ -47,20 +47,25 @@ export default class ChoroplethLayer extends KibanaMapLayer {
 
     this._loaded = false;
     this._error = false;
-    $.ajax({
-      dataType: 'json',
-      url: geojsonUrl,
-      success: (data) => {
-        this._leafletLayer.addData(data);
-        this._loaded = true;
-        this._setStyle();
-      },
-      error: () => {
-        this._loaded = true;
-        this._error = true;
-      }
+    this._whenDataLoaded = new Promise((resolve) => {
+      $.ajax({
+        dataType: 'json',
+        url: geojsonUrl,
+        success: (data) => {
+          this._leafletLayer.addData(data);
+          this._loaded = true;
+          this._setStyle();
+          resolve();
+        },
+        error: () => {
+          this._loaded = true;
+          this._error = true;
+          resolve();
+        }
+      });
     });
   }
+
 
   _setStyle() {
     if (this._error || (!this._loaded || !this._metrics || !this._joinField)) {
@@ -76,7 +81,6 @@ export default class ChoroplethLayer extends KibanaMapLayer {
       const quantizeDomain = (min !== max) ? [min, max] : d3.scale.quantize().domain();
       this._legendQuantizer = d3.scale.quantize().domain(quantizeDomain).range(this._legendColors);
     }
-
     this._boundsOfData = styler.getLeafletBounds();
     this.emit('styleChanged', {
       mismatches: styler.getMismatches()
@@ -116,6 +120,10 @@ export default class ChoroplethLayer extends KibanaMapLayer {
   }
 
 
+  whenDataLoaded() {
+    return this._whenDataLoaded;
+  }
+
   setMetrics(metrics, metricsAgg) {
     this._metrics = metrics;
     this._metricsAgg = metricsAgg;
@@ -137,11 +145,10 @@ export default class ChoroplethLayer extends KibanaMapLayer {
 
   getBounds() {
     const bounds = super.getBounds();
-    return (this._boundsOfData) ? this._boundsOfData  : bounds;
+    return (this._boundsOfData) ? this._boundsOfData : bounds;
   }
 
   appendLegendContents(jqueryDiv) {
-
 
     if (!this._legendColors || !this._legendQuantizer || !this._metricsAgg) {
       return;
@@ -245,7 +252,7 @@ function makeChoroplethStyler(data, colorramp, joinField) {
       return outstandingFeatures.map((bucket) => bucket.term);
     },
     getLeafletBounds: function () {
-      return boundsOfAllFeatures.isValid() ?  boundsOfAllFeatures : null;
+      return boundsOfAllFeatures.isValid() ? boundsOfAllFeatures : null;
     }
   };
 

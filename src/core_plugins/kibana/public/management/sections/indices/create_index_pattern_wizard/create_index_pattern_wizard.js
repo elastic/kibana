@@ -77,7 +77,17 @@ uiModules.get('apps/management')
       });
     }
 
-    function getIndices(pattern, limit = MAX_SEARCH_SIZE) {
+    function getIndices(rawPattern, limit = MAX_SEARCH_SIZE) {
+      const pattern = rawPattern.trim();
+
+      // Searching for `*:` fails for CCS environments. The search request
+      // is worthless anyways as the we should only send a request
+      // for a specific query (where we do not append *) if there is at
+      // least a single character being searched for.
+      if (pattern === '*:') {
+        return [];
+      }
+
       const params = {
         index: pattern,
         ignore: [404],

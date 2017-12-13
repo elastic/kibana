@@ -1,6 +1,7 @@
 import Mocha from 'mocha';
 
 import { loadTestFiles } from './load_test_files';
+import { MochaReporterProvider } from './reporter';
 
 /**
  *  Instansiate mocha and load testfiles into it
@@ -16,8 +17,8 @@ export async function setupMocha(lifecycle, log, config, providers) {
   const mocha = new Mocha({
     ...config.get('mochaOpts'),
     reporter: await providers.loadExternalService(
-      'configured mocha reporter',
-      config.get('mochaOpts.reporterProvider')
+      'mocha reporter',
+      MochaReporterProvider
     )
   });
 

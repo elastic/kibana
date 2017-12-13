@@ -1,3 +1,7 @@
+// TODO: this should be moved to vis_update_state
+// Currently the migration takes place in Vis when calling setCurrentState.
+// It should rather convert the raw saved object before starting to instantiate
+// any JavaScript classes from it.
 const updateVisualizationConfig = (stateConfig, config) => {
   if (!stateConfig || stateConfig.seriesParams) return;
   if (!['line', 'area', 'histogram'].includes(config.type)) return;

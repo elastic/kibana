@@ -2,7 +2,7 @@ import React from 'react';
 import sinon from 'sinon';
 import { mount, render } from 'enzyme';
 
-import { requiredProps } from '../../test/required_props';
+import { findTestSubject, requiredProps } from '../../test';
 import { keyCodes } from '../../services';
 
 import {
@@ -42,7 +42,8 @@ test('onConfirm', () => {
       confirmButtonText="Confirm Button Text"
     />
   );
-  component.find('[data-test-subj="confirmModalConfirmButton"]').simulate('click');
+
+  findTestSubject(component, 'confirmModalConfirmButton').simulate('click');
   sinon.assert.calledOnce(onConfirm);
   sinon.assert.notCalled(onCancel);
 });
@@ -57,7 +58,8 @@ describe('onCancel', () => {
         confirmButtonText="Confirm Button Text"
       />
     );
-    component.find('[data-test-subj="confirmModalCancelButton"]').simulate('click');
+
+    findTestSubject(component, 'confirmModalCancelButton').simulate('click');
     sinon.assert.notCalled(onConfirm);
     sinon.assert.calledOnce(onCancel);
   });
@@ -72,7 +74,8 @@ describe('onCancel', () => {
         data-test-subj="modal"
       />
     );
-    component.find('[data-test-subj="modal"]').simulate('keydown', { keyCode: keyCodes.ESCAPE });
+
+    findTestSubject(component, 'modal').simulate('keydown', { keyCode: keyCodes.ESCAPE });
     sinon.assert.notCalled(onConfirm);
     sinon.assert.calledOnce(onCancel);
   });
@@ -83,12 +86,14 @@ describe('defaultFocusedButton', () => {
     const component = mount(
       <KuiConfirmModal
         onCancel={onCancel}
-        defaultFocusedButton={CANCEL_BUTTON}
+        onConfirm={onConfirm}
         cancelButtonText="Cancel Button Text"
         confirmButtonText="Confirm Button Text"
+        defaultFocusedButton={CANCEL_BUTTON}
       />
     );
-    const button = component.find('[data-test-subj="confirmModalCancelButton"]').getDOMNode();
+
+    const button = findTestSubject(component, 'confirmModalCancelButton').getDOMNode();
     expect(document.activeElement).toEqual(button);
   });
 
@@ -96,12 +101,14 @@ describe('defaultFocusedButton', () => {
     const component = mount(
       <KuiConfirmModal
         onCancel={onCancel}
-        defaultFocusedButton={CONFIRM_BUTTON}
+        onConfirm={onConfirm}
         cancelButtonText="Cancel Button Text"
         confirmButtonText="Confirm Button Text"
+        defaultFocusedButton={CONFIRM_BUTTON}
       />
     );
-    const button = component.find('[data-test-subj="confirmModalConfirmButton"]').getDOMNode();
+
+    const button = findTestSubject(component, 'confirmModalConfirmButton').getDOMNode();
     expect(document.activeElement).toEqual(button);
   });
 
@@ -109,6 +116,7 @@ describe('defaultFocusedButton', () => {
     const component = mount(
       <KuiConfirmModal
         onCancel={onCancel}
+        onConfirm={onConfirm}
         cancelButtonText="Cancel Button Text"
         confirmButtonText="Confirm Button Text"
       />

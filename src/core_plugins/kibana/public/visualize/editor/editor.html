@@ -50,7 +50,11 @@
     index-patterns="[indexPattern]"
   ></filter-bar>
 
-  <div class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm" ng-if="vis.type.shouldMarkAsExperimentalInUI()">
+  <div
+    class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm hide-for-sharing"
+    ng-if="vis.type.shouldMarkAsExperimentalInUI()"
+    data-test-subj="experimentalVisInfo"
+  >
     <div class="kuiInfoPanelBody">
       <div class="kuiInfoPanelBody__message" ng-bind-html="getAdditionalMessage()">
       </div>

@@ -7,7 +7,8 @@ import { createPromiseFromStreams, createConcatStream } from '../utils';
  * @param {String} key
  * @param {Object|null} options
  * @property {Boolean} options.force - if true, will overwrite without prompting
- * @property {Stream|Boolean} options.stdin - if true, uses process.stdin
+ * @property {Stream} options.stdinStream - defaults to process.stdin
+ * @property {Boolean} options.stdin - if true, uses options.stdin to read value
  */
 
 export async function add(keystore, key, options = {}) {
@@ -19,16 +20,20 @@ export async function add(keystore, key, options = {}) {
   }
 
   if (!options.force && keystore.has(key)) {
-    const overwrite = await confirm(`Setting ${key} already exists. Overwrite?`);
+    if (options.stdin) {
+      return logger.log(`Setting ${key} already exists, exiting without modifying keystore.`);
+    } else {
+      const overwrite = await confirm(`Setting ${key} already exists. Overwrite?`);
 
-    if (!overwrite) {
-      return logger.log('Exiting without modifying keystore.');
+      if (!overwrite) {
+        return logger.log('Exiting without modifying keystore.');
+      }
     }
   }
 
   if (options.stdin) {
     value = await createPromiseFromStreams([
-      options.stdin || process.stdin,
+      options.stdinStream || process.stdin,
       createConcatStream('')
     ]);
   } else {

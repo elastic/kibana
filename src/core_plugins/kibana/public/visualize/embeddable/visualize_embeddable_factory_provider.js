@@ -3,15 +3,13 @@ import { EmbeddableFactoriesRegistryProvider } from 'ui/embeddable/embeddable_fa
 
 export function visualizeEmbeddableFactoryProvider(Private) {
   const VisualizeEmbeddableFactoryProvider = (
-    $compile,
-    $rootScope,
     savedVisualizations,
     timefilter,
     Notifier,
     Promise,
     Private,
     config) => {
-    return new VisualizeEmbeddableFactory($compile, $rootScope, savedVisualizations, timefilter, Notifier, Promise, Private, config);
+    return new VisualizeEmbeddableFactory(savedVisualizations, timefilter, Notifier, Promise, Private, config);
   };
   return Private(VisualizeEmbeddableFactoryProvider);
 }

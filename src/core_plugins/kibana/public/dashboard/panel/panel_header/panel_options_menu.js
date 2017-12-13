@@ -43,7 +43,8 @@ export class PanelOptionsMenu extends React.Component {
           aria-hidden="true"
           className="kuiButton__icon kuiIcon fa-edit"
         />,
-        onClick: this.props.editUrl ? this.onEditPanel : undefined,
+        onClick: this.onEditPanel,
+        disabled: !this.props.editUrl,
       },
       {
         name: 'Customize panel',

@@ -1,7 +1,7 @@
 import sinon from 'sinon';
 import expect from 'expect.js';
 
-import Config from '../../../server/config/config';
+import { Config } from '../../../server/config';
 
 /* eslint-disable import/no-duplicates */
 import * as uiSettingsServiceFactoryNS from '../ui_settings_service_factory';

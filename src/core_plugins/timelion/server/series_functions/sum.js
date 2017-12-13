@@ -10,7 +10,7 @@ export default new Chainable('sum', {
     {
       name: 'term',
       types: ['seriesList', 'number'],
-      help: 'Number or series to sum with the input series. If passing a seriesList it must contain exactly 1 series.'
+      help: 'Number or series to sum with the input series. SeriesList with multiple series will be applied label-wise.'
 
     }
   ],

@@ -64,32 +64,26 @@ describe('server/mapping/index_mapping', function () {
         }
       });
     });
-  });
 
-  describe('#getDsl()', () => {
-    // tests are light because this method is used all over these tests
-    it('returns mapping as es dsl', function () {
-      const mapping = new IndexMappings();
-      expect(mapping.getDsl()).to.be.an('object');
-    });
-  });
-
-  describe('#addRootProperties()', () => {
-    it('extends the properties of the root type', () => {
-      const mapping = new IndexMappings({
+    it('accepts an array of new extensions that will be added to the mapping', () => {
+      const initialMapping = {
         x: { properties: {} }
-      });
-
-      mapping.addRootProperties({
-        y: {
+      };
+      const extensions = [
+        {
           properties: {
-            z: {
-              type: 'text'
+            y: {
+              properties: {
+                z: {
+                  type: 'text'
+                }
+              }
             }
           }
         }
-      });
+      ];
 
+      const mapping = new IndexMappings(initialMapping, extensions);
       expect(mapping.getDsl()).to.eql({
         x: {
           properties: {
@@ -105,24 +99,47 @@ describe('server/mapping/index_mapping', function () {
       });
     });
 
-    it('throws if any property is conflicting', () => {
-      const props = { foo: 'bar' };
-      const mapping = new IndexMappings({
-        root: { properties: props }
-      });
+    it('throws if any of the new properties conflict', () => {
+      const initialMapping = {
+        root: { properties: { foo: 'bar' } }
+      };
+      const extensions = [
+        {
+          properties: {
+            foo: 'bar'
+          }
+        }
+      ];
 
       expect(() => {
-        mapping.addRootProperties(props);
+        new IndexMappings(initialMapping, extensions);
       }).to.throwException(/foo/);
     });
 
-    it('includes the plugin option in the error message when specified', () => {
-      const props = { foo: 'bar' };
-      const mapping = new IndexMappings({ root: { properties: props } });
+    it('includes the pluginId from the extension in the error message if defined', () => {
+      const initialMapping = {
+        root: { properties: { foo: 'bar' } }
+      };
+      const extensions = [
+        {
+          pluginId: 'abc123',
+          properties: {
+            foo: 'bar'
+          }
+        }
+      ];
 
       expect(() => {
-        mapping.addRootProperties(props, { plugin: 'abc123' });
+        new IndexMappings(initialMapping, extensions);
       }).to.throwException(/plugin abc123/);
+    });
+  });
+
+  describe('#getDsl()', () => {
+    // tests are light because this method is used all over these tests
+    it('returns mapping as es dsl', function () {
+      const mapping = new IndexMappings();
+      expect(mapping.getDsl()).to.be.an('object');
     });
   });
 });

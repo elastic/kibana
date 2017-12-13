@@ -73,6 +73,23 @@ function inLocation(cursorPosition, location) {
   return cursorPosition >= location.min && cursorPosition <= location.max;
 }
 
+function getArgumentsHelp(functionHelp, functionArgs = []) {
+  if (!functionHelp) {
+    return [];
+  }
+
+  // Do not provide 'inputSeries' as argument suggestion for chainable functions
+  const argsHelp = functionHelp.chainable ? functionHelp.args.slice(1) : functionHelp.args.slice(0);
+
+  // ignore arguments that are already provided in function declaration
+  const functionArgNames = functionArgs.map((arg) => {
+    return arg.name;
+  });
+  return argsHelp.filter(arg => {
+    return !functionArgNames.includes(arg.name);
+  });
+}
+
 async function extractSuggestionsFromParsedResult(result, cursorPosition, functionList, argValueSuggestions) {
   const activeFunc = result.functions.find((func) => {
     return cursorPosition >= func.location.min && cursorPosition < func.location.max;
@@ -123,17 +140,8 @@ async function extractSuggestionsFromParsedResult(result, cursorPosition, functi
   }
 
   // return argument suggestions
-  const providedArguments = activeFunc.arguments.map((arg) => {
-    return arg.name;
-  });
-  // Do not provide 'inputSeries' as argument suggestion for chainable functions
-  const args = functionHelp.chainable ? functionHelp.args.slice(1) : functionHelp.args.slice(0);
-  const argumentSuggestions = args.filter(arg => {
-    // ignore arguments that are all ready provided in function declaration
-    if (providedArguments.includes(arg.name)) {
-      return false;
-    }
-
+  const argsHelp = getArgumentsHelp(functionHelp, activeFunc.arguments);
+  const argumentSuggestions = argsHelp.filter(arg => {
     if (_.get(activeArg, 'type') === 'namedArg') {
       return _.startsWith(arg.name, activeArg.name);
     } else if (activeArg) {
@@ -177,6 +185,18 @@ export async function suggest(expression, functionList, Parser, cursorPosition, 
         return { list, location: message.location, type: SUGGESTION_TYPE.FUNCTIONS };
       }
       case 'incompleteArgument': {
+        const {
+          currentFunction: functionName,
+          currentArgs: functionArgs,
+        } = message;
+        const functionHelp = functionList.find(func => func.name === functionName);
+        return {
+          list: getArgumentsHelp(functionHelp, functionArgs),
+          location: message.location,
+          type: SUGGESTION_TYPE.ARGUMENTS
+        };
+      }
+      case 'incompleteArgumentValue': {
         const {
           name: argName,
           currentFunction: functionName,

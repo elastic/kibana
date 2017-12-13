@@ -24,12 +24,6 @@ exports[`renders KuiListingTable 1`] = `
         />
       </div>
     </div>
-    <div
-      class="kuiToolBarSection"
-    />
-    <div
-      class="kuiToolBarSection"
-    />
   </div>
   <table
     class="kuiTable"
@@ -192,9 +186,6 @@ exports[`renders KuiListingTable 1`] = `
         0 items selected
       </div>
     </div>
-    <div
-      class="kuiToolBarFooterSection"
-    />
   </div>
 </div>
 `;

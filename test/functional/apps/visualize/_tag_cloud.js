@@ -55,6 +55,11 @@ export default function ({ getService, getPageObjects }) {
     describe('tag cloud chart', function () {
       const vizName1 = 'Visualization tagCloud';
 
+      it('should display spy panel toggle button', async function () {
+        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+        expect(spyToggleExists).to.be(true);
+      });
+
       it('should show correct tag cloud data', async function () {
         const data = await PageObjects.visualize.getTextTag();
         log.debug(data);

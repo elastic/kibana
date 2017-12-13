@@ -11,7 +11,7 @@ export function buildNodeParams(child, serializeStyle = 'operator') {
 export function toElasticsearchQuery(node, indexPattern) {
   let [ argument ] = node.arguments;
   if (argument.type === 'literal') {
-    argument = nodeTypes.function.buildNode('is', '*', argument.value);
+    argument = nodeTypes.function.buildNode('is', null, argument.value);
   }
 
   return {

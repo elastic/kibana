@@ -48,9 +48,9 @@ describe('kuery functions', function () {
         expect(result.bool.must_not).to.eql(ast.toElasticsearchQuery(childNode, indexPattern));
       });
 
-      it('should wrap a literal argument with an "is" function targeting all fields', function () {
+      it('should wrap a literal argument with an "is" function targeting the default_field', function () {
         const literalFoo = nodeTypes.literal.buildNode('foo');
-        const expectedChild = ast.toElasticsearchQuery(nodeTypes.function.buildNode('is', '*', 'foo'), indexPattern);
+        const expectedChild = ast.toElasticsearchQuery(nodeTypes.function.buildNode('is', null, 'foo'), indexPattern);
         const node = nodeTypes.function.buildNode('not', literalFoo);
         const result = not.toElasticsearchQuery(node, indexPattern);
         const resultChild = result.bool.must_not;
