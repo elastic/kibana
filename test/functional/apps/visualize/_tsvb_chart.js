@@ -27,6 +27,28 @@ export default function ({ getService, getPageObjects }) {
         });
     });
 
+    describe('Visual Builder chart', function indexPatternCreation() {
+      before(async () => {
+        await PageObjects.visualBuilder.clickMetric();
+        await PageObjects.common.sleep(1003);
+      });
+
+      it('should not display spy panel toggle button', async function () {
+        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+        expect(spyToggleExists).to.be(false);
+      });
+
+      it('should show correct data', function () {
+        const expectedMetricValue =  '156';
+
+        return PageObjects.visualBuilder.getMetricValue()
+          .then(function (value) {
+            log.debug(`metric value: ${value}`);
+            expect(value).to.eql(expectedMetricValue);
+          });
+      });
+    });
+
     describe('Visual Builder markdown', () => {
 
       before(async () => {
@@ -69,29 +91,6 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-    });
-
-    describe('Visual Builder chart', function indexPatternCreation() {
-
-      before(async () => {
-        await PageObjects.visualBuilder.clickMetric();
-        await PageObjects.common.sleep(1003);
-      });
-
-      it('should not display spy panel toggle button', async function () {
-        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
-        expect(spyToggleExists).to.be(false);
-      });
-
-      it('should show correct data', function () {
-        const expectedMetricValue =  '156';
-
-        return PageObjects.visualBuilder.getMetricValue()
-          .then(function (value) {
-            log.debug(`metric value: ${value}`);
-            expect(value).to.eql(expectedMetricValue);
-          });
-      });
     });
   });
 }
