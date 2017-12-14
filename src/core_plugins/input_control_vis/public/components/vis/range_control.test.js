@@ -8,6 +8,7 @@ import {
 
 const control = {
   id: 'mock-range-control',
+  isEnabled: () => { return true; },
   options: {
     decimalPlaces: 0,
     step: 1

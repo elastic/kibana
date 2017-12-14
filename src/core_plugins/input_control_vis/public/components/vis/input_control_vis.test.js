@@ -9,6 +9,7 @@ import {
 
 const mockListControl = {
   id: 'mock-list-control',
+  isEnabled: () => { return true; },
   options: {
     type: 'terms',
     multiselect: true
@@ -24,6 +25,7 @@ const mockListControl = {
 };
 const mockRangeControl = {
   id: 'mock-range-control',
+  isEnabled: () => { return true; },
   options: {
     decimalPlaces: 0,
     step: 1

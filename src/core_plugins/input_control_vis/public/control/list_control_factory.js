@@ -1,5 +1,8 @@
 import _ from 'lodash';
-import { Control } from './control';
+import {
+  Control,
+  noValuesDisableMsg
+} from './control';
 import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
 
 const termsAgg = (field, size, direction) => {
@@ -58,12 +61,17 @@ export async function listControlFactory(controlParams, kbnApi) {
     'desc'));
 
   const resp = await searchSource.fetch();
+  const termsSelectOptions = _.get(resp, 'aggregations.termsAgg.buckets', []).map((bucket) => {
+    return { label: bucket.key.toString(), value: bucket.key.toString() };
+  });
 
-  return new ListControl(
+  const listControl = new ListControl(
     controlParams,
     new PhraseFilterManager(controlParams.id, controlParams.fieldName, indexPattern, kbnApi.queryFilter, listControlDelimiter),
-    _.get(resp, 'aggregations.termsAgg.buckets', []).map((bucket) => {
-      return { label: bucket.key.toString(), value: bucket.key.toString() };
-    })
+    termsSelectOptions
   );
+  if (termsSelectOptions.length === 0) {
+    listControl.disable(noValuesDisableMsg(controlParams.fieldName, indexPattern.title));
+  }
+  return listControl;
 }
