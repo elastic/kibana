@@ -2,18 +2,18 @@ import moment from 'moment';
 
 export const rounddate = {
   name: 'rounddate',
-  type: 'string',
-  help: 'Round Moment parsable date strings (or ms since epoch) using a moment formatting string. Returns an ISO8601 string',
+  type: 'number',
+  help: 'Round ms since epoch, or an ISO8601 formatted string, using a moment formatting string. Returns ms since epoch',
   context: {
-    types: ['string', 'number'],
+    types: ['number', 'string'],
   },
   args: {
     _: {
       types: ['string'],
-      help: 'MomentJS  Format with which to bucket (See https://momentjs.com/docs/#/displaying/)',
+      help: 'MomentJS  Format with which to bucket (See https://momentjs.com/docs/#/displaying/). For example "YYYY-MM" would round to the month',
     },
   },
   fn: (context, args) => {
-    return moment(moment(context).format(args._), args._).format();
+    return moment(moment(context).format(args._), args._).valueOf();
   },
 };
