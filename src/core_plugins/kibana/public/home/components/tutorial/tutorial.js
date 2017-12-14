@@ -4,7 +4,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Introduction } from './introduction';
 import { InstructionSet } from './instruction_set';
-import { ParameterForm } from './parameter_form';
 import { RadioButtonGroup } from './radio_button_group';
 
 const INSTRUCTIONS_TYPE = {
@@ -121,7 +120,9 @@ export class Tutorial extends React.Component {
           title={instructionSet.title}
           instructionVariants={instructionSet.instructionVariants}
           offset={currentOffset}
+          params={instructions.params}
           paramValues={this.state.paramValues}
+          setParameter={this.setParameter}
           replaceTemplateStrings={this.props.replaceTemplateStrings}
           key={index}
         />
@@ -148,16 +149,6 @@ export class Tutorial extends React.Component {
       }
 
       const instructions = this.getInstructions();
-      let params;
-      if (instructions.params) {
-        params = (
-          <ParameterForm
-            params={instructions.params}
-            paramValues={this.state.paramValues}
-            setParameter={this.setParameter}
-          />
-        );
-      }
       content = (
         <div>
           <Introduction
@@ -171,7 +162,6 @@ export class Tutorial extends React.Component {
           </div>
 
           <div className="homePanel kuiVerticalRhythm">
-            {params}
             {this.renderInstructionSets(instructions)}
           </div>
         </div>

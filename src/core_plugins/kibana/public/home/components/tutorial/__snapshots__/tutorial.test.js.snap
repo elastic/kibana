@@ -35,6 +35,7 @@ exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`
           offset={1}
           paramValues={Object {}}
           replaceTemplateStrings={[Function]}
+          setParameter={[Function]}
           title="Instruction title"
         />
       </div>
@@ -96,6 +97,7 @@ exports[`should render ON_PREM instructions with instructions cloud toggle when 
           offset={1}
           paramValues={Object {}}
           replaceTemplateStrings={[Function]}
+          setParameter={[Function]}
           title="Instruction title"
         />
       </div>

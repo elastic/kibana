@@ -1,11 +1,15 @@
+import classNames from 'classnames';
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
+  KuiBar,
+  KuiBarSection,
   KuiTabs,
   KuiTab
 } from 'ui_framework/components';
 import { Instruction } from './instruction';
 import { Step } from './step';
+import { ParameterForm } from './parameter_form';
 import { getDisplayText } from '../../../../common/tutorials/instruction_variant';
 
 export class InstructionSet extends React.Component {
@@ -20,11 +24,19 @@ export class InstructionSet extends React.Component {
       };
     });
 
+    this.state = {
+      isParamFormVisible: false
+    };
+
     if (this.tabs.length > 0) {
-      this.state = {
-        selectedTabId: this.tabs[0].id
-      };
+      this.state.selectedTabId = this.tabs[0].id;
     }
+  }
+
+  handleToggleVisibility = () => {
+    this.setState(prevState => (
+      {  isParamFormVisible: !prevState.isParamFormVisible }
+    ));
   }
 
   onSelectedTabChanged = id => {
@@ -71,19 +83,62 @@ export class InstructionSet extends React.Component {
     ));
   }
 
+  renderHeader = () => {
+    let paramsVisibilityToggle;
+    if (this.props.params) {
+      const visibilityToggleClasses = classNames('kuiIcon kuiSideBarCollapsibleTitle__caret', {
+        'fa-caret-right': !this.state.isParamFormVisible,
+        'fa-caret-down': this.state.isParamFormVisible
+      });
+      paramsVisibilityToggle = (
+        <div className="kuiSideBarCollapsibleTitle" style={{ cursor: 'pointer' }}>
+          <div
+            aria-label="toggle command parameters visibility"
+            className="kuiSideBarCollapsibleTitle__label"
+            onClick={this.handleToggleVisibility}
+          >
+            <span className={visibilityToggleClasses} />
+            <span className="kuiSideBarCollapsibleTitle__text">
+              Customize your code snippets
+            </span>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <KuiBar className="kuiVerticalRhythm">
+        <KuiBarSection>
+          <div className="kuiTitle">
+            {this.props.title}
+          </div>
+        </KuiBarSection>
+
+        <KuiBarSection>
+          {paramsVisibilityToggle}
+        </KuiBarSection>
+      </KuiBar>
+    );
+  }
+
   render() {
-    let title;
-    if (this.props.title) {
-      title = (
-        <h1 className="kuiTitle kuiVerticalRhythm">
-          {this.props.title}
-        </h1>
+    let paramsForm;
+    if (this.props.params && this.state.isParamFormVisible) {
+      paramsForm = (
+        <ParameterForm
+          params={this.props.params}
+          paramValues={this.props.paramValues}
+          setParameter={this.props.setParameter}
+        />
       );
     }
 
     return (
       <div className="kuiVerticalRhythmLarge">
-        {title}
+
+        {this.renderHeader()}
+
+        {paramsForm}
 
         <KuiTabs className="kuiVerticalRhythm">
           {this.renderTabs()}
@@ -100,6 +155,8 @@ InstructionSet.propTypes = {
   title: PropTypes.string.isRequired,
   instructionVariants: PropTypes.array.isRequired,
   offset: PropTypes.number.isRequired,
+  params: PropTypes.array,
   paramValues: PropTypes.object.isRequired,
+  setParameter: PropTypes.func,
   replaceTemplateStrings: PropTypes.func.isRequired,
 };
