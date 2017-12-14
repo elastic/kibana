@@ -56,14 +56,14 @@ export default function ({ getService, getPageObjects }) {
 
         it('allow positive time offsets', async () => {
           await PageObjects.visualBuilder.enterOffsetSeries('2h');
-          await PageObjects.common.sleep(500);
+          await PageObjects.header.waitUntilLoadingHasFinished();
           const text = await PageObjects.visualBuilder.getMarkdownText();
           expect(text).to.be('1442901600000#3');
         });
 
         it('allow negative time offsets', async () => {
           await PageObjects.visualBuilder.enterOffsetSeries('-2h');
-          await PageObjects.common.sleep(500);
+          await PageObjects.header.waitUntilLoadingHasFinished();
           const text = await PageObjects.visualBuilder.getMarkdownText();
           expect(text).to.be('1442901600000#23');
         });
