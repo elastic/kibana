@@ -31,7 +31,7 @@ export class ListControl extends Component {
       // react-select clobbers the tooltip, so just returning a disabled input instead
       return (
         <input
-          disabled={!this.props.control.isEnabled()}
+          disabled={true}
           className="kuiTextInput"
           style={{ width: '100%' }}
         />
