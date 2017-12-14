@@ -134,7 +134,7 @@ export default function ({ getService, getPageObjects }) {
       expect(headers[1]).to.be('agent');
     });
 
-    it('Tile map with no changes will update with visualization changes', async () => {
+    it.skip('Tile map with no changes will update with visualization changes', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await PageObjects.dashboard.clickNewDashboard();
