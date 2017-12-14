@@ -17,6 +17,11 @@
   .collapsible-sidebar {
     .flex-parent(0, 0, auto);
     margin-right: 10px;
+    flex-direction: row;
+  }
+
+  #editor_resizer {
+    margin: 0;
   }
 
   .visualization-options {
@@ -82,7 +87,6 @@
     @media (min-width: @screen-md-min) {
       flex-basis: @vis-editor-sidebar-basis;
       min-width: @vis-editor-sidebar-min-width;
-      max-width: @vis-editor-sidebar-min-width;
     }
 
     .index-pattern,
