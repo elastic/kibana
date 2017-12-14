@@ -85,6 +85,7 @@ function MarkdownSeries(props) {
           </button>
           <button
             role="tab"
+            data-test-subj="markdownSeriesOptions"
             aria-selected={selectedTab === 'metrics'}
             className={optionsClassname}
             onClick={() => props.switchTab('options')}
