@@ -155,6 +155,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickMapZoomIn();
 
       await PageObjects.visualize.saveVisualization('Visualization TileMap');
+      await PageObjects.header.clickToastOK();
       await PageObjects.header.clickDashboard();
 
       await PageObjects.dashboard.openDashboardPanelSpyPanel();
