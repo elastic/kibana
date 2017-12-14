@@ -98,6 +98,6 @@ test('should get a ScopedDataClient observable', async () => {
 
   expect(dataClient).toBeInstanceOf(ScopedDataClient);
   expect(elasticsearchConfig.filterHeaders).toHaveBeenCalledWith({
-    foo: 'bar',
+    foo: 'bar'
   });
 });
