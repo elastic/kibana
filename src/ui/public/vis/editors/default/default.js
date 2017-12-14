@@ -61,6 +61,18 @@ const defaultEditor = function ($rootScope, $compile) {
             $scope.vis.dirty = false;
           };
 
+          $scope.autoApplyEnabled = false;
+          if ($scope.vis.type.editorConfig.enableAutoApply) {
+            $scope.toggleAutoApply = () => {
+              $scope.autoApplyEnabled = !$scope.autoApplyEnabled;
+            };
+
+            $scope.$watch('vis.dirty', () => {
+              if (!$scope.autoApplyEnabled || !$scope.vis.dirty) return;
+              $scope.stageEditableVis();
+            });
+          }
+
           $scope.$watch(function () {
             return $scope.vis.getCurrentState(false);
           }, function (newState) {
