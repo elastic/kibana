@@ -19,15 +19,25 @@ const locToDirMap = {
 export class VegaParser {
 
   constructor(spec, es, timefilter, dashboardContext) {
-
     this.spec = spec;
     this.hideWarnings = false;
+    this.error = undefined;
     this.warnings = [];
     this.es = es;
     this.esQueryParser = new EsQueryParser(timefilter, dashboardContext);
   }
 
   async parseAsync() {
+    try {
+      await this._parseAsync();
+    } catch (err) {
+      // if we reject current promise, it will use the standard Kibana error handling
+      this.error = ViewUtils.formatErrorToStr(err);
+    }
+    return this;
+  }
+
+  async _parseAsync() {
     if (this.isVegaLite !== undefined) throw new Error();
 
     if (typeof this.spec === 'string') {
@@ -57,8 +67,6 @@ export class VegaParser {
       this._compileVegaLite();
     }
     this._calcSizing();
-
-    return this;
   }
 
   /**
@@ -348,7 +356,7 @@ export class VegaParser {
    */
   _onWarning() {
     if (!this.hideWarnings) {
-      this.warnings.push(ViewUtils.makeWarningMsg(...arguments));
+      this.warnings.push(ViewUtils.formatWarningToStr(...arguments));
     }
   }
 }

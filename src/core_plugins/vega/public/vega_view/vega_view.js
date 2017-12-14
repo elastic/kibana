@@ -3,6 +3,7 @@ import L from 'leaflet';
 import 'leaflet-vega';
 import * as vega from 'vega';
 import * as vegaLite from 'vega-lite';
+import { ViewUtils } from './index';
 
 //https://github.com/elastic/kibana/issues/13327
 vega.scheme('elastic',
@@ -11,92 +12,102 @@ vega.scheme('elastic',
 
 // FIXME: handle runtime errors by overwriting  vega.logging.error ...
 export class VegaView {
-  constructor(vegaConfig, $parentEl, vegaParser, serviceSettings, onError, onWarn) {
-    this._onWarn = onWarn;
-    this._onError = onError;
-    this._parentEl = $parentEl;
+  constructor(vegaConfig, parentEl, vegaParser, serviceSettings) {
+    this._vegaConfig = vegaConfig;
+    this._$parentEl = $(parentEl);
     this._serviceSettings = serviceSettings;
     this._parser = vegaParser;
-
-    if (this._parser.hideWarnings) {
-      this._onWarn = () => 0;
-    }
-
-    this._parentEl.css('flex-direction', this._parser.containerDir);
-
     this._view = null;
-
-    this._viewConfig = {
-      logLevel: vega.Warn,
-      renderer: 'canvas',
-    };
-
-    /**
-     * ... the loader instance to use for data file loading. A
-     * loader object must provide a "load" method for loading files and a
-     * "sanitize" method for checking URL/filename validity. Both methods
-     * should accept a URI and options hash as arguments, and return a Promise
-     * that resolves to the loaded file contents (load) or a hash containing
-     * sanitized URI data with the sanitized url assigned to the "href" property
-     * (sanitize).
-     */
-    if (!vegaConfig.enableExternalUrls) {
-      const loader = vega.loader();
-      loader.load = () => {
-        throw new Error('External URLs have been disabled in kibana.yml');
-      };
-      this._viewConfig.loader = loader;
-    }
+    this._vegaViewConfig = null;
+    this._$messages = null;
+    this._destroyHandlers = [];
+    this._initialized = false;
   }
 
   async init() {
-    this._$container = $('<div class="vega-view-container">').appendTo(this._parentEl);
-    this._$controls = $('<div class="vega-controls-container">')
-      .css('flex-direction', this._parser.controlsDir)
-      .appendTo(this._parentEl);
-
-    this._addDestroyHandler(() => {
-      this._$container.remove();
-      this._$container = null;
-      this._$controls.remove();
-      this._$controls = null;
-    });
+    // safety
+    if (this._initialized) throw new Error();
+    this._initialized = true;
 
     try {
+      this._$parentEl.empty()
+        .addClass('vega-main')
+        .css('flex-direction', this._parser.containerDir);
+
+      if (this._parser.error) {
+        this._addMessage('err', this._parser.error);
+        return;
+      }
+
+      this._$container = $('<div class="vega-view-container">')
+        .appendTo(this._$parentEl);
+      this._$controls = $('<div class="vega-controls-container">')
+        .css('flex-direction', this._parser.controlsDir)
+        .appendTo(this._$parentEl);
+
+      // bypass the onWarn warning checks - in some cases warnings may still need to be shown despite being off
+      for (const warn of this._parser.warnings) {
+        this._addMessage('warn', warn);
+      }
+
+      this._addDestroyHandler(() => {
+        this._$container.remove();
+        this._$container = null;
+        this._$controls.remove();
+        this._$controls = null;
+        if (this._$messages) {
+          this._$messages.remove();
+          this._$messages = null;
+        }
+      });
+
+      this._vegaViewConfig = {
+        logLevel: vega.Warn,
+        renderer: 'canvas',
+      };
+      if (!this._vegaConfig.enableExternalUrls) {
+        // Override URL loader to disable all URL-based requests
+        const loader = vega.loader();
+        loader.load = () => {
+          throw new Error('External URLs have been disabled in kibana.yml');
+        };
+        this._vegaViewConfig.loader = loader;
+      }
+
       if (this._parser.useMap) {
         await this._initLeafletVega();
       } else {
         await this._initRawVega();
       }
     } catch (err) {
-      this._onError(err);
+      this.onError(err);
     }
+  }
+
+  onError() {
+    this._addMessage('err', ViewUtils.formatErrorToStr(...arguments));
+  }
+
+  onWarn() {
+    if (!this._parser || !this._parser.hideWarnings) {
+      this._addMessage('warn', ViewUtils.formatWarningToStr(...arguments));
+    }
+  }
+
+  _addMessage(type, text) {
+    if (!this._$messages) {
+      this._$messages = $(`<ul class="vega-messages">`).appendTo(this._$parentEl);
+    }
+    this._$messages.append(
+      $(`<li class="vega-message-${type}">`).append(
+        $(`<pre>`).text(text)
+      )
+    );
   }
 
   resize() {
     if (this._parser.useResize && this._view && this.updateVegaSize(this._view)) {
       return this._view.runAsync();
-    }
-  }
-
-  // BUG: FIXME: if this method is called twice without awaiting, the sceond call will return success right away
-  async destroy() {
-    if (this._destroyHandlers) {
-      const handlers = this._destroyHandlers;
-      this._destroyHandlers = null;
-      for (const handler of handlers) {
-        await handler();
-      }
-    }
-  }
-
-  _destroyHandlers = [];
-
-  _addDestroyHandler(handler) {
-    if (this._destroyHandlers) {
-      this._destroyHandlers.push(handler);
-    } else {
-      handler();
     }
   }
 
@@ -116,11 +127,11 @@ export class VegaView {
     // In some cases, Vega may be initialized twice... TBD
     if (!this._$container) return;
 
-    const view = new vega.View(vega.parse(this._parser.spec), this._viewConfig);
+    const view = new vega.View(vega.parse(this._parser.spec), this._vegaViewConfig);
     VegaView.setDebugValues(view, this._parser.spec, this._parser.vlspec);
 
-    view.warn = this._onWarn;
-    view.error = this._onError;
+    view.warn = this.onWarn.bind(this);
+    view.error = this.onError.bind(this);
     if (this._parser.useResize) this.updateVegaSize(view);
     view.initialize(this._$container.get(0), this._$controls.get(0));
 
@@ -158,10 +169,10 @@ export class VegaView {
       if (value === undefined) {
         value = dflt;
       } else if (value < min) {
-        this._onWarn(`Reseting ${name} to ${min}`);
+        this.onWarn(`Resetting ${name} to ${min}`);
         value = min;
       } else if (value > max) {
-        this._onWarn(`Reseting ${name} to ${max}`);
+        this.onWarn(`Resetting ${name} to ${max}`);
         value = max;
       }
       return value;
@@ -170,7 +181,7 @@ export class VegaView {
     let minZoom = validate('minZoom', mapConfig.minZoom, limits.minZoom, limits.minZoom, limits.maxZoom);
     let maxZoom = validate('maxZoom', mapConfig.maxZoom, limits.maxZoom, limits.minZoom, limits.maxZoom);
     if (minZoom > maxZoom) {
-      this._onWarn('minZoom and maxZoom have been swapped');
+      this.onWarn('minZoom and maxZoom have been swapped');
       [minZoom, maxZoom] = [maxZoom, minZoom];
     }
     const zoom = validate('zoom', mapConfig.zoom, 2, minZoom, maxZoom);
@@ -210,9 +221,9 @@ export class VegaView {
         vega,
         bindingsContainer: this._$controls.get(0),
         delayRepaint: mapConfig.delayRepaint,
-        viewConfig: this._viewConfig,
-        onWarning: this._onWarn,
-        onError: this._onError
+        viewConfig: this._vegaViewConfig,
+        onWarning: this.onWarn.bind(this),
+        onError: this.onError.bind(this),
       })
       .addTo(map);
 
@@ -241,6 +252,27 @@ export class VegaView {
       window.VEGA_DEBUG.view = view;
       window.VEGA_DEBUG.vega_spec = spec;
       window.VEGA_DEBUG.vegalite_spec = vlspec;
+    }
+  }
+
+  destroy() {
+    // properly handle multiple destroy() calls by converting this._destroyHandlers
+    // from an array into a promise, while handlers are being disposed
+    if (this._destroyHandlers) {
+      if (this._destroyHandlers.then) {
+        return this._destroyHandlers;
+      } else {
+        this._destroyHandlers = Promise.all(this._destroyHandlers.map(v => v()));
+        return this._destroyHandlers.then(() => this._destroyHandlers = null);
+      }
+    }
+  }
+
+  _addDestroyHandler(handler) {
+    if (this._destroyHandlers) {
+      this._destroyHandlers.push(handler);
+    } else {
+      handler(); // When adding a handled after disposing, dispose it right away
     }
   }
 }

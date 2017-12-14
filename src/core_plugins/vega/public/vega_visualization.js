@@ -1,5 +1,4 @@
-import $ from 'jquery';
-import { VegaView, ViewUtils } from './vega_view';
+import { VegaView } from './vega_view';
 
 export function VegaVisualizationProvider(vegaConfig, serviceSettings) {
   return class VegaVisualization {
@@ -7,37 +6,8 @@ export function VegaVisualizationProvider(vegaConfig, serviceSettings) {
       // fixme: remove
       console.log('VegaVisualization constructor');
 
-      this.messages = [];
-      this.el = $(el);
-      this.vis = vis;
-
-      // Without this class, all vega styling will not be applied
-      this.el.addClass('vega-main');
-
-      // FIXME: this Angular template was used before to display warnings & errors. Need to be re-applied
-
-      // <ul ng-if="vega.messages.length" class="vega-messages">
-      //   <li ng-repeat="message in vega.messages"
-      //       ng-class="{error: 'vega-message-err', warning: 'vega-message-warn'}[message.type]"
-      //   >
-      //     <pre>{{message.data}}</pre>
-      //   </li>
-      // </ul>
-    }
-
-    onError(error) {
-      if (!error) {
-        error = 'ERR';
-      } else if (error instanceof Error) {
-        if (console && console.log) console.log(error);
-        error = error.message;
-      }
-
-      this.messages.push(ViewUtils.makeErrorMsg(error, ...Array.from(arguments).slice(1)));
-    }
-
-    onWarn() {
-      this.messages.push(ViewUtils.makeErrorMsg(...arguments));
+      this._el = el;
+      this._vis = vis;
     }
 
     /**
@@ -47,8 +17,7 @@ export function VegaVisualizationProvider(vegaConfig, serviceSettings) {
      * @returns {Promise<void>}
      */
     async render(visData, status) {
-
-      if (!visData && !this.vegaView) {
+      if (!visData && !this._vegaView) {
         console.log('Unable to render without data', status);
         return;
       }
@@ -57,32 +26,38 @@ export function VegaVisualizationProvider(vegaConfig, serviceSettings) {
       console.log('** render **', visData, status);
 
       try {
-        if (visData && (status.data || !this.vegaView)) {
+        if (visData && (status.data || !this._vegaView)) {
           // New data received, rebuild the graph
-          if (this.vegaView) {
-            await this.vegaView.destroy();
-            this.vegaView = null;
+          if (this._vegaView) {
+            await this._vegaView.destroy();
+            this._vegaView = null;
           }
-          this.vegaView = new VegaView(
-            vegaConfig, this.el, visData, serviceSettings,
-            this.onError.bind(this), this.onWarn.bind(this));
-
-          await this.vegaView.init();
+          this._vegaView = new VegaView(vegaConfig, this._el, visData, serviceSettings);
+          await this._vegaView.init();
         } else if (status.resize) {
-          // the graph has been resized
           // fixme: remove
           console.log('VegaVisualization resizing');
-          await this.vegaView.resize();
+
+          // the graph has been resized
+          await this._vegaView.resize();
         }
 
       } catch (error) {
-        this.onError(error);
+        if (this._vegaView) {
+          this._vegaView.onError(error);
+        } else {
+          // Shouldn't happen, but just in case to avoid silent ignores
+          // fixme: make this error appear at the top of Kibana
+          console.log(error);
+        }
       }
     }
 
     destroy() {
       // fixme: remove
       console.log('VegaVisualization destroying');
+
+      return this._vegaView && this._vegaView.destroy();
     }
   };
 }
