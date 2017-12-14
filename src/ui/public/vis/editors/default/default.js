@@ -24,14 +24,14 @@ const defaultEditor = function ($rootScope, $compile) {
       }
     }
 
-    render(visData, searchSource) {
+    render(visData, searchSource, updateStatus, uiState) {
       let $scope;
 
       const updateScope = () => {
         $scope.showSpyPanel = this.showSpyPanel;
         $scope.vis = this.vis;
         $scope.visData = visData;
-        $scope.uiState = this.vis.getUiState();
+        $scope.uiState = uiState;
         $scope.searchSource = searchSource;
         $scope.$apply();
       };
