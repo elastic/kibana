@@ -8,6 +8,7 @@ import {
 
 const control = {
   id: 'mock-list-control',
+  isEnabled: () => { return true; },
   options: {
     type: 'terms',
     multiselect: true
