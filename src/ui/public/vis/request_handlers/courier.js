@@ -35,12 +35,12 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
             };
 
             searchSource.rawResponse = resp;
-            resolve(resp);
+            resolve(_.cloneDeep(resp));
           }).catch(e => reject(e));
 
           courier.fetch();
         } else {
-          resolve(searchSource.rawResponse);
+          resolve(_.cloneDeep(searchSource.rawResponse));
         }
 
 
