@@ -219,7 +219,7 @@ These can be either an AngularJS template or React component.
     title: 'My New Vis',
     icon: 'my_icon',
     description: 'Cool new chart',
-    editorController: 'default',
+    editor: 'default',
     editorConfig: {
        optionsTemplate: '<my-custom-options-directive></my-custom-options-directive>' // or
        optionsTemplate: MyReactComponent // or if multiple tabs are required:
@@ -265,7 +265,7 @@ const MyNewVisType = (Private) => {
     title: 'My New Vis',
     icon: 'my_icon',
     description: 'Cool new chart',
-    editorController: MyEditorController,
+    editor: MyEditorController,
     editorConfig: { my: 'custom config' }
   });
 }
