@@ -24,7 +24,7 @@ export class TutorialDirectory extends React.Component {
       name: 'Logging',
     }, {
       id: 'metrics',
-      name: 'Merics',
+      name: 'Metrics',
     }, {
       id: 'security',
       name: 'Security Analytics',
@@ -103,13 +103,6 @@ export class TutorialDirectory extends React.Component {
               {this.renderTabs()}
             </KuiTabs>
             <KuiFlexGrid columns={4} className="homeDirectory">
-              <KuiFlexItem>
-                <Synopsis
-                  description="Is your data already in Elastic Search? Set up an Index Pattern to quickly query it."
-                  title="Set up an Index Pattern"
-                  url={this.props.addBasePath('/app/kibana#/management/kibana/index')}
-                />
-              </KuiFlexItem>
               { this.renderTutorials() }
             </KuiFlexGrid>
           </div>
