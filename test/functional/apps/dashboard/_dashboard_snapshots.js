@@ -5,7 +5,7 @@ import { AREA_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 
 export default function ({ getService, getPageObjects, updateBaselines }) {
   const dashboardVisualizations = getService('dashboardVisualizations');
-  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize']);
+  const PageObjects = getPageObjects(['dashboard', 'header', 'visualize', 'common']);
   const screenshot = getService('screenshots');
   const remote = getService('remote');
 
@@ -56,7 +56,12 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.dashboard.clickFullScreenMode();
       await PageObjects.dashboard.toggleExpandPanel();
 
-      await PageObjects.dashboard.waitForRenderCounter(6);
+      // TODO: hopefully we will be able to get rid of this sleep once render-complete is implemented.
+      // right now the render-counter value is unstable and unreliable.  Sometimes it'll be 4 when it's "settled",
+      // sometimes it'll be 6.
+      await PageObjects.dashboard.waitForRenderCounter(4);
+      await PageObjects.common.sleep(1000);
+
       const percentSimilar = await screenshot.compareAgainstBaseline('area_chart', updateBaselines);
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
