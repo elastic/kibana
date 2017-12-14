@@ -16,9 +16,18 @@ exports[`renders disabled control with tooltip 1`] = `
   >
     <OverlayTrigger
       display={false}
-      overlay={<Tooltip />}
+      isSticky={false}
+      overlay={
+        <Tooltip
+          className="inputControlDisabledTooltip"
+          isSticky={false}
+          size="auto"
+          visible={true}
+        />
+      }
       pin={true}
       placement="top"
+      theme="dark"
       trigger="hover"
     >
       <div>
