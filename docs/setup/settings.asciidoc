@@ -28,7 +28,7 @@ certificate and key files. These files validate that your Elasticsearch backend 
 `elasticsearch.ssl.certificateAuthorities:`:: Optional setting that enables you to specify a list of paths to the PEM file for the certificate
 authority for your Elasticsearch instance.
 `elasticsearch.ssl.keyPassphrase:`:: The passphrase that will be used to decrypt the private key. This value is optional as the key may not be encrypted.
-`elasticsearch.ssl.verificationMode:`:: *Default: full* Controls the verification of certificates presented by Elastisearch. Valid values are `none`, `certificate`, and `full`.
+`elasticsearch.ssl.verificationMode:`:: *Default: full* Controls the verification of certificates presented by Elasticsearch. Valid values are `none`, `certificate`, and `full`.
 `full` performs hostname verification, and `certificate` does not.
 `elasticsearch.startupTimeout:`:: *Default: 5000* Time in milliseconds to wait for Elasticsearch at Kibana startup before
 retrying.
