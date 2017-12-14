@@ -424,6 +424,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
       PageObjects.header.clickToastOK();
       PageObjects.header.clickToastOK();
+      // wait for the ok click to hide the toast messages so text for the
+      // right one is returned
+      PageObjects.common.sleep(1000);
       return await PageObjects.header.getToastMessage();
     }
 
