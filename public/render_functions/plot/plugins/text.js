@@ -17,11 +17,26 @@ function processOptions(/*plot, options*/) {
 
 function draw(plot, ctx) {
   $('.valueLabel', plot.getPlaceholder()).remove();
-  $.each(plot.getData(), function (idx, series) {
+  plot.getData().forEach(function (series) {
     const show = get(series.numbers, 'show');
     if (!show) return;
 
-    const points = series.data;
+    let points = series.data;
+
+    // TODO: This might only work on single x and y axis charts.
+    if (series.stack != null) {
+      points = points.map((point, i) => {
+        const p = point.slice(0);
+
+        // This magic * 3 and + 1 are due to the way the stacking plugin for flot modifies the series.
+        // Note that series.data and series.datapoints.point are different, both in meaning and in format
+        // series.data is the original data supplied by the user
+        // series.datapoints.point are the calculated points made as result of data processing.
+        p[1] = series.datapoints.points[i * 3 + 1];
+        return p;
+      });
+    }
+
     const offset = plot.getPlotOffset();
     ctx.save();
     ctx.textBaseline = 'middle';
@@ -31,26 +46,8 @@ function draw(plot, ctx) {
 
       const point = {
         'x': xAlign(points[i][0]),
-        'y': yAlign(points[i][1]),
+        'y': yAlign(points[i][1]), // Need to calculate here.
       };
-
-      /*
-      const axes = {
-        0: 'x',
-        1: 'y',
-      };
-      const horizontalShift = 1;
-      const barNumber = i + horizontalShift;
-      let text;
-      if (series.stack != null) {
-        const value = series.data[i / 3][horizontalShift]; // Why the / 3 here? What is this voodoo?
-        point[axes[horizontalShift]] = (points[i][1] - value + yAlign(value));
-        text = value;
-      } else {
-        text = points[i][1];
-      }
-      */
-
 
       function writeText(text, x, y) {
         if (typeof text === 'undefined') return;
