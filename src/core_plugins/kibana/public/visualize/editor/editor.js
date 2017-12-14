@@ -169,12 +169,6 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
     $scope.isAddToDashMode = () => addToDashMode;
 
-    // Associate PersistedState instance with the Vis instance, so that
-    // `uiStateVal` can be called on it. Currently this is only used to extract
-    // map-specific information (e.g. mapZoom, mapCenter).
-    vis.setUiState($scope.uiState);
-
-
     $scope.timefilter = timefilter;
     $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter', 'isAddToDashMode');
 
