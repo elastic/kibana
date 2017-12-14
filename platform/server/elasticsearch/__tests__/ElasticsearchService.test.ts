@@ -11,18 +11,15 @@ import { logger } from '../../../logging/__mocks__';
 import { k$, BehaviorSubject, first, toPromise } from '@elastic/kbn-observable';
 
 test('should not create multiple clients while service is running', async () => {
-  const elasticsearchConfig = {
+  const createElasticsearchConfig = (type: string) => ({
     filterHeaders: () => {},
-    toElasticsearchClientConfig: () => {},
+    toElasticsearchClientConfig: (options: any) => ({ type, options }),
     requestHeadersWhitelist: []
-  };
-
+  });
   const elasticsearchConfigs = {
-    forType: () => elasticsearchConfig
+    forType: (type: string) => createElasticsearchConfig(type)
   };
-
   const configs$: any = new BehaviorSubject(elasticsearchConfigs);
-
   const service = new ElasticsearchService(configs$, logger);
 
   mockCreateClient.mockReset();
@@ -38,15 +35,15 @@ test('should not create multiple clients while service is running', async () => 
   // Calling it again does not create any new elasticsearch clients
   await service.getScopedDataClient({ foo: 'bar' });
 
-
   service.stop();
 
   // We expect it to be called only twice: once for the data client
   // and once for the admin client.
   expect(mockCreateClient).toHaveBeenCalledTimes(2);
 
-  // TODO: check that specifically the admin client and the data client
+  // Check that specifically the admin client and the data client
   // were created
+  expect(mockCreateClient.mock.calls).toMatchSnapshot();
 });
 
 test('should get an AdminClient', async () => {

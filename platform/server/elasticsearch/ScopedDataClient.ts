@@ -5,8 +5,6 @@ import { Headers } from '../http/Router/headers';
 type CallAPIOptions = { wrap401Errors?: boolean };
 type CallAPIClientParams = { [key: string]: any };
 
-// TODO: eventually do this:
-//export class ScopedDataClient extends DataClient {
 export class ScopedDataClient {
   constructor(
     private readonly client: Client,
