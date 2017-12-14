@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }) {
 
     });
 
-    describe.skip('Visual Builder chart', function indexPatternCreation() {
+    describe('Visual Builder chart', function indexPatternCreation() {
 
       before(async () => {
         await PageObjects.visualBuilder.clickMetric();
