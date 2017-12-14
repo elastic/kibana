@@ -35,6 +35,13 @@ uiModules
 
         $scope.addLegend = false;
 
+        // Whenever the uiState changed, that the visualization should use,
+        // attach it to the actual Vis class. Thus we don't require any users
+        // of the <visualization/> directive to manuallay set the uiState.
+        $scope.$watch('uiState', (uiState) => {
+          $scope.vis.setUiState(uiState);
+        });
+
         // Show no results message when isZeroHits is true and it requires search
         $scope.showNoResultsMessage = function () {
           const requiresSearch = _.get($scope, 'vis.type.requiresSearch');
