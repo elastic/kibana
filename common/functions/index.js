@@ -24,6 +24,7 @@ import { ply } from './ply';
 import { render } from './render';
 import { replace } from './replace';
 import { rounddate } from './rounddate';
+import { rowCount } from './rowCount';
 import { seriesStyle } from './seriesStyle';
 import { sleep } from './sleep';
 import { sort } from './sort';
@@ -61,6 +62,7 @@ export const commonFunctions = [
   render,
   replace,
   rounddate,
+  rowCount,
   seriesStyle,
   sort,
   sleep,
