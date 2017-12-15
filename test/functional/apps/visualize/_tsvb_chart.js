@@ -27,7 +27,34 @@ export default function ({ getService, getPageObjects }) {
         });
     });
 
-    describe('Visual Builder metric', function indexPatternCreation() {
+    describe('Visual Builder Time Series', function () {
+
+      it('should show the correct count in the legend', async function () {
+        const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
+        expect(actualCount).to.be('156');
+      });
+
+      it('should show the correct count in the legend with 2h offset', async function () {
+        await PageObjects.visualBuilder.clickSeriesOption();
+        await PageObjects.visualBuilder.enterOffsetSeries('2h');
+        const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
+        expect(actualCount).to.be('293');
+      });
+
+      it('should show the correct count in the legend with -2h offset', async function () {
+        await PageObjects.visualBuilder.enterOffsetSeries('-2h');
+        const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
+        expect(actualCount).to.be('53');
+      });
+
+      after(async () => {
+        // set back to no offset for the next test, an empty string didn't seem to work here
+        await PageObjects.visualBuilder.enterOffsetSeries('0h');
+      });
+
+    });
+
+    describe('Visual Builder metric', () => {
       before(async () => {
         await PageObjects.visualBuilder.clickMetric();
         await PageObjects.common.sleep(1003);
@@ -38,7 +65,7 @@ export default function ({ getService, getPageObjects }) {
         expect(spyToggleExists).to.be(false);
       });
 
-      it('should show correct data', function () {
+      it('should show correct data', async function () {
         const expectedMetricValue =  '156';
 
         return PageObjects.visualBuilder.getMetricValue()
@@ -78,16 +105,18 @@ export default function ({ getService, getPageObjects }) {
 
         it('allow positive time offsets', async () => {
           await PageObjects.visualBuilder.enterOffsetSeries('2h');
-          await PageObjects.header.waitUntilLoadingHasFinished();
           const text = await PageObjects.visualBuilder.getMarkdownText();
-          expect(text).to.be('1442901600000#3');
+          const [timestamp, value] = text.split('#');
+          expect(timestamp).to.be('1442901600000');
+          expect(value).to.be('3');
         });
 
         it('allow negative time offsets', async () => {
           await PageObjects.visualBuilder.enterOffsetSeries('-2h');
-          await PageObjects.header.waitUntilLoadingHasFinished();
           const text = await PageObjects.visualBuilder.getMarkdownText();
-          expect(text).to.be('1442901600000#23');
+          const [timestamp, value] = text.split('#');
+          expect(timestamp).to.be('1442901600000');
+          expect(value).to.be('23');
         });
       });
 

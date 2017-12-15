@@ -1,8 +1,9 @@
 import Keys from 'leadfoot/keys';
 
-export function VisualBuilderPageProvider({ getService }) {
+export function VisualBuilderPageProvider({ getService, getPageObjects }) {
   const find = getService('find');
   const testSubjects = getService('testSubjects');
+  const PageObjects = getPageObjects(['common', 'header']);
 
   class VisualBuilderPage {
     async clickMetric() {
@@ -29,6 +30,7 @@ export function VisualBuilderPageProvider({ getService }) {
       await input.session.pressKeys(Keys.NULL); // Release modifier keys
       await input.session.pressKeys(Keys.BACKSPACE); // Delete all content
       await input.type(markdown);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async getMarkdownText() {
@@ -37,19 +39,32 @@ export function VisualBuilderPageProvider({ getService }) {
     }
 
     async clickMarkdownData() {
-      const el = await testSubjects.find('markdownDataBtn');
-      await el.click();
+      await testSubjects.click('markdownDataBtn');
     }
 
     async clickSeriesOption(nth = 0) {
       const el = await testSubjects.findAll('seriesOptions');
       await el[nth].click();
+      await PageObjects.common.sleep(300);
+    }
+
+    async clearOffsetSeries() {
+      const el = await testSubjects.find('offsetTimeSeries');
+      await el.clearValue();
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async enterOffsetSeries(value) {
       const el = await testSubjects.find('offsetTimeSeries');
       await el.clearValue();
       await el.type(value);
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async getRhythmChartLegendValue() {
+      const metricValue = await find.byCssSelector('.rhythm_chart__legend_value');
+      await metricValue.session.moveMouseTo(metricValue);
+      return await metricValue.getVisibleText();
     }
   }
 
