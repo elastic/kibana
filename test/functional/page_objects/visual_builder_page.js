@@ -52,9 +52,9 @@ export function VisualBuilderPageProvider({ getService }) {
       await el.click();
     }
 
-    async clickMarkdownFirstSeriesOption() {
-      const el = await testSubjects.find('markdownSeriesOptions');
-      await el.click();
+    async clickSeriesOption(nth = 0) {
+      const el = await testSubjects.findAll('seriesOptions');
+      await el[nth].click();
     }
 
     async enterOffsetSeries(value) {

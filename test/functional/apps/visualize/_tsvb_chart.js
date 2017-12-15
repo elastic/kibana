@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }) {
         before(async () => {
           await PageObjects.visualBuilder.enterMarkdown('{{ count.data.raw.[0].[0] }}#{{ count.data.raw.[0].[1] }}');
           await PageObjects.visualBuilder.clickMarkdownData();
-          await PageObjects.visualBuilder.clickMarkdownFirstSeriesOption();
+          await PageObjects.visualBuilder.clickSeriesOption();
         });
 
         it('allow positive time offsets', async () => {
