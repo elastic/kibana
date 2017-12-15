@@ -1,24 +1,13 @@
 import Keys from 'leadfoot/keys';
 
 export function VisualBuilderPageProvider({ getService }) {
-  const config = getService('config');
   const find = getService('find');
-  const log = getService('log');
   const testSubjects = getService('testSubjects');
-
-  const defaultFindTimeout = config.get('timeouts.find');
 
   class VisualBuilderPage {
     async clickMetric() {
-      const nav = await find.allByCssSelector('.vis_editor__vis_picker-label', defaultFindTimeout);
-      log.debug('found navigation items: ' + nav.length);
-      await Promise.all(nav.map(async function (link) {
-        const text = await link.getVisibleText();
-        log.debug('nav text:' + text);
-        if (text === 'Metric') {
-          await link.click();
-        }
-      }));
+      const button = await testSubjects.find('metricTsvbTypeBtn');
+      await button.click();
     }
 
     async clickMarkdown() {
