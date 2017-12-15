@@ -4,7 +4,7 @@ import { functionsRegistry } from './common/lib/functions_registry';
 export default function (kibana) {
   return new kibana.Plugin({
     name: 'canvas',
-    require: ['kibana', 'elasticsearch'],
+    require: ['kibana', 'elasticsearch', 'xpack_main'],
     uiExports: {
       app: {
         title: 'Canvas',
