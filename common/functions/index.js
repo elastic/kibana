@@ -2,10 +2,12 @@ import { alterColumn } from './alterColumn';
 import { asFn } from './as.js';
 import { compare } from './compare';
 import { containerStyle } from './containerStyle';
+import { context } from './context';
 import { columns } from './columns';
 import { date } from './date';
 import { exactly } from './exactly';
 import { font } from './font';
+import { formatdate } from './formatdate';
 import { getCell } from './getCell';
 import { grid } from './grid';
 import { head } from './head';
@@ -25,6 +27,8 @@ import { rounddate } from './rounddate';
 import { seriesStyle } from './seriesStyle';
 import { sleep } from './sleep';
 import { sort } from './sort';
+import { staticColumn } from './staticColumn';
+import { string } from './string';
 import { table } from './table';
 import { tail } from './tail';
 import { timefilter } from './timefilter';
@@ -36,9 +40,11 @@ export const commonFunctions = [
   containerStyle,
   compare,
   columns,
+  context,
   date,
   exactly,
   font,
+  formatdate,
   getCell,
   grid,
   head,
@@ -58,6 +64,8 @@ export const commonFunctions = [
   seriesStyle,
   sort,
   sleep,
+  staticColumn,
+  string,
   table,
   tail,
   timefilter,
