@@ -1,4 +1,4 @@
-import { omit, pick } from 'lodash';
+import { omit, pick, find } from 'lodash';
 
 export const columns = {
   name: 'columns',
@@ -34,7 +34,13 @@ export const columns = {
     if (include) {
       const fields = include.split(',').map(field => field.trim());
       const rows = result.rows.map(row => pick(row, fields));
-      const columns = result.columns.filter(col => fields.includes(col.name));
+      //const columns = result.columns.filter(col => fields.includes(col.name));
+      // Include columns in the order the user specified
+      const columns = [];
+      fields.forEach(field => {
+        const column = find(result.columns, { name: field });
+        if (column) columns.push(column);
+      });
       result = { ...result, rows, columns };
     }
 
