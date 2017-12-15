@@ -8,15 +8,16 @@ module.controller('VegaEditorController', ($scope /*, $element, $timeout, kbnUiA
   return new (class VegaEditorController {
     constructor() {
       $scope.aceLoaded = editor => {
-        this.aceEditor = editor;
-        // this.aceSession = editor.getSession();
-        // this.aceSession.setTabSize(2);
-        // this.aceSession.setUseSoftTabs(false);
-
         editor.$blockScrolling = Infinity;
+
+        const session = editor.getSession();
+        session.setTabSize(2);
+        session.setUseSoftTabs(true);
 
         // FIXME: enabling this service breaks ACE width auto-resize
         // kbnUiAceKeyboardModeService.initialize($scope, editor);
+
+        this.aceEditor = editor;
       };
 
       $scope.formatJson = (event) => {
@@ -39,9 +40,13 @@ module.controller('VegaEditorController', ($scope /*, $element, $timeout, kbnUiA
       try {
         event.preventDefault();
 
-        const session = this.aceEditor.getSession();
+        const session = this.aceEditor; // .getSession();
         const spec = hjson.parse(session.getValue(), { legacyRoot: false, keepWsc: true });
-        session.setValue(stringify(spec, opts));
+        const spec2 = stringify(spec, opts);
+        session.setValue(spec2);
+
+        // FIXME!  HACK!  For some reason, spec is not updated via ACE's setValue -> onChange -> ace-ui
+        $scope.vis.params.spec = spec2;
 
       } catch (err) {
         // FIXME!
