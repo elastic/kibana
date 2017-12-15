@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { TooltipTrigger } from 'pui-react-tooltip';
+import { Tooltip } from 'pui-react-tooltip';
+import { OverlayTrigger } from 'pui-react-overlay-trigger';
 import { KuiButton } from 'ui_framework/components';
 import { copyToClipboard } from '../../copy_to_clipboard';
 
@@ -34,17 +35,22 @@ export class CopyButton extends React.Component {
 
   render() {
     return (
-      <TooltipTrigger
-        tooltip={this.state.tooltipText}
-        onMouseOut={this.resetTooltipText}
+      <OverlayTrigger
+        placement="top"
+        overlay={
+          <Tooltip>
+            {this.state.tooltipText}
+          </Tooltip>
+        }
       >
         <KuiButton
           buttonType="secondary"
           onClick={this.copySnippet}
+          onMouseOut={this.resetTooltipText}
         >
           Copy snippet
         </KuiButton>
-      </TooltipTrigger>
+      </OverlayTrigger>
     );
   }
 }
