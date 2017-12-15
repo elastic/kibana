@@ -2,21 +2,24 @@ import moment from 'moment';
 
 export const date = {
   name: 'date',
-  type: 'string',
+  type: 'number',
   context: {
     types: ['null'],
   },
-  help: 'Returns the time, as a string, in the current execution environment.' +
-  ' Be careful with this if your server and client have different times',
+  help: 'Returns the current time, or a time parsed from a string, as milliseconds since epoch',
   args: {
     _: {
-      types: ['string'],
-      default: '"YYYY-MM-DDTHH:mm:ssZ"',
-      'aliases': ['format'],
-      help: 'The momentJS format for the output (See https://momentjs.com/docs/#/displaying/)',
+      types: ['string', 'null'],
+      help: 'An optional date string to parse into milliseconds since epoch',
+    },
+    format: {
+      types: ['string', 'null'],
+      help: 'The momentJS format for parsing the optional date string (See https://momentjs.com/docs/#/displaying/)',
     },
   },
   fn: (context, args) => {
-    return moment().format(args._);
+    if (!args._) return moment().valueOf();
+    if (!args.format) return moment(args._).valueOf();
+    return moment(args._, args.format).valueOf();
   },
 };
