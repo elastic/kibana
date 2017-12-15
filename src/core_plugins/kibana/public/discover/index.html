@@ -39,7 +39,7 @@
       <filter-bar
         state="state"
         index-patterns="[indexPattern]"
-        ng-if="state.query.language === 'lucene'"
+        ng-if="['lucene', 'simpleKuery'].includes(state.query.language)"
       ></filter-bar>
     </div>
     <div class="row">

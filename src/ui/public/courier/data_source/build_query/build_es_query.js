@@ -17,15 +17,16 @@ export function BuildESQueryProvider(Private) {
     const queriesByLanguage = groupBy(validQueries, 'language');
 
     const kueryQuery = buildQueryFromKuery(indexPattern, queriesByLanguage.kuery);
+    const simpleKueryQuery = buildQueryFromKuery(indexPattern, queriesByLanguage.simpleKuery, true);
     const luceneQuery = buildQueryFromLucene(queriesByLanguage.lucene, decorateQuery);
     const filterQuery = buildQueryFromFilters(filters, decorateQuery);
 
     return {
       bool: {
-        must: [].concat(kueryQuery.must, luceneQuery.must, filterQuery.must),
-        filter: [].concat(kueryQuery.filter, luceneQuery.filter, filterQuery.filter),
-        should: [].concat(kueryQuery.should, luceneQuery.should, filterQuery.should),
-        must_not: [].concat(kueryQuery.must_not, luceneQuery.must_not, filterQuery.must_not),
+        must: [].concat(kueryQuery.must, simpleKueryQuery.must, luceneQuery.must, filterQuery.must),
+        filter: [].concat(kueryQuery.filter, simpleKueryQuery.filter, luceneQuery.filter, filterQuery.filter),
+        should: [].concat(kueryQuery.should, simpleKueryQuery.should, luceneQuery.should, filterQuery.should),
+        must_not: [].concat(kueryQuery.must_not, simpleKueryQuery.must_not, luceneQuery.must_not, filterQuery.must_not),
       }
     };
   }

@@ -39,7 +39,7 @@
     ng-show="showFilterBar()"
     state="state"
     index-patterns="indexPatterns"
-    ng-if="model.query.language === 'lucene'"
+    ng-if="['lucene', 'simpleKuery'].includes(model.query.language)"
   ></filter-bar>
 
   <div

@@ -1,21 +1,25 @@
 import grammar from 'raw-loader!./kuery.peg';
+import simpleGrammar from 'raw-loader!./simple_kuery.peg';
 import PEG from 'pegjs';
 import _ from 'lodash';
 import { nodeTypes } from '../node_types/index';
 
 const kueryParser = PEG.buildParser(grammar);
+const simpleKueryParser = PEG.buildParser(simpleGrammar);
 
-export function fromKueryExpression(expression, parseOptions = {}) {
+export function fromKueryExpression(expression, parseOptions = {}, useSimpleParser = false) {
   if (_.isUndefined(expression)) {
     throw new Error('expression must be a string, got undefined instead');
   }
+
+  const parser = useSimpleParser ? simpleKueryParser : kueryParser;
 
   parseOptions = {
     ...parseOptions,
     helpers: { nodeTypes }
   };
 
-  return kueryParser.parse(expression, parseOptions);
+  return parser.parse(expression, parseOptions);
 }
 
 export function toKueryExpression(node) {

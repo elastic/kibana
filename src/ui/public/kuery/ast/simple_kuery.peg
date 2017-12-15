@@ -1,0 +1,123 @@
+/*
+ * Kuery parser
+ */
+
+/*
+ * Initialization block
+ */
+{
+  var nodeTypes = options.helpers.nodeTypes;
+
+  if (options.includeMetadata === undefined) {
+    options.includeMetadata = true;
+  }
+
+  function addMeta(source, text, location) {
+    if (options.includeMetadata) {
+      return Object.assign(
+        {},
+        source,
+        {
+          text: text,
+          location: simpleLocation(location),
+        }
+      );
+    }
+
+    return source;
+  }
+
+  function simpleLocation(location) {
+    // Returns an object representing the position of the function within the expression,
+    // demarcated by the position of its first character and last character. We calculate these values
+    // using the offset because the expression could span multiple lines, and we don't want to deal
+    // with column and line values.
+    return {
+      min: location.start.offset,
+      max: location.end.offset
+    }
+  }
+}
+
+start
+  = Query
+  / space* {
+    return addMeta(nodeTypes.function.buildNode('and', []), text(), location());
+  }
+
+Query
+  = space? query:OrQuery space? {
+    if (query.type === 'literal') {
+      return addMeta(nodeTypes.function.buildNode('and', [query]), text(), location());
+    }
+    return query;
+  }
+
+OrQuery
+  = left:AndQuery space 'or'i space right:OrQuery {
+    return addMeta(nodeTypes.function.buildNode('or', [left, right]), text(), location());
+  }
+  / AndQuery
+
+AndQuery
+  = left:NotQuery space 'and'i space right:AndQuery {
+    return addMeta(nodeTypes.function.buildNode('and', [left, right]), text(), location());
+  }
+  / NotQuery
+
+NotQuery
+  = 'not'i space clause:Clause {
+    return addMeta(nodeTypes.function.buildNode('not', clause), text(), location());
+  }
+  / Clause
+
+Clause
+  = '(' subQuery:Query ')' {
+    return subQuery;
+  }
+  / Term
+
+Term
+  = field:literal_arg_type space? ':' space? value:literal_arg_type {
+    return addMeta(nodeTypes.function.buildNodeWithArgumentNodes('is', [field, value]), text(), location());
+  }
+  / field:literal_arg_type space? ':' space? '[' space? gt:literal_arg_type space 'to'i space lt:literal_arg_type space? ']' {
+    return addMeta(nodeTypes.function.buildNodeWithArgumentNodes('range', [field, gt, lt]), text(), location());
+  }
+  / !Keywords literal:literal_arg_type { return literal; }
+
+literal_arg_type
+ = literal:literal {
+   var result = addMeta(nodeTypes.literal.buildNode(literal), text(), location());
+   return result;
+ }
+
+Keywords
+  = 'or'i / 'and'i / 'not'i
+
+ /* ----- Core types ----- */
+
+literal "literal"
+  =  '"' chars:dq_char* '"' { return chars.join(''); } // double quoted string
+  / "'" chars:sq_char* "'" { return chars.join(''); } // single quoted string
+  / 'true'  { return true; } // unquoted literals from here down
+  / 'false' { return false; }
+  / 'null'  { return null; }
+  / string:[^\[\]()"',:=\ \t]+ { // this also matches numbers via Number()
+   var result = string.join('');
+   // Sort of hacky, but PEG doesn't have backtracking so
+   // a number rule is hard to read, and performs worse
+   if (isNaN(Number(result))) return result;
+   return Number(result)
+  }
+
+space
+ = [\ \t\r\n]+
+
+dq_char
+  = "\\" sequence:('"' / "\\") { return sequence; }
+  / [^"] // everything except "
+
+sq_char
+  = "\\" sequence:("'" / "\\") { return sequence; }
+  / [^'] // everything except '

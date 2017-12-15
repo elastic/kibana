@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import { fromKueryExpression, toElasticsearchQuery, nodeTypes } from '../../../kuery';
 
-export function buildQueryFromKuery(indexPattern, queries) {
-  const queryASTs = _.map(queries, query => fromKueryExpression(query.query));
+export function buildQueryFromKuery(indexPattern, queries, useSimple = false) {
+  const queryASTs = _.map(queries, query => fromKueryExpression(query.query, undefined, useSimple));
   const compoundQueryAST = nodeTypes.function.buildNode('and', queryASTs);
   const kueryQuery = toElasticsearchQuery(compoundQueryAST, indexPattern);
   return {
@@ -13,5 +13,3 @@ export function buildQueryFromKuery(indexPattern, queries) {
     ...kueryQuery.bool
   };
 }
-
-
