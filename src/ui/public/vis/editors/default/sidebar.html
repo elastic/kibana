@@ -9,7 +9,7 @@
     <div
       css-truncate
       aria-label="{{:: 'Index pattern: ' + vis.indexPattern.title}}"
-      ng-if="vis.type.requiresSearch"
+      ng-if="vis.type.requiresSearch && vis.type.options.showIndexSelection"
       class="index-pattern"
       tabindex="0"
       id="sidebarIndexPatternTitle"
