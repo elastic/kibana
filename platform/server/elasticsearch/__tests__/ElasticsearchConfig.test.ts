@@ -25,13 +25,16 @@ describe('creates elasticsearch client config', () => {
     expect(config.toElasticsearchClientConfig()).toMatchSnapshot();
   });
 
-  test('when shouldAuth is false (for admin clients)', () => {});
-  const clusterSchema = {
-    pingTimeout: { asMilliseconds: () => {} },
-    requestTimeout: { asMilliseconds: () => {} },
-    url: ''
-  } as ClusterSchema;
-  const config = new ElasticsearchConfig('data', clusterSchema);
+  test('when shouldAuth is false (for admin clients)', () => {
+    const clusterSchema = {
+      pingTimeout: { asMilliseconds: () => {} },
+      requestTimeout: { asMilliseconds: () => {} },
+      url: ''
+    } as ClusterSchema;
+    const config = new ElasticsearchConfig('data', clusterSchema);
 
-  expect(config.toElasticsearchClientConfig({ shouldAuth: false })).toMatchSnapshot();
+    expect(
+      config.toElasticsearchClientConfig({ shouldAuth: false })
+    ).toMatchSnapshot();
+  });
 });

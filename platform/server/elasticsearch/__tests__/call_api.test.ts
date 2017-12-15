@@ -1,58 +1,60 @@
 import { callAPI } from '../call_api';
 
-test('should call the api when it exists, with the right context and params', async () => {
-  let apiContext;
-  const baz = jest.fn(function(this: any) {
-    apiContext = this;
+describe('things', () => {
+  test('should call the api when it exists, with the right context and params', async () => {
+    let apiContext;
+    const baz = jest.fn(function(this: any) {
+      apiContext = this;
+    });
+    const clientParams = {};
+    const client: any = { foo: { bar: { baz: baz } } };
+    await callAPI(client, 'foo.bar.baz', clientParams, {});
+
+    expect(baz).toHaveBeenCalledWith(clientParams);
+    expect(apiContext).toBe(client.foo.bar);
   });
-  const clientParams = {};
-  const client: any = { foo: { bar: { baz: baz } } };
-  await callAPI(client, 'foo.bar.baz', clientParams, {});
 
-  expect(baz).toHaveBeenCalledWith(clientParams);
-  expect(apiContext).toBe(client.foo.bar);
-});
+  test('should fail when endpoint does not exist on client', async () => {
+    expect.assertions(1);
 
-test('should fail when endpoint does not exist on client', async () => {
-  expect.assertions(1);
+    const client: any = {};
 
-  const client: any = {};
-
-  try {
-    await callAPI(client, 'foo.bar.baz', {}, {});
-  } catch (error) {
-    expect(error.message).toEqual(
-      'called with an invalid endpoint: foo.bar.baz'
-    );
-  }
-});
-
-test('should handle top-level endpoint', async () => {
-  let apiContext;
-  const fooFn = jest.fn(function(this: any) {
-    apiContext = this;
+    try {
+      await callAPI(client, 'foo.bar.baz', {}, {});
+    } catch (error) {
+      expect(error.message).toEqual(
+        'called with an invalid endpoint: foo.bar.baz'
+      );
+    }
   });
-  const client: any = { foo: fooFn };
-  await callAPI(client, 'foo', {}, {});
 
-  expect(apiContext).toBe(client);
-});
-
-test('should handle failing api call', async () => {
-  expect.assertions(2);
-
-  const fooFn = () => {
-    throw new Error('api call failed');
-  };
-
-  const client: any = { foo: fooFn };
-
-  try {
+  test('should handle top-level endpoint', async () => {
+    let apiContext;
+    const fooFn = jest.fn(function(this: any) {
+      apiContext = this;
+    });
+    const client: any = { foo: fooFn };
     await callAPI(client, 'foo', {}, {});
-  } catch (error) {
-    expect(error.message).toEqual('api call failed');
-    expect(error.wrap401Errors).toBeUndefined();
-  }
+
+    expect(apiContext).toBe(client);
+  });
+
+  test('should handle failing api call', async () => {
+    expect.assertions(2);
+
+    const fooFn = () => {
+      throw new Error('api call failed');
+    };
+
+    const client: any = { foo: fooFn };
+
+    try {
+      await callAPI(client, 'foo', {}, {});
+    } catch (error) {
+      expect(error.message).toEqual('api call failed');
+      expect(error.wrap401Errors).toBeUndefined();
+    }
+  });
 });
 
 // TODO: change this test after implementing

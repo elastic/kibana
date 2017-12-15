@@ -27,7 +27,7 @@ test('should not create multiple clients while service is running', async () => 
   // Start subscribing to this.clients$,
   // which means new elasticsearch data and admin clients are created,
   // calling mockCreateClient once for each client (twice)
-  service.start();
+  await service.start();
 
   // Get the latest elasticsearch data client
   // and create a ScopedDataClient around it
@@ -35,7 +35,7 @@ test('should not create multiple clients while service is running', async () => 
   // Calling it again does not create any new elasticsearch clients
   await service.getScopedDataClient({ foo: 'bar' });
 
-  service.stop();
+  await service.stop();
 
   // We expect it to be called only twice: once for the data client
   // and once for the admin client.

@@ -1,7 +1,9 @@
 import { get } from 'lodash';
 import { Client } from 'elasticsearch';
 
-type CallAPIOptions = { wrap401Errors?: boolean };
+type CallAPIOptions = {
+  wrap401Errors?: boolean;
+};
 type CallAPIClientParams = { [key: string]: any };
 
 export async function callAPI(
@@ -10,7 +12,8 @@ export async function callAPI(
   clientParams: CallAPIClientParams,
   options: CallAPIOptions
 ) {
-  const wrap401Errors = options.wrap401Errors !== false;
+  const wrap401Errors =
+    options.wrap401Errors === undefined ? true : options.wrap401Errors;
   const clientPath = endpoint.split('.');
   const api: any = get(client, clientPath);
 
