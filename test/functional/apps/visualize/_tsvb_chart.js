@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }) {
         });
     });
 
-    describe('Visual Builder chart', function indexPatternCreation() {
+    describe('Visual Builder metric', function indexPatternCreation() {
       before(async () => {
         await PageObjects.visualBuilder.clickMetric();
         await PageObjects.common.sleep(1003);
