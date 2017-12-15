@@ -139,7 +139,7 @@ describe('timepicker directive', function () {
       _.each(modes, function (mode) {
         $scope.setMode(mode);
         $scope.$digest();
-        expect($elem.find('.kbn-timepicker-modes .active').text().trim().toLowerCase()).to.be(mode);
+        expect($elem.find('.kbn-timepicker-modes .euiTab-isSelected').text().trim().toLowerCase()).to.be(mode);
       });
     });
   });
