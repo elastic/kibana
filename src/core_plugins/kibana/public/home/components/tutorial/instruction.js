@@ -2,10 +2,7 @@ import './instruction.less';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Content } from './content';
-import {
-  KuiCodeEditor
-} from 'ui_framework/components';
-import 'brace/mode/sh';
+import { CommandBlock } from './command_block';
 
 export function Instruction({ commands, paramValues, textPost, textPre, replaceTemplateStrings }) {
   let pre;
@@ -28,23 +25,14 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
     );
   }
 
-  let commandsMarkup;
+  let commandBlock;
   if (commands) {
-    const aceOptions = {
-      fontSize: '14px',
-      maxLines: commands.length
-    };
-    commandsMarkup = (
-      <div className="kuiVerticalRhythm">
-        <KuiCodeEditor
-          mode="sh"
-          theme="github"
-          width="100%"
-          value={commands.map(cmd => { return replaceTemplateStrings(cmd, paramValues); }).join('\n')}
-          setOptions={aceOptions}
-          isReadOnly
-        />
-      </div>
+    commandBlock = (
+      <CommandBlock
+        commands={commands}
+        paramValues={paramValues}
+        replaceTemplateStrings={replaceTemplateStrings}
+      />
     );
   }
 
@@ -52,7 +40,9 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
     <div className="instruction">
 
       {pre}
-      {commandsMarkup}
+
+      {commandBlock}
+
       {post}
 
     </div>
