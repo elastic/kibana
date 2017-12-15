@@ -8,6 +8,7 @@ export default function ({ getService, loadTestFile }) {
       await esArchiver.unload('logstash_functional');
       await esArchiver.load('empty_kibana');
       await esArchiver.loadIfNeeded('makelogs');
+
     });
 
     after(async function () {
@@ -24,6 +25,7 @@ export default function ({ getService, loadTestFile }) {
     loadTestFile(require.resolve('./_index_pattern_filter'));
     loadTestFile(require.resolve('./_scripted_fields_filter'));
     loadTestFile(require.resolve('./_import_objects'));
+    loadTestFile(require.resolve('./_test_huge_fields'));
   });
 
 }
