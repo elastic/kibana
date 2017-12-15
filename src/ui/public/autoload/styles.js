@@ -9,7 +9,7 @@ theme.registerTheme('light', euiThemeLight);
 
 // Elastic UI Framework, dark theme
 const euiThemeDark = require('!!raw-loader!@elastic/eui/dist/eui_theme_k6_dark.css');
-theme.registerTheme('dark', [euiThemeDark]);
+theme.registerTheme('dark', euiThemeDark);
 
 // Set default theme.
 theme.applyTheme('light');
