@@ -36,23 +36,26 @@ module.controller('VegaEditorController', ($scope /*, $element, $timeout, kbnUiA
     }
 
     _format(event, stringify, opts) {
-      // TODO: error handling and reporting
-      try {
-        event.preventDefault();
+      event.preventDefault();
 
-        const session = this.aceEditor; // .getSession();
-        const spec = hjson.parse(session.getValue(), { legacyRoot: false, keepWsc: true });
-        const spec2 = stringify(spec, opts);
-        session.setValue(spec2);
+      // FIXME: should I use $scope.$evalAsync() instead?
+      $scope.$evalAsync(() => {
+        // TODO: error handling and reporting
+        try {
+          const doc = this.aceEditor;
+          const spec = hjson.parse(doc.getValue(), { legacyRoot: false, keepWsc: true });
+          const spec2 = stringify(spec, opts);
+          doc.setValue(spec2);
 
-        // FIXME!  HACK!  For some reason, spec is not updated via ACE's setValue -> onChange -> ace-ui
-        $scope.vis.params.spec = spec2;
+          // FIXME!  HACK!  For some reason, spec is not updated via ACE's setValue -> onChange -> ace-ui
+          // $scope.vis.params.spec = spec2;
 
-      } catch (err) {
-        // FIXME!
-        alert(err);
-      }
-      this.aceEditor.focus();
+        } catch (err) {
+          // FIXME!
+          alert(err);
+        }
+        this.aceEditor.focus();
+      });
     }
   })();
 });
