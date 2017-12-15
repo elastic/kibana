@@ -7,6 +7,19 @@ exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`
   <div
     className="kuiViewContent kuiViewContent--constrainedWidth"
   >
+    <a
+      className="kuiLink"
+      href="#/home"
+    >
+      Home
+    </a>
+     / 
+    <a
+      className="kuiLink"
+      href="#/home/tutorial_directory"
+    >
+      Add Data
+    </a>
     <div>
       <Introduction
         description="tutorial used to drive jest tests"
@@ -51,6 +64,19 @@ exports[`should render ON_PREM instructions with instructions cloud toggle when 
   <div
     className="kuiViewContent kuiViewContent--constrainedWidth"
   >
+    <a
+      className="kuiLink"
+      href="#/home"
+    >
+      Home
+    </a>
+     / 
+    <a
+      className="kuiLink"
+      href="#/home/tutorial_directory"
+    >
+      Add Data
+    </a>
     <div>
       <Introduction
         description="tutorial used to drive jest tests"
