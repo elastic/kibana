@@ -1,16 +1,17 @@
-<div class="vegaEditor">
+<div class="vegaEditor" ng-controller="VegaEditorController">
   <div
     ui-ace="{
-    useWrapMode: true,
-    advanced: {
-      highlightActiveLine: false
-    },
-    rendererOptions: {
-      showPrintMargin: false
-    },
-    mode: 'hjson'
-  }"
-    class="vegaEditorSpec"
+      onLoad: aceLoaded,
+      useWrapMode: true,
+      advanced: {
+        highlightActiveLine: false
+      },
+      rendererOptions: {
+        showPrintMargin: false
+      },
+      mode: 'hjson'
+    }"
+    id="vegaAceEditor"
     ng-model="vis.params.spec"
   ></div>
 
@@ -61,10 +62,10 @@
         aria-labelledby="vegaOptions"
       >
         <li role="menuitem">
-          <button ng-click="autoIndent($event)">Auto indent (HJSON)</button>
+          <button ng-click="formatHJson($event)">Reformat as HJSON</button>
         </li>
         <li role="menuitem">
-          <button ng-click="autoIndent($event)">Auto indent (JSON)</button>
+          <button ng-click="formatJson($event)">Reformat as JSON, delete comments</button>
         </li>
       </ul>
     </span>

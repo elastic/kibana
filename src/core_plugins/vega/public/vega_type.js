@@ -10,6 +10,7 @@ import './vega.less';
 // Editor-specific code
 import 'brace/mode/hjson';
 import './vega_editor.less';
+import './vega_editor.controller';
 import vegaEditorTemplate from './vega_editor.template.html';
 import defaultSpec from '!!raw-loader!./default.spec.hjson';
 

@@ -1,62 +1,53 @@
+import { uiModules } from 'ui/modules';
 import hjson from 'hjson';
 import compactStringify from 'json-stringify-pretty-compact';
-import split from 'split.js';
 
-export function createVegaEditorController(getAppState) {
+const module = uiModules.get('kibana/vega', ['kibana']);
+module.controller('VegaEditorController', ($scope /*, $element, $timeout, kbnUiAceKeyboardModeService*/) => {
 
-  class VegaEditorController {
-    link($scope, $el /*, $attr*/) {
+  return new (class VegaEditorController {
+    constructor() {
+      $scope.aceLoaded = editor => {
+        this.aceEditor = editor;
+        // this.aceSession = editor.getSession();
+        // this.aceSession.setTabSize(2);
+        // this.aceSession.setUseSoftTabs(false);
 
-      split([$el.find('.vegaEditor').get(0), $el.find('.vegaEditorPreview').get(0)], {
-        sizes: [40, 60],
-        minSize: [200, 200],
-        elementStyle: (dim, size, gutterSize) => ({ 'flex-basis': 'calc(' + size + '% - ' + gutterSize + 'px)' }),
-        gutterStyle: (dim, gutterSize) => ({ 'flex-basis': gutterSize + 'px' })
-      });
+        editor.$blockScrolling = Infinity;
 
-      $scope.$watchMulti(
-        ['=vegaEditor.vis.params'],
-        () => {
-          const appState = getAppState();
-          appState.vis.params = $scope.vegaEditor.vis.params;
-          appState.save(true);
-        }
-      );
+        // FIXME: enabling this service breaks ACE width auto-resize
+        // kbnUiAceKeyboardModeService.initialize($scope, editor);
+      };
+
+      $scope.formatJson = (event) => {
+        this._format(event, compactStringify, {
+          maxLength: this.aceEditor.getSession().getWrapLimit(),
+        });
+      };
+
+      $scope.formatHJson = (event) => {
+        this._format(event, hjson.stringify, {
+          condense: this.aceEditor.getSession().getWrapLimit(),
+          bracesSameLine: true,
+          keepWsc: true,
+        });
+      };
     }
 
-    shouldShowSpyPanel() {
-      return false;
-    }
-
-    getCodeWidth() {
-      // TODO: make this dynamic, based on the width of the code window
-      return 65;
-    }
-
-    formatJson() {
-      this._format(compactStringify, {
-        maxLength: this.getCodeWidth()
-      });
-    }
-
-    formatHJson() {
-      this._format(hjson.stringify, {
-        condense: this.getCodeWidth(),
-        bracesSameLine: true
-      });
-    }
-
-    _format(stringify, opts) {
+    _format(event, stringify, opts) {
       // TODO: error handling and reporting
       try {
-        const spec = hjson.parse(this.vis.params.spec);
-        this.vis.params.spec = stringify(spec, opts);
+        event.preventDefault();
+
+        const session = this.aceEditor.getSession();
+        const spec = hjson.parse(session.getValue(), { legacyRoot: false, keepWsc: true });
+        session.setValue(stringify(spec, opts));
+
       } catch (err) {
         // FIXME!
         alert(err);
       }
+      this.aceEditor.focus();
     }
-  }
-
-  return new VegaEditorController();
-}
+  })();
+});

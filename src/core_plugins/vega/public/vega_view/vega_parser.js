@@ -41,7 +41,7 @@ export class VegaParser {
     if (this.isVegaLite !== undefined) throw new Error();
 
     if (typeof this.spec === 'string') {
-      this.spec = hjson.parse(this.spec);
+      this.spec = hjson.parse(this.spec, { legacyRoot: false });
     }
     if (!_.isPlainObject(this.spec)) {
       throw new Error('Invalid Vega spec');
