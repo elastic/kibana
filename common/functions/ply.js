@@ -38,7 +38,9 @@ function combineAcross(datatableArray) {
   const rows = [];
   for (let i = 0; i < targetRowLength; i++) {
     const rowsAcross = map(arrayOfRowsArrays, i);
-    rows.push({ ...rowsAcross });
+
+    // The reason for the Object.assign is that rowsAcross is an array and those rows need to be applied as arguments to Object.assign
+    rows.push(Object.assign({}, ...rowsAcross));
   }
 
   const columns = combineColumns(map(datatableArray, 'columns'));
