@@ -108,5 +108,29 @@ describe('kibana_map tests', function () {
         kibanaMap.fitToData();
       }).to.not.throwException();
     });
+
+    it('should not throw when resizing to 0 on heatmap', function () {
+
+      const geohashGridOptions = {
+        mapType: 'Heatmap',
+        heatmap: {
+          heatClusterSize: '2'
+        }
+      };
+
+      const geohashLayer = new GeohashLayer(GeoHashSampleData, geohashGridOptions, kibanaMap.getZoomLevel(), kibanaMap);
+      kibanaMap.addLayer(geohashLayer);
+      domNode.style.width = 0;
+      domNode.style.height = 0;
+      expect(() => {
+        kibanaMap.resize();
+      }).to.not.throwException();
+
+    });
+
+
+
+
+
   });
 });

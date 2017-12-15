@@ -114,12 +114,18 @@ describe('kibana_map tests', function () {
       it('should calculate map dimensions based on enforcement of single pixel min-width CSS-rule', function () {
         const bounds = kibanaMap.getUntrimmedBounds();
         expect(bounds).to.have.property('bottom_right');
-        expect(bounds.bottom_right.lon.toFixed(2)).to.equal('0.27');
-        expect(bounds.bottom_right.lat.toFixed(2)).to.equal('-0.00');
+        expect(round(bounds.bottom_right.lon, 2)).to.equal(0.27);
+        expect(round(bounds.bottom_right.lat, 2)).to.equal(0);
         expect(bounds).to.have.property('top_left');
-        expect(bounds.top_left.lon.toFixed(2)).to.equal('-0.27');
-        expect(bounds.top_left.lat.toFixed(2)).to.equal('0.00');
+        expect(round(bounds.top_left.lon, 2)).to.equal(-0.27);
+        expect(round(bounds.top_left.lat, 2)).to.equal(0);
       });
+
+      function round(num, dig) {
+        return Math.round(num * Math.pow(10, dig)) / Math.pow(10, dig);
+      }
+
+
     });
 
     describe('no map width (should default to size of 1px for width)', function () {
