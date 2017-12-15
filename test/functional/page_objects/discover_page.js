@@ -247,13 +247,7 @@ export function DiscoverPageProvider({ getService, getPageObjects }) {
     }
 
     async clickFieldListItemAdd(field) {
-      retry.try(async () => {
-        await testSubjects.moveMouseTo(`field-${field}`);
-        const exists = await testSubjects.exists(`fieldToggle-${field}`);
-        if (!exists) {
-          throw new Error('field toggle not visible, try again.');
-        }
-      });
+      await testSubjects.moveMouseTo(`field-${field}`);
       await testSubjects.click(`fieldToggle-${field}`);
     }
 
