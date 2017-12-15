@@ -2,12 +2,14 @@ import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
 
-import { VegaVisualizationProvider } from './vega_visualization';
 import { VegaRequestHandlerProvider } from './vega_request_handler';
+import { VegaVisualizationProvider } from './vega_visualization';
 
 import './vega.less';
-import './vega_editor.less';
 
+// Editor-specific code
+import 'brace/mode/hjson';
+import './vega_editor.less';
 import vegaEditorTemplate from './vega_editor.template.html';
 import defaultSpec from '!!raw-loader!./default.spec.json';
 
