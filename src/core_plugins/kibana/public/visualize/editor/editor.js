@@ -231,8 +231,6 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
    * Called when the user clicks "Save" button.
    */
   $scope.doSave = function () {
-    notify.info('Doing save...');
-
     // vis.title was not bound and it's needed to reflect title into visState
     $state.vis.title = savedVis.title;
     $state.vis.type = savedVis.type || $state.vis.type;

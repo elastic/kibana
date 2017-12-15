@@ -421,11 +421,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       log.debug('click submit button');
       await testSubjects.click('saveVisualizationButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
-
-      PageObjects.header.clickToastOK();
-      // wait for the ok click to hide the toast messages so text for the
-      // right one is returned
-      PageObjects.common.sleep(1000);
       return await PageObjects.header.getToastMessage();
     }
 

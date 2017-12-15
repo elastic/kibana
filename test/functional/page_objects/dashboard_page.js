@@ -31,6 +31,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         'defaultIndex': 'logstash-*'
       });
 
+      await kibanaServer.uiSettings.disableToastAutohide();
       await PageObjects.common.navigateToApp('dashboard');
     }
 
