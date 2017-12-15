@@ -18,7 +18,7 @@
             ng-class="{'euiTab-isSelected': mode === 'quick' }"
             ng-click="setMode('quick')"
             aria-selected="{{mode === 'quick'}}"
-            kbn-accessible-click
+            data-test-subj="timepicker-quick-button"
           >
             Quick
           </button>
@@ -30,7 +30,7 @@
             ng-class="{'euiTab-isSelected': mode === 'relative' }"
             ng-click="setMode('relative')"
             aria-selected="{{mode === 'relative'}}"
-            kbn-accessible-click
+            data-test-subj="timepicker-relative-button"
           >
             Relative
           </button>
@@ -42,7 +42,7 @@
             ng-class="{'euiTab-isSelected': mode === 'absolute' }"
             ng-click="setMode('absolute')"
             aria-selected="{{mode === 'absolute'}}"
-            kbn-accessible-click
+            data-test-subj="timepicker-absolute-button"
           >
             Absolute
           </button>
