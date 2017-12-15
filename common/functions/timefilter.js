@@ -42,7 +42,7 @@ export const timefilter = {
     function parseAndValidate(str) {
       if (!str) return;
       const moment = dateMath.parse(str);
-      if (!moment.isValid()) throw new Error(`Invalid date/time string ${str}`);
+      if (!moment || !moment.isValid()) throw new Error(`Invalid date/time string ${str}`);
       return moment.toISOString();
     }
 
