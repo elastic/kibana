@@ -79,7 +79,7 @@ describe(`Server logging configuration`, function () {
 
       function expectPlainTextLogLine(line) {
         // assert
-        const tags = `[\u001b[32minfo\u001b[39m][\u001b[36mconfig\u001b[39m]`;
+        const tags = `[info][config]`;
         const status = `Reloaded logging configuration due to SIGHUP.`;
         const expected = `${tags} ${status}`;
         const actual = line.slice(-expected.length);
