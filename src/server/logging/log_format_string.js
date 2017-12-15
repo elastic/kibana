@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import ansicolors from 'ansicolors';
+import chalk from 'chalk';
 
 import LogFormat from './log_format';
 
@@ -14,7 +14,7 @@ const statuses = [
 ];
 
 const typeColors = {
-  log: 'blue',
+  log: 'white',
   req: 'green',
   res: 'green',
   ops: 'cyan',
@@ -23,18 +23,18 @@ const typeColors = {
   info: 'green',
   error: 'red',
   warning: 'red',
-  fatal: 'magenta',
-  status: 'yellow',
-  debug: 'brightBlack',
-  server: 'brightBlack',
+  fatal: 'magentaBright',
+  status: 'yellowBright',
+  debug: 'gray',
+  server: 'gray',
   optmzr: 'white',
   managr: 'green',
-  optimize: 'magenta',
-  listening: 'magenta'
+  optimize: 'magentaBright',
+  listening: 'magentaBright'
 };
 
 const color = _.memoize(function (name) {
-  return ansicolors[typeColors[name]] || _.identity;
+  return chalk[typeColors[name]] || _.identity;
 });
 
 const type = _.memoize(function (t) {
