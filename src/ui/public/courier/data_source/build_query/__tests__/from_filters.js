@@ -1,18 +1,12 @@
 import { buildQueryFromFilters } from '../from_filters';
-import { DecorateQueryProvider } from '../../_decorate_query.js';
 import ngMock from 'ng_mock';
 import { expectDeepEqual } from '../../../../../../test_utils/expect_deep_equal.js';
-
-let decorateQuery;
 
 describe('build query', function () {
 
   describe('buildQueryFromFilters', function () {
 
     beforeEach(ngMock.module('kibana'));
-    beforeEach(ngMock.inject(function (Private) {
-      decorateQuery = Private(DecorateQueryProvider);
-    }));
 
     it('should return the parameters of an Elasticsearch bool query', function () {
       const result = buildQueryFromFilters([]);
@@ -42,7 +36,7 @@ describe('build query', function () {
         { exists: { field: 'foo' } }
       ];
 
-      const result = buildQueryFromFilters(filters, decorateQuery);
+      const result = buildQueryFromFilters(filters);
 
       expectDeepEqual(result.must, expectedESQueries);
     });
@@ -59,7 +53,7 @@ describe('build query', function () {
         { match_all: {} },
       ];
 
-      const result = buildQueryFromFilters(filters, decorateQuery);
+      const result = buildQueryFromFilters(filters);
 
       expectDeepEqual(result.must_not, expectedESQueries);
     });
@@ -78,7 +72,7 @@ describe('build query', function () {
         }
       ];
 
-      const result = buildQueryFromFilters(filters, decorateQuery);
+      const result = buildQueryFromFilters(filters);
 
       expectDeepEqual(result.must, expectedESQueries);
     });
@@ -97,7 +91,7 @@ describe('build query', function () {
         }
       ];
 
-      const result = buildQueryFromFilters(filters, decorateQuery);
+      const result = buildQueryFromFilters(filters);
 
       expectDeepEqual(result.must, expectedESQueries);
     });
