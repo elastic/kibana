@@ -46,7 +46,7 @@ export const UpdateModal = ({ filename, setFilename, changes }) => {
 
         <h5>2. Install the new version</h5>
         <code>
-          ./bin/kibana-plugin install https://download.elastic.co/kibana/canvas/{ filename }
+          NODE_OPTIONS="--max-old-space-size=4096" ./bin/kibana-plugin install https://download.elastic.co/kibana/canvas/{ filename }
         </code>
         <h5>3. Start Kibana and refresh your browser</h5>
         You should be good to go. Good luck!
