@@ -6,7 +6,13 @@
       on-select="setIndexPattern($item)"
     >
       <ui-select-match>
-        {{$select.selected.get('title')}}
+        <span
+          class="uiSelectMatch--ellipsis"
+          tooltip="{{$select.selected.get('title')}}"
+          tooltip-append-to-body="true"
+        >
+          {{$select.selected.get('title')}}
+        </span>
       </ui-select-match>
       <ui-select-choices repeat="pattern in indexPatternList | filter:$select.search">
         <div ng-bind-html="pattern.get('title') | highlight: $select.search"></div>
