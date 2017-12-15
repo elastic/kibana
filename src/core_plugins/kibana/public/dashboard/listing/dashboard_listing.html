@@ -177,6 +177,10 @@
               </span>
             </button>
           </th>
+
+          <th scope="col" class="kuiTableHeaderCell" width="80px">
+            <div class="kuiTableHeaderCell__liner">Actions</div>
+          </th>
         </tr>
       </thead>
 
@@ -213,6 +217,17 @@
           <td class="kuiTableRowCell kuiTableRowCell--wrap">
             <div class="kuiTableRowCell__liner">
               {{ item.description }}
+            </div>
+          </td>
+          <td class="kuiTableRowCell kuiTableRowCell--wrap">
+            <div class="kuiTableRowCell__liner">
+              <a
+                class="kuiMenuButton kuiMenuButton--basic"
+                data-test-subj="dashboardListingTitleEditLink-{{item.title.split(' ').join('-')}}"
+                ng-href="{{ listingController.getEditUrlForItem(item) }}"
+              >
+                Edit
+              </a>
             </div>
           </td>
         </tr>

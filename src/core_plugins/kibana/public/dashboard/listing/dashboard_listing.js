@@ -156,6 +156,10 @@ export function DashboardListingController($injector, $scope, $location) {
     return `#${createDashboardEditUrl(item.id)}`;
   };
 
+  this.getEditUrlForItem = function getEditUrlForItem(item) {
+    return `#${createDashboardEditUrl(item.id)}?_a=(viewMode:edit)`;
+  };
+
   this.getCreateDashboardHref = function getCreateDashboardHref() {
     return `#${DashboardConstants.CREATE_NEW_DASHBOARD_URL}`;
   };
