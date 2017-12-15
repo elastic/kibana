@@ -1,25 +1,4 @@
-<!--TODO: add collapsible-sidebar class (doesn't work in 5.5 with the split.js) -->
-<div class="sidebar-container vegaEditor" style="margin-right: 0;">
-  <div class="vegaEditorToolbar">
-    <div>Reformat&nbsp;as:</div>
-    <button
-      ng-click="formatHJson()"
-      tooltip="Format graph code as HJSON"
-      class="kuiButton kuiButton--basic"
-    >
-      <span>HJSON</span>
-    </button>
-    <button
-      ng-click="formatJson()"
-      tooltip="Format graph code as JSON"
-      class="kuiButton kuiButton--basic"
-    >
-      <span>JSON</span>
-    </button>
-    <div class="vegaEditorHelp">
-      <a target="_blank" href="https://github.com/nyurik/kibana-vega-vis#vega-visualization-plugin-for-kibana">help</a>
-    </div>
-  </div>
+<div class="vegaEditor">
   <div
     ui-ace="{
     useWrapMode: true,
@@ -34,4 +13,61 @@
     class="vegaEditorSpec"
     ng-model="vis.params.spec"
   ></div>
+
+  <div id="editor_actions">
+    <span dropdown>
+      <button
+        id="vegaHelp"
+        class="editor_action"
+        dropdown-toggle href="#"
+        aria-label="Vega help"
+      >
+        <span class="kuiIcon fa-question-circle"></span>
+      </button>
+      <ul
+        class="dropdown-menu"
+        role="menu"
+        aria-labelledby="vegaHelp"
+      >
+        <li role="menuitem">
+          <a target="_blank" href="https://github.com/nyurik/kibana-vega-vis#vega-visualization-plugin-for-kibana">
+            Kibana Vega Help
+          </a>
+        </li>
+        <li role="menuitem">
+          <a target="_blank" href="https://vega.github.io/vega-lite/docs/">
+            Vega-Lite Documentation
+          </a>
+        </li>
+        <li role="menuitem">
+          <a target="_blank" href="https://vega.github.io/vega/docs/">
+            Vega Documentation
+          </a>
+        </li>
+      </ul>
+    </span>
+    <span dropdown>
+      <button
+        id="vegaOptions"
+        class="editor_action"
+        dropdown-toggle href="#"
+        aria-label="Vega editor options"
+      >
+        <span class="kuiIcon fa-wrench"></span>
+      </button>
+      <ul
+        class="dropdown-menu"
+        role="menu"
+        aria-labelledby="vegaOptions"
+      >
+        <li role="menuitem">
+          <button ng-click="autoIndent($event)">Auto indent (HJSON)</button>
+        </li>
+        <li role="menuitem">
+          <button ng-click="autoIndent($event)">Auto indent (JSON)</button>
+        </li>
+      </ul>
+    </span>
+  </div>
+
 </div>

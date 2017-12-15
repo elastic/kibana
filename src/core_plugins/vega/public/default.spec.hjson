@@ -1,5 +1,6 @@
 {
-  // Use the "reformat" buttons above to remove comments
+  // Use help icon to view Vega examples, tutorials, and other docs
+  // Use the wrench icon to reformat and remove comments
 
   "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
   "title": "Event counts from all indexes",

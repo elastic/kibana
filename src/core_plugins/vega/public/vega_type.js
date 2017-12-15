@@ -11,7 +11,7 @@ import './vega.less';
 import 'brace/mode/hjson';
 import './vega_editor.less';
 import vegaEditorTemplate from './vega_editor.template.html';
-import defaultSpec from '!!raw-loader!./default.spec.json';
+import defaultSpec from '!!raw-loader!./default.spec.hjson';
 
 VisTypesRegistryProvider.register((Private) => {
   const VisFactory = Private(VisFactoryProvider);
@@ -26,7 +26,7 @@ VisTypesRegistryProvider.register((Private) => {
     category: CATEGORY.OTHER,
     visConfig: { defaults: { spec: defaultSpec } },
     editorController: 'default',
-    editorConfig: { optionsTemplate: vegaEditorTemplate },
+    editorConfig: { optionsTemplate: vegaEditorTemplate, enableAutoApply: true },
     visualization: VegaVisualization,
     requestHandler: vegaRequestHandler,
     responseHandler: 'none',
