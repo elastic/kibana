@@ -139,11 +139,11 @@ class MarkdownEditor extends Component {
             </EuiText>
           </div>
           <EuiCodeBlock>
-{`# All servers:
+            {`# All servers:
 
-{{#each _all}}
-- {{ label }} {{ last.formatted }}
-{{/each}}`}
+            {{#each _all}}
+            - {{ label }} {{ last.formatted }}
+            {{/each}}`}
           </EuiCodeBlock>
         </div>
       </div>
