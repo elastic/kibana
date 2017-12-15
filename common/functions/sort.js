@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { sortBy } from 'lodash';
 
 export const sort = {
   name: 'sort',
@@ -24,8 +24,8 @@ export const sort = {
       help: 'Reverse the sort order',
     },
   },
-  fn: (context, args) =>
-    _.assign(context, {
-      rows: args.reverse ? _.sortBy(context.rows, args._).reverse() : _.sortBy(context.rows, args._),
-    }),
+  fn: (context, args) => ({
+    ...context,
+    rows: args.reverse ? sortBy(context.rows, args._).reverse() : sortBy(context.rows, args._),
+  }),
 };

@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { omit } from 'lodash';
 
 export const alterColumn = {
   name: 'alterColumn',
@@ -25,7 +25,7 @@ export const alterColumn = {
     },
   },
   fn: (context, args) => {
-    const column = _.find(context.columns, { name: args.column });
+    const column = context.columns.find(column => column.name === args.column);
     if (!column) throw new Error(`Column not found: '${args.column}'`);
 
     let destination = args.column;
@@ -52,9 +52,9 @@ export const alterColumn = {
     column.name = destination;
     column.type = type;
 
-    context.rows = _.map(context.rows, row =>
-      Object.assign(_.omit(row, args.column), { [destination]: handler(row[args.column]) })
-    );
+    context.rows = context.rows.map(row => Object.assign(omit(row, args.column), {
+      [destination]: handler(row[args.column]),
+    }));
 
     return context;
   },

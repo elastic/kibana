@@ -1,4 +1,4 @@
-import { toPath } from 'lodash';
+import { convert } from '../../lib/modify_path';
 import { setLoading, setValue, inFlightActive, inFlightComplete } from '../actions/resolved_args';
 
 export const inFlight = ({ dispatch }) => (next) => {
@@ -23,7 +23,7 @@ export const inFlight = ({ dispatch }) => (next) => {
     const isSetting = action.type === setValue.toString();
 
     if (isLoading || isSetting) {
-      const cacheKey = toPath(action.payload.path).join('/');
+      const cacheKey = convert(action.payload.path).join('/');
 
       if (isLoading) {
         pendingCache.push(cacheKey);

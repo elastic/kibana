@@ -1,4 +1,6 @@
-import { clone, each, keys, last, map, mapValues, values, zipObject, omitBy } from 'lodash';
+import { each, keys, last, map, mapValues, values, zipObject } from 'lodash';
+import clone from 'lodash.clone';
+import omitBy from 'lodash.omitby';
 import { castProvider } from './cast';
 import { getType } from '../lib/get_type';
 import { fromExpression } from '../lib/ast';

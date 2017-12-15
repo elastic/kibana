@@ -1,4 +1,4 @@
-import { assign, take } from 'lodash';
+import { take } from 'lodash';
 
 export const head = {
   name: 'head',
@@ -16,8 +16,8 @@ export const head = {
       help: 'Return this many rows from the beginning of the datatable',
     },
   },
-  fn: (context, args) =>
-    assign(context, {
-      rows: take(context.rows, args._),
-    }),
+  fn: (context, args) => ({
+    ...context,
+    rows: take(context.rows, args._),
+  }),
 };

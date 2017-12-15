@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { has } from 'lodash';
 import uuid from 'uuid/v4';
 import { interpretProvider } from './interpret';
 
@@ -25,7 +25,7 @@ export function socketInterpreterProvider({ types, functions, handlers, referabl
       // Get the list of functions that are known elsewhere
       return Promise.resolve(referableFunctions).then((referableFunctionMap) => {
         // Check if the not-found function is in the list of alternatives, if not, throw
-        if (!_.has(referableFunctionMap, functionName)) {
+        if (!has(referableFunctionMap, functionName)) {
           throw new Error(`Function not found: ${functionName}`);
         }
 

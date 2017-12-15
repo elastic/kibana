@@ -1,4 +1,4 @@
-import { noop } from 'lodash';
+const noop = () => {};
 
 export const location = {
   name: 'location',

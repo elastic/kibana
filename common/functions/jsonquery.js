@@ -1,5 +1,5 @@
 import jsonQuery from 'json-query';
-import { isArray, get } from 'lodash';
+import { get } from 'lodash';
 
 // TODO: Decide if we actually want to get data from table like this
 // We need *some* way of accessing the data in tables, that could be via a collection of our own functions
@@ -30,7 +30,7 @@ export const jsonquery = {
       data: context.rows,
     }), 'value');
 
-    if (isArray(result)) return result.map(item => String(item)).join(', ');
+    if (Array.isArray(result)) return result.map(item => String(item)).join(', ');
     return String(result);
   },
 };

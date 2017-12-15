@@ -1,5 +1,5 @@
 // TODO: pointseries performs poorly, that's why we run it on the server.
-import { groupBy, flatten, pick, map, find, times } from 'lodash';
+import { groupBy, flatten, pick, map } from 'lodash';
 import { getType } from '../lib/get_type';
 
 
@@ -13,7 +13,7 @@ function checkDatatableType(datatable) {
 function combineColumns(arrayOfColumnsArrays) {
   return arrayOfColumnsArrays.reduce((resultingColumns, columns) => {
     columns.forEach(column => {
-      if(find(resultingColumns, resultingColumn => resultingColumn.name === column.name)) return;
+      if(resultingColumns.find(resultingColumn => resultingColumn.name === column.name)) return;
       else resultingColumns.push(column);
     });
 
@@ -35,10 +35,11 @@ function combineAcross(datatableArray) {
 
   // Merge columns and rows.
   const arrayOfRowsArrays = map(datatableArray, 'rows');
-  const rows = times(targetRowLength, i => {
+  const rows = [];
+  for (let i = 0; i < targetRowLength; i++) {
     const rowsAcross = map(arrayOfRowsArrays, i);
-    return Object.assign({}, ...rowsAcross);
-  });
+    rows.push({ ...rowsAcross });
+  }
 
   const columns = combineColumns(map(datatableArray, 'columns'));
 

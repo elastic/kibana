@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { noop } from 'lodash';
 import './media_card.less';
+
+const noop = () => {};
 
 export const MediaCard = ({ image, children, title, onClick }) => {
   const classes = ['canvas__media_card'];

@@ -2,7 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import './element_types.less';
 import { MediaCard } from '../../media_card';
-import { map, includes, lowerCase } from 'lodash';
+import { map, includes } from 'lodash';
+import lowerCase from 'lodash.lowercase';
 import { FormControl } from 'react-bootstrap';
 
 export const ElementTypes = ({ elements, onClick, search, setSearch }) => {

@@ -1,4 +1,5 @@
-import _ from 'lodash';
+import { flatten, get, map, filter, includes } from 'lodash';
+import uniqBy from 'lodash.uniqby';
 import { parse } from '../../common/lib/grammar';
 import { functionsRegistry } from './functions_registry';
 import { typesRegistry } from './types_registry';
@@ -7,7 +8,7 @@ import { getServerFunctions } from './interpreter';
 const cursor = '$cursor$';
 let allFns;
 getServerFunctions.then(fns => {
-  allFns = _.uniqBy([
+  allFns = uniqBy([
     ...functionsRegistry.toArray(),
     ...Object.values(fns),
   ], 'name');
@@ -29,7 +30,7 @@ export function getAutocompleteProposals({ value, selection }) {
 }
 
 function getAutocompleteProposalsForChain(chain) {
-  return _.flatten(chain.map((fn, i) => (
+  return flatten(chain.map((fn, i) => (
     getAutocompleteProposalsForFnNode(fn, chain[i - 1])
   )));
 }
@@ -40,11 +41,11 @@ function getAutocompleteProposalsForChain(chain) {
  */
 function getAutocompleteProposalsForFnNode(fn, previousFn) {
   if (fn.cursor) {
-    const previousFnName = _.get(previousFn, 'function');
+    const previousFnName = get(previousFn, 'function');
     const previousFnDef = allFns.find(f => f.name === previousFnName);
-    return getFunctionNameProposals(fn, _.get(previousFnDef, 'type'));
+    return getFunctionNameProposals(fn, get(previousFnDef, 'type'));
   } else {
-    return _.flatten(_.map(fn.arguments, (args, name) => (
+    return flatten(map(fn.arguments, (args, name) => (
       getAutocompleteProposalsForArgNode(fn, args, name)
     )));
   }
@@ -55,7 +56,7 @@ function getAutocompleteProposalsForFnNode(fn, previousFn) {
  * has its own chain, look in the chain for the cursor.
  */
 function getAutocompleteProposalsForArgNode(fn, args, name) {
-  return _.flatten(args.map(arg => {
+  return flatten(args.map(arg => {
     if (arg.cursor) {
       return getArgumentProposals(fn, name, arg);
     } else if (arg.chain) {
@@ -91,7 +92,7 @@ function getFunctionNameProposals(fn, previousFnType = 'null') {
  * argument values. If it's unnamed, also suggest argument names.
  */
 function getArgumentProposals(fn, name, arg) {
-  return _.flatten([
+  return flatten([
     (name === '_' ? getArgumentNameProposals(fn, arg) : []),
     getArgumentValueProposals(fn, name, arg),
   ]);
@@ -105,10 +106,10 @@ function getArgumentProposals(fn, name, arg) {
 function getArgumentNameProposals(fn, arg) {
   const { prefix, suffix, location } = arg;
   const fnDef = allFns.find(f => f.name === fn.function);
-  const args = _.filter(fnDef.args, ({ name }) => name !== '_')
+  const args = filter(fnDef.args, ({ name }) => name !== '_')
     .filter(({ name }) => nameMatches(name, prefix, suffix))
     .filter(({ name, multi }) => multi || !fn.arguments.hasOwnProperty(name));
-  return _.uniqBy(args, 'name')
+  return uniqBy(args, 'name')
     .map(({ name, help }) => ({
       value: name + '=',
       name: name,
@@ -133,7 +134,7 @@ function nameMatches(name, prefix, suffix) {
 }
 
 function canCast(fromTypeName = 'null', toTypeNames) {
-  if (_.includes(toTypeNames, fromTypeName)) return true;
+  if (includes(toTypeNames, fromTypeName)) return true;
 
   const fromTypeDef = typesRegistry.get(fromTypeName);
 
@@ -141,7 +142,7 @@ function canCast(fromTypeName = 'null', toTypeNames) {
   if (fromTypeDef && fromTypeDef.castsTo(toTypeNames)) return true;
 
   // If that isn't possible, filter the valid types to ones that can create themselves from fromTypeName
-  return _.find(toTypeNames, toTypeName => {
+  return toTypeNames.find(toTypeName => {
     const toTypeDef = typesRegistry.get(toTypeName);
     return toTypeDef && toTypeDef.castsFrom([fromTypeName]);
   });

@@ -1,4 +1,5 @@
-import { uniq, map, get, groupBy, keyBy, sortBy, mapValues } from 'lodash';
+import { uniq, map, get, groupBy, sortBy, mapValues } from 'lodash';
+import keyBy from 'lodash.keyby';
 
 const getResultValues = (items, name, sorter) => {
   const vals = uniq(map(items, name).filter(v => v !== undefined));

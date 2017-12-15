@@ -1,4 +1,4 @@
-import { assign, takeRight } from 'lodash';
+import { takeRight } from 'lodash';
 
 export const tail = {
   name: 'tail',
@@ -16,8 +16,8 @@ export const tail = {
       help: 'Return this many rows from the end of the datatable',
     },
   },
-  fn: (context, args) =>
-    assign(context, {
-      rows: takeRight(context.rows, args._),
-    }),
+  fn: (context, args) => ({
+    ...context,
+    rows: takeRight(context.rows, args._),
+  }),
 };

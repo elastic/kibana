@@ -1,4 +1,4 @@
-import { assign, cloneDeep, map } from 'lodash';
+import { cloneDeep } from 'lodash';
 import moment from 'moment';
 import ci from './ci.json';
 import shirts from './shirts.json';
@@ -33,7 +33,8 @@ export const demodata = {
           { name: 'state', type: 'string' },
           { name: 'project', type: 'string' },
         ],
-        rows: map(cloneDeep(ci), row => assign(row, {
+        rows: cloneDeep(ci).map(row => ({
+          ...row,
           time: moment(moment(row.time).format('YYYY-MM-DD'), 'YYYY-MM-DD').valueOf(),
         })),
       },

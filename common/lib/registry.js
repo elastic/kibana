@@ -1,4 +1,4 @@
-import { clone } from 'lodash';
+import clone from 'lodash.clone';
 
 export class Registry {
   constructor(prop = 'name') {

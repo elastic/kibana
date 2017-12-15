@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import $ from 'jquery';
-import _ from 'lodash';
+import { isEqual } from 'lodash';
 import { move, resize, rotate, remove } from './interaction';
 import { lifecycle, compose } from 'recompose';
 
@@ -16,7 +16,7 @@ const PositionableLifecycle = lifecycle({
 
   componentWillUpdate(nextProps, nextState) {
     // This is gross and hacky but is needed to make updating state from props smooth.
-    if (_.isEqual(this.state, nextState) && !_.isEqual(nextProps.position, this.state)) this.setState(nextProps.position);
+    if (isEqual(this.state, nextState) && !isEqual(nextProps.position, this.state)) this.setState(nextProps.position);
   },
 
   componentDidUpdate(prevProps) {

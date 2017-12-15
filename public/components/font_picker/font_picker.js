@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { find } from 'lodash';
 import './font_picker.less';
 import { Popover, OverlayTrigger } from 'react-bootstrap';
 import { FauxSelect } from '../faux_select';
@@ -26,7 +25,7 @@ const fonts = [
 
 export const FontPicker = ({ onSelect, value, placement }) => {
 
-  const selected = find(fonts, { value }) || { label: value, value };
+  const selected = fonts.find(font => font.value === value) || { label: value, value };
 
   const picker = (
     <Popover className="canvas__font-picker--popover" id="popover-trigger-click" style={{ width: 207 }}>

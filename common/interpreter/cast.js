@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import { filter, includes } from 'lodash';
 import { getType } from '../lib/get_type';
 
 export function castProvider(types) {
@@ -8,7 +8,7 @@ export function castProvider(types) {
 
     // No need to cast if node is already one of the valid types
     const fromTypeName = getType(node);
-    if (_.includes(toTypeNames, fromTypeName)) return node;
+    if (includes(toTypeNames, fromTypeName)) return node;
 
     const fromTypeDef = types[fromTypeName];
 
@@ -16,7 +16,7 @@ export function castProvider(types) {
     if (fromTypeDef && fromTypeDef.castsTo(toTypeNames)) return fromTypeDef.to(node, toTypeNames);
 
     // If that isn't possible, filter the valid types to ones that can create themselves from fromTypeName
-    const validToTypeNames = _.filter(toTypeNames, toTypeName => {
+    const validToTypeNames = filter(toTypeNames, toTypeName => {
       const toTypeDef = types[toTypeName];
       if (!toTypeDef) return false;
       return toTypeDef.castsFrom([fromTypeName]);

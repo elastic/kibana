@@ -1,4 +1,4 @@
-import { isArray, includes } from 'lodash';
+import { includes } from 'lodash';
 import { getType } from '../../common/lib/get_type';
 
 /*
@@ -30,6 +30,6 @@ export function getSimpleArg(name, args) {
 }
 
 export function setSimpleArg(name, value) {
-  value = isArray(value) ? value : [value];
+  value = Array.isArray(value) ? value : [value];
   return { [name]: value.map(validateArg) };
 }

@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import _ from 'lodash';
+import { values } from 'lodash';
 
 function setupInteraction(eventName, elem, e, onEnd) {
   e.stopPropagation();
@@ -13,7 +13,7 @@ function setupInteraction(eventName, elem, e, onEnd) {
     target.removeClass('active');
     $(window).off('mouseup.rework');
     $(window).off('mousemove.rework');
-    if (_.isFunction(onEnd)) onEnd();
+    if (typeof onEnd === 'function') onEnd();
   });
 }
 
@@ -148,15 +148,16 @@ function doUnrotated(elem, fn) {
 }
 
 export const resize = (elem, config) => {
-  const allHandles = _.values(config.sides).join(', ');
+  const allHandles = values(config.sides).join(', ');
   elem.data('rework.resize.sides', allHandles);
 
   $(allHandles, elem).on('mousedown.reworkResize', (e) => {
-    const sides = _.chain(config.sides)
-      .mapValues((side) => $(e.target).is(side))
-      .omitBy((side) => !side)
-      .keys()
-      .value();
+    const sides = Object.keys(config.sides).reduce((acc, side) => {
+      const selector = config.sides[side];
+      const isSelected = $(e.target).is(selector);
+      if (isSelected) acc.push(side);
+      return acc;
+    }, []);
 
     const originalTarget = $(e.target);
     const originalEvent = e;
@@ -188,22 +189,22 @@ export const resize = (elem, config) => {
 
       const result = getInteractionObj(originalTarget, originalEvent, elemPosition, elemSize);
 
-      if (_.includes(sides, 'bottom')) {
+      if (sides.includes('bottom')) {
         result.interaction.delta.height = unrotatedDelta.top;
         result.interaction.absolute.height += result.interaction.delta.height;
       }
 
-      if (_.includes(sides, 'right')) {
+      if (sides.includes('right')) {
         result.interaction.delta.width = unrotatedDelta.left;
         result.interaction.absolute.width += result.interaction.delta.width;
       }
 
-      if (_.includes(sides, 'left')) {
+      if (sides.includes('left')) {
         result.interaction.delta.width = -unrotatedDelta.left;
         result.interaction.absolute.width += result.interaction.delta.width;
       }
 
-      if (_.includes(sides, 'top')) {
+      if (sides.includes('top')) {
         result.interaction.delta.height = -unrotatedDelta.top;
         result.interaction.absolute.height += result.interaction.delta.height;
       }
@@ -214,12 +215,12 @@ export const resize = (elem, config) => {
       result.interaction.absolute.top -= offset.fromAny.top;
       result.interaction.absolute.left -= offset.fromAny.left;
 
-      if (_.includes(sides, 'left')) {
+      if (sides.includes('left')) {
         result.interaction.absolute.left += offset.fromLeft.left;
         result.interaction.absolute.top += offset.fromLeft.top;
       }
 
-      if (_.includes(sides, 'top')) {
+      if (sides.includes('top')) {
         result.interaction.absolute.left += offset.fromTop.left;
         result.interaction.absolute.top += offset.fromTop.top;
       }

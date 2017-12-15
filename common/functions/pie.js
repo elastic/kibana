@@ -1,4 +1,5 @@
-import { get, map, groupBy, sortBy, keyBy } from 'lodash';
+import { get, map, groupBy, sortBy } from 'lodash';
+import keyBy from 'lodash.keyby';
 import chroma from 'chroma-js';
 
 export const pie = {

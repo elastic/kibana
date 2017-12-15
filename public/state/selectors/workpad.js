@@ -1,4 +1,4 @@
-import { get, find, findIndex, map, omit } from 'lodash';
+import { get, omit } from 'lodash';
 import { safeElementFromExpression } from '../../../common/lib/ast';
 import { append } from '../../lib/modify_path';
 import { getAssets } from './assets';
@@ -34,15 +34,17 @@ export function getSelectedPage(state) {
 }
 
 export function getPages(state) {
-  return get(state, append(workpadRoot, 'pages'));
+  return get(state, append(workpadRoot, 'pages'), []);
 }
 
 export function getPageById(state, id) {
-  return find(getPages(state), { id });
+  const pages = getPages(state);
+  return pages.find(page => page.id === id);
 }
 
 export function getPageIndexById(state, id) {
-  return findIndex(getPages(state), { id });
+  const pages = getPages(state);
+  return pages.findIndex(page => page.id === id);
 }
 
 export function getWorkpadName(state) {
@@ -58,7 +60,10 @@ export function getAllElements(state) {
 }
 
 export function getGlobalFilterExpression(state) {
-  return map(getAllElements(state), 'filter').filter(str => str != null && str.length).join(' | ');
+  return getAllElements(state)
+  .map(el => el.filter)
+  .filter(str => str != null && str.length)
+  .join(' | ');
 }
 
 // element getters
@@ -88,7 +93,7 @@ export function getElements(state, pageId, withAst = true) {
 }
 
 export function getElementById(state, id, pageId) {
-  const element = find(getElements(state, pageId, false), { id });
+  const element = getElements(state, pageId, []).find(el => el.id === id);
   if (element) return appendAst(element);
 }
 

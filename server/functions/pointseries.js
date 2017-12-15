@@ -2,7 +2,9 @@
 
 import { math } from '../../common/lib/math.js';
 import moment from 'moment';
-import { groupBy, zipObject, uniqBy, omit, pickBy, find, uniq, map, mapValues } from 'lodash';
+import { groupBy, zipObject, omit, uniq, map, mapValues } from 'lodash';
+import uniqBy from 'lodash.uniqby';
+import pickBy from 'lodash.pickby';
 import { findInObject } from '../../common/lib/find_in_object';
 import { pivotObjectArray } from '../../common/lib/pivot_object_array.js';
 
@@ -32,7 +34,7 @@ function isMeasure(mathScope, mathExpression) {
 
 function getFieldType(columns, field) {
   if (!field) return 'null';
-  const column = find(columns, { name: field });
+  const column = columns.find(column => column.name === field);
   return column ? column.type : 'null';
 }
 

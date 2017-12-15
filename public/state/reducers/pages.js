@@ -1,6 +1,5 @@
 import { handleActions } from 'redux-actions';
 import { push, set, del, insert } from 'object-path-immutable';
-import { findIndex } from 'lodash';
 import { getId } from '../../lib/get_id.js';
 import { getDefaultPage } from '../defaults';
 import * as actions from '../actions/pages';
@@ -95,7 +94,7 @@ export const pagesReducer = handleActions({
   },
 
   [actions.stylePage]: (workpadState, { payload }) => {
-    const pageIndex = findIndex(workpadState.pages, { id: payload.pageId });
+    const pageIndex = workpadState.pages.findIndex(page => page.id === payload.pageId);
     return set(workpadState, ['pages', pageIndex, 'style'], payload.style);
   },
 }, {});

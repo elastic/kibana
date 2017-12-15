@@ -1,4 +1,5 @@
-import { groupBy, keyBy, get, set, map, sortBy } from 'lodash';
+import { groupBy, get, set, map, sortBy } from 'lodash';
+import keyBy from 'lodash.keyby';
 import chroma from 'chroma-js';
 
 export const plot = {

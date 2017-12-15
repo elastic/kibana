@@ -1,5 +1,5 @@
 import { createEagerElement } from 'recompose';
-import { pick, isUndefined } from 'lodash';
+import { pick } from 'lodash';
 import { ArgForm } from '../components/arg_form';
 import { argTypeRegistry } from './arg_type';
 
@@ -28,7 +28,7 @@ export class Arg {
       multi: false,
       required: false,
       types: [],
-      default: isUndefined(argType.default) ? null : argType.default,
+      default: argType.default != null ? argType.default : null,
       options: {},
       resolve: () => ({}),
     };

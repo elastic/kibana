@@ -1,6 +1,5 @@
-//import { buildESRequest } from '../esdocs/lib/build_es_request';
 import fetch from 'axios';
-import { flatten, find } from 'lodash';
+import { flatten } from 'lodash';
 import { buildBoolArray } from './esdocs/lib/build_bool_array';
 
 export const timelion = {
@@ -36,7 +35,7 @@ export const timelion = {
 
     // TODO: Find time range, or just request a giant single bucket?
     function findTimeRangeInFilterContext() {
-      const timeFilter = find(context.and, { type: 'time' });
+      const timeFilter = context.and.find(and => and.type === 'time');
       if (!timeFilter) throw new Error ('No time filter found');
       return { from: timeFilter.from, to: timeFilter.to };
     }

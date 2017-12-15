@@ -1,4 +1,4 @@
-import { uniqBy } from 'lodash';
+import uniqBy from 'lodash.uniqby';
 import { uiModules } from 'ui/modules';
 import { onStart } from '../../state/on_start';
 import { getInitialState } from '../../state/initial_state';

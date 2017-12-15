@@ -1,10 +1,10 @@
 import { handleActions } from 'redux-actions';
-import { get, findIndex } from 'lodash';
+import { get } from 'lodash';
 import { assign, push, del, set } from 'object-path-immutable';
 import * as actions from '../actions/elements';
 
 function getPageIndexById(workpadState, pageId) {
-  return findIndex(get(workpadState, 'pages'), { id: pageId });
+  return get(workpadState, 'pages', []).findIndex(page => page.id === pageId);
 }
 
 function getElementIndexById(page, elementId) {
@@ -14,7 +14,7 @@ function getElementIndexById(page, elementId) {
 function assignElementProperties(workpadState, pageId, elementId, props) {
   const pageIndex = getPageIndexById(workpadState, pageId);
   const elementsPath = ['pages', pageIndex, 'elements'];
-  const elementIndex = findIndex(get(workpadState, elementsPath), { id: elementId });
+  const elementIndex = get(workpadState, elementsPath, []).findIndex(element => element.id === elementId);
 
   if (pageIndex === -1 || elementIndex === -1) return workpadState;
   return assign(workpadState, elementsPath.concat(elementIndex), props);
