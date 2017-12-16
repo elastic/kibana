@@ -17,7 +17,12 @@ function assignElementProperties(workpadState, pageId, elementId, props) {
   const elementIndex = get(workpadState, elementsPath, []).findIndex(element => element.id === elementId);
 
   if (pageIndex === -1 || elementIndex === -1) return workpadState;
-  return assign(workpadState, elementsPath.concat(elementIndex), props);
+
+  // remove any AST value from the element caused by https://github.com/elastic/kibana-canvas/issues/260
+  // TODO: remove this after a bit of time
+  const cleanWorkpadState =  del(workpadState, elementsPath.concat([elementIndex, 'ast']));
+
+  return assign(cleanWorkpadState, elementsPath.concat(elementIndex), props);
 }
 
 function moveElementLayer(workpadState, pageId, elementId, movement) {

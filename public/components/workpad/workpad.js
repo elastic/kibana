@@ -68,7 +68,6 @@ export const Workpad = ({
 Workpad.propTypes = {
   pages: PropTypes.array.isRequired,
   selectedPageId: PropTypes.string.isRequired,
-  elements: PropTypes.array.isRequired,
   isFullscreen: PropTypes.bool.isRequired,
   workpad: PropTypes.object.isRequired,
   undoHistory: PropTypes.func.isRequired,

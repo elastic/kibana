@@ -85,13 +85,13 @@ describe('workpad selectors', () => {
     });
 
     it('returns all pages in persisent state', () => {
-      expect(selector.getPages(state)).to.equal(state.persistent.workpad.pages);
+      expect(selector.getPages(state)).to.eql(state.persistent.workpad.pages);
     });
   });
 
   describe('getPageById', () => {
     it('should return matching page', () => {
-      expect(selector.getPageById(state, 'page-1')).to.equal(state.persistent.workpad.pages[0]);
+      expect(selector.getPageById(state, 'page-1')).to.eql(state.persistent.workpad.pages[0]);
     });
   });
 

@@ -1,4 +1,5 @@
 import boom from 'boom';
+import { pick } from 'lodash';
 import { CANVAS_TYPE, API_ROUTE_WORKPAD } from '../../common/lib/constants';
 import { getId } from '../../public/lib/get_id.js';
 
@@ -90,7 +91,19 @@ export function workpad(server) {
 
       callWithRequest(request, 'get', doc)
       .then(formatResponse(reply, true))
-      .then(resp => reply(resp._source[CANVAS_TYPE]))
+      .then(resp => {
+        const workpad = resp._source[CANVAS_TYPE];
+
+        // remove unwanted fields caused by caused by https://github.com/elastic/kibana-canvas/issues/260
+        // TODO: remove this after a while, maybe...
+        const elementFields = ['id', 'expression', 'filter', 'position'];
+        const fixedPages = workpad.pages.map(page => ({
+          ...page,
+          elements: page.elements.map(el => pick(el, elementFields)),
+        }));
+
+        reply({ ...workpad, pages: fixedPages });
+      })
       .catch(formatResponse(reply));
     },
   });
