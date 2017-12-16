@@ -132,7 +132,7 @@ describe('timepicker directive', function () {
     });
 
     it('should highlight the right mode', function () {
-      expect($elem.find('.kbn-timepicker-modes .active').text().trim()).to.be('Quick');
+      expect($elem.find('.kbn-timepicker-modes .euiTab-isSelected').text().trim()).to.be('Quick');
 
       // Each of the 3 modes
       const modes = ['absolute', 'relative', 'quick'];
