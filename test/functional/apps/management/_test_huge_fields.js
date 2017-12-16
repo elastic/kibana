@@ -11,7 +11,7 @@ export default function ({ getService, getPageObjects }) {
       await esArchiver.loadIfNeeded('large_fields');
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndices();
-      await PageObjects.settings.createIndexPattern('testhuge');
+      await PageObjects.settings.createIndexPattern('testhuge', 'date');
     });
 
     it('test_huge data should have expected number of fields', function () {
