@@ -71,6 +71,7 @@ function TopNSeries(props) {
             Metrics
           </div>
           <div
+            data-test-subj="seriesOptions"
             className={optionsClassname}
             onClick={() => props.switchTab('options')}
           >
