@@ -19,7 +19,7 @@ export function positionTooltip(opts, html) {
   const prev = $chart.data('previousPlacement') || {};
   const event = opts.event;
 
-  if (!$chart.size() || !$el.size()) return;
+  if (!$chart.length || !$el.length) return;
 
   const size = getTtSize(html || $el.html(), $sizer);
   const pos = getBasePosition(size, event);
