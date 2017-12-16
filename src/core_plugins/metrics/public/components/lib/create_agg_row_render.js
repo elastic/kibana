@@ -10,6 +10,7 @@ export default function createAggRowRender(props) {
     const changeHandler = seriesChangeHandler(props, items);
     return (
       <Agg
+        className="vis_editor__metric"
         key={row.id}
         disableDelete={items.length < 2}
         fields={fields}
