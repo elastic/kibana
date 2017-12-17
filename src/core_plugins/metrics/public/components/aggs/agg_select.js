@@ -39,8 +39,7 @@ const siblingAggs = [
 ];
 
 const specialAggs = [
-  { label: 'Series Agg', value: 'series_agg' },
-  { label: 'Math', value: 'math' }
+  { label: 'Series Agg', value: 'series_agg' }
 ];
 
 class AggSelectOption extends Component {
