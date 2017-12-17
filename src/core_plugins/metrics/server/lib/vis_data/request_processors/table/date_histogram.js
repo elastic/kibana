@@ -7,7 +7,7 @@ import { calculateAggRoot } from './calculate_agg_root';
 export default function dateHistogram(req, panel) {
   return next => doc => {
     const { timeField, interval } = getIntervalAndTimefield(panel);
-    const { bucketSize, intervalString } = getBucketSize(req, interval);
+    const { intervalString } = getBucketSize(req, interval);
     const { from, to }  = getTimerange(req);
     panel.series.forEach(column => {
       const aggRoot = calculateAggRoot(doc, column);
@@ -17,7 +17,7 @@ export default function dateHistogram(req, panel) {
         min_doc_count: 0,
         extended_bounds: {
           min: from.valueOf(),
-          max: to.valueOf() - (bucketSize * 1000)
+          max: to.valueOf()
         }
       });
     });
