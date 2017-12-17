@@ -39,7 +39,6 @@ class CalculationVars extends Component {
         <div className="vis_editor__calc_vars-var">
           <MetricSelect
             onChange={this.handleChange(row, 'field')}
-            exclude={['percentile']}
             metrics={this.props.metrics}
             metric={this.props.model}
             value={row.field}
