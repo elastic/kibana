@@ -35,7 +35,6 @@ module.exports = function () {
         'Public domain',
         'Unlicense',
         'WTFPL OR ISC',
-        'MIT OR GPL-2.0',
         'WTFPL',
       ],
       overrides: {
