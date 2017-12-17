@@ -1,8 +1,10 @@
+import getBucketSize from '../../helpers/get_bucket_size';
 import getTimerange from '../../helpers/get_timerange';
 import getIntervalAndTimefield from '../../get_interval_and_timefield';
 export default function query(req, panel) {
   return next => doc => {
-    const { timeField } = getIntervalAndTimefield(panel);
+    const { timeField, interval } = getIntervalAndTimefield(panel);
+    const { bucketSize } = getBucketSize(req, interval);
     const { from, to } = getTimerange(req);
 
     doc.size = 0;
@@ -16,7 +18,7 @@ export default function query(req, panel) {
       range: {
         [timeField]: {
           gte: from.valueOf(),
-          lte: to.valueOf(),
+          lte: to.valueOf() - (bucketSize * 1000),
           format: 'epoch_millis',
         }
       }
