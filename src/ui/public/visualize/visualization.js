@@ -161,10 +161,7 @@ uiModules
             $scope.$emit('render');
           });
 
-          let resizeInit = false;
           resizeChecker.on('resize',  () => {
-            // the very first resize event is the initialization, which we can safely ignore.
-            if (!resizeInit) return resizeInit = true;
             $scope.$emit('render');
           });
         }
