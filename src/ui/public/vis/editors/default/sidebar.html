@@ -4,6 +4,7 @@
     ng-submit="visualizeEditor.$invalid ? stageEditableVis(false) : stageEditableVis()"
     name="visualizeEditor"
     novalidate
+    ng-keydown="submitEditorWithKeyboard($event)"
   ><!-- see http://goo.gl/9kgz5w -->
 
     <div

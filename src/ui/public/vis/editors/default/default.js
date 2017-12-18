@@ -73,6 +73,12 @@ const defaultEditor = function ($rootScope, $compile) {
             }, 800));
           }
 
+          $scope.submitEditorWithKeyboard = (event) => {
+            if (event.ctrlKey && event.keyCode === 13) {
+              $scope.stageEditableVis();
+            }
+          };
+
           $scope.$watch(function () {
             return $scope.vis.getCurrentState(false);
           }, function (newState) {
