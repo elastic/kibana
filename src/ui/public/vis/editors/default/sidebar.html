@@ -87,9 +87,13 @@
               class="kuiButton kuiButton--basic navbar-btn-link"
               aria-label="Auto update the visualization on every changes"
               ng-click="toggleAutoApply()"
-              ng-class="{ 'kuiButton--primary': autoApplyEnabled }"
+              ng-class="{
+                'kuiButton--primary': autoApplyEnabled,
+                'kuiButton--basic': !autoApplyEnabled
+              }"
             >
-              auto
+              <span ng-hide="autoApplyEnabled" aria-hidden="true" class="kuiIcon fa-repeat"></span>
+              <span ng-show="autoApplyEnabled">Auto Apply</span>
             </button>
           </li>
 
@@ -97,6 +101,7 @@
             tooltip="Apply changes"
             tooltip-placement="bottom"
             tooltip-popup-delay="400" tooltip-append-to-body="1"
+            ng-hide="autoApplyEnabled"
           >
             <button
               data-test-subj="visualizeEditorRenderButton"
@@ -114,6 +119,7 @@
             tooltip-placement="bottom"
             tooltip-popup-delay="400"
             tooltip-append-to-body="1"
+            ng-hide="autoApplyEnabled"
           >
             <button
               class="kuiButton kuiButton--basic navbar-btn-link"
