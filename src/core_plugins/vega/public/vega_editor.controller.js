@@ -7,7 +7,7 @@ module.controller('VegaEditorController', ($scope /*, $element, $timeout, kbnUiA
 
   return new (class VegaEditorController {
     constructor() {
-      $scope.aceLoaded = editor => {
+      $scope.aceLoaded = (editor) => {
         editor.$blockScrolling = Infinity;
 
         const session = editor.getSession();
@@ -22,23 +22,27 @@ module.controller('VegaEditorController', ($scope /*, $element, $timeout, kbnUiA
 
       $scope.formatJson = (event) => {
         this._format(event, compactStringify, {
-          maxLength: this.aceEditor.getSession().getWrapLimit(),
+          maxLength: this._getCodeWidth(),
         });
       };
 
       $scope.formatHJson = (event) => {
         this._format(event, hjson.stringify, {
-          condense: this.aceEditor.getSession().getWrapLimit(),
+          condense: this._getCodeWidth(),
           bracesSameLine: true,
           keepWsc: true,
         });
       };
     }
 
+    _getCodeWidth() {
+      return this.aceEditor.getSession().getWrapLimit();
+    }
+
     _format(event, stringify, opts) {
       event.preventDefault();
 
-      // FIXME: should I use $scope.$evalAsync() instead?
+      // FIXME: is this the right eval method?
       $scope.$evalAsync(() => {
         // TODO: error handling and reporting
         try {
@@ -54,7 +58,7 @@ module.controller('VegaEditorController', ($scope /*, $element, $timeout, kbnUiA
           // FIXME!
           alert(err);
         }
-        this.aceEditor.focus();
+        // this.aceEditor.focus();
       });
     }
   })();

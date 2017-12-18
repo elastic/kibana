@@ -117,6 +117,11 @@ export class VegaView {
     const width = Math.max(0, this._$container.width() - this._parser.paddingWidth);
     const height = Math.max(0, this._$container.height() - this._parser.paddingHeight) - heightExtraPadding;
     if (view.width() !== width || view.height() !== height) {
+
+      // fixme: remove
+      if (!view.____id) view.____id = Math.ceil(Math.random() * 10000);
+      console.log(`new Vega size #${view.____id} = ${width}x${height}`);
+
       view.width(width).height(height);
       return true;
     }

@@ -37,7 +37,8 @@
     "Nicolás Bevacqua <nico@elastic.co>",
     "Shelby Sturgis <shelby@elastic.co>",
     "Spencer Alger <spencer.alger@elastic.co>",
-    "Tim Sullivan <tim@elastic.co>"
+    "Tim Sullivan <tim@elastic.co>",
+    "Yuri Astrakhan <yuri@elastic.co>"
   ],
   "scripts": {
     "test": "grunt test",

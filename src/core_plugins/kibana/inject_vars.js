@@ -9,7 +9,6 @@ export function injectVars(server) {
   const tilemapConfig = serverConfig.get('tilemap');
   const regionmapsConfig = serverConfig.get('regionmap');
   const mapConfig = serverConfig.get('map');
-  const vegaConfig = serverConfig.get('vega');
 
 
   regionmapsConfig.layers =  (regionmapsConfig.layers) ? regionmapsConfig.layers : [];
@@ -18,7 +17,6 @@ export function injectVars(server) {
     kbnDefaultAppId: serverConfig.get('kibana.defaultAppId'),
     regionmapsConfig: regionmapsConfig,
     mapConfig: mapConfig,
-    vegaConfig: vegaConfig,
     tilemapsConfig: {
       deprecated: {
         isOverridden: isOverridden,

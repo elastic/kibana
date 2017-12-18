@@ -5,7 +5,10 @@ export default kibana => new kibana.Plugin({
   uiExports: {
     visTypes: [
       'plugins/vega/vega_type'
-    ]
+    ],
+    app: {
+      injectVars: (server) => ({ vegaConfig: server.config().get('vega') })
+    }
   },
 
   // todo: does this plugin need this?   isEnabled(config) => config.get('vega.enabled'),
