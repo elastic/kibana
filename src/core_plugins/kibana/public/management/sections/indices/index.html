@@ -1,6 +1,6 @@
 <div class="col-md-2 sidebar-container" role="region" aria-label="Index patterns">
   <div class="sidebar-list">
-    <div class="sidebar-item-title full-title">
+    <div class="sidebar-list-header">
       <h5>
         <a
           ng-if="editingId"
@@ -18,12 +18,10 @@
         class="sidebar-item"
       >
         <div class="sidebar-item-title full-title">
-          <div class="euiText euiText--extraSmall">
-            <div class="euiBadge euiBadge--warning">Warning</div>
-            <p>
-              No default index pattern. You must select or create one to continue.
-            </p>
-          </div>
+          <span class="label label-warning">Warning</span>
+          <p>
+            No default index pattern. You must select or create one to continue.
+          </p>
         </div>
       </li>
 
@@ -31,7 +29,7 @@
         ng-repeat="pattern in indexPatternList | orderBy:['-default','title'] track by pattern.id"
         class="sidebar-item"
       >
-        <a href="{{::pattern.url}}" class="euiLink euiLink--primary show">
+        <a href="{{::pattern.url}}" class="show">
           <div class="{{::pattern.class}}">
             <i aria-hidden="true" ng-if="pattern.default" class="fa fa-star"></i>
             <span ng-bind="::pattern.title"></span>
