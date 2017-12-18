@@ -282,8 +282,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByCssSelector('button[data-test-subj="toggleEditor"]');
     }
 
-    async clickNewSearch() {
-      await find.clickByCssSelector('.list-group-item a');
+    async clickNewSearch(indexPattern = 'logstash-*') {
+      await testSubjects.click(`paginatedListItem-${indexPattern}`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async setValue(newValue) {
