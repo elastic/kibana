@@ -28,10 +28,10 @@ describe('Url Format', function () {
 
       const $a = unwrap($(url.convert('http://elastic.co', 'html')));
       expect($a.is('a')).to.be(true);
-      expect($a.size()).to.be(1);
+      expect($a.length).to.be(1);
       expect($a.attr('href')).to.be('http://elastic.co');
       expect($a.attr('target')).to.be('_blank');
-      expect($a.children().size()).to.be(0);
+      expect($a.children().length).to.be(0);
     });
 
     it('outputs a <a> link with target=_self if "open link in current tab" is checked', function () {
@@ -55,10 +55,10 @@ describe('Url Format', function () {
         const url = new Url({ urlTemplate: 'http://{{ value }}' });
         const $a = unwrap($(url.convert('url', 'html')));
         expect($a.is('a')).to.be(true);
-        expect($a.size()).to.be(1);
+        expect($a.length).to.be(1);
         expect($a.attr('href')).to.be('http://url');
         expect($a.attr('target')).to.be('_blank');
-        expect($a.children().size()).to.be(0);
+        expect($a.children().length).to.be(0);
       });
 
       it('only outputs the url if the contentType === "text"', function () {
@@ -72,7 +72,7 @@ describe('Url Format', function () {
         const url = new Url({ labelTemplate: 'extension: {{ value }}', urlTemplate: 'http://www.{{value}}.com' });
         const $a = unwrap($(url.convert('php', 'html')));
         expect($a.is('a')).to.be(true);
-        expect($a.size()).to.be(1);
+        expect($a.length).to.be(1);
         expect($a.attr('href')).to.be('http://www.php.com');
         expect($a.html()).to.be('extension: php');
       });

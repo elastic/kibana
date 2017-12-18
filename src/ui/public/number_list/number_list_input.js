@@ -53,7 +53,7 @@ uiModules
         function go(dir) {
           return function () {
             const $to = $get(dir);
-            if ($to.size()) $to.focus();
+            if ($to.length) $to.focus();
             else return false;
           };
         }
