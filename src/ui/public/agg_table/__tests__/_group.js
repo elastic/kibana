@@ -45,7 +45,7 @@ describe('AggTableGroup Directive', function () {
     $scope.$digest();
 
     // should create one sub-tbale
-    expect($el.find('kbn-agg-table').size()).to.be(1);
+    expect($el.find('kbn-agg-table').length).to.be(1);
   });
 
   it('renders nothing if the table list is empty', function () {
@@ -59,7 +59,7 @@ describe('AggTableGroup Directive', function () {
     $scope.$digest();
 
     const $subTables = $el.find('kbn-agg-table');
-    expect($subTables.size()).to.be(0);
+    expect($subTables.length).to.be(0);
   });
 
   it('renders a complex response properly', function () {
@@ -82,10 +82,10 @@ describe('AggTableGroup Directive', function () {
     $scope.$digest();
 
     const $subTables = $el.find('kbn-agg-table');
-    expect($subTables.size()).to.be(3);
+    expect($subTables.length).to.be(3);
 
     const $subTableHeaders = $el.find('.agg-table-group-header');
-    expect($subTableHeaders.size()).to.be(3);
+    expect($subTableHeaders.length).to.be(3);
 
     $subTableHeaders.each(function (i) {
       expect($(this).text()).to.be(group.tables[i].title);
