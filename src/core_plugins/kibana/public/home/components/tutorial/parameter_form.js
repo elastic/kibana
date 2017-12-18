@@ -1,19 +1,37 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Parameter } from './parameter';
+import { NumberParameter } from './number_parameter';
+import { StringParameter } from './string_parameter';
 
 export class ParameterForm extends React.Component {
 
   renderInputs = () => {
-    return this.props.params.map(param => (
-      <Parameter
-        key={param.id}
-        id={param.id}
-        label={param.label}
-        value={this.props.paramValues[param.id]}
-        setParameter={this.props.setParameter}
-      />
-    ));
+    return this.props.params.map(param => {
+      switch (param.type) {
+        case 'number':
+          return (
+            <NumberParameter
+              key={param.id}
+              id={param.id}
+              label={param.label}
+              value={this.props.paramValues[param.id]}
+              setParameter={this.props.setParameter}
+            />
+          );
+        case 'string':
+          return (
+            <StringParameter
+              key={param.id}
+              id={param.id}
+              label={param.label}
+              value={this.props.paramValues[param.id]}
+              setParameter={this.props.setParameter}
+            />
+          );
+        default:
+          throw new Error(`Unhandled parameter type ${param.type}`);
+      }
+    });
   }
 
   render() {
@@ -29,8 +47,14 @@ export class ParameterForm extends React.Component {
   }
 }
 
+const paramsShape = PropTypes.shape({
+  id: PropTypes.string.isRequired,
+  label: PropTypes.string.isRequired,
+  type: PropTypes.string.isRequired,
+});
+
 ParameterForm.propTypes = {
-  params: PropTypes.array.isRequired,
+  params: PropTypes.arrayOf(paramsShape).isRequired,
   paramValues: PropTypes.object.isRequired,
   setParameter: PropTypes.func.isRequired
 };

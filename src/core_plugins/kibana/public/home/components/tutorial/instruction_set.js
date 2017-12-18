@@ -151,9 +151,21 @@ export class InstructionSet extends React.Component {
   }
 }
 
+const instructionShape = PropTypes.shape({
+  title: PropTypes.string,
+  textPre: PropTypes.string,
+  commands: PropTypes.arrayOf(PropTypes.string),
+  textPost: PropTypes.string
+});
+
+const instructionVariantShape = PropTypes.shape({
+  id: PropTypes.string.isRequired,
+  instructions: PropTypes.arrayOf(instructionShape).isRequired,
+});
+
 InstructionSet.propTypes = {
   title: PropTypes.string.isRequired,
-  instructionVariants: PropTypes.array.isRequired,
+  instructionVariants: PropTypes.arrayOf(instructionVariantShape).isRequired,
   offset: PropTypes.number.isRequired,
   params: PropTypes.array,
   paramValues: PropTypes.object.isRequired,

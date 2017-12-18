@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-export function Parameter({ id, label, value, setParameter }) {
+export function StringParameter({ id, label, value, setParameter }) {
   const handleChange = (evt) => {
-    setParameter(id, parseFloat(evt.target.value));
+    setParameter(id, evt.target.value);
   };
 
   return (
@@ -25,9 +25,9 @@ export function Parameter({ id, label, value, setParameter }) {
   );
 }
 
-Parameter.propTypes = {
+StringParameter.propTypes = {
   id: PropTypes.string.isRequired,
   label: PropTypes.string.isRequired,
-  value: PropTypes.number.isRequired,
-  setParameter: PropTypes.func.isRequired
+  value: PropTypes.string.isRequired,
+  setParameter: PropTypes.func.isRequired,
 };
