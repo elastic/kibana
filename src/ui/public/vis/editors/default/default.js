@@ -61,7 +61,7 @@ const defaultEditor = function ($rootScope, $compile) {
             $scope.vis.dirty = false;
           };
 
-          $scope.autoApplyEnabled = $scope.vis.type.editorConfig.enableAutoApply;
+          $scope.autoApplyEnabled = false;
           if ($scope.vis.type.editorConfig.enableAutoApply) {
             $scope.toggleAutoApply = () => {
               $scope.autoApplyEnabled = !$scope.autoApplyEnabled;
