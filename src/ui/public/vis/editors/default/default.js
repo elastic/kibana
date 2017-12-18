@@ -7,6 +7,7 @@ import _ from 'lodash';
 import angular from 'angular';
 import defaultEditorTemplate from './default.html';
 import { keyCodes } from 'ui_framework/services';
+import { DefaultEditorSize } from 'ui/vis/editor_size';
 
 import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
 
@@ -75,10 +76,20 @@ const defaultEditor = function ($rootScope, $compile) {
           }
 
           $scope.submitEditorWithKeyboard = (event) => {
-            event.preventDefault();
-            event.stopPropagation();
             if (event.ctrlKey && event.keyCode === keyCodes.ENTER) {
+              event.preventDefault();
+              event.stopPropagation();
               $scope.stageEditableVis();
+            }
+          };
+
+          $scope.getSidebarClass = () => {
+            if ($scope.vis.type.editorConfig.defaultSize === DefaultEditorSize.SMALL) {
+              return 'collapsible-sidebar--small';
+            } else if ($scope.vis.type.editorConfig.defaultSize === DefaultEditorSize.MEDIUM) {
+              return 'collapsible-sidebar--medium';
+            } else if ($scope.vis.type.editorConfig.defaultSize === DefaultEditorSize.LARGE) {
+              return 'collapsible-sidebar--large';
             }
           };
 

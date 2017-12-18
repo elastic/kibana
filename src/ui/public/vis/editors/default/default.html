@@ -1,8 +1,4 @@
-<div class="collapsible-sidebar" ng-class="{
-    'collapsible-sidebar--small': vis.type.editorConfig.defaultSize === 0,
-    'collapsible-sidebar--medium': vis.type.editorConfig.defaultSize === 1,
-    'collapsible-sidebar--large': vis.type.editorConfig.defaultSize === 2
-  }">
+<div class="collapsible-sidebar" ng-class="::getSidebarClass()">
   <vis-editor-sidebar class="vis-editor-sidebar" />
   <vis-editor-resizer
     class="default-editor__resizer"
