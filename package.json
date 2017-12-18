@@ -87,7 +87,6 @@
     "angular-sanitize": "1.5.7",
     "angular-sortable-view": "0.0.15",
     "angular-translate": "2.13.1",
-    "ansicolors": "0.3.2",
     "autoprefixer": "6.5.4",
     "babel-core": "6.21.0",
     "babel-jest": "21.0.0",
@@ -107,6 +106,7 @@
     "brace": "0.10.0",
     "bunyan": "1.7.1",
     "cache-loader": "1.0.3",
+    "chalk": "2.3.0",
     "check-hash": "1.0.1",
     "color": "1.0.3",
     "commander": "2.8.1",
@@ -222,7 +222,6 @@
     "babel-eslint": "8.0.2",
     "backport": "2.2.0",
     "chai": "3.5.0",
-    "chalk": "2.0.1",
     "chance": "1.0.6",
     "cheerio": "0.22.0",
     "chokidar": "1.6.0",
@@ -303,7 +302,7 @@
     "yo": "2.0.0"
   },
   "engines": {
-    "node": "6.11.5",
+    "node": "6.12.2",
     "npm": "3.10.10"
   }
 }
