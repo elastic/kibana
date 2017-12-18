@@ -38,6 +38,7 @@ export default function TimelionVisProvider(Private) {
     },
     editorConfig: {
       optionsTemplate: editorConfigTemplate,
+      defaultSize: 'medium',
     },
     requestHandler: timelionRequestHandler.handler,
     responseHandler: 'none',

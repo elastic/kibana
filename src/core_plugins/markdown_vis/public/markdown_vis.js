@@ -34,6 +34,7 @@ function MarkdownVisProvider(Private) {
     editorConfig: {
       optionsTemplate: markdownVisParamsTemplate,
       enableAutoApply: true,
+      defaultSize: 'large',
     },
     options: {
       showTimePicker: false,

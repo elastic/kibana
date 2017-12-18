@@ -18,7 +18,21 @@
     .flex-parent(0, 0, auto);
     margin-right: 10px;
     flex-direction: row;
+    max-width: 75%;
   }
+
+  .collapsible-sidebar-small {
+    width: 15%;
+  }
+
+  .collapsible-sidebar-medium {
+    width: 30%;
+  }
+
+  .collapsible-sidebar-large {
+    width: 50%;
+  }
+
 
   #editor_resizer {
     margin: 0;
@@ -89,7 +103,6 @@
       flex-basis: @vis-editor-sidebar-basis;
       min-width: @vis-editor-sidebar-min-width;
       width: @vis-editor-sidebar-min-width;
-      max-width: 75%;
     }
 
     .index-pattern,
