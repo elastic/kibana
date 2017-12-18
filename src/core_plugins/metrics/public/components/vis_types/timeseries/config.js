@@ -195,6 +195,7 @@ function TimeseriesConfig(props) {
           </label>
           <input
             id={htmlId('offset')}
+            data-test-subj="offsetTimeSeries"
             className="vis_editor__input-grows"
             type="text"
             onChange={handleTextChange('offset_time')}

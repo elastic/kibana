@@ -148,6 +148,7 @@ class MarkdownPanelConfig extends Component {
           >Markdown
           </button>
           <button
+            data-test-subj="markdownDataBtn"
             role="tab"
             aria-selected={selectedTab === 'data'}
             className={`kbnTabs__tab${selectedTab === 'data' && '-active' || ''}`}
