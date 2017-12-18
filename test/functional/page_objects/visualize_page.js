@@ -393,6 +393,11 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await testSubjects.click('visualizeEditorAutoButton');
     }
 
+    async sizeUpEditor() {
+      await testSubjects.click('visualizeEditorResizer');
+      await remote.pressKeys('\uE014');
+    }
+
     async clickOptions() {
       await find.clickByPartialLinkText('Options');
     }

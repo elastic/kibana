@@ -1,7 +1,8 @@
 import expect from 'expect.js';
 
-export default function ({ getPageObjects }) {
+export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
+  const find = getService('find');
   const markdown = `
 # Heading 1
 
@@ -41,6 +42,14 @@ export default function ({ getPageObjects }) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         const h1Txt = await PageObjects.visualize.getMarkdownBodyDescendentText('h2');
         expect(h1Txt).to.equal('Heading 2');
+      });
+
+      it('should resize the editor', async function () {
+        const editorSidebar = await find.byCssSelector('.vis-editor-sidebar');
+        const initialSize = await editorSidebar.getSize();
+        await PageObjects.visualize.sizeUpEditor();
+        const afterSize = await editorSidebar.getSize();
+        expect(afterSize.width).to.equal(initialSize.width + 15);
       });
     });
   });
