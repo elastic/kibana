@@ -44,8 +44,8 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it.skip('should show Split Gauges', function () {
-        const expectedTexts = [ 'win 8', 'win xp', 'win 7', 'ios', 'osx' ];
+      it('should show Split Gauges', function () {
+        const expectedTexts = [ 'win 8', 'win xp', 'win 7', 'ios' ];
         return PageObjects.visualize.clickMetricEditor()
           .then(function clickBucket() {
             log.debug('Bucket = Split Group');
@@ -58,6 +58,10 @@ export default function ({ getService, getPageObjects }) {
           .then(function selectField() {
             log.debug('Field = machine.os.raw');
             return PageObjects.visualize.selectField('machine.os.raw');
+          })
+          .then(function setSize() {
+            log.debug('Size = 4');
+            return PageObjects.visualize.setSize('4');
           })
           .then(function clickGo() {
             return PageObjects.visualize.clickGo();
@@ -72,7 +76,7 @@ export default function ({ getService, getPageObjects }) {
           });
       });
 
-      it.skip('should show correct values for fields with fieldFormatters', async function () {
+      it('should show correct values for fields with fieldFormatters', async function () {
         const expectedTexts = [ '2,904\nwin 8: Count', '5.528KB' ];
 
 
@@ -94,6 +98,7 @@ export default function ({ getService, getPageObjects }) {
             });
         });
       });
+
     });
   });
 }
