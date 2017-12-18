@@ -14,7 +14,7 @@ export const compare = {
     },
     to: {
       aliases: ['this', 'b'],
-      help: 'A boolean true or false, usually returned by a subexpression',
+      help: 'The value to compare the context to, usually returned by a subexpression',
     },
   },
   fn: (context, args) => {

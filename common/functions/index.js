@@ -6,6 +6,7 @@ import { context } from './context';
 import { columns } from './columns';
 import { date } from './date';
 import { exactly } from './exactly';
+import { filterrows } from './filterrows';
 import { font } from './font';
 import { formatdate } from './formatdate';
 import { getCell } from './getCell';
@@ -44,6 +45,7 @@ export const commonFunctions = [
   context,
   date,
   exactly,
+  filterrows,
   font,
   formatdate,
   getCell,
