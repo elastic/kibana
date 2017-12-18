@@ -14,7 +14,6 @@ export default function ({ getPageObjects }) {
       await PageObjects.visualize.clickMarkdownWidget();
       await PageObjects.visualize.setMarkdownTxt(markdown);
       await PageObjects.visualize.clickGo();
-      await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
     describe('markdown vis', async () => {
@@ -33,6 +32,15 @@ export default function ({ getPageObjects }) {
         const expected = 'Heading 1\n<h3>Inline HTML that should not be rendered as html</h3>';
         const actual = await PageObjects.visualize.getMarkdownText();
         expect(actual).to.equal(expected);
+      });
+
+      it('should auto apply changes if auto mode is turned on', async function () {
+        const markdown2 = '## Heading 2';
+        await PageObjects.visualize.toggleAutoMode();
+        await PageObjects.visualize.setMarkdownTxt(markdown2);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        const h1Txt = await PageObjects.visualize.getMarkdownBodyDescendentText('h2');
+        expect(h1Txt).to.equal('Heading 2');
       });
     });
   });

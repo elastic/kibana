@@ -389,6 +389,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
+    async toggleAutoMode() {
+      await testSubjects.click('visualizeEditorAutoButton');
+    }
+
     async clickOptions() {
       await find.clickByPartialLinkText('Options');
     }
