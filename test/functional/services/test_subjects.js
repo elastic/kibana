@@ -124,6 +124,7 @@ export function TestSubjectsProvider({ getService }) {
     }
 
     async moveMouseTo(selector) {
+      log.debug(`testSubjects.moveMouseTo(${selector})`);
       // Wrapped in a retry because even though the find should do a stale element check of it's own, we seem to
       // have run into a case where the element becomes stale after the find succeeds, throwing an error during the
       // moveMouseTo function.

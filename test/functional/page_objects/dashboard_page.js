@@ -14,7 +14,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'header']);
+  const PageObjects = getPageObjects(['common', 'header', 'visualize']);
 
   const defaultFindTimeout = config.get('timeouts.find');
 
@@ -31,6 +31,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         'defaultIndex': 'logstash-*'
       });
 
+      await kibanaServer.uiSettings.disableToastAutohide();
       await PageObjects.common.navigateToApp('dashboard');
     }
 
@@ -126,6 +127,17 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
     }
 
+    async openDashboardPanelSpyPanel() {
+      await retry.try(async () => {
+        await testSubjects.moveMouseTo('dashboardPanel');
+        const spyToggleExists = await testSubjects.exists('spyToggleButton');
+        if (!spyToggleExists) {
+          throw new Error('Spy toggle still not showing. Try to move mouse over dashboard panel again.');
+        }
+      });
+      await PageObjects.visualize.openSpyPanel();
+    }
+
     async getQueryInputElement() {
       return await testSubjects.find('queryInput');
     }
@@ -143,7 +155,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async clickFilterButton() {
       log.debug('Clicking filter button');
-      return await testSubjects.click('querySubmitButton');
+      await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickClone() {
