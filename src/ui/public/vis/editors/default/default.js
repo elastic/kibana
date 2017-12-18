@@ -1,6 +1,6 @@
 import './sidebar';
 import './vis_options';
-import './resizer';
+import './vis_editor_resizer';
 import $ from 'jquery';
 
 import _ from 'lodash';
