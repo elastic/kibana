@@ -67,10 +67,10 @@ const defaultEditor = function ($rootScope, $compile) {
               $scope.autoApplyEnabled = !$scope.autoApplyEnabled;
             };
 
-            $scope.$watch('vis.dirty', () => {
+            $scope.$watch('vis.dirty', _.debounce(() => {
               if (!$scope.autoApplyEnabled || !$scope.vis.dirty) return;
               $scope.stageEditableVis();
-            });
+            }, 800));
           }
 
           $scope.$watch(function () {
