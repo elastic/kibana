@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import AddDeleteButtons from '../../add_delete_buttons';
 import SeriesConfig from './config';
 import Sortable from 'react-anything-sortable';
@@ -70,6 +71,7 @@ function TopNSeries(props) {
             Metrics
           </div>
           <div
+            data-test-subj="seriesOptions"
             className={optionsClassname}
             onClick={() => props.switchTab('options')}
           >

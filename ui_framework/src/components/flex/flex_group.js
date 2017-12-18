@@ -27,6 +27,7 @@ const justifyContentToClassNameMap = {
   center: 'kuiFlexGroup--justifyContentCenter',
   spaceBetween: 'kuiFlexGroup--justifyContentSpaceBetween',
   spaceAround: 'kuiFlexGroup--justifyContentSpaceAround',
+  spaceEvenly: 'kuiFlexGroup--justifyContentSpaceEvenly',
 };
 
 export const JUSTIFY_CONTENTS = Object.keys(justifyContentToClassNameMap);

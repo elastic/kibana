@@ -21,7 +21,6 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
   return VisFactory.createBaseVisualization({
     name: 'region_map',
     title: 'Region Map',
-    implementsRenderComplete: true,
     description: 'Show metrics on a thematic map. Use one of the provide base maps, or add your own. ' +
     'Darker colors represent higher values.',
     category: CATEGORY.MAP,
@@ -87,5 +86,3 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
 
   });
 });
-
-

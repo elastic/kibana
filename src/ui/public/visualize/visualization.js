@@ -7,6 +7,7 @@ import { uiModules } from 'ui/modules';
 import { ResizeCheckerProvider } from 'ui/resize_checker';
 import visualizationTemplate from 'ui/visualize/visualization.html';
 import { getUpdateStatus } from 'ui/vis/update_status';
+import { PersistedState } from 'ui/persisted_state';
 import 'angular-sanitize';
 
 uiModules
@@ -35,6 +36,16 @@ uiModules
         const getSpyContainer = jQueryGetter('.visualize-spy-container');
 
         $scope.addLegend = false;
+
+        // Set the passed in uiState to the vis object, so we don't require any
+        // users of the <visualization/> directive to manually set the uiState.
+        if (!$scope.uiState) $scope.uiState = new PersistedState({});
+        $scope.vis.setUiState($scope.uiState);
+        // Whenever the uiState changed, that the visualization should use,
+        // attach it to the actual Vis class.
+        $scope.$watch('uiState', (uiState) => {
+          $scope.vis.setUiState(uiState);
+        });
 
         // Show no results message when isZeroHits is true and it requires search
         $scope.showNoResultsMessage = function () {

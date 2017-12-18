@@ -12,6 +12,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
   >
     <KuiFlexItem
       grow={true}
+      key="mock-list-control"
       style={
         Object {
           "minWidth": "250px",
@@ -23,6 +24,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
           Object {
             "getMultiSelectDelimiter": [Function],
             "id": "mock-list-control",
+            "isEnabled": [Function],
             "label": "list control",
             "options": Object {
               "multiselect": true,
@@ -106,6 +108,7 @@ exports[`Clear btns enabled when there are values 1`] = `
   >
     <KuiFlexItem
       grow={true}
+      key="mock-list-control"
       style={
         Object {
           "minWidth": "250px",
@@ -117,6 +120,7 @@ exports[`Clear btns enabled when there are values 1`] = `
           Object {
             "getMultiSelectDelimiter": [Function],
             "id": "mock-list-control",
+            "isEnabled": [Function],
             "label": "list control",
             "options": Object {
               "multiselect": true,
@@ -200,6 +204,7 @@ exports[`Renders list control 1`] = `
   >
     <KuiFlexItem
       grow={true}
+      key="mock-list-control"
       style={
         Object {
           "minWidth": "250px",
@@ -211,6 +216,7 @@ exports[`Renders list control 1`] = `
           Object {
             "getMultiSelectDelimiter": [Function],
             "id": "mock-list-control",
+            "isEnabled": [Function],
             "label": "list control",
             "options": Object {
               "multiselect": true,
@@ -294,6 +300,7 @@ exports[`Renders range control 1`] = `
   >
     <KuiFlexItem
       grow={true}
+      key="mock-range-control"
       style={
         Object {
           "minWidth": "250px",
@@ -304,6 +311,7 @@ exports[`Renders range control 1`] = `
         control={
           Object {
             "id": "mock-range-control",
+            "isEnabled": [Function],
             "label": "ragne control",
             "max": 100,
             "min": 0,

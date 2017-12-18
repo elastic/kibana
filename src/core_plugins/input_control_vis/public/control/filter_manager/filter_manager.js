@@ -10,6 +10,10 @@ export class FilterManager {
     this.unsetValue = unsetValue;
   }
 
+  getIndexPattern() {
+    return this.indexPattern;
+  }
+
   createFilter() {
     throw new Error('Must implement createFilter.');
   }

@@ -18,6 +18,21 @@ exports[`KuiContextMenuItem is rendered 1`] = `
 </button>
 `;
 
+exports[`KuiContextMenuItem props disabled is rendered 1`] = `
+<button
+  class="kuiContextMenuItem kuiContextMenuItem-disabled"
+  disabled=""
+>
+  <span
+    class="kuiContextMenu__itemLayout"
+  >
+    <span
+      class="kuiContextMenuItem__text"
+    />
+  </span>
+</button>
+`;
+
 exports[`KuiContextMenuItem props hasPanel is rendered 1`] = `
 <button
   class="kuiContextMenuItem"

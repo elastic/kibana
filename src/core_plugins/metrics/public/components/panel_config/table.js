@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import FieldSelect from '../aggs/field_select';
 import SeriesEditor from '../series_editor';
 import { IndexPattern } from '../index_pattern';

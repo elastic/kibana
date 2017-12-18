@@ -200,6 +200,13 @@ dashboard-viewport-provider {
 }
 
 /**
+ * Disable transitions from the library on each grid element.
+ */
+.react-grid-item {
+  transition: none;
+}
+
+/**
  * Overwrites red coloring that comes from this library by default.
  */
 .react-grid-item.react-grid-placeholder {
@@ -404,9 +411,11 @@ dashboard-viewport-provider {
 }
 
 .dashboard-viewport {
+  width: 100%;
   background-color: @dashboard-bg;
 }
 .dashboard-viewport-with-margins {
+  width: 100%;
   background-color: @dashboard-bg-with-margins;
 }
 

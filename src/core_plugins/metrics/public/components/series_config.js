@@ -36,6 +36,7 @@ export const SeriesConfig = props => {
             Offset series time by (1m, 1h, 1w, 1d)
           </label>
           <input
+            data-test-subj="offsetTimeSeries"
             style={{ width: 100 }}
             id={htmlId('offsetSeries')}
             className="vis_editor__input-grows"
