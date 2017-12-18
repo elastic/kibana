@@ -108,7 +108,7 @@ export function VislibVisualizationsPieChartProvider(Private) {
       const self = this;
       const marginFactor = 0.95;
       const isDonut = self._attr.isDonut;
-      const maxRadius = (Math.min(width, height) / 2) * marginFactor;
+      const radius = (Math.min(width, height) / 2) * marginFactor;
       const color = self.handler.data.getPieColorFunc();
       const tooltip = self.tooltip;
       const isTooltip = self._attr.addTooltip;
@@ -121,8 +121,6 @@ export function VislibVisualizationsPieChartProvider(Private) {
       const truncateLabelLength = self._attr.labels.truncate;
       const showOnlyOnLastLevel = self._attr.labels.last_level;
 
-      const radius = showLabels ? maxRadius * 0.7 : maxRadius;
-
       const partition = d3.layout.partition()
         .sort(null)
         .value(function (d) {
@@ -130,7 +128,7 @@ export function VislibVisualizationsPieChartProvider(Private) {
         });
 
       const x = d3.scale.linear().range([0, 2 * Math.PI]);
-      const y = d3.scale.sqrt().range([0, radius]);
+      const y = d3.scale.sqrt().range([0, showLabels ? radius * 0.7 : radius]);
 
       const startAngle = function (d) {
         return Math.max(0, Math.min(2 * Math.PI, x(d.x)));
