@@ -6,6 +6,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 import angular from 'angular';
 import defaultEditorTemplate from './default.html';
+import { keyCodes } from 'ui_framework/services';
 
 import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
 
@@ -74,7 +75,9 @@ const defaultEditor = function ($rootScope, $compile) {
           }
 
           $scope.submitEditorWithKeyboard = (event) => {
-            if (event.ctrlKey && event.keyCode === 13) {
+            event.preventDefault();
+            event.stopPropagation();
+            if (event.ctrlKey && event.keyCode === keyCodes.ENTER) {
               $scope.stageEditableVis();
             }
           };

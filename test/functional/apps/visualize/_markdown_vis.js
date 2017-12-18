@@ -49,7 +49,7 @@ export default function ({ getPageObjects, getService }) {
         const initialSize = await editorSidebar.getSize();
         await PageObjects.visualize.sizeUpEditor();
         const afterSize = await editorSidebar.getSize();
-        expect(afterSize.width).to.equal(initialSize.width + 15);
+        expect(afterSize.width).to.be.greaterThan(initialSize.width);
       });
     });
   });

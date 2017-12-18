@@ -80,13 +80,14 @@
           <li
             tooltip="Auto apply changes"
             tooltip-placement="bottom"
-            tooltip-popup-delay="400" tooltip-append-to-body="1"
+            tooltip-popup-delay="400"
+            tooltip-append-to-body="1"
             ng-if="vis.type.editorConfig.enableAutoApply"
           >
             <button
               data-test-subj="visualizeEditorAutoButton"
               class="kuiButton kuiButton--basic navbar-btn-link"
-              aria-label="Auto update the visualization on every changes"
+              aria-label="Auto update the visualization on every change"
               ng-click="toggleAutoApply()"
               ng-class="{
                 'kuiButton--primary': autoApplyEnabled,

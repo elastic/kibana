@@ -1,11 +1,11 @@
 <div class="collapsible-sidebar" ng-class="{
-    'collapsible-sidebar-small': vis.type.editorConfig.defaultSize === 'small',
-    'collapsible-sidebar-medium': vis.type.editorConfig.defaultSize === 'medium',
-    'collapsible-sidebar-large': vis.type.editorConfig.defaultSize === 'large'
+    'collapsible-sidebar--small': vis.type.editorConfig.defaultSize === 0,
+    'collapsible-sidebar--medium': vis.type.editorConfig.defaultSize === 1,
+    'collapsible-sidebar--large': vis.type.editorConfig.defaultSize === 2
   }">
   <vis-editor-sidebar class="vis-editor-sidebar" />
   <vis-editor-resizer
-    id="editor_resizer"
+    class="default-editor__resizer"
     tabindex="0"
     aria-label="Press left/right to resize the editor"
     data-test-subj="visualizeEditorResizer"

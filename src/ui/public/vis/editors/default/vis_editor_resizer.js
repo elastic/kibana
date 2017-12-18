@@ -8,23 +8,16 @@ uiModules
     return {
       restrict: 'E',
       link: function ($scope, $el) {
-        let $left;
-        const minWidth = 360;
+        const $left = $el.parent();
 
         $el.on('mousedown', function (event) {
-          if (!$left) {
-            $left = $('.collapsible-sidebar');
-          }
-
           $el.addClass('active');
           const startWidth = $left.width();
           const startX = event.pageX;
 
           function onMove(event) {
             const newWidth = startWidth + event.pageX - startX;
-            if (newWidth > minWidth) {
-              $left.width(startWidth + event.pageX - startX);
-            }
+            $left.width(newWidth);
           }
 
           $(document.body)
@@ -39,18 +32,12 @@ uiModules
         $el.on('keydown', event => {
           const { keyCode } = event;
 
-          if (!$left) {
-            $left = $('.collapsible-sidebar');
-          }
-
           if (keyCode === keyCodes.LEFT || keyCode === keyCodes.RIGHT) {
             event.preventDefault();
             const startWidth = $left.width();
             const newWidth = startWidth + (keyCode === keyCodes.LEFT ? -15 : 15);
-            if (newWidth > minWidth) {
-              $left.width(newWidth);
-              $scope.$broadcast('render');
-            }
+            $left.width(newWidth);
+            $scope.$broadcast('render');
           }
         });
       }

@@ -6,6 +6,7 @@ import markdownVisTemplate from 'plugins/markdown_vis/markdown_vis.html';
 import markdownVisParamsTemplate from 'plugins/markdown_vis/markdown_vis_params.html';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import image from './images/icon-markdown.svg';
+import { DefaultEditorSize } from 'ui/vis/editor_size';
 // we need to load the css ourselves
 
 // we also need to load the controller and used by the template
@@ -34,7 +35,7 @@ function MarkdownVisProvider(Private) {
     editorConfig: {
       optionsTemplate: markdownVisParamsTemplate,
       enableAutoApply: true,
-      defaultSize: 'large',
+      defaultSize: DefaultEditorSize.LARGE,
     },
     options: {
       showTimePicker: false,
