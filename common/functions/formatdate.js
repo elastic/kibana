@@ -14,6 +14,6 @@ export const formatdate = {
     },
   },
   fn: (context, args) => {
-    return moment(context).format(args._);
+    return moment(new Date(context)).format(args._);
   },
 };
