@@ -5,6 +5,7 @@ export function getESIndices(kbnIndex, elasticsearchClient) {
     index: kbnIndex,
     _source: 'index-pattern.title',
     q: 'type:"index-pattern"',
+    size: 100,
   };
 
   return elasticsearchClient('search', config)

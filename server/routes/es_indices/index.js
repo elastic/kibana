@@ -2,6 +2,7 @@ import { getESIndices } from './get_es_indices';
 import { partial } from 'lodash';
 
 // TODO: Error handling, note: esErrors
+// TODO: Allow filtering by pattern name
 export function esIndices(server) {
   const kbnIndex = server.config().get('kibana.index');
   const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');

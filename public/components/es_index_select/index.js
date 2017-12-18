@@ -7,11 +7,13 @@ const basePath = chrome.getBasePath();
 const apiPath = `${basePath}/api/canvas/es_indices`;
 
 export const ESIndexSelect = compose(
+  withState('loading', 'setLoading', true),
   withState('indices', 'setIndices', []),
   lifecycle({
     componentDidMount() {
       fetch.get(`${apiPath}`)
       .then(res => {
+        this.props.setLoading(false);
         this.props.setIndices(res.data.sort());
       });
     },
