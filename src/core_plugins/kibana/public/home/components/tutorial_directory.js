@@ -93,6 +93,7 @@ export class TutorialDirectory extends React.Component {
         <div className="kuiViewContent">
 
           <div className="kuiViewContentItem kuiVerticalRhythmXLarge">
+            <a className="kuiLink" href="#/home">Home</a>
             <h1 className="kuiTitle ">
               Add Data to Kibana
             </h1>
