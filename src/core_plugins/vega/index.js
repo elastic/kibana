@@ -6,9 +6,11 @@ export default kibana => new kibana.Plugin({
     visTypes: [
       'plugins/vega/vega_type'
     ],
-    app: {
-      injectVars: (server) => ({ vegaConfig: server.config().get('vega') })
-    }
+    // fixme: For some reason, injectVars() is never called
+    // fixme: once fixed, remove it from src/core_plugins/kibana/inject_vars.js
+    // app: {
+    //   injectVars: (server) => ({ vegaConfig: server.config().get('vega') })
+    // }
   },
 
   // todo: does this plugin need this?   isEnabled(config) => config.get('vega.enabled'),
