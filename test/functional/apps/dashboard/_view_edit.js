@@ -57,27 +57,6 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         });
 
-        it('when time changed is stored with dashboard', async function () {
-          const originalFromTime = '2015-09-19 06:31:44.000';
-          const originalToTime = '2015-09-19 06:31:44.000';
-          await PageObjects.header.setAbsoluteRange(originalFromTime, originalToTime);
-          await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
-          await PageObjects.header.clickToastOK();
-
-          await PageObjects.dashboard.clickEdit();
-          await PageObjects.header.setAbsoluteRange('2013-09-19 06:31:44.000', '2013-09-19 06:31:44.000');
-          await PageObjects.dashboard.clickCancelOutOfEditMode();
-
-          // confirm lose changes
-          await PageObjects.common.clickConfirmOnModal();
-
-          const newFromTime = await PageObjects.header.getFromTime();
-          const newToTime = await PageObjects.header.getToTime();
-
-          expect(newFromTime).to.equal(originalFromTime);
-          expect(newToTime).to.equal(originalToTime);
-        });
-
         it('when the query is edited and applied', async function () {
           const originalQuery = await PageObjects.dashboard.getQuery();
           await PageObjects.dashboard.setQuery(`${originalQuery} and extra stuff`);
