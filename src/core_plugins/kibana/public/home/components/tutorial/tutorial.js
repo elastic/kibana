@@ -30,13 +30,28 @@ export class Tutorial extends React.Component {
     }
   }
 
-  async componentWillMount() {
+  componentWillMount() {
+    this._isMounted = true;
+  }
+
+  componentWillUnmount() {
+    this._isMounted = false;
+  }
+
+  async componentDidMount() {
     const tutorial = await this.props.getTutorial(this.props.tutorialId);
+
+    if (!this._isMounted) {
+      return;
+    }
+
     if (tutorial) {
+      // eslint-disable-next-line react/no-did-mount-set-state
       this.setState({
         tutorial: tutorial
       }, this.setParamDefaults);
     } else {
+      // eslint-disable-next-line react/no-did-mount-set-state
       this.setState({
         notFound: true,
       });
