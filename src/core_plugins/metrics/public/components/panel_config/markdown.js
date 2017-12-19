@@ -11,7 +11,7 @@ import YesNo from '../yes_no';
 import MarkdownEditor from '../markdown_editor';
 import less from 'less/lib/less-browser';
 import { KuiCodeEditor } from 'ui_framework/components';
-import { htmlIdGenerator } from 'ui_framework/services';
+import { htmlIdGenerator } from '@elastic/eui';
 const lessC = less(window, { env: 'production' });
 
 class MarkdownPanelConfig extends Component {

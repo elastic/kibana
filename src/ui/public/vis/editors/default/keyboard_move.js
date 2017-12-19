@@ -21,7 +21,7 @@
  * }
  */
 import { uiModules } from 'ui/modules';
-import { keyCodes } from 'ui_framework/services';
+import { keyCodes } from '@elastic/eui';
 
 export const Direction = {
   up: 'up',
