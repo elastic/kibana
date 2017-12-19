@@ -21,9 +21,7 @@ function VisSpyTableProvider(Notifier, $filter, $rootScope, config, Private) {
         if (!$scope.vis || !$scope.searchSource.rawResponse) {
           $scope.table = null;
         } else {
-          if (!$scope.spy.params.spyPerPage) {
-            $scope.spy.params.spyPerPage = PER_PAGE_DEFAULT;
-          }
+          $scope.rowsPerPage = PER_PAGE_DEFAULT;
 
           $scope.table = tabifyAggResponse($scope.vis, $scope.searchSource.rawResponse, {
             canSplit: false,
