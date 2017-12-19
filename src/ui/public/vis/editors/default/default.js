@@ -6,7 +6,7 @@ import $ from 'jquery';
 import _ from 'lodash';
 import angular from 'angular';
 import defaultEditorTemplate from './default.html';
-import { keyCodes } from 'ui_framework/services';
+import { keyCodes } from '@elastic/eui';
 import { DefaultEditorSize } from 'ui/vis/editor_size';
 
 import { VisEditorTypesRegistryProvider } from 'ui/registry/vis_editor_types';
