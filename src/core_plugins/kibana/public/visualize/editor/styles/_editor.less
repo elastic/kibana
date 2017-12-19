@@ -17,6 +17,42 @@
   .collapsible-sidebar {
     .flex-parent(0, 0, auto);
     margin-right: 10px;
+    flex-direction: row;
+    max-width: 75%;
+    min-width: @vis-editor-sidebar-min-width;
+    width: @vis-editor-sidebar-min-width;
+  }
+
+  .collapsible-sidebar--small {
+    width: 15%;
+  }
+
+  .collapsible-sidebar--medium {
+    width: 30%;
+  }
+
+  .collapsible-sidebar--large {
+    width: 50%;
+  }
+
+
+  .default-editor__resizer {
+    display: flex;
+    flex: 0 0 13px;
+    cursor: ew-resize;
+    background-color: @globalColorLightestGray;
+    align-items: center;
+    margin: 0;
+    user-select: none;
+
+    &:hover {
+      background-color: lighten(@globalColorBlue, 50%);
+    }
+
+    &.active {
+      background-color: @globalColorBlue;
+      color: white;
+    }
   }
 
   .visualization-options {
@@ -81,8 +117,6 @@
     // overrided for tablet and desktop
     @media (min-width: @screen-md-min) {
       flex-basis: @vis-editor-sidebar-basis;
-      min-width: @vis-editor-sidebar-min-width;
-      max-width: @vis-editor-sidebar-min-width;
     }
 
     .index-pattern,
