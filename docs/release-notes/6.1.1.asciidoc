@@ -1,0 +1,17 @@
+[[release-notes-6.1.1]]
+== 6.1.1 Release Notes
+
+Also see <<breaking-changes-6.0>>.
+
+[float]
+[[bug-6.1.1]]
+=== Bug fixes
+Management::
+* Allow pasting into index pattern field using keyboard shortcut {pull}15500[#15500]
+* Typing a CCS pattern into the index pattern field no longer triggers an error {pull}15372[#15372]
+Operations::
+* Bump node.js version to 6.12.2 {pull}15612[#15612]
+* Kibana indices are no longer flagged as out-of-date just because they include `_default_` {pull}15432[#15432]
+Visualizations::
+* Disable math aggregation in Time Series Visual Builder {pull}15653[#15653]
+* Bucket paths for overall aggregations now use syntax compatible with Elasticsearch 6+ {pull}15322[#15322]
