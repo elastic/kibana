@@ -8,7 +8,11 @@ import FieldSelect from './aggs/field_select';
 import uuid from 'uuid';
 import IconSelect from './icon_select';
 import YesNo from './yes_no';
-import { htmlIdGenerator } from '@elastic/eui';
+
+import {
+  htmlIdGenerator,
+  EuiText,
+} from '@elastic/eui';
 
 function newAnnotation() {
   return {
@@ -175,12 +179,14 @@ class AnnotationsEditor extends Component {
         .bind(null, this.props, newAnnotation);
       content = (
         <div className="vis_editor__annotations-missing">
-          <p>Click the button below to create an annotation data source.</p>
-          <button
-            className="thor__button-outlined-default large"
-            onClick={handleAdd}
-          >Add Data Source
-          </button>
+          <EuiText>
+            <p>Click the button below to create an annotation data source.</p>
+            <button
+              className="thor__button-outlined-default large"
+              onClick={handleAdd}
+            >Add Data Source
+            </button>
+          </EuiText>
         </div>
       );
     } else {

@@ -1,6 +1,6 @@
 <div class="discover-field-details">
   <div class="kuiVerticalRhythmSmall">
-    <p class="kuiSubduedText" ng-show="!field.details.error">
+    <p class="euiText euiText--extraSmall euiTextColor--subdued" ng-show="!field.details.error">
       Top 5 values in
       <span ng-if="!field.details.error">
         <a
@@ -20,7 +20,7 @@
 
     <div class="clearfix"></div>
 
-    <div ng-if="field.details.error" class="discover-field-details-error">{{field.details.error}}</div>
+    <div ng-if="field.details.error" class="euiText euiText--extraSmall euiTextColor--subdued">{{field.details.error}}</div>
 
     <div ng-if="!field.details.error">
       <div ng-repeat="bucket in ::field.details.buckets" class="discover-field-details-item">

@@ -3690,7 +3690,8 @@ main {
   max-width: 20px;
   /* 1 */
   color: #191E23;
-  border-top: 1px solid #D9D9D9; }
+  border-top: 1px solid #D9D9D9;
+  vertical-align: middle; }
 
 /**
    * 1. Vertically align all children.
