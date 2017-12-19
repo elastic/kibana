@@ -1,9 +1,6 @@
 import { duplicatePage } from '../actions/pages';
-import { fetchRenderable, fetchAllRenderables } from '../actions/elements';
-import { setRefreshInterval } from '../actions/workpad';
+import { fetchRenderable } from '../actions/elements';
 import { getPages } from '../selectors/workpad';
-
-let refreshInterval;
 
 export const workpadUpdate = ({ dispatch, getState }) => next => (action) => {
   next(action);
@@ -16,17 +13,5 @@ export const workpadUpdate = ({ dispatch, getState }) => next => (action) => {
 
     // For each element on that page, dispatch the action to update it
     return newPage.elements.forEach(element => dispatch(fetchRenderable(element)));
-  }
-
-  // This middleware creates or destroys an interval that will cause workpad elements to update
-  if (action.type === setRefreshInterval.toString()) {
-    // clear any existing interval
-    clearInterval(refreshInterval);
-
-    // if the new interval is not 0, start a new interval
-    const interval = action.payload;
-    if (interval > 0) {
-      refreshInterval = setInterval(() => dispatch(fetchAllRenderables()), action.payload);
-    }
   }
 };

@@ -45,7 +45,7 @@ export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterv
       </div>
 
       <div>
-        <form onSubmit={(ev) => { ev.preventDefault; setRefresh(refreshInput.value); }}>
+        <form onSubmit={(ev) => { ev.preventDefault(); setRefresh(refreshInput.value); }}>
           Interval: <input type="text" ref={i => refreshInput = i} />
           <Button bsSize="xsmall" type="submit">Set</Button>
         </form>

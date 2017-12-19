@@ -6,6 +6,7 @@ import { esPersistMiddleware } from './es_persist';
 import { historyMiddleware } from './history';
 import { inFlight } from './in_flight';
 import { workpadUpdate } from './workpad_update';
+import { workpadRefresh } from './workpad_refresh';
 import { appReady } from './app_ready';
 import { getWindow } from '../../lib/get_window';
 
@@ -37,6 +38,7 @@ const middlewares = [
     inFlight,
     appReady,
     workpadUpdate,
+    workpadRefresh,
   ),
   persistState('persistent', { key: storageKey }),
   persistState('assets', {
