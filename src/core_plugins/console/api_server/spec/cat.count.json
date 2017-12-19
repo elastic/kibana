@@ -1,5 +1,5 @@
 {
-  "_cat/aliases": {
+  "_cat/count": {
     "url_params": {
       "format": "",
       "local": "__flag__",
@@ -13,8 +13,8 @@
       "GET"
     ],
     "patterns": [
-      "/_cat/aliases",
-      "/_cat/aliases/{name}"
+      "/_cat/count",
+      "/_cat/count/{indices}"
     ]
   }
 }

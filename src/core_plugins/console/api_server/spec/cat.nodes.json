@@ -1,7 +1,8 @@
 {
-  "_cat/aliases": {
+  "_cat/nodes": {
     "url_params": {
       "format": "",
+      "full_id": "__flag__",
       "local": "__flag__",
       "master_timeout": "",
       "h": [],
@@ -13,8 +14,7 @@
       "GET"
     ],
     "patterns": [
-      "/_cat/aliases",
-      "/_cat/aliases/{name}"
+      "/_cat/nodes"
     ]
   }
 }

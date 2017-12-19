@@ -1,7 +1,15 @@
 {
-  "_cat/aliases": {
+  "_cat/thread_pool": {
     "url_params": {
       "format": "",
+      "size": [
+        "",
+        "k",
+        "m",
+        "g",
+        "t",
+        "p"
+      ],
       "local": "__flag__",
       "master_timeout": "",
       "h": [],
@@ -13,8 +21,8 @@
       "GET"
     ],
     "patterns": [
-      "/_cat/aliases",
-      "/_cat/aliases/{name}"
+      "/_cat/thread_pool",
+      "/_cat/thread_pool/{thread_pool_patterns}"
     ]
   }
 }

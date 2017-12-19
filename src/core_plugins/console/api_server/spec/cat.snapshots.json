@@ -1,8 +1,8 @@
 {
-  "_cat/aliases": {
+  "_cat/snapshots": {
     "url_params": {
       "format": "",
-      "local": "__flag__",
+      "ignore_unavailable": "__flag__",
       "master_timeout": "",
       "h": [],
       "help": "__flag__",
@@ -13,8 +13,8 @@
       "GET"
     ],
     "patterns": [
-      "/_cat/aliases",
-      "/_cat/aliases/{name}"
+      "/_cat/snapshots",
+      "/_cat/snapshots/{repository}"
     ]
   }
 }

@@ -1,5 +1,5 @@
 {
-  "_cat/aliases": {
+  "_cat/health": {
     "url_params": {
       "format": "",
       "local": "__flag__",
@@ -7,14 +7,14 @@
       "h": [],
       "help": "__flag__",
       "s": [],
+      "ts": "__flag__",
       "v": "__flag__"
     },
     "methods": [
       "GET"
     ],
     "patterns": [
-      "/_cat/aliases",
-      "/_cat/aliases/{name}"
+      "/_cat/health"
     ]
   }
 }
