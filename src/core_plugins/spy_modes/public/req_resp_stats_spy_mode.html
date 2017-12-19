@@ -10,9 +10,9 @@
   <i class="fa fa-danger"></i> Request Failed
 </div>
 
-<div ng-if="spy.mode.name === 'request'" class="euiText">
-  <h3>
-    Elasticsearch request body &nbsp;
+<div ng-if="spy.mode.name === 'request'">
+  <h3 class="euiTitle euiTitle--small">
+    Elasticsearch request body
   </h3>
   <div
     data-test-subj="visualizationEsRequestBody"
@@ -24,9 +24,9 @@
   </div>
 </div>
 
-<div ng-if="spy.mode.name === 'response'" class="euiText">
-  <h3>
-    Elasticsearch response body &nbsp;
+<div ng-if="spy.mode.name === 'response'">
+  <h3 class="euiTitle euiTitle--small">
+    Elasticsearch response body
   </h3>
   <div class="euiCodeBlock euiCodeBlock--light euiCodeBlock--fontSmall euiCodeBlock--paddingSmall">
     <code class="euiCodeBlock__code">
