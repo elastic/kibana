@@ -44,57 +44,6 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('should show Split Gauges', function () {
-        const expectedTexts = [ 'win 8', 'win xp', 'win 7', 'ios', 'osx' ];
-        return PageObjects.visualize.clickMetricEditor()
-          .then(function clickBucket() {
-            log.debug('Bucket = Split Group');
-            return PageObjects.visualize.clickBucket('Split Group');
-          })
-          .then(function selectAggregation() {
-            log.debug('Aggregation = Terms');
-            return PageObjects.visualize.selectAggregation('Terms');
-          })
-          .then(function selectField() {
-            log.debug('Field = machine.os.raw');
-            return PageObjects.visualize.selectField('machine.os.raw');
-          })
-          .then(function clickGo() {
-            return PageObjects.visualize.clickGo();
-          })
-          .then(function () {
-            return retry.try(function tryingForTime() {
-              return PageObjects.visualize.getGaugeValue()
-                .then(function (metricValue) {
-                  expect(expectedTexts).to.eql(metricValue);
-                });
-            });
-          });
-      });
-
-      it('should show correct values for fields with fieldFormatters', async function () {
-        const expectedTexts = [ '2,904\nwin 8: Count', '5.528KB' ];
-
-
-        await PageObjects.visualize.clickMetricEditor();
-        await PageObjects.visualize.clickBucket('Split Group');
-        await PageObjects.visualize.selectAggregation('Terms');
-        await PageObjects.visualize.selectField('machine.os.raw');
-        await PageObjects.visualize.setSize('1');
-        await PageObjects.visualize.clickAddMetric();
-        await PageObjects.visualize.clickBucket('Metric');
-        await PageObjects.visualize.selectAggregation('Average', 'metrics');
-        await PageObjects.visualize.selectField('bytes', 'metrics');
-        await PageObjects.visualize.clickGo();
-
-        return retry.try(function tryingForTime() {
-          return PageObjects.visualize.getGaugeValue()
-            .then(function (metricValue) {
-              expect(expectedTexts).to.eql(metricValue);
-            });
-        });
-      });
-
     });
   });
 }
