@@ -144,7 +144,7 @@ export function Home({ addBasePath, directories }) {
       >
         <EuiFlexItem>
           <EuiTitle size="l">
-            <h1>Welcome to Kibana</h1>
+            <h1>Add Data to Kibana</h1>
           </EuiTitle>
         </EuiFlexItem>
 
