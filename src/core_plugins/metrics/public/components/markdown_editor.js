@@ -11,9 +11,6 @@ import { KuiCodeEditor } from 'ui_framework/components';
 import _ from 'lodash';
 import 'brace/mode/markdown';
 import 'brace/theme/github';
-import {
-  EuiCodeBlock,
-} from '@elastic/eui';
 
 import {
   EuiText,

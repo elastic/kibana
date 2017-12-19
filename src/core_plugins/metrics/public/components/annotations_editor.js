@@ -8,9 +8,9 @@ import FieldSelect from './aggs/field_select';
 import uuid from 'uuid';
 import IconSelect from './icon_select';
 import YesNo from './yes_no';
-import { htmlIdGenerator } from '@elastic/eui';
 
 import {
+  htmlIdGenerator,
   EuiText,
 } from '@elastic/eui';
 
