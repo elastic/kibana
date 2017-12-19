@@ -14,6 +14,13 @@ uiModules
     return {
       restrict: 'E',
       template: spyTemplate,
+      scope: {
+        vis: '<',
+        spy: '<',
+        searchSource: '<',
+        visData: '<',
+        uiState: '<'
+      },
       link: function ($scope, $el) {
         let currentSpy;
         const $container = $el.find('[data-spy-content-container]');

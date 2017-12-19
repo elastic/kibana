@@ -21,4 +21,11 @@
     class="visualize-chart"></div>
   <visualize-legend ng-if="addLegend"></visualize-legend>
 </div>
-<visualize-spy ng-if="showSpyPanel"></visualize-spy>
+<visualize-spy
+  ng-if="showSpyPanel"
+  spy="spy"
+  vis="vis"
+  search-source="searchSource"
+  vis-data="visData"
+  ui-state="uiState"
+></visualize-spy>
