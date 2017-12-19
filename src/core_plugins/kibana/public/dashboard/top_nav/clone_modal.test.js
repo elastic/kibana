@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import { mount, render } from 'enzyme';
 import {
   findTestSubject,
-} from 'ui_framework/test';
+} from '@elastic/eui/lib/test';
 
 import {
   DashboardCloneModal,
