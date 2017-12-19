@@ -2,14 +2,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import {
-  KuiModal,
-  KuiModalHeader,
-  KuiModalHeaderTitle,
-  KuiModalBody,
-  KuiModalFooter,
-  KuiButton,
-  KuiModalOverlay
-} from 'ui_framework/components';
+  EuiButton,
+  EuiFieldText,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
+  EuiModalOverlay,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 
 export class DashboardCloneModal extends React.Component {
   constructor(props) {
@@ -30,53 +33,53 @@ export class DashboardCloneModal extends React.Component {
 
   render() {
     return (
-      <KuiModalOverlay>
-        <KuiModal
+      <EuiModalOverlay>
+        <EuiModal
           data-tests-subj="dashboardCloneModal"
           className="dashboardCloneModal"
           onClose={this.props.onClose}
         >
-          <KuiModalHeader>
-            <KuiModalHeaderTitle>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>
               Clone Dashboard
-            </KuiModalHeaderTitle>
-          </KuiModalHeader>
+            </EuiModalHeaderTitle>
+          </EuiModalHeader>
 
-          <KuiModalBody>
-            <p className="kuiText kuiVerticalRhythm">
-              Please enter a new name for your dashboard.
-            </p>
+          <EuiModalBody>
+            <EuiText>
+              <p>
+                Please enter a new name for your dashboard.
+              </p>
+            </EuiText>
 
-            <div className="kuiVerticalRhythm">
-              <input
-                autoFocus
-                data-test-subj="clonedDashboardTitle"
-                className="kuiTextInput kuiTextInput--large"
-                value={this.state.newDashboardName}
-                onChange={this.onInputChange}
-              />
-            </div>
-          </KuiModalBody>
+            <EuiSpacer />
 
-          <KuiModalFooter>
-            <KuiButton
-              buttonType="hollow"
+            <EuiFieldText
+              autoFocus
+              data-test-subj="clonedDashboardTitle"
+              value={this.state.newDashboardName}
+              onChange={this.onInputChange}
+            />
+          </EuiModalBody>
+
+          <EuiModalFooter>
+            <EuiButton
               data-test-subj="cloneCancelButton"
               onClick={this.props.onClose}
             >
               Cancel
-            </KuiButton>
+            </EuiButton>
 
-            <KuiButton
-              buttonType="primary"
+            <EuiButton
+              fill
               data-test-subj="cloneConfirmButton"
               onClick={this.cloneDashboard}
             >
               Confirm Clone
-            </KuiButton>
-          </KuiModalFooter>
-        </KuiModal>
-      </KuiModalOverlay>
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      </EuiModalOverlay>
     );
   }
 }

@@ -2,50 +2,57 @@
 
 exports[`renders DashboardCloneModal 1`] = `
 <div
-  class="kuiModalOverlay"
+  class="euiModalOverlay"
 >
   <div>
     <div
-      class="kuiModal dashboardCloneModal"
+      class="euiModal dashboardCloneModal"
       data-tests-subj="dashboardCloneModal"
       tabindex="0"
     >
       <div
-        class="kuiModalHeader"
+        class="euiModalHeader"
       >
         <div
-          class="kuiModalHeader__title"
+          class="euiModalHeader__title"
         >
           Clone Dashboard
         </div>
       </div>
       <div
-        class="kuiModalBody"
+        class="euiModalBody"
       >
-        <p
-          class="kuiText kuiVerticalRhythm"
-        >
-          Please enter a new name for your dashboard.
-        </p>
         <div
-          class="kuiVerticalRhythm"
+          class="euiText"
+        >
+          <p>
+            Please enter a new name for your dashboard.
+          </p>
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l"
+        />
+        <div
+          class="euiFormControlLayout"
         >
           <input
-            class="kuiTextInput kuiTextInput--large"
+            class="euiFieldText"
             data-test-subj="clonedDashboardTitle"
+            type="text"
             value="dash title"
           />
         </div>
       </div>
       <div
-        class="kuiModalFooter"
+        class="euiModalFooter"
       >
         <button
-          class="kuiButton kuiButton--hollow"
+          class="euiButton euiButton--primary"
           data-test-subj="cloneCancelButton"
+          type="button"
         >
           <span
-            class="kuiButton__inner"
+            class="euiButton__content"
           >
             <span>
               Cancel
@@ -53,11 +60,12 @@ exports[`renders DashboardCloneModal 1`] = `
           </span>
         </button>
         <button
-          class="kuiButton kuiButton--primary"
+          class="euiButton euiButton--primary euiButton--fill"
           data-test-subj="cloneConfirmButton"
+          type="button"
         >
           <span
-            class="kuiButton__inner"
+            class="euiButton__content"
           >
             <span>
               Confirm Clone
