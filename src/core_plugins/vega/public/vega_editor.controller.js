@@ -3,7 +3,7 @@ import hjson from 'hjson';
 import compactStringify from 'json-stringify-pretty-compact';
 
 const module = uiModules.get('kibana/vega', ['kibana']);
-module.controller('VegaEditorController', ($scope /*, $element, $timeout, kbnUiAceKeyboardModeService*/) => {
+module.controller('VegaEditorController', ($scope /*, kbnUiAceKeyboardModeService*/) => {
 
   return new (class VegaEditorController {
     constructor() {
@@ -14,7 +14,7 @@ module.controller('VegaEditorController', ($scope /*, $element, $timeout, kbnUiA
         session.setTabSize(2);
         session.setUseSoftTabs(true);
 
-        // FIXME: enabling this service breaks ACE width auto-resize
+        // FIXME: enabling this service breaks ACE text wrapping on width resize
         // kbnUiAceKeyboardModeService.initialize($scope, editor);
 
         this.aceEditor = editor;
@@ -33,6 +33,10 @@ module.controller('VegaEditorController', ($scope /*, $element, $timeout, kbnUiA
           keepWsc: true,
         });
       };
+
+      // $hack: by default, Vega vis should enable auto-apply, as it is a more natural way
+      // to develop Vega visualizations, and consistent with other Vega tools and Kibana Vega plugin.
+      $scope.$parent.$parent.$parent.$parent.autoApplyEnabled = true;
     }
 
     _getCodeWidth() {
@@ -51,14 +55,17 @@ module.controller('VegaEditorController', ($scope /*, $element, $timeout, kbnUiA
           const spec2 = stringify(spec, opts);
           doc.setValue(spec2);
 
-          // FIXME!  HACK!  For some reason, spec is not updated via ACE's setValue -> onChange -> ace-ui
-          // $scope.vis.params.spec = spec2;
+          // FIXME!
+          // The dirty state of the spec is not updated via ACE's setValue -> onChange -> ace-ui
+          // Repo: disable auto, use "format as ..." to change the spec, click save.
+          // Observe that stale version is saved.
+          // FIXME: Enabling this kills the editor UNDO after formatting (loss of comments with ->JSON)
+          $scope.vis.params.spec = spec2;
 
         } catch (err) {
           // FIXME!
           alert(err);
         }
-        // this.aceEditor.focus();
       });
     }
   })();

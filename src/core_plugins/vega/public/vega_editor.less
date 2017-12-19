@@ -3,6 +3,13 @@
     // this is the only control, no need for padding
     padding: 0 !important;
   }
+
+  // Hiding the "discard" button, which is not needed for a single text entry editor:
+  // * There are other ways to undo: Ctrl+Z, window refresh, or navigating away to another Kibana tab.
+  // * It is dangerous as it may result in large loss of work without a way to undo
+  .navbar-nav li:nth-of-type(3) {
+    display: none;
+  }
 }
 
 visualization-editor {
