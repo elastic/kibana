@@ -13,7 +13,7 @@ import {
   ExitFullScreenButton,
 } from './exit_full_screen_button';
 
-import { keyCodes } from 'ui_framework/services';
+import { keyCodes } from '@elastic/eui';
 
 
 test('is rendered', () => {

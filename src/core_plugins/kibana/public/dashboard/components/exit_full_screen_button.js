@@ -8,7 +8,7 @@ import {
 
 import {
   keyCodes,
-} from 'ui_framework/services';
+} from '@elastic/eui';
 
 export class ExitFullScreenButton extends PureComponent {
 

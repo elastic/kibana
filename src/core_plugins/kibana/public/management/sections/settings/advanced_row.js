@@ -1,7 +1,7 @@
 import 'ui/elastic_textarea';
 import 'ui/filters/markdown';
 import { uiModules } from 'ui/modules';
-import { keyCodes } from 'ui_framework/services';
+import { keyCodes } from '@elastic/eui';
 import advancedRowTemplate from 'plugins/kibana/management/sections/settings/advanced_row.html';
 
 uiModules.get('apps/management')

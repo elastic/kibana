@@ -34,7 +34,7 @@ import {
   suggest,
   insertAtLocation,
 } from './timelion_expression_input_helpers';
-import { comboBoxKeyCodes } from 'ui_framework/services';
+import { comboBoxKeyCodes } from '@elastic/eui';
 import { ArgValueSuggestionsProvider } from './timelion_expression_suggestions/arg_value_suggestions';
 
 const Parser = PEG.buildParser(grammar);
