@@ -1,19 +1,6 @@
-* {
-  box-sizing: border-box;
-
-  &:before,
-  &:after {
-    box-sizing: border-box;
-  }
-}
-
 // Removes outline, but still provides a two color box shadow that works anywhere.
 :focus {
   @include focus;
-}
-
-body {
-  font-family: $kuiFontFamily;
 }
 
 /**
@@ -21,10 +8,4 @@ body {
  */
 main {
   display: block; /* 1 */
-}
-
-button,
-input[type="submit"],
-input[type="button"] {
-  border-radius: 0;
 }

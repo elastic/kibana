@@ -11,6 +11,9 @@ import { KuiCodeEditor } from 'ui_framework/components';
 import _ from 'lodash';
 import 'brace/mode/markdown';
 import 'brace/theme/github';
+import {
+  EuiCodeBlock,
+} from '@elastic/eui';
 
 class MarkdownEditor extends Component {
   constructor(props) {
@@ -129,15 +132,14 @@ class MarkdownEditor extends Component {
             There is also a special variable named <code>_all</code> which you can use to access the entire tree. This is useful for
             creating lists with data from a group by...
           </div>
-          <pre>
-            <code>
-              {`# All servers:
 
-{{#each _all}}
-- {{ label }} {{ last.formatted }}
-{{/each}}`}
-            </code>
-          </pre>
+          <EuiCodeBlock>
+            {`# All servers:
+
+            {{#each _all}}
+            - {{ label }} {{ last.formatted }}
+            {{/each}}`}
+          </EuiCodeBlock>
         </div>
       </div>
     );

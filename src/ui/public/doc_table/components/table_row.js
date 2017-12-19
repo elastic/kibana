@@ -166,7 +166,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
           const $target = reuse ? $(reuse).detach() : $(html);
           $target.data('discover:html', html);
           const $before = $cells.eq(i - 1);
-          if ($before.size()) {
+          if ($before.length) {
             $before.after($target);
           } else {
             $el.append($target);
