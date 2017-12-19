@@ -10,7 +10,7 @@
   <i class="fa fa-danger"></i> Request Failed
 </div>
 
-<div ng-if="spy.mode.name === 'request'">
+<div ng-if="mode === 'request'">
   <h3 class="euiTitle euiTitle--small">
     Elasticsearch request body
   </h3>
@@ -24,7 +24,7 @@
   </div>
 </div>
 
-<div ng-if="spy.mode.name === 'response'">
+<div ng-if="mode === 'response'">
   <h3 class="euiTitle euiTitle--small">
     Elasticsearch response body
   </h3>
@@ -35,7 +35,7 @@
   </div>
 </div>
 
-<div ng-if="spy.mode.name === 'stats'">
+<div ng-if="mode === 'stats'">
   <table class="table">
     <tr ng-repeat="pair in stats">
       <td>{{pair[0]}}</td>

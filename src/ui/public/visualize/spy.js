@@ -1,5 +1,4 @@
 import $ from 'jquery';
-import _ from 'lodash';
 import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
 import { uiModules } from 'ui/modules';
 import spyTemplate from 'ui/visualize/spy.html';
@@ -18,7 +17,8 @@ uiModules
         vis: '<',
         spy: '<',
         searchSource: '<',
-        uiState: '<'
+        uiState: '<',
+        visElement: '<',
       },
       link: function ($scope, $el) {
 
@@ -26,11 +26,14 @@ uiModules
         if (!$scope.uiState) $scope.uiState = new PersistedState({});
 
         let currentSpy;
-        let defaultMode;
+        let defaultModeName;
+
         const $container = $el.find('[data-spy-content-container]');
-        let fullPageSpy = _.get($scope.spy, 'mode.fill', false);
+
         $scope.modes = [];
-        $scope.spy.params = $scope.spy.params || {};
+
+        $scope.currentMode = null;
+        $scope.maximizedSpy = false;
 
         /**
          * Filter for modes that should actually be active for this visualization.
@@ -42,86 +45,114 @@ uiModules
           $scope.modes = spyModes.inOrder.filter(mode =>
             mode.showMode ? mode.showMode($scope.vis) : true
           );
-          defaultMode = $scope.modes.length > 0 ? $scope.modes[0].name : null;
+          defaultModeName = $scope.modes.length > 0 ? $scope.modes[0].name : null;
         }
 
         filterModes();
         $scope.$watch('vis', filterModes);
 
-        function getSpyObject(name) {
-          name = _.isUndefined(name) ? $scope.spy.mode.name : name;
-          fullPageSpy = (_.isNull(name)) ? false : fullPageSpy;
-
-          return {
-            name: name,
-            fill: fullPageSpy,
-          };
+        function syncFromUiState() {
+          $scope.currentMode = $scope.uiState.get('spy.mode.name');
+          $scope.maximizedSpy = $scope.uiState.get('spy.mode.fill');
         }
 
+        /**
+         * Write our current state into the uiState.
+         * This will write the name and fill (maximized) into the uiState
+         * if a panel is opened (currentMode is set) or it will otherwise
+         * remove the spy key from the uiState.
+         */
+        function updateUiState() {
+          if ($scope.currentMode) {
+            $scope.uiState.set('spy.mode', {
+              name: $scope.currentMode,
+              fill: $scope.maximizedSpy,
+            });
+          } else {
+            $scope.uiState.removeChild('spy');
+          }
+        }
+
+        // Initially sync the panel state from the uiState.
+        syncFromUiState();
+
+        // Whenever the uiState changes, update the settings from it.
+        $scope.uiState.on('change', syncFromUiState);
+        $scope.$on('$destroy', () => $scope.uiState.off('change', syncFromUiState));
+
         $scope.setSpyMode = function setSpyMode(modeName) {
-          if (!_.isString(modeName)) modeName = null;
-          $scope.spy.mode = getSpyObject(modeName);
+          $scope.currentMode = modeName;
+          updateUiState();
           $scope.$emit('render');
         };
 
-        const renderSpy = function (spyName) {
-          const newMode = spyModes.byName[spyName];
+        $scope.toggleDisplay = function () {
+          // If the spy panel is already shown (a currentMode is set),
+          // close the panel by setting the name to null, otherwise open the
+          // panel (i.e. set it to the default mode name).
+          $scope.setSpyMode($scope.currentMode ? null : defaultModeName);
+        };
 
-          // clear the current value
+        /**
+         * Should we currently show the spy panel. True if a currentMode has been set.
+         */
+        $scope.shouldShowSpyPanel = () => {
+          return !!$scope.currentMode;
+        };
+
+        /**
+         * Toggle maximized state of spy panel and update the UI state.
+         */
+        $scope.toggleMaximize = function () {
+          $scope.maximizedSpy = !$scope.maximizedSpy;
+          updateUiState();
+        };
+
+        /**
+         * Whenever the maximized state changes, we also need to toggle the class
+         * of the visualization.
+         */
+        $scope.$watch('maximizedSpy', (maximized) => {
+          $scope.visElement.toggleClass('spy-only', !!maximized);
+        });
+
+        /**
+         * Watch for changes of the currentMode. Whenever it changes, we render
+         * the new mode into the template. Therefore we remove the previously rendered
+         * mode (if existing) and compile and bind the template of the new mode.
+         */
+        $scope.$watch('currentMode', (mode, prevMode) => {
+          if (mode === prevMode && (currentSpy && currentSpy.mode === mode)) {
+            // When the mode hasn't changed and we have already rendered it, return.
+            return;
+          }
+
+          const newMode = spyModes.byName[mode];
+
           if (currentSpy) {
-            currentSpy.$container && currentSpy.$container.remove();
-            currentSpy.$scope && currentSpy.$scope.$destroy();
-            $scope.spy.mode = {};
+            // If we already have a spy loaded, remove that HTML element and
+            // destroy the previous Angular scope.
+            currentSpy.$container.remove();
+            currentSpy.$scope.$destroy();
             currentSpy = null;
           }
 
-          // no further changes
+          // If we want haven't specified a new mode we won't do anything further.
           if (!newMode) return;
 
-          // update the spy mode and append to the container
-          const selectedSpyMode = getSpyObject(newMode.name);
-          $scope.spy.mode = selectedSpyMode;
-          $scope.selectedModeName = selectedSpyMode.name;
+          const contentScope = $scope.$new();
+          const contentContainer = $('<div class="visualize-spy-content">');
+          contentContainer.append($compile(newMode.template)(contentScope));
 
-          currentSpy = _.assign({
-            $scope: $scope.$new(),
-            $container: $('<div class="visualize-spy-content">').appendTo($container)
-          }, $scope.spy.mode);
+          $container.append(contentContainer);
 
-          currentSpy.$container.append($compile(newMode.template)(currentSpy.$scope));
-          newMode.link && newMode.link(currentSpy.$scope, currentSpy.$container);
-        };
+          currentSpy = {
+            $scope: contentScope,
+            $container: contentContainer,
+            mode: mode,
+          };
 
-        $scope.toggleDisplay = function () {
-          const modeName = _.get($scope.spy, 'mode.name');
-          $scope.setSpyMode(modeName ? null : defaultMode);
-        };
-
-        $scope.toggleFullPage = function () {
-          fullPageSpy = !fullPageSpy;
-          $scope.spy.mode = getSpyObject();
-        };
-
-        // sync external uiState changes
-        const syncUIState = () => $scope.spy.mode = $scope.uiState.get('spy.mode');
-        $scope.uiState.on('change', syncUIState);
-        $scope.$on('$destroy', () => $scope.uiState.off('change', syncUIState));
-
-        // re-render the spy when the name of fill modes change
-        $scope.$watchMulti([
-          'spy.mode.name',
-          'spy.mode.fill'
-        ], function (newVals, oldVals) {
-          // update the ui state, but only if it really changes
-          const changedVals = newVals.filter((val) => !_.isUndefined(val)).length > 0;
-          if (changedVals && !_.isEqual(newVals, oldVals)) {
-            $scope.uiState.set('spy.mode', $scope.spy.mode);
-          }
-
-          // ensure the fill mode is synced
-          fullPageSpy = _.get($scope.spy, 'mode.fill', fullPageSpy);
-
-          renderSpy(_.get($scope.spy, 'mode.name', null));
+          newMode.link && newMode.link(currentSpy.$scope, currentSpy.$element);
         });
       }
     };

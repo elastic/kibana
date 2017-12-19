@@ -10,14 +10,15 @@
   >
     <span
       class="kuiIcon"
-      ng-class="spy.mode.name ? 'fa-chevron-circle-down' : 'fa-chevron-circle-up'"
+      ng-class="shouldShowSpyPanel() ? 'fa-chevron-circle-down' : 'fa-chevron-circle-up'"
     ></span>
   </button>
 </div>
 
 <div
   class="visualize-spy-container"
-  ng-show="spy.mode.name"
+  ng-class="{'only': maximizedSpy}"
+  ng-show="shouldShowSpyPanel()"
 >
   <div class="visualize-spy__tab-container euiTabs euiTabs--small">
     <div role="tablist" class="visualize-spy__tabs">
@@ -25,8 +26,8 @@
         role="tab"
         class="euiTab"
         ng-repeat="mode in modes"
-        aria-selected="{{mode.name === selectedModeName}}"
-        ng-class="{'euiTab-isSelected': mode.name === selectedModeName}"
+        aria-selected="{{mode.name === currentMode}}"
+        ng-class="{'euiTab-isSelected': mode.name === currentMode}"
         data-test-subj="spyModeSelect-{{::mode.name}}"
         ng-click="setSpyMode(mode.name)"
       >
@@ -39,11 +40,11 @@
     <button
       aria-label="Toggle spy panel fullscreen"
       class="kuiButton kuiButton--hollow"
-      ng-click="toggleFullPage()"
+      ng-click="toggleMaximize()"
     >
       <span
         class="kuiIcon"
-        ng-class="spy.mode.fill ? 'fa-compress' : 'fa-expand'"
+        ng-class="currentMode.fill ? 'fa-compress' : 'fa-expand'"
       ></span>
     </button>
   </div>
