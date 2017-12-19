@@ -9,7 +9,6 @@ uiModules
   .directive('visualizeSpy', function (Private, $compile) {
 
     const spyModes = Private(SpyModesRegistryProvider);
-    const defaultMode = spyModes.inOrder[0].name;
 
     return {
       restrict: 'E',
@@ -23,10 +22,27 @@ uiModules
       },
       link: function ($scope, $el) {
         let currentSpy;
+        let defaultMode;
         const $container = $el.find('[data-spy-content-container]');
         let fullPageSpy = _.get($scope.spy, 'mode.fill', false);
-        $scope.modes = spyModes;
+        $scope.modes = [];
         $scope.spy.params = $scope.spy.params || {};
+
+        /**
+         * Filter for modes that should actually be active for this visualization.
+         * This will call the showMode method of the mode, pass it the vis object.
+         * Depending on whether or not that returns a truthy value, it will be shown
+         * or not. If the method is not present, the mode will always be shown.
+         */
+        function filterModes() {
+          $scope.modes = spyModes.inOrder.filter(mode =>
+            mode.showMode ? mode.showMode($scope.vis) : true
+          );
+          defaultMode = $scope.modes.length > 0 ? $scope.modes[0].name : null;
+        }
+
+        filterModes();
+        $scope.$watch('vis', filterModes);
 
         function getSpyObject(name) {
           name = _.isUndefined(name) ? $scope.spy.mode.name : name;
@@ -45,7 +61,7 @@ uiModules
         }
 
         const renderSpy = function (spyName) {
-          const newMode = $scope.modes.byName[spyName];
+          const newMode = spyModes.byName[spyName];
 
           // clear the current value
           if (currentSpy) {
