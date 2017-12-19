@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
 import { uiModules } from 'ui/modules';
 import spyTemplate from 'ui/visualize/spy.html';
+import { PersistedState } from 'ui/persisted_state';
 
 uiModules
   .get('app/visualize')
@@ -20,6 +21,10 @@ uiModules
         uiState: '<'
       },
       link: function ($scope, $el) {
+
+        // If no uiState has been passed, create a local one for this spy.
+        if (!$scope.uiState) $scope.uiState = new PersistedState({});
+
         let currentSpy;
         let defaultMode;
         const $container = $el.find('[data-spy-content-container]');
@@ -97,12 +102,10 @@ uiModules
           $scope.spy.mode = getSpyObject();
         };
 
-        if ($scope.uiState) {
-          // sync external uiState changes
-          const syncUIState = () => $scope.spy.mode = $scope.uiState.get('spy.mode');
-          $scope.uiState.on('change', syncUIState);
-          $scope.$on('$destroy', () => $scope.uiState.off('change', syncUIState));
-        }
+        // sync external uiState changes
+        const syncUIState = () => $scope.spy.mode = $scope.uiState.get('spy.mode');
+        $scope.uiState.on('change', syncUIState);
+        $scope.$on('$destroy', () => $scope.uiState.off('change', syncUIState));
 
         // re-render the spy when the name of fill modes change
         $scope.$watchMulti([
