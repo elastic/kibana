@@ -1,27 +1,23 @@
 <div>
   <div class="euiFlexGroup euiFlexGroup--responsive euiFlexGroup--gutterMedium">
     <div class="euiFlexItem euiText">
-      <div class="form-group">
-        <h3>
-          Vis State
-        </h3>
-        <div class="euiCodeBlock euiCodeBlock--light euiCodeBlock--fontSmall euiCodeBlock--paddingSmall">
-          <code class="euiCodeBlock__code">
-            <pre class="euiCodeBlock__pre">{{visStateJson}}</pre>
-          </code>
-        </div>
+      <h3>
+        Vis State
+      </h3>
+      <div class="euiCodeBlock euiCodeBlock--light euiCodeBlock--fontSmall euiCodeBlock--paddingSmall">
+        <code class="euiCodeBlock__code">
+          <pre class="euiCodeBlock__pre">{{vis.getEnabledState() | json}}</pre>
+        </code>
       </div>
     </div>
     <div class="euiFlexItem euiText">
-      <div class="form-group">
-        <h3>Details</h3>
-        <dl class="euiDescriptionList euiDescriptionList--column">
-          <dt class="euiDescriptionList__title">Type Name</dt>
-          <dd class="euiDescriptionList__description">{{vis.type.name}}</dd>
-          <dt class="euiDescriptionList__title">Hierarchical Data</dt>
-          <dd class="euiDescriptionList__description">{{vis.isHierarchical()}}</dd>
-        </dl>
-      </div>
+      <h3>Details</h3>
+      <dl class="euiDescriptionList euiDescriptionList--column">
+        <dt class="euiDescriptionList__title">Type Name</dt>
+        <dd class="euiDescriptionList__description">{{vis.type.name}}</dd>
+        <dt class="euiDescriptionList__title">Hierarchical Data</dt>
+        <dd class="euiDescriptionList__description">{{vis.isHierarchical()}}</dd>
+      </dl>
     </div>
   </div>
 </div>
