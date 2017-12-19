@@ -28,7 +28,6 @@ export function VislibLibAxisTitleProvider() {
           const div = d3.select(el);
           const width = $(el).width();
           const height = $(el).height();
-          const titlePadding = 12;
           const axisPrefix = config.isHorizontal() ? 'x' : 'y';
 
           const svg = div.append('svg')
@@ -39,11 +38,12 @@ export function VislibLibAxisTitleProvider() {
           const bbox = svg.append('text')
             .attr('transform', function () {
               if (config.isHorizontal()) {
-                return `translate(${width / 2},${titlePadding})`;
+                return `translate(${width / 2},0)`;
               }
-              return `translate(${titlePadding},${height / 2}) rotate(270)`;
+              return `translate(0,${height / 2}) rotate(270)`;
             })
             .attr('text-anchor', 'middle')
+            .attr('alignment-baseline', 'hanging')
             .text(config.get('title.text'))
             .node()
             .getBBox();
