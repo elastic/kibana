@@ -56,9 +56,6 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.dashboard.clickFullScreenMode();
       await PageObjects.dashboard.toggleExpandPanel();
 
-      // TODO: hopefully we will be able to get rid of this sleep once render-complete is implemented.
-      // right now the render-counter value is unstable and unreliable.  Sometimes it'll be 4 when it's "settled",
-      // sometimes it'll be 6.
       await PageObjects.dashboard.waitForRenderComplete();
       await PageObjects.common.sleep(1000);
 

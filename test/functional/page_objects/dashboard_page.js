@@ -588,7 +588,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
           return await sharedItem.getAttribute('data-render-complete');
         }));
         if (renderComplete.length !== sharedItems.length) {
-          throw new Error('Some shared items dont have render counter attribute');
+          throw new Error('Some shared items dont have data-render-complete attribute');
         }
         const totalCount = renderComplete.filter(value => value === 'true' || value === 'disabled').length;
         if (totalCount < sharedItems.length) {
