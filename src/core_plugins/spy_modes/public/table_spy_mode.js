@@ -12,6 +12,7 @@ function VisSpyTableProvider(Notifier, $filter, $rootScope, config, Private) {
     display: 'Table',
     order: 1,
     template: tableSpyModeTemplate,
+    showMode: vis => vis.type.requestHandler === 'courier' && vis.type.requiresSearch,
     link: function tableLinkFn($scope) {
       $rootScope.$watchMulti.call($scope, [
         'vis',

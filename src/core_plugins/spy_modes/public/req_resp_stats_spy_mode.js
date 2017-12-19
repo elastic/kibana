@@ -27,6 +27,10 @@ const linkReqRespStats = function ($scope) {
   });
 };
 
+function shouldShowSpyMode(vis) {
+  return vis.type.requestHandler === 'courier' && vis.type.requiresSearch;
+}
+
 SpyModesRegistryProvider
   .register(function () {
     return {
@@ -34,6 +38,7 @@ SpyModesRegistryProvider
       display: 'Request',
       order: 2,
       template: reqRespStatsHTML,
+      showMode: shouldShowSpyMode,
       link: linkReqRespStats
     };
   })
@@ -43,6 +48,7 @@ SpyModesRegistryProvider
       display: 'Response',
       order: 3,
       template: reqRespStatsHTML,
+      showMode: shouldShowSpyMode,
       link: linkReqRespStats
     };
   })
@@ -52,6 +58,7 @@ SpyModesRegistryProvider
       display: 'Statistics',
       order: 4,
       template: reqRespStatsHTML,
+      showMode: shouldShowSpyMode,
       link: linkReqRespStats
     };
   });
