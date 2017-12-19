@@ -61,7 +61,7 @@ export const METRICBEAT_INSTRUCTIONS = {
       title: 'Start Metricbeat',
       commands: [
         './metricbeat setup -e',
-        './metricbeat -e --setup',
+        './metricbeat -e',
       ],
       textPost: 'The `setup` command loads the Kibana dashboards.' +
                 ' If the dashboards are already set up, omit this command.'
