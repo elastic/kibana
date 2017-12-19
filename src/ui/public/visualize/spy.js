@@ -17,7 +17,6 @@ uiModules
         vis: '<',
         spy: '<',
         searchSource: '<',
-        visData: '<',
         uiState: '<'
       },
       link: function ($scope, $el) {

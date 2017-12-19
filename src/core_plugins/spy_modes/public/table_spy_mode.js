@@ -16,9 +16,9 @@ function VisSpyTableProvider(Notifier, $filter, $rootScope, config, Private) {
     link: function tableLinkFn($scope) {
       $rootScope.$watchMulti.call($scope, [
         'vis',
-        'visData'
+        'searchSource.rawResponse'
       ], function () {
-        if (!$scope.vis || !$scope.visData) {
+        if (!$scope.vis || !$scope.searchSource.rawResponse) {
           $scope.table = null;
         } else {
           if (!$scope.spy.params.spyPerPage) {
