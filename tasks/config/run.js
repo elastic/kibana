@@ -200,7 +200,7 @@ module.exports = function (grunt) {
       options: {
         wait: false,
         ready: /Optimization .+ complete/,
-        quiet: false
+        quiet: true
       },
       cmd: optimizeScript,
       args: [
