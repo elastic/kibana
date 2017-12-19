@@ -82,11 +82,15 @@ export function AggTypesBucketsTermsProvider(Private) {
         write: _.noop
       }, {
         name: 'otherBucketLabel',
-        default: '_other_',
+        default: 'Other',
+        write: _.noop
+      }, {
+        name: 'missingBucket',
+        default: false,
         write: _.noop
       }, {
         name: 'missingBucketLabel',
-        default: '',
+        default: 'Missing',
         write: _.noop
       },
       {
