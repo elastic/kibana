@@ -1,6 +1,7 @@
 import React from 'react';
 import sinon from 'sinon';
 import { mount, shallow } from 'enzyme';
+import { findTestSubject } from '@elastic/eui/lib/test';
 
 import {
   ListControlEditor,
@@ -82,7 +83,7 @@ test('handleCheckboxOptionChange - multiselect', () => {
     handleCheckboxOptionChange={handleCheckboxOptionChange}
     handleNumberOptionChange={handleNumberOptionChange}
   />);
-  const checkbox = component.find('#multiselect-0');
+  const checkbox = findTestSubject(component, 'listControlMultiselectInput');
   checkbox.simulate('change', { target: { checked: true } });
   sinon.assert.notCalled(handleFieldNameChange);
   sinon.assert.notCalled(handleIndexPatternChange);
@@ -112,7 +113,7 @@ test('handleNumberOptionChange - size', () => {
     handleCheckboxOptionChange={handleCheckboxOptionChange}
     handleNumberOptionChange={handleNumberOptionChange}
   />);
-  const input = component.find('#size-0');
+  const input = findTestSubject(component, 'listControlSizeInput');
   input.simulate('change', { target: { value: 7 } });
   sinon.assert.notCalled(handleCheckboxOptionChange);
   sinon.assert.notCalled(handleFieldNameChange);

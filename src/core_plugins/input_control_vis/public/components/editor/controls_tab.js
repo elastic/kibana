@@ -2,8 +2,16 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { ControlEditor } from './control_editor';
-import { KuiButton, KuiButtonIcon } from 'ui_framework/components';
 import { addControl, moveControl, newControl, removeControl, setControl } from '../../editor_utils';
+
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiPanel,
+  EuiSelect,
+} from '@elastic/eui';
 
 export class ControlsTab extends Component {
 
@@ -103,28 +111,39 @@ export class ControlsTab extends Component {
 
         {this.renderControls()}
 
-        <div className="kuiSideBarFormRow">
-          <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
-            <select
-              aria-label="Select control type"
-              className="kuiSelect"
-              value={this.state.type}
-              onChange={evt => this.setState({ type: evt.target.value })}
-            >
-              <option value="range">Range slider</option>
-              <option value="list">Options list</option>
-            </select>
-          </div>
-          <KuiButton
-            buttonType="primary"
-            type="button"
-            icon={<KuiButtonIcon type="create" />}
-            onClick={this.handleAddControl}
-            data-test-subj="inputControlEditorAddBtn"
-          >
-            Add
-          </KuiButton>
-        </div>
+        <EuiPanel grow={false}>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiFormRow
+                id="slectControlType"
+              >
+                <EuiSelect
+                  options={[
+                    { value: 'range', text: 'Range slider' },
+                    { value: 'list', text: 'Options list' },
+                  ]}
+                  value={this.state.type}
+                  onChange={evt => this.setState({ type: evt.target.value })}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiFormRow
+                id="addControl"
+              >
+                <EuiButton
+                  fill
+                  onClick={this.handleAddControl}
+                  iconType="plusInCircle"
+                  data-test-subj="inputControlEditorAddBtn"
+                >
+                  Add
+                </EuiButton>
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+
       </div>
     );
   }

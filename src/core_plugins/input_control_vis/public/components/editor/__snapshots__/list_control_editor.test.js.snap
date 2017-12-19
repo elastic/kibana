@@ -14,48 +14,33 @@ exports[`renders ListControlEditor 1`] = `
     onChange={[Function]}
     value="keywordField"
   />
-  <div
-    className="kuiSideBarFormRow"
+  <EuiFormRow
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    id="multiselect-0"
   >
-    <label
-      className="kuiSideBarFormRow__label"
-      htmlFor="multiselect-0"
-    >
-      Enable Multiselect
-    </label>
-    <div
-      className="kuiSideBarFormRow__control"
-    >
-      <input
-        checked={true}
-        className="kuiCheckBox"
-        id="multiselect-0"
-        onChange={[Function]}
-        type="checkbox"
-      />
-    </div>
-  </div>
-  <div
-    className="kuiSideBarFormRow"
+    <EuiSwitch
+      checked={true}
+      data-test-subj="listControlMultiselectInput"
+      defaultChecked={false}
+      label="Multiselect"
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    id="size-0"
+    label="Size"
   >
-    <label
-      className="kuiSideBarFormRow__label"
-      htmlFor="size-0"
-    >
-      Size
-    </label>
-    <div
-      className="kuiSideBarFormRow__control kuiFieldGroupSection--wide"
-    >
-      <input
-        className="kuiTextInput"
-        id="size-0"
-        min="1"
-        onChange={[Function]}
-        type="number"
-        value={10}
-      />
-    </div>
-  </div>
+    <EuiFieldNumber
+      data-test-subj="listControlSizeInput"
+      fullWidth={false}
+      isLoading={false}
+      min={1}
+      onChange={[Function]}
+      value={10}
+    />
+  </EuiFormRow>
 </div>
 `;

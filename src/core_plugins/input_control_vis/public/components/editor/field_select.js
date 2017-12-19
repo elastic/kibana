@@ -2,7 +2,11 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Select from 'react-select';
-import { htmlIdGenerator } from '@elastic/eui';
+
+import {
+  EuiFormRow,
+  htmlIdGenerator,
+} from '@elastic/eui';
 
 export class FieldSelect extends Component {
   constructor(props) {
@@ -62,22 +66,20 @@ export class FieldSelect extends Component {
     const idGenerator = htmlIdGenerator();
     const selectId = idGenerator('indexPatternSelect');
     return (
-      <div className="kuiSideBarFormRow">
-        <label className="kuiSideBarFormRow__label" htmlFor={selectId}>
-          Field
-        </label>
-        <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
-          <Select
-            className="field-react-select"
-            placeholder="Select field..."
-            value={this.props.value}
-            options={this.state.fields}
-            onChange={this.props.onChange}
-            resetValue={''}
-            inputProps={{ id: selectId }}
-          />
-        </div>
-      </div>
+      <EuiFormRow
+        id={selectId}
+        label="Index Pattern"
+      >
+        <Select
+          className="field-react-select"
+          placeholder="Select field..."
+          value={this.props.value}
+          options={this.state.fields}
+          onChange={this.props.onChange}
+          resetValue={''}
+          inputProps={{ id: selectId }}
+        />
+      </EuiFormRow>
     );
   }
 }

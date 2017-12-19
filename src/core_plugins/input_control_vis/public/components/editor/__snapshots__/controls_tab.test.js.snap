@@ -55,43 +55,71 @@ exports[`renders ControlsTab 1`] = `
     key="2"
     moveControl={[Function]}
   />
-  <div
-    className="kuiSideBarFormRow"
+  <EuiPanel
+    grow={false}
+    hasShadow={false}
+    paddingSize="m"
   >
-    <div
-      className="kuiSideBarFormRow__control kuiFieldGroupSection--wide"
+    <EuiFlexGroup
+      alignItems="stretch"
+      component="div"
+      gutterSize="l"
+      justifyContent="flexStart"
+      responsive={true}
+      wrap={false}
     >
-      <select
-        aria-label="Select control type"
-        className="kuiSelect"
-        onChange={[Function]}
-        value="list"
+      <EuiFlexItem
+        component="div"
+        grow={true}
       >
-        <option
-          value="range"
+        <EuiFormRow
+          fullWidth={false}
+          hasEmptyLabelSpace={false}
+          id="slectControlType"
         >
-          Range slider
-        </option>
-        <option
-          value="list"
+          <EuiSelect
+            fullWidth={false}
+            isLoading={false}
+            onChange={[Function]}
+            options={
+              Array [
+                Object {
+                  "text": "Range slider",
+                  "value": "range",
+                },
+                Object {
+                  "text": "Options list",
+                  "value": "list",
+                },
+              ]
+            }
+            value="list"
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem
+        component="div"
+        grow={true}
+      >
+        <EuiFormRow
+          fullWidth={false}
+          hasEmptyLabelSpace={false}
+          id="addControl"
         >
-          Options list
-        </option>
-      </select>
-    </div>
-    <KuiButton
-      buttonType="primary"
-      data-test-subj="inputControlEditorAddBtn"
-      icon={
-        <KuiButtonIcon
-          type="create"
-        />
-      }
-      onClick={[Function]}
-      type="button"
-    >
-      Add
-    </KuiButton>
-  </div>
+          <EuiButton
+            color="primary"
+            data-test-subj="inputControlEditorAddBtn"
+            fill={true}
+            iconSide="left"
+            iconType="plusInCircle"
+            onClick={[Function]}
+            type="button"
+          >
+            Add
+          </EuiButton>
+        </EuiFormRow>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  </EuiPanel>
 </div>
 `;

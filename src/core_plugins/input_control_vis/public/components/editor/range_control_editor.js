@@ -3,6 +3,11 @@ import React from 'react';
 import { IndexPatternSelect } from './index_pattern_select';
 import { FieldSelect } from './field_select';
 
+import {
+  EuiFormRow,
+  EuiFieldNumber,
+} from '@elastic/eui';
+
 function filterField(field) {
   return field.type === 'number';
 }
@@ -33,36 +38,26 @@ export function RangeControlEditor(props) {
         getIndexPattern={props.getIndexPattern}
       />
 
-      <div className="kuiSideBarFormRow">
-        <label className="kuiSideBarFormRow__label" htmlFor={stepSizeId}>
-          Step Size
-        </label>
-        <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
-          <input
-            id={stepSizeId}
-            className="kuiTextInput"
-            type="number"
-            value={props.controlParams.options.step}
-            onChange={handleStepChange}
-          />
-        </div>
-      </div>
+      <EuiFormRow
+        id={stepSizeId}
+        label="Step Size"
+      >
+        <EuiFieldNumber
+          value={props.controlParams.options.step}
+          onChange={handleStepChange}
+        />
+      </EuiFormRow>
 
-      <div className="kuiSideBarFormRow">
-        <label className="kuiSideBarFormRow__label" htmlFor={decimalPlacesId}>
-          Decimal Places
-        </label>
-        <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
-          <input
-            id={decimalPlacesId}
-            className="kuiTextInput"
-            type="number"
-            min="0"
-            value={props.controlParams.options.decimalPlaces}
-            onChange={handleDecimalPlacesChange}
-          />
-        </div>
-      </div>
+      <EuiFormRow
+        id={decimalPlacesId}
+        label="Decimal Places"
+      >
+        <EuiFieldNumber
+          min={0}
+          value={props.controlParams.options.decimalPlaces}
+          onChange={handleDecimalPlacesChange}
+        />
+      </EuiFormRow>
 
     </div>
   );

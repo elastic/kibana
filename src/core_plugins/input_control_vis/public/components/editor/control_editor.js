@@ -1,9 +1,17 @@
-import classNames from 'classnames';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { RangeControlEditor } from './range_control_editor';
 import { ListControlEditor } from './list_control_editor';
 import { getTitle } from '../../editor_utils';
+
+import {
+  EuiButtonIcon,
+  EuiFieldText,
+  EuiForm,
+  EuiFormRow,
+  EuiPanel,
+  EuiText,
+} from '@elastic/eui';
 
 export class ControlEditor extends Component {
 
@@ -77,80 +85,65 @@ export class ControlEditor extends Component {
 
     const labelId = `controlLabel${this.props.controlIndex}`;
     return (
-      <div>
-        <div className="kuiSideBarFormRow">
-          <label className="kuiSideBarFormRow__label" htmlFor={labelId}>
-            Label
-          </label>
-          <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
-            <input
-              className="kuiTextInput"
-              id={labelId}
-              type="text"
-              value={this.props.controlParams.label}
-              onChange={this.changeLabel}
-            />
-          </div>
-        </div>
+      <EuiForm>
+        <EuiFormRow
+          id={labelId}
+          label="Control Label"
+        >
+          <EuiFieldText
+            value={this.props.controlParams.label}
+            onChange={this.changeLabel}
+          />
+        </EuiFormRow>
 
         {controlEditor}
-      </div>
+      </EuiForm>
     );
   }
 
   render() {
-    const visibilityToggleClasses = classNames('fa', {
-      'fa-caret-right': !this.state.isEditorCollapsed,
-      'fa-caret-down': this.state.isEditorCollapsed
-    });
+    const visibilityToggleIcon = this.state.isEditorCollapsed ? 'arrowDown' : 'arrowRight';
 
     return (
-      <div className="sidebar-item">
-        <div className="vis-editor-agg-header">
-          <button
+      <EuiPanel grow={false}>
+        <div>
+          <EuiButtonIcon
             aria-label={this.state.isEditorCollapsed ? 'Close Editor' : 'Open Editor'}
             onClick={this.handleToggleControlVisibility}
-            type="button"
-            className="kuiButton kuiButton--primary kuiButton--small vis-editor-agg-header-toggle"
-          >
-            <i aria-hidden="true" className={visibilityToggleClasses} />
-          </button>
-          <span className="vis-editor-agg-header-title ng-binding">
-            {getTitle(this.props.controlParams, this.props.controlIndex)}
-          </span>
-          <div className="vis-editor-agg-header-controls kuiButtonGroup kuiButtonGroup--united">
-            <button
+            iconType={visibilityToggleIcon}
+          />
+          <EuiText style={{ display: 'inline' }}>
+            <span>
+              {getTitle(this.props.controlParams, this.props.controlIndex)}
+            </span>
+          </EuiText>
+          <div style={{ float: 'right' }}>
+            <EuiButtonIcon
               aria-label="Move control down"
-              type="button"
-              className="kuiButton kuiButton--small"
+              color="secondary"
               onClick={this.moveDownControl}
+              iconType="arrowDown"
               data-test-subj={`inputControlEditorMoveDownControl${this.props.controlIndex}`}
-            >
-              <i aria-hidden="true" className="fa fa-chevron-down" />
-            </button>
-            <button
+            />
+            <EuiButtonIcon
               aria-label="Move control up"
-              type="button"
-              className="kuiButton kuiButton--small"
+              color="secondary"
               onClick={this.moveUpControl}
+              iconType="arrowUp"
               data-test-subj={`inputControlEditorMoveUpControl${this.props.controlIndex}`}
-            >
-              <i aria-hidden="true" className="fa fa-chevron-up" />
-            </button>
-            <button
+            />
+            <EuiButtonIcon
               aria-label="Remove control"
-              className="kuiButton kuiButton--danger kuiButton--small"
-              type="button"
+              color="danger"
               onClick={this.removeControl}
+              iconType="cross"
               data-test-subj={`inputControlEditorRemoveControl${this.props.controlIndex}`}
-            >
-              <i aria-hidden="true" className="fa fa-times" />
-            </button>
+            />
           </div>
         </div>
 
         {this.state.isEditorCollapsed && this.renderEditor()}
-      </div>
+      </EuiPanel>
     );
   }
 }
