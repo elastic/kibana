@@ -10,18 +10,29 @@
   <i class="fa fa-danger"></i> Request Failed
 </div>
 
-<div ng-if="spy.mode.name === 'request'">
-  <label>
+<div ng-if="spy.mode.name === 'request'" class="euiText">
+  <h3>
     Elasticsearch request body &nbsp;
-  </label>
-  <pre data-test-subj="visualizationEsRequestBody">{{req.fetchParams.body | json}}</pre>
+  </h3>
+  <div
+    data-test-subj="visualizationEsRequestBody"
+    class="euiCodeBlock euiCodeBlock--light euiCodeBlock--fontSmall euiCodeBlock--paddingSmall"
+  >
+    <code class="euiCodeBlock__code">
+      <pre class="euiCodeBlock__pre">{{req.fetchParams.body | json}}</pre>
+    </code>
+  </div>
 </div>
 
-<div ng-if="spy.mode.name === 'response'">
-  <label>
+<div ng-if="spy.mode.name === 'response'" class="euiText">
+  <h3>
     Elasticsearch response body &nbsp;
-  </label>
-  <pre>{{req.resp | json}}</pre>
+  </h3>
+  <div class="euiCodeBlock euiCodeBlock--light euiCodeBlock--fontSmall euiCodeBlock--paddingSmall">
+    <code class="euiCodeBlock__code">
+      <pre class="euiCodeBlock__pre">{{req.resp | json}}</pre>
+    </code>
+  </div>
 </div>
 
 <div ng-if="spy.mode.name === 'stats'">
