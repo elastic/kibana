@@ -1,4 +1,5 @@
 import { VisualizeConstants } from '../../../src/core_plugins/kibana/public/visualize/visualize_constants';
+import Keys from 'leadfoot/keys';
 
 export function VisualizePageProvider({ getService, getPageObjects }) {
   const remote = getService('remote');
@@ -387,6 +388,15 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async clickGo() {
       await testSubjects.click('visualizeEditorRenderButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async toggleAutoMode() {
+      await testSubjects.click('visualizeEditorAutoButton');
+    }
+
+    async sizeUpEditor() {
+      await testSubjects.click('visualizeEditorResizer');
+      await remote.pressKeys(Keys.ARROW_RIGHT);
     }
 
     async clickOptions() {
