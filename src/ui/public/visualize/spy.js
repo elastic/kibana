@@ -53,11 +53,11 @@ uiModules
           };
         }
 
-        function setSpyMode(modeName) {
+        $scope.setSpyMode = function setSpyMode(modeName) {
           if (!_.isString(modeName)) modeName = null;
           $scope.spy.mode = getSpyObject(modeName);
           $scope.$emit('render');
-        }
+        };
 
         const renderSpy = function (spyName) {
           const newMode = spyModes.byName[spyName];
@@ -89,16 +89,12 @@ uiModules
 
         $scope.toggleDisplay = function () {
           const modeName = _.get($scope.spy, 'mode.name');
-          setSpyMode(modeName ? null : defaultMode);
+          $scope.setSpyMode(modeName ? null : defaultMode);
         };
 
         $scope.toggleFullPage = function () {
           fullPageSpy = !fullPageSpy;
           $scope.spy.mode = getSpyObject();
-        };
-
-        $scope.onSpyModeChange = function onSpyModeChange() {
-          setSpyMode($scope.selectedModeName);
         };
 
         if ($scope.uiState) {

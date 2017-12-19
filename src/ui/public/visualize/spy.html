@@ -19,32 +19,33 @@
   class="visualize-spy-container"
   ng-show="spy.mode.name"
 >
-  <div class="kuiBar kuiVerticalRhythm">
-    <div class="kuiBarSection">
-      <select
-        class="kuiSelect visualize-fixed-position"
-        ng-model="selectedModeName"
-        ng-change="onSpyModeChange()"
-        data-test-subj="spyModeSelect"
+  <div class="visualize-spy__tab-container euiTabs euiTabs--small">
+    <div role="tablist" class="visualize-spy__tabs">
+      <button
+        role="tab"
+        class="euiTab"
+        ng-repeat="mode in modes"
+        aria-selected="{{mode.name === selectedModeName}}"
+        ng-class="{'euiTab-isSelected': mode.name === selectedModeName}"
+        data-test-subj="spyModeSelect-{{::mode.name}}"
+        ng-click="setSpyMode(mode.name)"
       >
-        <option
-          ng-repeat="mode in modes"
-          value="{{mode.name}}"
-          data-test-subj="spyModeSelect-{{ mode.name }}"
-        >
-          {{mode.display}}
-        </option>
-      </select>
-    </div>
-
-    <div class="kuiBarSection">
-      <button class="kuiButton kuiButton--hollow" ng-click="toggleFullPage()">
-        <span
-          class="kuiIcon"
-          ng-class="spy.mode.fill ? 'fa-compress' : 'fa-expand'"
-        ></span>
+        <span class="euiTab__content">
+          {{::mode.display}}
+        </span>
       </button>
     </div>
+
+    <button
+      aria-label="Toggle spy panel fullscreen"
+      class="kuiButton kuiButton--hollow"
+      ng-click="toggleFullPage()"
+    >
+      <span
+        class="kuiIcon"
+        ng-class="spy.mode.fill ? 'fa-compress' : 'fa-expand'"
+      ></span>
+    </button>
   </div>
 
   <div
