@@ -10,7 +10,7 @@ import {
 
 import {
   RIGHT_ALIGNMENT
-} from '../../../../services';
+} from '../../../../src/services';
 
 function renderHeader() {
   return [

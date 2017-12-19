@@ -9,7 +9,7 @@ import {
 
 import {
   RIGHT_ALIGNMENT
-} from '../../../../services';
+} from '../../../../src/services';
 
 export class ListingTable extends Component {
   constructor(props) {

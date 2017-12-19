@@ -4,7 +4,7 @@ import {
   KuiCollapseButton
 } from '../../../../components';
 
-import { htmlIdGenerator } from '../../../../services';
+import { htmlIdGenerator } from '../../../../src/services';
 
 export default class extends Component {
 
