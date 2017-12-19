@@ -69,7 +69,7 @@ uiModules
               fill: $scope.maximizedSpy,
             });
           } else {
-            $scope.uiState.removeChild('spy');
+            $scope.uiState.set('spy', null);
           }
         }
 
