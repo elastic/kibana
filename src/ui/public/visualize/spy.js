@@ -115,7 +115,7 @@ uiModules
           // update the ui state, but only if it really changes
           const changedVals = newVals.filter((val) => !_.isUndefined(val)).length > 0;
           if (changedVals && !_.isEqual(newVals, oldVals)) {
-            if ($scope.uiState) $scope.uiState.set('spy.mode', $scope.spy.mode);
+            $scope.uiState.set('spy.mode', $scope.spy.mode);
           }
 
           // ensure the fill mode is synced
