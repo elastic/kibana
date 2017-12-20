@@ -17,7 +17,7 @@
 
 <div
   class="visualize-spy-container"
-  ng-class="{'only': maximizedSpy}"
+  ng-class="{ 'only': maximizedSpy || forceMaximized }"
   ng-show="shouldShowSpyPanel()"
 >
   <div class="visualize-spy__tab-container euiTabs euiTabs--small">
@@ -40,6 +40,7 @@
     <button
       aria-label="Toggle spy panel fullscreen"
       class="kuiButton kuiButton--hollow"
+      ng-hide="forceMaximized"
       ng-click="toggleMaximize()"
     >
       <span

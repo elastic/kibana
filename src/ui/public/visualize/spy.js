@@ -6,7 +6,7 @@ import { PersistedState } from 'ui/persisted_state';
 
 uiModules
   .get('app/visualize')
-  .directive('visualizeSpy', function (Private, $compile) {
+  .directive('visualizeSpy', function (Private, $compile, $timeout) {
 
     const spyModes = Private(SpyModesRegistryProvider);
 
@@ -34,6 +34,20 @@ uiModules
 
         $scope.currentMode = null;
         $scope.maximizedSpy = false;
+        $scope.forceMaximized = false;
+
+        function checkForcedMaximized() {
+          $timeout(() => {
+            if ($scope.visElement && $scope.visElement.height() < 180) {
+              $scope.forceMaximized = true;
+            } else {
+              $scope.forceMaximized = false;
+            }
+          });
+        }
+
+        checkForcedMaximized();
+
 
         /**
          * Filter for modes that should actually be active for this visualization.
@@ -90,7 +104,13 @@ uiModules
           // If the spy panel is already shown (a currentMode is set),
           // close the panel by setting the name to null, otherwise open the
           // panel (i.e. set it to the default mode name).
-          $scope.setSpyMode($scope.currentMode ? null : defaultModeName);
+          if ($scope.currentMode) {
+            $scope.setSpyMode(null);
+            $scope.forceMaximized = false;
+          } else {
+            $scope.setSpyMode(defaultModeName);
+            checkForcedMaximized();
+          }
         };
 
         /**
@@ -112,8 +132,8 @@ uiModules
          * Whenever the maximized state changes, we also need to toggle the class
          * of the visualization.
          */
-        $scope.$watch('maximizedSpy', (maximized) => {
-          $scope.visElement.toggleClass('spy-only', !!maximized);
+        $scope.$watchMulti(['maximizedSpy', 'forceMaximized'], () => {
+          $scope.visElement.toggleClass('spy-only', $scope.maximizedSpy || $scope.forceMaximized);
         });
 
         /**
@@ -138,7 +158,11 @@ uiModules
           }
 
           // If we want haven't specified a new mode we won't do anything further.
-          if (!newMode) return;
+          if (!newMode) {
+            // Reset the forced maximized flag if we are about to close the panel.
+            $scope.forceMaximized = false;
+            return;
+          }
 
           const contentScope = $scope.$new();
           const contentContainer = $('<div class="visualize-spy-content">');
