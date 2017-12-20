@@ -113,7 +113,7 @@ describe('should not wrap 401 errors', () => {
     const client: any = { foo: fooFn };
 
     try {
-      await callAPI(client, 'foo', {}, { wrap401Errors: false });
+      await callAPI(client, 'foo', {}, { wrap401Errors: true });
     } catch (error) {
       expect(error.message).toEqual('api call failed');
       expect(error.wrap401Errors).toBeUndefined();
