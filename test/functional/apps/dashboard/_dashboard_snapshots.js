@@ -48,7 +48,9 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
     it('compare area chart snapshot', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
-      await PageObjects.dashboard.setTimepickerInDataRange();
+      const fromTime = '2015-09-22 16:00:44.000';
+      const toTime = '2015-09-23 18:31:44.000';
+      await PageObjects.header.setAbsoluteRange(fromTime, toTime);
       await PageObjects.dashboard.addVisualizations([AREA_CHART_VIS_NAME]);
       await PageObjects.dashboard.saveDashboard('area');
       await PageObjects.header.clickToastOK();
