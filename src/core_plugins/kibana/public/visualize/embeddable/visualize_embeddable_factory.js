@@ -53,6 +53,14 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
           ...parsedUiState,
           ...panel.embeddableConfig,
         });
+        container.onEmbeddableConfigChanged(newEmbeddableConfig => {
+          for (const key in newEmbeddableConfig) {
+            if (newEmbeddableConfig.hasOwnProperty(key)) {
+              uiState.set(key, newEmbeddableConfig[key]);
+            }
+          }
+        });
+
         const uiStateChangeHandler = () => {
           panel = container.updatePanel(
             panel.panelIndex,
