@@ -38,10 +38,14 @@ const getAggConfigResult = (responseAggs, aggId, bucketKey) => {
     return resultBuckets;
   }
   _.each(responseAggs, agg => {
-    resultBuckets = [
-      ...resultBuckets,
-      ...getAggConfigResult(agg.aggs, aggId, bucketKey)
-    ];
+    if (agg.buckets) {
+      _.each(agg.buckets, bucket => {
+        resultBuckets = [
+          ...resultBuckets,
+          ...getAggConfigResult(bucket, aggId, bucketKey)
+        ];
+      });
+    }
   });
 
   return resultBuckets;
@@ -130,7 +134,6 @@ export const OtherBucketHelperProvider = (Private) => {
   };
 
   const updateMissingBucket = (response, aggConfigs, agg) => {
-    if (agg.params.missingBucketLabel === '') return;
     const aggResultBuckets = getAggConfigResult(response.aggregations, agg.id, '__missing__');
     aggResultBuckets.forEach(bucket => {
       bucket.key = agg.params.missingBucketLabel;

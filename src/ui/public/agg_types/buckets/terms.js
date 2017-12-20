@@ -63,12 +63,16 @@ export function AggTypesBucketsTermsProvider(Private) {
     },
     createFilter: createFilter,
     postFlightRequest: async (aggConfigs, aggConfig, searchSourceAggs, resp, nestedSearchSource) => {
-      const filterAgg = buildOtherBucketAgg(aggConfigs, searchSourceAggs, aggConfig, resp);
-      nestedSearchSource.set('aggs', filterAgg);
-      const response = await nestedSearchSource.fetchAsRejectablePromise();
-      // todo: refactor to not have side effects
-      mergeOtherBucketAggResponse(aggConfigs, resp, response, aggConfig, filterAgg());
-      updateMissingBucket(resp, aggConfigs, aggConfig);
+      if (aggConfig.params.otherBucket) {
+        const filterAgg = buildOtherBucketAgg(aggConfigs, searchSourceAggs, aggConfig, resp);
+        nestedSearchSource.set('aggs', filterAgg);
+        const response = await nestedSearchSource.fetchAsRejectablePromise();
+        // todo: refactor to not have side effects
+        mergeOtherBucketAggResponse(aggConfigs, resp, response, aggConfig, filterAgg());
+      }
+      if (aggConfig.params.missingBucket) {
+        updateMissingBucket(resp, aggConfigs, aggConfig);
+      }
       return resp;
     },
     params: [
@@ -198,7 +202,7 @@ export function AggTypesBucketsTermsProvider(Private) {
             output.params.valueType = agg.getField().type === 'number' ? 'float' : agg.getField().type;
           }
 
-          if (agg.params.missingBucketLabel !== '') {
+          if (agg.params.missingBucket) {
             output.params.missing = '__missing__';
           }
 
