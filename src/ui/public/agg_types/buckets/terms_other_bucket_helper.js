@@ -69,10 +69,9 @@ export const OtherBucketHelperProvider = (Private) => {
     });
 
     // nest all the child aggregations of aggWithOtherBucket
-    const filterAggDsl = filterAgg.toDsl();
     const resultAgg = {
       aggs: getAggConfig(aggs, aggWithOtherBucket).aggs,
-      filters: filterAggDsl
+      filters: filterAgg.toDsl(),
     };
 
     // create filters for all parent aggregation buckets
@@ -93,12 +92,12 @@ export const OtherBucketHelperProvider = (Private) => {
         return;
       }
 
-      filterAggDsl.filters[key] = {
+      resultAgg.filters.filters[key] = {
         bool: { must: filters, must_not: [ { terms: {} } ] }
       };
 
       if (agg.buckets.find(bucket => bucket.key === '__missing__')) {
-        filterAggDsl.filters[key].bool.must.push({
+        resultAgg.filters.filters[key].bool.must.push({
           exists: {
             field: aggWithOtherBucket.params.field.name
           }
@@ -107,7 +106,7 @@ export const OtherBucketHelperProvider = (Private) => {
 
       // create not filters for all the buckets
       const notKeys = agg.buckets.map(bucket => bucket.key);
-      filterAggDsl.filters[key].bool.must_not[0].terms[aggWithOtherBucket.params.field.name] = notKeys;
+      resultAgg.filters.filters[key].bool.must_not[0].terms[aggWithOtherBucket.params.field.name] = notKeys;
 
     };
     walkBucketTree(0, response.aggregations, bucketAggs[0].id, [], '');
