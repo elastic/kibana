@@ -43,7 +43,7 @@ export class ElasticsearchService implements CoreService {
       switchMap(
         configs =>
           new Observable<Clients>(observer => {
-            log.info('creating Elasticsearch clusters');
+            log.info('creating Elasticsearch clients');
 
             const clients = {
               data: new Client(
@@ -59,7 +59,7 @@ export class ElasticsearchService implements CoreService {
             observer.next(clients);
 
             return () => {
-              log.info('closing Elasticsearch clusters');
+              log.info('closing Elasticsearch clients');
 
               clients.data.close();
               clients.admin.close();
@@ -67,14 +67,14 @@ export class ElasticsearchService implements CoreService {
           })
       ),
       // We only want a single subscription of this as we only want to create a
-      // single set of clusters at a time. We therefore share these, plus we
+      // single set of clients at a time. We therefore share these, plus we
       // always replay the latest set of clusters when subscribing.
       shareLast()
     );
   }
 
   async start() {
-    // ensure that we don't unnecessarily re-create clusters by always having
+    // ensure that we don't unnecessarily re-create clients by always having
     // at least one current connection
     this.subscription = this.clients$.subscribe();
   }
@@ -104,16 +104,4 @@ export class ElasticsearchService implements CoreService {
   getScopedDataClient(headers: Headers) {
     return k$(this.getScopedDataClient$(headers))(first(), toPromise());
   }
-
-  // typed as a DataClient
-  // for health check, e.g. which uses callWithInternalUser
-  // const unscopedDataClient = elasticsearch.getUnscopedDataClient();
-
-  // SAML or Basic Auth case
-  // scoped adminClient
-  // const scopedAdminClient = elasticsearch.getScopedAdminClient(headers);
-
-  // example for adminclient
-  // adminClient is the same across requests
-  // const adminClient$ = elasticsearch.service.getAdminClient$();
 }
