@@ -48,7 +48,17 @@ uiModules
 
         if (!$scope.savedObj) throw(`saved object was not provided to <visualize> directive`);
         if (!$scope.appState) $scope.appState = getAppState();
-        if (!$scope.uiState) $scope.uiState = new PersistedState({});
+
+        // Set the passed in uiState to the vis object, so we don't require any
+        // users of the <visualization/> directive to manually set the uiState.
+        if (!$scope.uiState) {
+          if ($scope.vis.hasUiState()) {
+            $scope.uiState = $scope.vis.getUiState();
+          } else {
+            $scope.uiState = new PersistedState({});
+          }
+        }
+        $scope.vis.setUiState($scope.uiState);
 
         $scope.vis = $scope.savedObj.vis;
         $scope.vis.visualizeScope = true;

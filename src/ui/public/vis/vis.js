@@ -51,7 +51,6 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
 
       this.setCurrentState(visState);
       this.setState(this.getCurrentState(), false);
-      this.setUiState(uiState);
 
       // Session state is for storing information that is transitory, and will not be saved with the visualization.
       // For instance, map bounds, which depends on the view port, browser window size, etc.
@@ -154,14 +153,6 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
 
     getState() {
       return this.getStateInternal(true);
-    }
-
-    clone() {
-      const uiJson = this.hasUiState() ? this.getUiState().toJSON() : {};
-      const uiState = new PersistedState(uiJson);
-      const clonedVis = new Vis(this.indexPattern, this.getState(), uiState);
-      clonedVis.editorMode = this.editorMode;
-      return clonedVis;
     }
 
     /**
