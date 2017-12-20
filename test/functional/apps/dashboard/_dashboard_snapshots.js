@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 
-import { AREA_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
+import { AREA_CHART_VIS_NAME, DATA_TABLE_VIS_NAME } from '../../page_objects/dashboard_page';
 
 
 export default function ({ getService, getPageObjects, updateBaselines }) {
@@ -66,8 +66,30 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
 
       await PageObjects.dashboard.clickExitFullScreenLogoButton();
 
-      // Testing some OS/browser differnces were shown to cause .009 percent difference.
+      // Testing some OS/browser differences were shown to cause .009 percent difference.
       expect(percentSimilar).to.be.lessThan(0.05);
+    });
+
+    it('compare data table snapshot', async () => {
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.dashboard.setTimepickerInDataRange();
+      await PageObjects.dashboard.addVisualizations([DATA_TABLE_VIS_NAME]);
+      await PageObjects.dashboard.saveDashboard('data table');
+      await PageObjects.header.clickToastOK();
+
+      await PageObjects.dashboard.clickFullScreenMode();
+      await PageObjects.dashboard.toggleExpandPanel();
+
+      // TODO: Get rid of this sleep once render-complete is implemented.
+      await PageObjects.dashboard.waitForRenderCounter(2);
+      await PageObjects.common.sleep(1000);
+
+      const percentSimilar = await screenshot.compareAgainstBaseline('data_table', updateBaselines);
+
+      await PageObjects.dashboard.clickExitFullScreenLogoButton();
+
+      expect(percentSimilar).to.be.lessThan(.001);
     });
   });
 }
