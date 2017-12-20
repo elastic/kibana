@@ -1,5 +1,6 @@
-import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { findDOMNode } from 'react-dom';
 import _ from 'lodash';
 import $ from 'ui/flot-charts';
 import eventBus from '../lib/events';
@@ -174,10 +175,14 @@ class FlotChart extends Component {
     return _.assign(opts, props.options);
   }
 
-  handleResize(width, height) {
-    this.size = { width, height };
+  handleResize() {
+    const resize = findDOMNode(this.resize);
+    if (!this.rendered) {
+      this.renderChart();
+      return;
+    }
 
-    if (this.size.height > 0 && this.size.width > 0) {
+    if (resize && resize.clientHeight > 0 && resize.clientHeight > 0) {
       if (!this.plot) return;
       this.plot.resize();
       this.plot.setupGrid();
@@ -187,15 +192,14 @@ class FlotChart extends Component {
   }
 
   renderChart() {
+    const resize = findDOMNode(this.resize);
 
-    if (this.size.height > 0 && this.size.width > 0) {
-
+    if (resize.clientWidth > 0 && resize.clientHeight > 0) {
       this.rendered = true;
       const { series } = this.props;
       const data = this.calculateData(series, this.props.show);
 
       this.plot = $.plot(this.target, data, this.getOptions(this.props));
-
       this.handleDraw(this.plot);
 
       _.defer(() => this.handleResize());
@@ -253,10 +257,16 @@ class FlotChart extends Component {
 
   render() {
     return (
-      <div className="rhythm_chart__timeseries-container">
-        <div ref={el => (this.target = el)} className="rhythm_chart__timeseries-container" />
-        <Resize onResize={this.handleResize} />
-      </div>
+      <Resize
+        onResize={this.handleResize}
+        ref={(el) => this.resize = el}
+        className="rhythm_chart__timeseries-container"
+      >
+        <div
+          ref={(el) => this.target = el}
+          className="rhythm_chart__timeseries-container"
+        />
+      </Resize>
     );
   }
 }
