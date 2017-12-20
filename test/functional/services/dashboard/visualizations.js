@@ -51,5 +51,19 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       }
       await PageObjects.dashboard.addSavedSearch(name);
     }
+
+    async createAndAddDataTableVisualization(name) {
+      log.debug(`createAndAddDataTableVisualization(${name})`);
+      const inViewMode = await PageObjects.dashboard.getIsInViewMode();
+      if (inViewMode) {
+        await PageObjects.dashboard.clickEdit();
+      }
+      await PageObjects.dashboard.clickAddVisualization();
+      await PageObjects.dashboard.clickAddNewVisualizationLink();
+      await PageObjects.visualize.clickDataTable();
+      await PageObjects.visualize.clickNewSearch();
+      await PageObjects.visualize.saveVisualization(name);
+      await PageObjects.header.clickToastOK();
+    }
   };
 }

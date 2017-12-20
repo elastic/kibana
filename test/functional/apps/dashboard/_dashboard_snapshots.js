@@ -1,6 +1,6 @@
 import expect from 'expect.js';
 
-import { AREA_CHART_VIS_NAME, DATA_TABLE_VIS_NAME } from '../../page_objects/dashboard_page';
+import { AREA_CHART_VIS_NAME } from '../../page_objects/dashboard_page';
 
 
 export default function ({ getService, getPageObjects, updateBaselines }) {
@@ -74,7 +74,10 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.setTimepickerInDataRange();
-      await PageObjects.dashboard.addVisualizations([DATA_TABLE_VIS_NAME]);
+      // We are specificially using a default generated data table here instead of a more complex one because
+      // font and font size differences require a higher threshold the more text is shown on the data table. See
+      // https://github.com/elastic/kibana/issues/15714 for more information.
+      await dashboardVisualizations.createAndAddDataTableVisualization('data table');
       await PageObjects.dashboard.saveDashboard('data table');
       await PageObjects.header.clickToastOK();
 
