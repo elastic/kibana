@@ -215,9 +215,9 @@ export function TabbedAggResponseWriterProvider(Private) {
    * @param  {function} block - the function to run while this value is in the row
    * @return {any} - the value that was added
    */
-  TabbedAggResponseWriter.prototype.cell = function (agg, value, block) {
+  TabbedAggResponseWriter.prototype.cell = function (agg, value, block, filters) {
     if (this.asAggConfigResults) {
-      value = new AggConfigResult(agg, this.acrStack[0], value, value);
+      value = new AggConfigResult(agg, this.acrStack[0], value, value, filters);
     }
 
     const staskResult = this.asAggConfigResults && value.type === 'bucket';
