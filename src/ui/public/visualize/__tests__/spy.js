@@ -7,7 +7,7 @@ import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logsta
 import FixturesStubbedSearchSourceProvider from 'fixtures/stubbed_search_source';
 import MockState from 'fixtures/mock_state';
 
-describe('visualize spy directive', function () {
+describe.skip('visualize spy directive', function () {
   let $rootScope;
   let $compile;
   let $el;
