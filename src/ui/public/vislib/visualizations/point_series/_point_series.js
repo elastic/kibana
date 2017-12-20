@@ -15,7 +15,7 @@ export function VislibVisualizationsPointSeriesProvider() {
     }
 
     validateDataCompliesWithScalingMethod(data) {
-      const invalidLogScale = data.values && data.values.some(d => d.y < 1);
+      const invalidLogScale = data.values && data.values.some(d => d.y < 0);
       if (this.getValueAxis().axisConfig.isLogScale() && invalidLogScale) {
         throw new InvalidLogScaleValues();
       }
