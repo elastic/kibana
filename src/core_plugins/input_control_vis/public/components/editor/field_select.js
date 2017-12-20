@@ -2,7 +2,7 @@ import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import Select from 'react-select';
-import { htmlIdGenerator } from 'ui_framework/services';
+import { htmlIdGenerator } from '@elastic/eui';
 
 export class FieldSelect extends Component {
   constructor(props) {

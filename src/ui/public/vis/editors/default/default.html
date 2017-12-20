@@ -1,5 +1,11 @@
-<div class="collapsible-sidebar">
+<div class="collapsible-sidebar" ng-class="::getSidebarClass()">
   <vis-editor-sidebar class="vis-editor-sidebar" />
+  <vis-editor-resizer
+    class="default-editor__resizer"
+    tabindex="0"
+    aria-label="Press left/right to resize the editor"
+    data-test-subj="visualizeEditorResizer"
+  >&#xFE19;</vis-editor-resizer>
 </div>
 
 <div

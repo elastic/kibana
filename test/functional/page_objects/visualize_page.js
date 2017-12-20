@@ -1,4 +1,5 @@
 import { VisualizeConstants } from '../../../src/core_plugins/kibana/public/visualize/visualize_constants';
+import Keys from 'leadfoot/keys';
 
 export function VisualizePageProvider({ getService, getPageObjects }) {
   const remote = getService('remote');
@@ -282,8 +283,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByCssSelector('button[data-test-subj="toggleEditor"]');
     }
 
-    async clickNewSearch() {
-      await find.clickByCssSelector('.list-group-item a');
+    async clickNewSearch(indexPattern = 'logstash-*') {
+      await testSubjects.click(`paginatedListItem-${indexPattern}`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async setValue(newValue) {
@@ -386,6 +388,15 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async clickGo() {
       await testSubjects.click('visualizeEditorRenderButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async toggleAutoMode() {
+      await testSubjects.click('visualizeEditorAutoButton');
+    }
+
+    async sizeUpEditor() {
+      await testSubjects.click('visualizeEditorResizer');
+      await remote.pressKeys(Keys.ARROW_RIGHT);
     }
 
     async clickOptions() {
