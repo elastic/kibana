@@ -12,7 +12,7 @@ visualizations by clicking the small up-arrow at the bottom of the list.
 Hovering over a visualization displays the container controls that enable you to
 edit, move, delete, and resize the visualization. 
 
-Your sample dashboard should end up looking roughly like this:
+Your sample dashboard should end up looking similar to this:
 
 image::images/tutorial-dashboard.png[]
 
