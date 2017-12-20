@@ -230,44 +230,51 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
   /**
    * Called when the user clicks "Save" button.
    */
-  $scope.doSave = function () {
+  $scope.doSave = async () => {
     // vis.title was not bound and it's needed to reflect title into visState
     $state.vis.title = savedVis.title;
     $state.vis.type = savedVis.type || $state.vis.type;
     savedVis.visState = $state.vis;
     savedVis.uiStateJSON = angular.toJson($scope.uiState.getChanges());
 
-    savedVis.save()
-      .then(function (id) {
-        stateMonitor.setInitialState($state.toJSON());
-        $scope.kbnTopNav.close('save');
+    let id;
+    try {
+      id = await savedVis.save();
+    } catch (error) {
 
-        if (id) {
-          notify.info('Saved Visualization "' + savedVis.title + '"');
-          if ($scope.isAddToDashMode()) {
-            const savedVisualizationParsedUrl = new KibanaParsedUrl({
-              basePath: chrome.getBasePath(),
-              appId: kbnBaseUrl.slice('/app/'.length),
-              appPath: kbnUrl.eval(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id }),
-            });
-            // Manually insert a new url so the back button will open the saved visualization.
-            $window.history.pushState({}, '', savedVisualizationParsedUrl.getRootRelativePath());
-            // Since we aren't reloading the page, only inserting a new browser history item, we need to manually update
-            // the last url for this app, so directly clicking on the Visualize tab will also bring the user to the saved
-            // url, not the unsaved one.
-            chrome.trackSubUrlForApp('kibana:visualize', savedVisualizationParsedUrl);
+      // fixme: was the original intention to call notify.error() on all of the following code, and not just .save() ?
 
-            const lastDashboardAbsoluteUrl = chrome.getNavLinkById('kibana:dashboard').lastSubUrl;
-            const dashboardParsedUrl = absoluteToParsedUrl(lastDashboardAbsoluteUrl, chrome.getBasePath());
-            dashboardParsedUrl.addQueryParameter(DashboardConstants.NEW_VISUALIZATION_ID_PARAM, savedVis.id);
-            kbnUrl.change(dashboardParsedUrl.appPath);
-          } else if (savedVis.id === $route.current.params.id) {
-            docTitle.change(savedVis.lastSavedTitle);
-          } else {
-            kbnUrl.change(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id });
-          }
-        }
-      }, notify.error);
+      return notify.error(error);
+    }
+
+    stateMonitor.setInitialState($state.toJSON());
+    $scope.kbnTopNav.close('save');
+
+    if (id) {
+      notify.info('Saved Visualization "' + savedVis.title + '"');
+      if ($scope.isAddToDashMode()) {
+        const savedVisualizationParsedUrl = new KibanaParsedUrl({
+          basePath: chrome.getBasePath(),
+          appId: kbnBaseUrl.slice('/app/'.length),
+          appPath: kbnUrl.eval(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id }),
+        });
+        // Manually insert a new url so the back button will open the saved visualization.
+        $window.history.pushState({}, '', savedVisualizationParsedUrl.getRootRelativePath());
+        // Since we aren't reloading the page, only inserting a new browser history item, we need to manually update
+        // the last url for this app, so directly clicking on the Visualize tab will also bring the user to the saved
+        // url, not the unsaved one.
+        chrome.trackSubUrlForApp('kibana:visualize', savedVisualizationParsedUrl);
+
+        const lastDashboardAbsoluteUrl = chrome.getNavLinkById('kibana:dashboard').lastSubUrl;
+        const dashboardParsedUrl = absoluteToParsedUrl(lastDashboardAbsoluteUrl, chrome.getBasePath());
+        dashboardParsedUrl.addQueryParameter(DashboardConstants.NEW_VISUALIZATION_ID_PARAM, savedVis.id);
+        kbnUrl.change(dashboardParsedUrl.appPath);
+      } else if (savedVis.id === $route.current.params.id) {
+        docTitle.change(savedVis.lastSavedTitle);
+      } else {
+        kbnUrl.change(`${VisualizeConstants.EDIT_PATH}/{{id}}`, { id: savedVis.id });
+      }
+    }
   };
 
   $scope.unlink = function () {

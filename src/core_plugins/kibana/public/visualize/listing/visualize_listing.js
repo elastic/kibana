@@ -6,9 +6,7 @@ import { uiModules } from 'ui/modules';
 import { VisualizeListingTable } from './visualize_listing_table';
 
 const app = uiModules.get('app/visualize', ['ngRoute', 'react']);
-app.directive('visualizeListingTable', function (reactDirective) {
-  return reactDirective(VisualizeListingTable);
-});
+app.directive('visualizeListingTable', (reactDirective) => reactDirective(VisualizeListingTable));
 
 export function VisualizeListingController($injector) {
   const Notifier = $injector.get('Notifier');
@@ -24,19 +22,21 @@ export function VisualizeListingController($injector) {
   const visualizationService = services.visualizations;
   const notify = new Notifier({ location: 'Visualize' });
 
-  this.fetchItems = (filter) => {
+  this.fetchItems = async (filter) => {
     const isLabsEnabled = config.get('visualize:enableLabs');
-    return visualizationService.find(filter, config.get('savedObjects:listingLimit'))
-      .then(result => {
-        this.totalItems = result.total;
-        this.showLimitError = result.total > config.get('savedObjects:listingLimit');
-        this.listingLimit = config.get('savedObjects:listingLimit');
-        return result.hits.filter(result => (isLabsEnabled || result.type.stage !== 'lab'));
-      });
+    const result = await visualizationService.find(filter, config.get('savedObjects:listingLimit'));
+    this.totalItems = result.total;
+    this.showLimitError = result.total > config.get('savedObjects:listingLimit');
+    this.listingLimit = config.get('savedObjects:listingLimit');
+
+    return result.hits.filter(result => (isLabsEnabled || result.type.stage !== 'lab'));
   };
 
-  this.deleteSelectedItems = function deleteSelectedItems(selectedIds) {
-    return visualizationService.delete(selectedIds)
-      .catch(error => notify.error(error));
+  this.deleteSelectedItems = async (selectedIds) => {
+    try {
+      return visualizationService.delete(selectedIds);
+    } catch (error) {
+      notify.error(error);
+    }
   };
 }
