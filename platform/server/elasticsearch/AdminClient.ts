@@ -1,8 +1,8 @@
 import { Client } from 'elasticsearch';
 import { callAPI } from './call_api';
 
-type CallAPIOptions = { wrap401Errors?: boolean };
-type CallAPIClientParams = { [key: string]: any };
+export type CallAPIOptions = { wrap401Errors: boolean };
+export type CallAPIClientParams = { [key: string]: any };
 
 export class AdminClient {
   constructor(private readonly client: Client) {}
@@ -21,7 +21,7 @@ export class AdminClient {
   call(
     endpoint: string,
     clientParams: CallAPIClientParams = {},
-    options: CallAPIOptions = {}
+    options: CallAPIOptions = { wrap401Errors: true }
   ): any {
     return callAPI(this.client, endpoint, clientParams, options);
   }

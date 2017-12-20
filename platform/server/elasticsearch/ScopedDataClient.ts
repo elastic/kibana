@@ -2,8 +2,8 @@ import { Client } from 'elasticsearch';
 import { callAPI } from './call_api';
 import { Headers } from '../http/Router/headers';
 
-type CallAPIOptions = { wrap401Errors?: boolean };
-type CallAPIClientParams = { [key: string]: any };
+export type CallAPIOptions = { wrap401Errors: boolean };
+export type CallAPIClientParams = { [key: string]: any };
 
 export class ScopedDataClient {
   constructor(
@@ -25,7 +25,7 @@ export class ScopedDataClient {
   call(
     endpoint: string,
     clientParams: CallAPIClientParams = {},
-    options: CallAPIOptions = {}
+    options: CallAPIOptions = { wrap401Errors: true }
   ): any {
     clientParams = { ...clientParams, headers: this.headers };
 

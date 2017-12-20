@@ -1,19 +1,17 @@
 import { get } from 'lodash';
 import { Client } from 'elasticsearch';
 
-type CallAPIOptions = {
-  wrap401Errors?: boolean;
+export type CallAPIOptions = {
+  wrap401Errors: boolean;
 };
-type CallAPIClientParams = { [key: string]: any };
+export type CallAPIClientParams = { [key: string]: any };
 
 export async function callAPI(
   client: Client,
   endpoint: string,
   clientParams: CallAPIClientParams,
-  options: CallAPIOptions
+  options: CallAPIOptions = { wrap401Errors: true }
 ) {
-  const wrap401Errors =
-    options.wrap401Errors === undefined ? true : options.wrap401Errors;
   const clientPath = endpoint.split('.');
   const api: any = get(client, clientPath);
 
@@ -27,7 +25,7 @@ export async function callAPI(
   try {
     return await api.call(apiContext, clientParams);
   } catch (err) {
-    if (wrap401Errors && err.statusCode === 401) {
+    if (options.wrap401Errors && err.statusCode === 401) {
       // TODO: decide on using homegrown error lib or boom
       // https://github.com/elastic/kibana/issues/12464
 

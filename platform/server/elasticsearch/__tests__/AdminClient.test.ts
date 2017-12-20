@@ -18,7 +18,12 @@ beforeEach(() => {
 describe('call passes correct arguments to callAPI', () => {
   test('when only endpoint is specified', () => {
     client.call('foo');
-    expect(mockCallAPI).toHaveBeenCalledWith(esClient, 'foo', {}, {});
+    expect(mockCallAPI).toHaveBeenCalledWith(
+      esClient,
+      'foo',
+      {},
+      { wrap401Errors: true }
+    );
   });
 
   test('when endpoint and clientParams are specified', () => {
@@ -27,7 +32,7 @@ describe('call passes correct arguments to callAPI', () => {
       esClient,
       'foo',
       { bar: 'baz' },
-      {}
+      { wrap401Errors: true }
     );
   });
 
@@ -43,6 +48,11 @@ describe('call passes correct arguments to callAPI', () => {
 
   test('when endpoint contains periods', () => {
     client.call('foo.bar.baz');
-    expect(mockCallAPI).toHaveBeenCalledWith(esClient, 'foo.bar.baz', {}, {});
+    expect(mockCallAPI).toHaveBeenCalledWith(
+      esClient,
+      'foo.bar.baz',
+      {},
+      { wrap401Errors: true }
+    );
   });
 });

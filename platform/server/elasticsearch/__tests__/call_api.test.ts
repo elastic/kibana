@@ -8,7 +8,7 @@ describe('things', () => {
     });
     const clientParams = {};
     const client: any = { foo: { bar: { baz: baz } } };
-    await callAPI(client, 'foo.bar.baz', clientParams, {});
+    await callAPI(client, 'foo.bar.baz', clientParams);
 
     expect(baz).toHaveBeenCalledWith(clientParams);
     expect(apiContext).toBe(client.foo.bar);
@@ -20,7 +20,7 @@ describe('things', () => {
     const client: any = {};
 
     try {
-      await callAPI(client, 'foo.bar.baz', {}, {});
+      await callAPI(client, 'foo.bar.baz', {});
     } catch (error) {
       expect(error.message).toEqual(
         'called with an invalid endpoint: foo.bar.baz'
@@ -34,7 +34,7 @@ describe('things', () => {
       apiContext = this;
     });
     const client: any = { foo: fooFn };
-    await callAPI(client, 'foo', {}, {});
+    await callAPI(client, 'foo', {});
 
     expect(apiContext).toBe(client);
   });
@@ -49,7 +49,7 @@ describe('things', () => {
     const client: any = { foo: fooFn };
 
     try {
-      await callAPI(client, 'foo', {}, {});
+      await callAPI(client, 'foo', {});
     } catch (error) {
       expect(error.message).toEqual('api call failed');
       expect(error.wrap401Errors).toBeUndefined();
@@ -73,7 +73,7 @@ describe('should wrap 401 errors', () => {
     const client: any = { foo: fooFn };
 
     try {
-      await callAPI(client, 'foo', {}, {});
+      await callAPI(client, 'foo', {});
     } catch (error) {
       expect(error.message).toEqual('api call failed');
       expect(error.wrap401Errors).toBe(true);

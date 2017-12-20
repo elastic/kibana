@@ -22,7 +22,7 @@ describe('call passes correct arguments to callAPI', () => {
       esClient,
       'foo',
       { headers: { foo: 'bar' } },
-      {}
+      { wrap401Errors: true }
     );
   });
 
@@ -32,7 +32,7 @@ describe('call passes correct arguments to callAPI', () => {
       esClient,
       'foo',
       { headers: { foo: 'bar' }, bar: 'baz' },
-      {}
+      { wrap401Errors: true }
     );
   });
 
@@ -52,7 +52,7 @@ describe('call passes correct arguments to callAPI', () => {
       esClient,
       'foo.bar.baz',
       { headers: { foo: 'bar' } },
-      {}
+      { wrap401Errors: true }
     );
   });
 });
