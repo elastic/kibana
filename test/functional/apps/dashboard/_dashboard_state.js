@@ -58,6 +58,20 @@ export default function ({ getService, getPageObjects }) {
           expect(newPanelDimensions[0].width).to.be.greaterThan(currentPanelDimensions[0].width * 2 - marginOfError);
         });
       });
+
+      it('for embeddable config color parameters on a visualization', async function () {
+        await PageObjects.visualize.clickLegendOption('80,000');
+        await PageObjects.visualize.selectNewLegendColorChoice('#F9D9F9');
+        const currentUrl = await remote.getCurrentUrl();
+        const newUrl = currentUrl.replace('F9D9F9', 'FFFFFF');
+        await remote.get(newUrl.toString(), false);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.try(async () => {
+          const colorExists = await PageObjects.visualize.doesSelectedLegendColorExist('#FFFFFF');
+          expect(colorExists).to.be(true);
+        });
+      });
     });
 
     it('Overriding colors on an area chart is preserved', async () => {
