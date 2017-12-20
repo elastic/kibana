@@ -11,8 +11,8 @@
     "dashboarding"
   ],
   "private": false,
-  "version": "6.1.1",
-  "branch": "6.x",
+  "version": "6.1.2",
+  "branch": "6.1",
   "build": {
     "number": 8467,
     "sha": "6cb7fec4e154faa0a4a3fee4b33dfef91b9870d9"
