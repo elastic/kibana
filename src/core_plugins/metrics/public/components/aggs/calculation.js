@@ -10,7 +10,7 @@ import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import Vars from './vars';
 
-import { htmlIdGenerator } from 'ui_framework/services';
+import { htmlIdGenerator } from '@elastic/eui';
 
 class CalculationAgg extends Component {
 

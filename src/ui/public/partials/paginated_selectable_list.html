@@ -48,7 +48,10 @@
   </button>
   <ul class="li-striped list-group list-group-menu">
     <li class="list-group-item list-group-menu-item" ng-repeat="hit in page">
-      <a ng-show="userMakeUrl" kbn-href="{{ makeUrl(hit) }}">
+      <a
+        data-test-subj="paginatedListItem-{{accessor(hit)}}"
+        ng-show="userMakeUrl"
+        kbn-href="{{ makeUrl(hit) }}">
         <span>{{ accessor(hit) }}</span>
       </a>
 

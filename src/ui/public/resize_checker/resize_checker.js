@@ -12,7 +12,7 @@ export function ResizeCheckerProvider(Private) {
     // so we wrap in jQuery then extract the element
     const $el = $(el);
 
-    if ($el.size() !== 1) {
+    if ($el.length !== 1) {
       throw new TypeError('ResizeChecker must be constructed with a single DOM element.');
     }
 
