@@ -68,10 +68,10 @@ export function AggTypesBucketsTermsProvider(Private) {
         nestedSearchSource.set('aggs', filterAgg);
         const response = await nestedSearchSource.fetchAsRejectablePromise();
         // todo: refactor to not have side effects
-        mergeOtherBucketAggResponse(aggConfigs, resp, response, aggConfig, filterAgg());
+        resp = mergeOtherBucketAggResponse(aggConfigs, resp, response, aggConfig, filterAgg());
       }
       if (aggConfig.params.missingBucket) {
-        updateMissingBucket(resp, aggConfigs, aggConfig);
+        resp = updateMissingBucket(resp, aggConfigs, aggConfig);
       }
       return resp;
     },

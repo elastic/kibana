@@ -123,9 +123,10 @@ export const OtherBucketHelperProvider = (Private) => {
   };
 
   const mergeOtherBucketAggResponse = (aggsConfig, response, otherResponse, otherAgg, requestAgg) => {
+    const updatedResponse = _.cloneDeep(response);
     _.each(otherResponse.aggregations['other-filter'].buckets, (bucket, key) => {
       const bucketKey = key.replace(/^-/, '');
-      const aggResultBuckets = getAggResultBuckets(aggsConfig, response.aggregations, otherAgg, bucketKey);
+      const aggResultBuckets = getAggResultBuckets(aggsConfig, updatedResponse.aggregations, otherAgg, bucketKey);
       const requestFilterTerms = getOtherAggTerms(requestAgg, key, otherAgg);
 
       const phraseFilter = buildPhrasesFilter(otherAgg.params.field, requestFilterTerms, otherAgg.params.field.indexPattern);
@@ -140,16 +141,19 @@ export const OtherBucketHelperProvider = (Private) => {
       bucket.key = otherAgg.params.otherBucketLabel;
       aggResultBuckets.push(bucket);
     });
+    return updatedResponse;
   };
 
   const updateMissingBucket = (response, aggConfigs, agg) => {
-    const aggResultBuckets = getAggConfigResult(response.aggregations, agg.id, '__missing__');
+    const updatedResponse = _.cloneDeep(response);
+    const aggResultBuckets = getAggConfigResult(updatedResponse.aggregations, agg.id, '__missing__');
     aggResultBuckets.forEach(bucket => {
       bucket.key = agg.params.missingBucketLabel;
       const existsFilter = buildExistsFilter(agg.params.field, agg.params.field.indexPattern);
       existsFilter.meta.negate = true;
       bucket.filters = [ existsFilter ];
     });
+    return updatedResponse;
   };
 
   return { buildOtherBucketAgg, mergeOtherBucketAggResponse, updateMissingBucket };
