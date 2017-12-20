@@ -4,19 +4,31 @@ import { buildPhrasesFilter } from 'ui/filter_manager/lib/phrases';
 import { buildExistsFilter } from 'ui/filter_manager/lib/exists';
 import { buildQueryFromFilters } from 'ui/courier/data_source/build_query/from_filters';
 
-const getAggConfig = (aggs, aggWithOtherBucket) => {
-  if (aggs[aggWithOtherBucket.id]) return aggs[aggWithOtherBucket.id];
-  return getAggConfig(_.values(aggs)[0].aggs, aggWithOtherBucket);
+/**
+ * walks the aggregation DSL and returns DSL starting at aggregation with id of startFromAggId
+ * @param aggNestedDsl: aggregation config DSL (top level)
+ * @param startFromId: id of an aggregation from where we want to get the nested DSL
+ */
+const getNestedAggDSL = (aggNestedDsl, startFromAggId) => {
+  if (aggNestedDsl[startFromAggId]) return aggNestedDsl[startFromAggId];
+  return getNestedAggDSL(_.values(aggNestedDsl)[0].aggs, startFromAggId);
 };
 
-const getAggResultBuckets = (aggsConfig, response, aggWithOtherBucket, key) => {
+/**
+ * returns buckets from response for a specific other bucket
+ * @param aggConfigs: configuration for the aggregations
+ * @param response: response from elasticsearch
+ * @param aggWithOtherBucket: AggConfig of the aggregation with other bucket enabled
+ * @param key: key from the other bucket request for a specific other bucket
+ */
+const getAggResultBuckets = (aggConfigs, response, aggWithOtherBucket, key) => {
   const keyParts = key.split('-');
   let responseAgg = response;
   for (const i in keyParts) {
     if (keyParts[i]) {
       const agg = _.values(responseAgg)[0];
       const aggKey = _.keys(responseAgg)[0];
-      const aggConfig = _.find(aggsConfig, agg => agg.id === aggKey);
+      const aggConfig = _.find(aggConfigs, agg => agg.id === aggKey);
       const bucket = _.find(agg.buckets, (bucket, bucketObjKey) => {
         const bucketKey = aggConfig.getKey(bucket, Number.isInteger(bucketObjKey) ? null : bucketObjKey).toString();
         return bucketKey === keyParts[i];
@@ -30,10 +42,16 @@ const getAggResultBuckets = (aggsConfig, response, aggWithOtherBucket, key) => {
   return [];
 };
 
-const getAggConfigResult = (responseAggs, aggId, bucketKey) => {
+/**
+ * gets all the missing buckets in our response for a specific aggregation id
+ * @param responseAggs: array of aggregations from response
+ * @param aggId: id of the aggregation with missing bucket
+ */
+const getAggConfigResultMissingBuckets = (responseAggs, aggId) => {
+  const missingKey = '__missing__';
   let resultBuckets = [];
   if (responseAggs[aggId]) {
-    const matchingBucket = responseAggs[aggId].buckets.find(bucket => bucket.key === bucketKey);
+    const matchingBucket = responseAggs[aggId].buckets.find(bucket => bucket.key === missingKey);
     if (matchingBucket) resultBuckets.push(matchingBucket);
     return resultBuckets;
   }
@@ -42,7 +60,7 @@ const getAggConfigResult = (responseAggs, aggId, bucketKey) => {
       _.each(agg.buckets, bucket => {
         resultBuckets = [
           ...resultBuckets,
-          ...getAggConfigResult(bucket, aggId, bucketKey)
+          ...getAggConfigResultMissingBuckets(bucket, aggId, missingKey)
         ];
       });
     }
@@ -51,6 +69,12 @@ const getAggConfigResult = (responseAggs, aggId, bucketKey) => {
   return resultBuckets;
 };
 
+/**
+ * gets all the terms that are NOT in the other bucket
+ * @param requestAgg: an aggregation we are looking at
+ * @param key: the key for this specific other bucket
+ * @param otherAgg: AggConfig of the aggregation with other bucket
+ */
 const getOtherAggTerms = (requestAgg, key, otherAgg) => {
   return requestAgg['other-filter'].filters.filters[key].bool.must_not.map(filter => {
     if (filter.match_phrase && filter.match_phrase[otherAgg.params.field.name]) {
@@ -79,7 +103,7 @@ export const OtherBucketHelperProvider = (Private) => {
 
     // nest all the child aggregations of aggWithOtherBucket
     const resultAgg = {
-      aggs: getAggConfig(aggs, aggWithOtherBucket).aggs,
+      aggs: getNestedAggDSL(aggs, aggWithOtherBucket.id).aggs,
       filters: filterAgg.toDsl(),
     };
 
@@ -99,7 +123,7 @@ export const OtherBucketHelperProvider = (Private) => {
         return;
       }
 
-      if (!aggWithOtherBucket.params.missingBucket || agg.buckets.find(bucket => bucket.key === '__missing__')) {
+      if (!aggWithOtherBucket.params.missingBucket || agg.buckets.some(bucket => bucket.key === '__missing__')) {
         filters.push(buildExistsFilter(aggWithOtherBucket.params.field, aggWithOtherBucket.params.field.indexPattern));
       }
 
@@ -110,8 +134,9 @@ export const OtherBucketHelperProvider = (Private) => {
         filters.push(filter);
       });
 
-      resultAgg.filters.filters[key] = { bool: {} };
-      resultAgg.filters.filters[key].bool = buildQueryFromFilters(filters, _.noop);
+      resultAgg.filters.filters[key] = {
+        bool: buildQueryFromFilters(filters, _.noop)
+      };
     };
     walkBucketTree(0, response.aggregations, bucketAggs[0].id, [], '');
 
@@ -132,12 +157,6 @@ export const OtherBucketHelperProvider = (Private) => {
       const phraseFilter = buildPhrasesFilter(otherAgg.params.field, requestFilterTerms, otherAgg.params.field.indexPattern);
       phraseFilter.meta.negate = true;
       bucket.filters = [ phraseFilter ];
-
-      if (!otherAgg.params.missingBucket || aggResultBuckets.find(bucket => bucket.key === '__missing__')) {
-        const existsFilter = buildExistsFilter(otherAgg.params.field, otherAgg.params.field.indexPattern);
-        bucket.filters.push(existsFilter);
-      }
-
       bucket.key = otherAgg.params.otherBucketLabel;
       aggResultBuckets.push(bucket);
     });
@@ -146,7 +165,7 @@ export const OtherBucketHelperProvider = (Private) => {
 
   const updateMissingBucket = (response, aggConfigs, agg) => {
     const updatedResponse = _.cloneDeep(response);
-    const aggResultBuckets = getAggConfigResult(updatedResponse.aggregations, agg.id, '__missing__');
+    const aggResultBuckets = getAggConfigResultMissingBuckets(updatedResponse.aggregations, agg.id);
     aggResultBuckets.forEach(bucket => {
       bucket.key = agg.params.missingBucketLabel;
       const existsFilter = buildExistsFilter(agg.params.field, agg.params.field.indexPattern);
