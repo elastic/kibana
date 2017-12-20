@@ -16,12 +16,13 @@
 </div>
 
 <div
+  data-test-subj="spyContainer"
   class="visualize-spy-container"
   ng-class="{ 'only': maximizedSpy || forceMaximized }"
   ng-show="shouldShowSpyPanel()"
 >
   <div class="visualize-spy__tab-container euiTabs euiTabs--small">
-    <div role="tablist" class="visualize-spy__tabs">
+    <div role="tablist" class="visualize-spy__tabs" data-test-subj="spyModTabs">
       <button
         role="tab"
         class="euiTab"
@@ -38,6 +39,7 @@
     </div>
 
     <button
+      data-test-subj="toggleSpyFullscreen"
       aria-label="Toggle spy panel fullscreen"
       class="kuiButton kuiButton--hollow"
       ng-hide="forceMaximized"
