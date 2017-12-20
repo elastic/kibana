@@ -3,11 +3,11 @@ import chrome from 'ui/chrome';
 let i = 0;
 
 // eslint-disable-next-line @elastic/kibana-custom/no-default-export
-export default function AggConfigResult(aggConfig, parent, value, key, filter) {
+export default function AggConfigResult(aggConfig, parent, value, key, filters) {
   this.key = key;
   this.value = value;
   this.aggConfig = aggConfig;
-  this.filter = filter;
+  this.filters = filters;
   this.$parent = parent;
   this.$order = ++i;
 
@@ -35,7 +35,7 @@ AggConfigResult.prototype.getPath = function () {
  * @returns {object} Elasticsearch filter
  */
 AggConfigResult.prototype.createFilter = function () {
-  return this.filter || this.aggConfig.createFilter(this.key);
+  return this.filters || this.aggConfig.createFilter(this.key);
 };
 
 AggConfigResult.prototype.toString = function (contentType) {

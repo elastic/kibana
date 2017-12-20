@@ -128,8 +128,15 @@ export const OtherBucketHelperProvider = (Private) => {
       const aggResultBuckets = getAggResultBuckets(aggsConfig, response.aggregations, otherAgg, bucketKey);
       const requestFilterTerms = getOtherAggTerms(requestAgg, key, otherAgg);
 
-      bucket.filter = buildPhrasesFilter(otherAgg.params.field, requestFilterTerms, otherAgg.params.field.indexPattern);
-      bucket.filter.meta.negate = true;
+      const phraseFilter = buildPhrasesFilter(otherAgg.params.field, requestFilterTerms, otherAgg.params.field.indexPattern);
+      phraseFilter.meta.negate = true;
+      bucket.filters = [ phraseFilter ];
+
+      if (!otherAgg.params.missingBucket || aggResultBuckets.find(bucket => bucket.key === '__missing__')) {
+        const existsFilter = buildExistsFilter(otherAgg.params.field, otherAgg.params.field.indexPattern);
+        bucket.filters.push(existsFilter);
+      }
+
       bucket.key = otherAgg.params.otherBucketLabel;
       aggResultBuckets.push(bucket);
     });
@@ -139,8 +146,9 @@ export const OtherBucketHelperProvider = (Private) => {
     const aggResultBuckets = getAggConfigResult(response.aggregations, agg.id, '__missing__');
     aggResultBuckets.forEach(bucket => {
       bucket.key = agg.params.missingBucketLabel;
-      bucket.filter = buildExistsFilter(agg.params.field, agg.params.field.indexPattern);
-      bucket.filter.meta.negate = true;
+      const existsFilter = buildExistsFilter(agg.params.field, agg.params.field.indexPattern);
+      existsFilter.meta.negate = true;
+      bucket.filters = [ existsFilter ];
     });
   };
 

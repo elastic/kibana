@@ -10,7 +10,7 @@ export function HierarchicalTransformAggregationProvider() {
         parent && parent.aggConfigResult,
         metric.getValue(bucket),
         agg.getKey(bucket),
-        bucket.filter
+        bucket.filters
       );
 
       const branch = {
