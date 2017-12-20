@@ -5,25 +5,15 @@ import { ListControlEditor } from './list_control_editor';
 import { getTitle } from '../../editor_utils';
 
 import {
+  EuiAccordion,
   EuiButtonIcon,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
   EuiPanel,
-  EuiText,
 } from '@elastic/eui';
 
 export class ControlEditor extends Component {
-
-  state = {
-    isEditorCollapsed: true
-  }
-
-  handleToggleControlVisibility = () => {
-    this.setState(prevState => (
-      {  isEditorCollapsed: !prevState.isEditorCollapsed }
-    ));
-  }
 
   changeLabel = (evt) => {
     this.props.handleLabelChange(this.props.controlIndex, evt);
@@ -101,48 +91,46 @@ export class ControlEditor extends Component {
     );
   }
 
-  render() {
-    const visibilityToggleIcon = this.state.isEditorCollapsed ? 'arrowDown' : 'arrowRight';
+  renderEditorButtons() {
+    return (
+      <div>
+        <EuiButtonIcon
+          aria-label="Move control down"
+          color="secondary"
+          onClick={this.moveDownControl}
+          iconType="arrowDown"
+          data-test-subj={`inputControlEditorMoveDownControl${this.props.controlIndex}`}
+        />
+        <EuiButtonIcon
+          aria-label="Move control up"
+          color="secondary"
+          onClick={this.moveUpControl}
+          iconType="arrowUp"
+          data-test-subj={`inputControlEditorMoveUpControl${this.props.controlIndex}`}
+        />
+        <EuiButtonIcon
+          aria-label="Remove control"
+          color="danger"
+          onClick={this.removeControl}
+          iconType="cross"
+          data-test-subj={`inputControlEditorRemoveControl${this.props.controlIndex}`}
+        />
+      </div>
+    );
+  }
 
+  render() {
     return (
       <EuiPanel grow={false}>
-        <div>
-          <EuiButtonIcon
-            aria-label={this.state.isEditorCollapsed ? 'Close Editor' : 'Open Editor'}
-            onClick={this.handleToggleControlVisibility}
-            iconType={visibilityToggleIcon}
-          />
-          <EuiText style={{ display: 'inline' }}>
-            <span>
-              {getTitle(this.props.controlParams, this.props.controlIndex)}
-            </span>
-          </EuiText>
-          <div style={{ float: 'right' }}>
-            <EuiButtonIcon
-              aria-label="Move control down"
-              color="secondary"
-              onClick={this.moveDownControl}
-              iconType="arrowDown"
-              data-test-subj={`inputControlEditorMoveDownControl${this.props.controlIndex}`}
-            />
-            <EuiButtonIcon
-              aria-label="Move control up"
-              color="secondary"
-              onClick={this.moveUpControl}
-              iconType="arrowUp"
-              data-test-subj={`inputControlEditorMoveUpControl${this.props.controlIndex}`}
-            />
-            <EuiButtonIcon
-              aria-label="Remove control"
-              color="danger"
-              onClick={this.removeControl}
-              iconType="cross"
-              data-test-subj={`inputControlEditorRemoveControl${this.props.controlIndex}`}
-            />
-          </div>
-        </div>
 
-        {this.state.isEditorCollapsed && this.renderEditor()}
+        <EuiAccordion
+          id="controlEditorAccordion"
+          buttonContent={getTitle(this.props.controlParams, this.props.controlIndex)}
+          extraAction={this.renderEditorButtons()}
+        >
+          {this.renderEditor()}
+        </EuiAccordion>
+
       </EuiPanel>
     );
   }
