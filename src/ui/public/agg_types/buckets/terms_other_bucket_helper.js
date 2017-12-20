@@ -99,7 +99,7 @@ export const OtherBucketHelperProvider = (Private) => {
         return;
       }
 
-      if (agg.buckets.find(bucket => bucket.key === '__missing__')) {
+      if (!aggWithOtherBucket.params.missingBucket || agg.buckets.find(bucket => bucket.key === '__missing__')) {
         filters.push(buildExistsFilter(aggWithOtherBucket.params.field, aggWithOtherBucket.params.field.indexPattern));
       }
 
