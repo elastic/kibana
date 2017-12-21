@@ -6,21 +6,44 @@
 [![NPM version](https://img.shields.io/npm/v/backport.svg)](https://www.npmjs.com/package/backport)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](#badge)
 
-A simple CLI tool for backporting commits
+A simple CLI tool that automates the process of backporting commits
 
 ![Demonstration gif](https://i.makeagif.com/media/10-05-2017/kEJLqe.gif)
 
-### Install
+## What is backporting?
+
+> Backporting is the action of taking parts from a newer version of a software system [..] and porting them to an older version of the same software. It forms part of the maintenance step in a software development process, and it is commonly used for fixing security issues in older versions of the software and also for providing new features to older versions.
+
+Source: [https://en.wikipedia.org/wiki/Backporting](https://en.wikipedia.org/wiki/Backporting)
+
+
+## Who is this tool for?
+
+If your development workflow looks something like this:
+
+1. Write some code, merge those changes to master (eg. using a pull request)
+1. Cherry-pick one or more commits from master onto one or more branches
+1. Push those branches and a create new backport pull requests
+
+Then `backport` might save you a lot of time and effort. 
+
+The CLI will ask you a few questions and then do those steps for you. You can even save a configuration with your preferences to make the process even more automated. See below for instructions on how to use and configure it.
+
+## Install
 
 ```
 npm install -g backport
 ```
 
-### Usage
+## Usage
+
+Run the CLI in your project folder:
 
 ```
-> backport
+$ backport
 ```
+
+Follow the steps. You can use the `arrow keys` to choose options and `Enter` to select.
 
 ### Options
 
@@ -35,12 +58,12 @@ npm install -g backport
 | --help              | Show help                                 |                             |
 | -v, --version       | Show version number                       |                             |
 
-### Configuration
+## Configuration
 
-#### Global Config
+### Global configuration
 
-The first time you run `backport` a skeleton configuration file will be created
-in `/<homedir>/.backport/config.json`. You need to update the config file with
+The first time you run `backport` a sample configuration file will be created
+in `~/.backport/config.json`. You need to update the config file with
 your Github username and a Github Access Token (can be created
 [here](https://github.com/settings/tokens/new)).
 
@@ -68,7 +91,7 @@ your Github username and a Github Access Token (can be created
 
 </details>
 
-#### Project-specific config
+### Project-specific configuration
 
 Add `.backportrc.json` to the root of your project with the following structure:
 
@@ -102,10 +125,10 @@ Add `.backportrc.json` to the root of your project with the following structure:
 
 </details>
 
-### Troubleshooting
+## Troubleshooting
 
 `backport` never touches your local repositories or files. Instead a separate
-clone of your repositories are created in `/<homedir>/.backport/repositories/`.
+clone of your repositories are created in `~/.backport/repositories/`.
 This is also where you'll need to solve merge conflicts. If you are experiencing
 issues, you can try deleting the repository, or the entire `.backport` folder -
 it will be recreated next time you run `backport`.
