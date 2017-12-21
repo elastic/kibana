@@ -74,6 +74,7 @@ export default function ({ getService, getPageObjects }) {
           });
         });
 
+        // Unskip once https://github.com/elastic/kibana/issues/15736 is fixed.
         it.skip('and updates the pie slice legend color', async function () {
           await retry.try(async () => {
             const colorExists = await PageObjects.visualize.doesSelectedLegendColorExist('#FFFFFF');
@@ -89,13 +90,15 @@ export default function ({ getService, getPageObjects }) {
 
           await retry.try(async () => {
             const pieSliceStyle = await PageObjects.visualize.getPieSliceStyle('80,000');
-            expect(pieSliceStyle.indexOf('rgb(249, 217, 249)')).to.be.greaterThan(0);
+            // The default green color that was stored with the visualization before any dashboard overrides.
+            expect(pieSliceStyle.indexOf('rgb(87, 193, 123)')).to.be.greaterThan(0);
           });
         });
 
-        it('resets the legend color as well', async function () {
+        // Unskip once https://github.com/elastic/kibana/issues/15736 is fixed.
+        it.skip('resets the legend color as well', async function () {
           await retry.try(async () => {
-            const colorExists = await PageObjects.visualize.doesSelectedLegendColorExist('#F9D9F9');
+            const colorExists = await PageObjects.visualize.doesSelectedLegendColorExist('#57c17b');
             expect(colorExists).to.be(true);
           });
         });
