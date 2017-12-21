@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import $ from 'jquery';
 import { metadata } from 'ui/metadata';
 import { formatMsg, formatStack } from './lib';
 import fatalSplashScreen from './partials/fatal_splash_screen.html';
@@ -23,7 +24,7 @@ const fatalCallbacks = [];
 
 export const addFatalErrorCallback = callback => {
   fatalCallbacks.push(callback);
-}
+};
 
 function formatInfo() {
   const info = [];
@@ -47,7 +48,7 @@ function formatInfo() {
  * @param  {Error} err - The error that occured
  */
 export function fatalError(err, location) {
-    if (firstFatal) {
+  if (firstFatal) {
     _.callEach(fatalCallbacks);
     firstFatal = false;
     window.addEventListener('hashchange', function () {
@@ -73,7 +74,7 @@ export function fatalError(err, location) {
   }
 
   $container.append(html);
-  console.error(err.stack);
+  console.error(err.stack); // eslint-disable-line no-console
 
   throw err;
-};
+}

@@ -5,14 +5,12 @@
  */
 
 import _ from 'lodash';
-import { fatalError, Notifier } from 'ui/notify';
+import { fatalError } from 'ui/notify';
 import { SimpleEmitter } from 'ui/utils/simple_emitter';
 
 const location = 'EventEmitter';
 
 export function EventsProvider(Private, Promise) {
-  const notify = new Notifier({ location });
-
   _.class(Events).inherits(SimpleEmitter);
   function Events() {
     Events.Super.call(this);

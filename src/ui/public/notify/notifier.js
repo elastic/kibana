@@ -1,8 +1,7 @@
 import _ from 'lodash';
 import angular from 'angular';
-import $ from 'jquery';
 import { metadata } from 'ui/metadata';
-import { formatMsg } from './lib';
+import { formatMsg, formatStack } from './lib';
 import { fatalError } from './fatal_error';
 import 'ui/render_directive';
 
@@ -557,13 +556,13 @@ function createGroupLogger(type, opts) {
 
     if (consoleGroups) {
       if (status) {
-        console.log(status);
-        console.groupEnd();
+        console.log(status); // eslint-disable-line no-console
+        console.groupEnd(); // eslint-disable-line no-console
       } else {
         if (opts.open) {
-          console.group(name);
+          console.group(name); // eslint-disable-line no-console
         } else {
-          console.groupCollapsed(name);
+          console.groupCollapsed(name); // eslint-disable-line no-console
         }
       }
     } else {

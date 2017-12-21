@@ -1,5 +1,4 @@
 import { fatalError } from 'ui/notify';
-import { courierNotifier, location } from './notifier';
 import { CallClientProvider } from './call_client';
 import { CallResponseHandlersProvider } from './call_response_handlers';
 import { ContinueIncompleteProvider } from './continue_incomplete';
