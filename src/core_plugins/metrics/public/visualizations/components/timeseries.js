@@ -135,6 +135,7 @@ class Timeseries extends Component {
               options={this.props.options}
               xaxisLabel={this.props.xaxisLabel}
               yaxes={this.props.yaxes}
+              xAxisFormatter={this.props.xAxisFormatter}
             />
           </div>
           <Legend
