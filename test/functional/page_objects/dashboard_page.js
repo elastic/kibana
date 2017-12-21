@@ -31,6 +31,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         'defaultIndex': 'logstash-*'
       });
 
+      await kibanaServer.uiSettings.disableToastAutohide();
       await PageObjects.common.navigateToApp('dashboard');
     }
 
@@ -143,7 +144,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async clickFilterButton() {
       log.debug('Clicking filter button');
-      return await testSubjects.click('querySubmitButton');
+      await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickClone() {

@@ -41,7 +41,7 @@ export function TestSubjectsProvider({ getService }) {
 
     async find(selector, timeout = defaultFindTimeout) {
       log.debug(`TestSubjects.find(${selector})`);
-      return await find.displayedByCssSelector(testSubjSelector(selector), timeout);
+      return await find.byCssSelector(testSubjSelector(selector), timeout);
     }
 
     async findAll(selector) {

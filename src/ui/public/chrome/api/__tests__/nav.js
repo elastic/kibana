@@ -92,6 +92,51 @@ describe('chrome nav apis', function () {
     });
   });
 
+  describe('#untrackNavLinksForDeletedSavedObjects', function () {
+    const appId = 'appId';
+    const appUrl = 'https://localhost:9200/app/kibana#test';
+    const deletedId = 'IAMDELETED';
+
+    it('should clear last url when last url contains link to deleted saved object', function () {
+      const appUrlStore = new StubBrowserStorage();
+      const nav = [
+        {
+          id: appId,
+          title: 'Discover',
+          linkToLastSubUrl: true,
+          lastSubUrl: `${appUrl}?id=${deletedId}`,
+          url: appUrl
+        }
+      ];
+      const {
+        chrome
+      } = init({ appUrlStore, nav });
+
+      chrome.untrackNavLinksForDeletedSavedObjects([deletedId]);
+      expect(chrome.getNavLinkById('appId').lastSubUrl).to.be(appUrl);
+    });
+
+    it('should not clear last url when last url does not contains link to deleted saved object', function () {
+      const lastUrl = `${appUrl}?id=anotherSavedObjectId`;
+      const appUrlStore = new StubBrowserStorage();
+      const nav = [
+        {
+          id: appId,
+          title: 'Discover',
+          linkToLastSubUrl: true,
+          lastSubUrl: lastUrl,
+          url: appUrl
+        }
+      ];
+      const {
+        chrome
+      } = init({ appUrlStore, nav });
+
+      chrome.untrackNavLinksForDeletedSavedObjects([deletedId]);
+      expect(chrome.getNavLinkById(appId).lastSubUrl).to.be(lastUrl);
+    });
+  });
+
   describe('internals.trackPossibleSubUrl()', function () {
     it('injects the globalState of the current url to all links for the same app', function () {
       const appUrlStore = new StubBrowserStorage();

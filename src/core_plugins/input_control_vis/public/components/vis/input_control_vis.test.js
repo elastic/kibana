@@ -1,7 +1,7 @@
 import React from 'react';
 import sinon from 'sinon';
 import { mount, shallow } from 'enzyme';
-import { findTestSubject } from 'ui_framework/test';
+import { findTestSubject } from '@elastic/eui/lib/test';
 
 import {
   InputControlVis,
@@ -9,6 +9,7 @@ import {
 
 const mockListControl = {
   id: 'mock-list-control',
+  isEnabled: () => { return true; },
   options: {
     type: 'terms',
     multiselect: true
@@ -24,6 +25,7 @@ const mockListControl = {
 };
 const mockRangeControl = {
   id: 'mock-range-control',
+  isEnabled: () => { return true; },
   options: {
     decimalPlaces: 0,
     step: 1

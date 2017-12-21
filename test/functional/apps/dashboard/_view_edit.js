@@ -57,6 +57,7 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         });
 
+
         it('when time changed is stored with dashboard', async function () {
           const originalFromTime = '2015-09-19 06:31:44.000';
           const originalToTime = '2015-09-19 06:31:44.000';
@@ -181,6 +182,32 @@ export default function ({ getService, getPageObjects }) {
           expect(fromTime).to.equal(newFromTime);
           expect(toTime).to.equal(newToTime);
         });
+      });
+    });
+
+    describe.skip('and preserves edits on cancel', function () {
+      it('when time changed is stored with dashboard', async function () {
+        await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
+        const newFromTime = '2015-09-19 06:31:44.000';
+        const newToTime = '2015-09-19 06:31:44.000';
+        await PageObjects.header.setAbsoluteRange('2013-09-19 06:31:44.000', '2013-09-19 06:31:44.000');
+        await PageObjects.dashboard.saveDashboard(dashboardName, true);
+        await PageObjects.header.clickToastOK();
+        await PageObjects.dashboard.clickEdit();
+        await PageObjects.header.setAbsoluteRange(newToTime, newToTime);
+        await PageObjects.dashboard.clickCancelOutOfEditMode();
+
+        await PageObjects.common.clickCancelOnModal();
+        await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
+        await PageObjects.header.clickToastOK();
+
+        await PageObjects.dashboard.loadSavedDashboard(dashboardName);
+
+        const fromTime = await PageObjects.header.getFromTime();
+        const toTime = await PageObjects.header.getToTime();
+
+        expect(fromTime).to.equal(newFromTime);
+        expect(toTime).to.equal(newToTime);
       });
     });
 

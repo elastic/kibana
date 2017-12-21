@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 
-import { SortableProperties } from 'ui_framework/services';
+import { SortableProperties } from '@elastic/eui';
 import { Pager } from 'ui/pager';
 import { NoVisualizationsPrompt } from './no_visualizations_prompt';
 

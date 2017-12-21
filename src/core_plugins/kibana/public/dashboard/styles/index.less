@@ -117,7 +117,7 @@
 .start-screen {
   margin: 20px auto;
   max-width: 800px;
-  background: tint(@globalColorBlue, 90%);
+  background: #FFF;
   padding: 40px;
   border-radius: 4px;
 }
@@ -197,6 +197,13 @@ dashboard-viewport-provider {
   [data-reactroot] {
     flex: 1;
   }
+}
+
+/**
+ * Disable transitions from the library on each grid element.
+ */
+.react-grid-item {
+  transition: none;
 }
 
 /**
@@ -404,12 +411,10 @@ dashboard-viewport-provider {
 }
 
 .dashboard-viewport {
-  height: 100%;
   width: 100%;
   background-color: @dashboard-bg;
 }
 .dashboard-viewport-with-margins {
-  height: 100%;
   width: 100%;
   background-color: @dashboard-bg-with-margins;
 }

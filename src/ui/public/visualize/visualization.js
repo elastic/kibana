@@ -6,6 +6,7 @@ import { uiModules } from 'ui/modules';
 import { ResizeCheckerProvider } from 'ui/resize_checker';
 import visualizationTemplate from 'ui/visualize/visualization.html';
 import { getUpdateStatus } from 'ui/vis/update_status';
+import { PersistedState } from 'ui/persisted_state';
 import 'angular-sanitize';
 
 uiModules
@@ -25,15 +26,23 @@ uiModules
       },
       template: visualizationTemplate,
       link: function ($scope, $el) {
-        const minVisChartHeight = 180;
         const resizeChecker = new ResizeChecker($el);
 
         //todo: lets make this a simple function call.
         const getVisEl = jQueryGetter('.visualize-chart');
         const getVisContainer = jQueryGetter('.vis-container');
-        const getSpyContainer = jQueryGetter('.visualize-spy-container');
 
         $scope.addLegend = false;
+
+        // Set the passed in uiState to the vis object, so we don't require any
+        // users of the <visualization/> directive to manually set the uiState.
+        if (!$scope.uiState) $scope.uiState = new PersistedState({});
+        $scope.vis.setUiState($scope.uiState);
+        // Whenever the uiState changed, that the visualization should use,
+        // attach it to the actual Vis class.
+        $scope.$watch('uiState', (uiState) => {
+          $scope.vis.setUiState(uiState);
+        });
 
         // Show no results message when isZeroHits is true and it requires search
         $scope.showNoResultsMessage = function () {
@@ -55,49 +64,13 @@ uiModules
           return legendPositionToVisContainerClassMap[$scope.vis.params.legendPosition];
         };
 
-        $scope.spy = {};
-        $scope.spy.mode = ($scope.uiState) ? $scope.uiState.get('spy.mode', {}) : {};
-
-        const applyClassNames = function () {
-          const $visEl = getVisContainer();
-          const $spyEl = getSpyContainer();
-          if (!$spyEl) return;
-
-          const fullSpy = ($scope.spy.mode && ($scope.spy.mode.fill || $scope.fullScreenSpy));
-
-          $visEl.toggleClass('spy-only', Boolean(fullSpy));
-          $spyEl.toggleClass('only', Boolean(fullSpy));
-
-          $timeout(function () {
-            if (shouldHaveFullSpy()) {
-              $visEl.addClass('spy-only');
-              $spyEl.addClass('only');
-            }
-          }, 0);
-        };
+        $scope.visElement = getVisContainer();
 
         const loadingDelay = config.get('visualization:loadingDelay');
         $scope.loadingStyle = {
           '-webkit-transition-delay': loadingDelay,
           'transition-delay': loadingDelay
         };
-
-        function shouldHaveFullSpy() {
-          const $visEl = getVisEl();
-          if (!$visEl) return;
-
-          return ($visEl.height() < minVisChartHeight)
-          && _.get($scope.spy, 'mode.fill')
-          && _.get($scope.spy, 'mode.name');
-        }
-
-        // spy watchers
-        $scope.$watch('fullScreenSpy', applyClassNames);
-
-        $scope.$watchCollection('spy.mode', function () {
-          $scope.fullScreenSpy = shouldHaveFullSpy();
-          applyClassNames();
-        });
 
         const Visualization = $scope.vis.type.visualization;
         const visualization = new Visualization(getVisEl()[0], $scope.vis);
@@ -154,7 +127,7 @@ uiModules
         function jQueryGetter(selector) {
           return function () {
             const $sel = $el.find(selector);
-            if ($sel.size()) return $sel;
+            if ($sel.length) return $sel;
           };
         }
       }
