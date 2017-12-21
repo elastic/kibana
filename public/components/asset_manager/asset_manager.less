@@ -1,7 +1,6 @@
 @import (reference) "../../style/main";
 
 .canvas__asset-manager {
-
   .canvas__asset-manager--thumb {
     display: inline-block;
     position: relative;
@@ -13,8 +12,20 @@
     margin-bottom: @spacingM;
     background-color: @lightestGrey;
     background-size: cover;
-    background-position: center;
+    background-position: left;
     background-repeat: no-repeat;
+
   }
 
+  .canvas__asset-manager--asset-identifier {
+    position: absolute;
+    bottom: 0;
+    background-color: fade(@darkestGrey, 80%);
+    border-radius: 0 0 @borderRadius @borderRadius;
+    padding: @spacingXS;
+
+    .asset-copy {
+      float: right;
+    }
+  }
 }

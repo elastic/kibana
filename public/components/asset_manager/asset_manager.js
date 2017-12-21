@@ -1,7 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Button } from 'react-bootstrap';
 import './asset_manager.less';
 import { RemoveIcon } from '../remove_icon';
+import { Clipboard } from '../clipboard';
 
 export const AssetManager = ({ assets, removeAsset }) => {
 
@@ -25,6 +27,14 @@ export const AssetManager = ({ assets, removeAsset }) => {
           backgroundImage: `url("${asset.value}")`,
         }}>
           <RemoveIcon style={{ position: 'absolute', top: 0, right: 0 }} onClick={() => removeAsset(asset.id)}/>
+          <div className="canvas__asset-manager--asset-identifier">
+            <div className="asset-copy">
+              <Clipboard content={asset.id}>
+                <Button bsSize="xsmall"><span className="fa fa-clipboard" /></Button>
+              </Clipboard>
+            </div>
+            <div className="asset-id">{asset.id}</div>
+          </div>
         </div>
       ))}
     </div>
