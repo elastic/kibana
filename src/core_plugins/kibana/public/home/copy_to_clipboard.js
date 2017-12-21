@@ -26,6 +26,7 @@ export function copyToClipboard(text) {
   try {
     document.body.appendChild(elementToBeCopied);
     range.selectNode(elementToBeCopied);
+    selection.empty();
     selection.addRange(range);
 
     if (!document.execCommand('copy')) {
