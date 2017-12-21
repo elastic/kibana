@@ -5,8 +5,7 @@
  */
 
 import _ from 'lodash';
-import { fatalError } from 'ui/notify';
-import { Notifier } from 'ui/notify/notifier';
+import { fatalError, Notifier } from 'ui/notify';
 import { SimpleEmitter } from 'ui/utils/simple_emitter';
 
 const location = 'EventEmitter';
