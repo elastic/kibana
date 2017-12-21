@@ -34,7 +34,7 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
   const filterManager = Private(FilterManagerProvider);
 
   class Vis extends EventEmitter {
-    constructor(indexPattern, visState, uiState) {
+    constructor(indexPattern, visState) {
       super();
       visState = visState || {};
 
@@ -44,10 +44,6 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
         };
       }
       this.indexPattern = indexPattern;
-
-      if (!uiState) {
-        uiState = new PersistedState();
-      }
 
       this.setCurrentState(visState);
       this.setState(this.getCurrentState(), false);
