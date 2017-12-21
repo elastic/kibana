@@ -15,7 +15,6 @@ uiModules
       template: spyTemplate,
       scope: {
         vis: '<',
-        spy: '<',
         searchSource: '<',
         uiState: '<',
         visElement: '<',
