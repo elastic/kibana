@@ -73,7 +73,7 @@ your Github username and a Github Access Token (can be created
 ```js
 {
   // Github personal access token. Create here: https://github.com/settings/tokens/new
-  // Please check "Full control of private repositories"
+  // Please check "Repo (Full control of private repositories)"
   "accessToken": "",
 
   // Github username, eg. kimchy
