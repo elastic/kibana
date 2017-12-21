@@ -14,6 +14,11 @@ uiModules.get('kibana')
     return {
       restrict: 'E',
       template: html,
+      scope: {
+        vis: '<',
+        visData: '<',
+        uiState: '<',
+      },
       link: function ($scope) {
         const $state = getAppState();
         const clickHandler = filterBarClickHandler($state);
