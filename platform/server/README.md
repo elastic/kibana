@@ -15,8 +15,6 @@ How you'd get an `AdminClient` that's bound to the same underlying elasticsearch
 const adminClient$ = elasticsearch.service.getAdminClient$();
 ```
 
-ElasticsearchConfigs, ElasticsearchModule, and ElasticsearchClusterType.
-
 ### Other clients
 We might want an unscoped data client for API calls that hit the data cluster but use the internal kibana user for auth. Then we could create a generic `DataClient` class that `UnscopedDataClient` and `ScopedDataClient` extend. Or maybe just `ScopedDataClient` would extend `DataClient`, which would be assumed to be unscoped.
 
