@@ -3,7 +3,7 @@ import moment from 'moment-timezone';
 
 import { DocTitleProvider } from 'ui/doc_title';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import { notify } from 'ui/notify';
+import { notify, fatalError } from 'ui/notify';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 
 require('ui/autoload/all');
@@ -47,6 +47,8 @@ require('ui/routes')
     }
   });
 
+const location = 'Timelion';
+
 app.controller('timelion', function (
   $http,
   $route,
@@ -75,7 +77,7 @@ app.controller('timelion', function (
   timefilter.enableTimeRangeSelector();
 
   const notify = new Notifier({
-    location: 'Timelion'
+    location
   });
 
   const savedVisualizations = Private(SavedObjectRegistryProvider).byLoaderPropertiesName.visualizations;
@@ -112,7 +114,7 @@ app.controller('timelion', function (
         savedSheet.delete().then(() => {
           notify.info('Deleted ' + title);
           kbnUrl.change('/');
-        }).catch(notify.fatal);
+        }).catch(error => fatalError(error, location));
       }
 
       const confirmModalOptions = {

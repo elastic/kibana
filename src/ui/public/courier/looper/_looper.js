@@ -1,6 +1,7 @@
 import _ from 'lodash';
 
 import 'ui/promises';
+import { fatalError } from 'ui/notify';
 import { Notifier } from 'ui/notify/notifier';
 
 export function LooperProvider($timeout, Promise) {
@@ -144,7 +145,7 @@ export function LooperProvider($timeout, Promise) {
       })
       .catch(function (err) {
         self.stop();
-        notify.fatal(err);
+        fatalError(err);
       })
       .finally(function () {
         self.active = null;
