@@ -2,6 +2,25 @@ import Joi from 'joi';
 import { PARAM_TYPES } from './param_types';
 import { TUTORIAL_CATEGORY } from './tutorial_category';
 
+const dashboardSchema = Joi.object({
+  title: Joi.string().required(),
+  linkLabel: Joi.string().when('isOverview', {
+    is: true,
+    then: Joi.required(),
+  }),
+  // Is this an Overview / Entry Point dashboard?
+  isOverview: Joi.boolean().required()
+});
+
+const artifactsSchema = Joi.object({
+  // Fields present in Elasticsearch documents created by this product.
+  exportedFields: Joi.object({
+    documentationUrl: Joi.string()
+  }),
+  // Kibana dashboards created by this product.
+  dashboards: Joi.array().items(dashboardSchema).required()
+});
+
 const instructionSchema = Joi.object({
   title: Joi.string(),
   textPre: Joi.string(),
@@ -16,6 +35,7 @@ const instructionVariantSchema = Joi.object({
 
 const instructionSetSchema = Joi.object({
   title: Joi.string(),
+  // Variants (OSes, languages, etc.) for which tutorial instructions are specified.
   instructionVariants: Joi.array().items(instructionVariantSchema).required()
 });
 
@@ -48,5 +68,8 @@ export const tutorialSchema = {
   elasticCloud: instructionsSchema.required(),
 
   // kibana running on prem and elastic cluster running in elastic's cloud
-  onPremElasticCloud: instructionsSchema.required()
+  onPremElasticCloud: instructionsSchema.required(),
+
+  // Elastic stack artifacts produced by product when it is setup and run.
+  artifacts: artifactsSchema,
 };
