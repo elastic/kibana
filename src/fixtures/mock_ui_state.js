@@ -1,18 +1,21 @@
 import _ from 'lodash';
-const keys = {};
+let values = {};
 export default {
   get: function (path, def) {
-    return keys[path] == null ? def : keys[path];
+    return _.get(values, path, def);
   },
   set: function (path, val) {
-    keys[path] = val;
+    _.set(values, path, val);
     return val;
   },
   setSilent: function (path, val) {
-    keys[path] = val;
+    _.set(values, path, val);
     return val;
   },
   emit: _.noop,
   on: _.noop,
-  off: _.noop
+  off: _.noop,
+  _reset: function () {
+    values = {};
+  }
 };
