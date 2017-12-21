@@ -1,6 +1,6 @@
 {
   "name": "backport",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "main": "./src/cli/index.js",
   "bin": {
     "backport": "./src/cli/index.js"
