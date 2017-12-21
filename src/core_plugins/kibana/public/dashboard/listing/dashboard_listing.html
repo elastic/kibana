@@ -178,7 +178,12 @@
             </button>
           </th>
 
-          <th scope="col" class="kuiTableHeaderCell" width="80px">
+          <th
+            ng-if="!listingController.hideWriteControls"
+            scope="col"
+            class="kuiTableHeaderCell"
+            width="80px"
+          >
             <div class="kuiTableHeaderCell__liner">Actions</div>
           </th>
         </tr>
@@ -219,7 +224,10 @@
               {{ item.description }}
             </div>
           </td>
-          <td class="kuiTableRowCell kuiTableRowCell--wrap">
+          <td
+            ng-if="!listingController.hideWriteControls"
+            class="kuiTableRowCell kuiTableRowCell--wrap"
+          >
             <div class="kuiTableRowCell__liner">
               <a
                 class="kuiMenuButton kuiMenuButton--basic"
