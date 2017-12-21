@@ -39,6 +39,16 @@ export const plot = {
       help: 'Legend position, nw, sw, ne, se or false',
       default: 'nw',
     },
+    yaxis: {
+      types: ['boolean'],
+      help: 'Show the y-axis?',
+      default: true,
+    },
+    xaxis: {
+      types: ['boolean'],
+      help: 'Show the x-axis?',
+      default: true,
+    },
   },
   fn: (context, args) => {
     function seriesStyleToFlot(seriesStyle) {
@@ -174,10 +184,12 @@ export const plot = {
             },
           },
           xaxis: {
+            show: args.xaxis,
             ticks: get(context.columns, 'x.type') === 'string' ? map(ticks.x.hash, (position, name) => [position, name]) : undefined,
             mode: get(context.columns, 'x.type') === 'date' ? 'time' : undefined,
           },
           yaxis: {
+            show: args.yaxis,
             ticks: get(context.columns, 'y.type') === 'string' ? map(ticks.y.hash, (position, name) => [position, name]) : undefined,
             mode: get(context.columns, 'y.type') === 'date' ? 'time' : undefined,
           },
