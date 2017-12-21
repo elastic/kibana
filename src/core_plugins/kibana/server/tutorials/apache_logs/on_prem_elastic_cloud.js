@@ -2,6 +2,10 @@ import { INSTRUCTION_VARIANT } from '../../../common/tutorials/instruction_varia
 import { FILEBEAT_INSTRUCTIONS } from '../../../common/tutorials/filebeat_instructions';
 import { FILEBEAT_CLOUD_INSTRUCTIONS } from '../../../common/tutorials/filebeat_cloud_instructions';
 import { FILEBEAT_ONPREM_CLOUD_INSTRUCTIONS } from '../../../common/tutorials/filebeat_onprem_cloud_instructions';
+import {
+  TRYCLOUD_OPTION1,
+  TRYCLOUD_OPTION2
+} from '../../../common/tutorials/onprem_cloud_instructions';
 
 export const ON_PREM_ELASTIC_CLOUD_INSTRUCTIONS = {
   instructionSets: [
@@ -11,8 +15,8 @@ export const ON_PREM_ELASTIC_CLOUD_INSTRUCTIONS = {
         {
           id: INSTRUCTION_VARIANT.OSX,
           instructions: [
-            FILEBEAT_ONPREM_CLOUD_INSTRUCTIONS.TRYCLOUD_OPTION1,
-            FILEBEAT_ONPREM_CLOUD_INSTRUCTIONS.TRYCLOUD_OPTION2,
+            TRYCLOUD_OPTION1,
+            TRYCLOUD_OPTION2,
             FILEBEAT_CLOUD_INSTRUCTIONS.INSTALL.OSX,
             FILEBEAT_ONPREM_CLOUD_INSTRUCTIONS.CONFIG.OSX,
             {
@@ -29,8 +33,8 @@ export const ON_PREM_ELASTIC_CLOUD_INSTRUCTIONS = {
         {
           id: INSTRUCTION_VARIANT.DEB,
           instructions: [
-            FILEBEAT_ONPREM_CLOUD_INSTRUCTIONS.TRYCLOUD_OPTION1,
-            FILEBEAT_ONPREM_CLOUD_INSTRUCTIONS.TRYCLOUD_OPTION2,
+            TRYCLOUD_OPTION1,
+            TRYCLOUD_OPTION2,
             FILEBEAT_CLOUD_INSTRUCTIONS.INSTALL.DEB,
             FILEBEAT_ONPREM_CLOUD_INSTRUCTIONS.CONFIG.DEB,
             {
@@ -46,8 +50,8 @@ export const ON_PREM_ELASTIC_CLOUD_INSTRUCTIONS = {
         {
           id: INSTRUCTION_VARIANT.RPM,
           instructions: [
-            FILEBEAT_ONPREM_CLOUD_INSTRUCTIONS.TRYCLOUD_OPTION1,
-            FILEBEAT_ONPREM_CLOUD_INSTRUCTIONS.TRYCLOUD_OPTION2,
+            TRYCLOUD_OPTION1,
+            TRYCLOUD_OPTION2,
             FILEBEAT_CLOUD_INSTRUCTIONS.INSTALL.RPM,
             FILEBEAT_ONPREM_CLOUD_INSTRUCTIONS.CONFIG.RPM,
             {
@@ -63,8 +67,8 @@ export const ON_PREM_ELASTIC_CLOUD_INSTRUCTIONS = {
         {
           id: INSTRUCTION_VARIANT.WINDOWS,
           instructions: [
-            FILEBEAT_ONPREM_CLOUD_INSTRUCTIONS.TRYCLOUD_OPTION1,
-            FILEBEAT_ONPREM_CLOUD_INSTRUCTIONS.TRYCLOUD_OPTION2,
+            TRYCLOUD_OPTION1,
+            TRYCLOUD_OPTION2,
             FILEBEAT_CLOUD_INSTRUCTIONS.INSTALL.WINDOWS,
             FILEBEAT_ONPREM_CLOUD_INSTRUCTIONS.CONFIG.WINDOWS,
             {
