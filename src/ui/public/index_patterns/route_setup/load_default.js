@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { Notifier } from 'ui/notify/notifier';
+import { Notifier } from 'ui/notify';
 import { NoDefaultIndexPattern } from 'ui/errors';
 import { IndexPatternsGetProvider } from '../_get';
 import uiRoutes from 'ui/routes';

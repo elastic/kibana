@@ -8,7 +8,7 @@ import 'ui/share';
 import 'ui/query_bar';
 import chrome from 'ui/chrome';
 import angular from 'angular';
-import { Notifier } from 'ui/notify/notifier';
+import { Notifier } from 'ui/notify';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { DocTitleProvider } from 'ui/doc_title';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';

@@ -11,8 +11,7 @@ import angular from 'angular';
 import rison from 'rison-node';
 import { applyDiff } from 'ui/utils/diff_object';
 import { EventsProvider } from 'ui/events';
-import { fatalError } from 'ui/notify';
-import { Notifier } from 'ui/notify/notifier';
+import { fatalError, Notifier } from 'ui/notify';
 import 'ui/state_management/config_provider';
 
 import {
