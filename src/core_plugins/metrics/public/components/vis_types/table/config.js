@@ -72,6 +72,7 @@ class TableSeriesConfig extends Component {
             />
           </div>
           <div className="vis_editor__series_config-row">
+            <label className="vis_editor__label" htmlFor={htmlId('aggregateFunctionInput')}>Aggregate by Field</label>
             <div className="vis_editor__row_item">
               <FieldSelect
                 fields={this.props.fields}

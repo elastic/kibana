@@ -34,7 +34,8 @@ function Visualization(props) {
 
   const path = visData.type === 'table' ? 'series' : `${model.id}.series`;
   const noData = _.get(visData, path, []).length === 0;
-  if (noData) {
+  const incompatibleDataType = visData.type !== model.type;
+  if (noData || incompatibleDataType) {
     return (
       <div className={props.className}>
         <NoData />

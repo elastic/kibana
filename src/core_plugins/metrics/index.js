@@ -15,7 +15,9 @@ export default function (kibana) {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         chartResolution: Joi.number().default(150),
-        minimumBucketSize: Joi.number().default(10)
+        minimumBucketSize: Joi.number().default(10),
+        tablePartitionSize: Joi.number().default(50),
+        tableTotalSize: Joi.number().default(10000)
       }).default();
     },
 
