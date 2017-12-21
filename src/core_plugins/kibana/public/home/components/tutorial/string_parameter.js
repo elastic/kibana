@@ -16,7 +16,7 @@ export function StringParameter({ id, label, value, setParameter }) {
       <div className="kuiSideBarFormRow__control kuiFieldGroupSection--wide">
         <input
           className="kuiTextInput"
-          type="number"
+          type="text"
           value={value}
           onChange={handleChange}
         />
