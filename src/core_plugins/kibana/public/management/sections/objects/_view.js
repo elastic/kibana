@@ -5,9 +5,12 @@ import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_o
 import objectViewHTML from 'plugins/kibana/management/sections/objects/_view.html';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
+import { fatalError } from 'ui/notify';
 import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
 import { castEsToKbnFieldTypeName } from '../../../../../../utils';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
+
+const location = 'SavedObject view';
 
 uiRoutes
   .when('/management/kibana/objects/:service/:id', {
@@ -19,7 +22,7 @@ uiModules.get('apps/management')
     return {
       restrict: 'E',
       controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, Private) {
-        const notify = new Notifier({ location: 'SavedObject view' });
+        const notify = new Notifier({ location });
         const serviceObj = savedObjectManagementRegistry.get($routeParams.service);
         const service = $injector.get(serviceObj.service);
         const savedObjectsClient = Private(SavedObjectsClientProvider);
@@ -122,7 +125,7 @@ uiModules.get('apps/management')
               return (orderIndex > -1) ? orderIndex : Infinity;
             });
           })
-          .catch(notify.fatal);
+          .catch(fatalError);
 
         // This handles the validation of the Ace Editor. Since we don't have any
         // other hooks into the editors to tell us if the content is valid or not
@@ -173,7 +176,7 @@ uiModules.get('apps/management')
               .then(function () {
                 return redirectHandler('deleted');
               })
-              .catch(notify.fatal);
+              .catch(error => fatalError(error, location));
           }
           const confirmModalOptions = {
             onConfirm: doDelete,
@@ -206,7 +209,7 @@ uiModules.get('apps/management')
             .then(function () {
               return redirectHandler('updated');
             })
-            .catch(notify.fatal);
+            .catch(error => fatalError(error, location));
         };
 
         function redirectHandler(action) {

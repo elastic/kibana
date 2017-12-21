@@ -1,28 +1,20 @@
 import _ from 'lodash';
 import angular from 'angular';
-import $ from 'jquery';
 import { metadata } from 'ui/metadata';
-import { formatMsg } from 'ui/notify/lib/_format_msg';
-import fatalSplashScreen from 'ui/notify/partials/fatal_splash_screen.html';
+import { formatMsg, formatStack } from './lib';
+import { fatalError } from './fatal_error';
 import 'ui/render_directive';
-/* eslint no-console: 0 */
 
 const notifs = [];
-const version = metadata.version;
-const buildNum = metadata.buildNum;
+
+const {
+  version,
+  buildNum,
+} = metadata;
+
 const consoleGroups = ('group' in window.console) && ('groupCollapsed' in window.console) && ('groupEnd' in window.console);
 
 const log = _.bindKey(console, 'log');
-
-// used to identify the first call to fatal, set to false there
-let firstFatal = true;
-
-const fatalToastTemplate = (function lazyTemplate(tmpl) {
-  let compiled;
-  return function (vars) {
-    return (compiled || (compiled = _.template(tmpl)))(vars);
-  };
-}(require('ui/notify/partials/fatal.html')));
 
 function now() {
   if (window.performance && window.performance.now) {
@@ -188,28 +180,6 @@ function set(opts, cb) {
 Notifier.prototype.add = add;
 Notifier.prototype.set = set;
 
-function formatInfo() {
-  const info = [];
-
-  if (!_.isUndefined(version)) {
-    info.push(`Version: ${version}`);
-  }
-
-  if (!_.isUndefined(buildNum)) {
-    info.push(`Build: ${buildNum}`);
-  }
-
-  return info.join('\n');
-}
-
-// browsers format Error.stack differently; always include message
-function formatStack(err) {
-  if (err.stack && !~err.stack.indexOf(err.message)) {
-    return 'Error: ' + err.message + '\n' + err.stack;
-  }
-  return err.stack;
-}
-
 /**
  * Functionality to check that
  */
@@ -220,7 +190,17 @@ export function Notifier(opts) {
   // label type thing to say where notifications came from
   self.from = opts.location;
 
-  'event lifecycle timed fatal error warning info banner'.split(' ').forEach(function (m) {
+  const notificationLevels = [
+    'event',
+    'lifecycle',
+    'timed',
+    'error',
+    'warning',
+    'info',
+    'banner',
+  ];
+
+  notificationLevels.forEach(function (m) {
     self[m] = _.bind(self[m], self);
   });
 }
@@ -237,9 +217,6 @@ Notifier.config = {
 Notifier.applyConfig = function (config) {
   _.merge(Notifier.config, config);
 };
-
-// to be notified when the first fatal error occurs, push a function into this array.
-Notifier.fatalCallbacks = [];
 
 // "Constants"
 Notifier.QS_PARAM_MESSAGE = 'notif_msg';
@@ -260,7 +237,12 @@ Notifier.pullMessageFromUrl = ($location) => {
   $location.search(Notifier.QS_PARAM_LEVEL, null);
 
   const notifier = new Notifier(config);
-  notifier[level](message);
+
+  if (level === 'fatal') {
+    fatalError(message);
+  } else {
+    notifier[level](message);
+  }
 };
 
 // simply a pointer to the global notif list
@@ -307,55 +289,6 @@ Notifier.prototype.timed = function (name, fn) {
       return fn.apply(cntx, args);
     });
   };
-};
-
-/**
- * Kill the page, display an error, then throw the error.
- * Used as a last-resort error back in many promise chains
- * so it rethrows the error that's displayed on the page.
- *
- * @param  {Error} err - The error that occured
- */
-Notifier.prototype.fatal = function (err) {
-  this._showFatal(err);
-  throw err;
-};
-
-/**
- * Display an error that destroys the entire app. Broken out so that
- * global error handlers can display fatal errors without throwing another
- * error like in #fatal()
- *
- * @param  {Error} err - The fatal error that occured
- */
-Notifier.prototype._showFatal = function (err) {
-  if (firstFatal) {
-    _.callEach(Notifier.fatalCallbacks);
-    firstFatal = false;
-    window.addEventListener('hashchange', function () {
-      window.location.reload();
-    });
-  }
-
-  const html = fatalToastTemplate({
-    info: formatInfo(),
-    msg: formatMsg(err, this.from),
-    stack: formatStack(err)
-  });
-
-  let $container = $('#fatal-splash-screen');
-
-  if (!$container.length) {
-    $(document.body)
-      // in case the app has not completed boot
-      .removeAttr('ng-cloak')
-      .html(fatalSplashScreen);
-
-    $container = $('#fatal-splash-screen');
-  }
-
-  $container.append(html);
-  console.error(err.stack);
 };
 
 const overrideableOptions = ['lifetime', 'icon'];
@@ -623,13 +556,13 @@ function createGroupLogger(type, opts) {
 
     if (consoleGroups) {
       if (status) {
-        console.log(status);
-        console.groupEnd();
+        console.log(status); // eslint-disable-line no-console
+        console.groupEnd(); // eslint-disable-line no-console
       } else {
         if (opts.open) {
-          console.group(name);
+          console.group(name); // eslint-disable-line no-console
         } else {
-          console.groupCollapsed(name);
+          console.groupCollapsed(name); // eslint-disable-line no-console
         }
       }
     } else {

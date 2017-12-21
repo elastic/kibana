@@ -1,4 +1,4 @@
-import { courierNotifier } from './notifier';
+import { fatalError } from 'ui/notify';
 import { CallClientProvider } from './call_client';
 import { CallResponseHandlersProvider } from './call_response_handlers';
 import { ContinueIncompleteProvider } from './continue_incomplete';
@@ -30,7 +30,7 @@ export function FetchNowProvider(Private, Promise) {
       if (!req.started) return req;
       return req.retry();
     }))
-      .catch(courierNotifier.fatal);
+      .catch(error => fatalError(error, location));
   }
 
   function fetchSearchResults(requests) {
