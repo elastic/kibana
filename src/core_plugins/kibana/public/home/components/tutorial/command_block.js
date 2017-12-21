@@ -5,6 +5,9 @@ import {
   KuiBar,
   KuiBarSection,
 } from 'ui_framework/components';
+import {
+  EuiCodeBlock,
+} from '@elastic/eui';
 
 export function CommandBlock({ commands, paramValues, replaceTemplateStrings }) {
 
@@ -22,9 +25,9 @@ export function CommandBlock({ commands, paramValues, replaceTemplateStrings }) 
         </KuiBar>
       </div>
       <div className="kuiVerticalRhythm">
-        <pre>
+        <EuiCodeBlock>
           {cmdText}
-        </pre>
+        </EuiCodeBlock>
       </div>
     </div>
   );
