@@ -3,14 +3,26 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import ticFormatter from '../../lib/tick_formatter';
 import calculateLabel from '../../../../common/calculate_label';
-import { isSortable } from './is_sortable';
-import { EuiToolTip } from '@elastic/eui';
 import replaceVars from '../../lib/replace_vars';
+
+const STATE_KEY = 'table.sort';
+
+import {
+  Pager,
+  EuiSpacer,
+  EuiTable,
+  EuiTableBody,
+  EuiTableHeader,
+  EuiTableHeaderCell,
+  EuiTablePagination,
+  EuiTableRow,
+  EuiTableRowCell,
+} from '@elastic/eui';
 
 function getColor(rules, colorKey, value) {
   let color;
   if (rules) {
-    rules.forEach((rule) => {
+    rules.forEach(rule => {
       if (rule.opperator && rule.value != null) {
         if (_[rule.opperator](value, rule.value)) {
           color = rule[colorKey];
@@ -22,11 +34,40 @@ function getColor(rules, colorKey, value) {
 }
 
 class TableVis extends Component {
-
   constructor(props) {
     super(props);
     this.renderRow = this.renderRow.bind(this);
+    this.state = {
+      itemsPerPage: 10,
+      sort: props.uiState.get(STATE_KEY, {
+        column: '_default_',
+        order: 'asc',
+      }),
+    };
+    this.pager = new Pager(
+      props.visData.series.length,
+      this.state.itemsPerPage
+    );
+    this.state.firstItemIndex = this.pager.getFirstItemIndex();
+    this.state.lastItemIndex = this.pager.getLastItemIndex();
   }
+
+  onChangeItemsPerPage = itemsPerPage => {
+    this.pager.setItemsPerPage(itemsPerPage);
+    this.setState({
+      itemsPerPage,
+      firstItemIndex: this.pager.getFirstItemIndex(),
+      lastItemIndex: this.pager.getLastItemIndex(),
+    });
+  };
+
+  onChangePage = pageIndex => {
+    this.pager.goToPageIndex(pageIndex);
+    this.setState({
+      firstItemIndex: this.pager.getFirstItemIndex(),
+      lastItemIndex: this.pager.getLastItemIndex(),
+    });
+  };
 
   renderRow(row) {
     const { model } = this.props;
@@ -34,7 +75,7 @@ class TableVis extends Component {
     let rowDisplay = rowId;
     if (model.drilldown_url) {
       const url = replaceVars(model.drilldown_url, {}, { key: row.key });
-      rowDisplay = (<a href={url}>{rowDisplay}</a>);
+      rowDisplay = <a href={url}>{rowDisplay}</a>;
     }
     const columns = row.series.filter(item => item).map(item => {
       const column = model.series.find(c => c.id === item.id);
@@ -43,154 +84,148 @@ class TableVis extends Component {
       const value = formatter(item.last);
       let trend;
       if (column.trend_arrows) {
-        const trendClass = item.slope > 0 ? 'fa-long-arrow-up' : 'fa-long-arrow-down';
+        const trendClass =
+          item.slope > 0 ? 'fa-long-arrow-up' : 'fa-long-arrow-down';
         trend = (
           <span className="tsvb-table__trend">
-            <i className={`fa ${trendClass}`}/>
+            <i className={`fa ${trendClass}`} />
           </span>
         );
       }
       const style = { color: getColor(column.color_rules, 'text', item.last) };
       return (
-        <td key={`${rowId}-${item.id}`} className="tsvb-table__value" style={style}>
-          <span className="tsvb-table__value-display">{ value }</span>
+        <EuiTableRowCell
+          key={`${rowId}-${item.id}`}
+          textOnly={false}
+          align="right"
+        >
+          <span style={style} className="tsvb-table__value-display">
+            {value}
+          </span>
           {trend}
-        </td>
+        </EuiTableRowCell>
       );
     });
     return (
-      <tr key={rowId}>
-        <td className="tsvb-table__fieldName">{rowDisplay}</td>
+      <EuiTableRow key={rowId}>
+        <EuiTableRowCell textOnly={false} align="left">
+          {rowDisplay}
+        </EuiTableRowCell>
         {columns}
-      </tr>
+      </EuiTableRow>
     );
   }
 
   renderHeader() {
-    const { model, uiState, onUiState } = this.props;
-    const stateKey = `${model.type}.sort`;
-    const sort = uiState.get(stateKey, {
-      column: '_default_',
-      order: 'asc'
-    });
-    const columns  = model.series.map(item => {
+    const { model, onUiState } = this.props;
+    const { sort } = this.state;
+    const columns = model.series.map(item => {
       const metric = _.last(item.metrics);
       const label = item.label || calculateLabel(metric, item.metrics);
       const handleClick = () => {
-        if (!isSortable(metric)) return;
-        let order;
+        let order = sort.order;
         if (sort.column === item.id) {
           order = sort.order === 'asc' ? 'desc' : 'asc';
-        } else {
-          order = 'asc';
         }
-        onUiState(stateKey, { column: item.id, order });
+        const nextSort = { column: item.id, order };
+        this.setState({ sort: nextSort }, () => {
+          onUiState(STATE_KEY, nextSort);
+        });
       };
-      let sortComponent;
-      if (isSortable(metric)) {
-        let sortIcon;
-        if (sort.column === item.id) {
-          sortIcon = sort.order === 'asc' ? 'sort-asc' : 'sort-desc';
-        } else {
-          sortIcon = 'sort';
-        }
-        sortComponent = (
-          <i className={`fa fa-${sortIcon}`} />
-        );
-      }
-      let headerContent = (
-        <span>{label} {sortComponent}</span>
-      );
-      if (!isSortable(metric)) {
-        headerContent = (
-          <EuiToolTip content="This Column is Not Sortable">{headerContent}</EuiToolTip>
-        );
-      }
-
+      const isSortAscending = sort.order === 'asc';
       return (
-        <th
-          className="tsvb-table__columnName"
-          onClick={handleClick}
+        <EuiTableHeaderCell
           key={item.id}
-          scope="col"
+          align="right"
+          onSort={handleClick}
+          isSorted={sort.column === item.id}
+          isSortAscending={isSortAscending}
         >
-          {headerContent}
-        </th>
+          {label}
+        </EuiTableHeaderCell>
       );
     });
+
     const label = model.pivot_label || model.pivot_field || model.pivot_id;
-    let sortIcon;
-    if (sort.column === '_default_') {
-      sortIcon = sort.order === 'asc' ? 'sort-asc' : 'sort-desc';
-    } else {
-      sortIcon = 'sort';
-    }
-    const sortComponent = (
-      <i className={`fa fa-${sortIcon}`} />
-    );
+    const isSortAscending = sort.order === 'asc';
     const handleSortClick = () => {
-      let order;
+      let order = sort.order;
       if (sort.column === '_default_') {
         order = sort.order === 'asc' ? 'desc' : 'asc';
-      } else {
-        order = 'asc';
       }
-      onUiState(stateKey, { column: '_default_', order });
+      const nextSort = { column: '_default_', order };
+      this.setState({ sort: nextSort }, () => {
+        onUiState(STATE_KEY, nextSort);
+      });
     };
+
     return (
-      <tr>
-        <th scope="col" onClick={handleSortClick}>{label} {sortComponent}</th>
-        { columns }
-      </tr>
+      <EuiTableHeader>
+        <EuiTableHeaderCell
+          align="left"
+          onSort={handleSortClick}
+          isSorted={sort.column === '_default_'}
+          isSortAscending={isSortAscending}
+        >
+          {label}
+        </EuiTableHeaderCell>
+        {columns}
+      </EuiTableHeader>
     );
   }
 
+  sortIdentity = item => {
+    const { sort } = this.state;
+    if (sort.column === '_default_') return item.key;
+    const column = item.series.find(i => i.id === sort.column);
+    if (column) return column.last;
+  };
+
   render() {
     const { visData, model } = this.props;
+    const { firstItemIndex, lastItemIndex, itemsPerPage } = this.state;
     const header = this.renderHeader();
+
     let rows;
-    let reversedClass = '';
-
-    if (this.props.reversed) {
-      reversedClass = 'reversed';
-    }
-
     if (_.isArray(visData.series) && visData.series.length) {
-      rows = visData.series.map(this.renderRow);
+      const series =
+        this.state.sort.order === 'asc'
+          ? _.sortBy(visData.series, this.sortIdentity)
+          : _.sortBy(visData.series, this.sortIdentity).reverse();
+      rows = series.slice(firstItemIndex, lastItemIndex).map(this.renderRow);
     } else {
       let message = 'No results available.';
       if (!model.pivot_id) {
         message += ' You must choose a group by field for this visualization.';
       }
       rows = (
-        <tr>
-          <td
-            className="tsvb-table__noResults"
-            colSpan={model.series.length + 1}
-          >
-            {message}
-          </td>
-        </tr>
+        <EuiTableRow colSpan={model.series.length + 1}>
+          <EuiTableRowCell>{message}</EuiTableRowCell>
+        </EuiTableRow>
       );
     }
-    return(
-      <div className={`dashboard__visualization ${reversedClass}`} data-test-subj="tableView">
-        <table className="table">
-          <thead>
-            {header}
-          </thead>
-          <tbody>
-            {rows}
-          </tbody>
-        </table>
+    return (
+      <div className="dashboard__tableVisualization" data-test-subj="tableView">
+        <EuiTable>
+          {header}
+          <EuiTableBody>{rows}</EuiTableBody>
+        </EuiTable>
+        <EuiSpacer size="m" />
+        <EuiTablePagination
+          activePage={this.pager.getCurrentPageIndex()}
+          itemsPerPage={itemsPerPage}
+          itemsPerPageOptions={[5, 10, 20]}
+          pageCount={this.pager.getTotalPages()}
+          onChangeItemsPerPage={this.onChangeItemsPerPage}
+          onChangePage={this.onChangePage}
+        />
       </div>
     );
   }
-
 }
 
 TableVis.defaultProps = {
-  sort: {}
+  sort: {},
 };
 
 TableVis.propTypes = {
@@ -201,7 +236,7 @@ TableVis.propTypes = {
   onUiState: PropTypes.func,
   uiState: PropTypes.object,
   pageNumber: PropTypes.number,
-  reversed: PropTypes.bool
+  reversed: PropTypes.bool,
 };
 
 export default TableVis;
