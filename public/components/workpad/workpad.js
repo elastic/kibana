@@ -13,11 +13,15 @@ export const Workpad = ({
   fetchAllRenderables,
   undoHistory,
   redoHistory,
+  setGrid, // TODO: Get rid of grid when we improve the layout engine
+  grid,
   nextPage,
   previousPage,
   isFullscreen,
 }) => {
   const { height, width } = workpad;
+
+  // TODO: I think this is mixing in background color, that should be pushed down to a page component, otherwise reporting wont work right
   const itsTheNewStyle = Object.assign({}, style, { height, width });
 
   const keyHandler = (action) => {
@@ -26,6 +30,7 @@ export const Workpad = ({
     if (action === 'REDO') return redoHistory();
     if (action === 'PREV') return previousPage();
     if (action === 'NEXT') return nextPage();
+    if (action === 'GRID') return setGrid(!grid);
   };
 
   return (
@@ -55,8 +60,8 @@ export const Workpad = ({
                       targetNodeSelector="body"
                     />
                   }
-
                   <PageStack pages={pages} selectedPageId={selectedPageId} height={height} width={width} />
+                  <div className="canvas__grid" style={{ height, width, display: grid ? 'block' : 'none' }}/>
                 </div>
             );
           }}
@@ -66,6 +71,8 @@ export const Workpad = ({
 };
 
 Workpad.propTypes = {
+  grid: PropTypes.bool.isRequired,
+  setGrid: PropTypes.func.isRequired,
   pages: PropTypes.array.isRequired,
   selectedPageId: PropTypes.string.isRequired,
   isFullscreen: PropTypes.bool.isRequired,

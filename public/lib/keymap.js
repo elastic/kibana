@@ -6,6 +6,7 @@ export const keymap = {
     PREV: 'alt+[',
     FULLSCREEN: ['alt+p', 'alt+f'],
     EDITING: ['alt+e'],
+    GRID: 'alt+g',
     REFRESH: 'alt+r',
   },
   ELEMENT: {

@@ -11,6 +11,15 @@
   position: absolute;
 }
 
+.canvas__grid {
+  position: absolute;
+  user-select: none;
+  pointer-events: none;
+  background-image: linear-gradient(to right, grey 1px, transparent 1px), linear-gradient(to bottom, grey 1px, transparent 1px);
+  background-size:50px 50px;
+}
+
+
 // For some bizarre reason, you must repeat the styles in their own blocks or they won’t be applied
 // https://www.sitepoint.com/html5-full-screen-api/
 // #canvas--fullscreen:-moz-full-screen {

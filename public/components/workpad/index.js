@@ -6,6 +6,7 @@ import { getPageById, getSelectedPage, getWorkpad, getPages } from '../../state/
 import { getFullscreen, getEditing } from '../../state/selectors/app';
 import { nextPage, previousPage } from '../../state/actions/pages';
 import { Workpad as Component } from './workpad';
+import { compose, withState } from 'recompose';
 
 const mapStateToProps = (state) => {
   return {
@@ -26,4 +27,7 @@ const mapDispatchToProps = {
   fetchAllRenderables,
 };
 
-export const Workpad = connect(mapStateToProps, mapDispatchToProps)(Component);
+export const Workpad = compose(
+  withState('grid', 'setGrid', false),
+  connect(mapStateToProps, mapDispatchToProps)
+)(Component);
