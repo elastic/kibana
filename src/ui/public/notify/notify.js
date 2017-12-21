@@ -1,6 +1,7 @@
 import { uiModules } from 'ui/modules';
-import { Notifier } from 'ui/notify/notifier';
-import 'ui/notify/directives';
+import { fatalError } from './fatal_error';
+import { Notifier } from './notifier';
+import './directives';
 import { metadata } from 'ui/metadata';
 
 const module = uiModules.get('kibana/notify');
@@ -46,7 +47,7 @@ function applyConfig(config) {
 }
 
 window.onerror = function (err, url, line) {
-  notify.fatal(new Error(err + ' (' + url + ':' + line + ')'));
+  fatalError(new Error(`${err} (${url}:${line})`));
   return true;
 };
 

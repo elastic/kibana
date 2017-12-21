@@ -1,4 +1,4 @@
-import { formatMsg } from 'ui/notify/lib/_format_msg';
+import { formatMsg } from '../../lib';
 import expect from 'expect.js';
 describe('formatMsg', function () {
 

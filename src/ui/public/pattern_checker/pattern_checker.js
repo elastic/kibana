@@ -1,10 +1,12 @@
 import { uiModules } from 'ui/modules';
+import { fatalError } from 'ui/notify';
 import { callAfterBindingsWorkaround } from 'ui/compat';
 import template from './pattern_checker.html';
 import './pattern_checker.less';
 import chrome from 'ui/chrome';
 
 const module = uiModules.get('kibana');
+const location = 'Add Data';
 
 module.directive('patternChecker', function () {
   return {
@@ -19,7 +21,7 @@ module.directive('patternChecker', function () {
       let validationTimeout;
 
       const notify = new Notifier({
-        location: 'Add Data'
+        location,
       });
 
       this.validateInstall = () => {
@@ -33,7 +35,7 @@ module.directive('patternChecker', function () {
                 this.resultCount = 0;
               }
               else {
-                notify.fatal(error);
+                fatalError(error, location);
               }
             }
           )

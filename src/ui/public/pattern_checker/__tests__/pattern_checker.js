@@ -66,7 +66,7 @@ describe('pattern checker', function () {
     expect(_.contains(element.html(), `0 results`)).to.be.ok();
   });
 
-  it('should throw a fatal notificaiton for any error other than a 404', function () {
+  it('should throw a fatal notification for any error other than a 404', function () {
     apiResponse.respond(500, 'Bad things happened');
 
     $compile('<pattern-checker pattern="logstash"></pattern-checker>')($rootScope);

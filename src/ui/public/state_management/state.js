@@ -11,6 +11,7 @@ import angular from 'angular';
 import rison from 'rison-node';
 import { applyDiff } from 'ui/utils/diff_object';
 import { EventsProvider } from 'ui/events';
+import { fatalError } from 'ui/notify';
 import { Notifier } from 'ui/notify/notifier';
 import 'ui/state_management/config_provider';
 
@@ -270,7 +271,7 @@ export function StateProvider(Private, $rootScope, $location, stateManagementCon
     }
 
     // If we ran out of space trying to persist the state, notify the user.
-    this._notifier.fatal(
+    fatalError(
       new Error(
         'Kibana is unable to store history items in your session ' +
         'because it is full and there don\'t seem to be items any items safe ' +
