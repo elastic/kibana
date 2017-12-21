@@ -59,17 +59,45 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      it('for embeddable config color parameters on a visualization', async function () {
-        await PageObjects.visualize.clickLegendOption('80,000');
-        await PageObjects.visualize.selectNewLegendColorChoice('#F9D9F9');
-        const currentUrl = await remote.getCurrentUrl();
-        const newUrl = currentUrl.replace('F9D9F9', 'FFFFFF');
-        await remote.get(newUrl.toString(), false);
-        await PageObjects.header.waitUntilLoadingHasFinished();
+      describe('for embeddable config color parameters on a visualization', () => {
+        it('updates a pie slice color on a soft refresh', async function () {
+          await PageObjects.visualize.clickLegendOption('80,000');
+          await PageObjects.visualize.selectNewLegendColorChoice('#F9D9F9');
+          const currentUrl = await remote.getCurrentUrl();
+          const newUrl = currentUrl.replace('F9D9F9', 'FFFFFF');
+          await remote.get(newUrl.toString(), false);
+          await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await retry.try(async () => {
-          const colorExists = await PageObjects.visualize.doesSelectedLegendColorExist('#FFFFFF');
-          expect(colorExists).to.be(true);
+          await retry.try(async () => {
+            const pieSliceStyle = await PageObjects.visualize.getPieSliceStyle('80,000');
+            expect(pieSliceStyle.indexOf('rgb(255, 255, 255)')).to.be.greaterThan(0);
+          });
+        });
+
+        it.skip('and updates the pie slice legend color', async function () {
+          await retry.try(async () => {
+            const colorExists = await PageObjects.visualize.doesSelectedLegendColorExist('#FFFFFF');
+            expect(colorExists).to.be(true);
+          });
+        });
+
+        it('resets a pie slice color to the original when removed', async function () {
+          const currentUrl = await remote.getCurrentUrl();
+          const newUrl = currentUrl.replace('vis:(colors:(%2780,000%27:%23FFFFFF))', '');
+          await remote.get(newUrl.toString(), false);
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
+          await retry.try(async () => {
+            const pieSliceStyle = await PageObjects.visualize.getPieSliceStyle('80,000');
+            expect(pieSliceStyle.indexOf('rgb(249, 217, 249)')).to.be.greaterThan(0);
+          });
+        });
+
+        it('resets the legend color as well', async function () {
+          await retry.try(async () => {
+            const colorExists = await PageObjects.visualize.doesSelectedLegendColorExist('#F9D9F9');
+            expect(colorExists).to.be(true);
+          });
         });
       });
     });

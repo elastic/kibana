@@ -798,6 +798,16 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async doesSelectedLegendColorExist(color) {
       return await testSubjects.exists(`legendSelectedColor-${color}`);
     }
+
+    async getPieSlice(name) {
+      return await testSubjects.find(`pieSlice-${name.split(' ').join('-')}`);
+    }
+
+    async getPieSliceStyle(name) {
+      log.debug(`VisualizePage.getPieSliceStyle(${name})`);
+      const pieSlice = await this.getPieSlice(name);
+      return await pieSlice.getAttribute('style');
+    }
   }
 
   return new VisualizePage();
