@@ -50,9 +50,9 @@ uiModules
         if (!$scope.appState) $scope.appState = getAppState();
         // Set the passed in uiState to the vis object. uiState reference should never be changed
         if (!$scope.uiState) $scope.uiState = new PersistedState({});
-        $scope.vis.setUiState($scope.uiState);
 
         $scope.vis = $scope.savedObj.vis;
+        $scope.vis._setUiState($scope.uiState);
         $scope.vis.visualizeScope = true;
         $scope.vis.description = $scope.savedObj.description;
 

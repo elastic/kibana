@@ -184,7 +184,7 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
       return !!this.__uiState;
     }
 
-    setUiState(uiState) {
+    _setUiState(uiState) {
       if (uiState instanceof PersistedState) {
         this.__uiState = uiState;
       }

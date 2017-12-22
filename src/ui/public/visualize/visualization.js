@@ -36,7 +36,7 @@ uiModules
 
         // Set the passed in uiState to the vis object. uiState reference should never be changed
         if (!$scope.uiState) $scope.uiState = new PersistedState({});
-        $scope.vis.setUiState($scope.uiState);
+        $scope.vis._setUiState($scope.uiState);
 
 
         // Show no results message when isZeroHits is true and it requires search
