@@ -2,6 +2,7 @@ import 'ui/field_editor';
 import { IndexPatternsFieldProvider } from 'ui/index_patterns/_field';
 import { KbnUrlProvider } from 'ui/url';
 import uiRoutes from 'ui/routes';
+import { toastNotifications } from 'ui/notify';
 import template from './scripted_field_editor.html';
 
 uiRoutes
@@ -29,9 +30,8 @@ uiRoutes
       }
     },
     controllerAs: 'fieldSettings',
-    controller: function FieldEditorPageController($route, Private, Notifier, docTitle) {
+    controller: function FieldEditorPageController($route, Private, docTitle) {
       const Field = Private(IndexPatternsFieldProvider);
-      const notify = new Notifier({ location: 'Field Editor' });
       const kbnUrl = Private(KbnUrlProvider);
 
       this.mode = $route.current.mode;
@@ -43,7 +43,11 @@ uiRoutes
         this.field = this.indexPattern.fields.byName[fieldName];
 
         if (!this.field) {
-          notify.error(this.indexPattern + ' does not have a "' + fieldName + '" field.');
+          toastNotifications.add({
+            title: `"${this.indexPattern.title}" index pattern doesn't have a scripted field called "${fieldName}"`,
+            color: 'primary',
+          });
+
           kbnUrl.redirectToRoute(this.indexPattern, 'edit');
           return;
         }

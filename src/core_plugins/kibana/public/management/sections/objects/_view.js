@@ -5,7 +5,7 @@ import { savedObjectManagementRegistry } from 'plugins/kibana/management/saved_o
 import objectViewHTML from 'plugins/kibana/management/sections/objects/_view.html';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
-import { fatalError } from 'ui/notify';
+import { fatalError, toastNotifications } from 'ui/notify';
 import 'ui/accessibility/kbn_ui_ace_keyboard_mode';
 import { castEsToKbnFieldTypeName } from '../../../../../../utils';
 import { SavedObjectsClientProvider } from 'ui/saved_objects';
@@ -18,11 +18,10 @@ uiRoutes
   });
 
 uiModules.get('apps/management')
-  .directive('kbnManagementObjectsView', function (kbnIndex, Notifier, confirmModal) {
+  .directive('kbnManagementObjectsView', function (kbnIndex, confirmModal) {
     return {
       restrict: 'E',
       controller: function ($scope, $injector, $routeParams, $location, $window, $rootScope, Private) {
-        const notify = new Notifier({ location });
         const serviceObj = savedObjectManagementRegistry.get($routeParams.service);
         const service = $injector.get(serviceObj.service);
         const savedObjectsClient = Private(SavedObjectsClientProvider);
@@ -214,14 +213,17 @@ uiModules.get('apps/management')
         };
 
         function redirectHandler(action) {
-          const msg = 'You successfully ' + action + ' the "' + $scope.obj.attributes.title + '" ' + $scope.title.toLowerCase() + ' object';
-
           $location.path('/management/kibana/objects').search({
             _a: rison.encode({
               tab: serviceObj.title
             })
           });
-          notify.info(msg);
+
+          toastNotifications.add({
+            title: `${_.capitalize(action)} "${$scope.obj.attributes.title}" ${$scope.title.toLowerCase()} object`,
+            color: 'success',
+            iconType: 'check',
+          });
         }
       }
     };

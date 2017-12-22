@@ -4,16 +4,15 @@ import 'ui/paginated_table';
 import fieldControlsHtml from '../field_controls.html';
 import { dateScripts } from './date_scripts';
 import { uiModules } from 'ui/modules';
+import { toastNotifications } from 'ui/notify';
 import template from './scripted_fields_table.html';
 import { getSupportedScriptingLanguages, getDeprecatedScriptingLanguages } from 'ui/scripting_languages';
 import { documentationLinks } from 'ui/documentation_links/documentation_links';
 
 uiModules.get('apps/management')
-  .directive('scriptedFieldsTable', function (kbnUrl, Notifier, $filter, confirmModal) {
+  .directive('scriptedFieldsTable', function (kbnUrl, $filter, confirmModal) {
     const rowScopes = []; // track row scopes, so they can be destroyed as needed
     const filter = $filter('filter');
-
-    const notify = new Notifier();
 
     return {
       restrict: 'E',
@@ -82,11 +81,21 @@ uiModules.get('apps/management')
           });
 
           if (fieldsAdded > 0) {
-            notify.info(fieldsAdded + ' script fields created');
+            toastNotifications.add({
+              title: 'Created script fields',
+              text: `Created ${fieldsAdded}`,
+              color: 'success',
+              iconType: 'check',
+            });
           }
 
           if (conflictFields.length > 0) {
-            notify.info('Not adding ' + conflictFields.length + ' duplicate fields: ' + conflictFields.join(', '));
+            toastNotifications.add({
+              title: `Didn't add duplicate fields`,
+              text: `${conflictFields.length} fields: ${conflictFields.join(', ')}`,
+              color: 'warning',
+              iconType: 'alert',
+            });
           }
         };
 
