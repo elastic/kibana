@@ -336,7 +336,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       log.debug(`setIndexPatternField(${indexPatternName})`);
       const field = await this.getIndexPatternField();
       await field.clearValue();
-      field.type(indexPatternName);
+      await field.type(indexPatternName);
     }
 
     async getCreateIndexPatternGoToStep2Button() {
