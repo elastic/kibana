@@ -1,5 +1,5 @@
 <div>
-  <h2 class="euiTitle">
+  <h2 class="euiTitle euiTitle--small">
     Step 1 of 2: Define index pattern
   </h2>
 
@@ -121,10 +121,8 @@
         indices="stepIndexPattern.allIndices"
         pattern="stepIndexPattern.indexPatternName"
       >
-        <span class="euiTextColor euiTextColor--primary">
-          <span>
-            The index pattern you've entered doesn't match any indices. You can match any of your <strong>{{stepIndexPattern.allIndices.length}} indices</strong>, below.
-          </span>
+        <span>
+          The index pattern you've entered doesn't match any indices. You can match any of your <strong>{{stepIndexPattern.allIndices.length}} indices</strong>, below.
         </span>
       </matching-indices-list>
     </div>
@@ -134,10 +132,8 @@
         indices="stepIndexPattern.partialMatchingIndices"
         pattern="stepIndexPattern.indexPatternName"
       >
-        <span class="euiTextColor euiTextColor--primary">
-          <span>
-            Your index pattern doesn't match any indices, but you have <strong>{{stepIndexPattern.partialMatchingIndices.length}} {{stepIndexPattern.partialMatchingIndices.length > 1 ? 'indices' : 'index'}}</strong> which {{stepIndexPattern.partialMatchingIndices.length > 1 ? 'look' : 'looks'}} similar.
-          </span>
+        <span>
+          Your index pattern doesn't match any indices, but you have <strong>{{stepIndexPattern.partialMatchingIndices.length}} {{stepIndexPattern.partialMatchingIndices.length > 1 ? 'indices' : 'index'}}</strong> which {{stepIndexPattern.partialMatchingIndices.length > 1 ? 'look' : 'looks'}} similar.
         </span>
       </matching-indices-list>
     </div>

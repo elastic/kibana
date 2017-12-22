@@ -22,23 +22,27 @@
         </div>
 
         <div class="euiFlexItem euiFlexItem--flexGrowZero">
-          <label
+          <div
+            class="euiCheckbox"
             ng-if="controller.isSystemIndicesCheckBoxVisible()"
-            class="kuiCheckBoxLabel "
-            for="indexPatternCreationIncludeSystemIndices"
           >
             <input
               type="checkbox"
+              class="euiCheckbox__input"
               id="indexPatternCreationIncludeSystemIndices"
-              class="kuiCheckBox"
               ng-model="controller.doesIncludeSystemIndices"
               ng-change="controller.onIncludeSystemIndicesChange()"
             >
-
-            <span class="kuiCheckBoxLabel__text">
+            <div class="euiCheckbox__square">
+              <div class="euiCheckbox__check"></div>
+            </div>
+            <label
+              class="euiCheckbox__label"
+              for="indexPatternCreationIncludeSystemIndices"
+            >
               Include system indices
-            </span>
-          </label>
+            </label>
+          </div>
         </div>
       </div>
 
@@ -48,55 +52,67 @@
         <!-- User has no data -->
         <div ng-if="!controller.hasIndices()">
           <div class="euiPageContentBody">
-            <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentCenter euiFlexGroup--alignItemsCenter euiFlexGroup--responsive" style="height:100%">
+            <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--responsive">
               <!-- Fetching state -->
               <div
                 ng-if="controller.isFetchingExistingIndices"
-                class="euiFlexItem euiFlexItem--flexGrowZero"
+                class="euiFlexItem euiFlexItem--flexGrowZero createIndexPatternPrompt"
               >
                 <h2 class="euiTitle euiTextColor euiTextColor--subdued">
                   Checking for Elasticsearch data
                 </h2>
                 <div class="euiSpacer euiSpacer--s"></div>
-                <p class="euiTextColor euiTextColor--subdued">
-                  Reticulating splines...
-                </p>
+                <div class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter">
+                  <div class="euiFlexItem euiFlexItem--flexGrowZero">
+                    <div
+                      class="euiLoadingSpinner euiLoadingSpinner--medium"
+                      aria-hidden="true"
+                    ></div>
+                  </div>
+                  <div class="euiFlexItem euiFlexItem--flexGrowZero">
+                    <p class="euiTextColor euiTextColor--subdued">
+                      Reticulating splines...
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <!-- Empty state -->
               <div
-                class="euiFlexItem euiFlexItem--flexGrowZero"
+                class="euiFlexItem euiFlexItem--flexGrowZero createIndexPatternPrompt"
                 ng-if="!controller.isFetchingExistingIndices"
               >
-                <h1 class="euiTitle euiTextColor euiTextColor--subdued">
-                  Couldn't find any Elasticsearch data
-                </h1>
-                <div class="euiSpacer euiSpacer--s"></div>
-                <p class="euiTextColor euiTextColor--subdued">
-                  <span>
-                    You'll need to index some data into Elasticsearch before you can create an index pattern.
-                  </span>
-                  <a
-                    class="kuiLink"
-                    aria-label="Learn how to index data into Elasticsearch"
-                    documentation-href="indexPatterns.loadingData"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    Learn how.
-                  </a>
-                </p>
-                <div class="euiSpacer euiSpacer--s"></div>
-                <button
-                  class="euiButton euiButton--secondary"
-                  ng-click="controller.fetchExistingIndices()"
-                >
-                  <span class="euiButton__content">
+                <div>
+                  <h2 class="euiTitle euiTextColor euiTextColor--subdued">
+                    Couldn't find any Elasticsearch data
+                  </h2>
+                  <div class="euiSpacer euiSpacer--s"></div>
+                  <p class="euiTextColor euiTextColor--subdued">
                     <span>
-                      Check for new data
+                      You'll need to index some data into Elasticsearch before you can create an index pattern.
                     </span>
-                  </span>
-                </button>
+                    <a
+                      class="euiLink"
+                      aria-label="Learn how to index data into Elasticsearch"
+                      documentation-href="indexPatterns.loadingData"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Learn how.
+                    </a>
+                  </p>
+                  <div class="euiSpacer euiSpacer--s"></div>
+                  <button
+                    class="euiButtonEmpty euiButtonEmpty--primary"
+                    ng-click="controller.fetchExistingIndices()"
+                  >
+                    <span class="euiButton__content">
+                      <span>
+                        Check for new data
+                      </span>
+                    </span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>

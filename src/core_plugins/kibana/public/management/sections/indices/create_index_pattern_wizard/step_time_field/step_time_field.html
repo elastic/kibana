@@ -3,7 +3,7 @@
   role="form"
   ng-submit="stepTimeField.createIndexPattern()"
 >
-  <h2 class="euiTitle">
+  <h2 class="euiTitle euiTitle--small">
     Step 2 of 2: Configure settings
   </h2>
 
@@ -30,7 +30,7 @@
         <div class="euiFlexItem euiFlexItem--flexGrowZero">
           <a
             ng-if="!stepTimeField.isFetchingTimeFieldOptions"
-            class="euiLink euiText euiText--extraSmall"
+            class="euiLink euiText euiText--extraSmall timeFieldRefreshButton"
             ng-click="stepTimeField.fetchTimeFieldOptions()"
             kbn-accessible-click
             aria-describedby="timeFilterFieldSelectLabel"
@@ -38,29 +38,12 @@
             Refresh
           </a>
 
-          <p
+          <div
             ng-if="stepTimeField.isFetchingTimeFieldOptions"
-            class="euiTextColor euiTextColor--subdued"
+            class="euiLoadingSpinner euiLoadingSpinner--small"
             aria-label="Please wait while we fetch your time field options"
             aria-describedby="timeFilterFieldSelectLabel"
-          >
-            <svg
-              aria-hidden="true"
-              class="euiIcon euiIcon--medium"
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-            >
-              <g fill="none" fill-rule="evenodd">
-                <circle cx="5" cy="5" r="1" fill="#13252D" />
-                <circle cx="10" cy="5" r="1" fill="#13252D" />
-                <circle cx="7.5" cy="7.5" r="7" stroke="#13252D" />
-                <path stroke="#13252D" stroke-linecap="round" stroke-linejoin="bevel"
-                d="M3 8c1.167 2 2.667 3 4.5 3 1.833 0 3.333-1 4.5-3" />
-              </g>
-            </svg>
-          </p>
+          ></div>
         </div>
       </div>
     </div>
@@ -182,7 +165,7 @@
   <div class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--justifyContentFlexEnd">
     <div class="euiFlexItem euiFlexItem--flexGrowZero">
       <button
-        class="euiButtonEmpty euiButtonEmpty--primary kuiButton--iconText"
+        class="euiButtonEmpty euiButtonEmpty--primary"
         ng-click="stepTimeField.goToPreviousStep()"
       >
         <span class="euiButtonEmpty__content">
@@ -203,7 +186,7 @@
       <button
         data-test-subj="createIndexPatternCreateButton"
         ng-disabled="!stepTimeField.canCreateIndexPattern()"
-        class="euiButton euiButton--primary"
+        class="euiButton euiButton--primary euiButton--fill"
         type="submit"
       >
         <span class="euiButton__content">
