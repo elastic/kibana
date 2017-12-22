@@ -1,3 +1,5 @@
+@import (reference) "~ui/styles/variables";
+
 .vis-type-vega {
   .vis-editor-config {
     // this is the only control, no need for padding
@@ -22,6 +24,12 @@ visualization-editor {
     display: flex;
     flex: 1 1 auto;
     position: relative;
+
+    // If the screen too small, make sure the editor has some height
+    min-height: 18em;
+    @media (min-width: @screen-md-min) {
+      min-height: unset;
+    }
 
     #editor_actions {
       position: absolute;
