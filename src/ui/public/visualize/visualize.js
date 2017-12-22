@@ -149,7 +149,6 @@ uiModules
         queryFilter.on('update', handleQueryUpdate);
 
         if ($scope.appState) {
-          let oldUiState;
           const stateMonitor = stateMonitorFactory.create($scope.appState);
           stateMonitor.onChange((status, type, keys) => {
             if (keys[0] === 'vis') {
@@ -159,30 +158,25 @@ uiModules
             if ($scope.vis.type.requiresSearch && ['query', 'filters'].includes(keys[0])) {
               $scope.fetch();
             }
-            if (keys[0] === 'uiState') {
-            // uiState can be changed by other visualizations on dashboard. this makes sure this fires only if
-            // current visualizations uiState changed.
-              if (!oldUiState || oldUiState !== JSON.stringify($scope.uiState.toJSON())) {
-                oldUiState = JSON.stringify($scope.uiState.toJSON());
-                $scope.fetch();
-              }
-            }
           });
 
           $scope.$on('$destroy', () => {
             stateMonitor.destroy();
-          });
-        } else {
-          const handleUiStateChange = () => { $scope.$broadcast('render'); };
-          $scope.uiState.on('change', handleUiStateChange);
-          $scope.$on('$destroy', () => {
-            $scope.uiState.off('change', handleUiStateChange);
           });
         }
 
         resizeChecker.on('resize',  () => {
           $scope.$broadcast('render');
         });
+        // Listen on uiState changes to start fetching new data again.
+        // Some visualizations might need different data depending on their uiState,
+        // thus we need to retrigger. The request handler should take care about
+        // checking if anything changed, that actually require a new fetch or return
+        // cached data otherwise.
+        const handleUiStateChange = () => {
+          $scope.fetch();
+        };
+        $scope.uiState.on('change', handleUiStateChange);
 
         // visualize needs to know about timeFilter
         $scope.$listen(timefilter, 'fetch', $scope.fetch);
@@ -190,6 +184,7 @@ uiModules
         $scope.$on('$destroy', () => {
           $scope.vis.removeListener('update', handleVisUpdate);
           queryFilter.off('update', handleQueryUpdate);
+          $scope.uiState.off('change', handleUiStateChange);
           resizeChecker.destroy();
         });
 
