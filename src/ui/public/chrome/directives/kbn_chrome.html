@@ -10,8 +10,17 @@
 
   <div class="app-wrapper" ng-class="{ 'hidden-chrome': !chrome.getVisible() }">
     <div class="app-wrapper-panel">
-      <kbn-notifications list="notifList"></kbn-notifications>
+      <kbn-notifications
+        list="notifList"
+      ></kbn-notifications>
+
+      <global-toast-list
+        toasts="toastNotifications"
+        dismiss-toast="dismissToast"
+      ></global-toast-list>
+
       <kbn-loading-indicator></kbn-loading-indicator>
+
       <div
         class="application"
         ng-class="'tab-' + chrome.getFirstPathSegment() + ' ' + chrome.getApplicationClasses()"
