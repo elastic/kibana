@@ -1,5 +1,4 @@
 import React, {
-  // cloneElement,
   Component,
 } from 'react';
 import PropTypes from 'prop-types';
@@ -12,10 +11,9 @@ import {
   EuiToast,
 } from '@elastic/eui';
 
-const TOAST_LIFE_TIME_MS = 6000;
-const TOAST_FADE_OUT_MS = 250;
+export const TOAST_FADE_OUT_MS = 250;
 
-class GlobalToastList extends Component {
+export class GlobalToastList extends Component {
   constructor(props) {
     super(props);
 
@@ -30,15 +28,30 @@ class GlobalToastList extends Component {
   static propTypes = {
     toasts: PropTypes.array,
     dismissToast: PropTypes.func.isRequired,
+    toastLifeTimeMs: PropTypes.number.isRequired,
   };
 
   static defaultProps = {
     toasts: [],
   };
 
-  scheduleToastForDismissal = (toast, isImmediate = false) => {
-    const lifeTime = isImmediate ? TOAST_FADE_OUT_MS : TOAST_LIFE_TIME_MS;
+  scheduleAllToastsForDismissal = () => {
+    this.props.toasts.forEach(toast => {
+      if (!this.toastsScheduledForDismissal[toast.id]) {
+        this.scheduleToastForDismissal(toast);
+      }
+    });
+  };
 
+  scheduleToastForDismissal = (toast, isImmediate = false) => {
+    const toastLifeTimeMs = isImmediate ? 0 : this.props.toastLifeTimeMs;
+
+    // Start fading the toast out once its lifetime elapses.
+    this.timeoutIds.push(setTimeout(() => {
+      this.startDismissingToast(toast);
+    }, toastLifeTimeMs));
+
+    // Remove the toast after it's done fading out.
     this.timeoutIds.push(setTimeout(() => {
       this.props.dismissToast(toast);
       this.setState(prevState => {
@@ -49,11 +62,7 @@ class GlobalToastList extends Component {
           toastIdToDismissedMap,
         };
       });
-    }, lifeTime));
-
-    this.timeoutIds.push(setTimeout(() => {
-      this.startDismissingToast(toast);
-    }, lifeTime - TOAST_FADE_OUT_MS));
+    }, toastLifeTimeMs + TOAST_FADE_OUT_MS));
   };
 
   startDismissingToast(toast) {
@@ -67,16 +76,16 @@ class GlobalToastList extends Component {
     });
   }
 
+  componentDidMount() {
+    this.scheduleAllToastsForDismissal();
+  }
+
   componentWillUnmount() {
     this.timeoutIds.forEach(timeoutId => clearTimeout(timeoutId));
   }
 
-  componentDidUpdate(prevProps) {
-    prevProps.toasts.forEach(toast => {
-      if (!this.toastsScheduledForDismissal[toast.id]) {
-        this.scheduleToastForDismissal(toast);
-      }
-    });
+  componentDidUpdate() {
+    this.scheduleAllToastsForDismissal();
   }
 
   render() {
@@ -118,6 +127,7 @@ const app = uiModules.get('app/kibana', ['react']);
 app.directive('globalToastList', function (reactDirective) {
   return reactDirective(GlobalToastList, [
     'toasts',
+    'toastLifeTimeMs',
     ['dismissToast', { watchDepth: 'reference' }],
   ]);
 });

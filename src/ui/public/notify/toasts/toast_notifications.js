@@ -1,13 +1,12 @@
-let toastCounter = 0;
-
-class ToastNotifications {
+export class ToastNotifications {
   constructor() {
     this.list = [];
+    this.idCounter = 0;
   }
 
   add = toast => {
     this.list.push({
-      id: toastCounter++,
+      id: this.idCounter++,
       ...toast
     });
   };

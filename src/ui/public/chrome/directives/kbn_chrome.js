@@ -71,6 +71,7 @@ export function kbnChromeProvider(chrome, internals) {
           $scope.notifList = notify._notifs;
           $scope.toastNotifications = toastNotifications.list;
           $scope.dismissToast = toastNotifications.remove;
+          $scope.TOAST_LIFE_TIME_MS = 6000;
 
           return chrome;
         }

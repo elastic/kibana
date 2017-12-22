@@ -30,7 +30,7 @@ export function FetchNowProvider(Private, Promise) {
       if (!req.started) return req;
       return req.retry();
     }))
-      .catch(error => fatalError(error, location));
+      .catch(error => fatalError(error));
   }
 
   function fetchSearchResults(requests) {
