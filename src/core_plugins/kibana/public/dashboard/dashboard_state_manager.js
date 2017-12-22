@@ -143,8 +143,7 @@ export class DashboardStateManager {
    */
   triggerEmbeddableConfigUpdateListeners() {
     const state = store.getState();
-    for (let i = 0; i < this.appState.panels.length; i++) {
-      const appStatePanel = this.appState.panels[i];
+    for(const appStatePanel of this.appState.panels) {
       const storePanel = getPanel(state, appStatePanel.panelIndex);
       if (storePanel && !_.isEqual(appStatePanel.embeddableConfig, storePanel.embeddableConfig)) {
         this.embeddableConfigChangeListeners.forEach(listener => listener(appStatePanel.embeddableConfig));
