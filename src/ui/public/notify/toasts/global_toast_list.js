@@ -85,13 +85,24 @@ class GlobalToastList extends Component {
     } = this.props;
 
     const renderedToasts = toasts.map(toast => {
-      const { text, ...rest } = toast;
+      const {
+        title,
+        text,
+        iconType,
+        color,
+        ...rest
+      } = toast;
+
       return (
         <EuiGlobalToastListItem
           key={toast.id}
           isDismissed={this.state.toastIdToDismissedMap[toast.id]}
         >
           <EuiToast
+            title={title}
+            text={text}
+            iconType={iconType}
+            color={color}
             onClose={this.scheduleToastForDismissal.bind(toast, true)}
             {...rest}
           >
