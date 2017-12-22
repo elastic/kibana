@@ -184,6 +184,11 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
       return !!this.__uiState;
     }
 
+    /***
+     * this should not be used outside of visualize
+     * @param uiState
+     * @private
+     */
     _setUiState(uiState) {
       if (uiState instanceof PersistedState) {
         this.__uiState = uiState;
