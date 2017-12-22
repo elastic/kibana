@@ -136,6 +136,10 @@ uiModules
           });
         }
 
+        resizeChecker.on('resize', () => {
+          $scope.$emit('render');
+        });
+
         function jQueryGetter(selector) {
           return function () {
             const $sel = $el.find(selector);

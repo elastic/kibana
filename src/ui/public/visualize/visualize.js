@@ -5,7 +5,6 @@ import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import visualizeTemplate from 'ui/visualize/visualize.html';
 import { VisRequestHandlersRegistryProvider } from 'ui/registry/vis_request_handlers';
 import { VisResponseHandlersRegistryProvider } from 'ui/registry/vis_response_handlers';
-import { ResizeCheckerProvider } from 'ui/resize_checker';
 import 'angular-sanitize';
 import './visualization';
 import './visualization_editor';
@@ -22,7 +21,6 @@ uiModules
     const notify = new Notifier({ location: 'Visualize' });
     const requestHandlers = Private(VisRequestHandlersRegistryProvider);
     const responseHandlers = Private(VisResponseHandlersRegistryProvider);
-    const ResizeChecker = Private(ResizeCheckerProvider);
     const queryFilter = Private(FilterBarQueryFilterProvider);
 
     function getHandler(from, name) {
@@ -43,8 +41,6 @@ uiModules
       },
       template: visualizeTemplate,
       link: async function ($scope, $el) {
-        const resizeChecker = new ResizeChecker($el);
-
         if (!$scope.savedObj) throw(`saved object was not provided to <visualize> directive`);
         if (!$scope.appState) $scope.appState = getAppState();
 
@@ -164,9 +160,6 @@ uiModules
           });
         }
 
-        resizeChecker.on('resize',  () => {
-          $scope.$broadcast('render');
-        });
         // Listen on uiState changes to start fetching new data again.
         // Some visualizations might need different data depending on their uiState,
         // thus we need to retrigger. The request handler should take care about
@@ -184,7 +177,6 @@ uiModules
           $scope.vis.removeListener('update', handleVisUpdate);
           queryFilter.off('update', handleQueryUpdate);
           $scope.uiState.off('change', handleUiStateChange);
-          resizeChecker.destroy();
         });
 
         $scope.$watch('vis.initialized', $scope.fetch);
