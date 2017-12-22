@@ -12,7 +12,7 @@ import {
   EuiToast,
 } from '@elastic/eui';
 
-const TOAST_LIFE_TIME_MS = 4000;
+const TOAST_LIFE_TIME_MS = 6000;
 const TOAST_FADE_OUT_MS = 250;
 
 class GlobalToastList extends Component {
@@ -86,10 +86,7 @@ class GlobalToastList extends Component {
 
     const renderedToasts = toasts.map(toast => {
       const {
-        title,
         text,
-        iconType,
-        color,
         ...rest
       } = toast;
 
@@ -99,10 +96,6 @@ class GlobalToastList extends Component {
           isDismissed={this.state.toastIdToDismissedMap[toast.id]}
         >
           <EuiToast
-            title={title}
-            text={text}
-            iconType={iconType}
-            color={color}
             onClose={this.scheduleToastForDismissal.bind(toast, true)}
             {...rest}
           >
