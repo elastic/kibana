@@ -55,7 +55,9 @@ function getBasePosition(size, event) {
 function getBounds($el) {
   // in testing, $window is not actually a window, so we need to add
   // the offsets to make it work right.
-  const bounds = $el.offset() || { top: 0, left: 0 };
+  // Sometimes $el is a $(window), which doesn't have getBoundingClientRect()
+  // which breaks in jQuery 3
+  const bounds = $.isWindow($el[0]) ? { top: 0, left: 0 } : $el.offset();
   bounds.top += $el.scrollTop();
   bounds.left += $el.scrollLeft();
   bounds.bottom = bounds.top + $el.outerHeight();
