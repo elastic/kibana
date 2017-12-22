@@ -10,47 +10,48 @@
     role="form"
     ng-submit="stepIndexPattern.goToNextStep()"
   >
-    <div class="euiFormRow">
-      <label
-        for="indexPatternNameField"
-        class="euiFormLabel"
-      >
-        Index pattern
-      </label>
-      <div class="euiFormControlLayout">
-        <!-- Index pattern input -->
-        <input
-          id="indexPatternNameField"
-          class="euiFieldText euiFieldText--fullWidth createIndexPatternInputField"
-          data-test-subj="createIndexPatternNameInput"
-          ng-model="stepIndexPattern.indexPatternName"
-          placeholder="index-name-*"
-          validate-index-pattern
-          validate-index-pattern-allow-wildcard
-          append-wildcard
-          name="name"
-          required
-          type="text"
-          aria-describedby="indexPatternNameFieldHelp1 indexPatternNameFieldHelp2"
-        >
-      </div>
-    </div>
-    <div class="euiSpacer euiSpacer--xs"></div>
-    <div class="euiFlexGroup">
-      <div class="euiFlexItem">
-        <p
-          id="indexPatternNameFieldHelp1"
-          class="euiTextColor euiTextColor--subdued"
-        >
-          You can use a <strong>*</strong> as a wildcard in your index pattern.
-        </p>
-        <div class="euiSpacer euiSpacer--xs"></div>
-        <p
-          id="indexPatternNameFieldHelp2"
-          class="euiTextColor euiTextColor--subdued"
-        >
-          You can't use empty spaces or the characters <strong>\ / ? " < > |</strong>.
-        </p>
+    <div class="euiFlexGroup euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--alignItemsEnd euiFlexGroup--responsive">
+      <div class="euiFlexItem euiFlexItem--flexGrowZero">
+        <div class="euiFormRow">
+          <label
+            for="indexPatternNameField"
+            class="euiFormLabel"
+          >
+            Index pattern
+          </label>
+          <div class="euiFormControlLayout">
+            <!-- Index pattern input -->
+            <input
+              id="indexPatternNameField"
+              class="euiFieldText euiFieldText--fullWidth createIndexPatternInputField"
+              data-test-subj="createIndexPatternNameInput"
+              ng-model="stepIndexPattern.indexPatternName"
+              placeholder="index-name-*"
+              validate-index-pattern
+              validate-index-pattern-allow-wildcard
+              append-wildcard
+              name="name"
+              required
+              type="text"
+              aria-describedby="indexPatternNameFieldHelp1 indexPatternNameFieldHelp2"
+            >
+          </div>
+          <div class="euiFormHelpText euiFormRow__text">
+            <p
+              id="indexPatternNameFieldHelp1"
+              class="euiTextColor euiTextColor--subdued"
+            >
+              You can use a <strong>*</strong> as a wildcard in your index pattern.
+            </p>
+            <div class="euiSpacer euiSpacer--xs"></div>
+            <p
+              id="indexPatternNameFieldHelp2"
+              class="euiTextColor euiTextColor--subdued"
+            >
+              You can't use empty spaces or the characters <strong>\ / ? " < > |</strong>.
+            </p>
+          </div>
+        </div>
       </div>
       <div class="euiFlexItem euiFlexItem--flexGrowZero">
         <!-- Action -->
@@ -105,14 +106,12 @@
         indices="stepIndexPattern.allIndices"
         pattern="stepIndexPattern.indexPatternName"
       >
-        <span class="euiTextColor euiTextColor--primary">
-          <span ng-if="!stepIndexPattern.allIndices.length">
-            You only have a single index. You can create an index pattern to match it.
-          </span>
+        <span ng-if="!stepIndexPattern.allIndices.length">
+          You only have a single index. You can create an index pattern to match it.
+        </span>
 
-          <span ng-if="stepIndexPattern.allIndices.length">
-            Your index pattern can match any of your <strong>{{stepIndexPattern.allIndices.length}} indices</strong>, below.
-          </span>
+        <span ng-if="stepIndexPattern.allIndices.length">
+          Your index pattern can match any of your <strong>{{stepIndexPattern.allIndices.length}} indices</strong>, below.
         </span>
       </matching-indices-list>
     </div>

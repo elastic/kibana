@@ -6,13 +6,21 @@
       class="kuiViewContent"
     >
       <!-- Intro -->
-      <h1 class="euiTitle">
+      <h1 class="euiTitle euiTitle--medium">
         Create index pattern
       </h1>
-      <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--responsive">
-        <p class="euiFlexItem euiFlexItem--flexGrowZero euiTextColor euiTextColor--subdued">
-          Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations.
-        </p>
+
+      <div class="euiSpacer euiSpacer--small"></div>
+
+      <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--alignItemsEnd euiFlexGroup--responsive">
+        <div class="euiFlexItem euiFlexItem--flexGrowZero">
+          <div class="euiText">
+            <p class="euiTextColor euiTextColor--subdued">
+              Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations.
+            </p>
+          </div>
+        </div>
+
         <div class="euiFlexItem euiFlexItem--flexGrowZero">
           <label
             ng-if="controller.isSystemIndicesCheckBoxVisible()"
