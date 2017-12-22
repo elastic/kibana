@@ -60,6 +60,7 @@
   },
   "dependencies": {
     "@elastic/eui": "4.0.1",
+    "@elastic/datemath": "4.0.2",
     "@elastic/filesaver": "1.1.2",
     "@elastic/numeral": "2.3.2",
     "@elastic/ui-ace": "0.2.3",

@@ -30,11 +30,11 @@ export async function getTableData(req, panel) {
   try {
     const resp = await callWithRequest(req, 'search', params);
     const buckets = get(resp, 'aggregations.pivot.buckets', []);
-    return { type: 'table', series: buckets.map(processBucket(panel)) };
+    return { type: 'table', series: buckets.map(processBucket(panel)), meta: { request: params.body, response: resp } };
   } catch (err) {
     if (err.body) {
       err.response = err.body;
-      return { type: 'table', ...handleErrorResponse(panel)(err) };
+      return { type: 'table', ...handleErrorResponse(panel)(err), meta: { request: params.body } };
     }
   }
 }

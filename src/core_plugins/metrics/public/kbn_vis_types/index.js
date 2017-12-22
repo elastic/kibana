@@ -66,13 +66,16 @@ export default function MetricsVisProvider(Private) {
             stacked: 'none'
           }],
         time_field: '@timestamp',
+        timerange_mode: 'last',
+        timerange_mode_interval: 'auto',
         index_pattern: '',
         interval: 'auto',
         axis_position: 'left',
         axis_formatter: 'number',
         axis_scale: 'normal',
         show_legend: 1,
-        show_grid: 1
+        show_grid: 1,
+        drop_last_bucket: 1
       },
       component: require('../components/vis_editor')
     },

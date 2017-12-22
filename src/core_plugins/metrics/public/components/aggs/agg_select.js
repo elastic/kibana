@@ -22,6 +22,7 @@ import React from 'react';
 import {
   EuiComboBox,
 } from '@elastic/eui';
+import { isMetric } from '../../../common/metric_types';
 
 const metricAggs = [
   { label: 'Average', value: 'avg' },
@@ -80,7 +81,7 @@ function filterByPanelType(panelType) {
 }
 
 function AggSelect(props) {
-  const { siblings, panelType, value } = props;
+  const { siblings, panelType, value, timerangeMode } = props;
 
   const selectedOption = allAggOptions.find(option => {
     return value === option.value;
@@ -95,6 +96,15 @@ function AggSelect(props) {
   let options;
   if (panelType === 'metrics') {
     options = metricAggs;
+  } else if (isMetric(panelType) && timerangeMode === 'all') {
+    options = [
+      { label: 'Metric Aggregations', value: null, heading: true, disabled: true },
+      ...metricAggs,
+      { label: 'Parent Pipeline Aggregations', value: null, pipeline: true, heading: true, disabled: true },
+      ...pipelineAggs.filter(filterByPanelType(panelType))
+        .filter(agg => agg.value === 'calculation')
+        .map(agg => ({ ...agg, disabled: !enablePipelines })),
+    ];
   } else {
     options = [
       {
@@ -142,6 +152,7 @@ AggSelect.propTypes = {
   panelType: PropTypes.string,
   siblings: PropTypes.array,
   value: PropTypes.string,
+  timerangeMode: PropTypes.oneOf(['all', 'last']),
 };
 
 export default AggSelect;

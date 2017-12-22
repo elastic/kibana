@@ -21,12 +21,15 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import FieldSelect from '../aggs/field_select';
 import SeriesEditor from '../series_editor';
-import { IndexPattern } from '../index_pattern';
 import createTextHandler from '../lib/create_text_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import uuid from 'uuid';
 import YesNo from '../yes_no';
 import { htmlIdGenerator } from '@elastic/eui';
+import Select from 'react-select';
+import { Code } from '../code';
+import { Note } from '../note';
+import { Info } from '../info';
 
 class TablePanelConfig extends Component {
 
@@ -55,6 +58,18 @@ class TablePanelConfig extends Component {
     const handleSelectChange = createSelectHandler(this.props.onChange);
     const handleTextChange = createTextHandler(this.props.onChange);
     const htmlId = htmlIdGenerator();
+    const timerangeModes = [
+      { label: 'Entire timerange', value: 'all' },
+      { label: 'Last value', value: 'last' }
+    ];
+    const timerangeModeHelp = (
+      <Note style={{ width: '300px' }}>
+        This setting controls the timespan used for matching documents.{' '}
+        <Code>Entire timerange</Code> will match all the documents selected
+        in the timepicker. <Code>Last value</Code> will match only the documents
+        for the specified interval from the end of the timerange.
+      </Note>
+    );
     let view;
     if (selectedTab === 'data') {
       view = (
@@ -96,6 +111,56 @@ class TablePanelConfig extends Component {
                   value={model.pivot_rows}
                 />
               </div>
+              <div className="vis_editor__vis_config-row">
+                <label className="vis_editor__label" htmlFor={htmlId('index_pattern')}>
+                  Index pattern
+                </label>
+                <input
+                  id={htmlId('index_pattern')}
+                  className="vis_editor__input-grows"
+                  type="text"
+                  onChange={handleTextChange('index_pattern')}
+                  value={model.index_pattern}
+                />
+                <label className="vis_editor__label" htmlFor={htmlId('time_field')}>
+                  Time Field
+                </label>
+                <div className="vis_editor__row_item">
+                  <FieldSelect
+                    id={htmlId('time_field')}
+                    restrict="date"
+                    value={model.time_field}
+                    onChange={handleSelectChange('time_field')}
+                    indexPattern={model.index_pattern}
+                    fields={this.props.fields}
+                  />
+                </div>
+                <label className="vis_editor__label" htmlFor={htmlId('timerange_mode')}>
+                  Data timerange mode <Info message={timerangeModeHelp} />
+                </label>
+                <div className="vis_editor__row_item">
+                  <Select
+                    options={timerangeModes}
+                    clearable={false}
+                    onChange={handleSelectChange('timerange_mode')}
+                    value={model.timerange_mode}
+                  />
+                </div>
+                {model.timerange_mode === 'last' && (
+                  <label className="vis_editor__label" htmlFor={htmlId('timerange_mode_interval')}>
+                    Interval (1s, 1m, 1h, 1d)
+                  </label>
+                ) || null}
+                {model.timerange_mode === 'last' && (
+                  <input
+                    id={htmlId('timerange_mode_interval')}
+                    className="vis_editor__input-grows"
+                    type="text"
+                    onChange={handleTextChange('timerange_mode_interval')}
+                    value={model.timerange_mode_interval}
+                  />
+                ) || null}
+              </div>
             </div>
           </div>
           <SeriesEditor
@@ -120,11 +185,6 @@ class TablePanelConfig extends Component {
               value={model.drilldown_url}
             />
           </div>
-          <IndexPattern
-            fields={this.props.fields}
-            model={this.props.model}
-            onChange={this.props.onChange}
-          />
           <div className="vis_editor__vis_config-row">
             <label className="vis_editor__label" htmlFor={htmlId('panelFilterInput')}>Panel Filter</label>
             <input
@@ -139,6 +199,12 @@ class TablePanelConfig extends Component {
               id={htmlId('globalFilterOption')}
               value={model.ignore_global_filter}
               name="ignore_global_filter"
+              onChange={this.props.onChange}
+            />
+            <div className="vis_editor__label">Drop Partial Bucket</div>
+            <YesNo
+              value={model.drop_last_bucket}
+              name="drop_last_bucket"
               onChange={this.props.onChange}
             />
           </div>

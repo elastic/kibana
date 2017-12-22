@@ -28,6 +28,7 @@ import {
 } from './lib/collection_actions';
 import newSeriesFn from './lib/new_series_fn';
 import Sortable from 'react-anything-sortable';
+import { DataConfig } from './data_config';
 
 class SeriesEditor extends Component {
 
@@ -79,7 +80,7 @@ class SeriesEditor extends Component {
   }
 
   render() {
-    const { limit, model, name } = this.props;
+    const { limit, model, name, fields } = this.props;
     const series = model[name]
       .filter((val, index) => index < (limit || Infinity))
       .map(this.renderRow);
@@ -88,15 +89,22 @@ class SeriesEditor extends Component {
       this.props.onChange({ series });
     };
     return (
-      <div className="vis_editor__series_editor-container">
-        <Sortable
-          dynamic={true}
-          direction="vertical"
-          onSort={handleSort}
-          sortHandle="vis_editor__sort"
-        >
-          { series }
-        </Sortable>
+      <div>
+        {model.type !== 'table' ? (
+          <div className="vis_editor__dataRangeSelect">
+            <DataConfig model={model} fields={fields} onChange={this.props.onChange} />
+          </div>
+        ) : null }
+        <div className="vis_editor__series_editor-container">
+          <Sortable
+            dynamic={true}
+            direction="vertical"
+            onSort={handleSort}
+            sortHandle="vis_editor__sort"
+          >
+            { series }
+          </Sortable>
+        </div>
       </div>
     );
   }

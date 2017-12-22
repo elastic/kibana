@@ -44,7 +44,9 @@ export const StandardSiblingAgg = props => {
   if (model.type === 'std_deviation_bucket') {
     stdDev.sigma = (
       <div className="vis_editor__std_deviation-sigma_item">
-        <label className="vis_editor__label" htmlFor={htmlId('sigma')}>Sigma</label>
+        <label className="vis_editor__label" htmlFor={htmlId('sigma')}>
+          Sigma
+        </label>
         <input
           id={htmlId('sigma')}
           className="vis_editor__std_deviation-sigma"
@@ -58,7 +60,7 @@ export const StandardSiblingAgg = props => {
       { label: 'Raw', value: 'raw' },
       { label: 'Upper Bound', value: 'upper' },
       { label: 'Lower Bound', value: 'lower' },
-      { label: 'Bounds Band', value: 'band' }
+      { label: 'Bounds Band', value: 'band' },
     ];
     const selectedModeOption = modeOptions.find(option => {
       return model.mode === option.value;
@@ -90,6 +92,7 @@ export const StandardSiblingAgg = props => {
         <div className="vis_editor__label">Aggregation</div>
         <AggSelect
           panelType={props.panel.type}
+          timerangeMode={props.panel.timerange_mode}
           siblings={props.siblings}
           value={model.type}
           onChange={handleSelectChange('type')}
@@ -105,8 +108,8 @@ export const StandardSiblingAgg = props => {
           value={model.field}
         />
       </div>
-      { stdDev.sigma }
-      { stdDev.mode }
+      {stdDev.sigma}
+      {stdDev.mode}
     </AggRow>
   );
 };

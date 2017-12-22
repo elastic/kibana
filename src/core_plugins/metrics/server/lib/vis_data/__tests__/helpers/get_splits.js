@@ -26,6 +26,7 @@ describe('getSplits(resp, panel, series)', () => {
     const resp = {
       aggregations: {
         SERIES: {
+          meta: { bucketSize: 10000 },
           timeseries: { buckets: [] },
           SIBAGG: { value: 1 },
           meta: { bucketSize: 10 }
@@ -49,6 +50,7 @@ describe('getSplits(resp, panel, series)', () => {
         meta: { bucketSize: 10 },
         color: '#FF0000',
         timeseries: { buckets: [] },
+        meta: { bucketSize: 10000 },
         SIBAGG: { value: 1 }
       }
     ]);
@@ -58,6 +60,7 @@ describe('getSplits(resp, panel, series)', () => {
     const resp = {
       aggregations: {
         SERIES: {
+          meta: { bucketSize: 10000 },
           buckets: [
             {
               key: 'example-01',
@@ -93,6 +96,7 @@ describe('getSplits(resp, panel, series)', () => {
         label: 'example-01',
         meta: { bucketSize: 10 },
         color: '#FF0000',
+        meta: { bucketSize: 10000 },
         timeseries: { buckets: [] },
         SIBAGG: { value: 1 }
       },
@@ -102,6 +106,7 @@ describe('getSplits(resp, panel, series)', () => {
         label: 'example-02',
         meta: { bucketSize: 10 },
         color: '#FF0000',
+        meta: { bucketSize: 10000 },
         timeseries: { buckets: [] },
         SIBAGG: { value: 2 }
       }
@@ -112,6 +117,7 @@ describe('getSplits(resp, panel, series)', () => {
     const resp = {
       aggregations: {
         SERIES: {
+          meta: { bucketSize: 10000 },
           buckets: [
             {
               key: 'example-01',
@@ -147,6 +153,7 @@ describe('getSplits(resp, panel, series)', () => {
         label: 'example-01',
         meta: { bucketSize: 10 },
         color: '#FF0000',
+        meta: { bucketSize: 10000 },
         timeseries: { buckets: [] },
         SIBAGG: { value: 1 }
       },
@@ -156,6 +163,7 @@ describe('getSplits(resp, panel, series)', () => {
         label: 'example-02',
         meta: { bucketSize: 10 },
         color: '#930000',
+        meta: { bucketSize: 10000 },
         timeseries: { buckets: [] },
         SIBAGG: { value: 2 }
       }
@@ -166,6 +174,7 @@ describe('getSplits(resp, panel, series)', () => {
     const resp = {
       aggregations: {
         SERIES: {
+          meta: { bucketSize: 10000 },
           buckets: {
             'filter-1': {
               timeseries: { buckets: [] },
@@ -196,7 +205,7 @@ describe('getSplits(resp, panel, series)', () => {
         id: 'SERIES:filter-1',
         key: 'filter-1',
         label: '200s',
-        meta: { bucketSize: 10 },
+        meta: { bucketSize: 10000 },
         color: '#F00',
         timeseries: { buckets: [] },
       },
@@ -204,7 +213,7 @@ describe('getSplits(resp, panel, series)', () => {
         id: 'SERIES:filter-2',
         key: 'filter-2',
         label: '300s',
-        meta: { bucketSize: 10 },
+        meta: { bucketSize: 10000 },
         color: '#0F0',
         timeseries: { buckets: [] },
       }

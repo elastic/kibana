@@ -19,10 +19,19 @@
 
 import offsetTime from '../../offset_time';
 import getIntervalAndTimefield from '../../get_interval_and_timefield';
+import getBucketSize from '../../helpers/get_bucket_size';
+import { metricTypes } from '../../../../../common/metric_types';
+import { hasSiblingAggs } from '../../helpers/has_sibling_aggs';
+
 export default function query(req, panel, series) {
   return next => doc => {
-    const { timeField } = getIntervalAndTimefield(panel, series);
+    const { timeField, interval } = getIntervalAndTimefield(panel, series);
+    const { bucketSize } = getBucketSize(req, interval);
     const { from, to } = offsetTime(req, series.offset_time);
+
+    const boundsMin = metricTypes.includes(panel.type) && !hasSiblingAggs(series) ?
+      to.clone().subtract(5 * bucketSize, 's') :
+      from;
 
     doc.size = 0;
     doc.query = {
@@ -34,7 +43,7 @@ export default function query(req, panel, series) {
     const timerange = {
       range: {
         [timeField]: {
-          gte: from.valueOf(),
+          gte: panel.timerange_mode === 'all' ? from.valueOf() : boundsMin.valueOf(),
           lte: to.valueOf(),
           format: 'epoch_millis',
         }

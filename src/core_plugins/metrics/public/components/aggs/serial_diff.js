@@ -50,6 +50,7 @@ export const SerialDiffAgg = props => {
         <div className="vis_editor__label">Aggregation</div>
         <AggSelect
           panelType={props.panel.type}
+          timerangeMode={props.panel.timerange_mode}
           siblings={props.siblings}
           value={model.type}
           onChange={handleSelectChange('type')}
@@ -65,7 +66,9 @@ export const SerialDiffAgg = props => {
         />
       </div>
       <div>
-        <label className="vis_editor__label" htmlFor={htmlId('lag')}>Lag</label>
+        <label className="vis_editor__label" htmlFor={htmlId('lag')}>
+          Lag
+        </label>
         <input
           id={htmlId('lag')}
           className="vis_editor__input"

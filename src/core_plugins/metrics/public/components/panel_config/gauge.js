@@ -20,7 +20,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import SeriesEditor from '../series_editor';
-import { IndexPattern } from '../index_pattern';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import ColorRules from '../color_rules';
@@ -91,11 +90,6 @@ class GaugePanelConfig extends Component {
     } else {
       view = (
         <div className="vis_editor__container">
-          <IndexPattern
-            fields={this.props.fields}
-            model={this.props.model}
-            onChange={this.props.onChange}
-          />
           <div className="vis_editor__vis_config-row">
             <label className="vis_editor__label" htmlFor={htmlId('panelFilter')}>
               Panel Filter
@@ -111,6 +105,12 @@ class GaugePanelConfig extends Component {
             <YesNo
               value={model.ignore_global_filter}
               name="ignore_global_filter"
+              onChange={this.props.onChange}
+            />
+            <div className="vis_editor__label">Drop Partial Bucket</div>
+            <YesNo
+              value={model.drop_last_bucket}
+              name="drop_last_bucket"
               onChange={this.props.onChange}
             />
           </div>

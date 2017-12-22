@@ -101,7 +101,7 @@
     lodash "^4.17.10"
     to-fast-properties "^2.0.0"
 
-"@elastic/datemath@^4.0.2":
+"@elastic/datemath@4.0.2", "@elastic/datemath@^4.0.2":
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/@elastic/datemath/-/datemath-4.0.2.tgz#91417763fa4ec93ad1426cb69aaf2de2e9914a68"
   dependencies:

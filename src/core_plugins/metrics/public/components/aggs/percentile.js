@@ -28,6 +28,7 @@ import AddDeleteButtons from '../add_delete_buttons';
 import uuid from 'uuid';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
+import { createNewPercentile } from '../lib/create_new_percentile';
 import {
   htmlIdGenerator,
   EuiComboBox,
@@ -69,7 +70,7 @@ class Percentiles extends Component {
     const selectedModeOption = modeOptions.find(option => {
       return model.mode === option.value;
     });
-    return  (
+    return (
       <div className="vis_editor__percentiles-row" key={model.id}>
         <div className="vis_editor__percentiles-content">
           <input
@@ -128,12 +129,12 @@ class Percentiles extends Component {
 
   render() {
     const { model, name } = this.props;
-    if (!model[name]) return (<div/>);
+    if (!model[name]) return (<div />);
 
     const rows = model[name].map(this.renderRow);
     return (
       <div className="vis_editor__percentiles">
-        { rows }
+        {rows}
       </div>
     );
   }
@@ -154,9 +155,11 @@ class PercentileAgg extends Component { // eslint-disable-line react/no-multi-co
 
   componentWillMount() {
     if (!this.props.model.percentiles) {
-      this.props.onChange(_.assign({}, this.props.model, {
-        percentiles: [newPercentile({ value: 50 })]
-      }));
+      this.props.onChange(
+        _.assign({}, this.props.model, {
+          percentiles: [createNewPercentile({ value: 50 })],
+        })
+      );
     }
   }
 
@@ -165,7 +168,9 @@ class PercentileAgg extends Component { // eslint-disable-line react/no-multi-co
 
     const handleChange = createChangeHandler(this.props.onChange, model);
     const handleSelectChange = createSelectHandler(handleChange);
-    const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
+    const indexPattern =
+      (series.override_index_pattern && series.series_index_pattern) ||
+      panel.index_pattern;
 
     return (
       <AggRow
@@ -181,6 +186,7 @@ class PercentileAgg extends Component { // eslint-disable-line react/no-multi-co
               <div className="vis_editor__label">Aggregation</div>
               <AggSelect
                 panelType={this.props.panel.type}
+                timerangeMode={this.props.panel.timerangeMode}
                 siblings={this.props.siblings}
                 value={model.type}
                 onChange={handleSelectChange('type')}
@@ -207,7 +213,6 @@ class PercentileAgg extends Component { // eslint-disable-line react/no-multi-co
       </AggRow>
     );
   }
-
 }
 
 PercentileAgg.propTypes = {

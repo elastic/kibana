@@ -51,6 +51,7 @@ export const DerivativeAgg = props => {
         <div className="vis_editor__label">Aggregation</div>
         <AggSelect
           panelType={props.panel.type}
+          timerangeMode={props.panel.timerange_mode}
           siblings={props.siblings}
           value={model.type}
           onChange={handleSelectChange('type')}

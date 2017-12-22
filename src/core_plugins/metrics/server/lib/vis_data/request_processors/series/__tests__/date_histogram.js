@@ -56,6 +56,13 @@ describe('dateHistogram(req, panel, series)', () => {
     expect(doc).to.eql({
       aggs: {
         test: {
+          meta: {
+            bucketSize: 10,
+            to: '2017-01-01T01:00:00.000Z',
+            from: '2017-01-01T00:00:00.000Z',
+            intervalString: '10s',
+            timeField: '@timestamp'
+          },
           aggs: {
             timeseries: {
               date_histogram: {
@@ -87,6 +94,13 @@ describe('dateHistogram(req, panel, series)', () => {
     expect(doc).to.eql({
       aggs: {
         test: {
+          meta: {
+            bucketSize: 10,
+            to: '2017-01-01T00:00:00.000Z',
+            from: '2016-12-31T23:00:00.000Z',
+            intervalString: '10s',
+            timeField: '@timestamp'
+          },
           aggs: {
             timeseries: {
               date_histogram: {
@@ -121,6 +135,13 @@ describe('dateHistogram(req, panel, series)', () => {
     expect(doc).to.eql({
       aggs: {
         test: {
+          meta: {
+            bucketSize: 20,
+            to: '2017-01-01T01:00:00.000Z',
+            from: '2017-01-01T00:00:00.000Z',
+            intervalString: '20s',
+            timeField: 'timestamp'
+          },
           aggs: {
             timeseries: {
               date_histogram: {

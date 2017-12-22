@@ -81,6 +81,7 @@ function SeriesAgg(props) {
         <div className="vis_editor__label">Aggregation</div>
         <AggSelect
           panelType={panel.type}
+          timerangeMode={panel.timerange_mode}
           siblings={props.siblings}
           value={model.type}
           onChange={handleSelectChange('type')}
@@ -98,7 +99,6 @@ function SeriesAgg(props) {
       </div>
     </AggRow>
   );
-
 }
 
 SeriesAgg.propTypes = {

@@ -40,6 +40,7 @@ function CumulativeSumAgg(props) {
       <div className="vis_editor__row_item">
         <div className="vis_editor__label">Aggregation</div>
         <AggSelect
+          timerangeMode={props.panel.timerange_mode}
           panelType={props.panel.type}
           siblings={props.siblings}
           value={model.type}
@@ -57,7 +58,6 @@ function CumulativeSumAgg(props) {
       </div>
     </AggRow>
   );
-
 }
 
 CumulativeSumAgg.propTypes = {

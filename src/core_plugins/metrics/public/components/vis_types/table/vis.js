@@ -158,7 +158,7 @@ class TableVis extends Component {
     };
     return (
       <tr>
-        <th scope="col" onClick={handleSortClick}>{label} {sortComponent}</th>
+        <th scope="col" style={{ textAlign: 'left' }} onClick={handleSortClick}>{label} {sortComponent}</th>
         { columns }
       </tr>
     );

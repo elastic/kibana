@@ -36,7 +36,9 @@ function StandardAgg(props) {
     restrict = 'none';
   }
 
-  const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
+  const indexPattern =
+    (series.override_index_pattern && series.series_index_pattern) ||
+    panel.index_pattern;
   const htmlId = htmlIdGenerator();
 
   return (
@@ -51,31 +53,30 @@ function StandardAgg(props) {
         <div className="vis_editor__label">Aggregation</div>
         <AggSelect
           panelType={props.panel.type}
+          timerangeMode={props.panel.timerange_mode}
           siblings={props.siblings}
           value={model.type}
           onChange={handleSelectChange('type')}
         />
       </div>
-      {
-        model.type !== 'count'
-          ? (
-            <div className="vis_editor__item">
-              <label className="vis_editor__label" htmlFor={htmlId('field')}>Field</label>
-              <FieldSelect
-                id={htmlId('field')}
-                fields={fields}
-                type={model.type}
-                restrict={restrict}
-                indexPattern={indexPattern}
-                value={model.field}
-                onChange={handleSelectChange('field')}
-              />
-            </div>
-          ) : null
-      }
+      {model.type !== 'count' ? (
+        <div className="vis_editor__item">
+          <label className="vis_editor__label" htmlFor={htmlId('field')}>
+            Field
+          </label>
+          <FieldSelect
+            id={htmlId('field')}
+            fields={fields}
+            type={model.type}
+            restrict={restrict}
+            indexPattern={indexPattern}
+            value={model.field}
+            onChange={handleSelectChange('field')}
+          />
+        </div>
+      ) : null}
     </AggRow>
   );
-
 }
 
 StandardAgg.propTypes = {

@@ -36,7 +36,9 @@ export const PercentileRankAgg = props => {
   const handleSelectChange = createSelectHandler(handleChange);
   const handleTextChange = createTextHandler(handleChange);
 
-  const indexPattern = series.override_index_pattern && series.series_index_pattern || panel.index_pattern;
+  const indexPattern =
+    (series.override_index_pattern && series.series_index_pattern) ||
+    panel.index_pattern;
   const htmlId = htmlIdGenerator();
 
   return (
@@ -51,13 +53,16 @@ export const PercentileRankAgg = props => {
         <div className="vis_editor__label">Aggregation</div>
         <AggSelect
           panelType={props.panel.type}
+          timerangeMode={props.panel.timerange_mode}
           siblings={props.siblings}
           value={model.type}
           onChange={handleSelectChange('type')}
         />
       </div>
       <div className="vis_editor__row_item">
-        <label className="vis_editor__label" htmlFor={htmlId('field')}>Field</label>
+        <label className="vis_editor__label" htmlFor={htmlId('field')}>
+          Field
+        </label>
         <FieldSelect
           id={htmlId('field')}
           fields={fields}
@@ -69,7 +74,9 @@ export const PercentileRankAgg = props => {
         />
       </div>
       <div className="vis_editor__percentile_rank_value">
-        <label className="vis_editor__label" htmlFor={htmlId('value')}>Value</label>
+        <label className="vis_editor__label" htmlFor={htmlId('value')}>
+          Value
+        </label>
         <input
           id={htmlId('value')}
           className="vis_editor__input-grows"

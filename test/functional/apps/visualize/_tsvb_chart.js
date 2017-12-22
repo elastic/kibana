@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }) {
 
       it('should show the correct count in the legend', async function () {
         const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('156');
+        expect(actualCount).to.be('56');
       });
 
       it('should show the correct count in the legend with 2h offset', async function () {
@@ -41,14 +41,14 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualBuilder.enterOffsetSeries('2h');
         await PageObjects.header.waitUntilLoadingHasFinished();
         const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('293');
+        expect(actualCount).to.be('379');
       });
 
       it('should show the correct count in the legend with -2h offset', async function () {
         await PageObjects.visualBuilder.enterOffsetSeries('-2h');
         await PageObjects.header.waitUntilLoadingHasFinished();
         const actualCount = await PageObjects.visualBuilder.getRhythmChartLegendValue();
-        expect(actualCount).to.be('53');
+        expect(actualCount).to.be('31');
       });
 
       after(async () => {
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show correct data', async function () {
-        const expectedMetricValue =  '157';
+        const expectedMetricValue = '57';
         const value = await PageObjects.visualBuilder.getMetricValue();
         log.debug(`metric value: ${JSON.stringify(value)}`);
         log.debug(`metric value: ${value}`);
@@ -95,7 +95,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show correct data', async function () {
-        const expectedMetricValue =  '156';
+        const expectedMetricValue = '56';
         const value = await PageObjects.visualBuilder.getMetricValue();
         log.debug(`metric value: ${value}`);
         expect(value).to.eql(expectedMetricValue);
@@ -116,7 +116,7 @@ export default function ({ getService, getPageObjects }) {
           const labelString = await PageObjects.visualBuilder.getGaugeLabel();
           expect(labelString).to.be('Count');
           const gaugeCount = await PageObjects.visualBuilder.getGaugeCount();
-          expect(gaugeCount).to.be('156');
+          expect(gaugeCount).to.be('56');
         });
       });
     });
@@ -133,7 +133,7 @@ export default function ({ getService, getPageObjects }) {
         const labelString = await PageObjects.visualBuilder.getTopNLabel();
         expect(labelString).to.be('Count');
         const gaugeCount = await PageObjects.visualBuilder.getTopNCount();
-        expect(gaugeCount).to.be('156');
+        expect(gaugeCount).to.be('56');
       });
     });
 
@@ -205,7 +205,7 @@ export default function ({ getService, getPageObjects }) {
       it('should be able verify that values are displayed in the table', async () => {
         const tableData = await PageObjects.visualBuilder.getViewTable();
         log.debug(`Values on ${tableData}`);
-        const expectedData = 'OS Count\nwin 8 13\nwin xp 10\nwin 7 12\nios 5\nosx 3';
+        const expectedData = 'OS Count\nwin 8 13\nwin 7 12\nwin xp 10\nios 5\nosx 3';
         expect(tableData).to.be(expectedData);
       });
 

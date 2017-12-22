@@ -50,9 +50,9 @@ class TimeseriesVisualization extends Component {
   }
 
   xaxisFormatter = (val) => {
-    const { scaledDataFormat, dateFormat } = this.props.visData;
-    if (!scaledDataFormat || !dateFormat) return val;
-    const formatter = createXaxisFormatter(this.getInterval(), scaledDataFormat, dateFormat);
+    const { visData } = this.props;
+    if (!visData.scaledDataFormat || !visData.dateFormat) return val;
+    const formatter = createXaxisFormatter(this.getInterval(), visData.scaledDataFormat, visData.dateFormat);
     return formatter(val);
   }
 
