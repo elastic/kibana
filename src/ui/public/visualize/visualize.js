@@ -54,7 +54,6 @@ uiModules
         if (!$scope.uiState) $scope.uiState = $scope.vis.getUiState();
         else $scope.vis._setUiState($scope.uiState);
 
-        $scope.vis.visualizeScope = true;
         $scope.vis.description = $scope.savedObj.description;
 
         if ($scope.timeRange) {

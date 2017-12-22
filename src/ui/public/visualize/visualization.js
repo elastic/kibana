@@ -23,6 +23,13 @@ uiModules
         vis: '=',
         visData: '=',
         uiState: '=?',
+        // If set to true (default) the visualization directive will listen for
+        // several changes in the data and uiState to trigger a render. If set to
+        // false (boolean value, not a falsy value), this directive won't listen
+        // for any changes and require to be notified by the 'render' event broadcasted
+        // to its scope, that it needs to rerender this. Usually when using this as
+        // a consumer you don't want to change the default behavior.
+        listenOnChange: '<',
         searchSource: '='
       },
       template: visualizationTemplate,
@@ -114,13 +121,18 @@ uiModules
           renderSubscription.unsubscribe();
         });
 
-        if (!$scope.vis.visualizeScope) {
-          $scope.$watchGroup(['visData', 'vis.params'], () => {
+        // Listen on changes to trigger a render if listenOnChange is not false
+        // i.e. true or has not been used (undefined in that case)
+        if ($scope.listenOnChange !== false) {
+          const onChangeListener = () => {
             $scope.$emit('render');
-          });
+          };
 
-          resizeChecker.on('resize',  () => {
-            $scope.$emit('render');
+          $scope.$watchGroup(['visData', 'vis.params'], onChangeListener);
+
+          $scope.uiState.on('change', onChangeListener);
+          $scope.$on('$destroy', () => {
+            $scope.uiState.off('change', onChangeListener);
           });
         }
 
