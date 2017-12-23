@@ -6,6 +6,7 @@ import versionCompare from 'compare-versions';
 import { EsQueryParser } from './es_query_parser';
 import hjson from 'hjson';
 import { ViewUtils } from './view_utils';
+import compactStringify from 'json-stringify-pretty-compact';
 
 const DEFAULT_SCHEMA = 'https://vega.github.io/schema/vega/v3.0.json';
 
@@ -24,7 +25,7 @@ export class VegaParser {
     this.error = undefined;
     this.warnings = [];
     this.es = es;
-    this.esQueryParser = new EsQueryParser(timefilter, dashboardContext);
+    this.esQueryParser = new EsQueryParser(timefilter, dashboardContext, this._onWarning.bind(this));
   }
 
   async parseAsync() {
@@ -275,16 +276,33 @@ export class VegaParser {
     } else if (_.isPlainObject(obj)) {
       if (key === 'data') {
         // Assume that any  "data": {...}  is a request for data
-        const { esRequest, esIndex, esContext } = obj;
-        if (esRequest !== undefined || esIndex !== undefined || esContext !== undefined) {
-          if (obj.url !== undefined || obj.values !== undefined || obj.source !== undefined) {
-            throw new Error('Data must not have "url", "values", and "source" when using ' +
-              'Elasticsearch parameters like esRequest, esIndex, or esContext.');
+
+        let hasEsParams = obj.esRequest !== undefined || obj.esIndex !== undefined || obj.esContext !== undefined;
+        if (hasEsParams && (obj.url !== undefined || obj.values !== undefined || obj.source !== undefined)) {
+          throw new Error('Data must not have "url", "values", and "source" when using ' +
+            'Elasticsearch parameters like esRequest, esIndex, or esContext.');
+        }
+
+        // Convert legacy data request to modern form
+        // Legacy format: https://github.com/nyurik/kibana-vega-vis#querying-elasticsearch
+        if (_.isPlainObject(obj.url)) {
+          if (obj.values !== undefined || obj.source !== undefined) {
+            throw new Error('Data must not have more than one of "url", "values", and "source"');
           }
+          const dataBefore = compactStringify(obj);
+          Object.assign(obj, this.esQueryParser.migrateLegacyRequest(obj.url));
+          delete obj.url;
+          const dataAfter = compactStringify(obj);
+          this._onWarning(`Deprecated ES data request was migrated from:\n\n${dataBefore}\n\n-- to --\n\n${dataAfter}`);
+          hasEsParams = true;
+        }
+
+        if (hasEsParams) {
+          const request = this.esQueryParser.parseEsRequest(obj.esRequest, obj.esIndex, obj.esContext);
           delete obj.esRequest;
           delete obj.esIndex;
           delete obj.esContext;
-          onFind(obj, this.esQueryParser.parseEsRequest(esRequest, esIndex, esContext));
+          onFind(obj, request);
         }
       } else {
         for (const k of Object.keys(obj)) {

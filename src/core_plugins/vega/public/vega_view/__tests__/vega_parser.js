@@ -55,12 +55,12 @@ describe(`VegaParser._setDefaultColors`, () => {
 });
 
 describe('VegaParser._resolveEsQueries', () => {
-  function test(spec, expected) {
+  function test(spec, expected, warnCount) {
     return async () => {
       const vp = new VegaParser(spec, { search: async () => [42] });
       await vp._resolveEsQueriesAsync();
       expect(vp.spec).to.eql(expected);
-      expect(vp.warnings).to.have.length(0);
+      expect(vp.warnings).to.have.length(warnCount || 0);
     };
   }
 
@@ -69,6 +69,9 @@ describe('VegaParser._resolveEsQueries', () => {
   it('non-es data', test({ data: { a: 10 } }, { data: { a: 10 } }));
   it('es', test({ data: { esIndex: 'a', x: 1 } }, { data: { values: [42], x: 1 } }));
   it('es arr', test({ arr: [{ data: { esIndex: 'a', x: 1 } }] }, { arr: [{ data: { values: [42], x: 1 } }] }));
+  it('es legacy', test(
+    { arr: [{ data: { url: { index: 'idx', body: { size: 10, hist: 42 } }, x: 1 } }] },
+    { arr: [{ data: { values: [42], x: 1 } }] }, 1));
 });
 
 describe('VegaParser._parseSchema', () => {

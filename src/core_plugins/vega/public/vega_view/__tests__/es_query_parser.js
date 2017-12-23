@@ -13,14 +13,17 @@ const ctxArr = { bool: { must: [{ match_all: { c: 3 } }], must_not: [{ d: 4 }] }
 const ctxObj = { bool: { must: { match_all: { a: 1 } }, must_not: { b: 2 } } };
 
 function create(min, max, dashboardCtx) {
-  return new EsQueryParser(
+  const inst = new EsQueryParser(
     {
       getBounds: () => ({
         min: { valueOf: () => min },
         max: { valueOf: () => max }
       })
     },
-    () => _.cloneDeep(dashboardCtx));
+    () => _.cloneDeep(dashboardCtx),
+    () => (inst.$$$warnCount = (inst.$$$warnCount || 0) + 1)
+  );
+  return inst;
 }
 
 describe(`EsQueryParser time`, () => {
@@ -76,6 +79,23 @@ describe(`EsQueryParser.injectQueryContextVars`, () => {
   it(`%timefilter% = true`, test(
     { a: { '%timefilter%': true } },
     { a: { format: `epoch_millis`, gte: rangeStart, lte: rangeEnd } }));
+});
+
+describe(`EsQueryParser.migrateLegacyRequest`, () => {
+  function test(url, expectedRequest, expectedWarnings) {
+    return () => {
+      const parser = create();
+      const actual = parser.migrateLegacyRequest(url);
+      expect(actual).to.eql(expectedRequest);
+      expect(parser.$$$warnCount).to.eql(expectedWarnings);
+    };
+  }
+
+  it(`simple`, test(
+    { index: 'idx', body: 'bdy', '%context_query%': 'ctx' },
+    { esIndex: 'idx', esRequest: 'bdy', esContext: 'ctx' }));
+  it(`with extra`, test({ index: 'idx', extra: 42 }, { esIndex: 'idx' }, 1));
+  it(`with no es`, () => expect(test({ extra: 42 })).to.throwError());
 });
 
 describe(`EsQueryParser.parseEsRequest`, () => {

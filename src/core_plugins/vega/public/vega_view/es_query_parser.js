@@ -7,10 +7,37 @@ const MUST_NOT_CLAUSE = '%dashboard_context-must_not_clause%';
 
 export class EsQueryParser {
 
-  constructor(timefilter, dashboardContext) {
-    this.timefilter = timefilter;
-    this.dashboardContext = dashboardContext;
+  constructor(timefilter, dashboardContext, onWarning) {
+    this._timefilter = timefilter;
+    this._dashboardContext = dashboardContext;
     this._timeBounds = false;
+    this._onWarning = onWarning;
+  }
+
+  static legacyKeyMap = {
+    'index': 'esIndex',
+    '%context_query%': 'esContext',
+    'body': 'esRequest',
+  };
+
+  migrateLegacyRequest(url) {
+    const result = {};
+    let isEmpty = true;
+    for (const key of Object.keys(url)) {
+      const match = EsQueryParser.legacyKeyMap[key];
+      if (!match) {
+        this._onWarning(`Unexpected url field "${key}", ignoring`);
+      } else {
+        result[match] = url[key];
+        isEmpty = false;
+      }
+    }
+
+    if (isEmpty) {
+      throw new Error(`Legacy: data url is given as an object without the expected index, body, and %context_query%`);
+    }
+
+    return result;
   }
 
   parseEsRequest(esRequest, esIndex, esContext) {
@@ -35,7 +62,7 @@ export class EsQueryParser {
           'or it can be the name of the time field, e.g. "@timestamp"');
       }
 
-      esRequest.query = this.dashboardContext();
+      esRequest.query = this._dashboardContext();
       if (esContext !== true) {
         // Inject range filter based on the timefilter values
         esRequest.query.bool.must.push({
@@ -66,7 +93,7 @@ export class EsQueryParser {
           const item = obj[pos];
           if (isQuery && (item === MUST_CLAUSE || item === MUST_NOT_CLAUSE)) {
             const ctxTag = item === MUST_CLAUSE ? 'must' : 'must_not';
-            const ctx = this.dashboardContext();
+            const ctx = this._dashboardContext();
             if (ctx && ctx.bool && ctx.bool[ctxTag]) {
               if (Array.isArray(ctx.bool[ctxTag])) {
                 // replace one value with an array of values
@@ -231,7 +258,7 @@ export class EsQueryParser {
   _getTimeRange() {
     // Caching function
     if (this._timeBounds) return this._timeBounds;
-    const bounds = this.timefilter.getBounds();
+    const bounds = this._timefilter.getBounds();
     this._timeBounds = {
       min: bounds.min.valueOf(),
       max: bounds.max.valueOf()

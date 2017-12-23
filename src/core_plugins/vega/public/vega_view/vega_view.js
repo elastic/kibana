@@ -34,6 +34,11 @@ export class VegaView {
         .addClass('vega-main')
         .css('flex-direction', this._parser.containerDir);
 
+      // bypass the onWarn warning checks - in some cases warnings may still need to be shown despite being disabled
+      for (const warn of this._parser.warnings) {
+        this._addMessage('warn', warn);
+      }
+
       if (this._parser.error) {
         this._addMessage('err', this._parser.error);
         return;
@@ -44,11 +49,6 @@ export class VegaView {
       this._$controls = $('<div class="vega-controls-container">')
         .css('flex-direction', this._parser.controlsDir)
         .appendTo(this._$parentEl);
-
-      // bypass the onWarn warning checks - in some cases warnings may still need to be shown despite being off
-      for (const warn of this._parser.warnings) {
-        this._addMessage('warn', warn);
-      }
 
       this._addDestroyHandler(() => {
         this._$container.remove();

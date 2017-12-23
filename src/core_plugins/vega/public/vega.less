@@ -7,11 +7,15 @@
   > .vega-messages {
     position: absolute;
     top: 0;
-    width: 95%;
+    width: 100%;
     margin: auto;
     opacity: 0.8;
     z-index: 1;
     list-style: none;
+
+    li {
+      margin: 0.5em;
+    }
 
     .vega-message-warn pre {
       background: #ffff83;
@@ -23,6 +27,7 @@
 
     pre {
       white-space: pre-wrap;
+      padding: 0.7em;
     }
   }
 
