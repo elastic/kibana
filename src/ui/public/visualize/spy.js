@@ -37,7 +37,7 @@ uiModules
 
         function checkForcedMaximized() {
           $timeout(() => {
-            if ($scope.visElement && $scope.visElement.height() < 180) {
+            if ($scope.visElement && $scope.currentMode && $scope.visElement.height() < 180) {
               $scope.forceMaximized = true;
             } else {
               $scope.forceMaximized = false;
