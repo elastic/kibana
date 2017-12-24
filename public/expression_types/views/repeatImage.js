@@ -21,6 +21,11 @@ export const repeatImage = () => ({
       return wrap(elasticLogo);
     },
   }, {
+    name: 'size',
+    displayName: 'Image size',
+    argType: 'number',
+    default: '100',
+  }, {
     name: 'max',
     displayName: 'Max repeated images',
     argType: 'number',
