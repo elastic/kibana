@@ -3,6 +3,7 @@ import { debug } from './debug';
 import { error } from './error';
 import { grid } from './grid';
 import { image } from './image';
+import { repeatImage } from './repeat_image';
 import { markdown } from './markdown';
 import { pie } from './pie';
 import { plot } from './plot';
@@ -15,6 +16,7 @@ export const renderFunctions = [
   error,
   grid,
   image,
+  repeatImage,
   markdown,
   pie,
   plot,

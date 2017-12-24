@@ -3,6 +3,7 @@ import { checkbox } from './checkbox';
 import { datacolumn } from './datacolumn';
 import { expression } from './expression';
 import { imageUpload } from './image_upload';
+import { number } from './number';
 import { palette } from './palette';
 import { select } from './select';
 import { seriesStyle } from './series_style';
@@ -18,6 +19,7 @@ export const argTypeSpecs = [
   expression,
   font,
   imageUpload,
+  number,
   palette,
   select,
   string,

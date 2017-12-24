@@ -1,0 +1,1 @@
+export { repeatImage } from './repeatImage';

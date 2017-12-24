@@ -26,6 +26,7 @@ import { render } from './render';
 import { replace } from './replace';
 import { rounddate } from './rounddate';
 import { rowCount } from './rowCount';
+import { repeatImage } from './repeatImage';
 import { seriesStyle } from './seriesStyle';
 import { sleep } from './sleep';
 import { sort } from './sort';
@@ -62,6 +63,7 @@ export const commonFunctions = [
   pie,
   ply,
   render,
+  repeatImage,
   replace,
   rounddate,
   rowCount,
