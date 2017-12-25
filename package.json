@@ -1,6 +1,20 @@
 {
   "name": "backport",
-  "version": "2.2.1",
+  "description": "A CLI tool that automates the process of backporting commits",
+  "keywords": [
+    "backport",
+    "backporting",
+    "versioning",
+    "cherry-pick",
+    "git",
+    "git-cherry-pick",
+    "cli",
+    "automation",
+    "productivity",
+    "branches",
+    "branching"
+  ],
+  "version": "2.2.2",
   "main": "./src/cli/index.js",
   "bin": {
     "backport": "./src/cli/index.js"
@@ -15,19 +29,22 @@
     "precommit": "lint-staged"
   },
   "lint-staged": {
-    "*.js": [
-      "prettier --write",
-      "git add"
-    ]
+    "*.js": ["prettier --write", "git add"]
+  },
+  "author": "Søren Louv-Jansen",
+  "homepage": "https://github.com/sqren/backport/blob/master/README.md",
+  "bugs": {
+    "url": "https://github.com/sqren/backport/issues"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sqren/backport.git"
   },
   "jest": {
-    "setupFiles": [
-      "./test/setup.js"
-    ]
+    "setupFiles": ["./test/setup.js"]
+  },
+  "engines": {
+    "node": ">=6.0.0"
   },
   "dependencies": {
     "axios": "^0.17.0",
