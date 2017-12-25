@@ -2,7 +2,7 @@ import { debug } from './debug';
 import { grid } from './grid';
 import { image } from './image';
 import { repeatImage } from './repeatImage';
-
+import { revealImage } from './revealImage';
 import { markdown } from './markdown';
 import { pie } from './pie';
 import { plot } from './plot';
@@ -15,6 +15,7 @@ export const elementSpecs = [
   grid,
   image,
   repeatImage,
+  revealImage,
   markdown,
   plot,
   pie,
