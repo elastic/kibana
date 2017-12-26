@@ -191,6 +191,41 @@ dataTypesArray.forEach(function (dataType) {
   });
 });
 
+describe('stackData method - data set with injected zeros in percentage mode', function () {
+  let vis;
+  let persistedState;
+  const visLibParams = {
+    type: 'histogram',
+    addLegend: true,
+    addTooltip: true,
+    mode: 'percentage',
+    zeroFill: true
+  };
+
+  beforeEach(ngMock.module('kibana'));
+  beforeEach(ngMock.inject(function (Private, $injector) {
+    vis = Private(FixturesVislibVisFixtureProvider)(visLibParams);
+    persistedState = new ($injector.get('PersistedState'))();
+    vis.on('brush', _.noop);
+    vis.render(seriesMonthlyInterval, persistedState);
+  }));
+
+  afterEach(function () {
+    vis.destroy();
+  });
+
+  it('should not mutate the injected zeros', function () {
+    expect(vis.handler.charts).to.have.length(1);
+    const chart = vis.handler.charts[0];
+    expect(chart.chartData.series).to.have.length(1);
+    const series = chart.chartData.series[0].values;
+    // with the interval set in seriesMonthlyInterval data, the point at x=1454309600000 does not exist
+    const point = _.find(series, 'x', 1454309600000);
+    expect(point).to.not.be(undefined);
+    expect(point.y).to.be(0);
+  });
+});
+
 describe('datumWidth - split chart data set with holes', function () {
   let vis;
   let persistedState;
