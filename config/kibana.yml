@@ -102,10 +102,3 @@
 # The default locale. This locale can be used in certain circumstances to substitute any missing
 # translations.
 #i18n.defaultLocale: "en"
-
-
-optimize:
-#  sourceMaps: '#cheap-source-map' # options -> http://webpack.github.io/docs/configuration.html#devtool
-  sourceMaps: '#source-map' # options -> http://webpack.github.io/docs/configuration.html#devtool
-  unsafeCache: true
-  lazyPrebuild: true
