@@ -24,13 +24,13 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
 
     async render(esReponse, status) {
       await super.render(esReponse, status);
-
-      await this._choroplethLayer.whenDataLoaded();
+      if (this._choroplethLayer) {
+        await this._choroplethLayer.whenDataLoaded();
+      }
     }
 
 
     async _updateData(tableGroup) {
-
       let results;
       if (!tableGroup || !tableGroup.tables || !tableGroup.tables.length || tableGroup.tables[0].columns.length !== 2) {
         results = [];
