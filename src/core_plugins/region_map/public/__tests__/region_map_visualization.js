@@ -178,9 +178,6 @@ describe('RegionMapsVisualizationTests', function () {
     });
 
     afterEach(function () {
-      if (window._skipTeardown) {
-        return;
-      }
       teardownDOM();
       imageComparator.destroy();
     });
@@ -280,7 +277,6 @@ describe('RegionMapsVisualizationTests', function () {
       newTableGroup.tables[0].rows.pop();//remove one shape
 
       await regionMapsVisualization.render(newTableGroup, {
-        // resize: true,
         resize: false,
         params: false,
         aggs: false,
