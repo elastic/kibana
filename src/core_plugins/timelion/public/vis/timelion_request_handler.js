@@ -15,8 +15,6 @@ const TimelionRequestHandlerProvider = function (Private, Notifier, $http, $root
     handler: function (vis /*, appState, uiState, queryFilter*/) {
 
       return new Promise((resolve, reject) => {
-        console.log('[timelion] get');
-
         const expression = vis.params.expression;
         if (!expression) return;
 
