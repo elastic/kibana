@@ -34,6 +34,11 @@ export default function createDateAgg(config, tlConfig, scriptedFields) {
       const metricName = metric[0] + '(' + metric[1] + ')';
       dateAgg.time_buckets.aggs[metricName] = {};
       dateAgg.time_buckets.aggs[metricName][metric[0]] = buildAggBody(metric[1], scriptedFields);
+      if (metric[0] === 'percentiles' && metric[2]) {
+        let percentList = metric[2].split(',');
+        percentList = percentList.map(x => parseFloat(x));
+        dateAgg.time_buckets.aggs[metricName][metric[0]].percents = percentList;
+      }
     } else {
       throw new Error ('`metric` requires metric:field or simply count');
     }

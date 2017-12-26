@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, shallow, mount } from 'enzyme';
-import { requiredProps } from '../../../test/required_props';
+import { requiredProps, findTestSubject } from '../../../test';
 import sinon from 'sinon';
 
 import {
@@ -55,8 +55,8 @@ describe('KuiTextInput', () => {
         );
 
         expect(
-          component.find('[data-test-subj="input"]').matchesElement(document.activeElement)
-        ).toBe(true);
+          findTestSubject(component, 'input').getDOMNode()
+        ).toBe(document.activeElement);
       });
 
       test('does not focus the element by default', () => {
@@ -68,8 +68,8 @@ describe('KuiTextInput', () => {
         );
 
         expect(
-          component.find('[data-test-subj="input"]').matchesElement(document.activeElement)
-        ).toBe(false);
+          findTestSubject(component, 'input').getDOMNode()
+        ).not.toBe(document.activeElement);
       });
     });
 

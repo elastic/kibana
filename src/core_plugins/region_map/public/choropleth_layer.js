@@ -47,25 +47,28 @@ export default class ChoroplethLayer extends KibanaMapLayer {
 
     this._loaded = false;
     this._error = false;
-    this._whenDataLoaded = new Promise((resolve) => {
-      $.ajax({
-        dataType: 'json',
-        url: geojsonUrl,
-        success: (data) => {
-          this._leafletLayer.addData(data);
-          this._loaded = true;
-          this._setStyle();
-          resolve();
-        },
-        error: () => {
-          this._loaded = true;
-          this._error = true;
-          resolve();
-        }
-      });
+    this._whenDataLoaded = new Promise(async (resolve) => {
+      try {
+        const data = await this._makeJsonAjaxCall(geojsonUrl);
+        this._leafletLayer.addData(data);
+        this._loaded = true;
+        this._setStyle();
+        resolve();
+      } catch (e) {
+        this._loaded = true;
+        this._error = true;
+        resolve();
+      }
     });
   }
 
+  //This method is stubbed in the tests to avoid network request during unit tests.
+  async _makeJsonAjaxCall(url) {
+    return await $.ajax({
+      dataType: 'json',
+      url: url
+    });
+  }
 
   _setStyle() {
     if (this._error || (!this._loaded || !this._metrics || !this._joinField)) {

@@ -46,7 +46,7 @@ describe('tooltipFormatter', function () {
     const event = _.cloneDeep(baseEvent);
     const $el = $(tooltipFormatter(event));
     const $rows = $el.find('tr');
-    expect($rows.size()).to.be(3);
+    expect($rows.length).to.be(3);
 
     const $row1 = $rows.eq(0).find('td');
     expect(cell($row1, 0)).to.be('inner');

@@ -49,7 +49,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     async clickQuickButton() {
       await retry.try(async () => {
         remote.setFindTimeout(defaultFindTimeout);
-        await remote.findByLinkText('Quick').click();
+        await testSubjects.click('timepicker-quick-button');
       });
     }
 
@@ -68,8 +68,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       if (!isAbsoluteSectionShowing) {
         await retry.try(async () => {
           await remote.setFindTimeout(defaultFindTimeout);
-          const absoluteButton = await remote.findByLinkText('Absolute');
-          await absoluteButton.click();
+          await testSubjects.click('timepicker-absolute-button');
           // Check to make sure one of the elements on the absolute section is showing.
           await this.getFromTime();
         });
