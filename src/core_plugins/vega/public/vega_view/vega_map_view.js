@@ -1,4 +1,5 @@
 import L from 'leaflet';
+import 'leaflet-vega';
 import * as vega from 'vega';
 import { VegaBaseView } from './vega_base_view';
 

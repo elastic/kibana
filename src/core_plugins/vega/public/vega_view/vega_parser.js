@@ -24,7 +24,8 @@ export class VegaParser {
     this.error = undefined;
     this.warnings = [];
     this._es = es;
-    this._esQueryParser = new EsQueryParser(timefilter, dashboardContext, serviceSettings, this._onWarning.bind(this));
+    this._serviceSettings = serviceSettings;
+    this._esQueryParser = new EsQueryParser(timefilter, dashboardContext, this._onWarning.bind(this));
   }
 
   async parseAsync() {
@@ -61,7 +62,7 @@ export class VegaParser {
       this.spec.autosize = { type: 'fit', contains: 'padding' };
     }
 
-    await this._resolveEsQueriesAsync();
+    await this._resolveObjectQueriesAsync();
 
     if (this.isVegaLite) {
       this._compileVegaLite();
@@ -247,59 +248,82 @@ export class VegaParser {
   }
 
   /**
-   * Replace all instances of ES requests with raw values
+   * Replace all instances of ES requests with raw values.
+   * Also handle any other type of url: {type: xxx, ...}
    * @private
    */
-  async _resolveEsQueriesAsync() {
-    // TODO: switch to ES multi-search, instead of doing it one by one
-    const sources = [];
-    this._findEsRequests((obj, esReq) => sources.push({ obj, esReq }), this.spec);
+  async _resolveObjectQueriesAsync() {
+    // FIXME: switch to ES multi-search, instead of doing it one by one
+    const esRequests = [];
+    const layerRequests = [];
 
-    for (const { obj, esReq } of sources) {
-      const values = await this._es.search(esReq);
-      obj.values = values;
+    this._findEsRequests(this.spec, (obj) => {
+      const url = obj.url;
+      switch (url.type) {
+        case undefined:
+        case 'elasticsearch':
+          const request = this._esQueryParser.parseEsRequest(url);
+          esRequests.push({ obj, request });
+          break;
+        case 'filelayer':
+          if (typeof url.name !== 'string') {
+            throw new Error(`data.url with {"type": "filelayer"} must also set the "name" of the layer`);
+          }
+          layerRequests.push({ obj, name: url.name });
+          break;
+        default:
+          throw new Error(`url.type = ${url.type} is not supported`);
+      }
+    });
+
+    await Promise.all([
+      this._populateEsResults(esRequests),
+      this._populateFileLayerResults(layerRequests)
+    ]);
+  }
+
+  async _populateEsResults(esRequests) {
+    for (const { obj, request } of esRequests) {
+      obj.values = await this._es.search(request);
+    }
+  }
+
+  async _populateFileLayerResults(layerRequests) {
+    if (layerRequests.length === 0) return;
+
+    const layers = await this._serviceSettings.getFileLayers();
+
+    for (const { obj, name } of layerRequests) {
+      const foundLayer = layers.find(v => v.name === name);
+      if (!foundLayer) throw new Error(`filelayer ${JSON.stringify(name)} does not exist`);
+      obj.url = foundLayer.url;
     }
   }
 
   /**
-   * Recursively find and callback every instance of ES data object
-   * @param {function({object}, {object})} onFind Call this function for all ES queries
+   * Recursively find and callback every instance of the data.url as an object
    * @param {*} obj current location in the object tree
+   * @param {function({object})} onFind Call this function for all url objects
    * @param {string} [key] field name of the current object
    * @private
    */
-  _findEsRequests(onFind, obj, key) {
+  _findEsRequests(obj, onFind, key) {
     if (Array.isArray(obj)) {
       for (const elem of obj) {
-        this._findEsRequests(onFind, elem, key);
+        this._findEsRequests(elem, onFind, key);
       }
     } else if (_.isPlainObject(obj)) {
-
-      const url = obj.url;
-      if (key === 'data' && _.isPlainObject(url)) {
+      if (key === 'data' && _.isPlainObject(obj.url)) {
         // Assume that any  "data": {"url": {...}}  is a request for data
-        delete obj.url;
-
         if (obj.values !== undefined || obj.source !== undefined) {
           throw new Error('Data must not have more than one of "url", "values", and "source"');
         }
-
-        switch (url.type) {
-          case undefined:
-          case 'elasticsearch':
-            const request = this._esQueryParser.parseEsRequest(url);
-            onFind(obj, request);
-            break;
-          default:
-            throw new Error(`url.type = ${url.type} is not supported`);
-        }
-
+        onFind(obj);
       } else {
         for (const k of Object.keys(obj)) {
-          this._findEsRequests(onFind, obj[k], k);
+          this._findEsRequests(obj[k], onFind, k);
         }
       }
-
     }
   }
 

@@ -7,10 +7,9 @@ const MUST_NOT_CLAUSE = '%dashboard_context-must_not_clause%';
 
 export class EsQueryParser {
 
-  constructor(timefilter, dashboardContext, serviceSettings, onWarning) {
+  constructor(timefilter, dashboardContext, onWarning) {
     this._timefilter = timefilter;
     this._dashboardContext = dashboardContext;
-    this._serviceSettings = serviceSettings;
     this._timeBounds = false;
     this._onWarning = onWarning;
   }
