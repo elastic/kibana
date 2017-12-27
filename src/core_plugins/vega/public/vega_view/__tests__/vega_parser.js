@@ -57,8 +57,10 @@ describe(`VegaParser._setDefaultColors`, () => {
 describe('VegaParser._resolveEsQueries', () => {
   function test(spec, expected, warnCount) {
     return async () => {
-      const vp = new VegaParser(spec, { search: async () => [42] });
-      await vp._resolveEsQueriesAsync();
+      const vp = new VegaParser(spec, { search: async () => [42] }, 0, 0, {
+        getFileLayers: async () => [{ name: 'file1', url: 'url1' }]
+      });
+      await vp._resolveDataUrls();
       expect(vp.spec).to.eql(expected);
       expect(vp.warnings).to.have.length(warnCount || 0);
     };
@@ -68,7 +70,9 @@ describe('VegaParser._resolveEsQueries', () => {
   it('no data2', test({ a: 1 }, { a: 1 }));
   it('non-es data', test({ data: { a: 10 } }, { data: { a: 10 } }));
   it('es', test({ data: { url: { index: 'a' }, x: 1 } }, { data: { values: [42], x: 1 } }));
+  it('es', test({ data: { url: { type: 'elasticsearch', index: 'a' } } }, { data: { values: [42] } }));
   it('es arr', test({ arr: [{ data: { url: { index: 'a' }, x: 1 } }] }, { arr: [{ data: { values: [42], x: 1 } }] }));
+  it('emsfile', test({ data: { url: { type: 'emsfile', name: 'file1' } } }, { data: { url: 'url1' } }));
 });
 
 describe('VegaParser._parseSchema', () => {

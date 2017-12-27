@@ -62,7 +62,7 @@ export class VegaParser {
       this.spec.autosize = { type: 'fit', contains: 'padding' };
     }
 
-    await this._resolveObjectQueriesAsync();
+    await this._resolveDataUrls();
 
     if (this.isVegaLite) {
       this._compileVegaLite();
@@ -252,24 +252,24 @@ export class VegaParser {
    * Also handle any other type of url: {type: xxx, ...}
    * @private
    */
-  async _resolveObjectQueriesAsync() {
-    // FIXME: switch to ES multi-search, instead of doing it one by one
+  async _resolveDataUrls() {
     const esRequests = [];
-    const layerRequests = [];
+    const emsFiles = [];
 
     this._findEsRequests(this.spec, (obj) => {
       const url = obj.url;
+      delete obj.url;
       switch (url.type) {
         case undefined:
         case 'elasticsearch':
           const request = this._esQueryParser.parseEsRequest(url);
           esRequests.push({ obj, request });
           break;
-        case 'filelayer':
+        case 'emsfile':
           if (typeof url.name !== 'string') {
-            throw new Error(`data.url with {"type": "filelayer"} must also set the "name" of the layer`);
+            throw new Error(`data.url with {"type": "emsfile"} is missing the "name" of the file`);
           }
-          layerRequests.push({ obj, name: url.name });
+          emsFiles.push({ obj, name: url.name });
           break;
         default:
           throw new Error(`url.type = ${url.type} is not supported`);
@@ -278,24 +278,25 @@ export class VegaParser {
 
     await Promise.all([
       this._populateEsResults(esRequests),
-      this._populateFileLayerResults(layerRequests)
+      this._populateEmsFileResults(emsFiles)
     ]);
   }
 
   async _populateEsResults(esRequests) {
+    // FIXME: switch to ES multi-search, instead of doing it one by one
     for (const { obj, request } of esRequests) {
       obj.values = await this._es.search(request);
     }
   }
 
-  async _populateFileLayerResults(layerRequests) {
+  async _populateEmsFileResults(layerRequests) {
     if (layerRequests.length === 0) return;
 
     const layers = await this._serviceSettings.getFileLayers();
 
     for (const { obj, name } of layerRequests) {
       const foundLayer = layers.find(v => v.name === name);
-      if (!foundLayer) throw new Error(`filelayer ${JSON.stringify(name)} does not exist`);
+      if (!foundLayer) throw new Error(`emsfile ${JSON.stringify(name)} does not exist`);
       obj.url = foundLayer.url;
     }
   }
