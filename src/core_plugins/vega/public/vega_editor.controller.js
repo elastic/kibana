@@ -45,23 +45,24 @@ module.controller('VegaEditorController', ($scope /*, kbnUiAceKeyboardModeServic
     _format(event, stringify, opts) {
       event.preventDefault();
 
-      $scope.$apply(() => {
-        try {
-          const doc = this.aceEditor;
-          const spec = hjson.parse(doc.getValue(), { legacyRoot: false, keepWsc: true });
-          const spec2 = stringify(spec, opts);
-          doc.setValue(spec2);
+      let newSpec;
+      try {
+        const spec = hjson.parse(this.aceEditor.getSession().doc.getValue(), { legacyRoot: false, keepWsc: true });
+        newSpec = stringify(spec, opts);
+      } catch (err) {
+        // This is a common case - user tries to format an invalid HJSON text
+        notify.error(err);
+        return;
+      }
 
-          // FIXME!
-          // The dirty state of the spec is not updated via ACE's setValue -> onChange -> ace-ui
-          // Repo: disable auto, use "format as ..." to change the spec, click save.
-          // Observe that stale version is saved.
-          // FIXME: Enabling this kills the editor UNDO after formatting (loss of comments with ->JSON)
-          $scope.vis.params.spec = spec2;
-
-        } catch (err) {
-          notify.error(err);
-        }
+      // ui-ace only accepts changes from the editor when they
+      // happen outside of a digest cycle
+      $scope.$$postDigest(() => {
+        // set the new value to the session doc so that it
+        // is treated as an edit by ace: ace adds it to the
+        // undo stack and emits it as a change like all
+        // other edits
+        this.aceEditor.getSession().doc.setValue(newSpec);
       });
     }
   })();

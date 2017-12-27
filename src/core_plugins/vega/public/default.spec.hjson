@@ -1,6 +1,9 @@
 {
-  // Use help icon to view Vega examples, tutorials, and other docs
-  // Use the wrench icon to reformat and remove comments
+  // This graph shows document count in all indexes in the current time range.
+  //
+  // You might need to adjust the time filter in the upper right corner.
+  // Use help icon to view Vega examples, tutorials, and other docs.
+  // Use the wrench icon to reformat and remove comments.
 
   "$schema": "https://vega.github.io/schema/vega-lite/v2.json",
   "title": "Event counts from all indexes",

@@ -21,6 +21,7 @@ function create(min, max, dashboardCtx) {
       })
     },
     () => _.cloneDeep(dashboardCtx),
+    undefined,
     () => (inst.$$$warnCount = (inst.$$$warnCount || 0) + 1)
   );
   return inst;
