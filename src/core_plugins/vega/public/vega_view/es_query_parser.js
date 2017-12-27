@@ -21,64 +21,73 @@ export class EsQueryParser {
     'body': 'esRequest',
   };
 
-  migrateLegacyRequest(url) {
-    const result = {};
-    let isEmpty = true;
-    for (const key of Object.keys(url)) {
-      const match = EsQueryParser.legacyKeyMap[key];
-      if (!match) {
-        this._onWarning(`Unexpected url field "${key}", ignoring`);
-      } else {
-        result[match] = url[key];
-        isEmpty = false;
-      }
-    }
+  parseEsRequest(req) {
+    const index = req.index;
+    let body = req.body;
+    let context = req.context;
+    let timefield = req.timefield;
+    let usesContext = context !== undefined || timefield !== undefined;
 
-    if (isEmpty) {
-      throw new Error(`Legacy: data url is given as an object without the expected index, body, and %context_query%`);
-    }
-
-    return result;
-  }
-
-  parseEsRequest(esRequest, esIndex, esContext) {
-    if (esIndex === undefined || typeof esIndex !== 'string' || esIndex.length === 0) {
-      throw new Error('Data must have "esIndex" string field when using "esRequest" or "esContext". ' +
+    if (index === undefined || typeof index !== 'string' || index.length === 0) {
+      throw new Error('Data must have a url.index string field for ES data sources". ' +
         'Set it to "_all" to search all indexes.');
     }
 
-    if (esRequest === undefined) {
-      esRequest = {};
-    } else if (!_.isPlainObject(esRequest)) {
-      throw new Error('"esRequest" must be an object');
+    if (body === undefined) {
+      body = {};
+    } else if (!_.isPlainObject(body)) {
+      throw new Error('url.body must be an object');
     }
 
-    if (esContext) {
-      if (esRequest.query !== undefined) {
-        throw new Error('Data must not contain "esContext" and "esRequest.query" values at the same time');
-      }
-
-      if (esContext !== true && (typeof esContext !== 'string' || esContext.length === 0)) {
-        throw new Error('"esContext" can either be true (ignores time range picker), ' +
+    // Migrate legacy %context_query% into context & timefield values
+    const legacyContext = req['%context_query%'];
+    if (legacyContext !== undefined) {
+      if (body.query !== undefined) {
+        throw new Error('Data url must not contain legacy "%context_query%" and "body.query" values at the same time');
+      } else if (usesContext) {
+        throw new Error('Data url must not have "%context_query%" together with "context" or "timefield"');
+      } else if (legacyContext !== true && (typeof legacyContext !== 'string' || legacyContext.length === 0)) {
+        throw new Error('Legacy "%context_query%" can either be true (ignores time range picker), ' +
           'or it can be the name of the time field, e.g. "@timestamp"');
       }
 
-      esRequest.query = this._dashboardContext();
-      if (esContext !== true) {
-        // Inject range filter based on the timefilter values
-        esRequest.query.bool.must.push({
-          range: {
-            [esContext]: this._createRangeFilter({ [TIMEFILTER]: true })
-          }
-        });
+      usesContext = true;
+      context = true;
+      let result = `"url": {"context": true`;
+      if (typeof legacyContext === 'string') {
+        timefield = legacyContext;
+        result += `, "timefield": ${JSON.stringify(timefield)}`;
       }
-    } else {
-      this._injectContextVars(esRequest.query, true);
+      result += '}';
+
+      this._onWarning(`Legacy "url": {"%context_query%": ${JSON.stringify(legacyContext)}} should change to ${result}`);
     }
 
-    this._injectContextVars(esRequest.aggs, false);
+    if (body.query !== undefined) {
+      if (usesContext) {
+        throw new Error('url.context and url.timefield must not be used when url.body.query is set');
+      }
+      this._injectContextVars(body.query, true);
+    } else if (usesContext) {
 
-    return { index: esIndex, body: esRequest };
+      if (timefield) {
+        // Inject range filter based on the timefilter values
+        body.query = { range: { [timefield]: this._createRangeFilter({ [TIMEFILTER]: true }) } };
+      }
+
+      if (context) {
+        // Use dashboard context
+        const newQuery = this._dashboardContext();
+        if (timefield) {
+          newQuery.bool.must.push(body.query);
+        }
+        body.query = newQuery;
+      }
+    }
+
+    this._injectContextVars(body.aggs, false);
+
+    return { index, body };
   }
 
   /**
