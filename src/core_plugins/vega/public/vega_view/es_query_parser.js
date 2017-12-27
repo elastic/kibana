@@ -15,12 +15,6 @@ export class EsQueryParser {
     this._onWarning = onWarning;
   }
 
-  static legacyKeyMap = {
-    'index': 'esIndex',
-    '%context_query%': 'esContext',
-    'body': 'esRequest',
-  };
-
   parseEsRequest(req) {
     const index = req.index;
     let body = req.body;

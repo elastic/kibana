@@ -82,33 +82,23 @@ describe(`EsQueryParser.injectQueryContextVars`, () => {
     { a: { format: `epoch_millis`, gte: rangeStart, lte: rangeEnd } }));
 });
 
-describe(`EsQueryParser.migrateLegacyRequest`, () => {
-  function test(url, expectedRequest, expectedWarnings) {
-    return () => {
-      const parser = create();
-      const actual = parser.migrateLegacyRequest(url);
-      expect(actual).to.eql(expectedRequest);
-      expect(parser.$$$warnCount).to.eql(expectedWarnings);
-    };
-  }
-
-  it(`simple`, test(
-    { index: 'idx', body: 'bdy', '%context_query%': 'ctx' },
-    { esIndex: 'idx', esRequest: 'bdy', esContext: 'ctx' }));
-  it(`with extra`, test({ index: 'idx', extra: 42 }, { esIndex: 'idx' }, 1));
-  it(`with no es`, () => expect(test({ extra: 42 })).to.throwError());
-});
-
 describe(`EsQueryParser.parseEsRequest`, () => {
-  function test(esIndex, esContext, esRequest, ctx, expected) {
+  function test(req, ctx, expected) {
     return () => {
-      const actual = create(rangeStart, rangeEnd, ctx).parseEsRequest(esRequest, esIndex, esContext);
+      const actual = create(rangeStart, rangeEnd, ctx).parseEsRequest(req);
       expect(actual).to.eql(expected);
     };
   }
 
-  it(`esContext=true`, test('_all', true, undefined, ctxArr, { index: '_all', body: { query: ctxArr } }));
-  it(`esContext='abc'`, test('_all', 'abc', undefined, ctxArr, {
+  it(`%context_query%=true`, test(
+    { index: '_all', '%context_query%': true }, ctxArr,
+    { index: '_all', body: { query: ctxArr } }));
+
+  it(`context=true`, test(
+    { index: '_all', context: true }, ctxArr,
+    { index: '_all', body: { query: ctxArr } }));
+
+  const expectedForCtxAndTimefield = {
     index: '_all',
     body: {
       query: {
@@ -121,7 +111,19 @@ describe(`EsQueryParser.parseEsRequest`, () => {
         }
       }
     }
-  }));
-  it(`no esRequest`, test('_all', undefined, undefined, ctxArr, { index: '_all', body: {} }));
-  it(`esRequest`, test('_all', undefined, { a: 2 }, ctxArr, { index: '_all', body: { a: 2 } }));
+  };
+  it(`%context_query%='abc'`, test({ index: '_all', '%context_query%': 'abc' }, ctxArr, expectedForCtxAndTimefield));
+  it(`context=true, timefield='abc'`, test(
+    { index: '_all', context: true, timefield: 'abc' }, ctxArr, expectedForCtxAndTimefield));
+
+  it(`timefield='abc'`, test({ index: '_all', timefield: 'abc' }, ctxArr,
+    {
+      index: '_all',
+      body: { query: { range: { abc: { format: 'epoch_millis', gte: rangeStart, lte: rangeEnd } } } }
+    }
+  ));
+
+  it(`no esRequest`, test({ index: '_all' }, ctxArr, { index: '_all', body: {} }));
+
+  it(`esRequest`, test({ index: '_all', body: { a: 2 } }, ctxArr, { index: '_all', body: { a: 2 } }));
 });

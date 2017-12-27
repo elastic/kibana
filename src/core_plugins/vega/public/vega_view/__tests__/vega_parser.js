@@ -67,11 +67,8 @@ describe('VegaParser._resolveEsQueries', () => {
   it('no data', test({}, {}));
   it('no data2', test({ a: 1 }, { a: 1 }));
   it('non-es data', test({ data: { a: 10 } }, { data: { a: 10 } }));
-  it('es', test({ data: { esIndex: 'a', x: 1 } }, { data: { values: [42], x: 1 } }));
-  it('es arr', test({ arr: [{ data: { esIndex: 'a', x: 1 } }] }, { arr: [{ data: { values: [42], x: 1 } }] }));
-  it('es legacy', test(
-    { arr: [{ data: { url: { index: 'idx', body: { size: 10, hist: 42 } }, x: 1 } }] },
-    { arr: [{ data: { values: [42], x: 1 } }] }, 1));
+  it('es', test({ data: { url: { index: 'a' }, x: 1 } }, { data: { values: [42], x: 1 } }));
+  it('es arr', test({ arr: [{ data: { url: { index: 'a' }, x: 1 } }] }, { arr: [{ data: { values: [42], x: 1 } }] }));
 });
 
 describe('VegaParser._parseSchema', () => {
