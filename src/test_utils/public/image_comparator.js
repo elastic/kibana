@@ -31,6 +31,47 @@ export class ImageComparator {
 
   }
 
+
+  async compareDOMContents(domContentsText, sourceWidth, sourceHeight, expectedImageSourcePng, threshold) {
+
+
+    const DOMURL = window.URL || window.webkitURL || window;
+
+    const sourceCanvas = document.createElement('canvas');
+    sourceCanvas.width = sourceWidth;
+    sourceCanvas.height = sourceHeight;
+    sourceCanvas.style.position = 'fixed';
+    sourceCanvas.style.left = 0;
+    sourceCanvas.style.top = 0;
+    sourceCanvas.style.border = '1px solid blue';
+    const sourceContext2d = sourceCanvas.getContext('2d');
+    document.body.appendChild(sourceCanvas);
+
+    const sourceData =
+      `<svg xmlns="http://www.w3.org/2000/svg" width="${sourceWidth}" height="${sourceHeight}">
+        <foreignObject width="100%" height="100%">
+        ${domContentsText}
+        </foreignObject>
+      </svg>`;
+
+    const sourceImage = new Image();
+    const url = 'data:image/svg+xml;base64,' + btoa(sourceData);
+    return new Promise((resolve) => {
+
+      sourceImage.onload = async () => {
+        sourceContext2d.drawImage(sourceImage, 0, 0);
+        DOMURL.revokeObjectURL(url);
+        const mismatch = await this.compareImage(sourceCanvas, expectedImageSourcePng, threshold);
+        document.body.removeChild(sourceCanvas);
+        resolve(mismatch);
+      };
+
+      sourceImage.src = url;
+    });
+
+
+  }
+
   /**
    * Do pixel-comparison of two images
    * @param actualCanvasFromUser HTMl5 canvas
@@ -38,13 +79,9 @@ export class ImageComparator {
    * @param threshold number between 0-1. A lower number indicates a lower tolerance for pixel-differences.
    * @return number
    */
-  async  compareImage(actualCanvasFromUser, expectedImageSourcePng, threshold) {
-
-    console.log('compare image:actual ', actualCanvasFromUser);
-    console.log('compare image:expected ', expectedImageSourcePng);
+  async compareImage(actualCanvasFromUser, expectedImageSourcePng, threshold) {
 
     return new Promise((resolve) => {
-
 
       window.setTimeout(() => {
 
