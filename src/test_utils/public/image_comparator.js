@@ -34,9 +34,6 @@ export class ImageComparator {
 
   async compareDOMContents(domContentsText, sourceWidth, sourceHeight, expectedImageSourcePng, threshold) {
 
-
-    const DOMURL = window.URL || window.webkitURL || window;
-
     const sourceCanvas = document.createElement('canvas');
     sourceCanvas.width = sourceWidth;
     sourceCanvas.height = sourceHeight;
@@ -55,21 +52,15 @@ export class ImageComparator {
       </svg>`;
 
     const sourceImage = new Image();
-    const url = 'data:image/svg+xml;base64,' + btoa(sourceData);
     return new Promise((resolve) => {
-
       sourceImage.onload = async () => {
         sourceContext2d.drawImage(sourceImage, 0, 0);
-        DOMURL.revokeObjectURL(url);
         const mismatch = await this.compareImage(sourceCanvas, expectedImageSourcePng, threshold);
         document.body.removeChild(sourceCanvas);
         resolve(mismatch);
       };
-
-      sourceImage.src = url;
+      sourceImage.src = 'data:image/svg+xml;base64,' + btoa(sourceData);
     });
-
-
   }
 
   /**
