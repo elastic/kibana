@@ -110,8 +110,10 @@ export class UiBundlesController {
     return resolve(this._workingDir, ...args);
   }
 
-  getCachePath() {
-    return this.resolvePath('../.cache', this.hashBundleEntries());
+  getCacheDirectory(...subPath) {
+    if (this.isDevMode()) {
+      return this.resolvePath('../.cache', this.hashBundleEntries(), ...subPath);
+    }
   }
 
   getDescription() {

@@ -1,4 +1,3 @@
-import { resolve } from 'path';
 import { writeFile } from 'fs';
 
 import Boom from 'boom';
@@ -70,8 +69,6 @@ export default class BaseOptimizer {
   }
 
   getConfig() {
-    const cacheDirectory = this.uiBundles.getCachePath();
-
     function getStyleLoaders(preProcessors = [], postProcessors = []) {
       return ExtractTextPlugin.extract({
         fallback: {
@@ -99,6 +96,19 @@ export default class BaseOptimizer {
           ...preProcessors,
         ],
       });
+    }
+
+    function getCacheLoaders(cacheDirectory) {
+      if (!cacheDirectory) {
+        return [];
+      }
+
+      return [
+        {
+          loader: 'cache-loader',
+          options: { cacheDirectory }
+        }
+      ];
     }
 
     const commonConfig = {
@@ -136,12 +146,7 @@ export default class BaseOptimizer {
             test: /\.less$/,
             use: getStyleLoaders(
               ['less-loader'],
-              [{
-                loader: 'cache-loader',
-                options: {
-                  cacheDirectory: resolve(cacheDirectory, 'less'),
-                }
-              }]
+              getCacheLoaders(this.uiBundles.getCacheDirectory('less'))
             ),
           },
           {
@@ -169,12 +174,7 @@ export default class BaseOptimizer {
             test: /\.js$/,
             exclude: BABEL_EXCLUDE_RE.concat(this.uiBundles.getWebpackNoParseRules()),
             use: [
-              {
-                loader: 'cache-loader',
-                options: {
-                  cacheDirectory: resolve(cacheDirectory, 'babel'),
-                }
-              },
+              ...getCacheLoaders(this.uiBundles.getCacheDirectory('babel')),
               {
                 loader: 'babel-loader',
                 options: {
