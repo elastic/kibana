@@ -3,22 +3,16 @@ export default kibana => new kibana.Plugin({
   require: ['elasticsearch'],
 
   uiExports: {
-    visTypes: [
-      'plugins/vega/vega_type'
-    ],
-    // fixme: For some reason, injectVars() is never called
-    // fixme: once fixed, remove it from src/core_plugins/kibana/inject_vars.js
-    // app: {
-    //   injectVars: (server) => ({ vegaConfig: server.config().get('vega') })
-    // }
+    visTypes: ['plugins/vega/vega_type'],
+    injectDefaultVars: server => ({ vegaConfig: server.config().get('vega') }),
   },
 
-  // todo: does this plugin need this?   isEnabled(config) => config.get('vega.enabled'),
-
+  // fixme: other plugins declare 'enabled' param, but it doesn't work by default. It doesn't work without it
   config: Joi => Joi.object({
-    // todo: other plugins declare 'enabled' param, but it doesn't work by default. It doesn't work without it
     enabled: Joi.boolean().default(true),
     enableExternalUrls: Joi.boolean().default(true)
   }).default(),
+
+  // fixme: do we need this code:   isEnabled(config) => config.get('vega.enabled'),
 
 });

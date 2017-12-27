@@ -3,7 +3,7 @@ import { VegaView } from './vega_view';
 export function VegaVisualizationProvider(vegaConfig, serviceSettings) {
   return class VegaVisualization {
     constructor(el, vis) {
-      // fixme: remove
+      // FIXME: remove
       console.log('VegaVisualization constructor');
 
       this._el = el;

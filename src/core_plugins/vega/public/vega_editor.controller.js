@@ -1,9 +1,12 @@
-import { uiModules } from 'ui/modules';
-import hjson from 'hjson';
 import compactStringify from 'json-stringify-pretty-compact';
+import hjson from 'hjson';
+import { Notifier } from 'ui/notify';
+import { uiModules } from 'ui/modules';
 
 const module = uiModules.get('kibana/vega', ['kibana']);
 module.controller('VegaEditorController', ($scope /*, kbnUiAceKeyboardModeService*/) => {
+
+  const notify = new Notifier({ location: 'Vega' });
 
   return new (class VegaEditorController {
     constructor() {
@@ -33,10 +36,6 @@ module.controller('VegaEditorController', ($scope /*, kbnUiAceKeyboardModeServic
           keepWsc: true,
         });
       };
-
-      // $hack: by default, Vega vis should enable auto-apply, as it is a more natural way
-      // to develop Vega visualizations, and consistent with other Vega tools and Kibana Vega plugin.
-      $scope.$parent.$parent.$parent.$parent.autoApplyEnabled = true;
     }
 
     _getCodeWidth() {
@@ -46,9 +45,7 @@ module.controller('VegaEditorController', ($scope /*, kbnUiAceKeyboardModeServic
     _format(event, stringify, opts) {
       event.preventDefault();
 
-      // FIXME: is this the right eval method?
-      $scope.$evalAsync(() => {
-        // TODO: error handling and reporting
+      $scope.$apply(() => {
         try {
           const doc = this.aceEditor;
           const spec = hjson.parse(doc.getValue(), { legacyRoot: false, keepWsc: true });
@@ -63,8 +60,7 @@ module.controller('VegaEditorController', ($scope /*, kbnUiAceKeyboardModeServic
           $scope.vis.params.spec = spec2;
 
         } catch (err) {
-          // FIXME!
-          alert(err);
+          notify.error(err);
         }
       });
     }
