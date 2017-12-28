@@ -112,7 +112,6 @@ class VisEditorVisualization extends Component {
       <div>
         <div
           style={style}
-          ref={(el) => this.visDiv = el}
           className="vis_editor__visualization"
           data-shared-items-container
           data-shared-item
