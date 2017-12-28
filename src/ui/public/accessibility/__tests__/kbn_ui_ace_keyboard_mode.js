@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
 import '../kbn_ui_ace_keyboard_mode';
-import { keyCodes } from 'ui_framework/services';
+import { keyCodes } from '@elastic/eui';
 
 describe('kbnUiAceKeyboardMode directive', () => {
   let element;

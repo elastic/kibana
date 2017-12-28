@@ -7,7 +7,7 @@ import {
 
 import {
   keyCodes,
-} from 'ui_framework/services';
+} from '@elastic/eui';
 
 export function PanelOptionsMenuForm({ title, onReset, onUpdatePanelTitle, onClose }) {
   function onInputChange(event) {

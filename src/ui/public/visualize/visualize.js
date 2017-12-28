@@ -77,12 +77,6 @@ uiModules
         $scope.editorMode = $scope.editorMode || false;
         $scope.vis.editorMode = $scope.editorMode;
 
-        // spy panel is supported only with courier request handler
-        $scope.shouldShowSpyPanel = () => {
-          if ($scope.vis.type.requestHandler !== 'courier') return false;
-          return $scope.vis.type.requiresSearch && $scope.showSpyPanel;
-        };
-
         const requestHandler = getHandler(requestHandlers, $scope.vis.type.requestHandler);
         const responseHandler = getHandler(responseHandlers, $scope.vis.type.responseHandler);
 

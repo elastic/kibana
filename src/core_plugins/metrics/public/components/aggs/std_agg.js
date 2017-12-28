@@ -5,7 +5,7 @@ import FieldSelect from './field_select';
 import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
-import { htmlIdGenerator } from 'ui_framework/services';
+import { htmlIdGenerator } from '@elastic/eui';
 
 function StandardAgg(props) {
   const { model, panel, series, fields } = props;

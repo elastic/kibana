@@ -22,8 +22,8 @@ describe('jQuery.findTestSubject', function () {
     const $otherMatch = $make('subject').appendTo($container);
 
     const $found = $container.findTestSubject('subject');
-    expect($found.filter($match).size()).to.be(1);
-    expect($found.filter($otherMatch).size()).to.be(1);
+    expect($found.filter($match).length).to.be(1);
+    expect($found.filter($otherMatch).length).to.be(1);
   });
 
   it('finds all of the elements with either subject', function () {
@@ -33,9 +33,9 @@ describe('jQuery.findTestSubject', function () {
     const $noMatch = $make('notSubject').appendTo($container);
 
     const $found = $container.findTestSubject('subject', 'alsoSubject');
-    expect($found.filter($match1).size()).to.be(1);
-    expect($found.filter($match2).size()).to.be(1);
-    expect($found.filter($noMatch).size()).to.be(0);
+    expect($found.filter($match1).length).to.be(1);
+    expect($found.filter($match2).length).to.be(1);
+    expect($found.filter($noMatch).length).to.be(0);
   });
 
   it('finds all of the elements with a decendant selector', function () {

@@ -14,7 +14,7 @@ import { getEmbeddableFactoryMock } from '../__tests__/get_embeddable_factories_
 
 import {
   takeMountedSnapshot,
-} from 'ui_framework/src/test';
+} from '@elastic/eui/lib/test';
 
 function getProps(props = {}) {
   const defaultTestProps = {

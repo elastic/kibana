@@ -78,6 +78,10 @@ describe('validate-json directive', function () {
         checkValid(input.invalid, 'ng-invalid');
       });
 
+      it('should be invalid if a number', function () {
+        checkValid('0', 'ng-invalid');
+      });
+
       it('should update validity on changes', function () {
         checkValid(input.valid, 'ng-valid');
         checkValid(input.invalid, 'ng-invalid');

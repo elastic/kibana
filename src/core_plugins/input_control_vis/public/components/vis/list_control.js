@@ -26,25 +26,43 @@ export class ListControl extends Component {
     return `${selected.label.substring(0, 23)}...`;
   }
 
+  renderControl() {
+    if (!this.props.control.isEnabled()) {
+      // react-select clobbers the tooltip, so just returning a disabled input instead
+      return (
+        <input
+          disabled={true}
+          className="kuiTextInput"
+          style={{ width: '100%' }}
+        />
+      );
+    }
+
+    return (
+      <Select
+        className="list-control-react-select"
+        placeholder="Select..."
+        multi={this.props.control.options.multiselect}
+        simpleValue={true}
+        delimiter={this.props.control.getMultiSelectDelimiter()}
+        value={this.props.control.value}
+        options={this.props.control.selectOptions}
+        onChange={this.handleOnChange}
+        valueRenderer={this.truncate}
+        inputProps={{ id: this.props.control.id }}
+      />
+    );
+  }
+
   render() {
     return (
       <FormRow
         id={this.props.control.id}
         label={this.props.control.label}
         controlIndex={this.props.controlIndex}
+        control={this.props.control}
       >
-        <Select
-          className="list-control-react-select"
-          placeholder="Select..."
-          multi={this.props.control.options.multiselect}
-          simpleValue={true}
-          delimiter={this.props.control.getMultiSelectDelimiter()}
-          value={this.props.control.value}
-          options={this.props.control.selectOptions}
-          onChange={this.handleOnChange}
-          valueRenderer={this.truncate}
-          inputProps={{ id: this.props.control.id }}
-        />
+        {this.renderControl()}
       </FormRow>
     );
   }

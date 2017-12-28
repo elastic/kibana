@@ -2,10 +2,9 @@ import React from 'react';
 import { expect } from 'chai';
 import { shallow } from 'enzyme';
 import sinon from 'sinon';
-import YesNo from '../yes_no';
+import YesNo from './yes_no';
 
-describe('<YesNo />', () => {
-
+describe('YesNo', () => {
   it('call onChange={handleChange} on yes', () => {
     const handleChange = sinon.spy();
     const wrapper = shallow(
@@ -29,5 +28,4 @@ describe('<YesNo />', () => {
       test: 0
     });
   });
-
 });

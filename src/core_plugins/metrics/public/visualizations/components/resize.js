@@ -1,177 +1,66 @@
-/*
- * Please note: Much of this code is taken from the MIT licensed react-resize-detector module written by @maslianok
- */
-
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-
-const parentStyle = {
-  position: 'absolute',
-  left: 0,
-  top: 0,
-  right: 0,
-  bottom: 0,
-  overflow: 'hidden',
-  zIndex: -1,
-  visibility: 'hidden'
-};
-
-const shrinkChildStyle = {
-  position: 'absolute',
-  left: 0,
-  top: 0,
-  width: '200%',
-  height: '200%'
-};
-
-const expandChildStyle = {
-  position: 'absolute',
-  left: 0,
-  top: 0,
-  width: '100%',
-  height: '100%'
-};
-
+import { findDOMNode } from 'react-dom';
 class Resize extends Component {
-  constructor() {
-    super();
 
-    this.state = {
-      expandChildHeight: 0,
-      expandChildWidth: 0,
-      expandScrollLeft: 0,
-      expandScrollTop: 0,
-      shrinkScrollTop: 0,
-      shrinkScrollLeft: 0,
-      lastWidth: 0,
-      lastHeight: 0
-    };
-
-    this.reset = this.reset.bind(this);
-    this.handleScroll = this.handleScroll.bind(this);
+  constructor(props) {
+    super(props);
+    this.state = {};
+    this.handleResize = this.handleResize.bind(this);
   }
 
-  componentWillMount() {
-    this.forceUpdate();
+  checkSize() {
+    const el = findDOMNode(this.el);
+    if (!el) return;
+    this.timeout = setTimeout(() => {
+      const { currentHeight, currentWidth } = this.state;
+      if (currentHeight !== el.parentNode.clientHeight || currentWidth !== el.parentNode.clientWidth) {
+        this.setState({
+          currentWidth: el.parentNode.clientWidth,
+          currentHeight: el.parentNode.clientHeight
+        });
+        this.handleResize();
+      }
+      clearTimeout(this.timeout);
+      this.checkSize();
+    }, this.props.frequency);
   }
 
   componentDidMount() {
-    const [width, height] = this.containerSize();
-    this.reset(width, height);
-    this.props.onResize(width, height);
+    this.checkSize();
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
-    return this.props !== nextProps || this.state !== nextState;
+  componentWillUnmount() {
+    clearTimeout(this.timeout);
   }
 
-  componentDidUpdate() {
-    this.expand.scrollLeft = this.expand.scrollWidth;
-    this.expand.scrollTop = this.expand.scrollHeight;
-
-    this.shrink.scrollLeft = this.shrink.scrollWidth;
-    this.shrink.scrollTop = this.shrink.scrollHeight;
-  }
-
-  containerSize() {
-    return [
-      this.props.handleWidth && this.container.parentElement.offsetWidth,
-      this.props.handleHeight && this.container.parentElement.offsetHeight
-    ];
-  }
-
-  reset(containerWidth, containerHeight) {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    const parent = this.container.parentElement;
-
-    let position = 'static';
-    if (parent.currentStyle) {
-      position = parent.currentStyle.position;
-    } else if (window.getComputedStyle) {
-      position = window.getComputedStyle(parent).position;
-    }
-    if (position === 'static') {
-      parent.style.position = 'relative';
-    }
-
-    this.setState({
-      expandChildHeight: this.expand.offsetHeight + 10,
-      expandChildWidth: this.expand.offsetWidth + 10,
-      lastWidth: containerWidth,
-      lastHeight: containerHeight
-    });
-  }
-
-  handleScroll(e) {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    e.preventDefault();
-    e.stopPropagation();
-
-    const { state } = this;
-
-    const [width, height] = this.containerSize();
-    if (width !== state.lastWidth || height !== state.lastHeight) {
-      this.props.onResize(width, height);
-    }
-
-    this.reset(width, height);
+  handleResize() {
+    if (this.props.onResize) this.props.onResize();
   }
 
   render() {
-    const { state } = this;
-
-    const expandStyle = {
-      ...expandChildStyle,
-      width: state.expandChildWidth,
-      height: state.expandChildHeight
-    };
-
-    return (
+    const style = this.props.style || {};
+    const className = this.props.className || '';
+    return(
       <div
-        style={parentStyle}
-        ref={e => {
-          this.container = e;
-        }}
+        style={style}
+        className={className}
+        ref={(el) => this.el = el}
       >
-        <div
-          style={parentStyle}
-          onScroll={this.handleScroll}
-          ref={e => {
-            this.expand = e;
-          }}
-        >
-          <div style={expandStyle} />
-        </div>
-        <div
-          style={parentStyle}
-          onScroll={this.handleScroll}
-          ref={e => {
-            this.shrink = e;
-          }}
-        >
-          <div style={shrinkChildStyle} />
-        </div>
+        {this.props.children}
       </div>
     );
   }
+
 }
 
-Resize.propTypes = {
-  handleWidth: PropTypes.bool,
-  handleHeight: PropTypes.bool,
-  onResize: PropTypes.func
+Resize.defaultProps = {
+  frequency: 500
 };
 
-Resize.defaultProps = {
-  handleWidth: true,
-  handleHeight: true,
-  onResize: e => e
+Resize.propTypes = {
+  frequency: PropTypes.number,
+  onResize: PropTypes.func
 };
 
 export default Resize;

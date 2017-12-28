@@ -6,7 +6,7 @@ import createSelectHandler from '../../lib/create_select_handler';
 import YesNo from '../../yes_no';
 import createTextHandler from '../../lib/create_text_handler';
 import { IndexPattern } from '../../index_pattern';
-import { htmlIdGenerator } from 'ui_framework/services';
+import { htmlIdGenerator } from '@elastic/eui';
 
 function TimeseriesConfig(props) {
   const handleSelectChange = createSelectHandler(props.onChange);
@@ -195,6 +195,7 @@ function TimeseriesConfig(props) {
           </label>
           <input
             id={htmlId('offset')}
+            data-test-subj="offsetTimeSeries"
             className="vis_editor__input-grows"
             type="text"
             onChange={handleTextChange('offset_time')}
