@@ -14,6 +14,8 @@ const MetricsRequestHandlerProvider = function (Private, Notifier, config, timef
         const panel = vis.params;
         const uiStateObj = uiState.get(panel.type, {});
         const timeRange = vis.params.timeRange || timefilter.getBounds();
+        const scaledDataFormat = config.get('dateFormat:scaled');
+        const dateFormat = config.get('dateFormat');
         if (panel && panel.id) {
           const params = {
             timerange: { timezone, ...timeRange },
@@ -26,7 +28,7 @@ const MetricsRequestHandlerProvider = function (Private, Notifier, config, timef
             const maxBuckets = config.get('metrics:max_buckets');
             validateInterval(timeRange, panel, maxBuckets);
             const httpResult = $http.post('../api/metrics/vis/data', params)
-              .then(resp => resp.data)
+              .then(resp => ({ dateFormat, scaledDataFormat, timezone, ...resp.data }))
               .catch(resp => { throw resp.data; });
 
             return httpResult

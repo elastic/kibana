@@ -1,4 +1,5 @@
 import { VisualizeConstants } from '../../../src/core_plugins/kibana/public/visualize/visualize_constants';
+import Keys from 'leadfoot/keys';
 
 export function VisualizePageProvider({ getService, getPageObjects }) {
   const remote = getService('remote');
@@ -241,22 +242,22 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async openSpyPanel() {
       log.debug('openSpyPanel');
-      const isOpen = await testSubjects.exists('spyModeSelect');
+      const isOpen = await testSubjects.exists('spyContentContainer');
       if (!isOpen) {
         await retry.try(async () => {
           await this.toggleSpyPanel();
-          await testSubjects.find('spyModeSelect');
+          await testSubjects.find('spyContentContainer');
         });
       }
     }
 
     async closeSpyPanel() {
       log.debug('closeSpyPanel');
-      let isOpen = await testSubjects.exists('spyModeSelect');
+      let isOpen = await testSubjects.exists('spyContentContainer');
       if (isOpen) {
         await retry.try(async () => {
           await this.toggleSpyPanel();
-          isOpen = await testSubjects.exists('spyModeSelect');
+          isOpen = await testSubjects.exists('spyContentContainer');
           if (isOpen) {
             throw new Error('Failed to close spy panel');
           }
@@ -387,6 +388,15 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async clickGo() {
       await testSubjects.click('visualizeEditorRenderButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async toggleAutoMode() {
+      await testSubjects.click('visualizeEditorAutoButton');
+    }
+
+    async sizeUpEditor() {
+      await testSubjects.click('visualizeEditorResizer');
+      await remote.pressKeys(Keys.ARROW_RIGHT);
     }
 
     async clickOptions() {
@@ -603,7 +613,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async selectTableInSpyPaneSelect() {
-      await testSubjects.click('spyModeSelect');
       await testSubjects.click('spyModeSelect-table');
     }
 
@@ -650,7 +659,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async getVisualizationRequest() {
       log.debug('getVisualizationRequest');
       await this.openSpyPanel();
-      await testSubjects.click('spyModeSelect');
       await testSubjects.click('spyModeSelect-request');
       return await testSubjects.getVisibleText('visualizationEsRequestBody');
     }
