@@ -155,10 +155,8 @@ uiModules
 
         const renderSubscription = Observable.merge(success$, requestError$)
           .subscribe(() => {
-            window.requestAnimationFrame(() => {
-              $scope.$emit('renderComplete');
-              dispatchCustomEvent('renderComplete');
-            });
+            $scope.$emit('renderComplete');
+            dispatchCustomEvent('renderComplete');
           });
 
         $scope.$on('$destroy', () => {
