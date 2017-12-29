@@ -43,7 +43,6 @@ export default class ChoroplethLayer extends KibanaMapLayer {
               const leafletGeojon = L.geoJson(feature);
               location = leafletGeojon.getBounds().getCenter();
             }
-
             this.emit('showTooltip', {
               content: tooltipContents,
               position: location
@@ -173,14 +172,6 @@ export default class ChoroplethLayer extends KibanaMapLayer {
     this.emit('styleChanged', {
       mismatches: styler.getMismatches()
     });
-  }
-
-  getMetrics() {
-    return this._metrics;
-  }
-
-  getMetricsAgg() {
-    return this._metricsAgg;
   }
 
   getUrl() {
