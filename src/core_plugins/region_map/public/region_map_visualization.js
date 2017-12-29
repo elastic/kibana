@@ -111,10 +111,17 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
           url,
           attribution,
           this.vis.params.selectedLayer.format,
-          showAllData
+          showAllData,
+          this.vis.params.selectedLayer.meta
         );
       } else {
-        this._choroplethLayer = new ChoroplethLayer(url, attribution, this.vis.params.selectedLayer.format, showAllData);
+        this._choroplethLayer = new ChoroplethLayer(
+          url,
+          attribution,
+          this.vis.params.selectedLayer.format,
+          showAllData,
+          this.vis.params.selectedLayer.meta
+        );
       }
 
       this._choroplethLayer.on('select', (event) => {

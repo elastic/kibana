@@ -2,8 +2,8 @@ import $ from 'jquery';
 import L from 'leaflet';
 import _ from 'lodash';
 import d3 from 'd3';
-import {KibanaMapLayer} from '../../tile_map/public/kibana_map_layer';
-import {truncatedColorMaps} from 'ui/vislib/components/color/truncated_colormaps';
+import { KibanaMapLayer } from '../../tile_map/public/kibana_map_layer';
+import { truncatedColorMaps } from 'ui/vislib/components/color/truncated_colormaps';
 import * as topojson from 'topojson-client';
 
 
@@ -17,7 +17,7 @@ const EMPTY_STYLE = {
 
 export default class ChoroplethLayer extends KibanaMapLayer {
 
-  constructor(geojsonUrl, attribution, format, showAllShapes) {
+  constructor(geojsonUrl, attribution, format, showAllShapes, meta) {
     super();
 
     this._metrics = null;
@@ -60,7 +60,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
     this._loaded = false;
     this._error = false;
     this._isJoinValid = false;
-    this._whenDataLoaded = new Promise(async(resolve) => {
+    this._whenDataLoaded = new Promise(async (resolve) => {
       try {
         const data = await this._makeJsonAjaxCall(geojsonUrl);
         let featureCollection;
@@ -68,13 +68,12 @@ export default class ChoroplethLayer extends KibanaMapLayer {
         if (formatType === 'geojson') {
           featureCollection = data;
         } else if (formatType === 'topojson') {
-          const features = _.get(data, format.featureCollectionPath);
+          const features = _.get(data, 'objects.' + meta.feature_collection_path);
           featureCollection = topojson.feature(data, features);//conversion to geojson
         } else {
           //should never happen
           throw new Error('Unrecognized format ' + formatType);
         }
-
         this._sortedFeatures = featureCollection.features.slice();
         this._sortFeatures();
 
@@ -165,7 +164,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
     this._leafletLayer.setStyle(styler.leafletStyleFunction);
 
     if (this._metrics && this._metrics.length > 0) {
-      const {min, max} = getMinMax(this._metrics);
+      const { min, max } = getMinMax(this._metrics);
       this._legendColors = getLegendColors(this._colorRamp);
       const quantizeDomain = (min !== max) ? [min, max] : d3.scale.quantize().domain();
       this._legendQuantizer = d3.scale.quantize().domain(quantizeDomain).range(this._legendColors);
@@ -209,8 +208,8 @@ export default class ChoroplethLayer extends KibanaMapLayer {
     this._setStyle();
   }
 
-  cloneChoroplethLayerForNewData(url, attribution, format, showAllData) {
-    const clonedLayer = new ChoroplethLayer(url, attribution, format, showAllData);
+  cloneChoroplethLayerForNewData(url, attribution, format, showAllData, meta) {
+    const clonedLayer = new ChoroplethLayer(url, attribution, format, showAllData, meta);
     clonedLayer.setJoinField(this._joinField);
     clonedLayer.setColorRamp(this._colorRamp);
     clonedLayer.setLineWeight(this._lineWeight);
@@ -351,7 +350,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
       };
     }
 
-    const {min, max} = getMinMax(this._metrics);
+    const { min, max } = getMinMax(this._metrics);
 
     const boundsOfAllFeatures = new L.LatLngBounds();
     return {
@@ -407,7 +406,7 @@ function getMinMax(data) {
     min = Math.min(data[i].value, min);
     max = Math.max(data[i].value, max);
   }
-  return {min, max};
+  return { min, max };
 }
 
 function getLegendColors(colorRamp) {

@@ -77,7 +77,7 @@ uiModules.get('kibana')
           }
           const fileService = fileServices[0];
           const manifest = await this._getManifest(fileService.manifest, this._queryParams);
-          const layers = manifest.data.layers.filter(layer => layer.format === 'geojson');
+          const layers = manifest.data.layers.filter(layer => layer.format === 'geojson' || layer.format === 'topojson');
           layers.forEach((layer) => {
             layer.url = this._extendUrlWithParams(layer.url);
             layer.attribution = $sanitize(markdownIt.render(layer.attribution));
