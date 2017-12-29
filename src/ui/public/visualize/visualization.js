@@ -12,7 +12,7 @@ import 'angular-sanitize';
 
 uiModules
   .get('kibana/directive', ['ngSanitize'])
-  .directive('visualization', function (Notifier, SavedVis, indexPatterns, Private, config, $timeout) {
+  .directive('visualization', function (Notifier, SavedVis, indexPatterns, Private, config) {
     const ResizeChecker = Private(ResizeCheckerProvider);
 
     return {
