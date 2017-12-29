@@ -66,7 +66,7 @@ export default class KbnServer {
       savedObjectsMixin,
 
       // ensure that all bundles are built, or that the
-      // lazy bundle server is running
+      // watch bundle server is running
       optimizeMixin,
 
       // initialize the plugins
