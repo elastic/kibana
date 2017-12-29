@@ -17,6 +17,37 @@ const EMPTY_STYLE = {
 
 export default class ChoroplethLayer extends KibanaMapLayer {
 
+  static _doInnerJoin(sortedMetrics, sortedGeojsonFeatures, joinField) {
+    let j = 0;
+    for (let i = 0; i < sortedGeojsonFeatures.length; i++) {
+      const property = sortedGeojsonFeatures[i].properties[joinField];
+      sortedGeojsonFeatures[i].__kbnJoinedMetric = null;
+      const position = sortedMetrics.length ? property.localeCompare(sortedMetrics[j].term) : -1;
+      if (position === -1) {//just need to cycle on
+      } else if (position === 0) {
+        sortedGeojsonFeatures[i].__kbnJoinedMetric = sortedMetrics[j];
+      } else if (position === 1) {//needs to catch up
+        while (j < sortedMetrics.length) {
+          const newTerm = sortedMetrics[j].term;
+          const newPosition = newTerm.localeCompare(property);
+          if (newPosition === -1) {//not far enough
+          } else if (newPosition === 0) {
+            sortedGeojsonFeatures[i].__kbnJoinedMetric = sortedMetrics[j];
+            break;
+          } else if (newPosition === 1) {//too far!
+            break;
+          }
+          if (j === sortedMetrics.length - 1) {//always keep a reference to the last metric
+            break;
+          } else {
+            j++;
+          }
+        }
+      }
+    }
+  }
+
+
   constructor(geojsonUrl, attribution, format, showAllShapes, meta) {
     super();
 
@@ -107,39 +138,7 @@ export default class ChoroplethLayer extends KibanaMapLayer {
   }
 
   _doInnerJoin() {
-
-    const features = this._sortedFeatures;
-    const metrics = this._metrics;
-    let j = 0;
-
-    for (let i = 0; i < features.length; i++) {
-      const property = features[i].properties[this._joinField];
-      features[i].__kbnJoinedMetric = null;
-
-
-      const position = metrics.length ? property.localeCompare(metrics[j].term) : -1;
-      if (position === -1) {//just need to cycle on
-      } else if (position === 0) {
-        features[i].__kbnJoinedMetric = metrics[j];
-      } else if (position === 1) {//needs to catch up
-        while (j < metrics.length) {
-          const newTerm = metrics[j].term;
-          const newPosition = newTerm.localeCompare(property);
-          if (newPosition === -1) {//not far enough
-          } else if (newPosition === 0) {
-            features[i].__kbnJoinedMetric = metrics[j];
-            break;
-          } else if (newPosition === 1) {//too far!
-            break;
-          }
-          if (j === metrics.length - 1) {//always keep a reference to the last metric
-            break;
-          } else {
-            j++;
-          }
-        }
-      }
-    }
+    ChoroplethLayer._doInnerJoin(this._metrics, this._sortedFeatures, this._joinField);
     this._isJoinValid = true;
   }
 
