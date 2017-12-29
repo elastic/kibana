@@ -102,7 +102,7 @@ export default class WatchOptimizer extends BaseOptimizer {
       this.status$.next({
         type: STATUS.FAILURE,
         seconds,
-        error: this.failedStatsToError(status)
+        error: this.failedStatsToError(stats)
       });
     } else {
       this.status$.next({
