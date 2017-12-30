@@ -38,9 +38,13 @@ export default function (kbnServer, server, config) {
     return origConfigGet.call(kbnServer.config, key, ...rest);
   };
 
+  server.decorate('server', 'getRootBasePath', () => (
+    origConfigGet.call(kbnServer.config, 'server.basePath')
+  ));
+
   const reqAltBasePaths = new WeakMap();
-  server.decorate('request', 'setBasePath', function (newBasePath) {
-    reqAltBasePaths.set(this, newBasePath);
+  server.decorate('request', 'extendBasePath', function (extension) {
+    reqAltBasePaths.set(this, `${server.getRootBasePath()}${extension}`);
   });
 
   server.decorate('request', 'getBasePath', function () {
