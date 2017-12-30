@@ -62,7 +62,7 @@ export function uiRenderMixin(kbnServer, server, config) {
       branch: config.get('pkg.branch'),
       buildNum: config.get('pkg.buildNum'),
       buildSha: config.get('pkg.buildSha'),
-      basePath: config.get('server.basePath'),
+      basePath: request.getBasePath(),
       serverName: config.get('server.name'),
       devMode: config.get('env.dev'),
       translations: translations,
@@ -94,7 +94,7 @@ export function uiRenderMixin(kbnServer, server, config) {
           includeUserProvidedConfig,
           injectedVarsOverrides
         }),
-        bundlePath: `${config.get('server.basePath')}/bundles`,
+        bundlePath: `${request.getBasePath()}/bundles`,
         i18n: key => get(translations, key, ''),
       });
     } catch (err) {
