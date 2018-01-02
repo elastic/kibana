@@ -88,9 +88,8 @@ export class PersistedState {
 
   clearAllKeys() {
     Object.getOwnPropertyNames(this._changedState).forEach(key => {
-      this.setSilent(key, null);
+      this.set(key, null);
     });
-    this.emit('set');
   }
 
   reset(path) {
