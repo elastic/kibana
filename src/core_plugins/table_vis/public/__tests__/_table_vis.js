@@ -87,7 +87,7 @@ describe('Integration', function () {
     });
   }
 
-  it('passes the table groups to the kbnAggTableGroup directive', function () {
+  it('passes the table groups to the kbnAggTableGroup directive', function (cb) {
     init(new OneRangeVis(), fixtures.oneRangeBucket);
 
     $rootScope.$on('renderComplete', () => {
@@ -95,11 +95,12 @@ describe('Integration', function () {
       expect($atg.length).to.be(1);
       expect($atg.attr('group')).to.be('tableGroups');
       expect($atg.isolateScope().group).to.be($atg.scope().tableGroups);
+      cb();
     });
 
   });
 
-  it('displays an error if the search had no hits', function () {
+  it('displays an error if the search had no hits', function (cb) {
     init(new OneRangeVis(), { hits: { total: 0, hits: [] } });
 
     $rootScope.$on('renderComplete', () => {
@@ -108,10 +109,11 @@ describe('Integration', function () {
       const $err = $el.find('.table-vis-error');
       expect($err.length).to.be(1);
       expect($err.text().trim()).to.be('No results found');
+      cb();
     });
   });
 
-  it('displays an error if the search hits, but didn\'t create any rows', function () {
+  it('displays an error if the search hits, but didn\'t create any rows', function (cb) {
     const visParams = {
       showPartialRows: false,
       metricsAtAllLevels: true
@@ -133,6 +135,7 @@ describe('Integration', function () {
       const $err = $el.find('.table-vis-error');
       expect($err.length).to.be(1);
       expect($err.text().trim()).to.be('No results found');
+      cb();
     });
   });
 });
