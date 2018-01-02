@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('existing dashboard opens in view mode', async function () {
       await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.clickDashboardByLinkText(dashboardName);
+      await PageObjects.dashboard.selectDashboard(dashboardName);
       const inViewMode = await PageObjects.dashboard.getIsInViewMode();
 
       expect(inViewMode).to.equal(true);
@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }) {
     describe('panel edit controls', function () {
       it('are hidden in view mode', async function () {
         await PageObjects.dashboard.gotoDashboardLandingPage();
-        await PageObjects.dashboard.clickDashboardByLinkText(dashboardName);
+        await PageObjects.dashboard.selectDashboard(dashboardName);
 
         const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
         const moveExists = await testSubjects.exists('dashboardPanelMoveIcon');
