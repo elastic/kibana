@@ -3,6 +3,7 @@
 
 * <<development-basepath>>
 * <<development-dependencies>>
+* <<development-forking>>
 * <<development-modules>>
 * <<development-elasticsearch>>
 * <<development-functional-tests>>
@@ -10,6 +11,8 @@
 include::core/development-basepath.asciidoc[]
 
 include::core/development-dependencies.asciidoc[]
+
+include::core/development-forking.asciidoc[]
 
 include::core/development-modules.asciidoc[]
 

@@ -1,0 +1,57 @@
+[[development-forking]]
+=== Forking a dependency
+
+So you want to fork a third-party project to use in Kibana? Before we begin, let's start with the [hopefully] obvious:
+
+Don't!  Seriously, avoid forking projects wherever possible.  Forking a project requires a massive, ongoing investment in developer time and energy.  It often feels like it is the "fastest" way to accomplish what you're trying to accomplish, but you're just borrowing from the contributors' time in the future.
+
+[float]
+==== Alternatives to forking
+
+Alternatives to forking a dependency are almost always ideal in the long term. Some possible scenarios where an alternative should be used are outlined below:
+
+**Scenario 1: The thing we want already exists as a well-built third-party project, but that project is abandoned.**
+
+Consider all viable alternative projects. There may not be a drop-in replacement for the project in question, but there may be actively maintained alternatives that we could ultimately use to accomplish what we wanted to accomplish. See scenario 2.
+
+**Scenario 2: The thing we want mostly exists in viable third-party projects, but they don't do exactly what we want.**
+
+Consider filling in the gaps in functionality in these third party projects.
+
+Maybe the alternative project would accept contributions for the changes we desire. This would be the best scenario.
+
+Alternatively, perhaps there's a lightweight module we could develop in Kibana that uses this third-party module as an implementation detail so we don't have to build it all from scratch, but we can add the additional capabilities we need in our own code. The benefit of this approach is that we could move forward with the changes in Kibana now while still working to contribute the changes upstream so our custom module could potentially be short lived.
+
+**Scenario 3: We require a change in an existing third-party dependency, but that dependency has since been abandoned or is refusing to accept the change we need.**
+
+Ouch. This is the nightmare scenario we constantly try to avoid because there isn't an easy answer.
+
+First, accept that there is *not* a quick solution here.
+
+Next, accept that the only sustainable, long-term solution here is to move away from this third party dependency one way or another.  To that end, audit the usage of this dependency in kibana and explore alternative third-party dependencies to migrate to.  If there's a plausible alternative, then see scenario 2.
+
+It's rare that a drop-in replacement will exist for any dependency, so migrating from one dependency to another will require one of two approaches:
+
+1. Build a custom wrapper for the new module that we can use to shim the api of the abandoned module to the new module so that we do have a drop-in replacement as far as consuming code in Kibana is concerned. If you can repurpose the tests from the abandoned module to verify compatible APIs in your shim, then do so.
+2. Update all code that consumes this abandoned module in Kibana to use the new dependency. Make sure there's reasonable test coverage on the various features of Kibana that you are touching in order to prevent regressions when you do make the switch.
+
+It's rare that you'll encounter this scenario at a time when it is convenient to undergo this level of effort, but that doesn't mean we shouldn't undergo the effort. At this point, we have a ticking time bomb in Kibana that needs to be addressed now.
+
+[float]
+==== The cardinal forking sin
+
+Forking a dependency is almost certainly going to be rejected if the intention is to maintain a new repo with some customizations while continuing to sync changes with the original project over time (or ever again, really).
+
+[float]
+==== It's forking time
+
+If you absolutely *must* fork a project, then understand that the forked code is now our code, and we are responsible for supporting it as extensively as any that we wrote ourselves. In concrete terms, the forked source code...
+
+* should be brought into the kibana repo
+* should include the original license information/attribution in the directory of the fork and have an appropriate notice added to the base NOTICE file
+* should be code reviewed in entirety, held to the same standards as code we wrote from scratch
+* should have a robust system of tests that are wired up with our own CI so they run on every commit, even if that means they must be ported over to our own testing software
+* should be wired into our existing build system/dev workflow if necessary
+* should be stripped of unused functionality where possible
+* should not include extraneous files that are not relevant to kibana
+* should assume a new name within the kibana project where possible/practical to emphasize that this is a new project
