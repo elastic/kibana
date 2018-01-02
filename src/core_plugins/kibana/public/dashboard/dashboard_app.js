@@ -248,9 +248,10 @@ app.directive('dashboardApp', function ($injector) {
           {
             onConfirm: revertChangesAndExitEditMode,
             onCancel: _.noop,
-            confirmButtonText: 'Yes, lose changes',
-            cancelButtonText: 'No, keep working',
-            defaultFocusedButton: ConfirmationButtonTypes.CANCEL
+            confirmButtonText: 'Discard changes',
+            cancelButtonText: 'Continue editing',
+            defaultFocusedButton: ConfirmationButtonTypes.CANCEL,
+            title: 'Discard changes to dashboard?'
           }
         );
       };

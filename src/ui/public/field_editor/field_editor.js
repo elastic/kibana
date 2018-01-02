@@ -99,11 +99,12 @@ uiModules
               });
           }
           const confirmModalOptions = {
-            confirmButtonText: 'Delete field',
-            onConfirm: doDelete
+            confirmButtonText: 'Delete',
+            onConfirm: doDelete,
+            title: `Delete field ${self.field.name}?`
           };
           confirmModal(
-            `Are you sure want to delete '${self.field.name}'? This action is irreversible!`,
+            `You can't recover a deleted field.`,
             confirmModalOptions
           );
         };

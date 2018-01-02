@@ -130,11 +130,12 @@ uiModules.get('apps/management')
           }
 
           const confirmModalOptions = {
-            confirmButtonText: `Delete ${$scope.currentTab.title}`,
-            onConfirm: doBulkDelete
+            confirmButtonText: 'Delete',
+            onConfirm: doBulkDelete,
+            title: `Delete selected ${$scope.currentTab.title}?`
           };
           confirmModal(
-            `Are you sure you want to delete the selected ${$scope.currentTab.title}? This action is irreversible!`,
+            `You can't recover deleted ${$scope.currentTab.title}.`,
             confirmModalOptions
           );
         };
@@ -200,6 +201,7 @@ uiModules.get('apps/management')
                 cancelButtonText: `No, prompt me for each one`,
                 onConfirm: () => resolve(true),
                 onCancel: () => resolve(false),
+                title: 'Automatically overwrite all existing saved objects?'
               }
             );
           })

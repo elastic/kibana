@@ -117,9 +117,10 @@ app.controller('timelion', function (
 
       const confirmModalOptions = {
         onConfirm: doDelete,
-        confirmButtonText: 'Delete sheet'
+        confirmButtonText: 'Delete',
+        title: `Delete Timelion sheet ${title}?`
       };
-      confirmModal(`Are you sure you want to delete the sheet ${title}?`, confirmModalOptions);
+      confirmModal(`You can't recover deleted sheets.`, confirmModalOptions);
     },
     testId: 'timelionDeleteButton',
   }, {
