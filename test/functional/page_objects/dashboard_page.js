@@ -266,10 +266,15 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       });
     }
 
+<<<<<<< HEAD
     clickDashboardByLinkText(dashName) {
       return getRemote()
         .findByLinkText(dashName)
         .click();
+=======
+    async selectDashboard(dashName) {
+      await testSubjects.click(`dashboardListingTitleLink-${dashName.split(' ').join('-')}`);
+>>>>>>> d0c99661c8... Investigate fix for flaky clone test (#15503)
     }
 
     async clearSearchValue() {
@@ -300,7 +305,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getCountOfDashboardsInListingTable() {
-      const dashboardTitles = await testSubjects.findAll('dashboardListingTitleLink');
+      const dashboardTitles = await testSubjects.findAll('dashboardListingRow');
       return dashboardTitles.length;
     }
 
@@ -317,9 +322,16 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async loadSavedDashboard(dashName) {
       log.debug(`Load Saved Dashboard ${dashName}`);
 
-      await this.searchForDashboardWithName(dashName);
-      await this.clickDashboardByLinkText(dashName);
-      return PageObjects.header.waitUntilLoadingHasFinished();
+      await retry.try(async () => {
+        await this.searchForDashboardWithName(dashName);
+        await this.selectDashboard(dashName);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        const onDashboardLandingPage = await this.onDashboardLandingPage();
+        if (onDashboardLandingPage) {
+          throw new Error('Failed to open the dashboard up');
+        }
+      });
     }
 
     getPanelTitles() {
