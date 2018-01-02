@@ -15,7 +15,7 @@ import {
 } from 'ui_framework/components';
 
 import {
-  EuiModalOverlay,
+  EuiOverlayMask,
   EuiConfirmModal,
   SortableProperties,
 } from '@elastic/eui';
@@ -189,7 +189,7 @@ export class VisualizeListingTable extends Component {
 
   renderConfirmDeleteModal() {
     return (
-      <EuiModalOverlay>
+      <EuiOverlayMask>
         <EuiConfirmModal
           title="Delete selected visualizations?"
           onCancel={this.closeModal}
@@ -199,7 +199,7 @@ export class VisualizeListingTable extends Component {
         >
           <p>{`You can't recover deleted visualizations.`}</p>
         </EuiConfirmModal>
-      </EuiModalOverlay>
+      </EuiOverlayMask>
     );
   }
 
