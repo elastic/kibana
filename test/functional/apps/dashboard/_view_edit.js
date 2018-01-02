@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }) {
     describe('panel edit controls', function () {
       it('are hidden in view mode', async function () {
         await PageObjects.dashboard.gotoDashboardLandingPage();
-        await PageObjects.dashboard.clickDashboardByLinkText(dashboardName);
+        await PageObjects.dashboard.selectDashboard(dashboardName);
 
         const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
         const moveExists = await testSubjects.exists('dashboardPanelMoveIcon');

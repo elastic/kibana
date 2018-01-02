@@ -266,15 +266,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       });
     }
 
-<<<<<<< HEAD
-    clickDashboardByLinkText(dashName) {
-      return getRemote()
-        .findByLinkText(dashName)
-        .click();
-=======
     async selectDashboard(dashName) {
       await testSubjects.click(`dashboardListingTitleLink-${dashName.split(' ').join('-')}`);
->>>>>>> d0c99661c8... Investigate fix for flaky clone test (#15503)
     }
 
     async clearSearchValue() {
