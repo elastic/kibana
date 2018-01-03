@@ -18,34 +18,30 @@ function createHiddenTextElement(text) {
 }
 
 export function copyToClipboard(text) {
-  let isCopied = false;
+  let isCopied = true;
   const range = document.createRange();
   const selection = document.getSelection();
   const elementToBeCopied = createHiddenTextElement(text);
 
-  try {
-    document.body.appendChild(elementToBeCopied);
-    range.selectNode(elementToBeCopied);
-    selection.empty();
-    selection.addRange(range);
+  document.body.appendChild(elementToBeCopied);
+  range.selectNode(elementToBeCopied);
+  selection.empty();
+  selection.addRange(range);
 
-    if (!document.execCommand('copy')) {
-      throw new Error('copy command was unsuccessful');
-    }
-    isCopied = true;
-  } catch (err) {
-    console.warn(`Unable to copy to clipboard. Error: ${err}`); // eslint-disable-line no-console
-  } finally {
-    if (selection) {
-      if (typeof selection.removeRange === 'function') {
-        selection.removeRange(range);
-      } else {
-        selection.removeAllRanges();
-      }
-    }
-
-    document.body.removeChild(elementToBeCopied);
+  if (!document.execCommand('copy')) {
+    isCopied = false;
+    console.warn('Unable to copy to clipboard.'); // eslint-disable-line no-console
   }
+
+  if (selection) {
+    if (typeof selection.removeRange === 'function') {
+      selection.removeRange(range);
+    } else {
+      selection.removeAllRanges();
+    }
+  }
+
+  document.body.removeChild(elementToBeCopied);
 
   return isCopied;
 }
