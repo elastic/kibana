@@ -4,7 +4,7 @@ export function registerTutorials(server) {
     path: '/api/kibana/home/tutorials',
     method: ['GET'],
     handler: async function (req, reply) {
-      reply(req.getTutorials());
+      reply(server.getTutorials());
     }
   });
 }

@@ -44,9 +44,7 @@ export function copyToClipboard(text) {
       }
     }
 
-    if (elementToBeCopied) {
-      document.body.removeChild(elementToBeCopied);
-    }
+    document.body.removeChild(elementToBeCopied);
   }
 
   return isCopied;

@@ -5,7 +5,7 @@ import { tutorialSchema } from '../core_plugins/kibana/common/tutorials/tutorial
 export function tutorialsMixin(kbnServer, server) {
   const tutorials = [];
 
-  server.decorate('request', 'getTutorials', () => {
+  server.decorate('server', 'getTutorials', () => {
     return _.cloneDeep(tutorials);
   });
 

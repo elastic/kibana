@@ -24,6 +24,9 @@ import {
 
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
+import chrome from 'ui/chrome';
+const kbnBaseUrl = chrome.getInjected('kbnBaseUrl');
+
 export function Home({ addBasePath, directories }) {
 
   const renderDirectories = (category) => {
@@ -72,7 +75,7 @@ export function Home({ addBasePath, directories }) {
             <KuiCardFooter>
               <KuiLinkButton
                 buttonType="secondary"
-                href={addBasePath('/app/kibana#/home/tutorial_directory/logging')}
+                href={addBasePath(`${kbnBaseUrl}#/home/tutorial_directory/logging`)}
               >
                 Add data
               </KuiLinkButton>
@@ -98,7 +101,7 @@ export function Home({ addBasePath, directories }) {
             <KuiCardFooter>
               <KuiLinkButton
                 buttonType="secondary"
-                href={addBasePath('/app/kibana#/home/tutorial_directory/metrics')}
+                href={addBasePath(`${kbnBaseUrl}#/home/tutorial_directory/metrics`)}
               >
                 Add data
               </KuiLinkButton>
@@ -124,7 +127,7 @@ export function Home({ addBasePath, directories }) {
             <KuiCardFooter>
               <KuiLinkButton
                 buttonType="secondary"
-                href={addBasePath('/app/kibana#/home/tutorial_directory/security')}
+                href={addBasePath(`${kbnBaseUrl}#/home/tutorial_directory/security`)}
               >
                 Add data
               </KuiLinkButton>
