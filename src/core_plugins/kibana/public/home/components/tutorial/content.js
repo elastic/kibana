@@ -8,7 +8,7 @@ const markdownIt = new MarkdownIt('zero', { html: false, linkify: true });
 markdownIt.enable(['backticks', 'emphasis', 'link', 'list']);
 
 export function Content({ className, text }) {
-  const classes = classNames('kuiText kuiSubduedText tutorialContent', className);
+  const classes = classNames('kuiText kuiSubduedText tutorialContent markdown-body', className);
   return (
     <div
       className={classes}
