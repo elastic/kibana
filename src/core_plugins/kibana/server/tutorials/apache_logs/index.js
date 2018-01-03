@@ -13,17 +13,20 @@ export function apacheLogsSpecProvider() {
                      ' [Learn more]({config.docs.beats.filebeat}/filebeat-module-apache2.html)' +
                      ' about the apache2 module.',
     //iconPath: '', TODO
-    /*artifacts: {
+    artifacts: {
       dashboards: [
         {
-          id: 'Filebeat-Apache2-Dashboard',
+          title: 'Filebeat-Apache2-Dashboard',
           linkLabel: 'Apache2 logs dashboard',
           isOverview: true
         }
-      ]
-    },*/
+      ],
+      exportedFields: {
+        documentationUrl: '{config.docs.beats.filebeat}/exported-fields-apache2.html'
+      }
+    },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/kibana/home/tutorial_resources/apacheLogs/kibana-apache2.png',
+    previewImagePath: '/plugins/kibana/home/tutorial_resources/apache_logs/screenshot.png',
     onPrem: ON_PREM_INSTRUCTIONS,
     elasticCloud: ELASTIC_CLOUD_INSTRUCTIONS,
     onPremElasticCloud: ON_PREM_ELASTIC_CLOUD_INSTRUCTIONS,

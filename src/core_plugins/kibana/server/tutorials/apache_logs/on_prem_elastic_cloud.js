@@ -1,7 +1,5 @@
 import { INSTRUCTION_VARIANT } from '../../../common/tutorials/instruction_variant';
 import { FILEBEAT_INSTRUCTIONS } from '../../../common/tutorials/filebeat_instructions';
-import { FILEBEAT_CLOUD_INSTRUCTIONS } from '../../../common/tutorials/filebeat_cloud_instructions';
-import { FILEBEAT_ONPREM_CLOUD_INSTRUCTIONS } from '../../../common/tutorials/filebeat_onprem_cloud_instructions';
 import {
   TRYCLOUD_OPTION1,
   TRYCLOUD_OPTION2
@@ -17,8 +15,8 @@ export const ON_PREM_ELASTIC_CLOUD_INSTRUCTIONS = {
           instructions: [
             TRYCLOUD_OPTION1,
             TRYCLOUD_OPTION2,
-            FILEBEAT_CLOUD_INSTRUCTIONS.INSTALL.OSX,
-            FILEBEAT_ONPREM_CLOUD_INSTRUCTIONS.CONFIG.OSX,
+            FILEBEAT_INSTRUCTIONS.INSTALL.OSX,
+            FILEBEAT_INSTRUCTIONS.CONFIG.OSX,
             {
               title: 'Enable and configure the apache2 module',
               textPre: 'From the installation directory, run:',
@@ -35,8 +33,8 @@ export const ON_PREM_ELASTIC_CLOUD_INSTRUCTIONS = {
           instructions: [
             TRYCLOUD_OPTION1,
             TRYCLOUD_OPTION2,
-            FILEBEAT_CLOUD_INSTRUCTIONS.INSTALL.DEB,
-            FILEBEAT_ONPREM_CLOUD_INSTRUCTIONS.CONFIG.DEB,
+            FILEBEAT_INSTRUCTIONS.INSTALL.DEB,
+            FILEBEAT_INSTRUCTIONS.CONFIG.DEB,
             {
               title: 'Enable and configure the apache2 module',
               commands: [
@@ -52,8 +50,8 @@ export const ON_PREM_ELASTIC_CLOUD_INSTRUCTIONS = {
           instructions: [
             TRYCLOUD_OPTION1,
             TRYCLOUD_OPTION2,
-            FILEBEAT_CLOUD_INSTRUCTIONS.INSTALL.RPM,
-            FILEBEAT_ONPREM_CLOUD_INSTRUCTIONS.CONFIG.RPM,
+            FILEBEAT_INSTRUCTIONS.INSTALL.RPM,
+            FILEBEAT_INSTRUCTIONS.CONFIG.RPM,
             {
               title: 'Enable and configure the apache2 module',
               commands: [
@@ -69,8 +67,8 @@ export const ON_PREM_ELASTIC_CLOUD_INSTRUCTIONS = {
           instructions: [
             TRYCLOUD_OPTION1,
             TRYCLOUD_OPTION2,
-            FILEBEAT_CLOUD_INSTRUCTIONS.INSTALL.WINDOWS,
-            FILEBEAT_ONPREM_CLOUD_INSTRUCTIONS.CONFIG.WINDOWS,
+            FILEBEAT_INSTRUCTIONS.INSTALL.WINDOWS,
+            FILEBEAT_INSTRUCTIONS.CONFIG.WINDOWS,
             {
               title: 'Enable and configure the apache2 module',
               textPre: 'From the `C:\\Program Files\\Filebeat` folder, run:',
