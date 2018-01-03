@@ -6,7 +6,7 @@ import { applyTheme } from 'ui/theme';
 
 import 'ui/query_bar';
 
-import { getDashboardTitle, getUnsavedChangesWarningMessage } from './dashboard_strings';
+import { getDashboardTitle } from './dashboard_strings';
 import { DashboardViewMode } from './dashboard_view_mode';
 import { TopNavIds } from './top_nav/top_nav_ids';
 import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
@@ -244,7 +244,7 @@ app.directive('dashboardApp', function ($injector) {
         }
 
         confirmModal(
-          getUnsavedChangesWarningMessage(dashboardStateManager.getChangedFilterTypes(timefilter)),
+          `Once you discard your changes, there's no getting them back.`,
           {
             onConfirm: revertChangesAndExitEditMode,
             onCancel: _.noop,
