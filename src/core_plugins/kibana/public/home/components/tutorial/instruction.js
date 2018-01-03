@@ -2,7 +2,13 @@ import './instruction.less';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Content } from './content';
-import { CommandBlock } from './command_block';
+import { CopyButton } from './copy_button';
+
+import {
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 
 export function Instruction({ commands, paramValues, textPost, textPre, replaceTemplateStrings }) {
   let pre;
@@ -25,21 +31,36 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
     );
   }
 
+  let copyButton;
   let commandBlock;
   if (commands) {
-    commandBlock = (
-      <CommandBlock
-        commands={commands}
-        paramValues={paramValues}
-        replaceTemplateStrings={replaceTemplateStrings}
+    const cmdText = commands.map(cmd => { return replaceTemplateStrings(cmd, paramValues); }).join('\n');
+    copyButton = (
+      <CopyButton
+        textToCopy={cmdText}
       />
+    );
+    commandBlock = (
+      <div className="kuiVerticalRhythm">
+        <EuiCodeBlock language="sh">
+          {cmdText}
+        </EuiCodeBlock>
+      </div>
     );
   }
 
   return (
     <div className="instruction">
 
-      {pre}
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
+        <EuiFlexItem grow={false}>
+          {pre}
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          {copyButton}
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
       {commandBlock}
 
