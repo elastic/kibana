@@ -97,6 +97,7 @@ export default class BaseOptimizer {
       });
     }
 
+    const nodeModulesPath = fromRoot('node_modules');
     const commonConfig = {
       node: { fs: 'empty' },
       context: fromRoot('.'),
@@ -127,7 +128,8 @@ export default class BaseOptimizer {
         new webpack.optimize.CommonsChunkPlugin({
           name: 'vendors',
           filename: 'vendors.bundle.js',
-          minChunks: module => module.context && module.context.indexOf('node_modules') !== -1
+          // only combine node_modules from Kibana
+          minChunks: module => module.context && module.context.indexOf(nodeModulesPath) !== -1
         }),
 
         new webpack.NoEmitOnErrorsPlugin(),
