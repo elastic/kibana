@@ -11,7 +11,7 @@ export default function ({ getService, getPageObjects }) {
   const remote = getService('remote');
   const retry = getService('retry');
 
-  describe('dashboard state', function describeIndexTests() {
+  describe.skip('dashboard state', function describeIndexTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();

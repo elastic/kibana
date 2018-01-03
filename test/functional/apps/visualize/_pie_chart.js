@@ -57,7 +57,7 @@ export default function ({ getService, getPageObjects }) {
     describe('pie chart', function indexPatternCreation() {
       const vizName1 = 'Visualization PieChart';
 
-      it('should save and load', function () {
+      it.skip('should save and load', function () {
         return PageObjects.visualize.saveVisualization(vizName1)
           .then(function (message) {
             log.debug('Saved viz message = ' + message);

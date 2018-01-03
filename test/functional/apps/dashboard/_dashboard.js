@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }) {
   const testVisualizationTitles = [];
   const testVisualizationDescriptions = [];
 
-  describe('dashboard tab', function describeIndexTests() {
+  describe.skip('dashboard tab', function describeIndexTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();

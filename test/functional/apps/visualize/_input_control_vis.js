@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('input control visualization', () => {
 
-      it('should not display spy panel toggle button', async function () {
+      it.skip('should not display spy panel toggle button', async function () {
         const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
         expect(spyToggleExists).to.be(false);
       });

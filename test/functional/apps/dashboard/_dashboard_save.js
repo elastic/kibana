@@ -4,7 +4,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['dashboard', 'header', 'common']);
 
-  describe('dashboard save', function describeIndexTests() {
+  describe.skip('dashboard save', function describeIndexTests() {
     const dashboardName = 'Dashboard Save Test';
 
     before(async function () {

@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }) {
         expect(promptExists).to.be(true);
       });
 
-      it('creates a new dashboard', async function () {
+      it.skip('creates a new dashboard', async function () {
         await PageObjects.dashboard.clickCreateDashboardPrompt();
         await PageObjects.dashboard.saveDashboard(dashboardName);
         await PageObjects.header.clickToastOK();
@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }) {
         expect(countOfDashboards).to.equal(1);
       });
 
-      it('is not shown when there is a dashboard', async function () {
+      it.skip('is not shown when there is a dashboard', async function () {
         const promptExists = await PageObjects.dashboard.getCreateDashboardPromptExists();
         expect(promptExists).to.be(false);
       });
@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('delete', async function () {
+    describe.skip('delete', async function () {
       it('default confirm action is cancel', async function () {
         await PageObjects.dashboard.searchForDashboardWithName('');
         await PageObjects.dashboard.clickListItemCheckbox();
@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('search', function () {
+    describe.skip('search', function () {
       before(async () => {
         await PageObjects.dashboard.clearSearchValue();
         await PageObjects.dashboard.clickCreateDashboardPrompt();
@@ -106,7 +106,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe('search by title', function () {
+    describe.skip('search by title', function () {
       it('loads a dashboard if title matches', async function () {
         const currentUrl = await remote.getCurrentUrl();
         const newUrl = currentUrl + '&title=Two%20Words';

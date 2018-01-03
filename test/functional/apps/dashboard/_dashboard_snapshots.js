@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       expect(percentSimilar).to.be(0);
     });
 
-    it('compare area chart snapshot', async () => {
+    it.skip('compare area chart snapshot', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.setTimepickerInDataRange();

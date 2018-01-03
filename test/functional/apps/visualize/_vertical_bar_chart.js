@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }) {
     describe('vertical bar chart', function indexPatternCreation() {
       const vizName1 = 'Visualization VerticalBarChart';
 
-      it('should save and load', function () {
+      it.skip('should save and load', function () {
         return PageObjects.visualize.saveVisualization(vizName1)
           .then(function (message) {
             log.debug('Saved viz message = ' + message);

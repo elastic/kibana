@@ -5,7 +5,7 @@ export default function ({ getService, getPageObjects }) {
   const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
 
-  describe('visualize app', function describeIndexTests() {
+  describe.skip('visualize app', function describeIndexTests() {
     before(function () {
       const fromTime = '2015-09-19 06:31:44.000';
       const toTime = '2015-09-23 18:31:44.000';

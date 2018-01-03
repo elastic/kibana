@@ -125,7 +125,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
 
-      it('should be able to save and load', function () {
+      it.skip('should be able to save and load', function () {
 
         return PageObjects.visualize.saveVisualization(vizName1)
           .then(function (message) {

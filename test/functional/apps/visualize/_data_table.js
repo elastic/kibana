@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }) {
     describe('data table', function indexPatternCreation() {
       const vizName1 = 'Visualization DataTable';
 
-      it('should be able to save and load', function () {
+      it.skip('should be able to save and load', function () {
         return PageObjects.visualize.saveVisualization(vizName1)
           .then(function (message) {
             log.debug('Saved viz message = ' + message);

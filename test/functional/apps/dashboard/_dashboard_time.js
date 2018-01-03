@@ -8,7 +8,7 @@ const toTime = '2015-09-23 18:31:44.000';
 export default function ({ getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'header']);
 
-  describe('dashboard time', function dashboardSaveWithTime() {
+  describe.skip('dashboard time', function dashboardSaveWithTime() {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();

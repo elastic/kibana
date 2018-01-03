@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }) {
         expect(data).to.eql([ '32,212,254,720', '21,474,836,480', '20,401,094,656', '19,327,352,832', '18,253,611,008' ]);
       });
 
-      it('should save and load', function () {
+      it.skip('should save and load', function () {
         return PageObjects.visualize.saveVisualization(vizName1)
           .then(function (message) {
             log.debug('Saved viz message = ' + message);
@@ -149,7 +149,7 @@ export default function ({ getService, getPageObjects }) {
           });
       });
 
-      describe('formatted field', function () {
+      describe.skip('formatted field', function () {
         before(async function () {
           await PageObjects.settings.navigateTo();
           await PageObjects.settings.clickKibanaIndices();

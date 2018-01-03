@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.dashboard.gotoDashboardLandingPage();
     });
 
-    it('Nested visualization query filters data as expected', async () => {
+    it.skip('Nested visualization query filters data as expected', async () => {
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.setTimepickerInDataRange();
 
@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardExpect.pieSliceCount(2);
     });
 
-    it('Pie chart attached to saved search filters data as expected', async () => {
+    it.skip('Pie chart attached to saved search filters data as expected', async () => {
       await dashboardVisualizations.createAndAddSavedSearch({
         name: 'bytes < 90',
         query: 'bytes:<90',
@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }) {
       await dashboardExpect.pieSliceCount(3);
     });
 
-    it('Pie chart attached to saved search filters shows no data with conflicting dashboard query', async () => {
+    it.skip('Pie chart attached to saved search filters shows no data with conflicting dashboard query', async () => {
       await PageObjects.dashboard.setQuery('bytes:>100');
       await PageObjects.dashboard.clickFilterButton();
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }) {
         expect(filters.length).to.equal(0);
       });
 
-      it('are added when a pie chart slice is clicked', async function () {
+      it.skip('are added when a pie chart slice is clicked', async function () {
         await PageObjects.dashboard.addVisualizations([PIE_CHART_VIS_NAME]);
         // Click events not added until visualization is finished rendering.
         // See https://github.com/elastic/kibana/issues/15480#issuecomment-350195245 for more info on why
@@ -100,7 +100,7 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.pieSliceCount(1);
       });
 
-      it('are preserved after saving a dashboard', async () => {
+      it.skip('are preserved after saving a dashboard', async () => {
         await PageObjects.dashboard.saveDashboard('with filters');
         await PageObjects.header.waitUntilLoadingHasFinished();
 
@@ -110,7 +110,7 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.pieSliceCount(1);
       });
 
-      it('are preserved after opening a dashboard saved with filters', async () => {
+      it.skip('are preserved after opening a dashboard saved with filters', async () => {
         await PageObjects.dashboard.gotoDashboardLandingPage();
         await PageObjects.dashboard.loadSavedDashboard('with filters');
         await PageObjects.header.waitUntilLoadingHasFinished();
