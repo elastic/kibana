@@ -81,8 +81,8 @@ describe('Color Format', function () {
       });
 
       const converter = colorer.getConverterFor('html');
-      expect(converter(`<`, 'html')).to.eql('<span ng-non-bindable>&lt;</span>');
-      expect(converter(`A <`, 'html')).to.eql(
+      expect(converter('<', 'html')).to.eql('<span ng-non-bindable>&lt;</span>');
+      expect(converter('A <', 'html')).to.eql(
         '<span ng-non-bindable><span style="color: blue;background-color: yellow;">A &lt;</span></span>'
       );
     });
