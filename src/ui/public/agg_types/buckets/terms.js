@@ -62,9 +62,9 @@ export function AggTypesBucketsTermsProvider(Private) {
       return agg.getFieldDisplayName() + ': ' + params.order.display;
     },
     createFilter: createFilter,
-    postFlightRequest: async (aggConfigs, aggConfig, searchSourceAggs, resp, nestedSearchSource) => {
+    postFlightRequest: async (aggConfigs, aggConfig, resp, nestedSearchSource) => {
       if (aggConfig.params.otherBucket) {
-        const filterAgg = buildOtherBucketAgg(aggConfigs, searchSourceAggs, aggConfig, resp);
+        const filterAgg = buildOtherBucketAgg(aggConfigs, aggConfig, resp);
         nestedSearchSource.set('aggs', filterAgg);
         const response = await nestedSearchSource.fetchAsRejectablePromise();
         resp = mergeOtherBucketAggResponse(aggConfigs, resp, response, aggConfig, filterAgg());

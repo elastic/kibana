@@ -87,12 +87,13 @@ const getOtherAggTerms = (requestAgg, key, otherAgg) => {
 export const OtherBucketHelperProvider = (Private) => {
   const AggConfig = Private(VisAggConfigProvider);
 
-  const buildOtherBucketAgg = (aggsConfig, aggs, aggWithOtherBucket, response) => {
-    const bucketAggs = aggsConfig.filter(agg => agg.type.type === 'buckets');
+  const buildOtherBucketAgg = (aggConfigs, aggWithOtherBucket, response) => {
+    const bucketAggs = aggConfigs.filter(agg => agg.type.type === 'buckets');
     const index = bucketAggs.findIndex(agg => agg.id === aggWithOtherBucket.id);
+    const aggs = aggConfigs.toDsl();
 
     // create filters aggregation
-    const filterAgg = new AggConfig(aggsConfig[index].vis, {
+    const filterAgg = new AggConfig(aggConfigs[index].vis, {
       type: 'filters',
       id: 'other',
       schema: {
