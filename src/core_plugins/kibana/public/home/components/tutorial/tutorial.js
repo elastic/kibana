@@ -114,7 +114,7 @@ export class Tutorial extends React.Component {
     if (!this.props.isCloudEnabled) {
       const radioButtons = [
         { onClick: this.onPrem, label: 'On premise', dataTestSubj: 'onPremBtn' },
-        { onClick: this.onPremElasticCloud, label: 'Elastic cloud', dataTestSubj: 'onPremElasticCloudBtn' },
+        { onClick: this.onPremElasticCloud, label: 'Elastic Cloud', dataTestSubj: 'onPremElasticCloudBtn' },
       ];
       return (
         <RadioButtonGroup
