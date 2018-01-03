@@ -11,8 +11,8 @@ import './vega.less';
 import 'brace/mode/hjson';
 import 'brace/ext/searchbox';
 import './vega_editor.less';
-import './vega_editor.controller';
-import vegaEditorTemplate from './vega_editor.template.html';
+import './vega_editor_controller';
+import vegaEditorTemplate from './vega_editor_template.html';
 import defaultSpec from '!!raw-loader!./default.spec.hjson';
 
 VisTypesRegistryProvider.register((Private) => {

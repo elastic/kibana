@@ -105,7 +105,7 @@ export class VegaBaseView {
   }
 
   updateVegaSize(view) {
-    // FIXME: for some reason the object is slightly scrollable without this
+    // For some reason the object is slightly scrollable without the extra padding.
     // This might be due to https://github.com/jquery/jquery/issues/3808
     // Which is being fixed as part of jQuery 3.3.0
     const heightExtraPadding = 6;

@@ -17,9 +17,6 @@ module.controller('VegaEditorController', ($scope /*, kbnUiAceKeyboardModeServic
         session.setTabSize(2);
         session.setUseSoftTabs(true);
 
-        // FIXME: enabling this service breaks ACE text wrapping on width resize
-        // kbnUiAceKeyboardModeService.initialize($scope, editor);
-
         this.aceEditor = editor;
       };
 

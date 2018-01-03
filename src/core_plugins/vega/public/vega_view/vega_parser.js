@@ -283,7 +283,6 @@ export class VegaParser {
   }
 
   async _populateEsResults(esRequests) {
-    // FIXME: switch to ES multi-search, instead of doing it one by one
     for (const { obj, request } of esRequests) {
       obj.values = await this._es.search(request);
     }
