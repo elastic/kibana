@@ -14,7 +14,6 @@ import {
   EuiLink,
   EuiButton,
   EuiIcon,
-  EuiHorizontalRule,
   EuiForm,
   EuiFormRow,
   EuiFieldText,
@@ -27,6 +26,7 @@ import {
   EuiContextMenuPanel,
   EuiPagination,
   EuiPopover,
+  EuiSelect,
 } from '@elastic/eui';
 import { documentationLinks } from 'ui/documentation_links';
 import { appendWildcard } from '../create_index_pattern_wizard/step_index_pattern/lib/append_wildcard';
@@ -116,11 +116,40 @@ function isIndexPatternQueryValid(pattern) {
   return !ILLEGAL_CHARACTERS.some(char => pattern.includes(char));
 }
 
+function extractTimeFieldsFromFields(fields) {
+  const dateFields = fields.filter(field => field.type === 'date');
+
+  if (dateFields.length === 0) {
+    return [{
+      display: `The indices which match this index pattern don't contain any time fields.`,
+    }];
+  }
+
+  const disabledDividerOption = {
+    isDisabled: true,
+    display: '───',
+    fieldName: '',
+  };
+  const noTimeFieldOption = {
+    display: `I don't want to use the Time Filter`,
+  };
+
+  return [
+    ...dateFields.map(field => ({
+      display: field.name,
+      fieldName: field.name
+    })),
+    disabledDividerOption,
+    noTimeFieldOption,
+  ];
+}
+
 class CreateIndexPatternWizard extends Component {
   static propTypes = {
     loadingDataDocUrl: PropTypes.string.isRequired,
     services: PropTypes.shape({
       es: PropTypes.object.isRequired,
+      indexPatterns: PropTypes.object.isRequired,
     }).isRequired,
   }
 
@@ -135,9 +164,13 @@ class CreateIndexPatternWizard extends Component {
       isLoadingIndices: false,
       isIncludingSystemIndices: false,
       page: 0,
-      perPage: PER_PAGE_INCREMENTS[0],
+      perPage: PER_PAGE_INCREMENTS[1],
       isPerPageControlOpen: false,
-      showIndexPatternQueryErrors: false,
+      showingIndexPatternQueryErrors: false,
+      timeFields: null,
+      selectedTimeField: '',
+      showingAdvancedOptions: false,
+      indexPatternId: '',
     };
   }
 
@@ -158,9 +191,42 @@ class CreateIndexPatternWizard extends Component {
     }, 500);
   }
 
+  fetchTimeFields = async () => {
+    const { query } = this.state;
+    const { services } = this.props;
+
+    const fields = await services.indexPatterns.fieldsFetcher.fetchForWildcard(query);
+    const timeFields = extractTimeFieldsFromFields(fields);
+
+    this.setState({ timeFields });
+  }
+
+  onTimeFieldChanged = (e) => {
+    this.setState({ selectedTimeField: e.target.value });
+  }
+
+  onChangeIndexPatternId = (e) => {
+    this.setState({ indexPatternId: e.target.value });
+  }
+
+  loadNextStep = () => {
+    this.fetchTimeFields();
+    this.setState({ step: 2 });
+  }
+
+  goToPreviousStep = () => {
+    this.setState({ step: 1 });
+  }
+
   onChangeIncludingSystemIndices = () => {
     this.setState(state => ({
       isIncludingSystemIndices: !state.isIncludingSystemIndices,
+    }));
+  }
+
+  toggleAdvancedOptions = () => {
+    this.setState(state => ({
+      showingAdvancedOptions: !state.showingAdvancedOptions
     }));
   }
 
@@ -173,7 +239,7 @@ class CreateIndexPatternWizard extends Component {
     else {
       setTimeout(() => target.setSelectionRange(1, 1));
     }
-    this.setState({ query, showIndexPatternQueryErrors: !!query.length });
+    this.setState({ query, showingIndexPatternQueryErrors: !!query.length });
     this.fetchIndices(query);
   }
 
@@ -265,7 +331,7 @@ class CreateIndexPatternWizard extends Component {
         <EuiTitle>
           <h1>Create index pattern</h1>
         </EuiTitle>
-        <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiText>
               <p>
@@ -283,7 +349,7 @@ class CreateIndexPatternWizard extends Component {
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer/>
+        <EuiSpacer size="s"/>
       </div>
     );
   }
@@ -371,7 +437,7 @@ class CreateIndexPatternWizard extends Component {
       isInitiallyLoadingIndices,
       step,
       query,
-      showIndexPatternQueryErrors,
+      showingIndexPatternQueryErrors,
     } = this.state;
 
     if (initialIndices.length === 0 || isInitiallyLoadingIndices || step !== 1) {
@@ -389,48 +455,43 @@ class CreateIndexPatternWizard extends Component {
     }
 
     return (
-      <EuiPanel paddingSize="m">
-        <EuiTitle>
+      <EuiPanel paddingSize="l">
+        <EuiTitle size="s">
           <h2>
             Step 1 of 2: Define index pattern
           </h2>
         </EuiTitle>
-        <EuiHorizontalRule margin="s"/>
-        <EuiForm
-          isInvalid={showIndexPatternQueryErrors && containsErrors}
-        >
-          <EuiFormRow
-            label="Index pattern"
-            isInvalid={showIndexPatternQueryErrors && containsErrors}
-            error={errors}
-          >
-            <EuiFieldText
-              name="indexPattern"
-              placeholder="index-name-*"
-              value={query}
-              isInvalid={showIndexPatternQueryErrors && containsErrors}
-              onChange={this.onQueryChanged}
-            />
-          </EuiFormRow>
-        </EuiForm>
-        <EuiSpacer size="xs"/>
-        <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiSpacer size="m"/>
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <EuiTextColor color="subdued">
-                You can use a <strong>*</strong> as a wildcard in your index pattern.
-              </EuiTextColor>
-            </EuiText>
-            <EuiText size="s">
-              <EuiTextColor color="subdued">
-                You can&apos;t use empty spaces or the characters <strong>{characterList}</strong>.
-              </EuiTextColor>
-            </EuiText>
+            <EuiForm
+              isInvalid={showingIndexPatternQueryErrors && containsErrors}
+            >
+              <EuiFormRow
+                label="Index pattern"
+                isInvalid={showingIndexPatternQueryErrors && containsErrors}
+                error={errors}
+                helpText={
+                  <div>
+                    <p>You can use a <strong>*</strong> as a wildcard in your index pattern.</p>
+                    <p>You can&apos;t use empty spaces or the characters <strong>{characterList}</strong>.</p>
+                  </div>
+                }
+              >
+                <EuiFieldText
+                  name="indexPattern"
+                  placeholder="index-name-*"
+                  value={query}
+                  isInvalid={showingIndexPatternQueryErrors && containsErrors}
+                  onChange={this.onQueryChanged}
+                />
+              </EuiFormRow>
+            </EuiForm>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
               iconType="arrowRight"
-              onClick={this.goToNextStep}
+              onClick={this.loadNextStep}
               isDisabled={containsErrors || indices.length === 0}
             >
               Next step
@@ -438,14 +499,14 @@ class CreateIndexPatternWizard extends Component {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s"/>
-        <EuiPanel paddingSize="m">
+        <div>
           {this.renderStepOneLoadingState()}
           {this.renderStepOneStatusMessage()}
           <EuiSpacer size="s"/>
           {this.renderStepOneList()}
           <EuiSpacer size="m"/>
           {this.renderStepOnePagination()}
-        </EuiPanel>
+        </div>
       </EuiPanel>
     );
   }
@@ -516,9 +577,9 @@ class CreateIndexPatternWizard extends Component {
       statusColor = 'primary';
       statusMessage = (
         <span>
-          Your index pattern doesn&apos;t match any indices, but you have
+          Your index pattern doesn&apos;t match any indices, but you have&nbsp;
           <strong>
-            {partialMatchingIndices.length} {partialMatchingIndices.length > 1 ? 'indices' : 'index'}
+            {partialMatchingIndices.length} {partialMatchingIndices.length > 1 ? 'indices ' : 'index '}
           </strong>
           which {partialMatchingIndices.length > 1 ? 'look' : 'looks'} similar.
         </span>
@@ -595,14 +656,17 @@ class CreateIndexPatternWizard extends Component {
             />
           </EuiPopover>
         </EuiFlexItem>
+        { pageCount > 1 ?
+          <EuiFlexItem grow={false}>
+            <EuiPagination
+              pageCount={pageCount}
+              activePage={page}
+              onPageClick={this.onChangePage}
+            />
+          </EuiFlexItem>
+          : null
+        }
 
-        <EuiFlexItem grow={false}>
-          <EuiPagination
-            pageCount={pageCount}
-            activePage={page}
-            onPageClick={this.onChangePage}
-          />
-        </EuiFlexItem>
       </EuiFlexGroup>
     );
   }
@@ -634,6 +698,144 @@ class CreateIndexPatternWizard extends Component {
     );
   }
 
+  renderStepTwo() {
+    const {
+      step,
+      query,
+      timeFields,
+      selectedTimeField,
+      showingAdvancedOptions,
+      indexPatternId,
+    } = this.state;
+
+    if (step !== 2) {
+      return null;
+    }
+
+    const timeFieldOptions = timeFields ?
+      [
+        { text: '', value: undefined },
+        ...timeFields.map(timeField => ({
+          text: timeField.display,
+          value: timeField.fieldName,
+          isDisabled: timeFields.isDisabled,
+        }))
+      ]
+      : [];
+
+    const showTimeField = !timeFields || timeFields.length > 1;
+    const submittable = !showTimeField || selectedTimeField;
+
+    return (
+      <EuiPanel paddingSize="l">
+        <EuiTitle size="s">
+          <h2>
+            Step 2 of 2: Configure settings
+          </h2>
+        </EuiTitle>
+        <EuiSpacer size="m"/>
+        <EuiText color="subdued">
+          <span>
+            You&apos;ve defined <strong>{query}</strong> as your index pattern. Now you can specify some settings before we create it.
+          </span>
+        </EuiText>
+        <EuiSpacer size="xs"/>
+        <EuiForm>
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              { showTimeField ?
+                <EuiFormRow
+                  label="Time Filter field name"
+                  helpText={
+                    <div>
+                      <p>The Time Filter will use this field to filter your data by time.</p>
+                      <p>You can choose not to have a time field, but you will not be able to narrow down your data by a time range.</p>
+                    </div>
+                  }
+                >
+                  <EuiSelect
+                    name="timeField"
+                    options={timeFieldOptions}
+                    isLoading={!timeFields}
+                    value={selectedTimeField}
+                    onChange={this.onTimeFieldChanged}
+                  />
+                </EuiFormRow>
+                :
+                <EuiText>
+                  <p>The indices which match this index pattern don&apos;t contain any time fields.</p>
+                </EuiText>
+              }
+            </EuiFlexItem>
+            { showTimeField ?
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  onClick={this.refreshFields}
+                >
+                  Refresh
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              : null
+            }
+          </EuiFlexGroup>
+        </EuiForm>
+        <EuiSpacer size="s"/>
+        <EuiButtonEmpty
+          iconType={showingAdvancedOptions ? 'arrowDown' : 'arrowRight'}
+          onClick={this.toggleAdvancedOptions}
+        >
+          { showingAdvancedOptions
+            ? (<span>Hide advanced options</span>)
+            : (<span>Show advanced options</span>)
+          }
+
+        </EuiButtonEmpty>
+        <EuiSpacer size="xs"/>
+        { showingAdvancedOptions ?
+          <EuiForm>
+            <EuiFormRow
+              label="Custom index pattern ID"
+              helpText={
+                <span>
+                  Kibana will provide a unique identifier for each index pattern.
+                  If you do not want to use this unique ID, enter a custom one.
+                </span>
+              }
+            >
+              <EuiFieldText
+                name="indexPatternId"
+                value={indexPatternId}
+                onChange={this.onChangeIndexPatternId}
+                placeholder="Id"
+              />
+            </EuiFormRow>
+          </EuiForm>
+          : null
+        }
+        <EuiSpacer size="m"/>
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="arrowLeft"
+              onClick={this.goToPreviousStep}
+            >
+              Back
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              isDisabled={!submittable}
+              fill
+              onClick={this.createIndexPattern}
+            >
+              Create index pattern
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    );
+  }
+
   render() {
     return (
       <div>
@@ -641,17 +843,19 @@ class CreateIndexPatternWizard extends Component {
         {this.renderInitialLoadingState()}
         {this.renderInitialEmptyState()}
         {this.renderStepOne()}
+        {this.renderStepTwo()}
       </div>
     );
   }
 }
 
-export const renderReact = (es) => {
+export const renderReact = (es, indexPatterns) => {
   render(
     <CreateIndexPatternWizard
       loadingDataDocUrl={documentationLinks.indexPatterns.loadingData}
       services={{
         es,
+        indexPatterns,
       }}
     />,
     document.getElementById('react')

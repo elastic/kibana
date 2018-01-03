@@ -31,7 +31,7 @@ uiModules.get('apps/management')
     Notifier,
     Promise
   ) {
-    renderReact(es);
+    renderReact(es, indexPatterns);
     // This isn't ideal. We want to avoid searching for 20 indices
     // then filtering out the majority of them because they are sysetm indices.
     // We'd like to filter system indices out in the query
