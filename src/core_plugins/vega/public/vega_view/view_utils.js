@@ -24,7 +24,6 @@ export class ViewUtils {
     if (!error) {
       error = 'ERR';
     } else if (error instanceof Error) {
-      if (console && console.log) console.log(error);
       error = error.message;
     }
     return ViewUtils.formatWarningToStr(error, ...Array.from(arguments).slice(1));
