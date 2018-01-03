@@ -64,7 +64,7 @@ export function FilterBarClickHandlerProvider(Notifier, Private) {
         filters = dedupFilters($state.filters, uniqFilters(filters), { negate: true });
 
         if (!simulate) {
-          if (['lucene', 'simpleKuery'].includes($state.query.language)) {
+          if (['lucene', 'kql'].includes($state.query.language)) {
             $state.$newFilters = filters;
           }
           else if ($state.query.language === 'kuery') {
