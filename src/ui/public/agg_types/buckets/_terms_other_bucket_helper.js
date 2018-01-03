@@ -76,12 +76,11 @@ const getAggConfigResultMissingBuckets = (responseAggs, aggId) => {
  * @param otherAgg: AggConfig of the aggregation with other bucket
  */
 const getOtherAggTerms = (requestAgg, key, otherAgg) => {
-  return requestAgg['other-filter'].filters.filters[key].bool.must_not.map(filter => {
-    if (filter.match_phrase && filter.match_phrase[otherAgg.params.field.name]) {
-      return filter.match_phrase[otherAgg.params.field.name].query;
-    }
-    return null;
-  }).filter(phrase => !!phrase);
+  return requestAgg['other-filter'].filters.filters[key].bool.must_not.filter(filter =>
+    filter.match_phrase && filter.match_phrase[otherAgg.params.field.name]
+  ).map(filter =>
+    filter.match_phrase[otherAgg.params.field.name].query
+  );
 };
 
 
@@ -129,6 +128,7 @@ export const OtherBucketHelperProvider = (Private) => {
 
       // create not filters for all the buckets
       _.each(agg.buckets, bucket => {
+        if (bucket.key === '__missing__') return;
         const filter = currentAgg.createFilter(bucket.key);
         filter.meta.negate = true;
         filters.push(filter);
@@ -150,6 +150,7 @@ export const OtherBucketHelperProvider = (Private) => {
   const mergeOtherBucketAggResponse = (aggsConfig, response, otherResponse, otherAgg, requestAgg) => {
     const updatedResponse = _.cloneDeep(response);
     _.each(otherResponse.aggregations['other-filter'].buckets, (bucket, key) => {
+      if (!bucket.doc_count) return;
       const bucketKey = key.replace(/^-/, '');
       const aggResultBuckets = getAggResultBuckets(aggsConfig, updatedResponse.aggregations, otherAgg, bucketKey);
       const requestFilterTerms = getOtherAggTerms(requestAgg, key, otherAgg);
@@ -158,6 +159,11 @@ export const OtherBucketHelperProvider = (Private) => {
       phraseFilter.meta.negate = true;
       bucket.filters = [ phraseFilter ];
       bucket.key = otherAgg.params.otherBucketLabel;
+
+      if (aggResultBuckets.some(bucket => bucket.key === '__missing__')) {
+        bucket.filters.push(buildExistsFilter(otherAgg.params.field, otherAgg.params.field.indexPattern));
+      }
+
       aggResultBuckets.push(bucket);
     });
     return updatedResponse;

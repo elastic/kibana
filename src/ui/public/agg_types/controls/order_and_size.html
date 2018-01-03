@@ -28,10 +28,11 @@
     <div class="form-group">
       <label>
         <input type="checkbox"
+               class="kuiCheckBox"
                name="showOther"
                ng-model="agg.params.otherBucket">
-        Group other values into separate bucket
-        <kbn-info info="All the other values not in top N will be grouped into 'other' bucket. The documents with missing values will not be used unless 'show missing values' is enabled as well."></kbn-info>
+        Group other values in separate bucket
+        <kbn-info info="Values not in the top N are grouped in this bucket.  To include documents with missing values, enable 'Show missing values'."></kbn-info>
       </label>
     </div>
   </div>
@@ -44,7 +45,7 @@
         <input
           type="text"
           ng-model="agg.params.otherBucketLabel"
-          class="form-control"
+          class="form-control kuiSideBarInput"
         >
       </div>
     </div>
@@ -53,10 +54,11 @@
     <div class="form-group">
       <label>
         <input type="checkbox"
+               class="kuiCheckBox"
                name="showOther"
                ng-model="agg.params.missingBucket">
         Show missing values
-        <kbn-info info="Enabling this will include documents with missing values in the search as well. The 'missing' bucket will only appear if its big enough to be one of the top N buckets. If 'group other values into separate bucket' is enabled as well it will include the missing values in case 'missing' bucket is not big enough."></kbn-info>
+        <kbn-info info="When enabled, include documents with missing values in the search.  If this bucket is in the top N, it appears in the chart.  If not in the top N, and you enable 'Group other values in separate bucket', Elasticsearch adds the missing values to the 'other' bucket."></kbn-info>
       </label>
     </div>
   </div>
@@ -69,7 +71,7 @@
         <input
           type="text"
           ng-model="agg.params.missingBucketLabel"
-          class="form-control"
+          class="form-control kuiSideBarInput"
         >
       </div>
     </div>

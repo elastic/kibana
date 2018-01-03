@@ -28,7 +28,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
       return new Promise((resolve, reject) => {
         if (shouldQuery()) {
           delete vis.reload;
-          searchSource.onResults().then(async resp => {
+          searchSource.onResults().then(resp => {
             searchSource.lastQuery = {
               filter: _.cloneDeep(searchSource.get('filter')),
               query: _.cloneDeep(searchSource.get('query')),
@@ -46,8 +46,7 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
           resolve(_.cloneDeep(searchSource.rawResponse));
         }
       }).then(async resp => {
-        for (let i = 0; i < vis.aggs.length; i++) {
-          const agg = vis.aggs[i];
+        for (const agg of vis.aggs) {
           if (!agg.type || !agg.type.postFlightRequest) continue;
           const nestedSearchSource = new SearchSource().inherits(searchSource);
           resp = await agg.type.postFlightRequest(vis.aggs, agg, searchSource.get('aggs')(), resp, nestedSearchSource);

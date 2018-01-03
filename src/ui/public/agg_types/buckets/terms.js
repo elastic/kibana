@@ -6,7 +6,7 @@ import { AggTypesBucketsCreateFilterTermsProvider } from 'ui/agg_types/buckets/c
 import orderAggTemplate from 'ui/agg_types/controls/order_agg.html';
 import orderAndSizeTemplate from 'ui/agg_types/controls/order_and_size.html';
 import { RouteBasedNotifierProvider } from 'ui/route_based_notifier';
-import { OtherBucketHelperProvider } from './terms_other_bucket_helper';
+import { OtherBucketHelperProvider } from './_terms_other_bucket_helper';
 
 export function AggTypesBucketsTermsProvider(Private) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
@@ -67,7 +67,6 @@ export function AggTypesBucketsTermsProvider(Private) {
         const filterAgg = buildOtherBucketAgg(aggConfigs, searchSourceAggs, aggConfig, resp);
         nestedSearchSource.set('aggs', filterAgg);
         const response = await nestedSearchSource.fetchAsRejectablePromise();
-        // todo: refactor to not have side effects
         resp = mergeOtherBucketAggResponse(aggConfigs, resp, response, aggConfig, filterAgg());
       }
       if (aggConfig.params.missingBucket) {
