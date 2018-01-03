@@ -1,7 +1,7 @@
 import React from 'react';
 import sinon from 'sinon';
 import { mount, shallow } from 'enzyme';
-import { findTestSubject } from 'ui_framework/test';
+import { findTestSubject } from '@elastic/eui/lib/test';
 import {
   ControlsTab,
 } from './controls_tab';

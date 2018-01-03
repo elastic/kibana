@@ -117,7 +117,7 @@
 .start-screen {
   margin: 20px auto;
   max-width: 800px;
-  background: tint(@globalColorBlue, 90%);
+  background: #FFF;
   padding: 40px;
   border-radius: 4px;
 }
@@ -204,6 +204,13 @@ dashboard-viewport-provider {
  */
 .react-grid-item {
   transition: none;
+}
+
+/**
+ * Dragged panels in dashboard should always appear above other panels.
+ */
+.react-grid-item.react-draggable-dragging {
+  z-index: @dashboardDraggingGridDepth !important;
 }
 
 /**

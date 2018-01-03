@@ -65,7 +65,10 @@
           <!-- loading -->
           <div ng-show="resultState === 'loading'">
             <div class="discover-overlay">
-              <h2>Searching</h2>
+              <div class="euiTitle">
+                <h2>Searching</h2>
+              </div>
+              <div class="euiSpacer euiSpacer--m"></div>
               <div ng-show="fetchStatus">{{fetchStatus.complete}}/{{fetchStatus.total}}</div>
             </div>
           </div>

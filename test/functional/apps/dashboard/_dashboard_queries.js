@@ -36,6 +36,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await PageObjects.visualize.saveVisualization(PIE_CHART_VIS_NAME);
+      await PageObjects.header.clickToastOK();
 
       await PageObjects.header.clickDashboard();
 

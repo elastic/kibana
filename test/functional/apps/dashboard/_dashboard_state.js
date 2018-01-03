@@ -134,7 +134,7 @@ export default function ({ getService, getPageObjects }) {
       expect(headers[1]).to.be('agent');
     });
 
-    it.skip('Tile map with no changes will update with visualization changes', async () => {
+    it('Tile map with no changes will update with visualization changes', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await PageObjects.dashboard.clickNewDashboard();
@@ -156,6 +156,8 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickMapZoomIn();
 
       await PageObjects.visualize.saveVisualization('Visualization TileMap');
+      await PageObjects.header.clickToastOK();
+
       await PageObjects.header.clickDashboard();
 
       await testSubjects.moveMouseTo('dashboardPanel');

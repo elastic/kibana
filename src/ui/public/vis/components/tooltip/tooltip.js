@@ -101,7 +101,7 @@ Tooltip.prototype.hide = function () {
  */
 Tooltip.prototype.$getChart = function () {
   const chart = $(this.container && this.container.node());
-  return chart.size() ? chart : false;
+  return chart.length ? chart : false;
 };
 
 /**

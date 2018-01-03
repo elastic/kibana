@@ -86,6 +86,7 @@ function TopNSeries(props) {
           </button>
           <button
             role="tab"
+            data-test-subj="seriesOptions"
             aria-selected={selectedTab === 'options'}
             className={optionsClassname}
             onClick={() => props.switchTab('options')}
