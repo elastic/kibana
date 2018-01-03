@@ -1,4 +1,6 @@
 import { INSTRUCTION_VARIANT } from '../../../common/tutorials/instruction_variant';
+import { LOGSTASH_INSTRUCTIONS } from '../../../common/tutorials/logstash_instructions';
+import { COMMON_NETFLOW_INSTRUCTIONS } from './common_instructions';
 
 // TODO: compare with onPremElasticCloud and onPrem scenarios and extract out common bits
 export const ELASTIC_CLOUD_INSTRUCTIONS = {
@@ -9,9 +11,9 @@ export const ELASTIC_CLOUD_INSTRUCTIONS = {
         {
           id: INSTRUCTION_VARIANT.OSX,
           instructions: [
-            {
-              title: 'elastiCloud instructions - TBD',
-            }
+            ...LOGSTASH_INSTRUCTIONS.INSTALL.OSX,
+            ...COMMON_NETFLOW_INSTRUCTIONS.CONFIG.ELASTIC_CLOUD.OSX,
+            ...COMMON_NETFLOW_INSTRUCTIONS.SETUP.OSX
           ]
         }
       ]

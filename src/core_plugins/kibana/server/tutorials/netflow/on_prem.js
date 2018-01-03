@@ -12,7 +12,7 @@ export const ON_PREM_INSTRUCTIONS = {
           id: INSTRUCTION_VARIANT.OSX,
           instructions: [
             ...LOGSTASH_INSTRUCTIONS.INSTALL.OSX,
-            ...COMMON_NETFLOW_INSTRUCTIONS.CONFIG.OSX,
+            ...COMMON_NETFLOW_INSTRUCTIONS.CONFIG.ON_PREM.OSX,
             ...COMMON_NETFLOW_INSTRUCTIONS.SETUP.OSX
           ]
         }
