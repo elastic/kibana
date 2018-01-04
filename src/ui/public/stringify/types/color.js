@@ -71,7 +71,7 @@ export function stringifyColor(Private) {
   _Color.prototype._convert = {
     html(val) {
       const color = this.findColorRuleForVal(val);
-      if (!color) return _.asPrettyString(val);
+      if (!color) return _.escape(_.asPrettyString(val));
 
       let style = '';
       if (color.text) style += `color: ${color.text};`;

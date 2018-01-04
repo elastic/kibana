@@ -72,7 +72,26 @@ describe('Color Format', function () {
       expect(converter('AB', 'html')).to.eql(
         '<span ng-non-bindable><span style="color: blue;background-color: yellow;">AB</span></span>'
       );
+
+      expect(converter('AB <', 'html')).to.eql(
+        '<span ng-non-bindable><span style="color: blue;background-color: yellow;">AB &lt;</span></span>'
+      );
+
       expect(converter('a', 'html')).to.eql('<span ng-non-bindable>a</span>');
+    });
+
+    it('returns original value (escaped) when regex is invalid', function () {
+      const colorer = new ColorFormat({
+        fieldType: 'string',
+        colors: [{
+          regex: 'A.*',
+          text: 'blue',
+          background: 'yellow'
+        }]
+      });
+
+      const converter = colorer.getConverterFor('html');
+      expect(converter('<', 'html')).to.eql('<span ng-non-bindable>&lt;</span>');
     });
   });
 });
