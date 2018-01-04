@@ -1,6 +1,6 @@
 import compactStringify from 'json-stringify-pretty-compact';
 
-export class ViewUtils {
+export class Utils {
 
   /**
    * If the 2nd array parameter in args exists, append it to the warning/error string value
@@ -26,7 +26,7 @@ export class ViewUtils {
     } else if (error instanceof Error) {
       error = error.message;
     }
-    return ViewUtils.formatWarningToStr(error, ...Array.from(arguments).slice(1));
+    return Utils.formatWarningToStr(error, ...Array.from(arguments).slice(1));
   }
 
 }

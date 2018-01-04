@@ -1,6 +1,5 @@
 [[vega-graph]]
-Vega Graphs
------------
+== Vega Graphs
 
 __________________________________________________________________________________________________________________________________________________________________________________
 Build https://vega.github.io/vega/examples/[Vega] and
@@ -45,8 +44,7 @@ https://vega.github.io/editor/[this editor] to convert VegaLite into
 Vega.
 
 [[vega-querying-elasticsearch]]
-Querying ElasticSearch
-----------------------
+== Querying ElasticSearch
 
 By default, Vega's https://vega.github.io/vega/docs/data/[data] element
 can use embedded and external data with a `"url"` parameter. Kibana adds support for the direct ElasticSearch queries by overloading
@@ -162,14 +160,13 @@ The `"%timefilter%"` can also be used to specify a single min or max
 value. As shown above, the date_histogram's `extended_bounds` can be set
 with two values - min and max. Instead of hardcoding a value, you may
 use `"min": {"%timefilter%": "min"}`, which will be replaced with the
-begining of the current time range. The `shift` and `unit` values are
+beginning of the current time range. The `shift` and `unit` values are
 also supported. The `"interval"` can also be set dynamically, depending
 on the currently picked range: `"interval": {"%autointerval%": 10}` will
-try to get about 10-15 datapoints (buckets).
+try to get about 10-15 data points (buckets).
 
 [[vega-esmfiles]]
-Elastic Map Files
-~~~~~~~~~~~~~~~~~
+=== Elastic Map Files
 
 It is possible to access Elastic Map Service's files via the same mechanism
 
@@ -188,17 +185,15 @@ format: {property: "features"}
 ----
 
 [[vega-debugging]]
-Debugging
----------
+== Debugging
 
 [[vega-browser-debugging-console]]
-Browser Debugging console
-~~~~~~~~~~~~~~~~~~~~~~~~~
+=== Browser Debugging console
 
 Use browser debugging tools (e.g. F12 or Ctrl+Shift+J in Chrome) to
 inspect the `VEGA_DEBUG` variable:
 * `view` - access to the Vega View object. See https://vega.github.io/vega/docs/api/debugging/[Vega Debugging Guide]
- on how to inspect data and signals at runtime. For VegaLite, `VEGA_DEBUG.view.data('source_0')` gets the main dataset.
+ on how to inspect data and signals at runtime. For VegaLite, `VEGA_DEBUG.view.data('source_0')` gets the main data set.
  For Vega, it uses the data name as defined in your Vega spec.
 * `vega_spec` - Vega JSON specification after some modifications by this plugin. In case
 of VegaLite, this is the output of the VegaLite compiler.
@@ -206,8 +201,7 @@ of VegaLite, this is the output of the VegaLite compiler.
 VegaLite compilation.
 
 [[vega-data]]
-Data
-~~~~
+=== Data
 
 If you are using ElasticSearch query, make sure your resulting data is
 what you expected. The easiest way to view it is by using "networking"
@@ -228,8 +222,7 @@ To restrict Vega from using non-ES data sources, add `vega.enableExternalUrls: f
 to your kibana.yml file.
 
 [[vega-notes]]
-Notes
------
+== Notes
 
 [[vega-useful-links]]
 === Useful Links
@@ -246,8 +239,7 @@ https://vega.github.io/vega/docs/[docs],
 https://vega.github.io/vega/examples/[examples]
 
 [[vega-using-vega-and-vegalite-examples]]
-Using Vega and VegaLite examples
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== Using Vega and VegaLite examples
 
 When using https://vega.github.io/vega/examples/[Vega] and
 https://vega.github.io/vega-lite/examples/[VegaLite] examples, you may
@@ -259,8 +251,7 @@ Kibana plugin uses `fit`. Remove all `autosize`, `width`, and `height`
 values. See link:#sizing-and-positioning[sizing and positioning] below.
 
 [[vega-additional-configuration-options]]
-Additional configuration options
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+==== Additional configuration options
 
 These options are specific to this plugin. They control how plugin
 interprets your Vega spec.
@@ -277,6 +268,8 @@ interprets your Vega spec.
       controlsDirection: vertical
       // If true, hides most of Vega and VegaLite warnings
       hideWarnings: true
+      // Vega renderer to use: `svg` or `canvas` (default)
+      renderer: canvas
     }
   }
   /* the rest of Vega code */
@@ -284,8 +277,7 @@ interprets your Vega spec.
 ----
 
 [[vega-sizing-and-positioning]]
-Sizing and positioning
-^^^^^^^^^^^^^^^^^^^^^^
+==== Sizing and positioning
 
 [[vega-and-vegalite]]
 Vega and VegaLite

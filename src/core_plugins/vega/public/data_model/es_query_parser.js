@@ -5,6 +5,15 @@ const AUTOINTERVAL = '%autointerval%';
 const MUST_CLAUSE = '%dashboard_context-must_clause%';
 const MUST_NOT_CLAUSE = '%dashboard_context-must_not_clause%';
 
+// These values may appear in the  'url': { ... }  object
+const LEGACY_CONTEXT = '%context_query%';
+const CONTEXT = 'context';
+const TIMEFIELD = 'timefield';
+
+/**
+ * This class processes all Vega spec customizations,
+ * converting url object parameters into query results.
+ */
 export class EsQueryParser {
 
   constructor(timefilter, dashboardContext, onWarning) {
@@ -17,8 +26,8 @@ export class EsQueryParser {
   parseEsRequest(req) {
     const index = req.index;
     let body = req.body;
-    let context = req.context;
-    let timefield = req.timefield;
+    let context = req[CONTEXT];
+    let timefield = req[TIMEFIELD];
     let usesContext = context !== undefined || timefield !== undefined;
     const injectionOpts = { usesTime: false };
 
@@ -34,32 +43,33 @@ export class EsQueryParser {
     }
 
     // Migrate legacy %context_query% into context & timefield values
-    const legacyContext = req['%context_query%'];
+    const legacyContext = req[LEGACY_CONTEXT];
     if (legacyContext !== undefined) {
       if (body.query !== undefined) {
-        throw new Error('Data url must not contain legacy "%context_query%" and "body.query" values at the same time');
+        throw new Error(`Data url must not have legacy "${LEGACY_CONTEXT}" and "body.query" values at the same time`);
       } else if (usesContext) {
-        throw new Error('Data url must not have "%context_query%" together with "context" or "timefield"');
+        throw new Error(`Data url must not have "${LEGACY_CONTEXT}" together with "${CONTEXT}" or "${TIMEFIELD}"`);
       } else if (legacyContext !== true && (typeof legacyContext !== 'string' || legacyContext.length === 0)) {
-        throw new Error('Legacy "%context_query%" can either be true (ignores time range picker), ' +
+        throw new Error(`Legacy "${LEGACY_CONTEXT}" can either be true (ignores time range picker), ` +
           'or it can be the name of the time field, e.g. "@timestamp"');
       }
 
       usesContext = true;
       context = true;
-      let result = `"url": {"context": true`;
+      let result = `"url": {"${CONTEXT}": true`;
       if (typeof legacyContext === 'string') {
         timefield = legacyContext;
-        result += `, "timefield": ${JSON.stringify(timefield)}`;
+        result += `, "${TIMEFIELD}": ${JSON.stringify(timefield)}`;
       }
       result += '}';
 
-      this._onWarning(`Legacy "url": {"%context_query%": ${JSON.stringify(legacyContext)}} should change to ${result}`);
+      this._onWarning(
+        `Legacy "url": {"${LEGACY_CONTEXT}": ${JSON.stringify(legacyContext)}} should change to ${result}`);
     }
 
     if (body.query !== undefined) {
       if (usesContext) {
-        throw new Error('url.context and url.timefield must not be used when url.body.query is set');
+        throw new Error(`url.${CONTEXT} and url.${TIMEFIELD} must not be used when url.body.query is set`);
       }
       injectionOpts.isQuery = true;
       this._injectContextVars(body.query, injectionOpts);

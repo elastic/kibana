@@ -5,7 +5,7 @@ import schemaParser from 'vega-schema-url-parser';
 import versionCompare from 'compare-versions';
 import { EsQueryParser } from './es_query_parser';
 import hjson from 'hjson';
-import { ViewUtils } from './view_utils';
+import { Utils } from './utils';
 
 const DEFAULT_SCHEMA = 'https://vega.github.io/schema/vega/v3.0.json';
 
@@ -33,7 +33,7 @@ export class VegaParser {
       await this._parseAsync();
     } catch (err) {
       // if we reject current promise, it will use the standard Kibana error handling
-      this.error = ViewUtils.formatErrorToStr(err);
+      this.error = Utils.formatErrorToStr(err);
     }
     return this;
   }
@@ -49,12 +49,14 @@ export class VegaParser {
     }
     this.isVegaLite = this._parseSchema();
     this.useHover = !this.isVegaLite;
-    this.config = this._parseConfig();
-    this.hideWarnings = !!this.config.hideWarnings;
-    this.useMap = this.config.type === 'map';
+
+    this._config = this._parseConfig();
+    this.hideWarnings = !!this._config.hideWarnings;
+    this.useMap = this._config.type === 'map';
+    this.renderer = this._config.renderer === 'svg' ? 'svg' : 'canvas';
 
     this._setDefaultColors();
-    this._parseControlPlacement(this.config);
+    this._parseControlPlacement(this._config);
     if (this.useMap) {
       this.mapConfig = this._parseMapConfig();
     } else if (this.spec.autosize === undefined) {
@@ -121,16 +123,16 @@ export class VegaParser {
    * @private
    */
   _parseControlPlacement() {
-    this.containerDir = locToDirMap[this.config.controlsLocation];
+    this.containerDir = locToDirMap[this._config.controlsLocation];
     if (this.containerDir === undefined) {
-      if (this.config.controlsLocation === undefined) {
+      if (this._config.controlsLocation === undefined) {
         this.containerDir = 'column';
       } else {
         throw new Error('Unrecognized controlsLocation value. Expecting one of ["' +
           locToDirMap.keys().join('", "') + '"]');
       }
     }
-    const dir = this.config.controlsDirection;
+    const dir = this._config.controlsDirection;
     if (dir !== undefined && dir !== 'horizontal' && dir !== 'vertical') {
       throw new Error('Unrecognized dir value. Expecting one of ["horizontal", "vertical"]');
     }
@@ -169,11 +171,11 @@ export class VegaParser {
    */
   _parseMapConfig() {
     const res = {
-      delayRepaint: this.config.delayRepaint === undefined ? true : this.config.delayRepaint,
+      delayRepaint: this._config.delayRepaint === undefined ? true : this._config.delayRepaint,
     };
 
     const validate = (name, isZoom) => {
-      const val = this.config[name];
+      const val = this._config[name];
       if (val !== undefined) {
         const parsed = Number.parseFloat(val);
         if (Number.isFinite(parsed) && (!isZoom || (parsed >= 0 && parsed <= 30))) {
@@ -192,13 +194,13 @@ export class VegaParser {
     validate(`maxZoom`, true);
 
     // `false` is a valid value
-    res.mapStyle = this.config.mapStyle === undefined ? `default` : this.config.mapStyle;
+    res.mapStyle = this._config.mapStyle === undefined ? `default` : this._config.mapStyle;
     if (res.mapStyle !== `default` && res.mapStyle !== false) {
       this._onWarning(`config.kibana.mapStyle may either be false or "default"`);
       res.mapStyle = `default`;
     }
 
-    const zoomControl = this.config.zoomControl;
+    const zoomControl = this._config.zoomControl;
     if (zoomControl === undefined) {
       res.zoomControl = true;
     } else if (typeof zoomControl !== 'boolean') {
@@ -208,7 +210,7 @@ export class VegaParser {
       res.zoomControl = zoomControl;
     }
 
-    const maxBounds = this.config.maxBounds;
+    const maxBounds = this._config.maxBounds;
     if (maxBounds !== undefined) {
       if (!Array.isArray(maxBounds) || maxBounds.length !== 4 ||
         !maxBounds.every(v => typeof v === 'number' && Number.isFinite(v))
@@ -393,7 +395,7 @@ export class VegaParser {
    */
   _onWarning() {
     if (!this.hideWarnings) {
-      this.warnings.push(ViewUtils.formatWarningToStr(...arguments));
+      this.warnings.push(Utils.formatWarningToStr(...arguments));
     }
   }
 }

@@ -102,7 +102,7 @@ describe('VegaParser._parseMapConfig', () => {
   function test(config, expected, warnCount) {
     return () => {
       const vp = new VegaParser();
-      vp.config = config;
+      vp._config = config;
       expect(vp._parseMapConfig()).to.eql(expected);
       expect(vp.warnings).to.have.length(warnCount);
     };
@@ -187,6 +187,6 @@ describe('VegaParser._calcSizing', () => {
   it('fit obj', test({ autosize: { type: 'fit' } }, true, 0, 0));
   it('padding const', test({ autosize: 'fit', padding: 10 }, true, 20, 20));
   it('padding obj', test({ autosize: 'fit', padding: { left: 5, bottom: 7, right: 6, top: 8 } }, true, 11, 15));
-  it('padding', test({ autosize: 'fit', width: 1, height: 2 }, true, 0, 0, false, false, 1));
-  it('padding', test({ autosize: 'fit', width: 1, height: 2 }, true, 0, 0, true, { autosize: 'fit' }, 0));
+  it('width height', test({ autosize: 'fit', width: 1, height: 2 }, true, 0, 0, false, false, 1));
+  it('VL width height', test({ autosize: 'fit', width: 1, height: 2 }, true, 0, 0, true, { autosize: 'fit' }, 0));
 });

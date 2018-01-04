@@ -1,6 +1,6 @@
-import { VegaParser } from './vega_view/vega_parser';
+import { VegaParser } from './data_model/vega_parser';
 import { dashboardContextProvider } from 'plugins/kibana/dashboard/dashboard_context';
-import { SearchCache } from './search_cache';
+import { SearchCache } from './data_model/search_cache';
 
 export function VegaRequestHandlerProvider(Private, es, timefilter, serviceSettings) {
 

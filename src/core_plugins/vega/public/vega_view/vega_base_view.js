@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import * as vega from 'vega';
 import * as vegaLite from 'vega-lite';
-import { ViewUtils } from './view_utils';
+import { Utils } from '../data_model/utils';
 
 //https://github.com/elastic/kibana/issues/13327
 vega.scheme('elastic',
@@ -59,7 +59,7 @@ export class VegaBaseView {
 
       this._vegaViewConfig = {
         logLevel: vega.Warn,
-        renderer: 'canvas',
+        renderer: this._parser.renderer,
       };
       if (!this._vegaConfig.enableExternalUrls) {
         // Override URL loader to disable all URL-based requests
@@ -78,12 +78,12 @@ export class VegaBaseView {
   }
 
   onError() {
-    this._addMessage('err', ViewUtils.formatErrorToStr(...arguments));
+    this._addMessage('err', Utils.formatErrorToStr(...arguments));
   }
 
   onWarn() {
     if (!this._parser || !this._parser.hideWarnings) {
-      this._addMessage('warn', ViewUtils.formatWarningToStr(...arguments));
+      this._addMessage('warn', Utils.formatWarningToStr(...arguments));
     }
   }
 
