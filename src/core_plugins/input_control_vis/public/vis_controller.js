@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { InputControlVis } from './components/vis/input_control_vis';
@@ -7,7 +8,7 @@ class VisController {
   constructor(el, vis) {
     this.el = el;
     this.vis = vis;
-    this.lastTimeFilter = JSON.stringify(this.vis.API.timeFilter.time);
+    this.lastTimeFilter = _.clone(this.vis.API.timeFilter.time);
     this.controls = [];
 
     this.queryBarUpdateHandler = this.updateControlsFromKbn.bind(this);
@@ -16,9 +17,9 @@ class VisController {
 
   async render(visData, status) {
     let timeFilterChanged = false;
-    if (this.lastTimeFilter !== JSON.stringify(this.vis.API.timeFilter.time)) {
+    if (!_.isEqual(this.lastTimeFilter, this.vis.API.timeFilter.time)) {
       timeFilterChanged = true;
-      this.lastTimeFilter = JSON.stringify(this.vis.API.timeFilter.time);
+      this.lastTimeFilter = _.clone(this.vis.API.timeFilter.time);
     }
     const drawBecauseOfTimeFilterChange = this.vis.params.useTimeFilter && timeFilterChanged;
 
