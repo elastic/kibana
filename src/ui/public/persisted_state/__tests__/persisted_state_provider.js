@@ -44,59 +44,10 @@ describe('Persisted State Provider', function () {
       expect(persistedState.get()).to.not.equal(val);
     });
 
-    it('should not throw if creating valid child object', function () {
-      const run = function () {
-        const val = { red: 'blue' };
-        const path = ['test.path'];
-        const parent = new PersistedState();
-        new PersistedState(val, path, parent);
-      };
-
-      expect(run).not.to.throwException();
-    });
-
     it('should throw if given an invalid value', function () {
       const run = function () {
         const val = 'bananas';
         new PersistedState(val);
-      };
-
-      expect(run).to.throwException(function (err) {
-        expect(err).to.be.a(PersistedStateError);
-      });
-    });
-
-    it('should not throw if given primitive to child', function () {
-      const run = function () {
-        const val = 'bananas';
-        const path = ['test.path'];
-        const parent = new PersistedState();
-        new PersistedState(val, path, parent);
-      };
-
-      expect(run).not.to.throwException();
-    });
-
-    it('should throw if given an invalid parent object', function () {
-      const run = function () {
-        const val = { red: 'blue' };
-        const path = ['test.path'];
-        const parent = {};
-        new PersistedState(val, path, parent);
-      };
-
-      expect(run).to.throwException(function (err) {
-        expect(err).to.be.a(PersistedStateError);
-      });
-    });
-
-    it('should throw if given a parent without a path', function () {
-      const run = function () {
-        const val = { red: 'blue' };
-        let path;
-        const parent = new PersistedState();
-
-        new PersistedState(val, path, parent);
       };
 
       expect(run).to.throwException(function (err) {
