@@ -24,6 +24,7 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
     destroy() {
       if (this._kibanaMap) {
         this._kibanaMap.destroy();
+        this._kibanaMap = null;
       }
     }
 
@@ -43,6 +44,11 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
      * @return {Promise}
      */
     async render(esResponse, status) {
+
+      if (!this._kibanaMap) {
+        //the visualization has been destroyed;
+        return;
+      }
 
       await this._mapIsLoaded;
 
@@ -78,8 +84,9 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
       const uiState = this.vis.getUiState();
       const zoomFromUiState = parseInt(uiState.get('mapZoom'));
       const centerFromUIState = uiState.get('mapCenter');
-      options.zoom = !isNaN(zoomFromUiState) ? zoomFromUiState : this.vis.type.visConfig.defaults.mapZoom;
-      options.center = centerFromUIState ? centerFromUIState : this.vis.type.visConfig.defaults.mapCenter;
+      options.zoom = !isNaN(zoomFromUiState) ? zoomFromUiState : this.vis.params.mapZoom;
+      options.center = centerFromUIState ? centerFromUIState : this.vis.params.mapCenter;
+
       this._kibanaMap = new KibanaMap(this._container, options);
 
       this._kibanaMap.addLegendControl();
@@ -95,8 +102,6 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
 
       const mapparams = this._getMapsParams();
       await this._updateBaseLayer(mapparams);
-
-
     }
 
 
@@ -111,7 +116,6 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
         this._notify.warning(e.message);
       }
       const { minZoom, maxZoom } = this._getMinMaxZoom();
-
       if (mapParams.wms.enabled) {
         // Switch to WMS
         if (maxZoom > this._kibanaMap.getMaxZoomLevel()) {
