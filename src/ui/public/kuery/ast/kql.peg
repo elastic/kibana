@@ -1,123 +1,150 @@
-/*
- * Kuery parser
- */
-
-/*
- * Initialization block
- */
+// Initialization block
 {
-  var nodeTypes = options.helpers.nodeTypes;
-
-  if (options.includeMetadata === undefined) {
-    options.includeMetadata = true;
-  }
-
-  function addMeta(source, text, location) {
-    if (options.includeMetadata) {
-      return Object.assign(
-        {},
-        source,
-        {
-          text: text,
-          location: simpleLocation(location),
-        }
-      );
-    }
-
-    return source;
-  }
-
-  function simpleLocation(location) {
-    // Returns an object representing the position of the function within the expression,
-    // demarcated by the position of its first character and last character. We calculate these values
-    // using the offset because the expression could span multiple lines, and we don't want to deal
-    // with column and line values.
-    return {
-      min: location.start.offset,
-      max: location.end.offset
-    }
-  }
+  var { nodeTypes: { function: { buildNode }}} = options.helpers;
 }
 
 start
-  = Query
-  / space* {
-    return addMeta(nodeTypes.function.buildNode('and', []), text(), location());
-  }
+  = OrQuery
+  / EmptyQuery
 
-Query
-  = space? query:OrQuery space? {
-    if (query.type === 'literal') {
-      return addMeta(nodeTypes.function.buildNode('and', [query]), text(), location());
-    }
-    return query;
+EmptyQuery
+  = Space* {
+    return buildNode('and', []);
   }
 
 OrQuery
-  = left:AndQuery space 'or'i space right:OrQuery {
-    return addMeta(nodeTypes.function.buildNode('or', [left, right]), text(), location());
+  = head:AndQuery Or tail:OrQuery {
+    return buildNode('or', [head, tail]);
   }
   / AndQuery
 
 AndQuery
-  = left:NotQuery space 'and'i space right:AndQuery {
-    return addMeta(nodeTypes.function.buildNode('and', [left, right]), text(), location());
+  = head:NotQuery And tail:AndQuery{
+    return buildNode('and', [head, tail]);
   }
   / NotQuery
 
 NotQuery
-  = 'not'i space clause:Clause {
-    return addMeta(nodeTypes.function.buildNode('not', clause), text(), location());
+  = Not query:SubQuery {
+    return buildNode('not', query);
   }
-  / Clause
+  / SubQuery
 
-Clause
-  = '(' subQuery:Query ')' {
-    return subQuery;
-  }
-  / Term
+SubQuery
+  = '(' Space* query:OrQuery Space* ')' { return query; }
+  / Expression
 
-Term
-  = field:literal_arg_type space? ':' space? value:literal_arg_type {
-    return addMeta(nodeTypes.function.buildNodeWithArgumentNodes('is', [field, value]), text(), location());
-  }
-  / field:literal_arg_type space? ':' space? '[' space? gt:literal_arg_type space 'to'i space lt:literal_arg_type space? ']' {
-    return addMeta(nodeTypes.function.buildNodeWithArgumentNodes('range', [field, gt, lt]), text(), location());
-  }
-  / !Keywords literal:literal_arg_type { return literal; }
+Expression
+  = FieldListExpression
+  / FieldRangeExpression
+  / ValueExpression
 
-literal_arg_type
- = literal:literal {
-   var result = addMeta(nodeTypes.literal.buildNode(literal), text(), location());
-   return result;
- }
-
-Keywords
-  = 'or'i / 'and'i / 'not'i
-
- /* ----- Core types ----- */
-
-literal "literal"
-  =  '"' chars:dq_char* '"' { return chars.join(''); } // double quoted string
-  / "'" chars:sq_char* "'" { return chars.join(''); } // single quoted string
-  / 'true'  { return true; } // unquoted literals from here down
-  / 'false' { return false; }
-  / 'null'  { return null; }
-  / string:[^\[\]()"',:=\ \t]+ { // this also matches numbers via Number()
-   var result = string.join('');
-   // Sort of hacky, but PEG doesn't have backtracking so
-   // a number rule is hard to read, and performs worse
-   if (isNaN(Number(result))) return result;
-   return Number(result)
+FieldListExpression
+  = field:Literal Space* ':' Space* list:SubList {
+    function buildNodeWithField(field, list) {
+      if (list.hasOwnProperty('and')) {
+        return buildNode('and', list.and.map(node => buildNodeWithField(field, node)));
+      } else if (list.hasOwnProperty('or')) {
+        return buildNode('or', list.or.map(node => buildNodeWithField(field, node)));
+      } else if (list.hasOwnProperty('not')) {
+        return buildNode('not', buildNodeWithField(field, list.not));
+      } else {
+        return buildNode('is', field, list);
+      }
+    }
+    return buildNodeWithField(field, list);
   }
 
-space
- = [\ \t\r\n]+
+FieldRangeExpression
+  = field:Literal Space* operator:RangeOperator Space* value:Literal {
+    return buildNode('range', field, { [operator]: value });
+  }
 
-dq_char
-  = "\\" sequence:('"' / "\\") { return sequence; }
-  / [^"] // everything except "
+ValueExpression
+  = value:Literal {
+    return buildNode('is', '*', value);
+  }
 
-sq_char
-  = "\\" sequence:("'" / "\\") { return sequence; }
-  / [^'] // everything except '
+OrList
+  = head:AndList Or tail:OrList {
+    return { or: [head, tail] };
+  }
+  / AndList
+
+AndList
+  = head:NotList And tail:AndList{
+    return { and: [head, tail] };
+  }
+  / NotList
+
+NotList
+  = Not list:SubList {
+    return { not: list };
+  }
+  / SubList
+
+SubList
+  = '(' Space* list:OrList Space* ')' { return list; }
+  / Literal
+
+Or
+  = Space+ 'or'i Space+
+
+And
+  = Space+ 'and'i Space+
+
+Not
+  = 'not'i Space+
+
+Literal
+  = SingleQuotedString
+  / DoubleQuotedString
+  / UnquotedLiteral
+
+SingleQuotedString
+  = "'" chars:(EscapedQuote / [^'])* "'" {
+    return chars.join('');
+  }
+
+DoubleQuotedString
+  = '"' chars:(EscapedQuote / [^"])* '"' {
+    return chars.join('');
+  }
+
+UnquotedLiteral
+  = chars:UnquotedCharacter+ {
+    const sequence = chars.join('').trim();
+    if (sequence === 'null') return null;
+    if (sequence === 'true') return true;
+    if (sequence === 'false') return false;
+    const number = Number(sequence);
+    return isNaN(number) ? sequence : number;
+  }
+
+EscapedQuote
+  = '\\' quote:('"' / '"') { return quote; }
+
+UnquotedCharacter
+  = EscapedSpecialCharacter
+  / !Separator char:. { return char; }
+
+EscapedSpecialCharacter
+  = '\\' char:SpecialCharacter { return char; }
+
+Separator
+  = Keyword / SpecialCharacter
+
+Keyword
+  = Or / And / Not
+
+SpecialCharacter
+  = [():<>]
+
+RangeOperator
+  = '<=' { return 'lte'; }
+  / '>=' { return 'gte'; }
+  / '<' { return 'lt'; }
+  / '>' { return 'gt'; }
+
+Space
+  = [\ \t\r\n]
