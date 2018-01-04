@@ -61,6 +61,7 @@ export default function ({ getService, getPageObjects }) {
 
       describe('for embeddable config color parameters on a visualization', () => {
         it('updates a pie slice color on a soft refresh', async function () {
+          await PageObjects.dashboard.addVisualization(PIE_CHART_VIS_NAME);
           await PageObjects.visualize.clickLegendOption('80,000');
           await PageObjects.visualize.selectNewLegendColorChoice('#F9D9F9');
           const currentUrl = await remote.getCurrentUrl();
@@ -69,8 +70,15 @@ export default function ({ getService, getPageObjects }) {
           await PageObjects.header.waitUntilLoadingHasFinished();
 
           await retry.try(async () => {
-            const pieSliceStyle = await PageObjects.visualize.getPieSliceStyle('80,000');
-            expect(pieSliceStyle.indexOf('rgb(255, 255, 255)')).to.be.greaterThan(0);
+            const allPieSlicesColor = await PageObjects.visualize.getAllPieSliceStyles('80,000');
+            let whitePieSliceCounts = 0;
+            allPieSlicesColor.forEach(style => {
+              if (style.indexOf('rgb(255, 255, 255)') > 0) {
+                whitePieSliceCounts++;
+              }
+            });
+
+            expect(whitePieSliceCounts).to.be(1);
           });
         });
 
