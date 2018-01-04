@@ -50,12 +50,14 @@ const getUpdateStatus = ($scope) => {
     return false;
   }
 
+  const time = $scope.vis.params.timeRange ? $scope.vis.params.timeRange : $scope.vis.API.timeFilter.getBounds();
+
   return {
     aggs: hasChangedUsingGenericHashComparison('aggs', $scope.vis.aggs),
     data: hasChangedUsingGenericHashComparison('data', $scope.visData),
     params: hasChangedUsingGenericHashComparison('param', $scope.vis.params),
     resize: hasSizeChanged($scope.vis.size),
-    time: hasChangedUsingGenericHashComparison('time', $scope.vis.API.timeFilter.getBounds()),
+    time: hasChangedUsingGenericHashComparison('time', time),
     uiState: hasChangedUsingGenericHashComparison('uiState', $scope.uiState)
   };
 };
