@@ -111,9 +111,7 @@ export class UiBundlesController {
   }
 
   getCacheDirectory(...subPath) {
-    if (this.isDevMode()) {
-      return this.resolvePath('../.cache', this.hashBundleEntries(), ...subPath);
-    }
+    return this.resolvePath('../.cache', this.hashBundleEntries(), ...subPath);
   }
 
   getDescription() {

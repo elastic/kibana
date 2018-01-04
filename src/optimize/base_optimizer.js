@@ -98,16 +98,20 @@ export default class BaseOptimizer {
       });
     }
 
-    function getCacheLoaders(cacheDirectory) {
-      if (!cacheDirectory) {
-        return [];
+    function maybeAddCacheLoader(uiBundles, cacheName, loaders) {
+      // only use cache-loader in dev mode
+      if (!uiBundles.isDevMode()) {
+        return loaders;
       }
 
       return [
         {
           loader: 'cache-loader',
-          options: { cacheDirectory }
-        }
+          options: {
+            cacheDirectory: uiBundles.getCacheDirectory(cacheName)
+          }
+        },
+        ...loaders
       ];
     }
 
@@ -146,7 +150,7 @@ export default class BaseOptimizer {
             test: /\.less$/,
             use: getStyleLoaders(
               ['less-loader'],
-              getCacheLoaders(this.uiBundles.getCacheDirectory('less'))
+              maybeAddCacheLoader(this.uiBundles, 'less', [])
             ),
           },
           {
@@ -173,8 +177,7 @@ export default class BaseOptimizer {
           {
             test: /\.js$/,
             exclude: BABEL_EXCLUDE_RE.concat(this.uiBundles.getWebpackNoParseRules()),
-            use: [
-              ...getCacheLoaders(this.uiBundles.getCacheDirectory('babel')),
+            use: maybeAddCacheLoader(this.uiBundles, 'babel', [
               {
                 loader: 'babel-loader',
                 options: {
@@ -183,8 +186,8 @@ export default class BaseOptimizer {
                     BABEL_PRESET_PATH,
                   ],
                 },
-              },
-            ],
+              }
+            ]),
           },
           ...this.uiBundles.getPostLoaders().map(loader => ({
             enforce: 'post',
