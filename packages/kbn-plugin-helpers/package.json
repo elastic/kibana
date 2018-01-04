@@ -23,7 +23,7 @@
     "commander": "^2.9.0",
     "del": "^2.2.2",
     "gulp-rename": "1.2.2",
-    "gulp-zip": "3.1.0",
+    "gulp-zip": "^4.1.0",
     "inquirer": "^1.2.2",
     "through2-map": "^3.0.0",
     "vinyl-fs": "2.3.1"
