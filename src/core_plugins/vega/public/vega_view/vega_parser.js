@@ -18,12 +18,12 @@ const locToDirMap = {
 
 export class VegaParser {
 
-  constructor(spec, es, timefilter, dashboardContext, serviceSettings) {
+  constructor(spec, searchCache, timefilter, dashboardContext, serviceSettings) {
     this.spec = spec;
     this.hideWarnings = false;
     this.error = undefined;
     this.warnings = [];
-    this._es = es;
+    this._searchCache = searchCache;
     this._serviceSettings = serviceSettings;
     this._esQueryParser = new EsQueryParser(timefilter, dashboardContext, this._onWarning.bind(this));
   }
@@ -262,8 +262,8 @@ export class VegaParser {
       switch (url.type) {
         case undefined:
         case 'elasticsearch':
-          const request = this._esQueryParser.parseEsRequest(url);
-          esRequests.push({ obj, request });
+          const res = this._esQueryParser.parseEsRequest(url);
+          esRequests.push({ obj, ...res });
           break;
         case 'emsfile':
           if (typeof url.name !== 'string') {
@@ -283,8 +283,12 @@ export class VegaParser {
   }
 
   async _populateEsResults(esRequests) {
-    for (const { obj, request } of esRequests) {
-      obj.values = await this._es.search(request);
+    const reqs = esRequests.map((r) => ({ meta: { index: r.index }, body: r.body }));
+
+    const results = await this._searchCache.search(reqs);
+
+    for (let i = 0; i < esRequests.length; i++) {
+      esRequests[i].obj.values = results[i];
     }
   }
 
