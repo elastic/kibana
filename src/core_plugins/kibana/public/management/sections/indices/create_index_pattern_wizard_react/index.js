@@ -231,16 +231,19 @@ class CreateIndexPatternWizard extends Component {
   }
 
   onQueryChanged = (e) => {
-    const target = e.target;
-    let query = appendWildcard(e.nativeEvent, this.state.query);
-    if (!query) {
-      query = e.target.value;
-    }
-    else {
-      setTimeout(() => target.setSelectionRange(1, 1));
+    let query = e.target.value;
+    if (query.length === 1 && appendWildcard(e.nativeEvent)) {
+      query += '*';
     }
     this.setState({ query, showingIndexPatternQueryErrors: !!query.length });
     this.fetchIndices(query);
+  }
+
+  onQueryKeyPress = (e) => {
+    if (this.state.query.length === 0 && appendWildcard(e.nativeEvent)) {
+      const target = e.target;
+      setTimeout(() => target.setSelectionRange(1, 1));
+    }
   }
 
   onChangePage = page => {
@@ -327,7 +330,7 @@ class CreateIndexPatternWizard extends Component {
 
     return (
       <div>
-        <EuiSpacer size="s"/>
+        <EuiSpacer size="m"/>
         <EuiTitle>
           <h1>Create index pattern</h1>
         </EuiTitle>
@@ -349,7 +352,7 @@ class CreateIndexPatternWizard extends Component {
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size="s"/>
+        <EuiSpacer size="m"/>
       </div>
     );
   }
@@ -484,6 +487,7 @@ class CreateIndexPatternWizard extends Component {
                   value={query}
                   isInvalid={showingIndexPatternQueryErrors && containsErrors}
                   onChange={this.onQueryChanged}
+                  onKeyPress={this.onQueryKeyPress}
                 />
               </EuiFormRow>
             </EuiForm>
@@ -566,6 +570,7 @@ class CreateIndexPatternWizard extends Component {
       statusColor = 'secondary';
       statusMessage = (
         <span>
+          &nbsp;
           <strong>Success!</strong>
           &nbsp;
           Your index pattern matches <strong>{exactMatchingIndices.length} {exactMatchingIndices.length > 1 ? 'indices' : 'index'}</strong>.
@@ -741,43 +746,43 @@ class CreateIndexPatternWizard extends Component {
         </EuiText>
         <EuiSpacer size="xs"/>
         <EuiForm>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              { showTimeField ?
-                <EuiFormRow
-                  label="Time Filter field name"
-                  helpText={
-                    <div>
-                      <p>The Time Filter will use this field to filter your data by time.</p>
-                      <p>You can choose not to have a time field, but you will not be able to narrow down your data by a time range.</p>
-                    </div>
-                  }
-                >
-                  <EuiSelect
-                    name="timeField"
-                    options={timeFieldOptions}
-                    isLoading={!timeFields}
-                    value={selectedTimeField}
-                    onChange={this.onTimeFieldChanged}
-                  />
-                </EuiFormRow>
-                :
-                <EuiText>
-                  <p>The indices which match this index pattern don&apos;t contain any time fields.</p>
-                </EuiText>
+          { showTimeField ?
+            <EuiFormRow
+              label={
+                <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    <span>Time Filter field name</span>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      size="s"
+                      onClick={this.fetchTimeFields}
+                    >
+                      Refresh
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               }
-            </EuiFlexItem>
-            { showTimeField ?
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  onClick={this.refreshFields}
-                >
-                  Refresh
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              : null
-            }
-          </EuiFlexGroup>
+              helpText={
+                <div>
+                  <p>The Time Filter will use this field to filter your data by time.</p>
+                  <p>You can choose not to have a time field, but you will not be able to narrow down your data by a time range.</p>
+                </div>
+              }
+            >
+              <EuiSelect
+                name="timeField"
+                options={timeFieldOptions}
+                isLoading={!timeFields}
+                value={selectedTimeField}
+                onChange={this.onTimeFieldChanged}
+              />
+            </EuiFormRow>
+            :
+            <EuiText>
+              <p>The indices which match this index pattern don&apos;t contain any time fields.</p>
+            </EuiText>
+          }
         </EuiForm>
         <EuiSpacer size="s"/>
         <EuiButtonEmpty
