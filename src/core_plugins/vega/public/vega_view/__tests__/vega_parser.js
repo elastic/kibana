@@ -57,7 +57,7 @@ describe(`VegaParser._setDefaultColors`, () => {
 describe('VegaParser._resolveEsQueries', () => {
   function test(spec, expected, warnCount) {
     return async () => {
-      const vp = new VegaParser(spec, { search: async () => [42] }, 0, 0, {
+      const vp = new VegaParser(spec, { search: async () => [[42]] }, 0, 0, {
         getFileLayers: async () => [{ name: 'file1', url: 'url1' }]
       });
       await vp._resolveDataUrls();
