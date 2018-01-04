@@ -10,6 +10,7 @@ import openRowHtml from 'ui/doc_table/components/table_row/open.html';
 import detailsHtml from 'ui/doc_table/components/table_row/details.html';
 import { uiModules } from 'ui/modules';
 import { disableFilter } from 'ui/filter_bar';
+import { dispatchRenderComplete } from 'ui/render_complete';
 
 const module = uiModules.get('app/discover');
 
@@ -109,13 +110,6 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
         return `${path}?${hash}`;
       };
 
-      const dispatchCustomEvent = (name) => {
-        // we're using the native events so that we aren't tied to the jQuery custom events,
-        // otherwise we have to use jQuery(element).on(...) because jQuery's events sit on top
-        // of the native events per https://github.com/jquery/jquery/issues/2476
-        $el[0].dispatchEvent(new CustomEvent(name, { bubbles: true }));
-      };
-
       // create a tr element that lists the value for each *column*
       function createSummaryRow(row) {
         const indexPattern = $scope.indexPattern;
@@ -187,7 +181,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
 
         // trim off cells that were not used rest of the cells
         $cells.filter(':gt(' + (newHtmls.length - 1) + ')').remove();
-        dispatchCustomEvent('renderComplete');
+        dispatchRenderComplete($el[0]);
       }
 
       /**

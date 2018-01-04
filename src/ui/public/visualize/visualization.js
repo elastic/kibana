@@ -9,6 +9,7 @@ import visualizationTemplate from 'ui/visualize/visualization.html';
 import { getUpdateStatus } from 'ui/vis/update_status';
 import { PersistedState } from 'ui/persisted_state';
 import 'angular-sanitize';
+import { dispatchRenderComplete, dispatchRenderStart } from 'ui/render_complete';
 
 uiModules
   .get('kibana/directive', ['ngSanitize'])
@@ -78,13 +79,6 @@ uiModules
 
         $scope.vis.initialized = true;
 
-        const dispatchCustomEvent = (name) => {
-          // we're using the native events so that we aren't tied to the jQuery custom events,
-          // otherwise we have to use jQuery(element).on(...) because jQuery's events sit on top
-          // of the native events per https://github.com/jquery/jquery/issues/2476
-          $el[0].dispatchEvent(new CustomEvent(name, { bubbles: true }));
-        };
-
         const render$ = Observable.create(observer => {
           $scope.$on('render', () => {
             observer.next({
@@ -97,7 +91,7 @@ uiModules
 
         const success$ = render$
           .do(() => {
-            dispatchCustomEvent('renderStart');
+            dispatchRenderStart($el[0]);
           })
           .filter(({ vis, visData, container }) => vis && vis.initialized && container && (!vis.type.requiresSearch || visData))
           .do(({ vis }) => {
@@ -118,7 +112,7 @@ uiModules
         const renderSubscription = Observable.merge(success$, requestError$)
           .subscribe(() => {
             $scope.$emit('renderComplete');
-            dispatchCustomEvent('renderComplete');
+            dispatchRenderComplete($el[0]);
           });
 
         $scope.$on('$destroy', () => {

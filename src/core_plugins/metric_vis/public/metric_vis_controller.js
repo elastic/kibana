@@ -1,6 +1,7 @@
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import { getHeatmapColors } from 'ui/vislib/components/color/heatmap_color';
+import { dispatchRenderComplete } from 'ui/render_complete';
 // get the kibana/metric_vis module, and make sure that it requires the "kibana" module if it
 // didn't already
 const module = uiModules.get('kibana/metric_vis', ['kibana']);
@@ -112,13 +113,6 @@ module.controller('KbnMetricVisController', function ($scope, $element) {
     });
   };
 
-  const dispatchCustomEvent = (name) => {
-    // we're using the native events so that we aren't tied to the jQuery custom events,
-    // otherwise we have to use jQuery(element).on(...) because jQuery's events sit on top
-    // of the native events per https://github.com/jquery/jquery/issues/2476
-    $element[0].dispatchEvent(new CustomEvent(name, { bubbles: true }));
-  };
-
   $scope.$watch('esResponse', function (resp) {
     if (resp) {
       metrics.length = 0;
@@ -127,7 +121,7 @@ module.controller('KbnMetricVisController', function ($scope, $element) {
       colors = getColors();
       labels = getLabels();
       $scope.processTableGroups(resp);
-      dispatchCustomEvent('renderComplete');
+      dispatchRenderComplete($element[0]);
     }
   });
 });

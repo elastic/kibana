@@ -9,6 +9,7 @@ import { VislibLibAlertsProvider } from './alerts';
 import { VislibLibAxisProvider } from './axis/axis';
 import { VislibGridProvider } from './chart_grid';
 import { VislibVisualizationsVisTypesProvider } from '../visualizations/vis_types';
+import { dispatchRenderComplete } from 'ui/render_complete';
 
 const markdownIt = new MarkdownIt({
   html: false,
@@ -212,7 +213,7 @@ export function VisHandlerProvider(Private) {
         div.append('h4').text(markdownIt.renderInline(message));
       }
 
-      this.el.dispatchEvent(new CustomEvent('renderComplete', { bubbles: true }));
+      dispatchRenderComplete(this.el);
       return div;
     }
 
