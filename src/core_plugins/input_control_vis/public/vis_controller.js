@@ -7,6 +7,7 @@ class VisController {
   constructor(el, vis) {
     this.el = el;
     this.vis = vis;
+    this.lastTimeFilter = JSON.stringify(this.vis.API.timeFilter.time);
     this.controls = [];
 
     this.queryBarUpdateHandler = this.updateControlsFromKbn.bind(this);
@@ -14,7 +15,14 @@ class VisController {
   }
 
   async render(visData, status) {
-    if (status.params) {
+    let timeFilterChanged = false;
+    if (this.lastTimeFilter !== JSON.stringify(this.vis.API.timeFilter.time)) {
+      timeFilterChanged = true;
+      this.lastTimeFilter = JSON.stringify(this.vis.API.timeFilter.time);
+    }
+    const drawBecauseOfTimeFilterChange = this.vis.params.useTimeFilter && timeFilterChanged;
+
+    if (status.params || drawBecauseOfTimeFilterChange) {
       this.controls = [];
       this.controls = await this.initControls();
       this.drawVis();
@@ -51,7 +59,7 @@ class VisController {
       })
         .map((controlParams) => {
           const factory = controlFactory(controlParams);
-          return factory(controlParams, this.vis.API);
+          return factory(controlParams, this.vis.API, this.vis.params.useTimeFilter);
         })
     );
   }
