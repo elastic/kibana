@@ -98,7 +98,7 @@ uiModules
               return canSkipResponseHandler ? $scope.visData : Promise.resolve(responseHandler($scope.vis, requestHandlerResponse));
             }, e => {
               $scope.savedObj.searchSource.cancelQueued();
-              $el.trigger('renderComplete');
+              $scope.vis.requestError = e;
               if (isTermSizeZeroError(e)) {
                 return notify.error(
                   `Your visualization ('${$scope.vis.title}') has an error: it has a term ` +
@@ -177,24 +177,12 @@ uiModules
           });
         }
 
-        // the very first resize event is the initialization, which we can safely ignore.
-        // however, we also want to debounce the resize event, and not miss a resize event
-        // if it occurs within the first 200ms window
-        const resizeFunc = _.debounce(() => {
-          $scope.$broadcast('render');
-        }, 200);
-
-        let resizeInit = false;
         resizeChecker.on('resize',  () => {
-          if (!resizeInit) return resizeInit = true;
-          resizeFunc();
+          $scope.$broadcast('render');
         });
 
         // visualize needs to know about timeFilter
         $scope.$listen(timefilter, 'fetch', $scope.fetch);
-        $scope.$on('renderComplete', () => {
-          $el.trigger('renderComplete');
-        });
 
         $scope.$on('$destroy', () => {
           $scope.vis.removeListener('update', handleVisUpdate);
