@@ -6,6 +6,7 @@ import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_regis
 import { notify } from 'ui/notify';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 
+require('ui/autoload/all');
 require('plugins/timelion/directives/cells/cells');
 require('plugins/timelion/directives/fixed_element');
 require('plugins/timelion/directives/fullscreen/fullscreen');
@@ -70,7 +71,9 @@ app.controller('timelion', function (
   // TODO: For some reason the Kibana core doesn't correctly do this for all apps.
   moment.tz.setDefault(config.get('dateFormat:tz'));
 
-  timefilter.enabled = true;
+  timefilter.enableAutoRefreshSelector();
+  timefilter.enableTimeRangeSelector();
+
   const notify = new Notifier({
     location: 'Timelion'
   });

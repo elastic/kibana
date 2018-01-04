@@ -54,9 +54,19 @@ argument
   currentArgs.push(arg);
   return arg;
  }
- / name:argument_name space? '=' {
+ / space? '=' space? value:arg_type? {
   var exception = {
    type: 'incompleteArgument',
+   currentArgs: currentArgs,
+   currentFunction: currentFunction,
+   location: simpleLocation(location()),
+   text: text()
+  }
+  error(JSON.stringify(exception));
+ }
+ / name:argument_name space? '=' {
+  var exception = {
+   type: 'incompleteArgumentValue',
    currentArgs: currentArgs,
    currentFunction: currentFunction,
    name: name,

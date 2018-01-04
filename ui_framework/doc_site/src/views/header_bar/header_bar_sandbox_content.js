@@ -77,19 +77,19 @@ export default () => {
             <table className="kuiTable">
               <thead>
                 <tr>
-                  <th className="kuiTableHeaderCell kuiTableHeaderCell--checkBox">
+                  <th scope="col" className="kuiTableHeaderCell kuiTableHeaderCell--checkBox">
                     <input type="checkbox" className="kuiCheckBox"/>
                   </th>
-                  <th className="kuiTableHeaderCell">
+                  <th scope="col" className="kuiTableHeaderCell">
                     Title
                   </th>
-                  <th className="kuiTableHeaderCell">
+                  <th scope="col" className="kuiTableHeaderCell">
                     Status
                   </th>
-                  <th className="kuiTableHeaderCell">
+                  <th scope="col" className="kuiTableHeaderCell">
                     Date created
                   </th>
-                  <th className="kuiTableHeaderCell kuiTableHeaderCell--alignRight">
+                  <th scope="col" className="kuiTableHeaderCell kuiTableHeaderCell--alignRight">
                     Orders of magnitude
                   </th>
                 </tr>

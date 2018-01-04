@@ -1,5 +1,8 @@
 import expect from 'expect.js';
-import { ColorFormat } from '../color';
+import { createColorFormat } from '../color';
+import { FieldFormat } from '../../../../../../ui/field_formats/field_format';
+
+const ColorFormat = createColorFormat(FieldFormat);
 
 describe('Color Format', function () {
 

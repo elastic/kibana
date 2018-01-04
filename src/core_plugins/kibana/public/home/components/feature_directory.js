@@ -26,7 +26,7 @@ export class FeatureDirectory extends React.Component {
       name: 'All',
     }, {
       id: FeatureCatalogueCategory.DATA,
-      name: 'Explore & Visualize',
+      name: 'Data Exploration & Visualization',
     }, {
       id: FeatureCatalogueCategory.ADMIN,
       name: 'Administrative',
@@ -93,7 +93,7 @@ export class FeatureDirectory extends React.Component {
         <div className="kuiViewContent">
           <div className="kuiViewContentItem kuiVerticalRhythmXLarge">
             <h1 className="kuiTitle ">
-              Feature Directory
+              Directory
             </h1>
           </div>
           <div className="kuiViewContentItem kuiVerticalRhythmXLarge">

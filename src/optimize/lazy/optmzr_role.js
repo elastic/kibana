@@ -8,8 +8,7 @@ export default async (kbnServer, kibanaHapiServer, config) => {
     config.get('server.basePath'),
     new LazyOptimizer({
       log: (tags, data) => kibanaHapiServer.log(tags, data),
-      env: kbnServer.bundles.env,
-      bundles: kbnServer.bundles,
+      uiBundles: kbnServer.uiBundles,
       profile: config.get('optimize.profile'),
       sourceMaps: config.get('optimize.sourceMaps'),
       prebuild: config.get('optimize.lazyPrebuild'),

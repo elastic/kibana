@@ -75,7 +75,79 @@ describe('Timelion expression suggestions', () => {
         });
       });
 
-      describe('incompleteArgument', () => {
+      describe('no argument name provided', () => {
+        it('should return no argument suggestions when none provided by help', async () => {
+          const expression = '.otherFunc(=)';
+          const cursorPosition = 0;
+          const suggestions = await suggest(expression, functionList, Parser, cursorPosition, argValueSuggestions);
+          expect(suggestions).to.eql({
+            'list': [],
+            'location': {
+              'min': 11,
+              'max': 12
+            },
+            'type': 'arguments'
+          });
+        });
+
+        it('should return argument suggestions when provided by help', async () => {
+          const expression = '.myFunc2(=)';
+          const cursorPosition = 0;
+          const suggestions = await suggest(expression, functionList, Parser, cursorPosition, argValueSuggestions);
+          expect(suggestions).to.eql({
+            'list': myFunc2.args,
+            'location': {
+              'min': 9,
+              'max': 10
+            },
+            'type': 'arguments'
+          });
+        });
+
+        it('should return argument suggestions when argument value provided', async () => {
+          const expression = '.myFunc2(=whatArgumentAmI)';
+          const cursorPosition = 0;
+          const suggestions = await suggest(expression, functionList, Parser, cursorPosition, argValueSuggestions);
+          expect(suggestions).to.eql({
+            'list': myFunc2.args,
+            'location': {
+              'min': 9,
+              'max': 25
+            },
+            'type': 'arguments'
+          });
+        });
+
+        it('should not show first argument for chainable functions', async () => {
+          const expression = '.func1(=)';
+          const cursorPosition = 0;
+          const suggestions = await suggest(expression, functionList, Parser, cursorPosition, argValueSuggestions);
+          expect(suggestions).to.eql({
+            'list': [{ name: 'argA' }, { name: 'argAB', suggestions: [{ name: 'value1' }] }],
+            'location': {
+              'min': 7,
+              'max': 8
+            },
+            'type': 'arguments'
+          });
+        });
+
+        it('should not provide argument suggestions for argument that is all ready set in function def', async () => {
+          const expression = '.myFunc2(argAB=provided,=)';
+          const cursorPosition = 0;
+          const suggestions = await suggest(expression, functionList, Parser, cursorPosition, argValueSuggestions);
+          expect(suggestions).to.eql({
+            'list': [{ name: 'argA' }, { name: 'argABC' }],
+            'location': {
+              'min': 24,
+              'max': 25
+            },
+            'type': 'arguments'
+          });
+        });
+      });
+
+      describe('no argument value provided', () => {
         it('should return no argument value suggestions when not provided by help', async () => {
           const expression = '.func1(argA=)';
           const cursorPosition = 11;

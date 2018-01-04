@@ -43,9 +43,9 @@
           <div class="suggestion-details" ng-show="suggestions.length === 1">
             <table class="table table-striped table-condensed table-bordered">
             <thead>
-              <th>Argument Name</th>
-              <th>Accepted Types</th>
-              <th>Information</th>
+              <th scope="col">Argument Name</th>
+              <th scope="col">Accepted Types</th>
+              <th scope="col">Information</th>
             </thead>
             <tr ng-repeat="arg in suggestion.args" ng-hide="$index < 1 && suggestion.chainable">
               <td>{{arg.name}}</td>

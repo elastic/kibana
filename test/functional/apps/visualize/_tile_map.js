@@ -96,6 +96,11 @@ export default function ({ getService, getPageObjects }) {
     });
 
     describe('tile map chart', function indexPatternCreation() {
+      it('should display spy panel toggle button', async function () {
+        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+        expect(spyToggleExists).to.be(true);
+      });
+
       it('should show correct tile map data on default zoom level', async function () {
         const expectedTableData = ['9 5,787 { "lat": 37.22448418632405, "lon": -103.01935195013255 }',
           'd 5,600 { "lat": 37.44271478370398, "lon": -81.72692197253595 }',
@@ -164,46 +169,6 @@ export default function ({ getService, getPageObjects }) {
         // until we figure out how to make sure the map center is always the exact same, we can't comparison check.
         expect(mapBounds).to.not.be(undefined);
         expect(afterSaveMapBounds).to.not.be(undefined);
-      });
-
-      it('should zoom in to level 10', function () {
-        const vizName1 = 'Visualization TileMap';
-
-        return PageObjects.visualize.loadSavedVisualization(vizName1)
-          .then(function () {
-          // 6
-            return PageObjects.visualize.clickMapZoomIn();
-          })
-          .then(function () {
-          // 7
-            return PageObjects.visualize.clickMapZoomIn();
-          })
-          .then(function () {
-          // 8
-            return PageObjects.visualize.clickMapZoomIn();
-          })
-          .then(function () {
-          // 9
-            return PageObjects.visualize.clickMapZoomIn();
-          })
-          .then(function () {
-            return retry.try(function tryingForTime() {
-              return PageObjects.visualize.getMapZoomInEnabled()
-                .then(function (enabled) {
-                  expect(enabled).to.be(true);
-                });
-            });
-          })
-          .then(function () {
-            return PageObjects.visualize.clickMapZoomIn();
-          })
-          .then(function () {
-            return PageObjects.visualize.getMapZoomInEnabled();
-          })
-        // now we're at level 10 and zoom out should be disabled
-          .then(function (enabled) {
-            expect(enabled).to.be(false);
-          });
       });
 
     });

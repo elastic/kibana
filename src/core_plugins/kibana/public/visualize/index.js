@@ -29,7 +29,7 @@ FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'visualize',
     title: 'Visualize',
-    description: 'Build a variety of graphs for your data.',
+    description: 'Create visualizations and aggregate data stores in your Elasticsearch indices.',
     icon: '/plugins/kibana/assets/app_visualize.svg',
     path: `/app/kibana#${VisualizeConstants.LANDING_PAGE_PATH}`,
     showOnHomePage: true,

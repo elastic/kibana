@@ -1,7 +1,10 @@
 import _ from 'lodash';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { KuiFieldGroup, KuiFieldGroupSection } from 'ui_framework/components';
+import {
+  KuiFieldGroup,
+  KuiFieldGroupSection,
+  KuiCheckBoxLabel } from 'ui_framework/components';
 
 export class OptionsTab extends Component {
   constructor(props) {
@@ -28,16 +31,12 @@ export class OptionsTab extends Component {
           <div className="vis-editor-agg-header">
             <KuiFieldGroup>
               <KuiFieldGroupSection>
-                <label>
-                  <input
-                    className="kuiCheckBox"
-                    type="checkbox"
-                    checked={this.props.scope.vis.params.updateFiltersOnChange}
-                    onChange={this.handleUpdateFiltersChange}
-                    data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"
-                  />
-                  Update kibana filters on each change
-                </label>
+                <KuiCheckBoxLabel
+                  text="Update Kibana filters on each change"
+                  isChecked={this.props.scope.vis.params.updateFiltersOnChange}
+                  onChange={this.handleUpdateFiltersChange}
+                  data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"
+                />
               </KuiFieldGroupSection>
             </KuiFieldGroup>
           </div>

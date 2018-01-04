@@ -87,8 +87,8 @@ uiRoutes
 FeatureCatalogueRegistryProvider.register(() => {
   return {
     id: 'dashboard',
-    title: 'Dashboards',
-    description: 'Create visual landing pages made up of content from other apps.',
+    title: 'Dashboard',
+    description: 'Display and share a collection of visualizations and saved searches.',
     icon: '/plugins/kibana/assets/app_dashboard.svg',
     path: `/app/kibana#${DashboardConstants.LANDING_PAGE_PATH}`,
     showOnHomePage: true,

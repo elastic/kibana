@@ -24,7 +24,7 @@
         <div>
           <a
             class="kuiLink"
-            ng-click="filterEditor.isEditingQueryDsl = !filterEditor.isEditingQueryDsl"
+            ng-click="filterEditor.toggleEditingQueryDsl()"
             kbn-accessible-click
           >
             <span ng-if="filterEditor.isEditingQueryDsl">
@@ -41,7 +41,7 @@
       <!-- Filter dropdowns -->
       <div
         class="kuiFieldGroup kuiVerticalRhythmSmall kuiFieldGroup--alignTop"
-        ng-show="!filterEditor.showQueryDslEditor()"
+        ng-show="!filterEditor.isQueryDslEditorVisible()"
       >
         <div class="kuiFieldGroupSection filterEditor__wideField">
           <filter-field-select
@@ -73,12 +73,13 @@
       <!-- DSL editor -->
       <div
         class="kuiVerticalRhythmSmall"
-        ng-show="filterEditor.showQueryDslEditor()"
+        ng-show="filterEditor.isQueryDslEditorVisible()"
       >
         <filter-query-dsl-editor
           class="kuiVerticalRhythmSmall"
           filter="filterEditor.filter"
           on-change="filterEditor.setQueryDsl(queryDsl)"
+          is-visible="filterEditor.isQueryDslEditorVisible()"
         ></filter-query-dsl-editor>
 
         <p class="kuiText kuiVerticalRhythmSmall">

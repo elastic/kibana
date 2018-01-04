@@ -43,7 +43,7 @@ export default class extends Component {
         ),
         onClick: () => { this.closePopover(); window.alert('Show fullscreen'); },
       }, {
-        name: 'Share this dasbhoard',
+        name: 'Share this dashboard',
         icon: <span className="kuiIcon fa-user" />,
         panel: {
           id: 1,
@@ -106,6 +106,11 @@ export default class extends Component {
         name: 'Display options',
         icon: <span className="kuiIcon fa-user" />,
         onClick: () => { this.closePopover(); window.alert('Display options'); },
+      }, {
+        name: 'Disabled option',
+        icon: <span className="kuiIcon fa-user" />,
+        disabled: true,
+        onClick: () => { this.closePopover(); window.alert('Disabled option'); },
       }],
     };
 

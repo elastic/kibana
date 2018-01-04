@@ -78,6 +78,11 @@ export default function ({ getService, getPageObjects }) {
           });
       });
 
+      it('should display spy panel toggle button', async function () {
+        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+        expect(spyToggleExists).to.be(true);
+      });
+
       it('should show 10 slices in pie chart, take screenshot', function () {
         const expectedPieChartSliceCount = 10;
 

@@ -77,12 +77,6 @@ uiModules
         $scope.editorMode = $scope.editorMode || false;
         $scope.vis.editorMode = $scope.editorMode;
 
-        // spy panel is supported only with courier request handler
-        $scope.shouldShowSpyPanel = () => {
-          if ($scope.vis.type.requestHandler !== 'courier') return false;
-          return $scope.vis.type.requiresSearch && $scope.showSpyPanel;
-        };
-
         const requestHandler = getHandler(requestHandlers, $scope.vis.type.requestHandler);
         const responseHandler = getHandler(responseHandlers, $scope.vis.type.responseHandler);
 
@@ -183,12 +177,18 @@ uiModules
           });
         }
 
-        let resizeInit = false;
+        // the very first resize event is the initialization, which we can safely ignore.
+        // however, we also want to debounce the resize event, and not miss a resize event
+        // if it occurs within the first 200ms window
         const resizeFunc = _.debounce(() => {
-          if (!resizeInit) return resizeInit = true;
           $scope.$broadcast('render');
         }, 200);
-        resizeChecker.on('resize',  resizeFunc);
+
+        let resizeInit = false;
+        resizeChecker.on('resize',  () => {
+          if (!resizeInit) return resizeInit = true;
+          resizeFunc();
+        });
 
         // visualize needs to know about timeFilter
         $scope.$listen(timefilter, 'fetch', $scope.fetch);

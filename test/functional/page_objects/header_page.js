@@ -49,18 +49,12 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     async clickQuickButton() {
       await retry.try(async () => {
         remote.setFindTimeout(defaultFindTimeout);
-        await remote.findByLinkText('Quick').click();
+        await testSubjects.click('timepicker-quick-button');
       });
     }
 
     async isTimepickerOpen() {
-      remote.setFindTimeout(2000);
-      try {
-        await remote.findDisplayedByCssSelector('.kbn-timepicker');
-        return true;
-      } catch (error) {
-        return false;
-      }
+      return await testSubjects.exists('timePicker');
     }
 
     async isAbsoluteSectionShowing() {
@@ -74,8 +68,7 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
       if (!isAbsoluteSectionShowing) {
         await retry.try(async () => {
           await remote.setFindTimeout(defaultFindTimeout);
-          const absoluteButton = await remote.findByLinkText('Absolute');
-          await absoluteButton.click();
+          await testSubjects.click('timepicker-absolute-button');
           // Check to make sure one of the elements on the absolute section is showing.
           await this.getFromTime();
         });
@@ -138,11 +131,14 @@ export function HeaderPageProvider({ getService, getPageObjects }) {
     }
 
     async ensureTimePickerIsOpen() {
+      log.debug('ensureTimePickerIsOpen');
       const isOpen = await this.isTimepickerOpen();
-      log.debug(`ensureTimePickerIsOpen: ${isOpen}`);
       if (!isOpen) {
-        log.debug('--Opening time picker');
-        await this.clickTimepicker();
+        await retry.try(async () => {
+          await this.clickTimepicker();
+          const isOpen = await this.isTimepickerOpen();
+          if (!isOpen) throw new Error('Time picker still not open, try again.');
+        });
       }
     }
 

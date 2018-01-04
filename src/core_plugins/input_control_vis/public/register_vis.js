@@ -5,6 +5,7 @@ import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { VisController } from './vis_controller';
 import { ControlsTab } from './components/editor/controls_tab';
 import { OptionsTab } from './components/editor/options_tab';
+import { defaultFeedbackMessage } from 'ui/vis/default_feedback_message';
 import image from './images/icon-input-control.svg';
 
 
@@ -18,7 +19,8 @@ function InputControlVisProvider(Private) {
     image,
     description: 'Create interactive controls for easy dashboard manipulation.',
     category: CATEGORY.OTHER,
-    isExperimental: true,
+    stage: 'lab',
+    feedbackMessage: defaultFeedbackMessage,
     visualization: VisController,
     visConfig: {
       defaults: {

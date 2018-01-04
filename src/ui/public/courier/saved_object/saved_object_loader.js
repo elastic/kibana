@@ -3,12 +3,13 @@ import { StringUtils } from 'ui/utils/string_utils';
 import { SavedObjectsClient } from 'ui/saved_objects';
 
 export class SavedObjectLoader {
-  constructor(SavedObjectClass, kbnIndex, kbnUrl, $http) {
+  constructor(SavedObjectClass, kbnIndex, kbnUrl, $http, chrome) {
     this.type = SavedObjectClass.type;
     this.Class = SavedObjectClass;
     this.lowercaseType = this.type.toLowerCase();
     this.kbnIndex = kbnIndex;
     this.kbnUrl = kbnUrl;
+    this.chrome = chrome;
 
     this.scanner = new Scanner($http, {
       index: kbnIndex,
@@ -21,7 +22,9 @@ export class SavedObjectLoader {
       nouns: `${ this.lowercaseType }s`,
     };
 
-    this.savedObjectsClient = new SavedObjectsClient($http);
+    this.savedObjectsClient = new SavedObjectsClient({
+      $http
+    });
   }
 
   /**
@@ -46,7 +49,11 @@ export class SavedObjectLoader {
       return savedObject.delete();
     });
 
-    return Promise.all(deletions);
+    return Promise.all(deletions).then(() => {
+      if (this.chrome) {
+        this.chrome.untrackNavLinksForDeletedSavedObjects(ids);
+      }
+    });
   }
 
   /**

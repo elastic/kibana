@@ -16,7 +16,8 @@ export function VisualizeListingController($injector) {
   const timefilter = $injector.get('timefilter');
   const config = $injector.get('config');
 
-  timefilter.enabled = false;
+  timefilter.disableAutoRefreshSelector();
+  timefilter.disableTimeRangeSelector();
 
   // TODO: Extract this into an external service.
   const services = Private(SavedObjectRegistryProvider).byLoaderPropertiesName;
@@ -24,12 +25,13 @@ export function VisualizeListingController($injector) {
   const notify = new Notifier({ location: 'Visualize' });
 
   this.fetchItems = (filter) => {
+    const isLabsEnabled = config.get('visualize:enableLabs');
     return visualizationService.find(filter, config.get('savedObjects:listingLimit'))
       .then(result => {
         this.totalItems = result.total;
         this.showLimitError = result.total > config.get('savedObjects:listingLimit');
         this.listingLimit = config.get('savedObjects:listingLimit');
-        return result.hits;
+        return result.hits.filter(result => (isLabsEnabled || result.type.stage !== 'lab'));
       });
   };
 

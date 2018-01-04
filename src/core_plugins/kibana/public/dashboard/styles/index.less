@@ -4,7 +4,7 @@
 @import "~react-grid-layout/css/styles.css";
 @import "~react-resizable/css/styles.css";
 
-.fullScreenModePlaceholder {
+.exitFullScreenButton {
   text-align: center;
   width: 100%;
   height: 0;
@@ -117,7 +117,7 @@
 .start-screen {
   margin: 20px auto;
   max-width: 800px;
-  background: tint(@globalColorBlue, 90%);
+  background: #FFF;
   padding: 40px;
   border-radius: 4px;
 }
@@ -197,6 +197,20 @@ dashboard-viewport-provider {
   [data-reactroot] {
     flex: 1;
   }
+}
+
+/**
+ * Disable transitions from the library on each grid element.
+ */
+.react-grid-item {
+  transition: none;
+}
+
+/**
+ * Dragged panels in dashboard should always appear above other panels.
+ */
+.react-grid-item.react-draggable-dragging {
+  z-index: @dashboardDraggingGridDepth !important;
 }
 
 /**
@@ -404,9 +418,11 @@ dashboard-viewport-provider {
 }
 
 .dashboard-viewport {
+  width: 100%;
   background-color: @dashboard-bg;
 }
 .dashboard-viewport-with-margins {
+  width: 100%;
   background-color: @dashboard-bg-with-margins;
 }
 

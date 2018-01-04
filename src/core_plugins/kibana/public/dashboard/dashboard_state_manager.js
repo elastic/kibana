@@ -13,10 +13,11 @@ import {
   minimizePanel,
   updateTitle,
   updateDescription,
+  updateHidePanelTitles,
 } from './actions';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
-import { createPanelState, getPersistedStateId } from './panel';
-import { getAppStateDefaults } from './lib';
+import { createPanelState } from './panel';
+import { getAppStateDefaults, migrateAppState } from './lib';
 import {
   getViewMode,
   getFullScreenMode,
@@ -25,6 +26,7 @@ import {
   getTitle,
   getDescription,
   getUseMargins,
+  getHidePanelTitles,
 } from '../selectors';
 
 /**
@@ -37,7 +39,6 @@ import {
  *  - description
  *  - timeRestore
  *  - query
- *  - uiState
  *  - filters
  *
  * State that is only stored in the Store:
@@ -45,7 +46,7 @@ import {
  *  - maximizedPanelId
  *
  * State that is shared and needs to be synced:
- * - fullScreenMode - changes only propagate from AppState -> Store
+ * - fullScreenMode - changes propagate from AppState -> Store and from Store -> AppState.
  * - viewMode - changes only propagate from AppState -> Store
  * - panels - changes propagate from AppState -> Store and from Store -> AppState.
  *
@@ -65,7 +66,13 @@ export class DashboardStateManager {
     this.stateDefaults = getAppStateDefaults(this.savedDashboard, this.hideWriteControls);
 
     this.appState = new AppState(this.stateDefaults);
-    this.uiState = this.appState.makeStateful('uiState');
+
+    // Initializing appState does two things - first it translates the defaults into AppState, second it updates
+    // appState based on the URL (the url trumps the defaults). This means if we update the state format at all and
+    // want to handle BWC, we must not only migrate the data stored with saved Dashboard, but also any old state in the
+    // url.
+    migrateAppState(this.appState);
+
     this.isDirty = false;
 
     // We can't compare the filters stored on this.appState to this.savedDashboard because in order to apply
@@ -85,6 +92,7 @@ export class DashboardStateManager {
     store.dispatch(setPanels(this.getPanels()));
     store.dispatch(updateViewMode(this.getViewMode()));
     store.dispatch(updateUseMargins(this.getUseMargins()));
+    store.dispatch(updateHidePanelTitles(this.getHidePanelTitles()));
     store.dispatch(updateIsFullScreenMode(this.getFullScreenMode()));
     store.dispatch(updateTitle(this.getTitle()));
     store.dispatch(updateDescription(this.getDescription()));
@@ -138,6 +146,10 @@ export class DashboardStateManager {
       store.dispatch(updateUseMargins(this.getUseMargins()));
     }
 
+    if (getHidePanelTitles(state) !== this.getHidePanelTitles()) {
+      store.dispatch(updateHidePanelTitles(this.getHidePanelTitles()));
+    }
+
     if (getFullScreenMode(state) !== this.getFullScreenMode()) {
       store.dispatch(updateIsFullScreenMode(this.getFullScreenMode()));
     }
@@ -152,21 +164,22 @@ export class DashboardStateManager {
   }
 
   _handleStoreChanges() {
-    if (this._areStoreAndAppStatePanelsEqual()) {
-      return;
+    let dirty = false;
+    if (!this._areStoreAndAppStatePanelsEqual()) {
+      const panels = getPanels(store.getState());
+      this.appState.panels = [];
+      Object.values(panels).map(panel => {
+        this.appState.panels.push(panel);
+      });
+      dirty = true;
     }
 
-    const state = store.getState();
-    // The only state that the store deals with that appState cares about is the panels array. Every other state change
-    // (that appState cares about) is initiated from appState (e.g. view mode).
-    this.appState.panels = [];
-    _.map(getPanels(state), panel => {
-      this.appState.panels.push(panel);
-    });
+    const fullScreen = getFullScreenMode(store.getState());
+    if (fullScreen !== this.getFullScreenMode()) {
+      this.setFullScreenMode(fullScreen);
+    }
 
-    this.changeListeners.forEach(function (listener) {
-      return listener({ dirty: true, clean: false });
-    });
+    this.changeListeners.forEach(listener => listener({ dirty }));
     this.saveState();
   }
 
@@ -266,6 +279,15 @@ export class DashboardStateManager {
 
   setUseMargins(useMargins) {
     this.appState.options.useMargins = useMargins;
+    this.saveState();
+  }
+
+  getHidePanelTitles() {
+    return this.appState.options.hidePanelTitles;
+  }
+
+  setHidePanelTitles(hidePanelTitles) {
+    this.appState.options.hidePanelTitles = hidePanelTitles;
     this.saveState();
   }
 
@@ -411,7 +433,6 @@ export class DashboardStateManager {
   removePanel(panelIndex) {
     _.remove(this.getPanels(), (panel) => {
       if (panel.panelIndex === panelIndex) {
-        this.uiState.removeChild(getPersistedStateId(panel));
         delete this.panelIndexPatternMapping[panelIndex];
         return true;
       } else {

@@ -79,14 +79,12 @@ export class RangeControl extends Component {
     return formatedValue;
   }
 
-  render() {
+  renderControl() {
     return (
-      <FormRow
-        id={this.props.control.id}
-        label={this.props.control.label}
-      >
+      <div>
         <input
           id={`${this.props.control.id}_min`}
+          disabled={!this.props.control.isEnabled()}
           name="min"
           type="number"
           className="kuiTextInput"
@@ -97,6 +95,7 @@ export class RangeControl extends Component {
         />
         <div className="inputRangeContainer">
           <InputRange
+            disabled={!this.props.control.isEnabled()}
             maxValue={this.props.control.max}
             minValue={this.props.control.min}
             step={this.props.control.options.step}
@@ -110,6 +109,7 @@ export class RangeControl extends Component {
         </div>
         <input
           id={`${this.props.control.id}_max`}
+          disabled={!this.props.control.isEnabled()}
           name="max"
           type="number"
           className="kuiTextInput"
@@ -118,6 +118,19 @@ export class RangeControl extends Component {
           max={this.props.control.max}
           onChange={this.handleInputChange}
         />
+      </div>
+    );
+  }
+
+  render() {
+    return (
+      <FormRow
+        id={this.props.control.id}
+        label={this.props.control.label}
+        controlIndex={this.props.controlIndex}
+        control={this.props.control}
+      >
+        {this.renderControl()}
       </FormRow>
     );
   }

@@ -2,21 +2,6 @@
   class="app-container dashboard-container"
   ng-class="{'dashboard-container-with-margins': model.useMargins}"
 >
-  <div class="fullScreenModePlaceholder">
-    <div
-      aria-label="Exit full screen mode"
-      kbn-accessible-click
-      ng-if="fullScreenMode"
-      class="exitFullScreenMode"
-      ng-click="exitFullScreenMode()"
-    >
-      <span class="exitFullScreenModeLogo" data-test-subj="exitFullScreenModeLogo"></span>
-      <span class="exitFullScreenModeText" data-test-subj="exitFullScreenModeText">
-        Exit full screen
-        <span class="kuiIcon fa fa-angle-left"></span>
-      </span>
-    </div>
-  </div>
   <!-- Local nav. -->
   <kbn-top-nav name="dashboard" config="topNavMenu">
     <!-- Transcluded elements. -->

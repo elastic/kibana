@@ -187,7 +187,8 @@ export default function (program) {
 function logFatal(message, server) {
   if (server) {
     server.log(['fatal'], message);
-  } else {
-    console.error('FATAL', message);
   }
+
+  // It's possible for the Hapi logger to not be setup
+  console.error('FATAL', message);
 }

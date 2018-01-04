@@ -1,5 +1,8 @@
 import expect from 'expect.js';
-import { TruncateFormat } from '../truncate';
+import { createTruncateFormat } from '../truncate';
+import { FieldFormat } from '../../../../../../ui/field_formats/field_format';
+
+const TruncateFormat = createTruncateFormat(FieldFormat);
 
 describe('String TruncateFormat', function () {
 

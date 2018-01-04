@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import getLastValue from '../lib/get_last_value';
+import getLastValue from '../../../common/get_last_value';
 import reactcss from 'reactcss';
 
 class TopN extends Component {
@@ -16,7 +16,7 @@ class TopN extends Component {
   renderRow(maxValue) {
     return item => {
       const key = `${item.id || item.label}`;
-      const lastValue = getLastValue(item.data, item.data.length);
+      const lastValue = getLastValue(item.data);
       const formatter = item.tickFormatter || this.props.tickFormatter;
       const value = formatter(lastValue);
       const width = `${100 * (lastValue / maxValue)}%`;
@@ -56,7 +56,7 @@ class TopN extends Component {
   render() {
     if (!this.props.series) return null;
     const maxValue = this.props.series.reduce((max, series) => {
-      const lastValue = getLastValue(series.data, series.data.length);
+      const lastValue = getLastValue(series.data);
       return lastValue > max ? lastValue : max;
     }, 0);
 

@@ -11,6 +11,7 @@ export default function ({ getService, getPageObjects }) {
   describe('dashboard view edit mode', function viewEditModeTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
+      await PageObjects.dashboard.preserveCrossAppState();
       await kibanaServer.uiSettings.disableToastAutohide();
       await remote.refresh();
     });
@@ -20,13 +21,6 @@ export default function ({ getService, getPageObjects }) {
     });
 
     it('create new dashboard opens in edit mode', async function () {
-      // This flip between apps fixes the url so state is preserved when switching apps in test mode.
-      // Without this flip the url in test mode looks something like
-      // "http://localhost:5620/app/kibana?_t=1486069030837#/dashboard?_g=...."
-      // after the initial flip, the url will look like this: "http://localhost:5620/app/kibana#/dashboard?_g=...."
-      await PageObjects.header.clickVisualize();
-      await PageObjects.header.clickDashboard();
-
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.clickCancelOutOfEditMode();
     });
@@ -41,7 +35,7 @@ export default function ({ getService, getPageObjects }) {
 
     it('existing dashboard opens in view mode', async function () {
       await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.clickDashboardByLinkText(dashboardName);
+      await PageObjects.dashboard.selectDashboard(dashboardName);
       const inViewMode = await PageObjects.dashboard.getIsInViewMode();
 
       expect(inViewMode).to.equal(true);
@@ -62,6 +56,7 @@ export default function ({ getService, getPageObjects }) {
         beforeEach(async function () {
           await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         });
+
 
         it('when time changed is stored with dashboard', async function () {
           const originalFromTime = '2015-09-19 06:31:44.000';
@@ -187,6 +182,32 @@ export default function ({ getService, getPageObjects }) {
           expect(fromTime).to.equal(newFromTime);
           expect(toTime).to.equal(newToTime);
         });
+      });
+    });
+
+    describe.skip('and preserves edits on cancel', function () {
+      it('when time changed is stored with dashboard', async function () {
+        await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
+        const newFromTime = '2015-09-19 06:31:44.000';
+        const newToTime = '2015-09-19 06:31:44.000';
+        await PageObjects.header.setAbsoluteRange('2013-09-19 06:31:44.000', '2013-09-19 06:31:44.000');
+        await PageObjects.dashboard.saveDashboard(dashboardName, true);
+        await PageObjects.header.clickToastOK();
+        await PageObjects.dashboard.clickEdit();
+        await PageObjects.header.setAbsoluteRange(newToTime, newToTime);
+        await PageObjects.dashboard.clickCancelOutOfEditMode();
+
+        await PageObjects.common.clickCancelOnModal();
+        await PageObjects.dashboard.saveDashboard(dashboardName, { storeTimeWithDashboard: true });
+        await PageObjects.header.clickToastOK();
+
+        await PageObjects.dashboard.loadSavedDashboard(dashboardName);
+
+        const fromTime = await PageObjects.header.getFromTime();
+        const toTime = await PageObjects.header.getToTime();
+
+        expect(fromTime).to.equal(newFromTime);
+        expect(toTime).to.equal(newToTime);
       });
     });
 

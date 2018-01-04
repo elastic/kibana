@@ -101,5 +101,29 @@ describe('AggConfigResult', function () {
         expect(filter.query.match.extension).to.have.property('type', 'phrase');
       });
     });
+
+    describe('toString', function () {
+      it('should provide a parsedUrl to the field formatter', function () {
+        const vis = new Vis(indexPattern, {
+          type: 'histogram',
+          aggs: [
+            { type: 'terms', schema: 'segment', params: { field: 'extension' } }
+          ]
+        });
+
+        const aggConfig = vis.aggs.byTypeName.terms[0];
+        aggConfig.fieldFormatter = () => {
+          return (value, second, third, parsedUrl) => {
+            return parsedUrl;
+          };
+        };
+        const result = new AggConfigResult(aggConfig, null, '../app/kibana/#visualize', 'php');
+        const parsedUrl = result.toString('html');
+        const keys = Object.keys(parsedUrl);
+        expect(keys[0]).to.be('origin');
+        expect(keys[1]).to.be('pathname');
+        expect(keys[2]).to.be('basePath');
+      });
+    });
   });
 });

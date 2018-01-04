@@ -22,7 +22,7 @@ import {
   KuiPager,
 } from 'ui_framework/components';
 
-import { keyCodes } from 'ui_framework/services';
+import { keyCodes } from '@elastic/eui';
 
 export class ChangeIndexModal extends React.Component {
   constructor(props) {

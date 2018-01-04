@@ -1,6 +1,5 @@
 import {
   KibanaServerProvider,
-  KibanaIndexProvider,
   EsProvider,
   EsArchiverProvider,
   RetryProvider,
@@ -17,7 +16,6 @@ export default function () {
     },
     services: {
       kibanaServer: KibanaServerProvider,
-      kibanaIndex: KibanaIndexProvider,
       retry: RetryProvider,
       es: EsProvider,
       esArchiver: EsArchiverProvider,

@@ -70,6 +70,11 @@ export default function ({ getService, getPageObjects }) {
           });
       });
 
+      it('should display spy panel toggle button', async function () {
+        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+        expect(spyToggleExists).to.be(true);
+      });
+
       it('should show correct chart, take screenshot', async function () {
         const expectedChartValues = ['0 - 400', '0 - 400', '400 - 800', '1,200 - 1,600',
           '1,200 - 1,600', '400 - 800', '0 - 400', '0 - 400', '0 - 400', '0 - 400', '400 - 800',

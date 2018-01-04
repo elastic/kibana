@@ -1,4 +1,5 @@
 import { VisualizeConstants } from '../../../src/core_plugins/kibana/public/visualize/visualize_constants';
+import Keys from 'leadfoot/keys';
 
 export function VisualizePageProvider({ getService, getPageObjects }) {
   const remote = getService('remote');
@@ -11,6 +12,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
   const defaultFindTimeout = config.get('timeouts.find');
 
   class VisualizePage {
+
+    async waitForVisualizationSelectPage() {
+      await testSubjects.find('visualizeSelectTypePage');
+    }
 
     async clickAreaChart() {
       await find.clickByPartialLinkText('Area');
@@ -106,6 +111,31 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       }
       const getChartTypesPromises = chartTypes.map(getChartType);
       return await Promise.all(getChartTypesPromises);
+    }
+
+    async selectVisSourceIfRequired() {
+      log.debug('selectVisSourceIfRequired');
+      const selectPage = await testSubjects.findAll('visualizeSelectSearch');
+      if (selectPage.length) {
+        log.debug('a search is required for this visualization');
+        await this.clickNewSearch();
+      }
+    }
+
+    async getLabTypeLinks() {
+      return await remote.findAllByPartialLinkText('(Lab)');
+    }
+
+    async getExperimentalTypeLinks() {
+      return await remote.findAllByPartialLinkText('(Experimental)');
+    }
+
+    async isExperimentalInfoShown() {
+      return await testSubjects.exists('experimentalVisInfo');
+    }
+
+    async getExperimentalInfo() {
+      return await testSubjects.find('experimentalVisInfo');
     }
 
     async clickAbsoluteButton() {
@@ -212,22 +242,22 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async openSpyPanel() {
       log.debug('openSpyPanel');
-      const isOpen = await testSubjects.exists('spyModeSelect');
+      const isOpen = await testSubjects.exists('spyContentContainer');
       if (!isOpen) {
         await retry.try(async () => {
           await this.toggleSpyPanel();
-          await testSubjects.find('spyModeSelect');
+          await testSubjects.find('spyContentContainer');
         });
       }
     }
 
     async closeSpyPanel() {
       log.debug('closeSpyPanel');
-      let isOpen = await testSubjects.exists('spyModeSelect');
+      let isOpen = await testSubjects.exists('spyContentContainer');
       if (isOpen) {
         await retry.try(async () => {
           await this.toggleSpyPanel();
-          isOpen = await testSubjects.exists('spyModeSelect');
+          isOpen = await testSubjects.exists('spyContentContainer');
           if (isOpen) {
             throw new Error('Failed to close spy panel');
           }
@@ -253,8 +283,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByCssSelector('button[data-test-subj="toggleEditor"]');
     }
 
-    async clickNewSearch() {
-      await find.clickByCssSelector('.list-group-item a');
+    async clickNewSearch(indexPattern = 'logstash-*') {
+      await testSubjects.click(`paginatedListItem-${indexPattern}`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async setValue(newValue) {
@@ -348,9 +379,24 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await input.type(newValue + '');
     }
 
+    async setSize(newValue) {
+      const input = await find.byCssSelector('input[name="size"]');
+      await input.clearValue();
+      await input.type(newValue);
+    }
+
     async clickGo() {
       await testSubjects.click('visualizeEditorRenderButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async toggleAutoMode() {
+      await testSubjects.click('visualizeEditorAutoButton');
+    }
+
+    async sizeUpEditor() {
+      await testSubjects.click('visualizeEditorResizer');
+      await remote.pressKeys(Keys.ARROW_RIGHT);
     }
 
     async clickOptions() {
@@ -567,7 +613,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async selectTableInSpyPaneSelect() {
-      await testSubjects.click('spyModeSelect');
       await testSubjects.click('spyModeSelect-table');
     }
 
@@ -614,7 +659,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async getVisualizationRequest() {
       log.debug('getVisualizationRequest');
       await this.openSpyPanel();
-      await testSubjects.click('spyModeSelect');
       await testSubjects.click('spyModeSelect-request');
       return await testSubjects.getVisibleText('visualizationEsRequestBody');
     }
@@ -688,6 +732,18 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
           if (!onLandingPage) throw new Error('Not on the landing page.');
         });
       }
+    }
+
+    async clickLegendOption(name) {
+      await testSubjects.click(`legend-${name}`);
+    }
+
+    async selectNewLegendColorChoice(color) {
+      await testSubjects.click(`legendSelectColor-${color}`);
+    }
+
+    async doesSelectedLegendColorExist(color) {
+      return await testSubjects.exists(`legendSelectedColor-${color}`);
     }
   }
 

@@ -9,7 +9,6 @@
        For some reasons it doesn't work without it (even though the default role of
        the element is textbox anyway). -->
   <textarea
-    id="timelionExpressionTextArea"
     data-expression-input
     role="textbox"
     rows="{{ rows }}"
@@ -28,6 +27,7 @@
     aria-autocomplete="list"
     aria-controls="timelionSuggestionList"
     aria-activedescendant="{{ getActiveSuggestionId() }}"
+    data-test-subj="timelionExpressionTextArea"
   ></textarea>
 
   <timelion-expression-suggestions

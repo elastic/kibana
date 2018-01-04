@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { IndexedArray } from 'ui/indexed_array';
-const notPropsOptNames = IndexedArray.OPT_NAMES.concat('constructor');
+const notPropsOptNames = IndexedArray.OPT_NAMES.concat('constructor', 'invokeProviders');
 
 /**
  * Create a registry, which is just a Private module provider.
@@ -49,6 +49,7 @@ export function uiRegistry(spec) {
   spec = spec || {};
 
   const constructor = _.has(spec, 'constructor') && spec.constructor;
+  const invokeProviders = _.has(spec, 'invokeProviders') && spec.invokeProviders;
   const iaOpts = _.defaults(_.pick(spec, IndexedArray.OPT_NAMES), { index: ['name'] });
   const props = _.omit(spec, notPropsOptNames);
   const providers = [];
@@ -62,8 +63,12 @@ export function uiRegistry(spec) {
    *                          defines how things will be indexed.
    */
   const registry = function (Private, $injector) {
+    // call the registered providers to get their values
+    iaOpts.initialSet = invokeProviders
+      ? $injector.invoke(invokeProviders, undefined, { providers })
+      : providers.map(Private);
+
     // index all of the modules
-    iaOpts.initialSet = providers.map(Private);
     let modules = new IndexedArray(iaOpts);
 
     // mixin other props
@@ -86,4 +91,3 @@ export function uiRegistry(spec) {
 
   return registry;
 }
-

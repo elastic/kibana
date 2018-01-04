@@ -1,3 +1,5 @@
+$disabledTextColor: #9B9B9B;
+
 /**
  * 1. Button reset.
  * 2. Ensure buttons stack.
@@ -47,4 +49,18 @@
 
   .kuiContextMenuItem__arrow {
     align-self: flex-end;
+  }
+
+  .kuiContextMenuItem-disabled {
+    color: $disabledTextColor;
+    @include darkTheme {
+      color: $disabledTextColor;
+    }
+
+    cursor: default;
+    &:hover, &:focus {
+      .kuiContextMenuItem__text {
+        text-decoration: none;
+      }
+    }
   }

@@ -4,6 +4,7 @@ import {
   maximizePanel,
   minimizePanel,
   updateUseMargins,
+  updateHidePanelTitles,
   updateIsFullScreenMode,
 } from '../actions';
 
@@ -20,6 +21,11 @@ export const view = handleActions({
     useMargins: payload
   }),
 
+  [updateHidePanelTitles]: (state, { payload }) => ({
+    ...state,
+    hidePanelTitles: payload
+  }),
+
   [combineActions(maximizePanel, minimizePanel)]: (state, { payload }) => ({
     ...state,
     maximizedPanelId: payload
@@ -34,4 +40,5 @@ export const view = handleActions({
   viewMode: DashboardViewMode.VIEW,
   maximizedPanelId: undefined,
   useMargins: true,
+  hidePanelTitles: false,
 });

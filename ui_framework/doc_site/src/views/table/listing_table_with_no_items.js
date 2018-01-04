@@ -3,14 +3,13 @@ import React from 'react';
 import {
   KuiButton,
   KuiButtonIcon,
-  KuiPager,
   KuiListingTable,
   KuiListingTableNoMatchesPrompt,
 } from '../../../../components';
 
 import {
   RIGHT_ALIGNMENT
-} from '../../../../services';
+} from '../../../../src/services';
 
 function renderToolBarActions() {
   return [
@@ -36,22 +35,6 @@ function renderToolBarActions() {
   ];
 }
 
-function renderPager() {
-  return (
-    <KuiPager
-      startNumber={1}
-      hasNextPage={true}
-      hasPreviousPage={false}
-      endNumber={10}
-      totalItems={100}
-      onNextPage={() => {
-      }}
-      onPreviousPage={() => {
-      }}
-    />
-  );
-}
-
 function renderHeader() {
   return [
     'Title',
@@ -67,7 +50,6 @@ function renderHeader() {
 export function ListingTableWithNoItems() {
   return (
     <KuiListingTable
-      pager={renderPager()}
       toolBarActions={renderToolBarActions()}
       header={renderHeader()}
       onFilter={() => {}}

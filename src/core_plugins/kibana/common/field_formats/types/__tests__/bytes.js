@@ -1,5 +1,8 @@
 import expect from 'expect.js';
-import { BytesFormat } from '../bytes';
+import { createBytesFormat } from '../bytes';
+import { FieldFormat } from '../../../../../../ui/field_formats/field_format';
+
+const BytesFormat = createBytesFormat(FieldFormat);
 
 describe('BytesFormat', function () {
 

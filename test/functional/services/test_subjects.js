@@ -27,6 +27,7 @@ export function TestSubjectsProvider({ getService }) {
     }
 
     async click(selector, timeout = defaultFindTimeout) {
+      log.debug(`TestSubjects.click(${selector})`);
       return await retry.try(async () => {
         const element = await this.find(selector, timeout);
         await remote.moveMouseTo(element);
@@ -40,7 +41,7 @@ export function TestSubjectsProvider({ getService }) {
 
     async find(selector, timeout = defaultFindTimeout) {
       log.debug(`TestSubjects.find(${selector})`);
-      return await find.displayedByCssSelector(testSubjSelector(selector), timeout);
+      return await find.byCssSelector(testSubjSelector(selector), timeout);
     }
 
     async findAll(selector) {

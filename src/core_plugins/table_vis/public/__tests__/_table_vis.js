@@ -92,7 +92,7 @@ describe('Integration', function () {
 
     $rootScope.$on('renderComplete', () => {
       const $atg = $el.find('kbn-agg-table-group').first();
-      expect($atg.size()).to.be(1);
+      expect($atg.length).to.be(1);
       expect($atg.attr('group')).to.be('tableGroups');
       expect($atg.isolateScope().group).to.be($atg.scope().tableGroups);
     });
@@ -103,10 +103,10 @@ describe('Integration', function () {
     init(new OneRangeVis(), { hits: { total: 0, hits: [] } });
 
     $rootScope.$on('renderComplete', () => {
-      expect($el.find('kbn-agg-table-group').size()).to.be(0);
+      expect($el.find('kbn-agg-table-group').length).to.be(0);
 
       const $err = $el.find('.table-vis-error');
-      expect($err.size()).to.be(1);
+      expect($err.length).to.be(1);
       expect($err.text().trim()).to.be('No results found');
     });
   });
@@ -128,10 +128,10 @@ describe('Integration', function () {
     init(new ThreeTermVis(visParams), resp);
 
     $rootScope.$on('renderComplete', () => {
-      expect($el.find('kbn-agg-table-group').size()).to.be(0);
+      expect($el.find('kbn-agg-table-group').length).to.be(0);
 
       const $err = $el.find('.table-vis-error');
-      expect($err.size()).to.be(1);
+      expect($err.length).to.be(1);
       expect($err.text().trim()).to.be('No results found');
     });
   });

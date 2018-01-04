@@ -36,7 +36,7 @@ const translateToQuery = function (filter) {
  * @returns {object}
  */
 const cleanFilter = function (filter) {
-  return _.omit(filter, ['meta']);
+  return _.omit(filter, ['meta', '$state']);
 };
 
 export function buildQueryFromFilters(filters, decorateQuery) {

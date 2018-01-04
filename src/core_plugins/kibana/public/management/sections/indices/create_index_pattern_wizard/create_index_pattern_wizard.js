@@ -10,6 +10,7 @@ import { sendCreateIndexPatternRequest } from './send_create_index_pattern_reque
 import './step_index_pattern';
 import './step_time_field';
 import './matching_indices_list';
+import './create_index_pattern_wizard.less';
 
 uiRoutes
   .when('/management/kibana/index', {
@@ -77,7 +78,17 @@ uiModules.get('apps/management')
       });
     }
 
-    function getIndices(pattern, limit = MAX_SEARCH_SIZE) {
+    function getIndices(rawPattern, limit = MAX_SEARCH_SIZE) {
+      const pattern = rawPattern.trim();
+
+      // Searching for `*:` fails for CCS environments. The search request
+      // is worthless anyways as the we should only send a request
+      // for a specific query (where we do not append *) if there is at
+      // least a single character being searched for.
+      if (pattern === '*:') {
+        return [];
+      }
+
       const params = {
         index: pattern,
         ignore: [404],
@@ -105,6 +116,15 @@ uiModules.get('apps/management')
               name: bucket.key
             };
           }), 'name');
+        })
+        .catch(err => {
+          const type = _.get(err, 'body.error.caused_by.type');
+          if (type === 'index_not_found_exception') {
+            // This happens in a CSS environment when the controlling node returns a 500 even though the data
+            // nodes returned a 404. Remove this when/if this is handled: https://github.com/elastic/elasticsearch/issues/27461
+            return [];
+          }
+          throw err;
         });
     }
 

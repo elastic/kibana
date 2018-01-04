@@ -15,8 +15,8 @@ export default new Chainable('precision', {
     }
   ],
   help: 'number of digits to round the decimal portion of the value to',
-  fn: function precisionFn(args) {
-    alter(args, function (eachSeries, precision) {
+  fn: async function precisionFn(args) {
+    await alter(args, function (eachSeries, precision) {
       eachSeries._meta = eachSeries._meta || {};
       eachSeries._meta.precision = precision;
       return eachSeries;

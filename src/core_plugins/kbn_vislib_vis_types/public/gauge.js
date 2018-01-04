@@ -21,7 +21,7 @@ export default function GaugeVisType(Private) {
         type: 'gauge',
         addTooltip: true,
         addLegend: true,
-
+        isDisplayWarning: false,
         gauge: {
           verticalSplit: false,
           extendRange: true,
@@ -64,7 +64,7 @@ export default function GaugeVisType(Private) {
     },
     editorConfig: {
       collections: {
-        gaugeTypes: ['Arc', 'Circle', 'Metric'],
+        gaugeTypes: ['Arc', 'Circle'],
         gaugeColorMode: ['None', 'Labels', 'Background'],
         scales: ['linear', 'log', 'square root'],
         colorSchemas: Object.keys(vislibColorMaps),

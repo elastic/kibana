@@ -16,10 +16,11 @@ export function saveDashboard(toJson, timeFilter, dashboardStateManager) {
   const savedDashboard = dashboardStateManager.savedDashboard;
   const appState = dashboardStateManager.appState;
 
-  updateSavedDashboard(savedDashboard, appState, dashboardStateManager.uiState, timeFilter, toJson);
+  updateSavedDashboard(savedDashboard, appState, timeFilter, toJson);
 
   return savedDashboard.save()
     .then((id) => {
+      dashboardStateManager.lastSavedDashboardFilters = dashboardStateManager.getFilterState();
       dashboardStateManager.resetState();
       return id;
     });

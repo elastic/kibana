@@ -12,7 +12,7 @@ import { Command } from 'commander';
 import elasticsearch from 'elasticsearch';
 
 import { EsArchiver } from './es_archiver';
-import { createToolingLog } from '../utils';
+import { createToolingLog } from '../dev';
 import { readConfigFile } from '../functional_test_runner';
 
 const cmd = new Command('node scripts/es_archiver');

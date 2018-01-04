@@ -3,6 +3,7 @@ import _ from 'lodash';
 import { DashboardConstants } from '../../../src/core_plugins/kibana/public/dashboard/dashboard_constants';
 
 export const PIE_CHART_VIS_NAME = 'Visualization PieChart';
+export const AREA_CHART_VIS_NAME = 'Visualization漢字 AreaChart';
 
 export function DashboardPageProvider({ getService, getPageObjects }) {
   const log = getService('log');
@@ -19,25 +20,33 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
   class DashboardPage {
     async initTests() {
-      const logstash = esArchiver.loadIfNeeded('logstash_functional');
+      log.debug('load kibana index with visualizations and log data');
+      await Promise.all([
+        esArchiver.load('dashboard'),
+        esArchiver.loadIfNeeded('logstash_functional')
+      ]);
+
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'UTC',
         'defaultIndex': 'logstash-*'
       });
 
-      log.debug('load kibana index with visualizations');
-      await esArchiver.load('dashboard');
-
+      await kibanaServer.uiSettings.disableToastAutohide();
       await PageObjects.common.navigateToApp('dashboard');
-      return logstash;
+    }
+
+    async preserveCrossAppState() {
+      const url = await remote.getCurrentUrl();
+      await remote.get(url, false);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickEditVisualization() {
       log.debug('clickEditVisualization');
-      await testSubjects.click('dashboardPanelToggleMenuIcon');
 
       // Edit link may sometimes be disabled if the embeddable isn't rendered yet.
       await retry.try(async () => {
+        await this.showPanelEditControlsDropdownMenu();
         await testSubjects.click('dashboardPanelEditLink');
         const current = await remote.getCurrentUrl();
         if (current.indexOf('visualize') < 0) {
@@ -77,6 +86,18 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async clickExitFullScreenTextButton() {
       await testSubjects.click('exitFullScreenModeText');
+    }
+
+    async getDashboardIdFromCurrentUrl() {
+      const currentUrl = await remote.getCurrentUrl();
+      const urlSubstring = 'kibana#/dashboard/';
+      const startOfIdIndex = currentUrl.indexOf(urlSubstring) + urlSubstring.length;
+      const endIndex = currentUrl.indexOf('?');
+      const id = currentUrl.substring(startOfIdIndex, endIndex < 0 ? currentUrl.length : endIndex);
+
+      log.debug(`Dashboard id extracted from ${currentUrl} is ${id}`);
+
+      return id;
     }
 
     /**
@@ -123,12 +144,17 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async clickFilterButton() {
       log.debug('Clicking filter button');
-      return await testSubjects.click('querySubmitButton');
+      await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickClone() {
       log.debug('Clicking clone');
       await testSubjects.click('dashboardClone');
+    }
+
+    async getCloneTitle() {
+      return await testSubjects.getProperty('clonedDashboardTitle', 'value');
     }
 
     async confirmClone() {
@@ -235,13 +261,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
     }
 
-    async filterVizNames(vizName) {
-      const visFilter = await find.byCssSelector('input[placeholder="Visualizations Filter..."]');
-      await visFilter.click();
-      await remote.pressKeys(vizName);
-      await PageObjects.header.waitUntilLoadingHasFinished();
-    }
-
     async clickVizNameLink(vizName) {
       await find.clickByPartialLinkText(vizName);
     }
@@ -256,7 +275,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       await this.clickEdit();
     }
 
-    async filterSearchNames(name) {
+    async filterEmbeddableNames(name) {
       await testSubjects.setValue('savedObjectFinderSearchInput', name);
       await PageObjects.header.waitUntilLoadingHasFinished();
     }
@@ -268,7 +287,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async addSavedSearch(searchName) {
       await this.clickAddVisualization();
       await this.clickSavedSearchTab();
-      await this.filterSearchNames(searchName);
+      await this.filterEmbeddableNames(searchName);
 
       await find.clickByPartialLinkText(searchName);
       await PageObjects.header.clickToastOK();
@@ -278,7 +297,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async addVisualization(vizName) {
       await this.clickAddVisualization();
       log.debug('filter visualization (' + vizName + ')');
-      await this.filterVizNames(vizName);
+      await this.filterEmbeddableNames(vizName);
       await this.clickVizNameLink(vizName);
       await PageObjects.header.clickToastOK();
       // this second click of 'Add' collapses the Add Visualization pane
@@ -337,8 +356,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async clickDashboardByLinkText(dashName) {
-      await find.clickByLinkText(dashName);
+    async selectDashboard(dashName) {
+      await testSubjects.click(`dashboardListingTitleLink-${dashName.split(' ').join('-')}`);
     }
 
     async clearSearchValue() {
@@ -374,7 +393,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getCountOfDashboardsInListingTable() {
-      const dashboardTitles = await testSubjects.findAll('dashboardListingTitleLink');
+      const dashboardTitles = await testSubjects.findAll('dashboardListingRow');
       return dashboardTitles.length;
     }
 
@@ -393,7 +412,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
       await retry.try(async () => {
         await this.searchForDashboardWithName(dashName);
-        await this.clickDashboardByLinkText(dashName);
+        await this.selectDashboard(dashName);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const onDashboardLandingPage = await this.onDashboardLandingPage();
@@ -417,7 +436,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async getDashboardPanels() {
       return await testSubjects.findAll('dashboardPanel');
     }
-
 
     async getPanelDimensions() {
       const panels = await find.allByCssSelector('.react-grid-item'); // These are gridster-defined elements and classes
@@ -443,7 +461,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       return [
         { name: PIE_CHART_VIS_NAME, description: 'PieChart' },
         { name: 'Visualization☺ VerticalBarChart', description: 'VerticalBarChart' },
-        { name: 'Visualization漢字 AreaChart', description: 'AreaChart' },
+        { name: AREA_CHART_VIS_NAME, description: 'AreaChart' },
         { name: 'Visualization☺漢字 DataTable', description: 'DataTable' },
         { name: 'Visualization漢字 LineChart', description: 'LineChart' },
         { name: 'Visualization TileMap', description: 'TileMap' },
@@ -456,9 +474,17 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async showPanelEditControlsDropdownMenu() {
+      log.debug('showPanelEditControlsDropdownMenu');
       const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
       if (editLinkExists) return;
-      await testSubjects.click('dashboardPanelToggleMenuIcon');
+
+      await retry.try(async () => {
+        await testSubjects.click('dashboardPanelToggleMenuIcon');
+        const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
+        if (!editLinkExists) {
+          throw new Error('No edit link exists, toggle menu not open. Try again.');
+        }
+      });
     }
 
     async clickDashboardPanelEditLink() {
@@ -553,6 +579,25 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
 
       throw new Error('no element');
+    }
+
+    async waitForRenderCounter(count) {
+      await retry.try(async () => {
+        const sharedItems = await find.allByCssSelector('[data-shared-item]');
+        const renderCounters = await Promise.all(sharedItems.map(async sharedItem => {
+          return await sharedItem.getAttribute('render-counter');
+        }));
+        if (renderCounters.length !== sharedItems.length) {
+          throw new Error('Some shared items dont have render counter attribute');
+        }
+        let totalCount = 0;
+        renderCounters.forEach(counter => {
+          totalCount += counter;
+        });
+        if (totalCount < count) {
+          throw new Error('Still waiting on more visualizations to finish rendering');
+        }
+      });
     }
 
     async getPanelSharedItemData() {

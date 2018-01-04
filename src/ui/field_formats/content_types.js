@@ -4,17 +4,17 @@ import { getHighlightHtml } from '../../core_plugins/kibana/common/highlight/hig
 
 const types = {
   html: function (format, convert) {
-    function recurse(value, field, hit) {
+    function recurse(value, field, hit, meta) {
       if (value == null) {
         return asPrettyString(value);
       }
 
       if (!value || typeof value.map !== 'function') {
-        return convert.call(format, value, field, hit);
+        return convert.call(format, value, field, hit, meta);
       }
 
       const subVals = value.map(v => {
-        return recurse(v, field, hit);
+        return recurse(v, field, hit, meta);
       });
       const useMultiLine = subVals.some(sub => {
         return sub.indexOf('\n') > -1;

@@ -14,7 +14,7 @@ describe('getLastValue(data)', () => {
 
   it('returns the second to last value if the last value is null (default)', () => {
     const data = [[1, 4], [2, null]];
-    expect(getLastValue(data)).to.equal(4);
+    expect(getLastValue(data)).to.equal(0);
   });
 
   it('returns the zero if second to last is null (default)', () => {
@@ -29,3 +29,4 @@ describe('getLastValue(data)', () => {
 
 
 });
+

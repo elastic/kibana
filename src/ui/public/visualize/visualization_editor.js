@@ -14,6 +14,7 @@ uiModules
     return {
       restrict: 'E',
       scope: {
+        showSpyPanel: '=',
         vis: '=',
         visData: '=',
         uiState: '=?',
@@ -24,11 +25,11 @@ uiModules
         const vis = $scope.vis;
         const Editor = typeof vis.type.editor === 'function' ? vis.type.editor :
           editorTypes.find(editor => editor.key === vis.type.editor);
-        const editor = new Editor(element[0], vis);
+        const editor = new Editor(element[0], vis, $scope.showSpyPanel);
 
         $scope.renderFunction = () => {
           if (!$scope.vis) return;
-          editor.render($scope.visData, $scope.searchSource, getUpdateStatus($scope)).then(() => {
+          editor.render($scope.visData, $scope.searchSource, getUpdateStatus($scope), $scope.uiState).then(() => {
             $scope.$emit('renderComplete');
           });
         };

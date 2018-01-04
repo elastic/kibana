@@ -13,12 +13,25 @@ const serverSslEnabled = (settings, log) => {
   }
 };
 
+const savedObjectsIndexCheckTimeout = (settings, log) => {
+  if (_.has(settings, 'savedObjects.indexCheckTimeout')) {
+    log('savedObjects.indexCheckTimeout is no longer necessary.');
+
+    if (Object.keys(settings.savedObjects).length > 1) {
+      delete settings.savedObjects.indexCheckTimeout;
+    } else {
+      delete settings.savedObjects;
+    }
+  }
+};
+
 const deprecations = [
   //server
   rename('server.ssl.cert', 'server.ssl.certificate'),
   unused('server.xsrf.token'),
   unused('uiSettings.enabled'),
   serverSslEnabled,
+  savedObjectsIndexCheckTimeout,
 ];
 
 export const transformDeprecations = createTransform(deprecations);

@@ -6,7 +6,7 @@ export default function (kibana) {
         title: 'Redirecting',
         id: 'stateSessionStorageRedirect',
         main: 'plugins/state_session_storage_redirect',
-        listed: false,
+        hidden: true,
       }
     }
   });

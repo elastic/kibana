@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import getLastValue from '../../visualizations/lib/get_last_value';
+import getLastValue from '../../../common/get_last_value';
 import tickFormatter from './tick_formatter';
 import moment from 'moment';
 export default (series, model, dateFormat = 'lll') => {
@@ -14,7 +14,7 @@ export default (series, model, dateFormat = 'lll') => {
         ].filter(v => v).join('.');
 
         const formatter = tickFormatter(seriesModel.formatter, seriesModel.value_template);
-        const lastValue = getLastValue(row.data, 10);
+        const lastValue = getLastValue(row.data);
 
         const data = {
           last: {

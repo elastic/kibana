@@ -20,13 +20,13 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickBucket('Split Rows');
       log.debug('Aggregation = Histogram');
       await PageObjects.visualize.selectAggregation('Histogram');
-      log.debug('Field = bytes');
-      await PageObjects.visualize.selectField('bytes');
+      log.debug('Field = machine.ram');
+      await PageObjects.visualize.selectField('machine.ram');
     });
 
     describe('interval parameter uses autoBounds', function indexPatternCreation() {
       it('should use provided value when number of generated buckets is less than histogram:maxBars', async function () {
-        const providedInterval = 2000;
+        const providedInterval = 2400000000;
         log.debug(`Interval = ${providedInterval}`);
         await PageObjects.visualize.setNumericInterval(providedInterval);
         await PageObjects.visualize.clickGo();
@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }) {
         const bucketStart = parseInt(dataArray[0], 10);
         const bucketEnd = parseInt(dataArray[2], 10);
         const actualInterval = bucketEnd - bucketStart;
-        expect(actualInterval).to.eql(200);
+        expect(actualInterval).to.eql(1200000000);
       });
     });
   });

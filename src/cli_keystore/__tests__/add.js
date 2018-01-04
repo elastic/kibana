@@ -126,7 +126,7 @@ describe('Kibana keystore', () => {
         stdin.end();
       });
 
-      await add(keystore, 'foo', { stdin });
+      await add(keystore, 'foo', { stdin: true, stdinStream: stdin });
 
       expect(keystore.data.foo).to.eql('kibana');
     });

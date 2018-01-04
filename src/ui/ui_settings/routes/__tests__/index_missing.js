@@ -1,23 +1,21 @@
 import expect from 'expect.js';
+import sinon from 'sinon';
 
 import {
   getServices,
   chance,
-  assertServiceUnavailableResponse,
-  waitUntilNextHealthCheck,
+  assertSinonMatch,
 } from './lib';
 
 export function indexMissingSuite() {
-  beforeEach(waitUntilNextHealthCheck);
-
   async function setup() {
     const { callCluster, kbnServer } = getServices();
     const indexName = kbnServer.config.get('kibana.index');
 
-    // delete the kibana index and run the test, we have about 2 seconds
-    // before the healthCheck runs again, that SHOULD be enough time
+    // ensure the kibana index does not exist
     await callCluster('indices.delete', {
       index: indexName,
+      ignore: [404],
     });
 
     return {
@@ -25,23 +23,21 @@ export function indexMissingSuite() {
 
       // an incorrect number of shards is how we determine when the index was not created by Kibana,
       // but automatically by writing to es when index didn't exist
-      async assertNoKibanaIndex() {
-        const resp = await callCluster('indices.delete', {
-          index: indexName,
-          ignore: [404]
+      async assertValidKibanaIndex() {
+        const resp = await callCluster('indices.get', {
+          index: indexName
         });
-        expect(resp).to.have.property('status', 404);
+
+        expect(resp[indexName].mappings).to.have.property('doc');
+        expect(resp[indexName].mappings.doc.properties).to.have.keys(
+          'index-pattern',
+          'visualization',
+          'search',
+          'dashboard'
+        );
       }
     };
   }
-
-  afterEach(async () => {
-    const { kbnServer, callCluster } = getServices();
-    await callCluster('indices.delete', {
-      index: kbnServer.config.get('kibana.index'),
-      ignore: 404
-    });
-  });
 
   describe('get route', () => {
     it('returns a 200 and with empty values', async () => {
@@ -58,49 +54,82 @@ export function indexMissingSuite() {
   });
 
   describe('set route', () => {
-    it('returns a 503 and does not create the kibana index', async () => {
-      const { kbnServer, assertNoKibanaIndex } = await setup();
+    it('returns a 200 and creates a valid kibana index', async () => {
+      const { kbnServer, assertValidKibanaIndex } = await setup();
 
-      assertServiceUnavailableResponse(await kbnServer.inject({
+      const defaultIndex = chance.word();
+      const { statusCode, result } = await kbnServer.inject({
         method: 'POST',
         url: '/api/kibana/settings/defaultIndex',
         payload: {
-          value: chance.word()
+          value: defaultIndex
         }
-      }));
+      });
 
-      await assertNoKibanaIndex();
+      expect(statusCode).to.be(200);
+      assertSinonMatch(result, {
+        settings: {
+          buildNum: {
+            userValue: sinon.match.number
+          },
+          defaultIndex: {
+            userValue: defaultIndex
+          }
+        }
+      });
+
+      await assertValidKibanaIndex();
     });
   });
 
   describe('setMany route', () => {
-    it('returns a 503 and does not create the kibana index', async () => {
-      const { kbnServer, assertNoKibanaIndex } = await setup();
+    it('returns a 200 and creates a valid kibana index', async () => {
+      const { kbnServer, assertValidKibanaIndex } = await setup();
 
-      assertServiceUnavailableResponse(await kbnServer.inject({
+      const defaultIndex = chance.word();
+      const { statusCode, result } = await kbnServer.inject({
         method: 'POST',
         url: '/api/kibana/settings',
         payload: {
-          changes: {
-            defaultIndex: chance.word()
+          changes: { defaultIndex }
+        }
+      });
+
+      expect(statusCode).to.be(200);
+      assertSinonMatch(result, {
+        settings: {
+          buildNum: {
+            userValue: sinon.match.number
+          },
+          defaultIndex: {
+            userValue: defaultIndex
           }
         }
-      }));
+      });
 
-      await assertNoKibanaIndex();
+      await assertValidKibanaIndex();
     });
   });
 
   describe('delete route', () => {
-    it('returns a 503 and does not create the kibana index', async () => {
-      const { kbnServer, assertNoKibanaIndex } = await setup();
+    it('returns a 200 and creates a valid kibana index', async () => {
+      const { kbnServer, assertValidKibanaIndex } = await setup();
 
-      assertServiceUnavailableResponse(await kbnServer.inject({
+      const { statusCode, result } = await kbnServer.inject({
         method: 'DELETE',
         url: '/api/kibana/settings/defaultIndex'
-      }));
+      });
 
-      await assertNoKibanaIndex();
+      expect(statusCode).to.be(200);
+      assertSinonMatch(result, {
+        settings: {
+          buildNum: {
+            userValue: sinon.match.number
+          }
+        }
+      });
+
+      await assertValidKibanaIndex();
     });
   });
 }

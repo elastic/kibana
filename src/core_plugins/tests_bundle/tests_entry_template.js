@@ -1,24 +1,12 @@
 import { esTestConfig } from '../../test_utils/es';
 
-export default function ({ env, bundle }) {
-
-  const pluginSlug = env.pluginInfo.sort()
-    .map(p => ' *  - ' + p)
-    .join('\n');
-
-  const requires = bundle.modules
-    .map(m => `require(${JSON.stringify(m)});`)
-    .join('\n');
-
-  return `
+export const createTestEntryTemplate = (defaultUiSettings) => (bundle) => `
 /**
  * Test entry file
  *
  * This is programatically created and updated, do not modify
  *
- * context: ${JSON.stringify(env.context)}
- * includes code from:
-${pluginSlug}
+ * context: ${bundle.getContext()}
  *
  */
 
@@ -43,18 +31,16 @@ window.__KBN__ = {
       layers: []
     },
     mapConfig: {
-      manifestServiceUrl: 'https://geo.elastic.co/v1/manifest'
+      manifestServiceUrl: 'https://staging-dot-catalogue-dot-elastic-layer.appspot.com/v1/manifest'
     }
   },
   uiSettings: {
-    defaults: ${JSON.stringify(env.defaultUiSettings, null, 2).split('\n').join('\n    ')},
+    defaults: ${JSON.stringify(defaultUiSettings, null, 2).split('\n').join('\n    ')},
     user: {}
   }
 };
 
 require('ui/test_harness');
-${requires}
+${bundle.getRequires().join('\n')}
 require('ui/test_harness').bootstrap(/* go! */);
 `;
-
-}

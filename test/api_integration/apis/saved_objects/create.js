@@ -47,7 +47,7 @@ export default function ({ getService }) {
         })
       ));
 
-      it('should return 503 and not create kibana index', async () => {
+      it('should return 200 and create kibana index', async () => {
         await supertest
           .post(`/api/saved_objects/visualization`)
           .send({
@@ -55,22 +55,27 @@ export default function ({ getService }) {
               title: 'My favorite vis'
             }
           })
-          .expect(503)
+          .expect(200)
           .then(resp => {
             // loose uuid validation
+            expect(resp.body).to.have.property('id').match(/^[0-9a-f-]{36}$/);
+
+            // loose ISO8601 UTC time with milliseconds validation
+            expect(resp.body).to.have.property('updated_at').match(/^[\d-]{10}T[\d:\.]{12}Z$/);
+
             expect(resp.body).to.eql({
-              error: 'Service Unavailable',
-              statusCode: 503,
-              message: 'Service Unavailable'
+              id: resp.body.id,
+              type: 'visualization',
+              updated_at: resp.body.updated_at,
+              version: 1,
+              attributes: {
+                title: 'My favorite vis'
+              }
             });
           });
 
-        const index = await es.indices.get({
-          index: '.kibana',
-          ignore: [404]
-        });
-
-        expect(index).to.have.property('status', 404);
+        expect(await es.indices.exists({ index: '.kibana' }))
+          .to.be(true);
       });
     });
   });

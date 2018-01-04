@@ -2,23 +2,21 @@
 
 exports[`KuiCodeEditor behavior hint element should be disabled when the ui ace box gains focus 1`] = `
 <div
-  className="kuiCodeEditorKeyboardHint kuiCodeEditorKeyboardHint-isInactive"
+  class="kuiCodeEditorKeyboardHint"
   data-test-subj="codeEditorHint"
-  id={42}
-  onClick={[Function]}
-  onKeyDown={[Function]}
+  id="42"
   role="button"
-  tabIndex="0"
+  tabindex="0"
 >
   <p
-    className="kuiText kuiVerticalRhythmSmall"
+    class="kuiText kuiVerticalRhythmSmall"
   >
     Press Enter to start 
     editing
     .
   </p>
   <p
-    className="kuiText kuiVerticalRhythmSmall"
+    class="kuiText kuiVerticalRhythmSmall"
   >
     When you’re done, press Escape to stop 
     editing
@@ -29,23 +27,46 @@ exports[`KuiCodeEditor behavior hint element should be disabled when the ui ace 
 
 exports[`KuiCodeEditor behavior hint element should be enabled when the ui ace box loses focus 1`] = `
 <div
-  className="kuiCodeEditorKeyboardHint"
+  class="kuiCodeEditorKeyboardHint"
   data-test-subj="codeEditorHint"
-  id={42}
-  onClick={[Function]}
-  onKeyDown={[Function]}
+  id="42"
   role="button"
-  tabIndex="0"
+  tabindex="0"
 >
   <p
-    className="kuiText kuiVerticalRhythmSmall"
+    class="kuiText kuiVerticalRhythmSmall"
   >
     Press Enter to start 
     editing
     .
   </p>
   <p
-    className="kuiText kuiVerticalRhythmSmall"
+    class="kuiText kuiVerticalRhythmSmall"
+  >
+    When you’re done, press Escape to stop 
+    editing
+    .
+  </p>
+</div>
+`;
+
+exports[`KuiCodeEditor behavior hint element should be tabable 1`] = `
+<div
+  class="kuiCodeEditorKeyboardHint"
+  data-test-subj="codeEditorHint"
+  id="42"
+  role="button"
+  tabindex="0"
+>
+  <p
+    class="kuiText kuiVerticalRhythmSmall"
+  >
+    Press Enter to start 
+    editing
+    .
+  </p>
+  <p
+    class="kuiText kuiVerticalRhythmSmall"
   >
     When you’re done, press Escape to stop 
     editing
@@ -68,28 +89,12 @@ exports[`KuiCodeEditor is rendered 1`] = `
     <p
       class="kuiText kuiVerticalRhythmSmall"
     >
-      <!-- react-text: 4 -->
-      Press Enter to start 
-      <!-- /react-text -->
-      <!-- react-text: 5 -->
-      editing
-      <!-- /react-text -->
-      <!-- react-text: 6 -->
-      .
-      <!-- /react-text -->
+      Press Enter to start editing.
     </p>
     <p
       class="kuiText kuiVerticalRhythmSmall"
     >
-      <!-- react-text: 8 -->
-      When you’re done, press Escape to stop 
-      <!-- /react-text -->
-      <!-- react-text: 9 -->
-      editing
-      <!-- /react-text -->
-      <!-- react-text: 10 -->
-      .
-      <!-- /react-text -->
+      When you’re done, press Escape to stop editing.
     </p>
   </div>
   <div
@@ -197,28 +202,12 @@ exports[`KuiCodeEditor props isReadOnly renders alternate hint text 1`] = `
     <p
       class="kuiText kuiVerticalRhythmSmall"
     >
-      <!-- react-text: 4 -->
-      Press Enter to start 
-      <!-- /react-text -->
-      <!-- react-text: 5 -->
-      interacting with the code
-      <!-- /react-text -->
-      <!-- react-text: 6 -->
-      .
-      <!-- /react-text -->
+      Press Enter to start interacting with the code.
     </p>
     <p
       class="kuiText kuiVerticalRhythmSmall"
     >
-      <!-- react-text: 8 -->
-      When you’re done, press Escape to stop 
-      <!-- /react-text -->
-      <!-- react-text: 9 -->
-      interacting with the code
-      <!-- /react-text -->
-      <!-- react-text: 10 -->
-      .
-      <!-- /react-text -->
+      When you’re done, press Escape to stop interacting with the code.
     </p>
   </div>
   <div

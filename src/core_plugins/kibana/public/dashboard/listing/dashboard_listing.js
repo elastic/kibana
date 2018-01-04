@@ -2,7 +2,7 @@ import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_regis
 import 'ui/pager_control';
 import 'ui/pager';
 import { DashboardConstants, createDashboardEditUrl } from '../dashboard_constants';
-import { SortableProperties } from 'ui_framework/services';
+import { SortableProperties } from '@elastic/eui';
 import { ConfirmationButtonTypes } from 'ui/modals';
 
 export function DashboardListingController($injector, $scope, $location) {
@@ -15,7 +15,8 @@ export function DashboardListingController($injector, $scope, $location) {
   const config = $injector.get('config');
   const dashboardConfig = $injector.get('dashboardConfig');
 
-  timefilter.enabled = false;
+  timefilter.disableAutoRefreshSelector();
+  timefilter.disableTimeRangeSelector();
 
   const limitTo = $filter('limitTo');
   // TODO: Extract this into an external service.
@@ -153,6 +154,10 @@ export function DashboardListingController($injector, $scope, $location) {
 
   this.getUrlForItem = function getUrlForItem(item) {
     return `#${createDashboardEditUrl(item.id)}`;
+  };
+
+  this.getEditUrlForItem = function getEditUrlForItem(item) {
+    return `#${createDashboardEditUrl(item.id)}?_a=(viewMode:edit)`;
   };
 
   this.getCreateDashboardHref = function getCreateDashboardHref() {

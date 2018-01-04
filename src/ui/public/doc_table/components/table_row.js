@@ -42,7 +42,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
       onRemoveColumn: '=?',
     },
     link: function ($scope, $el) {
-      $el.after('<tr>');
+      $el.after('<tr data-test-subj="docTableDetailsRow">');
       $el.empty();
 
       // when we compile the details, we use this $scope
@@ -159,7 +159,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
           const $target = reuse ? $(reuse).detach() : $(html);
           $target.data('discover:html', html);
           const $before = $cells.eq(i - 1);
-          if ($before.size()) {
+          if ($before.length) {
             $before.after($target);
           } else {
             $el.append($target);

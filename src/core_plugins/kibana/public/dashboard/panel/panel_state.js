@@ -102,11 +102,3 @@ export function createPanelState(id, type, panelIndex, currentPanels) {
   };
 }
 
-/**
- * Returns a unique id for storing the panel state in the persistent ui.
- * @param {PanelState} panel
- * @returns {string}
- */
-export function getPersistedStateId(panel) {
-  return `P-${panel.panelIndex}`;
-}

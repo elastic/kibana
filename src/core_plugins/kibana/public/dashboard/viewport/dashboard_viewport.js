@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { DashboardGrid } from '../grid';
+import { ExitFullScreenButton } from '../components/exit_full_screen_button';
 
 export function DashboardViewport({
   getContainerApi,
@@ -10,6 +11,8 @@ export function DashboardViewport({
   title,
   description,
   useMargins,
+  isFullScreenMode,
+  onExitFullScreenMode,
 }) {
   return (
     <div
@@ -19,6 +22,7 @@ export function DashboardViewport({
       data-description={description}
       className={useMargins ? 'dashboard-viewport-with-margins' : 'dashboard-viewport'}
     >
+      { isFullScreenMode && <ExitFullScreenButton onExitFullScreenMode={onExitFullScreenMode} /> }
       <DashboardGrid
         getEmbeddableFactory={getEmbeddableFactory}
         getContainerApi={getContainerApi}

@@ -136,7 +136,7 @@ export default async function (kbnServer, server, config) {
           return;
         }
 
-        const app = kbnServer.uiExports.apps.byId.stateSessionStorageRedirect;
+        const app = server.getHiddenUiAppById('stateSessionStorageRedirect');
         reply.renderApp(app, {
           redirectUrl: url,
         });
