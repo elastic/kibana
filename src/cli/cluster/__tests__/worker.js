@@ -21,7 +21,11 @@ function assertListenerRemoved(emitter, event) {
 }
 
 function setup(opts = {}) {
-  const worker = new Worker(opts);
+  const worker = new Worker({
+    ...opts,
+    baseArgv: []
+  });
+
   workersToShutdown.push(worker);
   return worker;
 }
