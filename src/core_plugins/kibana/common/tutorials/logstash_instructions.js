@@ -2,7 +2,7 @@ export const LOGSTASH_INSTRUCTIONS = {
   INSTALL: {
     OSX: [
       {
-        title: 'Download and install the Java runtime environment',
+        title: 'Download and install the Java Runtime Environment',
         textPre: 'Follow the installation instructions [here](https://docs.oracle.com/javase/8/docs/technotes/guides/install/mac_jre.html).'
       },
       {

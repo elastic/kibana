@@ -4,8 +4,8 @@ export const COMMON_NETFLOW_INSTRUCTIONS = {
       OSX: [
         {
           title: 'Edit the configuration',
-          textPre: 'While in the Logstash install directory, modify `config/logstash.yml` to set the'
-            + ' configuration parameters for the Netflow module:',
+          textPre: 'In the Logstash installation directory, modify `config/logstash.yml` to set the'
+            + ' configuration parameters for the Netflow module.',
           commands: [
             'modules:',
             '  - name: netflow',
@@ -20,8 +20,8 @@ export const COMMON_NETFLOW_INSTRUCTIONS = {
       OSX: [
         {
           title: 'Edit the configuration',
-          textPre: 'While in the Logstash install directory, modify `config/logstash.yml` to set the'
-            + ' configuration parameters for the Netflow module:',
+          textPre: 'In the Logstash installation directory, modify `config/logstash.yml` to set the'
+            + ' configuration parameters for the Netflow module.',
           commands: [
             'modules:',
             '  - name: netflow',
@@ -37,8 +37,8 @@ export const COMMON_NETFLOW_INSTRUCTIONS = {
   SETUP: {
     OSX: [
       {
-        title: 'Set up and run the Netflow module',
-        textPre: 'In the Logstash install directory, run the following command to set up the Netflow module.',
+        title: 'Run the Netflow module',
+        textPre: 'In the Logstash installation directory, run the following command to set up the Netflow module.',
         commands: [
           './bin/logstash --modules netflow --setup',
         ],
