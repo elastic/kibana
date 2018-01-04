@@ -155,7 +155,6 @@ export default function ({ getService, getPageObjects }) {
         });
 
         it('should re-create control when global time filter is updated', async () => {
-          // set time range to time with no documents - input controls do not use time filter be default
           await PageObjects.header.setAbsoluteRange('2015-01-01', '2016-01-01');
           await PageObjects.header.waitUntilLoadingHasFinished();
 
