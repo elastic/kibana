@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import expect from 'expect.js';
 import { VegaParser } from '../vega_parser';
 
@@ -146,4 +147,46 @@ describe('VegaParser._parseMapConfig', () => {
     mapStyle: 'default',
     zoomControl: true,
   }, 4));
+});
+
+describe('VegaParser._parseConfig', () => {
+  function test(spec, expectedConfig, expectedSpec, warnCount) {
+    return async () => {
+      expectedSpec = expectedSpec || _.cloneDeep(spec);
+      const vp = new VegaParser(spec);
+      const config = await vp._parseConfig();
+      expect(config).to.eql(expectedConfig);
+      expect(vp.spec).to.eql(expectedSpec);
+      expect(vp.warnings).to.have.length(warnCount || 0);
+    };
+  }
+
+  it('no config', test({}, {}, {}));
+  it('simple config', test({ config: { a: 1 } }, {}));
+  it('kibana config', test({ config: { kibana: { a: 1 } } }, { a: 1 }, { config: {} }));
+  it('_hostConfig', test({ _hostConfig: { a: 1 } }, { a: 1 }, {}, 1));
+});
+
+describe('VegaParser._calcSizing', () => {
+  function test(spec, useResize, paddingWidth, paddingHeight, isVegaLite, expectedSpec, warnCount) {
+    return async () => {
+      expectedSpec = expectedSpec || _.cloneDeep(spec);
+      const vp = new VegaParser(spec);
+      vp.isVegaLite = !!isVegaLite;
+      vp._calcSizing();
+      expect(vp.useResize).to.eql(useResize);
+      expect(vp.paddingWidth).to.eql(paddingWidth);
+      expect(vp.paddingHeight).to.eql(paddingHeight);
+      expect(vp.spec).to.eql(expectedSpec);
+      expect(vp.warnings).to.have.length(warnCount || 0);
+    };
+  }
+
+  it('no size', test({ autosize: {} }, false, 0, 0));
+  it('fit', test({ autosize: 'fit' }, true, 0, 0));
+  it('fit obj', test({ autosize: { type: 'fit' } }, true, 0, 0));
+  it('padding const', test({ autosize: 'fit', padding: 10 }, true, 20, 20));
+  it('padding obj', test({ autosize: 'fit', padding: { left: 5, bottom: 7, right: 6, top: 8 } }, true, 11, 15));
+  it('padding', test({ autosize: 'fit', width: 1, height: 2 }, true, 0, 0, false, false, 1));
+  it('padding', test({ autosize: 'fit', width: 1, height: 2 }, true, 0, 0, true, { autosize: 'fit' }, 0));
 });

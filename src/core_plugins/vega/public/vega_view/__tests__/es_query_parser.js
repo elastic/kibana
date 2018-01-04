@@ -131,5 +131,5 @@ describe(`EsQueryParser.parseEsRequest`, () => {
 
   it(`no esRequest`, test({ index: '_all' }, ctxArr, { index: '_all', body: {}, usesTime: false }));
 
-  it(`esRequest`, test({ index: '_all', body: { a: 2 } }, ctxArr, { index: '_all', body: { a: 2 }, usesTime: false }));
+  it(`esRequest`, test({ index: '_all', body: { query: 2 } }, ctxArr, { index: '_all', body: { query: 2 }, usesTime: false }));
 });

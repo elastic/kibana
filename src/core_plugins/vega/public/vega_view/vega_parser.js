@@ -107,7 +107,7 @@ export class VegaParser {
     }
 
     if (this.useResize && (this.spec.width || this.spec.height)) {
-      if (vegaLite) {
+      if (this.isVegaLite) {
         delete this.spec.width;
         delete this.spec.height;
       } else {
@@ -139,7 +139,7 @@ export class VegaParser {
 
   /**
    * Parse {config: kibana: {...}} portion of the Vega spec (or root-level _hostConfig for backward compat)
-   * @returns {object}
+   * @returns {object} kibana config
    * @private
    */
   _parseConfig() {
