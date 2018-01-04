@@ -44,6 +44,7 @@ export default async (kbnServer, server, config) => {
     uiBundles,
     profile: config.get('optimize.profile'),
     sourceMaps: config.get('optimize.sourceMaps'),
+    resolveSymlinks: config.get('optimize.resolveSymlinks'),
     unsafeCache: config.get('optimize.unsafeCache'),
   });
 

@@ -201,6 +201,10 @@ In development mode, Kibana runs a customized version of [Webpack](http://webpac
  - A module id that used to resolve to a single file now resolves to a directory, but webpack isn't adapting
  - (if you discover other scenarios, please send a PR!)
 
+#### Build Optimizations
+
+If you do not intend on utilizing `yarn link` or `npm link`, you can set `optimize.resolveSymlink: false` to disable symlink resolution which will provide a small decrease in build time.
+
 #### Setting Up SSL
 
 Kibana includes a self-signed certificate that can be used for development purposes: `npm start -- --ssl`.

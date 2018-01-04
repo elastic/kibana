@@ -161,6 +161,11 @@ export default () => Joi.object({
         )
         .default('#cheap-source-map'),
     }),
+    resolveSymlinks: Joi.when('$prod', {
+      is: true,
+      then: Joi.boolean().valid(false),
+      otherwise: Joi.boolean().default(true)
+    }),
     profile: Joi.boolean().default(false)
   }).default(),
   status: Joi.object({
