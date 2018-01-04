@@ -6,6 +6,7 @@ import 'ui/directives/truncated';
 import 'ui/directives/infinite_scroll';
 import 'ui/doc_table/components/table_header';
 import 'ui/doc_table/components/table_row';
+import { dispatchRenderComplete } from 'ui/render_complete';
 import { uiModules } from 'ui/modules';
 
 import { getLimitedSearchResultsMessage } from './doc_table_strings';
@@ -71,7 +72,6 @@ uiModules.get('kibana')
           if ($scope.columns.length === 0) $scope.columns.push('_source');
         });
 
-
         $scope.$watch('searchSource', function () {
           if (!$scope.searchSource) return;
 
@@ -101,7 +101,7 @@ uiModules.get('kibana')
 
             $scope.hits = resp.hits.hits;
             if ($scope.hits.length === 0) {
-              $el.trigger('renderComplete');
+              dispatchRenderComplete($el[0]);
             }
             // We limit the number of returned results, but we want to show the actual number of hits, not
             // just how many we retrieved.

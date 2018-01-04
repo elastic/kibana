@@ -1,6 +1,5 @@
 import d3 from 'd3';
 import _ from 'lodash';
-import $ from 'jquery';
 import MarkdownIt from 'markdown-it';
 import { NoResults } from 'ui/errors';
 import { Binder } from 'ui/binder';
@@ -10,6 +9,7 @@ import { VislibLibAlertsProvider } from './alerts';
 import { VislibLibAxisProvider } from './axis/axis';
 import { VislibGridProvider } from './chart_grid';
 import { VislibVisualizationsVisTypesProvider } from '../visualizations/vis_types';
+import { dispatchRenderComplete } from 'ui/render_complete';
 
 const markdownIt = new MarkdownIt({
   html: false,
@@ -213,7 +213,7 @@ export function VisHandlerProvider(Private) {
         div.append('h4').text(markdownIt.renderInline(message));
       }
 
-      $(this.el).trigger('renderComplete');
+      dispatchRenderComplete(this.el);
       return div;
     }
 
