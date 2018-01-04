@@ -44,7 +44,7 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
         };
       }
       this.indexPattern = indexPattern;
-
+      this._setUiState(new PersistedState());
       this.setCurrentState(visState);
       this.setState(this.getCurrentState(), false);
 

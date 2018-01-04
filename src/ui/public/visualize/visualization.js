@@ -6,7 +6,6 @@ import { uiModules } from 'ui/modules';
 import { ResizeCheckerProvider } from 'ui/resize_checker';
 import visualizationTemplate from 'ui/visualize/visualization.html';
 import { getUpdateStatus } from 'ui/vis/update_status';
-import { PersistedState } from 'ui/persisted_state';
 import 'angular-sanitize';
 
 uiModules
@@ -35,8 +34,8 @@ uiModules
         $scope.addLegend = false;
 
         // Set the passed in uiState to the vis object. uiState reference should never be changed
-        if (!$scope.uiState) $scope.uiState = new PersistedState({});
-        $scope.vis._setUiState($scope.uiState);
+        if (!$scope.uiState) $scope.uiState = $scope.vis.getUiState();
+        else $scope.vis._setUiState($scope.uiState);
 
 
         // Show no results message when isZeroHits is true and it requires search
