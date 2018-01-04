@@ -55,6 +55,7 @@ const getUpdateStatus = ($scope) => {
     data: hasChangedUsingGenericHashComparison('data', $scope.visData),
     params: hasChangedUsingGenericHashComparison('param', $scope.vis.params),
     resize: hasSizeChanged($scope.vis.size),
+    time: hasChangedUsingGenericHashComparison('time', $scope.vis.API.timeFilter.getBounds()),
     uiState: hasChangedUsingGenericHashComparison('uiState', $scope.uiState)
   };
 };
