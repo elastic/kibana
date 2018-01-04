@@ -53,7 +53,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
           ...parsedUiState,
           ...panel.embeddableConfig,
         });
-        container.onEmbeddableConfigChanged(newEmbeddableConfig => {
+        container.onEmbeddableConfigChanged(panel.panelIndex, newEmbeddableConfig => {
           uiState.clearAllKeys();
           Object.getOwnPropertyNames(newEmbeddableConfig).forEach(key => {
             uiState.set(key, newEmbeddableConfig[key]);

@@ -24,7 +24,7 @@ export class DashboardContainerAPI extends ContainerAPI {
     return this.dashboardState.getHidePanelTitles();
   }
 
-  onEmbeddableConfigChanged(listener) {
-    this.dashboardState.registerEmbeddableConfigChangeListener(listener);
+  onEmbeddableConfigChanged(panelIndex, listener) {
+    this.dashboardState.registerEmbeddableConfigChangeListener(panelIndex, listener);
   }
 }

@@ -97,7 +97,7 @@ export class DashboardStateManager {
     store.dispatch(updateTitle(this.getTitle()));
     store.dispatch(updateDescription(this.getDescription()));
 
-    this.embeddableConfigChangeListeners = [];
+    this.embeddableConfigChangeListeners = {};
     this.changeListeners = [];
 
     this.unsubscribe = store.subscribe(() => this._handleStoreChanges());
@@ -107,8 +107,12 @@ export class DashboardStateManager {
     });
   }
 
-  registerEmbeddableConfigChangeListener(callback) {
-    this.embeddableConfigChangeListeners.push(callback);
+  registerEmbeddableConfigChangeListener(panelIndex, callback) {
+    let panelListeners = this.embeddableConfigChangeListeners[panelIndex];
+    if (!panelListeners) {
+      panelListeners = this.embeddableConfigChangeListeners[panelIndex] = [];
+    }
+    panelListeners.push(callback);
   }
 
   registerChangeListener(callback) {
@@ -146,7 +150,10 @@ export class DashboardStateManager {
     for(const appStatePanel of this.appState.panels) {
       const storePanel = getPanel(state, appStatePanel.panelIndex);
       if (storePanel && !_.isEqual(appStatePanel.embeddableConfig, storePanel.embeddableConfig)) {
-        this.embeddableConfigChangeListeners.forEach(listener => listener(appStatePanel.embeddableConfig));
+        const panelListeners = this.embeddableConfigChangeListeners[appStatePanel.panelIndex];
+        if (panelListeners) {
+          panelListeners.forEach(listener => listener(appStatePanel.embeddableConfig));
+        }
       }
     }
   }
