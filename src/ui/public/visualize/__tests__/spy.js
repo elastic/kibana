@@ -181,6 +181,13 @@ describe('visualize spy panel', function () {
       expect($el.panel.hasClass('only')).to.equal(true);
       expect(visElement.hasClass('spy-only')).to.equal(true);
     });
+
+    it('should not trigger forced maximized mode, when spy is not shown', () => {
+      visElement.height(50);
+      compile();
+      $timeout.flush();
+      expect(visElement.hasClass('spy-only')).to.equal(false);
+    });
   });
 
   describe('spy modes', () => {

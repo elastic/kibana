@@ -31,7 +31,7 @@ window.__KBN__ = {
       layers: []
     },
     mapConfig: {
-      manifestServiceUrl: 'https://geo.elastic.co/v1/manifest'
+      manifestServiceUrl: 'https://staging-dot-catalogue-dot-elastic-layer.appspot.com/v1/manifest'
     }
   },
   uiSettings: {

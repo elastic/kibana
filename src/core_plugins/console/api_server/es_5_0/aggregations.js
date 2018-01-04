@@ -270,6 +270,29 @@ var rules = {
       "size": 10,
       "shard_size": 10
     },
+    "composite": {
+      __template: {
+        "sources": [
+          {
+            "NAME": {
+              "AGG_TYPE": {}
+            }
+          }
+        ]
+      },
+      "sources": [
+        {
+          __scope_link: ".",
+          __template: {
+            "NAME": {
+              "AGG_TYPE": {}
+            }
+          }
+        }
+      ],
+      "size": 10,
+      "after": {}
+    },
     "percentiles": {
       __template: {
         "field": "",

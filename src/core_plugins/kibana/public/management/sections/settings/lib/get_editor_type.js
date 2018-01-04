@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-const NAMED_EDITORS = ['json', 'array', 'boolean', 'select', 'markdown'];
+const NAMED_EDITORS = ['json', 'array', 'boolean', 'select', 'markdown', 'image'];
 const NORMAL_EDITOR = ['number', 'string', 'null', 'undefined'];
 
 /**
