@@ -38,7 +38,7 @@ export const matchPairsProvider = ({
     } else if (
       selectionStart === selectionEnd &&
       key === 'Backspace' &&
-      !event.metaKey && pairs.includes(value.substr(selectionEnd - 1, 2))
+      !e.metaKey && pairs.includes(value.substr(selectionEnd - 1, 2))
     ) {
       // 3. (See above)
       e.preventDefault();
