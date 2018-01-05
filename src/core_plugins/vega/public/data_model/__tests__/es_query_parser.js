@@ -95,8 +95,8 @@ describe(`EsQueryParser.parseEsRequest`, () => {
     { index: '_all', '%context_query%': true }, ctxArr,
     { index: '_all', body: { query: ctxArr }, usesTime: false }));
 
-  it(`context=true`, test(
-    { index: '_all', context: true }, ctxArr,
+  it(`%context%=true`, test(
+    { index: '_all', '%context%': true }, ctxArr,
     { index: '_all', body: { query: ctxArr }, usesTime: false }));
 
   const expectedForCtxAndTimefield = {
@@ -118,10 +118,10 @@ describe(`EsQueryParser.parseEsRequest`, () => {
   it(`%context_query%='abc'`, test(
     { index: '_all', '%context_query%': 'abc' }, ctxArr, expectedForCtxAndTimefield));
 
-  it(`context=true, timefield='abc'`, test(
-    { index: '_all', context: true, timefield: 'abc' }, ctxArr, expectedForCtxAndTimefield));
+  it(`%context%=true, %timefield%='abc'`, test(
+    { index: '_all', '%context%': true, '%timefield%': 'abc' }, ctxArr, expectedForCtxAndTimefield));
 
-  it(`timefield='abc'`, test({ index: '_all', timefield: 'abc' }, ctxArr,
+  it(`%timefield%='abc'`, test({ index: '_all', '%timefield%': 'abc' }, ctxArr,
     {
       index: '_all',
       body: { query: { range: { abc: { format: 'epoch_millis', gte: rangeStart, lte: rangeEnd } } } },
@@ -131,5 +131,9 @@ describe(`EsQueryParser.parseEsRequest`, () => {
 
   it(`no esRequest`, test({ index: '_all' }, ctxArr, { index: '_all', body: {}, usesTime: false }));
 
-  it(`esRequest`, test({ index: '_all', body: { query: 2 } }, ctxArr, { index: '_all', body: { query: 2 }, usesTime: false }));
+  it(`esRequest`, test({ index: '_all', body: { query: 2 } }, ctxArr, {
+    index: '_all',
+    body: { query: 2 },
+    usesTime: false
+  }));
 });

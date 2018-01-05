@@ -7,8 +7,8 @@ const MUST_NOT_CLAUSE = '%dashboard_context-must_not_clause%';
 
 // These values may appear in the  'url': { ... }  object
 const LEGACY_CONTEXT = '%context_query%';
-const CONTEXT = 'context';
-const TIMEFIELD = 'timefield';
+const CONTEXT = '%context%';
+const TIMEFIELD = '%timefield%';
 
 /**
  * This class processes all Vega spec customizations,

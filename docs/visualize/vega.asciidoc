@@ -57,12 +57,13 @@ Here is an example of an ES query that counts the number of documents in all ind
 // An object instead of a string for the url value
 // is treated as a context-aware Elasticsearch query.
 url: {
+  // Filter the time picker (upper right corner) with this field
+  %timefield%: @timestamp
+  // Apply dashboard context filters when set
+  %context%: true
+
   // Which indexes to search
   index: _all
-  // Filter the time picker (upper right corner) with this field
-  timefield: @timestamp
-  // Apply dashboard context filters when set
-  context: true
   // The body element may contain "aggs" and "query" subfields
   body: {
     aggs: {
@@ -72,11 +73,11 @@ url: {
           field: @timestamp
           // interval value will depend on the daterange picker
           // Use an integer to set approximate bucket count
-          interval: {%autointerval%: true}
+          interval: { %autointerval%: true }
           // Make sure we get an entire range, even if it has no data
           extended_bounds: {
-            min: {%timefilter%: "min"}
-            max: {%timefilter%: "max"}
+            min: { %timefilter%: "min" }
+            max: { %timefilter%: "max" }
           }
           // Use this for linear (e.g. line, area) graphs
           // Without it, empty buckets will not show up
@@ -114,7 +115,7 @@ Vega date expressions.
 For most graphs we only need the list of the bucket values, so we use `format: {property: "aggregations.time_buckets.buckets"}` expression to focus on just the data we need.
 
 Query may be specified with individual range and dashboard context as
-well. This query is equivalent to `"context": true, "timefield": "@timestamp"`,
+well. This query is equivalent to `"%context%": true, "%timefield%": "@timestamp"`,
 except that the timerange is shifted back by 10 minutes:
 
 [source,yaml]

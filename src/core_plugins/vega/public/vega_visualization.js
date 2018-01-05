@@ -1,9 +1,6 @@
 import { Notifier } from 'ui/notify';
 import { VegaView } from './vega_view/vega_view';
 
-// TODO: Pending map support port in the future version of Kibana
-// import { VegaMapView } from './vega_view/vega_map_view';
-
 export function VegaVisualizationProvider(vegaConfig, serviceSettings) {
 
   const notify = new Notifier({ location: 'Vega' });
@@ -49,9 +46,7 @@ export function VegaVisualizationProvider(vegaConfig, serviceSettings) {
         }
 
         if (vegaParser.useMap) {
-          // TODO: Once MapView starts using Kibana's own map support, re-enable.
           throw new Error('Map mode is not yet supported in Kibana Core. You must use Kibana Vega plugin');
-          // this._vegaView = new VegaMapView(vegaConfig, this._el, vegaParser, serviceSettings);
         } else {
           this._vegaView = new VegaView(vegaConfig, this._el, vegaParser, serviceSettings);
         }

@@ -16,12 +16,17 @@
       // This query counts the number of documents per time interval,
       // assuming you have a @timestamp field in your data
 
+      // -- META fields (%) are processed before sending the query to ES
+      // Apply dashboard context filters when set
+      "%context%": true,
+      // Filter the time picker (upper right corner) with this field
+      "%timefield%": "@timestamp",
+
+      // -- The rest of these parameters are submitted to ES. See .search() docs:
+      // https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/api-reference.html#api-search
+
       // Which indexes to search
       "index": "_all",
-      // Filter the time picker (upper right corner) with this field
-      "timefield": "@timestamp",
-      // Apply dashboard context filters when set
-      "context": true,
       // The body element may contain "aggs" and "query" subfields
       "body": {
         "aggs": {

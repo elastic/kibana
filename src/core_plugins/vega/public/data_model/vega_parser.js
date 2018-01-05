@@ -261,7 +261,7 @@ export class VegaParser {
     this._findEsRequests(this.spec, (obj) => {
       const url = obj.url;
       delete obj.url;
-      switch (url.type) {
+      switch (url['%type%']) {
         case undefined:
         case 'elasticsearch':
           const res = this._esQueryParser.parseEsRequest(url);
@@ -269,12 +269,12 @@ export class VegaParser {
           break;
         case 'emsfile':
           if (typeof url.name !== 'string') {
-            throw new Error(`data.url with {"type": "emsfile"} is missing the "name" of the file`);
+            throw new Error(`data.url with {"%type%": "emsfile"} is missing the "name" of the file`);
           }
           emsFiles.push({ obj, name: url.name });
           break;
         default:
-          throw new Error(`url.type = ${url.type} is not supported`);
+          throw new Error(`url: {"%type%": "${url['%type%']}"} is not supported`);
       }
     });
 
