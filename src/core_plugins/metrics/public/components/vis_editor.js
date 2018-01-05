@@ -121,6 +121,10 @@ class VisEditor extends Component {
   componentDidMount() {
     this.props.renderComplete();
   }
+
+  componentDidUpdate() {
+    this.props.renderComplete();
+  }
 }
 
 VisEditor.defaultProps = {

@@ -90,6 +90,8 @@ describe('visualization_editor directive', function () {
 
     $scope.$emit('render');
     $scope.$apply();
+    $timeout.flush();
+    $timeout.verifyNoPendingTasks();
     expect(renderComplete).to.equal(1);
   });
 });

@@ -1,4 +1,3 @@
-import { resolve } from 'path';
 import { writeFile } from 'fs';
 
 import Boom from 'boom';
@@ -70,8 +69,6 @@ export default class BaseOptimizer {
   }
 
   getConfig() {
-    const cacheDirectory = this.uiBundles.getCachePath();
-
     function getStyleLoaders(preProcessors = [], postProcessors = []) {
       return ExtractTextPlugin.extract({
         fallback: {
@@ -99,6 +96,28 @@ export default class BaseOptimizer {
           ...preProcessors,
         ],
       });
+    }
+
+    /**
+     * Adds a cache loader if we're running in dev mode. The reason we're not adding
+     * the cache-loader when running in production mode is that it creates cache
+     * files in optimize/.cache that are not necessary for distributable versions
+     * of Kibana and just make compressing and extracting it more difficult.
+     */
+    function maybeAddCacheLoader(uiBundles, cacheName, loaders) {
+      if (!uiBundles.isDevMode()) {
+        return loaders;
+      }
+
+      return [
+        {
+          loader: 'cache-loader',
+          options: {
+            cacheDirectory: uiBundles.getCacheDirectory(cacheName)
+          }
+        },
+        ...loaders
+      ];
     }
 
     const commonConfig = {
@@ -136,12 +155,7 @@ export default class BaseOptimizer {
             test: /\.less$/,
             use: getStyleLoaders(
               ['less-loader'],
-              [{
-                loader: 'cache-loader',
-                options: {
-                  cacheDirectory: resolve(cacheDirectory, 'less'),
-                }
-              }]
+              maybeAddCacheLoader(this.uiBundles, 'less', [])
             ),
           },
           {
@@ -168,13 +182,7 @@ export default class BaseOptimizer {
           {
             test: /\.js$/,
             exclude: BABEL_EXCLUDE_RE.concat(this.uiBundles.getWebpackNoParseRules()),
-            use: [
-              {
-                loader: 'cache-loader',
-                options: {
-                  cacheDirectory: resolve(cacheDirectory, 'babel'),
-                }
-              },
+            use: maybeAddCacheLoader(this.uiBundles, 'babel', [
               {
                 loader: 'babel-loader',
                 options: {
@@ -183,8 +191,8 @@ export default class BaseOptimizer {
                     BABEL_PRESET_PATH,
                   ],
                 },
-              },
-            ],
+              }
+            ]),
           },
           ...this.uiBundles.getPostLoaders().map(loader => ({
             enforce: 'post',
