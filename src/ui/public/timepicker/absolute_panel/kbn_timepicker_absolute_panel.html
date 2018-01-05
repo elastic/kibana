@@ -64,6 +64,20 @@
   </div>
 
   <div class="kbn-timepicker-actions kuiVerticalRhythm">
+    <select
+      ng-if="history.length > 0"
+      ng-change="selectHistory(selectedIndex)"
+      ng-model="selectedIndex"
+      class="kuiSelect fullWidth"
+    >
+      <option value="" disabled selected hidden>Select previous absolute time</option>
+      <option
+        ng-repeat="time in history"
+        value="{{$index}}"
+      >
+        {{time.from}} to {{time.to}}
+      </option>
+    </select>
     <span
       class="kbn-timepicker-action-item kbn-timepicker-error"
       ng-show="absolute.from > absolute.to"

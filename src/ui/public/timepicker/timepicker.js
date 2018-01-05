@@ -15,6 +15,7 @@ import 'ui/timepicker/refresh_intervals';
 import 'ui/timepicker/time_units';
 import 'ui/timepicker/kbn_global_timepicker';
 import { uiModules } from 'ui/modules';
+import { TIME_MODES } from './modes';
 const module = uiModules.get('ui/timepicker');
 const notify = new Notifier({
   location: 'timepicker',
@@ -35,10 +36,10 @@ module.directive('kbnTimepicker', function (timeUnits, refreshIntervals) {
     template: html,
     controller: function ($scope) {
       $scope.format = 'MMMM Do YYYY, HH:mm:ss.SSS';
-      $scope.modes = ['quick', 'relative', 'absolute'];
+      $scope.modes = [TIME_MODES.QUICK, TIME_MODES.RELATIVE, TIME_MODES.ABSOLUTE];
       $scope.activeTab = $scope.activeTab || 'filter';
 
-      if (_.isUndefined($scope.mode)) $scope.mode = 'quick';
+      if (_.isUndefined($scope.mode)) $scope.mode = TIME_MODES.QUICK;
 
       $scope.refreshLists = _(refreshIntervals).groupBy('section').values().value();
 
@@ -67,13 +68,13 @@ module.directive('kbnTimepicker', function (timeUnits, refreshIntervals) {
       $scope.relativeOptions = relativeOptions;
 
       $scope.$watch('from', function (date) {
-        if (moment.isMoment(date) && $scope.mode === 'absolute') {
+        if (moment.isMoment(date) && $scope.mode === TIME_MODES.ABSOLUTE) {
           $scope.absolute.from = date;
         }
       });
 
       $scope.$watch('to', function (date) {
-        if (moment.isMoment(date) && $scope.mode === 'absolute') {
+        if (moment.isMoment(date) && $scope.mode === TIME_MODES.ABSOLUTE) {
           $scope.absolute.to = date;
         }
       });
@@ -125,14 +126,14 @@ module.directive('kbnTimepicker', function (timeUnits, refreshIntervals) {
 
       $scope.setMode = function (thisMode) {
         switch (thisMode) {
-          case 'quick':
+          case TIME_MODES.QUICK:
             break;
-          case 'relative':
+          case TIME_MODES.RELATIVE:
             $scope.relative = parseRelativeParts($scope.from, $scope.to);
             $scope.formatRelative('from');
             $scope.formatRelative('to');
             break;
-          case 'absolute':
+          case TIME_MODES.ABSOLUTE:
             $scope.absolute.from = dateMath.parse($scope.from || moment().subtract(15, 'minutes'));
             $scope.absolute.to = dateMath.parse($scope.to || moment(), { roundUp: true });
             break;
