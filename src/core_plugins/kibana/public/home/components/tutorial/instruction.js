@@ -57,7 +57,10 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
           {pre}
         </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          style={{ minWidth: 114 }}
+          grow={false}
+        >
           {copyButton}
         </EuiFlexItem>
       </EuiFlexGroup>
