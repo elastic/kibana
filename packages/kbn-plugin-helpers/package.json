@@ -29,8 +29,8 @@
     "vinyl-fs": "2.3.1"
   },
   "devDependencies": {
-    "@elastic/eslint-config-kibana": "^0.13.0",
-    "babel-eslint": "^7.2.3",
+    "@elastic/eslint-config-kibana": "^0.15.0",
+    "babel-eslint": "^8.0.0",
     "eslint": "^4.1.0",
     "eslint-plugin-babel": "^4.1.1",
     "eslint-plugin-import": "^2.6.0",
