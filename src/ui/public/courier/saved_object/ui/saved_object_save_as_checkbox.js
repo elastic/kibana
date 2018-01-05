@@ -7,6 +7,7 @@ uiModules
     return {
       restrict: 'E',
       template: saveObjectSaveAsCheckboxTemplate,
+      replace: true,
       scope: {
         savedObject: '='
       }

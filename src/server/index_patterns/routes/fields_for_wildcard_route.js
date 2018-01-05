@@ -23,7 +23,7 @@ export const createFieldsForWildcardRoute = pre => ({
           pattern,
           metaFields
         })
-        .then(fields => ({ fields }))
+          .then(fields => ({ fields }))
       );
     }
   }

@@ -9,7 +9,7 @@ import { compareFilters } from 'ui/filter_bar/lib/compare_filters';
  * @returns {object} An array of filters that were not in existing
  */
 export function dedupFilters(existingFilters, filters, comparatorOptions) {
-  if (!_.isArray(filters)) filters = [filters];
+  if (!Array.isArray(filters)) filters = [filters];
 
   return _.filter(filters, function (filter) {
     return !_.find(existingFilters, function (existingFilter) {

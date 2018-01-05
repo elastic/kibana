@@ -14,8 +14,8 @@ export default () => (
     </KuiBarSection>
 
     <KuiBarSection>
-      <div>Limit to</div>
-      <input className="kuiTextInput" size="2" value="10" readOnly/>
+      <label htmlFor="limitInputField">Limit to</label>
+      <input id="limitInputField" className="kuiTextInput" size="2" value="10" readOnly/>
       <div>pages</div>
     </KuiBarSection>
   </KuiBar>

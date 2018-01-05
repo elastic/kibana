@@ -16,7 +16,10 @@ export default new Chainable('trend', {
     {
       name: 'mode',
       types: ['string'],
-      help: 'The algorithm to use for generating the trend line. One of: ' + _.keys(validRegressions).join(', ')
+      help: `The algorithm to use for generating the trend line. One of: ${_.keys(validRegressions).join(', ')}`,
+      suggestions: _.keys(validRegressions).map(key => {
+        return { name: key, help: validRegressions[key] };
+      })
     },
     {
       name: 'start',

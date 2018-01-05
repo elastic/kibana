@@ -1,0 +1,104 @@
+[[development-embedding-visualizations]]
+=== Embedding Visualizations
+
+There are two different methods you can use to insert a visualization in your page.
+
+To display an already saved visualization, use the `VisualizeLoader`.
+To reuse an existing visualization implementation for a more custom purpose,
+use the Angular `<visualization>` directive instead.
+
+==== VisualizeLoader
+
+The `VisualizeLoader` class is the easiest way to embed a visualization into your plugin.
+It will take care of loading the data and rendering the visualization.
+
+To get an instance of the loader, do the following:
+
+["source","js"]
+-----------
+import { getVisualizeLoader } from 'ui/visualize/loader';
+
+getVisualizeLoader().then((loader) => {
+  // You now have access to the loader
+});
+-----------
+
+The loader exposes the following methods:
+
+- `getVisualizationList()`: which returns promise which gets resolved with a list of saved visualizations
+- `embedVisualizationWithId(container, savedId, params)`: which embeds visualization by id
+- `embedVisualizationWithSavedObject(container, savedObject, params)`: which embeds visualization from saved object
+
+Depending on which embed method you are using, you either pass in the id of the
+saved object for the visualization, or a `savedObject`, that you can retrieve via
+the `savedVisualizations` Angular service by its id. The `savedObject` give you access
+to the filter and query logic and allows you to attach listeners to the visualizations.
+For a more complex use-case you usually want to use that method.
+
+`container` should be a DOM element (jQuery wrapped or regular DOM element) into which the visualization should be embedded
+`params` is a parameter object specifying several parameters, that influence rendering.
+
+You will find a detailed description of all the parameters in the inline docs
+in the {repo}blob/{branch}/src/ui/public/visualize/loader/loader.js[loader source code].
+
+Both methods return an `EmbeddedVisualizeHandler`, that gives you some access
+to the visualization. The `embedVisualizationWithSavedObject` method will return
+the handler immediately from the method call, whereas the `embedVisualizationWithId`
+will return a promise, that resolves with the handler, as soon as the `id` could be
+found. It will reject, if the `id` is invalid.
+
+The returned `EmbeddedVisualizeHandler` itself has the following methods and properties:
+
+- `destroy()`: destroys the underlying Angualr scope of the visualization
+- `getElement()`: a reference to the jQuery wrapped DOM element, that renders the visualization
+- `whenFirstRenderComplete()`: will return a promise, that resolves as soon as the visualization has
+  finished rendering for the first time
+- `addRenderCompleteListener(listener)`: will register a listener to be called whenever
+  a rendering of this visualization finished (not just the first one)
+- `removeRenderCompleteListener(listener)`: removes an event listener from the handler again
+
+You can find the detailed `EmbeddedVisualizeHandler` documentation in its
+{repo}blob/{branch}/src/ui/public/visualize/loader/embedded_visualize_handler.js[source code].
+
+We recommend *not* to use the internal `<visualize>` Angular directive directly.
+
+==== `<visualization>` directive
+The `<visualization>` directive takes a visualization configuration and data.
+It should be used, if you don't want to render a saved visualization, but specify
+the config and data directly.
+
+`<visualization vis='vis' vis-data='visData' ui-state='uiState' ></visualization>` where
+
+`vis` is an instance of `Vis` object. The constructor takes 3 parameters:
+
+- `indexPattern` <string>: the indexPattern you want to pass to the visualization
+- `visConfig` <object>: the configuration object
+- `uiState` <object>: uiState object you want to pass to Vis. If not provided Vis will create its own.
+
+`visData` is the data object. Each visualization defines a `responseHandler`, which defines the format of this object.
+
+`uiState` is an instance of PersistedState. Visualizations use it to keep track of their current state. If not provided
+`<visualization>` will create its own (but you won't be able to check its values)
+
+*code example: create single metric visualization*
+["source","html"]
+-----------
+<div ng-controller="KbnTestController" class="test_vis">
+  <visualization vis='vis' vis-data='visData'></visualize>
+</div>
+-----------
+["source","js"]
+-----------
+import { uiModules } from 'ui/modules';
+
+uiModules.get('kibana')
+.controller('KbnTestController', function ($scope) {
+  const visConfig = {
+    type: 'metric'
+  };
+  $scope.vis = new Vis('.logstash*', visConfig);
+  $scope.visData = [{ columns: [{ title: 'Count' }], rows: [[ 1024 ], [ 256 ]] }];
+});
+-----------
+
+<visualization> will trigger `renderComplete` event on the element once it's done rendering.

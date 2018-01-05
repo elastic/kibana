@@ -14,15 +14,15 @@ export function getTopNavConfig(dashboardMode, actions, hideWriteControls) {
     case DashboardViewMode.VIEW:
       return (
         hideWriteControls ?
-        [
-          getFullScreenConfig(actions[TopNavIds.FULL_SCREEN])
-        ]
-        : [
-          getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
-          getShareConfig(),
-          getCloneConfig(actions[TopNavIds.CLONE]),
-          getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE])
-        ]
+          [
+            getFullScreenConfig(actions[TopNavIds.FULL_SCREEN])
+          ]
+          : [
+            getFullScreenConfig(actions[TopNavIds.FULL_SCREEN]),
+            getShareConfig(),
+            getCloneConfig(actions[TopNavIds.CLONE]),
+            getEditConfig(actions[TopNavIds.ENTER_EDIT_MODE])
+          ]
       );
     case DashboardViewMode.EDIT:
       return [

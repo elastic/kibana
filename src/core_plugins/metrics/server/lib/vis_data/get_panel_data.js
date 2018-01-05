@@ -1,32 +1,8 @@
-import getRequestParams from './get_request_params';
-import handleResponseBody from './handle_response_body';
-import handleErrorResponse from './handle_error_response';
-import getAnnotations from './get_annotations';
+import { getTableData } from './get_table_data';
+import { getSeriesData } from './get_series_data';
 export default function getPanelData(req) {
-  const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('data');
   return panel => {
-
-    const bodies = panel.series.map(series => getRequestParams(req, panel, series));
-    const params = {
-      body: bodies.reduce((acc, items) => acc.concat(items), [])
-    };
-    return callWithRequest(req, 'msearch', params)
-      .then(resp => {
-        const series = resp.responses.map(handleResponseBody(panel));
-        return {
-          [panel.id]: {
-            id: panel.id,
-            series: series.reduce((acc, series) => acc.concat(series), [])
-          }
-        };
-      })
-      .then(resp => {
-        if (!panel.annotations || panel.annotations.length === 0) return resp;
-        return getAnnotations(req, panel).then(annotations => {
-          resp[panel.id].annotations = annotations;
-          return resp;
-        });
-      })
-      .catch(handleErrorResponse(panel));
+    if (panel.type === 'table') return getTableData(req, panel);
+    return getSeriesData(req, panel);
   };
 }

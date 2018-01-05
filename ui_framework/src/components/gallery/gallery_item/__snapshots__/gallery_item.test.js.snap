@@ -1,0 +1,32 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renders KuiGalleryItem with href 1`] = `
+<a
+  aria-label="aria-label"
+  class="kuiGalleryItem testClass1 testClass2"
+  data-test-subj="test subject string"
+  href="#"
+>
+  children
+</a>
+`;
+
+exports[`renders KuiGalleryItem with onClick 1`] = `
+<button
+  aria-label="aria-label"
+  class="kuiGalleryItem testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  children
+</button>
+`;
+
+exports[`renders KuiGalleryItem without href and onClick 1`] = `
+<button
+  aria-label="aria-label"
+  class="kuiGalleryItem testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  children
+</button>
+`;

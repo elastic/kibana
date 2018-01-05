@@ -25,49 +25,49 @@ import { ApplyScopeBindingsProvider } from './apply_scope_bindings';
  *                                          post link functions.
  */
 uiModules
-.get('kibana')
-.directive('renderDirective', function (Private) {
-  const applyScopeBindings = Private(ApplyScopeBindingsProvider);
+  .get('kibana')
+  .directive('renderDirective', function (Private) {
+    const applyScopeBindings = Private(ApplyScopeBindingsProvider);
 
-  return {
-    restrict: 'E',
-    scope: {
-      'definition': '='
-    },
-    template: function ($el) {
-      return $el.html();
-    },
-    controller: function ($scope, $element, $attrs, $transclude, $injector) {
-      if (!$scope.definition) throw new Error('render-directive must have a definition attribute');
+    return {
+      restrict: 'E',
+      scope: {
+        'definition': '='
+      },
+      template: function ($el) {
+        return $el.html();
+      },
+      controller: function ($scope, $element, $attrs, $transclude, $injector) {
+        if (!$scope.definition) throw new Error('render-directive must have a definition attribute');
 
-      const { controller, controllerAs, scope } = $scope.definition;
+        const { controller, controllerAs, scope } = $scope.definition;
 
-      applyScopeBindings(scope, $scope, $attrs);
+        applyScopeBindings(scope, $scope, $attrs);
 
-      if (controller) {
-        if (controllerAs) {
-          $scope[controllerAs] = this;
+        if (controller) {
+          if (controllerAs) {
+            $scope[controllerAs] = this;
+          }
+
+          const locals = { $scope, $element, $attrs, $transclude };
+          const controllerInstance = $injector.invoke(controller, this, locals) || this;
+
+          if (controllerAs) {
+            $scope[controllerAs] = controllerInstance;
+          }
         }
-
-        const locals = { $scope, $element, $attrs, $transclude };
-        const controllerInstance = $injector.invoke(controller, this, locals) || this;
-
-        if (controllerAs) {
-          $scope[controllerAs] = controllerInstance;
-        }
+      },
+      link: {
+        pre($scope, $el, $attrs, controller) {
+          const { link } = $scope.definition;
+          const preLink = isPlainObject(link) ? link.pre : null;
+          if (preLink) preLink($scope, $el, $attrs, controller);
+        },
+        post($scope, $el, $attrs, controller) {
+          const { link } = $scope.definition;
+          const postLink = isPlainObject(link) ? link.post : link;
+          if (postLink) postLink($scope, $el, $attrs, controller);
+        },
       }
-    },
-    link: {
-      pre($scope, $el, $attrs, controller) {
-        const { link } = $scope.definition;
-        const preLink = isPlainObject(link) ? link.pre : null;
-        if (preLink) preLink($scope, $el, $attrs, controller);
-      },
-      post($scope, $el, $attrs, controller) {
-        const { link } = $scope.definition;
-        const postLink = isPlainObject(link) ? link.post : link;
-        if (postLink) postLink($scope, $el, $attrs, controller);
-      },
-    }
-  };
-});
+    };
+  });

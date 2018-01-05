@@ -37,7 +37,7 @@ describe('kibana_map tests', function () {
       kibanaMap = new KibanaMap(domNode, {
         minZoom: 1,
         maxZoom: 10,
-        center: [0,0],
+        center: [0, 0],
         zoom: 0
       });
     });
@@ -86,7 +86,7 @@ describe('kibana_map tests', function () {
         kibanaMap = new KibanaMap(domNode, {
           minZoom: 1,
           maxZoom: 10,
-          center: [0,0],
+          center: [0, 0],
           zoom: 2
         });
       });
@@ -98,7 +98,7 @@ describe('kibana_map tests', function () {
       });
     });
 
-    describe('no map height', function () {
+    describe('no map height (should default to size of 1px for height)', function () {
       beforeEach(async function () {
         setupDOM('386px', '256px');
         const noHeightNode = createDiv('386px', '0px');
@@ -106,23 +106,29 @@ describe('kibana_map tests', function () {
         kibanaMap = new KibanaMap(noHeightNode, {
           minZoom: 1,
           maxZoom: 10,
-          center: [0,0],
+          center: [0, 0],
           zoom: 10
         });
       });
 
-      it('should calculate map dimensions based on parent element dimensions', function () {
+      it('should calculate map dimensions based on enforcement of single pixel min-width CSS-rule', function () {
         const bounds = kibanaMap.getUntrimmedBounds();
         expect(bounds).to.have.property('bottom_right');
-        expect(bounds.bottom_right.lon.toFixed(2)).to.equal('0.27');
-        expect(bounds.bottom_right.lat.toFixed(2)).to.equal('-0.18');
+        expect(round(bounds.bottom_right.lon, 2)).to.equal(0.27);
+        expect(round(bounds.bottom_right.lat, 2)).to.equal(0);
         expect(bounds).to.have.property('top_left');
-        expect(bounds.top_left.lon.toFixed(2)).to.equal('-0.27');
-        expect(bounds.top_left.lat.toFixed(2)).to.equal('0.18');
+        expect(round(bounds.top_left.lon, 2)).to.equal(-0.27);
+        expect(round(bounds.top_left.lat, 2)).to.equal(0);
       });
+
+      function round(num, dig) {
+        return Math.round(num * Math.pow(10, dig)) / Math.pow(10, dig);
+      }
+
+
     });
 
-    describe('no map width', function () {
+    describe('no map width (should default to size of 1px for width)', function () {
       beforeEach(async function () {
         setupDOM('386px', '256px');
         const noWidthNode = createDiv('0px', '256px');
@@ -130,18 +136,18 @@ describe('kibana_map tests', function () {
         kibanaMap = new KibanaMap(noWidthNode, {
           minZoom: 1,
           maxZoom: 10,
-          center: [0,0],
+          center: [0, 0],
           zoom: 10
         });
       });
 
-      it('should calculate map dimensions based on parent element dimensions', function () {
+      it('should calculate map dimensions based on enforcement of single pixel min-width CSS-rule', function () {
         const bounds = kibanaMap.getUntrimmedBounds();
         expect(bounds).to.have.property('bottom_right');
-        expect(bounds.bottom_right.lon.toFixed(2)).to.equal('0.27');
+        expect(Math.round(bounds.bottom_right.lon)).to.equal(0);
         expect(bounds.bottom_right.lat.toFixed(2)).to.equal('-0.18');
         expect(bounds).to.have.property('top_left');
-        expect(bounds.top_left.lon.toFixed(2)).to.equal('-0.27');
+        expect(Math.round(bounds.top_left.lon)).to.equal(0);
         expect(bounds.top_left.lat.toFixed(2)).to.equal('0.18');
       });
     });
@@ -199,7 +205,7 @@ describe('kibana_map tests', function () {
       kibanaMap = new KibanaMap(domNode, {
         minZoom: 1,
         maxZoom: 10,
-        center: [0,0],
+        center: [0, 0],
         zoom: 0
       });
     });

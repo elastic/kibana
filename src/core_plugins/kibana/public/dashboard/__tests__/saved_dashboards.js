@@ -10,6 +10,6 @@ describe('SavedDashboards Service', function () {
   }));
 
   it('delete returns a native promise', function () {
-    expect(savedDashboardLoader.delete(['1','2'])).to.be.a(Promise);
+    expect(savedDashboardLoader.delete(['1', '2'])).to.be.a(Promise);
   });
 });

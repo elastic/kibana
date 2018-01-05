@@ -2,7 +2,8 @@ import React from 'react';
 import sinon from 'sinon';
 import { mount, render } from 'enzyme';
 
-import { requiredProps } from '../../test/required_props';
+import { findTestSubject, requiredProps } from '../../test';
+import { keyCodes } from '../../services';
 
 import {
   CANCEL_BUTTON, CONFIRM_BUTTON, KuiConfirmModal,
@@ -17,60 +18,64 @@ beforeEach(() => {
 });
 
 test('renders KuiConfirmModal', () => {
-  const component = render(<KuiConfirmModal
-    message="This is a confirmation modal example"
-    title="A confirmation modal"
-    onCancel={() => {}}
-    onConfirm={onConfirm}
-    cancelButtonText="Cancel Button Text"
-    confirmButtonText="Confirm Button Text"
-    {...requiredProps}
-  />);
+  const component = render(
+    <KuiConfirmModal
+      title="A confirmation modal"
+      onCancel={() => {}}
+      onConfirm={onConfirm}
+      cancelButtonText="Cancel Button Text"
+      confirmButtonText="Confirm Button Text"
+      {...requiredProps}
+    >
+      This is a confirmation modal example
+    </KuiConfirmModal>
+  );
   expect(component).toMatchSnapshot();
 });
 
 test('onConfirm', () => {
-  const component = mount(<KuiConfirmModal
-    message="This is a confirmation modal example"
-    title="A confirmation modal"
-    onCancel={onCancel}
-    onConfirm={onConfirm}
-    cancelButtonText="Cancel"
-    confirmButtonText="Confirm"
-    {...requiredProps}
-  />);
-  component.find('[data-test-subj="confirmModalConfirmButton"]').simulate('click');
+  const component = mount(
+    <KuiConfirmModal
+      onCancel={onCancel}
+      onConfirm={onConfirm}
+      cancelButtonText="Cancel Button Text"
+      confirmButtonText="Confirm Button Text"
+    />
+  );
+
+  findTestSubject(component, 'confirmModalConfirmButton').simulate('click');
   sinon.assert.calledOnce(onConfirm);
   sinon.assert.notCalled(onCancel);
 });
 
 describe('onCancel', () => {
   test('triggerd by click', () => {
-    const component = mount(<KuiConfirmModal
-      message="This is a confirmation modal example"
-      title="A confirmation modal"
-      onCancel={onCancel}
-      onConfirm={onConfirm}
-      cancelButtonText="Cancel"
-      confirmButtonText="Confirm"
-      {...requiredProps}
-    />);
-    component.find('[data-test-subj="confirmModalCancelButton"]').simulate('click');
+    const component = mount(
+      <KuiConfirmModal
+        onCancel={onCancel}
+        onConfirm={onConfirm}
+        cancelButtonText="Cancel Button Text"
+        confirmButtonText="Confirm Button Text"
+      />
+    );
+
+    findTestSubject(component, 'confirmModalCancelButton').simulate('click');
     sinon.assert.notCalled(onConfirm);
     sinon.assert.calledOnce(onCancel);
   });
 
   test('triggered by esc key', () => {
-    const component = mount(<KuiConfirmModal
-      message="This is a confirmation modal example"
-      title="A confirmation modal"
-      onCancel={onCancel}
-      onConfirm={onConfirm}
-      cancelButtonText="Cancel"
-      confirmButtonText="Confirm"
-      {...requiredProps}
-    />);
-    component.simulate('keydown', { keyCode: 27 });
+    const component = mount(
+      <KuiConfirmModal
+        onCancel={onCancel}
+        onConfirm={onConfirm}
+        cancelButtonText="Cancel Button Text"
+        confirmButtonText="Confirm Button Text"
+        data-test-subj="modal"
+      />
+    );
+
+    findTestSubject(component, 'modal').simulate('keydown', { keyCode: keyCodes.ESCAPE });
     sinon.assert.notCalled(onConfirm);
     sinon.assert.calledOnce(onCancel);
   });
@@ -78,47 +83,44 @@ describe('onCancel', () => {
 
 describe('defaultFocusedButton', () => {
   test('is cancel', () => {
-    const component = mount(<KuiConfirmModal
-      message="This is a confirmation modal example"
-      title="A confirmation modal"
-      onCancel={onCancel}
-      onConfirm={onConfirm}
-      cancelButtonText="Cancel"
-      confirmButtonText="Confirm"
-      defaultFocusedButton={CANCEL_BUTTON}
-      {...requiredProps}
-    />);
-    const button = component.find('[data-test-subj="confirmModalCancelButton"]').getDOMNode();
+    const component = mount(
+      <KuiConfirmModal
+        onCancel={onCancel}
+        onConfirm={onConfirm}
+        cancelButtonText="Cancel Button Text"
+        confirmButtonText="Confirm Button Text"
+        defaultFocusedButton={CANCEL_BUTTON}
+      />
+    );
+
+    const button = findTestSubject(component, 'confirmModalCancelButton').getDOMNode();
     expect(document.activeElement).toEqual(button);
   });
 
   test('is confirm', () => {
-    const component = mount(<KuiConfirmModal
-      message="This is a confirmation modal example"
-      title="A confirmation modal"
-      onCancel={onCancel}
-      onConfirm={onConfirm}
-      cancelButtonText="Cancel"
-      confirmButtonText="Confirm"
-      defaultFocusedButton={CONFIRM_BUTTON}
-      {...requiredProps}
-    />);
-    const button = component.find('[data-test-subj="confirmModalConfirmButton"]').getDOMNode();
+    const component = mount(
+      <KuiConfirmModal
+        onCancel={onCancel}
+        onConfirm={onConfirm}
+        cancelButtonText="Cancel Button Text"
+        confirmButtonText="Confirm Button Text"
+        defaultFocusedButton={CONFIRM_BUTTON}
+      />
+    );
+
+    const button = findTestSubject(component, 'confirmModalConfirmButton').getDOMNode();
     expect(document.activeElement).toEqual(button);
   });
 
-  test('when not given focuses on the confirm button', () => {
-    const component = mount(<KuiConfirmModal
-      message="This is a confirmation modal example"
-      title="A confirmation modal"
-      onCancel={onCancel}
-      onConfirm={onConfirm}
-      cancelButtonText="Cancel"
-      confirmButtonText="Confirm"
-      {...requiredProps}
-    />);
-    const button = component.find('[data-test-subj="confirmModalConfirmButton"]').getDOMNode();
-    expect(document.activeElement).toEqual(button);
+  test('when not given gives focus to the modal', () => {
+    const component = mount(
+      <KuiConfirmModal
+        onCancel={onCancel}
+        onConfirm={onConfirm}
+        cancelButtonText="Cancel Button Text"
+        confirmButtonText="Confirm Button Text"
+      />
+    );
+    expect(document.activeElement).toEqual(component.getDOMNode().firstChild);
   });
 });
-

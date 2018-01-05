@@ -115,10 +115,10 @@ IdAutocompleteComponent.prototype = _.create(
     if (!token) {
       return null;
     }
-    if (!this.multi_match && _.isArray(token)) {
+    if (!this.multi_match && Array.isArray(token)) {
       return null;
     }
-    token = _.isArray(token) ? token : [token];
+    token = Array.isArray(token) ? token : [token];
     if (_.find(token, function (t) {
         return t.match(/[\/,]/);
       })) {

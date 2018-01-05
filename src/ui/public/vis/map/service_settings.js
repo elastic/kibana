@@ -47,7 +47,7 @@ uiModules.get('kibana')
       }
       _invalidateSettings() {
 
-        this._loadCatalogue = _.once(async() => {
+        this._loadCatalogue = _.once(async () => {
           try {
             const response = await this._getManifest(mapConfig.manifestServiceUrl, this._queryParams);
             return response.data;
@@ -63,7 +63,7 @@ uiModules.get('kibana')
         });
 
 
-        this._loadFileLayers = _.once(async() => {
+        this._loadFileLayers = _.once(async () => {
           const catalogue = await this._loadCatalogue();
           const fileService = catalogue.services.filter((service) => service.type === 'file')[0];
           const manifest = await this._getManifest(fileService.manifest, this._queryParams);
@@ -75,7 +75,7 @@ uiModules.get('kibana')
           return layers;
         });
 
-        this._loadTMSServices = _.once(async() => {
+        this._loadTMSServices = _.once(async () => {
 
           if (tilemapsConfig.deprecated.isOverridden) {//use settings from yml (which are overridden)
             const tmsService = _.cloneDeep(tmsOptionsFromConfig);
@@ -87,7 +87,6 @@ uiModules.get('kibana')
           const tmsService = catalogue.services.filter((service) => service.type === 'tms')[0];
           const manifest = await this._getManifest(tmsService.manifest, this._queryParams);
           const services = manifest.data.services;
-
           const firstService = _.cloneDeep(services[0]);
           if (!firstService) {
             throw new Error('Manifest response does not include sufficient service data.');
@@ -108,6 +107,9 @@ uiModules.get('kibana')
         }));
       }
 
+      /**
+       * this internal method is overridden by the tests to simulate custom manifest.
+       */
       async _getManifest(manifestUrl) {
         return $http({
           url: extendUrl(manifestUrl, { query: this._queryParams }),

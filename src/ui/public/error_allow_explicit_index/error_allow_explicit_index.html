@@ -1,0 +1,19 @@
+<div class="app-container error-multi-allow-explicit-index">
+  <h3>
+    <i aria-hidden="true" class="fa fa-warning text-danger"></i> Oh no!
+  </h3>
+  <p>
+    It looks like your Elasticsearch cluster has the <code>rest.action.multi.allow_explicit_index</code> setting set to <code>false</code>, which prevents Kibana from making search requests. We use this ability to send a single request to Elasticsearch that searches multiple indexes so that when there are many panels on a dashboard they will load quickly and uniformly.
+  </p>
+
+  <p>
+    Unfortunately, until this issue is fixed you won't be able to use certain apps in Kibana, like Discover, Visualize and Dashboard.
+  </p>
+
+  <h3>Ok, how do I fix this?</h3>
+  <ol>
+    <li>Remove <code>rest.action.multi.allow_explicit_index: false</code> from your Elasticsearch config file.</li>
+    <li>Restart Elasticsearch.</li>
+    <li>Use the browser's back button to return to what you were doing.</li>
+  </ol>
+</div>

@@ -16,10 +16,10 @@ export function VislibLibLayoutSplitsColumnChartChartTitleSplitProvider() {
 
       if (!data.series) {
         div.selectAll('.chart-title')
-        .data(function (d) {
-          return d.rows ? d.rows : d.columns;
-        })
-        .enter()
+          .data(function (d) {
+            return d.rows ? d.rows : d.columns;
+          })
+          .enter()
           .append('div')
           .attr('class', 'chart-title');
 

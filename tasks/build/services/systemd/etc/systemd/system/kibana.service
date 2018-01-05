@@ -1,0 +1,18 @@
+[Unit]
+Description=Kibana
+ 
+[Service]
+Type=simple
+User=kibana
+Group=kibana
+# Load env vars from /etc/default/ and /etc/sysconfig/ if they exist.
+# Prefixing the path with '-' makes it try to load, but if the file doesn't
+# exist, it continues onward.
+EnvironmentFile=-/etc/default/kibana
+EnvironmentFile=-/etc/sysconfig/kibana
+ExecStart=/usr/share/kibana/bin/kibana "-c /etc/kibana/kibana.yml"
+Restart=always
+WorkingDirectory=/
+
+[Install]
+WantedBy=multi-user.target

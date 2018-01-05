@@ -70,7 +70,7 @@ describe('Vislib VisConfig Class Test Suite', function () {
   beforeEach(ngMock.inject(function (Private, $injector) {
     const VisConfig = Private(VislibVisConfigProvider);
     const PersistedState = $injector.get('PersistedState');
-    el = d3.select('body')
+    el = d3.select('body').append('div')
       .attr('class', 'vis-wrapper')
       .node();
 
@@ -78,6 +78,10 @@ describe('Vislib VisConfig Class Test Suite', function () {
       type: 'point_series'
     }, data, new PersistedState(), el);
   }));
+
+  afterEach(() => {
+    el.remove();
+  });
 
   describe('get Method', function () {
     it('should be a function', function () {

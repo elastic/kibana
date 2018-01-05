@@ -7,7 +7,7 @@
     </p>
   </div>
   <div ng-if="editor.creating" class="form-group">
-    <label for="scriptedFieldName">Name</label>
+    <label for="scriptedFieldName" class="kuiFormLabel">Name</label>
     <input
       ng-model="editor.field.name"
       id="scriptedFieldName"
@@ -27,20 +27,41 @@
   </div>
 
   <div ng-if="editor.field.scripted" class="form-group">
-    <label for="scriptedFieldLang">Language</label>
+    <label for="scriptedFieldLang" class="kuiFormLabel">Language</label>
+    <div class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm" ng-if="editor.field.lang && editor.isDeprecatedLang(editor.field.lang)">
+      <div class="kuiInfoPanelHeader">
+        <span
+          class="kuiInfoPanelHeader__icon kuiIcon kuiIcon--warning fa-bolt"
+          aria-label="Warning"
+          role="img"
+        ></span>
+        <span class="kuiInfoPanelHeader__title">
+          Deprecation Warning
+        </span>
+      </div>
+
+      <div class="kuiInfoPanelBody">
+        <div class="kuiInfoPanelBody__message">
+          <span class="text-capitalize">{{editor.field.lang}}</span> is deprecated and support will be removed in the
+          next major version of Kibana and Elasticsearch. We recommend using
+          <a class="kuiLink" ng-href="{{editor.docLinks.painless}}">Painless</a>
+          for new scripted fields.
+        </div>
+      </div>
+    </div>
     <select
       ng-model="editor.field.lang"
       id="scriptedFieldLang"
       ng-options="lang as lang for lang in editor.scriptingLangs"
       required
-      class="form-control"
+      class="form-control kuiVerticalRhythm"
       data-test-subj="editorFieldLang">
       <option value="">-- Select Language --</option>
     </select>
   </div>
 
   <div class="form-group">
-    <label for="scriptedFieldType">Type</label>
+    <label for="scriptedFieldType" class="kuiFormLabel">Type</label>
     <select
       ng-if="editor.field.scripted"
       id="scriptedFieldType"
@@ -62,7 +83,7 @@
       <i class="fa fa-warning"></i> Warning
     </span>
 
-    <label for="scriptFieldFormat">Format <small>(Default: <i>{{editor.defFormatType.resolvedTitle}}</i>)</small></label>
+    <label for="scriptFieldFormat" class="kuiFormLabel">Format <small>(Default: <i>{{editor.defFormatType.resolvedTitle}}</i>)</small></label>
 
     <div class="hintbox" ng-if="editor.showFormatHelp">
       <h4 class="hintbox-heading">
@@ -91,7 +112,7 @@
   </div>
 
   <div class="form-group">
-    <label for="editorFieldCount">Popularity</label>
+    <label for="editorFieldCount" class="kuiFormLabel">Popularity</label>
     <div class="kuiFieldGroup">
       <div class="kuiFieldGroupSection">
         <input
@@ -136,7 +157,7 @@
 
   <div ng-if="editor.field.scripted">
     <div class="form-group">
-      <label for="scriptedFieldScript">Script</label>
+      <label for="scriptedFieldScript" class="kuiFormLabel">Script</label>
       <textarea
         required
         class="field-editor_script-input form-control text-monospace"
@@ -146,14 +167,13 @@
       ></textarea>
     </div>
 
-    <div class="form-group">
-      <div class="hintbox">
-        <h4>
-          <i class="fa fa-warning text-warning"></i> Proceed with caution
-        </h4>
-
+    <div class="euiCallOut euiCallOut--warning">
+      <div class="euiCallOutHeader">
+        <span class="euiCallOutHeader__title">Proceed with caution</span>
+      </div>
+      <div class="euiText euiText--small">
         <p>
-          Please familiarize yourself with <a target="_window" ng-href="{{ editor.docLinks.scriptFields }}">script fields <i class="fa-link fa"></i></a> and with <a target="_window" ng-href="{{ editor.docLinks.scriptAggs }}">scripts in aggregations <i class="fa-link fa"></i></a> before using scripted fields.
+          Please familiarize yourself with <a target="_window" documentation-href="scriptedFields.scriptFields">script fields <i class="fa-link fa"></i></a> and with <a target="_window" documentation-href="scriptedFields.scriptAggs">scripts in aggregations <i class="fa-link fa"></i></a> before using scripted fields.
         </p>
 
         <p>
@@ -162,20 +182,21 @@
       </div>
     </div>
 
-    <div class="form-group">
-      <div class="hintbox">
-        <h4>
-          <i class="fa fa-question-circle text-info"></i> Scripting Help
-        </h4>
+    <div class="euiSpacer euiSpacer--m"></div>
 
+    <div class="euiCallOut euiCallOut--primary">
+      <div class="euiCallOutHeader">
+        <span class="euiCallOutHeader__title">Scripting Help</span>
+      </div>
+      <div class="euiText euiText--small">
         <p>
-          By default, Kibana scripted fields use <a target="_window" ng-href="{{editor.docLinks.painless}}">Painless <i class="fa-link fa"></i></a>, a simple and secure scripting language designed specifically for use with Elasticsearch.  To access values in the document use the following format:
+          By default, Kibana scripted fields use <a target="_window" documentation-href="scriptedFields.painless">Painless <i class="fa-link fa"></i></a>, a simple and secure scripting language designed specifically for use with Elasticsearch.  To access values in the document use the following format:
         </p>
 
         <p><code>doc['some_field'].value</code></p>
 
         <p>
-          Painless is powerful but easy to use. It provides access to many <a target="_window" ng-href="{{editor.docLinks.painlessApi}}">native Java APIs <i class="fa-link fa"></i></a>. Read up on its <a target="_window" ng-href="{{editor.docLinks.painlessSyntax}}">syntax <i class="fa-link fa"></i></a> and you'll be up to speed in no time!
+          Painless is powerful but easy to use. It provides access to many <a target="_window" documentation-href="scriptedFields.painlessApi">native Java APIs <i class="fa-link fa"></i></a>. Read up on its <a target="_window" documentation-href="scriptedFields.painlessSyntax">syntax <i class="fa-link fa"></i></a> and you'll be up to speed in no time!
         </p>
 
         <p>
@@ -183,7 +204,7 @@
         </p>
 
         <p>
-          Coming from an older version of Kibana? The <a target="_window" ng-href="{{editor.docLinks.luceneExpressions}}">Lucene Expressions <i class="fa-link fa"></i></a> you know and love are still available. Lucene expressions are a lot like JavaScript, but limited to basic arithmetic, bitwise and comparison operations.
+          Coming from an older version of Kibana? The <a target="_window" documentation-href="scriptedFields.luceneExpressions">Lucene Expressions <i class="fa-link fa"></i></a> you know and love are still available. Lucene expressions are a lot like JavaScript, but limited to basic arithmetic, bitwise and comparison operations.
         </p>
 
         <p>
@@ -213,6 +234,8 @@
 
   </div>
 
+  <div class="euiSpacer euiSpacer--l"></div>
+
   <div  ng-if="editor.conflictDescriptionsLength > 0">
     <p>
       <i class="fa fa-warning text-warning"></i>
@@ -220,8 +243,8 @@
       The type of this field changes across indices. It is unavailable for many analysis functions. The indices per type are as follows:
       <table class="table">
       <thead>
-        <th> Field Type </th>
-        <th> Index Names </th>
+        <th scope="col"> Field Type </th>
+        <th scope="col"> Index Names </th>
       </thead>
       <tbody>
       <tr ng-repeat="(type, indices) in editor.field.conflictDescriptions">

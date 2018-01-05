@@ -1,9 +1,9 @@
-import { AbstractRequestProvider } from './request';
+import { SearchRequestProvider } from './request';
 
 export function IsRequestProvider(Private) {
-  const AbstractRequest = Private(AbstractRequestProvider);
+  const SearchRequest = Private(SearchRequestProvider);
 
   return function isRequest(obj) {
-    return obj instanceof AbstractRequest;
+    return obj instanceof SearchRequest;
   };
 }

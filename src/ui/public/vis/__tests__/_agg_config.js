@@ -289,7 +289,7 @@ describe('AggConfig', function () {
           }
         ]
       }
-    },{
+    }, {
       config1: {
         type: 'metric',
         aggs: [

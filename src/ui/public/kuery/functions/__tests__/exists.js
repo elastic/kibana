@@ -46,7 +46,7 @@ describe('kuery functions', function () {
       it('should throw an error for scripted fields', function () {
         const existsNode = nodeTypes.function.buildNode('exists', 'script string');
         expect(exists.toElasticsearchQuery)
-        .withArgs(existsNode, indexPattern).to.throwException(/Exists query does not support scripted fields/);
+          .withArgs(existsNode, indexPattern).to.throwException(/Exists query does not support scripted fields/);
       });
 
     });

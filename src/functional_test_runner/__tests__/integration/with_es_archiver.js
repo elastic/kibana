@@ -3,7 +3,8 @@ import { resolve } from 'path';
 import { format as formatUrl } from 'url';
 
 import { readConfigFile } from '../../lib';
-import { createToolingLog, createReduceStream } from '../../../utils';
+import { createToolingLog } from '../../../dev';
+import { createReduceStream } from '../../../utils';
 import { createEsTestCluster } from '../../../test_utils/es';
 import { startupKibana } from '../lib';
 

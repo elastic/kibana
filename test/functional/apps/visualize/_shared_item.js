@@ -21,13 +21,13 @@ export default function ({ getService, getPageObjects }) {
         };
 
         return PageObjects.visualize.clickVisualizationByName('Shared-Item Visualization AreaChart')
-        .then(() => retry.try(function () {
-          return PageObjects.common.getSharedItemTitleAndDescription()
-            .then(({ title, description }) => {
-              expect(title).to.eql(expected.title);
-              expect(description).to.eql(expected.description);
-            });
-        }));
+          .then(() => retry.try(function () {
+            return PageObjects.common.getSharedItemTitleAndDescription()
+              .then(({ title, description }) => {
+                expect(title).to.eql(expected.title);
+                expect(description).to.eql(expected.description);
+              });
+          }));
       });
     });
   });

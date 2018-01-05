@@ -7,7 +7,7 @@ import { AggTypesBucketsBucketAggTypeProvider } from 'ui/agg_types/buckets/_buck
 import { TimeBucketsProvider } from 'ui/time_buckets';
 import { AggTypesBucketsCreateFilterDateHistogramProvider } from 'ui/agg_types/buckets/create_filter/date_histogram';
 import { AggTypesBucketsIntervalOptionsProvider } from 'ui/agg_types/buckets/_interval_options';
-import intervalTemplate from 'ui/agg_types/controls/interval.html';
+import intervalTemplate from 'ui/agg_types/controls/time_interval.html';
 
 export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private) {
   const BucketAggType = Private(AggTypesBucketsBucketAggTypeProvider);
@@ -29,7 +29,8 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
   function setBounds(agg, force) {
     if (agg.buckets._alreadySet && !force) return;
     agg.buckets._alreadySet = true;
-    agg.buckets.setBounds(agg.fieldIsTimeField() && timefilter.getActiveBounds());
+    const timeRange = agg.getTimeRange() || timefilter.getActiveBounds();
+    agg.buckets.setBounds(agg.fieldIsTimeField() && timeRange);
   }
 
 
@@ -47,6 +48,7 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
     createFilter: createFilter,
     decorateAggConfig: function () {
       let buckets;
+      let timeRange;
       return {
         buckets: {
           configurable: true,
@@ -58,6 +60,19 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
             setBounds(this);
 
             return buckets;
+          }
+        },
+        setTimeRange: {
+          configurable: true,
+          value(newValue) {
+            timeRange = newValue;
+            setBounds(this, true);
+          }
+        },
+        getTimeRange: {
+          configurable: true,
+          value() {
+            return timeRange;
           }
         }
       };
@@ -95,7 +110,7 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
         default: 'auto',
         options: intervalOptions,
         editor: intervalTemplate,
-        onRequest: function (agg) {
+        modifyAggConfigOnSearchRequestStart: function (agg) {
           setBounds(agg, true);
         },
         write: function (agg, output) {

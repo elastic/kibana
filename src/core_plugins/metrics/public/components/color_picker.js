@@ -81,18 +81,18 @@ class ColorPicker extends Component {
         { clear }
         {
           this.state.displayPicker
-          ? (
-            <div className="vis_editor__color_picker-popover">
-              <div
-                className="vis_editor__color_picker-cover"
-                onClick={this.handleClose}
-              />
-              <Picker
-                color={value}
-                onChangeComplete={this.handleChange}
-              />
-            </div>
-          ) : null
+            ? (
+              <div className="vis_editor__color_picker-popover">
+                <div
+                  className="vis_editor__color_picker-cover"
+                  onClick={this.handleClose}
+                />
+                <Picker
+                  color={value}
+                  onChangeComplete={this.handleChange}
+                />
+              </div>
+            ) : null
         }
       </div>
     );

@@ -3,7 +3,7 @@ import expect from 'expect.js';
 import ngMock from 'ng_mock';
 
 import { SegmentedRequestProvider } from '../segmented';
-import { AbstractRequestProvider } from '../request';
+import { SearchRequestProvider } from '../search_request';
 
 describe('SegmentedRequestProvider', () => {
   let Promise;
@@ -17,8 +17,8 @@ describe('SegmentedRequestProvider', () => {
     Promise = $injector.get('Promise');
     SegmentedReq = Private(SegmentedRequestProvider);
 
-    const AbstractReq = Private(AbstractRequestProvider);
-    abstractReqStart = sinon.stub(AbstractReq.prototype, 'start', () => {
+    const SearchRequest = Private(SearchRequestProvider);
+    abstractReqStart = sinon.stub(SearchRequest.prototype, 'start', () => {
       const promise = Promise.resolve();
       sinon.spy(promise, 'then');
       return promise;

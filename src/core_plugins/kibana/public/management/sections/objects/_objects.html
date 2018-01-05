@@ -3,7 +3,7 @@
     <!-- Header -->
     <div class="kuiViewContentItem kuiBar kuiVerticalRhythm">
       <div class="kuiBarSection">
-        <h1 class="kuiTitle">
+        <h1 class="euiTitle">
           Edit Saved Objects
         </h1>
       </div>
@@ -11,6 +11,7 @@
       <div class="kuiBarSection">
         <button
           class="kuiButton kuiButton--basic kuiButton--iconText"
+          data-test-subj="exportAllObjects"
           ng-click="exportAll()"
         >
           <span class="kuiButton__inner">
@@ -37,9 +38,13 @@
     </div>
 
     <!-- Intro -->
-    <p class="kuiViewContentItem kuiVerticalRhythm">
-      From here you can delete saved objects, such as saved searches. You can also edit the raw data of saved objects. Typically objects are only modified via their associated application, which is probably what you should use instead of this screen. Each tab is limited to 100 results. You can use the filter to find objects not in the default list.
-    </p>
+    <div class="euiText">
+      <p class="kuiViewContentItem">
+        From here you can delete saved objects, such as saved searches. You can also edit the raw data of saved objects. Typically objects are only modified via their associated application, which is probably what you should use instead of this screen. Each tab is limited to 100 results. You can use the filter to find objects not in the default list.
+      </p>
+    </div>
+
+    <div class="euiSpacer euiSpacer--m"></div>
 
     <!-- Tabs -->
     <div class="kuiViewContentItem kuiVerticalRhythm">
@@ -49,6 +54,7 @@
           ng-class="{ 'kuiTab-isSelected': state.tab === service.title }"
           ng-repeat="service in services"
           ng-click="changeTab(service)"
+          data-test-subj="objectsTab-{{ service.title }}"
         >
           {{ service.title }}
           <small aria-label="{{:: service.data.length + ' of ' + service.total + ' ' + service.title }}">
@@ -76,7 +82,7 @@
               class="kuiToolBarSearchBox__input"
               type="text"
               placeholder="Search..."
-              aria-label="Filter"
+              aria-label="Search"
               ng-model="managementObjectsController.advancedFilter"
             >
           </div>
@@ -126,10 +132,10 @@
       </div>
 
       <!-- Table -->
-      <table class="kuiTable" ng-if="service.data.length">
+      <table class="kuiTable" ng-if="service.data.length" data-test-subj="objectsTable-{{service.title}}">
         <thead>
           <tr>
-            <th class="kuiTableHeaderCell kuiTableHeaderCell--checkBox">
+            <th scope="col" class="kuiTableHeaderCell kuiTableHeaderCell--checkBox">
               <div class="kuiTableHeaderCell__liner">
                 <input
                   type="checkbox"
@@ -142,7 +148,7 @@
               </div>
             </th>
 
-            <th class="kuiTableHeaderCell">
+            <th scope="col" class="kuiTableHeaderCell">
               <div class="kuiTableHeaderCell__liner">
                 Title
               </div>
@@ -154,6 +160,7 @@
           <tr
             ng-repeat="item in service.data | orderBy:'title'"
             class="kuiTableRow"
+            data-test-subj="objectsTableRow"
           >
             <td class="kuiTableRowCell kuiTableRowCell--checkBox">
               <div class="kuiTableRowCell__liner">

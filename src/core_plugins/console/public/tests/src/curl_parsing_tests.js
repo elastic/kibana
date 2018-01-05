@@ -1,6 +1,6 @@
 let _ = require('lodash');
 let curl = require('../../src/curl');
-let curlTests = require('raw!./curl_parsing_tests.txt');
+let curlTests = require('raw-loader!./curl_parsing_tests.txt');
 
 var { test, module, ok, equal } = window.QUnit;
 

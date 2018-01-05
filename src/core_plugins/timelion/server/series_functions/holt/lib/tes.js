@@ -16,7 +16,7 @@ function initSeasonalComponents(samplePoints, seasonLength) {
   let currentSeason = [];
   const seasonalAverages = _.reduce(samplePoints, (result, point, i) => {
     currentSeason.push(point);
-      // If this is the end of the season, add it to the result;
+    // If this is the end of the season, add it to the result;
     if (i % seasonLength === seasonLength - 1) {
       result.push(_.sum(currentSeason) / seasonLength);
       currentSeason = [];

@@ -6,9 +6,9 @@ module.exports = function (grunt) {
     const rootPath = grunt.config.get('root');
 
     const buildFiles = grunt.file.expand('build/kibana/{*,.*}')
-    .map(function (file) {
-      return resolve(rootPath, file);
-    });
+      .map(function (file) {
+        return resolve(rootPath, file);
+      });
 
     const transferFiles = (source, link) => exec('cp', ['-r', source, link]);
 

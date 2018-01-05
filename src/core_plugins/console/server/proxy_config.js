@@ -7,12 +7,16 @@ import { WildcardMatcher } from './wildcard_matcher';
 
 export class ProxyConfig {
   constructor(config) {
-    config = Object.assign({}, config);
+    config = {
+      ...config
+    };
 
     // -----
     // read "match" info
     // -----
-    const rawMatches = Object.assign({}, config.match);
+    const rawMatches = {
+      ...config.match
+    };
     this.id = formatUrl({
       protocol: rawMatches.protocol,
       hostname: rawMatches.host,

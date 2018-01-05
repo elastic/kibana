@@ -30,7 +30,7 @@ describe('ui/errors', () => {
     new SearchTimeout(),
     new RequestFailure('an error', { }),
     new FetchFailure({ }),
-    new ShardFailure({ '_shards' : 5 }),
+    new ShardFailure({ '_shards': 5 }),
     new VersionConflict({ }),
     new MappingConflict({ }),
     new RestrictedMapping('field', 'indexPattern'),

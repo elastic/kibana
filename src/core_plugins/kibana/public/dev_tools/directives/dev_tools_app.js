@@ -5,23 +5,23 @@ import 'plugins/kibana/dev_tools/styles/dev_tools_app.less';
 import 'ui/kbn_top_nav';
 
 uiModules
-.get('apps/dev_tools')
-.directive('kbnDevToolsApp', function (Private, $location) {
-  const devToolsRegistry = Private(DevToolsRegistryProvider);
+  .get('apps/dev_tools')
+  .directive('kbnDevToolsApp', function (Private, $location) {
+    const devToolsRegistry = Private(DevToolsRegistryProvider);
 
-  return {
-    restrict: 'E',
-    replace: true,
-    template,
-    transclude: true,
-    scope: {
-      topNavConfig: '='
-    },
-    bindToController: true,
-    controllerAs: 'kbnDevToolsApp',
-    controller() {
-      this.devTools = devToolsRegistry.inOrder;
-      this.currentPath = `#${$location.path()}`;
-    }
-  };
-});
+    return {
+      restrict: 'E',
+      replace: true,
+      template,
+      transclude: true,
+      scope: {
+        topNavConfig: '='
+      },
+      bindToController: true,
+      controllerAs: 'kbnDevToolsApp',
+      controller() {
+        this.devTools = devToolsRegistry.inOrder;
+        this.currentPath = `#${$location.path()}`;
+      }
+    };
+  });

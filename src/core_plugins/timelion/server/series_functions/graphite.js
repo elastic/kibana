@@ -19,7 +19,7 @@ export default new Datasource ('graphite', {
 
     const time = {
       min: moment(tlConfig.time.from).format('HH:mm[_]YYYYMMDD'),
-      max:  moment(tlConfig.time.to).format('HH:mm[_]YYYYMMDD')
+      max: moment(tlConfig.time.to).format('HH:mm[_]YYYYMMDD')
     };
 
     const URL = tlConfig.settings['timelion:graphite.url'] + '/render/' +

@@ -4,7 +4,7 @@ import ngMock from 'ng_mock';
 import { BaseParamTypeProvider } from '../../param_types/base';
 import { StringParamTypeProvider } from '../../param_types/string';
 
-// eslint-disable-next-line kibana-custom/no-default-export
+// eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default describe('String', function () {
   const paramName = 'json_test';
   let BaseParamType;

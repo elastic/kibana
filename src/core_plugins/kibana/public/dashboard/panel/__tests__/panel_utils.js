@@ -1,3 +1,4 @@
+import expect from 'expect.js';
 import { PanelUtils } from '../panel_utils';
 import { DEFAULT_PANEL_WIDTH, DEFAULT_PANEL_HEIGHT } from '../../dashboard_constants';
 

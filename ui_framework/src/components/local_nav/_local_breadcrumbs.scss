@@ -35,9 +35,9 @@
 .kuiLocalBreadcrumb__link {
   @include link;
   color: $localBreadcrumbLinkColor; /* 1 */
-  font-size: $globalFontSize;
+  font-size: $kuiFontSize;
 }
 
 .kuiLocalBreadcrumb__emphasis {
-  font-weight: $globalFontWeightBold;
+  font-weight: $kuiFontWeightBold;
 }

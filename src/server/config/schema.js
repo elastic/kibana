@@ -87,30 +87,32 @@ export default () => Joi.object({
     silent: Joi.boolean().default(false),
 
     quiet: Joi.boolean()
-    .when('silent', {
-      is: true,
-      then: Joi.default(true).valid(true),
-      otherwise: Joi.default(false)
-    }),
+      .when('silent', {
+        is: true,
+        then: Joi.default(true).valid(true),
+        otherwise: Joi.default(false)
+      }),
 
     verbose: Joi.boolean()
-    .when('quiet', {
-      is: true,
-      then: Joi.valid(false).default(false),
-      otherwise: Joi.default(false)
-    }),
+      .when('quiet', {
+        is: true,
+        then: Joi.valid(false).default(false),
+        otherwise: Joi.default(false)
+      }),
 
     events: Joi.any().default({}),
     dest: Joi.string().default('stdout'),
     filter: Joi.any().default({}),
     json: Joi.boolean()
-    .when('dest', {
-      is: 'stdout',
-      then: Joi.default(!process.stdout.isTTY),
-      otherwise: Joi.default(true)
-    })
+      .when('dest', {
+        is: 'stdout',
+        then: Joi.default(!process.stdout.isTTY),
+        otherwise: Joi.default(true)
+      }),
+
+    useUTC: Joi.boolean().default(true),
   })
-  .default(),
+    .default(),
 
   ops: Joi.object({
     interval: Joi.number().default(5000),
@@ -186,6 +188,7 @@ export default () => Joi.object({
     }).default()
   }).default(),
   regionmap: Joi.object({
+    includeElasticMapsService: Joi.boolean().default(true),
     layers: Joi.array().items(Joi.object({
       url: Joi.string(),
       type: Joi.string(),
@@ -196,13 +199,6 @@ export default () => Joi.object({
         description: Joi.string()
       }))
     }))
-  }).default(),
-  uiSettings: Joi.object({
-    // this is used to prevent the uiSettings from initializing. Since they
-    // require the elasticsearch plugin in order to function we need to turn
-    // them off when we turn off the elasticsearch plugin (like we do in the
-    // optimizer half of the dev server)
-    enabled: Joi.boolean().default(true)
   }).default(),
 
   i18n: Joi.object({

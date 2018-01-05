@@ -6,7 +6,7 @@ import AggRow from './agg_row';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createNumberHandler from '../lib/create_number_handler';
-import { htmlIdGenerator } from 'ui_framework/services';
+import { htmlIdGenerator } from '@elastic/eui';
 
 export const SerialDiffAgg = props => {
   const { siblings } = props;
@@ -30,6 +30,7 @@ export const SerialDiffAgg = props => {
       <div className="vis_editor__row_item">
         <div className="vis_editor__label">Aggregation</div>
         <AggSelect
+          panelType={props.panel.type}
           siblings={props.siblings}
           value={model.type}
           onChange={handleSelectChange('type')}

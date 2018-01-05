@@ -14,70 +14,70 @@ export default function ({ getService, getPageObjects }) {
 
       log.debug('navigateToApp visualize');
       return PageObjects.common.navigateToUrl('visualize', 'new')
-      .then(function () {
-        log.debug('clickLineChart');
-        return PageObjects.visualize.clickLineChart();
-      })
-      .then(function clickNewSearch() {
-        return PageObjects.visualize.clickNewSearch();
-      })
-      .then(function setAbsoluteRange() {
-        log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
-        return PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      })
-      .then(function clickBucket() {
-        log.debug('Bucket = X-Axis');
-        return PageObjects.visualize.clickBucket('X-Axis');
-      })
-      .then(function selectAggregation() {
-        log.debug('Aggregation = Date Histogram');
-        return PageObjects.visualize.selectAggregation('Date Histogram');
-      })
-      .then(function selectField() {
-        log.debug('Field = @timestamp');
-        return PageObjects.visualize.selectField('@timestamp');
-      })
+        .then(function () {
+          log.debug('clickLineChart');
+          return PageObjects.visualize.clickLineChart();
+        })
+        .then(function clickNewSearch() {
+          return PageObjects.visualize.clickNewSearch();
+        })
+        .then(function setAbsoluteRange() {
+          log.debug('Set absolute time range from \"' + fromTime + '\" to \"' + toTime + '\"');
+          return PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        })
+        .then(function clickBucket() {
+          log.debug('Bucket = X-Axis');
+          return PageObjects.visualize.clickBucket('X-Axis');
+        })
+        .then(function selectAggregation() {
+          log.debug('Aggregation = Date Histogram');
+          return PageObjects.visualize.selectAggregation('Date Histogram');
+        })
+        .then(function selectField() {
+          log.debug('Field = @timestamp');
+          return PageObjects.visualize.selectField('@timestamp');
+        })
       // add another metrics
-      .then(function clickAddMetrics() {
-        log.debug('Add Metric');
-        return PageObjects.visualize.clickAddMetric();
-      })
-      .then(function () {
-        log.debug('Metric = Value Axis');
-        return PageObjects.visualize.clickBucket('Y-Axis');
-      })
-      .then(function selectAggregation() {
-        log.debug('Aggregation = Average');
-        return PageObjects.visualize.selectAggregation('Average', 'metrics');
-      })
-      .then(function selectField() {
-        log.debug('Field = memory');
-        return PageObjects.visualize.selectField('machine.ram', 'metrics');
-      })
+        .then(function clickAddMetrics() {
+          log.debug('Add Metric');
+          return PageObjects.visualize.clickAddMetric();
+        })
+        .then(function () {
+          log.debug('Metric = Value Axis');
+          return PageObjects.visualize.clickBucket('Y-Axis');
+        })
+        .then(function selectAggregation() {
+          log.debug('Aggregation = Average');
+          return PageObjects.visualize.selectAggregation('Average', 'metrics');
+        })
+        .then(function selectField() {
+          log.debug('Field = memory');
+          return PageObjects.visualize.selectField('machine.ram', 'metrics');
+        })
       // go to options page
-      .then(function gotoAxisOptions() {
-        log.debug('Going to axis options');
-        return pointSeriesVis.clickAxisOptions();
-      })
+        .then(function gotoAxisOptions() {
+          log.debug('Going to axis options');
+          return pointSeriesVis.clickAxisOptions();
+        })
       // add another value axis
-      .then(function addAxis() {
-        log.debug('adding axis');
-        return pointSeriesVis.clickAddAxis();
-      })
+        .then(function addAxis() {
+          log.debug('adding axis');
+          return pointSeriesVis.clickAddAxis();
+        })
       // set average count to use second value axis
-      .then(function setAxis() {
-        return pointSeriesVis.toggleCollapsibleTitle('Average machine.ram')
-          .then(function () {
-            log.debug('Average memory value axis - ValueAxis-2');
-            return pointSeriesVis.setSeriesAxis(1, 'ValueAxis-2');
-          });
-      })
-      .then(function clickGo() {
-        return PageObjects.visualize.clickGo();
-      })
-      .then(function () {
-        return PageObjects.header.isGlobalLoadingIndicatorHidden();
-      });
+        .then(function setAxis() {
+          return pointSeriesVis.toggleCollapsibleTitle('Average machine.ram')
+            .then(function () {
+              log.debug('Average memory value axis - ValueAxis-2');
+              return pointSeriesVis.setSeriesAxis(1, 'ValueAxis-2');
+            });
+        })
+        .then(function clickGo() {
+          return PageObjects.visualize.clickGo();
+        })
+        .then(function () {
+          return PageObjects.header.isGlobalLoadingIndicatorHidden();
+        });
     });
 
     describe('secondary value axis', function () {

@@ -6,7 +6,7 @@ import { IndexMappings } from './index_mappings';
  *  and timelion plugins for examples.
  *  @type {EsMappingDsl}
  */
-const BASE_KIBANA_INDEX_MAPPINGS_DSL = {
+const BASE_SAVED_OBJECT_MAPPINGS = {
   doc: {
     dynamic: 'strict',
     properties: {
@@ -29,19 +29,10 @@ const BASE_KIBANA_INDEX_MAPPINGS_DSL = {
 };
 
 export function kibanaIndexMappingsMixin(kbnServer, server) {
-  /**
-   *  Stores the current mappings that we expect to find in the Kibana
-   *  index. Using `kbnServer.mappings.addRootProperties()` the UiExports
-   *  class extends these mappings based on `mappings` ui export specs.
-   *
-   *  Application code should not access this object, and instead should
-   *  use `server.getKibanaIndexMappingsDsl()` from below, mixed with the
-   *  helpers exposed by this module, to interact with the mappings via
-   *  their DSL.
-   *
-   *  @type {IndexMappings}
-   */
-  kbnServer.mappings = new IndexMappings(BASE_KIBANA_INDEX_MAPPINGS_DSL);
+  const mappings = new IndexMappings(
+    BASE_SAVED_OBJECT_MAPPINGS,
+    kbnServer.uiExports.savedObjectMappings
+  );
 
   /**
    *  Get the mappings dsl that we expect to see in the
@@ -57,6 +48,6 @@ export function kibanaIndexMappingsMixin(kbnServer, server) {
    *  @returns {EsMappingDsl}
    */
   server.decorate('server', 'getKibanaIndexMappingsDsl', () => {
-    return kbnServer.mappings.getDsl();
+    return mappings.getDsl();
   });
 }

@@ -1,6 +1,6 @@
 <div class="actions">
   <button
-    aria-label="Edit source filter"
+    aria-label="Edit"
     ng-if="sourceFilters.editing !== filter"
     ng-click="sourceFilters.editing = filter"
     type="button"
@@ -8,8 +8,9 @@
   >
     <span aria-hidden="true" class="kuiIcon fa-pencil"></span>
   </button>
+
   <button
-    aria-label="Save source filter"
+    aria-label="Save"
     ng-if="sourceFilters.editing === filter"
     ng-click="sourceFilters.save()"
     ng-disabled="!filter.value"
@@ -18,8 +19,9 @@
   >
     <span aria-hidden="true" class="kuiIcon fa-save"></span>
   </button>
+
   <button
-    aria-label="Delete source filter"
+    aria-label="Delete"
     ng-click="sourceFilters.delete(filter)"
     type="button"
     class="kuiButton kuiButton--danger kuiButton--small"

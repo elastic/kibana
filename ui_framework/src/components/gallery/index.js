@@ -1,5 +1,5 @@
 export { KuiGallery } from './gallery';
-export { KuiGalleryButton } from './gallery_button/gallery_button.js';
-export { KuiGalleryButtonIcon } from './gallery_button/gallery_button_icon.js';
-export { KuiGalleryButtonImage } from './gallery_button/gallery_button_image.js';
-export { KuiGalleryButtonLabel } from './gallery_button/gallery_button_label.js';
+export { KuiGalleryItem } from './gallery_item/gallery_item.js';
+export { KuiGalleryItemIcon } from './gallery_item/gallery_item_icon.js';
+export { KuiGalleryItemImage } from './gallery_item/gallery_item_image.js';
+export { KuiGalleryItemLabel } from './gallery_item/gallery_item_label.js';

@@ -1,5 +1,4 @@
 export default function (api) {
-  api.addEndpointDescription('_cluster/nodes/stats');
   api.addEndpointDescription('_cluster/state', {
     patterns: [
       "_cluster/state",

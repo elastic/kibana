@@ -1,0 +1,40 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiCheckBox Props isChecked false renders unchecked 1`] = `
+<input
+  class="kuiCheckBox"
+  type="checkbox"
+/>
+`;
+
+exports[`KuiCheckBox Props isChecked true renders checked 1`] = `
+<input
+  checked=""
+  class="kuiCheckBox"
+  type="checkbox"
+/>
+`;
+
+exports[`KuiCheckBox Props isDisabled false renders enabled 1`] = `
+<input
+  class="kuiCheckBox"
+  type="checkbox"
+/>
+`;
+
+exports[`KuiCheckBox Props isDisabled true renders disabled 1`] = `
+<input
+  class="kuiCheckBox"
+  disabled=""
+  type="checkbox"
+/>
+`;
+
+exports[`KuiCheckBox renders 1`] = `
+<input
+  aria-label="aria-label"
+  class="kuiCheckBox testClass1 testClass2"
+  data-test-subj="test subject string"
+  type="checkbox"
+/>
+`;

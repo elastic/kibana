@@ -13,11 +13,12 @@
       ></bread-crumbs>
 
       <!-- Tabs. -->
-      <div data-transclude-slot="bottomRow" class="kuiLocalTabs">
+      <div data-transclude-slot="bottomRow" class="kuiLocalTabs" role="tablist">
         <h2 class="kuiLocalTab" ng-if="!sectionName" id="tabHeader" tabindex="0">
           {{::section.display}}
         </h2>
         <a
+          role="tab"
           ng-if="sectionName"
           ng-repeat="item in section.visibleItems"
           class="kuiLocalTab"
@@ -28,6 +29,8 @@
           tooltip-placement="bottom"
           tooltip-popup-delay="400"
           tooltip-append-to-body="1"
+          aria-selected="{{!!item.active}}"
+          aria-disabled="{{!!item.disabled}}"
         >
           {{::item.display}}
         </a>

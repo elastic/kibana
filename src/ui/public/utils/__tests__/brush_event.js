@@ -27,7 +27,7 @@ describe('brushEvent', function () {
     let brushEvent;
 
     const baseState = {
-      filters:[],
+      filters: [],
     };
 
     const baseEvent = {
@@ -113,16 +113,16 @@ describe('brushEvent', function () {
           expect($state)
             .to.have.property('$newFilters');
           expect($state.filters.length)
-           .to.equal(0);
+            .to.equal(0);
           expect($state.$newFilters.length)
-           .to.equal(1);
+            .to.equal(1);
           expect($state.$newFilters[0].range.anotherTimeField.gte)
-           .to.equal(rangeBegin);
+            .to.equal(rangeBegin);
           expect($state.$newFilters[0].range.anotherTimeField.lt)
-           .to.equal(rangeEnd);
+            .to.equal(rangeEnd);
           expect($state.$newFilters[0].range.anotherTimeField).to.have.property('format');
           expect($state.$newFilters[0].range.anotherTimeField.format)
-           .to.equal('epoch_millis');
+            .to.equal('epoch_millis');
         });
 
         it('converts Date fields to milliseconds', function () {
@@ -136,13 +136,13 @@ describe('brushEvent', function () {
           expect($state)
             .to.have.property('$newFilters');
           expect($state.filters.length)
-           .to.equal(0);
+            .to.equal(0);
           expect($state.$newFilters.length)
-           .to.equal(1);
+            .to.equal(1);
           expect($state.$newFilters[0].range.anotherTimeField.gte)
-           .to.equal(rangeBeginMs);
+            .to.equal(rangeBeginMs);
           expect($state.$newFilters[0].range.anotherTimeField.lt)
-           .to.equal(rangeEndMs);
+            .to.equal(rangeEndMs);
         });
       });
     });
@@ -169,24 +169,24 @@ describe('brushEvent', function () {
 
       it('by creating a new filter', function () {
         const event = _.cloneDeep(numberEvent);
-        event.range = [1,2,3,4];
+        event.range = [1, 2, 3, 4];
         brushEvent(event);
         expect($state)
           .to.have.property('$newFilters');
         expect($state.filters.length)
-         .to.equal(0);
+          .to.equal(0);
         expect($state.$newFilters.length)
-         .to.equal(1);
+          .to.equal(1);
         expect($state.$newFilters[0].range.numberField.gte)
-         .to.equal(1);
+          .to.equal(1);
         expect($state.$newFilters[0].range.numberField.lt)
-         .to.equal(4);
+          .to.equal(4);
         expect($state.$newFilters[0].range.numberField).not.to.have.property('format');
       });
 
       it('by updating the existing range filter', function () {
         const event = _.cloneDeep(numberEvent);
-        event.range = [3,7];
+        event.range = [3, 7];
         $state.filters.push({
           meta: {
             key: 'numberField'
@@ -197,16 +197,16 @@ describe('brushEvent', function () {
         expect($state)
           .not.have.property('$newFilters');
         expect($state.filters.length)
-         .to.equal(1);
+          .to.equal(1);
         expect($state.filters[0].range.numberField.gte)
-         .to.equal(3);
+          .to.equal(3);
         expect($state.filters[0].range.numberField.lt)
-         .to.equal(7);
+          .to.equal(7);
       });
 
       it('by updating the existing scripted filter', function () {
         const event = _.cloneDeep(numberEvent);
-        event.range = [3,7];
+        event.range = [3, 7];
         $state.filters.push({
           meta: {
             key: 'numberField'
@@ -224,11 +224,11 @@ describe('brushEvent', function () {
         expect($state)
           .not.have.property('$newFilters');
         expect($state.filters.length)
-         .to.equal(1);
+          .to.equal(1);
         expect($state.filters[0].script.script.params.gte)
-         .to.equal(3);
+          .to.equal(3);
         expect($state.filters[0].script.script.params.lt)
-         .to.equal(7);
+          .to.equal(7);
       });
     });
   });

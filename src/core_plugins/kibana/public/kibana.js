@@ -6,6 +6,7 @@ import routes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 
 import 'ui/autoload/all';
+import 'plugins/kibana/home/index';
 import 'plugins/kibana/discover/index';
 import 'plugins/kibana/visualize/index';
 import 'plugins/kibana/dashboard/index';
@@ -24,9 +25,9 @@ import { KibanaRootController } from './kibana_root_controller';
 routes.enable();
 
 routes
-.otherwise({
-  redirectTo: `/${chrome.getInjected('kbnDefaultAppId', 'discover')}`
-});
+  .otherwise({
+    redirectTo: `/${chrome.getInjected('kbnDefaultAppId', 'discover')}`
+  });
 
 chrome.setRootController('kibana', KibanaRootController);
 

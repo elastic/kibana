@@ -7,6 +7,9 @@
   height: 100%;
 }
 
+  /**
+   * 1. Override inherited typographic styles.
+   */
   .kuiLocalTab {
     padding: 5px 0 6px 0;
     font-size: 18px;
@@ -14,6 +17,8 @@
     border-bottom: 2px solid transparent;
     text-decoration: none;
     cursor: pointer;
+    margin-top: 0 !important; /* 1 */
+    margin-bottom: 0 !important; /* 1 */
 
     &:hover:not(.kuiLocalTab-isDisabled),
     &:active:not(.kuiLocalTab-isDisabled) {

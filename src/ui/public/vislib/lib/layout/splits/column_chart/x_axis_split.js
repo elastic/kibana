@@ -13,12 +13,12 @@ export function VislibLibLayoutSplitsColumnChartXAxisSplitProvider() {
       const div = d3.select(this);
       let columns;
       div.selectAll('.x-axis-div')
-      .append('div')
-      .data(function (d) {
-        columns = d.columns ? d.columns.length : 1;
-        return d.columns ? d.columns : [d];
-      })
-      .enter()
+        .append('div')
+        .data(function (d) {
+          columns = d.columns ? d.columns.length : 1;
+          return d.columns ? d.columns : [d];
+        })
+        .enter()
         .append('div')
         .attr('class', (d, i) => {
           let divClass = '';

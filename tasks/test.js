@@ -97,7 +97,7 @@ module.exports = function (grunt) {
     if (subTask) grunt.fail.fatal(`invalid task "test:${subTask}"`);
 
     grunt.task.run(_.compact([
-      !grunt.option('quick') && 'eslint:source',
+      !grunt.option('quick') && 'run:eslint',
       'licenses',
       'test:quick'
     ]));

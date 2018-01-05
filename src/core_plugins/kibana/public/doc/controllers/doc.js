@@ -21,18 +21,19 @@ const resolveIndexPattern = {
 };
 
 uiRoutes
-.when('/doc/:indexPattern/:index/:type/:id', {
-  template: html,
-  resolve: resolveIndexPattern
-})
-.when('/doc/:indexPattern/:index/:type', {
-  template: html,
-  resolve: resolveIndexPattern
-});
+  .when('/doc/:indexPattern/:index/:type/:id', {
+    template: html,
+    resolve: resolveIndexPattern
+  })
+  .when('/doc/:indexPattern/:index/:type', {
+    template: html,
+    resolve: resolveIndexPattern
+  });
 
 app.controller('doc', function ($scope, $route, es, timefilter) {
 
-  timefilter.enabled = false;
+  timefilter.disableAutoRefreshSelector();
+  timefilter.disableTimeRangeSelector();
 
   // Pretty much only need this for formatting, not actually using it for fetching anything.
   $scope.indexPattern = $route.current.locals.indexPattern;

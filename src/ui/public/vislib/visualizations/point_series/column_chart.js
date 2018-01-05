@@ -51,24 +51,24 @@ export function VislibVisualizationsColumnChartProvider(Private) {
       const isTooltip = this.handler.visConfig.get('tooltip.show');
 
       const layer = svg.append('g')
-      .attr('class', 'series histogram')
-      .attr('clip-path', 'url(#' + this.baseChart.clipPathId + ')');
+        .attr('class', 'series histogram')
+        .attr('clip-path', 'url(#' + this.baseChart.clipPathId + ')');
 
       const bars = layer.selectAll('rect')
-      .data(data.values.filter(function (d) {
-        return !_.isNull(d.y);
-      }));
+        .data(data.values.filter(function (d) {
+          return !_.isNull(d.y);
+        }));
 
       bars
-      .exit()
-      .remove();
+        .exit()
+        .remove();
 
       bars
-      .enter()
-      .append('rect')
-      .attr('data-label', data.label)
-      .attr('fill', () => color(data.label))
-      .attr('stroke', () => color(data.label));
+        .enter()
+        .append('rect')
+        .attr('data-label', data.label)
+        .attr('fill', () => color(data.label))
+        .attr('stroke', () => color(data.label));
 
       self.updateBars(bars);
 
@@ -157,10 +157,10 @@ export function VislibVisualizationsColumnChartProvider(Private) {
 
       // update
       bars
-      .attr('x', isHorizontal ? x : y)
-      .attr('width', isHorizontal ? widthFunc : heightFunc)
-      .attr('y', isHorizontal ? y : x)
-      .attr('height', isHorizontal ? heightFunc : widthFunc);
+        .attr('x', isHorizontal ? x : y)
+        .attr('width', isHorizontal ? widthFunc : heightFunc)
+        .attr('y', isHorizontal ? y : x)
+        .attr('height', isHorizontal ? heightFunc : widthFunc);
 
       return bars;
     }
@@ -222,10 +222,10 @@ export function VislibVisualizationsColumnChartProvider(Private) {
 
       // update
       bars
-      .attr('x', isHorizontal ? x : y)
-      .attr('width', isHorizontal ? widthFunc : heightFunc)
-      .attr('y', isHorizontal ? y : x)
-      .attr('height', isHorizontal ? heightFunc : widthFunc);
+        .attr('x', isHorizontal ? x : y)
+        .attr('width', isHorizontal ? widthFunc : heightFunc)
+        .attr('y', isHorizontal ? y : x)
+        .attr('height', isHorizontal ? heightFunc : widthFunc);
 
       return bars;
     }

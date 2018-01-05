@@ -12,7 +12,7 @@ export function lodashLangMixin(_) {
      * @return {Boolean}
      */
     isNumeric: function (v) {
-      return !_.isNaN(v) && (typeof v === 'number' || (!_.isArray(v) && !_.isNaN(parseFloat(v))));
+      return !_.isNaN(v) && (typeof v === 'number' || (!Array.isArray(v) && !_.isNaN(parseFloat(v))));
     },
 
   });

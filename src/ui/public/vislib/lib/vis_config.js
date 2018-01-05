@@ -11,7 +11,7 @@ export function VislibVisConfigProvider(Private) {
   const visTypes = Private(VislibTypesProvider);
   const DEFAULT_VIS_CONFIG = {
     style: {
-      margin : { top: 10, right: 3, bottom: 5, left: 3 }
+      margin: { top: 10, right: 3, bottom: 5, left: 3 }
     },
     alerts: [],
     categoryAxes: [],

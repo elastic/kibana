@@ -64,7 +64,7 @@ module.service('Promise', function ($q, $timeout) {
     return obj && typeof obj.then === 'function';
   };
   Promise.halt = _.once(function () {
-    const promise = new Promise();
+    const promise = new Promise(() => {});
     promise.then = _.constant(promise);
     promise.catch = _.constant(promise);
     return promise;
@@ -76,7 +76,7 @@ module.service('Promise', function ($q, $timeout) {
 
     let value;
 
-    if (_.isArray(args)) {
+    if (Array.isArray(args)) {
       try { value = fn.apply(ctx, args); }
       catch (e) { return Promise.reject(e); }
     } else {

@@ -26,9 +26,9 @@ export function LocalNavWithTabs() {
         </KuiLocalNavRowSection>
         <KuiLocalNavRowSection>
           <div className="kuiLocalMenu">
-            <div className="kuiLocalMenuItem">New</div>
-            <div className="kuiLocalMenuItem">Save</div>
-            <div className="kuiLocalMenuItem">Open</div>
+            <button className="kuiLocalMenuItem">New</button>
+            <button className="kuiLocalMenuItem">Save</button>
+            <button className="kuiLocalMenuItem">Open</button>
             <button className="kuiLocalMenuItem">
               <div className="kuiLocalMenuItem__icon kuiIcon fa-clock-o" />
               Last 5 minutes

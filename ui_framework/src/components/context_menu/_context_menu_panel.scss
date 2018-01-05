@@ -1,0 +1,111 @@
+@import '../popover/mixins';
+
+.kuiContextMenuPanel {
+  width: 100%;
+  visibility: visible;
+  background-color: #ffffff;
+
+  /**
+   * 1. Override global focus style.
+   */
+  &:focus {
+    box-shadow: none; /* 1 */
+  }
+
+  &.kuiContextMenuPanel-txInLeft {
+    pointer-events: none;
+    animation: kuiContextMenuPanelTxInLeft $kuiAnimSpeedNormal $kuiAnimSlightResistance;
+  }
+
+  &.kuiContextMenuPanel-txOutLeft {
+    pointer-events: none;
+    animation: kuiContextMenuPanelTxOutLeft $kuiAnimSpeedNormal $kuiAnimSlightResistance;
+  }
+
+  &.kuiContextMenuPanel-txInRight {
+    pointer-events: none;
+    animation: kuiContextMenuPanelTxInRight $kuiAnimSpeedNormal $kuiAnimSlightResistance;
+  }
+
+  &.kuiContextMenuPanel-txOutRight {
+    pointer-events: none;
+    animation: kuiContextMenuPanelTxOutRight $kuiAnimSpeedNormal $kuiAnimSlightResistance;
+  }
+
+  @include darkTheme {
+    background-color: $kuiBackgroundColor--darkTheme;
+  }
+}
+
+.kuiContextMenuPanel--next {
+  transform: translateX($kuiContextMenuWidth);
+  visibility: hidden;
+}
+
+.kuiContextMenuPanel--previous {
+  transform: translateX(-$kuiContextMenuWidth);
+  visibility: hidden;
+}
+
+/**
+ * 1. Button reset.
+ */
+.kuiContextMenuPanelTitle {
+  appearance: none; /* 1 */
+  border: none; /* 1 */
+  cursor: pointer; /* 1 */
+
+  @include kuiPopoverTitle;
+
+  width: 100%;
+  text-align: left;
+
+  &:hover, &:focus {
+    .kuiContextMenu__text {
+      text-decoration: underline;
+    }
+  }
+
+  /**
+   * 1. Overwrite default style.
+   */
+  &:focus {
+    box-shadow: none; /* 1 */
+  }
+}
+
+@keyframes kuiContextMenuPanelTxInLeft {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes kuiContextMenuPanelTxOutLeft {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes kuiContextMenuPanelTxInRight {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@keyframes kuiContextMenuPanelTxOutRight {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}

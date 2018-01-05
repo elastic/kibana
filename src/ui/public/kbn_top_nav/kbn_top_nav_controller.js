@@ -68,12 +68,13 @@ export function KbnTopNavControllerProvider($compile) {
     }
     // apply the defaults to individual options
     _applyOptDefault(opt = {}) {
-      const defaultedOpt = Object.assign({
+      const defaultedOpt = {
         label: capitalize(opt.key),
         hasFunction: !!opt.run,
         description: opt.run ? opt.key : `Toggle ${opt.key} view`,
-        run: (item) => this.toggle(item.key)
-      }, opt);
+        run: (item) => this.toggle(item.key),
+        ...opt
+      };
 
       defaultedOpt.hideButton = isFunction(opt.hideButton) ? opt.hideButton : () => !!opt.hideButton;
       defaultedOpt.disableButton = isFunction(opt.disableButton) ? opt.disableButton : () => !!opt.disableButton;

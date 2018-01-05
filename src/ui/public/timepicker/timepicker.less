@@ -1,4 +1,5 @@
-@import '../styles/bootstrap/variables.less';
+@import (reference) '../styles/variables.less';
+
 .kbn-timepicker {
   display: flex;
   justify-content: flex-end;
@@ -41,6 +42,11 @@
   .kbn-timepicker-actions {
     display: flex;
     justify-content: flex-end;
+    align-items: baseline;
+  }
+  .kbn-timepicker-action-item,
+  .kbn-timepicker-submit-button {
+    margin-left: 10px;
   }
   .kbn-timepicker-submit-button {
     min-width: 100px;
@@ -59,13 +65,15 @@
     display: flex;
     justify-content: space-between;
   }
+  /**
+   * 1. Override kuiLocalNav styles.
+   */
+  .kbn-timepicker-title__text {
+    margin-bottom: 0 !important; /* 1 */
+  }
   .kbn-timepicker-title__section {
     display: flex;
     align-items: center;
-  }
-  .kbn-timerpicker-nav-button {
-    padding: 3px 10px;
-    font-size: 14px;
   }
   /**
    * Avoid last nav overlaping collapse button

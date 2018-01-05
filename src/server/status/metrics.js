@@ -30,7 +30,7 @@ export class Metrics {
       process: {
         mem: {
           heap_max_in_bytes: get(hapiEvent, 'psmem.heapTotal'),
-          heap_used_in_bytes:  get(hapiEvent, 'psmem.heapUsed')
+          heap_used_in_bytes: get(hapiEvent, 'psmem.heapUsed')
         }
       },
       os: {
@@ -43,10 +43,10 @@ export class Metrics {
         }
       },
       response_times: {
-        avg_in_millis:  get(hapiEvent, ['responseTimes', port, 'avg']),
+        avg_in_millis: get(hapiEvent, ['responseTimes', port, 'avg']),
         max_in_millis: get(hapiEvent, ['responseTimes', port, 'max'])
       },
-      requests:  keysToSnakeCaseShallow(get(hapiEvent, ['requests', port])),
+      requests: keysToSnakeCaseShallow(get(hapiEvent, ['requests', port])),
       concurrent_connections: get(hapiEvent, ['concurrents', port])
     };
   }

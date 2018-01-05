@@ -8,7 +8,7 @@ import {
 // element, e.g. onClick, tabIndex, and role.
 const CustomComponent = ({
   children,
-  ...rest,
+  ...rest
 }) => (
   <div {...rest}>
     {children}

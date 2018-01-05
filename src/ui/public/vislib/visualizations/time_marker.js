@@ -41,29 +41,29 @@ export function VislibVisualizationsTimeMarkerProvider() {
 
       selection.each(function () {
         d3.select(this).selectAll('time-marker')
-        .data(self.times)
-        .enter().append('line')
-        .attr('class', function (d) {
-          return d.class;
-        })
-        .attr('pointer-events', 'none')
-        .attr('stroke', function (d) {
-          return d.color;
-        })
-        .attr('stroke-width', function (d) {
-          return d.width;
-        })
-        .attr('stroke-opacity', function (d) {
-          return d.opacity;
-        })
-        .attr('x1', function (d) {
-          return self.xScale(d.time);
-        })
-        .attr('x2', function (d) {
-          return self.xScale(d.time);
-        })
-        .attr('y1', self.height)
-        .attr('y2', self.xScale.range()[0]);
+          .data(self.times)
+          .enter().append('line')
+          .attr('class', function (d) {
+            return d.class;
+          })
+          .attr('pointer-events', 'none')
+          .attr('stroke', function (d) {
+            return d.color;
+          })
+          .attr('stroke-width', function (d) {
+            return d.width;
+          })
+          .attr('stroke-opacity', function (d) {
+            return d.opacity;
+          })
+          .attr('x1', function (d) {
+            return self.xScale(d.time);
+          })
+          .attr('x2', function (d) {
+            return self.xScale(d.time);
+          })
+          .attr('y1', self.height)
+          .attr('y2', self.xScale.range()[0]);
       });
     }
   }

@@ -9,7 +9,10 @@ import {
 } from '../../components';
 
 import CodeEditor from './code_editor';
-const codeEditorSource = require('!!raw!./code_editor');
+const codeEditorSource = require('!!raw-loader!./code_editor');
+
+import ReadOnly from './read_only';
+const readOnlySource = require('!!raw-loader!./read_only');
 
 export default props => (
   <GuidePage title={props.route.name}>
@@ -34,6 +37,18 @@ export default props => (
 
       <GuideDemo>
         <CodeEditor />
+      </GuideDemo>
+    </GuideSection>
+
+    <GuideSection
+      title="Read-only"
+      source={[{
+        type: GuideSectionTypes.JS,
+        code: readOnlySource,
+      }]}
+    >
+      <GuideDemo>
+        <ReadOnly />
       </GuideDemo>
     </GuideSection>
   </GuidePage>

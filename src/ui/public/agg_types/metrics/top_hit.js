@@ -172,14 +172,14 @@ export function AggTypesMetricsTopHitProvider(Private) {
       let values = _(hits).map(hit => {
         return path === '_source' ? hit._source : agg.vis.indexPattern.flattenHit(hit, true)[path];
       })
-      .flatten()
-      .value();
+        .flatten()
+        .value();
 
       if (values.length === 1) {
         values = values[0];
       }
 
-      if (_.isArray(values)) {
+      if (Array.isArray(values)) {
         if (!_.compact(values).length) {
           return null;
         }

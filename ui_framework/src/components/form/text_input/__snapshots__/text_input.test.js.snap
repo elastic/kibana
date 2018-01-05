@@ -1,0 +1,77 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiTextInput Props isDisabled false renders enabled 1`] = `
+<input
+  class="kuiTextInput"
+  type="text"
+/>
+`;
+
+exports[`KuiTextInput Props isDisabled true renders disabled 1`] = `
+<input
+  class="kuiTextInput"
+  disabled=""
+  type="text"
+/>
+`;
+
+exports[`KuiTextInput Props isInvalid false renders valid 1`] = `
+<input
+  class="kuiTextInput"
+  type="text"
+/>
+`;
+
+exports[`KuiTextInput Props isInvalid true renders invalid 1`] = `
+<input
+  class="kuiTextInput kuiTextInput-isInvalid"
+  type="text"
+/>
+`;
+
+exports[`KuiTextInput Props placeholder 1`] = `
+<input
+  class="kuiTextInput"
+  placeholder="placeholder"
+  type="text"
+/>
+`;
+
+exports[`KuiTextInput Props size renders large 1`] = `
+<input
+  class="kuiTextInput kuiTextInput--large"
+  type="text"
+/>
+`;
+
+exports[`KuiTextInput Props size renders medium 1`] = `
+<input
+  class="kuiTextInput"
+  type="text"
+/>
+`;
+
+exports[`KuiTextInput Props size renders small 1`] = `
+<input
+  class="kuiTextInput kuiTextInput--small"
+  type="text"
+/>
+`;
+
+exports[`KuiTextInput Props value 1`] = `
+<input
+  class="kuiTextInput"
+  type="text"
+  value="value"
+/>
+`;
+
+exports[`KuiTextInput renders 1`] = `
+<input
+  aria-label="aria-label"
+  class="kuiTextInput testClass1 testClass2"
+  data-test-subj="test subject string"
+  type="text"
+  value="text input"
+/>
+`;

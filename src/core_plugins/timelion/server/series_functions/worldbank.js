@@ -28,7 +28,7 @@ export default new Datasource ('worldbank', {
 
     const time = {
       min: moment(tlConfig.time.from).format('YYYY'),
-      max:  moment(tlConfig.time.to).format('YYYY')
+      max: moment(tlConfig.time.to).format('YYYY')
     };
 
     const URL = 'http://api.worldbank.org/' + config.code +
@@ -60,7 +60,7 @@ export default new Datasource ('worldbank', {
       return {
         type: 'seriesList',
         list: [{
-          data:  data,
+          data: data,
           type: 'series',
           label: description,
           _meta: {

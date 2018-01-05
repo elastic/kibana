@@ -9,11 +9,11 @@ import {
 } from '../../components';
 
 import HeaderBar from './header_bar';
-const headerBarSource = require('!!raw!./header_bar');
+const headerBarSource = require('!!raw-loader!./header_bar');
 const headerBarHtml = renderToHtml(HeaderBar);
 
 import HeaderBarTwoSections from './header_bar_two_sections';
-const headerBarTwoSectionsSource = require('!!raw!./header_bar_two_sections');
+const headerBarTwoSectionsSource = require('!!raw-loader!./header_bar_two_sections');
 const headerBarTwoSectionsHtml = renderToHtml(HeaderBarTwoSections);
 
 export default props => (

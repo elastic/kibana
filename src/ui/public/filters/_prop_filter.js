@@ -25,7 +25,7 @@ export function propFilter(prop) {
       return list.filter((item) => filters(item[prop]));
     }
 
-    if (!_.isArray(filters)) filters = filters.split(',');
+    if (!Array.isArray(filters)) filters = filters.split(',');
     if (_.contains(filters, '*')) return list;
 
     const options = filters.reduce(function (options, filter) {

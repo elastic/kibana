@@ -12,7 +12,7 @@ function isIntegerInRange(integer, min, max) {
     && integer % 1 === 0;
 }
 
-// eslint-disable-next-line kibana-custom/no-default-export
+// eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default function Ipv4Address(ipAddress) {
   this.value = ipAddress;
 

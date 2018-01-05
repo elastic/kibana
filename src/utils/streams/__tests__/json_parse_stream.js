@@ -31,7 +31,7 @@ describe('jsonParseStream', () => {
         createJsonParseStream(),
         createConcatStream([])
       ]))
-      .to.eql(['foo', 1]);
+        .to.eql(['foo', 1]);
     });
   });
 

@@ -69,7 +69,7 @@ export function lodashCollectionMixin(_) {
       _.each(collection, function (obj) {
         const keys = prop === false ? callback(obj) : obj[prop];
 
-        if (!_.isArray(keys)) {
+        if (!Array.isArray(keys)) {
           add(keys, obj);
           return;
         }

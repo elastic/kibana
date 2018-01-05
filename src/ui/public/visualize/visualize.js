@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import dateMath from '@elastic/datemath';
 import { uiModules } from 'ui/modules';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import visualizeTemplate from 'ui/visualize/visualize.html';
@@ -16,7 +17,7 @@ import {
 } from '../elasticsearch_errors';
 
 uiModules
-.get('kibana/directive', ['ngSanitize'])
+  .get('kibana/directive', ['ngSanitize'])
   .directive('visualize', function (Notifier, Private, timefilter, getAppState, Promise) {
     const notify = new Notifier({ location: 'Visualize' });
     const requestHandlers = Private(VisRequestHandlersRegistryProvider);
@@ -31,82 +32,121 @@ uiModules
 
     return {
       restrict: 'E',
-      scope : {
+      scope: {
         showSpyPanel: '=?',
         editorMode: '=?',
-        savedObj: '=',
-        appState: '=',
-        uiState: '=?'
+        savedObj: '=?',
+        appState: '=?',
+        uiState: '=?',
+        savedId: '=?',
+        timeRange: '=?',
       },
       template: visualizeTemplate,
-      link: function ($scope, $el) {
+      link: async function ($scope, $el) {
         const resizeChecker = new ResizeChecker($el);
 
+        if (!$scope.savedObj) throw(`saved object was not provided to <visualize> directive`);
+        if (!$scope.appState) $scope.appState = getAppState();
+
         $scope.vis = $scope.savedObj.vis;
+
+        // Set the passed in uiState to the vis object. uiState reference should never be changed
+        if (!$scope.uiState) $scope.uiState = $scope.vis.getUiState();
+        else $scope.vis._setUiState($scope.uiState);
+
+        $scope.vis.visualizeScope = true;
+        $scope.vis.description = $scope.savedObj.description;
+
+        if ($scope.timeRange) {
+          $scope.vis.params.timeRange = {
+            min: dateMath.parse($scope.timeRange.min),
+            max: dateMath.parse($scope.timeRange.max)
+          };
+
+          $scope.vis.aggs.forEach(agg => {
+            if (agg.type.name !== 'date_histogram') return;
+            agg.setTimeRange($scope.vis.params.timeRange);
+          });
+
+          const searchSource = $scope.savedObj.searchSource;
+          const filter = timefilter.get(searchSource.index(), $scope.vis.params.timeRange);
+          const searchSourceFilters = searchSource.get('filter');
+          if (searchSourceFilters instanceof Array) {
+            searchSourceFilters.push(filter);
+            searchSource.skipTimeRangeFilter = true;
+          }
+        }
+
         $scope.editorMode = $scope.editorMode || false;
         $scope.vis.editorMode = $scope.editorMode;
-        $scope.vis.visualizeScope = true;
-
-        if (!$scope.appState) $scope.appState = getAppState();
 
         const requestHandler = getHandler(requestHandlers, $scope.vis.type.requestHandler);
         const responseHandler = getHandler(responseHandlers, $scope.vis.type.responseHandler);
 
         $scope.fetch = _.debounce(function () {
-          if (!$scope.vis.initialized) return;
+          if (!$scope.vis.initialized || !$scope.savedObj) return;
           // searchSource is only there for courier request handler
           requestHandler($scope.vis, $scope.appState, $scope.uiState, queryFilter, $scope.savedObj.searchSource)
-          .then(requestHandlerResponse => {
+            .then(requestHandlerResponse => {
 
             //No need to call the response handler when there have been no data nor has been there changes
             //in the vis-state (response handler does not depend on uiStat
-            const canSkipResponseHandler = (
-              $scope.previousRequestHandlerResponse && $scope.previousRequestHandlerResponse === requestHandlerResponse &&
+              const canSkipResponseHandler = (
+                $scope.previousRequestHandlerResponse && $scope.previousRequestHandlerResponse === requestHandlerResponse &&
               $scope.previousVisState && _.isEqual($scope.previousVisState, $scope.vis.getState())
-            );
+              );
 
-            $scope.previousVisState = $scope.vis.getState();
-            $scope.previousRequestHandlerResponse = requestHandlerResponse;
-            return canSkipResponseHandler ? $scope.visData : Promise.resolve(responseHandler($scope.vis, requestHandlerResponse));
-          }, e => {
-            $scope.savedObj.searchSource.cancelQueued();
-            $el.trigger('renderComplete');
-            if (isTermSizeZeroError(e)) {
-              return notify.error(
-                `Your visualization ('${$scope.vis.title}') has an error: it has a term ` +
+              $scope.previousVisState = $scope.vis.getState();
+              $scope.previousRequestHandlerResponse = requestHandlerResponse;
+              return canSkipResponseHandler ? $scope.visData : Promise.resolve(responseHandler($scope.vis, requestHandlerResponse));
+            }, e => {
+              $scope.savedObj.searchSource.cancelQueued();
+              $scope.vis.requestError = e;
+              if (isTermSizeZeroError(e)) {
+                return notify.error(
+                  `Your visualization ('${$scope.vis.title}') has an error: it has a term ` +
                 `aggregation with a size of 0. Please set it to a number greater than 0 to resolve ` +
                 `the error.`
-              );
-            }
-            notify.error(e);
-          })
-          .then(resp => {
-            $scope.visData = resp;
-            $scope.$apply();
-            $scope.$broadcast('render');
-            return resp;
-          });
+                );
+              }
+              notify.error(e);
+            })
+            .then(resp => {
+              $scope.visData = resp;
+              $scope.$apply();
+              $scope.$broadcast('render');
+              return resp;
+            });
         }, 100);
 
-        $scope.vis.on('update', () => {
+        //todo: clean this one up as well
+        const handleVisUpdate = () => {
           if ($scope.editorMode) {
             $scope.appState.vis = $scope.vis.getState();
             $scope.appState.save();
           } else {
             $scope.fetch();
           }
-        });
+        };
+        $scope.vis.on('update', handleVisUpdate);
+
 
         const reload = () => {
           $scope.vis.reload = true;
           $scope.fetch();
         };
         $scope.vis.on('reload', reload);
-      // auto reload will trigger this event
+        // auto reload will trigger this event
         $scope.$on('courier:searchRefresh', reload);
-      // dashboard will fire fetch event when it wants to refresh
+        // dashboard will fire fetch event when it wants to refresh
         $scope.$on('fetch', reload);
-        queryFilter.on('update', $scope.fetch);
+
+
+
+        const handleQueryUpdate = ()=> {
+          $scope.fetch();
+        };
+        queryFilter.on('update', handleQueryUpdate);
 
         if ($scope.appState) {
           let oldUiState;
@@ -132,29 +172,30 @@ uiModules
           $scope.$on('$destroy', () => {
             stateMonitor.destroy();
           });
+        } else {
+          const handleUiStateChange = () => { $scope.$broadcast('render'); };
+          $scope.uiState.on('change', handleUiStateChange);
+          $scope.$on('$destroy', () => {
+            $scope.uiState.off('change', handleUiStateChange);
+          });
         }
 
-        let resizeInit = false;
-        const resizeFunc = _.debounce(() => {
-          if (!resizeInit) return resizeInit = true;
+        resizeChecker.on('resize',  () => {
           $scope.$broadcast('render');
-        }, 200);
-        resizeChecker.on('resize',  resizeFunc);
-
-      // visualize needs to know about timeFilter
-        $scope.$listen(timefilter, 'fetch', $scope.fetch);
-        $scope.$on('renderComplete', () => {
-          $el.trigger('renderComplete');
         });
 
+        // visualize needs to know about timeFilter
+        $scope.$listen(timefilter, 'fetch', $scope.fetch);
+
         $scope.$on('$destroy', () => {
+          $scope.vis.removeListener('update', handleVisUpdate);
+          queryFilter.off('update', handleQueryUpdate);
           resizeChecker.destroy();
         });
 
         $scope.$watch('vis.initialized', $scope.fetch);
 
         $scope.fetch();
-        $scope.$root.$broadcast('ready:vis');
       }
     };
   });

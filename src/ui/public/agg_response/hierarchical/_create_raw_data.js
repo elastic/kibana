@@ -22,18 +22,18 @@ export function createRawData(vis, resp) {
 
   // Create the columns
   results.columns = _(aggs)
-  .flattenDeep()
-  .map(function (agg) {
-    return {
-      categoryName: agg.schema.name,
-      id: agg.id,
-      aggConfig: agg,
-      aggType: agg.type,
-      field: agg.params.field,
-      label: agg.makeLabel()
-    };
-  })
-  .value();
+    .flattenDeep()
+    .map(function (agg) {
+      return {
+        categoryName: agg.schema.name,
+        id: agg.id,
+        aggConfig: agg,
+        aggType: agg.type,
+        field: agg.params.field,
+        label: agg.makeLabel()
+      };
+    })
+    .value();
 
 
   // if there are no buckets then we need to just set the value and return
@@ -55,7 +55,7 @@ export function createRawData(vis, resp) {
    */
   function walkBuckets(agg, data, record) {
     if (!data) return;
-    if (!_.isArray(record)) {
+    if (!Array.isArray(record)) {
       record = [];
     }
 

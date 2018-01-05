@@ -42,10 +42,10 @@ describe('kibana cli', function () {
           });
 
           return cleanPrevious(settings, logger)
-          .catch(errorStub)
-          .then(function () {
-            expect(errorStub.called).to.be(false);
-          });
+            .catch(errorStub)
+            .then(function () {
+              expect(errorStub.called).to.be(false);
+            });
         });
 
         it('should rethrow any exception except ENOENT from fs.statSync', function () {
@@ -57,10 +57,10 @@ describe('kibana cli', function () {
 
           errorStub = sinon.stub();
           return cleanPrevious(settings, logger)
-          .catch(errorStub)
-          .then(function () {
-            expect(errorStub.called).to.be(true);
-          });
+            .catch(errorStub)
+            .then(function () {
+              expect(errorStub.called).to.be(true);
+            });
         });
 
         it('should log a message if there was a working directory', function () {
@@ -68,10 +68,10 @@ describe('kibana cli', function () {
           sinon.stub(fs, 'statSync');
 
           return cleanPrevious(settings, logger)
-          .catch(errorStub)
-          .then(function () {
-            expect(logger.log.calledWith('Found previous install attempt. Deleting...')).to.be(true);
-          });
+            .catch(errorStub)
+            .then(function () {
+              expect(logger.log.calledWith('Found previous install attempt. Deleting...')).to.be(true);
+            });
         });
 
         it('should rethrow any exception from rimraf.sync', function () {
@@ -82,10 +82,10 @@ describe('kibana cli', function () {
 
           errorStub = sinon.stub();
           return cleanPrevious(settings, logger)
-          .catch(errorStub)
-          .then(function () {
-            expect(errorStub.called).to.be(true);
-          });
+            .catch(errorStub)
+            .then(function () {
+              expect(errorStub.called).to.be(true);
+            });
         });
 
         it('should resolve if the working path is deleted', function () {
@@ -93,10 +93,10 @@ describe('kibana cli', function () {
           sinon.stub(fs, 'statSync');
 
           return cleanPrevious(settings, logger)
-          .catch(errorStub)
-          .then(function () {
-            expect(errorStub.called).to.be(false);
-          });
+            .catch(errorStub)
+            .then(function () {
+              expect(errorStub.called).to.be(false);
+            });
         });
       });
 

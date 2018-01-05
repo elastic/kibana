@@ -41,7 +41,7 @@ describe('Control Group', function () {
       expect(cpuStat).to.eql({
         number_of_elapsed_periods: 0,
         number_of_times_throttled: 10,
-        time_throttled_nanos:  20
+        time_throttled_nanos: 20
       });
     });
 
@@ -52,7 +52,7 @@ describe('Control Group', function () {
       expect(cpuStat).to.eql({
         number_of_elapsed_periods: -1,
         number_of_times_throttled: -1,
-        time_throttled_nanos:  -1
+        time_throttled_nanos: -1
       });
     });
   });

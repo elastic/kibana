@@ -15,7 +15,7 @@ describe('calculateLabel(metric, metrics)', () => {
   });
 
   it('returns "Calcuation" for a bucket script metric', () => {
-    expect(calculateLabel({ type: 'calculation' })).to.equal('Calculation');
+    expect(calculateLabel({ type: 'calculation' })).to.equal('Bucket Script');
   });
 
   it('returns formated label for series_agg', () => {

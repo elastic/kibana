@@ -1,18 +1,21 @@
 import _ from 'lodash';
 
+import { ErrorAllowExplicitIndexProvider } from 'ui/error_allow_explicit_index';
 import { IsRequestProvider } from './is_request';
 import { MergeDuplicatesRequestProvider } from './merge_duplicate_requests';
-import { ReqStatusProvider } from './req_status';
+import { RequestStatus } from './req_status';
+import { RequestFetchParamsToBodyProvider } from './request/request_fetch_params_to_body_provider';
 
 export function CallClientProvider(Private, Promise, es) {
-
+  const errorAllowExplicitIndex = Private(ErrorAllowExplicitIndexProvider);
   const isRequest = Private(IsRequestProvider);
   const mergeDuplicateRequests = Private(MergeDuplicatesRequestProvider);
+  const requestFetchParamsToBody = Private(RequestFetchParamsToBodyProvider);
 
-  const ABORTED = Private(ReqStatusProvider).ABORTED;
-  const DUPLICATE = Private(ReqStatusProvider).DUPLICATE;
+  const ABORTED = RequestStatus.ABORTED;
+  const DUPLICATE = RequestStatus.DUPLICATE;
 
-  function callClient(strategy, requests) {
+  function callClient(requests) {
     // merging docs can change status to DUPLICATE, capture new statuses
     const statuses = mergeDuplicateRequests(requests);
 
@@ -44,10 +47,10 @@ export function CallClientProvider(Private, Promise, es) {
             return responses[index];
         }
       })
-      .then(
-        (res) => defer.resolve(res),
-        (err) => defer.reject(err)
-      );
+        .then(
+          (res) => defer.resolve(res),
+          (err) => defer.reject(err)
+        );
     };
 
 
@@ -91,51 +94,52 @@ export function CallClientProvider(Private, Promise, es) {
         .then(value => ({ resolved: value }))
         .catch(error => ({ rejected: error }));
     })
-    .then(function (results) {
-      const requestsWithFetchParams = [];
-      // Gather the fetch param responses from all the successful requests.
-      results.forEach((result, index) => {
-        if (result.resolved) {
-          requestsWithFetchParams.push(result.resolved);
-        } else {
-          const request = requestsToFetch[index];
-          request.handleFailure(result.rejected);
-          requestsToFetch[index] = undefined;
-        }
-      });
-      // The index of the request inside requestsToFetch determines which response is mapped to it. If a request
-      // won't generate a response, since it already failed, we need to remove the request
-      // from the requestsToFetch array so the indexes will continue to match up to the responses correctly.
-      requestsToFetch = requestsToFetch.filter(request => request !== undefined);
-      return strategy.reqsFetchParamsToBody(requestsWithFetchParams);
-    })
-    .then(function (body) {
+      .then(function (results) {
+        const requestsWithFetchParams = [];
+        // Gather the fetch param responses from all the successful requests.
+        results.forEach((result, index) => {
+          if (result.resolved) {
+            requestsWithFetchParams.push(result.resolved);
+          } else {
+            const request = requestsToFetch[index];
+            request.handleFailure(result.rejected);
+            requestsToFetch[index] = undefined;
+          }
+        });
+        // The index of the request inside requestsToFetch determines which response is mapped to it. If a request
+        // won't generate a response, since it already failed, we need to remove the request
+        // from the requestsToFetch array so the indexes will continue to match up to the responses correctly.
+        requestsToFetch = requestsToFetch.filter(request => request !== undefined);
+        return requestFetchParamsToBody(requestsWithFetchParams);
+      })
+      .then(function (body) {
       // while the strategy was converting, our request was aborted
-      if (esPromise === ABORTED) {
-        throw ABORTED;
-      }
+        if (esPromise === ABORTED) {
+          throw ABORTED;
+        }
 
-      return (esPromise = es[strategy.clientMethod]({ body }));
-    })
-    .then(function (clientResp) {
-      return strategy.getResponses(clientResp);
-    })
-    .then(respond)
-    .catch(function (err) {
-      if (err === ABORTED) respond();
-      else defer.reject(err);
-    });
+        return (esPromise = es.msearch({ body }));
+      })
+      .then((clientResponse => respond(clientResponse.responses)))
+      .catch(function (error) {
+        if (errorAllowExplicitIndex.test(error)) {
+          return errorAllowExplicitIndex.takeover();
+        }
+
+        if (error === ABORTED) respond();
+        else defer.reject(error);
+      });
 
     // return our promise, but catch any errors we create and
     // send them to the requests
     return defer.promise
-    .catch(function (err) {
-      requests.forEach(function (req, i) {
-        if (statuses[i] !== ABORTED) {
-          req.handleFailure(err);
-        }
+      .catch(function (err) {
+        requests.forEach(function (req, i) {
+          if (statuses[i] !== ABORTED) {
+            req.handleFailure(err);
+          }
+        });
       });
-    });
 
   }
 

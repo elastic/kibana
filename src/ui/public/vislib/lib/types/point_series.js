@@ -84,9 +84,9 @@ export function VislibTypesPointSeries() {
               type: config.scale,
               setYExtents: config.setYExtents,
               defaultYExtents: config.defaultYExtents,
-              min : isUserDefinedYAxis ? config.yAxis.min : undefined,
-              max : isUserDefinedYAxis ? config.yAxis.max : undefined,
-              mode : mode
+              min: isUserDefinedYAxis ? config.yAxis.min : undefined,
+              max: isUserDefinedYAxis ? config.yAxis.max : undefined,
+              mode: mode
             },
             labels: {
               axisFormatter: data.data.yAxisFormatter || data.get('yAxisFormatter')
@@ -196,7 +196,7 @@ export function VislibTypesPointSeries() {
         },
         labels: {
           filter: false,
-          axisFormatter:  function (val) { return val; }
+          axisFormatter: function (val) { return val; }
         },
         style: {
           rangePadding: 0,

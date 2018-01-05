@@ -1,7 +1,8 @@
 import reqRespStatsHTML from 'plugins/spy_modes/req_resp_stats_spy_mode.html';
 import { SpyModesRegistryProvider } from 'ui/registry/spy_modes';
 
-const linkReqRespStats = function ($scope) {
+const linkReqRespStats = function (mode, $scope) {
+  $scope.mode = mode;
   $scope.$bind('req', 'searchSource.history[searchSource.history.length - 1]');
   $scope.$watchMulti([
     'req',
@@ -27,31 +28,38 @@ const linkReqRespStats = function ($scope) {
   });
 };
 
+function shouldShowSpyMode(vis) {
+  return vis.type.requestHandler === 'courier' && vis.type.requiresSearch;
+}
+
 SpyModesRegistryProvider
-.register(function () {
-  return {
-    name: 'request',
-    display: 'Request',
-    order: 2,
-    template: reqRespStatsHTML,
-    link: linkReqRespStats
-  };
-})
-.register(function () {
-  return {
-    name: 'response',
-    display: 'Response',
-    order: 3,
-    template: reqRespStatsHTML,
-    link: linkReqRespStats
-  };
-})
-.register(function () {
-  return {
-    name: 'stats',
-    display: 'Statistics',
-    order: 4,
-    template: reqRespStatsHTML,
-    link: linkReqRespStats
-  };
-});
+  .register(function () {
+    return {
+      name: 'request',
+      display: 'Request',
+      order: 2,
+      template: reqRespStatsHTML,
+      showMode: shouldShowSpyMode,
+      link: linkReqRespStats.bind(null, 'request')
+    };
+  })
+  .register(function () {
+    return {
+      name: 'response',
+      display: 'Response',
+      order: 3,
+      template: reqRespStatsHTML,
+      showMode: shouldShowSpyMode,
+      link: linkReqRespStats.bind(null, 'response')
+    };
+  })
+  .register(function () {
+    return {
+      name: 'stats',
+      display: 'Statistics',
+      order: 4,
+      template: reqRespStatsHTML,
+      showMode: shouldShowSpyMode,
+      link: linkReqRespStats.bind(null, 'stats')
+    };
+  });

@@ -2,13 +2,13 @@
   font-size: 16px;
   line-height: 0;
   background-color: transparent;
-  color: $globalLinkColor;
+  color: $kuiLinkColor;
   cursor: pointer;
   border: none;
   padding: 0;
 
   &:hover,
   &:active {
-    color: $globalLinkColor-isHover;
+    color: $kuiLinkColor-isHover;
   }
 }

@@ -18,7 +18,11 @@ const injectReplacer = (kbnServer, replacer) => {
   // normally the replacer would be defined in a plugin's uiExports,
   // but that requires stubbing out an entire plugin directory for
   // each test, so we fake it and jam the replacer into uiExports
-  kbnServer.uiExports.injectedVarsReplacers.push(replacer);
+  const { injectedVarsReplacers = [] } = kbnServer.uiExports;
+  kbnServer.uiExports.injectedVarsReplacers = [
+    ...injectedVarsReplacers,
+    replacer
+  ];
 };
 
 describe('UiExports', function () {
@@ -32,17 +36,24 @@ describe('UiExports', function () {
         server: { port: 0 }, // pick a random open port
         logging: { silent: true }, // no logs
         optimize: { enabled: false },
-        uiSettings: { enabled: false },
         plugins: {
           paths: [resolve(__dirname, './fixtures/test_app')] // inject an app so we can hit /app/{id}
         },
       });
 
       await kbnServer.ready();
-      kbnServer.status.get('ui settings').state = 'green';
-      kbnServer.server.decorate('request', 'getUiSettingsService', () => {
-        return { getDefaults: noop, getUserProvided: noop };
-      });
+
+      // TODO: hopefully we can add better support for something
+      // like this in the new platform
+      kbnServer.server._requestor._decorations.getUiSettingsService = {
+        apply: undefined,
+        method() {
+          return {
+            getDefaults: noop,
+            getUserProvided: noop
+          };
+        }
+      };
     });
 
     afterEach(async () => {
@@ -115,7 +126,6 @@ describe('UiExports', function () {
     it('starts off with the injected vars for the app merged with the default injected vars', async () => {
       const stub = sinon.stub();
       injectReplacer(kbnServer, stub);
-      kbnServer.uiExports.defaultInjectedVars.from_defaults = true;
 
       await kbnServer.inject('/app/test_app');
       sinon.assert.calledOnce(stub);

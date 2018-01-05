@@ -3,6 +3,10 @@ import Boom from 'boom';
 const code = Symbol('SavedObjectsClientErrorCode');
 
 function decorate(error, errorCode, statusCode, message) {
+  if (isSavedObjectsClientError(error)) {
+    return error;
+  }
+
   const boom = Boom.boomify(error, {
     statusCode,
     message,
@@ -12,6 +16,10 @@ function decorate(error, errorCode, statusCode, message) {
   boom[code] = errorCode;
 
   return boom;
+}
+
+export function isSavedObjectsClientError(error) {
+  return error && !!error[code];
 }
 
 // 400 - badRequest
@@ -46,8 +54,8 @@ export function isForbiddenError(error) {
 
 // 404 - Not Found
 const CODE_NOT_FOUND = 'SavedObjectsClient/notFound';
-export function decorateNotFoundError(error, reason) {
-  return decorate(error, CODE_NOT_FOUND, 404, reason);
+export function createGenericNotFoundError() {
+  return decorate(Boom.notFound(), CODE_NOT_FOUND, 404);
 }
 export function isNotFoundError(error) {
   return error && error[code] === CODE_NOT_FOUND;
@@ -64,13 +72,26 @@ export function isConflictError(error) {
 }
 
 
-// 500 - Es Unavailable
+// 503 - Es Unavailable
 const CODE_ES_UNAVAILABLE = 'SavedObjectsClient/esUnavailable';
 export function decorateEsUnavailableError(error, reason) {
   return decorate(error, CODE_ES_UNAVAILABLE, 503, reason);
 }
 export function isEsUnavailableError(error) {
   return error && error[code] === CODE_ES_UNAVAILABLE;
+}
+
+
+// 503 - Unable to automatically create index because of action.auto_create_index setting
+const CODE_ES_AUTO_CREATE_INDEX_ERROR = 'SavedObjectsClient/autoCreateIndex';
+export function createEsAutoCreateIndexError() {
+  const error = Boom.serverUnavailable('Automatic index creation failed');
+  error.output.payload.code = 'ES_AUTO_CREATE_INDEX_ERROR';
+
+  return decorate(error, CODE_ES_AUTO_CREATE_INDEX_ERROR, 503);
+}
+export function isEsAutoCreateIndexError(error) {
+  return error && error[code] === CODE_ES_AUTO_CREATE_INDEX_ERROR;
 }
 
 

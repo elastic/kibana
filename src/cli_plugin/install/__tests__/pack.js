@@ -66,25 +66,25 @@ describe('kibana cli', function () {
       //Ignores the others.
       it('successfully extract a valid zip', function () {
         return copyReplyFile('test_plugin.zip')
-        .then(() => {
-          return getPackData(settings, logger);
-        })
-        .then(() => {
-          return extract(settings, logger);
-        })
-        .then(() => {
-          const files = glob.sync('**/*', { cwd: testWorkingPath });
-          const expected = [
-            'archive.part',
-            'README.md',
-            'index.js',
-            'package.json',
-            'public',
-            'public/app.js',
-            'extra file only in zip.txt'
-          ];
-          expect(files.sort()).to.eql(expected.sort());
-        });
+          .then(() => {
+            return getPackData(settings, logger);
+          })
+          .then(() => {
+            return extract(settings, logger);
+          })
+          .then(() => {
+            const files = glob.sync('**/*', { cwd: testWorkingPath });
+            const expected = [
+              'archive.part',
+              'README.md',
+              'index.js',
+              'package.json',
+              'public',
+              'public/app.js',
+              'extra file only in zip.txt'
+            ];
+            expect(files.sort()).to.eql(expected.sort());
+          });
       });
 
     });
@@ -93,99 +93,99 @@ describe('kibana cli', function () {
 
       it('populate settings.plugins', function () {
         return copyReplyFile('test_plugin.zip')
-        .then(() => {
-          return getPackData(settings, logger);
-        })
-        .then(() => {
-          expect(settings.plugins[0].name).to.be('test-plugin');
-          expect(settings.plugins[0].archivePath).to.be('kibana/test-plugin');
-          expect(settings.plugins[0].version).to.be('1.0.0');
-          expect(settings.plugins[0].kibanaVersion).to.be('1.0.0');
-        });
+          .then(() => {
+            return getPackData(settings, logger);
+          })
+          .then(() => {
+            expect(settings.plugins[0].name).to.be('test-plugin');
+            expect(settings.plugins[0].archivePath).to.be('kibana/test-plugin');
+            expect(settings.plugins[0].version).to.be('1.0.0');
+            expect(settings.plugins[0].kibanaVersion).to.be('1.0.0');
+          });
       });
 
       it('populate settings.plugin.kibanaVersion', function () {
         //kibana.version is defined in this package.json and is different than plugin version
         return copyReplyFile('test_plugin_different_version.zip')
-        .then(() => {
-          return getPackData(settings, logger);
-        })
-        .then(() => {
-          expect(settings.plugins[0].kibanaVersion).to.be('5.0.1');
-        });
+          .then(() => {
+            return getPackData(settings, logger);
+          })
+          .then(() => {
+            expect(settings.plugins[0].kibanaVersion).to.be('5.0.1');
+          });
       });
 
       it('populate settings.plugin.kibanaVersion (default to plugin version)', function () {
         //kibana.version is not defined in this package.json, defaults to plugin version
         return copyReplyFile('test_plugin.zip')
-        .then(() => {
-          return getPackData(settings, logger);
-        })
-        .then(() => {
-          expect(settings.plugins[0].kibanaVersion).to.be('1.0.0');
-        });
+          .then(() => {
+            return getPackData(settings, logger);
+          })
+          .then(() => {
+            expect(settings.plugins[0].kibanaVersion).to.be('1.0.0');
+          });
       });
 
       it('populate settings.plugins with multiple plugins', function () {
         return copyReplyFile('test_plugin_many.zip')
-        .then(() => {
-          return getPackData(settings, logger);
-        })
-        .then(() => {
-          expect(settings.plugins[0].name).to.be('funger-plugin');
-          expect(settings.plugins[0].archivePath).to.be('kibana/funger-plugin');
-          expect(settings.plugins[0].version).to.be('1.0.0');
+          .then(() => {
+            return getPackData(settings, logger);
+          })
+          .then(() => {
+            expect(settings.plugins[0].name).to.be('funger-plugin');
+            expect(settings.plugins[0].archivePath).to.be('kibana/funger-plugin');
+            expect(settings.plugins[0].version).to.be('1.0.0');
 
-          expect(settings.plugins[1].name).to.be('pdf');
-          expect(settings.plugins[1].archivePath).to.be('kibana/pdf-linux');
-          expect(settings.plugins[1].version).to.be('1.0.0');
+            expect(settings.plugins[1].name).to.be('pdf');
+            expect(settings.plugins[1].archivePath).to.be('kibana/pdf-linux');
+            expect(settings.plugins[1].version).to.be('1.0.0');
 
-          expect(settings.plugins[2].name).to.be('pdf');
-          expect(settings.plugins[2].archivePath).to.be('kibana/pdf-win32');
-          expect(settings.plugins[2].version).to.be('1.0.0');
+            expect(settings.plugins[2].name).to.be('pdf');
+            expect(settings.plugins[2].archivePath).to.be('kibana/pdf-win32');
+            expect(settings.plugins[2].version).to.be('1.0.0');
 
-          expect(settings.plugins[3].name).to.be('pdf');
-          expect(settings.plugins[3].archivePath).to.be('kibana/pdf-win64');
-          expect(settings.plugins[3].version).to.be('1.0.0');
+            expect(settings.plugins[3].name).to.be('pdf');
+            expect(settings.plugins[3].archivePath).to.be('kibana/pdf-win64');
+            expect(settings.plugins[3].version).to.be('1.0.0');
 
-          expect(settings.plugins[4].name).to.be('pdf');
-          expect(settings.plugins[4].archivePath).to.be('kibana/pdf');
-          expect(settings.plugins[4].version).to.be('1.0.0');
+            expect(settings.plugins[4].name).to.be('pdf');
+            expect(settings.plugins[4].archivePath).to.be('kibana/pdf');
+            expect(settings.plugins[4].version).to.be('1.0.0');
 
-          expect(settings.plugins[5].name).to.be('test-plugin');
-          expect(settings.plugins[5].archivePath).to.be('kibana/test-plugin');
-          expect(settings.plugins[5].version).to.be('1.0.0');
-        });
+            expect(settings.plugins[5].name).to.be('test-plugin');
+            expect(settings.plugins[5].archivePath).to.be('kibana/test-plugin');
+            expect(settings.plugins[5].version).to.be('1.0.0');
+          });
       });
 
       it('throw an error if there is no kibana plugin', function () {
         return copyReplyFile('test_plugin_no_kibana.zip')
-        .then(() => {
-          return getPackData(settings, logger);
-        })
-        .then(shouldReject, (err) => {
-          expect(err.message).to.match(/No kibana plugins found in archive/i);
-        });
+          .then(() => {
+            return getPackData(settings, logger);
+          })
+          .then(shouldReject, (err) => {
+            expect(err.message).to.match(/No kibana plugins found in archive/i);
+          });
       });
 
       it('throw an error with a corrupt zip', function () {
         return copyReplyFile('corrupt.zip')
-        .then(() => {
-          return getPackData(settings, logger);
-        })
-        .then(shouldReject, (err) => {
-          expect(err.message).to.match(/error retrieving/i);
-        });
+          .then(() => {
+            return getPackData(settings, logger);
+          })
+          .then(shouldReject, (err) => {
+            expect(err.message).to.match(/error retrieving/i);
+          });
       });
 
       it('throw an error if there an invalid plugin name', function () {
         return copyReplyFile('invalid_name.zip')
-        .then(() => {
-          return getPackData(settings, logger);
-        })
-        .then(shouldReject, (err) => {
-          expect(err.message).to.match(/invalid plugin name/i);
-        });
+          .then(() => {
+            return getPackData(settings, logger);
+          })
+          .then(shouldReject, (err) => {
+            expect(err.message).to.match(/invalid plugin name/i);
+          });
       });
 
     });

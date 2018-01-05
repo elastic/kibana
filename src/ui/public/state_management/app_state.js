@@ -108,10 +108,10 @@ export function AppStateProvider(Private, $rootScope, $location, $injector) {
 }
 
 uiModules.get('kibana/global_state')
-.factory('AppState', function (Private) {
-  return Private(AppStateProvider);
-})
-.service('getAppState', function (Private) {
-  return Private(AppStateProvider).getAppState;
-});
+  .factory('AppState', function (Private) {
+    return Private(AppStateProvider);
+  })
+  .service('getAppState', function (Private) {
+    return Private(AppStateProvider).getAppState;
+  });
 

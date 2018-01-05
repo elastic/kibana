@@ -1,17 +1,17 @@
 <div>
     <table class="vis-editor-agg-editor-ranges form-group" ng-show="agg.params.ranges.length">
       <tr>
-        <th>
+        <th scope="col">
           <label id="visEditorDateRangeFrom{{agg.id}}">From</label>
         </th>
-        <th colspan="2">
+        <th scope="col" colspan="2">
           <label id="visEditorDateRangeTo{{agg.id}}">To</label>
         </th>
       </tr>
 
       <tr
         ng-repeat="range in agg.params.ranges track by $index">
-        <td class="kbn-timepicker">
+        <td>
           <input
             aria-labelledby="visEditorDateRangeFrom{{agg.id}}"
             ng-model="range.from"
@@ -20,7 +20,7 @@
             class="form-control"
             name="range.from" />
         </td>
-        <td class="kbn-timepicker">
+        <td>
           <input
             aria-labelledby="visEditorDateRangeTo{{agg.id}}"
             ng-model="range.to"
@@ -43,8 +43,9 @@
           <small>
             <a
               class="kuiLink"
-              ng-href="{{dateDocLinks.dateMath}}"
+              documentation-href="date.dateMath"
               target="_blank"
+              rel="noopener noreferrer"
             >
               Accepted date formats
             </a>

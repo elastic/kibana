@@ -90,4 +90,4 @@ export default async function downloadUrl(logger, sourceUrl, targetPath, timeout
     }
     throw err;
   }
-};
+}

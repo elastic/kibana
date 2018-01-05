@@ -5,7 +5,7 @@ import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import FixturesStubbedLogstashIndexPatternProvider from 'fixtures/stubbed_logstash_index_pattern';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
 
-// eslint-disable-next-line kibana-custom/no-default-export
+// eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default function AggParamWriterHelper(Private) {
   const Vis = Private(VisProvider);
   const aggTypes = Private(AggTypesIndexProvider);
@@ -105,12 +105,6 @@ export default function AggParamWriterHelper(Private) {
 
     const aggConfig = _.find(self.vis.aggs, function (aggConfig) {
       return aggConfig.type === self.aggType;
-    });
-
-    aggConfig.type.params.forEach(function (param) {
-      if (param.onRequest) {
-        param.onRequest(aggConfig);
-      }
     });
 
     return aggConfig.type.params.write(aggConfig);

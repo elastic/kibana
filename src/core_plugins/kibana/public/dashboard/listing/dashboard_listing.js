@@ -2,10 +2,10 @@ import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_regis
 import 'ui/pager_control';
 import 'ui/pager';
 import { DashboardConstants, createDashboardEditUrl } from '../dashboard_constants';
-import { SortableProperties } from 'ui_framework/services';
+import { SortableProperties } from '@elastic/eui';
 import { ConfirmationButtonTypes } from 'ui/modals';
 
-export function DashboardListingController($injector, $scope) {
+export function DashboardListingController($injector, $scope, $location) {
   const $filter = $injector.get('$filter');
   const confirmModal = $injector.get('confirmModal');
   const Notifier = $injector.get('Notifier');
@@ -15,7 +15,8 @@ export function DashboardListingController($injector, $scope) {
   const config = $injector.get('config');
   const dashboardConfig = $injector.get('dashboardConfig');
 
-  timefilter.enabled = false;
+  timefilter.disableAutoRefreshSelector();
+  timefilter.disableTimeRangeSelector();
 
   const limitTo = $filter('limitTo');
   // TODO: Extract this into an external service.
@@ -69,7 +70,7 @@ export function DashboardListingController($injector, $scope) {
   this.isFetchingItems = false;
   this.items = [];
   this.pageOfItems = [];
-  this.filter = '';
+  this.filter = ($location.search()).filter || '';
 
   this.pager = pagerFactory.create(this.items.length, 20, 1);
 
@@ -78,6 +79,7 @@ export function DashboardListingController($injector, $scope) {
   $scope.$watch(() => this.filter, () => {
     deselectAll();
     fetchItems();
+    $location.search('filter', this.filter);
   });
   this.isAscending = (name) => sortableProperties.isAscendingByName(name);
   this.getSortedProperty = () => sortableProperties.getSortedProperty();
@@ -152,6 +154,10 @@ export function DashboardListingController($injector, $scope) {
 
   this.getUrlForItem = function getUrlForItem(item) {
     return `#${createDashboardEditUrl(item.id)}`;
+  };
+
+  this.getEditUrlForItem = function getEditUrlForItem(item) {
+    return `#${createDashboardEditUrl(item.id)}?_a=(viewMode:edit)`;
   };
 
   this.getCreateDashboardHref = function getCreateDashboardHref() {

@@ -26,7 +26,7 @@ export function scrollSearchApi(server) {
     handler: (req, reply) => {
       const { callWithRequest } = server.plugins.elasticsearch.getCluster('admin');
       const { scrollId } = req.payload;
-      return callWithRequest(req, 'scroll', { scrollId })
+      return callWithRequest(req, 'scroll', { scrollId, scroll: '1m' })
         .then(reply)
         .catch(error => reply(handleESError(error)));
     }

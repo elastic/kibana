@@ -1,11 +1,6 @@
 import moment from 'moment-timezone';
 
 export function KibanaRootController($scope, courier, config) {
-  // wait for the application to finish loading
-  $scope.$on('application.load', function () {
-    courier.start();
-  });
-
   config.watch('dateFormat:tz', setDefaultTimezone, $scope);
   config.watch('dateFormat:dow', setStartDayOfWeek, $scope);
 

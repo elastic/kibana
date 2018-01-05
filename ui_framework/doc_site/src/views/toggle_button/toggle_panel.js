@@ -8,6 +8,8 @@ const $togglePanelContent = $('[data-id="togglePanelContent"]');
 $togglePanelButton.on('click', () => {
   isButtonCollapsed = !isButtonCollapsed;
 
+  $togglePanelButton.attr('aria-expanded', !isButtonCollapsed);
+
   if (isButtonCollapsed) {
     $togglePanelButtonIcon.addClass('fa-caret-right');
     $togglePanelButtonIcon.removeClass('fa-caret-down');

@@ -24,7 +24,7 @@ export default (id, metrics) => {
     case 'std_deviation':
     case 'variance':
     case 'sum_of_squares':
-      if (/^std_deviation/.test(metric.type) && ~['upper','lower'].indexOf(metric.mode)) {
+      if (/^std_deviation/.test(metric.type) && ~['upper', 'lower'].indexOf(metric.mode)) {
         bucketsPath += `[std_${metric.mode}]`;
       } else {
         bucketsPath += `[${metric.type}]`;

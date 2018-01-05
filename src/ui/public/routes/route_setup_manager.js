@@ -65,29 +65,29 @@ export class RouteSetupManager {
     };
 
     return invokeEach(this.setupWork)
-    .then(
-      () => invokeEach(this.onSetupComplete),
-      err => callErrorHandlers(this.onSetupError, err)
-    )
-    .then(() => {
+      .then(
+        () => invokeEach(this.onSetupComplete),
+        err => callErrorHandlers(this.onSetupError, err)
+      )
+      .then(() => {
       // wait for the queue to fill up, then do all the work
-      const defer = Promise.defer();
-      userWork.resolveWhenFull(defer);
+        const defer = Promise.defer();
+        userWork.resolveWhenFull(defer);
 
-      return defer.promise.then(() => Promise.all(userWork.doWork()));
-    })
-    .catch(error => {
-      if (error === WAIT_FOR_URL_CHANGE_TOKEN) {
+        return defer.promise.then(() => Promise.all(userWork.doWork()));
+      })
+      .catch(error => {
+        if (error === WAIT_FOR_URL_CHANGE_TOKEN) {
         // prevent moving forward, return a promise that never resolves
         // so that the $router can observe the $location update
-        return Promise.halt();
-      }
+          return Promise.halt();
+        }
 
-      throw error;
-    })
-    .then(
-      () => invokeEach(this.onWorkComplete),
-      err => callErrorHandlers(this.onWorkError, err)
-    );
+        throw error;
+      })
+      .then(
+        () => invokeEach(this.onWorkComplete),
+        err => callErrorHandlers(this.onWorkError, err)
+      );
   }
 }

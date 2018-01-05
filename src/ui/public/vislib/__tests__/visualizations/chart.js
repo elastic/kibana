@@ -14,15 +14,15 @@ describe('Vislib _chart Test Suite', function () {
   let myChart;
   let config;
   const data = {
-    hits      : 621,
-    label     : '',
-    ordered   : {
+    hits: 621,
+    label: '',
+    ordered: {
       date: true,
       interval: 30000,
-      max     : 1408734982458,
-      min     : 1408734082458
+      max: 1408734982458,
+      min: 1408734082458
     },
-    series    : [
+    series: [
       {
         values: [
           {

@@ -94,7 +94,7 @@ class TagCloud extends EventEmitter {
   }
 
   setData(data) {
-    this._words = data.map(toWordTag);
+    this._words = data;
     this._invalidate(false);
   }
 
@@ -158,7 +158,7 @@ class TagCloud extends EventEmitter {
 
   async _pickPendingJob() {
     return await new Promise((resolve) => {
-      this._setTimeoutId = setTimeout(async() => {
+      this._setTimeoutId = setTimeout(async () => {
         const job = this._pendingJob;
         this._pendingJob = null;
         this._setTimeoutId = null;
@@ -200,12 +200,13 @@ class TagCloud extends EventEmitter {
       enteringTags.style('fill', getFill);
       enteringTags.attr('text-anchor', () => 'middle');
       enteringTags.attr('transform', affineTransform);
-      enteringTags.text(getText);
+      enteringTags.attr('data-test-subj', getDisplayText);
+      enteringTags.text(getDisplayText);
 
       const self = this;
       enteringTags.on({
         click: function (event) {
-          self.emit('select', event.text);
+          self.emit('select', event.rawText);
         },
         mouseover: function () {
           d3.select(this).style('cursor', 'pointer');
@@ -266,7 +267,7 @@ class TagCloud extends EventEmitter {
     return {
       refreshLayout: true,
       size: this._size.slice(),
-      words: this._words.map(toWordTag)
+      words: this._words
     };
   }
 
@@ -280,7 +281,8 @@ class TagCloud extends EventEmitter {
           y: tag.y,
           rotate: tag.rotate,
           size: tag.size,
-          text: tag.text
+          rawText: tag.rawText || tag.text,
+          displayText: tag.displayText
         };
       })
     };
@@ -302,6 +304,12 @@ class TagCloud extends EventEmitter {
 
   async _updateLayout(job) {
 
+    if (job.size[0] <= 0 || job.size[1] <= 0) {
+      // If either width or height isn't above 0 we don't relayout anything,
+      // since the d3-cloud will be stuck in an infinite loop otherwise.
+      return;
+    }
+
     const mapSizeToFontSize = this._makeTextSizeMapper();
     const tagCloudLayoutGenerator = d3TagCloud();
     tagCloudLayoutGenerator.size(job.size);
@@ -314,7 +322,7 @@ class TagCloud extends EventEmitter {
     tagCloudLayoutGenerator.random(seed);
     tagCloudLayoutGenerator.spiral(this._spiral);
     tagCloudLayoutGenerator.words(job.words);
-    tagCloudLayoutGenerator.text(getText);
+    tagCloudLayoutGenerator.text(getDisplayText);
     tagCloudLayoutGenerator.timeInterval(this._timeInterval);
 
     this._layoutIsUpdating = true;
@@ -336,7 +344,8 @@ class TagCloud extends EventEmitter {
     const debug = {};
     debug.positions = this._completedJob ? this._completedJob.words.map(tag => {
       return {
-        text: tag.text,
+        displayText: tag.displayText,
+        rawText: tag.rawText || tag.text,
         x: tag.x,
         y: tag.y,
         rotate: tag.rotate
@@ -357,13 +366,12 @@ function seed() {
   return 0.5;//constant seed (not random) to ensure constant layouts for identical data
 }
 
-function toWordTag(word) {
-  return { value: word.value, text: word.text };
+function getText(word) {
+  return word.rawText;
 }
 
-
-function getText(word) {
-  return word.text;
+function getDisplayText(word) {
+  return word.displayText;
 }
 
 function positionWord(xTranslate, yTranslate, word) {

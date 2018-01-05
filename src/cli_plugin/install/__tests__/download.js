@@ -70,20 +70,20 @@ describe('kibana cli', function () {
           const sourceUrl = 'http://example.com/plugin.tar.gz';
 
           return _downloadSingle(settings, logger, sourceUrl)
-          .then(shouldReject, function (err) {
-            expect(err.message).to.match(/ENOTFOUND/);
-            expectWorkingPathEmpty();
-          });
+            .then(shouldReject, function (err) {
+              expect(err.message).to.match(/ENOTFOUND/);
+              expectWorkingPathEmpty();
+            });
         });
 
         it('should throw an UnsupportedProtocolError for an invalid url', function () {
           const sourceUrl = 'i am an invalid url';
 
           return _downloadSingle(settings, logger, sourceUrl)
-          .then(shouldReject, function (err) {
-            expect(err).to.be.an(UnsupportedProtocolError);
-            expectWorkingPathEmpty();
-          });
+            .then(shouldReject, function (err) {
+              expect(err).to.be.an(UnsupportedProtocolError);
+              expectWorkingPathEmpty();
+            });
         });
 
         it('should download a file from a valid http url', function () {
@@ -100,9 +100,9 @@ describe('kibana cli', function () {
           const sourceUrl = 'http://example.com/plugin.zip';
 
           return _downloadSingle(settings, logger, sourceUrl)
-          .then(function () {
-            expectWorkingPathNotEmpty();
-          });
+            .then(function () {
+              expectWorkingPathNotEmpty();
+            });
         });
 
       });
@@ -114,10 +114,10 @@ describe('kibana cli', function () {
           const sourceUrl = 'file://' + filePath.replace(/\\/g, '/');
 
           return _downloadSingle(settings, logger, sourceUrl)
-          .then(shouldReject, function (err) {
-            expect(err.message).to.match(/ENOTFOUND/);
-            expectWorkingPathEmpty();
-          });
+            .then(shouldReject, function (err) {
+              expect(err.message).to.match(/ENOTFOUND/);
+              expectWorkingPathEmpty();
+            });
         });
 
         it('should copy a valid local file', function () {
@@ -125,9 +125,9 @@ describe('kibana cli', function () {
           const sourceUrl = 'file://' + filePath.replace(/\\/g, '/');
 
           return _downloadSingle(settings, logger, sourceUrl)
-          .then(function () {
-            expectWorkingPathNotEmpty();
-          });
+            .then(function () {
+              expectWorkingPathNotEmpty();
+            });
         });
 
       });
@@ -176,24 +176,24 @@ describe('kibana cli', function () {
         ];
 
         nock('http://example.com')
-        .defaultReplyHeaders({
-          'content-length': '10'
-        })
-        .get('/badfile1.tar.gz')
-        .reply(404)
-        .get('/badfile2.tar.gz')
-        .reply(404)
-        .get('/goodfile.tar.gz')
-        .replyWithFile(200, filePath);
+          .defaultReplyHeaders({
+            'content-length': '10'
+          })
+          .get('/badfile1.tar.gz')
+          .reply(404)
+          .get('/badfile2.tar.gz')
+          .reply(404)
+          .get('/goodfile.tar.gz')
+          .replyWithFile(200, filePath);
 
         return download(settings, logger)
-        .then(function () {
-          expect(logger.log.getCall(0).args[0]).to.match(/badfile1.tar.gz/);
-          expect(logger.log.getCall(1).args[0]).to.match(/badfile2.tar.gz/);
-          expect(logger.log.getCall(2).args[0]).to.match(/I am a bad uri/);
-          expect(logger.log.getCall(3).args[0]).to.match(/goodfile.tar.gz/);
-          expectWorkingPathNotEmpty();
-        });
+          .then(function () {
+            expect(logger.log.getCall(0).args[0]).to.match(/badfile1.tar.gz/);
+            expect(logger.log.getCall(1).args[0]).to.match(/badfile2.tar.gz/);
+            expect(logger.log.getCall(2).args[0]).to.match(/I am a bad uri/);
+            expect(logger.log.getCall(3).args[0]).to.match(/goodfile.tar.gz/);
+            expectWorkingPathNotEmpty();
+          });
       });
 
       it('should stop looping through urls when it finds a good one.', function () {
@@ -206,25 +206,25 @@ describe('kibana cli', function () {
         ];
 
         nock('http://example.com')
-        .defaultReplyHeaders({
-          'content-length': '10'
-        })
-        .get('/badfile1.tar.gz')
-        .reply(404)
-        .get('/badfile2.tar.gz')
-        .reply(404)
-        .get('/goodfile.tar.gz')
-        .replyWithFile(200, filePath)
-        .get('/badfile3.tar.gz')
-        .reply(404);
+          .defaultReplyHeaders({
+            'content-length': '10'
+          })
+          .get('/badfile1.tar.gz')
+          .reply(404)
+          .get('/badfile2.tar.gz')
+          .reply(404)
+          .get('/goodfile.tar.gz')
+          .replyWithFile(200, filePath)
+          .get('/badfile3.tar.gz')
+          .reply(404);
 
         return download(settings, logger)
-        .then(function () {
-          for (let i = 0; i < logger.log.callCount; i++) {
-            expect(logger.log.getCall(i).args[0]).to.not.match(/badfile3.tar.gz/);
-          }
-          expectWorkingPathNotEmpty();
-        });
+          .then(function () {
+            for (let i = 0; i < logger.log.callCount; i++) {
+              expect(logger.log.getCall(i).args[0]).to.not.match(/badfile3.tar.gz/);
+            }
+            expectWorkingPathNotEmpty();
+          });
       });
 
       it('should throw an error when it doesn\'t find a good url.', function () {
@@ -235,21 +235,21 @@ describe('kibana cli', function () {
         ];
 
         nock('http://example.com')
-        .defaultReplyHeaders({
-          'content-length': '10'
-        })
-        .get('/badfile1.tar.gz')
-        .reply(404)
-        .get('/badfile2.tar.gz')
-        .reply(404)
-        .get('/badfile3.tar.gz')
-        .reply(404);
+          .defaultReplyHeaders({
+            'content-length': '10'
+          })
+          .get('/badfile1.tar.gz')
+          .reply(404)
+          .get('/badfile2.tar.gz')
+          .reply(404)
+          .get('/badfile3.tar.gz')
+          .reply(404);
 
         return download(settings, logger)
-        .then(shouldReject, function (err) {
-          expect(err.message).to.match(/no valid url specified/i);
-          expectWorkingPathEmpty();
-        });
+          .then(shouldReject, function (err) {
+            expect(err.message).to.match(/no valid url specified/i);
+            expectWorkingPathEmpty();
+          });
       });
 
       after(function () {

@@ -11,6 +11,7 @@ exports[`property hasNextPage disables next button when false 1`] = `
   </div>
   <div
     class="kuiButtonGroup kuiButtonGroup--united"
+    role="group"
   >
     <button
       aria-label="Show previous page"
@@ -56,6 +57,7 @@ exports[`property hasPreviousPage disables previous button when false 1`] = `
   </div>
   <div
     class="kuiButtonGroup kuiButtonGroup--united"
+    role="group"
   >
     <button
       aria-label="Show previous page"
@@ -103,6 +105,7 @@ exports[`renders KuiPager 1`] = `
   </div>
   <div
     class="kuiButtonGroup kuiButtonGroup--united"
+    role="group"
   >
     <button
       aria-label="Show previous page"

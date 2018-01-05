@@ -31,7 +31,10 @@ const hashStatesInQuery = (states, query) => {
   }, {});
 
 
-  return Object.assign({}, query, hashedQuery);
+  return {
+    ...query,
+    ...hashedQuery
+  };
 };
 
 export const hashUrl = (states, redirectUrl) => {

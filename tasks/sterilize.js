@@ -1,4 +1,4 @@
-import { bgRed, white } from 'ansicolors';
+import { bgRed, white } from 'chalk';
 import { execSync } from 'child_process';
 import { createInterface } from 'readline';
 
@@ -11,9 +11,9 @@ export default function (grunt) {
       '.aws-config.json',
       'config/kibana.dev.yml'
     ]
-    .concat(String(grunt.option('ignore') || '').split(','))
-    .map(f => `-e "${f.split('"').join('\\"')}"`)
-    .reduce((all, arg) => `${all} ${arg}`, '');
+      .concat(String(grunt.option('ignore') || '').split(','))
+      .map(f => `-e "${f.split('"').join('\\"')}"`)
+      .reduce((all, arg) => `${all} ${arg}`, '');
 
     const stdio = 'inherit';
     execSync(`${cmd} -n ${ignores}`, { stdio });

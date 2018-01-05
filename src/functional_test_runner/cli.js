@@ -2,7 +2,7 @@ import { resolve } from 'path';
 
 import { Command } from 'commander';
 
-import { createToolingLog } from '../utils';
+import { createToolingLog } from '../dev';
 import { createFunctionalTestRunner } from './functional_test_runner';
 
 const cmd = new Command('node scripts/functional_test_runner');
@@ -16,6 +16,7 @@ cmd
   .option('--verbose', 'Log everything', false)
   .option('--quiet', 'Only log errors', false)
   .option('--silent', 'Log nothing', false)
+  .option('--updateBaselines', 'Replace baseline screenshots with whatever is generated from the test', false)
   .option('--debug', 'Run in debug mode', false)
   .parse(process.argv);
 
@@ -35,7 +36,8 @@ const functionalTestRunner = createFunctionalTestRunner({
     mochaOpts: {
       bail: cmd.bail,
       grep: cmd.grep,
-    }
+    },
+    updateBaselines: cmd.updateBaselines
   }
 });
 

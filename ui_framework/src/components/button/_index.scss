@@ -2,7 +2,7 @@
 $buttonHeight: 30px;
 $buttonIconSpacing: 8px;
 $buttonIconSmallSpacing: 4px;
-$buttonFontWeight: $globalFontWeightRegular;
+$buttonFontWeight: $kuiFontWeightRegular;
 
 // Size
 $buttonSmallFontSize: 12px;
@@ -13,27 +13,27 @@ $buttonSmallHeight: 22px;
 $buttonDefaultTextColor: #FFF;
 
 // Basic
-$buttonBasicTextColor: $globalTextColor;
-$buttonBasicBackgroundColor: $globalColorLightestGray;
-$buttonBasicHoverBackgroundColor: darken($globalColorLightestGray, 10%);
-$buttonBasicDisabledTextColor: $globalTextColor;
+$buttonBasicTextColor: $kuiTextColor;
+$buttonBasicBackgroundColor: $kuiColorLightestGray;
+$buttonBasicHoverBackgroundColor: darken($kuiColorLightestGray, 10%);
+$buttonBasicDisabledTextColor: $kuiTextColor;
 $buttonBasicTextColor--darkTheme: #FFF;
 $buttonBasicBackgroundColor--darkTheme: #9c9c9c;
 $buttonBasicHoverBackgroundColor--darkTheme: darken($buttonBasicBackgroundColor--darkTheme, 20%);
 
 // Primary
-$buttonPrimaryBackgroundColor: $globalLinkColor;
-$buttonPrimaryHoverBackgroundColor: $globalLinkColor-isHover;
-$buttonPrimaryDisabledBackgroundColor: desaturate($globalLinkColor, 70%);
+$buttonPrimaryBackgroundColor: $kuiLinkColor;
+$buttonPrimaryHoverBackgroundColor: $kuiLinkColor-isHover;
+$buttonPrimaryDisabledBackgroundColor: desaturate($kuiLinkColor, 70%);
 
 // Success
-$buttonSuccessBackgroundColor: $globalColorTeal;
-$buttonSuccessHoverBackgroundColor: darken($globalColorTeal, 10%);
-$buttonSuccessDisabledBackgroundColor: desaturate($globalColorTeal, 70%);
+$buttonSuccessBackgroundColor: $kuiColorTeal;
+$buttonSuccessHoverBackgroundColor: darken($kuiColorTeal, 10%);
+$buttonSuccessDisabledBackgroundColor: desaturate($kuiColorTeal, 70%);
 
 // Danger
-$buttonDangerBackgroundColor: $globalColorRed;
-$buttonDangerHoverBackgroundColor: darken($globalColorRed, 10%);
+$buttonDangerBackgroundColor: $kuiColorRed;
+$buttonDangerHoverBackgroundColor: darken($kuiColorRed, 10%);
 $buttonDangerDisabledBackgroundColor: lighten($buttonDangerBackgroundColor, 50%);
 
 // Warning

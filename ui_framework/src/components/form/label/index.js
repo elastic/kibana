@@ -1,0 +1,1 @@
+export { KuiLabel } from './label';

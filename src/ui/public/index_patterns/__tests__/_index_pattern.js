@@ -353,10 +353,10 @@ describe('index pattern', function () {
       describe('with sort order', function () {
         it('passes the sort order to the intervals module', function () {
           return indexPattern.toIndexList(1, 2, 'SORT_DIRECTION')
-          .then(function () {
-            expect(intervals.toIndexList.callCount).to.be(1);
-            expect(intervals.toIndexList.getCall(0).args[4]).to.be('SORT_DIRECTION');
-          });
+            .then(function () {
+              expect(intervals.toIndexList.callCount).to.be(1);
+              expect(intervals.toIndexList.getCall(0).args[4]).to.be('SORT_DIRECTION');
+            });
         });
       });
     });
@@ -457,7 +457,7 @@ describe('index pattern', function () {
       expect(notif).to.have.property('type', 'warning');
       expect(notif.content).to.match(MARKDOWN_LINK_RE);
 
-      const [,text,url] = notif.content.match(MARKDOWN_LINK_RE);
+      const [, text, url] = notif.content.match(MARKDOWN_LINK_RE);
       expect(text).to.contain(indexPattern.title);
       expect(url).to.contain(indexPattern.id);
       expect(url).to.contain('management/kibana/indices');

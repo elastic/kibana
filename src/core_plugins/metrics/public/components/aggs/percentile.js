@@ -10,7 +10,7 @@ import Select from 'react-select';
 import uuid from 'uuid';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
-import { htmlIdGenerator } from 'ui_framework/services';
+import { htmlIdGenerator } from '@elastic/eui';
 const newPercentile = (opts) => {
   return _.assign({ id: uuid.v1(), mode: 'line', shade: 0.2 }, opts);
 };
@@ -155,6 +155,7 @@ class PercentileAgg extends Component { // eslint-disable-line react/no-multi-co
             <div className="vis_editor__row_item">
               <div className="vis_editor__label">Aggregation</div>
               <AggSelect
+                panelType={this.props.panel.type}
                 siblings={this.props.siblings}
                 value={model.type}
                 onChange={handleSelectChange('type')}

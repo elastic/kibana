@@ -177,7 +177,7 @@ export class PersistedState {
 
   _setPath(path) {
     const isString = _.isString(path);
-    const isArray = _.isArray(path);
+    const isArray = Array.isArray(path);
 
     if (!isString && !isArray) return [];
     return (isString) ? [this._getIndex(path)] : path;
@@ -240,7 +240,7 @@ export class PersistedState {
 
         if (!initialChildState) {
           // arrays are merge by index, not desired - ensure they are replaced
-          if (_.isArray(_.get(this._mergedState, keyPath))) {
+          if (Array.isArray(_.get(this._mergedState, keyPath))) {
             if (hasKeyPath) _.set(this._mergedState, keyPath, undefined);
             else this._mergedState = undefined;
           }

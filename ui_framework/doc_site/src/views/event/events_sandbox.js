@@ -9,7 +9,7 @@ import {
 } from '../../components';
 
 import EventsSandboxContent from './events_sandbox_content';
-const eventsSandboxContentSource = require('!!raw!./events_sandbox_content');
+const eventsSandboxContentSource = require('!!raw-loader!./events_sandbox_content');
 const eventsSandboxContentHtml = renderToHtml(EventsSandboxContent);
 
 export default props => (

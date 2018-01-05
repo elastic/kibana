@@ -1,7 +1,8 @@
 import ngMock from 'ng_mock';
 import sinon from 'sinon';
+import expect from 'expect.js';
 
-import { SearchRequestProvider } from '../search';
+import { SearchRequestProvider } from '../search_request';
 import { requestQueue } from '../../../_request_queue';
 
 describe('ui/courier/fetch search request', () => {

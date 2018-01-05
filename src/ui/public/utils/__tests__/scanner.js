@@ -32,7 +32,7 @@ describe('Scanner', function () {
     let search;
     let scroll;
     let scanner;
-    const mockSearch = { '_scroll_id':'abc','took':1,'timed_out':false,'_shards':{ 'total':1,'successful':1,'failed':0 },'hits':{ 'total':2,'max_score':0.0,'hits':[] } }; // eslint-disable-line max-len
+    const mockSearch = { '_scroll_id': 'abc', 'took': 1, 'timed_out': false, '_shards': { 'total': 1, 'successful': 1, 'failed': 0 }, 'hits': { 'total': 2, 'max_score': 0.0, 'hits': [] } }; // eslint-disable-line max-len
     const hits = [{
       _id: 'one',
       _type: 'config',
@@ -42,7 +42,7 @@ describe('Scanner', function () {
       _type: 'config',
       _source: { title: 'Second title' }
     }];
-    const mockScroll = { 'took':1,'timed_out':false,'_shards':{ 'total':1,'successful':1,'failed':0 },'hits':{ 'total':2,'max_score':0.0,'hits':hits } }; // eslint-disable-line max-len
+    const mockScroll = { 'took': 1, 'timed_out': false, '_shards': { 'total': 1, 'successful': 1, 'failed': 0 }, 'hits': { 'total': 2, 'max_score': 0.0, 'hits': hits } }; // eslint-disable-line max-len
 
     beforeEach(function () {
       scanner = new Scanner(http, {
@@ -66,52 +66,52 @@ describe('Scanner', function () {
     it('should reject when an error occurs', function () {
       search = search.returns(Promise.reject(new Error('fail.')));
       return scanner.scanAndMap('')
-      .then(function () {
-        throw new Error('should reject');
-      })
-      .catch(function (error) {
-        expect(error.message).to.be('fail.');
-      });
+        .then(function () {
+          throw new Error('should reject');
+        })
+        .catch(function (error) {
+          expect(error.message).to.be('fail.');
+        });
     });
 
     it('should search and then scroll for results', function () {
       return scanner.scanAndMap('')
-      .then(function () {
-        expect(search.called).to.be(true);
-        expect(scroll.called).to.be(true);
-      });
+        .then(function () {
+          expect(search.called).to.be(true);
+          expect(scroll.called).to.be(true);
+        });
     });
 
     it('should map results if a function is provided', function () {
       return scanner.scanAndMap(null, null, function (hit) {
         return hit._id.toUpperCase();
       })
-      .then(function (response) {
-        expect(response.hits[0]).to.be('ONE');
-        expect(response.hits[1]).to.be('TWO');
-      });
+        .then(function (response) {
+          expect(response.hits[0]).to.be('ONE');
+          expect(response.hits[1]).to.be('TWO');
+        });
     });
 
     it('should only return the requested number of documents', function () {
       return scanner.scanAndMap(null, { docCount: 1 }, function (hit) {
         return hit._id.toUpperCase();
       })
-      .then(function (response) {
-        expect(response.hits[0]).to.be('ONE');
-        expect(response.hits[1]).to.be(undefined);
-      });
+        .then(function (response) {
+          expect(response.hits[0]).to.be('ONE');
+          expect(response.hits[1]).to.be(undefined);
+        });
     });
 
     it('should scroll across multiple pages', function () {
-      const oneResult = { 'took':1,'timed_out':false,'_shards':{ 'total':1,'successful':1,'failed':0 },'hits':{ 'total':2,'max_score':0.0,'hits':['one'] } }; // eslint-disable-line max-len
+      const oneResult = { 'took': 1, 'timed_out': false, '_shards': { 'total': 1, 'successful': 1, 'failed': 0 }, 'hits': { 'total': 2, 'max_score': 0.0, 'hits': ['one'] } }; // eslint-disable-line max-len
       scroll = sinon.stub().returns(Promise.resolve({ data: oneResult }));
       return scanner.scanAndMap(null, { pageSize: 1 })
-      .then(function (response) {
-        expect(scroll.calledTwice);
-        expect(response.hits.length).to.be(2);
-        expect(scroll.getCall(1).args[0].scrollId).to.be('abc');
-        expect(scroll.getCall(0).args[0].scrollId).to.be('abc');
-      });
+        .then(function (response) {
+          expect(scroll.calledTwice);
+          expect(response.hits.length).to.be(2);
+          expect(scroll.getCall(1).args[0].scrollId).to.be('abc');
+          expect(scroll.getCall(0).args[0].scrollId).to.be('abc');
+        });
     });
 
     afterEach(function () {

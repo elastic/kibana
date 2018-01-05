@@ -79,7 +79,7 @@ describe('Vislib Column Layout Test Suite', function () {
   });
 
   it('should return an array of objects', function () {
-    expect(_.isArray(columnLayout)).to.be(true);
+    expect(Array.isArray(columnLayout)).to.be(true);
     expect(_.isObject(columnLayout[0])).to.be(true);
   });
 

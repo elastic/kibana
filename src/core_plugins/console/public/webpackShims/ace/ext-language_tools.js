@@ -1103,7 +1103,7 @@ var Autocomplete = function() {
         "Esc": function(editor) { editor.completer.detach(); },
         "Space": function(editor) { editor.completer.detach(); editor.insert(" ");},
         "Return": function(editor) { editor.completer.insertMatch(); },
-        "Shift-Return": function(editor) { editor.completer.insertMatch(true); },
+        "Shift-Return": function(editor) { editor.completer.insertMatch(); },
         "Tab": function(editor) { editor.completer.insertMatch(); },
 
         "PageUp": function(editor) { editor.completer.popup.gotoPageUp(); },

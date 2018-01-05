@@ -24,7 +24,7 @@ export function merge(sources) {
   }, {});
 }
 
-export default function (paths) {
+export function readYamlConfig(paths) {
   const files = [].concat(paths || []);
   const yamls = files.map(path => safeLoad(read(path, 'utf8')));
   return merge(yamls);

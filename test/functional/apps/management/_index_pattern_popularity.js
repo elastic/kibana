@@ -9,9 +9,9 @@ export default function ({ getService, getPageObjects }) {
     before(function () {
       // delete .kibana index and then wait for Kibana to re-create it
       return kibanaServer.uiSettings.replace({})
-      .then(function () {
-        return PageObjects.settings.navigateTo();
-      });
+        .then(function () {
+          return PageObjects.settings.navigateTo();
+        });
     });
 
     beforeEach(function be() {

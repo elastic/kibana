@@ -5,7 +5,7 @@ import { uiModules } from 'ui/modules';
 import { AppStateProvider } from 'ui/state_management/app_state';
 
 uiModules.get('kibana/url')
-.service('kbnUrl', function (Private) { return Private(KbnUrlProvider); });
+  .service('kbnUrl', function (Private) { return Private(KbnUrlProvider); });
 
 export function KbnUrlProvider($injector, $location, $rootScope, $parse, Private) {
   /**

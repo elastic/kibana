@@ -147,7 +147,7 @@ module.exports = class extends Generator {
       this.log(chalk.white('\n// Import demo into example.'));
       this.log(
         `${chalk.magenta('import')} ${componentExampleName} from ${chalk.cyan(`'./${fileName}'`)};\n` +
-        `${chalk.magenta('const')} ${componentExamplePrefix}Source = require(${chalk.cyan(`'!!raw!./${fileName}'`)});\n` +
+        `${chalk.magenta('const')} ${componentExamplePrefix}Source = require(${chalk.cyan(`'!!raw-loader!./${fileName}'`)});\n` +
         `${chalk.magenta('const')} ${componentExamplePrefix}Html = renderToHtml(${componentExampleName});`
       );
 

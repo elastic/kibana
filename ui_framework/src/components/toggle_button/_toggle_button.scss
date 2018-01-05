@@ -10,18 +10,18 @@
   padding: 0;
   font-size: inherit; /* 1 */
   line-height: inherit; /* 1 */
-  color: $globalFontColor;
+  color: $kuiFontColor;
 
   &:focus {
-    color: $globalFontColor;
+    color: $kuiFontColor;
   }
 
   &:active {
-    color: $globalLinkColor !important; /* 2 */
+    color: $kuiLinkColor !important; /* 2 */
   }
 
   &:hover:not(:disabled) {
-    color: $globalLinkHoverColor !important; /* 2 */
+    color: $kuiLinkHoverColor !important; /* 2 */
     text-decoration: underline;
   }
 

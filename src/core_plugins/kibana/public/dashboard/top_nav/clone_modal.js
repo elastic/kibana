@@ -6,7 +6,6 @@ import {
   KuiModalHeader,
   KuiModalHeaderTitle,
   KuiModalBody,
-  KuiModalBodyText,
   KuiModalFooter,
   KuiButton,
   KuiModalOverlay
@@ -29,31 +28,26 @@ export class DashboardCloneModal extends React.Component {
     this.setState({ newDashboardName: event.target.value });
   };
 
-  onKeyDown = (event) => {
-    if (event.keyCode === 27) { // ESC key
-      this.props.onClose();
-    }
-  };
-
   render() {
     return (
       <KuiModalOverlay>
         <KuiModal
           data-tests-subj="dashboardCloneModal"
-          aria-label="Clone a dashboard"
           className="dashboardCloneModal"
-          onKeyDown={this.onKeyDown}
+          onClose={this.props.onClose}
         >
           <KuiModalHeader>
             <KuiModalHeaderTitle>
               Clone Dashboard
             </KuiModalHeaderTitle>
           </KuiModalHeader>
+
           <KuiModalBody>
-            <KuiModalBodyText className="kuiVerticalRhythm">
+            <p className="kuiText kuiVerticalRhythm">
               Please enter a new name for your dashboard.
-            </KuiModalBodyText>
-            <KuiModalBodyText className="kuiVerticalRhythm">
+            </p>
+
+            <div className="kuiVerticalRhythm">
               <input
                 autoFocus
                 data-test-subj="clonedDashboardTitle"
@@ -61,7 +55,7 @@ export class DashboardCloneModal extends React.Component {
                 value={this.state.newDashboardName}
                 onChange={this.onInputChange}
               />
-            </KuiModalBodyText>
+            </div>
           </KuiModalBody>
 
           <KuiModalFooter>
@@ -72,6 +66,7 @@ export class DashboardCloneModal extends React.Component {
             >
               Cancel
             </KuiButton>
+
             <KuiButton
               buttonType="primary"
               data-test-subj="cloneConfirmButton"

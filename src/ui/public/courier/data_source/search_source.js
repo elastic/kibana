@@ -55,15 +55,13 @@ import _ from 'lodash';
 import { NormalizeSortRequestProvider } from './_normalize_sort_request';
 import { RootSearchSourceProvider } from './_root_search_source';
 import { AbstractDataSourceProvider } from './_abstract';
-import { SearchRequestProvider } from '../fetch/request/search';
+import { SearchRequestProvider } from '../fetch/request';
 import { SegmentedRequestProvider } from '../fetch/request/segmented';
-import { SearchStrategyProvider } from '../fetch/strategy/search';
 
 export function SearchSourceProvider(Promise, Private, config) {
   const SourceAbstract = Private(AbstractDataSourceProvider);
   const SearchRequest = Private(SearchRequestProvider);
   const SegmentedRequest = Private(SegmentedRequestProvider);
-  const searchStrategy = Private(SearchStrategyProvider);
   const normalizeSortRequest = Private(NormalizeSortRequestProvider);
 
   const forIp = Symbol('for which index pattern?');
@@ -74,7 +72,7 @@ export function SearchSourceProvider(Promise, Private, config) {
 
   _.class(SearchSource).inherits(SourceAbstract);
   function SearchSource(initialState) {
-    SearchSource.Super.call(this, initialState, searchStrategy);
+    SearchSource.Super.call(this, initialState);
   }
 
   /*****
@@ -100,7 +98,7 @@ export function SearchSourceProvider(Promise, Private, config) {
     'size',
     'source',
     'version',
-    'fields',
+    'fields'
   ];
 
   SearchSource.prototype.index = function (indexPattern) {
@@ -154,7 +152,7 @@ export function SearchSourceProvider(Promise, Private, config) {
     const self = this;
     if (self._parent === false) return;
     if (self._parent) return self._parent;
-    return onlyHardLinked ? undefined : Private(RootSearchSourceProvider).get();
+    return onlyHardLinked || this.skipTimeRangeFilter ? undefined : Private(RootSearchSourceProvider).get();
   };
 
   /**
@@ -229,9 +227,9 @@ export function SearchSourceProvider(Promise, Private, config) {
     if (typeof val === 'function') {
       const source = this;
       return Promise.cast(val(this))
-      .then(function (newVal) {
-        return source._mergeProp(state, newVal, key);
-      });
+        .then(function (newVal) {
+          return source._mergeProp(state, newVal, key);
+        });
     }
 
     if (val == null || !key || !_.isString(key)) return;
@@ -240,7 +238,7 @@ export function SearchSourceProvider(Promise, Private, config) {
       case 'filter':
         let verifiedFilters = val;
         if (config.get('courier:ignoreFilterIfFieldNotInIndex')) {
-          if (!_.isArray(val)) val = [val];
+          if (!Array.isArray(val)) val = [val];
           verifiedFilters = val.filter(function (el) {
             if ('meta' in el && 'index' in state) {
               const field = state.index.fields.byName[el.meta.key];
@@ -251,12 +249,12 @@ export function SearchSourceProvider(Promise, Private, config) {
         }
         // user a shallow flatten to detect if val is an array, and pull the values out if it is
         state.filters = _([ state.filters || [], verifiedFilters ])
-        .flatten()
-        // Yo Dawg! I heard you needed to filter out your filters
-        .reject(function (filter) {
-          return !filter || _.get(filter, 'meta.disabled');
-        })
-        .value();
+          .flatten()
+          // Yo Dawg! I heard you needed to filter out your filters
+          .reject(function (filter) {
+            return !filter || _.get(filter, 'meta.disabled');
+          })
+          .value();
         return;
       case 'index':
       case 'type':

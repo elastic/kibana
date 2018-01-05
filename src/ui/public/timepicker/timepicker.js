@@ -181,7 +181,7 @@ module.directive('kbnTimepicker', function (timeUnits, refreshIntervals) {
       $scope.applyRelative = function () {
         $scope.onFilterSelect({
           from: getRelativeString('from'),
-          to:  getRelativeString('to')
+          to: getRelativeString('to')
         });
       };
 

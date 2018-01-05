@@ -10,11 +10,11 @@ import {
 } from '../../components';
 
 import { EmptyTablePrompt } from './empty_table_prompt';
-const emptyTablePromptSource = require('!!raw!./empty_table_prompt');
+const emptyTablePromptSource = require('!!raw-loader!./empty_table_prompt');
 const emptyTablePromptHtml = renderToHtml(EmptyTablePrompt);
 
 import { ControlledTableWithEmptyPrompt } from './table_with_empty_prompt';
-const tableWithEmptyPromptSource = require('!!raw!./table_with_empty_prompt');
+const tableWithEmptyPromptSource = require('!!raw-loader!./table_with_empty_prompt');
 const tableWithEmptyPromptHtml = renderToHtml(ControlledTableWithEmptyPrompt);
 
 export default props => (

@@ -107,7 +107,7 @@ module.directive('kbnRows', function ($compile, $rootScope, getAppState, Private
 
         $el.empty();
 
-        if (!_.isArray(rows)) rows = [];
+        if (!Array.isArray(rows)) rows = [];
         const width = rows.reduce(maxRowSize, 0);
 
         if (isFinite(min) && rows.length < min) {

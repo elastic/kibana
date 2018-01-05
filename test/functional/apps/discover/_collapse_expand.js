@@ -13,25 +13,25 @@ export default function ({ getService, getPageObjects }) {
 
       // delete .kibana index and update configDoc
       return kibanaServer.uiSettings.replace({
-        'dateFormat:tz':'UTC',
-        'defaultIndex':'logstash-*'
+        'dateFormat:tz': 'UTC',
+        'defaultIndex': 'logstash-*'
       })
-      .then(function loadkibanaIndexPattern() {
-        log.debug('load kibana index with default index pattern');
-        return esArchiver.load('discover');
-      })
+        .then(function loadkibanaIndexPattern() {
+          log.debug('load kibana index with default index pattern');
+          return esArchiver.load('discover');
+        })
       // and load a set of makelogs data
-      .then(function loadIfEmptyMakelogs() {
-        return esArchiver.loadIfNeeded('logstash_functional');
-      })
-      .then(function () {
-        log.debug('discover');
-        return PageObjects.common.navigateToApp('discover');
-      })
-      .then(function () {
-        log.debug('setAbsoluteRange');
-        return PageObjects.header.setAbsoluteRange(fromTime, toTime);
-      });
+        .then(function loadIfEmptyMakelogs() {
+          return esArchiver.loadIfNeeded('logstash_functional');
+        })
+        .then(function () {
+          log.debug('discover');
+          return PageObjects.common.navigateToApp('discover');
+        })
+        .then(function () {
+          log.debug('setAbsoluteRange');
+          return PageObjects.header.setAbsoluteRange(fromTime, toTime);
+        });
     });
 
     describe('field data', function () {

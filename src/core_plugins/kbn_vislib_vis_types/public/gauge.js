@@ -18,10 +18,10 @@ export default function GaugeVisType(Private) {
     category: CATEGORY.DATA,
     visConfig: {
       defaults: {
-        type:'gauge',
+        type: 'gauge',
         addTooltip: true,
         addLegend: true,
-
+        isDisplayWarning: false,
         gauge: {
           verticalSplit: false,
           extendRange: true,
@@ -64,7 +64,7 @@ export default function GaugeVisType(Private) {
     },
     editorConfig: {
       collections: {
-        gaugeTypes: ['Arc', 'Circle', 'Metric'],
+        gaugeTypes: ['Arc', 'Circle'],
         gaugeColorMode: ['None', 'Labels', 'Background'],
         scales: ['linear', 'log', 'square root'],
         colorSchemas: Object.keys(vislibColorMaps),
@@ -78,7 +78,7 @@ export default function GaugeVisType(Private) {
           min: 1,
           aggFilter: [
             '!std_dev', '!geo_centroid', '!percentiles', '!percentile_ranks',
-            '!derivative', '!serial_diff', '!moving_avg', '!cumulative_sum','!geo_bounds'],
+            '!derivative', '!serial_diff', '!moving_avg', '!cumulative_sum', '!geo_bounds'],
           defaults: [
             { schema: 'metric', type: 'count' }
           ]

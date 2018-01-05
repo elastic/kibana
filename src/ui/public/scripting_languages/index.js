@@ -4,16 +4,20 @@ import { Notifier } from 'ui/notify/notifier';
 const notify = new Notifier({ location: 'Scripting Language Service' });
 
 export function getSupportedScriptingLanguages() {
-  return ['expression', 'painless'];
+  return ['painless'];
+}
+
+export function getDeprecatedScriptingLanguages() {
+  return [];
 }
 
 export function GetEnabledScriptingLanguagesProvider($http) {
   return () => {
     return $http.get(chrome.addBasePath('/api/kibana/scripts/languages'))
-    .then((res) => res.data)
-    .catch(() => {
-      notify.error('Error getting available scripting languages from Elasticsearch');
-      return [];
-    });
+      .then((res) => res.data)
+      .catch(() => {
+        notify.error('Error getting available scripting languages from Elasticsearch');
+        return [];
+      });
   };
 }

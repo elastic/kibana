@@ -3,6 +3,8 @@ import _ from 'lodash';
 import TagCloud from 'plugins/tagcloud/tag_cloud';
 import d3 from 'd3';
 import { fromNode, delay } from 'bluebird';
+import { ImageComparator } from 'test_utils/image_comparator';
+import simpleloadPng from './simpleload.png';
 
 describe('tag cloud tests', function () {
 
@@ -11,9 +13,9 @@ describe('tag cloud tests', function () {
   const midValue = (minValue + maxValue) / 2;
   const baseTest = {
     data: [
-      { text: 'foo', value: minValue },
-      { text: 'bar', value: midValue },
-      { text: 'foobar', value: maxValue },
+      { rawText: 'foo', displayText: 'foo', value: minValue },
+      { rawText: 'bar', displayText: 'bar', value: midValue },
+      { rawText: 'foobar', displayText: 'foobar', value: maxValue },
     ],
     options: {
       orientation: 'single',
@@ -372,6 +374,37 @@ describe('tag cloud tests', function () {
     });
 
   });
+
+  describe('tagcloudscreenshot', function () {
+
+    let imageComparator;
+    beforeEach(async function () {
+      setupDOM();
+      imageComparator = new ImageComparator();
+    });
+
+
+    afterEach(() => {
+      imageComparator.destroy();
+      teardownDOM();
+    });
+
+
+    it('should test', async function () {
+
+      tagCloud = new TagCloud(domNode);
+      tagCloud.setData(baseTest.data);
+      tagCloud.setOptions(baseTest.options);
+
+      await fromNode(cb => tagCloud.once('renderComplete', cb));
+
+      const mismatchedPixels = await imageComparator.compareDOMContents(domNode.innerHTML, 512, 512, simpleloadPng, 0.50);
+      expect(mismatchedPixels).to.be.lessThan(64);
+    });
+
+
+  });
+
 
   function verifyTagProperties(expectedValues, actualElements, tagCloud) {
     expect(actualElements.length).to.equal(expectedValues.length);

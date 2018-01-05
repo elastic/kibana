@@ -1,4 +1,4 @@
-<div>
+<div class="kuiSideBarSection">
   <div class="kuiSideBarFormRow">
     <label class="kuiSideBarFormRow__label" for="gaugeType">
       Gauge Type
@@ -32,6 +32,17 @@
     </label>
     <div class="kuiSideBarFormRow__control">
       <input class="kuiCheckBox" id="verticalSplit" type="checkbox" ng-model="vis.params.gauge.verticalSplit">
+    </div>
+  </div>
+
+  <div class="kuiSideBarFormRow">
+    <label class="kuiSideBarFormRow__label" for="displayWarnings">
+      Display warnings &nbsp;
+      <kbn-info info="Turns on/off warnings. When turned on, a warning will be shown if not all labels could be displayed."></kbn-info>
+    </label>
+
+    <div class="kuiSideBarFormRow__control">
+      <input class="kuiCheckBox" id="displayWarnings" type="checkbox" ng-model="vis.params.isDisplayWarning">
     </div>
   </div>
 
@@ -109,10 +120,10 @@
       <div class="kuiSideBarSection">
         <table class="vis-editor-agg-editor-ranges form-group" ng-show="vis.params.gauge.colorsRange.length">
           <tr>
-            <th>
+            <th scope="col">
               <label id="gaugeOptionsCustomRangeFrom">From</label>
             </th>
-            <th colspan="2">
+            <th scope="col" colspan="2">
               <label id="gaugeOptionsCustomRangeTo">To</label>
             </th>
           </tr>
@@ -164,6 +175,7 @@
           class="kuiButton kuiButton--primary kuiButton--fullWidth">
           Add Range
         </div>
+        <div class="euiSpacer euiSpacer--s"></div>
         <div class="text text-center text-info">Note: colors can be changed in the legend</div>
       </div>
     </div>

@@ -1,9 +1,9 @@
-import Promise from 'bluebird';
-import _ from 'lodash';
-
-import { fromRoot } from '../../src/utils';
-import KbnServer from '../../src/server/kbn_server';
+import { fromRoot, formatListAsProse } from '../../src/utils';
 import * as i18nVerify from '../utils/i18n_verify_keys';
+
+import { findPluginSpecs } from '../../src/plugin_discovery';
+import { collectUiExports } from '../../src/ui';
+import { I18n } from '../../src/ui/ui_i18n/i18n';
 
 export default function (grunt) {
 
@@ -12,74 +12,63 @@ export default function (grunt) {
     '_build:check'
   ]);
 
-  grunt.registerTask('_build:check', function () {
+  grunt.registerTask('_build:check', async function () {
     const done = this.async();
 
-    const serverConfig = {
-      env: 'production',
-      logging: {
-        silent: true,
-        quiet: true,
-        verbose: false
-      },
-      optimize: {
-        useBundleCache: false,
-        enabled: false
-      },
-      server: {
-        autoListen: false
-      },
-      plugins: {
-        initialize: true,
-        scanDirs: [fromRoot('src/core_plugins')]
-      },
-      uiSettings: {
-        enabled: false
-      }
-    };
+    try {
+      const { spec$ } = findPluginSpecs({
+        env: 'production',
+        plugins: {
+          scanDirs: [fromRoot('src/core_plugins')]
+        }
+      });
 
-    const kbnServer = new KbnServer(serverConfig);
-    kbnServer.ready()
-    .then(() => verifyTranslations(kbnServer.uiI18n))
-    .then(() => kbnServer.close())
-    .then(done)
-    .catch((err) => {
-      kbnServer.close()
-      .then(() => done(err));
-    });
+      const specs = await spec$.toArray().toPromise();
+      const uiExports = collectUiExports(specs);
+      await verifyTranslations(uiExports);
+
+      done();
+    } catch (error) {
+      done(error);
+    }
   });
 
 }
 
-function verifyTranslations(uiI18nObj)
-{
+async function verifyTranslations(uiExports) {
   const angularTranslations = require(fromRoot('build/i18n_extract/en.json'));
-  const translationKeys = Object.keys(angularTranslations);
+  const keysUsedInViews = Object.keys(angularTranslations);
+
+  // Search files for used translation keys
   const translationPatterns = [
-    { regEx: 'i18n\\(\'(.*)\'\\)',
-      parsePaths: [fromRoot('/src/ui/views/*.jade')] }
+    { regexp: 'i18n\\(\'(.*)\'\\)',
+      parsePaths: [fromRoot('src/ui/ui_render/views/*.jade')] }
   ];
+  for (const { regexp, parsePaths } of translationPatterns) {
+    const keys = await i18nVerify.getTranslationKeys(regexp, parsePaths);
+    for (const key of keys) {
+      keysUsedInViews.push(key);
+    }
+  }
 
-  const keyPromises = _.map(translationPatterns, (pattern) => {
-    return i18nVerify.getTranslationKeys(pattern.regEx, pattern.parsePaths)
-    .then(function (keys) {
-      const arrayLength = keys.length;
-      for (let i = 0; i < arrayLength; i++) {
-        translationKeys.push(keys[i]);
-      }
-    });
-  });
+  // get all of the translations from uiExports
+  const translations = await I18n.getAllTranslationsFromPaths(uiExports.translationPaths);
+  const keysWithoutTranslations = Object.entries(
+    i18nVerify.getNonTranslatedKeys(keysUsedInViews, translations)
+  );
 
-  return Promise.all(keyPromises)
-  .then(function () {
-    return uiI18nObj.getAllTranslations()
-    .then(function (translations) {
-      const keysNotTranslatedPerLocale = i18nVerify.getNonTranslatedKeys(translationKeys, translations);
-      if (!_.isEmpty(keysNotTranslatedPerLocale)) {
-        const str  = JSON.stringify(keysNotTranslatedPerLocale);
-        const errMsg = 'The following translation keys per locale are not translated: ' + str;
-        throw new Error(errMsg);
-      }
-    });
-  });
+  if (!keysWithoutTranslations.length) {
+    return;
+  }
+
+  throw new Error(
+    '\n' +
+    '\n' +
+    'The following keys are used in angular/jade views but are not translated:\n' +
+    keysWithoutTranslations.map(([locale, keys]) => (
+      `   - ${locale}: ${formatListAsProse(keys)}`
+    )).join('\n') +
+    '\n' +
+    '\n'
+  );
 }

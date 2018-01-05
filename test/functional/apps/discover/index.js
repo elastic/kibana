@@ -4,7 +4,7 @@ export default function ({ getService, loadTestFile }) {
 
   describe('discover app', function () {
     before(function () {
-      return remote.setWindowSize(1200,800);
+      return remote.setWindowSize(1200, 800);
     });
 
     after(function unloadMakelogs() {

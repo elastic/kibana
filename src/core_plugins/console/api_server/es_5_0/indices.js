@@ -19,6 +19,19 @@ export default function (api) {
     }
   });
 
+
+  api.addEndpointDescription('_rollover', {
+    methods: ['POST'],
+    patterns: [
+      "{name}/_rollover",
+      "{name}/_rollover/{name}"
+    ],
+    url_params: {
+      wait_for_active_shards: "",
+      dry_run: "__flag__"
+    }
+  });
+
   api.addEndpointDescription('_flush_synced', {
     methods: ['POST'],
     patterns: [
@@ -169,7 +182,7 @@ export default function (api) {
   });
 
   api.addEndpointDescription('_get_index_settings', {
-    methods: ['GET',],
+    methods: ['GET', ],
     patterns: [
       "{indices}/_settings",
     ],
@@ -179,7 +192,7 @@ export default function (api) {
   });
 
   api.addEndpointDescription('_get_index', {
-    methods: ['GET',],
+    methods: ['GET', ],
     patterns: [
       "{indices}",
       "{indices}/{feature}"

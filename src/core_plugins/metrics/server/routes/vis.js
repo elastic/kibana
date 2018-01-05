@@ -10,7 +10,7 @@ export default (server) => {
         .then(reply)
         .catch(err => {
           if (err.isBoom && err.status === 401) return reply(err);
-          reply(Boom.wrap(err, 500));
+          reply(Boom.boomify(err, { statusCode: 500 }));
         });
     }
   });

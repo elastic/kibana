@@ -113,8 +113,8 @@ describe('Vislib Labels Module Test Suite', function () {
       getLabels = Private(VislibComponentsLabelsLabelsProvider);
       seriesLabels = getLabels(seriesData);
       rowsLabels = getLabels(rowsData);
-      seriesArr = _.isArray(seriesLabels);
-      rowsArr = _.isArray(rowsLabels);
+      seriesArr = Array.isArray(seriesLabels);
+      rowsArr = Array.isArray(rowsLabels);
       uniqLabels = _.chain(rowsData.rows)
         .pluck('series')
         .flattenDeep()
@@ -177,8 +177,8 @@ describe('Vislib Labels Module Test Suite', function () {
       dataArray = Private(VislibComponentsLabelsDataArrayProvider);
       seriesLabels = dataArray(seriesData);
       rowsLabels = dataArray(rowsData);
-      testSeries = _.isArray(seriesLabels);
-      testRows = _.isArray(rowsLabels);
+      testSeries = Array.isArray(seriesLabels);
+      testRows = Array.isArray(rowsLabels);
     }));
 
     it('should throw an error if the input is not an object', function () {
@@ -288,7 +288,7 @@ describe('Vislib Labels Module Test Suite', function () {
     beforeEach(ngMock.inject(function (Private) {
       uniqLabels = Private(VislibComponentsLabelsUniqLabelsProvider);
       uniq = uniqLabels(arrObj, function (d) { return d; });
-      testArr = _.isArray(uniq);
+      testArr = Array.isArray(uniq);
     }));
 
     it('should throw an error if input is not an array', function () {
@@ -362,8 +362,8 @@ describe('Vislib Labels Module Test Suite', function () {
       getSeries = Private(VislibComponentsLabelsFlattenSeriesProvider);
       columnsLabels = getSeries(columnsData);
       rowsLabels = getSeries(rowsData);
-      columnsArr = _.isArray(columnsLabels);
-      rowsArr = _.isArray(rowsLabels);
+      columnsArr = Array.isArray(columnsLabels);
+      rowsArr = Array.isArray(rowsLabels);
     }));
 
     it('should throw an error if input is not an object', function () {

@@ -3,6 +3,7 @@
     <ul class="list-unstyled">
       <li ng-repeat="option in list">
         <a
+          class="kuiLink"
           ng-click="setQuick({from: option.from, to: option.to})"
           ng-bind="::option.display"
           kbn-accessible-click

@@ -9,6 +9,8 @@ export const KuiTab = ({ isSelected, onClick, children, className, ...rest }) =>
 
   return (
     <button
+      role="tab"
+      aria-selected={!!isSelected}
       className={classes}
       onClick={onClick}
       {...rest}

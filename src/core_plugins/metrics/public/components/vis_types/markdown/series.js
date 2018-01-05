@@ -85,6 +85,7 @@ function MarkdownSeries(props) {
           </button>
           <button
             role="tab"
+            data-test-subj="seriesOptions"
             aria-selected={selectedTab === 'metrics'}
             className={optionsClassname}
             onClick={() => props.switchTab('options')}
@@ -98,7 +99,6 @@ function MarkdownSeries(props) {
 
   return (
     <div
-      aria-hidden="true"
       className={`${props.className} vis_editor__series`}
       style={props.style}
       onMouseDown={props.onMouseDown}

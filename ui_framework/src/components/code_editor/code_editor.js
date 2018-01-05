@@ -3,12 +3,12 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import AceEditor from 'react-ace';
 
-import { htmlIdGenerator, keyCodes } from '../../../services';
+import { htmlIdGenerator, keyCodes } from '../../services';
 
 export class KuiCodeEditor extends Component {
-
   state = {
-    isHintActive: true
+    isHintActive: true,
+    isEditing: false,
   };
 
   idGenerator = htmlIdGenerator();
@@ -30,6 +30,15 @@ export class KuiCodeEditor extends Component {
     }
   }
 
+  onFocusAce = (...args) => {
+    this.setState({
+      isEditing: true,
+    });
+    if (this.props.onFocus) {
+      this.props.onFocus(...args);
+    }
+  }
+
   onBlurAce = (...args) => {
     this.stopEditing();
     if (this.props.onBlur) {
@@ -45,44 +54,98 @@ export class KuiCodeEditor extends Component {
   };
 
   startEditing = () => {
-    this.setState({ isHintActive: false });
+    this.setState({
+      isHintActive: false,
+    });
     this.aceEditor.editor.textInput.focus();
   }
 
   stopEditing() {
-    this.setState({ isHintActive: true });
+    this.setState({
+      isHintActive: true,
+      isEditing: false,
+    });
   }
 
   render() {
-    const { width, height } = this.props;
-    const classes = classNames('kuiCodeEditorKeyboardHint', {
+    const {
+      width,
+      height,
+      onBlur, // eslint-disable-line no-unused-vars
+      isReadOnly,
+      setOptions,
+      cursorStart,
+      ...rest
+    } = this.props;
+
+    const classes = classNames('kuiCodeEditorWrapper', {
+      'kuiCodeEditorWrapper-isEditing': this.state.isEditing,
+    });
+
+    const promptClasses = classNames('kuiCodeEditorKeyboardHint', {
       'kuiCodeEditorKeyboardHint-isInactive': !this.state.isHintActive
     });
+
+    let filteredCursorStart;
+
+    const options = { ...setOptions };
+
+    if (isReadOnly) {
+      // Put the cursor at the beginning of the editor, so that it doesn't look like
+      // a prompt to begin typing.
+      filteredCursorStart = -1;
+
+      Object.assign(options, {
+        readOnly: true,
+        highlightActiveLine: false,
+        highlightGutterLine: false,
+      });
+    } else {
+      filteredCursorStart = cursorStart;
+    }
+
+    const activity =
+      isReadOnly
+        ? 'interacting with the code'
+        : 'editing';
+
+    const prompt = (
+      <div
+        className={promptClasses}
+        id={this.idGenerator('codeEditor')}
+        ref={(hint) => { this.editorHint = hint; }}
+        tabIndex="0"
+        role="button"
+        onClick={this.startEditing}
+        onKeyDown={this.onKeyDownHint}
+        data-test-subj="codeEditorHint"
+      >
+        <p className="kuiText kuiVerticalRhythmSmall">
+          Press Enter to start {activity}.
+        </p>
+
+        <p className="kuiText kuiVerticalRhythmSmall">
+          When you&rsquo;re done, press Escape to stop {activity}.
+        </p>
+      </div>
+    );
+
     return (
       <div
-        className="kuiCodeEditorWrapper"
+        className={classes}
         style={{ width, height }}
       >
-        <div
-          className={classes}
-          id={this.idGenerator('codeEditor')}
-          ref={(hint) => { this.editorHint = hint; }}
-          tabIndex="0"
-          role="button"
-          onClick={this.startEditing}
-          onKeyDown={this.onKeyDownHint}
-        >
-          <p className="kuiText kuiVerticalRhythmSmall">
-            Press Enter to start editing.
-          </p>
-          <p className="kuiText kuiVerticalRhythmSmall">
-            When you&rsquo;re done, press Escape to stop editing.
-          </p>
-        </div>
+        {prompt}
+
         <AceEditor
-          {...this.props}
           ref={this.aceEditorRef}
+          width={width}
+          height={height}
+          onFocus={this.onFocusAce}
           onBlur={this.onBlurAce}
+          setOptions={options}
+          cursorStart={filteredCursorStart}
+          {...rest}
         />
       </div>
     );
@@ -90,7 +153,14 @@ export class KuiCodeEditor extends Component {
 }
 
 KuiCodeEditor.propTypes = {
+  width: PropTypes.string,
   height: PropTypes.string,
   onBlur: PropTypes.func,
-  width: PropTypes.string,
+  isReadOnly: PropTypes.bool,
+  setOptions: PropTypes.object,
+  cursorStart: PropTypes.number,
+};
+
+KuiCodeEditor.defaultProps = {
+  setOptions: {},
 };

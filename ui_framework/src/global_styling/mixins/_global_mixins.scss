@@ -9,7 +9,7 @@
  * 2. Allow these styles to be applied to a button element.
  */
 @mixin link {
-  color: $globalLinkColor;
+  color: $kuiLinkColor;
   text-decoration: none;
   cursor: pointer; /* 1 */
   appearance: none; /* 2 */
@@ -20,19 +20,19 @@
 
   &:visited,
   &:active {
-    color: $globalLinkColor;
+    color: $kuiLinkColor;
   }
 
   &:hover {
-    color: $globalLinkHoverColor;
+    color: $kuiLinkHoverColor;
     text-decoration: underline;
   }
 
   @include darkTheme {
-    color: $globalLinkColor--darkTheme;
+    color: $kuiLinkColor--darkTheme;
 
     &:hover {
-      color: $globalLinkColor--darkTheme;
+      color: $kuiLinkColor--darkTheme;
     }
   }
 }
@@ -47,7 +47,7 @@
   border: none;
   line-height: 1;
   font-size: 16px;
-  color: $globalTextColor !important; /* 1 */
+  color: $kuiTextColor !important; /* 1 */
   cursor: pointer;
   opacity: 0.35;
 
@@ -56,7 +56,7 @@
   }
 
   @include darkTheme {
-    color: $globalTextColor--darkTheme !important; /* 1 */
+    color: $kuiTextColor--darkTheme !important; /* 1 */
   }
 }
 
@@ -122,7 +122,7 @@
  * 2. Override inherited styles (possibly from Bootstrap).
  * 3. Create an offset box-shadow that follows the contours of the element.
  */
-@mixin focus($color: $globalFocusColor, $backgroundColor: $globalFocusBackgroundColor) {
+@mixin focus($color: $kuiFocusColor, $backgroundColor: $kuiFocusBackgroundColor) {
   z-index: 1; /* 1 */
   outline: none !important; /* 2 */
   box-shadow: 0 0 0 1px $backgroundColor, 0 0 0 2px $color; /* 3 */
@@ -130,7 +130,7 @@
 
 @mixin formControlFocus {
   outline: none;
-  border-color: $globalSelectedBorderColor;
+  border-color: $kuiSelectedBorderColor;
 }
 
 /**
@@ -138,28 +138,28 @@
  */
 @mixin formControlBase {
   appearance: none;
-  font-family: $globalFontFamily;
-  padding: $globalFormControlPadding;
-  font-size: $globalFontSize;
+  font-family: $kuiFontFamily;
+  padding: $kuiFormControlPadding;
+  font-size: $kuiFontSize;
   font-weight: 400;
-  line-height: $globalLineHeight;
-  color: $globalFontColor;
+  line-height: $kuiLineHeight;
+  color: $kuiFontColor;
 
   @include darkTheme {
-    color: $globalInputTextColor--darkTheme;
+    color: $kuiInputTextColor--darkTheme;
   }
 }
 
 /**
  * 1. Prevent Firefox users from being able to resize textareas to smaller than the min-height.
  */
-@mixin formControl($borderRadius: $globalBorderRadius) {
+@mixin formControl($borderRadius: $kuiBorderRadius) {
   @include formControlBase;
   background-color: #ffffff;
-  border: 1px solid $globalFormControlBorderColor;
+  border: 1px solid $kuiFormControlBorderColor;
   border-radius: $borderRadius;
-  transition: border-color $globalInputTransitionTiming;
-  min-height: $globalFormInputHeight; /* 1 */
+  transition: border-color $kuiInputTransitionTiming;
+  min-height: $kuiFormInputHeight; /* 1 */
 
   &:invalid {
     @include formControlInvalid;
@@ -175,8 +175,8 @@
   }
 
   @include darkTheme {
-    background-color: $globalInputBackgroundColor--darkTheme;
-    border-color: $globalInputBorderColor--darkTheme;
+    background-color: $kuiInputBackgroundColor--darkTheme;
+    border-color: $kuiInputBorderColor--darkTheme;
 
     &:focus {
       @include formControlFocus;
@@ -189,7 +189,7 @@
  * coupled with Angular.
  */
 @mixin formControlInvalid {
-  border-color: $globalDangerBorderColor;
+  border-color: $kuiDangerBorderColor;
 }
 
 /**
@@ -197,7 +197,7 @@
  * 2. Make room on right side for the caret.
  * 3. Prevent Firefox from showing dotted line around text on focus.
  */
-@mixin select($borderRadius: $globalBorderRadius) {
+@mixin select($borderRadius: $kuiBorderRadius) {
   @include formControl($borderRadius);
   padding-right: 30px; /* 2 */
   background-image: url('data:image/svg+xml;utf8,<svg width="1792" height="1792" viewBox="0 0 1792 1792" xmlns="http://www.w3.org/2000/svg"><path d="M1408 704q0 26-19 45l-448 448q-19 19-45 19t-45-19l-448-448q-19-19-19-45t19-45 45-19h896q26 0 45 19t19 45z"/></svg>'); /* 1 */
@@ -225,12 +225,12 @@
   cursor: pointer;
   padding: 2px 5px;
   border: 1px solid transparent;
-  color: $globalSubduedTextColor;
+  color: $kuiSubduedTextColor;
   background-color: transparent;
   line-height: 1; /* 2 */
 
   &:hover {
-    color: $globalFontColor;
+    color: $kuiFontColor;
   }
 }
 
@@ -286,13 +286,13 @@
 @mixin buttonOnStandoutBackground {
   .kuiButton {
     @include kuiButtonFocus {
-      @include focus($globalFocusColor, $globalBorderColor);
+      @include focus($kuiFocusColor, $kuiBorderColor);
     }
   }
 
   .kuiButton--danger {
     @include kuiButtonFocus {
-      @include focus($globalFocusDangerColor, $globalBorderColor);
+      @include focus($kuiFocusDangerColor, $kuiBorderColor);
     }
   }
 }

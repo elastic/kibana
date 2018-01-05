@@ -19,6 +19,9 @@ visual text representation (e.g. an icon button):
 <button aria-label="Add filter"><span class="fa fa-plus"></span></button>
 ```
 
+If you have to use a form element without a related `<label>` element, you can use `aria-label`
+directly on the form element to provide labeling information to screen readers.
+
 If the actual name for that element is already present in another element,
 you can use `aria-labelledby` to reference the id of that element:
 

@@ -43,13 +43,13 @@ export function JsonParamTypeProvider(Private) {
     function filteredCombine(srcA, srcB) {
       function mergeObjs(a, b) {
         return _(a)
-        .keys()
-        .union(_.keys(b))
-        .transform(function (dest, key) {
-          const val = compare(a[key], b[key]);
-          if (val !== undefined) dest[key] = val;
-        }, {})
-        .value();
+          .keys()
+          .union(_.keys(b))
+          .transform(function (dest, key) {
+            const val = compare(a[key], b[key]);
+            if (val !== undefined) dest[key] = val;
+          }, {})
+          .value();
       }
 
       function mergeArrays(a, b) {
@@ -61,7 +61,7 @@ export function JsonParamTypeProvider(Private) {
 
       function compare(a, b) {
         if (_.isPlainObject(a) && _.isPlainObject(b)) return mergeObjs(a, b);
-        if (_.isArray(a) && _.isArray(b)) return mergeArrays(a, b);
+        if (Array.isArray(a) && Array.isArray(b)) return mergeArrays(a, b);
         if (b === null) return undefined;
         if (b !== undefined) return b;
         return a;

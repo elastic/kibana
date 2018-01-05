@@ -4,7 +4,7 @@ import FieldSelect from './aggs/field_select';
 import createSelectHandler from './lib/create_select_handler';
 import createTextHandler from './lib/create_text_handler';
 import YesNo from './yes_no';
-import { htmlIdGenerator } from 'ui_framework/services';
+import { htmlIdGenerator } from '@elastic/eui';
 
 export const IndexPattern = props => {
   const { fields, prefix } = props;
@@ -51,7 +51,7 @@ export const IndexPattern = props => {
         />
       </div>
       <label className="vis_editor__label" htmlFor={htmlId('interval')}>
-        Interval (auto, 1m, 1d, 1w, 1y, &gt;=1m)
+        Interval (auto, 1m, 1d, 7d, 1y, &gt;=1m)
       </label>
       <input
         id={htmlId('interval')}

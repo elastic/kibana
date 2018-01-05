@@ -27,10 +27,6 @@ class Resize extends Component {
   }
 
   componentDidMount() {
-    const el = findDOMNode(this.el);
-    const currentWidth = el.parentNode.clientWidth;
-    const currentHeight = el.parentNode.clientHeight;
-    this.setState({ currentHeight, currentWidth }); // eslint-disable-line react/no-did-mount-set-state
     this.checkSize();
   }
 

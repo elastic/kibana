@@ -209,8 +209,8 @@ export function VislibVisualizationsHeatmapChartProvider(Private) {
           Math.abs(squareHeight / Math.sin(rotateRad))
         ) - cellPadding;
         const maxHeight = Math.min(
-            Math.abs(squareWidth / Math.sin(rotateRad)),
-            Math.abs(squareHeight / Math.cos(rotateRad))
+          Math.abs(squareWidth / Math.sin(rotateRad)),
+          Math.abs(squareHeight / Math.cos(rotateRad))
         ) - cellPadding;
 
         let hiddenLabels = false;

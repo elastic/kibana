@@ -10,32 +10,32 @@ import {
 } from '../../components';
 
 import { Table } from './table';
-const tableSource = require('!!raw!./table');
+const tableSource = require('!!raw-loader!./table');
 const tableHtml = renderToHtml(Table);
 
 import { TableWithMenuButtons } from './table_with_menu_buttons';
-const tableWithMenuButtonsSource = require('!!raw!./table_with_menu_buttons');
+const tableWithMenuButtonsSource = require('!!raw-loader!./table_with_menu_buttons');
 const tableWithMenuButtonsHtml = renderToHtml(TableWithMenuButtons);
 
 import { FluidTable } from './fluid_table';
-const fluidTableSource = require('!!raw!./fluid_table');
+const fluidTableSource = require('!!raw-loader!./fluid_table');
 const fluidTableHtml = renderToHtml(FluidTable);
 
-import { ControlledTable } from './controlled_table';
-const controlledTableSource = require('!!raw!./controlled_table');
-const controlledTableHtml = renderToHtml(ControlledTable);
+import { ListingTable } from './listing_table';
+const listingTableSource = require('!!raw-loader!./listing_table');
+const listingTableHtml = renderToHtml(ListingTable);
 
-import { ControlledTableWithEmptyPrompt } from './controlled_table_with_empty_prompt';
-const controlledTableWithEmptyPromptSource = require('!!raw!./controlled_table_with_empty_prompt');
-const controlledTableWithEmptyPromptHtml = renderToHtml(ControlledTableWithEmptyPrompt);
+import { ListingTableWithEmptyPrompt } from './listing_table_with_empty_prompt';
+const listingTableWithEmptyPromptSource = require('!!raw-loader!./listing_table_with_empty_prompt');
+const listingTableWithEmptyPromptHtml = renderToHtml(ListingTableWithEmptyPrompt);
 
-import { ControlledTableWithNoItems } from './controlled_table_with_no_items';
-const controlledTableWithNoItemsSource = require('!!raw!./controlled_table_with_no_items');
-const controlledTableWithNoItemsHtml = renderToHtml(ControlledTableWithNoItems);
+import { ListingTableWithNoItems } from './listing_table_with_no_items';
+const listingTableWithNoItemsSource = require('!!raw-loader!./listing_table_with_no_items');
+const listingTableWithNoItemsHtml = renderToHtml(ListingTableWithNoItems);
 
-import { ControlledTableLoadingItems } from './controlled_table_loading_items';
-const controlledTableLoadingItemsSource = require('!!raw!./controlled_table_loading_items');
-const controlledTableLoadingItemsHtml = renderToHtml(ControlledTableLoadingItems);
+import { ListingTableLoadingItems } from './listing_table_loading_items';
+const listingTableLoadingItemsSource = require('!!raw-loader!./listing_table_loading_items');
+const listingTableLoadingItemsHtml = renderToHtml(ListingTableLoadingItems);
 
 export default props => (
   <GuidePage title={props.route.name}>
@@ -93,62 +93,62 @@ export default props => (
     </GuideSection>
 
     <GuideSection
-      title="ControlledTable"
+      title="ListingTable"
       source={[{
         type: GuideSectionTypes.JS,
-        code: controlledTableSource,
+        code: listingTableSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: controlledTableHtml,
+        code: listingTableHtml,
       }]}
     >
       <GuideDemo>
-        <ControlledTable />
+        <ListingTable />
       </GuideDemo>
     </GuideSection>
 
     <GuideSection
-      title="ControlledTable with loading items"
+      title="ListingTable with loading items"
       source={[{
         type: GuideSectionTypes.JS,
-        code: controlledTableLoadingItemsSource,
+        code: listingTableLoadingItemsSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: controlledTableLoadingItemsHtml,
+        code: listingTableLoadingItemsHtml,
       }]}
     >
       <GuideDemo>
-        <ControlledTableLoadingItems />
+        <ListingTableLoadingItems />
       </GuideDemo>
     </GuideSection>
 
     <GuideSection
-      title="ControlledTable with no items"
+      title="ListingTable with no items"
       source={[{
         type: GuideSectionTypes.JS,
-        code: controlledTableWithNoItemsSource,
+        code: listingTableWithNoItemsSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: controlledTableWithNoItemsHtml,
+        code: listingTableWithNoItemsHtml,
       }]}
     >
       <GuideDemo>
-        <ControlledTableWithNoItems />
+        <ListingTableWithNoItems />
       </GuideDemo>
     </GuideSection>
 
     <GuideSection
-      title="ControlledTable with EmptyTablePrompt"
+      title="ListingTable with EmptyTablePrompt"
       source={[{
         type: GuideSectionTypes.JS,
-        code: controlledTableWithEmptyPromptSource,
+        code: listingTableWithEmptyPromptSource,
       }, {
         type: GuideSectionTypes.HTML,
-        code: controlledTableWithEmptyPromptHtml,
+        code: listingTableWithEmptyPromptHtml,
       }]}
     >
       <GuideDemo>
-        <ControlledTableWithEmptyPrompt />
+        <ListingTableWithEmptyPrompt />
       </GuideDemo>
     </GuideSection>
   </GuidePage>

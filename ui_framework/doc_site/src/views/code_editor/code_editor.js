@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
 
+import 'brace/mode/less';
+import 'brace/theme/github';
+
 import {
   KuiCodeEditor
 } from '../../../../components';

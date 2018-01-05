@@ -32,10 +32,15 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    it('clone warns on duplicate name', async function () {
+    it('clone appends Copy to the dashboard title name', async () => {
       await PageObjects.dashboard.loadSavedDashboard(dashboardName);
       await PageObjects.dashboard.clickClone();
 
+      const title = await PageObjects.dashboard.getCloneTitle();
+      expect(title).to.be(clonedDashboardName);
+    });
+
+    it('and warns on duplicate name', async function () {
       await PageObjects.dashboard.confirmClone();
       const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
       expect(isConfirmOpen).to.equal(true);
@@ -45,12 +50,14 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.common.clickCancelOnModal();
       await PageObjects.dashboard.confirmClone();
 
-      // Should see the same confirmation if the title is the same.
-      const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
-      expect(isConfirmOpen).to.equal(true);
+      await retry.try(async () => {
+        // Should see the same confirmation if the title is the same.
+        const isConfirmOpen = await PageObjects.common.isConfirmModalOpen();
+        expect(isConfirmOpen).to.equal(true);
+      });
     });
 
-    it('and doesn\'t save', async() => {
+    it('and doesn\'t save', async () => {
       await PageObjects.common.clickCancelOnModal();
       await PageObjects.dashboard.cancelClone();
 

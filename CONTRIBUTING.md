@@ -273,6 +273,9 @@ Using `npm run test:dev` initializes an environment for debugging the browser te
 npm run test:dev
 ```
 
+In the screenshot below, you'll notice the URL is `localhost:9876/debug.html`. You can append a `grep` query parameter to this URL and set it to a string value which will be used to exclude tests which don't match. For example, if you changed the URL to `localhost:9876/debug.html?query=my test` and then refreshed the browser, you'd only see tests run which contain "my test" in the test description.
+
+
 ![Browser test debugging](http://i.imgur.com/DwHxgfq.png)
 
 ### Unit Testing Plugins
@@ -307,12 +310,11 @@ npm run test:browser -- --dev # remove the --dev flag to run them once and close
 
 ### Building OS packages
 
-Packages are built using fpm, pleaserun, dpkg, and rpm.  fpm and pleaserun can be installed using gem.  Package building has only been tested on Linux and is not supported on any other platform.
+Packages are built using fpm, dpkg, and rpm.  Package building has only been tested on Linux and is not supported on any other platform.
 
 ```bash
 apt-get install ruby-dev rpm
 gem install fpm -v 1.5.0
-gem install pleaserun -v 0.0.24
 npm run build -- --skip-archives
 ```
 

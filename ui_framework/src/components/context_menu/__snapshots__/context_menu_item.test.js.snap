@@ -1,0 +1,68 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`KuiContextMenuItem is rendered 1`] = `
+<button
+  aria-label="aria-label"
+  class="kuiContextMenuItem testClass1 testClass2"
+  data-test-subj="test subject string"
+>
+  <span
+    class="kuiContextMenu__itemLayout"
+  >
+    <span
+      class="kuiContextMenuItem__text"
+    >
+      Hello
+    </span>
+  </span>
+</button>
+`;
+
+exports[`KuiContextMenuItem props disabled is rendered 1`] = `
+<button
+  class="kuiContextMenuItem kuiContextMenuItem-disabled"
+  disabled=""
+>
+  <span
+    class="kuiContextMenu__itemLayout"
+  >
+    <span
+      class="kuiContextMenuItem__text"
+    />
+  </span>
+</button>
+`;
+
+exports[`KuiContextMenuItem props hasPanel is rendered 1`] = `
+<button
+  class="kuiContextMenuItem"
+>
+  <span
+    class="kuiContextMenu__itemLayout"
+  >
+    <span
+      class="kuiContextMenuItem__text"
+    />
+    <span
+      class="kuiContextMenu__arrow kuiIcon fa-angle-right"
+    />
+  </span>
+</button>
+`;
+
+exports[`KuiContextMenuItem props icon is rendered 1`] = `
+<button
+  class="kuiContextMenuItem"
+>
+  <span
+    class="kuiContextMenu__itemLayout"
+  >
+    <span
+      class="kuiIcon fa-user kuiContextMenu__icon"
+    />
+    <span
+      class="kuiContextMenuItem__text"
+    />
+  </span>
+</button>
+`;

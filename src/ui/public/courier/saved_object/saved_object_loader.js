@@ -1,15 +1,15 @@
-import _ from 'lodash';
 import { Scanner } from 'ui/utils/scanner';
 import { StringUtils } from 'ui/utils/string_utils';
 import { SavedObjectsClient } from 'ui/saved_objects';
 
 export class SavedObjectLoader {
-  constructor(SavedObjectClass, kbnIndex, kbnUrl, $http) {
+  constructor(SavedObjectClass, kbnIndex, kbnUrl, $http, chrome) {
     this.type = SavedObjectClass.type;
     this.Class = SavedObjectClass;
     this.lowercaseType = this.type.toLowerCase();
     this.kbnIndex = kbnIndex;
     this.kbnUrl = kbnUrl;
+    this.chrome = chrome;
 
     this.scanner = new Scanner($http, {
       index: kbnIndex,
@@ -22,7 +22,9 @@ export class SavedObjectLoader {
       nouns: `${ this.lowercaseType }s`,
     };
 
-    this.savedObjectsClient = new SavedObjectsClient($http);
+    this.savedObjectsClient = new SavedObjectsClient({
+      $http
+    });
   }
 
   /**
@@ -40,14 +42,18 @@ export class SavedObjectLoader {
   }
 
   delete(ids) {
-    ids = !_.isArray(ids) ? [ids] : ids;
+    ids = !Array.isArray(ids) ? [ids] : ids;
 
     const deletions = ids.map(id => {
       const savedObject = new this.Class(id);
       return savedObject.delete();
     });
 
-    return Promise.all(deletions);
+    return Promise.all(deletions).then(() => {
+      if (this.chrome) {
+        this.chrome.untrackNavLinksForDeletedSavedObjects(ids);
+      }
+    });
   }
 
   /**
@@ -88,7 +94,7 @@ export class SavedObjectLoader {
    * @param size
    * @returns {Promise}
    */
-  find(search = '', size = 100) {
+  findAll(search = '', size = 100) {
     return this.savedObjectsClient.find(
       {
         type: this.lowercaseType,
@@ -97,10 +103,20 @@ export class SavedObjectLoader {
         page: 1,
         searchFields: ['title^3', 'description']
       }).then((resp) => {
-        return {
-          total: resp.total,
-          hits: resp.savedObjects.map((savedObject) => this.mapSavedObjectApiHits(savedObject))
-        };
-      });
+      return {
+        total: resp.total,
+        hits: resp.savedObjects
+          .map((savedObject) => this.mapSavedObjectApiHits(savedObject))
+      };
+    });
+  }
+
+  find(search = '', size = 100) {
+    return this.findAll(search, size).then(resp => {
+      return {
+        total: resp.total,
+        hits: resp.hits.filter(savedObject => !savedObject.error)
+      };
+    });
   }
 }

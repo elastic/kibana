@@ -1,0 +1,66 @@
+$disabledTextColor: #9B9B9B;
+
+/**
+ * 1. Button reset.
+ * 2. Ensure buttons stack.
+ */
+.kuiContextMenuItem {
+  appearance: none; /* 1 */
+  background-color: transparent; /* 1 */
+  font-size: $kuiFontSize; /* 1 */
+  border: none; /* 1 */
+  cursor: pointer; /* 1 */
+  display: block; /* 2 */
+  padding: 12px;
+  width: 100%;
+  text-align: left;
+  color: $kuiTextColor;
+
+  &:hover, &:focus {
+    .kuiContextMenuItem__text {
+      text-decoration: underline;
+    }
+  }
+
+  /**
+   * 1. Overwrite default style.
+   */
+  &:focus {
+    background-color: $kuiFocusAltBackgroundColor;
+    box-shadow: none; /* 1 */
+
+    @include darkTheme {
+      background-color: transparent;
+    }
+  }
+
+  @include darkTheme {
+    color: #ffffff;
+  }
+}
+
+  .kuiContextMenuItem__inner {
+    display: flex;
+  }
+
+  .kuiContextMenuItem__text {
+    flex-grow: 1;
+  }
+
+  .kuiContextMenuItem__arrow {
+    align-self: flex-end;
+  }
+
+  .kuiContextMenuItem-disabled {
+    color: $disabledTextColor;
+    @include darkTheme {
+      color: $disabledTextColor;
+    }
+
+    cursor: default;
+    &:hover, &:focus {
+      .kuiContextMenuItem__text {
+        text-decoration: none;
+      }
+    }
+  }

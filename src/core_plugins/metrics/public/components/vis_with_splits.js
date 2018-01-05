@@ -5,6 +5,7 @@ import calculateLabel  from '../../common/calculate_label';
 export function visWithSplits(WrappedComponent) {
   function SplitVisComponent(props) {
     const { model, visData } = props;
+    if (!model || !visData || !visData[model.id]) return (<WrappedComponent {...props} />);
     if (visData[model.id].series.every(s => s.id.split(':').length === 1)) {
       return (<WrappedComponent {...props} />);
     }

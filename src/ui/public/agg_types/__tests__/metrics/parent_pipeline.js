@@ -79,7 +79,7 @@ describe('parent pipeline aggs', function () {
         init({
           metricAgg: 'custom',
           customMetric: {
-            id:'1-orderAgg',
+            id: '1-orderAgg',
             type: 'max',
             params: { field: 'bytes' },
             schema: 'orderAgg'
@@ -92,12 +92,12 @@ describe('parent pipeline aggs', function () {
         init({
           metricAgg: 'custom',
           customMetric: {
-            id:'2-orderAgg',
+            id: '2-orderAgg',
             type: metric.name,
             params: {
               buckets_path: 'custom',
               customMetric: {
-                id:'2-orderAgg-orderAgg',
+                id: '2-orderAgg-orderAgg',
                 type: 'count',
                 schema: 'orderAgg'
               }
@@ -112,7 +112,7 @@ describe('parent pipeline aggs', function () {
         init({
           metricAgg: 'custom',
           customMetric: {
-            id:'2-metric',
+            id: '2-metric',
             type: 'max',
             params: { field: 'bytes' },
             schema: 'orderAgg'
@@ -126,12 +126,12 @@ describe('parent pipeline aggs', function () {
         init({
           metricAgg: 'custom',
           customMetric: {
-            id:'2-metric',
+            id: '2-metric',
             type: metric.name,
             params: {
               buckets_path: 'custom',
               customMetric: {
-                id:'2-metric-metric',
+                id: '2-metric-metric',
                 type: 'max',
                 params: { field: 'bytes' },
                 schema: 'orderAgg'
@@ -155,12 +155,12 @@ describe('parent pipeline aggs', function () {
         init({
           metricAgg: 'custom',
           customMetric: {
-            id:'2-metric',
+            id: '2-metric',
             type: metric.name,
             params: {
               buckets_path: 'custom',
               customMetric: {
-                id:'2-metric-metric',
+                id: '2-metric-metric',
                 type: 'max',
                 params: { field: 'bytes' },
                 schema: 'orderAgg'

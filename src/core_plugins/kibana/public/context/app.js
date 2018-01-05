@@ -50,8 +50,8 @@ function ContextAppController($scope, config, Private, timefilter) {
   const queryParameterActions = Private(QueryParameterActionsProvider);
   const queryActions = Private(QueryActionsProvider);
 
-  // this is apparently the "canonical" way to disable the time picker
-  timefilter.enabled = false;
+  timefilter.disableAutoRefreshSelector();
+  timefilter.disableTimeRangeSelector();
 
   this.state = createInitialState(
     parseInt(config.get('context:step'), 10),
@@ -59,11 +59,10 @@ function ContextAppController($scope, config, Private, timefilter) {
     this.discoverUrl,
   );
 
-  this.actions = _.mapValues(Object.assign(
-    {},
-    queryParameterActions,
-    queryActions,
-  ), (action) => (...args) => action(this.state)(...args));
+  this.actions = _.mapValues({
+    ...queryParameterActions,
+    ...queryActions,
+  }, (action) => (...args) => action(this.state)(...args));
 
   this.constants = {
     FAILURE_REASONS,

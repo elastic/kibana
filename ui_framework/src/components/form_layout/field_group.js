@@ -6,7 +6,7 @@ export const KuiFieldGroup = ({
   isAlignedTop,
   children,
   className,
-   ...rest
+  ...rest
 }) => {
   const classes = classNames('kuiFieldGroup', className, {
     'kuiFieldGroup--alignTop': isAlignedTop

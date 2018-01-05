@@ -3,7 +3,7 @@ import Chainable from '../lib/classes/chainable';
 import _ from 'lodash';
 
 function unflatten(data) {
-  if (Object(data) !== data || _.isArray(data)) return data;
+  if (Object(data) !== data || Array.isArray(data)) return data;
 
   const regex = new RegExp(/\.?([^.\[\]]+)|\[(\d+)\]/g);
   const result = {};

@@ -7,6 +7,7 @@ app.directive('timelionExpressionSuggestions', () => {
     restrict: 'E',
     scope: {
       suggestions: '=',
+      suggestionsType: '=',
       selectedIndex: '=',
       onClickSuggestion: '&',
       shouldPopover: '=',

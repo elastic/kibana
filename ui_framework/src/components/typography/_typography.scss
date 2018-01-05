@@ -3,8 +3,12 @@
  */
 .kuiTitle {
   margin: 0; /* 1 */
-  font-weight: $globalFontWeightRegular; /* 1 */
+  font-weight: $kuiFontWeightRegular; /* 1 */
   font-size: $typcographyTitleFontSize;
+
+  @include darkTheme {
+    color: $kuiTextColor--darkTheme;
+  }
 }
 
 /**
@@ -12,8 +16,12 @@
  */
 .kuiSubTitle {
   margin: 0; /* 1 */
-  font-weight: $globalFontWeightRegular; /* 1 */
-  font-size: $globalTitleFontSize;
+  font-weight: $kuiFontWeightRegular; /* 1 */
+  font-size: $kuiTitleFontSize;
+
+  @include darkTheme {
+    color: $kuiTextColor--darkTheme;
+  }
 }
 
 /**
@@ -21,9 +29,13 @@
  */
 .kuiTextTitle {
   margin: 0; /* 1 */
-  font-weight: $globalFontWeightBold; /* 1 */
-  line-height: $globalLineHeight;
-  font-size: $globalFontSize;
+  font-weight: $kuiFontWeightBold; /* 1 */
+  line-height: $kuiLineHeight;
+  font-size: $kuiFontSize;
+
+  @include darkTheme {
+    color: $kuiTextColor--darkTheme;
+  }
 }
 
 /**
@@ -31,18 +43,26 @@
  */
 .kuiText {
   margin: 0; /* 1 */
-  font-weight: $globalFontWeightRegular; /* 1 */
-  line-height: $globalLineHeight;
-  font-size: $globalFontSize;
+  font-weight: $kuiFontWeightRegular; /* 1 */
+  line-height: $kuiLineHeight;
+  font-size: $kuiFontSize;
+
+  @include darkTheme {
+    color: $kuiTextColor--darkTheme;
+  }
 }
 
 .kuiSubText {
   margin: 0; /* 1 */
-  font-weight: $globalFontWeightRegular; /* 1 */
-  line-height: $globalLineHeight;
-  font-size: $globalSubTextFontSize;
+  font-weight: $kuiFontWeightRegular; /* 1 */
+  line-height: $kuiLineHeight;
+  font-size: $kuiSubTextFontSize;
+
+  @include darkTheme {
+    color: $kuiTextColor--darkTheme;
+  }
 }
 
 .kuiSubduedText {
-  color: $globalSubduedTextColor !important;
+  color: $kuiSubduedTextColor !important;
 }

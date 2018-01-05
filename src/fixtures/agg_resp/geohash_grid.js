@@ -27,20 +27,20 @@ export default function GeoHashGridAggResponseFixture() {
     const buckets = _.times(_.random(40, 200), function () {
       return _.sample(geoHashCharts, 3).join('');
     })
-    .sort()
-    .map(function (geoHash) {
-      const count = _.random(1, 5000);
+      .sort()
+      .map(function (geoHash) {
+        const count = _.random(1, 5000);
 
-      docCount += count;
+        docCount += count;
 
-      return {
-        key: geoHash,
-        doc_count: count,
-        1: {
-          value: 2048 + i
-        }
-      };
-    });
+        return {
+          key: geoHash,
+          doc_count: count,
+          1: {
+            value: 2048 + i
+          }
+        };
+      });
 
     return {
       key: 'tag ' + (i + 1),

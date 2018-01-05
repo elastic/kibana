@@ -106,6 +106,6 @@ export function addToRules(otherRules, embedUnder) {
   otherRules.embedRules(ScriptHighlightRules, "script-", [{
      token: "punctuation.end_triple_quote",
      regex: '"""',
-     next  : "pop",
+     next: "pop",
   }]);
 }

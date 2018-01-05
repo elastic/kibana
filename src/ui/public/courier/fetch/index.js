@@ -1,1 +1,1 @@
-export { FetchProvider } from './fetch';
+export { FetchSoonProvider } from './fetch_soon';

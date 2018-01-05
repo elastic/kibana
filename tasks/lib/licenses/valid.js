@@ -1,5 +1,5 @@
 const describeInvalidLicenses = getInvalid => pkg => (
-`
+  `
   ${pkg.name}
     version: ${pkg.version}
     all licenses: ${pkg.licenses}

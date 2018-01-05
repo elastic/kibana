@@ -53,9 +53,9 @@ describe('kuery functions', function () {
         );
       });
 
-      it('should wrap a literal argument with an "is" function targeting all fields', function () {
+      it('should wrap a literal argument with an "is" function targeting the default_field', function () {
         const literalFoo = nodeTypes.literal.buildNode('foo');
-        const expectedChild = ast.toElasticsearchQuery(nodeTypes.function.buildNode('is', '*', 'foo'), indexPattern);
+        const expectedChild = ast.toElasticsearchQuery(nodeTypes.function.buildNode('is', null, 'foo'), indexPattern);
         const node = nodeTypes.function.buildNode('and', [literalFoo]);
         const result = and.toElasticsearchQuery(node, indexPattern);
         const resultChild = result.bool.filter[0];
@@ -90,7 +90,7 @@ describe('kuery functions', function () {
       it('should throw an error for nodes with unknown or undefined serialize styles', function () {
         const node = nodeTypes.function.buildNode('and', [childNode1, childNode2], 'notValid');
         expect(and.toKueryExpression)
-        .withArgs(node).to.throwException(/Cannot serialize "and" function as "notValid"/);
+          .withArgs(node).to.throwException(/Cannot serialize "and" function as "notValid"/);
       });
 
     });

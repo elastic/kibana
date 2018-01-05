@@ -30,13 +30,10 @@ function fetchAnchorProvider(courier, Private) {
       throw new Error('Failed to load anchor document.');
     }
 
-    return Object.assign(
-      {},
-      _.get(response, ['hits', 'hits', 0]),
-      {
-        $$_isAnchor: true,
-      },
-    );
+    return {
+      ..._.get(response, ['hits', 'hits', 0]),
+      $$_isAnchor: true,
+    };
   };
 }
 

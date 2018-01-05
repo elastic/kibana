@@ -1,7 +1,7 @@
 export {
   startServers,
   getServices,
-  stopServers
+  stopServers,
 } from './servers';
 
 export {
@@ -10,5 +10,4 @@ export {
 
 export {
   assertSinonMatch,
-  assertDocMissingResponse
 } from './assert';

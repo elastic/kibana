@@ -8,7 +8,7 @@ const schema = Symbol('Joi Schema');
 const schemaExts = Symbol('Schema Extensions');
 const vals = Symbol('config values');
 
-export default class Config {
+export class Config {
   static withDefaultSchema(settings = {}) {
     return new Config(createDefaultSchema(), settings);
   }
@@ -144,7 +144,7 @@ export default class Config {
       }
     }
 
-    if (_.isArray(key)) {
+    if (Array.isArray(key)) {
       // TODO: add .has() support for array keys
       key = key.join('.');
     }

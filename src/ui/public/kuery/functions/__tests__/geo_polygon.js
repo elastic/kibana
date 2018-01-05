@@ -82,7 +82,7 @@ describe('kuery functions', function () {
       it('should throw an error for scripted fields', function () {
         const node = nodeTypes.function.buildNode('geoPolygon', 'script number', points);
         expect(geoPolygon.toElasticsearchQuery)
-        .withArgs(node, indexPattern).to.throwException(/Geo polygon query does not support scripted fields/);
+          .withArgs(node, indexPattern).to.throwException(/Geo polygon query does not support scripted fields/);
       });
     });
   });

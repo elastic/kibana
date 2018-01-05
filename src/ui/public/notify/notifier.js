@@ -345,11 +345,11 @@ Notifier.prototype._showFatal = function (err) {
 
   let $container = $('#fatal-splash-screen');
 
-  if (!$container.size()) {
+  if (!$container.length) {
     $(document.body)
       // in case the app has not completed boot
-    .removeAttr('ng-cloak')
-    .html(fatalSplashScreen);
+      .removeAttr('ng-cloak')
+      .html(fatalSplashScreen);
 
     $container = $('#fatal-splash-screen');
   }
@@ -421,7 +421,7 @@ Notifier.prototype.info = function (msg, opts, cb) {
     content: formatMsg(msg, this.from),
     icon: 'info-circle',
     title: 'Debug',
-    lifetime: Notifier.config.infoLifetime,
+    lifetime: _.get(opts, 'lifetime', Notifier.config.infoLifetime),
     actions: ['accept']
   }, _.pick(opts, overrideableOptions));
   return add(config, cb);

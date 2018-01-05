@@ -4,3 +4,5 @@ logging:
   json: true
 optimize:
   enabled: false
+plugins:
+  initialize: false

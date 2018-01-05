@@ -9,6 +9,8 @@ export function FilterBarClickHandlerProvider(Notifier, Private) {
 
   return function ($state) {
     return function (event, simulate) {
+      if (!$state) return;
+
       const notify = new Notifier({
         location: 'Filter bar'
       });
@@ -38,17 +40,18 @@ export function FilterBarClickHandlerProvider(Notifier, Private) {
         }
 
         let filters = _(aggBuckets)
-        .map(function (result) {
-          try {
-            return result.createFilter();
-          } catch (e) {
-            if (!simulate) {
-              notify.warning(e.message);
+          .map(function (result) {
+            try {
+              return result.createFilter();
+            } catch (e) {
+              if (!simulate) {
+                notify.warning(e.message);
+              }
             }
-          }
-        })
-        .filter(Boolean)
-        .value();
+          })
+          .flatten()
+          .filter(Boolean)
+          .value();
 
         if (!filters.length) return;
 
@@ -62,16 +65,16 @@ export function FilterBarClickHandlerProvider(Notifier, Private) {
         filters = dedupFilters($state.filters, uniqFilters(filters), { negate: true });
 
         if (!simulate) {
-          if ($state.query.language === 'lucene') {
+          if (['lucene', 'kql'].includes($state.query.language)) {
             $state.$newFilters = filters;
           }
           else if ($state.query.language === 'kuery') {
             addFiltersToKuery($state, filters)
-            .then(() => {
-              if (_.isFunction($state.save)) {
-                $state.save();
-              }
-            });
+              .then(() => {
+                if (_.isFunction($state.save)) {
+                  $state.save();
+                }
+              });
           }
         }
         return filters;
@@ -79,4 +82,3 @@ export function FilterBarClickHandlerProvider(Notifier, Private) {
     };
   };
 }
-

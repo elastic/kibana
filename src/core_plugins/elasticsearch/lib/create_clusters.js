@@ -1,22 +1,28 @@
 import { Cluster } from './cluster';
 
 export function createClusters(server) {
-  const esPlugin = server.plugins.elasticsearch;
-  esPlugin._clusters = esPlugin._clusters || new Map();
+  const clusters = new Map();
+
+  server.on('stop', () => {
+    for (const [name, cluster] of clusters) {
+      cluster.close();
+      clusters.delete(name);
+    }
+  });
 
   return {
     get(name) {
-      return esPlugin._clusters.get(name);
+      return clusters.get(name);
     },
 
     create(name, config) {
       const cluster = new Cluster(config);
 
-      if (esPlugin._clusters.has(name)) {
+      if (clusters.has(name)) {
         throw new Error(`cluster '${name}' already exists`);
       }
 
-      esPlugin._clusters.set(name, cluster);
+      clusters.set(name, cluster);
 
       return cluster;
     }

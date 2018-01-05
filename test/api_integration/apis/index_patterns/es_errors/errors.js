@@ -1,5 +1,6 @@
 import expect from 'expect.js';
 import { errors as esErrors } from 'elasticsearch';
+import Boom from 'boom';
 
 import {
   isEsIndexNotFoundError,
@@ -105,6 +106,16 @@ export default function ({ getService }) {
         const converted = convertEsError(indices, error);
         expect(converted).to.have.property('isBoom');
         expect(converted.output.statusCode).to.be(403);
+      });
+
+      it('handles errors that are already Boom errors', () => {
+        const error = new Error();
+        error.statusCode = 401;
+        const boomError = Boom.boomify(error, { statusCode: error.statusCode });
+
+        const converted = convertEsError(indices, boomError);
+
+        expect(converted.output.statusCode).to.be(401);
       });
     });
   });

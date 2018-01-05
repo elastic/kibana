@@ -1,6 +1,6 @@
 .kuiPanel {
-  border: $globalBorderThin;
-  border-radius: $globalBorderRadius;
+  border: $kuiBorderThin;
+  border-radius: $kuiBorderRadius;
 }
 
 .kuiPanel--prompt {
@@ -39,15 +39,15 @@
 
   padding: $panelPadding;
   height: $panelHeight;
-  border-bottom: $globalBorderThin;
+  border-bottom: $kuiBorderThin;
 }
 
   /**
    * 1. This way we can use h1, h2, etc.
    */
   .kuiPanelHeader__title {
-    font-size: $globalTitleFontSize;
-    line-height: $globalLineHeight;
+    font-size: $kuiTitleFontSize;
+    line-height: $kuiLineHeight;
     margin: 0; /* 1 */
   }
 

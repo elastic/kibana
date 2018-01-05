@@ -23,10 +23,10 @@ describe('plugin folder rename', function () {
     });
 
     return renamePlugin('/foo/bar', '/bar/foo')
-    .catch(function (err) {
-      expect(err.code).to.be('error');
-      expect(renameStub.callCount).to.be(1);
-    });
+      .catch(function (err) {
+        expect(err.code).to.be('error');
+        expect(renameStub.callCount).to.be(1);
+      });
   });
 
   it('should resolve if there are no errors', function () {
@@ -35,12 +35,12 @@ describe('plugin folder rename', function () {
     });
 
     return renamePlugin('/foo/bar', '/bar/foo')
-    .then(function () {
-      expect(renameStub.callCount).to.be(1);
-    })
-    .catch(function () {
-      throw new Error('We shouln\'t have any errors');
-    });
+      .then(function () {
+        expect(renameStub.callCount).to.be(1);
+      })
+      .catch(function () {
+        throw new Error('We shouln\'t have any errors');
+      });
   });
 
   describe('Windows', function () {
@@ -63,10 +63,10 @@ describe('plugin folder rename', function () {
         });
       });
       return renamePlugin('/foo/bar', '/bar/foo')
-      .catch(function (err) {
-        expect(err.code).to.be('EPERM');
-        expect(renameStub.callCount).to.be.greaterThan(1);
-      });
+        .catch(function (err) {
+          expect(err.code).to.be('EPERM');
+          expect(renameStub.callCount).to.be.greaterThan(1);
+        });
     });
   });
 });

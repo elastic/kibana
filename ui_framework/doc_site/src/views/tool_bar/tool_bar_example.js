@@ -10,11 +10,11 @@ import {
 } from '../../components';
 
 import { ToolBar } from './tool_bar';
-const toolBarSource = require('!!raw!./tool_bar');
+const toolBarSource = require('!!raw-loader!./tool_bar');
 const toolBarHtml = renderToHtml(ToolBar);
 
 import { ToolBarFooter } from './tool_bar_footer';
-const toolBarFooterSource = require('!!raw!./tool_bar_footer');
+const toolBarFooterSource = require('!!raw-loader!./tool_bar_footer');
 const toolBarFooterHtml = renderToHtml(ToolBarFooter);
 
 export default props => (

@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import _ from 'lodash';
-import getLastValue from '../lib/get_last_value';
+import getLastValue from '../../../common/get_last_value';
 import TimeseriesChart from './timeseries_chart';
 import Legend from './legend';
 import eventBus from '../lib/events';
@@ -60,7 +60,7 @@ class Timeseries extends Component {
     const values = {};
     if (pos) {
       this.props.series.forEach((row) => {
-        if (row.data && _.isArray(row.data)) {
+        if (row.data && Array.isArray(row.data)) {
           if (item && row.data[item.dataIndex] && row.data[item.dataIndex][0] === item.datapoint[0]) {
             values[row.id] = row.data[item.dataIndex][1];
           } else {
@@ -135,6 +135,7 @@ class Timeseries extends Component {
               options={this.props.options}
               xaxisLabel={this.props.xaxisLabel}
               yaxes={this.props.yaxes}
+              xAxisFormatter={this.props.xAxisFormatter}
             />
           </div>
           <Legend

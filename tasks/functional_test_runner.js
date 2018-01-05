@@ -1,5 +1,5 @@
 import { createFunctionalTestRunner } from '../src/functional_test_runner';
-import { createToolingLog } from '../src/utils';
+import { createToolingLog } from '../src/dev';
 
 export default function (grunt) {
   grunt.registerMultiTask('functional_test_runner', 'run tests with the functional test runner', function () {

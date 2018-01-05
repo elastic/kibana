@@ -5,7 +5,7 @@ import { createListStream } from '../';
 
 describe('listStream', () => {
   it('provides the values in the initial list', async () => {
-    const str = createListStream([1,2,3,4]);
+    const str = createListStream([1, 2, 3, 4]);
     const stub = sinon.stub();
     str.on('data', stub);
 
@@ -19,10 +19,10 @@ describe('listStream', () => {
   });
 
   it('does not modify the list passed', async () => {
-    const list = [1,2,3,4];
+    const list = [1, 2, 3, 4];
     const str = createListStream(list);
     str.resume();
     await new Promise(resolve => str.on('end', resolve));
-    expect(list).to.eql([1,2,3,4]);
+    expect(list).to.eql([1, 2, 3, 4]);
   });
 });

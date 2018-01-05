@@ -6,8 +6,14 @@
   ng-mouseleave="pill.deactivateActions()"
 >
 
-  <div class="filter-description" ng-class="{'filter-description-deactivated': pill.areActionsActivated}">
+  <div
+    class="filter-description"
+    ng-class="{'filter-description-deactivated': pill.areActionsActivated}"
+    tabindex="0"
+    aria-disabled="{{pill.filter.meta.disabled}}"
+  >
     <span ng-if="pill.filter.$state.store == 'globalState'"><i class="fa fa-fw fa-thumb-tack pinned"></i></span>
+    <span ng-if="pill.filter.meta.negate">NOT</span>
     <span ng-if="pill.filter.meta.alias">{{ pill.filter.meta.alias }}</span>
     <span ng-if="!pill.filter.meta.alias">{{ pill.filter.meta.key }}:</span>
     <span ng-if="!pill.filter.meta.alias">"{{ pill.filter.meta.value }}"</span>

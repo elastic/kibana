@@ -1,7 +1,7 @@
 let _ = require('lodash');
 let utils = require('../../src/utils');
-let collapsingTests = require('raw!./utils_string_collapsing.txt');
-let expandingTests = require('raw!./utils_string_expanding.txt');
+let collapsingTests = require('raw-loader!./utils_string_collapsing.txt');
+let expandingTests = require('raw-loader!./utils_string_expanding.txt');
 
 var { test, module, deepEqual } = window.QUnit;
 

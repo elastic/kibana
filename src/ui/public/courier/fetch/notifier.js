@@ -1,7 +1,5 @@
 import { Notifier } from 'ui/notify/notifier';
 
-export function CourierNotifierProvider() {
-  return new Notifier({
-    location: 'Courier Fetch'
-  });
-}
+export const courierNotifier = new Notifier({
+  location: 'Courier Fetch'
+});

@@ -19,28 +19,30 @@
     <button
       ng-if="setDefault"
       ng-click="setDefault()"
+      aria-label="Set as default index"
       tooltip="Set as default index"
       class="kuiButton kuiButton--basic"
       data-test-subj="setDefaultIndexPatternButton"
     >
-      <span class="sr-only">Set as default index</span>
-      <ispan
+      <span
         aria-hidden="true"
         class="kuiIcon fa-star"
       ></span>
     </button>
+
     <button
       ng-if="refreshFields"
       ng-click="refreshFields()"
+      aria-label="Reload field list"
       tooltip="Refresh field list"
       class="kuiButton kuiButton--basic"
     >
-      <span class="sr-only">Reload field list</span>
       <span
         aria-hidden="true"
         class="kuiIcon fa-refresh"
       ></span>
     </button>
+
     <button
       ng-if="delete"
       ng-click="delete()"
@@ -49,7 +51,6 @@
       class="kuiButton kuiButton--danger"
       data-test-subj="deleteIndexPatternButton"
     >
-      <span class="sr-only">Remove index pattern</span>
       <span
         aria-hidden="true"
         class="kuiIcon fa-trash"

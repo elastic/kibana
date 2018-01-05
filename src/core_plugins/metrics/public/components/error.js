@@ -7,6 +7,7 @@ function ErrorComponent(props) {
   let additionalInfo;
   const type = _.get(error, 'error.caused_by.type');
   let reason = _.get(error, 'error.caused_by.reason');
+  const title = _.get(error, 'error.caused_by.title');
 
   if (!reason) {
     reason = _.get(error, 'message');
@@ -17,22 +18,22 @@ function ErrorComponent(props) {
     reason = _.get(error, 'error.caused_by.caused_by.reason');
     additionalInfo = (
       <div className="metrics_error__additional">
-        <div className="metrics_error__reason">{ reason }</div>
-        <div className="metrics_error__stack">{ scriptStack.join('\n')}</div>
+        <div className="metrics_error__reason">{reason}</div>
+        <div className="metrics_error__stack">{scriptStack.join('\n')}</div>
       </div>
     );
   } else if (reason) {
     additionalInfo = (
       <div className="metrics_error__additional">
-        <div className="metrics_error__reason">{ reason }</div>
+        <div className="metrics_error__reason">{reason}</div>
       </div>
     );
   }
 
   return (
     <div className="metrics_error">
-      <div className="merics_error__title">The request for this panel failed.</div>
-      { additionalInfo }
+      <div className="merics_error__title">{title || 'The request for this panel failed.'}</div>
+      {additionalInfo}
     </div>
   );
 }

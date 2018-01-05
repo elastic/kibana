@@ -4,6 +4,8 @@
       ng-controller="managementIndicesEdit"
       data-test-subj="editIndexPattern"
       class="kuiViewContent"
+      role="region"
+      aria-label="Index pattern details"
     >
       <!-- Header -->
       <kbn-management-index-header
@@ -25,7 +27,7 @@
         index and the field's associated core type as recorded by Elasticsearch.
         While this list allows you to view the core type of each field, changing
         field types must be done using Elasticsearch's
-        <a target="_window" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html">
+        <a target="_window" class="euiLink euiLink--primary" href="http://www.elastic.co/guide/en/elasticsearch/reference/current/mapping.html">
           Mapping API
           <i aria-hidden="true" class="fa-link fa"></i>
         </a>
@@ -100,6 +102,7 @@
               aria-label="Filter"
               ng-model="fieldFilter"
               placeholder="Filter"
+              data-test-subj="indexPatternFieldFilter"
             >
           </div>
         </div>

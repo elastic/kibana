@@ -6,9 +6,9 @@ import {
 
 export default () => (
   <div>
-    <KuiCollapseButton direction="down"/>
-    <KuiCollapseButton direction="up"/>
-    <KuiCollapseButton direction="left"/>
-    <KuiCollapseButton direction="right"/>
+    <KuiCollapseButton aria-label="Toggle panel" direction="down"/>
+    <KuiCollapseButton aria-label="Toggle panel" direction="up"/>
+    <KuiCollapseButton aria-label="Toggle panel" direction="left"/>
+    <KuiCollapseButton aria-label="Toggle panel" direction="right"/>
   </div>
 );

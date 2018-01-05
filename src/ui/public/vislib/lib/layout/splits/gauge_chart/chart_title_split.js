@@ -1,6 +1,6 @@
 import d3 from 'd3';
 
-// eslint-disable-next-line kibana-custom/no-default-export
+// eslint-disable-next-line @elastic/kibana-custom/no-default-export
 export default function ChartTitleSplitFactory() {
 
   /*
@@ -17,11 +17,11 @@ export default function ChartTitleSplitFactory() {
 
       if (!data.slices) {
         div.selectAll('.chart-title')
-        .append('div')
-        .data(function (d) {
-          return d.rows ? d.rows : d.columns;
-        })
-        .enter()
+          .append('div')
+          .data(function (d) {
+            return d.rows ? d.rows : d.columns;
+          })
+          .enter()
           .append('div')
           .attr('class', 'chart-title');
 

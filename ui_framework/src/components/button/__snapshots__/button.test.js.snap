@@ -16,6 +16,7 @@ exports[`KuiButton Baseline HTML attributes are rendered 1`] = `
 
 exports[`KuiButton Baseline is rendered 1`] = `
 <button
+  aria-label="aria label"
   class="kuiButton"
 >
   <span
@@ -26,6 +27,7 @@ exports[`KuiButton Baseline is rendered 1`] = `
 
 exports[`KuiButton Props buttonType basic renders the basic class 1`] = `
 <button
+  aria-label="aria label"
   class="kuiButton kuiButton--basic"
 >
   <span
@@ -36,6 +38,7 @@ exports[`KuiButton Props buttonType basic renders the basic class 1`] = `
 
 exports[`KuiButton Props buttonType danger renders the danger class 1`] = `
 <button
+  aria-label="aria label"
   class="kuiButton kuiButton--danger"
 >
   <span
@@ -46,6 +49,7 @@ exports[`KuiButton Props buttonType danger renders the danger class 1`] = `
 
 exports[`KuiButton Props buttonType hollow renders the hollow class 1`] = `
 <button
+  aria-label="aria label"
   class="kuiButton kuiButton--hollow"
 >
   <span
@@ -56,6 +60,7 @@ exports[`KuiButton Props buttonType hollow renders the hollow class 1`] = `
 
 exports[`KuiButton Props buttonType primary renders the primary class 1`] = `
 <button
+  aria-label="aria label"
   class="kuiButton kuiButton--primary"
 >
   <span
@@ -66,6 +71,7 @@ exports[`KuiButton Props buttonType primary renders the primary class 1`] = `
 
 exports[`KuiButton Props buttonType secondary renders the secondary class 1`] = `
 <button
+  aria-label="aria label"
   class="kuiButton kuiButton--secondary"
 >
   <span
@@ -76,6 +82,7 @@ exports[`KuiButton Props buttonType secondary renders the secondary class 1`] = 
 
 exports[`KuiButton Props buttonType warning renders the warning class 1`] = `
 <button
+  aria-label="aria label"
   class="kuiButton kuiButton--warning"
 >
   <span
@@ -115,6 +122,7 @@ exports[`KuiButton Props icon is rendered with children 1`] = `
 
 exports[`KuiButton Props icon is rendered without children 1`] = `
 <button
+  aria-label="aria label"
   class="kuiButton kuiButton--iconText"
 >
   <span
@@ -142,6 +150,7 @@ exports[`KuiButton Props iconPosition moves the icon to the right 1`] = `
 
 exports[`KuiButton Props isLoading doesn't render the icon prop 1`] = `
 <button
+  aria-label="aria label"
   class="kuiButton kuiButton--iconText"
 >
   <span
@@ -157,6 +166,7 @@ exports[`KuiButton Props isLoading doesn't render the icon prop 1`] = `
 
 exports[`KuiButton Props isLoading renders a spinner 1`] = `
 <button
+  aria-label="aria label"
   class="kuiButton kuiButton--iconText"
 >
   <span

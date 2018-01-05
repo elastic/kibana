@@ -3,6 +3,7 @@
 exports[`renders KuiPagerButtonGroup 1`] = `
 <div
   class="kuiButtonGroup kuiButtonGroup--united"
+  role="group"
 >
   <button
     aria-label="Show previous page"

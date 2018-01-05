@@ -1,6 +1,12 @@
 import _ from 'lodash';
 
-export class FunctionSuggestions {
+export const SUGGESTION_TYPE = {
+  ARGUMENTS: 'arguments',
+  ARGUMENT_VALUE: 'argument_value',
+  FUNCTIONS: 'functions'
+};
+
+export class Suggestions {
   constructor() {
     this.reset();
   }
@@ -8,11 +14,22 @@ export class FunctionSuggestions {
   reset() {
     this.index = -1;
     this.list = [];
+    this.type = null;
     this.isVisible = false;
   }
 
-  setList(list) {
-    this.list = list;
+  setList(list, type) {
+    this.list = list.sort((a, b) => {
+      if (a.name < b.name) {
+        return -1;
+      }
+      if (a.name > b.name) {
+        return 1;
+      }
+      // names must be equal
+      return 0;
+    });
+    this.type = type;
 
     // Only try to position index inside of list range, when it was already focused
     // beforehand (i.e. not -1)
@@ -52,48 +69,164 @@ export class FunctionSuggestions {
   }
 }
 
-export function suggest(expression, functionList, Parser) {
-  return new Promise((resolve, reject) => {
+function inLocation(cursorPosition, location) {
+  return cursorPosition >= location.min && cursorPosition <= location.max;
+}
+
+function getArgumentsHelp(functionHelp, functionArgs = []) {
+  if (!functionHelp) {
+    return [];
+  }
+
+  // Do not provide 'inputSeries' as argument suggestion for chainable functions
+  const argsHelp = functionHelp.chainable ? functionHelp.args.slice(1) : functionHelp.args.slice(0);
+
+  // ignore arguments that are already provided in function declaration
+  const functionArgNames = functionArgs.map((arg) => {
+    return arg.name;
+  });
+  return argsHelp.filter(arg => {
+    return !functionArgNames.includes(arg.name);
+  });
+}
+
+async function extractSuggestionsFromParsedResult(result, cursorPosition, functionList, argValueSuggestions) {
+  const activeFunc = result.functions.find((func) => {
+    return cursorPosition >= func.location.min && cursorPosition < func.location.max;
+  });
+
+  if (!activeFunc) {
+    return;
+  }
+
+  const functionHelp = functionList.find((func) => {
+    return func.name === activeFunc.function;
+  });
+
+  // return function suggestion when cursor is outside of parentheses
+  // location range includes '.', function name, and '('.
+  const openParen = activeFunc.location.min + activeFunc.function.length + 2;
+  if (cursorPosition < openParen) {
+    return { list: [functionHelp], location: activeFunc.location, type: SUGGESTION_TYPE.FUNCTIONS };
+  }
+
+  // return argument value suggestions when cursor is inside agrument value
+  const activeArg = activeFunc.arguments.find((argument) => {
+    return inLocation(cursorPosition, argument.location);
+  });
+  if (activeArg && activeArg.type === 'namedArg' && inLocation(cursorPosition, activeArg.value.location)) {
+    const {
+      function: functionName,
+      arguments: functionArgs,
+    } = activeFunc;
+
+    const {
+      name: argName,
+      value: { text: partialInput },
+    } = activeArg;
+
+    let valueSuggestions;
+    if (argValueSuggestions.hasDynamicSuggestionsForArgument(functionName, argName)) {
+      valueSuggestions = await argValueSuggestions.getDynamicSuggestionsForArgument(functionName, argName, functionArgs, partialInput);
+    } else {
+      const {
+        suggestions: staticSuggestions,
+      } = functionHelp.args.find((arg) => {
+        return arg.name === activeArg.name;
+      });
+      valueSuggestions = argValueSuggestions.getStaticSuggestionsForInput(partialInput, staticSuggestions);
+    }
+    return { list: valueSuggestions, location: activeArg.value.location, type: SUGGESTION_TYPE.ARGUMENT_VALUE };
+  }
+
+  // return argument suggestions
+  const argsHelp = getArgumentsHelp(functionHelp, activeFunc.arguments);
+  const argumentSuggestions = argsHelp.filter(arg => {
+    if (_.get(activeArg, 'type') === 'namedArg') {
+      return _.startsWith(arg.name, activeArg.name);
+    } else if (activeArg) {
+      return _.startsWith(arg.name, activeArg.text);
+    }
+    return true;
+  });
+  const location = activeArg ? activeArg.location : { min: cursorPosition, max: cursorPosition };
+  return { list: argumentSuggestions, location: location, type: SUGGESTION_TYPE.ARGUMENTS };
+}
+
+export async function suggest(expression, functionList, Parser, cursorPosition, argValueSuggestions) {
+  try {
+    const result = await Parser.parse(expression);
+    return await extractSuggestionsFromParsedResult(result, cursorPosition, functionList, argValueSuggestions);
+  } catch (e) {
+
+    let message;
     try {
-      // We rely on the grammar to throw an error in order to suggest function(s).
-      Parser.parse(expression);
-
-      // If the grammar doesn't throw an error, then we have no suggestions to offer.
-      return reject();
+      // The grammar will throw an error containing a message if the expression is formatted
+      // correctly and is prepared to accept suggestions. If the expression is not formmated
+      // correctly the grammar will just throw a regular PEG SyntaxError, and this JSON.parse
+      // attempt will throw an error.
+      message = JSON.parse(e.message);
     } catch (e) {
-      try {
-        // The grammar will throw an error containing a message if the expression is formatted
-        // correctly and is prepared to accept suggestions. If the expression is not formmated
-        // correctly the grammar will just throw a regular PEG SyntaxError, and this JSON.parse
-        // attempt will throw an error.
-        const message = JSON.parse(e.message);
-        const functionLocation = message.location;
+      // The expression isn't correctly formatted, so JSON.parse threw an error.
+      return;
+    }
 
-        if (message.type === 'incompleteFunction') {
-          let list;
-
-          if (message.function) {
-            // The user has start typing a function name, so we'll filter the list down to only
-            // possible matches.
-            list = functionList.filter(func => _.startsWith(func.name, message.function));
-          } else {
-            // The user hasn't typed anything yet, so we'll just return the entire list.
-            list = functionList;
-          }
-
-          return resolve({ list, functionLocation });
+    switch (message.type) {
+      case 'incompleteFunction': {
+        let list;
+        if (message.function) {
+          // The user has start typing a function name, so we'll filter the list down to only
+          // possible matches.
+          list = functionList.filter(func => _.startsWith(func.name, message.function));
+        } else {
+          // The user hasn't typed anything yet, so we'll just return the entire list.
+          list = functionList;
         }
-      } catch (e) {
-        // The expression isn't correctly formatted, so JSON.parse threw an error.
-        return reject();
+        return { list, location: message.location, type: SUGGESTION_TYPE.FUNCTIONS };
+      }
+      case 'incompleteArgument': {
+        const {
+          currentFunction: functionName,
+          currentArgs: functionArgs,
+        } = message;
+        const functionHelp = functionList.find(func => func.name === functionName);
+        return {
+          list: getArgumentsHelp(functionHelp, functionArgs),
+          location: message.location,
+          type: SUGGESTION_TYPE.ARGUMENTS
+        };
+      }
+      case 'incompleteArgumentValue': {
+        const {
+          name: argName,
+          currentFunction: functionName,
+          currentArgs: functionArgs,
+        } = message;
+        let valueSuggestions = [];
+        if (argValueSuggestions.hasDynamicSuggestionsForArgument(functionName, argName)) {
+          valueSuggestions = await argValueSuggestions.getDynamicSuggestionsForArgument(functionName, argName, functionArgs);
+        } else {
+          const functionHelp = functionList.find(func => func.name === functionName);
+          if (functionHelp) {
+            const argHelp = functionHelp.args.find(arg => arg.name === argName);
+            if (argHelp && argHelp.suggestions) {
+              valueSuggestions = argHelp.suggestions;
+            }
+          }
+        }
+        return {
+          list: valueSuggestions,
+          location: { min: cursorPosition, max: cursorPosition },
+          type: SUGGESTION_TYPE.ARGUMENT_VALUE
+        };
       }
     }
-  });
+  }
 }
 
 export function insertAtLocation(valueToInsert, destination, replacementRangeStart, replacementRangeEnd) {
   // Insert the value at a location caret within the destination.
-  const prefix = destination.slice(0, replacementRangeStart + 1);
+  const prefix = destination.slice(0, replacementRangeStart);
   const suffix =  destination.slice(replacementRangeEnd, destination.length);
   const result = `${prefix}${valueToInsert}${suffix}`;
   return result;

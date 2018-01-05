@@ -12,15 +12,15 @@ module.exports = function (grunt) {
     grunt.file.mkdir(targetDir);
 
     readdir(targetDir)
-    .map(function (archive) {
+      .map(function (archive) {
       // only sha the archives and packages
-      if (!archive.match(/\.zip$|\.tar.gz$|\.deb$|\.rpm$/)) return;
+        if (!archive.match(/\.zip$|\.tar.gz$|\.deb$|\.rpm$/)) return;
 
-      return exec(cmd + archive + ' > ' + archive + '.sha1.txt', {
-        cwd: targetDir
-      });
-    })
-    .nodeify(this.async());
+        return exec(cmd + archive + ' > ' + archive + '.sha1.txt', {
+          cwd: targetDir
+        });
+      })
+      .nodeify(this.async());
   });
 
 };

@@ -3,6 +3,8 @@ import WeirdControlFlow from './weird_control_flow';
 import { once } from 'lodash';
 import { join } from 'path';
 
+import { createBundlesRoute } from '../bundles_route';
+
 export default class LazyOptimizer extends BaseOptimizer {
   constructor(opts) {
     super(opts);
@@ -21,7 +23,7 @@ export default class LazyOptimizer extends BaseOptimizer {
   async init() {
     this.initializing = true;
 
-    await this.bundles.writeEntryFiles();
+    await this.uiBundles.writeEntryFiles();
     await this.initCompiler();
 
     this.compiler.plugin('watch-run', (w, webpackCb) => {
@@ -57,8 +59,8 @@ export default class LazyOptimizer extends BaseOptimizer {
 
     this.initializing = false;
     this.log(['info', 'optimize'], {
-      tmpl: `Lazy optimization of ${this.bundles.desc()} ready`,
-      bundles: this.bundles.getIds()
+      tmpl: `Lazy optimization of ${this.uiBundles.getDescription()} ready`,
+      bundles: this.uiBundles.getIds()
     });
   }
 
@@ -67,33 +69,35 @@ export default class LazyOptimizer extends BaseOptimizer {
     return join(this.compiler.outputPath, relativePath);
   }
 
-  bindToServer(server) {
-    server.route({
-      path: '/bundles/{asset*}',
-      method: 'GET',
-      handler: async (request, reply) => {
-        try {
-          const path = await this.getPath(request.params.asset);
-          return reply.file(path);
-        } catch (error) {
-          console.log(error.stack);
-          return reply(error);
-        }
-      }
+  bindToServer(server, basePath) {
+
+    // calling `build.get()` resolves when the build is
+    // "stable" (the compiler is not running) so this pauses
+    // all requests received while the compiler is running
+    // and lets the continue once it is done.
+    server.ext('onRequest', (request, reply) => {
+      this.build.get()
+        .then(() => reply.continue())
+        .catch(reply);
     });
+
+    server.route(createBundlesRoute({
+      bundlesPath: this.compiler.outputPath,
+      basePublicPath: basePath
+    }));
   }
 
   logRunStart() {
     this.log(['info', 'optimize'], {
       tmpl: `Lazy optimization started`,
-      bundles: this.bundles.getIds()
+      bundles: this.uiBundles.getIds()
     });
   }
 
   logRunSuccess() {
     this.log(['info', 'optimize'], {
       tmpl: 'Lazy optimization <%= status %> in <%= seconds %> seconds',
-      bundles: this.bundles.getIds(),
+      bundles: this.uiBundles.getIds(),
       status: 'success',
       seconds: this.timer.end()
     });
@@ -106,7 +110,7 @@ export default class LazyOptimizer extends BaseOptimizer {
 
     this.log(['fatal', 'optimize'], {
       tmpl: 'Lazy optimization <%= status %> in <%= seconds %> seconds<%= err %>',
-      bundles: this.bundles.getIds(),
+      bundles: this.uiBundles.getIds(),
       status: 'failed',
       seconds: this.timer.end(),
       err: err

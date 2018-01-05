@@ -55,10 +55,10 @@ describe(filename, () => {
 
     it('does not allow undefined symbols', () => {
       return invoke(fn, [seriesList, null, null, null, null, 'beer'])
-      .then(expect.fail)
-      .catch((e) => {
-        expect(e).to.be.an('error');
-      });
+        .then(expect.fail)
+        .catch((e) => {
+          expect(e).to.be.an('error');
+        });
     });
   });
 

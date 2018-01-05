@@ -188,6 +188,14 @@ var rules = {
       },
       "field": "{field}",
       "interval": 50,
+      "extended_bounds": {
+        "__template": {
+          "min": 0,
+          "max": 50
+        },
+        "min": 0,
+        "max": 50
+      },
       "min_doc_count": 0,
       "order": {
         __template: {
@@ -208,6 +216,14 @@ var rules = {
       "field": "{field}",
       "interval": { __one_of: ["year", "quarter", "week", "day", "hour", "minute", "second"] },
       "min_doc_count": 0,
+      "extended_bounds": {
+        "__template": {
+          "min": "now/d",
+          "max": "now/d"
+        },
+        "min": "now/d",
+        "max": "now/d"
+      },
       "order": {
         __template: {
           "_key": "asc"
@@ -253,6 +269,29 @@ var rules = {
       "precision": { __one_of: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] },
       "size": 10,
       "shard_size": 10
+    },
+    "composite": {
+      __template: {
+        "sources": [
+          {
+            "NAME": {
+              "AGG_TYPE": {}
+            }
+          }
+        ]
+      },
+      "sources": [
+        {
+          __scope_link: ".",
+          __template: {
+            "NAME": {
+              "AGG_TYPE": {}
+            }
+          }
+        }
+      ],
+      "size": 10,
+      "after": {}
     },
     "percentiles": {
       __template: {

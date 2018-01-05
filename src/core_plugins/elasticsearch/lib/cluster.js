@@ -8,9 +8,12 @@ import { parseConfig } from './parse_config';
 
 export class Cluster {
   constructor(config) {
-    this._config = Object.assign({}, config);
+    this._config = {
+      ...config
+    };
     this.errors = elasticsearch.errors;
 
+    this._clients = new Set();
     this._client = this.createClient();
     this._noAuthClient = this.createClient({ auth: false });
 
@@ -43,18 +46,22 @@ export class Cluster {
   getClient = () => this._client;
 
   close() {
-    if (this._client) {
-      this._client.close();
+    for (const client of this._clients) {
+      client.close();
     }
 
-    if (this._noAuthClient) {
-      this._noAuthClient.close();
-    }
+    this._clients.clear();
   }
 
   createClient = configOverrides => {
-    const config = Object.assign({}, this._getClientConfig(), configOverrides);
-    return new elasticsearch.Client(parseConfig(config));
+    const config = {
+      ...this._getClientConfig(),
+      ...configOverrides
+    };
+
+    const client = new elasticsearch.Client(parseConfig(config));
+    this._clients.add(client);
+    return client;
   }
 
   _getClientConfig = () => {
@@ -93,7 +100,7 @@ function callAPI(client, endpoint, clientParams = {}, options = {}) {
       return Promise.reject(err);
     }
 
-    const boomError = Boom.wrap(err, err.statusCode);
+    const boomError = Boom.boomify(err, { statusCode: err.statusCode });
     const wwwAuthHeader = get(err, 'body.error.header[WWW-Authenticate]');
     boomError.output.headers['WWW-Authenticate'] = wwwAuthHeader || 'Basic realm="Authorization Required"';
 

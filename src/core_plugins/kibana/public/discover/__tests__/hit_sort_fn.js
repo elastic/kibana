@@ -18,7 +18,7 @@ describe('hit sort function', function () {
     const total = sortOpts.length * groupSize;
 
     sortOpts = sortOpts.map(function (opt) {
-      if (_.isArray(opt)) return opt;
+      if (Array.isArray(opt)) return opt;
       else return [opt];
     });
     const sortOptLength = sortOpts.length;
@@ -31,10 +31,10 @@ describe('hit sort function', function () {
     });
 
     hits.sort(createHitSortFn(dir))
-    .forEach(function (hit, i) {
-      const group = Math.floor(i / groupSize);
-      expect(hit.sort).to.eql(sortOpts[group]);
-    });
+      .forEach(function (hit, i) {
+        const group = Math.floor(i / groupSize);
+        expect(hit.sort).to.eql(sortOpts[group]);
+      });
   };
 
 

@@ -1,11 +1,12 @@
 import _ from 'lodash';
+import { buildAggBody } from './agg_body';
 import createDateAgg from './create_date_agg';
 
-export default function buildRequest(config, tlConfig) {
+export default function buildRequest(config, tlConfig, scriptedFields) {
 
   const bool = { must: [] };
 
-  const timeFilter = { range:{} };
+  const timeFilter = { range: {} };
   timeFilter.range[config.timefield] = { gte: tlConfig.time.from, lte: tlConfig.time.to, format: 'epoch_millis' };
   bool.must.push(timeFilter);
 
@@ -19,7 +20,7 @@ export default function buildRequest(config, tlConfig) {
       meta: { type: 'split' },
       filters: {
         filters: _.chain(config.q).map(function (q) {
-          return [q, { query_string:{ query: q } }];
+          return [q, { query_string: { query: q } }];
         }).zipObject().value(),
       },
       aggs: {}
@@ -31,12 +32,11 @@ export default function buildRequest(config, tlConfig) {
   _.each(config.split, function (clause) {
     clause = clause.split(':');
     if (clause[0] && clause[1]) {
+      const termsAgg = buildAggBody(clause[0], scriptedFields);
+      termsAgg.size = parseInt(clause[1], 10);
       aggCursor[clause[0]] = {
         meta: { type: 'split' },
-        terms: {
-          field: clause[0],
-          size: parseInt(clause[1], 10)
-        },
+        terms: termsAgg,
         aggs: {}
       };
       aggCursor = aggCursor[clause[0]].aggs;
@@ -45,7 +45,7 @@ export default function buildRequest(config, tlConfig) {
     }
   });
 
-  _.assign(aggCursor, createDateAgg(config, tlConfig));
+  _.assign(aggCursor, createDateAgg(config, tlConfig, scriptedFields));
 
 
   return {

@@ -9,13 +9,13 @@
   appearance: none;
   cursor: pointer;
   padding: 4px 12px 5px;
-  font-size: $globalFontSize;
+  font-size: $kuiFontSize;
   font-weight: $buttonFontWeight;
-  line-height: $globalLineHeight;
+  line-height: $kuiLineHeight;
   height: $buttonHeight;
   text-decoration: none;
   border: none;
-  border-radius: $globalBorderRadius;
+  border-radius: $kuiBorderRadius;
 
   @include kuiButtonDisabled {
     cursor: not-allowed;
@@ -91,7 +91,7 @@
     background-color: $buttonBasicBackgroundColor--darkTheme;
 
     @include kuiButtonFocus {
-      @include focus($globalFocusColor, $globalBackgroundColor--darkTheme);
+      @include focus($kuiFocusColor, $kuiBackgroundColor--darkTheme);
       color: $buttonBasicTextColor--darkTheme;
     }
 
@@ -139,19 +139,19 @@
  * 1. Override Bootstrap.
  */
 .kuiButton--danger {
-  color: $globalColorRed;
-  background-color: rgba($globalColorWhite, 0.5);
-  border: solid 1px $globalColorRed;
+  color: $kuiColorRed;
+  background-color: rgba($kuiColorWhite, 0.5);
+  border: solid 1px $kuiColorRed;
 
   @include kuiButtonFocus {
-    @include focus($globalFocusDangerColor);
-    color: $globalColorRed;
+    @include focus($kuiFocusDangerColor);
+    color: $kuiColorRed;
   }
 
   @include kuiButtonHoverAndActive {
-    color: darken($globalColorRed, 10%) !important;
-    background-color: rgba(lighten($globalColorRed, 50%), 0.5);
-    border: solid 1px darken($globalColorRed, 10%);
+    color: darken($kuiColorRed, 10%) !important;
+    background-color: rgba(lighten($kuiColorRed, 50%), 0.5);
+    border: solid 1px darken($kuiColorRed, 10%);
   }
 }
 
@@ -163,7 +163,7 @@
   background-color: $buttonWarningBackgroundColor;
 
   @include kuiButtonFocus {
-    @include focus($globalFocusWarningColor);
+    @include focus($kuiFocusWarningColor);
     color: $buttonDefaultTextColor;
   }
 
@@ -182,23 +182,31 @@
  * 2. Override either Bootstrap or Timelion styles.
  */
 .kuiButton--hollow {
-  color: $globalLinkColor !important; /* 2 */
+  color: $kuiLinkColor !important; /* 2 */
   background-color: transparent;
 
+  @include darkTheme {
+    color: $kuiLinkColor--darkTheme !important; /* 2 */
+  }
+
   @include kuiButtonHoverAndActive {
-    color: $globalLinkHoverColor !important; /* 1 */
+    color: $kuiLinkHoverColor !important; /* 1 */
     text-decoration: underline;
+
+    @include darkTheme {
+      color: $kuiLinkColor-isHover--darkTheme !important; /* 2 */
+    }
   }
 }
 
 .kuiButton--secondary {
-  color: $globalLinkColor !important; /* 2 */
-  border: solid 1px $globalColorBlue;
-  background-color: rgba($globalColorWhite, 0.5);
+  color: $kuiLinkColor !important; /* 2 */
+  border: solid 1px $kuiColorBlue;
+  background-color: rgba($kuiColorWhite, 0.5);
 
   @include kuiButtonHoverAndActive {
-    color: darken($globalLinkColor, 10%) !important; /* 1 */
-    border: solid 1px darken($globalColorBlue, 10%);
-    background-color: rgba(lighten($globalLinkColor, 50%), 0.5);
+    color: darken($kuiLinkColor, 10%) !important; /* 1 */
+    border: solid 1px darken($kuiColorBlue, 10%);
+    background-color: rgba(lighten($kuiLinkColor, 50%), 0.5);
   }
 }

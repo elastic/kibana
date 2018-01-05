@@ -44,8 +44,8 @@ describe('AggTable Directive', function () {
     const $el = $compile('<kbn-agg-table table="table"></kbn-agg-table>')($scope);
     $scope.$digest();
 
-    expect($el.find('tbody').size()).to.be(1);
-    expect($el.find('td').size()).to.be(1);
+    expect($el.find('tbody').length).to.be(1);
+    expect($el.find('td').length).to.be(1);
     expect($el.find('td').text()).to.eql(1000);
   });
 
@@ -54,7 +54,7 @@ describe('AggTable Directive', function () {
     const $el = $compile('<kbn-agg-table table="table"></kbn-agg-table>')($scope);
     $scope.$digest();
 
-    expect($el.find('tbody').size()).to.be(0);
+    expect($el.find('tbody').length).to.be(0);
   });
 
   it('renders a complex response properly', function () {
@@ -76,10 +76,10 @@ describe('AggTable Directive', function () {
     $compile($el)($scope);
     $scope.$digest();
 
-    expect($el.find('tbody').size()).to.be(1);
+    expect($el.find('tbody').length).to.be(1);
 
     const $rows = $el.find('tbody tr');
-    expect($rows.size()).to.be.greaterThan(0);
+    expect($rows.length).to.be.greaterThan(0);
 
     function validBytes(str) {
       expect(str).to.match(/^\d+$/);
@@ -90,7 +90,7 @@ describe('AggTable Directive', function () {
     $rows.each(function () {
       // 6 cells in every row
       const $cells = $(this).find('td');
-      expect($cells.size()).to.be(6);
+      expect($cells.length).to.be(6);
 
       const txts = $cells.map(function () {
         return $(this).text().trim();
@@ -119,7 +119,7 @@ describe('AggTable Directive', function () {
           { type: 'min', schema: 'metric', params: { field: '@timestamp' } },
           { type: 'terms', schema: 'bucket', params: { field: 'extension' } },
           { type: 'date_histogram', schema: 'bucket', params: { field: '@timestamp', interval: 'd' } },
-          { type: 'derivative', schema: 'metric', params: { metricAgg: 'custom', customMetric: { id:'5-orderAgg', type: 'count' } } },
+          { type: 'derivative', schema: 'metric', params: { metricAgg: 'custom', customMetric: { id: '5-orderAgg', type: 'count' } } },
           { type: 'top_hits', schema: 'metric', params: { field: 'bytes', aggregate: { val: 'min' }, size: 1 } }
         ]
       });
@@ -144,13 +144,13 @@ describe('AggTable Directive', function () {
       $compile($el)($scope);
       $scope.$digest();
 
-      expect($el.find('tfoot').size()).to.be(1);
+      expect($el.find('tfoot').length).to.be(1);
 
       const $rows = $el.find('tfoot tr');
-      expect($rows.size()).to.be(1);
+      expect($rows.length).to.be(1);
 
       const $cells = $($rows[0]).find('th');
-      expect($cells.size()).to.be(6);
+      expect($cells.length).to.be(6);
 
       for (let i = 0; i < 6; i++) {
         expect($($cells[i]).text()).to.be(expected[i]);

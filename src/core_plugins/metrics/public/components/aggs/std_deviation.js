@@ -7,7 +7,7 @@ import Select from 'react-select';
 import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
-import { htmlIdGenerator } from 'ui_framework/services';
+import { htmlIdGenerator } from '@elastic/eui';
 
 export const StandardDeviationAgg = props => {
   const { series, panel, fields } = props;
@@ -18,8 +18,11 @@ export const StandardDeviationAgg = props => {
     { label: 'Raw', value: 'raw' },
     { label: 'Upper Bound', value: 'upper' },
     { label: 'Lower Bound', value: 'lower' },
-    { label: 'Bounds Band', value: 'band' }
   ];
+
+  if (panel.type !== 'table') {
+    modeOptions.push({ label: 'Bounds Band', value: 'band' });
+  }
 
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
@@ -39,6 +42,7 @@ export const StandardDeviationAgg = props => {
       <div className="vis_editor__row_item">
         <div className="vis_editor__label">Aggregation</div>
         <AggSelect
+          panelType={props.panel.type}
           siblings={props.siblings}
           value={model.type}
           onChange={handleSelectChange('type')}

@@ -1,4 +1,5 @@
 import { VisualizeConstants } from '../../../src/core_plugins/kibana/public/visualize/visualize_constants';
+import Keys from 'leadfoot/keys';
 
 export function VisualizePageProvider({ getService, getPageObjects }) {
   const remote = getService('remote');
@@ -11,6 +12,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
   const defaultFindTimeout = config.get('timeouts.find');
 
   class VisualizePage {
+
+    async waitForVisualizationSelectPage() {
+      await testSubjects.find('visualizeSelectTypePage');
+    }
 
     async clickAreaChart() {
       await find.clickByPartialLinkText('Area');
@@ -60,6 +65,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByPartialLinkText('Visual Builder');
     }
 
+    async clickEditorSidebarCollapse() {
+      await testSubjects.click('collapseSideBarButton');
+    }
+
+    async selectTagCloudTag(tagDisplayText) {
+      await testSubjects.click(tagDisplayText);
+    }
+
     async getTextTag() {
       const elements = await find.allByCssSelector('text');
       return await Promise.all(elements.map(async element => await element.getVisibleText()));
@@ -98,6 +111,31 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       }
       const getChartTypesPromises = chartTypes.map(getChartType);
       return await Promise.all(getChartTypesPromises);
+    }
+
+    async selectVisSourceIfRequired() {
+      log.debug('selectVisSourceIfRequired');
+      const selectPage = await testSubjects.findAll('visualizeSelectSearch');
+      if (selectPage.length) {
+        log.debug('a search is required for this visualization');
+        await this.clickNewSearch();
+      }
+    }
+
+    async getLabTypeLinks() {
+      return await remote.findAllByPartialLinkText('(Lab)');
+    }
+
+    async getExperimentalTypeLinks() {
+      return await remote.findAllByPartialLinkText('(Experimental)');
+    }
+
+    async isExperimentalInfoShown() {
+      return await testSubjects.exists('experimentalVisInfo');
+    }
+
+    async getExperimentalInfo() {
+      return await testSubjects.find('experimentalVisInfo');
     }
 
     async clickAbsoluteButton() {
@@ -153,7 +191,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async getReactSelectOptions(containerSelector) {
       await testSubjects.click(containerSelector);
       const menu = await retry.try(
-          async () => find.byCssSelector('.Select-menu-outer'));
+        async () => find.byCssSelector('.Select-menu-outer'));
       return await menu.getVisibleText();
     }
 
@@ -168,7 +206,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       }
 
       const valueElement = await retry.try(
-          async () => find.byCssSelector(className + ' * .Select-value-label'));
+        async () => find.byCssSelector(className + ' * .Select-value-label'));
       return await valueElement.getVisibleText();
     }
 
@@ -204,22 +242,22 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async openSpyPanel() {
       log.debug('openSpyPanel');
-      const isOpen = await testSubjects.exists('spyModeSelect');
+      const isOpen = await testSubjects.exists('spyContentContainer');
       if (!isOpen) {
         await retry.try(async () => {
           await this.toggleSpyPanel();
-          await testSubjects.find('spyModeSelect');
+          await testSubjects.find('spyContentContainer');
         });
       }
     }
 
     async closeSpyPanel() {
       log.debug('closeSpyPanel');
-      let isOpen = await testSubjects.exists('spyModeSelect');
+      let isOpen = await testSubjects.exists('spyContentContainer');
       if (isOpen) {
         await retry.try(async () => {
           await this.toggleSpyPanel();
-          isOpen = await testSubjects.exists('spyModeSelect');
+          isOpen = await testSubjects.exists('spyContentContainer');
           if (isOpen) {
             throw new Error('Failed to close spy panel');
           }
@@ -245,8 +283,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByCssSelector('button[data-test-subj="toggleEditor"]');
     }
 
-    async clickNewSearch() {
-      await find.clickByCssSelector('.list-group-item a');
+    async clickNewSearch(indexPattern = 'logstash-*') {
+      await testSubjects.click(`paginatedListItem-${indexPattern}`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async setValue(newValue) {
@@ -254,10 +293,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const input = await find.byCssSelector('input[ng-model="numberListCntr.getList()[$index]"]');
       await input.clearValue();
       await input.type(newValue);
-    }
-
-    async clickSavedSearch() {
-      await find.clickByCssSelector('li[ng-click="stepTwoMode=\'saved\'"]');
     }
 
     async selectSearch(searchName) {
@@ -317,7 +352,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async orderBy(fieldValue) {
       await find.clickByCssSelector(
-          'select.form-control.ng-pristine.ng-valid.ng-untouched.ng-valid-required[ng-model="agg.params.orderBy"] ' +
+        'select.form-control.ng-pristine.ng-valid.ng-untouched.ng-valid-required[ng-model="agg.params.orderBy"] ' +
           'option.ng-binding.ng-scope:contains("' + fieldValue + '")');
     }
 
@@ -340,12 +375,36 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async setNumericInterval(newValue) {
       const input = await find.byCssSelector('input[name="interval"]');
+      await input.clearValue();
+      await input.type(newValue + '');
+    }
+
+    async setSize(newValue) {
+      const input = await find.byCssSelector('input[name="size"]');
+      await input.clearValue();
       await input.type(newValue);
+    }
+
+    async toggleOtherBucket() {
+      return await find.clickByCssSelector('input[name="showOther"]');
+    }
+
+    async toggleMissingBucket() {
+      return await find.clickByCssSelector('input[name="showMissing"]');
     }
 
     async clickGo() {
       await testSubjects.click('visualizeEditorRenderButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async toggleAutoMode() {
+      await testSubjects.click('visualizeEditorAutoButton');
+    }
+
+    async sizeUpEditor() {
+      await testSubjects.click('visualizeEditorResizer');
+      await remote.pressKeys(Keys.ARROW_RIGHT);
     }
 
     async clickOptions() {
@@ -397,7 +456,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // can't uses dashes in saved visualizations when filtering
       // or extended character sets
       // https://github.com/elastic/kibana/issues/6300
-      await input.type(vizName.replace('-',' '));
+      await input.type(vizName.replace('-', ' '));
     }
 
     async clickVisualizationByName(vizName) {
@@ -405,9 +464,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
       return retry.try(function tryingForTime() {
         return remote
-        .setFindTimeout(defaultFindTimeout)
-        .findByPartialLinkText(vizName)
-        .click();
+          .setFindTimeout(defaultFindTimeout)
+          .findByPartialLinkText(vizName)
+          .click();
       });
     }
 
@@ -464,7 +523,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       // by a bunch of 'L'ines from that point to the next.  Those points are
       // the values we're going to use to calculate the data values we're testing.
       // So git rid of the one 'M' and split the rest on the 'L's.
-      const tempArray = data.replace('M','').split('L');
+      const tempArray = data.replace('M', '').split('L');
       const chartSections = tempArray.length / 2;
       log.debug('chartSections = ' + chartSections + ' height = ' + yAxisHeight + ' yAxisLabel = ' + yAxisLabel);
       const chartData = [];
@@ -483,7 +542,7 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const yLabel = await maxYAxisMarker.getVisibleText();
       const yAxisLabel = yLabel.replace(/,/g, '');
 
-        // 2). find and save the y-axis pixel size (the chart height)
+      // 2). find and save the y-axis pixel size (the chart height)
       const rectangle = await find.byCssSelector('clipPath rect');
       const theHeight = await rectangle.getAttribute('height');
       const yAxisHeight = theHeight;
@@ -551,6 +610,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await Promise.all(getChartTypesPromises);
     }
 
+    async getPieChartLabels() {
+      const chartTypes = await find.allByCssSelector('path.slice', defaultFindTimeout * 2);
+
+      const getChartTypesPromises = chartTypes.map(async chart => await chart.getAttribute('data-label'));
+      return await Promise.all(getChartTypesPromises);
+    }
+
     async getChartAreaWidth() {
       const rect = await retry.try(async () => find.byCssSelector('clipPath rect'));
       return await rect.getAttribute('width');
@@ -562,7 +628,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async selectTableInSpyPaneSelect() {
-      await testSubjects.click('spyModeSelect');
       await testSubjects.click('spyModeSelect-table');
     }
 
@@ -609,7 +674,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async getVisualizationRequest() {
       log.debug('getVisualizationRequest');
       await this.openSpyPanel();
-      await testSubjects.click('spyModeSelect');
       await testSubjects.click('spyModeSelect-request');
       return await testSubjects.getVisibleText('visualizationEsRequestBody');
     }
@@ -683,6 +747,18 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
           if (!onLandingPage) throw new Error('Not on the landing page.');
         });
       }
+    }
+
+    async clickLegendOption(name) {
+      await testSubjects.click(`legend-${name}`);
+    }
+
+    async selectNewLegendColorChoice(color) {
+      await testSubjects.click(`legendSelectColor-${color}`);
+    }
+
+    async doesSelectedLegendColorExist(color) {
+      return await testSubjects.exists(`legendSelectedColor-${color}`);
     }
   }
 

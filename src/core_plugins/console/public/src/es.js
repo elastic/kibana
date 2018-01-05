@@ -15,7 +15,11 @@ export function getContentType(body) {
 export function send(method, path, data) {
   var wrappedDfd = $.Deferred();
 
-  console.log("Calling " + path);
+  var isGetRequest = /^get$/i.test(method)
+  if (data && isGetRequest) {
+    method = "POST";
+  }
+
   var options = {
     url: '../api/console/proxy?' + formatQueryString({ path, method }),
     data,

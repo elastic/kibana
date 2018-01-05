@@ -10,8 +10,8 @@
   min-height: 69px; /* 1 */
   color: $localNavTextColor;
   background-color: $localNavBackgroundColor;
-  line-height: $globalLineHeight;
-  border-bottom: solid 1px $globalColorLightGray;
+  line-height: $kuiLineHeight;
+  border-bottom: solid 1px $kuiColorLightGray;
 
   @include darkTheme {
     color: $localNavTextColor--darkTheme;
@@ -43,7 +43,6 @@
  *    of this container using padding.
  */
 .kuiLocalNavRow--secondary {
-  height: 40px; /* 1 */
-  padding: 0 $localNavSideSpacing 0; /* 1 */
+  padding: 0 $localNavSideSpacing; /* 1 */
   align-items: flex-start; /* 1 */
 }

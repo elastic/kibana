@@ -1,6 +1,8 @@
-import { Numeral } from './_numeral';
+import { createNumeralFormat } from './_numeral';
 
-export const NumberFormat = Numeral.factory({
-  id: 'number',
-  title: 'Number'
-});
+export function createNumberFormat(FieldFormat) {
+  return createNumeralFormat(FieldFormat, {
+    id: 'number',
+    title: 'Number'
+  });
+}

@@ -138,17 +138,17 @@ export function LooperProvider($timeout, Promise) {
     }
 
     self.active = Promise
-    .try(this._fn)
-    .then(function () {
-      self._scheduleLoop();
-    })
-    .catch(function (err) {
-      self.stop();
-      notify.fatal(err);
-    })
-    .finally(function () {
-      self.active = null;
-    });
+      .try(this._fn)
+      .then(function () {
+        self._scheduleLoop();
+      })
+      .catch(function (err) {
+        self.stop();
+        notify.fatal(err);
+      })
+      .finally(function () {
+        self.active = null;
+      });
   };
 
   /**

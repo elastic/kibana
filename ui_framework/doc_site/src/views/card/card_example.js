@@ -11,11 +11,11 @@ import {
 } from '../../components';
 
 import Card from './card';
-const cardSource = require('!!raw!./card');
+const cardSource = require('!!raw-loader!./card');
 const cardHtml = renderToHtml(Card);
 
 import CardGroup from './card_group';
-const cardGroupSource = require('!!raw!./card_group');
+const cardGroupSource = require('!!raw-loader!./card_group');
 const cardGroupHtml = renderToHtml(CardGroup);
 
 export default props => (

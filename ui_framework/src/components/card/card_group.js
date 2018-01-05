@@ -4,7 +4,7 @@ import classNames from 'classnames';
 
 export const KuiCardGroup = ({ children, className, isUnited, ...rest }) => {
   const classes = classNames('kuiCardGroup', className, { 'kuiCardGroup--united': isUnited });
-  return <div className={classes} {...rest}>{children}</div>;
+  return <div className={classes} role="group" {...rest}>{children}</div>;
 };
 
 KuiCardGroup.defaultProps = {

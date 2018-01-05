@@ -1,0 +1,33 @@
+.kuiPanelSimple {
+  @include kuiBottomShadowSmall;
+
+  background-color: $kuiColorEmptyShade;
+  border: $kuiBorderThin;
+  border-radius: $kuiBorderRadius;
+  flex-grow: 1;
+
+  &.kuiPanelSimple--paddingSmall {
+    padding: $kuiSizeS;
+  }
+
+  &.kuiPanelSimple--paddingMedium {
+    padding: $kuiSize;
+  }
+
+  &.kuiPanelSimple--paddingLarge {
+    padding: $kuiSizeL;
+  }
+
+  &.kuiPanelSimple--shadow {
+    @include kuiBottomShadow;
+  }
+
+  &.kuiPanelSimple--flexGrowZero {
+    flex-grow: 0;
+  }
+
+  @include darkTheme {
+    background-color: $kuiBackgroundColor--darkTheme;
+    border-color: $kuiInputBorderColor--darkTheme;
+  }
+}

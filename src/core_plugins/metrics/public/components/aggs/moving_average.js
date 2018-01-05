@@ -8,7 +8,7 @@ import createChangeHandler from '../lib/create_change_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import createTextHandler from '../lib/create_text_handler';
 import createNumberHandler from '../lib/create_number_handler';
-import { htmlIdGenerator } from 'ui_framework/services';
+import { htmlIdGenerator } from '@elastic/eui';
 
 export const MovingAverageAgg = props => {
   const { siblings } = props;
@@ -48,6 +48,7 @@ export const MovingAverageAgg = props => {
           <div className="vis_editor__row_item">
             <div className="vis_editor__label">Aggregation</div>
             <AggSelect
+              panelType={props.panel.type}
               siblings={props.siblings}
               value={model.type}
               onChange={handleSelectChange('type')}
@@ -95,6 +96,18 @@ export const MovingAverageAgg = props => {
               onChange={handleSelectChange('minimize')}
               value={model.minimize}
               options={minimizeOptions}
+            />
+          </div>
+          <div className="vis_editor__row_item">
+            <label className="vis_editor__label" htmlFor={htmlId('windowSize')}>
+              Predict
+            </label>
+            <input
+              id={htmlId('predict')}
+              className="vis_editor__input-grows-100"
+              type="text"
+              onChange={handleNumberChange('predict')}
+              value={model.predict}
             />
           </div>
         </div>

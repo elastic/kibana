@@ -1,2 +1,2 @@
-export { DashboardPanel } from './dashboard_panel';
-export { createPanelState, getPersistedStateId } from './panel_state';
+export { DashboardPanelContainer as DashboardPanel } from './dashboard_panel_container';
+export { createPanelState } from './panel_state';

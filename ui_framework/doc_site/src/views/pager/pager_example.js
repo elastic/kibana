@@ -10,11 +10,11 @@ import {
 } from '../../components';
 
 import { ToolBarPager } from './tool_bar_pager';
-const toolBarPagerSource = require('!!raw!./tool_bar_pager');
+const toolBarPagerSource = require('!!raw-loader!./tool_bar_pager');
 const toolBarPagerHtml = renderToHtml(ToolBarPager);
 
 import { PagerButtons } from './pager_buttons';
-const pagerButtonsSource = require('!!raw!./pager_buttons');
+const pagerButtonsSource = require('!!raw-loader!./pager_buttons');
 const pagerButtonsHtml = renderToHtml(PagerButtons);
 
 export default props => (

@@ -30,11 +30,7 @@ module.directive('vislibSeries', function () {
       $scope.series = $scope.vis.params.seriesParams;
       $scope.$watch(() => {
         return $scope.vis.aggs.map(agg => {
-          try {
-            return agg.makeLabel();
-          } catch (e) {
-            return '';
-          }
+          return agg.makeLabel();
         }).join();
       }, () => {
         const schemaTitle = $scope.vis.type.schemas.metrics[0].title;

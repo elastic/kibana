@@ -66,11 +66,13 @@ describe('savedObjectsClient/decorateEsError', () => {
     expect(isForbiddenError(error)).to.be(true);
   });
 
-  it('makes es.NotFound a SavedObjectsClient/NotFound error', () => {
+  it('discards es.NotFound errors and returns a generic NotFound error', () => {
     const error = new esErrors.NotFound();
     expect(isNotFoundError(error)).to.be(false);
-    expect(decorateEsError(error)).to.be(error);
-    expect(isNotFoundError(error)).to.be(true);
+    const genericError = decorateEsError(error);
+    expect(genericError).to.not.be(error);
+    expect(isNotFoundError(error)).to.be(false);
+    expect(isNotFoundError(genericError)).to.be(true);
   });
 
   it('makes es.BadRequest a SavedObjectsClient/BadRequest error', () => {

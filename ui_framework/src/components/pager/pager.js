@@ -5,16 +5,16 @@ import classNames from 'classnames';
 import { KuiPagerButtonGroup } from './pager_button_group';
 
 export function KuiPager({
-    className,
-    startNumber,
-    endNumber,
-    totalItems,
-    hasPreviousPage,
-    hasNextPage,
-    onNextPage,
-    onPreviousPage,
-    ...rest,
-  }) {
+  className,
+  startNumber,
+  endNumber,
+  totalItems,
+  hasPreviousPage,
+  hasNextPage,
+  onNextPage,
+  onPreviousPage,
+  ...rest
+}) {
   const classes = classNames('kuiPager', className);
   return (
     <div className={classes} {...rest}>

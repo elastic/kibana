@@ -19,15 +19,15 @@ module.exports = function (grunt) {
       '_build:notice',
       '_build:removePkgJsonDeps',
       'clean:testsFromModules',
+      'clean:examplesFromModules',
+      '_build:copyNodeForOptimize',
       'run:optimizeBuild',
       'stop:optimizeBuild',
+      'clean:nodeForOptimize',
       '_build:versionedLinks',
       '_build:osShellScripts',
       grunt.option('skip-archives') ? [] : ['_build:archives'],
-      grunt.option('skip-os-packages') ? [] : [
-        '_build:pleaseRun',
-        '_build:osPackages',
-      ],
+      grunt.option('skip-os-packages') ? [] : ['_build:osPackages'],
       '_build:shasums'
     ]));
   });

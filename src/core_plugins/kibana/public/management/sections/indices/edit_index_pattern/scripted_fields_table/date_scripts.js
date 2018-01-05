@@ -3,15 +3,15 @@ import _ from 'lodash';
 export function dateScripts(indexPattern) {
   const dateScripts = {};
   const scripts = {
-    __dayOfMonth:   'dayOfMonth',
-    __dayOfWeek:    'dayOfWeek',
-    __dayOfYear:    'dayOfYear',
-    __hourOfDay:    'hourOfDay',
-    __minuteOfDay:  'minuteOfDay',
+    __dayOfMonth: 'dayOfMonth',
+    __dayOfWeek: 'dayOfWeek',
+    __dayOfYear: 'dayOfYear',
+    __hourOfDay: 'hourOfDay',
+    __minuteOfDay: 'minuteOfDay',
     __minuteOfHour: 'minuteOfHour',
-    __monthOfYear:  'monthOfYear',
-    __weekOfYear:   'weekOfWeekyear',
-    __year:         'year'
+    __monthOfYear: 'monthOfYear',
+    __weekOfYear: 'weekOfWeekyear',
+    __year: 'year'
   };
 
   _.each(indexPattern.fields.byType.date, function (field) {

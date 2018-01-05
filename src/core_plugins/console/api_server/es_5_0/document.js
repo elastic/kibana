@@ -9,8 +9,8 @@ export default function (api) {
       "routing": "",
       "parent": "",
       "_source": "",
-      "_source_exclude": "",
-      "_source_include": ""
+      "_source_excludes": "",
+      "_source_includes": ""
     }
   });
   api.addEndpointDescription('_get_doc_source', {
@@ -22,8 +22,8 @@ export default function (api) {
       "version": 1,
       "routing": "",
       "parent": "",
-      "_source_exclude": "",
-      "_source_include": ""
+      "_source_excludes": "",
+      "_source_includes": ""
     }
   });
   api.addEndpointDescription('_delete_doc', {

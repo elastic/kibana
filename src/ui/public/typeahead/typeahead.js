@@ -2,8 +2,8 @@ import './typeahead.less';
 import './typeahead_input';
 import './typeahead_item';
 import template from './typeahead.html';
-import { comboBoxKeyCodes } from 'ui_framework/services';
 import { uiModules } from 'ui/modules';
+import { comboBoxKeyCodes } from '@elastic/eui';
 
 const { UP, DOWN, ENTER, TAB, ESCAPE } = comboBoxKeyCodes;
 const typeahead = uiModules.get('kibana/typeahead');

@@ -90,8 +90,8 @@ module.directive('kbnTableHeader', function (shortDotsFilter) {
         const [currentColumnName, currentDirection = 'asc'] = $scope.sortOrder;
         const newDirection = (
           (columnName === currentColumnName && currentDirection === 'asc')
-          ? 'desc'
-          : 'asc'
+            ? 'desc'
+            : 'asc'
         );
 
         $scope.onChangeSortOrder(columnName, newDirection);

@@ -4,8 +4,8 @@
 
 .kuiEventSymbol {
   flex: 0 1 auto;
-  font-size: $globalFontSize;
-  line-height: $globalLineHeight;
+  font-size: $kuiFontSize;
+  line-height: $kuiLineHeight;
   padding-right: 8px;
 }
 
@@ -14,13 +14,13 @@
 }
 
   .kuiEventBody__message {
-    font-size: $globalFontSize;
-    line-height: $globalLineHeight;
-    color: $globalFontColor;
+    font-size: $kuiFontSize;
+    line-height: $kuiLineHeight;
+    color: $kuiFontColor;
   }
 
   .kuiEventBody__metadata {
-    font-size: $globalFontSize;
-    line-height: $globalLineHeight;
-    color: $globalSubduedTextColor;
+    font-size: $kuiFontSize;
+    line-height: $kuiLineHeight;
+    color: $kuiSubduedTextColor;
   }

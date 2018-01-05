@@ -35,7 +35,7 @@ export function AggResponseTabifyProvider(Private, Notifier) {
 
     switch (agg.schema.group) {
       case 'buckets':
-        const buckets = new Buckets(bucket[agg.id]);
+        const buckets = new Buckets(bucket[agg.id], agg.params);
         if (buckets.length) {
           const splitting = write.canSplit && agg.schema.name === 'split';
           if (splitting) {
@@ -46,7 +46,7 @@ export function AggResponseTabifyProvider(Private, Notifier) {
             buckets.forEach(function (subBucket, key) {
               write.cell(agg, agg.getKey(subBucket, key), function () {
                 collectBucket(write, subBucket, agg.getKey(subBucket, key), aggScale);
-              });
+              }, subBucket.filters);
             });
           }
         } else if (write.partialRows && write.metricsForAllBuckets && write.minimalColumns) {

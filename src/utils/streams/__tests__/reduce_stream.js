@@ -14,7 +14,7 @@ describe('reduceStream', () => {
   it('calls the reducer for each item provided', async () => {
     const stub = sinon.stub();
     await createPromiseFromStreams([
-      createListStream([1,2,3]),
+      createListStream([1, 2, 3]),
       createReduceStream(stub.returnsArg(1), 0)
     ]);
     sinon.assert.calledThrice(stub);

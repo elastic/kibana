@@ -16,7 +16,7 @@ module.exports = function (grunt) {
       args: [
         '-p',
         '--config=ui_framework/doc_site/webpack.config.js',
-        '--devtool', // Prevent the source map from being generated
+        '--devtool=null', // Prevent the source map from being generated
       ],
       opts: { stdio: 'inherit' }
     };
@@ -55,7 +55,7 @@ module.exports = function (grunt) {
       cmd: isPlatformWindows ? '.\\node_modules\\.bin\\webpack-dev-server.cmd' : './node_modules/.bin/webpack-dev-server',
       args: [
         '--config=ui_framework/doc_site/webpack.config.js',
-        '--hot ',
+        '--hot',
         '--inline',
         '--content-base=ui_framework/doc_site/build',
         '--host=0.0.0.0',

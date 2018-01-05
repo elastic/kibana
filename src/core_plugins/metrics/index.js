@@ -3,7 +3,7 @@ import visDataRoutes from './server/routes/vis';
 
 export default function (kibana) {
   return new kibana.Plugin({
-    require: ['kibana','elasticsearch'],
+    require: ['kibana', 'elasticsearch'],
 
     uiExports: {
       visTypes: [

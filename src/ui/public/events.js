@@ -25,7 +25,7 @@ export function EventsProvider(Private, Promise) {
    * @return {Events} - this, for chaining
    */
   Events.prototype.on = function (name, handler) {
-    if (!_.isArray(this._listeners[name])) {
+    if (!Array.isArray(this._listeners[name])) {
       this._listeners[name] = [];
     }
 
@@ -90,6 +90,9 @@ export function EventsProvider(Private, Promise) {
 
     return Promise.map(self._listeners[name], function (listener) {
       return self._emitChain = self._emitChain.then(function () {
+        // Double check that off wasn't called after an emit, but before this is fired.
+        if (!self._listeners[name] || self._listeners[name].indexOf(listener) < 0) return;
+
         listener.defer.resolve(args);
         return listener.resolved;
       });

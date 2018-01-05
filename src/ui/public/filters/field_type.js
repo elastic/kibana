@@ -5,7 +5,7 @@ import { uiModules } from 'ui/modules';
 // Or an array of types to get all fields of that type
 
 uiModules
-.get('kibana')
-.filter('fieldType', function () {
-  return propFilter('type');
-});
+  .get('kibana')
+  .filter('fieldType', function () {
+    return propFilter('type');
+  });

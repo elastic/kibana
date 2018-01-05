@@ -18,14 +18,17 @@ export function RedirectWhenMissingProvider($location, kbnUrl, Notifier, Promise
 
     return function (err) {
       // if this error is not "404", rethrow
-      if (!(err instanceof SavedObjectNotFound)) throw err;
+      const savedObjectNotFound = err instanceof SavedObjectNotFound;
+      const unknownVisType = err.message.indexOf('Invalid type') === 0;
+      if (unknownVisType) err.savedObjectType = 'visualization';
+      else if (!savedObjectNotFound) throw err;
 
       let url = mapping[err.savedObjectType] || mapping['*'];
       if (!url) url = '/';
 
       url += (url.indexOf('?') >= 0 ? '&' : '?') + `notFound=${err.savedObjectType}`;
 
-      notify.error(err);
+      notify.info(err);
       kbnUrl.redirect(url);
       return Promise.halt();
     };

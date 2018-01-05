@@ -12,7 +12,7 @@ import { decorateMochaUi } from './decorate_mocha_ui';
  *  @param  {String} path
  *  @return {undefined} - mutates mocha, no return value
  */
-export const loadTestFiles = (mocha, log, lifecycle, providers, paths) => {
+export const loadTestFiles = (mocha, log, lifecycle, providers, paths, updateBaselines) => {
   const innerLoadTestFile = (path) => {
     if (typeof path !== 'string' || !isAbsolute(path)) {
       throw new TypeError('loadTestFile() only accepts absolute paths');
@@ -38,13 +38,15 @@ export const loadTestFiles = (mocha, log, lifecycle, providers, paths) => {
     loadTracer(provider, `testProvider[${path}]`, () => {
       // mocha.suite hocus-pocus comes from: https://git.io/vDnXO
 
-      mocha.suite.emit('pre-require', decorateMochaUi(lifecycle, global), path, mocha);
+      const context = decorateMochaUi(lifecycle, global);
+      mocha.suite.emit('pre-require', context, path, mocha);
 
       const returnVal = provider({
         loadTestFile: innerLoadTestFile,
         getService: providers.getService,
         getPageObject: providers.getPageObject,
         getPageObjects: providers.getPageObjects,
+        updateBaselines,
       });
 
       if (returnVal && typeof returnVal.then === 'function') {
@@ -53,6 +55,7 @@ export const loadTestFiles = (mocha, log, lifecycle, providers, paths) => {
 
       mocha.suite.emit('require', returnVal, path, mocha);
       mocha.suite.emit('post-require', global, path, mocha);
+      context.revertProxiedAssignments();
     });
   };
 

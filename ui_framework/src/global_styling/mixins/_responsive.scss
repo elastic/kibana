@@ -1,0 +1,9 @@
+// Responsiveness
+
+$breakpoints: ("small": 768px) !default;
+
+@mixin screenXSmall {
+  @media only screen and (max-width: map-get($breakpoints, "small")) {
+     @content;
+  }
+}

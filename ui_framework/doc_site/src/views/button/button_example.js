@@ -11,47 +11,47 @@ import {
 } from '../../components';
 
 import Basic from './button_basic';
-const basicSource = require('!!raw!./button_basic');
+const basicSource = require('!!raw-loader!./button_basic');
 const basicHtml = renderToHtml(Basic);
 
 import Hollow from './button_hollow';
-const hollowSource = require('!!raw!./button_hollow');
+const hollowSource = require('!!raw-loader!./button_hollow');
 const hollowHtml = renderToHtml(Hollow);
 
 import Primary from './button_primary';
-const primarySource = require('!!raw!./button_primary');
+const primarySource = require('!!raw-loader!./button_primary');
 const primaryHtml = renderToHtml(Primary);
 
 import Secondary from './button_secondary';
-const secondarySource = require('!!raw!./button_secondary');
+const secondarySource = require('!!raw-loader!./button_secondary');
 const secondaryHtml = renderToHtml(Secondary);
 
 import Danger from './button_danger';
-const dangerSource = require('!!raw!./button_danger');
+const dangerSource = require('!!raw-loader!./button_danger');
 const dangerHtml = renderToHtml(Danger);
 
 import Warning from './button_warning';
-const warningSource = require('!!raw!./button_danger');
+const warningSource = require('!!raw-loader!./button_danger');
 const warningHtml = renderToHtml(Warning);
 
 import Loading from './button_loading';
-const loadingSource = require('!!raw!./button_loading');
+const loadingSource = require('!!raw-loader!./button_loading');
 const loadingHtml = renderToHtml(Loading, { isLoading: true });
 
 import WithIcon from './button_with_icon';
-const withIconSource = require('!!raw!./button_with_icon');
+const withIconSource = require('!!raw-loader!./button_with_icon');
 const withIconHtml = renderToHtml(WithIcon);
 
 import ButtonGroup from './button_group';
-const buttonGroupSource = require('!!raw!./button_group');
+const buttonGroupSource = require('!!raw-loader!./button_group');
 const buttonGroupHtml = renderToHtml(ButtonGroup);
 
 import ButtonGroupUnited from './button_group_united';
-const buttonGroupUnitedSource = require('!!raw!./button_group_united');
+const buttonGroupUnitedSource = require('!!raw-loader!./button_group_united');
 const buttonGroupUnitedHtml = renderToHtml(ButtonGroupUnited);
 
 import Elements from './button_elements';
-const elementsSource = require('!!raw!./button_elements');
+const elementsSource = require('!!raw-loader!./button_elements');
 const elementsHtml = renderToHtml(Elements);
 
 const sizesHtml = require('./button_sizes.html');
@@ -203,8 +203,12 @@ export default props => (
       }]}
     >
       <GuideText>
-        You can toss an icon into a Button, with or without text. You can also use a predefined icon
-        or specify custom icon classes.
+        <p>
+          You can toss an icon into a Button, with or without text. You can also use a predefined icon
+          or specify custom icon classes. If you have a button without textual content, make sure you set
+          the <code>aria-label</code> attribute with a textual representation for screen readers (see
+          last example below).
+        </p>
       </GuideText>
 
       <GuideDemo>

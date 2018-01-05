@@ -1,5 +1,8 @@
 import expect from 'expect.js';
-import { BoolFormat } from '../boolean';
+import { createBoolFormat } from '../boolean';
+import { FieldFormat } from '../../../../../../ui/field_formats/field_format';
+
+const BoolFormat = createBoolFormat(FieldFormat);
 
 describe('Boolean Format', function () {
 
@@ -42,7 +45,7 @@ describe('Boolean Format', function () {
       expected: 'true'
     },
     {
-      input: ' True  ',//should handle trailing and mixed case
+      input: ' True  ', //should handle trailing and mixed case
       expected: 'true'
     }
   ].forEach((test)=> {

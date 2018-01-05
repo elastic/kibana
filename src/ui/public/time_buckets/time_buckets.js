@@ -49,12 +49,12 @@ export function TimeBucketsProvider(Private, timefilter, config) {
       // accept the response from timefilter.getActiveBounds()
       bounds = [input.min, input.max];
     } else {
-      bounds = _.isArray(input) ? input : [];
+      bounds = Array.isArray(input) ? input : [];
     }
 
     const moments = _(bounds)
-    .map(_.ary(moment, 1))
-    .sortBy(Number);
+      .map(_.ary(moment, 1))
+      .sortBy(Number);
 
     const valid = moments.size() === 2 && moments.every(isValidMoment);
     if (!valid) {

@@ -3,11 +3,13 @@ import React from 'react';
 import timeseries from './panel_config/timeseries';
 import metric from './panel_config/metric';
 import topN from './panel_config/top_n';
+import table from './panel_config/table';
 import gauge from './panel_config/gauge';
 import markdown from './panel_config/markdown';
 
 const types = {
   timeseries,
+  table,
   metric,
   top_n: topN,
   gauge,

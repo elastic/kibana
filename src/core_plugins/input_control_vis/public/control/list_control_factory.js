@@ -1,5 +1,8 @@
 import _ from 'lodash';
-import { Control } from './control';
+import {
+  Control,
+  noValuesDisableMsg
+} from './control';
 import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
 
 const termsAgg = (field, size, direction) => {
@@ -7,9 +10,9 @@ const termsAgg = (field, size, direction) => {
     size = 1;
   }
   const terms = {
-    'size': size,
-    'order': {
-      '_count': direction
+    size: size,
+    order: {
+      _count: direction
     }
   };
   if (field.scripted) {
@@ -44,7 +47,11 @@ class ListControl extends Control {
 
 export async function listControlFactory(controlParams, kbnApi) {
   const indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
-  const searchSource = new kbnApi.SearchSource();
+  // TODO replace SearchSource with call to suggestions API
+  const searchSource = new kbnApi.SearchSource({
+    timeout: '1s',
+    terminate_after: 100000
+  });
   searchSource.inherits(false); //Do not filter by time so can not inherit from rootSearchSource
   searchSource.size(0);
   searchSource.index(indexPattern);
@@ -54,12 +61,17 @@ export async function listControlFactory(controlParams, kbnApi) {
     'desc'));
 
   const resp = await searchSource.fetch();
+  const termsSelectOptions = _.get(resp, 'aggregations.termsAgg.buckets', []).map((bucket) => {
+    return { label: bucket.key.toString(), value: bucket.key.toString() };
+  });
 
-  return new ListControl(
+  const listControl = new ListControl(
     controlParams,
-    new PhraseFilterManager(controlParams.fieldName, indexPattern, kbnApi.queryFilter, listControlDelimiter),
-    _.get(resp, 'aggregations.termsAgg.buckets', []).map((bucket) => {
-      return { label: bucket.key.toString(), value: bucket.key.toString() };
-    })
+    new PhraseFilterManager(controlParams.id, controlParams.fieldName, indexPattern, kbnApi.queryFilter, listControlDelimiter),
+    termsSelectOptions
   );
+  if (termsSelectOptions.length === 0) {
+    listControl.disable(noValuesDisableMsg(controlParams.fieldName, indexPattern.title));
+  }
+  return listControl;
 }

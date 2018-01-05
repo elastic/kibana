@@ -733,7 +733,7 @@ export default function (editor) {
     while (t && isUrlParamsToken(t)) {
       switch (t.type) {
         case "url.value":
-          if (_.isArray(curUrlPart)) {
+          if (Array.isArray(curUrlPart)) {
             curUrlPart.unshift(t.value);
           }
           else if (curUrlPart) {
@@ -747,7 +747,7 @@ export default function (editor) {
           if (!curUrlPart) {
             curUrlPart = [];
           }
-          else if (!_.isArray(curUrlPart)) {
+          else if (!Array.isArray(curUrlPart)) {
             curUrlPart = [curUrlPart];
           }
           break;
@@ -772,7 +772,7 @@ export default function (editor) {
     while (t && t.type.indexOf("url") != -1) {
       switch (t.type) {
         case "url.part":
-          if (_.isArray(curUrlPart)) {
+          if (Array.isArray(curUrlPart)) {
             curUrlPart.unshift(t.value);
           }
           else if (curUrlPart) {
@@ -786,7 +786,7 @@ export default function (editor) {
           if (!curUrlPart) {
             curUrlPart = [];
           }
-          else if (!_.isArray(curUrlPart)) {
+          else if (!Array.isArray(curUrlPart)) {
             curUrlPart = [curUrlPart];
           }
           break;

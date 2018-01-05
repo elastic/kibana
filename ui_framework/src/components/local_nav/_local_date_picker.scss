@@ -2,7 +2,7 @@
   background-color: transparent;
   border-collapse: collapse;
   border-spacing: 0;
-  line-height: $globalLineHeight;
+  line-height: $kuiLineHeight;
 }
 
 .kuiDatePickerNavigationCell {
@@ -23,10 +23,10 @@
   appearance: none;
   background-color: transparent;
   border: none;
-  font-size: $globalSubTextFontSize;
+  font-size: $kuiSubTextFontSize;
   color: $localNavButtonTextColor;
   padding: $localDatePickerButtonPadding;
-  border-radius: $globalBorderRadius;
+  border-radius: $kuiBorderRadius;
 
   &:hover,
   &:active {
@@ -36,7 +36,7 @@
   }
 
   &:focus {
-    @include focus($globalFocusColor, $localDropdownBackgroundColor);
+    @include focus($kuiFocusColor, $localDropdownBackgroundColor);
 
     color: $localNavButtonTextColor; /* 1 */
   }
@@ -51,7 +51,7 @@
     }
 
     &:focus {
-      @include focus($globalFocusColor, $localDropdownBackgroundColor--darkTheme);
+      @include focus($kuiFocusColor, $localDropdownBackgroundColor--darkTheme);
 
       color: $localNavButtonTextColor--darkTheme; /* 1 */
     }
@@ -61,13 +61,13 @@
 .kuiDatePickerHeaderCell {
   padding: $localDatePickerHeaderCellPadding;
   color: $localNavTextColor;
-  font-size: $globalSubTextFontSize;
+  font-size: $kuiSubTextFontSize;
   font-weight: bold;
   text-align: center;
   line-height: 1.2;
 
   @include darkTheme {
-    color: $globalTextColor--darkTheme;
+    color: $kuiTextColor--darkTheme;
   }
 }
 
@@ -98,13 +98,13 @@
   width: 100%;
   border: 1px solid transparent;
   color: $localNavTextColor;
-  font-size: $globalSubTextFontSize;
+  font-size: $kuiSubTextFontSize;
   padding: $localDatePickerCellPadding;
-  border-radius: $globalBorderRadius;
+  border-radius: $kuiBorderRadius;
   line-height: $localDatePickerCellLineHeight;
 
   &:focus {
-    @include focus($globalFocusColor, $localDropdownBackgroundColor);
+    @include focus($kuiFocusColor, $localDropdownBackgroundColor);
 
     color: $localNavTextColor; /* 1 */
   }
@@ -120,7 +120,7 @@
   }
 
   &.kuiDatePickerRowCellContent-isCurrent {
-    color: $globalLinkColor;
+    color: $kuiLinkColor;
   }
 
   &.kuiDatePickerRowCellContent-isSelected {
@@ -136,14 +136,14 @@
   }
 
   @include darkTheme {
-    color: $globalTextColor--darkTheme;
+    color: $kuiTextColor--darkTheme;
 
     &:focus {
-      @include focus($globalFocusColor, $localDropdownBackgroundColor--darkTheme);
+      @include focus($kuiFocusColor, $localDropdownBackgroundColor--darkTheme);
     }
 
     &.kuiDatePickerRowCellContent-isCurrent {
-      color: $globalLinkColor--darkTheme;
+      color: $kuiLinkColor--darkTheme;
     }
 
     &.kuiDatePickerRowCellContent-isSelected {

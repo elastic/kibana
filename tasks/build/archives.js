@@ -33,7 +33,7 @@ export default (grunt) => {
     all(
       config.get('platforms').map(async platform => await archives(platform))
     )
-    .nodeify(this.async());
+      .nodeify(this.async());
 
   });
 };

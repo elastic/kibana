@@ -1,0 +1,54 @@
+.kuiFlexGrid {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 0;
+
+  > .kuiFlexItem {
+    flex-grow: 0;
+
+    &.kuiFlexItem--flexGrowZero {
+      flex-grow: 0 !important;
+      flex-basis: auto !important;
+    }
+  }
+}
+
+$gutterTypes: (
+  gutterSmall: $kuiSizeS,
+  gutterMedium: $kuiSize,
+  gutterLarge: $kuiSizeL,
+  gutterXLarge: $kuiSizeXL,
+);
+
+$fractions: (
+  fourths: 25%,
+  thirds: 33.3%,
+  halves: 50%,
+);
+
+@each $gutterName, $gutterSize in $gutterTypes {
+  $halfGutterSize: $gutterSize * 0.5;
+
+  /**
+   * Uncouple the gutter margin from the column widths to support cases where we use a FlexGrid
+   * without columns.
+   */
+  .kuiFlexGrid--#{$gutterName} {
+    > .kuiFlexItem {
+      margin: $halfGutterSize;
+    }
+  }
+
+  @each $fraction, $percentage in $fractions {
+    .kuiFlexGrid--#{$gutterName} {
+      margin: -$halfGutterSize;
+      align-items: stretch;
+
+      &.kuiFlexGrid--#{$fraction} {
+        > .kuiFlexItem {
+          flex-basis: calc(#{$percentage} - #{$gutterSize});
+        }
+      }
+    }
+  }
+}

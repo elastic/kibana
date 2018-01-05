@@ -8,22 +8,22 @@ import { UrlOverflowServiceProvider } from './url_overflow_service';
 export * from './url_overflow_service';
 
 uiRoutes
-.when('/error/url-overflow', {
-  template,
-  controllerAs: 'controller',
-  controller: class OverflowController {
-    constructor(Private, config, $scope) {
-      const kbnUrl = Private(KbnUrlProvider);
-      const urlOverflow = Private(UrlOverflowServiceProvider);
+  .when('/error/url-overflow', {
+    template,
+    controllerAs: 'controller',
+    controller: class OverflowController {
+      constructor(Private, config, $scope) {
+        const kbnUrl = Private(KbnUrlProvider);
+        const urlOverflow = Private(UrlOverflowServiceProvider);
 
-      if (!urlOverflow.get()) {
-        kbnUrl.redirectPath('/');
-        return;
+        if (!urlOverflow.get()) {
+          kbnUrl.redirectPath('/');
+          return;
+        }
+
+        this.url = urlOverflow.get();
+        this.limit = urlOverflow.failLength();
+        $scope.$on('$destroy', () => urlOverflow.clear());
       }
-
-      this.url = urlOverflow.get();
-      this.limit = urlOverflow.failLength();
-      $scope.$on('$destroy', () => urlOverflow.clear());
     }
-  }
-});
+  });

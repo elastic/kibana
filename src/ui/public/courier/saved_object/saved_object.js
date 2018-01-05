@@ -118,7 +118,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
      *
      * @return {Promise<IndexPattern | null>}
      */
-    const hydrateIndexPattern = () => {
+    this.hydrateIndexPattern = (id) => {
       if (!this.searchSource) {
         return Promise.resolve(null);
       }
@@ -128,7 +128,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
         return Promise.resolve(null);
       }
 
-      let index = config.indexPattern || this.searchSource.getOwn('index');
+      let index = id || config.indexPattern || this.searchSource.getOwn('index');
 
       if (!index) {
         return Promise.resolve(null);
@@ -163,7 +163,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
           if (!this.id) {
             // just assign the defaults and be done
             _.assign(this, this.defaults);
-            return hydrateIndexPattern().then(() => {
+            return this.hydrateIndexPattern().then(() => {
               return afterESResp.call(this);
             });
           }
@@ -217,7 +217,7 @@ export function SavedObjectProvider(Promise, Private, Notifier, confirmModalProm
 
       return Promise.try(() => {
         parseSearchSource(meta.searchSourceJSON);
-        return hydrateIndexPattern();
+        return this.hydrateIndexPattern();
       }).then(() => {
         return Promise.cast(afterESResp.call(this, resp));
       });

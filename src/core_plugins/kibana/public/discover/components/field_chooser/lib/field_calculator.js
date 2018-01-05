@@ -69,11 +69,11 @@ function _groupValues(allValues, params) {
   let k;
 
   allValues.forEach(function (value) {
-    if (_.isObject(value) && !_.isArray(value)) {
+    if (_.isObject(value) && !Array.isArray(value)) {
       throw new Error('Analysis is not available for object fields');
     }
 
-    if (_.isArray(value) && !params.grouped) {
+    if (Array.isArray(value) && !params.grouped) {
       k = value;
     } else {
       k = value == null ? undefined : [value];

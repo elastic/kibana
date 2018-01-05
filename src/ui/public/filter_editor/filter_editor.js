@@ -3,7 +3,7 @@ import { uiModules } from 'ui/modules';
 import { callAfterBindingsWorkaround } from 'ui/compat';
 import { FILTER_OPERATOR_TYPES } from './lib/filter_operators';
 import template from './filter_editor.html';
-import { documentationLinks } from '../documentation_links/documentation_links';
+import '../directives/documentation_href';
 import './filter_query_dsl_editor';
 import './filter_field_select';
 import './filter_operator_select';
@@ -37,7 +37,6 @@ module.directive('filterEditor', function ($timeout, indexPatterns) {
     controller: callAfterBindingsWorkaround(function ($scope, $element) {
       this.init = () => {
         const { filter } = this;
-        this.docLinks = documentationLinks;
         this.alias = filter.meta.alias;
         this.isEditingQueryDsl = false;
         this.queryDsl = getQueryDslFromFilter(filter);
@@ -88,13 +87,17 @@ module.directive('filterEditor', function ($timeout, indexPatterns) {
         $timeout(() => $scope.$broadcast(`focus-${name}`));
       };
 
-      this.showQueryDslEditor = () => {
+      this.toggleEditingQueryDsl = () => {
+        this.isEditingQueryDsl = !this.isEditingQueryDsl;
+      };
+
+      this.isQueryDslEditorVisible = () => {
         const { type, isNew } = this.filter.meta;
         return this.isEditingQueryDsl || (!isNew && !FILTER_OPERATOR_TYPES.includes(type));
       };
 
       this.isValid = () => {
-        if (this.showQueryDslEditor()) {
+        if (this.isQueryDslEditorVisible()) {
           return _.isObject(this.queryDsl);
         }
         const { field, operator, params } = this;
@@ -105,7 +108,7 @@ module.directive('filterEditor', function ($timeout, indexPatterns) {
         const { filter, field, operator, params, alias } = this;
 
         let newFilter;
-        if (this.showQueryDslEditor()) {
+        if (this.isQueryDslEditorVisible()) {
           const meta = _.pick(filter.meta, ['negate', 'index']);
           meta.index = meta.index || this.indexPatterns[0].id;
           newFilter = Object.assign(this.queryDsl, { meta });

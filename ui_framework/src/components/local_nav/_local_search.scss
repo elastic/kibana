@@ -1,14 +1,15 @@
 .kuiLocalSearch {
   display: flex;
   width: 100%;
+  margin-bottom: 10px;
 }
 
 .kuiLocalSearchInput {
   @include formControl;
   flex: 1 1 100%;
   border-color: $localSearchBackgroundColor;
-  border-color: $globalColorLightGray;
-  border-radius: $globalBorderRadius 0 0 $globalBorderRadius;
+  border-color: $kuiColorLightGray;
+  border-radius: $kuiBorderRadius 0 0 $kuiBorderRadius;
 
   &.kuiLocalSearchInput-isInvalid {
     border-color: $localSearchBorderColor-isInvalid;
@@ -39,7 +40,7 @@
    */
   .kuiLocalSearchAssistedInput__assistance {
     position: absolute;
-    right: $globalFormControlHorizontalPadding;
+    right: $kuiFormControlHorizontalPadding;
     top: 50%; /* 1 */
     z-index: 2;
     transform: translateY(-50%); /* 1 */
@@ -58,15 +59,15 @@
 .kuiLocalSearchButton {
   width: 43px;
   height: $localSearchHeight;
-  font-size: $globalFontSize;
+  font-size: $kuiFontSize;
   line-height: 0; /* 1 */
   color: $localSearchButtonTextColor;
   background-color: $localSearchButtonBackgroundColor;
   border: 0;
-  border-radius: 0 $globalBorderRadius $globalBorderRadius 0;
+  border-radius: 0 $kuiBorderRadius $kuiBorderRadius 0;
 
   &:focus {
-    @include focus($globalFocusColor, $globalBorderColor);
+    @include focus($kuiFocusColor, $kuiBorderColor);
   }
 
   @include darkTheme {
@@ -74,7 +75,7 @@
     background-color: $localSearchButtonBackgroundColor--darkTheme;
 
     &:focus {
-      @include focus($globalFocusColor, $localNavBackgroundColor--darkTheme);
+      @include focus($kuiFocusColor, $localNavBackgroundColor--darkTheme);
     }
   }
 }

@@ -13,7 +13,26 @@ export function docExistsSuite() {
       initialSettings
     } = options;
 
-    const { kbnServer, uiSettings } = getServices();
+    const { kbnServer, uiSettings, callCluster } = getServices();
+
+    // delete the kibana index to ensure we start fresh
+    await callCluster('indices.delete', {
+      index: kbnServer.config.get('kibana.index'),
+      ignore: [404]
+    });
+
+    // write a setting to create kibana index and savedConfig
+    await kbnServer.inject({
+      method: 'POST',
+      url: '/api/kibana/settings/defaultIndex',
+      payload: { value: 'abc' }
+    });
+
+    // delete our defaultIndex setting to make doc empty
+    await kbnServer.inject({
+      method: 'DELETE',
+      url: '/api/kibana/settings/defaultIndex',
+    });
 
     if (initialSettings) {
       await uiSettings.setMany(initialSettings);

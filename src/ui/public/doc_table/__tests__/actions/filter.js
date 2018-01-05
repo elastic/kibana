@@ -38,7 +38,7 @@ describe('doc table filter actions', function () {
       expect(filterManager.add.calledWith(...args)).to.be(true);
     });
 
-    it('should add an operator style "is" function to kuery queries' , function () {
+    it('should add an operator style "is" function to kuery queries', function () {
       const state = {
         query: { query: '', language: 'kuery' }
       };
@@ -46,7 +46,7 @@ describe('doc table filter actions', function () {
       expect(state.query.query).to.be('"foo":"bar"');
     });
 
-    it('should combine the new clause with any existing query clauses using an implicit "and"' , function () {
+    it('should combine the new clause with any existing query clauses using an implicit "and"', function () {
       const state = {
         query: { query: 'foo', language: 'kuery' }
       };
@@ -54,7 +54,7 @@ describe('doc table filter actions', function () {
       expect(state.query.query).to.be('foo "foo":"bar"');
     });
 
-    it('should support creation of negated clauses' , function () {
+    it('should support creation of negated clauses', function () {
       const state = {
         query: { query: 'foo', language: 'kuery' }
       };
@@ -62,7 +62,7 @@ describe('doc table filter actions', function () {
       expect(state.query.query).to.be('foo !"foo":"bar"');
     });
 
-    it('should add an exists query when the provided field name is "_exists_"' , function () {
+    it('should add an exists query when the provided field name is "_exists_"', function () {
       const state = {
         query: { query: 'foo', language: 'kuery' }
       };

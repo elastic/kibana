@@ -24,8 +24,8 @@ target
 data
 disabledPlugins
 webpackstats.json
-config/*
-!config/kibana.yml
+/config/*
+/!config/kibana.yml
 coverage
 selenium
 .babelcache.json
@@ -39,3 +39,4 @@ yarn.lock
 package-lock.json
 .yo-rc.json
 /.vscode
+npm-debug.log*

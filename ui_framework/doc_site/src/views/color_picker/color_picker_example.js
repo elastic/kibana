@@ -10,15 +10,15 @@ import {
 import { renderToHtml } from '../../services';
 
 import { ColorPicker } from './color_picker';
-const colorPickerSource = require('!!raw!./color_picker');
+const colorPickerSource = require('!!raw-loader!./color_picker');
 const colorPickerHtml = renderToHtml(ColorPicker);
 
 import { ColorPickerLabelAndClear } from './color_picker_clear';
-const colorPickerClearSource = require('!!raw!./color_picker_clear');
+const colorPickerClearSource = require('!!raw-loader!./color_picker_clear');
 const colorPickerClearHtml = renderToHtml(ColorPickerLabelAndClear);
 
 import { ColorPickerNoColorLabel } from './color_picker_no_color_label';
-const colorPickerNoColorLabelSource = require('!!raw!./color_picker_no_color_label');
+const colorPickerNoColorLabelSource = require('!!raw-loader!./color_picker_no_color_label');
 const colorPickerNoColorLabelHtml = renderToHtml(ColorPickerNoColorLabel);
 
 export default props => (

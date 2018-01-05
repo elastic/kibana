@@ -15,11 +15,11 @@ import {
 import KeyboardAccessible from './keyboard_accessible';
 import ScreenReaderOnly from './screen_reader';
 
-const keyboardAccessibleSource = require('!!raw!./keyboard_accessible');
+const keyboardAccessibleSource = require('!!raw-loader!./keyboard_accessible');
 const keyboardAccessibleHtml = renderToHtml(KeyboardAccessible);
 
 const screenReaderOnlyHtml = renderToHtml(ScreenReaderOnly);
-const screenReaderOnlySource = require('!!raw!./screen_reader');
+const screenReaderOnlySource = require('!!raw-loader!./screen_reader');
 
 export default props => (
   <GuidePage title={props.route.name}>

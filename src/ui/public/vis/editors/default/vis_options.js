@@ -11,53 +11,53 @@ import visOptionsTemplate from './vis_options.html';
  */
 
 uiModules
-.get('app/visualize')
-.directive('visEditorVisOptions', function (Private, $compile) {
-  return {
-    restrict: 'E',
-    template: visOptionsTemplate,
-    scope: {
-      vis: '=',
-      visData: '=',
-      uiState: '=',
-      editor: '=',
-      visualizeEditor: '='
-    },
-    link: function ($scope, $el) {
-      const $optionContainer = $el.find('[data-visualization-options]');
+  .get('app/visualize')
+  .directive('visEditorVisOptions', function (Private, $compile) {
+    return {
+      restrict: 'E',
+      template: visOptionsTemplate,
+      scope: {
+        vis: '=',
+        visData: '=',
+        uiState: '=',
+        editor: '=',
+        visualizeEditor: '='
+      },
+      link: function ($scope, $el) {
+        const $optionContainer = $el.find('[data-visualization-options]');
 
-      const reactOptionsComponent = typeof $scope.editor !== 'string';
-      const stageEditorParams = (params) => {
-        $scope.vis.params = _.cloneDeep(params);
-        $scope.$apply();
-      };
-      const renderReactComponent = () => {
-        const Component = $scope.editor;
-        render(<Component scope={$scope} stageEditorParams={stageEditorParams} />, $el[0]);
-      };
-      // Bind the `editor` template with the scope.
-      if (reactOptionsComponent) {
-        renderReactComponent();
-      } else {
-        const $editor = $compile($scope.editor)($scope);
-        $optionContainer.append($editor);
-      }
-
-      $scope.$watchGroup(['visData', 'visualizeEditor', 'vis.params'], () => {
+        const reactOptionsComponent = typeof $scope.editor !== 'string';
+        const stageEditorParams = (params) => {
+          $scope.vis.params = _.cloneDeep(params);
+          $scope.$apply();
+        };
+        const renderReactComponent = () => {
+          const Component = $scope.editor;
+          render(<Component scope={$scope} stageEditorParams={stageEditorParams} />, $el[0]);
+        };
+        // Bind the `editor` template with the scope.
         if (reactOptionsComponent) {
           renderReactComponent();
+        } else {
+          const $editor = $compile($scope.editor)($scope);
+          $optionContainer.append($editor);
         }
-      });
 
-      $scope.$watch('vis.type.schemas.all.length', function (len) {
-        $scope.alwaysShowOptions = len === 0;
-      });
+        $scope.$watchGroup(['visData', 'visualizeEditor', 'vis.params'], () => {
+          if (reactOptionsComponent) {
+            renderReactComponent();
+          }
+        });
 
-      $el.on('$destroy', () => {
-        if (reactOptionsComponent) {
-          unmountComponentAtNode($el[0]);
-        }
-      });
-    }
-  };
-});
+        $scope.$watch('vis.type.schemas.all.length', function (len) {
+          $scope.alwaysShowOptions = len === 0;
+        });
+
+        $el.on('$destroy', () => {
+          if (reactOptionsComponent) {
+            unmountComponentAtNode($el[0]);
+          }
+        });
+      }
+    };
+  });

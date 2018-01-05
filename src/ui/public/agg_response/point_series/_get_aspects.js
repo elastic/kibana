@@ -39,16 +39,16 @@ export function PointSeriesGetAspectsProvider(Private) {
   return function getAspects(vis, table) {
     const aspects = _(table.columns)
     // write each column into the aspects under it's group
-    .transform(columnToAspect, {})
-    // unwrap groups that only have one value, and validate groups that have more
-    .transform(function (aspects, group, name) {
-      if (name !== 'y' && group.length > 1) {
-        throw new TypeError('Only multiple metrics are supported in point series');
-      }
+      .transform(columnToAspect, {})
+      // unwrap groups that only have one value, and validate groups that have more
+      .transform(function (aspects, group, name) {
+        if (name !== 'y' && group.length > 1) {
+          throw new TypeError('Only multiple metrics are supported in point series');
+        }
 
-      aspects[name] = group.length > 1 ? group : group[0];
-    })
-    .value();
+        aspects[name] = group.length > 1 ? group : group[0];
+      })
+      .value();
 
     if (!aspects.x) {
       aspects.x = fakeXAspect(vis);

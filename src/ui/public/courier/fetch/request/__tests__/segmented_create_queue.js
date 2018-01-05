@@ -38,7 +38,7 @@ describe('ui/courier/fetch/request/segmented/_createQueue', () => {
   it('relies on indexPattern.toDetailedIndexList to generate queue', async function () {
     const source = new MockSource();
     const ip = source.get('index');
-    const indices = [1,2,3];
+    const indices = [1, 2, 3];
     sinon.stub(ip, 'toDetailedIndexList').returns(Promise.resolve(indices));
 
     const req = new SegmentedReq(source);
@@ -50,7 +50,7 @@ describe('ui/courier/fetch/request/segmented/_createQueue', () => {
     const source = new MockSource();
     const ip = source.get('index');
     const req = new SegmentedReq(source);
-    sinon.stub(ip, 'toDetailedIndexList').returns(Promise.resolve([1,2,3]));
+    sinon.stub(ip, 'toDetailedIndexList').returns(Promise.resolve([1, 2, 3]));
 
     req.setDirection('asc');
     await req._createQueue();

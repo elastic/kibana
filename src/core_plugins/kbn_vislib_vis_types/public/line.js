@@ -126,7 +126,7 @@ export default function PointSeriesVisType(Private) {
           name: 'metric',
           title: 'Y-Axis',
           min: 1,
-          aggFilter: ['!geo_centroid','!geo_bounds'],
+          aggFilter: ['!geo_centroid', '!geo_bounds'],
           defaults: [
             { schema: 'metric', type: 'count' }
           ]

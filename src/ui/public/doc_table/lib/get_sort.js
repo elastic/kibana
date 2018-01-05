@@ -15,7 +15,7 @@ export function getSort(sort, indexPattern, defaultSortOrder = 'desc') {
     return (indexPattern.fields.byName[field] && indexPattern.fields.byName[field].sortable);
   }
 
-  if (_.isArray(sort) && sort.length === 2 && isSortable(sort[0])) {
+  if (Array.isArray(sort) && sort.length === 2 && isSortable(sort[0])) {
     // At some point we need to refact the sorting logic, this array sucks.
     field = sort[0];
     direction = sort[1];

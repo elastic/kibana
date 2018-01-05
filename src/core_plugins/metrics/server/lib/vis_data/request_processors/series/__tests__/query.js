@@ -124,6 +124,35 @@ describe('query(req, panel, series)', () => {
     });
   });
 
+  it('returns doc with series filter', () => {
+    series.filter = 'host:web-server';
+    const next = doc => doc;
+    const doc = query(req, panel, series)(next)({});
+    expect(doc).to.eql({
+      size: 0,
+      query: {
+        bool: {
+          must: [
+            {
+              range: {
+                timestamp: {
+                  gte: 1483228800000,
+                  lte: 1483232400000,
+                  format: 'epoch_millis'
+                }
+              }
+            },
+            {
+              query_string: {
+                query: series.filter,
+                analyze_wildcard: true
+              }
+            }
+          ]
+        }
+      }
+    });
+  });
   it('returns doc with panel filter and global', () => {
     req.payload.filters = [
       {

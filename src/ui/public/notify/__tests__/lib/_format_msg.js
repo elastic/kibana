@@ -39,11 +39,11 @@ describe('formatMsg', function () {
 
   it('should handle an extended elasticsearch error', function () {
     const err = {
-      resp : {
-        error : {
-          root_cause : [
+      resp: {
+        error: {
+          root_cause: [
             {
-              reason : 'I am the detailed message'
+              reason: 'I am the detailed message'
             }
           ]
         }

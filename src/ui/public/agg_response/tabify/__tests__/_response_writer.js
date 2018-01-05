@@ -255,17 +255,17 @@ describe('ResponseWriter class', function () {
 
     describe('#cell()', function () {
       it('logs a cell in the ResponseWriters row buffer, calls the block arg, then removes the value from the buffer',
-      function () {
-        const vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
-        const writer = new ResponseWriter(vis);
+        function () {
+          const vis = new Vis(indexPattern, { type: 'histogram', aggs: [] });
+          const writer = new ResponseWriter(vis);
 
-        expect(writer.rowBuffer).to.have.length(0);
-        writer.cell({}, 500, function () {
-          expect(writer.rowBuffer).to.have.length(1);
-          expect(writer.rowBuffer[0]).to.be(500);
+          expect(writer.rowBuffer).to.have.length(0);
+          writer.cell({}, 500, function () {
+            expect(writer.rowBuffer).to.have.length(1);
+            expect(writer.rowBuffer[0]).to.be(500);
+          });
+          expect(writer.rowBuffer).to.have.length(0);
         });
-        expect(writer.rowBuffer).to.have.length(0);
-      });
     });
 
     describe('#row()', function () {

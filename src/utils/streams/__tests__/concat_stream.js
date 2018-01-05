@@ -9,11 +9,11 @@ import {
 describe('concatStream', () => {
   it('accepts an initial value', async () => {
     const output = await createPromiseFromStreams([
-      createListStream([1,2,3]),
+      createListStream([1, 2, 3]),
       createConcatStream([0])
     ]);
 
-    expect(output).to.eql([0,1,2,3]);
+    expect(output).to.eql([0, 1, 2, 3]);
   });
 
   describe(`combines using the previous value's concat method`, () => {
@@ -33,12 +33,12 @@ describe('concatStream', () => {
       const output = await createPromiseFromStreams([
         createListStream([
           [1],
-          [2,3,4],
+          [2, 3, 4],
           [10]
         ]),
         createConcatStream()
       ]);
-      expect(output).to.eql([1,2,3,4,10]);
+      expect(output).to.eql([1, 2, 3, 4, 10]);
     });
 
     it('works with a mixture, starting with array', async () => {
@@ -49,11 +49,11 @@ describe('concatStream', () => {
           2,
           3,
           4,
-          [5,6,7]
+          [5, 6, 7]
         ]),
         createConcatStream()
       ]);
-      expect(output).to.eql([1,2,3,4,5,6,7]);
+      expect(output).to.eql([1, 2, 3, 4, 5, 6, 7]);
     });
 
     it('fails when the value does not have a concat method', async () => {

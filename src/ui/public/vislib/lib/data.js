@@ -315,13 +315,13 @@ export function VislibLibDataProvider(Private) {
         const namedObj = this.returnNames(slices.children, 0, columns);
 
         return _(namedObj)
-        .sortBy(function (obj) {
-          return obj.index;
-        })
-        .unique(function (d) {
-          return d.label;
-        })
-        .value();
+          .sortBy(function (obj) {
+            return obj.index;
+          })
+          .unique(function (d) {
+            return d.label;
+          })
+          .value();
       }
     }
 

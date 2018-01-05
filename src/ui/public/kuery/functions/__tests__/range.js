@@ -97,14 +97,14 @@ describe('kuery functions', function () {
       it('should throw an error for nodes with unknown or undefined serialize styles', function () {
         const node = nodeTypes.function.buildNode('range', 'bytes', { gte: 1000, lte: 8000 }, 'notValid');
         expect(range.toKueryExpression)
-        .withArgs(node).to.throwException(/Cannot serialize "range" function as "notValid"/);
+          .withArgs(node).to.throwException(/Cannot serialize "range" function as "notValid"/);
       });
 
       it('should not support exclusive ranges in the operator syntax', function () {
         const node = nodeTypes.function.buildNode('range', 'bytes', { gt: 1000, lt: 8000 });
         node.serializeStyle = 'operator';
         expect(range.toKueryExpression)
-        .withArgs(node).to.throwException(/Operator syntax only supports inclusive ranges/);
+          .withArgs(node).to.throwException(/Operator syntax only supports inclusive ranges/);
       });
 
     });

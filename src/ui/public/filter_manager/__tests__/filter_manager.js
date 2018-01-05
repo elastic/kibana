@@ -15,7 +15,7 @@ function checkAddFilters(length, comps, idx) {
   const filters = queryFilter.addFilters.getCall(idx).args[0];
 
   expect(filters.length).to.be(length);
-  if (!_.isArray(comps)) return;
+  if (!Array.isArray(comps)) return;
   comps.forEach(function (comp, i) {
     expect(filters[i]).to.eql(comp);
   });
@@ -45,7 +45,7 @@ describe('Filter Manager', function () {
       return appState.filters;
     });
     sinon.stub(queryFilter, 'addFilters', function (filters) {
-      if (!_.isArray(filters)) filters = [filters];
+      if (!Array.isArray(filters)) filters = [filters];
       appState.filters = appState.filters.concat(filters);
     });
     sinon.stub(queryFilter, 'invertFilter', function (filter) {

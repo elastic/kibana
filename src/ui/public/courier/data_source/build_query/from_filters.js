@@ -36,7 +36,7 @@ const translateToQuery = function (filter) {
  * @returns {object}
  */
 const cleanFilter = function (filter) {
-  return _.omit(filter, ['meta']);
+  return _.omit(filter, ['meta', '$state']);
 };
 
 export function buildQueryFromFilters(filters, decorateQuery) {
@@ -48,16 +48,16 @@ export function buildQueryFromFilters(filters, decorateQuery) {
 
   return {
     must: (filters || [])
-    .filter(filterNegate(false))
-    .map(translateToQuery)
-    .map(cleanFilter)
-    .map(migrateFilter),
+      .filter(filterNegate(false))
+      .map(translateToQuery)
+      .map(cleanFilter)
+      .map(migrateFilter),
     filter: [],
     should: [],
     must_not: (filters || [])
-    .filter(filterNegate(true))
-    .map(translateToQuery)
-    .map(cleanFilter)
-    .map(migrateFilter)
+      .filter(filterNegate(true))
+      .map(translateToQuery)
+      .map(cleanFilter)
+      .map(migrateFilter)
   };
 }

@@ -1,34 +1,21 @@
 import expect from 'expect.js';
+import sinon from 'sinon';
 
 import {
   getServices,
   chance,
-  assertDocMissingResponse
+  assertSinonMatch,
 } from './lib';
 
 export function indexMissingSuite() {
-  beforeEach(async function () {
-    const { kbnServer } = getServices();
-    await kbnServer.server.plugins.elasticsearch.waitUntilReady();
-  });
-
-  function getNumberOfShards(index) {
-    return parseInt(Object.values(index)[0].settings.index.number_of_shards, 10);
-  }
-
-  async function getIndex(callCluster, indexName) {
-    return await callCluster('indices.get', {
-      index: indexName,
-    });
-  }
-
   async function setup() {
     const { callCluster, kbnServer } = getServices();
     const indexName = kbnServer.config.get('kibana.index');
-    const initialIndex = await getIndex(callCluster, indexName);
 
+    // ensure the kibana index does not exist
     await callCluster('indices.delete', {
       index: indexName,
+      ignore: [404],
     });
 
     return {
@@ -36,22 +23,21 @@ export function indexMissingSuite() {
 
       // an incorrect number of shards is how we determine when the index was not created by Kibana,
       // but automatically by writing to es when index didn't exist
-      async assertInvalidKibanaIndex() {
-        const index = await getIndex(callCluster, indexName);
+      async assertValidKibanaIndex() {
+        const resp = await callCluster('indices.get', {
+          index: indexName
+        });
 
-        expect(getNumberOfShards(index))
-        .to.not.be(getNumberOfShards(initialIndex));
+        expect(resp[indexName].mappings).to.have.property('doc');
+        expect(resp[indexName].mappings.doc.properties).to.have.keys(
+          'index-pattern',
+          'visualization',
+          'search',
+          'dashboard'
+        );
       }
     };
   }
-
-  afterEach(async () => {
-    const { kbnServer, callCluster } = getServices();
-    await callCluster('indices.delete', {
-      index: kbnServer.config.get('kibana.index'),
-      ignore: 404
-    });
-  });
 
   describe('get route', () => {
     it('returns a 200 and with empty values', async () => {
@@ -68,49 +54,82 @@ export function indexMissingSuite() {
   });
 
   describe('set route', () => {
-    it('creates an invalid Kibana index and returns a 404 document missing error', async () => {
-      const { kbnServer, assertInvalidKibanaIndex } = await setup();
+    it('returns a 200 and creates a valid kibana index', async () => {
+      const { kbnServer, assertValidKibanaIndex } = await setup();
 
-      assertDocMissingResponse(await kbnServer.inject({
+      const defaultIndex = chance.word();
+      const { statusCode, result } = await kbnServer.inject({
         method: 'POST',
         url: '/api/kibana/settings/defaultIndex',
         payload: {
-          value: chance.word()
+          value: defaultIndex
         }
-      }));
+      });
 
-      await assertInvalidKibanaIndex();
+      expect(statusCode).to.be(200);
+      assertSinonMatch(result, {
+        settings: {
+          buildNum: {
+            userValue: sinon.match.number
+          },
+          defaultIndex: {
+            userValue: defaultIndex
+          }
+        }
+      });
+
+      await assertValidKibanaIndex();
     });
   });
 
   describe('setMany route', () => {
-    it('creates an invalid Kibana index and returns a 404 document missing error', async () => {
-      const { kbnServer, assertInvalidKibanaIndex } = await setup();
+    it('returns a 200 and creates a valid kibana index', async () => {
+      const { kbnServer, assertValidKibanaIndex } = await setup();
 
-      assertDocMissingResponse(await kbnServer.inject({
+      const defaultIndex = chance.word();
+      const { statusCode, result } = await kbnServer.inject({
         method: 'POST',
         url: '/api/kibana/settings',
         payload: {
-          changes: {
-            defaultIndex: chance.word()
+          changes: { defaultIndex }
+        }
+      });
+
+      expect(statusCode).to.be(200);
+      assertSinonMatch(result, {
+        settings: {
+          buildNum: {
+            userValue: sinon.match.number
+          },
+          defaultIndex: {
+            userValue: defaultIndex
           }
         }
-      }));
+      });
 
-      await assertInvalidKibanaIndex();
+      await assertValidKibanaIndex();
     });
   });
 
   describe('delete route', () => {
-    it('creates an invalid Kibana index and returns a 404 document missing error', async () => {
-      const { kbnServer, assertInvalidKibanaIndex } = await setup();
+    it('returns a 200 and creates a valid kibana index', async () => {
+      const { kbnServer, assertValidKibanaIndex } = await setup();
 
-      assertDocMissingResponse(await kbnServer.inject({
+      const { statusCode, result } = await kbnServer.inject({
         method: 'DELETE',
         url: '/api/kibana/settings/defaultIndex'
-      }));
+      });
 
-      await assertInvalidKibanaIndex();
+      expect(statusCode).to.be(200);
+      assertSinonMatch(result, {
+        settings: {
+          buildNum: {
+            userValue: sinon.match.number
+          }
+        }
+      });
+
+      await assertValidKibanaIndex();
     });
   });
 }

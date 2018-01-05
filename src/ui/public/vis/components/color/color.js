@@ -13,7 +13,7 @@ export function VislibComponentsColorColorProvider(Private) {
 
   return function (arrayOfStringsOrNumbers, colorMapping) {
     colorMapping = colorMapping || {};
-    if (!_.isArray(arrayOfStringsOrNumbers)) {
+    if (!Array.isArray(arrayOfStringsOrNumbers)) {
       throw new Error('ColorUtil expects an array');
     }
 

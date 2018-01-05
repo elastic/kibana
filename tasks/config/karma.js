@@ -1,6 +1,8 @@
 import { times } from 'lodash';
+import { resolve, dirname } from 'path';
 
 const TOTAL_CI_SHARDS = 4;
+const ROOT = dirname(require.resolve('../../package.json'));
 
 module.exports = function (grunt) {
   const config = {
@@ -18,12 +20,28 @@ module.exports = function (grunt) {
       browsers: ['<%= karmaBrowser %>'],
 
       // available reporters: https://npmjs.org/browse/keyword/karma-reporter
-      reporters: process.env.CI ? ['dots'] : ['progress'],
+      reporters: process.env.CI ? ['dots', 'junit'] : ['progress'],
+
+      junitReporter: {
+        outputFile: resolve(ROOT, 'target/junit/karma.xml'),
+        useBrowserName: false,
+        nameFormatter: (browser, result) => [
+          ...result.suite,
+          result.description
+        ].join(' '),
+        classNameFormatter: (browser, result) => {
+          const rootSuite = result.suite[0] || result.description;
+          return `Browser Unit Tests.${rootSuite.replace(/\./g, '·')}`;
+        }
+      },
 
       // list of files / patterns to load in the browser
       files: [
+        'http://localhost:5610/bundles/vendors.bundle.js',
         'http://localhost:5610/bundles/commons.bundle.js',
         'http://localhost:5610/bundles/tests.bundle.js',
+
+        'http://localhost:5610/bundles/vendors.style.css',
         'http://localhost:5610/bundles/commons.style.css',
         'http://localhost:5610/bundles/tests.style.css'
       ],
@@ -111,8 +129,11 @@ module.exports = function (grunt) {
       singleRun: true,
       options: {
         files: [
+          'http://localhost:5610/bundles/vendors.bundle.js',
           'http://localhost:5610/bundles/commons.bundle.js',
           `http://localhost:5610/bundles/tests.bundle.js?shards=${TOTAL_CI_SHARDS}&shard_num=${n}`,
+
+          'http://localhost:5610/bundles/vendors.style.css',
           'http://localhost:5610/bundles/commons.style.css',
           'http://localhost:5610/bundles/tests.style.css'
         ]

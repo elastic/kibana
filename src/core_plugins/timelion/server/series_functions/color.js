@@ -17,21 +17,26 @@ export default new Chainable('color', {
   ],
   help: 'Change the color of the series',
   fn: function colorFn(args) {
-    let colors = args.byName.color.split(':');
-
-    if (colors.length > 1 && args.byName.inputSeries.list.length > 1) {
-      colors = tinygradient(colors).rgb(args.byName.inputSeries.list.length);
+    const colors = args.byName.color.split(':');
+    const gradientStops = args.byName.inputSeries.list.length;
+    let gradient;
+    if (colors.length > 1 && gradientStops > 1) {
+      // trim number of colors to avoid exception thrown by having more colors than gradient stops
+      let trimmedColors = colors;
+      if (colors.length > gradientStops) {
+        trimmedColors = colors.slice(0, gradientStops);
+      }
+      gradient = tinygradient(trimmedColors).rgb(gradientStops);
     }
 
     let i = 0;
     return alter(args, function (eachSeries) {
-      if (colors.length === 1 || args.byName.inputSeries.list.length === 1) {
+      if (gradient) {
+        eachSeries.color = gradient[i++].toHexString();
+      } else if (colors.length === 1) {
         eachSeries.color = colors[0];
-      } else if (colors.length > 1) {
-        eachSeries.color = colors[i].toHexString();
-        i++;
       } else {
-        throw new Error('Hey, I need at least one color to work with');
+        throw new Error('color not provided');
       }
 
       return eachSeries;

@@ -11,12 +11,12 @@ export default function ({ getService, getPageObjects }) {
     before(function () {
       // delete .kibana index and then wait for Kibana to re-create it
       return kibanaServer.uiSettings.replace({})
-      .then(function () {
-        return PageObjects.settings.navigateTo();
-      })
-      .then(function () {
-        return PageObjects.settings.clickKibanaIndices();
-      });
+        .then(function () {
+          return PageObjects.settings.navigateTo();
+        })
+        .then(function () {
+          return PageObjects.settings.clickKibanaIndices();
+        });
     });
 
     describe('index pattern creation', function indexPatternCreation() {
@@ -36,37 +36,37 @@ export default function ({ getService, getPageObjects }) {
       it('should have index pattern in url', function url() {
         return retry.try(function tryingForTime() {
           return remote.getCurrentUrl()
-          .then(function (currentUrl) {
-            expect(currentUrl).to.contain(indexPatternId);
-          });
+            .then(function (currentUrl) {
+              expect(currentUrl).to.contain(indexPatternId);
+            });
         });
       });
 
       it('should have expected table headers', function checkingHeader() {
         return PageObjects.settings.getTableHeader()
-        .then(function (headers) {
-          log.debug('header.length = ' + headers.length);
-          const expectedHeaders = [
-            'name',
-            'type',
-            'format',
-            'searchable',
-            'aggregatable',
-            'excluded',
-            'controls'
-          ];
+          .then(function (headers) {
+            log.debug('header.length = ' + headers.length);
+            const expectedHeaders = [
+              'name',
+              'type',
+              'format',
+              'searchable',
+              'aggregatable',
+              'excluded',
+              'controls'
+            ];
 
-          expect(headers.length).to.be(expectedHeaders.length);
+            expect(headers.length).to.be(expectedHeaders.length);
 
-          const comparedHeaders = headers.map(function compareHead(header, i) {
-            return header.getVisibleText()
-            .then(function (text) {
-              expect(text).to.be(expectedHeaders[i]);
+            const comparedHeaders = headers.map(function compareHead(header, i) {
+              return header.getVisibleText()
+                .then(function (text) {
+                  expect(text).to.be(expectedHeaders[i]);
+                });
             });
-          });
 
-          return Promise.all(comparedHeaders);
-        });
+            return Promise.all(comparedHeaders);
+          });
       });
     });
 
@@ -74,9 +74,9 @@ export default function ({ getService, getPageObjects }) {
       before(function () {
         const expectedAlertText = 'Are you sure you want to remove this index pattern?';
         return PageObjects.settings.removeIndexPattern()
-        .then(function (alertText) {
-          expect(alertText).to.be(expectedAlertText);
-        });
+          .then(function (alertText) {
+            expect(alertText).to.be(expectedAlertText);
+          });
       });
 
       it('should return to index pattern creation page', function returnToPage() {
@@ -89,10 +89,10 @@ export default function ({ getService, getPageObjects }) {
         // give the url time to settle
         return retry.try(function tryingForTime() {
           return remote.getCurrentUrl()
-          .then(function (currentUrl) {
-            log.debug('currentUrl = ' + currentUrl);
-            expect(currentUrl).to.not.contain('logstash-*');
-          });
+            .then(function (currentUrl) {
+              log.debug('currentUrl = ' + currentUrl);
+              expect(currentUrl).to.not.contain('logstash-*');
+            });
         });
       });
     });

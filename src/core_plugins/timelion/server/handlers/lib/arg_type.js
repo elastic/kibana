@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 export default function argType(arg) {
-  if (_.isArray(arg)) {
+  if (Array.isArray(arg)) {
     return _.chain(arg)
       .map(argType)
       .flattenDeep()

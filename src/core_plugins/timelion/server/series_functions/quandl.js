@@ -49,7 +49,7 @@ export default new Datasource ('quandl', {
 
     const time = {
       min: moment.utc(tlConfig.time.from).format('YYYY-MM-DD'),
-      max:  moment.utc(tlConfig.time.to).format('YYYY-MM-DD')
+      max: moment.utc(tlConfig.time.to).format('YYYY-MM-DD')
     };
 
     // POSITIONS
@@ -74,7 +74,7 @@ export default new Datasource ('quandl', {
       return {
         type: 'seriesList',
         list: [{
-          data:  data,
+          data: data,
           type: 'series',
           fit: 'nearest',
           label: resp.name

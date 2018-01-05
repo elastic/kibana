@@ -6,7 +6,7 @@ import { IndexedArray } from 'ui/indexed_array';
 // this is generally a data-structure that IndexedArray is good for managing
 const users = [
   { name: 'John', id: 69, username: 'beast', group: 'admins' },
-  { name: 'Anon', id:  0, username: 'shhhh', group: 'secret' },
+  { name: 'Anon', id: 0, username: 'shhhh', group: 'secret' },
   { name: 'Fern', id: 42, username: 'kitty', group: 'editor' },
   { name: 'Mary', id: 55, username: 'sheep', group: 'editor' }
 ];
@@ -32,12 +32,12 @@ describe('IndexedArray', function () {
     });
 
     it('fails basic lodash check', function () {
-      expect(_.isArray(reg)).to.be(false);
+      expect(Array.isArray(reg)).to.be(false);
     });
 
     it('clones to an object', function () {
       expect(_.isPlainObject(_.clone(reg))).to.be(true);
-      expect(_.isArray(_.clone(reg))).to.be(false);
+      expect(Array.isArray(_.clone(reg))).to.be(false);
     });
   });
 
@@ -145,6 +145,34 @@ describe('IndexedArray', function () {
 
       expect(reg.byUsername).to.eql(index);
       expect(reg.byUsername).to.not.be(index);
+    });
+  });
+
+  describe('Ordering', function () {
+    it('ordering is case insensitive', function () {
+      const reg = new IndexedArray({
+        index: ['title'],
+        order: ['title'],
+        initialSet: [{ title: 'APM' }, { title: 'Advanced Settings' }]
+      });
+
+      const ordered = reg.inTitleOrder;
+      expect(ordered[0].title).to.be('Advanced Settings');
+      expect(ordered[1].title).to.be('APM');
+    });
+
+    it('ordering handles numbers', function () {
+      const reg = new IndexedArray({
+        index: ['id'],
+        order: ['id'],
+        initialSet: users
+      });
+
+      const ordered = reg.inIdOrder;
+      expect(ordered[0].id).to.be(0);
+      expect(ordered[1].id).to.be(42);
+      expect(ordered[2].id).to.be(55);
+      expect(ordered[3].id).to.be(69);
     });
   });
 });

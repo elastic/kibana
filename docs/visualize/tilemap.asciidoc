@@ -33,7 +33,7 @@ Enter a string in the *Custom Label* field to change the display label.
 
 ===== Buckets
 
-Coordinate maps use the {es-ref}search-aggregations-bucket-geohashgrid-aggregation.html[_geohash_] aggregation. Select a field, typically coordinates, from the
+Coordinate maps use the {ref}/search-aggregations-bucket-geohashgrid-aggregation.html[_geohash_] aggregation. Select a field, typically coordinates, from the
 drop-down.
 
 - The_Change precision on map zoom_ box is checked by default. Uncheck the box to disable this behavior.
