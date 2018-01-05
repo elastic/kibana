@@ -2,45 +2,37 @@ export const METRICBEAT_INSTRUCTIONS = {
   INSTALL: {
     OSX: {
       title: 'Download and install Metricbeat',
-      textPre: 'Skip this step if Metricbeat is already installed.' +
-               ' First time using Metricbeat? See the [Getting Started Guide]' +
+      textPre: 'First time using Metricbeat? See the [Getting Started Guide]' +
                '({config.docs.beats.metricbeat}/metricbeat-getting-started.html).',
       commands: [
         'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
         'tar xzvf metricbeat-{config.kibana.version}-darwin-x86_64.tar.gz',
         'cd metricbeat-{config.kibana.version}-darwin-x86_64/',
-      ],
-      textPost: 'Modify the settings under `output.elasticsearch` in the ' +
-                '`metricbeat.yml` file to point to your Elasticsearch installation.'
+      ]
     },
     DEB: {
       title: 'Download and install Metricbeat',
-      textPre: 'Skip this step if Metricbeat is already installed.' +
-               ' First time using Metricbeat? See the [Getting Started Guide]' +
+      textPre: 'First time using Metricbeat? See the [Getting Started Guide]' +
                '({config.docs.beats.metricbeat}/metricbeat-getting-started.html).',
       commands: [
         'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-amd64.deb',
         'sudo dpkg -i metricbeat-{config.kibana.version}-amd64.deb'
       ],
-      textPost: 'Edit the `/etc/metricbeat/metricbeat.yml` file and ' +
-                 'adjust the `output.elasticsearch` settings if needed.'
+      textPost: 'Looking for the 32 bits packages? See the [Download page](https://www.elastic.co/downloads/beats/metricbeat).'
     },
     RPM: {
       title: 'Download and install Metricbeat',
-      textPre: 'Skip this step if Metricbeat is already installed.' +
-               ' First time using Metricbeat? See the [Getting Started Guide]' +
+      textPre: 'First time using Metricbeat? See the [Getting Started Guide]' +
                '({config.docs.beats.metricbeat}/metricbeat-getting-started.html).',
       commands: [
         'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-x86_64.rpm',
         'sudo rpm -vi metricbeat-{config.kibana.version}-x86_64.rpm'
       ],
-      textPost: 'Edit the `/etc/metricbeat/metricbeat.yml` file and ' +
-                 'adjust the `output.elasticsearch` settings if needed.'
+      textPost: 'Looking for the 32 bits packages? See the [Download page](https://www.elastic.co/downloads/beats/metricbeat).'
     },
     WINDOWS: {
       title: 'Download and install Metricbeat',
-      textPre: 'Skip this step if Metricbeat is already installed.' +
-               ' First time using Metricbeat? See the [Getting Started Guide]' +
+      textPre: 'First time using Metricbeat? See the [Getting Started Guide]' +
                '({config.docs.beats.metricbeat}/metricbeat-getting-started.html).\n' +
                '1. Download the Metricbeat Windows zip file from the [downloads](https://www.elastic.co/downloads/beats/metricbeat) page.\n' +
                '2. Extract the contents of the zip file into `C:\\Program Files`.\n' +
@@ -52,46 +44,104 @@ export const METRICBEAT_INSTRUCTIONS = {
         'PS > cd C:\\Program Files\\Metricbeat',
         'PS C:\\Program Files\\Metricbeat> .\\install-service-metricbeat.ps1'
       ],
-      textPost: 'Edit the `C:\\Program Files\\Metricbeat\\metricbeat.yml` file and ' +
-                 'adjust the `output.elasticsearch` settings if needed.'
+      textPost: 'Modify the settings under `output.elasticsearch` in the ' +
+                '`C:\\Program Files\\Metricbeat\\metricbeat.yml` file to point to your Elasticsearch installation.'
     }
   },
   START: {
     OSX: {
       title: 'Start Metricbeat',
+      textPre: 'The `setup` command loads the Kibana dashboards.' +
+                ' If the dashboards are already set up, omit this command.',
       commands: [
-        './metricbeat setup -e',
+        './metricbeat setup',
         './metricbeat -e',
-      ],
-      textPost: 'The `setup` command loads the Kibana dashboards.' +
-                ' If the dashboards are already set up, omit this command.'
+      ]
     },
     DEB: {
       title: 'Start Metricbeat',
+      textPre: 'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, ' +
+                'omit this command.',
       commands: [
-        'sudo metricbeat setup -e',
+        'sudo metricbeat setup',
         'sudo service metricbeat start',
-      ],
-      textPost: 'The `setup` command loads the Kibana dashboards. If the dashboards are already installed, ' +
-                'omit this command.'
+      ]
     },
     RPM: {
       title: 'Start Metricbeat',
+      textPre: 'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, ' +
+                'omit this command.',
       commands: [
-        'sudo metricbeat setup -e',
+        'sudo metricbeat setup',
         'sudo service metricbeat start',
       ],
-      textPost: 'The `setup` command loads the Kibana dashboards. If the dashboards are already installed, ' +
-                'omit this command.'
     },
     WINDOWS: {
       title: 'Start Metricbeat',
+      textPre: 'The `setup` command loads the Kibana dashboards. If the dashboards are already set up, ' +
+                'omit this command.',
       commands: [
-        'PS C:\\Program Files\\Metricbeat> metricbeat.exe setup -e',
+        'PS C:\\Program Files\\Metricbeat> metricbeat.exe setup',
         'PS C:\\Program Files\\Metricbeat> Service-Start metricbeat',
+      ]
+    }
+  },
+  CONFIG: {
+    OSX: {
+      title: 'Edit the configuration',
+      textPre: 'Modify `metricbeat.yml` to set the connection information:',
+      commands: [
+        'output.elasticsearch:',
+        '  hosts: ["<es_url>"]',
+        '  username: "elastic"',
+        '  password: "<password>"',
+        'setup.kibana:',
+        '  host: "<kibana_url>"'
       ],
-      textPost: 'The `setup` command loads the Kibana dashboards. If the dashboards are already installed, ' +
-                'omit this command.'
+      textPost: 'Where `<password>` is the password of the `elastic` user, ' +
+                '`<es_url>` is the URL of Elasticsearch, and `<kibana_url>` is the URL of Kibana.'
+    },
+    DEB: {
+      title: 'Edit the configuration',
+      textPre: 'Modify `/etc/metricbeat/metricbeat.yml` to set the connection information:',
+      commands: [
+        'output.elasticsearch:',
+        '  hosts: ["<es_url>"]',
+        '  username: "elastic"',
+        '  password: "<password>"',
+        'setup.kibana:',
+        '  host: "<kibana_url>"'
+      ],
+      textPost: 'Where `<password>` is the password of the `elastic` user, ' +
+                '`<es_url>` is the URL of Elasticsearch, and `<kibana_url>` is the URL of Kibana.'
+    },
+    RPM: {
+      title: 'Edit the configuration',
+      textPre: 'Modify `/etc/metricbeat/metricbeat.yml` to set the connection information:',
+      commands: [
+        'output.elasticsearch:',
+        '  hosts: ["<es_url>"]',
+        '  username: "elastic"',
+        '  password: "<password>"',
+        'setup.kibana:',
+        '  host: "<kibana_url>"'
+      ],
+      textPost: 'Where `<password>` is the password of the `elastic` user, ' +
+                '`<es_url>` is the URL of Elasticsearch, and `<kibana_url>` is the URL of Kibana.'
+    },
+    WINDOWS: {
+      title: 'Edit the configuration',
+      textPre: 'Modify `C:\\Program Files\\Metricbeat\\metricbeat.yml` to set the connection information:',
+      commands: [
+        'output.elasticsearch:',
+        '  hosts: ["<es_url>"]',
+        '  username: "elastic"',
+        '  password: "<password>"',
+        'setup.kibana:',
+        '  host: "<kibana_url>"'
+      ],
+      textPost: 'Where `<password>` is the password of the `elastic` user, ' +
+                '`<es_url>` is the URL of Elasticsearch, and `<kibana_url>` is the URL of Kibana.'
     }
   }
 };
