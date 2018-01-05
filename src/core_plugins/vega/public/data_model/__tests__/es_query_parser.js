@@ -51,53 +51,51 @@ describe(`EsQueryParser time`, () => {
 
 describe(`EsQueryParser.injectQueryContextVars`, () => {
 
-  function test(obj, expected, usesTime, ctx) {
+  function test(obj, expected, ctx) {
     return () => {
-      const opts = { isQuery: true, usesTime: false };
-      create(rangeStart, rangeEnd, ctx)._injectContextVars(obj, opts);
+      create(rangeStart, rangeEnd, ctx)._injectContextVars(obj, true);
       expect(obj).to.eql(expected);
-      expect(opts).to.eql({ isQuery: true, usesTime });
     };
   }
 
-  it(`empty`, test({}, {}, false));
+  it(`empty`, test({}, {}));
   it(`simple`, () => {
     const obj = { a: { c: 10 }, b: [{ d: 2 }, 4, 5], c: [], d: {} };
-    return test(obj, _.cloneDeep(obj), false)();
+    test(obj, _.cloneDeep(obj));
   });
-  it(`must clause empty`, test({ arr: ['%dashboard_context-must_clause%'] }, { arr: [] }, false, {}));
-  it(`must clause arr`, test({ arr: ['%dashboard_context-must_clause%'] }, { arr: [...ctxArr.bool.must] }, false, ctxArr));
-  it(`must clause obj`, test({ arr: ['%dashboard_context-must_clause%'] }, { arr: [ctxObj.bool.must] }, false, ctxObj));
+  it(`must clause empty`, test({ arr: ['%dashboard_context-must_clause%'] }, { arr: [] }, {}));
+  it(`must clause arr`, test({ arr: ['%dashboard_context-must_clause%'] }, { arr: [...ctxArr.bool.must] }, ctxArr));
+  it(`must clause obj`, test({ arr: ['%dashboard_context-must_clause%'] }, { arr: [ctxObj.bool.must] }, ctxObj));
   it(`mixed clause arr`, test(
     { arr: [1, '%dashboard_context-must_clause%', 2, '%dashboard_context-must_not_clause%'] },
-    { arr: [1, ...ctxArr.bool.must, 2, ...ctxArr.bool.must_not] }, false, ctxArr));
+    { arr: [1, ...ctxArr.bool.must, 2, ...ctxArr.bool.must_not] }, ctxArr));
   it(`mixed clause obj`, test(
     { arr: ['%dashboard_context-must_clause%', 1, '%dashboard_context-must_not_clause%', 2] },
-    { arr: [ctxObj.bool.must, 1, ctxObj.bool.must_not, 2] }, false, ctxObj));
-  it(`%autointerval% = true`, test({ interval: { '%autointerval%': true } }, { interval: `1h` }, true, ctxObj));
-  it(`%autointerval% = 10`, test({ interval: { '%autointerval%': 10 } }, { interval: `3h` }, true, ctxObj));
-  it(`%timefilter% = min`, test({ a: { '%timefilter%': 'min' } }, { a: rangeStart }, true));
-  it(`%timefilter% = max`, test({ a: { '%timefilter%': 'max' } }, { a: rangeEnd }, true));
+    { arr: [ctxObj.bool.must, 1, ctxObj.bool.must_not, 2] }, ctxObj));
+  it(`%autointerval% = true`, test({ interval: { '%autointerval%': true } }, { interval: `1h` }, ctxObj));
+  it(`%autointerval% = 10`, test({ interval: { '%autointerval%': 10 } }, { interval: `3h` }, ctxObj));
+  it(`%timefilter% = min`, test({ a: { '%timefilter%': 'min' } }, { a: rangeStart }));
+  it(`%timefilter% = max`, test({ a: { '%timefilter%': 'max' } }, { a: rangeEnd }));
   it(`%timefilter% = true`, test(
     { a: { '%timefilter%': true } },
-    { a: { format: `epoch_millis`, gte: rangeStart, lte: rangeEnd } }, true));
+    { a: { format: `epoch_millis`, gte: rangeStart, lte: rangeEnd } }));
 });
 
 describe(`EsQueryParser.parseEsRequest`, () => {
   function test(req, ctx, expected) {
     return () => {
-      const actual = create(rangeStart, rangeEnd, ctx).parseEsRequest(req);
-      expect(actual).to.eql(expected);
+      create(rangeStart, rangeEnd, ctx).parseEsRequest(req);
+      expect(req).to.eql(expected);
     };
   }
 
   it(`%context_query%=true`, test(
     { index: '_all', '%context_query%': true }, ctxArr,
-    { index: '_all', body: { query: ctxArr }, usesTime: false }));
+    { index: '_all', body: { query: ctxArr } }));
 
   it(`%context%=true`, test(
     { index: '_all', '%context%': true }, ctxArr,
-    { index: '_all', body: { query: ctxArr }, usesTime: false }));
+    { index: '_all', body: { query: ctxArr } }));
 
   const expectedForCtxAndTimefield = {
     index: '_all',
@@ -111,8 +109,7 @@ describe(`EsQueryParser.parseEsRequest`, () => {
           must_not: [{ 'd': 4 }]
         }
       }
-    },
-    usesTime: true
+    }
   };
 
   it(`%context_query%='abc'`, test(
@@ -124,16 +121,14 @@ describe(`EsQueryParser.parseEsRequest`, () => {
   it(`%timefield%='abc'`, test({ index: '_all', '%timefield%': 'abc' }, ctxArr,
     {
       index: '_all',
-      body: { query: { range: { abc: { format: 'epoch_millis', gte: rangeStart, lte: rangeEnd } } } },
-      usesTime: true
+      body: { query: { range: { abc: { format: 'epoch_millis', gte: rangeStart, lte: rangeEnd } } } }
     }
   ));
 
-  it(`no esRequest`, test({ index: '_all' }, ctxArr, { index: '_all', body: {}, usesTime: false }));
+  it(`no esRequest`, test({ index: '_all' }, ctxArr, { index: '_all', body: {} }));
 
   it(`esRequest`, test({ index: '_all', body: { query: 2 } }, ctxArr, {
     index: '_all',
-    body: { query: 2 },
-    usesTime: false
+    body: { query: 2 }
   }));
 });

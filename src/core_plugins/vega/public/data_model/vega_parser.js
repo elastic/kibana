@@ -264,8 +264,9 @@ export class VegaParser {
       switch (url['%type%']) {
         case undefined:
         case 'elasticsearch':
-          const res = this._esQueryParser.parseEsRequest(url);
-          esRequests.push({ obj, ...res });
+          delete url['%type%'];
+          this._esQueryParser.parseEsRequest(url);
+          esRequests.push({ obj, searchReq: url });
           break;
         case 'emsfile':
           if (typeof url.name !== 'string') {
@@ -285,7 +286,7 @@ export class VegaParser {
   }
 
   async _populateEsResults(esRequests) {
-    const reqs = esRequests.map((r) => ({ meta: { index: r.index }, body: r.body }));
+    const reqs = esRequests.map((r) => r.searchReq);
 
     const results = await this._searchCache.search(reqs);
 

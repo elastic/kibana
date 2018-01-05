@@ -23,27 +23,27 @@ export class EsQueryParser {
     this._onWarning = onWarning;
   }
 
+  /**
+   * Update request object, expanding any context-aware keywords
+   * @param req
+   */
   parseEsRequest(req) {
-    const index = req.index;
     let body = req.body;
     let context = req[CONTEXT];
+    delete req[CONTEXT];
     let timefield = req[TIMEFIELD];
+    delete req[TIMEFIELD];
     let usesContext = context !== undefined || timefield !== undefined;
-    const injectionOpts = { usesTime: false };
-
-    if (index === undefined || typeof index !== 'string' || index.length === 0) {
-      throw new Error('Data must have a url.index string field for ES data sources". ' +
-        'Set it to "_all" to search all indexes.');
-    }
 
     if (body === undefined) {
-      body = {};
+      req.body = body = {};
     } else if (!_.isPlainObject(body)) {
       throw new Error('url.body must be an object');
     }
 
     // Migrate legacy %context_query% into context & timefield values
     const legacyContext = req[LEGACY_CONTEXT];
+    delete req[LEGACY_CONTEXT];
     if (legacyContext !== undefined) {
       if (body.query !== undefined) {
         throw new Error(`Data url must not have legacy "${LEGACY_CONTEXT}" and "body.query" values at the same time`);
@@ -71,14 +71,12 @@ export class EsQueryParser {
       if (usesContext) {
         throw new Error(`url.${CONTEXT} and url.${TIMEFIELD} must not be used when url.body.query is set`);
       }
-      injectionOpts.isQuery = true;
-      this._injectContextVars(body.query, injectionOpts);
+      this._injectContextVars(body.query, true);
     } else if (usesContext) {
 
       if (timefield) {
         // Inject range filter based on the timefilter values
         body.query = { range: { [timefield]: this._createRangeFilter({ [TIMEFILTER]: true }) } };
-        injectionOpts.usesTime = true;
       }
 
       if (context) {
@@ -91,26 +89,21 @@ export class EsQueryParser {
       }
     }
 
-    injectionOpts.isQuery = false;
-    this._injectContextVars(body.aggs, injectionOpts);
-
-    return { index, body, usesTime: injectionOpts.usesTime };
+    this._injectContextVars(body.aggs, false);
   }
 
   /**
    * Modify ES request by processing magic keywords
    * @param {*} obj
-   * @param {object} injectionOpts
-   * @param {boolean} injectionOpts.isQuery - if true, the `obj` belongs to the req's query portion
-   * @param {boolean} injectionOpts.usesTime - [out] will be set to true if request uses timefilter
+   * @param {boolean} isQuery - if true, the `obj` belongs to the req's query portion
    */
-  _injectContextVars(obj, injectionOpts) {
+  _injectContextVars(obj, isQuery) {
     if (obj && typeof obj === 'object') {
       if (Array.isArray(obj)) {
         // For arrays, replace MUST_CLAUSE and MUST_NOT_CLAUSE string elements
         for (let pos = 0; pos < obj.length;) {
           const item = obj[pos];
-          if (injectionOpts.isQuery && (item === MUST_CLAUSE || item === MUST_NOT_CLAUSE)) {
+          if (isQuery && (item === MUST_CLAUSE || item === MUST_NOT_CLAUSE)) {
             const ctxTag = item === MUST_CLAUSE ? 'must' : 'must_not';
             const ctx = this._dashboardContext();
             if (ctx && ctx.bool && ctx.bool[ctxTag]) {
@@ -125,7 +118,7 @@ export class EsQueryParser {
               obj.splice(pos, 1); // remove item, keep pos at the same position
             }
           } else {
-            this._injectContextVars(item, injectionOpts);
+            this._injectContextVars(item, isQuery);
             pos++;
           }
         }
@@ -145,7 +138,6 @@ export class EsQueryParser {
             }
             const bounds = this._getTimeRange();
             obj.interval = EsQueryParser._roundInterval((bounds.max - bounds.min) / size);
-            injectionOpts.usesTime = true;
             continue;
           }
 
@@ -155,15 +147,13 @@ export class EsQueryParser {
             case 'max':
               // Replace {"%timefilter%": "min|max", ...} object with a timestamp
               obj[prop] = this._getTimeBound(subObj, subObj[TIMEFILTER]);
-              injectionOpts.usesTime = true;
               continue;
             case true:
               // Replace {"%timefilter%": true, ...} object with the "range" object
               this._createRangeFilter(subObj);
-              injectionOpts.usesTime = true;
               continue;
             case undefined:
-              this._injectContextVars(subObj, injectionOpts);
+              this._injectContextVars(subObj, isQuery);
               continue;
             default:
               throw new Error(`"${TIMEFILTER}" property must be set to true, "min", or "max"`);

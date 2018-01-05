@@ -71,9 +71,9 @@ describe('VegaParser._resolveEsQueries', () => {
   it('no data2', test({ a: 1 }, { a: 1 }));
   it('non-es data', test({ data: { a: 10 } }, { data: { a: 10 } }));
   it('es', test({ data: { url: { index: 'a' }, x: 1 } }, { data: { values: [42], x: 1 } }));
-  it('es', test({ data: { url: { type: 'elasticsearch', index: 'a' } } }, { data: { values: [42] } }));
+  it('es', test({ data: { url: { '%type%': 'elasticsearch', index: 'a' } } }, { data: { values: [42] } }));
   it('es arr', test({ arr: [{ data: { url: { index: 'a' }, x: 1 } }] }, { arr: [{ data: { values: [42], x: 1 } }] }));
-  it('emsfile', test({ data: { url: { type: 'emsfile', name: 'file1' } } }, { data: { url: 'url1' } }));
+  it('emsfile', test({ data: { url: { '%type%': 'emsfile', name: 'file1' } } }, { data: { url: 'url1' } }));
 });
 
 describe('VegaParser._parseSchema', () => {
