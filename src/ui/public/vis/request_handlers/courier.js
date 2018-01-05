@@ -47,9 +47,8 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
         }
       }).then(async resp => {
         for (const agg of vis.aggs) {
-          if (!agg.type || !agg.type.postFlightRequest) continue;
           const nestedSearchSource = new SearchSource().inherits(searchSource);
-          resp = await agg.type.postFlightRequest(vis.aggs, agg, resp, nestedSearchSource);
+          resp = await agg.type.postFlightRequest(resp, vis.aggs, agg, nestedSearchSource);
         }
         return resp;
       });

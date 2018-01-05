@@ -62,7 +62,7 @@ export function AggTypesBucketsTermsProvider(Private) {
       return agg.getFieldDisplayName() + ': ' + params.order.display;
     },
     createFilter: createFilter,
-    postFlightRequest: async (aggConfigs, aggConfig, resp, nestedSearchSource) => {
+    postFlightRequest: async (resp, aggConfigs, aggConfig, nestedSearchSource) => {
       if (aggConfig.params.otherBucket) {
         const filterAgg = buildOtherBucketAgg(aggConfigs, aggConfig, resp);
         nestedSearchSource.set('aggs', filterAgg);
