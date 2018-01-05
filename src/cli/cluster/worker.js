@@ -41,7 +41,10 @@ export default class Worker extends EventEmitter {
 
     this.env = {
       kbnWorkerType: this.type,
-      kbnWorkerArgv: JSON.stringify(baseArgv.concat(opts.argv || []))
+      kbnWorkerArgv: JSON.stringify([
+        ...(opts.baseArgv || baseArgv),
+        ...(opts.argv || [])
+      ])
     };
   }
 

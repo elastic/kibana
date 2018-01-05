@@ -1,13 +1,8 @@
-import { resolve } from 'path';
 import { writeFile } from 'fs';
 
 import Boom from 'boom';
 import ExtractTextPlugin from 'extract-text-webpack-plugin';
 import webpack from 'webpack';
-import CommonsChunkPlugin from 'webpack/lib/optimize/CommonsChunkPlugin';
-import DefinePlugin from 'webpack/lib/DefinePlugin';
-import UglifyJsPlugin from 'webpack/lib/optimize/UglifyJsPlugin';
-import NoEmitOnErrorsPlugin from 'webpack/lib/NoEmitOnErrorsPlugin';
 import Stats from 'webpack/lib/Stats';
 import webpackMerge from 'webpack-merge';
 
@@ -70,8 +65,6 @@ export default class BaseOptimizer {
   }
 
   getConfig() {
-    const cacheDirectory = this.uiBundles.getCachePath();
-
     function getStyleLoaders(preProcessors = [], postProcessors = []) {
       return ExtractTextPlugin.extract({
         fallback: {
@@ -101,6 +94,30 @@ export default class BaseOptimizer {
       });
     }
 
+    const nodeModulesPath = fromRoot('node_modules');
+
+    /**
+     * Adds a cache loader if we're running in dev mode. The reason we're not adding
+     * the cache-loader when running in production mode is that it creates cache
+     * files in optimize/.cache that are not necessary for distributable versions
+     * of Kibana and just make compressing and extracting it more difficult.
+     */
+    function maybeAddCacheLoader(uiBundles, cacheName, loaders) {
+      if (!uiBundles.isDevMode()) {
+        return loaders;
+      }
+
+      return [
+        {
+          loader: 'cache-loader',
+          options: {
+            cacheDirectory: uiBundles.getCacheDirectory(cacheName)
+          }
+        },
+        ...loaders
+      ];
+    }
+
     const commonConfig = {
       node: { fs: 'empty' },
       context: fromRoot('.'),
@@ -122,12 +139,20 @@ export default class BaseOptimizer {
           allChunks: true
         }),
 
-        new CommonsChunkPlugin({
+        new webpack.optimize.CommonsChunkPlugin({
           name: 'commons',
-          filename: 'commons.bundle.js'
+          filename: 'commons.bundle.js',
+          minChunks: 2,
         }),
 
-        new NoEmitOnErrorsPlugin(),
+        new webpack.optimize.CommonsChunkPlugin({
+          name: 'vendors',
+          filename: 'vendors.bundle.js',
+          // only combine node_modules from Kibana
+          minChunks: module => module.context && module.context.indexOf(nodeModulesPath) !== -1
+        }),
+
+        new webpack.NoEmitOnErrorsPlugin(),
       ],
 
       module: {
@@ -136,12 +161,7 @@ export default class BaseOptimizer {
             test: /\.less$/,
             use: getStyleLoaders(
               ['less-loader'],
-              [{
-                loader: 'cache-loader',
-                options: {
-                  cacheDirectory: resolve(cacheDirectory, 'less'),
-                }
-              }]
+              maybeAddCacheLoader(this.uiBundles, 'less', [])
             ),
           },
           {
@@ -168,13 +188,7 @@ export default class BaseOptimizer {
           {
             test: /\.js$/,
             exclude: BABEL_EXCLUDE_RE.concat(this.uiBundles.getWebpackNoParseRules()),
-            use: [
-              {
-                loader: 'cache-loader',
-                options: {
-                  cacheDirectory: resolve(cacheDirectory, 'babel'),
-                }
-              },
+            use: maybeAddCacheLoader(this.uiBundles, 'babel', [
               {
                 loader: 'babel-loader',
                 options: {
@@ -183,8 +197,8 @@ export default class BaseOptimizer {
                     BABEL_PRESET_PATH,
                   ],
                 },
-              },
-            ],
+              }
+            ]),
           },
           ...this.uiBundles.getPostLoaders().map(loader => ({
             enforce: 'post',
@@ -225,12 +239,12 @@ export default class BaseOptimizer {
 
     return webpackMerge(commonConfig, {
       plugins: [
-        new DefinePlugin({
+        new webpack.DefinePlugin({
           'process.env': {
             'NODE_ENV': '"production"'
           }
         }),
-        new UglifyJsPlugin({
+        new webpack.optimize.UglifyJsPlugin({
           compress: {
             warnings: false
           },

@@ -43,7 +43,7 @@ export function createColorFormat(FieldFormat) {
   ColorFormat.prototype._convert = {
     html(val) {
       const color = this.findColorRuleForVal(val);
-      if (!color) return asPrettyString(val);
+      if (!color) return _.escape(asPrettyString(val));
 
       let style = '';
       if (color.text) style += `color: ${color.text};`;
