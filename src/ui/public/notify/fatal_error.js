@@ -40,6 +40,39 @@ function formatInfo() {
   return info.join('\n');
 }
 
+// We're exporting this because state_management/state.js calls fatalError, which makes it
+// impossible to test unless we stub this stuff out.
+export const fatalErrorInternals = {
+  show: (err, location) => {
+    if (firstFatal) {
+      _.callEach(fatalCallbacks);
+      firstFatal = false;
+      window.addEventListener('hashchange', function () {
+        window.location.reload();
+      });
+    }
+
+    const html = fatalToastTemplate({
+      info: formatInfo(),
+      msg: formatMsg(err, location),
+      stack: formatStack(err)
+    });
+
+    let $container = $('#fatal-splash-screen');
+
+    if (!$container.length) {
+      $(document.body)
+        // in case the app has not completed boot
+        .removeAttr('ng-cloak')
+        .html(fatalSplashScreen);
+
+      $container = $('#fatal-splash-screen');
+    }
+
+    $container.append(html);
+  },
+};
+
 /**
  * Kill the page, display an error, then throw the error.
  * Used as a last-resort error back in many promise chains
@@ -48,32 +81,7 @@ function formatInfo() {
  * @param  {Error} err - The error that occured
  */
 export function fatalError(err, location) {
-  if (firstFatal) {
-    _.callEach(fatalCallbacks);
-    firstFatal = false;
-    window.addEventListener('hashchange', function () {
-      window.location.reload();
-    });
-  }
-
-  const html = fatalToastTemplate({
-    info: formatInfo(),
-    msg: formatMsg(err, location),
-    stack: formatStack(err)
-  });
-
-  let $container = $('#fatal-splash-screen');
-
-  if (!$container.length) {
-    $(document.body)
-      // in case the app has not completed boot
-      .removeAttr('ng-cloak')
-      .html(fatalSplashScreen);
-
-    $container = $('#fatal-splash-screen');
-  }
-
-  $container.append(html);
+  fatalErrorInternals.show(err, location);
   console.error(err.stack); // eslint-disable-line no-console
 
   throw err;
