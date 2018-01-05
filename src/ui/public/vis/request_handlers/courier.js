@@ -1,8 +1,10 @@
 import _ from 'lodash';
-
+import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
 import { VisRequestHandlersRegistryProvider } from 'ui/registry/vis_request_handlers';
 
 const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
+  const SearchSource = Private(SearchSourceProvider);
+
   return {
     name: 'courier',
     handler: function (vis, appState, uiState, queryFilter, searchSource) {
@@ -35,15 +37,20 @@ const CourierRequestHandlerProvider = function (Private, courier, timefilter) {
             };
 
             searchSource.rawResponse = resp;
-            resolve(resp);
+
+            resolve(_.cloneDeep(resp));
           }).catch(e => reject(e));
 
           courier.fetch();
         } else {
-          resolve(searchSource.rawResponse);
+          resolve(_.cloneDeep(searchSource.rawResponse));
         }
-
-
+      }).then(async resp => {
+        for (const agg of vis.aggs) {
+          const nestedSearchSource = new SearchSource().inherits(searchSource);
+          resp = await agg.type.postFlightRequest(resp, vis.aggs, agg, nestedSearchSource);
+        }
+        return resp;
       });
     }
   };

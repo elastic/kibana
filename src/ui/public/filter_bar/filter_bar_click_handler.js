@@ -49,6 +49,7 @@ export function FilterBarClickHandlerProvider(Notifier, Private) {
               }
             }
           })
+          .flatten()
           .filter(Boolean)
           .value();
 
