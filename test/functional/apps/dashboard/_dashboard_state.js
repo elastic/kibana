@@ -11,7 +11,7 @@ export default function ({ getService, getPageObjects }) {
   const remote = getService('remote');
   const retry = getService('retry');
 
-  describe.skip('dashboard state', function describeIndexTests() {
+  describe('dashboard state', function describeIndexTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
@@ -68,7 +68,6 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.dashboard.addVisualizations([AREA_CHART_VIS_NAME]);
       await PageObjects.dashboard.saveDashboard('Overridden colors');
-      await PageObjects.header.clickToastOK();
 
       await PageObjects.dashboard.clickEdit();
       await PageObjects.visualize.clickLegendOption('Count');
@@ -97,7 +96,6 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.dashboard.addSavedSearch('my search');
       await PageObjects.dashboard.saveDashboard('No local edits');
-      await PageObjects.header.clickToastOK();
 
       await PageObjects.header.clickDiscover();
       await PageObjects.discover.clickFieldListItemAdd('agent');
@@ -118,7 +116,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.discover.removeHeaderColumn('bytes');
       await PageObjects.dashboard.clickEdit();
       await PageObjects.dashboard.saveDashboard('Has local edits');
-      await PageObjects.header.clickToastOK();
 
       await PageObjects.header.clickDiscover();
       await PageObjects.discover.clickFieldListItemAdd('clientip');
@@ -142,7 +139,6 @@ export default function ({ getService, getPageObjects }) {
 
       await PageObjects.dashboard.addVisualizations(['Visualization TileMap']);
       await PageObjects.dashboard.saveDashboard('No local edits');
-      await PageObjects.header.clickToastOK();
 
       await testSubjects.moveMouseTo('dashboardPanel');
       await PageObjects.visualize.openSpyPanel();
@@ -159,7 +155,6 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.visualize.clickMapZoomIn();
 
       await PageObjects.visualize.saveVisualization('Visualization TileMap');
-      await PageObjects.header.clickToastOK();
 
       await PageObjects.header.clickDashboard();
 

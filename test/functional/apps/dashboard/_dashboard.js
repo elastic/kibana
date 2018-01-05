@@ -13,7 +13,7 @@ export default function ({ getService, getPageObjects }) {
   const testVisualizationTitles = [];
   const testVisualizationDescriptions = [];
 
-  describe.skip('dashboard tab', function describeIndexTests() {
+  describe('dashboard tab', function describeIndexTests() {
     before(async function () {
       await PageObjects.dashboard.initTests();
       await PageObjects.dashboard.preserveCrossAppState();
@@ -57,7 +57,6 @@ export default function ({ getService, getPageObjects }) {
     it('should save and load dashboard', async function saveAndLoadDashboard() {
       const dashboardName = 'Dashboard Test 1';
       await PageObjects.dashboard.saveDashboard(dashboardName);
-      await PageObjects.header.clickToastOK();
       await PageObjects.dashboard.gotoDashboardLandingPage();
 
       await retry.try(function () {
@@ -247,7 +246,6 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.clickAreaChart();
         await PageObjects.visualize.clickNewSearch();
         await PageObjects.visualize.saveVisualization('visualization from add new link');
-        await PageObjects.header.clickToastOK();
 
         return retry.try(async () => {
           const panelCount = await PageObjects.dashboard.getPanelCount();

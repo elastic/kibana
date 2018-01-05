@@ -51,11 +51,14 @@ export default function ({ getService, getPageObjects }) {
     describe('data table', function indexPatternCreation() {
       const vizName1 = 'Visualization DataTable';
 
-      it.skip('should be able to save and load', function () {
+      it('should be able to save and load', function () {
         return PageObjects.visualize.saveVisualization(vizName1)
-          .then(function (message) {
-            log.debug('Saved viz message = ' + message);
-            expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
+          .then(() => {
+            return PageObjects.common.getBreadcrumbPageTitle();
+          })
+          .then(pageTitle => {
+            log.debug(`Save viz page title is ${pageTitle}`);
+            expect(pageTitle).to.contain(vizName1);
           })
           .then(function testVisualizeWaitForToastMessageGone() {
             return PageObjects.header.waitForToastMessageGone();

@@ -150,7 +150,7 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.closeSpyPanel();
       });
 
-      it.skip('Newly saved visualization retains map bounds', async () => {
+      it('Newly saved visualization retains map bounds', async () => {
         const vizName1 = 'Visualization TileMap';
 
         await PageObjects.visualize.clickMapZoomIn();
@@ -160,7 +160,6 @@ export default function ({ getService, getPageObjects }) {
 
         await PageObjects.visualize.closeSpyPanel();
         await PageObjects.visualize.saveVisualization(vizName1);
-        await PageObjects.header.waitForToastMessageGone();
 
         const afterSaveMapBounds = await PageObjects.visualize.getMapBounds();
 

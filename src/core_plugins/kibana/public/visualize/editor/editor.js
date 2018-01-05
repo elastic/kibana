@@ -255,6 +255,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
             title: `Saved '${savedVis.title}'`,
             color: 'success',
             iconType: 'check',
+            'data-test-subj': 'saveVisualizationSuccess',
           });
 
           if ($scope.isAddToDashMode()) {

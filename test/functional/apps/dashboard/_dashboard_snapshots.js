@@ -32,7 +32,6 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       await PageObjects.dashboard.setTimepickerInDataRange();
       await dashboardVisualizations.createAndAddTSVBVisualization('TSVB');
       await PageObjects.dashboard.saveDashboard('tsvb');
-      await PageObjects.header.clickToastOK();
 
       await PageObjects.dashboard.clickFullScreenMode();
       await PageObjects.dashboard.toggleExpandPanel();
@@ -45,13 +44,12 @@ export default function ({ getService, getPageObjects, updateBaselines }) {
       expect(percentSimilar).to.be(0);
     });
 
-    it.skip('compare area chart snapshot', async () => {
+    it('compare area chart snapshot', async () => {
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.setTimepickerInDataRange();
       await PageObjects.dashboard.addVisualizations([AREA_CHART_VIS_NAME]);
       await PageObjects.dashboard.saveDashboard('area');
-      await PageObjects.header.clickToastOK();
 
       await PageObjects.dashboard.clickFullScreenMode();
       await PageObjects.dashboard.toggleExpandPanel();

@@ -198,6 +198,7 @@ app.directive('dashboardApp', function ($injector) {
           title: 'Saved search added to your dashboard',
           color: 'success',
           iconType: 'check',
+          'data-test-subj': 'addSavedSearchToDashboardSuccess',
         });
       };
 
@@ -282,6 +283,7 @@ app.directive('dashboardApp', function ($injector) {
                 title: `Saved '${dash.title}'`,
                 color: 'success',
                 iconType: 'check',
+                'data-test-subj': 'saveDashboardSuccess',
               });
 
               if (dash.id !== $routeParams.id) {

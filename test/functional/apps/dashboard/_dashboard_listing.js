@@ -17,17 +17,16 @@ export default function ({ getService, getPageObjects }) {
         expect(promptExists).to.be(true);
       });
 
-      it.skip('creates a new dashboard', async function () {
+      it('creates a new dashboard', async function () {
         await PageObjects.dashboard.clickCreateDashboardPrompt();
         await PageObjects.dashboard.saveDashboard(dashboardName);
-        await PageObjects.header.clickToastOK();
 
         await PageObjects.dashboard.gotoDashboardLandingPage();
         const countOfDashboards = await PageObjects.dashboard.getDashboardCountWithName(dashboardName);
         expect(countOfDashboards).to.equal(1);
       });
 
-      it.skip('is not shown when there is a dashboard', async function () {
+      it('is not shown when there is a dashboard', async function () {
         const promptExists = await PageObjects.dashboard.getCreateDashboardPromptExists();
         expect(promptExists).to.be(false);
       });
@@ -41,7 +40,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe.skip('delete', async function () {
+    describe('delete', async function () {
       it('default confirm action is cancel', async function () {
         await PageObjects.dashboard.searchForDashboardWithName('');
         await PageObjects.dashboard.clickListItemCheckbox();
@@ -67,12 +66,11 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe.skip('search', function () {
+    describe('search', function () {
       before(async () => {
         await PageObjects.dashboard.clearSearchValue();
         await PageObjects.dashboard.clickCreateDashboardPrompt();
         await PageObjects.dashboard.saveDashboard('Two Words');
-        await PageObjects.header.clickToastOK();
       });
 
       it('matches on the first word', async function () {
@@ -106,7 +104,7 @@ export default function ({ getService, getPageObjects }) {
       });
     });
 
-    describe.skip('search by title', function () {
+    describe('search by title', function () {
       it('loads a dashboard if title matches', async function () {
         const currentUrl = await remote.getCurrentUrl();
         const newUrl = currentUrl + '&title=Two%20Words';

@@ -50,9 +50,8 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.selectedLegendColorCount('#F9D9F9', 5);
       });
 
-      it.skip('loads a saved dashboard', async function () {
+      it('loads a saved dashboard', async function () {
         await PageObjects.dashboard.saveDashboard('saved with colors', { storeTimeWithDashboard: true });
-        await PageObjects.header.clickToastOK();
 
         const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
         const url = `${kibanaBaseUrl}#/dashboard/${id}`;
@@ -67,7 +66,7 @@ export default function ({ getService, getPageObjects }) {
         await dashboardExpect.selectedLegendColorCount('#F9D9F9', 5);
       });
 
-      it.skip('uiState in url takes precedence over saved dashboard state', async function () {
+      it('uiState in url takes precedence over saved dashboard state', async function () {
         const id = await PageObjects.dashboard.getDashboardIdFromCurrentUrl();
         const updatedQuery = urlQuery.replace(/F9D9F9/g, '000000');
         const url = `${kibanaBaseUrl}#/dashboard/${id}?${updatedQuery}`;

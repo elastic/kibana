@@ -14,7 +14,6 @@ export function DashboardVisualizationProvider({ getService, getPageObjects }) {
       await PageObjects.dashboard.clickAddNewVisualizationLink();
       await PageObjects.visualize.clickVisualBuilder();
       await PageObjects.visualize.saveVisualization(name);
-      await PageObjects.header.clickToastOK();
     }
 
     async createSavedSearch({ name, query, fields }) {

@@ -37,14 +37,13 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.dashboard.addVisualization(PIE_CHART_VIS_NAME);
       });
 
-      it.skip('are hidden in view mode', async function () {
+      it('are hidden in view mode', async function () {
         await PageObjects.dashboard.saveDashboard(dashboardName);
-        await PageObjects.header.clickToastOK();
         const panelToggleMenu = await testSubjects.exists('dashboardPanelToggleMenuIcon');
         expect(panelToggleMenu).to.equal(false);
       });
 
-      it.skip('are shown in edit mode', async function () {
+      it('are shown in edit mode', async function () {
         await PageObjects.dashboard.clickEdit();
 
         const panelToggleMenu = await testSubjects.exists('dashboardPanelToggleMenuIcon');
@@ -59,7 +58,7 @@ export default function ({ getService, getPageObjects }) {
 
       // Based off an actual bug encountered in a PR where a hard refresh in edit mode did not show the edit mode
       // controls.
-      it ('are shown in edit mode after a hard refresh', async () => {
+      it('are shown in edit mode after a hard refresh', async () => {
         const currentUrl = await remote.getCurrentUrl();
         // the second parameter of true will include the timestamp in the url and trigger a hard refresh.
         await remote.get(currentUrl.toString(), true);
@@ -77,16 +76,15 @@ export default function ({ getService, getPageObjects }) {
       });
 
       describe('on an expanded panel', function () {
-        it.skip('are hidden in view mode', async function () {
+        it('are hidden in view mode', async function () {
           await PageObjects.dashboard.saveDashboard(dashboardName);
-          await PageObjects.header.clickToastOK();
           await PageObjects.dashboard.toggleExpandPanel();
 
           const panelToggleMenu = await testSubjects.exists('dashboardPanelToggleMenuIcon');
           expect(panelToggleMenu).to.equal(false);
         });
 
-        it.skip('in edit mode hides remove icons ', async function () {
+        it('in edit mode hides remove icons ', async function () {
           await PageObjects.dashboard.clickEdit();
 
           const panelToggleMenu = await testSubjects.exists('dashboardPanelToggleMenuIcon');
@@ -121,7 +119,7 @@ export default function ({ getService, getPageObjects }) {
         });
       });
 
-      describe.skip('saved search object edit menu', () => {
+      describe('saved search object edit menu', () => {
         before(async () => {
           await PageObjects.header.clickDiscover();
           await PageObjects.discover.clickFieldListItemAdd('bytes');
@@ -155,7 +153,7 @@ export default function ({ getService, getPageObjects }) {
 
     // Panel expand should also be shown in view mode, but only on mouse hover.
     describe('panel expand control', function () {
-      it.skip('shown in edit mode', async function () {
+      it('shown in edit mode', async function () {
         await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
         await testSubjects.click('dashboardPanelToggleMenuIcon');
         const expandExists = await testSubjects.exists('dashboardPanelExpandIcon');

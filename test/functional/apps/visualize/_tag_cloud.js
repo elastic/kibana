@@ -98,11 +98,14 @@ export default function ({ getService, getPageObjects }) {
         expect(data).to.eql([ '32,212,254,720', '21,474,836,480', '20,401,094,656', '19,327,352,832', '18,253,611,008' ]);
       });
 
-      it.skip('should save and load', function () {
+      it('should save and load', function () {
         return PageObjects.visualize.saveVisualization(vizName1)
-          .then(function (message) {
-            log.debug('Saved viz message = ' + message);
-            expect(message).to.be('Visualization Editor: Saved Visualization \"' + vizName1 + '\"');
+          .then(() => {
+            return PageObjects.common.getBreadcrumbPageTitle();
+          })
+          .then(pageTitle => {
+            log.debug(`Save viz page title is ${pageTitle}`);
+            expect(pageTitle).to.contain(vizName1);
           })
           .then(function testVisualizeWaitForToastMessageGone() {
             return PageObjects.header.waitForToastMessageGone();
@@ -149,7 +152,7 @@ export default function ({ getService, getPageObjects }) {
           });
       });
 
-      describe.skip('formatted field', function () {
+      describe('formatted field', function () {
         before(async function () {
           await PageObjects.settings.navigateTo();
           await PageObjects.settings.clickKibanaIndices();
