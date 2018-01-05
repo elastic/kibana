@@ -3,6 +3,7 @@ import { callAfterBindingsWorkaround } from 'ui/compat';
 import template from './query_bar.html';
 import { queryLanguages } from '../lib/queryLanguages';
 import '../../directives/documentation_href';
+import '../../directives/match_pairs';
 
 const module = uiModules.get('kibana');
 
