@@ -31,7 +31,14 @@ module.directive('matchPairs', () => ({
         // 1. (See above)
         e.preventDefault();
         target.setSelectionRange(selectionStart + 1, selectionEnd + 1);
-      } else if (openers.includes(key)) {
+      } else if (
+        openers.includes(key) && (
+          // Don't match quotes following alphanumeric characters when there isn't a selection
+          !['"', `'`].includes(key) ||
+          selectionStart !== selectionEnd ||
+          !(value.charAt(selectionStart - 1) || '').match(/[a-zA-Z0-9_]/)
+        )
+      ) {
         // 2. (See above)
         e.preventDefault();
         ngModel.$setViewValue(
@@ -44,7 +51,7 @@ module.directive('matchPairs', () => ({
       } else if (
         selectionStart === selectionEnd &&
         key === 'Backspace' &&
-        !event.metaKey && pairs.includes(value.substr(selectionEnd - 1, 2))
+        !e.metaKey && pairs.includes(value.substr(selectionEnd - 1, 2))
       ) {
         // 3. (See above)
         e.preventDefault();

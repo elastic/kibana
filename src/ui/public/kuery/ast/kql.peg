@@ -1,6 +1,6 @@
 // Initialization block
 {
-  var { nodeTypes: { function: { buildNode }}} = options.helpers;
+  const { nodeTypes: { function: { buildNode }}} = options.helpers;
 }
 
 start
