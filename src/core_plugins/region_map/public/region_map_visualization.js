@@ -1,6 +1,5 @@
 import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
 import _ from 'lodash';
-import AggConfigResult from 'ui/vis/agg_config_result';
 import { BaseMapsVisualizationProvider } from '../../tile_map/public/base_maps_visualization';
 import ChoroplethLayer from './choropleth_layer';
 import { truncatedColorMaps }  from 'ui/vislib/components/color/truncated_colormaps';
@@ -93,9 +92,9 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
         this._choroplethLayer.setMetrics(previousMetrics, previousMetricsAgg);
       }
       this._choroplethLayer.on('select', (event) => {
-        const aggs = this._vis.getAggConfig().getResponseAggs();
-        const aggConfigResult = new AggConfigResult(aggs[0], false, event, event);
-        this._vis.API.events.filter({ point: { aggConfigResult: aggConfigResult } });
+        const agg = this.vis.aggs.bySchemaName.segment[0];
+        const filter = agg.createFilter(event);
+        this.vis.API.queryFilter.addFilters(filter);
       });
       this._choroplethLayer.on('styleChanged', (event) => {
         const shouldShowWarning = this._vis.params.isDisplayWarning && config.get('visualization:regionmap:showWarnings');
