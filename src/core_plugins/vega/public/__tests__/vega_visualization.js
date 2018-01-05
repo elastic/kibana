@@ -12,8 +12,8 @@ import embeddedDataImage512 from './embedded_data_image_512.png';
 import { VegaParser } from '../data_model/vega_parser';
 import { SearchCache } from '../data_model/search_cache';
 
-const THRESHOLD = 0.25;
-const PIXEL_DIFF = 64;
+const THRESHOLD = 0.35;
+const PIXEL_DIFF = 128;
 
 describe('VegaVisualizations', () => {
 
