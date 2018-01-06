@@ -15,10 +15,7 @@ const ctxObj = { bool: { must: { match_all: { a: 1 } }, must_not: { b: 2 } } };
 function create(min, max, dashboardCtx) {
   const inst = new EsQueryParser(
     {
-      getBounds: () => ({
-        min: { valueOf: () => min },
-        max: { valueOf: () => max }
-      })
+      getTimeBounds: () => ({ min, max })
     },
     () => _.cloneDeep(dashboardCtx),
     () => (inst.$$$warnCount = (inst.$$$warnCount || 0) + 1)
@@ -28,7 +25,6 @@ function create(min, max, dashboardCtx) {
 
 describe(`EsQueryParser time`, () => {
 
-  it(`getTimeRange`, () => expect(create(1000, 2000)._getTimeRange()).to.eql({ min: 1000, max: 2000 }));
   it(`roundInterval(4s)`, () => expect(EsQueryParser._roundInterval(4 * second)).to.be(`1s`));
   it(`roundInterval(4hr)`, () => expect(EsQueryParser._roundInterval(4 * hour)).to.be(`3h`));
   it(`getTimeBound`, () => expect(create(1000, 2000)._getTimeBound({}, `min`)).to.be(1000));

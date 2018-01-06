@@ -16,10 +16,9 @@ const TIMEFIELD = '%timefield%';
  */
 export class EsQueryParser {
 
-  constructor(timefilter, dashboardContext, onWarning) {
-    this._timefilter = timefilter;
+  constructor(timeCache, dashboardContext, onWarning) {
+    this._timeCache = timeCache;
     this._dashboardContext = dashboardContext;
-    this._timeBounds = false;
     this._onWarning = onWarning;
   }
 
@@ -136,7 +135,7 @@ export class EsQueryParser {
             } else if (typeof size !== 'number') {
               throw new Error(`"${AUTOINTERVAL}" must be either true or a number`);
             }
-            const bounds = this._getTimeRange();
+            const bounds = this._timeCache.getTimeBounds();
             obj.interval = EsQueryParser._roundInterval((bounds.max - bounds.min) / size);
             continue;
           }
@@ -187,7 +186,7 @@ export class EsQueryParser {
    * @returns {*}
    */
   _getTimeBound(opts, type) {
-    const bounds = this._getTimeRange();
+    const bounds = this._timeCache.getTimeBounds();
     let result = bounds[type];
 
     if (opts.shift) {
@@ -268,14 +267,4 @@ export class EsQueryParser {
     }
   }
 
-  _getTimeRange() {
-    // Caching function
-    if (this._timeBounds) return this._timeBounds;
-    const bounds = this._timefilter.getBounds();
-    this._timeBounds = {
-      min: bounds.min.valueOf(),
-      max: bounds.max.valueOf()
-    };
-    return this._timeBounds;
-  }
 }

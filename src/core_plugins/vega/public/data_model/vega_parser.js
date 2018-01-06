@@ -18,14 +18,14 @@ const locToDirMap = {
 
 export class VegaParser {
 
-  constructor(spec, searchCache, timefilter, dashboardContext, serviceSettings) {
+  constructor(spec, searchCache, timeCache, dashboardContext, serviceSettings) {
     this.spec = spec;
     this.hideWarnings = false;
     this.error = undefined;
     this.warnings = [];
     this._searchCache = searchCache;
     this._serviceSettings = serviceSettings;
-    this._esQueryParser = new EsQueryParser(timefilter, dashboardContext, this._onWarning.bind(this));
+    this._esQueryParser = new EsQueryParser(timeCache, dashboardContext, this._onWarning.bind(this));
   }
 
   async parseAsync() {

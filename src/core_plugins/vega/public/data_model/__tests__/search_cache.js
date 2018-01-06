@@ -3,10 +3,6 @@ import { SearchCache } from '../search_cache';
 
 describe(`SearchCache`, () => {
 
-  /**
-   * msearch returns combined Nth and N+1 th value as result
-   * @type {{search(*): Promise<*>}}
-   */
   class FauxEs {
     constructor() {
       // contains all request batches, separated by 0
