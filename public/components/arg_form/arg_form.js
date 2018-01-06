@@ -5,7 +5,7 @@ import { ArgSimpleForm } from './arg_simple_form';
 import { SimpleFailure } from './simple_failure';
 import { AdvancedFailure } from './advanced_failure';
 import { ErrorBoundary } from '../enhance/error_boundary';
-import { RenderError } from '../../lib/errors';
+import { RenderError } from '../../../common/lib/errors';
 import './arg_form.less';
 
 const getTemplates = (err, { argTypeInstance, label, setLabel, resetErrorState, templateProps }) => {

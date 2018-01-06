@@ -1,4 +1,4 @@
-import { each, keys, last, map, mapValues, values, zipObject } from 'lodash';
+import { each, keys, last, mapValues, values, zipObject } from 'lodash';
 import clone from 'lodash.clone';
 import omitBy from 'lodash.omitby';
 import { castProvider } from './cast';
@@ -37,100 +37,96 @@ export function interpretProvider(config) {
       case 'number':
       case 'null':
       case 'boolean':
-        return Promise.resolve(node);
+        return node;
       default:
         throw new Error(`Unknown AST object: ${JSON.stringify(node)}`);
     }
   }
 
-  function invokeChain(chainArr, context) {
+  async function invokeChain(chainArr, context) {
     if (!chainArr.length) return Promise.resolve(context);
 
     const chain = clone(chainArr);
     const link = chain.shift(); // Every thing in the chain will always be a function right?
     const { function: fnName, arguments: fnArgs } = link;
-
     const fnDef = functions[fnName];
+
+    // if the function is not found, pass the expression chain to the not found handler
+    // in this case, it will try to execute the function in another context
     if (!fnDef) {
       chain.unshift(link);
       return onFunctionNotFound({ type: 'expression', chain: chain }, context);
     }
 
-    // TODO: handle errors here
-    return resolveArgs(fnName, context, fnArgs) // Resolve arguments before passing to function
-    .then((resolvedArgs) => {
-      return invokeFunction(fnName, context, resolvedArgs) // Then invoke function with resolved arguments
-      .then(newContext => {
-        // if something failed, just return the failure
-        if(getType(newContext) === 'error') {
-          console.log('error', newContext);
-          return newContext;
-        }
+    try {
+      // Resolve arguments before passing to function
+      // TODO: handle errors here
+      const resolvedArgs = await resolveArgs(fnName, context, fnArgs);
+      const newContext = await invokeFunction(fnName, context, resolvedArgs);
 
-        // Continue re-invoking chain until its empty
-        return invokeChain(chain, newContext);
-      })
-      .catch((err) => {
-        console.error(`common/interpret ${fnName}: invokeFunction rejected`);
-        // throw e;
-        return createError(err, { name: fnName, context, args: fnArgs });
-      });
-    })
-    .catch((err) => {
-      console.error(`common/interpret ${fnName}: resolveArgs rejected`, err);
-      // throw e;
+      // if something failed, just return the failure
+      if(getType(newContext) === 'error') {
+        console.log('newContext error', newContext);
+        return newContext;
+      }
+
+      // Continue re-invoking chain until it's empty
+      return await invokeChain(chain, newContext);
+    } catch (err) {
+      console.error(`common/interpret ${fnName}: invokeChain rejected`, err);
       return createError(err, { name: fnName, context, args: fnArgs });
-    });
+    }
   }
 
-  function invokeFunction(name, context, args) {
+  async function invokeFunction(name, context, args) {
     // Check function input.
     const fnDef = functions[name];
-    const acceptableContext =  cast(context, fnDef.context.types);
+    const acceptableContext = cast(context, fnDef.context.types);
+    const fnOutput = await fnDef.fn(acceptableContext, args, handlers);
 
-    return fnDef.fn(acceptableContext, args, handlers)
-    .then((output) => {
-      // Validate that the function returned the type it said it would.
-      // This isn't really required, but it keeps function developers honest.
-      const returnType = getType(output);
-      const expectedType = fnDef.type;
-      if (expectedType && returnType !== expectedType) {
-        throw new Error(`Function '${name}' should return '${expectedType}', actually returned '${returnType}'`);
+    // Validate that the function returned the type it said it would.
+    // This isn't really required, but it keeps function developers honest.
+    const returnType = getType(fnOutput);
+    const expectedType = fnDef.type;
+    if (expectedType && returnType !== expectedType) {
+      throw new Error(`Function '${name}' should return '${expectedType}',` +
+        ` actually returned '${returnType}'`);
+    }
+
+    // Validate the function output against the type definition's validate function
+    const type = typesRegistry.get(fnDef.type);
+    if (type && type.validate) {
+      try {
+        type.validate(fnOutput);
+      } catch (e) {
+        throw new Error(`Output of '${name}' is not a valid type '${fnDef.type}': ${e}`);
       }
+    }
 
-      // Validate the function output against the type definition's validate function
-      const type = typesRegistry.get(fnDef.type);
-      if (type && type.validate) {
-        try {
-          type.validate(output);
-        } catch (e) {
-          throw new Error(`Output of '${name}' is not a valid type '${fnDef.type}': ${e}`);
-        }
-      }
-
-      return output;
-    })
-    .catch(err => createError(err, { name: fnDef.name, context, args }));
+    return fnOutput;
   }
 
   // Processes the multi-valued AST argument values into arguments that can be passed to the function
-  function resolveArgs(fnName, context, astArgs) {
+  async function resolveArgs(fnName, context, astArgs) {
     const fnDef = functions[fnName];
     const argDefs = fnDef.args;
     const nonAliasArgDefs = omitBy(argDefs, { isAlias: true });
 
-    // Break this into keys and values, then recombine later.
+    // Break argument definitions into keys and values, then recombine later
+    const multiValuedArgValues = values(astArgs);
     const nonAliasArgNames = keys(astArgs).map(argName => {
-      if (!argDefs[argName]) throw new Error(`Unknown argument '${argName}' passed to function ${fnDef.name}()`);
+      if (!argDefs[argName]) {
+        throw new Error(`Unknown argument '${argName}' passed to function '${fnDef.name}'`);
+      }
 
       // This is where the alias gets turned into the actual name
       return argDefs[argName].name;
     });
-    const multiValuedArgValues = values(astArgs);
 
-    // Fill in defaults
+    // Fill in default values from argument definition
     each(nonAliasArgDefs, (argDef, argName) => {
       if (nonAliasArgNames.includes(argName)) return;
+
       if (typeof argDef.default !== 'undefined') {
         nonAliasArgNames.push(argName);
         multiValuedArgValues.push([fromExpression(argDef.default, 'argument')]);
@@ -138,33 +134,31 @@ export function interpretProvider(config) {
     });
 
     // Create an array of promises, each representing 1 argument name
-    const argListPromises = map(multiValuedArgValues, multiValueArg => {
-      // Also an array of promises. Since each argument in the AST is multivalued each
-      // argument value is an array. We use Promise.all to turn the values into a single promise.
-
+    const argListPromises = multiValuedArgValues.map(multiValueArg => {
+      // Since each argument in the AST is multivalued, each argument value is an array
+      // We use Promise.all to turn the values into a single promise
       // Note that we're resolving the argument values before even looking up their definition
-      return Promise.all(map(multiValueArg, argValue => interpret(argValue, context)));
+      const argPromises = multiValueArg.map(argValue => interpret(argValue, context));
+      return Promise.all(argPromises);
     });
 
+    const argValues = await Promise.all(argListPromises);
+    const resolvedArgs = zipObject(nonAliasArgNames, argValues);
 
-    return Promise.all(argListPromises)
-    .then(resolvedArgs => zipObject(nonAliasArgNames, resolvedArgs)) // Recombine the keys
-    .then(resolvedArgs => {
-      return mapValues(resolvedArgs, (val, name) => {
-        // TODO: Implement a system to allow for undeclared arguments
-        const argDef = argDefs[name];
-        if (!argDef) throw new Error(`Unknown argument to function: ${fnName}(${name})`);
+    return mapValues(resolvedArgs, (val, name) => {
+      // TODO: Implement a system to allow for undeclared arguments
+      const argDef = argDefs[name];
+      if (!argDef) {
+        throw new Error(`Unknown argument '${name}' passed to function '${fnName}'`);
+      }
 
-        // Return an array for multi-valued arguments
-        if (argDef.multi) {
-          each(val, argValue => cast(argValue, argDef.types));
-          return val;
-        }
+      // Return an array for multi-valued arguments
+      if (argDef.multi) {
+        return val.map(argValue => cast(argValue, argDef.types));
+      }
 
-        // Otherwise return the final instance
-        const argValue = last(val);
-        return cast(argValue, argDef.types);
-      });
+      // Otherwise return the final instance
+      return cast(last(val), argDef.types);
     });
   }
 }
