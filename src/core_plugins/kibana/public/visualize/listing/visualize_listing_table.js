@@ -49,20 +49,18 @@ export class VisualizeListingTable extends Component {
     this.items = [];
     this.pager = new Pager(this.items.length, 20, 1);
 
-    this.debouncedFetch = _.debounce(filter => {
-      this.props.fetchItems(filter)
-        .then(items => {
-          // We need this check to handle the case where search results come back in a different
-          // order than they were sent out. Only load results for the most recent search.
-          if (filter === this.state.filter) {
-            this.setState({
-              isFetchingItems: false,
-              selectedRowIds: [],
-            });
-            this.items = items;
-            this.calculateItemsOnPage();
-          }
+    this.debouncedFetch = _.debounce(async (filter) => {
+      const items = await this.props.fetchItems(filter);
+      // We need this check to handle the case where search results come back in a different
+      // order than they were sent out. Only load results for the most recent search.
+      if (filter === this.state.filter) {
+        this.setState({
+          isFetchingItems: false,
+          selectedRowIds: [],
         });
+        this.items = items;
+        this.calculateItemsOnPage();
+      }
     }, 300);
   }
 
@@ -203,12 +201,15 @@ export class VisualizeListingTable extends Component {
     this.setState({ showDeleteModal: true });
   };
 
-  deleteSelectedItems = () => {
-    this.props.deleteSelectedItems(this.state.selectedRowIds)
-      .then(() => this.fetchItems(this.state.filter))
-      .catch(() => {})
-      .then(() => this.deselectAll())
-      .then(() => this.closeModal());
+  deleteSelectedItems = async () => {
+    try {
+      await this.props.deleteSelectedItems(this.state.selectedRowIds);
+      await  this.fetchItems(this.state.filter);
+    } catch (e) {
+      // eslint-disable-line no-empty
+    }
+    await this.deselectAll();
+    await this.closeModal();
   };
 
   onItemSelectionChanged = (newSelectedIds) => {

@@ -24,71 +24,67 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
     return this.savedVisualizations.urlFor(panelId);
   }
 
-  render(domNode, panel, container) {
+  async render(domNode, panel, container) {
     const editUrl = this.getEditPath(panel.id);
 
-    const waitFor = [ getVisualizeLoader(), this.savedVisualizations.get(panel.id) ];
-    return this.Promise.all(waitFor)
-      .then(([loader, savedObject]) => {
-        const isLabsEnabled = this._config.get('visualize:enableLabs');
+    const waitFor = [getVisualizeLoader(), this.savedVisualizations.get(panel.id)];
+    const [loader, savedObject] = await this.Promise.all(waitFor);
 
-        if (!isLabsEnabled && savedObject.vis.type.stage === 'lab') {
-          domNode.innerHTML = labDisabledTemplate.replace('{{title}}', savedObject.title);
+    const isLabsEnabled = this._config.get('visualize:enableLabs');
 
-          return new Embeddable({
-            title: savedObject.title
-          });
-        }
+    if (!isLabsEnabled && savedObject.vis.type.stage === 'lab') {
+      domNode.innerHTML = labDisabledTemplate.replace('{{title}}', savedObject.title);
+      return new Embeddable({ title: savedObject.title });
+    }
 
-        let panelTitle;
-        if (!container.getHidePanelTitles()) {
-          panelTitle = panel.title !== undefined ? panel.title : savedObject.title;
-        }
+    let panelTitle;
+    if (!container.getHidePanelTitles()) {
+      panelTitle = panel.title !== undefined ? panel.title : savedObject.title;
+    }
 
-        const parsedUiState = savedObject.uiStateJSON ? JSON.parse(savedObject.uiStateJSON) : {};
-        const uiState = new PersistedState({
-          ...parsedUiState,
-          ...panel.embeddableConfig,
-        });
-        const uiStateChangeHandler = () => {
-          panel = container.updatePanel(
-            panel.panelIndex,
-            { embeddableConfig: uiState.toJSON() }
-          );
-        };
-        uiState.on('change', uiStateChangeHandler);
+    const parsedUiState = savedObject.uiStateJSON ? JSON.parse(savedObject.uiStateJSON) : {};
+    const uiState = new PersistedState({
+      ...parsedUiState,
+      ...panel.embeddableConfig,
+    });
+    const uiStateChangeHandler = () => {
+      panel = container.updatePanel(
+        panel.panelIndex,
+        { embeddableConfig: uiState.toJSON() }
+      );
+    };
+    uiState.on('change', uiStateChangeHandler);
 
-        savedObject.vis.listeners.click = this.filterBarClickHandler(container.getAppState());
-        savedObject.vis.listeners.brush = this.brushEvent(container.getAppState());
+    savedObject.vis.listeners.click = this.filterBarClickHandler(container.getAppState());
+    savedObject.vis.listeners.brush = this.brushEvent(container.getAppState());
 
-        container.registerPanelIndexPattern(panel.panelIndex, savedObject.vis.indexPattern);
+    container.registerPanelIndexPattern(panel.panelIndex, savedObject.vis.indexPattern);
 
-        const handler = loader.embedVisualizationWithSavedObject(domNode, savedObject, {
-          uiState: uiState,
-          // Append visualization to container instead of replacing its content
-          append: true,
-          cssClass: `panel-content ${savedObject.vis.type.name}`,
-          // The chrome is permanently hidden in "embed mode" in which case we don't want to show the spy pane, since
-          // we deem that situation to be more public facing and want to hide more detailed information.
-          showSpyPanel: !chrome.getIsChromePermanentlyHidden(),
-          dataAttrs: {
-            'shared-item': '',
-            title: panelTitle,
-            description: savedObject.description,
-          }
-        });
+    const handler = loader.embedVisualizationWithSavedObject(domNode, savedObject, {
+      uiState: uiState,
+      // Append visualization to container instead of replacing its content
+      append: true,
+      cssClass: `panel-content ${savedObject.vis.type.name}`,
+      // The chrome is permanently hidden in "embed mode" in which case we don't want to show the spy pane, since
+      // we deem that situation to be more public facing and want to hide more detailed information.
+      showSpyPanel: !chrome.getIsChromePermanentlyHidden(),
+      dataAttrs: {
+        'shared-item': '',
+        title: panelTitle,
+        description: savedObject.description,
+      }
+    });
 
-        this.addDestroyEmeddable(panel.panelIndex, () => {
-          uiState.off('change', uiStateChangeHandler);
-          handler.getElement().remove();
-          savedObject.destroy();
-          handler.destroy();
-        });
+    this.addDestroyEmeddable(panel.panelIndex, () => {
+      uiState.off('change', uiStateChangeHandler);
+      handler.getElement().remove();
+      savedObject.destroy();
+      handler.destroy();
+    });
 
-        return new Embeddable({
-          title: savedObject.title,
-          editUrl: editUrl
-        });
-      });
+    return new Embeddable({
+      title: savedObject.title,
+      editUrl: editUrl
+    });
   }
 }

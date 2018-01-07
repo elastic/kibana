@@ -31,7 +31,7 @@ routes.when(VisualizeConstants.WIZARD_STEP_1_PAGE_PATH, {
   controller: 'VisualizeWizardStep1',
 });
 
-module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, timefilter, Private, config) {
+module.controller('VisualizeWizardStep1', ($scope, $route, kbnUrl, timefilter, Private, config) => {
   timefilter.disableAutoRefreshSelector();
   timefilter.disableTimeRangeSelector();
 
@@ -160,7 +160,7 @@ module.controller('VisualizeWizardStep1', function ($scope, $route, kbnUrl, time
     return 'bottom';
   };
 
-  $scope.getVisTypeUrl = function (visType) {
+  $scope.getVisTypeUrl = (visType) => {
     const baseUrl =
       visType.requiresSearch && visType.options.showIndexSelection
         ? `#${VisualizeConstants.WIZARD_STEP_2_PAGE_PATH}?`
@@ -191,24 +191,26 @@ routes.when(VisualizeConstants.WIZARD_STEP_2_PAGE_PATH, {
   template: visualizeWizardStep2Template,
   controller: 'VisualizeWizardStep2',
   resolve: {
-    indexPatterns: function (Private) {
+    indexPatterns: async (Private) => {
       const savedObjectsClient = Private(SavedObjectsClientProvider);
 
-      return savedObjectsClient.find({
+      const response = await savedObjectsClient.find({
         type: 'index-pattern',
         fields: ['title'],
         perPage: 10000
-      }).then(response => response.savedObjects);
+      });
+
+      return response.savedObjects;
     }
   }
 });
 
-module.controller('VisualizeWizardStep2', function ($route, $scope, timefilter, kbnUrl) {
+module.controller('VisualizeWizardStep2', ($route, $scope, timefilter, kbnUrl) => {
   const type = $route.current.params.type;
   const addToDashMode = $route.current.params[DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM];
   kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
 
-  $scope.step2WithSearchUrl = function (hit) {
+  $scope.step2WithSearchUrl = (hit) => {
     if (addToDashMode) {
       return kbnUrl.eval(
         `#${VisualizeConstants.CREATE_PATH}` +
@@ -232,7 +234,7 @@ module.controller('VisualizeWizardStep2', function ($route, $scope, timefilter, 
     list: $route.current.locals.indexPatterns
   };
 
-  $scope.makeUrl = function (pattern) {
+  $scope.makeUrl = (pattern) => {
     if (!pattern) return;
 
     if (addToDashMode) {

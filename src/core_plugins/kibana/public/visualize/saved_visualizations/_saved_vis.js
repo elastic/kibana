@@ -17,12 +17,12 @@ uiModules
     const Vis = Private(VisProvider);
 
     _.class(SavedVis).inherits(courier.SavedObject);
+
     function SavedVis(opts) {
-      const self = this;
       opts = opts || {};
       if (typeof opts !== 'object') opts = { id: opts };
 
-      SavedVis.Super.call(self, {
+      SavedVis.Super.call(this, {
         type: SavedVis.type,
         mapping: SavedVis.mapping,
         searchSource: SavedVis.searchSource,
@@ -63,77 +63,59 @@ uiModules
 
     SavedVis.searchSource = true;
 
-    SavedVis.prototype._afterEsResp = function () {
-      const self = this;
+    SavedVis.prototype._afterEsResp = async function () {
+      await this._getLinkedSavedSearch();
+      this.searchSource.size(0);
+      await this.vis ? this._updateVis() : this._createVis();
+      this.searchSource.onRequestStart(
+        (searchSource, searchRequest) => this.vis.onSearchRequestStart(searchSource, searchRequest)
+      );
+      this.searchSource.aggs(() => this.vis.aggs.toDsl());
 
-      return self._getLinkedSavedSearch()
-        .then(function () {
-          self.searchSource.size(0);
-
-          return self.vis ? self._updateVis() : self._createVis();
-        })
-        .then(function () {
-          self.searchSource.onRequestStart((searchSource, searchRequest) => {
-            return self.vis.onSearchRequestStart(searchSource, searchRequest);
-          });
-
-          self.searchSource.aggs(function () {
-            return self.vis.aggs.toDsl();
-          });
-
-          return self;
-        });
+      return this;
     };
 
-    SavedVis.prototype._getLinkedSavedSearch = Promise.method(function () {
-      const self = this;
-      const linkedSearch = !!self.savedSearchId;
-      const current = self.savedSearch;
+    SavedVis.prototype._getLinkedSavedSearch = async function () {
+      const linkedSearch = !!this.savedSearchId;
+      const current = this.savedSearch;
 
-      if (linkedSearch && current && current.id === self.savedSearchId) {
+      if (linkedSearch && current && current.id === this.savedSearchId) {
         return;
       }
 
-      if (self.savedSearch) {
-        self.searchSource.inherits(self.savedSearch.searchSource.getParent());
-        self.savedSearch.destroy();
-        self.savedSearch = null;
+      if (this.savedSearch) {
+        this.searchSource.inherits(this.savedSearch.searchSource.getParent());
+        this.savedSearch.destroy();
+        this.savedSearch = null;
       }
 
       if (linkedSearch) {
-        return savedSearches.get(self.savedSearchId)
-          .then(function (savedSearch) {
-            self.savedSearch = savedSearch;
-            self.searchSource.inherits(self.savedSearch.searchSource);
-          });
+        this.savedSearch = await savedSearches.get(this.savedSearchId);
+        this.searchSource.inherits(this.savedSearch.searchSource);
       }
-    });
+    };
 
     SavedVis.prototype._createVis = function () {
-      const self = this;
-
-      self.visState = updateOldState(self.visState);
+      this.visState = updateOldState(this.visState);
 
       // visState doesn't yet exist when importing a visualization, so we can't
       // assume that exists at this point. If it does exist, then we're not
       // importing a visualization, so we want to sync the title.
-      if (self.visState) {
-        self.visState.title = self.title;
+      if (this.visState) {
+        this.visState.title = this.title;
       }
-      self.vis = new Vis(
-        self.searchSource.get('index'),
-        self.visState
+      this.vis = new Vis(
+        this.searchSource.get('index'),
+        this.visState
       );
 
-      return self.vis;
+      return this.vis;
     };
 
     SavedVis.prototype._updateVis = function () {
-      const self = this;
-
-      self.vis.indexPattern = self.searchSource.get('index');
-      self.visState.title = self.title;
-      self.vis.setState(self.visState);
+      this.vis.indexPattern = this.searchSource.get('index');
+      this.visState.title = this.title;
+      this.vis.setState(this.visState);
     };
 
     return SavedVis;
