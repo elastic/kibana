@@ -120,7 +120,7 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
       const query = this.vis.API.queryManager.getQuery();
       const language = query.language;
 
-      if (['lucene', 'kql'].includes(language)) {
+      if (language === 'lucene') {
         const filter = { meta: { negate: false, index: indexPatternName } };
         filter[filterName] = { ignore_unmapped: true };
         filter[filterName][field] = filterData;
@@ -198,3 +198,4 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 
   return CoordinateMapsVisualization;
 }
+

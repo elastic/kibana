@@ -1,21 +1,11 @@
 import grammar from 'raw-loader!./kuery.peg';
-import kqlGrammar from 'raw-loader!./kql.peg';
 import PEG from 'pegjs';
 import _ from 'lodash';
 import { nodeTypes } from '../node_types/index';
 
 const kueryParser = PEG.buildParser(grammar);
-const kqlParser = PEG.buildParser(kqlGrammar);
 
-export function fromKueryExpression(expression, parseOptions) {
-  return fromExpression(expression, parseOptions, kueryParser);
-}
-
-export function fromKqlExpression(expression, parseOptions) {
-  return fromExpression(expression, parseOptions, kqlParser);
-}
-
-function fromExpression(expression, parseOptions = {}, parser = kqlParser) {
+export function fromKueryExpression(expression, parseOptions = {}) {
   if (_.isUndefined(expression)) {
     throw new Error('expression must be a string, got undefined instead');
   }
@@ -25,7 +15,7 @@ function fromExpression(expression, parseOptions = {}, parser = kqlParser) {
     helpers: { nodeTypes }
   };
 
-  return parser.parse(expression, parseOptions);
+  return kueryParser.parse(expression, parseOptions);
 }
 
 export function toKueryExpression(node) {
