@@ -120,11 +120,8 @@ block content
         return anchor.href;
       }
       var files = [
-        bundleFile('vendors.style.css'),
         bundleFile('commons.style.css'),
         bundleFile('#{app.getId()}.style.css'),
-
-        bundleFile('vendors.bundle.js'),
         bundleFile('commons.bundle.js'),
         bundleFile('#{app.getId()}.bundle.js')
       ];
