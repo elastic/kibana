@@ -6,6 +6,7 @@ import versionCompare from 'compare-versions';
 import { EsQueryParser } from './es_query_parser';
 import hjson from 'hjson';
 import { Utils } from './utils';
+import { EmsFileParser } from './ems_file_parser';
 
 const DEFAULT_SCHEMA = 'https://vega.github.io/schema/vega/v3.0.json';
 
@@ -16,6 +17,9 @@ const locToDirMap = {
   bottom: 'column'
 };
 
+// If there is no "%type%" parameter, use this parser
+const DEFAULT_PARSER = 'elasticsearch';
+
 export class VegaParser {
 
   constructor(spec, searchCache, timeCache, dashboardContext, serviceSettings) {
@@ -23,9 +27,10 @@ export class VegaParser {
     this.hideWarnings = false;
     this.error = undefined;
     this.warnings = [];
-    this._searchCache = searchCache;
-    this._serviceSettings = serviceSettings;
-    this._esQueryParser = new EsQueryParser(timeCache, dashboardContext, this._onWarning.bind(this));
+    this._urlParsers = {
+      elasticsearch: new EsQueryParser(timeCache, searchCache, dashboardContext, this._onWarning.bind(this)),
+      emsfile: new EmsFileParser(serviceSettings),
+    };
   }
 
   async parseAsync() {
@@ -255,55 +260,34 @@ export class VegaParser {
    * @private
    */
   async _resolveDataUrls() {
-    const esRequests = [];
-    const emsFiles = [];
+    const pending = {};
 
-    this._findEsRequests(this.spec, (obj) => {
+    this._findObjectDataUrls(this.spec, (obj) => {
       const url = obj.url;
       delete obj.url;
-      switch (url['%type%']) {
-        case undefined:
-        case 'elasticsearch':
-          delete url['%type%'];
-          this._esQueryParser.parseEsRequest(url);
-          esRequests.push({ obj, searchReq: url });
-          break;
-        case 'emsfile':
-          if (typeof url.name !== 'string') {
-            throw new Error(`data.url with {"%type%": "emsfile"} is missing the "name" of the file`);
-          }
-          emsFiles.push({ obj, name: url.name });
-          break;
-        default:
-          throw new Error(`url: {"%type%": "${url['%type%']}"} is not supported`);
+      let type = url['%type%'];
+      delete url['%type%'];
+      if (type === undefined) {
+        type = DEFAULT_PARSER;
       }
+
+      const parser = this._urlParsers[type];
+      if (parser === undefined) {
+        throw new Error(`url: {"%type%": "${type}"} is not supported`);
+      }
+
+      let pendingArr = pending[type];
+      if (pendingArr === undefined) {
+        pending[type] = pendingArr = [];
+      }
+
+      pendingArr.push(parser.parseUrl(obj, url));
     });
 
-    await Promise.all([
-      this._populateEsResults(esRequests),
-      this._populateEmsFileResults(emsFiles)
-    ]);
-  }
-
-  async _populateEsResults(esRequests) {
-    const reqs = esRequests.map((r) => r.searchReq);
-
-    const results = await this._searchCache.search(reqs);
-
-    for (let i = 0; i < esRequests.length; i++) {
-      esRequests[i].obj.values = results[i];
-    }
-  }
-
-  async _populateEmsFileResults(layerRequests) {
-    if (layerRequests.length === 0) return;
-
-    const layers = await this._serviceSettings.getFileLayers();
-
-    for (const { obj, name } of layerRequests) {
-      const foundLayer = layers.find(v => v.name === name);
-      if (!foundLayer) throw new Error(`emsfile ${JSON.stringify(name)} does not exist`);
-      obj.url = foundLayer.url;
+    const pendingParsers = Object.keys(pending);
+    if (pendingParsers.length > 0) {
+      // let each parser populate its data in parallel
+      await Promise.all(pendingParsers.map(type => this._urlParsers[type].populateData(pending[type])));
     }
   }
 
@@ -314,10 +298,10 @@ export class VegaParser {
    * @param {string} [key] field name of the current object
    * @private
    */
-  _findEsRequests(obj, onFind, key) {
+  _findObjectDataUrls(obj, onFind, key) {
     if (Array.isArray(obj)) {
       for (const elem of obj) {
-        this._findEsRequests(elem, onFind, key);
+        this._findObjectDataUrls(elem, onFind, key);
       }
     } else if (_.isPlainObject(obj)) {
       if (key === 'data' && _.isPlainObject(obj.url)) {
@@ -328,7 +312,7 @@ export class VegaParser {
         onFind(obj);
       } else {
         for (const k of Object.keys(obj)) {
-          this._findEsRequests(obj[k], onFind, k);
+          this._findObjectDataUrls(obj[k], onFind, k);
         }
       }
     }

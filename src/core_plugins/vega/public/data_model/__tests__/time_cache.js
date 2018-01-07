@@ -46,7 +46,7 @@ describe(`TimeCache`, () => {
     const timefilter = new FauxTimefilter(10000, 20000, 'quick');
     const tc = new TimeCache(timefilter, 5000);
     const time = new FauxTime();
-    TimeCache.now = () => time.now();
+    tc._now = () => time.now();
 
     let timeAccess = 0;
     let filterAccess = 0;

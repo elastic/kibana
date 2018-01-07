@@ -17,6 +17,7 @@ function create(min, max, dashboardCtx) {
     {
       getTimeBounds: () => ({ min, max })
     },
+    () => {},
     () => _.cloneDeep(dashboardCtx),
     () => (inst.$$$warnCount = (inst.$$$warnCount || 0) + 1)
   );
@@ -80,7 +81,7 @@ describe(`EsQueryParser.injectQueryContextVars`, () => {
 describe(`EsQueryParser.parseEsRequest`, () => {
   function test(req, ctx, expected) {
     return () => {
-      create(rangeStart, rangeEnd, ctx).parseEsRequest(req);
+      create(rangeStart, rangeEnd, ctx).parseUrl({}, req);
       expect(req).to.eql(expected);
     };
   }

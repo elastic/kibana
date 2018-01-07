@@ -16,8 +16,9 @@ export class TimeCache {
     this._cacheTS = 0;
   }
 
-  static now() {
-    // Simplifies unit testing
+  // Simplifies unit testing
+  // noinspection JSMethodCanBeStatic
+  _now() {
     return Date.now();
   }
 
@@ -26,7 +27,7 @@ export class TimeCache {
    * @returns {{min: number, max: number}}
    */
   getTimeBounds() {
-    const ts = TimeCache.now();
+    const ts = this._now();
 
     let bounds;
     if (this._cachedBounds) {
