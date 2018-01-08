@@ -15,6 +15,14 @@ export const ON_PREM_INSTRUCTIONS = {
             ...COMMON_NETFLOW_INSTRUCTIONS.CONFIG.ON_PREM.OSX,
             ...COMMON_NETFLOW_INSTRUCTIONS.SETUP.OSX
           ]
+        },
+        {
+          id: INSTRUCTION_VARIANT.WINDOWS,
+          instructions: [
+            ...LOGSTASH_INSTRUCTIONS.INSTALL.WINDOWS,
+            ...COMMON_NETFLOW_INSTRUCTIONS.CONFIG.ON_PREM.WINDOWS,
+            ...COMMON_NETFLOW_INSTRUCTIONS.SETUP.WINDOWS
+          ]
         }
       ]
     }

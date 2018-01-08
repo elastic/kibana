@@ -15,6 +15,14 @@ export const ELASTIC_CLOUD_INSTRUCTIONS = {
             ...COMMON_NETFLOW_INSTRUCTIONS.CONFIG.ELASTIC_CLOUD.OSX,
             ...COMMON_NETFLOW_INSTRUCTIONS.SETUP.OSX
           ]
+        },
+        {
+          id: INSTRUCTION_VARIANT.WINDOWS,
+          instructions: [
+            ...LOGSTASH_INSTRUCTIONS.INSTALL.WINDOWS,
+            ...COMMON_NETFLOW_INSTRUCTIONS.CONFIG.ELASTIC_CLOUD.WINDOWS,
+            ...COMMON_NETFLOW_INSTRUCTIONS.SETUP.WINDOWS
+          ]
         }
       ]
     }

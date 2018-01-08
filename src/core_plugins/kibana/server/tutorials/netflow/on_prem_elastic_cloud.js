@@ -21,6 +21,16 @@ export const ON_PREM_ELASTIC_CLOUD_INSTRUCTIONS = {
             ...COMMON_NETFLOW_INSTRUCTIONS.CONFIG.ON_PREM.OSX,
             ...COMMON_NETFLOW_INSTRUCTIONS.SETUP.OSX
           ]
+        },
+        {
+          id: INSTRUCTION_VARIANT.WINDOWS,
+          instructions: [
+            TRYCLOUD_OPTION1,
+            TRYCLOUD_OPTION2,
+            ...LOGSTASH_INSTRUCTIONS.INSTALL.WINDOWS,
+            ...COMMON_NETFLOW_INSTRUCTIONS.CONFIG.ON_PREM.WINDOWS,
+            ...COMMON_NETFLOW_INSTRUCTIONS.SETUP.WINDOWS
+          ]
         }
       ]
     }
