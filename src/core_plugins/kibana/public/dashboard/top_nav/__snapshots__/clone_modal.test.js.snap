@@ -1,79 +1,57 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`renders DashboardCloneModal 1`] = `
-<div
-  class="euiModalOverlay"
->
-  <div>
-    <div
-      class="euiModal dashboardCloneModal"
-      data-tests-subj="dashboardCloneModal"
-      tabindex="0"
-    >
-      <div
-        class="euiModalHeader"
+<EuiOverlayMask>
+  <EuiModal
+    className="dashboardCloneModal"
+    data-tests-subj="dashboardCloneModal"
+    onClose={[Function]}
+  >
+    <EuiModalHeader>
+      <EuiModalHeaderTitle>
+        Clone Dashboard
+      </EuiModalHeaderTitle>
+    </EuiModalHeader>
+    <EuiModalBody>
+      <EuiText>
+        <p>
+          Please enter a new name for your dashboard.
+        </p>
+      </EuiText>
+      <EuiSpacer
+        size="l"
+      />
+      <EuiFieldText
+        autoFocus={true}
+        data-test-subj="clonedDashboardTitle"
+        fullWidth={false}
+        isLoading={false}
+        onChange={[Function]}
+        value="dash title"
+      />
+    </EuiModalBody>
+    <EuiModalFooter>
+      <EuiButton
+        color="primary"
+        data-test-subj="cloneCancelButton"
+        fill={false}
+        iconSide="left"
+        onClick={[Function]}
+        type="button"
       >
-        <div
-          class="euiModalHeader__title"
-        >
-          Clone Dashboard
-        </div>
-      </div>
-      <div
-        class="euiModalBody"
+        Cancel
+      </EuiButton>
+      <EuiButton
+        color="primary"
+        data-test-subj="cloneConfirmButton"
+        fill={true}
+        iconSide="left"
+        onClick={[Function]}
+        type="button"
       >
-        <div
-          class="euiText"
-        >
-          <p>
-            Please enter a new name for your dashboard.
-          </p>
-        </div>
-        <div
-          class="euiSpacer euiSpacer--l"
-        />
-        <div
-          class="euiFormControlLayout"
-        >
-          <input
-            class="euiFieldText"
-            data-test-subj="clonedDashboardTitle"
-            type="text"
-            value="dash title"
-          />
-        </div>
-      </div>
-      <div
-        class="euiModalFooter"
-      >
-        <button
-          class="euiButton euiButton--primary"
-          data-test-subj="cloneCancelButton"
-          type="button"
-        >
-          <span
-            class="euiButton__content"
-          >
-            <span>
-              Cancel
-            </span>
-          </span>
-        </button>
-        <button
-          class="euiButton euiButton--primary euiButton--fill"
-          data-test-subj="cloneConfirmButton"
-          type="button"
-        >
-          <span
-            class="euiButton__content"
-          >
-            <span>
-              Confirm Clone
-            </span>
-          </span>
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
+        Confirm Clone
+      </EuiButton>
+    </EuiModalFooter>
+  </EuiModal>
+</EuiOverlayMask>
 `;
