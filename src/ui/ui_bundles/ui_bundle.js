@@ -33,6 +33,10 @@ export class UiBundle {
     return this._controller.resolvePath(`${this.getId()}.entry.js`);
   }
 
+  getStylePath() {
+    return this._controller.resolvePath(`${this.getId()}.style.css`);
+  }
+
   getOutputPath() {
     return this._controller.resolvePath(`${this.getId()}.bundle.js`);
   }
@@ -60,6 +64,20 @@ export class UiBundle {
   async writeEntryFile() {
     return await fcb(cb => (
       writeFile(this.getEntryPath(), this.renderContent(), 'utf8', cb)
+    ));
+  }
+
+  async hasStyleFile() {
+    return await fcb(cb => {
+      return stat(this.getStylePath(), error => {
+        cb(null, error && error.code !== 'ENOENT');
+      });
+    });
+  }
+
+  async touchStyleFile() {
+    return await fcb(cb => (
+      writeFile(this.getStylePath(), '', 'utf8', cb)
     ));
   }
 

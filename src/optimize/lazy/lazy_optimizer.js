@@ -24,6 +24,8 @@ export default class LazyOptimizer extends BaseOptimizer {
     this.initializing = true;
 
     await this.uiBundles.writeEntryFiles();
+    await this.uiBundles.ensureStyleFiles();
+
     await this.initCompiler();
 
     this.compiler.plugin('watch-run', (w, webpackCb) => {
