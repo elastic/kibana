@@ -65,7 +65,7 @@ export function FilterBarClickHandlerProvider(Notifier, Private) {
         filters = dedupFilters($state.filters, uniqFilters(filters), { negate: true });
 
         if (!simulate) {
-          if (['lucene', 'kql'].includes($state.query.language)) {
+          if ($state.query.language === 'lucene') {
             $state.$newFilters = filters;
           }
           else if ($state.query.language === 'kuery') {
@@ -82,3 +82,4 @@ export function FilterBarClickHandlerProvider(Notifier, Private) {
     };
   };
 }
+
