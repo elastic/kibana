@@ -15,7 +15,8 @@ export function Introduction({ description, previewUrl, title }) {
         size="l"
         hasShadow
         allowFullScreen
-        title="screenshot of primary dashboard."
+        fullScreenIconColor="dark"
+        alt="screenshot of primary dashboard."
         url={previewUrl}
       />
     );

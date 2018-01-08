@@ -8,6 +8,7 @@ import {
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
 } from '@elastic/eui';
 
 export function Instruction({ commands, paramValues, textPost, textPre, replaceTemplateStrings }) {
@@ -15,7 +16,6 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
   if (textPre) {
     pre = (
       <Content
-        className="kuiVerticalRhythm"
         text={replaceTemplateStrings(textPre)}
       />
     );
@@ -24,10 +24,12 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
   let post;
   if (textPost) {
     post = (
-      <Content
-        className="kuiVerticalRhythm"
-        text={replaceTemplateStrings(textPost)}
-      />
+      <div>
+        <EuiSpacer size="s" />
+        <Content
+          text={replaceTemplateStrings(textPost)}
+        />
+      </div>
     );
   }
 
@@ -41,7 +43,8 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
       />
     );
     commandBlock = (
-      <div className="kuiVerticalRhythm">
+      <div>
+        <EuiSpacer size="s" />
         <EuiCodeBlock language="sh">
           {cmdText}
         </EuiCodeBlock>
