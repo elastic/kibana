@@ -385,6 +385,14 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await input.type(newValue);
     }
 
+    async toggleOtherBucket() {
+      return await find.clickByCssSelector('input[name="showOther"]');
+    }
+
+    async toggleMissingBucket() {
+      return await find.clickByCssSelector('input[name="showMissing"]');
+    }
+
     async clickGo() {
       await testSubjects.click('visualizeEditorRenderButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -599,6 +607,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const chartTypes = await find.allByCssSelector('path.slice', defaultFindTimeout * 2);
 
       const getChartTypesPromises = chartTypes.map(async chart => await chart.getAttribute('d'));
+      return await Promise.all(getChartTypesPromises);
+    }
+
+    async getPieChartLabels() {
+      const chartTypes = await find.allByCssSelector('path.slice', defaultFindTimeout * 2);
+
+      const getChartTypesPromises = chartTypes.map(async chart => await chart.getAttribute('data-label'));
       return await Promise.all(getChartTypesPromises);
     }
 

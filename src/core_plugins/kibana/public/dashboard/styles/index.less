@@ -207,6 +207,13 @@ dashboard-viewport-provider {
 }
 
 /**
+ * Dragged panels in dashboard should always appear above other panels.
+ */
+.react-grid-item.react-draggable-dragging {
+  z-index: @dashboardDraggingGridDepth !important;
+}
+
+/**
  * Overwrites red coloring that comes from this library by default.
  */
 .react-grid-item.react-grid-placeholder {
