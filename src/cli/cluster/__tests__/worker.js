@@ -22,7 +22,11 @@ function assertListenerRemoved(emitter, event) {
 }
 
 function setup(opts = {}) {
-  const worker = new Worker(opts);
+  const worker = new Worker({
+    ...opts,
+    baseArgv: []
+  });
+
   workersToShutdown.push(worker);
   return worker;
 }
@@ -154,7 +158,8 @@ describe('CLI cluster manager', function () {
 
   describe('#start', function () {
     describe('when not started', function () {
-      it('creates a fork and waits for it to come online', async function () {
+      // TODO This test is flaky, see https://github.com/elastic/kibana/issues/15888
+      it.skip('creates a fork and waits for it to come online', async function () {
         const worker = setup({ log: new Log(false, true) });
 
         sinon.spy(worker, 'on');

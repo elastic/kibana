@@ -108,13 +108,4 @@ describe('visualize directive', function () {
     expect($scope.vis.reload).to.equal(true);
   });
 
-  it('renderComplete is triggered on the element', () => {
-    let counter = 0;
-    $el.on('renderComplete', () => {
-      counter++;
-    });
-    $scope.$emit('renderComplete');
-    expect(counter).to.equal(1);
-  });
-
 });

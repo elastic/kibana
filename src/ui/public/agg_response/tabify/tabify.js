@@ -46,7 +46,7 @@ export function AggResponseTabifyProvider(Private, Notifier) {
             buckets.forEach(function (subBucket, key) {
               write.cell(agg, agg.getKey(subBucket, key), function () {
                 collectBucket(write, subBucket, agg.getKey(subBucket, key), aggScale);
-              });
+              }, subBucket.filters);
             });
           }
         } else if (write.partialRows && write.metricsForAllBuckets && write.minimalColumns) {

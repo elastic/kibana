@@ -140,6 +140,18 @@ export function AggTypesAggTypeProvider(Private) {
      */
     this.decorateAggConfig = config.decorateAggConfig || null;
 
+    /**
+     * A function that needs to be called after the main request has been made
+     * and should return an updated response
+     * @param aggConfigs - agg config array used to produce main request
+     * @param aggConfig - AggConfig that requested the post flight request
+     * @param searchSourceAggs - SearchSource aggregation configuration
+     * @param resp - Response to the main request
+     * @param nestedSearchSource - the new SearchSource that will be used to make post flight request
+     * @return {Promise}
+     */
+    this.postFlightRequest = config.postFlightRequest || _.identity;
+
     if (config.getFormat) {
       this.getFormat = config.getFormat;
     }
