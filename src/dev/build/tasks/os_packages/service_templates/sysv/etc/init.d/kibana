@@ -15,9 +15,6 @@
 # Description:       Kibana
 ### END INIT INFO
 
-PATH=/sbin:/usr/sbin:/bin:/usr/bin
-export PATH
-
 name=kibana
 program=/usr/share/kibana/bin/kibana
 args=-c\\\ /etc/kibana/kibana.yml
