@@ -101,7 +101,7 @@ uiModules
           const confirmModalOptions = {
             confirmButtonText: 'Delete',
             onConfirm: doDelete,
-            title: `Delete field ${self.field.name}?`
+            title: `Delete field '${self.field.name}'?`
           };
           confirmModal(
             `You can't recover a deleted field.`,
