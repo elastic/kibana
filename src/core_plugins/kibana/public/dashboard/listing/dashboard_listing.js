@@ -132,11 +132,12 @@ export function DashboardListingController($injector, $scope, $location) {
     };
 
     confirmModal(
-      'Are you sure you want to delete the selected dashboards? This action is irreversible!',
+      `You can't recover deleted dashboards.`,
       {
         confirmButtonText: 'Delete',
         onConfirm: doDelete,
-        defaultFocusedButton: ConfirmationButtonTypes.CANCEL
+        defaultFocusedButton: ConfirmationButtonTypes.CANCEL,
+        title: 'Delete selected dashboards?'
       });
   };
 
