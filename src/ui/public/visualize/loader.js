@@ -20,7 +20,7 @@ const VisualizeLoaderProvider = ($compile, $rootScope, savedVisualizations) => {
     const visHtml = $compile(visEl)(scope);
     container.html(visHtml);
 
-    const handler = { destroy: scope.$destroy };
+    const handler = { destroy: () => scope.$destroy() };
 
     return new Promise((resolve) => {
       visEl.on('renderComplete', () => {
