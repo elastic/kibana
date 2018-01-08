@@ -16,9 +16,6 @@ import {
 } from '@elastic/eui';
 import { documentationLinks } from 'ui/documentation_links';
 
-import { StepIndexPattern } from './components/step_index_pattern';
-import { StepTimeField } from './components/step_time_field/step_time_field';
-
 import { MAX_SEARCH_SIZE } from './constants';
 import { getIndices } from './lib/get_indices';
 
@@ -203,9 +200,7 @@ class CreateIndexPatternWizard extends Component {
 
   renderStepOne() {
     const {
-      initialIndices,
       isInitiallyLoadingIndices,
-      isIncludingSystemIndices,
       step,
     } = this.state;
 
@@ -213,34 +208,20 @@ class CreateIndexPatternWizard extends Component {
       return null;
     }
 
-    const { services, initialQuery } = this.props;
-
     return (
-      <StepIndexPattern
-        initialIndices={initialIndices}
-        initialQuery={initialQuery}
-        isIncludingSystemIndices={isIncludingSystemIndices}
-        esService={services.es}
-        goToNextStep={this.goToTimeFieldStep}
-      />
+      <div>Step One</div>
     );
   }
 
   renderStepTwo() {
-    const { step, indexPattern } = this.state;
-    const { services } = this.props;
+    const { step } = this.state;
 
     if (step !== 2) {
       return null;
     }
 
     return (
-      <StepTimeField
-        indexPattern={indexPattern}
-        indexPatternsService={services.indexPatterns}
-        goToPreviousStep={this.goToIndexPatternStep}
-        createIndexPattern={this.createIndexPattern}
-      />
+      <div>Step Two</div>
     );
   }
 
