@@ -95,7 +95,7 @@ exports[`should render ON_PREM instructions with instructions cloud toggle when 
               },
               Object {
                 "dataTestSubj": "onPremElasticCloudBtn",
-                "label": "Elastic cloud",
+                "label": "Elastic Cloud",
                 "onClick": [Function],
               },
             ]

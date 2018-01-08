@@ -1,6 +1,6 @@
 import React from 'react';
 import { shallow, mount } from 'enzyme';
-import { findTestSubject } from 'ui_framework/test';
+import { findTestSubject } from '@elastic/eui/lib/test';
 
 import {
   Tutorial,
