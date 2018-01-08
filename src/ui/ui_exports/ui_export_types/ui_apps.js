@@ -17,6 +17,7 @@ function applySpecDefaults(spec, type, pluginSpec) {
     listed = !hidden,
     templateName = 'ui_app',
     injectVars = noop,
+    hasCSS = true,
     url = `/app/${id}`,
     uses = [],
   } = spec;
@@ -34,6 +35,7 @@ function applySpecDefaults(spec, type, pluginSpec) {
     listed,
     templateName,
     injectVars,
+    hasCSS,
     url,
     uses: uniq([
       ...uses,

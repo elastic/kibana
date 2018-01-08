@@ -15,6 +15,7 @@ export class UiApp {
       listed,
       templateName = 'ui_app',
       injectVars,
+      hasCSS = true,
       url = `/app/${id}`,
       uses = []
     } = spec;
@@ -35,6 +36,7 @@ export class UiApp {
     this._templateName = templateName;
     this._url = url;
     this._injectedVarsProvider = injectVars;
+    this._hasCSS = hasCSS;
     this._pluginId = pluginId;
     this._kbnServer = kbnServer;
 
@@ -96,6 +98,10 @@ export class UiApp {
     if (this.isListed()) {
       return this._navLink;
     }
+  }
+
+  getHasCSS() {
+    return this._hasCSS;
   }
 
   getInjectedVars() {
