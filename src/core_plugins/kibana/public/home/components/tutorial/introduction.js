@@ -3,14 +3,20 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Content } from './content';
 
+import {
+  EuiImage,
+} from '@elastic/eui';
+
 export function Introduction({ description, previewUrl, title }) {
   let img;
   if (previewUrl) {
     img = (
-      <img
-        className="previewImage"
-        src={previewUrl}
-        alt=""
+      <EuiImage
+        size="l"
+        hasShadow
+        allowFullScreen
+        title="screenshot of primary dashboard."
+        url={previewUrl}
       />
     );
   }
