@@ -121,10 +121,13 @@ block content
       }
       var files = [
         bundleFile('commons.style.css'),
-        bundleFile('#{app.getId()}.style.css'),
         bundleFile('commons.bundle.js'),
         bundleFile('#{app.getId()}.bundle.js')
       ];
+
+      if ('#{app.getHasCSS()}' == 'true') {
+        files.push(bundleFile('#{app.getId()}.style.css'));
+      }
 
       (function next() {
         var file = files.shift();

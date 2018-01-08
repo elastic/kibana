@@ -15,6 +15,7 @@ function createStubUiAppSpec(extraParams) {
     linkToLastSubUrl: true,
     hidden: false,
     listed: false,
+    hasCSS: false,
     templateName: 'ui_app_test',
     uses: [
       'visTypes',
@@ -86,6 +87,10 @@ describe('UiApp', () => {
         expect(app.getNavLink()).to.be.a(UiNavLink);
       });
 
+      it('has CSS', () => {
+        expect(app.getHasCSS()).to.be(true);
+      });
+
       it('has no injected vars', () => {
         expect(app.getInjectedVars()).to.be(undefined);
       });
@@ -137,6 +142,10 @@ describe('UiApp', () => {
 
       it('has no navLink', () => {
         expect(app.getNavLink()).to.be(undefined);
+      });
+
+      it('has no CSS', () => {
+        expect(app.getHasCSS()).to.be(false);
       });
 
       it('has injected vars', () => {
