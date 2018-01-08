@@ -9,7 +9,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
-  EuiModalOverlay,
+  EuiOverlayMask,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -33,7 +33,7 @@ export class DashboardCloneModal extends React.Component {
 
   render() {
     return (
-      <EuiModalOverlay>
+      <EuiOverlayMask>
         <EuiModal
           data-tests-subj="dashboardCloneModal"
           className="dashboardCloneModal"
@@ -79,7 +79,7 @@ export class DashboardCloneModal extends React.Component {
             </EuiButton>
           </EuiModalFooter>
         </EuiModal>
-      </EuiModalOverlay>
+      </EuiOverlayMask>
     );
   }
 }
