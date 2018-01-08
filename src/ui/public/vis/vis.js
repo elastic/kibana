@@ -34,7 +34,7 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
   const filterManager = Private(FilterManagerProvider);
 
   class Vis extends EventEmitter {
-    constructor(indexPattern, visState, uiState) {
+    constructor(indexPattern, visState) {
       super();
       visState = visState || {};
 
@@ -44,14 +44,9 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
         };
       }
       this.indexPattern = indexPattern;
-
-      if (!uiState) {
-        uiState = new PersistedState();
-      }
-
+      this._setUiState(new PersistedState());
       this.setCurrentState(visState);
       this.setState(this.getCurrentState(), false);
-      this.setUiState(uiState);
 
       // Session state is for storing information that is transitory, and will not be saved with the visualization.
       // For instance, map bounds, which depends on the view port, browser window size, etc.
@@ -156,14 +151,6 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
       return this.getStateInternal(true);
     }
 
-    clone() {
-      const uiJson = this.hasUiState() ? this.getUiState().toJSON() : {};
-      const uiState = new PersistedState(uiJson);
-      const clonedVis = new Vis(this.indexPattern, this.getState(), uiState);
-      clonedVis.editorMode = this.editorMode;
-      return clonedVis;
-    }
-
     /**
      *  Hook for pre-flight logic, see AggType#onSearchRequestStart()
      *  @param {Courier.SearchSource} searchSource
@@ -197,7 +184,12 @@ export function VisProvider(Private, Promise, indexPatterns, timefilter, getAppS
       return !!this.__uiState;
     }
 
-    setUiState(uiState) {
+    /***
+     * this should not be used outside of visualize
+     * @param uiState
+     * @private
+     */
+    _setUiState(uiState) {
       if (uiState instanceof PersistedState) {
         this.__uiState = uiState;
       }

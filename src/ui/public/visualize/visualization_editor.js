@@ -36,7 +36,7 @@ uiModules
 
         $scope.$on('render', (event) => {
           event.preventDefault();
-          $scope.renderFunction();
+          $timeout(() => { $scope.renderFunction(); });
         });
 
         $scope.$on('$destroy', () => {

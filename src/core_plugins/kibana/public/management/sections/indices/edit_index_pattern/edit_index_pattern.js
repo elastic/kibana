@@ -92,11 +92,12 @@ uiModules.get('apps/management')
 
     $scope.refreshFields = function () {
       const confirmModalOptions = {
-        confirmButtonText: 'Refresh fields',
-        onConfirm: () => { $scope.indexPattern.refreshFields(); }
+        confirmButtonText: 'Refresh',
+        onConfirm: () => { $scope.indexPattern.refreshFields(); },
+        title: 'Refresh field list?'
       };
       confirmModal(
-        'This will reset the field popularity counters. Are you sure you want to refresh your fields?',
+        'This action resets the popularity counter of each field.',
         confirmModalOptions
       );
     };
@@ -119,10 +120,11 @@ uiModules.get('apps/management')
       }
 
       const confirmModalOptions = {
-        confirmButtonText: 'Remove index pattern',
-        onConfirm: doRemove
+        confirmButtonText: 'Delete',
+        onConfirm: doRemove,
+        title: 'Delete index pattern?'
       };
-      confirmModal('Are you sure you want to remove this index pattern?', confirmModalOptions);
+      confirmModal('', confirmModalOptions);
     };
 
     $scope.setDefaultPattern = function () {

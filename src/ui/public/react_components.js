@@ -2,8 +2,11 @@ import 'ngreact';
 
 import {
   KuiToolBarSearchBox,
-  KuiConfirmModal,
 } from 'ui_framework/components';
+
+import {
+  EuiConfirmModal,
+} from '@elastic/eui';
 
 import { uiModules } from 'ui/modules';
 
@@ -12,5 +15,5 @@ app.directive('toolBarSearchBox', function (reactDirective) {
   return reactDirective(KuiToolBarSearchBox);
 });
 app.directive('confirmModal', function (reactDirective) {
-  return reactDirective(KuiConfirmModal);
+  return reactDirective(EuiConfirmModal);
 });
