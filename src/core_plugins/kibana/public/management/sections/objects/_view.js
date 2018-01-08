@@ -177,10 +177,11 @@ uiModules.get('apps/management')
           }
           const confirmModalOptions = {
             onConfirm: doDelete,
-            confirmButtonText: 'Delete object'
+            confirmButtonText: 'Delete',
+            title: 'Delete saved Kibana object?'
           };
           confirmModal(
-            'Are you sure want to delete this object? This action is irreversible!',
+            `You can't recover deleted objects`,
             confirmModalOptions
           );
         };
