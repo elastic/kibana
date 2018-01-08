@@ -109,10 +109,11 @@ uiModules.get('apps/management')
 
         $scope.remove = function (field) {
           const confirmModalOptions = {
-            confirmButtonText: 'Delete field',
-            onConfirm: () => { $scope.indexPattern.removeScriptedField(field.name); }
+            confirmButtonText: 'Delete',
+            onConfirm: () => { $scope.indexPattern.removeScriptedField(field.name); },
+            title: `Delete scripted field '${field.name}'?`
           };
-          confirmModal(`Are you sure want to delete ${field.name}? This action is irreversible!`, confirmModalOptions);
+          confirmModal(`You can't recover scripted fields.`, confirmModalOptions);
         };
 
         function getLanguagesInUse() {

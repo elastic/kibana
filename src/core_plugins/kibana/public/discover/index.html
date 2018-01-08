@@ -39,7 +39,7 @@
       <filter-bar
         state="state"
         index-patterns="[indexPattern]"
-        ng-if="state.query.language === 'lucene'"
+        ng-if="['lucene', 'kql'].includes(state.query.language)"
       ></filter-bar>
     </div>
     <div class="row">
@@ -139,7 +139,7 @@
                 data-title="{{opts.savedSearch.lastSavedTitle}}"
                 data-description="{{opts.savedSearch.description}}"
                 minimum-visible-rows="minimumVisibleRows"
-                render-counter
+                render-complete
                 on-add-column="addColumn"
                 on-change-sort-order="setSortOrder"
                 on-move-column="moveColumn"
