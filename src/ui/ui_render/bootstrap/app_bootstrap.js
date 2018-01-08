@@ -30,14 +30,9 @@ export class AppBootstrap {
   }
 
   async getJsFileHash() {
-    if (!this._rawTemplate) {
-      this._rawTemplate = await loadRawTemplate();
-    }
-
+    const fileContents = await this.getJsFile();
     const hash = createHash('sha1');
-    hash.update(this._rawTemplate);
-    hash.update(JSON.stringify(this.templateData));
-    hash.update(JSON.stringify(this.translations));
+    hash.update(fileContents);
     return hash.digest('hex');
   }
 }

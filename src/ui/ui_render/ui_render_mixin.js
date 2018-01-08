@@ -35,13 +35,13 @@ export function uiRenderMixin(kbnServer, server, config) {
     path: '/bundles/app/{id}/bootstrap.js',
     method: 'GET',
     async handler(request, reply) {
-      const { id } = request.params;
-      const app = server.getUiAppById(id);
-      if (!app) {
-        return reply(Boom.notFound(`Unknown app: ${id}`));
-      }
-
       try {
+        const { id } = request.params;
+        const app = server.getUiAppById(id);
+        if (!app) {
+          throw Boom.notFound(`Unknown app: ${id}`);
+        }
+
         const bootstrap = new AppBootstrap({
           templateData: {
             appId: app.getId(),

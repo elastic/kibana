@@ -2,7 +2,6 @@
   "rootDir": "../../..",
   "roots": [
     "<rootDir>/src/ui",
-    "<rootDir>/src/ui/public",
     "<rootDir>/src/core_plugins",
     "<rootDir>/ui_framework/",
     "<rootDir>/packages"
