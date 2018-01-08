@@ -38,24 +38,6 @@
 
 @vis-hover-opacity: 0.8;
 
-/* SVG Element Default Styling */
-rect {
-  opacity: 1;
-
-  &:hover {
-    opacity: @vis-hover-opacity;
-  }
-}
-
-circle {
-  opacity: 0;
-
-  &:hover {
-    opacity: 1;
-    stroke-width: 10px;
-    stroke-opacity: @vis-hover-opacity;
-  }
-}
 
 .overlap_area {
   opacity: 0.8;
@@ -70,12 +52,6 @@ circle {
 
 .blur_shape {
   opacity: 0.3 !important;
-}
-
-path {
-  &:hover {
-    //opacity: @vis-hover-opacity;
-  }
 }
 
 .slice {
