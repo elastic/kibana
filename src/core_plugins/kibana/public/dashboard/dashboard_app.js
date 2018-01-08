@@ -279,7 +279,7 @@ app.directive('dashboardApp', function ($injector) {
             $scope.kbnTopNav.close('save');
             if (id) {
               toastNotifications.add({
-                title: `Saved "${dash.title}"`,
+                title: `Saved '${dash.title}'`,
                 color: 'success',
                 iconType: 'check',
               });

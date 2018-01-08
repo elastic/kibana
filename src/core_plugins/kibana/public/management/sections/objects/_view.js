@@ -220,7 +220,7 @@ uiModules.get('apps/management')
           });
 
           toastNotifications.add({
-            title: `${_.capitalize(action)} "${$scope.obj.attributes.title}" ${$scope.title.toLowerCase()} object`,
+            title: `${_.capitalize(action)} '${$scope.obj.attributes.title}' ${$scope.title.toLowerCase()} object`,
             color: 'success',
             iconType: 'check',
           });

@@ -252,7 +252,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
         if (id) {
           toastNotifications.add({
-            title: `Saved "${savedVis.title}"`,
+            title: `Saved '${savedVis.title}'`,
             color: 'success',
             iconType: 'check',
           });
@@ -287,7 +287,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     if (!$state.linked) return;
 
     toastNotifications.add({
-      title: `Unlinked from saved search "${savedVis.savedSearch.title}"`,
+      title: `Unlinked from saved search '${savedVis.savedSearch.title}'`,
       color: 'success',
       iconType: 'check',
     });
