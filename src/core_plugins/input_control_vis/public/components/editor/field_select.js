@@ -64,11 +64,11 @@ export class FieldSelect extends Component {
     }
 
     const idGenerator = htmlIdGenerator();
-    const selectId = idGenerator('indexPatternSelect');
+    const selectId = idGenerator('fieldSelect');
     return (
       <EuiFormRow
         id={selectId}
-        label="Index Pattern"
+        label="Field"
       >
         <Select
           className="field-react-select"
