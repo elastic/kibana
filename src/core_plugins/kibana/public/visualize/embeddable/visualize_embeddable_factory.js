@@ -67,7 +67,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
           uiState: uiState,
           // Append visualization to container instead of replacing its content
           append: true,
-          cssClass: `panel-content ${savedObject.vis.type.name}`,
+          cssClass: `panel-content`,
           // The chrome is permanently hidden in "embed mode" in which case we don't want to show the spy pane, since
           // we deem that situation to be more public facing and want to hide more detailed information.
           showSpyPanel: !chrome.getIsChromePermanentlyHidden(),
