@@ -16,6 +16,10 @@ export class EmsFileParser {
     if (typeof url.name !== 'string') {
       throw new Error(`data.url with {"%type%": "emsfile"} is missing the "name" of the file`);
     }
+    // Optimization: so initiate remote request as early as we know that we will need it
+    if (!this._fileLayersP) {
+      this._fileLayersP = this._serviceSettings.getFileLayers();
+    }
     return { obj, name: url.name };
   }
 
@@ -27,7 +31,7 @@ export class EmsFileParser {
   async populateData(requests) {
     if (requests.length === 0) return;
 
-    const layers = await this._serviceSettings.getFileLayers();
+    const layers = await this._fileLayersP;
 
     for (const { obj, name } of requests) {
       const foundLayer = layers.find(v => v.name === name);
