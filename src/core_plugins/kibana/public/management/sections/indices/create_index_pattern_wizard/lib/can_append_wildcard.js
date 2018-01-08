@@ -1,4 +1,4 @@
-export const appendWildcard = (keyboardEvent) => {
+export const canAppendWildcard = (keyboardEvent) => {
   const {
     key,
     metaKey,
