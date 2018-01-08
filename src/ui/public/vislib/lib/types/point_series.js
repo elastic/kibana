@@ -26,7 +26,8 @@ export function VislibTypesPointSeries() {
 
     return {
       ...matchingSeriesParams,
-      data: seri
+      data: seri,
+      radiusRatio: cfg.radiusRatio
     };
   };
 
