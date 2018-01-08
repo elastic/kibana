@@ -127,6 +127,7 @@ export class ControlEditor extends Component {
           id="controlEditorAccordion"
           buttonContent={getTitle(this.props.controlParams, this.props.controlIndex)}
           extraAction={this.renderEditorButtons()}
+          initialIsOpen={true}
         >
           {this.renderEditor()}
         </EuiAccordion>
