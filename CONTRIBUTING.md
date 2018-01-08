@@ -158,11 +158,7 @@ Install the version of node.js listed in the `.node-version` file _(this can be 
 nvm install "$(cat .node-version)"
 ```
 
-Install the latest version of [yarn](https://yarnpkg.com)
-
-```bash
-npm install -g yarn
-```
+Install the latest version of [yarn](https://yarnpkg.com).
 
 Install dependencies
 
