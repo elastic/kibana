@@ -168,7 +168,6 @@
     "raw-loader": "0.5.1",
     "react": "16.0.0",
     "react-ace": "5.5.0",
-    "react-addons-test-utils": "15.6.2",
     "react-anything-sortable": "1.7.3",
     "react-color": "2.11.7",
     "react-dom": "16.0.0",
