@@ -5,9 +5,6 @@ const module = uiModules.get('kibana');
 module.directive('tileMapVisParams', function () {
   return {
     restrict: 'E',
-    template: tileMapTemplate,
-    link: function () {
-      console.log('call linker function');
-    }
+    template: tileMapTemplate
   };
 });
