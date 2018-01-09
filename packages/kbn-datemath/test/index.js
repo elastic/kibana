@@ -81,8 +81,12 @@ describe('dateMath', function () {
       expect(dateMath.parse(string).format(format)).to.eql(mmnt.format(format));
     });
 
-    it('should return the current time if passed now', function () {
+    it(`should return the current time when parsing now`, function () {
       expect(dateMath.parse('now').format(format)).to.eql(now.format(format));
+    });
+
+    it(`should use the forceNow parameter when parsing now`, function () {
+      expect(dateMath.parse('now', undefined, undefined, mmnt).format(format)).to.eql(mmnt.format(format));
     });
   });
 
@@ -111,6 +115,10 @@ describe('dateMath', function () {
 
         it('should return ' + len + span + ' before ' + anchor, function () {
           expect(dateMath.parse(thenEx).format(format)).to.eql(anchored.subtract(len, span).format(format));
+        });
+
+        it('should return ' + len + span + ' before forceNow', function () {
+          expect(dateMath.parse(nowEx, undefined, undefined, anchored).format(format)).to.eql(anchored.subtract(len, span).format(format));
         });
       });
     });
@@ -142,16 +150,22 @@ describe('dateMath', function () {
         it('should return ' + len + span + ' after ' + anchor, function () {
           expect(dateMath.parse(thenEx).format(format)).to.eql(anchored.add(len, span).format(format));
         });
+
+        it('should return ' + len + span + ' after forceNow', function () {
+          expect(dateMath.parse(nowEx, undefined, undefined, anchored).format(format)).to.eql(anchored.add(len, span).format(format));
+        });
       });
     });
   });
 
   describe('rounding', function () {
     let now;
+    let anchored;
 
     beforeEach(function () {
       clock = sinon.useFakeTimers(unix);
       now = moment();
+      anchored = moment(anchor);
     });
 
     afterEach(function () {
@@ -163,18 +177,28 @@ describe('dateMath', function () {
         expect(dateMath.parse('now/' + span).format(format)).to.eql(now.startOf(span).format(format));
       });
 
+      it(`should round now to the beginning of forceNow's ` + span, function () {
+        expect(dateMath.parse('now/' + span, undefined, undefined, anchored).format(format)).to.eql(anchored.startOf(span).format(format));
+      });
+
       it('should round now to the end of the ' + span, function () {
         expect(dateMath.parse('now/' + span, true).format(format)).to.eql(now.endOf(span).format(format));
+      });
+
+      it(`should round now to the end of forceNow's ` + span, function () {
+        expect(dateMath.parse('now/' + span, true, undefined, anchored).format(format)).to.eql(anchored.endOf(span).format(format));
       });
     });
   });
 
   describe('math and rounding', function () {
     let now;
+    let anchored;
 
     beforeEach(function () {
       clock = sinon.useFakeTimers(unix);
       now = moment();
+      anchored = moment(anchor);
     });
 
     it('should round to the nearest second with 0 value', function () {
@@ -222,6 +246,11 @@ describe('dateMath', function () {
       // The end of the range (rounding up) should be the last day of the week (so one day before)
       // our start of the week, that's why 3 - 1
       expect(val.isoWeekday()).to.eql(3 - 1);
+    });
+
+    it('should round relative to forceNow', function () {
+      const val = dateMath.parse('now-0s/s', undefined, undefined, anchored).format(format);
+      expect(val).to.eql(anchored.startOf('s').format(format));
     });
   });
 
