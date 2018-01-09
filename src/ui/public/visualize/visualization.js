@@ -105,7 +105,6 @@ uiModules
 
         const renderSubscription = Observable.merge(success$, requestError$)
           .subscribe(() => {
-            $scope.$emit('renderComplete');
             dispatchRenderComplete($el[0]);
           });
 

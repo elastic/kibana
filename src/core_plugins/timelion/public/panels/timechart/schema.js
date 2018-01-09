@@ -319,7 +319,7 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
           $scope.plot = $.plot(canvasElem, _.compact(series), options);
 
           if ($scope.plot) {
-            $scope.$emit('renderComplete');
+            $scope.$emit('timelionChartRendered');
           }
 
           legendScope.$destroy();
