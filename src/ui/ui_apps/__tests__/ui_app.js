@@ -1,8 +1,11 @@
 import sinon from 'sinon';
 import expect from 'expect.js';
+import Chance from 'chance';
 
 import { UiApp } from '../ui_app';
 import { UiNavLink } from '../../ui_nav_links';
+
+const chance = new Chance();
 
 function createStubUiAppSpec(extraParams) {
   return {
@@ -51,7 +54,7 @@ function createUiApp(spec = createStubUiAppSpec(), kbnServer = createStubKbnServ
   return new UiApp(kbnServer, spec);
 }
 
-describe('UiApp', () => {
+describe('ui apps / UiApp', () => {
   describe('constructor', () => {
     it('throws an exception if an ID is not given', () => {
       const spec = {}; // should have id property
@@ -352,6 +355,47 @@ describe('UiApp', () => {
           expect(error.message).to.match(/Unknown plugin id/);
         });
       });
+    });
+  });
+
+  describe('#getModules', () => {
+    it('returns empty array by default', () => {
+      const app = createUiApp({ id: 'foo' });
+      expect(app.getModules()).to.eql([]);
+    });
+
+    it('returns main module if not using appExtensions', () => {
+      const app = createUiApp({ id: 'foo', main: 'bar' });
+      expect(app.getModules()).to.eql(['bar']);
+    });
+
+    it('returns appExtensions for used types only, in alphabetical order, starting with main module', () => {
+      const kbnServer = createStubKbnServer();
+      kbnServer.uiExports.appExtensions = {
+        abc: chance.shuffle([
+          'a',
+          'b',
+          'c',
+        ]),
+        def: chance.shuffle([
+          'd',
+          'e',
+          'f',
+        ])
+      };
+
+      const appExtensionType = chance.shuffle(Object.keys(kbnServer.uiExports.appExtensions))[0];
+      const appSpec = {
+        id: 'foo',
+        main: 'bar',
+        uses: [appExtensionType],
+      };
+
+      const app = createUiApp(appSpec, kbnServer);
+      expect(app.getModules()).to.eql([
+        'bar',
+        ...appExtensionType.split(''),
+      ]);
     });
   });
 });
