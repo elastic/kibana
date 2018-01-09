@@ -7,6 +7,7 @@ import { EsQueryParser } from './es_query_parser';
 import hjson from 'hjson';
 import { Utils } from './utils';
 import { EmsFileParser } from './ems_file_parser';
+import { UrlParser } from './url_parser';
 
 const DEFAULT_SCHEMA = 'https://vega.github.io/schema/vega/v3.0.json';
 
@@ -27,9 +28,12 @@ export class VegaParser {
     this.hideWarnings = false;
     this.error = undefined;
     this.warnings = [];
+
+    const onWarn = this._onWarning.bind(this);
     this._urlParsers = {
-      elasticsearch: new EsQueryParser(timeCache, searchCache, dashboardContext, this._onWarning.bind(this)),
+      elasticsearch: new EsQueryParser(timeCache, searchCache, dashboardContext, onWarn),
       emsfile: new EmsFileParser(serviceSettings),
+      url: new UrlParser(onWarn),
     };
   }
 
