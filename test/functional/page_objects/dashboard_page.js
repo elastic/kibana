@@ -31,6 +31,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         'defaultIndex': 'logstash-*'
       });
 
+      await kibanaServer.uiSettings.disableToastAutohide();
       await PageObjects.common.navigateToApp('dashboard');
     }
 
@@ -143,7 +144,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async clickFilterButton() {
       log.debug('Clicking filter button');
-      return await testSubjects.click('querySubmitButton');
+      await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickClone() {
@@ -579,20 +581,17 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       throw new Error('no element');
     }
 
-    async waitForRenderCounter(count) {
+    async waitForRenderComplete() {
       await retry.try(async () => {
         const sharedItems = await find.allByCssSelector('[data-shared-item]');
-        const renderCounters = await Promise.all(sharedItems.map(async sharedItem => {
-          return await sharedItem.getAttribute('render-counter');
+        const renderComplete = await Promise.all(sharedItems.map(async sharedItem => {
+          return await sharedItem.getAttribute('data-render-complete');
         }));
-        if (renderCounters.length !== sharedItems.length) {
-          throw new Error('Some shared items dont have render counter attribute');
+        if (renderComplete.length !== sharedItems.length) {
+          throw new Error('Some shared items dont have data-render-complete attribute');
         }
-        let totalCount = 0;
-        renderCounters.forEach(counter => {
-          totalCount += counter;
-        });
-        if (totalCount < count) {
+        const totalCount = renderComplete.filter(value => value === 'true' || value === 'disabled').length;
+        if (totalCount < sharedItems.length) {
           throw new Error('Still waiting on more visualizations to finish rendering');
         }
       });

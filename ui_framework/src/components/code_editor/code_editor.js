@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import AceEditor from 'react-ace';
 
-import { htmlIdGenerator, keyCodes } from '../../../services';
+import { htmlIdGenerator, keyCodes } from '../../services';
 
 export class KuiCodeEditor extends Component {
   state = {

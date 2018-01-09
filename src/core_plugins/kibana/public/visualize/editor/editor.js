@@ -118,6 +118,14 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     dirty: !savedVis.id
   };
 
+  this.getSharingTitle = () => {
+    return savedVis.title;
+  };
+
+  this.getSharingType = () => {
+    return 'visualization';
+  };
+
   if (savedVis.id) {
     docTitle.change(savedVis.title);
   }

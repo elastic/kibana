@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show Split Gauges', function () {
-        const expectedTexts = [ 'win 8', 'win xp', 'win 7', 'ios', 'osx' ];
+        const expectedTexts = [ 'win 8', 'win xp', 'win 7', 'ios' ];
         return PageObjects.visualize.clickMetricEditor()
           .then(function clickBucket() {
             log.debug('Bucket = Split Group');
@@ -58,6 +58,10 @@ export default function ({ getService, getPageObjects }) {
           .then(function selectField() {
             log.debug('Field = machine.os.raw');
             return PageObjects.visualize.selectField('machine.os.raw');
+          })
+          .then(function setSize() {
+            log.debug('Size = 4');
+            return PageObjects.visualize.setSize('4');
           })
           .then(function clickGo() {
             return PageObjects.visualize.clickGo();
@@ -73,7 +77,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show correct values for fields with fieldFormatters', async function () {
-        const expectedTexts = [ '2,904\nwin 8: Count', '5.528KB' ];
+        const expectedTexts = [ '2,904\nwin 8: Count', '0B\nwin 8: Min bytes' ];
 
 
         await PageObjects.visualize.clickMetricEditor();
@@ -83,13 +87,13 @@ export default function ({ getService, getPageObjects }) {
         await PageObjects.visualize.setSize('1');
         await PageObjects.visualize.clickAddMetric();
         await PageObjects.visualize.clickBucket('Metric');
-        await PageObjects.visualize.selectAggregation('Average', 'metrics');
+        await PageObjects.visualize.selectAggregation('Min', 'metrics');
         await PageObjects.visualize.selectField('bytes', 'metrics');
         await PageObjects.visualize.clickGo();
 
         return retry.try(function tryingForTime() {
           return PageObjects.visualize.getGaugeValue()
-            .then(function (metricValue) {
+            .then(async function (metricValue) {
               expect(expectedTexts).to.eql(metricValue);
             });
         });

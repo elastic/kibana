@@ -5,7 +5,7 @@ export default function ({ getService, getPageObjects }) {
   const remote = getService('remote');
   const PageObjects = getPageObjects(['settings', 'common', 'dashboard', 'header']);
 
-  describe('creating and deleting default index', function describeIndexTests() {
+  describe('kibana settings', function describeIndexTests() {
     before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});

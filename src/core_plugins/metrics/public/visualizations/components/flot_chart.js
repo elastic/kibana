@@ -1,5 +1,6 @@
-import PropTypes from 'prop-types';
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
+import { findDOMNode } from 'react-dom';
 import _ from 'lodash';
 import $ from 'ui/flot-charts';
 import eventBus from '../lib/events';
@@ -74,6 +75,7 @@ class FlotChart extends Component {
       const { series } = newProps;
       const options = this.plot.getOptions();
       _.set(options, 'series.bars.barWidth', calculateBarWidth(series));
+      _.set(options, 'xaxes[0].ticks', this.calcualteTicks());
       this.plot.setData(this.calculateData(series, newProps.show));
       this.plot.setupGrid();
       this.plot.draw();
@@ -145,7 +147,8 @@ class FlotChart extends Component {
         color: lineColor,
         timezone: 'browser',
         mode: 'time',
-        font: { color: textColor }
+        font: { color: textColor },
+        ticks: this.calcualteTicks()
       },
       series: {
         shadowSize: 0
@@ -170,15 +173,34 @@ class FlotChart extends Component {
     if (props.onBrush) {
       _.set(opts, 'selection', { mode: 'x', color: textColor });
     }
+
+    if (props.xAxisFormatter) {
+      _.set(opts, 'xaxis.tickFormatter', props.xAxisFormatter);
+    }
+
     _.set(opts, 'series.bars.barWidth', calculateBarWidth(props.series));
     return _.assign(opts, props.options);
   }
 
-  handleResize(width, height) {
-    this.size = { width, height };
+  calcualteTicks() {
+    const sample = this.props.xAxisFormatter(new Date());
+    const tickLetterWidth = 7;
+    const tickPadding = 45;
+    const ticks = Math.floor(this.target.clientWidth / ((sample.length * tickLetterWidth) + tickPadding));
+    return ticks;
+  }
 
-    if (this.size.height > 0 && this.size.width > 0) {
+  handleResize() {
+    const resize = findDOMNode(this.resize);
+    if (!this.rendered) {
+      this.renderChart();
+      return;
+    }
+
+    if (resize && resize.clientHeight > 0 && resize.clientHeight > 0) {
       if (!this.plot) return;
+      const options = this.plot.getOptions();
+      _.set(options, 'xaxes[0].ticks', this.calcualteTicks());
       this.plot.resize();
       this.plot.setupGrid();
       this.plot.draw();
@@ -187,15 +209,14 @@ class FlotChart extends Component {
   }
 
   renderChart() {
+    const resize = findDOMNode(this.resize);
 
-    if (this.size.height > 0 && this.size.width > 0) {
-
+    if (resize.clientWidth > 0 && resize.clientHeight > 0) {
       this.rendered = true;
       const { series } = this.props;
       const data = this.calculateData(series, this.props.show);
 
       this.plot = $.plot(this.target, data, this.getOptions(this.props));
-
       this.handleDraw(this.plot);
 
       _.defer(() => this.handleResize());
@@ -222,7 +243,7 @@ class FlotChart extends Component {
         this.handlePlotover = (e, pos, item) => eventBus.trigger('thorPlotover', [pos, item, this.plot]);
         this.handlePlotleave = () => eventBus.trigger('thorPlotleave');
         this.handleThorPlotleave = e => {
-          this.plot.clearCrosshair();
+          if (this.plot) this.plot.clearCrosshair();
           if (this.props.plothover) this.props.plothover(e);
         };
 
@@ -253,10 +274,16 @@ class FlotChart extends Component {
 
   render() {
     return (
-      <div className="rhythm_chart__timeseries-container">
-        <div ref={el => (this.target = el)} className="rhythm_chart__timeseries-container" />
-        <Resize onResize={this.handleResize} />
-      </div>
+      <Resize
+        onResize={this.handleResize}
+        ref={(el) => this.resize = el}
+        className="rhythm_chart__timeseries-container"
+      >
+        <div
+          ref={(el) => this.target = el}
+          className="rhythm_chart__timeseries-container"
+        />
+      </Resize>
     );
   }
 }

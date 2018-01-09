@@ -10,6 +10,7 @@ import openRowHtml from 'ui/doc_table/components/table_row/open.html';
 import detailsHtml from 'ui/doc_table/components/table_row/details.html';
 import { uiModules } from 'ui/modules';
 import { disableFilter } from 'ui/filter_bar';
+import { dispatchRenderComplete } from 'ui/render_complete';
 
 const module = uiModules.get('app/discover');
 
@@ -159,7 +160,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
           const $target = reuse ? $(reuse).detach() : $(html);
           $target.data('discover:html', html);
           const $before = $cells.eq(i - 1);
-          if ($before.size()) {
+          if ($before.length) {
             $before.after($target);
           } else {
             $el.append($target);
@@ -180,7 +181,7 @@ module.directive('kbnTableRow', function ($compile, $httpParamSerializer, kbnUrl
 
         // trim off cells that were not used rest of the cells
         $cells.filter(':gt(' + (newHtmls.length - 1) + ')').remove();
-        $el.trigger('renderComplete');
+        dispatchRenderComplete($el[0]);
       }
 
       /**

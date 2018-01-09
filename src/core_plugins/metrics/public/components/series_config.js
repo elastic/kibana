@@ -5,7 +5,7 @@ import createSelectHandler from './lib/create_select_handler';
 import createTextHandler from './lib/create_text_handler';
 import YesNo from './yes_no';
 import { IndexPattern } from './index_pattern';
-import { htmlIdGenerator } from 'ui_framework/services';
+import { htmlIdGenerator } from '@elastic/eui';
 
 export const SeriesConfig = props => {
   const defaults = { offset_time: '', value_template: '' };

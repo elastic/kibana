@@ -36,6 +36,7 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await PageObjects.visualize.saveVisualization(PIE_CHART_VIS_NAME);
+      await PageObjects.header.clickToastOK();
 
       await PageObjects.header.clickDashboard();
 
@@ -91,7 +92,7 @@ export default function ({ getService, getPageObjects }) {
         // Click events not added until visualization is finished rendering.
         // See https://github.com/elastic/kibana/issues/15480#issuecomment-350195245 for more info on why
         // this is necessary.
-        await PageObjects.dashboard.waitForRenderCounter(2);
+        await PageObjects.dashboard.waitForRenderComplete();
         await PageObjects.dashboard.filterOnPieSlice();
         const filters = await PageObjects.dashboard.getFilters();
         expect(filters.length).to.equal(1);

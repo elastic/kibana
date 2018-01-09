@@ -3,7 +3,7 @@ import { Server } from 'hapi';
 import { fromNode } from 'bluebird';
 import registerHapiPlugins from '../../server/http/register_hapi_plugins';
 
-export default class LazyServer {
+export default class WatchServer {
   constructor(host, port, basePath, optimizer) {
     this.basePath = basePath;
     this.optimizer = optimizer;
