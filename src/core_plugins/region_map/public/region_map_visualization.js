@@ -92,9 +92,9 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
         this._choroplethLayer.setMetrics(previousMetrics, previousMetricsAgg);
       }
       this._choroplethLayer.on('select', (event) => {
-        const agg = this.vis.aggs.bySchemaName.segment[0];
+        const agg = this._vis.aggs.bySchemaName.segment[0];
         const filter = agg.createFilter(event);
-        this.vis.API.queryFilter.addFilters(filter);
+        this._vis.API.queryFilter.addFilters(filter);
       });
       this._choroplethLayer.on('styleChanged', (event) => {
         const shouldShowWarning = this._vis.params.isDisplayWarning && config.get('visualization:regionmap:showWarnings');
