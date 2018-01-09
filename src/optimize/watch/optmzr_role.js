@@ -1,17 +1,17 @@
-import LazyServer from './lazy_server';
-import LazyOptimizer from './lazy_optimizer';
+import WatchServer from './watch_server';
+import WatchOptimizer from './watch_optimizer';
 
 export default async (kbnServer, kibanaHapiServer, config) => {
-  const server = new LazyServer(
-    config.get('optimize.lazyHost'),
-    config.get('optimize.lazyPort'),
+  const server = new WatchServer(
+    config.get('optimize.watchHost'),
+    config.get('optimize.watchPort'),
     config.get('server.basePath'),
-    new LazyOptimizer({
+    new WatchOptimizer({
       log: (tags, data) => kibanaHapiServer.log(tags, data),
       uiBundles: kbnServer.uiBundles,
       profile: config.get('optimize.profile'),
       sourceMaps: config.get('optimize.sourceMaps'),
-      prebuild: config.get('optimize.lazyPrebuild'),
+      prebuild: config.get('optimize.watchPrebuild'),
       unsafeCache: config.get('optimize.unsafeCache'),
     })
   );
