@@ -1,6 +1,16 @@
 // Initialization block
 {
   const { nodeTypes: { function: { buildNode }}} = options.helpers;
+  const parseCursor = Boolean(options.parseCursor);
+
+  function getCursor(chars) {
+    const i = chars.findIndex(char => char.type === 'cursor');
+    return {
+      type: 'cursor',
+      prefix: chars.slice(0, i).join(''),
+      suffix: chars.slice(i + 1).join('')
+    };
+  }
 }
 
 start
@@ -14,18 +24,23 @@ EmptyQuery
 
 OrQuery
   = head:AndQuery Or tail:OrQuery {
+    const cursor = [head, tail].find(node => node.type === 'cursor');
+    if (cursor) return cursor;
     return buildNode('or', [head, tail]);
   }
   / AndQuery
 
 AndQuery
-  = head:NotQuery And tail:AndQuery{
+  = head:NotQuery And tail:AndQuery {
+    const cursor = [head, tail].find(node => node.type === 'cursor');
+    if (cursor) return cursor;
     return buildNode('and', [head, tail]);
   }
   / NotQuery
 
 NotQuery
   = Not query:SubQuery {
+    if (query.type === 'cursor') return query;
     return buildNode('not', query);
   }
   / SubQuery
@@ -42,7 +57,13 @@ Expression
 FieldListExpression
   = field:Literal Space* ':' Space* list:SubList {
     function buildNodeWithField(field, list) {
-      if (list.hasOwnProperty('and')) {
+      if (list.type === 'cursor') {
+        return {
+          ...list,
+          field,
+          suggest: 'values'
+        };
+      } else if (list.hasOwnProperty('and')) {
         return buildNode('and', list.and.map(node => buildNodeWithField(field, node)));
       } else if (list.hasOwnProperty('or')) {
         return buildNode('or', list.or.map(node => buildNodeWithField(field, node)));
@@ -62,29 +83,63 @@ FieldRangeExpression
 
 ValueExpression
   = value:Literal {
+    if (value.type === 'cursor') {
+      return {
+        ...value,
+        suggest: 'fields'
+      };
+    }
     return buildNode('is', '*', value);
   }
 
 OrList
   = head:AndList Or tail:OrList {
+    const cursor = [head, tail].find(node => node.type === 'cursor');
+    if (cursor) {
+      return {
+        ...cursor,
+        suggest: 'values'
+      };
+    }
     return { or: [head, tail] };
   }
   / AndList
 
 AndList
-  = head:NotList And tail:AndList{
+  = head:NotList And tail:AndList {
+    const cursor = [head, tail].find(node => node.type === 'cursor');
+    if (cursor) {
+      return {
+        ...cursor,
+        suggest: 'values'
+      };
+    }
     return { and: [head, tail] };
   }
   / NotList
 
 NotList
   = Not list:SubList {
+    if (list.type === 'cursor') {
+      return {
+        ...list,
+        suggest: 'values'
+      };
+    }
     return { not: list };
   }
   / SubList
 
 SubList
-  = '(' Space* list:OrList Space* ')' { return list; }
+  = '(' Space* list:OrList Space* ')' {
+    if (list.type === 'cursor') {
+      return {
+        ...list,
+        suggest: 'values'
+      };
+    }
+    return list;
+  }
   / Literal
 
 Or
@@ -102,17 +157,26 @@ Literal
   / UnquotedLiteral
 
 SingleQuotedString
-  = "'" chars:(EscapedQuote / [^'])* "'" {
+  = "'" chars:(Cursor / EscapedQuote / [^'])* "'" {
+    if (chars.find(char => char.type === 'cursor')) {
+      return getCursor(chars);
+    }
     return chars.join('');
   }
 
 DoubleQuotedString
-  = '"' chars:(EscapedQuote / [^"])* '"' {
+  = '"' chars:(Cursor / EscapedQuote / [^"])* '"' {
+    if (chars.find(char => char.type === 'cursor')) {
+      return getCursor(chars);
+    }
     return chars.join('');
   }
 
 UnquotedLiteral
-  = chars:UnquotedCharacter+ {
+  = chars:(UnquotedCharacter)+ {
+    if (chars.find(char => char.type === 'cursor')) {
+      return getCursor(chars);
+    }
     const sequence = chars.join('').trim();
     if (sequence === 'null') return null;
     if (sequence === 'true') return true;
@@ -125,7 +189,8 @@ EscapedQuote
   = '\\' quote:('"' / '"') { return quote; }
 
 UnquotedCharacter
-  = EscapedSpecialCharacter
+  = Cursor
+  / EscapedSpecialCharacter
   / !Separator char:. { return char; }
 
 EscapedSpecialCharacter
@@ -148,3 +213,8 @@ RangeOperator
 
 Space
   = [\ \t\r\n]
+
+Cursor
+  = &{ return parseCursor; } '@kibana-cursor@' {
+    return { type: 'cursor' };
+  }

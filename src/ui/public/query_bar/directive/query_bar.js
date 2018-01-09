@@ -2,6 +2,7 @@ import { uiModules } from 'ui/modules';
 import { callAfterBindingsWorkaround } from 'ui/compat';
 import template from './query_bar.html';
 import { queryLanguages } from '../lib/queryLanguages';
+import { getSuggestionsProvider } from '../../kuery';
 import '../../directives/documentation_href';
 import '../../directives/match_pairs';
 
@@ -16,11 +17,12 @@ module.directive('queryBar', function () {
       query: '=',
       appName: '=?',
       onSubmit: '&',
-      disableAutoFocus: '='
+      disableAutoFocus: '=',
+      indexPattern: '='
     },
     controllerAs: 'queryBar',
     bindToController: true,
-    controller: callAfterBindingsWorkaround(function ($scope, config) {
+    controller: callAfterBindingsWorkaround(function ($scope, $http, config) {
       this.appName = this.appName || 'global';
       this.availableQueryLanguages = queryLanguages;
       this.showLanguageSwitcher = config.get('search:queryLanguage:switcher:enable');
@@ -35,6 +37,17 @@ module.directive('queryBar', function () {
         this.submit();
       };
 
+      const getSuggestions = getSuggestionsProvider($http, this.indexPattern);
+
+      this.updateSuggestions = async (e) => {
+        const { target } = e;
+        const location = {
+          start: target.selectionStart,
+          end: target.selectionEnd
+        };
+        this.suggestions = await getSuggestions(this.localQuery.query, location);
+      };
+
       $scope.$watch('queryBar.query', (newQuery) => {
         this.localQuery = {
           ...newQuery
@@ -42,5 +55,4 @@ module.directive('queryBar', function () {
       }, true);
     })
   };
-
 });

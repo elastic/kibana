@@ -73,6 +73,7 @@
           ng-model="queryBar.localQuery.query"
           input-focus
           match-pairs
+          ng-keyup="queryBar.updateSuggestions($event)"
           disable-input-focus="queryBar.disableAutoFocus"
           kbn-typeahead-input
           placeholder="Search... (e.g. status:200 AND extension:PHP)"
@@ -105,6 +106,9 @@
         <span class="fa fa-search" aria-hidden="true"></span>
       </button>
     </div>
-    <kbn-typeahead-items></kbn-typeahead-items>
+    <div ng-repeat="suggestion in suggestions">
+      {{suggestion}}
+    </div>
+    <!-- <kbn-typeahead-items></kbn-typeahead-items> -->
   </div>
 </form>
