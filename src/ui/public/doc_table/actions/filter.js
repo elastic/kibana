@@ -8,7 +8,7 @@ export function addFilter(field, values = [], operation, index, state, filterMan
     values = [values];
   }
 
-  if (state.query.language === 'lucene') {
+  if (['lucene', 'kql'].includes(state.query.language)) {
     filterManager.add(field, values, operation, index);
   }
 
