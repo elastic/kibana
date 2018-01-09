@@ -50,11 +50,6 @@ describe('dateHistogram(req, panel, series)', () => {
                 }
               }
             }
-          },
-          meta: {
-            bucketSize: 10,
-            intervalString: '10s',
-            timeField: '@timestamp'
           }
         }
       }
@@ -81,11 +76,6 @@ describe('dateHistogram(req, panel, series)', () => {
                 }
               }
             }
-          },
-          meta: {
-            bucketSize: 10,
-            intervalString: '10s',
-            timeField: '@timestamp'
           }
         }
       }
@@ -115,11 +105,6 @@ describe('dateHistogram(req, panel, series)', () => {
                 }
               }
             }
-          },
-          meta: {
-            bucketSize: 20,
-            intervalString: '20s',
-            timeField: 'timestamp'
           }
         }
       }
