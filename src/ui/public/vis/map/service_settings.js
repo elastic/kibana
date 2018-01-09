@@ -151,10 +151,6 @@ uiModules.get('kibana')
         return allServices;
       }
 
-      getFallbackZoomSettings(isWMSEnabled) {
-        return (isWMSEnabled) ? { minZoom: 0, maxZoom: 18 } : { minZoom: 0, maxZoom: 10 };
-      }
-
       /**
        * Add optional query-parameters to all requests
        *

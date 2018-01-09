@@ -4,6 +4,9 @@ import { Observable } from 'rxjs/Rx';
 import 'ui/vis/map/service_settings';
 
 
+const MINZOOM = 0;
+const MAXZOOM = 18;
+
 export function BaseMapsVisualizationProvider() {
 
   /**
@@ -87,8 +90,8 @@ export function BaseMapsVisualizationProvider() {
       options.center = centerFromUIState ? centerFromUIState : this.vis.params.mapCenter;
 
       this._kibanaMap = new KibanaMap(this._container, options);
-      this._kibanaMap.setMinZoom(0);//use a default
-      this._kibanaMap.setMaxZoom(18);//use a default
+      this._kibanaMap.setMinZoom(MINZOOM);//use a default
+      this._kibanaMap.setMaxZoom(MAXZOOM);//use a default
 
       this._kibanaMap.addLegendControl();
       this._kibanaMap.addFitControl();
@@ -114,18 +117,16 @@ export function BaseMapsVisualizationProvider() {
       try {
 
         if (mapParams.wms.enabled) {
-          const minZoom = 0;
-          const maxZoom = 18;
-          if (maxZoom > this._kibanaMap.getMaxZoomLevel()) {
-            this._kibanaMap.setMinZoom(minZoom);
-            this._kibanaMap.setMaxZoom(maxZoom);
+          if (MINZOOM > this._kibanaMap.getMaxZoomLevel()) {
+            this._kibanaMap.setMinZoom(MINZOOM);
+            this._kibanaMap.setMaxZoom(MAXZOOM);
           }
 
           this._kibanaMap.setBaseLayer({
             baseLayerType: 'wms',
             options: {
-              minZoom: minZoom,
-              maxZoom: maxZoom,
+              minZoom: MINZOOM,
+              maxZoom: MAXZOOM,
               url: mapParams.wms.url,
               ...mapParams.wms.options
             }
