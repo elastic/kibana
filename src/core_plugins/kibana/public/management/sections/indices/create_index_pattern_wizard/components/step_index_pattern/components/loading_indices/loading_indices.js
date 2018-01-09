@@ -5,10 +5,14 @@ import {
   EuiFlexItem,
   EuiText,
   EuiTextColor,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 
 export const LoadingIndices = () => (
-  <EuiFlexGroup justifyContent="center">
+  <EuiFlexGroup justifyContent="center" alignItems="center">
+    <EuiFlexItem grow={false}>
+      <EuiLoadingSpinner size="m" />
+    </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiText>
         <EuiTextColor color="subdued">

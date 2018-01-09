@@ -31,12 +31,16 @@ export class StepIndexPattern extends Component {
     initialQuery: PropTypes.string,
   }
 
+  static defaultProps = {
+    initialQuery: '',
+  }
+
   constructor(props) {
     super(props);
     this.state = {
       matchingIndices: [],
       isLoadingIndices: false,
-      query: props.initialQuery || '',
+      query: props.initialQuery,
       appendedWildcard: false,
       showingIndexPatternQueryErrors: false,
     };
@@ -193,12 +197,10 @@ export class StepIndexPattern extends Component {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="s"/>
-        <div>
-          {this.renderLoadingState()}
-          {this.renderStatusMessage()}
-          <EuiSpacer size="s"/>
-          {this.renderList()}
-        </div>
+        {this.renderLoadingState()}
+        {this.renderStatusMessage()}
+        <EuiSpacer size="s"/>
+        {this.renderList()}
       </EuiPanel>
     );
   }
