@@ -312,13 +312,9 @@ angular-translate@2.13.1:
   dependencies:
     angular ">=1.2.26 <=1.6"
 
-angular@1.6.5:
+angular@1.6.5, angular@>=1.0.6, "angular@>=1.2.26 <=1.6":
   version "1.6.5"
   resolved "https://registry.yarnpkg.com/angular/-/angular-1.6.5.tgz#37f788eebec5ce2e3fa02b17bbcb2a231576a0d6"
-
-angular@>=1.0.6, "angular@>=1.2.26 <=1.6":
-  version "1.6.8"
-  resolved "https://registry.yarnpkg.com/angular/-/angular-1.6.8.tgz#5be378a58be91a5489e78b59c4518cd9fd273ffb"
 
 ansi-align@^2.0.0:
   version "2.0.0"
@@ -2480,7 +2476,7 @@ create-hmac@^1.1.0, create-hmac@^1.1.2, create-hmac@^1.1.4:
     safe-buffer "^5.0.1"
     sha.js "^2.4.8"
 
-create-react-class@^15.5.1, create-react-class@^15.5.2, create-react-class@^15.5.3, create-react-class@^15.6.0:
+create-react-class@^15.5.1, create-react-class@^15.5.2, create-react-class@^15.5.3:
   version "15.6.2"
   resolved "https://registry.yarnpkg.com/create-react-class/-/create-react-class-15.6.2.tgz#cf1ed15f12aad7f14ef5f2dfe05e6c42f91ef02a"
   dependencies:
@@ -7572,13 +7568,9 @@ moment-timezone@0.5.4:
   dependencies:
     moment ">= 2.6.0"
 
-moment@2.13.0, "moment@>= 2.6.0", moment@~2.13.0:
+moment@2.13.0, moment@2.x.x, "moment@>= 2.6.0", moment@^2.10.3, moment@^2.10.6, moment@^2.7.0, moment@~2.13.0:
   version "2.13.0"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.13.0.tgz#24162d99521e6d40f99ae6939e806d2139eaac52"
-
-moment@2.x.x, moment@^2.10.3, moment@^2.10.6, moment@^2.7.0:
-  version "2.20.1"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.20.1.tgz#d6eb1a46cbcc14a2b2f9434112c1ff8907f313fd"
 
 mri@1.1.0:
   version "1.1.0"
@@ -9363,7 +9355,7 @@ react-toggle@4.0.2:
   dependencies:
     classnames "^2.2.5"
 
-react@16.0.0:
+react@16.0.0, react@>=0.13.3, react@^15.6.2:
   version "16.0.0"
   resolved "https://registry.yarnpkg.com/react/-/react-16.0.0.tgz#ce7df8f1941b036f02b2cca9dbd0cb1f0e855e2d"
   dependencies:
@@ -9371,25 +9363,6 @@ react@16.0.0:
     loose-envify "^1.1.0"
     object-assign "^4.1.1"
     prop-types "^15.6.0"
-
-react@>=0.13.3:
-  version "16.2.0"
-  resolved "https://registry.yarnpkg.com/react/-/react-16.2.0.tgz#a31bd2dab89bff65d42134fa187f24d054c273ba"
-  dependencies:
-    fbjs "^0.8.16"
-    loose-envify "^1.1.0"
-    object-assign "^4.1.1"
-    prop-types "^15.6.0"
-
-react@^15.6.2:
-  version "15.6.2"
-  resolved "https://registry.yarnpkg.com/react/-/react-15.6.2.tgz#dba0434ab439cfe82f108f0f511663908179aa72"
-  dependencies:
-    create-react-class "^15.6.0"
-    fbjs "^0.8.9"
-    loose-envify "^1.1.0"
-    object-assign "^4.1.0"
-    prop-types "^15.5.10"
 
 reactcss@1.2.3, reactcss@^1.2.0:
   version "1.2.3"
