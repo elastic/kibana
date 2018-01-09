@@ -29,9 +29,7 @@ uiModules
 
         $scope.renderFunction = () => {
           if (!$scope.vis) return;
-          editor.render($scope.visData, $scope.searchSource, getUpdateStatus($scope), $scope.uiState).then(() => {
-            $scope.$emit('renderComplete');
-          });
+          editor.render($scope.visData, $scope.searchSource, getUpdateStatus($scope), $scope.uiState);
         };
 
         $scope.$on('render', (event) => {
