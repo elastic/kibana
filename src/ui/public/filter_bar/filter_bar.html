@@ -3,7 +3,9 @@
     <form ng-submit="applyFilters(newFilters)">
     <ul class="list-unstyled">
       <li>Apply these filters?</li>
-      <li ng-repeat="filter in newFilters track by $index" class="filter" ng-click="filter.meta.apply = !filter.meta.apply"><input type="checkbox" ng-checked="filter.meta.apply"/> {{ filter.meta.key }}: {{ filter.meta.value }}</li>
+      <li ng-repeat="filter in newFilters track by $index" class="filter" ng-click="filter.meta.apply = !filter.meta.apply"><input type="checkbox" ng-checked="filter.meta.apply"/>
+        <span ng-if="filter.meta.negate">NOT </span> {{ filter.meta.key }}: {{ filter.meta.value }}
+      </li>
       <li ng-if="changeTimeFilter" class="changeTimeFilter filter" ng-click="changeTimeFilter.meta.apply = !changeTimeFilter.meta.apply"><input type="checkbox" ng-checked="changeTimeFilter.meta.apply"/> <strong>Change time to:</strong> {{changeTimeFilter.meta.value}} </li>
       <li>
         <div class="kuiButtonGroup">

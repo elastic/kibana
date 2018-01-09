@@ -2,21 +2,19 @@ import { isWorker } from 'cluster';
 
 export default async kbnServer => {
 
-
   if (!isWorker) {
-    throw new Error(`lazy optimization is only available in "watch" mode`);
+    throw new Error(`watch optimization is only available when using the "--dev" cli flag`);
   }
 
   /**
-   * When running in lazy mode two workers/threads run in one
-   * of the modes: 'optmzr' or 'server'
+   * When running in watch mode two processes run in one of the following modes:
    *
-   * optmzr: this thread runs the LiveOptimizer and the LazyServer
-   *   which serves the LiveOptimizer's output and blocks requests
+   * optmzr: this process runs the WatchOptimizer and the WatchServer
+   *   which serves the WatchOptimizer's output and blocks requests
    *   while the optimizer is running
    *
-   * server: this thread runs the entire kibana server and proxies
-   *   all requests for /bundles/* to the optmzr
+   * server: this process runs the entire kibana server and proxies
+   *   all requests for /bundles/* to the optmzr process
    *
    * @param  {string} process.env.kbnWorkerType
    */
