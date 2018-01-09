@@ -1,8 +1,6 @@
 import { exec } from 'child_process';
 module.exports = function (grunt) {
   grunt.registerTask('_build:installDependencies', function () {
-    grunt.file.mkdir('<%= root %>/build/kibana/node_modules');
-
     // We rely on a local version of Yarn that contains the bugfix from
     // https://github.com/yarnpkg/yarn/pull/5059. Once this fix is merged
     // and released we can use Yarn directly in the build.
