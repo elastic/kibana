@@ -1,5 +1,8 @@
-Contains a version of Yarn which include the bugfix in
-https://github.com/yarnpkg/yarn/pull/5059 to handle optional dependencies.
+Kibana ships with a vendored version of Yarn, which is used to install
+dependencies when preparing the production build of Kibana.
+
+The currently vendored version of Yarn contains the bugfix in
+https://github.com/yarnpkg/yarn/pull/5059, which handles optional dependencies.
 
 To build a new Yarn bundle, check out that pull requst and run:
 
