@@ -62,7 +62,7 @@ VisTypesRegistryProvider.register(function TileMapVisType(Private, getAppState, 
         ],
         baseLayers: []
       },
-      optionsTemplate: '<tile_map-vis-params></tile_map-vis-params>',
+      optionsTemplate: '<tile-map-vis-params></tile-map-vis-params>',
       schemas: new Schemas([
         {
           group: 'metrics',
