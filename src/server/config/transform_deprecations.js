@@ -30,6 +30,11 @@ const deprecations = [
   rename('server.ssl.cert', 'server.ssl.certificate'),
   unused('server.xsrf.token'),
   unused('uiSettings.enabled'),
+  rename('optimize.lazy', 'optimize.watch'),
+  rename('optimize.lazyPort', 'optimize.watchPort'),
+  rename('optimize.lazyHost', 'optimize.watchHost'),
+  rename('optimize.lazyPrebuild', 'optimize.watchPrebuild'),
+  rename('optimize.lazyProxyTimeout', 'optimize.watchProxyTimeout'),
   serverSslEnabled,
   savedObjectsIndexCheckTimeout,
 ];

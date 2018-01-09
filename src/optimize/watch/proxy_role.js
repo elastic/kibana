@@ -8,8 +8,8 @@ export default (kbnServer, server, config) => {
     method: 'GET',
     handler: {
       proxy: {
-        host: config.get('optimize.lazyHost'),
-        port: config.get('optimize.lazyPort'),
+        host: config.get('optimize.watchHost'),
+        port: config.get('optimize.watchPort'),
         passThrough: true,
         xforward: true
       }
@@ -19,11 +19,11 @@ export default (kbnServer, server, config) => {
 
   return fromNode(cb => {
     const timeout = setTimeout(() => {
-      cb(new Error('Server timedout waiting for the optimizer to become ready'));
-    }, config.get('optimize.lazyProxyTimeout'));
+      cb(new Error('Timeout waiting for the optimizer to become ready'));
+    }, config.get('optimize.watchProxyTimeout'));
 
     const waiting = once(() => {
-      server.log(['info', 'optimize'], 'Waiting for optimizer completion');
+      server.log(['info', 'optimize'], 'Waiting for optimizer to be ready');
     });
 
     if (!process.connected) return;
