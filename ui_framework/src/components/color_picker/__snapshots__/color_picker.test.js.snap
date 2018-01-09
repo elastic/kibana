@@ -12,7 +12,7 @@ exports[`renders KuiColorPicker 1`] = `
       aria-label="aria-label"
       class="kuiColorPicker__swatch"
       data-test-subj="colorSwatch"
-      style="background:#ffeedd;"
+      style="background:#ffeedd"
     />
     <div
       aria-label="Color selection is #ffeedd"
@@ -36,7 +36,7 @@ exports[`renders KuiColorPicker with an empty swatch when color is null 1`] = `
       aria-label="aria-label"
       class="kuiColorPicker__swatch kuiColorPicker__emptySwatch"
       data-test-subj="colorSwatch"
-      style="background:;"
+      style="background:"
     >
       <svg>
         <line
@@ -69,7 +69,7 @@ exports[`renders KuiColorPicker without a color label when showColorLabel is fal
       aria-label="aria-label"
       class="kuiColorPicker__swatch"
       data-test-subj="colorSwatch"
-      style="background:#ffffff;"
+      style="background:#ffffff"
     />
   </div>
 </div>

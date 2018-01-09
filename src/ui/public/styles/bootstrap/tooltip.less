@@ -4,7 +4,7 @@
 
 
 // Base class
-.tooltip {
+.bsTooltip {
   position: absolute;
   z-index: @zindex-tooltip;
   display: block;
@@ -23,7 +23,7 @@
 }
 
 // Wrapper for the tooltip content
-.tooltip-inner {
+.bsTooltip-inner {
   max-width: @tooltip-max-width;
   padding: 3px 8px;
   color: @tooltip-color;
@@ -33,7 +33,7 @@
 }
 
 // Arrows
-.tooltip-arrow {
+.bsTooltip-arrow {
   position: absolute;
   width: 0;
   height: 0;
@@ -41,57 +41,57 @@
   border-style: solid;
 }
 // Note: Deprecated .top-left, .top-right, .bottom-left, and .bottom-right as of v3.3.1
-.tooltip {
-  &.top .tooltip-arrow {
+.bsTooltip {
+  &.top .bsTooltip-arrow {
     bottom: 0;
     left: 50%;
     margin-left: -@tooltip-arrow-width;
     border-width: @tooltip-arrow-width @tooltip-arrow-width 0;
     border-top-color: @tooltip-arrow-color;
   }
-  &.top-left .tooltip-arrow {
+  &.top-left .bsTooltip-arrow {
     bottom: 0;
     right: @tooltip-arrow-width;
     margin-bottom: -@tooltip-arrow-width;
     border-width: @tooltip-arrow-width @tooltip-arrow-width 0;
     border-top-color: @tooltip-arrow-color;
   }
-  &.top-right .tooltip-arrow {
+  &.top-right .bsTooltip-arrow {
     bottom: 0;
     left: @tooltip-arrow-width;
     margin-bottom: -@tooltip-arrow-width;
     border-width: @tooltip-arrow-width @tooltip-arrow-width 0;
     border-top-color: @tooltip-arrow-color;
   }
-  &.right .tooltip-arrow {
+  &.right .bsTooltip-arrow {
     top: 50%;
     left: 0;
     margin-top: -@tooltip-arrow-width;
     border-width: @tooltip-arrow-width @tooltip-arrow-width @tooltip-arrow-width 0;
     border-right-color: @tooltip-arrow-color;
   }
-  &.left .tooltip-arrow {
+  &.left .bsTooltip-arrow {
     top: 50%;
     right: 0;
     margin-top: -@tooltip-arrow-width;
     border-width: @tooltip-arrow-width 0 @tooltip-arrow-width @tooltip-arrow-width;
     border-left-color: @tooltip-arrow-color;
   }
-  &.bottom .tooltip-arrow {
+  &.bottom .bsTooltip-arrow {
     top: 0;
     left: 50%;
     margin-left: -@tooltip-arrow-width;
     border-width: 0 @tooltip-arrow-width @tooltip-arrow-width;
     border-bottom-color: @tooltip-arrow-color;
   }
-  &.bottom-left .tooltip-arrow {
+  &.bottom-left .bsTooltip-arrow {
     top: 0;
     right: @tooltip-arrow-width;
     margin-top: -@tooltip-arrow-width;
     border-width: 0 @tooltip-arrow-width @tooltip-arrow-width;
     border-bottom-color: @tooltip-arrow-color;
   }
-  &.bottom-right .tooltip-arrow {
+  &.bottom-right .bsTooltip-arrow {
     top: 0;
     left: @tooltip-arrow-width;
     margin-top: -@tooltip-arrow-width;

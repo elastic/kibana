@@ -13,7 +13,8 @@ export class KuiContextMenuItem extends Component {
     onClick: PropTypes.func,
     hasPanel: PropTypes.bool,
     buttonRef: PropTypes.func,
-  }
+    disabled: PropTypes.bool,
+  };
 
   render() {
     const {
@@ -22,6 +23,7 @@ export class KuiContextMenuItem extends Component {
       hasPanel,
       icon,
       buttonRef,
+      disabled,
       ...rest
     } = this.props;
 
@@ -39,12 +41,15 @@ export class KuiContextMenuItem extends Component {
       arrow = <span className="kuiContextMenu__arrow kuiIcon fa-angle-right" />;
     }
 
-    const classes = classNames('kuiContextMenuItem', className);
+    const classes = classNames('kuiContextMenuItem', className, {
+      'kuiContextMenuItem-disabled': disabled,
+    });
 
     return (
       <button
         className={classes}
         ref={buttonRef}
+        disabled={disabled}
         {...rest}
       >
         <span className="kuiContextMenu__itemLayout">

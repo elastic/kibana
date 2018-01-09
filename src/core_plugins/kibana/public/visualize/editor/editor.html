@@ -45,13 +45,13 @@
 
   <!-- Filters. -->
   <filter-bar
-    ng-if="vis.type.options.showFilterBar && state.query.language === 'lucene'"
+    ng-if="vis.type.options.showFilterBar && ['lucene', 'kql'].includes(state.query.language)"
     state="state"
     index-patterns="[indexPattern]"
   ></filter-bar>
 
   <div
-    class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm"
+    class="kuiInfoPanel kuiInfoPanel--warning kuiVerticalRhythm hide-for-sharing"
     ng-if="vis.type.shouldMarkAsExperimentalInUI()"
     data-test-subj="experimentalVisInfo"
   >

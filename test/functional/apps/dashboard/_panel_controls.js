@@ -63,18 +63,18 @@ export default function ({ getService, getPageObjects }) {
         const currentUrl = await remote.getCurrentUrl();
         // the second parameter of true will include the timestamp in the url and trigger a hard refresh.
         await remote.get(currentUrl.toString(), true);
+        await PageObjects.header.waitUntilLoadingHasFinished();
 
         await PageObjects.dashboard.showPanelEditControlsDropdownMenu();
         const editLinkExists = await testSubjects.exists('dashboardPanelEditLink');
-        const removeExists = await testSubjects.exists('dashboardPanelRemoveIcon');
-
         expect(editLinkExists).to.equal(true);
+
+        const removeExists = await testSubjects.exists('dashboardPanelRemoveIcon');
         expect(removeExists).to.equal(true);
 
         // Get rid of the timestamp in the url.
         await remote.get(currentUrl.toString(), false);
       });
-
 
       describe('on an expanded panel', function () {
         it('are hidden in view mode', async function () {

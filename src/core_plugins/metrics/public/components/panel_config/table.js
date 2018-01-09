@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import FieldSelect from '../aggs/field_select';
 import SeriesEditor from '../series_editor';
 import { IndexPattern } from '../index_pattern';
@@ -6,7 +7,7 @@ import createTextHandler from '../lib/create_text_handler';
 import createSelectHandler from '../lib/create_select_handler';
 import uuid from 'uuid';
 import YesNo from '../yes_no';
-import { htmlIdGenerator } from 'ui_framework/services';
+import { htmlIdGenerator } from '@elastic/eui';
 
 class TablePanelConfig extends Component {
 

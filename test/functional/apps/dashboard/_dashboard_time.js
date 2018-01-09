@@ -11,10 +11,7 @@ export default function ({ getPageObjects }) {
   describe('dashboard time', function dashboardSaveWithTime() {
     before(async function () {
       await PageObjects.dashboard.initTests();
-
-      // This flip between apps fixes the url so state is preserved when switching apps in test mode.
-      await PageObjects.header.clickVisualize();
-      await PageObjects.header.clickDashboard();
+      await PageObjects.dashboard.preserveCrossAppState();
     });
 
     after(async function () {

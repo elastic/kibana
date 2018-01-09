@@ -21,7 +21,7 @@ module.directive('validateJson', function () {
 
         // We actually need a proper object in all JSON inputs
         newValue = (newValue || '').trim();
-        if (newValue[0] === '{' || '[') {
+        if (newValue[0] === '{' || newValue[0] === '[') {
           try {
             JSON.parse(newValue);
             setValid();

@@ -1,4 +1,3 @@
-import { resolve } from 'path';
 import { writeFile } from 'fs';
 
 import Boom from 'boom';
@@ -25,8 +24,7 @@ const BABEL_EXCLUDE_RE = [
 
 export default class BaseOptimizer {
   constructor(opts) {
-    this.env = opts.env;
-    this.bundles = opts.bundles;
+    this.uiBundles = opts.uiBundles;
     this.profile = opts.profile || false;
 
     switch (opts.sourceMaps) {
@@ -60,7 +58,7 @@ export default class BaseOptimizer {
     this.compiler.plugin('done', stats => {
       if (!this.profile) return;
 
-      const path = resolve(this.env.workingDir, 'stats.json');
+      const path = this.uiBundles.resolvePath('stats.json');
       const content = JSON.stringify(stats.toJson());
       writeFile(path, content, function (err) {
         if (err) throw err;
@@ -71,8 +69,6 @@ export default class BaseOptimizer {
   }
 
   getConfig() {
-    const cacheDirectory = resolve(this.env.workingDir, '../.cache', this.bundles.hashBundleEntries());
-
     function getStyleLoaders(preProcessors = [], postProcessors = []) {
       return ExtractTextPlugin.extract({
         fallback: {
@@ -102,16 +98,38 @@ export default class BaseOptimizer {
       });
     }
 
+    /**
+     * Adds a cache loader if we're running in dev mode. The reason we're not adding
+     * the cache-loader when running in production mode is that it creates cache
+     * files in optimize/.cache that are not necessary for distributable versions
+     * of Kibana and just make compressing and extracting it more difficult.
+     */
+    function maybeAddCacheLoader(uiBundles, cacheName, loaders) {
+      if (!uiBundles.isDevMode()) {
+        return loaders;
+      }
+
+      return [
+        {
+          loader: 'cache-loader',
+          options: {
+            cacheDirectory: uiBundles.getCacheDirectory(cacheName)
+          }
+        },
+        ...loaders
+      ];
+    }
+
     const commonConfig = {
       node: { fs: 'empty' },
       context: fromRoot('.'),
-      entry: this.bundles.toWebpackEntries(),
+      entry: this.uiBundles.toWebpackEntries(),
 
       devtool: this.sourceMaps,
       profile: this.profile || false,
 
       output: {
-        path: this.env.workingDir,
+        path: this.uiBundles.getWorkingDir(),
         filename: '[name].bundle.js',
         sourceMapFilename: '[file].map',
         publicPath: PUBLIC_PATH_PLACEHOLDER,
@@ -137,12 +155,7 @@ export default class BaseOptimizer {
             test: /\.less$/,
             use: getStyleLoaders(
               ['less-loader'],
-              [{
-                loader: 'cache-loader',
-                options: {
-                  cacheDirectory: resolve(cacheDirectory, 'less'),
-                }
-              }]
+              maybeAddCacheLoader(this.uiBundles, 'less', [])
             ),
           },
           {
@@ -168,14 +181,8 @@ export default class BaseOptimizer {
           },
           {
             test: /\.js$/,
-            exclude: BABEL_EXCLUDE_RE.concat(this.env.noParse),
-            use: [
-              {
-                loader: 'cache-loader',
-                options: {
-                  cacheDirectory: resolve(cacheDirectory, 'babel'),
-                }
-              },
+            exclude: BABEL_EXCLUDE_RE.concat(this.uiBundles.getWebpackNoParseRules()),
+            use: maybeAddCacheLoader(this.uiBundles, 'babel', [
               {
                 loader: 'babel-loader',
                 options: {
@@ -184,15 +191,15 @@ export default class BaseOptimizer {
                     BABEL_PRESET_PATH,
                   ],
                 },
-              },
-            ],
+              }
+            ]),
           },
-          ...this.env.postLoaders.map(loader => ({
+          ...this.uiBundles.getPostLoaders().map(loader => ({
             enforce: 'post',
             ...loader
           })),
         ],
-        noParse: this.env.noParse,
+        noParse: this.uiBundles.getWebpackNoParseRules(),
       },
 
       resolve: {
@@ -205,12 +212,12 @@ export default class BaseOptimizer {
           'node_modules',
           fromRoot('node_modules'),
         ],
-        alias: this.env.aliases,
+        alias: this.uiBundles.getAliases(),
         unsafeCache: this.unsafeCache,
       },
     };
 
-    if (this.env.context.env === 'development') {
+    if (this.uiBundles.isDevMode()) {
       return webpackMerge(commonConfig, {
         // In the test env we need to add react-addons (and a few other bits) for the
         // enzyme tests to work.

@@ -5,6 +5,7 @@ import { findIndex } from 'lodash';
 
 import MockClusterFork from './_mock_cluster_fork';
 import Worker from '../worker';
+import Log from '../../log';
 
 const workersToShutdown = [];
 
@@ -21,7 +22,11 @@ function assertListenerRemoved(emitter, event) {
 }
 
 function setup(opts = {}) {
-  const worker = new Worker(opts);
+  const worker = new Worker({
+    ...opts,
+    baseArgv: []
+  });
+
   workersToShutdown.push(worker);
   return worker;
 }
@@ -66,7 +71,7 @@ describe('CLI cluster manager', function () {
   describe('#shutdown', function () {
     describe('after starting()', function () {
       it('kills the worker and unbinds from message, online, and disconnect events', async function () {
-        const worker = setup();
+        const worker = setup({ log: new Log(false, true) });
         await worker.start();
         expect(worker).to.have.property('online', true);
         const fork = worker.fork;
@@ -93,27 +98,29 @@ describe('CLI cluster manager', function () {
   describe('#parseIncomingMessage()', function () {
     describe('on a started worker', function () {
       it(`is bound to fork's message event`, async function () {
-        const worker = setup();
+        const worker = setup({ log: new Log(false, true) });
         await worker.start();
         sinon.assert.calledWith(worker.fork.on, 'message');
       });
     });
 
-    it('ignores non-array messsages', function () {
-      const worker = setup();
-      worker.parseIncomingMessage('some string thing');
-      worker.parseIncomingMessage(0);
-      worker.parseIncomingMessage(null);
-      worker.parseIncomingMessage(undefined);
-      worker.parseIncomingMessage({ like: 'an object' });
-      worker.parseIncomingMessage(/weird/);
-    });
+    describe('do after', function () {
+      it('ignores non-array messsages', function () {
+        const worker = setup();
+        worker.parseIncomingMessage('some string thing');
+        worker.parseIncomingMessage(0);
+        worker.parseIncomingMessage(null);
+        worker.parseIncomingMessage(undefined);
+        worker.parseIncomingMessage({ like: 'an object' });
+        worker.parseIncomingMessage(/weird/);
+      });
 
-    it('calls #onMessage with message parts', function () {
-      const worker = setup();
-      const stub = sinon.stub(worker, 'onMessage');
-      worker.parseIncomingMessage([10, 100, 1000, 10000]);
-      sinon.assert.calledWith(stub, 10, 100, 1000, 10000);
+      it('calls #onMessage with message parts', function () {
+        const worker = setup();
+        const stub = sinon.stub(worker, 'onMessage');
+        worker.parseIncomingMessage([10, 100, 1000, 10000]);
+        sinon.assert.calledWith(stub, 10, 100, 1000, 10000);
+      });
     });
   });
 
@@ -151,8 +158,9 @@ describe('CLI cluster manager', function () {
 
   describe('#start', function () {
     describe('when not started', function () {
-      it('creates a fork and waits for it to come online', async function () {
-        const worker = setup();
+      // TODO This test is flaky, see https://github.com/elastic/kibana/issues/15888
+      it.skip('creates a fork and waits for it to come online', async function () {
+        const worker = setup({ log: new Log(false, true) });
 
         sinon.spy(worker, 'on');
 
@@ -163,7 +171,7 @@ describe('CLI cluster manager', function () {
       });
 
       it('listens for cluster and process "exit" events', async function () {
-        const worker = setup();
+        const worker = setup({ log: new Log(false, true) });
 
         sinon.spy(process, 'on');
         sinon.spy(cluster, 'on');

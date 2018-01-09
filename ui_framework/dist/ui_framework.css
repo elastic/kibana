@@ -54,11 +54,6 @@
  * 4. Fix an IE bug which causes the last child to overflow the container.
  * 5. Fixing this bug means we now need to align the children to the right.
  */
-* {
-  box-sizing: border-box; }
-  *:before, *:after {
-    box-sizing: border-box; }
-
 :focus {
   z-index: 1;
   /* 1 */
@@ -67,20 +62,12 @@
   box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #0079a5;
   /* 3 */ }
 
-body {
-  font-family: "Open Sans", Helvetica, Arial, sans-serif; }
-
 /**
  * 1. Required for IE11.
  */
 main {
   display: block;
   /* 1 */ }
-
-button,
-input[type="submit"],
-input[type="button"] {
-  border-radius: 0; }
 
 .kuiScreenReaderOnly {
   position: absolute;
@@ -1100,6 +1087,14 @@ input[type="button"] {
       -ms-flex-item-align: end;
           align-self: flex-end; }
 
+.kuiContextMenuItem-disabled {
+  color: #9B9B9B;
+  cursor: default; }
+  .theme-dark .kuiContextMenuItem-disabled {
+    color: #9B9B9B; }
+  .kuiContextMenuItem-disabled:hover .kuiContextMenuItem__text, .kuiContextMenuItem-disabled:focus .kuiContextMenuItem__text {
+    text-decoration: none; }
+
 .kuiEvent {
   display: -webkit-box;
   display: -webkit-flex;
@@ -1191,6 +1186,12 @@ input[type="button"] {
   margin: -20px; }
   .kuiFlexGroup--gutterExtraLarge > .kuiFlexItem {
     margin: 20px; }
+
+.kuiFlexGroup--justifyContentSpaceEvenly {
+  -webkit-box-pack: space-evenly;
+  -webkit-justify-content: space-evenly;
+      -ms-flex-pack: space-evenly;
+          justify-content: space-evenly; }
 
 .kuiFlexGroup--justifyContentSpaceBetween {
   -webkit-box-pack: justify;
@@ -3689,7 +3690,8 @@ input[type="button"] {
   max-width: 20px;
   /* 1 */
   color: #191E23;
-  border-top: 1px solid #D9D9D9; }
+  border-top: 1px solid #D9D9D9;
+  vertical-align: middle; }
 
 /**
    * 1. Vertically align all children.
@@ -4055,6 +4057,8 @@ input[type="button"] {
 
 /**
  * 1. Put 10px of space between each child.
+ * 2. Fix IE11 bug which causes this item to grow too wide when there is only a single
+ *    kuiToolBarSection sibling.
  */
 .kuiToolBarSearch {
   display: -webkit-box;
@@ -4071,7 +4075,8 @@ input[type="button"] {
   -webkit-flex: 1 1 auto;
       -ms-flex: 1 1 auto;
           flex: 1 1 auto;
-  max-width: 800px;
+  max-width: 100%;
+  /* 2 */
   line-height: 1.5; }
   .kuiToolBarSearch:first-child {
     margin-left: 0; }
@@ -4087,7 +4092,8 @@ input[type="button"] {
       -ms-flex: 1 1 auto;
           flex: 1 1 auto;
   position: relative;
-  font-size: 14px; }
+  font-size: 14px;
+  max-width: 800px; }
 
 .kuiToolBarSearchBox__icon {
   position: absolute;

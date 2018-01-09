@@ -10,7 +10,7 @@ export default new Chainable('subtract', {
     {
       name: 'term',
       types: ['seriesList', 'number'],
-      help: 'Number or series to subtract from input. If passing a seriesList it must contain exactly 1 series.'
+      help: 'Number or series to subtract from input. SeriesList with multiple series will be applied label-wise.'
     }
   ],
   help: 'Subtract the values of one or more series in a seriesList to each position, in each series, of the input seriesList',

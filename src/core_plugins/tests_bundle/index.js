@@ -1,6 +1,9 @@
 import { union } from 'lodash';
-import findSourceFiles from './find_source_files';
+
 import { fromRoot } from '../../utils';
+
+import findSourceFiles from './find_source_files';
+import { createTestEntryTemplate } from './tests_entry_template';
 
 export default (kibana) => {
   return new kibana.Plugin({
@@ -13,9 +16,18 @@ export default (kibana) => {
     },
 
     uiExports: {
-      bundle: async (UiBundle, env, apps, plugins) => {
+      async __bundleProvider__(kbnServer) {
         let modules = [];
-        const config = kibana.config;
+
+        const {
+          config,
+          uiApps,
+          uiBundles,
+          plugins,
+          uiExports: {
+            uiSettingDefaults = {}
+          }
+        } = kbnServer;
 
         const testGlobs = [
           'src/ui/public/**/*.js',
@@ -26,20 +38,25 @@ export default (kibana) => {
         if (testingPluginIds) {
           testGlobs.push('!src/ui/public/**/__tests__/**/*');
           testingPluginIds.split(',').forEach((pluginId) => {
-            const plugin = plugins.byId[pluginId];
-            if (!plugin) throw new Error('Invalid testingPluginId :: unknown plugin ' + pluginId);
+            const plugin = plugins
+              .find(plugin => plugin.id === pluginId);
+
+            if (!plugin) {
+              throw new Error('Invalid testingPluginId :: unknown plugin ' + pluginId);
+            }
 
             // add the modules from all of this plugins apps
-            for (const app of plugin.apps) {
-              modules = union(modules, app.getModules());
+            for (const app of uiApps) {
+              if (app.getPluginId() === pluginId) {
+                modules = union(modules, app.getModules());
+              }
             }
 
             testGlobs.push(`${plugin.publicDir}/**/__tests__/**/*.js`);
           });
         } else {
-
           // add the modules from all of the apps
-          for (const app of apps) {
+          for (const app of uiApps) {
             modules = union(modules, app.getModules());
           }
 
@@ -52,24 +69,17 @@ export default (kibana) => {
         for (const f of testFiles) modules.push(f);
 
         if (config.get('tests_bundle.instrument')) {
-          env.addPostLoader({
+          uiBundles.addPostLoader({
             test: /\.js$/,
             exclude: /[\/\\](__tests__|node_modules|bower_components|webpackShims)[\/\\]/,
-            loader: 'istanbul-instrumenter'
+            loader: 'istanbul-instrumenter-loader'
           });
         }
 
-        env.defaultUiSettings = plugins.kbnServer.uiExports.consumers
-          // find the first uiExportsConsumer that has a getUiSettingDefaults method
-          // See src/ui/ui_settings/ui_exports_consumer.js
-          .find(consumer => typeof consumer.getUiSettingDefaults === 'function')
-          .getUiSettingDefaults();
-
-        return new UiBundle({
+        uiBundles.add({
           id: 'tests',
-          modules: modules,
-          template: require('./tests_entry_template'),
-          env: env
+          modules,
+          template: createTestEntryTemplate(uiSettingDefaults),
         });
       },
 

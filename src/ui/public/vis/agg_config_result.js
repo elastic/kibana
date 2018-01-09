@@ -1,10 +1,13 @@
+import chrome from 'ui/chrome';
+
 let i = 0;
 
 // eslint-disable-next-line @elastic/kibana-custom/no-default-export
-export default function AggConfigResult(aggConfig, parent, value, key) {
+export default function AggConfigResult(aggConfig, parent, value, key, filters) {
   this.key = key;
   this.value = value;
   this.aggConfig = aggConfig;
+  this.filters = filters;
   this.$parent = parent;
   this.$order = ++i;
 
@@ -32,11 +35,16 @@ AggConfigResult.prototype.getPath = function () {
  * @returns {object} Elasticsearch filter
  */
 AggConfigResult.prototype.createFilter = function () {
-  return this.aggConfig.createFilter(this.key);
+  return this.filters || this.aggConfig.createFilter(this.key);
 };
 
 AggConfigResult.prototype.toString = function (contentType) {
-  return this.aggConfig.fieldFormatter(contentType)(this.value);
+  const parsedUrl = {
+    origin: window.location.origin,
+    pathname: window.location.pathname,
+    basePath: chrome.getBasePath(),
+  };
+  return this.aggConfig.fieldFormatter(contentType)(this.value, null, null, parsedUrl);
 };
 
 AggConfigResult.prototype.valueOf = function () {

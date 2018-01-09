@@ -1,7 +1,7 @@
 import React from 'react';
-import { render, shallow, mount } from 'enzyme';
+import { render, mount } from 'enzyme';
 import sinon from 'sinon';
-import { requiredProps } from '../../test/required_props';
+import { findTestSubject, requiredProps } from '../../test';
 
 import {
   KuiContextMenuPanel,
@@ -75,7 +75,7 @@ describe('KuiContextMenuPanel', () => {
       test(`isn't called upon instantiation`, () => {
         const onCloseHandler = sinon.stub();
 
-        shallow(
+        mount(
           <KuiContextMenuPanel title="Title" onClose={onCloseHandler} />
         );
 
@@ -85,7 +85,7 @@ describe('KuiContextMenuPanel', () => {
       test('is called when the title is clicked', () => {
         const onCloseHandler = sinon.stub();
 
-        const component = shallow(
+        const component = mount(
           <KuiContextMenuPanel title="Title" onClose={onCloseHandler} />
         );
 
@@ -170,9 +170,7 @@ describe('KuiContextMenuPanel', () => {
           />
         );
 
-        expect(
-          component.find('[data-test-subj="itemB"]').matchesElement(document.activeElement)
-        ).toBe(true);
+        expect(findTestSubject(component, 'itemB').getDOMNode()).toBe(document.activeElement);
       });
     });
 
@@ -278,9 +276,7 @@ describe('KuiContextMenuPanel', () => {
           </KuiContextMenuPanel>
         );
 
-        expect(
-          component.find('[data-test-subj="button"]').matchesElement(document.activeElement)
-        ).toBe(true);
+        expect(findTestSubject(component, 'button').getDOMNode()).toBe(document.activeElement);
       });
 
       it('is not set on anything if hasFocus is false', () => {
@@ -290,9 +286,7 @@ describe('KuiContextMenuPanel', () => {
           </KuiContextMenuPanel>
         );
 
-        expect(
-          component.find('[data-test-subj="button"]').matchesElement(document.activeElement)
-        ).toBe(true);
+        expect(findTestSubject(component, 'button').getDOMNode()).not.toBe(document.activeElement);
       });
     });
 
@@ -314,60 +308,48 @@ describe('KuiContextMenuPanel', () => {
         );
       });
 
-      it(`doesn't focus an item by default`, () => {
-        expect(component.find('[data-test-subj]').contains(document.activeElement)).toBe(false);
+      it(`focuses the panel by default`, () => {
+        expect(component.getDOMNode()).toBe(document.activeElement);
       });
 
       it('down arrow key focuses the first menu item', () => {
         component.simulate('keydown', { keyCode: keyCodes.DOWN });
 
-        expect(
-          component.find('[data-test-subj="itemA"]').matchesElement(document.activeElement)
-        ).toBe(true);
+        expect(findTestSubject(component, 'itemA').getDOMNode()).toBe(document.activeElement);
       });
 
       it('subsequently, down arrow key focuses the next menu item', () => {
         component.simulate('keydown', { keyCode: keyCodes.DOWN });
         component.simulate('keydown', { keyCode: keyCodes.DOWN });
 
-        expect(
-          component.find('[data-test-subj="itemB"]').matchesElement(document.activeElement)
-        ).toBe(true);
+        expect(findTestSubject(component, 'itemB').getDOMNode()).toBe(document.activeElement);
       });
 
       it('down arrow key wraps to first menu item', () => {
         component.simulate('keydown', { keyCode: keyCodes.UP });
         component.simulate('keydown', { keyCode: keyCodes.DOWN });
 
-        expect(
-          component.find('[data-test-subj="itemA"]').matchesElement(document.activeElement)
-        ).toBe(true);
+        expect(findTestSubject(component, 'itemA').getDOMNode()).toBe(document.activeElement);
       });
 
       it('up arrow key focuses the last menu item', () => {
         component.simulate('keydown', { keyCode: keyCodes.UP });
 
-        expect(
-          component.find('[data-test-subj="itemC"]').matchesElement(document.activeElement)
-        ).toBe(true);
+        expect(findTestSubject(component, 'itemC').getDOMNode()).toBe(document.activeElement);
       });
 
       it('subsequently, up arrow key focuses the previous menu item', () => {
         component.simulate('keydown', { keyCode: keyCodes.UP });
         component.simulate('keydown', { keyCode: keyCodes.UP });
 
-        expect(
-          component.find('[data-test-subj="itemB"]').matchesElement(document.activeElement)
-        ).toBe(true);
+        expect(findTestSubject(component, 'itemB').getDOMNode()).toBe(document.activeElement);
       });
 
       it('up arrow key wraps to last menu item', () => {
         component.simulate('keydown', { keyCode: keyCodes.DOWN });
         component.simulate('keydown', { keyCode: keyCodes.UP });
 
-        expect(
-          component.find('[data-test-subj="itemC"]').matchesElement(document.activeElement)
-        ).toBe(true);
+        expect(findTestSubject(component, 'itemC').getDOMNode()).toBe(document.activeElement);
       });
 
       it(`right arrow key shows next panel with focused item's index`, () => {

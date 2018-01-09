@@ -64,6 +64,7 @@
           ng-keyup="maybeCancel($event, conf)"
           elastic-textarea
           validate-json
+          data-test-subj="unsavedValueJsonTextArea"
         ></textarea>
 
         <p
@@ -98,6 +99,25 @@
           ng-options="option as option for option in conf.options"
           class="kuiSelect"
         ></select>
+
+        <input
+          ng-if="conf.image"
+          ng-model="conf.unsavedValue"
+          input-base-sixty-four
+          max="{{conf.options.maxSize && conf.options.maxSize.length}}"
+          accept=".jpg,.jpeg,.png"
+          type="file"
+          class="fullWidth"
+          on-change="onImageChange"
+        >
+
+        <p
+          class="kuiSubText"
+          ng-show="forms.configEdit.$error.maxSize"
+        >
+          Image is too large, maximum size is {{conf.options.maxSize.description}}
+        </p>
+
       </form>
 
       <!-- Setting display formats -->
@@ -118,6 +138,12 @@
           ng-if="conf.markdown"
           ng-bind-html="conf.value | markdown"
         ></span>
+        <img
+          alt="Image"
+          ng-if="conf.image && conf.value"
+          ng-src="{{ conf.value }}"
+          class="advancedSettingsTableRowImage"
+        ></img>
       </span>
     </div>
   </td>

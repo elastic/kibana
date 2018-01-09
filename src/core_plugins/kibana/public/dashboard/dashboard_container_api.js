@@ -15,10 +15,6 @@ export class DashboardContainerAPI extends ContainerAPI {
     return this.dashboardState.appState;
   }
 
-  createChildUistate(path, initialState) {
-    return this.dashboardState.uiState.createChild(path, initialState, true);
-  }
-
   registerPanelIndexPattern(panelIndex, pattern) {
     this.dashboardState.registerPanelIndexPatternMap(panelIndex, pattern);
     this.dashboardState.saveState();

@@ -6,7 +6,7 @@ import replaceVars from '../../lib/replace_vars';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { sortBy, first, get, gt, gte, lt, lte } from 'lodash';
-const OPPERATORS = [ gt, gte, lt, lte ];
+const OPPERATORS = { gt, gte, lt, lte };
 
 function sortByDirection(data, direction, fn) {
   if (direction === 'desc') {

@@ -91,6 +91,14 @@ describe('Keystore', () => {
     });
   });
 
+  describe('reset', () => {
+    it('clears the data', () => {
+      const keystore = new Keystore('/data/protected.keystore', 'changeme');
+      keystore.reset();
+      expect(keystore.data).to.eql([]);
+    });
+  });
+
   describe('keys', () => {
     it('lists object keys', () => {
       const keystore = new Keystore('/data/unprotected.keystore');

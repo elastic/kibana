@@ -5,6 +5,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const remote = getService('remote');
   const retry = getService('retry');
+  const find = getService('find');
   const PageObjects = getPageObjects(['common', 'visualize', 'header', 'settings']);
 
   describe('visualize app', function () {
@@ -55,10 +56,25 @@ export default function ({ getService, getPageObjects }) {
     describe('tag cloud chart', function () {
       const vizName1 = 'Visualization tagCloud';
 
+      it('should display spy panel toggle button', async function () {
+        const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
+        expect(spyToggleExists).to.be(true);
+      });
+
       it('should show correct tag cloud data', async function () {
         const data = await PageObjects.visualize.getTextTag();
         log.debug(data);
         expect(data).to.eql([ '32,212,254,720', '21,474,836,480', '20,401,094,656', '19,327,352,832', '18,253,611,008' ]);
+      });
+
+      it('should collapse the sidebar', async function () {
+        const editorSidebar = await find.byCssSelector('.collapsible-sidebar');
+        await PageObjects.visualize.clickEditorSidebarCollapse();
+        // Give d3 tag cloud some time to rearrange tags
+        await PageObjects.common.sleep(1000);
+        const afterSize = await editorSidebar.getSize();
+        expect(afterSize.width).to.be(0);
+        await PageObjects.visualize.clickEditorSidebarCollapse();
       });
 
       it('should still show all tags after sidebar has been collapsed', async function () {

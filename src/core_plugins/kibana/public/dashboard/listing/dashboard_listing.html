@@ -177,6 +177,15 @@
               </span>
             </button>
           </th>
+
+          <th
+            ng-if="!listingController.hideWriteControls"
+            scope="col"
+            class="kuiTableHeaderCell"
+            width="80px"
+          >
+            <div class="kuiTableHeaderCell__liner">Actions</div>
+          </th>
         </tr>
       </thead>
 
@@ -184,6 +193,7 @@
         <tr
           ng-repeat="item in listingController.pageOfItems track by item.id"
           class="kuiTableRow"
+          data-test-subj="dashboardListingRow"
         >
           <td class="kuiTableRowCell kuiTableRowCell--checkBox" ng-if="!listingController.hideWriteControls">
             <div class="kuiTableRowCell__liner">
@@ -202,7 +212,7 @@
             <div class="kuiTableRowCell__liner">
               <a
                 class="kuiLink"
-                data-test-subj="dashboardListingTitleLink"
+                data-test-subj="dashboardListingTitleLink-{{item.title.split(' ').join('-')}}"
                 ng-href="{{ listingController.getUrlForItem(item) }}"
               >
                 {{ item.title }}
@@ -212,6 +222,20 @@
           <td class="kuiTableRowCell kuiTableRowCell--wrap">
             <div class="kuiTableRowCell__liner">
               {{ item.description }}
+            </div>
+          </td>
+          <td
+            ng-if="!listingController.hideWriteControls"
+            class="kuiTableRowCell kuiTableRowCell--wrap"
+          >
+            <div class="kuiTableRowCell__liner">
+              <a
+                class="kuiMenuButton kuiMenuButton--basic"
+                data-test-subj="dashboardListingTitleEditLink-{{item.title.split(' ').join('-')}}"
+                ng-href="{{ listingController.getEditUrlForItem(item) }}"
+              >
+                Edit
+              </a>
             </div>
           </td>
         </tr>
