@@ -12,7 +12,6 @@ import { PositiveOnlyAgg } from '../aggs/positive_only';
 import { FilterRatioAgg } from '../aggs/filter_ratio';
 import { PercentileRankAgg } from '../aggs/percentile_rank';
 import { Static } from '../aggs/static';
-import MathAgg from '../aggs/math';
 export default {
   count: StdAgg,
   avg: StdAgg,
@@ -41,8 +40,7 @@ export default {
   serial_diff: SerialDiffAgg,
   filter_ratio: FilterRatioAgg,
   positive_only: PositiveOnlyAgg,
-  static: Static,
-  math: MathAgg
+  static: Static
 };
 
 
