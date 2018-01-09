@@ -27,7 +27,8 @@ uiModules.get('kibana/region_map')
                 const layerFromService = layersFromService[i];
                 const alreadyAdded = newVectorLayers.some((layer) => layerFromService.layerId === layer.layerId);
                 if (!alreadyAdded) {
-                  if (layerFromService.format === 'geojson') {//backfill v1 manifest for now
+                  //backfill v1 manifest for now
+                  if (layerFromService.format === 'geojson') {
                     layerFromService.format = {
                       type: 'geojson'
                     };

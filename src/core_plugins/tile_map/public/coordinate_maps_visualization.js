@@ -25,13 +25,13 @@ export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 
 
     async _makeKibanaMap() {
+
       await super._makeKibanaMap();
 
       this.vis.sessionState.mapBounds = this._kibanaMap.getUntrimmedBounds();
 
       let previousPrecision = this._kibanaMap.getAutoPrecision();
       let precisionChange = false;
-
       this._kibanaMap.on('zoomchange', () => {
         precisionChange = (previousPrecision !== this._kibanaMap.getAutoPrecision());
         previousPrecision = this._kibanaMap.getAutoPrecision();

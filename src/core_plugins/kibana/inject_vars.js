@@ -10,6 +10,7 @@ export function injectVars(server) {
   const regionmapsConfig = serverConfig.get('regionmap');
   const mapConfig = serverConfig.get('map');
 
+
   regionmapsConfig.layers =  (regionmapsConfig.layers) ? regionmapsConfig.layers : [];
 
   return {
