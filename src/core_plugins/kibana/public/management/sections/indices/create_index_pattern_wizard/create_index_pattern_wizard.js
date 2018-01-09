@@ -7,7 +7,8 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './create_index_pattern_wizard.html';
 import { sendCreateIndexPatternRequest } from './send_create_index_pattern_request';
-import './step_index_pattern';
+import { renderStepIndexPattern } from './components/step_index_pattern';
+// import './step_index_pattern';
 import './step_time_field';
 import './matching_indices_list';
 import './create_index_pattern_wizard.less';
@@ -33,7 +34,7 @@ uiModules.get('apps/management')
   // then filtering out the majority of them because they are sysetm indices.
   // We'd like to filter system indices out in the query
   // so if we can accomplish that in the future, this logic can go away
-    const ESTIMATED_NUMBER_OF_SYSTEM_INDICES = 20;
+    const ESTIMATED_NUMBER_OF_SYSTEM_INDICES = 100;
     const MAX_NUMBER_OF_MATCHING_INDICES = 20;
     const MAX_SEARCH_SIZE = MAX_NUMBER_OF_MATCHING_INDICES + ESTIMATED_NUMBER_OF_SYSTEM_INDICES;
     const notify = new Notifier();
@@ -62,8 +63,8 @@ uiModules.get('apps/management')
     this.isCreatingIndexPattern = false;
     this.doesIncludeSystemIndices = false;
     let allIndices = [];
-    let matchingIndices = [];
-    let partialMatchingIndices = [];
+    const matchingIndices = [];
+    const partialMatchingIndices = [];
     this.allIndices = [];
     this.matchingIndices = [];
     this.partialMatchingIndices = [];
@@ -149,42 +150,7 @@ uiModules.get('apps/management')
 
     this.onIncludeSystemIndicesChange = () => {
       updateWhiteListedIndices();
-    };
-
-    let mostRecentFetchMatchingIndicesRequest;
-
-    this.fetchMatchingIndices = () => {
-      this.isFetchingMatchingIndices = true;
-
-      // Default to searching for all indices.
-      const exactSearchQuery = this.formValues.name;
-      let partialSearchQuery = this.formValues.name;
-
-      if (!_.endsWith(partialSearchQuery, '*')) {
-        partialSearchQuery = `${partialSearchQuery}*`;
-      }
-      if (!_.startsWith(partialSearchQuery, '*')) {
-        partialSearchQuery = `*${partialSearchQuery}`;
-      }
-
-      const thisFetchMatchingIndicesRequest = mostRecentFetchMatchingIndicesRequest = Promise.all([
-        getIndices(exactSearchQuery),
-        getIndices(partialSearchQuery),
-        createReasonableWait()
-      ])
-        .then(([
-          matchingIndicesResponse,
-          partialMatchingIndicesResponse
-        ]) => {
-          if (thisFetchMatchingIndicesRequest === mostRecentFetchMatchingIndicesRequest) {
-            matchingIndices = matchingIndicesResponse;
-            partialMatchingIndices = partialMatchingIndicesResponse;
-            updateWhiteListedIndices();
-            this.isFetchingMatchingIndices = false;
-          }
-        }).catch(error => {
-          notify.error(error);
-        });
+      this.renderStepIndexPatternReact();
     };
 
     this.fetchExistingIndices = () => {
@@ -200,6 +166,9 @@ uiModules.get('apps/management')
           allIndices = allIndicesResponse;
           updateWhiteListedIndices();
           this.isFetchingExistingIndices = false;
+          if (allIndices.length) {
+            this.renderStepIndexPatternReact();
+          }
         }).catch(error => {
           notify.error(error);
           this.isFetchingExistingIndices = false;
@@ -212,6 +181,22 @@ uiModules.get('apps/management')
 
     this.goToIndexPatternStep = () => {
       this.wizardStep = 'indexPattern';
+      this.renderStepIndexPatternReact();
+    };
+
+    this.renderStepIndexPatternReact = () => {
+      $scope.$$postDigest(() => renderStepIndexPattern(
+        'stepIndexPatternReact',
+        allIndices,
+        this.formValues.name,
+        this.doesIncludeSystemIndices,
+        es,
+        query => {
+          this.formValues.name = query;
+          this.goToTimeFieldStep();
+          $scope.$apply();
+        }
+      ));
     };
 
     this.goToTimeFieldStep = () => {
