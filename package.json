@@ -302,6 +302,9 @@
     "yeoman-generator": "1.1.1",
     "yo": "2.0.0"
   },
+  "resolutions": {
+    "moment-timezone/moment": "2.13.0"
+  },
   "engines": {
     "node": "6.12.2",
     "yarn": "^1.3.2"
