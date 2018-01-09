@@ -8,7 +8,6 @@ import { uiModules } from 'ui/modules';
 import template from './create_index_pattern_wizard.html';
 import { sendCreateIndexPatternRequest } from './send_create_index_pattern_request';
 import { renderStepIndexPattern } from './components/step_index_pattern';
-// import './step_index_pattern';
 import './step_time_field';
 import './matching_indices_list';
 import './create_index_pattern_wizard.less';

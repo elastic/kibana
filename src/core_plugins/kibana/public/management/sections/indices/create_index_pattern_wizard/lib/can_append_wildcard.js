@@ -9,8 +9,6 @@ export const canAppendWildcard = (keyboardEvent) => {
 
   const keyPressed = key || data;
 
-  // console.log('keyPressed', keyPressed);
-
   // https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode
   // is not recommended so we need to rely on `key` but browser support
   // is still spotty (https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key)
