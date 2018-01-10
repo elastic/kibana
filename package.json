@@ -155,20 +155,19 @@
     "mkdirp": "0.5.1",
     "moment": "2.13.0",
     "moment-timezone": "0.5.4",
+    "mustache": "2.3.0",
     "ngreact": "0.5.1",
     "no-ui-slider": "1.2.0",
     "node-fetch": "1.3.2",
     "pegjs": "0.9.0",
+    "pivotal-ui": "11.0.0",
     "postcss-loader": "2.0.6",
     "prop-types": "15.5.8",
     "proxy-from-env": "1.0.0",
-    "pui-react-overlay-trigger": "8.3.3",
-    "pui-react-tooltip": "8.3.3",
     "querystring-browser": "1.0.4",
     "raw-loader": "0.5.1",
     "react": "16.0.0",
-    "react-ace": "5.2.2",
-    "react-addons-test-utils": "15.6.2",
+    "react-ace": "5.5.0",
     "react-anything-sortable": "1.7.3",
     "react-color": "2.11.7",
     "react-dom": "16.0.0",
@@ -211,6 +210,7 @@
     "vision": "4.1.0",
     "webpack": "3.6.0",
     "webpack-merge": "4.1.0",
+    "whatwg-fetch": "^2.0.3",
     "wreck": "12.4.0",
     "yauzl": "2.7.0"
   },
@@ -254,6 +254,7 @@
     "grunt-simple-mocha": "0.4.0",
     "gulp-sourcemaps": "1.7.3",
     "highlight.js": "9.0.0",
+    "history": "2.1.1",
     "html": "1.0.0",
     "html-loader": "0.5.1",
     "husky": "0.8.1",
@@ -300,8 +301,13 @@
     "yeoman-generator": "1.1.1",
     "yo": "2.0.0"
   },
+  "resolutions": {
+    "angular": "1.6.5",
+    "moment": "2.13.0",
+    "react": "16.0.0"
+  },
   "engines": {
     "node": "6.12.2",
-    "npm": "3.10.10"
+    "yarn": "^1.3.2"
   }
 }

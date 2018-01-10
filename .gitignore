@@ -35,7 +35,6 @@ selenium
 *.out
 ui_framework/doc_site/build
 !ui_framework/doc_site/build/index.html
-yarn.lock
 package-lock.json
 .yo-rc.json
 /.vscode
