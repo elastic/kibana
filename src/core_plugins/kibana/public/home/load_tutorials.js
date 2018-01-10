@@ -1,3 +1,4 @@
+import 'whatwg-fetch';
 import _ from 'lodash';
 import chrome from 'ui/chrome';
 import { notify } from 'ui/notify';
