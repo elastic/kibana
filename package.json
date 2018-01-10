@@ -21,6 +21,12 @@
   "bugs": {
     "url": "http://github.com/elastic/kibana/issues"
   },
+  "lint-staged": {
+    "*.js": [
+      "prettier --list-different",
+      "git add"
+    ]
+  },
   "license": "Apache-2.0",
   "author": "Rashid Khan <rashid.khan@elastic.co>",
   "contributors": [
@@ -53,8 +59,9 @@
     "checkLicenses": "grunt licenses",
     "build": "grunt build",
     "release": "grunt release",
-    "start": "node scripts/kibana --dev",
-    "precommit": "node scripts/precommit_hook",
+    "start": "sh ./bin/kibana --dev",
+    "prettier": "node scripts/prettier",
+    "precommit": "node scripts/precommit_hook && lint-staged",
     "karma": "karma start",
     "elasticsearch": "grunt esvm:dev:keepalive",
     "lint": "echo 'use `node scripts/eslint`' && false",
@@ -67,6 +74,7 @@
     "uiFramework:createComponent": "yo ./ui_framework/generator-kui/app/component.js",
     "uiFramework:documentComponent": "yo ./ui_framework/generator-kui/app/documentation.js"
   },
+  
   "repository": {
     "type": "git",
     "url": "https://github.com/elastic/kibana.git"
@@ -275,6 +283,7 @@
     "keymirror": "0.1.1",
     "leadfoot": "1.7.1",
     "license-checker": "5.1.2",
+    "lint-staged": "5.0.0",
     "load-grunt-config": "0.19.2",
     "makelogs": "4.0.2",
     "marked-text-renderer": "0.1.0",
@@ -285,6 +294,7 @@
     "nock": "8.0.0",
     "node-sass": "4.5.3",
     "pixelmatch": "4.0.2",
+    "prettier": "1.8.2",
     "proxyquire": "1.7.10",
     "sass-loader": "6.0.6",
     "simple-git": "1.37.0",
