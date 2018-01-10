@@ -45,13 +45,7 @@ const options = {
   },
 };
 
-const defaultOptions = {
-  series: {
-  },
-};
-
 function drawbubbleDefault(ctx, series, x, y, radius, c) {
-
   ctx.fillStyle = c;
   ctx.strokeStyle = c;
 
@@ -68,12 +62,10 @@ function drawbubbleDefault(ctx, series, x, y, radius, c) {
 }
 
 function init(plot) {
-
   plot.hooks.processOptions.push(processOptions);
 
   function processOptions(plot, options) {
     if (options.series.bubbles.active) {
-      Object.assign({}, options, defaultOptions);
       plot.hooks.drawSeries.push(drawSeries);
     }
   }
@@ -86,7 +78,6 @@ function init(plot) {
 
     if (series.bubbles.show) {
       const offset = plot.getPlotOffset();
-
 
       function drawPoint(point) {
         const x = offset.left + series.xaxis.p2c(point[0]);
@@ -111,8 +102,6 @@ function init(plot) {
       series.data.forEach(point => drawPoint(point));
     }
   }
-
-
 
 }
 

@@ -28,7 +28,7 @@ export function getSelectedPageIndex(state) {
 }
 
 export function getSelectedPage(state) {
-  const pageIndex =  getSelectedPageIndex(state);
+  const pageIndex = getSelectedPageIndex(state);
   const pages = getPages(state);
   return get(pages, `[${pageIndex}].id`);
 }
@@ -69,9 +69,9 @@ export function getAllElements(state) {
 
 export function getGlobalFilterExpression(state) {
   return getAllElements(state)
-  .map(el => el.filter)
-  .filter(str => str != null && str.length)
-  .join(' | ');
+    .map(el => el.filter)
+    .filter(str => str != null && str.length)
+    .join(' | ');
 }
 
 // element getters

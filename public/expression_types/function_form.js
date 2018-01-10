@@ -1,12 +1,12 @@
 import React from 'react';
 import { Alert } from 'react-bootstrap';
 import { isPlainObject, uniq, last, compact } from 'lodash';
-import { BaseForm } from './base_form';
-import { Arg } from './arg';
 import { fromExpression } from '../../common/lib/ast';
 import { ArgAddPopover } from '../components/arg_add_popover';
 import { SidebarSection } from '../components/sidebar/sidebar_section';
 import { SidebarSectionTitle } from '../components/sidebar/sidebar_section_title';
+import { BaseForm } from './base_form';
+import { Arg } from './arg';
 
 export class FunctionForm extends BaseForm {
   constructor(props) {
@@ -106,10 +106,12 @@ export class FunctionForm extends BaseForm {
       );
 
     } catch (e) {
-      return (<Alert bsStyle="danger">
-        <h4>Expression rendering error</h4>
-        {e.message}
-      </Alert>);
+      return (
+        <Alert bsStyle="danger">
+          <h4>Expression rendering error</h4>
+          {e.message}
+        </Alert>
+      );
     }
   }
 }

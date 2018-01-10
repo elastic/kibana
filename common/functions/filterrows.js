@@ -21,10 +21,10 @@ export const filterrows = {
     }));
 
     return Promise.all(checks)
-    .then(results => context.rows.filter((row, i) => results[i]))
-    .then(rows => ({
-      ...context,
-      rows,
-    }));
+      .then(results => context.rows.filter((row, i) => results[i]))
+      .then(rows => ({
+        ...context,
+        rows,
+      }));
   },
 };

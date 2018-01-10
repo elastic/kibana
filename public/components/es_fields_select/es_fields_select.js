@@ -1,6 +1,6 @@
 import React from 'react';
-import { PillSelect } from '../pill_select';
 import PropTypes from 'prop-types';
+import { PillSelect } from '../pill_select';
 
 export const ESFieldsSelect = ({ selected, fields, onChange }) => (
   <PillSelect

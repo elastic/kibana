@@ -17,28 +17,28 @@ export const UpdateModal = compose(
       if (!currentBuild) return;
 
       fetch(`${siteUrl}/build.json`)
-      .then((build) => {
-        const buildNum = Number(get(build, 'data.buildNumber'));
-        const buildFile = get(build, 'data.filename');
+        .then((build) => {
+          const buildNum = Number(get(build, 'data.buildNumber'));
+          const buildFile = get(build, 'data.filename');
 
-        if (currentBuild < buildNum) {
-          fetch(`${siteUrl}/changelog.md`)
-          .then(res => res.data)
-          .then((changelog) => {
-            const changes = changelog.split('---')[0];
-            const md = new Markdown({ html: false });
-            setChanges(md.render(String(changes)));
-            setFilename(buildFile);
-          })
-          .catch(() => {
-            console.log('Could not fetch changelog');
-            setFilename(buildFile);
-          });
-        }
-      })
-      .catch(() => {
-        console.log('Could not fetch remote build info');
-      });
+          if (currentBuild < buildNum) {
+            fetch(`${siteUrl}/changelog.md`)
+              .then(res => res.data)
+              .then((changelog) => {
+                const changes = changelog.split('---')[0];
+                const md = new Markdown({ html: false });
+                setChanges(md.render(String(changes)));
+                setFilename(buildFile);
+              })
+              .catch(() => {
+                console.log('Could not fetch changelog');
+                setFilename(buildFile);
+              });
+          }
+        })
+        .catch(() => {
+          console.log('Could not fetch remote build info');
+        });
     },
   })
 )(Component);

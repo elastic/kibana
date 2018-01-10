@@ -1,9 +1,9 @@
 import React from 'react';
 import { Table } from 'react-bootstrap';
 import PropTypes from 'prop-types';
+import moment from 'moment';
 import { Paginate } from '../paginate';
 import { PageControls } from '../paginate_controls';
-import moment from 'moment';
 import './datatable.less';
 
 const getIcon = (type) => {
@@ -51,9 +51,9 @@ export const Datatable = ({ datatable, perPage, paginate }) => (
               {rows.map((row, i) => (
                 <tr key={i}>
                   {datatable.columns.map(col => (
-                    <td key={`row-${i}-${getColumnName(col)}`}>{
-                      getFormattedValue(row[getColumnName(col)], getColumnType(col))
-                    }</td>
+                    <td key={`row-${i}-${getColumnName(col)}`}>
+                      {getFormattedValue(row[getColumnName(col)], getColumnType(col))}
+                    </td>
                   ))}
                 </tr>
               ))}
@@ -72,7 +72,6 @@ export const Datatable = ({ datatable, perPage, paginate }) => (
             nextPageEnabled={nextPageEnabled}
           />
         )}
-
 
       </div>
     )}

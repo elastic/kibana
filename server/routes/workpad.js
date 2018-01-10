@@ -5,7 +5,7 @@ import { getId } from '../../public/lib/get_id.js';
 
 export function workpad(server) {
   const config = server.config();
-  const { callWithRequest, errors:esErrors } = server.plugins.elasticsearch.getCluster('data');
+  const { callWithRequest, errors: esErrors } = server.plugins.elasticsearch.getCluster('data');
   const routePrefix = API_ROUTE_WORKPAD;
   const indexName = config.get('kibana.index');
 
@@ -48,34 +48,34 @@ export function workpad(server) {
     };
 
     return callWithRequest(request, 'get', findDoc)
-    .then(({ _source }) => {
-      const body = {
-        type: CANVAS_TYPE,
-        [CANVAS_TYPE]: {
-          ...request.payload,
-          '@created': _source['@created'] || (new Date()).toISOString(),
-          '@timestamp': (new Date()).toISOString(),
-        },
-      };
+      .then(({ _source }) => {
+        const body = {
+          type: CANVAS_TYPE,
+          [CANVAS_TYPE]: {
+            ...request.payload,
+            '@created': _source['@created'] || (new Date()).toISOString(),
+            '@timestamp': (new Date()).toISOString(),
+          },
+        };
 
-      // const srcElements = get(_source, '')
-      const doc = {
-        refresh: 'wait_for',
-        index: indexName,
-        type: 'doc',
-        id: workpadId,
-        body: body,
-      };
+        // const srcElements = get(_source, '')
+        const doc = {
+          refresh: 'wait_for',
+          index: indexName,
+          type: 'doc',
+          id: workpadId,
+          body: body,
+        };
 
-      return callWithRequest(request, 'index', doc);
-    })
-    .catch((err) => {
-      if (err instanceof esErrors['404']) {
-        return createWorkpad(request, workpadId);
-      }
+        return callWithRequest(request, 'index', doc);
+      })
+      .catch((err) => {
+        if (err instanceof esErrors['404']) {
+          return createWorkpad(request, workpadId);
+        }
 
-      throw err;
-    });
+        throw err;
+      });
   }
 
   // get workpad
@@ -90,21 +90,21 @@ export function workpad(server) {
       };
 
       callWithRequest(request, 'get', doc)
-      .then(formatResponse(reply, true))
-      .then(resp => {
-        const workpad = resp._source[CANVAS_TYPE];
+        .then(formatResponse(reply, true))
+        .then(resp => {
+          const workpad = resp._source[CANVAS_TYPE];
 
-        // remove unwanted fields caused by caused by https://github.com/elastic/kibana-canvas/issues/260
-        // TODO: remove this after a while, maybe...
-        const elementFields = ['id', 'expression', 'filter', 'position'];
-        const fixedPages = workpad.pages.map(page => ({
-          ...page,
-          elements: page.elements.map(el => pick(el, elementFields)),
-        }));
+          // remove unwanted fields caused by caused by https://github.com/elastic/kibana-canvas/issues/260
+          // TODO: remove this after a while, maybe...
+          const elementFields = ['id', 'expression', 'filter', 'position'];
+          const fixedPages = workpad.pages.map(page => ({
+            ...page,
+            elements: page.elements.map(el => pick(el, elementFields)),
+          }));
 
-        reply({ ...workpad, pages: fixedPages });
-      })
-      .catch(formatResponse(reply));
+          reply({ ...workpad, pages: fixedPages });
+        })
+        .catch(formatResponse(reply));
     },
   });
 
@@ -115,8 +115,8 @@ export function workpad(server) {
     config: { payload: { maxBytes: 26214400 } }, // 25MB payload limit
     handler: function (request, reply) {
       createWorkpad(request)
-      .then(formatResponse(reply))
-      .catch(formatResponse(reply));
+        .then(formatResponse(reply))
+        .catch(formatResponse(reply));
     },
   });
 
@@ -127,8 +127,8 @@ export function workpad(server) {
     config: { payload: { maxBytes: 26214400 } }, // 25MB payload limit
     handler: function (request, reply) {
       updateWorkpad(request)
-      .then(formatResponse(reply))
-      .catch(formatResponse(reply));
+        .then(formatResponse(reply))
+        .catch(formatResponse(reply));
     },
   });
 
@@ -144,8 +144,8 @@ export function workpad(server) {
       };
 
       callWithRequest(request, 'delete', doc)
-      .then(formatResponse(reply))
-      .catch(formatResponse(reply));
+        .then(formatResponse(reply))
+        .catch(formatResponse(reply));
     },
   });
 
@@ -193,14 +193,14 @@ export function workpad(server) {
       };
 
       callWithRequest(request, 'search', doc)
-      .then(formatResponse(reply, true))
-      .then((resp) => {
-        reply({
-          total: resp.hits.total,
-          workpads: resp.hits.hits.map(hit => hit._source[CANVAS_TYPE]),
-        });
-      })
-      .catch(formatResponse(reply));
+        .then(formatResponse(reply, true))
+        .then((resp) => {
+          reply({
+            total: resp.hits.total,
+            workpads: resp.hits.hits.map(hit => hit._source[CANVAS_TYPE]),
+          });
+        })
+        .catch(formatResponse(reply));
     },
   });
 }

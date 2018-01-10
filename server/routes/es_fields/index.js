@@ -1,5 +1,5 @@
-import { getESFieldTypes } from './get_es_field_types';
 import { partial } from 'lodash';
+import { getESFieldTypes } from './get_es_field_types';
 
 // TODO: Error handling, note: esErrors
 export function esFields(server) {

@@ -14,7 +14,7 @@ const PaletteArgInput = ({ onValueChange, argValue, renderError }) => {
   function astToPalette({ chain }) {
     if (chain.length !== 1 || chain[0].function !== 'palette') throwNotParsed();
     try {
-      const colors =  chain[0].arguments._.map(astObj => {
+      const colors = chain[0].arguments._.map(astObj => {
         if (getType(astObj) !== 'string') throwNotParsed();
         return astObj;
       });

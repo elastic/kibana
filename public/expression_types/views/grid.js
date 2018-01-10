@@ -1,5 +1,5 @@
-import { getState, getValue } from '../../lib/resolved_arg';
 import { map, uniq } from 'lodash';
+import { getState, getValue } from '../../lib/resolved_arg';
 
 export const grid = () => ({
   name: 'grid',

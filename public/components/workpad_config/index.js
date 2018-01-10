@@ -4,7 +4,6 @@ import { get } from 'lodash';
 import { sizeWorkpad, setName } from '../../state/actions/workpad';
 import { getWorkpad } from '../../state/selectors/workpad';
 
-
 import { WorkpadConfig as Component } from './workpad_config';
 
 const mapStateToProps = (state) => {

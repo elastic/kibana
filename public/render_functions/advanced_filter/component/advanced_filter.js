@@ -5,7 +5,8 @@ import './advanced_filter.less';
 
 export const AdvancedFilter = ({ value, onChange, commit }) => (
   <form onSubmit={e => { e.preventDefault(); commit(value); }} className="canvas__element__advanced_filter">
-    <FormControl className="canvas__element__advanced_filter--input"
+    <FormControl
+      className="canvas__element__advanced_filter--input"
       type="text"
       placeholder="Enter text"
       value={value}

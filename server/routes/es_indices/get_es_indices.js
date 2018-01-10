@@ -9,7 +9,7 @@ export function getESIndices(kbnIndex, elasticsearchClient) {
   };
 
   return elasticsearchClient('search', config)
-  .then(resp => {
-    return map(resp.hits.hits, '_source["index-pattern"].title');
-  });
+    .then(resp => {
+      return map(resp.hits.hits, '_source["index-pattern"].title');
+    });
 }

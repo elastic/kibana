@@ -24,13 +24,13 @@ export const geoip = {
     return fetch(`https://freegeoip.net/json/${args._}`, {
       method: 'GET',
     })
-    .then(res => {
+      .then(res => {
 
-      return {
-        type: 'location',
-        latitude: res.data.latitude,
-        longitude: res.data.longitude,
-      };
-    });
+        return {
+          type: 'location',
+          latitude: res.data.latitude,
+          longitude: res.data.longitude,
+        };
+      });
   },
 };

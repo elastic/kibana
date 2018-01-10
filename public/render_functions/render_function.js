@@ -3,7 +3,7 @@ export function RenderFunction(config) {
   this.name = config.name;
 
   // Use this to set a more friendly name
-  this.displayName = config.displayName || name;
+  this.displayName = config.displayName || this.name;
 
   // A sentence or few about what this element does
   this.help = config.help;

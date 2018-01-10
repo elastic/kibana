@@ -2,13 +2,13 @@ import { applyMiddleware, compose } from 'redux';
 import thunkMiddleware from 'redux-thunk';
 import persistState from 'redux-localstorage';
 import lzString from 'lz-string';
+import { getWindow } from '../../lib/get_window';
 import { esPersistMiddleware } from './es_persist';
 import { historyMiddleware } from './history';
 import { inFlight } from './in_flight';
 import { workpadUpdate } from './workpad_update';
 import { workpadRefresh } from './workpad_refresh';
 import { appReady } from './app_ready';
-import { getWindow } from '../../lib/get_window';
 
 const storageKey = 'canvas';
 

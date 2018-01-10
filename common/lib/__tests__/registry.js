@@ -105,7 +105,10 @@ describe('Registry', () => {
     class CustomRegistry extends Registry {
       wrapper(obj) {
         // append custom prop to shallow cloned object, with index as a value
-        return Object.assign({}, obj, { __CUSTOM_PROP__: idx += 1 });
+        return {
+          ...obj,
+          __CUSTOM_PROP__: idx += 1,
+        };
       }
     }
 

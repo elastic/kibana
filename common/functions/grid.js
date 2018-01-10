@@ -54,11 +54,12 @@ export const grid = {
           if (row.x === column) {
             const seriesStyle = seriesStyles[row.color];
 
-            acc.push(Object.assign({}, row, {
+            acc.push({
+              ...row,
               style: {
                 color: get(seriesStyle, 'color'),
               },
-            }));
+            });
           }
 
           return acc;
@@ -86,9 +87,10 @@ export const grid = {
 
     const summary = mapValues(context.columns, (val, name) => {
       if (!val) return;
-      return Object.assign({}, val, {
+      return {
+        ...val,
         values: getResultValues(context.rows, name, val => val),
-      });
+      };
     });
 
     return {

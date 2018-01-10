@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ElementControls } from './element_controls';
 import { Positionable } from '../positionable';
+import { ElementControls } from './element_controls';
 import './element_wrapper.less';
 
 export const ElementWrapper = (props) => {

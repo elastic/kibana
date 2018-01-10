@@ -1,8 +1,8 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { TimeFilter } from './components/time_filter';
-import { fromExpression, toExpression } from '../../../common/lib/ast';
 import { get, set } from 'lodash';
+import { fromExpression, toExpression } from '../../../common/lib/ast';
+import { TimeFilter } from './components/time_filter';
 
 export const timeFilter = {
   name: 'time_filter',

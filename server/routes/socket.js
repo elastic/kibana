@@ -1,9 +1,9 @@
 import socket from 'socket.io';
-import { getAuthHeader } from './get_auth/get_auth_header';
 import { createHandlers } from '../lib/create_handlers';
 import { socketInterpreterProvider } from '../../common/interpreter/socket_interpret';
 import { functionsRegistry } from '../../common/lib/functions_registry';
 import { typesRegistry } from '../../common/lib/types_registry';
+import { getAuthHeader } from './get_auth/get_auth_header';
 
 export function socketApi(server) {
   const io = socket(server.listener);
@@ -29,35 +29,35 @@ export function socketApi(server) {
         getClientFunctions,
         authHeader,
       ])
-      .then(([
-        clientFunctions,
-        authHeader,
-      ]) => {
-        if (server.plugins.security) request.headers.authorization = authHeader;
+        .then(([
+          clientFunctions,
+          authHeader,
+        ]) => {
+          if (server.plugins.security) request.headers.authorization = authHeader;
 
-        const interpret = socketInterpreterProvider({
-          types: typesRegistry.toJS(),
-          functions: functionsRegistry.toJS(),
-          handlers: createHandlers(request, server),
-          referableFunctions: clientFunctions,
-          socket: socket,
-        });
+          const interpret = socketInterpreterProvider({
+            types: typesRegistry.toJS(),
+            functions: functionsRegistry.toJS(),
+            handlers: createHandlers(request, server),
+            referableFunctions: clientFunctions,
+            socket: socket,
+          });
 
-        return interpret(msg.ast, msg.context)
-        .then(resp => {
-          socket.emit('resp', {
-            id: msg.id,
-            value: resp,
-          });
-        })
-        .catch(e => {
-          socket.emit('resp', {
-            id: msg.id,
-            error: e.message,
-            stack: e.stack,
-          });
+          return interpret(msg.ast, msg.context)
+            .then(resp => {
+              socket.emit('resp', {
+                id: msg.id,
+                value: resp,
+              });
+            })
+            .catch(e => {
+              socket.emit('resp', {
+                id: msg.id,
+                error: e.message,
+                stack: e.stack,
+              });
+            });
         });
-      });
     };
 
     socket.on('run', handler);

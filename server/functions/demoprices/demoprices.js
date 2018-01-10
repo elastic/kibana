@@ -1,9 +1,12 @@
 import moment from 'moment';
-import rows from './mock.json';
 import { queryDatatable } from '../../../common/lib/datatable/query';
+import rows from './mock.json';
 
 function mapRecord(row, i, adjustedTime) {
-  return Object.assign({}, row, { time: adjustedTime || row.time });
+  return {
+    ...row,
+    time: adjustedTime || row.time,
+  };
 }
 
 export const demoprices = {

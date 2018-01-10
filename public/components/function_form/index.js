@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { FunctionForm as Component } from './function_form';
 import { findExpressionType } from '../../lib/find_expression_type';
 import { getId } from '../../lib/get_id.js';
 import { createAsset } from '../../state/actions/assets';
@@ -15,6 +14,7 @@ import {
   getSelectedPage,
   getContextForIndex,
 } from '../../state/selectors/workpad';
+import { FunctionForm as Component } from './function_form';
 
 const mapStateToProps = (state, { expressionIndex }) => ({
   context: getContextForIndex(state, expressionIndex),
@@ -61,14 +61,17 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { argType, nextArgType } = ownProps;
   const { updateContext, setArgument, addArgument, deleteArgument, ...dispatchers } = dispatchProps;
 
-  return Object.assign({}, stateProps, dispatchers, ownProps, {
+  return {
+    ...stateProps,
+    ...dispatchers,
+    ...ownProps,
     updateContext: updateContext(element),
     expressionType: findExpressionType(argType),
     nextExpressionType: nextArgType ? findExpressionType(nextArgType) : nextArgType,
     onValueChange: setArgument(element, pageId),
     onValueAdd: addArgument(element, pageId),
     onValueRemove: deleteArgument(element, pageId),
-  });
+  };
 };
 
 export const FunctionForm = connect(mapStateToProps, mapDispatchToProps, mergeProps)(Component);

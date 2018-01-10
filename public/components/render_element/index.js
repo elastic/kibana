@@ -1,9 +1,9 @@
 import { compose, withState, lifecycle, withPropsOnChange, withProps } from 'recompose';
 import PropTypes from 'prop-types';
 import { isEqual, cloneDeep } from 'lodash';
+import { notify } from '../../lib/notify';
 import { RenderElement as Component } from './render_element';
 import { ElementHandlers } from './lib/handlers';
-import { notify } from '../../lib/notify';
 
 export const RenderElement = compose(
   withState('domNode', 'setDomNode'), // Still don't like this, seems to be the only way todo it.

@@ -1,4 +1,5 @@
 import { connect } from 'react-redux';
+import { compose, withState } from 'recompose';
 import { get } from 'lodash';
 import { undoHistory, redoHistory } from '../../state/actions/history';
 import { fetchAllRenderables } from '../../state/actions/elements';
@@ -6,7 +7,6 @@ import { getPageById, getSelectedPage, getWorkpad, getPages } from '../../state/
 import { getFullscreen, getEditing } from '../../state/selectors/app';
 import { nextPage, previousPage } from '../../state/actions/pages';
 import { Workpad as Component } from './workpad';
-import { compose, withState } from 'recompose';
 
 const mapStateToProps = (state) => {
   return {

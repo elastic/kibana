@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ElementContent } from './element_content';
 import { pure } from 'recompose';
 import { RemoveIcon } from '../remove_icon';
+import { ElementContent } from './element_content';
 
 export const ElementControls = pure((props) => {
   const {
@@ -41,12 +41,12 @@ export const ElementControls = pure((props) => {
       */}
 
       <ElementContent
-         state={state}
-         renderable={renderable}
-         renderFunction={renderFunction}
-         size={size}
-         handlers={handlers}
-       />
+        state={state}
+        renderable={renderable}
+        renderFunction={renderFunction}
+        size={size}
+        handlers={handlers}
+      />
 
       {!isSelected ? null :
         (<RemoveIcon style={{ position: 'absolute', top: -20, right: -20 }} onClick={removeHandler}/>)

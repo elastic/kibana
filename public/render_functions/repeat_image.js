@@ -1,9 +1,6 @@
 import $ from 'jquery';
 import { times } from 'lodash';
 
-
-
-
 export const repeatImage = {
   name: 'repeatImage',
   displayName: 'Image Repeat',

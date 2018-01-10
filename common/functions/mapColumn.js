@@ -28,22 +28,24 @@ export const mapColumn = {
   fn: (context, args) => {
     const rowPromises = context.rows.map(row => {
       return args.expression(!args.context ? null :
-      {
-        type: 'datatable',
-        columns: context.columns,
-        rows: [row],
-      })
-      .then(val => {
-        if (typeof val === 'object' && val !== null) {
-          throw new Error ('Expression must return a literal, eg a string, number, boolean, null');
-        }
-        return Object.assign({}, row, { [args._]: val });
-      });
+        {
+          type: 'datatable',
+          columns: context.columns,
+          rows: [row],
+        })
+        .then(val => {
+          if (typeof val === 'object' && val !== null) {
+            throw new Error ('Expression must return a literal, eg a string, number, boolean, null');
+          }
+
+          return {
+            ...row,
+            [args._]: val,
+          };
+        });
     });
 
     return Promise.all(rowPromises).then(rows => {
-      Object.assign({}, context, { rows: rows });
-
       if (!context.columns.find(column => column.name === args._)) {
         context.columns.push({ name: args._, type: getType(rows[0][args._]) });
       }

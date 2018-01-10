@@ -1,10 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { compose, withProps } from 'recompose';
 import { Form, FormGroup, FormControl, Button } from 'react-bootstrap';
 import { get } from 'lodash';
 import { createStatefulPropHoc } from '../../components/enhance/stateful_prop';
-import { compose, withProps } from 'recompose';
-
 
 // This is basically a direct copy of the string input, but with some Number() goodness maybe you think that's cheating and it should be
 // abstracted. If you can think of a 3rd or 4th usage for that abstraction, cool, do it, just don't make it more confusing. Copying is the
@@ -32,7 +31,6 @@ NumberArgInput.propTypes = {
   confirm: PropTypes.string,
   commit: PropTypes.func.isRequired,
 };
-
 
 // TODO: Here's where you would put that max/min support stuff
 const template = compose(

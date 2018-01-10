@@ -1,13 +1,12 @@
 import React from 'react';
 import { compose, withPropsOnChange, withHandlers } from 'recompose';
 import PropTypes from 'prop-types';
-import { sortBy } from 'lodash';
 import { FormControl } from 'react-bootstrap';
-import { SimpleMathFunction } from './simple_math_function';
+import { sortBy } from 'lodash';
+import { parse } from 'mathjs';
 import { createStatefulPropHoc } from '../../../components/enhance/stateful_prop';
 import { getType } from '../../../../common/lib/get_type';
-import { parse } from 'mathjs';
-
+import { SimpleMathFunction } from './simple_math_function';
 import './datacolumn.less';
 
 // TODO: Garbage, we could make a much nicer math form that can handle way more.

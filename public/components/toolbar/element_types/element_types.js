@@ -1,10 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import './element_types.less';
-import { MediaCard } from '../../media_card';
+import { FormControl } from 'react-bootstrap';
 import { map, includes } from 'lodash';
 import lowerCase from 'lodash.lowercase';
-import { FormControl } from 'react-bootstrap';
+import { MediaCard } from '../../media_card';
+import './element_types.less';
 
 export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
   search = lowerCase(search);

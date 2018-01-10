@@ -1,8 +1,8 @@
 import { pure, compose, lifecycle, withState, branch, renderComponent } from 'recompose';
-import { DatasourcePreview as Component } from './datasource_preview';
-import { Loading } from '../../loading';
 import { PropTypes } from 'prop-types';
+import { Loading } from '../../loading';
 import { interpretAst } from '../../../lib/interpreter';
+import { DatasourcePreview as Component } from './datasource_preview';
 
 export const DatasourcePreview = compose(
   pure,

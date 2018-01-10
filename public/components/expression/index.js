@@ -1,10 +1,10 @@
 import { connect } from 'react-redux';
 import { compose, withState, withHandlers, lifecycle, withPropsOnChange, branch, renderComponent } from 'recompose';
-import { Expression as Component } from './expression';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
 import { setExpression, flushContext } from '../../state/actions/elements';
-import { ElementNotSelected } from './element_not_selected';
 import { fromExpression } from '../../../common/lib/ast';
+import { ElementNotSelected } from './element_not_selected';
+import { Expression as Component } from './expression';
 
 const mapStateToProps = (state) => ({
   pageId: getSelectedPage(state),
@@ -23,15 +23,17 @@ const mapDispatchToProps = (dispatch) => ({
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { element, pageId } = stateProps;
+  const allProps = { ...ownProps, ...stateProps, ...dispatchProps };
 
-  if (!element) return Object.assign({}, ownProps, stateProps, dispatchProps);
+  if (!element) return allProps;
 
   const { expression } = element;
 
-  return Object.assign({}, ownProps, stateProps, dispatchProps, {
+  return {
+    ...allProps,
     expression,
     setExpression: dispatchProps.setExpression(element.id, pageId),
-  });
+  };
 };
 
 const expressionLifecycle = lifecycle({

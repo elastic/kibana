@@ -5,7 +5,7 @@ export function Element(config) {
   this.name = config.name;
 
   // Use this to set a more friendly name
-  this.displayName = config.displayName || name;
+  this.displayName = config.displayName || this.name;
 
   // An image to use in the element type selector
   this.image = config.image || defaultHeader;

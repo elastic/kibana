@@ -2,8 +2,6 @@ import { createAction } from 'redux-actions';
 import { get, pick } from 'lodash';
 import { set, del } from 'object-path-immutable';
 import { createThunk } from 'redux-thunks';
-import * as args from './resolved_args';
-import { selectElement } from './transient';
 import { getPages, getElementById } from '../selectors/workpad';
 import { getValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
@@ -11,24 +9,26 @@ import { getType } from '../../../common/lib/get_type';
 import { fromExpression, toExpression, safeElementFromExpression } from '../../../common/lib/ast';
 import { interpretAst } from '../../lib/interpreter';
 import { notify } from '../../lib/notify';
+import { selectElement } from './transient';
+import * as args from './resolved_args';
 
 function runInterpreter(ast, context = null, retry = false) {
   return interpretAst(ast, context)
-  .then((renderable) => {
-    if (getType(renderable) === 'render') {
-      return renderable;
-    }
+    .then((renderable) => {
+      if (getType(renderable) === 'render') {
+        return renderable;
+      }
 
-    if (!retry) {
-      return runInterpreter(fromExpression('render'), renderable || context, true);
-    }
+      if (!retry) {
+        return runInterpreter(fromExpression('render'), renderable || context, true);
+      }
 
-    return new Error(`Ack! I don't know how to render a '${getType(renderable)}'`);
-  })
-  .catch((err) => {
-    notify.error(err);
-    throw err;
-  });
+      return new Error(`Ack! I don't know how to render a '${getType(renderable)}'`);
+    })
+    .catch((err) => {
+      notify.error(err);
+      throw err;
+    });
 }
 
 function getSiblingContext(state, elementId, checkIndex) {
@@ -95,12 +95,12 @@ export const fetchContext = createThunk('fetchContext', ({ dispatch, getState },
     ...element.ast,
     chain: astChain,
   }, prevContextValue)
-  .then((value) => {
-    dispatch(args.setValue({
-      path: contextPath,
-      value,
-    }));
-  });
+    .then((value) => {
+      dispatch(args.setValue({
+        path: contextPath,
+        value,
+      }));
+    });
 });
 
 export const fetchRenderableWithContext = createThunk('fetchRenderableWithContext', ({ dispatch }, element, ast, context) => {
@@ -111,19 +111,19 @@ export const fetchRenderableWithContext = createThunk('fetchRenderableWithContex
   }));
 
   return runInterpreter(ast, context)
-  .then((renderable) => {
-    dispatch(args.setValue({
-      path: argumentPath,
-      value: renderable,
-    }));
-  })
-  .catch((err) => {
-    notify.error(err);
-    dispatch(args.setValue({
-      path: argumentPath,
-      value: err,
-    }));
-  });
+    .then((renderable) => {
+      dispatch(args.setValue({
+        path: argumentPath,
+        value: renderable,
+      }));
+    })
+    .catch((err) => {
+      notify.error(err);
+      dispatch(args.setValue({
+        path: argumentPath,
+        value: err,
+      }));
+    });
 });
 
 export const fetchRenderable = createThunk('fetchRenderable', ({ dispatch }, element) => {
@@ -142,7 +142,7 @@ export const fetchAllRenderables = createThunk('fetchAllRenderables', ({ dispatc
 });
 
 export const duplicateElement = createThunk('duplicateElement', ({ dispatch, type }, element, pageId) => {
-  const newElement = Object.assign({}, getDefaultElement(), getBareElement(element));
+  const newElement = { ...getDefaultElement(), ...getBareElement(element) };
   // move the element so users can see that it was added
   newElement.position.top = newElement.position.top + 10;
   newElement.position.left = newElement.position.left + 10;
@@ -168,7 +168,7 @@ export const removeElement = createThunk('removeElement', ({ dispatch, getState 
   if (shouldRefresh) dispatch(fetchAllRenderables());
 });
 
-export const setFilter = createThunk('setFilter', ({ dispatch, getState }, filter, elementId, pageId, doRender = true) => {
+export const setFilter = createThunk('setFilter', ({ dispatch }, filter, elementId, pageId, doRender = true) => {
   const _setFilter = createAction('setFilter');
   dispatch(_setFilter({ filter, elementId, pageId }));
 
@@ -276,7 +276,7 @@ export const deleteArgumentAtIndex = createThunk('deleteArgumentAtIndex', ({ dis
   payload: element defaults. Eg {expression: 'foo'}
 */
 export const addElement = createThunk('addElement', ({ dispatch }, pageId, element) => {
-  const newElement = Object.assign({}, getDefaultElement(), getBareElement(element));
+  const newElement = { ...getDefaultElement(), ...getBareElement(element) };
   const _addElement = createAction('addElement');
   dispatch(_addElement({ pageId, element: newElement }));
 

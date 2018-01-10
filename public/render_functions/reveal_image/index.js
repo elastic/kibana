@@ -16,7 +16,6 @@ export const revealImage = {
     };
     handlers.onResize(img.onload);
 
-
     container.className = 'revealImage';
     aligner.className = 'revealImageAligner';
     aligner.style.backgroundImage = `url(${config.emptyImage})`;

@@ -52,7 +52,8 @@ export const alterColumn = {
     column.name = destination;
     column.type = type;
 
-    context.rows = context.rows.map(row => Object.assign(omit(row, args.column), {
+    context.rows = context.rows.map(row => ({
+      ...omit(row, args.column),
       [destination]: handler(row[args.column]),
     }));
 

@@ -9,7 +9,8 @@ export const DatetimeQuickList = ({ from, to, ranges, onSelect }) => (
         <li
           className={(from === range.from && to === range.to) ? 'active' : null}
           key={i}
-          onClick={() => onSelect(range.from, range.to)}>
+          onClick={() => onSelect(range.from, range.to)}
+        >
           <a>{range.display}</a>
         </li>
       ))}

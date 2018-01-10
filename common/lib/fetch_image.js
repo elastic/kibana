@@ -8,15 +8,15 @@ export const fetchRawImage = (url) => {
     method: 'GET',
     responseType,
   })
-  .then((res) => {
-    const type = res.headers['content-type'];
+    .then((res) => {
+      const type = res.headers['content-type'];
 
-    if (imageTypes.indexOf(type) < 0) {
-      return Promise.reject(new Error(`Invalid image type: ${type}`));
-    }
+      if (imageTypes.indexOf(type) < 0) {
+        return Promise.reject(new Error(`Invalid image type: ${type}`));
+      }
 
-    return { data: res.data, type };
-  });
+      return { data: res.data, type };
+    });
 };
 
 export const fetchImage = (url) => {

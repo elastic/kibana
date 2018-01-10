@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { compose, withProps } from 'recompose';
 import { FormGroup, FormControl, Button } from 'react-bootstrap';
 import { get } from 'lodash';
 import { createStatefulPropHoc } from '../../components/enhance/stateful_prop';
-import { compose, withProps } from 'recompose';
 
 const TextAreaArgInput = ({ updateValue, value, confirm, commit, renderError }) => {
   if (typeof value !== 'string') renderError();

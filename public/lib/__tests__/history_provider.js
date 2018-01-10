@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import lzString from 'lz-string';
-import { createWindow } from './fixtures/window';
 import { historyProvider } from '../history_provider';
+import { createWindow } from './fixtures/window';
 
 function createState() {
   return {

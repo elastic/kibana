@@ -1,5 +1,5 @@
-import { normalizeType } from './normalize_type';
 import { mapValues, keys } from 'lodash';
+import { normalizeType } from './normalize_type';
 
 export function getESFieldTypes(index, fields, elasticsearchClient) {
   const config = {
@@ -12,17 +12,17 @@ export function getESFieldTypes(index, fields, elasticsearchClient) {
   }
 
   return elasticsearchClient('fieldCaps', config)
-  .then(resp => {
-    return mapValues(resp.fields, (types) => {
+    .then(resp => {
+      return mapValues(resp.fields, (types) => {
 
-      if (keys(types).length > 1) return 'conflict';
+        if (keys(types).length > 1) return 'conflict';
 
-      try {
-        return normalizeType(keys(types)[0]);
-      } catch (e) {
-        return 'unsupported';
-      }
+        try {
+          return normalizeType(keys(types)[0]);
+        } catch (e) {
+          return 'unsupported';
+        }
 
+      });
     });
-  });
 }

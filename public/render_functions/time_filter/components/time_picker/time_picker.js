@@ -2,18 +2,18 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import dateMath from '@elastic/datemath';
 import { Button } from 'react-bootstrap';
+import moment from 'moment';
 import { DatetimeRangeAbsolute } from '../datetime_range_absolute';
 import { DatetimeQuickList } from '../datetime_quick_list';
-import moment from 'moment';
 import './time_picker.less';
 
 export const quickRanges = [
-  { from: 'now-24h',  to: 'now',      display: 'Last 24 hours' },
-  { from: 'now-7d',   to: 'now',      display: 'Last 7 days'   },
-  { from: 'now-14d',   to: 'now',     display: 'Last 2 weeks'   },
-  { from: 'now-30d',  to: 'now',      display: 'Last 30 days'  },
-  { from: 'now-90d',  to: 'now',      display: 'Last 90 days'  },
-  { from: 'now-1y',   to: 'now',      display: 'Last 1 year'   },
+  { from: 'now-24h', to: 'now', display: 'Last 24 hours' },
+  { from: 'now-7d', to: 'now', display: 'Last 7 days' },
+  { from: 'now-14d', to: 'now', display: 'Last 2 weeks' },
+  { from: 'now-30d', to: 'now', display: 'Last 30 days' },
+  { from: 'now-90d', to: 'now', display: 'Last 90 days' },
+  { from: 'now-1y', to: 'now', display: 'Last 1 year' },
 ];
 
 export const TimePicker = ({ range, setRange, dirty, setDirty, onSelect }) => {
@@ -33,7 +33,8 @@ export const TimePicker = ({ range, setRange, dirty, setDirty, onSelect }) => {
           bsStyle="success"
           disabled={!dirty}
           className="canvas__time-picker--apply"
-          onClick={ () => { setDirty(false); onSelect(range.from, range.to); } }>
+          onClick={() => { setDirty(false); onSelect(range.from, range.to); }}
+        >
           Apply
         </Button>
       </div>

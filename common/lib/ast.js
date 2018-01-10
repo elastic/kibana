@@ -1,5 +1,5 @@
-import { parse } from './grammar';
 import { getType } from '../lib/get_type';
+import { parse } from './grammar';
 
 function getArgumentString(arg, argKey) {
   const type = getType(arg);

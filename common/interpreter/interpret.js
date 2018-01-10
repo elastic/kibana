@@ -1,10 +1,10 @@
 import { each, keys, last, mapValues, values, zipObject } from 'lodash';
 import clone from 'lodash.clone';
 import omitBy from 'lodash.omitby';
-import { castProvider } from './cast';
 import { getType } from '../lib/get_type';
 import { fromExpression } from '../lib/ast';
 import { typesRegistry } from '../lib/types_registry';
+import { castProvider } from './cast';
 
 const createError = (err, { name, context, args }) => ({
   type: 'error',

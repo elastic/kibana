@@ -1,11 +1,11 @@
 import React, { createElement } from 'react';
 import PropTypes from 'prop-types';
+import { ErrorBoundary } from '../enhance/error_boundary';
+import { RenderError } from '../../../common/lib/errors';
 import { ArgLabel } from './arg_label';
 import { ArgSimpleForm } from './arg_simple_form';
 import { SimpleFailure } from './simple_failure';
 import { AdvancedFailure } from './advanced_failure';
-import { ErrorBoundary } from '../enhance/error_boundary';
-import { RenderError } from '../../../common/lib/errors';
 import './arg_form.less';
 
 const getTemplates = (err, { argTypeInstance, label, setLabel, resetErrorState, templateProps }) => {

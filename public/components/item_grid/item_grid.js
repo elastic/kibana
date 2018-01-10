@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { last } from 'lodash';
 
-const defaultPerRow =  6;
+const defaultPerRow = 6;
 
 export const ItemGrid = ({ items, itemsPerRow, children }) => {
   if (!items) return null;

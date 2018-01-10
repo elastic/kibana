@@ -1,10 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import $ from 'jquery';
-import { isEqual } from 'lodash';
-import { move, resize, rotate, remove } from './interaction';
 import { lifecycle, compose } from 'recompose';
-
+import $ from 'jquery';
+import { move, resize, rotate, remove } from './interaction';
 import './positionable.less';
 
 let wrapperNode;
@@ -12,11 +10,6 @@ let wrapperNode;
 const PositionableLifecycle = lifecycle({
   componentWillUnmount() {
     this.removeHandlers(wrapperNode);
-  },
-
-  componentWillUpdate(nextProps, nextState) {
-    // This is gross and hacky but is needed to make updating state from props smooth.
-    if (isEqual(this.state, nextState) && !isEqual(nextProps.position, this.state)) this.setState(nextProps.position);
   },
 
   componentDidUpdate(prevProps) {
@@ -44,12 +37,12 @@ const PositionableLifecycle = lifecycle({
 
     const stateMoveOrResize = (e) => {
       const { top, left, height, width } = e.interaction.absolute;
-      setPosition(Object.assign({}, this.props.position, { top, left, height, width }));
+      setPosition({ ...this.props.position, top, left, height, width });
     };
 
     const stateRotate = (e) => {
       const { angle } = e.interaction.absolute;
-      setPosition(Object.assign({}, this.props.position, { angle }));
+      setPosition({ ...this.props.position, angle });
     };
 
     move(elem, {
@@ -67,9 +60,9 @@ const PositionableLifecycle = lifecycle({
       on: (e) => stateMoveOrResize(e),
       onEnd: () => onChange(this.props.position),
       sides: {
-        left:   '.canvas--interactable-resize-nw, .canvas--interactable-resize-sw, .canvas--interactable-resize-w',
-        top:    '.canvas--interactable-resize-nw, .canvas--interactable-resize-ne, .canvas--interactable-resize-n',
-        right:  '.canvas--interactable-resize-ne, .canvas--interactable-resize-se, .canvas--interactable-resize-e',
+        left: '.canvas--interactable-resize-nw, .canvas--interactable-resize-sw, .canvas--interactable-resize-w',
+        top: '.canvas--interactable-resize-nw, .canvas--interactable-resize-ne, .canvas--interactable-resize-n',
+        right: '.canvas--interactable-resize-ne, .canvas--interactable-resize-se, .canvas--interactable-resize-e',
         bottom: '.canvas--interactable-resize-sw, .canvas--interactable-resize-se, .canvas--interactable-resize-s',
       },
     });
@@ -89,7 +82,7 @@ const PositionableComponent = ({ position, children, interact }) => {
     // TODO: Throw if there is more thean one child
     const newStyle = {
       position: 'absolute',
-      transform: `rotate(${angle}deg)`,// translate(${position.left}px, ${position.top}px)`,
+      transform: `rotate(${angle}deg)`, // translate(${position.left}px, ${position.top}px)`,
       height: height,
       width: width,
       top: top,
@@ -99,10 +92,11 @@ const PositionableComponent = ({ position, children, interact }) => {
     const stepChild = React.cloneElement(child, { size: { height, width } });
 
     return (
-      <div className="canvas--positionable canvas--interactable"
+      <div
+        className="canvas--positionable canvas--interactable"
         ref={setWrapperNode}
-        style={newStyle}>
-
+        style={newStyle}
+      >
         {stepChild}
 
         {interact && (

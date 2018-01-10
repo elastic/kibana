@@ -36,7 +36,8 @@ export const simpleTemplate = (props) => {
           </div>
           <ColorPickerMini
             value={color}
-            onChange={(val) => handlePlain('color', val)} />
+            onChange={(val) => handlePlain('color', val)}
+          />
         </div>
       )}
 

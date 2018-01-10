@@ -1,12 +1,12 @@
-// TODO: pointseries performs poorly, that's why we run it on the server.
-
-import { math } from '../../common/lib/math.js';
-import moment from 'moment';
 import { groupBy, zipObject, omit, uniq, map, mapValues } from 'lodash';
 import uniqBy from 'lodash.uniqby';
 import pickBy from 'lodash.pickby';
+import moment from 'moment';
+import { math } from '../../common/lib/math.js';
 import { findInObject } from '../../common/lib/find_in_object';
 import { pivotObjectArray } from '../../common/lib/pivot_object_array.js';
+
+// TODO: pointseries performs poorly, that's why we run it on the server.
 
 function isColumnReference(mathExpression) {
   const parsedMath = math.parse(mathExpression);
@@ -91,7 +91,7 @@ export const pointseries = {
     });
 
     const PRIMARY_KEY = '%%CANVAS_POINTSERIES_PRIMARY_KEY%%';
-    const rows = context.rows.map((row, i) => Object.assign({}, row, { [PRIMARY_KEY]: i }));
+    const rows = context.rows.map((row, i) => ({ ...row, [PRIMARY_KEY]: i }));
 
     function normalizeValue(expression, value) {
       switch (getType(context.columns, expression)) {

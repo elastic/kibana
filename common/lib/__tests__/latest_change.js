@@ -1,5 +1,5 @@
-import { latestChange } from '../latest_change';
 import expect from 'expect.js';
+import { latestChange } from '../latest_change';
 
 describe('latestChange', () => {
   it('returns a function', () => {

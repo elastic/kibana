@@ -26,7 +26,7 @@ export const urlparam = {
     },
   },
   fn: (context, args) => {
-    const query = parse(location.href, true).query;
+    const query = parse(window.location.href, true).query;
     return query[args._] || args.default;
   },
 };

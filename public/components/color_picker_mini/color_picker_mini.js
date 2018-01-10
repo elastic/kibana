@@ -1,10 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Popover, OverlayTrigger } from 'react-bootstrap';
 import { ColorPicker } from '../color_picker';
 import { ColorDot } from '../color_dot';
-import { Popover, OverlayTrigger } from 'react-bootstrap';
 import './color_picker_mini.less';
-
 
 export const ColorPickerMini = ({ onChange, value, placement }) => {
 

@@ -1,15 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import './text_style_picker.less';
 import { Button, ButtonGroup, FormControl, FormGroup } from 'react-bootstrap';
 import { FontPicker } from '../font_picker';
-import { fontSizes } from './font_sizes';
 import { ColorPickerMini } from '../color_picker_mini';
+import { fontSizes } from './font_sizes';
+import './text_style_picker.less';
 
 export const TextStylePicker = ({ family, size, align, color, weight, underline, italic, onChange }) => {
-
   function doChange(propName, value) {
-    onChange(Object.assign({
+    onChange({
       family,
       size,
       align,
@@ -17,9 +16,8 @@ export const TextStylePicker = ({ family, size, align, color, weight, underline,
       weight,
       underline,
       italic,
-    }, {
       [propName]: value,
-    }));
+    });
   }
 
   return (
@@ -32,7 +30,7 @@ export const TextStylePicker = ({ family, size, align, color, weight, underline,
             onChange={(e) => doChange('size', Number(e.target.value))}
           >
             {fontSizes.map(size => (
-              <option key={ size } value={size}>{ size }</option>
+              <option key={size} value={size}>{ size }</option>
             ))}
           </FormControl>
         </div>
@@ -44,21 +42,36 @@ export const TextStylePicker = ({ family, size, align, color, weight, underline,
       <FormGroup className="canvas__text-style-picker--bottom">
         <ColorPickerMini value={color} onChange={(value) => doChange('color', value)}/>
         <ButtonGroup bsSize="small">
-          <Button active={weight === 'bold'}
-            onClick={() => doChange('weight', weight !== 'bold' ? 'bold' : 'normal')}><span style={{ fontWeight: 'bold' }}>B</span></Button>
-          <Button active={italic}
-            onClick={() => doChange('italic', !italic)}><span style={{ fontStyle: 'italic' }}>I</span></Button>
-          <Button active={underline}
-            onClick={() => doChange('underline', !underline)}><span style={{ textDecoration: 'underline' }}>U</span></Button>
+          <Button
+            active={weight === 'bold'}
+            onClick={() => doChange('weight', weight !== 'bold' ? 'bold' : 'normal')}
+          >
+            <span style={{ fontWeight: 'bold' }}>B</span>
+          </Button>
+          <Button
+            active={italic}
+            onClick={() => doChange('italic', !italic)}
+          >
+            <span style={{ fontStyle: 'italic' }}>I</span>
+          </Button>
+          <Button
+            active={underline}
+            onClick={() => doChange('underline', !underline)}
+          >
+            <span style={{ textDecoration: 'underline' }}>U</span>
+          </Button>
         </ButtonGroup>
         &nbsp;
         <ButtonGroup bsSize="small">
-          <Button active={align === 'left'}
-            onClick={() => doChange('align', 'left')}><i className="fa fa-align-left"/></Button>
-          <Button active={align === 'center'}
-            onClick={() => doChange('align', 'center')}><i className="fa fa-align-center"/></Button>
-          <Button active={align === 'right'}
-            onClick={() => doChange('align', 'right')}><i className="fa fa-align-right"/></Button>
+          <Button active={align === 'left'} onClick={() => doChange('align', 'left')}>
+            <i className="fa fa-align-left"/>
+          </Button>
+          <Button active={align === 'center'} onClick={() => doChange('align', 'center')}>
+            <i className="fa fa-align-center"/>
+          </Button>
+          <Button active={align === 'right'} onClick={() => doChange('align', 'right')}>
+            <i className="fa fa-align-right"/>
+          </Button>
         </ButtonGroup>
       </FormGroup>
     </div>
@@ -73,5 +86,5 @@ TextStylePicker.propTypes = {
   weight: PropTypes.string,
   underline: PropTypes.bool,
   italic: PropTypes.bool,
-  onChange: PropTypes.func,
+  onChange: PropTypes.func.isRequired,
 };

@@ -1,6 +1,9 @@
 export function queryDatatable(datatable, query) {
   if (query.size) {
-    datatable = Object.assign({}, datatable, { rows: datatable.rows.slice(0, query.size) });
+    datatable = {
+      ...datatable,
+      rows: datatable.rows.slice(0, query.size),
+    };
   }
 
   if (query.and) {

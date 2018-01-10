@@ -4,15 +4,16 @@ import { MediaCard } from '../media_card';
 
 export const DatasourceSelector = ({ onSelect, datasources }) => (
   <div>
-    { datasources.map(d =>
+    { datasources.map(d => (
       <MediaCard
         key={d.name}
         title={d.displayName}
         image={d.image}
-        onClick={() => onSelect(d.name)}>
+        onClick={() => onSelect(d.name)}
+      >
         {d.function.help}
-      </MediaCard>)
-    }
+      </MediaCard>
+    )) }
   </div>
 );
 

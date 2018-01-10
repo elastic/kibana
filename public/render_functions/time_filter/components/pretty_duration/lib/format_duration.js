@@ -1,13 +1,12 @@
 import moment from 'moment';
-import { quickRanges } from './quick_ranges';
 import dateMath from '@elastic/datemath';
+import { quickRanges } from './quick_ranges';
 import { timeUnits } from './time_units';
 
 const lookupByRange = {};
 quickRanges.forEach(function (frame) {
   lookupByRange[frame.from + ' to ' + frame.to] = frame;
 });
-
 
 function cantLookup(from, to) {
   const format = (time, to = false) => {

@@ -24,9 +24,9 @@ export const Expression = ({
       </FormGroup>
       <ButtonToolbar>
         <Button disabled={!!error} bsStyle="success" onClick={() => setExpression(formState.expression)}> Run</Button>
-        {done ?
-          (<Button onClick={done}> {formState.dirty ? 'Cancel' : 'Done'}</Button>)
-        : null}
+        {done && (
+          <Button onClick={done}> {formState.dirty ? 'Cancel' : 'Done'}</Button>
+        )}
       </ButtonToolbar>
     </div>
   );

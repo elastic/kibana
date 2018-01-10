@@ -7,11 +7,10 @@ export const FunctionFormList = ({ functionFormItems }) => {
     return (
       <FunctionForm
         {...functionFormProps}
-        key={`${functionFormProps.argType}-${functionFormProps.expressionIndex}`
-      }/>
+        key={`${functionFormProps.argType}-${functionFormProps.expressionIndex}`}
+      />
     );
   });
-
 
   return (
     <div>

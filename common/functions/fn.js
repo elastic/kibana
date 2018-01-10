@@ -18,9 +18,9 @@ export function Fn(config) {
   this.help = config.help || ''; // A short help text
   this.args = {};
   each(config.args, (arg, name) => {
-    this.args[name] = new Arg(Object.assign({ name: name }, arg));
+    this.args[name] = new Arg({ name, ...arg });
     each(arg.aliases, alias => {
-      this.args[alias] = new Arg(Object.assign({ name: name, isAlias: true }, arg));
+      this.args[alias] = new Arg({ name, ...arg, isAlias: true });
     });
   });
 

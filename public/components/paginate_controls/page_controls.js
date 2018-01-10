@@ -12,7 +12,9 @@ const showPages = ({ setPage, pageNumber, totalPages }) => {
           key={`pageNumber${i}`}
           className="btn btn-link page-number"
           onClick={() => setPage(i)}
-        >{i}</button>);
+        >
+          {i}
+        </button>);
     }
   }
 

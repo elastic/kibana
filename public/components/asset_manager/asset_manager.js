@@ -23,9 +23,13 @@ export const AssetManager = ({ assets, removeAsset }) => {
       </div>
 
       {assets.map(asset => (
-        <div key={asset.id} className="canvas__asset-manager--thumb" style={{
-          backgroundImage: `url("${asset.value}")`,
-        }}>
+        <div
+          key={asset.id}
+          className="canvas__asset-manager--thumb"
+          style={{
+            backgroundImage: `url("${asset.value}")`,
+          }}
+        >
           <RemoveIcon style={{ position: 'absolute', top: 0, right: 0 }} onClick={() => removeAsset(asset.id)}/>
           <div className="canvas__asset-manager--asset-identifier">
             <div className="asset-copy">

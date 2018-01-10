@@ -18,7 +18,8 @@ export const markdown = {
       <div
         className="canvas__element__markdown"
         style={fontStyle}
-        dangerouslySetInnerHTML={html}/>
+        dangerouslySetInnerHTML={html}
+      />
     ), domNode, () => handlers.done());
 
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));

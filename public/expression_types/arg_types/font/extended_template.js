@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { TextStylePicker } from '../../../components/text_style_picker';
 import { get, mapValues, set } from 'lodash';
+import { TextStylePicker } from '../../../components/text_style_picker';
 
 export const extendedTemplate = (props) => {
   const { onValueChange, argValue } = props;

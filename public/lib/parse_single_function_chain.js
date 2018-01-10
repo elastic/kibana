@@ -1,5 +1,5 @@
-import { fromExpression } from '../../common/lib/ast';
 import { get, mapValues, map } from 'lodash';
+import { fromExpression } from '../../common/lib/ast';
 
 export function parseSingleFunctionChain(filterString) {
   const ast = fromExpression(filterString);

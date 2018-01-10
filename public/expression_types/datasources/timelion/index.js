@@ -2,18 +2,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { ControlLabel, FormControl } from 'react-bootstrap';
 import { getSimpleArg, setSimpleArg } from '../../../lib/arg_helpers';
-import header from './header.png';
 import { TooltipIcon } from '../../../components/tooltip_icon';
+import header from './header.png';
 import './timelion.less';
-
 
 const template = ({ args, updateArgs }) => {
 
   const setArg = (name, value) => {
-    updateArgs && updateArgs(Object.assign({},
-      args,
-      setSimpleArg(name, value),
-    ));
+    updateArgs && updateArgs({
+      ...args,
+      ...setSimpleArg(name, value),
+    });
   };
 
   // TODO: This is a terrible way of doing defaults. We need to find a way to read the defaults for the function
@@ -35,15 +34,15 @@ const template = ({ args, updateArgs }) => {
 
       <div className="canvas__timelion-row">
         <div className="canvas__timelion-query">
-            <ControlLabel>
-              Query &nbsp;
-              <TooltipIcon text="Lucene Query String syntax" placement="right"/>
-            </ControlLabel>
-            <FormControl
-              type="text"
-              value={getQuery()}
-              onChange={(e) => setArg('query', e.target.value)}
-            />
+          <ControlLabel>
+            Query &nbsp;
+            <TooltipIcon text="Lucene Query String syntax" placement="right"/>
+          </ControlLabel>
+          <FormControl
+            type="text"
+            value={getQuery()}
+            onChange={(e) => setArg('query', e.target.value)}
+          />
         </div>
         {
           // TODO: Time timelion interval picker should be a drop down

@@ -73,13 +73,15 @@ export const pie = {
 
       // append series style, if there is a match
       if (seriesStyle) {
-        Object.assign(item, { color: get(seriesStyle, 'color') });
+        item.color = get(seriesStyle, 'color');
       }
 
       return item;
     });
 
-    const colors = args.palette.gradient ? chroma.scale(args.palette.colors).colors(data.length) : args.palette.colors;
+    const colors = args.palette.gradient
+      ? chroma.scale(args.palette.colors).colors(data.length)
+      : args.palette.colors;
 
     return {
       type: 'render',

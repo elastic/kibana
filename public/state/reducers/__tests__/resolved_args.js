@@ -1,7 +1,7 @@
 import expect from 'expect.js';
-import { actionCreator } from './fixtures/action_creator';
 import * as actions from '../../actions/resolved_args';
 import { resolvedArgsReducer } from '../resolved_args';
+import { actionCreator } from './fixtures/action_creator';
 
 describe('resolved args reducer', () => {
   let state;

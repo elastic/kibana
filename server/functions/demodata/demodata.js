@@ -1,8 +1,8 @@
 import { cloneDeep } from 'lodash';
 import moment from 'moment';
+import { queryDatatable } from '../../../common/lib/datatable/query';
 import ci from './ci.json';
 import shirts from './shirts.json';
-import { queryDatatable } from '../../../common/lib/datatable/query';
 
 export const demodata = {
   name: 'demodata',

@@ -120,12 +120,10 @@ export const plot = {
     const data = map(groupBy(context.rows, 'color'), (series, label) => {
       const seriesStyle = seriesStyles[label] || args.defaultStyle;
 
-      const result = {};
-      if (seriesStyle) {
-        Object.assign(result, seriesStyleToFlot(seriesStyle));
-      }
+      const result = seriesStyle ? seriesStyleToFlot(seriesStyle) : {};
 
-      Object.assign(result, {
+      return {
+        ...result,
         label: label,
         data: series.map(point => {
           const attrs = {};
@@ -143,9 +141,7 @@ export const plot = {
 
           return [x, y, attrs];
         }),
-      });
-
-      return result;
+      };
     });
 
     const colors = args.palette.gradient ? chroma.scale(args.palette.colors).colors(data.length) : args.palette.colors;
@@ -193,13 +189,14 @@ export const plot = {
             ticks: get(context.columns, 'y.type') === 'string' ? map(ticks.y.hash, (position, name) => [position, name]) : undefined,
             mode: get(context.columns, 'y.type') === 'date' ? 'time' : undefined,
           },
-          series: Object.assign({
+          series: {
             bubbles: {
               active: true,
               show: true,
             },
             shadowSize: 0,
-          }, seriesStyleToFlot(args.defaultStyle)),
+            ...seriesStyleToFlot(args.defaultStyle),
+          },
         },
       },
     };

@@ -22,7 +22,6 @@ export const DatasourceComponent = (props) => {
     done,
   } = props;
 
-
   const getDatasourceFunctionNode = (name, args) => ({
     arguments: args,
     function: name,

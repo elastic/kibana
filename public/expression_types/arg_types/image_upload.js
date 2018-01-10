@@ -12,21 +12,21 @@ const ImageUploadArgInput = ({ typeInstance, onAssetAdd, onValueChange, setLoadi
     setLoading(true); // start loading indicator
 
     return encode(upload)
-    .then(dataurl => onAssetAdd('dataurl', dataurl))
-    .then((assetId) => {
-      setLoading(false); // stop loading indicator
+      .then(dataurl => onAssetAdd('dataurl', dataurl))
+      .then((assetId) => {
+        setLoading(false); // stop loading indicator
 
-      onValueChange({
-        type: 'expression',
-        chain: [{
-          type: 'function',
-          function: 'asset',
-          arguments: {
-            _: [assetId],
-          },
-        }],
+        onValueChange({
+          type: 'expression',
+          chain: [{
+            type: 'function',
+            function: 'asset',
+            arguments: {
+              _: [assetId],
+            },
+          }],
+        });
       });
-    });
   }
 
   return (

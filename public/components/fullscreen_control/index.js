@@ -1,10 +1,10 @@
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { compose, withState, withProps } from 'recompose';
-import { FullscreenControl as Component } from './fullscreen_control';
 import { defaultIdent, createHandler } from '../../lib/fullscreen.js';
 import { setFullscreen } from '../../state/actions/transient.js';
 import { getFullscreen } from '../../state/selectors/app.js';
+import { FullscreenControl as Component } from './fullscreen_control';
 
 const mapStateToProps = (state) => ({
   isFullscreen: getFullscreen(state),

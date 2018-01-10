@@ -1,6 +1,6 @@
 import React from 'react';
-import { Tooltip } from '../tooltip';
 import { PropTypes } from 'prop-types';
+import { Tooltip } from '../tooltip';
 
 export const TooltipIcon = ({ icon = 'info', text, placement }) => {
   const classes = ['fa'];

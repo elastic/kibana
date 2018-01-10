@@ -1,6 +1,6 @@
 import React from 'react';
-import { Datatable } from '../../datatable';
 import PropTypes from 'prop-types';
+import { Datatable } from '../../datatable';
 import './datasource_preview.less';
 
 export const DatasourcePreview = ({ done, datatable }) => (

@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { compose, withProps } from 'recompose';
 import { Form, FormGroup, FormControl, Button } from 'react-bootstrap';
 import { get } from 'lodash';
 import { createStatefulPropHoc } from '../../components/enhance/stateful_prop';
-import { compose, withProps } from 'recompose';
 
 const StringArgInput = ({ updateValue, value, confirm, commit }) => (
   <Form inline>

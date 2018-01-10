@@ -34,14 +34,14 @@ export const esPersistMiddleware = ({ getState }) => next => (action) => {
   if (workpadChanged(curState, newState) || assetsChanged(curState, newState)) {
     const persistedWorkpad = getWorkpadPersisted(getState());
     return update(persistedWorkpad.id, persistedWorkpad)
-    .catch((err) => {
-      if (err.response.status === 400) {
-        const respErr = err.response;
-        respErr.data.message = `Could not save your changes to Elasticsearch: ${respErr.data.message}`;
-        return notify.error(respErr);
-      }
+      .catch((err) => {
+        if (err.response.status === 400) {
+          const respErr = err.response;
+          respErr.data.message = `Could not save your changes to Elasticsearch: ${respErr.data.message}`;
+          return notify.error(respErr);
+        }
 
-      return notify.error(err.response);
-    });
+        return notify.error(err.response);
+      });
   }
 };

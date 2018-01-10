@@ -1,7 +1,7 @@
 import { compose, withState, lifecycle } from 'recompose';
-import { ESFieldSelect as Component } from './es_field_select';
-import { fetch } from '../../../common/lib/fetch';
 import chrome from 'ui/chrome';
+import { fetch } from '../../../common/lib/fetch';
+import { ESFieldSelect as Component } from './es_field_select';
 
 const basePath = chrome.getBasePath();
 const apiPath = `${basePath}/api/canvas/es_fields`;
@@ -17,12 +17,12 @@ export const ESFieldSelect = compose(
   lifecycle({
     componentDidMount() {
       getFields(this.props.index)
-      .then(this.props.setFields);
+        .then(this.props.setFields);
     },
     componentDidUpdate({ index }) {
       if (this.props.index !== index) {
         getFields(this.props.index)
-        .then(this.props.setFields);
+          .then(this.props.setFields);
       }
     },
   })

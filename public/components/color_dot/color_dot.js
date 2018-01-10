@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import './color_dot.less';
 
-
 export const ColorDot = ({ value, children }) => {
   return (
     <div className="canvas__color-dot">

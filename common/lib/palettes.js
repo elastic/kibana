@@ -55,19 +55,19 @@ export const palettes = {
     gradient: true,
   },
   green_blue_red: {
-    colors: ['#D3FB71','#7ECAE3','#f03b20'],
+    colors: ['#D3FB71', '#7ECAE3', '#f03b20'],
     gradient: true,
   },
   yellow_green: {
-    colors: ['#f7fcb9','#addd8e','#31a354'],
+    colors: ['#f7fcb9', '#addd8e', '#31a354'],
     gradient: true,
   },
   yellow_blue: {
-    colors: ['#edf8b1','#7fcdbb','#2c7fb8'],
+    colors: ['#edf8b1', '#7fcdbb', '#2c7fb8'],
     gradient: true,
   },
   yellow_red: {
-    colors: ['#ffeda0','#feb24c','#f03b20'],
+    colors: ['#ffeda0', '#feb24c', '#f03b20'],
     gradient: true,
   },
   instagram: {

@@ -1,8 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { createListener, canFullscreen } from '../../lib/fullscreen.js';
 import { Shortcuts } from 'react-shortcuts';
-
+import { createListener, canFullscreen } from '../../lib/fullscreen.js';
 
 // TODO: this is a class because this has to use ref, and it seemed best to allow
 // multile instances of this component... can we use ref with SFCs?

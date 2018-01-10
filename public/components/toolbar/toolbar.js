@@ -1,19 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-
 import { Navbar } from '../navbar';
-import { Tray } from './tray';
 import { NavbarButton } from '../navbar_button';
 import { FeedbackButton } from '../feedback_button';
-
 import { NavbarDivider } from '../navbar_divider';
 import { Expression } from '../expression';
 import { Datasource } from '../datasource';
-import { ElementTypes } from './element_types';
 import { WorkpadLoader } from '../workpad_loader';
 import { PageManager } from '../page_manager';
 import { AssetManager } from '../asset_manager';
-
+import { ElementTypes } from './element_types';
+import { Tray } from './tray';
 import './toolbar.less';
 
 export const Toolbar = (props) => {
@@ -56,9 +53,9 @@ export const Toolbar = (props) => {
       {trays[tray] && (<Tray>{ trays[tray] }</Tray>)}
 
       <Navbar>
-        <NavbarButton onClick={ previousPage }><i className="fa fa-chevron-left"/></NavbarButton>
+        <NavbarButton onClick={previousPage}><i className="fa fa-chevron-left"/></NavbarButton>
         { selectedPageNumber }
-        <NavbarButton onClick={ nextPage }><i className="fa fa-chevron-right"/></NavbarButton>
+        <NavbarButton onClick={nextPage}><i className="fa fa-chevron-right"/></NavbarButton>
 
         <NavbarDivider/>
 
@@ -94,16 +91,16 @@ export const Toolbar = (props) => {
 
             <NavbarDivider/>
 
-            <NavbarButton onClick={ () => elementLayer(Infinity) }>
+            <NavbarButton onClick={() => elementLayer(Infinity)}>
               <i className="fa fa-arrow-circle-up" />
             </NavbarButton>
-            <NavbarButton onClick={ () => elementLayer(1) }>
+            <NavbarButton onClick={() => elementLayer(1)}>
               <i className="fa fa-arrow-up" />
             </NavbarButton>
-            <NavbarButton onClick={ () => elementLayer(-1) }>
+            <NavbarButton onClick={() => elementLayer(-1)}>
               <i className="fa fa-arrow-down" />
             </NavbarButton>
-            <NavbarButton onClick={ () => elementLayer(-Infinity) }>
+            <NavbarButton onClick={() => elementLayer(-Infinity)}>
               <i className="fa fa-arrow-circle-down" />
             </NavbarButton>
           </span>

@@ -1,4 +1,5 @@
 import { get } from 'lodash';
+import $ from 'jquery';
 
 /*
   FreeBSD-License
@@ -42,30 +43,29 @@ function draw(plot, ctx) {
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
 
+    function writeText(text, x, y) {
+      if (typeof text === 'undefined') return;
+      const textNode = $('<div/>')
+        .text(String(text))
+        .addClass('valueLabel')
+        .css({
+          position: 'absolute',
+        });
+
+      plot.getPlaceholder().append(textNode);
+
+      textNode.css({
+        left: x - (textNode.width() / 2),
+        top: y - (textNode.height() / 2),
+      });
+    }
+
     for (let i = 0; i < points.length; i++) {
 
       const point = {
         'x': xAlign(points[i][0]),
         'y': yAlign(points[i][1]), // Need to calculate here.
       };
-
-      function writeText(text, x, y) {
-        if (typeof text === 'undefined') return;
-        const textNode = $('<div/>')
-          .text(String(text))
-          .addClass('valueLabel')
-          .css({
-            position: 'absolute',
-          });
-
-        plot.getPlaceholder().append(textNode);
-
-        textNode.css({
-          left: x - (textNode.width() / 2),
-          top: y - (textNode.height() / 2),
-        });
-
-      }
 
       const text = points[i][2].text;
       const c = plot.p2c(point);

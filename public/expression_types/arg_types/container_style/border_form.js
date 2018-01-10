@@ -58,7 +58,8 @@ export const BorderForm = ({ className, value, radius, onChange }) => {
       <div className="border-color">
         <ColorPickerMini
           value={borderColor}
-          onChange={borderColorChange} />
+          onChange={borderColorChange}
+        />
         <ControlLabel>Color</ControlLabel>
       </div>
     </div>

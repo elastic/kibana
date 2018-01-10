@@ -23,11 +23,12 @@ export const markdown = {
   },
   fn: (context, args) => {
     const compileFunctions = args._.map(str => Handlebars.compile(String(str)));
-    const ctx = Object.assign({
+    const ctx = {
       columns: [],
       rows: [],
       type: null,
-    }, context);
+      ...context,
+    };
 
     return {
       type: 'render',

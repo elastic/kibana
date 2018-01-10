@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { Datatable } from '../components/datatable';
 import { get } from 'lodash';
+import { Datatable } from '../components/datatable';
 
 export const table = {
   name: 'table',
@@ -11,10 +11,7 @@ export const table = {
   render(domNode, config, handlers) {
     const { datatable, paginate, perPage, font } = config;
     ReactDOM.render((
-      <div style={{
-        ...get(font, 'spec'),
-        height: '100%',
-      }}>
+      <div style={{ ...get(font, 'spec'), height: '100%' }}>
         <Datatable
           datatable={datatable}
           perPage={perPage}

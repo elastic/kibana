@@ -6,7 +6,8 @@ export const simpleTemplate = ({ getArgValue, setArgValue }) => (
   <div className="canvas__argtype--containerStyle-simple">
     <ColorPickerMini
       value={getArgValue('backgroundColor')}
-      onChange={color => setArgValue('backgroundColor', color)} />
+      onChange={color => setArgValue('backgroundColor', color)}
+    />
   </div>
 );
 

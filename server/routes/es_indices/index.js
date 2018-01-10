@@ -1,5 +1,5 @@
-import { getESIndices } from './get_es_indices';
 import { partial } from 'lodash';
+import { getESIndices } from './get_es_indices';
 
 // TODO: Error handling, note: esErrors
 // TODO: Allow filtering by pattern name

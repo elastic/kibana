@@ -241,7 +241,6 @@ export const resize = (elem, config) => {
   });
 };
 
-
 export const rotate = (elem, config) => {
   elem.data('rework.rotate.handle', config.handle);
 
@@ -256,7 +255,6 @@ export const rotate = (elem, config) => {
     function createRotationObj(e) {
       const elemSize = { height: elem.outerHeight(), width: elem.outerWidth() };
 
-
       const pointerPosition = {
         top: e.pageY,
         left: e.pageX,
@@ -265,7 +263,7 @@ export const rotate = (elem, config) => {
       const result = {
         interaction: {
           absolute: {
-            angle: Math.round(angleBetweenPoints(elemCenter, pointerPosition) * 10)  / 10,
+            angle: Math.round(angleBetweenPoints(elemCenter, pointerPosition) * 10) / 10,
           },
         },
       };
@@ -298,7 +296,6 @@ export const move = (elem, config) => {
     ].join(', ');
 
     if ($(e.target).is(ignoreIf)) return;
-
 
     const target = $(e.target);
     const originalEvent = e;

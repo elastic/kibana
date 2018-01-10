@@ -2,21 +2,20 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { ControlLabel, FormControl } from 'react-bootstrap';
 import { getSimpleArg, setSimpleArg } from '../../../lib/arg_helpers';
-import header from './header.png';
 import { ESFieldsSelect } from '../../../components/es_fields_select';
 import { ESFieldSelect } from '../../../components/es_field_select';
 import { ESIndexSelect } from '../../../components/es_index_select';
 import { TooltipIcon } from '../../../components/tooltip_icon';
+import header from './header.png';
 import './esdocs.less';
-
 
 const template = ({ args, updateArgs }) => {
 
   const setArg = (name, value) => {
-    updateArgs && updateArgs(Object.assign({},
-      args,
-      setSimpleArg(name, value),
-    ));
+    updateArgs && updateArgs({
+      ...args,
+      ...setSimpleArg(name, value),
+    });
   };
 
   const getQuery = () => {
@@ -34,7 +33,6 @@ const template = ({ args, updateArgs }) => {
     return commas.split(',').map(str => str.trim());
   };
 
-
   const fields = getFields();
   const sort = getSort();
   const index = getSimpleArg('index', args)[0];
@@ -50,62 +48,65 @@ const template = ({ args, updateArgs }) => {
       <div className="canvas__esdocs--row">
         <div className="canvas__esdocs--index">
           <label>Index &nbsp;
-          <TooltipIcon
-            text="The index pattern to query. Time filters will apply to the timefield from this pattern."
-            placement="right"/>
+            <TooltipIcon
+              text="The index pattern to query. Time filters will apply to the timefield from this pattern."
+              placement="right"
+            />
           </label>
           <ESIndexSelect value={index} onChange={index => setArg('index', index)}/>
         </div>
 
         <div className="canvas__esdocs--query">
-            <ControlLabel>
-              Query &nbsp;
-              <TooltipIcon text="Lucene Query String syntax" placement="right"/>
-            </ControlLabel>
-            <FormControl
-              type="text"
-              value={getQuery()}
-              onChange={(e) => setArg('query', e.target.value)}
-            />
+          <ControlLabel>
+            Query &nbsp;
+            <TooltipIcon text="Lucene Query String syntax" placement="right"/>
+          </ControlLabel>
+          <FormControl
+            type="text"
+            value={getQuery()}
+            onChange={(e) => setArg('query', e.target.value)}
+          />
         </div>
 
         <div className="canvas__esdocs--sort-field">
           <label>Sort &nbsp;
-          <TooltipIcon
-            text="Document sort order, field and direction"
-            placement="right"/>
+            <TooltipIcon
+              text="Document sort order, field and direction"
+              placement="right"
+            />
           </label>
           <ESFieldSelect index={index} value={sort[0]} onChange={(field) => setArg('sort', [field, sort[1]].join(', '))}/>
         </div>
 
         <div className="canvas__esdocs--sort-dir">
-            <ControlLabel>
-              &nbsp;
-            </ControlLabel>
-            <FormControl
-              componentClass="select"
-              value={sort[1]}
-              onChange={(e) => setArg('sort', [sort[0], e.target.value].join(', '))}
-            >
-              <option value="asc">asc</option>
-              <option value="desc">desc</option>
-            </FormControl>
+          <ControlLabel>
+            &nbsp;
+          </ControlLabel>
+          <FormControl
+            componentClass="select"
+            value={sort[1]}
+            onChange={(e) => setArg('sort', [sort[0], e.target.value].join(', '))}
+          >
+            <option value="asc">asc</option>
+            <option value="desc">desc</option>
+          </FormControl>
         </div>
       </div>
 
-
       <div>
         <label>Fields &nbsp;
-          { fields.length <= 10 ?
-            (<TooltipIcon
+          { fields.length <= 10 ? (
+            <TooltipIcon
               text="The fields to extract. Kibana scripted fields are not currently available"
-              placement="right"/>)
-            :
-            (<TooltipIcon
+              placement="right"
+            />
+          ) : (
+            <TooltipIcon
               icon="warning"
               text="This datasource performs best with 10 or fewer fields"
-              placement="right"/>)
-          }
+              placement="right"
+            />
+          )}
         </label>
         <ESFieldsSelect
           index={index}

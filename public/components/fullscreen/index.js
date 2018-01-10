@@ -1,9 +1,9 @@
 import { connect } from 'react-redux';
 import { compose, withProps, withState, withHandlers, lifecycle } from 'recompose';
 import { debounce } from 'lodash';
-import { Fullscreen as Component } from './fullscreen';
 import { getFullscreen } from '../../state/selectors/app.js';
 import { defaultIdent } from '../../lib/fullscreen.js';
+import { Fullscreen as Component } from './fullscreen';
 
 const mapStateToProps = (state) => ({
   isFullscreen: getFullscreen(state),

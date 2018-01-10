@@ -55,7 +55,7 @@ export const UpdateModal = ({ filename, setFilename, changes }) => {
       <Modal.Footer>
         <p style={{ flexGrow: 1, textAlign: 'left' }}><small>*Uhg. I'm going to fire our transcriptionist</small></p>
         <Button
-          onClick={ () => setFilename(null) }
+          onClick={() => setFilename(null)}
         >
           Dismiss
         </Button>

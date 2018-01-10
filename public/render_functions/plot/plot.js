@@ -1,4 +1,5 @@
 import { debounce, includes } from 'lodash';
+import $ from 'jquery';
 import { size } from './plugins/size';
 import { text } from './plugins/text';
 import '../../lib/flot-charts';

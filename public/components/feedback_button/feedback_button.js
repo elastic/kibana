@@ -62,7 +62,7 @@ export const FeedbackButton = ({ show, setShow }) => {
           </Modal.Body>
 
           <Modal.Footer>
-            <Button onClick={ () => setShow(false) }>
+            <Button onClick={() => setShow(false)}>
               Dismiss
             </Button>
           </Modal.Footer>

@@ -21,7 +21,7 @@ export const DatetimeInput = ({ strValue, setStrValue, setMoment, valid, setVali
       spellCheck={false}
       value={strValue}
       onChange={check}
-      className={ valid ? '' : 'has-error' }
+      className={valid ? '' : 'has-error'}
       style={{ textAlign: 'center' }}
     />
   );

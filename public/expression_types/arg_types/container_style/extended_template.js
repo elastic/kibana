@@ -22,7 +22,8 @@ export const extendedTemplate = ({ getArgValue, setArgValue }) => (
         className="canvas__argtype--containerStyle--border"
         value={getArgValue('border', '')}
         radius={getArgValue('borderRadius')}
-        onChange={setArgValue} />
+        onChange={setArgValue}
+      />
     </div>
   </div>
 );

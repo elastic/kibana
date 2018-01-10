@@ -88,7 +88,8 @@ export const WorkpadLoader = (props) => {
         onDragEnter={() => setDropping(true)}
         onDragLeave={() => setDropping(false)}
         disableClick
-        style={{ border: dropping ? '2px dashed' : '2px solid transparent' }}>
+        style={{ border: dropping ? '2px dashed' : '2px solid transparent' }}
+      >
         <center>
           <p>
             <i>Tip: Drag and drop a <code>JSON</code> exported workpad into this dialog to load new workpad from a file</i>
@@ -114,9 +115,6 @@ export const WorkpadLoader = (props) => {
             onChange={ev => search(ev.target.value)}
           />
         </Form>
-
-
-
 
         <Table condensed className="canvas__workpad_loader--workpads">
           <thead>

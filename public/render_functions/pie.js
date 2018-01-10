@@ -1,6 +1,6 @@
 import { debounce } from 'lodash';
 import '../lib/flot-charts';
-
+import $ from 'jquery';
 
 export const pie = {
   name: 'pie',
@@ -28,7 +28,6 @@ export const pie = {
       }
 
     }
-
 
     function destroy() {
       if (plot) plot.shutdown();

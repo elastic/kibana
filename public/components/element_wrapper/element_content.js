@@ -1,3 +1,13 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+import { pure, compose, branch, renderComponent } from 'recompose';
+import Style from 'style-it';
+import { Loading } from '../loading';
+import { RenderElement } from '../render_element';
+import { getType } from '../../../common/lib/get_type';
+import { InvalidExpression } from './invalid_expression';
+import { InvalidElementType } from './invalid_element_type';
+
 /*
   This feels like a crummy hack but I need a way to make sure that Positionable is able to pass the
   size property all the way down to RenderElement.
@@ -5,16 +15,6 @@
   Positionable keeps size as local state because constantly pushing it through redux is too expensive,
   thus size is coming in via a child clone in Positionable. Gross right?
 */
-
-import React from 'react';
-import PropTypes from 'prop-types';
-import { InvalidExpression } from './invalid_expression';
-import { InvalidElementType } from './invalid_element_type';
-import { Loading } from '../loading';
-import { pure, compose, branch, renderComponent } from 'recompose';
-import { RenderElement } from '../render_element';
-import Style from 'style-it';
-import { getType } from '../../../common/lib/get_type';
 
 /*
   Branches
@@ -46,7 +46,7 @@ export const ElementContent = compose(
   ...branches,
 )(({ renderFunction, renderable, size, handlers }) => {
   return Style.it(renderable.css,
-    <div style={Object.assign({}, renderable.containerStyle, size)}>
+    <div style={{ ...renderable.containerStyle, ...size }}>
       <div className="canvas__element--content">
         <RenderElement
           name={renderFunction.name}

@@ -1,7 +1,7 @@
 import expect from 'expect.js';
 import { get } from 'lodash';
-import { actionCreator } from './fixtures/action_creator';
 import { elementsReducer } from '../elements';
+import { actionCreator } from './fixtures/action_creator';
 
 describe('elements reducer', () => {
   let state;

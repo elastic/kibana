@@ -24,10 +24,10 @@ export const PalettePicker = ({ onChange, value, placement }) => {
     <div className="canvas__palette-picker">
 
       <OverlayTrigger
-          rootClose
-          overlay={picker}
-          placement={placement || 'bottom'}
-          trigger="click"
+        rootClose
+        overlay={picker}
+        placement={placement || 'bottom'}
+        trigger="click"
       >
         <div style={{ width: '100%' }}><PaletteSwatch colors={value.colors} gradient={value.gradient}/></div>
       </OverlayTrigger>

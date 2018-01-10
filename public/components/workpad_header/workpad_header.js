@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Shortcuts } from 'react-shortcuts';
 import { Toggle } from '../toggle';
 import { FullscreenControl } from '../fullscreen_control';
 import { RefreshControl } from '../refresh_control';
-import { Shortcuts } from 'react-shortcuts';
 import './workpad_header.less';
 
 const btnClass = 'canvas__workpad_header--button';

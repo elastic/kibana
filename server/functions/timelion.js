@@ -40,14 +40,15 @@ export const timelion = {
       return { from: timeFilter.from, to: timeFilter.to };
     }
 
-    const defaultRange = { from: args.from || 'now-1y', to: args.to || 'now' };
+    const range = (() => {
+      const defaultRange = { from: args.from || 'now-1y', to: args.to || 'now' };
 
-    let range;
-    try {
-      range = Object.assign({}, defaultRange, findTimeRangeInFilterContext());
-    } catch(e) {
-      range = Object.assign({}, defaultRange);
-    }
+      try {
+        return { ...defaultRange, ...findTimeRangeInFilterContext() };
+      } catch(e) {
+        return defaultRange;
+      }
+    })();
 
     const body = {
       extended: {
@@ -87,9 +88,9 @@ export const timelion = {
       return {
         type: 'datatable',
         columns: [
-          { name: '@timestamp', type: 'date'    },
-          { name: 'value',      type: 'number'  },
-          { name: 'label',      type: 'string'  },
+          { name: '@timestamp', type: 'date' },
+          { name: 'value', type: 'number' },
+          { name: 'label', type: 'string' },
         ],
         rows: rows,
       };

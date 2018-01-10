@@ -1,8 +1,8 @@
 import { compose, withProps } from 'recompose';
 import { get } from 'lodash';
-import { FunctionFormList as Component } from './function_form_list';
 import { modelRegistry, viewRegistry } from '../../expression_types';
 import { toExpression } from '../../../common/lib/ast';
+import { FunctionFormList as Component } from './function_form_list';
 
 function getExpression(chain) {
   if (!Array.isArray(chain) || !chain.length) return null;

@@ -4,7 +4,6 @@ import { typesRegistry } from '../../common/lib/types_registry';
 import { createHandlers } from '../lib/create_handlers';
 import { fromExpression } from '../../common/lib/ast';
 
-
 export function runApi(server) {
   const handleRequest = (request, reply, expression, context) => {
     const interpret = interpretProvider({
@@ -16,9 +15,9 @@ export function runApi(server) {
 
     try {
       interpret(fromExpression(expression), context)
-      .then(resp => {
-        reply(resp);
-      });
+        .then(resp => {
+          reply(resp);
+        });
     } catch (e) {
       reply({ error: e.message }).code(500);
     }

@@ -1,5 +1,5 @@
-import { findInObject } from '../find_in_object';
 import expect from 'expect.js';
+import { findInObject } from '../find_in_object';
 
 const findMe = {
   foo: {
@@ -44,7 +44,6 @@ describe('findInObject', () => {
 
     expect(findInObject(findMe, (obj) => obj.id === 4).length).to.eql(1);
     expect(findInObject(findMe, (obj) => obj.id === 10000).length).to.eql(0);
-
 
   });
 });

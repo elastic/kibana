@@ -2,7 +2,6 @@
 import { groupBy, flatten, pick, map } from 'lodash';
 import { getType } from '../lib/get_type';
 
-
 function checkDatatableType(datatable) {
   if (getType(datatable) !== 'datatable') {
     throw new Error ('All ply expressions must return a datatable. Use `as` to turn a literal (eg string, number) into a datatable');
@@ -39,7 +38,8 @@ function combineAcross(datatableArray) {
   for (let i = 0; i < targetRowLength; i++) {
     const rowsAcross = map(arrayOfRowsArrays, i);
 
-    // The reason for the Object.assign is that rowsAcross is an array and those rows need to be applied as arguments to Object.assign
+    // The reason for the Object.assign is that rowsAcross is an array
+    // and those rows need to be applied as arguments to Object.assign
     rows.push(Object.assign({}, ...rowsAcross));
   }
 
@@ -102,7 +102,7 @@ export const ply = {
 
       // Here we're just merging each for the by splits, so it doesn't actually matter if the rows are the same length
       const columns = combineColumns([byColumns].concat(map(newDatatables, 'columns')));
-      const rows  = flatten(newDatatables.map((dt, i) => {
+      const rows = flatten(newDatatables.map((dt, i) => {
         const byColumnValues = pick(originalDatatables[i].rows[0], args.by);
         return dt.rows.map(row => ({
           ...byColumnValues,

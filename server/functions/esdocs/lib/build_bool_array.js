@@ -1,5 +1,5 @@
-import { getESFilter } from './get_es_filter';
 import { compact } from 'lodash';
+import { getESFilter } from './get_es_filter';
 
 export function buildBoolArray(canvasQueryFilterArray) {
   return compact(canvasQueryFilterArray.map(clause => {

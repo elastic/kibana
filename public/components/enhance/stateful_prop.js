@@ -30,7 +30,7 @@ export function createStatefulPropHoc(fieldname, updater = 'updateValue') {
           [updater]: this.handleChange,
         };
 
-        return (<Comp { ...passedProps } />);
+        return (<Comp {...passedProps} />);
       }
     }
 

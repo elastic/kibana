@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { PrettyDuration } from '../pretty_duration';
 import { Button, Popover, OverlayTrigger } from 'react-bootstrap';
+import { PrettyDuration } from '../pretty_duration';
 import { TimePicker } from '../time_picker';
 
 export const TimePickerMini = ({ from, to, onSelect }) => {

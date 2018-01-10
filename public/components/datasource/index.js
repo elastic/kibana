@@ -2,11 +2,11 @@ import { PropTypes } from 'prop-types';
 import { connect } from 'react-redux';
 import { withState, withHandlers, compose } from 'recompose';
 import { get } from 'lodash';
-import { Datasource as Component } from './datasource';
 import { datasourceRegistry } from '../../expression_types';
 import { getSelectedElement, getSelectedPage } from '../../state/selectors/workpad';
 import { getFunctionDefinitions } from '../../state/selectors/app';
 import { setArgumentAtIndex, setAstAtIndex, flushContext } from '../../state/actions/elements';
+import { Datasource as Component } from './datasource';
 
 const mapStateToProps = (state) => ({
   element: getSelectedElement(state),
@@ -52,9 +52,15 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     };
   }).filter(Boolean)[0];
 
-  return Object.assign({}, ownProps, stateProps, dispatchProps, {
+  return {
+    ...ownProps,
+    ...stateProps,
+    ...dispatchProps,
     ...datasourceAst,
-    datasources: datasourceRegistry.toArray().map(ds => Object.assign(ds, { function: getDataTableFunctionsByName(ds.name) })),
+    datasources: datasourceRegistry.toArray().map(ds => ({
+      ...ds,
+      function: getDataTableFunctionsByName(ds.name),
+    })),
     setDatasourceAst: dispatchAstAtIndex({
       pageId,
       element,
@@ -65,7 +71,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
       element,
       index: datasourceAst && datasourceAst.expressionIndex,
     }),
-  });
+  };
 };
 
 export const Datasource = compose(

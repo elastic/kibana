@@ -1,7 +1,7 @@
-import { flattenHit } from './lib/flatten_hit';
-import { buildESRequest } from './lib/build_es_request';
 import { keys, map } from 'lodash';
 import { getESFieldTypes } from '../../routes/es_fields/get_es_field_types';
+import { flattenHit } from './lib/flatten_hit';
+import { buildESRequest } from './lib/build_es_request';
 
 export const esdocs = {
   name: 'esdocs',
@@ -70,24 +70,23 @@ export const esdocs = {
     }, context);
 
     return handlers.elasticsearchClient('search', esRequest)
-    .then(resp => {
+      .then(resp => {
 
-      const metaFields = args.metaFields ? args.metaFields.split(',').map(field => field.trim()) : [];
-      // TODO: This doesn't work for complex fields such as geo objects. This is really important to fix.
-      // we need to pull the field caps for the index first, then use that knowledge to flatten the documents
-      const flatHits = map(resp.hits.hits, hit => flattenHit(hit, metaFields));
-      const columnNames = keys(flatHits[0]);
+        const metaFields = args.metaFields ? args.metaFields.split(',').map(field => field.trim()) : [];
+        // TODO: This doesn't work for complex fields such as geo objects. This is really important to fix.
+        // we need to pull the field caps for the index first, then use that knowledge to flatten the documents
+        const flatHits = map(resp.hits.hits, hit => flattenHit(hit, metaFields));
+        const columnNames = keys(flatHits[0]);
 
-      return getESFieldTypes(args.index, columnNames, handlers.elasticsearchClient)
-      .then(typedFields => {
-        return {
-          type: 'datatable',
-          columns: map(typedFields, (type, name) => ({ name, type })),
-          rows: flatHits,
-        };
+        return getESFieldTypes(args.index, columnNames, handlers.elasticsearchClient)
+          .then(typedFields => {
+            return {
+              type: 'datatable',
+              columns: map(typedFields, (type, name) => ({ name, type })),
+              rows: flatHits,
+            };
+          });
+
       });
-
-
-    });
   },
 };

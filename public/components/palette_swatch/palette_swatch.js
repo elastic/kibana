@@ -2,9 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import './palette_swatch.less';
 
-
 export const PaletteSwatch = ({ colors, gradient }) => {
-
 
   let colorBoxes;
 
@@ -15,7 +13,8 @@ export const PaletteSwatch = ({ colors, gradient }) => {
         className="canvas__palette-swatch--box"
         style={{
           backgroundColor: color,
-        }}/>
+        }}
+      />
     ));
   } else {
     colorBoxes = [(<div
@@ -23,10 +22,10 @@ export const PaletteSwatch = ({ colors, gradient }) => {
       className="canvas__palette-swatch--box"
       style={{
         background: `linear-gradient(90deg, ${colors.join(', ')})`,
-      }}/>
+      }}
+    />
     )];
   }
-
 
   return (
     <div className="canvas__palette-swatch">

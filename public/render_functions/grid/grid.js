@@ -55,9 +55,9 @@ const render = (domNode, config, handlers) => {
         {!summary.y && !summary.x ? null : (
           <thead>
             <tr>
-              {!summary.y ? null :
+              {summary.y && (
                 <th>{summary.y.expression}</th>
-              }
+              )}
               {columns.map(col => (
                 <th key={`header-${col}`} className="canvas__element--grid-label">{String(col)}</th>
               ))}
@@ -66,7 +66,7 @@ const render = (domNode, config, handlers) => {
         )}
         <tbody>
           {rows.map((row, i) => (
-            <tr key=  {`row-${i}`}>
+            <tr key={`row-${i}`}>
               {row.label == null ? null : (
                 <td className="canvas__element--grid-label">{row.label}</td>
               )}
@@ -82,7 +82,7 @@ const render = (domNode, config, handlers) => {
                         color: getColor(palette, summary, val),
                       }}
                     >
-                      { (!mark && !val.text) &&  <i className={`fa fa-circle`}/>}
+                      { (!mark && !val.text) && <i className={`fa fa-circle`}/>}
                       { mark && <i className={`fa fa-${mark}`}/> }
                       { val.text && <div className="canvas__element--grid--series-label">{String(val.text)}</div> }
                     </div>

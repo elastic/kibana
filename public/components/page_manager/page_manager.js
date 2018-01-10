@@ -1,10 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { PageControls } from './page_controls';
 import { ConfirmModal } from '../confirm_modal';
 import { RemoveIcon } from '../remove_icon';
+import { PageControls } from './page_controls';
 import './page_manager.less';
-
 
 export const PageManager = (props) => {
   const {
@@ -37,14 +36,16 @@ export const PageManager = (props) => {
           >
             <RemoveIcon
               className="canvas__page-manager--page-remove"
-              onClick={() => confirmDelete(page.id)}/>
+              onClick={() => confirmDelete(page.id)}
+            />
             <div className="canvas__page-manager--page-index">
               { i + 1 }
             </div>
             <PageControls
               pageId={page.id}
               movePage={movePage}
-              duplicatePage={duplicatePage}/>
+              duplicatePage={duplicatePage}
+            />
           </div>
         ))}
         <div

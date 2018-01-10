@@ -14,12 +14,11 @@ export const PageStack = ({ pages, selectedPageId, height, width }) => {
           left: selectedPageId === page.id ? undefined : '-9999999px',
           height,
           width,
-        }}>
-        {
-          page.elements.map(element => (
-            <ElementWrapper key={element.id} element={element} />
-          ))
-        }
+        }}
+      >
+        {page.elements.map(element => (
+          <ElementWrapper key={element.id} element={element} />
+        ))}
       </div>
     ))
   );

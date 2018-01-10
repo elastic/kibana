@@ -20,7 +20,7 @@ function assignElementProperties(workpadState, pageId, elementId, props) {
 
   // remove any AST value from the element caused by https://github.com/elastic/kibana-canvas/issues/260
   // TODO: remove this after a bit of time
-  const cleanWorkpadState =  del(workpadState, elementsPath.concat([elementIndex, 'ast']));
+  const cleanWorkpadState = del(workpadState, elementsPath.concat([elementIndex, 'ast']));
 
   return assign(cleanWorkpadState, elementsPath.concat(elementIndex), props);
 }

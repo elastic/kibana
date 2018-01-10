@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { ControlLabel, FormControl } from 'react-bootstrap';
 
-export const LabeledText =  ({ type, label, value, className, onChange }) => (
+export const LabeledText = ({ type, label, value, className, onChange }) => (
   <div className={className}>
     <FormControl
       type={type}

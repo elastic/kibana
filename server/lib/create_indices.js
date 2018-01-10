@@ -10,7 +10,7 @@ function createWorkpadType(client, kibanaIndex) {
             type: 'text',
             fields: {
               keyword: {
-                type:  'keyword',
+                type: 'keyword',
               },
             },
           },

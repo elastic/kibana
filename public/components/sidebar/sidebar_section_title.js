@@ -2,18 +2,28 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Tooltip } from '../tooltip';
 
-export const SidebarSectionTitle = ({ title, tip, children }) => (
-  <div className="canvas__sidebar-section-title">
-    {tip ?
-      (<Tooltip placement="left" text={tip}>
-        <span>{ title }</span>
-      </Tooltip>)
-    :
-      (<span>{ title }</span>)
+export const SidebarSectionTitle = ({ title, tip, children }) => {
+  const renderTitle = () => {
+    if (tip) {
+      return (
+        <Tooltip placement="left" text={tip}>
+          <span>{ title }</span>
+        </Tooltip>
+      );
     }
-    {children}
-  </div>
-);
+
+    return (
+      <span>{ title }</span>
+    );
+  };
+
+  return (
+    <div className="canvas__sidebar-section-title">
+      {renderTitle(tip)}
+      {children}
+    </div>
+  );
+};
 
 SidebarSectionTitle.propTypes = {
   children: PropTypes.node,
