@@ -75,6 +75,10 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
             'shared-item': '',
             title: panelTitle,
             description: savedObject.description,
+          },
+          timeRange: {
+            from: 'now-15m',
+            to: 'now'
           }
         });
 
