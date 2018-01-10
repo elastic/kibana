@@ -43,14 +43,16 @@ export class UiApp {
     }
 
     const { appExtensions = [] } = kbnServer.uiExports;
-    this._modules = []
-      .concat(this._main, ...uses.map(type => appExtensions[type] || []))
-      .filter(Boolean)
-      .reduce((modules, item) => (
-        modules.includes(item)
-          ? modules
-          : modules.concat(item)
-      ), []);
+    this._modules = [].concat(
+      this._main || [],
+      uses
+        // flatten appExtensions for used types
+        .reduce((acc, type) => acc.concat(appExtensions[type] || []), [])
+        // de-dupe app extension module ids
+        .reduce((acc, item) => !item || acc.includes(item) ? acc : acc.concat(item), [])
+        // sort app extension module ids alphabetically
+        .sort((a, b) => a.localeCompare(b))
+    );
 
     if (!this.isHidden()) {
       // unless an app is hidden it gets a navlink, but we only respond to `getNavLink()`
