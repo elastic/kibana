@@ -47,14 +47,28 @@ export PATH="$nodeDir/bin:$PATH"
 hash -r
 
 ###
-### setting up yarn
+### downloading yarn
 ###
-yarnVersion="1.3.2"
+yarnVersion="$(node -e "console.log(String(require('./package.json').engines.yarn || '').replace(/^[^\d]+/,''))")"
+yarnUrl="https://github.com/yarnpkg/yarn/releases/download/v$yarnVersion/yarn-$yarnVersion.js"
 yarnDir="$cacheDir/yarn/$yarnVersion"
+if [ -z "$yarnVersion" ]; then
+  echo " !! missing engines.yarn in package.json";
+  exit 1
+elif [ -x "$yarnDir/bin/yarn" ] && [ "$($yarnDir/bin/yarn --version)" == "$yarnVersion" ]; then
+  echo " -- reusing yarn install"
+else
+  if [ -d "$yarnDir" ]; then
+    echo " -- clearing previous yarn install"
+    rm -rf "$yarnDir"
+  fi
 
-echo " -- using vendored version of yarn"
-mkdir -p "$yarnDir/bin"
-cp "$dir/tasks/vendor/yarn-1.3.2-with-ignore-fix.js" "$yarnDir/bin/yarn"
+  echo " -- downloading yarn from $yarnUrl"
+  mkdir -p "$yarnDir/bin"
+  curl -L --silent "$yarnUrl" > "$yarnDir/bin/yarn"
+  chmod +x "$yarnDir/bin/yarn"
+fi
+
 
 ###
 ### "install" yarn into this shell
