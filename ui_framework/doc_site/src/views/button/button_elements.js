@@ -43,6 +43,7 @@ export default () => (
       buttonType="basic"
       href="http://www.google.com"
       target="_blank"
+      rel="noopener noreferrer"
     >
       Anchor element
     </KuiLinkButton>
@@ -54,6 +55,7 @@ export default () => (
       buttonType="basic"
       href="http://www.google.com"
       target="_blank"
+      rel="noopener noreferrer"
       disabled
     >
       Anchor element, disabled

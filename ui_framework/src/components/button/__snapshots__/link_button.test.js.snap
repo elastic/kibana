@@ -6,6 +6,7 @@ exports[`KuiLinkButton Baseline HTML attributes are rendered (and disabled rende
   class="kuiButton testClass1 testClass2 kuiButton-isDisabled"
   data-test-subj="test subject string"
   href="#"
+  rel="noopener noreferrer"
   target="_blank"
   type="submit"
 >

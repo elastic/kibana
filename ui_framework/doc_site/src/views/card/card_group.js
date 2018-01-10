@@ -59,6 +59,7 @@ export default () => {
               buttonType="primary"
               href="https://www.elastic.co/subscriptions/xpack"
               target="_blank"
+              rel="noopener noreferrer"
             >
               Pteradactyl!
             </KuiLinkButton>
@@ -81,6 +82,7 @@ export default () => {
               buttonType="basic"
               href="https://www.elastic.co/subscriptions/xpack"
               target="_blank"
+              rel="noopener noreferrer"
             >
               Magnolia!
             </KuiLinkButton>
@@ -128,6 +130,7 @@ export default () => {
               buttonType="primary"
               href="https://www.elastic.co/subscriptions/xpack"
               target="_blank"
+              rel="noopener noreferrer"
             >
               Pteradactyl!
             </KuiLinkButton>
@@ -150,6 +153,7 @@ export default () => {
               buttonType="basic"
               href="https://www.elastic.co/subscriptions/xpack"
               target="_blank"
+              rel="noopener noreferrer"
             >
               Magnolia!
             </KuiLinkButton>

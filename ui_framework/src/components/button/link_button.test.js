@@ -27,6 +27,7 @@ describe('KuiLinkButton', () => {
           type="submit"
           href="#"
           target="_blank"
+          rel="noopener noreferrer"
         />
       );
 
