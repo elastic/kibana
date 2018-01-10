@@ -9,7 +9,7 @@ export default kibana => new kibana.Plugin({
 
   config: (Joi) => Joi.object({
     enabled: Joi.boolean().default(true),
-    enableExternalUrls: Joi.boolean().default(true)
+    enableExternalUrls: Joi.boolean().default(false)
   }).default(),
 
 });

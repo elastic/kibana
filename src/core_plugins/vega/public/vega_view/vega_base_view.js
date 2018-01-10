@@ -62,11 +62,13 @@ export class VegaBaseView {
         renderer: this._parser.renderer,
       };
       if (!this._vegaConfig.enableExternalUrls) {
-        // Override URL loader to disable all URL-based requests
-        const loader = vega.loader();
-        loader.load = () => {
-          throw new Error('External URLs have been disabled in kibana.yml');
+        // Override URL loader and sanitizer to disable all URL-based requests
+        const errorFunc = () => {
+          throw new Error('External URLs are not enabled. Add  "vega": {"enableExternalUrls": true}  to kibana.yml');
         };
+        const loader = vega.loader();
+        loader.load = errorFunc;
+        loader.sanitize = errorFunc;
         this._vegaViewConfig.loader = loader;
       }
 
