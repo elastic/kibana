@@ -9,19 +9,23 @@ describe('workpad selectors', () => {
     asts = {
       'element-0': {
         type: 'expression',
-        chain: [{
-          type: 'function',
-          function: 'demoprices',
-          arguments: {},
-        }],
+        chain: [
+          {
+            type: 'function',
+            function: 'demoprices',
+            arguments: {},
+          },
+        ],
       },
       'element-1': {
         type: 'expression',
-        chain: [{
-          type: 'function',
-          function: 'demodata',
-          arguments: {},
-        }],
+        chain: [
+          {
+            type: 'function',
+            function: 'demodata',
+            arguments: {},
+          },
+        ],
       },
     };
 
@@ -46,16 +50,21 @@ describe('workpad selectors', () => {
         workpad: {
           id: 'workpad-1',
           page: 0,
-          pages: [{
-            id: 'page-1',
-            elements: [{
-              id: 'element-0',
-              expression: 'demoprices',
-            }, {
-              id: 'element-1',
-              expression: 'demodata',
-            }],
-          }],
+          pages: [
+            {
+              id: 'page-1',
+              elements: [
+                {
+                  id: 'element-0',
+                  expression: 'demoprices',
+                },
+                {
+                  id: 'element-1',
+                  expression: 'demodata',
+                },
+              ],
+            },
+          ],
         },
       },
     };

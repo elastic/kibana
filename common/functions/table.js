@@ -4,9 +4,7 @@ export const table = {
   type: 'render',
   help: 'Configure a Data Table element',
   context: {
-    types: [
-      'datatable',
-    ],
+    types: ['datatable'],
   },
   args: {
     font: {

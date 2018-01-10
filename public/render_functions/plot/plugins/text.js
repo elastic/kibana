@@ -8,8 +8,12 @@ const options = {
   numbers: {},
 };
 
-const xAlign = function (x) { return x; };
-const yAlign = function (y) { return y; };
+const xAlign = function(x) {
+  return x;
+};
+const yAlign = function(y) {
+  return y;
+};
 //const horizontalShift = 1;
 
 function processOptions(/*plot, options*/) {
@@ -18,7 +22,7 @@ function processOptions(/*plot, options*/) {
 
 function draw(plot, ctx) {
   $('.valueLabel', plot.getPlaceholder()).remove();
-  plot.getData().forEach(function (series) {
+  plot.getData().forEach(function(series) {
     const show = get(series.numbers, 'show');
     if (!show) return;
 
@@ -55,16 +59,15 @@ function draw(plot, ctx) {
       plot.getPlaceholder().append(textNode);
 
       textNode.css({
-        left: x - (textNode.width() / 2),
-        top: y - (textNode.height() / 2),
+        left: x - textNode.width() / 2,
+        top: y - textNode.height() / 2,
       });
     }
 
     for (let i = 0; i < points.length; i++) {
-
       const point = {
-        'x': xAlign(points[i][0]),
-        'y': yAlign(points[i][1]), // Need to calculate here.
+        x: xAlign(points[i][0]),
+        y: yAlign(points[i][1]), // Need to calculate here.
       };
 
       const text = points[i][2].text;

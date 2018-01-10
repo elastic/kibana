@@ -5,27 +5,20 @@ import { PrettyDuration } from '../pretty_duration';
 import { TimePicker } from '../time_picker';
 
 export const TimePickerMini = ({ from, to, onSelect }) => {
-
   const picker = (
     <Popover id="timefilter-popover-trigger-click">
       <div className="canvas">
-        <TimePicker from={from} to={to} onSelect={onSelect}/>
+        <TimePicker from={from} to={to} onSelect={onSelect} />
       </div>
     </Popover>
   );
 
   return (
-    <OverlayTrigger
-      rootClose
-      overlay={picker}
-      placement={'bottom'}
-      trigger="click"
-    >
+    <OverlayTrigger rootClose overlay={picker} placement={'bottom'} trigger="click">
       <Button style={{ width: '100%' }}>
-        <PrettyDuration from={from} to={to}/>
+        <PrettyDuration from={from} to={to} />
       </Button>
     </OverlayTrigger>
-
   );
 };
 

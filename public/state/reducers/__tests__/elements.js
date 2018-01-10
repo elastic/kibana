@@ -9,16 +9,21 @@ describe('elements reducer', () => {
   beforeEach(() => {
     state = {
       id: 'workpad-1',
-      pages: [{
-        id: 'page-1',
-        elements: [{
-          id: 'element-0',
-          expression: '',
-        }, {
-          id: 'element-1',
-          expression: 'demodata',
-        }],
-      }],
+      pages: [
+        {
+          id: 'page-1',
+          elements: [
+            {
+              id: 'element-0',
+              expression: '',
+            },
+            {
+              id: 'element-1',
+              expression: 'demodata',
+            },
+          ],
+        },
+      ],
     };
   });
 

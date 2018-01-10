@@ -5,8 +5,9 @@ export const containerStyle = {
     types: ['null'],
   },
   type: 'containerStyle',
-  help: 'Creates an object used for describing the properties of a series on a chart.' +
-  ' You would usually use this inside of a charting function',
+  help:
+    'Creates an object used for describing the properties of a series on a chart.' +
+    ' You would usually use this inside of a charting function',
   args: {
     border: {
       types: ['string', 'null'],

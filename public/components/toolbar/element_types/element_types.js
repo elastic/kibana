@@ -34,9 +34,7 @@ export const ElementTypes = ({ elements, onClick, search, setSearch }) => {
         onChange={e => setSearch(e.target.value)}
         value={search}
       />
-      <div>
-        {elementList}
-      </div>
+      <div>{elementList}</div>
     </div>
   );
 };

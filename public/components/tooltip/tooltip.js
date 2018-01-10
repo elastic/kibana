@@ -3,13 +3,11 @@ import { Tooltip, OverlayTrigger } from 'react-bootstrap';
 import { PropTypes } from 'prop-types';
 
 export const TooltipComponent = ({ children, text, placement = 'top' }) => {
-  const tooltip = (
-    <Tooltip id="tooltip">{ text }</Tooltip>
-  );
+  const tooltip = <Tooltip id="tooltip">{text}</Tooltip>;
 
   return (
     <OverlayTrigger placement={placement} overlay={tooltip}>
-      { children }
+      {children}
     </OverlayTrigger>
   );
 };

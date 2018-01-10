@@ -6,12 +6,14 @@ export const ESIndexSelect = ({ value = '_all', loading, indices, onChange }) =>
   <FormControl
     componentClass="select"
     value={value}
-    onChange={(e) => onChange(e.target.value)}
+    onChange={e => onChange(e.target.value)}
     disabled={loading}
   >
     <option value="_all">_all</option>
     {indices.map(index => (
-      <option key={index} value={index}>{index}</option>
+      <option key={index} value={index}>
+        {index}
+      </option>
     ))}
   </FormControl>
 );

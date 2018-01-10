@@ -6,12 +6,4 @@ import { pointseries } from './pointseries';
 import { timelion } from './timelion';
 import { toFn } from './to';
 
-export const serverFunctions = [
-  esdocs,
-  escount,
-  demodata,
-  demoprices,
-  pointseries,
-  timelion,
-  toFn,
-];
+export const serverFunctions = [esdocs, escount, demodata, demoprices, pointseries, timelion, toFn];

@@ -4,9 +4,7 @@ const oldHandler = window.onerror;
 // so check for a known custom error type and skip the default error handling when we find one
 window.onerror = (err, url, line) => {
   // know errors to skip for, see common/lib/errors.js
-  const knownErrors = [
-    'RenderError',
-  ];
+  const knownErrors = ['RenderError'];
 
   const msg = err.message || err.toString();
 

@@ -7,6 +7,6 @@ export function pivotObjectArray(rows, columns) {
   if (!columnNames.every(isString)) {
     throw new Error('Columns should be an array of strings');
   }
-  const columnValues = map(columnNames, (name) => map(rows, name));
+  const columnValues = map(columnNames, name => map(rows, name));
   return zipObject(columnNames, columnValues);
 }

@@ -8,9 +8,7 @@ export const plot = {
   type: 'render',
   help: 'Configure a plot element',
   context: {
-    types: [
-      'pointseries',
-    ],
+    types: ['pointseries'],
   },
   args: {
     seriesStyle: {
@@ -110,11 +108,13 @@ export const plot = {
     }
 
     if (get(context.columns, 'y.type') === 'string') {
-      sortBy(context.rows, ['y']).reverse().forEach(row => {
-        if (!ticks.y.hash[row.y]) {
-          ticks.y.hash[row.y] = ticks.y.counter++;
-        }
-      });
+      sortBy(context.rows, ['y'])
+        .reverse()
+        .forEach(row => {
+          if (!ticks.y.hash[row.y]) {
+            ticks.y.hash[row.y] = ticks.y.counter++;
+          }
+        });
     }
 
     const data = map(groupBy(context.rows, 'color'), (series, label) => {
@@ -144,7 +144,9 @@ export const plot = {
       };
     });
 
-    const colors = args.palette.gradient ? chroma.scale(args.palette.colors).colors(data.length) : args.palette.colors;
+    const colors = args.palette.gradient
+      ? chroma.scale(args.palette.colors).colors(data.length)
+      : args.palette.colors;
 
     function getLegendPosition() {
       if (args.legend === true) return 'nw';
@@ -181,12 +183,18 @@ export const plot = {
           },
           xaxis: {
             show: args.xaxis,
-            ticks: get(context.columns, 'x.type') === 'string' ? map(ticks.x.hash, (position, name) => [position, name]) : undefined,
+            ticks:
+              get(context.columns, 'x.type') === 'string'
+                ? map(ticks.x.hash, (position, name) => [position, name])
+                : undefined,
             mode: get(context.columns, 'x.type') === 'date' ? 'time' : undefined,
           },
           yaxis: {
             show: args.yaxis,
-            ticks: get(context.columns, 'y.type') === 'string' ? map(ticks.y.hash, (position, name) => [position, name]) : undefined,
+            ticks:
+              get(context.columns, 'y.type') === 'string'
+                ? map(ticks.y.hash, (position, name) => [position, name])
+                : undefined,
             mode: get(context.columns, 'y.type') === 'date' ? 'time' : undefined,
           },
           series: {

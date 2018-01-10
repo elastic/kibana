@@ -5,11 +5,7 @@ import PropTypes from 'prop-types';
 export const simpleTemplate = (/*props*/) => {
   // const { argValue, onValueChange, labels } = props;
 
-  return (
-    <div className="canvas__argtype--font">
-      Oh look, free beer
-    </div>
-  );
+  return <div className="canvas__argtype--font">Oh look, free beer</div>;
 };
 
 simpleTemplate.displayName = 'FontArgSimpleInput';

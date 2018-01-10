@@ -6,10 +6,11 @@ import header from './header.png';
 
 const template = ({ args, updateArgs }) => {
   const updateBucket = ({ target }) => {
-    updateArgs && updateArgs({
-      ...args,
-      bucket: [target],
-    });
+    updateArgs &&
+      updateArgs({
+        ...args,
+        bucket: [target],
+      });
   };
 
   return (

@@ -9,26 +9,26 @@ export const jsonquery = {
   name: 'jsonquery',
   aliases: [],
   type: 'string',
-  help: 'Retrieve a string from a datatable using JSON Query. (See https://github.com/mmckegg/json-query)',
+  help:
+    'Retrieve a string from a datatable using JSON Query. (See https://github.com/mmckegg/json-query)',
   context: {
-    types: [
-      'datatable',
-    ],
+    types: ['datatable'],
   },
   args: {
     _: {
-      types: [
-        'string',
-      ],
-      'aliases': ['q', 'query'],
-      'multi': false,
+      types: ['string'],
+      aliases: ['q', 'query'],
+      multi: false,
       help: 'A JSON Query to run on the datatable rows.',
     },
   },
   fn: (context, args) => {
-    const result = get(jsonQuery(args._, {
-      data: context.rows,
-    }), 'value');
+    const result = get(
+      jsonQuery(args._, {
+        data: context.rows,
+      }),
+      'value'
+    );
 
     if (Array.isArray(result)) return result.map(item => String(item)).join(', ');
     return String(result);

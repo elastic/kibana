@@ -4,16 +4,13 @@ import { ColorPickerMini } from '../color_picker_mini';
 import './page_config.less';
 
 export const PageConfig = ({ setBackground, background }) => {
-
   return (
     <div className="canvas__page-config">
       <div>
-        <label>
-          Page Background
-        </label>
+        <label>Page Background</label>
       </div>
 
-      <ColorPickerMini onChange={setBackground} value={background}/>
+      <ColorPickerMini onChange={setBackground} value={background} />
     </div>
   );
 };

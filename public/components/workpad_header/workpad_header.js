@@ -9,14 +9,14 @@ import './workpad_header.less';
 const btnClass = 'canvas__workpad_header--button';
 
 export const WorkpadHeader = ({ workpadName, editing, toggleEditing }) => {
-  const keyHandler = (action) => {
+  const keyHandler = action => {
     if (action === 'EDITING') toggleEditing();
   };
 
   return (
     <div className="canvas__workpad_header">
       <h2>
-        { workpadName }
+        {workpadName}
 
         <RefreshControl className={`canvas__workpad_header--refresh ${btnClass}`} />
 
@@ -29,7 +29,7 @@ export const WorkpadHeader = ({ workpadName, editing, toggleEditing }) => {
         </FullscreenControl>
 
         <span className={`canvas__workpad_header--editToggle ${btnClass}`}>
-          <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global/>
+          <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global />
           <Toggle value={editing} onChange={toggleEditing} />
         </span>
       </h2>

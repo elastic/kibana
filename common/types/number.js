@@ -2,11 +2,11 @@ export const number = {
   name: 'number',
   from: {
     null: () => 0,
-    string: (n) => Number(n),
+    string: n => Number(n),
   },
   to: {
-    string: (n) => String(n),
-    render: (input) => {
+    string: n => String(n),
+    render: input => {
       return {
         type: 'render',
         as: 'markdown',
@@ -15,7 +15,7 @@ export const number = {
         },
       };
     },
-    datatable: (value) => {
+    datatable: value => {
       return {
         type: 'datatable',
         columns: [

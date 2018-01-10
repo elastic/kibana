@@ -24,27 +24,33 @@ const mapStateToProps = (state, { expressionIndex }) => ({
 
 const mapDispatchToProps = (dispatch, { expressionIndex }) => ({
   addArgument: (element, pageId) => (argName, argValue) => () => {
-    dispatch(addArgumentValueAtIndex({ index: expressionIndex, element, pageId, argName, value: argValue }));
+    dispatch(
+      addArgumentValueAtIndex({ index: expressionIndex, element, pageId, argName, value: argValue })
+    );
   },
-  updateContext: (element) => () => dispatch(fetchContext(expressionIndex, element)),
-  setArgument: (element, pageId) => (argName, valueIndex) => (value) => {
-    dispatch(setArgumentAtIndex({
-      index: expressionIndex,
-      element,
-      pageId,
-      argName,
-      value,
-      valueIndex,
-    }));
+  updateContext: element => () => dispatch(fetchContext(expressionIndex, element)),
+  setArgument: (element, pageId) => (argName, valueIndex) => value => {
+    dispatch(
+      setArgumentAtIndex({
+        index: expressionIndex,
+        element,
+        pageId,
+        argName,
+        value,
+        valueIndex,
+      })
+    );
   },
   deleteArgument: (element, pageId) => (argName, argIndex) => () => {
-    dispatch(deleteArgumentAtIndex({
-      index: expressionIndex,
-      element,
-      pageId,
-      argName,
-      argIndex,
-    }));
+    dispatch(
+      deleteArgumentAtIndex({
+        index: expressionIndex,
+        element,
+        pageId,
+        argName,
+        argIndex,
+      })
+    );
   },
   onAssetAdd: (type, content) => {
     // make the ID here and pass it into the action

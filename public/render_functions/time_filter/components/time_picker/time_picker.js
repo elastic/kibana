@@ -26,14 +26,26 @@ export const TimePicker = ({ range, setRange, dirty, setDirty, onSelect }) => {
 
   return (
     <div className="canvas__time-picker">
-      <DatetimeRangeAbsolute from={dateMath.parse(from)} to={dateMath.parse(to)} onSelect={absoluteSelect}/>
+      <DatetimeRangeAbsolute
+        from={dateMath.parse(from)}
+        to={dateMath.parse(to)}
+        onSelect={absoluteSelect}
+      />
       <div>
-        <DatetimeQuickList from={range.from} to={range.to} ranges={quickRanges} onSelect={onSelect}/>
+        <DatetimeQuickList
+          from={range.from}
+          to={range.to}
+          ranges={quickRanges}
+          onSelect={onSelect}
+        />
         <Button
           bsStyle="success"
           disabled={!dirty}
           className="canvas__time-picker--apply"
-          onClick={() => { setDirty(false); onSelect(range.from, range.to); }}
+          onClick={() => {
+            setDirty(false);
+            onSelect(range.from, range.to);
+          }}
         >
           Apply
         </Button>

@@ -6,6 +6,6 @@ import template from './index.html';
 uiRoutes.when('/', { template });
 
 const app = uiModules.get('apps/canvas', []);
-app.controller('canvasWorkpad', function ($scope) {
+app.controller('canvasWorkpad', function($scope) {
   $scope.component = App;
 });

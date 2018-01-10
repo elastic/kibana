@@ -7,7 +7,7 @@ function setupInteraction(eventName, elem, e, onEnd) {
   $('body').css({ 'user-select': 'none' });
   target.addClass('active');
 
-  $(window).on('mouseup.rework', (e) => {
+  $(window).on('mouseup.rework', e => {
     e.stopPropagation();
     $('body').css({ 'user-select': 'auto' });
     target.removeClass('active');
@@ -59,7 +59,10 @@ function debugMarker(position, color, timeout, attachTo, size) {
 
 function getRotatedOffset(originalSize, deltaSize, angle) {
   const radians = angle * Math.PI / 180;
-  const resizedSize = { width: originalSize.width + deltaSize.width, height: originalSize.height + deltaSize.height };
+  const resizedSize = {
+    width: originalSize.width + deltaSize.width,
+    height: originalSize.height + deltaSize.height,
+  };
 
   // This returns the offset of the perceived rotated top-left, relative to an elements actual top left
   // You can use it to translate the element's absolute position to the user's perception of it as rotated
@@ -67,8 +70,8 @@ function getRotatedOffset(originalSize, deltaSize, angle) {
     compareTo = compareTo || unrotated;
     // A point -height/2 and -width/2 away from the perceived top-left,
     const rotated = {
-      top: (unrotated.top * Math.cos(radians)) + (unrotated.left * Math.sin(radians)),
-      left: (unrotated.top * Math.sin(radians)) - (unrotated.left * Math.cos(radians)),
+      top: unrotated.top * Math.cos(radians) + unrotated.left * Math.sin(radians),
+      left: unrotated.top * Math.sin(radians) - unrotated.left * Math.cos(radians),
     };
     return { left: rotated.left + compareTo.left, top: -rotated.top + compareTo.top };
   }
@@ -80,16 +83,31 @@ function getRotatedOffset(originalSize, deltaSize, angle) {
   const resized = { top: resizedSize.height / 2, left: resizedSize.width / 2 };
   const resizedDelta = getRotationDelta(resized);
 
-  const deltaLeft = { top: originalSize.height / 2, left: deltaSize.width + (originalSize.width / 2) };
+  const deltaLeft = {
+    top: originalSize.height / 2,
+    left: deltaSize.width + originalSize.width / 2,
+  };
   const deltaLeftDelta = getRotationDelta(deltaLeft, original);
 
-  const deltaTop = { top: deltaSize.height + (originalSize.height / 2), left: originalSize.width / 2 };
+  const deltaTop = {
+    top: deltaSize.height + originalSize.height / 2,
+    left: originalSize.width / 2,
+  };
   const deltaTopDelta = getRotationDelta(deltaTop, original);
 
   const result = {
-    fromAny: { left: resizedDelta.left - originalDelta.left, top: resizedDelta.top - originalDelta.top },
-    fromLeft: { left: deltaLeftDelta.left - originalDelta.left, top: deltaLeftDelta.top - originalDelta.top },
-    fromTop: { left: deltaTopDelta.left - originalDelta.left, top: deltaTopDelta.top - originalDelta.top },
+    fromAny: {
+      left: resizedDelta.left - originalDelta.left,
+      top: resizedDelta.top - originalDelta.top,
+    },
+    fromLeft: {
+      left: deltaLeftDelta.left - originalDelta.left,
+      top: deltaLeftDelta.top - originalDelta.top,
+    },
+    fromTop: {
+      left: deltaTopDelta.left - originalDelta.left,
+      top: deltaTopDelta.top - originalDelta.top,
+    },
   };
 
   return result;
@@ -103,27 +121,29 @@ function absAngle(angle) {
 
 function angleBetweenPoints(origin, destination) {
   if (origin.top === destination.top && origin.left === destination.left) return 0;
-  return absAngle((Math.atan2(destination.top - origin.top, destination.left - origin.left) * 180 / Math.PI) + 90);
+  return absAngle(
+    Math.atan2(destination.top - origin.top, destination.left - origin.left) * 180 / Math.PI + 90
+  );
 }
 
 function distanceBetweenPoints(origin, destination) {
   const a = destination.top - origin.top;
   const b = destination.left - origin.left;
 
-  return Math.sqrt((a * a) + (b * b));
+  return Math.sqrt(a * a + b * b);
 }
 
 function getPointByAngleAndDistance(origin, angle, distance) {
   const result = {};
 
-  result.top = (Math.cos(angle * Math.PI / 180) * distance * -1) + origin.top;
+  result.top = Math.cos(angle * Math.PI / 180) * distance * -1 + origin.top;
   result.left = Math.sin(angle * Math.PI / 180) * distance + origin.left;
 
   return result;
 }
 
 function getElemCenter(elem) {
-  return doUnrotated(elem, (elem) => {
+  return doUnrotated(elem, elem => {
     return {
       top: elem.offset().top + elem.outerHeight() / 2,
       left: elem.offset().left + elem.outerWidth() / 2,
@@ -135,7 +155,10 @@ function getCurrentRotation(elem) {
   const matrixStr = elem.css('transform');
   if (matrixStr === 'none') return 0;
 
-  const values = matrixStr.split('(')[1].split(')')[0].split(',');
+  const values = matrixStr
+    .split('(')[1]
+    .split(')')[0]
+    .split(',');
   return absAngle(Math.atan2(values[1], values[0]) * (180 / Math.PI));
 }
 
@@ -151,7 +174,7 @@ export const resize = (elem, config) => {
   const allHandles = values(config.sides).join(', ');
   elem.data('rework.resize.sides', allHandles);
 
-  $(allHandles, elem).on('mousedown.reworkResize', (e) => {
+  $(allHandles, elem).on('mousedown.reworkResize', e => {
     const sides = Object.keys(config.sides).reduce((acc, side) => {
       const selector = config.sides[side];
       const isSelected = $(e.target).is(selector);
@@ -166,7 +189,7 @@ export const resize = (elem, config) => {
       left: e.pageX,
     };
 
-    const elemPosition = doUnrotated(elem, (elem) => elem.position());
+    const elemPosition = doUnrotated(elem, elem => elem.position());
     const elemSize = { height: elem.outerHeight(), width: elem.outerWidth() };
 
     const elemAngle = getCurrentRotation(elem);
@@ -181,7 +204,11 @@ export const resize = (elem, config) => {
       const interactionDistance = distanceBetweenPoints(originalPointer, pointerPosition);
 
       const unrotatedAngle = interactionAngle - elemAngle;
-      const unrotatedPointer = getPointByAngleAndDistance(originalPointer, unrotatedAngle, interactionDistance);
+      const unrotatedPointer = getPointByAngleAndDistance(
+        originalPointer,
+        unrotatedAngle,
+        interactionDistance
+      );
       const unrotatedDelta = {
         top: unrotatedPointer.top - originalPointer.top,
         left: unrotatedPointer.left - originalPointer.left,
@@ -234,7 +261,7 @@ export const resize = (elem, config) => {
       if (!getCurrentEvent()) return;
       config.onEnd(getCurrentEvent());
     });
-    $(window).on('mousemove.rework', (e) => {
+    $(window).on('mousemove.rework', e => {
       currentEvent = createPositionObj(e);
       config.on(currentEvent);
     });
@@ -244,8 +271,7 @@ export const resize = (elem, config) => {
 export const rotate = (elem, config) => {
   elem.data('rework.rotate.handle', config.handle);
 
-  $(config.handle, elem).on('mousedown.reworkRotate', (e) => {
-
+  $(config.handle, elem).on('mousedown.reworkRotate', e => {
     // TODO: SOoooo gross
     // Positioning goes wonky when rotated
     // So for the tiniest of moments, which the user can't even see, set 0 and get position
@@ -268,7 +294,11 @@ export const rotate = (elem, config) => {
         },
       };
 
-      getRotatedOffset(elemSize, { height: 0, left: 0 }, result.interaction.absolute.angle * Math.PI / 180);
+      getRotatedOffset(
+        elemSize,
+        { height: 0, left: 0 },
+        result.interaction.absolute.angle * Math.PI / 180
+      );
 
       return result;
     }
@@ -279,7 +309,7 @@ export const rotate = (elem, config) => {
       if (!getCurrentEvent()) return;
       config.onEnd(getCurrentEvent());
     });
-    $(window).on('mousemove.rework', (e) => {
+    $(window).on('mousemove.rework', e => {
       currentEvent = createRotationObj(e);
       config.on(currentEvent);
     });
@@ -287,26 +317,25 @@ export const rotate = (elem, config) => {
 };
 
 export const move = (elem, config) => {
-  elem.on('mousedown.reworkMove', (e) => {
+  elem.on('mousedown.reworkMove', e => {
     // TODO: This is hacky, but it needs to know if its being moved or resized, and later, rotated
     // Don't move if this is some handle for some other function
-    const ignoreIf = [
-      elem.data('rework.resize.sides'),
-      elem.data('rework.rotate.handle'),
-    ].join(', ');
+    const ignoreIf = [elem.data('rework.resize.sides'), elem.data('rework.rotate.handle')].join(
+      ', '
+    );
 
     if ($(e.target).is(ignoreIf)) return;
 
     const target = $(e.target);
     const originalEvent = e;
-    const originalPosition = doUnrotated(elem, (elem) => elem.position());
+    const originalPosition = doUnrotated(elem, elem => elem.position());
     const originalSize = { height: elem.outerHeight(), width: elem.outerWidth() };
 
     function createPositionObj(e) {
       const result = getInteractionObj(target, originalEvent, originalPosition, originalSize);
 
-      result.interaction.delta.top = (e.pageY - originalEvent.pageY);
-      result.interaction.delta.left = (e.pageX - originalEvent.pageX);
+      result.interaction.delta.top = e.pageY - originalEvent.pageY;
+      result.interaction.delta.left = e.pageX - originalEvent.pageX;
 
       result.interaction.absolute.top += result.interaction.delta.top;
       result.interaction.absolute.left += result.interaction.delta.left;
@@ -320,14 +349,14 @@ export const move = (elem, config) => {
       if (!getCurrentEvent()) return;
       config.onEnd(getCurrentEvent());
     });
-    $(window).on('mousemove.rework', (e) => {
+    $(window).on('mousemove.rework', e => {
       currentEvent = createPositionObj(e);
       config.on(currentEvent);
     });
   });
 };
 
-export const remove = (elem) => {
+export const remove = elem => {
   $(elem).off('mousedown.reworkMove');
   $(elem).off('mousedown.reworkResize');
   $(elem).off('mousedown.reworkRotate');

@@ -7,14 +7,12 @@ export const SidebarSectionTitle = ({ title, tip, children }) => {
     if (tip) {
       return (
         <Tooltip placement="left" text={tip}>
-          <span>{ title }</span>
+          <span>{title}</span>
         </Tooltip>
       );
     }
 
-    return (
-      <span>{ title }</span>
-    );
+    return <span>{title}</span>;
   };
 
   return (

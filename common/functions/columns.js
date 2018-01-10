@@ -3,7 +3,8 @@ import { omit, pick, find } from 'lodash';
 export const columns = {
   name: 'columns',
   type: 'datatable',
-  help: 'Include or exclude columns from a data table. If you specify both, this will exclude first',
+  help:
+    'Include or exclude columns from a data table. If you specify both, this will exclude first',
   context: {
     types: ['datatable'],
   },

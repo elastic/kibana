@@ -46,20 +46,18 @@ export const loadWorkpadById = createThunk('loadWorkpadById', ({ dispatch }, wor
 // TODO: this should not be a redux action, it doesn't use redux...
 export const downloadWorkpadById = createThunk('downloadWorkpadbyId', ({}, workpadId) => {
   // TODO: handle the failed loading state
-  workpadService.get(workpadId)
-    .then(resp => {
-      const jsonBlob = new Blob([JSON.stringify(resp)], { type: 'application/json' });
-      fileSaver.saveAs(jsonBlob, `canvas-workpad-${resp.name}-${resp.id}.json`);
-    });
+  workpadService.get(workpadId).then(resp => {
+    const jsonBlob = new Blob([JSON.stringify(resp)], { type: 'application/json' });
+    fileSaver.saveAs(jsonBlob, `canvas-workpad-${resp.name}-${resp.id}.json`);
+  });
 });
 
 export const createWorkpad = createThunk('createWorkpad', ({ dispatch }) => {
   const newWorkpad = getDefaultWorkpad();
 
   // TODO: handle the failed loading state
-  workpadService.create(newWorkpad)
-    .then(() => {
-      dispatch(setWorkpad(newWorkpad));
-      dispatch(resetAssets());
-    });
+  workpadService.create(newWorkpad).then(() => {
+    dispatch(setWorkpad(newWorkpad));
+    dispatch(resetAssets());
+  });
 });

@@ -30,15 +30,15 @@ export class FullscreenControl extends React.PureComponent {
     const { isActive, children, isFullscreen, onFullscreen } = this.props;
     if (!isActive) return null;
 
-    const keyHandler = (action) => {
+    const keyHandler = action => {
       if (action === 'FULLSCREEN') onFullscreen();
     };
 
     return (
-      <span ref={node => this.node = node}>
-        {!isFullscreen &&
+      <span ref={node => (this.node = node)}>
+        {!isFullscreen && (
           <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global isolate />
-        }
+        )}
         {children({ isFullscreen, onFullscreen })}
       </span>
     );
@@ -51,9 +51,6 @@ FullscreenControl.propTypes = {
   setFullscreen: PropTypes.func.isRequired,
   children: PropTypes.func.isRequired,
   ident: PropTypes.string.isRequired,
-  onFullscreen: PropTypes.oneOfType([
-    PropTypes.func,
-    PropTypes.bool,
-  ]),
+  onFullscreen: PropTypes.oneOfType([PropTypes.func, PropTypes.bool]),
   isFullscreen: PropTypes.bool,
 };

@@ -8,7 +8,7 @@ import { getAuthHeader } from './get_auth/get_auth_header';
 export function socketApi(server) {
   const io = socket(server.listener);
 
-  io.on('connection', (socket) => {
+  io.on('connection', socket => {
     console.log('User connected, attaching handlers');
 
     // This is the HAPI request object
@@ -18,46 +18,39 @@ export function socketApi(server) {
 
     // Create the function list
     socket.emit('getFunctionList');
-    const getClientFunctions = new Promise((resolve) => socket.once('functionList', resolve));
+    const getClientFunctions = new Promise(resolve => socket.once('functionList', resolve));
 
     socket.on('getFunctionList', () => {
       socket.emit('functionList', functionsRegistry.toJS());
     });
 
-    const handler = (msg) => {
-      Promise.all([
-        getClientFunctions,
-        authHeader,
-      ])
-        .then(([
-          clientFunctions,
-          authHeader,
-        ]) => {
-          if (server.plugins.security) request.headers.authorization = authHeader;
+    const handler = msg => {
+      Promise.all([getClientFunctions, authHeader]).then(([clientFunctions, authHeader]) => {
+        if (server.plugins.security) request.headers.authorization = authHeader;
 
-          const interpret = socketInterpreterProvider({
-            types: typesRegistry.toJS(),
-            functions: functionsRegistry.toJS(),
-            handlers: createHandlers(request, server),
-            referableFunctions: clientFunctions,
-            socket: socket,
-          });
-
-          return interpret(msg.ast, msg.context)
-            .then(resp => {
-              socket.emit('resp', {
-                id: msg.id,
-                value: resp,
-              });
-            })
-            .catch(e => {
-              socket.emit('resp', {
-                id: msg.id,
-                error: e.message,
-                stack: e.stack,
-              });
-            });
+        const interpret = socketInterpreterProvider({
+          types: typesRegistry.toJS(),
+          functions: functionsRegistry.toJS(),
+          handlers: createHandlers(request, server),
+          referableFunctions: clientFunctions,
+          socket: socket,
         });
+
+        return interpret(msg.ast, msg.context)
+          .then(resp => {
+            socket.emit('resp', {
+              id: msg.id,
+              value: resp,
+            });
+          })
+          .catch(e => {
+            socket.emit('resp', {
+              id: msg.id,
+              error: e.message,
+              stack: e.stack,
+            });
+          });
+      });
     };
 
     socket.on('run', handler);

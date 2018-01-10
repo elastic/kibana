@@ -60,7 +60,7 @@ function createHistoryInstance(win) {
 
     resetOnChange() {
       // splice to clear the onChange array, and remove listener for each fn
-      historyState.onChange.splice(0).forEach((changeFn) => {
+      historyState.onChange.splice(0).forEach(changeFn => {
         win.removeEventListener('popstate', changeFn, false);
       });
     },
@@ -69,7 +69,7 @@ function createHistoryInstance(win) {
 
 const instances = new WeakMap();
 
-export const historyProvider = (win) => {
+export const historyProvider = win => {
   const instance = instances.get(win);
   if (instance) return instance;
 

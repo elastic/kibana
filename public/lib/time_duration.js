@@ -1,4 +1,4 @@
-const getLabel = (label, val) => val > 1 || val === 0 ? `${label}s` : label;
+const getLabel = (label, val) => (val > 1 || val === 0 ? `${label}s` : label);
 
 export const timeDuration = (time, format) => {
   const seconds = time / 1000;
@@ -8,7 +8,8 @@ export const timeDuration = (time, format) => {
 
   if (format === 'days' || days >= 1) return { length: days, format: getLabel('day', days) };
   if (format === 'hours' || hours >= 1) return { length: hours, format: getLabel('hour', hours) };
-  if (format === 'minutes' || minutes >= 1) return { length: seconds / 60, format: getLabel('minute', minutes) };
+  if (format === 'minutes' || minutes >= 1)
+    return { length: seconds / 60, format: getLabel('minute', minutes) };
   return { length: seconds, format: getLabel('second', seconds) };
 };
 

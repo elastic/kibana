@@ -11,15 +11,18 @@ describe('resolved args reducer', () => {
       selectedPage: 'page-1',
       selectedElement: 'element-1',
       resolvedArgs: {
-        'element-0': [{
-          state: 'ready',
-          value: 'testing',
-          error: null,
-        }, {
-          state: 'error',
-          value: 'old value',
-          error: new Error('error test'),
-        }],
+        'element-0': [
+          {
+            state: 'ready',
+            value: 'testing',
+            error: null,
+          },
+          {
+            state: 'error',
+            value: 'old value',
+            error: new Error('error test'),
+          },
+        ],
       },
     };
   });
@@ -31,11 +34,13 @@ describe('resolved args reducer', () => {
       });
 
       const newState = resolvedArgsReducer(state, action);
-      expect(newState.resolvedArgs['element-1']).to.eql([{
-        state: 'pending',
-        value: null,
-        error: null,
-      }]);
+      expect(newState.resolvedArgs['element-1']).to.eql([
+        {
+          state: 'pending',
+          value: null,
+          error: null,
+        },
+      ]);
     });
 
     it('sets state to loading, with array path', () => {
@@ -44,11 +49,13 @@ describe('resolved args reducer', () => {
       });
 
       const newState = resolvedArgsReducer(state, action);
-      expect(newState.resolvedArgs['element-1']).to.eql([{
-        state: 'pending',
-        value: null,
-        error: null,
-      }]);
+      expect(newState.resolvedArgs['element-1']).to.eql([
+        {
+          state: 'pending',
+          value: null,
+          error: null,
+        },
+      ]);
     });
   });
 
@@ -61,11 +68,13 @@ describe('resolved args reducer', () => {
       });
 
       const newState = resolvedArgsReducer(state, action);
-      expect(newState.resolvedArgs['element-1']).to.eql([{
-        state: 'ready',
-        value,
-        error: null,
-      }]);
+      expect(newState.resolvedArgs['element-1']).to.eql([
+        {
+          state: 'ready',
+          value,
+          error: null,
+        },
+      ]);
     });
 
     it('handles error values', () => {
@@ -76,11 +85,13 @@ describe('resolved args reducer', () => {
       });
 
       const newState = resolvedArgsReducer(state, action);
-      expect(newState.resolvedArgs['element-1']).to.eql([{
-        state: 'error',
-        value: null,
-        error: err,
-      }]);
+      expect(newState.resolvedArgs['element-1']).to.eql([
+        {
+          state: 'error',
+          value: null,
+          error: err,
+        },
+      ]);
     });
 
     it('preserves old value on error', () => {
@@ -107,11 +118,13 @@ describe('resolved args reducer', () => {
 
       const newState = resolvedArgsReducer(state, action);
       expect(newState.resolvedArgs['element-0']).to.have.length(1);
-      expect(newState.resolvedArgs['element-0']).to.eql([{
-        state: 'ready',
-        value: 'testing',
-        error: null,
-      }]);
+      expect(newState.resolvedArgs['element-0']).to.eql([
+        {
+          state: 'ready',
+          value: 'testing',
+          error: null,
+        },
+      ]);
     });
 
     it('deeply removes resolved values', () => {
@@ -124,4 +137,3 @@ describe('resolved args reducer', () => {
     });
   });
 });
-

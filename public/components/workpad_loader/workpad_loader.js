@@ -8,7 +8,7 @@ import './workpad_loader.less';
 import { getId } from '../../lib/get_id';
 import { create as saveToES } from '../../lib/workpad_service';
 
-export const WorkpadLoader = (props) => {
+export const WorkpadLoader = props => {
   const {
     workpadId,
     workpads,
@@ -32,7 +32,7 @@ export const WorkpadLoader = (props) => {
   const isLoading = !Boolean(workpads);
   const isDeleteOpen = Boolean(deleteWorkpad.id && deleteWorkpad.name);
 
-  const onDrop = (files) => {
+  const onDrop = files => {
     const reader = new FileReader();
     reader.onload = () => {
       const workpad = JSON.parse(reader.result);
@@ -46,14 +46,14 @@ export const WorkpadLoader = (props) => {
     setDropping(false);
   };
 
-  const load = (id) => {
+  const load = id => {
     if (id !== workpadId) {
       loadWorkpadById(id);
       onClose();
     }
   };
 
-  const formatDate = (date) => {
+  const formatDate = date => {
     return moment(date).format('MMM D, YYYY @ h:mma');
   };
 
@@ -70,12 +70,12 @@ export const WorkpadLoader = (props) => {
     setDeleteWorkpad({});
   };
 
-  const remove = (id) => {
+  const remove = id => {
     removeWorkpad(id);
     closeRemoveConfirm();
   };
 
-  const search = (str) => {
+  const search = str => {
     setSearchText(str);
     findWorkpads(str);
   };
@@ -92,7 +92,10 @@ export const WorkpadLoader = (props) => {
       >
         <center>
           <p>
-            <i>Tip: Drag and drop a <code>JSON</code> exported workpad into this dialog to load new workpad from a file</i>
+            <i>
+              Tip: Drag and drop a <code>JSON</code> exported workpad into this dialog to load new
+              workpad from a file
+            </i>
           </p>
         </center>
 
@@ -126,27 +129,44 @@ export const WorkpadLoader = (props) => {
             </tr>
           </thead>
           <tbody>
-            {!isLoading && workpads.length === 0 && (
-              <tr>
-                <td colSpan="3">No matching workpads found</td>
-              </tr>
-            )}
-            {!isLoading && workpads.workpads.map(wp => (
-              <tr
-                key={wp.id}
-                className="canvas__workpad_loader--workpad"
-              >
-                <td width="97%" className="canvas__workpad_loader--name" onClick={() => load(wp.id)}>{wp.name}</td>
-                <td width="1%" className="canvas__workpad_loader--created" onClick={() => load(wp.id)}>{formatDate(wp['@created'])}</td>
-                <td width="1%" className="canvas__workpad_loader--updated" onClick={() => load(wp.id)}>{formatDate(wp['@timestamp'])}</td>
-                <td width="1%" className="canvas__workpad_loader--export">
-                  <span onClick={() => downloadWorkpadById(wp.id)} className="fa fa-download" />
-                </td>
-                <td width="1%" className="canvas__workpad_loader--delete">
-                  <span onClick={() => removeConfirm(wp)} className="fa fa-trash" />
-                </td>
-              </tr>
-            ))}
+            {!isLoading &&
+              workpads.length === 0 && (
+                <tr>
+                  <td colSpan="3">No matching workpads found</td>
+                </tr>
+              )}
+            {!isLoading &&
+              workpads.workpads.map(wp => (
+                <tr key={wp.id} className="canvas__workpad_loader--workpad">
+                  <td
+                    width="97%"
+                    className="canvas__workpad_loader--name"
+                    onClick={() => load(wp.id)}
+                  >
+                    {wp.name}
+                  </td>
+                  <td
+                    width="1%"
+                    className="canvas__workpad_loader--created"
+                    onClick={() => load(wp.id)}
+                  >
+                    {formatDate(wp['@created'])}
+                  </td>
+                  <td
+                    width="1%"
+                    className="canvas__workpad_loader--updated"
+                    onClick={() => load(wp.id)}
+                  >
+                    {formatDate(wp['@timestamp'])}
+                  </td>
+                  <td width="1%" className="canvas__workpad_loader--export">
+                    <span onClick={() => downloadWorkpadById(wp.id)} className="fa fa-download" />
+                  </td>
+                  <td width="1%" className="canvas__workpad_loader--delete">
+                    <span onClick={() => removeConfirm(wp)} className="fa fa-trash" />
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </Table>
       </Dropzone>

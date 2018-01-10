@@ -4,19 +4,22 @@ export const markdown = () => ({
   help: 'Generate markup using markdown',
   modelArgs: [],
   requiresContext: false,
-  args: [{
-    name: '_',
-    displayName: 'Markdown content',
-    help: 'Markdown formatted text',
-    argType: 'textarea',
-    options: {
-      confirm: 'Apply',
+  args: [
+    {
+      name: '_',
+      displayName: 'Markdown content',
+      help: 'Markdown formatted text',
+      argType: 'textarea',
+      options: {
+        confirm: 'Apply',
+      },
+      multi: true,
     },
-    multi: true,
-  }, {
-    name: 'font',
-    displayName: 'Text settings',
-    help: 'Fonts, alignment and color',
-    argType: 'font',
-  }],
+    {
+      name: 'font',
+      displayName: 'Text settings',
+      help: 'Fonts, alignment and color',
+      argType: 'font',
+    },
+  ],
 });

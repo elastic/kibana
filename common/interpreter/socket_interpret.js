@@ -13,17 +13,25 @@ import { interpretProvider } from './interpret';
   socket: the socket to communicate over
 */
 
-export function socketInterpreterProvider({ types, functions, handlers, referableFunctions, socket }) {
+export function socketInterpreterProvider({
+  types,
+  functions,
+  handlers,
+  referableFunctions,
+  socket,
+}) {
   // Return the interpet() function
   return interpretProvider({
-    types, functions, handlers,
+    types,
+    functions,
+    handlers,
 
     onFunctionNotFound: (chain, context) => {
       // Get the name of the function that wasn't found
       const functionName = chain.chain[0].function;
 
       // Get the list of functions that are known elsewhere
-      return Promise.resolve(referableFunctions).then((referableFunctionMap) => {
+      return Promise.resolve(referableFunctions).then(referableFunctionMap => {
         // Check if the not-found function is in the list of alternatives, if not, throw
         if (!has(referableFunctionMap, functionName)) {
           throw new Error(`Function not found: ${functionName}`);
@@ -33,14 +41,14 @@ export function socketInterpreterProvider({ types, functions, handlers, referabl
         const id = uuid();
 
         return new Promise((resolve, reject) => {
-          const listener = (resp) => {
+          const listener = resp => {
             // Resolve or reject the promise once we get our ID back
             if (resp.id === id) {
               socket.removeListener('resp', listener);
 
               if (resp.error) {
                 // cast error strings back into error instances
-                const err = (resp.error instanceof Error) ? resp.error : new Error(resp.error);
+                const err = resp.error instanceof Error ? resp.error : new Error(resp.error);
                 if (resp.stack) err.stack = resp.stack;
                 reject(err);
               } else {

@@ -5,7 +5,7 @@ import { RemoveIcon } from '../remove_icon';
 import { PageControls } from './page_controls';
 import './page_manager.less';
 
-export const PageManager = (props) => {
+export const PageManager = props => {
   const {
     pages,
     selectedPage,
@@ -18,7 +18,7 @@ export const PageManager = (props) => {
     setDeleteId,
   } = props;
 
-  const confirmDelete = (pageId) => setDeleteId(pageId);
+  const confirmDelete = pageId => setDeleteId(pageId);
   const resetDelete = () => setDeleteId(null);
   const doDelete = () => {
     resetDelete();
@@ -38,23 +38,12 @@ export const PageManager = (props) => {
               className="canvas__page-manager--page-remove"
               onClick={() => confirmDelete(page.id)}
             />
-            <div className="canvas__page-manager--page-index">
-              { i + 1 }
-            </div>
-            <PageControls
-              pageId={page.id}
-              movePage={movePage}
-              duplicatePage={duplicatePage}
-            />
+            <div className="canvas__page-manager--page-index">{i + 1}</div>
+            <PageControls pageId={page.id} movePage={movePage} duplicatePage={duplicatePage} />
           </div>
         ))}
-        <div
-          className="canvas__page-manager--page"
-          onClick={addPage}
-        >
-          <div className="canvas__page-manager--page-index">
-            +
-          </div>
+        <div className="canvas__page-manager--page" onClick={addPage}>
+          <div className="canvas__page-manager--page-index">+</div>
         </div>
       </div>
 

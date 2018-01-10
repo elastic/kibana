@@ -10,7 +10,7 @@ export const style = {
     },
   },
   to: {
-    render: (value) => ({
+    render: value => ({
       type: 'render',
       as: 'debug',
       value,

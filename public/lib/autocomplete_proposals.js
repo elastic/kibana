@@ -8,10 +8,7 @@ import { getServerFunctions } from './interpreter';
 const cursor = '$cursor$';
 let allFns;
 getServerFunctions.then(fns => {
-  allFns = uniqBy([
-    ...functionsRegistry.toArray(),
-    ...Object.values(fns),
-  ], 'name');
+  allFns = uniqBy([...functionsRegistry.toArray(), ...Object.values(fns)], 'name');
 });
 
 export function getAutocompleteProposals({ value, selection }) {
@@ -30,9 +27,7 @@ export function getAutocompleteProposals({ value, selection }) {
 }
 
 function getAutocompleteProposalsForChain(chain) {
-  return flatten(chain.map((fn, i) => (
-    getAutocompleteProposalsForFnNode(fn, chain[i - 1])
-  )));
+  return flatten(chain.map((fn, i) => getAutocompleteProposalsForFnNode(fn, chain[i - 1])));
 }
 
 /**
@@ -45,9 +40,9 @@ function getAutocompleteProposalsForFnNode(fn, previousFn) {
     const previousFnDef = allFns.find(f => f.name === previousFnName);
     return getFunctionNameProposals(fn, get(previousFnDef, 'type'));
   } else {
-    return flatten(map(fn.arguments, (args, name) => (
-      getAutocompleteProposalsForArgNode(fn, args, name)
-    )));
+    return flatten(
+      map(fn.arguments, (args, name) => getAutocompleteProposalsForArgNode(fn, args, name))
+    );
   }
 }
 
@@ -56,15 +51,17 @@ function getAutocompleteProposalsForFnNode(fn, previousFn) {
  * has its own chain, look in the chain for the cursor.
  */
 function getAutocompleteProposalsForArgNode(fn, args, name) {
-  return flatten(args.map(arg => {
-    if (arg.cursor) {
-      return getArgumentProposals(fn, name, arg);
-    } else if (arg.chain) {
-      return getAutocompleteProposalsForChain(arg.chain);
-    } else {
-      return [];
-    }
-  }));
+  return flatten(
+    args.map(arg => {
+      if (arg.cursor) {
+        return getArgumentProposals(fn, name, arg);
+      } else if (arg.chain) {
+        return getAutocompleteProposalsForChain(arg.chain);
+      } else {
+        return [];
+      }
+    })
+  );
 }
 
 /**
@@ -93,7 +90,7 @@ function getFunctionNameProposals(fn, previousFnType = 'null') {
  */
 function getArgumentProposals(fn, name, arg) {
   return flatten([
-    (name === '_' ? getArgumentNameProposals(fn, arg) : []),
+    name === '_' ? getArgumentNameProposals(fn, arg) : [],
     getArgumentValueProposals(fn, name, arg),
   ]);
 }
@@ -109,16 +106,15 @@ function getArgumentNameProposals(fn, arg) {
   const args = filter(fnDef.args, ({ name }) => name !== '_')
     .filter(({ name }) => nameMatches(name, prefix, suffix))
     .filter(({ name, multi }) => multi || !fn.arguments.hasOwnProperty(name));
-  return uniqBy(args, 'name')
-    .map(({ name, help }) => ({
-      value: name + '=',
-      name: name,
-      description: help,
-      location: {
-        start: location.start.offset,
-        end: location.end.offset - cursor.length,
-      },
-    }));
+  return uniqBy(args, 'name').map(({ name, help }) => ({
+    value: name + '=',
+    name: name,
+    description: help,
+    location: {
+      start: location.start.offset,
+      end: location.end.offset - cursor.length,
+    },
+  }));
 }
 
 /**

@@ -13,7 +13,7 @@ import { getType } from '../../common/lib/get_type';
 const allowedTypes = ['string', 'number', 'boolean'];
 const badType = () => new Error(`Arg setting helpers only support ${allowedTypes.join(',')}`);
 
-const isAllowed = (type) => includes(allowedTypes, type);
+const isAllowed = type => includes(allowedTypes, type);
 
 export function validateArg(value) {
   const type = getType(value);

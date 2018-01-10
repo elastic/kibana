@@ -14,10 +14,9 @@ export function runApi(server) {
     });
 
     try {
-      interpret(fromExpression(expression), context)
-        .then(resp => {
-          reply(resp);
-        });
+      interpret(fromExpression(expression), context).then(resp => {
+        reply(resp);
+      });
     } catch (e) {
       reply({ error: e.message }).code(500);
     }
@@ -26,8 +25,9 @@ export function runApi(server) {
   server.route({
     method: 'GET',
     path: '/api/canvas/run',
-    handler: function (request, reply) {
-      if (!request.query.expression) return reply({ error: '"expression" query is required' }).code(400);
+    handler: function(request, reply) {
+      if (!request.query.expression)
+        return reply({ error: '"expression" query is required' }).code(400);
       handleRequest(request, reply, request.query.expression, null);
     },
   });
@@ -35,7 +35,7 @@ export function runApi(server) {
   server.route({
     method: 'POST',
     path: '/api/canvas/run',
-    handler: function (request, reply) {
+    handler: function(request, reply) {
       const { expression, context } = request.payload;
       if (!expression) return reply({ error: '"expression" key is required' }).code(400);
       handleRequest(request, reply, expression, typeof context === 'undefined' ? null : context);

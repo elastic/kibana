@@ -16,17 +16,13 @@ export const timefilter = {
       help: 'The column or field to attach the filter to',
     },
     from: {
-      types: [
-        'string',
-      ],
-      'aliases': ['f', 'start'],
+      types: ['string'],
+      aliases: ['f', 'start'],
       help: 'Beginning of the range, in ISO8601 or Elasticsearch datemath format',
     },
     to: {
-      types: [
-        'string',
-      ],
-      'aliases': ['t', 'end'],
+      types: ['string'],
+      aliases: ['t', 'end'],
       help: 'End of the range, in ISO8601 or Elasticsearch datemath format',
     },
   },

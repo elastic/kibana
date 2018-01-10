@@ -2,7 +2,7 @@ import { duplicatePage } from '../actions/pages';
 import { fetchRenderable } from '../actions/elements';
 import { getPages } from '../selectors/workpad';
 
-export const workpadUpdate = ({ dispatch, getState }) => next => (action) => {
+export const workpadUpdate = ({ dispatch, getState }) => next => action => {
   next(action);
 
   // This middleware fetches all of the renderable elements on new, duplicate page

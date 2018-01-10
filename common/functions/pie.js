@@ -8,9 +8,7 @@ export const pie = {
   type: 'render',
   help: 'Configure a pie chart element',
   context: {
-    types: [
-      'pointseries',
-    ],
+    types: ['pointseries'],
   },
   args: {
     palette: {
@@ -41,7 +39,7 @@ export const pie = {
     strokeColor: {
       types: ['string'],
       default: '#000000',
-      help: 'A color for the outline of the pie and it\'s slices',
+      help: "A color for the outline of the pie and it's slices",
     },
     strokeWidth: {
       types: ['number'],

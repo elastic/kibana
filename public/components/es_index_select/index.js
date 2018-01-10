@@ -11,11 +11,10 @@ export const ESIndexSelect = compose(
   withState('indices', 'setIndices', []),
   lifecycle({
     componentDidMount() {
-      fetch.get(`${apiPath}`)
-        .then(res => {
-          this.props.setLoading(false);
-          this.props.setIndices(res.data.sort());
-        });
+      fetch.get(`${apiPath}`).then(res => {
+        this.props.setLoading(false);
+        this.props.setIndices(res.data.sort());
+      });
     },
   })
 )(Component);

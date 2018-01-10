@@ -17,7 +17,8 @@ export const mapColumn = {
     expression: {
       types: ['function'],
       aliases: ['exp', 'fn'],
-      help: 'A canvas expression which will be passed each row as a single row datatable unless you set context=false',
+      help:
+        'A canvas expression which will be passed each row as a single row datatable unless you set context=false',
     },
     context: {
       types: ['boolean'],
@@ -27,15 +28,19 @@ export const mapColumn = {
   },
   fn: (context, args) => {
     const rowPromises = context.rows.map(row => {
-      return args.expression(!args.context ? null :
-        {
-          type: 'datatable',
-          columns: context.columns,
-          rows: [row],
-        })
+      return args
+        .expression(
+          !args.context
+            ? null
+            : {
+                type: 'datatable',
+                columns: context.columns,
+                rows: [row],
+              }
+        )
         .then(val => {
           if (typeof val === 'object' && val !== null) {
-            throw new Error ('Expression must return a literal, eg a string, number, boolean, null');
+            throw new Error('Expression must return a literal, eg a string, number, boolean, null');
           }
 
           return {

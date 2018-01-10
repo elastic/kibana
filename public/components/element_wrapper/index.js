@@ -24,9 +24,9 @@ const mapStateToProps = (state, { element }) => ({
 
 const mapDispatchToProps = (dispatch, { element }) => ({
   selectElement: isInteractable => () => isInteractable && dispatch(selectElement(element.id)),
-  removeElement: (pageId) => () => dispatch(removeElement(element.id, pageId)),
-  setPosition: (pageId) => (position) => dispatch(setPosition(element.id, pageId, position)),
-  handlers: (pageId) => createHandlers(element, pageId, dispatch),
+  removeElement: pageId => () => dispatch(removeElement(element.id, pageId)),
+  setPosition: pageId => position => dispatch(setPosition(element.id, pageId, position)),
+  handlers: pageId => createHandlers(element, pageId, dispatch),
 });
 
 const mergeProps = (stateProps, dispatchProps, { element }) => {

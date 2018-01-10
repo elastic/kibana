@@ -14,5 +14,4 @@ export function queryDatatable(datatable, query) {
   }
 
   return datatable;
-
 }

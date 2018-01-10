@@ -20,28 +20,31 @@ export const escount = {
     },
   },
   fn: (context, args, handlers) => {
-    context.and = context.and
-      .concat([{ // q
+    context.and = context.and.concat([
+      {
+        // q
         type: 'luceneQueryString',
         query: args.q,
-      }]);
-
-    const esRequest = buildESRequest({
-      index: args.index,
-      body: {
-        query: {
-          bool: {
-            must: [ { match_all: {} } ],
-          },
-        },
-        size: 0,
       },
-    }, context);
+    ]);
 
-    return handlers
-      .elasticsearchClient('search', esRequest)
-      .then(resp => {
-        return resp.hits.total;
-      });
+    const esRequest = buildESRequest(
+      {
+        index: args.index,
+        body: {
+          query: {
+            bool: {
+              must: [{ match_all: {} }],
+            },
+          },
+          size: 0,
+        },
+      },
+      context
+    );
+
+    return handlers.elasticsearchClient('search', esRequest).then(resp => {
+      return resp.hits.total;
+    });
   },
 };

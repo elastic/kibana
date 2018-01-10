@@ -3,6 +3,6 @@ import './loading.less';
 
 export const Loading = () => (
   <div className="canvas__loading">
-    <i className="fa fa-clock-o"/>
+    <i className="fa fa-clock-o" />
   </div>
 );

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import './render_element.less';
 
 export const RenderElement = ({ domNode, setDomNode }) => {
-  const linkRef = (refNode) => {
+  const linkRef = refNode => {
     if (!domNode && refNode) {
       // Initialize the domNode property. This should only happen once, even if config changes.
       setDomNode(refNode);

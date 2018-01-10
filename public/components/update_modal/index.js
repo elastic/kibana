@@ -17,14 +17,14 @@ export const UpdateModal = compose(
       if (!currentBuild) return;
 
       fetch(`${siteUrl}/build.json`)
-        .then((build) => {
+        .then(build => {
           const buildNum = Number(get(build, 'data.buildNumber'));
           const buildFile = get(build, 'data.filename');
 
           if (currentBuild < buildNum) {
             fetch(`${siteUrl}/changelog.md`)
               .then(res => res.data)
-              .then((changelog) => {
+              .then(changelog => {
                 const changes = changelog.split('---')[0];
                 const md = new Markdown({ html: false });
                 setChanges(md.render(String(changes)));

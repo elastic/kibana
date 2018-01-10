@@ -93,16 +93,20 @@ describe('ast fromExpression', () => {
       });
 
       it('has expected shape', () => {
-        expect(block.arguments.exampleFunction).to.eql([{
-          type: 'expression',
-          chain: [{
-            type: 'function',
-            function: 'someFunction',
-            arguments: {
-              q: ['do something'],
-            },
-          }],
-        }]);
+        expect(block.arguments.exampleFunction).to.eql([
+          {
+            type: 'expression',
+            chain: [
+              {
+                type: 'function',
+                function: 'someFunction',
+                arguments: {
+                  q: ['do something'],
+                },
+              },
+            ],
+          },
+        ]);
       });
     });
 
@@ -123,16 +127,20 @@ describe('ast fromExpression', () => {
       });
 
       it('has expected shape', () => {
-        expect(block.arguments.examplePartial).to.eql([{
-          type: 'partial',
-          chain: [{
-            type: 'function',
-            function: 'somePartialFunction',
-            arguments: {
-              q: ['do something'],
-            },
-          }],
-        }]);
+        expect(block.arguments.examplePartial).to.eql([
+          {
+            type: 'partial',
+            chain: [
+              {
+                type: 'function',
+                function: 'somePartialFunction',
+                arguments: {
+                  q: ['do something'],
+                },
+              },
+            ],
+          },
+        ]);
       });
     });
   });

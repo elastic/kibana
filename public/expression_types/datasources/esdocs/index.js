@@ -10,12 +10,12 @@ import header from './header.png';
 import './esdocs.less';
 
 const template = ({ args, updateArgs }) => {
-
   const setArg = (name, value) => {
-    updateArgs && updateArgs({
-      ...args,
-      ...setSimpleArg(name, value),
-    });
+    updateArgs &&
+      updateArgs({
+        ...args,
+        ...setSimpleArg(name, value),
+      });
   };
 
   const getQuery = () => {
@@ -40,52 +40,53 @@ const template = ({ args, updateArgs }) => {
   return (
     <div>
       <p>
-        The Elasticsearch Docs datasource is used to pull documents directly from Elasticsearch without the use of aggregations.
-        It is best used with low volume datasets and in situations where you need to view raw documents or plot exact, non-aggregated
-        values on a chart.
+        The Elasticsearch Docs datasource is used to pull documents directly from Elasticsearch
+        without the use of aggregations. It is best used with low volume datasets and in situations
+        where you need to view raw documents or plot exact, non-aggregated values on a chart.
       </p>
 
       <div className="canvas__esdocs--row">
         <div className="canvas__esdocs--index">
-          <label>Index &nbsp;
+          <label>
+            Index &nbsp;
             <TooltipIcon
               text="The index pattern to query. Time filters will apply to the timefield from this pattern."
               placement="right"
             />
           </label>
-          <ESIndexSelect value={index} onChange={index => setArg('index', index)}/>
+          <ESIndexSelect value={index} onChange={index => setArg('index', index)} />
         </div>
 
         <div className="canvas__esdocs--query">
           <ControlLabel>
             Query &nbsp;
-            <TooltipIcon text="Lucene Query String syntax" placement="right"/>
+            <TooltipIcon text="Lucene Query String syntax" placement="right" />
           </ControlLabel>
           <FormControl
             type="text"
             value={getQuery()}
-            onChange={(e) => setArg('query', e.target.value)}
+            onChange={e => setArg('query', e.target.value)}
           />
         </div>
 
         <div className="canvas__esdocs--sort-field">
-          <label>Sort &nbsp;
-            <TooltipIcon
-              text="Document sort order, field and direction"
-              placement="right"
-            />
+          <label>
+            Sort &nbsp;
+            <TooltipIcon text="Document sort order, field and direction" placement="right" />
           </label>
-          <ESFieldSelect index={index} value={sort[0]} onChange={(field) => setArg('sort', [field, sort[1]].join(', '))}/>
+          <ESFieldSelect
+            index={index}
+            value={sort[0]}
+            onChange={field => setArg('sort', [field, sort[1]].join(', '))}
+          />
         </div>
 
         <div className="canvas__esdocs--sort-dir">
-          <ControlLabel>
-            &nbsp;
-          </ControlLabel>
+          <ControlLabel>&nbsp;</ControlLabel>
           <FormControl
             componentClass="select"
             value={sort[1]}
-            onChange={(e) => setArg('sort', [sort[0], e.target.value].join(', '))}
+            onChange={e => setArg('sort', [sort[0], e.target.value].join(', '))}
           >
             <option value="asc">asc</option>
             <option value="desc">desc</option>
@@ -94,8 +95,9 @@ const template = ({ args, updateArgs }) => {
       </div>
 
       <div>
-        <label>Fields &nbsp;
-          { fields.length <= 10 ? (
+        <label>
+          Fields &nbsp;
+          {fields.length <= 10 ? (
             <TooltipIcon
               text="The fields to extract. Kibana scripted fields are not currently available"
               placement="right"
@@ -110,7 +112,7 @@ const template = ({ args, updateArgs }) => {
         </label>
         <ESFieldsSelect
           index={index}
-          onChange={(fields) => setArg('fields', fields.join(', '))}
+          onChange={fields => setArg('fields', fields.join(', '))}
           selected={fields}
         />
       </div>

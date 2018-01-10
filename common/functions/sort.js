@@ -6,17 +6,13 @@ export const sort = {
   type: 'datatable',
   help: 'Sorts a datatable on a column',
   context: {
-    types: [
-      'datatable',
-    ],
+    types: ['datatable'],
   },
   args: {
     _: {
-      types: [
-        'string',
-      ],
-      'aliases': [],
-      'multi': false, // TODO: No reason you couldn't.
+      types: ['string'],
+      aliases: [],
+      multi: false, // TODO: No reason you couldn't.
       help: 'The column to sort on',
     },
     reverse: {

@@ -6,7 +6,7 @@ export const ArgForm = compose(
   withState('label', 'setLabel', ({ label, argTypeInstance }) => {
     return label || argTypeInstance.displayName || argTypeInstance.name;
   }),
-  withState('expand', 'setExpand', ({ argTypeInstance }) => argTypeInstance.expanded),
+  withState('expand', 'setExpand', ({ argTypeInstance }) => argTypeInstance.expanded)
 )(Component);
 
 ArgForm.propTypes = {

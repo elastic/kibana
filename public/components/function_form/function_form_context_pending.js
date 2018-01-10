@@ -1,6 +1,4 @@
 import React from 'react';
 import { Loading } from '../loading';
 
-export const FunctionFormContextPending = () => (
-  <Loading />
-);
+export const FunctionFormContextPending = () => <Loading />;

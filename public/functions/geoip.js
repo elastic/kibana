@@ -11,9 +11,7 @@ export const geoip = {
   help: 'Uses an online service to perform a lookup on your own, or another, IP',
   args: {
     _: {
-      types: [
-        'string',
-      ],
+      types: ['string'],
       aliases: ['ip', 'host'],
       default: '""',
       help: 'An optional IP or hostname. If left blank your own IP will be used',
@@ -23,14 +21,12 @@ export const geoip = {
   fn: (context, args) => {
     return fetch(`https://freegeoip.net/json/${args._}`, {
       method: 'GET',
-    })
-      .then(res => {
-
-        return {
-          type: 'location',
-          latitude: res.data.latitude,
-          longitude: res.data.longitude,
-        };
-      });
+    }).then(res => {
+      return {
+        type: 'location',
+        latitude: res.data.latitude,
+        longitude: res.data.longitude,
+      };
+    });
   },
 };

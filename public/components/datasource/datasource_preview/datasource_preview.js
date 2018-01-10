@@ -6,15 +6,11 @@ import './datasource_preview.less';
 export const DatasourcePreview = ({ done, datatable }) => (
   //<Datatable datatable={datatable}/>
   <div style={{ overflow: 'auto' }}>
-    {!done ? null : (
-      <a onClick={() => done()}>&lt; Back</a>
-    )}
+    {!done ? null : <a onClick={() => done()}>&lt; Back</a>}
     <div className="canvas__datasource_preview">
-      <Datatable datatable={datatable}/>
+      <Datatable datatable={datatable} />
     </div>
-
   </div>
-
 );
 
 DatasourcePreview.propTypes = {

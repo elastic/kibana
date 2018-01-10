@@ -5,7 +5,7 @@ const ExpressionArgInput = (props = {}) => {
     <div className="canvas__argtype--expression">
       <div>expression args:</div>
       <div>
-        <pre>{ JSON.stringify(props, null, 2) }</pre>
+        <pre>{JSON.stringify(props, null, 2)}</pre>
       </div>
     </div>
   );

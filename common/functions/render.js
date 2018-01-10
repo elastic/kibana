@@ -4,14 +4,13 @@ export const render = {
   type: 'render',
   help: 'Render an input as a specific element and set element level options such as styling',
   context: {
-    types: [
-      'render',
-    ],
+    types: ['render'],
   },
   args: {
     as: {
       types: ['string', 'null'],
-      help: 'The element type to use in rendering. You probably want a specialized function instead, such as plot or grid',
+      help:
+        'The element type to use in rendering. You probably want a specialized function instead, such as plot or grid',
     },
     css: {
       types: ['string', 'null'],

@@ -1,7 +1,7 @@
 import { convert } from '../../lib/modify_path';
 import { setLoading, setValue, inFlightActive, inFlightComplete } from '../actions/resolved_args';
 
-export const inFlight = ({ dispatch }) => (next) => {
+export const inFlight = ({ dispatch }) => next => {
   const pendingCache = [];
 
   // TODO: this timer is tracked so we can hide the spinner when things fail

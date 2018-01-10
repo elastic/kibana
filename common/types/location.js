@@ -2,6 +2,6 @@ export const location = {
   name: 'location',
   from: {},
   to: {
-    'string': (value) => `${value.latitude},${value.longitude}`,
+    string: value => `${value.latitude},${value.longitude}`,
   },
 };

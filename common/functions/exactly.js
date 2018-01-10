@@ -13,10 +13,8 @@ export const exactly = {
       help: 'The column or field to attach the filter to',
     },
     value: {
-      types: [
-        'string',
-      ],
-      'aliases': ['v', 'val'],
+      types: ['string'],
+      aliases: ['v', 'val'],
       help: 'The value to match exactly, including white space and capitalization',
     },
   },

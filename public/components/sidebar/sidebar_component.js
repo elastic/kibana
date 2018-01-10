@@ -5,7 +5,7 @@ import { FunctionFormList } from '../function_form_list';
 export const SidebarComponent = ({ element }) => (
   <div className="canvas__sidebar">
     <div className="canvas__sidebar--args">
-      <FunctionFormList element={element}/>
+      <FunctionFormList element={element} />
     </div>
   </div>
 );

@@ -5,9 +5,7 @@ import { Button } from 'react-bootstrap';
 export const ElementNotSelected = ({ done }) => (
   <div>
     <div>Select an element to show expression input</div>
-    {done && (
-      <Button onClick={done}> Close</Button>
-    )}
+    {done && <Button onClick={done}> Close</Button>}
   </div>
 );
 

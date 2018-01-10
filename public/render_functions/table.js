@@ -10,15 +10,13 @@ export const table = {
   reuseDomNode: true,
   render(domNode, config, handlers) {
     const { datatable, paginate, perPage, font } = config;
-    ReactDOM.render((
+    ReactDOM.render(
       <div style={{ ...get(font, 'spec'), height: '100%' }}>
-        <Datatable
-          datatable={datatable}
-          perPage={perPage}
-          paginate={paginate}
-        />
-      </div>
-    ), domNode, () => handlers.done());
+        <Datatable datatable={datatable} perPage={perPage} paginate={paginate} />
+      </div>,
+      domNode,
+      () => handlers.done()
+    );
 
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },

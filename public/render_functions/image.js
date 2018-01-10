@@ -15,9 +15,7 @@ export const image = {
       backgroundSize: config.mode,
     };
 
-    ReactDOM.render((
-      <div style={style} />
-    ), domNode, () => handlers.done());
+    ReactDOM.render(<div style={style} />, domNode, () => handlers.done());
 
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
 

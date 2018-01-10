@@ -14,17 +14,10 @@ export const ContextMenu = ({
   onKeyDown,
   onKeyPress,
 }) => (
-  <div
-    className="contextMenu"
-    onKeyDown={onKeyDown}
-    onKeyPress={onKeyPress}
-  >
+  <div className="contextMenu" onKeyDown={onKeyDown} onKeyPress={onKeyPress}>
     {children}
     {isOpen && items.length ? (
-      <div
-        className="contextMenuItems"
-        style={itemsStyle}
-      >
+      <div className="contextMenuItems" style={itemsStyle}>
         {items.map((item, i) => (
           <div
             key={i}
@@ -36,7 +29,9 @@ export const ContextMenu = ({
           </div>
         ))}
       </div>
-    ) : ''}
+    ) : (
+      ''
+    )}
   </div>
 );
 

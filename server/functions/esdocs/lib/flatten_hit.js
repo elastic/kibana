@@ -22,7 +22,7 @@ export function flattenHit(hit, metaFields) {
 
       flatten(val, key);
     });
-  }(hit._source));
+  })(hit._source);
 
   // assign the meta fields
   each(metaFields, meta => {

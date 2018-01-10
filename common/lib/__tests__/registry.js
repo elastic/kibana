@@ -40,14 +40,17 @@ function validateRegistry(registry, elements) {
 
 describe('Registry', () => {
   describe('name registry', () => {
-    const elements = [{
-      name: '__test1',
-      prop1: 'some value',
-    }, {
-      name: '__test2',
-      prop2: 'some other value',
-      type: 'unused',
-    }];
+    const elements = [
+      {
+        name: '__test1',
+        prop1: 'some value',
+      },
+      {
+        name: '__test2',
+        prop2: 'some other value',
+        type: 'unused',
+      },
+    ];
 
     const registry = new Registry();
     registry.register(elements[0]);
@@ -66,14 +69,17 @@ describe('Registry', () => {
   });
 
   describe('type registry', () => {
-    const elements = [{
-      type: '__test1',
-      prop1: 'some value',
-    }, {
-      type: '__test2',
-      prop2: 'some other value',
-      name: 'unused',
-    }];
+    const elements = [
+      {
+        type: '__test1',
+        prop1: 'some value',
+      },
+      {
+        type: '__test2',
+        prop2: 'some other value',
+        name: 'unused',
+      },
+    ];
 
     const registry = new Registry('type');
     registry.register(elements[0]);
@@ -93,21 +99,24 @@ describe('Registry', () => {
 
   describe('wrapped registry', () => {
     let idx = 0;
-    const elements = [{
-      name: '__test1',
-      prop1: 'some value',
-    }, {
-      name: '__test2',
-      prop2: 'some other value',
-      type: 'unused',
-    }];
+    const elements = [
+      {
+        name: '__test1',
+        prop1: 'some value',
+      },
+      {
+        name: '__test2',
+        prop2: 'some other value',
+        type: 'unused',
+      },
+    ];
 
     class CustomRegistry extends Registry {
       wrapper(obj) {
         // append custom prop to shallow cloned object, with index as a value
         return {
           ...obj,
-          __CUSTOM_PROP__: idx += 1,
+          __CUSTOM_PROP__: (idx += 1),
         };
       }
     }
@@ -135,11 +144,15 @@ describe('Registry', () => {
           this.name = name;
         }
 
-        baseFunc() { return 'base'; }
+        baseFunc() {
+          return 'base';
+        }
       }
 
       class Thing extends Base {
-        doThing() { return 'done'; }
+        doThing() {
+          return 'done';
+        }
       }
 
       thing = new Thing(name);

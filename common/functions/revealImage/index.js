@@ -6,9 +6,7 @@ export const revealImage = {
   type: 'render',
   help: 'Configure a image reveal element',
   context: {
-    types: [
-      'number',
-    ],
+    types: ['number'],
   },
   args: {
     image: {

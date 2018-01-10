@@ -16,7 +16,7 @@ export const filter = {
     },
   },
   to: {
-    render: (value) => ({
+    render: value => ({
       type: 'render',
       as: 'debug',
       value,

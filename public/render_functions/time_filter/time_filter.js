@@ -20,9 +20,15 @@ export const timeFilter = {
       handlers.setFilter(toExpression(ast));
     }
 
-    ReactDOM.render((
-      <TimeFilter compact={config.compact} commit={handlers.setFilter} filter={toExpression(ast)}/>
-    ), domNode, () => handlers.done());
+    ReactDOM.render(
+      <TimeFilter
+        compact={config.compact}
+        commit={handlers.setFilter}
+        filter={toExpression(ast)}
+      />,
+      domNode,
+      () => handlers.done()
+    );
 
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },

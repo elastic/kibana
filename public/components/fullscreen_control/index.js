@@ -6,7 +6,7 @@ import { setFullscreen } from '../../state/actions/transient.js';
 import { getFullscreen } from '../../state/selectors/app.js';
 import { FullscreenControl as Component } from './fullscreen_control';
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
   isFullscreen: getFullscreen(state),
 });
 
@@ -19,12 +19,12 @@ export const FullscreenControl = compose(
   withState('isActive', 'setActive', true),
   withProps(({ ident, isActive }) => ({
     ident: ident || defaultIdent,
-    onFullscreen: (ev) => {
+    onFullscreen: ev => {
       if (!isActive) return;
       const fullscreenHandler = createHandler(ident || defaultIdent);
       fullscreenHandler(ev);
     },
-  })),
+  }))
 )(Component);
 
 FullscreenControl.propTypes = {

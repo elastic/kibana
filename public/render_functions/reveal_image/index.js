@@ -6,11 +6,10 @@ export const revealImage = {
   help: 'Reveal a percentage of an image to make a custom gauge-style chart',
   reuseDomNode: true,
   render(domNode, config, handlers) {
-
     const container = document.createElement('div');
     const aligner = document.createElement('div');
     const img = new Image();
-    img.onload = function () {
+    img.onload = function() {
       setSize();
       finish();
     };
@@ -57,6 +56,5 @@ export const revealImage = {
         img.style.height = 'initial';
       }
     }
-
   },
 };

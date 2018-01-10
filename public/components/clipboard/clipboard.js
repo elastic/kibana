@@ -5,10 +5,7 @@ import copy from 'copy-to-clipboard';
 export class Clipboard extends React.PureComponent {
   static propTypes = {
     children: PropTypes.element.isRequired,
-    content: PropTypes.oneOfType([
-      PropTypes.string,
-      PropTypes.number,
-    ]).isRequired,
+    content: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     onCopy: PropTypes.func,
   };
 
@@ -19,7 +16,7 @@ export class Clipboard extends React.PureComponent {
     const result = copy(content, { debug: true });
 
     if (typeof onCopy === 'function') onCopy(result);
-  }
+  };
 
   render() {
     return (

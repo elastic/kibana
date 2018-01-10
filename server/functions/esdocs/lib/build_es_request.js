@@ -10,5 +10,4 @@ export function buildESRequest(esRequest, canvasQuery) {
   }
 
   return esRequest;
-
 }

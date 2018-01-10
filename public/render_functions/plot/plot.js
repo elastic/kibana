@@ -28,7 +28,6 @@ const render = (domNode, config, handlers) => {
     } catch (e) {
       // Nope
     }
-
   }
 
   function destroy() {

@@ -16,7 +16,7 @@ function addArgType(expFn) {
 }
 
 function addExpressionType(typeName, expObj) {
-  switch(typeName) {
+  switch (typeName) {
     case 'datasource':
       datasourceRegistry.register(expObj);
       break;

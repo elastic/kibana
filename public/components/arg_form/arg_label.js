@@ -6,17 +6,14 @@ import PropTypes from 'prop-types';
 export const ArgLabel = ({ label, /*help,*/ expandable, expanded, setExpand }) => {
   const className = expandable ? 'canvas__arg--label clickable' : 'canvas__arg--label';
 
-  return expandable ?
-    (
-      <label className={className} onClick={() => setExpand(!expanded)}>
-        <i className={`fa fa-chevron-${expanded ? 'down' : 'right'}`}/>
-        {label}
-      </label>
-    ) : (
-      <label className="canvas__arg--label">
-        {label}
-      </label>
-    );
+  return expandable ? (
+    <label className={className} onClick={() => setExpand(!expanded)}>
+      <i className={`fa fa-chevron-${expanded ? 'down' : 'right'}`} />
+      {label}
+    </label>
+  ) : (
+    <label className="canvas__arg--label">{label}</label>
+  );
 };
 
 ArgLabel.propTypes = {

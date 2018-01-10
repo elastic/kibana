@@ -12,11 +12,7 @@ export const FunctionFormList = ({ functionFormItems }) => {
     );
   });
 
-  return (
-    <div>
-      {argTypeComponents}
-    </div>
-  );
+  return <div>{argTypeComponents}</div>;
 };
 
 FunctionFormList.propTypes = {

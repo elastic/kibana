@@ -8,7 +8,7 @@ export function Arg(config) {
   this.aliases = config.aliases || [];
   this.isAlias = config.isAlias || false;
   this.multi = config.multi == null ? false : config.multi;
-  this.accepts = (type) => {
+  this.accepts = type => {
     if (!this.types.length) return true;
     return includes(config.types, type);
   };

@@ -20,7 +20,7 @@ export function toProvider(types) {
       },
     },
     fn: (context, args) => {
-      if (!args._) throw new Error ('Must specify a casting type');
+      if (!args._) throw new Error('Must specify a casting type');
       return castProvider(types.toJS())(context, args._);
     },
   };

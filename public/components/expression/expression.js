@@ -4,29 +4,26 @@ import { FormGroup, Button, ButtonToolbar } from 'react-bootstrap';
 import './expression.less';
 import { ExpressionInput } from '../expression_input';
 
-export const Expression = ({
-  formState,
-  updateValue,
-  setExpression,
-  done,
-  error,
-}) => {
+export const Expression = ({ formState, updateValue, setExpression, done, error }) => {
   return (
     <div className="canvas__expression">
       <FormGroup controlId="formControlsTextarea" validationState={error ? 'error' : null}>
-        <ExpressionInput
-          value={formState.expression}
-          onChange={updateValue}
-        />
+        <ExpressionInput value={formState.expression} onChange={updateValue} />
         <label>
-          { error ? error : `The Canvas expression backing the element. Better know what you're doing here.`}
+          {error
+            ? error
+            : `The Canvas expression backing the element. Better know what you're doing here.`}
         </label>
       </FormGroup>
       <ButtonToolbar>
-        <Button disabled={!!error} bsStyle="success" onClick={() => setExpression(formState.expression)}> Run</Button>
-        {done && (
-          <Button onClick={done}> {formState.dirty ? 'Cancel' : 'Done'}</Button>
-        )}
+        <Button
+          disabled={!!error}
+          bsStyle="success"
+          onClick={() => setExpression(formState.expression)}
+        >
+          Run
+        </Button>
+        {done && <Button onClick={done}> {formState.dirty ? 'Cancel' : 'Done'}</Button>}
       </ButtonToolbar>
     </div>
   );

@@ -12,7 +12,7 @@ function requiresContext(expressionType) {
 // helper to check the state of the passed in expression type
 function checkState(state) {
   return ({ context, expressionType }) => {
-    const matchState = (!context || context.state === state);
+    const matchState = !context || context.state === state;
     return requiresContext(expressionType) && matchState;
   };
 }
@@ -46,10 +46,7 @@ const contextLifecycle = lifecycle({
   },
 });
 
-export const FunctionForm = compose(
-  contextLifecycle,
-  ...branches
-)(FunctionFormComponent);
+export const FunctionForm = compose(contextLifecycle, ...branches)(FunctionFormComponent);
 
 FunctionForm.propTypes = {
   expressionType: PropTypes.object,

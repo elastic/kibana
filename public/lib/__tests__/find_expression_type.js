@@ -22,7 +22,6 @@ const { findExpressionType } = proxy.noCallThru().load('../find_expression_type'
   '../expression_types/view': {
     viewRegistry: registries.view,
   },
-
 });
 
 describe('findExpressionType', () => {
@@ -31,7 +30,7 @@ describe('findExpressionType', () => {
   beforeEach(() => {
     expTypes = [];
     const keys = Object.keys(registries);
-    keys.forEach((key) => {
+    keys.forEach(key => {
       const reg = registries[key];
       reg.reset();
 
@@ -64,7 +63,9 @@ describe('findExpressionType', () => {
         name: commonName,
       });
 
-      const check = () => { findExpressionType(commonName); };
+      const check = () => {
+        findExpressionType(commonName);
+      };
       expect(check).to.throwException(/Found multiple expressions/i);
     });
   });

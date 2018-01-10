@@ -16,21 +16,22 @@ const TextAreaArgInput = ({ updateValue, value, confirm, commit, renderError }) 
           componentClass="textarea"
           style={{ height: 200 }}
           value={value}
-          onChange={confirm ? updateValue : (ev) => commit(ev.target.value)}
+          onChange={confirm ? updateValue : ev => commit(ev.target.value)}
         />
       </FormGroup>
 
-      {confirm && (<Button bsStyle="primary" bsSize="xsmall" onClick={() => commit(value)}>{confirm}</Button>)}
+      {confirm && (
+        <Button bsStyle="primary" bsSize="xsmall" onClick={() => commit(value)}>
+          {confirm}
+        </Button>
+      )}
     </div>
   );
 };
 
 TextAreaArgInput.propTypes = {
   updateValue: PropTypes.func.isRequired,
-  value: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.object,
-  ]).isRequired,
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.object]).isRequired,
   confirm: PropTypes.string,
   commit: PropTypes.func.isRequired,
   renderError: PropTypes.func,
@@ -42,7 +43,7 @@ const template = compose(
     commit: onValueChange,
     value: argValue,
   })),
-  createStatefulPropHoc('value'),
+  createStatefulPropHoc('value')
 )(TextAreaArgInput);
 
 template.propTypes = {

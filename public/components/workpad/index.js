@@ -8,7 +8,7 @@ import { getFullscreen, getEditing } from '../../state/selectors/app';
 import { nextPage, previousPage } from '../../state/actions/pages';
 import { Workpad as Component } from './workpad';
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   return {
     pages: getPages(state),
     selectedPageId: getSelectedPage(state),

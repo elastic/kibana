@@ -10,11 +10,10 @@ export const grid = {
   name: 'grid',
   aliases: [],
   type: 'render',
-  help: 'Creates a renderable element represented by a grid of icons or values. Similar to a heat map',
+  help:
+    'Creates a renderable element represented by a grid of icons or values. Similar to a heat map',
   context: {
-    types: [
-      'pointseries',
-    ],
+    types: ['pointseries'],
   },
   args: {
     mark: {
@@ -48,22 +47,24 @@ export const grid = {
     if (resultColumns.length === 0) resultColumns.push('');
 
     function getConsolidateRow(rows, label) {
-      const cells = resultColumns.map((column) => {
+      const cells = resultColumns.map(column => {
         // If there was a y value we could also filter for that. Nice.
-        const marks = (!context.columns.x) ? rows : rows.reduce((acc, row) => {
-          if (row.x === column) {
-            const seriesStyle = seriesStyles[row.color];
+        const marks = !context.columns.x
+          ? rows
+          : rows.reduce((acc, row) => {
+              if (row.x === column) {
+                const seriesStyle = seriesStyles[row.color];
 
-            acc.push({
-              ...row,
-              style: {
-                color: get(seriesStyle, 'color'),
-              },
-            });
-          }
+                acc.push({
+                  ...row,
+                  style: {
+                    color: get(seriesStyle, 'color'),
+                  },
+                });
+              }
 
-          return acc;
-        }, []);
+              return acc;
+            }, []);
 
         return sortBy(marks, 'text');
       });
@@ -81,7 +82,7 @@ export const grid = {
 
     // If there is no "y" then there exists only one row. How do we get it?
     // We can also filter the rows by 'y' above.
-    const resultRows = (context.columns.y)
+    const resultRows = context.columns.y
       ? getConsolidatedRows(context.rows)
       : [getConsolidateRow(context.rows)];
 

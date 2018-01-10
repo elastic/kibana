@@ -6,7 +6,7 @@ import { getWorkpad } from '../../state/selectors/workpad';
 
 import { WorkpadConfig as Component } from './workpad_config';
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
   const workpad = getWorkpad(state);
 
   return {
@@ -18,9 +18,9 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatchToProps = ({
-  setSize: (size) => sizeWorkpad(size),
-  setName: (name) => setName(name),
-});
+const mapDispatchToProps = {
+  setSize: size => sizeWorkpad(size),
+  setName: name => setName(name),
+};
 
 export const WorkpadConfig = connect(mapStateToProps, mapDispatchToProps)(Component);

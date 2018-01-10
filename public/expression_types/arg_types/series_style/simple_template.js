@@ -5,7 +5,7 @@ import { set, del } from 'object-path-immutable';
 import { ColorPickerMini } from '../../../components/color_picker_mini';
 import { Tooltip } from '../../../components/tooltip';
 
-export const simpleTemplate = (props) => {
+export const simpleTemplate = props => {
   const { argValue, onValueChange, labels } = props;
   const chain = get(argValue, 'chain.0', {});
   const chainArgs = get(chain, 'arguments', {});
@@ -23,21 +23,20 @@ export const simpleTemplate = (props) => {
   return (
     <div className="canvas__argtype--seriesStyle--color">
       <label style={{ paddingRight: '4px' }}>Color </label>
-      { !color || color.length === 0 ? (
+      {!color || color.length === 0 ? (
         <div className="canvas__argtype--seriesStyle--color-picker">
           <div>
-            <a onClick={() => handlePlain('color', '#000000')}>Auto <i className="fa fa-bolt"/> </a>
+            <a onClick={() => handlePlain('color', '#000000')}>
+              Auto <i className="fa fa-bolt" />
+            </a>
           </div>
         </div>
       ) : (
         <div className="canvas__argtype--seriesStyle--color-picker">
           <div className="canvas__argtype--seriesStyle--remove-color">
-            <i onClick={() => handlePlain('color', '')} className="fa fa-times-circle clickable"/>
+            <i onClick={() => handlePlain('color', '')} className="fa fa-times-circle clickable" />
           </div>
-          <ColorPickerMini
-            value={color}
-            onChange={(val) => handlePlain('color', val)}
-          />
+          <ColorPickerMini value={color} onChange={val => handlePlain('color', val)} />
         </div>
       )}
 

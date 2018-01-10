@@ -6,7 +6,7 @@ import { createIndices } from './server/lib/create_indices';
 import { commonFunctions } from './common/functions';
 import { typeSpecs } from './common/types';
 
-export default function (server, /*options*/) {
+export default function(server /*options*/) {
   const elasticsearch = server.plugins.elasticsearch;
 
   server.plugins.canvas = {

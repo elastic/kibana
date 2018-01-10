@@ -16,9 +16,12 @@ export function getRootReducer(initialState) {
     assets: assetsReducer,
     app: appReducer,
     transient: reduceReducers(transientReducer, resolvedArgsReducer),
-    persistent: reduceReducers(historyReducer, combineReducers({
-      workpad: reduceReducers(workpadReducer, pagesReducer, elementsReducer),
-      schemaVersion: (state = get(initialState, 'persistent.schemaVersion')) => state,
-    })),
+    persistent: reduceReducers(
+      historyReducer,
+      combineReducers({
+        workpad: reduceReducers(workpadReducer, pagesReducer, elementsReducer),
+        schemaVersion: (state = get(initialState, 'persistent.schemaVersion')) => state,
+      })
+    ),
   });
 }

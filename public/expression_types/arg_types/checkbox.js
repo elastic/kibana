@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 const CheckboxArgInput = ({ onValueChange, argValue }) => {
-
   function handleChange() {
     onValueChange(!argValue);
   }

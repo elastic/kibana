@@ -39,14 +39,20 @@ export const alterColumn = {
     if (args.type) {
       handler = (function getHandler() {
         switch (type) {
-          case 'string': return String;
-          case 'number': return Number;
-          case 'date': return (v) => (new Date(v)).valueOf();
-          case 'boolean': return Boolean;
-          case 'null': return null;
-          default: throw new Error(`can not convert to ${type}`);
+          case 'string':
+            return String;
+          case 'number':
+            return Number;
+          case 'date':
+            return v => new Date(v).valueOf();
+          case 'boolean':
+            return Boolean;
+          case 'null':
+            return null;
+          default:
+            throw new Error(`can not convert to ${type}`);
         }
-      }());
+      })();
     }
 
     column.name = destination;

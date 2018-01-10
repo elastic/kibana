@@ -7,7 +7,7 @@ import './arg_add_popover.less';
 
 export const ArgAddPopover = ({ options }) => {
   let close;
-  const linkRef = (refNode) => {
+  const linkRef = refNode => {
     // TODO: handleHide is a private method, there must be a supported way to do this, I just don't know
     // what it is.
     close = get(refNode, 'handleHide');
@@ -20,21 +20,18 @@ export const ArgAddPopover = ({ options }) => {
           key={`${opt.arg.name}-add`}
           displayName={opt.arg.displayName}
           help={opt.arg.help}
-          onValueAdd={() => { opt.onValueAdd(...arguments); close();}}
+          onValueAdd={() => {
+            opt.onValueAdd(...arguments);
+            close();
+          }}
         />
       ))}
     </Popover>
   );
 
   return (
-    <OverlayTrigger
-      rootClose
-      overlay={picker}
-      placement="bottom"
-      trigger="click"
-      ref={linkRef}
-    >
-      <i className="fa fa-plus-circle canvas__add-arg-button"/>
+    <OverlayTrigger rootClose overlay={picker} placement="bottom" trigger="click" ref={linkRef}>
+      <i className="fa fa-plus-circle canvas__add-arg-button" />
     </OverlayTrigger>
   );
 };

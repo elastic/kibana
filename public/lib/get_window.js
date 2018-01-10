@@ -2,5 +2,5 @@
 const windowObj = {};
 
 export const getWindow = () => {
-  return typeof (window) === 'undefined' ? windowObj : window;
+  return typeof window === 'undefined' ? windowObj : window;
 };

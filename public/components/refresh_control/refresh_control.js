@@ -38,7 +38,7 @@ const getRefreshInterval = (val = '') => {
   }
 };
 
-export const RefreshControl = (props) => {
+export const RefreshControl = props => {
   const { inFlight, doRefresh, setRefreshInterval, refreshInterval, className } = props;
   const setRefresh = val => setRefreshInterval(getRefreshInterval(val));
 

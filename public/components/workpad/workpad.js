@@ -24,7 +24,7 @@ export const Workpad = ({
   // TODO: I think this is mixing in background color, that should be pushed down to a page component, otherwise reporting wont work right
   const itsTheNewStyle = { ...style, height, width };
 
-  const keyHandler = (action) => {
+  const keyHandler = action => {
     if (action === 'REFRESH') return fetchAllRenderables();
     if (action === 'UNDO') return undoHistory();
     if (action === 'REDO') return redoHistory();
@@ -36,32 +36,38 @@ export const Workpad = ({
   return (
     <div className="canvas__checkered" style={{ height, width }}>
       {!isFullscreen && (
-        <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global/>
+        <Shortcuts name="EDITOR" handler={keyHandler} targetNodeSelector="body" global />
       )}
 
       <Fullscreen>
         {({ isFullscreen, windowSize }) => {
           const scale = Math.min(windowSize.height / height, windowSize.width / width);
-          const fsStyle = (!isFullscreen) ? {} : {
-            WebkitTransform: `scale3d(${scale}, ${scale}, 1)`,
-            msTransform: `scale3d(${scale}, ${scale}, 1)`,
-            transform: `scale3d(${scale}, ${scale}, 1)`,
-          };
+          const fsStyle = !isFullscreen
+            ? {}
+            : {
+                WebkitTransform: `scale3d(${scale}, ${scale}, 1)`,
+                msTransform: `scale3d(${scale}, ${scale}, 1)`,
+                transform: `scale3d(${scale}, ${scale}, 1)`,
+              };
 
           return (
             <div
               className={`canvas__workpad ${isFullscreen ? 'fullscreen' : ''}`}
               style={{ ...itsTheNewStyle, ...fsStyle }}
             >
-              { isFullscreen && (
-                <Shortcuts
-                  name="PRESENTATION"
-                  handler={keyHandler}
-                  targetNodeSelector="body"
-                />
+              {isFullscreen && (
+                <Shortcuts name="PRESENTATION" handler={keyHandler} targetNodeSelector="body" />
               )}
-              <PageStack pages={pages} selectedPageId={selectedPageId} height={height} width={width} />
-              <div className="canvas__grid" style={{ height, width, display: grid ? 'block' : 'none' }}/>
+              <PageStack
+                pages={pages}
+                selectedPageId={selectedPageId}
+                height={height}
+                width={width}
+              />
+              <div
+                className="canvas__grid"
+                style={{ height, width, display: grid ? 'block' : 'none' }}
+              />
             </div>
           );
         }}

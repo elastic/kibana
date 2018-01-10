@@ -8,34 +8,34 @@ export class TextareaWithSelection extends React.Component {
       const { start, end } = this.props.selection;
       this.input.setSelectionRange(start, end);
     }
-  }
+  };
 
-  onMouseDown = (e) => {
+  onMouseDown = e => {
     this.updateSelection(e);
     if (this.props.onMouseDown) this.props.onMouseDown(e);
-  }
+  };
 
-  onMouseUp = (e) => {
+  onMouseUp = e => {
     this.updateSelection(e);
     if (this.props.onMouseUp) this.props.onMouseUp(e);
-  }
+  };
 
-  onKeyDown = (e) => {
+  onKeyDown = e => {
     this.updateSelection(e);
     if (this.props.onKeyDown) this.props.onKeyDown(e);
-  }
+  };
 
-  onKeyUp = (e) => {
+  onKeyUp = e => {
     this.updateSelection(e);
     if (this.props.onKeyUp) this.props.onKeyUp(e);
-  }
+  };
 
-  ref = (input) => {
+  ref = input => {
     this.input = input;
     if (this.props.ref) this.props.ref(input);
-  }
+  };
 
-  updateSelection = (e) => {
+  updateSelection = e => {
     const { currentTarget } = e;
     const { selectionStart, selectionEnd } = currentTarget;
     const selection = {
@@ -45,11 +45,11 @@ export class TextareaWithSelection extends React.Component {
     if (!isEqual(selection, this.props.selection)) {
       this.props.onSelectionChange(selection);
     }
-  }
+  };
 
   getTextareaProps = () => {
     return omit(this.props, 'selection', 'onSelectionChange');
-  }
+  };
 
   render = () => (
     <textarea
@@ -60,7 +60,7 @@ export class TextareaWithSelection extends React.Component {
       ref={input => this.ref(input)}
       {...this.getTextareaProps()}
     />
-  )
+  );
 }
 
 TextareaWithSelection.propTypes = {

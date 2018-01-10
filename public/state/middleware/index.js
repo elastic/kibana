@@ -13,10 +13,10 @@ import { appReady } from './app_ready';
 const storageKey = 'canvas';
 
 // caching serializer, prevents lzString.compress from running all the time
-const serializer = (function () {
+const serializer = (function() {
   let prevString;
   let prevState;
-  return (state) => {
+  return state => {
     const newString = JSON.stringify(state);
 
     // state changed, recompress and cache the value
@@ -28,7 +28,7 @@ const serializer = (function () {
     prevString = newString;
     return prevState;
   };
-}());
+})();
 
 const middlewares = [
   applyMiddleware(
@@ -38,7 +38,7 @@ const middlewares = [
     inFlight,
     appReady,
     workpadUpdate,
-    workpadRefresh,
+    workpadRefresh
   ),
   persistState('persistent', { key: storageKey }),
   persistState('assets', {
@@ -48,6 +48,7 @@ const middlewares = [
   }),
 ];
 
-if (getWindow().__REDUX_DEVTOOLS_EXTENSION__) middlewares.push(getWindow().__REDUX_DEVTOOLS_EXTENSION__());
+if (getWindow().__REDUX_DEVTOOLS_EXTENSION__)
+  middlewares.push(getWindow().__REDUX_DEVTOOLS_EXTENSION__());
 
 export const middleware = compose(...middlewares);

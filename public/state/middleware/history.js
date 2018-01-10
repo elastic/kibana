@@ -3,16 +3,16 @@ import { historyProvider } from '../../lib/history_provider';
 import { restoreHistory, undoHistory, redoHistory } from '../actions/history';
 import { initializeWorkpad } from '../actions/workpad.js';
 
-export const historyMiddleware = (win) => {
+export const historyMiddleware = win => {
   const history = historyProvider(win);
 
   return ({ dispatch, getState }) => {
     // wire up history change handler (this only happens once)
-    history.onChange((historyState) => {
+    history.onChange(historyState => {
       if (historyState) return dispatch(restoreHistory(historyState));
     });
 
-    return next => (action) => {
+    return next => action => {
       const oldState = getState();
 
       // deal with history actions

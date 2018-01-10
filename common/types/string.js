@@ -2,11 +2,11 @@ export const string = {
   name: 'string',
   from: {
     null: () => '',
-    number: (n) => String(n),
+    number: n => String(n),
   },
   to: {
-    number: (n) => Number(n),
-    render: (input) => {
+    number: n => Number(n),
+    render: input => {
       return {
         type: 'render',
         as: 'markdown',

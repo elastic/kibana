@@ -4,17 +4,17 @@ import { getSelectedPageIndex, getPages } from '../../state/selectors/workpad';
 import { stylePage } from '../../state/actions/pages';
 import { PageConfig as Component } from './page_config';
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
   page: getPages(state)[getSelectedPageIndex(state)],
 });
 
-const mapDispatchToProps = ({
+const mapDispatchToProps = {
   stylePage,
-});
+};
 
 const mergeProps = (stateProps, dispatchProps) => {
   return {
-    setBackground: (background) => {
+    setBackground: background => {
       const itsTheNewStyle = { ...stateProps.page.style, background };
       dispatchProps.stylePage(stateProps.page.id, itsTheNewStyle);
     },

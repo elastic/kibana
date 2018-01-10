@@ -6,24 +6,24 @@ import { Paginate } from '../paginate';
 import { PageControls } from '../paginate_controls';
 import './datatable.less';
 
-const getIcon = (type) => {
+const getIcon = type => {
   if (type === null) return;
 
   switch (type) {
     case 'string':
-      return (<strong>a</strong>);
+      return <strong>a</strong>;
     case 'number':
-      return (<strong>#</strong>);
+      return <strong>#</strong>;
     case 'date':
-      return (<i className="fa fa-calendar"/>);
+      return <i className="fa fa-calendar" />;
     case 'boolean':
-      return (<strong>t</strong>);
+      return <strong>t</strong>;
     default:
-      return (<strong>?</strong>);
+      return <strong>?</strong>;
   }
 };
 
-const getColumnName = col => (typeof col === 'string') ? col : col.name;
+const getColumnName = col => (typeof col === 'string' ? col : col.name);
 
 const getColumnType = col => col.type || null;
 
@@ -34,7 +34,16 @@ const getFormattedValue = (val, type) => {
 
 export const Datatable = ({ datatable, perPage, paginate }) => (
   <Paginate rows={datatable.rows} perPage={perPage || 10}>
-    {({ rows, nextPage, prevPage, setPage, prevPageEnabled, nextPageEnabled, pageNumber, totalPages }) => (
+    {({
+      rows,
+      nextPage,
+      prevPage,
+      setPage,
+      prevPageEnabled,
+      nextPageEnabled,
+      pageNumber,
+      totalPages,
+    }) => (
       <div className="canvas__datatable">
         <div style={{ flexGrow: 1 }}>
           <Table condensed>
@@ -42,7 +51,8 @@ export const Datatable = ({ datatable, perPage, paginate }) => (
               <tr>
                 {datatable.columns.map(col => (
                   <th key={`header-${getColumnName(col)}`}>
-                    {getColumnName(col)} <small className="muted">{getIcon(getColumnType(col))}</small>
+                    {getColumnName(col)}{' '}
+                    <small className="muted">{getIcon(getColumnType(col))}</small>
                   </th>
                 ))}
               </tr>
@@ -72,7 +82,6 @@ export const Datatable = ({ datatable, perPage, paginate }) => (
             nextPageEnabled={nextPageEnabled}
           />
         )}
-
       </div>
     )}
   </Paginate>

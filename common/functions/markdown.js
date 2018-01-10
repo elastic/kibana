@@ -4,14 +4,16 @@ export const markdown = {
   name: 'markdown',
   aliases: [],
   type: 'render',
-  help: 'An element for rendering markdown text. Great for single numbers, metrics or paragraphs of text.',
+  help:
+    'An element for rendering markdown text. Great for single numbers, metrics or paragraphs of text.',
   context: {
     types: ['datatable', 'null'],
   },
   args: {
     _: {
       types: ['string'],
-      help: 'A string containing markdown. You can pass this multiple times to achieve concatenation',
+      help:
+        'A string containing markdown. You can pass this multiple times to achieve concatenation',
       default: '',
       multi: true,
     },

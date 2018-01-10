@@ -14,7 +14,7 @@ export const SimpleMathFunction = ({ onChange, value, inputRef }) => {
     { label: 'Mode', value: 'mode' },
   ];
 
-  const onSelect = (ev) => onChange(ev.target.value);
+  const onSelect = ev => onChange(ev.target.value);
 
   return (
     <div className="canvas__argtype--mathExpression">
@@ -25,8 +25,10 @@ export const SimpleMathFunction = ({ onChange, value, inputRef }) => {
         onChange={onSelect}
         inputRef={inputRef}
       >
-        { options.map(option => (
-          <option key={option.value} value={option.value}>{option.label}</option>
+        {options.map(option => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
         ))}
       </FormControl>
     </div>

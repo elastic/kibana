@@ -10,17 +10,18 @@ export function workpad(server) {
   const indexName = config.get('kibana.index');
 
   function formatResponse(reply, returnResponse = false) {
-    return (resp) => {
+    return resp => {
       if (resp instanceof esErrors['400']) return reply(boom.badRequest(resp));
       if (resp instanceof esErrors['401']) return reply(boom.unauthorized());
-      if (resp instanceof esErrors['403']) return reply(boom.forbidden('Sorry, you don\'t have access to that'));
+      if (resp instanceof esErrors['403'])
+        return reply(boom.forbidden("Sorry, you don't have access to that"));
       if (resp instanceof esErrors['404']) return reply(boom.wrap(resp, 404));
       return returnResponse ? resp : reply(resp);
     };
   }
 
   function createWorkpad(request, id) {
-    const now = (new Date()).toISOString();
+    const now = new Date().toISOString();
     const doc = {
       refresh: 'wait_for',
       index: indexName,
@@ -53,8 +54,8 @@ export function workpad(server) {
           type: CANVAS_TYPE,
           [CANVAS_TYPE]: {
             ...request.payload,
-            '@created': _source['@created'] || (new Date()).toISOString(),
-            '@timestamp': (new Date()).toISOString(),
+            '@created': _source['@created'] || new Date().toISOString(),
+            '@timestamp': new Date().toISOString(),
           },
         };
 
@@ -69,7 +70,7 @@ export function workpad(server) {
 
         return callWithRequest(request, 'index', doc);
       })
-      .catch((err) => {
+      .catch(err => {
         if (err instanceof esErrors['404']) {
           return createWorkpad(request, workpadId);
         }
@@ -82,7 +83,7 @@ export function workpad(server) {
   server.route({
     method: 'GET',
     path: `${routePrefix}/{id}`,
-    handler: function (request, reply) {
+    handler: function(request, reply) {
       const doc = {
         index: indexName,
         type: 'doc',
@@ -113,7 +114,7 @@ export function workpad(server) {
     method: 'POST',
     path: routePrefix,
     config: { payload: { maxBytes: 26214400 } }, // 25MB payload limit
-    handler: function (request, reply) {
+    handler: function(request, reply) {
       createWorkpad(request)
         .then(formatResponse(reply))
         .catch(formatResponse(reply));
@@ -125,7 +126,7 @@ export function workpad(server) {
     method: 'PUT',
     path: `${routePrefix}/{id}`,
     config: { payload: { maxBytes: 26214400 } }, // 25MB payload limit
-    handler: function (request, reply) {
+    handler: function(request, reply) {
       updateWorkpad(request)
         .then(formatResponse(reply))
         .catch(formatResponse(reply));
@@ -136,7 +137,7 @@ export function workpad(server) {
   server.route({
     method: 'DELETE',
     path: `${routePrefix}/{id}`,
-    handler: function (request, reply) {
+    handler: function(request, reply) {
       const doc = {
         index: indexName,
         type: 'doc',
@@ -153,27 +154,31 @@ export function workpad(server) {
   server.route({
     method: 'GET',
     path: `${routePrefix}/find`,
-    handler: function (request, reply) {
+    handler: function(request, reply) {
       const { name, page } = request.query;
       const limit = Number(request.query.limit) || 10000;
-      const offset = (page && page >= 1) ? (page - 1) * limit : 0;
+      const offset = page && page >= 1 ? (page - 1) * limit : 0;
 
-      const getQuery = (name) => {
+      const getQuery = name => {
         const nameField = `${CANVAS_TYPE}.name`;
         const nameFieldKeyword = `${nameField}.keyword`;
 
         if (name != null) {
-          return { bool: { should: [
-            { match: { type: CANVAS_TYPE } },
-            { match: { [nameField]: name } },
-            { wildcard: { [nameField]: `*${name}` } },
-            { wildcard: { [nameField]: `${name}*` } },
-            { wildcard: { [nameField]: `*${name}*` } },
-            { match: { [nameFieldKeyword]: name } },
-            { wildcard: { [nameFieldKeyword]: `*${name}` } },
-            { wildcard: { [nameFieldKeyword]: `${name}*` } },
-            { wildcard: { [nameFieldKeyword]: `*${name}*` } },
-          ] } };
+          return {
+            bool: {
+              should: [
+                { match: { type: CANVAS_TYPE } },
+                { match: { [nameField]: name } },
+                { wildcard: { [nameField]: `*${name}` } },
+                { wildcard: { [nameField]: `${name}*` } },
+                { wildcard: { [nameField]: `*${name}*` } },
+                { match: { [nameFieldKeyword]: name } },
+                { wildcard: { [nameFieldKeyword]: `*${name}` } },
+                { wildcard: { [nameFieldKeyword]: `${name}*` } },
+                { wildcard: { [nameFieldKeyword]: `*${name}*` } },
+              ],
+            },
+          };
         }
 
         return { match_all: {} };
@@ -194,7 +199,7 @@ export function workpad(server) {
 
       callWithRequest(request, 'search', doc)
         .then(formatResponse(reply, true))
-        .then((resp) => {
+        .then(resp => {
           reply({
             total: resp.hits.total,
             workpads: resp.hits.hits.map(hit => hit._source[CANVAS_TYPE]),

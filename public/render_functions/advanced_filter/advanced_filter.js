@@ -8,9 +8,11 @@ export const advancedFilter = {
   help: 'Render a Canvas filter expression',
   reuseDomNode: true,
   render(domNode, config, handlers) {
-    ReactDOM.render((
-      <AdvancedFilter commit={handlers.setFilter} filter={handlers.getFilter()}/>
-    ), domNode, () => handlers.done());
+    ReactDOM.render(
+      <AdvancedFilter commit={handlers.setFilter} filter={handlers.getFilter()} />,
+      domNode,
+      () => handlers.done()
+    );
 
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },

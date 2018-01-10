@@ -31,10 +31,12 @@ function getFullscreenElement(doc) {
 }
 
 export function canFullscreen(el) {
-  return typeof el.requestFullscreen === 'function'
-    || typeof el.msRequestFullscreen === 'function'
-    || typeof el.mozRequestFullScreen === 'function'
-    || typeof el.webkitRequestFullscreen === 'function';
+  return (
+    typeof el.requestFullscreen === 'function' ||
+    typeof el.msRequestFullscreen === 'function' ||
+    typeof el.mozRequestFullScreen === 'function' ||
+    typeof el.webkitRequestFullscreen === 'function'
+  );
 }
 
 export function createHandler(ident = defaultIdent, doc = document) {
@@ -43,7 +45,7 @@ export function createHandler(ident = defaultIdent, doc = document) {
   // TODO: tell the user something failed, at least in dev mode
   if (!el || !canFullscreen(el)) return false;
 
-  return (ev) => {
+  return ev => {
     ev && ev.preventDefault();
 
     // check to see if any element is already fullscreen, do nothing if so
@@ -74,7 +76,7 @@ export function initialize(doc = document) {
   for (const m in checks) {
     if (typeof doc[checks[m]] !== 'undefined') {
       if (doc[checks[m]] === null) {
-        doc[checks[m]] = (ev) => {
+        doc[checks[m]] = ev => {
           const el = getFullscreenElement(doc);
           const payload = {
             fullscreen: Boolean(el),
@@ -83,7 +85,7 @@ export function initialize(doc = document) {
           };
 
           // _emitter.emit('onfullscreenchange', payload);
-          _listeners.forEach((listener) => {
+          _listeners.forEach(listener => {
             listener.call(null, payload);
           });
         };

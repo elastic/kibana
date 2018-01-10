@@ -10,11 +10,11 @@ export const TooltipIcon = ({ icon = 'info', text, placement }) => {
     info: ['fa-info-circle'],
   };
 
-  if (!Object.keys(icons).includes(icon)) throw new Error ('Unsupported icon type');
+  if (!Object.keys(icons).includes(icon)) throw new Error('Unsupported icon type');
 
   return (
     <Tooltip text={text} placement={placement}>
-      <i className={classes.concat(icons[icon]).join(' ')}/>
+      <i className={classes.concat(icons[icon]).join(' ')} />
     </Tooltip>
   );
 };

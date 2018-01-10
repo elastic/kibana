@@ -7,7 +7,7 @@ export const DatetimeQuickList = ({ from, to, ranges, onSelect }) => (
     <ul className="nav nav-pills nav-stacked">
       {ranges.map((range, i) => (
         <li
-          className={(from === range.from && to === range.to) ? 'active' : null}
+          className={from === range.from && to === range.to ? 'active' : null}
           key={i}
           onClick={() => onSelect(range.from, range.to)}
         >

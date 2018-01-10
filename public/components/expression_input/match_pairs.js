@@ -19,10 +19,14 @@ export const matchPairsProvider = ({
 }) => {
   const openers = pairs.map(pair => pair[0]);
   const closers = pairs.map(pair => pair[1]);
-  return (e) => {
+  return e => {
     const { target, key } = e;
     const { value, selectionStart, selectionEnd } = target;
-    if (selectionStart === selectionEnd && closers.includes(key) && value.charAt(selectionEnd) === key) {
+    if (
+      selectionStart === selectionEnd &&
+      closers.includes(key) &&
+      value.charAt(selectionEnd) === key
+    ) {
       // 1. (See above)
       e.preventDefault();
       setSelection({ start: selectionStart + 1, end: selectionEnd + 1 });
@@ -30,15 +34,18 @@ export const matchPairsProvider = ({
       // 2. (See above)
       e.preventDefault();
       setValue(
-        value.substr(0, selectionStart) + key +
-        value.substring(selectionStart, selectionEnd) + closers[openers.indexOf(key)] +
-        value.substr(selectionEnd)
+        value.substr(0, selectionStart) +
+          key +
+          value.substring(selectionStart, selectionEnd) +
+          closers[openers.indexOf(key)] +
+          value.substr(selectionEnd)
       );
       setSelection({ start: selectionStart + 1, end: selectionEnd + 1 });
     } else if (
       selectionStart === selectionEnd &&
       key === 'Backspace' &&
-      !e.metaKey && pairs.includes(value.substr(selectionEnd - 1, 2))
+      !e.metaKey &&
+      pairs.includes(value.substr(selectionEnd - 1, 2))
     ) {
       // 3. (See above)
       e.preventDefault();

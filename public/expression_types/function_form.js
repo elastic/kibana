@@ -25,15 +25,16 @@ export class FunctionForm extends BaseForm {
     // TODO: show some information to the user than an argument was skipped
     if (!arg || skipRender) return null;
 
-    const renderArgWithProps = (argValue, valueIndex) => arg.render({
-      key: `${argType}-${expressionIndex}-${arg.name}-${valueIndex}`,
-      ...passedProps,
-      label,
-      valueIndex,
-      argValue,
-      onValueChange: onValueChange(arg.name, valueIndex),
-      onValueRemove: onValueRemove(arg.name, valueIndex),
-    });
+    const renderArgWithProps = (argValue, valueIndex) =>
+      arg.render({
+        key: `${argType}-${expressionIndex}-${arg.name}-${valueIndex}`,
+        ...passedProps,
+        label,
+        valueIndex,
+        argValue,
+        onValueChange: onValueChange(arg.name, valueIndex),
+        onValueRemove: onValueRemove(arg.name, valueIndex),
+      });
 
     // render the argument's template, wrapped in a remove control
     // if the argument is required but not included, render the control anyway
@@ -96,15 +97,11 @@ export class FunctionForm extends BaseForm {
       return (
         <SidebarSection>
           <SidebarSectionTitle title={argTypeDef.displayName} tip={argTypeDef.help}>
-            {addableArgs.length === 0 ? null : (
-              <ArgAddPopover options={addableArgs}/>
-            )}
+            {addableArgs.length === 0 ? null : <ArgAddPopover options={addableArgs} />}
           </SidebarSectionTitle>
           {argumentForms}
-
         </SidebarSection>
       );
-
     } catch (e) {
       return (
         <Alert bsStyle="danger">

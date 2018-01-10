@@ -9,7 +9,7 @@ export const onKeyDownProvider = ({
   setIsOpen,
   selectedIndex,
   setSelectedIndex,
-}) => (e) => {
+}) => e => {
   if (!isOpen || !items.length) return;
   const { key } = e;
   if (key === 'ArrowUp') {
@@ -32,10 +32,7 @@ export const onKeyDownProvider = ({
  * show the menu whenever ANY key down event happens (like arrow keys) cuz that
  * would be just downright annoying.
  */
-export const onKeyPressProvider = ({
-  setIsOpen,
-  setSelectedIndex,
-}) => () => {
+export const onKeyPressProvider = ({ setIsOpen, setSelectedIndex }) => () => {
   setIsOpen(true);
   setSelectedIndex(-1);
 };

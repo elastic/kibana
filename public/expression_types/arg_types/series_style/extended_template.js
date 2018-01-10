@@ -5,7 +5,7 @@ import { get } from 'lodash';
 import { set, del } from 'object-path-immutable';
 import { LabeledInput } from '../../../components/labeled_input';
 
-export const extendedTemplate = (props) => {
+export const extendedTemplate = props => {
   const { typeInstance, onValueChange, labels, argValue } = props;
   const chain = get(argValue, 'chain.0', {});
   const chainArgs = get(chain, 'arguments', {});
@@ -37,7 +37,11 @@ export const extendedTemplate = (props) => {
               onChange={ev => handleChange('label', ev)}
             >
               <option value={null}>Select a Series Label</option>
-              { labels.sort().map(val => <option key={val} value={val}>{val}</option>) }
+              {labels.sort().map(val => (
+                <option key={val} value={val}>
+                  {val}
+                </option>
+              ))}
             </FormControl>
             <ControlLabel>Series Identifier</ControlLabel>
           </FormGroup>
@@ -51,7 +55,7 @@ export const extendedTemplate = (props) => {
                   className="canvas__argtype--seriesStyle--lines"
                   label="Line"
                   value={get(chainArgs, 'lines.0', 0)}
-                  values={[ ...values ]}
+                  values={[...values]}
                   onChange={ev => handleChange('lines', ev)}
                 />
               )}
@@ -61,7 +65,7 @@ export const extendedTemplate = (props) => {
                   className="canvas__argtype--seriesStyle--bars"
                   label="Bar"
                   value={get(chainArgs, 'bars.0', 0)}
-                  values={[ ...values ]}
+                  values={[...values]}
                   onChange={ev => handleChange('bars', ev)}
                 />
               )}
@@ -71,7 +75,7 @@ export const extendedTemplate = (props) => {
                   className="canvas__argtype--seriesStyle--points"
                   label="Point"
                   value={get(chainArgs, 'points.0', 0)}
-                  values={[ ...values ]}
+                  values={[...values]}
                   onChange={ev => handleChange('points', ev)}
                 />
               )}

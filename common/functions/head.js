@@ -6,9 +6,7 @@ export const head = {
   type: 'datatable',
   help: 'Get the first N rows from the datatable. Also see `tail`',
   context: {
-    types: [
-      'datatable',
-    ],
+    types: ['datatable'],
   },
   args: {
     _: {

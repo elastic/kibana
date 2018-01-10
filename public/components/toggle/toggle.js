@@ -5,7 +5,12 @@ export const Toggle = ({ value, onChange }) => {
   const classNames = ['fa', value ? 'fa-toggle-on' : 'fa-toggle-off'].join(' ');
 
   return (
-    <i onClick={() => {onChange(!value);}} className={classNames} />
+    <i
+      onClick={() => {
+        onChange(!value);
+      }}
+      className={classNames}
+    />
   );
 };
 

@@ -10,14 +10,11 @@ export const MediaCard = ({ image, children, title, onClick }) => {
 
   return (
     <div className={classes.join(' ')} onClick={onClick || noop}>
-      <div
-        className="canvas__media_card-image"
-        style={{ backgroundImage: `url(${image})` }}
-      />
+      <div className="canvas__media_card-image" style={{ backgroundImage: `url(${image})` }} />
 
       <div className="canvas__media_card-content">
         <h4 className="canvas__media_card-title">{title}</h4>
-        { children }
+        {children}
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 export const image = {
   name: 'image',
   to: {
-    render: (input) => {
+    render: input => {
       return {
         type: 'render',
         as: 'image',

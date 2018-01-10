@@ -5,7 +5,12 @@ const showPages = ({ setPage, pageNumber, totalPages }) => {
   const pages = [];
 
   for (let i = 1; i <= totalPages; i++) {
-    if (i === pageNumber) pages.push(<span key={`pageNumber${i}`} className="page-number active">{i}</span>);
+    if (i === pageNumber)
+      pages.push(
+        <span key={`pageNumber${i}`} className="page-number active">
+          {i}
+        </span>
+      );
     else {
       pages.push(
         <button
@@ -14,21 +19,34 @@ const showPages = ({ setPage, pageNumber, totalPages }) => {
           onClick={() => setPage(i)}
         >
           {i}
-        </button>);
+        </button>
+      );
     }
   }
 
   return pages;
 };
 
-export const PageControls = ({ prevPage, prevPageEnabled, setPage, pageNumber, totalPages, nextPage, nextPageEnabled }) => (
+export const PageControls = ({
+  prevPage,
+  prevPageEnabled,
+  setPage,
+  pageNumber,
+  totalPages,
+  nextPage,
+  nextPageEnabled,
+}) => (
   <div className="canvas__paginate--page-controls">
     {prevPageEnabled && (
-      <button className="btn btn-link page-navigate" onClick={prevPage}><i className="fa fa-angle-left" /></button>
+      <button className="btn btn-link page-navigate" onClick={prevPage}>
+        <i className="fa fa-angle-left" />
+      </button>
     )}
     {showPages({ setPage, pageNumber, totalPages })}
     {nextPageEnabled && (
-      <button className="btn btn-link page-navigate" onClick={nextPage}><i className="fa fa-angle-right" /></button>
+      <button className="btn btn-link page-navigate" onClick={nextPage}>
+        <i className="fa fa-angle-right" />
+      </button>
     )}
   </div>
 );

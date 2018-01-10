@@ -6,23 +6,20 @@ import { ESFieldSelect as Component } from './es_field_select';
 const basePath = chrome.getBasePath();
 const apiPath = `${basePath}/api/canvas/es_fields`;
 
-const getFields = (index) => {
+const getFields = index => {
   index = index || '_all';
-  return fetch.get(`${apiPath}?index=${index}`)
-    .then(res => Object.keys(res.data).sort());
+  return fetch.get(`${apiPath}?index=${index}`).then(res => Object.keys(res.data).sort());
 };
 
 export const ESFieldSelect = compose(
   withState('fields', 'setFields', []),
   lifecycle({
     componentDidMount() {
-      getFields(this.props.index)
-        .then(this.props.setFields);
+      getFields(this.props.index).then(this.props.setFields);
     },
     componentDidUpdate({ index }) {
       if (this.props.index !== index) {
-        getFields(this.props.index)
-          .then(this.props.setFields);
+        getFields(this.props.index).then(this.props.setFields);
       }
     },
   })

@@ -7,15 +7,14 @@ import { ElementHandlers } from './lib/handlers';
 
 export const RenderElement = compose(
   withState('domNode', 'setDomNode'), // Still don't like this, seems to be the only way todo it.
-  withPropsOnChange(() => false, () => ({
-    elementHandlers: new ElementHandlers(),
-  })),
+  withPropsOnChange(
+    () => false,
+    () => ({
+      elementHandlers: new ElementHandlers(),
+    })
+  ),
   withProps(({ handlers, elementHandlers }) => ({
-    handlers: Object.assign(
-      elementHandlers,
-      handlers,
-      { done: () => {} },
-    ),
+    handlers: Object.assign(elementHandlers, handlers, { done: () => {} }),
   })),
   lifecycle({
     componentDidMount() {
@@ -80,7 +79,7 @@ export const RenderElement = compose(
       // call destroy on existing element
       if (!this.firstRender) handlers.destroy();
 
-      while(domNode.firstChild) {
+      while (domNode.firstChild) {
         domNode.removeChild(domNode.firstChild);
       }
 
@@ -99,15 +98,17 @@ export const RenderElement = compose(
     shouldFullRerender(prevProps) {
       // TODO: What a shitty hack. None of these props should update when you move the element.
       // This should be fixed at a higher level.
-      return !isEqual(this.props.config, prevProps.config) ||
-      !isEqual(this.props.domNode, prevProps.domNode) ||
-      !isEqual(this.props.renderFn.toString(), prevProps.renderFn.toString());
+      return (
+        !isEqual(this.props.config, prevProps.config) ||
+        !isEqual(this.props.domNode, prevProps.domNode) ||
+        !isEqual(this.props.renderFn.toString(), prevProps.renderFn.toString())
+      );
     },
 
     destroy() {
       this.props.handlers.destroy();
     },
-  }),
+  })
 )(Component);
 
 RenderElement.propTypes = {

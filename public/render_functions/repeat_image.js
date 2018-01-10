@@ -26,18 +26,18 @@ export const repeatImage = {
     }
 
     const img = new Image();
-    img.onload = function () {
+    img.onload = function() {
       setSize(img);
       if (settings.max && settings.count > settings.max) settings.count = settings.max;
       times(settings.count, () => container.append(img.cloneNode(true)));
 
       if (settings.emptyImage) {
         if (settings.max == null) {
-          throw new Error ('max must be set if using an emptyImage');
+          throw new Error('max must be set if using an emptyImage');
         }
 
         const emptyImage = new Image();
-        emptyImage.onload = function () {
+        emptyImage.onload = function() {
           setSize(emptyImage);
           times(settings.max - settings.count, () => container.append(emptyImage.cloneNode(true)));
           finish();
@@ -49,6 +49,5 @@ export const repeatImage = {
     };
 
     img.src = settings.image;
-
   },
 };

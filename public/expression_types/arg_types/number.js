@@ -16,11 +16,13 @@ const NumberArgInput = ({ updateValue, value, confirm, commit }) => (
       <FormControl
         spellCheck={false}
         value={value}
-        onChange={confirm ? updateValue : (ev) => commit(Number(ev.target.value))}
+        onChange={confirm ? updateValue : ev => commit(Number(ev.target.value))}
       />
     </FormGroup>
     {confirm && (
-      <Button bsStyle="primary" bsSize="xsmall" onClick={() => commit(Number(value))}>{confirm}</Button>
+      <Button bsStyle="primary" bsSize="xsmall" onClick={() => commit(Number(value))}>
+        {confirm}
+      </Button>
     )}
   </Form>
 );
@@ -39,7 +41,7 @@ const template = compose(
     commit: onValueChange,
     value: argValue,
   })),
-  createStatefulPropHoc('value'),
+  createStatefulPropHoc('value')
 )(NumberArgInput);
 
 template.propTypes = {

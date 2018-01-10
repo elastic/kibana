@@ -3,9 +3,7 @@ import PropTypes from 'prop-types';
 import './function_form.less';
 
 export const FunctionFormComponent = ({ expressionType, ...passedProps }) => (
-  <div className="canvas__function">
-    { expressionType.render(passedProps) }
-  </div>
+  <div className="canvas__function">{expressionType.render(passedProps)}</div>
 );
 
 FunctionFormComponent.propTypes = {

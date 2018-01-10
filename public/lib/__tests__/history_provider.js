@@ -116,10 +116,10 @@ describe('historyProvider', () => {
       expect(getListeners('popstate')).to.have.length(0);
     });
 
-    it('should pass decompress state to handler', (done) => {
+    it('should pass decompress state to handler', done => {
       history.push(state);
 
-      const handler = (curState) => {
+      const handler = curState => {
         expect(curState).to.eql(state);
         done();
       };
@@ -166,5 +166,4 @@ describe('historyProvider', () => {
       expect(history.encode(state)).to.eql(historyState);
     });
   });
-
 });

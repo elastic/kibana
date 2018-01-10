@@ -5,7 +5,7 @@ import { Button, FormGroup, FormControl } from 'react-bootstrap';
 import { createStatefulPropHoc } from '../../components/enhance/stateful_prop';
 import { fromExpression, toExpression } from '../../../common/lib/ast';
 
-export const AdvancedFailureComponent = (props) => {
+export const AdvancedFailureComponent = props => {
   const {
     onValueChange,
     defaultValue,
@@ -15,7 +15,7 @@ export const AdvancedFailureComponent = (props) => {
     valid,
   } = props;
 
-  const valueChange = (ev) => {
+  const valueChange = ev => {
     ev.preventDefault();
 
     resetErrorState(); // when setting a new value, attempt to reset the error state
@@ -23,10 +23,9 @@ export const AdvancedFailureComponent = (props) => {
     if (valid) {
       return onValueChange(fromExpression(argExpression.trim(), 'argument'));
     }
-
   };
 
-  const confirmReset = (ev) => {
+  const confirmReset = ev => {
     ev.preventDefault();
     resetErrorState(); // when setting a new value, attempt to reset the error state
     onValueChange(fromExpression(defaultValue, 'argument'));
@@ -34,7 +33,7 @@ export const AdvancedFailureComponent = (props) => {
 
   return (
     <div className="canvas__arg--error canvas__arg--error-simple">
-      <form onSubmit={(e) => valueChange(e)}>
+      <form onSubmit={e => valueChange(e)}>
         <FormGroup className={!valid && 'has-error'}>
           <FormControl
             spellCheck={false}
@@ -45,10 +44,15 @@ export const AdvancedFailureComponent = (props) => {
           />
         </FormGroup>
         <div className="canvas__arg--controls--submit">
-          {(defaultValue && defaultValue.length) && (
-            <Button bsSize="xsmall" bsStyle="link" onClick={confirmReset}>Reset</Button>
-          )}
-          <Button disabled={!valid} type="submit" bsSize="xsmall" bsStyle="primary">Apply</Button>
+          {defaultValue &&
+            defaultValue.length && (
+              <Button bsSize="xsmall" bsStyle="link" onClick={confirmReset}>
+                Reset
+              </Button>
+            )}
+          <Button disabled={!valid} type="submit" bsSize="xsmall" bsStyle="primary">
+            Apply
+          </Button>
         </div>
       </form>
     </div>
@@ -70,16 +74,15 @@ export const AdvancedFailure = compose(
   })),
   createStatefulPropHoc('argExpression', 'updateArgExpression'),
   withPropsOnChange(['argExpression'], ({ argExpression }) => ({
-    valid: (function () {
+    valid: (function() {
       try {
         fromExpression(argExpression, 'argument');
         return true;
       } catch (e) {
         return false;
       }
-    }()),
-  })),
-
+    })(),
+  }))
 )(AdvancedFailureComponent);
 
 AdvancedFailure.propTypes = {

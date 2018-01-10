@@ -10,17 +10,15 @@ export const ArgSimpleForm = ({ children, required, valueMissing, onRemove }) =>
     <div className="canvas__arg--simple">
       <div className="canvas__arg--simple-wrapper">
         <div className="canvas__arg--simple-top" />
-        <div className="canvas__arg--simple-controls">
-          {children}
-        </div>
+        <div className="canvas__arg--simple-controls">{children}</div>
         <div className="canvas__arg--simple-bottom" />
       </div>
-      { !required && (
+      {!required && (
         <div className="canvas__arg--remove">
           <i className="fa fa-trash-o clickable" onClick={onRemove} />
         </div>
       )}
-      { (valueMissing) && (
+      {valueMissing && (
         <div className="canvas__arg--required">
           <Tooltip text={missingDescription} placement="left">
             <i className="fa fa-exclamation-circle " />

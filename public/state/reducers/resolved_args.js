@@ -45,40 +45,43 @@ function getContext(value, loading = false, oldVal = null) {
 
 function getFullPath(path) {
   const isArray = Array.isArray(path);
-  const isString = (typeof path === 'string');
+  const isString = typeof path === 'string';
   if (!isArray && !isString) throw new Error(`Resolved argument path is invalid: ${path}`);
   return prepend(path, 'resolvedArgs');
 }
 
-export const resolvedArgsReducer = handleActions({
-  [actions.setLoading]: (transientState, { payload }) => {
-    const { path, loading = true } = payload;
-    const fullPath = getFullPath(path);
-    const oldVal = get(transientState, fullPath, null);
-    return set(transientState, fullPath, getContext(get(oldVal, 'value', null), loading));
-  },
+export const resolvedArgsReducer = handleActions(
+  {
+    [actions.setLoading]: (transientState, { payload }) => {
+      const { path, loading = true } = payload;
+      const fullPath = getFullPath(path);
+      const oldVal = get(transientState, fullPath, null);
+      return set(transientState, fullPath, getContext(get(oldVal, 'value', null), loading));
+    },
 
-  [actions.setValue]: (transientState, { payload }) => {
-    const { path, value } = payload;
-    const fullPath = getFullPath(path);
-    const oldVal = get(transientState, fullPath, null);
-    return set(transientState, fullPath, getContext(value, false, oldVal));
-  },
+    [actions.setValue]: (transientState, { payload }) => {
+      const { path, value } = payload;
+      const fullPath = getFullPath(path);
+      const oldVal = get(transientState, fullPath, null);
+      return set(transientState, fullPath, getContext(value, false, oldVal));
+    },
 
-  [actions.clear]: (transientState, { payload }) => {
-    const { path } = payload;
-    return del(transientState, getFullPath(path));
-  },
+    [actions.clear]: (transientState, { payload }) => {
+      const { path } = payload;
+      return del(transientState, getFullPath(path));
+    },
 
-  [actions.inFlightActive]: (transientState) => {
-    return set(transientState, 'inFlight', true);
-  },
+    [actions.inFlightActive]: transientState => {
+      return set(transientState, 'inFlight', true);
+    },
 
-  [actions.inFlightComplete]: (transientState) => {
-    return set(transientState, 'inFlight', false);
-  },
+    [actions.inFlightComplete]: transientState => {
+      return set(transientState, 'inFlight', false);
+    },
 
-  [flushContext]: (transientState, { payload: elementId }) => {
-    return del(transientState, getFullPath([elementId, 'expressionContext']));
+    [flushContext]: (transientState, { payload: elementId }) => {
+      return del(transientState, getFullPath([elementId, 'expressionContext']));
+    },
   },
-}, {});
+  {}
+);

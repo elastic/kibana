@@ -15,7 +15,9 @@ export class View extends FunctionForm {
     Object.assign(this, defaultProps, pick(props, propNames));
 
     if (!this.modelArgs || !Array.isArray(this.modelArgs)) {
-      throw new Error(`${this.name} element is invalid, all elements must contain a modelArgs array property`);
+      throw new Error(
+        `${this.name} element is invalid, all elements must contain a modelArgs array property`
+      );
     }
   }
 }

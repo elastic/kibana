@@ -5,12 +5,12 @@ function getArgumentString(arg, argKey) {
   const type = getType(arg);
 
   function maybeArgKey(argString) {
-    return (argKey == null || argKey === '_') ? argString : `${argKey}=${argString}`;
+    return argKey == null || argKey === '_' ? argString : `${argKey}=${argString}`;
   }
 
   // TODO: this works, but seems a little hacky. it removes existing escaped chars on quotes
   // and adds the escaping onto all other double quotes it finds in the string
-  const escapeQuotes = (val) => val.replace(/\\\"/g, '"').replace(/\"/g, '\\"');
+  const escapeQuotes = val => val.replace(/\\\"/g, '"').replace(/\"/g, '\\"');
 
   if (type === 'string') return maybeArgKey(`"${escapeQuotes(arg)}"`);
   if (type === 'boolean' || type === 'null' || type === 'number') return maybeArgKey(`${arg}`);
@@ -26,7 +26,7 @@ function getExpressionArgs(block) {
   if (!hasValidateArgs(args)) throw new Error('Arguments can only be an object');
 
   const argKeys = Object.keys(args);
-  return argKeys.map((argKey) => {
+  return argKeys.map(argKey => {
     const multiArgs = args[argKey];
 
     return multiArgs.reduce((acc, arg) => acc.concat(getArgumentString(arg, argKey)), []).join(' ');
@@ -34,7 +34,7 @@ function getExpressionArgs(block) {
 }
 
 function hasValidateArgs(args) {
-  return (typeof args === 'object' && args != null && !Array.isArray(args));
+  return typeof args === 'object' && args != null && !Array.isArray(args);
 }
 
 function fnWithArgs(fnName, args) {
@@ -45,18 +45,21 @@ function fnWithArgs(fnName, args) {
 function getExpression(chain) {
   if (!chain) throw new Error('expression and partial arguments must contain a chain');
 
-  return chain.map(chainObj => {
-    const type = getType(chainObj);
+  return chain
+    .map(chainObj => {
+      const type = getType(chainObj);
 
-    if (type === 'function' || type === 'partial') {
-      const fn = chainObj.function;
-      if (!fn || fn.length === 0) throw new Error('Functions and partials must have a function name');
+      if (type === 'function' || type === 'partial') {
+        const fn = chainObj.function;
+        if (!fn || fn.length === 0)
+          throw new Error('Functions and partials must have a function name');
 
-      const expArgs = getExpressionArgs(chainObj);
+        const expArgs = getExpressionArgs(chainObj);
 
-      return fnWithArgs(fn, expArgs);
-    }
-  }, []).join(' | ');
+        return fnWithArgs(fn, expArgs);
+      }
+    }, [])
+    .join(' | ');
 }
 
 export function fromExpression(expression, type = 'expression') {

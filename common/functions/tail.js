@@ -6,9 +6,7 @@ export const tail = {
   type: 'datatable',
   help: 'Get the last N rows from the end of a datatable. Also see `head`',
   context: {
-    types: [
-      'datatable',
-    ],
+    types: ['datatable'],
   },
   args: {
     _: {

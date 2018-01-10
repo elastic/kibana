@@ -8,17 +8,17 @@ describe('resolved args selector', () => {
     state = {
       transient: {
         resolvedArgs: {
-          'test1': {
+          test1: {
             state: 'ready',
             value: 'test value',
             error: null,
           },
-          'test2': {
+          test2: {
             state: 'pending',
             value: null,
             error: null,
           },
-          'test3': {
+          test3: {
             state: 'error',
             value: 'some old value',
             error: new Error('i have failed'),

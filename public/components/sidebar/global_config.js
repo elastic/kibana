@@ -6,11 +6,11 @@ import { SidebarSectionTitle } from './sidebar_section_title';
 
 export const GlobalConfig = () => (
   <div className="canvas__sidebar">
-    <SidebarSectionTitle title="Workpad Settings"/>
+    <SidebarSectionTitle title="Workpad Settings" />
     <SidebarSection>
-      <WorkpadConfig/>
-      <hr/>
-      <PageConfig/>
+      <WorkpadConfig />
+      <hr />
+      <PageConfig />
     </SidebarSection>
   </div>
 );

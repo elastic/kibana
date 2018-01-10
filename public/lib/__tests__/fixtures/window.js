@@ -12,13 +12,15 @@ export function createWindow() {
     back() {
       if (historyIndex >= -1) {
         historyIndex -= 1;
-        listeners.popstate && listeners.popstate.forEach(fn => fn.call(null, historyItems[historyIndex]));
+        listeners.popstate &&
+          listeners.popstate.forEach(fn => fn.call(null, historyItems[historyIndex]));
       }
     },
     forward() {
       if (historyItems.length > historyIndex + 1) {
         historyIndex += 1;
-        listeners.popstate && listeners.popstate.forEach(fn => fn.call(null, historyItems[historyIndex]));
+        listeners.popstate &&
+          listeners.popstate.forEach(fn => fn.call(null, historyItems[historyIndex]));
       }
     },
     pushState(state, title = '', url = '') {

@@ -1,7 +1,18 @@
 export function normalizeType(type) {
   const normalTypes = {
     string: ['string', 'text', 'keyword', '_type', '_id', '_index'],
-    number: ['float', 'half_float', 'scaled_float', 'double', 'integer', 'long', 'short', 'byte', 'token_count', '_version'],
+    number: [
+      'float',
+      'half_float',
+      'scaled_float',
+      'double',
+      'integer',
+      'long',
+      'short',
+      'byte',
+      'token_count',
+      '_version',
+    ],
     date: ['date'],
   };
 

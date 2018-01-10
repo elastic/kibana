@@ -26,7 +26,6 @@ export const pie = {
         console.log(e);
         // Nope
       }
-
     }
 
     function destroy() {

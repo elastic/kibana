@@ -29,14 +29,12 @@ export const timelion = {
     },
   },
   type: 'datatable',
-  help:
-    'Use timelion to extract one or more timeseries from many sources.',
+  help: 'Use timelion to extract one or more timeseries from many sources.',
   fn: (context, args, handlers) => {
-
     // TODO: Find time range, or just request a giant single bucket?
     function findTimeRangeInFilterContext() {
       const timeFilter = context.and.find(and => and.type === 'time');
-      if (!timeFilter) throw new Error ('No time filter found');
+      if (!timeFilter) throw new Error('No time filter found');
       return { from: timeFilter.from, to: timeFilter.to };
     }
 
@@ -45,7 +43,7 @@ export const timelion = {
 
       try {
         return { ...defaultRange, ...findTimeRangeInFilterContext() };
-      } catch(e) {
+      } catch (e) {
         return defaultRange;
       }
     })();
@@ -78,12 +76,13 @@ export const timelion = {
       },
       data: body,
     }).then(resp => {
-
       const seriesList = resp.data.sheet[0].list;
 
-      const rows = flatten(seriesList.map(series =>
-        series.data.map(row => ({ '@timestamp': row[0], value: row[1], label: series.label }))
-      ));
+      const rows = flatten(
+        seriesList.map(series =>
+          series.data.map(row => ({ '@timestamp': row[0], value: row[1], label: series.label }))
+        )
+      );
 
       return {
         type: 'datatable',

@@ -4,7 +4,7 @@ import { pure } from 'recompose';
 import { RemoveIcon } from '../remove_icon';
 import { ElementContent } from './element_content';
 
-export const ElementControls = pure((props) => {
+export const ElementControls = pure(props => {
   const {
     selectElement,
     removeElement,
@@ -20,12 +20,12 @@ export const ElementControls = pure((props) => {
     size,
   } = props;
 
-  const selectHandler = (ev) => {
+  const selectHandler = ev => {
     ev && ev.stopPropagation();
     selectElement();
   };
 
-  const removeHandler = (ev) => {
+  const removeHandler = ev => {
     ev && ev.stopPropagation();
     removeElement();
   };
@@ -48,9 +48,12 @@ export const ElementControls = pure((props) => {
         handlers={handlers}
       />
 
-      {!isSelected ? null :
-        (<RemoveIcon style={{ position: 'absolute', top: -20, right: -20 }} onClick={removeHandler}/>)
-      }
+      {!isSelected ? null : (
+        <RemoveIcon
+          style={{ position: 'absolute', top: -20, right: -20 }}
+          onClick={removeHandler}
+        />
+      )}
     </div>
   );
 });

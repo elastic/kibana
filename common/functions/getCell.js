@@ -20,9 +20,9 @@ export const getCell = {
   fn: (context, args) => {
     const row = context.rows[args.row];
 
-    if (!row) throw new Error (`Row not found: ${args.row}`);
+    if (!row) throw new Error(`Row not found: ${args.row}`);
     const value = row[args._];
-    if (typeof value === 'undefined') (`Column not found: ${args._}`);
+    if (typeof value === 'undefined') `Column not found: ${args._}`;
 
     return value;
   },

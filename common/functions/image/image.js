@@ -24,8 +24,9 @@ export const image = {
     },
     mode: {
       types: ['string', 'null'],
-      help: '"contain" will show the entire image, scaled to fit.' +
-'"cover" will fill the container with the image, cropping from the sides or bottom as needed.',
+      help:
+        '"contain" will show the entire image, scaled to fit.' +
+        '"cover" will fill the container with the image, cropping from the sides or bottom as needed.',
     },
   },
   fn: (context, args) => {
@@ -38,7 +39,8 @@ export const image = {
       };
     }
 
-    if (!includes(['contain', 'cover', 'stretch'], args.mode)) throw '"mode" must be "contain", "cover", or "stretch"';
+    if (!includes(['contain', 'cover', 'stretch'], args.mode))
+      throw '"mode" must be "contain", "cover", or "stretch"';
     // return image object
     // TODO: validate data type
     if (args.url) {

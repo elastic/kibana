@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormControl } from 'react-bootstrap';
 
-const getArgValueString = argValue => typeof argValue === 'string' ? argValue : argValue.value;
+const getArgValueString = argValue => (typeof argValue === 'string' ? argValue : argValue.value);
 
 const SelectArgInput = ({ typeInstance, onValueChange, argValue }) => {
   // TODO: why is this neccesary? Does the dialog really need to know what parameter it is setting?
@@ -13,9 +13,13 @@ const SelectArgInput = ({ typeInstance, onValueChange, argValue }) => {
 
   return (
     <FormControl componentClass="select" value={choice} onChange={handleChange}>
-      <option value="" disabled>select column</option>
+      <option value="" disabled>
+        select column
+      </option>
       {choices.map(choice => (
-        <option value={choice.value} key={choice.value}>{choice.name}</option>
+        <option value={choice.value} key={choice.value}>
+          {choice.name}
+        </option>
       ))}
     </FormControl>
   );

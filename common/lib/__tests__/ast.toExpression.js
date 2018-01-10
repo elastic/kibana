@@ -29,11 +29,13 @@ describe('ast toExpression', () => {
       for (let i = 0; i < invalidTypes.length; i++) {
         const astObject = {
           type: 'expression',
-          chain: [{
-            type: 'function',
-            function: 'test',
-            arguments: invalidTypes[i],
-          }],
+          chain: [
+            {
+              type: 'function',
+              function: 'test',
+              arguments: invalidTypes[i],
+            },
+          ],
         };
 
         // eslint-disable-next-line no-loop-func
@@ -56,16 +58,20 @@ describe('ast toExpression', () => {
       const errMsg = `invalid argument type: ${argType}`;
       const astObject = {
         type: 'expression',
-        chain: [{
-          type: 'function',
-          function: 'test',
-          arguments: {
-            test: [{
-              type: argType,
-              value: 'invalid type',
-            }],
+        chain: [
+          {
+            type: 'function',
+            function: 'test',
+            arguments: {
+              test: [
+                {
+                  type: argType,
+                  value: 'invalid type',
+                },
+              ],
+            },
           },
-        }],
+        ],
       };
 
       expect(() => toExpression(astObject)).to.throwException(errMsg);
@@ -82,16 +88,20 @@ describe('ast toExpression', () => {
       for (let i = 0; i < chainTypes.length; i++) {
         const astObject = {
           type: 'expression',
-          chain: [{
-            type: 'function',
-            function: 'test',
-            arguments: {
-              test: [{
-                type: chainTypes[i],
-                invalid: 'no chain here',
-              }],
+          chain: [
+            {
+              type: 'function',
+              function: 'test',
+              arguments: {
+                test: [
+                  {
+                    type: chainTypes[i],
+                    invalid: 'no chain here',
+                  },
+                ],
+              },
             },
-          }],
+          ],
         };
 
         validate(astObject);
@@ -109,10 +119,12 @@ describe('ast toExpression', () => {
       for (let i = 0; i < chainTypes.length; i++) {
         const astObject = {
           type: 'expression',
-          chain: [{
-            type: chainTypes[i],
-            function: '',
-          }],
+          chain: [
+            {
+              type: chainTypes[i],
+              function: '',
+            },
+          ],
         };
 
         validate(astObject);
@@ -122,11 +134,13 @@ describe('ast toExpression', () => {
     it('single expression', () => {
       const astObj = {
         type: 'expression',
-        chain: [{
-          type: 'function',
-          function: 'csv',
-          arguments: {},
-        }],
+        chain: [
+          {
+            type: 'function',
+            function: 'csv',
+            arguments: {},
+          },
+        ],
       };
 
       const expression = toExpression(astObj);
@@ -136,15 +150,15 @@ describe('ast toExpression', () => {
     it('single expression with string argument', () => {
       const astObj = {
         type: 'expression',
-        chain: [{
-          type: 'function',
-          function: 'csv',
-          arguments: {
-            input: [
-              'stuff\nthings',
-            ],
+        chain: [
+          {
+            type: 'function',
+            function: 'csv',
+            arguments: {
+              input: ['stuff\nthings'],
+            },
           },
-        }],
+        ],
       };
 
       const expression = toExpression(astObj);
@@ -154,15 +168,15 @@ describe('ast toExpression', () => {
     it('single expression string value with a backslash', () => {
       const astObj = {
         type: 'expression',
-        chain: [{
-          type: 'function',
-          function: 'csv',
-          arguments: {
-            input: [
-              'slash \\\\ slash',
-            ],
+        chain: [
+          {
+            type: 'function',
+            function: 'csv',
+            arguments: {
+              input: ['slash \\\\ slash'],
+            },
           },
-        }],
+        ],
       };
 
       const expression = toExpression(astObj);
@@ -172,15 +186,15 @@ describe('ast toExpression', () => {
     it('single expression string value with a double quote', () => {
       const astObj = {
         type: 'expression',
-        chain: [{
-          type: 'function',
-          function: 'csv',
-          arguments: {
-            input: [
-              'stuff\nthings\n"such"',
-            ],
+        chain: [
+          {
+            type: 'function',
+            function: 'csv',
+            arguments: {
+              input: ['stuff\nthings\n"such"'],
+            },
           },
-        }],
+        ],
       };
 
       const expression = toExpression(astObj);
@@ -190,15 +204,15 @@ describe('ast toExpression', () => {
     it('single expression with number argument', () => {
       const astObj = {
         type: 'expression',
-        chain: [{
-          type: 'function',
-          function: 'series',
-          arguments: {
-            input: [
-              1234,
-            ],
+        chain: [
+          {
+            type: 'function',
+            function: 'series',
+            arguments: {
+              input: [1234],
+            },
           },
-        }],
+        ],
       };
 
       const expression = toExpression(astObj);
@@ -208,15 +222,15 @@ describe('ast toExpression', () => {
     it('single expression with boolean argument', () => {
       const astObj = {
         type: 'expression',
-        chain: [{
-          type: 'function',
-          function: 'series',
-          arguments: {
-            input: [
-              true,
-            ],
+        chain: [
+          {
+            type: 'function',
+            function: 'series',
+            arguments: {
+              input: [true],
+            },
           },
-        }],
+        ],
       };
 
       const expression = toExpression(astObj);
@@ -226,15 +240,15 @@ describe('ast toExpression', () => {
     it('single expression with null argument', () => {
       const astObj = {
         type: 'expression',
-        chain: [{
-          type: 'function',
-          function: 'series',
-          arguments: {
-            input: [
-              null,
-            ],
+        chain: [
+          {
+            type: 'function',
+            function: 'series',
+            arguments: {
+              input: [null],
+            },
           },
-        }],
+        ],
       };
 
       const expression = toExpression(astObj);
@@ -244,18 +258,16 @@ describe('ast toExpression', () => {
     it('single expression with multiple arguments', () => {
       const astObj = {
         type: 'expression',
-        chain: [{
-          type: 'function',
-          function: 'csv',
-          arguments: {
-            input: [
-              'stuff\nthings',
-            ],
-            separator: [
-              '\\n',
-            ],
+        chain: [
+          {
+            type: 'function',
+            function: 'csv',
+            arguments: {
+              input: ['stuff\nthings'],
+              separator: ['\\n'],
+            },
           },
-        }],
+        ],
       };
 
       const expression = toExpression(astObj);
@@ -265,45 +277,48 @@ describe('ast toExpression', () => {
     it('single expression with multiple and repeated arguments', () => {
       const astObj = {
         type: 'expression',
-        chain: [{
-          type: 'function',
-          function: 'csv',
-          arguments: {
-            input: [
-              'stuff\nthings',
-              'more,things\nmore,stuff',
-            ],
-            separator: [
-              '\\n',
-            ],
+        chain: [
+          {
+            type: 'function',
+            function: 'csv',
+            arguments: {
+              input: ['stuff\nthings', 'more,things\nmore,stuff'],
+              separator: ['\\n'],
+            },
           },
-        }],
+        ],
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('csv input="stuff\nthings" input="more,things\nmore,stuff" separator="\\n"');
+      expect(expression).to.equal(
+        'csv input="stuff\nthings" input="more,things\nmore,stuff" separator="\\n"'
+      );
     });
 
     it('single expression with expression argument', () => {
       const astObj = {
         type: 'expression',
-        chain: [{
-          type: 'function',
-          function: 'csv',
-          arguments: {
-            calc: [{
-              type: 'expression',
-              chain: [{
-                type: 'function',
-                function: 'getcalc',
-                arguments: {},
-              }],
-            }],
-            input: [
-              'stuff\nthings',
-            ],
+        chain: [
+          {
+            type: 'function',
+            function: 'csv',
+            arguments: {
+              calc: [
+                {
+                  type: 'expression',
+                  chain: [
+                    {
+                      type: 'function',
+                      function: 'getcalc',
+                      arguments: {},
+                    },
+                  ],
+                },
+              ],
+              input: ['stuff\nthings'],
+            },
           },
-        }],
+        ],
       };
 
       const expression = toExpression(astObj);
@@ -313,23 +328,27 @@ describe('ast toExpression', () => {
     it('single expression with partial argument', () => {
       const astObj = {
         type: 'expression',
-        chain: [{
-          type: 'function',
-          function: 'csv',
-          arguments: {
-            calc: [{
-              type: 'partial',
-              chain: [{
-                type: 'function',
-                function: 'partcalc',
-                arguments: {},
-              }],
-            }],
-            input: [
-              'stuff\nthings',
-            ],
+        chain: [
+          {
+            type: 'function',
+            function: 'csv',
+            arguments: {
+              calc: [
+                {
+                  type: 'partial',
+                  chain: [
+                    {
+                      type: 'function',
+                      function: 'partcalc',
+                      arguments: {},
+                    },
+                  ],
+                },
+              ],
+              input: ['stuff\nthings'],
+            },
           },
-        }],
+        ],
       };
 
       const expression = toExpression(astObj);
@@ -339,43 +358,49 @@ describe('ast toExpression', () => {
     it('single expression with partial and expression arguments, with arguments', () => {
       const astObj = {
         type: 'expression',
-        chain: [{
-          type: 'function',
-          function: 'csv',
-          arguments: {
-            sep: [{
-              type: 'partial',
-              chain: [{
-                type: 'function',
-                function: 'partcalc',
-                arguments: {
-                  type: [
-                    'comma',
+        chain: [
+          {
+            type: 'function',
+            function: 'csv',
+            arguments: {
+              sep: [
+                {
+                  type: 'partial',
+                  chain: [
+                    {
+                      type: 'function',
+                      function: 'partcalc',
+                      arguments: {
+                        type: ['comma'],
+                      },
+                    },
                   ],
                 },
-              }],
-            }],
-            input: [
-              'stuff\nthings',
-            ],
-            break: [{
-              type: 'expression',
-              chain: [{
-                type: 'function',
-                function: 'setBreak',
-                arguments: {
-                  type: [
-                    'newline',
+              ],
+              input: ['stuff\nthings'],
+              break: [
+                {
+                  type: 'expression',
+                  chain: [
+                    {
+                      type: 'function',
+                      function: 'setBreak',
+                      arguments: {
+                        type: ['newline'],
+                      },
+                    },
                   ],
                 },
-              }],
-            }],
+              ],
+            },
           },
-        }],
+        ],
       };
 
       const expression = toExpression(astObj);
-      expect(expression).to.equal('csv sep=${partcalc type="comma"} input="stuff\nthings" break={setBreak type="newline"}');
+      expect(expression).to.equal(
+        'csv sep=${partcalc type="comma"} input="stuff\nthings" break={setBreak type="newline"}'
+      );
     });
   });
 
@@ -383,56 +408,65 @@ describe('ast toExpression', () => {
     it('two chained expressions', () => {
       const astObj = {
         type: 'expression',
-        chain: [{
-          type: 'function',
-          function: 'csv',
-          arguments: {
-            input: [
-              'year,make,model,price\n2016,honda,cr-v,23845\n2016,honda,fit,15890,\n2016,honda,civic,18640',
-            ],
+        chain: [
+          {
+            type: 'function',
+            function: 'csv',
+            arguments: {
+              input: [
+                'year,make,model,price\n2016,honda,cr-v,23845\n2016,honda,fit,15890,\n2016,honda,civic,18640',
+              ],
+            },
           },
-        }, {
-          type: 'function',
-          function: 'line',
-          arguments: {
-            x: [{
-              type: 'partial',
-              chain: [{
-                type: 'function',
-                function: 'distinct',
-                arguments: {
-                  f: [
-                    'year',
+          {
+            type: 'function',
+            function: 'line',
+            arguments: {
+              x: [
+                {
+                  type: 'partial',
+                  chain: [
+                    {
+                      type: 'function',
+                      function: 'distinct',
+                      arguments: {
+                        f: ['year'],
+                      },
+                    },
                   ],
                 },
-              }],
-            }],
-            y: [{
-              type: 'partial',
-              chain: [{
-                type: 'function',
-                function: 'sum',
-                arguments: {
-                  f: [
-                    'price',
+              ],
+              y: [
+                {
+                  type: 'partial',
+                  chain: [
+                    {
+                      type: 'function',
+                      function: 'sum',
+                      arguments: {
+                        f: ['price'],
+                      },
+                    },
                   ],
                 },
-              }],
-            }],
-            colors: [{
-              type: 'partial',
-              chain: [{
-                type: 'function',
-                function: 'distinct',
-                arguments: {
-                  f: [
-                    'model',
+              ],
+              colors: [
+                {
+                  type: 'partial',
+                  chain: [
+                    {
+                      type: 'function',
+                      function: 'distinct',
+                      arguments: {
+                        f: ['model'],
+                      },
+                    },
                   ],
                 },
-              }],
-            }],
+              ],
+            },
           },
-        }],
+        ],
       };
 
       const expression = toExpression(astObj);
@@ -448,73 +482,85 @@ describe('ast toExpression', () => {
     it('three chained expressions', () => {
       const astObj = {
         type: 'expression',
-        chain: [{
-          type: 'function',
-          function: 'csv',
-          arguments: {
-            input: [
-              'year,make,model,price\n2016,honda,cr-v,23845\n2016,honda,fit,15890,\n2016,honda,civic,18640',
-            ],
+        chain: [
+          {
+            type: 'function',
+            function: 'csv',
+            arguments: {
+              input: [
+                'year,make,model,price\n2016,honda,cr-v,23845\n2016,honda,fit,15890,\n2016,honda,civic,18640',
+              ],
+            },
           },
-        }, {
-          type: 'function',
-          function: 'pointseries',
-          arguments: {
-            x: [{
-              type: 'partial',
-              chain: [{
-                type: 'function',
-                function: 'distinct',
-                arguments: {
-                  f: [
-                    'year',
+          {
+            type: 'function',
+            function: 'pointseries',
+            arguments: {
+              x: [
+                {
+                  type: 'partial',
+                  chain: [
+                    {
+                      type: 'function',
+                      function: 'distinct',
+                      arguments: {
+                        f: ['year'],
+                      },
+                    },
                   ],
                 },
-              }],
-            }],
-            y: [{
-              type: 'partial',
-              chain: [{
-                type: 'function',
-                function: 'sum',
-                arguments: {
-                  f: [
-                    'price',
+              ],
+              y: [
+                {
+                  type: 'partial',
+                  chain: [
+                    {
+                      type: 'function',
+                      function: 'sum',
+                      arguments: {
+                        f: ['price'],
+                      },
+                    },
                   ],
                 },
-              }],
-            }],
-            colors: [{
-              type: 'partial',
-              chain: [{
-                type: 'function',
-                function: 'distinct',
-                arguments: {
-                  f: [
-                    'model',
+              ],
+              colors: [
+                {
+                  type: 'partial',
+                  chain: [
+                    {
+                      type: 'function',
+                      function: 'distinct',
+                      arguments: {
+                        f: ['model'],
+                      },
+                    },
                   ],
                 },
-              }],
-            }],
+              ],
+            },
           },
-        }, {
-          type: 'function',
-          function: 'line',
-          arguments: {
-            pallette: [{
-              type: 'expression',
-              chain: [{
-                type: 'function',
-                function: 'getColorPallette',
-                arguments: {
-                  name: [
-                    'elastic',
+          {
+            type: 'function',
+            function: 'line',
+            arguments: {
+              pallette: [
+                {
+                  type: 'expression',
+                  chain: [
+                    {
+                      type: 'function',
+                      function: 'getColorPallette',
+                      arguments: {
+                        name: ['elastic'],
+                      },
+                    },
                   ],
                 },
-              }],
-            }],
+              ],
+            },
           },
-        }],
+        ],
       };
 
       const expression = toExpression(astObj);
@@ -536,18 +582,20 @@ describe('ast toExpression', () => {
         function: 'pointseries',
         arguments: {
           x: ['time'],
-          y: [{
-            type: 'partial',
-            chain: [{
+          y: [
+            {
               type: 'partial',
-              function: 'math',
-              arguments: {
-                _: [
-                  'sum(price)',
-                ],
-              },
-            }],
-          }],
+              chain: [
+                {
+                  type: 'partial',
+                  function: 'math',
+                  arguments: {
+                    _: ['sum(price)'],
+                  },
+                },
+              ],
+            },
+          ],
         },
       };
       expect(toExpression(astObj)).to.equal('pointseries x="time" y=${math "sum(price)"}');
@@ -558,17 +606,15 @@ describe('ast toExpression', () => {
     it('only unnamed', () => {
       const astObj = {
         type: 'expression',
-        chain: [{
-          type: 'function',
-          function: 'list',
-          arguments: {
-            _: [
-              'one',
-              'two',
-              'three',
-            ],
+        chain: [
+          {
+            type: 'function',
+            function: 'list',
+            arguments: {
+              _: ['one', 'two', 'three'],
+            },
           },
-        }],
+        ],
       };
 
       const expression = toExpression(astObj);
@@ -578,23 +624,17 @@ describe('ast toExpression', () => {
     it('named and unnamed', () => {
       const astObj = {
         type: 'expression',
-        chain: [{
-          type: 'function',
-          function: 'both',
-          arguments: {
-            named: [
-              'example',
-            ],
-            another: [
-              'item',
-            ],
-            _: [
-              'one',
-              'two',
-              'three',
-            ],
+        chain: [
+          {
+            type: 'function',
+            function: 'both',
+            arguments: {
+              named: ['example'],
+              another: ['item'],
+              _: ['one', 'two', 'three'],
+            },
           },
-        }],
+        ],
       };
 
       const expression = toExpression(astObj);

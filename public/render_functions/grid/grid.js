@@ -16,7 +16,7 @@ function getSize(summary, val) {
       min: min(summary.size.values),
       max: max(summary.size.values),
     };
-    return ((1 / (extents.max - extents.min) * (size - extents.min)) + 0.1) * 2;
+    return (1 / (extents.max - extents.min) * (size - extents.min) + 0.1) * 2;
   }
 
   if (role === 'dimension') {
@@ -55,11 +55,11 @@ const render = (domNode, config, handlers) => {
         {!summary.y && !summary.x ? null : (
           <thead>
             <tr>
-              {summary.y && (
-                <th>{summary.y.expression}</th>
-              )}
+              {summary.y && <th>{summary.y.expression}</th>}
               {columns.map(col => (
-                <th key={`header-${col}`} className="canvas__element--grid-label">{String(col)}</th>
+                <th key={`header-${col}`} className="canvas__element--grid-label">
+                  {String(col)}
+                </th>
               ))}
             </tr>
           </thead>
@@ -82,9 +82,13 @@ const render = (domNode, config, handlers) => {
                         color: getColor(palette, summary, val),
                       }}
                     >
-                      { (!mark && !val.text) && <i className={`fa fa-circle`}/>}
-                      { mark && <i className={`fa fa-${mark}`}/> }
-                      { val.text && <div className="canvas__element--grid--series-label">{String(val.text)}</div> }
+                      {!mark && !val.text && <i className={`fa fa-circle`} />}
+                      {mark && <i className={`fa fa-${mark}`} />}
+                      {val.text && (
+                        <div className="canvas__element--grid--series-label">
+                          {String(val.text)}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </td>

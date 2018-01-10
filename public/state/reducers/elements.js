@@ -14,7 +14,9 @@ function getElementIndexById(page, elementId) {
 function assignElementProperties(workpadState, pageId, elementId, props) {
   const pageIndex = getPageIndexById(workpadState, pageId);
   const elementsPath = ['pages', pageIndex, 'elements'];
-  const elementIndex = get(workpadState, elementsPath, []).findIndex(element => element.id === elementId);
+  const elementIndex = get(workpadState, elementsPath, []).findIndex(
+    element => element.id === elementId
+  );
 
   if (pageIndex === -1 || elementIndex === -1) return workpadState;
 
@@ -31,12 +33,12 @@ function moveElementLayer(workpadState, pageId, elementId, movement) {
   const elements = get(workpadState, ['pages', pageIndex, 'elements']);
   const from = elementIndex;
 
-  const to = (function () {
+  const to = (function() {
     if (movement < Infinity && movement > -Infinity) return elementIndex + movement;
     if (movement === Infinity) return elements.length - 1;
     if (movement === -Infinity) return 0;
     throw new Error('Invalid element layer movement');
-  }());
+  })();
 
   if (to > elements.length - 1 || to < 0) return workpadState;
 
@@ -47,42 +49,45 @@ function moveElementLayer(workpadState, pageId, elementId, movement) {
   return set(workpadState, ['pages', pageIndex, 'elements'], newElements);
 }
 
-export const elementsReducer = handleActions({
-  // TODO: This takes the entire element, which is not neccesary, it could just take the id.
-  [actions.setExpression]: (workpadState, { payload }) => {
-    const { expression, pageId, elementId } = payload;
-    return assignElementProperties(workpadState, pageId, elementId, { expression });
-  },
-  [actions.setFilter]: (workpadState, { payload }) => {
-    const { filter, pageId, elementId } = payload;
-    return assignElementProperties(workpadState, pageId, elementId, { filter });
-  },
-  [actions.setPosition]: (workpadState, { payload }) => {
-    const { position, pageId, elementId } = payload;
-    return assignElementProperties(workpadState, pageId, elementId, { position });
-  },
-  [actions.elementLayer]: (workpadState, { payload: { pageId, elementId, movement } }) => {
-    return moveElementLayer(workpadState, pageId, elementId, movement);
-  },
-  [actions.addElement]: (workpadState, { payload: { pageId, element } }) => {
-    const pageIndex = getPageIndexById(workpadState, pageId);
-    if (pageIndex < 0) return workpadState;
+export const elementsReducer = handleActions(
+  {
+    // TODO: This takes the entire element, which is not neccesary, it could just take the id.
+    [actions.setExpression]: (workpadState, { payload }) => {
+      const { expression, pageId, elementId } = payload;
+      return assignElementProperties(workpadState, pageId, elementId, { expression });
+    },
+    [actions.setFilter]: (workpadState, { payload }) => {
+      const { filter, pageId, elementId } = payload;
+      return assignElementProperties(workpadState, pageId, elementId, { filter });
+    },
+    [actions.setPosition]: (workpadState, { payload }) => {
+      const { position, pageId, elementId } = payload;
+      return assignElementProperties(workpadState, pageId, elementId, { position });
+    },
+    [actions.elementLayer]: (workpadState, { payload: { pageId, elementId, movement } }) => {
+      return moveElementLayer(workpadState, pageId, elementId, movement);
+    },
+    [actions.addElement]: (workpadState, { payload: { pageId, element } }) => {
+      const pageIndex = getPageIndexById(workpadState, pageId);
+      if (pageIndex < 0) return workpadState;
 
-    return push(workpadState, ['pages', pageIndex, 'elements'], element);
-  },
-  [actions.duplicateElement]: (workpadState, { payload: { pageId, element } }) => {
-    const pageIndex = getPageIndexById(workpadState, pageId);
-    if (pageIndex < 0) return workpadState;
+      return push(workpadState, ['pages', pageIndex, 'elements'], element);
+    },
+    [actions.duplicateElement]: (workpadState, { payload: { pageId, element } }) => {
+      const pageIndex = getPageIndexById(workpadState, pageId);
+      if (pageIndex < 0) return workpadState;
 
-    return push(workpadState, ['pages', pageIndex, 'elements'], element);
-  },
-  [actions.removeElement]: (workpadState, { payload: { pageId, elementId } }) => {
-    const pageIndex = getPageIndexById(workpadState, pageId);
-    if (pageIndex < 0) return workpadState;
+      return push(workpadState, ['pages', pageIndex, 'elements'], element);
+    },
+    [actions.removeElement]: (workpadState, { payload: { pageId, elementId } }) => {
+      const pageIndex = getPageIndexById(workpadState, pageId);
+      if (pageIndex < 0) return workpadState;
 
-    const elementIndex = getElementIndexById(workpadState.pages[pageIndex], elementId);
-    if (elementIndex < 0) return workpadState;
+      const elementIndex = getElementIndexById(workpadState.pages[pageIndex], elementId);
+      if (elementIndex < 0) return workpadState;
 
-    return del(workpadState, ['pages', pageIndex, 'elements', elementIndex]);
+      return del(workpadState, ['pages', pageIndex, 'elements', elementIndex]);
+    },
   },
-}, {});
+  {}
+);

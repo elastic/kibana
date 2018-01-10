@@ -22,7 +22,9 @@ function createError(name) {
       Error.captureStackTrace(instance, CustomError);
     } else {
       Object.defineProperty(this, 'stack', {
-        get() { return instance.stack; },
+        get() {
+          return instance.stack;
+        },
       });
     }
     return instance;

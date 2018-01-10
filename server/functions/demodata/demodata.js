@@ -50,10 +50,13 @@ export const demodata = {
     };
 
     const { columns, rows } = sets[args._];
-    return queryDatatable({
-      type: 'datatable',
-      columns,
-      rows,
-    }, context);
+    return queryDatatable(
+      {
+        type: 'datatable',
+        columns,
+        rows,
+      },
+      context
+    );
   },
 };

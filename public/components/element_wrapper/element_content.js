@@ -28,7 +28,7 @@ const branches = [
 
   // renderable is available, but no matching element is found, render invalid
   branch(({ renderable, renderFunction }) => {
-    return (renderable && getType(renderable) !== 'render' && !renderFunction);
+    return renderable && getType(renderable) !== 'render' && !renderFunction;
   }, renderComponent(InvalidElementType)),
 
   // error state, render invalid expression notice
@@ -41,26 +41,26 @@ const branches = [
   }, renderComponent(InvalidExpression)),
 ];
 
-export const ElementContent = compose(
-  pure,
-  ...branches,
-)(({ renderFunction, renderable, size, handlers }) => {
-  return Style.it(renderable.css,
-    <div style={{ ...renderable.containerStyle, ...size }}>
-      <div className="canvas__element--content">
-        <RenderElement
-          name={renderFunction.name}
-          renderFn={renderFunction.render}
-          reuseNode={renderFunction.reuseDomNode}
-          config={renderable.value}
-          css={renderable.css} // This is an actual CSS stylesheet string, it will be scoped by RenderElement
-          size={size} // Size is only passed for the purpose of triggering the resize event, it isn't really used otherwise
-          handlers={handlers}
-        />
+export const ElementContent = compose(pure, ...branches)(
+  ({ renderFunction, renderable, size, handlers }) => {
+    return Style.it(
+      renderable.css,
+      <div style={{ ...renderable.containerStyle, ...size }}>
+        <div className="canvas__element--content">
+          <RenderElement
+            name={renderFunction.name}
+            renderFn={renderFunction.render}
+            reuseNode={renderFunction.reuseDomNode}
+            config={renderable.value}
+            css={renderable.css} // This is an actual CSS stylesheet string, it will be scoped by RenderElement
+            size={size} // Size is only passed for the purpose of triggering the resize event, it isn't really used otherwise
+            handlers={handlers}
+          />
+        </div>
       </div>
-    </div>
-  );
-});
+    );
+  }
+);
 
 ElementContent.propTypes = {
   renderFunction: PropTypes.object,

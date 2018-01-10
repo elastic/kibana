@@ -19,10 +19,7 @@ export const ColorManager = ({ value, addColor, removeColor, onChange }) => (
         onChange={e => onChange(e.target.value)}
       />
     </div>
-    <i
-      onClick={() => addColor(value)}
-      className="canvas__color-manager--add fa fa-plus-circle"
-    />
+    <i onClick={() => addColor(value)} className="canvas__color-manager--add fa fa-plus-circle" />
     <i
       onClick={() => removeColor(value)}
       className="canvas__color-manager--remove fa fa-times-circle"

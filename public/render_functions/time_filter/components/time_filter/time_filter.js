@@ -16,11 +16,12 @@ export const TimeFilter = ({ compact, filter, setFilter, commit }) => {
     const filter = `timefilter from="${from}" to=${to} column=${column}`;
 
     // TODO: Changes to element.filter do not cause a re-render
-    setFilter(filter); commit(filter);
+    setFilter(filter);
+    commit(filter);
   }
 
-  if (compact) return (<TimePickerMini from={from} to={to} onSelect={doSetFilter}/>);
-  else return (<TimePicker from={from} to={to} onSelect={doSetFilter}/>);
+  if (compact) return <TimePickerMini from={from} to={to} onSelect={doSetFilter} />;
+  else return <TimePicker from={from} to={to} onSelect={doSetFilter} />;
 };
 
 TimeFilter.propTypes = {

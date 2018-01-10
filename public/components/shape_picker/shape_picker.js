@@ -41,7 +41,7 @@ const picker = (value, onSelect) => (
         {({ item }) => (
           <div
             key={item}
-            className={`canvas__shape-picker-item ${(item === value) ? 'selected' : ''}`}
+            className={`canvas__shape-picker-item ${item === value ? 'selected' : ''}`}
             onClick={() => onSelect(item)}
           >
             <span className={`fa fa-${item}`} />

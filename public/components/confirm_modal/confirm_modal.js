@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Button } from 'react-bootstrap';
 
-export const ConfirmModal = (props) => {
+export const ConfirmModal = props => {
   const {
     isOpen,
     title,
@@ -14,11 +14,11 @@ export const ConfirmModal = (props) => {
     className,
   } = props;
 
-  const confirm = (ev) => {
+  const confirm = ev => {
     onConfirm && onConfirm(ev);
   };
 
-  const cancel = (ev) => {
+  const cancel = ev => {
     onCancel && onCancel(ev);
   };
 
@@ -36,13 +36,13 @@ export const ConfirmModal = (props) => {
         <Modal.Title id="confirm-modal-title">{title || 'Confirm'}</Modal.Title>
       </Modal.Header>
 
-      <Modal.Body>
-        {message}
-      </Modal.Body>
+      <Modal.Body>{message}</Modal.Body>
 
       <Modal.Footer>
         <Button onClick={cancel}>{cancelButtonText || 'Cancel'}</Button>
-        <Button bsStyle="primary" onClick={confirm} autoFocus>{confirmButtonText || 'Confirm'}</Button>
+        <Button bsStyle="primary" onClick={confirm} autoFocus>
+          {confirmButtonText || 'Confirm'}
+        </Button>
       </Modal.Footer>
     </Modal>
   );

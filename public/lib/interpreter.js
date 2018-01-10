@@ -6,12 +6,12 @@ import { functionsRegistry } from './functions_registry';
 
 // Create the function list
 socket.emit('getFunctionList');
-export const getServerFunctions = new Promise((resolve) => socket.once('functionList', resolve));
+export const getServerFunctions = new Promise(resolve => socket.once('functionList', resolve));
 
 // Use the above promise to seed the interpreter with the functions it can defer to
 export function interpretAst(ast, context) {
   return getServerFunctions
-    .then((serverFunctionList) => {
+    .then(serverFunctionList => {
       return socketInterpreterProvider({
         types: typesRegistry.toJS(),
         handlers: createHandlers(socket),
@@ -23,9 +23,8 @@ export function interpretAst(ast, context) {
     .then(interpretFn => interpretFn(ast, context));
 }
 
-socket.on('run', (msg) => {
-  interpretAst(msg.ast, msg.context)
-    .then(resp => {
-      socket.emit('resp', { value: resp, id: msg.id });
-    });
+socket.on('run', msg => {
+  interpretAst(msg.ast, msg.context).then(resp => {
+    socket.emit('resp', { value: resp, id: msg.id });
+  });
 });

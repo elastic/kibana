@@ -12,8 +12,10 @@ export const ColorPalette = ({ value, colors, colorsPerRow, onChange }) => (
       {({ item: color }) => (
         <div key={color} onClick={() => onChange(color)} className="canvas__color-palette--dot">
           <ColorDot value={color}>
-            { color === value && <i className="fa fa-check" style={{ color: readableColor(value) }}/> }
-            { color !== value && <i className="fa"/> }
+            {color === value && (
+              <i className="fa fa-check" style={{ color: readableColor(value) }} />
+            )}
+            {color !== value && <i className="fa" />}
           </ColorDot>
         </div>
       )}

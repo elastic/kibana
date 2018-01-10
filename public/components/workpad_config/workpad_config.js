@@ -26,9 +26,7 @@ export const WorkpadConfig = ({ size, name, setSize, setName }) => {
             onChange={e => setSize({ width: Number(e.target.value), height: size.height })}
             value={size.width}
           />
-          <ControlLabel>
-            Width
-          </ControlLabel>
+          <ControlLabel>Width</ControlLabel>
         </div>
         <div>
           <FormControl
@@ -38,19 +36,25 @@ export const WorkpadConfig = ({ size, name, setSize, setName }) => {
             onChange={e => setSize({ height: Number(e.target.value), width: size.width })}
             value={size.height}
           />
-          <ControlLabel>
-            Height
-          </ControlLabel>
+          <ControlLabel>Height</ControlLabel>
         </div>
         <div>
-          <i onClick={rotate} className="fa fa-rotate-right"/>
+          <i onClick={rotate} className="fa fa-rotate-right" />
         </div>
       </div>
       <div className="canvas__workpad_config--presets">
-        <Label bsStyle="default" onClick={() => setSize({ height: 1080, width: 1920 })}>1080p</Label>
-        <Label bsStyle="default" onClick={() => setSize({ height: 720, width: 1280 })}>720p</Label>
-        <Label bsStyle="default" onClick={() => setSize({ height: 842, width: 590 })}>A4</Label>
-        <Label bsStyle="default" onClick={() => setSize({ height: 792, width: 612 })}>US Letter</Label>
+        <Label bsStyle="default" onClick={() => setSize({ height: 1080, width: 1920 })}>
+          1080p
+        </Label>
+        <Label bsStyle="default" onClick={() => setSize({ height: 720, width: 1280 })}>
+          720p
+        </Label>
+        <Label bsStyle="default" onClick={() => setSize({ height: 842, width: 590 })}>
+          A4
+        </Label>
+        <Label bsStyle="default" onClick={() => setSize({ height: 792, width: 612 })}>
+          US Letter
+        </Label>
       </div>
     </div>
   );

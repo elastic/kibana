@@ -52,7 +52,7 @@ export class Arg {
     const formProps = {
       key,
       argTypeInstance: this,
-      valueMissing: (this.required && argValue == null),
+      valueMissing: this.required && argValue == null,
       label,
       onValueChange,
       onValueRemove,

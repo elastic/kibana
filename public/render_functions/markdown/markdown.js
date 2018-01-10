@@ -14,13 +14,15 @@ export const markdown = {
     const html = { __html: md.render(String(config.content)) };
     const fontStyle = config.font ? config.font.spec : {};
 
-    ReactDOM.render((
+    ReactDOM.render(
       <div
         className="canvas__element__markdown"
         style={fontStyle}
         dangerouslySetInnerHTML={html}
-      />
-    ), domNode, () => handlers.done());
+      />,
+      domNode,
+      () => handlers.done()
+    );
 
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },

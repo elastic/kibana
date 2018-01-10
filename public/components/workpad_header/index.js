@@ -4,14 +4,14 @@ import { getWorkpadName } from '../../state/selectors/workpad';
 import { setEditing } from '../../state/actions/transient';
 import { WorkpadHeader as Component } from './workpad_header';
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
   editing: getEditing(state),
   workpadName: getWorkpadName(state),
 });
 
-const mapDispatchToProps = ({
+const mapDispatchToProps = {
   setEditing,
-});
+};
 
 const mergeProps = (stateProps, dispatchProps, ownProps) => ({
   ...stateProps,

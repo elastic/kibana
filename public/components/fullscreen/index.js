@@ -5,7 +5,7 @@ import { getFullscreen } from '../../state/selectors/app.js';
 import { defaultIdent } from '../../lib/fullscreen.js';
 import { Fullscreen as Component } from './fullscreen';
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
   isFullscreen: getFullscreen(state),
 });
 
@@ -20,9 +20,10 @@ export const Fullscreen = compose(
   })),
   withState('windowSize', 'setWindowSize', getWindowSize()),
   withHandlers({
-    windowResizeHandler: ({ setWindowSize }) => debounce(() => {
-      setWindowSize(getWindowSize());
-    }, 100),
+    windowResizeHandler: ({ setWindowSize }) =>
+      debounce(() => {
+        setWindowSize(getWindowSize());
+      }, 100),
   }),
   connect(mapStateToProps),
   lifecycle({
@@ -32,5 +33,5 @@ export const Fullscreen = compose(
     componentWillUnmount() {
       window.removeEventListener('resize', this.props.windowResizeHandler);
     },
-  }),
+  })
 )(Component);

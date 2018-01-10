@@ -4,7 +4,7 @@ import { Provider } from 'react-redux';
 import { uiModules } from 'ui/modules';
 
 const app = uiModules.get('apps/canvas');
-app.directive('react', (canvasStore) => {
+app.directive('react', canvasStore => {
   return {
     restrict: 'E',
     scope: {
@@ -13,11 +13,12 @@ app.directive('react', (canvasStore) => {
     link: ($scope, $el) => {
       const Component = $scope.component;
 
-      render((
+      render(
         <Provider store={canvasStore}>
           <Component />
-        </Provider>
-      ), $el[0]);
+        </Provider>,
+        $el[0]
+      );
 
       $scope.$on('$destroy', () => {
         unmountComponentAtNode($el[0]);

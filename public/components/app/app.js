@@ -11,7 +11,7 @@ const branches = [
 
 export const App = compose(
   ...branches,
-  withContext({ shortcuts: PropTypes.object.isRequired }, () => ({ shortcuts: shortcutManager })),
+  withContext({ shortcuts: PropTypes.object.isRequired }, () => ({ shortcuts: shortcutManager }))
 )(Component);
 
 App.propTypes = {

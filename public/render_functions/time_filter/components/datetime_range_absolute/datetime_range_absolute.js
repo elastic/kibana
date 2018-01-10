@@ -6,13 +6,12 @@ import './datetime_range_absolute.less';
 export const DatetimeRangeAbsolute = ({ from, to, onSelect }) => (
   <div className="canvas__datetime-range-absolute">
     <div>
-      <DatetimeCalendar value={from} onSelect={val => onSelect(val, to)}/>
+      <DatetimeCalendar value={from} onSelect={val => onSelect(val, to)} />
     </div>
     <div>
-      <DatetimeCalendar value={to} onSelect={val => onSelect(from, val)}/>
+      <DatetimeCalendar value={to} onSelect={val => onSelect(from, val)} />
     </div>
   </div>
-
 );
 
 DatetimeRangeAbsolute.propTypes = {

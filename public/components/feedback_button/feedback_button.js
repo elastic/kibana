@@ -9,25 +9,25 @@ export const FeedbackButton = ({ show, setShow }) => {
   const formId = '1FAIpQLSfrHmSrLAWcLx8s4RM_pKP8_BvRGbASGeG-F_fagxUtGu7q4A';
   const feedbackFormUrl = `https://docs.google.com/a/elastic.co/forms/d/e/${formId}/viewform?embedded=true`;
   const forumLink = text => (
-    <a
-      rel="noopener noreferrer"
-      target="_blank"
-      href="https://discuss.elastic.co/c/kibana"
-    >
+    <a rel="noopener noreferrer" target="_blank" href="https://discuss.elastic.co/c/kibana">
       {text}
     </a>
   );
 
   return (
     <span>
-      <NavbarButton onClick={() => setShow(true)} className="pull-right"><i className="fa fa-comment" />
+      <NavbarButton onClick={() => setShow(true)} className="pull-right">
+        <i className="fa fa-comment" />
         Give Feedback
       </NavbarButton>
 
-      {show &&
+      {show && (
         <Modal.Dialog dialogClassName="canvas__feedback-modal">
           <Modal.Header className="canvas__feedback-modal--header">Give Feedback</Modal.Header>
-          <Modal.Body className="canvas__feedback-modal--body" style={{ overflow: 'none', position: 'relative' }}>
+          <Modal.Body
+            className="canvas__feedback-modal--body"
+            style={{ overflow: 'none', position: 'relative' }}
+          >
             <div className="message">
               <p>
                 Use the form below to provide feedback about Canvas, which only the people working
@@ -40,7 +40,6 @@ export const FeedbackButton = ({ show, setShow }) => {
               </p>
 
               <hr />
-
             </div>
 
             <div style={{ position: 'absolute', width: '100%' }}>
@@ -58,17 +57,13 @@ export const FeedbackButton = ({ show, setShow }) => {
                 </iframe>
               </div>
             </div>
-
           </Modal.Body>
 
           <Modal.Footer>
-            <Button onClick={() => setShow(false)}>
-              Dismiss
-            </Button>
+            <Button onClick={() => setShow(false)}>Dismiss</Button>
           </Modal.Footer>
-
         </Modal.Dialog>
-      }
+      )}
     </span>
   );
 };

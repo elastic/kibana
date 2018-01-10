@@ -4,23 +4,20 @@ export const urlparam = {
   name: 'urlparam',
   aliases: [],
   type: 'string',
-  help: 'Access URL parameters and use them in expressions. Eg https://localhost:5601/app/canvas?myVar=20. This will always return a string',
+  help:
+    'Access URL parameters and use them in expressions. Eg https://localhost:5601/app/canvas?myVar=20. This will always return a string',
   context: {
     types: ['null'],
   },
   args: {
     _: {
-      types: [
-        'string',
-      ],
-      'aliases': ['var', 'variable'],
+      types: ['string'],
+      aliases: ['var', 'variable'],
       help: 'The URL hash parameter to access',
-      'multi': false,
+      multi: false,
     },
     default: {
-      types: [
-        'string',
-      ],
+      types: ['string'],
       default: '""',
       help: 'Return this string if the url parameter is not defined',
     },

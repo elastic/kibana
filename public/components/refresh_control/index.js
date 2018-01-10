@@ -5,14 +5,14 @@ import { getInFlight } from '../../state/selectors/resolved_args';
 import { getRefreshInterval } from '../../state/selectors/workpad';
 import { RefreshControl as Component } from './refresh_control';
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
   inFlight: getInFlight(state),
   refreshInterval: getRefreshInterval(state),
 });
 
-const mapDispatchToProps = ({
+const mapDispatchToProps = {
   doRefresh: fetchAllRenderables,
   setRefreshInterval,
-});
+};
 
 export const RefreshControl = connect(mapStateToProps, mapDispatchToProps)(Component);

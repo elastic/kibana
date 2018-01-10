@@ -6,7 +6,16 @@ import { ColorPickerMini } from '../color_picker_mini';
 import { fontSizes } from './font_sizes';
 import './text_style_picker.less';
 
-export const TextStylePicker = ({ family, size, align, color, weight, underline, italic, onChange }) => {
+export const TextStylePicker = ({
+  family,
+  size,
+  align,
+  color,
+  weight,
+  underline,
+  italic,
+  onChange,
+}) => {
   function doChange(propName, value) {
     onChange({
       family,
@@ -27,20 +36,19 @@ export const TextStylePicker = ({ family, size, align, color, weight, underline,
           <FormControl
             componentClass="select"
             value={size}
-            onChange={(e) => doChange('size', Number(e.target.value))}
+            onChange={e => doChange('size', Number(e.target.value))}
           >
             {fontSizes.map(size => (
-              <option key={size} value={size}>{ size }</option>
+              <option key={size} value={size}>
+                {size}
+              </option>
             ))}
           </FormControl>
         </div>
-        <FontPicker
-          value={family}
-          onSelect={(value) => doChange('family', value)}
-        />
+        <FontPicker value={family} onSelect={value => doChange('family', value)} />
       </FormGroup>
       <FormGroup className="canvas__text-style-picker--bottom">
-        <ColorPickerMini value={color} onChange={(value) => doChange('color', value)}/>
+        <ColorPickerMini value={color} onChange={value => doChange('color', value)} />
         <ButtonGroup bsSize="small">
           <Button
             active={weight === 'bold'}
@@ -48,29 +56,23 @@ export const TextStylePicker = ({ family, size, align, color, weight, underline,
           >
             <span style={{ fontWeight: 'bold' }}>B</span>
           </Button>
-          <Button
-            active={italic}
-            onClick={() => doChange('italic', !italic)}
-          >
+          <Button active={italic} onClick={() => doChange('italic', !italic)}>
             <span style={{ fontStyle: 'italic' }}>I</span>
           </Button>
-          <Button
-            active={underline}
-            onClick={() => doChange('underline', !underline)}
-          >
+          <Button active={underline} onClick={() => doChange('underline', !underline)}>
             <span style={{ textDecoration: 'underline' }}>U</span>
           </Button>
         </ButtonGroup>
         &nbsp;
         <ButtonGroup bsSize="small">
           <Button active={align === 'left'} onClick={() => doChange('align', 'left')}>
-            <i className="fa fa-align-left"/>
+            <i className="fa fa-align-left" />
           </Button>
           <Button active={align === 'center'} onClick={() => doChange('align', 'center')}>
-            <i className="fa fa-align-center"/>
+            <i className="fa fa-align-center" />
           </Button>
           <Button active={align === 'right'} onClick={() => doChange('align', 'right')}>
-            <i className="fa fa-align-right"/>
+            <i className="fa fa-align-right" />
           </Button>
         </ButtonGroup>
       </FormGroup>

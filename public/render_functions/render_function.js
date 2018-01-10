@@ -15,5 +15,9 @@ export function RenderFunction(config) {
   this.reuseDomNode = Boolean(config.reuseDomNode);
 
   // the function called to render the data
-  this.render = config.render || function render(domNode, data, done) { done(); };
+  this.render =
+    config.render ||
+    function render(domNode, data, done) {
+      done();
+    };
 }

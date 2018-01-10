@@ -85,13 +85,16 @@ function init(plot) {
         const size = point[2].size;
 
         const delta = maxPoint - minPoint;
-        const radius = (function () {
+        const radius = (function() {
           if (size == null) return 0; // If there is no size, draw nothing
           if (delta === 0) return series.bubbles.size.min; // If there is no difference between the min and the max, draw the minimum bubble.
 
           // Otherwise draw something between the min and max acceptable radius.
-          return ((series.bubbles.size.max - series.bubbles.size.min) / delta * (size - minPoint) + series.bubbles.size.min);
-        }());
+          return (
+            (series.bubbles.size.max - series.bubbles.size.min) / delta * (size - minPoint) +
+            series.bubbles.size.min
+          );
+        })();
 
         const color = series.color === 'function' ? series.color.apply(this, point) : series.color;
 
@@ -102,7 +105,6 @@ function init(plot) {
       series.data.forEach(point => drawPoint(point));
     }
   }
-
 }
 
 export const size = {

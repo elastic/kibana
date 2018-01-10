@@ -2,8 +2,9 @@ const name = 'seriesStyle';
 
 export const seriesStyle = {
   name,
-  help: 'Creates an object used for describing the properties of a series on a chart.' +
-  ' You would usually use this inside of a charting function',
+  help:
+    'Creates an object used for describing the properties of a series on a chart.' +
+    ' You would usually use this inside of a charting function',
   context: {
     types: ['null'],
   },
@@ -11,7 +12,8 @@ export const seriesStyle = {
     label: {
       types: ['string'],
       displayName: 'Series Label',
-      help: 'The label of the line this style applies to, not the name you would like to give the line.',
+      help:
+        'The label of the line this style applies to, not the name you would like to give the line.',
     },
     color: {
       types: ['string', 'null'],
@@ -45,7 +47,8 @@ export const seriesStyle = {
     stack: {
       types: ['number', 'null'],
       displayName: 'Stack Series',
-      help: 'Should we stack the series? This is the stack "id". Series with the same stack id will be stacked together',
+      help:
+        'Should we stack the series? This is the stack "id". Series with the same stack id will be stacked together',
     },
   },
   fn: (context, args) => ({ type: name, ...args }),

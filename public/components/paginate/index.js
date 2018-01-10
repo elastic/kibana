@@ -15,7 +15,7 @@ export const Paginate = compose(
   }),
   withProps(({ rows, totalPages, currentPage, perPage }) => {
     const start = currentPage * perPage;
-    const end = currentPage === 0 ? perPage : (perPage * (currentPage + 1));
+    const end = currentPage === 0 ? perPage : perPage * (currentPage + 1);
     return {
       pageNumber: currentPage + 1,
       nextPageEnabled: currentPage < totalPages - 1,
@@ -24,16 +24,15 @@ export const Paginate = compose(
     };
   }),
   withHandlers({
-    nextPage: ({ currentPage, nextPageEnabled, setPage }) => () => nextPageEnabled && setPage(currentPage + 1),
-    prevPage: ({ currentPage, prevPageEnabled, setPage }) => () => prevPageEnabled && setPage(currentPage - 1),
+    nextPage: ({ currentPage, nextPageEnabled, setPage }) => () =>
+      nextPageEnabled && setPage(currentPage + 1),
+    prevPage: ({ currentPage, prevPageEnabled, setPage }) => () =>
+      prevPageEnabled && setPage(currentPage - 1),
   })
 )(Component);
 
 Paginate.propTypes = {
   rows: PropTypes.array.isRequired,
-  perPage: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.number,
-  ]),
+  perPage: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   startPage: PropTypes.number,
 };

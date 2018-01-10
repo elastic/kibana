@@ -11,9 +11,13 @@ export const PalettePicker = ({ onChange, value, placement }) => {
     <Popover id="popover-trigger-click">
       <div className="canvas__palette-picker--swatches">
         {map(palettes, (palette, name) => (
-          <div key={name} onClick={() => onChange(palette)} className="clickable canvas__palette-picker--swatch">
+          <div
+            key={name}
+            onClick={() => onChange(palette)}
+            className="clickable canvas__palette-picker--swatch"
+          >
             <div className="clickable canvas__palette-picker--label">{name.replace(/_/g, ' ')}</div>
-            <PaletteSwatch colors={palette.colors} gradient={palette.gradient}/>
+            <PaletteSwatch colors={palette.colors} gradient={palette.gradient} />
           </div>
         ))}
       </div>
@@ -22,14 +26,10 @@ export const PalettePicker = ({ onChange, value, placement }) => {
 
   return (
     <div className="canvas__palette-picker">
-
-      <OverlayTrigger
-        rootClose
-        overlay={picker}
-        placement={placement || 'bottom'}
-        trigger="click"
-      >
-        <div style={{ width: '100%' }}><PaletteSwatch colors={value.colors} gradient={value.gradient}/></div>
+      <OverlayTrigger rootClose overlay={picker} placement={placement || 'bottom'} trigger="click">
+        <div style={{ width: '100%' }}>
+          <PaletteSwatch colors={value.colors} gradient={value.gradient} />
+        </div>
       </OverlayTrigger>
     </div>
   );

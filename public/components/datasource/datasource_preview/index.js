@@ -11,9 +11,7 @@ export const DatasourcePreview = compose(
     componentDidMount() {
       interpretAst({
         type: 'expression',
-        chain: [
-          this.props.function,
-        ],
+        chain: [this.props.function],
       }).then(this.props.setDatatable);
     },
   }),

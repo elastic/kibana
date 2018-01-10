@@ -44,5 +44,4 @@ describe('resolved arg helper', () => {
       expect(getError(arg).toString()).to.match(/i failed/);
     });
   });
-
 });

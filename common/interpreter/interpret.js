@@ -28,7 +28,7 @@ export function interpretProvider(config) {
   function interpret(node, context = null) {
     switch (getType(node)) {
       case 'partial':
-        return (partialContext) => invokeChain(node.chain, partialContext);
+        return partialContext => invokeChain(node.chain, partialContext);
       case 'expression':
         return invokeChain(node.chain, context);
       case 'function':
@@ -65,7 +65,7 @@ export function interpretProvider(config) {
       const newContext = await invokeFunction(fnName, context, resolvedArgs);
 
       // if something failed, just return the failure
-      if(getType(newContext) === 'error') {
+      if (getType(newContext) === 'error') {
         console.log('newContext error', newContext);
         return newContext;
       }
@@ -89,8 +89,9 @@ export function interpretProvider(config) {
     const returnType = getType(fnOutput);
     const expectedType = fnDef.type;
     if (expectedType && returnType !== expectedType) {
-      throw new Error(`Function '${name}' should return '${expectedType}',` +
-        ` actually returned '${returnType}'`);
+      throw new Error(
+        `Function '${name}' should return '${expectedType}',` + ` actually returned '${returnType}'`
+      );
     }
 
     // Validate the function output against the type definition's validate function

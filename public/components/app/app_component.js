@@ -18,17 +18,14 @@ export const AppComponent = ({ editing, deselectElement }) => (
           <Workpad />
         </div>
       </div>
-      { editing ? (
+      {editing ? (
         <div className="canvas__app--sidebar">
           <Sidebar />
         </div>
-      ) : null }
+      ) : null}
     </div>
 
-    { editing ? (
-      <Toolbar />
-    ) : null }
-
+    {editing ? <Toolbar /> : null}
   </div>
 );
 

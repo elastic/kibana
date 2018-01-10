@@ -5,7 +5,7 @@ import { getAssets } from './assets';
 
 const workpadRoot = 'persistent.workpad';
 
-const appendAst = (element) => ({
+const appendAst = element => ({
   ...element,
   ast: safeElementFromExpression(element.expression),
 });
@@ -39,7 +39,7 @@ export function getPages(state) {
   // explicitely strip the ast, basically a fix for corrupted workpads
   // due to https://github.com/elastic/kibana-canvas/issues/260
   // TODO: remove this once it's been in the wild a bit
-  return pages.map((page) => ({
+  return pages.map(page => ({
     ...page,
     elements: page.elements.map(el => omit(el, ['ast'])),
   }));

@@ -28,20 +28,26 @@ function getFormObject(argValue) {
       column: argValue,
     };
 
-  // Check if its a simple function, eg a function wrapping a symbol node
+    // Check if its a simple function, eg a function wrapping a symbol node
   } else if (mathObj.type === 'FunctionNode' && mathObj.args[0].type === 'SymbolNode') {
     return {
       fn: mathObj.name,
       column: mathObj.args[0].name,
     };
 
-  // Screw it, textarea for you my fancy.
+    // Screw it, textarea for you my fancy.
   } else {
     throw new Error(`Invalid math object type: ${mathObj.type}`);
   }
 }
 
-const DatacolumnArgInput = ({ onValueChange, columns, mathValue, setMathFunction, renderError }) => {
+const DatacolumnArgInput = ({
+  onValueChange,
+  columns,
+  mathValue,
+  setMathFunction,
+  renderError,
+}) => {
   if (mathValue.error) return renderError();
 
   const inputRefs = {};
@@ -49,7 +55,7 @@ const DatacolumnArgInput = ({ onValueChange, columns, mathValue, setMathFunction
   const updateFunctionValue = () => {
     // if setting size, auto-select the first column if no column is already set
     if (inputRefs.fn.value === 'size') {
-      const col = inputRefs.column.value || columns[0] && columns[0].name;
+      const col = inputRefs.column.value || (columns[0] && columns[0].name);
       if (col) return onValueChange(`${inputRefs.fn.value}(${col})`);
     }
 
@@ -73,20 +79,24 @@ const DatacolumnArgInput = ({ onValueChange, columns, mathValue, setMathFunction
     <div className="canvas__argtype--datacolumn">
       <SimpleMathFunction
         value={mathValue.fn}
-        inputRef={ref => inputRefs.fn = ref}
+        inputRef={ref => (inputRefs.fn = ref)}
         onChange={updateFunctionValue}
       />
       <FormControl
         componentClass="select"
         placeholder="select"
         value={column}
-        inputRef={ref => inputRefs.column = ref}
+        inputRef={ref => (inputRefs.column = ref)}
         onChange={updateFunctionValue}
       >
-        <option value="" disabled>select column</option>
-        { sortBy(columns, 'name').map(column => (
-          <option key={column.name} value={column.name}>{column.name}</option>
-        )) }
+        <option value="" disabled>
+          select column
+        </option>
+        {sortBy(columns, 'name').map(column => (
+          <option key={column.name} value={column.name}>
+            {column.name}
+          </option>
+        ))}
       </FormControl>
     </div>
   );
@@ -103,7 +113,7 @@ DatacolumnArgInput.propTypes = {
 
 const simpleTemplate = compose(
   withPropsOnChange(['argValue'], ({ argValue }) => ({
-    mathValue: ((argValue) => {
+    mathValue: (argValue => {
       if (getType(argValue) !== 'string') return { error: 'argValue is not a string type' };
       try {
         return getFormObject(argValue);
@@ -114,15 +124,12 @@ const simpleTemplate = compose(
   })),
   createStatefulPropHoc('mathValue', 'setMathValue'),
   withHandlers({
-    setMathFunction: ({ mathValue, setMathValue }) => (fn) => setMathValue({ ...mathValue, fn }),
+    setMathFunction: ({ mathValue, setMathValue }) => fn => setMathValue({ ...mathValue, fn }),
   })
 )(DatacolumnArgInput);
 
 simpleTemplate.propTypes = {
-  argValue: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.object,
-  ]).isRequired,
+  argValue: PropTypes.oneOfType([PropTypes.string, PropTypes.object]).isRequired,
 };
 
 export const datacolumn = () => ({

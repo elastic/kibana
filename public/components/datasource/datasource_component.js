@@ -4,7 +4,7 @@ import { Button, ButtonToolbar, FormGroup } from 'react-bootstrap';
 import { DatasourceSelector } from './datasource_selector';
 import { DatasourcePreview } from './datasource_preview';
 
-export const DatasourceComponent = (props) => {
+export const DatasourceComponent = props => {
   const {
     datasources,
     datasource,
@@ -28,7 +28,7 @@ export const DatasourceComponent = (props) => {
     type: 'function',
   });
 
-  const setSelectedDatasource = (value) => {
+  const setSelectedDatasource = value => {
     if (datasource.name === value) {
       // if selecting the current datasource, reset the arguments
       resetArgs && resetArgs();
@@ -50,11 +50,16 @@ export const DatasourceComponent = (props) => {
   };
 
   if (selecting) {
-    return (<DatasourceSelector datasources={datasources} onSelect={setSelectedDatasource} />);
+    return <DatasourceSelector datasources={datasources} onSelect={setSelectedDatasource} />;
   }
 
   if (previewing) {
-    return (<DatasourcePreview done={() => setPreviewing(false)} function={getDatasourceFunctionNode(stateDatasource.name, stateArgs)}/>);
+    return (
+      <DatasourcePreview
+        done={() => setPreviewing(false)}
+        function={getDatasourceFunctionNode(stateDatasource.name, stateArgs)}
+      />
+    );
   }
 
   return (
@@ -65,11 +70,15 @@ export const DatasourceComponent = (props) => {
         </FormGroup>
       </div>
       <ButtonToolbar>
-        <Button bsStyle="success" onClick={save}> Apply</Button>
-        <Button bsStyle="primary" onClick={() => setPreviewing(true)}> Preview</Button>
+        <Button bsStyle="success" onClick={save}>
+          Apply
+        </Button>
+        <Button bsStyle="primary" onClick={() => setPreviewing(true)}>
+          Preview
+        </Button>
         <Button onClick={close}> Cancel</Button>
         <a onClick={() => setSelecting(!selecting)} className="btn btn-link">
-          <i className="fa fa-database"/> Change Datasource
+          <i className="fa fa-database" /> Change Datasource
         </a>
       </ButtonToolbar>
     </div>

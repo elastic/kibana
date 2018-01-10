@@ -4,7 +4,7 @@ import { Positionable } from '../positionable';
 import { ElementControls } from './element_controls';
 import './element_wrapper.less';
 
-export const ElementWrapper = (props) => {
+export const ElementWrapper = props => {
   const {
     selectElement,
     removeElement,

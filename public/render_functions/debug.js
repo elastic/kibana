@@ -7,11 +7,13 @@ export const debug = {
   help: 'Render debug output as formatted JSON',
   reuseDomNode: true,
   render(domNode, config, handlers) {
-    ReactDOM.render((
+    ReactDOM.render(
       <div style={{ overflow: 'auto', height: '100%' }}>
         <pre>{JSON.stringify(config, null, ' ')}</pre>
-      </div>
-    ), domNode, () => handlers.done());
+      </div>,
+      domNode,
+      () => handlers.done()
+    );
 
     handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
   },

@@ -6,9 +6,7 @@ export const repeatImage = {
   type: 'render',
   help: 'Configure a repeating image element',
   context: {
-    types: [
-      'number',
-    ],
+    types: ['number'],
   },
   args: {
     image: {
@@ -19,7 +17,8 @@ export const repeatImage = {
     size: {
       types: ['number'],
       default: 100,
-      help: 'The maximum height or width of the image, in pixels. Eg, if you images is taller than it is wide, this will limit its height',
+      help:
+        'The maximum height or width of the image, in pixels. Eg, if you images is taller than it is wide, this will limit its height',
     },
     max: {
       types: ['number', 'null'],

@@ -10,15 +10,18 @@ export const filterrows = {
     _: {
       aliases: ['fn'],
       types: ['function'],
-      help: 'An expression to pass each rows in the datatable into. The expression should return a boolean. ' +
+      help:
+        'An expression to pass each rows in the datatable into. The expression should return a boolean. ' +
         'A true value will preserve the row, and a false value will remove it.',
     },
   },
   fn(context, { _: fn }) {
-    const checks = context.rows.map(row => fn({
-      ...context,
-      rows: [row],
-    }));
+    const checks = context.rows.map(row =>
+      fn({
+        ...context,
+        rows: [row],
+      })
+    );
 
     return Promise.all(checks)
       .then(results => context.rows.filter((row, i) => results[i]))

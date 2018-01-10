@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { get, mapValues, set } from 'lodash';
 import { TextStylePicker } from '../../../components/text_style_picker';
 
-export const extendedTemplate = (props) => {
+export const extendedTemplate = props => {
   const { onValueChange, argValue } = props;
   const chain = get(argValue, 'chain.0', {});
   const chainArgs = get(chain, 'arguments', {});
@@ -30,7 +30,6 @@ export const extendedTemplate = (props) => {
         onChange={handleChange}
       />
     </div>
-
   );
 };
 

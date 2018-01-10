@@ -12,9 +12,7 @@ const branches = [
   branch(({ unknownArgs }) => unknownArgs && unknownArgs.length > 0, renderComponent(UnknownArgs)),
 ];
 
-export const Datasource = compose(
-  ...branches
-)(DatasourceComponent);
+export const Datasource = compose(...branches)(DatasourceComponent);
 
 Datasource.propTypes = {
   args: PropTypes.object,

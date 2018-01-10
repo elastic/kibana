@@ -13,8 +13,9 @@ import { ElementTypes } from './element_types';
 import { Tray } from './tray';
 import './toolbar.less';
 
-export const Toolbar = (props) => {
-  const { editing,
+export const Toolbar = props => {
+  const {
+    editing,
     hasAssets,
     tray,
     setTray,
@@ -27,12 +28,12 @@ export const Toolbar = (props) => {
     selectedPageNumber,
   } = props;
   const done = () => setTray(null);
-  const showHideTray = (exp) => {
+  const showHideTray = exp => {
     if (tray && tray === exp) return done();
     setTray(exp);
   };
 
-  const createElement = (expression) => {
+  const createElement = expression => {
     addElement(expression);
 
     // close the tray
@@ -40,24 +41,28 @@ export const Toolbar = (props) => {
   };
 
   const trays = {
-    pageManager: (<PageManager/>),
-    assetManager: (<AssetManager/>),
-    elements: (<ElementTypes done={done} onClick={createElement} />),
-    expression: !elementIsSelected ? null : (<Expression done={done} />),
-    datasource: !elementIsSelected ? null : (<Datasource done={done} />),
-    workpadloader: (<WorkpadLoader onClose={done} />),
+    pageManager: <PageManager />,
+    assetManager: <AssetManager />,
+    elements: <ElementTypes done={done} onClick={createElement} />,
+    expression: !elementIsSelected ? null : <Expression done={done} />,
+    datasource: !elementIsSelected ? null : <Datasource done={done} />,
+    workpadloader: <WorkpadLoader onClose={done} />,
   };
 
   return !editing ? null : (
     <div className="canvas__toolbar">
-      {trays[tray] && (<Tray>{ trays[tray] }</Tray>)}
+      {trays[tray] && <Tray>{trays[tray]}</Tray>}
 
       <Navbar>
-        <NavbarButton onClick={previousPage}><i className="fa fa-chevron-left"/></NavbarButton>
-        { selectedPageNumber }
-        <NavbarButton onClick={nextPage}><i className="fa fa-chevron-right"/></NavbarButton>
+        <NavbarButton onClick={previousPage}>
+          <i className="fa fa-chevron-left" />
+        </NavbarButton>
+        {selectedPageNumber}
+        <NavbarButton onClick={nextPage}>
+          <i className="fa fa-chevron-right" />
+        </NavbarButton>
 
-        <NavbarDivider/>
+        <NavbarDivider />
 
         <NavbarButton onClick={() => showHideTray('workpadloader')}>
           <i className="fa fa-briefcase" /> Workpads
@@ -69,15 +74,15 @@ export const Toolbar = (props) => {
           <i className="fa fa-plus" /> Elements
         </NavbarButton>
 
-        { hasAssets &&
+        {hasAssets && (
           <NavbarButton onClick={() => showHideTray('assetManager')}>
             <i className="fa fa-image" /> Assets
           </NavbarButton>
-        }
+        )}
 
-        { elementIsSelected && (
+        {elementIsSelected && (
           <span>
-            <NavbarDivider/>
+            <NavbarDivider />
 
             <NavbarButton onClick={() => showHideTray('datasource')}>
               <i className="fa fa-database" /> Datasource
@@ -89,7 +94,7 @@ export const Toolbar = (props) => {
               <i className="fa fa-clone" /> Clone
             </NavbarButton>
 
-            <NavbarDivider/>
+            <NavbarDivider />
 
             <NavbarButton onClick={() => elementLayer(Infinity)}>
               <i className="fa fa-arrow-circle-up" />
@@ -105,8 +110,7 @@ export const Toolbar = (props) => {
             </NavbarButton>
           </span>
         )}
-        <FeedbackButton/>
-
+        <FeedbackButton />
       </Navbar>
     </div>
   );

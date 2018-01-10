@@ -1,18 +1,26 @@
 import { connect } from 'react-redux';
-import { compose, withState, withHandlers, lifecycle, withPropsOnChange, branch, renderComponent } from 'recompose';
+import {
+  compose,
+  withState,
+  withHandlers,
+  lifecycle,
+  withPropsOnChange,
+  branch,
+  renderComponent,
+} from 'recompose';
 import { getSelectedPage, getSelectedElement } from '../../state/selectors/workpad';
 import { setExpression, flushContext } from '../../state/actions/elements';
 import { fromExpression } from '../../../common/lib/ast';
 import { ElementNotSelected } from './element_not_selected';
 import { Expression as Component } from './expression';
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
   pageId: getSelectedPage(state),
   element: getSelectedElement(state),
 });
 
-const mapDispatchToProps = (dispatch) => ({
-  setExpression: (elementId, pageId) => (expression) => {
+const mapDispatchToProps = dispatch => ({
+  setExpression: (elementId, pageId) => expression => {
     // destroy the context cache
     dispatch(flushContext(elementId));
 
@@ -70,7 +78,7 @@ export const Expression = compose(
   }),
   expressionLifecycle,
   withPropsOnChange(['formState'], ({ formState }) => ({
-    error: (function () {
+    error: (function() {
       try {
         // TODO: We should merge the advanced UI input and this into a single validated expression input.
         fromExpression(formState.expression);
@@ -78,7 +86,7 @@ export const Expression = compose(
       } catch (e) {
         return e.message;
       }
-    }()),
+    })(),
   })),
-  branch(props => !props.element, renderComponent(ElementNotSelected)),
+  branch(props => !props.element, renderComponent(ElementNotSelected))
 )(Component);

@@ -8,12 +8,8 @@ import { DatetimeInput } from '../datetime_input';
 
 export const DatetimeCalendar = ({ value, onSelect }) => (
   <div className="canvas__datetime-calendar">
-    <DatetimeInput moment={dateMath.parse(value)} setMoment={onSelect}/>
-    <Datetime
-      value={value}
-      input={false}
-      onChange={onSelect}
-    />
+    <DatetimeInput moment={dateMath.parse(value)} setMoment={onSelect} />
+    <Datetime value={value} input={false} onChange={onSelect} />
   </div>
 );
 

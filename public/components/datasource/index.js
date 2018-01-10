@@ -8,13 +8,13 @@ import { getFunctionDefinitions } from '../../state/selectors/app';
 import { setArgumentAtIndex, setAstAtIndex, flushContext } from '../../state/actions/elements';
 import { Datasource as Component } from './datasource';
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = state => ({
   element: getSelectedElement(state),
   pageId: getSelectedPage(state),
   functionDefinitions: getFunctionDefinitions(state),
 });
 
-const mapDispatchToProps = (dispatch) => ({
+const mapDispatchToProps = dispatch => ({
   dispatchArgumentAtIndex: props => arg => dispatch(setArgumentAtIndex({ ...props, arg })),
   dispatchAstAtIndex: ({ index, element, pageId }) => ast => {
     dispatch(flushContext(element.id));
@@ -26,31 +26,35 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
   const { element, pageId, functionDefinitions } = stateProps;
   const { dispatchArgumentAtIndex, dispatchAstAtIndex } = dispatchProps;
 
-  const getDataTableFunctionsByName = name => functionDefinitions.find(fn => fn.name === name && fn.type === 'datatable');
+  const getDataTableFunctionsByName = name =>
+    functionDefinitions.find(fn => fn.name === name && fn.type === 'datatable');
 
   // find the matching datasource from the expression AST
-  const datasourceAst = get(element, 'ast.chain', []).map((astDef, i) => {
-    // if it's not a function, it's can't be a datasource
-    if (astDef.type !== 'function') return;
-    const args = astDef.arguments;
+  const datasourceAst = get(element, 'ast.chain', [])
+    .map((astDef, i) => {
+      // if it's not a function, it's can't be a datasource
+      if (astDef.type !== 'function') return;
+      const args = astDef.arguments;
 
-    // if there's no matching datasource in the registry, we're done
-    const datasource = datasourceRegistry.get(astDef.function);
-    if (!datasource) return;
+      // if there's no matching datasource in the registry, we're done
+      const datasource = datasourceRegistry.get(astDef.function);
+      if (!datasource) return;
 
-    const datasourceDef = getDataTableFunctionsByName(datasource.name);
-    const knownArgs = datasourceDef && Object.keys(datasourceDef.args);
-    const unknownArgs = datasourceDef && Object.keys(args).filter(arg => knownArgs.indexOf(arg) === -1);
+      const datasourceDef = getDataTableFunctionsByName(datasource.name);
+      const knownArgs = datasourceDef && Object.keys(datasourceDef.args);
+      const unknownArgs =
+        datasourceDef && Object.keys(args).filter(arg => knownArgs.indexOf(arg) === -1);
 
-    // keep track of the ast, the ast index2, and the datasource
-    return {
-      datasource,
-      datasourceDef,
-      unknownArgs,
-      args,
-      expressionIndex: i,
-    };
-  }).filter(Boolean)[0];
+      // keep track of the ast, the ast index2, and the datasource
+      return {
+        datasource,
+        datasourceDef,
+        unknownArgs,
+        args,
+        expressionIndex: i,
+      };
+    })
+    .filter(Boolean)[0];
 
   return {
     ...ownProps,

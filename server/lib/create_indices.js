@@ -27,7 +27,6 @@ function createWorkpadType(client, kibanaIndex) {
     type: 'doc',
     body: body,
   });
-
 }
 
 export function createIndices(server) {
@@ -36,7 +35,5 @@ export function createIndices(server) {
   const config = server.config();
   const kibanaIndex = config.get('kibana.index');
 
-  return Promise.all([
-    createWorkpadType(client, kibanaIndex),
-  ]);
+  return Promise.all([createWorkpadType(client, kibanaIndex)]);
 }

@@ -6,5 +6,6 @@ export const font = () => ({
   displayName: 'Text Settings',
   help: 'Set the font, size and color',
   template: extendedTemplate,
-  default: '{font size=12 family="\'Open Sans\', Helvetica, Arial, sans-serif" color="#000000" align=left}',
+  default:
+    '{font size=12 family="\'Open Sans\', Helvetica, Arial, sans-serif" color="#000000" align=left}',
 });

@@ -15,7 +15,8 @@ export const staticColumn = {
     },
     value: {
       types: ['string', 'number', 'boolean', 'null'],
-      help: 'The value to insert in each column. Tip: use a sub-expression to rollup other columns into a static value',
+      help:
+        'The value to insert in each column. Tip: use a sub-expression to rollup other columns into a static value',
     },
   },
   fn: (context, args) => {

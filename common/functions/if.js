@@ -3,23 +3,23 @@ export const ifFn = {
   help: 'Perform conditional logic',
   args: {
     _: {
-      types: [
-        'boolean',
-        'null',
-      ],
-      'aliases': ['condition'],
-      help: 'A boolean true or false, usually returned by a subexpression. If this is not supplied then the input context will be used',
+      types: ['boolean', 'null'],
+      aliases: ['condition'],
+      help:
+        'A boolean true or false, usually returned by a subexpression. If this is not supplied then the input context will be used',
     },
     then: {
       help: 'The return value if true',
     },
     else: {
-      help: 'The return value if false. If else is not specified, and the condition is false' +
-            'then the input context to the function will be returned',
+      help:
+        'The return value if false. If else is not specified, and the condition is false' +
+        'then the input context to the function will be returned',
     },
     // TODO: When we add "action" functions, this could be used a perform an action without
     passthru: {
-      help: 'Instead of returning the value of then, simply execute it and pass the input context through',
+      help:
+        'Instead of returning the value of then, simply execute it and pass the input context through',
       default: false,
     },
   },

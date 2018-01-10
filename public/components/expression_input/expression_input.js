@@ -29,7 +29,7 @@ export class ExpressionInput extends React.Component {
     this.ref.setSelectionRange(start, end);
   }
 
-  onChange = (e) => {
+  onChange = e => {
     const { target } = e;
     const { value, selectionStart, selectionEnd } = target;
     const selection = {
@@ -37,23 +37,25 @@ export class ExpressionInput extends React.Component {
       end: selectionEnd,
     };
     this.updateState({ value, selection });
-  }
+  };
 
-  onSuggestionSelect = (suggestion) => {
-    const value = this.props.value.substr(0, suggestion.location.start) +
-      suggestion.value + this.props.value.substr(suggestion.location.end);
+  onSuggestionSelect = suggestion => {
+    const value =
+      this.props.value.substr(0, suggestion.location.start) +
+      suggestion.value +
+      this.props.value.substr(suggestion.location.end);
     const selection = {
       start: suggestion.location.start + suggestion.value.length,
       end: suggestion.location.start + suggestion.value.length,
     };
     this.updateState({ value, selection });
-  }
+  };
 
   updateState = ({ value, selection }) => {
     const suggestions = getAutocompleteProposals({ value, selection });
     this.props.onChange(value);
     this.setState({ selection, suggestions });
-  }
+  };
 
   // TODO: Use a hidden div and measure it rather than using hardcoded values
   getContextMenuItemsStyle = () => {
@@ -65,7 +67,7 @@ export class ExpressionInput extends React.Component {
     const textareaHeight = 200;
     const top = Math.min(padding + numberOfNewlines * lineHeight, textareaHeight) + 'px';
     return { top };
-  }
+  };
 
   render() {
     return (
@@ -81,7 +83,7 @@ export class ExpressionInput extends React.Component {
             value={this.props.value}
             onKeyDown={this.matchPairs}
             onChange={this.onChange}
-            ref={ref => this.ref = ref}
+            ref={ref => (this.ref = ref)}
           />
         </ContextMenu>
       </div>

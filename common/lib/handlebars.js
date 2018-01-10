@@ -7,7 +7,7 @@ Hbars.registerHelper('math', (rows, expression, precision) => {
   if (!Array.isArray(rows)) return 'MATH ERROR: first argument must be an array';
   const value = math.eval(expression, pivotObjectArray(rows));
   try {
-    return (precision) ? value.toFixed(precision) : value;
+    return precision ? value.toFixed(precision) : value;
   } catch (e) {
     return value;
   }

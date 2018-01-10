@@ -1,7 +1,7 @@
 import init from './init';
 import { functionsRegistry } from './common/lib/functions_registry';
 
-export default function (kibana) {
+export default function(kibana) {
   return new kibana.Plugin({
     name: 'canvas',
     require: ['kibana', 'elasticsearch', 'xpack_main'],
@@ -20,7 +20,7 @@ export default function (kibana) {
           'spyModes',
           'fieldFormats',
         ],
-        injectVars: (server) => {
+        injectVars: server => {
           const config = server.config();
           const basePath = config.get('server.basePath');
 
@@ -49,7 +49,7 @@ export default function (kibana) {
       ],
     },
 
-    config: (Joi) => {
+    config: Joi => {
       return Joi.object({
         enabled: Joi.boolean().default(true),
         indexPrefix: Joi.string().default('.canvas'),

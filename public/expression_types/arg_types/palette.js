@@ -30,14 +30,16 @@ const PaletteArgInput = ({ onValueChange, argValue, renderError }) => {
   function handleChange(palette) {
     const astObj = {
       type: 'expression',
-      chain: [{
-        type: 'function',
-        function: 'palette',
-        arguments: {
-          _: palette.colors,
-          gradient: [palette.gradient],
+      chain: [
+        {
+          type: 'function',
+          function: 'palette',
+          arguments: {
+            _: palette.colors,
+            gradient: [palette.gradient],
+          },
         },
-      }],
+      ],
     };
 
     onValueChange(astObj);
@@ -45,9 +47,7 @@ const PaletteArgInput = ({ onValueChange, argValue, renderError }) => {
 
   const palette = astToPalette(argValue);
 
-  return (
-    <PalettePicker value={palette} onChange={handleChange}/>
-  );
+  return <PalettePicker value={palette} onChange={handleChange} />;
 };
 
 PaletteArgInput.propTypes = {
@@ -60,6 +60,7 @@ export const palette = () => ({
   name: 'palette',
   displayName: 'Palette',
   help: 'Color palette selector',
-  default: '{palette #882E72 #B178A6 #D6C1DE #1965B0 #5289C7 #7BAFDE #4EB265 #90C987 #CAE0AB #F7EE55 #F6C141 #F1932D #E8601C #DC050C}',
+  default:
+    '{palette #882E72 #B178A6 #D6C1DE #1965B0 #5289C7 #7BAFDE #4EB265 #90C987 #CAE0AB #F7EE55 #F6C141 #F1932D #E8601C #DC050C}',
   simpleTemplate: PaletteArgInput,
 });

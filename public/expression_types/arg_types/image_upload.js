@@ -4,27 +4,35 @@ import { FormGroup, ControlLabel } from 'react-bootstrap';
 import { withState } from 'recompose';
 import { encode } from '../../../common/lib/dataurl';
 
-const ImageUploadArgInput = ({ typeInstance, onAssetAdd, onValueChange, setLoading, isLoading }) => {
+const ImageUploadArgInput = ({
+  typeInstance,
+  onAssetAdd,
+  onValueChange,
+  setLoading,
+  isLoading,
+}) => {
   const { name } = typeInstance;
 
   function handleUpload(ev) {
-    const [ upload ] = ev.target.files;
+    const [upload] = ev.target.files;
     setLoading(true); // start loading indicator
 
     return encode(upload)
       .then(dataurl => onAssetAdd('dataurl', dataurl))
-      .then((assetId) => {
+      .then(assetId => {
         setLoading(false); // stop loading indicator
 
         onValueChange({
           type: 'expression',
-          chain: [{
-            type: 'function',
-            function: 'asset',
-            arguments: {
-              _: [assetId],
+          chain: [
+            {
+              type: 'function',
+              function: 'asset',
+              arguments: {
+                _: [assetId],
+              },
             },
-          }],
+          ],
         });
       });
   }

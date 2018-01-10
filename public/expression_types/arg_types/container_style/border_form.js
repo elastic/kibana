@@ -8,9 +8,9 @@ const styles = ['solid', 'dotted', 'dashed', 'double', 'groove', 'ridge', 'inset
 
 export const BorderForm = ({ className, value, radius, onChange }) => {
   const border = value || '';
-  const [ borderWidth, borderStyle, borderColor ] = border.split(' ');
-  const borderWidthVal = (borderWidth) ? borderWidth.replace('px', '') : '';
-  const radiusVal = (radius) ? radius.replace('px', '') : '';
+  const [borderWidth, borderStyle, borderColor] = border.split(' ');
+  const borderWidthVal = borderWidth ? borderWidth.replace('px', '') : '';
+  const radiusVal = radius ? radius.replace('px', '') : '';
 
   const namedChange = name => ev => {
     const val = ev.target.value;
@@ -56,10 +56,7 @@ export const BorderForm = ({ className, value, radius, onChange }) => {
       />
 
       <div className="border-color">
-        <ColorPickerMini
-          value={borderColor}
-          onChange={borderColorChange}
-        />
+        <ColorPickerMini value={borderColor} onChange={borderColorChange} />
         <ControlLabel>Color</ControlLabel>
       </div>
     </div>
