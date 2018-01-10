@@ -150,6 +150,9 @@ export class StepIndexPattern extends Component {
       containsErrors = true;
     }
 
+    const isInvalid = showingIndexPatternQueryErrors && containsErrors;
+    const isDisabled = containsErrors || indices.length === 0;
+
     return (
       <EuiPanel paddingSize="l">
         <EuiTitle size="s">
@@ -161,11 +164,11 @@ export class StepIndexPattern extends Component {
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiForm
-              isInvalid={showingIndexPatternQueryErrors && containsErrors}
+              isInvalid={isInvalid}
             >
               <EuiFormRow
                 label="Index pattern"
-                isInvalid={showingIndexPatternQueryErrors && containsErrors}
+                isInvalid={isInvalid}
                 error={errors}
                 helpText={
                   <div>
@@ -178,7 +181,7 @@ export class StepIndexPattern extends Component {
                   name="indexPattern"
                   placeholder="index-name-*"
                   value={query}
-                  isInvalid={showingIndexPatternQueryErrors && containsErrors}
+                  isInvalid={isInvalid}
                   onChange={this.onQueryChanged}
                   data-test-subj="createIndexPatternNameInput"
                 />
@@ -189,7 +192,7 @@ export class StepIndexPattern extends Component {
             <EuiButton
               iconType="arrowRight"
               onClick={() => goToNextStep(query)}
-              isDisabled={containsErrors || indices.length === 0}
+              isDisabled={isDisabled}
               data-test-subj="createIndexPatternGoToStep2Button"
             >
               Next step
