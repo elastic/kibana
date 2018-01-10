@@ -34,11 +34,11 @@ uiModules
       },
       template: visualizationTemplate,
       link: function ($scope, $el) {
-        const resizeChecker = new ResizeChecker($el);
-
         //todo: lets make this a simple function call.
         const getVisEl = jQueryGetter('.visualize-chart');
         const getVisContainer = jQueryGetter('.vis-container');
+
+        const resizeChecker = new ResizeChecker(getVisEl());
 
         $scope.addLegend = false;
 
