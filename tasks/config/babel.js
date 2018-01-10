@@ -10,8 +10,7 @@ module.exports = {
       '!**/public/**',
       '!**/node_modules/**',
       '!**/bower_components/**',
-      '!**/__tests__/**',
-      '!**/vega_vis/**',
+      '!**/__tests__/**'
     ],
     dest: '.',
     expand: true

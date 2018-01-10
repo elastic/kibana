@@ -54,6 +54,8 @@ module.controller('VegaEditorController', ($scope /*, kbnUiAceKeyboardModeServic
 
       // ui-ace only accepts changes from the editor when they
       // happen outside of a digest cycle
+      // Per @spalger, we used $$postDigest() instead of setTimeout(() => {}, 0)
+      // because it better described the intention.
       $scope.$$postDigest(() => {
         // set the new value to the session doc so that it
         // is treated as an edit by ace: ace adds it to the
