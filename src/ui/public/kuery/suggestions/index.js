@@ -5,15 +5,16 @@ const baseUrl = chrome.addBasePath('/api/kibana/suggestions/values');
 const cursor = '@kibana-cursor@';
 
 export function getSuggestionsProvider($http, indexPattern) {
-  return async function getSuggestions(query, selection) {
-    const { start, end } = selection;
-    const cursoredQuery = query.substr(0, start) + cursor + query.substr(end);
-    const { suggest, prefix, suffix, field } = fromKqlExpression(cursoredQuery, { parseCursor: true });
+  return async function getSuggestions(query, selectionStart, selectionEnd) {
+    const cursoredQuery = query.substr(0, selectionStart) + cursor + query.substr(selectionEnd);
+    const { suggest, prefix, suffix, start, end, field } = fromKqlExpression(cursoredQuery, { parseCursor: true });
+    let suggestions;
     if (suggest === 'fields') {
-      return getFieldSuggestions(indexPattern, prefix, suffix);
+      suggestions = getFieldSuggestions(indexPattern, prefix, suffix);
     } else if (suggest === 'values') {
-      return await getValueSuggestions(indexPattern, $http, prefix, suffix, indexPattern.fields.byName[field]);
+      suggestions = await getValueSuggestions(indexPattern, $http, prefix, suffix, indexPattern.fields.byName[field]);
     }
+    return { start, end, suggestions };
   };
 }
 

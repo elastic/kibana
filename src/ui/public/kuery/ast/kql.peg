@@ -3,12 +3,14 @@
   const { nodeTypes: { function: { buildNode }}} = options.helpers;
   const parseCursor = Boolean(options.parseCursor);
 
-  function getCursor(chars) {
+  function getCursor(chars, location) {
     const i = chars.findIndex(char => char.type === 'cursor');
     return {
       type: 'cursor',
       prefix: chars.slice(0, i).join(''),
-      suffix: chars.slice(i + 1).join('')
+      suffix: chars.slice(i + 1).join(''),
+      start: location.start.offset,
+      end: location.end.offset - '@kibana-cursor@'.length
     };
   }
 }
@@ -159,7 +161,7 @@ Literal
 SingleQuotedString
   = "'" chars:(Cursor / EscapedQuote / [^'])* "'" {
     if (chars.find(char => char.type === 'cursor')) {
-      return getCursor(chars);
+      return getCursor(chars, location());
     }
     return chars.join('');
   }
@@ -167,7 +169,7 @@ SingleQuotedString
 DoubleQuotedString
   = '"' chars:(Cursor / EscapedQuote / [^"])* '"' {
     if (chars.find(char => char.type === 'cursor')) {
-      return getCursor(chars);
+      return getCursor(chars, location());
     }
     return chars.join('');
   }
@@ -175,7 +177,7 @@ DoubleQuotedString
 UnquotedLiteral
   = chars:(UnquotedCharacter)+ {
     if (chars.find(char => char.type === 'cursor')) {
-      return getCursor(chars);
+      return getCursor(chars, location());
     }
     const sequence = chars.join('').trim();
     if (sequence === 'null') return null;

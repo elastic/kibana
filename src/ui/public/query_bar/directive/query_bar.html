@@ -3,11 +3,20 @@
   name="queryBarForm"
   ng-submit="queryBar.submit()"
 >
-  <div class="typeahead" kbn-typeahead="{{queryBar.typeaheadKey()}}" on-select="queryBar.submit()" role="search">
-    <div class="kuiLocalSearch">
+  <kbn-typeahead
+    items="queryBar.suggestions.suggestions"
+    on-select="queryBar.onTypeaheadSelect(item)"
+  >
+    <div
+      class="kuiLocalSearch"
+      role="search"
+    >
 
       <!-- Lucene input -->
-      <div class="kuiLocalSearchAssistedInput" ng-if="queryBar.localQuery.language === 'lucene'">
+      <div
+        class="kuiLocalSearchAssistedInput"
+        ng-if="queryBar.localQuery.language === 'lucene'"
+      >
         <input
           parse-query
           input-focus
@@ -38,7 +47,10 @@
       </div>
 
       <!-- kuery input -->
-      <div class="kuiLocalSearchAssistedInput" ng-if="queryBar.localQuery.language === 'kuery'">
+      <div
+        class="kuiLocalSearchAssistedInput"
+        ng-if="queryBar.localQuery.language === 'kuery'"
+      >
         <input
           ng-model="queryBar.localQuery.query"
           input-focus
@@ -71,9 +83,10 @@
       <div class="kuiLocalSearchAssistedInput" ng-if="queryBar.localQuery.language === 'kql'">
         <input
           ng-model="queryBar.localQuery.query"
+          ng-trim="false"
+          ng-keyup="queryBar.updateSuggestions($event)"
           input-focus
           match-pairs
-          ng-keyup="queryBar.updateSuggestions($event)"
           disable-input-focus="queryBar.disableAutoFocus"
           kbn-typeahead-input
           placeholder="Search... (e.g. status:200 AND extension:PHP)"
@@ -106,6 +119,5 @@
         <span class="fa fa-search" aria-hidden="true"></span>
       </button>
     </div>
-    <kbn-typeahead-items></kbn-typeahead-items>
-  </div>
+  </kbn-typeahead>
 </form>
