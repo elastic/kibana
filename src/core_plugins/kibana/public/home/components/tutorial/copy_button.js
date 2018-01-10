@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Tooltip } from 'pui-react-tooltip';
-import { OverlayTrigger } from 'pui-react-overlay-trigger';
+import { Tooltip } from 'pivotal-ui/react/tooltip';
+import { OverlayTrigger } from 'pivotal-ui/react/overlay-trigger';
 import { KuiButton } from 'ui_framework/components';
 import { copyToClipboard } from '../../copy_to_clipboard';
 
