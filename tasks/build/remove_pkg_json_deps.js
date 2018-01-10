@@ -8,5 +8,7 @@ module.exports = function (grunt) {
       'build/kibana/package.json',
       JSON.stringify(pkg, null, '  ')
     );
+
+    grunt.file.delete('build/kibana/yarn.lock');
   });
 };
