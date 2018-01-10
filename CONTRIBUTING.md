@@ -235,6 +235,9 @@ Once that's done, just run:
 yarn test && yarn build --skip-os-packages
 ```
 
+### Debugging Server Code
+`yarn debug` will start the server with Node's inspect and debug-brk flags.  Kibana's development mode will start three processes.  Chrome's developer tools can be configured to connect to all three under the connection tab.
+
 ### Debugging Unit Tests
 
 The standard `yarn test` task runs several sub tasks and can take several minutes to complete, making debugging failures pretty painful. In order to ease the pain specialized tasks provide alternate methods for running the tests.
