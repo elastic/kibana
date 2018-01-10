@@ -79,9 +79,9 @@ To accomplish this the `serve` task does a few things:
 
 This proxy can sometimes have unintended side effects in development, so when
 needed you can opt out by passing the `--no-base-path` flag to the `serve` task
-or `npm start`.
+or `yarn start`.
 
 ["source","shell"]
 -----------
-npm start -- --no-base-path
+yarn start --no-base-path
 -----------

@@ -298,8 +298,13 @@
     "yeoman-generator": "1.1.1",
     "yo": "2.0.0"
   },
+  "resolutions": {
+    "angular": "1.6.5",
+    "moment": "2.13.0",
+    "react": "16.0.0"
+  },
   "engines": {
     "node": "6.12.2",
-    "npm": "3.10.10"
+    "yarn": "^1.3.2"
   }
 }
