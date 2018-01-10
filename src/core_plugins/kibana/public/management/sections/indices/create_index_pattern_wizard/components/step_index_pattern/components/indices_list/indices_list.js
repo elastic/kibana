@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { getPaginatedIndices } from '../../../../lib/get_paginated_indices';
 import { PER_PAGE_INCREMENTS } from '../../../../constants';
 
 import {
@@ -18,6 +17,10 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 
+import {
+  Pager
+} from '@elastic/eui/lib/services';
+
 export class IndicesList extends Component {
   static propTypes = {
     indices: PropTypes.array.isRequired,
@@ -31,13 +34,17 @@ export class IndicesList extends Component {
       perPage: PER_PAGE_INCREMENTS[1],
       isPerPageControlOpen: false,
     };
+
+    this.pager = new Pager(props.indices.length, this.state.perPage, this.state.page);
   }
 
   onChangePage = page => {
+    this.pager.goToPageIndex(page);
     this.setState({ page });
   }
 
   onChangePerPage = perPage => {
+    this.pager.setItemsPerPage(perPage);
     this.setState({ perPage });
     this.closePerPageControl();
   }
@@ -52,7 +59,6 @@ export class IndicesList extends Component {
 
   renderPagination() {
     const { perPage, page, isPerPageControlOpen } = this.state;
-    const { indices } = this.props;
 
     const button = (
       <EuiButtonEmpty
@@ -78,7 +84,7 @@ export class IndicesList extends Component {
       );
     });
 
-    const pageCount = Math.ceil(indices.length / perPage);
+    const pageCount = this.pager.getTotalPages();
 
     return (
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -113,9 +119,8 @@ export class IndicesList extends Component {
 
   render() {
     const { indices } = this.props;
-    const { page, perPage } = this.state;
 
-    const paginatedIndices = getPaginatedIndices(indices, page, perPage);
+    const paginatedIndices = indices.slice(this.pager.firstItemIndex, this.pager.lastItemIndex + 1);
     const rows = paginatedIndices.map((index, key) => {
       return (
         <EuiTableRow key={key}>
