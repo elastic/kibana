@@ -10,7 +10,7 @@ cacheDir="${CACHE_DIR:-"/tmp/kibana"}"
 ### check that we seem to be in a kibana project
 ###
 if [ -f "$dir/package.json" ] && [ -f "$dir/.node-version" ]; then
-  echo "Setting up node.js and npm in $dir"
+  echo "Setting up node.js and yarn in $dir"
 else
   echo "src/dev/ci_setup/setup.sh must be run within a kibana repo"
   exit 1
@@ -41,13 +41,33 @@ fi
 
 
 ###
-### "install" node by extending the path with it's bin directory
+### "install" node into this shell
 ###
 export PATH="$nodeDir/bin:$PATH"
+hash -r
+
+###
+### setting up yarn
+###
+yarnVersion="1.3.2"
+yarnDir="$cacheDir/yarn/$yarnVersion"
+
+echo " -- using vendored version of yarn"
+mkdir -p "$yarnDir/bin"
+cp "$dir/tasks/vendor/yarn-1.3.2-with-ignore-fix.js" "$yarnDir/bin/yarn"
+
+###
+### "install" yarn into this shell
+###
+export PATH="$yarnDir/bin:$PATH"
+yarnGlobalDir="$(yarn global bin)"
+export PATH="$PATH:$yarnGlobalDir"
+hash -r
 
 
 ###
 ### install dependencies
 ###
 echo " -- installing node.js dependencies"
-npm install --cache "$cacheDir/npm"
+yarn config set cache-folder "$cacheDir/yarn"
+yarn --frozen-lockfile
