@@ -185,7 +185,7 @@ app.directive('dashboardApp', function ($injector) {
         dashboardStateManager.addNewPanel(hit.id, 'visualization');
         if (showToast) {
           toastNotifications.add({
-            title: 'Visualization added to your dashboard',
+            title: 'Added visualization to your dashboard',
             color: 'success',
             iconType: 'check',
           });
@@ -195,7 +195,7 @@ app.directive('dashboardApp', function ($injector) {
       $scope.addSearch = function (hit) {
         dashboardStateManager.addNewPanel(hit.id, 'search');
         toastNotifications.add({
-          title: 'Saved search added to your dashboard',
+          title: 'Added saved search to your dashboard',
           color: 'success',
           iconType: 'check',
           'data-test-subj': 'addSavedSearchToDashboardSuccess',

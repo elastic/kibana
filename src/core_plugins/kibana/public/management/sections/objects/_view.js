@@ -124,7 +124,7 @@ uiModules.get('apps/management')
               return (orderIndex > -1) ? orderIndex : Infinity;
             });
           })
-          .catch(fatalError);
+          .catch(error => fatalError(error, location));
 
         // This handles the validation of the Ace Editor. Since we don't have any
         // other hooks into the editors to tell us if the content is valid or not
