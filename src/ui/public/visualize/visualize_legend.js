@@ -16,22 +16,25 @@ uiModules.get('kibana')
       template: html,
       scope: {
         vis: '<',
-        visData: '<',
         uiState: '<',
+        refresh$: '<',
       },
       link: function ($scope) {
+        let visData;
         const $state = getAppState();
         const clickHandler = filterBarClickHandler($state);
         $scope.legendId = htmlIdGenerator()('legend');
         $scope.open = $scope.uiState.get('vis.legendOpen', true);
 
-        $scope.$watch('visData', function (data) {
-          if (!data) return;
-          $scope.data = data;
+        const refreshSubscription = $scope.refresh$.subscribe((data) => {
+          if (data) {
+            visData = data;
+            refresh();
+          }
         });
 
-        $scope.$watch('vis.refreshLegend', () => {
-          refresh();
+        $scope.$on('$destroy', () => {
+          refreshSubscription.unsubscribe();
         });
 
         $scope.highlight = function (event) {
@@ -139,7 +142,7 @@ uiModules.get('kibana')
               });
             }
           } else {
-            $scope.labels = getLabels($scope.data, vislibVis.visConfigArgs.type);
+            $scope.labels = getLabels(visData, vislibVis.visConfigArgs.type);
           }
 
           if (vislibVis.visConfig) {

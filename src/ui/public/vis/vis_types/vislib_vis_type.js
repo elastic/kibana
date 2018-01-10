@@ -23,8 +23,6 @@ export function VislibVisTypeProvider(Private) {
       this._response = esResponse;
       if (this.vis.vislibVis) {
         this.destroy();
-      } else {
-        this.vis.refreshLegend = 0;
       }
 
       return new Promise((resolve, reject) => {
@@ -57,7 +55,6 @@ export function VislibVisTypeProvider(Private) {
       }
       opts.visualization = VislibVisController;
       super(opts);
-      this.refreshLegend = 0;
     }
   }
 

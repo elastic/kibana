@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs/Rx';
+import { Observable, ReplaySubject } from 'rxjs/Rx';
 import 'ui/visualize/spy';
 import 'ui/visualize/visualize.less';
 import 'ui/visualize/visualize_legend';
@@ -83,14 +83,21 @@ uiModules
           });
         });
 
+        // This observable will be used to signal the legend to refresh it
+        // and pass the visData to it. Using a ReplaySubject will cause the latest
+        // visData to be stored, so that any call to subscribe would immediately
+        // retrieve the latest visData. The parameter shows the amount of stored
+        // previous values (in this case only the last one).
+        $scope.refreshLegend$ = new ReplaySubject(1);
+
         const success$ = render$
           .do(() => {
             dispatchRenderStart($el[0]);
           })
           .filter(({ vis, visData, container }) => vis && vis.initialized && container && (!vis.type.requiresSearch || visData))
-          .do(({ vis }) => {
+          .do(({ vis, visData }) => {
             $scope.addLegend = vis.params.addLegend;
-            vis.refreshLegend++;
+            $scope.refreshLegend$.next(visData);
           })
           .debounceTime(100)
           .switchMap(async ({ vis, visData, container }) => {
