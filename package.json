@@ -253,6 +253,7 @@
     "grunt-simple-mocha": "0.4.0",
     "gulp-sourcemaps": "1.7.3",
     "highlight.js": "9.0.0",
+    "history": "2.1.1",
     "html": "1.0.0",
     "html-loader": "0.5.1",
     "husky": "0.8.1",
