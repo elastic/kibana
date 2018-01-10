@@ -245,7 +245,7 @@ export function getUiSettingDefaults() {
       value: 'en',
       type: 'select',
       options: numeralLanguageIds,
-      description: '<a href="http://numeraljs.com/" target="_blank" rel="noopener">numeral language</a>'
+      description: '<a href="http://numeraljs.com/" target="_blank" rel="noopener noreferrer">numeral language</a>'
     },
     'savedObjects:perPage': {
       type: 'number',
