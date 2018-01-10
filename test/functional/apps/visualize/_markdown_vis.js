@@ -19,7 +19,7 @@ export default function ({ getPageObjects, getService }) {
 
     describe('markdown vis', async () => {
 
-      it.skip('should not display spy panel toggle button', async function () {
+      it('should not display spy panel toggle button', async function () {
         const spyToggleExists = await PageObjects.visualize.getSpyToggleExists();
         expect(spyToggleExists).to.be(false);
       });
