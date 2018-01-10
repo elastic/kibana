@@ -63,12 +63,10 @@ uiModules
           // });
 
           const searchSource = $scope.savedObj.searchSource;
-          const filter = timefilter.get(searchSource.index(), $scope.timeRange);
-          const searchSourceFilters = searchSource.get('filter');
-          if (searchSourceFilters instanceof Array) {
-            searchSourceFilters.push(filter);
-            searchSource.skipTimeRangeFilter = true;
-          }
+          searchSource.filter(() => {
+            return timefilter.get(searchSource.index(), $scope.timeRange);
+          });
+          searchSource.skipTimeRangeFilter = true;
         }
 
         $scope.editorMode = $scope.editorMode || false;
