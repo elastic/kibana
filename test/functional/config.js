@@ -106,6 +106,10 @@ export default async function ({ readConfigFile }) {
         pathname: '/app/kibana',
         hash: '/dev_tools/console',
       },
+      home: {
+        pathname: '/app/kibana',
+        hash: '/home',
+      },
     },
     junit: {
       reportName: 'UI Functional Tests'
