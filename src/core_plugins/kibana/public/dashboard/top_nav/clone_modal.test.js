@@ -1,6 +1,6 @@
 import React from 'react';
 import sinon from 'sinon';
-import { mount, render } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import {
   findTestSubject,
 } from '@elastic/eui/lib/test';
@@ -29,7 +29,7 @@ function createComponent(creationMethod = mount) {
 }
 
 test('renders DashboardCloneModal', () => {
-  createComponent(render);
+  createComponent(shallow);
   expect(component).toMatchSnapshot(); // eslint-disable-line
 });
 

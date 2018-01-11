@@ -118,6 +118,14 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     dirty: !savedVis.id
   };
 
+  this.getSharingTitle = () => {
+    return savedVis.title;
+  };
+
+  this.getSharingType = () => {
+    return 'visualization';
+  };
+
   if (savedVis.id) {
     docTitle.change(savedVis.title);
   }
@@ -299,7 +307,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
 
   $scope.getAdditionalMessage = () => {
-    return `This visualization is marked as experimental. ${vis.type.feedbackMessage}`;
+    return `<i class="kuiIcon fa-flask"></i> This visualization is marked as experimental. ${vis.type.feedbackMessage}`;
   };
 
   init();
