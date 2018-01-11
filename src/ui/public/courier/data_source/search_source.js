@@ -152,7 +152,7 @@ export function SearchSourceProvider(Promise, Private, config) {
     const self = this;
     if (self._parent === false) return;
     if (self._parent) return self._parent;
-    return onlyHardLinked || this.skipTimeRangeFilter ? undefined : Private(RootSearchSourceProvider).get();
+    return onlyHardLinked ? undefined : Private(RootSearchSourceProvider).get();
   };
 
   /**
@@ -187,6 +187,10 @@ export function SearchSourceProvider(Promise, Private, config) {
       }
       addRequest();
     });
+  };
+
+  SearchSource.prototype.addFilterPredicate = function (predicate) {
+    this._filterPredicates.push(predicate);
   };
 
   /******
@@ -236,25 +240,13 @@ export function SearchSourceProvider(Promise, Private, config) {
 
     switch (key) {
       case 'filter':
-        let verifiedFilters = val;
-        if (config.get('courier:ignoreFilterIfFieldNotInIndex')) {
-          if (!Array.isArray(val)) val = [val];
-          verifiedFilters = val.filter(function (el) {
-            if ('meta' in el && 'index' in state) {
-              const field = state.index.fields.byName[el.meta.key];
-              if (!field) return false;
-            }
-            return true;
-          });
-        }
-        // user a shallow flatten to detect if val is an array, and pull the values out if it is
-        state.filters = _([ state.filters || [], verifiedFilters ])
-          .flatten()
-          // Yo Dawg! I heard you needed to filter out your filters
-          .reject(function (filter) {
-            return !filter || _.get(filter, 'meta.disabled');
-          })
-          .value();
+        let filters = Array.isArray(val) ? val : [val];
+
+        filters = filters.filter(filter => {
+          return this._filterPredicates.every(predicate => predicate(filter, state));
+        });
+
+        state.filters = [ ...state.filters || [], ...filters];
         return;
       case 'index':
       case 'type':
@@ -297,6 +289,27 @@ export function SearchSourceProvider(Promise, Private, config) {
       }
     }
   };
+
+  SearchSource.prototype._filterPredicates = [
+    (filter) => {
+      return filter;
+    },
+    (filter) => {
+      const disabled = _.get(filter, 'meta.disabled');
+      return disabled === undefined || disabled === false;
+    },
+    (filter, state) => {
+      if (!config.get('courier:ignoreFilterIfFieldNotInIndex')) {
+        return true;
+      }
+
+      if ('meta' in filter && 'index' in state) {
+        const field = state.index.fields.byName[filter.meta.key];
+        if (!field) return false;
+      }
+      return true;
+    }
+  ];
 
   SearchSource.prototype.clone = function () {
     const clone = new SearchSource(this.toString());

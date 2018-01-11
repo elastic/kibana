@@ -66,7 +66,21 @@ uiModules
           searchSource.filter(() => {
             return timefilter.get(searchSource.index(), $scope.timeRange);
           });
-          searchSource.skipTimeRangeFilter = true;
+
+          // we're only adding one range filter against the timeFieldName to ensure
+          // that our filter is the only one applied and override the global filters
+          searchSource.addFilterPredicate((filter, state) => {
+            if (!filter.range) {
+              return true;
+            }
+
+            const timeFieldName = searchSource.index().timeFieldName;
+            if (!timeFieldName) {
+              return true;
+            }
+
+            return !(state.filters || []).find(f => f.range && f.range[timeFieldName]);
+          });
         }
 
         $scope.editorMode = $scope.editorMode || false;
