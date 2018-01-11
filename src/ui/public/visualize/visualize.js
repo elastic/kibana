@@ -40,7 +40,7 @@ uiModules
         timeRange: '=?',
       },
       template: visualizeTemplate,
-      link: async function ($scope, $el) {
+      link: async function ($scope) {
         if (!$scope.savedObj) throw(`saved object was not provided to <visualize> directive`);
         if (!$scope.appState) $scope.appState = getAppState();
 
