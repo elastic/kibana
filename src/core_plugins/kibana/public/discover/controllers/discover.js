@@ -195,9 +195,16 @@ function discoverController(
   };
 
   /**
+   * @return Front of the queue without dequeue.
+   */
+  $scope.fetchQueue.peekFront = function () {
+    return $scope.fetchQueue[0];
+  };
+
+  /**
    * @return Dequeue the $scope.fetchQueue.
    */
-  $scope.fetchQueue.denqueue = function () {
+  $scope.fetchQueue.dequeue = function () {
     return $scope.fetchQueue.shift();
   };
 
@@ -479,9 +486,9 @@ function discoverController(
 
     $scope.updateTime();
 
+    const noOnGoingFetch = $scope.fetchQueue.isEmpty();
     $scope.fetchQueue.enqueue();
 
-    const noOnGoingFetch = !$scope.fetchStatus;
     if (noOnGoingFetch) {
       $scope.updateDataSourceForFetch()
         .then(setupVisualization)
@@ -491,7 +498,7 @@ function discoverController(
         })
         .catch(notify.error);
     } else if (_.isObject($scope.currentSegmentedReq)) {
-      $scope.currentSegmentedReq.abort();
+      $scope.currentSegmentedReq.skip.resolve();
     }
   };
 
@@ -617,6 +624,12 @@ function discoverController(
   }, () => {
     $scope.currentSegmentedReq = null;
 
+    try {
+      $scope.fetchQueue.dequeue();
+    } catch (e) {
+      $log.error('Request in in $scope.fetchQueue was dequeued before being completed.');
+    }
+
     if (!$scope.fetchQueue.isEmpty()) {
       $scope.updateDataSourceForFetch()
         .then(setupVisualization)
@@ -661,7 +674,7 @@ function discoverController(
       $log.error('$scope.updateDataSourceForFetch is called with empty $scope.fetchQueue.');
       $scope.updateDataSourceFromCurrent();
     } else {
-      const fetchQueueData = $scope.fetchQueue.shift();
+      const fetchQueueData = $scope.fetchQueue.peekFront();
       $scope.searchSource
         .size(fetchQueueData.size)
         .sort(fetchQueueData.sort)

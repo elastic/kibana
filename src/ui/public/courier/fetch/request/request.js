@@ -13,6 +13,7 @@ export function AbstractRequestProvider(Private, Promise) {
       this.source = source;
       this.defer = defer || Promise.defer();
       this.abortedDefer = Promise.defer();
+      this.skip = defer || Promise.defer();
 
       this.setErrorHandler((...args) => {
         this.retry();
@@ -136,6 +137,10 @@ export function AbstractRequestProvider(Private, Promise) {
 
     getCompleteOrAbortedPromise() {
       return Promise.race([ this.defer.promise, this.abortedDefer.promise ]);
+    }
+
+    getCompleteOrSkippedPromise() {
+      return Promise.race([ this.defer.promise, this.skip.promise ]);
     }
 
     clone() {

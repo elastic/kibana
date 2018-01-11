@@ -178,7 +178,7 @@ export function SearchSourceProvider(Promise, Private, config) {
 
       // return promises created by the completion or abort handler so that
       // errors will bubble properly
-      return req.getCompleteOrAbortedPromise().then(nextFn).then(addRequest);
+      return req.getCompleteOrSkippedPromise().then(nextFn).then(addRequest);
     });
   };
 
