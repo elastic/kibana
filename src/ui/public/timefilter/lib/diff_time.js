@@ -9,7 +9,7 @@ export function TimefilterLibDiffTimeProvider(Private) {
     let oldTime = _.clone(self.time);
     return function () {
       if (diff(self.time, oldTime)) {
-        timeHistory.setTime(self.time);
+        timeHistory.add(self.time);
         self.emit('update');
         self.emit('fetch');
       }

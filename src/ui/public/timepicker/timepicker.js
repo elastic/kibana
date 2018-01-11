@@ -129,7 +129,9 @@ module.directive('kbnTimepicker', function (timeUnits, refreshIntervals) {
           case TIME_MODES.QUICK:
             break;
           case TIME_MODES.RELATIVE:
-            $scope.setRelative($scope.from, $scope.to);
+            $scope.relative = parseRelativeParts($scope.from, $scope.to);
+            $scope.formatRelative('from');
+            $scope.formatRelative('to');
             break;
           case TIME_MODES.ABSOLUTE:
             $scope.absolute.from = dateMath.parse($scope.from || moment().subtract(15, 'minutes'));
@@ -152,12 +154,6 @@ module.directive('kbnTimepicker', function (timeUnits, refreshIntervals) {
         $scope.relative[key].count = 0;
         $scope.relative[key].round = false;
         $scope.formatRelative(key);
-      };
-
-      $scope.setRelative = function (from, to) {
-        $scope.relative = parseRelativeParts(from, to);
-        $scope.formatRelative('from');
-        $scope.formatRelative('to');
       };
 
       $scope.checkRelative = function () {

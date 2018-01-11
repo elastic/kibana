@@ -8,7 +8,6 @@ import { TimefilterLibDiffTimeProvider } from 'ui/timefilter/lib/diff_time';
 import { TimefilterLibDiffIntervalProvider } from 'ui/timefilter/lib/diff_interval';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
-import { timeHistory } from 'ui/timefilter/time_history';
 
 uiRoutes
   .addSetupWork(function (timefilter) {
@@ -37,8 +36,8 @@ uiModules
       self.isAutoRefreshSelectorEnabled = false;
 
       self.init = _.once(function () {
-        const timeDefaults = timeHistory.getTime(config.get('timepicker:timeDefaults'));
-        const refreshIntervalDefaults = timeHistory.getRefreshInterval(config.get('timepicker:refreshIntervalDefaults'));
+        const timeDefaults = config.get('timepicker:timeDefaults');
+        const refreshIntervalDefaults = config.get('timepicker:refreshIntervalDefaults');
 
         // These can be date math strings or moments.
         self.time = _.defaults(globalState.time || {}, timeDefaults);
