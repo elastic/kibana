@@ -15,6 +15,8 @@ const originalLinkRender = markdownIt.renderer.rules.link_open || function (toke
 };
 markdownIt.renderer.rules.link_open = function (tokens, idx, options, env, self) {
   tokens[idx].attrPush(['target', '_blank']);
+  // https://www.jitbit.com/alexblog/256-targetblank---the-most-underestimated-vulnerability-ever/
+  tokens[idx].attrPush(['rel', 'noopener noreferrer']);
   return originalLinkRender(tokens, idx, options, env, self);
 };
 
