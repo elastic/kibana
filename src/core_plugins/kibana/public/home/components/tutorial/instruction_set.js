@@ -4,13 +4,16 @@ import PropTypes from 'prop-types';
 import {
   KuiBar,
   KuiBarSection,
-  KuiTabs,
-  KuiTab
 } from 'ui_framework/components';
 import { Instruction } from './instruction';
-import { Step } from './step';
 import { ParameterForm } from './parameter_form';
 import { getDisplayText } from '../../../../common/tutorials/instruction_variant';
+import {
+  EuiTabs,
+  EuiTab,
+  EuiSpacer,
+  EuiSteps,
+} from '@elastic/eui';
 
 export class InstructionSet extends React.Component {
 
@@ -47,13 +50,13 @@ export class InstructionSet extends React.Component {
 
   renderTabs = () => {
     return this.tabs.map((tab, index) => (
-      <KuiTab
+      <EuiTab
         onClick={() => this.onSelectedTabChanged(tab.id)}
         isSelected={tab.id === this.state.selectedTabId}
         key={index}
       >
         {tab.name}
-      </KuiTab>
+      </EuiTab>
     ));
   }
 
@@ -65,13 +68,8 @@ export class InstructionSet extends React.Component {
       return;
     }
 
-    return instructionVariant.instructions.map((instruction, index) => (
-      <Step
-        className="kuiVerticalRhythm"
-        key={index}
-        step={this.props.offset + index}
-        title={instruction.title}
-      >
+    const steps = instructionVariant.instructions.map((instruction, index) => {
+      const step = (
         <Instruction
           commands={instruction.commands}
           paramValues={this.props.paramValues}
@@ -79,8 +77,20 @@ export class InstructionSet extends React.Component {
           textPost={instruction.textPost}
           replaceTemplateStrings={this.props.replaceTemplateStrings}
         />
-      </Step>
-    ));
+      );
+      return {
+        title: instruction.title,
+        children: step,
+        key: index
+      };
+    });
+
+    return (
+      <EuiSteps
+        steps={steps}
+        firstStepNumber={this.props.offset}
+      />
+    );
   }
 
   renderHeader = () => {
@@ -140,9 +150,11 @@ export class InstructionSet extends React.Component {
 
         {paramsForm}
 
-        <KuiTabs className="kuiVerticalRhythm">
+        <EuiTabs className="kuiVerticalRhythm">
           {this.renderTabs()}
-        </KuiTabs>
+        </EuiTabs>
+
+        <EuiSpacer size="m" />
 
         {this.renderInstructions()}
 
