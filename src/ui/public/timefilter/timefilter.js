@@ -16,7 +16,7 @@ uiRoutes
 
 uiModules
   .get('kibana')
-  .service('timefilter', function (Private, globalState, $rootScope, config, $location) {
+  .service('timefilter', function (Private, globalState, $rootScope, config) {
     const Events = Private(EventsProvider);
 
     function convertISO8601(stringTime) {
@@ -107,8 +107,8 @@ uiModules
 
     Timefilter.prototype.calculateBounds = function (timeRange) {
       return {
-        min: dateMath.parse(timeRange.from, undefined, undefined, $location.search().forceNow),
-        max: dateMath.parse(timeRange.to, true, undefined, $location.search().forceNow)
+        min: dateMath.parse(timeRange.from),
+        max: dateMath.parse(timeRange.to, true)
       };
     };
 
