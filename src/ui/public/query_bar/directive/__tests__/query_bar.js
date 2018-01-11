@@ -130,19 +130,5 @@ describe('queryBar directive', function () {
 
   });
 
-  describe('typeahead key', function () {
-
-    it('should use a unique typeahead key for each appName/language combo', function () {
-      init({ query: 'foo', language: 'lucene' }, 'discover', true);
-      const typeahead = $elem.find('.typeahead');
-      expect(typeahead.isolateScope().historyKey).to.be('discover-lucene');
-
-      $parentScope.query = { query: 'foo', language: 'kuery' };
-      $parentScope.$digest();
-      expect(typeahead.isolateScope().historyKey).to.be('discover-kuery');
-    });
-
-  });
-
 
 });

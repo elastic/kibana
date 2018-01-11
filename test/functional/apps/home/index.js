@@ -7,5 +7,6 @@ export default function ({ getService, loadTestFile }) {
     });
 
     loadTestFile(require.resolve('./_home'));
+    loadTestFile(require.resolve('./_add_data'));
   });
 }

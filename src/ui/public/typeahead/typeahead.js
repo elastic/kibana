@@ -66,7 +66,8 @@ typeahead.directive('kbnTypeahead', function () {
 
         this.isHidden = (keyCode === ESCAPE);
 
-        if ([TAB, ENTER].includes(keyCode) && this.selectedIndex !== null) {
+        if (!this.hidden && [TAB, ENTER].includes(keyCode) && this.selectedIndex !== null) {
+          event.preventDefault();
           this.submit();
         } else if (keyCode === UP) {
           this.selectPrevious();

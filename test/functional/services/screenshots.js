@@ -41,7 +41,7 @@ export async function ScreenshotsProvider({ getService }) {
         return 0;
       } else {
         await mkdirAsync(FAILURE_DIRECTORY);
-        return await comparePngs(sessionPath, baselinePath, failurePath, log);
+        return await comparePngs(sessionPath, baselinePath, failurePath, SESSION_DIRECTORY, log);
       }
     }
 
