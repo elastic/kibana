@@ -1,6 +1,5 @@
 {
   $schema: https://vega.github.io/schema/vega-lite/v2.json
-  title: Event counts from all indexes
   data: {
     format: {property: "aggregations.time_buckets.buckets"}
     values: {
@@ -28,12 +27,12 @@
     x: {
       field: key
       type: temporal
-      axis: {title: false}
+      axis: null
     }
     y: {
       field: doc_count
       type: quantitative
-      axis: {title: "Document count"}
+      axis: null
     }
   }
   config: {

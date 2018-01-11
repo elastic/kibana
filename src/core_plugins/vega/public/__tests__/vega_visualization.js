@@ -15,8 +15,8 @@ import vegaImage512 from './vega_image_512.png';
 import { VegaParser } from '../data_model/vega_parser';
 import { SearchCache } from '../data_model/search_cache';
 
-const THRESHOLD = 0.9;
-const PIXEL_DIFF = 512;
+const THRESHOLD = 0.10;
+const PIXEL_DIFF = 10;
 
 describe('VegaVisualizations', () => {
 
