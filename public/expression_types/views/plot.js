@@ -12,21 +12,30 @@ export const plot = () => ({
       name: 'palette',
       displayName: 'Color palette',
       argType: 'palette',
-    },
-    {
+    }, {
       name: 'legend',
       displayName: 'Legend Visibility',
       help: 'Enable or disable the legend',
       argType: 'checkbox',
       default: 'true',
-    },
-    {
+    }, {
+      name: 'xaxis',
+      displayName: 'X-Axis',
+      help: 'Enable or disable the x-axis',
+      argType: 'checkbox',
+      default: 'true',
+    }, {
+      name: 'yaxis',
+      displayName: 'Y-Axis',
+      help: 'Enable or disable the Y-axis',
+      argType: 'checkbox',
+      default: 'true',
+    }, {
       name: 'font',
       displayName: 'Text settings',
       help: 'Fonts, alignment and color',
       argType: 'font',
-    },
-    {
+    }, {
       name: 'defaultStyle',
       displayName: 'Default style',
       help: 'Set the style to be used by default by every series, unless overridden.',
@@ -34,7 +43,6 @@ export const plot = () => ({
       default: '{seriesStyle points=5}',
       options: {
         include: styleProps,
-      },
     },
     {
       name: 'seriesStyle',
