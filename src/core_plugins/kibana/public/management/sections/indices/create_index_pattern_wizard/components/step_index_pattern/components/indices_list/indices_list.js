@@ -86,6 +86,18 @@ export class IndicesList extends Component {
 
     const pageCount = this.pager.getTotalPages();
 
+    const paginationControls = pageCount > 1
+      ? (
+        <EuiFlexItem grow={false}>
+          <EuiPagination
+            pageCount={pageCount}
+            activePage={page}
+            onPageClick={this.onChangePage}
+          />
+        </EuiFlexItem>
+      )
+      : null;
+
     return (
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
@@ -102,17 +114,7 @@ export class IndicesList extends Component {
             />
           </EuiPopover>
         </EuiFlexItem>
-        { pageCount > 1 ?
-          <EuiFlexItem grow={false}>
-            <EuiPagination
-              pageCount={pageCount}
-              activePage={page}
-              onPageClick={this.onChangePage}
-            />
-          </EuiFlexItem>
-          : null
-        }
-
+        {paginationControls}
       </EuiFlexGroup>
     );
   }

@@ -1,30 +1,26 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { ILLEGAL_CHARACTERS } from '../../constants';
-import { getIndices } from '../../lib/get_indices';
-import { isIndexPatternQueryValid } from '../../lib/is_index_pattern_query_valid';
-import { getWhitelistedIndices } from '../../lib/get_whitelisted_indices';
+import {
+  getIndices,
+  isIndexPatternQueryValid,
+  getMatchedIndices,
+  canAppendWildcard,
+  createReasonableWait
+} from '../../lib';
 import { LoadingIndices } from './components/loading_indices';
 import { StatusMessage } from './components/status_message';
 import { IndicesList } from './components/indices_list';
+import { Header } from './components/header';
 
 import {
-  EuiTitle,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiPanel,
   EuiSpacer,
-  EuiButton,
-  EuiForm,
-  EuiFormRow,
-  EuiFieldText,
 } from '@elastic/eui';
-import { canAppendWildcard } from '../../lib/can_append_wildcard';
-import { createReasonableWait } from '../../lib/create_reasonable_wait';
 
 export class StepIndexPattern extends Component {
   static propTypes = {
-    initialIndices: PropTypes.array.isRequired,
+    allIndices: PropTypes.array.isRequired,
     isIncludingSystemIndices: PropTypes.bool.isRequired,
     esService: PropTypes.object.isRequired,
     goToNextStep: PropTypes.func.isRequired,
@@ -38,7 +34,7 @@ export class StepIndexPattern extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      matchingIndices: [],
+      partialMatchedIndices: [],
       isLoadingIndices: false,
       query: props.initialQuery,
       appendedWildcard: false,
@@ -50,8 +46,8 @@ export class StepIndexPattern extends Component {
     const { esService } = this.props;
 
     this.setState({ isLoadingIndices: true });
-    const matchingIndices = await getIndices(esService, `${query}*`);
-    createReasonableWait(() => this.setState({ matchingIndices, isLoadingIndices: false }));
+    const partialMatchedIndices = await getIndices(esService, `${query}*`);
+    createReasonableWait(() => this.setState({ partialMatchedIndices, isLoadingIndices: false }));
   }
 
   onQueryChanged = (e) => {
@@ -59,7 +55,7 @@ export class StepIndexPattern extends Component {
     const { target } = e;
 
     let query = target.value;
-    if (query.length === 1 && canAppendWildcard(e.nativeEvent)) {
+    if (query.length === 1 && canAppendWildcard(e.nativeEvent.data)) {
       query += '*';
       this.setState({ appendedWildcard: true });
       setTimeout(() => target.setSelectionRange(1, 1));
@@ -78,38 +74,38 @@ export class StepIndexPattern extends Component {
   renderLoadingState() {
     const { isLoadingIndices } = this.state;
 
-    if (isLoadingIndices) {
-      return (
-        <LoadingIndices/>
-      );
+    if (!isLoadingIndices) {
+      return null;
     }
 
-    return null;
+    return (
+      <LoadingIndices/>
+    );
   }
 
   renderStatusMessage() {
-    const { initialIndices, isIncludingSystemIndices } = this.props;
-    const { query, isLoadingIndices, matchingIndices } = this.state;
+    const { allIndices, isIncludingSystemIndices } = this.props;
+    const { query, isLoadingIndices, partialMatchedIndices } = this.state;
 
     if (isLoadingIndices) {
       return null;
     }
 
+    const matchedIndices = getMatchedIndices(allIndices, partialMatchedIndices, query, isIncludingSystemIndices);
+
     return (
       <StatusMessage
-        initialIndices={initialIndices}
-        matchingIndices={matchingIndices}
+        matchedIndices={matchedIndices}
         query={query}
-        isIncludingSystemIndices={isIncludingSystemIndices}
       />
     );
   }
 
   renderList() {
-    const { isIncludingSystemIndices, initialIndices } = this.props;
+    const { isIncludingSystemIndices, allIndices } = this.props;
     const {
       query,
-      matchingIndices,
+      partialMatchedIndices,
       isLoadingIndices,
     } = this.state;
 
@@ -117,10 +113,11 @@ export class StepIndexPattern extends Component {
       return null;
     }
 
-    const indices = getWhitelistedIndices(initialIndices, isIncludingSystemIndices, query, matchingIndices);
+    const indices = getMatchedIndices(allIndices, partialMatchedIndices, query, isIncludingSystemIndices);
+
     const indicesToList = query.length
       ? indices.visibleIndices
-      : indices.initialIndices;
+      : indices.allIndices;
 
     return (
       <IndicesList
@@ -129,17 +126,17 @@ export class StepIndexPattern extends Component {
     );
   }
 
-  render() {
-    const { isIncludingSystemIndices, initialIndices, goToNextStep } = this.props;
+  renderHeader() {
+    const { isIncludingSystemIndices, allIndices, goToNextStep } = this.props;
     const {
       query,
       showingIndexPatternQueryErrors,
-      matchingIndices,
+      partialMatchedIndices,
     } = this.state;
 
     const {
-      exactMatchingIndices: indices
-    } = getWhitelistedIndices(initialIndices, isIncludingSystemIndices, query, matchingIndices);
+      exactMatchedIndices: indices
+    } = getMatchedIndices(allIndices, partialMatchedIndices, query, isIncludingSystemIndices);
 
     let containsErrors = false;
     const errors = [];
@@ -150,55 +147,26 @@ export class StepIndexPattern extends Component {
       containsErrors = true;
     }
 
-    const isInvalid = showingIndexPatternQueryErrors && containsErrors;
-    const isDisabled = containsErrors || indices.length === 0;
+    const isInputInvalid = showingIndexPatternQueryErrors && containsErrors;
+    const isNextStepDisabled = containsErrors || indices.length === 0;
 
     return (
+      <Header
+        isInputInvalid={isInputInvalid}
+        errors={errors}
+        characterList={characterList}
+        query={query}
+        onQueryChanged={this.onQueryChanged}
+        goToNextStep={goToNextStep}
+        isNextStepDisabled={isNextStepDisabled}
+      />
+    );
+  }
+
+  render() {
+    return (
       <EuiPanel paddingSize="l">
-        <EuiTitle size="s">
-          <h2>
-            Step 1 of 2: Define index pattern
-          </h2>
-        </EuiTitle>
-        <EuiSpacer size="m"/>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiForm
-              isInvalid={isInvalid}
-            >
-              <EuiFormRow
-                label="Index pattern"
-                isInvalid={isInvalid}
-                error={errors}
-                helpText={
-                  <div>
-                    <p>You can use a <strong>*</strong> as a wildcard in your index pattern.</p>
-                    <p>You can&apos;t use empty spaces or the characters <strong>{characterList}</strong>.</p>
-                  </div>
-                }
-              >
-                <EuiFieldText
-                  name="indexPattern"
-                  placeholder="index-name-*"
-                  value={query}
-                  isInvalid={isInvalid}
-                  onChange={this.onQueryChanged}
-                  data-test-subj="createIndexPatternNameInput"
-                />
-              </EuiFormRow>
-            </EuiForm>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              iconType="arrowRight"
-              onClick={() => goToNextStep(query)}
-              isDisabled={isDisabled}
-              data-test-subj="createIndexPatternGoToStep2Button"
-            >
-              Next step
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {this.renderHeader()}
         <EuiSpacer size="s"/>
         {this.renderLoadingState()}
         {this.renderStatusMessage()}

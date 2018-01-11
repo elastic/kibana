@@ -1,10 +1,10 @@
-import { getWhitelistedIndices } from '../get_whitelisted_indices';
+import { getMatchedIndices } from '../get_matched_indices';
 
 jest.mock('../../constants', () => ({
   MAX_NUMBER_OF_MATCHING_INDICES: 5,
 }));
 
-describe('getWhitelistedIndices', () => {
+describe('getMatchedIndices', () => {
   it('should return exact matches if they exist', () => {
     const indices = [
       { name: 'kibana' },
@@ -13,17 +13,17 @@ describe('getWhitelistedIndices', () => {
     ];
 
     const query = 'kibana';
-    const matchingIndices = [
+    const matchedIndices = [
       { name: '.kibana' },
       { name: 'kibana' },
     ];
 
-    const result = getWhitelistedIndices(indices, false, query, matchingIndices);
+    const result = getMatchedIndices(indices, matchedIndices, query, false);
 
     expect(result).toEqual({
-      initialIndices: [{ name: 'kibana' }, { name: 'es' }],
-      exactMatchingIndices: [{ name: 'kibana' }],
-      partialMatchingIndices: [{ name: 'kibana' }],
+      allIndices: [{ name: 'kibana' }, { name: 'es' }],
+      exactMatchedIndices: [{ name: 'kibana' }],
+      partialMatchedIndices: [{ name: 'kibana' }],
       visibleIndices: [{ name: 'kibana' }]
     });
   });
@@ -36,17 +36,17 @@ describe('getWhitelistedIndices', () => {
     ];
 
     const query = 'ki*';
-    const matchingIndices = [
+    const matchedIndices = [
       { name: '.kibana' },
       { name: 'kibana' },
     ];
 
-    const result = getWhitelistedIndices(indices, false, query, matchingIndices);
+    const result = getMatchedIndices(indices, matchedIndices, query, false);
 
     expect(result).toEqual({
-      initialIndices: [{ name: 'kibana' }, { name: 'es' }],
-      exactMatchingIndices: [{ name: 'kibana' }],
-      partialMatchingIndices: [{ name: 'kibana' }],
+      allIndices: [{ name: 'kibana' }, { name: 'es' }],
+      exactMatchedIndices: [{ name: 'kibana' }],
+      partialMatchedIndices: [{ name: 'kibana' }],
       visibleIndices: [{ name: 'kibana' }]
     });
   });
@@ -59,14 +59,14 @@ describe('getWhitelistedIndices', () => {
     ];
 
     const query = 'fo';
-    const matchingIndices = [];
+    const matchedIndices = [];
 
-    const result = getWhitelistedIndices(indices, false, query, matchingIndices);
+    const result = getMatchedIndices(indices, matchedIndices, query, false);
 
     expect(result).toEqual({
-      initialIndices: [{ name: 'kibana' }, { name: 'es' }],
-      exactMatchingIndices: [],
-      partialMatchingIndices: [],
+      allIndices: [{ name: 'kibana' }, { name: 'es' }],
+      exactMatchedIndices: [],
+      partialMatchedIndices: [],
       visibleIndices: [{ name: 'kibana' }, { name: 'es' }]
     });
   });
@@ -79,17 +79,17 @@ describe('getWhitelistedIndices', () => {
     ];
 
     const query = 'ki';
-    const matchingIndices = [
+    const matchedIndices = [
       { name: '.kibana' },
       { name: 'kibana' },
     ];
 
-    const result = getWhitelistedIndices(indices, true, query, matchingIndices);
+    const result = getMatchedIndices(indices, matchedIndices, query, true);
 
     expect(result).toEqual({
-      initialIndices: [{ name: 'kibana' }, { name: 'es' }, { name: '.kibana' }],
-      exactMatchingIndices: [],
-      partialMatchingIndices: [{ name: '.kibana' }, { name: 'kibana' }],
+      allIndices: [{ name: 'kibana' }, { name: 'es' }, { name: '.kibana' }],
+      exactMatchedIndices: [],
+      partialMatchedIndices: [{ name: '.kibana' }, { name: 'kibana' }],
       visibleIndices: [{ name: '.kibana' }, { name: 'kibana' }]
     });
   });
@@ -105,7 +105,7 @@ describe('getWhitelistedIndices', () => {
     ];
 
     const query = '';
-    const matchingIndices = [
+    const matchedIndices = [
       { name: 'kibana' },
       { name: 'es' },
       { name: '.kibana' },
@@ -114,12 +114,12 @@ describe('getWhitelistedIndices', () => {
       { name: 'metricbeat' },
     ];
 
-    const result = getWhitelistedIndices(indices, true, query, matchingIndices);
+    const result = getMatchedIndices(indices, matchedIndices, query, true);
 
     expect(result).toEqual({
-      initialIndices: [{ name: 'kibana' }, { name: 'es' }, { name: '.kibana' }, { name: 'monitor' }, { name: '.monitor' }],
-      exactMatchingIndices: [],
-      partialMatchingIndices: [{ name: 'kibana' }, { name: 'es' }, { name: '.kibana' }, { name: 'monitor' }, { name: '.monitor' }],
+      allIndices: [{ name: 'kibana' }, { name: 'es' }, { name: '.kibana' }, { name: 'monitor' }, { name: '.monitor' }],
+      exactMatchedIndices: [],
+      partialMatchedIndices: [{ name: 'kibana' }, { name: 'es' }, { name: '.kibana' }, { name: 'monitor' }, { name: '.monitor' }],
       visibleIndices: [{ name: 'kibana' }, { name: 'es' }, { name: '.kibana' }, { name: 'monitor' }, { name: '.monitor' }]
     });
   });

@@ -6,22 +6,22 @@ describe('canAppendWildcard', () => {
   });
 
   test('ignores symbols', () => {
-    expect(canAppendWildcard({ data: '%' })).toBeFalsy();
+    expect(canAppendWildcard('%')).toBeFalsy();
   });
 
   test('accepts numbers', () => {
-    expect(canAppendWildcard({ data: '1' })).toBeTruthy();
+    expect(canAppendWildcard('1')).toBeTruthy();
   });
 
   test('accepts letters', () => {
-    expect(canAppendWildcard({ data: 'b' })).toBeTruthy();
+    expect(canAppendWildcard('b')).toBeTruthy();
   });
 
   test('accepts uppercase letters', () => {
-    expect(canAppendWildcard({ data: 'B' })).toBeTruthy();
+    expect(canAppendWildcard('B')).toBeTruthy();
   });
 
   test('ignores if more than one key pressed', () => {
-    expect(canAppendWildcard({ data: 'ab' })).toBeFalsy();
+    expect(canAppendWildcard('ab')).toBeFalsy();
   });
 });

@@ -4,7 +4,7 @@ import { StepIndexPattern } from './step_index_pattern';
 
 export function renderStepIndexPattern(
   domElementId,
-  initialIndices,
+  allIndices,
   initialQuery,
   isIncludingSystemIndices,
   esService,
@@ -12,7 +12,7 @@ export function renderStepIndexPattern(
 ) {
   render(
     <StepIndexPattern
-      initialIndices={initialIndices}
+      allIndices={allIndices}
       initialQuery={initialQuery}
       isIncludingSystemIndices={isIncludingSystemIndices}
       esService={esService}
