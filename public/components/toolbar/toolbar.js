@@ -90,9 +90,6 @@ export const Toolbar = props => {
             <NavbarButton onClick={() => showHideTray('expression')}>
               <i className="fa fa-terminal" /> Code
             </NavbarButton>
-            <NavbarButton onClick={() => duplicateElement()}>
-              <i className="fa fa-clone" /> Clone
-            </NavbarButton>
 
             <NavbarDivider />
 
@@ -108,6 +105,11 @@ export const Toolbar = props => {
             <NavbarButton onClick={() => elementLayer(-Infinity)}>
               <i className="fa fa-arrow-circle-down" />
             </NavbarButton>
+
+            <NavbarButton onClick={() => duplicateElement()}>
+              <i className="fa fa-clone" /> Clone
+            </NavbarButton>
+
           </span>
         )}
         <FeedbackButton />
