@@ -57,10 +57,7 @@ uiModules
         $scope.vis.description = $scope.savedObj.description;
 
         if ($scope.timeRange) {
-          // $scope.vis.aggs.forEach(agg => {
-          //   if (agg.type.name !== 'date_histogram') return;
-          //   agg.setTimeRange($scope.timeRange);
-          // });
+          $scope.vis.getTimeRange = () => $scope.timeRange;
 
           const searchSource = $scope.savedObj.searchSource;
           searchSource.filter(() => {
@@ -68,7 +65,9 @@ uiModules
           });
 
           // we're only adding one range filter against the timeFieldName to ensure
-          // that our filter is the only one applied and override the global filters
+          // that our filter is the only one applied and override the global filters.
+          // this does rely on the "implementation detail" that filters are added first
+          // on the leaf SearchSource and subsequently on the parents
           searchSource.addFilterPredicate((filter, state) => {
             if (!filter.range) {
               return true;
