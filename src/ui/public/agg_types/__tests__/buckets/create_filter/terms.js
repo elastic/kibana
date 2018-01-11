@@ -45,13 +45,13 @@ describe('AggConfig Filters', function () {
       expect(filterFalse).to.have.property('query');
       expect(filterFalse.query).to.have.property('match');
       expect(filterFalse.query.match).to.have.property('ssl');
-      expect(filterFalse.query.match.ssl).to.have.property('query', 'false');
+      expect(filterFalse.query.match.ssl).to.have.property('query', false);
 
       const filterTrue = createFilter(aggConfig, 1);
       expect(filterTrue).to.have.property('query');
       expect(filterTrue.query).to.have.property('match');
       expect(filterTrue.query.match).to.have.property('ssl');
-      expect(filterTrue.query.match.ssl).to.have.property('query', 'true');
+      expect(filterTrue.query.match.ssl).to.have.property('query', true);
     });
   });
 });
