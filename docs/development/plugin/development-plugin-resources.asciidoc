@@ -20,7 +20,20 @@ Many Kibana developers hang out on `irc.freenode.net` in the `#kibana` channel. 
 [float]
 ==== Plugin Generator
 
-Check out the https://github.com/elastic/generator-kibana-plugin[plugin generator] to kick-start your plugin.
+Check out the https://github.com/elastic/template-kibana-plugin/[plugin generator] to kick-start your plugin.
+
+[float]
+==== Directory structure for plugins
+
+The Kibana directory must be named `kibana`, and your plugin directory must be located within the sibling `kibana-extra` folder, for example:
+
+["source","shell"]
+-----------
+.
+├── kibana
+├── kibana-extra/foo-plugin
+└── kibana-extra/bar-plugin
+-----------
 
 [float]
 ==== References in the code
