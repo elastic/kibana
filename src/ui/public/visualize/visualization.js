@@ -12,7 +12,7 @@ import { dispatchRenderComplete, dispatchRenderStart } from 'ui/render_complete'
 
 uiModules
   .get('kibana/directive', ['ngSanitize'])
-  .directive('visualization', function (Notifier, SavedVis, indexPatterns, Private, config) {
+  .directive('visualization', function ($timeout, Notifier, SavedVis, indexPatterns, Private, config) {
     const ResizeChecker = Private(ResizeCheckerProvider);
 
     return {
@@ -95,12 +95,13 @@ uiModules
             dispatchRenderStart($el[0]);
           })
           .filter(({ vis, visData, container }) => vis && vis.initialized && container && (!vis.type.requiresSearch || visData))
-          .do(({ vis }) => {
-            $scope.addLegend = vis.params.addLegend;
-            vis.refreshLegend++;
-          })
           .debounceTime(100)
           .switchMap(async ({ vis, visData, container }) => {
+            $scope.addLegend = vis.params.addLegend;
+            vis.refreshLegend++;
+            // We need to wait one digest cycle for the legend to render, before
+            // we want to render the chart, so it know about the legend size.
+            await new Promise(resolve => $timeout(resolve));
             vis.size = [container.width(), container.height()];
             const status = getUpdateStatus($scope);
             const renderPromise = visualization.render(visData, status);
