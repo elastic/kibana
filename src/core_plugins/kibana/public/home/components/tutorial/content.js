@@ -7,6 +7,17 @@ const markdownIt = new MarkdownIt('zero', { html: false, linkify: true });
 // list of rules can be found at https://github.com/markdown-it/markdown-it/issues/361
 markdownIt.enable(['backticks', 'emphasis', 'link', 'list']);
 
+// All links should open in new browser tab.
+// Define custom renderer to add 'target' attribute
+// https://github.com/markdown-it/markdown-it/blob/master/docs/architecture.md#renderer
+const originalLinkRender = markdownIt.renderer.rules.link_open || function (tokens, idx, options, env, self) {
+  return self.renderToken(tokens, idx, options);
+};
+markdownIt.renderer.rules.link_open = function (tokens, idx, options, env, self) {
+  tokens[idx].attrPush(['target', '_blank']);
+  return originalLinkRender(tokens, idx, options, env, self);
+};
+
 export function Content({ className, text }) {
   const classes = classNames('kuiText kuiSubduedText tutorialContent markdown-body', className);
   return (
