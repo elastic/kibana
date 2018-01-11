@@ -31,5 +31,9 @@ export function replaceTemplateStrings(text, params = {}) {
     params: params
   };
   Mustache.parse(text, TEMPLATE_TAGS);
+  // do not html escape output
+  Mustache.escape = function (value) {
+    return value;
+  };
   return Mustache.render(text, variables);
 }

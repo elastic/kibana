@@ -170,6 +170,11 @@ export class Tutorial extends React.Component {
         previewUrl = this.props.addBasePath(this.state.tutorial.previewImagePath);
       }
 
+      let exportedFieldsUrl;
+      if (_.has(this.state, 'tutorial.artifacts.exportedFields')) {
+        exportedFieldsUrl = this.props.replaceTemplateStrings(this.state.tutorial.artifacts.exportedFields.documentationUrl);
+      }
+
       const instructions = this.getInstructions();
       content = (
         <div>
@@ -177,6 +182,7 @@ export class Tutorial extends React.Component {
             title={this.state.tutorial.name}
             description={this.props.replaceTemplateStrings(this.state.tutorial.longDescription)}
             previewUrl={previewUrl}
+            exportedFieldsUrl={exportedFieldsUrl}
           />
 
           <div className="text-center kuiVerticalRhythm">
