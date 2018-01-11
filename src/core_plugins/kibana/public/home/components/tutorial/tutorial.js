@@ -126,6 +126,12 @@ export class Tutorial extends React.Component {
   }
 
   renderInstructionSets = (instructions) => {
+    let overviewDashboard;
+    if (_.has(this.state, 'tutorial.artifacts.dashboards')) {
+      overviewDashboard = this.state.tutorial.artifacts.dashboards.find(dashboard => {
+        return dashboard.isOverview;
+      });
+    }
     let offset = 1;
     return instructions.instructionSets.map((instructionSet, index) => {
       const currentOffset = offset;
@@ -139,6 +145,7 @@ export class Tutorial extends React.Component {
           paramValues={this.state.paramValues}
           setParameter={this.setParameter}
           replaceTemplateStrings={this.props.replaceTemplateStrings}
+          overviewDashboard={overviewDashboard}
           key={index}
         />
       );
