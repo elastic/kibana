@@ -12,7 +12,7 @@ const isDate = d => toString.call(d) === '[object Date]';
  * will be done using this (and its locale settings) instead of the one bundled
  * with this library.
  */
-function parse(text, roundUp, momentInstance = moment, forceNow = undefined) {
+function parse(text, { roundUp = false, momentInstance = moment, forceNow } = {}) {
   if (!text) return undefined;
   if (momentInstance.isMoment(text)) return text;
   if (isDate(text)) return momentInstance(text);
