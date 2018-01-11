@@ -292,6 +292,7 @@ export function SearchSourceProvider(Promise, Private, config) {
 
   SearchSource.prototype._filterPredicates = [
     (filter) => {
+      // remove null/undefined filters
       return filter;
     },
     (filter) => {
