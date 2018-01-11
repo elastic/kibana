@@ -54,6 +54,7 @@
     "build": "grunt build",
     "release": "grunt release",
     "start": "node scripts/kibana --dev",
+    "debug": "node --nolazy --inspect --debug-brk scripts/kibana --dev",
     "precommit": "node scripts/precommit_hook",
     "karma": "karma start",
     "elasticsearch": "grunt esvm:dev:keepalive",
