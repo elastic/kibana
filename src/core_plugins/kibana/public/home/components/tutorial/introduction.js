@@ -8,6 +8,7 @@ import {
 } from 'ui_framework/components';
 import {
   EuiImage,
+  EuiSpacer,
 } from '@elastic/eui';
 
 export function Introduction({ description, previewUrl, title, exportedFieldsUrl }) {
@@ -28,9 +29,12 @@ export function Introduction({ description, previewUrl, title, exportedFieldsUrl
   if (exportedFieldsUrl) {
     exportedFields = (
       <div>
+        <EuiSpacer />
         <KuiLinkButton
           buttonType="secondary"
           href={exportedFieldsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
         >
           View exported fields
         </KuiLinkButton>
