@@ -1,5 +1,5 @@
 import { createAction } from 'redux-actions';
-import { get, pick } from 'lodash';
+import { get, pick, cloneDeep } from 'lodash';
 import { set, del } from 'object-path-immutable';
 import { createThunk } from 'redux-thunks';
 import { getPages, getElementById } from '../selectors/workpad';
@@ -54,7 +54,7 @@ function getSiblingContext(state, elementId, checkIndex) {
 function getBareElement(el, includeId = false) {
   const props = ['position', 'expression', 'filter'];
   if (includeId) return pick(el, props.concat('id'));
-  return pick(el, props);
+  return cloneDeep(pick(el, props));
 }
 
 export const elementLayer = createAction('elementLayer');
