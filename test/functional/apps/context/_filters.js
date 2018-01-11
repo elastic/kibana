@@ -42,21 +42,22 @@ export default function ({ getService, getPageObjects }) {
       expect(hasOnlyFilteredRows).to.be(true);
     });
 
-    it('should be toggleable via the filter bar', async function () {
-      const table = await docTable.getTable();
-
-      await filterBar.toggleFilterEnabled(TEST_ANCHOR_FILTER_FIELD);
-      await PageObjects.context.waitUntilContextLoadingHasFinished();
-
-      expect(await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, TEST_ANCHOR_FILTER_VALUE, false)).to.be(true);
-
-      const rows = await docTable.getBodyRows(table);
-      const hasOnlyFilteredRows = (
-        await Promise.all(rows.map(
-          async (row) => await (await docTable.getFields(row))[2].getVisibleText()
-        ))
-      ).every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
-      expect(hasOnlyFilteredRows).to.be(false);
-    });
+    // Flaky: https://github.com/elastic/kibana/issues/16002
+    // it('should be toggleable via the filter bar', async function () {
+    //   const table = await docTable.getTable();
+    //
+    //   await filterBar.toggleFilterEnabled(TEST_ANCHOR_FILTER_FIELD);
+    //   await PageObjects.context.waitUntilContextLoadingHasFinished();
+    //
+    //   expect(await filterBar.hasFilter(TEST_ANCHOR_FILTER_FIELD, TEST_ANCHOR_FILTER_VALUE, false)).to.be(true);
+    //
+    //   const rows = await docTable.getBodyRows(table);
+    //   const hasOnlyFilteredRows = (
+    //     await Promise.all(rows.map(
+    //       async (row) => await (await docTable.getFields(row))[2].getVisibleText()
+    //     ))
+    //   ).every((fieldContent) => fieldContent === TEST_ANCHOR_FILTER_VALUE);
+    //   expect(hasOnlyFilteredRows).to.be(false);
+    // });
   });
 }
