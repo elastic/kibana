@@ -2,11 +2,16 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
 import {
-  KuiTabs,
-  KuiTab,
-  KuiFlexItem,
-  KuiFlexGrid,
-} from 'ui_framework/components';
+  EuiTabs,
+  EuiTab,
+  EuiFlexItem,
+  EuiFlexGrid,
+  EuiPage,
+  EuiTitle,
+  EuiPanel,
+  EuiSpacer,
+} from '@elastic/eui';
+
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
 const ALL_TAB_ID = 'all';
@@ -51,14 +56,14 @@ export class FeatureDirectory extends React.Component {
 
   renderTabs = () => {
     return this.tabs.map((tab, index) => (
-      <KuiTab
+      <EuiTab
         className="homeDirectoryTab"
         onClick={() => this.onSelectedTabChanged(tab.id)}
         isSelected={tab.id === this.state.selectedTabId}
         key={index}
       >
         {tab.name}
-      </KuiTab>
+      </EuiTab>
     ));
   }
 
@@ -75,37 +80,37 @@ export class FeatureDirectory extends React.Component {
       })
       .map((directory) => {
         return (
-          <KuiFlexItem key={directory.id}>
-            <Synopsis
-              description={directory.description}
-              iconUrl={this.props.addBasePath(directory.icon)}
-              title={directory.title}
-              url={this.props.addBasePath(directory.path)}
-            />
-          </KuiFlexItem>
+          <EuiFlexItem key={directory.id}>
+            <EuiPanel>
+              <Synopsis
+                description={directory.description}
+                iconUrl={this.props.addBasePath(directory.icon)}
+                title={directory.title}
+                url={this.props.addBasePath(directory.path)}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
         );
       });
   };
 
   render() {
     return (
-      <div className="kuiView home">
-        <div className="kuiViewContent">
-          <div className="kuiViewContentItem kuiVerticalRhythmXLarge">
-            <h1 className="kuiTitle ">
-              Directory
-            </h1>
-          </div>
-          <div className="kuiViewContentItem kuiVerticalRhythmXLarge">
-            <KuiTabs className="homeDirectoryTabs">
-              {this.renderTabs()}
-            </KuiTabs>
-            <KuiFlexGrid columns={4} className="homeDirectory">
-              { this.renderDirectories() }
-            </KuiFlexGrid>
-          </div>
-        </div>
-      </div>
+      <EuiPage className="home">
+        <EuiTitle size="l">
+          <h1>
+            Directory
+          </h1>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+        <EuiTabs className="homeDirectoryTabs">
+          {this.renderTabs()}
+        </EuiTabs>
+        <EuiSpacer />
+        <EuiFlexGrid columns={4}>
+          { this.renderDirectories() }
+        </EuiFlexGrid>
+      </EuiPage>
     );
   }
 }

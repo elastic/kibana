@@ -39,6 +39,7 @@
             <label
               class="euiCheckbox__label"
               for="indexPatternCreationIncludeSystemIndices"
+              style="white-space: nowrap"
             >
               Include system indices
             </label>
@@ -83,16 +84,16 @@
                 ng-if="!controller.isFetchingExistingIndices"
               >
                 <div>
-                  <h2 class="euiTitle euiTitle--small euiTextColor euiTextColor--subdued">
+                  <h2 class="euiTitle euiTitle--small">
                     Couldn't find any Elasticsearch data
                   </h2>
                   <div class="euiSpacer euiSpacer--s"></div>
-                  <p class="euiTextColor euiTextColor--subdued">
+                  <p>
                     <span>
                       You'll need to index some data into Elasticsearch before you can create an index pattern.
                     </span>
                     <a
-                      class="euiLink"
+                      class="euiLink euiLink--primary"
                       aria-label="Learn how to index data into Elasticsearch"
                       documentation-href="indexPatterns.loadingData"
                       target="_blank"

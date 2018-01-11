@@ -2,19 +2,21 @@ import './synopsis.less';
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-  KuiFlexGroup,
-  KuiFlexItem
-} from 'ui_framework/components';
+  EuiFlexGroup,
+  EuiFlexItem
+} from '@elastic/eui';
 
 export function Synopsis({ description, iconUrl, title, url }) {
-  let img;
+  let optionalImg;
   if (iconUrl) {
-    img = (
-      <img
-        className="synopsisIcon"
-        src={iconUrl}
-        alt=""
-      />
+    optionalImg = (
+      <EuiFlexItem grow={false}>
+        <img
+          className="synopsisIcon"
+          src={iconUrl}
+          alt=""
+        />
+      </EuiFlexItem>
     );
   }
 
@@ -24,17 +26,17 @@ export function Synopsis({ description, iconUrl, title, url }) {
       className="kuiLink synopsis"
       data-test-subj={`homeSynopsisLink${title.toLowerCase()}`}
     >
-      <KuiFlexGroup>
-        <KuiFlexItem grow={false}>{img}</KuiFlexItem>
-        <KuiFlexItem className="synopsisContent">
+      <EuiFlexGroup>
+        {optionalImg}
+        <EuiFlexItem className="synopsisContent">
           <h4 className="kuiTextTitle synopsisTitle">
             {title}
           </h4>
           <p className="kuiText kuiSubduedText">
             {description}
           </p>
-        </KuiFlexItem>
-      </KuiFlexGroup>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </a>
   );
 }
