@@ -88,7 +88,7 @@ uiModules
               container: getVisContainer(),
             });
           });
-        });
+        }).share();
 
         const success$ = render$
           .do(() => {
