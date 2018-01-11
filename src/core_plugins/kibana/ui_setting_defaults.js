@@ -1,6 +1,5 @@
 import moment from 'moment-timezone';
 import numeralLanguages from '@elastic/numeral/languages';
-// import { documentationLinks } from '../../ui/public/documentation_links';
 
 export function getUiSettingDefaults() {
   const weekdays = moment.weekdays().slice();
