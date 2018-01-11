@@ -1,5 +1,6 @@
 import moment from 'moment-timezone';
 import numeralLanguages from '@elastic/numeral/languages';
+// import { documentationLinks } from '../../ui/public/documentation_links';
 
 export function getUiSettingDefaults() {
   const weekdays = moment.weekdays().slice();
@@ -306,7 +307,10 @@ export function getUiSettingDefaults() {
         { from: 'now-5y',   to: 'now',      display: 'Last 5 years',          section: 2 },
 
       ], null, 2),
-      description: 'The list of ranges to show in the Quick section of the time picker.'
+      description: 'The list of ranges to show in the Quick section of the time picker. ' +
+        'This should be an array of objects, with each object containing "from", "to" (see ' +
+        '<a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#date-math" target="_blank" rel="noopener noreferrer">accepted formats</a>' +
+        '), "display" (the title to be displayed), and "section" (which column to put the option in).'
     },
     'dashboard:defaultDarkTheme': {
       value: false,
@@ -318,7 +322,7 @@ export function getUiSettingDefaults() {
     },
     'filterEditor:suggestValues': {
       value: true,
-      description: 'Set this property to `false` to prevent the filter editor from suggesting values for fields.'
+      description: 'Set this property to false to prevent the filter editor from suggesting values for fields.'
     },
     'notifications:banner': {
       type: 'markdown',
