@@ -8,6 +8,7 @@ import { mysqlLogsSpecProvider } from './mysql_logs';
 import { mysqlMetricsSpecProvider } from './mysql_metrics';
 import { redisLogsSpecProvider } from './redis_logs';
 import { redisMetricsSpecProvider } from './redis_metrics';
+import { dockerMetricsSpecProvider } from './docker_metrics';
 import { netflowSpecProvider } from './netflow';
 
 export function registerTutorials(server) {
@@ -21,5 +22,6 @@ export function registerTutorials(server) {
   server.registerTutorial(mysqlMetricsSpecProvider);
   server.registerTutorial(redisLogsSpecProvider);
   server.registerTutorial(redisMetricsSpecProvider);
+  server.registerTutorial(dockerMetricsSpecProvider);
   server.registerTutorial(netflowSpecProvider);
 }
