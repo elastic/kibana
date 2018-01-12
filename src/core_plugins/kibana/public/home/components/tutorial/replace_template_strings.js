@@ -1,4 +1,4 @@
-import Mustache from 'mustache';
+import { Writer } from 'mustache';
 import chrome from 'ui/chrome';
 import { metadata } from 'ui/metadata';
 import {
@@ -8,6 +8,16 @@ import {
 } from 'ui/documentation_links/documentation_links';
 
 const TEMPLATE_TAGS = ['{', '}'];
+
+// Can not use 'Mustache' since its a global object
+const mustacheWriter = new Writer();
+// do not html escape output
+mustacheWriter.escapedValue = function escapedValue(token, context) {
+  const value = context.lookup(token[1]);
+  if (value != null) {
+    return value;
+  }
+};
 
 export function replaceTemplateStrings(text, params = {}) {
   const variables = {
@@ -30,6 +40,6 @@ export function replaceTemplateStrings(text, params = {}) {
     },
     params: params
   };
-  Mustache.parse(text, TEMPLATE_TAGS);
-  return Mustache.render(text, variables);
+  mustacheWriter.parse(text, TEMPLATE_TAGS);
+  return mustacheWriter.render(text, variables);
 }
