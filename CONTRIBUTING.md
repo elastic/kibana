@@ -163,7 +163,7 @@ Install the latest version of [yarn](https://yarnpkg.com).
 Bootstrap Kibana and install all the dependencies
 
 ```bash
-node scripts/kbn bootstrap
+yarn kbn bootstrap
 ```
 
 Start elasticsearch.
