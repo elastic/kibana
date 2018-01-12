@@ -165,10 +165,7 @@ uiModules
         // thus we need to retrigger. The request handler should take care about
         // checking if anything changed, that actually require a new fetch or return
         // cached data otherwise.
-        const handleUiStateChange = () => {
-          $scope.fetch();
-        };
-        $scope.uiState.on('change', handleUiStateChange);
+        $scope.uiState.on('change', $scope.fetch);
 
         // visualize needs to know about timeFilter
         $scope.$listen(timefilter, 'fetch', $scope.fetch);
@@ -176,7 +173,7 @@ uiModules
         $scope.$on('$destroy', () => {
           $scope.vis.removeListener('update', handleVisUpdate);
           queryFilter.off('update', handleQueryUpdate);
-          $scope.uiState.off('change', handleUiStateChange);
+          $scope.uiState.off('change', $scope.fetch);
         });
 
         $scope.$watch('vis.initialized', $scope.fetch);
