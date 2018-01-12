@@ -175,6 +175,8 @@ export function Home({ addBasePath, directories }) {
         </EuiFlexItem>
       </EuiFlexGroup>
 
+      <EuiSpacer />
+
 
       { renderPromo() }
 

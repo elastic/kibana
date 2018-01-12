@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`] = `
-<div
-  className="kuiView home"
+<EuiPage
+  className="home"
 >
   <div
     className="kuiViewContent kuiViewContent--constrainedWidth"
@@ -26,10 +26,15 @@ exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`
         title="jest test tutorial"
       />
       <div
-        className="text-center kuiVerticalRhythm"
+        className="text-center"
       />
-      <div
-        className="homePanel kuiVerticalRhythm"
+      <EuiSpacer
+        size="l"
+      />
+      <EuiPanel
+        grow={true}
+        hasShadow={false}
+        paddingSize="l"
       >
         <InstructionSet
           instructionVariants={
@@ -51,15 +56,15 @@ exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`
           setParameter={[Function]}
           title="Instruction title"
         />
-      </div>
+      </EuiPanel>
     </div>
   </div>
-</div>
+</EuiPage>
 `;
 
 exports[`should render ON_PREM instructions with instructions cloud toggle when isCloudEnabled is false 1`] = `
-<div
-  className="kuiView home"
+<EuiPage
+  className="home"
 >
   <div
     className="kuiViewContent kuiViewContent--constrainedWidth"
@@ -83,7 +88,7 @@ exports[`should render ON_PREM instructions with instructions cloud toggle when 
         title="jest test tutorial"
       />
       <div
-        className="text-center kuiVerticalRhythm"
+        className="text-center"
       >
         <RadioButtonGroup
           buttons={
@@ -103,8 +108,13 @@ exports[`should render ON_PREM instructions with instructions cloud toggle when 
           selectedBtnLabel="On premise"
         />
       </div>
-      <div
-        className="homePanel kuiVerticalRhythm"
+      <EuiSpacer
+        size="l"
+      />
+      <EuiPanel
+        grow={true}
+        hasShadow={false}
+        paddingSize="l"
       >
         <InstructionSet
           instructionVariants={
@@ -126,8 +136,8 @@ exports[`should render ON_PREM instructions with instructions cloud toggle when 
           setParameter={[Function]}
           title="Instruction title"
         />
-      </div>
+      </EuiPanel>
     </div>
   </div>
-</div>
+</EuiPage>
 `;

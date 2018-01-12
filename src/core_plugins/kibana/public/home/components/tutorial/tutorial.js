@@ -199,10 +199,8 @@ export class Tutorial extends React.Component {
     }
     return (
       <EuiPage className="home">
-        <div className="kuiViewContent kuiViewContent--constrainedWidth">
-          <a className="kuiLink" href="#/home">Home</a> / <a className="kuiLink" href="#/home/tutorial_directory">Add Data</a>
-          {content}
-        </div>
+        <a className="kuiLink" href="#/home">Home</a> / <a className="kuiLink" href="#/home/tutorial_directory">Add Data</a>
+        {content}
       </EuiPage>
     );
   }

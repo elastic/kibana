@@ -71,6 +71,8 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
 
       {post}
 
+      <EuiSpacer />
+
     </div>
   );
 }
