@@ -1,5 +1,6 @@
 export function buildPhraseFilter(field, value, indexPattern) {
   const filter = { meta: { index: indexPattern.id } };
+  const convertedValue = getConvertedValueForField(field, value);
 
   if (field.scripted) {
     filter.script = getPhraseScript(field, value);
@@ -7,7 +8,7 @@ export function buildPhraseFilter(field, value, indexPattern) {
   } else {
     filter.query = { match: {} };
     filter.query.match[field.name] = {
-      query: value,
+      query: convertedValue,
       type: 'phrase'
     };
   }
@@ -32,7 +33,7 @@ export function getPhraseScript(field, value) {
 // See https://github.com/elastic/elasticsearch/issues/20941 and https://github.com/elastic/kibana/issues/8677
 // and https://github.com/elastic/elasticsearch/pull/22201
 // for the reason behind this change. Aggs now return boolean buckets with a key of 1 or 0.
-function getConvertedValueForField(field, value) {
+export function getConvertedValueForField(field, value) {
   if (typeof value !== 'boolean' && field.type === 'boolean') {
     if (value !== 1 && value !== 0) {
       throw new Error('Boolean scripted fields must return true or false');
