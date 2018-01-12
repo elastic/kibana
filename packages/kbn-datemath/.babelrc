@@ -1,4 +1,13 @@
 {
-  "presets": "es2015",
+  "presets": [["env", {
+    "targets": {
+      "node": "6.0",
+      "browsers": [
+        "last 2 versions",
+        "> 5%",
+        "Safari 7",
+      ]
+    }
+  }]],
   "plugins": "add-module-exports"
 }
