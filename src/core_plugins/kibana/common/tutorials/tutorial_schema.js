@@ -15,7 +15,7 @@ const dashboardSchema = Joi.object({
 const artifactsSchema = Joi.object({
   // Fields present in Elasticsearch documents created by this product.
   exportedFields: Joi.object({
-    documentationUrl: Joi.string()
+    documentationUrl: Joi.string().required()
   }),
   // Kibana dashboards created by this product.
   dashboards: Joi.array().items(dashboardSchema).required()
