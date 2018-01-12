@@ -242,7 +242,7 @@ export function SearchSourceProvider(Promise, Private, config) {
           verifiedFilters = val.filter(function (el) {
             if ('meta' in el && 'index' in state) {
               const field = state.index.fields.byName[el.meta.key];
-              if (!field) return false;
+              return typeof field !== 'undefined' || el.meta.index === state.index.id;
             }
             return true;
           });
