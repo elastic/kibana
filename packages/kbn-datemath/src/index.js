@@ -6,6 +6,8 @@ const unitsDesc = unitsAsc.reverse();
 
 const isDate = d => toString.call(d) === '[object Date]';
 
+const isValidDate = d => isDate(d) && !isNaN(d.valueOf());
+
 /*
  * This is a simplified version of elasticsearch's date parser.
  * If you pass in a momentjs instance as the third parameter the calculation
@@ -16,6 +18,7 @@ function parse(text, { roundUp = false, momentInstance = moment, forceNow } = {}
   if (!text) return undefined;
   if (momentInstance.isMoment(text)) return text;
   if (isDate(text)) return momentInstance(text);
+  if (forceNow !== undefined && !isValidDate(forceNow)) throw new Error('forceNow must be a valid Date');
 
   let time;
   let mathString = '';

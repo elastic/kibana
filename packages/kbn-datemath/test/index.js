@@ -21,6 +21,7 @@ describe('dateMath', function () {
   // Test each of these intervals when testing relative time
   const spans = ['s', 'm', 'h', 'd', 'w', 'M', 'y', 'ms'];
   const anchor =  '2014-01-01T06:06:06.666Z';
+  const anchoredDate = new Date(Date.parse(anchor));
   const unix = moment(anchor).valueOf();
   const format = 'YYYY-MM-DDTHH:mm:ss.SSSZ';
   let clock;
@@ -47,6 +48,20 @@ describe('dateMath', function () {
       expect(dateMath.parse('now-0')).to.be(undefined);
       expect(dateMath.parse('now-00')).to.be(undefined);
       expect(dateMath.parse('now-000')).to.be(undefined);
+    });
+
+    describe('forceNow', function () {
+      it('should throw an Error if passed a string', function () {
+        expect(() => dateMath.parse('now', { forceNow: '2000-01-01T00:00:00.000Z' })).to.throwError();
+      });
+
+      it('should throw an Error if passed a moment', function () {
+        expect(() => dateMath.parse('now', { forceNow: moment() })).to.throwError();
+      });
+
+      it('should throw an Error if passed an invalid date', function () {
+        expect(() => dateMath.parse('now', { forceNow: new Date('foobar') })).to.throwError();
+      });
     });
 
   });
@@ -86,7 +101,7 @@ describe('dateMath', function () {
     });
 
     it(`should use the forceNow parameter when parsing now`, function () {
-      expect(dateMath.parse('now', { forceNow: mmnt }).format(format)).to.eql(mmnt.format(format));
+      expect(dateMath.parse('now', { forceNow: anchoredDate }).valueOf()).to.eql(unix);
     });
   });
 
@@ -118,7 +133,7 @@ describe('dateMath', function () {
         });
 
         it('should return ' + len + span + ' before forceNow', function () {
-          expect(dateMath.parse(nowEx, { forceNow: anchored }).format(format)).to.eql(anchored.subtract(len, span).format(format));
+          expect(dateMath.parse(nowEx, { forceNow: anchoredDate }).valueOf()).to.eql(anchored.subtract(len, span).valueOf());
         });
       });
     });
@@ -152,7 +167,7 @@ describe('dateMath', function () {
         });
 
         it('should return ' + len + span + ' after forceNow', function () {
-          expect(dateMath.parse(nowEx, { forceNow: anchored }).format(format)).to.eql(anchored.add(len, span).format(format));
+          expect(dateMath.parse(nowEx, { forceNow: anchoredDate }).valueOf()).to.eql(anchored.add(len, span).valueOf());
         });
       });
     });
@@ -178,7 +193,7 @@ describe('dateMath', function () {
       });
 
       it(`should round now to the beginning of forceNow's ` + span, function () {
-        expect(dateMath.parse('now/' + span, { forceNow: anchored }).format(format)).to.eql(anchored.startOf(span).format(format));
+        expect(dateMath.parse('now/' + span, { forceNow: anchoredDate }).valueOf()).to.eql(anchored.startOf(span).valueOf());
       });
 
       it('should round now to the end of the ' + span, function () {
@@ -186,7 +201,7 @@ describe('dateMath', function () {
       });
 
       it(`should round now to the end of forceNow's ` + span, function () {
-        expect(dateMath.parse('now/' + span, { roundUp: true, forceNow: anchored }).format(format)).to.eql(anchored.endOf(span).format(format));
+        expect(dateMath.parse('now/' + span, { roundUp: true, forceNow: anchoredDate }).valueOf()).to.eql(anchored.endOf(span).valueOf());
       });
     });
   });
@@ -249,8 +264,8 @@ describe('dateMath', function () {
     });
 
     it('should round relative to forceNow', function () {
-      const val = dateMath.parse('now-0s/s', { forceNow: anchored }).format(format);
-      expect(val).to.eql(anchored.startOf('s').format(format));
+      const val = dateMath.parse('now-0s/s', { forceNow: anchoredDate }).valueOf();
+      expect(val).to.eql(anchored.startOf('s').valueOf());
     });
   });
 
