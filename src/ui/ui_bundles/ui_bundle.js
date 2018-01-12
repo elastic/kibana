@@ -70,7 +70,7 @@ export class UiBundle {
   async hasStyleFile() {
     return await fcb(cb => {
       return stat(this.getStylePath(), error => {
-        cb(null, error && error.code !== 'ENOENT');
+        cb(null, !(error && error.code === 'ENOENT'));
       });
     });
   }
