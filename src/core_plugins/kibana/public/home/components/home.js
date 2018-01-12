@@ -78,7 +78,7 @@ export function Home({ addBasePath, directories }) {
                 buttonType="secondary"
                 href={addBasePath(`${kbnBaseUrl}#/home/tutorial_directory/logging`)}
               >
-                Add data
+                Add log data
               </KuiLinkButton>
             </KuiCardFooter>
           </KuiCard>
@@ -104,7 +104,7 @@ export function Home({ addBasePath, directories }) {
                 buttonType="secondary"
                 href={addBasePath(`${kbnBaseUrl}#/home/tutorial_directory/metrics`)}
               >
-                Add data
+                Add metric data
               </KuiLinkButton>
             </KuiCardFooter>
           </KuiCard>
@@ -116,7 +116,7 @@ export function Home({ addBasePath, directories }) {
                   src={addBasePath('/plugins/kibana/assets/app_security.svg')}
                 />
                 <p>
-                  Security Analytics
+                  Security analytics
                 </p>
               </KuiCardDescriptionTitle>
 
@@ -130,7 +130,7 @@ export function Home({ addBasePath, directories }) {
                 buttonType="secondary"
                 href={addBasePath(`${kbnBaseUrl}#/home/tutorial_directory/security`)}
               >
-                Add data
+                Add security events
               </KuiLinkButton>
             </KuiCardFooter>
           </KuiCard>
@@ -152,8 +152,7 @@ export function Home({ addBasePath, directories }) {
           </EuiTitle>
           <EuiText>
             <p>
-              These turnkey solutions will help you quickly add data into Kibana and turn it into
-              pre-built dashboards and monitoring systems.
+              Use these solutions to quickly turn your data into pre-built dashboards and monitoring systems.
             </p>
           </EuiText>
         </EuiFlexItem>

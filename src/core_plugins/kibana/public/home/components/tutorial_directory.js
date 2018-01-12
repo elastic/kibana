@@ -10,7 +10,6 @@ import {
   EuiFlexGrid,
   EuiSpacer,
   EuiTitle,
-  EuiPanel,
 } from '@elastic/eui';
 
 
@@ -84,13 +83,12 @@ export class TutorialDirectory extends React.Component {
       .map((tutorial) => {
         return (
           <EuiFlexItem key={tutorial.name}>
-            <EuiPanel>
-              <Synopsis
-                description={tutorial.shortDescription}
-                title={tutorial.name}
-                url={this.props.addBasePath(`#/home/tutorial/${tutorial.id}`)}
-              />
-            </EuiPanel>
+            <Synopsis
+              description={tutorial.shortDescription}
+              title={tutorial.name}
+              wrapInPanel
+              url={this.props.addBasePath(`#/home/tutorial/${tutorial.id}`)}
+            />
           </EuiFlexItem>
         );
       });

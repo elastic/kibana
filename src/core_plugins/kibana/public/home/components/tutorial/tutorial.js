@@ -188,6 +188,7 @@ export class Tutorial extends React.Component {
             exportedFieldsUrl={exportedFieldsUrl}
           />
 
+          <EuiSpacer />
           <div className="text-center">
             {this.renderInstructionSetsToggle()}
           </div>

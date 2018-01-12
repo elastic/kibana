@@ -8,7 +8,6 @@ import {
   EuiFlexGrid,
   EuiPage,
   EuiTitle,
-  EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
 
@@ -81,14 +80,13 @@ export class FeatureDirectory extends React.Component {
       .map((directory) => {
         return (
           <EuiFlexItem key={directory.id}>
-            <EuiPanel>
-              <Synopsis
-                description={directory.description}
-                iconUrl={this.props.addBasePath(directory.icon)}
-                title={directory.title}
-                url={this.props.addBasePath(directory.path)}
-              />
-            </EuiPanel>
+            <Synopsis
+              description={directory.description}
+              iconUrl={this.props.addBasePath(directory.icon)}
+              title={directory.title}
+              url={this.props.addBasePath(directory.path)}
+              wrapInPanel
+            />
           </EuiFlexItem>
         );
       });

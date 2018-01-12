@@ -3,10 +3,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {
   EuiFlexGroup,
-  EuiFlexItem
+  EuiFlexItem,
+  EuiPanel,
+  EuiTitle,
+  EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 
-export function Synopsis({ description, iconUrl, title, url }) {
+export function Synopsis({ description, iconUrl, title, url, wrapInPanel }) {
   let optionalImg;
   if (iconUrl) {
     optionalImg = (
@@ -20,23 +24,44 @@ export function Synopsis({ description, iconUrl, title, url }) {
     );
   }
 
+  const content = (
+    <EuiFlexGroup>
+      {optionalImg}
+      <EuiFlexItem className="synopsisContent">
+        <EuiTitle size="s" className="synopsisTitle">
+          <h4>
+            {title}
+          </h4>
+        </EuiTitle>
+        <EuiText className="synopsisBody">
+          <p>
+            <EuiTextColor color="subdued">
+              {description}
+            </EuiTextColor>
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  let synopsisDisplay = content;
+  if (wrapInPanel) {
+    synopsisDisplay = (
+      <EuiPanel className="synopsisPanel">
+        {content}
+      </EuiPanel>
+    );
+  }
+
+
+
   return (
     <a
       href={url}
-      className="kuiLink synopsis"
+      className="euiLink synopsis"
       data-test-subj={`homeSynopsisLink${title.toLowerCase()}`}
     >
-      <EuiFlexGroup>
-        {optionalImg}
-        <EuiFlexItem className="synopsisContent">
-          <h4 className="kuiTextTitle synopsisTitle">
-            {title}
-          </h4>
-          <p className="kuiText kuiSubduedText">
-            {description}
-          </p>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {synopsisDisplay}
     </a>
   );
 }
