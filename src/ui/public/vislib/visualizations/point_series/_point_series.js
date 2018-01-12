@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import { InvalidLogScaleValues } from 'ui/errors';
 
 export function VislibVisualizationsPointSeriesProvider() {
 
@@ -10,15 +9,6 @@ export function VislibVisualizationsPointSeriesProvider() {
       this.chartEl = seriesEl;
       this.chartData = seriesData;
       this.seriesConfig = seriesConfig;
-
-      this.validateDataCompliesWithScalingMethod(this.chartData);
-    }
-
-    validateDataCompliesWithScalingMethod(data) {
-      const invalidLogScale = data.values && data.values.some(d => d.y < 1);
-      if (this.getValueAxis().axisConfig.isLogScale() && invalidLogScale) {
-        throw new InvalidLogScaleValues();
-      }
     }
 
     getGroupedCount() {
