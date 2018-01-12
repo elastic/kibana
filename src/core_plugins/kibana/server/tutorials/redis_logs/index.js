@@ -22,7 +22,7 @@ export function redisLogsSpecProvider() {
     artifacts: {
       dashboards: [
         {
-          title: 'Filebeat-Redis-Dashboard',
+          title: '7fea2930-478e-11e7-b1f0-cb29bac6bf8b',
           linkLabel: 'Redis logs dashboard',
           isOverview: true
         }
