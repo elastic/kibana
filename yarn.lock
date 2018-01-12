@@ -306,13 +306,7 @@ angular-sortable-view@0.0.15:
   version "0.0.15"
   resolved "https://registry.yarnpkg.com/angular-sortable-view/-/angular-sortable-view-0.0.15.tgz#e8463df909db83d641b028f0773a10d50292874f"
 
-angular-translate@2.13.1:
-  version "2.13.1"
-  resolved "https://registry.yarnpkg.com/angular-translate/-/angular-translate-2.13.1.tgz#05673eb371986fc11edc151f590299d7e0c46228"
-  dependencies:
-    angular ">=1.2.26 <=1.6"
-
-angular@1.6.5, angular@>=1.0.6, "angular@>=1.2.26 <=1.6":
+angular@1.6.5, angular@>=1.0.6:
   version "1.6.5"
   resolved "https://registry.yarnpkg.com/angular/-/angular-1.6.5.tgz#37f788eebec5ce2e3fa02b17bbcb2a231576a0d6"
 
@@ -4169,12 +4163,6 @@ flat-cache@^1.2.1:
     graceful-fs "^4.1.2"
     write "^0.2.1"
 
-flat@^1.2.0:
-  version "1.6.1"
-  resolved "https://registry.yarnpkg.com/flat/-/flat-1.6.1.tgz#476b9dbb70d5e9340dbbc038bde084a20945921c"
-  dependencies:
-    is-buffer "~1.1.2"
-
 flatten@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/flatten/-/flatten-1.0.2.tgz#dae46a9d78fbe25292258cc1e780a41d95c03782"
@@ -4709,14 +4697,6 @@ growl@1.9.2:
 growly@^1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/growly/-/growly-1.3.0.tgz#f10748cbe76af964b7c96c93c6bcc28af120c081"
-
-grunt-angular-translate@0.3.0:
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/grunt-angular-translate/-/grunt-angular-translate-0.3.0.tgz#bd0118afa24d8f570231fd8d52d829d808c511b3"
-  dependencies:
-    flat "^1.2.0"
-    json-stable-stringify "^1.0.0"
-    lodash "~2.4.1"
 
 grunt-aws-s3@0.14.5:
   version "0.14.5"
@@ -5600,7 +5580,7 @@ is-binary-path@^1.0.0:
   dependencies:
     binary-extensions "^1.0.0"
 
-is-buffer@^1.0.2, is-buffer@^1.1.4, is-buffer@^1.1.5, is-buffer@~1.1.2:
+is-buffer@^1.0.2, is-buffer@^1.1.4, is-buffer@^1.1.5:
   version "1.1.6"
   resolved "https://registry.yarnpkg.com/is-buffer/-/is-buffer-1.1.6.tgz#efaa2ea9daa0d7ab2ea13a97b2b8ad51fefbe8be"
 
@@ -6494,7 +6474,7 @@ json-stable-stringify-without-jsonify@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/json-stable-stringify-without-jsonify/-/json-stable-stringify-without-jsonify-1.0.1.tgz#9db7b59496ad3f3cfef30a75142d2d930ad72651"
 
-json-stable-stringify@^1.0.0, json-stable-stringify@^1.0.1:
+json-stable-stringify@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/json-stable-stringify/-/json-stable-stringify-1.0.1.tgz#9a759d39c5f2ff503fd5300646ed445f88c4f9af"
   dependencies:
