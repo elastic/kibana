@@ -38,7 +38,7 @@ export class PersistedLog {
   }
 
   get() {
-    return this.items;
+    return _.cloneDeep(this.items);
   }
 }
 
