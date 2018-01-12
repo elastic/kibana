@@ -1,11 +1,14 @@
-import './introduction.less';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Content } from './content';
-
+import { EuiTitle, EuiFlexItem, EuiFlexGroup, EuiSpacer, EuiImage } from '@elastic/eui';
 import {
   EuiImage,
 } from '@elastic/eui';
+
+import {
+  KuiLinkButton,
+} from 'ui_framework/components';
 
 export function Introduction({ description, previewUrl, title }) {
   let img;
@@ -22,22 +25,19 @@ export function Introduction({ description, previewUrl, title }) {
     );
   }
   return (
-    <div className="introduction kuiVerticalRhythm">
-      <div className="kuiFlexGroup kuiFlexGroup--gutterLarge">
-
-        <div className="kuiFlexItem">
-          <h1 className="kuiTitle kuiVerticalRhythm">
-            {title}
-          </h1>
-          <Content className="kuiVerticalRhythm" text={description}/>
-        </div>
-
-        <div className="kuiFlexItem kuiFlexItem--flexGrowZero">
-          {img}
-        </div>
-
-      </div>
-    </div>
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiTitle size="l">
+          <h2>{title}</h2>
+        </EuiTitle>
+        <EuiSpacer />
+        <Content text={description} />
+        {exportedFields}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        {img}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
 
