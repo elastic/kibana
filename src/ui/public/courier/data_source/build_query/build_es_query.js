@@ -19,7 +19,7 @@ export function BuildESQueryProvider(Private) {
     const kueryQuery = buildQueryFromKuery(indexPattern, queriesByLanguage.kuery);
     const kqlQuery = buildQueryFromKql(indexPattern, queriesByLanguage.kql);
     const luceneQuery = buildQueryFromLucene(queriesByLanguage.lucene, decorateQuery);
-    const filterQuery = buildQueryFromFilters(filters, decorateQuery);
+    const filterQuery = buildQueryFromFilters(filters, decorateQuery, indexPattern);
 
     return {
       bool: {
