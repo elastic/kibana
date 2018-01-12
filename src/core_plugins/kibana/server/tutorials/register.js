@@ -9,6 +9,7 @@ import { mysqlMetricsSpecProvider } from './mysql_metrics';
 import { redisLogsSpecProvider } from './redis_logs';
 import { redisMetricsSpecProvider } from './redis_metrics';
 import { dockerMetricsSpecProvider } from './docker_metrics';
+import { kubernetesMetricsSpecProvider } from './kubernetes_metrics';
 import { netflowSpecProvider } from './netflow';
 
 export function registerTutorials(server) {
@@ -23,5 +24,6 @@ export function registerTutorials(server) {
   server.registerTutorial(redisLogsSpecProvider);
   server.registerTutorial(redisMetricsSpecProvider);
   server.registerTutorial(dockerMetricsSpecProvider);
+  server.registerTutorial(kubernetesMetricsSpecProvider);
   server.registerTutorial(netflowSpecProvider);
 }
