@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import { Introduction } from './introduction';
 import { InstructionSet } from './instruction_set';
 import { RadioButtonGroup } from './radio_button_group';
+import { EuiSpacer, EuiPage, EuiPanel, EuiLink, EuiText } from '@elastic/eui';
 
 const INSTRUCTIONS_TYPE = {
   ELASTIC_CLOUD: 'elasticCloud',
@@ -157,9 +158,11 @@ export class Tutorial extends React.Component {
     if (this.state.notFound) {
       content = (
         <div className="homePanel">
-          <p className="kuiText kuiSubduedText kuiVerticalRhythm kuiVerticalRhythmSmall">
-            Unable to find tutorial {this.props.tutorialId}
-          </p>
+          <EuiText>
+            <p>
+              Unable to find tutorial {this.props.tutorialId}
+            </p>
+          </EuiText>
         </div>
       );
     }
@@ -185,23 +188,25 @@ export class Tutorial extends React.Component {
             exportedFieldsUrl={exportedFieldsUrl}
           />
 
-          <div className="text-center kuiVerticalRhythm">
+          <EuiSpacer />
+          <div className="text-center">
             {this.renderInstructionSetsToggle()}
           </div>
 
-          <div className="homePanel kuiVerticalRhythm">
+          <EuiSpacer />
+          <EuiPanel paddingSize="l">
             {this.renderInstructionSets(instructions)}
-          </div>
+          </EuiPanel>
         </div>
       );
     }
     return (
-      <div className="kuiView home">
-        <div className="kuiViewContent kuiViewContent--constrainedWidth">
-          <a className="kuiLink" href="#/home">Home</a> / <a className="kuiLink" href="#/home/tutorial_directory">Add Data</a>
-          {content}
-        </div>
-      </div>
+      <EuiPage className="home">
+
+        <EuiLink href="#/home">Home</EuiLink> / <EuiLink href="#/home/tutorial_directory">Add Data</EuiLink>
+        <EuiSpacer size="s" />
+        {content}
+      </EuiPage>
     );
   }
 }
