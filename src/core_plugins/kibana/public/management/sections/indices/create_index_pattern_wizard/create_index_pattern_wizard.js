@@ -7,7 +7,7 @@ import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
 import template from './create_index_pattern_wizard.html';
 import { sendCreateIndexPatternRequest } from './send_create_index_pattern_request';
-import { renderStepIndexPattern } from './components/step_index_pattern';
+import { renderStepIndexPattern, destroyStepIndexPattern } from './components/step_index_pattern';
 import './step_time_field';
 import './matching_indices_list';
 import './create_index_pattern_wizard.less';
@@ -44,6 +44,12 @@ uiModules.get('apps/management')
     const noTimeFieldOption = {
       display: `I don't want to use the Time Filter`,
     };
+
+    const REACT_DOM_ELEMENT_ID = 'stepIndexPatternReact';
+
+    $scope.$on('$destroy', () => {
+      destroyStepIndexPattern(REACT_DOM_ELEMENT_ID);
+    });
 
     // Configure the new index pattern we're going to create.
     this.formValues = {
@@ -185,12 +191,13 @@ uiModules.get('apps/management')
 
     this.renderStepIndexPatternReact = () => {
       $scope.$$postDigest(() => renderStepIndexPattern(
-        'stepIndexPatternReact',
+        REACT_DOM_ELEMENT_ID,
         allIndices,
         this.formValues.name,
         this.doesIncludeSystemIndices,
         es,
         query => {
+          destroyStepIndexPattern(REACT_DOM_ELEMENT_ID);
           this.formValues.name = query;
           this.goToTimeFieldStep();
           $scope.$apply();

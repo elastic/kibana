@@ -83,15 +83,12 @@ export class StepIndexPattern extends Component {
     );
   }
 
-  renderStatusMessage() {
-    const { allIndices, isIncludingSystemIndices } = this.props;
-    const { query, isLoadingIndices, partialMatchedIndices } = this.state;
+  renderStatusMessage(matchedIndices) {
+    const { query, isLoadingIndices } = this.state;
 
     if (isLoadingIndices) {
       return null;
     }
-
-    const matchedIndices = getMatchedIndices(allIndices, partialMatchedIndices, query, isIncludingSystemIndices);
 
     return (
       <StatusMessage
@@ -101,23 +98,16 @@ export class StepIndexPattern extends Component {
     );
   }
 
-  renderList() {
-    const { isIncludingSystemIndices, allIndices } = this.props;
-    const {
-      query,
-      partialMatchedIndices,
-      isLoadingIndices,
-    } = this.state;
+  renderList({ visibleIndices, allIndices }) {
+    const { query, isLoadingIndices } = this.state;
 
     if (isLoadingIndices) {
       return null;
     }
 
-    const indices = getMatchedIndices(allIndices, partialMatchedIndices, query, isIncludingSystemIndices);
-
     const indicesToList = query.length
-      ? indices.visibleIndices
-      : indices.allIndices;
+      ? visibleIndices
+      : allIndices;
 
     return (
       <IndicesList
@@ -126,17 +116,9 @@ export class StepIndexPattern extends Component {
     );
   }
 
-  renderHeader() {
-    const { isIncludingSystemIndices, allIndices, goToNextStep } = this.props;
-    const {
-      query,
-      showingIndexPatternQueryErrors,
-      partialMatchedIndices,
-    } = this.state;
-
-    const {
-      exactMatchedIndices: indices
-    } = getMatchedIndices(allIndices, partialMatchedIndices, query, isIncludingSystemIndices);
+  renderHeader({ exactMatchedIndices: indices }) {
+    const { goToNextStep } = this.props;
+    const { query, showingIndexPatternQueryErrors } = this.state;
 
     let containsErrors = false;
     const errors = [];
@@ -164,14 +146,19 @@ export class StepIndexPattern extends Component {
   }
 
   render() {
+    const { isIncludingSystemIndices, allIndices } = this.props;
+    const { query, partialMatchedIndices } = this.state;
+
+    const matchedIndices = getMatchedIndices(allIndices, partialMatchedIndices, query, isIncludingSystemIndices);
+
     return (
       <EuiPanel paddingSize="l">
-        {this.renderHeader()}
+        {this.renderHeader(matchedIndices)}
         <EuiSpacer size="s"/>
-        {this.renderLoadingState()}
-        {this.renderStatusMessage()}
+        {this.renderLoadingState(matchedIndices)}
+        {this.renderStatusMessage(matchedIndices)}
         <EuiSpacer size="s"/>
-        {this.renderList()}
+        {this.renderList(matchedIndices)}
       </EuiPanel>
     );
   }

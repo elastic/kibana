@@ -1,5 +1,5 @@
 import React from 'react';
-import { render } from 'react-dom';
+import { render, unmountComponentAtNode } from 'react-dom';
 import { StepIndexPattern } from './step_index_pattern';
 
 export function renderStepIndexPattern(
@@ -20,4 +20,8 @@ export function renderStepIndexPattern(
     />,
     document.getElementById(domElementId),
   );
+}
+
+export function destroyStepIndexPattern(domElementId) {
+  unmountComponentAtNode(document.getElementById(domElementId));
 }
