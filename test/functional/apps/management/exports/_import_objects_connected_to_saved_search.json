@@ -1,28 +1,5 @@
 [
   {
-    "_id": "c45e6c50-ba72-11e7-a8f9-ad70f02e633d",
-    "_type": "search",
-    "_source": {
-      "title": "PHP saved search",
-      "description": "",
-      "hits": 0,
-      "columns": [
-        "_source"
-      ],
-      "sort": [
-        "@timestamp",
-        "desc"
-      ],
-      "version": 1,
-      "kibanaSavedObjectMeta": {
-        "searchSourceJSON": "{\"index\":\"f0df0960-ae8d-11e7-9c8d-53400275d89a\",\"highlightAll\":true,\"version\":true,\"query\":{\"language\":\"lucene\",\"query\":\"php\"},\"filter\":[]}"
-      }
-    },
-    "_meta": {
-      "savedObjectVersion": 2
-    }
-  },
-  {
     "_id": "cbd520f0-ba72-11e7-a8f9-ad70f02e633d",
     "_type": "visualization",
     "_source": {
