@@ -39,9 +39,6 @@ export function VislibComponentsZeroInjectionUniqKeysProvider(Private) {
       const key = d.x;
       const prev = uniqueXValues.get(key);
       let sum = d.y;
-      if (d.xi != null) {
-        i = d.xi;
-      }
 
       if (prev) {
         i = Math.min(i, prev.index);
