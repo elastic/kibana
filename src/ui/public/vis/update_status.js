@@ -74,4 +74,4 @@ const getUpdateStatus = ($scope) => {
   };
 };
 
-module.exports = { getUpdateStatus };
+export { getUpdateStatus };
