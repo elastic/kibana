@@ -1,3 +1,5 @@
+// adopted form https://github.com/bevacqua/hash-sum
+
 function pad(hash, len) {
   while (hash.length < len) {
     hash = '0' + hash;
@@ -37,7 +39,7 @@ function foldValue(input, value, key, seen) {
   }
   if (typeof value === 'object') {
     // skip vis object from hash calculation
-    if (key === 'vis') {
+    if (key === 'vis' && value.constructor.name === 'Vis') {
       return hash;
     }
     if (seen.indexOf(value) !== -1) {
