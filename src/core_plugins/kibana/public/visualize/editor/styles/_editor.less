@@ -14,13 +14,37 @@
     height: 100%;
   }
 
+  @media (max-width: @screen-sm-max) {
+    visualization {
+      // While we are on a small screen the visualization is below the
+      // editor. In this cases it needs a minimum height, since it would otherwise
+      // maybe end up with 0 height since it just gets the flexbox rest of the screen.
+      min-height: 400px;
+    }
+  }
+
   .collapsible-sidebar {
     .flex-parent(0, 0, auto);
     margin-right: 10px;
     flex-direction: row;
-    max-width: 75%;
     min-width: @vis-editor-sidebar-min-width;
+    max-width: 100%;
     width: @vis-editor-sidebar-min-width;
+
+    @media (max-width: @screen-sm-max) {
+      // If we are on a small screen we force the editor to take 100% width.
+      // We cannot use a min-width: @screen-md-min query here, since we
+      // would otherwise break the manual resizing on large screens.
+      width: 100% !important;
+
+      vis-editor-resizer {
+        display: none;
+      }
+    }
+
+    @media (min-width: @screen-md-min) {
+      max-width: 75%;
+    }
   }
 
   .collapsible-sidebar.closed {
@@ -351,14 +375,10 @@
     flex-direction: row;
     overflow: auto;
     padding-left: @collapser-width;
+    flex-shrink: 1;
+    flex-basis: 100%;
 
     &.embedded {
-      flex-shrink: 1;
-      flex-basis: 100%;
-    }
-
-    // overrided for tablet and desktop
-    @media (min-width: @screen-md-min) {
       flex-shrink: 1;
       flex-basis: 100%;
     }

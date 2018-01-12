@@ -39,7 +39,7 @@ function readServerSettings(opts, extraCliOptions) {
 
   if (opts.dev) {
     set('env', 'development');
-    set('optimize.lazy', true);
+    set('optimize.watch', true);
 
     if (opts.ssl) {
       set('server.ssl.enabled', true);

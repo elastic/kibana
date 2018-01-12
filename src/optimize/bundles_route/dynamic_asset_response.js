@@ -67,7 +67,7 @@ export async function createDynamicAssetResponse(options) {
     const response = request.generateResponse(replacePlaceholder(read, publicPath));
     response.code(200);
     response.etag(`${hash}-${publicPath}`);
-    response.header('last-modified', stat.mtime.toUTCString());
+    response.header('cache-control', 'must-revalidate');
     response.type(request.server.mime.path(path).type);
     return response;
 

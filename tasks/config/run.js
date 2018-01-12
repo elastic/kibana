@@ -141,8 +141,8 @@ module.exports = function (grunt) {
         '--elasticsearch.url=' + esTestConfig.getUrl(),
         '--dev',
         '--no-base-path',
-        '--optimize.lazyPort=5611',
-        '--optimize.lazyPrebuild=true',
+        '--optimize.watchPort=5611',
+        '--optimize.watchPrebuild=true',
         '--optimize.bundleDir=' + resolve(__dirname, '../../optimize/testUiServer'),
         ...kbnServerFlags,
       ]
@@ -178,8 +178,8 @@ module.exports = function (grunt) {
         '--no-watch',
         '--no-base-path',
         '--server.port=5610',
-        '--optimize.lazyPort=5611',
-        '--optimize.lazyPrebuild=true',
+        '--optimize.watchPort=5611',
+        '--optimize.watchPrebuild=true',
         '--optimize.bundleDir=' + resolve(__dirname, '../../optimize/testdev'),
         ...kbnServerFlags,
       ]

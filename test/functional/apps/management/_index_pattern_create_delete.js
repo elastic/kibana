@@ -72,7 +72,7 @@ export default function ({ getService, getPageObjects }) {
 
     describe('index pattern deletion', function indexDelete() {
       before(function () {
-        const expectedAlertText = 'Are you sure you want to remove this index pattern?';
+        const expectedAlertText = 'Delete index pattern?';
         return PageObjects.settings.removeIndexPattern()
           .then(function (alertText) {
             expect(alertText).to.be(expectedAlertText);

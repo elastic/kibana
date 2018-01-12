@@ -13,12 +13,10 @@ To get started copy and paste this example to `test/functional/config.js`:
 ["source","js"]
 -----------
 import { resolve } from 'path';
+import { resolveKibanaPath } from '@elastic/plugin-helpers';
+
 import { MyServiceProvider } from './services/my_service';
 import { MyAppPageProvider } from './services/my_app_page;
-
-// allow overriding the default kibana directory
-// using the KIBANA_DIR environment variable
-const KIBANA_CONFIG_PATH = resolve(process.env.KIBANA_DIR || '../kibana', 'test/functional/config.js');
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
@@ -26,7 +24,7 @@ export default async function ({ readConfigFile }) {
 
   // read the Kibana config file so that we can utilize some of
   // its services and PageObjects
-  const kibanaConfig = await readConfigFile(KIBANA_CONFIG_PATH);
+  const kibanaConfig = await readConfigFile(resolveKibanaPath('test/functional/config.js'));
 
   return {
     // list paths to the files that contain your plugins tests
@@ -81,7 +79,7 @@ From the root of your repo you should now be able to run the `FunctionalTestRunn
 
 ["source","shell"]
 -----------
-node ../kibana/scripts/functional_test_runner
+node ../../kibana/scripts/functional_test_runner
 -----------
 
 [float]
