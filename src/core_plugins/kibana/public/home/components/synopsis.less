@@ -1,19 +1,33 @@
 @import (reference) "~ui/styles/variables.less";
 
+.synopsis {
+  display: flex;
+  flex-grow: 1;
+}
+
 .synopsis:hover {
   text-decoration: none;
-  .kuiTextTitle {
+  .synopsisTitle {
     text-decoration: underline;
   }
 }
 
-.synopsisContent {
-  margin-left: 10px !important;
+.synopsis:focus {
+  text-decoration: none;
+
+  .synopsisPanel {
+    border: solid 1px @globalColorBlue;
+  }
+
+  .synopsisBody {
+    text-decoration: none;
+  }
 }
 
 .synopsisTitle {
   font-size: 16px;
   font-weight: normal;
+  color: @globalColorBlue;
 }
 
 .synopsisIcon {
