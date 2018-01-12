@@ -9,8 +9,8 @@ describe('DashboardState', function () {
   let savedDashboard;
   let SavedDashboard;
   let timefilter;
-  let quickTimeRanges;
   let dashboardConfig;
+  const mockQuickTimeRanges = [{ from: 'now/w', to: 'now/w', display: 'This week', section: 0 }];
   const mockIndexPattern = { id: 'index1' };
 
   function initDashboardState() {
@@ -20,7 +20,6 @@ describe('DashboardState', function () {
   beforeEach(ngMock.module('kibana'));
   beforeEach(ngMock.inject(function ($injector) {
     timefilter = $injector.get('timefilter');
-    quickTimeRanges = $injector.get('quickRanges');
     AppState = $injector.get('AppState');
     SavedDashboard = $injector.get('SavedDashboard');
     dashboardConfig = $injector.get('dashboardConfig');
@@ -38,7 +37,7 @@ describe('DashboardState', function () {
       timefilter.time.mode = 'absolute';
 
       initDashboardState();
-      dashboardState.syncTimefilterWithDashboard(timefilter, quickTimeRanges);
+      dashboardState.syncTimefilterWithDashboard(timefilter, mockQuickTimeRanges);
 
       expect(timefilter.time.mode).to.equal('quick');
       expect(timefilter.time.to).to.equal('now/w');
@@ -55,7 +54,7 @@ describe('DashboardState', function () {
       timefilter.time.mode = 'absolute';
 
       initDashboardState();
-      dashboardState.syncTimefilterWithDashboard(timefilter, quickTimeRanges);
+      dashboardState.syncTimefilterWithDashboard(timefilter, mockQuickTimeRanges);
 
       expect(timefilter.time.mode).to.equal('relative');
       expect(timefilter.time.to).to.equal('now');
@@ -72,7 +71,7 @@ describe('DashboardState', function () {
       timefilter.time.mode = 'quick';
 
       initDashboardState();
-      dashboardState.syncTimefilterWithDashboard(timefilter, quickTimeRanges);
+      dashboardState.syncTimefilterWithDashboard(timefilter, mockQuickTimeRanges);
 
       expect(timefilter.time.mode).to.equal('absolute');
       expect(timefilter.time.to).to.equal(savedDashboard.timeTo);
