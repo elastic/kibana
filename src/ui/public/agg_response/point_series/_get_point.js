@@ -11,7 +11,6 @@ export function PointSeriesGetPointProvider() {
 
     const point = {
       x: unwrap(xRow, '_all'),
-      xi: xRow && xRow.$order,
       y: unwrap(row[y.i]),
       z: zRow && unwrap(zRow),
       aggConfigResult: row[y.i],
