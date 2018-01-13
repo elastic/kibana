@@ -83,13 +83,13 @@
     "@elastic/ui-ace": "0.2.3",
     "JSONStream": "1.1.1",
     "accept-language-parser": "1.2.0",
-    "angular": "1.6.5",
-    "angular-aria": "1.6.6",
-    "angular-bootstrap-colorpicker": "3.0.19",
-    "angular-elastic": "2.5.0",
-    "angular-route": "1.4.7",
-    "angular-sanitize": "1.5.7",
-    "angular-sortable-view": "0.0.15",
+    "angular": "^1.6.5",
+    "angular-aria": "^1.6.6",
+    "angular-bootstrap-colorpicker": "^3.0.19",
+    "angular-elastic": "^2.5.0",
+    "angular-route": "^1.4.7",
+    "angular-sanitize": "^1.5.7",
+    "angular-sortable-view": "^0.0.15",
     "autoprefixer": "6.5.4",
     "babel-core": "6.21.0",
     "babel-jest": "^22.0.6",
@@ -225,7 +225,7 @@
     "@elastic/eslint-config-kibana": "link:packages/eslint-config-kibana",
     "@elastic/eslint-import-resolver-kibana": "1.0.0",
     "@elastic/eslint-plugin-kibana-custom": "link:packages/eslint-plugin-kibana-custom",
-    "angular-mocks": "1.4.7",
+    "angular-mocks": "^1.4.7",
     "babel-eslint": "8.1.2",
     "backport": "2.2.0",
     "chai": "3.5.0",
@@ -308,7 +308,6 @@
     "yo": "2.0.0"
   },
   "resolutions": {
-    "angular": "1.6.5",
     "moment": "2.13.0"
   },
   "engines": {
