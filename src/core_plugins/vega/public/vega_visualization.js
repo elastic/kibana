@@ -48,7 +48,7 @@ export function VegaVisualizationProvider(vegaConfig, serviceSettings) {
         if (vegaParser.useMap) {
           throw new Error('Map mode is not yet supported in Kibana Core. You must use Kibana Vega plugin');
         } else {
-          this._vegaView = new VegaView(vegaConfig, this._el, vegaParser, serviceSettings);
+          this._vegaView = new VegaView(vegaConfig, this._vis.editorMode, this._el, vegaParser, serviceSettings);
         }
         await this._vegaView.init();
 

@@ -9,8 +9,9 @@ vega.scheme('elastic',
 );
 
 export class VegaBaseView {
-  constructor(vegaConfig, parentEl, vegaParser, serviceSettings) {
+  constructor(vegaConfig, editorMode, parentEl, vegaParser, serviceSettings) {
     this._vegaConfig = vegaConfig;
+    this._editorMode = editorMode;
     this._$parentEl = $(parentEl);
     this._parser = vegaParser;
     this._serviceSettings = serviceSettings;
@@ -123,7 +124,12 @@ export class VegaBaseView {
   /**
    * Set global debug variable to simplify vega debugging in console. Show info message first time
    */
-  static setDebugValues(view, spec, vlspec) {
+  setDebugValues(view, spec, vlspec) {
+    if (!this._editorMode) {
+      // VEGA_DEBUG should only be enabled in the editor mode
+      return;
+    }
+
     if (window) {
       if (window.VEGA_DEBUG === undefined && console) {
         console.log('%cWelcome to Kibana Vega Plugin!', 'font-size: 16px; font-weight: bold;');
