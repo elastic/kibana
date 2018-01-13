@@ -1,17 +1,47 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
-    "forceConsistentCasingInFileNames": true,
-    "lib": ["dom", "es2017"],
-    "module": "commonjs",
+    // Enables all strict type checking options.
     "strict": true,
-    "moduleResolution": "node",
-    "noImplicitReturns": false,
-    "noUnusedLocals": true,
-    "sourceMap": true,
+
+    // Library files to be included in the compilation. Basically which "core
+    // language features" TypeScript should enable.
+    "lib": ["es2015", "es2016", "es2017"],
+
+    // Which version of EcmaScript TypeScript should transpile to. Because of
+    // how Babel and Webpack is set up we currently target `esnext`, and let
+    // Babel take care of transpiling it down.
     "target": "esnext",
-    // TODO The `skipLibCheck` setting can be removed when
-    // https://github.com/ReactiveX/rxjs/issues/3031 is resolved.
+
+    // Ideally we should output `esnext` modules, but because of how default
+    // exports have historically been handled in TypeScript we can't do it yet.
+    // However, https://github.com/Microsoft/TypeScript/pull/19675 is targeted
+    // for the next release of TypeScript, which means we should be able to
+    // switch this to `esnext` and specify `--esModuleInterop` to have it work
+    // as expected.
+    "module": "commonjs",
+
+    // Resolve modules in the same as Node.js. Aka make `require` works the same
+    // in TypeScript as it does in Node.js. 
+    "moduleResolution": "node",
+
+    // Disallow inconsistently-cased references to the same file.
+    "forceConsistentCasingInFileNames": true,
+
+    // Report error when not all code paths in function return a value.
+    "noImplicitReturns": false,
+
+    // Report errors on unused locals.
+    "noUnusedLocals": true,
+
+    // Generate an external source map. There's also an `--inlineSourceMap` for
+    // emitting a single file with source maps instead of having a separate file.
+    "sourceMap": true,
+
+    // Skip type checking of all declaration files (*.d.ts).
+    // TODO The is only enabled because of a bug in RxJS, and _should_ be
+    // removed once https://github.com/ReactiveX/rxjs/issues/3031 is resolved
+    // and released.
     "skipLibCheck": true
   },
   "exclude": [
