@@ -20,6 +20,7 @@ import {
   EuiFlexItem,
   EuiFlexGrid,
   EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
@@ -56,7 +57,7 @@ export function Home({ addBasePath, directories }) {
     return (
       <div className="kuiVerticalRhythm">
         <KuiCardGroup>
-          <KuiCard style={cardStyle}>
+          <KuiCard style={cardStyle} className="euiPanel">
             <KuiCardDescription>
               <KuiCardDescriptionTitle>
                 <img
@@ -77,12 +78,12 @@ export function Home({ addBasePath, directories }) {
                 buttonType="secondary"
                 href={addBasePath(`${kbnBaseUrl}#/home/tutorial_directory/logging`)}
               >
-                Add data
+                Add log data
               </KuiLinkButton>
             </KuiCardFooter>
           </KuiCard>
 
-          <KuiCard style={cardStyle}>
+          <KuiCard style={cardStyle} className="euiPanel">
             <KuiCardDescription>
               <KuiCardDescriptionTitle>
                 <img
@@ -103,19 +104,19 @@ export function Home({ addBasePath, directories }) {
                 buttonType="secondary"
                 href={addBasePath(`${kbnBaseUrl}#/home/tutorial_directory/metrics`)}
               >
-                Add data
+                Add metric data
               </KuiLinkButton>
             </KuiCardFooter>
           </KuiCard>
 
-          <KuiCard style={cardStyle}>
+          <KuiCard style={cardStyle} className="euiPanel">
             <KuiCardDescription>
               <KuiCardDescriptionTitle>
                 <img
                   src={addBasePath('/plugins/kibana/assets/app_security.svg')}
                 />
                 <p>
-                  Security Analytics
+                  Security analytics
                 </p>
               </KuiCardDescriptionTitle>
 
@@ -129,7 +130,7 @@ export function Home({ addBasePath, directories }) {
                 buttonType="secondary"
                 href={addBasePath(`${kbnBaseUrl}#/home/tutorial_directory/security`)}
               >
-                Add data
+                Add security events
               </KuiLinkButton>
             </KuiCardFooter>
           </KuiCard>
@@ -149,33 +150,32 @@ export function Home({ addBasePath, directories }) {
           <EuiTitle size="l">
             <h1>Add Data to Kibana</h1>
           </EuiTitle>
+          <EuiText>
+            <p>
+              Use these solutions to quickly turn your data into pre-built dashboards and monitoring systems.
+            </p>
+          </EuiText>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={false}>
-              <p className="kuiText kuiSubduedText">
+          <EuiTextColor color="subdued">
+            <EuiText>
+              <p>
                 Data already in Elasticsearch?
               </p>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <KuiLinkButton
-                buttonType="secondary"
-                href={addBasePath('/app/kibana#/management/kibana/index')}
-              >
-                Set up index patterns
-              </KuiLinkButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
+            </EuiText>
+          </EuiTextColor>
+          <EuiSpacer size="s" />
+          <a href="/app/kibana#/management/kibana/index" className="euiButton euiButton--primary euiButton--small">
+            <span className="euiButton__content">
+              Set up index patterns
+            </span>
+          </a>
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <p className="kuiText kuiSubduedText kuiVerticalRhythm kuiVerticalRhythmSmall">
-        These turnkey solutions will help you quickly add data into Kibana and turn it into
-        pre-built dashboards and monitoring systems.
-      </p>
+      <EuiSpacer />
+
 
       { renderPromo() }
 
