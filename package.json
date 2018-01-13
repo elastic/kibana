@@ -37,7 +37,8 @@
     "Nicolás Bevacqua <nico@elastic.co>",
     "Shelby Sturgis <shelby@elastic.co>",
     "Spencer Alger <spencer.alger@elastic.co>",
-    "Tim Sullivan <tim@elastic.co>"
+    "Tim Sullivan <tim@elastic.co>",
+    "Yuri Astrakhan <yuri@elastic.co>"
   ],
   "scripts": {
     "test": "grunt test",
@@ -111,6 +112,7 @@
     "check-hash": "1.0.1",
     "color": "1.0.3",
     "commander": "2.8.1",
+    "compare-versions": "3.1.0",
     "css-loader": "0.28.7",
     "d3": "3.5.6",
     "d3-cloud": "1.2.1",
@@ -132,6 +134,7 @@
     "h2o2": "5.1.1",
     "handlebars": "4.0.5",
     "hapi": "14.2.0",
+    "hjson": "3.1.0",
     "http-proxy-agent": "1.0.0",
     "imports-loader": "0.7.1",
     "inert": "4.0.2",
@@ -140,6 +143,7 @@
     "joi": "10.4.1",
     "jquery": "3.2.1",
     "js-yaml": "3.4.1",
+    "json-stringify-pretty-compact": "1.0.4",
     "json-stringify-safe": "5.0.1",
     "jstimezonedetect": "1.0.5",
     "leaflet": "1.0.3",
@@ -207,6 +211,9 @@
     "url-loader": "0.5.9",
     "uuid": "3.0.1",
     "validate-npm-package-name": "2.2.2",
+    "vega": "3.0.8",
+    "vega-lite": "2.0.3",
+    "vega-schema-url-parser": "1.0.0",
     "vision": "4.1.0",
     "webpack": "3.6.0",
     "webpack-merge": "4.1.0",
