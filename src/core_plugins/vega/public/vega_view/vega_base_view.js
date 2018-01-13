@@ -131,17 +131,23 @@ export class VegaBaseView {
     }
 
     if (window) {
-      if (window.VEGA_DEBUG === undefined && console) {
-        console.log('%cWelcome to Kibana Vega Plugin!', 'font-size: 16px; font-weight: bold;');
-        console.log('You can access the Vega view with VEGA_DEBUG. Learn more at https://vega.github.io/vega/docs/api/debugging/.');
-      }
+      if (!view) {
+        // disposing, get rid of the stale debug info
+        delete window.VEGA_DEBUG;
+      } else {
+        if (window.VEGA_DEBUG === undefined && console) {
+          console.log('%cWelcome to Kibana Vega Plugin!', 'font-size: 16px; font-weight: bold;');
+          console.log('You can access the Vega view with VEGA_DEBUG. ' +
+            'Learn more at https://vega.github.io/vega/docs/api/debugging/.');
+        }
 
-      window.VEGA_DEBUG = window.VEGA_DEBUG || {};
-      window.VEGA_DEBUG.VEGA_VERSION = vega.version;
-      window.VEGA_DEBUG.VEGA_LITE_VERSION = vegaLite.version;
-      window.VEGA_DEBUG.view = view;
-      window.VEGA_DEBUG.vega_spec = spec;
-      window.VEGA_DEBUG.vegalite_spec = vlspec;
+        window.VEGA_DEBUG = window.VEGA_DEBUG || {};
+        window.VEGA_DEBUG.VEGA_VERSION = vega.version;
+        window.VEGA_DEBUG.VEGA_LITE_VERSION = vegaLite.version;
+        window.VEGA_DEBUG.view = view;
+        window.VEGA_DEBUG.vega_spec = spec;
+        window.VEGA_DEBUG.vegalite_spec = vlspec;
+      }
     }
   }
 
@@ -152,6 +158,7 @@ export class VegaBaseView {
       if (this._destroyHandlers.then) {
         return this._destroyHandlers;
       } else {
+        this.setDebugValues();
         this._destroyHandlers = Promise.all(this._destroyHandlers.map(v => v()));
         return this._destroyHandlers.then(() => this._destroyHandlers = null);
       }
@@ -159,10 +166,11 @@ export class VegaBaseView {
   }
 
   _addDestroyHandler(handler) {
-    if (this._destroyHandlers) {
+    // If disposing hasn't started yet, enqueue it, otherwise dispose right away
+    if (this._destroyHandlers && !this._destroyHandlers.then) {
       this._destroyHandlers.push(handler);
     } else {
-      handler(); // When adding a handled after disposing, dispose it right away
+      handler();
     }
   }
 }
