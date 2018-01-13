@@ -1,52 +1,13 @@
 <kbn-management-app>
-  <kbn-management-landing>
-    <!-- General info -->
-    <div class="page-row">
-      <div class="page-row-text">Version: {{::kbnVersion}}</div>
-    </div>
+  <div>
+    <!-- This gif will "freeze" when the tab crashes. -->
+    <img src="https://media1.giphy.com/media/3oxRmD9a5pLTOOLigM/giphy.gif" />
 
-    <!-- Management sections for the ES stack -->
-    <div
-      ng-if="section.visibleItems.length > 0"
-      ng-repeat="section in sections"
-      class="page-row"
-    >
-      <div class="kuiPanel management-panel">
-        <div class="kuiPanelHeader">
-          <div class="kuiPanelHeaderSection">
-            <div
-              class="management-panel__heading-icon management-panel__heading-icon--{{::section.id}}"
-            ></div>
-            <div class="kuiPanelHeader__title">
-              {{::section.display}}
-            </div>
-          </div>
-        </div>
+    <!-- The following code will crash a Mackbook Pro with dedicated gfx card and Chrome hardware accelerated enabled -->
+    <svg width="774" height="256">
+      <path d="M0,83.33333333333334L125,166.66666666666669L250,0L250,250L125,250L0,250Z" style="stroke: rgb(249, 133, 16);" />
 
-        <div class="kuiPanelBody">
-          <div class="row">
-            <ul class="list-unstyled">
-              <li
-                class="col-xs-4 col-md-3"
-                ng-repeat="item in section.visibleItems"
-              >
-                <a
-                  data-test-subj="{{::item.name}}"
-                  class="euiLink euiLink--primary management-panel__link"
-                  ng-class="{ 'management-panel__link--disabled': item.disabled || !item.url }"
-                  kbn-href="{{::item.disabled ? '' : item.url}}"
-                  tooltip="{{::item.tooltip}}"
-                  tooltip-placement="bottom"
-                  tooltip-popup-delay="400"
-                  tooltip-append-to-body="1"
-                >
-                  {{::item.display}}
-                </a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-  </kbn-management-landing>
+      <path d="M0,250L125,200L250,83.33333333333334L250,250L125,250L0,250Z" style="stroke: rgb(49, 133, 252);" />
+    </svg>
+  </div>
 </kbn-management-app>
