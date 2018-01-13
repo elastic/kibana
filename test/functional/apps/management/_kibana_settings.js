@@ -5,7 +5,7 @@ export default function ({ getService, getPageObjects }) {
   const remote = getService('remote');
   const PageObjects = getPageObjects(['settings', 'common', 'dashboard', 'header']);
 
-  describe('creating and deleting default index', function describeIndexTests() {
+  describe('kibana settings', function describeIndexTests() {
     before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
       await kibanaServer.uiSettings.replace({});
@@ -26,6 +26,13 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.setAdvancedSettingsSelect('dateFormat:tz', 'America/Phoenix');
       const advancedSetting = await PageObjects.settings.getAdvancedSettings('dateFormat:tz');
       expect(advancedSetting).to.be('America/Phoenix');
+    });
+
+    it('should coerce an empty setting of type JSON into an empty object', async function () {
+      await PageObjects.settings.clickKibanaSettings();
+      await PageObjects.settings.setAdvancedSettingsInput('query:queryString:options', '', 'unsavedValueJsonTextArea');
+      const advancedSetting = await PageObjects.settings.getAdvancedSettings('query:queryString:options');
+      expect(advancedSetting).to.be.eql('{}');
     });
 
     describe('state:storeInSessionStorage', () => {

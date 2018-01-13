@@ -64,13 +64,6 @@ describe('Vis Class', function () {
     });
   });
 
-  describe('clone()', function () {
-    it('should make clone of itself', function () {
-      const clone = vis.clone();
-      verifyVis(clone);
-    });
-  });
-
   describe('setState()', function () {
     it('should set the state to defualts', function () {
       const vis = new Vis(indexPattern);

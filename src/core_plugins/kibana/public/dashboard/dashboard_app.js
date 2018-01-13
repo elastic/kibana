@@ -2,10 +2,11 @@ import _ from 'lodash';
 import angular from 'angular';
 import { uiModules } from 'ui/modules';
 import chrome from 'ui/chrome';
+import { applyTheme } from 'ui/theme';
 
 import 'ui/query_bar';
 
-import { getDashboardTitle, getUnsavedChangesWarningMessage } from './dashboard_strings';
+import { getDashboardTitle } from './dashboard_strings';
 import { DashboardViewMode } from './dashboard_view_mode';
 import { TopNavIds } from './top_nav/top_nav_ids';
 import { ConfirmationButtonTypes } from 'ui/modals/confirm_modal';
@@ -44,7 +45,6 @@ app.directive('dashboardApp', function ($injector) {
   const courier = $injector.get('courier');
   const AppState = $injector.get('AppState');
   const timefilter = $injector.get('timefilter');
-  const quickRanges = $injector.get('quickRanges');
   const kbnUrl = $injector.get('kbnUrl');
   const confirmModal = $injector.get('confirmModal');
   const config = $injector.get('config');
@@ -82,7 +82,7 @@ app.directive('dashboardApp', function ($injector) {
       // The 'previouslyStored' check is so we only update the time filter on dashboard open, not during
       // normal cross app navigation.
       if (dashboardStateManager.getIsTimeSavedWithDashboard() && !getAppState.previouslyStored()) {
-        dashboardStateManager.syncTimefilterWithDashboard(timefilter, quickRanges);
+        dashboardStateManager.syncTimefilterWithDashboard(timefilter, config.get('timepicker:quickRanges'));
       }
 
       const updateState = () => {
@@ -104,6 +104,14 @@ app.directive('dashboardApp', function ($injector) {
       // Part of the exposed plugin API - do not remove without careful consideration.
       this.appStatus = {
         dirty: !dash.id
+      };
+
+      this.getSharingTitle = () => {
+        return dash.title;
+      };
+
+      this.getSharingType = () => {
+        return 'dashboard';
       };
 
       dashboardStateManager.registerChangeListener(status => {
@@ -238,18 +246,19 @@ app.directive('dashboardApp', function ($injector) {
           // it does on 'open' because it's been saved to the url and the getAppState.previouslyStored() check on
           // reload will cause it not to sync.
           if (dashboardStateManager.getIsTimeSavedWithDashboard()) {
-            dashboardStateManager.syncTimefilterWithDashboard(timefilter, quickRanges);
+            dashboardStateManager.syncTimefilterWithDashboard(timefilter, config.get('timepicker:quickRanges'));
           }
         }
 
         confirmModal(
-          getUnsavedChangesWarningMessage(dashboardStateManager.getChangedFilterTypes(timefilter)),
+          `Once you discard your changes, there's no getting them back.`,
           {
             onConfirm: revertChangesAndExitEditMode,
             onCancel: _.noop,
-            confirmButtonText: 'Yes, lose changes',
-            cancelButtonText: 'No, keep working',
-            defaultFocusedButton: ConfirmationButtonTypes.CANCEL
+            confirmButtonText: 'Discard changes',
+            cancelButtonText: 'Continue editing',
+            defaultFocusedButton: ConfirmationButtonTypes.CANCEL,
+            title: 'Discard changes to dashboard?'
           }
         );
       };
@@ -329,11 +338,13 @@ app.directive('dashboardApp', function ($injector) {
       function setDarkTheme() {
         chrome.removeApplicationClass(['theme-light']);
         chrome.addApplicationClass('theme-dark');
+        applyTheme('dark');
       }
 
       function setLightTheme() {
         chrome.removeApplicationClass(['theme-dark']);
         chrome.addApplicationClass('theme-light');
+        applyTheme('light');
       }
 
       if ($route.current.params && $route.current.params[DashboardConstants.NEW_VISUALIZATION_ID_PARAM]) {

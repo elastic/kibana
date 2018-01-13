@@ -132,14 +132,14 @@ describe('timepicker directive', function () {
     });
 
     it('should highlight the right mode', function () {
-      expect($elem.find('.kbn-timepicker-modes .active').text().trim()).to.be('Quick');
+      expect($elem.find('.kbn-timepicker-modes .euiTab-isSelected').text().trim()).to.be('Quick');
 
       // Each of the 3 modes
       const modes = ['absolute', 'relative', 'quick'];
       _.each(modes, function (mode) {
         $scope.setMode(mode);
         $scope.$digest();
-        expect($elem.find('.kbn-timepicker-modes .active').text().trim().toLowerCase()).to.be(mode);
+        expect($elem.find('.kbn-timepicker-modes .euiTab-isSelected').text().trim().toLowerCase()).to.be(mode);
       });
     });
   });
@@ -151,8 +151,8 @@ describe('timepicker directive', function () {
       $scope.$digest();
     });
 
-    it('should contain 4 lists of options', function () {
-      expect($elem.find('.kbn-timepicker-section .list-unstyled').length).to.be(4);
+    it('should contain 3 lists of options', function () {
+      expect($elem.find('.kbn-timepicker-section .list-unstyled').length).to.be(3);
     });
 
     it('should have a $scope.setQuick() that calls handler', function () {

@@ -29,6 +29,10 @@ $gutterTypes: (
 }
 
 // Justify the grid
+.kuiFlexGroup--justifyContentSpaceEvenly {
+  justify-content: space-evenly;
+}
+
 .kuiFlexGroup--justifyContentSpaceBetween {
   justify-content: space-between;
 }

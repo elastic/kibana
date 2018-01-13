@@ -1,19 +1,10 @@
-* {
-  box-sizing: border-box;
-
-  &:before,
-  &:after {
-    box-sizing: border-box;
-  }
-}
-
-// Removes outline, but still provides a two color box shadow that works anywhere.
+// We apply brute force focus states to anything not coming from Eui
+// which has focus states designed at the component level.
 :focus {
-  @include focus;
-}
-
-body {
-  font-family: $kuiFontFamily;
+  &:not([class^="eui"]),
+  {
+    @include focus;
+  }
 }
 
 /**
@@ -21,10 +12,4 @@ body {
  */
 main {
   display: block; /* 1 */
-}
-
-button,
-input[type="submit"],
-input[type="button"] {
-  border-radius: 0;
 }

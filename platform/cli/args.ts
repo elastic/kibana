@@ -1,6 +1,6 @@
 import { accessSync, constants as fsConstants } from 'fs';
 import { resolve } from 'path';
-import * as chalk from 'chalk';
+import chalk from 'chalk';
 import { Options as ArgvOptions } from 'yargs';
 
 const { R_OK } = fsConstants;

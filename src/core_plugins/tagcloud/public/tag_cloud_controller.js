@@ -1,6 +1,5 @@
 import { uiModules } from 'ui/modules';
 import TagCloud from 'plugins/tagcloud/tag_cloud';
-import AggConfigResult from 'ui/vis/agg_config_result';
 
 const module = uiModules.get('kibana/tagcloud', ['kibana']);
 module.controller('KbnTagCloudController', function ($scope, $element) {
@@ -13,9 +12,8 @@ module.controller('KbnTagCloudController', function ($scope, $element) {
   const tagCloud = new TagCloud(containerNode);
   tagCloud.on('select', (event) => {
     if (!bucketAgg) return;
-    const aggConfigResult = new AggConfigResult(bucketAgg, false, event, event);
-    $scope.vis.API.events.filter({ point: { aggConfigResult: aggConfigResult } });
-    $scope.$apply();
+    const filter = bucketAgg.createFilter(event);
+    $scope.vis.API.queryFilter.addFilters(filter);
   });
 
   tagCloud.on('renderComplete', () => {

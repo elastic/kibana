@@ -2,6 +2,8 @@ import { spawn } from 'child_process';
 import { resolve } from 'path';
 import { format as formatUrl } from 'url';
 
+import expect from 'expect.js';
+
 import { readConfigFile } from '../../lib';
 import { createToolingLog } from '../../../dev';
 import { createReduceStream } from '../../../utils';
@@ -48,7 +50,8 @@ describe('single test that uses esArchiver', () => {
     cleanupWork.unshift(() => kibana.close());
   });
 
-  it('test', async () => {
+  it('test', async function () {
+    this.timeout(10000);
     const proc = spawn(process.execPath, [SCRIPT, '--config', CONFIG], {
       stdio: ['ignore', 'pipe', 'ignore']
     });
@@ -56,7 +59,7 @@ describe('single test that uses esArchiver', () => {
     const concatChunks = (acc, chunk) => `${acc}${chunk}`;
     const concatStdout = proc.stdout.pipe(createReduceStream(concatChunks));
 
-    const [stdout] = await Promise.all([
+    const [stdout, exitCode] = await Promise.all([
       new Promise((resolve, reject) => {
         concatStdout.on('error', reject);
         concatStdout.on('data', resolve); // reduce streams produce a single value, no need to wait for anything else
@@ -69,6 +72,7 @@ describe('single test that uses esArchiver', () => {
     ]);
 
     log.debug(stdout.toString('utf8'));
+    expect(exitCode).to.be(0);
   });
 
   after(async () => {

@@ -3,7 +3,7 @@
 @vis-editor-sidebar-basis: (100/12) * 2%; // two of twelve columns
 @vis-editor-sidebar-min-width: 350px;
 @vis-editor-nesting-width: 8px;
-@vis-editor-agg-editor-spacing: 5px;
+@vis-editor-agg-editor-spacing: 10px;
 
 .vis-editor {
   .flex-parent();
@@ -14,9 +14,73 @@
     height: 100%;
   }
 
+  @media (max-width: @screen-sm-max) {
+    visualization {
+      // While we are on a small screen the visualization is below the
+      // editor. In this cases it needs a minimum height, since it would otherwise
+      // maybe end up with 0 height since it just gets the flexbox rest of the screen.
+      min-height: 400px;
+    }
+  }
+
   .collapsible-sidebar {
     .flex-parent(0, 0, auto);
     margin-right: 10px;
+    flex-direction: row;
+    min-width: @vis-editor-sidebar-min-width;
+    max-width: 100%;
+    width: @vis-editor-sidebar-min-width;
+
+    @media (max-width: @screen-sm-max) {
+      // If we are on a small screen we force the editor to take 100% width.
+      // We cannot use a min-width: @screen-md-min query here, since we
+      // would otherwise break the manual resizing on large screens.
+      width: 100% !important;
+
+      vis-editor-resizer {
+        display: none;
+      }
+    }
+
+    @media (min-width: @screen-md-min) {
+      max-width: 75%;
+    }
+  }
+
+  .collapsible-sidebar.closed {
+    min-width: 0;
+  }
+
+  .collapsible-sidebar--small {
+    width: 15%;
+  }
+
+  .collapsible-sidebar--medium {
+    width: 30%;
+  }
+
+  .collapsible-sidebar--large {
+    width: 50%;
+  }
+
+
+  .default-editor__resizer {
+    display: flex;
+    flex: 0 0 13px;
+    cursor: ew-resize;
+    background-color: @globalColorLightestGray;
+    align-items: center;
+    margin: 0;
+    user-select: none;
+
+    &:hover {
+      background-color: lighten(@globalColorBlue, 50%);
+    }
+
+    &.active {
+      background-color: @globalColorBlue;
+      color: white;
+    }
   }
 
   .visualization-options {
@@ -81,8 +145,6 @@
     // overrided for tablet and desktop
     @media (min-width: @screen-md-min) {
       flex-basis: @vis-editor-sidebar-basis;
-      min-width: @vis-editor-sidebar-min-width;
-      max-width: @vis-editor-sidebar-min-width;
     }
 
     .index-pattern,
@@ -142,7 +204,7 @@
       margin-bottom: @vis-editor-agg-editor-spacing;
     }
 
-    label {
+    .kuiSideBarFormRow__label {
       flex: 2 0 0;
       margin-bottom: 0;
       font-size: 12px;
@@ -219,6 +281,7 @@
       text-align: center;
       background: @vis-editor-agg-error-bg;
       color: @vis-editor-agg-error-color;
+      line-height: 1.5;
     }
 
     .vis-editor-agg-editor-ranges {
@@ -312,14 +375,10 @@
     flex-direction: row;
     overflow: auto;
     padding-left: @collapser-width;
+    flex-shrink: 1;
+    flex-basis: 100%;
 
     &.embedded {
-      flex-shrink: 1;
-      flex-basis: 100%;
-    }
-
-    // overrided for tablet and desktop
-    @media (min-width: @screen-md-min) {
       flex-shrink: 1;
       flex-basis: 100%;
     }

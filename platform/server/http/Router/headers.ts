@@ -1,7 +1,7 @@
 import { pick } from '../../../lib/utils';
 
 export interface Headers {
-  [key: string]: string | string[];
+  [key: string]: string | string[] | undefined;
 }
 
 const normalizeHeaderField = (field: string) => field.trim().toLowerCase();

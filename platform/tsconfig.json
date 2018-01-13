@@ -6,5 +6,8 @@
   "include": [
     "**/*.ts",
     "../types/index.d.ts"
+  ],
+  "exclude": [
+    "**/__tests__/*"
   ]
 }

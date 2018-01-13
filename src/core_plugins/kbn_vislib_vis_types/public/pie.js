@@ -80,6 +80,5 @@ export default function HistogramVisType(Private) {
       ])
     },
     hierarchicalData: true,
-    implementsRenderComplete: true
   });
 }

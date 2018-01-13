@@ -5,6 +5,8 @@ import { FilterBarClickHandlerProvider as filterBarClickHandlerProvider } from '
 import { EmbeddableFactory, Embeddable } from 'ui/embeddable';
 import { PersistedState } from 'ui/persisted_state';
 
+import labDisabledTemplate from './visualize_lab_disabled.html';
+
 import chrome from 'ui/chrome';
 
 export class VisualizeEmbeddableFactory extends EmbeddableFactory {
@@ -31,13 +33,8 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
         const isLabsEnabled = this._config.get('visualize:enableLabs');
 
         if (!isLabsEnabled && savedObject.vis.type.stage === 'lab') {
-          domNode.innerHTML = `
-<div class="disabledLabVisualization">
-  <div class="kuiVerticalRhythm disabledLabVisualization__icon kuiIcon fa-flask" aria-hidden="true"></div>
-  <div class="kuiVerticalRhythm"><em>${savedObject.title}</em> is a lab visualization.</div>
-  <div class="kuiVerticalRhythm">Please turn on lab-mode in the advanced settings to see lab visualizations.</div>
-</div>
-`;
+          domNode.innerHTML = labDisabledTemplate.replace('{{title}}', savedObject.title);
+
           return new Embeddable({
             title: savedObject.title
           });
@@ -61,8 +58,6 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
         };
         uiState.on('change', uiStateChangeHandler);
 
-        savedObject.vis.setUiState(uiState);
-
         savedObject.vis.listeners.click = this.filterBarClickHandler(container.getAppState());
         savedObject.vis.listeners.brush = this.brushEvent(container.getAppState());
 
@@ -72,7 +67,7 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
           uiState: uiState,
           // Append visualization to container instead of replacing its content
           append: true,
-          cssClass: `panel-content ${savedObject.vis.type.name}`,
+          cssClass: `panel-content panel-content--fullWidth`,
           // The chrome is permanently hidden in "embed mode" in which case we don't want to show the spy pane, since
           // we deem that situation to be more public facing and want to hide more detailed information.
           showSpyPanel: !chrome.getIsChromePermanentlyHidden(),

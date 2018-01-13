@@ -13,7 +13,7 @@ import {
 
 import {
   SortableProperties,
-} from '../../../../services';
+} from '../../../../src/services';
 
 export class FluidTable extends Component {
   constructor(props) {

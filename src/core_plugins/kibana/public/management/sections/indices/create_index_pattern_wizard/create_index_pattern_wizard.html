@@ -6,86 +6,94 @@
       class="kuiViewContent"
     >
       <!-- Intro -->
-      <div class="kuiVerticalRhythm">
-        <div class="kuiBar">
-          <h1 class="kuiTitle">
-            Create index pattern
-          </h1>
+      <h1 class="euiTitle euiTitle--medium">
+        Create index pattern
+      </h1>
 
-          <div class="kuiBarSection">
-            <!-- Include system indices -->
-            <label
-              ng-if="controller.isSystemIndicesCheckBoxVisible()"
-              class="kuiCheckBoxLabel"
-              for="indexPatternCreationIncludeSystemIndices"
-            >
-              <input
-                type="checkbox"
-                id="indexPatternCreationIncludeSystemIndices"
-                class="kuiCheckBox"
-                ng-model="controller.doesIncludeSystemIndices"
-                ng-change="controller.onIncludeSystemIndicesChange()"
-              >
+      <div class="euiSpacer euiSpacer--small"></div>
 
-              <span class="kuiCheckBoxLabel__text">
-                Include system indices
-              </span>
-            </label>
+      <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--alignItemsFlexEnd euiFlexGroup--responsive">
+        <div class="euiFlexItem euiFlexItem--flexGrowZero">
+          <div class="euiText">
+            <p class="euiTextColor euiTextColor--subdued">
+              Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations.
+            </p>
           </div>
         </div>
 
-        <p class="kuiText kuiSubduedText">
-          Kibana uses index patterns to retrieve data from Elasticsearch indices for things like visualizations.
-        </p>
+        <div class="euiFlexItem euiFlexItem--flexGrowZero">
+          <div
+            class="euiCheckbox"
+            ng-if="controller.isSystemIndicesCheckBoxVisible()"
+          >
+            <input
+              type="checkbox"
+              class="euiCheckbox__input"
+              id="indexPatternCreationIncludeSystemIndices"
+              ng-model="controller.doesIncludeSystemIndices"
+              ng-change="controller.onIncludeSystemIndicesChange()"
+            >
+            <div class="euiCheckbox__square">
+              <div class="euiCheckbox__check"></div>
+            </div>
+            <label
+              class="euiCheckbox__label"
+              for="indexPatternCreationIncludeSystemIndices"
+              style="white-space: nowrap"
+            >
+              Include system indices
+            </label>
+          </div>
+        </div>
       </div>
 
-      <!-- User has no data -->
-      <div
-        class="kuiPanel kuiVerticalRhythm"
-        ng-if="!controller.hasIndices()"
-      >
-        <div class="kuiPanelBody">
-          <!-- Fetching state -->
-          <div
-            ng-if="controller.isFetchingExistingIndices"
-            class="kuiPanel kuiPanel--prompt kuiPanel--noBorder kuiVerticalRhythm"
-          >
-            <div class="kuiPanelBody">
-              <h2 class="kuiSubTitle kuiSubduedText kuiVerticalRhythm">
-                Checking for Elasticsearch data
-              </h2>
+      <div class="euiSpacer euiSpacer--m"></div>
 
-              <div class="kuiVerticalRhythm">
-                <p class="kuiText kuiSubduedText kuiVerticalRhythmSmall">
-                  <span class="kuiStatusText">
-                    <span
+      <div class="euiPanel euiPanel--paddingLarge">
+        <!-- User has no data -->
+        <div ng-if="!controller.hasIndices()">
+          <div class="euiPageContentBody">
+            <div class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--responsive">
+              <!-- Fetching state -->
+              <div
+                ng-if="controller.isFetchingExistingIndices"
+                class="euiFlexItem euiFlexItem--flexGrowZero createIndexPatternPrompt"
+              >
+                <h2 class="euiTitle euiTitle--small euiTextColor euiTextColor--subdued">
+                  Checking for Elasticsearch data
+                </h2>
+                <div class="euiSpacer euiSpacer--s"></div>
+                <div class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter">
+                  <div class="euiFlexItem euiFlexItem--flexGrowZero">
+                    <div
+                      class="euiLoadingSpinner euiLoadingSpinner--medium"
                       aria-hidden="true"
-                      class="kuiStatusText__icon kuiIcon fa-spinner fa-spin"
-                    ></span>
-                    <span>
+                    ></div>
+                  </div>
+                  <div class="euiFlexItem euiFlexItem--flexGrowZero">
+                    <p class="euiTextColor euiTextColor--subdued">
                       Reticulating splines...
-                    </span>
-                  </span>
-                </p>
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
 
-          <!-- Empty state -->
-          <div ng-if="!controller.isFetchingExistingIndices">
-            <div class="kuiPanel kuiPanel--prompt kuiPanel--noBorder kuiVerticalRhythm">
-              <div class="kuiPanelBody">
-                <h1 class="kuiSubTitle kuiSubduedText kuiVerticalRhythm">
-                  Couldn't find any Elasticsearch data
-                </h1>
-
-                <div class="kuiVerticalRhythm">
-                  <p class="kuiText kuiSubduedText kuiVerticalRhythmSmall">
+              <!-- Empty state -->
+              <div
+                class="euiFlexItem euiFlexItem--flexGrowZero createIndexPatternPrompt"
+                ng-if="!controller.isFetchingExistingIndices"
+              >
+                <div>
+                  <h2 class="euiTitle euiTitle--small">
+                    Couldn't find any Elasticsearch data
+                  </h2>
+                  <div class="euiSpacer euiSpacer--s"></div>
+                  <p>
                     <span>
                       You'll need to index some data into Elasticsearch before you can create an index pattern.
                     </span>
                     <a
-                      class="kuiLink"
+                      class="euiLink euiLink--primary"
                       aria-label="Learn how to index data into Elasticsearch"
                       documentation-href="indexPatterns.loadingData"
                       target="_blank"
@@ -94,61 +102,56 @@
                       Learn how.
                     </a>
                   </p>
-                </div>
-
-                <button
-                  class="kuiButton kuiButton--secondary kuiButton--iconText kuiVerticalRhythm"
-                  ng-click="controller.fetchExistingIndices()"
-                >
-                  <span class="kuiButton__inner">
-                    <span
-                      aria-hidden="true"
-                      class="kuiButton__icon kuiIcon fa-refresh"
-                    ></span>
-                    <span>
-                      Check for new data
+                  <div class="euiSpacer euiSpacer--s"></div>
+                  <button
+                    class="euiButtonEmpty euiButtonEmpty--primary"
+                    ng-click="controller.fetchExistingIndices()"
+                  >
+                    <span class="euiButton__content">
+                      <span>
+                        Check for new data
+                      </span>
                     </span>
-                  </span>
-                </button>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- User has data -->
-      <div
-        class="kuiVerticalRhythm"
-        ng-if="controller.hasIndices()"
-        ng-switch="controller.wizardStep"
-      >
-        <!-- Specify index pattern -->
-        <step-index-pattern
-          ng-switch-when="indexPattern"
-          fetch-existing-indices="controller.fetchExistingIndices()"
-          is-fetching-existing-indices="controller.isFetchingExistingIndices"
-          fetch-matching-indices="controller.fetchMatchingIndices()"
-          is-fetching-matching-indices="controller.isFetchingMatchingIndices"
-          has-indices="controller.hasIndices()"
-          index-pattern-name="controller.formValues.name"
-          all-indices="controller.allIndices"
-          partial-matching-indices="controller.partialMatchingIndices"
-          matching-indices="controller.matchingIndices"
-          go-to-next-step="controller.goToTimeFieldStep()"
-        ></step-index-pattern>
+        <!-- User has data -->
+        <div
+          ng-if="controller.hasIndices()"
+          ng-switch="controller.wizardStep"
+        >
+          <!-- Specify index pattern -->
+          <step-index-pattern
+            ng-switch-when="indexPattern"
+            fetch-existing-indices="controller.fetchExistingIndices()"
+            is-fetching-existing-indices="controller.isFetchingExistingIndices"
+            fetch-matching-indices="controller.fetchMatchingIndices()"
+            is-fetching-matching-indices="controller.isFetchingMatchingIndices"
+            has-indices="controller.hasIndices()"
+            index-pattern-name="controller.formValues.name"
+            all-indices="controller.allIndices"
+            partial-matching-indices="controller.partialMatchingIndices"
+            matching-indices="controller.matchingIndices"
+            go-to-next-step="controller.goToTimeFieldStep()"
+          ></step-index-pattern>
 
-        <!-- Specify optional time field -->
-        <step-time-field
-          ng-switch-when="timeField"
-          index-pattern-id="controller.formValues.id"
-          index-pattern-name="controller.formValues.name"
-          time-field-options="controller.timeFieldOptions"
-          selected-time-field-option="controller.formValues.timeFieldOption"
-          fetch-time-field-options="controller.fetchTimeFieldOptions()"
-          is-fetching-time-field-options="controller.isFetchingTimeFieldOptions"
-          go-to-previous-step="controller.goToIndexPatternStep()"
-          create-index-pattern="controller.createIndexPattern()"
-        ></step-time-field>
+          <!-- Specify optional time field -->
+          <step-time-field
+            ng-switch-when="timeField"
+            index-pattern-id="controller.formValues.id"
+            index-pattern-name="controller.formValues.name"
+            time-field-options="controller.timeFieldOptions"
+            selected-time-field-option="controller.formValues.timeFieldOption"
+            fetch-time-field-options="controller.fetchTimeFieldOptions()"
+            is-fetching-time-field-options="controller.isFetchingTimeFieldOptions"
+            go-to-previous-step="controller.goToIndexPatternStep()"
+            create-index-pattern="controller.createIndexPattern()"
+          ></step-time-field>
+        </div>
       </div>
     </div>
   </kbn-management-indices>

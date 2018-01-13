@@ -9,13 +9,13 @@
       ></bread-crumbs>
 
       <!-- Tabs. -->
-      <div data-transclude-slot="bottomRow" class="kuiLocalTabs" role="tablist">
+      <div data-transclude-slot="bottomRow" class="euiTabs" role="tablist">
         <a
           role="tab"
           aria-selected="{{kbnDevToolsApp.currentPath === item.url}}"
           ng-repeat="item in kbnDevToolsApp.devTools"
-          class="kuiLocalTab"
-          ng-class="{'kuiLocalTab-isSelected': kbnDevToolsApp.currentPath === item.url}"
+          class="euiTab"
+          ng-class="{'euiTab-isSelected': kbnDevToolsApp.currentPath === item.url}"
           kbn-href="{{::item.url}}"
         >
           {{::item.display}}

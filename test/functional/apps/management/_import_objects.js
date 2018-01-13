@@ -53,25 +53,26 @@ export default function ({ getService, getPageObjects }) {
       expect(rowCount).to.be(2);
     });
 
-    it('should allow for overrides', async function () {
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaSavedObjects();
-      await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects.json'));
-      await PageObjects.common.clickConfirmOnModal();
-      await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects.json'));
-      await PageObjects.common.clickConfirmOnModal();
-      await PageObjects.settings.clickVisualizationsTab();
-      const rowCount = await retry.try(async () => {
-        const rows = await PageObjects.settings.getVisualizationRows();
-        if (rows.length !== 2) {
-          throw 'Not loaded yet';
-        }
-        return rows.length;
-      });
-      expect(rowCount).to.be(2);
-    });
+    // Flaky: https://github.com/elastic/kibana/issues/15913
+    // it('should allow for overrides', async function () {
+    //   await PageObjects.settings.navigateTo();
+    //   await PageObjects.settings.clickKibanaSavedObjects();
+    //   await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects.json'));
+    //   await PageObjects.common.clickConfirmOnModal();
+    //   await PageObjects.settings.importFile(path.join(__dirname, 'exports', '_import_objects.json'));
+    //   await PageObjects.common.clickConfirmOnModal();
+    //   await PageObjects.settings.clickVisualizationsTab();
+    //   const rowCount = await retry.try(async () => {
+    //     const rows = await PageObjects.settings.getVisualizationRows();
+    //     if (rows.length !== 2) {
+    //       throw 'Not loaded yet';
+    //     }
+    //     return rows.length;
+    //   });
+    //   expect(rowCount).to.be(2);
+    // });
 
-    // Flaky: https://github.com/elastic/kibana/issues/15384
+    // Flaky: https://github.com/elastic/kibana/issues/15913
     // it('should allow for cancelling overrides', async function () {
     //   await PageObjects.settings.navigateTo();
     //   await PageObjects.settings.clickKibanaSavedObjects();

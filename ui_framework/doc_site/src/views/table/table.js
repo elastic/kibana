@@ -22,7 +22,7 @@ import {
 
 import {
   SortableProperties,
-} from '../../../../services';
+} from '../../../../src/services';
 
 const statusToIconClassNameMap = {
   success: 'kuiIcon--success fa-check',

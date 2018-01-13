@@ -1,16 +1,22 @@
-// Extracted from Flow, MIT licensed, Copyright (c) 2014-present, Facebook, Inc.
-// https://github.com/facebook/jest/blob/216e8edbe8ca60b34688d03e8ef3cb7262104b51/packages/jest-environment-jsdom/src/index.js#L37-L42
+// requestAnimationFrame isn't available in node so we need to polyfill it.
+// Borrowed from https://gist.github.com/paulirish/1579671.
+window.requestAnimationFrame = (() => {
+  let clock = Date.now();
 
-const started = process.hrtime();
+  return callback => {
+    const currentTime = Date.now();
 
-window.requestAnimationFrame = callback => {
-  const hr = process.hrtime(started);
-  const hrInNano = hr[0] * 1e9 + hr[1];
-  const hrInMicro = hrInNano / 1e6;
+    if (currentTime - clock > 16) {
+      clock = currentTime;
+      callback(currentTime);
+    } else {
+      setTimeout(() => {
+        window.requestAnimationFrame(callback);
+      }, 0);
+    }
+  };
+})();
 
-  return global.setTimeout(callback, 0, hrInMicro);
-};
-
-window.cancelAnimationFrame = id => {
-  window.clearTimeout(id);
+window.cancelAnimationFrame = (id) => {
+  clearTimeout(id);
 };

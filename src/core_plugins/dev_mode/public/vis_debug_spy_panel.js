@@ -6,12 +6,7 @@ function VisDetailsSpyProvider() {
     name: 'debug',
     display: 'Debug',
     template: visDebugSpyPanelTemplate,
-    order: 5,
-    link: function ($scope) {
-      $scope.$watch('vis.getEnabledState() | json', function (json) {
-        $scope.visStateJson = json;
-      });
-    }
+    order: 5
   };
 }
 

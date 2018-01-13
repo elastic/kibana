@@ -118,6 +118,14 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     dirty: !savedVis.id
   };
 
+  this.getSharingTitle = () => {
+    return savedVis.title;
+  };
+
+  this.getSharingType = () => {
+    return 'visualization';
+  };
+
   if (savedVis.id) {
     docTitle.change(savedVis.title);
   }
@@ -168,12 +176,6 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
     kbnUrl.removeParam(DashboardConstants.ADD_VISUALIZATION_TO_DASHBOARD_MODE_PARAM);
 
     $scope.isAddToDashMode = () => addToDashMode;
-
-    // Associate PersistedState instance with the Vis instance, so that
-    // `uiStateVal` can be called on it. Currently this is only used to extract
-    // map-specific information (e.g. mapZoom, mapCenter).
-    vis.setUiState($scope.uiState);
-
 
     $scope.timefilter = timefilter;
     $scope.opts = _.pick($scope, 'doSave', 'savedVis', 'shareData', 'timefilter', 'isAddToDashMode');
@@ -305,7 +307,7 @@ function VisEditor($scope, $route, timefilter, AppState, $window, kbnUrl, courie
 
 
   $scope.getAdditionalMessage = () => {
-    return `This visualization is marked as experimental. ${vis.type.feedbackMessage}`;
+    return `<i class="kuiIcon fa-flask"></i> This visualization is marked as experimental. ${vis.type.feedbackMessage}`;
   };
 
   init();

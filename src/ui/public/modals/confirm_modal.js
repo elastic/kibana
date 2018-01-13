@@ -7,9 +7,9 @@ import { ModalOverlay } from './modal_overlay';
 const module = uiModules.get('kibana');
 
 import {
-  KUI_MODAL_CONFIRM_BUTTON as CONFIRM_BUTTON,
-  KUI_MODAL_CANCEL_BUTTON as CANCEL_BUTTON,
-} from 'ui_framework/components';
+  EUI_MODAL_CONFIRM_BUTTON as CONFIRM_BUTTON,
+  EUI_MODAL_CANCEL_BUTTON as CANCEL_BUTTON,
+} from '@elastic/eui';
 
 export const ConfirmationButtonTypes = {
   CONFIRM: CONFIRM_BUTTON,

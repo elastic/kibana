@@ -1,4 +1,4 @@
-import * as chalk from 'chalk';
+import chalk from 'chalk';
 import { Schema, typeOfSchema } from '../../types/schema';
 import { LogLevel } from '../LogLevel';
 import { LogRecord } from '../LogRecord';
