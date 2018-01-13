@@ -24,6 +24,18 @@
           </button>
 
           <button
+            id="timepickerRecent"
+            role="tab"
+            class="euiTab"
+            ng-class="{'euiTab-isSelected': mode === 'recent' }"
+            ng-click="setMode('recent')"
+            aria-selected="{{mode === 'recent'}}"
+            data-test-subj="timepicker-recent-button"
+          >
+            Recent ranges
+          </button>
+
+          <button
             id="timepickerRelative"
             role="tab"
             class="euiTab"
@@ -60,6 +72,13 @@
           role="tabpanel"
           aria-labelledby="timepickerQuick"
         ></kbn-timepicker-quick-panel>
+
+        <kbn-timepicker-recent-panel
+          ng-switch-when="recent"
+          set-quick="setQuick(from, to)"
+          role="tabpanel"
+          aria-labelledby="timepickerRecent"
+        ></kbn-timepicker-recent-panel>
 
         <kbn-timepicker-relative-panel
           ng-switch-when="relative"

@@ -1,5 +1,6 @@
 import html from 'ui/timepicker/timepicker.html';
 import './quick_panel';
+import './recent_panel';
 import './relative_panel';
 import './absolute_panel';
 import _ from 'lodash';
@@ -36,7 +37,7 @@ module.directive('kbnTimepicker', function (timeUnits, refreshIntervals) {
     template: html,
     controller: function ($scope) {
       $scope.format = 'MMMM Do YYYY, HH:mm:ss.SSS';
-      $scope.modes = [TIME_MODES.QUICK, TIME_MODES.RELATIVE, TIME_MODES.ABSOLUTE];
+      $scope.modes = [TIME_MODES.QUICK, TIME_MODES.RECENT, TIME_MODES.RELATIVE, TIME_MODES.ABSOLUTE];
       $scope.activeTab = $scope.activeTab || 'filter';
 
       if (_.isUndefined($scope.mode)) $scope.mode = TIME_MODES.QUICK;
@@ -127,6 +128,8 @@ module.directive('kbnTimepicker', function (timeUnits, refreshIntervals) {
       $scope.setMode = function (thisMode) {
         switch (thisMode) {
           case TIME_MODES.QUICK:
+            break;
+          case TIME_MODES.RECENT:
             break;
           case TIME_MODES.RELATIVE:
             $scope.relative = parseRelativeParts($scope.from, $scope.to);
