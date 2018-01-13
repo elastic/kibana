@@ -19,7 +19,7 @@ class TimeHistory {
     // time from/to can be strings or moment objects - convert to strings so always dealing with same types
     const justStringsTime = {
       from: moment.isMoment(time.from) ? time.from.toISOString() : time.from,
-      mode: time.mode,
+      mode: TIME_MODES.RECENT,
       to: moment.isMoment(time.to) ? time.to.toISOString() : time.to
     };
     this.history.add(justStringsTime);
