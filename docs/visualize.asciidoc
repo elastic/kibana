@@ -50,6 +50,7 @@ data sets.
 <<tagcloud-chart,Tag cloud>>:: Display words as a cloud in which the size of the word correspond to its importance
 <<markdown-widget,Markdown widget>>:: Display free-form information or
 instructions.
+<<vega-graph,Vega graph>>:: Support for user-defined graphs, external data sources, images, and user-defined interactivity.
 . Specify a search query to retrieve the data for your visualization:
 ** To enter new search criteria, select the index pattern for the indices that
 contain the data you want to visualize. This opens the visualization builder
@@ -159,3 +160,5 @@ include::visualize/tagcloud.asciidoc[]
 include::visualize/heatmap.asciidoc[]
 
 include::visualize/visualization-raw-data.asciidoc[]
+
+include::visualize/vega.asciidoc[]
