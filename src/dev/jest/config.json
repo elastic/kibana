@@ -36,7 +36,8 @@
   ],
   "globals": {
     "ts-jest": {
-      "tsConfigFile": "src/jest/tsconfig.json"
+      "tsConfigFile": "src/jest/tsconfig.json",
+      "skipBabel": true
     }
   },
   "mapCoverage": true,

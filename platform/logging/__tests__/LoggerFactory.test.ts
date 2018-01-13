@@ -1,19 +1,23 @@
+let mockCreateWriteStream = {};
+
+jest.mock('fs', () => ({
+  createWriteStream: () => mockCreateWriteStream
+}));
+
 import * as mockSchema from '../../lib/schema';
 import { LoggingConfig } from '../LoggingConfig';
+import { MutableLoggerFactory } from '../LoggerFactory';
 
 const tickMs = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-const mockStreamWrite = jest.fn();
 const mockStreamEndFinished = jest.fn();
-const mockStreamEnd = jest.fn(async (chunk, encoding, callback) => {
+mockCreateWriteStream.write = jest.fn();
+mockCreateWriteStream.end = jest.fn(async (chunk, encoding, callback) => {
   // It's required to make sure `dispose` waits for `end` to complete.
   await tickMs(100);
   mockStreamEndFinished();
   callback();
 });
-jest.mock('fs', () => ({
-  createWriteStream: () => ({ write: mockStreamWrite, end: mockStreamEnd })
-}));
 
 const timestamp = new Date(Date.UTC(2012, 1, 1));
 const mockConsoleLog = jest
@@ -21,11 +25,9 @@ const mockConsoleLog = jest
   .mockImplementation(() => {});
 jest.spyOn(global, 'Date').mockImplementation(() => timestamp);
 
-import { MutableLoggerFactory } from '../LoggerFactory';
-
 beforeEach(() => {
-  mockStreamWrite.mockClear();
-  mockStreamEnd.mockClear();
+  mockCreateWriteStream.write.mockClear();
+  mockCreateWriteStream.end.mockClear();
   mockStreamEndFinished.mockClear();
   mockConsoleLog.mockClear();
 });
@@ -42,7 +44,7 @@ test('`get()` returns Logger that appends records to buffer if config is not rea
   testsChildLogger.info('Just some info that should not be logged.');
 
   expect(mockConsoleLog).not.toHaveBeenCalled();
-  expect(mockStreamWrite).not.toHaveBeenCalled();
+  expect(mockCreateWriteStream.write).not.toHaveBeenCalled();
 
   const loggingConfigSchema = LoggingConfig.createSchema(mockSchema);
   const config = new LoggingConfig(
@@ -80,11 +82,11 @@ test('`get()` returns Logger that appends records to buffer if config is not rea
     '[2012-02-01T00:00:00.000Z][INFO ][some-context] You know, just for your info.'
   );
 
-  expect(mockStreamWrite).toHaveBeenCalledTimes(2);
-  expect(mockStreamWrite).toHaveBeenCalledWith(
+  expect(mockCreateWriteStream.write).toHaveBeenCalledTimes(2);
+  expect(mockCreateWriteStream.write).toHaveBeenCalledWith(
     '[2012-02-01T00:00:00.000Z][WARN ][tests] Config is not ready!\n'
   );
-  expect(mockStreamWrite).toHaveBeenCalledWith(
+  expect(mockCreateWriteStream.write).toHaveBeenCalledWith(
     '[2012-02-01T00:00:00.000Z][ERROR][tests.child] Too bad that config is not ready :/\n'
   );
 });
@@ -133,13 +135,13 @@ test('`close()` disposes all resources used by appenders.', async () => {
   const logger = factory.get('some-context');
   logger.info('You know, just for your info.');
 
-  expect(mockStreamWrite).toHaveBeenCalled();
-  expect(mockStreamEnd).not.toHaveBeenCalled();
+  expect(mockCreateWriteStream.write).toHaveBeenCalled();
+  expect(mockCreateWriteStream.end).not.toHaveBeenCalled();
 
   await factory.close();
 
-  expect(mockStreamEnd).toHaveBeenCalledTimes(1);
-  expect(mockStreamEnd).toHaveBeenCalledWith(
+  expect(mockCreateWriteStream.end).toHaveBeenCalledTimes(1);
+  expect(mockCreateWriteStream.end).toHaveBeenCalledWith(
     undefined,
     undefined,
     expect.any(Function)
