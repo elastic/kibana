@@ -1,21 +1,19 @@
-import { Schema, typeOfSchema } from '../../types/schema';
+import { schema } from '@elastic/kbn-sdk';
 import { Env } from '../../config';
 
-const createPluginsSchema = (schema: Schema) =>
-  schema.object({
-    scanDirs: schema.arrayOf(schema.string(), {
-      defaultValue: []
-    })
-  });
+const pluginsSchema = schema.object({
+  scanDirs: schema.arrayOf(schema.string(), {
+    defaultValue: []
+  })
+});
 
-const pluginsConfigType = typeOfSchema(createPluginsSchema);
-type PluginsConfigType = typeof pluginsConfigType;
+type PluginsConfigType = schema.TypeOf<typeof pluginsSchema>;
 
 export class PluginsConfig {
   /**
    * @internal
    */
-  static createSchema = createPluginsSchema;
+  static schema = pluginsSchema;
 
   // Defines all directories where we will scan for plugins
   readonly scanDirs: string[];

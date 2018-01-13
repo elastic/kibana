@@ -1,10 +1,9 @@
-import * as mockSchema from '../../../lib/schema';
 import { JsonLayout } from '../JsonLayout';
 import { PatternLayout } from '../PatternLayout';
 import { Layouts } from '../Layouts';
 
-test('`createConfigSchema()` creates correct schema for `pattern` layout.', () => {
-  const layoutsSchema = Layouts.createConfigSchema(mockSchema);
+test('`configSchema` creates correct schema for `pattern` layout.', () => {
+  const layoutsSchema = Layouts.configSchema;
   const validConfigWithOptional = { kind: 'pattern' };
   expect(layoutsSchema.validate(validConfigWithOptional)).toEqual({
     kind: 'pattern',
@@ -28,7 +27,7 @@ test('`createConfigSchema()` creates correct schema for `pattern` layout.', () =
 });
 
 test('`createConfigSchema()` creates correct schema for `json` layout.', () => {
-  const layoutsSchema = Layouts.createConfigSchema(mockSchema);
+  const layoutsSchema = Layouts.configSchema;
 
   const validConfig = { kind: 'json' };
   expect(layoutsSchema.validate(validConfig)).toEqual({ kind: 'json' });

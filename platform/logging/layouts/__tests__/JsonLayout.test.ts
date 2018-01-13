@@ -1,5 +1,3 @@
-import * as mockSchema from '../../../lib/schema';
-
 import { LogLevel } from '../../LogLevel';
 import { LogRecord } from '../../LogRecord';
 import { JsonLayout } from '../JsonLayout';
@@ -49,7 +47,7 @@ const records: LogRecord[] = [
 ];
 
 test('`createConfigSchema()` creates correct schema.', () => {
-  const layoutSchema = JsonLayout.createConfigSchema(mockSchema);
+  const layoutSchema = JsonLayout.configSchema;
 
   expect(layoutSchema.validate({ kind: 'json' })).toEqual({ kind: 'json' });
 });

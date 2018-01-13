@@ -1,11 +1,10 @@
-import * as mockSchema from '../../../../lib/schema';
 import { LogLevel } from '../../../../logging/LogLevel';
 import { LogRecord } from '../../../../logging/LogRecord';
 import { LegacyKbnServer } from '../../../LegacyKbnServer';
 import { LegacyAppender } from '../LegacyAppender';
 
-test('`createConfigSchema()` creates correct schema.', () => {
-  const appenderSchema = LegacyAppender.createConfigSchema(mockSchema);
+test('`configSchema` creates correct schema.', () => {
+  const appenderSchema = LegacyAppender.configSchema;
   const validConfig = { kind: 'legacy-appender' };
   expect(appenderSchema.validate(validConfig)).toEqual({
     kind: 'legacy-appender'

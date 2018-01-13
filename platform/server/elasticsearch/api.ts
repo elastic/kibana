@@ -1,7 +1,6 @@
 import { Router } from '../http';
 import { ElasticsearchService } from './ElasticsearchService';
 import { LoggerFactory } from '../../logging';
-import { Schema } from '../../types/schema';
 
 export function registerElasticsearchRoutes(
   router: Router,
@@ -15,7 +14,7 @@ export function registerElasticsearchRoutes(
   router.get(
     {
       path: '/:field',
-      validate: (schema: Schema) => ({
+      validate: schema => ({
         params: schema.object({
           field: schema.string()
         }),

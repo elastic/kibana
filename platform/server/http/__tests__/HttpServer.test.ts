@@ -6,7 +6,6 @@ import { Env } from '../../../config/Env';
 import { Router } from '../Router';
 import { HttpServer } from '../HttpServer';
 import { HttpConfig } from '../HttpConfig';
-import { Schema } from '../../../types/schema';
 import { logger } from '../../../logging/__mocks__';
 
 const chance = new Chance();
@@ -121,7 +120,7 @@ test('valid params', async () => {
   router.get(
     {
       path: '/:test',
-      validate: (schema: Schema) => ({
+      validate: schema => ({
         params: schema.object({
           test: schema.string()
         })
@@ -150,7 +149,7 @@ test('invalid params', async () => {
   router.get(
     {
       path: '/:test',
-      validate: (schema: Schema) => ({
+      validate: schema => ({
         params: schema.object({
           test: schema.number()
         })
@@ -181,7 +180,7 @@ test('valid query', async () => {
   router.get(
     {
       path: '/',
-      validate: (schema: Schema) => ({
+      validate: schema => ({
         query: schema.object({
           bar: schema.string(),
           quux: schema.number()
@@ -211,7 +210,7 @@ test('invalid query', async () => {
   router.get(
     {
       path: '/',
-      validate: (schema: Schema) => ({
+      validate: schema => ({
         query: schema.object({
           bar: schema.number()
         })
@@ -242,7 +241,7 @@ test('valid body', async () => {
   router.post(
     {
       path: '/',
-      validate: (schema: Schema) => ({
+      validate: schema => ({
         body: schema.object({
           bar: schema.string(),
           baz: schema.number()
@@ -276,7 +275,7 @@ test('invalid body', async () => {
   router.post(
     {
       path: '/',
-      validate: (schema: Schema) => ({
+      validate: schema => ({
         body: schema.object({
           bar: schema.number()
         })
@@ -328,7 +327,7 @@ test('handles deleting', async () => {
   router.delete(
     {
       path: '/:id',
-      validate: (schema: Schema) => ({
+      validate: schema => ({
         params: schema.object({
           id: schema.number()
         })
@@ -437,7 +436,7 @@ describe('when run within legacy platform', () => {
 
     expect(newPlatformProxyListenerMock.bind).toHaveBeenCalledTimes(1);
     expect(newPlatformProxyListenerMock.bind).toHaveBeenCalledWith(
-      expect.any(http.Server)
+      expect.any((http as any).Server)
     );
     expect(newPlatformProxyListenerMock.bind.mock.calls[0][0]).toBe(
       (server as any).server
@@ -454,8 +453,8 @@ describe('when run within legacy platform', () => {
         expect(res.body).toEqual({ key: 'legacy-platform' });
         expect(newPlatformProxyListenerMock.proxy).toHaveBeenCalledTimes(1);
         expect(newPlatformProxyListenerMock.proxy).toHaveBeenCalledWith(
-          expect.any(http.IncomingMessage),
-          expect.any(http.ServerResponse)
+          expect.any((http as any).IncomingMessage),
+          expect.any((http as any).ServerResponse)
         );
       });
   });

@@ -11,11 +11,11 @@ class mockNetServer extends EventEmitter {
   }
 }
 jest.mock('net', () => ({
-  Server: jest.fn(() => new mockNetServer())
+  createServer: jest.fn(() => new mockNetServer())
 }));
 
 import { LegacyPlatformProxifier } from '..';
-import { Server } from 'net';
+import { createServer } from 'net';
 
 let root: any;
 let proxifier: LegacyPlatformProxifier;
@@ -35,7 +35,7 @@ beforeEach(() => {
 });
 
 test('correctly binds to the server.', () => {
-  const server = new Server();
+  const server = createServer();
   jest.spyOn(server, 'addListener');
   proxifier.bind(server);
 
@@ -49,7 +49,7 @@ test('correctly binds to the server.', () => {
 });
 
 test('correctly binds to the server and redirects its events.', () => {
-  const server = new Server();
+  const server = createServer();
   proxifier.bind(server);
 
   const eventsAndListeners = new Map(
@@ -75,10 +75,10 @@ test('correctly binds to the server and redirects its events.', () => {
 });
 
 test('correctly unbinds from the previous server.', () => {
-  const previousServer = new Server();
+  const previousServer = createServer();
   proxifier.bind(previousServer);
 
-  const currentServer = new Server();
+  const currentServer = createServer();
   proxifier.bind(currentServer);
 
   const eventsAndListeners = new Map(
@@ -119,7 +119,7 @@ test('correctly unbinds from the previous server.', () => {
 test('returns `address` from the underlying server.', () => {
   expect(proxifier.address()).toBeUndefined();
 
-  proxifier.bind(new Server());
+  proxifier.bind(createServer());
 
   expect(proxifier.address()).toEqual({
     port: 1234,
@@ -155,7 +155,7 @@ test('returns connection count from the underlying server.', () => {
   expect(onGetConnectionsComplete).toHaveBeenCalledWith(undefined, 0);
   onGetConnectionsComplete.mockReset();
 
-  proxifier.bind(new Server());
+  proxifier.bind(createServer());
   proxifier.getConnections(onGetConnectionsComplete);
 
   expect(onGetConnectionsComplete).toHaveBeenCalledTimes(1);

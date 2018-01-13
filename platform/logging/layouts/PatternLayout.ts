@@ -1,9 +1,11 @@
 import chalk from 'chalk';
-import { Schema, typeOfSchema } from '../../types/schema';
+import { schema } from '@elastic/kbn-sdk';
+
 import { LogLevel } from '../LogLevel';
 import { LogRecord } from '../LogRecord';
 import { Layout } from './Layouts';
 
+const { boolean, literal, maybe, object, string } = schema;
 /**
  * A set of static constants describing supported parameters in the log message pattern.
  */
@@ -44,17 +46,14 @@ const DEFAULT_PATTERN = `[${Parameters.Timestamp}][${Parameters.Level}][${
   Parameters.Context
 }] ${Parameters.Message}`;
 
-const createSchema = ({ boolean, literal, maybe, object, string }: Schema) => {
-  return object({
-    kind: literal('pattern'),
-    pattern: maybe(string()),
-    highlight: maybe(boolean())
-  });
-};
+const patternLayoutSchema = object({
+  kind: literal('pattern'),
+  pattern: maybe(string()),
+  highlight: maybe(boolean())
+});
 
-const schemaType = typeOfSchema(createSchema);
 /** @internal */
-export type PatternLayoutConfigType = typeof schemaType;
+export type PatternLayoutConfigType = schema.TypeOf<typeof patternLayoutSchema>;
 
 /**
  * Layout that formats `LogRecord` using the `pattern` string with optional
@@ -62,7 +61,7 @@ export type PatternLayoutConfigType = typeof schemaType;
  * @internal
  */
 export class PatternLayout implements Layout {
-  static createConfigSchema = createSchema;
+  static configSchema = patternLayoutSchema;
 
   constructor(
     private readonly pattern = DEFAULT_PATTERN,

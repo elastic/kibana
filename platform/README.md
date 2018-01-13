@@ -18,6 +18,10 @@ cd packages/kbn-observable
 yarn
 cd -
 
+cd packages/kbn-sdk
+yarn
+cd -
+
 #  from root directory
 yarn
 

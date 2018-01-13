@@ -80,6 +80,7 @@
     "@elastic/eui": "0.0.11",
     "@elastic/filesaver": "1.1.2",
     "@elastic/kbn-observable": "link:packages/kbn-observable",
+    "@elastic/kbn-sdk": "link:packages/kbn-sdk",
     "@elastic/numeral": "2.3.1",
     "@elastic/test-subj-selector": "0.2.1",
     "@elastic/ui-ace": "0.2.3",

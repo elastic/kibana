@@ -1,7 +1,6 @@
 // TODO inline all of these
-import * as schemaLib from '../lib/schema';
+import { schema } from '@elastic/kbn-sdk';
 import { Env } from './Env';
-import { Schema } from '../types/schema';
 
 /**
  * Interface that defines the static side of a config class.
@@ -13,18 +12,17 @@ import { Schema } from '../types/schema';
  * in TypeScript, but it can be used to ensure we have a config class that
  * matches whenever it's used.
  */
-export interface ConfigWithSchema<S extends schemaLib.Any, Config> {
+export interface ConfigWithSchema<S extends schema.Any, Config> {
   /**
    * Any config class must define a schema that validates the config, based on
    * the injected `schema` helper.
    */
-  createSchema: (schema: Schema) => S;
+  schema: S;
 
   /**
-   * @param validatedConfig The result from calling the static `createSchema`
-   * above. This config is validated before the config class is instantiated.
+   * @param validatedConfig The result of validating the static `schema` above.
    * @param env An instance of the `Env` class that defines environment specific
    * variables.
    */
-  new (validatedConfig: schemaLib.TypeOf<S>, env: Env): Config;
+  new (validatedConfig: schema.TypeOf<S>, env: Env): Config;
 }

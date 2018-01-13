@@ -1,18 +1,16 @@
-import { Schema, typeOfSchema } from '../../types/schema';
+import { schema } from '@elastic/kbn-sdk';
 
-const createKibanaSchema = (schema: Schema) =>
-  schema.object({
-    index: schema.string({ defaultValue: '.kibana' })
-  });
+const kibanaSchema = schema.object({
+  index: schema.string({ defaultValue: '.kibana' })
+});
 
-const kibanaConfigType = typeOfSchema(createKibanaSchema);
-type KibanaConfigType = typeof kibanaConfigType;
+type KibanaConfigType = schema.TypeOf<typeof kibanaSchema>;
 
 export class KibanaConfig {
   /**
    * @internal
    */
-  static createSchema = createKibanaSchema;
+  static schema = kibanaSchema;
 
   readonly index: string;
 

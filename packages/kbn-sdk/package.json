@@ -1,7 +1,8 @@
 {
-  "name": "@elastic/kbn-types",
+  "name": "@elastic/kbn-sdk",
   "version": "0.0.1",
-  "types": "./types/packages/kbn-types/index.d.ts",
+  "main": "./target/tsc/index.js",
+  "types": "./target/tsc-types/index.d.ts",
   "scripts": {
     "prepare": "npm run build",
     "build": "tsc",

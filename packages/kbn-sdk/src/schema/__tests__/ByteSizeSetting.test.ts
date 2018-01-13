@@ -1,5 +1,5 @@
 import { byteSize } from '../';
-import { ByteSizeValue } from '../../../lib/ByteSizeValue';
+import { ByteSizeValue } from '../../ByteSizeValue';
 
 test('returns value by default', () => {
   expect(byteSize().validate('123b')).toMatchSnapshot();

@@ -10,7 +10,7 @@ import { isEqual } from 'lodash';
 
 import { Env } from './Env';
 import { Logger, LoggerFactory } from '../logging';
-import * as schema from '../lib/schema';
+import { schema } from '@elastic/kbn-sdk';
 import { ConfigWithSchema } from './ConfigWithSchema';
 import { RawConfig } from './RawConfig';
 
@@ -43,14 +43,11 @@ export class ConfigService {
 
   /**
    * Reads the subset of the config at the specified `path` and validates it
-   * against the schema created by calling the static `createSchema` on the
-   * specified `ConfigClass`.
+   * against the static `schema` on the given `ConfigClass`.
    *
    * @param path The path to the desired subset of the config.
    * @param ConfigClass A class (not an instance of a class) that contains a
-   *                    static `createSchema` that will be called to create a
-   *                    schema that we validate the config at the given `path`
-   *                    against.
+   * static `schema` that be we validate the config at the given `path` against.
    */
   atPath<Schema extends schema.Any, Config>(
     path: ConfigPath,
@@ -113,10 +110,20 @@ export class ConfigService {
   ) {
     const context = Array.isArray(path) ? path.join('.') : path;
 
-    const config = ConfigClass.createSchema(schema).validate(
-      rawConfig,
-      context
-    );
+    const configSchema = ConfigClass.schema;
+
+    if (
+      configSchema === undefined ||
+      typeof configSchema.validate !== 'function'
+    ) {
+      throw new Error(
+        `The config class [${
+          ConfigClass.name
+        }] did not contain a static 'schema' field, which is required when creating a config instance`
+      );
+    }
+
+    const config = ConfigClass.schema.validate(rawConfig, context);
     return new ConfigClass(config, this.env);
   }
 

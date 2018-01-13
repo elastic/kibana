@@ -1,13 +1,12 @@
-import * as mockSchema from '../../lib/schema';
 import { LoggingConfig } from '../LoggingConfig';
 
-test('`createSchema()` creates correct schema with defaults.', () => {
-  const loggingConfigSchema = LoggingConfig.createSchema(mockSchema);
+test('`schema` creates correct schema with defaults.', () => {
+  const loggingConfigSchema = LoggingConfig.schema;
   expect(loggingConfigSchema.validate({})).toMatchSnapshot();
 });
 
-test('`createSchema()` throws if `root` logger does not have appenders configured.', () => {
-  const loggingConfigSchema = LoggingConfig.createSchema(mockSchema);
+test('`schema` throws if `root` logger does not have appenders configured.', () => {
+  const loggingConfigSchema = LoggingConfig.schema;
 
   expect(() =>
     loggingConfigSchema.validate({
@@ -32,7 +31,7 @@ test('`getLoggerContext()` returns correct joined context name.', () => {
 });
 
 test('correctly fills in default `appenders` config.', () => {
-  const loggingConfigSchema = LoggingConfig.createSchema(mockSchema);
+  const loggingConfigSchema = LoggingConfig.schema;
   const config = new LoggingConfig(loggingConfigSchema.validate({}));
 
   expect(config.appenders.size).toBe(1);
@@ -44,7 +43,7 @@ test('correctly fills in default `appenders` config.', () => {
 });
 
 test('correctly fills in custom `appenders` config.', () => {
-  const loggingConfigSchema = LoggingConfig.createSchema(mockSchema);
+  const loggingConfigSchema = LoggingConfig.schema;
   const config = new LoggingConfig(
     loggingConfigSchema.validate({
       appenders: {
@@ -81,7 +80,7 @@ test('correctly fills in custom `appenders` config.', () => {
 });
 
 test('correctly fills in default `loggers` config.', () => {
-  const loggingConfigSchema = LoggingConfig.createSchema(mockSchema);
+  const loggingConfigSchema = LoggingConfig.schema;
   const config = new LoggingConfig(loggingConfigSchema.validate({}));
 
   expect(config.loggers.size).toBe(1);
@@ -93,7 +92,7 @@ test('correctly fills in default `loggers` config.', () => {
 });
 
 test('correctly fills in custom `loggers` config.', () => {
-  const loggingConfigSchema = LoggingConfig.createSchema(mockSchema);
+  const loggingConfigSchema = LoggingConfig.schema;
   const config = new LoggingConfig(
     loggingConfigSchema.validate({
       appenders: {
@@ -146,7 +145,7 @@ test('correctly fills in custom `loggers` config.', () => {
 });
 
 test('fails if loggers use unknown appenders.', () => {
-  const loggingConfigSchema = LoggingConfig.createSchema(mockSchema);
+  const loggingConfigSchema = LoggingConfig.schema;
   const validateConfig = loggingConfigSchema.validate({
     loggers: [
       {

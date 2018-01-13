@@ -1,5 +1,3 @@
-import * as mockSchema from '../../../lib/schema';
-
 import { LogLevel } from '../../LogLevel';
 import { LogRecord } from '../../LogRecord';
 import { PatternLayout } from '../PatternLayout';
@@ -49,7 +47,7 @@ const records: LogRecord[] = [
 ];
 
 test('`createConfigSchema()` creates correct schema.', () => {
-  const layoutSchema = PatternLayout.createConfigSchema(mockSchema);
+  const layoutSchema = PatternLayout.configSchema;
 
   const validConfigWithOptional = { kind: 'pattern' };
   expect(layoutSchema.validate(validConfigWithOptional)).toEqual({

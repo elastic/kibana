@@ -1,13 +1,15 @@
-import * as mockSchema from '../../../lib/schema';
-
-const mockCreateLayoutConfigSchema = jest.fn();
 const mockCreateLayout = jest.fn();
-jest.mock('../../layouts/Layouts', () => ({
-  Layouts: {
-    createConfigSchema: mockCreateLayoutConfigSchema,
-    create: mockCreateLayout
-  }
-}));
+jest.mock('../../layouts/Layouts', () => {
+  const { schema } = require('@elastic/kbn-sdk');
+  return {
+    Layouts: {
+      create: mockCreateLayout,
+      configSchema: schema.object({
+        kind: schema.literal('mock')
+      })
+    }
+  };
+});
 
 import { ConsoleAppender } from '../console/ConsoleAppender';
 import { FileAppender } from '../file/FileAppender';
@@ -15,18 +17,11 @@ import { LegacyAppender } from '../../../legacy/logging/appenders/LegacyAppender
 import { Appenders } from '../Appenders';
 
 beforeEach(() => {
-  mockCreateLayoutConfigSchema.mockReset();
   mockCreateLayout.mockReset();
 });
 
-test('`createConfigSchema()` creates correct schema.', () => {
-  mockCreateLayoutConfigSchema.mockReturnValue(
-    mockSchema.object({
-      kind: mockSchema.literal('mock')
-    })
-  );
-
-  const appendersSchema = Appenders.createConfigSchema(mockSchema);
+test('`configSchema` creates correct schema.', () => {
+  const appendersSchema = Appenders.configSchema;
   const validConfig1 = { kind: 'file', layout: { kind: 'mock' }, path: 'path' };
   expect(appendersSchema.validate(validConfig1)).toEqual({
     kind: 'file',
