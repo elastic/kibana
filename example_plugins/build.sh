@@ -11,6 +11,6 @@ for i in "${plugins[@]}"
 do
   cd $i
   [ -d "target" ] && rm -r "target"
-  npm install
+  yarn
   cd ..
 done

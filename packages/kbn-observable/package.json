@@ -8,7 +8,7 @@
     "build": "tsc"
   },
   "dependencies": {
-    "@elastic/kbn-internal-native-observable": "file:../kbn-internal-native-observable",
+    "@elastic/kbn-internal-native-observable": "link:../kbn-internal-native-observable",
     "rxjs": "5.4.3"
   },
   "devDependencies": {

@@ -2,11 +2,6 @@
 
 ## Dev setup
 
-Make sure you're running the Node version specified in `../.node-version`.
-
-If you've upgraded your npm version, you might need to delete your `node_modules`
-folder and re-run `npm install`.
-
 ## Running code
 
 To get this stuff running locally (as we don't have a proper build system yet):
@@ -16,22 +11,22 @@ From a clean setup locally (the best is probably to just `rm` your
 
 ```sh
 cd packages/kbn-internal-native-observable
-npm install
+yarn
 cd -
 
 cd packages/kbn-observable
-npm install
+yarn
 cd -
 
 #  from root directory
-npm install
+yarn
 
 cd packages/kbn-types
-npm install
+yarn
 cd -
 
 # from root directory
-npm run ts:build
+yarn ts:build
 ```
 
 (Yeah, this is horrible — yeah, this is something I'm currently working on fixing properly)
@@ -48,7 +43,7 @@ node scripts/platform.js
 Or load it as a part of the legacy platform:
 
 ```bash
-npm start
+yarn start
 ```
 
 In the latter case, all Kibana requests will hit the new platform first and it will decide whether request can be
