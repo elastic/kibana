@@ -126,6 +126,12 @@ export class Tutorial extends React.Component {
   }
 
   renderInstructionSets = (instructions) => {
+    let overviewDashboard;
+    if (_.has(this.state, 'tutorial.artifacts.dashboards')) {
+      overviewDashboard = this.state.tutorial.artifacts.dashboards.find(dashboard => {
+        return dashboard.isOverview;
+      });
+    }
     let offset = 1;
     return instructions.instructionSets.map((instructionSet, index) => {
       const currentOffset = offset;
@@ -139,6 +145,7 @@ export class Tutorial extends React.Component {
           paramValues={this.state.paramValues}
           setParameter={this.setParameter}
           replaceTemplateStrings={this.props.replaceTemplateStrings}
+          overviewDashboard={overviewDashboard}
           key={index}
         />
       );
@@ -163,6 +170,11 @@ export class Tutorial extends React.Component {
         previewUrl = this.props.addBasePath(this.state.tutorial.previewImagePath);
       }
 
+      let exportedFieldsUrl;
+      if (_.has(this.state, 'tutorial.artifacts.exportedFields')) {
+        exportedFieldsUrl = this.props.replaceTemplateStrings(this.state.tutorial.artifacts.exportedFields.documentationUrl);
+      }
+
       const instructions = this.getInstructions();
       content = (
         <div>
@@ -170,6 +182,7 @@ export class Tutorial extends React.Component {
             title={this.state.tutorial.name}
             description={this.props.replaceTemplateStrings(this.state.tutorial.longDescription)}
             previewUrl={previewUrl}
+            exportedFieldsUrl={exportedFieldsUrl}
           />
 
           <div className="text-center kuiVerticalRhythm">
