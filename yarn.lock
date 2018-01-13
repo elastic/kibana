@@ -309,9 +309,9 @@ angular-mocks@^1.4.7:
   version "1.6.8"
   resolved "https://registry.yarnpkg.com/angular-mocks/-/angular-mocks-1.6.8.tgz#ba2120057b4edaa56492d8789ddfbc8f18afa3c5"
 
-angular-route@^1.4.7:
-  version "1.6.8"
-  resolved "https://registry.yarnpkg.com/angular-route/-/angular-route-1.6.8.tgz#82ace773e7b232bf77768370760244a8caab5d36"
+angular-route@~1.4.7:
+  version "1.4.14"
+  resolved "https://registry.yarnpkg.com/angular-route/-/angular-route-1.4.14.tgz#2e5dbfe1239423c678165c39bb38601ad66a0794"
 
 angular-sanitize@^1.5.7:
   version "1.6.8"
