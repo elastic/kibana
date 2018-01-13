@@ -3,6 +3,10 @@ import { has } from 'lodash';
 
 import { Schema, typeOfSchema } from '../../types/schema';
 
+// `crypto` type definitions doesn't currently include `crypto.constants`, see
+// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/fa5baf1733f49cf26228a4e509914572c1b74adf/types/node/v6/index.d.ts#L3412
+const cryptoConstants = (crypto as any).constants;
+
 const createSslSchema = (schema: Schema) => {
   const { object, boolean, string, arrayOf, oneOf, literal, maybe } = schema;
 
@@ -21,7 +25,7 @@ const createSslSchema = (schema: Schema) => {
         )
       ),
       cipherSuites: arrayOf(string(), {
-        defaultValue: crypto.constants.defaultCoreCipherList.split(':')
+        defaultValue: cryptoConstants.defaultCoreCipherList.split(':')
       })
     },
     {
