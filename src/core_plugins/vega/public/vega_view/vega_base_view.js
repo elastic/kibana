@@ -153,21 +153,23 @@ export class VegaBaseView {
 
   destroy() {
     // properly handle multiple destroy() calls by converting this._destroyHandlers
-    // from an array into a promise, while handlers are being disposed
+    // into the _ongoingDestroy promise, while handlers are being disposed
     if (this._destroyHandlers) {
-      if (this._destroyHandlers.then) {
-        return this._destroyHandlers;
-      } else {
-        this.setDebugValues();
-        this._destroyHandlers = Promise.all(this._destroyHandlers.map(v => v()));
-        return this._destroyHandlers.then(() => this._destroyHandlers = null);
-      }
+      // If no destroy is yet running, execute all handlers and wait for all of them to resolve.
+      // Once done, keep the resolved promise, and get rid of any values returned from handlers.
+      this._ongoingDestroy = Promise.all(this._destroyHandlers.map(v => v())).then(() => 0);
+      this._destroyHandlers = null;
     }
+    return this._ongoingDestroy;
   }
 
   _addDestroyHandler(handler) {
     // If disposing hasn't started yet, enqueue it, otherwise dispose right away
-    if (this._destroyHandlers && !this._destroyHandlers.then) {
+    // This creates a minor issue - if disposing has started but not yet finished,
+    // and we dispose the new handler right away, the destroy() does not wait for it.
+    // This behavior is no different from the case when disposing has already completed,
+    // so it shouldn't create any issues.
+    if (this._destroyHandlers) {
       this._destroyHandlers.push(handler);
     } else {
       handler();
