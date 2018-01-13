@@ -21,7 +21,7 @@ markdownIt.renderer.rules.link_open = function (tokens, idx, options, env, self)
 };
 
 export function Content({ className, text }) {
-  const classes = classNames('kuiText kuiSubduedText tutorialContent markdown-body', className);
+  const classes = classNames('euiText euiTextColor--subdued tutorialContent markdown-body', className);
   return (
     <div
       className={classes}
