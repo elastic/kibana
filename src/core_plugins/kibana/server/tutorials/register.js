@@ -11,6 +11,7 @@ import { redisMetricsSpecProvider } from './redis_metrics';
 import { dockerMetricsSpecProvider } from './docker_metrics';
 import { kubernetesMetricsSpecProvider } from './kubernetes_metrics';
 import { netflowSpecProvider } from './netflow';
+import { apmSpecProvider } from './apm';
 
 export function registerTutorials(server) {
   server.registerTutorial(systemLogsSpecProvider);
@@ -26,4 +27,5 @@ export function registerTutorials(server) {
   server.registerTutorial(dockerMetricsSpecProvider);
   server.registerTutorial(kubernetesMetricsSpecProvider);
   server.registerTutorial(netflowSpecProvider);
+  server.registerTutorial(apmSpecProvider);
 }
