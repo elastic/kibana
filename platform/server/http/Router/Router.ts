@@ -1,0 +1,152 @@
+import * as express from 'express';
+import * as bodyParser from 'body-parser';
+import { schema } from '@elastic/kbn-utils';
+
+import { RouteMethod, RouteSchemas, RouteConfig } from './Route';
+import { KibanaRequest } from './Request';
+import { KibanaResponse, ResponseFactory, responseFactory } from './Response';
+
+export class Router {
+  readonly router: express.Router = express.Router();
+
+  constructor(readonly path: string) {}
+
+  private routeSchemasFromRouteConfig<
+    P extends schema.ObjectSetting,
+    Q extends schema.ObjectSetting,
+    B extends schema.ObjectSetting
+  >(route: RouteConfig<P, Q, B>, routeMethod: RouteMethod) {
+    // The type doesn't allow `validate` to be undefined, but it can still
+    // happen when it's used from JavaScript.
+    if (route.validate === undefined) {
+      throw new Error(
+        `The [${routeMethod}] at [${
+          route.path
+        }] does not have a 'validation' specified. Use 'false' as the value if you want to bypass validation.`
+      );
+    }
+
+    return route.validate ? route.validate(schema) : undefined;
+  }
+
+  get<
+    P extends schema.ObjectSetting,
+    Q extends schema.ObjectSetting,
+    B extends schema.ObjectSetting
+  >(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) {
+    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'GET');
+    this.router.get(
+      route.path,
+      async (req, res) => await this.handle(routeSchemas, req, res, handler)
+    );
+  }
+
+  post<
+    P extends schema.ObjectSetting,
+    Q extends schema.ObjectSetting,
+    B extends schema.ObjectSetting
+  >(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) {
+    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'POST');
+    this.router.post(
+      route.path,
+      ...Router.getBodyParsers(),
+      async (req, res) => await this.handle(routeSchemas, req, res, handler)
+    );
+  }
+
+  put<
+    P extends schema.ObjectSetting,
+    Q extends schema.ObjectSetting,
+    B extends schema.ObjectSetting
+  >(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) {
+    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'POST');
+    this.router.put(
+      route.path,
+      ...Router.getBodyParsers(),
+      async (req, res) => await this.handle(routeSchemas, req, res, handler)
+    );
+  }
+
+  delete<
+    P extends schema.ObjectSetting,
+    Q extends schema.ObjectSetting,
+    B extends schema.ObjectSetting
+  >(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) {
+    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'DELETE');
+    this.router.delete(
+      route.path,
+      async (req, res) => await this.handle(routeSchemas, req, res, handler)
+    );
+  }
+
+  /**
+   * Returns list of supported body parsers.
+   */
+  private static getBodyParsers() {
+    return [
+      bodyParser.json(),
+      bodyParser.raw({ type: 'application/x-ndjson' }),
+      bodyParser.urlencoded({ extended: false })
+    ];
+  }
+
+  private async handle<
+    P extends schema.ObjectSetting,
+    Q extends schema.ObjectSetting,
+    B extends schema.ObjectSetting
+  >(
+    routeSchemas: RouteSchemas<P, Q, B> | undefined,
+    request: express.Request,
+    response: express.Response,
+    handler: RequestHandler<P, Q, B>
+  ) {
+    let kibanaRequest: KibanaRequest<
+      schema.TypeOf<P>,
+      schema.TypeOf<Q>,
+      schema.TypeOf<B>
+    >;
+
+    try {
+      kibanaRequest = KibanaRequest.from(request, routeSchemas);
+    } catch (e) {
+      // TODO Handle failed validation
+
+      response.status(400);
+      response.json({ error: e.message });
+      return;
+    }
+
+    try {
+      const kibanaResponse = await handler(kibanaRequest, responseFactory);
+
+      if (kibanaResponse instanceof KibanaResponse) {
+        response.status(kibanaResponse.status);
+
+        if (kibanaResponse.payload === undefined) {
+          response.send();
+        } else if (kibanaResponse.payload instanceof Error) {
+          // TODO Design an error format
+          response.json({ error: kibanaResponse.payload.message });
+        } else {
+          response.json(kibanaResponse.payload);
+        }
+      } else {
+        response.json(kibanaResponse);
+      }
+    } catch (e) {
+      // TODO Handle `KibanaResponseError`
+
+      // Otherwise we default to something along the lines of
+      response.status(500).json({ error: e.message });
+    }
+  }
+}
+
+export type RequestHandler<
+  P extends schema.ObjectSetting,
+  Q extends schema.ObjectSetting,
+  B extends schema.ObjectSetting
+> = (
+  req: KibanaRequest<schema.TypeOf<P>, schema.TypeOf<Q>, schema.TypeOf<B>>,
+  createResponse: ResponseFactory
+) => Promise<KibanaResponse<any> | { [key: string]: any }>;
