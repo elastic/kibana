@@ -4,18 +4,7 @@ import { schema, Schema } from '@elastic/kbn-utils';
 
 import { Headers, filterHeaders } from './headers';
 
-/**
- * Schemas for validating the request on a route.
- */
-export type RouteSchemas<
-  Params extends schema.ObjectSetting<any>,
-  Query extends schema.ObjectSetting<any>,
-  Body extends schema.ObjectSetting<any>
-> = (schema: Schema) => {
-  params?: Params;
-  query?: Query;
-  body?: Body;
-};
+type RouteMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
 export interface RouteConfig<
   Params extends schema.ObjectSetting<any>,
@@ -23,7 +12,27 @@ export interface RouteConfig<
   Body extends schema.ObjectSetting<any>
 > {
   path: string;
-  validate?: RouteSchemas<Params, Query, Body>
+  validate: RouteValidateFactory<Params, Query, Body> | false;
+}
+
+export type RouteValidateFactory<
+  P extends schema.ObjectSetting<any>,
+  Q extends schema.ObjectSetting<any>,
+  B extends schema.ObjectSetting<any>
+> = (schema: Schema) => RouteSchemas<P, Q, B>;
+
+/**
+ * RouteSchemas contains the schemas for validating the different parts of a
+ * request.
+ */
+export interface RouteSchemas<
+  Params extends schema.ObjectSetting<any>,
+  Query extends schema.ObjectSetting<any>,
+  Body extends schema.ObjectSetting<any>
+> {
+  params?: Params;
+  query?: Query;
+  body?: Body;
 }
 
 export interface ResponseFactory {
@@ -79,31 +88,20 @@ export class KibanaRequest<
     Query extends schema.Props,
     Body extends schema.Props
   >(
-    route: RouteConfig<
-      schema.ObjectSetting<Params>,
-      schema.ObjectSetting<Query>,
-      schema.ObjectSetting<Body>
-    >,
-    req: express.Request
+    req: express.Request,
+    routeSchemas:
+      | RouteSchemas<
+          schema.ObjectSetting<Params>,
+          schema.ObjectSetting<Query>,
+          schema.ObjectSetting<Body>
+        >
+      | undefined
   ): { params: Params; query: Query; body: Body } {
     const noParams = {} as Params;
     const noQuery = {} as Query;
     const noBody = {} as Body;
 
-    // When `validate` isn't specific on a route we return all fields as empty
-    if (route.validate === undefined) {
-      // TODO During development, should we log this?
-
-      return {
-        params: noParams,
-        query: noQuery,
-        body: noBody
-      };
-    }
-
-    const routeSchemas = route.validate(schema);
-
-    if (routeSchemas == null) {
+    if (routeSchemas === undefined) {
       return {
         params: noParams,
         query: noQuery,
@@ -148,14 +146,33 @@ export class Router {
 
   constructor(readonly path: string) {}
 
+  private routeSchemasFromRouteConfig<
+    P extends schema.ObjectSetting<any>,
+    Q extends schema.ObjectSetting<any>,
+    B extends schema.ObjectSetting<any>
+  >(route: RouteConfig<P, Q, B>, routeMethod: RouteMethod) {
+    // The type doesn't allow `validate` to be undefined, but it can still
+    // happen when it's used from JavaScript.
+    if (route.validate === undefined) {
+      throw new Error(
+        `The [${routeMethod}] at [${
+          route.path
+        }] does not have a 'validation' specified. Use 'false' as the value if you want to bypass validation.`
+      );
+    }
+
+    return route.validate ? route.validate(schema) : undefined;
+  }
+
   get<
     P extends schema.ObjectSetting<any>,
     Q extends schema.ObjectSetting<any>,
     B extends schema.ObjectSetting<any>
   >(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) {
+    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'GET');
     this.router.get(
       route.path,
-      async (req, res) => await this.handle(route, req, res, handler)
+      async (req, res) => await this.handle(routeSchemas, req, res, handler)
     );
   }
 
@@ -164,10 +181,11 @@ export class Router {
     Q extends schema.ObjectSetting<any>,
     B extends schema.ObjectSetting<any>
   >(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) {
+    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'POST');
     this.router.post(
       route.path,
       ...Router.getBodyParsers(),
-      async (req, res) => await this.handle(route, req, res, handler)
+      async (req, res) => await this.handle(routeSchemas, req, res, handler)
     );
   }
 
@@ -176,10 +194,11 @@ export class Router {
     Q extends schema.ObjectSetting<any>,
     B extends schema.ObjectSetting<any>
   >(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) {
+    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'POST');
     this.router.put(
       route.path,
       ...Router.getBodyParsers(),
-      async (req, res) => await this.handle(route, req, res, handler)
+      async (req, res) => await this.handle(routeSchemas, req, res, handler)
     );
   }
 
@@ -188,9 +207,10 @@ export class Router {
     Q extends schema.ObjectSetting<any>,
     B extends schema.ObjectSetting<any>
   >(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) {
+    const routeSchemas = this.routeSchemasFromRouteConfig(route, 'DELETE');
     this.router.delete(
       route.path,
-      async (req, res) => await this.handle(route, req, res, handler)
+      async (req, res) => await this.handle(routeSchemas, req, res, handler)
     );
   }
 
@@ -210,7 +230,7 @@ export class Router {
     Q extends schema.ObjectSetting<any>,
     B extends schema.ObjectSetting<any>
   >(
-    route: RouteConfig<P, Q, B>,
+    routeSchemas: RouteSchemas<P, Q, B> | undefined,
     request: express.Request,
     response: express.Response,
     handler: RequestHandler<P, Q, B>
@@ -222,7 +242,7 @@ export class Router {
     };
 
     try {
-      requestParts = KibanaRequest.validate(route, request);
+      requestParts = KibanaRequest.validate(request, routeSchemas);
     } catch (e) {
       response.status(400);
       response.json({ error: e.message });
