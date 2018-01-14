@@ -151,13 +151,13 @@ The accounts data set doesn't require any mappings, so at this point we're ready
 {ref}/docs-bulk.html[`bulk`] API to load the data sets with the following commands:
 
 [source,shell]
-curl -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/bank/account/_bulk?pretty' --data-binary @accounts.json
-curl -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/shakespeare/doc/_bulk?pretty' --data-binary @shakespeare_6.0.json
-curl -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/_bulk?pretty' --data-binary @logs.jsonl
+curl -u elastic -H 'Content-Type: application/x-ndjson' -XPOST ‘<elasticsearch-URL or localhost>:<port>/<index-name>/<type>_bulk?pretty’ --data-binary @<filename>
+curl -u elastic -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/shakespeare/doc/_bulk?pretty' --data-binary @shakespeare_6.0.json
+curl -u elastic -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/_bulk?pretty' --data-binary @logs.jsonl
 
 Or for Windows users, in Powershell:
 [source,shell]
-Invoke-RestMethod "http://localhost:9200/bank/account/_bulk?pretty" -Method Post -ContentType 'application/x-ndjson' -InFile "accounts.json"
+Invoke-RestMethod "http://<elasticsearch-URL or localhost>:<port>/<index-name>/<type>_bulk?pretty" -Method Post -ContentType 'application/x-ndjson' -InFile "<filename>"
 Invoke-RestMethod "http://localhost:9200/shakespeare/doc/_bulk?pretty" -Method Post -ContentType 'application/x-ndjson' -InFile "shakespeare_6.0.json"
 Invoke-RestMethod "http://localhost:9200/_bulk?pretty" -Method Post -ContentType 'application/x-ndjson' -InFile "logs.jsonl"
 
