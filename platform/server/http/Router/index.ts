@@ -4,19 +4,26 @@ import { schema, Schema } from '@elastic/kbn-utils';
 
 import { Headers, filterHeaders } from './headers';
 
-export interface Route<
+/**
+ * Schemas for validating the request on a route.
+ */
+export type RouteSchemas<
+  Params extends schema.ObjectSetting<any>,
+  Query extends schema.ObjectSetting<any>,
+  Body extends schema.ObjectSetting<any>
+> = (schema: Schema) => {
+  params?: Params;
+  query?: Query;
+  body?: Body;
+};
+
+export interface RouteConfig<
   Params extends schema.ObjectSetting<any>,
   Query extends schema.ObjectSetting<any>,
   Body extends schema.ObjectSetting<any>
 > {
   path: string;
-  validate?: (
-    schema: Schema
-  ) => {
-    params?: Params;
-    query?: Query;
-    body?: Body;
-  };
+  validate?: RouteSchemas<Params, Query, Body>
 }
 
 export interface ResponseFactory {
@@ -56,60 +63,68 @@ export class KibanaResponse<T> {
 }
 
 export class KibanaRequest<
-  Params extends schema.Props = {},
-  Query extends schema.Props = {},
-  Body extends schema.Props = {}
+  Params extends schema.Props,
+  Query extends schema.Props,
+  Body extends schema.Props
 > {
   readonly headers: Headers;
 
+  /**
+   * Validates the different parts of a request based on the schemas defined for
+   * the route. Builds up the actual params, query and body object that will be
+   * received in the route handler.
+   */
   static validate<
-    Params extends schema.Props = {},
-    Query extends schema.Props = {},
-    Body extends schema.Props = {}
+    Params extends schema.Props,
+    Query extends schema.Props,
+    Body extends schema.Props
   >(
-    route: Route<
+    route: RouteConfig<
       schema.ObjectSetting<Params>,
       schema.ObjectSetting<Query>,
       schema.ObjectSetting<Body>
     >,
     req: express.Request
   ): { params: Params; query: Query; body: Body } {
-    let params: Params;
-    let query: Query;
-    let body: Body;
+    const noParams = {} as Params;
+    const noQuery = {} as Query;
+    const noBody = {} as Body;
 
+    // When `validate` isn't specific on a route we return all fields as empty
     if (route.validate === undefined) {
-      params = req.params;
-      query = req.query;
-      body = req.body;
-      return { params, query, body };
+      // TODO During development, should we log this?
+
+      return {
+        params: noParams,
+        query: noQuery,
+        body: noBody
+      };
     }
 
-    const validateResult = route.validate(schema);
+    const routeSchemas = route.validate(schema);
 
-    if (validateResult === undefined) {
-      params = req.params;
-      query = req.query;
-      body = req.body;
-    } else {
-      if (validateResult.params === undefined) {
-        params = req.params;
-      } else {
-        params = validateResult.params.validate(req.params);
-      }
-
-      if (validateResult.query === undefined) {
-        query = req.query;
-      } else {
-        query = validateResult.query.validate(req.query);
-      }
-
-      if (validateResult.body === undefined) {
-        body = req.body;
-      } else {
-        body = validateResult.body.validate(req.body);
-      }
+    if (routeSchemas == null) {
+      return {
+        params: noParams,
+        query: noQuery,
+        body: noBody
+      };
     }
+
+    const params =
+      routeSchemas.params === undefined
+        ? noParams
+        : routeSchemas.params.validate(req.params);
+
+    const query =
+      routeSchemas.query === undefined
+        ? noQuery
+        : routeSchemas.query.validate(req.query);
+
+    const body =
+      routeSchemas.body === undefined
+        ? noBody
+        : routeSchemas.body.validate(req.body);
 
     return { query, params, body };
   }
@@ -137,7 +152,7 @@ export class Router {
     P extends schema.ObjectSetting<any>,
     Q extends schema.ObjectSetting<any>,
     B extends schema.ObjectSetting<any>
-  >(route: Route<P, Q, B>, handler: RequestHandler<P, Q, B>) {
+  >(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) {
     this.router.get(
       route.path,
       async (req, res) => await this.handle(route, req, res, handler)
@@ -148,7 +163,7 @@ export class Router {
     P extends schema.ObjectSetting<any>,
     Q extends schema.ObjectSetting<any>,
     B extends schema.ObjectSetting<any>
-  >(route: Route<P, Q, B>, handler: RequestHandler<P, Q, B>) {
+  >(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) {
     this.router.post(
       route.path,
       ...Router.getBodyParsers(),
@@ -160,7 +175,7 @@ export class Router {
     P extends schema.ObjectSetting<any>,
     Q extends schema.ObjectSetting<any>,
     B extends schema.ObjectSetting<any>
-  >(route: Route<P, Q, B>, handler: RequestHandler<P, Q, B>) {
+  >(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) {
     this.router.put(
       route.path,
       ...Router.getBodyParsers(),
@@ -172,7 +187,7 @@ export class Router {
     P extends schema.ObjectSetting<any>,
     Q extends schema.ObjectSetting<any>,
     B extends schema.ObjectSetting<any>
-  >(route: Route<P, Q, B>, handler: RequestHandler<P, Q, B>) {
+  >(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) {
     this.router.delete(
       route.path,
       async (req, res) => await this.handle(route, req, res, handler)
@@ -195,20 +210,19 @@ export class Router {
     Q extends schema.ObjectSetting<any>,
     B extends schema.ObjectSetting<any>
   >(
-    route: Route<P, Q, B>,
+    route: RouteConfig<P, Q, B>,
     request: express.Request,
     response: express.Response,
     handler: RequestHandler<P, Q, B>
   ) {
-    let valid: {
+    let requestParts: {
       params: schema.TypeOf<P>;
       query: schema.TypeOf<P>;
       body: schema.TypeOf<B>;
     };
 
-    // TODO Change this so we can get failures per type
     try {
-      valid = KibanaRequest.validate(route, request);
+      requestParts = KibanaRequest.validate(route, request);
     } catch (e) {
       response.status(400);
       response.json({ error: e.message });
@@ -217,9 +231,9 @@ export class Router {
 
     const kibanaRequest = new KibanaRequest(
       request,
-      valid.params,
-      valid.query,
-      valid.body
+      requestParts.params,
+      requestParts.query,
+      requestParts.body
     );
 
     try {

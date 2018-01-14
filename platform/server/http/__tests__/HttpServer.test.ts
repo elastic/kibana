@@ -304,9 +304,19 @@ test('invalid body', async () => {
 test('handles putting', async () => {
   const router = new Router('/foo');
 
-  router.put({ path: '/' }, async (req, res) => {
-    return res.ok(req.body);
-  });
+  router.put(
+    {
+      path: '/',
+      validate: schema => ({
+        body: schema.object({
+          key: schema.string()
+        })
+      })
+    },
+    async (req, res) => {
+      return res.ok(req.body);
+    }
+  );
 
   server.registerRouter(router);
 
