@@ -433,7 +433,7 @@ export type ObjectSettingType<P extends Props> = Readonly<
   { [K in keyof P]: TypeOf<P[K]> }
 >;
 
-export class ObjectSetting<P extends Props> extends Setting<
+export class ObjectSetting<P extends Props = Props> extends Setting<
   ObjectSettingType<P>
 > {
   constructor(
