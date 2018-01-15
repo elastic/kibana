@@ -1,10 +1,9 @@
-let mockCreateWriteStream = {};
+let mockCreateWriteStream: any = {};
 
 jest.mock('fs', () => ({
   createWriteStream: () => mockCreateWriteStream
 }));
 
-import * as mockSchema from '../../lib/schema';
 import { LoggingConfig } from '../LoggingConfig';
 import { MutableLoggerFactory } from '../LoggerFactory';
 
@@ -46,7 +45,7 @@ test('`get()` returns Logger that appends records to buffer if config is not rea
   expect(mockConsoleLog).not.toHaveBeenCalled();
   expect(mockCreateWriteStream.write).not.toHaveBeenCalled();
 
-  const loggingConfigSchema = LoggingConfig.createSchema(mockSchema);
+  const loggingConfigSchema = LoggingConfig.schema;
   const config = new LoggingConfig(
     loggingConfigSchema.validate({
       appenders: {
@@ -92,7 +91,7 @@ test('`get()` returns Logger that appends records to buffer if config is not rea
 });
 
 test('`get()` returns `root` logger if context is not specified.', () => {
-  const loggingConfigSchema = LoggingConfig.createSchema(mockSchema);
+  const loggingConfigSchema = LoggingConfig.schema;
   const factory = new MutableLoggerFactory({} as any);
   const config = loggingConfigSchema.validate({
     appenders: {
@@ -117,7 +116,7 @@ test('`get()` returns `root` logger if context is not specified.', () => {
 test('`close()` disposes all resources used by appenders.', async () => {
   const factory = new MutableLoggerFactory({} as any);
 
-  const loggingConfigSchema = LoggingConfig.createSchema(mockSchema);
+  const loggingConfigSchema = LoggingConfig.schema;
   const config = new LoggingConfig(
     loggingConfigSchema.validate({
       appenders: {

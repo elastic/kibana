@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig-package",
+  "compilerOptions": {
+    "declarationDir": "./target/tsc-types",
+    "outDir": "./target/tsc"
+  },
+  "include": [
+    "./src/**/*.ts"
+  ]
+}

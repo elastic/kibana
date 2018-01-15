@@ -111,6 +111,10 @@
   version "0.0.0"
   uid ""
 
+"@elastic/kbn-utils@link:packages/kbn-utils":
+  version "0.0.0"
+  uid ""
+
 "@elastic/numeral@2.3.1":
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/@elastic/numeral/-/numeral-2.3.1.tgz#743801971d8f0c975f9a122867d0e8939d31b3eb"

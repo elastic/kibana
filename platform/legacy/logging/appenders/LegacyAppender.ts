@@ -1,24 +1,19 @@
-import { Schema, typeOfSchema } from '../../../types/schema';
+import { schema } from '@elastic/kbn-utils';
+
 import { LogRecord } from '../../../logging/LogRecord';
 import { DisposableAppender } from '../../../logging/appenders/Appenders';
 import { LegacyKbnServer } from '../../LegacyKbnServer';
 
-const createSchema = (schema: Schema) => {
-  const { literal, object } = schema;
-
-  return object({ kind: literal('legacy-appender') });
-};
-
-const schemaType = typeOfSchema(createSchema);
-/** @internal */
-export type LegacyAppenderConfigType = typeof schemaType;
+const { literal, object } = schema;
 
 /**
  * Simple appender that just forwards `LogRecord` to the legacy KbnServer log.
  * @internal
  */
 export class LegacyAppender implements DisposableAppender {
-  static createConfigSchema = createSchema;
+  static configSchema = object({
+    kind: literal('legacy-appender')
+  });
 
   constructor(private readonly kbnServer: LegacyKbnServer) {}
 

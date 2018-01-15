@@ -1,15 +1,13 @@
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
+import { schema, Schema } from '@elastic/kbn-utils';
 
 import { Headers, filterHeaders } from './headers';
-import { ObjectSetting, Props, Any, TypeOf } from '../../../lib/schema';
-import { Schema } from '../../../types/schema';
-import * as schema from '../../../lib/schema';
 
 export interface Route<
-  Params extends ObjectSetting<any>,
-  Query extends ObjectSetting<any>,
-  Body extends ObjectSetting<any>
+  Params extends schema.ObjectSetting<any>,
+  Query extends schema.ObjectSetting<any>,
+  Body extends schema.ObjectSetting<any>
 > {
   path: string;
   validate?: (
@@ -38,11 +36,15 @@ const responseFactory: ResponseFactory = {
 };
 
 export type RequestHandler<
-  Params extends Any,
-  Query extends Any,
-  Body extends Any
+  Params extends schema.Any,
+  Query extends schema.Any,
+  Body extends schema.Any
 > = (
-  req: KibanaRequest<TypeOf<Params>, TypeOf<Query>, TypeOf<Body>>,
+  req: KibanaRequest<
+    schema.TypeOf<Params>,
+    schema.TypeOf<Query>,
+    schema.TypeOf<Body>
+  >,
   createResponse: ResponseFactory
 ) => Promise<KibanaResponse<any> | { [key: string]: any }>;
 
@@ -54,21 +56,21 @@ export class KibanaResponse<T> {
 }
 
 export class KibanaRequest<
-  Params extends Props = {},
-  Query extends Props = {},
-  Body extends Props = {}
+  Params extends schema.Props = {},
+  Query extends schema.Props = {},
+  Body extends schema.Props = {}
 > {
   readonly headers: Headers;
 
   static validate<
-    Params extends Props = {},
-    Query extends Props = {},
-    Body extends Props = {}
+    Params extends schema.Props = {},
+    Query extends schema.Props = {},
+    Body extends schema.Props = {}
   >(
     route: Route<
-      ObjectSetting<Params>,
-      ObjectSetting<Query>,
-      ObjectSetting<Body>
+      schema.ObjectSetting<Params>,
+      schema.ObjectSetting<Query>,
+      schema.ObjectSetting<Body>
     >,
     req: express.Request
   ): { params: Params; query: Query; body: Body } {
@@ -132,9 +134,9 @@ export class Router {
   constructor(readonly path: string) {}
 
   get<
-    P extends ObjectSetting<any>,
-    Q extends ObjectSetting<any>,
-    B extends ObjectSetting<any>
+    P extends schema.ObjectSetting<any>,
+    Q extends schema.ObjectSetting<any>,
+    B extends schema.ObjectSetting<any>
   >(route: Route<P, Q, B>, handler: RequestHandler<P, Q, B>) {
     this.router.get(
       route.path,
@@ -143,9 +145,9 @@ export class Router {
   }
 
   post<
-    P extends ObjectSetting<any>,
-    Q extends ObjectSetting<any>,
-    B extends ObjectSetting<any>
+    P extends schema.ObjectSetting<any>,
+    Q extends schema.ObjectSetting<any>,
+    B extends schema.ObjectSetting<any>
   >(route: Route<P, Q, B>, handler: RequestHandler<P, Q, B>) {
     this.router.post(
       route.path,
@@ -155,9 +157,9 @@ export class Router {
   }
 
   put<
-    P extends ObjectSetting<any>,
-    Q extends ObjectSetting<any>,
-    B extends ObjectSetting<any>
+    P extends schema.ObjectSetting<any>,
+    Q extends schema.ObjectSetting<any>,
+    B extends schema.ObjectSetting<any>
   >(route: Route<P, Q, B>, handler: RequestHandler<P, Q, B>) {
     this.router.put(
       route.path,
@@ -167,9 +169,9 @@ export class Router {
   }
 
   delete<
-    P extends ObjectSetting<any>,
-    Q extends ObjectSetting<any>,
-    B extends ObjectSetting<any>
+    P extends schema.ObjectSetting<any>,
+    Q extends schema.ObjectSetting<any>,
+    B extends schema.ObjectSetting<any>
   >(route: Route<P, Q, B>, handler: RequestHandler<P, Q, B>) {
     this.router.delete(
       route.path,
@@ -189,16 +191,20 @@ export class Router {
   }
 
   private async handle<
-    P extends ObjectSetting<any>,
-    Q extends ObjectSetting<any>,
-    B extends ObjectSetting<any>
+    P extends schema.ObjectSetting<any>,
+    Q extends schema.ObjectSetting<any>,
+    B extends schema.ObjectSetting<any>
   >(
     route: Route<P, Q, B>,
     request: express.Request,
     response: express.Response,
     handler: RequestHandler<P, Q, B>
   ) {
-    let valid: { params: TypeOf<P>; query: TypeOf<P>; body: TypeOf<B> };
+    let valid: {
+      params: schema.TypeOf<P>;
+      query: schema.TypeOf<P>;
+      body: schema.TypeOf<B>;
+    };
 
     // TODO Change this so we can get failures per type
     try {

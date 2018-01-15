@@ -1,9 +1,13 @@
-import * as mockSchema from '../../../lib/schema';
-
-const mockCreateLayoutConfigSchema = jest.fn();
-jest.mock('../../layouts/Layouts', () => ({
-  Layouts: { createConfigSchema: mockCreateLayoutConfigSchema }
-}));
+jest.mock('../../layouts/Layouts', () => {
+  const { schema } = require('@elastic/kbn-utils');
+  return {
+    Layouts: {
+      configSchema: schema.object({
+        kind: schema.literal('mock')
+      })
+    }
+  };
+});
 
 const mockCreateWriteStream = jest.fn();
 jest.mock('fs', () => ({ createWriteStream: mockCreateWriteStream }));
@@ -15,18 +19,11 @@ import { FileAppender } from '../file/FileAppender';
 const tickMs = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 beforeEach(() => {
-  mockCreateLayoutConfigSchema.mockReset();
   mockCreateWriteStream.mockReset();
 });
 
 test('`createConfigSchema()` creates correct schema.', () => {
-  mockCreateLayoutConfigSchema.mockReturnValue(
-    mockSchema.object({
-      kind: mockSchema.literal('mock')
-    })
-  );
-
-  const appenderSchema = FileAppender.createConfigSchema(mockSchema);
+  const appenderSchema = FileAppender.configSchema;
 
   const validConfig = { kind: 'file', layout: { kind: 'mock' }, path: 'path' };
   expect(appenderSchema.validate(validConfig)).toEqual({

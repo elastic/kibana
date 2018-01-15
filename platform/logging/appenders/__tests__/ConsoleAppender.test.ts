@@ -1,26 +1,20 @@
-import * as mockSchema from '../../../lib/schema';
-
-const mockCreateLayoutConfigSchema = jest.fn();
-jest.mock('../../layouts/Layouts', () => ({
-  Layouts: { createConfigSchema: mockCreateLayoutConfigSchema }
-}));
+jest.mock('../../layouts/Layouts', () => {
+  const { schema } = require('@elastic/kbn-utils');
+  return {
+    Layouts: {
+      configSchema: schema.object({
+        kind: schema.literal('mock')
+      })
+    }
+  };
+});
 
 import { LogLevel } from '../../LogLevel';
 import { LogRecord } from '../../LogRecord';
 import { ConsoleAppender } from '../console/ConsoleAppender';
 
-beforeEach(() => {
-  mockCreateLayoutConfigSchema.mockReset();
-});
-
-test('`createConfigSchema()` creates correct schema.', () => {
-  mockCreateLayoutConfigSchema.mockReturnValue(
-    mockSchema.object({
-      kind: mockSchema.literal('mock')
-    })
-  );
-
-  const appenderSchema = ConsoleAppender.createConfigSchema(mockSchema);
+test('`configSchema` creates correct schema.', () => {
+  const appenderSchema = ConsoleAppender.configSchema;
   const validConfig = { kind: 'console', layout: { kind: 'mock' } };
   expect(appenderSchema.validate(validConfig)).toEqual({
     kind: 'console',

@@ -1,23 +1,23 @@
-import { Schema, typeOfSchema } from '../../types/schema';
+import { schema } from '@elastic/kbn-utils';
+
 import { LogRecord } from '../LogRecord';
 import { Layout } from './Layouts';
 
-const createSchema = ({ literal, object }: Schema) => {
-  return object({
-    kind: literal('json')
-  });
-};
+const { literal, object } = schema;
 
-const schemaType = typeOfSchema(createSchema);
+const jsonLayoutSchema = object({
+  kind: literal('json')
+});
+
 /** @internal */
-export type JsonLayoutConfigType = typeof schemaType;
+export type JsonLayoutConfigType = schema.TypeOf<typeof jsonLayoutSchema>;
 
 /**
  * Layout that just converts `LogRecord` into JSON string.
  * @internal
  */
 export class JsonLayout implements Layout {
-  static createConfigSchema = createSchema;
+  static configSchema = jsonLayoutSchema;
 
   format(record: LogRecord): string {
     return JSON.stringify({

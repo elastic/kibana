@@ -1,7 +1,6 @@
 import { Observable } from '@elastic/kbn-observable';
+import { schema } from '@elastic/kbn-utils';
 
-import { Schema } from '../../types/schema';
-import * as schemaLib from '../../lib/schema';
 import { ConfigWithSchema } from '../../config';
 import { Router } from '../http';
 import { KibanaConfig } from '../kibana';
@@ -13,13 +12,6 @@ export interface KibanaPluginApi {
    * Plugin-scoped logger
    */
   logger: LoggerFactory;
-
-  /**
-   * Core Kibana utilities
-   */
-  util: {
-    schema: Schema;
-  };
 
   /**
    * Core Elasticsearch functionality
@@ -52,18 +44,16 @@ export interface KibanaPluginApi {
   config: {
     /**
      * Reads the subset of the config at the specified `path` and validates it
-     * against the schema created by calling the static `createSchema` on the
-     * specified `ConfigClass`.
+     * against the schema in the static `schema` on the given `ConfigClass`.
      *
      * @param path The path to the desired subset of the config.
      * @param ConfigClass A class (not an instance of a class) that contains a
-     * static `createSchema` that will be called to create a schema that we
-     * validate the config at the given `path` against.
+     * static `schema` that we validate the config at the given `path` against.
      */
-    create: <Schema extends schemaLib.Any, Config>(
+    create: <Schema extends schema.Any, Config>(
       ConfigClass: ConfigWithSchema<Schema, Config>
     ) => Observable<Config>;
-    createIfExists: <Schema extends schemaLib.Any, Config>(
+    createIfExists: <Schema extends schema.Any, Config>(
       ConfigClass: ConfigWithSchema<Schema, Config>
     ) => Observable<Config | undefined>;
   };

@@ -1,6 +1,5 @@
 import { KibanaPluginApi } from './KibanaPluginApi';
 import { KibanaCoreModules } from './KibanaCoreModules';
-import * as schema from '../../lib/schema';
 import { Router } from '../http';
 
 /**
@@ -25,9 +24,6 @@ export function createKibanaValuesForPlugin(
       get(...contextParts) {
         return core.logger.get('plugins', pluginName, ...contextParts);
       }
-    },
-    util: {
-      schema
     },
     elasticsearch: {
       service: core.elasticsearch.service,

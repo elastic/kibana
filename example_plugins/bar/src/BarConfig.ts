@@ -1,20 +1,19 @@
-import { Schema, typeOfSchema } from '@elastic/kbn-types';
+import { schema } from '@elastic/kbn-utils';
 
-const createBarConfig = (schema: Schema) =>
-  schema.object({
-    myValue: schema.string()
-  });
+const barConfig = schema.object({
+  myValue: schema.string()
+});
 
-const barConfigType = typeOfSchema(createBarConfig);
+type BarConfigType = schema.TypeOf<typeof barConfig>;
 
 export class BarConfig {
   /** @internal */
-  static createSchema = createBarConfig;
+  static schema = barConfig;
 
   myValue: string;
 
   /** @internal */
-  constructor(config: typeof barConfigType) {
+  constructor(config: BarConfigType) {
     this.myValue = config.myValue;
   }
 }

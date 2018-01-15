@@ -1,5 +1,7 @@
-import { Schema, typeOfSchema } from '../types/schema';
+import { schema } from '@elastic/kbn-utils';
 import { Appenders, AppenderConfigType } from './appenders/Appenders';
+
+const { literal, oneOf, object, string, arrayOf, mapOf } = schema;
 
 // We need this helper for the types to be correct
 // (otherwise it assumes an array of A|B instead of a tuple [A,B])
@@ -20,67 +22,55 @@ const ROOT_CONTEXT_NAME = 'root';
  */
 const DEFAULT_APPENDER_NAME = 'default';
 
-const createLevelSchema = ({ literal, oneOf }: Schema) => {
-  return oneOf(
-    [
-      literal('all'),
-      literal('fatal'),
-      literal('error'),
-      literal('warn'),
-      literal('info'),
-      literal('debug'),
-      literal('trace'),
-      literal('off')
-    ],
-    {
-      defaultValue: 'info'
-    }
-  );
-};
+const createLevelSchema = oneOf(
+  [
+    literal('all'),
+    literal('fatal'),
+    literal('error'),
+    literal('warn'),
+    literal('info'),
+    literal('debug'),
+    literal('trace'),
+    literal('off')
+  ],
+  {
+    defaultValue: 'info'
+  }
+);
 
-const createLoggerSchema = (schema: Schema) => {
-  const { object, string, arrayOf } = schema;
+const createLoggerSchema = object({
+  context: string(),
+  level: createLevelSchema,
+  appenders: arrayOf(string(), { defaultValue: [] })
+});
 
-  return object({
-    context: string(),
-    level: createLevelSchema(schema),
-    appenders: arrayOf(string(), { defaultValue: [] })
-  });
-};
-
-const createLoggingSchema = (schema: Schema) => {
-  const { arrayOf, object, string, mapOf } = schema;
-
-  return object({
-    appenders: mapOf(string(), Appenders.createConfigSchema(schema), {
-      defaultValue: new Map<string, AppenderConfigType>()
-    }),
-    root: object({
-      level: createLevelSchema(schema),
-      appenders: arrayOf(string(), {
-        defaultValue: [DEFAULT_APPENDER_NAME],
-        minSize: 1
-      })
-    }),
-    loggers: arrayOf(createLoggerSchema(schema), {
-      defaultValue: []
+const loggingSchema = object({
+  appenders: mapOf(string(), Appenders.configSchema, {
+    defaultValue: new Map<string, AppenderConfigType>()
+  }),
+  root: object({
+    level: createLevelSchema,
+    appenders: arrayOf(string(), {
+      defaultValue: [DEFAULT_APPENDER_NAME],
+      minSize: 1
     })
-  });
-};
+  }),
+  loggers: arrayOf(createLoggerSchema, {
+    defaultValue: []
+  })
+});
 
-const loggerConfigType = typeOfSchema(createLoggerSchema);
 /** @internal */
-export type LoggerConfigType = typeof loggerConfigType;
+export type LoggerConfigType = schema.TypeOf<typeof createLoggerSchema>;
 
-const loggingConfigType = typeOfSchema(createLoggingSchema);
-type LoggingConfigType = typeof loggingConfigType;
+type LoggingConfigType = schema.TypeOf<typeof loggingSchema>;
 
 /**
  * Describes the config used to fully setup logging subsystem.
  * @internal
  */
 export class LoggingConfig {
-  static createSchema = createLoggingSchema;
+  static schema = loggingSchema;
 
   /**
    * Map of the appender unique arbitrary key and its corresponding config.
@@ -129,18 +119,18 @@ export class LoggingConfig {
     return context.slice(0, lastIndexOfSeparator);
   }
 
-  private fillAppendersConfig(schema: LoggingConfigType) {
-    for (const [appenderKey, appenderSchema] of schema.appenders) {
+  private fillAppendersConfig(loggingConfig: LoggingConfigType) {
+    for (const [appenderKey, appenderSchema] of loggingConfig.appenders) {
       this.appenders.set(appenderKey, appenderSchema);
     }
   }
 
-  private fillLoggersConfig(schema: LoggingConfigType) {
+  private fillLoggersConfig(loggingConfig: LoggingConfigType) {
     // Include `root` logger into common logger list so that it can easily be a part
     // of the logger hierarchy and put all the loggers in map for easier retrieval.
     const loggers = [
-      { context: ROOT_CONTEXT_NAME, ...schema.root },
-      ...schema.loggers
+      { context: ROOT_CONTEXT_NAME, ...loggingConfig.root },
+      ...loggingConfig.loggers
     ];
 
     const loggerConfigByContext = new Map(

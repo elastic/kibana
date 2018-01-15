@@ -1,10 +1,9 @@
 import { BehaviorSubject, k$, first, toPromise } from '@elastic/kbn-observable';
+import { schema } from '@elastic/kbn-utils';
 
 import { ConfigService, ObjectToRawConfigAdapter } from '..';
 import { Env } from '../Env';
 import { logger } from '../../logging/__mocks__';
-import { Schema } from '../../types/schema';
-import * as schemaLib from '../../lib/schema';
 
 const emptyArgv = {};
 const defaultEnv = new Env('/kibana', emptyArgv);
@@ -105,7 +104,7 @@ test('pushes new config when reloading and config at path has changed', async ()
   expect(valuesReceived).toEqual(['value', 'new value']);
 });
 
-test("throws error if config class does not implement 'createSchema'", async () => {
+test("throws error if config class does not implement 'schema'", async () => {
   expect.assertions(1);
 
   class ExampleClass {}
@@ -150,12 +149,12 @@ test('tracks unhandled paths', async () => {
   );
   const configService = new ConfigService(config$, defaultEnv, logger);
 
-  configService.atPath('foo', createClassWithSchema(schemaLib.string()));
+  configService.atPath('foo', createClassWithSchema(schema.string()));
   configService.atPath(
     ['bar', 'deep2'],
     createClassWithSchema(
-      schemaLib.object({
-        key: schemaLib.string()
+      schema.object({
+        key: schema.string()
       })
     )
   );
@@ -240,20 +239,16 @@ test('treats config as enabled if config path is not present in config', async (
   expect(unusedPaths).toEqual([]);
 });
 
-function createClassWithSchema(schema: schemaLib.Any) {
+function createClassWithSchema(s: schema.Any) {
   return class ExampleClassWithSchema {
-    static createSchema = () => {
-      return schema;
-    };
+    static schema = s;
 
-    constructor(readonly value: schemaLib.TypeOf<typeof schema>) {}
+    constructor(readonly value: schema.TypeOf<typeof s>) {}
   };
 }
 
 class ExampleClassWithStringSchema {
-  static createSchema = (schema: Schema) => {
-    return schema.string();
-  };
+  static schema = schema.string();
 
   constructor(readonly value: string) {}
 }

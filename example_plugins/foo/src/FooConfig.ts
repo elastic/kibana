@@ -1,18 +1,17 @@
-import { Schema, typeOfSchema } from '@elastic/kbn-types';
+import { schema } from '@elastic/kbn-utils';
 
-const createFooSchema = (schema: Schema) =>
-  schema.object({
-    encryptionKey: schema.string({ defaultValue: 'default' })
-  });
+const fooSchema = schema.object({
+  encryptionKey: schema.string({ defaultValue: 'default' })
+});
 
-const fooConfigType = typeOfSchema(createFooSchema);
+type FooConfigType = schema.TypeOf<typeof fooSchema>;
 
 export class FooConfig {
-  static createSchema = createFooSchema;
+  static schema = fooSchema;
 
   encryptionKey: string;
 
-  constructor(config: typeof fooConfigType) {
+  constructor(config: FooConfigType) {
     this.encryptionKey = config.encryptionKey;
   }
 }

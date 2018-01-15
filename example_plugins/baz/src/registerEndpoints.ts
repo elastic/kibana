@@ -2,7 +2,6 @@ import { Observable } from '@elastic/kbn-observable';
 import {
   Router,
   LoggerFactory,
-  Schema,
   ElasticsearchService,
   KibanaConfig
 } from '@elastic/kbn-types';
@@ -30,7 +29,7 @@ export function registerEndpoints(
   router.get(
     {
       path: '/:type',
-      validate: (schema: Schema) => ({
+      validate: schema => ({
         params: schema.object({
           type: schema.string()
         }),

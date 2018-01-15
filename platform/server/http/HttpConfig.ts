@@ -1,48 +1,44 @@
 import { SslConfig } from './SslConfig';
 import { Env } from '../../config';
-import { ByteSizeValue } from '../../lib/ByteSizeValue';
-import { Schema, typeOfSchema } from '../../types/schema';
+import { schema, ByteSizeValue } from '@elastic/kbn-utils';
 
 const validHostnameRegex = /^(([A-Z0-9]|[A-Z0-9][A-Z0-9\-]*[A-Z0-9])\.)*([A-Z0-9]|[A-Z0-9][A-Z0-9\-]*[A-Z0-9])$/i;
 const validBasePathRegex = /(^$|^\/.*[^\/]$)/;
 
+const { object, string, number, byteSize, maybe } = schema;
+
 const match = (regex: RegExp, errorMsg: string) => (str: string) =>
   regex.test(str) ? undefined : errorMsg;
 
-const createHttpSchema = (schema: Schema) => {
-  const { object, string, number, byteSize, maybe } = schema;
+const createHttpSchema = object({
+  host: string({
+    defaultValue: 'localhost',
+    validate: match(validHostnameRegex, 'must be a valid hostname')
+  }),
+  port: number({
+    defaultValue: 5601
+  }),
+  maxPayload: byteSize({
+    defaultValue: '1mb'
+  }),
+  basePath: maybe(
+    string({
+      validate: match(
+        validBasePathRegex,
+        "must start with a slash, don't end with one"
+      )
+    })
+  ),
+  ssl: SslConfig.schema
+});
 
-  return object({
-    host: string({
-      defaultValue: 'localhost',
-      validate: match(validHostnameRegex, 'must be a valid hostname')
-    }),
-    port: number({
-      defaultValue: 5601
-    }),
-    maxPayload: byteSize({
-      defaultValue: '1mb'
-    }),
-    basePath: maybe(
-      string({
-        validate: match(
-          validBasePathRegex,
-          "must start with a slash, don't end with one"
-        )
-      })
-    ),
-    ssl: SslConfig.createSchema(schema)
-  });
-};
-
-const httpConfigType = typeOfSchema(createHttpSchema);
-type HttpConfigType = typeof httpConfigType;
+type HttpConfigType = schema.TypeOf<typeof createHttpSchema>;
 
 export class HttpConfig {
   /**
    * @internal
    */
-  static createSchema = createHttpSchema;
+  static schema = createHttpSchema;
 
   host: string;
   port: number;

@@ -1,29 +1,28 @@
-import { Schema, typeOfSchema } from '../../types/schema';
+import { schema } from '@elastic/kbn-utils';
 
 /**
  * @internal
  */
-export const createSslSchema = (schema: Schema) =>
-  schema.object({
-    verificationMode: schema.oneOf([
-      schema.literal('none'),
-      schema.literal('certificate'),
-      schema.literal('full')
-    ]),
-    certificateAuthorities: schema.maybe(
-      schema.arrayOf(schema.string(), { minSize: 1 })
-    ),
-    certificate: schema.maybe(schema.string()),
-    key: schema.maybe(schema.string()),
-    keyPassphrase: schema.maybe(schema.string())
-  });
+export const sslSchema = schema.object({
+  verificationMode: schema.oneOf([
+    schema.literal('none'),
+    schema.literal('certificate'),
+    schema.literal('full')
+  ]),
+  certificateAuthorities: schema.maybe(
+    schema.arrayOf(schema.string(), { minSize: 1 })
+  ),
+  certificate: schema.maybe(schema.string()),
+  key: schema.maybe(schema.string()),
+  keyPassphrase: schema.maybe(schema.string())
+});
 
 const DEFAULT_REQUEST_HEADERS = ['authorization'];
 
 /**
  * @internal
  */
-const createSharedFields = (schema: Schema) => ({
+const sharedElasticsearchFields = {
   url: schema.string({ defaultValue: 'http://localhost:9200' }),
   preserveHost: schema.boolean({ defaultValue: true }),
   username: schema.maybe(schema.string()),
@@ -38,48 +37,43 @@ const createSharedFields = (schema: Schema) => ({
   startupTimeout: schema.duration({ defaultValue: '5s' }),
   logQueries: schema.boolean({ defaultValue: false }),
   apiVersion: schema.string({ defaultValue: 'master' }),
-  ssl: schema.maybe(createSslSchema(schema))
+  ssl: schema.maybe(sslSchema)
+};
+
+/**
+ * @internal
+ */
+const clusterSchema = schema.object({
+  ...sharedElasticsearchFields
 });
 
 /**
  * @internal
  */
-const clusterSchema = (schema: Schema) =>
-  schema.object({
-    ...createSharedFields(schema)
-  });
+export const tribeSchema = schema.object({
+  ...sharedElasticsearchFields
+});
 
 /**
  * @internal
  */
-export const createTribeSchema = (schema: Schema) =>
-  schema.object({
-    ...createSharedFields(schema)
-  });
+export const elasticsearchSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
+  ...sharedElasticsearchFields,
+  healthCheck: schema.object({
+    delay: schema.duration({ defaultValue: '2500ms' })
+  }),
+  tribe: schema.maybe(tribeSchema)
+});
 
 /**
  * @internal
  */
-export const createElasticsearchSchema = (schema: Schema) =>
-  schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
-    ...createSharedFields(schema),
-    healthCheck: schema.object({
-      delay: schema.duration({ defaultValue: '2500ms' })
-    }),
-    tribe: schema.maybe(createTribeSchema(schema))
-  });
-
-const elasticsearchConfigType = typeOfSchema(createElasticsearchSchema);
+export type ElasticsearchConfigsSchema = schema.TypeOf<
+  typeof elasticsearchSchema
+>;
 
 /**
  * @internal
  */
-export type ElasticsearchConfigsSchema = typeof elasticsearchConfigType;
-
-const clusterConfigType = typeOfSchema(clusterSchema);
-
-/**
- * @internal
- */
-export type ClusterSchema = typeof clusterConfigType;
+export type ClusterSchema = schema.TypeOf<typeof clusterSchema>;

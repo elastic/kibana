@@ -1,8 +1,11 @@
+import { schema } from '@elastic/kbn-utils';
+
 import { assertNever } from '../../lib/utils';
-import { Schema } from '../../types/schema';
 import { JsonLayout, JsonLayoutConfigType } from './JsonLayout';
 import { PatternLayout, PatternLayoutConfigType } from './PatternLayout';
 import { LogRecord } from '../LogRecord';
+
+const { oneOf } = schema;
 
 type LayoutConfigType = PatternLayoutConfigType | JsonLayoutConfigType;
 
@@ -16,14 +19,10 @@ export interface Layout {
 
 /** @internal */
 export class Layouts {
-  static createConfigSchema(schema: Schema) {
-    const { oneOf } = schema;
-
-    return oneOf([
-      JsonLayout.createConfigSchema(schema),
-      PatternLayout.createConfigSchema(schema)
-    ]);
-  }
+  static configSchema = oneOf([
+    JsonLayout.configSchema,
+    PatternLayout.configSchema
+  ]);
 
   /**
    * Factory method that creates specific `Layout` instances based on the passed `config` parameter.

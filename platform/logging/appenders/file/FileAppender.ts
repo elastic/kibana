@@ -1,28 +1,22 @@
 import { createWriteStream, WriteStream } from 'fs';
-import { Schema, typeOfSchema } from '../../../types/schema';
+import { schema } from '@elastic/kbn-utils';
+
 import { Layout, Layouts } from '../../layouts/Layouts';
 import { LogRecord } from '../../LogRecord';
 import { DisposableAppender } from '../Appenders';
 
-const createSchema = (schema: Schema) => {
-  const { literal, object, string } = schema;
-  return object({
-    kind: literal('file'),
-    path: string(),
-    layout: Layouts.createConfigSchema(schema)
-  });
-};
-
-const schemaType = typeOfSchema(createSchema);
-/** @internal */
-export type FileAppenderConfigType = typeof schemaType;
+const { literal, object, string } = schema;
 
 /**
  * Appender that formats all the `LogRecord` instances it receives and writes them to the specified file.
  * @internal
  */
 export class FileAppender implements DisposableAppender {
-  static createConfigSchema = createSchema;
+  static configSchema = object({
+    kind: literal('file'),
+    path: string(),
+    layout: Layouts.configSchema
+  });
 
   /**
    * Writable file stream to write formatted `LogRecord` to.

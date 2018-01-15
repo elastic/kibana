@@ -1,23 +1,21 @@
+import { schema } from '@elastic/kbn-utils';
+
 import { assertNever } from '../../lib/utils';
-import { Schema } from '../../types/schema';
 import { Env } from '../../config/Env';
-import {
-  ConsoleAppender,
-  ConsoleAppenderConfigType
-} from './console/ConsoleAppender';
-import { FileAppender, FileAppenderConfigType } from './file/FileAppender';
-import {
-  LegacyAppender,
-  LegacyAppenderConfigType
-} from '../../legacy/logging/appenders/LegacyAppender';
+import { ConsoleAppender } from './console/ConsoleAppender';
+import { FileAppender } from './file/FileAppender';
+import { LegacyAppender } from '../../legacy/logging/appenders/LegacyAppender';
 import { LogRecord } from '../LogRecord';
 import { Layouts } from '../layouts/Layouts';
 
+const appendersSchema = schema.oneOf([
+  ConsoleAppender.configSchema,
+  FileAppender.configSchema,
+  LegacyAppender.configSchema
+]);
+
 /** @internal */
-export type AppenderConfigType =
-  | ConsoleAppenderConfigType
-  | FileAppenderConfigType
-  | LegacyAppenderConfigType;
+export type AppenderConfigType = schema.TypeOf<typeof appendersSchema>;
 
 /**
  * Entity that can append `LogRecord` instances to file, stdout, memory or whatever
@@ -40,15 +38,7 @@ export interface DisposableAppender extends Appender {
 
 /** @internal */
 export class Appenders {
-  static createConfigSchema(schema: Schema) {
-    const { oneOf } = schema;
-
-    return oneOf([
-      ConsoleAppender.createConfigSchema(schema),
-      FileAppender.createConfigSchema(schema),
-      LegacyAppender.createConfigSchema(schema)
-    ]);
-  }
+  static configSchema = appendersSchema;
 
   /**
    * Factory method that creates specific `Appender` instances based on the passed `config` parameter.
