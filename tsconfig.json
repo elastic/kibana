@@ -21,8 +21,8 @@
     // as expected.
     "module": "commonjs",
 
-    // Resolve modules in the same as Node.js. Aka make `require` works the same
-    // in TypeScript as it does in Node.js. 
+    // Resolve modules in the same way as Node.js. Aka make `require` works the
+    // same in TypeScript as it does in Node.js.
     "moduleResolution": "node",
 
     // Disallow inconsistently-cased references to the same file.
