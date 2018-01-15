@@ -122,6 +122,10 @@ export function BaseMapsVisualizationProvider() {
 
       try {
 
+        if (!this._kibanaMap) {
+          return;
+        }
+
         if (mapParams.wms.enabled) {
           if (MINZOOM > this._kibanaMap.getMaxZoomLevel()) {
             this._kibanaMap.setMinZoom(MINZOOM);
