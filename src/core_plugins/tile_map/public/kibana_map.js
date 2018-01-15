@@ -396,6 +396,16 @@ export class KibanaMap extends EventEmitter {
 
     const southEast = bounds.getSouthEast();
     const northWest = bounds.getNorthWest();
+
+    if (
+      southEast.lng === 0 &&
+      southEast.lat === 0 &&
+      northWest.lng === 0 &&
+      northWest.lat === 0
+    ) {
+      return null;
+    }
+
     const southEastLng = southEast.lng;
     const northWestLng = northWest.lng;
     const southEastLat = southEast.lat;
