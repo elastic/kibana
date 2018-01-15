@@ -12,7 +12,6 @@ module.directive('wmsOptions', function (serviceSettings) {
     },
     link: function ($scope) {
 
-      console.log('call linker wms options');
       //todo: just noodling, not sure if this is the right way
       $scope.options.baseLayersAreLoaded = new Promise((resolve, reject) => {
 
