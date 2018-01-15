@@ -133,15 +133,9 @@ uiModules.get('kibana')
       /**
        * Returns all the services published by EMS (if configures)
        * It also includes the service configured in tilemap (override)
-       *
-       *
        */
       async getTMSServices() {
-
         const allServices = await this._loadTMSServices();
-
-        //todo: ensure no clashing ids
-        //todo: figure out human readable name for layer
         if (tilemapsConfig.deprecated.isOverridden) {//use tilemap.* settings from yml
           const tmsService = _.cloneDeep(tmsOptionsFromConfig);
           tmsService.url = tilemapsConfig.deprecated.config.url;

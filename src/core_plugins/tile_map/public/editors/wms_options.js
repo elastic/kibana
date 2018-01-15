@@ -12,7 +12,6 @@ module.directive('wmsOptions', function (serviceSettings) {
     },
     link: function ($scope) {
 
-      //todo: just noodling, not sure if this is the right way
       $scope.options.baseLayersAreLoaded = new Promise((resolve, reject) => {
 
         serviceSettings
@@ -23,7 +22,6 @@ module.directive('wmsOptions', function (serviceSettings) {
               $scope.options.tmsLayers = [];
             }
 
-            //todo: clean up duplication with similar logic in region_map_vis_params
             const newBaseLayers = $scope.options.tmsLayers.slice();
             for (let i = 0; i < allTMSServices.length; i += 1) {
               const layerFromService = allTMSServices[i];
