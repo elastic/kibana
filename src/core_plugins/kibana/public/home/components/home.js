@@ -3,11 +3,30 @@ import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
 import {
   KuiLinkButton,
-  KuiFlexGroup,
-  KuiFlexItem,
-  KuiFlexGrid,
+  KuiCardGroup,
+  KuiCard,
+  KuiCardDescription,
+  KuiCardDescriptionTitle,
+  KuiCardDescriptionText,
+  KuiCardFooter,
 } from 'ui_framework/components';
+
+import {
+  EuiPage,
+  EuiPanel,
+  EuiTitle,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlexGrid,
+  EuiText,
+  EuiTextColor,
+} from '@elastic/eui';
+
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
+
+import chrome from 'ui/chrome';
+const kbnBaseUrl = chrome.getInjected('kbnBaseUrl');
 
 export function Home({ addBasePath, directories }) {
 
@@ -18,92 +37,199 @@ export function Home({ addBasePath, directories }) {
       })
       .map((directory) => {
         return (
-          <KuiFlexItem style={{ minHeight: 64 }} key={directory.id}>
+          <EuiFlexItem style={{ minHeight: 64 }} key={directory.id}>
             <Synopsis
               description={directory.description}
               iconUrl={addBasePath(directory.icon)}
               title={directory.title}
               url={addBasePath(directory.path)}
             />
-          </KuiFlexItem>
+          </EuiFlexItem>
         );
       });
   };
 
+  const renderPromo = () => {
+    const cardStyle = {
+      width: '250px',
+      'minWidth': '200px'
+    };
+    return (
+      <div className="kuiVerticalRhythm">
+        <KuiCardGroup>
+          <KuiCard style={cardStyle} className="euiPanel">
+            <KuiCardDescription>
+              <KuiCardDescriptionTitle>
+                <img
+                  src={addBasePath('/plugins/kibana/assets/app_logging.svg')}
+                />
+                <p>
+                  Logging
+                </p>
+              </KuiCardDescriptionTitle>
+
+              <KuiCardDescriptionText>
+                Ingest logs from popular data sources and easily visualize in preconfigured dashboards.
+              </KuiCardDescriptionText>
+            </KuiCardDescription>
+
+            <KuiCardFooter>
+              <KuiLinkButton
+                buttonType="secondary"
+                href={addBasePath(`${kbnBaseUrl}#/home/tutorial_directory/logging`)}
+              >
+                Add log data
+              </KuiLinkButton>
+            </KuiCardFooter>
+          </KuiCard>
+
+          <KuiCard style={cardStyle} className="euiPanel">
+            <KuiCardDescription>
+              <KuiCardDescriptionTitle>
+                <img
+                  src={addBasePath('/plugins/kibana/assets/app_monitoring.svg')}
+                />
+                <p>
+                  Metrics
+                </p>
+              </KuiCardDescriptionTitle>
+
+              <KuiCardDescriptionText>
+                Collect metrics from the operating system and services running on your servers.
+              </KuiCardDescriptionText>
+            </KuiCardDescription>
+
+            <KuiCardFooter>
+              <KuiLinkButton
+                buttonType="secondary"
+                href={addBasePath(`${kbnBaseUrl}#/home/tutorial_directory/metrics`)}
+              >
+                Add metric data
+              </KuiLinkButton>
+            </KuiCardFooter>
+          </KuiCard>
+
+          <KuiCard style={cardStyle} className="euiPanel">
+            <KuiCardDescription>
+              <KuiCardDescriptionTitle>
+                <img
+                  src={addBasePath('/plugins/kibana/assets/app_security.svg')}
+                />
+                <p>
+                  Security analytics
+                </p>
+              </KuiCardDescriptionTitle>
+
+              <KuiCardDescriptionText>
+                Centralize security events for interactive investigation in ready-to-go visualizations.
+              </KuiCardDescriptionText>
+            </KuiCardDescription>
+
+            <KuiCardFooter>
+              <KuiLinkButton
+                buttonType="secondary"
+                href={addBasePath(`${kbnBaseUrl}#/home/tutorial_directory/security`)}
+              >
+                Add security events
+              </KuiLinkButton>
+            </KuiCardFooter>
+          </KuiCard>
+        </KuiCardGroup>
+      </div>
+    );
+  };
 
   return (
-    <div className="kuiView home">
-      <div className="kuiViewContent">
+    <EuiPage className="home">
 
-        <div className="kuiViewContentItem kuiVerticalRhythmXLarge">
-          <KuiFlexGroup
-            className="kuiVerticalRhythmSmall"
-            justifyContent="spaceBetween"
-            alignItems="flexEnd"
-          >
-            <KuiFlexItem>
-              <h1 className="kuiTitle">
-                Welcome to Kibana
-              </h1>
-            </KuiFlexItem>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        alignItems="flexEnd"
+      >
+        <EuiFlexItem>
+          <EuiTitle size="l">
+            <h1>Add Data to Kibana</h1>
+          </EuiTitle>
+          <EuiText>
+            <p>
+              Use these solutions to quickly turn your data into pre-built dashboards and monitoring systems.
+            </p>
+          </EuiText>
+        </EuiFlexItem>
 
-            <KuiFlexItem grow={false}>
-              <KuiFlexGroup alignItems="center">
-                <KuiFlexItem grow={false}>
-                  <p className="kuiText kuiSubduedText">
-                    Data already in Elasticsearch?
-                  </p>
-                </KuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiTextColor color="subdued">
+            <EuiText>
+              <p>
+                Data already in Elasticsearch?
+              </p>
+            </EuiText>
+          </EuiTextColor>
+          <EuiSpacer size="s" />
+          <a href="/app/kibana#/management/kibana/index" className="euiButton euiButton--primary euiButton--small">
+            <span className="euiButton__content">
+              Set up index patterns
+            </span>
+          </a>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-                <KuiFlexItem grow={false}>
-                  <KuiLinkButton
-                    buttonType="secondary"
-                    href={addBasePath('/app/kibana#/management/kibana/index')}
-                  >
-                    Set up index patterns
-                  </KuiLinkButton>
-                </KuiFlexItem>
-              </KuiFlexGroup>
+      <EuiSpacer />
 
-            </KuiFlexItem>
-          </KuiFlexGroup>
-        </div>
 
-        <div className="kuiViewContentItem kuiVerticalRhythmXLarge">
-          <KuiFlexGroup className="kuiVerticalRhythm">
-            <KuiFlexItem className="kuiPanel homePanel">
-              <h3 className="kuiSubTitle kuiVerticalRhythm">
+      { renderPromo() }
+
+      <EuiSpacer size="l" />
+
+      <EuiFlexGroup className="kuiVerticalRhythm">
+        <EuiFlexItem>
+          <EuiPanel paddingSize="l">
+            <EuiTitle>
+              <h3>
                 Visualize and Explore Data
               </h3>
-              <KuiFlexGrid className="kuiVerticalRhythmSmall homeTopFeatures" columns={2}>
-                { renderDirectories(FeatureCatalogueCategory.DATA) }
-              </KuiFlexGrid>
-            </KuiFlexItem>
-            <KuiFlexItem className="kuiPanel homePanel">
-              <h3 className="kuiSubTitle kuiVerticalRhythm">
+            </EuiTitle>
+            <EuiSpacer size="m"/>
+            <EuiFlexGrid columns={2}>
+              { renderDirectories(FeatureCatalogueCategory.DATA) }
+            </EuiFlexGrid>
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiPanel paddingSize="l">
+            <EuiTitle>
+              <h3>
                 Manage and Administer the Elastic Stack
               </h3>
-              <KuiFlexGrid className="kuiVerticalRhythmSmall homeTopFeatures" columns={2}>
-                { renderDirectories(FeatureCatalogueCategory.ADMIN) }
-              </KuiFlexGrid>
-            </KuiFlexItem>
-          </KuiFlexGroup>
-        </div>
+            </EuiTitle>
+            <EuiSpacer size="m"/>
+            <EuiFlexGrid columns={2}>
+              { renderDirectories(FeatureCatalogueCategory.ADMIN) }
+            </EuiFlexGrid>
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-        <div className="kuiViewContentItem kuiVerticalRhythmXLarge text-center">
-          <h4 className="kuiSubduedText kuiVerticalRhythmSmall">
-            Didn’t find what you were looking for?
-          </h4>
+      <EuiSpacer size="l" />
+
+      <EuiFlexGroup justifyContent="center">
+        <EuiFlexItem grow={false}>
+          <EuiText>
+            <p>
+              Didn’t find what you were looking for?
+            </p>
+          </EuiText>
+          <EuiSpacer size="s" />
           <KuiLinkButton
             buttonType="secondary"
             href="#/home/feature_directory"
           >
             View full directory of Kibana plugins
           </KuiLinkButton>
-        </div>
+        </EuiFlexItem>
+      </EuiFlexGroup>
 
-      </div>
-    </div>
+    </EuiPage>
   );
 }
 

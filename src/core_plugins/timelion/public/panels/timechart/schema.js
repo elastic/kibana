@@ -6,7 +6,7 @@ import moment from 'moment-timezone';
 import observeResize from 'plugins/timelion/lib/observe_resize';
 import { calculateInterval, DEFAULT_TIME_FORMAT } from '../../../common/lib';
 
-const SET_LEGEND_NUMBERS_DELAY = 50;
+const DEBOUNCE_DELAY = 50;
 
 export default function timechartFn(Private, config, $rootScope, timefilter, $compile) {
   return function () {
@@ -30,11 +30,13 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
 
         let legendValueNumbers;
         let legendCaption;
-        const debouncedSetLegendNumbers = _.debounce(setLegendNumbers, SET_LEGEND_NUMBERS_DELAY, {
-          maxWait: SET_LEGEND_NUMBERS_DELAY,
+        const debouncedSetLegendNumbers = _.debounce(setLegendNumbers, DEBOUNCE_DELAY, {
+          maxWait: DEBOUNCE_DELAY,
           leading: true,
           trailing: false
         });
+        // ensure legend is the same height with or without a caption so legend items do not move around
+        const emptyCaption = '<br>';
 
         const defaultOptions = {
           xaxis: {
@@ -70,7 +72,9 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
 
               wrapperSpan.setAttribute('class', 'ngLegendValue');
               wrapperSpan.setAttribute('kbn-accessible-click', '');
-              wrapperSpan.setAttribute('ng-click', 'toggleSeries(' + series._id + ')');
+              wrapperSpan.setAttribute('ng-click', `toggleSeries(${series._id})`);
+              wrapperSpan.setAttribute('ng-focus', `focusSeries(${series._id})`);
+              wrapperSpan.setAttribute('ng-mouseover', `highlightSeries(${series._id})`);
 
               labelSpan.setAttribute('ng-non-bindable', '');
               labelSpan.appendChild(document.createTextNode(label));
@@ -85,6 +89,48 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
           colors: ['#01A4A4', '#C66', '#D0D102', '#616161', '#00A1CB', '#32742C', '#F18D05', '#113F8C', '#61AE24', '#D70060']
         };
 
+        const originalColorMap = new Map();
+        $scope.chart.forEach((series, seriesIndex) => {
+          if (!series.color) {
+            const colorIndex = seriesIndex % defaultOptions.colors.length;
+            series.color = defaultOptions.colors[colorIndex];
+          }
+          originalColorMap.set(series, series.color);
+        });
+
+        let hightlightedSeries;
+        let focusedSeries;
+        function unhighlightSeries() {
+          if (hightlightedSeries === null) {
+            return;
+          }
+
+          hightlightedSeries = null;
+          focusedSeries = null;
+          $scope.chart.forEach((series) => {
+            series.color = originalColorMap.get(series); // reset the colors
+          });
+          drawPlot($scope.chart);
+        }
+        $scope.highlightSeries = _.debounce(function (id) {
+          if (hightlightedSeries === id) {
+            return;
+          }
+
+          hightlightedSeries = id;
+          $scope.chart.forEach((series, seriesIndex) => {
+            if (seriesIndex !== id) {
+              series.color = 'rgba(128,128,128,0.1)'; // mark as grey
+            } else {
+              series.color = originalColorMap.get(series); // color it like it was
+            }
+          });
+          drawPlot($scope.chart);
+        }, DEBOUNCE_DELAY);
+        $scope.focusSeries = function (id) {
+          focusedSeries = id;
+          $scope.highlightSeries(id);
+        };
 
         $scope.toggleSeries = function (id) {
           const series = $scope.chart[id];
@@ -132,6 +178,8 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
 
         // Shamelessly borrowed from the flotCrosshairs example
         function setLegendNumbers(pos) {
+          unhighlightSeries();
+
           const plot = $scope.plot;
 
           const axes = plot.getAxes();
@@ -178,7 +226,7 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
 
         function clearLegendNumbers() {
           if (legendCaption) {
-            legendCaption.empty();
+            legendCaption.html(emptyCaption);
           }
           _.each(legendValueNumbers, function (num) {
             $(num).empty();
@@ -271,7 +319,7 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
           $scope.plot = $.plot(canvasElem, _.compact(series), options);
 
           if ($scope.plot) {
-            $scope.$emit('renderComplete');
+            $scope.$emit('timelionChartRendered');
           }
 
           legendScope.$destroy();
@@ -284,7 +332,14 @@ export default function timechartFn(Private, config, $rootScope, timefilter, $co
 
           if (_.get($scope.plot.getData(), '[0]._global.legend.showTime', true)) {
             legendCaption = $('<caption class="timelionLegendCaption"></caption>');
+            legendCaption.html(emptyCaption);
             canvasElem.find('div.legend table').append(legendCaption);
+
+            // legend has been re-created. Apply focus on legend element when previously set
+            if (focusedSeries || focusedSeries === 0) {
+              const $legendLabels = canvasElem.find('div.legend table .legendLabel>span');
+              $legendLabels.get(focusedSeries).focus();
+            }
           }
         }
         $scope.$watch('chart', drawPlot);

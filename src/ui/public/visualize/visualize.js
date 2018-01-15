@@ -5,12 +5,10 @@ import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import visualizeTemplate from 'ui/visualize/visualize.html';
 import { VisRequestHandlersRegistryProvider } from 'ui/registry/vis_request_handlers';
 import { VisResponseHandlersRegistryProvider } from 'ui/registry/vis_response_handlers';
-import { ResizeCheckerProvider } from 'ui/resize_checker';
 import 'angular-sanitize';
 import './visualization';
 import './visualization_editor';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
-import { PersistedState } from 'ui/persisted_state';
 
 
 import {
@@ -23,7 +21,6 @@ uiModules
     const notify = new Notifier({ location: 'Visualize' });
     const requestHandlers = Private(VisRequestHandlersRegistryProvider);
     const responseHandlers = Private(VisResponseHandlersRegistryProvider);
-    const ResizeChecker = Private(ResizeCheckerProvider);
     const queryFilter = Private(FilterBarQueryFilterProvider);
 
     function getHandler(from, name) {
@@ -43,15 +40,16 @@ uiModules
         timeRange: '=?',
       },
       template: visualizeTemplate,
-      link: async function ($scope, $el) {
-        const resizeChecker = new ResizeChecker($el);
-
+      link: async function ($scope) {
         if (!$scope.savedObj) throw(`saved object was not provided to <visualize> directive`);
         if (!$scope.appState) $scope.appState = getAppState();
-        if (!$scope.uiState) $scope.uiState = new PersistedState({});
 
         $scope.vis = $scope.savedObj.vis;
-        $scope.vis.visualizeScope = true;
+
+        // Set the passed in uiState to the vis object. uiState reference should never be changed
+        if (!$scope.uiState) $scope.uiState = $scope.vis.getUiState();
+        else $scope.vis._setUiState($scope.uiState);
+
         $scope.vis.description = $scope.savedObj.description;
 
         if ($scope.timeRange) {
@@ -77,12 +75,6 @@ uiModules
         $scope.editorMode = $scope.editorMode || false;
         $scope.vis.editorMode = $scope.editorMode;
 
-        // spy panel is supported only with courier request handler
-        $scope.shouldShowSpyPanel = () => {
-          if ($scope.vis.type.requestHandler !== 'courier') return false;
-          return $scope.vis.type.requiresSearch && $scope.showSpyPanel;
-        };
-
         const requestHandler = getHandler(requestHandlers, $scope.vis.type.requestHandler);
         const responseHandler = getHandler(responseHandlers, $scope.vis.type.responseHandler);
 
@@ -104,7 +96,7 @@ uiModules
               return canSkipResponseHandler ? $scope.visData : Promise.resolve(responseHandler($scope.vis, requestHandlerResponse));
             }, e => {
               $scope.savedObj.searchSource.cancelQueued();
-              $el.trigger('renderComplete');
+              $scope.vis.requestError = e;
               if (isTermSizeZeroError(e)) {
                 return notify.error(
                   `Your visualization ('${$scope.vis.title}') has an error: it has a term ` +
@@ -152,7 +144,6 @@ uiModules
         queryFilter.on('update', handleQueryUpdate);
 
         if ($scope.appState) {
-          let oldUiState;
           const stateMonitor = stateMonitorFactory.create($scope.appState);
           stateMonitor.onChange((status, type, keys) => {
             if (keys[0] === 'vis') {
@@ -162,50 +153,27 @@ uiModules
             if ($scope.vis.type.requiresSearch && ['query', 'filters'].includes(keys[0])) {
               $scope.fetch();
             }
-            if (keys[0] === 'uiState') {
-            // uiState can be changed by other visualizations on dashboard. this makes sure this fires only if
-            // current visualizations uiState changed.
-              if (!oldUiState || oldUiState !== JSON.stringify($scope.uiState.toJSON())) {
-                oldUiState = JSON.stringify($scope.uiState.toJSON());
-                $scope.fetch();
-              }
-            }
           });
 
           $scope.$on('$destroy', () => {
             stateMonitor.destroy();
           });
-        } else {
-          const handleUiStateChange = () => { $scope.$broadcast('render'); };
-          $scope.uiState.on('change', handleUiStateChange);
-          $scope.$on('$destroy', () => {
-            $scope.uiState.off('change', handleUiStateChange);
-          });
         }
 
-        // the very first resize event is the initialization, which we can safely ignore.
-        // however, we also want to debounce the resize event, and not miss a resize event
-        // if it occurs within the first 200ms window
-        const resizeFunc = _.debounce(() => {
-          $scope.$broadcast('render');
-        }, 200);
-
-        let resizeInit = false;
-        resizeChecker.on('resize',  () => {
-          if (!resizeInit) return resizeInit = true;
-          resizeFunc();
-        });
+        // Listen on uiState changes to start fetching new data again.
+        // Some visualizations might need different data depending on their uiState,
+        // thus we need to retrigger. The request handler should take care about
+        // checking if anything changed, that actually require a new fetch or return
+        // cached data otherwise.
+        $scope.uiState.on('change', $scope.fetch);
 
         // visualize needs to know about timeFilter
         $scope.$listen(timefilter, 'fetch', $scope.fetch);
-        $scope.$on('renderComplete', () => {
-          $el.trigger('renderComplete');
-        });
 
         $scope.$on('$destroy', () => {
           $scope.vis.removeListener('update', handleVisUpdate);
           queryFilter.off('update', handleQueryUpdate);
-          resizeChecker.destroy();
+          $scope.uiState.off('change', $scope.fetch);
         });
 
         $scope.$watch('vis.initialized', $scope.fetch);

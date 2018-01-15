@@ -15,7 +15,6 @@ import optimizeMixin from '../optimize';
 import * as Plugins from './plugins';
 import { indexPatternsMixin } from './index_patterns';
 import { savedObjectsMixin } from './saved_objects';
-import { statsMixin } from './stats';
 import { kibanaIndexMappingsMixin } from './mappings';
 import { serverExtensionsMixin } from './server_extensions';
 import { uiMixin } from '../ui';
@@ -43,9 +42,6 @@ export default class KbnServer {
       warningsMixin,
       statusMixin,
 
-      // set up stats route
-      statsMixin,
-
       // writes pid file
       pidMixin,
 
@@ -66,7 +62,7 @@ export default class KbnServer {
       savedObjectsMixin,
 
       // ensure that all bundles are built, or that the
-      // lazy bundle server is running
+      // watch bundle server is running
       optimizeMixin,
 
       // initialize the plugins

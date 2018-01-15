@@ -16,9 +16,6 @@ function init() {
 
     debounce = $injector.get('debounce');
     debounceFromProvider = Private(DebounceProvider);
-
-    // ensure there is a clean slate before testing deferred tasks
-    $timeout.flush();
   });
 }
 

@@ -2,39 +2,66 @@ import './synopsis.less';
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-  KuiFlexGroup,
-  KuiFlexItem
-} from 'ui_framework/components';
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiTitle,
+  EuiText,
+  EuiTextColor,
+} from '@elastic/eui';
 
-export function Synopsis({ description, iconUrl, title, url }) {
-  let img;
+export function Synopsis({ description, iconUrl, title, url, wrapInPanel }) {
+  let optionalImg;
   if (iconUrl) {
-    img = (
-      <img
-        className="synopsisIcon"
-        src={iconUrl}
-        alt=""
-      />
+    optionalImg = (
+      <EuiFlexItem grow={false}>
+        <img
+          className="synopsisIcon"
+          src={iconUrl}
+          alt=""
+        />
+      </EuiFlexItem>
     );
   }
+
+  const content = (
+    <EuiFlexGroup>
+      {optionalImg}
+      <EuiFlexItem className="synopsisContent">
+        <EuiTitle size="s" className="synopsisTitle">
+          <h4>
+            {title}
+          </h4>
+        </EuiTitle>
+        <EuiText className="synopsisBody">
+          <p>
+            <EuiTextColor color="subdued">
+              {description}
+            </EuiTextColor>
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+
+  let synopsisDisplay = content;
+  if (wrapInPanel) {
+    synopsisDisplay = (
+      <EuiPanel className="synopsisPanel">
+        {content}
+      </EuiPanel>
+    );
+  }
+
+
 
   return (
     <a
       href={url}
-      className="kuiLink synopsis"
+      className="euiLink synopsis"
       data-test-subj={`homeSynopsisLink${title.toLowerCase()}`}
     >
-      <KuiFlexGroup>
-        <KuiFlexItem grow={false}>{img}</KuiFlexItem>
-        <KuiFlexItem className="synopsisContent">
-          <h4 className="kuiTextTitle synopsisTitle">
-            {title}
-          </h4>
-          <p className="kuiText kuiSubduedText">
-            {description}
-          </p>
-        </KuiFlexItem>
-      </KuiFlexGroup>
+      {synopsisDisplay}
     </a>
   );
 }

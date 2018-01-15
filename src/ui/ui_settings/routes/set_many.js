@@ -5,6 +5,7 @@ async function handleRequest(request) {
   const uiSettings = request.getUiSettingsService();
 
   await uiSettings.setMany(changes);
+
   return {
     settings: await uiSettings.getUserProvided()
   };

@@ -7,6 +7,7 @@
  * @type {Array}
  */
 export const IGNORE_FILE_GLOBS = [
+  '.node-version',
   'docs/**/*',
   'bin/**/*',
   '**/+([A-Z_]).md',

@@ -12,7 +12,7 @@
   </div>
 </kbn-top-nav>
 
-<div class="kuiViewContent kuiViewContent--constrainedWidth" data-test-subj="visualizeSelectTypePage">
+<div class="kuiViewContent kuiViewContent--constrainedWidth kuiViewContentItem" data-test-subj="visualizeSelectTypePage">
   <div class="kuiViewContentItem">
     <!-- Header -->
     <div class="visualizeViewContentHeader kuiVerticalRhythm kuiVerticalRhythm--medium">
@@ -80,7 +80,7 @@
           ></div>
 
           <span
-            class="sr-only"
+            class="euiScreenReaderOnly"
             aria-hidden="true"
             id="visDescription_{{ ::getVisTypeId(type) }}"
           >{{::getVisTypeTooltip(type)}}</span>

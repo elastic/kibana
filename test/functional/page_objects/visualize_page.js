@@ -1,4 +1,6 @@
 import { VisualizeConstants } from '../../../src/core_plugins/kibana/public/visualize/visualize_constants';
+import Keys from 'leadfoot/keys';
+import Bluebird from 'bluebird';
 
 export function VisualizePageProvider({ getService, getPageObjects }) {
   const remote = getService('remote');
@@ -58,6 +60,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickTagCloud() {
       await find.clickByPartialLinkText('Tag Cloud');
+    }
+
+    async clickVega() {
+      await find.clickByPartialLinkText('Vega');
     }
 
     async clickVisualBuilder() {
@@ -160,6 +166,22 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return element.getVisibleText();
     }
 
+    async getVegaSpec() {
+      // Adapted from console_page.js:getVisibleTextFromAceEditor(). Is there a common utilities file?
+      const editor = await testSubjects.find('vega-editor');
+      const lines = await editor.findAllByClassName('ace_line_group');
+      const linesText = await Bluebird.map(lines, l => l.getVisibleText());
+      return linesText.join('\n');
+    }
+
+    async getVegaViewContainer() {
+      return await find.byCssSelector('div.vega-view-container');
+    }
+
+    async getVegaControlContainer() {
+      return await find.byCssSelector('div.vega-controls-container');
+    }
+
     async setFromTime(timeString) {
       const input = await find.byCssSelector('input[ng-model="absolute.from"]', defaultFindTimeout * 2);
       await input.clearValue();
@@ -241,22 +263,22 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async openSpyPanel() {
       log.debug('openSpyPanel');
-      const isOpen = await testSubjects.exists('spyModeSelect');
+      const isOpen = await testSubjects.exists('spyContentContainer');
       if (!isOpen) {
         await retry.try(async () => {
           await this.toggleSpyPanel();
-          await testSubjects.find('spyModeSelect');
+          await testSubjects.find('spyContentContainer');
         });
       }
     }
 
     async closeSpyPanel() {
       log.debug('closeSpyPanel');
-      let isOpen = await testSubjects.exists('spyModeSelect');
+      let isOpen = await testSubjects.exists('spyContentContainer');
       if (isOpen) {
         await retry.try(async () => {
           await this.toggleSpyPanel();
-          isOpen = await testSubjects.exists('spyModeSelect');
+          isOpen = await testSubjects.exists('spyContentContainer');
           if (isOpen) {
             throw new Error('Failed to close spy panel');
           }
@@ -282,8 +304,9 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await find.clickByCssSelector('button[data-test-subj="toggleEditor"]');
     }
 
-    async clickNewSearch() {
-      await find.clickByCssSelector('.list-group-item a');
+    async clickNewSearch(indexPattern = 'logstash-*') {
+      await testSubjects.click(`paginatedListItem-${indexPattern}`);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async setValue(newValue) {
@@ -383,9 +406,26 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       await input.type(newValue);
     }
 
+    async toggleOtherBucket() {
+      return await find.clickByCssSelector('input[name="showOther"]');
+    }
+
+    async toggleMissingBucket() {
+      return await find.clickByCssSelector('input[name="showMissing"]');
+    }
+
     async clickGo() {
       await testSubjects.click('visualizeEditorRenderButton');
       await PageObjects.header.waitUntilLoadingHasFinished();
+    }
+
+    async toggleAutoMode() {
+      await testSubjects.click('visualizeEditorAutoButton');
+    }
+
+    async sizeUpEditor() {
+      await testSubjects.click('visualizeEditorResizer');
+      await remote.pressKeys(Keys.ARROW_RIGHT);
     }
 
     async clickOptions() {
@@ -591,6 +631,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       return await Promise.all(getChartTypesPromises);
     }
 
+    async getPieChartLabels() {
+      const chartTypes = await find.allByCssSelector('path.slice', defaultFindTimeout * 2);
+
+      const getChartTypesPromises = chartTypes.map(async chart => await chart.getAttribute('data-label'));
+      return await Promise.all(getChartTypesPromises);
+    }
+
     async getChartAreaWidth() {
       const rect = await retry.try(async () => find.byCssSelector('clipPath rect'));
       return await rect.getAttribute('width');
@@ -602,7 +649,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     }
 
     async selectTableInSpyPaneSelect() {
-      await testSubjects.click('spyModeSelect');
       await testSubjects.click('spyModeSelect-table');
     }
 
@@ -649,7 +695,6 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
     async getVisualizationRequest() {
       log.debug('getVisualizationRequest');
       await this.openSpyPanel();
-      await testSubjects.click('spyModeSelect');
       await testSubjects.click('spyModeSelect-request');
       return await testSubjects.getVisibleText('visualizationEsRequestBody');
     }

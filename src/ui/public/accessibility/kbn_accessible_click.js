@@ -21,7 +21,7 @@
 import {
   accessibleClickKeys,
   keyCodes,
-} from 'ui_framework/services';
+} from '@elastic/eui';
 import { uiModules } from 'ui/modules';
 
 uiModules.get('kibana')

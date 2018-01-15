@@ -34,5 +34,24 @@ describe('AggConfig Filters', function () {
       expect(filter.meta).to.have.property('index', indexPattern.id);
 
     });
+
+    it('should set query to true or false for boolean filter', () => {
+      const vis = new Vis(indexPattern, {
+        type: 'histogram',
+        aggs: [ { type: 'terms', schema: 'segment', params: { field: 'ssl' } } ]
+      });
+      const aggConfig = vis.aggs.byTypeName.terms[0];
+      const filterFalse = createFilter(aggConfig, 0);
+      expect(filterFalse).to.have.property('query');
+      expect(filterFalse.query).to.have.property('match');
+      expect(filterFalse.query.match).to.have.property('ssl');
+      expect(filterFalse.query.match.ssl).to.have.property('query', false);
+
+      const filterTrue = createFilter(aggConfig, 1);
+      expect(filterTrue).to.have.property('query');
+      expect(filterTrue.query).to.have.property('match');
+      expect(filterTrue.query.match).to.have.property('ssl');
+      expect(filterTrue.query.match.ssl).to.have.property('query', true);
+    });
   });
 });

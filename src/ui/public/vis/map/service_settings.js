@@ -87,7 +87,6 @@ uiModules.get('kibana')
           const tmsService = catalogue.services.filter((service) => service.type === 'tms')[0];
           const manifest = await this._getManifest(tmsService.manifest, this._queryParams);
           const services = manifest.data.services;
-
           const firstService = _.cloneDeep(services[0]);
           if (!firstService) {
             throw new Error('Manifest response does not include sufficient service data.');
@@ -108,6 +107,9 @@ uiModules.get('kibana')
         }));
       }
 
+      /**
+       * this internal method is overridden by the tests to simulate custom manifest.
+       */
       async _getManifest(manifestUrl) {
         return $http({
           url: extendUrl(manifestUrl, { query: this._queryParams }),

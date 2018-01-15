@@ -1,5 +1,8 @@
 import _ from 'lodash';
-import { Control } from './control';
+import {
+  Control,
+  noValuesDisableMsg
+} from './control';
 import { RangeFilterManager } from './filter_manager/range_filter_manager';
 
 const minMaxAgg = (field) => {
@@ -40,13 +43,23 @@ export async function rangeControlFactory(controlParams, kbnApi) {
 
   const resp = await searchSource.fetch();
 
-  const min = _.get(resp, 'aggregations.minAgg.value');
-  const max = _.get(resp, 'aggregations.maxAgg.value');
+  let minMaxReturnedFromAggregation = true;
+  let min = _.get(resp, 'aggregations.minAgg.value');
+  let max = _.get(resp, 'aggregations.maxAgg.value');
+  if (min === null || max === null) {
+    min = 0;
+    max = 1;
+    minMaxReturnedFromAggregation = false;
+  }
   const emptyValue = { min: min, max: min };
-  return new RangeControl(
+  const rangeControl = new RangeControl(
     controlParams,
     new RangeFilterManager(controlParams.id, controlParams.fieldName, indexPattern, kbnApi.queryFilter, emptyValue),
     min,
     max
   );
+  if (!minMaxReturnedFromAggregation) {
+    rangeControl.disable(noValuesDisableMsg(controlParams.fieldName, indexPattern.title));
+  }
+  return rangeControl;
 }

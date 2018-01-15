@@ -256,6 +256,18 @@ describe('visualize loader', () => {
         container.find('visualize').trigger('renderComplete');
         expect(spy.notCalled).to.be(true);
       });
+
+      it('should call render complete listener also for native DOM events', async () => {
+        const container = newContainer();
+        const handler = loader.embedVisualizationWithSavedObject(container, createSavedObject(), {});
+        const spy = sinon.spy();
+        handler.addRenderCompleteListener(spy);
+        expect(spy.notCalled).to.be(true);
+        const event = new CustomEvent('renderComplete', { bubbles: true });
+        container.find('visualize')[0].dispatchEvent(event);
+        await timeout();
+        expect(spy.calledOnce).to.be(true);
+      });
     });
 
   });

@@ -2,20 +2,23 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
 
-import { SortableProperties } from 'ui_framework/services';
 import { Pager } from 'ui/pager';
 import { NoVisualizationsPrompt } from './no_visualizations_prompt';
 
 import {
   KuiPager,
-  KuiModalOverlay,
-  KuiConfirmModal,
   KuiListingTableDeleteButton,
   KuiListingTableCreateButton,
   KuiListingTable,
   KuiListingTableNoMatchesPrompt,
   KuiListingTableLoadingPrompt
 } from 'ui_framework/components';
+
+import {
+  EuiOverlayMask,
+  EuiConfirmModal,
+  SortableProperties,
+} from '@elastic/eui';
 
 export class VisualizeListingTable extends Component {
 
@@ -52,15 +55,18 @@ export class VisualizeListingTable extends Component {
     this.debouncedFetch = _.debounce(filter => {
       this.props.fetchItems(filter)
         .then(items => {
-          this.setState({
-            isFetchingItems: false,
-            selectedRowIds: [],
-            filter,
-          });
-          this.items = items;
-          this.calculateItemsOnPage();
+          // We need this check to handle the case where search results come back in a different
+          // order than they were sent out. Only load results for the most recent search.
+          if (filter === this.state.filter) {
+            this.setState({
+              isFetchingItems: false,
+              selectedRowIds: [],
+            });
+            this.items = items;
+            this.calculateItemsOnPage();
+          }
         });
-    }, 200);
+    }, 300);
   }
 
   componentWillUnmount() {
@@ -183,16 +189,17 @@ export class VisualizeListingTable extends Component {
 
   renderConfirmDeleteModal() {
     return (
-      <KuiModalOverlay>
-        <KuiConfirmModal
-          message="Are you sure you want to delete the selected visualizations? This action is irreversible!"
-          title="Warning"
+      <EuiOverlayMask>
+        <EuiConfirmModal
+          title="Delete selected visualizations?"
           onCancel={this.closeModal}
           onConfirm={this.deleteSelectedItems}
           cancelButtonText="Cancel"
           confirmButtonText="Delete"
-        />
-      </KuiModalOverlay>
+        >
+          <p>{`You can't recover deleted visualizations.`}</p>
+        </EuiConfirmModal>
+      </EuiOverlayMask>
     );
   }
 

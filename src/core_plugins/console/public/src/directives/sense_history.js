@@ -1,4 +1,4 @@
-import { keyCodes } from 'ui_framework/services';
+import { keyCodes } from '@elastic/eui';
 
 var { memoize } = require('lodash');
 let moment = require('moment');

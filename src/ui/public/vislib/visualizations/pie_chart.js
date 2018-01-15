@@ -128,7 +128,7 @@ export function VislibVisualizationsPieChartProvider(Private) {
         });
 
       const x = d3.scale.linear().range([0, 2 * Math.PI]);
-      const y = d3.scale.sqrt().range([0, radius * 0.7]);
+      const y = d3.scale.sqrt().range([0, showLabels ? radius * 0.7 : radius]);
 
       const startAngle = function (d) {
         return Math.max(0, Math.min(2 * Math.PI, x(d.x)));

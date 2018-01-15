@@ -12,7 +12,12 @@ function VisPickerItem(props) {
     labelClassName += ' selected';
   }
   return (
-    <button role="tab" className={itemClassName} onClick={() => props.onClick(type)}>
+    <button
+      role="tab"
+      className={itemClassName}
+      onClick={() => props.onClick(type)}
+      data-test-subj={`${type}TsvbTypeBtn`}
+    >
       <div className={iconClassName}>
         <i className={`fa ${icon}`} />
       </div>

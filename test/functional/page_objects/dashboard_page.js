@@ -31,7 +31,14 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
         'defaultIndex': 'logstash-*'
       });
 
+      await kibanaServer.uiSettings.disableToastAutohide();
       await PageObjects.common.navigateToApp('dashboard');
+    }
+
+    async preserveCrossAppState() {
+      const url = await remote.getCurrentUrl();
+      await remote.get(url, false);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickEditVisualization() {
@@ -137,7 +144,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
     async clickFilterButton() {
       log.debug('Clicking filter button');
-      return await testSubjects.click('querySubmitButton');
+      await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
     }
 
     async clickClone() {
@@ -348,8 +356,8 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       });
     }
 
-    async clickDashboardByLinkText(dashName) {
-      await find.clickByLinkText(dashName);
+    async selectDashboard(dashName) {
+      await testSubjects.click(`dashboardListingTitleLink-${dashName.split(' ').join('-')}`);
     }
 
     async clearSearchValue() {
@@ -385,7 +393,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     }
 
     async getCountOfDashboardsInListingTable() {
-      const dashboardTitles = await testSubjects.findAll('dashboardListingTitleLink');
+      const dashboardTitles = await testSubjects.findAll('dashboardListingRow');
       return dashboardTitles.length;
     }
 
@@ -404,7 +412,7 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
 
       await retry.try(async () => {
         await this.searchForDashboardWithName(dashName);
-        await this.clickDashboardByLinkText(dashName);
+        await this.selectDashboard(dashName);
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         const onDashboardLandingPage = await this.onDashboardLandingPage();
@@ -428,7 +436,6 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
     async getDashboardPanels() {
       return await testSubjects.findAll('dashboardPanel');
     }
-
 
     async getPanelDimensions() {
       const panels = await find.allByCssSelector('.react-grid-item'); // These are gridster-defined elements and classes
@@ -572,6 +579,22 @@ export function DashboardPageProvider({ getService, getPageObjects }) {
       }
 
       throw new Error('no element');
+    }
+
+    async waitForRenderComplete() {
+      await retry.try(async () => {
+        const sharedItems = await find.allByCssSelector('[data-shared-item]');
+        const renderComplete = await Promise.all(sharedItems.map(async sharedItem => {
+          return await sharedItem.getAttribute('data-render-complete');
+        }));
+        if (renderComplete.length !== sharedItems.length) {
+          throw new Error('Some shared items dont have data-render-complete attribute');
+        }
+        const totalCount = renderComplete.filter(value => value === 'true' || value === 'disabled').length;
+        if (totalCount < sharedItems.length) {
+          throw new Error('Still waiting on more visualizations to finish rendering');
+        }
+      });
     }
 
     async getPanelSharedItemData() {

@@ -54,12 +54,7 @@
  * 4. Fix an IE bug which causes the last child to overflow the container.
  * 5. Fixing this bug means we now need to align the children to the right.
  */
-* {
-  box-sizing: border-box; }
-  *:before, *:after {
-    box-sizing: border-box; }
-
-:focus {
+:focus:not([class^="eui"]) {
   z-index: 1;
   /* 1 */
   outline: none !important;
@@ -67,20 +62,12 @@
   box-shadow: 0 0 0 1px #ffffff, 0 0 0 2px #0079a5;
   /* 3 */ }
 
-body {
-  font-family: "Open Sans", Helvetica, Arial, sans-serif; }
-
 /**
  * 1. Required for IE11.
  */
 main {
   display: block;
   /* 1 */ }
-
-button,
-input[type="submit"],
-input[type="button"] {
-  border-radius: 0; }
 
 .kuiScreenReaderOnly {
   position: absolute;
@@ -1199,6 +1186,12 @@ input[type="button"] {
   margin: -20px; }
   .kuiFlexGroup--gutterExtraLarge > .kuiFlexItem {
     margin: 20px; }
+
+.kuiFlexGroup--justifyContentSpaceEvenly {
+  -webkit-box-pack: space-evenly;
+  -webkit-justify-content: space-evenly;
+      -ms-flex-pack: space-evenly;
+          justify-content: space-evenly; }
 
 .kuiFlexGroup--justifyContentSpaceBetween {
   -webkit-box-pack: justify;
@@ -3697,7 +3690,8 @@ input[type="button"] {
   max-width: 20px;
   /* 1 */
   color: #191E23;
-  border-top: 1px solid #D9D9D9; }
+  border-top: 1px solid #D9D9D9;
+  vertical-align: middle; }
 
 /**
    * 1. Vertically align all children.

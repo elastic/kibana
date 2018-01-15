@@ -104,7 +104,11 @@ export default function ({ getService, getPageObjects }) {
 
       it('should have the correct number of rows per page', async function () {
         for (let pageNum = 1; pageNum <= LAST_PAGE_NUMBER; pageNum += 1) {
-          await PageObjects.settings.goToPage(pageNum);
+          if (pageNum > 1) {
+            // We are by default on page 1 so don't navigate there
+            await PageObjects.settings.goToPage(pageNum);
+          }
+
           const pageFieldNames = await retry.tryMethod(PageObjects.settings, 'getFieldNames');
 
           if (pageNum === LAST_PAGE_NUMBER) {
