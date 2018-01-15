@@ -41,7 +41,7 @@ describe('Resize Checker', () => {
         return listener;
       };
 
-      return { EventEmitter, createEl, createChecker, createListener };
+      return { EventEmitter, createEl, createChecker, createListener, ResizeChecker };
     };
   }));
 
@@ -79,6 +79,53 @@ describe('Resize Checker', () => {
       sinon.assert.notCalled(listener);
       await listener.firstCallPromise;
       sinon.assert.calledOnce(listener);
+    });
+  });
+
+  describe('enable/disabled state', () => {
+    it('should not trigger events while disabled', async () => {
+      const { createEl, createListener, ResizeChecker } = setup();
+
+      const el = createEl();
+      const checker = new ResizeChecker(el, { disabled: true });
+      const listener = createListener();
+      checker.on('resize', listener);
+
+      expect(listener.notCalled).to.be(true);
+      $(el).height(100);
+      await delay(1000);
+      expect(listener.notCalled).to.be(true);
+    });
+
+    it('should trigger resize events after calling enable', async () => {
+      const { createEl, createListener, ResizeChecker } = setup();
+
+      const el = createEl();
+      const checker = new ResizeChecker(el, { disabled: true });
+      const listener = createListener();
+      checker.on('resize', listener);
+
+      expect(listener.notCalled).to.be(true);
+      checker.enable();
+      $(el).height(100);
+      await listener.firstCallPromise;
+      expect(listener.calledOnce).to.be(true);
+    });
+
+    it('should not trigger the first time after enable when the size does not change', async () => {
+      const { createEl, createListener, ResizeChecker } = setup();
+
+      const el = createEl();
+      const checker = new ResizeChecker(el, { disabled: true });
+      const listener = createListener();
+      checker.on('resize', listener);
+
+      expect(listener.notCalled).to.be(true);
+      $(el).height(250);
+      checker.enable();
+      $(el).height(250);
+      await delay(1000);
+      expect(listener.notCalled).to.be(true);
     });
   });
 
