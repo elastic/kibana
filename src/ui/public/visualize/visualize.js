@@ -10,6 +10,8 @@ import './visualization';
 import './visualization_editor';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 
+import { ResizeCheckerProvider } from 'ui/resize_checker';
+
 
 import {
   isTermSizeZeroError,
@@ -17,11 +19,12 @@ import {
 
 uiModules
   .get('kibana/directive', ['ngSanitize'])
-  .directive('visualize', function (Notifier, Private, timefilter, getAppState, Promise) {
+  .directive('visualize', function ($timeout, Notifier, Private, timefilter, getAppState, Promise) {
     const notify = new Notifier({ location: 'Visualize' });
     const requestHandlers = Private(VisRequestHandlersRegistryProvider);
     const responseHandlers = Private(VisResponseHandlersRegistryProvider);
     const queryFilter = Private(FilterBarQueryFilterProvider);
+    const ResizeChecker = Private(ResizeCheckerProvider);
 
     function getHandler(from, name) {
       if (typeof name === 'function') return name;
@@ -40,9 +43,17 @@ uiModules
         timeRange: '=?',
       },
       template: visualizeTemplate,
-      link: async function ($scope) {
+      link: async function ($scope, $el) {
         if (!$scope.savedObj) throw(`saved object was not provided to <visualize> directive`);
         if (!$scope.appState) $scope.appState = getAppState();
+
+        const resizeChecker = new ResizeChecker($el, { disabled: true });
+        $timeout(() => {
+          // We give the visualize one digest cycle time to actually render before
+          // we start tracking its size. If we don't do that, we cause a double
+          // initial rendering in editor mode.
+          resizeChecker.enable();
+        });
 
         $scope.vis = $scope.savedObj.vis;
 
@@ -174,6 +185,7 @@ uiModules
           $scope.vis.removeListener('update', handleVisUpdate);
           queryFilter.off('update', handleQueryUpdate);
           $scope.uiState.off('change', $scope.fetch);
+          resizeChecker.destroy();
         });
 
         $scope.$watch('vis.initialized', $scope.fetch);
