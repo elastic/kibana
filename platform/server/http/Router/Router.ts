@@ -11,6 +11,12 @@ export class Router {
 
   constructor(readonly path: string) {}
 
+  /**
+   * Create the schemas for a route
+   *
+   * @returns Route schemas if `validate` is specified on the route, otherwise
+   * undefined.
+   */
   private routeSchemasFromRouteConfig<
     P extends schema.ObjectSetting,
     Q extends schema.ObjectSetting,
@@ -29,6 +35,9 @@ export class Router {
     return route.validate ? route.validate(schema) : undefined;
   }
 
+  /**
+   * Register a `GET` request with the router
+   */
   get<
     P extends schema.ObjectSetting,
     Q extends schema.ObjectSetting,
@@ -41,6 +50,9 @@ export class Router {
     );
   }
 
+  /**
+   * Register a `POST` request with the router
+   */
   post<
     P extends schema.ObjectSetting,
     Q extends schema.ObjectSetting,
@@ -54,6 +66,9 @@ export class Router {
     );
   }
 
+  /**
+   * Register a `PUT` request with the router
+   */
   put<
     P extends schema.ObjectSetting,
     Q extends schema.ObjectSetting,
@@ -67,6 +82,9 @@ export class Router {
     );
   }
 
+  /**
+   * Register a `DELETE` request with the router
+   */
   delete<
     P extends schema.ObjectSetting,
     Q extends schema.ObjectSetting,
