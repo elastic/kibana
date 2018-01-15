@@ -7,7 +7,7 @@ import {
 
 export default function ({ getService, getPageObjects }) {
   const PageObjects = getPageObjects(['dashboard', 'visualize', 'header', 'discover']);
-  // const testSubjects = getService('testSubjects');
+  const testSubjects = getService('testSubjects');
   const remote = getService('remote');
   const retry = getService('retry');
 
@@ -134,39 +134,39 @@ export default function ({ getService, getPageObjects }) {
       expect(headers[1]).to.be('agent');
     });
 
-    // it('Tile map with no changes will update with visualization changes', async () => {
-    //   await PageObjects.dashboard.gotoDashboardLandingPage();
-    //
-    //   await PageObjects.dashboard.clickNewDashboard();
-    //   await PageObjects.dashboard.setTimepickerInDataRange();
-    //
-    //   await PageObjects.dashboard.addVisualizations(['Visualization TileMap']);
-    //   await PageObjects.dashboard.saveDashboard('No local edits');
-    //   await PageObjects.header.clickToastOK();
-    //
-    //   await testSubjects.moveMouseTo('dashboardPanel');
-    //   await PageObjects.visualize.openSpyPanel();
-    //   const tileMapData = await PageObjects.visualize.getDataTableData();
-    //   await testSubjects.moveMouseTo('dashboardPanel');
-    //   await PageObjects.visualize.closeSpyPanel();
-    //
-    //   await PageObjects.dashboard.clickEdit();
-    //   await PageObjects.dashboard.clickEditVisualization();
-    //   await PageObjects.visualize.clickMapZoomIn();
-    //   await PageObjects.visualize.clickMapZoomIn();
-    //
-    //   await PageObjects.visualize.saveVisualization('Visualization TileMap');
-    //   await PageObjects.header.clickToastOK();
-    //
-    //   await PageObjects.header.clickDashboard();
-    //
-    //   await testSubjects.moveMouseTo('dashboardPanel');
-    //   await PageObjects.visualize.openSpyPanel();
-    //   const changedTileMapData = await PageObjects.visualize.getDataTableData();
-    //   await testSubjects.moveMouseTo('dashboardPanel');
-    //   await PageObjects.visualize.closeSpyPanel();
-    //
-    //   expect(changedTileMapData.length).to.not.equal(tileMapData.length);
-    // });
+    it('Tile map with no changes will update with visualization changes', async () => {
+      await PageObjects.dashboard.gotoDashboardLandingPage();
+
+      await PageObjects.dashboard.clickNewDashboard();
+      await PageObjects.dashboard.setTimepickerInDataRange();
+
+      await PageObjects.dashboard.addVisualizations(['Visualization TileMap']);
+      await PageObjects.dashboard.saveDashboard('No local edits');
+      await PageObjects.header.clickToastOK();
+
+      await testSubjects.moveMouseTo('dashboardPanel');
+      await PageObjects.visualize.openSpyPanel();
+      const tileMapData = await PageObjects.visualize.getDataTableData();
+      await testSubjects.moveMouseTo('dashboardPanel');
+      await PageObjects.visualize.closeSpyPanel();
+
+      await PageObjects.dashboard.clickEdit();
+      await PageObjects.dashboard.clickEditVisualization();
+      await PageObjects.visualize.clickMapZoomIn();
+      await PageObjects.visualize.clickMapZoomIn();
+
+      await PageObjects.visualize.saveVisualization('Visualization TileMap');
+      await PageObjects.header.clickToastOK();
+
+      await PageObjects.header.clickDashboard();
+
+      await testSubjects.moveMouseTo('dashboardPanel');
+      await PageObjects.visualize.openSpyPanel();
+      const changedTileMapData = await PageObjects.visualize.getDataTableData();
+      await testSubjects.moveMouseTo('dashboardPanel');
+      await PageObjects.visualize.closeSpyPanel();
+
+      expect(changedTileMapData.length).to.not.equal(tileMapData.length);
+    });
   });
 }
