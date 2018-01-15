@@ -177,6 +177,7 @@ uiModules
         // checking if anything changed, that actually require a new fetch or return
         // cached data otherwise.
         $scope.uiState.on('change', $scope.fetch);
+        resizeChecker.on('resize', $scope.fetch);
 
         // visualize needs to know about timeFilter
         $scope.$listen(timefilter, 'fetch', $scope.fetch);
