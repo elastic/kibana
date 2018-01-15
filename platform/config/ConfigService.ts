@@ -47,7 +47,7 @@ export class ConfigService {
    *
    * @param path The path to the desired subset of the config.
    * @param ConfigClass A class (not an instance of a class) that contains a
-   * static `schema` that be we validate the config at the given `path` against.
+   * static `schema` that we validate the config at the given `path` against.
    */
   atPath<Schema extends schema.Any, Config>(
     path: ConfigPath,
