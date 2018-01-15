@@ -71,11 +71,12 @@ uiModules.get('kibana')
 
         this._loadFileLayers = _.once(async () => {
           const catalogue = await this._loadCatalogue();
-          const fileServices = catalogue.services.filter((service) => service.type === 'file');
-          if (fileServices.length < 1) {
+
+          const fileService = catalogue.services.find(service => service.type === 'file');
+          if (!fileService) {
             return [];
           }
-          const fileService = fileServices[0];
+
           const manifest = await this._getManifest(fileService.manifest, this._queryParams);
           const layers = manifest.data.layers.filter(layer => layer.format === 'geojson' || layer.format === 'topojson');
           layers.forEach((layer) => {
@@ -88,11 +89,10 @@ uiModules.get('kibana')
         this._loadTMSServices = _.once(async () => {
 
           const catalogue = await this._loadCatalogue();
-          const tmsServices = catalogue.services.filter((service) => service.type === 'tms');
-          if (tmsServices.length < 1) {
+          const tmsService = catalogue.services.find((service) => service.type === 'tms');
+          if (!tmsService) {
             return [];
           }
-          const tmsService = tmsServices[0];
           const tmsManifest = await this._getManifest(tmsService.manifest, this._queryParams);
           const preppedTMSServices = tmsManifest.data.services.map((tmsService) => {
             const preppedService = _.cloneDeep(tmsService);
