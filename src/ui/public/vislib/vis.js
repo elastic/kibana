@@ -47,15 +47,7 @@ export function VislibVisProvider(Private) {
 
       this.data = data;
 
-      if (!this.uiState) {
-        this.uiState = uiState;
-        this._uiStateChangeHandler = () => {
-          if (document.body.contains(this.el)) {
-            this.render(this.data, this.uiState);
-          }
-        };
-        uiState.on('change', this._uiStateChangeHandler);
-      }
+      this.uiState = uiState;
 
       this.visConfig = new VisConfig(this.visConfigArgs, this.data, this.uiState, this.el);
 
@@ -96,7 +88,6 @@ export function VislibVisProvider(Private) {
     destroy() {
       const selection = d3.select(this.el).select('.vis-wrapper');
 
-      if (this.uiState) this.uiState.off('change', this._uiStateChangeHandler);
       if (this.handler) this._runOnHandler('destroy');
 
       selection.remove();
