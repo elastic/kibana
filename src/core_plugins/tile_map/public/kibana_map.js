@@ -388,7 +388,8 @@ export class KibanaMap extends EventEmitter {
     };
   }
 
-  getUntrimmedBounds() {
+  _getLeafletBounds(resizeOnFail) {
+
     const bounds = this._leafletMap.getBounds();
     if (!bounds) {
       return null;
@@ -396,15 +397,31 @@ export class KibanaMap extends EventEmitter {
 
     const southEast = bounds.getSouthEast();
     const northWest = bounds.getNorthWest();
-
     if (
       southEast.lng === 0 &&
       southEast.lat === 0 &&
       northWest.lng === 0 &&
       northWest.lat === 0
     ) {
+      if (resizeOnFail) {
+        this._leafletMap.invalidateSize();
+        return this._getLeafletBounds(false);
+      } else {
+        return null;
+      }
+    } else {
+      return bounds;
+    }
+  }
+
+  getUntrimmedBounds() {
+    const bounds = this._getLeafletBounds(true);
+    if (!bounds) {
       return null;
     }
+
+    const southEast = bounds.getSouthEast();
+    const northWest = bounds.getNorthWest();
 
     const southEastLng = southEast.lng;
     const northWestLng = northWest.lng;
