@@ -73,7 +73,7 @@ const vectorManifest = {
 };
 
 
-const THRESHOLD = 0.25;
+const THRESHOLD = 0.45;
 const PIXEL_DIFF = 64;
 
 describe('RegionMapsVisualizationTests', function () {

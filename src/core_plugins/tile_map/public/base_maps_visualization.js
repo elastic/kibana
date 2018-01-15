@@ -107,12 +107,18 @@ export function BaseMapsVisualizationProvider() {
     }
 
 
+    _baseLayerConfigured() {
+      const mapParams = this._getMapsParams();
+      return mapParams.wms.baseLayersAreLoaded || mapParams.wms.selectedTmsLayer;
+    }
+
     async _updateBaseLayer() {
 
       const mapParams = this._getMapsParams();
-      if (!mapParams.wms.baseLayersAreLoaded && !mapParams.wms.selectedTmsLayer) {
+      if (!this._baseLayerConfigured()) {
         return;
       }
+
 
       try {
 
@@ -184,6 +190,10 @@ export function BaseMapsVisualizationProvider() {
     }
 
     _whenBaseLayerIsLoaded() {
+
+      if (!this._baseLayerConfigured()) {
+        return true;
+      }
 
       const maxTimeForBaseLayer = 10000;
       const interval$ = Observable.interval(10).filter(() => !this._baseLayerDirty);
