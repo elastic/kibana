@@ -1,6 +1,6 @@
 import * as express from 'express';
 import * as bodyParser from 'body-parser';
-import { schema, Schema } from '@elastic/kbn-sdk';
+import { schema, Schema } from '@elastic/kbn-utils';
 
 import { Headers, filterHeaders } from './headers';
 

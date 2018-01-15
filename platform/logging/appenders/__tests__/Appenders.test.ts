@@ -1,6 +1,6 @@
 const mockCreateLayout = jest.fn();
 jest.mock('../../layouts/Layouts', () => {
-  const { schema } = require('@elastic/kbn-sdk');
+  const { schema } = require('@elastic/kbn-utils');
   return {
     Layouts: {
       create: mockCreateLayout,

@@ -1,5 +1,5 @@
 jest.mock('../../layouts/Layouts', () => {
-  const { schema } = require('@elastic/kbn-sdk');
+  const { schema } = require('@elastic/kbn-utils');
   return {
     Layouts: {
       configSchema: schema.object({

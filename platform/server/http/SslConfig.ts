@@ -1,6 +1,6 @@
 import * as crypto from 'crypto';
 import { has } from 'lodash';
-import { schema } from '@elastic/kbn-sdk';
+import { schema } from '@elastic/kbn-utils';
 
 const { object, boolean, string, arrayOf, oneOf, literal, maybe } = schema;
 

@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { schema } from '@elastic/kbn-sdk';
+import { schema } from '@elastic/kbn-utils';
 
 import { LogLevel } from '../LogLevel';
 import { LogRecord } from '../LogRecord';

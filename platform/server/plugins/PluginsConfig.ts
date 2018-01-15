@@ -1,4 +1,4 @@
-import { schema } from '@elastic/kbn-sdk';
+import { schema } from '@elastic/kbn-utils';
 import { Env } from '../../config';
 
 const pluginsSchema = schema.object({

@@ -1,4 +1,4 @@
-import { schema } from '@elastic/kbn-sdk';
+import { schema } from '@elastic/kbn-utils';
 
 const fooSchema = schema.object({
   encryptionKey: schema.string({ defaultValue: 'default' })

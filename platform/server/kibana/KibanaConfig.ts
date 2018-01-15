@@ -1,4 +1,4 @@
-import { schema } from '@elastic/kbn-sdk';
+import { schema } from '@elastic/kbn-utils';
 
 const kibanaSchema = schema.object({
   index: schema.string({ defaultValue: '.kibana' })

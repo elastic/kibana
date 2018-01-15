@@ -1,5 +1,5 @@
 import { createWriteStream, WriteStream } from 'fs';
-import { schema } from '@elastic/kbn-sdk';
+import { schema } from '@elastic/kbn-utils';
 
 import { Layout, Layouts } from '../../layouts/Layouts';
 import { LogRecord } from '../../LogRecord';

@@ -1,5 +1,5 @@
 import { Observable } from '@elastic/kbn-observable';
-import { schema } from '@elastic/kbn-sdk';
+import { schema } from '@elastic/kbn-utils';
 
 import { ConfigWithSchema } from '../../config';
 import { Router } from '../http';

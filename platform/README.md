@@ -18,7 +18,7 @@ cd packages/kbn-observable
 yarn
 cd -
 
-cd packages/kbn-sdk
+cd packages/kbn-utils
 yarn
 cd -
 

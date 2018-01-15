@@ -111,7 +111,7 @@
   version "0.0.0"
   uid ""
 
-"@elastic/kbn-sdk@link:packages/kbn-sdk":
+"@elastic/kbn-utils@link:packages/kbn-utils":
   version "0.0.0"
   uid ""
 
