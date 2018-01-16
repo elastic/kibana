@@ -39,11 +39,11 @@ uiModules
         savedObj: '=?',
         appState: '=?',
         uiState: '=?',
-        savedId: '=?',
         timeRange: '=?',
       },
       template: visualizeTemplate,
       link: async function ($scope, $el) {
+        let destroyed = false;
         if (!$scope.savedObj) throw(`saved object was not provided to <visualize> directive`);
         if (!$scope.appState) $scope.appState = getAppState();
 
@@ -90,7 +90,10 @@ uiModules
         const responseHandler = getHandler(responseHandlers, $scope.vis.type.responseHandler);
 
         $scope.fetch = _.debounce(function () {
-          if (!$scope.vis.initialized || !$scope.savedObj) return;
+          // If destroyed == true the scope has already been destroyed, while this method
+          // was still waiting for its debounce, in this case we don't want to start
+          // fetching new data and rendering.
+          if (!$scope.vis.initialized || !$scope.savedObj || destroyed) return;
           // searchSource is only there for courier request handler
           requestHandler($scope.vis, $scope.appState, $scope.uiState, queryFilter, $scope.savedObj.searchSource)
             .then(requestHandlerResponse => {
@@ -183,6 +186,7 @@ uiModules
         $scope.$listen(timefilter, 'fetch', $scope.fetch);
 
         $scope.$on('$destroy', () => {
+          destroyed = true;
           $scope.vis.removeListener('update', handleVisUpdate);
           queryFilter.off('update', handleQueryUpdate);
           $scope.uiState.off('change', $scope.fetch);
