@@ -109,7 +109,6 @@ export const Toolbar = props => {
             <NavbarButton onClick={() => duplicateElement()}>
               <i className="fa fa-clone" /> Clone
             </NavbarButton>
-
           </span>
         )}
         <FeedbackButton />
