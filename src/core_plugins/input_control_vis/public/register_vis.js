@@ -25,7 +25,8 @@ function InputControlVisProvider(Private) {
     visConfig: {
       defaults: {
         controls: [],
-        updateFiltersOnChange: false
+        updateFiltersOnChange: false,
+        useTimeFilter: false,
       },
     },
     editor: 'default',

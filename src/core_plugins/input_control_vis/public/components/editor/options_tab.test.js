@@ -9,7 +9,8 @@ import {
 const scopeMock = {
   vis: {
     params: {
-      updateFiltersOnChange: false
+      updateFiltersOnChange: false,
+      useTimeFilter: false
     }
   }
 };
@@ -36,6 +37,20 @@ test('updateFiltersOnChange', () => {
   checkbox.simulate('change', { target: { checked: true } });
   const expectedParams = {
     updateFiltersOnChange: true
+  };
+  sinon.assert.calledOnce(stageEditorParams);
+  sinon.assert.calledWith(stageEditorParams, sinon.match(expectedParams));
+});
+
+test('useTimeFilter', () => {
+  const component = mount(<OptionsTab
+    scope={scopeMock}
+    stageEditorParams={stageEditorParams}
+  />);
+  const checkbox = component.find('[data-test-subj="inputControlEditorUseTimeFilterCheckbox"] input[type="checkbox"]');
+  checkbox.simulate('change', { target: { checked: true } });
+  const expectedParams = {
+    useTimeFilter: true
   };
   sinon.assert.calledOnce(stageEditorParams);
   sinon.assert.calledWith(stageEditorParams, sinon.match(expectedParams));

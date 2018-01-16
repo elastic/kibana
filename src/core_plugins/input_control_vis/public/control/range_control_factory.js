@@ -33,10 +33,12 @@ class RangeControl extends Control {
   }
 }
 
-export async function rangeControlFactory(controlParams, kbnApi) {
+export async function rangeControlFactory(controlParams, kbnApi, useTimeFilter) {
   const indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
   const searchSource = new kbnApi.SearchSource();
-  searchSource.inherits(false); //Do not filter by time so can not inherit from rootSearchSource
+  if (!useTimeFilter) {
+    searchSource.inherits(false); //Do not filter by time so can not inherit from rootSearchSource
+  }
   searchSource.size(0);
   searchSource.index(indexPattern);
   searchSource.aggs(minMaxAgg(indexPattern.fields.byName[controlParams.fieldName]));
