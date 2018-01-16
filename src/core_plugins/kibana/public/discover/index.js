@@ -4,7 +4,6 @@ import 'plugins/kibana/discover/directives/timechart';
 import 'ui/collapsible_sidebar';
 import 'plugins/kibana/discover/components/field_chooser/field_chooser';
 import 'plugins/kibana/discover/controllers/discover';
-import 'plugins/kibana/discover/styles/main.less';
 import 'ui/doc_table/components/table_row';
 import { FeatureCatalogueRegistryProvider, FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
