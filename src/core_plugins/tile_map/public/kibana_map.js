@@ -398,7 +398,7 @@ export class KibanaMap extends EventEmitter {
     const southEast = bounds.getSouthEast();
     const northWest = bounds.getNorthWest();
     if (
-      southEast.lng === northWest.lng &&
+      southEast.lng === northWest.lng ||
       southEast.lat === northWest.lat
     ) {
       if (resizeOnFail) {
