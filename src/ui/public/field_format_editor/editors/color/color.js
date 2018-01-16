@@ -1,4 +1,3 @@
-import './color.less';
 import colorTemplate from './color.html';
 import { DEFAULT_COLOR } from '../../../../../core_plugins/kibana/common/field_formats/types/color_default';
 
