@@ -1,6 +1,5 @@
 import { uiModules } from 'ui/modules';
 import toasterTemplate from 'ui/notify/partials/toaster.html';
-import 'ui/notify/notify.less';
 import 'ui/filters/markdown';
 import 'ui/directives/truncated';
 
