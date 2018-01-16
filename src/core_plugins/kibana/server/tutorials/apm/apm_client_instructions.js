@@ -82,7 +82,71 @@ export const RAILS_CLIENT_INSTRUCTIONS = [
       `server_url: 'http://localhost:8200'`,
     ],
     textPost: 'See the [documentation]' +
-      '({config.docs.base_url}guide/en/apm/agent/ruby/1.x/index.html) for configuration options and advanced usage.' +
+      '({config.docs.base_url}guide/en/apm/agent/ruby/1.x/index.html) for configuration options and advanced usage.\n\n' +
       '**Warning: The Ruby agent is currently in Beta and not meant for production use.**'
+  }
+];
+
+export const RACK_CLIENT_INSTRUCTIONS = [
+  {
+    title: 'Install the APM agent',
+    textPre: 'Add the agent to your Gemfile.',
+    commands: [
+      `gem 'elastic-apm'`
+    ]
+  },
+  {
+    title: 'Configure the agent',
+    textPre: 'Rack or compatible framework (like Sinatra). Include the middleware in your app and start the agent',
+    commands: [
+      `# config.ru`,
+      `require 'sinatra/base'`,
+      `class MySinatraApp < Sinatra::Base`,
+      `  use ElasticAPM::Middleware`,
+      ` `,
+      `  # ...`,
+      `end`,
+      `# Takes optional ElasticAPM::Config values`,
+      `ElasticAPM.start(`,
+      `  app: MySinatraApp, # required`,
+      `  server_url: 'http://localhost:8200'`,
+      `)`,
+      `run MySinatraApp`,
+      `at_exit {curlyOpen} ElasticAPM.stop {curlyClose}`,
+    ],
+    textPost: 'See the [documentation]' +
+      '({config.docs.base_url}guide/en/apm/agent/ruby/1.x/index.html) for configuration options and advanced usage.\n\n' +
+      '**Warning: The Rack agent is currently in Beta and not meant for production use.**'
+  }
+];
+
+export const JS_CLIENT_INSTRUCTIONS = [
+  {
+    title: 'Install the APM agent',
+    textPre: 'Install the APM agent for JavaScript as a dependency to your application:',
+    commands: [
+      `npm install elastic-apm-js-base --save`
+    ]
+  },
+  {
+    title: 'Configure the agent',
+    textPre: 'Agents are libraries that run inside of your application.',
+    commands: [
+      `import {curlyOpen} init as initApm {curlyClose} from 'elastic-apm-js-base'`,
+      `var apm = initApm({curlyOpen}`,
+      ` `,
+      `  // Set custom APM Server URL (default: http://localhost:8200)`,
+      `  serverUrl: 'http://localhost:8200',`,
+      ` `,
+      `  // Set required service name`,
+      `  serviceName: 'service-name',`,
+      ` `,
+      `  // Set service version (required for sourcemap feature)`,
+      `  serviceVersion: 'service-version'`,
+      `{curlyClose})`,
+    ],
+    textPost: 'See the [documentation]' +
+      '({config.docs.base_url}guide/en/apm/agent/js-base/0.x/index.html)  for advanced usage.\n\n' +
+      '**Warning: The JS agent is currently in Alpha and not meant for production use.**'
   }
 ];
