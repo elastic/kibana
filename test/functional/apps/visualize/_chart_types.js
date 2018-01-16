@@ -32,6 +32,7 @@ export default function ({ getService, getPageObjects }) {
           'Controls',
           'Markdown',
           'Tag Cloud',
+          'Vega',
         ];
 
         // find all the chart types and make sure there all there

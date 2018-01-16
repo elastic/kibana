@@ -4,7 +4,7 @@ import { uiModules } from 'ui/modules';
 
 const module = uiModules.get('ui/timepicker');
 
-module.directive('kbnTimepickerQuickPanel', function (quickRanges) {
+module.directive('kbnTimepickerQuickPanel', function (config) {
   return {
     restrict: 'E',
     replace: true,
@@ -13,6 +13,7 @@ module.directive('kbnTimepickerQuickPanel', function (quickRanges) {
     },
     template,
     controller: function ($scope) {
+      const quickRanges = config.get('timepicker:quickRanges');
       $scope.quickLists = _(quickRanges).groupBy('section').values().value();
     }
   };
