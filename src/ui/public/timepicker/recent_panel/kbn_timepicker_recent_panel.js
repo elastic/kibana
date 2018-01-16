@@ -1,8 +1,7 @@
 import moment from 'moment';
-import template from '../quick_panel/kbn_timepicker_quick_panel.html';
+import template from './kbn_timepicker_recent_panel.html';
 import { uiModules } from 'ui/modules';
 import { timeHistory } from 'ui/timefilter/time_history';
-import { TIME_MODES } from 'ui/timepicker/modes';
 
 const module = uiModules.get('ui/timepicker');
 
@@ -17,14 +16,7 @@ module.directive('kbnTimepickerRecentPanel', function () {
     controller: function ($scope, config) {
       $scope.quickLists = [];
       const history = timeHistory.get().map(time => {
-        if (time.mode === TIME_MODES.ABSOLUTE) {
-          const from = moment(time.from).format(config.get('dateFormat'));
-          const to = moment(time.to).format(config.get('dateFormat'));
-          time.display = `${from} - ${to}`;
-          return time;
-        }
-
-        time.display = `${time.from} to ${time.to}`;
+        time.display = `${formatDate(time.from)} to ${formatDate(time.to)}`;
         return time;
       });
       if (history.length > 5) {
@@ -33,8 +25,18 @@ module.directive('kbnTimepickerRecentPanel', function () {
         const halfIndex = Math.ceil(history.length / 2);
         $scope.quickLists.push(history.slice(0, halfIndex));
         $scope.quickLists.push(history.slice(halfIndex));
-      } else {
+      } else if (history.length > 0) {
+        // Put history in single column. Do not put empty history in quickLists
         $scope.quickLists.push(history);
+      }
+
+      function formatDate(dateString) {
+        if (dateString.includes('now')) {
+          // relative date
+          return dateString;
+        }
+
+        return moment(dateString).format(config.get('dateFormat'));
       }
     }
   };
