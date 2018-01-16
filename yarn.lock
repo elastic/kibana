@@ -11775,9 +11775,9 @@ vega-hierarchy@^2.1:
     vega-dataflow "3"
     vega-util "1"
 
-vega-lite@2.0.3:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/vega-lite/-/vega-lite-2.0.3.tgz#3b42a3ee002cfd0d6c082a2b029d30f01c987ab4"
+vega-lite@2.0.4:
+  version "2.0.4"
+  resolved "https://registry.yarnpkg.com/vega-lite/-/vega-lite-2.0.4.tgz#a30531e294dd2a831d96df05c58eed902d2cbb20"
   dependencies:
     json-stable-stringify "^1.0.1"
     tslib "^1.8.0"
