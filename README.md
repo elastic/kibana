@@ -1,4 +1,4 @@
-# Kibana 6.1.2
+# Kibana 6.1.3
 
 Kibana is your window into the [Elastic Stack](https://www.elastic.co/products). Specifically, it's
 an open source ([Apache Licensed](LICENSE.md)),
@@ -44,9 +44,9 @@ For the daring, snapshot builds are available. These builds are created nightly 
 
 | platform |  |
 | --- | --- |
-| OSX | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-6.1.2-SNAPSHOT-darwin-x86_64.tar.gz) |
-| Linux | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-6.1.2-SNAPSHOT-linux-x86_64.tar.gz) [deb](https://snapshots.elastic.co/downloads/kibana/kibana-6.1.2-SNAPSHOT-amd64.deb) [rpm](https://snapshots.elastic.co/downloads/kibana/kibana-6.1.2-SNAPSHOT-x86_64.rpm) |
-| Windows | [zip](https://snapshots.elastic.co/downloads/kibana/kibana-6.1.2-SNAPSHOT-windows-x86_64.zip) |
+| OSX | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-6.1.3-SNAPSHOT-darwin-x86_64.tar.gz) |
+| Linux | [tar](https://snapshots.elastic.co/downloads/kibana/kibana-6.1.3-SNAPSHOT-linux-x86_64.tar.gz) [deb](https://snapshots.elastic.co/downloads/kibana/kibana-6.1.3-SNAPSHOT-amd64.deb) [rpm](https://snapshots.elastic.co/downloads/kibana/kibana-6.1.3-SNAPSHOT-x86_64.rpm) |
+| Windows | [zip](https://snapshots.elastic.co/downloads/kibana/kibana-6.1.3-SNAPSHOT-windows-x86_64.zip) |
 
 ## Documentation
 
