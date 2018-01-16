@@ -398,10 +398,8 @@ export class KibanaMap extends EventEmitter {
     const southEast = bounds.getSouthEast();
     const northWest = bounds.getNorthWest();
     if (
-      southEast.lng === 0 &&
-      southEast.lat === 0 &&
-      northWest.lng === 0 &&
-      northWest.lat === 0
+      southEast.lng === northWest.lng &&
+      southEast.lat === northWest.lat
     ) {
       if (resizeOnFail) {
         this._leafletMap.invalidateSize();
