@@ -7,7 +7,7 @@ import 'ui/vis/map/service_settings';
 const MINZOOM = 0;
 const MAXZOOM = 18;
 
-export function BaseMapsVisualizationProvider() {
+export function BaseMapsVisualizationProvider(Private, serviceSettings) {
 
   /**
    * Abstract base class for a visualization consisting of a map with a single baselayer.
@@ -114,17 +114,28 @@ export function BaseMapsVisualizationProvider() {
 
     async _updateBaseLayer() {
 
-      const mapParams = this._getMapsParams();
-      if (!this._baseLayerConfigured()) {
+
+      if (!this._kibanaMap) {
         return;
       }
 
 
-      try {
-
-        if (!this._kibanaMap) {
+      const mapParams = this._getMapsParams();
+      if (!this._baseLayerConfigured()) {
+        try {
+          const tmsServices = await serviceSettings.getTMSServices();
+          const firstRoadMapLayer = tmsServices.find((s) => {
+            return s.id === 'road_map';//first road map layer
+          });
+          this._setTmsLayer(firstRoadMapLayer);
+        } catch (e) {
+          this._notify.warning(e.message);
           return;
         }
+        return;
+      }
+
+      try {
 
         if (mapParams.wms.enabled) {
           if (MINZOOM > this._kibanaMap.getMaxZoomLevel()) {
@@ -145,28 +156,33 @@ export function BaseMapsVisualizationProvider() {
 
           await mapParams.wms.baseLayersAreLoaded;
           const selectedTmsLayer = mapParams.wms.selectedTmsLayer;
-          if (selectedTmsLayer.maxZoom < this._kibanaMap.getMaxZoomLevel()) {
-            this._kibanaMap.setMinZoom(selectedTmsLayer.minZoom);
-            this._kibanaMap.setMaxZoom(selectedTmsLayer.maxZoom);
-            if (this._kibanaMap.getZoomLevel() > selectedTmsLayer.maxZoom) {
-              this._kibanaMap.setZoomLevel(selectedTmsLayer.maxZoom);
-            }
+          this._setTmsLayer(selectedTmsLayer);
 
-            const url = selectedTmsLayer.url;
-            const options = _.cloneDeep(selectedTmsLayer);
-            delete options.id;
-            delete options.url;
-            this._kibanaMap.setBaseLayer({
-              baseLayerType: 'tms',
-              options: { url, ...options }
-            });
-          }
         }
       } catch (tmsLoadingError) {
         this._notify.warning(tmsLoadingError.message);
       }
 
 
+    }
+
+    async _setTmsLayer(tmsLayer) {
+      if (tmsLayer.maxZoom < this._kibanaMap.getMaxZoomLevel()) {
+        this._kibanaMap.setMinZoom(tmsLayer.minZoom);
+        this._kibanaMap.setMaxZoom(tmsLayer.maxZoom);
+        if (this._kibanaMap.getZoomLevel() > tmsLayer.maxZoom) {
+          this._kibanaMap.setZoomLevel(tmsLayer.maxZoom);
+        }
+
+        const url = tmsLayer.url;
+        const options = _.cloneDeep(tmsLayer);
+        delete options.id;
+        delete options.url;
+        this._kibanaMap.setBaseLayer({
+          baseLayerType: 'tms',
+          options: { url, ...options }
+        });
+      }
     }
 
     async _updateData() {
