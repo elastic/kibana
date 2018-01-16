@@ -34,7 +34,6 @@ uiModules
       },
       template: visualizationTemplate,
       link: function ($scope, $el) {
-        const resizeChecker = new ResizeChecker($el);
         //todo: lets make this a simple function call.
         const getVisEl = jQueryGetter('.visualize-chart');
         const getVisContainer = jQueryGetter('.vis-container');
@@ -116,7 +115,6 @@ uiModules
           });
 
         $scope.$on('$destroy', () => {
-          resizeChecker.destroy();
           visualization.destroy();
           renderSubscription.unsubscribe();
         });
@@ -130,15 +128,17 @@ uiModules
 
           $scope.$watchGroup(['visData', 'vis.params'], onChangeListener);
 
+          const resizeChecker = new ResizeChecker($el);
+          resizeChecker.on('resize', () => {
+            $scope.$emit('render');
+          });
+
           $scope.uiState.on('change', onChangeListener);
           $scope.$on('$destroy', () => {
+            resizeChecker.destroy();
             $scope.uiState.off('change', onChangeListener);
           });
         }
-
-        resizeChecker.on('resize', () => {
-          $scope.$emit('render');
-        });
 
         function jQueryGetter(selector) {
           return function () {
