@@ -204,6 +204,7 @@
     "tabbable": "1.1.0",
     "tar": "2.2.0",
     "tinygradient": "0.3.0",
+    "topojson-client": "3.0.0",
     "trunc-html": "1.0.2",
     "trunc-text": "1.0.2",
     "uglifyjs-webpack-plugin": "0.4.6",
