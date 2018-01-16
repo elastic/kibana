@@ -48,6 +48,9 @@ export class TutorialDirectory extends React.Component {
 
   async componentWillMount() {
     const tutorials = await getTutorials();
+    tutorials.sort((a, b) => {
+      return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+    });
     this.setState({
       tutorials: tutorials,
     });
