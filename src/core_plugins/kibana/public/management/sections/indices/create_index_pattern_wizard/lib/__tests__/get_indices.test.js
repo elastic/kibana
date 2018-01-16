@@ -58,18 +58,7 @@ describe('getIndices', () => {
         search: () => { throw 'Fail'; }
       };
 
-      // https://github.com/facebook/jest/issues/1377
-      const syncify = async (fn) => {
-        try {
-          const result = await fn();
-          return () => { return result; };
-        } catch (e) {
-          return () => { throw e; };
-        }
-      };
-
-      const fn = await syncify(() => getIndices(es, 'kibana', 1));
-      expect(fn).toThrow();
+      await expect(getIndices(es, 'kibana', 1)).rejects.toThrow();
     });
 
     it('should handle index_not_found_exception errors gracefully', async () => {
