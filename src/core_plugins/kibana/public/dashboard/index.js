@@ -1,6 +1,5 @@
 import 'plugins/kibana/dashboard/dashboard_app';
 import 'plugins/kibana/dashboard/saved_dashboard/saved_dashboards';
-import 'plugins/kibana/dashboard/styles/index.less';
 import 'plugins/kibana/dashboard/dashboard_config';
 import uiRoutes from 'ui/routes';
 import { notify } from 'ui/notify';
