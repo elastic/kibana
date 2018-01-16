@@ -156,8 +156,7 @@ export class VegaBaseView {
     // into the _ongoingDestroy promise, while handlers are being disposed
     if (this._destroyHandlers) {
       // If no destroy is yet running, execute all handlers and wait for all of them to resolve.
-      // Once done, keep the resolved promise, and get rid of any values returned from handlers.
-      this._ongoingDestroy = Promise.all(this._destroyHandlers.map(v => v())).then(() => 0);
+      this._ongoingDestroy = Promise.all(this._destroyHandlers.map(v => v()));
       this._destroyHandlers = null;
     }
     return this._ongoingDestroy;
