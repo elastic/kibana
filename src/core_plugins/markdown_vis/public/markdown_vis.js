@@ -1,3 +1,4 @@
+import 'plugins/markdown_vis/markdown_vis.less';
 import 'plugins/markdown_vis/markdown_vis_controller';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';

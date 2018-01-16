@@ -7,6 +7,7 @@ import { FieldWildcardProvider } from 'ui/field_wildcard';
 import controlsHtml from './controls.html';
 import filterHtml from './filter.html';
 import template from './source_filters_table.html';
+import './source_filters_table.less';
 
 const notify = new Notifier();
 

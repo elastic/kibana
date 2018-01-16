@@ -1,3 +1,4 @@
+import 'plugins/kibana/visualize/styles/main.less';
 import 'plugins/kibana/visualize/editor/editor';
 import 'plugins/kibana/visualize/wizard/wizard';
 import 'plugins/kibana/visualize/editor/agg_filter';

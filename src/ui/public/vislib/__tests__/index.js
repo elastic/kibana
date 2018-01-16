@@ -2,6 +2,7 @@
 import _ from 'lodash';
 import expect from 'expect.js';
 import ngMock from 'ng_mock';
+import 'ui/vislib/styles/main.less';
 import VislibProvider from 'ui/vislib';
 
 describe('Vislib Index Test Suite', function () {

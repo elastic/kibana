@@ -1,3 +1,4 @@
+import './region_map.less';
 import './region_map_vis_params';
 import image from './images/icon-vector-map.svg';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';

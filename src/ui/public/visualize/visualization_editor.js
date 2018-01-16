@@ -1,4 +1,5 @@
 import 'ui/visualize/spy';
+import 'ui/visualize/visualize.less';
 import 'ui/visualize/visualize_legend';
 import { uiModules } from 'ui/modules';
 import 'angular-sanitize';

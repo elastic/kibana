@@ -4,6 +4,7 @@ import './lib/types';
 import './lib/layout/layout_types';
 import './lib/data';
 import './visualizations/vis_types';
+import './styles/main.less';
 import { VislibVisProvider } from './vis';
 
 // prefetched for faster optimization runs

@@ -1,3 +1,4 @@
+import 'plugins/tagcloud/tag_cloud.less';
 import 'plugins/tagcloud/tag_cloud_controller';
 import 'plugins/tagcloud/tag_cloud_vis_params';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';

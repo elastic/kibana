@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import { remove } from 'lodash';
 
+import './kbn_chrome.less';
 import { uiModules } from 'ui/modules';
 import { isSystemApiRequest } from 'ui/system_api';
 import {

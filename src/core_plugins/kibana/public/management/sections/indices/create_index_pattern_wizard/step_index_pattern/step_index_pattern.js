@@ -1,4 +1,5 @@
 import { uiModules } from 'ui/modules';
+import './step_index_pattern.less';
 import template from './step_index_pattern.html';
 import './append_wildcard';
 

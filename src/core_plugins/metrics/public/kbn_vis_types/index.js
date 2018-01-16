@@ -1,3 +1,5 @@
+import '../visualizations/less/main.less';
+import '../less/main.less';
 import image from '../images/icon-visualbuilder.svg';
 import { MetricsRequestHandlerProvider } from './request_handler';
 import { ReactEditorControllerProvider } from './editor_controller';

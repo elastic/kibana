@@ -1,6 +1,9 @@
 import { uiModules } from 'ui/modules';
 import tagCloudVisParamsTemplate from 'plugins/tagcloud/tag_cloud_vis_params.html';
 import noUiSlider from 'no-ui-slider';
+import 'no-ui-slider/css/nouislider.css';
+import 'no-ui-slider/css/nouislider.pips.css';
+import 'no-ui-slider/css/nouislider.tooltips.css';
 
 uiModules.get('kibana/table_vis')
   .directive('tagcloudVisParams', function () {
