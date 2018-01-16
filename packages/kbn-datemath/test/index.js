@@ -322,4 +322,14 @@ describe('dateMath', function () {
     });
   });
 
+  describe('units', function () {
+    it('should have units descending for unitsDesc', function () {
+      expect(dateMath.unitsDesc).to.eql(['y', 'M', 'w', 'd', 'h', 'm', 's', 'ms']);
+    });
+
+    it('should have units ascending for unitsAsc', function () {
+      expect(dateMath.unitsAsc).to.eql(['ms', 's', 'm', 'h', 'd', 'w', 'M', 'y']);
+    });
+  });
+
 });
