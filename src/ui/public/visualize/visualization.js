@@ -1,6 +1,5 @@
 import { Observable } from 'rxjs/Rx';
 import 'ui/visualize/spy';
-import 'ui/visualize/visualize.less';
 import 'ui/visualize/visualize_legend';
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
