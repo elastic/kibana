@@ -18,6 +18,7 @@ if (timefield) {
         data-column="<%- column %>"
         tooltip="Filter for value"
         tooltip-append-to-body="1"
+        aria-label="Filter for value"
       ></button>
 
       <button
@@ -25,6 +26,7 @@ if (timefield) {
         class="fa fa-search-minus docTableRowFilterButton"
         data-column="<%- column %>"
         tooltip="Filter out value"
+        aria-label="Filter out value"
         tooltip-append-to-body="1"
       ></button>
     <% } %>
