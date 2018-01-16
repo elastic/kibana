@@ -4,7 +4,10 @@ import { Observable } from 'rxjs/Rx';
 import 'ui/vis/map/service_settings';
 
 
-export function BaseMapsVisualizationProvider(serviceSettings) {
+const MINZOOM = 0;
+const MAXZOOM = 18;
+
+export function BaseMapsVisualizationProvider(Private, serviceSettings) {
 
   /**
    * Abstract base class for a visualization consisting of a map with a single baselayer.
@@ -79,7 +82,6 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
      * @private
      */
     async _makeKibanaMap() {
-
       const options = {};
       const uiState = this.vis.getUiState();
       const zoomFromUiState = parseInt(uiState.get('mapZoom'));
@@ -88,6 +90,8 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
       options.center = centerFromUIState ? centerFromUIState : this.vis.params.mapCenter;
 
       this._kibanaMap = new KibanaMap(this._container, options);
+      this._kibanaMap.setMinZoom(MINZOOM);//use a default
+      this._kibanaMap.setMaxZoom(MAXZOOM);//use a default
 
       this._kibanaMap.addLegendControl();
       this._kibanaMap.addFitControl();
@@ -99,74 +103,85 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
       this._kibanaMap.on('baseLayer:loading', () => {
         this._baseLayerDirty = true;
       });
-
-      const mapparams = this._getMapsParams();
-      await this._updateBaseLayer(mapparams);
+      await this._updateBaseLayer();
     }
 
 
-    async _updateBaseLayer(mapParams) {
+    _baseLayerConfigured() {
+      const mapParams = this._getMapsParams();
+      return mapParams.wms.baseLayersAreLoaded || mapParams.wms.selectedTmsLayer;
+    }
+
+    async _updateBaseLayer() {
+
+
+      if (!this._kibanaMap) {
+        return;
+      }
+
+
+      const mapParams = this._getMapsParams();
+      if (!this._baseLayerConfigured()) {
+        try {
+          const tmsServices = await serviceSettings.getTMSServices();
+          const firstRoadMapLayer = tmsServices.find((s) => {
+            return s.id === 'road_map';//first road map layer
+          });
+          this._setTmsLayer(firstRoadMapLayer);
+        } catch (e) {
+          this._notify.warning(e.message);
+          return;
+        }
+        return;
+      }
 
       try {
-        this._tmsService = await serviceSettings.getTMSService();
-        this._tmsError = null;
-      } catch (e) {
-        this._tmsService = null;
-        this._tmsError = e;
-        this._notify.warning(e.message);
-      }
-      const { minZoom, maxZoom } = this._getMinMaxZoom();
-      if (mapParams.wms.enabled) {
-        // Switch to WMS
-        if (maxZoom > this._kibanaMap.getMaxZoomLevel()) {
-          //need to recreate the map with less restrictive zoom
-          this._kibanaMap.removeLayer(this._geohashLayer);
-          this._geohashLayer = null;
-          this._kibanaMap.setMinZoom(minZoom);
-          this._kibanaMap.setMaxZoom(maxZoom);
-        }
 
-        this._kibanaMap.setBaseLayer({
-          baseLayerType: 'wms',
-          options: {
-            minZoom: minZoom,
-            maxZoom: maxZoom,
-            url: mapParams.wms.url,
-            ...mapParams.wms.options
+        if (mapParams.wms.enabled) {
+          if (MINZOOM > this._kibanaMap.getMaxZoomLevel()) {
+            this._kibanaMap.setMinZoom(MINZOOM);
+            this._kibanaMap.setMaxZoom(MAXZOOM);
           }
-        });
-      } else {
 
-        // switch to tms
-        if (maxZoom < this._kibanaMap.getMaxZoomLevel()) {
-          //need to recreate the map with more restrictive zoom level
-          this._kibanaMap.removeLayer(this._geohashLayer);
-          this._geohashLayer = null;
-          this._kibanaMap.setMinZoom(minZoom);
-          this._kibanaMap.setMaxZoom(maxZoom);
-          if (this._kibanaMap.getZoomLevel() > maxZoom) {
-            this._kibanaMap.setZoomLevel(maxZoom);
-          }
-        }
-
-        if (!this._tmsError) {
-          const url = this._tmsService.getUrl();
-          const options = this._tmsService.getTMSOptions();
           this._kibanaMap.setBaseLayer({
-            baseLayerType: 'tms',
-            options: { url, ...options }
+            baseLayerType: 'wms',
+            options: {
+              minZoom: MINZOOM,
+              maxZoom: MAXZOOM,
+              url: mapParams.wms.url,
+              ...mapParams.wms.options
+            }
           });
+        } else {
+
+          await mapParams.wms.baseLayersAreLoaded;
+          const selectedTmsLayer = mapParams.wms.selectedTmsLayer;
+          this._setTmsLayer(selectedTmsLayer);
+
         }
+      } catch (tmsLoadingError) {
+        this._notify.warning(tmsLoadingError.message);
       }
+
+
     }
 
+    async _setTmsLayer(tmsLayer) {
+      if (tmsLayer.maxZoom < this._kibanaMap.getMaxZoomLevel()) {
+        this._kibanaMap.setMinZoom(tmsLayer.minZoom);
+        this._kibanaMap.setMaxZoom(tmsLayer.maxZoom);
+        if (this._kibanaMap.getZoomLevel() > tmsLayer.maxZoom) {
+          this._kibanaMap.setZoomLevel(tmsLayer.maxZoom);
+        }
 
-    _getMinMaxZoom() {
-      const mapParams = this._getMapsParams();
-      if (this._tmsError) {
-        return serviceSettings.getFallbackZoomSettings(mapParams.wms.enabled);
-      } else {
-        return this._tmsService.getMinMaxZoom(mapParams.wms.enabled);
+        const url = tmsLayer.url;
+        const options = _.cloneDeep(tmsLayer);
+        delete options.id;
+        delete options.url;
+        this._kibanaMap.setBaseLayer({
+          baseLayerType: 'tms',
+          options: { url, ...options }
+        });
       }
     }
 
@@ -195,6 +210,10 @@ export function BaseMapsVisualizationProvider(serviceSettings) {
     }
 
     _whenBaseLayerIsLoaded() {
+
+      if (!this._baseLayerConfigured()) {
+        return true;
+      }
 
       const maxTimeForBaseLayer = 10000;
       const interval$ = Observable.interval(10).filter(() => !this._baseLayerDirty);

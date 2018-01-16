@@ -11238,7 +11238,7 @@ topo@2.x.x:
   dependencies:
     hoek "4.x.x"
 
-topojson-client@3:
+topojson-client@3, topojson-client@3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/topojson-client/-/topojson-client-3.0.0.tgz#1f99293a77ef42a448d032a81aa982b73f360d2f"
   dependencies:

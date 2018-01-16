@@ -169,9 +169,10 @@ export default () => Joi.object({
   map: Joi.object({
     manifestServiceUrl: Joi.when('$dev', {
       is: true,
-      then: Joi.string().default('https://staging-dot-catalogue-dot-elastic-layer.appspot.com/v1/manifest'),
-      otherwise: Joi.string().default('https://catalogue.maps.elastic.co/v1/manifest')
-    })
+      then: Joi.string().default('https://staging-dot-catalogue-dot-elastic-layer.appspot.com/v2/manifest'),
+      otherwise: Joi.string().default('https://staging-dot-catalogue-dot-elastic-layer.appspot.com/v2/manifest')
+    }),
+    includeElasticMapsService: Joi.boolean().default(true)
   }).default(),
   tilemap: Joi.object({
     url: Joi.string(),
@@ -191,7 +192,16 @@ export default () => Joi.object({
     includeElasticMapsService: Joi.boolean().default(true),
     layers: Joi.array().items(Joi.object({
       url: Joi.string(),
-      type: Joi.string(),
+      format: Joi.object({
+        type: Joi.string().default('geojson')
+      }).default({
+        type: 'geojson'
+      }),
+      meta: Joi.object({
+        feature_collection_path: Joi.string().default('data')
+      }).default({
+        feature_collection_path: 'data'
+      }),
       attribution: Joi.string(),
       name: Joi.string(),
       fields: Joi.array().items(Joi.object({
