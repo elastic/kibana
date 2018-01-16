@@ -28,7 +28,7 @@ import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 import chrome from 'ui/chrome';
 const kbnBaseUrl = chrome.getInjected('kbnBaseUrl');
 
-export function Home({ addBasePath, directories }) {
+export function Home({ addBasePath, directories, isCloudEnabled }) {
 
   const renderDirectories = (category) => {
     return directories
@@ -54,9 +54,43 @@ export function Home({ addBasePath, directories }) {
       width: '250px',
       'minWidth': '200px'
     };
+
+    let apmCard;
+    if (!isCloudEnabled) {
+      apmCard = (
+        <KuiCard style={cardStyle} className="euiPanel">
+          <KuiCardDescription>
+            <KuiCardDescriptionTitle>
+              <img
+                src={addBasePath('/plugins/kibana/assets/app_APM.svg')}
+              />
+              <p>
+                APM
+              </p>
+            </KuiCardDescriptionTitle>
+
+            <KuiCardDescriptionText>
+              APM automatically collects in-depth performance metrics and errors from inside your applications.
+            </KuiCardDescriptionText>
+          </KuiCardDescription>
+
+          <KuiCardFooter>
+            <KuiLinkButton
+              buttonType="secondary"
+              href={addBasePath(`${kbnBaseUrl}#/home/tutorial/apm`)}
+            >
+              APM
+            </KuiLinkButton>
+          </KuiCardFooter>
+        </KuiCard>
+      );
+    }
     return (
       <div className="kuiVerticalRhythm">
         <KuiCardGroup>
+
+          {apmCard}
+
           <KuiCard style={cardStyle} className="euiPanel">
             <KuiCardDescription>
               <KuiCardDescriptionTitle>
@@ -243,5 +277,6 @@ Home.propTypes = {
     path: PropTypes.string.isRequired,
     showOnHomePage: PropTypes.bool.isRequired,
     category: PropTypes.string.isRequired
-  }))
+  })),
+  isCloudEnabled: PropTypes.bool.isRequired,
 };

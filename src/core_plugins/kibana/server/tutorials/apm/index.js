@@ -13,7 +13,7 @@ export function apmSpecProvider() {
     longDescription: 'APM consists of three components - the Agents, the Server, and the UI:\n' +
       '* The Agents are libraries in your application that run inside of your application process.\n' +
       '* The Server processes data from agents and stores the application data in Elasticsearch.\n' +
-      '* The UI is this dedicated Kibana APM plugin and customizable dashboards.\n\n' +
+      '* The UI is the preconfigured dashboards.\n\n' +
       'For more information, [please see our documentation]' +
       '({config.docs.base_url}guide/en/apm/get-started/{config.docs.version}/index.html).' +
       ' To get started, follow the steps below.',

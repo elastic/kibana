@@ -61,6 +61,7 @@ export function HomeApp({ addBasePath, directories }) {
           <Home
             addBasePath={addBasePath}
             directories={directories}
+            isCloudEnabled={chrome.getInjected('isCloudEnabled', false)}
           />
         </Route>
       </Switch>
