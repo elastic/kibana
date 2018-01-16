@@ -80,9 +80,9 @@
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-kibana-custom/-/eslint-plugin-kibana-custom-1.1.0.tgz#f4c5a10c16f7a23c46d32be7165e012fa628b967"
 
-"@elastic/eui@0.0.12":
-  version "0.0.12"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.12.tgz#5a087d45643c25d3a823b36e45aabaa65e983232"
+"@elastic/eui@0.0.13":
+  version "0.0.13"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-0.0.13.tgz#aa3a71c6bfc41978366c29a4254b3a8d1953108f"
   dependencies:
     brace "^0.10.0"
     classnames "^2.2.5"
