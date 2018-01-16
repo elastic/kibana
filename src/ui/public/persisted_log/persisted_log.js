@@ -5,12 +5,11 @@ import { Storage } from 'ui/storage';
 const localStorage = new Storage(window.localStorage);
 
 export class PersistedLog {
-  constructor(name, options, storage) {
-    options = options || {};
+  constructor(name, options = {}, storage = localStorage) {
     this.name = name;
     this.maxLength = parseInt(options.maxLength, 10);
     this.filterDuplicates = options.filterDuplicates || false;
-    this.storage = storage || localStorage;
+    this.storage = storage;
     this.items = this.storage.get(this.name) || [];
     if (!isNaN(this.maxLength)) this.items = _.take(this.items, this.maxLength);
   }

@@ -24,7 +24,7 @@ describe('PersistedLog', function () {
   });
 
   describe('expected API', function () {
-    it('has expected methods', function () {
+    test('has expected methods', function () {
       const log = new PersistedLog(historyName);
 
       expect(log.add).to.be.a('function');
@@ -33,14 +33,14 @@ describe('PersistedLog', function () {
   });
 
   describe('internal functionality', function () {
-    it('reads from storage', function () {
+    test('reads from storage', function () {
       new PersistedLog(historyName, {}, storage);
 
       expect(storage.get.calledOnce).to.be(true);
       expect(storage.get.calledWith(historyName)).to.be(true);
     });
 
-    it('writes to storage', function () {
+    test('writes to storage', function () {
       const log = new PersistedLog(historyName, {}, storage);
       const newItem = { first: 'diana', last: 'prince' };
 
@@ -52,7 +52,7 @@ describe('PersistedLog', function () {
   });
 
   describe('persisting data', function () {
-    it('fetches records from storage', function () {
+    test('fetches records from storage', function () {
       storage.get.returns(payload);
       const log = new PersistedLog(historyName, {}, storage);
 
@@ -61,7 +61,7 @@ describe('PersistedLog', function () {
       expect(items).to.eql(payload);
     });
 
-    it('prepends new records', function () {
+    test('prepends new records', function () {
       storage.get.returns(payload.slice(0));
       const log = new PersistedLog(historyName, {}, storage);
       const newItem = { first: 'selina', last: 'kyle' };
@@ -73,7 +73,7 @@ describe('PersistedLog', function () {
   });
 
   describe('stack options', function () {
-    it('should observe the maxLength option', function () {
+    test('should observe the maxLength option', function () {
       const bulkData = [];
 
       for (let i = 0; i < historyLimit; i++) {
@@ -88,7 +88,7 @@ describe('PersistedLog', function () {
       expect(items.length).to.equal(historyLimit);
     });
 
-    it('should observe the filterDuplicates option', function () {
+    test('should observe the filterDuplicates option', function () {
       storage.get.returns(payload.slice(0));
       const log = new PersistedLog(historyName, { filterDuplicates: true }, storage);
       const newItem = payload[1];
@@ -97,14 +97,14 @@ describe('PersistedLog', function () {
       expect(items.length).to.equal(payload.length);
     });
 
-    it ('should truncate the list upon initialization if too long', () => {
+    test('should truncate the list upon initialization if too long', () => {
       storage.get.returns(payload.slice(0));
       const log = new PersistedLog(historyName, { maxLength: 1 }, storage);
       const items = log.get();
       expect(items.length).to.equal(1);
     });
 
-    it('should allow a maxLength of 0', () => {
+    test('should allow a maxLength of 0', () => {
       storage.get.returns(payload.slice(0));
       const log = new PersistedLog(historyName, { maxLength: 0 }, storage);
       const items = log.get();
