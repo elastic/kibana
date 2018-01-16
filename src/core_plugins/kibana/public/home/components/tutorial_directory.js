@@ -1,12 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
+
 import {
-  KuiTabs,
-  KuiTab,
-  KuiFlexItem,
-  KuiFlexGrid,
-} from 'ui_framework/components';
+  EuiPage,
+  EuiTabs,
+  EuiTab,
+  EuiFlexItem,
+  EuiFlexGrid,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
+
+
 import { getTutorials } from '../load_tutorials';
 
 const ALL = 'all';
@@ -55,14 +61,14 @@ export class TutorialDirectory extends React.Component {
 
   renderTabs = () => {
     return this.tabs.map((tab, index) => (
-      <KuiTab
+      <EuiTab
         className="homeDirectoryTab"
         onClick={() => this.onSelectedTabChanged(tab.id)}
         isSelected={tab.id === this.state.selectedTabId}
         key={index}
       >
         {tab.name}
-      </KuiTab>
+      </EuiTab>
     ));
   }
 
@@ -76,40 +82,41 @@ export class TutorialDirectory extends React.Component {
       })
       .map((tutorial) => {
         return (
-          <KuiFlexItem key={tutorial.name}>
+          <EuiFlexItem key={tutorial.name}>
             <Synopsis
               description={tutorial.shortDescription}
               title={tutorial.name}
+              wrapInPanel
               url={this.props.addBasePath(`#/home/tutorial/${tutorial.id}`)}
             />
-          </KuiFlexItem>
+          </EuiFlexItem>
         );
       });
   };
 
   render() {
     return (
-      <div className="kuiView home">
-        <div className="kuiViewContent">
+      <EuiPage className="home">
 
-          <div className="kuiViewContentItem kuiVerticalRhythmXLarge">
-            <a className="kuiLink" href="#/home">Home</a>
-            <h1 className="kuiTitle ">
-              Add Data to Kibana
-            </h1>
-          </div>
+        <a className="kuiLink" href="#/home">Home</a>
+        <EuiSpacer size="s" />
+        <EuiTitle size="l">
+          <h1>
+            Add Data to Kibana
+          </h1>
+        </EuiTitle>
 
-          <div className="kuiViewContentItem kuiVerticalRhythmXLarge">
-            <KuiTabs>
-              {this.renderTabs()}
-            </KuiTabs>
-            <KuiFlexGrid columns={4} className="homeDirectory">
-              { this.renderTutorials() }
-            </KuiFlexGrid>
-          </div>
+        <EuiSpacer size="m" />
 
-        </div>
-      </div>
+        <EuiTabs>
+          {this.renderTabs()}
+        </EuiTabs>
+        <EuiSpacer />
+        <EuiFlexGrid columns={4}>
+          { this.renderTutorials() }
+        </EuiFlexGrid>
+
+      </EuiPage>
     );
   }
 }
