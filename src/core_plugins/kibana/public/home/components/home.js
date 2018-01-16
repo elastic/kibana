@@ -79,7 +79,7 @@ export function Home({ addBasePath, directories, isCloudEnabled }) {
               buttonType="secondary"
               href={addBasePath(`${kbnBaseUrl}#/home/tutorial/apm`)}
             >
-              APM
+              Add APM
             </KuiLinkButton>
           </KuiCardFooter>
         </KuiCard>

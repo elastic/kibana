@@ -65,3 +65,24 @@ export const DJANGO_CLIENT_INSTRUCTIONS = [
       '({config.docs.base_url}guide/en/apm/agent/python/current/django-support.html) for advanced usage.'
   }
 ];
+
+export const RAILS_CLIENT_INSTRUCTIONS = [
+  {
+    title: 'Install the APM agent',
+    textPre: 'Add the agent to your Gemfile.',
+    commands: [
+      `gem 'elastic-apm'`
+    ]
+  },
+  {
+    title: 'Configure the agent',
+    textPre: 'APM is automatically installed. Configure the agent, by creating the config file `config/elastic_apm.yml`',
+    commands: [
+      `# config/elastic_apm.yml`,
+      `server_url: 'http://localhost:8200'`,
+    ],
+    textPost: 'See the [documentation]' +
+      '({config.docs.base_url}guide/en/apm/agent/ruby/1.x/index.html) for configuration options and advanced usage.' +
+      '**Warning: The Ruby agent is currently in Beta and not meant for production use.**'
+  }
+];

@@ -7,6 +7,7 @@ import {
 import {
   NODE_CLIENT_INSTRUCTIONS,
   DJANGO_CLIENT_INSTRUCTIONS,
+  RAILS_CLIENT_INSTRUCTIONS,
 } from './apm_client_instructions';
 
 export const ON_PREM_INSTRUCTIONS = {
@@ -66,6 +67,10 @@ export const ON_PREM_INSTRUCTIONS = {
         {
           id: INSTRUCTION_VARIANT.DJANGO,
           instructions: DJANGO_CLIENT_INSTRUCTIONS
+        },
+        {
+          id: INSTRUCTION_VARIANT.RAILS,
+          instructions: RAILS_CLIENT_INSTRUCTIONS
         }
       ]
     }
