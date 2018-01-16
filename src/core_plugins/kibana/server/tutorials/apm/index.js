@@ -1,6 +1,5 @@
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { ON_PREM_INSTRUCTIONS } from './on_prem';
-import { ELASTIC_CLOUD_INSTRUCTIONS } from './elastic_cloud';
 
 export function apmSpecProvider() {
   return {
@@ -17,6 +16,5 @@ export function apmSpecProvider() {
       '({config.docs.base_url}guide/en/apm/get-started/{config.docs.version}/index.html).' +
       ' To get started, follow the steps below.',
     onPrem: ON_PREM_INSTRUCTIONS,
-    elasticCloud: ELASTIC_CLOUD_INSTRUCTIONS
   };
 }

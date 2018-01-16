@@ -65,7 +65,7 @@ export const tutorialSchema = {
   onPrem: instructionsSchema.required(),
 
   // kibana and elastic cluster running in elastic's cloud
-  elasticCloud: instructionsSchema.required(),
+  elasticCloud: instructionsSchema,
 
   // kibana running on prem and elastic cluster running in elastic's cloud
   onPremElasticCloud: instructionsSchema,
