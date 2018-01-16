@@ -1,8 +1,8 @@
 import { arrayOf, string, object, maybe } from '../';
 
 test('returns value if it matches the type', () => {
-  const setting = arrayOf(string());
-  expect(setting.validate(['foo', 'bar', 'baz'])).toEqual([
+  const type = arrayOf(string());
+  expect(type.validate(['foo', 'bar', 'baz'])).toEqual([
     'foo',
     'bar',
     'baz'
@@ -10,58 +10,58 @@ test('returns value if it matches the type', () => {
 });
 
 test('fails if wrong input type', () => {
-  const setting = arrayOf(string());
-  expect(() => setting.validate('test')).toThrowErrorMatchingSnapshot();
+  const type = arrayOf(string());
+  expect(() => type.validate('test')).toThrowErrorMatchingSnapshot();
 });
 
 test('includes context in failure when wrong top-level type', () => {
-  const setting = arrayOf(string());
+  const type = arrayOf(string());
   expect(() =>
-    setting.validate('test', 'foo-context')
+    type.validate('test', 'foo-context')
   ).toThrowErrorMatchingSnapshot();
 });
 
 test('includes context in failure when wrong item type', () => {
-  const setting = arrayOf(string());
+  const type = arrayOf(string());
   expect(() =>
-    setting.validate([123], 'foo-context')
+    type.validate([123], 'foo-context')
   ).toThrowErrorMatchingSnapshot();
 });
 
 test('fails if wrong type of content in array', () => {
-  const setting = arrayOf(string());
-  expect(() => setting.validate([1, 2, 3])).toThrowErrorMatchingSnapshot();
+  const type = arrayOf(string());
+  expect(() => type.validate([1, 2, 3])).toThrowErrorMatchingSnapshot();
 });
 
 test('fails if mixed types of content in array', () => {
-  const setting = arrayOf(string());
+  const type = arrayOf(string());
   expect(() =>
-    setting.validate(['foo', 'bar', true, {}])
+    type.validate(['foo', 'bar', true, {}])
   ).toThrowErrorMatchingSnapshot();
 });
 
-test('returns empty array if input is empty but setting has default value', () => {
-  const setting = arrayOf(string({ defaultValue: 'test' }));
-  expect(setting.validate([])).toEqual([]);
+test('returns empty array if input is empty but type has default value', () => {
+  const type = arrayOf(string({ defaultValue: 'test' }));
+  expect(type.validate([])).toEqual([]);
 });
 
-test('returns empty array if input is empty even if setting is required', () => {
-  const setting = arrayOf(string());
-  expect(setting.validate([])).toEqual([]);
+test('returns empty array if input is empty even if type is required', () => {
+  const type = arrayOf(string());
+  expect(type.validate([])).toEqual([]);
 });
 
 test('fails for null values if optional', () => {
-  const setting = arrayOf(maybe(string()));
-  expect(() => setting.validate([null])).toThrowErrorMatchingSnapshot();
+  const type = arrayOf(maybe(string()));
+  expect(() => type.validate([null])).toThrowErrorMatchingSnapshot();
 });
 
 test('handles default values for undefined values', () => {
-  const setting = arrayOf(string({ defaultValue: 'foo' }));
-  expect(setting.validate([undefined])).toEqual(['foo']);
+  const type = arrayOf(string({ defaultValue: 'foo' }));
+  expect(type.validate([undefined])).toEqual(['foo']);
 });
 
 test('array within array', () => {
-  const setting = arrayOf(
+  const type = arrayOf(
     arrayOf(string(), {
       minSize: 2,
       maxSize: 2
@@ -71,11 +71,11 @@ test('array within array', () => {
 
   const value = [['foo', 'bar']];
 
-  expect(setting.validate(value)).toEqual([['foo', 'bar']]);
+  expect(type.validate(value)).toEqual([['foo', 'bar']]);
 });
 
 test('object within array', () => {
-  const setting = arrayOf(
+  const type = arrayOf(
     object({
       foo: string({ defaultValue: 'foo' })
     })
@@ -87,11 +87,11 @@ test('object within array', () => {
     }
   ];
 
-  expect(setting.validate(value)).toEqual([{ foo: 'test' }]);
+  expect(type.validate(value)).toEqual([{ foo: 'test' }]);
 });
 
 test('object within array with required', () => {
-  const setting = arrayOf(
+  const type = arrayOf(
     object({
       foo: string()
     })
@@ -99,7 +99,7 @@ test('object within array with required', () => {
 
   const value = [{}];
 
-  expect(() => setting.validate(value)).toThrowErrorMatchingSnapshot();
+  expect(() => type.validate(value)).toThrowErrorMatchingSnapshot();
 });
 
 describe('#minSize', () => {

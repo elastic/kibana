@@ -12,9 +12,9 @@ export class KibanaRequest<Params, Query, Body> {
    * instance of a KibanaRequest.
    */
   static from<
-    P extends schema.ObjectSetting,
-    Q extends schema.ObjectSetting,
-    B extends schema.ObjectSetting
+    P extends schema.ObjectType,
+    Q extends schema.ObjectType,
+    B extends schema.ObjectType
   >(req: express.Request, routeSchemas: RouteSchemas<P, Q, B> | undefined) {
     const requestParts = KibanaRequest.validate(req, routeSchemas);
     return new KibanaRequest(
@@ -31,9 +31,9 @@ export class KibanaRequest<Params, Query, Body> {
    * received in the route handler.
    */
   private static validate<
-    P extends schema.ObjectSetting,
-    Q extends schema.ObjectSetting,
-    B extends schema.ObjectSetting
+    P extends schema.ObjectType,
+    Q extends schema.ObjectType,
+    B extends schema.ObjectType
   >(
     req: express.Request,
     routeSchemas: RouteSchemas<P, Q, B> | undefined

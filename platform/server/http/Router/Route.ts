@@ -2,9 +2,9 @@ import { schema, Schema } from '@elastic/kbn-utils';
 export type RouteMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
 export interface RouteConfig<
-  P extends schema.ObjectSetting,
-  Q extends schema.ObjectSetting,
-  B extends schema.ObjectSetting
+  P extends schema.ObjectType,
+  Q extends schema.ObjectType,
+  B extends schema.ObjectType
 > {
   /**
    * The endpoint _within_ the router path to register the route. E.g. if the
@@ -23,9 +23,9 @@ export interface RouteConfig<
 }
 
 export type RouteValidateFactory<
-  P extends schema.ObjectSetting,
-  Q extends schema.ObjectSetting,
-  B extends schema.ObjectSetting
+  P extends schema.ObjectType,
+  Q extends schema.ObjectType,
+  B extends schema.ObjectType
 > = (schema: Schema) => RouteSchemas<P, Q, B>;
 
 /**
@@ -33,9 +33,9 @@ export type RouteValidateFactory<
  * request.
  */
 export interface RouteSchemas<
-  P extends schema.ObjectSetting,
-  Q extends schema.ObjectSetting,
-  B extends schema.ObjectSetting
+  P extends schema.ObjectType,
+  Q extends schema.ObjectType,
+  B extends schema.ObjectType
 > {
   params?: P;
   query?: Q;
