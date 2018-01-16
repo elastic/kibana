@@ -8,7 +8,6 @@ import { parseRelativeParts } from './parse_relative_parts';
 import dateMath from '@elastic/datemath';
 import moment from 'moment';
 import { Notifier } from 'ui/notify/notifier';
-import 'ui/timepicker/timepicker.less';
 import 'ui/directives/input_datetime';
 import 'ui/directives/inequality';
 import 'ui/timepicker/quick_ranges';

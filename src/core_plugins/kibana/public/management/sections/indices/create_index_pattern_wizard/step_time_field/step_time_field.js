@@ -1,7 +1,6 @@
 import 'ui/toggle_panel';
 import { uiModules } from 'ui/modules';
 import { callAfterBindingsWorkaround } from 'ui/compat';
-import './step_time_field.less';
 import template from './step_time_field.html';
 
 const module = uiModules.get('apps/management');

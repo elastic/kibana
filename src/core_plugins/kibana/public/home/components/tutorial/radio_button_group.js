@@ -1,4 +1,3 @@
-import './radio_button_group.less';
 import React from 'react';
 import PropTypes from 'prop-types';
 import {

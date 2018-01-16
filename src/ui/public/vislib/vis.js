@@ -2,7 +2,6 @@ import _ from 'lodash';
 import d3 from 'd3';
 import { KbnError } from 'ui/errors';
 import { EventsProvider } from 'ui/events';
-import './styles/main.less';
 import { VislibVisConfigProvider } from './lib/vis_config';
 import { VisHandlerProvider } from './lib/handler';
 

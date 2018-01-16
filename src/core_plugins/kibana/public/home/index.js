@@ -1,4 +1,3 @@
-import './home.less';
 import chrome from 'ui/chrome';
 import routes from 'ui/routes';
 import template from './home_ng_wrapper.html';

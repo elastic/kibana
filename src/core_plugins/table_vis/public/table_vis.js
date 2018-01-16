@@ -1,4 +1,3 @@
-import 'plugins/table_vis/table_vis.less';
 import 'plugins/table_vis/table_vis_controller';
 import 'plugins/table_vis/table_vis_params';
 import 'ui/agg_table';

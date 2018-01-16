@@ -10,7 +10,6 @@ import 'plugins/timelion/vis/timelion_vis_controller';
 import 'plugins/timelion/directives/timelion_expression_input';
 
 // Stylin
-import 'plugins/timelion/vis/timelion_vis.less';
 
 import visConfigTemplate from 'plugins/timelion/vis/timelion_vis.html';
 import editorConfigTemplate from 'plugins/timelion/vis/timelion_vis_params.html';

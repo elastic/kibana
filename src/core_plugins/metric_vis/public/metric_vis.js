@@ -1,4 +1,3 @@
-import 'plugins/metric_vis/metric_vis.less';
 import 'plugins/metric_vis/metric_vis_params';
 import 'plugins/metric_vis/metric_vis_controller';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';

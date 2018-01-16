@@ -3,7 +3,6 @@ import { GeohashLayer } from './geohash_layer';
 import { BaseMapsVisualizationProvider } from './base_maps_visualization';
 import { SearchSourceProvider } from 'ui/courier/data_source/search_source';
 import { VisAggConfigProvider } from 'ui/vis/agg_config';
-import './styles/_tilemap.less';
 
 export function CoordinateMapsVisualizationProvider(Notifier, Private) {
 

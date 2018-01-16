@@ -1,4 +1,3 @@
-import './duration.less';
 import durationTemplate from './duration.html';
 
 export function durationEditor() {

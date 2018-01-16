@@ -3,7 +3,6 @@ import { uiModules } from 'ui/modules';
 import { DocViewsRegistryProvider } from 'ui/registry/doc_views';
 
 import 'ui/render_directive';
-import 'ui/doc_viewer/doc_viewer.less';
 
 uiModules.get('kibana')
   .directive('docViewer', function (config, Private) {

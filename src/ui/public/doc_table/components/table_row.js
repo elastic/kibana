@@ -4,7 +4,6 @@ import rison from 'rison-node';
 import 'ui/doc_viewer';
 import 'ui/filters/trust_as_html';
 import 'ui/filters/short_dots';
-import './table_row.less';
 import { noWhiteSpace } from '../../../../core_plugins/kibana/common/utils/no_white_space';
 import openRowHtml from 'ui/doc_table/components/table_row/open.html';
 import detailsHtml from 'ui/doc_table/components/table_row/details.html';
