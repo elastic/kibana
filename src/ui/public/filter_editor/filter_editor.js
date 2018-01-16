@@ -8,7 +8,6 @@ import './filter_query_dsl_editor';
 import './filter_field_select';
 import './filter_operator_select';
 import './params_editor/filter_params_editor';
-import './filter_editor.less';
 import {
   getQueryDslFromFilter,
   getFieldFromFilter,
