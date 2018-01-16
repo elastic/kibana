@@ -112,7 +112,7 @@ export class Tutorial extends React.Component {
   }
 
   renderInstructionSetsToggle = () => {
-    if (!this.props.isCloudEnabled) {
+    if (!this.props.isCloudEnabled && this.state.tutorial.onPremElasticCloud) {
       const radioButtons = [
         { onClick: this.onPrem, label: 'On premise', dataTestSubj: 'onPremBtn' },
         { onClick: this.onPremElasticCloud, label: 'Elastic Cloud', dataTestSubj: 'onPremElasticCloudBtn' },

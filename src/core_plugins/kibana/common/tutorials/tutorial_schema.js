@@ -68,7 +68,7 @@ export const tutorialSchema = {
   elasticCloud: instructionsSchema.required(),
 
   // kibana running on prem and elastic cluster running in elastic's cloud
-  onPremElasticCloud: instructionsSchema.required(),
+  onPremElasticCloud: instructionsSchema,
 
   // Elastic stack artifacts produced by product when it is setup and run.
   artifacts: artifactsSchema,
