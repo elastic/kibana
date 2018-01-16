@@ -3,7 +3,6 @@ import React, { Component } from 'react';
 import { keyCodes } from '@elastic/eui';
 import Visualization from './visualization';
 import Toggle from 'react-toggle';
-import 'react-toggle/style.css';
 
 const MIN_CHART_HEIGHT = 250;
 
