@@ -3,7 +3,6 @@ import 'ui/pager';
 import { last } from 'lodash';
 import { uiModules } from 'ui/modules';
 import { callAfterBindingsWorkaround } from 'ui/compat';
-import './matching_indices_list.less';
 import template from './matching_indices_list.html';
 
 const module = uiModules.get('apps/management');
