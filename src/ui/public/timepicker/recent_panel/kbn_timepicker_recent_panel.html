@@ -7,8 +7,8 @@
   </div>
 
   <div ng-repeat="list in quickLists" class="kbn-timepicker-section">
-    <ul class="list-unstyled">
-      <li ng-repeat="option in list">
+    <ul class="list-unstyled kbn-timepicker-list">
+      <li ng-repeat="option in list" class="kbn-timepicker-list-item">
         <a
           class="kuiLink"
           ng-click="setQuick({from: option.from, to: option.to})"
