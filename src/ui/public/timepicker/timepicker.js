@@ -13,16 +13,16 @@ import 'ui/timepicker/timepicker.less';
 import 'ui/directives/input_datetime';
 import 'ui/directives/inequality';
 import 'ui/timepicker/refresh_intervals';
-import 'ui/timepicker/time_units';
 import 'ui/timepicker/kbn_global_timepicker';
 import { uiModules } from 'ui/modules';
 import { TIME_MODES } from './modes';
+import { timeUnits } from './time_units';
 const module = uiModules.get('ui/timepicker');
 const notify = new Notifier({
   location: 'timepicker',
 });
 
-module.directive('kbnTimepicker', function (timeUnits, refreshIntervals) {
+module.directive('kbnTimepicker', function (refreshIntervals) {
   return {
     restrict: 'E',
     scope: {

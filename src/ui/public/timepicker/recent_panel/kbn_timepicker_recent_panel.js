@@ -1,7 +1,7 @@
-import moment from 'moment';
 import template from './kbn_timepicker_recent_panel.html';
 import { uiModules } from 'ui/modules';
 import { timeHistory } from 'ui/timefilter/time_history';
+import { prettyDuration } from 'ui/timepicker/pretty_duration';
 
 const module = uiModules.get('ui/timepicker');
 
@@ -14,9 +14,10 @@ module.directive('kbnTimepickerRecentPanel', function () {
     },
     template,
     controller: function ($scope, config) {
+      const getConfig = (...args) => config.get(...args);
       $scope.quickLists = [];
       const history = timeHistory.get().map(time => {
-        time.display = `${formatDate(time.from)} to ${formatDate(time.to)}`;
+        time.display = prettyDuration(time.from, time.to, getConfig);
         return time;
       });
       if (history.length > 5) {
@@ -28,15 +29,6 @@ module.directive('kbnTimepickerRecentPanel', function () {
       } else if (history.length > 0) {
         // Put history in single column. Do not put empty history in quickLists
         $scope.quickLists.push(history);
-      }
-
-      function formatDate(dateString) {
-        if (dateString.includes('now')) {
-          // relative date
-          return dateString;
-        }
-
-        return moment(dateString).format(config.get('dateFormat'));
       }
     }
   };
