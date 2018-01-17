@@ -2,7 +2,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { StepTimeField } from './step_time_field';
 
-export const TIME_FIELD_DOM_ELEMENT_ID = 'stepTimeFieldReact';
+const TIME_FIELD_DOM_ELEMENT_ID = 'stepTimeFieldReact';
 
 export function renderStepTimeField(
   indexPattern,

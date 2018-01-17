@@ -2,7 +2,7 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { StepIndexPattern } from './step_index_pattern';
 
-export const INDEX_PATTERN_DOM_ELEMENT_ID = 'stepIndexPatternReact';
+const INDEX_PATTERN_DOM_ELEMENT_ID = 'stepIndexPatternReact';
 
 export function renderStepIndexPattern(
   allIndices,
