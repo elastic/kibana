@@ -23,7 +23,9 @@ export const ON_PREM_INSTRUCTIONS = {
             {
               ...DOWNLOAD_SERVER,
               commands: [
-                'TODO'
+                'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-6.2.0-darwin-x86_64.tar.gz',
+                'tar xzvf apm-server-6.2.0-darwin-x86_64.tar.gz',
+                'cd apm-server-6.2.0-darwin-x86_64/',
               ]
             },
             ...UNIX_FAMILY_SERVER_INSTRUCTIONS
@@ -35,8 +37,10 @@ export const ON_PREM_INSTRUCTIONS = {
             {
               ...DOWNLOAD_SERVER,
               commands: [
-                'TODO'
-              ]
+                'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-6.2.0-amd64.deb',
+                'sudo dpkg -i apm-server-6.2.0-amd64.deb',
+              ],
+              textPost: 'Looking for the 32 bits packages? See the [Download page]({config.docs.base_url}downloads/apm/apm-server).'
             },
             ...UNIX_FAMILY_SERVER_INSTRUCTIONS
           ]
@@ -47,8 +51,10 @@ export const ON_PREM_INSTRUCTIONS = {
             {
               ...DOWNLOAD_SERVER,
               commands: [
-                'TODO'
-              ]
+                'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-6.2.0-x86_64.rpm',
+                'sudo dpkg -i apm-server-6.2.0-x86_64.rpm'
+              ],
+              textPost: 'Looking for the 32 bits packages? See the [Download page]({config.docs.base_url}downloads/apm/apm-server).'
             },
             ...UNIX_FAMILY_SERVER_INSTRUCTIONS
           ]
