@@ -79,6 +79,9 @@ export default () => Joi.object({
     }),
     xsrf: Joi.object({
       disableProtection: Joi.boolean().default(false),
+      whitelist: Joi.array().items(
+        Joi.string().regex(/^\//, 'start with a slash')
+      ).default([]),
       token: Joi.string().optional().notes('Deprecated')
     }).default(),
   }).default(),
