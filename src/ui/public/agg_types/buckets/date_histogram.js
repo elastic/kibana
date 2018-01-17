@@ -26,11 +26,20 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
     return interval;
   }
 
+  function getBounds(vis) {
+    if (!vis.getTimeRange) {
+      return timefilter.getActiveBounds();
+    }
+
+    const timeRange = vis.getTimeRange();
+    return timefilter.calculateBounds(timeRange);
+  }
+
   function setBounds(agg, force) {
     if (agg.buckets._alreadySet && !force) return;
     agg.buckets._alreadySet = true;
-    const timeRange = agg.getTimeRange() || timefilter.getActiveBounds();
-    agg.buckets.setBounds(agg.fieldIsTimeField() && timeRange);
+    const bounds = getBounds(agg.vis);
+    agg.buckets.setBounds(agg.fieldIsTimeField() && bounds);
   }
 
 
@@ -48,7 +57,6 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
     createFilter: createFilter,
     decorateAggConfig: function () {
       let buckets;
-      let timeRange;
       return {
         buckets: {
           configurable: true,
@@ -60,19 +68,6 @@ export function AggTypesBucketsDateHistogramProvider(timefilter, config, Private
             setBounds(this);
 
             return buckets;
-          }
-        },
-        setTimeRange: {
-          configurable: true,
-          value(newValue) {
-            timeRange = newValue;
-            setBounds(this, true);
-          }
-        },
-        getTimeRange: {
-          configurable: true,
-          value() {
-            return timeRange;
           }
         }
       };
