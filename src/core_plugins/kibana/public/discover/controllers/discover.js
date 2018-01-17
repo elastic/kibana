@@ -581,7 +581,7 @@ function discoverController(
   $scope.updateTime = function () {
     $scope.timeRange = {
       from: dateMath.parse(timefilter.time.from),
-      to: dateMath.parse(timefilter.time.to, true)
+      to: dateMath.parse(timefilter.time.to, { roundUp: true })
     };
   };
 
