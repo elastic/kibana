@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import dateMath from '@elastic/datemath';
 import { uiModules } from 'ui/modules';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import visualizeTemplate from 'ui/visualize/visualize.html';
@@ -64,23 +63,29 @@ uiModules
         $scope.vis.description = $scope.savedObj.description;
 
         if ($scope.timeRange) {
-          $scope.vis.params.timeRange = {
-            min: dateMath.parse($scope.timeRange.min),
-            max: dateMath.parse($scope.timeRange.max)
-          };
-
-          $scope.vis.aggs.forEach(agg => {
-            if (agg.type.name !== 'date_histogram') return;
-            agg.setTimeRange($scope.vis.params.timeRange);
-          });
+          $scope.vis.getTimeRange = () => $scope.timeRange;
 
           const searchSource = $scope.savedObj.searchSource;
-          const filter = timefilter.get(searchSource.index(), $scope.vis.params.timeRange);
-          const searchSourceFilters = searchSource.get('filter');
-          if (searchSourceFilters instanceof Array) {
-            searchSourceFilters.push(filter);
-            searchSource.skipTimeRangeFilter = true;
-          }
+          searchSource.filter(() => {
+            return timefilter.get(searchSource.index(), $scope.timeRange);
+          });
+
+          // we're only adding one range filter against the timeFieldName to ensure
+          // that our filter is the only one applied and override the global filters.
+          // this does rely on the "implementation detail" that filters are added first
+          // on the leaf SearchSource and subsequently on the parents
+          searchSource.addFilterPredicate((filter, state) => {
+            if (!filter.range) {
+              return true;
+            }
+
+            const timeFieldName = searchSource.index().timeFieldName;
+            if (!timeFieldName) {
+              return true;
+            }
+
+            return !(state.filters || []).find(f => f.range && f.range[timeFieldName]);
+          });
         }
 
         $scope.editorMode = $scope.editorMode || false;
