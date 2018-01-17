@@ -15,6 +15,15 @@ export function apmSpecProvider() {
       'For more information, [please see our documentation]' +
       '({config.docs.base_url}guide/en/apm/get-started/{config.docs.version}/index.html).' +
       ' To get started, follow the steps below.',
+    artifacts: {
+      dashboards: [
+        {
+          title: '[APM] Services',
+          linkLabel: 'APM Services dashboard',
+          isOverview: true
+        }
+      ]
+    },
     onPrem: ON_PREM_INSTRUCTIONS,
   };
 }
