@@ -37,7 +37,7 @@ module.directive('kbnTimepicker', function (refreshIntervals) {
     template: html,
     controller: function ($scope) {
       $scope.format = 'MMMM Do YYYY, HH:mm:ss.SSS';
-      $scope.modes = [TIME_MODES.QUICK, TIME_MODES.RECENT, TIME_MODES.RELATIVE, TIME_MODES.ABSOLUTE];
+      $scope.modes = Object.values(TIME_MODES);
       $scope.activeTab = $scope.activeTab || 'filter';
 
       if (_.isUndefined($scope.mode)) $scope.mode = TIME_MODES.QUICK;

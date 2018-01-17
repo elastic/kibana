@@ -24,18 +24,6 @@
           </button>
 
           <button
-            id="timepickerRecent"
-            role="tab"
-            class="euiTab"
-            ng-class="{'euiTab-isSelected': mode === 'recent' }"
-            ng-click="setMode('recent')"
-            aria-selected="{{mode === 'recent'}}"
-            data-test-subj="timepicker-recent-button"
-          >
-            Recent ranges
-          </button>
-
-          <button
             id="timepickerRelative"
             role="tab"
             class="euiTab"
@@ -57,6 +45,18 @@
             data-test-subj="timepicker-absolute-button"
           >
             Absolute
+          </button>
+
+          <button
+            id="timepickerRecent"
+            role="tab"
+            class="euiTab"
+            ng-class="{'euiTab-isSelected': mode === 'recent' }"
+            ng-click="setMode('recent')"
+            aria-selected="{{mode === 'recent'}}"
+            data-test-subj="timepicker-recent-button"
+          >
+            Recent
           </button>
         </div>
       </div>
