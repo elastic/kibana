@@ -1,4 +1,3 @@
-import './instruction.less';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Content } from './content';
@@ -25,7 +24,7 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
   if (textPost) {
     post = (
       <div>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
         <Content
           text={replaceTemplateStrings(textPost)}
         />
@@ -44,7 +43,7 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
     );
     commandBlock = (
       <div>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
         <EuiCodeBlock language="sh">
           {cmdText}
         </EuiCodeBlock>
@@ -71,6 +70,8 @@ export function Instruction({ commands, paramValues, textPost, textPre, replaceT
       {commandBlock}
 
       {post}
+
+      <EuiSpacer />
 
     </div>
   );

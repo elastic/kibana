@@ -36,6 +36,8 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
         wms: config.get('visualization:tileMap:WMSdefaults'),
         mapZoom: 2,
         mapCenter: [0, 0],
+        outlineWeight: 1,
+        showAllShapes: true//still under consideration
       }
     },
     visualization: RegionMapsVisualization,
@@ -57,6 +59,7 @@ VisTypesRegistryProvider.register(function RegionMapProvider(Private, regionmaps
         }],
         colorSchemas: Object.keys(truncatedColorMaps),
         vectorLayers: vectorLayers,
+        baseLayers: []
       },
       schemas: new Schemas([
         {

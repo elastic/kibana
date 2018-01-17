@@ -30,15 +30,10 @@ export function ResizeCheckerProvider(Private) {
    *  same reason, but for the editors.
    */
   return class ResizeChecker extends EventEmitter {
-    constructor(el) {
+    constructor(el, args = {}) {
       super();
 
       this._el = validateElArg(el);
-
-      // the width and height of the element that we expect to see
-      // on the next resize notification. If it matches the size at
-      // the time of the notifications then it we will be ignored.
-      this._expectedSize = getSize(this._el);
 
       this._observer = new ResizeObserver(() => {
         if (this._expectedSize) {
@@ -54,6 +49,21 @@ export function ResizeCheckerProvider(Private) {
         this.emit('resize');
       });
 
+      // Only enable the checker immediately if args.disabled wasn't set to true
+      if (!args.disabled) {
+        this.enable();
+      }
+    }
+
+    enable() {
+      if (this._destroyed) {
+        // Don't allow enabling an already destroyed resize checker
+        return;
+      }
+      // the width and height of the element that we expect to see
+      // on the next resize notification. If it matches the size at
+      // the time of starting observing then it we will be ignored.
+      this._expectedSize = getSize(this._el);
       this._observer.observe(this._el);
     }
 

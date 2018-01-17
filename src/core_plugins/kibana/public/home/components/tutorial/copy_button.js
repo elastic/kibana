@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Tooltip } from 'pivotal-ui/react/tooltip';
 import { OverlayTrigger } from 'pivotal-ui/react/overlay-trigger';
-import { KuiButton } from 'ui_framework/components';
+import { EuiButton } from '@elastic/eui';
 import { copyToClipboard } from '../../copy_to_clipboard';
 
 const UNCOPIED_MSG = 'Copy to clipboard';
@@ -43,13 +43,13 @@ export class CopyButton extends React.Component {
           </Tooltip>
         }
       >
-        <KuiButton
-          buttonType="secondary"
+        <EuiButton
+          size="s"
           onClick={this.copySnippet}
           onMouseOut={this.resetTooltipText}
         >
           Copy snippet
-        </KuiButton>
+        </EuiButton>
       </OverlayTrigger>
     );
   }
