@@ -260,6 +260,15 @@ describe('SearchSource', function () {
         });
       });
 
+      it('uses custom filter predicate', function () {
+        source.addFilterPredicate(() => {
+          return false;
+        });
+
+        const filter = {};
+        source._mergeProp(state, filter, 'filter');
+        expect(state.filters).to.be.empty();
+      });
     });
   });
 });
