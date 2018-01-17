@@ -67,7 +67,7 @@ export const ON_PREM_INSTRUCTIONS = {
       ]
     },
     {
-      title: 'APM Client',
+      title: 'APM Agents',
       instructionVariants: [
         {
           id: INSTRUCTION_VARIANT.NODE,
