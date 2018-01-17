@@ -19,6 +19,27 @@
   overflow: visible;
 }
 
+/* SVG Element Default Styling */
+.vis-wrapper {
+  rect {
+    opacity: 1;
+
+    &:hover {
+      opacity: @vis-hover-opacity;
+    }
+  }
+
+  circle {
+    opacity: 0;
+
+    &:hover {
+      opacity: 1;
+      stroke-width: 10px;
+      stroke-opacity: @vis-hover-opacity;
+    }
+  }
+}
+
 /* YAxis logic */
 .y-axis-col-wrapper {
   display: flex;
