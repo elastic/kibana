@@ -104,7 +104,7 @@ uiModules
     Timefilter.prototype.getBounds = function () {
       return {
         min: dateMath.parse(this.time.from),
-        max: dateMath.parse(this.time.to, true)
+        max: dateMath.parse(this.time.to, { roundUp: true })
       };
     };
 
