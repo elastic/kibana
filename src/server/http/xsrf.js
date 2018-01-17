@@ -2,11 +2,16 @@ import { badRequest } from 'boom';
 
 export default function (kbnServer, server, config) {
   const disabled = config.get('server.xsrf.disableProtection');
+  const whitelist = config.get('server.xsrf.whitelist');
   const versionHeader = 'kbn-version';
   const xsrfHeader = 'kbn-xsrf';
 
   server.ext('onPostAuth', function (req, reply) {
     if (disabled) {
+      return reply.continue();
+    }
+
+    if (whitelist.includes(req.path)) {
       return reply.continue();
     }
 
