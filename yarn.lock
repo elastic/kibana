@@ -63,12 +63,11 @@
     lodash "^4.2.0"
     to-fast-properties "^2.0.0"
 
-"@elastic/datemath@2.3.0":
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/@elastic/datemath/-/datemath-2.3.0.tgz#d540cc7660f0b7a1e50277a7af3a2fef18297ef7"
+"@elastic/datemath@4.0.1":
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/@elastic/datemath/-/datemath-4.0.1.tgz#d0d50d675f42a881912e1d5ca84bda493bb7e92d"
   dependencies:
-    lodash "~3.10.1"
-    moment "~2.13.0"
+    moment "^2.13.0"
 
 "@elastic/eslint-config-kibana@0.15.0":
   version "0.15.0"
@@ -7827,7 +7826,7 @@ moment-timezone@0.5.4:
   dependencies:
     moment ">= 2.6.0"
 
-moment@2.13.0, moment@2.x.x, "moment@>= 2.6.0", moment@^2.10.3, moment@^2.10.6, moment@^2.7.0, moment@~2.13.0:
+moment@2.13.0, moment@2.x.x, "moment@>= 2.6.0", moment@^2.10.3, moment@^2.10.6, moment@^2.13.0, moment@^2.7.0:
   version "2.13.0"
   resolved "https://registry.yarnpkg.com/moment/-/moment-2.13.0.tgz#24162d99521e6d40f99ae6939e806d2139eaac52"
 

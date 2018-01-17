@@ -62,7 +62,7 @@ module.directive('prettyDuration', function (config, timeUnits) {
             if ($scope[time] === 'now') {
               display[time] = 'now';
             } else {
-              const tryParse = dateMath.parse($scope[time], time === 'to' ? true : false);
+              const tryParse = dateMath.parse($scope[time], { roundUp: time === 'to' });
               display[time] = moment.isMoment(tryParse) ? '~ ' + tryParse.fromNow() : $scope[time];
             }
           }
