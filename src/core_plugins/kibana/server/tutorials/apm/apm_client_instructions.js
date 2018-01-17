@@ -24,9 +24,9 @@ export const NODE_CLIENT_INSTRUCTIONS = [
       `  serverUrl: ''`,
       `{curlyClose})`,
     ],
-    textPost: 'See [the documentation]({config.docs.base_url}guide/en/apm/agent/nodejs/current/index.html)' +
+    textPost: 'See [the documentation]({config.docs.base_url}guide/en/apm/agent/nodejs/1.x/index.html)' +
     ' for advanced usage. Babel users, please refer to [the documentation]' +
-    '({config.docs.base_url}guide/en/apm/agent/nodejs/current/advanced-setup.html#es-modules).'
+    '({config.docs.base_url}guide/en/apm/agent/nodejs/1.x/advanced-setup.html#es-modules).'
   }
 ];
 
@@ -62,7 +62,40 @@ export const DJANGO_CLIENT_INSTRUCTIONS = [
       `)`
     ],
     textPost: 'See the [documentation]' +
-      '({config.docs.base_url}guide/en/apm/agent/python/current/django-support.html) for advanced usage.'
+      '({config.docs.base_url}guide/en/apm/agent/python/2.x/django-support.html) for advanced usage.'
+  }
+];
+
+export const FLASK_CLIENT_INSTRUCTIONS = [
+  {
+    title: 'Install the APM agent',
+    textPre: 'Install the APM agent for Python as a dependency.',
+    commands: [
+      '$ pip install elastic-apm[flask]'
+    ]
+  },
+  {
+    title: 'Configure the agent',
+    textPre: 'Agents are libraries that run inside of your application process.' +
+      ' APM services are created programmatically based on the `SERVICE_NAME`.',
+    commands: [
+      `# initialize using environment variables`,
+      `from elasticapm.contrib.flask import ElasticAPM`,
+      `app = Flask(__name__)`,
+      `apm = ElasticAPM(app)`,
+      ` `,
+      `# or configure to use ELASTIC_APM in your application's settings`,
+      `from elasticapm.contrib.flask import ElasticAPM`,
+      `app.config['ELASTIC_APM'] = {curlyOpen}`,
+      `    # allowed characters in SERVICE_NAME: a-z, A-Z, 0-9, -, _, and space`,
+      `    'SERVICE_NAME': '<SERVICE-NAME>',`,
+      `    'SECRET_TOKEN': '<SECRET-TOKEN>',`,
+      `{curlyClose}`,
+      ` `,
+      `apm = ElasticAPM(app)`,
+    ],
+    textPost: 'See the [documentation]' +
+      '({config.docs.base_url}guide/en/apm/agent/python/2.x/flask-support.html) for advanced usage.'
   }
 ];
 
@@ -121,6 +154,10 @@ export const RACK_CLIENT_INSTRUCTIONS = [
 ];
 
 export const JS_CLIENT_INSTRUCTIONS = [
+  {
+    title: 'Enable experimental frontend support in the APM server',
+    textPre: 'Please refer to [the documentation]({config.docs.base_url}guide/en/apm/server/{config.docs.version}/frontend.html).'
+  },
   {
     title: 'Install the APM agent',
     textPre: 'Install the APM agent for JavaScript as a dependency to your application:',
