@@ -1,65 +1,88 @@
 # `kbn-build` — The Kibana build tool
 
-`kbn-build` is a build tool inspired by Lerna, which enables sharing code
-between Kibana and Kibana plugins.
+`kbn-build` is a build/monorepo tool inspired by Lerna, which enables sharing
+code between Kibana and Kibana plugins.
 
-To run `kbn-build`, go to Kibana root and run `node scripts/kbn`.
+To run `kbn-build`, go to Kibana root and run `yarn kbn`.
 
 ## Why `kbn-build`?
 
-Long-term we want to get rid of Webpack from production. That means third-party
-plugins (including x-pack) needs to be able to build themselves separately from
-Kibana, and they will therefore no longer be able to `import` files directly
-from the Kibana source code.
+Long-term we want to get rid of Webpack from production (basically, it's causing
+a lot of problems, using a lot of memory and adding a lot of complexity).
+Ideally we want each plugin to build its own separate production bundles for
+both server and UI. To get there all Kibana plugins (including x-pack) need to
+be able to build their production bundles separately from Kibana, which means
+they need to be able to depend on code from Kibana without `import`-ing random
+files directly from the Kibana source code.
 
-There are two different types of Kibana dependencies from a plugin perspective:
-runtime and static dependencies. The runtime dependencies will be injected into
-the plugin at startup, as they are dynamic. However, we also have some static
-dependencies in Kibana. `eslint-config-kibana` is one example of this, and it
-needs to be a separate package because eslint requires it. But we also have
-dependencies like `datemath`, `flot`, `eui` and others that we control, that we
-want to `import` in plugins instead of injecting. Being able to `import` these
-packages greatly improves the developer experience.
+From a plugin perspective there are two different types of Kibana dependencies:
+runtime and static dependencies. Runtime dependencies are things that are
+instantiated at runtime and that are injected into the plugin, for example
+config and elasticsearch clients. Static dependencies are those dependencies
+that we want to `import`. `eslint-config-kibana` is one example of this, and
+it's actually needed because eslint requires it to be a separate package. But we
+also have dependencies like `datemath`, `flot`, `eui` and others that we
+control, but where we want to `import` them in plugins instead of injecting them
+(because injecting them would be painful to work with). (Btw, these examples
+aren't necessarily a part of the Kibana repo today, they are just meant as
+examples of code that we might at some point want to include in the repo while
+having them be `import`able in Kibana plugins like any other npm package)
 
-Another reason we need static dependencies is that we're gradually introducing
-TypeScript into Kibana, and if we want to work nicely with TypeScript across
-plugins we need to be able to statically import dependencies. For example, we
-have built an observable lib for Kibana in TypeScript and we need to both expose
-the functionality and the TypeScript types to plugins, so other plugins built
-with TypeScript can get the types for the lib.
+Another reason we need static dependencies is that we're starting to introduce
+TypeScript into Kibana, and to work nicely with TypeScript across plugins we
+need to be able to statically import dependencies. We have for example built an
+observable library for Kibana in TypeScript and we need to expose both the
+functionality and the TypeScript types to plugins (so other plugins built with
+TypeScript can depend on the types for the lib).
 
-Even though we have multiple packages we don't necessarily want to `npm publish`
-them. The ideal solution is being able to work on code locally in the Kibana
-repo and have a nice workflow that doesn't require publishing, but where we
-still get the value of having "packages" that are available to plugins, without
-these plugins having to `import` files directly from the Kibana folder.
+However, even though we have multiple packages we don't necessarily want to
+`npm publish` them. The ideal solution for us is being able to work on code
+locally in the Kibana repo and have a nice workflow that doesn't require
+publishing, but where we still get the value of having "packages" that are
+available to plugins, without these plugins having to import files directly from
+the Kibana folder.
 
-> The _technically_ simplest approach is probably to allow plugins to `import`
-> the packages directly. However, this allows patterns we don't want, and that
-> we're specifically trying to get away from (because users could start
-> importing _other_ files too, which would not be intentional). We want a
-> stricter api in Kibana, and that goes for both runtime and static
-> dependencies.
+Basically, we just want to be able to share "static code" (aka being able to
+`import`) between Kibana and Kibana plugins. To get there we need tooling.
 
 `kbn-build` is a tool that helps us manage these static dependencies, and it
-enables us to share these packages between Kibana and Kibana plugins. It
-also enables these packages to have their own dependencies and their own build
+enables us to share these packages between Kibana and Kibana plugins. It also
+enables these packages to have their own dependencies and their own build
 scripts, while still having a nice developer experience.
 
 ## How it works
 
 The approach we went for to handle multiple packages in Kibana is relying on
-`link:` style dependencies in Yarn. That means we define a dependency's version
-using it's relative path instead of a version published to the npm registry,
-e.g.
+`link:` style dependencies in Yarn. With `link:` dependencies you specify the
+relative location to a package instead of a version when adding it to
+`package.json`. For example:
 
 ```
 "eslint-config-kibana": "link:packages/eslint-config-kibana"
 ```
 
-And now, when Yarn is installing dependencies it will set up a symlink to this
-folder, which means you can now make changes to the `eslint-config-kibana`
-package and immediately have it available in Kibana itself.
+Now when you run `yarn` it will set up a symlink to this folder instead of
+downloading code from the npm registry. That means you can make changes to
+eslint-config-kibana and immediately have them available in Kibana itself. No
+`npm publish` needed anymore — Kibana will always rely directly on the code
+that's in the local packages. And we can also do the same in x-pack-kibana or
+any other Kibana plugin, e.g.
+
+```
+"eslint-config-kibana": "link:../../kibana/packages/eslint-config-kibana"
+```
+
+This works because we moved to a strict location of Kibana plugins,
+`../kibana-extra/{pluginName}` relative to Kibana. This is one of the reasons we
+wanted to move towards a setup that looks like this:
+
+```
+elastic
+├── kibana
+└── kibana-extra
+    ├── kibana-canvas
+    └── x-pack-kibana
+```
 
 Relying on `link:` style dependencies means we no longer need to `npm publish`
 our Kibana specific packages. It also means that plugin authors no longer need
@@ -70,22 +93,20 @@ packages from their local Kibana.
 
 ### Bootstrapping
 
-When bootstrapping we cross-link (aka symlink) all the packages and install
-their dependencies (aka we run `yarn install` in each package). The reason we
-want bootstrapping to be responsible for installing dependencies in addition to
-just symlinking is that we don't want to jump into every package and manually
-install. That way we know when bootstrapping is done that we can start Kibana.
+Now, instead of installing all the dependencies with just running `yarn` you use
+the `kbn-build` tool, which can install dependencies (and set up symlinks) in
+all the packages using one command (aka "bootstrap" the setup).
 
 To bootstrap Kibana:
 
 ```
-node scripts/kbn bootstrap
+yarn kbn bootstrap
 ```
 
 You can specify additional arguments to `yarn`, e.g.
 
 ```
-node scripts/kbn bootstrap -- --frozen-lockfile
+yarn kbn bootstrap -- --frozen-lockfile
 ```
 
 By default, `kbn-build` will bootstrap all packages within Kibana, plus all
@@ -93,13 +114,13 @@ Kibana plugins located in `../kibana-extra`. There are several options for
 skipping parts of this, e.g. to skip bootstrapping of Kibana plugins:
 
 ```
-node scripts/kbn bootstrap --skip-kibana-extra
+yarn kbn bootstrap --skip-kibana-extra
 ```
 
 For more details, run:
 
 ```
-node scripts/kbn
+yarn kbn
 ```
 
 ### Running scripts
@@ -109,16 +130,20 @@ e.g. `build` or `test`. Instead of jumping into each package and running
 `yarn build` you can run:
 
 ```
-node scripts/kbn run build
+yarn kbn run build
 ```
 
 And if needed, you can skip packages in the same way as for bootstrapping, e.g.
-`--skip-kibana` and `--skip-kibana-extra`.
+`--skip-kibana` and `--skip-kibana-extra`:
+
+```
+yarn kbn run build --skip-kibana
+```
 
 ## Development
 
-This package is run from Kibana root, using `node scripts/kbn`. This will run
-the "pre-built" (aka built and committed to git) version of this tool, which is
+This package is run from Kibana root, using `yarn kbn`. This will run the
+"pre-built" (aka built and committed to git) version of this tool, which is
 located in the `dist/` folder.
 
 If you need to build a new version of this package, run `yarn build` in this
