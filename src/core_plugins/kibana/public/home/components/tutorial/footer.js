@@ -13,9 +13,8 @@ import {
 } from '@elastic/eui';
 
 export function Footer({ overviewDashboard }) {
-  let launchDashboard;
   if (overviewDashboard) {
-    launchDashboard = (
+    return (
       <div>
         <EuiHorizontalRule />
 
@@ -45,12 +44,6 @@ export function Footer({ overviewDashboard }) {
       </div>
     );
   }
-
-  return (
-    <div>
-      {launchDashboard}
-    </div>
-  );
 }
 
 Footer.propTypes = {
