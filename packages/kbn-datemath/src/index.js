@@ -18,7 +18,9 @@ function parse(text, { roundUp = false, momentInstance = moment, forceNow } = {}
   if (!text) return undefined;
   if (momentInstance.isMoment(text)) return text;
   if (isDate(text)) return momentInstance(text);
-  if (forceNow !== undefined && !isValidDate(forceNow)) throw new Error('forceNow must be a valid Date');
+  if (forceNow !== undefined && !isValidDate(forceNow)) {
+    throw new Error('forceNow must be a valid Date');
+  }
 
   let time;
   let mathString = '';
@@ -92,13 +94,14 @@ function parseDateMath(mathString, time, roundUp) {
     unit = mathString.charAt(i++);
 
     // append additional characters in the unit
-    for(let j=i; j < len; j++) {
+    for (let j = i; j < len; j++) {
       let unitChar = mathString.charAt(i);
-      if ((/[a-z]/i).test(unitChar)) {
+      if (/[a-z]/i.test(unitChar)) {
         unit += unitChar;
         i++;
+      } else {
+        break;
       }
-      else break;
     }
 
     if (units.indexOf(unit) === -1) {
@@ -122,5 +125,5 @@ export default {
   parse: parse,
   units: Object.freeze(units),
   unitsAsc: Object.freeze(unitsAsc),
-  unitsDesc: Object.freeze(unitsDesc)
+  unitsDesc: Object.freeze(unitsDesc),
 };

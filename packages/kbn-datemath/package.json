@@ -7,7 +7,8 @@
     "test": "test"
   },
   "scripts": {
-    "test": "npm run build && mocha --require babel-core/register",
+    "lint": "eslint \"src/*.js\" \"test/*.js\"",
+    "test": "npm run lint && npm run build && mocha --require babel-core/register",
     "build": "babel src --out-dir lib",
     "prepublishOnly": "npm run test"
   },
@@ -15,6 +16,11 @@
   "license": "Apache-2.0",
   "engines": {
     "node": ">=6.0.0"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "singleQuote": true,
+    "trailingComma": "es5"
   },
   "repository": {
     "type": "git",
@@ -25,8 +31,12 @@
     "babel-core": "^6.26.0",
     "babel-plugin-add-module-exports": "^0.2.1",
     "babel-preset-env": "^1.6.1",
+    "eslint": "^4.7.2",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-plugin-prettier": "^2.4.0",
     "expect.js": "^0.3.1",
     "mocha": "^4.1.0",
+    "prettier": "^1.9.2",
     "sinon": "^4.1.4"
   },
   "dependencies": {
