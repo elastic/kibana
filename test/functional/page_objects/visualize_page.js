@@ -1,5 +1,6 @@
 import { VisualizeConstants } from '../../../src/core_plugins/kibana/public/visualize/visualize_constants';
 import Keys from 'leadfoot/keys';
+import Bluebird from 'bluebird';
 
 export function VisualizePageProvider({ getService, getPageObjects }) {
   const remote = getService('remote');
@@ -59,6 +60,10 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
 
     async clickTagCloud() {
       await find.clickByPartialLinkText('Tag Cloud');
+    }
+
+    async clickVega() {
+      await find.clickByPartialLinkText('Vega');
     }
 
     async clickVisualBuilder() {
@@ -159,6 +164,22 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       const markdownContainer = await testSubjects.find('markdownBody');
       const element = await find.descendantDisplayedByCssSelector(selector, markdownContainer);
       return element.getVisibleText();
+    }
+
+    async getVegaSpec() {
+      // Adapted from console_page.js:getVisibleTextFromAceEditor(). Is there a common utilities file?
+      const editor = await testSubjects.find('vega-editor');
+      const lines = await editor.findAllByClassName('ace_line_group');
+      const linesText = await Bluebird.map(lines, l => l.getVisibleText());
+      return linesText.join('\n');
+    }
+
+    async getVegaViewContainer() {
+      return await find.byCssSelector('div.vega-view-container');
+    }
+
+    async getVegaControlContainer() {
+      return await find.byCssSelector('div.vega-controls-container');
     }
 
     async setFromTime(timeString) {

@@ -35,7 +35,7 @@ exports[`renders DashboardGrid 1`] = `
           "destroy": [Function],
           "getEditPath": [Function],
           "getTitleFor": [Function],
-          "render": [Function],
+          "render": [MockFunction],
         }
       }
       getContainerApi={[Function]}
@@ -55,7 +55,7 @@ exports[`renders DashboardGrid 1`] = `
           "destroy": [Function],
           "getEditPath": [Function],
           "getTitleFor": [Function],
-          "render": [Function],
+          "render": [MockFunction],
         }
       }
       getContainerApi={[Function]}

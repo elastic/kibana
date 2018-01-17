@@ -15,11 +15,14 @@ import chrome from 'ui/chrome';
 
 export function HomeApp({ addBasePath, directories }) {
 
+  const isCloudEnabled = chrome.getInjected('isCloudEnabled', false);
+
   const renderTutorialDirectory = (props) => {
     return (
       <TutorialDirectory
         addBasePath={addBasePath}
         openTab={props.match.params.tab}
+        isCloudEnabled={isCloudEnabled}
       />
     );
   };
@@ -28,7 +31,7 @@ export function HomeApp({ addBasePath, directories }) {
     return (
       <Tutorial
         addBasePath={addBasePath}
-        isCloudEnabled={chrome.getInjected('isCloudEnabled', false)}
+        isCloudEnabled={isCloudEnabled}
         getTutorial={getTutorial}
         replaceTemplateStrings={replaceTemplateStrings}
         tutorialId={props.match.params.id}
@@ -61,6 +64,7 @@ export function HomeApp({ addBasePath, directories }) {
           <Home
             addBasePath={addBasePath}
             directories={directories}
+            isCloudEnabled={isCloudEnabled}
           />
         </Route>
       </Switch>
