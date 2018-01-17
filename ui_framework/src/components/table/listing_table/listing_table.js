@@ -125,7 +125,7 @@ export function KuiListingTable({
   );
 }
 
-KuiListingTable.PropTypes = {
+KuiListingTable.propTypes = {
   header: PropTypes.arrayOf(
     PropTypes.oneOf([
       PropTypes.node,
