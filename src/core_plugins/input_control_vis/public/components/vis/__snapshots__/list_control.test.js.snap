@@ -31,7 +31,6 @@ exports[`renders ListControl 1`] = `
   label="list control"
 >
   <Select
-    addLabelText="Add \\"{label}\\"?"
     arrowRenderer={[Function]}
     autosize={true}
     backspaceRemoves={true}
@@ -41,6 +40,7 @@ exports[`renders ListControl 1`] = `
     clearRenderer={[Function]}
     clearValueText="Clear value"
     clearable={true}
+    closeOnSelect={true}
     deleteRemoves={true}
     delimiter=","
     disabled={false}
@@ -65,6 +65,8 @@ exports[`renders ListControl 1`] = `
     onBlurResetsInput={true}
     onChange={[Function]}
     onCloseResetsInput={true}
+    onSelectResetsInput={true}
+    openOnClick={true}
     optionComponent={[Function]}
     options={
       Array [
@@ -80,11 +82,14 @@ exports[`renders ListControl 1`] = `
     }
     pageSize={5}
     placeholder="Select..."
+    removeSelected={true}
     required={false}
+    rtl={false}
     scrollMenuIntoView={true}
     searchable={true}
     simpleValue={true}
     tabSelectsValue={true}
+    trimFilter={true}
     value=""
     valueComponent={[Function]}
     valueKey="value"
