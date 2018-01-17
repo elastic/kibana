@@ -41,6 +41,7 @@ exports[`renders RangeControl 1`] = `
       className="inputRangeContainer"
     >
       <InputRange
+        allowSameValues={false}
         ariaLabelledby="mock-range-control"
         classNames={
           Object {
