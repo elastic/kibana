@@ -4,6 +4,7 @@ export default function ({ getService, getPageObjects }) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects(['common', 'visualize', 'header']);
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
 
   const FIELD_NAME = 'machine.os.raw';
 
@@ -11,6 +12,8 @@ export default function ({ getService, getPageObjects }) {
     before(async () => {
       await PageObjects.common.navigateToUrl('visualize', 'new');
       await PageObjects.visualize.clickInputControlVis();
+      // set time range to time with no documents - input controls do not use time filter be default
+      await PageObjects.header.setAbsoluteRange('2017-01-01', '2017-01-02');
       await PageObjects.visualize.clickVisEditorTab('controls');
       await PageObjects.visualize.addInputControl();
       await PageObjects.visualize.setReactSelect('.index-pattern-react-select', 'logstash');
@@ -135,6 +138,29 @@ export default function ({ getService, getPageObjects }) {
 
           const hasFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
           expect(hasFilter).to.equal(true);
+        });
+      });
+
+      describe('useTimeFilter', () => {
+        it('should use global time filter when getting terms', async () => {
+          await PageObjects.visualize.clickVisEditorTab('options');
+          await PageObjects.visualize.checkCheckbox('inputControlEditorUseTimeFilterCheckbox');
+          await PageObjects.visualize.clickGo();
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
+          // Expect control to be disabled because no terms could be gathered with time filter applied
+          const input = await find.byCssSelector('[data-test-subj="inputControl0"] input');
+          const isDisabled = await input.getProperty('disabled');
+          expect(isDisabled).to.equal(true);
+        });
+
+        it('should re-create control when global time filter is updated', async () => {
+          await PageObjects.header.setAbsoluteRange('2015-01-01', '2016-01-01');
+          await PageObjects.header.waitUntilLoadingHasFinished();
+
+          // Expect control to have values for selected time filter
+          const menu = await PageObjects.visualize.getReactSelectOptions('inputControl0');
+          expect(menu.trim().split('\n').join()).to.equal('win 8,win xp,win 7,osx');
         });
       });
     });

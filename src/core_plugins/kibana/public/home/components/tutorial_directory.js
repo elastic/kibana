@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
@@ -47,7 +48,15 @@ export class TutorialDirectory extends React.Component {
   }
 
   async componentWillMount() {
-    const tutorials = await getTutorials();
+    let tutorials = await getTutorials();
+    if (this.props.isCloudEnabled) {
+      tutorials = tutorials.filter(tutorial => {
+        return _.has(tutorial, 'elasticCloud');
+      });
+    }
+    tutorials.sort((a, b) => {
+      return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+    });
     this.setState({
       tutorials: tutorials,
     });
@@ -123,5 +132,6 @@ export class TutorialDirectory extends React.Component {
 
 TutorialDirectory.propTypes = {
   addBasePath: PropTypes.func.isRequired,
-  openTab: PropTypes.string
+  openTab: PropTypes.string,
+  isCloudEnabled: PropTypes.bool.isRequired,
 };
