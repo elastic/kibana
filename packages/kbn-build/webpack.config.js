@@ -1,7 +1,4 @@
 const path = require('path');
-const webpack = require('webpack');
-
-const BABEL_PRESET_PATH = require.resolve('../../src/babel-preset/webpack');
 
 module.exports = {
   entry: {

@@ -1,4 +1,3 @@
-import { resolve } from 'path';
 import getopts from 'getopts';
 import dedent from 'dedent';
 import chalk from 'chalk';
@@ -15,7 +14,7 @@ function help() {
     usage: kbn <command> [<args>]
 
     By default commands are run for Kibana itself, all packages in the 'packages/'
-    folder and for all plugins in ../kibana-extra.
+    folder and for all plugins in '../kibana-extra'.
 
     Available commands:
 

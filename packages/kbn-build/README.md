@@ -16,10 +16,10 @@ There are two different types of Kibana dependencies from a plugin perspective:
 runtime and static dependencies. The runtime dependencies will be injected into
 the plugin at startup, as they are dynamic. However, we also have some static
 dependencies in Kibana. `eslint-config-kibana` is one example of this, and it
-neeeds to be a separate package because eslint requires it. But we also have
+needs to be a separate package because eslint requires it. But we also have
 dependencies like `datemath`, `flot`, `eui` and others that we control, that we
 want to `import` in plugins instead of injecting. Being able to `import` these
-packages greatly improves the developer experiece.
+packages greatly improves the developer experience.
 
 Another reason we need static dependencies is that we're gradually introducing
 TypeScript into Kibana, and if we want to work nicely with TypeScript across
@@ -42,7 +42,7 @@ these plugins having to `import` files directly from the Kibana folder.
 > dependencies.
 
 `kbn-build` is a tool that helps us manage these static dependencies, and it
-enables us to use share these packages between Kibana and Kibana plugins. It
+enables us to share these packages between Kibana and Kibana plugins. It
 also enables these packages to have their own dependencies and their own build
 scripts, while still having a nice developer experience.
 
@@ -85,7 +85,7 @@ node scripts/kbn bootstrap
 You can specify additional arguments to `yarn`, e.g.
 
 ```
-node scripts/kbn bootstrap -- --frozen-lockfiles
+node scripts/kbn bootstrap -- --frozen-lockfile
 ```
 
 By default, `kbn-build` will bootstrap all packages within Kibana, plus all
@@ -118,7 +118,7 @@ And if needed, you can skip packages in the same way as for bootstrapping, e.g.
 ## Development
 
 This package is run from Kibana root, using `node scripts/kbn`. This will run
-the "pre-built" (aka built and commited to git) version of this tool, which is
+the "pre-built" (aka built and committed to git) version of this tool, which is
 located in the `dist/` folder.
 
 If you need to build a new version of this package, run `yarn build` in this
@@ -185,7 +185,7 @@ feature which exists in both npm and Yarn, but it's not directly using that
 feature). It's a tool built specifically for managing JavaScript projects with
 multiple packages. However, it's primarily built (i.e. optimized) for monorepo
 _libraries_, so it's focused on publishing packages and other use-cases that are
-not necesserily optimized for our use-cases. It's also not ideal for the setup
+not necessarily optimized for our use-cases. It's also not ideal for the setup
 we currently have, with one app that "owns everything" and the rest being
 packages for that app.
 

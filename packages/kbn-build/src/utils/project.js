@@ -1,7 +1,7 @@
 import path from 'path';
 import chalk from 'chalk';
 
-import { installInDir, runScriptInPackageStreaming } from './npm';
+import { installInDir, runScriptInPackageStreaming } from './scripts';
 import { readPackageJson } from './package_json';
 import { CliError } from './errors';
 
