@@ -51,6 +51,52 @@ describe('getMatchedIndices', () => {
     });
   });
 
+  it('should support queries with wildcards in various places', () => {
+    const indices = [
+      { name: 'kibana' },
+      { name: 'es' },
+      { name: '.kibana' }
+    ];
+
+    const query = 'k*ib*';
+    const matchedIndices = [
+      { name: 'kibana' },
+    ];
+
+    const result = getMatchedIndices(indices, matchedIndices, query, false);
+
+    expect(result).toEqual({
+      allIndices: [{ name: 'kibana' }, { name: 'es' }],
+      exactMatchedIndices: [{ name: 'kibana' }],
+      partialMatchedIndices: [{ name: 'kibana' }],
+      visibleIndices: [{ name: 'kibana' }]
+    });
+  });
+
+  it('should support queries with wildcards in various places again', () => {
+    const indices = [
+      { name: 'kibana' },
+      { name: 'kibana2' },
+      { name: 'es' },
+      { name: '.kibana' }
+    ];
+
+    const query = '*kib*';
+    const matchedIndices = [
+      { name: 'kibana' },
+      { name: 'kibana2' }
+    ];
+
+    const result = getMatchedIndices(indices, matchedIndices, query, false);
+
+    expect(result).toEqual({
+      allIndices: [{ name: 'kibana' }, { name: 'kibana2' }, { name: 'es' }],
+      exactMatchedIndices: [{ name: 'kibana' }, { name: 'kibana2' }],
+      partialMatchedIndices: [{ name: 'kibana' }, { name: 'kibana2' }],
+      visibleIndices: [{ name: 'kibana' }, { name: 'kibana2' }]
+    });
+  });
+
   it('should return all indices as visible if there are no partial or exact matches', () => {
     const indices = [
       { name: 'kibana' },

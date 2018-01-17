@@ -26,9 +26,21 @@ export function getMatchedIndices(
     if (name === query) {
       return true;
     }
-    if (query.endsWith('*') && name.indexOf(query.substring(0, query.length - 1)) === 0) {
-      return true;
+
+    const regexQuery = query.startsWith('*')
+      ? `.${query}`
+      : query;
+
+    try {
+      const regex = new RegExp(regexQuery);
+      if (regex.test(name) && (query.endsWith('*') || query.length === name.length)) {
+        return true;
+      }
     }
+    catch (e) {
+      return false;
+    }
+
     return false;
   });
   const exactMatchedIndices = filterSystemIndices(exactIndices, isIncludingSystemIndices);
