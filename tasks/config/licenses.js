@@ -40,12 +40,6 @@ module.exports = function () {
         'WTFPL',
       ],
       overrides: {
-        'assert-plus@0.1.5': ['MIT'],
-        'bytes@1.0.0': ['MIT'],
-        'css-parse@1.0.4': ['MIT'],
-        'css-stringify@1.0.5': ['MIT'],
-        'css@1.0.8': ['MIT'],
-        'indexof@0.0.1': ['MIT'],
         'uglify-js@2.2.5': ['BSD'],
       }
     }
