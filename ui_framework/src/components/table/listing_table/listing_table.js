@@ -127,7 +127,7 @@ export function KuiListingTable({
 
 KuiListingTable.propTypes = {
   header: PropTypes.arrayOf(
-    PropTypes.oneOf([
+    PropTypes.oneOfType([
       PropTypes.node,
       PropTypes.shape({
         content: PropTypes.node,
@@ -141,7 +141,7 @@ KuiListingTable.propTypes = {
   rows: PropTypes.arrayOf(PropTypes.shape({
     id: PropTypes.string,
     cells: PropTypes.arrayOf(
-      PropTypes.oneOf([
+      PropTypes.oneOfType([
         PropTypes.node,
         PropTypes.shape({
           content: PropTypes.node,
