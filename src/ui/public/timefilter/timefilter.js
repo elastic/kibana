@@ -1,3 +1,4 @@
+import querystring from 'querystring';
 import _ from 'lodash';
 import moment from 'moment';
 import dateMath from '@elastic/datemath';
@@ -105,10 +106,21 @@ uiModules
       return this.calculateBounds(this.time);
     };
 
+    Timefilter.prototype.getForceNow = function () {
+      const query = querystring.parse(window.location.search.replace(/^\?/, '')).forceNow;
+      if (!query) {
+        return;
+      }
+
+      return new Date(Date.parse(query));
+    };
+
     Timefilter.prototype.calculateBounds = function (timeRange) {
+      const forceNow = this.getForceNow();
+
       return {
-        min: dateMath.parse(timeRange.from),
-        max: dateMath.parse(timeRange.to, { roundUp: true })
+        min: dateMath.parse(timeRange.from, { forceNow }),
+        max: dateMath.parse(timeRange.to, { roundUp: true, forceNow })
       };
     };
 
