@@ -12,7 +12,7 @@ class TimeHistory {
   }
 
   add(time) {
-    if (!time || time.mode === TIME_MODES.QUICK) {
+    if (!time) {
       return;
     }
 
