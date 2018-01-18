@@ -9,12 +9,14 @@ import StubIndexPatternProv from 'test_utils/stub_index_pattern';
 describe('SearchSource', function () {
   require('test_utils/no_digest_promises').activateForSuite();
 
+  let config;
   let SearchSource;
   let indexPattern;
   let indexPattern2;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject(function (Private) {
+  beforeEach(ngMock.inject(function (Private, _config_) {
+    config = _config_;
     SearchSource = Private(SearchSourceProvider);
 
     const IndexPattern = Private(StubIndexPatternProv);
@@ -148,6 +150,124 @@ describe('SearchSource', function () {
           expect(source.get('index')).to.be(undefined);
           expect(source.get('source')).to.be(football);
         });
+      });
+    });
+  });
+
+  describe('#_mergeProp', function () {
+    describe('filter', function () {
+      let source;
+      let state;
+
+      beforeEach(function () {
+        source = new SearchSource();
+        state = {};
+      });
+
+      [null, undefined].forEach(falsyValue => {
+        it(`ignores ${falsyValue} filter`, function () {
+          source._mergeProp(state, falsyValue, 'filter');
+          expect(state.filters).to.be(undefined);
+        });
+      });
+
+      [false, 0, '', NaN].forEach(falsyValue => {
+        it(`doesn't add ${falsyValue} filter`, function () {
+          source._mergeProp(state, falsyValue, 'filter');
+          expect(state.filters).to.be.empty();
+        });
+      });
+
+      it('adds "meta.disabled: undefined" filter', function () {
+        const filter = {
+          meta: {}
+        };
+        source._mergeProp(state, filter, 'filter');
+        expect(state.filters).to.eql([filter]);
+      });
+
+      it('adds "meta.disabled: false" filter', function () {
+        const filter = {
+          meta: {
+            disabled: false
+          }
+        };
+        source._mergeProp(state, filter, 'filter');
+        expect(state.filters).to.eql([filter]);
+      });
+
+      it(`doesn't add "meta.disabled: true" filter`, function () {
+        const filter = {
+          meta: {
+            disabled: true
+          }
+        };
+        source._mergeProp(state, filter, 'filter');
+        expect(state.filters).to.be.empty();
+      });
+
+      describe('when courier:ignoreFilterIfFieldNotInIndex is false', function () {
+        it('adds filter for non-existent field', function () {
+          config.set('courier:ignoreFilterIfFieldNotInIndex', false);
+          const filter = {
+            meta: {
+              key: 'bar'
+            }
+          };
+          state.index = {
+            fields: {
+              byName: {}
+            }
+          };
+          source._mergeProp(state, filter, 'filter');
+          expect(state.filters).to.eql([ filter ]);
+        });
+      });
+
+      describe('when courier:ignoreFilterIfFieldNotInIndex is true', function () {
+        it(`doesn't add filter for non-existent field`, function () {
+          config.set('courier:ignoreFilterIfFieldNotInIndex', true);
+          const filter = {
+            meta: {
+              key: 'bar'
+            }
+          };
+          state.index = {
+            fields: {
+              byName: {}
+            }
+          };
+          source._mergeProp(state, filter, 'filter');
+          expect(state.filters).to.be.empty();
+        });
+
+        it(`adds filter for existent field`, function () {
+          config.set('courier:ignoreFilterIfFieldNotInIndex', true);
+          const filter = {
+            meta: {
+              key: 'bar'
+            }
+          };
+          state.index = {
+            fields: {
+              byName: {
+                bar: true
+              }
+            }
+          };
+          source._mergeProp(state, filter, 'filter');
+          expect(state.filters).to.eql([ filter ]);
+        });
+      });
+
+      it('uses custom filter predicate', function () {
+        source.addFilterPredicate(() => {
+          return false;
+        });
+
+        const filter = {};
+        source._mergeProp(state, filter, 'filter');
+        expect(state.filters).to.be.empty();
       });
     });
   });

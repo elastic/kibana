@@ -45,14 +45,16 @@ class ListControl extends Control {
   }
 }
 
-export async function listControlFactory(controlParams, kbnApi) {
+export async function listControlFactory(controlParams, kbnApi, useTimeFilter) {
   const indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
   // TODO replace SearchSource with call to suggestions API
   const searchSource = new kbnApi.SearchSource({
     timeout: '1s',
     terminate_after: 100000
   });
-  searchSource.inherits(false); //Do not filter by time so can not inherit from rootSearchSource
+  if (!useTimeFilter) {
+    searchSource.inherits(false); //Do not filter by time so can not inherit from rootSearchSource
+  }
   searchSource.size(0);
   searchSource.index(indexPattern);
   searchSource.aggs(termsAgg(

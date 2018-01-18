@@ -2,6 +2,7 @@ import './tutorial.less';
 import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Footer } from './footer';
 import { Introduction } from './introduction';
 import { InstructionSet } from './instruction_set';
 import { RadioButtonGroup } from './radio_button_group';
@@ -112,7 +113,7 @@ export class Tutorial extends React.Component {
   }
 
   renderInstructionSetsToggle = () => {
-    if (!this.props.isCloudEnabled) {
+    if (!this.props.isCloudEnabled && this.state.tutorial.onPremElasticCloud) {
       const radioButtons = [
         { onClick: this.onPrem, label: 'On premise', dataTestSubj: 'onPremBtn' },
         { onClick: this.onPremElasticCloud, label: 'Elastic Cloud', dataTestSubj: 'onPremElasticCloudBtn' },
@@ -127,12 +128,6 @@ export class Tutorial extends React.Component {
   }
 
   renderInstructionSets = (instructions) => {
-    let overviewDashboard;
-    if (_.has(this.state, 'tutorial.artifacts.dashboards')) {
-      overviewDashboard = this.state.tutorial.artifacts.dashboards.find(dashboard => {
-        return dashboard.isOverview;
-      });
-    }
     let offset = 1;
     return instructions.instructionSets.map((instructionSet, index) => {
       const currentOffset = offset;
@@ -146,11 +141,24 @@ export class Tutorial extends React.Component {
           paramValues={this.state.paramValues}
           setParameter={this.setParameter}
           replaceTemplateStrings={this.props.replaceTemplateStrings}
-          overviewDashboard={overviewDashboard}
           key={index}
         />
       );
     });
+  }
+
+  renderFooter = () => {
+    if (_.has(this.state, 'tutorial.artifacts.dashboards')) {
+      const overviewDashboard = this.state.tutorial.artifacts.dashboards.find(dashboard => {
+        return dashboard.isOverview;
+      });
+
+      return (
+        <Footer
+          overviewDashboard={overviewDashboard}
+        />
+      );
+    }
   }
 
   render() {
@@ -196,6 +204,7 @@ export class Tutorial extends React.Component {
           <EuiSpacer />
           <EuiPanel paddingSize="l">
             {this.renderInstructionSets(instructions)}
+            {this.renderFooter()}
           </EuiPanel>
         </div>
       );
