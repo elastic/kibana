@@ -1,172 +1,96 @@
 import { getMatchedIndices } from '../get_matched_indices';
 
 jest.mock('../../constants', () => ({
-  MAX_NUMBER_OF_MATCHING_INDICES: 5,
+  MAX_NUMBER_OF_MATCHING_INDICES: 6,
 }));
 
+const indices = [
+  { name: 'kibana' },
+  { name: 'es' },
+  { name: 'logstash' },
+  { name: 'packetbeat' },
+  { name: 'metricbeat' },
+  { name: '.kibana' }
+];
+
 describe('getMatchedIndices', () => {
-  it('should return exact matches if they exist', () => {
-    const indices = [
-      { name: 'kibana' },
-      { name: 'es' },
-      { name: '.kibana' }
-    ];
+  describe('allIndices', () => {
+    it('should return filtered', () => {
+      const query = 'ki';
+      const { allIndices } = getMatchedIndices(indices, indices, query, false);
+      expect(allIndices).toEqual([
+        { name: 'kibana' },
+        { name: 'es' },
+        { name: 'logstash' },
+        { name: 'packetbeat' },
+        { name: 'metricbeat' },
+      ]);
+    });
 
-    const query = 'kibana';
-    const matchedIndices = [
-      { name: '.kibana' },
-      { name: 'kibana' },
-    ];
-
-    const result = getMatchedIndices(indices, matchedIndices, query, false);
-
-    expect(result).toEqual({
-      allIndices: [{ name: 'kibana' }, { name: 'es' }],
-      exactMatchedIndices: [{ name: 'kibana' }],
-      partialMatchedIndices: [{ name: 'kibana' }],
-      visibleIndices: [{ name: 'kibana' }]
+    it('should return unfiltered', () => {
+      const query = 'ki';
+      const { allIndices } = getMatchedIndices(indices, indices, query, true);
+      expect(allIndices).toEqual(indices);
     });
   });
 
-  it('should support queries with wildcards', () => {
-    const indices = [
-      { name: 'kibana' },
-      { name: 'es' },
-      { name: '.kibana' }
-    ];
+  describe('exactMatchedIndices', () => {
+    it('should return filtered', () => {
+      const query = 'ki*';
+      const { exactMatchedIndices } = getMatchedIndices(indices, indices, query, false);
+      expect(exactMatchedIndices).toEqual([
+        { name: 'kibana' },
+      ]);
+    });
 
-    const query = 'ki*';
-    const matchedIndices = [
-      { name: '.kibana' },
-      { name: 'kibana' },
-    ];
-
-    const result = getMatchedIndices(indices, matchedIndices, query, false);
-
-    expect(result).toEqual({
-      allIndices: [{ name: 'kibana' }, { name: 'es' }],
-      exactMatchedIndices: [{ name: 'kibana' }],
-      partialMatchedIndices: [{ name: 'kibana' }],
-      visibleIndices: [{ name: 'kibana' }]
+    it('should return unfiltered', () => {
+      const query = 'ki*';
+      const { exactMatchedIndices } = getMatchedIndices(indices, indices, query, true);
+      expect(exactMatchedIndices).toEqual([
+        { name: 'kibana' },
+        { name: '.kibana' },
+      ]);
     });
   });
 
-  it('should support queries with wildcards in various places', () => {
-    const indices = [
-      { name: 'kibana' },
-      { name: 'es' },
-      { name: '.kibana' }
-    ];
+  describe('partialMatchedIndices', () => {
+    it('should return filtered', () => {
+      const query = 'ki*';
+      const partialIndices = indices.slice(1);
+      const { partialMatchedIndices } = getMatchedIndices(indices, partialIndices, query, false);
+      expect(partialMatchedIndices).toEqual([
+        { name: 'es' },
+        { name: 'logstash' },
+        { name: 'packetbeat' },
+        { name: 'metricbeat' },
+      ]);
+    });
 
-    const query = 'k*ib*';
-    const matchedIndices = [
-      { name: 'kibana' },
-    ];
-
-    const result = getMatchedIndices(indices, matchedIndices, query, false);
-
-    expect(result).toEqual({
-      allIndices: [{ name: 'kibana' }, { name: 'es' }],
-      exactMatchedIndices: [{ name: 'kibana' }],
-      partialMatchedIndices: [{ name: 'kibana' }],
-      visibleIndices: [{ name: 'kibana' }]
+    it('should return unfiltered', () => {
+      const query = 'ki*';
+      const partialIndices = indices.slice(1);
+      const { partialMatchedIndices } = getMatchedIndices(indices, partialIndices, query, true);
+      expect(partialMatchedIndices).toEqual(partialIndices);
     });
   });
 
-  it('should support queries with wildcards in various places again', () => {
-    const indices = [
-      { name: 'kibana' },
-      { name: 'kibana2' },
-      { name: 'es' },
-      { name: '.kibana' }
-    ];
-
-    const query = '*kib*';
-    const matchedIndices = [
-      { name: 'kibana' },
-      { name: 'kibana2' }
-    ];
-
-    const result = getMatchedIndices(indices, matchedIndices, query, false);
-
-    expect(result).toEqual({
-      allIndices: [{ name: 'kibana' }, { name: 'kibana2' }, { name: 'es' }],
-      exactMatchedIndices: [{ name: 'kibana' }, { name: 'kibana2' }],
-      partialMatchedIndices: [{ name: 'kibana' }, { name: 'kibana2' }],
-      visibleIndices: [{ name: 'kibana' }, { name: 'kibana2' }]
+  describe('visibleIndices', () => {
+    it('should return filtered', () => {
+      const query = 'foo*';
+      const { visibleIndices } = getMatchedIndices(indices, indices, query, false);
+      expect(visibleIndices).toEqual([
+        { name: 'kibana' },
+        { name: 'es' },
+        { name: 'logstash' },
+        { name: 'packetbeat' },
+        { name: 'metricbeat' },
+      ]);
     });
-  });
 
-  it('should return all indices as visible if there are no partial or exact matches', () => {
-    const indices = [
-      { name: 'kibana' },
-      { name: 'es' },
-      { name: '.kibana' }
-    ];
-
-    const query = 'fo';
-    const matchedIndices = [];
-
-    const result = getMatchedIndices(indices, matchedIndices, query, false);
-
-    expect(result).toEqual({
-      allIndices: [{ name: 'kibana' }, { name: 'es' }],
-      exactMatchedIndices: [],
-      partialMatchedIndices: [],
-      visibleIndices: [{ name: 'kibana' }, { name: 'es' }]
-    });
-  });
-
-  it('should support showing system indices', () => {
-    const indices = [
-      { name: 'kibana' },
-      { name: 'es' },
-      { name: '.kibana' }
-    ];
-
-    const query = 'ki';
-    const matchedIndices = [
-      { name: '.kibana' },
-      { name: 'kibana' },
-    ];
-
-    const result = getMatchedIndices(indices, matchedIndices, query, true);
-
-    expect(result).toEqual({
-      allIndices: [{ name: 'kibana' }, { name: 'es' }, { name: '.kibana' }],
-      exactMatchedIndices: [],
-      partialMatchedIndices: [{ name: '.kibana' }, { name: 'kibana' }],
-      visibleIndices: [{ name: '.kibana' }, { name: 'kibana' }]
-    });
-  });
-
-  it('should only return the max number of indices', () => {
-    const indices = [
-      { name: 'kibana' },
-      { name: 'es' },
-      { name: '.kibana' },
-      { name: 'monitor' },
-      { name: '.monitor' },
-      { name: 'metricbeat' },
-    ];
-
-    const query = '';
-    const matchedIndices = [
-      { name: 'kibana' },
-      { name: 'es' },
-      { name: '.kibana' },
-      { name: 'monitor' },
-      { name: '.monitor' },
-      { name: 'metricbeat' },
-    ];
-
-    const result = getMatchedIndices(indices, matchedIndices, query, true);
-
-    expect(result).toEqual({
-      allIndices: [{ name: 'kibana' }, { name: 'es' }, { name: '.kibana' }, { name: 'monitor' }, { name: '.monitor' }],
-      exactMatchedIndices: [],
-      partialMatchedIndices: [{ name: 'kibana' }, { name: 'es' }, { name: '.kibana' }, { name: 'monitor' }, { name: '.monitor' }],
-      visibleIndices: [{ name: 'kibana' }, { name: 'es' }, { name: '.kibana' }, { name: 'monitor' }, { name: '.monitor' }]
+    it('should return unfiltered', () => {
+      const query = 'foo*';
+      const { visibleIndices } = getMatchedIndices(indices, indices, query, true);
+      expect(visibleIndices).toEqual(indices);
     });
   });
 });

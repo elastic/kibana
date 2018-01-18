@@ -1,4 +1,5 @@
 import { MAX_NUMBER_OF_MATCHING_INDICES } from '../constants';
+import { isQueryAMatch } from './is_query_a_match';
 
 function filterSystemIndices(indices, isIncludingSystemIndices) {
   if (!indices) {
@@ -22,27 +23,7 @@ export function getMatchedIndices(
   const allIndices = filterSystemIndices(unfilteredAllIndices, isIncludingSystemIndices);
   const partialMatchedIndices = filterSystemIndices(unfilteredPartialMatchedIndices, isIncludingSystemIndices);
 
-  const exactIndices = partialMatchedIndices.filter(({ name }) => {
-    if (name === query) {
-      return true;
-    }
-
-    const regexQuery = query.startsWith('*')
-      ? `.${query}`
-      : query;
-
-    try {
-      const regex = new RegExp(regexQuery);
-      if (regex.test(name) && (query.endsWith('*') || query.length === name.length)) {
-        return true;
-      }
-    }
-    catch (e) {
-      return false;
-    }
-
-    return false;
-  });
+  const exactIndices = partialMatchedIndices.filter(({ name }) => isQueryAMatch(query, name));
   const exactMatchedIndices = filterSystemIndices(exactIndices, isIncludingSystemIndices);
 
   let visibleIndices;
