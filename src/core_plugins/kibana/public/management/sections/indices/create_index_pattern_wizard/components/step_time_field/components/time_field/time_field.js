@@ -45,6 +45,7 @@ export const TimeField = ({
       >
         <EuiSelect
           name="timeField"
+          data-test-subj="createIndexPatternTimeFieldSelect"
           options={timeFieldOptions}
           isLoading={!timeFields}
           value={selectedTimeField}

@@ -28,6 +28,7 @@ export const AdvancedOptions = ({
       >
         <EuiFieldText
           name="indexPatternId"
+          data-test-subj="createIndexPatternIdInput"
           value={indexPatternId}
           onChange={onChangeIndexPatternId}
           placeholder="Id"

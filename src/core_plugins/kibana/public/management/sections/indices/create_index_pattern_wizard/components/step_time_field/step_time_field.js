@@ -131,6 +131,7 @@ export class StepTimeField extends Component {
           <EuiFlexItem grow={false}>
             <EuiButton
               isDisabled={!submittable}
+              data-test-subj="createIndexPatternCreateButton"
               fill
               onClick={() => createIndexPattern(selectedTimeField, indexPatternId)}
             >

@@ -101,6 +101,7 @@ exports[`StepTimeField should render a selected timeField 1`] = `
     >
       <EuiButton
         color="primary"
+        data-test-subj="createIndexPatternCreateButton"
         fill={true}
         iconSide="left"
         isDisabled={false}
@@ -193,6 +194,7 @@ exports[`StepTimeField should render advanced options 1`] = `
     >
       <EuiButton
         color="primary"
+        data-test-subj="createIndexPatternCreateButton"
         fill={true}
         iconSide="left"
         isDisabled={false}
@@ -285,6 +287,7 @@ exports[`StepTimeField should render advanced options with an index pattern id 1
     >
       <EuiButton
         color="primary"
+        data-test-subj="createIndexPatternCreateButton"
         fill={true}
         iconSide="left"
         isDisabled={false}
@@ -377,6 +380,7 @@ exports[`StepTimeField should render normally 1`] = `
     >
       <EuiButton
         color="primary"
+        data-test-subj="createIndexPatternCreateButton"
         fill={true}
         iconSide="left"
         isDisabled={false}
@@ -490,6 +494,7 @@ exports[`StepTimeField should render timeFields 1`] = `
     >
       <EuiButton
         color="primary"
+        data-test-subj="createIndexPatternCreateButton"
         fill={true}
         iconSide="left"
         isDisabled={true}
