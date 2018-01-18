@@ -62,7 +62,7 @@ export function Home({ addBasePath, directories, isCloudEnabled }) {
           <KuiCardDescription>
             <KuiCardDescriptionTitle>
               <img
-                src={addBasePath('/plugins/kibana/assets/app_APM.svg')}
+                src={addBasePath('/plugins/kibana/assets/app_apm.svg')}
               />
               <p>
                 APM
