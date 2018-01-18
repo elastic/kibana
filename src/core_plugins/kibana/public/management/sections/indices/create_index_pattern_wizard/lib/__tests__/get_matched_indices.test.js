@@ -15,7 +15,13 @@ const indices = [
 
 describe('getMatchedIndices', () => {
   describe('allIndices', () => {
-    it('should return filtered', () => {
+    it('should return all indices', () => {
+      const query = 'ki';
+      const { allIndices } = getMatchedIndices(indices, indices, query, true);
+      expect(allIndices).toEqual(indices);
+    });
+
+    it('should return all indices except for system indices', () => {
       const query = 'ki';
       const { allIndices } = getMatchedIndices(indices, indices, query, false);
       expect(allIndices).toEqual([
@@ -26,24 +32,10 @@ describe('getMatchedIndices', () => {
         { name: 'metricbeat' },
       ]);
     });
-
-    it('should return unfiltered', () => {
-      const query = 'ki';
-      const { allIndices } = getMatchedIndices(indices, indices, query, true);
-      expect(allIndices).toEqual(indices);
-    });
   });
 
   describe('exactMatchedIndices', () => {
-    it('should return filtered', () => {
-      const query = 'ki*';
-      const { exactMatchedIndices } = getMatchedIndices(indices, indices, query, false);
-      expect(exactMatchedIndices).toEqual([
-        { name: 'kibana' },
-      ]);
-    });
-
-    it('should return unfiltered', () => {
+    it('should return all exact matched indices', () => {
       const query = 'ki*';
       const { exactMatchedIndices } = getMatchedIndices(indices, indices, query, true);
       expect(exactMatchedIndices).toEqual([
@@ -51,10 +43,25 @@ describe('getMatchedIndices', () => {
         { name: '.kibana' },
       ]);
     });
+
+    it('should return all exact matched indices except for system indices', () => {
+      const query = 'ki*';
+      const { exactMatchedIndices } = getMatchedIndices(indices, indices, query, false);
+      expect(exactMatchedIndices).toEqual([
+        { name: 'kibana' },
+      ]);
+    });
   });
 
   describe('partialMatchedIndices', () => {
-    it('should return filtered', () => {
+    it('should return all partial matched indices', () => {
+      const query = 'ki*';
+      const partialIndices = indices.slice(1);
+      const { partialMatchedIndices } = getMatchedIndices(indices, partialIndices, query, true);
+      expect(partialMatchedIndices).toEqual(partialIndices);
+    });
+
+    it('should return all partial matched indices except for system indices', () => {
       const query = 'ki*';
       const partialIndices = indices.slice(1);
       const { partialMatchedIndices } = getMatchedIndices(indices, partialIndices, query, false);
@@ -65,17 +72,16 @@ describe('getMatchedIndices', () => {
         { name: 'metricbeat' },
       ]);
     });
-
-    it('should return unfiltered', () => {
-      const query = 'ki*';
-      const partialIndices = indices.slice(1);
-      const { partialMatchedIndices } = getMatchedIndices(indices, partialIndices, query, true);
-      expect(partialMatchedIndices).toEqual(partialIndices);
-    });
   });
 
   describe('visibleIndices', () => {
-    it('should return filtered', () => {
+    it('should return all visible indices', () => {
+      const query = 'foo*';
+      const { visibleIndices } = getMatchedIndices(indices, indices, query, true);
+      expect(visibleIndices).toEqual(indices);
+    });
+
+    it('should return all visible indices except for system indices', () => {
       const query = 'foo*';
       const { visibleIndices } = getMatchedIndices(indices, indices, query, false);
       expect(visibleIndices).toEqual([
@@ -85,12 +91,6 @@ describe('getMatchedIndices', () => {
         { name: 'packetbeat' },
         { name: 'metricbeat' },
       ]);
-    });
-
-    it('should return unfiltered', () => {
-      const query = 'foo*';
-      const { visibleIndices } = getMatchedIndices(indices, indices, query, true);
-      expect(visibleIndices).toEqual(indices);
     });
   });
 });
