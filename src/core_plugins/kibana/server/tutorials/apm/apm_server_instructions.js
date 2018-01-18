@@ -47,7 +47,7 @@ export const WINDOWS_SERVER_INSTRUCTIONS = [
       'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-6.2.0-windows-x86_64.zip',
       'sudo dpkg -i apm-server-6.2.0-windows-x86_64.zip'
     ],
-    textPost: 'Looking for the 32 bits packages? See the [Download page]({config.docs.base_url}downloads/apm/apm-server).'
+    textPost: 'Looking for the 32-bit packages? See the [Download page]({config.docs.base_url}downloads/apm/apm-server).'
   },
   {
     ...IMPORT_DASHBOARD,
