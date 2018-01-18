@@ -6,7 +6,10 @@ export const INSTRUCTION_VARIANT = {
   WINDOWS: 'windows',
   NODE: 'node',
   DJANGO: 'django',
-  FLASK: 'flask'
+  FLASK: 'flask',
+  RAILS: 'rails',
+  RACK: 'rack',
+  JS: 'js',
 };
 
 const DISPLAY_MAP = {
@@ -18,6 +21,9 @@ const DISPLAY_MAP = {
   [INSTRUCTION_VARIANT.NODE]: 'Node.js',
   [INSTRUCTION_VARIANT.DJANGO]: 'Django',
   [INSTRUCTION_VARIANT.FLASK]: 'Flask',
+  [INSTRUCTION_VARIANT.RAILS]: 'Ruby on Rails',
+  [INSTRUCTION_VARIANT.RACK]: 'Rack',
+  [INSTRUCTION_VARIANT.JS]: 'JS',
 };
 
 /**

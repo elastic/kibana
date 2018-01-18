@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import dateMath from '@elastic/datemath';
 import { uiModules } from 'ui/modules';
 import { stateMonitorFactory } from 'ui/state_management/state_monitor_factory';
 import visualizeTemplate from 'ui/visualize/visualize.html';
@@ -10,6 +9,8 @@ import './visualization';
 import './visualization_editor';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
 
+import { ResizeCheckerProvider } from 'ui/resize_checker';
+
 
 import {
   isTermSizeZeroError,
@@ -17,11 +18,12 @@ import {
 
 uiModules
   .get('kibana/directive', ['ngSanitize'])
-  .directive('visualize', function (Notifier, Private, timefilter, getAppState, Promise) {
+  .directive('visualize', function ($timeout, Notifier, Private, timefilter, getAppState, Promise) {
     const notify = new Notifier({ location: 'Visualize' });
     const requestHandlers = Private(VisRequestHandlersRegistryProvider);
     const responseHandlers = Private(VisResponseHandlersRegistryProvider);
     const queryFilter = Private(FilterBarQueryFilterProvider);
+    const ResizeChecker = Private(ResizeCheckerProvider);
 
     function getHandler(from, name) {
       if (typeof name === 'function') return name;
@@ -36,13 +38,21 @@ uiModules
         savedObj: '=?',
         appState: '=?',
         uiState: '=?',
-        savedId: '=?',
         timeRange: '=?',
       },
       template: visualizeTemplate,
-      link: async function ($scope) {
+      link: async function ($scope, $el) {
+        let destroyed = false;
         if (!$scope.savedObj) throw(`saved object was not provided to <visualize> directive`);
         if (!$scope.appState) $scope.appState = getAppState();
+
+        const resizeChecker = new ResizeChecker($el, { disabled: true });
+        $timeout(() => {
+          // We give the visualize one digest cycle time to actually render before
+          // we start tracking its size. If we don't do that, we cause a double
+          // initial rendering in editor mode.
+          resizeChecker.enable();
+        });
 
         $scope.vis = $scope.savedObj.vis;
 
@@ -53,23 +63,29 @@ uiModules
         $scope.vis.description = $scope.savedObj.description;
 
         if ($scope.timeRange) {
-          $scope.vis.params.timeRange = {
-            min: dateMath.parse($scope.timeRange.min),
-            max: dateMath.parse($scope.timeRange.max)
-          };
-
-          $scope.vis.aggs.forEach(agg => {
-            if (agg.type.name !== 'date_histogram') return;
-            agg.setTimeRange($scope.vis.params.timeRange);
-          });
+          $scope.vis.getTimeRange = () => $scope.timeRange;
 
           const searchSource = $scope.savedObj.searchSource;
-          const filter = timefilter.get(searchSource.index(), $scope.vis.params.timeRange);
-          const searchSourceFilters = searchSource.get('filter');
-          if (searchSourceFilters instanceof Array) {
-            searchSourceFilters.push(filter);
-            searchSource.skipTimeRangeFilter = true;
-          }
+          searchSource.filter(() => {
+            return timefilter.get(searchSource.index(), $scope.timeRange);
+          });
+
+          // we're only adding one range filter against the timeFieldName to ensure
+          // that our filter is the only one applied and override the global filters.
+          // this does rely on the "implementation detail" that filters are added first
+          // on the leaf SearchSource and subsequently on the parents
+          searchSource.addFilterPredicate((filter, state) => {
+            if (!filter.range) {
+              return true;
+            }
+
+            const timeFieldName = searchSource.index().timeFieldName;
+            if (!timeFieldName) {
+              return true;
+            }
+
+            return !(state.filters || []).find(f => f.range && f.range[timeFieldName]);
+          });
         }
 
         $scope.editorMode = $scope.editorMode || false;
@@ -79,7 +95,10 @@ uiModules
         const responseHandler = getHandler(responseHandlers, $scope.vis.type.responseHandler);
 
         $scope.fetch = _.debounce(function () {
-          if (!$scope.vis.initialized || !$scope.savedObj) return;
+          // If destroyed == true the scope has already been destroyed, while this method
+          // was still waiting for its debounce, in this case we don't want to start
+          // fetching new data and rendering.
+          if (!$scope.vis.initialized || !$scope.savedObj || destroyed) return;
           // searchSource is only there for courier request handler
           requestHandler($scope.vis, $scope.appState, $scope.uiState, queryFilter, $scope.savedObj.searchSource)
             .then(requestHandlerResponse => {
@@ -166,14 +185,17 @@ uiModules
         // checking if anything changed, that actually require a new fetch or return
         // cached data otherwise.
         $scope.uiState.on('change', $scope.fetch);
+        resizeChecker.on('resize', $scope.fetch);
 
         // visualize needs to know about timeFilter
         $scope.$listen(timefilter, 'fetch', $scope.fetch);
 
         $scope.$on('$destroy', () => {
+          destroyed = true;
           $scope.vis.removeListener('update', handleVisUpdate);
           queryFilter.off('update', handleQueryUpdate);
           $scope.uiState.off('change', $scope.fetch);
+          resizeChecker.destroy();
         });
 
         $scope.$watch('vis.initialized', $scope.fetch);
