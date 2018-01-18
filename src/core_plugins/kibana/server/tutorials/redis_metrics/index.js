@@ -8,7 +8,7 @@ export function redisMetricsSpecProvider() {
     id: 'redisMetrics',
     name: 'Redis metrics',
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Fetches internal metrics from Redis.',
+    shortDescription: 'Fetch internal metrics from Redis.',
     longDescription: 'The `redis` Metricbeat module fetches internal metrics from the Redis server.' +
                      ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-redis.html)' +
                      ' about the redis module.',

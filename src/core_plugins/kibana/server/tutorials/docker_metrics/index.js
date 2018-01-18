@@ -8,7 +8,7 @@ export function dockerMetricsSpecProvider() {
     id: 'dockerMetrics',
     name: 'Docker metrics',
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Fetches metrics about your Docker containers.',
+    shortDescription: 'Fetch metrics about your Docker containers.',
     longDescription: 'The `docker` Metricbeat module fetches metrics from the Docker server.' +
                      ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-docker.html)' +
                      ' about the docker module.',

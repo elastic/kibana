@@ -8,7 +8,7 @@ export function netflowSpecProvider() {
     id: 'netflow',
     name: 'Netflow',
     category: TUTORIAL_CATEGORY.SECURITY,
-    shortDescription: 'Collect Netflow records sent by a Netflow exporter',
+    shortDescription: 'Collect Netflow records sent by a Netflow exporter.',
     longDescription: 'The Logstash Netflow module simplifies the collection, normalization, and visualization of network flow data. ' +
       'With a single command, the module parses network flow data, indexes the events into Elasticsearch, and installs a suite of Kibana ' +
       'dashboards to get you exploring your data immediately. Logstash modules support Netflow Version 5 and 9. [Learn more]' +

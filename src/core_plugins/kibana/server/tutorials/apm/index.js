@@ -1,8 +1,7 @@
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { ON_PREM_INSTRUCTIONS } from './on_prem';
 
-const apmIntro = 'APM (Application Performance Monitoring) automatically collects in-depth' +
-  ' performance metrics and errors from inside your applications.';
+const apmIntro = 'Collect in-depth performance metrics and errors from inside your applications.';
 
 export function apmSpecProvider() {
   return {
