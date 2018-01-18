@@ -10,7 +10,7 @@ export function PanelError({ error }) {
   );
 }
 
-PanelError.PropTypes = {
+PanelError.propTypes = {
   error: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.node
