@@ -11,7 +11,6 @@ import { Notifier } from 'ui/notify/notifier';
 import 'ui/timepicker/timepicker.less';
 import 'ui/directives/input_datetime';
 import 'ui/directives/inequality';
-import 'ui/timepicker/quick_ranges';
 import 'ui/timepicker/refresh_intervals';
 import 'ui/timepicker/time_units';
 import 'ui/timepicker/kbn_global_timepicker';
@@ -135,7 +134,7 @@ module.directive('kbnTimepicker', function (timeUnits, refreshIntervals) {
             break;
           case 'absolute':
             $scope.absolute.from = dateMath.parse($scope.from || moment().subtract(15, 'minutes'));
-            $scope.absolute.to = dateMath.parse($scope.to || moment(), true);
+            $scope.absolute.to = dateMath.parse($scope.to || moment(), { roundUp: true });
             break;
         }
 
@@ -159,7 +158,7 @@ module.directive('kbnTimepicker', function (timeUnits, refreshIntervals) {
       $scope.checkRelative = function () {
         if ($scope.relative.from.count != null && $scope.relative.to.count != null) {
           const from = dateMath.parse(getRelativeString('from'));
-          const to = dateMath.parse(getRelativeString('to'), true);
+          const to = dateMath.parse(getRelativeString('to'), { roundUp: true });
           if (to && from) return to.isBefore(from);
           return true;
         }
@@ -167,7 +166,7 @@ module.directive('kbnTimepicker', function (timeUnits, refreshIntervals) {
 
       $scope.formatRelative = function (key) {
         const relativeString = getRelativeString(key);
-        const parsed = dateMath.parse(relativeString, key === 'to');
+        const parsed = dateMath.parse(relativeString, { roundUp: key === 'to' });
         let preview;
         if (relativeString === 'now') {
           preview = 'Now';

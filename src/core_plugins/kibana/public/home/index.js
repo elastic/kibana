@@ -27,3 +27,5 @@ function getRoute() {
 // redirect us to the default page by encountering a url it isn't marked as being able to handle.
 routes.when('/home', getRoute());
 routes.when('/home/feature_directory', getRoute());
+routes.when('/home/tutorial_directory/:tab?', getRoute());
+routes.when('/home/tutorial/:id', getRoute());

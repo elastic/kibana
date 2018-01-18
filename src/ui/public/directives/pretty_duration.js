@@ -1,13 +1,12 @@
 import _ from 'lodash';
 import dateMath from '@elastic/datemath';
 import moment from 'moment';
-import 'ui/timepicker/quick_ranges';
 import 'ui/timepicker/time_units';
 import { uiModules } from 'ui/modules';
 const module = uiModules.get('kibana');
 
 
-module.directive('prettyDuration', function (config, quickRanges, timeUnits) {
+module.directive('prettyDuration', function (config, timeUnits) {
   return {
     restrict: 'E',
     scope: {
@@ -15,6 +14,7 @@ module.directive('prettyDuration', function (config, quickRanges, timeUnits) {
       to: '='
     },
     link: function ($scope, $elem) {
+      const quickRanges = config.get('timepicker:quickRanges');
       const dateFormat = config.get('dateFormat');
 
       const lookupByRange = {};
@@ -62,7 +62,7 @@ module.directive('prettyDuration', function (config, quickRanges, timeUnits) {
             if ($scope[time] === 'now') {
               display[time] = 'now';
             } else {
-              const tryParse = dateMath.parse($scope[time], time === 'to' ? true : false);
+              const tryParse = dateMath.parse($scope[time], { roundUp: time === 'to' });
               display[time] = moment.isMoment(tryParse) ? '~ ' + tryParse.fromNow() : $scope[time];
             }
           }

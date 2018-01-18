@@ -12,20 +12,20 @@ There are three ways to run the tests depending on your goals:
 
 1. Easiest option:
 ** Description: Starts up Kibana & Elasticsearch servers, followed by running tests. This is much slower when running the tests multiple times because slow startup time for the servers. Recommended for single-runs.
-** `npm run test:ui`
+** `yarn test:ui`
 *** does everything in a single command, including running Elasticsearch and Kibana locally
 *** tears down everything after the tests run
 *** exit code reports success/failure of the tests
 
 2. Best for development:
 ** Description: Two commands, run in separate terminals, separate the components that are long-running and slow from those that are ephemeral and fast. Tests can be re-run much faster, and this still runs Elasticsearch & Kibana locally.
-** `npm run test:ui:server`
+** `yarn test:ui:server`
 *** starts Elasticsearch and Kibana servers
 *** slow to start
 *** can be reused for multiple executions of the tests, thereby saving some time when re-running tests
 *** automatically restarts the Kibana server when relevant changes are detected
 ** `node scripts/functional_test_runner`
-*** runs the tests against Kibana & Elasticsearch servers that were started `npm run test:ui:server`
+*** runs the tests against Kibana & Elasticsearch servers that were started `yarn test:ui:server`
 *** exit code reports success or failure of the tests
 
 3. Custom option:

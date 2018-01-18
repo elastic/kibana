@@ -1,0 +1,217 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`isCloudEnabled is false should not render instruction toggle when ON_PREM_ELASTIC_CLOUD instructions are not provided 1`] = `
+<EuiPage
+  className="home"
+>
+  <EuiLink
+    color="primary"
+    href="#/home"
+    type="button"
+  >
+    Home
+  </EuiLink>
+   / 
+  <EuiLink
+    color="primary"
+    href="#/home/tutorial_directory"
+    type="button"
+  >
+    Add Data
+  </EuiLink>
+  <EuiSpacer
+    size="s"
+  />
+  <div>
+    <Introduction
+      description="tutorial used to drive jest tests"
+      title="jest test tutorial"
+    />
+    <EuiSpacer
+      size="l"
+    />
+    <div
+      className="text-center"
+    />
+    <EuiSpacer
+      size="l"
+    />
+    <EuiPanel
+      grow={true}
+      hasShadow={false}
+      paddingSize="l"
+    >
+      <InstructionSet
+        instructionVariants={
+          Array [
+            Object {
+              "id": "platform id",
+              "instructions": Array [
+                Object {
+                  "title": "onPrem instructions",
+                },
+              ],
+            },
+          ]
+        }
+        key="0"
+        offset={1}
+        paramValues={Object {}}
+        replaceTemplateStrings={[Function]}
+        setParameter={[Function]}
+        title="Instruction title"
+      />
+    </EuiPanel>
+  </div>
+</EuiPage>
+`;
+
+exports[`isCloudEnabled is false should render ON_PREM instructions with instruction toggle 1`] = `
+<EuiPage
+  className="home"
+>
+  <EuiLink
+    color="primary"
+    href="#/home"
+    type="button"
+  >
+    Home
+  </EuiLink>
+   / 
+  <EuiLink
+    color="primary"
+    href="#/home/tutorial_directory"
+    type="button"
+  >
+    Add Data
+  </EuiLink>
+  <EuiSpacer
+    size="s"
+  />
+  <div>
+    <Introduction
+      description="tutorial used to drive jest tests"
+      title="jest test tutorial"
+    />
+    <EuiSpacer
+      size="l"
+    />
+    <div
+      className="text-center"
+    >
+      <RadioButtonGroup
+        buttons={
+          Array [
+            Object {
+              "dataTestSubj": "onPremBtn",
+              "label": "On premise",
+              "onClick": [Function],
+            },
+            Object {
+              "dataTestSubj": "onPremElasticCloudBtn",
+              "label": "Elastic Cloud",
+              "onClick": [Function],
+            },
+          ]
+        }
+        selectedBtnLabel="On premise"
+      />
+    </div>
+    <EuiSpacer
+      size="l"
+    />
+    <EuiPanel
+      grow={true}
+      hasShadow={false}
+      paddingSize="l"
+    >
+      <InstructionSet
+        instructionVariants={
+          Array [
+            Object {
+              "id": "platform id",
+              "instructions": Array [
+                Object {
+                  "title": "onPrem instructions",
+                },
+              ],
+            },
+          ]
+        }
+        key="0"
+        offset={1}
+        paramValues={Object {}}
+        replaceTemplateStrings={[Function]}
+        setParameter={[Function]}
+        title="Instruction title"
+      />
+    </EuiPanel>
+  </div>
+</EuiPage>
+`;
+
+exports[`should render ELASTIC_CLOUD instructions when isCloudEnabled is true 1`] = `
+<EuiPage
+  className="home"
+>
+  <EuiLink
+    color="primary"
+    href="#/home"
+    type="button"
+  >
+    Home
+  </EuiLink>
+   / 
+  <EuiLink
+    color="primary"
+    href="#/home/tutorial_directory"
+    type="button"
+  >
+    Add Data
+  </EuiLink>
+  <EuiSpacer
+    size="s"
+  />
+  <div>
+    <Introduction
+      description="tutorial used to drive jest tests"
+      title="jest test tutorial"
+    />
+    <EuiSpacer
+      size="l"
+    />
+    <div
+      className="text-center"
+    />
+    <EuiSpacer
+      size="l"
+    />
+    <EuiPanel
+      grow={true}
+      hasShadow={false}
+      paddingSize="l"
+    >
+      <InstructionSet
+        instructionVariants={
+          Array [
+            Object {
+              "id": "platform id",
+              "instructions": Array [
+                Object {
+                  "title": "elasticCloud instructions",
+                },
+              ],
+            },
+          ]
+        }
+        key="0"
+        offset={1}
+        paramValues={Object {}}
+        replaceTemplateStrings={[Function]}
+        setParameter={[Function]}
+        title="Instruction title"
+      />
+    </EuiPanel>
+  </div>
+</EuiPage>
+`;

@@ -3,6 +3,12 @@ import PropTypes from 'prop-types';
 import { Synopsis } from './synopsis';
 import {
   KuiLinkButton,
+  KuiCardGroup,
+  KuiCard,
+  KuiCardDescription,
+  KuiCardDescriptionTitle,
+  KuiCardDescriptionText,
+  KuiCardFooter,
 } from 'ui_framework/components';
 
 import {
@@ -14,11 +20,15 @@ import {
   EuiFlexItem,
   EuiFlexGrid,
   EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 
 import { FeatureCatalogueCategory } from 'ui/registry/feature_catalogue';
 
-export function Home({ addBasePath, directories }) {
+import chrome from 'ui/chrome';
+const kbnBaseUrl = chrome.getInjected('kbnBaseUrl');
+
+export function Home({ addBasePath, directories, isCloudEnabled }) {
 
   const renderDirectories = (category) => {
     return directories
@@ -39,6 +49,129 @@ export function Home({ addBasePath, directories }) {
       });
   };
 
+  const renderPromo = () => {
+    const cardStyle = {
+      width: '250px',
+      'minWidth': '200px'
+    };
+
+    let apmCard;
+    if (!isCloudEnabled) {
+      apmCard = (
+        <KuiCard style={cardStyle} className="euiPanel">
+          <KuiCardDescription>
+            <KuiCardDescriptionTitle>
+              <img
+                src={addBasePath('/plugins/kibana/assets/app_APM.svg')}
+              />
+              <p>
+                APM
+              </p>
+            </KuiCardDescriptionTitle>
+
+            <KuiCardDescriptionText>
+              APM automatically collects in-depth performance metrics and errors from inside your applications.
+            </KuiCardDescriptionText>
+          </KuiCardDescription>
+
+          <KuiCardFooter>
+            <KuiLinkButton
+              buttonType="secondary"
+              href={addBasePath(`${kbnBaseUrl}#/home/tutorial/apm`)}
+            >
+              Add APM
+            </KuiLinkButton>
+          </KuiCardFooter>
+        </KuiCard>
+      );
+    }
+    return (
+      <div className="kuiVerticalRhythm">
+        <KuiCardGroup>
+
+          {apmCard}
+
+          <KuiCard style={cardStyle} className="euiPanel">
+            <KuiCardDescription>
+              <KuiCardDescriptionTitle>
+                <img
+                  src={addBasePath('/plugins/kibana/assets/app_logging.svg')}
+                />
+                <p>
+                  Logging
+                </p>
+              </KuiCardDescriptionTitle>
+
+              <KuiCardDescriptionText>
+                Ingest logs from popular data sources and easily visualize in preconfigured dashboards.
+              </KuiCardDescriptionText>
+            </KuiCardDescription>
+
+            <KuiCardFooter>
+              <KuiLinkButton
+                buttonType="secondary"
+                href={addBasePath(`${kbnBaseUrl}#/home/tutorial_directory/logging`)}
+              >
+                Add log data
+              </KuiLinkButton>
+            </KuiCardFooter>
+          </KuiCard>
+
+          <KuiCard style={cardStyle} className="euiPanel">
+            <KuiCardDescription>
+              <KuiCardDescriptionTitle>
+                <img
+                  src={addBasePath('/plugins/kibana/assets/app_monitoring.svg')}
+                />
+                <p>
+                  Metrics
+                </p>
+              </KuiCardDescriptionTitle>
+
+              <KuiCardDescriptionText>
+                Collect metrics from the operating system and services running on your servers.
+              </KuiCardDescriptionText>
+            </KuiCardDescription>
+
+            <KuiCardFooter>
+              <KuiLinkButton
+                buttonType="secondary"
+                href={addBasePath(`${kbnBaseUrl}#/home/tutorial_directory/metrics`)}
+              >
+                Add metric data
+              </KuiLinkButton>
+            </KuiCardFooter>
+          </KuiCard>
+
+          <KuiCard style={cardStyle} className="euiPanel">
+            <KuiCardDescription>
+              <KuiCardDescriptionTitle>
+                <img
+                  src={addBasePath('/plugins/kibana/assets/app_security.svg')}
+                />
+                <p>
+                  Security analytics
+                </p>
+              </KuiCardDescriptionTitle>
+
+              <KuiCardDescriptionText>
+                Centralize security events for interactive investigation in ready-to-go visualizations.
+              </KuiCardDescriptionText>
+            </KuiCardDescription>
+
+            <KuiCardFooter>
+              <KuiLinkButton
+                buttonType="secondary"
+                href={addBasePath(`${kbnBaseUrl}#/home/tutorial_directory/security`)}
+              >
+                Add security events
+              </KuiLinkButton>
+            </KuiCardFooter>
+          </KuiCard>
+        </KuiCardGroup>
+      </div>
+    );
+  };
 
   return (
     <EuiPage className="home">
@@ -49,30 +182,36 @@ export function Home({ addBasePath, directories }) {
       >
         <EuiFlexItem>
           <EuiTitle size="l">
-            <h1>Welcome to Kibana</h1>
+            <h1>Add Data to Kibana</h1>
           </EuiTitle>
+          <EuiText>
+            <p>
+              Use these solutions to quickly turn your data into pre-built dashboards and monitoring systems.
+            </p>
+          </EuiText>
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={false}>
-              <p className="kuiText kuiSubduedText">
+          <EuiTextColor color="subdued">
+            <EuiText>
+              <p>
                 Data already in Elasticsearch?
               </p>
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <KuiLinkButton
-                buttonType="secondary"
-                href={addBasePath('/app/kibana#/management/kibana/index')}
-              >
-                Set up index patterns
-              </KuiLinkButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-
+            </EuiText>
+          </EuiTextColor>
+          <EuiSpacer size="s" />
+          <a href="/app/kibana#/management/kibana/index" className="euiButton euiButton--primary euiButton--small">
+            <span className="euiButton__content">
+              Set up index patterns
+            </span>
+          </a>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <EuiSpacer />
+
+
+      { renderPromo() }
 
       <EuiSpacer size="l" />
 
@@ -138,5 +277,6 @@ Home.propTypes = {
     path: PropTypes.string.isRequired,
     showOnHomePage: PropTypes.bool.isRequired,
     category: PropTypes.string.isRequired
-  }))
+  })),
+  isCloudEnabled: PropTypes.bool.isRequired,
 };

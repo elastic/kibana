@@ -31,8 +31,13 @@ window.__KBN__ = {
       layers: []
     },
     mapConfig: {
+      includeElasticMapsService: true,
       manifestServiceUrl: 'https://staging-dot-catalogue-dot-elastic-layer.appspot.com/v1/manifest'
-    }
+    },
+    vegaConfig: {
+      enabled: true,
+      enableExternalUrls: true
+    },
   },
   uiSettings: {
     defaults: ${JSON.stringify(defaultUiSettings, null, 2).split('\n').join('\n    ')},
