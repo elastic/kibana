@@ -10,7 +10,9 @@ export function migrateFilter(filter, indexPattern) {
       const params = _.get(filter, ['match', fieldName]);
       if (indexPattern) {
         const field = indexPattern.fields.find(f => f.name === fieldName);
-        params.query = getConvertedValueForField(field, params.query);
+        if (field) {
+          params.query = getConvertedValueForField(field, params.query);
+        }
       }
       return {
         match_phrase: {
