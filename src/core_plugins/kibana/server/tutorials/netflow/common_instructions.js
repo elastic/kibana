@@ -62,7 +62,7 @@ export const COMMON_NETFLOW_INSTRUCTIONS = {
     OSX: [
       {
         title: 'Run the Netflow module',
-        textPre: 'From the installation directory, run:',
+        textPre: 'Run:',
         commands: [
           './bin/logstash --modules netflow --setup',
         ],
@@ -73,7 +73,7 @@ export const COMMON_NETFLOW_INSTRUCTIONS = {
     WINDOWS: [
       {
         title: 'Run the Netflow module',
-        textPre: 'From the installation directory, run:',
+        textPre: 'Run:',
         commands: [
           'bin\\logstash --modules netflow --setup',
         ],
