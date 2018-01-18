@@ -15,6 +15,7 @@ exports[`AdvancedOptions should render normally 1`] = `
     label="Custom index pattern ID"
   >
     <EuiFieldText
+      data-test-subj="createIndexPatternIdInput"
       fullWidth={false}
       isLoading={false}
       name="indexPatternId"
