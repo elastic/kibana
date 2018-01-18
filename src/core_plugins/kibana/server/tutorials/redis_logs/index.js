@@ -16,8 +16,7 @@ export function redisLogsSpecProvider() {
                      ' For Redis to record slow logs, make sure the `slowlog-log-slower-than`' +
                      ' option is set.' +
                      ' Note that the `slowlog` fileset is experimental.' +
-                     ' [Learn more]({config.docs.beats.filebeat}/filebeat-module-redis.html)' +
-                     ' about the `redis` module.',
+                     ' [Learn more]({config.docs.beats.filebeat}/filebeat-module-redis.html).',
     //iconPath: '', TODO
     artifacts: {
       dashboards: [

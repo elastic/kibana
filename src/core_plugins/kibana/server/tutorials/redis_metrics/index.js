@@ -10,8 +10,7 @@ export function redisMetricsSpecProvider() {
     category: TUTORIAL_CATEGORY.METRICS,
     shortDescription: 'Fetch internal metrics from Redis.',
     longDescription: 'The `redis` Metricbeat module fetches internal metrics from the Redis server.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-redis.html)' +
-                     ' about the redis module.',
+                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-redis.html).',
     //iconPath: '', TODO
     artifacts: {
       dashboards: [
