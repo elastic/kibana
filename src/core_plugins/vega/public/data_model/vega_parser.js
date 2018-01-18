@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import * as vega from 'vega';
+import * as vega from 'vega-nocanvas';
 import * as vegaLite from 'vega-lite';
 import schemaParser from 'vega-schema-url-parser';
 import versionCompare from 'compare-versions';
