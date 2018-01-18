@@ -13,8 +13,8 @@
       "GET"
     ],
     "patterns": [
-      "/_cat/templates",
-      "/_cat/templates/{name}"
+      "_cat/templates",
+      "_cat/templates/{name}"
     ]
   }
 }

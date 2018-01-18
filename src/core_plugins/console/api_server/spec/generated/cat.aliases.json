@@ -13,8 +13,8 @@
       "GET"
     ],
     "patterns": [
-      "/_cat/aliases",
-      "/_cat/aliases/{name}"
+      "_cat/aliases",
+      "_cat/aliases/{name}"
     ]
   }
 }

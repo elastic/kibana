@@ -13,8 +13,8 @@
       "GET"
     ],
     "patterns": [
-      "/_cat/snapshots",
-      "/_cat/snapshots/{repository}"
+      "_cat/snapshots",
+      "_cat/snapshots/{repository}"
     ]
   }
 }

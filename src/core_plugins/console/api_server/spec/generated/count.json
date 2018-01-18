@@ -28,9 +28,9 @@
       "GET"
     ],
     "patterns": [
-      "/_count",
-      "/{indices}/_count",
-      "/{indices}/{type}/_count"
+      "_count",
+      "{indices}/_count",
+      "{indices}/{type}/_count"
     ]
   }
 }

@@ -13,8 +13,8 @@
       "GET"
     ],
     "patterns": [
-      "/_cat/count",
-      "/_cat/count/{indices}"
+      "_cat/count",
+      "_cat/count/{indices}"
     ]
   }
 }

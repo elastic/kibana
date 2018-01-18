@@ -24,8 +24,8 @@
       "GET"
     ],
     "patterns": [
-      "/_cat/segments",
-      "/_cat/segments/{indices}"
+      "_cat/segments",
+      "_cat/segments/{indices}"
     ]
   }
 }

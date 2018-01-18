@@ -26,8 +26,8 @@
       "GET"
     ],
     "patterns": [
-      "/_cat/shards",
-      "/_cat/shards/{indices}"
+      "_cat/shards",
+      "_cat/shards/{indices}"
     ]
   }
 }

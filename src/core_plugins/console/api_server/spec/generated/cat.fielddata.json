@@ -27,8 +27,8 @@
       "GET"
     ],
     "patterns": [
-      "/_cat/fielddata",
-      "/_cat/fielddata/{fields}"
+      "_cat/fielddata",
+      "_cat/fielddata/{fields}"
     ]
   }
 }

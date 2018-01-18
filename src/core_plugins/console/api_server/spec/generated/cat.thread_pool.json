@@ -21,8 +21,8 @@
       "GET"
     ],
     "patterns": [
-      "/_cat/thread_pool",
-      "/_cat/thread_pool/{thread_pool_patterns}"
+      "_cat/thread_pool",
+      "_cat/thread_pool/{thread_pool_patterns}"
     ]
   }
 }
