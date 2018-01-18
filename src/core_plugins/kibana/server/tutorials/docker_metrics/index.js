@@ -10,8 +10,7 @@ export function dockerMetricsSpecProvider() {
     category: TUTORIAL_CATEGORY.METRICS,
     shortDescription: 'Fetch metrics about your Docker containers.',
     longDescription: 'The `docker` Metricbeat module fetches metrics from the Docker server.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-docker.html)' +
-                     ' about the docker module.',
+                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-docker.html).',
     //iconPath: '', TODO
     artifacts: {
       dashboards: [

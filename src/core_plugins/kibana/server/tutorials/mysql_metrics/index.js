@@ -10,8 +10,7 @@ export function mysqlMetricsSpecProvider() {
     category: TUTORIAL_CATEGORY.METRICS,
     shortDescription: 'Fetch internal metrics from MySQL.',
     longDescription: 'The `mysql` Metricbeat module fetches internal metrics from the MySQL server.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-mysql.html)' +
-                     ' about the mysql module.',
+                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-mysql.html).',
     //iconPath: '', TODO
     artifacts: {
       dashboards: [
