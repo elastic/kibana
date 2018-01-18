@@ -69,5 +69,9 @@ describe('getIndices', () => {
       const result = await getIndices(es, 'kibana', 1);
       expect(result.length).toBe(0);
     });
+
+    it('should throw an exception if no limit is provided', async () => {
+      await expect(getIndices({}, 'kibana')).rejects.toThrow();
+    });
   });
 });
