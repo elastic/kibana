@@ -46,7 +46,7 @@ typeahead.directive('kbnTypeahead', function () {
 
       this.isVisible = () => {
         // Blur fires before click so if we don't show even after blur then the click won't fire
-        return this.items.length > 0 && !this.isHidden && (this.isFocused || this.isMousedOver);
+        return this.items && this.items.length > 0 && !this.isHidden && (this.isFocused || this.isMousedOver);
       };
 
       this.onKeyDown = (event) => {
