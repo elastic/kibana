@@ -55,7 +55,7 @@ KuiListingTableRow.propTypes = {
   row: PropTypes.shape({
     id: PropTypes.string,
     cells: PropTypes.arrayOf(
-      PropTypes.oneOf([
+      PropTypes.oneOfType([
         PropTypes.node,
         PropTypes.shape({
           content: PropTypes.node,
