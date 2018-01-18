@@ -51,7 +51,7 @@
 
       <div
         ng-class="{
-          'euiPanel euiPanel--paddingLarge': !controller.hasIndices() || controller.wizardStep !== 'indexPattern'
+          'euiPanel euiPanel--paddingLarge': !controller.hasIndices()
         }"
       >
         <!-- User has no data -->
@@ -137,17 +137,6 @@
           <div ng-switch-when="timeField">
             <div id="stepTimeFieldReact"></div>
           </div>
-          <!-- <step-time-field
-            ng-switch-when="timeField"
-            index-pattern-id="controller.formValues.id"
-            index-pattern-name="controller.formValues.name"
-            time-field-options="controller.timeFieldOptions"
-            selected-time-field-option="controller.formValues.timeFieldOption"
-            fetch-time-field-options="controller.fetchTimeFieldOptions()"
-            is-fetching-time-field-options="controller.isFetchingTimeFieldOptions"
-            go-to-previous-step="controller.goToIndexPatternStep()"
-            create-index-pattern="controller.createIndexPattern()"
-          ></step-time-field> -->
         </div>
       </div>
     </div>
