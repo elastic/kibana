@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AdvancedOptions should hide if not showing 1`] = `""`;
+
+exports[`AdvancedOptions should render normally 1`] = `
+<EuiForm>
+  <EuiFormRow
+    fullWidth={false}
+    hasEmptyLabelSpace={false}
+    helpText={
+      <span>
+        Kibana will provide a unique identifier for each index pattern. If you do not want to use this unique ID, enter a custom one.
+      </span>
+    }
+    label="Custom index pattern ID"
+  >
+    <EuiFieldText
+      fullWidth={false}
+      isLoading={false}
+      name="indexPatternId"
+      onChange={[Function]}
+      placeholder="Id"
+      value="foobar"
+    />
+  </EuiFormRow>
+</EuiForm>
+`;

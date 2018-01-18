@@ -2,19 +2,17 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { extractTimeFields } from '../../lib/extract_time_fields';
 
+import { Header } from './components/header';
+import { TimeField } from './components/time_field';
+import { AdvancedOptions } from './components/advanced_options';
+
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiForm,
-  EuiFormRow,
   EuiPanel,
-  EuiSelect,
   EuiSpacer,
-  EuiText,
-  EuiTitle,
 } from '@elastic/eui';
 
 export class StepTimeField extends Component {
@@ -93,58 +91,16 @@ export class StepTimeField extends Component {
 
     return (
       <EuiPanel paddingSize="l">
-        <EuiTitle size="s">
-          <h2>
-            Step 2 of 2: Configure settings
-          </h2>
-        </EuiTitle>
-        <EuiSpacer size="m"/>
-        <EuiText color="subdued">
-          <span>
-            You&apos;ve defined <strong>{indexPattern}</strong> as your index pattern.
-            Now you can specify some settings before we create it.
-          </span>
-        </EuiText>
+        <Header indexPattern={indexPattern}/>
         <EuiSpacer size="xs"/>
-        <EuiForm>
-          { showTimeField ?
-            <EuiFormRow
-              label={
-                <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <span>Time Filter field name</span>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty
-                      size="s"
-                      onClick={this.fetchTimeFields}
-                    >
-                      Refresh
-                    </EuiButtonEmpty>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              }
-              helpText={
-                <div>
-                  <p>The Time Filter will use this field to filter your data by time.</p>
-                  <p>You can choose not to have a time field, but you will not be able to narrow down your data by a time range.</p>
-                </div>
-              }
-            >
-              <EuiSelect
-                name="timeField"
-                options={timeFieldOptions}
-                isLoading={!timeFields}
-                value={selectedTimeField}
-                onChange={this.onTimeFieldChanged}
-              />
-            </EuiFormRow>
-            :
-            <EuiText>
-              <p>The indices which match this index pattern don&apos;t contain any time fields.</p>
-            </EuiText>
-          }
-        </EuiForm>
+        <TimeField
+          showTimeField={showTimeField}
+          fetchTimeFields={this.fetchTimeFields}
+          timeFieldOptions={timeFieldOptions}
+          timeFields={timeFields}
+          selectedTimeField={selectedTimeField}
+          onTimeFieldChanged={this.onTimeFieldChanged}
+        />
         <EuiSpacer size="s"/>
         <EuiButtonEmpty
           iconType={showingAdvancedOptions ? 'arrowDown' : 'arrowRight'}
@@ -157,27 +113,11 @@ export class StepTimeField extends Component {
 
         </EuiButtonEmpty>
         <EuiSpacer size="xs"/>
-        { showingAdvancedOptions ?
-          <EuiForm>
-            <EuiFormRow
-              label="Custom index pattern ID"
-              helpText={
-                <span>
-                  Kibana will provide a unique identifier for each index pattern.
-                  If you do not want to use this unique ID, enter a custom one.
-                </span>
-              }
-            >
-              <EuiFieldText
-                name="indexPatternId"
-                value={indexPatternId}
-                onChange={this.onChangeIndexPatternId}
-                placeholder="Id"
-              />
-            </EuiFormRow>
-          </EuiForm>
-          : null
-        }
+        <AdvancedOptions
+          showingAdvancedOptions={showingAdvancedOptions}
+          indexPatternId={indexPatternId}
+          onChangeIndexPatternId={this.onChangeIndexPatternId}
+        />
         <EuiSpacer size="m"/>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>

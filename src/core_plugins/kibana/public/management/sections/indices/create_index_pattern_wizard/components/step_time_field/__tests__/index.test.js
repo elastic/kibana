@@ -2,19 +2,18 @@ const render = jest.fn();
 
 jest.doMock('react-dom', () => ({ render }));
 
-const { renderStepIndexPattern } = require('../index');
+const { renderStepTimeField } = require('../index');
 
-describe('StepIndexPatternRender', () => {
+describe('StepTimeFieldRender', () => {
   beforeEach(() => {
     render.mockClear();
   });
 
   it('should call render', () => {
-    renderStepIndexPattern(
-      [],
+    renderStepTimeField(
       '',
-      false,
       {},
+      () => {},
       () => {}
     );
 

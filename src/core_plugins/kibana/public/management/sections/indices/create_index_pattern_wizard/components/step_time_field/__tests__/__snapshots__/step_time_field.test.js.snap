@@ -1,0 +1,504 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StepTimeField should render a selected timeField 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <Header
+    indexPattern="ki*"
+  />
+  <EuiSpacer
+    size="xs"
+  />
+  <TimeField
+    fetchTimeFields={[Function]}
+    onTimeFieldChanged={[Function]}
+    selectedTimeField="@timestamp"
+    showTimeField={true}
+    timeFieldOptions={
+      Array [
+        Object {
+          "text": "",
+          "value": "",
+        },
+        Object {
+          "isDisabled": undefined,
+          "text": "@timestamp",
+          "value": "@timestamp",
+        },
+        Object {
+          "isDisabled": undefined,
+          "text": "name",
+          "value": "name",
+        },
+      ]
+    }
+    timeFields={
+      Array [
+        Object {
+          "display": "@timestamp",
+          "fieldName": "@timestamp",
+        },
+        Object {
+          "display": "name",
+          "fieldName": "name",
+        },
+      ]
+    }
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <EuiButtonEmpty
+    color="primary"
+    iconSide="left"
+    iconType="arrowRight"
+    onClick={[Function]}
+    type="button"
+  >
+    <span>
+      Show advanced options
+    </span>
+  </EuiButtonEmpty>
+  <EuiSpacer
+    size="xs"
+  />
+  <AdvancedOptions
+    indexPatternId=""
+    onChangeIndexPatternId={[Function]}
+    showingAdvancedOptions={false}
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexEnd"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiButtonEmpty
+        color="primary"
+        iconSide="left"
+        iconType="arrowLeft"
+        onClick={[Function]}
+        type="button"
+      >
+        Back
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiButton
+        color="primary"
+        fill={true}
+        iconSide="left"
+        isDisabled={false}
+        onClick={[Function]}
+        type="button"
+      >
+        Create index pattern
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiPanel>
+`;
+
+exports[`StepTimeField should render advanced options 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <Header
+    indexPattern="ki*"
+  />
+  <EuiSpacer
+    size="xs"
+  />
+  <TimeField
+    fetchTimeFields={[Function]}
+    onTimeFieldChanged={[Function]}
+    showTimeField={false}
+    timeFieldOptions={
+      Array [
+        Object {
+          "text": "",
+          "value": "",
+        },
+      ]
+    }
+    timeFields={Array []}
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <EuiButtonEmpty
+    color="primary"
+    iconSide="left"
+    iconType="arrowDown"
+    onClick={[Function]}
+    type="button"
+  >
+    <span>
+      Hide advanced options
+    </span>
+  </EuiButtonEmpty>
+  <EuiSpacer
+    size="xs"
+  />
+  <AdvancedOptions
+    indexPatternId=""
+    onChangeIndexPatternId={[Function]}
+    showingAdvancedOptions={true}
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexEnd"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiButtonEmpty
+        color="primary"
+        iconSide="left"
+        iconType="arrowLeft"
+        onClick={[Function]}
+        type="button"
+      >
+        Back
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiButton
+        color="primary"
+        fill={true}
+        iconSide="left"
+        isDisabled={false}
+        onClick={[Function]}
+        type="button"
+      >
+        Create index pattern
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiPanel>
+`;
+
+exports[`StepTimeField should render advanced options with an index pattern id 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <Header
+    indexPattern="ki*"
+  />
+  <EuiSpacer
+    size="xs"
+  />
+  <TimeField
+    fetchTimeFields={[Function]}
+    onTimeFieldChanged={[Function]}
+    showTimeField={false}
+    timeFieldOptions={
+      Array [
+        Object {
+          "text": "",
+          "value": "",
+        },
+      ]
+    }
+    timeFields={Array []}
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <EuiButtonEmpty
+    color="primary"
+    iconSide="left"
+    iconType="arrowDown"
+    onClick={[Function]}
+    type="button"
+  >
+    <span>
+      Hide advanced options
+    </span>
+  </EuiButtonEmpty>
+  <EuiSpacer
+    size="xs"
+  />
+  <AdvancedOptions
+    indexPatternId="foobar"
+    onChangeIndexPatternId={[Function]}
+    showingAdvancedOptions={true}
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexEnd"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiButtonEmpty
+        color="primary"
+        iconSide="left"
+        iconType="arrowLeft"
+        onClick={[Function]}
+        type="button"
+      >
+        Back
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiButton
+        color="primary"
+        fill={true}
+        iconSide="left"
+        isDisabled={false}
+        onClick={[Function]}
+        type="button"
+      >
+        Create index pattern
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiPanel>
+`;
+
+exports[`StepTimeField should render normally 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <Header
+    indexPattern="ki*"
+  />
+  <EuiSpacer
+    size="xs"
+  />
+  <TimeField
+    fetchTimeFields={[Function]}
+    onTimeFieldChanged={[Function]}
+    showTimeField={false}
+    timeFieldOptions={
+      Array [
+        Object {
+          "text": "",
+          "value": "",
+        },
+      ]
+    }
+    timeFields={Array []}
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <EuiButtonEmpty
+    color="primary"
+    iconSide="left"
+    iconType="arrowRight"
+    onClick={[Function]}
+    type="button"
+  >
+    <span>
+      Show advanced options
+    </span>
+  </EuiButtonEmpty>
+  <EuiSpacer
+    size="xs"
+  />
+  <AdvancedOptions
+    indexPatternId=""
+    onChangeIndexPatternId={[Function]}
+    showingAdvancedOptions={false}
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexEnd"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiButtonEmpty
+        color="primary"
+        iconSide="left"
+        iconType="arrowLeft"
+        onClick={[Function]}
+        type="button"
+      >
+        Back
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiButton
+        color="primary"
+        fill={true}
+        iconSide="left"
+        isDisabled={false}
+        onClick={[Function]}
+        type="button"
+      >
+        Create index pattern
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiPanel>
+`;
+
+exports[`StepTimeField should render timeFields 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <Header
+    indexPattern="ki*"
+  />
+  <EuiSpacer
+    size="xs"
+  />
+  <TimeField
+    fetchTimeFields={[Function]}
+    onTimeFieldChanged={[Function]}
+    showTimeField={true}
+    timeFieldOptions={
+      Array [
+        Object {
+          "text": "",
+          "value": "",
+        },
+        Object {
+          "isDisabled": undefined,
+          "text": "@timestamp",
+          "value": "@timestamp",
+        },
+        Object {
+          "isDisabled": undefined,
+          "text": "name",
+          "value": "name",
+        },
+      ]
+    }
+    timeFields={
+      Array [
+        Object {
+          "display": "@timestamp",
+          "fieldName": "@timestamp",
+        },
+        Object {
+          "display": "name",
+          "fieldName": "name",
+        },
+      ]
+    }
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <EuiButtonEmpty
+    color="primary"
+    iconSide="left"
+    iconType="arrowRight"
+    onClick={[Function]}
+    type="button"
+  >
+    <span>
+      Show advanced options
+    </span>
+  </EuiButtonEmpty>
+  <EuiSpacer
+    size="xs"
+  />
+  <AdvancedOptions
+    indexPatternId=""
+    onChangeIndexPatternId={[Function]}
+    showingAdvancedOptions={false}
+  />
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexEnd"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiButtonEmpty
+        color="primary"
+        iconSide="left"
+        iconType="arrowLeft"
+        onClick={[Function]}
+        type="button"
+      >
+        Back
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiButton
+        color="primary"
+        fill={true}
+        iconSide="left"
+        isDisabled={true}
+        onClick={[Function]}
+        type="button"
+      >
+        Create index pattern
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiPanel>
+`;
