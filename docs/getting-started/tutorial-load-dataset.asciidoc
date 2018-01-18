@@ -151,15 +151,19 @@ The accounts data set doesn't require any mappings, so at this point we're ready
 {ref}/docs-bulk.html[`bulk`] API to load the data sets with the following commands:
 
 [source,shell]
-curl -u elastic -H 'Content-Type: application/x-ndjson' -XPOST ‘<elasticsearch-URL or localhost>:<port>/<index-name>/<type>_bulk?pretty’ --data-binary @<filename>
-curl -u elastic -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/shakespeare/doc/_bulk?pretty' --data-binary @shakespeare_6.0.json
-curl -u elastic -H 'Content-Type: application/x-ndjson' -XPOST 'localhost:9200/_bulk?pretty' --data-binary @logs.jsonl
+# <host> Elasticsearch listens at localhost by default
+# <port> Elasticsearch HTTP Port defaults to 9200
+curl -u elastic -H 'Content-Type: application/x-ndjson' -XPOST '<host>:<port>/<index-name>/<type>/_bulk?pretty' --data-binary @<filename>
+curl -u elastic -H 'Content-Type: application/x-ndjson' -XPOST '<host>:<port>/shakespeare/doc/_bulk?pretty' --data-binary @shakespeare_6.0.json
+curl -u elastic -H 'Content-Type: application/x-ndjson' -XPOST '<host>:<port>/_bulk?pretty' --data-binary @logs.jsonl
 
 Or for Windows users, in Powershell:
 [source,shell]
-Invoke-RestMethod "http://<elasticsearch-URL or localhost>:<port>/<index-name>/<type>_bulk?pretty" -Method Post -ContentType 'application/x-ndjson' -InFile "<filename>"
-Invoke-RestMethod "http://localhost:9200/shakespeare/doc/_bulk?pretty" -Method Post -ContentType 'application/x-ndjson' -InFile "shakespeare_6.0.json"
-Invoke-RestMethod "http://localhost:9200/_bulk?pretty" -Method Post -ContentType 'application/x-ndjson' -InFile "logs.jsonl"
+# <host> Elasticsearch listens at localhost by default
+# <port> Elasticsearch HTTP Port defaults to 9200
+Invoke-RestMethod "http://<host>:<port>/<index-name>/<type>/_bulk?pretty" -Method Post -ContentType 'application/x-ndjson' -InFile "<filename>"
+Invoke-RestMethod "http://<host>:<port>/shakespeare/doc/_bulk?pretty" -Method Post -ContentType 'application/x-ndjson' -InFile "shakespeare_6.0.json"
+Invoke-RestMethod "http://<host>:<port>/_bulk?pretty" -Method Post -ContentType 'application/x-ndjson' -InFile "logs.jsonl"
 
 These commands may take some time to execute, depending on the computing resources available.
 
