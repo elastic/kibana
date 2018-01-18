@@ -1,14 +1,14 @@
 <div class="kbn-timepicker-body">
 
-  <div ng-show="quickLists.length === 0" class="euiText">
+  <div ng-show="recent.length === 0" class="euiText">
     <p>
       No time history. Your most recent time ranges show up here, so you can easily view them later.
     </p>
   </div>
 
-  <div ng-repeat="list in quickLists" class="kbn-timepicker-section">
-    <ul class="list-unstyled kbn-timepicker-list">
-      <li ng-repeat="option in list" class="kbn-timepicker-list-item">
+  <div class="kbn-timepicker-section">
+    <ul class="list-unstyled">
+      <li ng-repeat="option in recent">
         <a
           class="kuiLink"
           ng-click="setQuick({from: option.from, to: option.to})"

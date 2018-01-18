@@ -17,11 +17,13 @@
   }
   .kbn-timepicker-section {
     float: left;
-    min-width: 120px;
 
     & + .kbn-timepicker-section {
       padding-left: 15px;
     }
+  }
+  .kbn-timepicker-quick-section {
+    width: 25%;
   }
   .kbn-timepicker-body {
     display: flex;
@@ -80,15 +82,5 @@
    */
   .nav:last-child {
     margin-right: 24px;
-  }
-}
-
-.kbn-timepicker-list {
-  line-height: 1.5;
-}
-
-.kbn-timepicker-list-item {
-  & + & {
-    margin-top: 4px;
   }
 }

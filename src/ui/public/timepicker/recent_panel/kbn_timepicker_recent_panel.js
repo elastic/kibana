@@ -15,21 +15,10 @@ module.directive('kbnTimepickerRecentPanel', function () {
     template,
     controller: function ($scope, config) {
       const getConfig = (...args) => config.get(...args);
-      $scope.quickLists = [];
-      const history = timeHistory.get().map(time => {
+      $scope.recent = timeHistory.get().map(time => {
         time.display = prettyDuration(time.from, time.to, getConfig);
         return time;
       });
-      if (history.length > 5) {
-        // Put history in two evenly sized sections.
-        // When history.length is odd, make first list have extra item
-        const halfIndex = Math.ceil(history.length / 2);
-        $scope.quickLists.push(history.slice(0, halfIndex));
-        $scope.quickLists.push(history.slice(halfIndex));
-      } else if (history.length > 0) {
-        // Put history in single column. Do not put empty history in quickLists
-        $scope.quickLists.push(history);
-      }
     }
   };
 });
