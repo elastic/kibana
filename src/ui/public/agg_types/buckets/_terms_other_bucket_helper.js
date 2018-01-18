@@ -91,6 +91,7 @@ export const OtherBucketHelperProvider = (Private) => {
     const bucketAggs = aggConfigs.filter(agg => agg.type.type === 'buckets');
     const index = bucketAggs.findIndex(agg => agg.id === aggWithOtherBucket.id);
     const aggs = aggConfigs.toDsl();
+    const indexPattern = aggWithOtherBucket.params.field.indexPattern;
 
     // create filters aggregation
     const filterAgg = new AggConfig(aggConfigs[index].vis, {
@@ -136,7 +137,7 @@ export const OtherBucketHelperProvider = (Private) => {
       });
 
       resultAgg.filters.filters[key] = {
-        bool: buildQueryFromFilters(filters, _.noop)
+        bool: buildQueryFromFilters(filters, _.noop, indexPattern)
       };
     };
     walkBucketTree(0, response.aggregations, bucketAggs[0].id, [], '');

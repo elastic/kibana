@@ -10,6 +10,7 @@
         <span ng-if="mapping[field].filterable">
           <button
             class="doc-viewer-button"
+            aria-label="Filter for value"
             ng-click="filter(mapping[field], flattened[field], '+')"
             data-test-subj="addInclusiveFilterButton"
           >
@@ -21,6 +22,7 @@
 
           <button
             class="doc-viewer-button"
+            aria-label="Filter out value"
             ng-click="filter(mapping[field], flattened[field],'-')"
           >
             <i
@@ -36,6 +38,8 @@
         <span ng-if="canToggleColumns()">
           <button
             class="doc-viewer-button"
+            aria-label="Toggle column in table"
+            aria-pressed="{{isColumnActive(field)}}"
             ng-click="toggleColumn(field)"
           >
             <i
@@ -48,6 +52,7 @@
         <span ng-if="!indexPattern.metaFields.includes(field) && !mapping[field].scripted">
           <button
             class="doc-viewer-button"
+            aria-label="Filter for field present"
             ng-click="filter('_exists_', field, '+')"
           >
             <i

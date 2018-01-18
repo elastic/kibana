@@ -2,9 +2,11 @@ import './tutorial.less';
 import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Footer } from './footer';
 import { Introduction } from './introduction';
 import { InstructionSet } from './instruction_set';
 import { RadioButtonGroup } from './radio_button_group';
+import { EuiSpacer, EuiPage, EuiPanel, EuiLink, EuiText } from '@elastic/eui';
 
 const INSTRUCTIONS_TYPE = {
   ELASTIC_CLOUD: 'elasticCloud',
@@ -111,7 +113,7 @@ export class Tutorial extends React.Component {
   }
 
   renderInstructionSetsToggle = () => {
-    if (!this.props.isCloudEnabled) {
+    if (!this.props.isCloudEnabled && this.state.tutorial.onPremElasticCloud) {
       const radioButtons = [
         { onClick: this.onPrem, label: 'On premise', dataTestSubj: 'onPremBtn' },
         { onClick: this.onPremElasticCloud, label: 'Elastic Cloud', dataTestSubj: 'onPremElasticCloudBtn' },
@@ -145,14 +147,30 @@ export class Tutorial extends React.Component {
     });
   }
 
+  renderFooter = () => {
+    if (_.has(this.state, 'tutorial.artifacts.dashboards')) {
+      const overviewDashboard = this.state.tutorial.artifacts.dashboards.find(dashboard => {
+        return dashboard.isOverview;
+      });
+
+      return (
+        <Footer
+          overviewDashboard={overviewDashboard}
+        />
+      );
+    }
+  }
+
   render() {
     let content;
     if (this.state.notFound) {
       content = (
         <div className="homePanel">
-          <p className="kuiText kuiSubduedText kuiVerticalRhythm kuiVerticalRhythmSmall">
-            Unable to find tutorial {this.props.tutorialId}
-          </p>
+          <EuiText>
+            <p>
+              Unable to find tutorial {this.props.tutorialId}
+            </p>
+          </EuiText>
         </div>
       );
     }
@@ -163,6 +181,11 @@ export class Tutorial extends React.Component {
         previewUrl = this.props.addBasePath(this.state.tutorial.previewImagePath);
       }
 
+      let exportedFieldsUrl;
+      if (_.has(this.state, 'tutorial.artifacts.exportedFields')) {
+        exportedFieldsUrl = this.props.replaceTemplateStrings(this.state.tutorial.artifacts.exportedFields.documentationUrl);
+      }
+
       const instructions = this.getInstructions();
       content = (
         <div>
@@ -170,25 +193,29 @@ export class Tutorial extends React.Component {
             title={this.state.tutorial.name}
             description={this.props.replaceTemplateStrings(this.state.tutorial.longDescription)}
             previewUrl={previewUrl}
+            exportedFieldsUrl={exportedFieldsUrl}
           />
 
-          <div className="text-center kuiVerticalRhythm">
+          <EuiSpacer />
+          <div className="text-center">
             {this.renderInstructionSetsToggle()}
           </div>
 
-          <div className="homePanel kuiVerticalRhythm">
+          <EuiSpacer />
+          <EuiPanel paddingSize="l">
             {this.renderInstructionSets(instructions)}
-          </div>
+            {this.renderFooter()}
+          </EuiPanel>
         </div>
       );
     }
     return (
-      <div className="kuiView home">
-        <div className="kuiViewContent kuiViewContent--constrainedWidth">
-          <a className="kuiLink" href="#/home">Home</a> / <a className="kuiLink" href="#/home/tutorial_directory">Add Data</a>
-          {content}
-        </div>
-      </div>
+      <EuiPage className="home">
+
+        <EuiLink href="#/home">Home</EuiLink> / <EuiLink href="#/home/tutorial_directory">Add Data</EuiLink>
+        <EuiSpacer size="s" />
+        {content}
+      </EuiPage>
     );
   }
 }

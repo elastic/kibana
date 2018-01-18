@@ -6,13 +6,7 @@ import { collectUiExports } from '../../src/ui';
 import { I18n } from '../../src/ui/ui_i18n/i18n';
 
 export default function (grunt) {
-
-  grunt.registerTask('_build:verifyTranslations', [
-    'i18nextract',
-    '_build:check'
-  ]);
-
-  grunt.registerTask('_build:check', async function () {
+  grunt.registerTask('_build:verifyTranslations', async function () {
     const done = this.async();
 
     try {
@@ -36,8 +30,7 @@ export default function (grunt) {
 }
 
 async function verifyTranslations(uiExports) {
-  const angularTranslations = require(fromRoot('build/i18n_extract/en.json'));
-  const keysUsedInViews = Object.keys(angularTranslations);
+  const keysUsedInViews = [];
 
   // Search files for used translation keys
   const translationPatterns = [

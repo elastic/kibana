@@ -39,6 +39,7 @@
             <label
               class="euiCheckbox__label"
               for="indexPatternCreationIncludeSystemIndices"
+              style="white-space: nowrap"
             >
               Include system indices
             </label>
@@ -48,7 +49,11 @@
 
       <div class="euiSpacer euiSpacer--m"></div>
 
-      <div class="euiPanel euiPanel--paddingLarge">
+      <div
+        ng-class="{
+          'euiPanel euiPanel--paddingLarge': !controller.hasIndices() || controller.wizardStep !== 'indexPattern'
+        }"
+      >
         <!-- User has no data -->
         <div ng-if="!controller.hasIndices()">
           <div class="euiPageContentBody">
@@ -83,16 +88,16 @@
                 ng-if="!controller.isFetchingExistingIndices"
               >
                 <div>
-                  <h2 class="euiTitle euiTitle--small euiTextColor euiTextColor--subdued">
+                  <h2 class="euiTitle euiTitle--small">
                     Couldn't find any Elasticsearch data
                   </h2>
                   <div class="euiSpacer euiSpacer--s"></div>
-                  <p class="euiTextColor euiTextColor--subdued">
+                  <p>
                     <span>
                       You'll need to index some data into Elasticsearch before you can create an index pattern.
                     </span>
                     <a
-                      class="euiLink"
+                      class="euiLink euiLink--primary"
                       aria-label="Learn how to index data into Elasticsearch"
                       documentation-href="indexPatterns.loadingData"
                       target="_blank"
@@ -124,7 +129,10 @@
           ng-switch="controller.wizardStep"
         >
           <!-- Specify index pattern -->
-          <step-index-pattern
+          <div ng-switch-when="indexPattern">
+            <div id="stepIndexPatternReact"></div>
+          </div>
+          <!-- <step-index-pattern
             ng-switch-when="indexPattern"
             fetch-existing-indices="controller.fetchExistingIndices()"
             is-fetching-existing-indices="controller.isFetchingExistingIndices"
@@ -136,7 +144,7 @@
             partial-matching-indices="controller.partialMatchingIndices"
             matching-indices="controller.matchingIndices"
             go-to-next-step="controller.goToTimeFieldStep()"
-          ></step-index-pattern>
+          ></step-index-pattern> -->
 
           <!-- Specify optional time field -->
           <step-time-field

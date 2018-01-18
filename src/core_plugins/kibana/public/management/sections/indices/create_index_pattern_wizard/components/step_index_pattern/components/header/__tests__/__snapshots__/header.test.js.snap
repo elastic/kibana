@@ -1,0 +1,177 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Header should mark the input as invalid 1`] = `
+<div>
+  <EuiTitle
+    size="s"
+  >
+    <h2>
+      Step 1 of 2: Define index pattern
+    </h2>
+  </EuiTitle>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    alignItems="flexEnd"
+    component="div"
+    gutterSize="l"
+    justifyContent="spaceBetween"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiForm
+        isInvalid={true}
+      >
+        <EuiFormRow
+          error={
+            Array [
+              "Input is invalid",
+            ]
+          }
+          fullWidth={false}
+          hasEmptyLabelSpace={false}
+          helpText={
+            <div>
+              <p>
+                You can use a 
+                <strong>
+                  *
+                </strong>
+                 as a wildcard in your index pattern.
+              </p>
+              <p>
+                You can't use empty spaces or the characters 
+                <strong>
+                  %
+                </strong>
+                .
+              </p>
+            </div>
+          }
+          isInvalid={true}
+          label="Index pattern"
+        >
+          <EuiFieldText
+            data-test-subj="createIndexPatternNameInput"
+            fullWidth={false}
+            isInvalid={true}
+            isLoading={false}
+            name="indexPattern"
+            onChange={[Function]}
+            placeholder="index-name-*"
+            value="%"
+          />
+        </EuiFormRow>
+      </EuiForm>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiButton
+        color="primary"
+        data-test-subj="createIndexPatternGoToStep2Button"
+        fill={false}
+        iconSide="left"
+        iconType="arrowRight"
+        isDisabled={true}
+        onClick={[Function]}
+        type="button"
+      >
+        Next step
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;
+
+exports[`Header should render normally 1`] = `
+<div>
+  <EuiTitle
+    size="s"
+  >
+    <h2>
+      Step 1 of 2: Define index pattern
+    </h2>
+  </EuiTitle>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    alignItems="flexEnd"
+    component="div"
+    gutterSize="l"
+    justifyContent="spaceBetween"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiForm
+        isInvalid={false}
+      >
+        <EuiFormRow
+          error={Array []}
+          fullWidth={false}
+          hasEmptyLabelSpace={false}
+          helpText={
+            <div>
+              <p>
+                You can use a 
+                <strong>
+                  *
+                </strong>
+                 as a wildcard in your index pattern.
+              </p>
+              <p>
+                You can't use empty spaces or the characters 
+                <strong>
+                  %
+                </strong>
+                .
+              </p>
+            </div>
+          }
+          isInvalid={false}
+          label="Index pattern"
+        >
+          <EuiFieldText
+            data-test-subj="createIndexPatternNameInput"
+            fullWidth={false}
+            isInvalid={false}
+            isLoading={false}
+            name="indexPattern"
+            onChange={[Function]}
+            placeholder="index-name-*"
+            value="k"
+          />
+        </EuiFormRow>
+      </EuiForm>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiButton
+        color="primary"
+        data-test-subj="createIndexPatternGoToStep2Button"
+        fill={false}
+        iconSide="left"
+        iconType="arrowRight"
+        isDisabled={false}
+        onClick={[Function]}
+        type="button"
+      >
+        Next step
+      </EuiButton>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;
