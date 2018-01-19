@@ -8,10 +8,9 @@ export function apacheMetricsSpecProvider() {
     id: 'apacheMetrics',
     name: 'Apache metrics',
     category: TUTORIAL_CATEGORY.METRICS,
-    shortDescription: 'Fetches internal metrics from the Apache 2 HTTP server.',
+    shortDescription: 'Fetch internal metrics from the Apache 2 HTTP server.',
     longDescription: 'The `apache` Metricbeat module fetches internal metrics from the Apache 2 HTTP server.' +
-                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-apache.html)' +
-                     ' about the apache module.',
+                     ' [Learn more]({config.docs.beats.metricbeat}/metricbeat-module-apache.html).',
     //iconPath: '', TODO
     artifacts: {
       dashboards: [
