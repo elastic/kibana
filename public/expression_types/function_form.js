@@ -12,8 +12,7 @@ export class FunctionForm extends BaseForm {
   constructor(props) {
     super({ ...props });
 
-    // auto-wrap arg values to create arg instances
-    this.args = props.args.map(argSpec => new Arg(argSpec)) || [];
+    this.args = props.args || [];
     this.resolve = props.resolve || (() => ({}));
   }
 
@@ -67,14 +66,17 @@ export class FunctionForm extends BaseForm {
   render(data = {}) {
     const { args, argTypeDef } = data;
 
+    // Don't instaniate these until render time, to give the registries a chance to populate.
+    const argInstances = this.args.map(argSpec => new Arg(argSpec));
+
     if (!isPlainObject(args)) {
       throw new Error(`Form "${this.name}" expects "args" object`);
     }
 
     // get a mapping of arg values from the expression and from the renderable's schema
-    const argNames = uniq(this.args.map(arg => arg.name).concat(Object.keys(args)));
+    const argNames = uniq(argInstances.map(arg => arg.name).concat(Object.keys(args)));
     const dataArgs = argNames.map(argName => {
-      const arg = this.args.find(arg => arg.name === argName);
+      const arg = argInstances.find(arg => arg.name === argName);
 
       // if arg is not multi, only preserve the last value found
       // otherwise, leave the value alone (including if the arg is not defined)
