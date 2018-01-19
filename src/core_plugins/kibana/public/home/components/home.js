@@ -62,7 +62,7 @@ export function Home({ addBasePath, directories, isCloudEnabled }) {
           <KuiCardDescription>
             <KuiCardDescriptionTitle>
               <img
-                src={addBasePath('/plugins/kibana/assets/app_APM.svg')}
+                src={addBasePath('/plugins/kibana/assets/app_apm.svg')}
               />
               <p>
                 APM
@@ -200,7 +200,7 @@ export function Home({ addBasePath, directories, isCloudEnabled }) {
             </EuiText>
           </EuiTextColor>
           <EuiSpacer size="s" />
-          <a href="/app/kibana#/management/kibana/index" className="euiButton euiButton--primary euiButton--small">
+          <a href="#/management/kibana/index" className="euiButton euiButton--primary euiButton--small">
             <span className="euiButton__content">
               Set up index patterns
             </span>

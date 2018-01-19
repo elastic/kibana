@@ -35,7 +35,7 @@ export default function ({ getService, getPageObjects }) {
 
         it('should contain dropdown with terms aggregation results as options', async () => {
           const menu = await PageObjects.visualize.getReactSelectOptions('inputControl0');
-          expect(menu.trim().split('\n').join()).to.equal('win 8,win xp,win 7,ios,osx');
+          expect(menu.trim().split('\n').join()).to.equal('ios,osx,win 7,win 8,win xp');
         });
 
         it('should display staging control buttons', async () => {
@@ -160,7 +160,7 @@ export default function ({ getService, getPageObjects }) {
 
           // Expect control to have values for selected time filter
           const menu = await PageObjects.visualize.getReactSelectOptions('inputControl0');
-          expect(menu.trim().split('\n').join()).to.equal('win 8,win xp,win 7,osx');
+          expect(menu.trim().split('\n').join()).to.equal('osx,win 7,win 8,win xp');
         });
       });
     });
