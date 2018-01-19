@@ -1,6 +1,6 @@
 {
   "name": "@elastic/datemath",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "elasticsearch datemath parser, used in kibana",
   "main": "lib/index.js",
   "directories": {
