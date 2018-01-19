@@ -153,7 +153,6 @@ The accounts data set doesn't require any mappings, so at this point we're ready
 [source,shell]
 <host> Elasticsearch listens at localhost by default
 <port> Elasticsearch HTTP Port defaults to 9200
-
 curl -u elastic -H 'Content-Type: application/x-ndjson' -XPOST '<host>:<port>/<index-name>/<type>/_bulk?pretty' --data-binary @<filename>
 curl -u elastic -H 'Content-Type: application/x-ndjson' -XPOST '<host>:<port>/bank/account/_bulk?pretty' --data-binary @accounts.json
 curl -u elastic -H 'Content-Type: application/x-ndjson' -XPOST '<host>:<port>/shakespeare/doc/_bulk?pretty' --data-binary @shakespeare_6.0.json
@@ -163,7 +162,6 @@ Or for Windows users, in Powershell:
 [source,shell]
 <host> Elasticsearch listens at localhost by default
 <port> Elasticsearch HTTP Port defaults to 9200
-
 Invoke-RestMethod "http://<host>:<port>/<index-name>/<type>/_bulk?pretty" -Method Post -ContentType 'application/x-ndjson' -InFile "<filename>"
 Invoke-RestMethod "http://<host>:<port>/bank/account/_bulk?pretty" -Method Post -ContentType 'application/x-ndjson' -InFile "accounts.json"
 Invoke-RestMethod "http://<host>:<port>/shakespeare/doc/_bulk?pretty" -Method Post -ContentType 'application/x-ndjson' -InFile "shakespeare_6.0.json"
