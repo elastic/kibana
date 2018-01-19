@@ -1,7 +1,7 @@
 const EDIT_CONFIG = {
   title: 'Edit the configuration',
-  textPre: `If you're using an X-Pack secured version of Elastic Stack, you need to specify` +
-    `credentials in the apm-server.yml config file.`,
+  textPre: `If you're using an X-Pack secured version of Elastic Stack, you must specify` +
+    ' credentials in the `apm-server.yml` config file.',
   commands: [
     'output.elasticsearch:',
     '    hosts: ["<es_url>"]',
@@ -12,12 +12,12 @@ const EDIT_CONFIG = {
 
 const IMPORT_DASHBOARD = {
   title: 'Import dashboards',
-  textPre: 'APM Server ships with pre-configured dashboards'
+  textPre: 'APM Server ships with preconfigured dashboards.'
 };
 
 const START_SERVER = {
   title: 'Start APM Server',
-  textPre: 'The server processes and stores application performance metrics in Elasticsearch'
+  textPre: 'The server processes and stores application performance metrics in Elasticsearch.'
 };
 
 export const DOWNLOAD_SERVER = {
@@ -47,7 +47,7 @@ export const WINDOWS_SERVER_INSTRUCTIONS = [
       'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-6.2.0-windows-x86_64.zip',
       'sudo dpkg -i apm-server-6.2.0-windows-x86_64.zip'
     ],
-    textPost: 'Looking for the 32 bits packages? See the [Download page]({config.docs.base_url}downloads/apm/apm-server).'
+    textPost: 'Looking for the 32-bit packages? See the [Download page]({config.docs.base_url}downloads/apm/apm-server).'
   },
   {
     ...IMPORT_DASHBOARD,

@@ -1,8 +1,7 @@
 import { TUTORIAL_CATEGORY } from '../../../common/tutorials/tutorial_category';
 import { ON_PREM_INSTRUCTIONS } from './on_prem';
 
-const apmIntro = 'APM (Application Performance Monitoring) automatically collects in-depth' +
-  ' performance metrics and errors from inside your applications.';
+const apmIntro = 'Collect in-depth performance metrics and errors from inside your applications.';
 
 export function apmSpecProvider() {
   return {
@@ -10,13 +9,10 @@ export function apmSpecProvider() {
     name: 'APM',
     category: TUTORIAL_CATEGORY.OTHER,
     shortDescription: apmIntro,
-    longDescription: `${apmIntro} APM consists of three components - the Agents, the Server, and the UI:\n` +
-      '* The Agents are libraries in your application that run inside of your application process.\n' +
-      '* The Server processes data from agents and stores the application data in Elasticsearch.\n' +
-      '* The UI is the dedicated APM UI (X-Pack Basic) and preconfigured dashboards.\n\n' +
-      'For more information, [please see our documentation]' +
-      '({config.docs.base_url}guide/en/apm/get-started/{config.docs.version}/index.html).' +
-      ' To get started, follow the steps below.',
+    longDescription: 'Application Performance Monitoring (APM) collects in-depth' +
+      ' performance metrics and errors from inside your application.' +
+      ' It allows you to monitor the performance of thousands of applications in real time.' +
+      ' [Learn more]({config.docs.base_url}guide/en/apm/get-started/{config.docs.version}/index.html).',
     artifacts: {
       dashboards: [
         {
@@ -27,5 +23,6 @@ export function apmSpecProvider() {
       ]
     },
     onPrem: ON_PREM_INSTRUCTIONS,
+    previewImagePath: '/plugins/kibana/home/tutorial_resources/apm/apm_dashboard_transactions.jpg',
   };
 }
