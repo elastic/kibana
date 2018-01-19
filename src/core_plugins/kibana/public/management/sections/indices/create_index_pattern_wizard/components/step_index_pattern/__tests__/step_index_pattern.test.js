@@ -29,7 +29,6 @@ describe('StepIndexPattern', () => {
         isIncludingSystemIndices={false}
         esService={esService}
         goToNextStep={goToNextStep}
-        initialQuery={'k'}
       />
     );
 
@@ -92,6 +91,21 @@ describe('StepIndexPattern', () => {
 
     component.update();
 
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should properly fetch indices for the initial query', async () => {
+    const component = shallow(
+      <StepIndexPattern
+        allIndices={allIndices}
+        isIncludingSystemIndices={false}
+        esService={esService}
+        goToNextStep={goToNextStep}
+        initialQuery="k*"
+      />
+    );
+    await component.update();
+    await component.update();
     expect(component).toMatchSnapshot();
   });
 });
