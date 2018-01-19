@@ -228,7 +228,7 @@ uiModules.get('apps/management')
       sendCreateIndexPatternRequest(indexPatterns, {
         id,
         name,
-        timeFieldName,
+        timeFieldName: timeFieldName === '-1' ? null : timeFieldName,
       }).then(createdId => {
         if (!createdId) {
           return;

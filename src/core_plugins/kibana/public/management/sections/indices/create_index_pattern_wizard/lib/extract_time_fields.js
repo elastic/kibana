@@ -13,6 +13,7 @@ export function extractTimeFields(fields) {
   };
   const noTimeFieldOption = {
     display: `I don't want to use the Time Filter`,
+    fieldName: '-1',
   };
 
   return [
