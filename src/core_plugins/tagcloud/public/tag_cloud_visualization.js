@@ -1,6 +1,5 @@
 import TagCloud from 'plugins/tagcloud/tag_cloud';
-import AggConfigResult from 'ui/vis/agg_config_result';
-import {Observable} from 'rxjs';
+import { Observable } from 'rxjs';
 
 const MAX_TAG_COUNT = 200;
 
@@ -9,8 +8,8 @@ export class TagCloudVisualization {
   constructor(node, vis) {
     this._containerNode = node;
 
-    const nodeContens = document.createElement('div');
-    nodeContens.innerHTML = `
+    const nodeContents = document.createElement('div');
+    nodeContents.innerHTML = `
             <div class="tagcloud-vis">
               <div class="tagcloud-custom-label"></div>
               <div class="tagcloud-notifications">
@@ -23,18 +22,18 @@ export class TagCloudVisualization {
               </div>
             </div>
           `;
-
-    this._containerNode.appendChild(nodeContens);
+    this._containerNode.appendChild(nodeContents);
 
     this._vis = vis;
     this._bucketAgg = null;
     this._truncated = false;
-    this._tagCloud = new TagCloud(node);
+    const cloudContainer = this._containerNode.querySelector('.tagcloud-vis');
+    this._tagCloud = new TagCloud(cloudContainer);
     this._tagCloud.on('select', (event) => {
       if (!this._bucketAgg) {
         return;
       }
-      const filter = bucketAgg.createFilter(event);
+      const filter = this._bucketAgg.createFilter(event);
       this._vis.API.queryFilter.addFilters(filter);
     });
     this._renderComplete$ = Observable.fromEvent(this._tagCloud, 'renderComplete');
