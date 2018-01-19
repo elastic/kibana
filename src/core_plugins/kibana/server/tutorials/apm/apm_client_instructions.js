@@ -25,7 +25,7 @@ export const NODE_CLIENT_INSTRUCTIONS = [
       `{curlyClose})`,
     ],
     textPost: 'See [the documentation]({config.docs.base_url}guide/en/apm/agent/nodejs/1.x/index.html)' +
-    ' for advanced usage. Babel users, please refer to [the documentation]' +
+    ' for advanced usage. Babel users, refer to [the documentation]' +
     '({config.docs.base_url}guide/en/apm/agent/nodejs/1.x/advanced-setup.html#es-modules).'
   }
 ];
@@ -109,7 +109,7 @@ export const RAILS_CLIENT_INSTRUCTIONS = [
   },
   {
     title: 'Configure the agent',
-    textPre: 'APM is automatically installed. Configure the agent, by creating the config file `config/elastic_apm.yml`',
+    textPre: 'Configure the agent by creating the config file `config/elastic_apm.yml`.',
     commands: [
       `# config/elastic_apm.yml`,
       `server_url: 'http://localhost:8200'`,
@@ -130,7 +130,7 @@ export const RACK_CLIENT_INSTRUCTIONS = [
   },
   {
     title: 'Configure the agent',
-    textPre: 'Rack or compatible framework (like Sinatra). Include the middleware in your app and start the agent',
+    textPre: 'For a Rack or compatible framework such as Sinatra, include the middleware in your app and start the agent.',
     commands: [
       `# config.ru`,
       `require 'sinatra/base'`,
