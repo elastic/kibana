@@ -23,5 +23,6 @@ export function apmSpecProvider() {
       ]
     },
     onPrem: ON_PREM_INSTRUCTIONS,
+    previewImagePath: '/plugins/kibana/home/tutorial_resources/apm/apm_dashboard_transactions.jpg',
   };
 }
