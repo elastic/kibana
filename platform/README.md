@@ -10,6 +10,9 @@ From a clean setup locally (the best is probably to just `rm` your
 `node_modules`), run:
 
 ```sh
+#  in root directory
+yarn
+
 cd packages/kbn-internal-native-observable
 yarn
 cd -
@@ -22,18 +25,15 @@ cd packages/kbn-utils
 yarn
 cd -
 
-#  from root directory
-yarn
-
 cd packages/kbn-types
 yarn
 cd -
 
-# from root directory
+# in root directory
 yarn ts:build
 ```
 
-(Yeah, this is horrible — yeah, this is something I'm currently working on fixing properly)
+(Yeah, this is horrible. Working on fixing it!)
 
 If you get into a weird state you might clean the `target` directories,
 `find . -name "target"`, or the `node_modules` directories.
