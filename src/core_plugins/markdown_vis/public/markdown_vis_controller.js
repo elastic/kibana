@@ -1,19 +1,28 @@
-import _ from 'lodash';
 import MarkdownIt from 'markdown-it';
-import { uiModules } from 'ui/modules';
-import 'angular-sanitize';
 
 const markdownIt = new MarkdownIt({
   html: false,
   linkify: true
 });
 
-const module = uiModules.get('kibana/markdown_vis', ['kibana', 'ngSanitize']);
-module.controller('KbnMarkdownVisController', function ($scope) {
-  $scope.$watch('renderComplete', function () {
-    if ($scope.updateStatus.params && _.get($scope, 'vis.params.markdown', null)) {
-      $scope.html = markdownIt.render($scope.vis.params.markdown);
+export class MarkdownVisController {
+  constructor(node, vis) {
+    this._vis = vis;
+    this._containerNode = document.createElement('div');
+    this._containerNode.className = 'markdown-vis';
+    node.appendChild(this._containerNode);
+  }
+
+  async render(data, status) {
+    if (status.params && this._vis.params.markdown) {
+      const markdownElement = document.createElement('div');
+      markdownElement.className = 'markdown-body';
+      markdownElement.style['font-size'] = `${this._vis.params.fontSize}pt`;
+      markdownElement.dataset.testSubj = 'markdownBody';
+      markdownElement.innerHTML = markdownIt.render(this._vis.params.markdown);
+      this._containerNode.innerHTML = '';
+      this._containerNode.appendChild(markdownElement);
     }
-    $scope.renderComplete();
-  });
-});
+  }
+
+}
