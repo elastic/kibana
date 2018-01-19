@@ -10,8 +10,7 @@ export function nginxLogsSpecProvider() {
     category: TUTORIAL_CATEGORY.LOGGING,
     shortDescription: 'Collect and parse access and error logs created by the Nginx HTTP server.',
     longDescription: 'The `nginx` Filebeat module parses access and error logs created by the Nginx HTTP server.' +
-                     ' [Learn more]({config.docs.beats.filebeat}/filebeat-module-nginx.html)' +
-                     ' about the nginx module.',
+                     ' [Learn more]({config.docs.beats.filebeat}/filebeat-module-nginx.html).',
     //iconPath: '', TODO
     artifacts: {
       dashboards: [

@@ -18,7 +18,7 @@ export const METRICBEAT_INSTRUCTIONS = {
         'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-amd64.deb',
         'sudo dpkg -i metricbeat-{config.kibana.version}-amd64.deb'
       ],
-      textPost: 'Looking for the 32 bits packages? See the [Download page](https://www.elastic.co/downloads/beats/metricbeat).'
+      textPost: 'Looking for the 32-bit packages? See the [Download page](https://www.elastic.co/downloads/beats/metricbeat).'
     },
     RPM: {
       title: 'Download and install Metricbeat',
@@ -28,17 +28,17 @@ export const METRICBEAT_INSTRUCTIONS = {
         'curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-{config.kibana.version}-x86_64.rpm',
         'sudo rpm -vi metricbeat-{config.kibana.version}-x86_64.rpm'
       ],
-      textPost: 'Looking for the 32 bits packages? See the [Download page](https://www.elastic.co/downloads/beats/metricbeat).'
+      textPost: 'Looking for the 32-bit packages? See the [Download page](https://www.elastic.co/downloads/beats/metricbeat).'
     },
     WINDOWS: {
       title: 'Download and install Metricbeat',
       textPre: 'First time using Metricbeat? See the [Getting Started Guide]' +
                '({config.docs.beats.metricbeat}/metricbeat-getting-started.html).\n' +
-               '1. Download the Metricbeat Windows zip file from the [downloads](https://www.elastic.co/downloads/beats/metricbeat) page.\n' +
+               '1. Download the Metricbeat Windows zip file from the [Download](https://www.elastic.co/downloads/beats/metricbeat) page.\n' +
                '2. Extract the contents of the zip file into `C:\\Program Files`.\n' +
                '3. Rename the `metricbeat-{config.kibana.version}-windows` directory to `Metricbeat`.\n' +
                '4. Open a PowerShell prompt as an Administrator (right-click the PowerShell icon and select' +
-               ' Run As Administrator). If you are running Windows XP, you may need to download and install PowerShell.\n' +
+               ' **Run As Administrator**). If you are running Windows XP, you might need to download and install PowerShell.\n' +
                '5. From the PowerShell prompt, run the following commands to install Metricbeat as a Windows service.',
       commands: [
         'PS > cd C:\\Program Files\\Metricbeat',
