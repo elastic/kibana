@@ -1,18 +1,10 @@
 import _ from 'lodash';
-import { uiModules } from 'ui/modules';
 import { getHeatmapColors } from 'ui/vislib/components/color/heatmap_color';
-// get the kibana/metric_vis module, and make sure that it requires the "kibana" module if it
-// didn't already
-const module = uiModules.get('kibana/metric_vis', ['kibana']);
 
-module.controller('KbnMetricVisController', function ($scope) {
+export class MetricVisController {
 
-  const metrics = $scope.metrics = [];
-  let labels = [];
-  let colors = [];
-
-  const getLabels = () => {
-    const config = $scope.vis.params.metric;
+  _getLabels() {
+    const config = this._vis.params.metric;
     const isPercentageMode = config.percentageMode;
     const colorsRange = config.colorsRange;
     const max = _.last(colorsRange).to;
@@ -24,14 +16,14 @@ module.controller('KbnMetricVisController', function ($scope) {
     });
 
     return labels;
-  };
+  }
 
-  const getColors = () => {
-    const config = $scope.vis.params.metric;
+  _getColors() {
+    const config = this._vis.params.metric;
     const invertColors = config.invertColors;
     const colorSchema = config.colorSchema;
     const colorsRange = config.colorsRange;
-    const labels = getLabels();
+    const labels = this._getLabels();
     const colors = {};
     for (let i = 0; i < labels.length; i += 1) {
       const divider = Math.max(colorsRange.length - 1, 1);
@@ -39,10 +31,10 @@ module.controller('KbnMetricVisController', function ($scope) {
       colors[labels[i]] = getHeatmapColors(val, colorSchema);
     }
     return colors;
-  };
+  }
 
-  const getBucket = (val) => {
-    const config = $scope.vis.params.metric;
+  _getBucket(val) {
+    const config = this._vis.params.metric;
     let bucket = _.findIndex(config.colorsRange, range => {
       return range.from <= val && range.to > val;
     });
@@ -53,24 +45,27 @@ module.controller('KbnMetricVisController', function ($scope) {
     }
 
     return bucket;
-  };
+  }
 
-  const getColor = (val) => {
-    const bucket = getBucket(val);
+  _getColor(val, labels, colors) {
+    const bucket = this._getBucket(val);
     const label = labels[bucket];
     return colors[label];
-  };
+  }
 
-  $scope.processTableGroups = function (tableGroups) {
-    const config = $scope.vis.params.metric;
+  _processTableGroups(tableGroups) {
+    const config = this._vis.params.metric;
     const isPercentageMode = config.percentageMode;
     const min = config.colorsRange[0].from;
     const max = _.last(config.colorsRange).to;
+    const colors = this._getColors();
+    const labels = this._getLabels();
+    const metrics = [];
 
-    tableGroups.tables.forEach(function (table) {
+    tableGroups.tables.forEach((table) => {
       let bucketAgg;
 
-      table.columns.forEach(function (column, i) {
+      table.columns.forEach((column, i) => {
         const aggConfig = column.aggConfig;
 
         if (aggConfig && aggConfig.schema.group === 'buckets') {
@@ -82,7 +77,7 @@ module.controller('KbnMetricVisController', function ($scope) {
 
           let title = column.title;
           let value = row[i];
-          const color = getColor(value);
+          const color = this._getColor(value, labels, colors);
 
           if (isPercentageMode) {
             const percentage = Math.round(100 * (value - min) / (max - min));
@@ -110,17 +105,40 @@ module.controller('KbnMetricVisController', function ($scope) {
         });
       });
     });
-  };
 
-  $scope.$watch('renderComplete', function () {
-    if ($scope.esResponse) {
-      metrics.length = 0;
-      labels.length = 0;
-      colors.length = 0;
-      colors = getColors();
-      labels = getLabels();
-      $scope.processTableGroups($scope.esResponse);
+    return metrics;
+  }
+
+
+  constructor(node, vis) {
+    this._vis = vis;
+    this._containerNode = document.createElement('div');
+    this._containerNode.className = 'metric-vis';
+    node.appendChild(this._containerNode);
+  }
+
+  async render(data) {
+    this._containerNode.innerHTML = '';
+    if (data) {
+      const metrics = this._processTableGroups(data);
+      metrics.forEach(metric => {
+        const metricDiv = document.createElement('div');
+        metricDiv.className = 'metric-container';
+        metricDiv.style['background-color'] = metric.bgColor;
+
+        metricDiv.innerHTML = `
+          <div class="metric-value"
+               style="font-size: ${this._vis.params.metric.style.fontSize}pt; color: ${metric.color}"
+          >${metric.value}</div>`;
+
+        if (this._vis.params.metric.labels.show) {
+          const labelDiv = document.createElement('div');
+          labelDiv.innerHTML = metric.label;
+          metricDiv.appendChild(labelDiv);
+        }
+
+        this._containerNode.appendChild(metricDiv);
+      });
     }
-    $scope.renderComplete();
-  });
-});
+  }
+}

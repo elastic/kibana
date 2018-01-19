@@ -1,12 +1,11 @@
 import 'plugins/metric_vis/metric_vis.less';
 import 'plugins/metric_vis/metric_vis_params';
-import 'plugins/metric_vis/metric_vis_controller';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
 import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
-import metricVisTemplate from 'plugins/metric_vis/metric_vis.html';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
+import { MetricVisController } from './metric_vis_controller';
 import image from './images/icon-number.svg';
 // we need to load the css ourselves
 
@@ -21,12 +20,13 @@ function MetricVisProvider(Private) {
 
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.
-  return VisFactory.createAngularVisualization({
+  return VisFactory.createBaseVisualization({
     name: 'metric',
     title: 'Metric',
     image,
     description: 'Display a calculation as a single number',
     category: CATEGORY.DATA,
+    visualization: MetricVisController,
     visConfig: {
       defaults: {
         addTooltip: true,
@@ -52,8 +52,7 @@ function MetricVisProvider(Private) {
             fontSize: 60,
           }
         }
-      },
-      template: metricVisTemplate,
+      }
     },
     editorConfig: {
       collections: {
