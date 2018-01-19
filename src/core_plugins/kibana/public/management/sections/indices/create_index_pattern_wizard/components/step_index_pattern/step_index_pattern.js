@@ -42,6 +42,12 @@ export class StepIndexPattern extends Component {
     };
   }
 
+  componentWillMount() {
+    if (this.state.query) {
+      this.fetchIndices(this.state.query);
+    }
+  }
+
   fetchIndices = async (query) => {
     const { esService } = this.props;
 
