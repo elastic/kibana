@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { ILLEGAL_CHARACTERS } from '../../constants';
+import { ILLEGAL_CHARACTERS, MAX_SEARCH_SIZE } from '../../constants';
 import {
   getIndices,
   isIndexPatternQueryValid,
@@ -46,7 +46,8 @@ export class StepIndexPattern extends Component {
     const { esService } = this.props;
 
     this.setState({ isLoadingIndices: true });
-    const partialMatchedIndices = await getIndices(esService, `${query}*`);
+    const esQuery = query.endsWith('*') ? query : `${query}*`;
+    const partialMatchedIndices = await getIndices(esService, esQuery, MAX_SEARCH_SIZE);
     createReasonableWait(() => this.setState({ partialMatchedIndices, isLoadingIndices: false }));
   }
 
