@@ -74,7 +74,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "dependencies": {
-    "@elastic/datemath": "4.0.1",
+    "@elastic/datemath": "4.0.2",
     "@elastic/eui": "0.0.13",
     "@elastic/filesaver": "1.1.2",
     "@elastic/numeral": "2.3.1",
