@@ -4,7 +4,7 @@ const units = ['y', 'M', 'w', 'd', 'h', 'm', 's', 'ms'];
 const unitsDesc = units;
 const unitsAsc = [...unitsDesc].reverse();
 
-const isDate = d => toString.call(d) === '[object Date]';
+const isDate = d => Object.prototype.toString.call(d) === '[object Date]';
 
 const isValidDate = d => isDate(d) && !isNaN(d.valueOf());
 
