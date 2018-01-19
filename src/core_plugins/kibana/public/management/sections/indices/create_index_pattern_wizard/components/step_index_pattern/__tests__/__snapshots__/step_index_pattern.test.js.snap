@@ -182,7 +182,11 @@ exports[`StepIndexPattern should show errors 1`] = `
             "name": "es",
           },
         ],
-        "exactMatchedIndices": Array [],
+        "exactMatchedIndices": Array [
+          Object {
+            "name": "kibana",
+          },
+        ],
         "partialMatchedIndices": Array [
           Object {
             "name": "kibana",
