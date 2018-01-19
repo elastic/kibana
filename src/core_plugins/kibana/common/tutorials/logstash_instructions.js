@@ -24,7 +24,7 @@ export const LOGSTASH_INSTRUCTIONS = {
         title: 'Download and install Logstash',
         textPre: 'First time using Logstash?  See the ' +
           '[Getting Started Guide]({config.docs.base_url}guide/en/logstash/current/getting-started-with-logstash.html).\n' +
-          '  1. Download the Logstash Windows zip file from the [Downloads page]({config.docs.base_url}downloads/logstash).\n' +
+          '  1. [Download](https://artifacts.elastic.co/downloads/logstash/logstash-{config.kibana.version}.zip) the Logstash Windows zip file.\n' +
           '  2. Extract the contents of the zip file.'
       }
     ],
