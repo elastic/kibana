@@ -65,6 +65,8 @@ export async function listControlFactory(controlParams, kbnApi, useTimeFilter) {
   const resp = await searchSource.fetch();
   const termsSelectOptions = _.get(resp, 'aggregations.termsAgg.buckets', []).map((bucket) => {
     return { label: bucket.key.toString(), value: bucket.key.toString() };
+  }).sort((a, b) => {
+    return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
   });
 
   const listControl = new ListControl(
