@@ -24,6 +24,7 @@ module.controller('KbnTagCloudController', function ($scope, $element) {
     if (!$scope.vis.aggs[0] || !$scope.vis.aggs[1]) {
       incompleteMessage.style.display = 'none';
       truncatedMessage.style.display = 'none';
+      $scope.renderComplete();
       return;
     }
 
@@ -38,18 +39,25 @@ module.controller('KbnTagCloudController', function ($scope, $element) {
       incompleteMessage.style.display = 'block';
     }
 
-
     $scope.renderComplete();
   });
 
-  $scope.$watch('esResponse', async function (response) {
+  $scope.$watch('renderComplete', async function () {
 
-    if (!response || !response.tables.length) {
+    if ($scope.updateStatus.resize) {
+      tagCloud.resize();
+    }
+
+    if ($scope.updateStatus.params) {
+      tagCloud.setOptions($scope.vis.params);
+    }
+
+    if (!$scope.esResponse || !$scope.esResponse.tables.length) {
       tagCloud.setData([]);
       return;
     }
 
-    const data = response.tables[0];
+    const data = $scope.esResponse.tables[0];
     bucketAgg = data.columns[0].aggConfig;
 
     const tags = data.rows.map(row => {
@@ -70,13 +78,6 @@ module.controller('KbnTagCloudController', function ($scope, $element) {
     }
 
     tagCloud.setData(tags);
-  });
-
-
-  $scope.$watch('vis.params', (options) => tagCloud.setOptions(options));
-
-  $scope.$watch('resize', () => {
-    tagCloud.resize();
   });
 
 });

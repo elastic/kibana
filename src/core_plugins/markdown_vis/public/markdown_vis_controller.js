@@ -9,9 +9,9 @@ const markdownIt = new MarkdownIt({
 
 const module = uiModules.get('kibana/markdown_vis', ['kibana', 'ngSanitize']);
 module.controller('KbnMarkdownVisController', function ($scope) {
-  $scope.$watch('vis.params.markdown', function (html) {
-    if (html) {
-      $scope.html = markdownIt.render(html);
+  $scope.$watch('renderComplete', function () {
+    if ($scope.updateStatus.params && $scope.vis.params.markdown) {
+      $scope.html = markdownIt.render($scope.vis.params.markdown);
     }
     $scope.renderComplete();
   });

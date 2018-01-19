@@ -2,8 +2,8 @@
   <div class="metric-container" ng-repeat="metric in metrics" ng-style="{'background-color': metric.bgColor}">
       <div class="metric-value"
            ng-bind-html="metric.value"
-           ng-style="{'font-size': vis.params.metric.style.fontSize+'pt', 'color': metric.color}"
+           ng-style="{'font-size': visState.params.metric.style.fontSize+'pt', 'color': metric.color}"
       ></div>
-      <div ng-if="vis.params.metric.labels.show">{{metric.label}}</div>
+      <div ng-if="visState.params.metric.labels.show">{{metric.label}}</div>
   </div>
 </div>
