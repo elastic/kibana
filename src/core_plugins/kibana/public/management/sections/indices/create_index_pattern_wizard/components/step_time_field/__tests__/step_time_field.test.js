@@ -6,6 +6,7 @@ import { StepTimeField } from '../step_time_field';
 jest.mock('../components/header', () => ({ Header: 'Header' }));
 jest.mock('../components/time_field', () => ({ TimeField: 'TimeField' }));
 jest.mock('../components/advanced_options', () => ({ AdvancedOptions: 'AdvancedOptions' }));
+jest.mock('../components/action_buttons', () => ({ ActionButtons: 'ActionButtons' }));
 jest.mock('../../../lib/extract_time_fields', () => ({
   extractTimeFields: fields => fields,
 }));
@@ -101,6 +102,21 @@ describe('StepTimeField', () => {
       showingAdvancedOptions: true,
       indexPatternId: 'foobar',
     });
+
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should render a loading state when creating the index pattern', () => {
+    const component = shallow(
+      <StepTimeField
+        indexPattern="ki*"
+        indexPatternsService={indexPatternsService}
+        goToPreviousStep={noop}
+        createIndexPattern={noop}
+      />
+    );
+
+    component.setState({ isCreating: true });
 
     expect(component).toMatchSnapshot();
   });

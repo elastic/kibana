@@ -1,5 +1,37 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`StepTimeField should render a loading state when creating the index pattern 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="m"
+>
+  <EuiFlexGroup
+    alignItems="center"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiText>
+        Creating index pattern...
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <EuiLoadingSpinner />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</EuiPanel>
+`;
+
 exports[`StepTimeField should render a selected timeField 1`] = `
 <EuiPanel
   grow={true}
@@ -51,67 +83,19 @@ exports[`StepTimeField should render a selected timeField 1`] = `
   <EuiSpacer
     size="s"
   />
-  <EuiButtonEmpty
-    color="primary"
-    iconSide="left"
-    iconType="arrowRight"
-    onClick={[Function]}
-    type="button"
-  >
-    <span>
-      Show advanced options
-    </span>
-  </EuiButtonEmpty>
-  <EuiSpacer
-    size="xs"
-  />
   <AdvancedOptions
     indexPatternId=""
     onChangeIndexPatternId={[Function]}
     showingAdvancedOptions={false}
+    toggleAdvancedOptions={[Function]}
   />
   <EuiSpacer
     size="m"
   />
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    gutterSize="l"
-    justifyContent="flexEnd"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <EuiButtonEmpty
-        color="primary"
-        iconSide="left"
-        iconType="arrowLeft"
-        onClick={[Function]}
-        type="button"
-      >
-        Back
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <EuiButton
-        color="primary"
-        data-test-subj="createIndexPatternCreateButton"
-        fill={true}
-        iconSide="left"
-        isDisabled={false}
-        onClick={[Function]}
-        type="button"
-      >
-        Create index pattern
-      </EuiButton>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+  <ActionButtons
+    createIndexPattern={[Function]}
+    submittable="@timestamp"
+  />
 </EuiPanel>
 `;
 
@@ -144,67 +128,19 @@ exports[`StepTimeField should render advanced options 1`] = `
   <EuiSpacer
     size="s"
   />
-  <EuiButtonEmpty
-    color="primary"
-    iconSide="left"
-    iconType="arrowDown"
-    onClick={[Function]}
-    type="button"
-  >
-    <span>
-      Hide advanced options
-    </span>
-  </EuiButtonEmpty>
-  <EuiSpacer
-    size="xs"
-  />
   <AdvancedOptions
     indexPatternId=""
     onChangeIndexPatternId={[Function]}
     showingAdvancedOptions={true}
+    toggleAdvancedOptions={[Function]}
   />
   <EuiSpacer
     size="m"
   />
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    gutterSize="l"
-    justifyContent="flexEnd"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <EuiButtonEmpty
-        color="primary"
-        iconSide="left"
-        iconType="arrowLeft"
-        onClick={[Function]}
-        type="button"
-      >
-        Back
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <EuiButton
-        color="primary"
-        data-test-subj="createIndexPatternCreateButton"
-        fill={true}
-        iconSide="left"
-        isDisabled={false}
-        onClick={[Function]}
-        type="button"
-      >
-        Create index pattern
-      </EuiButton>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+  <ActionButtons
+    createIndexPattern={[Function]}
+    submittable={true}
+  />
 </EuiPanel>
 `;
 
@@ -237,67 +173,19 @@ exports[`StepTimeField should render advanced options with an index pattern id 1
   <EuiSpacer
     size="s"
   />
-  <EuiButtonEmpty
-    color="primary"
-    iconSide="left"
-    iconType="arrowDown"
-    onClick={[Function]}
-    type="button"
-  >
-    <span>
-      Hide advanced options
-    </span>
-  </EuiButtonEmpty>
-  <EuiSpacer
-    size="xs"
-  />
   <AdvancedOptions
     indexPatternId="foobar"
     onChangeIndexPatternId={[Function]}
     showingAdvancedOptions={true}
+    toggleAdvancedOptions={[Function]}
   />
   <EuiSpacer
     size="m"
   />
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    gutterSize="l"
-    justifyContent="flexEnd"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <EuiButtonEmpty
-        color="primary"
-        iconSide="left"
-        iconType="arrowLeft"
-        onClick={[Function]}
-        type="button"
-      >
-        Back
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <EuiButton
-        color="primary"
-        data-test-subj="createIndexPatternCreateButton"
-        fill={true}
-        iconSide="left"
-        isDisabled={false}
-        onClick={[Function]}
-        type="button"
-      >
-        Create index pattern
-      </EuiButton>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+  <ActionButtons
+    createIndexPattern={[Function]}
+    submittable={true}
+  />
 </EuiPanel>
 `;
 
@@ -330,67 +218,19 @@ exports[`StepTimeField should render normally 1`] = `
   <EuiSpacer
     size="s"
   />
-  <EuiButtonEmpty
-    color="primary"
-    iconSide="left"
-    iconType="arrowRight"
-    onClick={[Function]}
-    type="button"
-  >
-    <span>
-      Show advanced options
-    </span>
-  </EuiButtonEmpty>
-  <EuiSpacer
-    size="xs"
-  />
   <AdvancedOptions
     indexPatternId=""
     onChangeIndexPatternId={[Function]}
     showingAdvancedOptions={false}
+    toggleAdvancedOptions={[Function]}
   />
   <EuiSpacer
     size="m"
   />
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    gutterSize="l"
-    justifyContent="flexEnd"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <EuiButtonEmpty
-        color="primary"
-        iconSide="left"
-        iconType="arrowLeft"
-        onClick={[Function]}
-        type="button"
-      >
-        Back
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <EuiButton
-        color="primary"
-        data-test-subj="createIndexPatternCreateButton"
-        fill={true}
-        iconSide="left"
-        isDisabled={false}
-        onClick={[Function]}
-        type="button"
-      >
-        Create index pattern
-      </EuiButton>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+  <ActionButtons
+    createIndexPattern={[Function]}
+    submittable={true}
+  />
 </EuiPanel>
 `;
 
@@ -444,66 +284,17 @@ exports[`StepTimeField should render timeFields 1`] = `
   <EuiSpacer
     size="s"
   />
-  <EuiButtonEmpty
-    color="primary"
-    iconSide="left"
-    iconType="arrowRight"
-    onClick={[Function]}
-    type="button"
-  >
-    <span>
-      Show advanced options
-    </span>
-  </EuiButtonEmpty>
-  <EuiSpacer
-    size="xs"
-  />
   <AdvancedOptions
     indexPatternId=""
     onChangeIndexPatternId={[Function]}
     showingAdvancedOptions={false}
+    toggleAdvancedOptions={[Function]}
   />
   <EuiSpacer
     size="m"
   />
-  <EuiFlexGroup
-    alignItems="stretch"
-    component="div"
-    gutterSize="l"
-    justifyContent="flexEnd"
-    responsive={true}
-    wrap={false}
-  >
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <EuiButtonEmpty
-        color="primary"
-        iconSide="left"
-        iconType="arrowLeft"
-        onClick={[Function]}
-        type="button"
-      >
-        Back
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-    <EuiFlexItem
-      component="div"
-      grow={false}
-    >
-      <EuiButton
-        color="primary"
-        data-test-subj="createIndexPatternCreateButton"
-        fill={true}
-        iconSide="left"
-        isDisabled={true}
-        onClick={[Function]}
-        type="button"
-      >
-        Create index pattern
-      </EuiButton>
-    </EuiFlexItem>
-  </EuiFlexGroup>
+  <ActionButtons
+    createIndexPattern={[Function]}
+  />
 </EuiPanel>
 `;

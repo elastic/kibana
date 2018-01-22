@@ -8,6 +8,7 @@ describe('AdvancedOptions', () => {
       <AdvancedOptions
         showingAdvancedOptions={true}
         indexPatternId={'foobar'}
+        toggleAdvancedOptions={() => {}}
         onChangeIndexPatternId={() => {}}
       />
     );
@@ -20,6 +21,7 @@ describe('AdvancedOptions', () => {
       <AdvancedOptions
         showingAdvancedOptions={false}
         indexPatternId={'foobar'}
+        toggleAdvancedOptions={() => {}}
         onChangeIndexPatternId={() => {}}
       />
     );

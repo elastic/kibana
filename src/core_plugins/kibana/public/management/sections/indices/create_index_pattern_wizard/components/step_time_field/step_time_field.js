@@ -5,15 +5,17 @@ import { extractTimeFields } from '../../lib/extract_time_fields';
 import { Header } from './components/header';
 import { TimeField } from './components/time_field';
 import { AdvancedOptions } from './components/advanced_options';
+import { ActionButtons } from './components/action_buttons';
 
 import {
-  EuiButton,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
+  EuiText,
   EuiSpacer,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
+
 
 export class StepTimeField extends Component {
   static propTypes = {
@@ -30,6 +32,7 @@ export class StepTimeField extends Component {
       timeFields: [],
       selectedTimeField: undefined,
       showingAdvancedOptions: false,
+      isCreating: false,
       indexPatternId: '',
     };
   }
@@ -61,18 +64,39 @@ export class StepTimeField extends Component {
     }));
   }
 
+  createIndexPattern = () => {
+    const { selectedTimeField, indexPatternId } = this.state;
+    this.setState({ isCreating: true });
+    this.props.createIndexPattern(selectedTimeField, indexPatternId);
+  }
+
   render() {
     const {
       timeFields,
       selectedTimeField,
       showingAdvancedOptions,
       indexPatternId,
+      isCreating,
     } = this.state;
+
+    if (isCreating) {
+      return (
+        <EuiPanel>
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiText>Creating index pattern...</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner/>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      );
+    }
 
     const {
       indexPattern,
       goToPreviousStep,
-      createIndexPattern,
     } = this.props;
 
     const timeFieldOptions = timeFields ?
@@ -102,43 +126,18 @@ export class StepTimeField extends Component {
           onTimeFieldChanged={this.onTimeFieldChanged}
         />
         <EuiSpacer size="s"/>
-        <EuiButtonEmpty
-          iconType={showingAdvancedOptions ? 'arrowDown' : 'arrowRight'}
-          onClick={this.toggleAdvancedOptions}
-        >
-          { showingAdvancedOptions
-            ? (<span>Hide advanced options</span>)
-            : (<span>Show advanced options</span>)
-          }
-
-        </EuiButtonEmpty>
-        <EuiSpacer size="xs"/>
         <AdvancedOptions
           showingAdvancedOptions={showingAdvancedOptions}
           indexPatternId={indexPatternId}
+          toggleAdvancedOptions={this.toggleAdvancedOptions}
           onChangeIndexPatternId={this.onChangeIndexPatternId}
         />
         <EuiSpacer size="m"/>
-        <EuiFlexGroup justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              iconType="arrowLeft"
-              onClick={goToPreviousStep}
-            >
-              Back
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              isDisabled={!submittable}
-              data-test-subj="createIndexPatternCreateButton"
-              fill
-              onClick={() => createIndexPattern(selectedTimeField, indexPatternId)}
-            >
-              Create index pattern
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <ActionButtons
+          goToPreviousStep={goToPreviousStep}
+          submittable={submittable}
+          createIndexPattern={this.createIndexPattern}
+        />
       </EuiPanel>
     );
   }
