@@ -1,8 +1,9 @@
 import expect from 'expect.js';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { prettyDuration } from './pretty_duration';
 
 const config = {};
+moment.tz.setDefault('UTC');
 config.dateFormat = 'MMMM Do YYYY, HH:mm:ss.SSS';
 config['timepicker:quickRanges'] = [
   {
@@ -37,13 +38,13 @@ describe('absolute range', () => {
   test('dates in string format)', () => {
     const timeFrom = '2018-01-17T18:57:57.149Z';
     const timeTo = '2018-01-17T20:00:00.000Z';
-    expect(prettyDuration(timeFrom, timeTo, getConfig)).to.be('January 17th 2018, 11:57:57.149 to January 17th 2018, 13:00:00.000');
+    expect(prettyDuration(timeFrom, timeTo, getConfig)).to.be('January 17th 2018, 18:57:57.149 to January 17th 2018, 20:00:00.000');
   });
 
   test('dates as moment objects', () => {
     const timeFrom = moment('2018-01-17T18:57:57.149Z');
     const timeTo = moment('2018-01-17T20:00:00.000Z');
-    expect(prettyDuration(timeFrom, timeTo, getConfig)).to.be('January 17th 2018, 11:57:57.149 to January 17th 2018, 13:00:00.000');
+    expect(prettyDuration(timeFrom, timeTo, getConfig)).to.be('January 17th 2018, 18:57:57.149 to January 17th 2018, 20:00:00.000');
   });
 });
 
