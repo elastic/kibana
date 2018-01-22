@@ -122,22 +122,24 @@ export class MetricVisController {
     if (data) {
       const metrics = this._processTableGroups(data);
       metrics.forEach(metric => {
-        const metricDiv = document.createElement('div');
-        metricDiv.className = 'metric-container';
-        metricDiv.style['background-color'] = metric.bgColor;
+        const metricContainerDiv = document.createElement('div');
+        metricContainerDiv.className = 'metric-container';
+        metricContainerDiv.style['background-color'] = metric.bgColor;
 
-        metricDiv.innerHTML = `
-          <div class="metric-value"
-               style="font-size: ${this._vis.params.metric.style.fontSize}pt; color: ${metric.color}"
-          >${metric.value}</div>`;
+        const metricDiv = document.createElement('div');
+        metricDiv.className = 'metric-value';
+        metricDiv.style['font-size'] = `${this._vis.params.metric.style.fontSize}pt`;
+        metricDiv.style.color = metric.color;
+        metricDiv.textContent = metric.value;
+        metricContainerDiv.appendChild(metricDiv);
 
         if (this._vis.params.metric.labels.show) {
           const labelDiv = document.createElement('div');
-          labelDiv.innerHTML = metric.label;
-          metricDiv.appendChild(labelDiv);
+          labelDiv.textContent = metric.label;
+          metricContainerDiv.appendChild(labelDiv);
         }
 
-        this._containerNode.appendChild(metricDiv);
+        this._containerNode.appendChild(metricContainerDiv);
       });
     }
   }
