@@ -56,11 +56,23 @@ export class RangeControl extends Component {
     const min = parseFloat(evt.target.value);
     const max = this.state.maxValue;
     if (isNaN(min)) {
-      this.handleOnChangeComplete({
-        min: this.props.control.min,
-        max: max
+      if (max === '') {
+        this.setState({
+          minValue: '',
+          isMinValid: true,
+          maxValue: '',
+          isMaxValid: true,
+          errorMsgs: [],
+        });
+        return;
+      }
+      this.setState({
+        minValue: '',
+        isMinValid: false,
+        errorMsgs: ['both min and max must be set'],
       });
       return;
+
     } else if (min > max) {
       this.setState({
         minValue: min,
@@ -80,15 +92,27 @@ export class RangeControl extends Component {
     const min = this.state.minValue;
     const max = parseFloat(evt.target.value);
     if (isNaN(max)) {
-      this.handleOnChangeComplete({
-        min: min,
-        max: this.props.control.max
+      if (min === '') {
+        this.setState({
+          minValue: '',
+          isMinValid: true,
+          maxValue: '',
+          isMaxValid: true,
+          errorMsgs: [],
+        });
+        return;
+      }
+      this.setState({
+        maxValue: '',
+        isMaxValid: false,
+        errorMsgs: ['both min and max must be set'],
       });
       return;
+
     } else if (max < min) {
       this.setState({
         maxValue: max,
-        isMinValid: false,
+        isMaxValid: false,
         errorMsgs: ['max must be greater than min'],
       });
       return;

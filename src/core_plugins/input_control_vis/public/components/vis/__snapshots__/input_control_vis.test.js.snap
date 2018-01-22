@@ -14,6 +14,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
   >
     <EuiFlexItem
       component="div"
+      data-test-subj="inputControlItem"
       grow={true}
       key="mock-list-control"
       style={
@@ -141,6 +142,7 @@ exports[`Clear btns enabled when there are values 1`] = `
   >
     <EuiFlexItem
       component="div"
+      data-test-subj="inputControlItem"
       grow={true}
       key="mock-list-control"
       style={
@@ -268,6 +270,7 @@ exports[`Renders list control 1`] = `
   >
     <EuiFlexItem
       component="div"
+      data-test-subj="inputControlItem"
       grow={true}
       key="mock-list-control"
       style={
@@ -395,6 +398,7 @@ exports[`Renders range control 1`] = `
   >
     <EuiFlexItem
       component="div"
+      data-test-subj="inputControlItem"
       grow={true}
       key="mock-range-control"
       style={

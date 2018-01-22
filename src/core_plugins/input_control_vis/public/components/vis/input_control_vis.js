@@ -57,7 +57,11 @@ export class InputControlVis extends Component {
           throw new Error(`Unhandled control type ${control.type}`);
       }
       return (
-        <EuiFlexItem key={control.id} style={{ minWidth: '250px' }}>
+        <EuiFlexItem
+          key={control.id}
+          style={{ minWidth: '250px' }}
+          data-test-subj="inputControlItem"
+        >
           {controlComponent}
         </EuiFlexItem>
       );
