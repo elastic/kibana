@@ -87,7 +87,7 @@ class VisController {
       });
     });
 
-    this.vis.API.queryFilter.addFilters(newFilters);
+    this.vis.API.queryFilter.addFilters(newFilters, this.vis.params.pinFilters);
   }
 
   clearControls() {
