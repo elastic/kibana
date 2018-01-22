@@ -32,9 +32,7 @@ module.controller('KbnTagCloudController', function ($scope, $element, Private, 
     }
 
     const bucketName = containerNode.querySelector('.tagcloud-custom-label');
-    bucketName.innerHTML = `${$scope.vis.aggs[0].makeLabel()} - ${$scope.vis.aggs[1].makeLabel()}`;
-
-
+    bucketName.textContent = `${$scope.vis.aggs[0].makeLabel()} - ${$scope.vis.aggs[1].makeLabel()}`;
     truncatedMessage.style.display = truncated ? 'block' : 'none';
 
 
