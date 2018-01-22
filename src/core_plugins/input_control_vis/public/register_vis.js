@@ -27,6 +27,7 @@ function InputControlVisProvider(Private) {
         controls: [],
         updateFiltersOnChange: false,
         useTimeFilter: false,
+        pinFilters: false,
       },
     },
     editor: 'default',

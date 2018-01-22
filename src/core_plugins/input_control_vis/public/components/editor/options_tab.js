@@ -22,6 +22,10 @@ export class OptionsTab extends Component {
     this.setVisParam('useTimeFilter', evt.target.checked);
   }
 
+  handlePinFilters = (evt) => {
+    this.setVisParam('pinFilters', evt.target.checked);
+  }
+
   render() {
     return (
       <div>
@@ -48,6 +52,19 @@ export class OptionsTab extends Component {
                   isChecked={this.props.scope.vis.params.useTimeFilter}
                   onChange={this.handleUseTimeFilter}
                   data-test-subj="inputControlEditorUseTimeFilterCheckbox"
+                />
+              </KuiFieldGroupSection>
+            </KuiFieldGroup>
+          </div>
+
+          <div className="vis-editor-agg-header">
+            <KuiFieldGroup>
+              <KuiFieldGroupSection>
+                <KuiCheckBoxLabel
+                  text="Pin filters to global state"
+                  isChecked={this.props.scope.vis.params.pinFilters}
+                  onChange={this.handlePinFilters}
+                  data-test-subj="inputControlEditorPinFiltersCheckbox"
                 />
               </KuiFieldGroupSection>
             </KuiFieldGroup>
