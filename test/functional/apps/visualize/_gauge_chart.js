@@ -4,7 +4,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const screenshots = getService('screenshots');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'discover']);
 
   describe('visualize app', function describeIndexTests() {
     const fromTime = '2015-09-19 06:31:44.000';
@@ -70,7 +70,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show correct values for fields with fieldFormatters', async function () {
-        const expectedTexts = [ '2,904\nwin 8: Count', '5.528KB' ];
+        const expectedTexts = [ '2,904\nwin 8: Count', '5.528KB\nwin 8: Average bytes' ];
 
 
         await PageObjects.visualize.closeMetricEditor();

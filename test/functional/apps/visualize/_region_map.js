@@ -39,6 +39,14 @@ export default function ({ getService, getPageObjects }) {
           log.debug('Field = geo.src');
           return PageObjects.visualize.selectField('geo.src');
         })
+        .then(function clickOptions() {
+          log.debug('clickOptions()');
+          return PageObjects.visualize.clickOptions();
+        })
+        .then(function selectVectorMap() {
+          log.debug('Vector Map = World Countries');
+          return PageObjects.visualize.selectVectorMap('US States');
+        })
         .then(function () {
           return PageObjects.visualize.clickGo();
         })
@@ -66,27 +74,24 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should change color ramp', function () {
-        return PageObjects.visualize.clickOptions()
-          .then(function () {
-            return PageObjects.visualize.selectFieldById('Blues', 'colorSchema');
-          })
-          .then(function () {
-            return PageObjects.visualize.clickGo();
-          })
-          .then(function () {
-            //this should visualize right away, without re-requesting data
-            return PageObjects.visualize.getVectorMapData();
-          })
-          .then(function (data) {
+        return PageObjects.visualize.selectFieldById('Blues', 'colorSchema')
+        .then(function () {
+          return PageObjects.visualize.clickGo();
+        })
+        .then(function () {
+          //this should visualize right away, without re-requesting data
+          return PageObjects.visualize.getVectorMapData();
+        })
+        .then(function (data) {
 
-            log.debug('Actual data-----------------------');
-            log.debug(data);
-            log.debug('---------------------------------');
+          log.debug('Actual data-----------------------');
+          log.debug(data);
+          log.debug('---------------------------------');
 
-            const expectedColors = [{ color: 'rgb(190,215,236)' }, { color: 'rgb(7,67,136)' }];
+          const expectedColors = [{ color: 'rgb(190,215,236)' }, { color: 'rgb(7,67,136)' }];
 
-            expect(data).to.eql(expectedColors);
-          });
+          expect(data).to.eql(expectedColors);
+        });
       });
 
     });
