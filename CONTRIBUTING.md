@@ -166,6 +166,8 @@ Bootstrap Kibana and install all the dependencies
 yarn kbn bootstrap
 ```
 
+(You can also run `yarn kbn` to see the other available commands. For more info about this tool, see https://github.com/elastic/kibana/tree/master/packages/kbn-build.)
+
 Start elasticsearch.
 
 ```bash
@@ -387,3 +389,4 @@ Remember, someone is blocked by a pull awaiting review, make it count. Be thorou
 1. **Merge the code** When everything looks good, put in a `LGTM` (looks good to me) comment. Merge into the target branch. Check the labels on the pull to see if backporting is required, and perform the backport if so.
 
 Thank you so much for reading our guidelines! :tada:
+
