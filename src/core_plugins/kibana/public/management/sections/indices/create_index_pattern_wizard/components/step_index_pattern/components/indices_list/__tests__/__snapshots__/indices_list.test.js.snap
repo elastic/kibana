@@ -300,7 +300,7 @@ exports[`IndicesList should render normally 1`] = `
 </div>
 `;
 
-exports[`IndicesList updating props should show all indices if more are added 1`] = `
+exports[`IndicesList updating props should render all new indices 1`] = `
 <div>
   <EuiTable>
     <EuiTableBody>
