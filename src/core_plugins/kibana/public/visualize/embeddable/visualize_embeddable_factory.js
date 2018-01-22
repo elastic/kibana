@@ -34,13 +34,17 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
         const isLabsEnabled = this._config.get('visualize:enableLabs');
 
         if (!isLabsEnabled && savedObject.vis.type.stage === 'lab') {
-          domNode.innerHTML = `
+          const template = angular.element(`
 <div class="disabledLabVisualization">
   <div class="kuiVerticalRhythm disabledLabVisualization__icon kuiIcon fa-flask" aria-hidden="true"></div>
-  <div class="kuiVerticalRhythm"><em>${savedObject.title}</em> is a lab visualization.</div>
+  <div class="kuiVerticalRhythm"><em class="disabledLabVisualization__title"></em> is a lab visualization.</div>
   <div class="kuiVerticalRhythm">Please turn on lab-mode in the advanced settings to see lab visualizations.</div>
 </div>
-`;
+`);
+          template.find('.disabledLabVisualization__title').text(savedObject.title);
+
+          angular.element(domNode).html(template);
+
           return new Embeddable({
             title: savedObject.title
           });
@@ -83,4 +87,3 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
       });
   }
 }
-
