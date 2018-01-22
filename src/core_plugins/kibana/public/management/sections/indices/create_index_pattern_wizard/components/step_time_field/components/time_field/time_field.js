@@ -11,15 +11,15 @@ import {
 } from '@elastic/eui';
 
 export const TimeField = ({
-  showTimeField,
+  isVisible,
   fetchTimeFields,
   timeFieldOptions,
-  timeFields,
+  isLoading,
   selectedTimeField,
   onTimeFieldChanged,
 }) => (
   <EuiForm>
-    { showTimeField ?
+    { isVisible ?
       <EuiFormRow
         label={
           <EuiFlexGroup gutterSize="xs" justifyContent="spaceBetween" alignItems="center">
@@ -47,7 +47,8 @@ export const TimeField = ({
           name="timeField"
           data-test-subj="createIndexPatternTimeFieldSelect"
           options={timeFieldOptions}
-          isLoading={!timeFields}
+          isLoading={isLoading}
+          disabled={isLoading}
           value={selectedTimeField}
           onChange={onTimeFieldChanged}
         />

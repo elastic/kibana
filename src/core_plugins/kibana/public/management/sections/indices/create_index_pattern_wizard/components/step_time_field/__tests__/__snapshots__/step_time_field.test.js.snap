@@ -46,9 +46,10 @@ exports[`StepTimeField should render a selected timeField 1`] = `
   />
   <TimeField
     fetchTimeFields={[Function]}
+    isLoading={true}
+    isVisible={true}
     onTimeFieldChanged={[Function]}
     selectedTimeField="@timestamp"
-    showTimeField={true}
     timeFieldOptions={
       Array [
         Object {
@@ -67,26 +68,14 @@ exports[`StepTimeField should render a selected timeField 1`] = `
         },
       ]
     }
-    timeFields={
-      Array [
-        Object {
-          "display": "@timestamp",
-          "fieldName": "@timestamp",
-        },
-        Object {
-          "display": "name",
-          "fieldName": "name",
-        },
-      ]
-    }
   />
   <EuiSpacer
     size="s"
   />
   <AdvancedOptions
     indexPatternId=""
+    isVisible={false}
     onChangeIndexPatternId={[Function]}
-    showingAdvancedOptions={false}
     toggleAdvancedOptions={[Function]}
   />
   <EuiSpacer
@@ -94,6 +83,7 @@ exports[`StepTimeField should render a selected timeField 1`] = `
   />
   <ActionButtons
     createIndexPattern={[Function]}
+    goToPreviousStep={[Function]}
     submittable="@timestamp"
   />
 </EuiPanel>
@@ -113,8 +103,9 @@ exports[`StepTimeField should render advanced options 1`] = `
   />
   <TimeField
     fetchTimeFields={[Function]}
+    isLoading={true}
+    isVisible={false}
     onTimeFieldChanged={[Function]}
-    showTimeField={false}
     timeFieldOptions={
       Array [
         Object {
@@ -123,15 +114,14 @@ exports[`StepTimeField should render advanced options 1`] = `
         },
       ]
     }
-    timeFields={Array []}
   />
   <EuiSpacer
     size="s"
   />
   <AdvancedOptions
     indexPatternId=""
+    isVisible={false}
     onChangeIndexPatternId={[Function]}
-    showingAdvancedOptions={true}
     toggleAdvancedOptions={[Function]}
   />
   <EuiSpacer
@@ -139,6 +129,7 @@ exports[`StepTimeField should render advanced options 1`] = `
   />
   <ActionButtons
     createIndexPattern={[Function]}
+    goToPreviousStep={[Function]}
     submittable={true}
   />
 </EuiPanel>
@@ -158,8 +149,9 @@ exports[`StepTimeField should render advanced options with an index pattern id 1
   />
   <TimeField
     fetchTimeFields={[Function]}
+    isLoading={true}
+    isVisible={false}
     onTimeFieldChanged={[Function]}
-    showTimeField={false}
     timeFieldOptions={
       Array [
         Object {
@@ -168,15 +160,14 @@ exports[`StepTimeField should render advanced options with an index pattern id 1
         },
       ]
     }
-    timeFields={Array []}
   />
   <EuiSpacer
     size="s"
   />
   <AdvancedOptions
     indexPatternId="foobar"
+    isVisible={false}
     onChangeIndexPatternId={[Function]}
-    showingAdvancedOptions={true}
     toggleAdvancedOptions={[Function]}
   />
   <EuiSpacer
@@ -184,6 +175,7 @@ exports[`StepTimeField should render advanced options with an index pattern id 1
   />
   <ActionButtons
     createIndexPattern={[Function]}
+    goToPreviousStep={[Function]}
     submittable={true}
   />
 </EuiPanel>
@@ -203,8 +195,9 @@ exports[`StepTimeField should render normally 1`] = `
   />
   <TimeField
     fetchTimeFields={[Function]}
+    isLoading={true}
+    isVisible={false}
     onTimeFieldChanged={[Function]}
-    showTimeField={false}
     timeFieldOptions={
       Array [
         Object {
@@ -213,15 +206,14 @@ exports[`StepTimeField should render normally 1`] = `
         },
       ]
     }
-    timeFields={Array []}
   />
   <EuiSpacer
     size="s"
   />
   <AdvancedOptions
     indexPatternId=""
+    isVisible={false}
     onChangeIndexPatternId={[Function]}
-    showingAdvancedOptions={false}
     toggleAdvancedOptions={[Function]}
   />
   <EuiSpacer
@@ -229,6 +221,7 @@ exports[`StepTimeField should render normally 1`] = `
   />
   <ActionButtons
     createIndexPattern={[Function]}
+    goToPreviousStep={[Function]}
     submittable={true}
   />
 </EuiPanel>
@@ -248,8 +241,9 @@ exports[`StepTimeField should render timeFields 1`] = `
   />
   <TimeField
     fetchTimeFields={[Function]}
+    isLoading={true}
+    isVisible={true}
     onTimeFieldChanged={[Function]}
-    showTimeField={true}
     timeFieldOptions={
       Array [
         Object {
@@ -268,26 +262,14 @@ exports[`StepTimeField should render timeFields 1`] = `
         },
       ]
     }
-    timeFields={
-      Array [
-        Object {
-          "display": "@timestamp",
-          "fieldName": "@timestamp",
-        },
-        Object {
-          "display": "name",
-          "fieldName": "name",
-        },
-      ]
-    }
   />
   <EuiSpacer
     size="s"
   />
   <AdvancedOptions
     indexPatternId=""
+    isVisible={false}
     onChangeIndexPatternId={[Function]}
-    showingAdvancedOptions={false}
     toggleAdvancedOptions={[Function]}
   />
   <EuiSpacer
@@ -295,6 +277,7 @@ exports[`StepTimeField should render timeFields 1`] = `
   />
   <ActionButtons
     createIndexPattern={[Function]}
+    goToPreviousStep={[Function]}
   />
 </EuiPanel>
 `;

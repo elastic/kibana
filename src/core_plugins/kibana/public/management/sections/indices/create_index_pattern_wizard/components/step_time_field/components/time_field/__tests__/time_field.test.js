@@ -6,10 +6,10 @@ describe('TimeField', () => {
   it('should render normally', () => {
     const component = shallow(
       <TimeField
-        showTimeField={true}
+        isVisible={true}
         fetchTimeFields={() => {}}
         timeFieldOptions={[{ text: '@timestamp', value: '@timestamp' }]}
-        timeFields={[]}
+        isLoading={false}
         selectedTimeField={''}
         onTimeFieldChanged={() => {}}
       />
@@ -21,10 +21,10 @@ describe('TimeField', () => {
   it('should render something if hiding time field', () => {
     const component = shallow(
       <TimeField
-        showTimeField={false}
+        isVisible={false}
         fetchTimeFields={() => {}}
         timeFieldOptions={[{ text: '@timestamp', value: '@timestamp' }]}
-        timeFields={[]}
+        isLoading={false}
         selectedTimeField={''}
         onTimeFieldChanged={() => {}}
       />
@@ -36,10 +36,10 @@ describe('TimeField', () => {
   it('should render a selected time field', () => {
     const component = shallow(
       <TimeField
-        showTimeField={true}
+        isVisible={true}
         fetchTimeFields={() => {}}
         timeFieldOptions={[{ text: '@timestamp', value: '@timestamp' }]}
-        timeFields={[]}
+        isLoading={false}
         selectedTimeField={'@timestamp'}
         onTimeFieldChanged={() => {}}
       />
@@ -51,10 +51,10 @@ describe('TimeField', () => {
   it('should render a loading state', () => {
     const component = shallow(
       <TimeField
-        showTimeField={true}
+        isVisible={true}
         fetchTimeFields={() => {}}
         timeFieldOptions={[{ text: '@timestamp', value: '@timestamp' }]}
-        timeFields={null}
+        isLoading={true}
         selectedTimeField={'@timestamp'}
         onTimeFieldChanged={() => {}}
       />

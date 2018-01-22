@@ -9,24 +9,24 @@ import {
 } from '@elastic/eui';
 
 export const AdvancedOptions = ({
-  showingAdvancedOptions,
+  isVisible,
   indexPatternId,
   toggleAdvancedOptions,
   onChangeIndexPatternId,
 }) => (
   <div>
     <EuiButtonEmpty
-      iconType={showingAdvancedOptions ? 'arrowDown' : 'arrowRight'}
+      iconType={isVisible ? 'arrowDown' : 'arrowRight'}
       onClick={toggleAdvancedOptions}
     >
-      { showingAdvancedOptions
+      { isVisible
         ? (<span>Hide advanced options</span>)
         : (<span>Show advanced options</span>)
       }
 
     </EuiButtonEmpty>
     <EuiSpacer size="xs"/>
-    { showingAdvancedOptions ?
+    { isVisible ?
       <EuiForm>
         <EuiFormRow
           label="Custom index pattern ID"
@@ -42,7 +42,7 @@ export const AdvancedOptions = ({
             data-test-subj="createIndexPatternIdInput"
             value={indexPatternId}
             onChange={onChangeIndexPatternId}
-            placeholder="Id"
+            placeholder="custom-index-pattern-id"
           />
         </EuiFormRow>
       </EuiForm>

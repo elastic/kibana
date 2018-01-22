@@ -31,7 +31,8 @@ export class StepTimeField extends Component {
     this.state = {
       timeFields: [],
       selectedTimeField: undefined,
-      showingAdvancedOptions: false,
+      isAdvancedOptionsVisible: false,
+      isFetchingTimeFields: false,
       isCreating: false,
       indexPatternId: '',
     };
@@ -44,10 +45,15 @@ export class StepTimeField extends Component {
   fetchTimeFields = async () => {
     const { indexPatternsService, indexPattern } = this.props;
 
+    this.setState({ isFetchingTimeFields: true });
     const fields = await indexPatternsService.fieldsFetcher.fetchForWildcard(indexPattern);
     const timeFields = extractTimeFields(fields);
 
-    this.setState({ timeFields });
+    setTimeout(() => {
+      this.setState({ timeFields, isFetchingTimeFields: false });
+    }, 5000);
+
+
   }
 
   onTimeFieldChanged = (e) => {
@@ -60,7 +66,7 @@ export class StepTimeField extends Component {
 
   toggleAdvancedOptions = () => {
     this.setState(state => ({
-      showingAdvancedOptions: !state.showingAdvancedOptions
+      isAdvancedOptionsVisible: !state.isAdvancedOptionsVisible
     }));
   }
 
@@ -74,9 +80,10 @@ export class StepTimeField extends Component {
     const {
       timeFields,
       selectedTimeField,
-      showingAdvancedOptions,
+      isAdvancedOptionsVisible,
       indexPatternId,
       isCreating,
+      isFetchingTimeFields,
     } = this.state;
 
     if (isCreating) {
@@ -118,16 +125,16 @@ export class StepTimeField extends Component {
         <Header indexPattern={indexPattern}/>
         <EuiSpacer size="xs"/>
         <TimeField
-          showTimeField={showTimeField}
+          isVisible={showTimeField}
           fetchTimeFields={this.fetchTimeFields}
           timeFieldOptions={timeFieldOptions}
-          timeFields={timeFields}
+          isLoading={isFetchingTimeFields}
           selectedTimeField={selectedTimeField}
           onTimeFieldChanged={this.onTimeFieldChanged}
         />
         <EuiSpacer size="s"/>
         <AdvancedOptions
-          showingAdvancedOptions={showingAdvancedOptions}
+          isVisible={isAdvancedOptionsVisible}
           indexPatternId={indexPatternId}
           toggleAdvancedOptions={this.toggleAdvancedOptions}
           onChangeIndexPatternId={this.onChangeIndexPatternId}
