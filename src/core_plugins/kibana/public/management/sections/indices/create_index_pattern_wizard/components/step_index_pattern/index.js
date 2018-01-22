@@ -9,6 +9,7 @@ export function renderStepIndexPattern(
   initialQuery,
   isIncludingSystemIndices,
   esService,
+  savedObjectsClient,
   goToNextStep,
 ) {
   render(
@@ -17,6 +18,7 @@ export function renderStepIndexPattern(
       initialQuery={initialQuery}
       isIncludingSystemIndices={isIncludingSystemIndices}
       esService={esService}
+      savedObjectsClient={savedObjectsClient}
       goToNextStep={goToNextStep}
     />,
     document.getElementById(INDEX_PATTERN_DOM_ELEMENT_ID),

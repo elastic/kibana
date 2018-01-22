@@ -6,6 +6,7 @@ import 'ui/directives/auto_select_if_only_one';
 import 'ui/directives/documentation_href';
 import uiRoutes from 'ui/routes';
 import { uiModules } from 'ui/modules';
+import { SavedObjectsClientProvider } from 'ui/saved_objects';
 import template from './create_index_pattern_wizard.html';
 import { sendCreateIndexPatternRequest } from './send_create_index_pattern_request';
 import { renderStepIndexPattern, destroyStepIndexPattern } from './components/step_index_pattern';
@@ -29,7 +30,8 @@ uiModules.get('apps/management')
     indexPatterns,
     kbnUrl,
     Notifier,
-    Promise
+    Promise,
+    Private,
   ) {
   // This isn't ideal. We want to avoid searching for 20 indices
   // then filtering out the majority of them because they are sysetm indices.
@@ -39,6 +41,7 @@ uiModules.get('apps/management')
     const MAX_NUMBER_OF_MATCHING_INDICES = 20;
     const MAX_SEARCH_SIZE = MAX_NUMBER_OF_MATCHING_INDICES + ESTIMATED_NUMBER_OF_SYSTEM_INDICES;
     const notify = new Notifier();
+    const savedObjectsClient = Private(SavedObjectsClientProvider);
 
     $scope.$on('$destroy', () => {
       destroyStepIndexPattern();
@@ -189,6 +192,7 @@ uiModules.get('apps/management')
         this.formValues.name,
         this.doesIncludeSystemIndices,
         es,
+        savedObjectsClient,
         query => {
           destroyStepIndexPattern();
           this.formValues.name = query;

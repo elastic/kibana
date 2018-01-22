@@ -1,5 +1,68 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`StepIndexPattern should disable the next step if the index pattern exists 1`] = `
+<EuiPanel
+  grow={true}
+  hasShadow={false}
+  paddingSize="l"
+>
+  <Header
+    characterList="\\\\, /, ?, \\", <, >, |"
+    errors={Array []}
+    goToNextStep={[Function]}
+    isInputInvalid={false}
+    isNextStepDisabled={false}
+    onQueryChanged={[Function]}
+    query="k*"
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <StatusMessage
+    matchedIndices={
+      Object {
+        "allIndices": Array [
+          Object {
+            "name": "kibana",
+          },
+          Object {
+            "name": "es",
+          },
+        ],
+        "exactMatchedIndices": Array [
+          Object {
+            "name": "kibana",
+          },
+        ],
+        "partialMatchedIndices": Array [
+          Object {
+            "name": "kibana",
+          },
+        ],
+        "visibleIndices": Array [
+          Object {
+            "name": "kibana",
+          },
+        ],
+      }
+    }
+    query="k*"
+  />
+  <EuiSpacer
+    size="s"
+  />
+  <IndicesList
+    indices={
+      Array [
+        Object {
+          "name": "kibana",
+        },
+      ]
+    }
+  />
+</EuiPanel>
+`;
+
 exports[`StepIndexPattern should properly fetch indices for the initial query 1`] = `
 <EuiPanel
   grow={true}

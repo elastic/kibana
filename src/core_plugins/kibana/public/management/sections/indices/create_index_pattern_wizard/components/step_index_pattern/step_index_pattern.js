@@ -16,6 +16,7 @@ import { Header } from './components/header';
 import {
   EuiPanel,
   EuiSpacer,
+  EuiCallOut,
 } from '@elastic/eui';
 
 export class StepIndexPattern extends Component {
@@ -23,6 +24,7 @@ export class StepIndexPattern extends Component {
     allIndices: PropTypes.array.isRequired,
     isIncludingSystemIndices: PropTypes.bool.isRequired,
     esService: PropTypes.object.isRequired,
+    savedObjectsClient: PropTypes.object.isRequired,
     goToNextStep: PropTypes.func.isRequired,
     initialQuery: PropTypes.string,
   }
@@ -36,22 +38,41 @@ export class StepIndexPattern extends Component {
     this.state = {
       partialMatchedIndices: [],
       isLoadingIndices: false,
+      existingIndexPatterns: [],
+      indexPatternExists: false,
       query: props.initialQuery,
       appendedWildcard: false,
       showingIndexPatternQueryErrors: false,
     };
   }
 
-  componentWillMount() {
+  async componentWillMount() {
+    this.fetchExistingIndexPatterns();
     if (this.state.query) {
       this.fetchIndices(this.state.query);
     }
   }
 
+  fetchExistingIndexPatterns = async () => {
+    const { savedObjects } = await this.props.savedObjectsClient.find({
+      type: 'index-pattern',
+      fields: ['title'],
+      perPage: 10000
+    });
+    const existingIndexPatterns = savedObjects.map(obj => obj && obj.attributes ? obj.attributes.title : '');
+    this.setState({ existingIndexPatterns });
+  }
+
   fetchIndices = async (query) => {
     const { esService } = this.props;
+    const { existingIndexPatterns } = this.state;
 
-    this.setState({ isLoadingIndices: true });
+    if (existingIndexPatterns.includes(query)) {
+      this.setState({ indexPatternExists: true });
+      return;
+    }
+
+    this.setState({ isLoadingIndices: true, indexPatternExists: false });
     const esQuery = query.endsWith('*') ? query : `${query}*`;
     const partialMatchedIndices = await getIndices(esService, esQuery, MAX_SEARCH_SIZE);
     createReasonableWait(() => this.setState({ partialMatchedIndices, isLoadingIndices: false }));
@@ -91,9 +112,9 @@ export class StepIndexPattern extends Component {
   }
 
   renderStatusMessage(matchedIndices) {
-    const { query, isLoadingIndices } = this.state;
+    const { query, isLoadingIndices, indexPatternExists } = this.state;
 
-    if (isLoadingIndices) {
+    if (isLoadingIndices || indexPatternExists) {
       return null;
     }
 
@@ -106,9 +127,9 @@ export class StepIndexPattern extends Component {
   }
 
   renderList({ visibleIndices, allIndices }) {
-    const { query, isLoadingIndices } = this.state;
+    const { query, isLoadingIndices, indexPatternExists } = this.state;
 
-    if (isLoadingIndices) {
+    if (isLoadingIndices || indexPatternExists) {
       return null;
     }
 
@@ -123,9 +144,27 @@ export class StepIndexPattern extends Component {
     );
   }
 
+  renderIndexPatternExists() {
+    const { indexPatternExists, query } = this.state;
+
+    if (!indexPatternExists) {
+      return null;
+    }
+
+    return (
+      <EuiCallOut
+        title="Whoops!"
+        iconType="help"
+        color="warning"
+      >
+        <p>There&apos;s already an index pattern called `{query}`</p>
+      </EuiCallOut>
+    );
+  }
+
   renderHeader({ exactMatchedIndices: indices }) {
     const { goToNextStep } = this.props;
-    const { query, showingIndexPatternQueryErrors } = this.state;
+    const { query, showingIndexPatternQueryErrors, indexPatternExists } = this.state;
 
     let containsErrors = false;
     const errors = [];
@@ -137,7 +176,7 @@ export class StepIndexPattern extends Component {
     }
 
     const isInputInvalid = showingIndexPatternQueryErrors && containsErrors;
-    const isNextStepDisabled = containsErrors || indices.length === 0;
+    const isNextStepDisabled = containsErrors || indices.length === 0 || indexPatternExists;
 
     return (
       <Header
@@ -163,6 +202,7 @@ export class StepIndexPattern extends Component {
         {this.renderHeader(matchedIndices)}
         <EuiSpacer size="s"/>
         {this.renderLoadingState(matchedIndices)}
+        {this.renderIndexPatternExists()}
         {this.renderStatusMessage(matchedIndices)}
         <EuiSpacer size="s"/>
         {this.renderList(matchedIndices)}

@@ -15,6 +15,7 @@ describe('StepIndexPatternRender', () => {
       '',
       false,
       {},
+      {},
       () => {}
     );
 
