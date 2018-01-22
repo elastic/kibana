@@ -193,6 +193,16 @@ Start the development server.
 
 Now you can point your web browser to https://localhost:5601 and start using Kibana! When running `yarn start`, Kibana will also log that it is listening on port 5603 due to the base path proxy, but you should still access Kibana on port 5601.
 
+#### Unsupported URL Type
+
+If you're installing dependencies and seeing an error that looks something like
+
+```
+Unsupported URL Type: link:packages/eslint-config-kibana
+```
+
+you're likely running `npm`. To install dependencies in Kibana you need to run `yarn kbn bootstrap`. For more info, see [Setting Up Your Development Environment](#setting-up-your-development-environment) above.
+
 #### Customizing `config/kibana.dev.yml`
 
 The `config/kibana.yml` file stores user configuration directives. Since this file is checked into source control, however, developer preferences can't be saved without the risk of accidentally committing the modified version. To make customizing configuration easier during development, the Kibana CLI will look for a `config/kibana.dev.yml` file if run with the `--dev` flag. This file behaves just like the non-dev version and accepts any of the [standard settings](https://www.elastic.co/guide/en/kibana/current/settings.html).
@@ -389,4 +399,3 @@ Remember, someone is blocked by a pull awaiting review, make it count. Be thorou
 1. **Merge the code** When everything looks good, put in a `LGTM` (looks good to me) comment. Merge into the target branch. Check the labels on the pull to see if backporting is required, and perform the backport if so.
 
 Thank you so much for reading our guidelines! :tada:
-
