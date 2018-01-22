@@ -4,6 +4,11 @@ import React, { Component } from 'react';
 import InputRange from 'react-input-range';
 import { FormRow } from './form_row';
 
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
+
 const toState = (props) => {
   const state = {
     sliderValue: props.control.value,
@@ -81,19 +86,21 @@ export class RangeControl extends Component {
 
   renderControl() {
     return (
-      <div>
-        <input
-          id={`${this.props.control.id}_min`}
-          disabled={!this.props.control.isEnabled()}
-          name="min"
-          type="number"
-          className="kuiTextInput"
-          value={this.state.minValue}
-          min={this.props.control.min}
-          max={this.props.control.max}
-          onChange={this.handleInputChange}
-        />
-        <div className="inputRangeContainer">
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <input
+            id={`${this.props.control.id}_min`}
+            disabled={!this.props.control.isEnabled()}
+            name="min"
+            type="number"
+            className="euiFieldNumber"
+            value={this.state.minValue}
+            min={this.props.control.min}
+            max={this.props.control.max}
+            onChange={this.handleInputChange}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem className="inputRangeContainer">
           <InputRange
             disabled={!this.props.control.isEnabled()}
             maxValue={this.props.control.max}
@@ -106,19 +113,21 @@ export class RangeControl extends Component {
             ariaLabelledby={this.props.control.id}
             formatLabel={this.formatLabel}
           />
-        </div>
-        <input
-          id={`${this.props.control.id}_max`}
-          disabled={!this.props.control.isEnabled()}
-          name="max"
-          type="number"
-          className="kuiTextInput"
-          value={this.state.maxValue}
-          min={this.props.control.min}
-          max={this.props.control.max}
-          onChange={this.handleInputChange}
-        />
-      </div>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <input
+            id={`${this.props.control.id}_max`}
+            disabled={!this.props.control.isEnabled()}
+            name="max"
+            type="number"
+            className="euiFieldNumber"
+            value={this.state.maxValue}
+            min={this.props.control.min}
+            max={this.props.control.max}
+            onChange={this.handleInputChange}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 

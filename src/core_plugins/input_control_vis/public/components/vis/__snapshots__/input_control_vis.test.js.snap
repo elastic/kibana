@@ -4,13 +4,16 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
 <div
   className="inputControlVis"
 >
-  <KuiFlexGroup
+  <EuiFlexGroup
     alignItems="stretch"
-    gutterSize="large"
+    component="div"
+    gutterSize="l"
     justifyContent="flexStart"
+    responsive={true}
     wrap={true}
   >
-    <KuiFlexItem
+    <EuiFlexItem
+      component="div"
       grow={true}
       key="mock-list-control"
       style={
@@ -47,52 +50,85 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
         controlIndex={0}
         stageFilter={[Function]}
       />
-    </KuiFlexItem>
-  </KuiFlexGroup>
-  <KuiFieldGroup
-    className="actions"
-    isAlignedTop={false}
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    style={
+      Object {
+        "maxWidth": "250px",
+      }
+    }
+    wrap={false}
   >
-    <KuiFieldGroupSection
-      isWide={false}
+    <EuiFlexItem
+      component="div"
+      grow={true}
     >
-      <KuiButton
-        buttonType="primary"
-        data-test-subj="inputControlSubmitBtn"
-        disabled={false}
-        onClick={[Function]}
-        type="button"
+      <EuiFormRow
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
       >
-        Apply changes
-      </KuiButton>
-    </KuiFieldGroupSection>
-    <KuiFieldGroupSection
-      isWide={false}
+        <EuiButton
+          color="primary"
+          data-test-subj="inputControlSubmitBtn"
+          disabled={false}
+          fill={true}
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          Apply changes
+        </EuiButton>
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
     >
-      <KuiButton
-        buttonType="basic"
-        data-test-subj="inputControlCancelBtn"
-        disabled={false}
-        onClick={[Function]}
-        type="button"
+      <EuiFormRow
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
       >
-        Cancel changes
-      </KuiButton>
-    </KuiFieldGroupSection>
-    <KuiFieldGroupSection
-      isWide={false}
+        <EuiButton
+          color="primary"
+          data-test-subj="inputControlCancelBtn"
+          disabled={false}
+          fill={false}
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          Cancel changes
+        </EuiButton>
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
     >
-      <KuiButton
-        buttonType="basic"
-        data-test-subj="inputControlClearBtn"
-        disabled={true}
-        onClick={[Function]}
-        type="button"
+      <EuiFormRow
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
       >
-        Clear form
-      </KuiButton>
-    </KuiFieldGroupSection>
-  </KuiFieldGroup>
+        <EuiButton
+          color="primary"
+          data-test-subj="inputControlClearBtn"
+          disabled={true}
+          fill={false}
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          Clear form
+        </EuiButton>
+      </EuiFormRow>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 </div>
 `;
 
@@ -100,13 +136,16 @@ exports[`Clear btns enabled when there are values 1`] = `
 <div
   className="inputControlVis"
 >
-  <KuiFlexGroup
+  <EuiFlexGroup
     alignItems="stretch"
-    gutterSize="large"
+    component="div"
+    gutterSize="l"
     justifyContent="flexStart"
+    responsive={true}
     wrap={true}
   >
-    <KuiFlexItem
+    <EuiFlexItem
+      component="div"
       grow={true}
       key="mock-list-control"
       style={
@@ -143,52 +182,85 @@ exports[`Clear btns enabled when there are values 1`] = `
         controlIndex={0}
         stageFilter={[Function]}
       />
-    </KuiFlexItem>
-  </KuiFlexGroup>
-  <KuiFieldGroup
-    className="actions"
-    isAlignedTop={false}
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    style={
+      Object {
+        "maxWidth": "250px",
+      }
+    }
+    wrap={false}
   >
-    <KuiFieldGroupSection
-      isWide={false}
+    <EuiFlexItem
+      component="div"
+      grow={true}
     >
-      <KuiButton
-        buttonType="primary"
-        data-test-subj="inputControlSubmitBtn"
-        disabled={true}
-        onClick={[Function]}
-        type="button"
+      <EuiFormRow
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
       >
-        Apply changes
-      </KuiButton>
-    </KuiFieldGroupSection>
-    <KuiFieldGroupSection
-      isWide={false}
+        <EuiButton
+          color="primary"
+          data-test-subj="inputControlSubmitBtn"
+          disabled={true}
+          fill={true}
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          Apply changes
+        </EuiButton>
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
     >
-      <KuiButton
-        buttonType="basic"
-        data-test-subj="inputControlCancelBtn"
-        disabled={true}
-        onClick={[Function]}
-        type="button"
+      <EuiFormRow
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
       >
-        Cancel changes
-      </KuiButton>
-    </KuiFieldGroupSection>
-    <KuiFieldGroupSection
-      isWide={false}
+        <EuiButton
+          color="primary"
+          data-test-subj="inputControlCancelBtn"
+          disabled={true}
+          fill={false}
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          Cancel changes
+        </EuiButton>
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
     >
-      <KuiButton
-        buttonType="basic"
-        data-test-subj="inputControlClearBtn"
-        disabled={false}
-        onClick={[Function]}
-        type="button"
+      <EuiFormRow
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
       >
-        Clear form
-      </KuiButton>
-    </KuiFieldGroupSection>
-  </KuiFieldGroup>
+        <EuiButton
+          color="primary"
+          data-test-subj="inputControlClearBtn"
+          disabled={false}
+          fill={false}
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          Clear form
+        </EuiButton>
+      </EuiFormRow>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 </div>
 `;
 
@@ -196,13 +268,16 @@ exports[`Renders list control 1`] = `
 <div
   className="inputControlVis"
 >
-  <KuiFlexGroup
+  <EuiFlexGroup
     alignItems="stretch"
-    gutterSize="large"
+    component="div"
+    gutterSize="l"
     justifyContent="flexStart"
+    responsive={true}
     wrap={true}
   >
-    <KuiFlexItem
+    <EuiFlexItem
+      component="div"
       grow={true}
       key="mock-list-control"
       style={
@@ -239,52 +314,85 @@ exports[`Renders list control 1`] = `
         controlIndex={0}
         stageFilter={[Function]}
       />
-    </KuiFlexItem>
-  </KuiFlexGroup>
-  <KuiFieldGroup
-    className="actions"
-    isAlignedTop={false}
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    style={
+      Object {
+        "maxWidth": "250px",
+      }
+    }
+    wrap={false}
   >
-    <KuiFieldGroupSection
-      isWide={false}
+    <EuiFlexItem
+      component="div"
+      grow={true}
     >
-      <KuiButton
-        buttonType="primary"
-        data-test-subj="inputControlSubmitBtn"
-        disabled={true}
-        onClick={[Function]}
-        type="button"
+      <EuiFormRow
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
       >
-        Apply changes
-      </KuiButton>
-    </KuiFieldGroupSection>
-    <KuiFieldGroupSection
-      isWide={false}
+        <EuiButton
+          color="primary"
+          data-test-subj="inputControlSubmitBtn"
+          disabled={true}
+          fill={true}
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          Apply changes
+        </EuiButton>
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
     >
-      <KuiButton
-        buttonType="basic"
-        data-test-subj="inputControlCancelBtn"
-        disabled={true}
-        onClick={[Function]}
-        type="button"
+      <EuiFormRow
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
       >
-        Cancel changes
-      </KuiButton>
-    </KuiFieldGroupSection>
-    <KuiFieldGroupSection
-      isWide={false}
+        <EuiButton
+          color="primary"
+          data-test-subj="inputControlCancelBtn"
+          disabled={true}
+          fill={false}
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          Cancel changes
+        </EuiButton>
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
     >
-      <KuiButton
-        buttonType="basic"
-        data-test-subj="inputControlClearBtn"
-        disabled={true}
-        onClick={[Function]}
-        type="button"
+      <EuiFormRow
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
       >
-        Clear form
-      </KuiButton>
-    </KuiFieldGroupSection>
-  </KuiFieldGroup>
+        <EuiButton
+          color="primary"
+          data-test-subj="inputControlClearBtn"
+          disabled={true}
+          fill={false}
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          Clear form
+        </EuiButton>
+      </EuiFormRow>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 </div>
 `;
 
@@ -292,13 +400,16 @@ exports[`Renders range control 1`] = `
 <div
   className="inputControlVis"
 >
-  <KuiFlexGroup
+  <EuiFlexGroup
     alignItems="stretch"
-    gutterSize="large"
+    component="div"
+    gutterSize="l"
     justifyContent="flexStart"
+    responsive={true}
     wrap={true}
   >
-    <KuiFlexItem
+    <EuiFlexItem
+      component="div"
       grow={true}
       key="mock-range-control"
       style={
@@ -329,51 +440,84 @@ exports[`Renders range control 1`] = `
         controlIndex={0}
         stageFilter={[Function]}
       />
-    </KuiFlexItem>
-  </KuiFlexGroup>
-  <KuiFieldGroup
-    className="actions"
-    isAlignedTop={false}
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    style={
+      Object {
+        "maxWidth": "250px",
+      }
+    }
+    wrap={false}
   >
-    <KuiFieldGroupSection
-      isWide={false}
+    <EuiFlexItem
+      component="div"
+      grow={true}
     >
-      <KuiButton
-        buttonType="primary"
-        data-test-subj="inputControlSubmitBtn"
-        disabled={true}
-        onClick={[Function]}
-        type="button"
+      <EuiFormRow
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
       >
-        Apply changes
-      </KuiButton>
-    </KuiFieldGroupSection>
-    <KuiFieldGroupSection
-      isWide={false}
+        <EuiButton
+          color="primary"
+          data-test-subj="inputControlSubmitBtn"
+          disabled={true}
+          fill={true}
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          Apply changes
+        </EuiButton>
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
     >
-      <KuiButton
-        buttonType="basic"
-        data-test-subj="inputControlCancelBtn"
-        disabled={true}
-        onClick={[Function]}
-        type="button"
+      <EuiFormRow
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
       >
-        Cancel changes
-      </KuiButton>
-    </KuiFieldGroupSection>
-    <KuiFieldGroupSection
-      isWide={false}
+        <EuiButton
+          color="primary"
+          data-test-subj="inputControlCancelBtn"
+          disabled={true}
+          fill={false}
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          Cancel changes
+        </EuiButton>
+      </EuiFormRow>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={true}
     >
-      <KuiButton
-        buttonType="basic"
-        data-test-subj="inputControlClearBtn"
-        disabled={true}
-        onClick={[Function]}
-        type="button"
+      <EuiFormRow
+        fullWidth={false}
+        hasEmptyLabelSpace={false}
       >
-        Clear form
-      </KuiButton>
-    </KuiFieldGroupSection>
-  </KuiFieldGroup>
+        <EuiButton
+          color="primary"
+          data-test-subj="inputControlClearBtn"
+          disabled={true}
+          fill={false}
+          iconSide="left"
+          onClick={[Function]}
+          type="button"
+        >
+          Clear form
+        </EuiButton>
+      </EuiFormRow>
+    </EuiFlexItem>
+  </EuiFlexGroup>
 </div>
 `;

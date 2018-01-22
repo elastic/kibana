@@ -25,20 +25,34 @@ exports[`renders RangeControl 1`] = `
   id="mock-range-control"
   label="range control"
 >
-  <div>
-    <input
-      className="kuiTextInput"
-      disabled={false}
-      id="mock-range-control_min"
-      max={100}
-      min={0}
-      name="min"
-      onChange={[Function]}
-      type="number"
-      value=""
-    />
-    <div
+  <EuiFlexGroup
+    alignItems="stretch"
+    component="div"
+    gutterSize="l"
+    justifyContent="flexStart"
+    responsive={true}
+    wrap={false}
+  >
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <input
+        className="euiFieldNumber"
+        disabled={false}
+        id="mock-range-control_min"
+        max={100}
+        min={0}
+        name="min"
+        onChange={[Function]}
+        type="number"
+        value=""
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
       className="inputRangeContainer"
+      component="div"
+      grow={true}
     >
       <InputRange
         allowSameValues={false}
@@ -72,18 +86,23 @@ exports[`renders RangeControl 1`] = `
           }
         }
       />
-    </div>
-    <input
-      className="kuiTextInput"
-      disabled={false}
-      id="mock-range-control_max"
-      max={100}
-      min={0}
-      name="max"
-      onChange={[Function]}
-      type="number"
-      value=""
-    />
-  </div>
+    </EuiFlexItem>
+    <EuiFlexItem
+      component="div"
+      grow={false}
+    >
+      <input
+        className="euiFieldNumber"
+        disabled={false}
+        id="mock-range-control_max"
+        max={100}
+        min={0}
+        name="max"
+        onChange={[Function]}
+        type="number"
+        value=""
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
 </FormRow>
 `;
