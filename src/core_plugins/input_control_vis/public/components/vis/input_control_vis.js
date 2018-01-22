@@ -66,8 +66,8 @@ export class InputControlVis extends Component {
 
   renderStagingButtons() {
     return (
-      <EuiFlexGroup style={{ maxWidth: '250px' }}>
-        <EuiFlexItem>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false}>
           <EuiFormRow>
             <EuiButton
               fill
@@ -79,7 +79,7 @@ export class InputControlVis extends Component {
             </EuiButton>
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiFormRow>
             <EuiButton
               onClick={this.handleReset}
@@ -90,7 +90,7 @@ export class InputControlVis extends Component {
             </EuiButton>
           </EuiFormRow>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <EuiFormRow>
             <EuiButton
               onClick={this.handleClearAll}

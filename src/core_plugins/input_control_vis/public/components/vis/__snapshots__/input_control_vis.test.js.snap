@@ -58,16 +58,11 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
     gutterSize="l"
     justifyContent="flexStart"
     responsive={true}
-    style={
-      Object {
-        "maxWidth": "250px",
-      }
-    }
     wrap={false}
   >
     <EuiFlexItem
       component="div"
-      grow={true}
+      grow={false}
     >
       <EuiFormRow
         fullWidth={false}
@@ -88,7 +83,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
     </EuiFlexItem>
     <EuiFlexItem
       component="div"
-      grow={true}
+      grow={false}
     >
       <EuiFormRow
         fullWidth={false}
@@ -109,7 +104,7 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
     </EuiFlexItem>
     <EuiFlexItem
       component="div"
-      grow={true}
+      grow={false}
     >
       <EuiFormRow
         fullWidth={false}
@@ -190,16 +185,11 @@ exports[`Clear btns enabled when there are values 1`] = `
     gutterSize="l"
     justifyContent="flexStart"
     responsive={true}
-    style={
-      Object {
-        "maxWidth": "250px",
-      }
-    }
     wrap={false}
   >
     <EuiFlexItem
       component="div"
-      grow={true}
+      grow={false}
     >
       <EuiFormRow
         fullWidth={false}
@@ -220,7 +210,7 @@ exports[`Clear btns enabled when there are values 1`] = `
     </EuiFlexItem>
     <EuiFlexItem
       component="div"
-      grow={true}
+      grow={false}
     >
       <EuiFormRow
         fullWidth={false}
@@ -241,7 +231,7 @@ exports[`Clear btns enabled when there are values 1`] = `
     </EuiFlexItem>
     <EuiFlexItem
       component="div"
-      grow={true}
+      grow={false}
     >
       <EuiFormRow
         fullWidth={false}
@@ -322,16 +312,11 @@ exports[`Renders list control 1`] = `
     gutterSize="l"
     justifyContent="flexStart"
     responsive={true}
-    style={
-      Object {
-        "maxWidth": "250px",
-      }
-    }
     wrap={false}
   >
     <EuiFlexItem
       component="div"
-      grow={true}
+      grow={false}
     >
       <EuiFormRow
         fullWidth={false}
@@ -352,7 +337,7 @@ exports[`Renders list control 1`] = `
     </EuiFlexItem>
     <EuiFlexItem
       component="div"
-      grow={true}
+      grow={false}
     >
       <EuiFormRow
         fullWidth={false}
@@ -373,7 +358,7 @@ exports[`Renders list control 1`] = `
     </EuiFlexItem>
     <EuiFlexItem
       component="div"
-      grow={true}
+      grow={false}
     >
       <EuiFormRow
         fullWidth={false}
@@ -448,16 +433,11 @@ exports[`Renders range control 1`] = `
     gutterSize="l"
     justifyContent="flexStart"
     responsive={true}
-    style={
-      Object {
-        "maxWidth": "250px",
-      }
-    }
     wrap={false}
   >
     <EuiFlexItem
       component="div"
-      grow={true}
+      grow={false}
     >
       <EuiFormRow
         fullWidth={false}
@@ -478,7 +458,7 @@ exports[`Renders range control 1`] = `
     </EuiFlexItem>
     <EuiFlexItem
       component="div"
-      grow={true}
+      grow={false}
     >
       <EuiFormRow
         fullWidth={false}
@@ -499,7 +479,7 @@ exports[`Renders range control 1`] = `
     </EuiFlexItem>
     <EuiFlexItem
       component="div"
-      grow={true}
+      grow={false}
     >
       <EuiFormRow
         fullWidth={false}
