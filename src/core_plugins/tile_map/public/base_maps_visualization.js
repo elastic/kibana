@@ -7,7 +7,7 @@ import 'ui/vis/map/service_settings';
 const MINZOOM = 0;
 const MAXZOOM = 18;
 
-export function BaseMapsVisualizationProvider(Private, serviceSettings) {
+export function BaseMapsVisualizationProvider(serviceSettings) {
 
   /**
    * Abstract base class for a visualization consisting of a map with a single baselayer.
@@ -173,16 +173,15 @@ export function BaseMapsVisualizationProvider(Private, serviceSettings) {
         if (this._kibanaMap.getZoomLevel() > tmsLayer.maxZoom) {
           this._kibanaMap.setZoomLevel(tmsLayer.maxZoom);
         }
-
-        const url = tmsLayer.url;
-        const options = _.cloneDeep(tmsLayer);
-        delete options.id;
-        delete options.url;
-        this._kibanaMap.setBaseLayer({
-          baseLayerType: 'tms',
-          options: { url, ...options }
-        });
       }
+      const url = tmsLayer.url;
+      const options = _.cloneDeep(tmsLayer);
+      delete options.id;
+      delete options.url;
+      this._kibanaMap.setBaseLayer({
+        baseLayerType: 'tms',
+        options: { url, ...options }
+      });
     }
 
     async _updateData() {
