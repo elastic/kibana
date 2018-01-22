@@ -4,9 +4,13 @@ export const datatable = {
   name: 'datatable',
   validate: datatable => {
     // TODO: Check columns types. Only string, boolean, number, date, allowed for now.
-    if (!datatable.columns || !datatable.columns.length)
-      throw new Error('datatable must have at least 1 column');
-    if (!datatable.rows) throw new Error('datatable must have a rows array, even if it is empty');
+    if (!datatable.columns) {
+      throw new Error('datatable must have a columns array, even if it is empty');
+    }
+
+    if (!datatable.rows) {
+      throw new Error('datatable must have a rows array, even if it is empty');
+    }
   },
   from: {
     null: () => {
