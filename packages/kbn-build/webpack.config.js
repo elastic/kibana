@@ -41,7 +41,8 @@ module.exports = {
   },
 
   node: {
-    __filename: true,
-    __dirname: true
+    // Don't replace built-in globals
+    __filename: false,
+    __dirname: false
   }
 };
