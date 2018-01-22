@@ -55,3 +55,17 @@ test('useTimeFilter', () => {
   sinon.assert.calledOnce(stageEditorParams);
   sinon.assert.calledWith(stageEditorParams, sinon.match(expectedParams));
 });
+
+test('pinFilters', () => {
+  const component = mount(<OptionsTab
+    scope={scopeMock}
+    stageEditorParams={stageEditorParams}
+  />);
+  const checkbox = component.find('[data-test-subj="inputControlEditorPinFiltersCheckbox"] input[type="checkbox"]');
+  checkbox.simulate('change', { target: { checked: true } });
+  const expectedParams = {
+    pinFilters: true
+  };
+  sinon.assert.calledOnce(stageEditorParams);
+  sinon.assert.calledWith(stageEditorParams, sinon.match(expectedParams));
+});
