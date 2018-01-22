@@ -45,6 +45,7 @@ export function RangeControlEditor(props) {
         <EuiFieldNumber
           value={props.controlParams.options.step}
           onChange={handleStepChange}
+          data-test-subj={`rangeControlSizeInput${props.controlIndex}`}
         />
       </EuiFormRow>
 
@@ -56,6 +57,7 @@ export function RangeControlEditor(props) {
           min={0}
           value={props.controlParams.options.decimalPlaces}
           onChange={handleDecimalPlacesChange}
+          data-test-subj={`rangeControlDecimalPlacesInput${props.controlIndex}`}
         />
       </EuiFormRow>
 

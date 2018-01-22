@@ -22,7 +22,6 @@ exports[`renders ListControlEditor 1`] = `
     <EuiSwitch
       checked={true}
       data-test-subj="listControlMultiselectInput"
-      defaultChecked={false}
       label="Multiselect"
       onChange={[Function]}
     />
