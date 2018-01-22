@@ -6,7 +6,7 @@ import './datetime_input.less';
 
 export const DatetimeInput = ({ strValue, setStrValue, setMoment, valid, setValid }) => {
   function check(e) {
-    const parsed = moment(e.target.value, 'YYYY-MM-DD hh:mm:ss', true);
+    const parsed = moment(e.target.value, 'YYYY-MM-DD HH:mm:ss', true);
     if (parsed.isValid()) {
       setMoment(parsed);
       setValid(true);

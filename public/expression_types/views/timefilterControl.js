@@ -1,3 +1,6 @@
+import { get } from 'lodash';
+import { getState, getValue } from '../../lib/resolved_arg';
+
 export const timefilterControl = () => ({
   name: 'timefilterControl',
   displayName: 'Time Filter',
@@ -13,4 +16,8 @@ export const timefilterControl = () => ({
       },
     },
   ],
+  resolve({ context }) {
+    if (getState(context) !== 'ready') return { columns: [] };
+    return { columns: get(getValue(context), 'columns', []) };
+  },
 });
