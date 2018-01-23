@@ -29,9 +29,7 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
   return {
     template,
     restrict: 'E',
-    scope: {
-      indexPatterns: '='
-    },
+    scope: {},
     link: function ($scope) {
       // bind query filter actions to the scope
       [
@@ -49,10 +47,6 @@ module.directive('filterBar', function (Private, Promise, getAppState) {
       });
 
       $scope.state = getAppState();
-
-      $scope.showAddFilterButton = () => {
-        return _.compact($scope.indexPatterns).length > 0;
-      };
 
       $scope.applyFilters = function (filters) {
         addAndInvertFilters(filterAppliedAndUnwrap(filters));

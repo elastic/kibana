@@ -35,7 +35,13 @@ module.directive('filterEditor', function ($timeout, indexPatterns) {
     controllerAs: 'filterEditor',
     bindToController: true,
     controller: callAfterBindingsWorkaround(function ($scope, $element) {
-      this.init = () => {
+      this.init = async () => {
+        if (this.indexPatterns === undefined || this.indexPatterns.length === 0) {
+          const defaultIndexPattern = await indexPatterns.getDefault();
+          if (defaultIndexPattern) {
+            this.indexPatterns = [defaultIndexPattern];
+          }
+        }
         const { filter } = this;
         this.alias = filter.meta.alias;
         this.isEditingQueryDsl = false;
