@@ -4,6 +4,7 @@ import header from './header.png';
 export const demodata = () => ({
   name: 'demodata',
   displayName: 'Demo Data',
+  help: 'Mock data set with with usernames, prices, projects, countries and phases.',
   image: header,
   template() {
     return (

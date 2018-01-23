@@ -41,6 +41,7 @@ template.propTypes = {
 export const demoprices = () => ({
   name: 'demoprices',
   displayName: 'Demo Prices',
+  help: 'Product pricing data in a variety of intervals',
   image: header,
   template,
 });

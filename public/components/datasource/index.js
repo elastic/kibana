@@ -61,10 +61,7 @@ const mergeProps = (stateProps, dispatchProps, ownProps) => {
     ...stateProps,
     ...dispatchProps,
     ...datasourceAst,
-    datasources: datasourceRegistry.toArray().map(ds => ({
-      ...ds,
-      function: getDataTableFunctionsByName(ds.name),
-    })),
+    datasources: datasourceRegistry.toArray(),
     setDatasourceAst: dispatchAstAtIndex({
       pageId,
       element,

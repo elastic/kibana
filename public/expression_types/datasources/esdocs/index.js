@@ -128,6 +128,7 @@ template.propTypes = {
 export const esdocs = () => ({
   name: 'esdocs',
   displayName: 'Elasticsearch Raw Documents',
+  help: 'Pull back raw documents from elasticsearch',
   image: header,
   template,
 });

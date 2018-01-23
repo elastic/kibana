@@ -84,6 +84,7 @@ template.propTypes = {
 export const timelion = () => ({
   name: 'timelion',
   displayName: 'Timelion',
+  help: 'Use timelion syntax to retrieve a timeseries',
   image: header,
   template,
 });

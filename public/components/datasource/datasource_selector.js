@@ -11,7 +11,7 @@ export const DatasourceSelector = ({ onSelect, datasources }) => (
         image={d.image}
         onClick={() => onSelect(d.name)}
       >
-        {d.function.help}
+        {d.help}
       </MediaCard>
     ))}
   </div>
