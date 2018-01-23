@@ -1,4 +1,5 @@
-import TagCloud from 'plugins/tagcloud/tag_cloud';
+import TagCloud from './tag_cloud';
+import tagCloudContainer from './tag_cloud_container.html';
 import { Observable } from 'rxjs';
 
 const MAX_TAG_COUNT = 200;
@@ -9,19 +10,7 @@ export class TagCloudVisualization {
     this._containerNode = node;
 
     const nodeContents = document.createElement('div');
-    nodeContents.innerHTML = `
-            <div class="tagcloud-vis">
-              <div class="tagcloud-custom-label"></div>
-              <div class="tagcloud-notifications">
-                  <div class="tagcloud-truncated-message">
-                    The number of tags has been truncated to avoid long draw times.
-                  </div>
-                  <div class="tagcloud-incomplete-message">
-                    The container is too small to display the entire cloud. Tags might be cropped or omitted.
-                  </div>
-              </div>
-            </div>
-          `;
+    nodeContents.innerHTML = tagCloudContainer;
     this._containerNode.appendChild(nodeContents);
 
     this._vis = vis;
