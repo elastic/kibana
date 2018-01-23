@@ -151,8 +151,8 @@ describe('timepicker directive', function () {
       $scope.$digest();
     });
 
-    it('should contain 4 lists of options', function () {
-      expect($elem.find('.kbn-timepicker-section .list-unstyled').length).to.be(4);
+    it('should contain 3 lists of options', function () {
+      expect($elem.find('.kbn-timepicker-section .list-unstyled').length).to.be(3);
     });
 
     it('should have a $scope.setQuick() that calls handler', function () {

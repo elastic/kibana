@@ -1,71 +1,57 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`renders DashboardCloneModal 1`] = `
-<div
-  class="kuiModalOverlay"
->
-  <div>
-    <div
-      class="kuiModal dashboardCloneModal"
-      data-tests-subj="dashboardCloneModal"
-      tabindex="0"
-    >
-      <div
-        class="kuiModalHeader"
-      >
-        <div
-          class="kuiModalHeader__title"
-        >
-          Clone Dashboard
-        </div>
-      </div>
-      <div
-        class="kuiModalBody"
-      >
-        <p
-          class="kuiText kuiVerticalRhythm"
-        >
+<EuiOverlayMask>
+  <EuiModal
+    className="dashboardCloneModal"
+    data-tests-subj="dashboardCloneModal"
+    onClose={[Function]}
+  >
+    <EuiModalHeader>
+      <EuiModalHeaderTitle>
+        Clone Dashboard
+      </EuiModalHeaderTitle>
+    </EuiModalHeader>
+    <EuiModalBody>
+      <EuiText>
+        <p>
           Please enter a new name for your dashboard.
         </p>
-        <div
-          class="kuiVerticalRhythm"
-        >
-          <input
-            class="kuiTextInput kuiTextInput--large"
-            data-test-subj="clonedDashboardTitle"
-            value="dash title"
-          />
-        </div>
-      </div>
-      <div
-        class="kuiModalFooter"
+      </EuiText>
+      <EuiSpacer
+        size="l"
+      />
+      <EuiFieldText
+        autoFocus={true}
+        data-test-subj="clonedDashboardTitle"
+        fullWidth={false}
+        isLoading={false}
+        onChange={[Function]}
+        value="dash title"
+      />
+    </EuiModalBody>
+    <EuiModalFooter>
+      <EuiButton
+        color="primary"
+        data-test-subj="cloneCancelButton"
+        fill={false}
+        iconSide="left"
+        onClick={[Function]}
+        type="button"
       >
-        <button
-          class="kuiButton kuiButton--hollow"
-          data-test-subj="cloneCancelButton"
-        >
-          <span
-            class="kuiButton__inner"
-          >
-            <span>
-              Cancel
-            </span>
-          </span>
-        </button>
-        <button
-          class="kuiButton kuiButton--primary"
-          data-test-subj="cloneConfirmButton"
-        >
-          <span
-            class="kuiButton__inner"
-          >
-            <span>
-              Confirm Clone
-            </span>
-          </span>
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
+        Cancel
+      </EuiButton>
+      <EuiButton
+        color="primary"
+        data-test-subj="cloneConfirmButton"
+        fill={true}
+        iconSide="left"
+        onClick={[Function]}
+        type="button"
+      >
+        Confirm Clone
+      </EuiButton>
+    </EuiModalFooter>
+  </EuiModal>
+</EuiOverlayMask>
 `;

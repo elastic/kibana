@@ -1,6 +1,5 @@
 import 'plugins/kbn_vislib_vis_types/controls/vislib_basic_options';
 import _ from 'lodash';
-import AggConfigResult from 'ui/vis/agg_config_result';
 import { BaseMapsVisualizationProvider } from '../../tile_map/public/base_maps_visualization';
 import ChoroplethLayer from './choropleth_layer';
 import { truncatedColorMaps }  from 'ui/vislib/components/color/truncated_colormaps';
@@ -49,7 +48,12 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
         return;
       }
 
-      this._updateChoroplethLayer(this._vis.params.selectedLayer.url, this._vis.params.selectedLayer.attribution);
+      this._updateChoroplethLayerForNewMetrics(
+        this._vis.params.selectedLayer.url,
+        this._vis.params.selectedLayer.attribution,
+        this._vis.params.showAllShapes,
+        results
+      );
       const metricsAgg = _.first(this._vis.getAggConfig().bySchemaName.metric);
       this._choroplethLayer.setMetrics(results, metricsAgg);
       this._setTooltipFormatter();
@@ -71,31 +75,59 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
         return;
       }
 
-      this._updateChoroplethLayer(visParams.selectedLayer.url, visParams.selectedLayer.attribution);
+      this._updateChoroplehLayerForNewProperties(
+        visParams.selectedLayer.url,
+        visParams.selectedLayer.attribution,
+        this._vis.params.showAllShapes
+      );
       this._choroplethLayer.setJoinField(visParams.selectedJoinField.name);
       this._choroplethLayer.setColorRamp(truncatedColorMaps[visParams.colorSchema]);
+      this._choroplethLayer.setLineWeight(visParams.outlineWeight);
       this._setTooltipFormatter();
 
     }
 
-    _updateChoroplethLayer(url, attribution) {
-
-      if (this._choroplethLayer && this._choroplethLayer.equalsGeoJsonUrl(url)) {//no need to recreate the layer
+    _updateChoroplethLayerForNewMetrics(url, attribution, showAllData, newMetrics) {
+      if (this._choroplethLayer && this._choroplethLayer.canReuseInstanceForNewMetrics(url, showAllData, newMetrics)) {
         return;
       }
+      return this._recreateChoroplethLayer(url, attribution, showAllData);
+    }
+
+    _updateChoroplehLayerForNewProperties(url, attribution, showAllData) {
+      if (this._choroplethLayer && this._choroplethLayer.canReuseInstance(url, showAllData)) {
+        return;
+      }
+      return this._recreateChoroplethLayer(url, attribution, showAllData);
+    }
+
+    _recreateChoroplethLayer(url, attribution, showAllData) {
 
       this._kibanaMap.removeLayer(this._choroplethLayer);
 
-      const previousMetrics = this._choroplethLayer ? this._choroplethLayer.getMetrics() : null;
-      const previousMetricsAgg = this._choroplethLayer ? this._choroplethLayer.getMetricsAgg() : null;
-      this._choroplethLayer = new ChoroplethLayer(url, attribution);
-      if (previousMetrics && previousMetricsAgg) {
-        this._choroplethLayer.setMetrics(previousMetrics, previousMetricsAgg);
+
+      if (this._choroplethLayer) {
+        this._choroplethLayer = this._choroplethLayer.cloneChoroplethLayerForNewData(
+          url,
+          attribution,
+          this.vis.params.selectedLayer.format,
+          showAllData,
+          this.vis.params.selectedLayer.meta
+        );
+      } else {
+        this._choroplethLayer = new ChoroplethLayer(
+          url,
+          attribution,
+          this.vis.params.selectedLayer.format,
+          showAllData,
+          this.vis.params.selectedLayer.meta
+        );
       }
+
       this._choroplethLayer.on('select', (event) => {
-        const aggs = this._vis.getAggConfig().getResponseAggs();
-        const aggConfigResult = new AggConfigResult(aggs[0], false, event, event);
-        this._vis.API.events.filter({ point: { aggConfigResult: aggConfigResult } });
+        const agg = this._vis.aggs.bySchemaName.segment[0];
+        const filter = agg.createFilter(event);
+        this._vis.API.queryFilter.addFilters(filter);
       });
       this._choroplethLayer.on('styleChanged', (event) => {
         const shouldShowWarning = this._vis.params.isDisplayWarning && config.get('visualization:regionmap:showWarnings');
@@ -106,7 +138,10 @@ export function RegionMapsVisualizationProvider(Private, Notifier, config) {
           );
         }
       });
+
+
       this._kibanaMap.addLayer(this._choroplethLayer);
+
     }
 
 

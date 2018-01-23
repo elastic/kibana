@@ -49,9 +49,7 @@ const defaultEditor = function ($rootScope, $compile) {
             $scope.$broadcast('render');
           };
 
-          $scope.$on('renderComplete', () => {
-            $scope.renderComplete();
-          });
+          this.el.one('renderComplete', resolve);
 
           // track state of editable vis vs. "actual" vis
           $scope.stageEditableVis = () => {
@@ -110,13 +108,17 @@ const defaultEditor = function ($rootScope, $compile) {
             catch (e) {} // eslint-disable-line no-empty
           }, true);
 
-          this.el.html($compile(defaultEditorTemplate)($scope));
+          // Load the default editor template, attach it to the DOM and compile it.
+          // It should be added to the DOM before compiling, to prevent some resize
+          // listener issues.
+          const template = $(defaultEditorTemplate);
+          this.el.html(template);
+          $compile(template)($scope);
         } else {
           $scope = this.$scope;
           updateScope();
         }
 
-        $scope.renderComplete = resolve;
         $scope.$broadcast('render');
       });
     }

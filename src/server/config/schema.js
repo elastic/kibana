@@ -79,6 +79,9 @@ export default () => Joi.object({
     }),
     xsrf: Joi.object({
       disableProtection: Joi.boolean().default(false),
+      whitelist: Joi.array().items(
+        Joi.string().regex(/^\//, 'start with a slash')
+      ).default([]),
       token: Joi.string().optional().notes('Deprecated')
     }).default(),
   }).default(),
@@ -133,11 +136,11 @@ export default () => Joi.object({
     bundleFilter: Joi.string().default('!tests'),
     bundleDir: Joi.string().default(fromRoot('optimize/bundles')),
     viewCaching: Joi.boolean().default(Joi.ref('$prod')),
-    lazy: Joi.boolean().default(false),
-    lazyPort: Joi.number().default(5602),
-    lazyHost: Joi.string().hostname().default('localhost'),
-    lazyPrebuild: Joi.boolean().default(false),
-    lazyProxyTimeout: Joi.number().default(5 * 60000),
+    watch: Joi.boolean().default(false),
+    watchPort: Joi.number().default(5602),
+    watchHost: Joi.string().hostname().default('localhost'),
+    watchPrebuild: Joi.boolean().default(false),
+    watchProxyTimeout: Joi.number().default(5 * 60000),
     useBundleCache: Joi.boolean().default(Joi.ref('$prod')),
     unsafeCache: Joi.when('$prod', {
       is: true,
@@ -169,9 +172,10 @@ export default () => Joi.object({
   map: Joi.object({
     manifestServiceUrl: Joi.when('$dev', {
       is: true,
-      then: Joi.string().default('https://staging-dot-catalogue-dot-elastic-layer.appspot.com/v1/manifest'),
-      otherwise: Joi.string().default('https://catalogue.maps.elastic.co/v1/manifest')
-    })
+      then: Joi.string().default('https://staging-dot-catalogue-dot-elastic-layer.appspot.com/v2/manifest'),
+      otherwise: Joi.string().default('https://catalogue.maps.elastic.co/v2/manifest')
+    }),
+    includeElasticMapsService: Joi.boolean().default(true)
   }).default(),
   tilemap: Joi.object({
     url: Joi.string(),
@@ -191,7 +195,16 @@ export default () => Joi.object({
     includeElasticMapsService: Joi.boolean().default(true),
     layers: Joi.array().items(Joi.object({
       url: Joi.string(),
-      type: Joi.string(),
+      format: Joi.object({
+        type: Joi.string().default('geojson')
+      }).default({
+        type: 'geojson'
+      }),
+      meta: Joi.object({
+        feature_collection_path: Joi.string().default('data')
+      }).default({
+        feature_collection_path: 'data'
+      }),
       attribution: Joi.string(),
       name: Joi.string(),
       fields: Joi.array().items(Joi.object({

@@ -12,7 +12,7 @@ import { dispatchRenderComplete, dispatchRenderStart } from 'ui/render_complete'
 
 uiModules
   .get('kibana/directive', ['ngSanitize'])
-  .directive('visualization', function (Notifier, SavedVis, indexPatterns, Private, config) {
+  .directive('visualization', function ($timeout, Notifier, SavedVis, indexPatterns, Private, config) {
     const ResizeChecker = Private(ResizeCheckerProvider);
 
     return {
@@ -23,12 +23,17 @@ uiModules
         vis: '=',
         visData: '=',
         uiState: '=?',
+        // If set to true (default) the visualization directive will listen for
+        // several changes in the data and uiState to trigger a render. If set to
+        // false (boolean value, not a falsy value), this directive won't listen
+        // for any changes and require to be notified by the 'render' event broadcasted
+        // to its scope, that it needs to rerender this. Usually when using this as
+        // a consumer you don't want to change the default behavior.
+        listenOnChange: '<',
         searchSource: '='
       },
       template: visualizationTemplate,
       link: function ($scope, $el) {
-        const resizeChecker = new ResizeChecker($el);
-
         //todo: lets make this a simple function call.
         const getVisEl = jQueryGetter('.visualize-chart');
         const getVisContainer = jQueryGetter('.vis-container');
@@ -81,19 +86,20 @@ uiModules
               container: getVisContainer(),
             });
           });
-        });
+        }).share();
 
         const success$ = render$
           .do(() => {
             dispatchRenderStart($el[0]);
           })
           .filter(({ vis, visData, container }) => vis && vis.initialized && container && (!vis.type.requiresSearch || visData))
-          .do(({ vis }) => {
-            $scope.addLegend = vis.params.addLegend;
-            vis.refreshLegend++;
-          })
           .debounceTime(100)
           .switchMap(async ({ vis, visData, container }) => {
+            $scope.addLegend = vis.params.addLegend;
+            vis.refreshLegend++;
+            // We need to wait one digest cycle for the legend to render, before
+            // we want to render the chart, so it know about the legend size.
+            await new Promise(resolve => $timeout(resolve));
             vis.size = [container.width(), container.height()];
             const status = getUpdateStatus($scope);
             const renderPromise = visualization.render(visData, status);
@@ -105,23 +111,32 @@ uiModules
 
         const renderSubscription = Observable.merge(success$, requestError$)
           .subscribe(() => {
-            $scope.$emit('renderComplete');
             dispatchRenderComplete($el[0]);
           });
 
         $scope.$on('$destroy', () => {
-          resizeChecker.destroy();
           visualization.destroy();
           renderSubscription.unsubscribe();
         });
 
-        if (!$scope.vis.visualizeScope) {
-          $scope.$watchGroup(['visData', 'vis.params'], () => {
+        // Listen on changes to trigger a render if listenOnChange is not false
+        // i.e. true or has not been used (undefined in that case)
+        if ($scope.listenOnChange !== false) {
+          const onChangeListener = () => {
+            $scope.$emit('render');
+          };
+
+          $scope.$watchGroup(['visData', 'vis.params'], onChangeListener);
+
+          const resizeChecker = new ResizeChecker($el);
+          resizeChecker.on('resize', () => {
             $scope.$emit('render');
           });
 
-          resizeChecker.on('resize',  () => {
-            $scope.$emit('render');
+          $scope.uiState.on('change', onChangeListener);
+          $scope.$on('$destroy', () => {
+            resizeChecker.destroy();
+            $scope.uiState.off('change', onChangeListener);
           });
         }
 

@@ -355,7 +355,7 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
       });
       await retry.try(async () => {
         log.debug('getAlertText');
-        alertText = await testSubjects.getVisibleText('confirmModalBodyText');
+        alertText = await testSubjects.getVisibleText('confirmModalTitleText');
       });
       await retry.try(async () => {
         log.debug('acceptConfirmation');

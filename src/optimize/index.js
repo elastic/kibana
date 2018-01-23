@@ -4,7 +4,7 @@ import { createBundlesRoute } from './bundles_route';
 export default async (kbnServer, server, config) => {
   if (!config.get('optimize.enabled')) return;
 
-  // the lazy optimizer sets up two threads, one is the server listening
+  // the watch optimizer sets up two threads, one is the server listening
   // on 5601 and the other is a server listening on 5602 that builds the
   // bundles in a "middleware" style.
   //
@@ -12,9 +12,9 @@ export default async (kbnServer, server, config) => {
   // on the watch setup managed by the cli. It proxies all bundles/* requests to
   // the other server. The server on 5602 is long running, in order to prevent
   // complete rebuilds of the optimize content.
-  const lazy = config.get('optimize.lazy');
-  if (lazy) {
-    return await kbnServer.mixin(require('./lazy/lazy'));
+  const watch = config.get('optimize.watch');
+  if (watch) {
+    return await kbnServer.mixin(require('./watch/watch'));
   }
 
   const { uiBundles } = kbnServer;
@@ -24,6 +24,10 @@ export default async (kbnServer, server, config) => {
   }));
 
   await uiBundles.writeEntryFiles();
+
+  // Not all entry files produce a css asset. Ensuring they exist prevents
+  // an error from occuring when the file is missing.
+  await uiBundles.ensureStyleFiles();
 
   // in prod, only bundle when someing is missing or invalid
   const reuseCache = config.get('optimize.useBundleCache')

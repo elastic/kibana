@@ -8,7 +8,7 @@ import { uiModules } from 'ui/modules';
 uiModules
   .get('kibana/timelion_vis', ['kibana'])
   .controller('TimelionVisController', function ($scope) {
-    $scope.$on('renderComplete', event => {
+    $scope.$on('timelionChartRendered', event => {
       event.stopPropagation();
       $scope.renderComplete();
     });

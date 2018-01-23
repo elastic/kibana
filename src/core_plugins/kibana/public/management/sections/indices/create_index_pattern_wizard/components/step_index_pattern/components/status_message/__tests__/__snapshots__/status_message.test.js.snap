@@ -1,0 +1,89 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`StatusMessage should render with exact matches 1`] = `
+<EuiText
+  size="s"
+>
+  <EuiTextColor
+    color="secondary"
+  >
+    <EuiIcon
+      size="m"
+      type="check"
+    />
+    <span>
+       
+      <strong>
+        Success!
+      </strong>
+        Your index pattern matches 
+      <strong>
+        1
+         
+        index
+      </strong>
+      .
+    </span>
+  </EuiTextColor>
+</EuiText>
+`;
+
+exports[`StatusMessage should render with no partial matches 1`] = `
+<EuiText
+  size="s"
+>
+  <EuiTextColor
+    color="default"
+  >
+    <span>
+      The index pattern you've entered doesn't match any indices. You can match any of your 
+      <strong>
+        2
+         indices
+      </strong>
+      , below.
+    </span>
+  </EuiTextColor>
+</EuiText>
+`;
+
+exports[`StatusMessage should render with partial matches 1`] = `
+<EuiText
+  size="s"
+>
+  <EuiTextColor
+    color="default"
+  >
+    <span>
+      Your index pattern doesn't match any indices, but you have 
+      <strong>
+        1
+         
+        index 
+      </strong>
+      which 
+      looks
+       similar.
+    </span>
+  </EuiTextColor>
+</EuiText>
+`;
+
+exports[`StatusMessage should render without a query 1`] = `
+<EuiText
+  size="s"
+>
+  <EuiTextColor
+    color="default"
+  >
+    <span>
+      Your index pattern can match any of your 
+      <strong>
+        2
+         indices
+      </strong>
+      , below.
+    </span>
+  </EuiTextColor>
+</EuiText>
+`;

@@ -1,11 +1,28 @@
 @import (reference) "~ui/styles/variables.less";
 
-.home {
+home-app {
   background-color: @globalColorLightestGray;
-  min-height: 100vh;
 }
 
-.homeFeatureDirectory {
+.home {
+  min-height: 100vh;
+  max-width: 1200px;
+  margin: auto;
+}
+
+.kuiCard__descriptionTitle img {
+  display: inline-block;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 10px;
+}
+
+.kuiCardGroup .kuiCard {
+  flex: 1 1 0 !important;
+  background-color: white;
+}
+
+.homeDirectory {
   background: @white;
   margin: 0;
   border-left: 1px solid @globalColorLightGray;
@@ -14,6 +31,6 @@
   padding: 16px;
 }
 
-.homeFeatureCategoryTab {
+.homeDirectoryTab {
   background-color: @globalColorLightestGray;
 }

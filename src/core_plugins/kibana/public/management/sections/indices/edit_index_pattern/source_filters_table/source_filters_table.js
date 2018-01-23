@@ -102,10 +102,11 @@ uiModules.get('kibana')
           };
 
           const confirmModalOptions = {
-            confirmButtonText: 'Delete filter',
-            onConfirm: doDelete
+            confirmButtonText: 'Delete',
+            onConfirm: doDelete,
+            title: 'Delete source filter?'
           };
-          confirmModal(`Are you sure want to delete this filter?`, confirmModalOptions);
+          confirmModal('', confirmModalOptions);
         }
 
         create() {

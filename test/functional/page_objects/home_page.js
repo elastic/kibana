@@ -1,7 +1,7 @@
 
 export function HomePageProvider({ getService }) {
   const testSubjects = getService('testSubjects');
-  //const PageObjects = getPageObjects(['common', 'header']);
+
   class HomePage {
 
     async clickKibanaIcon() {
@@ -12,6 +12,9 @@ export function HomePageProvider({ getService }) {
       await testSubjects.click(`homeSynopsisLink${title}`);
     }
 
+    async doesSynopsisExist(title) {
+      return await testSubjects.exists(`homeSynopsisLink${title}`);
+    }
 
   }
 
