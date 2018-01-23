@@ -74,7 +74,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "dependencies": {
-    "@elastic/datemath": "4.0.1",
+    "@elastic/datemath": "4.0.2",
     "@elastic/eui": "0.0.13",
     "@elastic/filesaver": "1.1.2",
     "@elastic/numeral": "2.3.1",
@@ -209,7 +209,7 @@
     "url-loader": "0.5.9",
     "uuid": "3.0.1",
     "validate-npm-package-name": "2.2.2",
-    "vega": "3.0.8",
+    "vega": "3.0.9",
     "vega-lite": "2.0.4",
     "vega-schema-url-parser": "1.0.0",
     "vision": "4.1.0",
@@ -278,7 +278,7 @@
     "karma-safari-launcher": "1.0.0",
     "keymirror": "0.1.1",
     "leadfoot": "1.7.1",
-    "license-checker": "5.1.2",
+    "license-checker": "^16.0.0",
     "load-grunt-config": "0.19.2",
     "makelogs": "^4.0.3",
     "marked-text-renderer": "0.1.0",

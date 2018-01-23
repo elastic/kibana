@@ -10,8 +10,7 @@ export function apacheLogsSpecProvider() {
     category: TUTORIAL_CATEGORY.LOGGING,
     shortDescription: 'Collect and parse access and error logs created by the Apache HTTP server.',
     longDescription: 'The apache2 Filebeat module parses access and error logs created by the Apache 2 HTTP server.' +
-                     ' [Learn more]({config.docs.beats.filebeat}/filebeat-module-apache2.html)' +
-                     ' about the apache2 module.',
+                     ' [Learn more]({config.docs.beats.filebeat}/filebeat-module-apache2.html).',
     //iconPath: '', TODO
     artifacts: {
       dashboards: [
