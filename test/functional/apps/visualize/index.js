@@ -6,7 +6,7 @@ export default function ({ getService, loadTestFile }) {
 
   describe('visualize app', function () {
     before(function () {
-      remote.setWindowSize(1280,800);
+      remote.setWindowSize(1380,800);
 
       log.debug('Starting visualize before method');
       const logstash = esArchiver.loadIfNeeded('logstash_functional');

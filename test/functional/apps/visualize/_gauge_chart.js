@@ -70,7 +70,7 @@ export default function ({ getService, getPageObjects }) {
       });
 
       it('should show correct values for fields with fieldFormatters', async function () {
-        const expectedTexts = [ '2,904\nwin 8: Count', '5.528KB' ];
+        const expectedTexts = [ '2,904\nwin 8: Count', '5.528KB\nwin 8: Average bytes' ];
 
 
         await PageObjects.visualize.closeMetricEditor();

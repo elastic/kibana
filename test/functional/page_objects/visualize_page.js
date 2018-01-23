@@ -881,6 +881,13 @@ export function VisualizePageProvider({ getService, getPageObjects }) {
       });
     }
 
+    selectVectorMap(map) {
+      return remote
+      .setFindTimeout(defaultFindTimeout)
+      .findByCssSelector(`#regionMap > option[label="${map}"]`)
+      .click();
+    }
+
   }
 
   return new VisualizePage();
