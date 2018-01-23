@@ -4,6 +4,7 @@ import {
   noValuesDisableMsg
 } from './control';
 import { PhraseFilterManager } from './filter_manager/phrase_filter_manager';
+import { createSearchSource } from './create_search_source';
 
 const termsAgg = (field, size, direction) => {
   if (size < 1) {
@@ -47,24 +48,22 @@ class ListControl extends Control {
 
 export async function listControlFactory(controlParams, kbnApi, useTimeFilter) {
   const indexPattern = await kbnApi.indexPatterns.get(controlParams.indexPattern);
-  // TODO replace SearchSource with call to suggestions API
-  const searchSource = new kbnApi.SearchSource({
+
+  const initialSearchSourceState = {
     timeout: '1s',
     terminate_after: 100000
-  });
-  if (!useTimeFilter) {
-    searchSource.inherits(false); //Do not filter by time so can not inherit from rootSearchSource
-  }
-  searchSource.size(0);
-  searchSource.index(indexPattern);
-  searchSource.aggs(termsAgg(
+  };
+  const aggs = termsAgg(
     indexPattern.fields.byName[controlParams.fieldName],
     _.get(controlParams, 'options.size', 5),
-    'desc'));
+    'desc');
+  const searchSource = createSearchSource(kbnApi, initialSearchSourceState, indexPattern, aggs, useTimeFilter);
 
   const resp = await searchSource.fetch();
   const termsSelectOptions = _.get(resp, 'aggregations.termsAgg.buckets', []).map((bucket) => {
     return { label: bucket.key.toString(), value: bucket.key.toString() };
+  }).sort((a, b) => {
+    return a.label.toLowerCase().localeCompare(b.label.toLowerCase());
   });
 
   const listControl = new ListControl(

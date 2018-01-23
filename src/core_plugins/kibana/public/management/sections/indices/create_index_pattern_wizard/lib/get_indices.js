@@ -11,6 +11,11 @@ export async function getIndices(es, rawPattern, limit) {
     return [];
   }
 
+  // We need to always provide a limit and not rely on the default
+  if (!limit) {
+    throw '`getIndices()` was called without the required `limit` parameter.';
+  }
+
   const params = {
     index: pattern,
     ignore: [404],

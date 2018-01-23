@@ -23,7 +23,7 @@ export function Footer({ overviewDashboard }) {
           <EuiFlexItem grow={false}>
             <EuiText>
               <p>
-                {`Once all steps are completed, you're ready to explore your data`}
+                {`When all steps are complete, you're ready to explore your data.`}
               </p>
             </EuiText>
           </EuiFlexItem>

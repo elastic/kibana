@@ -1,3 +1,4 @@
+import $ from 'jquery';
 import { getVisualizeLoader } from 'ui/visualize/loader';
 
 import { UtilsBrushEventProvider as utilsBrushEventProvider } from 'ui/utils/brush_event';
@@ -33,7 +34,9 @@ export class VisualizeEmbeddableFactory extends EmbeddableFactory {
         const isLabsEnabled = this._config.get('visualize:enableLabs');
 
         if (!isLabsEnabled && savedObject.vis.type.stage === 'lab') {
-          domNode.innerHTML = labDisabledTemplate.replace('{{title}}', savedObject.title);
+          const template = $(labDisabledTemplate);
+          template.find('.disabledLabVisualization__title').text(savedObject.title);
+          $(domNode).html(template);
 
           return new Embeddable({
             title: savedObject.title

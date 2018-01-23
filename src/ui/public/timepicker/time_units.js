@@ -1,7 +1,4 @@
-import { uiModules } from 'ui/modules';
-const module = uiModules.get('kibana');
-
-module.constant('timeUnits', {
+export const timeUnits = {
   s: 'second',
   m: 'minute',
   h: 'hour',
@@ -9,5 +6,5 @@ module.constant('timeUnits', {
   w: 'week',
   M: 'month',
   y: 'year'
-});
+};
 
