@@ -169,7 +169,7 @@ export function SearchSourceProvider(Promise, Private, config) {
     this._fetchDisabled = false;
   };
 
-  SearchSource.prototype.onBeginSegmentedFetch = function (initFunction) {
+  SearchSource.prototype.onBeginSegmentedFetch = function (initFunction, nextFn) {
     const self = this;
     return new Promise((resolve, reject) => {
       function addRequest() {
@@ -183,7 +183,7 @@ export function SearchSourceProvider(Promise, Private, config) {
 
         // Return promises created by the completion handler so that
         // errors will bubble properly
-        return req.getCompletePromise().then(addRequest);
+        return req.getCompleteOrSkippedPromise().then(nextFn).then(addRequest);
       }
       addRequest();
     });
