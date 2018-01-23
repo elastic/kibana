@@ -63,7 +63,7 @@ FieldListExpression
         return {
           ...list,
           field,
-          suggest: ['values']
+          suggest: ['values', 'conjunctions']
         };
       } else if (list.hasOwnProperty('and')) {
         return buildNode('and', list.and.map(node => buildNodeWithField(field, node)));

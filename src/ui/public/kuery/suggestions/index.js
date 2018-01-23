@@ -22,6 +22,10 @@ export function getSuggestionsProvider($http, indexPattern, persistedLog) {
       const operators = getOperatorSuggestions(indexPattern, start, end, indexPattern.fields.byName[field]);
       suggestions = [...suggestions, ...operators];
     }
+    if (suggest.includes('conjunctions')) {
+      const conjunctions = getConjunctionSuggestions(prefix, suffix, start);
+      suggestions = [...suggestions, ...conjunctions];
+    }
     const recentSearches = getRecentSearchSuggestions(persistedLog.get(), query);
     return [...suggestions, ...recentSearches];
   };
@@ -54,6 +58,15 @@ function getOperatorSuggestions(indexPattern, start, end, field) {
   }
   operators = [...operators, ':*'];
   return operators.map(suggestion => ({ start: end, end, suggestion }));
+}
+
+function getConjunctionSuggestions(prefix, suffix, start) {
+  if (!prefix.endsWith(' ')) return [];
+  return ['and ', 'or '].map(suggestion => ({
+    start: start + prefix.length,
+    end: start + prefix.length,
+    suggestion
+  }));
 }
 
 function getRecentSearchSuggestions(recentSearches, query) {
