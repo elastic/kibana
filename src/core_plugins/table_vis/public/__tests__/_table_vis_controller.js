@@ -79,6 +79,7 @@ describe('Controller', function () {
   // remove the response from the controller
   function removeEsResponseFromScope() {
     delete $rootScope.esResponse;
+    $rootScope.renderComplete = () => {};
     $rootScope.$apply();
   }
 
