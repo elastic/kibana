@@ -4,7 +4,8 @@
   ng-submit="queryBar.submit()"
 >
   <kbn-typeahead
-    items="queryBar.suggestions.suggestions"
+    items="queryBar.typeaheadItems"
+    item-template="queryBar.typeaheadItemTemplate"
     on-select="queryBar.onTypeaheadSelect(item)"
   >
     <div

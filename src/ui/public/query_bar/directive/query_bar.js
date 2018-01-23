@@ -45,21 +45,28 @@ module.directive('queryBar', function () {
         this.submit();
       };
 
+      this.typeaheadItemTemplate = '{{item.suggestion}}';
+
       const getSuggestions = getSuggestionsProvider($http, this.indexPattern);
 
       this.updateSuggestions = async () => {
         const inputEl = $element.find('input')[0];
         const { selectionStart, selectionEnd, value } = inputEl;
-        this.suggestions = await getSuggestions(value, selectionStart, selectionEnd);
+        const { start, end, suggestions } = await getSuggestions(value, selectionStart, selectionEnd);
+        const recentSearches = persistedLog.get().filter(search => search.includes(value));
+        this.typeaheadItems = [
+          ...suggestions.map(suggestion => ({ start, end, suggestion })).slice(0, 5),
+          ...recentSearches.map(search => ({ start: 0, end: value.length, suggestion: search })).slice(0, 5)
+        ];
       };
 
       // TODO: Figure out a better way to set selection
       this.onTypeaheadSelect = (item) => {
         const { query } = this.localQuery;
-        const { start, end } = this.suggestions;
+        const { start, end, suggestion } = item;
         const inputEl = $element.find('input')[0];
-        this.localQuery.query = inputEl.value = query.substr(0, start) + item + query.substr(end);
-        inputEl.setSelectionRange(start + item.length, start + item.length);
+        this.localQuery.query = inputEl.value = query.substr(0, start) + suggestion + query.substr(end);
+        inputEl.setSelectionRange(start + suggestion.length, start + suggestion.length);
         this.updateSuggestions();
       };
 
