@@ -53,7 +53,7 @@ export const ON_PREM_INSTRUCTIONS = {
               ...DOWNLOAD_SERVER,
               commands: [
                 'curl -L -O https://artifacts.elastic.co/downloads/apm-server/apm-server-6.2.0-x86_64.rpm',
-                'sudo dpkg -i apm-server-6.2.0-x86_64.rpm'
+                'sudo rpm -vi apm-server-6.2.0-x86_64.rpm'
               ],
               textPost: 'Looking for the 32-bit packages? See the [Download page]({config.docs.base_url}downloads/apm/apm-server).'
             },
