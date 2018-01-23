@@ -28,7 +28,7 @@ export class Router {
       throw new Error(
         `The [${routeMethod}] at [${
           route.path
-        }] does not have a 'validation' specified. Use 'false' as the value if you want to bypass validation.`
+        }] does not have a 'validate' specified. Use 'false' as the value if you want to bypass validation.`
       );
     }
 
