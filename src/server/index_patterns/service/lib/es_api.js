@@ -49,3 +49,26 @@ export async function callFieldCapsApi(callCluster, indices) {
     throw convertEsError(indices, error);
   }
 }
+
+/**
+ *  Call the indices.getMapping API for a list of indices.
+ *
+ *  Just like callIndexAliasApi(), callIndexMappingApi() throws
+ *  if no indexes are matched, but will return potentially
+ *  "partial" results if even a single index is matched.
+ *
+ *  @param  {Function} callCluster bound function for accessing an es client
+ *  @param  {Array<String>|String} indices
+ *  @return {Promise<FieldCapsResponse>}
+ */
+export async function callIndexMappingApi(callCluster, indexPattern) {
+  try {
+    return await callCluster('indices.getMapping', {
+      index: indexPattern,
+      allowNoIndices: false
+    });
+  } catch (error) {
+    throw convertEsError(indexPattern, error);
+  }
+}
+

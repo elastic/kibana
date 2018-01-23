@@ -28,6 +28,7 @@ uiModules.get('apps/management')
           { title: 'searchable', info: 'These fields can be used in the filter bar' },
           { title: 'aggregatable', info: 'These fields can be used in visualization aggregations' },
           { title: 'excluded', info: 'Fields that are excluded from _source when it is fetched' },
+          { title: 'nested', info: 'These fields are within a nested field.' },
           { title: 'controls', sortable: false }
         ];
 
@@ -49,6 +50,7 @@ uiModules.get('apps/management')
             rowScopes.push(childScope);
 
             const excluded = fieldWildcardMatch(field.name);
+            const nested = field.nested;
 
             return [
               {
@@ -79,6 +81,10 @@ uiModules.get('apps/management')
               {
                 markup: excluded ? yesTemplate : noTemplate,
                 value: excluded
+              },
+              {
+                markup: nested ? yesTemplate : noTemplate,
+                value: nested
               },
               {
                 markup: fieldControlsHtml,

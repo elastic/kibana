@@ -1,8 +1,8 @@
 import { defaults, indexBy, sortBy } from 'lodash';
-
 import { callFieldCapsApi } from '../es_api';
 import { readFieldCapsResponse } from './field_caps_response';
 import { mergeOverrides } from './overrides';
+import { getNestedFields } from './nested_fields';
 
 export const concatIfUniq = (arr, value) => (
   arr.includes(value) ? arr : arr.concat(value)
@@ -19,8 +19,8 @@ export const concatIfUniq = (arr, value) => (
  */
 export async function getFieldCapabilities(callCluster, indices = [], metaFields = []) {
   const esFieldCaps = await callFieldCapsApi(callCluster, indices);
+  const nestedFields = await getNestedFields(callCluster, indices);
   const fieldsFromFieldCapsByName = indexBy(readFieldCapsResponse(esFieldCaps), 'name');
-
   const allFieldsUnsorted = Object
     .keys(fieldsFromFieldCapsByName)
     .filter(name => !name.startsWith('_'))
@@ -32,6 +32,11 @@ export async function getFieldCapabilities(callCluster, indices = [], metaFields
       searchable: false,
       aggregatable: false,
       readFromDocValues: false
+    }))
+    .map(obj => ({
+      ...obj,
+      nested: !!nestedFields[obj.name],
+      nestedPaths: nestedFields[obj.name],
     }))
     .map(mergeOverrides);
 

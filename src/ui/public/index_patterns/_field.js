@@ -42,6 +42,8 @@ export function IndexPatternsFieldProvider(Private, shortDotsFilter, $rootScope,
     const searchable = !!spec.searchable || scripted;
     const aggregatable = !!spec.aggregatable || scripted;
     const readFromDocValues = !!spec.readFromDocValues && !scripted;
+    const nested = !!spec.nested;
+    const nestedPaths = spec.nestedPaths;
     const sortable = spec.name === '_score' || ((indexed || aggregatable) && type.sortable);
     const filterable = spec.name === '_id' || scripted || ((indexed || searchable) && type.filterable);
     const visualizable = aggregatable;
@@ -59,6 +61,8 @@ export function IndexPatternsFieldProvider(Private, shortDotsFilter, $rootScope,
     obj.fact('searchable', searchable);
     obj.fact('aggregatable', aggregatable);
     obj.fact('readFromDocValues', readFromDocValues);
+    obj.fact('nested', nested);
+    obj.fact('nestedPaths', nestedPaths);
 
     // usage flags, read-only and won't be saved
     obj.comp('format', format);
