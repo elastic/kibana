@@ -6,12 +6,6 @@ const markdownIt = new MarkdownIt({
 });
 
 export class MarkdownVisController {
-  _empty() {
-    while (this._containerNode.firstChild) {
-      this._containerNode.removeChild(this._containerNode.firstChild);
-    }
-  }
-
   constructor(node, vis) {
     this._vis = vis;
     this._containerNode = document.createElement('div');
@@ -26,7 +20,7 @@ export class MarkdownVisController {
       markdownElement.style['font-size'] = `${this._vis.params.fontSize}pt`;
       markdownElement.dataset.testSubj = 'markdownBody';
       markdownElement.innerHTML = markdownIt.render(this._vis.params.markdown);
-      this._empty();
+      this._containerNode.innerHTML = '';
       this._containerNode.appendChild(markdownElement);
     }
   }
