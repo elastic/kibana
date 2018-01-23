@@ -2,11 +2,10 @@ import expect from 'expect.js';
 
 export default function ({ getService, getPageObjects }) {
   const esArchiver = getService('esArchiver');
-  const retry = getService('retry');
   const PageObjects = getPageObjects(['common', 'home', 'settings']);
 
   describe('test large number of fields', function () {
-    const EXPECTED_FIELD_COUNT = 2259;
+    const EXPECTED_FIELD_COUNT = 10006;
     before(async function () {
       await esArchiver.loadIfNeeded('large_fields');
       await PageObjects.settings.navigateTo();
@@ -14,15 +13,9 @@ export default function ({ getService, getPageObjects }) {
       await PageObjects.settings.createIndexPattern('testhuge', 'date');
     });
 
-    it('test_huge data should have expected number of fields', function () {
-      return retry.try(function () {
-        return PageObjects.settings.getFieldsTabCount()
-          .then(function (tabCount) {
-            expect(tabCount).to.be('' + EXPECTED_FIELD_COUNT);
-          });
-      });
+    it('test_huge data should have expected number of fields', async function () {
+      const tabCount = await PageObjects.settings.getFieldsTabCount();
+      expect(tabCount).to.be(`(${EXPECTED_FIELD_COUNT})`);
     });
-
-
   });
 }

@@ -174,10 +174,10 @@ export function SettingsPageProvider({ getService, getPageObjects }) {
     }
 
     async getFieldsTabCount() {
-      return await retry.try(async () => {
+      return retry.try(async () => {
         const text = await testSubjects.getVisibleText('tab-count-indexedFields');
-        // the value has () around it, remove them
-        return text.replace(/\((.*)\)/, '$1');
+        log.debug(text);
+        return text;
       });
     }
 
