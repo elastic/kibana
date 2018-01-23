@@ -63,7 +63,7 @@ FieldListExpression
         return {
           ...list,
           field,
-          suggest: 'values'
+          suggest: ['values']
         };
       } else if (list.hasOwnProperty('and')) {
         return buildNode('and', list.and.map(node => buildNodeWithField(field, node)));
@@ -86,9 +86,11 @@ FieldRangeExpression
 ValueExpression
   = value:Literal {
     if (value.type === 'cursor') {
+      const field = (value.prefix + value.suffix).trim();
       return {
         ...value,
-        suggest: 'fields'
+        field,
+        suggest: ['fields', 'operators']
       };
     }
     return buildNode('is', '*', value);
@@ -100,7 +102,7 @@ OrList
     if (cursor) {
       return {
         ...cursor,
-        suggest: 'values'
+        suggest: ['values']
       };
     }
     return { or: [head, tail] };
@@ -113,7 +115,7 @@ AndList
     if (cursor) {
       return {
         ...cursor,
-        suggest: 'values'
+        suggest: ['values']
       };
     }
     return { and: [head, tail] };
@@ -125,7 +127,7 @@ NotList
     if (list.type === 'cursor') {
       return {
         ...list,
-        suggest: 'values'
+        suggest: ['values']
       };
     }
     return { not: list };
@@ -137,7 +139,7 @@ SubList
     if (list.type === 'cursor') {
       return {
         ...list,
-        suggest: 'values'
+        suggest: ['values']
       };
     }
     return list;

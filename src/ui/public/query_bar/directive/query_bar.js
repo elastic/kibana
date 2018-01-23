@@ -47,17 +47,12 @@ module.directive('queryBar', function () {
 
       this.typeaheadItemTemplate = '{{item.suggestion}}';
 
-      const getSuggestions = getSuggestionsProvider($http, this.indexPattern);
+      const getSuggestions = getSuggestionsProvider($http, this.indexPattern, persistedLog);
 
       this.updateSuggestions = async () => {
         const inputEl = $element.find('input')[0];
         const { selectionStart, selectionEnd, value } = inputEl;
-        const { start, end, suggestions } = await getSuggestions(value, selectionStart, selectionEnd);
-        const recentSearches = persistedLog.get().filter(search => search.includes(value));
-        this.typeaheadItems = [
-          ...suggestions.map(suggestion => ({ start, end, suggestion })).slice(0, 5),
-          ...recentSearches.map(search => ({ start: 0, end: value.length, suggestion: search })).slice(0, 5)
-        ];
+        this.typeaheadItems = await getSuggestions(value, selectionStart, selectionEnd);
       };
 
       // TODO: Figure out a better way to set selection

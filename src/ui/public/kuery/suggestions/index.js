@@ -4,31 +4,59 @@ import chrome from 'ui/chrome';
 const baseUrl = chrome.addBasePath('/api/kibana/suggestions/values');
 const cursor = '@kibana-cursor@';
 
-export function getSuggestionsProvider($http, indexPattern) {
+export function getSuggestionsProvider($http, indexPattern, persistedLog) {
   return async function getSuggestions(query, selectionStart, selectionEnd) {
     const cursoredQuery = query.substr(0, selectionStart) + cursor + query.substr(selectionEnd);
     const { suggest, prefix, suffix, start, end, field } = fromKqlExpression(cursoredQuery, { parseCursor: true });
-    let suggestions;
-    if (suggest === 'fields') {
-      suggestions = getFieldSuggestions(indexPattern, prefix, suffix);
-    } else if (suggest === 'values') {
-      suggestions = await getValueSuggestions(indexPattern, $http, prefix, suffix, indexPattern.fields.byName[field]);
+    if (!suggest) return [];
+    let suggestions = [];
+    if (suggest.includes('fields')) {
+      const fields = getFieldSuggestions(indexPattern, prefix, suffix, start, end);
+      suggestions = [...suggestions, ...fields];
     }
-    return { start, end, suggestions };
+    if (suggest.includes('values')) {
+      const values = await getValueSuggestions(indexPattern, $http, prefix, suffix, start, end, indexPattern.fields.byName[field]);
+      suggestions = [...suggestions, ...values];
+    }
+    if (suggest.includes('operators')) {
+      const operators = getOperatorSuggestions(indexPattern, start, end, indexPattern.fields.byName[field]);
+      suggestions = [...suggestions, ...operators];
+    }
+    const recentSearches = getRecentSearchSuggestions(persistedLog.get(), query);
+    return [...suggestions, ...recentSearches];
   };
 }
 
-function getFieldSuggestions(indexPattern, prefix, suffix) {
+function getFieldSuggestions(indexPattern, prefix, suffix, start, end) {
   const filterableFields = indexPattern.fields.filter(field => field.filterable);
   const fieldNames = filterableFields.map(field => field.name);
-  return fieldNames.filter(field => field.startsWith(prefix) && field.endsWith(suffix));
+  const suggestions = fieldNames.filter(field => field.startsWith(prefix) && field.endsWith(suffix));
+  return suggestions.map(suggestion => ({ start, end, suggestion }));
 }
 
-async function getValueSuggestions(indexPattern, $http, prefix, suffix, field) {
+async function getValueSuggestions(indexPattern, $http, prefix, suffix, start, end, field) {
   if (!field || !field.aggregatable || field.type !== 'string') return [];
-  const response = await $http.post(`${baseUrl}/${indexPattern.title}`, {
+  const { data } = await $http.post(`${baseUrl}/${indexPattern.title}`, {
     query: prefix + suffix,
     field: field.name
   });
-  return response.data;
+  return data.map(suggestion => ({ start, end, suggestion }));
+}
+
+function getOperatorSuggestions(indexPattern, start, end, field) {
+  if (!field) return [];
+  let operators = [];
+  if (['number', 'date', 'ip'].includes(field.type)) {
+    operators = [...operators, '<', '>', '<=', '>='];
+  }
+  if (['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape'].includes(field.type)) {
+    operators = [...operators, ':'];
+  }
+  operators = [...operators, ':*'];
+  return operators.map(suggestion => ({ start: end, end, suggestion }));
+}
+
+function getRecentSearchSuggestions(recentSearches, query) {
+  const matches = recentSearches.filter(search => search.includes(query));
+  return matches.map(suggestion => ({ start: 0, end: query.length, suggestion }));
 }
