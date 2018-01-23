@@ -19,6 +19,7 @@ describe('metric vis', function () {
   beforeEach(ngMock.module('kibana/metric_vis'));
   beforeEach(ngMock.inject(function ($rootScope, $controller) {
     $scope = $rootScope.$new();
+    $scope.renderComplete = () => {};
     $scope.vis = {
       params: {
         metric: {
