@@ -1,12 +1,11 @@
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
 import { getHeatmapColors } from 'ui/vislib/components/color/heatmap_color';
-import { dispatchRenderComplete } from 'ui/render_complete';
 // get the kibana/metric_vis module, and make sure that it requires the "kibana" module if it
 // didn't already
 const module = uiModules.get('kibana/metric_vis', ['kibana']);
 
-module.controller('KbnMetricVisController', function ($scope, $element) {
+module.controller('KbnMetricVisController', function ($scope) {
 
   const metrics = $scope.metrics = [];
   let labels = [];
@@ -113,15 +112,15 @@ module.controller('KbnMetricVisController', function ($scope, $element) {
     });
   };
 
-  $scope.$watch('esResponse', function (resp) {
-    if (resp) {
+  $scope.$watch('renderComplete', function () {
+    if ($scope.esResponse) {
       metrics.length = 0;
       labels.length = 0;
       colors.length = 0;
       colors = getColors();
       labels = getLabels();
-      $scope.processTableGroups(resp);
-      dispatchRenderComplete($element[0]);
+      $scope.processTableGroups($scope.esResponse);
     }
+    $scope.renderComplete();
   });
 });
