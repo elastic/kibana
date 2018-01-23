@@ -61,14 +61,15 @@ export class TagCloudVisualization {
     const truncatedMessage = this._containerNode.querySelector('.tagcloud-truncated-message');
     const incompleteMessage = this._containerNode.querySelector('.tagcloud-incomplete-message');
 
-    if (!this._vis.aggs[0] || !this._vis.aggs[1]) {
+    const hasAggDefined = this._vis.aggs[0] && this._vis.aggs[1];
+    if (!hasAggDefined) {
       incompleteMessage.style.display = 'none';
       truncatedMessage.style.display = 'none';
       return;
     }
 
     const bucketName = this._containerNode.querySelector('.tagcloud-custom-label');
-    bucketName.innerHTML = `${this._vis.aggs[0].makeLabel()} - ${this._vis.aggs[1].makeLabel()}`;
+    bucketName.textContent = `${this._vis.aggs[0].makeLabel()} - ${this._vis.aggs[1].makeLabel()}`;
     truncatedMessage.style.display = this._truncated ? 'block' : 'none';
 
     const tagCloudStatus = this._tagCloud.getStatus();
@@ -97,7 +98,7 @@ export class TagCloudVisualization {
     }
 
     const data = response.tables[0];
-    this._bucketAgg = data.columns[0].aggConfig;
+    this._bucketAgg = this._vis.aggs.find(agg => agg.type.name === 'terms');
 
     const tags = data.rows.map(row => {
       const [tag, count] = row;
