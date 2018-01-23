@@ -7,7 +7,7 @@ export default function ({ getService, loadTestFile }) {
   describe('visualize app', function () {
     before(async function () {
       log.debug('Starting visualize before method');
-      remote.setWindowSize(1280, 800);
+      remote.setWindowSize(1380, 800);
       await esArchiver.loadIfNeeded('logstash_functional');
       await esArchiver.load('visualize');
       await kibanaServer.uiSettings.replace({ 'dateFormat:tz': 'UTC', 'defaultIndex': 'logstash-*' });
