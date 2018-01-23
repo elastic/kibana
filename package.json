@@ -41,6 +41,7 @@
     "Yuri Astrakhan <yuri@elastic.co>"
   ],
   "scripts": {
+    "preinstall": "node ./preinstall_check",
     "kbn": "node scripts/kbn",
     "test": "grunt test",
     "test:dev": "grunt test:dev",
