@@ -39,7 +39,7 @@ test('listening after started', async () => {
 test('200 OK with body', async () => {
   const router = new Router('/foo');
 
-  router.get({ path: '/' }, async (req, res) => {
+  router.get({ path: '/', validate: false }, async (req, res) => {
     return res.ok({ key: 'value' });
   });
 
@@ -58,7 +58,7 @@ test('200 OK with body', async () => {
 test('202 Accepted with body', async () => {
   const router = new Router('/foo');
 
-  router.get({ path: '/' }, async (req, res) => {
+  router.get({ path: '/', validate: false }, async (req, res) => {
     return res.accepted({ location: 'somewhere' });
   });
 
@@ -77,7 +77,7 @@ test('202 Accepted with body', async () => {
 test('204 No content', async () => {
   const router = new Router('/foo');
 
-  router.get({ path: '/' }, async (req, res) => {
+  router.get({ path: '/', validate: false }, async (req, res) => {
     return res.noContent();
   });
 
@@ -97,7 +97,7 @@ test('204 No content', async () => {
 test('400 Bad request with error', async () => {
   const router = new Router('/foo');
 
-  router.get({ path: '/' }, async (req, res) => {
+  router.get({ path: '/', validate: false }, async (req, res) => {
     const err = new Error('some message');
     return res.badRequest(err);
   });
@@ -304,9 +304,19 @@ test('invalid body', async () => {
 test('handles putting', async () => {
   const router = new Router('/foo');
 
-  router.put({ path: '/' }, async (req, res) => {
-    return res.ok(req.body);
-  });
+  router.put(
+    {
+      path: '/',
+      validate: schema => ({
+        body: schema.object({
+          key: schema.string()
+        })
+      })
+    },
+    async (req, res) => {
+      return res.ok(req.body);
+    }
+  );
 
   server.registerRouter(router);
 
@@ -353,7 +363,7 @@ test('handles deleting', async () => {
 test('returns 200 OK if returning object', async () => {
   const router = new Router('/foo');
 
-  router.get({ path: '/' }, async (req, res) => {
+  router.get({ path: '/', validate: false }, async (req, res) => {
     return { key: 'value' };
   });
 
@@ -376,7 +386,7 @@ test('filtered headers', async () => {
 
   let filteredHeaders: any;
 
-  router.get({ path: '/' }, async (req, res) => {
+  router.get({ path: '/', validate: false }, async (req, res) => {
     filteredHeaders = req.getFilteredHeaders(['x-kibana-foo', 'host']);
 
     return res.noContent();
@@ -415,7 +425,7 @@ describe('when run within legacy platform', () => {
     );
 
     const router = new Router('/new');
-    router.get({ path: '/' }, async (req, res) => {
+    router.get({ path: '/', validate: false }, async (req, res) => {
       return res.ok({ key: 'new-platform' });
     });
 

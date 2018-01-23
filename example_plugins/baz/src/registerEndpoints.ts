@@ -17,7 +17,8 @@ export function registerEndpoints(
 
   router.get(
     {
-      path: '/fail'
+      path: '/fail',
+      validate: false
     },
     async (req, res) => {
       log.info(`GET should fail`);
