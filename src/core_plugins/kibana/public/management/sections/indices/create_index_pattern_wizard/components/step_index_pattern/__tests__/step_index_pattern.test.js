@@ -15,6 +15,7 @@ jest.mock('../../../lib/get_indices', () => ({
     ];
   },
 }));
+jest.mock('../../../lib/is_query_a_match', () => ({ isQueryAMatch: () => true }));
 
 const allIndices = [{ name: 'kibana' }, { name: 'es' }];
 const esService = {};
