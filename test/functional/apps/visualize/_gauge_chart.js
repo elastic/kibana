@@ -4,7 +4,7 @@ export default function ({ getService, getPageObjects }) {
   const log = getService('log');
   const retry = getService('retry');
   const screenshots = getService('screenshots');
-  const PageObjects = getPageObjects(['common', 'visualize', 'header', 'discover']);
+  const PageObjects = getPageObjects(['common', 'visualize', 'header']);
 
   describe('visualize app', function describeIndexTests() {
     const fromTime = '2015-09-19 06:31:44.000';
