@@ -49,11 +49,7 @@ export class StepTimeField extends Component {
     const fields = await indexPatternsService.fieldsFetcher.fetchForWildcard(indexPattern);
     const timeFields = extractTimeFields(fields);
 
-    setTimeout(() => {
-      this.setState({ timeFields, isFetchingTimeFields: false });
-    }, 5000);
-
-
+    this.setState({ timeFields, isFetchingTimeFields: false });
   }
 
   onTimeFieldChanged = (e) => {
