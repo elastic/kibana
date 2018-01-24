@@ -4,7 +4,7 @@ import 'ui/visualize/visualize.less';
 import 'ui/visualize/visualize_legend';
 import _ from 'lodash';
 import { uiModules } from 'ui/modules';
-import { ResizeCheckerProvider } from 'ui/resize_checker';
+import { ResizeChecker } from 'ui/resize_checker';
 import visualizationTemplate from 'ui/visualize/visualization.html';
 import { getUpdateStatus } from 'ui/vis/update_status';
 import 'angular-sanitize';
@@ -13,7 +13,6 @@ import { dispatchRenderComplete, dispatchRenderStart } from 'ui/render_complete'
 uiModules
   .get('kibana/directive', ['ngSanitize'])
   .directive('visualization', function ($timeout, Notifier, SavedVis, indexPatterns, Private, config) {
-    const ResizeChecker = Private(ResizeCheckerProvider);
 
     return {
       restrict: 'E',

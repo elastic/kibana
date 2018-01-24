@@ -8,9 +8,7 @@ import 'angular-sanitize';
 import './visualization';
 import './visualization_editor';
 import { FilterBarQueryFilterProvider } from 'ui/filter_bar/query_filter';
-
-import { ResizeCheckerProvider } from 'ui/resize_checker';
-
+import { ResizeChecker } from 'ui/resize_checker';
 
 import {
   isTermSizeZeroError,
@@ -23,7 +21,6 @@ uiModules
     const requestHandlers = Private(VisRequestHandlersRegistryProvider);
     const responseHandlers = Private(VisResponseHandlersRegistryProvider);
     const queryFilter = Private(FilterBarQueryFilterProvider);
-    const ResizeChecker = Private(ResizeCheckerProvider);
 
     function getHandler(from, name) {
       if (typeof name === 'function') return name;
