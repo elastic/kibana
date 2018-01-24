@@ -9,7 +9,7 @@ exports[`fails if key does not exist in schema 1`] = `"missing definitions in sc
 exports[`fails if missing required value 1`] = `"[name]: expected value of type [string] but got [undefined]"`;
 
 exports[`handles oneOf 1`] = `
-"[key]: settings that failed validation:
+"[key]: types that failed validation:
 - [key.0]: expected value of type [string] but got [number]"
 `;
 

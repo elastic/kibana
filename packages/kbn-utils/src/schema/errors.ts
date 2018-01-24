@@ -1,10 +1,10 @@
 import { KibanaError } from '../Errors';
 
-export class SettingError extends KibanaError {
+export class TypeError extends KibanaError {
   constructor(error: Error | string, key?: string) {
     super(
-      SettingError.extractMessage(error, key),
-      SettingError.extractCause(error)
+      TypeError.extractMessage(error, key),
+      TypeError.extractCause(error)
     );
   }
 
@@ -21,11 +21,11 @@ export class SettingError extends KibanaError {
   }
 }
 
-export class SettingsError extends KibanaError {
+export class TypesError extends KibanaError {
   constructor(errors: Array<Error>, message: string, key?: string) {
     super(
-      SettingsError.extractMessages(errors, message, key),
-      SettingsError.extractFirstCause(errors)
+      TypesError.extractMessages(errors, message, key),
+      TypesError.extractFirstCause(errors)
     );
   }
 

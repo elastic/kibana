@@ -3,30 +3,30 @@ const typeDetect = require('type-detect');
 import { difference, isPlainObject } from 'lodash';
 import { duration as momentDuration, isDuration, Duration } from 'moment';
 
-import { SettingError, SettingsError } from './SettingError';
+import { TypeError, TypesError } from './errors';
 import { ByteSizeValue } from '../ByteSizeValue';
 
 function toContext(parent: string = '', child: string | number) {
   return parent ? `${parent}.${child}` : String(child);
 }
 
-export type Any = Setting<any>;
+export type Any = Type<any>;
 export type TypeOf<RT extends Any> = RT['_type'];
 
-export type SettingOptions<T> = {
+export type TypeOptions<T> = {
   defaultValue?: T;
   validate?: (value: T) => string | void;
 };
 
 const noop = () => {};
 
-export abstract class Setting<V> {
+export abstract class Type<V> {
   // This is just to enable the `TypeOf` helper
   readonly _type: V;
   private readonly defaultValue: V | void;
   private readonly validateResult: (value: V) => string | void;
 
-  constructor(options: SettingOptions<V> = {}) {
+  constructor(options: TypeOptions<V> = {}) {
     this.defaultValue = options.defaultValue;
     this.validateResult = options.validate || noop;
   }
@@ -36,7 +36,7 @@ export abstract class Setting<V> {
 
     const validation = this.validateResult(result);
     if (typeof validation === 'string') {
-      throw new SettingError(validation, context);
+      throw new TypeError(validation, context);
     }
 
     return result;
@@ -45,12 +45,12 @@ export abstract class Setting<V> {
   protected abstract process(value: any, context?: string): V;
 }
 
-class MaybeSetting<V> extends Setting<V | undefined> {
-  private readonly setting: Setting<V>;
+class MaybeType<V> extends Type<V | undefined> {
+  private readonly type: Type<V>;
 
-  constructor(setting: Setting<V>) {
+  constructor(type: Type<V>) {
     super();
-    this.setting = setting;
+    this.type = type;
   }
 
   process(value: any, context?: string): V | undefined {
@@ -59,20 +59,20 @@ class MaybeSetting<V> extends Setting<V | undefined> {
     }
 
     if (value === null) {
-      throw new SettingError(
+      throw new TypeError(
         `expected value to either be undefined or defined, but not [null]`,
         context
       );
     }
 
-    return this.setting.validate(value, context);
+    return this.type.validate(value, context);
   }
 }
 
-class BooleanSetting extends Setting<boolean> {
+class BooleanType extends Type<boolean> {
   process(value: any, context?: string): boolean {
     if (typeof value !== 'boolean') {
-      throw new SettingError(
+      throw new TypeError(
         `expected value of type [boolean] but got [${typeDetect(value)}]`,
         context
       );
@@ -82,12 +82,12 @@ class BooleanSetting extends Setting<boolean> {
   }
 }
 
-export type StringOptions = SettingOptions<string> & {
+export type StringOptions = TypeOptions<string> & {
   minLength?: number;
   maxLength?: number;
 };
 
-class StringSetting extends Setting<string> {
+class StringType extends Type<string> {
   private readonly minLength: number | void;
   private readonly maxLength: number | void;
 
@@ -99,14 +99,14 @@ class StringSetting extends Setting<string> {
 
   process(value: any, context?: string): string {
     if (typeof value !== 'string') {
-      throw new SettingError(
+      throw new TypeError(
         `expected value of type [string] but got [${typeDetect(value)}]`,
         context
       );
     }
 
     if (this.minLength && value.length < this.minLength) {
-      throw new SettingError(
+      throw new TypeError(
         `value is [${value}] but it must have a minimum length of [${
           this.minLength
         }].`,
@@ -115,7 +115,7 @@ class StringSetting extends Setting<string> {
     }
 
     if (this.maxLength && value.length > this.maxLength) {
-      throw new SettingError(
+      throw new TypeError(
         `value is [${value}] but it must have a maximum length of [${
           this.maxLength
         }].`,
@@ -127,14 +127,14 @@ class StringSetting extends Setting<string> {
   }
 }
 
-class LiteralSetting<T> extends Setting<T> {
+class LiteralType<T> extends Type<T> {
   constructor(private readonly value: T) {
     super();
   }
 
   process(value: any, context?: string): T {
     if (value !== this.value) {
-      throw new SettingError(
+      throw new TypeError(
         `expected value to equal [${this.value}] but got [${value}]`,
         context
       );
@@ -144,32 +144,32 @@ class LiteralSetting<T> extends Setting<T> {
   }
 }
 
-class UnionSetting<RTS extends Array<Any>, T> extends Setting<T> {
-  constructor(public readonly settings: RTS, options?: SettingOptions<T>) {
+class UnionType<RTS extends Array<Any>, T> extends Type<T> {
+  constructor(public readonly types: RTS, options?: TypeOptions<T>) {
     super(options);
   }
 
   process(value: any, context?: string): T {
     let errors = [];
 
-    for (const i in this.settings) {
+    for (const i in this.types) {
       try {
-        return this.settings[i].validate(value, toContext(context, i));
+        return this.types[i].validate(value, toContext(context, i));
       } catch (e) {
         errors.push(e);
       }
     }
 
-    throw new SettingsError(errors, 'settings that failed validation', context);
+    throw new TypesError(errors, 'types that failed validation', context);
   }
 }
 
-export type NumberOptions = SettingOptions<number> & {
+export type NumberOptions = TypeOptions<number> & {
   min?: number;
   max?: number;
 };
 
-class NumberSetting extends Setting<number> {
+class NumberType extends Type<number> {
   private readonly min: number | void;
   private readonly max: number | void;
 
@@ -193,14 +193,14 @@ class NumberSetting extends Setting<number> {
     }
 
     if (typeof value !== 'number' || isNaN(value)) {
-      throw new SettingError(
+      throw new TypeError(
         `expected value of type [number] but got [${type}]`,
         context
       );
     }
 
     if (this.min && value < this.min) {
-      throw new SettingError(
+      throw new TypeError(
         `Value is [${value}] but it must be equal to or greater than [${
           this.min
         }].`,
@@ -209,7 +209,7 @@ class NumberSetting extends Setting<number> {
     }
 
     if (this.max && value > this.max) {
-      throw new SettingError(
+      throw new TypeError(
         `Value is [${value}] but it must be equal to or lower than [${
           this.max
         }].`,
@@ -241,7 +241,7 @@ function ensureByteSizeValue(value?: ByteSizeValue | string | number) {
   return value;
 }
 
-class ByteSizeSetting extends Setting<ByteSizeValue> {
+class ByteSizeType extends Type<ByteSizeValue> {
   private readonly min: ByteSizeValue | void;
   private readonly max: ByteSizeValue | void;
 
@@ -267,7 +267,7 @@ class ByteSizeSetting extends Setting<ByteSizeValue> {
     }
 
     if (!(value instanceof ByteSizeValue)) {
-      throw new SettingError(
+      throw new TypeError(
         `expected value of type [ByteSize] but got [${typeDetect(value)}]`,
         context
       );
@@ -276,7 +276,7 @@ class ByteSizeSetting extends Setting<ByteSizeValue> {
     const { min, max } = this;
 
     if (min && value.isLessThan(min)) {
-      throw new SettingError(
+      throw new TypeError(
         `Value is [${value.toString()}] ([${value.toString(
           'b'
         )}]) but it must be equal to or greater than [${min.toString()}]`,
@@ -285,7 +285,7 @@ class ByteSizeSetting extends Setting<ByteSizeValue> {
     }
 
     if (max && value.isGreaterThan(max)) {
-      throw new SettingError(
+      throw new TypeError(
         `Value is [${value.toString()}] ([${value.toString(
           'b'
         )}]) but it must be equal to or less than [${max.toString()}]`,
@@ -343,7 +343,7 @@ function numberToDuration(numberMs: number) {
   return momentDuration(numberMs);
 }
 
-class DurationSetting extends Setting<Duration> {
+class DurationType extends Type<Duration> {
   constructor(options: DurationOptions = {}) {
     const { defaultValue, ...rest } = options;
 
@@ -363,7 +363,7 @@ class DurationSetting extends Setting<Duration> {
     }
 
     if (!isDuration(value)) {
-      throw new SettingError(
+      throw new TypeError(
         `expected value of type [moment.Duration] but got [${typeDetect(
           value
         )}]`,
@@ -375,33 +375,33 @@ class DurationSetting extends Setting<Duration> {
   }
 }
 
-export type ArrayOptions<T> = SettingOptions<Array<T>> & {
+export type ArrayOptions<T> = TypeOptions<Array<T>> & {
   minSize?: number;
   maxSize?: number;
 };
 
-class ArraySetting<T> extends Setting<Array<T>> {
-  private readonly itemSetting: Setting<T>;
+class ArrayType<T> extends Type<Array<T>> {
+  private readonly itemType: Type<T>;
   private readonly minSize?: number;
   private readonly maxSize?: number;
 
-  constructor(setting: Setting<T>, options: ArrayOptions<T> = {}) {
+  constructor(type: Type<T>, options: ArrayOptions<T> = {}) {
     super(options);
-    this.itemSetting = setting;
+    this.itemType = type;
     this.minSize = options.minSize;
     this.maxSize = options.maxSize;
   }
 
   process(value: any, context?: string): Array<T> {
     if (!Array.isArray(value)) {
-      throw new SettingError(
+      throw new TypeError(
         `expected value of type [array] but got [${typeDetect(value)}]`,
         context
       );
     }
 
     if (this.minSize != null && value.length < this.minSize) {
-      throw new SettingError(
+      throw new TypeError(
         `array size is [${value.length}], but cannot be smaller than [${
           this.minSize
         }]`,
@@ -410,7 +410,7 @@ class ArraySetting<T> extends Setting<Array<T>> {
     }
 
     if (this.maxSize != null && value.length > this.maxSize) {
-      throw new SettingError(
+      throw new TypeError(
         `array size is [${value.length}], but cannot be greater than [${
           this.maxSize
         }]`,
@@ -419,7 +419,7 @@ class ArraySetting<T> extends Setting<Array<T>> {
     }
 
     return value.map((val, i) =>
-      this.itemSetting.validate(val, toContext(context, i))
+      this.itemType.validate(val, toContext(context, i))
     );
   }
 }
@@ -429,16 +429,16 @@ export type Props = Record<string, Any>;
 // Because of https://github.com/Microsoft/TypeScript/issues/14041
 // this might not have perfect _rendering_ output, but it will be typed.
 
-export type ObjectSettingType<P extends Props> = Readonly<
+export type ObjectResultType<P extends Props> = Readonly<
   { [K in keyof P]: TypeOf<P[K]> }
 >;
 
-export class ObjectSetting<P extends Props = Props> extends Setting<
-  ObjectSettingType<P>
+export class ObjectType<P extends Props = Props> extends Type<
+  ObjectResultType<P>
 > {
   constructor(
     private readonly schema: P,
-    options: SettingOptions<{ [K in keyof P]: TypeOf<P[K]> }> = {}
+    options: TypeOptions<{ [K in keyof P]: TypeOf<P[K]> }> = {}
   ) {
     super({
       ...options,
@@ -446,9 +446,9 @@ export class ObjectSetting<P extends Props = Props> extends Setting<
     });
   }
 
-  process(value: any = {}, context?: string): ObjectSettingType<P> {
+  process(value: any = {}, context?: string): ObjectResultType<P> {
     if (!isPlainObject(value)) {
-      throw new SettingError(
+      throw new TypeError(
         `expected a plain object value, but found [${typeDetect(
           value
         )}] instead.`,
@@ -463,15 +463,15 @@ export class ObjectSetting<P extends Props = Props> extends Setting<
     const missingInSchema = difference(valueKeys, schemaKeys);
 
     if (missingInSchema.length > 0) {
-      throw new SettingError(
+      throw new TypeError(
         `missing definitions in schema for keys [${missingInSchema.join(',')}]`,
         context
       );
     }
 
     return schemaKeys.reduce((newObject: any, key) => {
-      const setting = this.schema[key];
-      newObject[key] = setting.validate(value[key], toContext(context, key));
+      const type = this.schema[key];
+      newObject[key] = type.validate(value[key], toContext(context, key));
       return newObject;
     }, {});
   }
@@ -481,12 +481,12 @@ function isMap<K, V>(o: any): o is Map<K, V> {
   return o instanceof Map;
 }
 
-export type MapOfOptions<K, V> = SettingOptions<Map<K, V>>;
+export type MapOfOptions<K, V> = TypeOptions<Map<K, V>>;
 
-class MapOfSetting<K, V> extends Setting<Map<K, V>> {
+class MapOfType<K, V> extends Type<Map<K, V>> {
   constructor(
-    private readonly keySetting: Setting<K>,
-    private readonly valueSetting: Setting<V>,
+    private readonly keyType: Type<K>,
+    private readonly valueType: Type<V>,
     options: MapOfOptions<K, V> = {}
   ) {
     super(options);
@@ -502,7 +502,7 @@ class MapOfSetting<K, V> extends Setting<Map<K, V>> {
       return this.processEntries([...obj], context);
     }
 
-    throw new SettingError(
+    throw new TypeError(
       `expected value of type [Map] or [object] but got [${typeDetect(obj)}]`,
       context
     );
@@ -510,11 +510,11 @@ class MapOfSetting<K, V> extends Setting<Map<K, V>> {
 
   processEntries(entries: any[][], context?: string) {
     const res = entries.map(([key, value]) => {
-      const validatedKey = this.keySetting.validate(
+      const validatedKey = this.keyType.validate(
         key,
         toContext(context, String(key))
       );
-      const validatedValue = this.valueSetting.validate(
+      const validatedValue = this.valueType.validate(
         value,
         toContext(context, String(key))
       );
@@ -526,149 +526,149 @@ class MapOfSetting<K, V> extends Setting<Map<K, V>> {
   }
 }
 
-export function boolean(options?: SettingOptions<boolean>): Setting<boolean> {
-  return new BooleanSetting(options);
+export function boolean(options?: TypeOptions<boolean>): Type<boolean> {
+  return new BooleanType(options);
 }
 
-export function string(options?: StringOptions): Setting<string> {
-  return new StringSetting(options);
+export function string(options?: StringOptions): Type<string> {
+  return new StringType(options);
 }
 
 export function literal<T extends string | number | boolean>(
   value: T
-): Setting<T> {
-  return new LiteralSetting(value);
+): Type<T> {
+  return new LiteralType(value);
 }
 
-export function number(options?: NumberOptions): Setting<number> {
-  return new NumberSetting(options);
+export function number(options?: NumberOptions): Type<number> {
+  return new NumberType(options);
 }
 
-export function byteSize(options?: ByteSizeOptions): Setting<ByteSizeValue> {
-  return new ByteSizeSetting(options);
+export function byteSize(options?: ByteSizeOptions): Type<ByteSizeValue> {
+  return new ByteSizeType(options);
 }
 
-export function duration(options?: DurationOptions): Setting<Duration> {
-  return new DurationSetting(options);
+export function duration(options?: DurationOptions): Type<Duration> {
+  return new DurationType(options);
 }
 
 /**
- * Create an optional setting
+ * Create an optional type
  */
-export function maybe<V>(setting: Setting<V>): Setting<V | undefined> {
-  return new MaybeSetting(setting);
+export function maybe<V>(type: Type<V>): Type<V | undefined> {
+  return new MaybeType(type);
 }
 
 export function object<P extends Props>(
   schema: P,
-  options?: SettingOptions<{ [K in keyof P]: TypeOf<P[K]> }>
-): ObjectSetting<P> {
-  return new ObjectSetting(schema, options);
+  options?: TypeOptions<{ [K in keyof P]: TypeOf<P[K]> }>
+): ObjectType<P> {
+  return new ObjectType(schema, options);
 }
 
 export function arrayOf<T>(
-  itemSetting: Setting<T>,
+  itemType: Type<T>,
   options?: ArrayOptions<T>
-): Setting<Array<T>> {
-  return new ArraySetting(itemSetting, options);
+): Type<Array<T>> {
+  return new ArrayType(itemType, options);
 }
 
 export function mapOf<K, V>(
-  keySetting: Setting<K>,
-  valueSetting: Setting<V>,
+  keyType: Type<K>,
+  valueType: Type<V>,
   options?: MapOfOptions<K, V>
-): Setting<Map<K, V>> {
-  return new MapOfSetting(keySetting, valueSetting, options);
+): Type<Map<K, V>> {
+  return new MapOfType(keyType, valueType, options);
 }
 
 export function oneOf<A, B, C, D, E, F, G, H, I, J>(
   types: [
-    Setting<A>,
-    Setting<B>,
-    Setting<C>,
-    Setting<D>,
-    Setting<E>,
-    Setting<F>,
-    Setting<G>,
-    Setting<H>,
-    Setting<I>,
-    Setting<J>
+    Type<A>,
+    Type<B>,
+    Type<C>,
+    Type<D>,
+    Type<E>,
+    Type<F>,
+    Type<G>,
+    Type<H>,
+    Type<I>,
+    Type<J>
   ],
-  options?: SettingOptions<A | B | C | D | E | F | G | H | I | J>
-): Setting<A | B | C | D | E | F | G | H | I | J>;
+  options?: TypeOptions<A | B | C | D | E | F | G | H | I | J>
+): Type<A | B | C | D | E | F | G | H | I | J>;
 export function oneOf<A, B, C, D, E, F, G, H, I>(
   types: [
-    Setting<A>,
-    Setting<B>,
-    Setting<C>,
-    Setting<D>,
-    Setting<E>,
-    Setting<F>,
-    Setting<G>,
-    Setting<H>,
-    Setting<I>
+    Type<A>,
+    Type<B>,
+    Type<C>,
+    Type<D>,
+    Type<E>,
+    Type<F>,
+    Type<G>,
+    Type<H>,
+    Type<I>
   ],
-  options?: SettingOptions<A | B | C | D | E | F | G | H | I>
-): Setting<A | B | C | D | E | F | G | H | I>;
+  options?: TypeOptions<A | B | C | D | E | F | G | H | I>
+): Type<A | B | C | D | E | F | G | H | I>;
 export function oneOf<A, B, C, D, E, F, G, H>(
   types: [
-    Setting<A>,
-    Setting<B>,
-    Setting<C>,
-    Setting<D>,
-    Setting<E>,
-    Setting<F>,
-    Setting<G>,
-    Setting<H>
+    Type<A>,
+    Type<B>,
+    Type<C>,
+    Type<D>,
+    Type<E>,
+    Type<F>,
+    Type<G>,
+    Type<H>
   ],
-  options?: SettingOptions<A | B | C | D | E | F | G | H>
-): Setting<A | B | C | D | E | F | G | H>;
+  options?: TypeOptions<A | B | C | D | E | F | G | H>
+): Type<A | B | C | D | E | F | G | H>;
 export function oneOf<A, B, C, D, E, F, G>(
   types: [
-    Setting<A>,
-    Setting<B>,
-    Setting<C>,
-    Setting<D>,
-    Setting<E>,
-    Setting<F>,
-    Setting<G>
+    Type<A>,
+    Type<B>,
+    Type<C>,
+    Type<D>,
+    Type<E>,
+    Type<F>,
+    Type<G>
   ],
-  options?: SettingOptions<A | B | C | D | E | F | G>
-): Setting<A | B | C | D | E | F | G>;
+  options?: TypeOptions<A | B | C | D | E | F | G>
+): Type<A | B | C | D | E | F | G>;
 export function oneOf<A, B, C, D, E, F>(
   types: [
-    Setting<A>,
-    Setting<B>,
-    Setting<C>,
-    Setting<D>,
-    Setting<E>,
-    Setting<F>
+    Type<A>,
+    Type<B>,
+    Type<C>,
+    Type<D>,
+    Type<E>,
+    Type<F>
   ],
-  options?: SettingOptions<A | B | C | D | E | F>
-): Setting<A | B | C | D | E | F>;
+  options?: TypeOptions<A | B | C | D | E | F>
+): Type<A | B | C | D | E | F>;
 export function oneOf<A, B, C, D, E>(
-  types: [Setting<A>, Setting<B>, Setting<C>, Setting<D>, Setting<E>],
-  options?: SettingOptions<A | B | C | D | E>
-): Setting<A | B | C | D | E>;
+  types: [Type<A>, Type<B>, Type<C>, Type<D>, Type<E>],
+  options?: TypeOptions<A | B | C | D | E>
+): Type<A | B | C | D | E>;
 export function oneOf<A, B, C, D>(
-  types: [Setting<A>, Setting<B>, Setting<C>, Setting<D>],
-  options?: SettingOptions<A | B | C | D>
-): Setting<A | B | C | D>;
+  types: [Type<A>, Type<B>, Type<C>, Type<D>],
+  options?: TypeOptions<A | B | C | D>
+): Type<A | B | C | D>;
 export function oneOf<A, B, C>(
-  types: [Setting<A>, Setting<B>, Setting<C>],
-  options?: SettingOptions<A | B | C>
-): Setting<A | B | C>;
+  types: [Type<A>, Type<B>, Type<C>],
+  options?: TypeOptions<A | B | C>
+): Type<A | B | C>;
 export function oneOf<A, B>(
-  types: [Setting<A>, Setting<B>],
-  options?: SettingOptions<A | B>
-): Setting<A | B>;
+  types: [Type<A>, Type<B>],
+  options?: TypeOptions<A | B>
+): Type<A | B>;
 export function oneOf<A>(
-  types: [Setting<A>],
-  options?: SettingOptions<A>
-): Setting<A>;
+  types: [Type<A>],
+  options?: TypeOptions<A>
+): Type<A>;
 export function oneOf<RTS extends Array<Any>>(
   types: RTS,
-  options?: SettingOptions<any>
-): Setting<any> {
-  return new UnionSetting(types, options);
+  options?: TypeOptions<any>
+): Type<any> {
+  return new UnionType(types, options);
 }

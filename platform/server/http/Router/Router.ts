@@ -18,9 +18,9 @@ export class Router {
    * undefined.
    */
   private routeSchemasFromRouteConfig<
-    P extends schema.ObjectSetting,
-    Q extends schema.ObjectSetting,
-    B extends schema.ObjectSetting
+    P extends schema.ObjectType,
+    Q extends schema.ObjectType,
+    B extends schema.ObjectType
   >(route: RouteConfig<P, Q, B>, routeMethod: RouteMethod) {
     // The type doesn't allow `validate` to be undefined, but it can still
     // happen when it's used from JavaScript.
@@ -39,9 +39,9 @@ export class Router {
    * Register a `GET` request with the router
    */
   get<
-    P extends schema.ObjectSetting,
-    Q extends schema.ObjectSetting,
-    B extends schema.ObjectSetting
+    P extends schema.ObjectType,
+    Q extends schema.ObjectType,
+    B extends schema.ObjectType
   >(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) {
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'GET');
     this.router.get(
@@ -54,9 +54,9 @@ export class Router {
    * Register a `POST` request with the router
    */
   post<
-    P extends schema.ObjectSetting,
-    Q extends schema.ObjectSetting,
-    B extends schema.ObjectSetting
+    P extends schema.ObjectType,
+    Q extends schema.ObjectType,
+    B extends schema.ObjectType
   >(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) {
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'POST');
     this.router.post(
@@ -70,9 +70,9 @@ export class Router {
    * Register a `PUT` request with the router
    */
   put<
-    P extends schema.ObjectSetting,
-    Q extends schema.ObjectSetting,
-    B extends schema.ObjectSetting
+    P extends schema.ObjectType,
+    Q extends schema.ObjectType,
+    B extends schema.ObjectType
   >(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) {
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'POST');
     this.router.put(
@@ -86,9 +86,9 @@ export class Router {
    * Register a `DELETE` request with the router
    */
   delete<
-    P extends schema.ObjectSetting,
-    Q extends schema.ObjectSetting,
-    B extends schema.ObjectSetting
+    P extends schema.ObjectType,
+    Q extends schema.ObjectType,
+    B extends schema.ObjectType
   >(route: RouteConfig<P, Q, B>, handler: RequestHandler<P, Q, B>) {
     const routeSchemas = this.routeSchemasFromRouteConfig(route, 'DELETE');
     this.router.delete(
@@ -109,9 +109,9 @@ export class Router {
   }
 
   private async handle<
-    P extends schema.ObjectSetting,
-    Q extends schema.ObjectSetting,
-    B extends schema.ObjectSetting
+    P extends schema.ObjectType,
+    Q extends schema.ObjectType,
+    B extends schema.ObjectType
   >(
     routeSchemas: RouteSchemas<P, Q, B> | undefined,
     request: express.Request,
@@ -161,9 +161,9 @@ export class Router {
 }
 
 export type RequestHandler<
-  P extends schema.ObjectSetting,
-  Q extends schema.ObjectSetting,
-  B extends schema.ObjectSetting
+  P extends schema.ObjectType,
+  Q extends schema.ObjectType,
+  B extends schema.ObjectType
 > = (
   req: KibanaRequest<schema.TypeOf<P>, schema.TypeOf<Q>, schema.TypeOf<B>>,
   createResponse: ResponseFactory
