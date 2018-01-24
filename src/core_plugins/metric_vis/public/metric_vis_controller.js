@@ -127,7 +127,7 @@ export class MetricVisComponent extends Component {
           style={metricValueStyle}
           dangerouslySetInnerHTML={{ __html: metric.value }}
         />
-        { this.props.vis.params.metric.showLabel &&
+        { this.props.vis.params.metric.labels.show &&
           <div>{metric.label}</div>
         }
       </div>
