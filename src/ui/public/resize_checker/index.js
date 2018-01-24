@@ -1,1 +1,1 @@
-export { ResizeCheckerProvider } from './resize_checker';
+export { ResizeChecker } from './resize_checker';

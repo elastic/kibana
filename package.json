@@ -41,6 +41,7 @@
     "Yuri Astrakhan <yuri@elastic.co>"
   ],
   "scripts": {
+    "kbn": "node scripts/kbn",
     "test": "grunt test",
     "test:dev": "grunt test:dev",
     "test:quick": "grunt test:quick",
@@ -220,9 +221,9 @@
     "yauzl": "2.7.0"
   },
   "devDependencies": {
-    "@elastic/eslint-config-kibana": "0.15.0",
+    "@elastic/eslint-config-kibana": "link:packages/eslint-config-kibana",
     "@elastic/eslint-import-resolver-kibana": "1.0.0",
-    "@elastic/eslint-plugin-kibana-custom": "1.1.0",
+    "@elastic/eslint-plugin-kibana-custom": "link:packages/eslint-plugin-kibana-custom",
     "angular-mocks": "1.4.7",
     "babel-eslint": "8.1.2",
     "backport": "2.2.0",

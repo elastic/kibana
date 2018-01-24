@@ -19,7 +19,12 @@
         class="fullWidth"
       >
         <div ng-if="vis.type.requiresSearch && state.linked">
-          Linked to Saved Search &ldquo;{{ savedVis.savedSearch.title }}&rdquo;
+          Linked to Saved Search
+          <a
+            href="#/discover/{{savedVis.savedSearch.id}}"
+          >
+            {{ savedVis.savedSearch.title }}
+          </a>
           &nbsp;
           <a
             href=""
