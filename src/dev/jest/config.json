@@ -3,7 +3,8 @@
   "roots": [
     "<rootDir>/src/ui/public",
     "<rootDir>/src/core_plugins",
-    "<rootDir>/ui_framework/"
+    "<rootDir>/ui_framework/",
+    "<rootDir>/packages"
   ],
   "collectCoverageFrom": [
     "ui_framework/src/components/**/*.js",
@@ -40,7 +41,8 @@
   "testPathIgnorePatterns": [
     "<rootDir>/ui_framework/dist/",
     "<rootDir>/ui_framework/doc_site/",
-    "<rootDir>/ui_framework/generator-kui/"
+    "<rootDir>/ui_framework/generator-kui/",
+    ".*/__fixtures__/.*"
   ],
   "transform": {
     "^.+\\.js$": "<rootDir>/src/dev/jest/babel_transform.js"
