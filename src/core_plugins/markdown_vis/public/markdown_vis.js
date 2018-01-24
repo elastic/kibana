@@ -1,5 +1,5 @@
 import 'plugins/markdown_vis/markdown_vis.less';
-import { MarkdownVisController } from './markdown_vis_controller';
+import { MarkdownVisComponent } from './markdown_vis_controller';
 import { VisFactoryProvider } from 'ui/vis/vis_factory';
 import { CATEGORY } from 'ui/vis/vis_category';
 import markdownVisParamsTemplate from 'plugins/markdown_vis/markdown_vis_params.html';
@@ -18,15 +18,15 @@ function MarkdownVisProvider(Private) {
 
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.
-  return VisFactory.createBaseVisualization({
+  return VisFactory.createReactVisualization({
     name: 'markdown',
     title: 'Markdown',
     isAccessible: true,
     image,
     description: 'Create a document using markdown syntax',
     category: CATEGORY.OTHER,
-    visualization: MarkdownVisController,
     visConfig: {
+      component: MarkdownVisComponent,
       defaults: {
         fontSize: 12
       }
