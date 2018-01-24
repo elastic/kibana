@@ -11,7 +11,7 @@ describe('metric_vis', () => {
   let vis;
 
   beforeEach(ngMock.module('kibana'));
-  beforeEach(ngMock.inject((Private, $rootScope) => {
+  beforeEach(ngMock.inject((Private) => {
     setup = () => {
       const Vis = Private(VisProvider);
       const metricVisType = Private(MetricVisProvider);
@@ -27,20 +27,19 @@ describe('metric_vis', () => {
         aggs: [{ id: '1', type: 'top_hits', schema: 'metric', params: { field: 'ip' } }],
       });
 
-      const $el = $('<div>');
+      const el = document.createElement('div');
       const Controller = metricVisType.visualization;
-      const controller = new Controller($el, vis);
+      const controller = new Controller(el, vis);
       const render = (esResponse) => {
         controller.render(esResponse);
-        $rootScope.$digest();
       };
 
-      return { $el, render };
+      return { el, render };
     };
   }));
 
   it('renders html value from field formatter', () => {
-    const { $el, render } = setup();
+    const { el, render } = setup();
 
     const ip = '235.195.237.208';
     render({
@@ -50,7 +49,7 @@ describe('metric_vis', () => {
       }]
     });
 
-    const $link = $el
+    const $link = $(el)
       .find('a[href]')
       .filter(function () { return this.href.includes('ip.info'); });
 

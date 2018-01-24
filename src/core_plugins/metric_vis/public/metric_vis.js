@@ -5,7 +5,7 @@ import { CATEGORY } from 'ui/vis/vis_category';
 import { VisSchemasProvider } from 'ui/vis/editors/default/schemas';
 import { VisTypesRegistryProvider } from 'ui/registry/vis_types';
 import { vislibColorMaps } from 'ui/vislib/components/color/colormaps';
-import { MetricVisController } from './metric_vis_controller';
+import { MetricVisComponent } from './metric_vis_controller';
 import image from './images/icon-number.svg';
 // we need to load the css ourselves
 
@@ -20,14 +20,14 @@ function MetricVisProvider(Private) {
 
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.
-  return VisFactory.createBaseVisualization({
+  return VisFactory.createReactVisualization({
     name: 'metric',
     title: 'Metric',
     image,
     description: 'Display a calculation as a single number',
     category: CATEGORY.DATA,
-    visualization: MetricVisController,
     visConfig: {
+      component: MetricVisComponent,
       defaults: {
         addTooltip: true,
         addLegend: false,

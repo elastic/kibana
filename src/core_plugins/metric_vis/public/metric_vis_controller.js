@@ -1,10 +1,11 @@
 import _ from 'lodash';
+import React, { Component } from 'react';
 import { getHeatmapColors } from 'ui/vislib/components/color/heatmap_color';
 
-export class MetricVisController {
+export class MetricVisComponent extends Component {
 
   _getLabels() {
-    const config = this._vis.params.metric;
+    const config = this.props.vis.params.metric;
     const isPercentageMode = config.percentageMode;
     const colorsRange = config.colorsRange;
     const max = _.last(colorsRange).to;
@@ -19,7 +20,7 @@ export class MetricVisController {
   }
 
   _getColors() {
-    const config = this._vis.params.metric;
+    const config = this.props.vis.params.metric;
     const invertColors = config.invertColors;
     const colorSchema = config.colorSchema;
     const colorsRange = config.colorsRange;
@@ -34,7 +35,7 @@ export class MetricVisController {
   }
 
   _getBucket(val) {
-    const config = this._vis.params.metric;
+    const config = this.props.vis.params.metric;
     let bucket = _.findIndex(config.colorsRange, range => {
       return range.from <= val && range.to > val;
     });
@@ -54,7 +55,7 @@ export class MetricVisController {
   }
 
   _processTableGroups(tableGroups) {
-    const config = this._vis.params.metric;
+    const config = this.props.vis.params.metric;
     const isPercentageMode = config.percentageMode;
     const min = config.colorsRange[0].from;
     const max = _.last(config.colorsRange).to;
@@ -109,38 +110,44 @@ export class MetricVisController {
     return metrics;
   }
 
+  _renderMetric = (metric, index) => {
+    const metricValueStyle = {
+      fontSize: `${this.props.vis.params.metric.style.fontSize}pt`,
+      color: metric.color
+    };
 
-  constructor(node, vis) {
-    this._vis = vis;
-    this._containerNode = document.createElement('div');
-    this._containerNode.className = 'metric-vis';
-    node.appendChild(this._containerNode);
+    return (
+      <div
+        key={index}
+        className="metric-container"
+        style={{ backgroundColor: metric.bgColor }}
+      >
+        <div
+          className="metric-value"
+          style={metricValueStyle}
+          dangerouslySetInnerHTML={{ __html: metric.value }}
+        />
+        { this.props.vis.params.metric.showLabel &&
+          <div>{metric.label}</div>
+        }
+      </div>
+    );
+  };
+
+  render() {
+    let metricsHtml;
+    if (this.props.visData) {
+      const metrics = this._processTableGroups(this.props.visData);
+      metricsHtml = metrics.map(this._renderMetric);
+    }
+    return (<div className="metric-vis">{metricsHtml}</div>);
   }
 
-  async render(data) {
-    this._containerNode.innerHTML = '';
-    if (data) {
-      const metrics = this._processTableGroups(data);
-      metrics.forEach(metric => {
-        const metricContainerDiv = document.createElement('div');
-        metricContainerDiv.className = 'metric-container';
-        metricContainerDiv.style['background-color'] = metric.bgColor;
+  componentDidMount() {
+    this.props.renderComplete();
+  }
 
-        const metricDiv = document.createElement('div');
-        metricDiv.className = 'metric-value';
-        metricDiv.style['font-size'] = `${this._vis.params.metric.style.fontSize}pt`;
-        metricDiv.style.color = metric.color;
-        metricDiv.textContent = metric.value;
-        metricContainerDiv.appendChild(metricDiv);
-
-        if (this._vis.params.metric.labels.show) {
-          const labelDiv = document.createElement('div');
-          labelDiv.textContent = metric.label;
-          metricContainerDiv.appendChild(labelDiv);
-        }
-
-        this._containerNode.appendChild(metricContainerDiv);
-      });
-    }
+  componentDidUpdate() {
+    this.props.renderComplete();
   }
 }
