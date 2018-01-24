@@ -21,26 +21,25 @@ module.controller('KbnTableVisController', function ($scope) {
    * - the underlying data changes (esResponse)
    * - one of the view options changes (vis.params)
    */
-  $scope.$watch('esResponse', function (resp) {
+  $scope.$watch('renderComplete', function () {
 
     let tableGroups = $scope.tableGroups = null;
     let hasSomeRows = $scope.hasSomeRows = null;
 
-    if (resp) {
-      tableGroups = resp;
+    if ($scope.esResponse) {
+      tableGroups = $scope.esResponse;
 
       hasSomeRows = tableGroups.tables.some(function haveRows(table) {
         if (table.tables) return table.tables.some(haveRows);
         return table.rows.length > 0;
       });
-
-      $scope.renderComplete();
     }
 
     $scope.hasSomeRows = hasSomeRows;
     if (hasSomeRows) {
       $scope.tableGroups = tableGroups;
     }
+    $scope.renderComplete();
   });
 });
 

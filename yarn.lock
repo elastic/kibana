@@ -69,9 +69,9 @@
   dependencies:
     moment "^2.13.0"
 
-"@elastic/eslint-config-kibana@0.15.0":
-  version "0.15.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eslint-config-kibana/-/eslint-config-kibana-0.15.0.tgz#a552793497cdfc1829c2f9b7cd7018eb008f1606"
+"@elastic/eslint-config-kibana@link:packages/eslint-config-kibana":
+  version "0.0.0"
+  uid ""
 
 "@elastic/eslint-import-resolver-kibana@1.0.0":
   version "1.0.0"
@@ -83,9 +83,9 @@
     glob-all "^3.1.0"
     webpack "3.6.0"
 
-"@elastic/eslint-plugin-kibana-custom@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-kibana-custom/-/eslint-plugin-kibana-custom-1.1.0.tgz#f4c5a10c16f7a23c46d32be7165e012fa628b967"
+"@elastic/eslint-plugin-kibana-custom@link:packages/eslint-plugin-kibana-custom":
+  version "0.0.0"
+  uid ""
 
 "@elastic/eui@0.0.13":
   version "0.0.13"
