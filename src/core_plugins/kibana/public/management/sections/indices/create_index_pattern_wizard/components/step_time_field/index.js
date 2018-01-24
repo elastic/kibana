@@ -10,6 +10,11 @@ export function renderStepTimeField(
   goToPreviousStep,
   createIndexPattern,
 ) {
+  const node = document.getElementById(TIME_FIELD_DOM_ELEMENT_ID);
+  if (!node) {
+    return;
+  }
+
   render(
     <StepTimeField
       indexPattern={indexPattern}
@@ -17,7 +22,7 @@ export function renderStepTimeField(
       goToPreviousStep={goToPreviousStep}
       createIndexPattern={createIndexPattern}
     />,
-    document.getElementById(TIME_FIELD_DOM_ELEMENT_ID),
+    node,
   );
 }
 

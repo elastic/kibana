@@ -12,6 +12,11 @@ export function renderStepIndexPattern(
   savedObjectsClient,
   goToNextStep,
 ) {
+  const node = document.getElementById(INDEX_PATTERN_DOM_ELEMENT_ID);
+  if (!node) {
+    return;
+  }
+
   render(
     <StepIndexPattern
       allIndices={allIndices}
@@ -21,7 +26,7 @@ export function renderStepIndexPattern(
       savedObjectsClient={savedObjectsClient}
       goToNextStep={goToNextStep}
     />,
-    document.getElementById(INDEX_PATTERN_DOM_ELEMENT_ID),
+    node,
   );
 }
 
