@@ -1,4 +1,3 @@
-import { get as _get } from 'lodash';
 import chrome from 'ui/chrome';
 import { API_ROUTE_WORKPAD } from '../../common/lib/constants';
 import { fetch } from '../../common/lib/fetch';
@@ -23,7 +22,9 @@ export function remove(id) {
 }
 
 export function find(searchTerm) {
+  const validSearchTerm = typeof searchTerm === 'string' && searchTerm.length > 0;
+
   return fetch
-    .get(`${apiPath}/find?name=${_get(searchTerm, 'length') ? searchTerm : '*'}`)
+    .get(`${apiPath}/find?name=${validSearchTerm ? searchTerm : '*'}`)
     .then(resp => resp.data);
 }

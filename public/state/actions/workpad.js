@@ -1,7 +1,6 @@
 import { createAction } from 'redux-actions';
 import { createThunk } from 'redux-thunks';
 import { without, includes } from 'lodash';
-import fileSaver from 'file-saver';
 import * as workpadService from '../../lib/workpad_service';
 import { getWorkpadColors } from '../selectors/workpad';
 import { getDefaultWorkpad } from '../defaults';
@@ -33,22 +32,11 @@ export const setWorkpad = createThunk('setWorkpad', ({ dispatch, type }, workpad
   dispatch(initializeWorkpad()); // load all the elements on the workpad
 });
 
-export const loadWorkpad = createThunk('loadWorkpad', ({ dispatch }, { assets, ...workpad }) => {
-  dispatch(setWorkpad(workpad));
-  dispatch(setAssets(assets));
-});
-
 export const loadWorkpadById = createThunk('loadWorkpadById', ({ dispatch }, workpadId) => {
   // TODO: handle the failed loading state
-  workpadService.get(workpadId).then(workpad => dispatch(loadWorkpad(workpad)));
-});
-
-// TODO: this should not be a redux action, it doesn't use redux...
-export const downloadWorkpadById = createThunk('downloadWorkpadbyId', ({}, workpadId) => {
-  // TODO: handle the failed loading state
-  workpadService.get(workpadId).then(resp => {
-    const jsonBlob = new Blob([JSON.stringify(resp)], { type: 'application/json' });
-    fileSaver.saveAs(jsonBlob, `canvas-workpad-${resp.name}-${resp.id}.json`);
+  workpadService.get(workpadId).then(({ assets, ...workpad }) => {
+    dispatch(setWorkpad(workpad));
+    dispatch(setAssets(assets));
   });
 });
 

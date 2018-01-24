@@ -166,6 +166,7 @@ export function workpad(server) {
         if (name != null) {
           return {
             bool: {
+              minimum_should_match: 2,
               should: [
                 { match: { type: CANVAS_TYPE } },
                 { match: { [nameField]: name } },
