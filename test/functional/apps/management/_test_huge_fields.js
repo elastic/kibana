@@ -17,5 +17,10 @@ export default function ({ getService, getPageObjects }) {
       const tabCount = await PageObjects.settings.getFieldsTabCount();
       expect(tabCount).to.be(`(${EXPECTED_FIELD_COUNT})`);
     });
+
+    after(async () => {
+      await esArchiver.unload('large_fields');
+    });
+
   });
 }

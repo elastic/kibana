@@ -8,7 +8,6 @@ export default function ({ getService, loadTestFile }) {
       await esArchiver.unload('logstash_functional');
       await esArchiver.load('empty_kibana');
       await esArchiver.loadIfNeeded('makelogs');
-
     });
 
     after(async function () {
