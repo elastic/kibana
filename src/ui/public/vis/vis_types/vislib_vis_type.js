@@ -20,11 +20,15 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
       this.el = el;
       this.vis = vis;
 
-      this.chartEl = document.createElement('div');
-      this.chartEl.className = 'visualize-chart';
-      this.el.appendChild(this.chartEl);
+      this.container = document.createElement('div');
+      this.container.className = 'vislib-container';
+      this.el.appendChild(this.container);
 
-      this.el.className = 'vis-container';
+      this.chartEl = document.createElement('div');
+      this.chartEl.className = 'vislib-chart';
+      this.container.appendChild(this.chartEl);
+
+      //this.el.className = 'vis-container';
     }
 
     render(esResponse) {
@@ -41,10 +45,10 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
         let $scope;
         if (this.vis.params.addLegend) {
           const legendPositionToVisContainerClassMap = {
-            top: 'vis-container--legend-top',
-            bottom: 'vis-container--legend-bottom',
-            left: 'vis-container--legend-left',
-            right: 'vis-container--legend-right',
+            top: 'vislib-container--legend-top',
+            bottom: 'vislib-container--legend-bottom',
+            left: 'vislib-container--legend-left',
+            right: 'vislib-container--legend-right',
           };
 
           const getVisContainerClasses = () => {
@@ -52,8 +56,8 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
           };
 
           // update the legend class on the parent element
-          $(this.el).attr('class', (i, cls) => {
-            return cls.replace(/vis-container--legend-\S+/g, '');
+          $(this.container).attr('class', (i, cls) => {
+            return cls.replace(/vislib-container--legend-\S+/g, '');
           }).addClass(getVisContainerClasses());
 
           $scope = $rootScope.$new();
@@ -62,7 +66,7 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
           $scope.visData = esResponse;
           $scope.uiState = $scope.vis.getUiState();
           const legendHtml = $compile('<visualize-legend></visualize-legend>')($scope);
-          this.el.appendChild(legendHtml[0]);
+          this.container.appendChild(legendHtml[0]);
           $scope.$digest();
           // We need to wait one digest cycle for the legend to render, before
           // we want to render the chart, so it know about the legend size.
@@ -89,7 +93,7 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
         this.vis.vislibVis.destroy();
         delete this.vis.vislibVis;
       }
-      $(this.el).find('visualize-legend').remove();
+      $(this.container).find('visualize-legend').remove();
     }
   }
 
