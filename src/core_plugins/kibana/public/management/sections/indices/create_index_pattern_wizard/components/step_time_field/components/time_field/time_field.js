@@ -8,6 +8,7 @@ import {
   EuiButtonEmpty,
   EuiSelect,
   EuiText,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 
 export const TimeField = ({
@@ -27,12 +28,18 @@ export const TimeField = ({
               <span>Time Filter field name</span>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="s"
-                onClick={fetchTimeFields}
-              >
-                Refresh
-              </EuiButtonEmpty>
+              { isLoading ? (
+                <EuiLoadingSpinner size="m"/>
+              )
+                : (
+                  <EuiButtonEmpty
+                    size="s"
+                    onClick={fetchTimeFields}
+                  >
+                    Refresh
+                  </EuiButtonEmpty>
+                )
+              }
             </EuiFlexItem>
           </EuiFlexGroup>
         }
@@ -43,15 +50,26 @@ export const TimeField = ({
           </div>
         }
       >
-        <EuiSelect
-          name="timeField"
-          data-test-subj="createIndexPatternTimeFieldSelect"
-          options={timeFieldOptions}
-          isLoading={isLoading}
-          disabled={isLoading}
-          value={selectedTimeField}
-          onChange={onTimeFieldChanged}
-        />
+        { isLoading ? (
+          <EuiSelect
+            name="timeField"
+            data-test-subj="createIndexPatternTimeFieldSelect"
+            options={[
+              { text: 'Loading...', value: '' }
+            ]}
+            disabled={true}
+          />
+        ) : (
+          <EuiSelect
+            name="timeField"
+            data-test-subj="createIndexPatternTimeFieldSelect"
+            options={timeFieldOptions}
+            isLoading={isLoading}
+            disabled={isLoading}
+            value={selectedTimeField}
+            onChange={onTimeFieldChanged}
+          />
+        )}
       </EuiFormRow>
       :
       <EuiText>

@@ -36,15 +36,9 @@ exports[`TimeField should render a loading state 1`] = `
           component="div"
           grow={false}
         >
-          <EuiButtonEmpty
-            color="primary"
-            iconSide="left"
-            onClick={[Function]}
-            size="s"
-            type="button"
-          >
-            Refresh
-          </EuiButtonEmpty>
+          <EuiLoadingSpinner
+            size="m"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
     }
@@ -53,18 +47,16 @@ exports[`TimeField should render a loading state 1`] = `
       data-test-subj="createIndexPatternTimeFieldSelect"
       disabled={true}
       fullWidth={false}
-      isLoading={true}
+      isLoading={false}
       name="timeField"
-      onChange={[Function]}
       options={
         Array [
           Object {
-            "text": "@timestamp",
-            "value": "@timestamp",
+            "text": "Loading...",
+            "value": "",
           },
         ]
       }
-      value="@timestamp"
     />
   </EuiFormRow>
 </EuiForm>
