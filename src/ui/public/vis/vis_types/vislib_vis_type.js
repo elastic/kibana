@@ -19,6 +19,12 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
     constructor(el, vis) {
       this.el = el;
       this.vis = vis;
+
+      this.chartEl = document.createElement('div');
+      this.chartEl.className = 'visualize-chart';
+      this.el.appendChild(this.chartEl);
+
+      this.el.className = 'vis-container';
     }
 
     render(esResponse) {
@@ -46,7 +52,7 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
           };
 
           // update the legend class on the parent element
-          $(this.el.parentNode).attr('class', (i, cls) => {
+          $(this.el).attr('class', (i, cls) => {
             return cls.replace(/vis-container--legend-\S+/g, '');
           }).addClass(getVisContainerClasses());
 
@@ -56,14 +62,14 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
           $scope.visData = esResponse;
           $scope.uiState = $scope.vis.getUiState();
           const legendHtml = $compile('<visualize-legend></visualize-legend>')($scope);
-          this.el.parentNode.appendChild(legendHtml[0]);
+          this.el.appendChild(legendHtml[0]);
           $scope.$digest();
           // We need to wait one digest cycle for the legend to render, before
           // we want to render the chart, so it know about the legend size.
           await new Promise(resolve => $timeout(resolve));
         }
 
-        this.vis.vislibVis = new vislib.Vis(this.el, this.vis.params);
+        this.vis.vislibVis = new vislib.Vis(this.chartEl, this.vis.params);
         this.vis.vislibVis.on('brush', this.vis.API.events.brush);
         this.vis.vislibVis.on('click', this.vis.API.events.filter);
         this.vis.vislibVis.on('renderComplete', resolve);
@@ -83,7 +89,7 @@ export function VislibVisTypeProvider(Private, $rootScope, $timeout, $compile) {
         this.vis.vislibVis.destroy();
         delete this.vis.vislibVis;
       }
-      $(this.el.parentNode).find('visualize-legend').remove();
+      $(this.el).find('visualize-legend').remove();
     }
   }
 
