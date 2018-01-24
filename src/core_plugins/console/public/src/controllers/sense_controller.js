@@ -1,5 +1,5 @@
 import 'ui/doc_title';
-import { useResizeCheckerProvider } from '../sense_editor_resize';
+import { useResizeChecker } from '../sense_editor_resize';
 import $ from 'jquery';
 import { initializeInput } from '../input';
 import { initializeOutput } from '../output';
@@ -9,8 +9,6 @@ import { SenseTopNavController } from './sense_top_nav_controller';
 const module = require('ui/modules').get('app/sense');
 
 module.run(function (Private, $rootScope) {
-  const useResizeChecker = Private(useResizeCheckerProvider);
-
   module.setupResizeCheckerForRootEditors = ($el, ...editors) => {
     return useResizeChecker($rootScope, $el, ...editors);
   };
