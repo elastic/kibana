@@ -14,7 +14,7 @@ export function MarkdownVisComponent(props) {
         className="markdown-body"
         data-test-subj="markdownBody"
         style={{ fontSize: `${visParams.fontSize}pt` }}
-        dangerouslySetInnerHTML={{ __html: markdownIt.render(visParams.markdown) }}
+        dangerouslySetInnerHTML={{ __html: markdownIt.render(visParams.markdown || '') }}
       />
     </div>
   );
