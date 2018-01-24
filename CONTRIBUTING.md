@@ -160,11 +160,13 @@ nvm install "$(cat .node-version)"
 
 Install the latest version of [yarn](https://yarnpkg.com).
 
-Install dependencies
+Bootstrap Kibana and install all the dependencies
 
 ```bash
-yarn
+yarn kbn bootstrap
 ```
+
+(You can also run `yarn kbn` to see the other available commands. For more info about this tool, see https://github.com/elastic/kibana/tree/master/packages/kbn-build.)
 
 Start elasticsearch.
 
@@ -190,6 +192,16 @@ Start the development server.
 > On Windows, you'll need you use Git Bash, Cygwin, or a similar shell that exposes the `sh` command.  And to successfully build you'll need Cygwin optional packages zip, tar, and shasum.
 
 Now you can point your web browser to https://localhost:5601 and start using Kibana! When running `yarn start`, Kibana will also log that it is listening on port 5603 due to the base path proxy, but you should still access Kibana on port 5601.
+
+#### Unsupported URL Type
+
+If you're installing dependencies and seeing an error that looks something like
+
+```
+Unsupported URL Type: link:packages/eslint-config-kibana
+```
+
+you're likely running `npm`. To install dependencies in Kibana you need to run `yarn kbn bootstrap`. For more info, see [Setting Up Your Development Environment](#setting-up-your-development-environment) above.
 
 #### Customizing `config/kibana.dev.yml`
 
