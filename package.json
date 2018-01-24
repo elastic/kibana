@@ -159,7 +159,7 @@
     "minimatch": "2.0.10",
     "mkdirp": "0.5.1",
     "moment": "^2.20.1",
-    "moment-timezone": "^0.5.14",
+    "moment-timezone": "0.5.4",
     "mustache": "2.3.0",
     "ngreact": "0.5.1",
     "no-ui-slider": "1.2.0",
