@@ -11357,9 +11357,9 @@ trunc-text@1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/trunc-text/-/trunc-text-1.0.2.tgz#b582bb3ddea9c9adc25017d737c48ebdd2157406"
 
-tslib@^1.8.0:
-  version "1.8.1"
-  resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.8.1.tgz#6946af2d1d651a7b1863b531d6e5afa41aa44eac"
+tslib@^1.9.0:
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.9.0.tgz#e37a86fda8cbbaf23a057f473c9f4dc64e5fc2e8"
 
 tty-browserify@0.0.0:
   version "0.0.0"
@@ -11782,9 +11782,9 @@ vega-hierarchy@^2.1:
     vega-dataflow "3"
     vega-util "1"
 
-vega-lib@3.0.10-alpha:
-  version "3.0.10-alpha"
-  resolved "https://registry.yarnpkg.com/vega-lib/-/vega-lib-3.0.10-alpha.tgz#82abd998dedb972582ec6e80d085fb8d155c245a"
+vega-lib@3.0.10:
+  version "3.0.10"
+  resolved "https://registry.yarnpkg.com/vega-lib/-/vega-lib-3.0.10.tgz#8f7b7dca0bd3b2634af02e0abbb837c7dbd52dbf"
   dependencies:
     vega-crossfilter "2"
     vega-dataflow "3"
@@ -11807,15 +11807,15 @@ vega-lib@3.0.10-alpha:
     vega-voronoi "2"
     vega-wordcloud "^2.1"
 
-vega-lite@2.0.4:
-  version "2.0.4"
-  resolved "https://registry.yarnpkg.com/vega-lite/-/vega-lite-2.0.4.tgz#a30531e294dd2a831d96df05c58eed902d2cbb20"
+vega-lite@2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/vega-lite/-/vega-lite-2.1.0.tgz#8e6c1d438da6400eebdb53f0da7f9801b9da96f9"
   dependencies:
     json-stable-stringify "^1.0.1"
-    tslib "^1.8.0"
+    tslib "^1.9.0"
     vega-event-selector "^2.0.0"
     vega-util "^1.6.2"
-    yargs "^10.0.3"
+    yargs "^11.0.0"
 
 vega-loader@2:
   version "2.0.3"
@@ -12447,6 +12447,12 @@ yargs-parser@^8.1.0:
   dependencies:
     camelcase "^4.1.0"
 
+yargs-parser@^9.0.2:
+  version "9.0.2"
+  resolved "https://registry.yarnpkg.com/yargs-parser/-/yargs-parser-9.0.2.tgz#9ccf6a43460fe4ed40a9bb68f48d43b8a68cc077"
+  dependencies:
+    camelcase "^4.1.0"
+
 yargs@^10.0.3:
   version "10.1.1"
   resolved "https://registry.yarnpkg.com/yargs/-/yargs-10.1.1.tgz#5fe1ea306985a099b33492001fa19a1e61efe285"
@@ -12463,6 +12469,23 @@ yargs@^10.0.3:
     which-module "^2.0.0"
     y18n "^3.2.1"
     yargs-parser "^8.1.0"
+
+yargs@^11.0.0:
+  version "11.0.0"
+  resolved "https://registry.yarnpkg.com/yargs/-/yargs-11.0.0.tgz#c052931006c5eee74610e5fc0354bedfd08a201b"
+  dependencies:
+    cliui "^4.0.0"
+    decamelize "^1.1.1"
+    find-up "^2.1.0"
+    get-caller-file "^1.0.1"
+    os-locale "^2.0.0"
+    require-directory "^2.1.1"
+    require-main-filename "^1.0.1"
+    set-blocking "^2.0.0"
+    string-width "^2.0.0"
+    which-module "^2.0.0"
+    y18n "^3.2.1"
+    yargs-parser "^9.0.2"
 
 yargs@^6.6.0:
   version "6.6.0"
