@@ -1,4 +1,4 @@
-import * as vega from 'vega-nocanvas';
+import * as vega from 'vega-lib';
 import { VegaBaseView } from './vega_base_view';
 
 export class VegaView extends VegaBaseView {

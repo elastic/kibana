@@ -211,7 +211,7 @@
     "url-loader": "0.5.9",
     "uuid": "3.0.1",
     "validate-npm-package-name": "2.2.2",
-    "vega-nocanvas": "3.0.9",
+    "vega-lib": "3.0.10-alpha",
     "vega-lite": "2.0.4",
     "vega-schema-url-parser": "1.0.0",
     "vision": "4.1.0",
