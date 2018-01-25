@@ -1,20 +1,19 @@
 [[add-data-guide]]
-== Add Data guide
+== Add Data Guide
 
-`Add Data` in the Kibana Home application contains a collection of tutorials for setting up data flows in the Elastic stack.
+`Add Data` in the Kibana Home application contains tutorials for setting up data flows in the Elastic stack.
 
-Each tutorial contains 3 sets of instructions
+Each tutorial contains three sets of instructions:
 
-1. `On Premise` Instructions for setting up a data flow when both Kibana and Elasticsearch are running on premise
-2. `On Premise Elastic Cloud` Instructions for setting up a data flow when Kibana is running on premise but
-Elasticsearch is running on cloud.
-3. `Elastic Cloud` Instructions for setting up a data flow when both Kibana and Elasticsearch are running on cloud.
+* `On Premise.` Set up a data flow when both Kibana and Elasticsearch are running on premise.
+* `On Premise Elastic Cloud.` Set up a data flow when Kibana is running on premise and Elasticsearch is running on Elastic Cloud.
+* `Elastic Cloud.` Set up a data flow when both Kibana and Elasticsearch are running on Elastic Cloud.
 
 [float]
 === Creating a new tutorial
 1. Create a new directory in the link:https://github.com/elastic/kibana/tree/master/src/core_plugins/kibana/server/tutorials[tutorials directory].
 2. In the new directory, create a file called `index.js` that exports a function.
-The function must return a Javascript object that conforms to the link:https://github.com/elastic/kibana/blob/master/src/core_plugins/kibana/common/tutorials/tutorial_schema.js[tutorial schema].
+The function must return a JavaScript object that conforms to the link:https://github.com/elastic/kibana/blob/master/src/core_plugins/kibana/common/tutorials/tutorial_schema.js[tutorial schema].
 3. Register the tutorial in link:https://github.com/elastic/kibana/blob/master/src/core_plugins/kibana/server/tutorials/register.js[register.js] by calling `server.registerTutorial(myFuncImportedFromIndexJs)`.
 4. Add image assets to the link:https://github.com/elastic/kibana/tree/master/src/core_plugins/kibana/public/home/tutorial_resources[tutorial_resources directory].
 5. Run Kibana locally to preview the tutorial.
@@ -22,14 +21,14 @@ The function must return a Javascript object that conforms to the link:https://g
 
 [float]
 ==== Variables
-String values can contain variables that get substituted when rendered. Variables are specified by `{}`.
-For example: `{config.docs.version}` would get rendered as `6.2` when running the tutorial in Kibana 6.2.
+String values can contain variables that are substituted when rendered. Variables are specified by `{}`.
+For example: `{config.docs.version}` is rendered as `6.2` when running the tutorial in Kibana 6.2.
 
 link:https://github.com/elastic/kibana/blob/master/src/core_plugins/kibana/public/home/components/tutorial/replace_template_strings.js#L23[Provided variables]
 
 [float]
 ==== Markdown
-String values can contain limited markdown syntax.
+String values can contain limited Markdown syntax.
 
-link:https://github.com/elastic/kibana/blob/master/src/core_plugins/kibana/public/home/components/tutorial/content.js#L8[Enabled markdown grammars]
+link:https://github.com/elastic/kibana/blob/master/src/core_plugins/kibana/public/home/components/tutorial/content.js#L8[Enabled Markdown grammars]
 
