@@ -7,7 +7,7 @@ import {
   getUnhashableStatesProvider,
   unhashUrl,
 } from 'ui/state_management/state_hashing';
-import { Notifier } from 'ui/notify';
+import { toastNotifications } from 'ui/notify';
 
 import { UrlShortenerProvider } from '../lib/url_shortener';
 
@@ -145,10 +145,6 @@ app.directive('share', function (Private) {
       };
 
       this.copyToClipboard = selector => {
-        const notify = new Notifier({
-          location: `Share ${$scope.objectType}`,
-        });
-
         // Select the text to be copied. If the copy fails, the user can easily copy it manually.
         const copyTextarea = $document.find(selector)[0];
         copyTextarea.select();
@@ -156,12 +152,12 @@ app.directive('share', function (Private) {
         try {
           const isCopied = document.execCommand('copy');
           if (isCopied) {
-            notify.info('URL copied to clipboard.');
+            toastNotifications.add('URL copied to clipboard.');
           } else {
-            notify.info('URL selected. Press Ctrl+C to copy.');
+            toastNotifications.add('URL selected. Press Ctrl+C to copy.');
           }
         } catch (err) {
-          notify.info('URL selected. Press Ctrl+C to copy.');
+          toastNotifications.add('URL selected. Press Ctrl+C to copy.');
         }
       };
     }

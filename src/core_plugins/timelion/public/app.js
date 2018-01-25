@@ -3,7 +3,7 @@ import moment from 'moment-timezone';
 
 import { DocTitleProvider } from 'ui/doc_title';
 import { SavedObjectRegistryProvider } from 'ui/saved_objects/saved_object_registry';
-import { notify, fatalError } from 'ui/notify';
+import { notify, fatalError, toastNotifications } from 'ui/notify';
 import { timezoneProvider } from 'ui/vis/lib/timezone';
 
 require('ui/autoload/all');
@@ -112,7 +112,7 @@ app.controller('timelion', function (
       const title = savedSheet.title;
       function doDelete() {
         savedSheet.delete().then(() => {
-          notify.info('Deleted ' + title);
+          toastNotifications.addSuccess(`Deleted '${title}'`);
           kbnUrl.change('/');
         }).catch(error => fatalError(error, location));
       }
@@ -263,7 +263,7 @@ app.controller('timelion', function (
     savedSheet.timelion_rows = $scope.state.rows;
     savedSheet.save().then(function (id) {
       if (id) {
-        notify.info('Saved sheet as "' + savedSheet.title + '"');
+        toastNotifications.addSuccess(`Saved sheet '${savedSheet.title}'`);
         if (savedSheet.id !== $routeParams.id) {
           kbnUrl.change('/{{id}}', { id: savedSheet.id });
         }
@@ -280,7 +280,9 @@ app.controller('timelion', function (
       savedExpression.title = title;
       savedExpression.visState.title = title;
       savedExpression.save().then(function (id) {
-        if (id) notify.info('Saved expression as "' + savedExpression.title + '"');
+        if (id) {
+          toastNotifications.addSuccess(`Saved expression '${savedExpression.title}'`);
+        }
       });
     });
   }
