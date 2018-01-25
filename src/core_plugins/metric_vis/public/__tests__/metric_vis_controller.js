@@ -1,9 +1,19 @@
-import ngMock from 'ng_mock';
 import expect from 'expect.js';
-import $ from 'jquery';
+import { MetricVisComponent } from '../metric_vis_controller';
 
 describe('metric vis', function () {
-  let $scope;
+
+  const vis = {
+    params: {
+      metric: {
+        colorSchema: 'Green to Red',
+        colorsRange: [
+          { from: 0, to: 1000 }
+        ],
+        style: {}
+      }
+    }
+  };
 
   const formatter = function (value) {
     return value.toFixed(3);
@@ -16,43 +26,27 @@ describe('metric vis', function () {
     schema: {}
   };
 
-  beforeEach(ngMock.module('kibana/metric_vis'));
-  beforeEach(ngMock.inject(function ($rootScope, $controller) {
-    $scope = $rootScope.$new();
-    $scope.renderComplete = () => {};
-    $scope.vis = {
-      params: {
-        metric: {
-          colorsRange: [
-            { from: 0, to: 1000 }
-          ],
-          style: {
+  let metricController;
 
-          }
-        }
-      }
-    };
-
-    const $element = $('<div>');
-    $controller('KbnMetricVisController', { $scope, $element });
-    $scope.$digest();
-  }));
+  beforeEach(() => {
+    metricController = new MetricVisComponent({ vis: vis });
+  });
 
   it('should set the metric label and value', function () {
-    $scope.processTableGroups({
+    const metrics = metricController._processTableGroups({
       tables: [{
         columns: [{ title: 'Count', aggConfig: { ...aggConfig, makeLabel: () => 'Count' } }],
         rows: [[ 4301021 ]]
       }]
     });
 
-    expect($scope.metrics.length).to.be(1);
-    expect($scope.metrics[0].label).to.be('Count');
-    expect($scope.metrics[0].value).to.be('4301021.000');
+    expect(metrics.length).to.be(1);
+    expect(metrics[0].label).to.be('Count');
+    expect(metrics[0].value).to.be('4301021.000');
   });
 
   it('should support multi-value metrics', function () {
-    $scope.processTableGroups({
+    const metrics = metricController._processTableGroups({
       tables: [{
         columns: [
           { aggConfig: { ...aggConfig, makeLabel: () => '1st percentile of bytes' } },
@@ -62,10 +56,10 @@ describe('metric vis', function () {
       }]
     });
 
-    expect($scope.metrics.length).to.be(2);
-    expect($scope.metrics[0].label).to.be('1st percentile of bytes');
-    expect($scope.metrics[0].value).to.be('182.000');
-    expect($scope.metrics[1].label).to.be('99th percentile of bytes');
-    expect($scope.metrics[1].value).to.be('445842.463');
+    expect(metrics.length).to.be(2);
+    expect(metrics[0].label).to.be('1st percentile of bytes');
+    expect(metrics[0].value).to.be('182.000');
+    expect(metrics[1].label).to.be('99th percentile of bytes');
+    expect(metrics[1].value).to.be('445842.463');
   });
 });
