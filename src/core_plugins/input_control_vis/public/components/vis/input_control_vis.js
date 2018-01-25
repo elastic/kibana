@@ -74,12 +74,11 @@ export class InputControlVis extends Component {
         <EuiFlexItem grow={false}>
           <EuiFormRow>
             <EuiButton
-              fill
-              onClick={this.handleSubmit}
-              disabled={!this.props.hasChanges()}
-              data-test-subj="inputControlSubmitBtn"
+              onClick={this.handleClearAll}
+              disabled={!this.props.hasValues()}
+              data-test-subj="inputControlClearBtn"
             >
-              Apply changes
+              Clear form
             </EuiButton>
           </EuiFormRow>
         </EuiFlexItem>
@@ -97,11 +96,12 @@ export class InputControlVis extends Component {
         <EuiFlexItem grow={false}>
           <EuiFormRow>
             <EuiButton
-              onClick={this.handleClearAll}
-              disabled={!this.props.hasValues()}
-              data-test-subj="inputControlClearBtn"
+              fill
+              onClick={this.handleSubmit}
+              disabled={!this.props.hasChanges()}
+              data-test-subj="inputControlSubmitBtn"
             >
-              Clear form
+              Apply changes
             </EuiButton>
           </EuiFormRow>
         </EuiFlexItem>

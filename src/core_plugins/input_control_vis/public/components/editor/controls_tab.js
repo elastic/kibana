@@ -128,7 +128,7 @@ export class ControlsTab extends Component {
                 />
               </EuiFormRow>
             </EuiFlexItem>
-            <EuiFlexItem>
+            <EuiFlexItem grow={false}>
               <EuiFormRow
                 id="addControl"
               >

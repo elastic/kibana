@@ -1,3 +1,4 @@
+import './control_editor.less';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { RangeControlEditor } from './range_control_editor';
@@ -11,6 +12,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiPanel,
+  EuiSpacer,
 } from '@elastic/eui';
 
 export class ControlEditor extends Component {
@@ -98,14 +100,14 @@ export class ControlEditor extends Component {
           aria-label="Move control down"
           color="primary"
           onClick={this.moveDownControl}
-          iconType="arrowDown"
+          iconType="sortUp"
           data-test-subj={`inputControlEditorMoveDownControl${this.props.controlIndex}`}
         />
         <EuiButtonIcon
           aria-label="Move control up"
           color="primary"
           onClick={this.moveUpControl}
-          iconType="arrowUp"
+          iconType="sortDown"
           data-test-subj={`inputControlEditorMoveUpControl${this.props.controlIndex}`}
         />
         <EuiButtonIcon
@@ -121,7 +123,7 @@ export class ControlEditor extends Component {
 
   render() {
     return (
-      <EuiPanel grow={false} style={{ zIndex: 1 }}>
+      <EuiPanel grow={false} className="controlEditorPanel" style={{ zIndex: 1 }}>
 
         <EuiAccordion
           id="controlEditorAccordion"
@@ -129,6 +131,7 @@ export class ControlEditor extends Component {
           extraAction={this.renderEditorButtons()}
           initialIsOpen={true}
         >
+          <EuiSpacer size="s" />
           {this.renderEditor()}
         </EuiAccordion>
 

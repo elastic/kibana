@@ -71,14 +71,14 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
       >
         <EuiButton
           color="primary"
-          data-test-subj="inputControlSubmitBtn"
-          disabled={false}
-          fill={true}
+          data-test-subj="inputControlClearBtn"
+          disabled={true}
+          fill={false}
           iconSide="left"
           onClick={[Function]}
           type="button"
         >
-          Apply changes
+          Clear form
         </EuiButton>
       </EuiFormRow>
     </EuiFlexItem>
@@ -113,14 +113,14 @@ exports[`Apply and Cancel change btns enabled when there are changes 1`] = `
       >
         <EuiButton
           color="primary"
-          data-test-subj="inputControlClearBtn"
-          disabled={true}
-          fill={false}
+          data-test-subj="inputControlSubmitBtn"
+          disabled={false}
+          fill={true}
           iconSide="left"
           onClick={[Function]}
           type="button"
         >
-          Clear form
+          Apply changes
         </EuiButton>
       </EuiFormRow>
     </EuiFlexItem>
@@ -199,14 +199,14 @@ exports[`Clear btns enabled when there are values 1`] = `
       >
         <EuiButton
           color="primary"
-          data-test-subj="inputControlSubmitBtn"
-          disabled={true}
-          fill={true}
+          data-test-subj="inputControlClearBtn"
+          disabled={false}
+          fill={false}
           iconSide="left"
           onClick={[Function]}
           type="button"
         >
-          Apply changes
+          Clear form
         </EuiButton>
       </EuiFormRow>
     </EuiFlexItem>
@@ -241,14 +241,14 @@ exports[`Clear btns enabled when there are values 1`] = `
       >
         <EuiButton
           color="primary"
-          data-test-subj="inputControlClearBtn"
-          disabled={false}
-          fill={false}
+          data-test-subj="inputControlSubmitBtn"
+          disabled={true}
+          fill={true}
           iconSide="left"
           onClick={[Function]}
           type="button"
         >
-          Clear form
+          Apply changes
         </EuiButton>
       </EuiFormRow>
     </EuiFlexItem>
@@ -327,14 +327,14 @@ exports[`Renders list control 1`] = `
       >
         <EuiButton
           color="primary"
-          data-test-subj="inputControlSubmitBtn"
+          data-test-subj="inputControlClearBtn"
           disabled={true}
-          fill={true}
+          fill={false}
           iconSide="left"
           onClick={[Function]}
           type="button"
         >
-          Apply changes
+          Clear form
         </EuiButton>
       </EuiFormRow>
     </EuiFlexItem>
@@ -369,14 +369,14 @@ exports[`Renders list control 1`] = `
       >
         <EuiButton
           color="primary"
-          data-test-subj="inputControlClearBtn"
+          data-test-subj="inputControlSubmitBtn"
           disabled={true}
-          fill={false}
+          fill={true}
           iconSide="left"
           onClick={[Function]}
           type="button"
         >
-          Clear form
+          Apply changes
         </EuiButton>
       </EuiFormRow>
     </EuiFlexItem>
@@ -449,14 +449,14 @@ exports[`Renders range control 1`] = `
       >
         <EuiButton
           color="primary"
-          data-test-subj="inputControlSubmitBtn"
+          data-test-subj="inputControlClearBtn"
           disabled={true}
-          fill={true}
+          fill={false}
           iconSide="left"
           onClick={[Function]}
           type="button"
         >
-          Apply changes
+          Clear form
         </EuiButton>
       </EuiFormRow>
     </EuiFlexItem>
@@ -491,14 +491,14 @@ exports[`Renders range control 1`] = `
       >
         <EuiButton
           color="primary"
-          data-test-subj="inputControlClearBtn"
+          data-test-subj="inputControlSubmitBtn"
           disabled={true}
-          fill={false}
+          fill={true}
           iconSide="left"
           onClick={[Function]}
           type="button"
         >
-          Clear form
+          Apply changes
         </EuiButton>
       </EuiFormRow>
     </EuiFlexItem>

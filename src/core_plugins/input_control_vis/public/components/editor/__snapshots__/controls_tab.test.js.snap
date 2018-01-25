@@ -99,7 +99,7 @@ exports[`renders ControlsTab 1`] = `
       </EuiFlexItem>
       <EuiFlexItem
         component="div"
-        grow={true}
+        grow={false}
       >
         <EuiFormRow
           fullWidth={false}
