@@ -108,6 +108,7 @@
     "gulp-if": "^2.0.2",
     "gulp-mocha": "^4.3.1",
     "gulp-pegjs": "^0.1.0",
+    "gulp-webserver": "^0.9.1",
     "husky": "^0.13.3",
     "just-compose": "^1.0.6",
     "markdown-it-named-headers": "^0.0.4",
