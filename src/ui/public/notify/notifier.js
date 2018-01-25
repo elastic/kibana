@@ -196,7 +196,6 @@ export function Notifier(opts) {
     'timed',
     'error',
     'warning',
-    'info',
     'banner',
   ];
 
@@ -333,28 +332,6 @@ Notifier.prototype.warning = function (msg, opts, cb) {
     icon: 'warning',
     title: 'Warning',
     lifetime: Notifier.config.warningLifetime,
-    actions: ['accept']
-  }, _.pick(opts, overrideableOptions));
-  return add(config, cb);
-};
-
-/**
- * Display a debug message
- * @param  {String} msg
- * @param  {Function} cb
- */
-Notifier.prototype.info = function (msg, opts, cb) {
-  if (_.isFunction(opts)) {
-    cb = opts;
-    opts = {};
-  }
-
-  const config = _.assign({
-    type: 'info',
-    content: formatMsg(msg, this.from),
-    icon: 'info-circle',
-    title: 'Debug',
-    lifetime: _.get(opts, 'lifetime', Notifier.config.infoLifetime),
     actions: ['accept']
   }, _.pick(opts, overrideableOptions));
   return add(config, cb);
